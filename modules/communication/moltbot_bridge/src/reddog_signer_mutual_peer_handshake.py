@@ -28,8 +28,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     SigningResponse,
     public_key_fingerprint,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_socket_schema import (
-    SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
+from modules.communication.moltbot_bridge.src.reddog_signer_peer_instance_packet_validator import (
+    signer_profile_bindings_valid,
+    signer_run_packet_bindings_valid,
+    signer_run_packet_selection_valid,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_text,
@@ -38,10 +40,10 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 )
 
 
-SIGNER_PEER_HANDSHAKE_SCHEMA_VERSION = "reddog_signer_peer_handshake.v1"
-SIGNER_PEER_HANDSHAKE_SIGNING_PREFIX = "reddog-signer-peer-handshake.v1."
+SIGNER_PEER_HANDSHAKE_SCHEMA_VERSION = "reddog_signer_peer_handshake.v2"
+SIGNER_PEER_HANDSHAKE_SIGNING_PREFIX = "reddog-signer-peer-handshake.v2."
 SIGNER_PEER_HANDSHAKE_RESPONSE_ATTESTATION_PREFIX = (
-    "reddog-signer-peer-response-attestation.v1."
+    "reddog-signer-peer-response-attestation.v2."
 )
 SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION = "signer_socket_peer_handshake"
 SIGNER_PEER_HANDSHAKE_SIGNER_ROLE = "signer_peer_handshake"
@@ -59,6 +61,8 @@ _PAYLOAD_FIELDS = frozenset(
     {
         "schema_version",
         "challenge",
+        "manifest_id",
+        "artifact_generation_digest",
         "run_packet_id",
         "config_digest",
         "session_id",
@@ -71,31 +75,6 @@ _PAYLOAD_FIELDS = frozenset(
         "expires_at",
     }
 )
-_RUN_PACKET_FIXED_FIELDS = {
-    "run_mode": "signer_owned_cli_sidecar",
-    "process_owner_requirement": "distinct_signer_os_principal",
-    "redDog_must_not_spawn": True,
-    "main_py_must_not_spawn": True,
-    "shell_required": False,
-    "shell_command": None,
-    "no_secret_values_in_packet": True,
-}
-_RUN_PACKET_FIELDS = frozenset(
-    {
-        "schema_version", "run_mode", "repo_root", "working_directory",
-        "python_module", "argv", "config_path", "config_digest", "socket_path",
-        "profile_count", "provider_mode", "op_executable", "op_timeout_s",
-        "ttl_seconds", "session_id", "process_owner_requirement",
-        "redDog_must_not_spawn", "main_py_must_not_spawn", "shell_required",
-        "shell_command", "no_secret_values_in_packet", "run_packet_id",
-    }
-)
-_RUN_PACKET_CLI_MODULE = (
-    "modules.communication.moltbot_bridge.src."
-    "reddog_signer_socket_service_runtime_cli"
-)
-
-
 class SignatureVerifier(Protocol):
     def verify(self, public_key: str, signing_input: str, signature: str) -> bool:
         """Return True only for a valid signature."""
@@ -117,6 +96,8 @@ class SignerPeerInstanceBinding:
     session_id: str
     socket_path: str
     signer_profiles: tuple[SignerPeerProfileBinding, ...]
+    manifest_id: str
+    artifact_generation_digest: str
 
 
 @dataclass(frozen=True)
@@ -127,6 +108,8 @@ class VerifiedSignerPeerHandshake:
     request_digest: str
     response_digest: str
     challenge_digest: str
+    manifest_id: str
+    artifact_generation_digest: str
     run_packet_id: str
     config_digest: str
     session_id: str
@@ -156,17 +139,20 @@ def build_signer_peer_handshake_request(
     signer_public_key: str,
     key_epoch: str,
     requester_principal_id: str,
+    manifest_id: str,
+    artifact_generation_digest: str,
     now_epoch: int | None = None,
     ttl_seconds: int = DEFAULT_HANDSHAKE_TTL_SECONDS,
     challenge_factory: Callable[[], str] | None = None,
 ) -> SigningRequest:
     """Build a fresh, domain-separated signer authentication challenge."""
-
     issued_at = int(time.time() if now_epoch is None else now_epoch)
     challenge = (challenge_factory or (lambda: secrets.token_hex(32)))()
     payload = {
         "schema_version": SIGNER_PEER_HANDSHAKE_SCHEMA_VERSION,
         "challenge": challenge,
+        "manifest_id": manifest_id,
+        "artifact_generation_digest": artifact_generation_digest,
         "run_packet_id": run_packet_id,
         "config_digest": config_digest,
         "session_id": session_id,
@@ -263,7 +249,7 @@ def load_signer_peer_instance_binding(
         return None
     packet_path, raw, packet = packet_data
     config = Path(config_path).resolve()
-    if not _selected_packet_valid(
+    if not signer_run_packet_selection_valid(
         manifest_selection,
         packet,
         root=root,
@@ -273,7 +259,7 @@ def load_signer_peer_instance_binding(
         run_packet_raw=raw,
     ):
         return None
-    if not _run_packet_bindings_valid(
+    if not signer_run_packet_bindings_valid(
         packet,
         root=root,
         config_path=config,
@@ -282,11 +268,11 @@ def load_signer_peer_instance_binding(
         run_packet_path=packet_path,
         socket_path=Path(expected_socket_path).resolve(),
         python_executable=Path(python_executable).resolve(),
-    ) or not _profile_bindings_valid(
+    ) or not signer_profile_bindings_valid(
         signer_profiles, packet.get("profile_count")
     ):
         return None
-    return _peer_instance_binding(packet, signer_profiles)
+    return _peer_instance_binding(packet, signer_profiles, manifest_selection)
 
 
 def _read_selected_run_packet(
@@ -320,20 +306,10 @@ def _read_selected_run_packet(
     )
 
 
-def _selected_packet_valid(
-    selection: Mapping[str, Any],
-    packet: Mapping[str, Any],
-    **bindings: Any,
-) -> bool:
-    return _selection_bindings_valid(
-        selection,
-        **bindings,
-    ) and _run_packet_shape_valid(packet)
-
-
 def _peer_instance_binding(
     packet: Mapping[str, Any],
     signer_profiles: tuple[SignerPeerProfileBinding, ...],
+    selection: Mapping[str, Any],
 ) -> SignerPeerInstanceBinding:
     return SignerPeerInstanceBinding(
         run_packet_id=str(packet["run_packet_id"]),
@@ -343,6 +319,8 @@ def _peer_instance_binding(
         signer_profiles=tuple(
             sorted(signer_profiles, key=lambda item: item.signer_profile_id)
         ),
+        manifest_id=str(selection["manifest_id"]),
+        artifact_generation_digest=str(selection["artifact_generation_digest"]),
     )
 
 
@@ -418,7 +396,13 @@ def _payload_shape_valid(payload: object) -> bool:
     text_fields = _PAYLOAD_FIELDS - {"issued_at", "expires_at"}
     if any(not _ascii_text(payload.get(field)) for field in text_fields):
         return False
-    return bool(_CHALLENGE_RE.fullmatch(str(payload["challenge"])))
+    return all(
+        (
+            bool(_CHALLENGE_RE.fullmatch(str(payload["challenge"]))),
+            _sha256_digest(payload["manifest_id"]),
+            _sha256_digest(payload["artifact_generation_digest"]),
+        )
+    )
 
 
 def _request_bindings_valid(
@@ -470,6 +454,9 @@ def _instance_binding_matches(
     return profile is not None and all(
         (
             payload.get("run_packet_id") == binding.run_packet_id,
+            payload.get("manifest_id") == binding.manifest_id,
+            payload.get("artifact_generation_digest")
+            == binding.artifact_generation_digest,
             payload.get("config_digest") == binding.config_digest,
             payload.get("session_id") == binding.session_id,
             payload.get("socket_path_digest")
@@ -478,181 +465,6 @@ def _instance_binding_matches(
             payload.get("key_epoch") == profile.key_epoch,
         )
     )
-
-
-def _run_packet_shape_valid(packet: object) -> bool:
-    if not isinstance(packet, Mapping) or not _ascii_deep(packet):
-        return False
-    if set(packet) != _RUN_PACKET_FIELDS:
-        return False
-    if packet.get("schema_version") != SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION:
-        return False
-    packet_id = packet.get("run_packet_id")
-    if not _sha256_digest(packet_id):
-        return False
-    without_id = {key: value for key, value in packet.items() if key != "run_packet_id"}
-    if packet_id != _digest(without_id):
-        return False
-    return all(packet.get(key) == value for key, value in _RUN_PACKET_FIXED_FIELDS.items())
-
-
-def _run_packet_bindings_valid(
-    packet: Mapping[str, Any],
-    *,
-    root: Path,
-    config_path: Path,
-    config_digest: str,
-    session_id: str,
-    run_packet_path: Path,
-    socket_path: Path,
-    python_executable: Path,
-) -> bool:
-    return all(
-        (
-            Path(str(packet.get("repo_root") or "")).resolve() == root,
-            Path(str(packet.get("working_directory") or "")).resolve() == root,
-            Path(str(packet.get("config_path") or "")).resolve() == config_path,
-            packet.get("config_digest") == config_digest,
-            packet.get("session_id") == session_id,
-            Path(str(packet.get("socket_path") or "")).resolve() == socket_path,
-            packet.get("python_module") == _RUN_PACKET_CLI_MODULE,
-            _absolute_outside_repo(socket_path, root),
-            _argv_bindings_valid(
-                packet.get("argv"),
-                root=root,
-                config_path=config_path,
-                config_digest=config_digest,
-                session_id=session_id,
-                run_packet_path=run_packet_path,
-                op_executable=str(packet.get("op_executable") or ""),
-                op_timeout_s=packet.get("op_timeout_s"),
-                ttl_seconds=packet.get("ttl_seconds"),
-                python_executable=python_executable,
-            ),
-        )
-    )
-
-
-def _argv_bindings_valid(
-    value: object,
-    *,
-    root: Path,
-    config_path: Path,
-    config_digest: str,
-    session_id: str,
-    run_packet_path: Path,
-    op_executable: str,
-    op_timeout_s: object,
-    ttl_seconds: object,
-    python_executable: Path,
-) -> bool:
-    if (
-        not isinstance(value, list)
-        or len(value) != 19
-        or not all(_ascii_text(item) for item in value)
-        or value[1:3] != ["-m", _RUN_PACKET_CLI_MODULE]
-        or Path(value[0]).resolve() != python_executable
-    ):
-        return False
-    pairs: dict[str, str] = {}
-    for index, item in enumerate(value[:-1]):
-        if item.startswith("--"):
-            if item in pairs:
-                return False
-            pairs[item] = str(value[index + 1])
-    required = {
-        "--repo-root": str(root),
-        "--config": str(config_path),
-        "--expected-config-digest": config_digest,
-        "--run-packet": str(run_packet_path),
-        "--op-executable": op_executable,
-        "--op-timeout-s": _number_text(op_timeout_s),
-        "--ttl-seconds": str(ttl_seconds),
-        "--session-id": session_id,
-    }
-    return set(pairs) == set(required) and all(
-        pairs.get(key) == expected for key, expected in required.items()
-    )
-
-
-def _selection_bindings_valid(
-    value: object,
-    *,
-    root: Path,
-    config_path: Path,
-    run_packet_path: Path,
-    config_digest: str,
-    run_packet_raw: str,
-) -> bool:
-    if not isinstance(value, Mapping):
-        return False
-    required = {
-        "manifest_id",
-        "artifact_generation_digest",
-        "config_digest",
-        "config_raw_digest",
-        "run_packet_digest",
-        "repo_root",
-        "runtime_root",
-        "config_path",
-        "run_packet_path",
-    }
-    return (
-        set(value) == required
-        and all(
-            _sha256_digest(value.get(key))
-            for key in (
-                "manifest_id",
-                "artifact_generation_digest",
-                "config_digest",
-                "config_raw_digest",
-                "run_packet_digest",
-            )
-        )
-        and value.get("config_digest") == config_digest
-        and value.get("run_packet_digest") == _text_digest(run_packet_raw)
-        and Path(str(value.get("repo_root") or "")).resolve() == root
-        and Path(str(value.get("config_path") or "")).resolve() == config_path
-        and Path(str(value.get("run_packet_path") or "")).resolve()
-        == run_packet_path
-    )
-
-
-def _profile_bindings_valid(
-    profiles: tuple[SignerPeerProfileBinding, ...],
-    profile_count: object,
-) -> bool:
-    if not profiles or profile_count != len(profiles):
-        return False
-    ids = [item.signer_profile_id for item in profiles]
-    if len(ids) != len(set(ids)):
-        return False
-    return all(
-        _ascii_text(item.signer_profile_id)
-        and _ascii_text(item.signer_public_key)
-        and _ascii_text(item.key_epoch)
-        for item in profiles
-    )
-
-
-def _absolute_outside_repo(value: object, root: Path) -> bool:
-    text = str(value)
-    if "\x00" in text or text.startswith("\\\\?\\") or text.startswith("//?/"):
-        return False
-    try:
-        path = Path(text)
-        resolved = path.resolve()
-    except Exception:
-        return False
-    return path.is_absolute() and resolved != root and root not in resolved.parents
-
-
-def _number_text(value: object) -> str:
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
-        return ""
-    return str(int(number)) if number.is_integer() else str(number)
 
 
 def _response_bindings_valid(
@@ -690,6 +502,10 @@ def _verification_result(
             else ""
         ),
         challenge_digest=_text_digest(str(payload.get("challenge") or "")),
+        manifest_id=str(payload.get("manifest_id") or ""),
+        artifact_generation_digest=str(
+            payload.get("artifact_generation_digest") or ""
+        ),
         run_packet_id=str(payload.get("run_packet_id") or ""),
         config_digest=str(payload.get("config_digest") or ""),
         session_id=str(payload.get("session_id") or ""),
@@ -724,27 +540,13 @@ def _ascii_text(value: object) -> bool:
     return isinstance(value, str) and bool(value) and all(ord(char) < 128 for char in value)
 
 
-def _ascii_deep(value: object) -> bool:
-    if isinstance(value, str):
-        return all(ord(char) < 128 for char in value)
-    if isinstance(value, Mapping):
-        return all(
-            isinstance(key, str)
-            and all(ord(char) < 128 for char in key)
-            and _ascii_deep(item)
-            for key, item in value.items()
-        )
-    if isinstance(value, (list, tuple)):
-        return all(_ascii_deep(item) for item in value)
-    return value is None or isinstance(value, (bool, int, float))
-
-
 def _sha256_digest(value: object) -> bool:
     return (
         isinstance(value, str)
         and len(value) == 71
         and value.startswith("sha256:")
         and all(char in "0123456789abcdef" for char in value[7:])
+        and value[7:] != "0" * 64
     )
 
 

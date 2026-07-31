@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import os
 import socket
 import threading
 from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src import (
+    reddog_isolated_signer_socket_resident_service as resident_service,
+)
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
     build_reddog_isolated_signer_socket_client,
 )
@@ -16,6 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
     FAIL_SIGNER_RESIDENT_SERVICE_MAX_REQUESTS_INVALID,
+    FAIL_SIGNER_SERVICE_SOCKET_PARENT_UNSAFE,
     SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
     serve_reddog_isolated_signer_socket_bounded,
 )
@@ -153,3 +158,41 @@ def test_bounded_resident_service_rejects_unsafe_paths_and_limits(tmp_path: Path
     assert FAIL_SIGNER_SERVICE_SOCKET_PATH_INSIDE_REPO in inside_repo.rejection_reasons
     assert bad_count.accepted is False
     assert FAIL_SIGNER_RESIDENT_SERVICE_MAX_REQUESTS_INVALID in bad_count.rejection_reasons
+
+
+@pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="AF_UNIX required")
+def test_cleanup_never_unlinks_a_substituted_socket(tmp_path: Path) -> None:
+    socket_path = tmp_path / "signer.sock"
+    original = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    replacement = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        original.bind(str(socket_path))
+        identity = resident_service._socket_identity(socket_path)
+        assert identity is not None
+        original.close()
+        socket_path.unlink()
+        replacement.bind(str(socket_path))
+
+        assert resident_service._cleanup_socket(socket_path, identity) is False
+        assert socket_path.exists()
+    finally:
+        original.close()
+        replacement.close()
+        socket_path.unlink(missing_ok=True)
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX ownership required")
+def test_group_or_world_writable_socket_parent_is_rejected(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    runtime.chmod(0o777)
+
+    result = serve_reddog_isolated_signer_socket_bounded(
+        repo_root=repo,
+        socket_path=runtime / "signer.sock",
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_SERVICE_SOCKET_PARENT_UNSAFE in result.rejection_reasons

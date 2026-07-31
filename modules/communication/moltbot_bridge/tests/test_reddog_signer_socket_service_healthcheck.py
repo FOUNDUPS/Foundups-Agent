@@ -28,6 +28,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import (
+    FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED,
     FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED,
     FAIL_SIGNER_HEALTHCHECK_CONFIG_MISMATCH,
     FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING,
@@ -108,34 +109,7 @@ def _config(socket_path: Path, **overrides: object) -> dict[str, object]:
         "timeout_s": 2.5,
         "max_request_bytes": 4096,
         "max_response_bytes": 8192,
-        "key_provider_profiles": [
-            {
-                "signer_profile_id": "principal-identity",
-                "signer_agent_id": "signer:principal",
-                "signing_key_ref": "op://prod-vault/principal/private",
-                "audit_mac_key_ref": "op://prod-vault/principal/audit",
-                "expected_public_key": _PRINCIPAL_PUBLIC_KEY,
-                "expected_key_fingerprint": public_key_fingerprint(
-                    _PRINCIPAL_PUBLIC_KEY
-                ),
-                "expected_key_epoch": "epoch-1",
-                "permission_snapshot_digest": "sha256:" + "4" * 64,
-                "ttl_seconds": 60,
-            },
-            {
-                "signer_profile_id": "reddog-work-authority",
-                "signer_agent_id": "signer:reddog",
-                "signing_key_ref": "op://prod-vault/reddog/private",
-                "audit_mac_key_ref": "op://prod-vault/reddog/audit",
-                "expected_public_key": _REDDOG_PUBLIC_KEY,
-                "expected_key_fingerprint": public_key_fingerprint(
-                    _REDDOG_PUBLIC_KEY
-                ),
-                "expected_key_epoch": "epoch-1",
-                "permission_snapshot_digest": "sha256:" + "4" * 64,
-                "ttl_seconds": 60,
-            },
-        ],
+        "key_provider_profiles": _key_provider_profiles(),
         "peer_policy": {
             "uid_to_principal": {"1001": "github:mjtrout"},
             "allowed_gids": [1002],
@@ -145,6 +119,37 @@ def _config(socket_path: Path, **overrides: object) -> dict[str, object]:
     }
     payload.update(overrides)
     return payload
+
+
+def _key_provider_profiles() -> list[dict[str, object]]:
+    return [
+        {
+            "signer_profile_id": "principal-identity",
+            "signer_agent_id": "signer:principal",
+            "signing_key_ref": "op://prod-vault/principal/private",
+            "audit_mac_key_ref": "op://prod-vault/principal/audit",
+            "expected_public_key": _PRINCIPAL_PUBLIC_KEY,
+            "expected_key_fingerprint": public_key_fingerprint(
+                _PRINCIPAL_PUBLIC_KEY
+            ),
+            "expected_key_epoch": "epoch-1",
+            "permission_snapshot_digest": "sha256:" + "4" * 64,
+            "ttl_seconds": 60,
+        },
+        {
+            "signer_profile_id": "reddog-work-authority",
+            "signer_agent_id": "signer:reddog",
+            "signing_key_ref": "op://prod-vault/reddog/private",
+            "audit_mac_key_ref": "op://prod-vault/reddog/audit",
+            "expected_public_key": _REDDOG_PUBLIC_KEY,
+            "expected_key_fingerprint": public_key_fingerprint(
+                _REDDOG_PUBLIC_KEY
+            ),
+            "expected_key_epoch": "epoch-1",
+            "permission_snapshot_digest": "sha256:" + "4" * 64,
+            "ttl_seconds": 60,
+        },
+    ]
 
 
 def _packet(repo: Path, runtime: Path, *, config_payload: dict[str, object] | None = None) -> Path:
@@ -202,6 +207,17 @@ def _accepted_connector(_path: Path, request: bytes, _timeout: float, _max_bytes
     ).encode("utf-8")
 
 
+MANIFEST_ID = "sha256:" + "1" * 64
+ARTIFACT_GENERATION_DIGEST = "sha256:" + "2" * 64
+
+
+def _manifest_bindings() -> dict[str, str]:
+    return {
+        "manifest_id": MANIFEST_ID,
+        "artifact_generation_digest": ARTIFACT_GENERATION_DIGEST,
+    }
+
+
 def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     runtime = tmp_path / "runtime"
@@ -211,6 +227,7 @@ def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_pa
         repo_root=repo,
         run_packet_path=packet_path,
         connector=_accepted_connector,
+        **_manifest_bindings(),
     )
 
     assert result.accepted is True
@@ -225,6 +242,8 @@ def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_pa
     assert result.request_digest and result.request_digest.startswith("sha256:")
     assert result.response_digest and result.response_digest.startswith("sha256:")
     assert result.peer_handshake_verified is True
+    assert result.manifest_id == MANIFEST_ID
+    assert result.artifact_generation_digest == ARTIFACT_GENERATION_DIGEST
     assert result.peer_handshake_expires_at is not None
     assert result.no_signature_value_returned is True
     serialized = json.dumps(result.to_dict(), sort_keys=True)
@@ -288,6 +307,7 @@ def test_healthcheck_rejects_missing_profile_and_signer_rejection(tmp_path: Path
         repo_root=repo,
         run_packet_path=reject_packet,
         connector=lambda *_: b'{"accepted":false,"rejection_code":"REJECT_TEST"}\n',
+        **_manifest_bindings(),
     )
 
     assert FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING in missing_profile.rejection_reasons
@@ -303,10 +323,61 @@ def test_healthcheck_rejects_unavailable_socket_without_connector(tmp_path: Path
     result = run_reddog_signer_socket_service_healthcheck(
         repo_root=repo,
         run_packet_path=packet_path,
+        **_manifest_bindings(),
     )
 
     assert result.accepted is False
     assert FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED in result.rejection_reasons
+
+
+def test_healthcheck_never_accepts_an_unbound_manifest(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    packet_path = _packet(repo, tmp_path / "runtime")
+    called = False
+
+    def connector(*_args):
+        nonlocal called
+        called = True
+        return _accepted_connector(*_args)
+
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo,
+        run_packet_path=packet_path,
+        connector=connector,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED in (
+        result.rejection_reasons
+    )
+    assert called is False
+
+
+def test_healthcheck_rejects_all_zero_manifest_binding_before_connect(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    packet_path = _packet(repo, tmp_path / "runtime")
+    called = False
+
+    def connector(*_args):
+        nonlocal called
+        called = True
+        return _accepted_connector(*_args)
+
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo,
+        run_packet_path=packet_path,
+        connector=connector,
+        manifest_id="sha256:" + "0" * 64,
+        artifact_generation_digest=ARTIFACT_GENERATION_DIGEST,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED in (
+        result.rejection_reasons
+    )
+    assert called is False
 
 
 def test_healthcheck_module_has_no_spawn_secret_resolution_or_runtime_authority_surface() -> None:
