@@ -29,6 +29,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
     SignerRuntimeGenerationActivation,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_reader import (
+    SignerRuntimeGenerationReader,
     SignerRuntimeGenerationReaderAuthorityBoundary,
     require_signer_runtime_generation_reader_authority,
 )
@@ -171,7 +172,6 @@ def _create_external_signer_lifecycle_admission_boundary(
     trusted_monotonic_clock: Callable[[], int] | None = None,
     issue_boundary: Any,
 ) -> ExternalSignerLifecycleAdmissionBoundary:
-    """Create a one-shot boundary pinned to trusted lifecycle dependencies."""
     root = Path(repo_root).resolve()
     verified_policy = _verified_os_policy(
         os_policy_authority, os_policy_authority_boundary
@@ -206,6 +206,7 @@ def _create_external_signer_lifecycle_admission_boundary(
             issued,
             dependencies["clock"],
             dependencies["monotonic_clock"],
+            dependencies["generation_anchor"],
         ),
     )
     return boundary
@@ -306,6 +307,9 @@ def _make_admit(
             values = _verified_admission_values(
                 dependencies, selection_capability
             )
+            _validate_admitted_generation(
+                values, dependencies["generation_anchor"].load()
+            )
         except Exception as exc:
             raise ExternalSignerLifecycleAdmissionError(
                 "external_signer_lifecycle_rejected"
@@ -323,6 +327,7 @@ def _make_consume(
     issued: WeakKeyDictionary[object, str],
     clock: Callable[[], int],
     monotonic_clock: Callable[[], int],
+    generation_reader: SignerRuntimeGenerationReader,
 ) -> Any:
     def consume(value: object) -> ExternalSignerLifecycleAdmissionReceipt:
         if not isinstance(value, capability_type):
@@ -344,6 +349,12 @@ def _make_consume(
             raise ExternalSignerLifecycleAdmissionError(
                 "external_signer_lifecycle_unverified"
             )
+        try:
+            _validate_admitted_generation(values, generation_reader.load())
+        except Exception as exc:
+            raise ExternalSignerLifecycleAdmissionError(
+                "external_signer_lifecycle_unverified"
+            ) from exc
         return ExternalSignerLifecycleAdmissionReceipt(
             **dict(values), receipt_id=_digest(values)
         )
@@ -453,6 +464,26 @@ def _validate_generation(
         )
     ):
         raise ValueError("external_signer_generation_mismatch")
+
+
+def _validate_admitted_generation(
+    values: Mapping[str, Any],
+    activation: SignerRuntimeGenerationActivation | None,
+) -> None:
+    fields = (
+        "manifest_id",
+        "artifact_generation_digest",
+        "config_digest",
+        "config_raw_digest",
+        "run_packet_digest",
+    )
+    if (
+        activation is None
+        or activation.generation != values["generation"]
+        or activation.revision != values["generation_revision"]
+        or any(getattr(activation, field) != values[field] for field in fields)
+    ):
+        raise ValueError("external_signer_admitted_generation_stale")
 
 
 def _validate_policy_packet(

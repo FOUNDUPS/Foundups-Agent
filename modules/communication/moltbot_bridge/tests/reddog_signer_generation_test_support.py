@@ -73,6 +73,7 @@ def create_lifecycle_generation_authority(
     values: dict[str, object],
     *,
     manifest_id: str | None = None,
+    return_writer: bool = False,
 ):
     runtime = Path(str(values["runtime_root"]))
     authority_root = runtime.parent / "signer-authority"
@@ -118,7 +119,10 @@ def create_lifecycle_generation_authority(
         high_water_authority=high_authority,
         high_water_authority_boundary=high_boundary,
     )
-    return create_signer_runtime_generation_reader_authority(reader)
+    authority = create_signer_runtime_generation_reader_authority(reader)
+    if return_writer:
+        return (*authority, writer)
+    return authority
 
 
 def _high_water_store(

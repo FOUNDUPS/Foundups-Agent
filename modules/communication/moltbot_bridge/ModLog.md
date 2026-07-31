@@ -21,6 +21,8 @@
   retarget a lifecycle authority. Public constructors, factories, verifier
   calls, reader calls, and lifecycle calls expose no caller-supplied registry
   lookup or issuance hook; attempted injection fails at the API boundary.
+  Lifecycle admission and one-shot consumption each revalidate the current
+  authenticated generation, closing concurrent generation-advance races.
 - `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
   signer healthcheck with a fresh, short-lived, domain-separated Ed25519
   challenge verified against the configured signer key, fingerprint, epoch,

@@ -19,6 +19,8 @@
   module-global mutation surfaces; deleting a signed anchor still fails closed.
 - Proved public generation and lifecycle APIs expose no caller-supplied
   registry lookup or issuance parameter and reject forged-hook injection.
+- Proved generation advancement during observation or before capability
+  consumption rejects rather than admitting stale lifecycle evidence.
 - Kept service provisioning, valve consumption and live
   execution fail closed behind separately owned follow-ons.
 - Focused signer, manifest, safety and WSP 62 matrices remain
