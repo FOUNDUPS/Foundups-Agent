@@ -320,13 +320,61 @@ def test_holoindex_postmerge_reader_cannot_be_starved_by_global_top_ten() -> Non
                 context={"source": "self_audit"},
             )
         task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+        for index in range(12):
+            assert agent_db.create_autonomous_task_if_absent(
+                task_id="holoindex_postmerge_refresh:" + ("g" * 38) + f"{index:02d}",
+                description="malformed high priority postmerge lookalike",
+                required_skills=["holo-search"],
+                estimated_complexity=1.0,
+                priority_score=200.0,
+                context={
+                    "schema_version": "holoindex_postmerge_coordination_v1",
+                    "source": "holoindex_postmerge_coordinator",
+                },
+            )
+            assert agent_db.create_autonomous_task_if_absent(
+                task_id=f"holoindexXpostmergeYrefresh:{index:040x}",
+                description="wildcard-prefix poison row",
+                required_skills=["holo-search"],
+                estimated_complexity=1.0,
+                priority_score=300.0,
+                context={
+                    "schema_version": "holoindex_postmerge_coordination_v1",
+                    "source": "holoindex_postmerge_coordinator",
+                },
+            )
+            assert agent_db.create_autonomous_task_if_absent(
+                task_id="holoindex_postmerge_refresh:" + f"{index + 1:040x}",
+                description="wrong-source poison row",
+                required_skills=["holo-search"],
+                estimated_complexity=1.0,
+                priority_score=400.0,
+                context={
+                    "schema_version": "holoindex_postmerge_coordination_v1",
+                    "source": "attacker",
+                },
+            )
+            assert agent_db.create_autonomous_task_if_absent(
+                task_id="holoindex_postmerge_refresh:" + f"{index + 100:040x}",
+                description="wrong-schema poison row",
+                required_skills=["holo-search"],
+                estimated_complexity=1.0,
+                priority_score=500.0,
+                context={
+                    "schema_version": "attacker_schema",
+                    "source": "holoindex_postmerge_coordinator",
+                },
+            )
         assert agent_db.create_autonomous_task_if_absent(
             task_id=task_id,
             description="exact SHA maintenance",
             required_skills=["holo-search"],
             estimated_complexity=3.0,
             priority_score=19.0,
-            context={"source": "holoindex_postmerge_coordinator"},
+            context={
+                "schema_version": "holoindex_postmerge_coordination_v1",
+                "source": "holoindex_postmerge_coordinator",
+            },
         )
 
         assert all(

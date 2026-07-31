@@ -2088,9 +2088,12 @@ def test_triage_claims_only_postmerge_by_default(tmp_path, monkeypatch):
     db = MagicMock()
     db.db.execute_query.return_value = [
         {
-            "task_id": "holo",
-            "description": "Refresh exact-SHA HoloIndex authority",
-            "context": {"source": "holoindex_postmerge_coordinator"},
+                "task_id": "holoindex_postmerge_refresh:" + ("a" * 40),
+                "description": "Refresh exact-SHA HoloIndex authority",
+                "context": {
+                    "schema_version": "holoindex_postmerge_coordination_v1",
+                    "source": "holoindex_postmerge_coordinator",
+                },
             "required_skills": ["holo-search"],
         },
     ]
@@ -2105,7 +2108,9 @@ def test_triage_claims_only_postmerge_by_default(tmp_path, monkeypatch):
     )
 
     assert result["action"] == "execute_maintenance_task"
-    assert result["task"]["task_id"] == "holo"
+    assert result["task"]["task_id"] == (
+        "holoindex_postmerge_refresh:" + ("a" * 40)
+    )
     assert result["task"]["family"] == "holoindex_postmerge"
 
 
@@ -2117,9 +2122,12 @@ def test_generic_autonomous_executor_cannot_claim_postmerge_task(
     monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
     monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
     postmerge_task = {
-        "task_id": "holo",
+        "task_id": "holoindex_postmerge_refresh:" + ("a" * 40),
         "description": "Refresh exact-SHA HoloIndex authority",
-        "context": {"source": "holoindex_postmerge_coordinator"},
+        "context": {
+            "schema_version": "holoindex_postmerge_coordination_v1",
+            "source": "holoindex_postmerge_coordinator",
+        },
         "required_skills": ["holo-search"],
     }
     db = MagicMock()
