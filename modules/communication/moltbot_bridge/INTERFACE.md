@@ -115,9 +115,24 @@ against that signer-owned binding, configured key, fingerprint, epoch, and
 kernel-attested requester. The response carries a second, domain-separated
 signature covering its audit metadata and acceptance attestations. A matching
 public-key string or serialized `peer_handshake_verified` flag is not
-authority. The CLI intentionally has no default manifest-selection loader:
-external signer lifecycle supervision, current-generation/replay selection,
-and use-time consumption at every authority call remain fail closed.
+authority. `reddog_current_generation_manifest_launch_selection.py` now
+supplies the verifier-only selection boundary for an externally managed signer:
+it reads the authenticated durable generation, ignores caller manifest data,
+verifies the content-addressed manifest with the canonical Ed25519 backend,
+and rechecks all seven current artifact bytes before issuing a one-shot
+process-local capability. The CLI accepts `--owner-authority-config` only
+through a root-owned, non-group/world-writable Linux/WSL file outside the
+repository. One no-follow descriptor chain reads the checked directory and
+file, and every ancestor must be root-owned and non-writable. That file pins
+the generation public key, anchor, high-water
+identity, monotonic witness, and three disjoint persistence roots; it rebuilds
+read-only verifier capabilities, mints an opaque process-local owner authority,
+and rejects config/run-packet path substitution. The public CLI cannot accept
+an injected manifest selector. RedDog and `main.py` do not load this file and cannot spawn or
+stop the signer. Distinct-principal service-manager deployment and use-time
+consumption at every authority call remain fail closed.
+Production bootstrap also requires the exact generation-bound selection;
+legacy manifest-selection compatibility is confined below service admission.
 
 Signer generation persistence separates the signer-side authentication
 capability from the verifier supplied to RedDog. The concrete high-water store

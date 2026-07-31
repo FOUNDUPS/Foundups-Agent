@@ -1,3 +1,24 @@
+## 2026-07-31: CURRENT-GENERATION SIGNER LAUNCH SELECTION
+
+- Added focused regressions for generation-bound content-addressed manifest
+  selection, canonical signature and audit-attestation verification, all-seven
+  live artifact byte checks, caller-manifest substitution, activation-binding
+  mismatch, stale/future manifest rejection, short-lived selection expiry,
+  capability forgery/replay, and missing manifest rejection.
+- Added the new selector and test module to the exact signer WSP 62 gate.
+- Added descriptor-bound root-owned Linux/WSL owner-config reconstruction,
+  tamper, caller-path, owner-root overlap, platform fail-closed, opaque owner
+  authority, public-CLI injection denial, exact generation-selection shape, and real
+  parser-to-loader-to-bootstrap CLI regressions. The real CLI proof confirms
+  one resolver/service call on acceptance and zero calls for stale evidence.
+  Production bootstrap rejects the legacy nine-field selection downgrade.
+  Privileged Linux regressions cover root-owned success, wrong UID, writable
+  roots/files, symlinks, directory replacement, and full CLI admission.
+- Focused signer/manifest/generation/lifecycle matrix: 176 passed, 8 platform
+  skips, including WSP 62. Six privileged ownership cases skip on Windows.
+- Proposal/signer-policy compatibility matrix: 23 passed after upgrading its
+  test-only launch fixture to the generation-bound selection.
+
 ## 2026-07-31: SIGNER RUNTIME ATOMIC PROVISIONING
 - Added focused coverage for final-root manifest publication, last-step
   authenticated generation activation, missing/tampered artifacts, independent

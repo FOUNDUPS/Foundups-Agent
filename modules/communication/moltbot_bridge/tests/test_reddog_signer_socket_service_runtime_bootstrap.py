@@ -29,12 +29,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
     FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,
-    FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO,
-    FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING,
-    FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE,
-    FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE,
     FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
-    FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
     run_reddog_signer_socket_service_runtime_bootstrap,
@@ -243,6 +238,11 @@ def _launch_binding(
         "runtime_root": str(config_path.parent.resolve()),
         "config_path": str(config_path.resolve()),
         "run_packet_path": str(packet_path.resolve()),
+        "generation": 1,
+        "generation_revision": "a" * 64,
+        "selection_issued_at": 100,
+        "selection_expires_at": 130,
+        "owner_config_id": "sha256:" + ("c" * 64),
     }
     return {
         "expected_config_digest": supplied.config_digest,
@@ -315,6 +315,47 @@ def test_bootstrap_reads_outside_repo_config_and_runs_runtime_wiring(tmp_path: P
     ]
     assert result.no_env_parsed is True
     assert result.no_holoindex_reindex_performed is True
+
+
+def test_bootstrap_rejects_legacy_selection_downgrade(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    config_path = _write_json(
+        runtime / "signer-service.json",
+        _config(
+            _public_text(private_key),
+            socket_path=runtime / "signer.sock",
+        ),
+    )
+    launch = _launch_binding(repo, config_path)
+    boundary = launch["manifest_selection_boundary"]
+    assert isinstance(boundary, _ManifestSelectionBoundary)
+    for field in (
+        "generation",
+        "generation_revision",
+        "selection_issued_at",
+        "selection_expires_at",
+        "owner_config_id",
+    ):
+        boundary._values.pop(field)
+    resolver = _resolver(private_key)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=config_path,
+        resolver=resolver,
+        serve_bounded=service,
+        **launch,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert resolver.calls == []
+    assert service.calls == []
 
 
 @pytest.mark.parametrize(

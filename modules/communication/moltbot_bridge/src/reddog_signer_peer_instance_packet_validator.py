@@ -35,6 +35,19 @@ _CLI_MODULE = (
     "modules.communication.moltbot_bridge.src."
     "reddog_signer_socket_service_runtime_cli"
 )
+_SELECTION_FIELDS = frozenset(
+    {
+        "manifest_id", "artifact_generation_digest", "config_digest",
+        "config_raw_digest", "run_packet_digest", "repo_root", "runtime_root",
+        "config_path", "run_packet_path",
+    }
+)
+_GENERATION_SELECTION_FIELDS = frozenset(
+    {
+        "generation", "generation_revision", "selection_issued_at",
+        "selection_expires_at", "owner_config_id",
+    }
+)
 
 
 def signer_run_packet_selection_valid(
@@ -109,6 +122,17 @@ def signer_profile_bindings_valid(
     )
 
 
+def signer_generation_bound_selection_valid(value: object) -> bool:
+    """Require the exact current-generation launch selection shape."""
+
+    return bool(
+        isinstance(value, Mapping)
+        and set(value)
+        == _SELECTION_FIELDS | _GENERATION_SELECTION_FIELDS
+        and _generation_selection_valid(value)
+    )
+
+
 def _packet_shape_valid(packet: object) -> bool:
     if not isinstance(packet, Mapping) or not _ascii_deep(packet):
         return False
@@ -170,17 +194,22 @@ def _required_argv_pairs(bindings: Mapping[str, Any]) -> dict[str, str]:
 def _selection_valid(value: object, **bindings: Any) -> bool:
     if not isinstance(value, Mapping):
         return False
-    required = {
-        "manifest_id", "artifact_generation_digest", "config_digest",
-        "config_raw_digest", "run_packet_digest", "repo_root", "runtime_root",
-        "config_path", "run_packet_path",
-    }
+    fields = set(value)
+    if fields not in (
+        _SELECTION_FIELDS,
+        _SELECTION_FIELDS | _GENERATION_SELECTION_FIELDS,
+    ):
+        return False
+    if (
+        fields != _SELECTION_FIELDS
+        and not signer_generation_bound_selection_valid(value)
+    ):
+        return False
     return all(
         (
-            set(value) == required,
             all(
                 _sha256_digest(value.get(key))
-                for key in required
+                for key in _SELECTION_FIELDS
                 if key.endswith("digest") or key == "manifest_id"
             ),
             value.get("config_digest") == bindings["config_digest"],
@@ -192,6 +221,24 @@ def _selection_valid(value: object, **bindings: Any) -> bool:
             == bindings["config_path"],
             Path(str(value.get("run_packet_path") or "")).resolve()
             == bindings["run_packet_path"],
+        )
+    )
+
+
+def _generation_selection_valid(value: Mapping[str, Any]) -> bool:
+    generation = value.get("generation")
+    revision = str(value.get("generation_revision") or "")
+    issued = value.get("selection_issued_at")
+    expires = value.get("selection_expires_at")
+    return all(
+        (
+            type(generation) is int and generation > 0,
+            len(revision) == 64
+            and all(char in "0123456789abcdef" for char in revision),
+            type(issued) is int,
+            type(expires) is int,
+            expires - issued == 30,
+            _sha256_digest(value.get("owner_config_id")),
         )
     )
 
@@ -264,6 +311,7 @@ def _sha256_digest(value: object) -> bool:
 
 
 __all__ = [
+    "signer_generation_bound_selection_valid",
     "signer_profile_bindings_valid",
     "signer_run_packet_bindings_valid",
     "signer_run_packet_selection_valid",

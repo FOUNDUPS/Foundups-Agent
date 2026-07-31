@@ -1,4 +1,32 @@
 # ModLog - moltbot_bridge
+- `REDDOG_CURRENT_GENERATION_MANIFEST_LAUNCH_SELECTION_PHASE1`: added a
+  verifier-only external-signer launch selector that ignores caller-supplied
+  manifest payloads, reads the authenticated durable current generation, opens
+  its content-addressed signed manifest, applies the canonical Ed25519
+  verifier, verifies the domain-separated audit attestation, and checks all
+  seven current runtime artifact bytes before minting a process-local,
+  immutable, one-shot launch capability. The activated generation, repository
+  root, runtime root, manifest ID, generation digest, signer configuration
+  digest, raw configuration digest, and run-packet digest must all agree.
+  Canonical manifest freshness is checked at selection and consumption; a
+  committed generation is not treated as a fresh restart authorization. This
+  slice does not spawn or supervise the signer. Added the signer-owned CLI
+  adapter for a root-owned, non-writable Linux/WSL service configuration
+  outside the repository. It reads that configuration through one no-follow
+  directory/file descriptor chain, rejects writable ancestry and overlapping
+  trust roots, then mints an opaque owner authority instead of passing
+  caller-selected trust strings. The public CLI exposes no manifest-selection
+  injection seam. It reconstructs only
+  verifier/read-only generation capabilities, pins the generation key, anchor,
+  high-water and monotonic witness identities, and rejects caller path
+  substitution before handing the one-shot selection to the existing CLI.
+  The peer-instance packet validator accepts only its prior exact selection
+  shape or the exact generation-bound extension; arbitrary extra authority
+  fields and malformed generation/TTL values reject. Production signer
+  bootstrap requires the generation-bound extension, so legacy selection
+  compatibility cannot reach service startup.
+  RedDog and `main.py` still cannot spawn or stop the signer; system-service
+  deployment under the distinct principal remains a separate operator action.
 - `REDDOG_SIGNER_RUNTIME_ATOMIC_PROVISIONING_PHASE1`: added one
   generation-root-first coordinator that signs the seven canonical artifacts
   in their final inactive runtime root and advances the independently stored

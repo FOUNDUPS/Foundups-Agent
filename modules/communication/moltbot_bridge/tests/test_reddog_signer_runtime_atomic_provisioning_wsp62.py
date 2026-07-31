@@ -9,6 +9,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 FILES = (
     "modules/communication/moltbot_bridge/src/"
+    "reddog_current_generation_manifest_launch_selection.py",
+    "modules/communication/moltbot_bridge/src/"
+    "reddog_signer_system_service_manifest_selection_loader.py",
+    "modules/communication/moltbot_bridge/src/"
+    "reddog_signer_peer_instance_packet_validator.py",
+    "modules/communication/moltbot_bridge/src/"
+    "reddog_signer_socket_service_runtime_cli.py",
+    "modules/communication/moltbot_bridge/src/"
     "reddog_atomic_signer_runtime_generation_high_water.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_atomic_signer_runtime_generation_high_water_reader.py",
@@ -44,6 +52,14 @@ FILES = (
     "reddog_signer_runtime_generation_witness_binding.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_sqlite_monotonic_authority_store.py",
+    "modules/communication/moltbot_bridge/tests/"
+    "test_reddog_current_generation_manifest_launch_selection.py",
+    "modules/communication/moltbot_bridge/tests/"
+    "test_reddog_signer_system_service_manifest_selection_loader.py",
+    "modules/communication/moltbot_bridge/tests/"
+    "test_reddog_signer_system_service_manifest_selection_loader_linux.py",
+    "modules/communication/moltbot_bridge/tests/"
+    "test_reddog_signer_peer_instance_packet_validator_generation.py",
     "modules/communication/moltbot_bridge/tests/"
     "reddog_signer_generation_anchor_test_support.py",
     "modules/communication/moltbot_bridge/tests/"

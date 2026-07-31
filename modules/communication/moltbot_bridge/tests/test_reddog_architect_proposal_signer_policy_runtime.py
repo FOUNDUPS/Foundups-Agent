@@ -77,8 +77,6 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     run_reddog_signer_socket_service_config_supply,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
-    FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
-    FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,
     FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
     rehydrate_signer_socket_service_runtime_config,
     run_reddog_signer_socket_service_runtime_bootstrap,
@@ -728,6 +726,11 @@ def _write_proposal_launch_packet(
         "runtime_root": str(output_path.parent.resolve()),
         "config_path": str(config_path.resolve()),
         "run_packet_path": str(output_path.resolve()),
+        "generation": 1,
+        "generation_revision": "a" * 64,
+        "selection_issued_at": 100,
+        "selection_expires_at": 130,
+        "owner_config_id": "sha256:" + ("c" * 64),
     }
     return {
         "run_packet_path": output_path,

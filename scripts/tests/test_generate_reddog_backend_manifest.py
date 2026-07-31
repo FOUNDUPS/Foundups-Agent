@@ -95,7 +95,7 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     assert (
         "modules/communication/moltbot_bridge/src/reddog_signer_socket_schema.py"
         in generated["required_runtime_sha256"]
-    )
+        )
     assert generator.canonical_manifest_digest(generated) == (
-        "ab9bab746c17ecd7d328b3ac2eb1f616835b5c9703a05e76aa91a0b67284a1a7"
+        "8a5533c37a0089f5250f6302cd3ec4c129a64dbaa991e403b87bd9c1786e7db7"
     )
