@@ -18,10 +18,11 @@
   matrix: 185 passed, 2 platform skips.
 - Complete `test_reddog_*signer*.py` plus activation-lease matrix: 426 passed,
   13 platform skips.
-- Full bridge differential: untouched base `4778 passed, 33 failed, 23
-  skipped`; repaired branch `4843 passed, 33 failed, 24 skipped`. The
-  33-node failure set is identical, so the slice adds 65 passing tests, one
-  intentional POSIX fail-closed skip, and zero bridge regressions.
+- Full bridge differential: untouched base `4784 passed, 27 failed, 23
+  skipped`; repaired branch `4848 passed, 28 failed, 24 skipped`. The 27
+  baseline failures are shared. The candidate-only AgentDB concurrency
+  failure passed 10/10 isolated reruns, so the slice adds 64 passing tests,
+  one intentional POSIX fail-closed skip, and no reproducible regression.
 
 ## 2026-07-31: REDDOG SIGNER MANIFEST AND LIFECYCLE FOUNDATIONS
 - Proved Ed25519 manifest signing plus content-addressed no-replace
