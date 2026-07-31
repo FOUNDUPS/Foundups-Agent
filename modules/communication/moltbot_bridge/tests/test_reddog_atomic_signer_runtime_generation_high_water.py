@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import json
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
     SignerRuntimeGenerationBinding,
     SignerRuntimeGenerationHighWater,
     VerifiedSignerRuntimeGenerationHighWater,
+)
+from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
+    SqliteMonotonicAuthorityStore,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signer_generation_test_support import (
+    generation_witness_binding,
 )
 
 
@@ -147,6 +154,7 @@ def _store(
     *,
     authenticator: HmacAuthenticator | None = None,
     store_type=AtomicSignerRuntimeGenerationHighWaterStore,
+    witness_binding=None,
 ):
     repo, _, authority = roots
     signing_capability = authenticator or HmacAuthenticator()
@@ -161,6 +169,36 @@ def _store(
             key=signing_capability.key,
             identity=signing_capability.authenticator_id,
         ),
+        generation_witness_store=_witness(roots),
+        generation_witness_binding=(
+            witness_binding
+            or _witness_binding(roots, signing_capability.authenticator_id)
+        ),
+    )
+
+
+def _witness(roots):
+    repo, _, authority = roots
+    root = authority.parent / "signer-generation-witness"
+    root.mkdir(exist_ok=True)
+    return SqliteMonotonicAuthorityStore(
+        root / "generation-witness.sqlite3",
+        allowed_root=root,
+        repo_root=repo,
+        store_id="signer-generation-witness:production",
+        durability_receipt_id="sha256:" + "d" * 64,
+    )
+
+
+def _witness_binding(roots, authenticator_id="test-hmac:v1"):
+    _, runtime, _ = roots
+    return generation_witness_binding(
+        authenticator_id=authenticator_id,
+        runtime_root=runtime,
+        high_water_store_id="signer-high-water:production",
+        high_water_durability_receipt_id=DURABILITY_RECEIPT_ID,
+        witness_store_id="signer-generation-witness:production",
+        witness_durability_receipt_id="sha256:" + "d" * 64,
     )
 
 
@@ -183,6 +221,8 @@ def test_reader_rejects_noncanonical_verifier_boundary(roots) -> None:
             durability_receipt_id=DURABILITY_RECEIPT_ID,
             verifier_authority=object(),
             verifier_authority_boundary=HmacAuthenticator(),
+            generation_witness_store=_witness(roots),
+            generation_witness_binding=_witness_binding(roots),
         )
 
 
@@ -299,6 +339,32 @@ def test_recomputed_revision_cannot_authenticate_tampered_state(
         _store(roots).load(ANCHOR_ID)
 
 
+def test_recomputed_revision_cannot_forge_pending_rollback_snapshot(
+    roots,
+) -> None:
+    store = _store(roots)
+    store.prepare(
+        ANCHOR_ID,
+        expected=None,
+        next_value=_value(1, "1"),
+        previous_anchor_state_json="{}",
+    )
+    path = roots[2] / "generation-high-water.json"
+    state = json.loads(path.read_text(encoding="utf-8"))
+    state["entries"][ANCHOR_ID]["pending"][
+        "previous_anchor_state_json"
+    ] = '{"attacker":"selected"}'
+    body = dict(state)
+    body.pop("revision")
+    state["revision"] = hashlib.sha256(_canonical(body)).hexdigest()
+    path.write_text(json.dumps(state, sort_keys=True), encoding="utf-8")
+
+    with pytest.raises(
+        ValueError, match="generation_high_water_authentication_invalid"
+    ):
+        _store(roots).pending(ANCHOR_ID)
+
+
 def test_wrong_authenticator_and_placeholder_receipt_reject(roots) -> None:
     store = _store(roots)
     store.advance(
@@ -324,6 +390,8 @@ def test_wrong_authenticator_and_placeholder_receipt_reject(roots) -> None:
             durability_receipt_id="sha256:" + "0" * 64,
             signer=HmacAuthenticator(),
             verifier=VerifierOnly(),
+            generation_witness_store=_witness(roots),
+            generation_witness_binding=_witness_binding(roots),
         )
 
 
@@ -335,13 +403,16 @@ def test_anchor_restart_rolls_forward_exactly_one_generation(roots) -> None:
         anchor.activate(_binding(), expected_revision=None)
 
     recovered_store = _store(roots)
-    recovered = _anchor(roots, recovered_store).recover()
+    recovered = _anchor(roots, recovered_store).recover(
+        commit_guard=lambda _candidate: None
+    )
     assert recovered is not None
-    assert recovered.generation == 1
+    assert recovered_store.pending(ANCHOR_ID) is None
     assert recovered_store.load(ANCHOR_ID) == SignerRuntimeGenerationHighWater(
         generation=1,
         revision=recovered.revision,
     )
+    assert recovered.generation == 1
 
 
 def test_recovery_accepts_verified_post_high_water_commit_exception(
@@ -355,8 +426,9 @@ def test_recovery_accepts_verified_post_high_water_commit_exception(
         )
 
     recovered_store = _store(roots, store_type=RaiseAfterCommitStore)
-    recovered = _anchor(roots, recovered_store).recover()
-
+    recovered = _anchor(roots, recovered_store).recover(
+        commit_guard=lambda _candidate: None
+    )
     assert recovered is not None
     assert recovered_store.pending(ANCHOR_ID) is None
     assert recovered_store.load(ANCHOR_ID) == SignerRuntimeGenerationHighWater(
@@ -364,6 +436,45 @@ def test_recovery_accepts_verified_post_high_water_commit_exception(
         revision=recovered.revision,
     )
 
+
+def test_caller_cannot_reset_witness_namespace_after_commit(roots) -> None:
+    authenticator = HmacAuthenticator()
+    store = _store(roots, authenticator=authenticator)
+    store.advance(ANCHOR_ID, expected=None, next_value=_value(1, "1"))
+    changed = replace(
+        _witness_binding(roots, authenticator.authenticator_id),
+        key_epoch="attacker-selected-key-epoch",
+    )
+
+    with pytest.raises(ValueError, match="state_invalid"):
+        _store(
+            roots,
+            authenticator=authenticator,
+            witness_binding=changed,
+        ).load(ANCHOR_ID)
+
+
+def test_witness_domain_must_not_overlap_local_high_water(roots) -> None:
+    repo, _, authority = roots
+    witness = SqliteMonotonicAuthorityStore(
+        authority / "generation.sqlite3",
+        allowed_root=authority,
+        repo_root=repo,
+        store_id="signer-generation-witness:production",
+        durability_receipt_id="sha256:" + "d" * 64,
+    )
+    with pytest.raises(ValueError, match="witness_domain_overlap"):
+        AtomicSignerRuntimeGenerationHighWaterStore(
+            authority / "generation-high-water.json",
+            allowed_root=authority,
+            repo_root=repo,
+            store_id="signer-high-water:production",
+            durability_receipt_id=DURABILITY_RECEIPT_ID,
+            signer=HmacAuthenticator(),
+            verifier=VerifierOnly(),
+            generation_witness_store=witness,
+            generation_witness_binding=_witness_binding(roots),
+        )
 
 def test_anchor_post_commit_exception_rolls_forward(roots) -> None:
     store = _store(roots)
@@ -374,6 +485,22 @@ def test_anchor_post_commit_exception_rolls_forward(roots) -> None:
 
     assert activation.generation == 1
     assert _anchor(roots, _store(roots)).load() == activation
+
+
+def test_replayed_anchor_and_local_high_water_fail_external_witness(roots) -> None:
+    store = _store(roots)
+    anchor = _anchor(roots, store)
+    first = anchor.activate(_binding(), expected_revision=None)
+    anchor_bytes = anchor.path.read_bytes()
+    high_water_path = roots[2] / "generation-high-water.json"
+    high_water_bytes = high_water_path.read_bytes()
+    anchor.activate(_binding(2), expected_revision=first.revision)
+
+    anchor.path.write_bytes(anchor_bytes)
+    high_water_path.write_bytes(high_water_bytes)
+
+    with pytest.raises(ValueError, match="rollback_detected"):
+        _anchor(roots, _store(roots)).load()
 
 
 def test_anchor_pre_commit_exception_aborts_pending(roots) -> None:
@@ -411,6 +538,8 @@ def test_store_path_is_confined_outside_repository(roots) -> None:
             durability_receipt_id=DURABILITY_RECEIPT_ID,
             signer=HmacAuthenticator(),
             verifier=VerifierOnly(),
+            generation_witness_store=_witness(roots),
+            generation_witness_binding=_witness_binding(roots),
         )
     with pytest.raises(ValueError, match="outside_runtime_root"):
         AtomicSignerRuntimeGenerationHighWaterStore(
@@ -421,6 +550,8 @@ def test_store_path_is_confined_outside_repository(roots) -> None:
             durability_receipt_id=DURABILITY_RECEIPT_ID,
             signer=HmacAuthenticator(),
             verifier=VerifierOnly(),
+            generation_witness_store=_witness(roots),
+            generation_witness_binding=_witness_binding(roots),
         )
 
 

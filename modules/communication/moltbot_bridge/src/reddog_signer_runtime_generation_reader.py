@@ -49,11 +49,18 @@ class SignerRuntimeGenerationHighWaterReader(Protocol):
     @property
     def rollback_domain_root(self) -> Path: ...
 
+    @property
+    def witness_rollback_domain_root(self) -> Path: ...
+
     def load(self, anchor_id: str) -> SignerRuntimeGenerationHighWater | None: ...
 
     def pending(
         self, anchor_id: str
     ) -> SignerRuntimeGenerationPendingAdvance | None: ...
+
+    def witness_load(
+        self, anchor_id: str
+    ) -> SignerRuntimeGenerationHighWater | None: ...
 
 
 @dataclass(frozen=True)
@@ -123,6 +130,15 @@ def _high_water_pending(lookup: Any):
     return pending
 
 
+def _high_water_witness_load(lookup: Any):
+    def witness_load(
+        self: object, anchor_id: str
+    ) -> SignerRuntimeGenerationHighWater | None:
+        return lookup(self).witness_load(anchor_id)
+
+    return witness_load
+
+
 class _ReaderHandle:
     __slots__ = ("__weakref__",)
 
@@ -139,8 +155,12 @@ class _HighWaterReaderHandle:
     rollback_domain_root = _high_water_property(
         _lookup_high_water_target, "rollback_domain_root"
     )
+    witness_rollback_domain_root = _high_water_property(
+        _lookup_high_water_target, "witness_rollback_domain_root"
+    )
     load = _high_water_load(_lookup_high_water_target)
     pending = _high_water_pending(_lookup_high_water_target)
+    witness_load = _high_water_witness_load(_lookup_high_water_target)
 
 
 def _reader_boundary_require(lookup: Any):
@@ -225,11 +245,7 @@ def _initialize_durable_reader(
         != verified.reader.durability_receipt_id
     ):
         raise ValueError("generation_reader_high_water_authority_mismatch")
-    rollback_root = validate_runtime_root_path(
-        verified.reader.rollback_domain_root, repo_root=store.repo_root
-    )
-    if _paths_overlap(rollback_root, store.allowed_root):
-        raise ValueError("generation_reader_high_water_domain_overlap")
+    _validate_reader_domains(store, verified.reader)
     if not is_sha256(verified.durability_receipt_id):
         raise ValueError("generation_reader_high_water_receipt_invalid")
     issue_state(
@@ -246,6 +262,22 @@ def _initialize_durable_reader(
             ),
         ),
     )
+
+
+def _validate_reader_domains(store, high_water_reader) -> None:
+    rollback_root = validate_runtime_root_path(
+        high_water_reader.rollback_domain_root, repo_root=store.repo_root
+    )
+    witness_root = validate_runtime_root_path(
+        high_water_reader.witness_rollback_domain_root,
+        repo_root=store.repo_root,
+    )
+    if (
+        _paths_overlap(rollback_root, store.allowed_root)
+        or _paths_overlap(witness_root, store.allowed_root)
+        or _paths_overlap(witness_root, rollback_root)
+    ):
+        raise ValueError("generation_reader_high_water_domain_overlap")
 
 
 def _durable_reader_init(
@@ -306,12 +338,14 @@ def _durable_reader_load(lookup: Any):
                 ),
             )
             current = state.high_water.load(state.anchor_id)
+            witness = state.high_water.witness_load(state.anchor_id)
             if activation is None:
-                if current is not None:
+                if current is not None or witness is not None:
                     raise ValueError("generation_reader_rollback_detected")
                 return None
             if (
                 current is None
+                or witness != current
                 or current.generation != activation.generation
                 or current.revision != activation.revision
             ):

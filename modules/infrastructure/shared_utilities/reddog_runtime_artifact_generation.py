@@ -15,6 +15,9 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 REDDOG_RUNTIME_ARTIFACT_GENERATION_LOCK = (
     ".reddog-runtime-artifact-generation.lock"
 )
+REDDOG_RUNTIME_ARTIFACT_GENERATION_SEAL = (
+    ".reddog-runtime-artifact-generation-seal.json"
+)
 CANONICAL_REDDOG_RUNTIME_ARTIFACTS = frozenset(
     {
         "authoritative_work_state.json",
@@ -33,6 +36,7 @@ def reddog_runtime_artifact_generation_lock(
     runtime_root: Path | str,
     *,
     repo_root: Path | str,
+    allow_sealed: bool = False,
 ) -> Iterator[None]:
     """Serialize canonical artifact producers and manifest publication."""
 
@@ -42,11 +46,15 @@ def reddog_runtime_artifact_generation_lock(
         repo_root=repo_root,
         allowed_root=root,
     ):
+        seal = root / REDDOG_RUNTIME_ARTIFACT_GENERATION_SEAL
+        if not allow_sealed and seal.exists():
+            raise RuntimeError("runtime_artifact_generation_sealed")
         yield
 
 
 __all__ = [
     "CANONICAL_REDDOG_RUNTIME_ARTIFACTS",
     "REDDOG_RUNTIME_ARTIFACT_GENERATION_LOCK",
+    "REDDOG_RUNTIME_ARTIFACT_GENERATION_SEAL",
     "reddog_runtime_artifact_generation_lock",
 ]

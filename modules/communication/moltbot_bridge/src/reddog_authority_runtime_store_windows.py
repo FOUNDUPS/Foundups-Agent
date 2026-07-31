@@ -551,6 +551,41 @@ def open_windows_directory_without_delete_share(path: Path) -> int:
     raise ValueError("authority_runtime_store_parent_changed")
 
 
+def open_windows_file_without_write_delete_share(path: Path) -> int:
+    """Hold one verified file handle that denies write and delete opens."""
+
+    create_file = ctypes.windll.kernel32.CreateFileW
+    create_file.argtypes = [
+        wintypes.LPCWSTR,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        wintypes.LPVOID,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        wintypes.HANDLE,
+    ]
+    create_file.restype = wintypes.HANDLE
+    handle = create_file(
+        _windows_api_path(path),
+        0x80000000,
+        0x00000001,
+        None,
+        3,
+        0x00000080 | 0x00200000,
+        None,
+    )
+    if handle in (0, -1, ctypes.c_void_p(-1).value):
+        raise OSError("authority_runtime_store_file_lease_failed")
+    try:
+        if _same_path(_handle_path(handle), path.resolve(strict=True)):
+            return int(handle)
+    except Exception:
+        close_windows_handle(handle)
+        raise
+    close_windows_handle(handle)
+    raise ValueError("authority_runtime_store_file_changed")
+
+
 def _handle_path(handle: int) -> Path:
     buffer = ctypes.create_unicode_buffer(32768)
     get_path = ctypes.windll.kernel32.GetFinalPathNameByHandleW
@@ -586,6 +621,7 @@ def _same_path(left: Path, right: Path) -> bool:
 __all__ = [
     "close_windows_handle",
     "open_windows_directory_without_delete_share",
+    "open_windows_file_without_write_delete_share",
     "recover_windows_interrupted_files",
     "windows_atomic_replace",
 ]

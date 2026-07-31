@@ -54,6 +54,7 @@ class SignerRuntimeGenerationPendingAdvance:
     transaction_id: str
     expected: SignerRuntimeGenerationHighWater | None
     next_value: SignerRuntimeGenerationHighWater
+    previous_anchor_state_json: str
 
 
 @runtime_checkable
@@ -66,6 +67,21 @@ class SignerRuntimeGenerationHighWaterStore(Protocol):
 
     @property
     def rollback_domain_root(self) -> Path: ...
+
+    @property
+    def witness_rollback_domain_root(self) -> Path: ...
+
+    def witness_load(
+        self, anchor_id: str
+    ) -> SignerRuntimeGenerationHighWater | None: ...
+
+    def witness_advance(
+        self,
+        anchor_id: str,
+        *,
+        expected: SignerRuntimeGenerationHighWater | None,
+        next_value: SignerRuntimeGenerationHighWater,
+    ) -> None: ...
 
     def load(self, anchor_id: str) -> SignerRuntimeGenerationHighWater | None: ...
 
@@ -93,6 +109,7 @@ class TransactionalSignerRuntimeGenerationHighWaterStore(
         *,
         expected: SignerRuntimeGenerationHighWater | None,
         next_value: SignerRuntimeGenerationHighWater,
+        previous_anchor_state_json: str = "{}",
     ) -> SignerRuntimeGenerationPendingAdvance: ...
 
     def commit_prepared(self, anchor_id: str, transaction_id: str) -> None: ...

@@ -42,6 +42,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_v
     create_signer_runtime_generation_verifier_authority,
     require_signer_runtime_generation_verifier_authority,
 )
+from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
+    SqliteMonotonicAuthorityStore,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signer_generation_test_support import (
+    generation_witness_binding,
+)
 
 
 class Ed25519GenerationSigner:
@@ -114,6 +120,10 @@ def _high_water(repo: Path, authority: Path):
         verifier=signing.verifier_boundary.require(
             signing.verifier_authority
         ),
+        generation_witness_store=_witness(repo, authority),
+        generation_witness_binding=_witness_binding(
+            signing.authenticator_id, authority
+        ),
     )
     return signing, high_water
 
@@ -133,6 +143,10 @@ def _reader(
         durability_receipt_id=_sha("e"),
         verifier_authority=verifier.verifier_authority,
         verifier_authority_boundary=verifier.verifier_boundary,
+        generation_witness_store=_witness(repo, authority),
+        generation_witness_binding=_witness_binding(
+            verifier.authenticator_id, authority
+        ),
     )
     high_water_authority, reader_boundary = (
         create_signer_runtime_generation_high_water_reader_authority(
@@ -148,6 +162,29 @@ def _reader(
         verifier_authority_boundary=verifier.verifier_boundary,
         high_water_authority=high_water_authority,
         high_water_authority_boundary=reader_boundary,
+    )
+
+
+def _witness(repo: Path, authority: Path):
+    root = authority.parent / "witness"
+    root.mkdir(exist_ok=True)
+    return SqliteMonotonicAuthorityStore(
+        root / "generation.sqlite3",
+        allowed_root=root,
+        repo_root=repo,
+        store_id="generation-witness:production",
+        durability_receipt_id=_sha("d"),
+    )
+
+
+def _witness_binding(authenticator_id: str, authority: Path):
+    return generation_witness_binding(
+        authenticator_id=authenticator_id,
+        runtime_root=authority.parent / "runtime",
+        high_water_store_id="high-water:production",
+        high_water_durability_receipt_id=_sha("e"),
+        witness_store_id="generation-witness:production",
+        witness_durability_receipt_id=_sha("d"),
     )
 
 
@@ -243,6 +280,10 @@ def test_factory_authority_payloads_cannot_be_replaced_after_mint(
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
+        generation_witness_store=_witness(repo, authority),
+        generation_witness_binding=_witness_binding(
+            signing.authenticator_id, authority
+        ),
     )
     high_authority, high_boundary = (
         create_signer_runtime_generation_high_water_reader_authority(
@@ -335,6 +376,10 @@ def test_generation_authority_public_apis_reject_registry_injection(
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
+        generation_witness_store=_witness(repo, authority),
+        generation_witness_binding=_witness_binding(
+            signing.authenticator_id, authority
+        ),
     )
     high_authority, high_boundary = (
         create_signer_runtime_generation_high_water_reader_authority(
@@ -346,7 +391,6 @@ def test_generation_authority_public_apis_reject_registry_injection(
             high_authority, high_boundary
         ).reader
     )
-
     _assert_no_registry_hooks(
         AtomicSignerRuntimeGenerationHighWaterReader,
         DurableSignerRuntimeGenerationReader,
@@ -363,7 +407,6 @@ def test_generation_authority_public_apis_reject_registry_injection(
         accepted_high.pending,
         verifier.verify,
     )
-
     with pytest.raises(TypeError):
         accepted_reader.load(_lookup=lambda _value: object())
     with pytest.raises(TypeError):
@@ -409,6 +452,10 @@ def test_high_water_reader_cannot_be_retargeted_after_authority_mint(
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
+        generation_witness_store=_witness(repo, authority),
+        generation_witness_binding=_witness_binding(
+            signing.authenticator_id, authority
+        ),
     )
     high_authority, boundary = (
         create_signer_runtime_generation_high_water_reader_authority(reader)
@@ -487,6 +534,10 @@ def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
+        generation_witness_store=_witness(repo, runtime),
+        generation_witness_binding=_witness_binding(
+            signing.authenticator_id, runtime
+        ),
     )
     high_water_authority, boundary = (
         create_signer_runtime_generation_high_water_reader_authority(
@@ -529,6 +580,10 @@ def test_reader_rejects_forged_high_water_authority_boundary(
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
+        generation_witness_store=_witness(repo, authority),
+        generation_witness_binding=_witness_binding(
+            signing.authenticator_id, authority
+        ),
     )
 
     class ForgedBoundary:
@@ -564,6 +619,10 @@ def test_reader_rejects_verifier_with_signing_method(tmp_path: Path) -> None:
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
+        generation_witness_store=_witness(repo, authority),
+        generation_witness_binding=_witness_binding(
+            signing.authenticator_id, authority
+        ),
     )
     high_water_authority, boundary = (
         create_signer_runtime_generation_high_water_reader_authority(

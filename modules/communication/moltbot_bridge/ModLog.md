@@ -1,4 +1,32 @@
 # ModLog - moltbot_bridge
+- `REDDOG_SIGNER_RUNTIME_ATOMIC_PROVISIONING_PHASE1`: added one
+  generation-root-first coordinator that signs the seven canonical artifacts
+  in their final inactive runtime root and advances the independently stored
+  authenticated generation anchor only after manifest publication,
+  current-authority revalidation, a manifest-bound cooperative writer seal,
+  an OS-backed activation-window lease, and a final byte/signature commit
+  guard before the high-water transaction can activate. Guard failure restores
+  the prior authenticated anchor and aborts the pending high-water advance.
+  A typed witness binding ties the signer key epoch, runtime root, anchor,
+  local high-water state, and signer-side monotonic witness into one canonical
+  namespace. Those three persistence roots must be pairwise disjoint. SQLite
+  initialization and compare-and-swap are transactional and tolerate bounded
+  first-open contention without accepting two winners. The coordinator
+  rejects copied/replayed artifact generations, fake or
+  overlapping anchor/high-water roots, stale work state, changed artifacts,
+  activation-window write attempts, expired system time, and generation
+  compare-and-swap conflicts. A signed
+  published-but-inactive manifest can complete after restart; malformed or
+  ambiguous preseeds cannot. Failed activation preserves the sealed inert
+  manifest for forensic recovery and never starts the signer service, executes
+  work, or mutates the repository. Authenticated current-generation launch
+  selection and external lifecycle supervision remain separate fail-closed
+  follow-ons. The cooperative seal is not claimed as protection against a
+  privileged or same-principal adversary after the activation lease closes;
+  current bytes must still be verified at every use.
+  The SQLite witness proves persistence mechanics only. Independent production
+  freshness authority remains blocked until an externally supervised signer
+  principal owns and authenticates that witness.
 - `REDDOG_SIGNER_RUNTIME_GENERATION_AUTHORITY_PHASE1`: hardened signer
   generation activation with an authenticated, independently stored
   high-water transaction journal. Prepare, commit, abort, and restart

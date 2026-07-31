@@ -5,15 +5,19 @@ from __future__ import annotations
 import hashlib
 import json
 import secrets
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
 )
-from modules.communication.moltbot_bridge.src.reddog_read_only_runtime_json_store import (
-    ReadOnlyRuntimeJsonStore,
+from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water_reader import (
+    AtomicSignerRuntimeGenerationHighWaterReader,
+)
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    ProposalReplayHighWater,
+    ProposalReplayHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
     SignerRuntimeGenerationHighWater,
@@ -21,29 +25,28 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
     SignerRuntimeGenerationSigner,
     SignerRuntimeGenerationVerifier,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
-    _build_process_local_registry,
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_pending_codec import (
+    decode_high_water as _high_water,
+    decode_pending as _pending,
+    pending_dict as _pending_dict,
+    require_pending as _required_pending,
+    validate_next_high_water as _next_high_water,
+    validate_optional_high_water as _optional_high_water,
+    validate_pending as _validate_pending_value,
+    validate_previous_anchor_state_json as _previous_anchor_state_json,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_verifier_authority import (
-    SignerRuntimeGenerationVerifierAuthorityBoundary,
-    require_signer_runtime_generation_verifier_authority,
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_witness_binding import (
+    SignerRuntimeGenerationWitnessBinding,
+    require_generation_witness_binding,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     confined_runtime_operation_lock,
 )
 
 
-SCHEMA_VERSION = "reddog_signer_runtime_generation_high_water.v1"
+SCHEMA_VERSION = "reddog_signer_runtime_generation_high_water.v2"
 _MAX_ANCHORS = 128
 _MAX_AUTHENTICATION_TAG_LENGTH = 4096
-
-
-_issue_high_water_reader_state, _lookup_high_water_reader_state = (
-    _build_process_local_registry(
-        "generation_high_water_reader_state_unverified"
-    )
-)
-del _build_process_local_registry
 
 
 class AtomicSignerRuntimeGenerationHighWaterStore:
@@ -59,6 +62,8 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
         durability_receipt_id: str,
         signer: SignerRuntimeGenerationSigner,
         verifier: SignerRuntimeGenerationVerifier,
+        generation_witness_store: ProposalReplayHighWaterStore,
+        generation_witness_binding: SignerRuntimeGenerationWitnessBinding,
     ) -> None:
         self._store_id = _ascii(store_id, "store_id")
         self._durability_receipt_id = _sha256(
@@ -68,11 +73,27 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
         self._verifier = _verifier(verifier)
         if self._signer.authenticator_id != self._verifier.authenticator_id:
             raise ValueError("generation_high_water_signer_verifier_mismatch")
+        self._witness = _witness(generation_witness_store)
+        self._witness_binding = require_generation_witness_binding(
+            generation_witness_binding,
+            authenticator_id=self._verifier.authenticator_id,
+            high_water_store_id=self._store_id,
+            high_water_durability_receipt_id=self._durability_receipt_id,
+            witness_store_id=self._witness.store_id,
+            witness_durability_receipt_id=(
+                self._witness.durability_receipt_id
+            ),
+        )
         self._store = AtomicJsonAuthorityRuntimeStore(
             path,
             allowed_root=allowed_root,
             repo_root=repo_root,
         )
+        if _paths_overlap(
+            self._witness.rollback_domain_root,
+            self._store.allowed_root,
+        ):
+            raise ValueError("generation_high_water_witness_domain_overlap")
         self._lock_path = self._store.path.with_name(
             self._store.path.name + ".high-water-transaction.lock"
         )
@@ -84,7 +105,6 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
     @property
     def durable(self) -> bool:
         return True
-
     @property
     def durability_receipt_id(self) -> str:
         return self._durability_receipt_id
@@ -93,18 +113,41 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
     def rollback_domain_root(self) -> Path:
         return self._store.allowed_root
 
+    @property
+    def witness_rollback_domain_root(self) -> Path:
+        return self._witness.rollback_domain_root
+    def witness_load(
+        self, anchor_id: str
+    ) -> SignerRuntimeGenerationHighWater | None:
+        return _witness_high_water(
+            self._witness.load(self._witness_digest(anchor_id))
+        )
+
+    def witness_advance(
+        self,
+        anchor_id: str,
+        *,
+        expected: SignerRuntimeGenerationHighWater | None,
+        next_value: SignerRuntimeGenerationHighWater,
+    ) -> None:
+        self._witness.advance(
+            self._witness_digest(anchor_id),
+            expected=_proposal_high_water(expected),
+            next_value=_required_proposal_high_water(next_value),
+        )
+
     def load(
         self, anchor_id: str
     ) -> SignerRuntimeGenerationHighWater | None:
-        with self._lock():
-            entry = _entry(self._load(), _anchor_id(anchor_id))
+        with _writer_lock(self):
+            entry = _entry(_load_store_state(self), _anchor_id(anchor_id))
             return _high_water(entry.get("current"))
 
     def pending(
         self, anchor_id: str
     ) -> SignerRuntimeGenerationPendingAdvance | None:
-        with self._lock():
-            entry = _entry(self._load(), _anchor_id(anchor_id))
+        with _writer_lock(self):
+            entry = _entry(_load_store_state(self), _anchor_id(anchor_id))
             return _pending(entry.get("pending"))
 
     def prepare(
@@ -113,13 +156,17 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
         *,
         expected: SignerRuntimeGenerationHighWater | None,
         next_value: SignerRuntimeGenerationHighWater,
+        previous_anchor_state_json: str = "{}",
     ) -> SignerRuntimeGenerationPendingAdvance:
         anchor = _anchor_id(anchor_id)
         _optional_high_water(expected)
         _next_high_water(expected, next_value)
+        previous_state = _previous_anchor_state_json(
+            previous_anchor_state_json
+        )
         transaction_id = _random_transaction_id()
-        with self._lock():
-            state = self._load()
+        with _writer_lock(self):
+            state = _load_store_state(self)
             entry = _entry(state, anchor)
             if (
                 _high_water(entry.get("current")) != expected
@@ -130,8 +177,10 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
                 transaction_id=transaction_id,
                 expected=expected,
                 next_value=next_value,
+                previous_anchor_state_json=previous_state,
             )
-            self._commit(
+            _commit_store_state(
+                self,
                 _updated_entry(
                     state, anchor, current=expected, pending=pending
                 ),
@@ -142,13 +191,14 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
     def commit_prepared(self, anchor_id: str, transaction_id: str) -> None:
         anchor = _anchor_id(anchor_id)
         transaction = _sha256(transaction_id, "transaction_id")
-        with self._lock():
-            state = self._load()
+        with _writer_lock(self):
+            state = _load_store_state(self)
             entry = _entry(state, anchor)
             pending = _required_pending(entry, transaction)
             if _high_water(entry.get("current")) != pending.expected:
                 raise RuntimeError("generation_high_water_commit_conflict")
-            self._commit(
+            _commit_store_state(
+                self,
                 _updated_entry(
                     state,
                     anchor,
@@ -161,13 +211,14 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
     def abort_prepared(self, anchor_id: str, transaction_id: str) -> None:
         anchor = _anchor_id(anchor_id)
         transaction = _sha256(transaction_id, "transaction_id")
-        with self._lock():
-            state = self._load()
+        with _writer_lock(self):
+            state = _load_store_state(self)
             entry = _entry(state, anchor)
             pending = _required_pending(entry, transaction)
             if _high_water(entry.get("current")) != pending.expected:
                 raise RuntimeError("generation_high_water_abort_conflict")
-            self._commit(
+            _commit_store_state(
+                self,
                 _updated_entry(
                     state,
                     anchor,
@@ -185,181 +236,73 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
         next_value: SignerRuntimeGenerationHighWater,
     ) -> None:
         pending = self.prepare(
-            anchor_id, expected=expected, next_value=next_value
+            anchor_id,
+            expected=expected,
+            next_value=next_value,
+            previous_anchor_state_json="{}",
         )
         self.commit_prepared(anchor_id, pending.transaction_id)
         if self.load(anchor_id) != next_value:
             raise RuntimeError("generation_high_water_commit_unverified")
 
-    def _load(self) -> dict[str, Any]:
-        state = self._store.load()
-        return _verified_state(
-            state,
-            store_id=self._store_id,
-            durability_receipt_id=self._durability_receipt_id,
-            rollback_domain_digest=_root_digest(self.rollback_domain_root),
-            verifier=self._verifier,
-        )
-
-    def _commit(
-        self, state: Mapping[str, Any], previous: Mapping[str, Any]
-    ) -> None:
-        sealed = _sealed_state(
-            state,
-            store_id=self._store_id,
-            durability_receipt_id=self._durability_receipt_id,
-            rollback_domain_digest=_root_digest(self.rollback_domain_root),
-            signer=self._signer,
-            verifier=self._verifier,
-        )
-        self._store.commit(
-            sealed,
-            expected_revision=previous.get("revision"),
-        )
-
-    def _lock(self):
-        return confined_runtime_operation_lock(
-            self._lock_path,
-            repo_root=self._store.repo_root,
-            allowed_root=self._store.allowed_root,
+    def _witness_digest(self, anchor_id: str) -> str:
+        return self._witness_binding.anchor_binding_digest(
+            _anchor_id(anchor_id)
         )
 
 
-@dataclass(frozen=True)
-class _HighWaterReaderState:
-    store_id: str
-    durability_receipt_id: str
-    verifier: SignerRuntimeGenerationVerifier
-    store: ReadOnlyRuntimeJsonStore
-    lock_path: Path
+def _load_store_state(
+    writer: AtomicSignerRuntimeGenerationHighWaterStore,
+) -> dict[str, Any]:
+    return _verified_state(
+        writer._store.load(),
+        store_id=writer._store_id,
+        durability_receipt_id=writer._durability_receipt_id,
+        rollback_domain_digest=_root_digest(writer.rollback_domain_root),
+        witness_store_id=writer._witness.store_id,
+        witness_durability_receipt_id=(
+            writer._witness.durability_receipt_id
+        ),
+        witness_binding_context_digest=(
+            writer._witness_binding.context_digest()
+        ),
+        verifier=writer._verifier,
+    )
 
-def _initialize_high_water_reader(
-    self: object,
-    path: Path | str,
-    *,
-    allowed_root: Path | str,
-    repo_root: Path | str,
-    store_id: str,
-    durability_receipt_id: str,
-    verifier_authority: object,
-    verifier_authority_boundary: (
-        SignerRuntimeGenerationVerifierAuthorityBoundary
-    ),
-    issue_state: Any,
+
+def _commit_store_state(
+    writer: AtomicSignerRuntimeGenerationHighWaterStore,
+    state: Mapping[str, Any],
+    previous: Mapping[str, Any],
 ) -> None:
-    verifier = _verifier(
-        require_signer_runtime_generation_verifier_authority(
-            verifier_authority, verifier_authority_boundary
-        )
-    )
-    store = ReadOnlyRuntimeJsonStore(
-        path, allowed_root=allowed_root, repo_root=repo_root
-    )
-    issue_state(
-        self,
-        _HighWaterReaderState(
-            store_id=_ascii(store_id, "store_id"),
-            durability_receipt_id=_sha256(
-                durability_receipt_id, "durability_receipt_id"
-            ),
-            verifier=verifier,
-            store=store,
-            lock_path=store.path.with_name(
-                store.path.name + ".high-water-transaction.lock"
-            ),
+    sealed = _sealed_state(
+        state,
+        store_id=writer._store_id,
+        durability_receipt_id=writer._durability_receipt_id,
+        rollback_domain_digest=_root_digest(writer.rollback_domain_root),
+        witness_store_id=writer._witness.store_id,
+        witness_durability_receipt_id=(
+            writer._witness.durability_receipt_id
         ),
-    )
-
-def _high_water_reader_init(
-    issue_state: Any,
-    initialize_reader: Any = _initialize_high_water_reader,
-):
-    def initialize(
-        self: object,
-        path: Path | str,
-        *,
-        allowed_root: Path | str,
-        repo_root: Path | str,
-        store_id: str,
-        durability_receipt_id: str,
-        verifier_authority: object,
-        verifier_authority_boundary: (
-            SignerRuntimeGenerationVerifierAuthorityBoundary
+        witness_binding_context_digest=(
+            writer._witness_binding.context_digest()
         ),
-    ) -> None:
-        initialize_reader(
-            self,
-            path,
-            allowed_root=allowed_root,
-            repo_root=repo_root,
-            store_id=store_id,
-            durability_receipt_id=durability_receipt_id,
-            verifier_authority=verifier_authority,
-            verifier_authority_boundary=verifier_authority_boundary,
-            issue_state=issue_state,
-        )
-
-    return initialize
-
-def _high_water_reader_property(lookup: Any, name: str):
-    def read(self: object) -> Any:
-        state = lookup(self)
-        return (
-            state.store.allowed_root
-            if name == "rollback_domain_root"
-            else getattr(state, name)
-        )
-
-    return property(read)
-
-def _high_water_reader_entry(lookup: Any):
-    def entry(self: object, anchor_id: str) -> dict[str, Any]:
-        reader = lookup(self)
-        with confined_runtime_operation_lock(
-            reader.lock_path,
-            repo_root=reader.store.repo_root,
-            allowed_root=reader.store.allowed_root,
-        ):
-            state = _verified_state(
-                reader.store.load(),
-                store_id=reader.store_id,
-                durability_receipt_id=reader.durability_receipt_id,
-                rollback_domain_digest=_root_digest(
-                    reader.store.allowed_root
-                ),
-                verifier=reader.verifier,
-            )
-            return _entry(state, _anchor_id(anchor_id))
-
-    return entry
-
-
-class AtomicSignerRuntimeGenerationHighWaterReader:
-    """Verifier-only view of authenticated high-water state."""
-
-    __slots__ = ("__weakref__",)
-
-    __init__ = _high_water_reader_init(_issue_high_water_reader_state)
-    store_id = _high_water_reader_property(
-        _lookup_high_water_reader_state, "store_id"
+        signer=writer._signer,
+        verifier=writer._verifier,
     )
-    durability_receipt_id = _high_water_reader_property(
-        _lookup_high_water_reader_state, "durability_receipt_id"
+    writer._store.commit(
+        sealed,
+        expected_revision=previous.get("revision"),
     )
-    rollback_domain_root = _high_water_reader_property(
-        _lookup_high_water_reader_state, "rollback_domain_root"
+
+
+def _writer_lock(writer: AtomicSignerRuntimeGenerationHighWaterStore):
+    return confined_runtime_operation_lock(
+        writer._lock_path,
+        repo_root=writer._store.repo_root,
+        allowed_root=writer._store.allowed_root,
     )
-    _entry = _high_water_reader_entry(_lookup_high_water_reader_state)
 
-    def load(
-        self, anchor_id: str
-    ) -> SignerRuntimeGenerationHighWater | None:
-        return _high_water(self._entry(anchor_id).get("current"))
-
-    def pending(
-        self, anchor_id: str
-    ) -> SignerRuntimeGenerationPendingAdvance | None:
-        return _pending(self._entry(anchor_id).get("pending"))
 
 def _verified_state(
     state: Mapping[str, Any],
@@ -367,6 +310,9 @@ def _verified_state(
     store_id: str,
     durability_receipt_id: str,
     rollback_domain_digest: str,
+    witness_store_id: str,
+    witness_durability_receipt_id: str,
+    witness_binding_context_digest: str,
     verifier: SignerRuntimeGenerationVerifier,
 ) -> dict[str, Any]:
     if not state:
@@ -377,6 +323,9 @@ def _verified_state(
         "durability_receipt_id",
         "rollback_domain_digest",
         "authenticator_id",
+        "witness_store_id",
+        "witness_durability_receipt_id",
+        "witness_binding_context_digest",
         "entries",
         "authentication_tag",
         "revision",
@@ -388,6 +337,11 @@ def _verified_state(
         or state.get("durability_receipt_id") != durability_receipt_id
         or state.get("rollback_domain_digest") != rollback_domain_digest
         or state.get("authenticator_id") != verifier.authenticator_id
+        or state.get("witness_store_id") != witness_store_id
+        or state.get("witness_durability_receipt_id")
+        != witness_durability_receipt_id
+        or state.get("witness_binding_context_digest")
+        != witness_binding_context_digest
         or not isinstance(state.get("entries"), Mapping)
         or len(state["entries"]) > _MAX_ANCHORS
         or state.get("revision") != _revision(state)
@@ -412,6 +366,9 @@ def _sealed_state(
     store_id: str,
     durability_receipt_id: str,
     rollback_domain_digest: str,
+    witness_store_id: str,
+    witness_durability_receipt_id: str,
+    witness_binding_context_digest: str,
     signer: SignerRuntimeGenerationSigner,
     verifier: SignerRuntimeGenerationVerifier,
 ) -> dict[str, Any]:
@@ -422,6 +379,9 @@ def _sealed_state(
         "durability_receipt_id": durability_receipt_id,
         "rollback_domain_digest": rollback_domain_digest,
         "authenticator_id": verifier.authenticator_id,
+        "witness_store_id": witness_store_id,
+        "witness_durability_receipt_id": witness_durability_receipt_id,
+        "witness_binding_context_digest": witness_binding_context_digest,
         "entries": entries,
     }
     tag = signer.authenticate(_canonical(unsigned))
@@ -474,115 +434,8 @@ def _updated_entry(
     return {"entries": entries}
 
 
-def _pending(
-    value: Any,
-) -> SignerRuntimeGenerationPendingAdvance | None:
-    if value is None:
-        return None
-    if not isinstance(value, Mapping) or set(value) != {
-        "transaction_id",
-        "expected",
-        "next_value",
-    }:
-        raise ValueError("generation_high_water_pending_invalid")
-    pending = SignerRuntimeGenerationPendingAdvance(
-        transaction_id=_sha256(value.get("transaction_id"), "transaction_id"),
-        expected=_high_water(value.get("expected")),
-        next_value=_required_high_water(value.get("next_value")),
-    )
-    _validate_pending_value(pending)
-    return pending
-
-
-def _required_pending(
-    entry: Mapping[str, Any], transaction_id: str
-) -> SignerRuntimeGenerationPendingAdvance:
-    pending = _pending(entry.get("pending"))
-    if pending is None or pending.transaction_id != transaction_id:
-        raise RuntimeError("generation_high_water_transaction_conflict")
-    return pending
-
-
-def _validate_pending_value(
-    value: SignerRuntimeGenerationPendingAdvance,
-) -> None:
-    if not isinstance(value, SignerRuntimeGenerationPendingAdvance):
-        raise ValueError("generation_high_water_pending_invalid")
-    _sha256(value.transaction_id, "transaction_id")
-    _next_high_water(value.expected, value.next_value)
-
-
-def _pending_dict(
-    value: SignerRuntimeGenerationPendingAdvance,
-) -> dict[str, Any]:
-    return {
-        "transaction_id": value.transaction_id,
-        "expected": (
-            None if value.expected is None else asdict(value.expected)
-        ),
-        "next_value": asdict(value.next_value),
-    }
-
-
 def _random_transaction_id() -> str:
     return "sha256:" + hashlib.sha256(secrets.token_bytes(32)).hexdigest()
-
-
-def _high_water(
-    value: Any,
-) -> SignerRuntimeGenerationHighWater | None:
-    if value is None:
-        return None
-    return _required_high_water(value)
-
-
-def _required_high_water(value: Any) -> SignerRuntimeGenerationHighWater:
-    if not isinstance(value, Mapping) or set(value) != {
-        "generation",
-        "revision",
-    }:
-        raise ValueError("generation_high_water_value_invalid")
-    result = SignerRuntimeGenerationHighWater(
-        generation=value.get("generation"),
-        revision=value.get("revision"),
-    )
-    _optional_high_water(result)
-    return result
-
-
-def _next_high_water(
-    expected: SignerRuntimeGenerationHighWater | None,
-    value: SignerRuntimeGenerationHighWater | None,
-) -> None:
-    _optional_high_water(expected)
-    _optional_high_water(value)
-    if value is None or value.generation != (
-        1 if expected is None else expected.generation + 1
-    ):
-        raise ValueError("generation_high_water_not_monotonic")
-
-
-def _optional_high_water(
-    value: SignerRuntimeGenerationHighWater | None,
-) -> None:
-    if value is None:
-        return
-    if (
-        not isinstance(value, SignerRuntimeGenerationHighWater)
-        or type(value.generation) is not int
-        or value.generation < 1
-        or not _revision_value(value.revision)
-    ):
-        raise ValueError("generation_high_water_value_invalid")
-
-
-def _revision_value(value: Any) -> bool:
-    return (
-        isinstance(value, str)
-        and len(value) == 64
-        and value != "0" * 64
-        and all(char in "0123456789abcdef" for char in value)
-    )
 
 
 def _signer(
@@ -603,6 +456,56 @@ def _verifier(
         raise ValueError("generation_high_water_verifier_invalid")
     _ascii(getattr(value, "authenticator_id", None), "authenticator_id")
     return value
+
+
+def _witness(value: Any) -> ProposalReplayHighWaterStore:
+    if (
+        not isinstance(value, ProposalReplayHighWaterStore)
+        or value.durable is not True
+        or not isinstance(value.store_id, str)
+        or not value.store_id.strip()
+        or not value.store_id.isascii()
+        or not isinstance(
+            getattr(value, "rollback_domain_root", None), Path
+        )
+        or not _sha256(
+            value.durability_receipt_id,
+            "witness_durability_receipt_id",
+        )
+    ):
+        raise ValueError("generation_high_water_witness_invalid")
+    return value
+
+
+def _proposal_high_water(
+    value: SignerRuntimeGenerationHighWater | None,
+) -> ProposalReplayHighWater | None:
+    if value is None:
+        return None
+    return _required_proposal_high_water(value)
+
+
+def _required_proposal_high_water(
+    value: SignerRuntimeGenerationHighWater,
+) -> ProposalReplayHighWater:
+    _optional_high_water(value)
+    return ProposalReplayHighWater(
+        sequence=value.generation,
+        state_revision=value.revision,
+    )
+
+
+def _witness_high_water(
+    value: ProposalReplayHighWater | None,
+) -> SignerRuntimeGenerationHighWater | None:
+    if value is None:
+        return None
+    result = SignerRuntimeGenerationHighWater(
+        generation=value.sequence,
+        revision=value.state_revision,
+    )
+    _optional_high_water(result)
+    return result
 
 
 def _authentication_tag(value: Any) -> bool:
@@ -653,6 +556,10 @@ def _root_digest(value: Path) -> str:
     ).hexdigest()
 
 
+def _paths_overlap(first: Path, second: Path) -> bool:
+    return first == second or first in second.parents or second in first.parents
+
+
 def _canonical(value: Mapping[str, Any]) -> bytes:
     return json.dumps(
         value,
@@ -661,11 +568,6 @@ def _canonical(value: Mapping[str, Any]) -> bytes:
         ensure_ascii=True,
         allow_nan=False,
     ).encode("utf-8")
-
-
-del _issue_high_water_reader_state, _lookup_high_water_reader_state
-del _high_water_reader_entry, _high_water_reader_init
-del _high_water_reader_property, _initialize_high_water_reader
 
 
 __all__ = [

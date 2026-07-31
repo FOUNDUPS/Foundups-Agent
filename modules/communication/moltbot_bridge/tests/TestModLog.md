@@ -1,3 +1,25 @@
+## 2026-07-31: SIGNER RUNTIME ATOMIC PROVISIONING
+- Added focused coverage for final-root manifest publication, last-step
+  authenticated generation activation, missing/tampered artifacts, independent
+  anchor placement, replayed generations, create-only manifest publication,
+  activation compare-and-swap failure, concurrent work-state refresh,
+  activation-window direct-write denial, fake anchors, and no service or
+  execution authority.
+- Added canonical signer-witness namespace, rollback-domain separation,
+  restart-substitution, concurrent first-open, and signer-side SQLite
+  compare-and-swap regressions.
+- Focused provisioning, generation, activation-lease, commit-guard, and
+  monotonic-witness matrix: 108 passed, 1 platform skip, including a real
+  two-process race.
+- Manifest, generation anchor/reader/high-water, lifecycle admission and race
+  matrix: 138 passed, 1 platform skip.
+- Complete `test_reddog_*signer*.py` plus activation-lease matrix: 411 passed,
+  12 platform skips.
+- Full bridge differential: untouched base `4778 passed, 33 failed, 23
+  skipped`; branch `4824 passed, 33 failed, 23 skipped`. The 33-node failure
+  set is identical, so the slice adds 46 passing tests and zero bridge
+  regressions.
+
 ## 2026-07-31: REDDOG SIGNER MANIFEST AND LIFECYCLE FOUNDATIONS
 - Proved Ed25519 manifest signing plus content-addressed no-replace
   publication for all seven canonical runtime artifacts.

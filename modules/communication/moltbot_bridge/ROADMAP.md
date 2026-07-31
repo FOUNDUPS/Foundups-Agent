@@ -64,11 +64,12 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
   receipts; authenticated principal/model trust provenance; a fresh client-side
   signer handshake. Closed attempts do not consume nonce state.
 - Signed artifact manifests, signer mutual handshake, authenticated generation
-  state, authenticated transactional high-water persistence, verifier-only
-  lifecycle reads, kernel process/socket observation, and opaque lifecycle
-  admission are implemented. Independently administered production high-water
-  authority issuance, the external system service owner, immutable atomic
-  generation provisioning, and use-time valve consumption remain
+  state, authenticated transactional high-water persistence, generation-root-
+  first atomic provisioning, verifier-only lifecycle reads, kernel
+  process/socket observation, and opaque lifecycle admission are implemented.
+  Independently administered production high-water authority issuance,
+  authenticated current-generation launch selection, the external system
+  service owner, and use-time valve consumption remain
   SPECIFIED_NOT_IMPLEMENTED.
 - Only after those anchors and adversarial live-path tests are green may an
   operator run the Linux live canary; merge authority remains unavailable.
