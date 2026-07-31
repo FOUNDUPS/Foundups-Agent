@@ -84,6 +84,14 @@ def _sha(char: str) -> str:
     return "sha256:" + char * 64
 
 
+def _assert_no_registry_hooks(*callables: object) -> None:
+    for callable_value in callables:
+        parameters = inspect.signature(callable_value).parameters
+        assert not any(
+            name.startswith(("_issue", "_lookup")) for name in parameters
+        )
+
+
 def _roots(tmp_path: Path) -> tuple[Path, Path, Path]:
     repo = tmp_path / "repo"
     runtime = tmp_path / "runtime"
@@ -319,19 +327,47 @@ def test_generation_authority_public_apis_reject_registry_injection(
     verifier = require_signer_runtime_generation_verifier_authority(
         signing.verifier_authority, signing.verifier_boundary
     )
+    high_water_reader = AtomicSignerRuntimeGenerationHighWaterReader(
+        authority / "high-water.json",
+        allowed_root=authority,
+        repo_root=repo,
+        store_id="high-water:production",
+        durability_receipt_id=_sha("e"),
+        verifier_authority=signing.verifier_authority,
+        verifier_authority_boundary=signing.verifier_boundary,
+    )
+    high_authority, high_boundary = (
+        create_signer_runtime_generation_high_water_reader_authority(
+            high_water_reader
+        )
+    )
+    accepted_high = (
+        require_signer_runtime_generation_high_water_reader_authority(
+            high_authority, high_boundary
+        ).reader
+    )
 
-    for callable_value in (
+    _assert_no_registry_hooks(
+        AtomicSignerRuntimeGenerationHighWaterReader,
+        DurableSignerRuntimeGenerationReader,
         create_signer_runtime_generation_verifier_authority,
+        require_signer_runtime_generation_verifier_authority,
         create_signer_runtime_generation_reader_authority,
+        require_signer_runtime_generation_reader_authority,
+        create_signer_runtime_generation_high_water_reader_authority,
+        require_signer_runtime_generation_high_water_reader_authority,
         accepted_reader.load,
+        high_water_reader.load,
+        high_water_reader.pending,
+        accepted_high.load,
+        accepted_high.pending,
         verifier.verify,
-    ):
-        parameters = inspect.signature(callable_value).parameters
-        assert "_issue" not in parameters
-        assert "_lookup" not in parameters
+    )
 
     with pytest.raises(TypeError):
         accepted_reader.load(_lookup=lambda _value: object())
+    with pytest.raises(TypeError):
+        accepted_high.load("reddog-signer:production", _lookup=lambda _: {})
     with pytest.raises(TypeError):
         verifier.verify(b"payload", "not-a-signature", _lookup=lambda _value: True)
 

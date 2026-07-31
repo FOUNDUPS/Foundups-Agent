@@ -375,9 +375,14 @@ def test_lifecycle_public_api_rejects_registry_injection(tmp_path) -> None:
     factory_parameters = inspect.signature(
         create_external_signer_lifecycle_admission_boundary
     ).parameters
-    assert "_issue" not in factory_parameters
-    assert "_lookup" not in inspect.signature(boundary.admit).parameters
-    assert "_lookup" not in inspect.signature(boundary.consume).parameters
+    for parameters in (
+        factory_parameters,
+        inspect.signature(boundary.admit).parameters,
+        inspect.signature(boundary.consume).parameters,
+    ):
+        assert not any(
+            name.startswith(("_issue", "_lookup")) for name in parameters
+        )
     with pytest.raises(TypeError):
         boundary.admit(selection, _lookup=lambda _value: (object(), object()))
 
