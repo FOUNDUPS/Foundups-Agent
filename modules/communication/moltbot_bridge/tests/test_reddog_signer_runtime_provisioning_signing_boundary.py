@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import copy
-import pickle
+import inspect
 from pathlib import Path
 
 import pytest
@@ -75,12 +74,11 @@ def test_atomic_signing_capability_is_process_local_and_uncopyable(
 ) -> None:
     _, anchor, context = _context(tmp_path)
 
-    for copier in (copy.copy, copy.deepcopy, pickle.dumps):
-        with pytest.raises(TypeError):
-            copier(context.signing_authority)
     forged = SignerRuntimeAtomicProvisioningContext(
-        signing_authority=object(),
-        signing_authority_boundary=object(),  # type: ignore[arg-type]
+        signer=object(),  # type: ignore[arg-type]
+        authority=context.authority,
+        authority_boundary=context.authority_boundary,
+        authority_tier=context.authority_tier,
         generation_anchor=anchor,
     )
 
@@ -90,10 +88,15 @@ def test_atomic_signing_capability_is_process_local_and_uncopyable(
     assert anchor.load() is None
 
 
-def test_signing_boundary_exposes_no_verifier_or_registry_mutation_surface() -> None:
-    import modules.communication.moltbot_bridge.src.reddog_signer_runtime_provisioning_signing_boundary as target
+def test_atomic_factory_retains_no_mutable_verifier_or_registry_closure() -> None:
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signer_runtime_atomic_provisioning_contract as target,
+    )
 
-    assert "Ed25519SignatureVerifier" not in target.__dict__
-    assert "_binding" not in target.__dict__
-    assert "_records" not in target.__dict__
-    assert "_contexts" not in target.__dict__
+    closure = inspect.getclosurevars(
+        target.create_signer_runtime_atomic_provisioning_context
+    )
+    assert closure.nonlocals == {}
+    assert not {"records", "contexts", "verifier_type"} & set(
+        closure.globals
+    )

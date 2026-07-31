@@ -19,7 +19,7 @@
   published-but-inactive manifest can complete after restart. An expired
   manifest can roll forward only when the independent monotonic witness
   already proves that exact generation committed; otherwise freshness remains
-  mandatory and recovery rolls back. Typed recovery distinguishes a committed witness when restart sees its anchor first. Closure-confined signing discards caller-selected verifiers, so forged signer/permissive-verifier pairs cannot activate. Malformed or ambiguous preseeds cannot
+  mandatory and recovery rolls back. Typed recovery distinguishes a committed witness when restart sees its anchor first. Canonical Ed25519 verification discards caller-selected verifiers, so forged signer/permissive-verifier pairs cannot activate. Python closure opacity is not claimed as hostile-code isolation. Malformed or ambiguous preseeds cannot
   recover. Failed activation reports preservation only after manifest binding,
   signatures, and all seven current bytes verify. Coordinator
   receipts claim only coordinator-scoped no-service/no-work/no-repository

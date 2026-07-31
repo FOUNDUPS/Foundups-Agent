@@ -10,7 +10,7 @@
   compare-and-swap regressions.
 - Reviewer repair added post-commit recovery, caller-independent read-only
   witness state, per-open metadata checks, strict rollback, manifest
-  signature/byte preservation, POSIX external-owner, opaque canonical-verifier, forged-signer rejection, and typed committed-witness restart regressions.
+  signature/byte preservation, POSIX external-owner, canonical-verifier, forged-signer rejection, closure-substitution, and typed committed-witness restart regressions.
 - Focused provisioning, generation, activation-lease, commit-guard, and
   monotonic-witness matrix: 115 passed, 2 platform skips, including a real
   two-process race. POSIX activation is an intentional fail-closed skip.

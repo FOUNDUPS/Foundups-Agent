@@ -133,7 +133,7 @@ generation-bundle activation are still required.
 
 Atomic generation provisioning signs the final seven-artifact runtime root
 and activates its authenticated generation only after a last-byte check. The
-atomic coordinator uses an uncopyable process-local capability, discards caller-selected verifiers, and binds the authority key, key epoch, signer-client type, and canonical Ed25519 verifier. Signer lifecycle admission remains a separate post-launch boundary. The
+atomic coordinator discards caller-selected verifiers and directly applies canonical Ed25519 verification to the authority key and key epoch. Python in-process objects are not claimed as a hostile-code boundary; distinct-principal signer lifecycle admission remains separate. The
 activation lease is production-capable on Windows, where open handles deny
 write/delete sharing. POSIX/WSL callers receive
 `runtime_artifact_activation_lease_external_owner_required`; file modes are

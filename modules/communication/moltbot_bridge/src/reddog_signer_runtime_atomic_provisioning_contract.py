@@ -5,13 +5,19 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any
 
-from modules.communication.moltbot_bridge.src.reddog_signer_runtime_provisioning_signing_boundary import (
-    SignerRuntimeProvisioningSigningBoundary,
-    create_signer_runtime_provisioning_signing_boundary,
-    require_signer_runtime_provisioning_signing_context,
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    Ed25519SignatureVerifier,
+    decode_ed25519_public_key,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_manifest import (
     RuntimeArtifactManifestSigningContext,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    IsolatedSignerClient,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_authority import (
+    RuntimeArtifactManifestAuthority,
+    RuntimeArtifactManifestAuthorityBoundary,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
     DurableSignerRuntimeGenerationAnchor,
@@ -22,14 +28,29 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
 class SignerRuntimeAtomicProvisioningContext:
     """Authenticated dependencies for one generation activation."""
 
-    signing_authority: object
-    signing_authority_boundary: SignerRuntimeProvisioningSigningBoundary
+    signer: IsolatedSignerClient
+    authority: RuntimeArtifactManifestAuthority
+    authority_boundary: RuntimeArtifactManifestAuthorityBoundary
+    authority_tier: str
     generation_anchor: DurableSignerRuntimeGenerationAnchor
 
     def require_signing_context(self) -> RuntimeArtifactManifestSigningContext:
-        return require_signer_runtime_provisioning_signing_context(
-            self.signing_authority_boundary,
-            self.signing_authority,
+        values = self.authority_boundary.require(self.authority)
+        if (
+            not callable(getattr(self.signer, "sign", None))
+            or decode_ed25519_public_key(
+                str(values.get("signer_public_key") or "")
+            )
+            is None
+            or not str(values.get("key_epoch") or "")
+        ):
+            raise ValueError("signer_runtime_signing_identity_invalid")
+        return RuntimeArtifactManifestSigningContext(
+            signer=self.signer,
+            signature_verifier=Ed25519SignatureVerifier(),
+            authority=self.authority,
+            authority_boundary=self.authority_boundary,
+            authority_tier=self.authority_tier,
         )
 
 
@@ -60,12 +81,13 @@ def create_signer_runtime_atomic_provisioning_context(
 ) -> SignerRuntimeAtomicProvisioningContext:
     """Issue the only accepted process-local atomic provisioning context."""
 
-    boundary, capability = (
-        create_signer_runtime_provisioning_signing_boundary(manifest_signing)
-    )
+    if not isinstance(manifest_signing, RuntimeArtifactManifestSigningContext):
+        raise ValueError("signer_runtime_signing_context_invalid")
     return SignerRuntimeAtomicProvisioningContext(
-        signing_authority=capability,
-        signing_authority_boundary=boundary,
+        signer=manifest_signing.signer,
+        authority=manifest_signing.authority,
+        authority_boundary=manifest_signing.authority_boundary,
+        authority_tier=manifest_signing.authority_tier,
         generation_anchor=generation_anchor,
     )
 

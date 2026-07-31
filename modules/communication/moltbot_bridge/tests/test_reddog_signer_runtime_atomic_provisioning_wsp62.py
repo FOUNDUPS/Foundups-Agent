@@ -29,8 +29,6 @@ FILES = (
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_runtime_atomic_provisioning_contract.py",
     "modules/communication/moltbot_bridge/src/"
-    "reddog_signer_runtime_provisioning_signing_boundary.py",
-    "modules/communication/moltbot_bridge/src/"
     "reddog_signer_runtime_generation_anchor.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_runtime_generation_anchor_codec.py",
