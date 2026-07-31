@@ -1,4 +1,17 @@
 # ModLog - moltbot_bridge
+- `REDDOG_SIGNER_E0_AUTHENTICATED_SECRET_LEASE_GATE_PHASE1`: added a
+  verifier-only, process-local boundary for one signed signer secret-access
+  grant. The grant binds the independently resolved issuer key, signer agent
+  and profile, exact signing/audit reference hashes, permission snapshot,
+  owner configuration, signer generation, key epoch, nonce, and bounded
+  lifetime. Verification is strict, domain-separated, revocation-aware, and
+  consumes the nonce only after every binding and signature check passes.
+  Successful admission yields one immutable, noncopyable, nonserializable
+  capability that can be consumed once. This is the first E0 authorization
+  layer only: no vault provider, secret resolution, key loading, signing,
+  per-request material lease, system-service activation, OpenClaw work,
+  Hermes dispatch, or repository effect was added. The stable production
+  signer therefore remains fail closed.
 - `REDDOG_SIGNER_SYSTEM_SERVICE_STABLE_ENTRYPOINT_PHASE1`: replaced the
   generation-specific signer launch command with a v2 run packet that binds a
   stable signer-owned system-service entrypoint and the exact root-owned owner
