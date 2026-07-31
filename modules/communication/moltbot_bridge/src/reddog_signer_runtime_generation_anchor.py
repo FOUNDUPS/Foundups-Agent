@@ -135,11 +135,17 @@ class DurableSignerRuntimeGenerationAnchor:
         commit_guard: (
             Callable[[SignerRuntimeGenerationActivation], None] | None
         ) = None,
+        committed_witness_guard: (
+            Callable[[SignerRuntimeGenerationActivation], None] | None
+        ) = None,
     ) -> SignerRuntimeGenerationActivation | None:
         """Complete only an authenticated one-generation pending advance."""
 
         with self._lock():
-            return self._recover_current(commit_guard=commit_guard)
+            return self._recover_current(
+                commit_guard=commit_guard,
+                committed_witness_guard=committed_witness_guard,
+            )
 
     def activate(
         self,
@@ -155,7 +161,10 @@ class DurableSignerRuntimeGenerationAnchor:
         if commit_guard is not None and not callable(commit_guard):
             raise TypeError("generation_anchor_commit_guard_invalid")
         with self._lock():
-            current = self._recover_current(commit_guard=commit_guard)
+            current = self._recover_current(
+                commit_guard=commit_guard,
+                committed_witness_guard=commit_guard,
+            )
             _require_expected_revision(current, expected_revision)
             _require_next_generation(current, binding)
             unsigned = self._unsigned(binding, expected_revision)
@@ -176,10 +185,16 @@ class DurableSignerRuntimeGenerationAnchor:
         commit_guard: (
             Callable[[SignerRuntimeGenerationActivation], None] | None
         ),
+        committed_witness_guard: (
+            Callable[[SignerRuntimeGenerationActivation], None] | None
+        ) = None,
     ) -> SignerRuntimeGenerationActivation | None:
         current = self._decode(self._store.load())
         current = _recover_transaction(
-            self, current, commit_guard=commit_guard
+            self,
+            current,
+            commit_guard=commit_guard,
+            committed_witness_guard=committed_witness_guard,
         )
         return self._reconcile_high_water(current)
 
@@ -384,6 +399,9 @@ def _recover_transaction(
     current: SignerRuntimeGenerationActivation | None,
     *,
     commit_guard: Callable[[SignerRuntimeGenerationActivation], None] | None,
+    committed_witness_guard: (
+        Callable[[SignerRuntimeGenerationActivation], None] | None
+    ),
 ) -> SignerRuntimeGenerationActivation | None:
     store = anchor._high_water_store
     assert isinstance(
@@ -407,7 +425,12 @@ def _recover_transaction(
         if _high_water(anchor._decode(previous_state)) != pending.expected:
             raise ValueError("generation_anchor_previous_state_invalid")
         if store.witness_load(anchor._anchor_id) == pending.next_value:
-            commit_guard(current)
+            guard = committed_witness_guard or commit_guard
+            if guard is None:
+                raise ValueError(
+                    "generation_anchor_pending_verification_required"
+                )
+            guard(current)
         else:
             run_commit_guard_or_rollback(
                 anchor,

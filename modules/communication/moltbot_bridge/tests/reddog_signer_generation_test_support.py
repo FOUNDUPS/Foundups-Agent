@@ -131,7 +131,7 @@ def create_lifecycle_generation_authority(
         durability_receipt_id=high_water.durability_receipt_id,
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
-        generation_witness_store=high_water._witness,
+        generation_witness_reader=high_water._witness.reader(),
         generation_witness_binding=high_water._witness_binding,
     )
     high_authority, high_boundary = (

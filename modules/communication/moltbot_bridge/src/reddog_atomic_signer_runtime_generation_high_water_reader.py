@@ -6,9 +6,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
-    ProposalReplayHighWaterStore,
-)
 from modules.communication.moltbot_bridge.src.reddog_read_only_runtime_json_store import (
     ReadOnlyRuntimeJsonStore,
 )
@@ -25,6 +22,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_v
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_witness_binding import (
     SignerRuntimeGenerationWitnessBinding,
     require_generation_witness_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
+    SqliteMonotonicAuthorityReader,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     confined_runtime_operation_lock,
@@ -44,7 +44,7 @@ class _ReaderState:
     store_id: str
     durability_receipt_id: str
     verifier: SignerRuntimeGenerationVerifier
-    witness: ProposalReplayHighWaterStore
+    witness: SqliteMonotonicAuthorityReader
     witness_binding: SignerRuntimeGenerationWitnessBinding
 
 
@@ -60,7 +60,7 @@ def _initialize_reader(
     verifier_authority_boundary: (
         SignerRuntimeGenerationVerifierAuthorityBoundary
     ),
-    generation_witness_store: ProposalReplayHighWaterStore,
+    generation_witness_reader: SqliteMonotonicAuthorityReader,
     generation_witness_binding: SignerRuntimeGenerationWitnessBinding,
     issue_state: Any,
 ) -> None:
@@ -68,7 +68,6 @@ def _initialize_reader(
         _ascii,
         _sha256,
         _verifier,
-        _witness,
     )
 
     store = ReadOnlyRuntimeJsonStore(
@@ -81,7 +80,9 @@ def _initialize_reader(
         boundary=verifier_authority_boundary,
     )
     verifier = _verifier(verified)
-    witness = _witness(generation_witness_store)
+    if type(generation_witness_reader) is not SqliteMonotonicAuthorityReader:
+        raise ValueError("generation_high_water_witness_reader_invalid")
+    witness = generation_witness_reader
     binding = require_generation_witness_binding(
         generation_witness_binding,
         authenticator_id=verifier.authenticator_id,
@@ -121,7 +122,7 @@ def _reader_init(issue_state: Any):
         verifier_authority_boundary: (
             SignerRuntimeGenerationVerifierAuthorityBoundary
         ),
-        generation_witness_store: ProposalReplayHighWaterStore,
+        generation_witness_reader: SqliteMonotonicAuthorityReader,
         generation_witness_binding: SignerRuntimeGenerationWitnessBinding,
     ) -> None:
         _initialize_reader(
@@ -133,7 +134,7 @@ def _reader_init(issue_state: Any):
             durability_receipt_id=durability_receipt_id,
             verifier_authority=verifier_authority,
             verifier_authority_boundary=verifier_authority_boundary,
-            generation_witness_store=generation_witness_store,
+            generation_witness_reader=generation_witness_reader,
             generation_witness_binding=generation_witness_binding,
             issue_state=issue_state,
         )

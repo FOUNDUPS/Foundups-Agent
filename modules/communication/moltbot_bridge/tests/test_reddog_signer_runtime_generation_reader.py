@@ -143,7 +143,7 @@ def _reader(
         durability_receipt_id=_sha("e"),
         verifier_authority=verifier.verifier_authority,
         verifier_authority_boundary=verifier.verifier_boundary,
-        generation_witness_store=_witness(repo, authority),
+        generation_witness_reader=_witness(repo, authority).reader(),
         generation_witness_binding=_witness_binding(
             verifier.authenticator_id, authority
         ),
@@ -280,7 +280,7 @@ def test_factory_authority_payloads_cannot_be_replaced_after_mint(
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
-        generation_witness_store=_witness(repo, authority),
+        generation_witness_reader=_witness(repo, authority).reader(),
         generation_witness_binding=_witness_binding(
             signing.authenticator_id, authority
         ),
@@ -376,7 +376,7 @@ def test_generation_authority_public_apis_reject_registry_injection(
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
-        generation_witness_store=_witness(repo, authority),
+        generation_witness_reader=_witness(repo, authority).reader(),
         generation_witness_binding=_witness_binding(
             signing.authenticator_id, authority
         ),
@@ -452,7 +452,7 @@ def test_high_water_reader_cannot_be_retargeted_after_authority_mint(
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
-        generation_witness_store=_witness(repo, authority),
+        generation_witness_reader=_witness(repo, authority).reader(),
         generation_witness_binding=_witness_binding(
             signing.authenticator_id, authority
         ),
@@ -534,7 +534,7 @@ def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
-        generation_witness_store=_witness(repo, runtime),
+        generation_witness_reader=_witness(repo, runtime).reader(),
         generation_witness_binding=_witness_binding(
             signing.authenticator_id, runtime
         ),
@@ -567,6 +567,30 @@ def test_reader_rejects_write_capable_high_water(tmp_path: Path) -> None:
         )
 
 
+def test_high_water_reader_rejects_write_capable_witness(
+    tmp_path: Path,
+) -> None:
+    repo, _, authority = _roots(tmp_path)
+    signing = Ed25519GenerationSigner()
+    witness = _witness(repo, authority)
+
+    with pytest.raises(ValueError, match="witness_reader_invalid"):
+        AtomicSignerRuntimeGenerationHighWaterReader(
+            authority / "high-water.json",
+            allowed_root=authority,
+            repo_root=repo,
+            store_id="high-water:production",
+            durability_receipt_id=_sha("e"),
+            verifier_authority=signing.verifier_authority,
+            verifier_authority_boundary=signing.verifier_boundary,
+            generation_witness_reader=witness,  # type: ignore[arg-type]
+            generation_witness_binding=_witness_binding(
+                signing.authenticator_id,
+                authority,
+            ),
+        )
+
+
 def test_reader_rejects_forged_high_water_authority_boundary(
     tmp_path: Path,
 ) -> None:
@@ -580,7 +604,7 @@ def test_reader_rejects_forged_high_water_authority_boundary(
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
-        generation_witness_store=_witness(repo, authority),
+        generation_witness_reader=_witness(repo, authority).reader(),
         generation_witness_binding=_witness_binding(
             signing.authenticator_id, authority
         ),
@@ -619,7 +643,7 @@ def test_reader_rejects_verifier_with_signing_method(tmp_path: Path) -> None:
         durability_receipt_id=_sha("e"),
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
-        generation_witness_store=_witness(repo, authority),
+        generation_witness_reader=_witness(repo, authority).reader(),
         generation_witness_binding=_witness_binding(
             signing.authenticator_id, authority
         ),

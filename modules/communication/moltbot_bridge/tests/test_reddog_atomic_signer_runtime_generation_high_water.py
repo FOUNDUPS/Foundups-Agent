@@ -116,6 +116,13 @@ class RaiseAfterAnchorCommit:
     def load(self):
         return self._store.load()
 
+    @property
+    def path(self):
+        return self._store.path
+
+    def remove(self, *, expected_revision):
+        return self._store.remove(expected_revision=expected_revision)
+
     def commit(self, snapshot, *, expected_revision):
         revision = self._store.commit(
             snapshot, expected_revision=expected_revision
@@ -221,7 +228,7 @@ def test_reader_rejects_noncanonical_verifier_boundary(roots) -> None:
             durability_receipt_id=DURABILITY_RECEIPT_ID,
             verifier_authority=object(),
             verifier_authority_boundary=HmacAuthenticator(),
-            generation_witness_store=_witness(roots),
+            generation_witness_reader=_witness(roots).reader(),
             generation_witness_binding=_witness_binding(roots),
         )
 
@@ -413,6 +420,54 @@ def test_anchor_restart_rolls_forward_exactly_one_generation(roots) -> None:
         revision=recovered.revision,
     )
     assert recovered.generation == 1
+
+
+def test_committed_witness_recovery_uses_structural_guard(roots) -> None:
+    failing = _store(roots, store_type=FailCommitOnceStore)
+    anchor = _anchor(roots, failing)
+    with pytest.raises(RuntimeError, match="high_water_interrupted"):
+        anchor.activate(_binding(), expected_revision=None)
+
+    calls: list[str] = []
+    def reject_freshness(_candidate) -> None:
+        raise RuntimeError("freshness_guard_must_not_run")
+
+    recovered = _anchor(roots, _store(roots)).recover(
+        commit_guard=reject_freshness,
+        committed_witness_guard=lambda _candidate: calls.append(
+            "structural"
+        ),
+    )
+
+    assert recovered is not None
+    assert calls == ["structural"]
+    assert _anchor(roots, _store(roots)).recover(
+        commit_guard=lambda _candidate: None,
+    ) == recovered
+
+
+def test_uncommitted_witness_recovery_uses_strict_guard(roots) -> None:
+    store = _store(roots)
+    anchor = _anchor(roots, store)
+    calls: list[str] = []
+    anchor._store = RaiseAfterAnchorCommit(anchor._store)
+
+    def reject_freshness(_candidate) -> None:
+        calls.append("strict")
+        raise RuntimeError("manifest_expired")
+
+    with pytest.raises(RuntimeError, match="manifest_expired"):
+        anchor.activate(
+            _binding(),
+            expected_revision=None,
+            commit_guard=reject_freshness,
+        )
+
+    assert calls == ["strict"]
+    assert anchor.path.exists() is False
+    assert store.pending(ANCHOR_ID) is None
+    assert store.load(ANCHOR_ID) is None
+    assert store.witness_load(ANCHOR_ID) is None
 
 
 def test_recovery_accepts_verified_post_high_water_commit_exception(

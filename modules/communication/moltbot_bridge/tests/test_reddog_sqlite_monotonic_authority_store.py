@@ -12,6 +12,7 @@ from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce
     ProposalReplayHighWater,
 )
 from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
+    SqliteMonotonicAuthorityReader,
     SqliteMonotonicAuthorityStore,
 )
 
@@ -64,6 +65,20 @@ def test_restart_roundtrip_preserves_committed_high_water(roots) -> None:
 
     restarted.advance(BINDING, expected=first, next_value=second)
     assert _store(roots).load(BINDING) == second
+
+
+def test_reader_observes_commits_without_mutation_capability(roots) -> None:
+    store = _store(roots)
+    reader = store.reader()
+    first = _value(1, "1")
+
+    assert type(reader) is SqliteMonotonicAuthorityReader
+    assert not hasattr(reader, "advance")
+    assert reader.load(BINDING) is None
+
+    store.advance(BINDING, expected=None, next_value=first)
+
+    assert reader.load(BINDING) == first
 
 
 def test_compare_and_swap_rejects_stale_expected_value(roots) -> None:

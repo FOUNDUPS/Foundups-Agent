@@ -71,6 +71,17 @@ class SqliteMonotonicAuthorityStore:
     def rollback_domain_root(self) -> Path:
         return self._allowed_root
 
+    def reader(self) -> "SqliteMonotonicAuthorityReader":
+        """Return a separate read-only view with no mutation capability."""
+
+        return SqliteMonotonicAuthorityReader(
+            self._path,
+            allowed_root=self._allowed_root,
+            repo_root=self._repo_root,
+            store_id=self._store_id,
+            durability_receipt_id=self._durability_receipt_id,
+        )
+
     def load(self, binding_digest: str) -> ProposalReplayHighWater | None:
         binding = _digest(binding_digest, "binding")
         with self._connect() as connection:
@@ -157,6 +168,103 @@ class SqliteMonotonicAuthorityStore:
                 raise
 
 
+class SqliteMonotonicAuthorityReader:
+    """Read-only SQLite high-water view for verifier-side consumers."""
+
+    __slots__ = (
+        "_allowed_root",
+        "_durability_receipt_id",
+        "_path",
+        "_repo_root",
+        "_store_id",
+    )
+
+    def __init__(
+        self,
+        path: Path | str,
+        *,
+        allowed_root: Path | str,
+        repo_root: Path | str,
+        store_id: str,
+        durability_receipt_id: str,
+    ) -> None:
+        root = validate_runtime_root_path(allowed_root, repo_root=repo_root)
+        target = validate_runtime_artifact_path(
+            path,
+            allowed_root=root,
+            repo_root=repo_root,
+        )
+        if target.parent != root:
+            raise ValueError("monotonic_authority_path_invalid")
+        self._path = target
+        self._allowed_root = root
+        self._repo_root = Path(repo_root).resolve()
+        self._store_id = store_id
+        self._durability_receipt_id = durability_receipt_id
+        _validate_reader_identity(self)
+
+    @property
+    def store_id(self) -> str:
+        return self._store_id
+
+    @property
+    def durability_receipt_id(self) -> str:
+        return self._durability_receipt_id
+
+    @property
+    def rollback_domain_root(self) -> Path:
+        return self._allowed_root
+
+    def load(self, binding_digest: str) -> ProposalReplayHighWater | None:
+        binding = _digest(binding_digest, "binding")
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT sequence, state_revision FROM high_water "
+                "WHERE binding_digest = ?",
+                (binding,),
+            ).fetchone()
+        if row is None:
+            return None
+        value = ProposalReplayHighWater(int(row[0]), str(row[1]))
+        _validate_value(value)
+        return value
+
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
+        target = validate_runtime_artifact_path(
+            self._path,
+            allowed_root=self._allowed_root,
+            repo_root=self._repo_root,
+        )
+        connection = sqlite3.connect(
+            f"{target.as_uri()}?mode=ro",
+            uri=True,
+            timeout=30.0,
+            isolation_level=None,
+        )
+        try:
+            connection.execute("PRAGMA query_only=ON")
+            yield connection
+        finally:
+            connection.close()
+
+
+def _validate_reader_identity(reader: SqliteMonotonicAuthorityReader) -> None:
+    if (
+        not isinstance(reader.store_id, str)
+        or not reader.store_id.strip()
+        or not reader.store_id.isascii()
+        or not is_sha256(reader.durability_receipt_id)
+    ):
+        raise ValueError("monotonic_authority_identity_invalid")
+    with reader._connect() as connection:
+        rows = connection.execute(
+            "SELECT store_id, durability_receipt_id FROM metadata"
+        ).fetchall()
+    if rows != [(reader.store_id, reader.durability_receipt_id)]:
+        raise ValueError("monotonic_authority_identity_mismatch")
+
+
 def _open_configured_connection(target: Path) -> sqlite3.Connection:
     for attempt in range(5):
         connection = sqlite3.connect(
@@ -237,4 +345,7 @@ def _digest(value: Any, name: str) -> str:
     return str(value)
 
 
-__all__ = ["SqliteMonotonicAuthorityStore"]
+__all__ = [
+    "SqliteMonotonicAuthorityReader",
+    "SqliteMonotonicAuthorityStore",
+]

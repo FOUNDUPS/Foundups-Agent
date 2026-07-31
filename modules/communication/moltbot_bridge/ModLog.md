@@ -4,7 +4,7 @@
   in their final inactive runtime root and advances the independently stored
   authenticated generation anchor only after manifest publication,
   current-authority revalidation, a manifest-bound cooperative writer seal,
-  an OS-backed activation-window lease, and a final byte/signature commit
+  a Windows deny-write/delete activation lease, and a final byte/signature commit
   guard before the high-water transaction can activate. Guard failure restores
   the prior authenticated anchor and aborts the pending high-water advance.
   A typed witness binding ties the signer key epoch, runtime root, anchor,
@@ -16,14 +16,20 @@
   overlapping anchor/high-water roots, stale work state, changed artifacts,
   activation-window write attempts, expired system time, and generation
   compare-and-swap conflicts. A signed
-  published-but-inactive manifest can complete after restart; malformed or
-  ambiguous preseeds cannot. Failed activation preserves the sealed inert
-  manifest for forensic recovery and never starts the signer service, executes
-  work, or mutates the repository. Authenticated current-generation launch
+  published-but-inactive manifest can complete after restart. An expired
+  manifest can roll forward only when the independent monotonic witness
+  already proves that exact generation committed; otherwise freshness remains
+  mandatory and recovery rolls back. Malformed or ambiguous preseeds cannot
+  recover. Failed activation reports preserved evidence only after the
+  serialized manifest still validates and matches its produced ID. Coordinator
+  receipts claim only coordinator-scoped no-service/no-work/no-repository
+  effects; they do not infer behavior of injected signers. Authenticated current-generation launch
   selection and external lifecycle supervision remain separate fail-closed
   follow-ons. The cooperative seal is not claimed as protection against a
   privileged or same-principal adversary after the activation lease closes;
-  current bytes must still be verified at every use.
+  current bytes must still be verified at every use. POSIX/WSL activation now
+  fails closed until an externally owned signer lifecycle supplies a genuine
+  distinct-principal immutability boundary.
   The SQLite witness proves persistence mechanics only. Independent production
   freshness authority remains blocked until an externally supervised signer
   principal owns and authenticates that witness.
@@ -49,7 +55,9 @@
   retarget a lifecycle authority. Public constructors, factories, verifier
   calls, reader calls, and lifecycle calls expose no caller-supplied registry
   lookup or issuance hook; attempted injection fails at the API boundary.
-  Lifecycle admission and one-shot consumption each revalidate the current
+  Verifier-only high-water readers now retain a dedicated read-only SQLite
+  witness view with no `advance()` method; the mutable signer-side witness is
+  rejected at the reader boundary. Lifecycle admission and one-shot consumption each revalidate the current
   authenticated generation, closing concurrent generation-advance races.
 - `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
   signer healthcheck with a fresh, short-lived, domain-separated Ed25519

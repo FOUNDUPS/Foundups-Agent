@@ -7,6 +7,9 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_activation_lease import (
+    runtime_artifact_activation_lease,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_runtime_atomic_provisioning import (
     _context,
     _provision,
@@ -23,6 +26,7 @@ def _fixed_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(target, "_trusted_now", lambda: NOW)
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows lease required")
 def test_direct_write_during_anchor_activation_is_denied(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -43,6 +47,7 @@ def test_direct_write_during_anchor_activation_is_denied(
     assert result.inactive_artifacts_preserved is True
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows lease required")
 def test_preopened_writer_cannot_leave_failed_generation_active(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -70,6 +75,7 @@ def test_preopened_writer_cannot_leave_failed_generation_active(
     assert result.inactive_artifacts_preserved is True
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows lease required")
 def test_path_replacement_cannot_leave_failed_generation_active(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -90,3 +96,17 @@ def test_path_replacement_cannot_leave_failed_generation_active(
     assert result.accepted is False
     assert anchor.load() is None
     assert result.inactive_artifacts_preserved is True
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX fail-closed contract")
+def test_posix_activation_requires_external_owner(tmp_path: Path) -> None:
+    target = tmp_path / "artifact.json"
+    target.write_text("{}", encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="external_owner_required"):
+        with runtime_artifact_activation_lease(
+            (target,),
+            repo_root=tmp_path / "repo",
+            allowed_root=tmp_path,
+        ):
+            raise AssertionError("POSIX activation lease entered")

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import multiprocessing
+import os
+from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event, Thread
@@ -51,6 +53,19 @@ def _fixed_provisioning_clock(
     import modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning as target
 
     monkeypatch.setattr(target, "_trusted_now", lambda: NOW)
+    if os.name != "nt":
+        monkeypatch.setattr(
+            target,
+            "runtime_artifact_activation_lease",
+            _test_only_activation_lease,
+        )
+
+
+@contextmanager
+def _test_only_activation_lease(*_args, **_kwargs):
+    """Exercise coordinator logic where the OS lease is unavailable."""
+
+    yield
 
 
 def _private_key_bytes(private_key) -> bytes:
@@ -130,7 +145,7 @@ def test_valid_final_root_is_signed_and_activated_last(
 
     assert result.accepted is True
     assert result.generation == 1
-    assert result.no_service_started is True
+    assert result.no_service_start_performed_by_coordinator is True
     assert Path(str(result.manifest_path)).is_file()
     activation = anchor.load()
     assert activation is not None
@@ -167,7 +182,7 @@ def test_manifest_failure_never_activates(tmp_path: Path) -> None:
 
     assert result.accepted is False
     assert anchor.load() is None
-    assert result.no_service_started is True
+    assert result.no_service_start_performed_by_coordinator is True
 
 
 def test_manifest_tamper_before_reverification_rejects(
@@ -601,9 +616,9 @@ def test_result_contains_no_execution_or_service_authority(
     result = _provision(context).to_dict()
 
     assert result["accepted"] is True
-    assert result["no_service_started"] is True
-    assert result["no_execution_performed"] is True
-    assert result["no_repo_mutation_performed"] is True
+    assert result["no_service_start_performed_by_coordinator"] is True
+    assert result["no_work_execution_performed_by_coordinator"] is True
+    assert result["no_repo_mutation_performed_by_coordinator"] is True
     assert "token" not in json.dumps(result).lower()
 
 

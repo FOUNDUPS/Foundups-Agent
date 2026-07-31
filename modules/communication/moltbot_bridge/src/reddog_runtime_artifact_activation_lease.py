@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import stat
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, Sequence
@@ -29,8 +28,9 @@ def runtime_artifact_activation_lease(
         with _windows_activation_lease(targets):
             yield
         return
-    with _posix_activation_lease(targets):
-        yield
+    raise RuntimeError(
+        "runtime_artifact_activation_lease_external_owner_required"
+    )
 
 
 def _validated_targets(
@@ -51,11 +51,7 @@ def _validated_targets(
         raise ValueError("runtime_artifact_activation_lease_targets_invalid")
     for target in targets:
         metadata = target.lstat()
-        if (
-            target.is_symlink()
-            or not stat.S_ISREG(metadata.st_mode)
-            or int(getattr(metadata, "st_nlink", 1)) != 1
-        ):
+        if target.is_symlink() or not target.is_file() or metadata.st_nlink != 1:
             raise ValueError("runtime_artifact_activation_lease_target_invalid")
     return targets
 
@@ -75,36 +71,5 @@ def _windows_activation_lease(paths: tuple[Path, ...]) -> Iterator[None]:
     finally:
         for handle in reversed(handles):
             close_windows_handle(handle)
-
-
-@contextmanager
-def _posix_activation_lease(paths: tuple[Path, ...]) -> Iterator[None]:
-    descriptors: list[tuple[int, int]] = []
-    try:
-        for path in paths:
-            descriptor = os.open(
-                path,
-                os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
-            )
-            metadata = os.fstat(descriptor)
-            if (
-                not stat.S_ISREG(metadata.st_mode)
-                or int(getattr(metadata, "st_nlink", 1)) != 1
-            ):
-                os.close(descriptor)
-                raise ValueError(
-                    "runtime_artifact_activation_lease_target_invalid"
-                )
-            mode = stat.S_IMODE(metadata.st_mode)
-            os.fchmod(descriptor, mode & ~0o222)
-            descriptors.append((descriptor, mode))
-        yield
-    finally:
-        for descriptor, mode in reversed(descriptors):
-            try:
-                os.fchmod(descriptor, mode)
-            finally:
-                os.close(descriptor)
-
 
 __all__ = ["runtime_artifact_activation_lease"]

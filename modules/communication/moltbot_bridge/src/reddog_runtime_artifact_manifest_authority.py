@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from contextlib import contextmanager
 from pathlib import Path
 from types import MappingProxyType
@@ -134,6 +135,7 @@ def create_runtime_artifact_manifest_authority_boundary(
     forbidden_operations: Sequence[str] = (),
     revoked_key_epochs: Sequence[str] = (),
     leeway_s: int = 60,
+    trusted_clock: Any = time.time,
 ) -> RuntimeArtifactManifestAuthorityBoundary:
     """Build one authority boundary pinned to durable state and trust inputs."""
 
@@ -148,6 +150,7 @@ def create_runtime_artifact_manifest_authority_boundary(
         "required_valve_state": required_valve_state,
         "forbidden_operations": tuple(forbidden_operations),
         "revoked_key_epochs": tuple(revoked_key_epochs), "leeway_s": leeway_s,
+        "trusted_clock": trusted_clock,
     }
     return _make_capability_boundary(settings)
 
@@ -311,38 +314,96 @@ def _capability_revalidation_fence(
             raise ValueError("manifest_authority_revalidation_invalid")
         identity = _mapping(json.loads(source[0]))
         work = _mapping(json.loads(source[1]))
-        _verify_work_authority(
-            work=work,
-            identity=identity,
-            now_epoch=now_epoch,
-            signature_verifier=settings["signature_verifier"],
-            principal_key_resolver=settings["principal_key_resolver"],
-            nonce_store=settings["nonce_store"],
-            snapshot_resolver=settings["snapshot_resolver"],
-            revocation_oracle=settings["revocation_oracle"],
-            required_valve_state=settings["required_valve_state"],
-            forbidden_operations=settings["forbidden_operations"],
-            revoked_key_epochs=settings["revoked_key_epochs"],
-            leeway_s=settings["leeway_s"],
-        )
         with settings["store"].locked_snapshot() as state:
             with reddog_runtime_artifact_generation_lock(
                 settings["runtime"],
                 repo_root=settings["root"],
                 allow_sealed=True,
             ):
-                fresh = _fresh_authority_values(
+                _assert_fresh_authority(
                     settings,
                     state=state,
+                    original=original,
                     identity=identity,
                     work=work,
                     queue_item_id=source[2],
+                    minimum_now=now_epoch,
                 )
-                if _fingerprint(fresh) != _fingerprint(original):
-                    raise ValueError("manifest_authority_stale")
                 yield original
+                _assert_fresh_authority(
+                    settings,
+                    state=state,
+                    original=original,
+                    identity=identity,
+                    work=work,
+                    queue_item_id=source[2],
+                    minimum_now=now_epoch,
+                )
 
     return revalidate
+
+
+def _assert_fresh_authority(
+    settings: Mapping[str, Any],
+    *,
+    state: Mapping[str, Any],
+    original: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    work: Mapping[str, Any],
+    queue_item_id: str,
+    minimum_now: int,
+) -> None:
+    _verify_sources(
+        settings,
+        identity=identity,
+        work=work,
+        now_epoch=_locked_now(settings, minimum_now),
+    )
+    fresh = _fresh_authority_values(
+        settings,
+        state=state,
+        identity=identity,
+        work=work,
+        queue_item_id=queue_item_id,
+    )
+    if _fingerprint(fresh) != _fingerprint(original):
+        raise ValueError("manifest_authority_stale")
+
+
+def _locked_now(settings: Mapping[str, Any], minimum: int) -> int:
+    clock = settings.get("trusted_clock")
+    if not callable(clock):
+        raise ValueError("manifest_authority_clock_invalid")
+    current = clock()
+    if isinstance(current, bool) or not isinstance(current, (int, float)):
+        raise ValueError("manifest_authority_clock_invalid")
+    value = int(current)
+    if value <= 0:
+        raise ValueError("manifest_authority_clock_invalid")
+    return max(minimum, value)
+
+
+def _verify_sources(
+    settings: Mapping[str, Any],
+    *,
+    identity: Mapping[str, Any],
+    work: Mapping[str, Any],
+    now_epoch: int,
+) -> None:
+    _verify_work_authority(
+        work=work,
+        identity=identity,
+        now_epoch=now_epoch,
+        signature_verifier=settings["signature_verifier"],
+        principal_key_resolver=settings["principal_key_resolver"],
+        nonce_store=settings["nonce_store"],
+        snapshot_resolver=settings["snapshot_resolver"],
+        revocation_oracle=settings["revocation_oracle"],
+        required_valve_state=settings["required_valve_state"],
+        forbidden_operations=settings["forbidden_operations"],
+        revoked_key_epochs=settings["revoked_key_epochs"],
+        leeway_s=settings["leeway_s"],
+    )
 
 
 def _fresh_authority_values(

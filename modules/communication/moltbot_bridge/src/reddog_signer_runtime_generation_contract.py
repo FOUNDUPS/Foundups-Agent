@@ -54,7 +54,7 @@ class SignerRuntimeGenerationPendingAdvance:
     transaction_id: str
     expected: SignerRuntimeGenerationHighWater | None
     next_value: SignerRuntimeGenerationHighWater
-    previous_anchor_state_json: str
+    previous_anchor_state_json: str = "{}"
 
 
 @runtime_checkable

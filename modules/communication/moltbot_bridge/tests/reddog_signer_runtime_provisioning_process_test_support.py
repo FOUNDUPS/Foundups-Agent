@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+from contextlib import contextmanager
 from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -35,6 +37,10 @@ def process_provision(values: dict, output) -> None:
     import modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning as target
 
     target._trusted_now = lambda: NOW
+    if os.name != "nt":
+        target.runtime_artifact_activation_lease = (
+            _test_only_activation_lease
+        )
     repo = Path(values["repo_root"])
     runtime = Path(values["runtime_root"])
     reddog_private = Ed25519PrivateKey.from_private_bytes(
@@ -68,6 +74,13 @@ def process_provision(values: dict, output) -> None:
         ),
     )
     output.put(result.to_dict())
+
+
+@contextmanager
+def _test_only_activation_lease(*_args, **_kwargs):
+    """Exercise transaction concurrency without claiming a POSIX lease."""
+
+    yield
 
 
 def _process_generation_anchor(values, repo, generation_signer):

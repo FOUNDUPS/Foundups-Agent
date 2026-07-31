@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     atomic_create_confined_mapping,
@@ -70,9 +70,9 @@ class SignerRuntimeAtomicProvisioningResult:
     rejection_reasons: tuple[str, ...]
     inactive_artifacts_preserved: bool
     recovered_existing_activation: bool
-    no_service_started: bool = True
-    no_execution_performed: bool = True
-    no_repo_mutation_performed: bool = True
+    no_service_start_performed_by_coordinator: bool = True
+    no_work_execution_performed_by_coordinator: bool = True
+    no_repo_mutation_performed_by_coordinator: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -88,6 +88,7 @@ def provision_signer_runtime_generation(
 
     manifest_path: str | None = None
     manifest_id: str | None = None
+    runtime_root: Path | None = None
     try:
         runtime_root = _validated_roots(context)
         issued_at = _trusted_now()
@@ -128,6 +129,11 @@ def provision_signer_runtime_generation(
             (str(exc) or "signer_runtime_provisioning_rejected",),
             manifest_path=manifest_path,
             manifest_id=manifest_id,
+            inactive_artifacts_preserved=_published_manifest_preserved(
+                runtime_root,
+                manifest_path=manifest_path,
+                manifest_id=manifest_id,
+            ),
         )
 
 
@@ -201,6 +207,7 @@ def _verified_manifest(
     manifest_path: str | None,
     authority: Mapping[str, Any],
     now_epoch: int,
+    allow_expired_recovery: bool = False,
 ) -> dict[str, Any]:
     if not manifest_path:
         raise RuntimeArtifactManifestError("manifest_output_missing")
@@ -210,11 +217,18 @@ def _verified_manifest(
     )
     payload = validate_signed_payload(manifest)
     _validate_bindings(payload, authority)
-    validate_freshness(
-        payload,
-        now_epoch=now_epoch,
-        max_ttl_seconds=int(authority["max_ttl_seconds"]),
-    )
+    if allow_expired_recovery:
+        _validate_recovery_time(
+            payload,
+            now_epoch=now_epoch,
+            max_ttl_seconds=int(authority["max_ttl_seconds"]),
+        )
+    else:
+        validate_freshness(
+            payload,
+            now_epoch=now_epoch,
+            max_ttl_seconds=int(authority["max_ttl_seconds"]),
+        )
     current = tuple(
         item.to_dict()
         for item in _describe_runtime_artifacts_unlocked(authority)
@@ -230,6 +244,27 @@ def _verified_manifest(
     return payload
 
 
+def _validate_recovery_time(
+    payload: Mapping[str, Any],
+    *,
+    now_epoch: int,
+    max_ttl_seconds: int,
+) -> None:
+    issued = payload.get("issued_at")
+    expires = payload.get("expires_at")
+    if (
+        type(now_epoch) is not int
+        or type(max_ttl_seconds) is not int
+        or type(issued) is not int
+        or type(expires) is not int
+        or now_epoch <= 0
+        or issued > now_epoch
+        or expires <= issued
+        or expires - issued > max_ttl_seconds
+    ):
+        raise RuntimeArtifactManifestError("manifest_recovery_time_invalid")
+
+
 def _activate_manifest(
     context: SignerRuntimeAtomicProvisioningContext,
     *,
@@ -238,17 +273,17 @@ def _activate_manifest(
 ) -> tuple[SignerRuntimeGenerationActivation, bool]:
     authority_boundary = context.manifest_signing.authority_boundary
     authority_capability = context.manifest_signing.authority
-    now_epoch = _trusted_now()
     with authority_boundary.revalidation_fence(
         authority_capability,
-        now_epoch=now_epoch,
+        now_epoch=_trusted_now(),
     ) as authority:
         initial = _verified_manifest(
             context,
             runtime_root=runtime_root,
             manifest_path=manifest_path,
             authority=authority,
-            now_epoch=now_epoch,
+            now_epoch=_trusted_now(),
+            allow_expired_recovery=True,
         )
         _create_or_verify_generation_seal(
             runtime_root,
@@ -265,18 +300,15 @@ def _activate_manifest(
                 runtime_root=runtime_root,
                 manifest_path=manifest_path,
                 authority=authority,
-                now_epoch=now_epoch,
                 initial_manifest_id=str(initial["manifest_id"]),
             )
 
 
 def _activate_under_lease(
     context: SignerRuntimeAtomicProvisioningContext,
-    *,
-    runtime_root: Path,
+    *, runtime_root: Path,
     manifest_path: str | None,
     authority: Mapping[str, Any],
-    now_epoch: int,
     initial_manifest_id: str,
 ) -> tuple[SignerRuntimeGenerationActivation, bool]:
     manifest = _verified_manifest(
@@ -284,43 +316,86 @@ def _activate_under_lease(
         runtime_root=runtime_root,
         manifest_path=manifest_path,
         authority=authority,
-        now_epoch=now_epoch,
+        now_epoch=_trusted_now(),
+        allow_expired_recovery=True,
     )
     if manifest["manifest_id"] != initial_manifest_id:
         raise ValueError("runtime_artifact_manifest_changed")
-
-    def verify_candidate_bytes(
-        candidate: SignerRuntimeGenerationActivation,
-    ) -> None:
-        checked = _verified_manifest(
-            context,
-            runtime_root=runtime_root,
-            manifest_path=manifest_path,
-            authority=authority,
-            now_epoch=now_epoch,
-        )
-        if checked["manifest_id"] != manifest["manifest_id"]:
-            raise ValueError("runtime_artifact_manifest_changed")
-        _require_activation_matches(
-            candidate,
-            _binding_from_manifest(
-                checked,
-                generation=candidate.generation,
-            ),
-        )
-
+    recovered_committed: list[bool] = []
+    verify_candidate_bytes = _activation_guard(
+        context,
+        runtime_root=runtime_root,
+        manifest_path=manifest_path,
+        authority=authority,
+        manifest_id=str(manifest["manifest_id"]),
+    )
+    verify_committed_recovery = _activation_guard(
+        context,
+        runtime_root=runtime_root,
+        manifest_path=manifest_path,
+        authority=authority,
+        manifest_id=str(manifest["manifest_id"]),
+        allow_expired_recovery=True,
+        verified_marker=recovered_committed,
+    )
     current = context.generation_anchor.recover(
-        commit_guard=verify_candidate_bytes
+        commit_guard=verify_candidate_bytes,
+        committed_witness_guard=verify_committed_recovery,
     )
     if _current_matches_manifest(current, manifest):
+        if not recovered_committed:
+            verify_candidate_bytes(current)
         return current, True
+    fresh = _verified_manifest(
+        context,
+        runtime_root=runtime_root,
+        manifest_path=manifest_path,
+        authority=authority,
+        now_epoch=_trusted_now(),
+    )
+    if fresh["manifest_id"] != manifest["manifest_id"]:
+        raise ValueError("runtime_artifact_manifest_changed")
+    manifest = fresh
     binding = _generation_binding(manifest, current)
     activation = context.generation_anchor.activate(
         binding,
         expected_revision=current.revision if current else None,
         commit_guard=verify_candidate_bytes,
     )
+    verify_candidate_bytes(activation)
     return activation, False
+
+
+def _activation_guard(
+    context: SignerRuntimeAtomicProvisioningContext,
+    *,
+    runtime_root: Path,
+    manifest_path: str | None,
+    authority: Mapping[str, Any],
+    manifest_id: str,
+    allow_expired_recovery: bool = False,
+    verified_marker: list[bool] | None = None,
+) -> Callable[[SignerRuntimeGenerationActivation], None]:
+    def verify(candidate: SignerRuntimeGenerationActivation) -> None:
+        checked = _verified_manifest(
+            context,
+            runtime_root=runtime_root,
+            manifest_path=manifest_path,
+            authority=authority,
+            now_epoch=_trusted_now(),
+            allow_expired_recovery=allow_expired_recovery,
+        )
+        if checked["manifest_id"] != manifest_id:
+            raise ValueError("runtime_artifact_manifest_changed")
+        binding = _binding_from_manifest(
+            checked,
+            generation=candidate.generation,
+        )
+        _require_activation_matches(candidate, binding)
+        if verified_marker is not None:
+            verified_marker.append(True)
+
+    return verify
 
 
 def _activation_paths(
@@ -510,6 +585,25 @@ def _trusted_now() -> int:
     return value
 
 
+def _published_manifest_preserved(
+    runtime_root: Path | None,
+    *,
+    manifest_path: str | None,
+    manifest_id: str | None,
+) -> bool:
+    if runtime_root is None or not manifest_path or not manifest_id:
+        return False
+    try:
+        manifest = read_reddog_runtime_json_mapping(
+            manifest_path,
+            allowed_root=runtime_root,
+        )
+        payload = validate_signed_payload(manifest)
+    except (OSError, TypeError, ValueError):
+        return False
+    return payload.get("manifest_id") == manifest_id
+
+
 def _require_activation_matches(
     activation: SignerRuntimeGenerationActivation,
     binding: SignerRuntimeGenerationBinding,
@@ -534,6 +628,7 @@ def _reject(
     *,
     manifest_path: str | None,
     manifest_id: str | None,
+    inactive_artifacts_preserved: bool = False,
 ) -> SignerRuntimeAtomicProvisioningResult:
     return SignerRuntimeAtomicProvisioningResult(
         accepted=False,
@@ -542,7 +637,7 @@ def _reject(
         generation=None,
         activation_revision=None,
         rejection_reasons=tuple(reasons),
-        inactive_artifacts_preserved=bool(manifest_path),
+        inactive_artifacts_preserved=inactive_artifacts_preserved,
         recovered_existing_activation=False,
     )
 
