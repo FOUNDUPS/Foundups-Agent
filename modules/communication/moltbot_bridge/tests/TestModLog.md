@@ -1,22 +1,22 @@
-## 2026-07-31: REDDOG_SIGNED_RUNTIME_ARTIFACT_MANIFEST_PHASE1
-- Added real Ed25519 identity, delegated-work-authority, manifest-signing, and
-  signer audit-attestation coverage for the seven canonical runtime artifacts.
-- Proved content-addressed create-only publication, including rejection of a
-  pre-seeded malformed target, artifact/state drift rejection, signer-side
-  rereads, nonce replay and rollback behavior, closure-confined authority
-  capability immutability, arbitrary-domain rejection, and attacker replacement
-  plus self-signing rejection.
-- Proved OS-level no-replace publication under concurrent create attempts and
-  proved that the shared runtime-generation fence prevents a canonical writer
-  from crossing manifest publication.
-- Kept resident readiness fail closed pending durable replay high-water,
-  authenticated manifest activation, use-time current-generation verification,
-  and mutual signer peer handshake.
-- Focused validation: 29 manifest tests; 229 affected bridge tests passed with
-  8 platform skips; 80 canonical-producer tests; 15 WSP 62 tests; and 21 shared
-  safety tests passed with 1 platform skip.
-- Full bridge differential: branch 4619 passed, 40 failed, 19 skipped; exact
-  parent 4589 passed, 40 failed, 19 skipped, with the same 40 failing test IDs.
+## 2026-07-31: REDDOG SIGNER MANIFEST AND LIFECYCLE FOUNDATIONS
+- Proved Ed25519 manifest signing plus content-addressed no-replace
+  publication for all seven canonical runtime artifacts.
+- Proved authenticated generation compare-and-swap plus opaque
+  high-water rollback checks across restart and concurrent writers.
+- Unit-proved Linux PID/start/executable device/inode, exact argv,
+  requester identity and process-owned socket fail-closed parsing.
+- Proved exact manifest, generation, raw config, packet, policy,
+  profile, observation and v2 signed-handshake lifecycle admission.
+- Proved copied, serialized, forged, stale and replayed
+  process-local tokens reject; consumed receipts grant no effect.
+- Proved packet, config and observer tampering reject fail closed.
+- Proved protected-parent cleanup preserves an attacker-substituted
+  socket path rather than deleting another lifecycle object.
+- Kept service provisioning, valve consumption and live
+  execution fail closed behind separately owned follow-ons.
+- Focused signer, manifest, safety and WSP 62 matrices remain
+  mandatory before exact-SHA publication.
+  Kernel-backed distinct-principal Linux integration remains required.
 
 ## 2026-07-30: ARTIFACT MODEL AUTHORITY WSP 62 DECOMPOSITION
 - Moved model-runtime, provider-capability, and bounded-worker adversarial cases

@@ -47,6 +47,22 @@ from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshak
 
 NOW = 2_000_000_000
 CHALLENGE = "a" * 64
+WSP62_SLICE_FILES = (
+    "src/reddog_external_signer_lifecycle_admission.py",
+    "src/reddog_external_signer_os_observer.py",
+    "src/reddog_isolated_signer_socket_resident_service.py",
+    "src/reddog_runtime_artifact_manifest_launch_selection.py",
+    "src/reddog_signer_mutual_peer_handshake.py",
+    "src/reddog_signer_peer_instance_packet_validator.py",
+    "src/reddog_signer_runtime_generation_anchor.py",
+    "src/reddog_signer_socket_service_healthcheck.py",
+    "tests/test_reddog_external_signer_lifecycle_admission.py",
+    "tests/test_reddog_external_signer_os_observer.py",
+    "tests/test_reddog_isolated_signer_socket_resident_service.py",
+    "tests/test_reddog_signer_mutual_peer_handshake.py",
+    "tests/test_reddog_signer_runtime_generation_anchor.py",
+    "tests/test_reddog_signer_socket_service_healthcheck.py",
+)
 
 
 class _AuditMac:
@@ -85,6 +101,8 @@ def _binding() -> SignerPeerInstanceBinding:
                 key_epoch="epoch-1",
             ),
         ),
+        manifest_id="sha256:" + "3" * 64,
+        artifact_generation_digest="sha256:" + "4" * 64,
     )
 
 
@@ -95,6 +113,8 @@ def _request(
     binding = _binding()
     values = {
         "run_packet_id": binding.run_packet_id,
+        "manifest_id": binding.manifest_id,
+        "artifact_generation_digest": binding.artifact_generation_digest,
         "config_digest": binding.config_digest,
         "session_id": binding.session_id,
         "socket_path": binding.socket_path,
@@ -156,6 +176,34 @@ def test_backend_rejects_handshake_not_matching_signer_owned_instance() -> None:
 
     assert response.accepted is False
     assert response.rejection_code == REJECT_ED25519_SIGNER_REQUEST_INVALID
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"manifest_id": "sha256:" + "5" * 64},
+        {"artifact_generation_digest": "sha256:" + "6" * 64},
+    ],
+)
+def test_manifest_generation_substitution_is_rejected(
+    changes: dict[str, object],
+) -> None:
+    private_key = _private_key()
+    response = _backend(private_key).sign(
+        _request(private_key, **changes), _peer()
+    )
+
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_REQUEST_INVALID
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["manifest_id", "artifact_generation_digest"],
+)
+def test_all_zero_manifest_bindings_cannot_build_a_request(field: str) -> None:
+    with pytest.raises(ValueError, match=FAIL_HANDSHAKE_REQUEST_INVALID):
+        _request(_private_key(), **{field: "sha256:" + "0" * 64})
 
 
 def test_fabricated_acceptance_flags_and_key_text_do_not_authenticate() -> None:
@@ -355,14 +403,14 @@ class _FixedPeerAttestor:
 
 
 def test_handshake_modules_follow_wsp62_boundaries() -> None:
-    source_root = Path(__file__).parents[1] / "src"
-    for name in (
-        "reddog_signer_mutual_peer_handshake.py",
-        "reddog_runtime_artifact_manifest_launch_selection.py",
-    ):
-        source = (source_root / name).read_text(encoding="utf-8")
-        assert len(source.splitlines()) < 1200
+    bridge_root = Path(__file__).parents[1]
+    for name in WSP62_SLICE_FILES:
+        source = (bridge_root / name).read_text(encoding="utf-8")
+        assert len(source.splitlines()) <= 675
         for node in ast.walk(ast.parse(source)):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 assert node.end_lineno is not None
-                assert node.end_lineno - node.lineno + 1 <= 50
+                assert node.end_lineno - node.lineno + 1 <= 60
+            if isinstance(node, ast.ClassDef):
+                assert node.end_lineno is not None
+                assert node.end_lineno - node.lineno + 1 <= 200

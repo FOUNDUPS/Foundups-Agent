@@ -27,6 +27,7 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_clie
 from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
     FAIL_HANDSHAKE_SIGNATURE_INVALID,
     SignatureVerifier,
+    VerifiedSignerPeerHandshake,
     build_signer_peer_handshake_request,
     verify_signer_peer_handshake_response,
 )
@@ -49,6 +50,9 @@ FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING = "signer_healthcheck_profile_missing"
 FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID = "signer_healthcheck_requester_invalid"
 FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED = "signer_healthcheck_client_rejected"
 FAIL_SIGNER_HEALTHCHECK_SIGNER_REJECTED = "signer_healthcheck_signer_rejected"
+FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED = (
+    "signer_healthcheck_manifest_binding_required"
+)
 
 
 @dataclass(frozen=True)
@@ -68,6 +72,8 @@ class SignerServiceHealthcheckResult:
     request_digest: str | None
     response_digest: str | None
     rejection_reasons: tuple[str, ...]
+    manifest_id: str | None = None
+    artifact_generation_digest: str | None = None
     peer_handshake_verified: bool = False
     peer_handshake_expires_at: int | None = None
     no_signature_value_returned: bool = True
@@ -110,6 +116,8 @@ def run_reddog_signer_socket_service_healthcheck(
     now_epoch: Callable[[], int] | None = None,
     challenge_factory: Callable[[], str] | None = None,
     signature_verifier: SignatureVerifier | None = None,
+    manifest_id: str | None = None,
+    artifact_generation_digest: str | None = None,
 ) -> SignerServiceHealthcheckResult:
     """Validate run packet/config and probe an already-running signer socket."""
 
@@ -130,6 +138,8 @@ def run_reddog_signer_socket_service_healthcheck(
         now_epoch=now_epoch,
         challenge_factory=challenge_factory,
         signature_verifier=signature_verifier,
+        manifest_id=manifest_id,
+        artifact_generation_digest=artifact_generation_digest,
     )
 
 
@@ -193,28 +203,27 @@ def _run_peer_handshake(
     now_epoch: Callable[[], int] | None,
     challenge_factory: Callable[[], str] | None,
     signature_verifier: SignatureVerifier | None,
+    manifest_id: str | None,
+    artifact_generation_digest: str | None,
 ) -> SignerServiceHealthcheckResult:
-    packet = context.packet
-    profile = context.profile
+    rejected = _manifest_binding_rejection(
+        context, manifest_id, artifact_generation_digest
+    )
+    if rejected is not None:
+        return rejected
     client, rejected = _healthcheck_client(
         context, timeout_s, max_response_bytes, connector
     )
     if rejected is not None:
         return rejected
     assert client is not None
-    socket_path = context.socket_path
     trusted_now = now_epoch or (lambda: int(time.time()))
-    request = build_signer_peer_handshake_request(
-        run_packet_id=str(packet["run_packet_id"]),
-        config_digest=context.config_digest,
-        session_id=str(packet["session_id"]),
-        socket_path=str(socket_path),
-        signer_profile_id=str(profile["signer_profile_id"]),
-        signer_public_key=str(profile["expected_public_key"]),
-        key_epoch=str(profile["expected_key_epoch"]),
-        requester_principal_id=context.requester,
-        now_epoch=trusted_now(),
-        challenge_factory=challenge_factory,
+    request = _build_peer_request(
+        context,
+        str(manifest_id),
+        str(artifact_generation_digest),
+        trusted_now(),
+        challenge_factory,
     )
     response = client.sign(request)
     verification = verify_signer_peer_handshake_response(
@@ -225,7 +234,52 @@ def _run_peer_handshake(
             context, request.to_dict(), response.rejection_code,
             verification.rejection_reasons,
         )
-    return _handshake_accept(context, request.to_dict(), response.to_dict(), verification.expires_at)
+    return _handshake_accept(
+        context, request.to_dict(), response.to_dict(), verification
+    )
+
+
+def _manifest_binding_rejection(
+    context: _HealthcheckContext,
+    manifest_id: object,
+    artifact_generation_digest: object,
+) -> SignerServiceHealthcheckResult | None:
+    if all(
+        _sha256_digest(value)
+        for value in (manifest_id, artifact_generation_digest)
+    ):
+        return None
+    return _reject(
+        (FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED,),
+        packet_path=str(context.packet_path),
+        packet=context.packet,
+        config_digest=context.config_digest,
+        profile=context.profile,
+        requester=context.requester,
+    )
+
+
+def _build_peer_request(
+    context: _HealthcheckContext,
+    manifest_id: str,
+    artifact_generation_digest: str,
+    now_epoch: int,
+    challenge_factory: Callable[[], str] | None,
+) -> Any:
+    return build_signer_peer_handshake_request(
+        run_packet_id=str(context.packet["run_packet_id"]),
+        config_digest=context.config_digest,
+        session_id=str(context.packet["session_id"]),
+        socket_path=str(context.socket_path),
+        signer_profile_id=str(context.profile["signer_profile_id"]),
+        signer_public_key=str(context.profile["expected_public_key"]),
+        key_epoch=str(context.profile["expected_key_epoch"]),
+        requester_principal_id=context.requester,
+        manifest_id=manifest_id,
+        artifact_generation_digest=artifact_generation_digest,
+        now_epoch=now_epoch,
+        challenge_factory=challenge_factory,
+    )
 
 
 def _healthcheck_client(
@@ -258,7 +312,7 @@ def _handshake_accept(
     context: _HealthcheckContext,
     request: Mapping[str, Any],
     response: Mapping[str, Any],
-    expires_at: int,
+    verification: VerifiedSignerPeerHandshake,
 ) -> SignerServiceHealthcheckResult:
     packet = context.packet
     profile = context.profile
@@ -275,8 +329,10 @@ def _handshake_accept(
         requester_principal_id=context.requester,
         request_digest=_digest(request),
         response_digest=_digest(response),
+        manifest_id=verification.manifest_id,
+        artifact_generation_digest=verification.artifact_generation_digest,
         peer_handshake_verified=True,
-        peer_handshake_expires_at=expires_at,
+        peer_handshake_expires_at=verification.expires_at,
         rejection_reasons=(),
     )
 
@@ -485,6 +541,16 @@ def _digest(payload: Mapping[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _sha256_digest(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 71
+        and value.startswith("sha256:")
+        and all(char in "0123456789abcdef" for char in value[7:])
+        and value[7:] != "0" * 64
+    )
+
+
 def _dedupe(values: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(str(value) for value in values if str(value)))
 
@@ -519,6 +585,7 @@ def _ascii_deep(value: object) -> bool:
 __all__ = [
     "FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED",
     "FAIL_SIGNER_HEALTHCHECK_CONFIG_MISMATCH",
+    "FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED",
     "FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING",
     "FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID",
     "FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED",

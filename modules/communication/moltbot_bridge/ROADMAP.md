@@ -48,11 +48,11 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
   promotion rechecks the canonical admission receipt, current repository HEAD,
   HoloIndex freshness receipt, work-state revision, platform, and code-owned
   trust-anchor capabilities.
-  Valid prerequisite work may remain a blocked candidate; it cannot enter the
-  authoritative queue until a fresh determination observes the capability.
-  SHA-bound proposal receipts are integrity-only; a trusted proposal-admission
-  authenticity verifier remains required before production readiness can ever
-  become `READY`.
+  Valid prerequisite work may remain a blocked candidate and may enter the
+  authoritative queue only after proposal authenticity is cryptographically
+  verified. It still cannot execute until a fresh use-time determination
+  observes every required capability. SHA-bound proposal receipts remain
+  integrity-only and never establish readiness.
 - Phase 1 safety wiring complete locally: token-free canonical supplier,
   bootstrap-to-handler canonical routing, secure use-time reload, signed
   authority re-verification, process-local single-use effect admissions, and
@@ -63,6 +63,11 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
   descriptor-derived artifact manifests; verified consensus and sovereign
   receipts; authenticated principal/model trust provenance; a fresh client-side
   signer handshake. Closed attempts do not consume nonce state.
+- Signed artifact manifests, signer mutual handshake, authenticated generation
+  state, kernel process/socket observation, and opaque lifecycle admission are
+  implemented. The production high-water provider, external system service
+  owner, atomic generation provisioning, and use-time valve consumption remain
+  SPECIFIED_NOT_IMPLEMENTED.
 - Only after those anchors and adversarial live-path tests are green may an
   operator run the Linux live canary; merge authority remains unavailable.
 
