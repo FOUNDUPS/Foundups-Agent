@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import inspect
+from collections.abc import Mapping
 from pathlib import Path
 
 import pytest
@@ -198,21 +200,48 @@ def test_lifecycle_reader_authority_object_graph_has_no_effect_capability(
         "sign",
     }
 
-    reachable = [
-        boundary,
-        reader,
-        reader._store,
-        reader._verifier,
-        reader._high_water,
-        reader._high_water._store,
-        reader._high_water._verifier,
-    ]
-    for value in reachable:
+    for value in _reachable_runtime_values(boundary):
         assert not any(
             callable(getattr(value, name, None))
             or getattr(value, name, None) is not None
             for name in forbidden
         )
+
+
+def _reachable_runtime_values(root: object) -> list[object]:
+    """Traverse retained runtime state without following module globals."""
+
+    values: list[object] = []
+    pending = [root]
+    seen: set[int] = set()
+    while pending:
+        value = pending.pop()
+        if id(value) in seen:
+            continue
+        seen.add(id(value))
+        values.append(value)
+        if isinstance(value, (str, bytes, int, float, bool, type(None), Path)):
+            continue
+        if isinstance(value, Mapping):
+            pending.extend(value.values())
+        elif isinstance(value, (tuple, list, set, frozenset)):
+            pending.extend(value)
+        if inspect.isfunction(value) and value.__closure__:
+            pending.extend(cell.cell_contents for cell in value.__closure__)
+        attributes = getattr(value, "__dict__", None)
+        if isinstance(attributes, dict):
+            pending.extend(attributes.values())
+        for item_type in type(value).__mro__:
+            slots = getattr(item_type, "__slots__", ())
+            slots = (slots,) if isinstance(slots, str) else slots
+            for slot in slots:
+                if slot in {"__dict__", "__weakref__"}:
+                    continue
+                try:
+                    pending.append(getattr(value, slot))
+                except AttributeError:
+                    pass
+    return values
 
 
 def test_reader_rejects_authenticated_pending_generation(tmp_path: Path) -> None:
