@@ -1,4 +1,28 @@
 # ModLog - moltbot_bridge
+- `REDDOG_SIGNER_RUNTIME_GENERATION_AUTHORITY_PHASE1`: hardened signer
+  generation activation with an authenticated, independently stored
+  high-water transaction journal. Prepare, commit, abort, and restart
+  recovery are atomic and cross-process serialized; recovery requires the
+  authenticated pending record and never infers authority from a missing
+  high-water value. Deleted or rolled-back high-water state therefore remains
+  fail closed. Signing and verification are separate capabilities. The
+  external lifecycle now consumes a factory-issued public-key verifier and
+  confined read-only generation stores; it cannot reach a signer or mutable
+  authority store. Reader and high-water authorities must come from their
+  canonical factories; structural protocol lookalikes are rejected.
+  Nontransactional high-water implementations are rejected,
+  and post-commit recovery verifies durable state before returning. This is generation-authority
+  infrastructure only: production authority issuance, immutable generation
+  bundle activation, service supervision, and effect authority remain blocked.
+  Factory boundaries, verifier handles, generation readers, and high-water
+  readers retain no caller-mutable payload slots. Closure-private weak
+  registries hold their validated dependencies and expose no module-global
+  mutation surface, so post-mint replacement cannot attach a signer or
+  retarget a lifecycle authority. Public constructors, factories, verifier
+  calls, reader calls, and lifecycle calls expose no caller-supplied registry
+  lookup or issuance hook; attempted injection fails at the API boundary.
+  Lifecycle admission and one-shot consumption each revalidate the current
+  authenticated generation, closing concurrent generation-advance races.
 - `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
   signer healthcheck with a fresh, short-lived, domain-separated Ed25519
   challenge verified against the configured signer key, fingerprint, epoch,
