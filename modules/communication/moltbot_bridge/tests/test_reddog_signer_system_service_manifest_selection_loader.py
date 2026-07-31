@@ -421,7 +421,10 @@ def _prepare_real_cli_owner(
         harness.runtime_root / "signer_service_config.json",
         _runtime_config(harness),
     )
-    packet_path, supplied = _runtime_packet(harness, config_path)
+    owner_path = tmp_path / "signer-owner" / "owner.json"
+    packet_path, supplied = _runtime_packet(
+        harness, config_path, owner_path
+    )
     authority, boundary = _fresh_manifest_authority(harness)
     _sign_and_publish_manifest(harness, authority, boundary)
     selector = create_runtime_artifact_manifest_launch_selection_boundary(
@@ -468,12 +471,15 @@ def _runtime_config(harness: Any) -> dict[str, Any]:
     return value
 
 
-def _runtime_packet(harness: Any, config_path: Path):
+def _runtime_packet(
+    harness: Any, config_path: Path, owner_path: Path
+):
     packet_path = harness.runtime_root / "signer_service_run_packet.json"
     supplied = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=harness.repo_root,
         config_path=config_path,
         output_path=packet_path,
+        owner_authority_config_path=owner_path,
         op_executable="C:/Program Files/1Password/op.exe",
         op_timeout_s=7,
         ttl_seconds=61,

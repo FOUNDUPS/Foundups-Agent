@@ -1,3 +1,14 @@
+## 2026-07-31: STABLE SIGNER SYSTEM-SERVICE ENTRYPOINT
+
+- Added v2 packet regressions for the exact stable entrypoint command,
+  root-owned owner-config path binding, alternate-path substitution, current
+  generation selection, single-capability admission, fail-closed production
+  secret resolution, resolver-after-admission ordering, and zero
+  serialized-argv/shell/signer-process execution.
+- Migrated signer bootstrap, healthcheck, readiness, proposal-policy,
+  live-canary support, and `main.py` packet-supply tests to the same contract.
+- Added the entrypoint and its tests to the exact signer WSP 62 gate.
+
 ## 2026-07-31: CURRENT-GENERATION SIGNER LAUNCH SELECTION
 
 - Added focused regressions for generation-bound content-addressed manifest

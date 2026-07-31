@@ -13,7 +13,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_schema import
 
 
 _FIXED_FIELDS = {
-    "run_mode": "signer_owned_cli_sidecar",
+    "run_mode": "signer_owned_system_service_entrypoint",
     "process_owner_requirement": "distinct_signer_os_principal",
     "redDog_must_not_spawn": True,
     "main_py_must_not_spawn": True,
@@ -24,7 +24,8 @@ _FIXED_FIELDS = {
 _FIELDS = frozenset(
     {
         "schema_version", "run_mode", "repo_root", "working_directory",
-        "python_module", "argv", "config_path", "config_digest", "socket_path",
+        "python_module", "argv", "config_path", "config_digest",
+        "owner_authority_config_path", "socket_path",
         "profile_count", "provider_mode", "op_executable", "op_timeout_s",
         "ttl_seconds", "session_id", "process_owner_requirement",
         "redDog_must_not_spawn", "main_py_must_not_spawn", "shell_required",
@@ -33,7 +34,7 @@ _FIELDS = frozenset(
 )
 _CLI_MODULE = (
     "modules.communication.moltbot_bridge.src."
-    "reddog_signer_socket_service_runtime_cli"
+    "reddog_signer_system_service_entrypoint"
 )
 _SELECTION_FIELDS = frozenset(
     {
@@ -80,8 +81,9 @@ def signer_run_packet_bindings_valid(
     run_packet_path: Path,
     socket_path: Path,
     python_executable: Path,
+    owner_authority_config_path: Path | str | None = None,
 ) -> bool:
-    return all(
+    return signer_run_packet_static_valid(packet, root=root) and all(
         (
             Path(str(packet.get("repo_root") or "")).resolve() == root,
             Path(str(packet.get("working_directory") or "")).resolve() == root,
@@ -91,16 +93,20 @@ def signer_run_packet_bindings_valid(
             Path(str(packet.get("socket_path") or "")).resolve() == socket_path,
             packet.get("python_module") == _CLI_MODULE,
             _absolute_outside_repo(socket_path, root),
+            _absolute_outside_repo(
+                packet.get("owner_authority_config_path"), root
+            ),
+            bool(owner_authority_config_path),
+            Path(
+                str(packet.get("owner_authority_config_path") or "")
+            ).resolve()
+            == Path(str(owner_authority_config_path)).resolve(),
             _argv_valid(
                 packet.get("argv"),
                 root=root,
-                config_path=config_path,
-                config_digest=config_digest,
-                session_id=session_id,
-                run_packet_path=run_packet_path,
-                op_executable=str(packet.get("op_executable") or ""),
-                op_timeout_s=packet.get("op_timeout_s"),
-                ttl_seconds=packet.get("ttl_seconds"),
+                owner_authority_config_path=Path(
+                    str(owner_authority_config_path)
+                ).resolve(),
                 python_executable=python_executable,
             ),
         )
@@ -119,6 +125,41 @@ def signer_profile_bindings_valid(
         and _ascii_text(item.signer_public_key)
         and _ascii_text(item.key_epoch)
         for item in profiles
+    )
+
+
+def signer_run_packet_static_valid(
+    packet: object,
+    *,
+    root: Path,
+) -> bool:
+    """Validate the signed packet's self-contained stable launch contract."""
+
+    if not isinstance(packet, Mapping) or not _packet_shape_valid(packet):
+        return False
+    argv = packet.get("argv")
+    if not isinstance(argv, list) or not argv:
+        return False
+    python_executable = Path(str(argv[0])).resolve()
+    owner_path = Path(
+        str(packet.get("owner_authority_config_path") or "")
+    )
+    return all(
+        (
+            Path(str(packet.get("repo_root") or "")).resolve() == root,
+            Path(str(packet.get("working_directory") or "")).resolve()
+            == root,
+            packet.get("python_module") == _CLI_MODULE,
+            _absolute_outside_repo(owner_path, root),
+            _absolute_outside_repo(packet.get("config_path"), root),
+            _absolute_outside_repo(packet.get("socket_path"), root),
+            _argv_valid(
+                argv,
+                root=root,
+                owner_authority_config_path=owner_path.resolve(),
+                python_executable=python_executable,
+            ),
+        )
     )
 
 
@@ -157,7 +198,7 @@ def _argv_valid(value: object, **bindings: Any) -> bool:
     python_executable = bindings.pop("python_executable")
     if (
         not isinstance(value, list)
-        or len(value) != 19
+        or len(value) != 7
         or not all(_ascii_text(item) for item in value)
         or value[1:3] != ["-m", _CLI_MODULE]
         or Path(value[0]).resolve() != python_executable
@@ -181,13 +222,9 @@ def _argv_pairs(value: list[str]) -> dict[str, str] | None:
 def _required_argv_pairs(bindings: Mapping[str, Any]) -> dict[str, str]:
     return {
         "--repo-root": str(bindings["root"]),
-        "--config": str(bindings["config_path"]),
-        "--expected-config-digest": str(bindings["config_digest"]),
-        "--run-packet": str(bindings["run_packet_path"]),
-        "--op-executable": str(bindings["op_executable"]),
-        "--op-timeout-s": _number_text(bindings["op_timeout_s"]),
-        "--ttl-seconds": str(bindings["ttl_seconds"]),
-        "--session-id": str(bindings["session_id"]),
+        "--owner-authority-config": str(
+            bindings["owner_authority_config_path"]
+        ),
     }
 
 
@@ -314,5 +351,6 @@ __all__ = [
     "signer_generation_bound_selection_valid",
     "signer_profile_bindings_valid",
     "signer_run_packet_bindings_valid",
+    "signer_run_packet_static_valid",
     "signer_run_packet_selection_valid",
 ]

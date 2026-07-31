@@ -43,6 +43,8 @@ EXECUTABLE_FILES = (*BRIDGE_FILES, "holo_index.py")
 STATIC_RUNTIME_FILES = (
     "extensions/reddog/start_operations_python_bootstrap.py",
     "scripts/reddog_holoindex_owner_service_once.py",
+    "modules/communication/moltbot_bridge/src/"
+    "reddog_signer_system_service_entrypoint.py",
     "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md",
     "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
 )

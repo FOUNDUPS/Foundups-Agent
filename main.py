@@ -3127,9 +3127,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY=0                Materialize signer-owned CLI config from authority profile
         REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_ENFORCED=0       Block startup if signer config supply fails
         REDDOG_SIGNER_SERVICE_CONFIG_PATH                    Outside-repo signer CLI config JSON
-        REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY=0            Materialize signer-owned CLI argv packet
+        REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY=0            Materialize stable signer service argv packet
         REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED=0   Block startup if run-packet supply fails
-        REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH                Outside-repo signer CLI run-packet JSON
+        REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH                Outside-repo signer service run-packet JSON
         REDDOG_SIGNER_SERVICE_HEALTHCHECK=0                  Validate signer run packet and probe existing socket
         REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED=0         Block startup if signer healthcheck fails
         REDDOG_SIGNER_HEALTHCHECK_REQUESTER_PRINCIPAL_ID     Optional requester principal for healthcheck request
@@ -3419,6 +3419,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                     "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH",
                 )
                 or None,
+                owner_authority_config_path=(os.getenv("REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH") or "").strip() or None,
                 op_executable=str(os.getenv("REDDOG_SIGNER_SERVICE_OP_EXECUTABLE") or "op"),
                 op_timeout_s=_reddog_float_env("REDDOG_SIGNER_SERVICE_OP_TIMEOUT_S", 10.0),
                 ttl_seconds=_reddog_positive_int_env("REDDOG_SIGNER_SERVICE_TTL_SECONDS", 300),

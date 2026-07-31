@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from pathlib import Path
 
@@ -15,6 +16,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_WSP71_PERMISSIONED,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_peer_instance_packet_validator import (
+    signer_run_packet_static_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
@@ -23,6 +27,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_p
     FAIL_SIGNER_RUN_PACKET_CONFIG_PATH_INVALID,
     FAIL_SIGNER_RUN_PACKET_LIMITS_INVALID,
     FAIL_SIGNER_RUN_PACKET_OP_EXECUTABLE_INVALID,
+    FAIL_SIGNER_RUN_PACKET_OWNER_CONFIG_PATH_INVALID,
     FAIL_SIGNER_RUN_PACKET_OUTPUT_PATH_INVALID,
     SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
     SIGNER_SERVICE_RUN_PACKET_SUPPLY_ACCEPT,
@@ -125,11 +130,13 @@ def test_run_packet_supply_writes_shell_free_signer_cli_argv(tmp_path: Path) -> 
     socket_path = runtime / "reddog-signer.sock"
     config_path = _write_json(runtime / "signer-service.json", _config(socket_path))
     packet_path = runtime / "signer-run-packet.json"
+    owner_path = tmp_path / "signer-owner" / "owner.json"
 
     result = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=repo,
         config_path=config_path,
         output_path=packet_path,
+        owner_authority_config_path=owner_path,
         op_executable="op",
         op_timeout_s=11.5,
         ttl_seconds=300,
@@ -150,10 +157,13 @@ def test_run_packet_supply_writes_shell_free_signer_cli_argv(tmp_path: Path) -> 
 
     packet = json.loads(packet_path.read_text(encoding="utf-8"))
     assert packet["schema_version"] == SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION
-    assert packet["run_mode"] == "signer_owned_cli_sidecar"
+    assert packet["run_mode"] == "signer_owned_system_service_entrypoint"
     assert packet["config_path"] == str(config_path.resolve())
     assert packet["socket_path"] == str(socket_path.resolve())
     assert packet["profile_count"] == 2
+    assert packet["owner_authority_config_path"] == str(
+        owner_path.resolve()
+    )
     assert packet["shell_required"] is False
     assert packet["shell_command"] is None
     assert packet["redDog_must_not_spawn"] is True
@@ -163,14 +173,17 @@ def test_run_packet_supply_writes_shell_free_signer_cli_argv(tmp_path: Path) -> 
     assert argv[:3] == [
         "python",
         "-m",
-        "modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli",
+        "modules.communication.moltbot_bridge.src.reddog_signer_system_service_entrypoint",
     ]
-    assert "--config" in argv
-    assert argv[argv.index("--config") + 1] == str(config_path.resolve())
-    assert "--op-executable" in argv
-    assert argv[argv.index("--op-executable") + 1] == "op"
-    assert "--op-timeout-s" in argv
-    assert argv[argv.index("--op-timeout-s") + 1] == "11.5"
+    assert argv == [
+        "python",
+        "-m",
+        "modules.communication.moltbot_bridge.src.reddog_signer_system_service_entrypoint",
+        "--repo-root",
+        str(repo.resolve()),
+        "--owner-authority-config",
+        str(owner_path.resolve()),
+    ]
     serialized = json.dumps(packet, sort_keys=True)
     assert "ed25519-private-raw-b64-v1" not in serialized
     assert "audit-mac-test-key-b64-v1" not in serialized
@@ -200,6 +213,75 @@ def test_run_packet_supply_rejects_config_inside_repo_missing_or_malformed(tmp_p
     assert FAIL_SIGNER_RUN_PACKET_CONFIG_PATH_INVALID in missing.rejection_reasons
     assert FAIL_SIGNER_RUN_PACKET_CONFIG_PATH_INVALID in inside.rejection_reasons
     assert FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED in malformed.rejection_reasons
+
+
+def test_run_packet_supply_requires_owner_authority_outside_repo(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    config_path = _write_json(
+        runtime / "signer-service.json",
+        _config(runtime / "socket.sock"),
+    )
+    output = runtime / "run-packet.json"
+
+    missing = run_reddog_signer_socket_service_run_packet_supply(
+        repo_root=repo,
+        config_path=config_path,
+        output_path=output,
+    )
+    inside = run_reddog_signer_socket_service_run_packet_supply(
+        repo_root=repo,
+        config_path=config_path,
+        output_path=output,
+        owner_authority_config_path=repo / "owner.json",
+    )
+
+    assert FAIL_SIGNER_RUN_PACKET_OWNER_CONFIG_PATH_INVALID in (
+        missing.rejection_reasons
+    )
+    assert FAIL_SIGNER_RUN_PACKET_OWNER_CONFIG_PATH_INVALID in (
+        inside.rejection_reasons
+    )
+    assert output.exists() is False
+
+
+def test_persisted_v1_packet_rejects_even_after_self_rehash(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    config_path = _write_json(
+        runtime / "signer-service.json",
+        _config(runtime / "socket.sock"),
+    )
+    packet_path = runtime / "run-packet.json"
+    owner_path = tmp_path / "owner" / "owner.json"
+    result = run_reddog_signer_socket_service_run_packet_supply(
+        repo_root=repo,
+        config_path=config_path,
+        output_path=packet_path,
+        owner_authority_config_path=owner_path,
+        python_executable="python",
+    )
+    assert result.accepted is True
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    packet["schema_version"] = "reddog_signer_service_run_packet.v1"
+    without_id = {
+        key: value for key, value in packet.items() if key != "run_packet_id"
+    }
+    canonical = json.dumps(
+        without_id,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    packet["run_packet_id"] = (
+        "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    )
+
+    assert signer_run_packet_static_valid(packet, root=repo) is False
 
 
 def test_run_packet_supply_rejects_unbootable_schema_v2_config(

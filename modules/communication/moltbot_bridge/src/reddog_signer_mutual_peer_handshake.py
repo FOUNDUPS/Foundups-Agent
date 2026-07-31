@@ -231,11 +231,12 @@ def load_signer_peer_instance_binding(
     config_path: Path | str,
     expected_config_digest: str,
     run_packet_path: Path | str,
-    expected_session_id: str,
+    expected_session_id: str | None,
     expected_socket_path: Path | str,
     signer_profiles: tuple[SignerPeerProfileBinding, ...],
     manifest_selection: Mapping[str, Any],
     python_executable: Path | str,
+    owner_authority_config_path: Path | str,
 ) -> SignerPeerInstanceBinding | None:
     """Read and validate the signer launch packet at the signer boundary."""
 
@@ -249,6 +250,11 @@ def load_signer_peer_instance_binding(
         return None
     packet_path, raw, packet = packet_data
     config = Path(config_path).resolve()
+    actual_session_id = str(packet.get("session_id") or "")
+    if expected_session_id is not None and (
+        expected_session_id != actual_session_id
+    ):
+        return None
     if not signer_run_packet_selection_valid(
         manifest_selection,
         packet,
@@ -264,10 +270,13 @@ def load_signer_peer_instance_binding(
         root=root,
         config_path=config,
         config_digest=expected_config_digest,
-        session_id=expected_session_id,
+        session_id=actual_session_id,
         run_packet_path=packet_path,
         socket_path=Path(expected_socket_path).resolve(),
         python_executable=Path(python_executable).resolve(),
+        owner_authority_config_path=Path(
+            owner_authority_config_path
+        ).resolve(),
     ) or not signer_profile_bindings_valid(
         signer_profiles, packet.get("profile_count")
     ):

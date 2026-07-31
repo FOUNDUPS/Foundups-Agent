@@ -155,6 +155,7 @@ def _run_cli_args(
         expected_config_digest=args.expected_config_digest,
         run_packet_path=(Path(args.run_packet) if args.run_packet else None),
         expected_session_id=str(args.session_id),
+        expected_owner_authority_config_path=args.owner_authority_config,
         principal_key_resolver=(
             principal_key_resolver
             or FailClosedPrincipalKeyResolver()

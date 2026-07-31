@@ -45,6 +45,7 @@ def clean_signer_supply_env(monkeypatch) -> None:
         "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH",
         "REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY",
         "REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED",
+        "REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH",
         "REDDOG_SIGNER_SERVICE_HEALTHCHECK",
         "REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED",
         "REDDOG_SIGNER_HEALTHCHECK_REQUESTER_PRINCIPAL_ID",
@@ -406,6 +407,10 @@ def test_main_signer_run_packet_supply_writes_packet_without_socket_consumption(
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY", "1")
     monkeypatch.setenv("REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED", "1")
+    monkeypatch.setenv(
+        "REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH",
+        str(tmp_path / "signer-owner" / "owner.json"),
+    )
     monkeypatch.setenv("REDDOG_SIGNER_SERVICE_PYTHON_EXECUTABLE", "python")
     monkeypatch.setenv("REDDOG_SIGNER_SERVICE_SESSION_ID", "signer-main-run-packet")
 
@@ -427,7 +432,7 @@ def test_main_signer_run_packet_supply_writes_packet_without_socket_consumption(
     assert packet["argv"][:3] == [
         "python",
         "-m",
-        "modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli",
+        "modules.communication.moltbot_bridge.src.reddog_signer_system_service_entrypoint",
     ]
     assert mocked_bootstrap.call_args.kwargs["signer_socket_path"] is None
 
@@ -482,6 +487,10 @@ def test_main_signer_config_supply_can_feed_run_packet_supply_in_same_preflight(
     monkeypatch.setenv("REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_ENFORCED", "1")
     monkeypatch.setenv("REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY", "1")
     monkeypatch.setenv("REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED", "1")
+    monkeypatch.setenv(
+        "REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH",
+        str(tmp_path / "signer-owner" / "owner.json"),
+    )
     monkeypatch.setenv("REDDOG_SIGNER_SERVICE_PYTHON_EXECUTABLE", "python")
     monkeypatch.setenv("REDDOG_SIGNER_PRINCIPAL_SIGNING_KEY_REF", "op://prod-vault/principal/private")
     monkeypatch.setenv("REDDOG_SIGNER_PRINCIPAL_AUDIT_MAC_KEY_REF", "op://prod-vault/principal/audit")

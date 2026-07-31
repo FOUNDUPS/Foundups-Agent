@@ -678,22 +678,21 @@ def _write_proposal_launch_packet(
     session_id: str = "proposal-bootstrap-test",
 ) -> dict[str, object]:
     config = json.loads(config_path.read_text(encoding="utf-8"))
+    owner_path = output_path.parent.parent / "signer-owner" / "owner.json"
     argv = _proposal_launch_argv(
         repo=repo,
-        config_path=config_path,
-        config_digest=config_digest,
-        output_path=output_path,
-        session_id=session_id,
+        owner_path=owner_path,
     )
     packet: dict[str, object] = {
         "schema_version": SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
-        "run_mode": "signer_owned_cli_sidecar",
+        "run_mode": "signer_owned_system_service_entrypoint",
         "repo_root": str(repo.resolve()),
         "working_directory": str(repo.resolve()),
         "python_module": argv[2],
         "argv": argv,
         "config_path": str(config_path.resolve()),
         "config_digest": config_digest,
+        "owner_authority_config_path": str(owner_path.resolve()),
         "socket_path": str(Path(config["socket_path"]).resolve()),
         "profile_count": len(config["key_provider_profiles"]),
         "provider_mode": config["provider_mode"],
@@ -735,6 +734,7 @@ def _write_proposal_launch_packet(
     return {
         "run_packet_path": output_path,
         "expected_session_id": session_id,
+        "expected_owner_authority_config_path": owner_path,
         "manifest_selection": capability,
         "manifest_selection_boundary": _ManifestSelectionBoundary(
             capability, selection
@@ -749,31 +749,16 @@ def _raw_digest(path: Path) -> str:
 def _proposal_launch_argv(
     *,
     repo: Path,
-    config_path: Path,
-    config_digest: str,
-    output_path: Path,
-    session_id: str,
+    owner_path: Path,
 ) -> list[str]:
     return [
         sys.executable,
         "-m",
-        "modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli",
+        "modules.communication.moltbot_bridge.src.reddog_signer_system_service_entrypoint",
         "--repo-root",
         str(repo.resolve()),
-        "--config",
-        str(config_path.resolve()),
-        "--expected-config-digest",
-        config_digest,
-        "--run-packet",
-        str(output_path.resolve()),
-        "--op-executable",
-        "op",
-        "--op-timeout-s",
-        "10",
-        "--ttl-seconds",
-        "300",
-        "--session-id",
-        session_id,
+        "--owner-authority-config",
+        str(owner_path.resolve()),
     ]
 
 
@@ -1282,6 +1267,9 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
         repo_root=repo,
         config_path=runtime / "signer-service.json",
         output_path=tmp_path / "proposal-run-packet.json",
+        owner_authority_config_path=(
+            tmp_path / "signer-owner" / "owner.json"
+        ),
     )
     assert run_packet.accepted is False
     assert run_packet.rejection_reasons == (

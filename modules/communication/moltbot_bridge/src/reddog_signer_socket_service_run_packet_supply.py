@@ -3,8 +3,9 @@
 Slice: REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_PHASE1
 
 This module materializes an outside-repo run packet for a signer-owned service
-manager to start the signer socket CLI. It validates the signer service config
-and emits a shell-free argv list. It does not start the signer, resolve
+manager to start the stable signer system-service entrypoint. It validates the
+signer service config and emits a shell-free argv list. It does not start the
+signer, resolve
 secrets, bind sockets, parse environment variables, mutate the repository,
 enqueue OpenClaw, dispatch Hermes, publish PRs, settle rewards, or re-index
 HoloIndex.
@@ -48,6 +49,9 @@ SIGNER_SERVICE_RUN_PACKET_SUPPLY_REJECT = "SIGNER_SERVICE_RUN_PACKET_SUPPLY_REJE
 FAIL_SIGNER_RUN_PACKET_CONFIG_PATH_INVALID = "signer_run_packet_config_path_invalid"
 FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED = "signer_run_packet_config_malformed"
 FAIL_SIGNER_RUN_PACKET_OUTPUT_PATH_INVALID = "signer_run_packet_output_path_invalid"
+FAIL_SIGNER_RUN_PACKET_OWNER_CONFIG_PATH_INVALID = (
+    "signer_run_packet_owner_config_path_invalid"
+)
 FAIL_SIGNER_RUN_PACKET_OP_EXECUTABLE_INVALID = "signer_run_packet_op_executable_invalid"
 FAIL_SIGNER_RUN_PACKET_LIMITS_INVALID = "signer_run_packet_limits_invalid"
 FAIL_SIGNER_RUN_PACKET_SESSION_INVALID = "signer_run_packet_session_invalid"
@@ -58,7 +62,7 @@ FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE = (
 
 _CLI_MODULE = (
     "modules.communication.moltbot_bridge.src."
-    "reddog_signer_socket_service_runtime_cli"
+    "reddog_signer_system_service_entrypoint"
 )
 
 
@@ -73,6 +77,7 @@ class SignerServiceRunPacketSupplyResult:
     run_packet_digest: str | None
     config_path: str | None
     config_digest: str | None
+    owner_authority_config_path: str | None
     socket_path: str | None
     profile_count: int
     rejection_reasons: tuple[str, ...]
@@ -99,6 +104,7 @@ def run_reddog_signer_socket_service_run_packet_supply(
     repo_root: Path | str,
     config_path: Path | str | None,
     output_path: Path | str | None,
+    owner_authority_config_path: Path | str | None = None,
     op_executable: str = "op",
     op_timeout_s: float = 10.0,
     ttl_seconds: int = 300,
@@ -110,9 +116,15 @@ def run_reddog_signer_socket_service_run_packet_supply(
     root = Path(repo_root).resolve()
     config, config_digest, config_resolved, config_reasons = _read_config(root, config_path)
     output_resolved, output_reasons = _resolve_output_path(root, output_path)
+    owner_resolved, owner_reasons = _resolve_outside_repo(
+        root,
+        owner_authority_config_path,
+        FAIL_SIGNER_RUN_PACKET_OWNER_CONFIG_PATH_INVALID,
+    )
     reasons: list[str] = []
     reasons.extend(config_reasons)
     reasons.extend(output_reasons)
+    reasons.extend(owner_reasons)
     reasons.extend(_op_executable_reasons(op_executable))
     reasons.extend(_limit_reasons(op_timeout_s, ttl_seconds))
     reasons.extend(_session_reasons(session_id, python_executable or sys.executable))
@@ -124,6 +136,7 @@ def run_reddog_signer_socket_service_run_packet_supply(
     assert config_digest is not None
     assert config_resolved is not None
     assert output_resolved is not None
+    assert owner_resolved is not None
     if config.get("proposal_authority_policy") is not None:
         return _reject(
             (
@@ -139,30 +152,19 @@ def run_reddog_signer_socket_service_run_packet_supply(
         _CLI_MODULE,
         "--repo-root",
         str(root),
-        "--config",
-        str(config_resolved),
-        "--expected-config-digest",
-        config_digest,
-        "--run-packet",
-        str(output_resolved),
-        "--op-executable",
-        str(op_executable),
-        "--op-timeout-s",
-        _number_text(float(op_timeout_s)),
-        "--ttl-seconds",
-        str(int(ttl_seconds)),
-        "--session-id",
-        str(session_id),
+        "--owner-authority-config",
+        str(owner_resolved),
     )
     packet: dict[str, Any] = {
         "schema_version": SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
-        "run_mode": "signer_owned_cli_sidecar",
+        "run_mode": "signer_owned_system_service_entrypoint",
         "repo_root": str(root),
         "working_directory": str(root),
         "python_module": _CLI_MODULE,
         "argv": list(argv),
         "config_path": str(config_resolved),
         "config_digest": config_digest,
+        "owner_authority_config_path": str(owner_resolved),
         "socket_path": str(socket_path),
         "profile_count": len(profiles),
         "provider_mode": str(config.get("provider_mode") or ""),
@@ -191,6 +193,7 @@ def run_reddog_signer_socket_service_run_packet_supply(
         run_packet_digest=packet_digest,
         config_path=str(config_resolved),
         config_digest=config_digest,
+        owner_authority_config_path=str(owner_resolved),
         socket_path=str(socket_path),
         profile_count=len(profiles),
         rejection_reasons=(),
@@ -380,6 +383,7 @@ def _reject(reasons: tuple[str, ...]) -> SignerServiceRunPacketSupplyResult:
         run_packet_digest=None,
         config_path=None,
         config_digest=None,
+        owner_authority_config_path=None,
         socket_path=None,
         profile_count=0,
         rejection_reasons=_dedupe(reasons),
@@ -426,6 +430,7 @@ __all__ = [
     "FAIL_SIGNER_RUN_PACKET_CONFIG_PATH_INVALID",
     "FAIL_SIGNER_RUN_PACKET_LIMITS_INVALID",
     "FAIL_SIGNER_RUN_PACKET_OP_EXECUTABLE_INVALID",
+    "FAIL_SIGNER_RUN_PACKET_OWNER_CONFIG_PATH_INVALID",
     "FAIL_SIGNER_RUN_PACKET_OUTPUT_PATH_INVALID",
     "FAIL_SIGNER_RUN_PACKET_SESSION_INVALID",
     "FAIL_SIGNER_RUN_PACKET_WRITE_FAILED",
