@@ -2073,6 +2073,11 @@ def test_default_maintenance_candidates_include_only_postmerge():
         general_maintenance_enabled=True,
         postmerge_enabled=True,
     ) == tasks
+    assert maintenance_candidates(
+        tasks,
+        general_maintenance_enabled=True,
+        postmerge_enabled=False,
+    ) == [tasks[1]]
 
 
 def test_triage_claims_only_postmerge_by_default(tmp_path, monkeypatch):
@@ -2157,3 +2162,39 @@ def test_triage_postmerge_explicit_disable_keeps_general_maintenance_off(
 
     assert result["kind"] == "idle"
     db.get_autonomous_tasks.assert_not_called()
+
+
+def test_triage_postmerge_disable_preserves_other_explicit_maintenance(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("OPENCLAW_MAINTENANCE_ENABLED", "1")
+    monkeypatch.setenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", "0")
+    db = MagicMock()
+    db.get_autonomous_tasks.return_value = [
+        {
+            "task_id": "holo",
+            "description": "Refresh exact-SHA HoloIndex authority",
+            "context": {"source": "holoindex_postmerge_coordinator"},
+            "required_skills": ["holo-search"],
+        },
+        {
+            "task_id": "audit",
+            "description": "Apply safe audit fix",
+            "context": {"source": "self_audit"},
+            "required_skills": [],
+        },
+    ]
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result["action"] == "execute_maintenance_task"
+    assert result["task"]["family"] == "self_audit_fix"
+    assert result["task"]["task_id"] == "audit"

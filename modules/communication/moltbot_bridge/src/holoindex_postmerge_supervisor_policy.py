@@ -35,7 +35,11 @@ def maintenance_candidates(
     """Limit default maintenance authority to the post-merge family."""
 
     if general_maintenance_enabled:
-        return [dict(task) for task in tasks]
+        return [
+            dict(task)
+            for task in tasks
+            if postmerge_enabled or not is_holoindex_postmerge_task(task)
+        ]
     if not postmerge_enabled:
         return []
     return [dict(task) for task in tasks if is_holoindex_postmerge_task(task)]
