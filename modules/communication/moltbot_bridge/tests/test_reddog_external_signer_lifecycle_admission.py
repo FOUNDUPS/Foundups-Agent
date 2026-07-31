@@ -18,6 +18,9 @@ from modules.communication.moltbot_bridge.src.reddog_external_signer_lifecycle_a
     ExternalSignerLifecycleAdmissionError,
     create_external_signer_lifecycle_admission_boundary,
 )
+from modules.communication.moltbot_bridge.src import (
+    reddog_external_signer_lifecycle_admission as lifecycle_module,
+)
 from modules.communication.moltbot_bridge.src.reddog_external_signer_os_observer import (
     EXTERNAL_SIGNER_OS_OBSERVATION_SCHEMA_VERSION,
     ExternalSignerOsObservationPolicy,
@@ -347,6 +350,23 @@ def test_exact_generation_os_and_handshake_issue_one_shot_capability(tmp_path) -
     assert observer.calls == healthcheck.calls == 1
     with pytest.raises(ExternalSignerLifecycleAdmissionError):
         boundary.consume(capability)
+
+
+def test_lifecycle_boundary_cannot_be_retargeted_after_construction(
+    tmp_path,
+) -> None:
+    boundary, selection, *_ = _boundary(tmp_path)
+
+    for field in ("_admit", "_consume"):
+        with pytest.raises(AttributeError):
+            setattr(boundary, field, lambda *_args, **_kwargs: object())
+        with pytest.raises(AttributeError):
+            object.__setattr__(
+                boundary, field, lambda *_args, **_kwargs: object()
+            )
+    assert not hasattr(lifecycle_module, "_issue_boundary")
+    assert not hasattr(lifecycle_module, "_lookup_boundary")
+    assert boundary.admit(selection) is not None
 
 
 def test_canonical_lifecycle_graph_has_no_signer_or_writer_capability(

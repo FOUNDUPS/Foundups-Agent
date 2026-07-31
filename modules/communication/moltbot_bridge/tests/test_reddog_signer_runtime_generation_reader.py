@@ -10,6 +10,12 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from modules.communication.moltbot_bridge.src import (
+    reddog_signer_runtime_generation_reader as reader_module,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_signer_runtime_generation_verifier_authority as verifier_module,
+)
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water import (
     AtomicSignerRuntimeGenerationHighWaterReader,
     AtomicSignerRuntimeGenerationHighWaterStore,
@@ -175,6 +181,16 @@ def test_reader_holds_no_signing_capability_and_reads_active_generation(
     assert not hasattr(reader, "_high_water")
     assert not hasattr(reader, "_store")
 
+    reader_authority, reader_boundary = (
+        create_signer_runtime_generation_reader_authority(reader)
+    )
+    accepted = require_signer_runtime_generation_reader_authority(
+        reader_authority, reader_boundary
+    )
+    anchor_path.unlink()
+    with pytest.raises(ValueError, match="rollback_detected"):
+        accepted.load()
+
 
 def test_lifecycle_reader_authority_object_graph_has_no_effect_capability(
     tmp_path: Path,
@@ -254,6 +270,38 @@ def test_factory_authority_payloads_cannot_be_replaced_after_mint(
     assert accepted_reader.load() is None
     assert accepted_high.load("reddog-signer:production") is None
     assert not hasattr(accepted_verifier, "sign")
+
+
+def test_generation_authority_registries_are_not_module_mutation_surfaces() -> None:
+    for module, names in (
+        (
+            reader_module,
+            (
+                "_READER_TARGETS",
+                "_READER_AUTHORITIES",
+                "_HIGH_WATER_READER_TARGETS",
+                "_HIGH_WATER_READER_AUTHORITIES",
+                "_DURABLE_READER_STATES",
+                "_issue_reader_target",
+                "_lookup_reader_target",
+                "_issue_high_water_target",
+                "_lookup_high_water_target",
+            ),
+        ),
+        (
+            verifier_module,
+            (
+                "_VERIFIER_TARGETS",
+                "_VERIFIER_AUTHORITIES",
+                "_issue_verifier_target",
+                "_lookup_verifier_target",
+                "_issue_verifier_authority",
+                "_lookup_verifier_authority",
+            ),
+        ),
+    ):
+        for name in names:
+            assert not hasattr(module, name)
 
 
 def test_reader_sources_cannot_be_retargeted_after_authority_mint(

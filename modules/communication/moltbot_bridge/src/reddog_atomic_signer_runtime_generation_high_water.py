@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import secrets
+import threading
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -34,6 +35,36 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 SCHEMA_VERSION = "reddog_signer_runtime_generation_high_water.v1"
 _MAX_ANCHORS = 128
 _MAX_AUTHENTICATION_TAG_LENGTH = 4096
+
+
+def _build_reader_state_registry():
+    lock = threading.RLock()
+    records: WeakKeyDictionary[object, Any] = WeakKeyDictionary()
+
+    def issue(key: object, value: Any) -> None:
+        with lock:
+            if key in records:
+                raise ValueError(
+                    "generation_high_water_reader_state_already_issued"
+                )
+            records[key] = value
+
+    def lookup(key: object) -> Any:
+        with lock:
+            try:
+                return records[key]
+            except KeyError as exc:
+                raise ValueError(
+                    "generation_high_water_reader_state_unverified"
+                ) from exc
+
+    return issue, lookup
+
+
+_issue_high_water_reader_state, _lookup_high_water_reader_state = (
+    _build_reader_state_registry()
+)
+del _build_reader_state_registry
 
 
 class AtomicSignerRuntimeGenerationHighWaterStore:
@@ -232,6 +263,7 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
         verifier_authority_boundary: (
             SignerRuntimeGenerationVerifierAuthorityBoundary
         ),
+        _issue_state: Any = _issue_high_water_reader_state,
     ) -> None:
         resolved_store_id = _ascii(store_id, "store_id")
         resolved_receipt_id = _sha256(
@@ -248,7 +280,7 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
             allowed_root=allowed_root,
             repo_root=repo_root,
         )
-        _HIGH_WATER_READER_STATES[self] = _HighWaterReaderState(
+        _issue_state(self, _HighWaterReaderState(
             store_id=resolved_store_id,
             durability_receipt_id=resolved_receipt_id,
             verifier=verifier,
@@ -256,19 +288,25 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
             lock_path=store.path.with_name(
                 store.path.name + ".high-water-transaction.lock"
             ),
-        )
+        ))
 
     @property
-    def store_id(self) -> str:
-        return _HIGH_WATER_READER_STATES[self].store_id
+    def store_id(
+        self, _lookup: Any = _lookup_high_water_reader_state
+    ) -> str:
+        return _lookup(self).store_id
 
     @property
-    def durability_receipt_id(self) -> str:
-        return _HIGH_WATER_READER_STATES[self].durability_receipt_id
+    def durability_receipt_id(
+        self, _lookup: Any = _lookup_high_water_reader_state
+    ) -> str:
+        return _lookup(self).durability_receipt_id
 
     @property
-    def rollback_domain_root(self) -> Path:
-        return _HIGH_WATER_READER_STATES[self].store.allowed_root
+    def rollback_domain_root(
+        self, _lookup: Any = _lookup_high_water_reader_state
+    ) -> Path:
+        return _lookup(self).store.allowed_root
 
     def load(
         self, anchor_id: str
@@ -280,8 +318,12 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
     ) -> SignerRuntimeGenerationPendingAdvance | None:
         return _pending(self._entry(anchor_id).get("pending"))
 
-    def _entry(self, anchor_id: str) -> dict[str, Any]:
-        reader = _HIGH_WATER_READER_STATES[self]
+    def _entry(
+        self,
+        anchor_id: str,
+        _lookup: Any = _lookup_high_water_reader_state,
+    ) -> dict[str, Any]:
+        reader = _lookup(self)
         with confined_runtime_operation_lock(
             reader.lock_path,
             repo_root=reader.store.repo_root,
@@ -306,12 +348,6 @@ class _HighWaterReaderState:
     verifier: SignerRuntimeGenerationVerifier
     store: ReadOnlyRuntimeJsonStore
     lock_path: Path
-
-
-_HIGH_WATER_READER_STATES: WeakKeyDictionary[
-    AtomicSignerRuntimeGenerationHighWaterReader, _HighWaterReaderState
-] = WeakKeyDictionary()
-
 
 def _verified_state(
     state: Mapping[str, Any],
@@ -613,6 +649,9 @@ def _canonical(value: Mapping[str, Any]) -> bytes:
         ensure_ascii=True,
         allow_nan=False,
     ).encode("utf-8")
+
+
+del _issue_high_water_reader_state, _lookup_high_water_reader_state
 
 
 __all__ = [

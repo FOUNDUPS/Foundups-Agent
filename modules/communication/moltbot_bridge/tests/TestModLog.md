@@ -15,6 +15,8 @@
 - Proved post-mint `setattr` and `object.__setattr__` attacks cannot replace
   verifier, reader, high-water, or hidden-signer dependencies in any
   lifecycle authority object.
+- Proved lifecycle callables and reader/verifier registries are not exposed as
+  module-global mutation surfaces; deleting a signed anchor still fails closed.
 - Kept service provisioning, valve consumption and live
   execution fail closed behind separately owned follow-ons.
 - Focused signer, manifest, safety and WSP 62 matrices remain

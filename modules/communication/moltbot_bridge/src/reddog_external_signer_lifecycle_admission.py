@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -93,19 +94,56 @@ class ExternalSignerLifecycleAdmissionBoundary(Protocol):
     ) -> ExternalSignerLifecycleAdmissionReceipt: ...
 
 
+def _build_boundary_registry():
+    lock = threading.RLock()
+    records: WeakKeyDictionary[object, tuple[Any, Any]] = (
+        WeakKeyDictionary()
+    )
+
+    def issue(key: object, admit: Any, consume: Any) -> None:
+        with lock:
+            if key in records:
+                raise ExternalSignerLifecycleAdmissionError(
+                    "external_signer_lifecycle_boundary_already_issued"
+                )
+            records[key] = (admit, consume)
+
+    def lookup(key: object) -> tuple[Any, Any]:
+        with lock:
+            try:
+                return records[key]
+            except KeyError as exc:
+                raise ExternalSignerLifecycleAdmissionError(
+                    "external_signer_lifecycle_boundary_unverified"
+                ) from exc
+
+    return issue, lookup
+
+
+_issue_boundary, _lookup_boundary = _build_boundary_registry()
+del _build_boundary_registry
+
+
 class _Boundary:
-    __slots__ = ("_admit", "_consume")
+    __slots__ = ("__weakref__",)
 
-    def __init__(self, admit: Any, consume: Any) -> None:
-        self._admit, self._consume = admit, consume
-
-    def admit(self, value: object, **kwargs: Any) -> object:
-        return self._admit(value, **kwargs)
+    def admit(
+        self,
+        value: object,
+        _lookup: Any = _lookup_boundary,
+        **kwargs: Any,
+    ) -> object:
+        admit, _ = _lookup(self)
+        return admit(value, **kwargs)
 
     def consume(
-        self, value: object, **kwargs: Any
+        self,
+        value: object,
+        _lookup: Any = _lookup_boundary,
+        **kwargs: Any,
     ) -> ExternalSignerLifecycleAdmissionReceipt:
-        return self._consume(value, **kwargs)
+        _, consume = _lookup(self)
+        return consume(value, **kwargs)
 
 
 def create_external_signer_lifecycle_admission_boundary(
@@ -128,6 +166,7 @@ def create_external_signer_lifecycle_admission_boundary(
     ),
     trusted_clock: Callable[[], int] | None = None,
     trusted_monotonic_clock: Callable[[], int] | None = None,
+    _issue: Any = _issue_boundary,
 ) -> ExternalSignerLifecycleAdmissionBoundary:
     """Create a one-shot boundary pinned to trusted lifecycle dependencies."""
     root = Path(repo_root).resolve()
@@ -155,7 +194,8 @@ def create_external_signer_lifecycle_admission_boundary(
         "os_policy": verified_policy.policy,
         "os_policy_authority_receipt_id": verified_policy.authority_receipt_id,
     }
-    return _Boundary(
+    _issue(
+        boundary := _Boundary(),
         _make_admit(dependencies, capability_type, issued),
         _make_consume(
             capability_type,
@@ -165,6 +205,7 @@ def create_external_signer_lifecycle_admission_boundary(
             dependencies["monotonic_clock"],
         ),
     )
+    return boundary
 
 
 def _require_read_only_generation_reader(value: object) -> None:
@@ -526,6 +567,9 @@ def _digest(value: Mapping[str, Any]) -> str:
         dict(value), sort_keys=True, separators=(",", ":"), ensure_ascii=True
     )
     return _text_digest(raw)
+
+
+del _issue_boundary, _lookup_boundary
 
 
 __all__ = [
