@@ -27,6 +27,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_reader import (
     DurableSignerRuntimeGenerationReader,
     VerifiedSignerRuntimeGenerationHighWaterReader,
+    create_signer_runtime_generation_high_water_reader_authority,
     create_signer_runtime_generation_reader_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_verifier_authority import (
@@ -67,21 +68,6 @@ class Boundary:
     def require(self, value: object):
         if value is not self.capability:
             raise ValueError("test_authority_invalid")
-        return self.verified
-
-
-class ReaderBoundary:
-    def __init__(self, reader) -> None:
-        self.capability = object()
-        self.verified = VerifiedSignerRuntimeGenerationHighWaterReader(
-            reader=reader,
-            store_id=reader.store_id,
-            durability_receipt_id=reader.durability_receipt_id,
-        )
-
-    def require(self, value: object):
-        if value is not self.capability:
-            raise ValueError("test_reader_authority_invalid")
         return self.verified
 
 
@@ -131,7 +117,11 @@ def _reader(
         verifier_authority=verifier.verifier_authority,
         verifier_authority_boundary=verifier.verifier_boundary,
     )
-    reader_boundary = ReaderBoundary(high_water_reader)
+    high_water_authority, reader_boundary = (
+        create_signer_runtime_generation_high_water_reader_authority(
+            high_water_reader
+        )
+    )
     return DurableSignerRuntimeGenerationReader(
         runtime / "anchor.json",
         allowed_root=runtime,
@@ -139,7 +129,7 @@ def _reader(
         anchor_id="reddog-signer:production",
         verifier_authority=verifier.verifier_authority,
         verifier_authority_boundary=verifier.verifier_boundary,
-        high_water_authority=reader_boundary.capability,
+        high_water_authority=high_water_authority,
         high_water_authority_boundary=reader_boundary,
     )
 
@@ -271,7 +261,11 @@ def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
     )
-    boundary = ReaderBoundary(high_water_reader)
+    high_water_authority, boundary = (
+        create_signer_runtime_generation_high_water_reader_authority(
+            high_water_reader
+        )
+    )
 
     with pytest.raises(ValueError, match="high_water_domain_overlap"):
         DurableSignerRuntimeGenerationReader(
@@ -281,7 +275,7 @@ def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
             anchor_id="reddog-signer:production",
             verifier_authority=signing.verifier_authority,
             verifier_authority_boundary=signing.verifier_boundary,
-            high_water_authority=boundary.capability,
+            high_water_authority=high_water_authority,
             high_water_authority_boundary=boundary,
         )
 
@@ -289,9 +283,37 @@ def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
 def test_reader_rejects_write_capable_high_water(tmp_path: Path) -> None:
     repo, runtime, authority = _roots(tmp_path)
     signing, high_water = _high_water(repo, authority)
-    boundary = ReaderBoundary(high_water)
+    with pytest.raises(ValueError, match="high_water_reader_invalid"):
+        create_signer_runtime_generation_high_water_reader_authority(
+            high_water  # type: ignore[arg-type]
+        )
 
-    with pytest.raises(ValueError, match="write_capability"):
+
+def test_reader_rejects_forged_high_water_authority_boundary(
+    tmp_path: Path,
+) -> None:
+    repo, runtime, authority = _roots(tmp_path)
+    signing = Ed25519GenerationSigner()
+    high_reader = AtomicSignerRuntimeGenerationHighWaterReader(
+        authority / "high-water.json",
+        allowed_root=authority,
+        repo_root=repo,
+        store_id="high-water:production",
+        durability_receipt_id=_sha("e"),
+        verifier_authority=signing.verifier_authority,
+        verifier_authority_boundary=signing.verifier_boundary,
+    )
+
+    class ForgedBoundary:
+        def require(self, value):
+            del value
+            return VerifiedSignerRuntimeGenerationHighWaterReader(
+                reader=high_reader,
+                store_id=high_reader.store_id,
+                durability_receipt_id=high_reader.durability_receipt_id,
+            )
+
+    with pytest.raises(ValueError, match="reader_boundary_invalid"):
         DurableSignerRuntimeGenerationReader(
             runtime / "anchor.json",
             allowed_root=runtime,
@@ -299,8 +321,8 @@ def test_reader_rejects_write_capable_high_water(tmp_path: Path) -> None:
             anchor_id="reddog-signer:production",
             verifier_authority=signing.verifier_authority,
             verifier_authority_boundary=signing.verifier_boundary,
-            high_water_authority=boundary.capability,
-            high_water_authority_boundary=boundary,
+            high_water_authority=object(),
+            high_water_authority_boundary=ForgedBoundary(),
         )
 
 
@@ -316,7 +338,11 @@ def test_reader_rejects_verifier_with_signing_method(tmp_path: Path) -> None:
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
     )
-    boundary = ReaderBoundary(high_water_reader)
+    high_water_authority, boundary = (
+        create_signer_runtime_generation_high_water_reader_authority(
+            high_water_reader
+        )
+    )
 
     with pytest.raises(ValueError, match="authority_unverified"):
         DurableSignerRuntimeGenerationReader(
@@ -326,6 +352,6 @@ def test_reader_rejects_verifier_with_signing_method(tmp_path: Path) -> None:
             anchor_id="reddog-signer:production",
             verifier_authority=object(),
             verifier_authority_boundary=signing.verifier_boundary,
-            high_water_authority=boundary.capability,
+            high_water_authority=high_water_authority,
             high_water_authority_boundary=boundary,
         )

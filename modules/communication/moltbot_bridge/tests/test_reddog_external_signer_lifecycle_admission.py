@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import inspect
 import json
 import pickle
 import stat
+import types
 from dataclasses import replace
 from pathlib import Path
 
@@ -28,6 +30,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import (
     SIGNER_SERVICE_HEALTHCHECK_READY,
     SignerServiceHealthcheckResult,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signer_generation_test_support import (
+    create_lifecycle_generation_authority,
 )
 
 
@@ -272,14 +277,15 @@ def _boundary(tmp_path: Path, **changes):
         _health(packet_path), **changes.get("health_changes", {})
     )
     healthcheck = changes.get("healthcheck", _Healthcheck(health_result))
-    anchor = changes.get("anchor", _Anchor(_activation(values)))
-    reader_boundary = _ReaderBoundary(anchor)
+    generation_authority, reader_boundary = create_lifecycle_generation_authority(
+        repo, values
+    )
     clocks = changes.get("clocks", _Clocks())
     policy_boundary = _PolicyBoundary()
     boundary = create_external_signer_lifecycle_admission_boundary(
         repo_root=repo,
         manifest_boundary=selection,
-        generation_reader_authority=reader_boundary,
+        generation_reader_authority=generation_authority,
         generation_reader_authority_boundary=reader_boundary,
         os_policy_authority=policy_boundary,
         os_policy_authority_boundary=policy_boundary,
@@ -290,6 +296,37 @@ def _boundary(tmp_path: Path, **changes):
         trusted_monotonic_clock=clocks.monotonic,
     )
     return boundary, selection, observer, healthcheck, values, packet_path, clocks
+
+
+def _reachable_objects(root: object) -> tuple[object, ...]:
+    stack = [root]
+    seen: set[int] = set()
+    found: list[object] = []
+    while stack:
+        value = stack.pop()
+        if id(value) in seen or isinstance(
+            value, (str, bytes, int, float, bool, type(None), Path, type)
+        ):
+            continue
+        seen.add(id(value))
+        found.append(value)
+        if isinstance(value, dict):
+            stack.extend(value.values())
+        elif isinstance(value, (list, tuple, set, frozenset)):
+            stack.extend(value)
+        if isinstance(value, types.FunctionType) and value.__closure__:
+            stack.extend(cell.cell_contents for cell in value.__closure__)
+        namespace = getattr(value, "__dict__", None)
+        if isinstance(namespace, dict):
+            stack.extend(namespace.values())
+        for cls in type(value).__mro__:
+            slots = cls.__dict__.get("__slots__", ())
+            for name in (slots,) if isinstance(slots, str) else slots:
+                try:
+                    stack.append(object.__getattribute__(value, name))
+                except (AttributeError, TypeError):
+                    pass
+    return tuple(found)
 
 
 def test_exact_generation_os_and_handshake_issue_one_shot_capability(tmp_path) -> None:
@@ -312,6 +349,33 @@ def test_exact_generation_os_and_handshake_issue_one_shot_capability(tmp_path) -
         boundary.consume(capability)
 
 
+def test_canonical_lifecycle_graph_has_no_signer_or_writer_capability(
+    tmp_path,
+) -> None:
+    boundary, *_ = _boundary(tmp_path)
+    forbidden = {
+        "activate",
+        "advance",
+        "authenticate",
+        "commit",
+        "commit_prepared",
+        "prepare",
+        "private_key",
+        "sign",
+    }
+
+    for value in _reachable_objects(boundary):
+        for name in forbidden:
+            try:
+                inspect.getattr_static(value, name)
+            except AttributeError:
+                continue
+            pytest.fail(
+                f"forbidden capability {name} reachable on "
+                f"{type(value).__name__}"
+            )
+
+
 def test_capability_cannot_be_copied_pickled_or_forged(tmp_path) -> None:
     boundary, selection, *_ = _boundary(tmp_path)
     capability = boundary.admit(selection)
@@ -328,11 +392,13 @@ def test_caller_cannot_supply_an_unverified_os_policy(tmp_path) -> None:
     policy_boundary = _PolicyBoundary()
 
     with pytest.raises(ValueError, match="policy_authority_unverified"):
-        reader_boundary = _ReaderBoundary(_Anchor(_activation(values)))
+        generation_authority, reader_boundary = create_lifecycle_generation_authority(
+            repo, values
+        )
         create_external_signer_lifecycle_admission_boundary(
             repo_root=repo,
             manifest_boundary=_SelectionBoundary(values),
-            generation_reader_authority=reader_boundary,
+            generation_reader_authority=generation_authority,
             generation_reader_authority_boundary=reader_boundary,
             os_policy_authority=object(),
             os_policy_authority_boundary=policy_boundary,
@@ -346,7 +412,7 @@ def test_writer_generation_anchor_cannot_be_smuggled_into_lifecycle(tmp_path) ->
     reader_boundary = _ReaderBoundary(_WriterAnchor(_activation(values)))
     policy_boundary = _PolicyBoundary()
 
-    with pytest.raises(ValueError, match="generation_reader_invalid"):
+    with pytest.raises(ValueError, match="authority_boundary_invalid"):
         create_external_signer_lifecycle_admission_boundary(
             repo_root=repo,
             manifest_boundary=_SelectionBoundary(values),
@@ -364,7 +430,7 @@ def test_signing_reader_cannot_be_smuggled_into_lifecycle(tmp_path) -> None:
     reader_boundary = _ReaderBoundary(_SigningAnchor(_activation(values)))
     policy_boundary = _PolicyBoundary()
 
-    with pytest.raises(ValueError, match="generation_reader_invalid"):
+    with pytest.raises(ValueError, match="authority_boundary_invalid"):
         create_external_signer_lifecycle_admission_boundary(
             repo_root=repo,
             manifest_boundary=_SelectionBoundary(values),
@@ -381,13 +447,16 @@ def test_stale_generation_rejects_before_observation_or_handshake(tmp_path) -> N
     selection = _SelectionBoundary(values)
     observer = _Observer(_observation())
     healthcheck = _Healthcheck(_health(packet_path))
-    stale = replace(_activation(values), manifest_id=_sha("d"))
-    reader_boundary = _ReaderBoundary(_Anchor(stale))
+    generation_authority, reader_boundary = create_lifecycle_generation_authority(
+        repo,
+        values,
+        manifest_id=_sha("d"),
+    )
     policy_boundary = _PolicyBoundary()
     boundary = create_external_signer_lifecycle_admission_boundary(
         repo_root=repo,
         manifest_boundary=selection,
-        generation_reader_authority=reader_boundary,
+        generation_reader_authority=generation_authority,
         generation_reader_authority_boundary=reader_boundary,
         os_policy_authority=policy_boundary,
         os_policy_authority_boundary=policy_boundary,

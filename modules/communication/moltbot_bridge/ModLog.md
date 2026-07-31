@@ -8,7 +8,9 @@
   fail closed. Signing and verification are separate capabilities. The
   external lifecycle now consumes a factory-issued public-key verifier and
   confined read-only generation stores; it cannot reach a signer or mutable
-  authority store. Nontransactional high-water implementations are rejected,
+  authority store. Reader and high-water authorities must come from their
+  canonical factories; structural protocol lookalikes are rejected.
+  Nontransactional high-water implementations are rejected,
   and post-commit recovery verifies durable state before returning. This is generation-authority
   infrastructure only: production authority issuance, immutable generation
   bundle activation, service supervision, and effect authority remain blocked.

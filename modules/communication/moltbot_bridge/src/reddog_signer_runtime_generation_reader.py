@@ -6,6 +6,9 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Protocol
 
+from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water import (
+    AtomicSignerRuntimeGenerationHighWaterReader,
+)
 from modules.communication.moltbot_bridge.src.reddog_read_only_runtime_json_store import (
     ReadOnlyRuntimeJsonStore,
 )
@@ -84,6 +87,29 @@ class _ReaderAuthorityBoundary:
         return self._reader
 
 
+class _HighWaterReaderAuthorityBoundary:
+    __slots__ = ("_authority", "_reader")
+
+    def __init__(
+        self,
+        authority: object,
+        reader: AtomicSignerRuntimeGenerationHighWaterReader,
+    ) -> None:
+        self._authority = authority
+        self._reader = reader
+
+    def require(
+        self, value: object
+    ) -> VerifiedSignerRuntimeGenerationHighWaterReader:
+        if value is not self._authority:
+            raise ValueError("generation_high_water_reader_unverified")
+        return VerifiedSignerRuntimeGenerationHighWaterReader(
+            reader=self._reader,
+            store_id=self._reader.store_id,
+            durability_receipt_id=self._reader.durability_receipt_id,
+        )
+
+
 class DurableSignerRuntimeGenerationReader:
     """Read one authenticated generation without retaining signing capability."""
 
@@ -115,7 +141,10 @@ class DurableSignerRuntimeGenerationReader:
             allowed_root=allowed_root,
             repo_root=repo_root,
         )
-        verified = high_water_authority_boundary.require(high_water_authority)
+        verified = require_signer_runtime_generation_high_water_reader_authority(
+            high_water_authority,
+            high_water_authority_boundary,
+        )
         _read_only_high_water_reader(verified.reader)
         if (
             verified.store_id != verified.reader.store_id
@@ -172,10 +201,37 @@ class DurableSignerRuntimeGenerationReader:
 def create_signer_runtime_generation_reader_authority(
     reader: DurableSignerRuntimeGenerationReader,
 ) -> tuple[object, SignerRuntimeGenerationReaderAuthorityBoundary]:
-    if not isinstance(reader, DurableSignerRuntimeGenerationReader):
+    if type(reader) is not DurableSignerRuntimeGenerationReader:
         raise ValueError("generation_reader_authority_reader_invalid")
     authority = object()
     return authority, _ReaderAuthorityBoundary(authority, reader)
+
+
+def require_signer_runtime_generation_reader_authority(
+    authority: object,
+    boundary: SignerRuntimeGenerationReaderAuthorityBoundary,
+) -> SignerRuntimeGenerationReader:
+    if type(boundary) is not _ReaderAuthorityBoundary:
+        raise ValueError("generation_reader_authority_boundary_invalid")
+    return boundary.require(authority)
+
+
+def create_signer_runtime_generation_high_water_reader_authority(
+    reader: AtomicSignerRuntimeGenerationHighWaterReader,
+) -> tuple[object, SignerRuntimeGenerationHighWaterReaderAuthorityBoundary]:
+    if type(reader) is not AtomicSignerRuntimeGenerationHighWaterReader:
+        raise ValueError("generation_high_water_reader_invalid")
+    authority = object()
+    return authority, _HighWaterReaderAuthorityBoundary(authority, reader)
+
+
+def require_signer_runtime_generation_high_water_reader_authority(
+    authority: object,
+    boundary: SignerRuntimeGenerationHighWaterReaderAuthorityBoundary,
+) -> VerifiedSignerRuntimeGenerationHighWaterReader:
+    if type(boundary) is not _HighWaterReaderAuthorityBoundary:
+        raise ValueError("generation_high_water_reader_boundary_invalid")
+    return boundary.require(authority)
 
 
 def _verifier(value: object) -> SignerRuntimeGenerationVerifier:
@@ -214,7 +270,10 @@ def _paths_overlap(first: Path, second: Path) -> bool:
 
 __all__ = [
     "DurableSignerRuntimeGenerationReader",
+    "create_signer_runtime_generation_high_water_reader_authority",
     "create_signer_runtime_generation_reader_authority",
+    "require_signer_runtime_generation_high_water_reader_authority",
+    "require_signer_runtime_generation_reader_authority",
     "SignerRuntimeGenerationHighWaterReader",
     "SignerRuntimeGenerationHighWaterReaderAuthorityBoundary",
     "SignerRuntimeGenerationReader",

@@ -61,6 +61,7 @@ WSP62_SLICE_FILES = (
     "src/reddog_signer_runtime_generation_reader.py",
     "src/reddog_signer_runtime_generation_verifier_authority.py",
     "src/reddog_signer_socket_service_healthcheck.py",
+    "tests/reddog_signer_generation_test_support.py",
     "tests/test_reddog_external_signer_lifecycle_admission.py",
     "tests/test_reddog_external_signer_os_observer.py",
     "tests/test_reddog_atomic_signer_runtime_generation_high_water.py",
