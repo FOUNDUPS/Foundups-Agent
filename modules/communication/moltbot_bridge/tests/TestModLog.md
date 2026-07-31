@@ -8,19 +8,19 @@
 - Added canonical signer-witness namespace, rollback-domain separation,
   restart-substitution, concurrent first-open, and signer-side SQLite
   compare-and-swap regressions.
-- Reviewer repair added authority-expiry-under-lock, read-only witness,
-  committed-witness expired recovery, strict uncommitted recovery rollback,
-  manifest-preservation truth, and POSIX external-owner regressions.
+- Reviewer repair added post-commit recovery, caller-independent read-only
+  witness state, per-open metadata checks, strict rollback, manifest
+  signature/byte preservation truth, and POSIX external-owner regressions.
 - Focused provisioning, generation, activation-lease, commit-guard, and
   monotonic-witness matrix: 115 passed, 2 platform skips, including a real
   two-process race. POSIX activation is an intentional fail-closed skip.
 - Manifest, generation anchor/reader/high-water, lifecycle admission and race
-  matrix: 164 passed, 2 platform skips.
-- Complete `test_reddog_*signer*.py` plus activation-lease matrix: 416 passed,
+  matrix: 185 passed, 2 platform skips.
+- Complete `test_reddog_*signer*.py` plus activation-lease matrix: 422 passed,
   13 platform skips.
 - Full bridge differential: untouched base `4778 passed, 33 failed, 23
-  skipped`; repaired branch `4832 passed, 33 failed, 24 skipped`. The
-  33-node failure set is identical, so the slice adds 54 passing tests, one
+  skipped`; repaired branch `4838 passed, 33 failed, 24 skipped`. The
+  33-node failure set is identical, so the slice adds 60 passing tests, one
   intentional POSIX fail-closed skip, and zero bridge regressions.
 
 ## 2026-07-31: REDDOG SIGNER MANIFEST AND LIFECYCLE FOUNDATIONS

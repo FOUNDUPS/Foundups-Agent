@@ -82,7 +82,7 @@ def _initialize_reader(
     verifier = _verifier(verified)
     if type(generation_witness_reader) is not SqliteMonotonicAuthorityReader:
         raise ValueError("generation_high_water_witness_reader_invalid")
-    witness = generation_witness_reader
+    witness = generation_witness_reader.detached()
     binding = require_generation_witness_binding(
         generation_witness_binding,
         authenticator_id=verifier.authenticator_id,

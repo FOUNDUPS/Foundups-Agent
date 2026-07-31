@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
@@ -29,13 +29,17 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_manifest import (
-    RuntimeArtifactManifestSigningContext,
     _validate_bindings,
     _verify_signatures,
     produce_signed_runtime_artifact_manifest,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
     DurableSignerRuntimeGenerationAnchor,
+    load_persisted_signer_runtime_generation,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning_contract import (
+    SignerRuntimeAtomicProvisioningContext,
+    SignerRuntimeAtomicProvisioningResult,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
     SignerRuntimeGenerationActivation,
@@ -48,34 +52,6 @@ from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation 
 
 CONFIG_FILENAME = "signer_service_config.json"
 RUN_PACKET_FILENAME = "signer_service_run_packet.json"
-
-
-@dataclass(frozen=True)
-class SignerRuntimeAtomicProvisioningContext:
-    """Authenticated dependencies for one generation activation."""
-
-    manifest_signing: RuntimeArtifactManifestSigningContext
-    generation_anchor: DurableSignerRuntimeGenerationAnchor
-
-
-@dataclass(frozen=True)
-class SignerRuntimeAtomicProvisioningResult:
-    """Evidence from manifest publication and last-step activation."""
-
-    accepted: bool
-    manifest_path: str | None
-    manifest_id: str | None
-    generation: int | None
-    activation_revision: str | None
-    rejection_reasons: tuple[str, ...]
-    inactive_artifacts_preserved: bool
-    recovered_existing_activation: bool
-    no_service_start_performed_by_coordinator: bool = True
-    no_work_execution_performed_by_coordinator: bool = True
-    no_repo_mutation_performed_by_coordinator: bool = True
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
 
 
 def provision_signer_runtime_generation(
@@ -130,6 +106,7 @@ def provision_signer_runtime_generation(
             manifest_path=manifest_path,
             manifest_id=manifest_id,
             inactive_artifacts_preserved=_published_manifest_preserved(
+                context,
                 runtime_root,
                 manifest_path=manifest_path,
                 manifest_id=manifest_id,
@@ -273,35 +250,47 @@ def _activate_manifest(
 ) -> tuple[SignerRuntimeGenerationActivation, bool]:
     authority_boundary = context.manifest_signing.authority_boundary
     authority_capability = context.manifest_signing.authority
-    with authority_boundary.revalidation_fence(
-        authority_capability,
-        now_epoch=_trusted_now(),
-    ) as authority:
-        initial = _verified_manifest(
-            context,
-            runtime_root=runtime_root,
-            manifest_path=manifest_path,
-            authority=authority,
+    previous = load_persisted_signer_runtime_generation(context.generation_anchor)
+    try:
+        with authority_boundary.revalidation_fence(
+            authority_capability,
             now_epoch=_trusted_now(),
-            allow_expired_recovery=True,
-        )
-        _create_or_verify_generation_seal(
-            runtime_root,
-            manifest=initial,
-            repo_root=Path(authority["repo_root"]),
-        )
-        with runtime_artifact_activation_lease(
-            _activation_paths(runtime_root, manifest_path),
-            repo_root=authority["repo_root"],
-            allowed_root=runtime_root,
-        ):
-            return _activate_under_lease(
+        ) as authority:
+            initial = _verified_manifest(
                 context,
                 runtime_root=runtime_root,
                 manifest_path=manifest_path,
                 authority=authority,
-                initial_manifest_id=str(initial["manifest_id"]),
+                now_epoch=_trusted_now(),
+                allow_expired_recovery=True,
             )
+            _create_or_verify_generation_seal(
+                runtime_root,
+                manifest=initial,
+                repo_root=Path(authority["repo_root"]),
+            )
+            with runtime_artifact_activation_lease(
+                _activation_paths(runtime_root, manifest_path),
+                repo_root=authority["repo_root"],
+                allowed_root=runtime_root,
+            ):
+                return _activate_under_lease(
+                    context,
+                    runtime_root=runtime_root,
+                    manifest_path=manifest_path,
+                    authority=authority,
+                    initial_manifest_id=str(initial["manifest_id"]),
+                )
+    except (OSError, RuntimeError, TypeError, ValueError):
+        recovered = _recover_new_commit(
+            context,
+            runtime_root=runtime_root,
+            manifest_path=manifest_path,
+            previous=previous,
+        )
+        if recovered is None:
+            raise
+        return recovered, True
 
 
 def _activate_under_lease(
@@ -362,8 +351,41 @@ def _activate_under_lease(
         expected_revision=current.revision if current else None,
         commit_guard=verify_candidate_bytes,
     )
-    verify_candidate_bytes(activation)
     return activation, False
+
+
+def _recover_new_commit(
+    context: SignerRuntimeAtomicProvisioningContext,
+    *,
+    runtime_root: Path,
+    manifest_path: str | None,
+    previous: SignerRuntimeGenerationActivation | None,
+) -> SignerRuntimeGenerationActivation | None:
+    try:
+        authority = context.manifest_signing.authority_boundary.require(
+            context.manifest_signing.authority
+        )
+        manifest = _verified_manifest(
+            context, runtime_root=runtime_root, manifest_path=manifest_path,
+            authority=authority, now_epoch=_trusted_now(),
+            allow_expired_recovery=True,
+        )
+        guard = _activation_guard(
+            context, runtime_root=runtime_root, manifest_path=manifest_path,
+            authority=authority, manifest_id=str(manifest["manifest_id"]),
+            allow_expired_recovery=True,
+        )
+        current = context.generation_anchor.recover(
+            commit_guard=guard, committed_witness_guard=guard
+        )
+        if current is None or (
+            previous is not None and current.revision == previous.revision
+        ):
+            return None
+        guard(current)
+        return current
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return None
 
 
 def _activation_guard(
@@ -586,6 +608,7 @@ def _trusted_now() -> int:
 
 
 def _published_manifest_preserved(
+    context: SignerRuntimeAtomicProvisioningContext,
     runtime_root: Path | None,
     *,
     manifest_path: str | None,
@@ -594,12 +617,15 @@ def _published_manifest_preserved(
     if runtime_root is None or not manifest_path or not manifest_id:
         return False
     try:
-        manifest = read_reddog_runtime_json_mapping(
-            manifest_path,
-            allowed_root=runtime_root,
+        authority = context.manifest_signing.authority_boundary.require(
+            context.manifest_signing.authority
         )
-        payload = validate_signed_payload(manifest)
-    except (OSError, TypeError, ValueError):
+        payload = _verified_manifest(
+            context, runtime_root=runtime_root, manifest_path=manifest_path,
+            authority=authority, now_epoch=_trusted_now(),
+            allow_expired_recovery=True,
+        )
+    except (OSError, RuntimeError, TypeError, ValueError):
         return False
     return payload.get("manifest_id") == manifest_id
 

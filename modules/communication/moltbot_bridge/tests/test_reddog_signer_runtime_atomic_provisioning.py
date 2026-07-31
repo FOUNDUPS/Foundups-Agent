@@ -211,7 +211,7 @@ def test_manifest_tamper_before_reverification_rejects(
 
     assert result.accepted is False
     assert anchor.load() is None
-    assert result.inactive_artifacts_preserved is True
+    assert result.inactive_artifacts_preserved is False
 
 
 def test_anchor_must_be_outside_candidate_generation(
@@ -530,6 +530,35 @@ def test_concurrent_work_state_refresh_cannot_overtake_activation(
     assert harness.work_state_store.load()[
         "concurrent_refresh_marker"
     ] == "after-activation"
+
+
+def test_authority_expiry_after_durable_activation_reports_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    harness, anchor, context = _context(tmp_path)
+    clock = [NOW]
+    original = anchor.activate
+    import modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_authority as authority_module
+
+    monkeypatch.setattr(
+        authority_module,
+        "_locked_now",
+        lambda _settings, minimum: max(minimum, clock[0]),
+    )
+
+    def activate_then_expire(*args, **kwargs):
+        activation = original(*args, **kwargs)
+        clock[0] = NOW + 1_000
+        return activation
+
+    monkeypatch.setattr(anchor, "activate", activate_then_expire)
+    result = _provision(context)
+
+    assert result.accepted is True
+    assert result.recovered_existing_activation is True
+    assert anchor.load().revision == result.activation_revision
+    assert harness.work_state_store.load()["revision"]
 
 
 def test_expired_manifest_is_not_recovered_with_historical_time(

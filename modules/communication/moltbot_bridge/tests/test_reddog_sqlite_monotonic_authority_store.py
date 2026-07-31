@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Barrier
@@ -79,6 +80,23 @@ def test_reader_observes_commits_without_mutation_capability(roots) -> None:
     store.advance(BINDING, expected=None, next_value=first)
 
     assert reader.load(BINDING) == first
+
+
+def test_reader_revalidates_metadata_on_every_open(roots) -> None:
+    store = _store(roots)
+    reader = store.reader()
+    path = roots[1] / "generation-witness.sqlite3"
+
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "UPDATE metadata SET durability_receipt_id = ?",
+            ("sha256:" + "e" * 64,),
+        )
+
+    with pytest.raises(
+        ValueError, match="monotonic_authority_identity_mismatch"
+    ):
+        reader.load(BINDING)
 
 
 def test_compare_and_swap_rejects_stale_expected_value(roots) -> None:

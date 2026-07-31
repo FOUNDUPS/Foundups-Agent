@@ -215,6 +215,18 @@ class SqliteMonotonicAuthorityReader:
     def rollback_domain_root(self) -> Path:
         return self._allowed_root
 
+    def detached(self) -> "SqliteMonotonicAuthorityReader":
+        """Return an independently owned reader pinned to validated values."""
+
+        _validate_reader_identity(self)
+        return SqliteMonotonicAuthorityReader(
+            self._path,
+            allowed_root=self._allowed_root,
+            repo_root=self._repo_root,
+            store_id=self._store_id,
+            durability_receipt_id=self._durability_receipt_id,
+        )
+
     def load(self, binding_digest: str) -> ProposalReplayHighWater | None:
         binding = _digest(binding_digest, "binding")
         with self._connect() as connection:
@@ -244,6 +256,11 @@ class SqliteMonotonicAuthorityReader:
         )
         try:
             connection.execute("PRAGMA query_only=ON")
+            _require_reader_metadata(
+                connection,
+                store_id=self._store_id,
+                durability_receipt_id=self._durability_receipt_id,
+            )
             yield connection
         finally:
             connection.close()
@@ -257,11 +274,20 @@ def _validate_reader_identity(reader: SqliteMonotonicAuthorityReader) -> None:
         or not is_sha256(reader.durability_receipt_id)
     ):
         raise ValueError("monotonic_authority_identity_invalid")
-    with reader._connect() as connection:
-        rows = connection.execute(
-            "SELECT store_id, durability_receipt_id FROM metadata"
-        ).fetchall()
-    if rows != [(reader.store_id, reader.durability_receipt_id)]:
+    with reader._connect():
+        pass
+
+
+def _require_reader_metadata(
+    connection: sqlite3.Connection,
+    *,
+    store_id: str,
+    durability_receipt_id: str,
+) -> None:
+    rows = connection.execute(
+        "SELECT store_id, durability_receipt_id FROM metadata"
+    ).fetchall()
+    if rows != [(store_id, durability_receipt_id)]:
         raise ValueError("monotonic_authority_identity_mismatch")
 
 

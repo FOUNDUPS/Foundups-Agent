@@ -141,10 +141,10 @@ not represented as a same-principal immutability boundary.
 The generation high-water writer intentionally requires a signer-owned
 `SqliteMonotonicAuthorityStore`. Verifier-only construction must pass
 `store.reader()`, which exposes `load()` but no `advance()` capability; passing
-the writer object fails closed. This is an intentional constructor migration,
-not a compatibility alias. Legacy pending records that omit
-`previous_anchor_state_json` decode as the empty prior state, while all newly
-prepared records persist the authenticated prior anchor snapshot explicitly.
+the writer fails closed. The verifier snapshots an internally owned reader and
+checks SQLite identity on every open; legacy pending
+records that omit `previous_anchor_state_json` reject, while every
+accepted record persists the authenticated prior anchor snapshot explicitly.
 Crash recovery uses normal freshness verification unless the independent
 monotonic witness already proves the exact generation committed. That
 committed-witness path may structurally and cryptographically roll forward an

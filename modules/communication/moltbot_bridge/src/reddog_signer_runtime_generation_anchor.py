@@ -268,6 +268,17 @@ def _validate_generation_domains(store, high_water_store):
     return rollback_root, witness_root
 
 
+def load_persisted_signer_runtime_generation(
+    anchor: DurableSignerRuntimeGenerationAnchor,
+) -> SignerRuntimeGenerationActivation | None:
+    """Read authenticated persisted state without advancing recovery."""
+
+    if type(anchor) is not DurableSignerRuntimeGenerationAnchor:
+        raise ValueError("generation_anchor_invalid")
+    with anchor._lock():
+        return anchor._decode(anchor._store.load())
+
+
 def _activate_transactional(
     anchor: DurableSignerRuntimeGenerationAnchor,
     *,
@@ -464,6 +475,7 @@ def _verify_transaction_cleared(
 
 __all__ = [
     "DurableSignerRuntimeGenerationAnchor",
+    "load_persisted_signer_runtime_generation",
     "SCHEMA_VERSION",
     "decode_signer_runtime_generation_state",
     "SignerRuntimeGenerationActivation",

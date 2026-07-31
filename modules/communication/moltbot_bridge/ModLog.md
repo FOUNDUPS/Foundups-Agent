@@ -20,8 +20,8 @@
   manifest can roll forward only when the independent monotonic witness
   already proves that exact generation committed; otherwise freshness remains
   mandatory and recovery rolls back. Malformed or ambiguous preseeds cannot
-  recover. Failed activation reports preserved evidence only after the
-  serialized manifest still validates and matches its produced ID. Coordinator
+  recover. Failed activation reports preservation only after manifest binding,
+  signatures, and all seven current bytes verify. Coordinator
   receipts claim only coordinator-scoped no-service/no-work/no-repository
   effects; they do not infer behavior of injected signers. Authenticated current-generation launch
   selection and external lifecycle supervision remain separate fail-closed

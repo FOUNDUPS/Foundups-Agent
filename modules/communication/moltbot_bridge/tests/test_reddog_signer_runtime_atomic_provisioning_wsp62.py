@@ -27,6 +27,8 @@ FILES = (
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_runtime_atomic_provisioning.py",
     "modules/communication/moltbot_bridge/src/"
+    "reddog_signer_runtime_atomic_provisioning_contract.py",
+    "modules/communication/moltbot_bridge/src/"
     "reddog_signer_runtime_generation_anchor.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_runtime_generation_anchor_codec.py",
@@ -66,6 +68,8 @@ FILES = (
     "test_reddog_signer_runtime_generation_commit_guard.py",
     "modules/communication/moltbot_bridge/tests/"
     "test_reddog_signer_runtime_generation_reader.py",
+    "modules/communication/moltbot_bridge/tests/"
+    "test_reddog_signer_runtime_generation_witness_isolation.py",
     "modules/communication/moltbot_bridge/tests/"
     "test_reddog_sqlite_monotonic_authority_store.py",
     "modules/infrastructure/shared_utilities/"

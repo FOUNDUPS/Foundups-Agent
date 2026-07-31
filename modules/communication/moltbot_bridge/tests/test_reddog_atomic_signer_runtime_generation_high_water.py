@@ -21,6 +21,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
     SignerRuntimeGenerationHighWater,
     VerifiedSignerRuntimeGenerationHighWater,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_pending_codec import (
+    decode_pending,
+)
 from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
     SqliteMonotonicAuthorityStore,
 )
@@ -370,6 +373,22 @@ def test_recomputed_revision_cannot_forge_pending_rollback_snapshot(
         ValueError, match="generation_high_water_authentication_invalid"
     ):
         _store(roots).pending(ANCHOR_ID)
+
+
+def test_legacy_pending_without_rollback_snapshot_rejects() -> None:
+    with pytest.raises(
+        ValueError, match="generation_high_water_pending_invalid"
+    ):
+        decode_pending(
+            {
+                "transaction_id": "sha256:" + "a" * 64,
+                "expected": None,
+                "next_value": {
+                    "generation": 1,
+                    "revision": "1" * 64,
+                },
+            }
+        )
 
 
 def test_wrong_authenticator_and_placeholder_receipt_reject(roots) -> None:
