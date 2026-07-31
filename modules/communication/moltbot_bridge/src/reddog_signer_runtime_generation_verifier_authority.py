@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import hashlib
-import threading
 from typing import Any, Protocol
-from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -13,6 +11,7 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
     SignerRuntimeGenerationVerifier,
+    _build_process_local_registry,
 )
 
 
@@ -20,31 +19,13 @@ class SignerRuntimeGenerationVerifierAuthorityBoundary(Protocol):
     def require(self, value: object) -> SignerRuntimeGenerationVerifier: ...
 
 
-def _build_private_registry():
-    lock = threading.RLock()
-    records: WeakKeyDictionary[object, Any] = WeakKeyDictionary()
-
-    def issue(key: object, value: Any) -> None:
-        with lock:
-            if key in records:
-                raise ValueError("generation_verifier_handle_already_issued")
-            records[key] = value
-
-    def lookup(key: object) -> Any:
-        with lock:
-            try:
-                return records[key]
-            except KeyError as exc:
-                raise ValueError("generation_verifier_handle_unverified") from exc
-
-    return issue, lookup
-
-
-_issue_verifier_target, _lookup_verifier_target = _build_private_registry()
-_issue_verifier_authority, _lookup_verifier_authority = (
-    _build_private_registry()
+_issue_verifier_target, _lookup_verifier_target = (
+    _build_process_local_registry("generation_verifier_handle_unverified")
 )
-del _build_private_registry
+_issue_verifier_authority, _lookup_verifier_authority = (
+    _build_process_local_registry("generation_verifier_authority_unverified")
+)
+del _build_process_local_registry
 
 
 class _PublicGenerationVerifier:
@@ -72,52 +53,72 @@ class _PublicGenerationVerifier:
         )
 
 
+def _handle_authenticator_id(lookup: Any):
+    def authenticator_id(self: object) -> str:
+        return lookup(self).authenticator_id
+
+    return authenticator_id
+
+
+def _handle_verify(lookup: Any):
+    def verify(
+        self: object, payload: bytes, authentication_tag: str
+    ) -> bool:
+        return lookup(self).verify(payload, authentication_tag)
+
+    return verify
+
+
 class _VerifierHandle:
     __slots__ = ("__weakref__",)
 
-    @property
-    def authenticator_id(
-        self, _lookup: Any = _lookup_verifier_target
-    ) -> str:
-        return _lookup(self).authenticator_id
+    authenticator_id = property(
+        _handle_authenticator_id(_lookup_verifier_target)
+    )
+    verify = _handle_verify(_lookup_verifier_target)
 
-    def verify(
-        self,
-        payload: bytes,
-        authentication_tag: str,
-        _lookup: Any = _lookup_verifier_target,
-    ) -> bool:
-        return _lookup(self).verify(payload, authentication_tag)
+
+def _boundary_require(lookup: Any):
+    def require(
+        self: object, value: object
+    ) -> SignerRuntimeGenerationVerifier:
+        authority, verifier = lookup(self)
+        if value is not authority:
+            raise ValueError("generation_verifier_authority_unverified")
+        return verifier
+
+    return require
 
 
 class _VerifierAuthorityBoundary:
     __slots__ = ("__weakref__",)
 
-    def require(
-        self,
-        value: object,
-        _lookup: Any = _lookup_verifier_authority,
-    ) -> SignerRuntimeGenerationVerifier:
-        authority, verifier = _lookup(self)
-        if value is not authority:
-            raise ValueError("generation_verifier_authority_unverified")
-        return verifier
+    require = _boundary_require(_lookup_verifier_authority)
 
 
-def create_signer_runtime_generation_verifier_authority(
-    public_key: str,
-    _issue_target: Any = _issue_verifier_target,
-    _issue_authority: Any = _issue_verifier_authority,
-) -> tuple[object, SignerRuntimeGenerationVerifierAuthorityBoundary]:
-    """Mint one process-local authority around public verification material."""
+def _build_authority_factory(issue_target: Any, issue_authority: Any):
+    def create(
+        public_key: str,
+    ) -> tuple[object, SignerRuntimeGenerationVerifierAuthorityBoundary]:
+        """Mint one process-local authority around public verification material."""
 
-    target = _PublicGenerationVerifier(public_key)
-    verifier = _VerifierHandle()
-    _issue_target(verifier, target)
-    authority = object()
-    boundary = _VerifierAuthorityBoundary()
-    _issue_authority(boundary, (authority, verifier))
-    return authority, boundary
+        target = _PublicGenerationVerifier(public_key)
+        verifier = _VerifierHandle()
+        issue_target(verifier, target)
+        authority = object()
+        boundary = _VerifierAuthorityBoundary()
+        issue_authority(boundary, (authority, verifier))
+        return authority, boundary
+
+    return create
+
+
+create_signer_runtime_generation_verifier_authority = (
+    _build_authority_factory(
+        _issue_verifier_target,
+        _issue_verifier_authority,
+    )
+)
 
 
 def require_signer_runtime_generation_verifier_authority(
@@ -131,6 +132,8 @@ def require_signer_runtime_generation_verifier_authority(
 
 del _lookup_verifier_authority, _lookup_verifier_target
 del _issue_verifier_authority, _issue_verifier_target
+del _boundary_require, _build_authority_factory
+del _handle_authenticator_id, _handle_verify
 
 
 __all__ = [

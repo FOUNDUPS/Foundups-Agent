@@ -124,29 +124,32 @@ _issue_boundary, _lookup_boundary = _build_boundary_registry()
 del _build_boundary_registry
 
 
+def _boundary_admit(lookup: Any):
+    def admit(self: object, value: object) -> object:
+        call, _ = lookup(self)
+        return call(value)
+
+    return admit
+
+
+def _boundary_consume(lookup: Any):
+    def consume(
+        self: object, value: object
+    ) -> ExternalSignerLifecycleAdmissionReceipt:
+        _, call = lookup(self)
+        return call(value)
+
+    return consume
+
+
 class _Boundary:
     __slots__ = ("__weakref__",)
 
-    def admit(
-        self,
-        value: object,
-        _lookup: Any = _lookup_boundary,
-        **kwargs: Any,
-    ) -> object:
-        admit, _ = _lookup(self)
-        return admit(value, **kwargs)
-
-    def consume(
-        self,
-        value: object,
-        _lookup: Any = _lookup_boundary,
-        **kwargs: Any,
-    ) -> ExternalSignerLifecycleAdmissionReceipt:
-        _, consume = _lookup(self)
-        return consume(value, **kwargs)
+    admit = _boundary_admit(_lookup_boundary)
+    consume = _boundary_consume(_lookup_boundary)
 
 
-def create_external_signer_lifecycle_admission_boundary(
+def _create_external_signer_lifecycle_admission_boundary(
     *,
     repo_root: Path | str,
     manifest_boundary: RuntimeArtifactManifestLaunchSelectionBoundary,
@@ -166,7 +169,7 @@ def create_external_signer_lifecycle_admission_boundary(
     ),
     trusted_clock: Callable[[], int] | None = None,
     trusted_monotonic_clock: Callable[[], int] | None = None,
-    _issue: Any = _issue_boundary,
+    issue_boundary: Any,
 ) -> ExternalSignerLifecycleAdmissionBoundary:
     """Create a one-shot boundary pinned to trusted lifecycle dependencies."""
     root = Path(repo_root).resolve()
@@ -194,7 +197,7 @@ def create_external_signer_lifecycle_admission_boundary(
         "os_policy": verified_policy.policy,
         "os_policy_authority_receipt_id": verified_policy.authority_receipt_id,
     }
-    _issue(
+    issue_boundary(
         boundary := _Boundary(),
         _make_admit(dependencies, capability_type, issued),
         _make_consume(
@@ -206,6 +209,57 @@ def create_external_signer_lifecycle_admission_boundary(
         ),
     )
     return boundary
+
+
+def _build_lifecycle_factory(create: Any, issue: Any):
+    def factory(
+        *,
+        repo_root: Path | str,
+        manifest_boundary: RuntimeArtifactManifestLaunchSelectionBoundary,
+        generation_reader_authority: object,
+        generation_reader_authority_boundary: (
+            SignerRuntimeGenerationReaderAuthorityBoundary
+        ),
+        os_policy_authority: object,
+        os_policy_authority_boundary: ExternalSignerOsPolicyAuthorityBoundary,
+        requester_principal_id: str,
+        signer_profile_id: str = "reddog-work-authority",
+        os_observer: Callable[..., ExternalSignerOsObservationReceipt] = (
+            _DEFAULT_OS_OBSERVER
+        ),
+        healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = (
+            _DEFAULT_HEALTHCHECK_RUNNER
+        ),
+        trusted_clock: Callable[[], int] | None = None,
+        trusted_monotonic_clock: Callable[[], int] | None = None,
+    ) -> ExternalSignerLifecycleAdmissionBoundary:
+        return create(
+            repo_root=repo_root,
+            manifest_boundary=manifest_boundary,
+            generation_reader_authority=generation_reader_authority,
+            generation_reader_authority_boundary=(
+                generation_reader_authority_boundary
+            ),
+            os_policy_authority=os_policy_authority,
+            os_policy_authority_boundary=os_policy_authority_boundary,
+            requester_principal_id=requester_principal_id,
+            signer_profile_id=signer_profile_id,
+            os_observer=os_observer,
+            healthcheck_runner=healthcheck_runner,
+            trusted_clock=trusted_clock,
+            trusted_monotonic_clock=trusted_monotonic_clock,
+            issue_boundary=issue,
+        )
+
+    return factory
+
+
+create_external_signer_lifecycle_admission_boundary = (
+    _build_lifecycle_factory(
+        _create_external_signer_lifecycle_admission_boundary,
+        _issue_boundary,
+    )
+)
 
 
 def _require_read_only_generation_reader(value: object) -> None:
@@ -570,6 +624,9 @@ def _digest(value: Mapping[str, Any]) -> str:
 
 
 del _issue_boundary, _lookup_boundary
+del _boundary_admit, _boundary_consume
+del _build_lifecycle_factory
+del _create_external_signer_lifecycle_admission_boundary
 
 
 __all__ = [

@@ -18,7 +18,9 @@
   readers retain no caller-mutable payload slots. Closure-private weak
   registries hold their validated dependencies and expose no module-global
   mutation surface, so post-mint replacement cannot attach a signer or
-  retarget a lifecycle authority.
+  retarget a lifecycle authority. Public constructors, factories, verifier
+  calls, reader calls, and lifecycle calls expose no caller-supplied registry
+  lookup or issuance hook; attempted injection fails at the API boundary.
 - `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
   signer healthcheck with a fresh, short-lived, domain-separated Ed25519
   challenge verified against the configured signer key, fingerprint, epoch,

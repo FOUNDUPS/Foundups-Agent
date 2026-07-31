@@ -2,9 +2,31 @@
 
 from __future__ import annotations
 
+import threading
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
+from weakref import WeakKeyDictionary
+
+
+def _build_process_local_registry(error: str):
+    lock = threading.RLock()
+    records: WeakKeyDictionary[object, Any] = WeakKeyDictionary()
+
+    def issue(key: object, value: Any) -> None:
+        with lock:
+            if key in records:
+                raise ValueError(f"{error}_already_issued")
+            records[key] = value
+
+    def lookup(key: object) -> Any:
+        with lock:
+            try:
+                return records[key]
+            except KeyError as exc:
+                raise ValueError(error) from exc
+
+    return issue, lookup
 
 
 class SignerRuntimeGenerationSigner(Protocol):

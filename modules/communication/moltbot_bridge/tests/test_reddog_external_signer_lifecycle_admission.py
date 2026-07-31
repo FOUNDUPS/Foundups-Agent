@@ -369,6 +369,19 @@ def test_lifecycle_boundary_cannot_be_retargeted_after_construction(
     assert boundary.admit(selection) is not None
 
 
+def test_lifecycle_public_api_rejects_registry_injection(tmp_path) -> None:
+    boundary, selection, *_ = _boundary(tmp_path)
+
+    factory_parameters = inspect.signature(
+        create_external_signer_lifecycle_admission_boundary
+    ).parameters
+    assert "_issue" not in factory_parameters
+    assert "_lookup" not in inspect.signature(boundary.admit).parameters
+    assert "_lookup" not in inspect.signature(boundary.consume).parameters
+    with pytest.raises(TypeError):
+        boundary.admit(selection, _lookup=lambda _value: (object(), object()))
+
+
 def test_canonical_lifecycle_graph_has_no_signer_or_writer_capability(
     tmp_path,
 ) -> None:

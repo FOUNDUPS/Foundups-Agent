@@ -304,6 +304,38 @@ def test_generation_authority_registries_are_not_module_mutation_surfaces() -> N
             assert not hasattr(module, name)
 
 
+def test_generation_authority_public_apis_reject_registry_injection(
+    tmp_path: Path,
+) -> None:
+    repo, runtime, authority = _roots(tmp_path)
+    signing = Ed25519GenerationSigner()
+    reader = _reader(repo, runtime, authority, signing)
+    reader_authority, reader_boundary = (
+        create_signer_runtime_generation_reader_authority(reader)
+    )
+    accepted_reader = require_signer_runtime_generation_reader_authority(
+        reader_authority, reader_boundary
+    )
+    verifier = require_signer_runtime_generation_verifier_authority(
+        signing.verifier_authority, signing.verifier_boundary
+    )
+
+    for callable_value in (
+        create_signer_runtime_generation_verifier_authority,
+        create_signer_runtime_generation_reader_authority,
+        accepted_reader.load,
+        verifier.verify,
+    ):
+        parameters = inspect.signature(callable_value).parameters
+        assert "_issue" not in parameters
+        assert "_lookup" not in parameters
+
+    with pytest.raises(TypeError):
+        accepted_reader.load(_lookup=lambda _value: object())
+    with pytest.raises(TypeError):
+        verifier.verify(b"payload", "not-a-signature", _lookup=lambda _value: True)
+
+
 def test_reader_sources_cannot_be_retargeted_after_authority_mint(
     tmp_path: Path,
 ) -> None:

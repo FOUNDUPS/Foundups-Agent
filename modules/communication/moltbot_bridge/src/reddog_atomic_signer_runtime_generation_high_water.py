@@ -5,11 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 import secrets
-import threading
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping
-from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
@@ -22,6 +20,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
     SignerRuntimeGenerationPendingAdvance,
     SignerRuntimeGenerationSigner,
     SignerRuntimeGenerationVerifier,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
+    _build_process_local_registry,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_verifier_authority import (
     SignerRuntimeGenerationVerifierAuthorityBoundary,
@@ -37,34 +38,12 @@ _MAX_ANCHORS = 128
 _MAX_AUTHENTICATION_TAG_LENGTH = 4096
 
 
-def _build_reader_state_registry():
-    lock = threading.RLock()
-    records: WeakKeyDictionary[object, Any] = WeakKeyDictionary()
-
-    def issue(key: object, value: Any) -> None:
-        with lock:
-            if key in records:
-                raise ValueError(
-                    "generation_high_water_reader_state_already_issued"
-                )
-            records[key] = value
-
-    def lookup(key: object) -> Any:
-        with lock:
-            try:
-                return records[key]
-            except KeyError as exc:
-                raise ValueError(
-                    "generation_high_water_reader_state_unverified"
-                ) from exc
-
-    return issue, lookup
-
-
 _issue_high_water_reader_state, _lookup_high_water_reader_state = (
-    _build_reader_state_registry()
+    _build_process_local_registry(
+        "generation_high_water_reader_state_unverified"
+    )
 )
-del _build_reader_state_registry
+del _build_process_local_registry
 
 
 class AtomicSignerRuntimeGenerationHighWaterStore:
@@ -246,13 +225,57 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
         )
 
 
-class AtomicSignerRuntimeGenerationHighWaterReader:
-    """Verifier-only view of authenticated high-water state."""
+@dataclass(frozen=True)
+class _HighWaterReaderState:
+    store_id: str
+    durability_receipt_id: str
+    verifier: SignerRuntimeGenerationVerifier
+    store: ReadOnlyRuntimeJsonStore
+    lock_path: Path
 
-    __slots__ = ("__weakref__",)
-
-    def __init__(
+def _initialize_high_water_reader(
+    self: object,
+    path: Path | str,
+    *,
+    allowed_root: Path | str,
+    repo_root: Path | str,
+    store_id: str,
+    durability_receipt_id: str,
+    verifier_authority: object,
+    verifier_authority_boundary: (
+        SignerRuntimeGenerationVerifierAuthorityBoundary
+    ),
+    issue_state: Any,
+) -> None:
+    verifier = _verifier(
+        require_signer_runtime_generation_verifier_authority(
+            verifier_authority, verifier_authority_boundary
+        )
+    )
+    store = ReadOnlyRuntimeJsonStore(
+        path, allowed_root=allowed_root, repo_root=repo_root
+    )
+    issue_state(
         self,
+        _HighWaterReaderState(
+            store_id=_ascii(store_id, "store_id"),
+            durability_receipt_id=_sha256(
+                durability_receipt_id, "durability_receipt_id"
+            ),
+            verifier=verifier,
+            store=store,
+            lock_path=store.path.with_name(
+                store.path.name + ".high-water-transaction.lock"
+            ),
+        ),
+    )
+
+def _high_water_reader_init(
+    issue_state: Any,
+    initialize_reader: Any = _initialize_high_water_reader,
+):
+    def initialize(
+        self: object,
         path: Path | str,
         *,
         allowed_root: Path | str,
@@ -263,67 +286,35 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
         verifier_authority_boundary: (
             SignerRuntimeGenerationVerifierAuthorityBoundary
         ),
-        _issue_state: Any = _issue_high_water_reader_state,
     ) -> None:
-        resolved_store_id = _ascii(store_id, "store_id")
-        resolved_receipt_id = _sha256(
-            durability_receipt_id, "durability_receipt_id"
-        )
-        verifier = _verifier(
-            require_signer_runtime_generation_verifier_authority(
-                verifier_authority,
-                verifier_authority_boundary,
-            )
-        )
-        store = ReadOnlyRuntimeJsonStore(
+        initialize_reader(
+            self,
             path,
             allowed_root=allowed_root,
             repo_root=repo_root,
+            store_id=store_id,
+            durability_receipt_id=durability_receipt_id,
+            verifier_authority=verifier_authority,
+            verifier_authority_boundary=verifier_authority_boundary,
+            issue_state=issue_state,
         )
-        _issue_state(self, _HighWaterReaderState(
-            store_id=resolved_store_id,
-            durability_receipt_id=resolved_receipt_id,
-            verifier=verifier,
-            store=store,
-            lock_path=store.path.with_name(
-                store.path.name + ".high-water-transaction.lock"
-            ),
-        ))
 
-    @property
-    def store_id(
-        self, _lookup: Any = _lookup_high_water_reader_state
-    ) -> str:
-        return _lookup(self).store_id
+    return initialize
 
-    @property
-    def durability_receipt_id(
-        self, _lookup: Any = _lookup_high_water_reader_state
-    ) -> str:
-        return _lookup(self).durability_receipt_id
+def _high_water_reader_property(lookup: Any, name: str):
+    def read(self: object) -> Any:
+        state = lookup(self)
+        return (
+            state.store.allowed_root
+            if name == "rollback_domain_root"
+            else getattr(state, name)
+        )
 
-    @property
-    def rollback_domain_root(
-        self, _lookup: Any = _lookup_high_water_reader_state
-    ) -> Path:
-        return _lookup(self).store.allowed_root
+    return property(read)
 
-    def load(
-        self, anchor_id: str
-    ) -> SignerRuntimeGenerationHighWater | None:
-        return _high_water(self._entry(anchor_id).get("current"))
-
-    def pending(
-        self, anchor_id: str
-    ) -> SignerRuntimeGenerationPendingAdvance | None:
-        return _pending(self._entry(anchor_id).get("pending"))
-
-    def _entry(
-        self,
-        anchor_id: str,
-        _lookup: Any = _lookup_high_water_reader_state,
-    ) -> dict[str, Any]:
-        reader = _lookup(self)
+def _high_water_reader_entry(lookup: Any):
+    def entry(self: object, anchor_id: str) -> dict[str, Any]:
+        reader = lookup(self)
         with confined_runtime_operation_lock(
             reader.lock_path,
             repo_root=reader.store.repo_root,
@@ -340,14 +331,35 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
             )
             return _entry(state, _anchor_id(anchor_id))
 
+    return entry
 
-@dataclass(frozen=True)
-class _HighWaterReaderState:
-    store_id: str
-    durability_receipt_id: str
-    verifier: SignerRuntimeGenerationVerifier
-    store: ReadOnlyRuntimeJsonStore
-    lock_path: Path
+
+class AtomicSignerRuntimeGenerationHighWaterReader:
+    """Verifier-only view of authenticated high-water state."""
+
+    __slots__ = ("__weakref__",)
+
+    __init__ = _high_water_reader_init(_issue_high_water_reader_state)
+    store_id = _high_water_reader_property(
+        _lookup_high_water_reader_state, "store_id"
+    )
+    durability_receipt_id = _high_water_reader_property(
+        _lookup_high_water_reader_state, "durability_receipt_id"
+    )
+    rollback_domain_root = _high_water_reader_property(
+        _lookup_high_water_reader_state, "rollback_domain_root"
+    )
+    _entry = _high_water_reader_entry(_lookup_high_water_reader_state)
+
+    def load(
+        self, anchor_id: str
+    ) -> SignerRuntimeGenerationHighWater | None:
+        return _high_water(self._entry(anchor_id).get("current"))
+
+    def pending(
+        self, anchor_id: str
+    ) -> SignerRuntimeGenerationPendingAdvance | None:
+        return _pending(self._entry(anchor_id).get("pending"))
 
 def _verified_state(
     state: Mapping[str, Any],
@@ -652,6 +664,8 @@ def _canonical(value: Mapping[str, Any]) -> bytes:
 
 
 del _issue_high_water_reader_state, _lookup_high_water_reader_state
+del _high_water_reader_entry, _high_water_reader_init
+del _high_water_reader_property, _initialize_high_water_reader
 
 
 __all__ = [
