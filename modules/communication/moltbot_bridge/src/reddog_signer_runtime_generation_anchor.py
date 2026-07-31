@@ -32,6 +32,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_c
     SignerRuntimeGenerationHighWaterAuthorityBoundary,
     SignerRuntimeGenerationHighWaterStore,
     SignerRuntimeGenerationPendingAdvance,
+    SignerRuntimeGenerationRecoveryOutcome,
     SignerRuntimeGenerationSigner,
     SignerRuntimeGenerationVerifier,
     TransactionalSignerRuntimeGenerationHighWaterStore,
@@ -279,6 +280,47 @@ def load_persisted_signer_runtime_generation(
         return anchor._decode(anchor._store.load())
 
 
+def recover_signer_runtime_generation_with_outcome(
+    anchor: DurableSignerRuntimeGenerationAnchor,
+    *,
+    commit_guard: Callable[[SignerRuntimeGenerationActivation], None] | None,
+    committed_witness_guard: (
+        Callable[[SignerRuntimeGenerationActivation], None] | None
+    ),
+) -> SignerRuntimeGenerationRecoveryOutcome:
+    """Recover and report whether an independent committed witness won."""
+
+    if type(anchor) is not DurableSignerRuntimeGenerationAnchor:
+        raise ValueError("generation_anchor_invalid")
+    with anchor._lock():
+        store = anchor._high_water_store
+        assert isinstance(
+            store, TransactionalSignerRuntimeGenerationHighWaterStore
+        )
+        pending = store.pending(anchor._anchor_id)
+        current = anchor._decode(anchor._store.load())
+        witness_committed = bool(
+            pending is not None
+            and _high_water(current) == pending.next_value
+            and store.witness_load(anchor._anchor_id) == pending.next_value
+        )
+        current = _recover_transaction(
+            anchor,
+            current,
+            commit_guard=commit_guard,
+            committed_witness_guard=committed_witness_guard,
+        )
+        activation = anchor._reconcile_high_water(current)
+        completed = pending is not None and store.pending(
+            anchor._anchor_id
+        ) is None
+        return SignerRuntimeGenerationRecoveryOutcome(
+            activation=activation,
+            pending_completed=completed,
+            committed_witness_recovered=completed and witness_committed,
+        )
+
+
 def _activate_transactional(
     anchor: DurableSignerRuntimeGenerationAnchor,
     *,
@@ -476,12 +518,14 @@ def _verify_transaction_cleared(
 __all__ = [
     "DurableSignerRuntimeGenerationAnchor",
     "load_persisted_signer_runtime_generation",
+    "recover_signer_runtime_generation_with_outcome",
     "SCHEMA_VERSION",
     "decode_signer_runtime_generation_state",
     "SignerRuntimeGenerationActivation",
     "SignerRuntimeGenerationBinding",
     "SignerRuntimeGenerationHighWater",
     "SignerRuntimeGenerationPendingAdvance",
+    "SignerRuntimeGenerationRecoveryOutcome",
     "SignerRuntimeGenerationSigner",
     "SignerRuntimeGenerationVerifier",
     "SignerRuntimeGenerationHighWaterAuthorityBoundary",

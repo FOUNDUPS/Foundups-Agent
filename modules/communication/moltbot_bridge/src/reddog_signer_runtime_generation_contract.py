@@ -160,6 +160,15 @@ class SignerRuntimeGenerationActivation:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class SignerRuntimeGenerationRecoveryOutcome:
+    """Typed evidence describing one authenticated recovery attempt."""
+
+    activation: SignerRuntimeGenerationActivation | None
+    pending_completed: bool
+    committed_witness_recovered: bool
+
+
 __all__ = [
     "SignerRuntimeGenerationActivation",
     "SignerRuntimeGenerationBinding",
@@ -167,6 +176,7 @@ __all__ = [
     "SignerRuntimeGenerationHighWaterAuthorityBoundary",
     "SignerRuntimeGenerationHighWaterStore",
     "SignerRuntimeGenerationPendingAdvance",
+    "SignerRuntimeGenerationRecoveryOutcome",
     "SignerRuntimeGenerationSigner",
     "SignerRuntimeGenerationVerifier",
     "TransactionalSignerRuntimeGenerationHighWaterStore",

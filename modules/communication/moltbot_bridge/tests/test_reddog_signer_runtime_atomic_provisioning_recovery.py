@@ -7,8 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning import (
-    SignerRuntimeAtomicProvisioningContext,
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning_contract import (
+    create_signer_runtime_atomic_provisioning_context,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
+    load_persisted_signer_runtime_generation,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artifact_manifest import (
     NOW,
@@ -155,12 +158,17 @@ def test_expired_committed_witness_recovers_after_process_gap(
 
     monkeypatch.setattr(target, "_recover_new_commit", lambda *_a, **_k: None)
     _provision(context)
-    assert store.pending(anchor._anchor_id) is not None
+    pending = store.pending(anchor._anchor_id)
+    persisted = load_persisted_signer_runtime_generation(anchor)
+    assert pending is not None
+    assert persisted is not None
+    assert store.witness_load(anchor._anchor_id) == pending.next_value
+    assert persisted.generation == pending.next_value.generation
     monkeypatch.setattr(store, "commit_prepared", original)
     monkeypatch.undo()
     monkeypatch.setattr(target, "_trusted_now", lambda: NOW + 121)
     recovered = _provision(
-        SignerRuntimeAtomicProvisioningContext(
+        create_signer_runtime_atomic_provisioning_context(
             manifest_signing=harness.fresh_context(),
             generation_anchor=anchor,
         )

@@ -17,8 +17,10 @@ from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_gener
     AtomicSignerRuntimeGenerationHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning import (
-    SignerRuntimeAtomicProvisioningContext,
     provision_signer_runtime_generation,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning_contract import (
+    create_signer_runtime_atomic_provisioning_context,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_manifest import (
     SignedRuntimeArtifactManifestResult,
@@ -121,7 +123,7 @@ def _context(tmp_path: Path):
         high_water_authority=boundary.capability,
         high_water_authority_boundary=boundary,
     )
-    context = SignerRuntimeAtomicProvisioningContext(
+    context = create_signer_runtime_atomic_provisioning_context(
         manifest_signing=harness.context,
         generation_anchor=anchor,
     )
@@ -263,8 +265,8 @@ def test_anchor_must_be_outside_candidate_generation(
     )
 
     result = _provision(
-        SignerRuntimeAtomicProvisioningContext(
-            manifest_signing=context.manifest_signing,
+        create_signer_runtime_atomic_provisioning_context(
+            manifest_signing=harness.context,
             generation_anchor=bad_anchor,
         )
     )
@@ -284,7 +286,7 @@ def test_replayed_artifact_generation_does_not_advance_anchor(
     second = provision_signer_runtime_generation(
         nonce="provision-generation-2",
         ttl_seconds=120,
-        context=SignerRuntimeAtomicProvisioningContext(
+        context=create_signer_runtime_atomic_provisioning_context(
             manifest_signing=harness.fresh_context(),
             generation_anchor=anchor,
         ),
@@ -306,7 +308,7 @@ def test_manifest_publication_is_create_only_under_concurrency(
     assert first.accepted is True
 
     duplicate = _provision(
-        SignerRuntimeAtomicProvisioningContext(
+        create_signer_runtime_atomic_provisioning_context(
             manifest_signing=harness.fresh_context(),
             generation_anchor=anchor,
         )
@@ -326,7 +328,7 @@ def test_uncertain_return_retry_recovers_active_generation(
     assert first.accepted is True
 
     retried = _provision(
-        SignerRuntimeAtomicProvisioningContext(
+        create_signer_runtime_atomic_provisioning_context(
             manifest_signing=harness.fresh_context(),
             generation_anchor=anchor,
         )
@@ -344,7 +346,7 @@ def test_two_provisioners_converge_on_one_activation(
     harness, anchor, context = _context(tmp_path)
     contexts = (
         context,
-        SignerRuntimeAtomicProvisioningContext(
+        create_signer_runtime_atomic_provisioning_context(
             manifest_signing=harness.fresh_context(),
             generation_anchor=anchor,
         ),
@@ -451,7 +453,7 @@ def test_published_inactive_manifest_recovers_after_restart(
     monkeypatch.setattr(anchor, "activate", original)
 
     retried = _provision(
-        SignerRuntimeAtomicProvisioningContext(
+        create_signer_runtime_atomic_provisioning_context(
             manifest_signing=harness.fresh_context(),
             generation_anchor=anchor,
         )
@@ -573,7 +575,7 @@ def test_expired_manifest_is_not_recovered_with_historical_time(
 
     monkeypatch.setattr(target, "_trusted_now", lambda: NOW + 121)
     retried = _provision(
-        SignerRuntimeAtomicProvisioningContext(
+        create_signer_runtime_atomic_provisioning_context(
             manifest_signing=harness.fresh_context(),
             generation_anchor=anchor,
         )
@@ -659,8 +661,8 @@ def test_fake_anchor_is_rejected_before_manifest_publication(
     class FakeAnchor:
         path = tmp_path / "fake-anchor.json"
 
-    fake_context = SignerRuntimeAtomicProvisioningContext(
-        manifest_signing=context.manifest_signing,
+    fake_context = create_signer_runtime_atomic_provisioning_context(
+        manifest_signing=harness.context,
         generation_anchor=FakeAnchor(),  # type: ignore[arg-type]
     )
     result = _provision(fake_context)

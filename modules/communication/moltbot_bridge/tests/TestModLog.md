@@ -10,13 +10,13 @@
   compare-and-swap regressions.
 - Reviewer repair added post-commit recovery, caller-independent read-only
   witness state, per-open metadata checks, strict rollback, manifest
-  signature/byte preservation truth, and POSIX external-owner regressions.
+  signature/byte preservation, POSIX external-owner, opaque canonical-verifier, forged-signer rejection, and typed committed-witness restart regressions.
 - Focused provisioning, generation, activation-lease, commit-guard, and
   monotonic-witness matrix: 115 passed, 2 platform skips, including a real
   two-process race. POSIX activation is an intentional fail-closed skip.
 - Manifest, generation anchor/reader/high-water, lifecycle admission and race
   matrix: 185 passed, 2 platform skips.
-- Complete `test_reddog_*signer*.py` plus activation-lease matrix: 422 passed,
+- Complete `test_reddog_*signer*.py` plus activation-lease matrix: 425 passed,
   13 platform skips.
 - Full bridge differential: untouched base `4778 passed, 33 failed, 23
   skipped`; repaired branch `4838 passed, 33 failed, 24 skipped`. The

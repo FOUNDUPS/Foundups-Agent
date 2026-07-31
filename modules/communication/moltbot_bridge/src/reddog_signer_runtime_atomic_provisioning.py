@@ -34,8 +34,8 @@ from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_man
     produce_signed_runtime_artifact_manifest,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
-    DurableSignerRuntimeGenerationAnchor,
-    load_persisted_signer_runtime_generation,
+    DurableSignerRuntimeGenerationAnchor, load_persisted_signer_runtime_generation,
+    recover_signer_runtime_generation_with_outcome,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning_contract import (
     SignerRuntimeAtomicProvisioningContext,
@@ -66,10 +66,11 @@ def provision_signer_runtime_generation(
     manifest_id: str | None = None
     runtime_root: Path | None = None
     try:
+        signing = context.require_signing_context()
         runtime_root = _validated_roots(context)
         issued_at = _trusted_now()
-        context.manifest_signing.authority_boundary.revalidate(
-            context.manifest_signing.authority,
+        signing.authority_boundary.revalidate(
+            signing.authority,
             now_epoch=issued_at,
         )
         produced = produce_signed_runtime_artifact_manifest(
@@ -77,7 +78,7 @@ def provision_signer_runtime_generation(
             nonce=nonce,
             issued_at=issued_at,
             expires_at=issued_at + int(ttl_seconds),
-            context=context.manifest_signing,
+            context=signing,
         )
         if not produced.accepted:
             return _recover_or_reject_production(
@@ -160,9 +161,8 @@ def _validated_roots(
         raise ValueError("signer_runtime_provisioning_context_invalid")
     if type(context.generation_anchor) is not DurableSignerRuntimeGenerationAnchor:
         raise ValueError("signer_runtime_generation_anchor_invalid")
-    authority = context.manifest_signing.authority_boundary.require(
-        context.manifest_signing.authority
-    )
+    signing = context.require_signing_context()
+    authority = signing.authority_boundary.require(signing.authority)
     runtime_root = Path(authority["runtime_root"]).resolve()
     anchor_root = context.generation_anchor.authority_root.resolve()
     rollback_root = context.generation_anchor.rollback_domain_root.resolve()
@@ -216,7 +216,7 @@ def _verified_manifest(
         payload,
         canonical_signing_input(payload),
         authority,
-        context.manifest_signing.signature_verifier,
+        context.require_signing_context().signature_verifier,
     )
     return payload
 
@@ -248,8 +248,9 @@ def _activate_manifest(
     runtime_root: Path,
     manifest_path: str | None,
 ) -> tuple[SignerRuntimeGenerationActivation, bool]:
-    authority_boundary = context.manifest_signing.authority_boundary
-    authority_capability = context.manifest_signing.authority
+    signing = context.require_signing_context()
+    authority_boundary = signing.authority_boundary
+    authority_capability = signing.authority
     previous = load_persisted_signer_runtime_generation(context.generation_anchor)
     try:
         with authority_boundary.revalidation_fence(
@@ -362,9 +363,8 @@ def _recover_new_commit(
     previous: SignerRuntimeGenerationActivation | None,
 ) -> SignerRuntimeGenerationActivation | None:
     try:
-        authority = context.manifest_signing.authority_boundary.require(
-            context.manifest_signing.authority
-        )
+        signing = context.require_signing_context()
+        authority = signing.authority_boundary.require(signing.authority)
         manifest = _verified_manifest(
             context, runtime_root=runtime_root, manifest_path=manifest_path,
             authority=authority, now_epoch=_trusted_now(),
@@ -375,11 +375,14 @@ def _recover_new_commit(
             authority=authority, manifest_id=str(manifest["manifest_id"]),
             allow_expired_recovery=True,
         )
-        current = context.generation_anchor.recover(
-            commit_guard=guard, committed_witness_guard=guard
+        outcome = recover_signer_runtime_generation_with_outcome(
+            context.generation_anchor, commit_guard=guard,
+            committed_witness_guard=guard,
         )
+        current = outcome.activation
         if current is None or (
             previous is not None and current.revision == previous.revision
+            and not outcome.committed_witness_recovered
         ):
             return None
         guard(current)
@@ -617,9 +620,8 @@ def _published_manifest_preserved(
     if runtime_root is None or not manifest_path or not manifest_id:
         return False
     try:
-        authority = context.manifest_signing.authority_boundary.require(
-            context.manifest_signing.authority
-        )
+        signing = context.require_signing_context()
+        authority = signing.authority_boundary.require(signing.authority)
         payload = _verified_manifest(
             context, runtime_root=runtime_root, manifest_path=manifest_path,
             authority=authority, now_epoch=_trusted_now(),
@@ -668,8 +670,6 @@ def _reject(
     )
 
 
-__all__ = [
-    "SignerRuntimeAtomicProvisioningContext",
-    "SignerRuntimeAtomicProvisioningResult",
-    "provision_signer_runtime_generation",
-]
+__all__ = ["SignerRuntimeAtomicProvisioningContext",
+           "SignerRuntimeAtomicProvisioningResult",
+           "provision_signer_runtime_generation"]

@@ -133,11 +133,11 @@ generation-bundle activation are still required.
 
 Atomic generation provisioning signs the final seven-artifact runtime root
 and activates its authenticated generation only after a last-byte check. The
+atomic coordinator uses an uncopyable process-local capability, discards caller-selected verifiers, and binds the authority key, key epoch, signer-client type, and canonical Ed25519 verifier. Signer lifecycle admission remains a separate post-launch boundary. The
 activation lease is production-capable on Windows, where open handles deny
 write/delete sharing. POSIX/WSL callers receive
 `runtime_artifact_activation_lease_external_owner_required`; file modes are
 not represented as a same-principal immutability boundary.
-
 The generation high-water writer intentionally requires a signer-owned
 `SqliteMonotonicAuthorityStore`. Verifier-only construction must pass
 `store.reader()`, which exposes `load()` but no `advance()` capability; passing
@@ -148,7 +148,7 @@ accepted record persists the authenticated prior anchor snapshot explicitly.
 Crash recovery uses normal freshness verification unless the independent
 monotonic witness already proves the exact generation committed. That
 committed-witness path may structurally and cryptographically roll forward an
-expired manifest, but it cannot authorize a new activation.
+expired manifest, but it cannot authorize a new activation. Typed recovery prevents a committed witness from being misreported when its anchor already exists.
 
 The public generic key-provider API has no architect-proposal policy or nonce
 parameters. Proposal backend construction is an internal runtime-only path

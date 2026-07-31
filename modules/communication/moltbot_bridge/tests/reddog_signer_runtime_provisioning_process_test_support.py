@@ -12,8 +12,10 @@ from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_gener
     AtomicSignerRuntimeGenerationHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning import (
-    SignerRuntimeAtomicProvisioningContext,
     provision_signer_runtime_generation,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provisioning_contract import (
+    create_signer_runtime_atomic_provisioning_context,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
     DurableSignerRuntimeGenerationAnchor,
@@ -68,7 +70,7 @@ def process_provision(values: dict, output) -> None:
     result = provision_signer_runtime_generation(
         nonce="process-provision-generation-1",
         ttl_seconds=120,
-        context=SignerRuntimeAtomicProvisioningContext(
+        context=create_signer_runtime_atomic_provisioning_context(
             manifest_signing=signing_context,
             generation_anchor=anchor,
         ),
