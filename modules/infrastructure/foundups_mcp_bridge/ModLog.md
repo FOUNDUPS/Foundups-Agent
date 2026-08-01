@@ -1,5 +1,14 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-01 - Authority-worktree owner runtime binding
+
+- Bound the one-shot semantic owner to the selected clean authority checkout
+  for repository bytes while retaining the calling workspace as the validated
+  checkout-local Python dependency root.
+- Added regressions for both dirty-workspace authority selection and clean
+  workspace operation. This closes the authority checkout's
+  `SEMANTIC_BACKEND_UNAVAILABLE` failure without weakening generation binding.
+
 ## 2026-08-01 - Global owner-hit ranking for retrieval evaluation
 
 - Flattened typed semantic hit buckets into one deterministic descending-score

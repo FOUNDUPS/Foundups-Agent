@@ -1,5 +1,11 @@
 # RedDog Interface
 
+Version 0.4.45 separates the generation-authoritative repository root from the
+validated workspace dependency root when the one-shot semantic bridge uses a
+clean authority checkout. Query receipts and repository proof remain bound to
+the authority checkout; only the validated Python dependency path comes from
+the calling workspace.
+
 Version 0.4.44 pins the canonical HoloIndex owner-runtime dependency binding
 and fail-fast health contract. It retains the current resident thin client and
 supersedes the quarantined 0.4.42 Codex-intercept artifact. RedDog remains the

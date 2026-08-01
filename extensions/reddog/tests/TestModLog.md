@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-01 - Authority-worktree semantic owner repair (0.4.45)
+
+- Added authority/workspace runtime-root forwarding regressions and
+  revalidated the generated backend manifest and extension pin.
+- Live generation-bound queries returned CURRENT evidence for the retrieval
+  AutoResearch evaluator and M2M benchmark after the repair.
+
 ## 2026-07-30 - HoloIndex owner runtime compatibility release (0.4.44)
 
 - Revalidated the generated backend manifest and exact extension pin after the

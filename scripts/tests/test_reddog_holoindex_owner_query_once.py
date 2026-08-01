@@ -128,27 +128,54 @@ def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
         source="configured",
     )
     calls: dict = {}
+    bootstrap_calls: dict = {}
 
     def query_owner(**kwargs):
         calls.update(kwargs)
         return _success(authority)
 
-    result = query_once(
-        {"query": "audit pfmall"},
-        repo_root=tmp_path,
-        ensure_owner=lambda **kwargs: SimpleNamespace(
+    def ensure_owner(**kwargs):
+        bootstrap_calls.update(kwargs)
+        return SimpleNamespace(
             ready=kwargs["repo_root"] == authority,
             status="CONFIGURED",
             error="",
-        ),
+        )
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=ensure_owner,
         query_owner=query_owner,
         select_authority=lambda _root: selection,
     )
 
     assert result["ok"] is True
+    assert bootstrap_calls["repo_root"] == authority
+    assert bootstrap_calls["runtime_root"] == tmp_path
     assert calls["repo_root"] == authority
     assert result["workspace_overlay_present"] is True
     assert result["semantic_evidence_authority"] == "committed_head_only"
+
+
+def test_clean_workspace_is_its_own_trusted_runtime_root(tmp_path: Path) -> None:
+    bootstrap_calls: dict = {}
+
+    def ensure_owner(**kwargs):
+        bootstrap_calls.update(kwargs)
+        return SimpleNamespace(ready=True, status="CONFIGURED", error="")
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=ensure_owner,
+        query_owner=lambda **_kwargs: _success(tmp_path),
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is True
+    assert bootstrap_calls["repo_root"] == tmp_path
+    assert bootstrap_calls["runtime_root"] == tmp_path
 
 
 def test_bootstrap_failure_fails_closed_before_query(tmp_path: Path) -> None:
