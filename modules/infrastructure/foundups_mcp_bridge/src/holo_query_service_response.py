@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 from typing import Any, Mapping, Sequence
 
 
@@ -39,9 +40,8 @@ def flatten_hits(
     result: Mapping[str, Any],
     limit: int,
 ) -> list[Mapping[str, Any]]:
-    """Flatten typed backend hit buckets while preserving first-hit order."""
-    hits: list[Mapping[str, Any]] = []
-    seen: set[str] = set()
+    """Flatten typed buckets into one deterministic global score order."""
+    candidates: list[tuple[float, int, int, str, Mapping[str, Any]]] = []
     buckets = (
         ("code_hits", "code"),
         ("wsp_hits", "wsp"),
@@ -51,25 +51,54 @@ def flatten_hits(
         ("skill_hits", "skill"),
         ("symbol_hits", "symbol"),
     )
-    for key, kind in buckets:
+    for bucket_index, (key, kind) in enumerate(buckets):
         values = result.get(key)
         if not isinstance(values, Sequence) or isinstance(values, (str, bytes)):
             continue
-        for item in values:
+        for item_index, item in enumerate(values):
             if not isinstance(item, Mapping):
                 continue
             path = str(
                 item.get("path") or item.get("file") or item.get("location") or ""
             ).replace("\\", "/").strip()
             identity = path or json.dumps(item, sort_keys=True, default=str)
-            if identity in seen:
-                continue
-            seen.add(identity)
             normalized = dict(item)
             normalized.setdefault("type", kind)
-            hits.append(normalized)
-            if len(hits) >= limit:
-                return hits
+            candidates.append(
+                (_hit_score(item), bucket_index, item_index, identity, normalized)
+            )
+    candidates.sort(key=lambda value: (-value[0], value[1], value[2], value[3]))
+    return _deduplicated_hits(candidates, limit)
+
+
+def _hit_score(item: Mapping[str, Any]) -> float:
+    raw = item.get("score")
+    if raw is None:
+        raw = item.get("similarity")
+    try:
+        text = str(raw or "").strip()
+        percent = text.endswith("%")
+        score = float(text[:-1] if percent else text)
+    except (TypeError, ValueError):
+        return -math.inf
+    if percent:
+        score /= 100.0
+    return score if math.isfinite(score) else -math.inf
+
+
+def _deduplicated_hits(
+    candidates: Sequence[tuple[float, int, int, str, Mapping[str, Any]]],
+    limit: int,
+) -> list[Mapping[str, Any]]:
+    hits: list[Mapping[str, Any]] = []
+    seen: set[str] = set()
+    for _score, _bucket, _position, identity, normalized in candidates:
+        if identity in seen:
+            continue
+        seen.add(identity)
+        hits.append(normalized)
+        if len(hits) >= limit:
+            break
     return hits
 
 

@@ -228,6 +228,28 @@ def test_internal_normalizers_reject_bad_payloads_and_dedupe_hits() -> None:
     assert core._flatten_hits({"code_hits": [{"path": "one.py"}]}, 1)
 
 
+def test_flatten_hits_uses_global_score_across_typed_buckets() -> None:
+    hits = core._flatten_hits(
+        {
+            "code_hits": [
+                {"path": "low.py", "similarity": "10.0%"},
+                {"path": "same.py", "similarity": "20.0%"},
+            ],
+            "wsp_hits": [
+                {"path": "WSP_framework/src/high.md", "similarity": "95.0%"},
+                {"path": "same.py", "similarity": "90.0%"},
+            ],
+        },
+        3,
+    )
+    assert [item["path"] for item in hits] == [
+        "WSP_framework/src/high.md",
+        "same.py",
+        "low.py",
+    ]
+    assert hits[1]["type"] == "wsp"
+
+
 def test_default_factory_and_transport_wrapper_delegate(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

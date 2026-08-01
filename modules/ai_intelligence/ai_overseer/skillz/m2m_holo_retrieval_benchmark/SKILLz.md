@@ -1,7 +1,7 @@
 ---
 name: m2m_holo_retrieval_benchmark
-description: Benchmark Holo retrieval quality and latency before and after M2M staging/promotion
-version: 1.0.0
+description: Measure one pinned HoloIndex generation with receipt-bound public regression evidence
+version: 2.0.0
 author: 0102
 agents: [qwen, gemma]
 dependencies: [holo_index, ai_overseer, wre_core]
@@ -16,65 +16,80 @@ evals: []
 
 ## Purpose
 
-Prevent memory degradation by proving that M2M changes preserve retrieval quality while improving or maintaining search performance.
+Measure HoloIndex retrieval quality without mutating the index. The skill runs
+against the authenticated generation-bound query owner and emits a benchmark
+run plus a deterministically recomputed verification receipt.
 
 ## Inputs
 
-- `queries`: benchmark query set (required)
+- fixed public regression corpus: checked-in `retrieval_corpus_v1.json`
+  (not caller-overridable and not independent promotion evidence)
 - `limit`: per-query result count (default `8`)
-- `doc_type`: default `all`
-- `reindex`: `true|false` (default `true`)
+- `reindex`: must be absent or `false`; `true` fails closed
 
 ## Guardrails
 
-1. Must run with fixed query set for comparability.
-2. Must capture latency and hit quality metrics.
-3. Must fail if fidelity drops below threshold.
-4. Must produce machine-readable report for overseer trend tracking.
+1. Every query must have at least one graded relevant path.
+2. Every result must bind the exact repository root, SHA, generation, and freshness receipt.
+3. The owner must prove that no re-index occurred during the query.
+4. Metrics are Recall@K, MRR, nDCG@K, mean latency, and p95 latency.
+5. Verification recomputes ranking metrics from the bound query receipts.
+6. Recall@K, MRR, and nDCG@K must each meet the fixed `0.95` quality policy.
+7. The skill never promotes a generation or writes repository artifacts.
 
 ## Execution Steps
 
-### Step 1: Reindex
+### Step 1: Bind the Candidate
 
-If `reindex=true`, run:
-- `python holo_index.py --index-wsp`
-- `python holo_index.py --index-code`
+Load the current freshness generation and bind the benchmark limit plus the
+ranker source digest. Missing bindings fail closed.
 
-### Step 2: Baseline and Trial Runs
+### Step 2: Run Held-Out Queries
 
-For each query:
-- run semantic search with the same `limit` and `doc_type`
-- collect top-hit paths, ranks, latency
-- compute quality metrics (precision at k, key-path hit rate)
+For each query, use the authenticated loopback owner and build a
+`holoindex_query_receipt.v1`. Console output is never parsed.
 
 ### Step 3: Evaluate Gates
 
-Pass if all conditions hold:
-- no critical key-path loss
-- mean latency non-regressive beyond threshold
-- query-level fidelity score >= configured threshold
+The deterministic verifier checks the corpus, split, candidate binding, query
+receipts, ranked paths, and aggregate metrics. A valid run is evaluation
+evidence only; it is not promotion authority.
 
-### Step 4: Persist Report
+### Step 4: Return Receipts
 
-Write:
-- `modules/ai_intelligence/ai_overseer/memory/m2m_holo_retrieval_benchmark_latest.json`
-- append history:
-  `modules/ai_intelligence/ai_overseer/memory/m2m_holo_retrieval_benchmark.jsonl`
+Return the benchmark and verification receipts to the governed WRE caller.
+Negative-outcome persistence is `SPECIFIED_NOT_IMPLEMENTED` in this slice; a
+governed caller must retain it later, never through a query-time repository
+write.
 
 ## Output Contract
 
 ```json
 {
-  "status": "OK|FAIL",
-  "query_count": 12,
-  "mean_latency_ms": 43.2,
-  "p95_latency_ms": 88.7,
-  "precision_at_5": 0.83,
-  "key_path_hit_rate": 0.92,
-  "fidelity_score": 0.91,
-  "regressions": []
+  "success": true,
+  "benchmark_run": {
+    "schema_version": "holoindex_retrieval_benchmark_run.v1",
+    "metrics": {"recall_at_k": 1.0, "mrr": 1.0, "ndcg_at_k": 1.0},
+    "no_holoindex_reindex_performed": true,
+    "no_generation_promotion_performed": true
+  },
+  "verification": {
+    "schema_version": "holoindex_retrieval_benchmark_verification.v1",
+    "accepted": true
+  }
 }
 ```
+
+## Truth Boundary
+
+The deterministic receipt IDs prove integrity after serialization. They are
+not signatures and do not authorize promotion. A future promotion transaction
+must use a separate sealed evaluation corpus, rehydrate the receipts, and
+require independently signed authority. The legacy `heldout_cases` field means
+only that those cases are excluded from `train_cases`.
+
+The Skillz calls the existing authenticated loopback owner client directly.
+Its public API does not accept an arbitrary query callback.
 
 ## WSP Chain
 

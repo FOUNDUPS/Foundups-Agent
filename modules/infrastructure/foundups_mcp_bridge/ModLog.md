@@ -1,5 +1,15 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-01 - Global owner-hit ranking for retrieval evaluation
+
+- Flattened typed semantic hit buckets into one deterministic descending-score
+  order before applying the result limit. Missing/non-finite scores retain
+  stable bucket and source-position ordering.
+- Deduplication now occurs after global ordering, so the strongest occurrence
+  of a path is retained for Recall@K, MRR, and nDCG@K evaluation.
+- Reused the extracted response normalizer from the legacy service wrapper and
+  added cross-bucket score/dedup regression coverage.
+
 ## 2026-07-30 - Canonical Holo runtime dependency binding
 
 - OBSERVED: the auto-owned query service stayed alive but returned authenticated

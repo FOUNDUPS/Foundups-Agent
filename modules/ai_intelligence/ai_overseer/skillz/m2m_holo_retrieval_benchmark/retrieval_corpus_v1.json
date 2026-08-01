@@ -1,0 +1,64 @@
+{
+  "schema_version": "holoindex_retrieval_corpus_source.v1",
+  "train_cases": [
+    {
+      "case_id": "train-token-bypass",
+      "query": "token efficiency bypass classifier",
+      "relevance": [
+        {"path": "modules/infrastructure/token_efficiency/src/bypass_classifier.py", "grade": 3}
+      ]
+    },
+    {
+      "case_id": "train-m2m-fidelity",
+      "query": "M2M compiler fidelity gate",
+      "relevance": [
+        {"path": "modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py", "grade": 3}
+      ]
+    }
+  ],
+  "heldout_cases": [
+    {
+      "case_id": "heldout-m2m-compiler",
+      "query": "m2m compression sentinel",
+      "relevance": [
+        {"path": "prompt/swarm/m2m_compiler.py", "grade": 3},
+        {"path": "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py", "grade": 2}
+      ]
+    },
+    {
+      "case_id": "heldout-stage-promotion",
+      "query": "compile_to_staged promote_staged rollback",
+      "relevance": [
+        {"path": "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py", "grade": 3}
+      ]
+    },
+    {
+      "case_id": "heldout-wsp99",
+      "query": "WSP 99 M2M prompting protocol",
+      "relevance": [
+        {"path": "WSP_framework/src/WSP_99_M2M_Prompting.md", "grade": 3}
+      ]
+    },
+    {
+      "case_id": "heldout-query-receipt",
+      "query": "generation bound HoloIndex query receipt",
+      "relevance": [
+        {"path": "holo_index/query_receipt.py", "grade": 3}
+      ]
+    },
+    {
+      "case_id": "heldout-query-owner",
+      "query": "read only generation pinned HoloIndex query owner service",
+      "relevance": [
+        {"path": "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service.py", "grade": 3}
+      ]
+    },
+    {
+      "case_id": "heldout-freshness",
+      "query": "HoloIndex freshness generation receipt",
+      "relevance": [
+        {"path": "holo_index/freshness_receipt.py", "grade": 3}
+      ]
+    }
+  ]
+}

@@ -1,5 +1,21 @@
 # HoloIndex Package ModLog
 
+## [2026-08-01] Generation-bound retrieval AutoResearch evidence
+
+- Added immutable train/public-regression corpus digests and candidate bindings
+  for retrieval experiments. The public regression set is explicitly not
+  independent promotion evidence.
+- Added query-receipt validation plus Recall@K, MRR, nDCG@K, and latency
+  metrics with deterministic recomputation.
+- Bound observed query latency into each query receipt and made the normalized
+  hit limit explicit so K values above eight are measured truthfully.
+- Added a fail-closed comparison receipt that can report measured improvement
+  on the public regression corpus but cannot recommend or promote a generation.
+- Ordered owner hits globally by score across typed result buckets before
+  applying K, preserving deterministic bucket/position tie-breaking.
+- Replaced the AI Overseer benchmark Skillz query-time mutation path with the
+  authenticated read-only owner.
+
 ## [2026-07-29] Bounded symbol reconciliation
 
 - Replaced the unbounded persisted symbol-ID snapshot with deterministic

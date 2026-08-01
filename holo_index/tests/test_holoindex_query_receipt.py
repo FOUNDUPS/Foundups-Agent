@@ -163,6 +163,53 @@ def test_query_receipt_digest_changes_when_semantic_evidence_changes() -> None:
     assert before["receipt_id"] != changed["receipt_id"]
 
 
+def test_query_receipt_binds_observed_latency() -> None:
+    binding = {
+        "freshness_generation_id": "sha256:generation",
+        "freshness_receipt_digest": "sha256:freshness",
+        "repo_head_sha": "abc123",
+    }
+    base = {
+        "ok": True,
+        "query": "latency evidence",
+        "freshness": "CURRENT",
+        "hits": [],
+        "latency_ms": 12.3456,
+    }
+    before = build_query_receipt(
+        source="holoindex", source_class=SOURCE_CLASS_HOLOINDEX,
+        query="latency evidence", result=base, require_generation=True,
+        generation_binding=binding,
+    )
+    changed = build_query_receipt(
+        source="holoindex", source_class=SOURCE_CLASS_HOLOINDEX,
+        query="latency evidence", result={**base, "latency_ms": 99},
+        require_generation=True, generation_binding=binding,
+    )
+
+    assert before["observed_latency_ms"] == 12.346
+    assert before["receipt_id"] != changed["receipt_id"]
+
+
+def test_query_receipt_respects_explicit_benchmark_hit_limit() -> None:
+    hits = [{"path": f"module-{index}.py"} for index in range(12)]
+    receipt = build_query_receipt(
+        source="benchmark", source_class=SOURCE_CLASS_HOLOINDEX,
+        query="deep ranking", result={
+            "ok": True, "freshness": "CURRENT", "hits": hits,
+        },
+        require_generation=True,
+        generation_binding={
+            "freshness_generation_id": "sha256:generation",
+            "freshness_receipt_digest": "sha256:freshness",
+            "repo_head_sha": "abc123",
+        },
+        hit_limit=20,
+    )
+
+    assert len(receipt["hits"]) == 12
+
+
 def test_fresh_query_without_generation_is_stale_not_fresh() -> None:
     receipt = build_query_receipt(
         source="holoindex",

@@ -35,6 +35,7 @@ from .holo_query_freshness_gate import (
     normalize_binding as _binding,
     snapshot_error as _snapshot_error,
 )
+from .holo_query_service_response import flatten_hits as _flatten_hits
 
 
 SCHEMA_VERSION = "holoindex_query_service.v1"
@@ -79,36 +80,6 @@ def _failure_reason(error: str) -> str:
     if error in {"UNAUTHORIZED", "AUTH_NOT_CONFIGURED", TOKEN_TOO_SHORT_ERROR}:
         return "query_owner_authentication_failed"
     return "holoindex_owner_query_failed"
-
-
-def _flatten_hits(result: Mapping[str, Any], limit: int) -> list[Mapping[str, Any]]:
-    hits: list[Mapping[str, Any]] = []
-    seen: set[str] = set()
-    buckets = (
-        ("code_hits", "code"), ("wsp_hits", "wsp"), ("docs_hits", "docs"),
-        ("knowledge_hits", "knowledge"), ("test_hits", "test"),
-        ("skill_hits", "skill"), ("symbol_hits", "symbol"),
-    )
-    for key, kind in buckets:
-        values = result.get(key)
-        if not isinstance(values, Sequence) or isinstance(values, (str, bytes)):
-            continue
-        for item in values:
-            if not isinstance(item, Mapping):
-                continue
-            path = str(
-                item.get("path") or item.get("file") or item.get("location") or ""
-            ).replace("\\", "/").strip()
-            identity = path or json.dumps(item, sort_keys=True, default=str)
-            if identity in seen:
-                continue
-            seen.add(identity)
-            normalized = dict(item)
-            normalized.setdefault("type", kind)
-            hits.append(normalized)
-            if len(hits) >= limit:
-                return hits
-    return hits
 
 
 def _response(
