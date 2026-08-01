@@ -12,6 +12,9 @@ from modules.infrastructure.database.src.db_manager import DatabaseManager
 from modules.infrastructure.database.src.holoindex_postmerge_task_namespace import (
     HOLOINDEX_POSTMERGE_TASK_PREFIX,
 )
+from modules.infrastructure.database.src.signed_worker_execution_quarantine import (
+    quarantine_signed_worker_execution,
+)
 from modules.infrastructure.database.tests.signed_worker_assurance_test_support import (
     _request as _assurance_request,
     _seed_tasks as _seed_assurance_tasks,
@@ -274,6 +277,58 @@ def test_forged_legacy_assurance_binding_cannot_mutate_protected_task(
         assert result is not None
         assert result["accepted"] is False
     assert _raw_task(agent_db) == before
+
+
+def test_forged_legacy_assurance_binding_cannot_quarantine_protected_task(
+    agent_db: AgentDB,
+) -> None:
+    signed_task_id = "reddog-worker-dispatch-quarantine-attacker"
+    signed_context = '{"signed_worker":true}'
+    _seed_assurance_tasks(agent_db)
+    _create_protected(agent_db)
+    assert agent_db.reserve_independent_assurance(_assurance_request())["accepted"]
+    assert agent_db.db.execute_write(
+        "INSERT INTO agents_autonomous_tasks "
+        "(task_id, description, required_skills, estimated_complexity, "
+        "priority_score, context, status, assigned_to) "
+        "VALUES (?, 'signed author', '[]', 1.0, 1.0, ?, 'assigned', 'author-0102')",
+        (signed_task_id, signed_context),
+    ) == 1
+    agent_db.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET status = 'assigned', "
+        "assigned_to = 'verifier-0201' WHERE task_id = ?",
+        (TASK_ID,),
+    )
+    agent_db.db.execute_write(
+        "UPDATE agents_independent_assurance_reservations "
+        "SET author_task_id = ?, verifier_task_id = ? WHERE reservation_id = ?",
+        (signed_task_id, TASK_ID, "assurance-1"),
+    )
+    before_holo = _raw_task(agent_db)
+    before_author = agent_db.get_autonomous_task_by_id(signed_task_id)
+    before_reservation = agent_db.db.execute_query(
+        "SELECT * FROM agents_independent_assurance_reservations "
+        "WHERE reservation_id = ?",
+        ("assurance-1",),
+    )[0]
+
+    result = quarantine_signed_worker_execution(
+        agent_db,
+        task_id=signed_task_id,
+        raw_context=signed_context,
+        expected_status="assigned",
+        reason="security-replay",
+        now_iso="2026-08-01T00:00:00+00:00",
+    )
+
+    assert result == "REJECTED"
+    assert _raw_task(agent_db) == before_holo
+    assert agent_db.get_autonomous_task_by_id(signed_task_id) == before_author
+    assert agent_db.db.execute_query(
+        "SELECT * FROM agents_independent_assurance_reservations "
+        "WHERE reservation_id = ?",
+        ("assurance-1",),
+    )[0] == before_reservation
 
 
 def test_postmerge_reclaim_rejects_noncanonical_task_id(

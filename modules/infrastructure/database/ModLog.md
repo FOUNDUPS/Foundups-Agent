@@ -8,7 +8,8 @@ post-merge creation/retry/requeue/reclaim operations with exact-SHA and stored
 context validation. Retry changes are limited to the next sequence number and
 retry timestamp; authority bindings remain immutable. Independent-assurance
 reservation, renewal, staging, expiry, and revocation reject any HoloIndex
-post-merge task binding, including forged legacy reservation rows.
+post-merge task binding, including forged legacy reservation rows. Signed-worker
+quarantine applies the same guard before either reservation or task mutation.
 **Why**: A generic AgentDB caller could otherwise pre-seed, steal, complete, or
 strand the privileged maintenance task without passing its claim-bound owner.
 **Impact**: Only the dedicated coordinator lane mutates post-merge tasks;

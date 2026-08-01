@@ -1896,7 +1896,7 @@
     "modules/infrastructure/database/src/protected_autonomous_task_namespace.py": "e750afabcd867bbc4203012b83b934be96cf87d20e7f811667205de13aafb277",
     "modules/infrastructure/database/src/signed_worker_assignment.py": "40680b68ff7b1c38fbc19cf68ca16d9ea5661277cf8dca976410157dca614af0",
     "modules/infrastructure/database/src/signed_worker_assurance_completion.py": "d4ac382417a2573a5e27d994f4fe3ca53a482854ec8dec4c85e92f7a53f9b440",
-    "modules/infrastructure/database/src/signed_worker_assurance_quarantine.py": "8a8000e59c0eed2937381ee08cd2b483bd018c3a97ab05fcb4315a4d1f2bdb2c",
+    "modules/infrastructure/database/src/signed_worker_assurance_quarantine.py": "bfb37140950f9a1078517117feb0c69919f2c34688990d3c1771988492c4c9d4",
     "modules/infrastructure/database/src/signed_worker_assurance_request.py": "c0e0b0834063b8e031b709fe1a1a1551fda6784c2be9535c8c6889d347e56ff6",
     "modules/infrastructure/database/src/signed_worker_assurance_staging.py": "76e4569ddb404a031c5b1d3eca44105d509580bfe90a69a2ad238192c6569039",
     "modules/infrastructure/database/src/signed_worker_execution_binding.py": "12973e5625505bc0fc297d8db5d8dfcab1a8f2c1913a82732501b0992e8eaa27",

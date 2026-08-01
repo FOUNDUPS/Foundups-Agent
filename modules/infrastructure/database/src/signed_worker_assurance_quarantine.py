@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
+from .protected_autonomous_task_namespace import (
+    has_holoindex_postmerge_task_binding,
+)
+
 
 def quarantine_linked_assurance(
     connection: Any,
@@ -20,6 +24,8 @@ def quarantine_linked_assurance(
     if len(rows) != 1:
         return False
     reservation = rows[0]
+    if has_holoindex_postmerge_task_binding(reservation):
+        return False
     if reservation.get("status") == "QUARANTINED":
         return linked_assurance_is_quarantined(connection, task_id)
     if reservation.get("status") != "RESERVED":
@@ -48,7 +54,8 @@ def linked_assurance_is_quarantined(connection: Any, task_id: str) -> bool:
         return True
     reservation = rows[0] if len(rows) == 1 else {}
     return (
-        reservation.get("status") == "QUARANTINED"
+        not has_holoindex_postmerge_task_binding(reservation)
+        and reservation.get("status") == "QUARANTINED"
         and _paired_verifier_is_terminal(connection, task_id, reservation)
     )
 
