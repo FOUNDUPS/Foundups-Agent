@@ -25,7 +25,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Mapping, Optional
 
 from .db_manager import DatabaseManager
-from .signed_worker_execution_store import is_signed_worker_task_id
+from . import holoindex_postmerge_task_namespace as _postmerge_tasks
 from .signed_worker_assignment import assign_signed_worker_task as _assign_signed_worker_task
 from .signed_worker_execution_lease import ensure_execution_lease_schema
 from .signed_worker_result_ledger import ensure_result_history_schema
@@ -146,7 +146,7 @@ def _assurance_result(
     }
 
 
-class AgentDB:
+class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
     """
     Shared agent memory and state (WSP 78).
 
@@ -1195,7 +1195,7 @@ class AgentDB:
             origin_continuity_id: Optional continuity ID from the work that discovered this task.
                                   Enables background correlation when task is executed later.
         """
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         try:
             self.db.execute_write('''
@@ -1224,7 +1224,7 @@ class AgentDB:
         origin_continuity_id: str = None,
     ) -> bool:
         """Insert a task without replacing concurrent or already-claimed state."""
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         try:
             return self.db.execute_write(
@@ -1288,7 +1288,7 @@ class AgentDB:
 
     def assign_autonomous_task(self, task_id: str, agent_id: str) -> bool:
         """Atomically claim one pending autonomous task for an agent."""
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         return self.db.execute_write('''
             UPDATE agents_autonomous_tasks
@@ -1517,34 +1517,6 @@ class AgentDB:
         except Exception:
             return False
 
-    def reclaim_expired_holoindex_postmerge_task(
-        self,
-        task_id: str,
-        agent_id: str,
-        *,
-        expected_assigned_at: str,
-    ) -> bool:
-        """CAS one expired assignment into retryable failure."""
-        return (
-            self.db.execute_write(
-                """
-            UPDATE agents_autonomous_tasks
-            SET status = 'failed', completed_at = ?
-            WHERE task_id = ?
-              AND status IN ('assigned', 'executing')
-                  AND assigned_to = ?
-                  AND assigned_at = ?
-                """,
-                (
-                    datetime.now(timezone.utc).isoformat(),
-                    task_id,
-                    agent_id,
-                    expected_assigned_at,
-                ),
-            )
-            == 1
-        )
-
     def commit_holoindex_postmerge_completion(
         self,
         *,
@@ -1695,7 +1667,7 @@ class AgentDB:
 
     def complete_autonomous_task(self, task_id: str) -> bool:
         """Mark autonomous task as completed."""
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         return self.db.execute_write('''
             UPDATE agents_autonomous_tasks
@@ -1711,7 +1683,7 @@ class AgentDB:
         retry_not_before: str,
     ) -> bool:
         """Move a failed task into a durable bounded retry wait state."""
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         return self.db.execute_write(
             """
@@ -1733,7 +1705,7 @@ class AgentDB:
         expected_status: str = "retry_wait",
     ) -> bool:
         """Requeue a task only from the caller's exact expected state."""
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         return self.db.execute_write(
             """
