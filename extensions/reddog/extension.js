@@ -25,7 +25,8 @@ const startOperationsEnvironment = require('./start_operations_environment');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
-const EXTENSION_VERSION = '0.4.45';
+const foundupWorkRuntime = require('./foundup_work_runtime_binding');
+const EXTENSION_VERSION = '0.4.46';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -1170,7 +1171,7 @@ function deriveWorkFocusTargets(taskText) {
 // bytes preserved for the header-only shape) with derived work-focus targets (sources 2-7).
 // De-duplicated case-insensitively, first-seen order preserved. Returns
 // { targets, derived, derivation_sources } so callers can both drive recall AND emit telemetry.
-function collectRequiredTargets(taskText) {
+function collectRequiredTargets(taskText, repoRoot, foundupResolution) {
   const explicit = parseRequiredTargetPaths(taskText);
   if (!explicit.length && isOperationalDiagnosticPayload(taskText) && isPromptAuthoringRequest(taskText)) {
     return {
@@ -1189,6 +1190,9 @@ function collectRequiredTargets(taskText) {
     };
   }
   const derivedInfo = deriveWorkFocusTargets(taskText);
+  const foundup = foundupResolution || (repoRoot
+    ? foundupWorkRuntime.resolve(repoRoot, taskText, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)
+    : null);
   const targets = [];
   const seen = new Set();
   const usedSources = new Set();
@@ -1209,6 +1213,16 @@ function collectRequiredTargets(taskText) {
       targets.push(t);
     }
   }
+  if (foundup && foundup.passed === true && (foundup.applied === true || (foundup.foundup_language_present === true && explicit.length === 0))) {
+    for (const target of foundup.evidence_targets || []) {
+      const norm = String(target || '').toLowerCase();
+      if (target && !seen.has(norm)) {
+        seen.add(norm);
+        targets.push(target);
+        usedSources.add(foundup.applied === true ? 'foundup_registry' : 'foundup_registry_unresolved');
+      }
+    }
+  }
   // Record derivation sources only for targets that were NOT already covered by the explicit
   // header (honest provenance: a source tag means "this shape contributed at least one path").
   const explicitSet = new Set(explicit.map((t) => String(t || '').toLowerCase()));
@@ -1226,7 +1240,7 @@ function collectRequiredTargets(taskText) {
     .filter((t) => t && !requiredSet.has(String(t).toLowerCase()));
   return {
     targets: targets,
-    derived: anyDerivedNew,
+    derived: anyDerivedNew || usedSources.has('foundup_registry') || usedSources.has('foundup_registry_unresolved'),
     derivation_sources: Array.from(usedSources),
     dropped_low_confidence: droppedLowConfidence
   };
@@ -1440,8 +1454,11 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
   return targets;
 }
 
-function extractTypedTargets(taskText) {
+function extractTypedTargets(taskText, repoRoot) {
   const textWithoutQuotes = removeQuotedReferenceBlocks(taskText);
+  const foundup = repoRoot
+    ? foundupWorkRuntime.resolve(repoRoot, textWithoutQuotes, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)
+    : { applied: false, passed: true, rejection_reasons: [], evidence_targets: [], grants_authority: false };
   if (!parseRequiredTargetPaths(textWithoutQuotes).length && isOperationalDiagnosticPayload(textWithoutQuotes) && isPromptAuthoringRequest(taskText)) {
     return {
       repo_file_targets: PROMPT_AUTHORING_CONTEXT_TARGETS.slice(),
@@ -1451,7 +1468,8 @@ function extractTypedTargets(taskText) {
       repo_file_derivation_sources: ['prompt_authoring_context'],
       repo_file_targets_derived: true,
       dropped_low_confidence: [],
-      operational_diagnostic_payload: true
+      operational_diagnostic_payload: true,
+      foundup_work_grounding: foundup
     };
   }
   if (!parseRequiredTargetPaths(textWithoutQuotes).length && isOperationalDiagnosticPayload(textWithoutQuotes)) {
@@ -1463,10 +1481,11 @@ function extractTypedTargets(taskText) {
       repo_file_derivation_sources: [],
       repo_file_targets_derived: false,
       dropped_low_confidence: [],
-      operational_diagnostic_payload: true
+      operational_diagnostic_payload: true,
+      foundup_work_grounding: foundup
     };
   }
-  const collected = collectRequiredTargets(textWithoutQuotes);
+  const collected = collectRequiredTargets(textWithoutQuotes, repoRoot, foundup);
   const repoTargets = collected.targets.slice();
   const externalTargets = extractExternalResearchTargets(textWithoutQuotes);
   const quotedBlocks = extractQuotedReferenceBlocks(taskText);
@@ -1478,7 +1497,8 @@ function extractTypedTargets(taskText) {
     quoted_reference_blocks: quotedBlocks,
     repo_file_derivation_sources: Array.isArray(collected.derivation_sources) ? collected.derivation_sources.slice() : [],
     repo_file_targets_derived: collected.derived === true,
-    dropped_low_confidence: Array.isArray(collected.dropped_low_confidence) ? collected.dropped_low_confidence.slice() : []
+    dropped_low_confidence: Array.isArray(collected.dropped_low_confidence) ? collected.dropped_low_confidence.slice() : [],
+    foundup_work_grounding: foundup
   };
 }
 
@@ -1693,9 +1713,15 @@ function semanticTargetCoverageDigest(coverage) {
 
 function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   if (conversationalDraftPolicy.isConversationalDraftRequest(taskText)) return conversationalDraftPolicy.groundingExemption(taskText);
-  const typedTargets = extractTypedTargets(taskText);
+  const root = workspaceRoot();
+  const typedTargets = contextPacket && contextPacket.typed_targets
+    ? contextPacket.typed_targets
+    : extractTypedTargets(taskText, root);
   const scorecard = (contextPacket && contextPacket.holoindex_scorecard)
     || extractHoloIndexScorecard(contextMode, contextPacket && contextPacket.holoindex_meta);
+  const foundupState = foundupWorkRuntime.preflightState(root, typedTargets.foundup_work_grounding,
+    scorecard, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER);
+  const foundup = foundupState.receipt;
   const rejectionReasons = [];
   const repoAuditCoverage = repoAuditGrounding.evaluateRepoAuditContext(taskText, contextPacket);
   const repoAuditIntent = repoAuditGrounding.detectRepoAuditIntent(taskText);
@@ -1726,7 +1752,9 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   const external = typedTargets.external_research_targets;
   const quoted = typedTargets.quoted_reference_blocks;
   const targetUniverseEmpty = repoFiles.length === 0 && semantic.length === 0 && external.length === 0;
-  const targetUniverseRequired = isSubstantiveGroundingRequest(taskText);
+  const targetUniverseRequired = isSubstantiveGroundingRequest(taskText) || foundup.applied === true;
+
+  rejectionReasons.push.apply(rejectionReasons, foundupState.reasons);
 
   if (targetUniverseRequired && targetUniverseEmpty) {
     rejectionReasons.push('grounding_target_universe_empty');
@@ -1792,6 +1820,7 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     semantic_grounding_required: semantic.length > 0,
     external_research_required: external.length > 0,
     quoted_blocks_context_only: quoted.length > 0,
+    ...foundupState.fields,
     repo_audit_grounding_applied: repoAuditCoverage.applied === true,
     repo_audit_grounding_passed: repoAuditCoverage.passed === true,
     repo_audit_entity: repoAuditCoverage.entity || null,
@@ -2085,6 +2114,14 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     work_focus_targets_derived: meta.work_focus_targets_derived !== undefined ? meta.work_focus_targets_derived : 'unknown',
     work_focus_target_derivation_sources: Array.isArray(meta.work_focus_target_derivation_sources) ? meta.work_focus_target_derivation_sources : 'unknown',
     work_focus_targets_dropped_low_confidence: Array.isArray(meta.work_focus_targets_dropped_low_confidence) ? meta.work_focus_targets_dropped_low_confidence : 'unknown',
+    foundup_work_grounding_applied: meta.foundup_work_grounding_applied !== undefined ? meta.foundup_work_grounding_applied : false,
+    foundup_work_grounding_passed: meta.foundup_work_grounding_passed !== undefined ? meta.foundup_work_grounding_passed : false,
+    foundup_work_grounding_rejection_reasons: Array.isArray(meta.foundup_work_grounding_rejection_reasons) ? meta.foundup_work_grounding_rejection_reasons : [],
+    foundup_work_grounding_receipt_id: meta.foundup_work_grounding_receipt_id || '(none)',
+    foundup_id: meta.foundup_id || '(none)',
+    foundup_module_path: meta.foundup_module_path || '(none)',
+    foundup_evidence_targets: Array.isArray(meta.foundup_evidence_targets) ? meta.foundup_evidence_targets : [],
+    foundup_grants_authority: meta.foundup_grants_authority === true,
     typed_target_extraction_applied: meta.typed_target_extraction_applied !== undefined ? meta.typed_target_extraction_applied : 'unknown',
     repo_file_targets_count: meta.repo_file_targets_count !== undefined ? meta.repo_file_targets_count : 'unknown',
     semantic_targets_count: meta.semantic_targets_count !== undefined ? meta.semantic_targets_count : 'unknown',
@@ -2209,6 +2246,14 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- work_focus_target_derivation_sources: ' + (Array.isArray(scorecard.work_focus_target_derivation_sources) ? (scorecard.work_focus_target_derivation_sources.length ? scorecard.work_focus_target_derivation_sources.join(', ') : '(none)') : scorecard.work_focus_target_derivation_sources),
     // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: dropped low-confidence prose fragments.
     '- work_focus_targets_dropped_low_confidence: ' + (Array.isArray(scorecard.work_focus_targets_dropped_low_confidence) ? (scorecard.work_focus_targets_dropped_low_confidence.length ? scorecard.work_focus_targets_dropped_low_confidence.join(', ') : '(none)') : scorecard.work_focus_targets_dropped_low_confidence),
+    '- foundup_work_grounding_applied: ' + scorecard.foundup_work_grounding_applied,
+    '- foundup_work_grounding_passed: ' + scorecard.foundup_work_grounding_passed,
+    '- foundup_work_grounding_rejection_reasons: ' + (Array.isArray(scorecard.foundup_work_grounding_rejection_reasons) && scorecard.foundup_work_grounding_rejection_reasons.length ? scorecard.foundup_work_grounding_rejection_reasons.join(', ') : '(none)'),
+    '- foundup_work_grounding_receipt_id: ' + scorecard.foundup_work_grounding_receipt_id,
+    '- foundup_id: ' + scorecard.foundup_id,
+    '- foundup_module_path: ' + scorecard.foundup_module_path,
+    '- foundup_evidence_targets: ' + (Array.isArray(scorecard.foundup_evidence_targets) && scorecard.foundup_evidence_targets.length ? scorecard.foundup_evidence_targets.join(', ') : '(none)'),
+    '- foundup_grants_authority: ' + scorecard.foundup_grants_authority,
     '- typed_target_extraction_applied: ' + scorecard.typed_target_extraction_applied,
     '- repo_file_targets_count: ' + scorecard.repo_file_targets_count,
     '- semantic_targets_count: ' + scorecard.semantic_targets_count,
@@ -2610,19 +2655,6 @@ function addHoursIsoTimestamp(value, hours) {
   return new Date(base + hours * 60 * 60 * 1000).toISOString();
 }
 
-function deriveAllowedPathsFromTargets(targets) {
-  const scopes = [];
-  for (const target of Array.isArray(targets) ? targets : []) {
-    const normalized = stripSymbolSuffix(normalizeTargetPath(target));
-    if (!normalized || normalized.toLowerCase().startsWith('symbol:')) continue;
-    if (isTargetReadPathDenied(normalized)) continue;
-    const slash = normalized.lastIndexOf('/');
-    if (slash <= 0) continue;
-    scopes.push(normalized.slice(0, slash + 1) + '**');
-  }
-  return uniqueStrings(scopes).slice(0, 12);
-}
-
 function normalizePermissionSnapshotBinding(input, fallbackSnapshot, nowIso) {
   const fallback = fallbackSnapshot && typeof fallbackSnapshot === 'object' ? fallbackSnapshot : {};
   const raw = input && typeof input === 'object' ? input : null;
@@ -2716,7 +2748,13 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
     : (Array.isArray(construction.required_targets_authoritative_paths)
       ? construction.required_targets_authoritative_paths.slice()
       : []);
-  const allowedPaths = uniqueStrings(opts.allowedPaths || deriveAllowedPathsFromTargets(requiredTargets));
+  const foundupBinding = foundupWorkRuntime.workOrderBinding(opts.groundingPreflight,
+    opts.registeredFoundupTargetReceipt, opts.allowedPaths);
+  const foundupTarget = foundupBinding.receipt;
+  const foundupTargetValid = foundupBinding.targetValid;
+  const safeMutationSurfaces = foundupBinding.safe;
+  const requestedScopeValid = foundupBinding.scopeValid;
+  const allowedPaths = foundupBinding.allowed;
   const deniedPaths = uniqueStrings(opts.deniedPaths || ['.env', '.env.*', '**/.env', '**/.git/**']);
   const workFocusDigest = construction.work_focus_digest && construction.work_focus_digest.hash
     ? construction.work_focus_digest.hash
@@ -2778,6 +2816,10 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
     repo_permission_snapshot: permissionSnapshot,
     requested_operation: String(opts.requestedOperation || 'feature_slice'),
     authority_tier: String(opts.authorityTier || 'source'),
+    foundup_id: foundupTarget && foundupTarget.foundup_id || null,
+    registered_foundup_target_receipt_id: foundupTarget && foundupTarget.receipt_id || null,
+    registered_foundup_target_receipt: foundupTarget ? _safeJsonClone(foundupTarget) : null,
+    safe_mutation_surface_digest: canonicalWorkOrderDigest({ safe_mutation_surfaces: safeMutationSurfaces }),
     allowed_paths: allowedPaths,
     denied_paths: deniedPaths,
     branch_name: String(opts.branchName || ('feat/reddog-' + workOrderId.slice('rdog-wo-'.length))),
@@ -2801,7 +2843,9 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
       command_digest: commandDigest,
       work_focus_digest: workFocusDigest,
       wsp_prompt_digest: wspPromptDigest,
-      handoff_target: rec.target || 'none'
+      handoff_target: rec.target || 'none',
+      registered_foundup_target_receipt_id: foundupTarget && foundupTarget.receipt_id || null,
+      safe_mutation_surface_digest: canonicalWorkOrderDigest({ safe_mutation_surfaces: safeMutationSurfaces })
     }),
     advisory_only_source_packet: {
       work_focus_digest: workFocusDigest,
@@ -2814,6 +2858,8 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
     permissionBinding.observed === true
     && permissionBinding.fresh === true
     && allowedPaths.length > 0
+    && foundupTargetValid
+    && requestedScopeValid
     && signatureBinding.verified === true
     && opts.explicitValveRequested === true
   );
@@ -2853,6 +2899,8 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
       permissionBinding.fresh === true ? '' : 'permission_snapshot_stale_or_missing',
       permissionBinding.probe_performed === true ? '' : 'fresh_github_permission_probe_missing',
       allowedPaths.length === 0 ? 'allowed_paths_missing_or_unverified' : '',
+      foundupTargetValid ? '' : 'registered_foundup_target_receipt_invalid',
+      requestedScopeValid ? '' : 'allowed_paths_exceed_manifest_safe_mutation_surface',
       signatureBinding.verified === true ? '' : 'signed_work_authority_not_verified',
       signatureBinding.provided === true && signatureBinding.work_order_id_matches !== true ? 'signed_work_authority_work_order_mismatch' : '',
       opts.explicitValveRequested === true ? '' : 'explicit_worktree_valve_not_requested'
@@ -3048,44 +3096,6 @@ function inferWardrobeAuthorityRequest(workFocus, handoffRecommendation) {
   return 'none';
 }
 
-function buildWardrobeGroundingPreflightReceipt(holoScorecard, options) {
-  const scorecard = holoScorecard && typeof holoScorecard === 'object' ? holoScorecard : {};
-  const opts = options && typeof options === 'object' ? options : {};
-  const explicit = opts.groundingPreflight && typeof opts.groundingPreflight === 'object'
-    ? opts.groundingPreflight
-    : null;
-  const source = explicit || scorecard;
-  const rawReasons = Array.isArray(source.grounding_preflight_rejection_reasons)
-    ? source.grounding_preflight_rejection_reasons
-    : (Array.isArray(source.rejection_reasons) ? source.rejection_reasons : []);
-  const reasons = uniqueStrings(
-    rawReasons
-  );
-  const applied = explicit
-    ? source.applied === true
-    : source.grounding_preflight_applied === true;
-  const passed = explicit
-    ? source.passed === true
-    : source.grounding_preflight_passed === true;
-  return {
-    applied: applied,
-    passed: applied ? passed : true,
-    rejection_reasons: reasons,
-    repo_file_targets_count: numberFromScorecard(source.repo_file_targets_count),
-    semantic_targets_count: numberFromScorecard(source.semantic_targets_count),
-    semantic_targets_required: numberFromScorecard(source.semantic_targets_required),
-    semantic_targets_grounded: numberFromScorecard(source.semantic_targets_grounded),
-    semantic_targets_missing: Array.isArray(source.semantic_targets_missing) ? source.semantic_targets_missing.slice() : [],
-    semantic_target_coverage_digest: source.semantic_target_coverage_digest || '',
-    external_research_targets_count: numberFromScorecard(source.external_research_targets_count),
-    quoted_reference_blocks_count: numberFromScorecard(source.quoted_reference_blocks_count),
-    direct_read_required: source.direct_read_required === true || numberFromScorecard(source.repo_file_targets_count) > 0,
-    semantic_grounding_required: source.semantic_grounding_required === true || numberFromScorecard(source.semantic_targets_count) > 0,
-    external_research_required: source.external_research_required === true || numberFromScorecard(source.external_research_targets_count) > 0,
-    quoted_blocks_context_only: source.quoted_blocks_context_only === true || numberFromScorecard(source.quoted_reference_blocks_count) > 0
-  };
-}
-
 function buildWardrobeSelectionPayload(workFocus, holoScorecard, promptConstruction, handoffRecommendation, options) {
   const opts = options && typeof options === 'object' ? options : {};
   const construction = promptConstruction && typeof promptConstruction === 'object' ? promptConstruction : {};
@@ -3108,7 +3118,10 @@ function buildWardrobeSelectionPayload(workFocus, holoScorecard, promptConstruct
       ? construction.required_targets_authoritative_paths.slice()
       : [],
     target_recall_ok: scorecard.target_recall_ok === true,
-    grounding_preflight: buildWardrobeGroundingPreflightReceipt(scorecard, opts),
+    grounding_preflight: foundupWorkRuntime.wardrobePreflight(scorecard, opts),
+    registered_foundup_target_receipt: opts.groundingPreflight && opts.groundingPreflight.typed_targets
+      && opts.groundingPreflight.typed_targets.foundup_work_grounding && opts.groundingPreflight.typed_targets.foundup_work_grounding.applied === true
+      ? _safeJsonClone(opts.groundingPreflight.typed_targets.foundup_work_grounding) : null,
     wsp_refs: Array.isArray(opts.wspRefs) ? opts.wspRefs.slice() : ['WSP_00', 'WSP_15', 'WSP_46', 'WSP_95', 'WSP_97'],
     lane_refs: Array.isArray(opts.laneRefs) ? opts.laneRefs.slice() : [],
     continuation_packet_digest: opts.continuationPacketDigest || ''
@@ -3332,7 +3345,6 @@ function _normalizeSignatureResultForInvoke(value) {
     work_order_id: String(result.work_order_id || '')
   };
 }
-
 function buildWreOperationalSpineInvokePayload(preview, options) {
   const p = preview && typeof preview === 'object' ? preview : {};
   const opts = options && typeof options === 'object' ? options : {};
@@ -3353,6 +3365,12 @@ function buildWreOperationalSpineInvokePayload(preview, options) {
   if (!selectionReceipt || typeof selectionReceipt !== 'object') {
     rejectionReasons.push('selection_receipt_missing');
   }
+  if (workOrder && selectionReceipt && !foundupWorkRuntime.selectionMatches(workOrder.foundup_id,
+    workOrder.registered_foundup_target_receipt_id, selectionReceipt)) {
+    rejectionReasons.push('registered_foundup_target_selection_mismatch');
+  }
+  const workOrderFoundupTarget = workOrder && workOrder.registered_foundup_target_receipt;
+  if (workOrderFoundupTarget && !foundupWorkRuntime.verifyAtUse(opts.repoRoot || workspaceRoot(), workOrderFoundupTarget, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)) rejectionReasons.push('registered_foundup_target_use_time_verification_failed');
   const valveEnvironment = opts.valveEnvironment || opts.executionValveEnvironment || null;
   if (!valveEnvironment || typeof valveEnvironment !== 'object') {
     rejectionReasons.push('valve_environment_missing');
@@ -3507,7 +3525,6 @@ function buildOpenClawLiveEnqueueRuntimeBindingPayload(packet, selectionResult, 
   const opts = options && typeof options === 'object' ? options : {};
   const receipt = selection.receipt && typeof selection.receipt === 'object' ? selection.receipt : null;
   const reasons = [];
-
   if (gate.passed !== true) {
     reasons.push('runtime_consumption_gate_not_passed');
   }
@@ -3517,7 +3534,9 @@ function buildOpenClawLiveEnqueueRuntimeBindingPayload(packet, selectionResult, 
   if (!receipt) {
     reasons.push('selection_receipt_missing');
   }
-
+  const foundupTarget = opts.registeredFoundupTargetReceipt || null;
+  reasons.push.apply(reasons, foundupWorkRuntime.targetSelectionRejections(foundupTarget, receipt));
+  if (foundupTarget && !foundupWorkRuntime.verifyAtUse(opts.repoRoot || workspaceRoot(), foundupTarget, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)) reasons.push('registered_foundup_target_use_time_verification_failed');
   const adapterResult = _firstRuntimeArtifact(pkt, opts, ['adapterResult', 'openclaw_adapter_result', 'adapter_result']);
   const policyGateReceipt = _firstRuntimeArtifact(pkt, opts, ['policyGateReceipt', 'policy_gate_receipt']);
   const signedReceiptChainResult = _firstRuntimeArtifact(
@@ -3542,7 +3561,6 @@ function buildOpenClawLiveEnqueueRuntimeBindingPayload(packet, selectionResult, 
   if (!valveDecision) {
     reasons.push('valve_decision_missing');
   }
-
   if (reasons.length) {
     return {
       ok: false,
@@ -3550,13 +3568,14 @@ function buildOpenClawLiveEnqueueRuntimeBindingPayload(packet, selectionResult, 
       payload: null
     };
   }
-
   return {
     ok: true,
     rejection_reasons: [],
     payload: {
       explicit_live_enqueue_requested: true,
       selection_receipt: _safeJsonClone(receipt),
+      registered_foundup_target_receipt: foundupTarget ? _safeJsonClone(foundupTarget) : null,
+      repo_root: opts.repoRoot ? String(opts.repoRoot) : workspaceRoot(),
       adapter_result: _safeJsonClone(adapterResult),
       policy_gate_receipt: _safeJsonClone(policyGateReceipt),
       signed_receipt_chain_result: _safeJsonClone(signedReceiptChainResult),
@@ -3568,7 +3587,6 @@ function buildOpenClawLiveEnqueueRuntimeBindingPayload(packet, selectionResult, 
     }
   };
 }
-
 function buildOpenClawLiveEnqueueRuntimeBindingResult(decision, fields) {
   const payload = fields && typeof fields === 'object' ? fields : {};
   return Object.assign({
@@ -3680,13 +3698,18 @@ function buildResidentArchitectSessionPayload(workFocus, options) {
   if (!groundedTargetContinuity.receiptReady(groundingReceipt)) {
     return { ok: false, rejection_reasons: ['grounded_target_receipt_not_ready'], payload: null };
   }
+  const residentFoundupTarget = groundingReceipt.registered_foundup_target;
+  if (residentFoundupTarget && !foundupWorkRuntime.verifyAtUse(opts.repoRoot || workspaceRoot(), residentFoundupTarget, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)) return { ok: false, rejection_reasons: ['registered_foundup_target_use_time_verification_failed'], payload: null };
   const authenticatedPrincipal = String(
     opts.authenticatedPrincipal || process.env.REDDOG_AUTHENTICATED_PRINCIPAL_ID || ''
   ).trim();
   const authorizedFoundupIds = Array.isArray(opts.authorizedFoundupIds)
     ? opts.authorizedFoundupIds.map((item) => String(item || '').trim()).filter(Boolean)
     : String(process.env.REDDOG_AUTHORIZED_FOUNDUP_IDS || '').split(',').map((item) => item.trim()).filter(Boolean);
-  const foundupId = String(opts.foundupId || authorizedFoundupIds[0] || '').trim();
+  const { foundupId, conflict: foundupConflict } = foundupWorkRuntime.residentScope(groundingReceipt, opts.foundupId);
+  if (foundupConflict) {
+    return { ok: false, rejection_reasons: ['resident_architect_grounded_foundup_mismatch'], payload: null };
+  }
   if (!authenticatedPrincipal || !foundupId || !authorizedFoundupIds.includes(foundupId)) {
     return { ok: false, rejection_reasons: ['resident_architect_authenticated_scope_missing'], payload: null };
   }
@@ -5800,6 +5823,7 @@ function wireFusionWebview(context, webview, worker, state) {
         promptConstruction: promptConstruction,
         contextMode: contextMode,
         holoScorecard: holoScorecard,
+        groundingPreflight: groundingPreflight,
         repoPermissionSnapshot: githubPermissionProbeResult && githubPermissionProbeResult.repo_permission_snapshot
       })
       : null;
@@ -5815,6 +5839,8 @@ function wireFusionWebview(context, webview, worker, state) {
     )
       ? invokeOpenClawLiveEnqueueRuntimeBindingBridge(context, result, operatorWardrobeSelectionResult, runtimeConsumptionGate, {
         seenLiveEnqueueKeys: state.liveEnqueueKeys,
+        registeredFoundupTargetReceipt: groundingPreflight.typed_targets
+          && groundingPreflight.typed_targets.foundup_work_grounding,
         enableConcreteWriter: false
       })
       : null;
@@ -6421,6 +6447,7 @@ function requiredTargetSectionSurvived(text, target) {
 
 function buildBoundedRepoContext(mode, taskText) {
   const root = workspaceRoot();
+  const typedTargetsForContext = extractTypedTargets(taskText, root);
   const sections = [
     '## WSP_OPERATING_CONTRACT',
     '- You are a resident RedDog 0102 architect thin-client surface. 012 remains the external principal and final decision holder.',
@@ -6441,7 +6468,7 @@ function buildBoundedRepoContext(mode, taskText) {
   let audit_context = false;
   if (mode === 'none') {
     const text = sections.join('\n');
-    return { text, summary: 'Repo context: WSP operating contract only.', quality, holoindex_meta, holoindex_scorecard, audit_context, direct_read_hits: [] };
+    return { text, summary: 'Repo context: WSP operating contract only.', quality, holoindex_meta, holoindex_scorecard, audit_context, direct_read_hits: [], typed_targets: typedTargetsForContext };
   }
   // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: the head sections (WSP contract +
   // BOUNDED_REPO_CONTEXT preamble) always lead. Lower-priority sections (HoloIndex raw
@@ -6454,7 +6481,6 @@ function buildBoundedRepoContext(mode, taskText) {
   // required set the recall/direct-read layer uses -- the explicit header list MERGED with
   // work-focus-derived paths. Using the merged collector (not the header-only parser) ensures a
   // derived target that was direct-read is also packed into the protected block and proven present.
-  const typedTargetsForContext = extractTypedTargets(taskText);
   let requiredTargets = typedTargetsForContext.repo_file_targets.slice();
   let repoAuditProjection = null;
   let directReadSection = null;
@@ -6510,7 +6536,8 @@ function buildBoundedRepoContext(mode, taskText) {
   }
   let targetContentMeta = null;
   if (mode !== 'none') {
-    const targetSection = buildTargetRecallContentSection(root, taskText || '', 24000);
+    const evidenceTaskText = taskTextWithDiscoveredRepoTargets(taskText || '', requiredTargets);
+    const targetSection = buildTargetRecallContentSection(root, evidenceTaskText, 24000);
     // ADDENDUM B (3): when explicit required targets exist, demote/OMIT the self-file
     // target-recall snippet (extensions/reddog/extension.js) so it
     // cannot consume the protected required-target budget. Its meta is still recorded.
@@ -6613,6 +6640,8 @@ function buildBoundedRepoContext(mode, taskText) {
       ? holoindex_meta.repo_audit_grounding
       : null,
     repo_audit_projection: repoAuditProjection,
+    typed_targets: typedTargetsForContext,
+    foundup_work_grounding: typedTargetsForContext.foundup_work_grounding,
     direct_read_hits: directReadSection && Array.isArray(directReadSection.hits)
       ? directReadSection.hits.slice()
       : []
@@ -7492,9 +7521,10 @@ function mergeGenerationBoundHoloResult(bundleOutput, ownerResult) {
 }
 
 function holoIndexOutput(root, taskText, maxChars) {
-  const typedTargets = extractTypedTargets(taskText);
+  const typedTargets = extractTypedTargets(taskText, root);
+  const foundupGrounding = typedTargets.foundup_work_grounding;
   const queryPlan = semanticGroundingPolicy.buildEffectiveHoloQuery(taskText, typedTargets.semantic_targets);
-  const query = queryPlan.effective_query;
+  const query = foundupGrounding && foundupGrounding.applied === true && foundupGrounding.passed === true ? queryPlan.effective_query + '\nRegistered FoundUp: ' + foundupGrounding.foundup_id + '\nModule: ' + (foundupGrounding.module_path || 'external') : queryPlan.effective_query;
   const repoAuditIntent = repoAuditGrounding.detectRepoAuditIntent(taskText);
   const moduleHint = repoAuditGrounding.moduleHintForRepoAudit(taskText, moduleHintFromActive(root, taskText));
   const repoDeepDiveRequested = isRepoDeepDiveRequest(taskText);
@@ -7528,7 +7558,7 @@ function holoIndexOutput(root, taskText, maxChars) {
     if (requestedMode === 'semantic') {
       output = mergeGenerationBoundHoloResult(output, ownerResult);
     }
-    let evidenceTaskText = taskText;
+    let evidenceTaskText = taskTextWithDiscoveredRepoTargets(taskText, typedTargets.repo_file_targets);
     let repoDeepDiveDiscovery = repoDeepDiveRequested
       ? discoverRepoDeepDiveTargets(root, taskText, output, REPO_DEEP_DIVE_MAX_TARGETS)
       : {
@@ -7539,11 +7569,14 @@ function holoIndexOutput(root, taskText, maxChars) {
           semantic_paths: [],
           targets: []
         };
-    if (repoDeepDiveDiscovery.targets.length) {
-      evidenceTaskText = taskTextWithDiscoveredRepoTargets(taskText, repoDeepDiveDiscovery.targets);
-    }
+    evidenceTaskText = taskTextWithDiscoveredRepoTargets(
+      taskText,
+      uniqueStrings(typedTargets.repo_file_targets.concat(repoDeepDiveDiscovery.targets))
+    );
     let meta = holoIndexMetaFromBundle(output, false, evidenceTaskText);
     applyRepoDeepDiveDiscoveryMeta(meta, repoDeepDiveDiscovery);
+    foundupWorkRuntime.applyGroundingMeta(meta, foundupGrounding);
+    foundupWorkRuntime.applyTypedMeta(meta, typedTargets);
     meta.requested_retrieval_mode = requestedMode;
     // Semantic-owner failure withholds semantic hits, but it must not suppress
     // governed direct reads for repository targets already discovered locally.
@@ -7556,7 +7589,9 @@ function holoIndexOutput(root, taskText, maxChars) {
     // cannot silently defeat the strict === true trigger condition below.
     const indexGap = meta.index_gap_detected === true || meta.index_gap_detected === 'true';
     let fetchTelemetry = null;
-    if (indexGap && missing.length) {
+    const foundupEvidenceRequired = foundupGrounding
+      && foundupGrounding.applied === true && foundupGrounding.passed === true;
+    if ((indexGap || foundupEvidenceRequired) && missing.length) {
       const mustInclude = buildMustIncludeArgs(missing);
       if (mustInclude.length) {
         // REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1: buffer + timeout
@@ -7591,6 +7626,8 @@ function holoIndexOutput(root, taskText, maxChars) {
           output = enriched;
           meta = holoIndexMetaFromBundle(enriched, false, evidenceTaskText);
           applyRepoDeepDiveDiscoveryMeta(meta, repoDeepDiveDiscovery);
+          foundupWorkRuntime.applyGroundingMeta(meta, foundupGrounding);
+          foundupWorkRuntime.applyTypedMeta(meta, typedTargets);
           meta.requested_retrieval_mode = requestedMode;
         } catch (fetchErr) {
           // Fetch failure must not abort recall; keep the pre-fetch bundle+meta,
@@ -7652,11 +7689,14 @@ function holoIndexOutput(root, taskText, maxChars) {
             semantic_paths: [],
             targets: []
           };
-      const fallbackEvidenceTaskText = fallbackDiscovery.targets.length
-        ? taskTextWithDiscoveredRepoTargets(taskText, fallbackDiscovery.targets)
-        : taskText;
+      const fallbackEvidenceTaskText = taskTextWithDiscoveredRepoTargets(
+        taskText,
+        uniqueStrings(typedTargets.repo_file_targets.concat(fallbackDiscovery.targets))
+      );
       const meta = holoIndexMetaFromBundle(output, !ownerAccepted, fallbackEvidenceTaskText);
       applyRepoDeepDiveDiscoveryMeta(meta, fallbackDiscovery);
+      foundupWorkRuntime.applyGroundingMeta(meta, foundupGrounding);
+      foundupWorkRuntime.applyTypedMeta(meta, typedTargets);
       const fallbackGate = evaluateRepoDeepDiveGate(meta, null);
       meta.repo_deep_dive_gate_applied = fallbackGate.applied;
       meta.repo_deep_dive_gate_passed = fallbackGate.passed;
@@ -7679,14 +7719,14 @@ function holoIndexOutput(root, taskText, maxChars) {
         output: '[HoloIndex unavailable: ' + (offlineErr && offlineErr.message ? offlineErr.message.slice(0, 180) : 'unknown') + ']',
         quality: 'HoloIndex unavailable. Use supplied editor/git evidence only; propose HoloIndex recovery as a fix when retrieval affects the decision.',
         meta: Object.assign(
-          applyRepoDeepDiveDiscoveryMeta(holoIndexMetaFromBundle('', false, taskText), {
+          foundupWorkRuntime.applyTypedMeta(foundupWorkRuntime.applyGroundingMeta(applyRepoDeepDiveDiscoveryMeta(holoIndexMetaFromBundle('', false, taskTextWithDiscoveredRepoTargets(taskText, typedTargets.repo_file_targets)), {
             requested: repoDeepDiveRequested,
             manifest_generated: false,
             manifest_file_count: 0,
             concepts: repoDeepDiveConcepts(taskText),
             semantic_paths: [],
             targets: []
-          }),
+          }), foundupGrounding), typedTargets),
           queryPlan,
           {
             repo_deep_dive_gate_applied: repoDeepDiveRequested,
@@ -8273,6 +8313,7 @@ module.exports = {
   repoFileIndex,
   discoverRepoDeepDiveTargets,
   taskTextWithDiscoveredRepoTargets,
+  applyFoundupWorkGroundingMeta: foundupWorkRuntime.applyGroundingMeta,
   evaluateRepoDeepDiveGate,
   moduleHintFromActive,
   buildRequiredTargetProtectedSection,
@@ -8312,7 +8353,6 @@ module.exports = {
   buildGovernedHandoffSection,
   buildRedDogGovernedWorkOrderCandidate,
   buildRedDogGovernedWorkOrderCandidateSection,
-  deriveAllowedPathsFromTargets,
   normalizePermissionSnapshotBinding,
   normalizeSignedAuthorityBinding,
   buildWreOperationalSpineDryRunPreview,

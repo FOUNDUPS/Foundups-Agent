@@ -201,6 +201,28 @@ def test_rejects_when_explicit_request_missing_before_writer_call() -> None:
     assert writer.calls == []
 
 
+def test_foundup_selection_without_backend_target_receipt_rejects_before_writer() -> None:
+    writer = _FakeWriter()
+    result = invoke_reddog_extension_live_enqueue_explicit_valve(
+        explicit_live_enqueue_requested=True,
+        selection_receipt=_selection_receipt(
+            foundup_id="trade",
+            registered_foundup_target_receipt_id="sha256:" + "a" * 64,
+        ),
+        adapter_result=_adapter(),
+        policy_gate_receipt=_policy(),
+        signed_receipt_chain_result=_chain(),
+        valve_decision=_valve(),
+        writer=writer,
+        admission_registry=_admission_registry(),
+        repo_root=REPO_ROOT,
+    )
+    assert result.decision == EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT
+    assert ExtensionLiveEnqueueInvokeReason.FOUNDUP_TARGET_INVALID in result.rejection_reasons
+    assert "registered_foundup_target_receipt_missing" in result.rejection_reasons
+    assert writer.calls == []
+
+
 def test_rejects_missing_selection_receipt_before_writer_call() -> None:
     writer = _FakeWriter()
     result = invoke_reddog_extension_live_enqueue_explicit_valve(

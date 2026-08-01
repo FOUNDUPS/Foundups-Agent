@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const foundupWorkGrounding = require('./foundup_work_grounding');
 
 const SCHEMA_VERSION = 'reddog_grounded_target_receipt.v1';
 
@@ -46,10 +47,19 @@ function frozenTypedTargets(preflight) {
   };
 }
 
+function frozenFoundupTarget(preflight) {
+  const typed = preflight && preflight.typed_targets && typeof preflight.typed_targets === 'object'
+    ? preflight.typed_targets : {};
+  const value = typed.foundup_work_grounding;
+  if (!value || value.applied !== true) return null;
+  return JSON.parse(JSON.stringify(value));
+}
+
 function buildGroundedTargetReceipt(workFocus, groundingPreflight, holoScorecard, sourceSurface) {
   const preflight = groundingPreflight && typeof groundingPreflight === 'object' ? groundingPreflight : {};
   const scorecard = holoScorecard && typeof holoScorecard === 'object' ? holoScorecard : {};
   const typed = frozenTypedTargets(preflight);
+  const foundupTarget = frozenFoundupTarget(preflight);
   const coverage = Array.isArray(preflight.semantic_target_coverage)
     ? preflight.semantic_target_coverage.slice()
     : [];
@@ -59,6 +69,9 @@ function buildGroundedTargetReceipt(workFocus, groundingPreflight, holoScorecard
     work_focus_digest: canonicalDigest({ work_focus: String(workFocus || '') }),
     typed_targets: typed,
     typed_targets_digest: canonicalDigest(typed),
+    registered_foundup_target: foundupTarget,
+    registered_foundup_target_receipt_id: foundupTarget && foundupTarget.receipt_id || '',
+    foundup_id: foundupTarget && foundupTarget.foundup_id || '',
     grounding_preflight_applied: preflight.applied === true,
     grounding_preflight_passed: preflight.passed === true,
     grounding_preflight_rejection_reasons: strings(preflight.rejection_reasons),
@@ -90,10 +103,17 @@ function receiptReady(receipt) {
   const targetCount = strings(typed.repo_file_targets).length
     + strings(typed.semantic_targets).length
     + strings(typed.external_research_targets).length;
+  const foundupTarget = value.registered_foundup_target;
+  const foundupReady = !foundupTarget || (
+    foundupWorkGrounding.receiptIntegrityValid(foundupTarget)
+    && value.registered_foundup_target_receipt_id === foundupTarget.receipt_id
+    && value.foundup_id === foundupTarget.foundup_id
+  );
   return value.schema_version === SCHEMA_VERSION
     && value.grounding_preflight_applied === true
     && value.grounding_preflight_passed === true
     && (!value.grounding_target_universe_required || targetCount > 0)
+    && foundupReady
     && value.receipt_id === canonicalDigest(Object.fromEntries(
       Object.entries(value).filter(([key]) => key !== 'receipt_id')
     ));

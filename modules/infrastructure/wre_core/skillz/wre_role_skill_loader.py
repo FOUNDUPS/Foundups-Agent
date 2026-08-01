@@ -139,10 +139,11 @@ def _metadata_matches(
     )
 
 def _frontmatter(content: str) -> Mapping[str, Any]:
-    if not content.startswith("---\n"):
+    normalized = content.replace("\r\n", "\n")
+    if not normalized.startswith("---\n"):
         return {}
-    end = content.find("\n---\n", 4)
-    value = yaml.safe_load(content[4:end]) if end >= 0 else None
+    end = normalized.find("\n---\n", 4)
+    value = yaml.safe_load(normalized[4:end]) if end >= 0 else None
     return value if isinstance(value, Mapping) else {}
 
 def _metadata_healthy(metadata: Mapping[str, Any]) -> bool:

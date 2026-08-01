@@ -1,5 +1,23 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-02 - Registry-driven FoundUp work grounding (0.4.46)
+
+- Added generic resolver regressions across every canonical registry entity,
+  conversational and cross-domain aliases, unknown/ambiguous identity,
+  malformed registry/schema, traversal, dirty authority files, sensitive
+  evidence paths, deterministic receipt, tampering, no hard-coded names, and
+  no execution surfaces.
+- Added extension integration checks proving registry targets reach typed
+  grounding; identity survives continuity, wardrobe, work-order, WRE,
+  OpenClaw, and resident-intent handoffs; missing evidence or widened mutation
+  scope blocks; and direct-read evidence grants no authority.
+- Added reviewer-driven regressions for recomputed forged receipts, nested
+  mutation, checked-in schema conditionals, missing wardrobe use-time proof,
+  and stale checkout rejection at WRE, OpenClaw, and resident dispatch.
+- Reproduced the AntiFaFM direct-read budget failure through the real Holo
+  bundle and proved mandatory evidence now fits. Added conversational generic
+  and named-target grammar cases plus Python IPC boundary rejection tests.
+
 ## 2026-08-01 - Authority-worktree semantic owner repair (0.4.45)
 
 - Added authority/workspace runtime-root forwarding regressions and

@@ -47,6 +47,11 @@ def test_canonical_operations_skill_is_role_bound_and_model_independent() -> Non
     assert "approved Memex, Breadcrumb continuity, Brain history" in skill.content
     assert "historical artifact metadata" in skill.content
     assert "label unavailable content NEEDS_VERIFICATION" in skill.content
+    assert "Registered FoundUp Work" in skill.content
+    assert "foundup_registry.json" in skill.content
+    assert "requires_wsp109_resolution" in skill.content
+    assert "grant no mutation scope until resolved" in skill.content
+    assert "exactly one bounded REUSE or EXTEND slice" in skill.content
     assert not {
         "agents",
         "primary_agent",
