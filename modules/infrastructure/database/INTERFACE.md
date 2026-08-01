@@ -164,6 +164,10 @@ Generic task creation, assignment, completion, retry, and requeue methods
 reject the complete `holoindex_postmerge_refresh:*` namespace. Dedicated
 methods validate the exact lowercase Git SHA, coordinator schema/source,
 authority-root digest, request event, and stored context before mutation.
+Retry may change only `retry_count` by exactly one and `retry_not_before` to
+the separately supplied retry timestamp. Independent-assurance APIs reject
+the HoloIndex post-merge namespace as either author or verifier, including
+rehydrated legacy rows; signed-worker assurance remains unchanged.
 The claim is a `pending -> assigned` compare-and-swap over the exact serialized
 context. It publishes a one-use claim ID, canonical context digest, and
 expiry in the same transaction. The executor must atomically consume that

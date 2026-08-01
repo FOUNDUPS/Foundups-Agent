@@ -2,14 +2,14 @@ exemptions:
   - file: "src/agent_db.py"
     reason: >-
       Inherited AgentDB coordination monolith. The signed-worker security
-      repairs reduce this file from 3227 to 3155 lines and delegate new
+      repairs reduce this file from 3227 to 3129 lines and delegate new
       execution, lease, quarantine, result-ledger, and assurance behavior to
       bounded sibling modules, including the protected HoloIndex post-merge
       namespace. Splitting the remaining public compatibility
       surface requires a dedicated migration with database parity coverage.
-    threshold_override: 3155
-    function_threshold_override: 3007
-    class_threshold_override: 3007
+    threshold_override: 3129
+    function_threshold_override: 2981
+    class_threshold_override: 2981
     functions:
       - "_init_tables"
       - "_migrate_legacy_tables"
@@ -31,7 +31,7 @@ exemptions:
     remediation: >-
       modules/infrastructure/database/README.md#agentdb-decomposition-plan
     no_growth_ceiling:
-      file_lines: 3155
+      file_lines: 3129
       functions:
         _init_tables: 297
         _migrate_legacy_tables: 72
@@ -40,9 +40,9 @@ exemptions:
         start_holoindex_postmerge_execution: 61
         fail_holoindex_postmerge_task: 61
         commit_holoindex_postmerge_completion: 147
-        _validate_assurance_task_binding: 85
+        _validate_assurance_task_binding: 84
         reserve_independent_assurance: 248
         renew_independent_assurance: 249
         revoke_independent_assurance: 91
       classes:
-        AgentDB: 3007
+        AgentDB: 2981

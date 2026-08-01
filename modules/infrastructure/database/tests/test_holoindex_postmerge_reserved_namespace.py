@@ -12,6 +12,10 @@ from modules.infrastructure.database.src.db_manager import DatabaseManager
 from modules.infrastructure.database.src.holoindex_postmerge_task_namespace import (
     HOLOINDEX_POSTMERGE_TASK_PREFIX,
 )
+from modules.infrastructure.database.tests.signed_worker_assurance_test_support import (
+    _request as _assurance_request,
+    _seed_tasks as _seed_assurance_tasks,
+)
 
 
 SHA = "a" * 40
@@ -133,6 +137,7 @@ def test_protected_retry_lane_preserves_coordinator_operation(
     )
     retry_context = {**_context(), "retry_count": 1}
     retry_at = "2026-08-01T00:00:00+00:00"
+    retry_context["retry_not_before"] = retry_at
 
     assert agent_db.schedule_holoindex_postmerge_task_retry(
         TASK_ID,
@@ -164,6 +169,111 @@ def test_protected_retry_rejects_tampered_stored_binding(
         expected_status="failed",
     )
     assert agent_db.get_autonomous_task_by_id(TASK_ID)["status"] == "failed"
+
+
+@pytest.mark.parametrize(
+    "retry_context",
+    [
+        {
+            **_context(),
+            "authority_root_digest": "sha256:" + "c" * 64,
+            "retry_count": 1,
+            "retry_not_before": "2026-08-01T00:00:00+00:00",
+        },
+        {
+            **_context(),
+            "retry_count": 999,
+            "retry_not_before": "2026-08-01T00:00:00+00:00",
+        },
+    ],
+)
+def test_protected_retry_rejects_supplied_authority_or_sequence_rewrite(
+    agent_db: AgentDB,
+    retry_context: dict[str, Any],
+) -> None:
+    _create_protected(agent_db)
+    agent_db.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET status = 'failed' WHERE task_id = ?",
+        (TASK_ID,),
+    )
+    before = _raw_task(agent_db)
+
+    assert not agent_db.schedule_holoindex_postmerge_task_retry(
+        TASK_ID,
+        context=retry_context,
+        retry_not_before="2026-08-01T00:00:00+00:00",
+    )
+    assert _raw_task(agent_db) == before
+
+
+@pytest.mark.parametrize("protected_field", ["author_task_id", "verifier_task_id"])
+def test_assurance_reservation_rejects_protected_task_binding(
+    agent_db: AgentDB,
+    protected_field: str,
+) -> None:
+    _seed_assurance_tasks(agent_db)
+    _create_protected(agent_db)
+    before = _raw_task(agent_db)
+
+    result = agent_db.reserve_independent_assurance(
+        _assurance_request(**{protected_field: TASK_ID})
+    )
+
+    assert result["accepted"] is False
+    assert any(
+        "task_namespace_protected" in reason
+        for reason in result["rejection_reasons"]
+    )
+    assert _raw_task(agent_db) == before
+
+
+def test_forged_legacy_assurance_binding_cannot_mutate_protected_task(
+    agent_db: AgentDB,
+) -> None:
+    _seed_assurance_tasks(agent_db)
+    _create_protected(agent_db)
+    assert agent_db.reserve_independent_assurance(_assurance_request())["accepted"]
+    agent_db.db.execute_write(
+        "UPDATE agents_independent_assurance_reservations "
+        "SET verifier_task_id = ? WHERE reservation_id = ?",
+        (TASK_ID, "assurance-1"),
+    )
+    before = _raw_task(agent_db)
+
+    rehydrated = agent_db.get_independent_assurance_reservation("assurance-1")
+    revoked = agent_db.revoke_independent_assurance(
+        "assurance-1",
+        reason="security-test",
+        now_iso="2026-08-01T00:00:00+00:00",
+    )
+    staged = agent_db.stage_independent_assurance_completion(
+        {"verifier_task_id": TASK_ID}
+    )
+    agent_db.db.execute_write(
+        "UPDATE agents_independent_assurance_reservations SET status = 'EXPIRED' "
+        "WHERE reservation_id = ?",
+        ("assurance-1",),
+    )
+    renewed = agent_db.renew_independent_assurance(
+        _assurance_request(
+            verifier_task_id=TASK_ID,
+            lease_id="lease-2",
+            renewal_count=1,
+        )
+    )
+    agent_db.db.execute_write(
+        "UPDATE agents_independent_assurance_reservations "
+        "SET status = 'RESERVED', expires_at = ? WHERE reservation_id = ?",
+        ("2000-01-01T00:00:00Z", "assurance-1"),
+    )
+    expired = agent_db.expire_independent_assurance_reservations(
+        now_iso="2030-08-01T00:00:00+00:00"
+    )
+
+    for result in (rehydrated, renewed, revoked, expired, staged):
+        assert result is not None
+        assert result["accepted"] is False
+    assert _raw_task(agent_db) == before
 
 
 def test_postmerge_reclaim_rejects_noncanonical_task_id(

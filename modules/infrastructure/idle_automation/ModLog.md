@@ -22,6 +22,8 @@ This log tracks changes specific to the **idle_automation** module in the **infr
   requeue the reserved task namespace.
 - Stored task bindings are revalidated before retry/requeue effects, and
   malformed or cross-namespace reclamation fails closed.
+- Retry can update only its monotonic counter and retry timestamp; independent
+  assurance cannot claim or mutate a post-merge task through another lane.
 
 ### 2026-07-30 - Post-merge Holo owner runtime binding
 
