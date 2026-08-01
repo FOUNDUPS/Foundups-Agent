@@ -5,6 +5,9 @@ from __future__ import annotations
 import json
 from typing import Any, Mapping
 
+from .protected_autonomous_task_namespace import (
+    has_holoindex_postmerge_task_binding,
+)
 from .signed_worker_assurance_request import (
     canonical_request_digest,
     canonical_request_json,
@@ -167,7 +170,8 @@ def _reservation_accepts(
     )
     expires = parse_utc(str(reservation.get("expires_at") or ""))
     return (
-        reservation.get("status") == "RESERVED"
+        not has_holoindex_postmerge_task_binding(reservation)
+        and reservation.get("status") == "RESERVED"
         and reservation.get("verifier_task_id") == request["verifier_task_id"]
         and reservation.get("verifier_principal_id")
         == request["verifier_principal_id"]

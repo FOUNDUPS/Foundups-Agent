@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,7 @@ from modules.infrastructure.database.src.signed_worker_execution_quarantine impo
     quarantine_signed_worker_execution,
 )
 from modules.infrastructure.database.tests.signed_worker_assurance_test_support import (
+    _prepare_assurance_finalization,
     _request as _assurance_request,
     _seed_tasks as _seed_assurance_tasks,
 )
@@ -188,6 +190,26 @@ def test_protected_retry_rejects_tampered_stored_binding(
             "retry_count": 999,
             "retry_not_before": "2026-08-01T00:00:00+00:00",
         },
+        {
+            **_context(),
+            "retry_count": True,
+            "retry_not_before": "2026-08-01T00:00:00+00:00",
+        },
+        {
+            **_context(),
+            "retry_count": 1.0,
+            "retry_not_before": "2026-08-01T00:00:00+00:00",
+        },
+        {
+            **_context(),
+            "retry_count": "1",
+            "retry_not_before": "2026-08-01T00:00:00+00:00",
+        },
+        {
+            **_context(),
+            "retry_count": 1.9,
+            "retry_not_before": "2026-08-01T00:00:00+00:00",
+        },
     ],
 )
 def test_protected_retry_rejects_supplied_authority_or_sequence_rewrite(
@@ -324,6 +346,40 @@ def test_forged_legacy_assurance_binding_cannot_quarantine_protected_task(
     assert result == "REJECTED"
     assert _raw_task(agent_db) == before_holo
     assert agent_db.get_autonomous_task_by_id(signed_task_id) == before_author
+    assert agent_db.db.execute_query(
+        "SELECT * FROM agents_independent_assurance_reservations "
+        "WHERE reservation_id = ?",
+        ("assurance-1",),
+    )[0] == before_reservation
+
+
+def test_forged_holo_author_binding_cannot_stage_assurance_completion(
+    agent_db: AgentDB,
+) -> None:
+    _prepare_assurance_finalization(agent_db)
+    _create_protected(agent_db)
+    row = agent_db.db.execute_query(
+        "SELECT * FROM agents_independent_assurance_reservations "
+        "WHERE reservation_id = ?",
+        ("assurance-1",),
+    )[0]
+    completion = json.loads(row["staged_completion_json"])
+    agent_db.db.execute_write(
+        "UPDATE agents_independent_assurance_reservations SET author_task_id = ? "
+        "WHERE reservation_id = ?",
+        (TASK_ID, "assurance-1"),
+    )
+    before_holo = _raw_task(agent_db)
+    before_reservation = agent_db.db.execute_query(
+        "SELECT * FROM agents_independent_assurance_reservations "
+        "WHERE reservation_id = ?",
+        ("assurance-1",),
+    )[0]
+
+    result = agent_db.stage_independent_assurance_completion(completion)
+
+    assert result["accepted"] is False
+    assert _raw_task(agent_db) == before_holo
     assert agent_db.db.execute_query(
         "SELECT * FROM agents_independent_assurance_reservations "
         "WHERE reservation_id = ?",

@@ -5,11 +5,14 @@
 **What Changed**: Reserved `holoindex_postmerge_refresh:*` across generic task
 creation, assignment, completion, retry, and requeue APIs. Added bounded
 post-merge creation/retry/requeue/reclaim operations with exact-SHA and stored
-context validation. Retry changes are limited to the next sequence number and
-retry timestamp; authority bindings remain immutable. Independent-assurance
+context validation. Retry changes are limited to the next exact integer
+sequence number and retry timestamp; authority bindings remain immutable.
+Independent-assurance
 reservation, renewal, staging, expiry, and revocation reject any HoloIndex
 post-merge task binding, including forged legacy reservation rows. Signed-worker
 quarantine applies the same guard before either reservation or task mutation.
+Completion staging revalidates both durable reservation task bindings rather
+than trusting the verifier-only request shape.
 **Why**: A generic AgentDB caller could otherwise pre-seed, steal, complete, or
 strand the privileged maintenance task without passing its claim-bound owner.
 **Impact**: Only the dedicated coordinator lane mutates post-merge tasks;

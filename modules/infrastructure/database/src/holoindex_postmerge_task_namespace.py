@@ -82,12 +82,13 @@ def _retry_context_valid(
     mutable = {"retry_count", "retry_not_before"}
     old = {key: value for key, value in stored.items() if key not in mutable}
     new = {key: value for key, value in supplied.items() if key not in mutable}
-    try:
-        sequence_valid = int(supplied.get("retry_count")) == int(
-            stored.get("retry_count") or 0
-        ) + 1
-    except (TypeError, ValueError):
-        sequence_valid = False
+    stored_count = stored.get("retry_count")
+    supplied_count = supplied.get("retry_count")
+    sequence_valid = (
+        type(stored_count) is int
+        and type(supplied_count) is int
+        and supplied_count == stored_count + 1
+    )
     return old == new and sequence_valid and supplied.get("retry_not_before") == retry_at
 
 
