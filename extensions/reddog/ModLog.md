@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-08-01 - Authority-worktree semantic owner repair (0.4.45)
+
+- Bound one-shot HoloIndex owner dependencies to the validated calling
+  workspace while retaining repository code and generation proof in the clean
+  authority checkout.
+- Regenerated and pinned the backend compatibility manifest. No query-time
+  re-index, model fallback, or editor execution authority was added.
+
 ## 2026-07-30 - HoloIndex owner runtime compatibility release (0.4.44)
 
 - Regenerated the backend runtime manifest after binding nonsealed HoloIndex

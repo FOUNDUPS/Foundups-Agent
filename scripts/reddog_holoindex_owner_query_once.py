@@ -189,7 +189,12 @@ def query_once(
     try:
         while attempts < MAX_OWNER_ATTEMPTS:
             attempts += 1
-            bootstrap = ensure_owner(repo_root=authority_root, requested=True)
+            # Authority supplies repository bytes; workspace supplies vetted deps.
+            bootstrap = ensure_owner(
+                repo_root=authority_root,
+                runtime_root=repo_root,
+                requested=True,
+            )
             status = str(getattr(bootstrap, "status", ""))
             if getattr(bootstrap, "ready", False) is not True:
                 error = str(
