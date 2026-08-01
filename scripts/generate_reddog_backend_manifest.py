@@ -47,6 +47,8 @@ STATIC_RUNTIME_FILES = (
     "reddog_signer_system_service_entrypoint.py",
     "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md",
     "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
+    "modules/ai_intelligence/ai_overseer/skillz/"
+    "m2m_holo_retrieval_benchmark/retrieval_corpus_v1.json",
 )
 REPOSITORY_MARKERS = (
     "main.py",

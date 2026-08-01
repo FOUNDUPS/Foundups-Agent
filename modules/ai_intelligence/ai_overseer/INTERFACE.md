@@ -91,6 +91,12 @@ Execute one of the module-local M2M workflow skillz by name.
 **Safety**:
 - SKILL/boot-prompt content is rejected by compile gate (must remain verbatim).
 - Stage promotion requires explicit `target_path` (no inferred wildcard target).
+- `m2m_holo_retrieval_benchmark` is query-only. It rejects `reindex=true`,
+  requires non-empty relevance judgments, binds every query to the current
+  HoloIndex generation/freshness receipt, and returns benchmark plus verifier
+  receipts. It does not write reports or promote a generation.
+  The runtime uses the existing authenticated loopback owner client; callers
+  cannot inject an arbitrary query callback.
 
 ---
 

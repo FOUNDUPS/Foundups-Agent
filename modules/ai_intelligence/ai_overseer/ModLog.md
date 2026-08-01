@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-08-01 - HOLOINDEX_GENERATION_BOUND_RETRIEVAL_AUTORESEARCH_PHASE1
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 97
+
+- Replaced the M2M Holo benchmark's query-time reindex and CLI-text parsing
+  with the authenticated generation-bound owner query.
+- Added fixed public-regression relevance requirements and deterministic
+  Recall@K, MRR, nDCG@K, mean-latency, and p95-latency evidence. This corpus is
+  excluded from train but is not independent promotion evidence.
+- Removed repository-local latest/JSONL writes from the query path. The skill
+  now returns a benchmark run and deterministically recomputed verification
+  receipt; it performs no generation promotion.
+- Reused the existing authenticated loopback owner client directly and removed
+  arbitrary query-runner injection from the public Skillz boundary.
+- Bound every run to the exact repository root and current Git HEAD, and made
+  relevance scoring case-exact over canonical repository paths.
+
+---
+
 ## 2026-07-14 - MAIN_MENU_WRE_DASHBOARD_PREFLIGHT_CONTEXT_GUARD_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 50, 97

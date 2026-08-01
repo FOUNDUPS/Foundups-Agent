@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -286,6 +287,18 @@ def _result_stale_reasons(result: Mapping[str, Any]) -> list[str]:
     return reasons
 
 
+def _observed_latency_ms(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        latency = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(latency) or latency < 0:
+        return None
+    return round(latency, 3)
+
+
 def _enforce_generation_binding(
     *,
     binding: Mapping[str, Any],
@@ -342,6 +355,7 @@ def build_query_receipt(
     result: Mapping[str, Any],
     require_generation: bool,
     generation_binding: Mapping[str, Any] | None = None,
+    hit_limit: int = 8,
 ) -> Mapping[str, Any]:
     """Normalize a query result into a deterministic receipt.
 
@@ -363,7 +377,9 @@ def build_query_receipt(
         stale_reasons=stale_reasons,
     )
     generation_id = str(binding.get("freshness_generation_id") or "")
-    hits = normalize_query_hits(result.get("hits"), source_class=source_class)
+    hits = normalize_query_hits(
+        result.get("hits"), source_class=source_class, limit=hit_limit
+    )
     _, semantic_evidence_digest, semantic_evidence_count = (
         canonical_semantic_evidence(result.get("raw_result"))
     )
@@ -389,6 +405,7 @@ def build_query_receipt(
         "no_holoindex_reindex_performed": True,
         "semantic_evidence_digest": semantic_evidence_digest,
         "semantic_evidence_count": semantic_evidence_count,
+        "observed_latency_ms": _observed_latency_ms(result.get("latency_ms")),
     }
     root_digest = str(binding.get("repo_root_digest") or "")
     if root_digest:

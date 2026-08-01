@@ -94,6 +94,21 @@ HoloIndex + **HoloDAE** = Complete autonomous code intelligence system:
 - **Offline Mode** ― run `python holo_index.py --offline --search "..."` to avoid model downloads and auto-install; cached model loads if present, otherwise lexical fallback is used.
 - **Fast Search Mode** ― run `python holo_index.py --offline --fast-search --search "..."` (or set `HOLO_FAST_SEARCH=1`) to skip heavy advisor/orchestration steps for low-latency retrieval.
 
+### Generation-Bound Retrieval AutoResearch (2026-08-01)
+
+`holo_index.retrieval_autoresearch` evaluates a pinned semantic generation
+against immutable train/public-regression corpus digests. The legacy
+`heldout_cases` field means only "excluded from train"; the checked-in queries
+are not independent promotion evidence. It emits per-query generation
+receipts and deterministic Recall@K, MRR, nDCG@K, and latency metrics. A
+deterministic verifier recomputes the metrics before a candidate can be
+reported as measured-better on that public regression corpus.
+
+This is a shadow evaluation boundary, not an indexer. It never re-indexes,
+changes ranking heuristics, writes outcomes, or promotes a generation. A
+comparison result is integrity evidence only; a separate sealed evaluation and
+signed WRE authority transaction must authorize any later promotion.
+
 ### Operational Storage and Restricted-Worker Queries (2026-07-18)
 
 HoloIndex storage is resolved once by the canonical contract: explicit

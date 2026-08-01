@@ -14,6 +14,8 @@ Structure:
 - `test_openclaw_security_sentinel.py` OpenClaw sentinel policy and cache behavior.
 - `test_ai_overseer_openclaw_security.py` AI Overseer sentinel wiring and monitor lifecycle.
 - `test_openclaw_security_alerts.py` OpenClaw security event emission, dispatch, and dedupe behavior.
+- `test_m2m_holo_retrieval_benchmark.py` generation-bound, non-mutating Holo
+  benchmark Skillz runtime coverage.
 
 ## Running Tests
 
@@ -33,5 +35,8 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/ai_intelligence/ai_ove
 
 - `AI_OVERSEER_WITNESS_LOOP=1` enables witness loop scenarios.
 - `AI_OVERSEER_HEAVY_TESTS=1` re-enables heavy regression files.
+
+The Holo retrieval benchmark tests are explicitly allowlisted in the default
+lane; broader legacy AI Overseer suites remain opt-in.
 
 Keep these flags off for fast deterministic runs; enable intentionally for full-stack validation.
