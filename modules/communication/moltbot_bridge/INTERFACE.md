@@ -898,40 +898,25 @@ Canonical 0102 lifecycle owner:
 - implementation: `src/openclaw_supervisor.py`
 - broker launch wrapper: `scripts/launch.py`
 
-Current explicit states:
-- `BOOT`
-- `PREFLIGHT`
-- `OBSERVE`
-- `TRIAGE`
-- `PLAN`
-- `EXECUTE`
-- `VERIFY`
-- `REMEMBER`
-- `ESCALATE`
-- `IDLE_WATCH`
-
+Current explicit states: `BOOT -> PREFLIGHT -> OBSERVE -> TRIAGE -> PLAN -> EXECUTE -> VERIFY -> REMEMBER -> ESCALATE -> IDLE_WATCH`.
 Current operational rule:
 - the supervisor owns the daemon self-audit loop when enabled
 - `main.py` only starts direct self-audit as a fallback when supervisor is disabled
 - resident OpenClaw restarts are policy-gated through the broker/runtime surface
-- restart attempts are bounded by `OPENCLAW_SUPERVISOR_MAX_RESTARTS` within `OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC`
+- restart attempts use `OPENCLAW_SUPERVISOR_MAX_RESTARTS` and `OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC`
 - when the repair budget is exhausted, the supervisor escalates instead of retrying indefinitely
 - the supervisor advances a DAEmon follow cursor every cycle so repair decisions are tied to observed runtime history
 - IronClaw runtime readiness is validated at startup before resident/runtime bootstrap when IronClaw is the selected backend
-- optional post-merge HoloIndex observation runs on one background worker;
-  OpenClaw claims each exact-SHA task with compare-and-swap semantics and the
-  domain executor owns atomic completion
-- the one-use claim ID and context digest are passed explicitly through
-  `execute_task`; CLI or in-process calls without that capability stop before
-  the authority transaction
+- post-merge HoloIndex observation uses one background worker; OpenClaw claims
+  each exact-SHA task with compare-and-swap semantics and the domain executor
+  owns atomic completion
+- `execute_task` requires the one-use claim ID and context digest; calls
+  without that capability stop before the authority transaction
 
 Post-merge HoloIndex configuration:
-
-- `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED=1` enables the observer.
-- `HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC` sets its bounded polling
-  interval (minimum 30 seconds).
-- `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` selects the absolute dedicated clean
-  authority worktree.
+- `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED` defaults to `1`; set `0` to disable.
+- `HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC` sets polling (minimum 30 seconds).
+- `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` selects the clean authority worktree.
 
 ### PQN Runtime Control
 

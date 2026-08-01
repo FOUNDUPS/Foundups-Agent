@@ -25,7 +25,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Mapping, Optional
 
 from .db_manager import DatabaseManager
-from .signed_worker_execution_store import is_signed_worker_task_id
+from . import holoindex_postmerge_task_namespace as _postmerge_tasks
 from .signed_worker_assignment import assign_signed_worker_task as _assign_signed_worker_task
 from .signed_worker_execution_lease import ensure_execution_lease_schema
 from .signed_worker_result_ledger import ensure_result_history_schema
@@ -146,7 +146,7 @@ def _assurance_result(
     }
 
 
-class AgentDB:
+class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
     """
     Shared agent memory and state (WSP 78).
 
@@ -1195,7 +1195,7 @@ class AgentDB:
             origin_continuity_id: Optional continuity ID from the work that discovered this task.
                                   Enables background correlation when task is executed later.
         """
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         try:
             self.db.execute_write('''
@@ -1224,7 +1224,7 @@ class AgentDB:
         origin_continuity_id: str = None,
     ) -> bool:
         """Insert a task without replacing concurrent or already-claimed state."""
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         try:
             return self.db.execute_write(
@@ -1288,7 +1288,7 @@ class AgentDB:
 
     def assign_autonomous_task(self, task_id: str, agent_id: str) -> bool:
         """Atomically claim one pending autonomous task for an agent."""
-        if is_signed_worker_task_id(task_id):
+        if _postmerge_tasks.is_protected_autonomous_task_id(task_id):
             return False
         return self.db.execute_write('''
             UPDATE agents_autonomous_tasks
@@ -1517,34 +1517,6 @@ class AgentDB:
         except Exception:
             return False
 
-    def reclaim_expired_holoindex_postmerge_task(
-        self,
-        task_id: str,
-        agent_id: str,
-        *,
-        expected_assigned_at: str,
-    ) -> bool:
-        """CAS one expired assignment into retryable failure."""
-        return (
-            self.db.execute_write(
-                """
-            UPDATE agents_autonomous_tasks
-            SET status = 'failed', completed_at = ?
-            WHERE task_id = ?
-              AND status IN ('assigned', 'executing')
-                  AND assigned_to = ?
-                  AND assigned_at = ?
-                """,
-                (
-                    datetime.now(timezone.utc).isoformat(),
-                    task_id,
-                    agent_id,
-                    expected_assigned_at,
-                ),
-            )
-            == 1
-        )
-
     def commit_holoindex_postmerge_completion(
         self,
         *,
@@ -1693,61 +1665,6 @@ class AgentDB:
         except Exception:
             return False
 
-    def complete_autonomous_task(self, task_id: str) -> bool:
-        """Mark autonomous task as completed."""
-        if is_signed_worker_task_id(task_id):
-            return False
-        return self.db.execute_write('''
-            UPDATE agents_autonomous_tasks
-            SET completed_at = ?, status = 'completed'
-            WHERE task_id = ?
-        ''', (datetime.now().isoformat(), task_id)) > 0
-
-    def schedule_autonomous_task_retry(
-        self,
-        task_id: str,
-        *,
-        context: Dict[str, Any],
-        retry_not_before: str,
-    ) -> bool:
-        """Move a failed task into a durable bounded retry wait state."""
-        if is_signed_worker_task_id(task_id):
-            return False
-        return self.db.execute_write(
-            """
-            UPDATE agents_autonomous_tasks
-            SET status = 'retry_wait',
-                context = ?,
-                retry_not_before = ?,
-                assigned_to = NULL,
-                assigned_at = NULL
-            WHERE task_id = ? AND status = 'failed'
-            """,
-            (json.dumps(context), retry_not_before, task_id),
-        ) > 0
-
-    def requeue_autonomous_task(
-        self,
-        task_id: str,
-        *,
-        expected_status: str = "retry_wait",
-    ) -> bool:
-        """Requeue a task only from the caller's exact expected state."""
-        if is_signed_worker_task_id(task_id):
-            return False
-        return self.db.execute_write(
-            """
-            UPDATE agents_autonomous_tasks
-            SET status = 'pending',
-                retry_not_before = NULL,
-                assigned_to = NULL,
-                assigned_at = NULL,
-                completed_at = NULL
-            WHERE task_id = ? AND status = ?
-            """,
-            (task_id, expected_status),
-        ) > 0
-
     # ============================================================================
     # INDEPENDENT ASSURANCE CAPACITY RESERVATIONS
     # ============================================================================
@@ -1779,7 +1696,25 @@ class AgentDB:
             """,
             (reservation_id,),
         ).fetchone()
-        return dict(row) if row is not None else None
+        reservation = dict(row) if row is not None else None
+        if reservation and _postmerge_tasks.has_holoindex_postmerge_task_binding(
+            reservation
+        ):
+            raise _AssuranceReservationRejected(
+                "assurance_task_namespace_protected"
+            )
+        return reservation
+
+    @staticmethod
+    def _reject_protected_assurance_task(
+        task: Mapping[str, Any], task_kind: str
+    ) -> None:
+        if _postmerge_tasks.is_holoindex_postmerge_task_id(
+            str(task.get("task_id") or "")
+        ):
+            raise _AssuranceReservationRejected(
+                f"{task_kind}_task_namespace_protected"
+            )
 
     @staticmethod
     def _validate_assurance_task_binding(
@@ -1788,11 +1723,10 @@ class AgentDB:
         task_kind: str,
         expected: Mapping[str, str],
     ) -> None:
+        AgentDB._reject_protected_assurance_task(task, task_kind)
         context = AgentDB._parse_task_context(task)
         signed_dispatch = context.get("signed_authority_worker_dispatch_receipt")
-        signed_dispatch = (
-            dict(signed_dispatch) if isinstance(signed_dispatch, Mapping) else {}
-        )
+        signed_dispatch = dict(signed_dispatch) if isinstance(signed_dispatch, Mapping) else {}
         allocation = context.get("wsp15_allocation_receipt")
         allocation = dict(allocation) if isinstance(allocation, Mapping) else {}
         role = str(
@@ -1876,6 +1810,10 @@ class AgentDB:
         now_utc: datetime,
         now_iso: str,
     ) -> Dict[str, Any]:
+        if _postmerge_tasks.has_holoindex_postmerge_task_binding(reservation):
+            raise _AssuranceReservationRejected(
+                "assurance_task_namespace_protected"
+            )
         if str(reservation.get("status") or "") != "RESERVED":
             return dict(reservation)
         expires_at, _ = _parse_assurance_utc_timestamp(
@@ -2459,6 +2397,8 @@ class AgentDB:
         """Rehydrate the active reservation bound to one author/verifier task."""
 
         normalized_task_id = str(task_id or "").strip()
+        if _postmerge_tasks.is_holoindex_postmerge_task_id(normalized_task_id):
+            return None
         query = {
             "author": """
                 SELECT reservation_id
@@ -2522,6 +2462,12 @@ class AgentDB:
     ) -> Mapping[str, Any]:
         """Durably bind verifier output without terminalizing its task."""
 
+        if _postmerge_tasks.has_holoindex_postmerge_task_binding(request):
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("assurance_task_namespace_protected",),
+            )
         from modules.infrastructure.database.src.signed_worker_assurance_staging import (
             stage_assurance_completion,
         )

@@ -1,4 +1,12 @@
 # ModLog - moltbot_bridge
+- `HOLOINDEX_POSTMERGE_OWNER_ACTIVATION_PHASE1`: made the exact-SHA HoloIndex post-merge owner active by default
+  under OpenClaw supervision. General maintenance remains opt-in; when it is
+  disabled, only tasks issued by the canonical post-merge coordinator are
+  eligible. The generic autonomous executor excludes it from the exact-SHA
+  claim contract. Added explicit
+  scheduled/disabled telemetry and preserved the query-side prohibition on
+  re-indexing plus all freshness gates. A lock-owned poller waits during
+  shutdown and binds selection to the coordinator's exact canonical task ID.
 - `REDDOG_SIGNER_E0_AUTHENTICATED_SECRET_LEASE_GATE_PHASE1`: added a
   verifier-only, process-local boundary for one signed signer secret-access
   grant. The grant binds the independently resolved issuer key, signer agent

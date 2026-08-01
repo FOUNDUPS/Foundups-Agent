@@ -12,6 +12,19 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-08-01 - Protected post-merge AgentDB namespace
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 87, WSP 97
+
+- The coordinator now creates, retries, and requeues exact-SHA maintenance
+  tasks only through AgentDB's protected post-merge operations.
+- Generic task mutation APIs cannot pre-seed, steal, complete, retry, or
+  requeue the reserved task namespace.
+- Stored task bindings are revalidated before retry/requeue effects, and
+  malformed or cross-namespace reclamation fails closed.
+- Retry can update only its monotonic counter and retry timestamp; independent
+  assurance cannot claim or mutate a post-merge task through another lane.
+
 ### 2026-07-30 - Post-merge Holo owner runtime binding
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 87, WSP 97

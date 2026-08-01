@@ -1,5 +1,25 @@
 # Database Module - ModLog
 
+## Entry: HoloIndex Post-Merge Task Namespace Isolation
+**Date**: 2026-08-01
+**What Changed**: Reserved `holoindex_postmerge_refresh:*` across generic task
+creation, assignment, completion, retry, and requeue APIs. Added bounded
+post-merge creation/retry/requeue/reclaim operations with exact-SHA and stored
+context validation. Retry changes are limited to the next exact integer
+sequence number and retry timestamp; authority bindings remain immutable.
+Independent-assurance
+reservation, renewal, staging, expiry, and revocation reject any HoloIndex
+post-merge task binding, including forged legacy reservation rows. Signed-worker
+quarantine applies the same guard before either reservation or task mutation.
+Completion staging revalidates both durable reservation task bindings rather
+than trusting the verifier-only request shape.
+**Why**: A generic AgentDB caller could otherwise pre-seed, steal, complete, or
+strand the privileged maintenance task without passing its claim-bound owner.
+**Impact**: Only the dedicated coordinator lane mutates post-merge tasks;
+ordinary tasks and signed-worker behavior remain unchanged. The inherited
+AgentDB monolith is reduced to a lower exact WSP 62 no-growth ceiling.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 87, WSP 97
+
 ## Entry: Cross-Object Signed-Worker Quarantine Completion
 **Date**: 2026-07-28
 **What Changed**: Quarantine now resolves one assurance reservation by either

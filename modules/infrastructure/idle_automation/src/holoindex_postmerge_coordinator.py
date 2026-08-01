@@ -220,7 +220,7 @@ def coordinate_holoindex_postmerge(
             "request_event_id": request_event_id,
             "retry_count": 0,
         }
-        created = database.create_autonomous_task_if_absent(
+        created = database.create_holoindex_postmerge_task_if_absent(
             task_id=task_id,
             description=f"Refresh canonical HoloIndex for origin/main {target_sha}",
             required_skills=["holo-search"],
@@ -315,7 +315,7 @@ def coordinate_holoindex_postmerge(
             retry_context = dict(context)
             retry_context["retry_count"] = retry_count + 1
             retry_context["retry_not_before"] = retry_at.isoformat()
-            if not database.schedule_autonomous_task_retry(
+            if not database.schedule_holoindex_postmerge_task_retry(
                 task_id,
                 context=retry_context,
                 retry_not_before=retry_at.isoformat(),
@@ -347,7 +347,7 @@ def coordinate_holoindex_postmerge(
                     rejection_reasons=("retry_schedule_invalid",),
                 )
             if now() >= retry_at:
-                if not database.requeue_autonomous_task(
+                if not database.requeue_holoindex_postmerge_task(
                     task_id,
                     expected_status="retry_wait",
                 ):

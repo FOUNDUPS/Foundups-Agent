@@ -38,7 +38,7 @@ _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 class AgentDbPort(Protocol):
     def get_autonomous_task_by_id(self, task_id: str) -> dict[str, Any] | None: ...
 
-    def create_autonomous_task_if_absent(
+    def create_holoindex_postmerge_task_if_absent(
         self,
         task_id: str,
         description: str,
@@ -60,7 +60,7 @@ class AgentDbPort(Protocol):
 
     def get_coordination_event_by_id(self, event_id: str) -> dict[str, Any] | None: ...
 
-    def schedule_autonomous_task_retry(
+    def schedule_holoindex_postmerge_task_retry(
         self,
         task_id: str,
         *,
@@ -68,7 +68,7 @@ class AgentDbPort(Protocol):
         retry_not_before: str,
     ) -> bool: ...
 
-    def requeue_autonomous_task(
+    def requeue_holoindex_postmerge_task(
         self,
         task_id: str,
         *,

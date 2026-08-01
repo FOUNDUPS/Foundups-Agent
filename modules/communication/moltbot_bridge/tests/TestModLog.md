@@ -1,3 +1,15 @@
+## 2026-08-01: HOLOINDEX POST-MERGE OWNER ACTIVATION
+
+- Proved the exact-SHA post-merge coordinator schedules by default and can be
+  explicitly disabled with visible `OWNER_DISABLED` telemetry.
+- Proved general maintenance remains off by default while canonical
+  `holoindex_postmerge_coordinator` tasks remain eligible for the bounded
+  maintenance executor.
+- Proved unrelated self-audit maintenance cannot ride the default HoloIndex authority path.
+- Proved generic autonomous task execution cannot claim or bypass the
+  claim-bound HoloIndex post-merge executor.
+- Proved global top-10 pressure cannot hide post-merge tasks and shutdown waits before rejecting rescheduling.
+
 ## 2026-07-31: STABLE SIGNER SYSTEM-SERVICE ENTRYPOINT
 
 - Added v2 packet regressions for the exact stable entrypoint command,

@@ -47,7 +47,7 @@ class FakeDB:
         }
         return True
 
-    def create_autonomous_task_if_absent(self, **kwargs):
+    def create_holoindex_postmerge_task_if_absent(self, **kwargs):
         return self.create_autonomous_task(**kwargs)
 
     def create_coordination_event(
@@ -80,7 +80,7 @@ class FakeDB:
         self.events[event_id]["resolution_status"] = status
         return True
 
-    def schedule_autonomous_task_retry(
+    def schedule_holoindex_postmerge_task_retry(
         self,
         task_id: str,
         *,
@@ -95,7 +95,7 @@ class FakeDB:
         task["retry_not_before"] = retry_not_before
         return True
 
-    def requeue_autonomous_task(
+    def requeue_holoindex_postmerge_task(
         self, task_id: str, *, expected_status: str
     ):
         task = self.tasks.get(task_id)

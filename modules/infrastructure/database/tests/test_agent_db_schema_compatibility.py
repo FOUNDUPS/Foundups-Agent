@@ -181,6 +181,7 @@ def test_holoindex_postmerge_claim_and_completion_are_atomic() -> None:
             "source": "holoindex_postmerge_coordinator",
             "target_repo_head_sha": "a" * 40,
             "authority_root_digest": authority_digest,
+            "request_event_id": request_event_id,
         }
         assert agent_db.create_coordination_event(
             request_event_id,
@@ -189,7 +190,7 @@ def test_holoindex_postmerge_claim_and_completion_are_atomic() -> None:
             ["openclaw_supervisor"],
             request_payload,
         )
-        assert agent_db.create_autonomous_task_if_absent(
+        assert agent_db.create_holoindex_postmerge_task_if_absent(
             task_id=task_id,
             description="exact SHA maintenance",
             required_skills=["holo-search"],
@@ -312,8 +313,9 @@ def test_holoindex_postmerge_assignment_reclaim_is_compare_and_swap() -> None:
             "source": "holoindex_postmerge_coordinator",
             "target_repo_head_sha": "a" * 40,
             "authority_root_digest": "sha256:" + ("b" * 64),
+            "request_event_id": "holoindex_postmerge_requested:" + ("a" * 40),
         }
-        assert agent_db.create_autonomous_task_if_absent(
+        assert agent_db.create_holoindex_postmerge_task_if_absent(
             task_id=task_id,
             description="exact SHA maintenance",
             required_skills=["holo-search"],
