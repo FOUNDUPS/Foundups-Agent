@@ -1,6 +1,15 @@
 # RedDog
 
-Version: 0.4.45
+Version: 0.4.46
+
+Version 0.4.46 resolves named FoundUp work through the canonical registry and
+requires current registry, manifest, module, Skillz, and status evidence before
+Fusion. Identity and safe mutation scope remain bound through continuity,
+wardrobe, work-order, WRE, OpenClaw, and resident-intent handoffs. The generic
+grounding receipt grants no execution authority. The checked-in JSON schema is
+evaluated directly, dirty evidence is labeled as workspace-current, and every
+effect boundary revalidates authority-critical evidence against the current
+checkout before accepting a mutation scope.
 
 Version 0.4.45 preserves clean authority-checkout repository evidence while
 binding the semantic owner to the calling workspace's validated Python
@@ -358,6 +367,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.45.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.46.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

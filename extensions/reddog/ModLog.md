@@ -2,6 +2,30 @@
 
 # ModLog - RedDog Extension
 
+## 2026-08-02 - Registry-driven FoundUp work grounding (0.4.46)
+
+- Added a pure canonical-registry resolver for named FoundUp work. Aliases come
+  from registry identity, display name, token symbol, and module path; no
+  production branch names a specific FoundUp.
+- Bound current registry, manifest, module documentation, test history, and the
+  provider-neutral Operations Skillz into required direct-read evidence.
+- Bound repository HEAD, registry schema/entity/evidence digests, clean
+  authority-critical files, and manifest-declared safe mutation surfaces into
+  the receipt and downstream runtime handoffs.
+- Enforced the checked-in JSON schema through a generic pure validator, deeply
+  froze receipts, disclosed workspace-current dirty evidence, and required
+  current-checkout revalidation at work-order, WRE, OpenClaw, resident, and
+  wardrobe boundaries.
+- Removed optional registry audit-history documents from the mandatory read
+  budget, widened generic conversational target grammar, and kept generic
+  FoundUp registry/onboarding discussions outside identity resolution.
+- Unknown, ambiguous, malformed, escaped, dirty-authority, tampered, or
+  incompletely recalled FoundUp evidence now blocks Fusion. Direct-read paths
+  never derive mutation scope, and the receipt explicitly grants no authority.
+- Refreshed and re-pinned the backend compatibility manifest after the
+  production Skillz and wardrobe runtime changed, preventing a stale VSIX from
+  silently pairing with incompatible backend files.
+
 ## 2026-08-01 - Authority-worktree semantic owner repair (0.4.45)
 
 - Bound one-shot HoloIndex owner dependencies to the validated calling

@@ -1,5 +1,15 @@
 # RedDog Interface
 
+Version 0.4.46 adds registry-driven FoundUp work grounding. Requests to work on
+an existing FoundUp derive canonical direct-read targets without name-specific
+branches; unknown or ambiguous identities fail before Fusion. The grounding
+receipt binds repository HEAD, registry/schema/entity/evidence digests, and the
+manifest safe-mutation surface. It is deterministic and non-authoritative;
+read evidence never becomes write scope. Registry content is validated against
+the checked-in JSON schema. Workspace-current dirty evidence is disclosed in
+the receipt, while registry, schema, and manifest identity remain clean and
+effect boundaries independently revalidate the receipt before use.
+
 Version 0.4.45 separates the generation-authoritative repository root from the
 validated workspace dependency root when the one-shot semantic bridge uses a
 clean authority checkout. Query receipts and repository proof remain bound to

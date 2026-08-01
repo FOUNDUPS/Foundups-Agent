@@ -1,4 +1,13 @@
 # ModLog - moltbot_bridge
+- `REDDOG_FOUNDUP_WORK_SKILL_GROUNDING_PHASE1`: extended the provider-neutral
+  `reddog_operations` Skillz with a canonical registered-FoundUp procedure.
+  Existing FoundUps resolve through registry evidence and WSP 15; unknown
+  identities route to WSP 109 intake. The Skillz remains model-neutral and
+  grants no execution authority. Wardrobe selection now also requires the
+  extension's current-checkout verification flag before carrying a registered
+  FoundUp target into an action-plane receipt. A shared Python verifier now
+  independently rechecks registry, schema, entity, evidence, manifest, root,
+  selection, and work-order scope at WRE and OpenClaw IPC boundaries.
 - `HOLOINDEX_POSTMERGE_OWNER_ACTIVATION_PHASE1`: made the exact-SHA HoloIndex post-merge owner active by default
   under OpenClaw supervision. General maintenance remains opt-in; when it is
   disabled, only tasks issued by the canonical post-merge coordinator are

@@ -34,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_operational_spine impor
     RedDogWREOperationalSpineResult,
     run_reddog_wre_worktree_create_spine,
 )
+from modules.communication.moltbot_bridge.src.reddog_registered_foundup_target_verifier import (
+    verify_registered_foundup_target,
+)
 
 EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT = (
     "EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT"
@@ -52,6 +55,7 @@ class ExtensionWREOperationalSpineInvokeReason:
     SELECTION_AUTHORITY_BOUNDARY_INVALID = "REJECT_SELECTION_AUTHORITY_BOUNDARY_INVALID"
     SELECTION_ALREADY_EXECUTED = "REJECT_SELECTION_ALREADY_EXECUTED"
     WORKTREE_SPINE_REJECTED = "REJECT_WRE_OPERATIONAL_SPINE_REJECTED"
+    FOUNDUP_TARGET_INVALID = "REJECT_REGISTERED_FOUNDUP_TARGET_INVALID"
 
 
 @dataclass(frozen=True)
@@ -165,6 +169,14 @@ def invoke_reddog_extension_wre_operational_spine_explicit_valve(
 
     selection = _selection_mapping(selection_receipt)
     reasons = _validate_selection_receipt(selection)
+    target_reasons = verify_registered_foundup_target(
+        repo_root or Path.cwd(),
+        _mapping(work_order).get("registered_foundup_target_receipt"),
+        selection_receipt=selection,
+        work_order=_mapping(work_order),
+    )
+    if target_reasons:
+        reasons.extend([ExtensionWREOperationalSpineInvokeReason.FOUNDUP_TARGET_INVALID, *target_reasons])
     if reasons:
         return _reject(reasons, explicit_requested=True)
 

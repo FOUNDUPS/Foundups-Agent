@@ -18,7 +18,7 @@ from modules.infrastructure.wre_core.skillz.wre_skills_loader import WRESkillsLo
 
 
 SKILL_NAME = "reddog_operations"
-SKILL_VERSION = "1.0.0"
+SKILL_VERSION = "1.1.0"
 SKILL_RELATIVE_PATH = (
     "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md"
 )

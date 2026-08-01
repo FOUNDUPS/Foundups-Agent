@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from pathlib import Path
 
@@ -51,6 +52,17 @@ def _holo(**overrides):
     }
     payload.update(overrides)
     return payload
+
+
+def _foundup_target_receipt(foundup_id: str) -> dict:
+    payload = {
+        "schema_version": "registered_foundup_target_receipt.v1",
+        "passed": True,
+        "grants_authority": False,
+        "foundup_id": foundup_id,
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return {**payload, "receipt_id": f"sha256:{hashlib.sha256(raw.encode()).hexdigest()}"}
 
 
 def test_simple_exploration_selects_solo_retrieval() -> None:
@@ -122,6 +134,64 @@ def test_passed_grounding_preflight_is_bound_into_receipt() -> None:
     assert result.receipt.grounding_preflight_passed is True
     assert len(result.receipt.grounding_preflight_digest) == 64
     assert result.receipt.grounding_preflight_rejection_reasons == []
+
+
+def test_registered_foundup_target_is_bound_into_selection_receipt() -> None:
+    target = _foundup_target_receipt("trade")
+    result = select_reddog_operator_loop_wardrobe_dryrun(
+        "Implement a bounded Trade FoundUp slice.",
+        authority_request="draft_pr",
+        holoindex_evidence=_holo(),
+        grounding_preflight={
+            "applied": True,
+            "passed": True,
+            "foundup_id": "trade",
+            "registered_foundup_target_receipt_id": target["receipt_id"],
+            "registered_foundup_target_receipt": target,
+            "foundup_use_time_verified": True,
+        },
+    )
+    assert result.decision == WARDROBE_SELECTION_ACCEPT
+    assert result.receipt.foundup_id == "trade"
+    assert result.receipt.registered_foundup_target_receipt_id == target["receipt_id"]
+
+
+def test_registered_foundup_target_mismatch_rejects_selection() -> None:
+    target = _foundup_target_receipt("gotjunk_001")
+    result = select_reddog_operator_loop_wardrobe_dryrun(
+        "Implement a bounded FoundUp slice.",
+        authority_request="draft_pr",
+        holoindex_evidence=_holo(),
+        grounding_preflight={
+            "applied": True,
+            "passed": True,
+            "foundup_id": "trade",
+            "registered_foundup_target_receipt_id": target["receipt_id"],
+            "registered_foundup_target_receipt": target,
+            "foundup_use_time_verified": True,
+        },
+    )
+    assert result.decision == WARDROBE_SELECTION_REJECT
+    assert "grounding_preflight_not_passed" in result.receipt.rejection_reasons
+    assert "registered_foundup_target_binding_invalid" in result.receipt.grounding_preflight_rejection_reasons
+
+
+def test_registered_foundup_target_requires_extension_use_time_verification() -> None:
+    target = _foundup_target_receipt("trade")
+    result = select_reddog_operator_loop_wardrobe_dryrun(
+        "Implement a bounded Trade FoundUp slice.",
+        authority_request="draft_pr",
+        holoindex_evidence=_holo(),
+        grounding_preflight={
+            "applied": True,
+            "passed": True,
+            "foundup_id": "trade",
+            "registered_foundup_target_receipt_id": target["receipt_id"],
+            "registered_foundup_target_receipt": target,
+        },
+    )
+    assert result.decision == WARDROBE_SELECTION_REJECT
+    assert "registered_foundup_target_binding_invalid" in result.receipt.grounding_preflight_rejection_reasons
 
 
 def test_failed_grounding_preflight_blocks_action_plane_selection() -> None:

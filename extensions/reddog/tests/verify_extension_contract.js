@@ -222,8 +222,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.45', 'package version must be 0.4.45');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.45'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.46', 'package version must be 0.4.46');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.46'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -366,7 +366,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.45', 'README version mismatch');
+includes(readme, 'Version: 0.4.46', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -2096,13 +2096,13 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.45', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.46', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
-assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
-  'modules/communication/moltbot_bridge/src/**',
-  'modules/communication/moltbot_bridge/tests/**'
-], 'candidate should derive allowed paths from authoritative target paths');
+assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [],
+  'direct-read evidence must never derive mutation authority');
+assert(spinePreview.governed_work_order_runtime_emission.not_ready_reasons.includes('allowed_paths_missing_or_unverified'),
+  'evidence-only candidate must fail closed without an explicit mutation scope');
 assert.strictEqual(spinePreview.governed_work_order_runtime_emission.runtime_emission_performed, true, 'candidate emission flag');
 assert.strictEqual(spinePreview.governed_work_order_runtime_emission.authority_binding_performed, true, 'authority binding metadata must be emitted');
 assert.strictEqual(spinePreview.governed_work_order_runtime_emission.permission_binding.permission_truth_label, 'NEEDS_VERIFICATION', 'missing permission snapshot remains unverified');
@@ -2580,6 +2580,7 @@ const authoritySeed = orchestrator.buildRedDogGovernedWorkOrderCandidate(
   {
     createdAt: fixedAuthorityCreatedAt,
     repoPermissionSnapshot: freshPermissionSnapshot,
+    allowedPaths: ['extensions/reddog/**'],
     requiredTargets: ['extensions/reddog/extension.js']
   }
 );
@@ -2597,6 +2598,7 @@ const authorityBound = orchestrator.buildRedDogGovernedWorkOrderCandidate(
       signature: 'must-not-leak'
     },
     explicitValveRequested: true,
+    allowedPaths: ['extensions/reddog/**'],
     requiredTargets: ['extensions/reddog/extension.js']
   }
 );
@@ -3602,7 +3604,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.45'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.46'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -3616,7 +3618,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.45'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.46'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -3628,7 +3630,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.45'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.46'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -4339,6 +4341,189 @@ assert.strictEqual(quotedIsolationTargets.quoted_reference_blocks.length, 2, 'TT
 assert.deepStrictEqual(quotedIsolationTargets.repo_file_targets, [], 'TTX-013: quoted repo paths remain context only');
 assert.deepStrictEqual(quotedIsolationTargets.external_research_targets, [], 'TTX-014: quoted URLs remain context only');
 
+// REDDOG_FOUNDUP_WORK_SKILL_GROUNDING_PHASE1 (FWG-001..008): registered FoundUp
+// work derives evidence from the canonical registry, never a name-specific branch.
+const foundupWorkPrompt = 'work on TRADE foundup';
+const foundupWorkTargets = orchestrator.extractTypedTargets(foundupWorkPrompt, root);
+assert.strictEqual(foundupWorkTargets.foundup_work_grounding.applied, true, 'FWG-001: FoundUp work resolver must apply');
+assert.strictEqual(foundupWorkTargets.foundup_work_grounding.passed, true, 'FWG-002: registered FoundUp must resolve');
+assert.strictEqual(foundupWorkTargets.foundup_work_grounding.foundup_id, 'trade', 'FWG-003: registry identity must bind');
+assert(foundupWorkTargets.repo_file_targets.includes('modules/foundups/foundup_registry.json'), 'FWG-004: registry must be direct-read evidence');
+assert(foundupWorkTargets.repo_file_targets.includes('modules/foundups/trade/foundup_manifest.json'), 'FWG-004: manifest must be direct-read evidence');
+assert(foundupWorkTargets.repo_file_derivation_sources.includes('foundup_registry'), 'FWG-005: derivation provenance must be explicit');
+const foundupPass = orchestrator.buildTypedGroundingPreflight(foundupWorkPrompt, 'wsp_holo_skillz', {
+  typed_targets: foundupWorkTargets,
+  holoindex_scorecard: { target_recall_ok: true, required_targets_missing: [] }
+});
+assert.strictEqual(foundupPass.passed, true, 'FWG-006: fully recalled registry evidence may reach Fusion');
+assert.strictEqual(foundupPass.foundup_grants_authority, false, 'FWG-006: grounding never grants authority');
+const foundupMissing = orchestrator.buildTypedGroundingPreflight(foundupWorkPrompt, 'wsp_holo_skillz', {
+  typed_targets: foundupWorkTargets,
+  holoindex_scorecard: { target_recall_ok: false, required_targets_missing: ['modules/foundups/trade/foundup_manifest.json'] }
+});
+assert.strictEqual(foundupMissing.passed, false, 'FWG-007: missing FoundUp evidence must block Fusion');
+const unknownFoundupTargets = orchestrator.extractTypedTargets('fix Nimbus FoundUp', root);
+const unknownFoundup = orchestrator.buildTypedGroundingPreflight('fix Nimbus FoundUp', 'wsp_holo_skillz', {
+  typed_targets: unknownFoundupTargets,
+  holoindex_scorecard: { target_recall_ok: true, required_targets_missing: [] }
+});
+assert.strictEqual(unknownFoundup.passed, true, 'FWG-008: unresolved language may reach advisory Fusion with registry evidence');
+assert.strictEqual(unknownFoundup.foundup_requires_wsp109_resolution, true,
+  'FWG-008: unresolved language must route to WSP 109 without mutation scope');
+assert.strictEqual(orchestrator.extractTypedTargets('work on FoundUp Nimbus', root).foundup_work_grounding.requires_wsp109_resolution,
+  true, 'FWG-008: unresolved language must route consistently in either word order');
+for (const prompt of ['work on Nimbus, a FoundUp', 'work on Nimbus as a FoundUp', 'work on Nimbus, our new FoundUp',
+  'work on Nimbus, an existing FoundUp', 'work on Nimbus, which is a FoundUp', 'work on Nimbus, another FoundUp'])
+  assert.strictEqual(orchestrator.extractTypedTargets(prompt, root).foundup_work_grounding.requires_wsp109_resolution,
+    true, 'FWG-008: unmatched determiner grammar must route without authority');
+for (const prompt of ['Review how TRADE differs from another FoundUp.', 'Audit another FoundUp workflow.',
+  'Review some FoundUp workflows.', 'Review more FoundUp workflows.', 'Review all FoundUp workflows.'])
+  assert.strictEqual(orchestrator.extractTypedTargets(prompt, root).foundup_work_grounding.requires_wsp109_resolution,
+    true, 'FWG-008: generic language uses the same no-authority resolution route');
+for (const prompt of ['edit Nimbus FoundUp', 'modify Nimbus FoundUp', 'patch Nimbus FoundUp',
+  'create Nimbus FoundUp', 'migrate Nimbus FoundUp', 'work on Nimbus FoundUps', 'Review FoundUps agent workflows'])
+  assert.strictEqual(orchestrator.extractTypedTargets(prompt, root).foundup_work_grounding.requires_wsp109_resolution,
+    true, 'FWG-008: verb or plural variation cannot bypass WSP 109 resolution');
+assert.strictEqual(orchestrator.extractTypedTargets('Edit FoundUps Agent Market', root).foundup_work_grounding.foundup_id,
+  'agent_market', 'FWG-008: registered alias must outrank product-token similarity');
+const foundupHolo = orchestrator.holoIndexOutput(root, foundupWorkPrompt, 18000);
+assert.strictEqual(foundupHolo.meta.foundup_work_grounding_passed, true, 'FWG-009: Holo metadata must carry the registry receipt verdict');
+assert.strictEqual(foundupHolo.meta.direct_read_fetch_attempted, true, 'FWG-010: registered FoundUp evidence must trigger governed direct read');
+assert.strictEqual(foundupHolo.meta.target_recall_ok, true, 'FWG-011: canonical FoundUp evidence must be recalled');
+assert(foundupHolo.direct_read_section.paths.includes('modules/foundups/trade/foundup_manifest.json'), 'FWG-012: manifest content must enter the direct-read packet');
+const antifafmWorkPrompt = 'work on antifafm_001 foundup';
+const antifafmWorkTargets = orchestrator.extractTypedTargets(antifafmWorkPrompt, root);
+const antifafmHolo = orchestrator.holoIndexOutput(root, antifafmWorkPrompt, 18000);
+assert.strictEqual(antifafmWorkTargets.foundup_work_grounding.passed, true,
+  'FWG-012: registry-heavy FoundUp must resolve');
+assert.strictEqual(antifafmHolo.meta.target_recall_ok, true,
+  'FWG-012: mandatory FoundUp evidence must fit the direct-read budget');
+assert(!antifafmHolo.meta.direct_read_rejected.some((item) => item.reason === 'budget_exhausted'),
+  'FWG-012: optional audit history may not consume the direct-read budget');
+const foundupRuntimePreflight = orchestrator.buildTypedGroundingPreflight(foundupWorkPrompt, 'wsp_holo_skillz', {
+  typed_targets: foundupWorkTargets,
+  holoindex_scorecard: foundupHolo.meta
+});
+const foundupCandidate = orchestrator.buildRedDogGovernedWorkOrderCandidate(
+  foundupWorkPrompt, {}, handoffRec, { groundingPreflight: foundupRuntimePreflight }
+);
+assert.deepStrictEqual(foundupCandidate.work_order.allowed_paths, ['modules/foundups/trade/**'],
+  'FWG-013: manifest safe mutation surface, not read evidence, scopes the work order');
+assert.strictEqual(foundupCandidate.work_order.foundup_id, 'trade', 'FWG-013: work order binds registry identity');
+assert.strictEqual(foundupCandidate.work_order.registered_foundup_target_receipt_id,
+  foundupWorkTargets.foundup_work_grounding.receipt_id, 'FWG-013: work order binds grounding receipt');
+const foundupScopeEscape = orchestrator.buildRedDogGovernedWorkOrderCandidate(
+  foundupWorkPrompt, {}, handoffRec, {
+    groundingPreflight: foundupRuntimePreflight,
+    allowedPaths: ['modules/foundups/foundup_registry.json']
+  }
+);
+assert.deepStrictEqual(foundupScopeEscape.work_order.allowed_paths, [],
+  'FWG-014: registry evidence cannot become a mutation scope');
+assert(foundupScopeEscape.not_ready_reasons.includes('allowed_paths_exceed_manifest_safe_mutation_surface'),
+  'FWG-014: scope widening must fail closed');
+const foundupInvokeMismatch = orchestrator.buildWreOperationalSpineInvokePayload({
+  governed_work_order_candidate: foundupCandidate.work_order,
+  governed_work_order_ready_for_invocation: true
+}, {
+  explicitWreOperationalSpineRequested: true,
+  selectionReceipt: {
+    foundup_id: 'gotjunk_001',
+    registered_foundup_target_receipt_id: foundupWorkTargets.foundup_work_grounding.receipt_id
+  },
+  valveEnvironment: {},
+  signatureVerificationResult: { accepted: true, work_order_id: foundupCandidate.work_order.work_order_id }
+});
+assert.strictEqual(foundupInvokeMismatch.ok, false, 'FWG-015: WRE invoke must reject target mismatch');
+assert(foundupInvokeMismatch.rejection_reasons.includes('registered_foundup_target_selection_mismatch'),
+  'FWG-015: WRE invoke exposes target mismatch');
+const staleFoundupRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-stale-foundup-'));
+const matchingFoundupSelection = {
+  foundup_id: 'trade',
+  registered_foundup_target_receipt_id: foundupWorkTargets.foundup_work_grounding.receipt_id
+};
+const staleFoundupInvoke = orchestrator.buildWreOperationalSpineInvokePayload({
+  governed_work_order_candidate: foundupCandidate.work_order,
+  governed_work_order_ready_for_invocation: true
+}, {
+  explicitWreOperationalSpineRequested: true,
+  selectionReceipt: matchingFoundupSelection,
+  valveEnvironment: {},
+  signatureVerificationResult: { accepted: true, work_order_id: foundupCandidate.work_order.work_order_id },
+  repoRoot: staleFoundupRoot
+});
+assert(staleFoundupInvoke.rejection_reasons.includes('registered_foundup_target_use_time_verification_failed'),
+  'FWG-015: WRE must reverify the target against the current checkout');
+const foundupLiveMismatch = orchestrator.buildOpenClawLiveEnqueueRuntimeBindingPayload(
+  {},
+  {
+    authority_request: 'live_enqueue',
+    receipt: {
+      foundup_id: 'gotjunk_001',
+      registered_foundup_target_receipt_id: foundupWorkTargets.foundup_work_grounding.receipt_id
+    }
+  },
+  { passed: true },
+  { registeredFoundupTargetReceipt: foundupWorkTargets.foundup_work_grounding }
+);
+assert.strictEqual(foundupLiveMismatch.ok, false, 'FWG-016: OpenClaw enqueue must reject target mismatch');
+assert(foundupLiveMismatch.rejection_reasons.includes('registered_foundup_target_selection_mismatch'),
+  'FWG-016: OpenClaw enqueue exposes target mismatch');
+const staleFoundupLive = orchestrator.buildOpenClawLiveEnqueueRuntimeBindingPayload(
+  {}, { authority_request: 'live_enqueue', receipt: matchingFoundupSelection }, { passed: true },
+  { registeredFoundupTargetReceipt: foundupWorkTargets.foundup_work_grounding, repoRoot: staleFoundupRoot }
+);
+assert(staleFoundupLive.rejection_reasons.includes('registered_foundup_target_use_time_verification_failed'),
+  'FWG-016: OpenClaw must reverify the target against the current checkout');
+const foundupContinuity = groundedTargetContinuity.buildGroundedTargetReceipt(
+  foundupWorkPrompt, foundupRuntimePreflight, foundupHolo.meta, 'editor_thin_client'
+);
+assert.strictEqual(groundedTargetContinuity.receiptReady(foundupContinuity), true,
+  'FWG-017: target identity survives the continuity receipt');
+const tamperedFoundupContinuity = groundedTargetContinuity.buildGroundedTargetReceipt(
+  foundupWorkPrompt,
+  Object.assign({}, foundupRuntimePreflight, {
+    typed_targets: Object.assign({}, foundupRuntimePreflight.typed_targets, {
+      foundup_work_grounding: Object.assign({}, foundupWorkTargets.foundup_work_grounding, { foundup_id: 'gotjunk_001' })
+    })
+  }),
+  foundupHolo.meta,
+  'editor_thin_client'
+);
+assert.strictEqual(groundedTargetContinuity.receiptReady(tamperedFoundupContinuity), false,
+  'FWG-017: recomputed outer receipt cannot legitimize a tampered target receipt');
+const foundupResident = orchestrator.buildResidentArchitectSessionPayload(foundupWorkPrompt, {
+  explicitResidentArchitectSessionRequested: true,
+  authenticatedPrincipal: 'principal-012',
+  authorizedFoundupIds: ['trade'],
+  groundingPreflight: foundupRuntimePreflight,
+  holoScorecard: foundupHolo.meta
+});
+assert.strictEqual(foundupResident.ok, true, 'FWG-018: registered target drives resident FoundUp scope');
+assert.strictEqual(foundupResident.payload.red_dog_intent.foundup_id, 'trade',
+  'FWG-018: resident intent may not fall back to another authorized FoundUp');
+const staleFoundupResident = orchestrator.buildResidentArchitectSessionPayload(foundupWorkPrompt, {
+  explicitResidentArchitectSessionRequested: true,
+  authenticatedPrincipal: 'principal-012',
+  authorizedFoundupIds: ['trade'],
+  groundingPreflight: foundupRuntimePreflight,
+  holoScorecard: foundupHolo.meta,
+  repoRoot: staleFoundupRoot
+});
+assert(staleFoundupResident.rejection_reasons.includes('registered_foundup_target_use_time_verification_failed'),
+  'FWG-018: resident dispatch must reverify the target against the current checkout');
+const foundupResidentConflict = orchestrator.buildResidentArchitectSessionPayload(foundupWorkPrompt, {
+  explicitResidentArchitectSessionRequested: true,
+  authenticatedPrincipal: 'principal-012',
+  authorizedFoundupIds: ['trade', 'gotjunk_001'],
+  foundupId: 'gotjunk_001',
+  groundingPreflight: foundupRuntimePreflight,
+  holoScorecard: foundupHolo.meta
+});
+assert.strictEqual(foundupResidentConflict.ok, false, 'FWG-019: caller-selected identity cannot override grounding');
+assert(foundupResidentConflict.rejection_reasons.includes('resident_architect_grounded_foundup_mismatch'),
+  'FWG-019: identity conflict exposes a stable rejection reason');
+
 const typedRecall = orchestrator.evaluateTargetRecall(typedPrompt, {
   task_retrieval: {
     code_hits: [
@@ -4792,7 +4977,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.45' } }
+      ? { id, packageJSON: { version: '0.4.46' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({

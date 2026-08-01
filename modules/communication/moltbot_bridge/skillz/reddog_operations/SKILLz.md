@@ -1,7 +1,7 @@
 ---
 name: reddog_operations
 description: Provider-neutral operating discipline for bounded RedDog repository work.
-version: 1.0.0
+version: 1.1.0
 intent_type: DECISION
 promotion_state: production
 category: workflow
@@ -25,6 +25,10 @@ evals:
     expected: exact_sha_independent_verification
   - name: provider_selection
     expected: signed_runtime_role_binding
+  - name: registered_foundup_work
+    expected: registry_bound_evidence_then_one_bounded_slice
+  - name: unknown_foundup_work
+    expected: wsp109_intake_without_execution_authority
 retirement_date: null
 ---
 # RedDog Operations
@@ -93,6 +97,28 @@ or conflicting role receipt blocks the stage.
 9. After merge, route Holo maintenance through WRE and verify the new
    generation before recording the outcome.
 10. Admit only independently verified outcomes to PatternMemory.
+
+## Registered FoundUp Work
+
+For a request to work on a named FoundUp:
+
+1. Resolve the name, ID, token symbol, and module alias through the canonical
+   `foundup_registry.json`; do not use a model-specific or FoundUp-specific
+   conditional.
+2. Bind the registry entry, schema, manifest, module docs, and available test
+   history into one non-authoritative current-checkout grounding receipt.
+   Treat registry `evidence_docs` as optional HoloIndex research inputs; they
+   cannot displace mandatory direct reads or exhaust the bounded read budget.
+3. Reject ambiguous registered names before Fusion. Do not guess whether
+   unmatched language is a name or category: attach registry evidence, expose
+   `requires_wsp109_resolution`, and grant no mutation scope until resolved.
+4. Reconcile roadmap claims against current code, tests, ledger, PR, and
+   receipt evidence. A stale roadmap cannot define current truth.
+5. Apply WSP 15 and select exactly one bounded REUSE or EXTEND slice. CREATE is
+   valid only after registry and module searches prove no reusable surface.
+6. Execution still requires the normal signed work order, allowed paths,
+   independent verifier, and promotion gates. The grounding receipt grants no
+   shell, worktree, PR, merge, signer, or re-index authority.
 
 ## Start Operations Boundary
 

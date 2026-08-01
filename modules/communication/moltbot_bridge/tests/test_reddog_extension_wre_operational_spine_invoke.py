@@ -229,6 +229,39 @@ def test_serialized_sovereign_selection_without_lease_cannot_call_runner(
     assert runner.calls == []
 
 
+def test_foundup_work_order_without_backend_target_receipt_rejects_before_runner(
+    tmp_path: Path,
+) -> None:
+    fixed = datetime(2026, 7, 12, 12, 1, 0, tzinfo=timezone.utc)
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    target_id = "sha256:" + "a" * 64
+    order = _base_order(
+        fixed,
+        foundup_id="trade",
+        registered_foundup_target_receipt_id=target_id,
+    )
+    runner = FakeRunner()
+    result = invoke_reddog_extension_wre_operational_spine_explicit_valve(
+        order,
+        explicit_wre_operational_spine_requested=True,
+        selection_receipt=_selection_receipt(
+            foundup_id="trade",
+            registered_foundup_target_receipt_id=target_id,
+        ),
+        valve_environment=_open_worktree_env(),
+        signature_verification_result=_accepted_signature(order),
+        runner=runner,
+        repo_root=repo_root,
+        now=fixed,
+        locks=set(),
+    )
+    assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_REJECT
+    assert ExtensionWREOperationalSpineInvokeReason.FOUNDUP_TARGET_INVALID in result.rejection_reasons
+    assert "registered_foundup_target_receipt_missing" in result.rejection_reasons
+    assert runner.calls == []
+
+
 def test_rejects_missing_explicit_request_before_runner_call(tmp_path: Path) -> None:
     fixed = datetime(2026, 7, 12, 12, 5, 0, tzinfo=timezone.utc)
     repo_root = tmp_path / "repo"
