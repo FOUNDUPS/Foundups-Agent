@@ -128,6 +128,10 @@ class DaemonSelfAuditLoop:
         self.improvement_proposals_enabled = (
             os.getenv("OPENCLAW_SELF_AUDIT_IMPROVEMENT_PROPOSALS", "1").strip() == "1"
         )
+        self.legacy_process_dispatch_enabled = (
+            os.getenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "0").strip()
+            == "1"
+        )
         self.auto_fix_enabled = (
             os.getenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0").strip() == "1"
             and os.getenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "0").strip() == "1"
@@ -545,6 +549,11 @@ class DaemonSelfAuditLoop:
         self._increment_counter("self_audit_escalations_total")
 
     def _dispatch_escalation_command(self, cmd: str) -> Tuple[bool, str]:
+        if not (
+            self.legacy_process_dispatch_enabled
+            and self.escalation_dispatch_enabled
+        ):
+            return False, "legacy_process_dispatch_disabled"
         try:
             if self.escalation_allow_shell:
                 subprocess.Popen(
@@ -618,6 +627,8 @@ class DaemonSelfAuditLoop:
         return False, "no_policy_handler"
 
     def _dispatch_start_command(self, cmd: str) -> Tuple[bool, str]:
+        if not self.legacy_process_dispatch_enabled or not self.auto_fix_enabled:
+            return False, "legacy_process_dispatch_disabled"
         try:
             if self.allow_shell_start_cmd:
                 subprocess.Popen(

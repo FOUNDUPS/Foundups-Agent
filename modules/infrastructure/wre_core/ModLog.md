@@ -1,5 +1,12 @@
 # WRE Core - ModLog
 ## Chronological Change Log
+### [2026-08-02] - LEGACY SELF-AUDIT PROCESS DISPATCH MASTER GATE
+
+- Added a common fail-closed master gate at both legacy self-audit process
+  dispatch primitives. Existing per-path flags cannot reach `Popen` unless the
+  explicit compatibility master is also enabled; safe in-process repairs keep
+  their existing behavior. (WSP 15/22/50/97)
+
 ### [2026-08-01] - TEST IMPACT AND DIFFERENTIAL RECEIPT
 - Added pure parent/candidate differential analysis that compares exact test IDs
   instead of aggregate pass/fail counts.

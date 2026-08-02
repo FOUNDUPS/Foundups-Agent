@@ -264,7 +264,7 @@ class PolicyFlags:
     wsp_preflight_checked: bool = False
     wsp_preflight_passed: bool = False
 
-    dry_run_mode: bool = False
+    dry_run_mode: bool = True
 
     # HXA24: Capability token policy flags
     capability_token_checked: bool = False
@@ -338,7 +338,7 @@ class PolicyFlags:
             capability_token_validated=False,
             capability_token_scope_authorized=False,
             # Operator-authored: preserved (True is the safe/sandbox direction).
-            dry_run_mode=bool(data.get("dry_run_mode", False)),
+            dry_run_mode=bool(data.get("dry_run_mode", True)),
         )
 
 

@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-02: OpenClaw ingress and FoundUp mutation fail-closed hardening
+
+- Removed the known webhook-token fallback and made unconfigured webhook
+  authentication reject with constant-time comparison for configured tokens.
+- Prevented advisory and unauthenticated OpenClaw intents from reaching
+  mutating FoundUp queue/build/create/launch paths, including direct-dispatch
+  bypass attempts.
+- Made FoundUp policy flags dry-run by default and normalized object and
+  serialized representations through one routing rule so serialization cannot
+  silently change live-write classification. (WSP 15/22/50/97)
+
 ## 2026-08-02: Generic HoloIndex incident repair coordination
 
 - Extended the existing start-operations/post-merge Holo repair architecture

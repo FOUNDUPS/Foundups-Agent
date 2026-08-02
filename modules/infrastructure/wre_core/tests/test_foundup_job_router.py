@@ -23,6 +23,7 @@ from modules.infrastructure.wre_core.src.foundup_job_router import (
     RouteReasonCode,
     RouteEnvelope,
 )
+from modules.communication.moltbot_bridge.src.foundup_job_contract import PolicyFlags
 
 
 # ---------------------------------------------------------------------------
@@ -134,7 +135,11 @@ class TestCreateFoundUpRouting:
 
     def test_create_requires_explicit_dry_run(self):
         job = _create_foundup_job()
-        job.policy_flags = MockPolicyFlags(dry_run_mode=False)
+        job.policy_flags = PolicyFlags(
+            dry_run_mode=False,
+            security_gate_checked=True,
+            security_gate_passed=True,
+        )
 
         envelope = route_foundup_job(job)
 

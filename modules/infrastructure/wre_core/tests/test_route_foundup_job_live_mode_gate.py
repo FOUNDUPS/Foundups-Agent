@@ -5,15 +5,13 @@ Tests for route_foundup_job() live-mode security-gate discriminator + raw-dict s
 Slice: FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1 (narrow completion of #753)
 
 Proves at the ROUTING seam (route_foundup_job, NOT validate_foundup_job_envelope):
-  1. Object job with DEFAULT PolicyFlags (dry_run_mode=False default) still ROUTES
-     -> the no-over-block proof: the object/to_dict() path is intentionally never live.
+  1. Object job with DEFAULT PolicyFlags (dry_run_mode=True) ROUTES safely.
   2. Object job with dry_run_mode=True still ROUTES (dry-run object path is never gated).
   3. Raw-dict policy_flags with FORGED security_gate_passed=True + explicit dry_run_mode=False
      (explicit live) is BLOCKED (BLOCKED_POLICY_GATE) -> sanitization + fail-closed.
   4. Raw-dict policy_flags MISSING dry_run_mode (forged security flags) still ROUTES as dry-run
      (not live, not over-blocked) and the forged flags are sanitized away in policy_summary.
-  5. Object job that is genuinely server-authored live (real PolicyFlags object, dry_run_mode=False)
-     -> documents the object-path asymmetry: NOT treated as live here by design (routes).
+  5. Canonical object and raw representations agree on live-mode classification.
 
 Live-mode discriminator design (audit rationale):
   is_live = policy_summary.get("dry_run_mode") is False and not dry_run_defaulted
@@ -71,23 +69,17 @@ class _MockFoundUpJob:
 # ---------------------------------------------------------------------------
 
 
-class TestObjectPathNeverLive:
-    """The object/to_dict() path is intentionally never treated as live -> never over-blocked."""
+class TestCanonicalObjectPolicy:
+    """Canonical policy objects preserve explicit dry-run/live intent."""
 
     def test_default_policyflags_object_still_routes(self):
-        """Object job with DEFAULT PolicyFlags (dry_run_mode=False default) ROUTES.
-
-        This is the primary no-over-block proof: a server-authored PolicyFlags object
-        whose dry_run_mode happens to be the False default must NOT be mis-classified as
-        explicit-live and blocked. dry_run_defaulted stays True on the object path -> is_live
-        is False -> routing is preserved.
-        """
+        """Default canonical policy is dry-run and routes without live authority."""
         job = _MockFoundUpJob(
             job_id="job_route_001",
             tenant_id="tenant_alice",
             requested_action="build_foundup",
             foundup_id="gotjunk",
-            policy_flags=PolicyFlags(),  # all defaults; dry_run_mode=False, security_gate_passed=False
+            policy_flags=PolicyFlags(),
         )
 
         envelope = route_foundup_job(job)
@@ -111,21 +103,13 @@ class TestObjectPathNeverLive:
         assert envelope.route_status == RouteStatus.ROUTED
         assert envelope.reason_code == RouteReasonCode.OK_ROUTED
 
-    def test_server_authored_live_object_routes_by_design_asymmetry(self):
-        """Genuinely server-authored live object (dry_run_mode=False) ROUTES here by design.
-
-        Documents the object-path asymmetry (audit rationale): the routing seam does NOT
-        treat the object path as live because a FoundUpJob default dry_run_mode=False is
-        indistinguishable from explicit-live, so gating it would over-block default object
-        routing. Strict server-authored live validation lives in the validate_foundup_job_envelope
-        / _validate_live_mode_gates seam, not here. We therefore assert ROUTES (NOT a block).
-        """
+    def test_server_authored_live_object_routes_after_security_gate(self):
+        """Explicit live canonical policy routes only with server gate evidence."""
         job = _MockFoundUpJob(
             job_id="job_route_003",
             tenant_id="tenant_carol",
             requested_action="extract_foundup",
             foundup_id="move2japan",
-            # Even a "live-looking" server-authored object is not gated at the routing seam.
             policy_flags=PolicyFlags(
                 dry_run_mode=False,
                 security_gate_checked=True,
@@ -135,9 +119,22 @@ class TestObjectPathNeverLive:
 
         envelope = route_foundup_job(job)
 
-        # By-design asymmetry: object path is never live at the routing seam -> routes.
         assert envelope.route_status == RouteStatus.ROUTED
         assert envelope.reason_code != RouteReasonCode.BLOCKED_POLICY_GATE
+
+    def test_server_authored_live_object_without_security_is_blocked(self):
+        job = _MockFoundUpJob(
+            job_id="job_route_003b",
+            tenant_id="tenant_carol",
+            requested_action="extract_foundup",
+            foundup_id="move2japan",
+            policy_flags=PolicyFlags(dry_run_mode=False),
+        )
+
+        envelope = route_foundup_job(job)
+
+        assert envelope.route_status == RouteStatus.BLOCKED
+        assert envelope.reason_code == RouteReasonCode.BLOCKED_POLICY_GATE
 
 
 # ---------------------------------------------------------------------------

@@ -86,6 +86,35 @@ def test_self_audit_auto_fix_requires_legacy_opt_in(tmp_path: Path, monkeypatch)
     assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
 
 
+def test_direct_start_primitive_requires_master_process_gate(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "1")
+    monkeypatch.delenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", raising=False)
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+
+    with patch(POPEN_TARGET) as mock_popen:
+        attempted, result = loop._dispatch_start_command("echo start")
+
+    assert attempted is False
+    assert result == "legacy_process_dispatch_disabled"
+    mock_popen.assert_not_called()
+
+
+def test_direct_escalation_primitive_requires_master_process_gate(
+    tmp_path: Path, monkeypatch
+):
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_ESCALATION_DISPATCH", "1")
+    monkeypatch.delenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", raising=False)
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+
+    with patch(POPEN_TARGET) as mock_popen:
+        attempted, result = loop._dispatch_escalation_command("echo escalate")
+
+    assert attempted is False
+    assert result == "legacy_process_dispatch_disabled"
+    mock_popen.assert_not_called()
+
+
 def test_self_audit_legacy_policy_fix_dispatches_with_dual_opt_in(
     tmp_path: Path, monkeypatch
 ):
@@ -100,6 +129,7 @@ def test_self_audit_legacy_policy_fix_dispatches_with_dual_opt_in(
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
     monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "0")
@@ -128,6 +158,7 @@ def test_ironclaw_retry_reports_attempted_but_unhealthy(tmp_path: Path, monkeypa
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
     monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "2")
@@ -164,6 +195,7 @@ def test_ironclaw_retry_reports_healthy_when_health_endpoint_responds(tmp_path: 
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
     monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "3")
@@ -332,6 +364,7 @@ def test_self_audit_legacy_escalation_dispatches_configured_command(
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ESCALATION_COOLDOWN_SEC", "600")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ESCALATE_CMD", "echo escalate")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_ESCALATION_DISPATCH", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
     with patch(POPEN_TARGET) as mock_popen:

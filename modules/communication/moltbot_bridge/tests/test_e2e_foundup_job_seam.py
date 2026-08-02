@@ -246,6 +246,7 @@ class TestE2EFoundUpJobSeam:
             requested_action="validate_foundup",
             payload={"module_path": "modules/foundups/real_module"},
         )
+        job.policy_flags.dry_run_mode = False
 
         result = execute_foundup_job(job)
 
