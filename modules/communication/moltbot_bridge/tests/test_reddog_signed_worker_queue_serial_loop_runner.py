@@ -1110,6 +1110,82 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_without_generation_s
     )
 
 
+def test_queue_serial_loop_runner_accepts_only_production_ready_upstream_mode(
+    tmp_path: Path,
+) -> None:
+    for mode in ("openclaw_gateway",):
+        root = tmp_path / mode
+        root.mkdir()
+        config = _write_queue_stage_files(
+            root,
+            through_stage="assurance_capacity_admission",
+            artifact_request_binding=True,
+        )
+        kwargs = dict(config.bootstrap_kwargs)
+        kwargs["artifact_generator_mode"] = mode
+        configured = SignedWorkerQueueSerialLoopRunnerConfig(
+            repo_root=config.repo_root,
+            runtime_allowed_root=config.runtime_allowed_root,
+            work_state_path=config.work_state_path,
+            chain_results_path=config.chain_results_path,
+            authority_profile_path=config.authority_profile_path,
+            now_iso=config.now_iso,
+            now_epoch=config.now_epoch,
+            max_steps=2,
+            bootstrap_kwargs=kwargs,
+        )
+        runner = RedDogSignedWorkerQueueSerialLoopRunner(
+            configured,
+            bootstrap=_FakeBootstrap(
+                _bootstrap_payload(
+                    dispatched_stages=("bounded_worker_pilot", "exact_sha_commit"),
+                    no_hermes_dispatch_performed=(mode != "hermes_api"),
+                )
+            ),
+        )
+        context = _context(
+            worker_runtime="0102",
+            role="coding_worker_1",
+            capability="bounded_code_change",
+        )
+
+        result = runner.run_signed_worker_dispatch_task(
+            task_id=f"task-{mode}",
+            task_context=context,
+            worker_dispatch_intent=context["worker_dispatch_intent"],
+            signed_authority_receipt=context[
+                "signed_authority_worker_dispatch_receipt"
+            ],
+            repo_root=root / "repo",
+        )
+
+        assert result["accepted"] is True, result
+
+
+def test_queue_serial_loop_runner_rejects_hermes_until_service_identity_exists(
+    tmp_path: Path,
+) -> None:
+    config = _write_queue_stage_files(
+        tmp_path, through_stage="assurance_capacity_admission",
+        artifact_request_binding=True,
+    )
+    kwargs = dict(config.bootstrap_kwargs)
+    kwargs["artifact_generator_mode"] = "hermes_api"
+    configured = SignedWorkerQueueSerialLoopRunnerConfig(
+        **{**config.__dict__, "bootstrap_kwargs": kwargs}
+    )
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(configured, bootstrap=_FakeBootstrap())
+    context = _context(worker_runtime="0102", role="coding_worker_1", capability="bounded_code_change")
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-hermes-blocked", task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+    assert result["accepted"] is False
+    assert SignedWorkerQueueSerialLoopRunnerReason.CODE_ARTIFACT_GENERATION_MISSING in result["rejection_reasons"]
+
+
 def test_queue_serial_loop_runner_rejects_0102_bounded_code_before_artifact_stage(tmp_path: Path) -> None:
     config = _write_queue_stage_files(tmp_path, through_stage="execution_valve")
     runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=_FakeBootstrap())

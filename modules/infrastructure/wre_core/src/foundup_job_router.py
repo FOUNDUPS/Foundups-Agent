@@ -382,12 +382,24 @@ def _sanitize_untrusted_policy_flags_dict(
     sanitized = PolicyFlags.from_dict(policy_flags).to_dict()
 
     dry_run_defaulted = "dry_run_mode" not in policy_flags
-    if dry_run_defaulted:
-        # from_dict({}) yields dry_run_mode=False; restore the router's safe
-        # default so missing flags are NOT treated as live.
-        sanitized["dry_run_mode"] = True
-
     return sanitized, dry_run_defaulted
+
+
+def _normalize_policy_flags(value: Any) -> Tuple[Dict[str, bool], bool]:
+    """Normalize policy provenance without representation-dependent live mode."""
+    if value is None:
+        return {"dry_run_mode": True}, True
+    if isinstance(value, dict):
+        return _sanitize_untrusted_policy_flags_dict(value)
+
+    from modules.communication.moltbot_bridge.src.foundup_job_contract import PolicyFlags
+
+    if type(value) is PolicyFlags:
+        # A public dataclass instance proves shape, not server provenance.
+        # Preserve only the safe operator-authored dry-run direction and clear
+        # every asserted gate through the same untrusted normalization path.
+        return PolicyFlags.from_dict(value.to_dict()).to_dict(), False
+    return {"dry_run_mode": True}, True
 
 
 def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidationResult:
@@ -467,27 +479,20 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
     dry_run_defaulted = False
 
     if policy_flags is None:
-        # WSP 97: Default dry_run to True for safety
-        dry_run_defaulted = True
-        policy_snapshot = {"dry_run_mode": True}
+        policy_snapshot, dry_run_defaulted = _normalize_policy_flags(None)
         logger.info(
             "[WSP97] FoundUpJob envelope missing policy_flags - dry_run_mode defaulted to True"
         )
     elif isinstance(policy_flags, dict):
         # SECURITY (#752): raw envelope dict is UNTRUSTED. Sanitize so self-asserted
         # gate/token flags cannot survive; preserve safe dry_run default.
-        policy_snapshot, dry_run_defaulted = _sanitize_untrusted_policy_flags_dict(
-            policy_flags
-        )
+        policy_snapshot, dry_run_defaulted = _normalize_policy_flags(policy_flags)
         if dry_run_defaulted:
             logger.info(
                 "[WSP97] FoundUpJob envelope missing dry_run_mode - defaulted to True"
             )
-    elif hasattr(policy_flags, "to_dict"):
-        policy_snapshot = policy_flags.to_dict()
-        if not policy_snapshot.get("dry_run_mode"):
-            dry_run_defaulted = True
-            policy_snapshot["dry_run_mode"] = True
+    else:
+        policy_snapshot, dry_run_defaulted = _normalize_policy_flags(policy_flags)
 
     # Determine if this is live mode (explicit dry_run_mode=False)
     is_live_mode = policy_snapshot.get("dry_run_mode") is False and not dry_run_defaulted

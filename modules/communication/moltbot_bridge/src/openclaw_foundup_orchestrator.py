@@ -861,6 +861,19 @@ def dispatch_foundup(dae: Any, intent: Any) -> str:
     """
     raw_message = intent.raw_message
 
+    if (
+        _is_explicit_build_intent(raw_message)
+        or _is_foundup_launch_or_onboard_intent(raw_message)
+    ) and getattr(intent, "is_authorized_commander", False) is not True:
+        logger.warning(
+            "[OPENCLAW-FOUNDUP-ORCH] mutation_denied | sender=%s",
+            getattr(intent, "sender", "unknown"),
+        )
+        return (
+            "FoundUp mutation denied: authenticated commander authority is required. "
+            "No job was queued and no launch was attempted."
+        )
+
     # Phase 2: explicit build/create/queue intents -> typed FoundUpJob (QUEUED,
     # dry-run; no launch). Safe intake path; never calls fam_adapter.launch_foundup.
     if _is_explicit_build_intent(raw_message):
@@ -934,6 +947,12 @@ def _handle_build_intent(intent: Any) -> str:
     Returns:
         Job creation confirmation with job_id and status
     """
+    if getattr(intent, "is_authorized_commander", False) is not True:
+        return (
+            "FoundUp mutation denied: authenticated commander authority is required. "
+            "No job was queued and no launch was attempted."
+        )
+
     raw_message = intent.raw_message
     sender = intent.sender
     session_key = getattr(intent, "session_key", None)

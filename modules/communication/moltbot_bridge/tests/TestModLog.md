@@ -1,3 +1,20 @@
+## 2026-08-02: Upstream OpenClaw and Hermes fail-closed provider gate
+
+- Added fail-closed provider, command-transport,
+  canonical-mode, signed-model-binding, queue-admission, and receipt-truth
+  regressions for the actual OpenClaw CLI/Gateway and the production-blocked
+  Hermes mode.
+- Proved malformed output, unsafe exact-session sandbox state, duplicate JSON,
+  indeterminate timeout/termination, forged effect fields, unknown modes, and
+  unsupported Hermes identity reject before repository materialization.
+- Configured and verified the current installed OpenClaw loopback Gateway and
+  dedicated `reddog-artifact` agent. The repository adapter's real preflight
+  passed with a version-matched Gateway, exact-session sandbox, canonical
+  read-only sandbox workspace mount, wildcard tool deny, and no elevation.
+- Added semantic receipt-forgery, invalid nested effect receipt, truthful
+  Fusion network-effect, and uncertain OpenClaw abort regressions. Hermes is
+  current but unconfigured and remains production-blocked.
+
 ## 2026-08-02: HoloIndex incident repair runtime
 
 - Command: `pytest -q test_reddog_holoindex_incident_repair_runtime.py test_holoindex_postmerge_coordinator.py test_reddog_start_operations_holo_repair.py test_generate_reddog_backend_manifest.py`

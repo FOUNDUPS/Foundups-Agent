@@ -9,9 +9,7 @@ import json
 import logging
 import os
 import re
-import shlex
 import sqlite3
-import subprocess
 import threading
 import time
 from dataclasses import asdict
@@ -128,6 +126,9 @@ class DaemonSelfAuditLoop:
         self.improvement_proposals_enabled = (
             os.getenv("OPENCLAW_SELF_AUDIT_IMPROVEMENT_PROPOSALS", "1").strip() == "1"
         )
+        # Legacy command dispatch is retired. Environment variables are not
+        # signed authority; remediation must enter the resident WRE queue.
+        self.legacy_process_dispatch_enabled = False
         self.auto_fix_enabled = (
             os.getenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0").strip() == "1"
             and os.getenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "0").strip() == "1"
@@ -141,9 +142,7 @@ class DaemonSelfAuditLoop:
             if part.strip()
         }
         self.fix_cooldown_sec = int(os.getenv("OPENCLAW_SELF_AUDIT_FIX_COOLDOWN_SEC", "120"))
-        self.allow_shell_start_cmd = os.getenv(
-            "OPENCLAW_SELF_AUDIT_ALLOW_SHELL_START_CMD", "0"
-        ).strip() == "1"
+        self.allow_shell_start_cmd = False
         self.ironclaw_start_retry_count = max(
             0, int(os.getenv("IRONCLAW_START_RETRY_COUNT", "3"))
         )
@@ -159,13 +158,8 @@ class DaemonSelfAuditLoop:
             os.getenv("OPENCLAW_SELF_AUDIT_ESCALATION_COOLDOWN_SEC", "600")
         )
         self.escalation_cmd = os.getenv("OPENCLAW_SELF_AUDIT_ESCALATE_CMD", "").strip()
-        self.escalation_dispatch_enabled = (
-            os.getenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_ESCALATION_DISPATCH", "0").strip()
-            == "1"
-        )
-        self.escalation_allow_shell = (
-            os.getenv("OPENCLAW_SELF_AUDIT_ESCALATE_ALLOW_SHELL_CMD", "0").strip() == "1"
-        )
+        self.escalation_dispatch_enabled = False
+        self.escalation_allow_shell = False
 
         self.runtime_root = self._resolve_runtime_root()
         self.task_log_path = self.runtime_root / "daemon_self_audit_tasks.jsonl"
@@ -389,7 +383,11 @@ class DaemonSelfAuditLoop:
             )
             if improvement_job_id:
                 result = f"improvement_job_proposed:{improvement_job_id}"
-        if self.auto_fix_enabled and recommended in self.allowed_fixes:
+        process_fix_blocked = (
+            recommended == "start_ironclaw_gateway"
+            and not self.legacy_process_dispatch_enabled
+        )
+        if self.auto_fix_enabled and recommended in self.allowed_fixes and not process_fix_blocked:
             self._increment_counter("self_audit_auto_fix_attempts")
             attempted, result = self._apply_policy_fix(recommended)
             if attempted and self._is_successful_fix_result(result):
@@ -545,30 +543,8 @@ class DaemonSelfAuditLoop:
         self._increment_counter("self_audit_escalations_total")
 
     def _dispatch_escalation_command(self, cmd: str) -> Tuple[bool, str]:
-        try:
-            if self.escalation_allow_shell:
-                subprocess.Popen(
-                    cmd,
-                    cwd=str(self.repo_root),
-                    shell=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-                return True, "dispatched(shell)"
-
-            args = shlex.split(cmd, posix=os.name != "nt")
-            if not args:
-                return False, "invalid_escalation_command"
-            subprocess.Popen(
-                args,
-                cwd=str(self.repo_root),
-                shell=False,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            return True, "dispatched"
-        except Exception as exc:
-            return False, str(exc)
+        del cmd
+        return False, "legacy_process_dispatch_disabled"
 
     @staticmethod
     def _is_successful_fix_result(result: str) -> bool:
@@ -618,30 +594,8 @@ class DaemonSelfAuditLoop:
         return False, "no_policy_handler"
 
     def _dispatch_start_command(self, cmd: str) -> Tuple[bool, str]:
-        try:
-            if self.allow_shell_start_cmd:
-                subprocess.Popen(
-                    cmd,
-                    cwd=str(self.repo_root),
-                    shell=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-                return True, "start_command_dispatched(shell)"
-
-            args = shlex.split(cmd, posix=os.name != "nt")
-            if not args:
-                return False, "invalid_start_command"
-            subprocess.Popen(
-                args,
-                cwd=str(self.repo_root),
-                shell=False,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            return True, "start_command_dispatched"
-        except Exception as exc:
-            return False, str(exc)
+        del cmd
+        return False, "legacy_process_dispatch_disabled"
 
     def _dispatch_start_command_with_retry(self, cmd: str) -> Tuple[bool, str]:
         # Dispatch once; daemon start is fire-and-forget (Popen).

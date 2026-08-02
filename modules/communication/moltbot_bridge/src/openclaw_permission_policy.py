@@ -105,6 +105,20 @@ def resolve_autonomy_tier(dae: Any, intent: Any) -> Any:
             return dae.AutonomyTier.SOURCE
         return dae.AutonomyTier.DOCS_TESTS
 
+    if intent.category in (
+        dae.IntentCategory.AUTOMATION,
+        dae.IntentCategory.TRAINING,
+    ):
+        return dae.AutonomyTier.DOCS_TESTS
+
+    if intent.category in (
+        dae.IntentCategory.FOUNDUP,
+        dae.IntentCategory.IMPROVEMENT,
+    ):
+        if dae.permissions is None:
+            return dae.AutonomyTier.ADVISORY
+        return dae.AutonomyTier.SOURCE
+
     if intent.category == dae.IntentCategory.SCHEDULE:
         return dae.AutonomyTier.METRICS
 
@@ -227,6 +241,22 @@ def emit_permission_denied_event(dae: Any, intent: Any, tier: Any, reason: str) 
 def check_permission_gate(dae: Any, intent: Any, tier: Any) -> bool:
     """Verify resolved autonomy tier against permission policy."""
     if tier == dae.AutonomyTier.ADVISORY:
+        mutating_categories = (
+            dae.IntentCategory.COMMAND,
+            dae.IntentCategory.SYSTEM,
+            dae.IntentCategory.SCHEDULE,
+            dae.IntentCategory.SOCIAL,
+            dae.IntentCategory.AUTOMATION,
+            dae.IntentCategory.FOUNDUP,
+            dae.IntentCategory.TRAINING,
+            dae.IntentCategory.IMPROVEMENT,
+        )
+        if intent.category in mutating_categories:
+            logger.warning(
+                "[OPENCLAW-DAE] [PERMISSION] Mutation cannot use advisory tier: %s",
+                intent.category.value,
+            )
+            return False
         return True
 
     if not intent.is_authorized_commander and tier != dae.AutonomyTier.ADVISORY:

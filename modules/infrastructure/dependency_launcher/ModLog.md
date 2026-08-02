@@ -7,6 +7,16 @@
 
 ## Change Log
 
+### 2026-08-02: Trusted WSL resolver exported for upstream agent dispatch
+
+- Exported the existing System32-only WSL executable resolver for reuse by the
+  bounded OpenClaw Gateway command transport.
+- Preserved the prior injected test seam and the read-only advisory behavior.
+- No PATH lookup, shell execution, package update, Gateway lifecycle action,
+  or ambient agent authority was added. (WSP 22/50/62/84/97)
+
+---
+
 ### 2026-08-02: Canonical E-Drive WSL Agent Runtime Binding
 
 **Slice:** `OPENCLAW_HERMES_WSL_RUNTIME_LOCATION_BINDING_PHASE1`

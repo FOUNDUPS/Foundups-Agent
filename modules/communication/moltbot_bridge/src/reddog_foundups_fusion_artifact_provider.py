@@ -1,7 +1,6 @@
 """Explicit FoundUps Fusion provider for bounded artifact generation."""
 
 from __future__ import annotations
-
 import importlib.util
 import json
 import os
@@ -10,12 +9,10 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
-
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (
     REDACTION_GATE_PASSED,
     evaluate_redaction_gate,
 )
-
 from .reddog_artifact_generation_admission_capability import (
     ArtifactGenerationModelCapability,
     consume_artifact_generation_model,
@@ -71,8 +68,6 @@ class FoundupsFusionArtifactGenerationRunner:
             timeout_seconds,
             started,
         )
-
-
 def _invoke(
     runner: FoundupsFusionArtifactGenerationRunner,
     api_key: str,
@@ -95,14 +90,16 @@ def _invoke(
         "bridge_meta": {"artifact_generation_binding": verified, **_lineage(topology)},
     }
     try:
-        result = _runtime_loader()(api_key, prompt + ("\n\n" + context if context else ""), [], payload)
-    except TimeoutError:
-        return _reject(FAIL_MODEL_TIMEOUT, started)
+        runtime = _runtime_loader()
     except Exception:
-        return _reject("fusion_bridge_call_failed", started)
+        return _reject("fusion_bridge_unavailable", started)
+    try:
+        result = runtime(api_key, prompt + ("\n\n" + context if context else ""), [], payload)
+    except TimeoutError:
+        return _reject(FAIL_MODEL_TIMEOUT, started, True)
+    except Exception:
+        return _reject("fusion_bridge_call_failed", started, True)
     return _parse(result, started)
-
-
 def _parse(result: Any, started: float) -> ArtifactGenerationModelResult:
     if not isinstance(result, Mapping) or result.get("ok") is not True:
         return _reject("fusion_result_not_ok", started, True)
@@ -122,9 +119,10 @@ def _parse(result: Any, started: float) -> ArtifactGenerationModelResult:
             {"artifact_contents": normalized, "review_packet": review}
         ),
         made_network_call=True,
+        provider_runtime=RUNTIME_MODE_FOUNDUPS_FUSION,
+        provider_invocation_performed=True,
+        external_side_effects_possible=True,
     )
-
-
 def _topology(binding: Mapping[str, Any]) -> dict[str, Any]:
     selected = binding.get("model_selection")
     if not isinstance(selected, Mapping):
@@ -143,12 +141,8 @@ def _topology(binding: Mapping[str, Any]) -> dict[str, Any]:
         **{key: selected.get(key) for key in required},
     }
     return {"lead_model": lead, "panel_models": panel, **lineage} if lead else {}
-
-
 def _lineage(topology: Mapping[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in topology.items() if key not in {"lead_model", "panel_models"}}
-
-
 def _json_mapping(content: str) -> Mapping[str, Any]:
     raw = content.strip()
     if raw.startswith("```"):
@@ -161,8 +155,6 @@ def _json_mapping(content: str) -> Mapping[str, Any]:
     except (TypeError, ValueError):
         return {}
     return parsed if isinstance(parsed, Mapping) else {}
-
-
 def _load_runner():
     root = Path(__file__).resolve().parents[4]
     path = root / "scripts" / "advisory_model_once.py"
@@ -172,16 +164,12 @@ def _load_runner():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module._run_foundups_fusion
-
-
 def _runtime_loader():
     module = sys.modules.get(
         "modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime"
     )
     loader = getattr(module, "_load_foundups_fusion_runner", _load_runner)
     return loader()
-
-
 def _reject(reason: str, started: float, made_network_call: bool = False) -> ArtifactGenerationModelResult:
     return ArtifactGenerationModelResult(
         ok=False,
@@ -191,6 +179,9 @@ def _reject(reason: str, started: float, made_network_call: bool = False) -> Art
         ),
         made_network_call=made_network_call,
         rejection_reasons=(reason,),
+        provider_runtime=RUNTIME_MODE_FOUNDUPS_FUSION,
+        provider_invocation_performed=made_network_call,
+        external_side_effects_possible=made_network_call,
     )
 
 __all__ = [

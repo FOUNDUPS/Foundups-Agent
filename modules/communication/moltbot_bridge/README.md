@@ -1,5 +1,28 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## Upstream Agent Execution Boundary
+
+RedDog's bounded author stage can use the installed upstream agent runtimes,
+not repository-local classes that merely carry their names:
+
+- `openclaw_gateway` invokes `/usr/local/bin/openclaw agent` through the
+  upstream loopback Gateway. It requires a dedicated sandboxed agent, a live
+  version-matched Gateway, no elevated mode, exactly one canonical read-only
+  sandbox workspace mount, and a wildcard tool deny policy. OpenClaw
+  generates the artifact map; the existing Foundups writer alone materializes
+  the already-authorized paths in the isolated worktree.
+- `hermes_api` is recognized but fails closed with
+  `missing_hermes_authenticated_service_identity`. The installed upstream API
+  reports server-side tool execution without a split-runtime confinement proof;
+  a loopback address and bearer key do not authenticate the server process.
+
+Both modes consume the existing signed model-runtime binding and remain below
+the AgentDB/WRE work-order, WSP 15, exact-path, commit, and independent-verifier
+authority chain. Provider invocation and worker-process effects are recorded
+in the resident-cycle result instead of being reported as dry-run purity.
+`foundups_fusion` remains supported; unknown provider modes fail closed. No
+local class is presented as a Hermes worker.
+
 The external signer uses a stable signer-owned system-service command:
 `reddog_signer_system_service_entrypoint`. Its v2 run packet contains the
 rotating current-generation configuration, but the service manager receives

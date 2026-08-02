@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-02 - Upstream OpenClaw artifact runtime (0.4.52)
+
+- Updated exact extension-version and generated backend-manifest assertions.
+- Covered provider effect truth, durable receipt rehydration, OpenClaw
+  preflight/confinement, bounded command execution, and fail-closed Hermes
+  production selection.
+
 ## 2026-08-02 - Canonical WSL agent runtime binding (0.4.51)
 
 - Updated the exact generated backend-manifest pin and extension version.

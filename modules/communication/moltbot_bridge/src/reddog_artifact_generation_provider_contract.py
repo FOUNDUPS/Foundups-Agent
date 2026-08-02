@@ -19,6 +19,15 @@ class ArtifactGenerationModelResult:
     model_result_digest: str = ""
     made_network_call: bool = False
     rejection_reasons: tuple[str, ...] = ()
+    provider_runtime: str = "none"
+    provider_invocation_performed: bool = False
+    worker_process_started: bool = False
+    worker_process_spawn_count: int = 0
+    hermes_dispatch_performed: bool = False
+    file_write_performed: bool = False
+    external_side_effects_possible: bool = False
+    effect_observation_complete: bool = True
+    run_abort_confirmed: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

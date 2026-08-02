@@ -15,6 +15,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     NEXT_QUEUE_CHAIN_COMPLETE,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_serial_loop import (
+    FAIL_CHAIN_RESULTS_INTEGRITY,
     FAIL_DISPATCH_REJECTED,
     FAIL_EXPLICIT_LOOP_MISSING,
     FAIL_MAX_STEPS_INVALID,
@@ -208,6 +209,26 @@ def test_serial_loop_runs_all_injected_stages_to_chain_complete() -> None:
     stored = store.load()
     assert set(stored["stage_results"]) == set(STAGE_ACCEPT_VALUES)
     assert len(stored["stage_results"]) == len(STAGE_ACCEPT_VALUES)
+
+
+def test_serial_loop_rejects_tampered_persisted_stage_before_next_action() -> None:
+    store = InMemoryResidentQueueChainResultsStore()
+    first = run_reddog_resident_queue_serial_loop(
+        explicit_resident_queue_serial_loop_requested=True,
+        work_state_snapshot=_snapshot(), store=store, handlers=_handlers(),
+        now_iso=NOW, requested_queue_item_id="queue-1",
+    )
+    assert first.accepted is True
+    tampered = dict(store.load())
+    tampered["stage_results"]["bounded_worker_pilot"]["worker_process_spawn_count"] = 0
+    result = run_reddog_resident_queue_serial_loop(
+        explicit_resident_queue_serial_loop_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=InMemoryResidentQueueChainResultsStore(tampered), handlers={},
+        now_iso=NOW, requested_queue_item_id="queue-1",
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == [FAIL_CHAIN_RESULTS_INTEGRITY]
 
 
 def test_serial_loop_is_explicitly_requested() -> None:
