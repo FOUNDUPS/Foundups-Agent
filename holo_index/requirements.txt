@@ -6,7 +6,7 @@ llama-cpp-python==0.2.69
 sentence-transformers>=2.2.0
 
 # Vector database
-chromadb>=0.4.0
+chromadb==1.5.5
 
 # Telemetry and caching
 cachetools>=5.0.0

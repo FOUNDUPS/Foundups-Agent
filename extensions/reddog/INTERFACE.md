@@ -1,5 +1,9 @@
 # RedDog Interface
 
+Version 0.4.47 seals the HoloIndex persisted vector-segment cold-start proof
+into the backend compatibility manifest. It adds no editor execution authority
+and performs no query-time indexing.
+
 Version 0.4.46 adds registry-driven FoundUp work grounding. Requests to work on
 an existing FoundUp derive canonical direct-read targets without name-specific
 branches; unknown or ambiguous identities fail before Fusion. The grounding

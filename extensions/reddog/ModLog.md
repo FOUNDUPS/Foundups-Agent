@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-08-02 - HoloIndex persisted vector-segment proof (0.4.47)
+
+- Regenerated and pinned the backend compatibility manifest after the
+  HoloIndex maintenance gate began proving persisted vector segments in a
+  fresh process.
+- Retained the query-only editor boundary: RedDog does not re-index or repair
+  HoloIndex during the reasoning request.
+
 ## 2026-08-02 - Registry-driven FoundUp work grounding (0.4.46)
 
 - Added a pure canonical-registry resolver for named FoundUp work. Aliases come

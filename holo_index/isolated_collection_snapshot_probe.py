@@ -7,6 +7,7 @@ import json
 import os
 import subprocess  # nosec B404  # Fixed interpreter/module, never a worker command.
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
@@ -21,11 +22,14 @@ from holo_index.freshness_receipt import (
     freshness_receipt_integrity_ok,
 )
 from holo_index.storage_contract import storage_path_identity
+from holo_index.persisted_vector_segment_probe import unqueryable_vector_segments
 
 
 SCHEMA_VERSION = "holoindex_isolated_snapshot_probe.v1"
 MAX_RECEIPT_BYTES = 2_000_000
+MAX_PROCESS_OUTPUT_BYTES = 16_384
 DEFAULT_TIMEOUT_SECONDS = 180.0
+SUPPORTED_CHROMADB_VERSIONS = frozenset({"1.5.5"})
 
 
 class IsolatedSnapshotProbeError(RuntimeError):
@@ -88,8 +92,29 @@ def _default_client_factory(ssd_path: Path) -> Any:
         }
     )
     import chromadb
+    from chromadb.config import Settings
 
-    return chromadb.PersistentClient(path=str(ssd_path / "vectors"))
+    if str(getattr(chromadb, "__version__", "")) not in SUPPORTED_CHROMADB_VERSIONS:
+        raise ValueError("unsupported_chromadb_version")
+
+    return chromadb.PersistentClient(
+        path=str(ssd_path / "vectors"),
+        settings=Settings(anonymized_telemetry=False, migrations="validate"),
+    )
+
+
+def finalize_chroma_client(client: Any) -> None:
+    """Stop one pinned Chroma client and clear its process-local cache."""
+
+    system = getattr(client, "_system", None)
+    stop = getattr(system, "stop", None)
+    clear_cache = getattr(type(client), "clear_system_cache", None)
+    if not callable(stop) or not callable(clear_cache):
+        raise ValueError("probe_client_lifecycle_unavailable")
+    try:
+        stop()
+    finally:
+        clear_cache()
 
 
 def open_persisted_collection_view(
@@ -151,21 +176,39 @@ def probe_collection_snapshots(
         )
     try:
         client = (client_factory or _default_client_factory)(ssd)
-        holo = SimpleNamespace(client=client)
-        mismatches = tuple(
-            name
-            for name in sorted(BASELINE_QUERY_COLLECTIONS)
-            if not collection_snapshot_matches_entry(holo, name, entries[name])
-        )
+        mismatches = _snapshot_mismatches(client, entries)
     except Exception:
         return IsolatedSnapshotProbeResult(
             False, receipt.generation_id, (), "PERSISTED_STORE_UNAVAILABLE"
         )
+    if mismatches:
+        return IsolatedSnapshotProbeResult(
+            False,
+            receipt.generation_id,
+            mismatches,
+            "COLLECTION_SNAPSHOT_MISMATCH",
+        )
+    unqueryable = unqueryable_vector_segments(
+        client,
+        entries,
+        collection_names=BASELINE_QUERY_COLLECTIONS,
+    )
     return IsolatedSnapshotProbeResult(
-        not mismatches,
-        receipt.generation_id,
-        mismatches,
-        "" if not mismatches else "COLLECTION_SNAPSHOT_MISMATCH",
+        not unqueryable, receipt.generation_id,
+        unqueryable,
+        "" if not unqueryable else "VECTOR_SEGMENT_UNAVAILABLE",
+    )
+
+
+def _snapshot_mismatches(
+    client: Any,
+    entries: Mapping[str, CollectionFreshness],
+) -> tuple[str, ...]:
+    holo = SimpleNamespace(client=client)
+    return tuple(
+        name
+        for name in sorted(BASELINE_QUERY_COLLECTIONS)
+        if not collection_snapshot_matches_entry(holo, name, entries[name])
     )
 
 
@@ -184,15 +227,41 @@ def _probe_environment() -> dict[str, str]:
     return environment
 
 
-def verify_collection_snapshots_isolated(
+def _bounded_process_stdout(
+    completed: Any,
+    stdout_file: Any,
+    stderr_file: Any,
+) -> str:
+    injected_stdout = getattr(completed, "stdout", None)
+    if isinstance(injected_stdout, str):
+        stdout = injected_stdout
+        stdout_size = len(stdout.encode("utf-8"))
+    else:
+        stdout_file.seek(0, os.SEEK_END)
+        stdout_size = stdout_file.tell()
+        stdout_file.seek(0)
+        stdout = stdout_file.read(MAX_PROCESS_OUTPUT_BYTES + 1).decode(
+            "utf-8", errors="strict"
+        )
+    injected_stderr = getattr(completed, "stderr", None)
+    stderr_size = (
+        len(injected_stderr.encode("utf-8"))
+        if isinstance(injected_stderr, str)
+        else stderr_file.tell()
+    )
+    if stdout_size > MAX_PROCESS_OUTPUT_BYTES or stderr_size > (
+        MAX_PROCESS_OUTPUT_BYTES
+    ):
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_OUTPUT_LIMIT")
+    return stdout
+
+
+def _run_isolated_probe(
     receipt: HoloIndexFreshnessReceipt,
-    *,
     ssd_path: Path | str,
     repo_root: Path | str,
-    timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
-) -> list[str]:
-    """Run the persisted proof in a fresh Python process or fail closed."""
-
+    timeout_seconds: float,
+) -> str:
     command = [
         sys.executable,
         "-B",
@@ -202,26 +271,39 @@ def verify_collection_snapshots_isolated(
         str(Path(ssd_path).resolve(strict=False)),
     ]
     try:
-        completed = subprocess.run(  # nosec B603  # Fixed argv; shell is disabled.
-            command,
-            cwd=str(Path(repo_root).resolve(strict=False)),
-            env=_probe_environment(),
-            input=receipt.to_json(),
-            text=True,
-            encoding="utf-8",
-            errors="strict",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=float(timeout_seconds),
-            check=False,
-            shell=False,
-        )
+        with (
+            tempfile.TemporaryFile() as stdout_file,
+            tempfile.TemporaryFile() as stderr_file,
+        ):
+            completed = subprocess.run(  # nosec B603  # Fixed argv; shell is disabled.
+                command,
+                cwd=str(Path(repo_root).resolve(strict=False)),
+                env=_probe_environment(),
+                input=receipt.to_json().encode("utf-8"),
+                stdout=stdout_file,
+                stderr=stderr_file,
+                timeout=float(timeout_seconds),
+                check=False,
+                shell=False,
+            )
+            stdout = _bounded_process_stdout(completed, stdout_file, stderr_file)
     except (OSError, subprocess.SubprocessError, ValueError):
         raise IsolatedSnapshotProbeError("ISOLATED_PROBE_PROCESS_FAILED") from None
-    if completed.returncode != 0:
+    if (
+        not isinstance(completed.returncode, int)
+        or isinstance(completed.returncode, bool)
+        or completed.returncode != 0
+    ):
         raise IsolatedSnapshotProbeError("ISOLATED_PROBE_PROCESS_FAILED")
+    return stdout
+
+
+def _validated_probe_response(
+    stdout: str,
+    generation_id: str,
+) -> Mapping[str, Any]:
     try:
-        response = json.loads(completed.stdout)
+        response = json.loads(stdout)
     except (TypeError, ValueError, json.JSONDecodeError):
         raise IsolatedSnapshotProbeError("ISOLATED_PROBE_RESPONSE_INVALID") from None
     if not isinstance(response, Mapping):
@@ -235,15 +317,39 @@ def verify_collection_snapshots_isolated(
         )
         and len(mismatches) == len(set(mismatches))
     )
+    expected_keys = {
+        "schema_version", "ok", "generation_id", "mismatched_collections", "error"
+    }
     if (
-        response.get("schema_version") != SCHEMA_VERSION
-        or response.get("generation_id") != receipt.generation_id
+        set(response) != expected_keys
+        or response.get("schema_version") != SCHEMA_VERSION
+        or not isinstance(response.get("ok"), bool)
+        or not isinstance(response.get("error"), str)
+        or response.get("generation_id") != generation_id
         or not valid_mismatches
     ):
         raise IsolatedSnapshotProbeError("ISOLATED_PROBE_RESPONSE_INVALID")
+    return response
+
+
+def verify_collection_snapshots_isolated(
+    receipt: HoloIndexFreshnessReceipt,
+    *,
+    ssd_path: Path | str,
+    repo_root: Path | str,
+    timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+) -> list[str]:
+    """Run the persisted proof in a fresh Python process or fail closed."""
+
+    stdout = _run_isolated_probe(receipt, ssd_path, repo_root, timeout_seconds)
+    response = _validated_probe_response(stdout, receipt.generation_id)
+    mismatches = response["mismatched_collections"]
     if response.get("ok") is True and not mismatches and not response.get("error"):
         return []
-    if response.get("error") == "COLLECTION_SNAPSHOT_MISMATCH" and mismatches:
+    if response.get("error") in {
+        "COLLECTION_SNAPSHOT_MISMATCH",
+        "VECTOR_SEGMENT_UNAVAILABLE",
+    } and mismatches:
         return sorted(mismatches)
     raise IsolatedSnapshotProbeError(
         str(response.get("error") or "ISOLATED_PROBE_FAILED")
@@ -266,7 +372,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         receipt = _read_receipt()
-        result = probe_collection_snapshots(receipt, ssd_path=args.ssd)
+        original_ssd = Path(args.ssd).resolve(strict=False)
+        client = _default_client_factory(original_ssd)
+        try:
+            result = probe_collection_snapshots(
+                receipt,
+                ssd_path=original_ssd,
+                client_factory=lambda _path: client,
+            )
+        finally:
+            finalize_chroma_client(client)
     except Exception:
         result = IsolatedSnapshotProbeResult(False, "", (), "INVALID_REQUEST")
     sys.stdout.write(json.dumps(result.to_dict(), sort_keys=True) + "\n")
@@ -280,6 +395,7 @@ if __name__ == "__main__":
 __all__ = [
     "IsolatedSnapshotProbeError",
     "IsolatedSnapshotProbeResult",
+    "finalize_chroma_client",
     "open_persisted_collection_view",
     "probe_collection_snapshots",
     "verify_collection_snapshots_isolated",

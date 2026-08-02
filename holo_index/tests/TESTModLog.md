@@ -1,5 +1,20 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-02] Persisted vector-segment cold-start gate
+
+- Proved exact persisted collection snapshots are insufficient to certify
+  semantic readiness when a Chroma HNSW segment cannot reopen.
+- Added isolated child-response and direct-probe regressions for
+  `VECTOR_SEGMENT_UNAVAILABLE`, while preserving exact-generation response
+  binding and the healthy round-trip path.
+- Added adversarial coverage for forged neighbor IDs, unsupported unbounded
+  embedding reads, oversized child output, strict child response shape,
+  Chroma-version mismatch, writer-finalization failure, and incremental-owner
+  publication bypass. Incremental publication also rejects a verifier-returned
+  mismatch list; only an empty proof result can publish freshness.
+- Proved the maintenance-only probe runs after writer finalization with
+  migrations validation and no logical mutation or indexing API.
+
 ## [2026-07-25] REDDOG_HOLOINDEX_SEMANTIC_EVIDENCE_RECEIPT_BINDING_PHASE1
 
 - Added digest-change, exact bucket/metadata serialization, item-count, and ignored-extra-field coverage.

@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-02 - HoloIndex persisted vector-segment proof (0.4.47)
+
+- Revalidated the generated 1,109-file backend manifest, exact extension pin,
+  and local compatibility preflight after the cold-start proof was added.
+- Folded independent NO-GO reviews covering the incremental owner, forged
+  query results, output bounds, writer finalization, Chroma migration behavior,
+  and dependency pinning before publishing a replacement exact SHA.
+
 ## 2026-08-02 - Registry-driven FoundUp work grounding (0.4.46)
 
 - Added generic resolver regressions across every canonical registry entity,
