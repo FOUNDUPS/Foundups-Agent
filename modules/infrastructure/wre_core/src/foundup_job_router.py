@@ -395,7 +395,10 @@ def _normalize_policy_flags(value: Any) -> Tuple[Dict[str, bool], bool]:
     from modules.communication.moltbot_bridge.src.foundup_job_contract import PolicyFlags
 
     if type(value) is PolicyFlags:
-        return value.to_dict(), False
+        # A public dataclass instance proves shape, not server provenance.
+        # Preserve only the safe operator-authored dry-run direction and clear
+        # every asserted gate through the same untrusted normalization path.
+        return PolicyFlags.from_dict(value.to_dict()).to_dict(), False
     return {"dry_run_mode": True}, True
 
 

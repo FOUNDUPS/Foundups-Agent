@@ -48,6 +48,7 @@ class TestWSP109OnboardingGated:
         mock_intent = MagicMock()
         mock_intent.raw_message = self.ONBOARD_MSG
         mock_intent.sender = "012"
+        mock_intent.is_authorized_commander = True
         mock_intent.payload = None  # no genesis envelope present
         mock_dae = MagicMock()
 
@@ -91,6 +92,7 @@ class TestFoundupGenesisGate:
         mock_intent = MagicMock()
         mock_intent.raw_message = "launch foundup Shield with token SHLD"
         mock_intent.sender = "012"
+        mock_intent.is_authorized_commander = True
         mock_intent.payload = None
         mock_dae = MagicMock()
 
@@ -141,6 +143,7 @@ class TestDualParserConverged:
             mock_intent = MagicMock()
             mock_intent.raw_message = msg
             mock_intent.sender = "012"
+            mock_intent.is_authorized_commander = True
             mock_intent.session_key = None
             mock_intent.channel = "local_repl"
             result = dispatch_foundup(MagicMock(), mock_intent)

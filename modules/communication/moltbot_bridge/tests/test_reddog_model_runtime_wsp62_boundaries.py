@@ -14,6 +14,7 @@ BOUNDED_MODULES = (
     "reddog_artifact_generation_model_binding.py",
     "reddog_artifact_generation_model_capability.py",
     "reddog_artifact_generation_provider_contract.py",
+    "reddog_artifact_generation_receipt.py",
     "reddog_artifact_generation_result.py",
     "reddog_foundups_fusion_artifact_provider.py",
     "reddog_model_runtime_verifier_bootstrap.py",

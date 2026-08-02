@@ -8,8 +8,8 @@ outside the repository checkout, builds the injected handler registry with the
 dependencies this bootstrap owns today, and advances through the serial loop up
 to a bounded max step count.
 
-This slice does not introduce a production signer, runner, PR, PatternMemory,
-OpenClaw, Hermes, or HoloIndex dependency. Work-order and valve artifacts are
+This bootstrap does not grant signer, runner, PR, PatternMemory, OpenClaw,
+Hermes, or HoloIndex authority. Work-order and valve artifacts are
 loaded only from outside-repo JSON snapshots. Public signature verification can
 be enabled only through the explicit runtime dependency bundle. Missing
 later-stage dependencies fail closed through the registry and dispatcher.
@@ -70,6 +70,12 @@ from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_boot
     ModelRuntimeVerifierConfig,
     build_model_runtime_verifier,
 )
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_bootstrap import (
+    ArtifactProviderDependencies,
+    build_artifact_generator as _build_artifact_generator,
+    build_generation_dependencies as _build_generation_dependencies,
+    read_artifact_provider_effects as _artifact_provider_effects,
+)
 from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
     materialized_model_runtime_authority_fields,
 )
@@ -111,6 +117,12 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     no_signing_performed: bool = True
     no_signature_verification_performed: bool = True
     no_worker_spawn_performed: bool = True
+    no_upstream_agent_invocation_performed: bool = True
+    artifact_provider_runtime: str = "none"
+    worker_process_spawn_count: int = 0
+    no_artifact_provider_file_write_performed: bool = True
+    artifact_provider_effect_observation_complete: bool = True
+    artifact_provider_run_abort_confirmed: bool = True
     no_worktree_created: bool = True
     no_bounded_task_execution_performed: bool = True
     no_bounded_file_edit_performed: bool = True
@@ -189,6 +201,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     worktree_runner_timeout_s: int = 120,
     artifact_generator: Any = None,
     artifact_generator_mode: str | None = None,
+    artifact_provider_dependencies: ArtifactProviderDependencies | None = None,
     model_runtime_binding_verifier: Any = None,
     model_runtime_verifier_config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None = None,
     evidence_command_runner: Any = None,
@@ -442,7 +455,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         held_out_gate_request = _derive_held_out_gate_request_from_chain(chain_state)
     if pattern_memory_admission_request_binding_enabled and admission_request is None:
         admission_request = _derive_pattern_memory_admission_request_from_chain(chain_state)
-
     resolved_outcome_ratchet_store, ratchet_store_reasons = _build_outcome_ratchet_store(
         root,
         runtime_root,
@@ -451,7 +463,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if ratchet_store_reasons:
         return _not_ready(ratchet_store_reasons, chain_results_path=None)
-
     resolved_model_feedback_store, model_feedback_store_reasons = _build_model_feedback_ledger_store(
         root,
         runtime_root,
@@ -470,7 +481,9 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(runner_reasons, chain_results_path=None)
     generation = _build_generation_dependencies(
         root, runtime_root, artifact_generator, artifact_generator_mode,
-        model_runtime_binding_verifier, model_runtime_verifier_config, authority_clock)
+        model_runtime_binding_verifier, model_runtime_verifier_config, authority_clock,
+        provider_dependencies=artifact_provider_dependencies, verifier_builder=build_model_runtime_verifier,
+    )
     resolved_artifact_generator, resolved_model_verifier, generation_reasons = generation
     if generation_reasons:
         return _not_ready(generation_reasons, chain_results_path=None)
@@ -480,7 +493,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if evidence_runner_reasons:
         return _not_ready(evidence_runner_reasons, chain_results_path=None)
-
     dependency_bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=root,
         runtime_allowed_root=runtime_root,
@@ -1554,52 +1566,6 @@ def _build_evidence_command_runner(
     return SubprocessEvidenceCommandRunner(), ()
 
 
-def _build_artifact_generator(
-    *,
-    injected_runner: Any,
-    mode: str | None,
-) -> tuple[Any, tuple[str, ...]]:
-    if injected_runner is not None:
-        return injected_runner, ()
-    normalized = str(mode or "").strip().lower()
-    if not normalized:
-        return None, ()
-    if normalized not in {"foundups_fusion", "fusion"}:
-        return None, ("unsupported_artifact_generator_mode",)
-    from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
-        FoundupsFusionArtifactGenerationRunner,
-        RUNTIME_MODE_FOUNDUPS_FUSION,
-    )
-
-    return FoundupsFusionArtifactGenerationRunner(runtime_mode=RUNTIME_MODE_FOUNDUPS_FUSION), ()
-
-
-def _build_generation_dependencies(
-    root: Path,
-    runtime_root: Path,
-    artifact_generator: Any,
-    artifact_generator_mode: str | None,
-    model_verifier: Any,
-    verifier_config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None,
-    trusted_now: Callable[[], int],
-) -> tuple[Any, Any, tuple[str, ...]]:
-    generator, reasons = _build_artifact_generator(
-        injected_runner=artifact_generator,
-        mode=artifact_generator_mode,
-    )
-    if reasons:
-        return None, None, reasons
-    verifier, reasons = build_model_runtime_verifier(
-        repo_root=root,
-        runtime_root=runtime_root,
-        config=verifier_config,
-        trusted_now=trusted_now,
-        injected=model_verifier,
-        artifact_generator=generator,
-    )
-    return generator, verifier, reasons
-
-
 def _build_outcome_ratchet_store(
     repo_root: Path,
     allowed_root: Path,
@@ -1728,6 +1694,7 @@ def _from_loop(
     last_dispatch = loop.dispatch_results[-1] if loop.dispatch_results else None
     record = last_dispatch.record_result if last_dispatch else None
     receipt = record.receipt if record else None
+    effects = _artifact_provider_effects(chain_results_path)
     return RedDogMainResidentQueueSerialLoopBootstrapResult(
         accepted=accepted,
         status=status,
@@ -1744,6 +1711,14 @@ def _from_loop(
         queue_chain_requeue_required=loop.queue_chain_requeue_required,
         retry_at=loop.retry_at,
         no_signature_verification_performed="authority_verification" not in loop.dispatched_stages,
+        no_worker_spawn_performed=not effects["worker_process_started"],
+        no_upstream_agent_invocation_performed=not effects["invoked"],
+        artifact_provider_runtime=effects["runtime"],
+        worker_process_spawn_count=effects["worker_process_spawn_count"],
+        no_artifact_provider_file_write_performed=not effects["file_write_performed"],
+        artifact_provider_effect_observation_complete=effects["effect_observation_complete"],
+        artifact_provider_run_abort_confirmed=effects["run_abort_confirmed"],
+        no_hermes_dispatch_performed=not effects["hermes"],
         no_worktree_created="worktree_create" not in loop.dispatched_stages,
         no_bounded_task_execution_performed="bounded_worker_pilot" not in loop.dispatched_stages,
         no_bounded_file_edit_performed="bounded_worker_pilot" not in loop.dispatched_stages,

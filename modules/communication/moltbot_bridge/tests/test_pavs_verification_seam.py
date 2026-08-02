@@ -58,6 +58,7 @@ class TestSucceededReceiptWithEvidence(unittest.TestCase):
         )
         job.status = JobStatus.SUCCEEDED
         job.status_reason_code = StatusReasonCode.OK_COMPLETED
+        job.policy_flags.dry_run_mode = False
         job.evidence_refs = ["logs/run.txt", "outputs/result.json"]
 
         receipt_result = create_receipt_from_job(job)
@@ -116,6 +117,7 @@ class TestSucceededReceiptMissingEvidence(unittest.TestCase):
         )
         job.status = JobStatus.SUCCEEDED
         job.status_reason_code = StatusReasonCode.OK_COMPLETED
+        job.policy_flags.dry_run_mode = False
         job.evidence_refs = []  # No evidence!
 
         receipt_result = create_receipt_from_job(job)
@@ -355,6 +357,7 @@ class TestDictInputSupport(unittest.TestCase):
         """verify_receipt works with ProofOfComputeReceipt object."""
         job = create_job(requested_action="x", tenant_id="tenant_obj")
         job.status = JobStatus.SUCCEEDED
+        job.policy_flags.dry_run_mode = False
         job.evidence_refs = ["obj_evidence.txt"]
 
         receipt_result = create_receipt_from_job(job)
@@ -428,6 +431,7 @@ class TestResultSerialization(unittest.TestCase):
         """from_dict restores result from to_dict."""
         job = create_job(requested_action="x", tenant_id="t_roundtrip")
         job.status = JobStatus.SUCCEEDED
+        job.policy_flags.dry_run_mode = False
         job.evidence_refs = ["round.txt", "trip.txt"]
 
         receipt_result = create_receipt_from_job(job)

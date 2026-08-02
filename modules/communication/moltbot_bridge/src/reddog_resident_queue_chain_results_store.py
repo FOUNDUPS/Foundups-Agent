@@ -45,6 +45,7 @@ FAIL_CURRENT_PLAN_NOT_READY = "FAIL_CURRENT_PLAN_NOT_READY"
 FAIL_STAGE_NOT_CURRENT = "FAIL_STAGE_NOT_CURRENT"
 FAIL_PROPOSED_PLAN_REJECTED = "FAIL_PROPOSED_PLAN_REJECTED"
 FAIL_ATOMIC_COMMIT_FAILED = "FAIL_ATOMIC_COMMIT_FAILED"
+FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID = "FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID"
 
 
 class ResidentQueueChainResultsStore(Protocol):
@@ -135,6 +136,7 @@ class ResidentQueueChainResultReceipt:
     no_bridge_invoked: bool = True
     no_authority_issued: bool = True
     no_worker_spawn_performed: bool = True
+    no_file_write_performed: bool = True
     no_worktree_created: bool = True
     no_shell_command_executed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -161,6 +163,7 @@ class ResidentQueueChainResultRecordResult:
     no_bridge_invoked: bool = True
     no_authority_issued: bool = True
     no_worker_spawn_performed: bool = True
+    no_file_write_performed: bool = True
     no_worktree_created: bool = True
     no_shell_command_executed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -183,6 +186,7 @@ class ResidentQueueChainResultRecordResult:
             "no_bridge_invoked": self.no_bridge_invoked,
             "no_authority_issued": self.no_authority_issued,
             "no_worker_spawn_performed": self.no_worker_spawn_performed,
+            "no_file_write_performed": self.no_file_write_performed,
             "no_worktree_created": self.no_worktree_created,
             "no_shell_command_executed": self.no_shell_command_executed,
             "no_openclaw_enqueue_performed": self.no_openclaw_enqueue_performed,
@@ -370,6 +374,15 @@ def record_resident_queue_stage_result(
             next_plan=next_plan,
         )
 
+    try:
+        effects = _stage_effects(current, clean_stage_result)
+    except ValueError:
+        return _reject(
+            (FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID,),
+            previous_plan=previous_plan,
+            next_plan=next_plan,
+        )
+
     receipt = ResidentQueueChainResultReceipt(
         receipt_id=resident_queue_chain_receipt_id(
             queue_item_id=str(previous_plan.selected_queue_item_id or ""),
@@ -385,6 +398,10 @@ def record_resident_queue_stage_result(
         next_plan_id=next_plan.plan_id,
         next_action=next_plan.next_action,
         store_revision=None,
+        no_bridge_invoked=effects["no_bridge_invoked"],
+        no_worker_spawn_performed=effects["no_worker_spawn_performed"],
+        no_file_write_performed=effects["no_file_write_performed"],
+        no_hermes_dispatch_performed=effects["no_hermes_dispatch_performed"],
     )
     snapshot = {
         "schema_version": CHAIN_RESULTS_SCHEMA_VERSION,
@@ -393,13 +410,14 @@ def record_resident_queue_stage_result(
         "selected_slice": previous_plan.selected_slice,
         "stage_results": proposed_results,
         "receipts": [*list(_receipts(current)), receipt.to_dict()],
-        "no_bridge_invoked": True,
+        "no_bridge_invoked": effects["no_bridge_invoked"],
         "no_authority_issued": True,
-        "no_worker_spawn_performed": True,
+        "no_worker_spawn_performed": effects["no_worker_spawn_performed"],
+        "no_file_write_performed": effects["no_file_write_performed"],
         "no_worktree_created": True,
         "no_shell_command_executed": True,
         "no_openclaw_enqueue_performed": True,
-        "no_hermes_dispatch_performed": True,
+        "no_hermes_dispatch_performed": effects["no_hermes_dispatch_performed"],
         "no_repo_mutation_performed": True,
         "no_holoindex_reindex_performed": True,
         "no_pr_created": True,
@@ -427,7 +445,44 @@ def record_resident_queue_stage_result(
         previous_plan=previous_plan,
         next_plan=next_plan,
         snapshot=snapshot,
+        no_bridge_invoked=effects["no_bridge_invoked"],
+        no_worker_spawn_performed=effects["no_worker_spawn_performed"],
+        no_file_write_performed=effects["no_file_write_performed"],
+        no_hermes_dispatch_performed=effects["no_hermes_dispatch_performed"],
     )
+
+
+def _stage_effects(
+    current: Mapping[str, Any], stage_result: Mapping[str, Any]
+) -> dict[str, bool]:
+    """Carry forward effect truth and fold in the newly recorded stage."""
+    generation_present = "artifact_generation_result" in stage_result
+    generation = stage_result.get("artifact_generation_result")
+    if generation_present and not isinstance(generation, Mapping):
+        raise ValueError(FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID)
+    result = generation if isinstance(generation, Mapping) else {}
+    receipt = result.get("receipt") if result else None
+    from .reddog_artifact_generation_result import (
+        rehydrate_bounded_artifact_generation_receipt,
+    )
+
+    verified = rehydrate_bounded_artifact_generation_receipt(receipt or {})
+    if generation_present and verified is None:
+        raise ValueError(FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID)
+    spawned = bool(verified and verified.worker_process_started)
+    wrote = bool(verified and not verified.no_file_write_performed)
+    hermes = bool(verified and verified.hermes_dispatch_performed)
+    invoked = bool(verified and verified.provider_invocation_performed)
+    return {
+        "no_bridge_invoked": current.get("no_bridge_invoked") is not False
+        and not invoked,
+        "no_worker_spawn_performed": current.get("no_worker_spawn_performed") is not False
+        and not spawned,
+        "no_file_write_performed": current.get("no_file_write_performed") is not False
+        and not wrote,
+        "no_hermes_dispatch_performed": current.get("no_hermes_dispatch_performed") is not False
+        and not hermes,
+    }
 
 
 __all__ = [
@@ -436,6 +491,7 @@ __all__ = [
     "CHAIN_RESULT_RECORDED",
     "CHAIN_RESULT_REJECTED",
     "FAIL_ATOMIC_COMMIT_FAILED",
+    "FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID",
     "FAIL_CURRENT_PLAN_NOT_READY",
     "FAIL_PROPOSED_PLAN_REJECTED",
     "FAIL_STAGE_ALREADY_RECORDED",

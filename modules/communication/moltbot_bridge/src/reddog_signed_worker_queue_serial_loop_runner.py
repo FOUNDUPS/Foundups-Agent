@@ -26,6 +26,10 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_state_r
     read_assurance_completion_request,
     read_current_queue_plan,
 )
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_modes import (
+    normalize_artifact_generator_mode,
+    production_artifact_generator_mode,
+)
 
 
 SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT = (
@@ -82,7 +86,6 @@ _SIGNED_0102_BOUNDED_CODE_CAPABILITY = "bounded_code_change"
 _BOUNDED_WORKER_PILOT_STAGE = "bounded_worker_pilot"
 _BOUNDED_WORKER_PILOT_ACTION = "RUN_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE"
 _EXACT_SHA_COMMIT_STAGE = "exact_sha_commit"
-_ARTIFACT_GENERATOR_MODE_FOUNDUPS_FUSION = "foundups_fusion"
 _QUEUE_CHAIN_COMPLETE_ACTION = "STOP_QUEUE_CHAIN_COMPLETE"
 _POST_BOUNDED_QUEUE_STAGES = frozenset(
     {
@@ -153,7 +156,9 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
             return _reject(task_id, [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_EXCEPTION])
 
         payload = _mapping(result.to_dict() if hasattr(result, "to_dict") else result)
-        rejection = _bootstrap_rejection(task_id, target_kind, payload)
+        rejection = _bootstrap_rejection(
+            self.config, task_id, target_kind, payload
+        )
         return rejection or _accepted_runner_result(
             self.config, task_id, queue_item_id, target_kind, payload
         )
@@ -218,6 +223,7 @@ def _invoke_bootstrap(
         **dict(config.bootstrap_kwargs),
     )
 def _bootstrap_rejection(
+    config: SignedWorkerQueueSerialLoopRunnerConfig,
     task_id: str,
     target_kind: str | None,
     payload: Mapping[str, Any],
@@ -229,7 +235,7 @@ def _bootstrap_rejection(
              *_string_list(payload.get("rejection_reasons"))],
             bootstrap_result=payload,
         )
-    if _unsafe_bootstrap_effect_detected(payload):
+    if _unsafe_bootstrap_effect_detected(config, payload):
         return _reject(
             task_id,
             [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE],
@@ -340,7 +346,10 @@ def _receipt_id(task_id: str, queue_item_id: str, bootstrap_result: Mapping[str,
     ).removeprefix("sha256:")[:16]
 
 
-def _unsafe_bootstrap_effect_detected(payload: Mapping[str, Any]) -> bool:
+def _unsafe_bootstrap_effect_detected(
+    config: SignedWorkerQueueSerialLoopRunnerConfig,
+    payload: Mapping[str, Any],
+) -> bool:
     """Reject effects outside the signed queue-loop boundary.
 
     The serial-loop bootstrap is allowed to create an isolated worktree and
@@ -353,11 +362,16 @@ def _unsafe_bootstrap_effect_detected(payload: Mapping[str, Any]) -> bool:
     guarded_true_flags = (
         "no_shell_command_executed",
         "no_openclaw_enqueue_performed",
-        "no_hermes_dispatch_performed",
         "no_holoindex_reindex_performed",
         "no_reward_settlement_performed",
     )
     if any(payload.get(flag) is not True for flag in guarded_true_flags):
+        return True
+    mode = normalize_artifact_generator_mode(
+        config.bootstrap_kwargs.get("artifact_generator_mode")
+    )
+    hermes_performed = payload.get("no_hermes_dispatch_performed") is False
+    if hermes_performed != (mode == "hermes_api"):
         return True
     dispatched = set(_string_list(payload.get("dispatched_stages")))
     if (
@@ -434,9 +448,8 @@ def _bounded_code_stage_reasons(
         kwargs.get("artifact_generation_request_path")
         or kwargs.get("artifact_generation_request_binding_enabled")
     )
-    if (
-        not artifact_request_available
-        or str(kwargs.get("artifact_generator_mode") or "") != _ARTIFACT_GENERATOR_MODE_FOUNDUPS_FUSION
+    if not artifact_request_available or not production_artifact_generator_mode(
+        kwargs.get("artifact_generator_mode")
     ):
         reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CODE_ARTIFACT_GENERATION_MISSING)
 

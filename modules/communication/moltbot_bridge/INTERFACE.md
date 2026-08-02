@@ -199,8 +199,11 @@ work order, and exact artifact set already bound by worktree and bounded-worker
 receipts. Artifact generation first requires one canonical production model
 selection plus a verification-admitted runtime binding whose exact topology
 and proof digest match signed authority at use time; self-rehashed evidence and
-model substitution fail before the provider. The commit handler then rejects
-pre-staged, undeclared, changed, protected, or base-mismatched state.
+model substitution fails before `foundups_fusion` or sandbox-verified upstream
+`openclaw agent`; actual invocation effects remain receipt-bound. `hermes_api`
+is a recognized but production-blocked mode until Hermes exposes independently
+authenticated service identity and split execution confinement.
+Each returns only an artifact map to the existing Foundups materializer, and commit rejects pre-staged, undeclared, changed, protected, or base-mismatched state.
 
 The resulting `reddog_resident_queue_exact_sha_commit_receipt.v1` is
 canonically revalidated before the verifier request is built. The stage does

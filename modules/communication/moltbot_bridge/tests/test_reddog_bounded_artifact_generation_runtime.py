@@ -420,6 +420,10 @@ def test_foundups_fusion_runner_uses_model_selection_topology(monkeypatch: pytes
 
     assert gate.accepted is True
     assert gate.model_result is not None and gate.model_result.ok is True
+    assert gate.provider_runtime == "foundups_fusion"
+    assert gate.provider_invocation_performed is True
+    assert gate.external_side_effects_possible is True
+    assert gate.receipt.provider_invocation_performed is True
     assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
     assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
     assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == selection["receipt_id"]

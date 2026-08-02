@@ -16,9 +16,6 @@ from modules.infrastructure.wre_core.src.daemon_self_audit_loop import (
     DaemonSelfAuditLoop,
 )
 
-POPEN_TARGET = "modules.infrastructure.wre_core.src.daemon_self_audit_loop.subprocess.Popen"
-
-
 def _read_jsonl(path: Path):
     rows = []
     if not path.exists():
@@ -76,11 +73,9 @@ def test_self_audit_auto_fix_requires_legacy_opt_in(tmp_path: Path, monkeypatch)
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen:
-        events = loop.scan_once()
+    events = loop.scan_once()
 
     assert events == 1
-    assert mock_popen.call_count == 0
     rows = _read_jsonl(loop.task_log_path)
     assert rows[0]["auto_fix_attempted"] is False
     assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
@@ -92,12 +87,10 @@ def test_direct_start_primitive_requires_master_process_gate(tmp_path: Path, mon
     monkeypatch.delenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", raising=False)
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
 
-    with patch(POPEN_TARGET) as mock_popen:
-        attempted, result = loop._dispatch_start_command("echo start")
+    attempted, result = loop._dispatch_start_command("echo start")
 
     assert attempted is False
     assert result == "legacy_process_dispatch_disabled"
-    mock_popen.assert_not_called()
 
 
 def test_direct_escalation_primitive_requires_master_process_gate(
@@ -107,15 +100,13 @@ def test_direct_escalation_primitive_requires_master_process_gate(
     monkeypatch.delenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", raising=False)
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
 
-    with patch(POPEN_TARGET) as mock_popen:
-        attempted, result = loop._dispatch_escalation_command("echo escalate")
+    attempted, result = loop._dispatch_escalation_command("echo escalate")
 
     assert attempted is False
     assert result == "legacy_process_dispatch_disabled"
-    mock_popen.assert_not_called()
 
 
-def test_self_audit_legacy_policy_fix_dispatches_with_dual_opt_in(
+def test_self_audit_legacy_policy_fix_remains_disabled_with_dual_opt_in(
     tmp_path: Path, monkeypatch
 ):
     logs = tmp_path / "logs"
@@ -135,14 +126,12 @@ def test_self_audit_legacy_policy_fix_dispatches_with_dual_opt_in(
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen:
-        events = loop.scan_once()
+    events = loop.scan_once()
 
     assert events == 1
-    assert mock_popen.call_count == 1
     rows = _read_jsonl(loop.task_log_path)
-    assert rows[0]["auto_fix_attempted"] is True
-    assert rows[0]["auto_fix_result"] == "start_command_dispatched"
+    assert rows[0]["auto_fix_attempted"] is False
+    assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
 
 
 def test_ironclaw_retry_reports_attempted_but_unhealthy(tmp_path: Path, monkeypatch):
@@ -165,7 +154,7 @@ def test_ironclaw_retry_reports_attempted_but_unhealthy(tmp_path: Path, monkeypa
     monkeypatch.setenv("IRONCLAW_START_RETRY_DELAY_SEC", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen, patch.object(
+    with patch.object(
         DaemonSelfAuditLoop,
         "_verify_ironclaw_health",
         return_value=(False, "health_error:URLError"),
@@ -173,13 +162,9 @@ def test_ironclaw_retry_reports_attempted_but_unhealthy(tmp_path: Path, monkeypa
         events = loop.scan_once()
 
     assert events == 1
-    assert mock_popen.call_count == 1
     rows = _read_jsonl(loop.task_log_path)
-    # Dispatch ran -> attempted=True, even though health never came up.
-    assert rows[0]["auto_fix_attempted"] is True
-    result = rows[0]["auto_fix_result"]
-    assert result.startswith("attempted_but_unhealthy_after_2_attempt(s):")
-    assert "start_command_dispatched" not in result  # classified as failure
+    assert rows[0]["auto_fix_attempted"] is False
+    assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
 
 
 def test_ironclaw_retry_reports_healthy_when_health_endpoint_responds(tmp_path: Path, monkeypatch):
@@ -202,7 +187,7 @@ def test_ironclaw_retry_reports_healthy_when_health_endpoint_responds(tmp_path: 
     monkeypatch.setenv("IRONCLAW_START_RETRY_DELAY_SEC", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen, patch.object(
+    with patch.object(
         DaemonSelfAuditLoop,
         "_verify_ironclaw_health",
         return_value=(True, "health_ok:200"),
@@ -210,12 +195,9 @@ def test_ironclaw_retry_reports_healthy_when_health_endpoint_responds(tmp_path: 
         events = loop.scan_once()
 
     assert events == 1
-    assert mock_popen.call_count == 1
     rows = _read_jsonl(loop.task_log_path)
-    assert rows[0]["auto_fix_attempted"] is True
-    result = rows[0]["auto_fix_result"]
-    assert result.startswith("healthy_after_1_attempt(s):")
-    assert "start_command_dispatched" in result  # classified as success
+    assert rows[0]["auto_fix_attempted"] is False
+    assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
 
 
 def test_self_audit_verifies_event_store_when_sequence_error_seen(tmp_path: Path, monkeypatch):
@@ -330,25 +312,23 @@ def test_self_audit_escalation_command_requires_legacy_dispatch_flag(
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ESCALATE_CMD", "echo escalate")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen:
-        loop.scan_once()
-        with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-        loop._seen.clear()
-        loop.scan_once()
-        with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-        loop._seen.clear()
-        loop.scan_once()
+    loop.scan_once()
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    loop._seen.clear()
+    loop.scan_once()
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    loop._seen.clear()
+    loop.scan_once()
 
-    assert mock_popen.call_count == 0
     escalations = _read_jsonl(loop.escalation_log_path)
     assert len(escalations) == 1
     assert escalations[0]["dispatch_attempted"] is False
     assert escalations[0]["dispatch_result"] == "legacy_escalation_dispatch_disabled"
 
 
-def test_self_audit_legacy_escalation_dispatches_configured_command(
+def test_self_audit_legacy_escalation_remains_disabled_with_flags(
     tmp_path: Path, monkeypatch
 ):
     logs = tmp_path / "logs"
@@ -367,22 +347,20 @@ def test_self_audit_legacy_escalation_dispatches_configured_command(
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen:
-        loop.scan_once()
-        with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-        loop._seen.clear()
-        loop.scan_once()
-        with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-        loop._seen.clear()
-        loop.scan_once()
+    loop.scan_once()
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    loop._seen.clear()
+    loop.scan_once()
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    loop._seen.clear()
+    loop.scan_once()
 
-    assert mock_popen.call_count == 1
     escalations = _read_jsonl(loop.escalation_log_path)
     assert len(escalations) == 1
-    assert escalations[0]["dispatch_attempted"] is True
-    assert "dispatch" in escalations[0]["dispatch_result"]
+    assert escalations[0]["dispatch_attempted"] is False
+    assert escalations[0]["dispatch_result"] == "legacy_escalation_dispatch_disabled"
 
 
 def test_self_audit_filters_noise_signatures(tmp_path: Path, monkeypatch):

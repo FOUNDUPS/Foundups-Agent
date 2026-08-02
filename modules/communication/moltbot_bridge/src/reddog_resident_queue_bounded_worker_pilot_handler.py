@@ -190,6 +190,7 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
             result["pilot_dryrun_binding_result"] = dryrun_receipt
         if generation_receipt is not None:
             result["artifact_generation_result"] = generation_receipt
+            result.update(_artifact_provider_effects(generation_receipt))
         return result
 
     def _dispatch_rejection(
@@ -304,6 +305,35 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
             )
         except Exception:
             return _reject(FAIL_MODEL_RUNTIME_VERIFICATION_REJECTED)
+
+
+def _artifact_provider_effects(value: Mapping[str, Any]) -> dict[str, Any]:
+    from .reddog_artifact_generation_result import (
+        rehydrate_bounded_artifact_generation_receipt,
+    )
+
+    receipt = rehydrate_bounded_artifact_generation_receipt(
+        _mapping(value.get("receipt"))
+    )
+    runtime = receipt.provider_runtime if receipt else "none"
+    invoked = bool(receipt and receipt.provider_invocation_performed)
+    process = bool(receipt and receipt.worker_process_started)
+    hermes = bool(receipt and receipt.hermes_dispatch_performed)
+    return {
+        "artifact_provider_runtime": runtime,
+        "upstream_agent_invocation_performed": invoked,
+        "worker_process_started": process,
+        "worker_process_spawn_count": receipt.worker_process_spawn_count if receipt else 0,
+        "hermes_dispatch_performed": hermes,
+        "file_write_performed": bool(receipt and not receipt.no_file_write_performed),
+        "external_side_effects_possible": bool(
+            receipt and receipt.external_side_effects_possible
+        ),
+        "effect_observation_complete": bool(
+            receipt and receipt.effect_observation_complete
+        ),
+        "run_abort_confirmed": bool(receipt and receipt.run_abort_confirmed),
+    }
 
 
 def build_reddog_resident_queue_bounded_worker_pilot_stage_handler(

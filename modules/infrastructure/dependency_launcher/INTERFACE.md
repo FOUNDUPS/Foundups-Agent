@@ -227,6 +227,14 @@ installed program. Its receipt is explicitly unauthenticated availability
 evidence, never authority. When enabled, each component has a ten-second
 timeout. A failed probe is `NOT_READY` evidence and never denies menu access.
 
+### `resolve_trusted_wsl_executable() -> Path | None`
+
+Returns the Windows system-owned `wsl.exe` directly from System32 without
+PATH lookup. The upstream OpenClaw command provider reuses this resolver to
+reach the canonical agent distro with `shell=False`. The legacy private alias
+is retained for existing injected test seams; callers should use the public
+function. This resolver grants no component lifecycle or update authority.
+
 ## 0102 Directive
 
 Dependencies are orchestrated autonomously. The system self-heals. ✊✋🖐️

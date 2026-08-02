@@ -1571,12 +1571,17 @@ def _signed_0102_bounded_code_stage_ready_from_env(
         resident_queue_runtime_file_path,
         resident_queue_runtime_flag_enabled,
     )
+    from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_modes import (
+        production_artifact_generator_mode,
+    )
 
     if not isinstance(context, Mapping):
         return False
     if not resident_queue_runtime_flag_enabled(env, "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER"):
         return False
-    if resident_queue_artifact_generator_mode(env) != "foundups_fusion":
+    if not production_artifact_generator_mode(
+        resident_queue_artifact_generator_mode(env)
+    ):
         return False
     artifact_request_ready = bool(
         str(env.get("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH") or "").strip()

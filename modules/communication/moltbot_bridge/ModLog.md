@@ -1,5 +1,30 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-02: Actual OpenClaw provider and truthful Hermes boundary
+
+- Added a production adapter for the installed upstream OpenClaw Gateway CLI;
+  no repository-local OpenClaw-name wrapper is used as the execution engine.
+- Reused the signed model-runtime binding, AgentDB/WRE work order, canonical
+  Foundups artifact materializer, isolated worktree, exact-SHA commit, and
+  independent verifier instead of creating a second authority or writer.
+- OpenClaw requires a fixed dedicated agent, unique exact-session sandbox,
+  live version-matched loopback Gateway, one canonical read-only sandbox
+  workspace mount, no elevation, and a wildcard tool deny policy. Hermes
+  production dispatch remains blocked because the
+  current upstream API does not prove authenticated split-runtime confinement.
+- Bound complete provider-effect truth to stage and resident-cycle receipts, canonical
+  provider-mode admission, trusted WSL command transport, and fail-closed
+  queue admission for all unsupported or unconfined modes.
+- Verified installed and latest upstream versions match: OpenClaw `2026.7.1`
+  and Hermes Agent `v0.19.1 (2026.7.30)`. Retired constructor-based FoundUp
+  live authority and environment-enabled legacy shell dispatch. Hardened the
+  external OpenClaw service and dedicated agent without changing repository
+  source outside this slice; Hermes remains installed but unconfigured.
+  (WSP 00/15/22/50/62/84/97)
+- Receipt rehydration now rejects attacker-recomputed semantic contradictions,
+  malformed nested effect receipts block chain persistence, and Fusion network
+  invocation is reported as an external effect on success and failure.
+
 ## 2026-08-02: OpenClaw ingress and FoundUp mutation fail-closed hardening
 
 - Removed the known webhook-token fallback and made unconfigured webhook

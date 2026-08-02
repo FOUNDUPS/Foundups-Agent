@@ -103,8 +103,8 @@ class TestCanonicalObjectPolicy:
         assert envelope.route_status == RouteStatus.ROUTED
         assert envelope.reason_code == RouteReasonCode.OK_ROUTED
 
-    def test_server_authored_live_object_routes_after_security_gate(self):
-        """Explicit live canonical policy routes only with server gate evidence."""
+    def test_public_policy_object_cannot_self_authorize_live_routing(self):
+        """A public dataclass constructor is shape, not signed authority."""
         job = _MockFoundUpJob(
             job_id="job_route_003",
             tenant_id="tenant_carol",
@@ -119,8 +119,9 @@ class TestCanonicalObjectPolicy:
 
         envelope = route_foundup_job(job)
 
-        assert envelope.route_status == RouteStatus.ROUTED
-        assert envelope.reason_code != RouteReasonCode.BLOCKED_POLICY_GATE
+        assert envelope.route_status == RouteStatus.BLOCKED
+        assert envelope.reason_code == RouteReasonCode.BLOCKED_POLICY_GATE
+        assert envelope.policy_summary["security_gate_passed"] is False
 
     def test_server_authored_live_object_without_security_is_blocked(self):
         job = _MockFoundUpJob(

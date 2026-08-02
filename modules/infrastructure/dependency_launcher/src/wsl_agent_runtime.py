@@ -10,8 +10,6 @@ import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Callable, Mapping, Sequence
-
-
 RUNTIME_SCHEMA = "foundups_agent_wsl_runtime_receipt.v1"
 AUTHORITY_CLASS = "advisory_unverified_runtime_report"
 DEFAULT_DISTRO = "Ubuntu-24.04"
@@ -25,7 +23,6 @@ COMPONENT_VERSION_PATTERNS = {
 }
 _DISTRO_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
 _MAX_OUTPUT_CHARS = 128
-
 @dataclass(frozen=True)
 class WslAgentComponentStatus:
     component_id: str
@@ -147,7 +144,8 @@ def _run_command(command: Sequence[str], timeout: float) -> tuple[int, str]:
     return completed.returncode, completed.stdout or completed.stderr
 
 
-def _trusted_wsl_path() -> Path | None:
+def resolve_trusted_wsl_executable() -> Path | None:
+    """Return the system-owned WSL executable without PATH lookup."""
     if os.name != "nt":
         return None
     import ctypes
@@ -157,6 +155,8 @@ def _trusted_wsl_path() -> Path | None:
     candidate = Path(buffer.value) / "wsl.exe"
     return candidate if 0 < length < len(buffer) and candidate.is_file() else None
 
+
+_trusted_wsl_path = resolve_trusted_wsl_executable
 
 def _resolve_windows_wsl_base_path(distro: str) -> str:
     if os.name != "nt":
@@ -236,4 +236,5 @@ __all__ = [
     "build_wsl_version_command",
     "probe_wsl_agent_runtime",
     "run_wsl_agent_runtime_advisory",
+    "resolve_trusted_wsl_executable",
 ]

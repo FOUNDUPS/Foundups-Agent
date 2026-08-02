@@ -133,7 +133,7 @@ class TestCreateFoundUpRouting:
         )
         assert reason_fragment in envelope.reason_human
 
-    def test_create_requires_explicit_dry_run(self):
+    def test_public_policy_flags_cannot_assert_live_security_authority(self):
         job = _create_foundup_job()
         job.policy_flags = PolicyFlags(
             dry_run_mode=False,
@@ -144,7 +144,7 @@ class TestCreateFoundUpRouting:
         envelope = route_foundup_job(job)
 
         assert envelope.route_status == RouteStatus.BLOCKED
-        assert "dry_run_mode=True" in envelope.reason_human
+        assert "security gate passed" in envelope.reason_human
 
     def test_create_rejects_genesis_identity_mismatch(self):
         job = _create_foundup_job()

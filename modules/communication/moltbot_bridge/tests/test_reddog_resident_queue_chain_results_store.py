@@ -10,11 +10,19 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_contract import (
+    ArtifactGenerationModelResult,
+)
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_result import (
+    build_generation_result,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_orchestration_plan_bootstrap import (
     run_reddog_main_resident_queue_orchestration_plan_bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     CHAIN_RESULT_RECORDED,
+    FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID,
     FAIL_ATOMIC_COMMIT_FAILED,
     FAIL_PROPOSED_PLAN_REJECTED,
     FAIL_STAGE_ALREADY_RECORDED,
@@ -236,6 +244,70 @@ def test_commit_failure_fails_closed() -> None:
     assert result.accepted is False
     assert FAIL_ATOMIC_COMMIT_FAILED in result.rejection_reasons
     assert store.load() == {}
+
+
+def test_invalid_artifact_effect_receipt_rejects_without_commit() -> None:
+    store = InMemoryResidentQueueChainResultsStore()
+    stage = dict(_accepted("authority_request"))
+    stage["artifact_generation_result"] = {
+        "accepted": True,
+        "receipt": {"receipt_id": "attacker-recomputed"},
+    }
+
+    result = record_resident_queue_stage_result(
+        work_state_snapshot=_snapshot(),
+        store=store,
+        stage_key="authority_request",
+        stage_result=stage,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID in result.rejection_reasons
+    assert store.load() == {}
+
+
+def test_valid_provider_effect_receipt_clears_no_effect_claims() -> None:
+    model = ArtifactGenerationModelResult(
+        True,
+        "MODEL_OK",
+        {"x.py": "ok"},
+        "run-1",
+        "sha256:model",
+        True,
+        provider_runtime="openclaw_gateway",
+        provider_invocation_performed=True,
+        worker_process_started=True,
+        worker_process_spawn_count=5,
+        file_write_performed=True,
+        external_side_effects_possible=True,
+    )
+    generation = build_generation_result(
+        {"work_order_id": "wo-1", "slice_name": "slice-1"},
+        planned=["x.py"],
+        model_selection={"receipt_id": "selection-1"},
+        model_result=model,
+        artifacts={"x.py": "ok"},
+        reasons=[],
+    )
+    stage = dict(_accepted("authority_request"))
+    stage["artifact_generation_result"] = generation.to_dict()
+    store = InMemoryResidentQueueChainResultsStore()
+
+    result = record_resident_queue_stage_result(
+        work_state_snapshot=_snapshot(),
+        store=store,
+        stage_key="authority_request",
+        stage_result=stage,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.no_bridge_invoked is False
+    assert result.no_worker_spawn_performed is False
+    assert result.no_file_write_performed is False
+    assert result.receipt is not None and result.receipt.no_bridge_invoked is False
+    assert store.load()["no_bridge_invoked"] is False
 
 
 def test_atomic_json_store_writes_schema_for_bootstrap(tmp_path: Path) -> None:
