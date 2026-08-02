@@ -207,6 +207,26 @@ existing WRE watchlist refresh fetches the two allowlisted GitHub API release
 documents and publishes the cache. Partial configuration or any retrieval or
 validation failure returns nonzero. It never installs or invokes a component.
 
+### `run_wsl_agent_runtime_advisory(...)`
+
+On Windows, probes the canonical `Ubuntu-24.04` WSL distribution using exact,
+shell-free argument vectors for `/usr/local/bin/openclaw --version` and
+`/usr/local/bin/hermes --version`. The optional
+`FOUNDUPS_AGENT_WSL_EXPECTED_BASE` binding rejects a distro registration that
+has moved away from its operator-approved storage location.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED` | `0` | Explicitly enable the advisory probe |
+| `FOUNDUPS_AGENT_WSL_DISTRO` | `Ubuntu-24.04` | Exact WSL distribution name |
+| `FOUNDUPS_AGENT_WSL_EXPECTED_BASE` | empty | Optional expected Windows distro base path |
+
+The advisory does not install, update, onboard, start, stop, or dispatch either
+agent. It is disabled by default because invoking a version command executes the
+installed program. Its receipt is explicitly unauthenticated availability
+evidence, never authority. When enabled, each component has a ten-second
+timeout. A failed probe is `NOT_READY` evidence and never denies menu access.
+
 ## 0102 Directive
 
 Dependencies are orchestrated autonomously. The system self-heals. ✊✋🖐️

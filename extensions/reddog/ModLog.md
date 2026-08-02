@@ -1,5 +1,13 @@
 # RedDog ModLog
 
+## 2026-08-02 - Canonical WSL agent runtime availability binding (0.4.51)
+
+- Pinned the generated backend manifest containing the opt-in OpenClaw/Hermes
+  WSL availability adapter.
+- Kept the adapter disabled by default and explicitly non-authoritative.
+- Resolved `wsl.exe` through the Windows system API and constrained child output
+  to normalized product-version lines.
+
 ## 2026-08-02 - Governed runtime compatibility evidence supplier (0.4.50)
 
 - Bound the new WRE-side OpenClaw/Hermes/Qwen/backend evidence supplier into

@@ -7,6 +7,28 @@
 
 ## Change Log
 
+### 2026-08-02: Canonical E-Drive WSL Agent Runtime Binding
+
+**Slice:** `OPENCLAW_HERMES_WSL_RUNTIME_LOCATION_BINDING_PHASE1`
+
+- Added a read-only, shell-free probe for exact OpenClaw and Hermes executables
+  inside the named `Ubuntu-24.04` WSL distribution.
+- Added an optional expected-base-path check so a stale or broken WSL
+  registration reports `NOT_READY` before component probes.
+- Wired the probe into the existing nonblocking runtime-compatibility startup
+  boundary; menu access remains available on all probe failures.
+- Kept the executable probe opt-in, resolved `wsl.exe` only from Windows
+  System32, and constrained output to normalized product version lines.
+- Boundary: no package installation/update, onboarding, gateway start, worker
+  dispatch, repository mutation, or authority expansion.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation covers distro/component allowlists, base-path mismatch,
+missing components, content-free failures, shell/network/update denial, and
+startup fail-soft behavior.
+
+---
+
 ### 2026-08-02: Governed Runtime Compatibility Evidence Supplier
 
 **Slice:** `OPENCLAW_HERMES_QWEN_GOVERNED_FRESHNESS_EVIDENCE_SUPPLIER_PHASE1`

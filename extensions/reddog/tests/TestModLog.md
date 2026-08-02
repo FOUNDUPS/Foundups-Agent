@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-02 - Canonical WSL agent runtime binding (0.4.51)
+
+- Updated the exact generated backend-manifest pin and extension version.
+- Added focused regressions for default-disabled probing, trusted Windows WSL
+  resolution, strict version normalization, and startup menu continuity.
+
 ## 2026-08-02 - Governed runtime compatibility supplier contract (0.4.50)
 
 - Updated extension/version and backend-manifest assertions for the tracked

@@ -62,6 +62,10 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     ) in runtime
     assert "modules/infrastructure/database/src/Database.py" not in runtime
     assert "modules/infrastructure/database/src/database.py" in runtime
+    assert (
+        "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py"
+        in runtime
+    )
 
 
 def test_checked_in_manifest_matches_independent_generation() -> None:
@@ -103,5 +107,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         in generated["required_runtime_sha256"]
     )
     assert generator.canonical_manifest_digest(generated) == (
-        "714d51695273b615c79e4e5e390ce304441b9dbbdf475b4e768f8545d7833692"
+        "58cdce47d74ab5575df0f3ec428d2e450076a108b71f45678fb07964693d200b"
     )
