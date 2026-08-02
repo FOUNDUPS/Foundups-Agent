@@ -7,6 +7,39 @@
 
 ## Change Log
 
+### 2026-08-02: Governed Runtime Compatibility Evidence Supplier
+
+**Slice:** `OPENCLAW_HERMES_QWEN_GOVERNED_FRESHNESS_EVIDENCE_SUPPLIER_PHASE1`
+
+- Extended the existing OpenClaw ecosystem watchlist refresh instead of
+  creating a second network updater.
+- Added exact installed-observation and expected-binding source receipts with
+  recomputed IDs, bounded ASCII fields, TTL/future-skew checks, and exact
+  component-set enforcement.
+- Restricted network retrieval to the official OpenClaw and Hermes latest
+  release API endpoints, with redirect and response-size rejection.
+- Required Qwen general, Qwen code, and inference-backend expectations to come
+  from promoted runtime-binding references rather than model-name inference.
+- Reused the canonical runtime-artifact safety layer for confined reads and
+  descriptor-verified, locked replacement outside the repository.
+- Boundary: advisory evidence only; no install/update, command execution,
+  model load, route change, HoloIndex mutation, or update authority.
+- Truth boundary: source self-hashes prove integrity, not signer identity.
+  Integrity-only envelopes can report `OBSERVED_MATCH`/`OBSERVED_DRIFT`, but
+  the overall receipt remains `NOT_READY` with
+  `evidence_authentication_not_verified`; recomputed hashes never yield
+  authenticated `CURRENT`.
+- Rejected supply/output path aliasing before retrieval and added a regression
+  that exercises the production redirect-handler construction.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation covers recomputed-hash forgery, tampering, expiry,
+source-set mismatch, unofficial release URLs, redirects, oversized responses,
+prior-cache preservation, path aliasing, and the absence of
+execution/model-loading surfaces.
+
+---
+
 ### 2026-08-02: OpenClaw/Hermes/Qwen Runtime Compatibility Advisory
 
 **Slice:** `OPENCLAW_HERMES_QWEN_RUNTIME_FRESHNESS_AND_COMPATIBILITY_RECEIPT_PHASE1`

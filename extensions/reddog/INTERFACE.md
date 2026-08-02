@@ -1,7 +1,11 @@
 # RedDog Interface
 
-Version 0.4.49 binds the read-only runtime compatibility advisory into the
-canonical backend manifest. Version 0.4.48 adds a fail-closed incident-to-WRE
+Version 0.4.50 binds the WRE-owned runtime compatibility evidence supplier into
+the canonical backend manifest while startup remains cached-only and
+nonblocking. The supplier is integrity-only and cannot emit authenticated
+`CURRENT`; observed component matches or drift remain overall `NOT_READY`
+until signed source admission exists. Version 0.4.49 binds the read-only
+advisory. Version 0.4.48 adds a fail-closed incident-to-WRE
 repair adapter for exhausted
 semantic-owner failures. It accepts only the existing transient owner error
 classes after both owner attempts, revalidates the current clean authority
