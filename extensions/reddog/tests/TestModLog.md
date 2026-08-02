@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-02 - Runtime compatibility advisory manifest binding (0.4.49)
+
+- Regenerated the backend manifest at 1,115 runtime files.
+- Re-ran backend compatibility, generator, extension contract, and focused
+  runtime/startup regressions after the version and digest pin update.
+
 ## 2026-08-02 - HoloIndex incident to WRE repair runtime (0.4.48)
 
 - Commands:

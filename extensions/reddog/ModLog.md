@@ -1,5 +1,13 @@
 # RedDog ModLog
 
+## 2026-08-02 - Runtime compatibility advisory manifest binding (0.4.49)
+
+- Added the dependency-launcher runtime compatibility advisory and its two
+  implementation modules to the canonical RedDog backend manifest.
+- Updated the exact manifest digest pin and extension build identity.
+- The advisory remains read-only and nonblocking; no update or dispatch
+  authority was added to the extension.
+
 ## 2026-08-02 - HoloIndex incident to WRE repair runtime (0.4.48)
 
 - Added a bounded extension/Python incident bridge for exhausted semantic-owner
