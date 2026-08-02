@@ -44,6 +44,11 @@ from holo_index.maintenance_lock import (
     acquire_maintenance_lease,
     maintenance_lock_path,
 )
+from holo_index.isolated_collection_snapshot_probe import (
+    IsolatedSnapshotProbeError,
+    finalize_chroma_client,
+    verify_collection_snapshots_isolated,
+)
 from holo_index.repository_state import (
     REPOSITORY_DIRTY_CODE,
     REPOSITORY_STATE_UNAVAILABLE_CODE,
@@ -415,6 +420,20 @@ def _publish_final_receipt(
             state.initial_state.head_sha,
         ):
             return None, FINAL_PROOF_FAILED
+    except Exception:
+        return None, FINAL_RECEIPT_FAILED
+    try:
+        finalize_chroma_client(getattr(state.holo_for_receipt, "client", None))
+        proof_failures = verify_collection_snapshots_isolated(
+            receipt,
+            ssd_path=state.ssd_path,
+            repo_root=state.root,
+        )
+        if proof_failures:
+            return None, FINAL_PROOF_FAILED
+    except Exception:
+        return None, FINAL_PROOF_FAILED
+    try:
         write_freshness_receipt(receipt, state.receipt_path)
     except Exception:
         return None, FINAL_RECEIPT_FAILED

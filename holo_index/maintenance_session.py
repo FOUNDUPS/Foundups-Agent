@@ -34,6 +34,7 @@ from holo_index.maintenance_lock import (
 )
 from holo_index.isolated_collection_snapshot_probe import (
     IsolatedSnapshotProbeError,
+    finalize_chroma_client,
     open_persisted_collection_view,
     verify_collection_snapshots_isolated,
 )
@@ -370,18 +371,8 @@ def _requires_isolated_snapshot_probe(holo: Any) -> bool:
 def _finalize_writer_store(holo: Any) -> None:
     """Flush and stop the Chroma writer before isolated persisted proof."""
 
-    client = getattr(holo, "client", None)
-    system = getattr(client, "_system", None)
-    stop = getattr(system, "stop", None)
-    clear_cache = getattr(type(client), "clear_system_cache", None)
-    if not callable(stop) or not callable(clear_cache):
-        raise MaintenanceSessionError(
-            "HOLOINDEX_WRITER_STORE_FINALIZATION_FAILED",
-            "chroma_lifecycle_unavailable",
-        )
     try:
-        stop()
-        clear_cache()
+        finalize_chroma_client(getattr(holo, "client", None))
     except Exception as exc:
         raise MaintenanceSessionError(
             "HOLOINDEX_WRITER_STORE_FINALIZATION_FAILED",

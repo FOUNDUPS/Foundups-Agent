@@ -1,5 +1,23 @@
 # HoloIndex Package ModLog
 
+## [2026-08-02] Persisted vector-segment cold-start gate
+
+- Extended the isolated post-maintenance proof beyond collection snapshots:
+  every non-empty baseline collection must now answer one nearest-neighbor
+  query from its persisted HNSW segment before the freshness receipt publishes.
+- Reused one stored embedding, so the proof loads no encoder, performs no
+  network access, and invokes no logical mutation or indexing API.
+- Runs only inside an exclusive maintenance lease after writer finalization.
+  Chroma may rewrite physical segment caches on reader open, but the probe uses
+  no logical mutation or indexing API and keeps migrations validation-only.
+- Applies the same proof before incremental generation publication and rejects
+  both verifier exceptions and returned collection mismatches.
+- Pins Chroma 1.5.5 because the proof depends on its query and lifecycle
+  contracts; unsupported versions fail before opening persistence.
+- Added fail-closed regressions for the observed Chroma failure class where
+  SQLite collection data exists but the vector segment reports that nothing is
+  available on disk.
+
 ## [2026-08-01] Generation-bound retrieval AutoResearch evidence
 
 - Added immutable train/public-regression corpus digests and candidate bindings

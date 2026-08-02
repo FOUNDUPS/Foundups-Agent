@@ -54,6 +54,20 @@ SHA_B = "b" * 40
 SPACE_FINGERPRINT = "sha256:" + ("1" * 64)
 
 
+@pytest.fixture(autouse=True)
+def _accept_isolated_persisted_proof(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        executor_module,
+        "finalize_chroma_client",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        executor_module,
+        "verify_collection_snapshots_isolated",
+        lambda *_args, **_kwargs: [],
+    )
+
+
 class FakeCollection:
     def __init__(self, name: str):
         self.name = name
@@ -264,6 +278,103 @@ def test_executor_mutates_scoped_upserts_then_requires_full_proof(
     assert docs_collection.added[0]["metadatas"][0][
         "source_content_digest"
     ].startswith("sha256:")
+
+
+def test_incremental_publication_requires_isolated_vector_proof(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write_foundup_files(tmp_path)
+    gateway = FakeGateway()
+    plan = plan_incremental_foundup_index(
+        foundup_id="paccess_001",
+        changed_paths=["modules/foundups/paccess_001/src/main.py"],
+    )
+    _install_complete_proof_builder(monkeypatch, set(plan.target_collections))
+    calls: list[str] = []
+
+    def reject_probe(receipt, **_kwargs):
+        calls.append(receipt.generation_id)
+        raise executor_module.IsolatedSnapshotProbeError(
+            "VECTOR_SEGMENT_UNAVAILABLE"
+        )
+
+    monkeypatch.setattr(
+        executor_module,
+        "verify_collection_snapshots_isolated",
+        reject_probe,
+    )
+
+    receipt = _execute_plan(plan, repo_root=tmp_path, gateway=gateway)
+
+    assert calls
+    assert receipt.decision == DECISION_FAILED
+    assert receipt.rejection_reasons == [FINAL_PROOF_FAILED]
+    invalidation = load_freshness_receipt(freshness_receipt_path(tmp_path / "ssd"))
+    by_name = {entry.name: entry for entry in invalidation.collections}
+    assert all(
+        by_name[name].verification == "IN_PROGRESS"
+        for name in plan.target_collections
+    )
+
+
+def test_incremental_publication_rejects_reported_snapshot_mismatch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write_foundup_files(tmp_path)
+    gateway = FakeGateway()
+    plan = plan_incremental_foundup_index(
+        foundup_id="paccess_001",
+        changed_paths=["modules/foundups/paccess_001/src/main.py"],
+    )
+    _install_complete_proof_builder(monkeypatch, set(plan.target_collections))
+    monkeypatch.setattr(
+        executor_module,
+        "verify_collection_snapshots_isolated",
+        lambda _receipt, **_kwargs: ["navigation_code"],
+    )
+
+    receipt = _execute_plan(plan, repo_root=tmp_path, gateway=gateway)
+
+    assert receipt.decision == DECISION_FAILED
+    assert receipt.rejection_reasons == [FINAL_PROOF_FAILED]
+    invalidation = load_freshness_receipt(freshness_receipt_path(tmp_path / "ssd"))
+    by_name = {entry.name: entry for entry in invalidation.collections}
+    assert all(
+        by_name[name].verification == "IN_PROGRESS"
+        for name in plan.target_collections
+    )
+
+
+def test_incremental_publication_requires_writer_finalization(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write_foundup_files(tmp_path)
+    gateway = FakeGateway()
+    plan = plan_incremental_foundup_index(
+        foundup_id="paccess_001",
+        changed_paths=["modules/foundups/paccess_001/src/main.py"],
+    )
+    _install_complete_proof_builder(monkeypatch, set(plan.target_collections))
+    probe_calls: list[str] = []
+    monkeypatch.setattr(
+        executor_module,
+        "finalize_chroma_client",
+        lambda _client: (_ for _ in ()).throw(RuntimeError("not flushed")),
+    )
+    monkeypatch.setattr(
+        executor_module,
+        "verify_collection_snapshots_isolated",
+        lambda receipt, **_kwargs: probe_calls.append(receipt.generation_id),
+    )
+
+    receipt = _execute_plan(plan, repo_root=tmp_path, gateway=gateway)
+
+    assert receipt.decision == DECISION_FAILED
+    assert receipt.rejection_reasons == [FINAL_PROOF_FAILED]
+    assert probe_calls == []
 
 
 def test_oversize_source_is_rejected_without_partial_indexing(tmp_path: Path) -> None:
