@@ -14,12 +14,18 @@ from .runtime_compatibility_receipt import (
     RuntimeCompatibilityReceipt,
     build_runtime_compatibility_receipt,
 )
+from .wsl_agent_runtime import (
+    WslAgentRuntimeReceipt,
+    probe_wsl_agent_runtime,
+    run_wsl_agent_runtime_advisory,
+)
 
 __all__ = [
     "CompatibilityState",
     "INTEGRITY_ONLY",
     "RuntimeCompatibilityReceipt",
     "RuntimeComponentSourceReceipt",
+    "WslAgentRuntimeReceipt",
     "build_component_source_receipt",
     "build_runtime_compatibility_receipt",
     "build_runtime_compatibility_supply",
@@ -27,7 +33,9 @@ __all__ = [
     "ensure_dependencies",
     "get_dependency_status",
     "publish_runtime_compatibility_evidence",
+    "probe_wsl_agent_runtime",
     "run_runtime_compatibility_advisory",
+    "run_wsl_agent_runtime_advisory",
 ]
 
 

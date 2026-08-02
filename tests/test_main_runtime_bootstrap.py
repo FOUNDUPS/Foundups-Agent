@@ -267,6 +267,25 @@ def test_runtime_compatibility_adapter_failure_never_blocks_menu(tmp_path, monke
     assert "preflight=NOT_READY" in capsys.readouterr().out
 
 
+def test_wsl_runtime_adapter_failure_never_blocks_menu(tmp_path, monkeypatch, capsys):
+    from modules.infrastructure.dependency_launcher.src import runtime_compatibility_preflight
+    from modules.infrastructure.dependency_launcher.src import wsl_agent_runtime
+
+    monkeypatch.setattr(
+        runtime_compatibility_preflight,
+        "run_runtime_compatibility_advisory",
+        lambda _repo_root: None,
+    )
+    monkeypatch.setattr(
+        wsl_agent_runtime,
+        "run_wsl_agent_runtime_advisory",
+        lambda: (_ for _ in ()).throw(RuntimeError("must_not_escape")),
+    )
+
+    assert main.run_runtime_compatibility_advisory_preflight(tmp_path) is True
+    assert "preflight=NOT_READY" in capsys.readouterr().out
+
+
 def test_main_missing_resident_bindings_warns_and_still_loads_menu(monkeypatch):
     monkeypatch.setenv("OPENCLAW_SECURITY_PREFLIGHT", "0")
     monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "0")

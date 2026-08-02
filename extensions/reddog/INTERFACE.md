@@ -1,6 +1,8 @@
 # RedDog Interface
 
-Version 0.4.50 binds the WRE-owned runtime compatibility evidence supplier into
+Version 0.4.51 pins the opt-in, non-authoritative OpenClaw/Hermes WSL
+availability adapter into the backend integrity manifest. Version 0.4.50 binds
+the WRE-owned runtime compatibility evidence supplier into
 the canonical backend manifest while startup remains cached-only and
 nonblocking. The supplier is integrity-only and cannot emit authenticated
 `CURRENT`; observed component matches or drift remain overall `NOT_READY`

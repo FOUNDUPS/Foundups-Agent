@@ -4513,8 +4513,12 @@ def run_runtime_compatibility_advisory_preflight(repo_root: Path) -> bool:
         from modules.infrastructure.dependency_launcher.src.runtime_compatibility_preflight import (
             run_runtime_compatibility_advisory,
         )
+        from modules.infrastructure.dependency_launcher.src.wsl_agent_runtime import (
+            run_wsl_agent_runtime_advisory,
+        )
 
         run_runtime_compatibility_advisory(repo_root)
+        run_wsl_agent_runtime_advisory()
     except Exception as exc:
         print(f"[RUNTIME-COMPAT] preflight=NOT_READY reason=adapter_error:{type(exc).__name__}")
     return True
