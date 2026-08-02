@@ -1,7 +1,12 @@
 # RedDog Interface
 
-Version 0.4.51 pins the opt-in, non-authoritative OpenClaw/Hermes WSL
-availability adapter into the backend integrity manifest. Version 0.4.50 binds
+Version 0.4.52 pins the real upstream OpenClaw Gateway artifact provider into
+the backend integrity manifest. Signed authority is consumed before process
+creation, the dedicated OpenClaw agent is checked for confinement, and only a
+bounded artifact map reaches the existing isolated Foundups writer. Hermes
+production routing remains fail-closed pending authenticated split-runtime
+identity and confinement evidence. Version 0.4.51 pins the opt-in,
+non-authoritative OpenClaw/Hermes WSL availability adapter. Version 0.4.50 binds
 the WRE-owned runtime compatibility evidence supplier into
 the canonical backend manifest while startup remains cached-only and
 nonblocking. The supplier is integrity-only and cannot emit authenticated

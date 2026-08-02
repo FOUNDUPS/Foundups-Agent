@@ -1,5 +1,16 @@
 # RedDog ModLog
 
+## 2026-08-02 - Upstream OpenClaw artifact runtime (0.4.52)
+
+- Bound production artifact generation to the actual upstream OpenClaw
+  Gateway CLI and a dedicated, fail-closed confined agent.
+- Required signed AgentDB/WRE/model authority before any provider process and
+  propagated observable provider effects through the durable receipt chain.
+- Kept Hermes production dispatch blocked until its upstream runtime can prove
+  authenticated split-runtime identity and confinement.
+- Regenerated the canonical backend manifest and advanced the installed-client
+  build identity so stale VSIX installs cannot silently reject current main.
+
 ## 2026-08-02 - Canonical WSL agent runtime availability binding (0.4.51)
 
 - Pinned the generated backend manifest containing the opt-in OpenClaw/Hermes
