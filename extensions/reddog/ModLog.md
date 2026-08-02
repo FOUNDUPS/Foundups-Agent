@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-08-02 - Governed runtime compatibility evidence supplier (0.4.50)
+
+- Bound the new WRE-side OpenClaw/Hermes/Qwen/backend evidence supplier into
+  the canonical backend manifest.
+- Startup remains cached-evidence-only and nonblocking. The extension does not
+  fetch releases, install updates, load models, or mutate runtime routes.
+- The supplier reuses the existing OpenClaw watchlist runner and canonical
+  runtime-artifact safety layer.
+- Hardened the truth boundary after independent review: recomputed source
+  self-hashes can produce only integrity-checked `OBSERVED_MATCH` or
+  `OBSERVED_DRIFT`; overall state remains `NOT_READY` until signed source
+  authentication exists.
+
 ## 2026-08-02 - Runtime compatibility advisory manifest binding (0.4.49)
 
 - Added the dependency-launcher runtime compatibility advisory and its two

@@ -12,6 +12,7 @@ from modules.infrastructure.dependency_launcher.src.runtime_compatibility_prefli
 )
 from modules.infrastructure.dependency_launcher.src.runtime_compatibility_receipt import (
     EVIDENCE_SCHEMA,
+    INTEGRITY_ONLY,
     REQUIRED_COMPONENTS,
     build_runtime_compatibility_receipt,
     canonical_digest,
@@ -37,23 +38,25 @@ def _evidence(*, drift: str | None = None) -> dict[str, object]:
                 "expected_ref": expected,
                 "evidence_kind": "UPSTREAM_RELEASE" if component_id in {"openclaw", "hermes"} else "PROMOTED_RUNTIME_BINDING",
                 "evidence_receipt_id": _digest(component_id),
-                "verification": "PASS",
+                "verification": INTEGRITY_ONLY,
             }
         )
     payload: dict[str, object] = {
         "schema_version": EVIDENCE_SCHEMA,
         "generated_at_utc": NOW.isoformat(),
         "expires_at_utc": (NOW + timedelta(days=1)).isoformat(),
-        "verification": "PASS",
+        "verification": INTEGRITY_ONLY,
         "components": components,
     }
     payload["evidence_receipt_id"] = canonical_digest(payload)
     return payload
 
 
-def test_current_receipt_is_digest_bound() -> None:
+def test_integrity_only_match_is_digest_bound_but_not_authenticated() -> None:
     receipt = build_runtime_compatibility_receipt(_evidence(), now=NOW)
-    assert receipt.overall_state == "CURRENT"
+    assert receipt.overall_state == "NOT_READY"
+    assert {item.state for item in receipt.components} == {"OBSERVED_MATCH"}
+    assert receipt.reasons == ("evidence_authentication_not_verified",)
     assert len(receipt.components) == len(REQUIRED_COMPONENTS)
     assert receipt.receipt_id.startswith("sha256:")
     assert receipt.no_network_call is True
@@ -64,16 +67,16 @@ def test_current_receipt_is_digest_bound() -> None:
 
 def test_drift_is_advisory_and_identifies_component() -> None:
     receipt = build_runtime_compatibility_receipt(_evidence(drift="hermes"), now=NOW)
-    assert receipt.overall_state == "DRIFT"
+    assert receipt.overall_state == "NOT_READY"
     hermes = next(item for item in receipt.components if item.component_id == "hermes")
-    assert hermes.state == "DRIFT"
+    assert hermes.state == "OBSERVED_DRIFT"
 
 
 @pytest.mark.parametrize(
     ("mutation", "reason"),
     [
         (lambda data: data.update(schema_version="wrong"), "evidence_schema_invalid"),
-        (lambda data: data.update(verification="FAIL"), "evidence_verification_not_pass"),
+        (lambda data: data.update(verification="FAIL"), "evidence_verification_invalid"),
         (lambda data: data.update(expires_at_utc=(NOW - timedelta(seconds=1)).isoformat()), "evidence_expired"),
         (lambda data: data.update(expires_at_utc=(NOW + timedelta(days=30)).isoformat()), "evidence_ttl_exceeds_policy"),
         (lambda data: data.update(generated_at_utc=(NOW + timedelta(hours=1)).isoformat()), "evidence_generated_in_future"),
@@ -138,9 +141,9 @@ def test_startup_adapter_reads_only_runtime_root(tmp_path: Path, capsys) -> None
         },
     )
 
-    assert receipt.overall_state == "CURRENT"
+    assert receipt.overall_state == "NOT_READY"
     assert evidence_path.read_bytes() == before
-    assert "preflight=CURRENT" in capsys.readouterr().out
+    assert "preflight=NOT_READY" in capsys.readouterr().out
 
 
 def test_startup_adapter_never_raises_or_blocks_for_missing_evidence(tmp_path: Path, capsys) -> None:

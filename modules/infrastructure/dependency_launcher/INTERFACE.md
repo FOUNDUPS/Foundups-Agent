@@ -159,16 +159,53 @@ Reads a bounded, off-repo `reddog_runtime_compatibility_evidence.v1` artifact
 and returns a `RuntimeCompatibilityReceipt`. Required components are OpenClaw,
 Hermes, the general and coding Qwen model bindings, and the inference backend.
 
-The result is advisory only:
+The Phase 1 result is integrity-only and therefore always remains
+`NOT_READY` until a later signed source-admission gate authenticates every
+source. Valid component comparisons are still exposed without overclaiming:
 
-- `CURRENT`: each installed reference matches independently supplied evidence.
-- `DRIFT`: at least one valid reference differs.
-- `NOT_READY`: evidence is absent, expired, malformed, tampered, or incomplete.
+- `OBSERVED_MATCH`: the integrity-checked installed and expected references match.
+- `OBSERVED_DRIFT`: the integrity-checked references differ.
+- component `NOT_READY`: evidence is absent, expired, malformed, or incomplete.
+
+An integrity-only envelope includes the stable overall reason
+`evidence_authentication_not_verified`. Recomputing every self-hash cannot
+produce an authenticated `CURRENT` result.
 
 The function catches all input failures, prints one safe summary line, and
 never blocks startup. It makes no network call and performs no runtime mutation,
 model load, route change, package install, or HoloIndex action.
 The self-hash is an integrity check, not identity or update authorization.
+
+### `compose_runtime_compatibility_evidence(supply, *, upstream_releases, now=None)`
+
+Rehydrates exact installed-observation and promoted-expectation source
+receipts, adds stable OpenClaw/Hermes official-release evidence, and returns the
+`reddog_runtime_compatibility_evidence.v1` mapping consumed by startup.
+
+The source sets are exact:
+
+- Installed observations: OpenClaw, Hermes, Qwen general, Qwen code, backend.
+- Official upstream expectations: OpenClaw and Hermes only.
+- Promoted runtime expectations: Qwen general, Qwen code, backend only.
+
+Receipt self-hashes are recomputed at use time. They establish structural
+integrity, not signer identity, so composed envelopes are explicitly marked
+`INTEGRITY_ONLY`. A future authenticated source-admission owner remains
+required before `CURRENT`, update action, or promotion authority is possible.
+
+### `publish_runtime_compatibility_evidence(...) -> Path`
+
+Validates the composed evidence and uses the canonical runtime-artifact safety
+layer for descriptor-verified, locked replacement beneath an off-repo root.
+Invalid evidence cannot overwrite the previous cache.
+The supply and output paths must be distinct.
+
+### `scripts/refresh_openclaw_ecosystem_watchlist.py`
+
+When the compatibility root, supply, and output are all configured, the
+existing WRE watchlist refresh fetches the two allowlisted GitHub API release
+documents and publishes the cache. Partial configuration or any retrieval or
+validation failure returns nonzero. It never installs or invokes a component.
 
 ## 0102 Directive
 

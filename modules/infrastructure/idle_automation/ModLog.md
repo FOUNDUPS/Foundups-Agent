@@ -12,6 +12,23 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-08-02 - Runtime compatibility evidence publication
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- The existing OpenClaw ecosystem watchlist runner can now compose the cached
+  runtime compatibility evidence consumed by the nonblocking startup advisory.
+- Official network scope is limited to OpenClaw and Hermes latest-release API
+  documents; Qwen/backend expectations remain promotion-receipt inputs.
+- Publication is optional, off-repo, fail-closed, and has no install/update or
+  runtime route authority.
+- Publication is explicitly integrity-only: component observations may show
+  match/drift, but overall state remains `NOT_READY` pending signed source
+  admission.
+
+**WSP_15 MPS:** Complexity 3 + Importance 4 + Deferability 4 + Impact 4 = 15
+(P1).
+
 ### 2026-08-01 - Protected post-merge AgentDB namespace
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 87, WSP 97

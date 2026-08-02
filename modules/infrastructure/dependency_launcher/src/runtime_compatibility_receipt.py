@@ -12,6 +12,7 @@ from typing import Any, Mapping, Sequence
 
 EVIDENCE_SCHEMA = "reddog_runtime_compatibility_evidence.v1"
 RECEIPT_SCHEMA = "reddog_runtime_compatibility_receipt.v1"
+INTEGRITY_ONLY = "INTEGRITY_ONLY"
 REQUIRED_COMPONENTS = (
     "openclaw",
     "hermes",
@@ -34,6 +35,8 @@ MAX_REFERENCE_LENGTH = 512
 class CompatibilityState(str, Enum):
     CURRENT = "CURRENT"
     DRIFT = "DRIFT"
+    OBSERVED_MATCH = "OBSERVED_MATCH"
+    OBSERVED_DRIFT = "OBSERVED_DRIFT"
     NOT_READY = "NOT_READY"
 
 
@@ -110,8 +113,9 @@ def _validate_envelope(evidence: Mapping[str, Any], now: datetime) -> list[str]:
     reasons: list[str] = []
     if evidence.get("schema_version") != EVIDENCE_SCHEMA:
         reasons.append("evidence_schema_invalid")
-    if evidence.get("verification") != "PASS":
-        reasons.append("evidence_verification_not_pass")
+    if evidence.get("verification") != INTEGRITY_ONLY:
+        reasons.append("evidence_verification_invalid")
+    reasons.append("evidence_authentication_not_verified")
     receipt_id = evidence.get("evidence_receipt_id")
     if not _is_digest(receipt_id):
         reasons.append("evidence_receipt_id_invalid")
@@ -162,15 +166,15 @@ def _evaluate_component(component_id: str, raw: Mapping[str, Any] | None) -> Com
     expected = str(raw.get("expected_ref", "")).strip()
     kind = str(raw.get("evidence_kind", "")).strip()
     receipt_id = str(raw.get("evidence_receipt_id", "")).strip()
-    verified = raw.get("verification") == "PASS"
+    integrity_only = raw.get("verification") == INTEGRITY_ONLY
     references_valid = _is_reference(installed) and _is_reference(expected)
     kind_valid = kind == EXPECTED_EVIDENCE_KIND[component_id]
-    if not references_valid or not kind_valid or not _is_digest(receipt_id) or not verified:
+    if not references_valid or not kind_valid or not _is_digest(receipt_id) or not integrity_only:
         state, reason = CompatibilityState.NOT_READY.value, "component_evidence_invalid"
     elif installed == expected:
-        state, reason = CompatibilityState.CURRENT.value, "installed_matches_expected"
+        state, reason = CompatibilityState.OBSERVED_MATCH.value, "observed_refs_match"
     else:
-        state, reason = CompatibilityState.DRIFT.value, "installed_differs_from_expected"
+        state, reason = CompatibilityState.OBSERVED_DRIFT.value, "observed_refs_differ"
     return ComponentCompatibility(component_id, state, installed, expected, kind, receipt_id, reason)
 
 
@@ -240,6 +244,7 @@ __all__ = [
     "ComponentCompatibility",
     "EVIDENCE_SCHEMA",
     "EXPECTED_EVIDENCE_KIND",
+    "INTEGRITY_ONLY",
     "MAX_EVIDENCE_TTL_SECONDS",
     "MAX_FUTURE_SKEW_SECONDS",
     "MAX_REFERENCE_LENGTH",

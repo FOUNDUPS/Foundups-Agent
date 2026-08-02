@@ -1,5 +1,14 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-02 - Governed runtime compatibility supplier contract (0.4.50)
+
+- Updated extension/version and backend-manifest assertions for the tracked
+  WRE compatibility evidence supplier.
+- Preserved the cached-only, nonblocking startup and no-update boundary.
+- Added adversarial coverage for recomputed self-hashes, mixed relative/absolute
+  path aliasing, and production redirect-handler construction; integrity-only
+  evidence cannot report authenticated `CURRENT`.
+
 ## 2026-08-02 - Runtime compatibility advisory manifest binding (0.4.49)
 
 - Regenerated the backend manifest at 1,115 runtime files.

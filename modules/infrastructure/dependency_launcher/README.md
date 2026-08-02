@@ -73,8 +73,10 @@ Environment variables:
 ## Runtime Compatibility Advisory
 
 `main.py` runs a read-only advisory after the DAE broker starts. It consumes a
-bounded evidence file outside the repository and emits one digest-bound status:
-`CURRENT`, `DRIFT`, or `NOT_READY`. The advisory never blocks the menu and never
+bounded evidence file outside the repository and emits one digest-bound status.
+Phase 1 evidence is explicitly `INTEGRITY_ONLY`, so the overall status remains
+`NOT_READY` with `OBSERVED_MATCH`/`OBSERVED_DRIFT` component comparisons until
+signed source admission lands. The advisory never blocks the menu and never
 performs network access, package updates, model downloads/loads, inference,
 route changes, or HoloIndex maintenance.
 
@@ -84,12 +86,22 @@ Required environment variables:
 |----------|---------|
 | `REDDOG_RUNTIME_COMPATIBILITY_ROOT` | Absolute off-repo runtime artifact root |
 | `REDDOG_RUNTIME_COMPATIBILITY_EVIDENCE` | Evidence JSON inside that root |
+| `REDDOG_RUNTIME_COMPATIBILITY_SUPPLY` | WRE inventory/promotion supply JSON inside that root |
 
 The cached evidence is produced by a separate governed WRE/external-research
 cycle. A version or model change remains blocked on security, canary, rollback,
 benchmark, and signed model-promotion evidence; startup does not auto-update.
 The receipt proves cached-data integrity only; it is not authenticated update
-authority and cannot authorize dispatch or promotion.
+authority and cannot authorize dispatch or promotion. Recomputed attacker
+self-hashes cannot yield `CURRENT`.
+
+The existing OpenClaw ecosystem watchlist refresh optionally composes this
+cache when all three variables are configured. It retrieves only the
+allowlisted GitHub latest-release endpoints for OpenClaw and Hermes. General
+Qwen, coding Qwen, and inference-backend expectations must arrive as promoted
+runtime-binding source receipts. Missing, stale, tampered, redirected, partial,
+or oversized evidence fails closed and leaves the prior cache unchanged.
+Supply/output path aliasing is rejected before network retrieval.
 
 ## 0102 Directive
 

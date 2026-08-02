@@ -75,8 +75,10 @@ Provide zero-friction startup for YouTube DAE by automatically launching all req
 ## Runtime Freshness and Compatibility
 
 - [x] Phase 1: read-only, digest-bound startup advisory receipt.
-- [ ] Governed WRE producer for official OpenClaw/Hermes release evidence.
-- [ ] Bind Qwen/backend compatibility to signed model benchmark and promotion evidence.
+- [x] Phase 2: WRE watchlist producer for official OpenClaw/Hermes release
+  evidence plus promoted Qwen/backend expectation references.
+- [ ] Authenticate source receipts and bind Qwen/backend compatibility to
+  signed model benchmark and promotion evidence at use time.
 - [ ] Canary and rollback receipts before any runtime or model update.
 
 Automatic updates during `main.py` startup are explicitly rejected. Startup
