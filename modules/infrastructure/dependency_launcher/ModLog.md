@@ -7,6 +7,26 @@
 
 ## Change Log
 
+### 2026-08-02: OpenClaw/Hermes/Qwen Runtime Compatibility Advisory
+
+**Slice:** `OPENCLAW_HERMES_QWEN_RUNTIME_FRESHNESS_AND_COMPATIBILITY_RECEIPT_PHASE1`
+
+- Added a typed, digest-bound compatibility receipt for OpenClaw, Hermes,
+  general/coding Qwen bindings, and the inference backend.
+- Added a bounded off-repo evidence loader and a nonblocking startup advisory.
+- Reused the existing WRE ecosystem-watchlist and model-promotion direction;
+  this slice does not create another updater or model selector.
+- Fail-closed evidence rules cover schema, self-integrity, TTL, future timestamps,
+  duplicate/missing components, component verification, and allowlisted scope.
+- Boundary: no network, package update, model download/load, inference, route
+  mutation, process execution, HoloIndex maintenance, or startup blocking.
+- WSP references: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97.
+
+Focused validation: receipt/advisory tests plus the full `main.py` startup
+bootstrap suite.
+
+---
+
 ### 2026-06-17: Non-Destructive Attach Recovery - Open a Tab, Do NOT Kill (Phase 1)
 
 **By:** 0102 (Worker-Lane: ATTACH-AUTHOR)

@@ -223,6 +223,10 @@ def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(mon
         main, "run_reddog_readonly_operational_bootstrap_preflight", pass_step("readonly_bootstrap")
     ), patch.object(
         main, "bootstrap_runtime_dae_launches", pass_step("dae_bootstrap")
+    ), patch.object(
+        main,
+        "run_runtime_compatibility_advisory_preflight",
+        pass_step("runtime_compatibility"),
     ), patch(
         "modules.infrastructure.cli.src.main_menu.run_main_menu",
         side_effect=lambda **_kwargs: order.append("menu"),
@@ -247,8 +251,20 @@ def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(mon
         "queue_control_loop",
         "readonly_bootstrap",
         "dae_bootstrap",
+        "runtime_compatibility",
         "menu",
     ]
+
+
+def test_runtime_compatibility_adapter_failure_never_blocks_menu(tmp_path, monkeypatch, capsys):
+    from modules.infrastructure.dependency_launcher.src import runtime_compatibility_preflight
+
+    def fail(_repo_root):
+        raise RuntimeError("must_not_escape")
+
+    monkeypatch.setattr(runtime_compatibility_preflight, "run_runtime_compatibility_advisory", fail)
+    assert main.run_runtime_compatibility_advisory_preflight(tmp_path) is True
+    assert "preflight=NOT_READY" in capsys.readouterr().out
 
 
 def test_main_missing_resident_bindings_warns_and_still_loads_menu(monkeypatch):

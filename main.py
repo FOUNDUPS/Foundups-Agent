@@ -4507,6 +4507,19 @@ def bootstrap_runtime_dae_launches() -> None:
             print(f"[OPENCLAW-SUPERVISOR] bootstrap={launch_status}")
 
 
+def run_runtime_compatibility_advisory_preflight(repo_root: Path) -> bool:
+    """Emit runtime drift evidence without ever blocking the product menu."""
+    try:
+        from modules.infrastructure.dependency_launcher.src.runtime_compatibility_preflight import (
+            run_runtime_compatibility_advisory,
+        )
+
+        run_runtime_compatibility_advisory(repo_root)
+    except Exception as exc:
+        print(f"[RUNTIME-COMPAT] preflight=NOT_READY reason=adapter_error:{type(exc).__name__}")
+    return True
+
+
 def main():
     """Main entry point - thin router to CLI module."""
     repo_root = Path(__file__).resolve().parent
@@ -4598,6 +4611,7 @@ def main():
         return
 
     bootstrap_runtime_dae_launches()
+    run_runtime_compatibility_advisory_preflight(repo_root)
 
     # MAIN_MENU_ANTIFAFM_STARTUP_BOUNDARY_FIX_PHASE1:
     # Legacy ANTIFAFM_AUTO_START block removed. The env var is now ignored at menu boot.

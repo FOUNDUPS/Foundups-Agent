@@ -153,6 +153,23 @@ The comment engagement subprocess connects to Chrome on port 9222.
 
 ---
 
+### `run_runtime_compatibility_advisory(repo_root, *, environment=None)`
+
+Reads a bounded, off-repo `reddog_runtime_compatibility_evidence.v1` artifact
+and returns a `RuntimeCompatibilityReceipt`. Required components are OpenClaw,
+Hermes, the general and coding Qwen model bindings, and the inference backend.
+
+The result is advisory only:
+
+- `CURRENT`: each installed reference matches independently supplied evidence.
+- `DRIFT`: at least one valid reference differs.
+- `NOT_READY`: evidence is absent, expired, malformed, tampered, or incomplete.
+
+The function catches all input failures, prints one safe summary line, and
+never blocks startup. It makes no network call and performs no runtime mutation,
+model load, route change, package install, or HoloIndex action.
+The self-hash is an integrity check, not identity or update authorization.
+
 ## 0102 Directive
 
 Dependencies are orchestrated autonomously. The system self-heals. ✊✋🖐️
