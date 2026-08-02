@@ -238,6 +238,30 @@ def test_transient_bootstrap_exit_retries_once_then_succeeds(
     assert cleanup_calls == ["cleaned", "cleaned"]
 
 
+def test_transient_bootstrap_exhaustion_returns_bound_receipt(
+    tmp_path: Path,
+) -> None:
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=False,
+            status="FAILED",
+            error="HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
+        ),
+        cleanup_owner=lambda: None,
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is False
+    assert result["owner_attempts"] == 2
+    assert result["workspace_repo_head_sha"] == "c" * 40
+    assert result["authority_repo_head_sha"] == "c" * 40
+    assert result["query_receipt"]["receipt_id"].startswith("sha256:")
+    assert result["query_receipt"]["query"] == "audit pfmall"
+    assert result["no_authority_worktree_mutation_performed"] is True
+
+
 def test_process_owned_semantic_failure_retries_once_then_succeeds(
     tmp_path: Path,
 ) -> None:

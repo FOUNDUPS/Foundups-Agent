@@ -204,6 +204,9 @@ def query_once(
                     retry_reason = error
                     cleanup_owner()
                     continue
+                if error in TRANSIENT_OWNER_ERRORS:
+                    result = _failure(error, query=query)
+                    break
                 return _with_retry_telemetry(
                     _failure(error, query=query),
                     attempts=attempts,

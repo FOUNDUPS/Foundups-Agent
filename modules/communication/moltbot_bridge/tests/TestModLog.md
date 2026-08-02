@@ -1,3 +1,12 @@
+## 2026-08-02: HoloIndex incident repair runtime
+
+- Command: `pytest -q test_reddog_holoindex_incident_repair_runtime.py test_holoindex_postmerge_coordinator.py test_reddog_start_operations_holo_repair.py test_generate_reddog_backend_manifest.py`
+- Status: PASS (`59 passed`; owner-query bridge `18 passed`).
+- Coverage: caller and receipt forgery, independent owner recheck, exact-HEAD/root WRE task
+  reuse, retry/cooldown deferral, current-generation owner proof, escalation,
+  strict primitive/digest boundaries, active-task deferral, startup-exhaustion
+  receipts, and no direct model/shell/index invocation.
+
 ## 2026-08-01: HOLOINDEX POST-MERGE OWNER ACTIVATION
 
 - Proved the exact-SHA post-merge coordinator schedules by default and can be
