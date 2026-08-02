@@ -1,6 +1,8 @@
 # RedDog Interface
 
-Version 0.4.48 adds a fail-closed incident-to-WRE repair adapter for exhausted
+Version 0.4.49 binds the read-only runtime compatibility advisory into the
+canonical backend manifest. Version 0.4.48 adds a fail-closed incident-to-WRE
+repair adapter for exhausted
 semantic-owner failures. It accepts only the existing transient owner error
 classes after both owner attempts, revalidates the current clean authority
 selection, independently reproduces and verifies the owner result, and
