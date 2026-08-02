@@ -1,4 +1,15 @@
 # ModLog - moltbot_bridge
+
+## 2026-08-02: Generic HoloIndex incident repair coordination
+
+- Extended the existing start-operations/post-merge Holo repair architecture
+  with `reddog_holoindex_incident_repair_runtime.py`.
+- Authenticated exhausted owner failures are now routed to the protected
+  exact-HEAD AgentDB/OpenClaw maintenance task and its existing retry/cooldown
+  semantics. Before any effect, Python independently reproduces the owner
+  failure and validates its canonical receipt, evidence, HEAD, and root.
+- Repair exhaustion emits a non-authority coding-candidate requirement; model
+  selection and execution remain separate signed WSP 15 decisions.
 - `REDDOG_FOUNDUP_WORK_SKILL_GROUNDING_PHASE1`: extended the provider-neutral
   `reddog_operations` Skillz with a canonical registered-FoundUp procedure.
   Existing FoundUps resolve through registry evidence and WSP 15; unknown

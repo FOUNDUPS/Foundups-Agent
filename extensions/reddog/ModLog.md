@@ -1,5 +1,17 @@
 # RedDog ModLog
 
+## 2026-08-02 - HoloIndex incident to WRE repair runtime (0.4.48)
+
+- Added a bounded extension/Python incident bridge for exhausted semantic-owner
+  startup, poisoning, and backend-unavailable failures.
+- Reused the exact-HEAD post-merge AgentDB/OpenClaw coordinator for durable
+  dedupe, retry, cooldown, authority-worktree validation, and freshness proof.
+- Added process-local owner provenance, an independent Python owner requery,
+  canonical receipt/evidence validation, and bounded failure serialization.
+- Added fail-closed telemetry for deferred repair and coding-candidate
+  escalation. No direct HoloIndex mutation or model invocation was added.
+- Added focused Python and JavaScript security regressions.
+
 # ModLog - RedDog Extension
 
 ## 2026-08-02 - HoloIndex persisted vector-segment proof (0.4.47)

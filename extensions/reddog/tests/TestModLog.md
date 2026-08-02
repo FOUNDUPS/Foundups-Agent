@@ -1,5 +1,17 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-02 - HoloIndex incident to WRE repair runtime (0.4.48)
+
+- Commands:
+  - `pytest -q test_reddog_holoindex_incident_repair_runtime.py test_holoindex_postmerge_coordinator.py test_reddog_start_operations_holo_repair.py test_generate_reddog_backend_manifest.py`
+  - `node extensions/reddog/tests/test_holoindex_incident_repair.js`
+- Status: PASS (`59 passed`; owner-query bridge `18 passed`; focused JavaScript contract passed).
+- Coverage: process-local owner provenance, independent receipt-bound requery,
+  authenticated owner-failure shape, authority binding, exact-HEAD
+  coordinator reuse, deferred retry/cooldown state, current-generation owner
+  re-query, strict primitive/digest boundaries, active-task deferral,
+  startup-exhaustion receipts, bounded input/output, and no direct model/index.
+
 ## 2026-08-02 - HoloIndex persisted vector-segment proof (0.4.47)
 
 - Revalidated the generated 1,109-file backend manifest, exact extension pin,

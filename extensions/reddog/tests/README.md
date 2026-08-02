@@ -18,6 +18,7 @@ pytest -q scripts/tests/test_generate_reddog_backend_manifest.py
 node extensions/reddog/tests/verify_repo_audit_grounding.js
 node extensions/reddog/tests/verify_extension_contract.js
 node extensions/reddog/tests/test_start_operations_control.js
+node extensions/reddog/tests/test_holoindex_incident_repair.js
 git diff --check -- extensions/reddog
 ```
 
@@ -40,6 +41,7 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_foundup_work_grounding.js` | Canonical registry identity resolution, evidence derivation, runtime binding, WSP 62, failure closure, and non-authority receipt |
 | `scripts/tests/test_generate_reddog_backend_manifest.py` | Package-initializer resolution, executable roots, dynamic-load sentinels, and checked-in generator parity |
 | `test_start_operations_control.js` | Cross-language receipt parity, request replay, cumulative output, environment allowlist, and durable intent controls |
+| `test_holoindex_incident_repair.js` | Exhausted-owner admission, bounded bridge execution, WRE repair telemetry, version wiring, and no direct model binding |
 | `verify_extension_contract.js` | Single contract runner; ADDENDUM E ~line 518+, ADDENDUM F gate probe ~line 595+ |
 | `verify_repo_audit_grounding.js` | Focused alias, receipt, protected-context non-vacuity, local block, repair-provenance, and defensive-prompt contracts |
 

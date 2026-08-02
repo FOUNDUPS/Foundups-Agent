@@ -12,6 +12,7 @@ const {
 } = require('./fusion_progress_receipt');
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
+const holoIncidentRepair = require('./holoindex_incident_repair');
 const backendCompatibility = require('./backend_compatibility_preflight');
 const backendCompatibilityAsync = require('./backend_compatibility_async');
 const backendCompatibilityRender = require('./backend_compatibility_render');
@@ -26,7 +27,7 @@ const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
-const EXTENSION_VERSION = '0.4.47';
+const EXTENSION_VERSION = '0.4.48';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -2079,6 +2080,12 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     holoindex_authority_binding: [meta.holoindex_semantic_evidence_authority || 'unknown', 'overlay=' + (meta.holoindex_workspace_overlay_present === true), meta.holoindex_authority_repo_root_digest || '(none)', 'no_mutation=' + (meta.no_authority_worktree_mutation_performed === true)].join('|'),
     holoindex_query_receipt_id: meta.holoindex_query_receipt_id || '(none)',
     no_holoindex_reindex_performed: meta.no_holoindex_reindex_performed !== undefined ? meta.no_holoindex_reindex_performed : 'unknown',
+    holoindex_incident_repair_attempted: meta.incident_repair_attempted === true,
+    holoindex_incident_repair_status: meta.incident_repair_status || '(none)',
+    holoindex_incident_repair_task_id: meta.incident_repair_task_id || '(none)',
+    holoindex_incident_repair_receipt_id: meta.incident_repair_receipt_id || '(none)',
+    holoindex_incident_repair_enqueued: meta.incident_repair_enqueued === true,
+    holoindex_incident_repair_coding_candidate_required: meta.incident_repair_coding_candidate_required === true,
     code_hits_count: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
     wsp_hits: meta.wsp_hits !== undefined ? meta.wsp_hits : 'unknown',
     code_hits: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
@@ -2213,6 +2220,12 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- holoindex_authority_binding: ' + scorecard.holoindex_authority_binding,
     '- holoindex_query_receipt_id: ' + scorecard.holoindex_query_receipt_id,
     '- no_holoindex_reindex_performed: ' + scorecard.no_holoindex_reindex_performed,
+    '- holoindex_incident_repair_attempted: ' + scorecard.holoindex_incident_repair_attempted,
+    '- holoindex_incident_repair_status: ' + scorecard.holoindex_incident_repair_status,
+    '- holoindex_incident_repair_task_id: ' + scorecard.holoindex_incident_repair_task_id,
+    '- holoindex_incident_repair_receipt_id: ' + scorecard.holoindex_incident_repair_receipt_id,
+    '- holoindex_incident_repair_enqueued: ' + scorecard.holoindex_incident_repair_enqueued,
+    '- holoindex_incident_repair_coding_candidate_required: ' + scorecard.holoindex_incident_repair_coding_candidate_required,
     '- code_hits_count: ' + scorecard.code_hits_count,
     '- wsp_hits: ' + scorecard.wsp_hits,
     '- skill_hits: ' + scorecard.skill_hits,
@@ -7516,6 +7529,27 @@ function runHoloIndexOwnerQuery(root, query, limit) {
   }
 }
 
+function coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved) {
+  try {
+    const configuredPython = reddogConfigValue('pythonPath', 'python');
+    const interpreter = resolvePythonInterpreter(root, configuredPython);
+    return holoIncidentRepair.coordinate({
+      root,
+      query,
+      ownerResult,
+      ownerObserved,
+      interpreterPath: interpreter.path,
+      env: buildBridgePythonEnv(process.env)
+    });
+  } catch (err) {
+    return {
+      accepted: false,
+      status: 'REJECTED',
+      rejection_reasons: ['holoindex_incident_bridge_error']
+    };
+  }
+}
+
 function mergeGenerationBoundHoloResult(bundleOutput, ownerResult) {
   return holoGenerationBoundQuery.mergeBundle(bundleOutput, ownerResult);
 }
@@ -7533,7 +7567,7 @@ function holoIndexOutput(root, taskText, maxChars) {
   // structured memory and governed direct reads, so keep it lexical and avoid
   // loading a second semantic model whose hits are discarded during merge.
   const bundleEnv = buildHoloQueryEnv(process.env, 'lexical');
-  const ownerResult = requestedMode === 'semantic'
+  let ownerResult = requestedMode === 'semantic'
     ? runHoloIndexOwnerQuery(root, query, 5)
     : {
         ok: false,
@@ -7545,6 +7579,14 @@ function holoIndexOutput(root, taskText, maxChars) {
         stale_reasons: ['semantic_owner_not_requested'],
         no_holoindex_reindex_performed: true
       };
+  let incidentRepair = null;
+  const ownerObserved = holoGenerationBoundQuery.isObserved(ownerResult);
+  if (requestedMode === 'semantic' && holoIncidentRepair.shouldCoordinate(ownerResult, ownerObserved)) {
+    incidentRepair = coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved);
+    if (incidentRepair.accepted === true && incidentRepair.status === 'OWNER_READY') {
+      ownerResult = runHoloIndexOwnerQuery(root, query, 5);
+    }
+  }
   try {
     const baseArgs = ['-B', 'holo_index.py', '--bundle-json', '--search', query, '--bundle-module-hint', moduleHint, '--limit', '5', '--quiet-root-alerts'];
     let output = cp.execFileSync('python', baseArgs, {
@@ -7578,6 +7620,7 @@ function holoIndexOutput(root, taskText, maxChars) {
     foundupWorkRuntime.applyGroundingMeta(meta, foundupGrounding);
     foundupWorkRuntime.applyTypedMeta(meta, typedTargets);
     meta.requested_retrieval_mode = requestedMode;
+    if (incidentRepair) Object.assign(meta, holoIncidentRepair.metadata(incidentRepair));
     // Semantic-owner failure withholds semantic hits, but it must not suppress
     // governed direct reads for repository targets already discovered locally.
     // Semantic obligations still fail closed later in the typed grounding gate.
@@ -7629,6 +7672,7 @@ function holoIndexOutput(root, taskText, maxChars) {
           foundupWorkRuntime.applyGroundingMeta(meta, foundupGrounding);
           foundupWorkRuntime.applyTypedMeta(meta, typedTargets);
           meta.requested_retrieval_mode = requestedMode;
+          if (incidentRepair) Object.assign(meta, holoIncidentRepair.metadata(incidentRepair));
         } catch (fetchErr) {
           // Fetch failure must not abort recall; keep the pre-fetch bundle+meta,
           // but classify + surface the cause so it is never silent again.
@@ -7702,6 +7746,7 @@ function holoIndexOutput(root, taskText, maxChars) {
       meta.repo_deep_dive_gate_passed = fallbackGate.passed;
       meta.repo_deep_dive_gate_rejection_reasons = fallbackGate.rejection_reasons.slice();
       meta.requested_retrieval_mode = requestedMode;
+      if (incidentRepair) Object.assign(meta, holoIncidentRepair.metadata(incidentRepair));
       if (requestedMode === 'semantic' && !ownerAccepted) {
         holoGenerationBoundQuery.applyRejectedOwnerMeta(meta, ownerResult);
       }
@@ -7715,27 +7760,29 @@ function holoIndexOutput(root, taskText, maxChars) {
         repo_deep_dive_targets: fallbackDiscovery.targets.slice()
       };
     } catch (offlineErr) {
+      const terminalMeta = Object.assign(
+        foundupWorkRuntime.applyTypedMeta(foundupWorkRuntime.applyGroundingMeta(applyRepoDeepDiveDiscoveryMeta(holoIndexMetaFromBundle('', false, taskTextWithDiscoveredRepoTargets(taskText, typedTargets.repo_file_targets)), {
+          requested: repoDeepDiveRequested,
+          manifest_generated: false,
+          manifest_file_count: 0,
+          concepts: repoDeepDiveConcepts(taskText),
+          semantic_paths: [],
+          targets: []
+        }), foundupGrounding), typedTargets),
+        queryPlan,
+        {
+          repo_deep_dive_gate_applied: repoDeepDiveRequested,
+          repo_deep_dive_gate_passed: !repoDeepDiveRequested,
+          repo_deep_dive_gate_rejection_reasons: repoDeepDiveRequested
+            ? ['repository_manifest_missing', 'no_repository_targets', 'direct_read_not_attempted', 'no_direct_read_content', 'repository_target_recall_incomplete', 'repository_source_context_missing']
+            : []
+        }
+      );
+      if (incidentRepair) Object.assign(terminalMeta, holoIncidentRepair.metadata(incidentRepair));
       return {
         output: '[HoloIndex unavailable: ' + (offlineErr && offlineErr.message ? offlineErr.message.slice(0, 180) : 'unknown') + ']',
         quality: 'HoloIndex unavailable. Use supplied editor/git evidence only; propose HoloIndex recovery as a fix when retrieval affects the decision.',
-        meta: Object.assign(
-          foundupWorkRuntime.applyTypedMeta(foundupWorkRuntime.applyGroundingMeta(applyRepoDeepDiveDiscoveryMeta(holoIndexMetaFromBundle('', false, taskTextWithDiscoveredRepoTargets(taskText, typedTargets.repo_file_targets)), {
-            requested: repoDeepDiveRequested,
-            manifest_generated: false,
-            manifest_file_count: 0,
-            concepts: repoDeepDiveConcepts(taskText),
-            semantic_paths: [],
-            targets: []
-          }), foundupGrounding), typedTargets),
-          queryPlan,
-          {
-            repo_deep_dive_gate_applied: repoDeepDiveRequested,
-            repo_deep_dive_gate_passed: !repoDeepDiveRequested,
-            repo_deep_dive_gate_rejection_reasons: repoDeepDiveRequested
-              ? ['repository_manifest_missing', 'no_repository_targets', 'direct_read_not_attempted', 'no_direct_read_content', 'repository_target_recall_incomplete', 'repository_source_context_missing']
-              : []
-          }
-        ),
+        meta: terminalMeta,
         repo_deep_dive_targets: []
       };
     }

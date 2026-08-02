@@ -1,6 +1,15 @@
 # RedDog
 
-Version: 0.4.47
+Version: 0.4.48
+
+Version 0.4.48 routes an exhausted, generation-bound HoloIndex owner incident
+to the existing WRE/OpenClaw post-merge maintenance coordinator. The incident
+bridge independently revalidates the authority-worktree binding, creates or
+reconciles one exact-HEAD AgentDB task, inherits its retry/cooldown policy, and
+requires both process-local owner provenance and an independent receipt-bound
+owner requery before any effect. Query code
+still never re-indexes. A failed current-generation owner emits a coding
+candidate requirement; it does not invoke Qwen or another model directly.
 
 Version 0.4.47 pins the HoloIndex persisted vector-segment cold-start gate in
 the backend compatibility manifest. The gate is maintenance-time proof only;
@@ -371,6 +380,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.47.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.48.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

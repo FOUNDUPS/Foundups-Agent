@@ -33,6 +33,7 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     assert set(generator.EXECUTABLE_FILES).issubset(runtime)
     assert "holo_index.py" in runtime
     assert "scripts/reddog_authoritative_work_state_query_once.py" in runtime
+    assert "scripts/reddog_holoindex_incident_repair_once.py" in runtime
     assert "scripts/reddog_start_operations_control_once.py" in runtime
     assert (
         "modules/communication/moltbot_bridge/src/"
@@ -102,5 +103,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         in generated["required_runtime_sha256"]
     )
     assert generator.canonical_manifest_digest(generated) == (
-        "4d304efce92455bbd2987c6e37e9248a0764161ac700848604386cf82f7196d9"
+        "fafd179c7f254dbf468c1d3456f1f47bc00df0a096a7e62a66f2c1cc98074136"
     )

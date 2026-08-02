@@ -162,6 +162,10 @@ function isAccepted(result) {
   return OWNER_PROOF.isAccepted(result);
 }
 
+function isObserved(result) {
+  return OWNER_PROOF.isObserved(result);
+}
+
 function parseBridgeResult(stdout) {
   const lines = String(stdout || '').trim().split('\n');
   const result = JSON.parse(lines[lines.length - 1]);
@@ -354,6 +358,16 @@ function newMeta(usedOfflineFallback, emptyCoverageDigest) {
     no_authority_worktree_mutation_performed: false,
     holoindex_query_receipt_id: '',
     no_holoindex_reindex_performed: true,
+    incident_repair_attempted: false,
+    incident_repair_accepted: false,
+    incident_repair_status: '',
+    incident_repair_id: '',
+    incident_repair_task_id: '',
+    incident_repair_receipt_id: '',
+    incident_repair_enqueued: false,
+    incident_repair_owner_requery_performed: false,
+    incident_repair_coding_candidate_required: false,
+    incident_repair_rejection_reasons: [],
     routing_active: false,
     wsp_hits: 'unknown', code_hits: 'unknown', skill_hits: 'unknown',
     target_recall_ok: 'unknown', index_gap_detected: 'unknown',
@@ -491,6 +505,7 @@ module.exports = {
   semanticEvidenceDigest,
   verifiedSemanticEvidence,
   isAccepted,
+  isObserved,
   classifyOwnerBridgeError,
   runOwnerQuery,
   mergeBundle,

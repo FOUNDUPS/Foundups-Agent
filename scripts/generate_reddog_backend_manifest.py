@@ -30,6 +30,7 @@ BRIDGE_FILES = (
     "scripts/reddog_extension_live_enqueue_invoke_once.py",
     "scripts/reddog_extension_wre_spine_invoke_once.py",
     "scripts/reddog_github_permission_probe_once.py",
+    "scripts/reddog_holoindex_incident_repair_once.py",
     "scripts/reddog_holoindex_owner_query_once.py",
     "scripts/reddog_judgment_verifier_once.py",
     "scripts/reddog_model_freshness_query_once.py",

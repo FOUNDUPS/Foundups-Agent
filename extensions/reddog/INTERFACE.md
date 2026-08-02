@@ -1,5 +1,16 @@
 # RedDog Interface
 
+Version 0.4.48 adds a fail-closed incident-to-WRE repair adapter for exhausted
+semantic-owner failures. It accepts only the existing transient owner error
+classes after both owner attempts, revalidates the current clean authority
+selection, independently reproduces and verifies the owner result, and
+delegates task creation/retry/cooldown to the protected
+post-merge coordinator. `QUEUED`/`RETRY_WAIT` remain deferred; `CURRENT` must
+survive a receipt-bound query with exact HEAD/root and semantic-evidence
+digests; exhausted repair produces a non-authority coding
+candidate signal. No query surface indexes, executes a coding model, or
+changes worker authority.
+
 Version 0.4.47 seals the HoloIndex persisted vector-segment cold-start proof
 into the backend compatibility manifest. It adds no editor execution authority
 and performs no query-time indexing.
