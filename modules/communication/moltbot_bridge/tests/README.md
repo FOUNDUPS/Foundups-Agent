@@ -28,6 +28,17 @@ Optional custom args:
 .\modules\communication\moltbot_bridge\tests\run_tests.ps1 -PytestArgs @("-q", "-k", "skill_safety")
 ```
 
+Focused owner-controlled signer E0 admission:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py -q
+```
+
+This suite uses only temporary runtime roots and generated public/private test
+keys. It proves exact selection-tuple binding and fail-closed admission;
+manifest-bound principal authority and generation-fenced consumption are also
+covered. It does not resolve secrets, start a signer, bind a socket, or write
+the repo.
+
 Focused RedDog WRE operational spine:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_wre_operational_spine.py modules/communication/moltbot_bridge/tests/test_reddog_wre_worktree_create.py modules/communication/moltbot_bridge/tests/test_reddog_wre_execution_valve.py modules/communication/moltbot_bridge/tests/test_reddog_wre_executor_dryrun.py modules/communication/moltbot_bridge/tests/test_reddog_work_order_runtime_invocation.py -q

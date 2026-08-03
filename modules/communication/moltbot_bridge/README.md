@@ -47,7 +47,14 @@ now verifies one request-bound secret-access grant, atomically consumes durable
 replay state, resolves WSP71 keys for that sign only, and rechecks revocation,
 expiry, provider identity, and the returned signature. The stable entrypoint
 does not yet supply or compose this boundary, so production signing remains
-fail-closed. RedDog and `main.py` remain clients and cannot spawn the signer.
+fail-closed. The owner-controlled E0 admission layer now binds one signed
+policy to the exact current signer generation, key-reference digests,
+manifest-bound grant/revocation authorities, disjoint durable-state roots,
+operation/tier consensus rules, and rate limits. Its opaque one-use capability
+cannot be copied or serialized. Consumption revalidates while the canonical
+current-generation fence is held and returns only a non-authoritative receipt;
+it does not release signer composition authority or grant an effect.
+RedDog and `main.py` remain clients and cannot spawn the signer.
 
 `start operations` binds the production `reddog_operations` Skillz from the
 manifest-authenticated runtime before model selection or grounding. The

@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import copy
 import json
+from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -105,6 +106,30 @@ def test_current_generation_mints_one_shot_selection(tmp_path: Path) -> None:
         subject.consume(capability)
 
 
+def test_trusted_consumer_runs_inside_generation_fence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _harness, _manifest, subject = _prepared(tmp_path)
+    state = {"active": False}
+
+    @contextmanager
+    def fence(*_args: object, **_kwargs: object):
+        state["active"] = True
+        try:
+            yield
+        finally:
+            state["active"] = False
+
+    monkeypatch.setattr(
+        selection_module, "reddog_runtime_artifact_generation_lock", fence
+    )
+    capability = subject.select({}, now_epoch=NOW)
+
+    with subject._lease_current(capability) as _selected:
+        assert state["active"] is True
+    assert state["active"] is False
+
+
 def test_selection_expires_before_consumption(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -112,6 +137,22 @@ def test_selection_expires_before_consumption(
     monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW)
     capability = subject.select({}, now_epoch=NOW)
     monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW + 31)
+
+    with pytest.raises(
+        RuntimeArtifactManifestError,
+        match="manifest_launch_selection_expired",
+    ):
+        subject.consume(capability)
+
+
+def test_selection_freshness_rechecks_after_generation_lock_wait(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _harness, _manifest, subject = _prepared(tmp_path)
+    monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW)
+    capability = subject.select({}, now_epoch=NOW)
+    times = iter((NOW, NOW + 31))
+    monkeypatch.setattr(selection_module, "_now_epoch", lambda: next(times))
 
     with pytest.raises(
         RuntimeArtifactManifestError,
