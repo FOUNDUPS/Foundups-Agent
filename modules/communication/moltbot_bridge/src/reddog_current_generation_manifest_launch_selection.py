@@ -5,10 +5,11 @@ from __future__ import annotations
 import json
 import threading
 import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Mapping, Protocol
+from typing import Any, Iterator, Mapping, Protocol
 from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
@@ -59,6 +60,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 )
 
 SELECTION_TTL_SECONDS = 30
+PRINCIPAL_AUTHORITY_RECORDS_FILENAME = "principal_authority_records.json"
 
 
 @dataclass(frozen=True)
@@ -155,7 +157,7 @@ def create_current_generation_manifest_launch_selection_boundary(
         trust=owner.trust,
         owner_config_id=owner.owner_config_id,
     )
-    return _Boundary(state.select, state.consume)
+    return _Boundary(state.select, state.consume, state.current_selection_lease)
 
 
 def _require_owner_authority(
@@ -207,6 +209,14 @@ class _SelectionState:
         return capability
 
     def consume(self, value: object) -> Mapping[str, Any]:
+        with self.current_selection_lease(value) as selected:
+            return _legacy_launch_values(selected)
+
+    @contextmanager
+    def current_selection_lease(
+        self, value: object
+    ) -> Iterator[Mapping[str, Any]]:
+        """Yield one current selection while its generation is fenced."""
         expected = _claim_capability(
             value,
             self.capability_type,
@@ -215,54 +225,64 @@ class _SelectionState:
             self.issue_lock,
         )
         _require_selection_fresh(expected)
-        current = self._current_values(
-            selected_at=int(expected["selection_issued_at"])
-        )
-        if dict(current) != dict(expected):
-            raise RuntimeArtifactManifestError(
-                "manifest_launch_selection_stale"
+        with reddog_runtime_artifact_generation_lock(
+            self.runtime, repo_root=self.repo, allow_sealed=True
+        ):
+            _require_selection_fresh(expected)
+            current = self._current_values_locked(
+                selected_at=int(expected["selection_issued_at"])
             )
-        return MappingProxyType(dict(current))
+            if dict(current) != dict(expected):
+                raise RuntimeArtifactManifestError(
+                    "manifest_launch_selection_stale"
+                )
+            yield MappingProxyType(dict(current))
 
     def _current_values(self, *, selected_at: int) -> Mapping[str, Any]:
         with reddog_runtime_artifact_generation_lock(
             self.runtime, repo_root=self.repo, allow_sealed=True
         ):
-            activation = self.reader.load()
-            if activation is None:
-                raise RuntimeArtifactManifestError(
-                    "current_generation_not_activated"
-                )
-            _require_activation_trust(activation, self.trust)
-            manifest = _read_manifest(self.repo, self.runtime, activation)
-            validate_freshness(
-                manifest,
-                now_epoch=_now_epoch(),
-                max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS,
+            return self._current_values_locked(selected_at=selected_at)
+
+    def _current_values_locked(self, *, selected_at: int) -> Mapping[str, Any]:
+        activation = self.reader.load()
+        if activation is None:
+            raise RuntimeArtifactManifestError(
+                "current_generation_not_activated"
             )
-            _verify_manifest(
-                manifest,
-                activation,
-                self.repo,
-                self.runtime,
-                Ed25519SignatureVerifier(),
-            )
-            return _launch_values(
-                manifest,
-                activation,
-                self.repo,
-                self.runtime,
-                selected_at=selected_at,
-                owner_config_id=self.owner_config_id,
-            )
+        _require_activation_trust(activation, self.trust)
+        manifest = _read_manifest(self.repo, self.runtime, activation)
+        validate_freshness(
+            manifest,
+            now_epoch=_now_epoch(),
+            max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS,
+        )
+        _verify_manifest(
+            manifest,
+            activation,
+            self.repo,
+            self.runtime,
+            Ed25519SignatureVerifier(),
+        )
+        return _launch_values(
+            manifest,
+            activation,
+            self.repo,
+            self.runtime,
+            selected_at=selected_at,
+            owner_config_id=self.owner_config_id,
+        )
 
 
 class _Boundary:
-    __slots__ = ("_select", "_consume")
+    __slots__ = ("_select", "_consume", "_current_selection_lease")
 
-    def __init__(self, select: Any, consume: Any) -> None:
+    def __init__(
+        self, select: Any, consume: Any, current_selection_lease: Any
+    ) -> None:
         self._select = select
         self._consume = consume
+        self._current_selection_lease = current_selection_lease
 
     def select(
         self, manifest: Mapping[str, Any], *, now_epoch: int
@@ -271,6 +291,9 @@ class _Boundary:
 
     def consume(self, value: object) -> Mapping[str, Any]:
         return self._consume(value)
+
+    def _lease_current(self, value: object) -> Any:
+        return self._current_selection_lease(value)
 
 
 def _read_manifest(
@@ -427,6 +450,10 @@ def _launch_values(
     selected_at: int,
     owner_config_id: str,
 ) -> Mapping[str, Any]:
+    descriptors = {
+        str(item["filename"]): item for item in manifest["artifacts"]
+    }
+    principal = descriptors[PRINCIPAL_AUTHORITY_RECORDS_FILENAME]
     return MappingProxyType(
         {
             "manifest_id": activation.manifest_id,
@@ -443,6 +470,10 @@ def _launch_values(
             "runtime_root": str(runtime),
             "config_path": str(runtime / CONFIG_FILENAME),
             "run_packet_path": str(runtime / RUN_PACKET_FILENAME),
+            "principal_authority_records_path": str(
+                runtime / PRINCIPAL_AUTHORITY_RECORDS_FILENAME
+            ),
+            "principal_authority_records_digest": principal["content_digest"],
         }
     )
 
@@ -470,6 +501,16 @@ def _capability_type(seal: object) -> type:
             raise TypeError("manifest_launch_selection_not_copyable")
 
     return Capability
+
+
+def _legacy_launch_values(value: Mapping[str, Any]) -> Mapping[str, Any]:
+    hidden = {
+        "principal_authority_records_path",
+        "principal_authority_records_digest",
+    }
+    return MappingProxyType(
+        {key: item for key, item in value.items() if key not in hidden}
+    )
 
 
 def _claim_capability(

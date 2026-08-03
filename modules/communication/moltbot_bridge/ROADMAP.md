@@ -12,12 +12,19 @@
   ephemeral backend construction. Its signature is independently verified
   while one signer-owned revocation fence covers the complete sign operation;
   missing stores and backend-authored rejection payloads fail closed.
+- COMPLETE: owner-controlled E0 composition admission consumes one opaque
+  current-generation selection, requires that signed generation to pin the
+  complete E0 authority-scope digest and principal artifact, independently
+  verifies the signed owner policy and both authority keys, and releases one
+  process-local capability. Capability consumption revalidates under the
+  shared generation fence and returns only a non-authoritative receipt. It
+  performs no secret resolution, socket binding, or signer start.
 - NEXT: independently administered grant and revocation supply, WSP 71
   permissioned resolver composition, and native-memory zeroization evidence
   entrypoint. Socket v1 remains compatible but cannot reach the resolve-per-sign
   backend.
 - BLOCKED: durable system-service deployment and no-work-authority Linux
-  canary until grant supply, secret resolution, zeroization, and lifecycle
+  canary until grant/revocation supply, secret resolution, zeroization, and lifecycle
   supervision slices pass.
 
 ## RedDog provider-call evidence follow-ups
