@@ -1,5 +1,12 @@
 # HoloIndex Package ModLog
 
+## [2026-08-03] Windows device-entry repository discovery guard
+
+- Repository-audit discovery now rejects entries whose path cannot be
+  relativized to the governed repository root, including Windows device paths.
+- The rejection is receipt-counted as `invalid_entry_path`; remaining evidence
+  discovery continues without reading the invalid entry.
+
 ## [2026-08-02] Persisted vector-segment cold-start gate
 
 - Extended the isolated post-maintenance proof beyond collection snapshots:

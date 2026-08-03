@@ -23,8 +23,13 @@
 - Next: make the Fusion/OpenRouter gateway return authoritative served
   provider/model and normalized numeric usage evidence. Until then those
   fields remain null; configuration is never evidence of service.
-- Next: wire the same canonical receipt through OpenClaw/Hermes provider
-  boundaries after their independent lineage and retry contracts are defined.
+- Complete: actual upstream OpenClaw Gateway and Hermes API artifact providers
+  emit the canonical effect receipt. OpenClaw is exact-session sandboxed;
+  Hermes is text-only and requires a disabled tool/skill surface before and
+  after each run plus a complete effect-free SSE event history. Neither
+  provider owns Foundups repository effects.
+- Next: bind authoritative served provider/model and normalized usage evidence
+  from both upstream response surfaces without trusting requested identity.
 - Next: extract the atomic store from the focused contract module after
   cross-surface parity is stable, retiring the temporary WSP 62 ceiling.
 - Next: extract the backend architect model-call and accepted-receipt

@@ -226,6 +226,26 @@ def test_discovery_prunes_secret_vendor_generated_and_reparse(tmp_path):
     assert receipt["exclusion_counts"]["pruned"] >= 3
 
 
+def test_discovery_skips_windows_device_path_without_aborting(tmp_path, monkeypatch):
+    _seed_pfmall(tmp_path)
+    device_entry = tmp_path / "device.py"
+    device_entry.write_text("pfmall", encoding="utf-8")
+    real_relpath = discovery.os.path.relpath
+
+    def reject_device_path(path, start):
+        if os.fspath(path) == os.fspath(device_entry):
+            raise ValueError("path is on mount '\\\\.\\nul'")
+        return real_relpath(path, start)
+
+    monkeypatch.setattr(discovery.os.path, "relpath", reject_device_path)
+    receipt = discovery.build_repo_audit_grounding(
+        tmp_path, "audit pfmall codebase", {}
+    )["receipt"]
+    assert receipt["coverage"]["verdict"] == "PASS"
+    assert receipt["exclusion_counts"]["invalid_entry_path"] == 1
+    assert all(item["path"] != "device.py" for item in receipt["selected"])
+
+
 def test_discovery_never_enters_reads_or_selects_private_tool_state_roots(tmp_path, monkeypatch):
     _seed_pfmall(tmp_path)
     private_roots = sorted(discovery._PRIVATE_TOOL_STATE_SEGMENTS)

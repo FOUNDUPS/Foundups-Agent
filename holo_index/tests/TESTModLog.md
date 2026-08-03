@@ -586,3 +586,7 @@ HOLO_SKIP_MODEL=1 python -m pytest holo_index/tests/test_circuit_breaker.py \
 - **Script Dependencies**: Python standard library + HoloIndex components
 - **Error Handling**: Comprehensive exception catching with diagnostic output
 - **Performance**: Optimized for fast execution in CI/CD pipelines
+## [2026-08-03] Windows device-entry repository discovery regression
+
+- Proved an unrelativizable Windows device entry is excluded and counted while
+  valid implementation/test evidence remains discoverable.

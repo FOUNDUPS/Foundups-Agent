@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-03: Actual upstream Hermes API artifact provider
+
+- Replaced the production-blocked `hermes_api` placeholder with a real
+  authenticated loopback adapter for upstream Hermes Agent `/v1/runs`.
+- Consumes the signed principal model/provider route before secret access or
+  transport and reuses the existing Foundups artifact writer, worktree,
+  exact-SHA commit, and independent verifier.
+- Requires Hermes release `2026.7.30` / API runtime `0.19.1`, the dedicated
+  `reddogartifact` profile, bearer
+  enforcement, all API-server toolsets disabled, zero visible skills, and an
+  unchanged tool/skill surface after generation. The complete upstream SSE
+  event history must contain no tool, approval, or subagent event and its
+  terminal output must match the polled terminal status. Tool, approval, subagent,
+  malformed-output, timeout, and uncertain-stop paths fail closed.
+- Added a fixed loopback stdlib transport and a confined outside-repository
+  secret source. No secret is accepted from prompts, argv, repository files,
+  or provider receipts. Hermes receives no shell, worktree, Git, GitHub, PR,
+  merge, HoloIndex, PatternMemory, or reward authority (WSP 00, 15, 22, 50, 62, 97).
+
 ## 2026-08-02: Actual OpenClaw provider and truthful Hermes boundary
 
 - Added a production adapter for the installed upstream OpenClaw Gateway CLI;

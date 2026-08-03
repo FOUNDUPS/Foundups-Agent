@@ -1,3 +1,9 @@
+## 2026-08-03: Upstream Hermes complete-event-history confinement
+
+- Added regressions proving a completed poll result cannot hide an earlier
+  tool, approval, or subagent event; run ID, terminal event, and output must
+  match the complete upstream SSE event history.
+
 ## 2026-08-02: Upstream OpenClaw and Hermes fail-closed provider gate
 
 - Added fail-closed provider, command-transport,
@@ -1872,3 +1878,13 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
   - Confirms restart attempts are bounded by policy and escalate when the repair budget is exhausted.
   - Confirms failed verify cycles are still remembered before escalation.
 
+## 2026-08-03: Upstream Hermes API provider gate
+
+- Added real `/v1/runs` adapter tests for signed principal routing, fixed
+  loopback transport, confined bearer-key loading, exact upstream identity,
+  disabled toolsets, empty skills, post-run policy drift, approval/tool abort,
+  malicious run IDs, duplicate JSON, unsafe artifact paths, and secret
+  non-disclosure.
+- Re-ran the OpenClaw provider and shared upstream-provider bootstrap suites to
+  prove the two actual scaffolds share authority and materialization contracts
+  without sharing execution implementations.
