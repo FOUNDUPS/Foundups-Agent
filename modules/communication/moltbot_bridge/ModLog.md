@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-03: Extension resident model-runtime authority binding
+
+- Reused the canonical resident model-runtime binding loader in the RedDog
+  extension session bridge, matching the existing `main.py` authority path.
+- The bridge now supplies distinct authenticated BOUND audit and architect
+  receipts to the durable AgentDB cycle and rejects missing, invalid, stale,
+  wrong-surface, or receipt-ID-mismatched artifacts before client construction.
+- Preserved the read-only boundary: this slice adds no shell, worktree,
+  provider, executable queue, PR, merge, or HoloIndex mutation authority
+  (WSP 00, 15, 22, 50, 62, 97).
+
 ## 2026-08-03: Actual upstream Hermes API artifact provider
 
 - Replaced the production-blocked `hermes_api` placeholder with a real
