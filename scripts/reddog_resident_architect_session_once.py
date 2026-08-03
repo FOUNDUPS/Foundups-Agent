@@ -28,6 +28,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_architect_client i
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (  # noqa: E402
     validate_grounded_target_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_model_runtime_bindings import (  # noqa: E402
+    load_resident_model_runtime_bindings,
+)
 
 RESIDENT_ARCHITECT_SESSION_ACCEPT = "RESIDENT_ARCHITECT_SESSION_ACCEPT"
 RESIDENT_ARCHITECT_SESSION_REJECT = "RESIDENT_ARCHITECT_SESSION_REJECT"
@@ -209,6 +212,14 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
     if not principal or not authorized_foundups:
         return _reject("resident_architect_authenticated_scope_missing")
     try:
+        audit_binding, architect_binding, binding_reason = load_resident_model_runtime_bindings(
+            repo_root
+        )
+    except Exception:
+        return _reject("model_runtime_binding_artifact_invalid")
+    if binding_reason or audit_binding is None or architect_binding is None:
+        return _reject(binding_reason or "model_runtime_binding_artifact_invalid")
+    try:
         client = RedDogResidentArchitectClient(
             repo_root=repo_root,
             authenticated_principal_id=principal,
@@ -232,6 +243,8 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
                 "memex_snapshot_supply_config": _mapping(payload.get("memex_snapshot_supply")),
                 "external_research_retriever": _external_retriever_from_env(),
                 "timeout_seconds": _int(payload.get("timeout_seconds"), 60),
+                "audit_model_runtime_binding_receipt": audit_binding,
+                "architect_model_runtime_binding_receipt": architect_binding,
             },
         )
         result = client.submit(intent)

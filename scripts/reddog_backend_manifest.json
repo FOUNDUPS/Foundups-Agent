@@ -49,7 +49,7 @@
     "scripts/reddog_model_runtime_binding_query_once.py": "2a0dcd7995e457c9bc8c7ff6c7a99cf0fb64e53c221555ebb61911feb64be961",
     "scripts/reddog_operator_wardrobe_selection_once.py": "46142fcf1f0db74a93fbcffb2c831c53fcd4c11035fab11b12afe1bd32b5448c",
     "scripts/reddog_repair_guard_once.py": "4fd4e8b4200363195bab7b9a65b8d1d81deac24340654ac04fc7d4ee12ca9bc8",
-    "scripts/reddog_resident_architect_session_once.py": "68e07b17cc8463ac59a0f53be9cfcecd61dce19d3a495bff20cf4bc9d25a0175",
+    "scripts/reddog_resident_architect_session_once.py": "0a350587ed3315e31b6b6d86423170c7a35d9f0c8905b6e40df958924cb325af",
     "scripts/reddog_start_operations_control_once.py": "4b47974c5690042dbaf2733e57076b24849b523b4d32e14e26a5643dd702faed"
   },
   "required_runtime_files": [
@@ -2303,7 +2303,7 @@
     "scripts/reddog_model_runtime_binding_query_once.py": "2a0dcd7995e457c9bc8c7ff6c7a99cf0fb64e53c221555ebb61911feb64be961",
     "scripts/reddog_operator_wardrobe_selection_once.py": "46142fcf1f0db74a93fbcffb2c831c53fcd4c11035fab11b12afe1bd32b5448c",
     "scripts/reddog_repair_guard_once.py": "4fd4e8b4200363195bab7b9a65b8d1d81deac24340654ac04fc7d4ee12ca9bc8",
-    "scripts/reddog_resident_architect_session_once.py": "68e07b17cc8463ac59a0f53be9cfcecd61dce19d3a495bff20cf4bc9d25a0175",
+    "scripts/reddog_resident_architect_session_once.py": "0a350587ed3315e31b6b6d86423170c7a35d9f0c8905b6e40df958924cb325af",
     "scripts/reddog_start_operations_control_once.py": "4b47974c5690042dbaf2733e57076b24849b523b4d32e14e26a5643dd702faed",
     "tools/shared/module_scoring_engine.py": "933c20ea0afa7ba4ccd83f666f275c96ae22533820ccc821a5685a8df9d3d382",
     "utils/env_loader.py": "b7eadd95cd156b6330369969ff7f35f496f9c8885a8317ef77ccf062f5211f45",
