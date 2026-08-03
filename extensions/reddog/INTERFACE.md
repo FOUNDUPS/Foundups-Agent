@@ -1,6 +1,6 @@
 # RedDog Interface
 
-Version 0.4.52 pins the real upstream OpenClaw Gateway artifact provider into
+Version 0.4.53 pins the real upstream OpenClaw Gateway and Hermes API artifact providers into
 the backend integrity manifest. Signed authority is consumed before process
 creation, the dedicated OpenClaw agent is checked for confinement, and only a
 bounded artifact map reaches the existing isolated Foundups writer. Hermes

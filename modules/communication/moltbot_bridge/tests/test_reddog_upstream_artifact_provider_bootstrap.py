@@ -14,6 +14,7 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_
     _artifact_provider_effects as bootstrap_effects, _build_artifact_generator,
 )
 from modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider import OpenClawGatewayArtifactGenerationRunner
+from modules.communication.moltbot_bridge.src.reddog_hermes_api_artifact_provider import HermesApiArtifactGenerationRunner
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_bounded_worker_pilot_handler import _artifact_provider_effects as pilot_effects
 
 
@@ -55,13 +56,18 @@ def test_bootstrap_uses_fixed_openclaw_identity_and_ignores_environment(tmp_path
     assert built.command_runner is runner
 
 
-def test_production_hermes_mode_rejects_without_authenticated_service_identity(tmp_path):
+def test_production_hermes_mode_builds_real_upstream_api_adapter(tmp_path):
     repo, runtime = _roots(tmp_path)
+    transport, key_provider = object(), object()
     built, reasons = _build_artifact_generator(
         injected_runner=None, mode="hermes_api", repo_root=repo, runtime_root=runtime,
+        dependencies=ArtifactProviderDependencies(
+            hermes_api_transport=transport,
+            hermes_api_key_provider=key_provider,
+        ),
     )
-    assert built is None
-    assert reasons == ("missing_hermes_authenticated_service_identity",)
+    assert reasons == () and isinstance(built, HermesApiArtifactGenerationRunner)
+    assert built.transport is transport and built.api_key_provider is key_provider
 
 
 def test_unknown_provider_mode_rejects(tmp_path):

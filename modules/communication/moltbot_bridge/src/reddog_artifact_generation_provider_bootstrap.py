@@ -29,6 +29,8 @@ class ArtifactProviderDependencies:
     """Process-local dependencies that cannot be reconstructed from JSON."""
 
     openclaw_command_runner: Any = None
+    hermes_api_transport: Any = None
+    hermes_api_key_provider: Any = None
 
 
 def build_artifact_generator(
@@ -50,7 +52,7 @@ def build_artifact_generator(
     if normalized == RUNTIME_MODE_OPENCLAW_GATEWAY:
         return _build_openclaw(repo_root, runtime_root, supplied)
     if normalized == RUNTIME_MODE_HERMES_API:
-        return _build_hermes(supplied)
+        return _build_hermes(repo_root, runtime_root, supplied)
     if normalized != RUNTIME_MODE_FOUNDUPS_FUSION:
         return None, ("unsupported_artifact_generator_mode",)
     from .reddog_bounded_artifact_generation_runtime import (
@@ -164,10 +166,25 @@ def _build_openclaw(
 
 
 def _build_hermes(
+    repo_root: Path,
+    runtime_root: Path,
     dependencies: ArtifactProviderDependencies,
 ) -> tuple[Any, tuple[str, ...]]:
-    del dependencies
-    return None, ("missing_hermes_authenticated_service_identity",)
+    from .reddog_hermes_api_artifact_provider import HermesApiArtifactGenerationRunner
+    from .reddog_hermes_api_transport import (
+        RuntimeHermesApiKeyProvider,
+        SystemHermesApiTransport,
+    )
+
+    transport = dependencies.hermes_api_transport or SystemHermesApiTransport()
+    key_provider = dependencies.hermes_api_key_provider or RuntimeHermesApiKeyProvider(
+        runtime_root=runtime_root,
+        repo_root=repo_root,
+    )
+    return HermesApiArtifactGenerationRunner(
+        transport=transport,
+        api_key_provider=key_provider,
+    ), ()
 
 
 __all__ = [

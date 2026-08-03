@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-03 - Upstream Hermes artifact runtime (0.4.53)
+
+- Pinned the backend manifest containing the actual authenticated loopback
+  Hermes `/v1/runs` artifact provider and its fail-closed tool/skill
+  confinement. The extension remains a thin client and gains no direct model,
+  secret, shell, repository, or Hermes invocation path.
+
 ## 2026-08-02 - Upstream OpenClaw artifact runtime (0.4.52)
 
 - Bound production artifact generation to the actual upstream OpenClaw

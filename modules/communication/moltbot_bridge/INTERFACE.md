@@ -199,10 +199,16 @@ work order, and exact artifact set already bound by worktree and bounded-worker
 receipts. Artifact generation first requires one canonical production model
 selection plus a verification-admitted runtime binding whose exact topology
 and proof digest match signed authority at use time; self-rehashed evidence and
-model substitution fails before `foundups_fusion` or sandbox-verified upstream
-`openclaw agent`; actual invocation effects remain receipt-bound. `hermes_api`
-is a recognized but production-blocked mode until Hermes exposes independently
-authenticated service identity and split execution confinement.
+model substitution fails before `foundups_fusion`, sandbox-verified upstream
+`openclaw agent`, or the upstream Hermes API; actual invocation effects remain
+receipt-bound. `hermes_api` consumes the signed principal model/provider route,
+uses the fixed authenticated loopback `/v1/runs` surface, and requires exact
+version/profile identity, bearer enforcement, all API-server toolsets disabled,
+zero skills, an effect-free complete `/events` history, and unchanged tool/skill
+state after the run. The terminal event and polled output must match. Because upstream
+Hermes reports `tool_execution=server` and `split_runtime=false`, this adapter
+never grants Hermes shell or repository authority. Approval, tool, subagent,
+timeout, uncertain stop, malformed output, or confinement drift fails closed.
 Each returns only an artifact map to the existing Foundups materializer, and commit rejects pre-staged, undeclared, changed, protected, or base-mismatched state.
 
 The resulting `reddog_resident_queue_exact_sha_commit_receipt.v1` is

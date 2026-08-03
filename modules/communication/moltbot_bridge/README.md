@@ -11,17 +11,31 @@ not repository-local classes that merely carry their names:
   sandbox workspace mount, and a wildcard tool deny policy. OpenClaw
   generates the artifact map; the existing Foundups writer alone materializes
   the already-authorized paths in the isolated worktree.
-- `hermes_api` is recognized but fails closed with
-  `missing_hermes_authenticated_service_identity`. The installed upstream API
-  reports server-side tool execution without a split-runtime confinement proof;
-  a loopback address and bearer key do not authenticate the server process.
+- `hermes_api` calls the installed upstream Hermes Agent `/v1/runs` API through
+  authenticated loopback HTTP. It requires the fixed `reddogartifact` profile,
+  the pinned upstream version, bearer authentication, a complete disabled
+  API-server toolset inventory, zero visible skills, and the same closed surface
+  after the run. The adapter drains the complete run-event queue and rejects
+  any tool, approval, or subagent event, including events overwritten in the
+  pollable `last_event` field. Hermes performs text generation only; Foundups retains all
+  file, worktree, commit, verification, PR, and merge effects.
 
 Both modes consume the existing signed model-runtime binding and remain below
 the AgentDB/WRE work-order, WSP 15, exact-path, commit, and independent-verifier
 authority chain. Provider invocation and worker-process effects are recorded
 in the resident-cycle result instead of being reported as dry-run purity.
-`foundups_fusion` remains supported; unknown provider modes fail closed. No
-local class is presented as a Hermes worker.
+`foundups_fusion` remains supported; unknown provider modes fail closed. The
+legacy repository `HermesJobExecutor` is not used by this route and no local
+class is presented as the upstream Hermes runtime.
+
+The Hermes bearer key is read only from
+`<resident-runtime-root>/hermes-api/api-key` through the confined runtime-file
+reader. It never appears in prompts, argv, receipts, logs, or repository files.
+The upstream Hermes API currently executes tools in its server process and does
+not expose split-runtime confinement. Therefore any enabled toolset, visible
+skill, approval request, tool event, subagent event, or pre/post-run policy
+drift rejects the artifact result. This is an artifact-generation adapter, not
+Hermes shell authority.
 
 The external signer uses a stable signer-owned system-service command:
 `reddog_signer_system_service_entrypoint`. Its v2 run packet contains the

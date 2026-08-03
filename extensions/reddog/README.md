@@ -1,13 +1,16 @@
 # RedDog
 
-Version: 0.4.52
+Version: 0.4.53
 
-Version 0.4.52 pins the upstream OpenClaw Gateway artifact provider and its
-generated backend manifest. The provider runs only after signed work and model
-authority pass, uses a dedicated confined OpenClaw agent, and returns bounded
-artifact content to the existing isolated Foundups writer. Hermes production
-routing remains fail-closed until an authenticated split-runtime identity and
-confinement proof exist. Version 0.4.51 pins the opt-in OpenClaw/Hermes WSL
+Version 0.4.53 pins both actual upstream artifact-provider adapters and its
+generated backend manifest. OpenClaw uses its dedicated Gateway agent and
+exact-session sandbox. Hermes uses an authenticated loopback `/v1/runs` client
+only when its dedicated profile exposes zero enabled toolsets and zero skills;
+its complete event history must also prove no tool, approval, or subagent
+activity. It receives text-generation authority, never repository effects. Both run only
+after signed work and model authority pass and return bounded content to the
+existing isolated Foundups writer. Version 0.4.52 introduced the upstream
+OpenClaw provider. Version 0.4.51 pins the opt-in OpenClaw/Hermes WSL
 availability adapter. Version 0.4.50 binds the WRE-owned runtime
 compatibility evidence supplier into
 the canonical backend manifest. Startup remains cached-evidence-only and adds
@@ -393,6 +396,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.52.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.53.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

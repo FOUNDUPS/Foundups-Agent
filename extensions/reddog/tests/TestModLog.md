@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-03 - Upstream Hermes artifact runtime (0.4.53)
+
+- Updated the extension/backend compatibility contract for the Hermes provider
+  runtime files and RedDog 0.4.53 package identity.
+
 ## 2026-08-02 - Upstream OpenClaw artifact runtime (0.4.52)
 
 - Updated exact extension-version and generated backend-manifest assertions.

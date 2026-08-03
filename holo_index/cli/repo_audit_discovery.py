@@ -371,6 +371,14 @@ def _content_candidate(
     return _candidate(rel_path, entity, "deterministic", entity in content_key), read["bytes"]
 
 
+def _relative_discovery_path(entry_path: str, root: str, exclusions: Dict[str, int]) -> Optional[str]:
+    try:
+        return os.path.relpath(entry_path, root).replace("\\", "/")
+    except (OSError, ValueError):
+        exclusions["invalid_entry_path"] = exclusions.get("invalid_entry_path", 0) + 1
+        return None
+
+
 def _discover(repo_root: Path, entity: str, exclusions: Dict[str, int]) -> List[Dict[str, Any]]:
     root = os.path.abspath(os.fspath(repo_root))
     queue = [root]
@@ -389,7 +397,9 @@ def _discover(repo_root: Path, entity: str, exclusions: Dict[str, int]) -> List[
             if entries > MAX_DISCOVERY_ENTRIES:
                 exclusions["entry_limit"] = exclusions.get("entry_limit", 0) + 1
                 break
-            rel_path = os.path.relpath(entry.path, root).replace("\\", "/")
+            rel_path = _relative_discovery_path(entry.path, root, exclusions)
+            if rel_path is None:
+                continue
             try:
                 if _is_reparse_or_link(entry.path):
                     exclusions["reparse"] = exclusions.get("reparse", 0) + 1

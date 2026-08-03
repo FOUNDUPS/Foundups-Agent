@@ -222,8 +222,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.52', 'package version must be 0.4.52');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.52'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.53', 'package version must be 0.4.53');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.53'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -366,7 +366,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.52', 'README version mismatch');
+includes(readme, 'Version: 0.4.53', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -967,6 +967,15 @@ includes(rddLines, '- repo_deep_dive_pool_strategy: focus_core_plus_semantic_cro
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = 'semantic';
   cp.execFileSync = (file, args) => {
     const argv = Array.isArray(args) ? args.map(String) : [];
+    if (file === 'git') {
+      return originalExecFileSync(file, args, {
+        cwd: root,
+        encoding: 'utf8',
+        timeout: 5000,
+        maxBuffer: 4000000,
+        windowsHide: true
+      });
+    }
     calls.push(argv.slice());
     if (argv.some((arg) => /reddog_holoindex_owner_query_once\.py$/i.test(arg))) {
       const error = new Error('owner unavailable');
@@ -1011,7 +1020,9 @@ includes(rddLines, '- repo_deep_dive_pool_strategy: focus_core_plus_semantic_cro
     assert(meta.direct_read_bytes > 0, 'RDD-011: locally governed source bytes are present');
     assert.strictEqual(meta.repo_deep_dive_focus_coverage_passed, true,
       'RDD-011: owner failure recovery still proves p.fMALL evidence-category coverage');
-    assert.strictEqual(meta.repo_deep_dive_gate_passed, true, 'RDD-011: repository evidence gate passes');
+    assert.strictEqual(meta.repo_deep_dive_gate_passed, true,
+      'RDD-011: repository evidence gate passes; reasons=' +
+      JSON.stringify(meta.repo_deep_dive_gate_rejection_reasons || []));
     assert(result.direct_read_section && result.direct_read_section.chars > 0,
       'RDD-011: direct-read source context survives owner failure');
     const scorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', meta);
@@ -2096,7 +2107,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.52', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.53', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [],
@@ -3604,7 +3615,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.52'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.53'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -3618,7 +3629,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.52'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.53'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -3630,7 +3641,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.52'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.53'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -4977,7 +4988,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.52' } }
+      ? { id, packageJSON: { version: '0.4.53' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
