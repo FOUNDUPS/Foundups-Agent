@@ -64,26 +64,26 @@ The signer-service configuration and runtime wiring can provision one exact
 proposal policy only with a fresh, principal-signed, domain-separated policy
 authorization. An independently injected principal resolver supplies the
 trusted public verification key; proposal mode never resolves or loads the
-principal private key. WSP71 resolves only the RedDog 0102 proposal profile,
-and the socket exposes only that proposal-domain backend. The signer validates
-the exact payload and consumes a MAC-authenticated, bounded nonce store before
-returning an accepted signature. Replay rollback is checked against an
-independently injected monotonic high-water authority outside the nonce-state
-rollback domain. Production mode additionally requires that injected authority
-to be supplied by trusted signer-runtime composition, declare durable storage,
-and present the exact SHA-256 durability receipt bound into signer
-configuration and its normalized security-context digest; the in-memory test
-store is rejected. This slice validates capability and receipt agreement at
-that injection boundary; it does not issue or independently authenticate the
-durability receipt. The signed replay binding includes the authority's
-immutable identifier. Runtime rejects a mismatched, missing, or volatile
-authority. One atomic state document, a canonical transaction lock beside that
-document under the signer-owned runtime root, compare-and-swap commits, and
-one-step crash roll-forward prevent split-file ambiguity. The transaction lock
-is descriptor-path verified and does not depend on process-local temporary
-directories. Descriptor verification supports Windows and Linux with procfs;
-other POSIX environments fail closed. Nonce freshness is checked at durable
-reservation and again at durable
+principal private key. Socket v2 accepts one exact request-bound secret-access
+grant and rejects v1 grant smuggling. The E0 signer boundary verifies that
+grant, its attested peer, replay-store instance, permission snapshot, owner
+configuration, signer generation, operation, tier, request digest, and key
+identity before resolving WSP71 keys. It atomically consumes durable replay
+state before resolution and linearizes revocation, expiry, signing, and the
+post-sign checks under one authority fence. The returned signature is verified
+against the bound public key; backend self-reporting is never authority. Replay
+rollback uses the existing MAC nonce state and independently durable SQLite
+high-water store, with exact absolute paths bound into the store-instance
+digest. Production composition rejects missing, mismatched, alternate-path, or
+volatile stores. The stable system-service entrypoint does not yet issue the
+authenticated grant, supply the revocation authority, or compose this backend;
+production signing therefore remains fail-closed. Native-memory zeroization
+and complete signer lifecycle supervision remain SPECIFIED_NOT_IMPLEMENTED.
+No private key, resolved secret, grant signature, or audit key is serialized.
+The existing proposal policy, atomic state, canonical transaction lock, and
+compare-and-swap crash recovery remain unchanged. Descriptor verification
+supports Windows and Linux with procfs; other POSIX environments fail closed.
+Nonce freshness is checked at durable reservation and again at durable
 commit. The principal policy authorization is durably
 consumed before the backend is exposed; service failure never restores it.
 Runtime recomputes the signed security-context digest over paths, peer policy,

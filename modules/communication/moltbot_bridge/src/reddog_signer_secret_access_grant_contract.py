@@ -19,8 +19,8 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     constant_time_compare,
 )
 
-GRANT_SCHEMA = "reddog-signer-secret-access-grant.v1"
-GRANT_PREFIX = "reddog-signer-secret-access-grant.v1"
+GRANT_SCHEMA = "reddog-signer-secret-access-grant.v2"
+GRANT_PREFIX = "reddog-signer-secret-access-grant.v2"
 MAX_GRANT_TTL_SECONDS = 300
 
 REJECT_MALFORMED = "REJECT_SECRET_GRANT_MALFORMED"
@@ -40,6 +40,12 @@ _STRING_FIELDS = (
     "issuer_public_key", "signer_agent_id", "signer_profile_id",
     "signing_key_ref_hash", "audit_mac_key_ref_hash", "key_epoch",
     "permission_snapshot_digest", "owner_config_id", "signer_generation_id",
+    "signer_public_key", "signer_key_fingerprint",
+    "replay_store_binding_digest", "replay_store_id",
+    "replay_store_durability_receipt_id",
+    "replay_store_instance_digest",
+    "signing_request_digest", "requested_operation", "authority_tier",
+    "attested_peer_principal_id",
     "nonce", "grant_id", "signature",
 )
 _TIME_FIELDS = ("issued_at", "expires_at")
@@ -47,6 +53,9 @@ GRANT_FIELDS = frozenset(_STRING_FIELDS + _TIME_FIELDS)
 _DIGEST_FIELDS = (
     "signing_key_ref_hash", "audit_mac_key_ref_hash",
     "permission_snapshot_digest", "owner_config_id", "signer_generation_id",
+    "signer_key_fingerprint", "signing_request_digest",
+    "replay_store_binding_digest", "replay_store_durability_receipt_id",
+    "replay_store_instance_digest",
 )
 
 
@@ -71,6 +80,16 @@ class ExpectedSignerSecretGrantBinding:
     permission_snapshot_digest: str
     owner_config_id: str
     signer_generation_id: str
+    signer_public_key: str
+    signer_key_fingerprint: str
+    replay_store_binding_digest: str
+    replay_store_id: str
+    replay_store_durability_receipt_id: str
+    replay_store_instance_digest: str
+    signing_request_digest: str
+    requested_operation: str
+    authority_tier: str
+    attested_peer_principal_id: str
 
 
 def signer_secret_access_grant_id(grant: Mapping[str, Any]) -> str:
@@ -80,6 +99,17 @@ def signer_secret_access_grant_id(grant: Mapping[str, Any]) -> str:
     }
     raw = json.dumps(
         core, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    )
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def signer_secret_access_request_digest(request: Mapping[str, Any]) -> str:
+    """Bind a grant to the complete canonical signer request mapping."""
+
+    if not isinstance(request, Mapping) or not ascii_deep(request):
+        raise SignerSecretAccessGrantRejected(REJECT_MALFORMED)
+    raw = json.dumps(
+        dict(request), sort_keys=True, separators=(",", ":"), ensure_ascii=True
     )
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 

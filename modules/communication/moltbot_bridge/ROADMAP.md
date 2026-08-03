@@ -5,9 +5,20 @@
 - COMPLETE: current authenticated signer generation selection.
 - COMPLETE: stable signer-owned system-service entrypoint and v2 packet
   binding.
-- NEXT: E0-compliant resolve-per-sign secret isolation.
+- COMPLETE: signer-side socket v2 admission binds one authenticated grant to
+  the exact request, operation, authority tier, peer principal, profile,
+  permission snapshot, owner configuration, and signer generation. The grant
+  is consumed through pre-provisioned disjoint replay state before one fresh
+  ephemeral backend construction. Its signature is independently verified
+  while one signer-owned revocation fence covers the complete sign operation;
+  missing stores and backend-authored rejection payloads fail closed.
+- NEXT: independently administered grant and revocation supply, WSP 71
+  permissioned resolver composition, and native-memory zeroization evidence
+  entrypoint. Socket v1 remains compatible but cannot reach the resolve-per-sign
+  backend.
 - BLOCKED: durable system-service deployment and no-work-authority Linux
-  canary until secret and lifecycle supervision slices pass.
+  canary until grant supply, secret resolution, zeroization, and lifecycle
+  supervision slices pass.
 
 ## RedDog provider-call evidence follow-ups
 
