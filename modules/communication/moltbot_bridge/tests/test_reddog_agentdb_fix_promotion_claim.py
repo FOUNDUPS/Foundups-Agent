@@ -110,16 +110,29 @@ def _seed_fix_cycle(*, include_memex: bool = True):
     )
     assert result.accepted is True
     assert result.receipt is not None
+    assert result.receipt.proposal_admission is not None
+    proposal = result.receipt.proposal_admission
+    intent = _bound_intent()
+    memex = _memex_supply(
+        foundup_id=str(intent["foundup_id"]),
+        principal_id=str(intent["principal_ref"]),
+        snapshot_receipt_id=result.receipt.snapshot_receipt_id,
+        snapshot_content_digest=result.receipt.snapshot_content_digest,
+        policy_issued_at=NOW.isoformat(),
+        policy_expires_at=(NOW + timedelta(seconds=600)).isoformat(),
+        holoindex_generation_id=proposal.holoindex_generation_id,
+        source_revision=proposal.work_state_revision,
+    )
     cycle_store = AgentDbResidentArchitectCycleStore()
     record = cycle_runtime._new_record(_bound_intent(), retry_count=0)
     assert cycle_store.create_cycle(record)["ok"]
-    enqueued = cycle_store.transition_cycle(
+    cycle_store.transition_cycle(
         str(record["intent_id"]),
         expected_revision=0,
         expected_statuses=("SUBMITTED",),
         updates={"status": "ENQUEUED"},
     )["record"]
-    running = cycle_store.transition_cycle(
+    cycle_store.transition_cycle(
         str(record["intent_id"]),
         expected_revision=1,
         expected_statuses=("ENQUEUED",),
@@ -137,10 +150,8 @@ def _seed_fix_cycle(*, include_memex: bool = True):
             "queue_candidate_count": 1,
             "initial_bootstrap": (
                 {
-                    "memex_snapshot_supply_receipt": _memex_supply(
-                        snapshot_receipt_id=result.receipt.snapshot_receipt_id,
-                        snapshot_content_digest=result.receipt.snapshot_content_digest,
-                    )
+                    "memex_snapshot_supply_view_id": memex["memex_view_id"],
+                    "memex_snapshot_supply_receipt": memex,
                 }
                 if include_memex
                 else {}
@@ -650,6 +661,7 @@ def test_materialization_rejects_determination_changed_after_claim(
             "queue_candidate_id": claim.queue_candidate_id,
             "wsp15_allocation_receipt_id": claim.wsp15_allocation_receipt_id,
         },
+        now_iso=NOW.isoformat(),
     )
 
     assert result.accepted is False
@@ -662,6 +674,7 @@ def test_artifact_pair_failure_restores_previous_pair(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     cycle = _seed_fix_cycle()
+    claim = claim_next_reddog_fix_promotion(worker_id="main", now=NOW)
     determination_path = tmp_path / "determination.json"
     memex_path = tmp_path / "memex.json"
     determination_path.write_bytes(b"old-determination")
@@ -682,6 +695,14 @@ def test_artifact_pair_failure_restores_previous_pair(
         intent_id=cycle.intent_id,
         architect_determination_output_path=determination_path,
         memex_supply_receipt_output_path=memex_path,
+        expected_claim_binding={
+            "cycle_id": claim.cycle_id,
+            "snapshot_id": claim.snapshot_id,
+            "determination_id": claim.determination_id,
+            "queue_candidate_id": claim.queue_candidate_id,
+            "wsp15_allocation_receipt_id": claim.wsp15_allocation_receipt_id,
+        },
+        now_iso=NOW.isoformat(),
     )
 
     assert result.accepted is False

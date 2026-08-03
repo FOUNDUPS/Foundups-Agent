@@ -21,6 +21,7 @@ import json
 import os
 import tempfile
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -28,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     HIGH_AUTHORITY_OPERATIONS,
     HIGH_AUTHORITY_VALVE_STATES,
     PrincipalAuthorityRecord,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    rehydrate_operational_memex_supply_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
@@ -163,7 +167,6 @@ def run_reddog_authority_profile_seed_supply(
     else:
         reasons.append(AuthorityProfileSeedSupplyReason.WSP15_ALLOCATION_INVALID)
     reasons.extend(_model_selection_reasons(model_selection))
-    reasons.extend(_memex_supply_reasons(memex_supply, determination))
     if principal is None:
         reasons.append(AuthorityProfileSeedSupplyReason.PRINCIPAL_INVALID)
     if snapshot is None:
@@ -181,6 +184,15 @@ def run_reddog_authority_profile_seed_supply(
     fid = _selected_foundup_id(foundup_id, principal)
     if not fid:
         reasons.append(AuthorityProfileSeedSupplyReason.FOUNDUP_SCOPE_INVALID)
+    reasons.extend(
+        _memex_supply_reasons(
+            memex_supply,
+            determination,
+            principal_id=(principal.principal_id if principal else ""),
+            foundup_id=fid or "",
+            now_epoch=now_epoch,
+        )
+    )
     repo_full_name = _selected_repo_full_name(snapshot, principal)
     if not repo_full_name:
         reasons.append(AuthorityProfileSeedSupplyReason.REPO_SCOPE_INVALID)
@@ -308,16 +320,30 @@ def _model_selection_reasons(model_selection: Mapping[str, Any]) -> list[str]:
     return []
 
 
-def _memex_supply_reasons(memex_supply: Mapping[str, Any], determination: Mapping[str, Any]) -> list[str]:
+def _memex_supply_reasons(
+    memex_supply: Mapping[str, Any],
+    determination: Mapping[str, Any],
+    *,
+    principal_id: str,
+    foundup_id: str,
+    now_epoch: int,
+) -> list[str]:
     if not memex_supply:
         return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
-    if memex_supply.get("schema_version") != "reddog_operational_memex_snapshot_supply_receipt.v1":
-        return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
-    if not str(memex_supply.get("receipt_id") or "").startswith("sha256:"):
-        return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
-    if str(memex_supply.get("snapshot_receipt_id") or "") != str(determination.get("snapshot_receipt_id") or ""):
-        return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
-    if memex_supply.get("no_holoindex_reindex_performed") is not True:
+    proposal = _mapping(determination.get("proposal_admission"))
+    try:
+        now_iso = datetime.fromtimestamp(now_epoch, timezone.utc).isoformat()
+        rehydrate_operational_memex_supply_receipt(
+            memex_supply,
+            expected_foundup_id=foundup_id,
+            expected_principal_id=principal_id,
+            expected_snapshot_receipt_id=str(determination.get("snapshot_receipt_id") or ""),
+            expected_snapshot_content_digest=str(determination.get("snapshot_content_digest") or ""),
+            expected_holoindex_generation_id=str(proposal.get("holoindex_generation_id") or ""),
+            expected_source_revision=str(proposal.get("work_state_revision") or ""),
+            now_iso=now_iso,
+        )
+    except (OSError, OverflowError, TypeError, ValueError):
         return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
     return []
 

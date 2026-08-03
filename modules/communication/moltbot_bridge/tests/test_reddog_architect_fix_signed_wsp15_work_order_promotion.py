@@ -79,6 +79,10 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     allocate_reddog_wsp15_receipt,
     canonical_reddog_wsp15_allocation_digest,
 )
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    canonical_operational_memex_supply_digest,
+    operational_memex_supply_receipt_id,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -383,18 +387,25 @@ def _memex_supply(**overrides: Any) -> dict[str, Any]:
         "snapshot_receipt_id": SNAPSHOT_ID,
         "snapshot_content_digest": "sha256:" + ("b" * 64),
         "memex_view_id": "memex-view-1",
-        "holoindex_generation_id": "sha256:holo-generation",
-        "source_revision": "sha256:memex-source",
-        "policy_issued_at": NOW,
-        "policy_expires_at": "2026-07-16T01:00:00+00:00",
-        "assignment_id": "assignment-1",
-        "lane_id": "repo_code_audit",
-        "receipt_id": "sha256:memex-supply",
+        "holoindex_generation_id": _holo_receipt().generation_id,
+        "source_revision": _work_state()["revision"],
+        "policy_issued_at": "2026-07-15T23:59:50+00:00",
+        "policy_expires_at": "2026-07-16T00:09:50+00:00",
+        "assignment_count": 1,
+        "assignment_ids": ["assignment-1"],
+        "lane_ids": ["repo_code_audit"],
+        "task_ids": ["task-1"],
+        "assignment_receipt_ids": ["sha256:assignment-receipt-1"],
+        "max_records": 32,
         "no_memex_write_performed": True,
         "no_holoindex_reindex_performed": True,
         "no_repo_mutation_performed": True,
     }
+    supplied_receipt_id = overrides.pop("receipt_id", None)
     payload.update(overrides)
+    payload["receipt_id"] = supplied_receipt_id or operational_memex_supply_receipt_id(
+        payload
+    )
     return payload
 
 
@@ -601,7 +612,7 @@ def test_promotes_fix_determination_to_queue_item_and_authority_profile() -> Non
     assert result.status == promotion.ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT
     assert result.receipt is not None
     assert result.receipt.model_selection_receipt_id.startswith("model_selection_receipt:")
-    assert result.receipt.memex_supply_receipt_id == "sha256:memex-supply"
+    assert result.receipt.memex_supply_receipt_id == _memex_supply()["receipt_id"]
     assert result.authority_profile is not None
     assert result.authority_profile["wsp15_allocation_receipt"]["receipt_id"] == _allocation()["receipt_id"]
     assert result.authority_profile["model_selection_receipt"]["receipt_id"] == (
@@ -748,6 +759,85 @@ def test_rejects_missing_memex_supply_receipt() -> None:
     assert promotion.ArchitectFixPromotionReason.MEMEX_SUPPLY_MISSING in result.rejection_reasons
 
 
+def _signed_inputs_for_memex(receipt: Mapping[str, Any]):
+    determination = _determination()
+    profile = _authority_profile()
+    attestation, runtime_config, resolver = build_proposal_runtime_inputs(
+        determination,
+        profile,
+        receipt,
+        now_epoch=NOW_EPOCH,
+    )
+    return determination, profile, attestation, runtime_config, resolver
+
+
+def test_fabricated_sha256_memex_id_rejects_before_state_mutation() -> None:
+    original = _memex_supply()
+    determination, profile, attestation, runtime_config, resolver = (
+        _signed_inputs_for_memex(original)
+    )
+    forged = {**original, "receipt_id": "sha256:" + ("a" * 64)}
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+    before = store.load()
+
+    result, _ = _promote(
+        store=store,
+        architect_determination=determination,
+        authority_profile=profile,
+        memex_supply_receipt=forged,
+        proposal_authenticity_attestation=attestation,
+        signer_runtime_config=runtime_config,
+        principal_key_resolver=resolver,
+    )
+
+    assert result.accepted is False
+    assert promotion.ArchitectFixPromotionReason.MEMEX_SUPPLY_INVALID in (
+        result.rejection_reasons
+    )
+    assert store.load() == before
+
+
+def test_self_rehashed_memex_substitution_rejects_signed_digest_mismatch() -> None:
+    original = _memex_supply()
+    determination, profile, attestation, runtime_config, resolver = (
+        _signed_inputs_for_memex(original)
+    )
+    substituted = _memex_supply(memex_view_id="attacker-selected-view")
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+    before = store.load()
+
+    result, _ = _promote(
+        store=store,
+        architect_determination=determination,
+        authority_profile=profile,
+        memex_supply_receipt=substituted,
+        proposal_authenticity_attestation=attestation,
+        signer_runtime_config=runtime_config,
+        principal_key_resolver=resolver,
+    )
+
+    assert result.accepted is False
+    assert promotion.ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID in (
+        result.rejection_reasons
+    )
+    assert store.load() == before
+
+
+def test_promotion_binds_complete_memex_receipt_digest() -> None:
+    memex = _memex_supply()
+    result, store = _promote(memex_supply_receipt=memex)
+    expected = canonical_operational_memex_supply_digest(memex)
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert result.receipt.memex_supply_digest == expected
+    assert store.load()["wre_queue_items"][0]["memex_supply_digest"] == expected
+    assert result.authority_profile is not None
+    assert result.authority_profile["operational_context_binding"][
+        "memex_supply_digest"
+    ] == expected
+
+
 def test_rejects_duplicate_active_queue_item_for_same_determination() -> None:
     first, store = _promote()
     assert first.accepted is True
@@ -792,6 +882,7 @@ def test_blocked_candidate_with_forged_authenticity_still_rejects() -> None:
     attestation, runtime_config, resolver = build_proposal_runtime_inputs(
         determination,
         profile,
+        _memex_supply(),
         now_epoch=NOW_EPOCH,
     )
     forged = dict(attestation)

@@ -26,13 +26,20 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     SignatureVerifier,
 )
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    OperationalMemexSupplyReceipt,
+    canonical_operational_memex_supply_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_proposal_binding import (
+    verify_memex_supply_for_architect_proposal,
+)
 
 
 PROPOSAL_AUTHENTICITY_SCHEMA_VERSION = (
-    "reddog_architect_proposal_authenticity_attestation.v1"
+    "reddog_architect_proposal_authenticity_attestation.v2"
 )
 PROPOSAL_AUTHENTICITY_SIGNING_OPERATION = "attest_architect_proposal"
-PROPOSAL_AUTHENTICITY_SIGNING_PREFIX = "reddog-architect-proposal.v1."
+PROPOSAL_AUTHENTICITY_SIGNING_PREFIX = "reddog-architect-proposal.v2."
 PROPOSAL_AUTHENTICITY_SIGNER_ROLE = "reddog_architect"
 PROPOSAL_POLICY_AUTHORIZATION_SCHEMA_VERSION = (
     "reddog_architect_proposal_policy_authorization.v1"
@@ -68,6 +75,8 @@ class ArchitectProposalAuthenticityPayload:
     required_tests_digest: str
     required_policy_gates_digest: str
     target_effect_plane: str
+    memex_supply_receipt_id: str
+    memex_supply_digest: str
     requester_principal_id: str
     reddog_id: str
     signer_public_key: str
@@ -200,6 +209,7 @@ def build_architect_proposal_authenticity_payload(
     proposal_admission: Mapping[str, Any],
     determination: Mapping[str, Any],
     queue_candidate: Mapping[str, Any],
+    memex_supply_receipt: OperationalMemexSupplyReceipt,
     requester_principal_id: str,
     reddog_id: str,
     signer_public_key: str,
@@ -214,9 +224,20 @@ def build_architect_proposal_authenticity_payload(
 
     proposal = _mapping(proposal_admission)
     candidate = _mapping(queue_candidate)
+    memex_supply_receipt = verify_memex_supply_for_architect_proposal(
+        memex_supply_receipt,
+        proposal_admission=proposal,
+        requester_principal_id=requester_principal_id,
+        proposal_issued_at=issued_at,
+    )
     values = {
         "schema_version": PROPOSAL_AUTHENTICITY_SCHEMA_VERSION,
-        **_proposal_binding_values(proposal, determination, candidate),
+        **_proposal_binding_values(
+            proposal,
+            determination,
+            candidate,
+            memex_supply_receipt,
+        ),
         **_proposal_identity_values(
             requester_principal_id=requester_principal_id,
             reddog_id=reddog_id,
@@ -245,6 +266,7 @@ def _proposal_binding_values(
     proposal: Mapping[str, Any],
     determination: Mapping[str, Any],
     candidate: Mapping[str, Any],
+    memex_supply_receipt: OperationalMemexSupplyReceipt,
 ) -> dict[str, Any]:
     determination_body = {
         key: value
@@ -285,6 +307,10 @@ def _proposal_binding_values(
             proposal.get("required_policy_gates")
         ),
         "target_effect_plane": _text(proposal.get("target_effect_plane")),
+        "memex_supply_receipt_id": memex_supply_receipt.receipt_id,
+        "memex_supply_digest": canonical_operational_memex_supply_digest(
+            memex_supply_receipt.to_dict()
+        ),
     }
 
 
@@ -879,6 +905,7 @@ def _proposal_digests_valid(payload: Mapping[str, Any]) -> bool:
             "denied_paths_digest",
             "required_tests_digest",
             "required_policy_gates_digest",
+            "memex_supply_digest",
             "consensus_receipt_digest",
             "authority_profile_source_receipt_id",
         )

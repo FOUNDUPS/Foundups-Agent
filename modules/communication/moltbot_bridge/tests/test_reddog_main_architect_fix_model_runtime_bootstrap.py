@@ -52,9 +52,11 @@ def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Pat
     capability = model_runtime_binding_test_capability(selection, binding)
     determination = json.loads(files["determination"].read_text(encoding="utf-8"))
     authority_profile = json.loads(files["authority_profile_source"].read_text(encoding="utf-8"))
+    memex_supply = json.loads(files["memex_supply"].read_text(encoding="utf-8"))
     attestation, signer_config, key_resolver = build_proposal_runtime_inputs(
         determination,
         authority_profile,
+        memex_supply,
         now_epoch=int(datetime.fromisoformat(NOW).timestamp()),
     )
     with (

@@ -15,6 +15,7 @@ import tempfile
 import threading
 import time
 from concurrent.futures import ProcessPoolExecutor
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -42,6 +43,10 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    OperationalMemexSupplyReceipt,
+    operational_memex_supply_receipt_id,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
     SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
@@ -307,6 +312,7 @@ def _payload(public_key: str, **overrides: object):
         "proposal_admission": proposal,
         "determination": determination,
         "queue_candidate": candidate,
+        "memex_supply_receipt": _memex_receipt(now),
         "requester_principal_id": "github:mjtrout",
         "reddog_id": "reddog:foundups-agent",
         "signer_public_key": public_key,
@@ -318,7 +324,43 @@ def _payload(public_key: str, **overrides: object):
         "expires_at": now + 120,
     }
     values.update(overrides)
+    if "requester_principal_id" in overrides:
+        values["memex_supply_receipt"] = _memex_receipt(
+            now,
+            principal_id=str(values["requester_principal_id"]),
+        )
     return build_architect_proposal_authenticity_payload(**values)
+
+
+def _memex_receipt(
+    now: int,
+    *,
+    principal_id: str = "github:mjtrout",
+) -> OperationalMemexSupplyReceipt:
+    issued = datetime.fromtimestamp(now - 10, timezone.utc)
+    values = {
+        "schema_version": "reddog_operational_memex_snapshot_supply_receipt.v1",
+        "foundup_id": "foundups-agent",
+        "principal_id": principal_id,
+        "snapshot_receipt_id": "snapshot-1",
+        "snapshot_content_digest": "sha256:" + "2" * 64,
+        "memex_view_id": "memex-view-1",
+        "holoindex_generation_id": "generation-1",
+        "source_revision": "revision-1",
+        "policy_issued_at": issued.isoformat(),
+        "policy_expires_at": (issued + timedelta(seconds=600)).isoformat(),
+        "assignment_count": 1,
+        "assignment_ids": ("assignment-1",),
+        "lane_ids": ("lane-1",),
+        "task_ids": ("task-1",),
+        "assignment_receipt_ids": ("assignment-receipt-1",),
+        "max_records": 32,
+        "no_memex_write_performed": True,
+        "no_holoindex_reindex_performed": True,
+        "no_repo_mutation_performed": True,
+    }
+    values["receipt_id"] = operational_memex_supply_receipt_id(values)
+    return OperationalMemexSupplyReceipt(**values)
 
 
 def _profile(

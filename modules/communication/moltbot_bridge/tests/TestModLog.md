@@ -1,3 +1,14 @@
+## 2026-08-04: Memex supply authenticity regressions
+
+- Added exact receipt round-trip, unknown-field/type, lineage, scope, expiry,
+  timezone, maximum-age, maximum-lifetime, and boundary tests.
+- Added promotion-level proofs that fabricated `sha256:` IDs and
+  attacker-rehashed Memex substitutions cannot mutate authoritative work state,
+  while valid promotion binds the complete canonical Memex receipt digest.
+- Added proposal-builder, resident-handoff, and authority-seed regressions that
+  reject malformed public dataclass instances and forged serialized receipts
+  before signer, artifact, or profile effects.
+
 ## 2026-08-03: Upstream Hermes complete-event-history confinement
 
 - Added regressions proving a completed poll result cannot hide an earlier

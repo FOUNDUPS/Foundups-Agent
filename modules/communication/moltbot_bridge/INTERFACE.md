@@ -27,6 +27,13 @@ is the immutable admission SHA, not a branch. INDEX_GAP blocks ordinary work;
 the maintenance exception requires exact supporting direct-read paths.
 
 The receipt's SHA is integrity evidence, not authentication.
+Operational Memex supply receipts are exact-schema rehydrated before resident
+artifact handoff, authority-profile seed creation, proposal signing, and final
+promotion. The gate recomputes the receipt ID, enforces principal, FoundUp,
+snapshot, HoloIndex-generation, and source-revision bindings, and applies a
+300-second maximum age plus 600-second maximum policy lifetime. The complete
+canonical receipt digest is covered by the signed proposal attestation; a
+syntactically valid or attacker-rehashed `sha256:` identifier is not authority.
 `reddog_architect_proposal_authenticity.py` defines a domain-separated Ed25519
 attestation, an exact signer-owned proposal policy, transactional signer-side
 nonce reservation, and strict serialized-attestation integrity validation.
@@ -46,6 +53,14 @@ profile. There is no process-local authority registry or serializable promotion
 capability. Production startup remains fail closed until it receives the
 attestation, a current signer-runtime configuration, and an independently
 administered principal-key resolver.
+
+Architect proposal attestation v2 additionally requires a typed
+`OperationalMemexSupplyReceipt`. Promotion rehydrates the complete serialized
+receipt, recomputes its canonical ID, rejects unknown fields and stale or
+scope/lineage-mismatched inputs, and rebuilds the signed proposal over the full
+receipt digest. A caller-recomputed Memex self-hash is therefore integrity only;
+it cannot become promotion authority without the independently signed proposal
+attestation matching that exact receipt.
 `reddog_architect_fix_promotion_transaction.py` isolates record construction and publication; `reddog_architect_fix_promotion_publication.py` confines all artifacts, while `reddog_architect_fix_publication_effect_binding.py` binds current COMMITTED lineage into signer and worker-dispatch admission. Queue authority verification derives a canonical receipt from the recorded signed authority and accepted verification result. The dry-run receipt, each intent, the runtime receipt, and each AgentDB task retain that receipt ID/digest and exact work-authority digest. Immediately before AgentDB publication, the runtime reloads both stages, recomputes the lineage, obtains fresh time from a required production clock, binds the effective work order, FoundUp, operation, and exact worker roles to the signed authority plus authoritative WSP 15 plan, and re-verifies the principal and work-authority signatures, revocation, permission snapshot, scope, paths, freshness, and valve binding. Final admission uses `AUTHORITATIVE_USE` and consumes the durable nonce once before the writer; any later writer failure requires freshly signed authority. Static validation failures do not consume the nonce. Missing verifier/clock dependencies, forged signatures or substituted operations with attacker-recomputed local receipts, role/capability substitution, replay, expired authority reopened with an old environment epoch, synthetic dry-runs, and substituted authority all reject before the writer.
 AgentDB publication persists a canonical `reddog_signed_worker_agentdb_envelope.v1` containing the complete signed authority runtime, authoritative WSP 15 allocation, exact dispatch receipt, and exact worker intent. Both `OpenClawSupervisor` and direct `scripts/run_task.py` execution independently rehydrate and reverify it before runner selection; runner context comes from verified evidence, outer metadata is not authority, and inconsistent routing cannot fall through to generic WRE. The optional signed Memex supply ID/digest pair remains bound through profile materialization, dispatch, restart, claim, executor, read-only 0102 assignment, and independent slice verification; half-pairs, malformed digests, or conflicts reject and absence remains valid. `AuthoritativeWorkStateStore.locked_snapshot()` is the shared mutation fence for refresh, promotion, and AgentDB publication; its file-backed implementation is confined to an explicit outside-repository runtime root and uses a sibling operation lock.
 Canonical rehydration returns an opaque process-local verification proof that

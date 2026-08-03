@@ -100,6 +100,7 @@ def _materialize_claim(
                 claim.wsp15_allocation_receipt_id or ""
             ),
         },
+        now_iso=(now.isoformat() if now is not None else None),
     )
     if not handoff.accepted:
         store.release(claim, now=now)
