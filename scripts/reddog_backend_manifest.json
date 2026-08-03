@@ -37,7 +37,7 @@
     "scripts/reddog_start_operations_control_once.py"
   ],
   "required_bridge_sha256": {
-    "scripts/advisory_model_once.py": "2bb7e26179935d962b0b150015abb8fec9aa52d8712c1204be92432ecb168d8f",
+    "scripts/advisory_model_once.py": "c1a39d2686036ff6c3f964b9be2fa4ad6955e5767760b1986ff6916cd0bb5719",
     "scripts/reddog_authoritative_work_state_query_once.py": "9025d639b057d7f132205bcec029c4f1347f1e6787019ed27840f299caed5bd8",
     "scripts/reddog_extension_live_enqueue_invoke_once.py": "92aa98ab84fed01d239785a4f584817f789e289a7d27850027d0d0c744968d4d",
     "scripts/reddog_extension_wre_spine_invoke_once.py": "aeb957566760154e27f91495a52ad6a6dddcad7d1c61b739198be2f7a4dae9fc",
@@ -2290,7 +2290,7 @@
     "modules/platform_integration/youtube_shorts_scheduler/src/schedule_tracker.py": "7d0cd5e230f497464a716c9266ca587d8bd7131c10bd58684f8bd47d0528304a",
     "modules/platform_integration/youtube_shorts_scheduler/src/scheduler.py": "6a1e5b3efeb7a663ceb7f23331adbd1e1db9ccaae72f95dd6bac01529e6e00c7",
     "prompt/swarm/m2m_compiler.py": "e12f7c41246cebb2795f66b427b59c6117ba339aa88c7042a6842b21048c2408",
-    "scripts/advisory_model_once.py": "2bb7e26179935d962b0b150015abb8fec9aa52d8712c1204be92432ecb168d8f",
+    "scripts/advisory_model_once.py": "c1a39d2686036ff6c3f964b9be2fa4ad6955e5767760b1986ff6916cd0bb5719",
     "scripts/reddog_authoritative_work_state_query_once.py": "9025d639b057d7f132205bcec029c4f1347f1e6787019ed27840f299caed5bd8",
     "scripts/reddog_extension_live_enqueue_invoke_once.py": "92aa98ab84fed01d239785a4f584817f789e289a7d27850027d0d0c744968d4d",
     "scripts/reddog_extension_wre_spine_invoke_once.py": "aeb957566760154e27f91495a52ad6a6dddcad7d1c61b739198be2f7a4dae9fc",

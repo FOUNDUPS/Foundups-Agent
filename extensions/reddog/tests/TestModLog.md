@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-03 - Fusion critic retry route failover (0.4.54)
+
+- Added the blocked-first/usable-second panel regression proving the one bounded
+  adversarial retry selects the usable critic and can satisfy quorum only with a
+  real evidence and WSP_15 challenge.
+- Retained existing no-challenge, abstention, retry-recovery, and fail-closed
+  synthesis coverage.
+
 ## 2026-08-03 - Upstream Hermes artifact runtime (0.4.53)
 
 - Updated the extension/backend compatibility contract for the Hermes provider
