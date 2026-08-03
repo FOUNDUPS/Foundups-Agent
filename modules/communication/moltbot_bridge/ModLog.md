@@ -1,18 +1,10 @@
 # ModLog - moltbot_bridge
 
 ## 2026-08-03: Extension resident model-runtime authority binding
-
-- Reused the canonical resident model-runtime binding loader in the RedDog
-  extension session bridge, matching the existing `main.py` authority path.
-- The bridge now supplies distinct authenticated BOUND audit and architect
-  receipts to the durable AgentDB cycle and rejects missing, invalid, stale,
-  wrong-surface, or receipt-ID-mismatched artifacts before client construction.
-- Preserved the read-only boundary: this slice adds no shell, worktree,
-  provider, executable queue, PR, merge, or HoloIndex mutation authority
-  (WSP 00, 15, 22, 50, 62, 97).
-
+- Reused the `main.py` authenticated BOUND model-runtime loader in the extension
+  bridge; invalid audit/architect receipts reject before client construction,
+  with no executable or repository authority (WSP 00/15/22/50/62/97).
 ## 2026-08-03: Actual upstream Hermes API artifact provider
-
 - Replaced the production-blocked `hermes_api` placeholder with a real
   authenticated loopback adapter for upstream Hermes Agent `/v1/runs`.
 - Consumes the signed principal model/provider route before secret access or
@@ -31,7 +23,6 @@
   merge, HoloIndex, PatternMemory, or reward authority (WSP 00, 15, 22, 50, 62, 97).
 
 ## 2026-08-02: Actual OpenClaw provider and truthful Hermes boundary
-
 - Added a production adapter for the installed upstream OpenClaw Gateway CLI;
   no repository-local OpenClaw-name wrapper is used as the execution engine.
 - Reused the signed model-runtime binding, AgentDB/WRE work order, canonical
@@ -56,7 +47,6 @@
   invocation is reported as an external effect on success and failure.
 
 ## 2026-08-02: OpenClaw ingress and FoundUp mutation fail-closed hardening
-
 - Removed the known webhook-token fallback and made unconfigured webhook
   authentication reject with constant-time comparison for configured tokens.
 - Prevented advisory and unauthenticated OpenClaw intents from reaching
@@ -67,7 +57,6 @@
   silently change live-write classification. (WSP 15/22/50/97)
 
 ## 2026-08-02: Generic HoloIndex incident repair coordination
-
 - Extended the existing start-operations/post-merge Holo repair architecture
   with `reddog_holoindex_incident_repair_runtime.py`.
 - Authenticated exhausted owner failures are now routed to the protected
@@ -93,31 +82,31 @@
   scheduled/disabled telemetry and preserved the query-side prohibition on
   re-indexing plus all freshness gates. A lock-owned poller waits during
   shutdown and binds selection to the coordinator's exact canonical task ID.
-- `REDDOG_SIGNER_E0_AUTHENTICATED_SECRET_LEASE_GATE_PHASE1`: added a
-  verifier-only, process-local boundary for one signed signer secret-access
-  grant. The grant binds the independently resolved issuer key, signer agent
-  and profile, exact signing/audit reference hashes, permission snapshot,
-  owner configuration, signer generation, key epoch, nonce, and bounded
-  lifetime. Verification is strict, domain-separated, revocation-aware, and
-  consumes the nonce only after every binding and signature check passes.
-  Successful admission yields one immutable, noncopyable, nonserializable
-  capability that can be consumed once. This is the first E0 authorization
-  layer only: no vault provider, secret resolution, key loading, signing,
-  per-request material lease, system-service activation, OpenClaw work,
-  Hermes dispatch, or repository effect was added. The stable production
-  signer therefore remains fail closed.
+- `REDDOG_SIGNER_E0_AUTHENTICATED_SECRET_LEASE_GATE_PHASE1`: upgraded the
+  signed signer secret-access grant to v2, binding the issuer, profile, exact
+  key-reference hashes, permission snapshot, owner configuration, generation,
+  complete signing request, operation, authority tier, kernel-attested peer,
+  nonce, and bounded lifetime. Socket v2 consumes the noncopyable one-shot
+  capability before a fresh WSP 71 ephemeral backend resolves and signs once;
+  substitution, replay, concurrent reuse, resolution failure, and forged
+  signatures reject without secret-derived output. Production admission binds
+  pre-provisioned, disjoint replay roots and one atomic revocation fence; missing
+  state and non-static backend rejection payloads reject. Socket v1 cannot use it.
+  The public service remains fail closed pending independent grant
+  supply, authenticated revocation supply, strict native-memory zeroization,
+  and lifecycle supervision (WSP 00/15/22/50/62/71/97).
 - `REDDOG_SIGNER_SYSTEM_SERVICE_STABLE_ENTRYPOINT_PHASE1`: replaced the
   generation-specific signer launch command with a v2 run packet that binds a
   stable signer-owned system-service entrypoint and the exact root-owned owner
   configuration path. The entrypoint reconstructs and consumes the current
   authenticated generation, validates the packet and its stable command,
   and gives that single one-shot capability to the existing bootstrap.
-  Production secret resolution remains fail closed pending E0; injected test
-  resolvers prove only post-admission ordering. Rotating
-  config, packet, session, and resolver values remain signed packet data and
+  Production service composition remains fail closed pending authenticated
+  grant/revocation supply; injected tests prove only signer-side E0 ordering.
+  Rotating config, packet, session, and resolver values remain signed data and
   are not service-manager arguments. Serialized argv is never executed.
   RedDog, `main.py`, OpenClaw, and Hermes still cannot spawn the signer.
-  Service installation, E0 secret resolution, durable resident
+  Service installation, E0 composition, durable resident
   supervision, and live Linux activation remain separate fail-closed slices.
 - `REDDOG_CURRENT_GENERATION_MANIFEST_LAUNCH_SELECTION_PHASE1`: added a
   verifier-only external-signer launch selector that ignores caller-supplied

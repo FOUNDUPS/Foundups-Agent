@@ -42,10 +42,12 @@ The external signer uses a stable signer-owned system-service command:
 rotating current-generation configuration, but the service manager receives
 only the fixed repository root and root-owned owner-authority configuration
 path. The entrypoint revalidates the authenticated current generation before
-service admission and never executes packet argv. Production secret resolution
-is deliberately unavailable until the E0 boundary lands; the stable entrypoint
-is currently a no-work-authority lifecycle foundation. RedDog and `main.py`
-remain clients and cannot spawn the signer.
+service admission and never executes packet argv. The signer-side E0 boundary
+now verifies one request-bound secret-access grant, atomically consumes durable
+replay state, resolves WSP71 keys for that sign only, and rechecks revocation,
+expiry, provider identity, and the returned signature. The stable entrypoint
+does not yet supply or compose this boundary, so production signing remains
+fail-closed. RedDog and `main.py` remain clients and cannot spawn the signer.
 
 `start operations` binds the production `reddog_operations` Skillz from the
 manifest-authenticated runtime before model selection or grounding. The

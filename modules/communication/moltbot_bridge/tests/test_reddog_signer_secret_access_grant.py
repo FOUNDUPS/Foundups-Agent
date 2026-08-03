@@ -11,6 +11,10 @@ from typing import Any, Mapping
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    public_key_fingerprint,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant import (
     ExpectedSignerSecretGrantBinding,
     GRANT_SCHEMA,
@@ -57,11 +61,23 @@ def _grant(**overrides: Any) -> dict[str, Any]:
         "permission_snapshot_digest": _digest("3"),
         "owner_config_id": _digest("4"),
         "signer_generation_id": _digest("5"),
+        "signer_public_key": "public-key-v1:signer",
+        "signer_key_fingerprint": public_key_fingerprint(
+            "public-key-v1:signer"
+        ),
+        "replay_store_binding_digest": _digest("7"),
+        "replay_store_id": "signer-grant-replay:test",
+        "replay_store_durability_receipt_id": _digest("8"),
+        "replay_store_instance_digest": _digest("9"),
+        "signing_request_digest": _digest("6"),
+        "requested_operation": "write_repo",
+        "authority_tier": "HIGH",
+        "attested_peer_principal_id": "principal:founder",
         "nonce": "grant-nonce-1",
         "issued_at": NOW - 10,
         "expires_at": NOW + 100,
         "grant_id": "",
-        "signature": "fixture-signature-v1",
+        "signature": "fixture-signature-v2",
     }
     value.update(overrides)
     value["grant_id"] = signer_secret_access_grant_id(value)
@@ -205,11 +221,21 @@ def test_valid_grant_verifies_and_consumes_to_immutable_mapping() -> None:
         ("signer_profile_id", "other-profile"),
         ("key_epoch", "epoch-2"),
         ("signer_generation_id", _digest("c")),
+        ("signer_public_key", "public-key-v1:other"),
+        ("signer_key_fingerprint", _digest("f")),
+        ("replay_store_binding_digest", _digest("a")),
+        ("replay_store_id", "signer-grant-replay:other"),
+        ("replay_store_durability_receipt_id", _digest("b")),
+        ("replay_store_instance_digest", _digest("c")),
         ("owner_config_id", _digest("d")),
         ("permission_snapshot_digest", _digest("e")),
         ("issuer_principal_id", "principal:other"),
         ("issuer_principal_provider", "intake_session"),
         ("issuer_public_key", "public-key-v1:other"),
+        ("signing_request_digest", _digest("f")),
+        ("requested_operation", "publish_draft_pr"),
+        ("authority_tier", "LOW"),
+        ("attested_peer_principal_id", "principal:other"),
     ],
 )
 def test_changed_expected_binding_rejects(field: str, value: str) -> None:
@@ -530,7 +556,7 @@ def test_exact_fields_ascii_and_sha256_formats_are_enforced() -> None:
     extra["unexpected"] = "value"
     non_ascii = _grant(signer_agent_id="signer:\u2603")
     bad_digest = _grant(permission_snapshot_digest="sha256:not-a-digest")
-    wrong_schema = _grant(schema_version="reddog-signer-secret-access-grant.v2")
+    wrong_schema = _grant(schema_version="reddog-signer-secret-access-grant.v1")
     boolean_time = _grant(issued_at=True)
     oversized = _grant(signer_agent_id="s" * 4097)
     oversized_nonce = _grant(nonce="n" * 257)

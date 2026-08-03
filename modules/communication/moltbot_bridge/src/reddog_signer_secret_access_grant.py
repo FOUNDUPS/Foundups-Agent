@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import threading
 from types import MappingProxyType
-from typing import Any, Callable, Mapping, Protocol
+from typing import Any, Callable, Mapping, Protocol, TypeVar
 from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant_contract import (
@@ -12,23 +12,30 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant_
     GRANT_PREFIX,
     GRANT_SCHEMA,
     MAX_GRANT_TTL_SECONDS,
-    REJECT_BINDING,
+    REJECT_BINDING as REJECT_BINDING,
     REJECT_CAPABILITY,
-    REJECT_DIGEST,
+    REJECT_DIGEST as REJECT_DIGEST,
     REJECT_GRANT_ID,
-    REJECT_ISSUER,
-    REJECT_MALFORMED,
+    REJECT_ISSUER as REJECT_ISSUER,
+    REJECT_MALFORMED as REJECT_MALFORMED,
     REJECT_NONCE,
-    REJECT_NON_ASCII,
+    REJECT_NON_ASCII as REJECT_NON_ASCII,
     REJECT_REVOKED,
     REJECT_SIGNATURE,
     REJECT_TIME,
     SignerSecretAccessGrantRejected,
     canonical_signer_secret_access_grant_input,
     signer_secret_access_grant_id,
+    signer_secret_access_request_digest,
     validated_signer_secret_grant,
     verify_expected_signer_secret_grant,
     verify_signer_secret_grant_issuer,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_nonce_store import (
+    DurableSignerSecretGrantNonceStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_oracle import (
+    AtomicSignerSecretGrantRevocationOracle,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     NonceStore,
@@ -43,9 +50,21 @@ class SignerSecretGrantRevocationOracle(Protocol):
         self, *, grant_id: str, key_epoch: str, at_epoch: int
     ) -> bool: ...
 
+    def authorize_use(
+        self,
+        *,
+        grant_id: str,
+        key_epoch: str,
+        at_epoch: int,
+        action: Callable[[], "_T"],
+    ) -> "_T": ...
+
+
+_T = TypeVar("_T")
+
 
 class SignerSecretAccessGrantBoundary:
-    """Process-local issuer and one-shot consumer for verified grants."""
+    """Process-local capabilities backed by injected nonce durability."""
 
     def __init__(
         self,
@@ -61,6 +80,23 @@ class SignerSecretAccessGrantBoundary:
         self._nonce_store = nonce_store
         self._revocation_oracle = revocation_oracle
         self._clock = clock
+
+    def replay_store_matches(self, expected: ExpectedSignerSecretGrantBinding) -> bool:
+        store = self._nonce_store
+        return bool(
+            type(store) is DurableSignerSecretGrantNonceStore
+            and _same(store.replay_store_binding_digest,
+                      expected.replay_store_binding_digest)
+            and _same(store.replay_store_id, expected.replay_store_id)
+            and _same(store.durability_receipt_id,
+                      expected.replay_store_durability_receipt_id)
+            and _same(store.replay_store_instance_digest,
+                      expected.replay_store_instance_digest)
+        )
+
+    @property
+    def atomic_revocation(self) -> bool:
+        return type(self._revocation_oracle) is AtomicSignerSecretGrantRevocationOracle
 
     def verify(
         self, grant: Mapping[str, Any], *, expected: ExpectedSignerSecretGrantBinding,
@@ -98,13 +134,41 @@ class SignerSecretAccessGrantBoundary:
             raise SignerSecretAccessGrantRejected(REJECT_CAPABILITY)
         validated_signer_secret_grant(expected, self._now())
         self._require_not_revoked(expected)
-        try:
-            consumed = self._nonce_store.consume(str(expected["nonce"])) is True
-        except Exception:
-            consumed = False
+        if type(self._nonce_store) is DurableSignerSecretGrantNonceStore:
+            consumed = self._nonce_store.consume_grant(expected)
+        else:
+            try:
+                consumed = self._nonce_store.consume(str(expected["nonce"])) is True
+            except Exception:
+                consumed = False
         if not consumed:
             raise SignerSecretAccessGrantRejected(REJECT_NONCE)
         return expected
+
+    def authorize_consumed_use(
+        self, grant: Mapping[str, Any], action: Callable[[], _T]
+    ) -> _T:
+        """Execute one sign under the revocation authority's atomic fence."""
+        validated = validated_signer_secret_grant(grant, self._now())
+        if not self.atomic_revocation:
+            raise SignerSecretAccessGrantRejected(REJECT_REVOKED)
+
+        def checked_action() -> _T:
+            result = action()
+            validated_signer_secret_grant(validated, self._now())
+            return result
+
+        try:
+            return self._revocation_oracle.authorize_use(
+                grant_id=str(validated["grant_id"]),
+                key_epoch=str(validated["key_epoch"]),
+                at_epoch=self._now(),
+                action=checked_action,
+            )
+        except SignerSecretAccessGrantRejected:
+            raise
+        except Exception:
+            raise SignerSecretAccessGrantRejected(REJECT_REVOKED) from None
 
     def _now(self) -> int:
         try:
@@ -148,10 +212,15 @@ def _capability_type(seal: object) -> type:
             raise TypeError(REJECT_CAPABILITY)
 
     return Capability
+
+
+def _same(left: object, right: str) -> bool:
+    return type(left) is str and type(right) is str and constant_time_compare(left, right)
 __all__ = [
     "ExpectedSignerSecretGrantBinding", "GRANT_PREFIX", "GRANT_SCHEMA",
     "MAX_GRANT_TTL_SECONDS", "SignerSecretAccessGrantBoundary",
     "SignerSecretGrantRevocationOracle",
     "SignerSecretAccessGrantRejected", "canonical_signer_secret_access_grant_input",
     "signer_secret_access_grant_id",
+    "signer_secret_access_request_digest",
 ]
