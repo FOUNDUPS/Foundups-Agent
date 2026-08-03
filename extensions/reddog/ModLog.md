@@ -1,5 +1,14 @@
 # RedDog ModLog
 
+## 2026-08-03 - Fusion critic retry route failover (0.4.54)
+
+- Changed the existing one-shot adversarial critic retry to prefer a configured
+  critic that returned usable initial content over a blocked or abstaining
+  route, preserving configured model order as the deterministic tie-breaker.
+- Kept the retry count at one and preserved the substantive challenge, evidence,
+  output-validation, and runtime-consumption gates. No queue, OpenClaw, Hermes,
+  worktree, repository, PR, or merge authority was added (WSP 00, 15, 22, 50, 97).
+
 ## 2026-08-03 - Upstream Hermes artifact runtime (0.4.53)
 
 - Pinned the backend manifest containing the actual authenticated loopback

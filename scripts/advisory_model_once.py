@@ -522,13 +522,14 @@ def _adversarial_critic_retry_messages(
 def _retry_challenging_critic(
     api_key: str,
     panel_models: list[str],
+    panel_results: dict[str, str],
     abstaining_critics: list[str],
     critic_messages: list[dict[str, str]],
     panel_max_tokens: dict[str, int],
     temperature: float,
     timeout: int,
 ) -> tuple[str, str, bool]:
-    candidates = [model for model in panel_models if model not in abstaining_critics] or panel_models
+    candidates = _critic_retry_candidates(panel_models, panel_results, abstaining_critics)
     model = candidates[0]
     _progress("panel_retry", "No material critic challenge; one bounded adversarial retry is starting.", role="critic", model=model)
     _progress("panel_start", "Targeted adversarial critic retry started: " + model, role="panel", model=model)
@@ -545,6 +546,28 @@ def _retry_challenging_critic(
         return model, "[abstained: adversarial_retry_empty_or_none]", False
     _progress("panel_done", "Targeted adversarial critic retry received: " + model, role="critic", model=model)
     return model, text, _critic_challenges_framing_and_priority(text)
+
+
+def _critic_retry_candidates(
+    panel_models: list[str],
+    panel_results: dict[str, str],
+    abstaining_critics: list[str],
+) -> list[str]:
+    """Prefer a critic that returned usable text before retrying a failed route."""
+
+    abstaining = set(abstaining_critics)
+    usable = [
+        model
+        for model in panel_models
+        if model not in abstaining and _usable_panel_result(panel_results.get(model, ""))
+    ]
+    available = [model for model in panel_models if model not in abstaining]
+    return usable or available or panel_models
+
+
+def _usable_panel_result(value: str) -> bool:
+    normalized = str(value or "").strip().lower()
+    return bool(normalized) and not normalized.startswith(("[blocked:", "[abstained:"))
 
 
 def _empty_fusion_panel_rejection(
@@ -823,7 +846,7 @@ def _run_foundups_fusion_core(
     critic_challenge_retry_models: list[str] = []
     if not challenging_critics:
         retry_model, retry_text, retry_challenged = _retry_challenging_critic(
-            api_key, panel_models, abstaining_critics, critic_messages,
+            api_key, panel_models, panel_results, abstaining_critics, critic_messages,
             panel_max_tokens, temperature, timeout,
         )
         critic_challenge_retry_models.append(retry_model)

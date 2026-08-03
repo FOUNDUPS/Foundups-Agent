@@ -1,6 +1,9 @@
 # RedDog Interface
 
-Version 0.4.53 pins the real upstream OpenClaw Gateway and Hermes API artifact providers into
+Version 0.4.54 keeps the single Fusion adversarial retry but deterministically
+prefers a critic with a usable initial response over a route that blocked or
+abstained. Quorum still requires a material framing/evidence/WSP_15 challenge;
+the retry cannot create execution authority. Version 0.4.53 pinned the real upstream OpenClaw Gateway and Hermes API artifact providers into
 the backend integrity manifest. Signed authority is consumed before process
 creation, the dedicated OpenClaw agent is checked for confinement, and only a
 bounded artifact map reaches the existing isolated Foundups writer. Hermes

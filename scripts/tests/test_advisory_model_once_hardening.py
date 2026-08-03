@@ -397,6 +397,45 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(quorum["challenging_critics"], ["critic-a"])
         self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a"])
 
+    def test_fusion_quorum_retry_prefers_critic_with_usable_initial_response(self) -> None:
+        retry_models: list[str] = []
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Adversarial retry" in system:
+                retry_models.append(model)
+                return (
+                    "Challenge: the evidence is incomplete and WSP_15 should defer "
+                    "implementation until the missing runtime proof is verified.",
+                    {"retry_count": 0},
+                )
+            if "Panel critic pass" in system and model == "critic-a":
+                raise HTTPError("https://example.invalid", 503, "blocked", {}, None)
+            if "Panel critic pass" in system:
+                return "The proposal is generally reasonable.", {"retry_count": 0}
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a", "critic-b"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(retry_models, ["critic-b"])
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["challenging_critics"], ["critic-b"])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-b"])
+
     def test_no_material_challenge_prefix_never_satisfies_quorum(self) -> None:
         self.assertFalse(
             bridge._critic_challenges_framing_and_priority(
