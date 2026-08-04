@@ -242,7 +242,11 @@ def _parse_source(path: Path, relative: str) -> ast.AST:
 
 
 def _dependency_closure() -> tuple[str, ...]:
-    queue = [REPO_ROOT / relative for relative in EXECUTABLE_FILES]
+    queue = [
+        REPO_ROOT / relative
+        for relative in (*EXECUTABLE_FILES, *STATIC_RUNTIME_FILES)
+        if relative.endswith(".py")
+    ]
     observed: set[str] = set()
     while queue:
         path = queue.pop()

@@ -1,5 +1,39 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-04: Verified-outcome root authority supply (partial)
+- Extended the existing E0 signer and root-owned system-service owner config;
+  no second signer framework, database abstraction, or orchestrator was added.
+- Added an exact root-published authority descriptor with independent verifier
+  and held-out signatures over FoundUp/snapshot/work/slice/job/head/content,
+  runtime, PatternMemory, key, revocation, freshness, and replay bindings.
+- Bound authority admission to the authenticated owner-config ID and exact
+  signer run packet, config, session, manifest, and artifact generation.
+- Bound both verifier signatures to an immutable digest of the complete root,
+  signer, runtime, replay-anchor, and policy context so a co-signed grant cannot
+  be transplanted into another root-published descriptor.
+- Moved registry-backed root-authority verification into the shared signer
+  key-provider core, closing alternate production/test constructors and
+  unregistered same-type objects before any key material is resolved.
+- Reused the signer-owned SQLite monotonic store. Reservations burn before
+  signing and remain burned on rollback or crash; empty, alternate, identity-
+  mismatched, and concurrent replay stores fail closed.
+- Re-read the root-owned authority descriptor at every reservation and used a
+  signer-side trusted clock, so post-launch revocation and expiry fail before
+  signing even when a caller supplies an earlier request timestamp.
+- Extracted exact runtime/policy/peer matching into a bounded module. The new
+  authority modules remain below WSP 62 limits; inherited signer transaction
+  hosts carry exact, expiring no-growth ceilings.
+- Preserved v1 signer compatibility: absent outcome authority blocks only
+  verified-outcome signing, not unrelated E0 operations.
+- Hardened the backend manifest generator so Python files named as static
+  runtime roots contribute their complete import closure. Signer authority
+  dependencies are now content-bound rather than merely reachable.
+- Truth remains `VERIFIED_OUTCOME_RUNTIME_BINDING_PARTIAL`: resident verifier
+  workers do not issue the two independent signatures, and the consumer cannot
+  yet prove its connected signer loaded this descriptor. No PatternMemory,
+  learning, Brain/roadmap, HoloIndex, repository, or merge authority was added
+  (WSP 00/15/22/50/62/97).
+
 ## 2026-08-04: Verified-outcome runtime authority binding (partial)
 - Extended the draft verified-outcome rehydration foundation with a root-confined
   evidence and replay namespace in the existing authority runtime store. Signed

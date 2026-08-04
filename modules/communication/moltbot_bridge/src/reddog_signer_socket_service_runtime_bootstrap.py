@@ -26,6 +26,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     ProposalReplayHighWaterStore,
 )
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VerifiedOutcomeSigningAuthority,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
@@ -122,6 +125,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     manifest_selection_boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
@@ -154,6 +158,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         ready_callback=ready_callback,
         principal_key_resolver=principal_key_resolver,
         proposal_replay_high_water_store=proposal_replay_high_water_store,
+        verified_outcome_signing_authority=verified_outcome_signing_authority,
     )
     return _bootstrap_runtime_result(runtime, path=path, digest=digest)
 
@@ -410,7 +415,17 @@ def _attach_peer_binding(
         python_executable=sys.executable,
         owner_authority_config_path=owner_authority_config_path,
     )
-    return replace(config, signer_peer_instance_binding=binding) if binding else None
+    return (
+        replace(
+            config,
+            signer_peer_instance_binding=binding,
+            system_service_owner_config_id=str(
+                manifest_selection.get("owner_config_id") or ""
+            ),
+        )
+        if binding
+        else None
+    )
 
 
 def _profile_peer_binding(value: Any) -> SignerPeerProfileBinding:

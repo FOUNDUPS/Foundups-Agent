@@ -30,7 +30,11 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     SignerAuditMacBuilder,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VerifiedOutcomeSigningAuthority,
     VerifiedOutcomeSignerPolicy,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    root_verified_outcome_authority_bindings,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
     ArchitectProposalPolicyAuthorization,
@@ -166,6 +170,7 @@ def _build_signer_backend_from_provider_core(
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
     verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
     proposal_authority_policy: ArchitectProposalSignerPolicy | None = None,
     proposal_nonce_store_path: Path | str | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
@@ -186,6 +191,13 @@ def _build_signer_backend_from_provider_core(
 
     if not isinstance(profile, SignerKeyProviderProfile):
         return _reject(FAIL_PROVIDER_PROFILE_INVALID)
+    if verified_outcome_signing_authority is not None:
+        try:
+            root_verified_outcome_authority_bindings(
+                verified_outcome_signing_authority
+            )
+        except (TypeError, ValueError):
+            return _reject(FAIL_PROVIDER_PROFILE_INVALID, profile=profile)
     if not _provider_mode_authorized(
         provider_mode,
         allow_test_only_key_material=allow_test_only_key_material,
@@ -348,6 +360,7 @@ def _build_signer_backend_from_provider_core(
             proposal_authority_policy=proposal_authority_policy,
             proposal_nonce_store=effective_proposal_nonce_store,
             verified_outcome_signer_policy=verified_outcome_signer_policy,
+            verified_outcome_signing_authority=verified_outcome_signing_authority,
         ),
     )
 
@@ -362,6 +375,7 @@ def build_test_only_signer_backend_from_provider(
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
     verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
 ) -> SignerKeyProviderDryRunResult:
     """Build a generic signer backend without architect-proposal authority."""
 
@@ -374,6 +388,7 @@ def build_test_only_signer_backend_from_provider(
         control_loop_anchor_store=control_loop_anchor_store,
         control_loop_authority_policy=control_loop_authority_policy,
         verified_outcome_signer_policy=verified_outcome_signer_policy,
+        verified_outcome_signing_authority=verified_outcome_signing_authority,
     )
 
 
@@ -426,6 +441,7 @@ def build_signer_backend_from_provider(
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
     verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
 ) -> SignerKeyProviderDryRunResult:
     """Production-capable generic signer boundary; proposal mode is internal."""
 
@@ -438,6 +454,7 @@ def build_signer_backend_from_provider(
         control_loop_anchor_store=control_loop_anchor_store,
         control_loop_authority_policy=control_loop_authority_policy,
         verified_outcome_signer_policy=verified_outcome_signer_policy,
+        verified_outcome_signing_authority=verified_outcome_signing_authority,
     )
 
 

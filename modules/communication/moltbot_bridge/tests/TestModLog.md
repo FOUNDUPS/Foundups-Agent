@@ -1,3 +1,28 @@
+## 2026-08-04: Verified-outcome root authority regressions
+
+- Added exact descriptor, root-owner, signer-generation, verifier-class,
+  co-signature, expiry, revocation, scope, and lineage validation coverage.
+- Proved attacker-rehashed grant changes, unknown verifier classes, authority
+  collapse, wrong owner/session, alternate or reset replay stores, direct
+  capability construction, and forged reservations reject.
+- Proved co-signed grants cannot be transplanted across issuer, RedDog,
+  consensus, signer key epoch, or signer run/config/session/manifest/generation
+  contexts even when the descriptor ID is recomputed.
+- Proved all public key-provider constructors reject non-root and unregistered
+  same-type outcome authority before secret resolution, plus duplicate grants,
+  stale/future signed grants, held-out-key revocation, and wrong reservation
+  scope/time fail closed.
+- Proved one exact grant survives restart and eight concurrent reservations
+  produce exactly one winner.
+- Proved a signer process observes a root-config revocation written after
+  startup, and that grant expiry uses current signer time rather than the
+  caller's signed-request timestamp.
+- Proved bootstrap derives owner identity from authenticated generation
+  selection. Outcome signing stays fail closed without root authority while
+  unrelated signer operations remain available.
+- Proved the checked-in backend manifest includes the root-authority module
+  through the stable signer entrypoint's dependency closure.
+
 ## 2026-08-04: Verified-outcome runtime authority regressions
 
 - Added durable publication/rehydration tests for exact verifier and held-out

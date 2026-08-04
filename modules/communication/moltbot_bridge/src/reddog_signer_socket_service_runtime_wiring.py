@@ -68,7 +68,11 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     Ed25519SignerBackend,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VerifiedOutcomeSigningAuthority,
     VerifiedOutcomeSignerPolicy,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_runtime_binding import (
+    verified_outcome_authority_matches_runtime,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
     SignerPeerInstanceBinding,
@@ -154,6 +158,7 @@ class SignerSocketServiceRuntimeWiringConfig:
     proposal_replay_high_water_durability_receipt_id: str | None = None
     proposal_security_context_digest: str | None = None
     signer_peer_instance_binding: SignerPeerInstanceBinding | None = None
+    system_service_owner_config_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -311,6 +316,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
     ready_callback: Optional[Callable[[], None]] = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
 ) -> SignerSocketServiceRuntimeWiringResult:
     """Build a signer backend and serve a bounded signer socket service."""
 
@@ -332,6 +338,16 @@ def run_reddog_signer_socket_service_runtime_wiring(
     outcome_policy = _verified_outcome_signer_policy(
         config.verified_outcome_signer_policy
     )
+    if not verified_outcome_authority_matches_runtime(
+        outcome_policy,
+        verified_outcome_signing_authority,
+        expected_owner_config_id=config.system_service_owner_config_id,
+        signer_peer_instance_binding=config.signer_peer_instance_binding,
+    ):
+        return _reject(
+            FAIL_SIGNER_RUNTIME_CONFIG_INVALID,
+            injected_dependency_effects_unobserved=(outcome_policy is not None),
+        )
     proposal_policy = _proposal_authority_policy(
         config.proposal_authority_policy
     )
@@ -415,6 +431,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
         control_loop_anchor_store=anchor_store,
         control_loop_authority_policy=control_authority_policy,
         verified_outcome_signer_policy=outcome_policy,
+        verified_outcome_signing_authority=verified_outcome_signing_authority,
         proposal_authority_policy=proposal_policy,
         proposal_policy_authorization=proposal_authorization,
         proposal_nonce_store_path=proposal_nonce_store_path,
@@ -727,6 +744,7 @@ def _build_backend(
     control_loop_anchor_store: ControlLoopAnchorStore | None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None,
     verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None,
     proposal_authority_policy: ArchitectProposalSignerPolicy | None,
     proposal_policy_authorization: ArchitectProposalPolicyAuthorization | None,
     proposal_nonce_store_path: Path | None,
@@ -808,6 +826,13 @@ def _build_backend(
                 ),
                 verified_outcome_signer_policy=(
                     verified_outcome_signer_policy
+                    if verified_outcome_signer_policy is not None
+                    and profile.expected_public_key
+                    == verified_outcome_signer_policy.signer_public_key
+                    else None
+                ),
+                verified_outcome_signing_authority=(
+                    verified_outcome_signing_authority
                     if verified_outcome_signer_policy is not None
                     and profile.expected_public_key
                     == verified_outcome_signer_policy.signer_public_key

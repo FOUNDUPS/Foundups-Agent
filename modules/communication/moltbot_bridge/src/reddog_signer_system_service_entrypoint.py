@@ -31,6 +31,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
     load_system_service_manifest_selection,
+    load_system_service_verified_outcome_signing_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     FailClosedPrincipalKeyResolver,
@@ -94,6 +95,9 @@ def run_reddog_signer_system_service_entrypoint(
         emit=emit,
         principal_key_resolver=FailClosedPrincipalKeyResolver(),
         proposal_replay_high_water_store=None,
+        verified_outcome_authority_loader=(
+            load_system_service_verified_outcome_signing_authority
+        ),
     )
 
 
@@ -105,6 +109,7 @@ def _run_entrypoint_args(
     emit: Callable[[str], None],
     principal_key_resolver: PrincipalKeyResolver,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None,
+    verified_outcome_authority_loader: Callable[..., object] | None = None,
 ) -> int:
     root = Path(args.repo_root).resolve()
     owner_path = Path(args.owner_authority_config).resolve()
@@ -114,6 +119,14 @@ def _run_entrypoint_args(
                 owner_config_path=owner_path,
                 repo_root=root,
             )
+        )
+        verified_outcome_authority = (
+            verified_outcome_authority_loader(
+                owner_config_path=owner_path,
+                repo_root=root,
+            )
+            if verified_outcome_authority_loader is not None
+            else None
         )
     except Exception:
         emit(_receipt_json(None, (FAIL_SYSTEM_SERVICE_SELECTION,)))
@@ -129,6 +142,7 @@ def _run_entrypoint_args(
         expected_owner_authority_config_path=owner_path,
         principal_key_resolver=principal_key_resolver,
         proposal_replay_high_water_store=proposal_replay_high_water_store,
+        verified_outcome_signing_authority=verified_outcome_authority,
         manifest_selection=manifest_selection,
         manifest_selection_boundary=selection_boundary,
     )
