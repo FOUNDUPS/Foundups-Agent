@@ -339,7 +339,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
     outcome_policy = _verified_outcome_signer_policy(
         config.verified_outcome_signer_policy
     )
-    if not verified_outcome_authority_matches_runtime(
+    if outcome_policy is not None and not verified_outcome_authority_matches_runtime(
         outcome_policy,
         verified_outcome_signing_authority,
         expected_owner_config_id=config.system_service_owner_config_id,
@@ -432,7 +432,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
         control_loop_anchor_store=anchor_store,
         control_loop_authority_policy=control_authority_policy,
         verified_outcome_signer_policy=outcome_policy,
-        verified_outcome_signing_authority=verified_outcome_signing_authority,
+        verified_outcome_signing_authority=verified_outcome_signing_authority if outcome_policy else None,
         proposal_authority_policy=proposal_policy,
         proposal_policy_authorization=proposal_authorization,
         proposal_nonce_store_path=proposal_nonce_store_path,

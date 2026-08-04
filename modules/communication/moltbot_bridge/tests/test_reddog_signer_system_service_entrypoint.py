@@ -12,14 +12,21 @@ from pathlib import Path
 import pytest
 
 from modules.communication.moltbot_bridge.src import (
+    foundup_verified_outcome_root_authority_client as outcome_client_module,
     reddog_current_generation_manifest_launch_selection as selection_module,
-    reddog_signer_system_service_entrypoint as entrypoint_module,
+    reddog_signer_system_service_manifest_selection_loader as loader_module,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
+    digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_entrypoint import (
     SYSTEM_SERVICE_ENTRYPOINT_ACCEPT,
     SYSTEM_SERVICE_ENTRYPOINT_REJECT,
     _UnavailableSystemServiceResolver,
     _run_entrypoint_args,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
+    SCHEMA_VERSION_V2,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
     SignerProcessIsolationReceipt,
@@ -43,6 +50,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signer_system_servic
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artifact_manifest import (
     NOW,
 )
+from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import (
+    _descriptor,
+)
 
 MODULE_PATH = (
     Path(__file__).resolve().parents[1]
@@ -54,12 +64,75 @@ MODULE_PATH = (
 @pytest.fixture(autouse=True)
 def _trusted_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW)
+    monkeypatch.setattr(loader_module.time, "time", lambda: NOW)
+    monkeypatch.setattr(
+        outcome_client_module, "_require_protected_socket", lambda *_args: None
+    )
+
+
+def _upgrade_prepared_owner_to_v2(prepared: dict, tmp_path: Path) -> dict:
+    owner_path = Path(prepared["owner_path"])
+    owner = json.loads(owner_path.read_text(encoding="ascii"))
+    descriptor, _grant, _store = _descriptor(tmp_path / "outcome-source")
+    roots = {
+        name: tmp_path / f"outcome-{name}"
+        for name in ("state", "state-witness", "installation")
+    }
+    for root in roots.values():
+        root.mkdir()
+    owner["schema_version"] = SCHEMA_VERSION_V2
+    owner["verified_outcome_authority"] = _outcome_owner_block(
+        descriptor, roots=roots, tmp_path=tmp_path
+    )
+    owner["config_id"] = digest(
+        {key: value for key, value in owner.items() if key != "config_id"}
+    )
+    owner_path.write_text(
+        json.dumps(owner, sort_keys=True, separators=(",", ":")), encoding="ascii"
+    )
+    return owner
+
+
+def _outcome_owner_block(descriptor: dict, *, roots: dict, tmp_path: Path) -> dict:
+    return {
+        "descriptor": descriptor,
+        "authority_socket_path": str(tmp_path / "root-authority.sock"),
+        "authority_service_uid": 0,
+        "signer_uid": 1201,
+        "signer_gid": 1201,
+        "signer_principal_id": "reddog-e0-signer",
+        "state_root": str(roots["state"]),
+        "state_path": str(roots["state"] / "verified-outcome-authority.sqlite3"),
+        "state_store_id": descriptor["replay_store_id"],
+        "state_durability_receipt_id": descriptor["replay_store_durability_receipt_id"],
+        "state_witness_root": str(roots["state-witness"]),
+        "state_witness_path": str(
+            roots["state-witness"] / "verified-outcome-authority-witness.sqlite3"
+        ),
+        "state_witness_store_id": "verified-outcome-replay-witness",
+        "state_witness_durability_receipt_id": "sha256:" + "7" * 64,
+        "installation_root": str(roots["installation"]),
+        "installation_path": str(
+            roots["installation"] / "verified-outcome-authority-installation.sqlite3"
+        ),
+        "installation_store_id": "verified-outcome-replay-installation",
+        "installation_durability_receipt_id": "sha256:" + "8" * 64,
+    }
 
 
 def _isolation_receipt(accepted: bool) -> SignerProcessIsolationReceipt:
     return SignerProcessIsolationReceipt(
-        accepted, (() if accepted else ("rejected",)), 1201, 1201,
-        accepted, accepted, accepted, accepted, accepted, accepted, accepted,
+        accepted,
+        (() if accepted else ("rejected",)),
+        1201,
+        1201,
+        accepted,
+        accepted,
+        accepted,
+        accepted,
+        accepted,
+        accepted,
+        accepted,
     )
 
 
@@ -84,11 +157,7 @@ def test_stable_entrypoint_selects_current_generation_and_serves_once(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
-    monkeypatch.setattr(
-        entrypoint_module,
-        "load_system_service_signer_identity",
-        lambda **_kwargs: (1201, 1201),
-    )
+    _upgrade_prepared_owner_to_v2(prepared, tmp_path)
     resolver = FakeResolver(
         {
             "op://prod-vault/reddog-signing/private": _private_key_secret(
@@ -143,11 +212,7 @@ def test_system_service_isolation_rejects_before_resolver_or_socket(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
-    monkeypatch.setattr(
-        entrypoint_module,
-        "load_system_service_signer_identity",
-        lambda **_kwargs: (1201, 1201),
-    )
+    _upgrade_prepared_owner_to_v2(prepared, tmp_path)
     factory = CapturingResolverFactory(FakeResolver({}))
     service = CapturingBoundedService()
     emitted: list[str] = []
@@ -171,11 +236,89 @@ def test_system_service_isolation_rejects_before_resolver_or_socket(
     assert service.calls == []
 
 
+def test_production_entrypoint_rejects_legacy_v1_before_effects(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    factory = CapturingResolverFactory(FakeResolver({}))
+    service = CapturingBoundedService()
+    emitted: list[str] = []
+
+    code = _run_entrypoint_args(
+        argparse.Namespace(
+            repo_root=str(prepared["harness"].repo_root),
+            owner_authority_config=str(prepared["owner_path"]),
+        ),
+        resolver_factory=factory,
+        serve_bounded=service,
+        emit=emitted.append,
+        principal_key_resolver=FailClosedPrincipalKeyResolver(),
+        proposal_replay_high_water_store=None,
+    )
+
+    assert code == 2
+    assert json.loads(emitted[0])["status"] == SYSTEM_SERVICE_ENTRYPOINT_REJECT
+    assert factory.calls == []
+    assert service.calls == []
+
+
+def test_owner_rotation_during_read_cannot_mix_startup_authority(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    owner = _upgrade_prepared_owner_to_v2(prepared, tmp_path)
+    original = Path(prepared["owner_path"]).read_bytes()
+    owner["verified_outcome_authority"]["signer_uid"] = 1301
+    owner["verified_outcome_authority"]["signer_gid"] = 1301
+    owner["config_id"] = digest(
+        {key: value for key, value in owner.items() if key != "config_id"}
+    )
+    rotated = json.dumps(owner, sort_keys=True, separators=(",", ":")).encode("ascii")
+    reads: list[bytes] = []
+
+    def rotate_after_read(target: Path, _root: Path) -> bytes:
+        raw = target.read_bytes()
+        reads.append(raw)
+        target.write_bytes(rotated)
+        return raw
+
+    monkeypatch.setattr(loader_module, "_read_root_owned_bytes", rotate_after_read)
+    isolation_calls: list[tuple[int, int]] = []
+    factory = CapturingResolverFactory(FakeResolver({}))
+    service = CapturingBoundedService()
+
+    def reject_isolation(_policy: PeerCredentialPolicy, **expected: int):
+        isolation_calls.append(
+            (expected["expected_signer_uid"], expected["expected_signer_gid"])
+        )
+        return _isolation_receipt(False)
+
+    code = _run_entrypoint_args(
+        argparse.Namespace(
+            repo_root=str(prepared["harness"].repo_root),
+            owner_authority_config=str(prepared["owner_path"]),
+        ),
+        resolver_factory=factory,
+        serve_bounded=service,
+        emit=lambda _line: None,
+        principal_key_resolver=FailClosedPrincipalKeyResolver(),
+        proposal_replay_high_water_store=None,
+        process_isolation_gate=reject_isolation,
+    )
+
+    assert code == 2
+    assert reads == [original]
+    assert isolation_calls == [(1201, 1201)]
+    assert factory.calls == []
+    assert service.calls == []
+
+
 def test_alternate_owner_path_rejects_before_resolver_or_service(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    _upgrade_prepared_owner_to_v2(prepared, tmp_path)
     alternate_root = tmp_path / "alternate-owner"
     alternate_root.mkdir()
     alternate = alternate_root / "owner.json"
@@ -197,9 +340,7 @@ def test_alternate_owner_path_rejects_before_resolver_or_service(
     )
 
     assert code == 2
-    assert json.loads(emitted[0])["status"] == (
-        SYSTEM_SERVICE_ENTRYPOINT_REJECT
-    )
+    assert json.loads(emitted[0])["status"] == (SYSTEM_SERVICE_ENTRYPOINT_REJECT)
     assert factory.calls == []
     assert service.calls == []
 
@@ -209,16 +350,28 @@ def test_generation_capability_failure_rejects_before_resolver_or_service(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    _upgrade_prepared_owner_to_v2(prepared, tmp_path)
+
     class RejectedGenerationBoundary:
         @staticmethod
         def consume(_capability: object) -> object:
             raise RuntimeError("generation changed")
 
-    monkeypatch.setattr(
-        entrypoint_module,
-        "load_system_service_manifest_selection",
-        lambda **_kwargs: (object(), RejectedGenerationBoundary()),
+    startup = loader_module.load_system_service_startup_selection(
+        owner_config_path=prepared["owner_path"],
+        repo_root=prepared["harness"].repo_root,
     )
+
+    def startup_loader(**_kwargs):
+        return loader_module.SystemServiceStartupSelection(
+            owner_config_id=startup.owner_config_id,
+            manifest_selection=object(),
+            manifest_selection_boundary=RejectedGenerationBoundary(),
+            verified_outcome_authority=startup.verified_outcome_authority,
+            signer_uid=startup.signer_uid,
+            signer_gid=startup.signer_gid,
+        )
+
     factory = CapturingResolverFactory(FakeResolver({}))
     service = CapturingBoundedService()
     emitted: list[str] = []
@@ -233,6 +386,7 @@ def test_generation_capability_failure_rejects_before_resolver_or_service(
         emit=emitted.append,
         principal_key_resolver=FailClosedPrincipalKeyResolver(),
         proposal_replay_high_water_store=None,
+        startup_selection_loader=startup_loader,
     )
 
     assert code == 2
@@ -297,18 +451,17 @@ def test_entrypoint_has_no_process_or_dynamic_execution_surface() -> None:
     attributes = {
         (node.value.id, node.attr)
         for node in ast.walk(tree)
-        if isinstance(node, ast.Attribute)
-        and isinstance(node.value, ast.Name)
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name)
     }
 
     assert "subprocess" not in imported
-    assert not any(
-        name.endswith("op_cli_secret_resolver")
-        for name in import_modules
-    )
+    assert not any(name.endswith("op_cli_secret_resolver") for name in import_modules)
     assert not {"eval", "exec", "compile"} & calls
-    assert not {
-        ("os", "system"),
-        ("os", "popen"),
-        ("os", "spawn"),
-    } & attributes
+    assert (
+        not {
+            ("os", "system"),
+            ("os", "popen"),
+            ("os", "spawn"),
+        }
+        & attributes
+    )

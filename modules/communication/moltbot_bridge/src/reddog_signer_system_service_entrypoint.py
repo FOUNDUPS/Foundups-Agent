@@ -30,9 +30,8 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     ServeSignerSocketBounded,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
-    load_system_service_manifest_selection,
-    load_system_service_signer_identity,
-    load_system_service_verified_outcome_signing_authority,
+    SystemServiceStartupSelection,
+    load_system_service_startup_selection,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
     SignerProcessIsolationReceipt,
@@ -100,9 +99,6 @@ def run_reddog_signer_system_service_entrypoint(
         emit=emit,
         principal_key_resolver=FailClosedPrincipalKeyResolver(),
         proposal_replay_high_water_store=None,
-        verified_outcome_authority_loader=(
-            load_system_service_verified_outcome_signing_authority
-        ),
     )
 
 
@@ -114,7 +110,9 @@ def _run_entrypoint_args(
     emit: Callable[[str], None],
     principal_key_resolver: PrincipalKeyResolver,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None,
-    verified_outcome_authority_loader: Callable[..., object] | None = None,
+    startup_selection_loader: Callable[..., SystemServiceStartupSelection] = (
+        load_system_service_startup_selection
+    ),
     process_isolation_gate: Callable[..., SignerProcessIsolationReceipt] = (
         enforce_signer_process_isolation
     ),
@@ -122,21 +120,7 @@ def _run_entrypoint_args(
     root = Path(args.repo_root).resolve()
     owner_path = Path(args.owner_authority_config).resolve()
     try:
-        manifest_selection, selection_boundary = (
-            load_system_service_manifest_selection(
-                owner_config_path=owner_path,
-                repo_root=root,
-            )
-        )
-        verified_outcome_authority = (
-            verified_outcome_authority_loader(
-                owner_config_path=owner_path,
-                repo_root=root,
-            )
-            if verified_outcome_authority_loader is not None
-            else None
-        )
-        signer_uid, signer_gid = load_system_service_signer_identity(
+        startup = startup_selection_loader(
             owner_config_path=owner_path,
             repo_root=root,
         )
@@ -154,16 +138,17 @@ def _run_entrypoint_args(
         expected_owner_authority_config_path=owner_path,
         principal_key_resolver=principal_key_resolver,
         proposal_replay_high_water_store=proposal_replay_high_water_store,
-        verified_outcome_signing_authority=verified_outcome_authority,
+        verified_outcome_signing_authority=startup.verified_outcome_authority,
         process_isolation_required=True,
         process_isolation_gate=process_isolation_gate,
-        expected_signer_uid=signer_uid,
-        expected_signer_gid=signer_gid,
-        manifest_selection=manifest_selection,
-        manifest_selection_boundary=selection_boundary,
+        expected_signer_uid=startup.signer_uid,
+        expected_signer_gid=startup.signer_gid,
+        manifest_selection=startup.manifest_selection,
+        manifest_selection_boundary=startup.manifest_selection_boundary,
     )
     emit(_receipt_json(result, ()))
     return 0 if result.accepted else 2
+
 
 def _receipt_json(
     result: SignerSocketServiceRuntimeBootstrapResult | None,
@@ -190,9 +175,7 @@ def _receipt_json(
         "no_pr_created": True,
         "no_holoindex_reindex_performed": True,
     }
-    return json.dumps(
-        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-    )
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

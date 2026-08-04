@@ -31,19 +31,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
     KernelPeerCredentialAttestor,
     PeerCredentialPolicy,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
-    SignerProcessIsolationReceipt,
-    enforce_signer_process_isolation,
-)
-
-
 SIGNER_PROCESS_ENTRYPOINT_SERVED = "SIGNER_PROCESS_ENTRYPOINT_SERVED"
 SIGNER_PROCESS_ENTRYPOINT_REJECT = "SIGNER_PROCESS_ENTRYPOINT_REJECT"
 
 FAIL_SIGNER_PROCESS_CONFIG_INVALID = "FAIL_SIGNER_PROCESS_CONFIG_INVALID"
 FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID = "FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID"
 FAIL_SIGNER_PROCESS_KEY_PROVIDER_REJECTED = "FAIL_SIGNER_PROCESS_KEY_PROVIDER_REJECTED"
-FAIL_SIGNER_PROCESS_ISOLATION_REJECTED = "FAIL_SIGNER_PROCESS_ISOLATION_REJECTED"
 FAIL_SIGNER_PROCESS_SERVICE_REJECTED = "FAIL_SIGNER_PROCESS_SERVICE_REJECTED"
 FAIL_SIGNER_PROCESS_SERVICE_INVALID = "FAIL_SIGNER_PROCESS_SERVICE_INVALID"
 
@@ -66,17 +59,6 @@ class ServeSignerSocketOnce(Protocol):
         """Serve one signer request."""
 
 
-class EnforceSignerProcessIsolation(Protocol):
-    def __call__(
-        self,
-        policy: PeerCredentialPolicy,
-        *,
-        expected_signer_uid: int,
-        expected_signer_gid: int,
-    ) -> SignerProcessIsolationReceipt:
-        """Apply and verify the E0 process boundary."""
-
-
 @dataclass(frozen=True)
 class IsolatedSignerProcessEntryPointConfig:
     """Configuration supplied by the future isolated signer process owner."""
@@ -85,8 +67,6 @@ class IsolatedSignerProcessEntryPointConfig:
     socket_path: Path | str | None
     key_provider_profile: SignerKeyProviderProfile
     peer_policy: PeerCredentialPolicy
-    expected_signer_uid: int | None = None
-    expected_signer_gid: int | None = None
     provider_mode: str = PROVIDER_MODE_TEST_ONLY_DRYRUN
     allow_test_only_key_material: bool = False
     permission_snapshot_fresh: bool = False
@@ -125,22 +105,16 @@ def run_reddog_isolated_signer_process_once(
     resolver: SignerKeyResolver,
     *,
     serve_once: ServeSignerSocketOnce = serve_reddog_isolated_signer_socket_once,
-    enforce_isolation: EnforceSignerProcessIsolation = enforce_signer_process_isolation,
     ready_callback: Optional[Callable[[], None]] = None,
 ) -> IsolatedSignerProcessEntryPointResult:
     """Compose the one-shot signer service with injected dry-run dependencies."""
 
     if not isinstance(config, IsolatedSignerProcessEntryPointConfig):
         return _reject(FAIL_SIGNER_PROCESS_CONFIG_INVALID)
+    if config.provider_mode != PROVIDER_MODE_TEST_ONLY_DRYRUN:
+        return _reject(FAIL_SIGNER_PROCESS_CONFIG_INVALID)
     if not _peer_policy_valid(config.peer_policy):
         return _reject(FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID)
-
-    isolation_receipt = _production_isolation_receipt(config, enforce_isolation)
-    if isolation_receipt is not None and isolation_receipt.accepted is not True:
-        return _reject(
-            FAIL_SIGNER_PROCESS_ISOLATION_REJECTED,
-            process_isolation_receipt=isolation_receipt.to_dict(),
-        )
 
     key_result = build_signer_backend_from_provider(
         config.key_provider_profile,
@@ -175,9 +149,7 @@ def run_reddog_isolated_signer_process_once(
         rejection_reasons=(),
         key_provider_receipt=key_receipt,
         service_result=service_receipt,
-        process_isolation_receipt=(
-            isolation_receipt.to_dict() if isolation_receipt is not None else None
-        ),
+        process_isolation_receipt=None,
     )
 
 
@@ -194,29 +166,6 @@ def _reject(
         key_provider_receipt=key_provider_receipt or {},
         service_result=service_result,
         process_isolation_receipt=process_isolation_receipt,
-    )
-
-
-def _production_isolation_receipt(
-    config: IsolatedSignerProcessEntryPointConfig,
-    enforce_isolation: EnforceSignerProcessIsolation,
-) -> SignerProcessIsolationReceipt | None:
-    if config.provider_mode == PROVIDER_MODE_TEST_ONLY_DRYRUN:
-        return None
-    try:
-        result = enforce_isolation(
-            config.peer_policy,
-            expected_signer_uid=config.expected_signer_uid,
-            expected_signer_gid=config.expected_signer_gid,
-        )
-    except Exception:
-        return SignerProcessIsolationReceipt(
-            False, (FAIL_SIGNER_PROCESS_ISOLATION_REJECTED,), None, None,
-            False, False, False, False, False, False, False,
-        )
-    return result if isinstance(result, SignerProcessIsolationReceipt) else SignerProcessIsolationReceipt(
-        False, (FAIL_SIGNER_PROCESS_ISOLATION_REJECTED,), None, None,
-        False, False, False, False, False, False, False,
     )
 
 
@@ -256,7 +205,6 @@ def _is_ascii(value: str) -> bool:
 __all__ = [
     "FAIL_SIGNER_PROCESS_CONFIG_INVALID",
     "FAIL_SIGNER_PROCESS_KEY_PROVIDER_REJECTED",
-    "FAIL_SIGNER_PROCESS_ISOLATION_REJECTED",
     "FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID",
     "FAIL_SIGNER_PROCESS_SERVICE_INVALID",
     "FAIL_SIGNER_PROCESS_SERVICE_REJECTED",

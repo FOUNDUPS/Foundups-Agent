@@ -82,13 +82,13 @@ rotation therefore rejects until a supervised restart. The production isolated
 signer applies its Linux E0 boundary before key resolution: distinct non-root
 UID/GID matching the root-owned v2 owner config, YAMA ptrace controls, no
 `CAP_SYS_PTRACE`, disabled core/dumpable state, and a cleared inherited
-environment. The legacy runtime CLI always rejects before authority, resolver,
-or socket access; only the stable system-service entrypoint is production.
-Test-only dry-run mode is non-authoritative.
-Missing
-authority leaves unrelated signer operations available while every
-verified-outcome request fails closed. Owner, signer-generation, key, expiry,
-revocation, replay-store, and grant mismatches reject before key resolution.
+environment. The legacy CLI and one-shot isolated-process composer reject every
+non-test provider before authority, resolver, or socket access. Only the stable
+service is production; it derives manifest, outcome authority, owner ID, and
+signer UID/GID from one authenticated v2 snapshot. Legacy v1 cannot start it;
+test-only dry-run is non-authoritative. Missing outcome authority leaves
+unrelated signer operations available while every outcome request fails closed.
+Owner, generation, key, expiry, revocation, replay, or grant mismatches reject.
 Resident production admission remains blocked until the root service is deployed
 and independent verifier runtimes issue both grant signatures. Staged authority
 envelopes remain non-consumable until exact activation. PatternMemory admission

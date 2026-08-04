@@ -27,9 +27,9 @@
 - Proved a signer process observes a root-config revocation written after
   startup, and that grant expiry uses current signer time rather than the
   caller's signed-request timestamp.
-- Proved bootstrap derives owner identity from authenticated generation
-  selection. Outcome signing stays fail closed without root authority while
-  unrelated signer operations remain available.
+- Proved production bootstrap uses one root-owned v2 snapshot for manifest, outcome
+  authority, owner ID, and UID/GID; rotation cannot mix generations, v1 and one-shot
+  WSP71 reject before effects, and policy-absent signer operations remain available.
 - Proved the checked-in backend manifest includes the root-authority module
   through the stable signer entrypoint's dependency closure.
 

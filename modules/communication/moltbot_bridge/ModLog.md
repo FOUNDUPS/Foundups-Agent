@@ -29,9 +29,9 @@
   production WSP71 resolution now requires the exact root-owned non-root signer
   UID/GID, YAMA ptrace enforcement, no `CAP_SYS_PTRACE`, disabled core
   dumps/dumpability, and a cleared inherited environment.
-- Retired the older signer runtime CLI as an unconditional structured reject.
-  The root-owned stable system-service entrypoint is now the only production
-  path and performs isolation before constructing any secret resolver.
+- Retired the old CLI and one-shot WSP71 composer; only the stable service is production.
+  One immutable v2 read supplies manifest, dormant outcome authority, owner ID, and
+  UID/GID before isolation; v1 is migration-only and policy-absent generations get no capability.
 - Production remains fail closed until the root service is deployed with a
   root-owned config and independently co-signed verifier grants. This slice adds
   no learning candidate, Brain/roadmap write, HoloIndex mutation, repository,
@@ -60,8 +60,8 @@
 - Extracted exact runtime/policy/peer matching into a bounded module. The new
   authority modules remain below WSP 62 limits; inherited signer transaction
   hosts carry exact, expiring no-growth ceilings.
-- Preserved v1 signer compatibility: absent outcome authority blocks only
-  verified-outcome signing, not unrelated E0 operations.
+- Preserved unrelated signer operations when a generation omits the outcome
+  policy; the root-owned v2 config remains mandatory for production OS identity.
 - Hardened the backend manifest generator so Python files named as static
   runtime roots contribute their complete import closure. Signer authority
   dependencies are now content-bound rather than merely reachable.

@@ -7,6 +7,7 @@ import os
 import stat
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -116,6 +117,42 @@ _OUTCOME_OWNER_FIELDS = frozenset(
 )
 
 
+@dataclass(frozen=True)
+class SystemServiceStartupSelection:
+    """One immutable startup view derived from one authenticated owner read."""
+
+    owner_config_id: str
+    manifest_selection: object
+    manifest_selection_boundary: Any
+    verified_outcome_authority: RootVerifiedOutcomeSigningAuthority
+    signer_uid: int
+    signer_gid: int
+
+
+def load_system_service_startup_selection(
+    *, owner_config_path: Path | str, repo_root: Path
+) -> SystemServiceStartupSelection:
+    """Load all production signer authority from one root-owned v2 snapshot."""
+
+    repo = Path(repo_root).resolve()
+    owner = _load_owner_config(owner_config_path, repo=repo)
+    if owner.get("schema_version") != SCHEMA_VERSION_V2:
+        raise RuntimeArtifactManifestError("signer_owner_config_v2_required")
+    manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
+    authority = _verified_outcome_authority_from_owner(
+        owner, repo=repo, now_epoch=int(time.time())
+    )
+    signer_uid, signer_gid = _signer_identity_from_owner(owner)
+    return SystemServiceStartupSelection(
+        owner_config_id=str(owner["config_id"]),
+        manifest_selection=manifest,
+        manifest_selection_boundary=boundary,
+        verified_outcome_authority=authority,
+        signer_uid=signer_uid,
+        signer_gid=signer_gid,
+    )
+
+
 def load_system_service_manifest_selection(
     *,
     owner_config_path: Path | str,
@@ -127,6 +164,21 @@ def load_system_service_manifest_selection(
 
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
+    return _manifest_selection_from_owner(
+        owner,
+        repo=repo,
+        config_path=config_path,
+        run_packet_path=run_packet_path,
+    )
+
+
+def _manifest_selection_from_owner(
+    owner: Mapping[str, Any],
+    *,
+    repo: Path,
+    config_path: Path | None = None,
+    run_packet_path: Path | None = None,
+) -> tuple[object, Any]:
     runtime = validate_runtime_root_path(owner["runtime_root"], repo_root=repo)
     _require_cli_paths(runtime, config_path, run_packet_path)
     verifier_authority, verifier_boundary = (
@@ -148,18 +200,14 @@ def load_system_service_manifest_selection(
         verifier_authority=verifier_authority,
         verifier_boundary=verifier_boundary,
     )
-    owner_authority, owner_boundary = (
-        _issue_current_generation_launch_owner_authority(
-            repo_root=repo,
-            runtime_root=runtime,
-            anchor_id=str(owner["anchor_id"]),
-            authenticator_id=verifier.authenticator_id,
-            high_water_store_id=str(owner["high_water_store_id"]),
-            high_water_durability_receipt_id=str(
-                owner["high_water_durability_receipt_id"]
-            ),
-            owner_config_id=str(owner["config_id"]),
-        )
+    owner_authority, owner_boundary = _issue_current_generation_launch_owner_authority(
+        repo_root=repo,
+        runtime_root=runtime,
+        anchor_id=str(owner["anchor_id"]),
+        authenticator_id=verifier.authenticator_id,
+        high_water_store_id=str(owner["high_water_store_id"]),
+        high_water_durability_receipt_id=str(owner["high_water_durability_receipt_id"]),
+        owner_config_id=str(owner["config_id"]),
     )
     boundary = create_current_generation_manifest_launch_selection_boundary(
         owner_authority=owner_authority,
@@ -175,14 +223,24 @@ def load_system_service_verified_outcome_signing_authority(
     owner_config_path: Path | str,
     repo_root: Path,
     now_epoch: int | None = None,
-) -> RootVerifiedOutcomeSigningAuthority | None:
+) -> RootVerifiedOutcomeSigningAuthority:
     """Load a signer capability backed only by the root authority socket."""
 
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
+    return _verified_outcome_authority_from_owner(
+        owner,
+        repo=repo,
+        now_epoch=int(time.time()) if now_epoch is None else now_epoch,
+    )
+
+
+def _verified_outcome_authority_from_owner(
+    owner: Mapping[str, Any], *, repo: Path, now_epoch: int
+) -> RootVerifiedOutcomeSigningAuthority:
     raw = owner.get("verified_outcome_authority")
-    if raw is None:
-        return None
+    if not isinstance(raw, Mapping):
+        raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
     assert isinstance(raw, Mapping)
     descriptor = raw["descriptor"]
     assert isinstance(descriptor, Mapping)
@@ -193,7 +251,7 @@ def load_system_service_verified_outcome_signing_authority(
     )
     return _create_service_backed_outcome_authority(
         descriptor,
-        now_epoch=int(time.time()) if now_epoch is None else now_epoch,
+        now_epoch=now_epoch,
         owner_config_id=str(owner["config_id"]),
         exchange=exchange,
     )
@@ -205,6 +263,10 @@ def load_system_service_signer_identity(
     """Load the exact root-authorized signer process identity."""
 
     owner = _load_owner_config(owner_config_path, repo=Path(repo_root).resolve())
+    return _signer_identity_from_owner(owner)
+
+
+def _signer_identity_from_owner(owner: Mapping[str, Any]) -> tuple[int, int]:
     raw = owner.get("verified_outcome_authority")
     if not isinstance(raw, Mapping):
         raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
@@ -223,6 +285,7 @@ def load_root_authority_service_dependencies(
     raw = owner.get("verified_outcome_authority")
     if not isinstance(raw, Mapping):
         raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
+
     def supply() -> RootAuthoritySnapshot:
         current = _load_owner_config(owner_config_path, repo=repo)
         current_raw = current.get("verified_outcome_authority")
@@ -263,9 +326,7 @@ def _build_generation_reader(
         allowed_root=owner["witness_root"],
         repo_root=repo,
         store_id=str(owner["witness_store_id"]),
-        durability_receipt_id=str(
-            owner["witness_durability_receipt_id"]
-        ),
+        durability_receipt_id=str(owner["witness_durability_receipt_id"]),
     )
     binding = _witness_binding(owner, runtime=runtime)
     high_water = AtomicSignerRuntimeGenerationHighWaterReader(
@@ -273,18 +334,14 @@ def _build_generation_reader(
         allowed_root=owner["high_water_root"],
         repo_root=repo,
         store_id=str(owner["high_water_store_id"]),
-        durability_receipt_id=str(
-            owner["high_water_durability_receipt_id"]
-        ),
+        durability_receipt_id=str(owner["high_water_durability_receipt_id"]),
         verifier_authority=verifier_authority,
         verifier_authority_boundary=verifier_boundary,
         generation_witness_reader=witness,
         generation_witness_binding=binding,
     )
     high_authority, high_boundary = (
-        create_signer_runtime_generation_high_water_reader_authority(
-            high_water
-        )
+        create_signer_runtime_generation_high_water_reader_authority(high_water)
     )
     reader = DurableSignerRuntimeGenerationReader(
         owner["anchor_path"],
@@ -310,41 +367,29 @@ def _witness_binding(
         key_epoch=str(owner["generation_key_epoch"]),
         runtime_root_digest=raw_digest(str(runtime).encode("utf-8")),
         high_water_store_id=str(owner["high_water_store_id"]),
-        high_water_durability_receipt_id=str(
-            owner["high_water_durability_receipt_id"]
-        ),
+        high_water_durability_receipt_id=str(owner["high_water_durability_receipt_id"]),
         witness_store_id=str(owner["witness_store_id"]),
-        witness_durability_receipt_id=str(
-            owner["witness_durability_receipt_id"]
-        ),
+        witness_durability_receipt_id=str(owner["witness_durability_receipt_id"]),
     )
 
 
-def _load_owner_config(
-    path: Path | str, *, repo: Path
-) -> dict[str, Any]:
+def _load_owner_config(path: Path | str, *, repo: Path) -> dict[str, Any]:
     target = Path(path)
     if not target.is_absolute():
         raise RuntimeArtifactManifestError("signer_owner_config_not_absolute")
     root = validate_runtime_root_path(target.parent, repo_root=repo)
-    target = validate_runtime_artifact_path(
-        target, allowed_root=root, repo_root=repo
-    )
+    target = validate_runtime_artifact_path(target, allowed_root=root, repo_root=repo)
     raw = _read_root_owned_bytes(target, root)
     try:
         value = json.loads(raw.decode("ascii"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise RuntimeArtifactManifestError(
-            "signer_owner_config_malformed"
-        ) from exc
+        raise RuntimeArtifactManifestError("signer_owner_config_malformed") from exc
     return _validate_owner_config(value, repo=repo, owner_root=root)
 
 
 def _read_root_owned_bytes(target: Path, root: Path) -> bytes:
     if not sys.platform.startswith("linux"):
-        raise RuntimeArtifactManifestError(
-            "signer_owner_linux_service_required"
-        )
+        raise RuntimeArtifactManifestError("signer_owner_linux_service_required")
     try:
         return _read_root_owned_linux_bytes(target, root)
     except OSError as exc:
@@ -362,9 +407,7 @@ def _read_root_owned_linux_bytes(target: Path, root: Path) -> bytes:
         | getattr(os, "O_NOFOLLOW", 0)
     )
     file_flags = (
-        os.O_RDONLY
-        | getattr(os, "O_CLOEXEC", 0)
-        | getattr(os, "O_NOFOLLOW", 0)
+        os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
     )
     directory_fd = os.open(root, directory_flags)
     try:
@@ -400,9 +443,7 @@ def _require_root_directory_fd(file_descriptor: int) -> None:
         or metadata.st_uid != ROOT_UID
         or stat.S_IMODE(metadata.st_mode) & 0o022
     ):
-        raise RuntimeArtifactManifestError(
-            "signer_owner_config_permissions_invalid"
-        )
+        raise RuntimeArtifactManifestError("signer_owner_config_permissions_invalid")
 
 
 def _require_root_file_fd(file_descriptor: int) -> None:
@@ -412,9 +453,7 @@ def _require_root_file_fd(file_descriptor: int) -> None:
         or metadata.st_uid != ROOT_UID
         or stat.S_IMODE(metadata.st_mode) & 0o022
     ):
-        raise RuntimeArtifactManifestError(
-            "signer_owner_config_permissions_invalid"
-        )
+        raise RuntimeArtifactManifestError("signer_owner_config_permissions_invalid")
 
 
 def _read_bounded_fd(file_descriptor: int) -> bytes:
@@ -441,7 +480,10 @@ def _validate_owner_config(
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     schema = value.get("schema_version")
     expected_fields = FIELDS if schema == SCHEMA_VERSION else V2_FIELDS
-    if schema not in {SCHEMA_VERSION, SCHEMA_VERSION_V2} or set(value) != expected_fields:
+    if (
+        schema not in {SCHEMA_VERSION, SCHEMA_VERSION_V2}
+        or set(value) != expected_fields
+    ):
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     checked = dict(value)
     expected_id = digest(
@@ -449,16 +491,14 @@ def _validate_owner_config(
     )
     if checked["config_id"] != expected_id:
         raise RuntimeArtifactManifestError("signer_owner_config_id_invalid")
-    if checked["repo_root_digest"] != raw_digest(
-        str(repo).encode("utf-8")
-    ):
-        raise RuntimeArtifactManifestError(
-            "signer_owner_repo_binding_mismatch"
-        )
+    if checked["repo_root_digest"] != raw_digest(str(repo).encode("utf-8")):
+        raise RuntimeArtifactManifestError("signer_owner_repo_binding_mismatch")
     _validate_owner_text_and_digests(checked)
     _validate_owner_paths(checked, repo=repo, owner_root=owner_root)
     if schema == SCHEMA_VERSION_V2:
-        _validate_outcome_authority_owner_config(checked, repo=repo, owner_root=owner_root)
+        _validate_outcome_authority_owner_config(
+            checked, repo=repo, owner_root=owner_root
+        )
     return checked
 
 
@@ -488,17 +528,11 @@ def _validate_owner_paths(
     value: Mapping[str, Any], *, repo: Path, owner_root: Path
 ) -> None:
     runtime = validate_runtime_root_path(value["runtime_root"], repo_root=repo)
-    high_root = validate_runtime_root_path(
-        value["high_water_root"], repo_root=repo
-    )
-    witness_root = validate_runtime_root_path(
-        value["witness_root"], repo_root=repo
-    )
+    high_root = validate_runtime_root_path(value["high_water_root"], repo_root=repo)
+    witness_root = validate_runtime_root_path(value["witness_root"], repo_root=repo)
     roots = (runtime, high_root, witness_root)
     if any(
-        first == second
-        or first in second.parents
-        or second in first.parents
+        first == second or first in second.parents or second in first.parents
         for first, second in (
             (runtime, high_root),
             (runtime, witness_root),
@@ -575,9 +609,7 @@ def _validated_outcome_owner_paths(
     raw: Mapping[str, Any], *, repo: Path
 ) -> dict[str, Path]:
     roots = {
-        prefix: validate_runtime_root_path(
-            raw[f"{prefix}_root"], repo_root=repo
-        )
+        prefix: validate_runtime_root_path(raw[f"{prefix}_root"], repo_root=repo)
         for prefix in ("state", "state_witness", "installation")
     }
     expected = {
@@ -590,9 +622,7 @@ def _validated_outcome_owner_paths(
             raw[f"{prefix}_path"], allowed_root=root, repo_root=repo
         )
         if path != root / expected[prefix]:
-            raise RuntimeArtifactManifestError(
-                "verified_outcome_owner_state_invalid"
-            )
+            raise RuntimeArtifactManifestError("verified_outcome_owner_state_invalid")
     return roots
 
 
@@ -609,14 +639,16 @@ def _validate_outcome_authority_root_separation(
         for name in ("runtime_root", "high_water_root", "witness_root")
     ) + (owner_root,)
     if any(
-        first == second
-        or first in second.parents
-        or second in first.parents
+        first == second or first in second.parents or second in first.parents
         for first, second in (
             (state_root, witness_root),
             (state_root, installation_root),
             (witness_root, installation_root),
-            *((root, other) for root in (state_root, witness_root, installation_root) for other in existing_roots),
+            *(
+                (root, other)
+                for root in (state_root, witness_root, installation_root)
+                for other in existing_roots
+            ),
         )
     ):
         raise RuntimeArtifactManifestError("verified_outcome_owner_root_overlap")
@@ -630,17 +662,13 @@ def _require_cli_paths(
     if config_path is None and run_packet_path is None:
         return
     if config_path is None or run_packet_path is None:
-        raise RuntimeArtifactManifestError(
-            "signer_owner_cli_path_mismatch"
-        )
+        raise RuntimeArtifactManifestError("signer_owner_cli_path_mismatch")
     expected = (
         (Path(config_path).resolve(), runtime / CONFIG_FILENAME),
         (Path(run_packet_path).resolve(), runtime / RUN_PACKET_FILENAME),
     )
     if any(actual != wanted for actual, wanted in expected):
-        raise RuntimeArtifactManifestError(
-            "signer_owner_cli_path_mismatch"
-        )
+        raise RuntimeArtifactManifestError("signer_owner_cli_path_mismatch")
 
 
 def _ascii(value: object) -> bool:
@@ -656,7 +684,10 @@ __all__ = [
     "RootAuthorityServiceDependencies",
     "SCHEMA_VERSION",
     "SCHEMA_VERSION_V2",
+    "SystemServiceStartupSelection",
     "load_system_service_manifest_selection",
+    "load_system_service_signer_identity",
+    "load_system_service_startup_selection",
     "load_system_service_verified_outcome_signing_authority",
     "load_root_authority_service_dependencies",
 ]
