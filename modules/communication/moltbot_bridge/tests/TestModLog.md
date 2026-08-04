@@ -14,6 +14,10 @@
   multi-capability Brain admission, and trusted use-time clocks. Production
   activation remains blocked because no independently authenticated durable
   verifier-authority source exists.
+- Security re-review removed hash-shaped legacy authorization, proved staged
+  PatternMemory rows are invisible until authority activation, exercises
+  deterministic retry after an activation interruption, and rejects a pre-seeded
+  conflicting row instead of trusting its record identifier.
 
 ## 2026-08-04: Memex supply authenticity regressions
 

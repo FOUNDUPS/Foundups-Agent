@@ -3,7 +3,12 @@
 ## 2026-08-04: Verified-outcome runtime authority binding (partial)
 - Extended the draft verified-outcome rehydration foundation with a root-confined
   evidence and replay namespace in the existing authority runtime store. Signed
-  publication is staged and non-consumable until exact PatternMemory admission.
+  publication is staged and non-consumable until its exact activation transition.
+- Removed the unauthenticated legacy queue downgrade. Publisher-backed outcomes
+  now stage in an invisible table inside the existing PatternMemory database,
+  activate signed authority, then atomically become recallable. Retries roll
+  forward deterministically, and conflicting pre-seeded rows fail exact canonical
+  readback instead of satisfying admission by identifier alone.
 - Added committed-profile key resolution, revocation/freshness checks, exact
   FoundUp/snapshot/head/content/work/slice/job/worker/verifier/runtime lineage, and
   opaque one-use capabilities consumed by resident FoundUp Brain assembly.

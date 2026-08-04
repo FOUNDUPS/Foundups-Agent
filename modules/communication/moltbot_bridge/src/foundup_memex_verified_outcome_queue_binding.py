@@ -17,12 +17,6 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_run
 )
 
 
-LEGACY_COMPATIBILITY_SCHEMA_VERSION = (
-    "foundup_memex_verified_outcome_legacy_compatibility.v1"
-)
-LEGACY_COMPATIBILITY_MODE = "AUTHENTICATED_AUTHORITATIVE_WORK_STATE"
-
-
 def derive_verified_outcome_admission(
     chain_state: Mapping[str, Any],
     work_state_snapshot: Mapping[str, Any],
@@ -49,9 +43,7 @@ def derive_verified_outcome_admission(
     if runtime_binding_state == "PARTIAL":
         return None
     if runtime_binding_state == "ABSENT":
-        if not _legacy_compatibility_enabled(work_state_snapshot):
-            return None
-        return _legacy_admission(gate_receipt, work_order_id)
+        return None
     if not verifier_receipt or not now_iso:
         return None
     binding = _outcome_binding(queue_item, gate_receipt, verifier_receipt, work_order_id)
@@ -75,38 +67,6 @@ def _runtime_binding_state(queue_item: Mapping[str, Any]) -> str:
     if any(present) and not all(present):
         return "PARTIAL"
     return "COMPLETE" if all(present) else "ABSENT"
-
-
-def _legacy_compatibility_enabled(snapshot: Mapping[str, Any]) -> bool:
-    value = snapshot.get("verified_outcome_legacy_compatibility")
-    if not isinstance(value, Mapping):
-        return False
-    return bool(
-        set(value)
-        == {"schema_version", "mode", "enabled", "authorization_receipt_id"}
-        and value.get("schema_version") == LEGACY_COMPATIBILITY_SCHEMA_VERSION
-        and value.get("mode") == LEGACY_COMPATIBILITY_MODE
-        and value.get("enabled") is True
-        and str(value.get("authorization_receipt_id") or "").startswith("sha256:")
-        and len(str(value.get("authorization_receipt_id") or "")) == 71
-    )
-
-
-def _legacy_admission(
-    gate: Mapping[str, Any], work_order_id: str
-) -> Mapping[str, Any]:
-    return {
-        "work_order_id": work_order_id,
-        "admission_metadata": {
-            "source": "resident_queue_derived_pattern_memory_admission",
-            "gate_id": str(gate.get("gate_id") or ""),
-            "ratchet_id": str(gate.get("ratchet_id") or ""),
-            "verifier_receipt_id": str(gate.get("verifier_receipt_id") or ""),
-            "held_out_suite_id": str(gate.get("held_out_suite_id") or ""),
-            "held_out_suite_digest": str(gate.get("held_out_suite_digest") or ""),
-            "candidate_head_sha": str(gate.get("candidate_head_sha") or ""),
-        },
-    }
 
 
 def resolve_verified_outcome_publisher(

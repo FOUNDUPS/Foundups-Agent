@@ -12,6 +12,7 @@ from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sin
     REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY,
     PatternMemorySinkConfigurationError,
     build_reddog_verified_pattern_memory_sink,
+    reddog_verified_pattern_memory_record_id,
 )
 from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
 
@@ -129,6 +130,54 @@ def test_sink_is_idempotent_for_same_verified_outcome_record(tmp_path: Path) -> 
     second = sink.store_verified_outcome(_record())
 
     assert second == first
+
+
+def test_staged_outcome_is_invisible_until_activation(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    sink = build_reddog_verified_pattern_memory_sink(
+        repo_root=repo,
+        db_path=tmp_path / "runtime" / "pattern_memory.db",
+    )
+    assert sink is not None
+
+    record_id = sink.stage_verified_outcome(_record())
+
+    memory = PatternMemory(db_path=sink.db_path)
+    try:
+        assert memory.recall_successful_patterns("REDDOG_TEST_SLICE_PHASE1") == []
+    finally:
+        memory.close()
+    assert sink.load_verified_outcome(record_id) is None
+
+    assert sink.activate_verified_outcome(record_id) == record_id
+    assert sink.load_verified_outcome(record_id) == _record()
+
+
+def test_preseeded_conflicting_record_cannot_satisfy_idempotent_store(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    sink = build_reddog_verified_pattern_memory_sink(
+        repo_root=repo,
+        db_path=tmp_path / "runtime" / "pattern_memory.db",
+    )
+    assert sink is not None
+    record = _record()
+    record_id = reddog_verified_pattern_memory_record_id(record)
+    sink.store_verified_outcome(record)
+
+    memory = PatternMemory(db_path=sink.db_path)
+    try:
+        memory.conn.execute(
+            "UPDATE skill_outcomes SET output_result = ? WHERE execution_id = ?",
+            (json.dumps(_record(work_order_id="attacker")), record_id),
+        )
+        memory.conn.commit()
+    finally:
+        memory.close()
+
+    with pytest.raises(ValueError, match="verified_outcome_existing_record_conflict"):
+        sink.stage_verified_outcome(record)
 
 
 def test_sink_rejects_secret_bearing_verified_outcome_record(tmp_path: Path) -> None:
