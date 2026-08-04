@@ -11,6 +11,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
     RootVerifiedOutcomeAuthorityState,
+    root_authority_state_binding_digest,
     validate_root_authority_state_paths,
 )
 from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
@@ -68,6 +69,21 @@ def build_root_authority_service_dependencies(
     )
 
 
+def state_binding_from_owner_config(
+    raw: Mapping[str, Any], *, repo: Path
+) -> str:
+    paths = _state_paths(raw, repo=repo)
+    return root_authority_state_binding_digest(
+        {
+            prefix: {
+                "root": paths[f"{prefix}_root"],
+                "path": paths[f"{prefix}_path"],
+                "store_id": raw[f"{prefix}_store_id"],
+                "durability_receipt_id": raw[f"{prefix}_durability_receipt_id"],
+            }
+            for prefix in ("state", "state_witness", "installation")
+        }
+    )
 def _state_store(
     raw: Mapping[str, Any],
     *,
@@ -98,4 +114,5 @@ def _state_paths(raw: Mapping[str, Any], *, repo: Path) -> dict[str, Path]:
 __all__ = [
     "RootAuthorityServiceDependencies",
     "build_root_authority_service_dependencies",
+    "state_binding_from_owner_config",
 ]

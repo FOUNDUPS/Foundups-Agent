@@ -26,6 +26,8 @@ GENERATION_BINDING = "sha256:" + hashlib.sha256(
 INSTALLATION_BINDING = "sha256:" + hashlib.sha256(
     b"foundup-verified-outcome-root-authority-installation.v1"
 ).hexdigest()
+_STATE_BINDING_NAMES = ("state", "state_witness", "installation")
+_STATE_BINDING_FIELDS = ("root", "path", "store_id", "durability_receipt_id")
 
 
 class RootVerifiedOutcomeAuthorityState:
@@ -61,6 +63,16 @@ class RootVerifiedOutcomeAuthorityState:
         self._repo_root = Path(repo_root).resolve()
         self._require_ownership = require_root_ownership
         self._lock_path = first / ".verified-outcome-root-authority.lock"
+        self._state_binding_digest = root_authority_state_binding_digest(
+            {
+                name: _store_binding(store)
+                for name, store in zip(
+                    _STATE_BINDING_NAMES,
+                    (primary, witness, installation),
+                    strict=True,
+                )
+            }
+        )
 
     @property
     def store_id(self) -> str:
@@ -85,6 +97,10 @@ class RootVerifiedOutcomeAuthorityState:
     @property
     def witness_durability_receipt_id(self) -> str:
         return self._witness.durability_receipt_id
+
+    @property
+    def state_binding_digest(self) -> str:
+        return self._state_binding_digest
 
     def load(self, binding_digest: str) -> ProposalReplayHighWater | None:
         with self._lock():
@@ -251,6 +267,44 @@ def authorization_binding(authorization_id: str) -> str:
     ).hexdigest()
 
 
+def root_authority_state_binding_digest(
+    values: Mapping[str, Mapping[str, object]],
+) -> str:
+    """Bind the exact three-store identity used by one running service."""
+
+    if set(values) != set(_STATE_BINDING_NAMES):
+        raise ValueError("root_authority_state_binding_invalid")
+    normalized: dict[str, dict[str, str]] = {}
+    for name in _STATE_BINDING_NAMES:
+        item = values[name]
+        if not isinstance(item, Mapping) or set(item) != set(_STATE_BINDING_FIELDS):
+            raise ValueError("root_authority_state_binding_invalid")
+        root = Path(str(item["root"])).resolve()
+        path = Path(str(item["path"])).resolve()
+        store_id = str(item["store_id"])
+        receipt_id = str(item["durability_receipt_id"])
+        if path.parent != root or not store_id or not store_id.isascii() or not _sha256(receipt_id):
+            raise ValueError("root_authority_state_binding_invalid")
+        normalized[name] = {
+            "root": str(root),
+            "path": str(path),
+            "store_id": store_id,
+            "durability_receipt_id": receipt_id,
+        }
+    return "sha256:" + state_revision(
+        {"schema_version": "root_authority_state_binding.v1", "stores": normalized}
+    )
+
+
+def _store_binding(store: SqliteMonotonicAuthorityStore) -> dict[str, object]:
+    return {
+        "root": store.rollback_domain_root,
+        "path": store.path,
+        "store_id": store.store_id,
+        "durability_receipt_id": store.durability_receipt_id,
+    }
+
+
 def validate_root_authority_state_paths(
     *roots: Path | str,
     files: tuple[Path | str, ...] = (),
@@ -318,6 +372,7 @@ __all__ = [
     "INSTALLATION_BINDING",
     "RootVerifiedOutcomeAuthorityState",
     "authorization_binding",
+    "root_authority_state_binding_digest",
     "state_revision",
     "validate_root_authority_state_paths",
 ]

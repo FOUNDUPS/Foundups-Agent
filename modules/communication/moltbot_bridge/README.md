@@ -46,8 +46,9 @@ service admission and never executes packet argv. The signer-side E0 boundary
 now verifies one request-bound secret-access grant, atomically consumes durable
 replay state, resolves WSP71 keys for that sign only, and rechecks revocation,
 expiry, provider identity, and the returned signature. The stable entrypoint
-does not yet supply or compose this boundary, so production signing remains
-fail-closed. The owner-controlled E0 admission layer now binds one signed
+now applies the executable OS-isolation boundary before resolver construction.
+Its production WSP71 secret resolver remains unavailable, so production signing
+still fails closed. The owner-controlled E0 admission layer binds one signed
 policy to the exact current signer generation, key-reference digests,
 manifest-bound grant/revocation authorities, disjoint durable-state roots,
 operation/tier consensus rules, and rate limits. Its opaque one-use capability
@@ -74,6 +75,14 @@ provisioning event; later replay-store deletion cannot invoke the installer to
 reopen consumed grants. Runtime startup has no state-reset or initialization
 switch. The service loads no private signing key and grants no
 repository, queue, worker, PR, or merge authority.
+Each live owner-config reload also binds the resolved roots, database paths,
+store IDs, and durability receipts for all three state domains. Store rotation
+requires a supervised service restart; a running service never combines a new
+config with stores opened from an older config. Before any production WSP71
+key resolution, the existing isolated-signer entrypoint enforces a distinct
+non-root signer UID, YAMA ptrace protection, absence of `CAP_SYS_PTRACE`,
+`RLIMIT_CORE=0`, `PR_SET_DUMPABLE=0`, and a cleared inherited environment.
+Test-only dry-run keys remain non-authoritative and do not claim this boundary.
 
 `start operations` binds the production `reddog_operations` Skillz from the
 manifest-authenticated runtime before model selection or grounding. The

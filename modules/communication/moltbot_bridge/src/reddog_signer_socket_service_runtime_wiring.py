@@ -84,6 +84,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor 
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     KernelPeerCredentialAttestor,
     PeerCredentialPolicy,
+    rehydrate_peer_credential_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     ProposalReplayHighWaterStore,
@@ -1240,26 +1241,7 @@ def _profile(value: SignerKeyProviderProfile | Mapping[str, Any]) -> SignerKeyPr
 
 
 def _peer_policy(value: PeerCredentialPolicy | Mapping[str, Any]) -> PeerCredentialPolicy | None:
-    if isinstance(value, PeerCredentialPolicy):
-        return value
-    if not isinstance(value, Mapping):
-        return None
-    try:
-        uid_to_principal = {
-            int(uid): str(principal)
-            for uid, principal in dict(value.get("uid_to_principal") or {}).items()
-        }
-        allowed_gids = tuple(int(gid) for gid in tuple(value.get("allowed_gids") or ()))
-        return PeerCredentialPolicy(
-            uid_to_principal=uid_to_principal,
-            allowed_gids=allowed_gids,
-            transport=str(value.get("transport") or "unix_socket"),
-            credential_source_prefix=str(
-                value.get("credential_source_prefix") or "kernel_peer_credential"
-            ),
-        )
-    except Exception:
-        return None
+    return rehydrate_peer_credential_policy(value)
 
 
 def _peer_policy_valid(policy: PeerCredentialPolicy) -> bool:

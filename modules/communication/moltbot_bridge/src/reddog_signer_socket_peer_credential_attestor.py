@@ -14,7 +14,7 @@ from __future__ import annotations
 import socket
 import struct
 from dataclasses import dataclass, field
-from typing import Mapping, Optional, Protocol
+from typing import Any, Mapping, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
@@ -82,6 +82,32 @@ class KernelPeerCredentialAttestor:
     ) -> KernelPeerIdentity | None:
         identity, _error = _attest_identity_or_error(self.policy, connection)
         return identity
+
+
+def rehydrate_peer_credential_policy(
+    value: PeerCredentialPolicy | Mapping[str, Any],
+) -> PeerCredentialPolicy | None:
+    """Strictly rehydrate the shared peer policy used by signer gates."""
+
+    if isinstance(value, PeerCredentialPolicy):
+        return value if _policy_valid(value) else None
+    if not isinstance(value, Mapping):
+        return None
+    try:
+        policy = PeerCredentialPolicy(
+            uid_to_principal={
+                int(uid): str(principal)
+                for uid, principal in dict(value.get("uid_to_principal") or {}).items()
+            },
+            allowed_gids=tuple(int(gid) for gid in tuple(value.get("allowed_gids") or ())),
+            transport=str(value.get("transport") or "unix_socket"),
+            credential_source_prefix=str(
+                value.get("credential_source_prefix") or "kernel_peer_credential"
+            ),
+        )
+    except Exception:
+        return None
+    return policy if _policy_valid(policy) else None
 
 
 def _attest_identity_or_error(
@@ -176,4 +202,5 @@ __all__ = [
     "PEER_CREDENTIAL_SOURCE_GETPEEREID",
     "PEER_CREDENTIAL_SOURCE_SO_PEERCRED",
     "PeerCredentialPolicy",
+    "rehydrate_peer_credential_policy",
 ]

@@ -21,6 +21,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_system_service_entry
     _UnavailableSystemServiceResolver,
     _run_entrypoint_args,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
+    SignerProcessIsolationReceipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
+    PeerCredentialPolicy,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     FailClosedPrincipalKeyResolver,
 )
@@ -50,6 +56,17 @@ def _trusted_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW)
 
 
+def _isolation_receipt(accepted: bool) -> SignerProcessIsolationReceipt:
+    return SignerProcessIsolationReceipt(
+        accepted, (() if accepted else ("rejected",)), 1201, 1201,
+        accepted, accepted, accepted, accepted, accepted, accepted, accepted,
+    )
+
+
+def _accepted_isolation(_policy: PeerCredentialPolicy) -> SignerProcessIsolationReceipt:
+    return _isolation_receipt(True)
+
+
 def test_stable_entrypoint_selects_current_generation_and_serves_once(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -77,6 +94,7 @@ def test_stable_entrypoint_selects_current_generation_and_serves_once(
         emit=emitted.append,
         principal_key_resolver=FailClosedPrincipalKeyResolver(),
         proposal_replay_high_water_store=None,
+        process_isolation_gate=_accepted_isolation,
     )
 
     payload = json.loads(emitted[0])
@@ -87,6 +105,33 @@ def test_stable_entrypoint_selects_current_generation_and_serves_once(
     assert payload["no_serialized_argv_executed"] is True
     assert payload["no_signer_process_spawned"] is True
     assert payload["no_shell_invoked"] is True
+
+
+def test_system_service_isolation_rejects_before_resolver_or_socket(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    factory = CapturingResolverFactory(FakeResolver({}))
+    service = CapturingBoundedService()
+    emitted: list[str] = []
+
+    code = _run_entrypoint_args(
+        argparse.Namespace(
+            repo_root=str(prepared["harness"].repo_root),
+            owner_authority_config=str(prepared["owner_path"]),
+        ),
+        resolver_factory=factory,
+        serve_bounded=service,
+        emit=emitted.append,
+        principal_key_resolver=FailClosedPrincipalKeyResolver(),
+        proposal_replay_high_water_store=None,
+        process_isolation_gate=lambda _policy: _isolation_receipt(False),
+    )
+
+    assert code == 2
+    assert json.loads(emitted[0])["status"] == SYSTEM_SERVICE_ENTRYPOINT_REJECT
+    assert factory.calls == []
+    assert service.calls == []
 
 
 def test_alternate_owner_path_rejects_before_resolver_or_service(

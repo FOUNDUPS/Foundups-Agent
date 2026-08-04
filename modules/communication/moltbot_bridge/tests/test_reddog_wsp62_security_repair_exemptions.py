@@ -92,6 +92,10 @@ ROOT_OUTCOME_AUTHORITY_FILES = {
     "src/foundup_verified_outcome_root_authority_service_entrypoint.py",
     "src/foundup_verified_outcome_root_authority_socket_service.py",
     "src/foundup_verified_outcome_root_authority_state.py",
+    "src/reddog_isolated_signer_process_entrypoint.py",
+    "src/reddog_signer_process_isolation_gate.py",
+    "src/reddog_signer_socket_peer_credential_attestor.py",
+    "src/reddog_signer_socket_service_bootstrap_admission.py",
 }
 CURRENT_SECURITY_RUNTIME_FILES = {
     "scripts/run_task.py",

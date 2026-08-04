@@ -37,6 +37,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     initialize_root_authority_state,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
+    GENERATION_BINDING,
     RootVerifiedOutcomeAuthorityState,
     authorization_binding,
 )
@@ -127,12 +128,19 @@ def _state(
     return state, primary, witness, installation
 
 
-def _snapshot(descriptor: dict, owner_config_id: str | None = None):
+def _snapshot(
+    descriptor: dict,
+    owner_config_id: str | None = None,
+    state: RootVerifiedOutcomeAuthorityState | None = None,
+):
     return RootAuthoritySnapshot(
         owner_config_id=owner_config_id or _sha("owner-config"),
         authority_generation_sequence=descriptor[
             "authority_generation_sequence"
         ],
+        state_binding_digest=(
+            state.state_binding_digest if state is not None else _sha("state-binding")
+        ),
         signer_principal_id="reddog-e0-signer",
         signer_uid=1001,
         signer_gid=1001,
@@ -227,7 +235,7 @@ def _client_authority(
 def _runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     descriptor, grant, _legacy_store = _descriptor(tmp_path / "descriptor")
     state, primary, witness, installation = _state(tmp_path, descriptor)
-    current = {"snapshot": _snapshot(descriptor)}
+    current = {"snapshot": _snapshot(descriptor, state=state)}
     initialize_root_authority_state(state, current["snapshot"], now_epoch=NOW)
 
     def exchange(raw: bytes) -> bytes:
@@ -286,7 +294,7 @@ def test_real_linux_root_service_accepts_non_root_e0_signer(
         state, _primary, _witness, _installation = _state(base, descriptor)
         snapshot = RootAuthoritySnapshot(
             **{
-                **_snapshot(descriptor).__dict__,
+                **_snapshot(descriptor, state=state).__dict__,
                 "signer_uid": 65534,
                 "signer_gid": 65534,
             }
@@ -412,7 +420,7 @@ def test_revocation_between_reserve_and_commit_burns_grant(
     revoked["authority_generation_sequence"] = 2
     revoked["revoked_authorization_ids"] = [grant["authorization_id"]]
     revoked["descriptor_id"] = descriptor_id_for(revoked)
-    current["snapshot"] = _snapshot(revoked, _sha("owner-config-2"))
+    current["snapshot"] = _snapshot(revoked, _sha("owner-config-2"), state)
 
     with pytest.raises(ValueError, match="commit_rejected"):
         _commit(authority, reservation, _sha("signature"))
@@ -423,15 +431,15 @@ def test_revocation_between_reserve_and_commit_burns_grant(
 def test_authority_generation_rollback_rejects(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    descriptor, grant, _state_value, *_rest, current, authority = _runtime(
+    descriptor, grant, state, *_rest, current, authority = _runtime(
         tmp_path, monkeypatch
     )
     advanced = copy.deepcopy(descriptor)
     advanced["authority_generation_sequence"] = 2
     advanced["descriptor_id"] = descriptor_id_for(advanced)
-    current["snapshot"] = _snapshot(advanced, _sha("owner-config-2"))
+    current["snapshot"] = _snapshot(advanced, _sha("owner-config-2"), state)
     assert _reserve(authority, grant) is None
-    current["snapshot"] = _snapshot(descriptor)
+    current["snapshot"] = _snapshot(descriptor, state=state)
     assert _reserve(authority, grant) is None
 
 
@@ -450,23 +458,42 @@ def test_invalid_descriptor_cannot_advance_generation_fence(
     with pytest.raises(ValueError):
         _current_snapshot(
             state,
-            snapshot_supplier=lambda: _snapshot(invalid, owner_config_id),
+            snapshot_supplier=lambda: _snapshot(invalid, owner_config_id, state),
             now_epoch=NOW,
         )
 
     accepted = _current_snapshot(
         state,
-        snapshot_supplier=lambda: _snapshot(advanced, owner_config_id),
+        snapshot_supplier=lambda: _snapshot(advanced, owner_config_id, state),
         now_epoch=NOW,
     )
     assert accepted.authority_generation_sequence == 2
+
+
+def test_rotated_state_binding_rejects_before_generation_fence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    descriptor, _grant, state, *_rest = _runtime(tmp_path, monkeypatch)
+    advanced = copy.deepcopy(descriptor)
+    advanced["authority_generation_sequence"] = 2
+    advanced["descriptor_id"] = descriptor_id_for(advanced)
+    snapshot = _snapshot(advanced, _sha("owner-config-2"), state)
+    snapshot = RootAuthoritySnapshot(
+        **{**snapshot.__dict__, "state_binding_digest": _sha("rotated-state")}
+    )
+
+    with pytest.raises(ValueError, match="snapshot_binding_invalid"):
+        _current_snapshot(
+            state, snapshot_supplier=lambda: snapshot, now_epoch=NOW
+        )
+    assert state.load(GENERATION_BINDING).sequence == 1
 
 
 def test_wrong_kernel_peer_rejects_before_state_change(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     descriptor, grant, state, *_rest = _runtime(tmp_path, monkeypatch)
-    snapshot = _snapshot(descriptor)
+    snapshot = _snapshot(descriptor, state=state)
     good_authority = _client_authority(
         monkeypatch,
         descriptor,
@@ -488,7 +515,7 @@ def test_rotated_signer_uid_or_gid_rejects_current_request(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, peer: KernelPeerIdentity
 ) -> None:
     descriptor, grant, state, *_rest = _runtime(tmp_path, monkeypatch)
-    snapshot = _snapshot(descriptor)
+    snapshot = _snapshot(descriptor, state=state)
     authority = _client_authority(
         monkeypatch,
         descriptor,

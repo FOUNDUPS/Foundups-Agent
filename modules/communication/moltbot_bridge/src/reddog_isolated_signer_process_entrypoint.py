@@ -31,6 +31,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
     KernelPeerCredentialAttestor,
     PeerCredentialPolicy,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
+    SignerProcessIsolationReceipt,
+    enforce_signer_process_isolation,
+)
 
 
 SIGNER_PROCESS_ENTRYPOINT_SERVED = "SIGNER_PROCESS_ENTRYPOINT_SERVED"
@@ -39,6 +43,7 @@ SIGNER_PROCESS_ENTRYPOINT_REJECT = "SIGNER_PROCESS_ENTRYPOINT_REJECT"
 FAIL_SIGNER_PROCESS_CONFIG_INVALID = "FAIL_SIGNER_PROCESS_CONFIG_INVALID"
 FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID = "FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID"
 FAIL_SIGNER_PROCESS_KEY_PROVIDER_REJECTED = "FAIL_SIGNER_PROCESS_KEY_PROVIDER_REJECTED"
+FAIL_SIGNER_PROCESS_ISOLATION_REJECTED = "FAIL_SIGNER_PROCESS_ISOLATION_REJECTED"
 FAIL_SIGNER_PROCESS_SERVICE_REJECTED = "FAIL_SIGNER_PROCESS_SERVICE_REJECTED"
 FAIL_SIGNER_PROCESS_SERVICE_INVALID = "FAIL_SIGNER_PROCESS_SERVICE_INVALID"
 
@@ -59,6 +64,11 @@ class ServeSignerSocketOnce(Protocol):
         ready_callback: Optional[Callable[[], None]] = None,
     ) -> IsolatedSignerSocketServiceResult:
         """Serve one signer request."""
+
+
+class EnforceSignerProcessIsolation(Protocol):
+    def __call__(self, policy: PeerCredentialPolicy) -> SignerProcessIsolationReceipt:
+        """Apply and verify the E0 process boundary."""
 
 
 @dataclass(frozen=True)
@@ -86,6 +96,7 @@ class IsolatedSignerProcessEntryPointResult:
     rejection_reasons: tuple[str, ...]
     key_provider_receipt: dict[str, Any]
     service_result: Optional[dict[str, Any]]
+    process_isolation_receipt: Optional[dict[str, Any]] = None
     no_env_parsed: bool = True
     no_process_spawned: bool = True
     no_socket_bound_directly: bool = True
@@ -106,6 +117,7 @@ def run_reddog_isolated_signer_process_once(
     resolver: SignerKeyResolver,
     *,
     serve_once: ServeSignerSocketOnce = serve_reddog_isolated_signer_socket_once,
+    enforce_isolation: EnforceSignerProcessIsolation = enforce_signer_process_isolation,
     ready_callback: Optional[Callable[[], None]] = None,
 ) -> IsolatedSignerProcessEntryPointResult:
     """Compose the one-shot signer service with injected dry-run dependencies."""
@@ -114,6 +126,13 @@ def run_reddog_isolated_signer_process_once(
         return _reject(FAIL_SIGNER_PROCESS_CONFIG_INVALID)
     if not _peer_policy_valid(config.peer_policy):
         return _reject(FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID)
+
+    isolation_receipt = _production_isolation_receipt(config, enforce_isolation)
+    if isolation_receipt is not None and isolation_receipt.accepted is not True:
+        return _reject(
+            FAIL_SIGNER_PROCESS_ISOLATION_REJECTED,
+            process_isolation_receipt=isolation_receipt.to_dict(),
+        )
 
     key_result = build_signer_backend_from_provider(
         config.key_provider_profile,
@@ -127,15 +146,8 @@ def run_reddog_isolated_signer_process_once(
         return _reject(FAIL_SIGNER_PROCESS_KEY_PROVIDER_REJECTED, key_provider_receipt=key_receipt)
 
     try:
-        service_result = serve_once(
-            repo_root=config.repo_root,
-            socket_path=config.socket_path,
-            backend=key_result.backend,
-            peer_attestor=KernelPeerCredentialAttestor(config.peer_policy),
-            timeout_s=config.timeout_s,
-            max_request_bytes=config.max_request_bytes,
-            max_response_bytes=config.max_response_bytes,
-            ready_callback=ready_callback,
+        service_result = _invoke_signer_service(
+            config, key_result.backend, serve_once, ready_callback
         )
     except Exception:
         return _reject(FAIL_SIGNER_PROCESS_SERVICE_REJECTED, key_provider_receipt=key_receipt)
@@ -155,6 +167,9 @@ def run_reddog_isolated_signer_process_once(
         rejection_reasons=(),
         key_provider_receipt=key_receipt,
         service_result=service_receipt,
+        process_isolation_receipt=(
+            isolation_receipt.to_dict() if isolation_receipt is not None else None
+        ),
     )
 
 
@@ -162,6 +177,7 @@ def _reject(
     *reasons: str,
     key_provider_receipt: Optional[dict[str, Any]] = None,
     service_result: Optional[dict[str, Any]] = None,
+    process_isolation_receipt: Optional[dict[str, Any]] = None,
 ) -> IsolatedSignerProcessEntryPointResult:
     return IsolatedSignerProcessEntryPointResult(
         accepted=False,
@@ -169,6 +185,44 @@ def _reject(
         rejection_reasons=tuple(str(reason) for reason in reasons if reason),
         key_provider_receipt=key_provider_receipt or {},
         service_result=service_result,
+        process_isolation_receipt=process_isolation_receipt,
+    )
+
+
+def _production_isolation_receipt(
+    config: IsolatedSignerProcessEntryPointConfig,
+    enforce_isolation: EnforceSignerProcessIsolation,
+) -> SignerProcessIsolationReceipt | None:
+    if config.provider_mode == PROVIDER_MODE_TEST_ONLY_DRYRUN:
+        return None
+    try:
+        result = enforce_isolation(config.peer_policy)
+    except Exception:
+        return SignerProcessIsolationReceipt(
+            False, (FAIL_SIGNER_PROCESS_ISOLATION_REJECTED,), None, None,
+            False, False, False, False, False, False, False,
+        )
+    return result if isinstance(result, SignerProcessIsolationReceipt) else SignerProcessIsolationReceipt(
+        False, (FAIL_SIGNER_PROCESS_ISOLATION_REJECTED,), None, None,
+        False, False, False, False, False, False, False,
+    )
+
+
+def _invoke_signer_service(
+    config: IsolatedSignerProcessEntryPointConfig,
+    backend: Any,
+    serve_once: ServeSignerSocketOnce,
+    ready_callback: Optional[Callable[[], None]],
+) -> IsolatedSignerSocketServiceResult:
+    return serve_once(
+        repo_root=config.repo_root,
+        socket_path=config.socket_path,
+        backend=backend,
+        peer_attestor=KernelPeerCredentialAttestor(config.peer_policy),
+        timeout_s=config.timeout_s,
+        max_request_bytes=config.max_request_bytes,
+        max_response_bytes=config.max_response_bytes,
+        ready_callback=ready_callback,
     )
 
 
@@ -190,6 +244,7 @@ def _is_ascii(value: str) -> bool:
 __all__ = [
     "FAIL_SIGNER_PROCESS_CONFIG_INVALID",
     "FAIL_SIGNER_PROCESS_KEY_PROVIDER_REJECTED",
+    "FAIL_SIGNER_PROCESS_ISOLATION_REJECTED",
     "FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID",
     "FAIL_SIGNER_PROCESS_SERVICE_INVALID",
     "FAIL_SIGNER_PROCESS_SERVICE_REJECTED",

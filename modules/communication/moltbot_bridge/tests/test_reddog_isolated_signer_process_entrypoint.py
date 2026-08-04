@@ -15,6 +15,7 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_process_entrypoint import (
     FAIL_SIGNER_PROCESS_CONFIG_INVALID,
     FAIL_SIGNER_PROCESS_KEY_PROVIDER_REJECTED,
+    FAIL_SIGNER_PROCESS_ISOLATION_REJECTED,
     FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID,
     FAIL_SIGNER_PROCESS_SERVICE_INVALID,
     FAIL_SIGNER_PROCESS_SERVICE_REJECTED,
@@ -22,6 +23,9 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_process_ent
     SIGNER_PROCESS_ENTRYPOINT_SERVED,
     IsolatedSignerProcessEntryPointConfig,
     run_reddog_isolated_signer_process_once,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
+    SignerProcessIsolationReceipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_service import (
     SIGNER_SOCKET_SERVICE_REJECT,
@@ -196,6 +200,12 @@ def _request(public_key: str) -> SigningRequest:
     )
 
 
+def _accepted_isolation(_policy: PeerCredentialPolicy) -> SignerProcessIsolationReceipt:
+    return SignerProcessIsolationReceipt(
+        True, (), 1201, 1201, True, True, True, True, True, True, True
+    )
+
+
 def test_entrypoint_composes_key_provider_attestor_and_service() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
@@ -205,6 +215,7 @@ def test_entrypoint_composes_key_provider_attestor_and_service() -> None:
         _config(public_key),
         _resolver(private_key),
         serve_once=service,
+        enforce_isolation=_accepted_isolation,
     )
 
     assert result.accepted is True
@@ -215,9 +226,38 @@ def test_entrypoint_composes_key_provider_attestor_and_service() -> None:
     assert result.no_process_spawned is True
     assert len(service.calls) == 1
     backend = service.calls[0]["backend"]
-    response = backend.sign(_request(public_key), service.calls[0]["peer_attestor"].attest(_FakePeerCredSocket()))
+    response = backend.sign(
+        _request(public_key),
+        service.calls[0]["peer_attestor"].attest(_FakePeerCredSocket()),
+    )
     assert response.accepted is True
-    assert Ed25519SignatureVerifier().verify(public_key, _request(public_key).signing_input, response.signature) is True
+    assert Ed25519SignatureVerifier().verify(
+        public_key, _request(public_key).signing_input, response.signature
+    ) is True
+
+
+def test_production_isolation_rejects_before_key_resolution() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    resolver = _resolver(private_key)
+    resolver.resolve = lambda *_args, **_kwargs: pytest.fail("resolver called")  # type: ignore[method-assign]
+
+    result = run_reddog_isolated_signer_process_once(
+        _config(
+            public_key,
+            provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+        ),
+        resolver,
+        enforce_isolation=lambda _policy: SignerProcessIsolationReceipt(
+            False, ("failed",), None, None,
+            False, False, False, False, False, False, False,
+        ),
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_PROCESS_ISOLATION_REJECTED in result.rejection_reasons
+    assert result.key_provider_receipt == {}
 
 
 def test_entrypoint_accepts_wsp71_permissioned_provider_mode_without_test_override() -> None:
@@ -234,6 +274,7 @@ def test_entrypoint_accepts_wsp71_permissioned_provider_mode_without_test_overri
         ),
         _resolver(private_key),
         serve_once=service,
+        enforce_isolation=_accepted_isolation,
     )
 
     assert result.accepted is True

@@ -20,6 +20,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_dependency import (
     RootAuthorityServiceDependencies,
     build_root_authority_service_dependencies,
+    state_binding_from_owner_config,
 )
 
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water_reader import (
@@ -222,6 +223,9 @@ def load_root_authority_service_dependencies(
             owner_config_id=str(current["config_id"]),
             authority_generation_sequence=int(
                 descriptor["authority_generation_sequence"]
+            ),
+            state_binding_digest=state_binding_from_owner_config(
+                current_raw, repo=repo
             ),
             signer_principal_id=str(current_raw["signer_principal_id"]),
             signer_uid=int(current_raw["signer_uid"]),

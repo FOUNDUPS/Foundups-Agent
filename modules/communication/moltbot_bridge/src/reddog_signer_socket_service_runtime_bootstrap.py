@@ -15,7 +15,7 @@ import hashlib
 import hmac
 import json
 import sys
-from dataclasses import asdict, dataclass, replace
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
 
@@ -25,6 +25,18 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
 )
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     ProposalReplayHighWaterStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
+    enforce_signer_process_isolation,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import (
+    ProcessIsolationGate,
+    SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT,
+    SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
+    SignerSocketServiceRuntimeBootstrapResult,
+    bootstrap_runtime_result as _bootstrap_runtime_result,
+    reject_bootstrap as _reject,
+    require_process_isolation as _process_isolation_receipt,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
     VerifiedOutcomeSigningAuthority,
@@ -59,9 +71,6 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 )
 
 
-SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED"
-SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT"
-
 FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING"
 FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE"
 FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO"
@@ -71,6 +80,7 @@ FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH = (
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH"
 )
 FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED = "FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED"
+FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION = "FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION"
 FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION = (
     "FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION"
 )
@@ -82,31 +92,6 @@ BootstrapLoadResult = tuple[
     str | None,
     "SignerSocketServiceRuntimeBootstrapResult | None",
 ]
-
-
-@dataclass(frozen=True)
-class SignerSocketServiceRuntimeBootstrapResult:
-    """Audit-safe result for signer socket service runtime bootstrap."""
-
-    accepted: bool
-    status: str
-    rejection_reasons: tuple[str, ...]
-    config_path: Optional[str] = None
-    config_digest: Optional[str] = None
-    runtime_result: Optional[dict[str, Any]] = None
-    no_env_parsed: bool = True
-    no_process_spawned: bool = True
-    no_runtime_secret_file_loaded: bool = True
-    no_repo_mutation_performed: bool = True
-    no_openclaw_enqueue_performed: bool = True
-    no_hermes_dispatch_performed: bool = True
-    no_pr_created: bool = True
-    no_reward_settlement_performed: bool = True
-    no_holoindex_reindex_performed: bool = True
-    no_secret_values_returned: bool = True
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
 
 
 def run_reddog_signer_socket_service_runtime_bootstrap(
@@ -126,6 +111,8 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     principal_key_resolver: PrincipalKeyResolver | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
     verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
+    process_isolation_required: bool = False,
+    process_isolation_gate: ProcessIsolationGate = enforce_signer_process_isolation,
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
@@ -143,6 +130,18 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     if rejected is not None:
         return rejected
     assert config is not None and path is not None and digest is not None
+    isolation = _process_isolation_receipt(
+        config, required=process_isolation_required, gate=process_isolation_gate
+    )
+    if process_isolation_required and (
+        isolation is None or isolation.accepted is not True
+    ):
+        return _reject(
+            FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION,
+            config_path=str(path),
+            config_digest=digest,
+            process_isolation_receipt=(isolation.to_dict() if isolation else None),
+        )
     admitted_resolver = _resolver_after_admission(resolver, resolver_factory)
     if admitted_resolver is None:
         return _reject(
@@ -160,32 +159,9 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         proposal_replay_high_water_store=proposal_replay_high_water_store,
         verified_outcome_signing_authority=verified_outcome_signing_authority,
     )
-    return _bootstrap_runtime_result(runtime, path=path, digest=digest)
-
-
-def _bootstrap_runtime_result(
-    runtime: Any,
-    *,
-    path: Path,
-    digest: str,
-) -> SignerSocketServiceRuntimeBootstrapResult:
-    runtime_receipt = runtime.to_dict()
-    if runtime.accepted is not True:
-        return _reject(
-            FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
-            *runtime.rejection_reasons,
-            config_path=str(path),
-            config_digest=digest,
-            runtime_result=runtime_receipt,
-        )
-
-    return SignerSocketServiceRuntimeBootstrapResult(
-        accepted=True,
-        status=SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
-        rejection_reasons=(),
-        config_path=str(path),
-        config_digest=digest,
-        runtime_result=runtime_receipt,
+    return _bootstrap_runtime_result(
+        runtime, path=path, digest=digest,
+        process_isolation_receipt=(isolation.to_dict() if isolation else None),
     )
 
 
@@ -715,22 +691,6 @@ def _reject_json_constant(value: str) -> None:
     raise ValueError(f"non_finite_json_constant:{value}")
 
 
-def _reject(
-    *reasons: str,
-    config_path: Optional[str] = None,
-    config_digest: Optional[str] = None,
-    runtime_result: Optional[dict[str, Any]] = None,
-) -> SignerSocketServiceRuntimeBootstrapResult:
-    return SignerSocketServiceRuntimeBootstrapResult(
-        accepted=False,
-        status=SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT,
-        rejection_reasons=tuple(dict.fromkeys(reason for reason in reasons if reason)),
-        config_path=config_path,
-        config_digest=config_digest,
-        runtime_result=runtime_result,
-    )
-
-
 def _is_sha256_digest(value: object) -> bool:
     text = value if isinstance(value, str) else ""
     return (
@@ -754,6 +714,7 @@ __all__ = [
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE",
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE",
     "FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED",
+    "FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION",
     "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT",
     "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED",
     "SignerSocketServiceRuntimeBootstrapResult",

@@ -44,6 +44,7 @@ STATE_REJECTED = "REJECTED"
 class RootAuthoritySnapshot:
     owner_config_id: str
     authority_generation_sequence: int
+    state_binding_digest: str
     signer_principal_id: str
     signer_uid: int
     signer_gid: int
@@ -64,7 +65,7 @@ def initialize_root_authority_state(
     descriptor = validate_root_verified_outcome_descriptor_public(
         snapshot.descriptor, now_epoch=now_epoch
     )
-    _require_snapshot_identity(snapshot, descriptor)
+    _require_snapshot_identity(snapshot, descriptor, state=state)
     if (
         descriptor["replay_store_id"] != state.store_id
         or descriptor["replay_store_durability_receipt_id"]
@@ -141,13 +142,14 @@ def _current_snapshot(
     descriptor = validate_root_verified_outcome_descriptor(
         snapshot.descriptor, replay_store=state, now_epoch=now_epoch
     )
-    _require_snapshot_identity(snapshot, descriptor)
+    _require_snapshot_identity(snapshot, descriptor, state=state)
     state.observe_generation(
         snapshot.authority_generation_sequence, snapshot.owner_config_id
     )
     return RootAuthoritySnapshot(
         owner_config_id=snapshot.owner_config_id,
         authority_generation_sequence=snapshot.authority_generation_sequence,
+        state_binding_digest=snapshot.state_binding_digest,
         signer_principal_id=snapshot.signer_principal_id,
         signer_uid=snapshot.signer_uid,
         signer_gid=snapshot.signer_gid,
@@ -156,11 +158,15 @@ def _current_snapshot(
 
 
 def _require_snapshot_identity(
-    snapshot: RootAuthoritySnapshot, descriptor: Mapping[str, object]
+    snapshot: RootAuthoritySnapshot,
+    descriptor: Mapping[str, object],
+    *,
+    state: RootVerifiedOutcomeAuthorityState,
 ) -> None:
     if (
         descriptor["authority_generation_sequence"]
         != snapshot.authority_generation_sequence
+        or snapshot.state_binding_digest != state.state_binding_digest
         or not snapshot.signer_principal_id
         or not snapshot.signer_principal_id.isascii()
         or type(snapshot.signer_uid) is not int

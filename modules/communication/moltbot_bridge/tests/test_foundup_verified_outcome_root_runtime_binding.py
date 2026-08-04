@@ -10,6 +10,7 @@ import pytest
 from modules.communication.moltbot_bridge.src import (
     foundup_verified_outcome_root_authority_dependency as dependency_module,
     foundup_verified_outcome_root_authority_client as client_module,
+    foundup_verified_outcome_root_authority_state as state_module,
     reddog_signer_system_service_manifest_selection_loader as loader_module,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
@@ -241,6 +242,68 @@ def test_state_ancestry_rejects_before_any_sqlite_open(
         )
 
     assert all(not target.exists() for target in targets)
+
+
+@pytest.mark.parametrize(
+    "field",
+    tuple(
+        f"{prefix}_{suffix}"
+        for prefix in ("state", "state_witness", "installation")
+        for suffix in ("root", "path", "store_id", "durability_receipt_id")
+    ),
+)
+def test_live_owner_reload_cannot_rotate_open_state_store_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, field: str
+) -> None:
+    descriptor, _grant, _store = _descriptor(tmp_path)
+    path, owner = _v2_owner_config(tmp_path, descriptor)
+    _allow_test_root_reads(monkeypatch)
+    monkeypatch.setattr(
+        dependency_module, "validate_root_authority_state_paths", lambda *_a, **_k: None
+    )
+    monkeypatch.setattr(state_module, "_require_root_owned", lambda *_a: None)
+    dependencies = load_root_authority_service_dependencies(
+        owner_config_path=path, repo_root=REPO_ROOT
+    )
+    raw = owner["verified_outcome_authority"]
+    prefix, suffix = _store_field_parts(field)
+    if suffix == "root":
+        root = tmp_path / f"rotated-{prefix}"
+        root.mkdir()
+        raw[field] = str(root)
+        raw[f"{prefix}_path"] = str(root / _store_filename(prefix))
+    elif suffix == "path":
+        raw[field] = str(Path(raw[f"{prefix}_root"]) / "rotated.sqlite3")
+    elif suffix == "durability_receipt_id":
+        raw[field] = _sha(f"rotated-{prefix}-durability")
+    else:
+        raw[field] = f"rotated-{prefix}-store"
+    owner["config_id"] = digest(
+        {key: item for key, item in owner.items() if key != "config_id"}
+    )
+    path.write_text(json.dumps(owner, sort_keys=True, separators=(",", ":")))
+
+    try:
+        snapshot = dependencies.snapshot_supplier()
+    except Exception:
+        return
+    assert snapshot.state_binding_digest != dependencies.state.state_binding_digest
+
+
+def _store_field_parts(field: str) -> tuple[str, str]:
+    for prefix in ("state_witness", "installation", "state"):
+        marker = prefix + "_"
+        if field.startswith(marker):
+            return prefix, field[len(marker):]
+    raise AssertionError("unknown store field")
+
+
+def _store_filename(prefix: str) -> str:
+    return {
+        "state": "verified-outcome-authority.sqlite3",
+        "state_witness": "verified-outcome-authority-witness.sqlite3",
+        "installation": "verified-outcome-authority-installation.sqlite3",
+    }[prefix]
 
 
 def test_runtime_policy_requires_exact_root_owner_and_signer_binding(

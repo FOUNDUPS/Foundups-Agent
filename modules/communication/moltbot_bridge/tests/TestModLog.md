@@ -9,6 +9,9 @@
   Unix socket with a demoted non-root signer process.
 - Added exact descriptor, root-owner, signer-generation, verifier-class,
   co-signature, expiry, revocation, scope, and lineage validation coverage.
+- Added all-field three-store rotation rejection, generation-fence preservation,
+  and pre-key Linux signer isolation regressions for UID separation, YAMA,
+  capabilities, core dumps, dumpability, and inherited environment.
 - Proved attacker-rehashed grant changes, unknown verifier classes, authority
   collapse, wrong owner/session, alternate or reset replay stores, direct
   capability construction, and forged reservations reject.
