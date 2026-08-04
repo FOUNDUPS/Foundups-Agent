@@ -1,5 +1,12 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-04] Sandboxed write-probe regression
+
+- Replaced the import-time, checkout-specific `test_write.txt` write with a
+  pytest `tmp_path` probe.
+- Added source-level regression coverage preventing module-import filesystem
+  effects and a return of any absolute Windows checkout target.
+
 ## [2026-08-02] Persisted vector-segment cold-start gate
 
 - Proved exact persisted collection snapshots are insufficient to certify

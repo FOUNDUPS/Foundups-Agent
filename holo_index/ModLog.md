@@ -1,5 +1,11 @@
 # HoloIndex Package ModLog
 
+## [2026-08-04] Test write isolation
+
+- Removed a legacy HoloIndex test's import-time write into the repository root.
+- The write probe now uses pytest's per-test temporary directory, preserving a
+  clean checkout for exact-HEAD HoloIndex query admission and WSP 85.
+
 ## [2026-08-03] Windows device-entry repository discovery guard
 
 - Repository-audit discovery now rejects entries whose path cannot be
