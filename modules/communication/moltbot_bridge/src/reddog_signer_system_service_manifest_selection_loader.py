@@ -7,9 +7,8 @@ import os
 import stat
 import sys
 import time
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
     _create_service_backed_outcome_authority,
@@ -18,8 +17,9 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service import (
     RootAuthoritySnapshot,
 )
-from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
-    RootVerifiedOutcomeAuthorityState,
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_dependency import (
+    RootAuthorityServiceDependencies,
+    build_root_authority_service_dependencies,
 )
 
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water_reader import (
@@ -54,7 +54,6 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_w
 )
 from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
     SqliteMonotonicAuthorityReader,
-    SqliteMonotonicAuthorityStore,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
     RootVerifiedOutcomeSigningAuthority,
@@ -108,18 +107,12 @@ _OUTCOME_OWNER_FIELDS = frozenset(
         "state_witness_path",
         "state_witness_store_id",
         "state_witness_durability_receipt_id",
+        "installation_root",
+        "installation_path",
+        "installation_store_id",
+        "installation_durability_receipt_id",
     }
 )
-
-
-@dataclass(frozen=True)
-class RootAuthorityServiceDependencies:
-    state: RootVerifiedOutcomeAuthorityState
-    snapshot_supplier: Callable[[], RootAuthoritySnapshot]
-    socket_path: str
-    signer_uid: int
-    signer_gid: int
-    signer_principal_id: str
 
 
 def load_system_service_manifest_selection(
@@ -217,12 +210,6 @@ def load_root_authority_service_dependencies(
     raw = owner.get("verified_outcome_authority")
     if not isinstance(raw, Mapping):
         raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
-    primary = _outcome_state_store(raw, repo=repo, witness=False)
-    witness = _outcome_state_store(raw, repo=repo, witness=True)
-    state = RootVerifiedOutcomeAuthorityState(
-        primary, witness, repo_root=repo, require_root_ownership=True
-    )
-
     def supply() -> RootAuthoritySnapshot:
         current = _load_owner_config(owner_config_path, repo=repo)
         current_raw = current.get("verified_outcome_authority")
@@ -242,26 +229,8 @@ def load_root_authority_service_dependencies(
             descriptor=descriptor,
         )
 
-    return RootAuthorityServiceDependencies(
-        state=state,
-        snapshot_supplier=supply,
-        socket_path=str(raw["authority_socket_path"]),
-        signer_uid=int(raw["signer_uid"]),
-        signer_gid=int(raw["signer_gid"]),
-        signer_principal_id=str(raw["signer_principal_id"]),
-    )
-
-
-def _outcome_state_store(
-    raw: Mapping[str, Any], *, repo: Path, witness: bool
-) -> SqliteMonotonicAuthorityStore:
-    prefix = "state_witness" if witness else "state"
-    return SqliteMonotonicAuthorityStore(
-        raw[f"{prefix}_path"],
-        allowed_root=raw[f"{prefix}_root"],
-        repo_root=repo,
-        store_id=str(raw[f"{prefix}_store_id"]),
-        durability_receipt_id=str(raw[f"{prefix}_durability_receipt_id"]),
+    return build_root_authority_service_dependencies(
+        raw, repo=repo, snapshot_supplier=supply
     )
 
 
@@ -550,33 +519,26 @@ def _validate_outcome_authority_owner_config(
         or not _ascii(raw.get("signer_principal_id"))
     ):
         raise RuntimeArtifactManifestError("verified_outcome_owner_signer_uid_invalid")
-    state_root = validate_runtime_root_path(raw["state_root"], repo_root=repo)
-    witness_root = validate_runtime_root_path(
-        raw["state_witness_root"], repo_root=repo
-    )
-    state_path = validate_runtime_artifact_path(
-        raw["state_path"], allowed_root=state_root, repo_root=repo
-    )
-    witness_path = validate_runtime_artifact_path(
-        raw["state_witness_path"], allowed_root=witness_root, repo_root=repo
-    )
+    roots = _validated_outcome_owner_paths(raw, repo=repo)
     socket_path = Path(raw["authority_socket_path"])
     if (
-        state_path != state_root / "verified-outcome-authority.sqlite3"
-        or witness_path
-        != witness_root / "verified-outcome-authority-witness.sqlite3"
-        or not socket_path.is_absolute()
+        not socket_path.is_absolute()
         or repo == socket_path.resolve()
         or repo in socket_path.resolve().parents
         or any(
             not _ascii(raw.get(name))
-            for name in ("state_store_id", "state_witness_store_id")
+            for name in (
+                "state_store_id",
+                "state_witness_store_id",
+                "installation_store_id",
+            )
         )
         or any(
             not is_sha256(raw.get(name))
             for name in (
                 "state_durability_receipt_id",
                 "state_witness_durability_receipt_id",
+                "installation_durability_receipt_id",
             )
         )
     ):
@@ -584,12 +546,38 @@ def _validate_outcome_authority_owner_config(
     _validate_outcome_authority_root_separation(
         value,
         owner_root=owner_root,
-        state_root=state_root,
-        witness_root=witness_root,
+        state_root=roots["state"],
+        witness_root=roots["state_witness"],
+        installation_root=roots["installation"],
     )
     descriptor = raw.get("descriptor")
     if not isinstance(descriptor, Mapping):
         raise RuntimeArtifactManifestError("verified_outcome_owner_descriptor_invalid")
+
+
+def _validated_outcome_owner_paths(
+    raw: Mapping[str, Any], *, repo: Path
+) -> dict[str, Path]:
+    roots = {
+        prefix: validate_runtime_root_path(
+            raw[f"{prefix}_root"], repo_root=repo
+        )
+        for prefix in ("state", "state_witness", "installation")
+    }
+    expected = {
+        "state": "verified-outcome-authority.sqlite3",
+        "state_witness": "verified-outcome-authority-witness.sqlite3",
+        "installation": "verified-outcome-authority-installation.sqlite3",
+    }
+    for prefix, root in roots.items():
+        path = validate_runtime_artifact_path(
+            raw[f"{prefix}_path"], allowed_root=root, repo_root=repo
+        )
+        if path != root / expected[prefix]:
+            raise RuntimeArtifactManifestError(
+                "verified_outcome_owner_state_invalid"
+            )
+    return roots
 
 
 def _validate_outcome_authority_root_separation(
@@ -598,6 +586,7 @@ def _validate_outcome_authority_root_separation(
     owner_root: Path,
     state_root: Path,
     witness_root: Path,
+    installation_root: Path,
 ) -> None:
     existing_roots = tuple(
         Path(value[name]).resolve()
@@ -609,7 +598,9 @@ def _validate_outcome_authority_root_separation(
         or second in first.parents
         for first, second in (
             (state_root, witness_root),
-            *((root, other) for root in (state_root, witness_root) for other in existing_roots),
+            (state_root, installation_root),
+            (witness_root, installation_root),
+            *((root, other) for root in (state_root, witness_root, installation_root) for other in existing_roots),
         )
     ):
         raise RuntimeArtifactManifestError("verified_outcome_owner_root_overlap")

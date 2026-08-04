@@ -82,6 +82,17 @@ PUBLICATION_MODULE_FILES = {
 BOUNDED_AUTHORITY_BINDING_FILES = {
     "src/reddog_worker_dispatch_authority_binding.py",
 }
+ROOT_OUTCOME_AUTHORITY_FILES = {
+    "src/foundup_verified_outcome_root_authority.py",
+    "src/foundup_verified_outcome_root_authority_client.py",
+    "src/foundup_verified_outcome_root_authority_dependency.py",
+    "src/foundup_verified_outcome_root_authority_protocol.py",
+    "src/foundup_verified_outcome_root_authority_provision_entrypoint.py",
+    "src/foundup_verified_outcome_root_authority_service.py",
+    "src/foundup_verified_outcome_root_authority_service_entrypoint.py",
+    "src/foundup_verified_outcome_root_authority_socket_service.py",
+    "src/foundup_verified_outcome_root_authority_state.py",
+}
 CURRENT_SECURITY_RUNTIME_FILES = {
     "scripts/run_task.py",
     "src/reddog_run_task_support.py",
@@ -238,6 +249,13 @@ def test_new_authority_binding_modules_are_bounded_without_exemption() -> None:
         target = MODULE_ROOT / relative_path
         assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
         assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_root_outcome_authority_modules_stay_within_domain_limits() -> None:
+    for relative_path in ROOT_OUTCOME_AUTHORITY_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
+        assert _oversized_function_sizes(target) == {}
 
 
 def test_current_security_runtime_files_stay_under_domain_limit() -> None:

@@ -71,19 +71,33 @@ def initialize_root_authority_state(
         != state.durability_receipt_id
     ):
         raise ValueError("root_authority_state_store_binding_invalid")
-    state.observe_generation(
-        snapshot.authority_generation_sequence, snapshot.owner_config_id
-    )
     binding = str(descriptor["replay_anchor_binding_digest"])
     wanted = ProposalReplayHighWater(
         int(descriptor["replay_anchor_sequence"]),
         str(descriptor["replay_anchor_revision"]),
     )
-    current = state.load(binding)
-    if current is None:
-        state.advance(binding, expected=None, next_value=wanted)
-    elif current != wanted:
-        raise ValueError("root_authority_replay_anchor_conflict")
+    installation_revision = state_revision(
+        {
+            "owner_config_id": snapshot.owner_config_id,
+            "authority_generation_sequence": (
+                snapshot.authority_generation_sequence
+            ),
+            "replay_binding": binding,
+            "replay_anchor": {
+                "sequence": wanted.sequence,
+                "state_revision": wanted.state_revision,
+            },
+        }
+    )
+    state.initialize(
+        generation=ProposalReplayHighWater(
+            snapshot.authority_generation_sequence,
+            snapshot.owner_config_id[7:],
+        ),
+        replay_binding=binding,
+        replay_anchor=wanted,
+        installation_revision=installation_revision,
+    )
 
 
 def handle_root_authority_request(
@@ -124,13 +138,13 @@ def _current_snapshot(
     snapshot = snapshot_supplier()
     if not isinstance(snapshot, RootAuthoritySnapshot):
         raise ValueError("root_authority_snapshot_invalid")
-    state.observe_generation(
-        snapshot.authority_generation_sequence, snapshot.owner_config_id
-    )
     descriptor = validate_root_verified_outcome_descriptor(
         snapshot.descriptor, replay_store=state, now_epoch=now_epoch
     )
     _require_snapshot_identity(snapshot, descriptor)
+    state.observe_generation(
+        snapshot.authority_generation_sequence, snapshot.owner_config_id
+    )
     return RootAuthoritySnapshot(
         owner_config_id=snapshot.owner_config_id,
         authority_generation_sequence=snapshot.authority_generation_sequence,

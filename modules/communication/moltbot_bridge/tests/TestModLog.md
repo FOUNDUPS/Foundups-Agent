@@ -3,6 +3,10 @@
 - Added signer-instance proof, live UID/GID rotation, dual-store reset,
   one-step crash repair, unsafe ancestry, malformed-client continuity, and
   production test-mint absence regressions.
+- Added third-domain installation replay, validation-before-generation,
+  pre-open ancestry, pre-read peer attestation, cross-process CAS, and one-time
+  provisioning entrypoint regressions. Linux root CI also exercises the real
+  Unix socket with a demoted non-root signer process.
 - Added exact descriptor, root-owner, signer-generation, verifier-class,
   co-signature, expiry, revocation, scope, and lineage validation coverage.
 - Proved attacker-rehashed grant changes, unknown verifier classes, authority

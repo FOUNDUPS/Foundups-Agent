@@ -12,12 +12,6 @@ from modules.communication.moltbot_bridge.src import (
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_socket_service import (
     RootAuthoritySocketServiceResult,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
-    KernelPeerCredentialAttestor,
-    PeerCredentialPolicy,
-)
-
-
 class _State:
     pass
 
@@ -131,10 +125,39 @@ def test_startup_failure_is_fail_closed_and_does_not_echo_exception(
     assert "secret-shaped" not in emitted[0]
 
 
-def test_malformed_client_does_not_prevent_next_client_handling() -> None:
-    attestor = KernelPeerCredentialAttestor(
-        PeerCredentialPolicy({1001: "reddog-e0-signer"}, allowed_gids=(1002,))
+def test_unauthorized_client_is_rejected_before_request_read() -> None:
+    events: list[str] = []
+
+    class RejectingAttestor:
+        def attest_identity(self, _connection):
+            events.append("attest")
+            return None
+
+    connection = _Connection(fail_read=True)
+    socket_service._serve_connection(
+        connection,
+        timeout_s=1.0,
+        state=_State(),
+        snapshot_supplier=lambda: "snapshot",
+        peer_attestor=RejectingAttestor(),
     )
+    assert events == ["attest"]
+    assert connection.sent == [b'{"status":"REJECT"}\n']
+
+
+def test_malformed_authorized_client_does_not_prevent_next_client_handling(
+    monkeypatch,
+) -> None:
+    class AcceptingAttestor:
+        def attest_identity(self, _connection):
+            return object()
+
+    monkeypatch.setattr(
+        socket_service,
+        "handle_root_authority_request",
+        lambda *_args, **_kwargs: b'{"status":"ACCEPT"}\n',
+    )
+    attestor = AcceptingAttestor()
     first = _Connection(fail_read=True)
     second = _Connection(fail_read=False)
     for connection in (first, second):
@@ -146,4 +169,4 @@ def test_malformed_client_does_not_prevent_next_client_handling() -> None:
             peer_attestor=attestor,
         )
     assert first.sent == [b'{"status":"REJECT"}\n']
-    assert second.sent == [b'{"status":"REJECT"}\n']
+    assert second.sent == [b'{"status":"ACCEPT"}\n']

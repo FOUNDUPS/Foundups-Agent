@@ -162,19 +162,18 @@ def _serve_connection(
     peer_attestor: KernelPeerCredentialAttestor,
 ) -> None:
     try:
+        peer = peer_attestor.attest_identity(connection)
+        if peer is None:
+            connection.sendall(b'{"status":"REJECT"}\n')
+            return
         connection.settimeout(timeout_s)
         raw = _read_bounded(connection, MAX_MESSAGE_BYTES)
-        peer = peer_attestor.attest_identity(connection)
-        response = (
-            b'{"status":"REJECT"}\n'
-            if peer is None
-            else handle_root_authority_request(
-                raw,
-                peer=peer,
-                state=state,
-                snapshot_supplier=snapshot_supplier,
-                now_epoch=_now_epoch(),
-            )
+        response = handle_root_authority_request(
+            raw,
+            peer=peer,
+            state=state,
+            snapshot_supplier=snapshot_supplier,
+            now_epoch=_now_epoch(),
         )
         connection.sendall(response)
     except Exception:

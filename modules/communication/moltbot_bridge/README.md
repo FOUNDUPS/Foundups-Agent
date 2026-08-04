@@ -59,15 +59,20 @@ RedDog and `main.py` remain clients and cannot spawn the signer.
 Verified-outcome admission also requires the separately supervised root service:
 
 ```bash
+python -m modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_provision_entrypoint \
+  --repo-root /srv/foundups-agent \
+  --owner-authority-config /etc/foundups/reddog-signer-owner.json
+
 python -m modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service_entrypoint \
   --repo-root /srv/foundups-agent \
   --owner-authority-config /etc/foundups/reddog-signer-owner.json
 ```
 
-The primary/witness state and generation anchor must be provisioned once by a
-separate root installation step before service launch. Runtime startup has no
-state-reset or initialization switch, so restarting the service cannot reopen a
-consumed grant. The service loads no private signing key and grants no
+The primary/witness state and generation anchor are provisioned once by the
+separate root installer. A third disjoint installation witness commits that
+provisioning event; later replay-store deletion cannot invoke the installer to
+reopen consumed grants. Runtime startup has no state-reset or initialization
+switch. The service loads no private signing key and grants no
 repository, queue, worker, PR, or merge authority.
 
 `start operations` binds the production `reddog_operations` Skillz from the

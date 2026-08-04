@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from modules.communication.moltbot_bridge.src import (
+    foundup_verified_outcome_root_authority_dependency as dependency_module,
     foundup_verified_outcome_root_authority_client as client_module,
     reddog_signer_system_service_manifest_selection_loader as loader_module,
 )
@@ -33,6 +34,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshak
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
     SCHEMA_VERSION_V2,
+    load_root_authority_service_dependencies,
     load_system_service_verified_outcome_signing_authority,
 )
 from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import (
@@ -107,6 +109,18 @@ def _owner_config_value(tmp_path: Path, roots: dict, descriptor) -> dict:
             ),
             "state_witness_store_id": "verified-outcome-replay-witness",
             "state_witness_durability_receipt_id": _sha("witness-durable"),
+            "installation_root": str(tmp_path / "replay-installation"),
+            "installation_path": str(
+                tmp_path
+                / "replay-installation"
+                / "verified-outcome-authority-installation.sqlite3"
+            ),
+            "installation_store_id": (
+                "verified-outcome-replay-installation"
+            ),
+            "installation_durability_receipt_id": _sha(
+                "installation-durable"
+            ),
         },
     }
 
@@ -193,6 +207,40 @@ def test_v2_loader_rejects_state_root_overlap_before_service_connect(
             repo_root=REPO_ROOT,
             now_epoch=NOW,
         )
+
+
+def test_state_ancestry_rejects_before_any_sqlite_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    descriptor, _grant, _store = _descriptor(tmp_path)
+    path, owner = _v2_owner_config(tmp_path, descriptor)
+    raw = owner["verified_outcome_authority"]
+    targets = tuple(
+        Path(raw[name])
+        for name in (
+            "state_path",
+            "state_witness_path",
+            "installation_path",
+        )
+    )
+    for target in targets:
+        target.unlink(missing_ok=True)
+    _allow_test_root_reads(monkeypatch)
+    monkeypatch.setattr(
+        dependency_module,
+        "validate_root_authority_state_paths",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            ValueError("root_authority_state_root_invalid")
+        ),
+    )
+
+    with pytest.raises(ValueError, match="state_root_invalid"):
+        load_root_authority_service_dependencies(
+            owner_config_path=path,
+            repo_root=REPO_ROOT,
+        )
+
+    assert all(not target.exists() for target in targets)
 
 
 def test_runtime_policy_requires_exact_root_owner_and_signer_binding(

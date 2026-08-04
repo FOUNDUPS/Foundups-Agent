@@ -60,7 +60,8 @@ rejects unknown/stale/scope-mismatched inputs, and signs its full digest. Outcom
 rehydration checks canonical verifier/held-out receipts. The system-service
 signer loads an exact root-owned v2 outcome-authority descriptor and an opaque
 client for a separately launched root authority service. The service owns
-disjoint primary and witness monotonic stores; the signer owns neither. Each
+disjoint primary, witness, and one-time installation monotonic stores; the
+signer owns none of them. Each
 co-signed grant binds FoundUp, snapshot,
 work order, slice, job, worker, exact head/content, runtime, PatternMemory record,
 signer key/epoch, and the current signer run packet/config/session/manifest
@@ -73,7 +74,9 @@ kernel UID/GID credentials are checked against the current root config. The
 root service burns a reservation before signing, then re-reads current root
 configuration and rechecks revocation, generation, grant, reservation, signer
 proof, and signature digest before commit. Runtime startup cannot initialize or
-reset replay state. A failed or crashed reservation never reopens. Missing
+reset replay state. The separate installer rejects after its third-domain
+commit, including after both replay stores are deleted. A failed or crashed
+reservation never reopens. Missing
 authority leaves unrelated signer operations available while every
 verified-outcome request fails closed. Owner, signer-generation, key, expiry,
 revocation, replay-store, and grant mismatches reject before key resolution.

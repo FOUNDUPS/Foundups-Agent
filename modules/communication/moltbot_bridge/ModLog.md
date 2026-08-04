@@ -2,9 +2,10 @@
 
 ## 2026-08-04: Verified-outcome root authority service
 - Replaced the signer-owned outcome replay database with a separately launched,
-  root-owned Unix-socket authority service. The root process owns two disjoint
-  monotonic CAS stores and authenticates the non-root E0 signer with kernel peer
-  credentials; the signer verifies the service UID on every connection.
+  root-owned Unix-socket authority service. The root process owns disjoint
+  primary, witness, and one-time installation CAS stores and authenticates the
+  non-root E0 signer with kernel peer credentials; the signer verifies the
+  service UID on every connection.
 - Added a separately invoked root provisioning primitive, generation rollback
   fence, exact one-step witness repair, and `RESERVED_BURNED -> COMMITTED`
   transition. The runtime service has no state-reset/bootstrap option. The
@@ -18,7 +19,9 @@
   commit now require both fresh kernel UID/GID and a domain-separated E0 signer
   proof over every request field; malformed clients are isolated per connection.
 - Added a bounded root service entrypoint and extended the existing v2 root owner
-  config with exact socket, signer principal, primary state, and witness bindings.
+  config with exact socket, signer principal, primary, witness, and installation
+  bindings. A separate one-time provisioning entrypoint cannot reopen a committed
+  installation after replay-store loss.
 - Production remains fail closed until the root service is deployed with a
   root-owned config and independently co-signed verifier grants. This slice adds
   no learning candidate, Brain/roadmap write, HoloIndex mutation, repository,

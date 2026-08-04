@@ -23,32 +23,41 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 GENERATION_BINDING = "sha256:" + hashlib.sha256(
     b"foundup-verified-outcome-root-authority-generation.v1"
 ).hexdigest()
+INSTALLATION_BINDING = "sha256:" + hashlib.sha256(
+    b"foundup-verified-outcome-root-authority-installation.v1"
+).hexdigest()
 
 
 class RootVerifiedOutcomeAuthorityState:
-    """Two-domain root-owned monotonic state with deterministic repair."""
+    """Three-domain root-owned monotonic state with deterministic repair."""
 
     def __init__(
         self,
         primary: SqliteMonotonicAuthorityStore,
         witness: SqliteMonotonicAuthorityStore,
+        installation: SqliteMonotonicAuthorityStore,
         *,
         repo_root: Path | str,
         require_root_ownership: bool = True,
     ) -> None:
-        if (
-            type(primary) is not SqliteMonotonicAuthorityStore
-            or type(witness) is not SqliteMonotonicAuthorityStore
+        if any(
+            type(item) is not SqliteMonotonicAuthorityStore
+            for item in (primary, witness, installation)
         ):
             raise ValueError("root_authority_state_store_invalid")
         first = primary.rollback_domain_root.resolve()
         second = witness.rollback_domain_root.resolve()
-        if _overlap(first, second):
+        third = installation.rollback_domain_root.resolve()
+        if any(
+            _overlap(left, right)
+            for left, right in ((first, second), (first, third), (second, third))
+        ):
             raise ValueError("root_authority_state_domain_overlap")
         if require_root_ownership:
-            _require_root_owned(first, second)
+            _require_root_owned(first, second, third)
         self._primary = primary
         self._witness = witness
+        self._installation = installation
         self._repo_root = Path(repo_root).resolve()
         self._require_ownership = require_root_ownership
         self._lock_path = first / ".verified-outcome-root-authority.lock"
@@ -79,6 +88,7 @@ class RootVerifiedOutcomeAuthorityState:
 
     def load(self, binding_digest: str) -> ProposalReplayHighWater | None:
         with self._lock():
+            self._require_installed()
             return self._current(binding_digest)
 
     def advance(
@@ -89,6 +99,7 @@ class RootVerifiedOutcomeAuthorityState:
         next_value: ProposalReplayHighWater,
     ) -> None:
         with self._lock():
+            self._require_installed()
             current = self._current(binding_digest)
             if current != expected:
                 raise RuntimeError("root_authority_state_conflict")
@@ -99,6 +110,7 @@ class RootVerifiedOutcomeAuthorityState:
             raise ValueError("root_authority_generation_invalid")
         wanted = ProposalReplayHighWater(sequence, owner_config_id[7:])
         with self._lock():
+            self._require_installed()
             current = self._current(GENERATION_BINDING)
             if current == wanted:
                 return
@@ -106,6 +118,49 @@ class RootVerifiedOutcomeAuthorityState:
             if sequence != expected_sequence:
                 raise ValueError("root_authority_generation_rollback")
             self._advance_pair(GENERATION_BINDING, current, wanted)
+
+    def initialize(
+        self,
+        *,
+        generation: ProposalReplayHighWater,
+        replay_binding: str,
+        replay_anchor: ProposalReplayHighWater,
+        installation_revision: str,
+    ) -> None:
+        """Provision once; a committed third-domain witness forbids reset."""
+
+        prepared = ProposalReplayHighWater(1, installation_revision)
+        committed = ProposalReplayHighWater(2, installation_revision)
+        with self._lock():
+            self._require_current_ownership()
+            marker = self._installation.load(INSTALLATION_BINDING)
+            if marker == committed:
+                raise ValueError("root_authority_state_already_initialized")
+            if marker is None:
+                if any(
+                    value is not None
+                    for value in (
+                        self._primary.load(GENERATION_BINDING),
+                        self._witness.load(GENERATION_BINDING),
+                        self._primary.load(replay_binding),
+                        self._witness.load(replay_binding),
+                    )
+                ):
+                    raise ValueError("root_authority_state_preexisting_data")
+                self._installation.advance(
+                    INSTALLATION_BINDING,
+                    expected=None,
+                    next_value=prepared,
+                )
+            elif marker != prepared:
+                raise ValueError("root_authority_installation_conflict")
+            self._ensure_pair(GENERATION_BINDING, generation)
+            self._ensure_pair(replay_binding, replay_anchor)
+            self._installation.advance(
+                INSTALLATION_BINDING,
+                expected=prepared,
+                next_value=committed,
+            )
 
     def _current(self, binding: str) -> ProposalReplayHighWater | None:
         self._require_current_ownership()
@@ -144,14 +199,33 @@ class RootVerifiedOutcomeAuthorityState:
         if self._current(binding) != next_value:
             raise RuntimeError("root_authority_state_commit_unverified")
 
+    def _ensure_pair(
+        self, binding: str, wanted: ProposalReplayHighWater
+    ) -> None:
+        current = self._current(binding)
+        if current is None:
+            self._advance_pair(binding, None, wanted)
+        elif current != wanted:
+            raise ValueError("root_authority_installation_state_conflict")
+
+    def _require_installed(self) -> None:
+        marker = self._installation.load(INSTALLATION_BINDING)
+        if marker is None or marker.sequence != 2:
+            raise ValueError("root_authority_state_not_initialized")
+
     def _require_current_ownership(self) -> None:
         if not self._require_ownership:
             return
         _require_root_owned(
             self._primary.rollback_domain_root,
             self._witness.rollback_domain_root,
+            self._installation.rollback_domain_root,
         )
-        _require_root_files(self._primary.path, self._witness.path)
+        _require_root_files(
+            self._primary.path,
+            self._witness.path,
+            self._installation.path,
+        )
 
     def _lock(self):
         return confined_runtime_operation_lock(
@@ -175,6 +249,17 @@ def authorization_binding(authorization_id: str) -> str:
     return "sha256:" + hashlib.sha256(
         ("foundup-verified-outcome:" + authorization_id).encode("ascii")
     ).hexdigest()
+
+
+def validate_root_authority_state_paths(
+    *roots: Path | str,
+    files: tuple[Path | str, ...] = (),
+) -> None:
+    """Authenticate immutable root-owned ancestry before SQLite opens."""
+
+    resolved_roots = tuple(Path(item).resolve() for item in roots)
+    _require_root_owned(*resolved_roots)
+    _require_root_files(*(Path(item).resolve() for item in files))
 
 
 def _require_root_owned(*roots: Path) -> None:
@@ -230,7 +315,9 @@ def _sha256(value: Any) -> bool:
 
 __all__ = [
     "GENERATION_BINDING",
+    "INSTALLATION_BINDING",
     "RootVerifiedOutcomeAuthorityState",
     "authorization_binding",
     "state_revision",
+    "validate_root_authority_state_paths",
 ]
