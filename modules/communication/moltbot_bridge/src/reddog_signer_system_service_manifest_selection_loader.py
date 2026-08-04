@@ -129,27 +129,17 @@ class SystemServiceStartupSelection:
     signer_gid: int
 
 
-def load_system_service_startup_selection(
-    *, owner_config_path: Path | str, repo_root: Path
-) -> SystemServiceStartupSelection:
+def load_system_service_startup_selection(*, owner_config_path: Path | str, repo_root: Path) -> SystemServiceStartupSelection:
     """Load all production signer authority from one root-owned v2 snapshot."""
-
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
     if owner.get("schema_version") != SCHEMA_VERSION_V2:
         raise RuntimeArtifactManifestError("signer_owner_config_v2_required")
     manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
-    authority = _verified_outcome_authority_from_owner(
-        owner, repo=repo, now_epoch=int(time.time())
-    )
+    authority = _verified_outcome_authority_from_owner(owner, repo=repo, now_epoch=int(time.time()))
     signer_uid, signer_gid = _signer_identity_from_owner(owner)
     return SystemServiceStartupSelection(
-        owner_config_id=str(owner["config_id"]),
-        manifest_selection=manifest,
-        manifest_selection_boundary=boundary,
-        verified_outcome_authority=authority,
-        signer_uid=signer_uid,
-        signer_gid=signer_gid,
+        str(owner["config_id"]), manifest, boundary, authority, signer_uid, signer_gid
     )
 
 
@@ -165,19 +155,13 @@ def load_system_service_manifest_selection(
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
     return _manifest_selection_from_owner(
-        owner,
-        repo=repo,
-        config_path=config_path,
-        run_packet_path=run_packet_path,
+        owner, repo=repo, config_path=config_path, run_packet_path=run_packet_path
     )
 
 
 def _manifest_selection_from_owner(
-    owner: Mapping[str, Any],
-    *,
-    repo: Path,
-    config_path: Path | None = None,
-    run_packet_path: Path | None = None,
+    owner: Mapping[str, Any], *, repo: Path,
+    config_path: Path | None = None, run_packet_path: Path | None = None,
 ) -> tuple[object, Any]:
     runtime = validate_runtime_root_path(owner["runtime_root"], repo_root=repo)
     _require_cli_paths(runtime, config_path, run_packet_path)
@@ -190,9 +174,7 @@ def _manifest_selection_from_owner(
         verifier_authority, verifier_boundary
     )
     if verifier.authenticator_id != owner["generation_authenticator_id"]:
-        raise RuntimeArtifactManifestError(
-            "signer_owner_generation_authenticator_mismatch"
-        )
+        raise RuntimeArtifactManifestError("signer_owner_generation_authenticator_mismatch")
     reader_authority, reader_boundary = _build_generation_reader(
         owner,
         repo=repo,
