@@ -48,7 +48,10 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signer_system_servic
     _prepare_real_cli_owner,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artifact_manifest import (
+    CONSENSUS_DIGEST,
+    KEY_EPOCH,
     NOW,
+    PRINCIPAL_ID,
 )
 from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import (
     _descriptor,
@@ -74,10 +77,36 @@ def _trusted_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-def _upgrade_prepared_owner_to_v2(prepared: dict, tmp_path: Path) -> dict:
+def _upgrade_prepared_owner_to_v2(
+    prepared: dict, tmp_path: Path, *, bind_runtime: bool = False
+) -> dict:
     owner_path = Path(prepared["owner_path"])
     owner = json.loads(owner_path.read_text(encoding="ascii"))
-    descriptor, _grant, _store = _descriptor(tmp_path / "outcome-source")
+    overrides = {}
+    signer_key = None
+    if bind_runtime:
+        selection = prepared["selection"]
+        supplied = prepared["supplied"]
+        overrides = {
+            "issuer_principal_id": PRINCIPAL_ID,
+            "reddog_id": "reddog-0102",
+            "consensus_receipt_digest": CONSENSUS_DIGEST,
+            "signer_public_key": prepared["harness"].reddog_public_key,
+            "signer_key_epoch": KEY_EPOCH,
+            "signer_run_packet_id": supplied.run_packet_id,
+            "signer_config_digest": supplied.config_digest,
+            "signer_session_id": "session-prod",
+            "signer_manifest_id": selection["manifest_id"],
+            "signer_artifact_generation_digest": selection[
+                "artifact_generation_digest"
+            ],
+        }
+        signer_key = prepared["harness"].reddog_private_key
+    descriptor, _grant, _store = _descriptor(
+        tmp_path / "outcome-source",
+        descriptor_overrides=overrides,
+        signer_key=signer_key,
+    )
     roots = {
         name: tmp_path / f"outcome-{name}"
         for name in ("state", "state-witness", "installation")
@@ -210,6 +239,110 @@ def test_stable_entrypoint_selects_current_generation_and_serves_once(
     assert payload["no_serialized_argv_executed"] is True
     assert payload["no_signer_process_spawned"] is True
     assert payload["no_shell_invoked"] is True
+
+
+def _resolver_for(prepared: dict) -> FakeResolver:
+    return FakeResolver(
+        {
+            "op://prod-vault/reddog-signing/private": _private_key_secret(
+                prepared["harness"].reddog_private_key
+            ),
+            "op://prod-vault/reddog-audit/mac": _audit_secret(),
+        }
+    )
+
+
+def test_configured_outcome_policy_uses_root_authority_after_isolation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    prepared = _prepare_real_cli_owner(
+        tmp_path, monkeypatch, include_outcome_policy=True
+    )
+    _upgrade_prepared_owner_to_v2(prepared, tmp_path, bind_runtime=True)
+    monkeypatch.setattr(
+        outcome_client_module, "_require_protected_socket", lambda *_args: None
+    )
+    resolver = _resolver_for(prepared)
+    factory = CapturingResolverFactory(resolver)
+    service = CapturingBoundedService()
+    emitted: list[str] = []
+
+    code = _run_entrypoint_args(
+        argparse.Namespace(
+            repo_root=str(prepared["harness"].repo_root),
+            owner_authority_config=str(prepared["owner_path"]),
+        ),
+        resolver_factory=factory,
+        serve_bounded=service,
+        emit=emitted.append,
+        principal_key_resolver=FailClosedPrincipalKeyResolver(),
+        proposal_replay_high_water_store=None,
+        process_isolation_gate=_accepted_isolation,
+    )
+
+    assert code == 0, json.loads(emitted[0])
+    assert json.loads(emitted[0])["status"] == SYSTEM_SERVICE_ENTRYPOINT_ACCEPT
+    assert len(factory.calls) == 1
+    assert len(service.calls) == 1
+
+
+@pytest.mark.parametrize("supplier_failure", ("missing", "raised", "invalid"))
+def test_configured_outcome_policy_rejects_unusable_supplier(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    supplier_failure: str,
+) -> None:
+    prepared = _prepare_real_cli_owner(
+        tmp_path, monkeypatch, include_outcome_policy=True
+    )
+    _upgrade_prepared_owner_to_v2(prepared, tmp_path, bind_runtime=True)
+    startup = loader_module.load_system_service_startup_selection(
+        owner_config_path=prepared["owner_path"],
+        repo_root=prepared["harness"].repo_root,
+    )
+    if supplier_failure == "missing":
+        supplier = None
+    elif supplier_failure == "raised":
+        def supplier():
+            raise RuntimeError("unavailable")
+    else:
+        def supplier():
+            return object()
+
+    def startup_loader(**_kwargs):
+        return loader_module.SystemServiceStartupSelection(
+            startup.owner_config_id,
+            startup.manifest_selection,
+            startup.manifest_selection_boundary,
+            supplier,
+            startup.signer_uid,
+            startup.signer_gid,
+        )
+
+    resolver = _resolver_for(prepared)
+    factory = CapturingResolverFactory(resolver)
+    service = CapturingBoundedService()
+    emitted: list[str] = []
+    code = _run_entrypoint_args(
+        argparse.Namespace(
+            repo_root=str(prepared["harness"].repo_root),
+            owner_authority_config=str(prepared["owner_path"]),
+        ),
+        resolver_factory=factory,
+        serve_bounded=service,
+        emit=emitted.append,
+        principal_key_resolver=FailClosedPrincipalKeyResolver(),
+        proposal_replay_high_water_store=None,
+        startup_selection_loader=startup_loader,
+        process_isolation_gate=_accepted_isolation,
+    )
+
+    assert code == 2
+    assert json.loads(emitted[0])["status"] == SYSTEM_SERVICE_ENTRYPOINT_REJECT
+    assert len(factory.calls) == 1
+    assert resolver.calls == []
+    assert service.calls == []
 
 
 def test_system_service_isolation_rejects_before_resolver_or_socket(

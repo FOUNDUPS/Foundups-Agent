@@ -89,8 +89,14 @@ def _store(tmp_path: Path, *, suffix: str = "one") -> SqliteMonotonicAuthoritySt
     return store
 
 
-def _descriptor(tmp_path: Path, *, grant_overrides: dict[str, object] | None = None):
-    signer_key = _private_key()
+def _descriptor(
+    tmp_path: Path,
+    *,
+    grant_overrides: dict[str, object] | None = None,
+    descriptor_overrides: dict[str, object] | None = None,
+    signer_key: object | None = None,
+):
+    signer_key = signer_key or _private_key()
     verifier_key = _private_key()
     held_out_key = _private_key()
     store = _store(tmp_path)
@@ -127,6 +133,8 @@ def _descriptor(tmp_path: Path, *, grant_overrides: dict[str, object] | None = N
         "revoked_authorization_ids": [],
         "revoked_verifier_fingerprints": [],
     }
+    if descriptor_overrides:
+        descriptor.update(descriptor_overrides)
     grant = {
         "authorization_id": "pending",
         "authority_context_digest": authority_context_digest_for(descriptor),

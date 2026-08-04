@@ -345,11 +345,13 @@ def test_owner_read_is_descriptor_bound_and_bounded() -> None:
 def _prepare_real_cli_owner(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch | None,
+    *,
+    include_outcome_policy: bool = False,
 ) -> dict[str, Any]:
     harness = _build_harness(tmp_path)
     config_path = _write_json(
         harness.runtime_root / "signer_service_config.json",
-        _runtime_config(harness),
+        _runtime_config(harness, include_outcome_policy=include_outcome_policy),
     )
     owner_path = tmp_path / "signer-owner" / "owner.json"
     packet_path, supplied = _runtime_packet(harness, config_path, owner_path)
@@ -376,10 +378,13 @@ def _prepare_real_cli_owner(
         "packet_path": packet_path,
         "owner_path": _write_owner_config(tmp_path, owner),
         "supplied": supplied,
+        "selection": values,
     }
 
 
-def _runtime_config(harness: Any) -> dict[str, Any]:
+def _runtime_config(
+    harness: Any, *, include_outcome_policy: bool = False
+) -> dict[str, Any]:
     value = _config(
         harness.reddog_public_key,
         socket_path=harness.runtime_root / "signer.sock",
@@ -394,6 +399,15 @@ def _runtime_config(harness: Any) -> dict[str, Any]:
         }
     )
     value["key_provider_profiles"] = [value.pop("key_provider_profile")]
+    if include_outcome_policy:
+        value["verified_outcome_signer_policy"] = {
+            "issuer_principal_id": PRINCIPAL_ID,
+            "reddog_id": "reddog-0102",
+            "signer_public_key": harness.reddog_public_key,
+            "key_epoch": KEY_EPOCH,
+            "authority_tier": "HIGH",
+            "consensus_receipt_digest": CONSENSUS_DIGEST,
+        }
     return value
 
 

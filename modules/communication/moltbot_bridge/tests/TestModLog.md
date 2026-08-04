@@ -27,9 +27,9 @@
 - Proved a signer process observes a root-config revocation written after
   startup, and that grant expiry uses current signer time rather than the
   caller's signed-request timestamp.
-- Proved one v2 snapshot supplies manifest, lazy outcome authority, owner ID, and
-  UID/GID; rotation cannot mix generations, v1 and one-shot WSP71 reject before
-  effects, and policy-absent operations never touch the root-authority socket.
+- Proved one v2 snapshot supplies manifest, lazy authority, owner ID, and UID/GID;
+  absent policy never touches the root socket, configured policy binds after
+  isolation, and missing, raised, or mismatched suppliers reject before service.
 - Proved the checked-in backend manifest includes the root-authority module
   through the stable signer entrypoint's dependency closure.
 
