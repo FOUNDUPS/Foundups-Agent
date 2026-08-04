@@ -120,6 +120,10 @@ The maintenance handshake performs this exact sequence:
 9. Require all seven collections to finish with complete canonical
    source-manifest proofs, exact embedding-space fingerprints, and no failed
    source.
+   A logical collection snapshot mismatch is never retried. A first-open
+   `VECTOR_SEGMENT_UNAVAILABLE` result may continue only after two consecutive
+   fresh-process proofs of the unchanged receipt, including collection
+   snapshots and nearest-neighbor queries, within the original probe timeout.
 10. Re-prove the same clean HEAD, reload the atomic receipt, and validate its
     repository/store identities and generation.
 11. Start the private owner with the exact SHA, repository-root digest,

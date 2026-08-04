@@ -571,6 +571,52 @@ def test_real_client_routes_final_snapshot_check_to_isolated_probe(
     assert calls[0][1]["repo_root"] == tmp_path / "repo"
 
 
+def test_maintenance_preserves_vector_segment_failure_category(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    lifecycle: list[str] = []
+    writer = _holo()
+    proof = _holo()
+    _attach_chroma_client(writer, lifecycle, "writer")
+    _attach_chroma_client(proof, lifecycle, "proof")
+    monkeypatch.setattr(
+        maintenance_module,
+        "open_persisted_collection_view",
+        lambda _ssd: proof,
+    )
+    monkeypatch.setattr(
+        maintenance_module,
+        "verify_collection_snapshots_isolated",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            maintenance_module.IsolatedSnapshotProbeError(
+                "VECTOR_SEGMENT_UNAVAILABLE"
+            )
+        ),
+    )
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match=(
+            "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED: "
+            "VECTOR_SEGMENT_UNAVAILABLE"
+        ),
+    ):
+        session.complete(
+            writer,
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+
 def test_persisted_proof_view_finalizes_when_receipt_build_fails(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

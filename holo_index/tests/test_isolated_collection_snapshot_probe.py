@@ -142,6 +142,18 @@ def _fixture(tmp_path: Path):
     return receipt, collections, client
 
 
+def _probe_response(receipt, ok: bool, mismatches: list[str], error: str) -> str:
+    return json.dumps(
+        {
+            "schema_version": "holoindex_isolated_snapshot_probe.v1",
+            "ok": ok,
+            "generation_id": receipt.generation_id,
+            "mismatched_collections": mismatches,
+            "error": error,
+        }
+    )
+
+
 def test_isolated_probe_accepts_exact_persisted_collections(tmp_path: Path) -> None:
     receipt, collections, _client = _fixture(tmp_path)
     calls: list[tuple[str, object]] = []
@@ -371,7 +383,7 @@ def test_parent_accepts_generation_bound_isolated_success(
     assert failures == []
 
 
-def test_parent_returns_unqueryable_vector_segment(
+def test_parent_rejects_persistently_unqueryable_vector_segment(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -391,6 +403,67 @@ def test_parent_returns_unqueryable_vector_segment(
             stderr="",
         ),
     )
+    with pytest.raises(IsolatedSnapshotProbeError, match="VECTOR_SEGMENT_UNAVAILABLE"):
+        verify_collection_snapshots_isolated(
+            receipt,
+            ssd_path=tmp_path / "ssd",
+            repo_root=tmp_path / "repo",
+        )
+
+
+def test_parent_requires_two_successes_after_vector_cold_start(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt, _collections, _client = _fixture(tmp_path)
+    responses = [
+        _probe_response(receipt, False, ["navigation_code"], "VECTOR_SEGMENT_UNAVAILABLE"),
+        _probe_response(receipt, True, [], ""),
+        _probe_response(receipt, True, [], ""),
+    ]
+    calls = []
+    timeouts = []
+    moments = iter((100.0, 101.0, 102.0, 103.0))
+    monkeypatch.setattr(probe_module.time, "monotonic", lambda: next(moments))
+
+    def run_probe(*_args, **kwargs):
+        calls.append(kwargs["input"])
+        timeouts.append(kwargs["timeout"])
+        return SimpleNamespace(returncode=0, stdout=responses.pop(0), stderr="")
+
+    monkeypatch.setattr(
+        "holo_index.isolated_collection_snapshot_probe.subprocess.run",
+        run_probe,
+    )
+
+    failures = verify_collection_snapshots_isolated(
+        receipt,
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        timeout_seconds=10.0,
+    )
+
+    assert failures == []
+    assert len(calls) == 3
+    assert len(set(calls)) == 1
+    assert timeouts == [9.0, 8.0, 7.0]
+
+
+def test_parent_does_not_retry_collection_snapshot_mismatch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt, _collections, _client = _fixture(tmp_path)
+    calls = []
+    response = _probe_response(
+        receipt, False, ["navigation_code"], "COLLECTION_SNAPSHOT_MISMATCH"
+    )
+    monkeypatch.setattr(
+        "holo_index.isolated_collection_snapshot_probe.subprocess.run",
+        lambda *args, **kwargs: calls.append(kwargs["input"])
+        or SimpleNamespace(returncode=0, stdout=response, stderr=""),
+    )
+
     failures = verify_collection_snapshots_isolated(
         receipt,
         ssd_path=tmp_path / "ssd",
@@ -398,6 +471,81 @@ def test_parent_returns_unqueryable_vector_segment(
     )
 
     assert failures == ["navigation_code"]
+    assert len(calls) == 1
+
+
+def test_parent_stops_when_vector_retry_finds_snapshot_mismatch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt, _collections, _client = _fixture(tmp_path)
+    responses = [
+        _probe_response(receipt, False, ["navigation_code"], "VECTOR_SEGMENT_UNAVAILABLE"),
+        _probe_response(receipt, False, ["navigation_code"], "COLLECTION_SNAPSHOT_MISMATCH"),
+    ]
+    calls = []
+    monkeypatch.setattr(
+        "holo_index.isolated_collection_snapshot_probe.subprocess.run",
+        lambda *args, **kwargs: calls.append(kwargs["input"])
+        or SimpleNamespace(returncode=0, stdout=responses.pop(0), stderr=""),
+    )
+
+    with pytest.raises(
+        IsolatedSnapshotProbeError, match="COLLECTION_SNAPSHOT_MISMATCH"
+    ):
+        verify_collection_snapshots_isolated(
+            receipt,
+            ssd_path=tmp_path / "ssd",
+            repo_root=tmp_path / "repo",
+        )
+
+    assert len(calls) == 2
+
+
+def test_parent_rejects_interrupted_vector_convergence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt, _collections, _client = _fixture(tmp_path)
+    responses = [
+        _probe_response(receipt, False, ["navigation_code"], "VECTOR_SEGMENT_UNAVAILABLE"),
+        _probe_response(receipt, True, [], ""),
+        _probe_response(receipt, False, ["navigation_code"], "VECTOR_SEGMENT_UNAVAILABLE"),
+    ]
+    monkeypatch.setattr(
+        "holo_index.isolated_collection_snapshot_probe.subprocess.run",
+        lambda *args, **kwargs: SimpleNamespace(
+            returncode=0, stdout=responses.pop(0), stderr=""
+        ),
+    )
+
+    with pytest.raises(IsolatedSnapshotProbeError, match="VECTOR_SEGMENT_UNAVAILABLE"):
+        verify_collection_snapshots_isolated(
+            receipt,
+            ssd_path=tmp_path / "ssd",
+            repo_root=tmp_path / "repo",
+        )
+
+
+@pytest.mark.parametrize("timeout", (None, "bad", 0, float("nan")))
+def test_parent_rejects_invalid_total_timeout_before_child_process(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    timeout,
+) -> None:
+    receipt, _collections, _client = _fixture(tmp_path)
+    monkeypatch.setattr(
+        "holo_index.isolated_collection_snapshot_probe.subprocess.run",
+        lambda *_args, **_kwargs: pytest.fail("child process must not start"),
+    )
+
+    with pytest.raises(IsolatedSnapshotProbeError, match="ISOLATED_PROBE_TIMEOUT_INVALID"):
+        verify_collection_snapshots_isolated(
+            receipt,
+            ssd_path=tmp_path / "ssd",
+            repo_root=tmp_path / "repo",
+            timeout_seconds=timeout,
+        )
 
 
 @pytest.mark.parametrize(

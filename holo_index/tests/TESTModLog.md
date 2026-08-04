@@ -7,6 +7,15 @@
 - Added source-level regression coverage preventing module-import filesystem
   effects and a return of any absolute Windows checkout target.
 
+## [2026-08-04] Vector-segment convergence regressions
+
+- Added first-open vector failure followed by two-success acceptance coverage.
+- Proved collection snapshot mismatches are never retried, interrupted
+  convergence fails closed, all child processes receive identical receipts,
+  and the original total timeout budget is preserved.
+- Proved maintenance reports vector-segment failure separately from logical
+  collection snapshot mismatch.
+
 ## [2026-08-02] Persisted vector-segment cold-start gate
 
 - Proved exact persisted collection snapshots are insufficient to certify
