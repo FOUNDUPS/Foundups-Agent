@@ -279,6 +279,19 @@ def test_rejects_missing_scope_without_guessing_foundup() -> None:
     assert "missing_principal_id" in result.rejection_reasons
 
 
+def test_rejects_nonempty_outcomes_until_root_owned_runtime_binding_exists() -> None:
+    result = enrich_readonly_audit_tasks_with_operational_memex(
+        tasks=(_task(),),
+        snapshot=_snapshot(),
+        config=_config(verified_outcomes=({"accepted": True},)),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert result.tasks == ()
+    assert result.rejection_reasons == ("verified_outcome_runtime_binding_required",)
+
+
 def test_supplier_module_is_read_only_by_ast() -> None:
     tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
     forbidden_imports = {"subprocess", "requests", "httpx", "sqlite3", "os"}

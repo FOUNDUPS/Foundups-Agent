@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass, field, replace
+from dataclasses import dataclass, field, replace
 from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.foundup_memex_current_state import (
@@ -41,7 +41,7 @@ class OperationalMemexSnapshotSupplyConfig:
     principal_id: str
     identity: Mapping[str, Any] = field(default_factory=dict)
     roadmap_state: Mapping[str, Any] = field(default_factory=dict)
-    verified_outcomes: tuple[Mapping[str, Any], ...] = ()
+    verified_outcomes: tuple[Any, ...] = ()
     policy_issued_at: str = ""
     policy_expires_at: str = ""
     holoindex_generation_id: str = ""
@@ -49,7 +49,19 @@ class OperationalMemexSnapshotSupplyConfig:
     max_records: int = 32
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        return {
+            "foundup_id": self.foundup_id,
+            "principal_id": self.principal_id,
+            "identity": dict(self.identity),
+            "roadmap_state": dict(self.roadmap_state),
+            "verified_outcomes": (),
+            "verified_outcome_capability_count": len(self.verified_outcomes),
+            "policy_issued_at": self.policy_issued_at,
+            "policy_expires_at": self.policy_expires_at,
+            "holoindex_generation_id": self.holoindex_generation_id,
+            "source_revision": self.source_revision,
+            "max_records": self.max_records,
+        }
 
 
 @dataclass(frozen=True)
@@ -139,7 +151,7 @@ def normalize_operational_memex_supply_config(
         principal_id=_clean(data.get("principal_id")),
         identity=dict(data.get("identity") or {}),
         roadmap_state=dict(data.get("roadmap_state") or {}),
-        verified_outcomes=tuple(dict(item) for item in outcomes if isinstance(item, Mapping)),
+        verified_outcomes=tuple(outcomes),
         policy_issued_at=_clean(data.get("policy_issued_at")),
         policy_expires_at=_clean(data.get("policy_expires_at")),
         holoindex_generation_id=_clean(data.get("holoindex_generation_id")),
@@ -290,6 +302,8 @@ def _validate_config(config: OperationalMemexSnapshotSupplyConfig) -> list[str]:
         reasons.append("missing_memex_roadmap_state")
     if config.max_records <= 0:
         reasons.append("invalid_max_records")
+    if config.verified_outcomes:
+        reasons.append("verified_outcome_runtime_binding_required")
     return reasons
 
 

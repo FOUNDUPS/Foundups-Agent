@@ -1,17 +1,17 @@
 # ModLog - moltbot_bridge
 
 ## 2026-08-04: Memex supply authenticity gate
-- Replaced the promotion path's `sha256:` prefix check with exact typed Memex
-  supply receipt rehydration, canonical digest verification, scope/lineage and
+- Replaced the promotion path's `sha256:` prefix check with exact typed Memex supply
+  receipt rehydration, canonical digest verification, scope/lineage and
   freshness checks, and strict unknown-field/type rejection.
-- Upgraded architect proposal attestations to v2 so the isolated signer binds
-  the exact full Memex receipt digest. Attacker-rehashed substitutions now fail
-  against independently signed proposal authority before artifact, seed,
+- Upgraded architect proposal attestations to v2 so the isolated signer binds the
+  exact full Memex receipt digest. Attacker-rehashed substitutions now fail against
+  independently signed proposal authority before artifact, seed,
   queue, profile, or state mutation. Proposal signing rehydrates even a
   manually constructed typed receipt; receipt age is capped at 300 seconds and
-  policy lifetime at 600 seconds. No learning-candidate, default-supplier,
-  HoloIndex maintenance, or repository execution behavior was added
-  (WSP 00/15/22/50/62/97).
+  policy lifetime at 600 seconds. Added canonical verifier/held-out rehydration and
+  one-use signed-bundle capability primitives. Resident outcome admission stays
+  fail-closed pending root-owned durable trust/replay wiring (WSP 00/15/22/50/62/97).
 
 ## 2026-08-03: Extension resident model-runtime authority binding
 - Reused the `main.py` authenticated BOUND model-runtime loader in the extension
