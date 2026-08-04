@@ -29,20 +29,44 @@ from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sin
 )
 
 VERIFIED_OUTCOME_RECORD_SCHEMA = "reddog_verified_recursive_improvement_outcome.v1"
-VERIFIED_OUTCOME_BINDING_SCHEMA = "foundup_memex_verified_outcome_binding.v1"
+VERIFIED_OUTCOME_BINDING_SCHEMA = "foundup_memex_verified_outcome_binding.v2"
 _HEAD_SHA = re.compile(r"[0-9a-f]{40}\Z")
 _DIGEST = re.compile(r"sha256:[0-9a-f]{64}\Z")
 _RECORD_FIELDS = {
-    "schema_version", "record_type", "work_order_id", "slice_name", "gate_id",
-    "ratchet_id", "verifier_receipt_id", "improvement_job_id",
-    "held_out_suite_id", "held_out_suite_digest",
-    "model_runtime_binding_receipt_id", "model_runtime_binding_digest",
-    "candidate_head_sha", "regression_test_count",
-    "pattern_memory_admission_allowed", "gate_result_digest", "admission_metadata",
+    "schema_version",
+    "record_type",
+    "work_order_id",
+    "slice_name",
+    "gate_id",
+    "ratchet_id",
+    "verifier_receipt_id",
+    "improvement_job_id",
+    "held_out_suite_id",
+    "held_out_suite_digest",
+    "model_runtime_binding_receipt_id",
+    "model_runtime_binding_digest",
+    "candidate_head_sha",
+    "regression_test_count",
+    "pattern_memory_admission_allowed",
+    "gate_result_digest",
+    "admission_metadata",
 }
 _BINDING_FIELDS = {
-    "schema_version", "foundup_id", "snapshot_id", "snapshot_content_digest",
-    "worker_id", "verifier_id", "verified_at",
+    "schema_version",
+    "foundup_id",
+    "snapshot_id",
+    "snapshot_content_digest",
+    "work_order_id",
+    "slice_id",
+    "job_id",
+    "worker_id",
+    "verifier_id",
+    "head_sha",
+    "runtime_binding_receipt_id",
+    "runtime_binding_digest",
+    "verification_receipt_digest",
+    "held_out_receipt_digest",
+    "verified_at",
 }
 
 
@@ -81,12 +105,14 @@ class _OutcomeSeal:
     projection_digest: str
     replay_store: VerifiedOutcomeReplayStore
     replay_receipt_id: str
+    not_before: int
+    expires_at: int
 
 
 _LOCK = threading.Lock()
-_CAPABILITIES: weakref.WeakKeyDictionary[VerifiedFoundUpOutcomeCapability, _OutcomeSeal] = (
-    weakref.WeakKeyDictionary()
-)
+_CAPABILITIES: weakref.WeakKeyDictionary[
+    VerifiedFoundUpOutcomeCapability, _OutcomeSeal
+] = weakref.WeakKeyDictionary()
 
 
 def verify_and_issue_foundup_memex_outcome(
@@ -103,7 +129,8 @@ def verify_and_issue_foundup_memex_outcome(
     expected_snapshot_id: str,
     expected_snapshot_content_digest: str,
     replay_store: VerifiedOutcomeReplayStore,
-    now_epoch: int, max_age_seconds: int = 600,
+    now_epoch: int,
+    max_age_seconds: int = 600,
 ) -> VerifiedFoundUpOutcomeCapability:
     _validate_trust_dependencies(source, replay_store, signature_verifier)
     record, binding = _validated_record_and_binding(
@@ -120,11 +147,42 @@ def verify_and_issue_foundup_memex_outcome(
         held_out_receipt,
         verifier=verifier,
     )
-    _validate_evidence_links(record, binding, verifier.to_dict(), held_out.to_dict())
+    return _issue_validated_outcome(
+        record=record,
+        binding=binding,
+        record_id=record_id,
+        verifier=verifier.to_dict(),
+        held_out=held_out.to_dict(),
+        signed_receipts=signed_receipts,
+        reddog_public_key=reddog_public_key,
+        signature_verifier=signature_verifier,
+        reddog_id=reddog_id,
+        replay_store=replay_store,
+        now_epoch=now_epoch,
+        max_age_seconds=max_age_seconds,
+    )
+
+
+def _issue_validated_outcome(
+    *,
+    record: Mapping[str, Any],
+    binding: Mapping[str, Any],
+    record_id: str,
+    verifier: Mapping[str, Any],
+    held_out: Mapping[str, Any],
+    signed_receipts: Sequence[SignedReceipt | Mapping[str, Any]],
+    reddog_public_key: str,
+    signature_verifier: ReceiptSignatureVerifier,
+    reddog_id: str,
+    replay_store: VerifiedOutcomeReplayStore,
+    now_epoch: int,
+    max_age_seconds: int,
+) -> VerifiedFoundUpOutcomeCapability:
+    _validate_evidence_links(record, binding, verifier, held_out)
     signed_digest = verified_outcome_evidence_bundle_digest(
         record=record,
-        verifier_receipt=verifier.to_dict(),
-        held_out_receipt=held_out.to_dict(),
+        verifier_receipt=verifier,
+        held_out_receipt=held_out,
     )
     terminal, chain = _verify_signed_bundle(
         signed_receipts=signed_receipts,
@@ -136,18 +194,65 @@ def verify_and_issue_foundup_memex_outcome(
         now_epoch=now_epoch,
         max_age_seconds=max_age_seconds,
     )
+    return _mint_verified_bundle(
+        record=record,
+        binding=binding,
+        record_id=record_id,
+        signed_digest=signed_digest,
+        terminal=terminal,
+        chain=chain,
+        replay_store=replay_store,
+        now_epoch=now_epoch,
+        max_age_seconds=max_age_seconds,
+    )
+
+
+def _mint_verified_bundle(
+    *,
+    record: Mapping[str, Any],
+    binding: Mapping[str, Any],
+    record_id: str,
+    signed_digest: str,
+    terminal: SignedReceipt,
+    chain: Any,
+    replay_store: VerifiedOutcomeReplayStore,
+    now_epoch: int,
+    max_age_seconds: int,
+) -> VerifiedFoundUpOutcomeCapability:
+    projection = _projection(
+        record,
+        binding,
+        record_id,
+        reddog_verified_pattern_memory_record_digest(record),
+        signed_digest,
+        terminal,
+        chain,
+    )
     return _mint_capability(
-        _projection(
-            record,
-            binding,
-            record_id,
-            reddog_verified_pattern_memory_record_digest(record),
-            signed_digest,
-            terminal,
-            chain,
-        ),
+        projection,
         replay_store=replay_store,
         replay_receipt_id=terminal.receipt_id,
+        not_before=now_epoch,
+        expires_at=_capability_expiry(
+            binding=binding,
+            terminal_issued_at=terminal.issued_at,
+            now_epoch=now_epoch,
+            max_age_seconds=max_age_seconds,
+        ),
+    )
+
+
+def _capability_expiry(
+    *,
+    binding: Mapping[str, Any],
+    terminal_issued_at: int,
+    now_epoch: int,
+    max_age_seconds: int,
+) -> int:
+    return min(
+        now_epoch + max_age_seconds,
+        terminal_issued_at + max_age_seconds,
+        _verified_at_epoch(binding["verified_at"]) + max_age_seconds,
     )
 
 
@@ -176,7 +281,10 @@ def _verify_signed_bundle(
     terminal = _terminal_receipt(signed_receipts)
     if terminal.covered_action_digest != signed_digest:
         raise ValueError("verified_outcome_signed_digest_mismatch")
-    if now_epoch - terminal.issued_at < 0 or now_epoch - terminal.issued_at > max_age_seconds:
+    if (
+        now_epoch - terminal.issued_at < 0
+        or now_epoch - terminal.issued_at > max_age_seconds
+    ):
         raise ValueError("verified_outcome_signature_expired")
     return terminal, chain
 
@@ -186,6 +294,8 @@ def _mint_capability(
     *,
     replay_store: VerifiedOutcomeReplayStore,
     replay_receipt_id: str,
+    not_before: int,
+    expires_at: int,
 ) -> VerifiedFoundUpOutcomeCapability:
     capability = object.__new__(VerifiedFoundUpOutcomeCapability)
     with _LOCK:
@@ -194,6 +304,8 @@ def _mint_capability(
             projection_digest=_digest(projection),
             replay_store=replay_store,
             replay_receipt_id=replay_receipt_id,
+            not_before=not_before,
+            expires_at=expires_at,
         )
     return capability
 
@@ -204,6 +316,7 @@ def consume_verified_foundup_memex_outcome(
     expected_foundup_id: str,
     expected_snapshot_id: str,
     expected_snapshot_content_digest: str,
+    now_epoch: int,
 ) -> Mapping[str, Any] | None:
     """Consume one capability and return its immutable public projection."""
 
@@ -212,6 +325,12 @@ def consume_verified_foundup_memex_outcome(
     with _LOCK:
         seal = _CAPABILITIES.get(capability)
         if seal is None or _digest(seal.projection) != seal.projection_digest:
+            return None
+        if (
+            type(now_epoch) is not int
+            or now_epoch < seal.not_before
+            or now_epoch > seal.expires_at
+        ):
             return None
         projection = dict(seal.projection)
         expected = (
@@ -257,7 +376,9 @@ def _validated_record_and_binding(
     max_age_seconds: int,
 ) -> tuple[Mapping[str, Any], Mapping[str, Any]]:
     record = _load_exact_record(source, record_id)
-    binding = _exact_mapping(record.get("admission_metadata"), _BINDING_FIELDS, "binding")
+    binding = _exact_mapping(
+        record.get("admission_metadata"), _BINDING_FIELDS, "binding"
+    )
     _validate_record(record, binding, record_id)
     _require_equal(binding, "foundup_id", expected_foundup_id)
     _require_equal(binding, "snapshot_id", expected_snapshot_id)
@@ -272,11 +393,31 @@ def _validate_evidence_links(
     verifier: Mapping[str, Any],
     held_out: Mapping[str, Any],
 ) -> None:
+    exact_binding = {
+        "work_order_id": record["work_order_id"],
+        "slice_id": record["slice_name"],
+        "job_id": record["improvement_job_id"],
+        "head_sha": record["candidate_head_sha"],
+        "runtime_binding_receipt_id": record["model_runtime_binding_receipt_id"],
+        "runtime_binding_digest": record["model_runtime_binding_digest"],
+        "verification_receipt_digest": _digest(verifier),
+        "held_out_receipt_digest": _digest(held_out),
+    }
+    for key, expected in exact_binding.items():
+        if binding[key] != expected:
+            raise ValueError(f"verified_outcome_{key}_mismatch")
     if (
         binding["worker_id"] != verifier["worker_id"]
         or binding["verifier_id"] != verifier["verifier_id"]
     ):
         raise ValueError("verified_outcome_verifier_identity_mismatch")
+    _validate_verifier_links(record, verifier)
+    _validate_held_out_links(record, held_out)
+
+
+def _validate_verifier_links(
+    record: Mapping[str, Any], verifier: Mapping[str, Any]
+) -> None:
     required = (
         ("work_order_id", "work_order_id"),
         ("slice_name", "slice_name"),
@@ -285,6 +426,21 @@ def _validate_evidence_links(
     )
     if any(record[left] != verifier[right] for left, right in required):
         raise ValueError("verified_outcome_verifier_receipt_binding_mismatch")
+    verifier_runtime = (
+        verifier["model_runtime_binding_receipt_id"] or "",
+        verifier["model_runtime_binding_digest"],
+    )
+    record_runtime = (
+        record["model_runtime_binding_receipt_id"],
+        record["model_runtime_binding_digest"],
+    )
+    if record_runtime != verifier_runtime:
+        raise ValueError("verified_outcome_verifier_runtime_binding_mismatch")
+
+
+def _validate_held_out_links(
+    record: Mapping[str, Any], held_out: Mapping[str, Any]
+) -> None:
     held_out_required = (
         ("gate_id", "gate_id"),
         ("held_out_suite_id", "held_out_suite_id"),
@@ -302,19 +458,11 @@ def _validate_evidence_links(
     )
     if any(record[left] != (held_out[right] or "") for left, right in exact_held_out):
         raise ValueError("verified_outcome_held_out_lineage_mismatch")
-    verifier_runtime = (
-        verifier["model_runtime_binding_receipt_id"] or "",
-        verifier["model_runtime_binding_digest"],
-    )
-    record_runtime = (
-        record["model_runtime_binding_receipt_id"],
-        record["model_runtime_binding_digest"],
-    )
-    if record_runtime != verifier_runtime:
-        raise ValueError("verified_outcome_verifier_runtime_binding_mismatch")
 
 
-def _load_exact_record(source: VerifiedOutcomeSource, record_id: str) -> Mapping[str, Any]:
+def _load_exact_record(
+    source: VerifiedOutcomeSource, record_id: str
+) -> Mapping[str, Any]:
     if not record_id or source is None:
         raise ValueError("verified_outcome_source_required")
     value = source.load_verified_outcome(record_id)
@@ -327,10 +475,17 @@ def _exact_mapping(value: Any, fields: set[str], label: str) -> Mapping[str, Any
     return dict(value)
 
 
-def _validate_record(record: Mapping[str, Any], binding: Mapping[str, Any], record_id: str) -> None:
+def _validate_record(
+    record: Mapping[str, Any], binding: Mapping[str, Any], record_id: str
+) -> None:
     required = (
-        "work_order_id", "slice_name", "gate_id", "ratchet_id",
-        "verifier_receipt_id", "held_out_suite_id", "improvement_job_id",
+        "work_order_id",
+        "slice_name",
+        "gate_id",
+        "ratchet_id",
+        "verifier_receipt_id",
+        "held_out_suite_id",
+        "improvement_job_id",
     )
     if record.get("schema_version") != VERIFIED_OUTCOME_RECORD_SCHEMA:
         raise ValueError("verified_outcome_record_schema_invalid")
@@ -345,15 +500,23 @@ def _validate_record(record: Mapping[str, Any], binding: Mapping[str, Any], reco
             raise ValueError(f"verified_outcome_{key}_invalid")
     runtime_id = str(record.get("model_runtime_binding_receipt_id") or "")
     runtime_digest = str(record.get("model_runtime_binding_digest") or "")
-    if bool(runtime_id) != bool(runtime_digest) or (runtime_digest and not _DIGEST.fullmatch(runtime_digest)):
+    if bool(runtime_id) != bool(runtime_digest) or (
+        runtime_digest and not _DIGEST.fullmatch(runtime_digest)
+    ):
         raise ValueError("verified_outcome_runtime_binding_invalid")
     if not _HEAD_SHA.fullmatch(str(record.get("candidate_head_sha") or "")):
         raise ValueError("verified_outcome_head_sha_invalid")
-    if type(record.get("regression_test_count")) is not int or record["regression_test_count"] <= 0:
+    if (
+        type(record.get("regression_test_count")) is not int
+        or record["regression_test_count"] <= 0
+    ):
         raise ValueError("verified_outcome_regression_count_invalid")
     if binding.get("schema_version") != VERIFIED_OUTCOME_BINDING_SCHEMA:
         raise ValueError("verified_outcome_binding_schema_invalid")
-    if any(not str(binding.get(key) or "").strip() for key in _BINDING_FIELDS - {"schema_version"}):
+    if any(
+        not str(binding.get(key) or "").strip()
+        for key in _BINDING_FIELDS - {"schema_version"}
+    ):
         raise ValueError("verified_outcome_binding_field_missing")
     if binding["worker_id"] == binding["verifier_id"]:
         raise ValueError("verified_outcome_verifier_not_independent")
@@ -361,23 +524,32 @@ def _validate_record(record: Mapping[str, Any], binding: Mapping[str, Any], reco
         raise ValueError("verified_outcome_record_id_mismatch")
 
 
-def _terminal_receipt(receipts: Sequence[SignedReceipt | Mapping[str, Any]]) -> SignedReceipt:
+def _terminal_receipt(
+    receipts: Sequence[SignedReceipt | Mapping[str, Any]],
+) -> SignedReceipt:
     raw = receipts[-1]
     if isinstance(raw, SignedReceipt):
         return raw
     return SignedReceipt(
-        receipt_id=str(raw["receipt_id"]), work_order_id=str(raw["work_order_id"]),
-        reddog_id=str(raw["reddog_id"]), prev_receipt_hash=raw.get("prev_receipt_hash"),
+        receipt_id=str(raw["receipt_id"]),
+        work_order_id=str(raw["work_order_id"]),
+        reddog_id=str(raw["reddog_id"]),
+        prev_receipt_hash=raw.get("prev_receipt_hash"),
         covered_action_digest=str(raw["covered_action_digest"]),
-        reward_account=raw.get("reward_account"), issued_at=int(raw["issued_at"]),
+        reward_account=raw.get("reward_account"),
+        issued_at=int(raw["issued_at"]),
         signature=str(raw["signature"]),
     )
 
 
 def _projection(
-    record: Mapping[str, Any], binding: Mapping[str, Any], record_id: str,
-    record_digest: str, evidence_bundle_digest: str,
-    terminal: SignedReceipt, chain: Any,
+    record: Mapping[str, Any],
+    binding: Mapping[str, Any],
+    record_id: str,
+    record_digest: str,
+    evidence_bundle_digest: str,
+    terminal: SignedReceipt,
+    chain: Any,
 ) -> Mapping[str, Any]:
     return {
         "foundup_id": binding["foundup_id"],
@@ -409,15 +581,19 @@ def _require_equal(value: Mapping[str, Any], key: str, expected: str) -> None:
 
 
 def _validate_verified_at(value: Any, now_epoch: int, max_age_seconds: int) -> None:
+    age = now_epoch - _verified_at_epoch(value)
+    if age < 0 or age > max_age_seconds:
+        raise ValueError("verified_outcome_verification_expired")
+
+
+def _verified_at_epoch(value: Any) -> int:
     try:
         parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     except ValueError as exc:
         raise ValueError("verified_outcome_verified_at_invalid") from exc
     if parsed.tzinfo is None:
         raise ValueError("verified_outcome_verified_at_invalid")
-    age = now_epoch - int(parsed.astimezone(timezone.utc).timestamp())
-    if age < 0 or age > max_age_seconds:
-        raise ValueError("verified_outcome_verification_expired")
+    return int(parsed.astimezone(timezone.utc).timestamp())
 
 
 def _digest(value: Any) -> str:
@@ -426,9 +602,12 @@ def _digest(value: Any) -> str:
 
 
 __all__ = [
-    "VERIFIED_OUTCOME_BINDING_SCHEMA", "VERIFIED_OUTCOME_RECORD_SCHEMA",
-    "VerifiedFoundUpOutcomeCapability", "VerifiedOutcomeReplayStore",
-    "VerifiedOutcomeSource", "consume_verified_foundup_memex_outcome",
+    "VERIFIED_OUTCOME_BINDING_SCHEMA",
+    "VERIFIED_OUTCOME_RECORD_SCHEMA",
+    "VerifiedFoundUpOutcomeCapability",
+    "VerifiedOutcomeReplayStore",
+    "VerifiedOutcomeSource",
+    "consume_verified_foundup_memex_outcome",
     "is_verified_foundup_memex_outcome_capability",
     "verify_and_issue_foundup_memex_outcome",
 ]

@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-04: Verified-outcome runtime authority binding
+- Completed the draft verified-outcome rehydration foundation with a root-confined
+  durable evidence source and replay namespace in the existing authority runtime
+  store. The resident queue now publishes only canonical verifier, held-out, and
+  PatternMemory evidence signed by the isolated RedDog signer.
+- Added committed-profile key resolution, revocation/freshness checks, exact
+  FoundUp/snapshot/head/content/work/slice/job/worker/verifier/runtime lineage, and
+  opaque one-use capabilities consumed by resident FoundUp Brain assembly.
+- Wired production construction through the existing signer/runtime dependency
+  bundle and outside-repository runtime paths. Failures leave PatternMemory rows
+  inert and do not advance the resident stage.
+- Boundary remains narrow: no learning candidates, Brain or roadmap writes,
+  HoloIndex mutation, new database, new orchestrator, voting, or CABR governance
+  (WSP 00/15/22/50/62/97).
+
 ## 2026-08-04: Memex supply authenticity gate
 - Replaced the promotion path's `sha256:` prefix check with exact typed Memex supply
   receipt rehydration, canonical digest verification, scope/lineage and

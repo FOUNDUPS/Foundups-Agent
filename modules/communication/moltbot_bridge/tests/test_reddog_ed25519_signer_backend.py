@@ -14,6 +14,11 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
     Ed25519SignatureVerifier,
     encode_ed25519_public_key,
 )
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VERIFIED_OUTCOME_SIGNER_ROLE,
+    VERIFIED_OUTCOME_SIGNING_OPERATION,
+    VerifiedOutcomeSignerPolicy,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     CONTROL_LOOP_SIGNING_OPERATION,
     CONTROL_LOOP_SIGNING_PREFIX,
@@ -26,6 +31,7 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     REJECT_ED25519_SIGNER_CONTROL_ANCHOR_MISSING,
     REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH,
     REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH,
+    REJECT_ED25519_SIGNER_REQUEST_INVALID,
     canonical_control_audit_attestation_input,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
@@ -38,6 +44,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     InMemorySignerControlLoopAnchorStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_receipt_chain import (
+    build_receipt_payload_for_signing,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    PREFIX_RECEIPT,
+    canonical_signing_input,
 )
 
 
@@ -161,6 +174,70 @@ def test_ed25519_signer_backend_signs_and_public_verifier_accepts() -> None:
     assert response.audit_mac == "audit:nonce-1:github:mjtrout"
     assert response.no_secret_material_returned is True
     assert Ed25519SignatureVerifier().verify(public_key, request.signing_input, response.signature) is True
+
+
+def test_ed25519_backend_signs_only_exact_verified_outcome_domain() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    consensus_digest = "sha256:" + "c" * 64
+    policy = VerifiedOutcomeSignerPolicy(
+        issuer_principal_id="github:mjtrout",
+        reddog_id="reddog-0102",
+        signer_public_key=public_key,
+        key_epoch="epoch-1",
+        authority_tier="HIGH",
+        consensus_receipt_digest=consensus_digest,
+    )
+    payload = build_receipt_payload_for_signing(
+        receipt_id="verified-outcome-test",
+        work_order_id="wo-1",
+        reddog_id="reddog-0102",
+        prev_receipt_hash=None,
+        covered_action_digest="sha256:" + "d" * 64,
+        reward_account=None,
+        issued_at=1_800_000_000,
+    )
+    signing_input = canonical_signing_input(payload, PREFIX_RECEIPT)
+    request = SigningRequest(
+        signing_input=signing_input,
+        payload_digest=_request_digest(signing_input),
+        signer_role=VERIFIED_OUTCOME_SIGNER_ROLE,
+        signer_public_key=public_key,
+        requester_principal_id="github:mjtrout",
+        nonce=payload["receipt_id"],
+        key_epoch="epoch-1",
+        requested_operation=VERIFIED_OUTCOME_SIGNING_OPERATION,
+        authority_tier="HIGH",
+        consensus_receipt_digest=consensus_digest,
+    )
+    backend = Ed25519SignerBackend(
+        private_key=private_key,
+        public_key=public_key,
+        key_epoch="epoch-1",
+        audit_mac_builder=AuditMacBuilder(),
+        verified_outcome_signer_policy=policy,
+        proposal_clock=lambda: 1_800_000_000,
+    )
+
+    accepted = backend.sign(request, _peer())
+    wrong_digest = backend.sign(
+        replace(request, payload_digest="sha256:" + "0" * 64),
+        _peer(),
+    )
+    wrong_domain = backend.sign(
+        replace(request, requested_operation="create_foundup"),
+        _peer(),
+    )
+
+    assert accepted.accepted is True
+    assert Ed25519SignatureVerifier().verify(
+        public_key,
+        signing_input,
+        accepted.signature,
+    ) is True
+    assert wrong_digest.accepted is False
+    assert wrong_digest.rejection_code == REJECT_ED25519_SIGNER_REQUEST_INVALID
+    assert wrong_domain.accepted is False
 
 
 def test_ed25519_signer_backend_round_trips_through_socket_protocol() -> None:

@@ -279,7 +279,7 @@ def test_rejects_missing_scope_without_guessing_foundup() -> None:
     assert "missing_principal_id" in result.rejection_reasons
 
 
-def test_rejects_nonempty_outcomes_until_root_owned_runtime_binding_exists() -> None:
+def test_rejects_caller_supplied_outcome_mappings_before_runtime_authority() -> None:
     result = enrich_readonly_audit_tasks_with_operational_memex(
         tasks=(_task(),),
         snapshot=_snapshot(),
@@ -289,7 +289,20 @@ def test_rejects_nonempty_outcomes_until_root_owned_runtime_binding_exists() -> 
 
     assert result.accepted is False
     assert result.tasks == ()
-    assert result.rejection_reasons == ("verified_outcome_runtime_binding_required",)
+    assert result.rejection_reasons == ("untrusted_verified_outcomes_forbidden",)
+
+
+def test_malformed_runtime_reference_rejects_without_worker_call() -> None:
+    result = enrich_readonly_audit_tasks_with_operational_memex(
+        tasks=(_task(),),
+        snapshot=_snapshot(),
+        config=_config(verified_outcome_references=({"record_id": "forged"},)),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert result.tasks == ()
+    assert result.rejection_reasons == ("verified_outcome_runtime_reference_invalid",)
 
 
 def test_supplier_module_is_read_only_by_ast() -> None:

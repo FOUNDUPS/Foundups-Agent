@@ -54,6 +54,8 @@ NOW = 1_800_000_000
 VERIFIED_AT = "2027-01-15T07:59:55+00:00"
 PUBLIC_KEY = "test-public-key"
 REDDOG_ID = "reddog-0102"
+RUNTIME_RECEIPT_ID = "reddog_model_runtime_binding:test"
+RUNTIME_DIGEST = "sha256:" + "8" * 64
 
 
 class _Source:
@@ -91,8 +93,16 @@ def _record(**record_overrides):
         "foundup_id": FOUNDUP,
         "snapshot_id": SNAPSHOT,
         "snapshot_content_digest": SNAPSHOT_DIGEST,
+        "work_order_id": "work-order-1",
+        "slice_id": "FOUNDUP_MEMEX_VERIFIED_OUTCOME_AUTHENTICITY_GATE_PHASE1",
+        "job_id": "improvement-job-1",
         "worker_id": "author-worker",
         "verifier_id": "independent-verifier",
+        "head_sha": HEAD,
+        "runtime_binding_receipt_id": RUNTIME_RECEIPT_ID,
+        "runtime_binding_digest": RUNTIME_DIGEST,
+        "verification_receipt_digest": _digest(verifier),
+        "held_out_receipt_digest": _digest(held_out),
         "verified_at": VERIFIED_AT,
     }
     binding.update(record_overrides.pop("binding", {}))
@@ -105,8 +115,8 @@ def _record(**record_overrides):
         "improvement_job_id": "improvement-job-1",
         "held_out_suite_id": held_out["held_out_suite_id"],
         "held_out_suite_digest": held_out["held_out_suite_digest"],
-        "model_runtime_binding_receipt_id": "",
-        "model_runtime_binding_digest": "",
+        "model_runtime_binding_receipt_id": held_out["model_runtime_binding_receipt_id"],
+        "model_runtime_binding_digest": held_out["model_runtime_binding_digest"],
         "candidate_head_sha": HEAD,
         "regression_test_count": 7,
         "pattern_memory_admission_allowed": True,
@@ -142,8 +152,8 @@ def _verifier_receipt(**overrides):
         "receipt_chain_terminal_hash": "sha256:" + "f" * 64,
         "worktree_receipt_digest": "sha256:" + "1" * 64,
         "holoindex_freshness_receipt_digest": "sha256:" + "2" * 64,
-        "model_runtime_binding_receipt_id": None,
-        "model_runtime_binding_digest": "",
+        "model_runtime_binding_receipt_id": RUNTIME_RECEIPT_ID,
+        "model_runtime_binding_digest": RUNTIME_DIGEST,
         "memex_supply_receipt_id": None,
         "memex_supply_digest": "",
         "rejection_reasons": [],
@@ -182,8 +192,8 @@ def _held_out_receipt(verifier, **overrides):
         "candidate_digest": "sha256:" + "6" * 64,
         "candidate_head_sha": verifier["head_sha"],
         "holoindex_freshness_receipt_digest": "sha256:" + "7" * 64,
-        "model_runtime_binding_receipt_id": None,
-        "model_runtime_binding_digest": "",
+        "model_runtime_binding_receipt_id": RUNTIME_RECEIPT_ID,
+        "model_runtime_binding_digest": RUNTIME_DIGEST,
         "pattern_memory_admission_requested": True,
         "pattern_memory_admission_allowed": True,
         "rejection_reasons": [],
@@ -331,6 +341,7 @@ def test_valid_authoritative_record_issues_one_shot_capability() -> None:
         expected_foundup_id=FOUNDUP,
         expected_snapshot_id=SNAPSHOT,
         expected_snapshot_content_digest=SNAPSHOT_DIGEST,
+        now_epoch=NOW,
     )
     assert source.calls == [reddog_verified_pattern_memory_record_id(record)]
     assert projected is not None
@@ -343,6 +354,7 @@ def test_valid_authoritative_record_issues_one_shot_capability() -> None:
         expected_foundup_id=FOUNDUP,
         expected_snapshot_id=SNAPSHOT,
         expected_snapshot_content_digest=SNAPSHOT_DIGEST,
+        now_epoch=NOW,
     ) is None
 
 
@@ -382,7 +394,7 @@ def _brain_snapshot():
     return snapshot_result.snapshot
 
 
-def test_resident_brain_holds_capability_until_authoritative_runtime_binding() -> None:
+def test_resident_brain_consumes_authoritatively_bound_capability() -> None:
     snapshot = _brain_snapshot()
     record = _record(
         binding={
@@ -425,19 +437,18 @@ def test_resident_brain_holds_capability_until_authoritative_runtime_binding() -
         now_iso="2027-01-15T08:01:00+00:00",
         policy_foundup_scope=(FOUNDUP,),
     )
-    assert assembled.accepted is False
-    assert assembled.view is None
-    assert assembled.rejection_reasons == (
-        "verified_outcome_runtime_binding_required",
-    )
-    projected = consume_verified_foundup_memex_outcome(
+    assert assembled.accepted is True
+    assert assembled.view is not None
+    assert assembled.rejection_reasons == ()
+    assert len(assembled.view.verified_outcomes) == 1
+    assert assembled.view.verified_outcomes[0]["scope_origin"] == "verified_capability"
+    assert consume_verified_foundup_memex_outcome(
         capability,
         expected_foundup_id=FOUNDUP,
         expected_snapshot_id=snapshot.snapshot_receipt_id,
         expected_snapshot_content_digest=snapshot.snapshot_content_digest,
-    )
-    assert projected is not None
-    assert projected["scope_origin"] == "verified_capability"
+        now_epoch=NOW + 60,
+    ) is None
 
 
 @pytest.mark.parametrize(
@@ -504,6 +515,15 @@ def test_invalid_signature_wrong_covered_digest_expiry_and_replay_fail() -> None
         expected_foundup_id=FOUNDUP,
         expected_snapshot_id=SNAPSHOT,
         expected_snapshot_content_digest=SNAPSHOT_DIGEST,
+        now_epoch=NOW - 1,
+    ) is None
+    assert replay.seen == set()
+    assert consume_verified_foundup_memex_outcome(
+        first,
+        expected_foundup_id=FOUNDUP,
+        expected_snapshot_id=SNAPSHOT,
+        expected_snapshot_content_digest=SNAPSHOT_DIGEST,
+        now_epoch=NOW,
     ) is not None
     second = _issue(record, replay_store=replay)
     assert consume_verified_foundup_memex_outcome(
@@ -511,6 +531,7 @@ def test_invalid_signature_wrong_covered_digest_expiry_and_replay_fail() -> None
         expected_foundup_id=FOUNDUP,
         expected_snapshot_id=SNAPSHOT,
         expected_snapshot_content_digest=SNAPSHOT_DIGEST,
+        now_epoch=NOW,
     ) is None
 
     stale_record = _record(binding={"verified_at": "2027-01-15T07:49:00+00:00"})
@@ -574,13 +595,16 @@ def test_missing_source_receipts_fail_before_signature_admission() -> None:
 def test_substituted_held_out_and_verifier_identity_fail() -> None:
     verifier = _verifier_receipt()
     substituted = _held_out_receipt(verifier, held_out_suite_id="attacker-suite")
-    with pytest.raises(ValueError, match="held_out_receipt_binding_mismatch"):
+    with pytest.raises(ValueError, match="held_out_receipt_digest_mismatch"):
         _issue(verification_receipt=verifier, held_out_receipt=substituted)
 
     wrong_verifier = _verifier_receipt(verifier_id="other-verifier")
     wrong_held_out = _held_out_receipt(wrong_verifier)
     record = _record(verifier_receipt_id=wrong_verifier["receipt_id"], gate_id=wrong_held_out["gate_id"])
-    with pytest.raises(ValueError, match="verifier_identity_mismatch"):
+    with pytest.raises(
+        ValueError,
+        match="verification_receipt_digest_mismatch|verifier_identity_mismatch",
+    ):
         _issue(
             record,
             verification_receipt=wrong_verifier,
@@ -601,7 +625,13 @@ def test_substituted_held_out_and_verifier_identity_fail() -> None:
     ],
 )
 def test_signed_but_internally_conflicting_lineage_fails(changes) -> None:
-    with pytest.raises(ValueError, match="held_out_lineage_mismatch"):
+    with pytest.raises(
+        ValueError,
+        match=(
+            "held_out_lineage_mismatch|job_id_mismatch|"
+            "runtime_binding_receipt_id_mismatch"
+        ),
+    ):
         _issue(_record(**changes))
 
 
@@ -613,6 +643,7 @@ def test_scope_mismatch_does_not_burn_capability_or_replay_state() -> None:
         expected_foundup_id="other-foundup",
         expected_snapshot_id=SNAPSHOT,
         expected_snapshot_content_digest=SNAPSHOT_DIGEST,
+        now_epoch=NOW,
     ) is None
     assert replay.seen == set()
     assert consume_verified_foundup_memex_outcome(
@@ -620,6 +651,7 @@ def test_scope_mismatch_does_not_burn_capability_or_replay_state() -> None:
         expected_foundup_id=FOUNDUP,
         expected_snapshot_id=SNAPSHOT,
         expected_snapshot_content_digest=SNAPSHOT_DIGEST,
+        now_epoch=NOW,
     ) is not None
 
 
@@ -643,7 +675,7 @@ def test_attacker_rehashed_receipts_cannot_reuse_authentic_bundle_signature() ->
     forged_record["verifier_receipt_id"] = forged_verifier["receipt_id"]
     forged_record["gate_id"] = forged_held_out["gate_id"]
 
-    with pytest.raises(ValueError, match="signed_digest_mismatch"):
+    with pytest.raises(ValueError, match="verification_receipt_digest_mismatch"):
         _issue(
             forged_record,
             receipt=authentic_signature,
@@ -669,10 +701,10 @@ def test_capability_is_omitted_from_serialized_supply_configuration() -> None:
     payload = OperationalMemexSnapshotSupplyConfig(
         foundup_id=FOUNDUP,
         principal_id="principal-012",
-        verified_outcomes=(capability,),
+        untrusted_verified_outcomes_supplied=True,
     ).to_dict()
-    assert payload["verified_outcomes"] == ()
-    assert payload["verified_outcome_capability_count"] == 1
+    assert "verified_outcomes" not in payload
+    assert payload["verified_outcome_references"] == []
     assert capability not in payload.values()
 
 

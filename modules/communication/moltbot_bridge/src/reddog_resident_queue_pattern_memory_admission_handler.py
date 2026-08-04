@@ -18,6 +18,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional
 
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_publisher import (
+    VerifiedOutcomeEvidencePublisher,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     ResidentQueueChainResultsStore,
 )
@@ -30,6 +34,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_pattern_memory_admission_invoke import (
     PatternMemoryAdmissionSink,
     QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT,
+    build_queue_authorized_verified_outcome_record,
     invoke_reddog_wre_queue_authorized_pattern_memory_admission,
 )
 
@@ -42,6 +47,10 @@ FAIL_DISPATCH_NEXT_ACTION_MISMATCH = "FAIL_DISPATCH_NEXT_ACTION_MISMATCH"
 FAIL_HELD_OUT_REGRESSION_GATE_STAGE_MISSING = "FAIL_HELD_OUT_REGRESSION_GATE_STAGE_MISSING"
 FAIL_ADMISSION_REQUEST_MISSING = "FAIL_ADMISSION_REQUEST_MISSING"
 FAIL_PATTERN_MEMORY_SINK_MISSING = "FAIL_PATTERN_MEMORY_SINK_MISSING"
+FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION = (
+    "FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION"
+)
+SLICE_VERIFIER_STAGE_KEY = "slice_verifier"
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -82,6 +91,7 @@ class ResidentQueuePatternMemoryAdmissionStageHandler:
     chain_results_store: ResidentQueueChainResultsStore
     admission_request: Mapping[str, Any]
     sink: Optional[PatternMemoryAdmissionSink]
+    evidence_publisher: Optional[VerifiedOutcomeEvidencePublisher] = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != PATTERN_MEMORY_ADMISSION_STAGE_KEY:
@@ -96,7 +106,6 @@ class ResidentQueuePatternMemoryAdmissionStageHandler:
                 f"expected:{NEXT_QUEUE_PATTERN_MEMORY_ADMISSION_INVOKE}",
                 f"actual:{request.next_action}",
             )
-
         stage_results = _stage_results(_mapping(self.chain_results_store.load()))
         held_out_gate = _mapping(stage_results.get(HELD_OUT_REGRESSION_GATE_STAGE_KEY))
         if not held_out_gate:
@@ -105,15 +114,72 @@ class ResidentQueuePatternMemoryAdmissionStageHandler:
         admission_request = _mapping(self.admission_request)
         if not admission_request:
             return _reject(FAIL_ADMISSION_REQUEST_MISSING)
+        admission_metadata = _mapping(admission_request.get("admission_metadata"))
+        if (
+            admission_metadata.get("schema_version")
+            == "foundup_memex_verified_outcome_binding.v2"
+            and self.evidence_publisher is None
+        ):
+            return _reject(FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION)
         if self.sink is None:
             return _reject(FAIL_PATTERN_MEMORY_SINK_MISSING)
 
-        return invoke_reddog_wre_queue_authorized_pattern_memory_admission(
+        result = invoke_reddog_wre_queue_authorized_pattern_memory_admission(
             explicit_queue_authorized_pattern_memory_admission_requested=True,
             queue_held_out_gate_result=held_out_gate,
             admission_request=admission_request,
             sink=self.sink,
-        ).to_dict()
+        )
+        payload = result.to_dict()
+        payload["verified_outcome_authority_published"] = False
+        if result.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT:
+            return payload
+        if self.evidence_publisher is None:
+            return payload
+        return _publish_verified_outcome(
+            payload=payload,
+            publisher=self.evidence_publisher,
+            stage_results=stage_results,
+            held_out_gate=held_out_gate,
+            admission_request=admission_request,
+        )
+
+
+def _publish_verified_outcome(
+    *,
+    payload: dict[str, Any],
+    publisher: VerifiedOutcomeEvidencePublisher,
+    stage_results: Mapping[str, Mapping[str, Any]],
+    held_out_gate: Mapping[str, Any],
+    admission_request: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    verifier_stage = _mapping(stage_results.get(SLICE_VERIFIER_STAGE_KEY))
+    verifier_result = _mapping(verifier_stage.get("verifier_result"))
+    verification_receipt = _mapping(verifier_result.get("receipt"))
+    held_out_payload = _mapping(held_out_gate.get("gate_result"))
+    held_out_receipt = _mapping(held_out_payload.get("receipt"))
+    record = build_queue_authorized_verified_outcome_record(
+        gate_result=held_out_payload,
+        gate_receipt=held_out_receipt,
+        admission_request=admission_request,
+    )
+    record_id = str(
+        _mapping(payload.get("receipt")).get("pattern_memory_record_id") or ""
+    )
+    try:
+        published_id = publisher.publish(
+            record_id=record_id,
+            record=record,
+            verification_receipt=verification_receipt,
+            held_out_receipt=held_out_receipt,
+        )
+    except Exception:
+        payload["decision"] = QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT
+        payload["rejection_reasons"] = [FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION]
+        return payload
+    payload["verified_outcome_authority_published"] = True
+    payload["verified_outcome_authority_record_id"] = published_id
+    return payload
 
 
 def build_reddog_resident_queue_pattern_memory_admission_stage_handler(
@@ -121,6 +187,7 @@ def build_reddog_resident_queue_pattern_memory_admission_stage_handler(
     chain_results_store: ResidentQueueChainResultsStore,
     admission_request: Mapping[str, Any],
     sink: Optional[PatternMemoryAdmissionSink],
+    evidence_publisher: Optional[VerifiedOutcomeEvidencePublisher] = None,
 ) -> ResidentQueuePatternMemoryAdmissionStageHandler:
     """Build the injected PatternMemory admission handler for the dispatcher."""
 
@@ -128,6 +195,7 @@ def build_reddog_resident_queue_pattern_memory_admission_stage_handler(
         chain_results_store=chain_results_store,
         admission_request=admission_request,
         sink=sink,
+        evidence_publisher=evidence_publisher,
     )
 
 
@@ -137,6 +205,7 @@ __all__ = [
     "FAIL_DISPATCH_STAGE_MISMATCH",
     "FAIL_HELD_OUT_REGRESSION_GATE_STAGE_MISSING",
     "FAIL_PATTERN_MEMORY_SINK_MISSING",
+    "FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION",
     "HELD_OUT_REGRESSION_GATE_STAGE_KEY",
     "PATTERN_MEMORY_ADMISSION_STAGE_KEY",
     "ResidentQueuePatternMemoryAdmissionStageHandler",

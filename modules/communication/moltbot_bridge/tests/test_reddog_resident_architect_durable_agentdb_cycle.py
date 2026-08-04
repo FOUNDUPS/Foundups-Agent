@@ -520,7 +520,7 @@ def test_durable_cycle_supplies_operational_memex_to_openclaw_workers() -> None:
         == _fresh_holo_receipt().generation_id
         for context in contexts
     )
-    assert all(context["memex_evidence_bundle"]["records"] for context in contexts)
+    assert all(context["memex_evidence_bundle"]["record_count"] == 1 and context["memex_evidence_bundle"]["record_digests"] and context["memex_evidence_bundle"]["model_context_omitted_reason"] == "memex_supplemental_budget_preserves_repository_evidence" for context in contexts)
     completed = AgentDB().get_autonomous_tasks(status="completed", limit=10)
     readonly_contexts = [
         task["context"] if isinstance(task["context"], dict) else json.loads(task["context"])

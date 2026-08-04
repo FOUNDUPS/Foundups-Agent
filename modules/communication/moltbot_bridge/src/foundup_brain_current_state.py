@@ -21,6 +21,11 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_authenticity import (
+    consume_verified_foundup_memex_outcome,
+    is_verified_foundup_memex_outcome_capability,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     FRESH,
     SOURCE_BRAIN,
@@ -161,6 +166,7 @@ def assemble_foundup_brain_current_state(
         snapshot_id=snapshot.snapshot_receipt_id,
         snapshot_content_digest=snapshot.snapshot_content_digest,
         reasons=reasons,
+        now_iso=now_iso,
         resident_mode=resident_mode,
         legacy_single_foundup_compatibility=legacy_single_foundup_compatibility,
     )
@@ -371,6 +377,7 @@ def _verified_outcome_projections(
     snapshot_id: str,
     snapshot_content_digest: str,
     reasons: list[str],
+    now_iso: str | None,
     resident_mode: bool,
     legacy_single_foundup_compatibility: bool,
 ) -> tuple[dict[str, Any], ...]:
@@ -379,7 +386,24 @@ def _verified_outcome_projections(
     projected: list[dict[str, Any]] = []
     for outcome in outcomes:
         if resident_mode:
-            reasons.append("verified_outcome_runtime_binding_required")
+            if not is_verified_foundup_memex_outcome_capability(outcome):
+                reasons.append("verified_outcome_runtime_binding_required")
+                continue
+            now_epoch = _iso_epoch(now_iso)
+            if now_epoch is None:
+                reasons.append("verified_outcome_trusted_clock_required")
+                continue
+            consumed = consume_verified_foundup_memex_outcome(
+                outcome,
+                expected_foundup_id=foundup_id,
+                expected_snapshot_id=snapshot_id,
+                expected_snapshot_content_digest=snapshot_content_digest,
+                now_epoch=now_epoch,
+            )
+            if consumed is None:
+                reasons.append("verified_outcome_capability_rejected")
+                continue
+            projected.append(dict(consumed))
             continue
         if not legacy_single_foundup_compatibility or not isinstance(outcome, Mapping):
             reasons.append("verified_outcome_legacy_compatibility_required")
@@ -394,6 +418,18 @@ def _verified_outcome_projections(
             )
         )
     return tuple(projected)
+
+
+def _iso_epoch(value: str | None) -> int | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return int(parsed.timestamp())
 
 
 def _scope_work_records(

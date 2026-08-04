@@ -57,9 +57,16 @@ administered principal-key resolver.
 Architect proposal attestation v2 requires a typed `OperationalMemexSupplyReceipt`;
 promotion rehydrates its complete serialized form, recomputes the canonical ID,
 rejects unknown/stale/scope-mismatched inputs, and signs its full digest. Outcome
-rehydration now checks canonical verifier/held-out receipts and a signed evidence
-bundle, but resident admission rejects every nonempty outcome until a root-owned
-durable trust/replay binding is implemented. Raw booleans/IDs are never authority.
+rehydration checks canonical verifier/held-out receipts and a signed evidence
+bundle. The resident queue can publish that complete bundle through the isolated
+signer into the existing root-confined authority runtime store. Consumption reloads
+the durable envelope, resolves the key from the current committed authority profile,
+checks revocation, freshness, FoundUp/snapshot/head/content/work/slice/job/worker/
+verifier/runtime lineage, and issues an opaque one-use capability. The FoundUp Brain
+assembler consumes that capability against the same durable replay state. Raw
+booleans, raw receipt IDs, caller-supplied records, and serializable capability
+markers are never authority. Learning candidates, Brain writes, roadmap writes,
+default Memex supply, and HoloIndex mutation remain outside this interface.
 
 `reddog_architect_fix_promotion_transaction.py` isolates record construction and publication; `reddog_architect_fix_promotion_publication.py` confines all artifacts, while `reddog_architect_fix_publication_effect_binding.py` binds current COMMITTED lineage into signer and worker-dispatch admission. Queue authority verification derives a canonical receipt from the recorded signed authority and accepted verification result. The dry-run receipt, each intent, the runtime receipt, and each AgentDB task retain that receipt ID/digest and exact work-authority digest. Immediately before AgentDB publication, the runtime reloads both stages, recomputes the lineage, obtains fresh time from a required production clock, binds the effective work order, FoundUp, operation, and exact worker roles to the signed authority plus authoritative WSP 15 plan, and re-verifies the principal and work-authority signatures, revocation, permission snapshot, scope, paths, freshness, and valve binding. Final admission uses `AUTHORITATIVE_USE` and consumes the durable nonce once before the writer; any later writer failure requires freshly signed authority. Static validation failures do not consume the nonce. Missing verifier/clock dependencies, forged signatures or substituted operations with attacker-recomputed local receipts, role/capability substitution, replay, expired authority reopened with an old environment epoch, synthetic dry-runs, and substituted authority all reject before the writer.
 AgentDB publication persists a canonical `reddog_signed_worker_agentdb_envelope.v1` containing the complete signed authority runtime, authoritative WSP 15 allocation, exact dispatch receipt, and exact worker intent. Both `OpenClawSupervisor` and direct `scripts/run_task.py` execution independently rehydrate and reverify it before runner selection; runner context comes from verified evidence, outer metadata is not authority, and inconsistent routing cannot fall through to generic WRE. The optional signed Memex supply ID/digest pair remains bound through profile materialization, dispatch, restart, claim, executor, read-only 0102 assignment, and independent slice verification; half-pairs, malformed digests, or conflicts reject and absence remains valid. `AuthoritativeWorkStateStore.locked_snapshot()` is the shared mutation fence for refresh, promotion, and AgentDB publication; its file-backed implementation is confined to an explicit outside-repository runtime root and uses a sibling operation lock.

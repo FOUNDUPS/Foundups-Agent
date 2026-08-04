@@ -29,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     Ed25519SignerBackend,
     SignerAuditMacBuilder,
 )
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VerifiedOutcomeSignerPolicy,
+)
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
     ArchitectProposalPolicyAuthorization,
     ArchitectProposalSignerPolicy,
@@ -162,6 +165,7 @@ def _build_signer_backend_from_provider_core(
     permission_snapshot_fresh: bool = False,
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
+    verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
     proposal_authority_policy: ArchitectProposalSignerPolicy | None = None,
     proposal_nonce_store_path: Path | str | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
@@ -343,6 +347,7 @@ def _build_signer_backend_from_provider_core(
             control_loop_authority_policy=control_loop_authority_policy,
             proposal_authority_policy=proposal_authority_policy,
             proposal_nonce_store=effective_proposal_nonce_store,
+            verified_outcome_signer_policy=verified_outcome_signer_policy,
         ),
     )
 
@@ -356,6 +361,7 @@ def build_test_only_signer_backend_from_provider(
     permission_snapshot_fresh: bool = False,
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
+    verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
 ) -> SignerKeyProviderDryRunResult:
     """Build a generic signer backend without architect-proposal authority."""
 
@@ -367,6 +373,7 @@ def build_test_only_signer_backend_from_provider(
         permission_snapshot_fresh=permission_snapshot_fresh,
         control_loop_anchor_store=control_loop_anchor_store,
         control_loop_authority_policy=control_loop_authority_policy,
+        verified_outcome_signer_policy=verified_outcome_signer_policy,
     )
 
 
@@ -418,6 +425,7 @@ def build_signer_backend_from_provider(
     permission_snapshot_fresh: bool = False,
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
+    verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
 ) -> SignerKeyProviderDryRunResult:
     """Production-capable generic signer boundary; proposal mode is internal."""
 
@@ -429,6 +437,7 @@ def build_signer_backend_from_provider(
         permission_snapshot_fresh=permission_snapshot_fresh,
         control_loop_anchor_store=control_loop_anchor_store,
         control_loop_authority_policy=control_loop_authority_policy,
+        verified_outcome_signer_policy=verified_outcome_signer_policy,
     )
 
 

@@ -18,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_CHAIN_COMPLETE,
     NEXT_QUEUE_PATTERN_MEMORY_ADMISSION_INVOKE,
+    RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_pattern_memory_admission_handler import (
     FAIL_ADMISSION_REQUEST_MISSING,
@@ -25,6 +26,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_pattern_memo
     FAIL_DISPATCH_STAGE_MISMATCH,
     FAIL_HELD_OUT_REGRESSION_GATE_STAGE_MISSING,
     FAIL_PATTERN_MEMORY_SINK_MISSING,
+    FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION,
     HELD_OUT_REGRESSION_GATE_STAGE_KEY,
     PATTERN_MEMORY_ADMISSION_STAGE_KEY,
     build_reddog_resident_queue_pattern_memory_admission_stage_handler,
@@ -96,6 +98,18 @@ NOW_ISO = "2026-07-14T00:00:00+00:00"
 EXPIRES = "2026-07-14T01:00:00+00:00"
 
 
+class _EvidencePublisher:
+    def __init__(self, *, fail: bool = False) -> None:
+        self.fail = fail
+        self.calls: list[dict[str, object]] = []
+
+    def publish(self, **payload: object) -> str:
+        self.calls.append(dict(payload))
+        if self.fail:
+            raise ValueError("publication rejected")
+        return str(payload["record_id"])
+
+
 def _snapshot() -> dict[str, object]:
     queue_item = with_queue_wsp15_allocation(
         {
@@ -139,6 +153,7 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "worktree_create": {"decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT},
         "assurance_capacity_admission": ASSURANCE_CAPACITY_ADMISSION_STAGE_RESULT,
         "bounded_worker_pilot": _queue_pilot_result(),
+        "exact_sha_commit": {"decision": RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT},
         "slice_verifier": _queue_verifier_result(),
         "verified_draft_pr_publish": _queue_publish_result(),
         "verified_outcome_ratchet": _queue_ratchet_result(),
@@ -178,11 +193,13 @@ def _handler(
     chain_store: InMemoryResidentQueueChainResultsStore,
     admission_request: dict[str, object] | None = None,
     sink: FakePatternMemorySink | None = None,
+    evidence_publisher: _EvidencePublisher | None = None,
 ):
     return build_reddog_resident_queue_pattern_memory_admission_stage_handler(
         chain_results_store=chain_store,
         admission_request=admission_request if admission_request is not None else _admission_request(),
         sink=sink if sink is not None else FakePatternMemorySink(),
+        evidence_publisher=evidence_publisher,
     )
 
 
@@ -217,6 +234,56 @@ def test_dispatcher_records_pattern_memory_admission_and_completes_chain() -> No
     assert stage["no_reward_settlement_performed"] is True
     assert stage["no_holoindex_reindex_performed"] is True
     assert len(sink.records) == 1
+
+
+def test_dispatcher_publishes_full_verified_outcome_evidence() -> None:
+    chain_store = _seeded_store()
+    publisher = _EvidencePublisher()
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            PATTERN_MEMORY_ADMISSION_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                evidence_publisher=publisher,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is True
+    stage = chain_store.load()["stage_results"][PATTERN_MEMORY_ADMISSION_STAGE_KEY]
+    assert stage["verified_outcome_authority_published"] is True
+    assert len(publisher.calls) == 1
+    assert publisher.calls[0]["verification_receipt"]
+    assert publisher.calls[0]["held_out_receipt"]
+    assert publisher.calls[0]["record"]["admission_metadata"]
+
+
+def test_failed_authority_publication_leaves_pattern_record_inert() -> None:
+    chain_store = _seeded_store()
+    sink = FakePatternMemorySink()
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            PATTERN_MEMORY_ADMISSION_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                sink=sink,
+                evidence_publisher=_EvidencePublisher(fail=True),
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is False
+    assert FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION in result.rejection_reasons
+    assert len(sink.records) == 1
+    assert PATTERN_MEMORY_ADMISSION_STAGE_KEY not in chain_store.load()["stage_results"]
 
 
 def test_missing_held_out_stage_rejects_direct_handler_call() -> None:

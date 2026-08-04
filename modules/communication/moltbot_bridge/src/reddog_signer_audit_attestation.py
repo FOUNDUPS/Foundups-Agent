@@ -10,6 +10,7 @@ CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX = "reddog-control-loop-audit.v1."
 RUNTIME_ARTIFACT_MANIFEST_AUDIT_ATTESTATION_PREFIX = (
     "reddog-runtime-artifact-manifest-audit.v1."
 )
+VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX = "reddog-verified-outcome-audit.v1."
 SIGNER_AUDIT_ATTESTATION_PREFIX = CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX
 
 
@@ -37,6 +38,7 @@ def canonical_signer_audit_attestation_input(
     if domain_prefix not in {
         CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX,
         RUNTIME_ARTIFACT_MANIFEST_AUDIT_ATTESTATION_PREFIX,
+        VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
     }:
         raise ValueError("signer_audit_attestation_domain_invalid")
     return domain_prefix + json.dumps(
@@ -51,5 +53,6 @@ __all__ = [
     "CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX",
     "RUNTIME_ARTIFACT_MANIFEST_AUDIT_ATTESTATION_PREFIX",
     "SIGNER_AUDIT_ATTESTATION_PREFIX",
+    "VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX",
     "canonical_signer_audit_attestation_input",
 ]

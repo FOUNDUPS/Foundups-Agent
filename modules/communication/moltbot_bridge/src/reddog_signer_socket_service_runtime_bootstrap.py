@@ -669,6 +669,9 @@ def rehydrate_signer_socket_service_runtime_config(
             control_loop_authority_policy=payload.get(
                 "control_loop_authority_policy"
             ),
+            verified_outcome_signer_policy=payload.get(
+                "verified_outcome_signer_policy"
+            ),
             proposal_authority_policy=proposal_policy,
             proposal_policy_authorization=proposal_policy_authorization,
             proposal_nonce_store_path=proposal_nonce_path,

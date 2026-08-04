@@ -662,6 +662,9 @@ def _config_kwargs(
             control_loop_anchor_path=(
                 signer_runtime / "signer_control_loop_anchor.json"
             ).resolve(),
+            verified_outcome_signer_policy=unsigned_config.get(
+                "verified_outcome_signer_policy"
+            ),
             proposal_authority_policy=policy,
             proposal_nonce_store_path=(
                 signer_runtime

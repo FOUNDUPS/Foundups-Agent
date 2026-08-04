@@ -1,3 +1,14 @@
+## 2026-08-04: Verified-outcome runtime authority regressions
+
+- Added durable publication/rehydration tests for exact verifier and held-out
+  receipts, isolated-signer evidence, committed-profile key resolution, revocation,
+  freshness, and every required FoundUp/snapshot/head/content/work/slice/job/worker/
+  verifier/runtime binding.
+- Proved attacker-rehashed records and envelopes, wrong keys, missing durable
+  sources, caller booleans, stale evidence, replay, and cross-process replay reject.
+- Added resident assembly, queue publication, signer policy, and session-bootstrap
+  tests; concurrent consumers admit exactly one capability.
+
 ## 2026-08-04: Memex supply authenticity regressions
 
 - Added exact receipt round-trip, unknown-field/type, lineage, scope, expiry,

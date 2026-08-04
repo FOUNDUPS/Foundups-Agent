@@ -178,6 +178,7 @@ def run_reddog_main_readonly_operational_bootstrap(
     enqueue_readonly_audit_tasks: bool = False,
     enqueue_writer: ReadOnlyAuditTaskWriter | None = None,
     memex_snapshot_supply_config: OperationalMemexSnapshotSupplyConfig | Mapping[str, Any] | None = None,
+    verified_outcome_runtime_authority: Any = None,
     seen_assignment_ids: Optional[set[str]] = None,
     collect_readonly_audit_reports: bool = False,
     report_store: ReadOnlyAuditReportStore | None = None,
@@ -529,6 +530,9 @@ def run_reddog_main_readonly_operational_bootstrap(
                 delegate=writer,
                 snapshot=snapshot,
                 config=memex_snapshot_supply_config,
+                verified_outcome_runtime_authority=(
+                    verified_outcome_runtime_authority
+                ),
                 now_iso=now_iso,
             )
             writer = memex_writer

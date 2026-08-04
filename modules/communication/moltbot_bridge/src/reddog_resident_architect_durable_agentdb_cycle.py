@@ -579,6 +579,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
     brain_state: Mapping[str, Any] | None = None,
     workspace_memory_notes: Sequence[Mapping[str, Any]] = (),
     memex_snapshot_supply_config: OperationalMemexSnapshotSupplyConfig | Mapping[str, Any] | None = None,
+    verified_outcome_runtime_authority: Any = None,
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
     cycle_store: ResidentArchitectCycleStore | None = None,
     agent_db_factory: Optional[Callable[[], Any]] = None,
@@ -746,6 +747,9 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             memex_snapshot_supply_config=_intent_bound_memex_config(
                 red_dog_intent=red_dog_intent,
                 config=memex_snapshot_supply_config,
+            ),
+            verified_outcome_runtime_authority=(
+                verified_outcome_runtime_authority
             ),
             grounding_receipt=red_dog_intent.get("grounding_receipt"),
             grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
@@ -1111,7 +1115,10 @@ def _intent_bound_memex_config(
             principal_id=_principal_id(red_dog_intent),
             identity=config.identity,
             roadmap_state=config.roadmap_state,
-            verified_outcomes=config.verified_outcomes,
+            verified_outcome_references=config.verified_outcome_references,
+            untrusted_verified_outcomes_supplied=(
+                config.untrusted_verified_outcomes_supplied
+            ),
             policy_issued_at=config.policy_issued_at,
             policy_expires_at=config.policy_expires_at,
             holoindex_generation_id=config.holoindex_generation_id,

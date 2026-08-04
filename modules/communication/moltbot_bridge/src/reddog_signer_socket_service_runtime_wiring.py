@@ -67,6 +67,9 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     ControlLoopAuthorityPolicy,
     Ed25519SignerBackend,
 )
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VerifiedOutcomeSignerPolicy,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
     SignerPeerInstanceBinding,
 )
@@ -143,6 +146,7 @@ class SignerSocketServiceRuntimeWiringConfig:
     key_provider_profiles: tuple[SignerKeyProviderProfile | Mapping[str, Any], ...] = ()
     control_loop_anchor_path: Path | str | None = None
     control_loop_authority_policy: ControlLoopAuthorityPolicy | Mapping[str, Any] | None = None
+    verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | Mapping[str, Any] | None = None
     proposal_authority_policy: ArchitectProposalSignerPolicy | Mapping[str, Any] | None = None
     proposal_policy_authorization: ArchitectProposalPolicyAuthorization | Mapping[str, Any] | None = None
     proposal_nonce_store_path: Path | str | None = None
@@ -191,6 +195,9 @@ def architect_proposal_security_context_digest(
     )
     control_policy = _control_loop_authority_policy(
         config.control_loop_authority_policy
+    )
+    outcome_policy = _verified_outcome_signer_policy(
+        config.verified_outcome_signer_policy
     )
     if (
         profile_reasons
@@ -271,6 +278,9 @@ def architect_proposal_security_context_digest(
         "control_loop_authority_policy": (
             asdict(control_policy) if control_policy is not None else None
         ),
+        "verified_outcome_signer_policy": (
+            asdict(outcome_policy) if outcome_policy is not None else None
+        ),
         "proposal_authority_policy": {
             "expected_payload": (
                 proposal_policy.expected_payload.to_dict()
@@ -318,6 +328,9 @@ def run_reddog_signer_socket_service_runtime_wiring(
         return _reject(*anchor_reasons)
     control_authority_policy = _control_loop_authority_policy(
         config.control_loop_authority_policy
+    )
+    outcome_policy = _verified_outcome_signer_policy(
+        config.verified_outcome_signer_policy
     )
     proposal_policy = _proposal_authority_policy(
         config.proposal_authority_policy
@@ -401,6 +414,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
         permission_snapshot_fresh=config.permission_snapshot_fresh,
         control_loop_anchor_store=anchor_store,
         control_loop_authority_policy=control_authority_policy,
+        verified_outcome_signer_policy=outcome_policy,
         proposal_authority_policy=proposal_policy,
         proposal_policy_authorization=proposal_authorization,
         proposal_nonce_store_path=proposal_nonce_store_path,
@@ -529,6 +543,14 @@ def validate_signer_socket_service_runtime_config(
     control_authority_policy = _control_loop_authority_policy(
         config.control_loop_authority_policy
     )
+    outcome_policy = _verified_outcome_signer_policy(
+        config.verified_outcome_signer_policy
+    )
+    if (
+        config.verified_outcome_signer_policy is not None
+        and outcome_policy is None
+    ):
+        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
     if (
         config.control_loop_anchor_path is not None
         and control_authority_policy is None
@@ -550,6 +572,11 @@ def validate_signer_socket_service_runtime_config(
         control_authority_policy is not None
         and control_authority_policy.signer_public_key
         not in set(profile_public_keys)
+    ):
+        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
+    if (
+        outcome_policy is not None
+        and outcome_policy.signer_public_key not in set(profile_public_keys)
     ):
         return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
     proposal_policy = _proposal_authority_policy(
@@ -699,6 +726,7 @@ def _build_backend(
     permission_snapshot_fresh: bool,
     control_loop_anchor_store: ControlLoopAnchorStore | None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None,
+    verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None,
     proposal_authority_policy: ArchitectProposalSignerPolicy | None,
     proposal_policy_authorization: ArchitectProposalPolicyAuthorization | None,
     proposal_nonce_store_path: Path | None,
@@ -776,6 +804,13 @@ def _build_backend(
                     if control_loop_authority_policy is not None
                     and profile.expected_public_key
                     == control_loop_authority_policy.signer_public_key
+                    else None
+                ),
+                verified_outcome_signer_policy=(
+                    verified_outcome_signer_policy
+                    if verified_outcome_signer_policy is not None
+                    and profile.expected_public_key
+                    == verified_outcome_signer_policy.signer_public_key
                     else None
                 ),
             )
@@ -886,6 +921,36 @@ def _control_loop_authority_policy(
     ):
         if not _is_sha256_digest(digest):
             return None
+    return policy
+
+
+def _verified_outcome_signer_policy(
+    value: VerifiedOutcomeSignerPolicy | Mapping[str, Any] | None,
+) -> VerifiedOutcomeSignerPolicy | None:
+    if isinstance(value, VerifiedOutcomeSignerPolicy):
+        policy = value
+    elif isinstance(value, Mapping):
+        try:
+            policy = VerifiedOutcomeSignerPolicy(**dict(value))
+        except (TypeError, ValueError):
+            return None
+    else:
+        return None
+    values = (
+        policy.issuer_principal_id,
+        policy.reddog_id,
+        policy.signer_public_key,
+        policy.key_epoch,
+        policy.authority_tier,
+        policy.consensus_receipt_digest,
+    )
+    if (
+        any(not item or not _ascii(item) for item in values)
+        or not _is_sha256_digest(policy.consensus_receipt_digest)
+        or policy.max_future_skew_seconds <= 0
+        or policy.max_future_skew_seconds > 300
+    ):
+        return None
     return policy
 
 

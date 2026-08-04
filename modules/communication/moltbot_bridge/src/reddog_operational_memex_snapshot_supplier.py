@@ -16,6 +16,11 @@ import json
 from dataclasses import dataclass, field, replace
 from typing import Any, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_runtime_authority import (
+    VerifiedOutcomeRuntimeAuthority,
+    VerifiedOutcomeRuntimeReference,
+)
+
 from modules.communication.moltbot_bridge.src.foundup_memex_current_state import (
     assemble_foundup_memex_current_state,
 )
@@ -41,7 +46,8 @@ class OperationalMemexSnapshotSupplyConfig:
     principal_id: str
     identity: Mapping[str, Any] = field(default_factory=dict)
     roadmap_state: Mapping[str, Any] = field(default_factory=dict)
-    verified_outcomes: tuple[Any, ...] = ()
+    verified_outcome_references: tuple[VerifiedOutcomeRuntimeReference, ...] = ()
+    untrusted_verified_outcomes_supplied: bool = False
     policy_issued_at: str = ""
     policy_expires_at: str = ""
     holoindex_generation_id: str = ""
@@ -54,8 +60,9 @@ class OperationalMemexSnapshotSupplyConfig:
             "principal_id": self.principal_id,
             "identity": dict(self.identity),
             "roadmap_state": dict(self.roadmap_state),
-            "verified_outcomes": (),
-            "verified_outcome_capability_count": len(self.verified_outcomes),
+            "verified_outcome_references": [
+                reference.to_dict() for reference in self.verified_outcome_references
+            ],
             "policy_issued_at": self.policy_issued_at,
             "policy_expires_at": self.policy_expires_at,
             "holoindex_generation_id": self.holoindex_generation_id,
@@ -105,11 +112,13 @@ class OperationalMemexReadOnlyAuditTaskWriter:
         delegate: ReadOnlyAuditTaskWriter,
         snapshot: OperationalContextSnapshot,
         config: OperationalMemexSnapshotSupplyConfig | Mapping[str, Any],
+        verified_outcome_runtime_authority: VerifiedOutcomeRuntimeAuthority | None = None,
         now_iso: str | None = None,
     ) -> None:
         self.delegate = delegate
         self.snapshot = snapshot
         self.config = normalize_operational_memex_supply_config(config)
+        self.verified_outcome_runtime_authority = verified_outcome_runtime_authority
         self.now_iso = now_iso
         self.last_result: OperationalMemexTaskEnrichmentResult | None = None
 
@@ -122,6 +131,7 @@ class OperationalMemexReadOnlyAuditTaskWriter:
             tasks=tasks,
             snapshot=self.snapshot,
             config=self.config,
+            verified_outcome_runtime_authority=self.verified_outcome_runtime_authority,
             now_iso=self.now_iso,
         )
         self.last_result = result
@@ -143,15 +153,19 @@ def normalize_operational_memex_supply_config(
     if isinstance(config, OperationalMemexSnapshotSupplyConfig):
         return config
     data = dict(config or {})
-    outcomes = data.get("verified_outcomes") or ()
-    if isinstance(outcomes, Mapping):
-        outcomes = (outcomes,)
+    references = data.get("verified_outcome_references") or ()
+    if isinstance(references, Mapping):
+        references = (references,)
     return OperationalMemexSnapshotSupplyConfig(
         foundup_id=_clean(data.get("foundup_id")),
         principal_id=_clean(data.get("principal_id")),
         identity=dict(data.get("identity") or {}),
         roadmap_state=dict(data.get("roadmap_state") or {}),
-        verified_outcomes=tuple(outcomes),
+        verified_outcome_references=tuple(
+            VerifiedOutcomeRuntimeReference.from_mapping(value)
+            for value in references
+        ),
+        untrusted_verified_outcomes_supplied=bool(data.get("verified_outcomes")),
         policy_issued_at=_clean(data.get("policy_issued_at")),
         policy_expires_at=_clean(data.get("policy_expires_at")),
         holoindex_generation_id=_clean(data.get("holoindex_generation_id")),
@@ -165,11 +179,15 @@ def enrich_readonly_audit_tasks_with_operational_memex(
     tasks: Sequence[ReadOnlyAuditTaskSpec],
     snapshot: OperationalContextSnapshot,
     config: OperationalMemexSnapshotSupplyConfig | Mapping[str, Any],
+    verified_outcome_runtime_authority: VerifiedOutcomeRuntimeAuthority | None = None,
     now_iso: str | None = None,
 ) -> OperationalMemexTaskEnrichmentResult:
     """Attach a snapshot-bound Memex view and assignment bindings to tasks."""
 
-    cfg = normalize_operational_memex_supply_config(config)
+    try:
+        cfg = normalize_operational_memex_supply_config(config)
+    except (TypeError, ValueError):
+        return _reject("verified_outcome_runtime_reference_invalid")
     reasons = _validate_config(cfg)
     if not isinstance(snapshot, OperationalContextSnapshot):
         reasons.append("missing_operational_snapshot")
@@ -198,12 +216,24 @@ def enrich_readonly_audit_tasks_with_operational_memex(
     if missing_runtime:
         return _reject(missing_runtime)
 
+    capabilities: list[Any] = []
+    if cfg.verified_outcome_references:
+        if verified_outcome_runtime_authority is None:
+            return _reject("verified_outcome_runtime_authority_required")
+        try:
+            capabilities = [
+                verified_outcome_runtime_authority.issue(reference)
+                for reference in cfg.verified_outcome_references
+            ]
+        except (RuntimeError, TypeError, ValueError) as exc:
+            return _reject(f"verified_outcome_runtime_authority_rejected:{exc}")
+
     assembly = assemble_foundup_memex_current_state(
         foundup_id=cfg.foundup_id,
         snapshot=snapshot,
         identity=cfg.identity,
         roadmap_state=cfg.roadmap_state,
-        verified_outcomes=cfg.verified_outcomes,
+        verified_outcomes=tuple(capabilities),
         now_iso=issued_at,
         resident_mode=True,
         legacy_single_foundup_compatibility=False,
@@ -302,8 +332,10 @@ def _validate_config(config: OperationalMemexSnapshotSupplyConfig) -> list[str]:
         reasons.append("missing_memex_roadmap_state")
     if config.max_records <= 0:
         reasons.append("invalid_max_records")
-    if config.verified_outcomes:
-        reasons.append("verified_outcome_runtime_binding_required")
+    if config.untrusted_verified_outcomes_supplied:
+        reasons.append("untrusted_verified_outcomes_forbidden")
+    if len(config.verified_outcome_references) > config.max_records:
+        reasons.append("verified_outcome_reference_limit_exceeded")
     return reasons
 
 

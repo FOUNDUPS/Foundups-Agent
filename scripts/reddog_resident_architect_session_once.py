@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
@@ -30,6 +31,23 @@ from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_model_runtime_bindings import (  # noqa: E402
     load_resident_model_runtime_bindings,
+)
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_runtime_authority import (  # noqa: E402
+    CommittedAuthorityProfileOutcomeKeyResolver,
+    VerifiedOutcomeRuntimeAuthority,
+)
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_runtime_store import (  # noqa: E402
+    AuthorityRuntimeVerifiedOutcomeStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (  # noqa: E402
+    load_reddog_main_resident_queue_runtime_dependency_bundle,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (  # noqa: E402
+    read_reddog_runtime_json_mapping,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (  # noqa: E402
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
 )
 
 RESIDENT_ARCHITECT_SESSION_ACCEPT = "RESIDENT_ARCHITECT_SESSION_ACCEPT"
@@ -220,6 +238,11 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
     if binding_reason or audit_binding is None or architect_binding is None:
         return _reject(binding_reason or "model_runtime_binding_artifact_invalid")
     try:
+        memex_config = _mapping(payload.get("memex_snapshot_supply"))
+        verified_outcome_authority = _verified_outcome_authority_from_env(
+            repo_root,
+            memex_config,
+        )
         client = RedDogResidentArchitectClient(
             repo_root=repo_root,
             authenticated_principal_id=principal,
@@ -240,7 +263,8 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
                 "breadcrumbs": _sequence_of_mappings(payload.get("breadcrumbs")),
                 "brain_state": _mapping(payload.get("brain_state")),
                 "workspace_memory_notes": _sequence_of_mappings(payload.get("workspace_memory_notes")),
-                "memex_snapshot_supply_config": _mapping(payload.get("memex_snapshot_supply")),
+                "memex_snapshot_supply_config": memex_config,
+                "verified_outcome_runtime_authority": verified_outcome_authority,
                 "external_research_retriever": _external_retriever_from_env(),
                 "timeout_seconds": _int(payload.get("timeout_seconds"), 60),
                 "audit_model_runtime_binding_receipt": audit_binding,
@@ -253,6 +277,70 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
         output["resident_backend_invoked"] = True
         return output
     return _summarize_result(result)
+
+
+def _verified_outcome_authority_from_env(
+    repo_root: Path,
+    memex_config: Mapping[str, Any],
+) -> VerifiedOutcomeRuntimeAuthority | None:
+    if not memex_config.get("verified_outcome_references"):
+        return None
+    runtime_root_value = os.getenv("REDDOG_RUNTIME_ARTIFACT_ROOT", "").strip()
+    authority_state_value = os.getenv(
+        "REDDOG_AUTHORITY_RUNTIME_STATE_PATH", ""
+    ).strip()
+    work_state_value = os.getenv(
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""
+    ).strip()
+    profile_value = os.getenv("REDDOG_AUTHORITY_PROFILE_PATH", "").strip()
+    if not all(
+        (runtime_root_value, authority_state_value, work_state_value, profile_value)
+    ):
+        raise ValueError("verified_outcome_runtime_authority_config_missing")
+    runtime_root = validate_runtime_root_path(
+        runtime_root_value,
+        repo_root=repo_root,
+    )
+    now_epoch = int(time.time())
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo_root,
+        runtime_allowed_root=runtime_root,
+        authority_state_path=authority_state_value,
+        signature_verifier_backend="ed25519",
+        now_epoch=now_epoch,
+    )
+    if not bundle.accepted or bundle.authority_store is None:
+        raise ValueError("verified_outcome_runtime_dependency_bundle_rejected")
+    work_state = _runtime_mapping(
+        repo_root, runtime_root, work_state_value
+    )
+    profile = _runtime_mapping(repo_root, runtime_root, profile_value)
+    return VerifiedOutcomeRuntimeAuthority(
+        store=AuthorityRuntimeVerifiedOutcomeStore(bundle.authority_store),
+        verifier_key_resolver=CommittedAuthorityProfileOutcomeKeyResolver(
+            work_state_snapshot=work_state,
+            authority_profile=profile,
+        ),
+        signature_verifier=bundle.signature_verifier,
+        revocation_oracle=bundle.revocation_oracle,
+        issuer_principal_id=str(profile.get("principal_id") or ""),
+        issuer_principal_provider=str(profile.get("principal_provider") or ""),
+        reddog_id=str(profile.get("reddog_id") or ""),
+        trusted_now_epoch=lambda: int(time.time()),
+    )
+
+
+def _runtime_mapping(
+    repo_root: Path,
+    runtime_root: Path,
+    path_value: str,
+) -> Mapping[str, Any]:
+    path = validate_runtime_artifact_path(
+        path_value,
+        repo_root=repo_root,
+        allowed_root=runtime_root,
+    )
+    return read_reddog_runtime_json_mapping(path, allowed_root=runtime_root)
 
 
 def main() -> int:

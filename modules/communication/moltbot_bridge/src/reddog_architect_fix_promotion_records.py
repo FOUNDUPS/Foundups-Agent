@@ -255,6 +255,11 @@ def _queue_seed(
         "determination_receipt_id": inputs.determination_id,
         "authorized_base_sha": inputs.authorized_base_sha,
         "wsp15_allocation_receipt_id": inputs.allocation["receipt_id"],
+        "foundup_id": str(inputs.memex_supply["foundup_id"]),
+        "snapshot_id": str(inputs.memex_supply["snapshot_receipt_id"]),
+        "snapshot_content_digest": str(
+            inputs.memex_supply["snapshot_content_digest"]
+        ),
         **_evidence_receipt_ids(inputs),
         **_proposal_authority_binding(inputs),
     }
@@ -399,6 +404,11 @@ def _queue_item(
         ),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "memex_supply_digest": inputs.memex_supply_digest,
+        "foundup_id": str(inputs.memex_supply["foundup_id"]),
+        "snapshot_id": str(inputs.memex_supply["snapshot_receipt_id"]),
+        "snapshot_content_digest": str(
+            inputs.memex_supply["snapshot_content_digest"]
+        ),
         "no_execution_performed": True,
     }
 
