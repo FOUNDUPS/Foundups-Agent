@@ -57,9 +57,12 @@ administered principal-key resolver.
 Architect proposal attestation v2 requires a typed `OperationalMemexSupplyReceipt`;
 promotion rehydrates its complete serialized form, recomputes the canonical ID,
 rejects unknown/stale/scope-mismatched inputs, and signs its full digest. Outcome
-rehydration checks canonical verifier/held-out receipts and a signed evidence
-bundle. The resident queue can publish that complete bundle through the isolated
-signer into the existing root-confined authority runtime store. Consumption reloads
+rehydration checks canonical verifier/held-out receipts, but those receipts are
+not independently signed on current `main`. The isolated signer therefore
+requires a separately supplied durable outcome-authorization boundary before it
+will attest a bundle; no production implementation exists yet. Staged authority
+envelopes remain non-consumable until exact PatternMemory admission. Once an
+independently authorized envelope is activated, consumption reloads
 the durable envelope, resolves the key from the current committed authority profile,
 checks revocation, freshness, FoundUp/snapshot/head/content/work/slice/job/worker/
 verifier/runtime lineage, and issues an opaque one-use capability. The FoundUp Brain

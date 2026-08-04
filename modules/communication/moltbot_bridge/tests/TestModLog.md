@@ -8,6 +8,12 @@
   sources, caller booleans, stale evidence, replay, and cross-process replay reject.
 - Added resident assembly, queue publication, signer policy, and session-bootstrap
   tests; concurrent consumers admit exactly one capability.
+- Exact-SHA review added fail-closed regressions for absent signer-side outcome
+  authority, signing-request replay, missing production queue bindings, staged
+  envelope activation, zero PatternMemory writes on publication failure, atomic
+  multi-capability Brain admission, and trusted use-time clocks. Production
+  activation remains blocked because no independently authenticated durable
+  verifier-authority source exists.
 
 ## 2026-08-04: Memex supply authenticity regressions
 

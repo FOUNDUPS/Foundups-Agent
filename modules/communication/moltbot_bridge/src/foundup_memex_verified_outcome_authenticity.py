@@ -75,6 +75,8 @@ class VerifiedOutcomeSource(Protocol):
 
 
 class VerifiedOutcomeReplayStore(Protocol):
+    def consume_many_once(self, receipt_ids: Sequence[str]) -> bool: ...
+
     def consume_once(self, receipt_id: str) -> bool: ...
 
 
@@ -310,6 +312,68 @@ def _mint_capability(
     return capability
 
 
+def inspect_verified_foundup_memex_outcome(
+    capability: Any,
+    *,
+    expected_foundup_id: str,
+    expected_snapshot_id: str,
+    expected_snapshot_content_digest: str,
+    now_epoch: int,
+) -> Mapping[str, Any] | None:
+    """Inspect one capability without consuming local or durable replay state."""
+
+    if type(capability) is not VerifiedFoundUpOutcomeCapability:
+        return None
+    with _LOCK:
+        inspected = _inspect_capability_locked(
+            capability,
+            expected_foundup_id=expected_foundup_id,
+            expected_snapshot_id=expected_snapshot_id,
+            expected_snapshot_content_digest=expected_snapshot_content_digest,
+            now_epoch=now_epoch,
+        )
+        return copy.deepcopy(inspected[1]) if inspected is not None else None
+
+
+def consume_verified_foundup_memex_outcomes(
+    capabilities: Sequence[Any],
+    *,
+    expected_foundup_id: str,
+    expected_snapshot_id: str,
+    expected_snapshot_content_digest: str,
+    now_epoch: int,
+    expected_projections: Sequence[Mapping[str, Any]] | None = None,
+) -> bool:
+    """Atomically admit one capability set through its shared replay store."""
+
+    values = tuple(capabilities)
+    expected_values = tuple(expected_projections or ())
+    if not values or (expected_projections is not None and len(expected_values) != len(values)):
+        return False
+    with _LOCK:
+        inspected = _inspect_capability_set_locked(
+            values,
+            expected_foundup_id=expected_foundup_id,
+            expected_snapshot_id=expected_snapshot_id,
+            expected_snapshot_content_digest=expected_snapshot_content_digest,
+            now_epoch=now_epoch,
+        )
+        if inspected is None:
+            return False
+        seals, projections = inspected
+        if expected_projections is not None and tuple(
+            _digest(item) for item in expected_values
+        ) != tuple(seal.projection_digest for seal in seals):
+            return False
+        replay_store = seals[0].replay_store
+        receipt_ids = tuple(seal.replay_receipt_id for seal in seals)
+        if replay_store.consume_many_once(receipt_ids) is not True:
+            return False
+        for capability in values:
+            _CAPABILITIES.pop(capability, None)
+        return len(projections) == len(values)
+
+
 def consume_verified_foundup_memex_outcome(
     capability: Any,
     *,
@@ -318,37 +382,73 @@ def consume_verified_foundup_memex_outcome(
     expected_snapshot_content_digest: str,
     now_epoch: int,
 ) -> Mapping[str, Any] | None:
-    """Consume one capability and return its immutable public projection."""
+    """Consume one capability through the atomic batch admission path."""
 
-    if type(capability) is not VerifiedFoundUpOutcomeCapability:
+    projection = inspect_verified_foundup_memex_outcome(
+        capability,
+        expected_foundup_id=expected_foundup_id,
+        expected_snapshot_id=expected_snapshot_id,
+        expected_snapshot_content_digest=expected_snapshot_content_digest,
+        now_epoch=now_epoch,
+    )
+    if projection is None:
         return None
-    with _LOCK:
-        seal = _CAPABILITIES.get(capability)
-        if seal is None or _digest(seal.projection) != seal.projection_digest:
-            return None
-        if (
-            type(now_epoch) is not int
-            or now_epoch < seal.not_before
-            or now_epoch > seal.expires_at
-        ):
-            return None
-        projection = dict(seal.projection)
-        expected = (
-            expected_foundup_id,
-            expected_snapshot_id,
-            expected_snapshot_content_digest,
-        )
-        actual = (
-            projection.get("foundup_id"),
-            projection.get("snapshot_id"),
-            projection.get("snapshot_content_digest"),
-        )
-        if actual != expected:
-            return None
-        _CAPABILITIES.pop(capability, None)
-        if seal.replay_store.consume_once(seal.replay_receipt_id) is not True:
-            return None
-    return copy.deepcopy(projection)
+    accepted = consume_verified_foundup_memex_outcomes(
+        (capability,),
+        expected_foundup_id=expected_foundup_id,
+        expected_snapshot_id=expected_snapshot_id,
+        expected_snapshot_content_digest=expected_snapshot_content_digest,
+        now_epoch=now_epoch,
+        expected_projections=(projection,),
+    )
+    return projection if accepted else None
+
+
+def _inspect_capability_set_locked(
+    capabilities: Sequence[Any],
+    **expected: Any,
+) -> tuple[tuple[_OutcomeSeal, ...], tuple[Mapping[str, Any], ...]] | None:
+    if len({id(value) for value in capabilities}) != len(capabilities):
+        return None
+    inspected = tuple(
+        _inspect_capability_locked(value, **expected) for value in capabilities
+    )
+    if any(item is None for item in inspected):
+        return None
+    seals = tuple(item[0] for item in inspected if item is not None)
+    projections = tuple(item[1] for item in inspected if item is not None)
+    if any(seal.replay_store is not seals[0].replay_store for seal in seals):
+        return None
+    if len({seal.replay_receipt_id for seal in seals}) != len(seals):
+        return None
+    return seals, projections
+
+
+def _inspect_capability_locked(
+    capability: Any,
+    *,
+    expected_foundup_id: str,
+    expected_snapshot_id: str,
+    expected_snapshot_content_digest: str,
+    now_epoch: int,
+) -> tuple[_OutcomeSeal, Mapping[str, Any]] | None:
+    seal = _CAPABILITIES.get(capability)
+    if seal is None or _digest(seal.projection) != seal.projection_digest:
+        return None
+    if type(now_epoch) is not int or not seal.not_before <= now_epoch <= seal.expires_at:
+        return None
+    projection = dict(seal.projection)
+    actual = (
+        projection.get("foundup_id"),
+        projection.get("snapshot_id"),
+        projection.get("snapshot_content_digest"),
+    )
+    expected = (
+        expected_foundup_id,
+        expected_snapshot_id,
+        expected_snapshot_content_digest,
+    )
+    return (seal, projection) if actual == expected else None
 
 
 def is_verified_foundup_memex_outcome_capability(value: Any) -> bool:
@@ -358,7 +458,7 @@ def is_verified_foundup_memex_outcome_capability(value: Any) -> bool:
 def _validate_trust_dependencies(source: Any, replay_store: Any, verifier: Any) -> None:
     required = (
         getattr(source, "load_verified_outcome", None),
-        getattr(replay_store, "consume_once", None),
+        getattr(replay_store, "consume_many_once", None),
         getattr(verifier, "verify", None),
     )
     if not all(callable(item) for item in required):
@@ -608,6 +708,8 @@ __all__ = [
     "VerifiedOutcomeReplayStore",
     "VerifiedOutcomeSource",
     "consume_verified_foundup_memex_outcome",
+    "consume_verified_foundup_memex_outcomes",
+    "inspect_verified_foundup_memex_outcome",
     "is_verified_foundup_memex_outcome_capability",
     "verify_and_issue_foundup_memex_outcome",
 ]

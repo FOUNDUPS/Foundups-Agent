@@ -17,6 +17,12 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_run
 )
 
 
+LEGACY_COMPATIBILITY_SCHEMA_VERSION = (
+    "foundup_memex_verified_outcome_legacy_compatibility.v1"
+)
+LEGACY_COMPATIBILITY_MODE = "AUTHENTICATED_AUTHORITATIVE_WORK_STATE"
+
+
 def derive_verified_outcome_admission(
     chain_state: Mapping[str, Any],
     work_state_snapshot: Mapping[str, Any],
@@ -34,10 +40,17 @@ def derive_verified_outcome_admission(
     queue_item = _queue_item(
         work_state_snapshot, str(chain_state.get("queue_item_id") or "")
     )
+    if queue_item is None:
+        return None
     work_order_id = str(gate_receipt.get("work_order_id") or "")
     if not work_order_id:
         return None
-    if not _has_runtime_binding(queue_item):
+    runtime_binding_state = _runtime_binding_state(queue_item)
+    if runtime_binding_state == "PARTIAL":
+        return None
+    if runtime_binding_state == "ABSENT":
+        if not _legacy_compatibility_enabled(work_state_snapshot):
+            return None
         return _legacy_admission(gate_receipt, work_order_id)
     if not verifier_receipt or not now_iso:
         return None
@@ -56,12 +69,27 @@ def derive_verified_outcome_admission(
     }
 
 
-def _has_runtime_binding(queue_item: Mapping[str, Any]) -> bool:
+def _runtime_binding_state(queue_item: Mapping[str, Any]) -> str:
     fields = ("foundup_id", "snapshot_id", "snapshot_content_digest")
     present = tuple(bool(str(queue_item.get(key) or "")) for key in fields)
     if any(present) and not all(present):
-        raise ValueError("verified_outcome_queue_binding_partial")
-    return all(present)
+        return "PARTIAL"
+    return "COMPLETE" if all(present) else "ABSENT"
+
+
+def _legacy_compatibility_enabled(snapshot: Mapping[str, Any]) -> bool:
+    value = snapshot.get("verified_outcome_legacy_compatibility")
+    if not isinstance(value, Mapping):
+        return False
+    return bool(
+        set(value)
+        == {"schema_version", "mode", "enabled", "authorization_receipt_id"}
+        and value.get("schema_version") == LEGACY_COMPATIBILITY_SCHEMA_VERSION
+        and value.get("mode") == LEGACY_COMPATIBILITY_MODE
+        and value.get("enabled") is True
+        and str(value.get("authorization_receipt_id") or "").startswith("sha256:")
+        and len(str(value.get("authorization_receipt_id") or "")) == 71
+    )
 
 
 def _legacy_admission(
@@ -88,6 +116,8 @@ def resolve_verified_outcome_publisher(
     trusted_now_epoch: Callable[[], int],
 ) -> Any:
     if not getattr(dependency_bundle, "requested", False):
+        return None
+    if getattr(dependency_bundle, "verified_outcome_signing_authority", None) is None:
         return None
     inputs = _publisher_inputs(authority_profile)
     try:
@@ -172,10 +202,12 @@ def _publisher_inputs(profile: Mapping[str, Any]) -> Mapping[str, str]:
     }
 
 
-def _queue_item(snapshot: Mapping[str, Any], queue_item_id: str) -> Mapping[str, Any]:
+def _queue_item(
+    snapshot: Mapping[str, Any], queue_item_id: str
+) -> Mapping[str, Any] | None:
     items = snapshot.get("wre_queue_items")
     if not isinstance(items, list):
-        return {}
+        return None
     return next(
         (
             item
@@ -183,7 +215,7 @@ def _queue_item(snapshot: Mapping[str, Any], queue_item_id: str) -> Mapping[str,
             if isinstance(item, Mapping)
             and str(item.get("queue_item_id") or "") == queue_item_id
         ),
-        {},
+        None,
     )
 
 

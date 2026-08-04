@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_queue_binding import (
     derive_verified_outcome_admission,
 )
@@ -59,8 +57,25 @@ def _snapshot(**queue_overrides: str) -> dict:
     return {"wre_queue_items": [queue_item]}
 
 
-def test_legacy_queue_without_runtime_binding_preserves_v1_admission() -> None:
+def _legacy_compatibility() -> dict:
+    return {
+        "schema_version": "foundup_memex_verified_outcome_legacy_compatibility.v1",
+        "mode": "AUTHENTICATED_AUTHORITATIVE_WORK_STATE",
+        "enabled": True,
+        "authorization_receipt_id": "sha256:" + "e" * 64,
+    }
+
+
+def test_queue_without_runtime_binding_rejects_by_default() -> None:
     admission = derive_verified_outcome_admission(_chain(), _snapshot(), "")
+
+    assert admission is None
+
+
+def test_explicit_authoritative_compatibility_preserves_v1_admission() -> None:
+    snapshot = _snapshot()
+    snapshot["verified_outcome_legacy_compatibility"] = _legacy_compatibility()
+    admission = derive_verified_outcome_admission(_chain(), snapshot, "")
 
     assert admission is not None
     assert "schema_version" not in admission["admission_metadata"]
@@ -90,10 +105,30 @@ def test_complete_runtime_binding_requires_v2_signed_evidence() -> None:
 
 
 def test_partial_runtime_binding_is_rejected() -> None:
-    with pytest.raises(ValueError, match="verified_outcome_queue_binding_partial"):
-        derive_verified_outcome_admission(
-            _chain(), _snapshot(foundup_id="foundup-1"), "2026-08-04T00:00:00Z"
-        )
+    admission = derive_verified_outcome_admission(
+        _chain(), _snapshot(foundup_id="foundup-1"), "2026-08-04T00:00:00Z"
+    )
+
+    assert admission is None
+
+
+def test_missing_queue_item_rejects_even_with_legacy_compatibility() -> None:
+    snapshot = {
+        "wre_queue_items": [],
+        "verified_outcome_legacy_compatibility": _legacy_compatibility(),
+    }
+
+    assert derive_verified_outcome_admission(_chain(), snapshot, "") is None
+
+
+def test_malformed_legacy_compatibility_rejects() -> None:
+    snapshot = _snapshot()
+    snapshot["verified_outcome_legacy_compatibility"] = {
+        **_legacy_compatibility(),
+        "authorization_receipt_id": "sha256:attacker",
+    }
+
+    assert derive_verified_outcome_admission(_chain(), snapshot, "") is None
 
 
 class _Store:

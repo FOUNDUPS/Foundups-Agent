@@ -34,8 +34,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_pattern_memory_admission_invoke import (
     PatternMemoryAdmissionSink,
     QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT,
-    build_queue_authorized_verified_outcome_record,
     invoke_reddog_wre_queue_authorized_pattern_memory_admission,
+)
+from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+    reddog_verified_pattern_memory_record_id,
 )
 
 
@@ -106,7 +108,8 @@ class ResidentQueuePatternMemoryAdmissionStageHandler:
                 f"expected:{NEXT_QUEUE_PATTERN_MEMORY_ADMISSION_INVOKE}",
                 f"actual:{request.next_action}",
             )
-        stage_results = _stage_results(_mapping(self.chain_results_store.load()))
+        stored = _mapping(self.chain_results_store.load())
+        stage_results = _stage_results(stored)
         held_out_gate = _mapping(stage_results.get(HELD_OUT_REGRESSION_GATE_STAGE_KEY))
         if not held_out_gate:
             return _reject(FAIL_HELD_OUT_REGRESSION_GATE_STAGE_MISSING)
@@ -124,6 +127,15 @@ class ResidentQueuePatternMemoryAdmissionStageHandler:
         if self.sink is None:
             return _reject(FAIL_PATTERN_MEMORY_SINK_MISSING)
 
+        if self.evidence_publisher is not None:
+            return _publish_then_admit(
+                publisher=self.evidence_publisher,
+                sink=self.sink,
+                stage_results=stage_results,
+                held_out_gate=held_out_gate,
+                admission_request=admission_request,
+            )
+
         result = invoke_reddog_wre_queue_authorized_pattern_memory_admission(
             explicit_queue_authorized_pattern_memory_admission_requested=True,
             queue_held_out_gate_result=held_out_gate,
@@ -132,40 +144,74 @@ class ResidentQueuePatternMemoryAdmissionStageHandler:
         )
         payload = result.to_dict()
         payload["verified_outcome_authority_published"] = False
-        if result.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT:
-            return payload
-        if self.evidence_publisher is None:
-            return payload
-        return _publish_verified_outcome(
-            payload=payload,
-            publisher=self.evidence_publisher,
-            stage_results=stage_results,
-            held_out_gate=held_out_gate,
-            admission_request=admission_request,
-        )
+        return payload
 
 
-def _publish_verified_outcome(
+class _ValidatedRecordCapture:
+    def __init__(self) -> None:
+        self.record: Optional[dict[str, Any]] = None
+
+    def store_verified_outcome(self, record: Mapping[str, Any]) -> str:
+        if self.record is not None:
+            raise RuntimeError("verified_outcome_capture_reused")
+        self.record = dict(record)
+        return reddog_verified_pattern_memory_record_id(self.record)
+
+
+def _publish_then_admit(
     *,
-    payload: dict[str, Any],
     publisher: VerifiedOutcomeEvidencePublisher,
+    sink: PatternMemoryAdmissionSink,
     stage_results: Mapping[str, Mapping[str, Any]],
     held_out_gate: Mapping[str, Any],
     admission_request: Mapping[str, Any],
 ) -> Mapping[str, Any]:
+    capture = _ValidatedRecordCapture()
+    validation = invoke_reddog_wre_queue_authorized_pattern_memory_admission(
+        explicit_queue_authorized_pattern_memory_admission_requested=True,
+        queue_held_out_gate_result=held_out_gate,
+        admission_request=admission_request,
+        sink=capture,
+    )
+    payload = validation.to_dict()
+    payload["verified_outcome_authority_published"] = False
+    if validation.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT:
+        return payload
+    record = capture.record
+    if record is None:
+        return _publication_reject(payload)
+    record_id = reddog_verified_pattern_memory_record_id(record)
+    published_id = _publish_authority(
+        publisher=publisher,
+        stage_results=stage_results,
+        held_out_gate=held_out_gate,
+        record=record,
+        record_id=record_id,
+    )
+    if published_id != record_id:
+        return _publication_reject(payload)
+    return _admit_published(
+        publisher=publisher,
+        sink=sink,
+        held_out_gate=held_out_gate,
+        admission_request=admission_request,
+        record_id=record_id,
+    )
+
+
+def _publish_authority(
+    *,
+    publisher: VerifiedOutcomeEvidencePublisher,
+    stage_results: Mapping[str, Mapping[str, Any]],
+    held_out_gate: Mapping[str, Any],
+    record: Mapping[str, Any],
+    record_id: str,
+) -> Optional[str]:
     verifier_stage = _mapping(stage_results.get(SLICE_VERIFIER_STAGE_KEY))
     verifier_result = _mapping(verifier_stage.get("verifier_result"))
     verification_receipt = _mapping(verifier_result.get("receipt"))
     held_out_payload = _mapping(held_out_gate.get("gate_result"))
     held_out_receipt = _mapping(held_out_payload.get("receipt"))
-    record = build_queue_authorized_verified_outcome_record(
-        gate_result=held_out_payload,
-        gate_receipt=held_out_receipt,
-        admission_request=admission_request,
-    )
-    record_id = str(
-        _mapping(payload.get("receipt")).get("pattern_memory_record_id") or ""
-    )
     try:
         published_id = publisher.publish(
             record_id=record_id,
@@ -174,11 +220,61 @@ def _publish_verified_outcome(
             held_out_receipt=held_out_receipt,
         )
     except Exception:
-        payload["decision"] = QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT
-        payload["rejection_reasons"] = [FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION]
-        return payload
-    payload["verified_outcome_authority_published"] = True
-    payload["verified_outcome_authority_record_id"] = published_id
+        return None
+    return str(published_id or "")
+
+
+def _admit_published(
+    *,
+    publisher: VerifiedOutcomeEvidencePublisher,
+    sink: PatternMemoryAdmissionSink,
+    held_out_gate: Mapping[str, Any],
+    admission_request: Mapping[str, Any],
+    record_id: str,
+) -> Mapping[str, Any]:
+    admitted = invoke_reddog_wre_queue_authorized_pattern_memory_admission(
+        explicit_queue_authorized_pattern_memory_admission_requested=True,
+        queue_held_out_gate_result=held_out_gate,
+        admission_request=admission_request,
+        sink=sink,
+    )
+    admitted_payload = admitted.to_dict()
+    admitted_payload["verified_outcome_authority_published"] = False
+    admitted_record_id = str(
+        _mapping(admitted_payload.get("receipt")).get("pattern_memory_record_id") or ""
+    )
+    if (
+        admitted.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT
+        or admitted_record_id != record_id
+    ):
+        admitted_payload["decision"] = (
+            QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT
+        )
+        admitted_payload["rejection_reasons"] = [
+            FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION
+        ]
+        return admitted_payload
+    try:
+        activated_id = publisher.activate(record_id)
+    except Exception:
+        activated_id = ""
+    if activated_id != record_id:
+        admitted_payload["decision"] = (
+            QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT
+        )
+        admitted_payload["rejection_reasons"] = [
+            FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION
+        ]
+        return admitted_payload
+    admitted_payload["verified_outcome_authority_published"] = True
+    admitted_payload["verified_outcome_authority_record_id"] = record_id
+    return admitted_payload
+
+
+def _publication_reject(payload: dict[str, Any]) -> Mapping[str, Any]:
+    payload["decision"] = QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT
+    payload["rejection_reasons"] = [FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION]
+    payload["pattern_memory_write_performed"] = False
     return payload
 
 

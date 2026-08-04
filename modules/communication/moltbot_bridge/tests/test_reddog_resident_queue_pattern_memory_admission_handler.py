@@ -54,6 +54,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_patter
     QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT,
     QueueAuthorizedPatternMemoryAdmissionInvokeReason,
 )
+from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+    reddog_verified_pattern_memory_record_id,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_worktree_create_invoke import (
     QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT,
 )
@@ -99,15 +102,31 @@ EXPIRES = "2026-07-14T01:00:00+00:00"
 
 
 class _EvidencePublisher:
-    def __init__(self, *, fail: bool = False) -> None:
+    def __init__(self, *, fail: bool = False, activation_fail: bool = False) -> None:
         self.fail = fail
+        self.activation_fail = activation_fail
         self.calls: list[dict[str, object]] = []
+        self.activations: list[str] = []
 
     def publish(self, **payload: object) -> str:
         self.calls.append(dict(payload))
         if self.fail:
             raise ValueError("publication rejected")
         return str(payload["record_id"])
+
+    def activate(self, record_id: str) -> str:
+        self.activations.append(record_id)
+        if self.activation_fail:
+            raise ValueError("activation rejected")
+        return record_id
+
+
+class _CanonicalPatternMemorySink(FakePatternMemorySink):
+    def store_verified_outcome(self, record):
+        if self.fail:
+            raise RuntimeError("sink failed")
+        self.records.append(dict(record))
+        return reddog_verified_pattern_memory_record_id(record)
 
 
 def _snapshot() -> dict[str, object]:
@@ -239,6 +258,7 @@ def test_dispatcher_records_pattern_memory_admission_and_completes_chain() -> No
 def test_dispatcher_publishes_full_verified_outcome_evidence() -> None:
     chain_store = _seeded_store()
     publisher = _EvidencePublisher()
+    sink = _CanonicalPatternMemorySink()
 
     result = invoke_reddog_resident_queue_next_stage_dispatch(
         explicit_resident_queue_stage_dispatch_requested=True,
@@ -247,6 +267,7 @@ def test_dispatcher_publishes_full_verified_outcome_evidence() -> None:
         handlers={
             PATTERN_MEMORY_ADMISSION_STAGE_KEY: _handler(
                 chain_store=chain_store,
+                sink=sink,
                 evidence_publisher=publisher,
             )
         },
@@ -257,12 +278,15 @@ def test_dispatcher_publishes_full_verified_outcome_evidence() -> None:
     stage = chain_store.load()["stage_results"][PATTERN_MEMORY_ADMISSION_STAGE_KEY]
     assert stage["verified_outcome_authority_published"] is True
     assert len(publisher.calls) == 1
+    assert publisher.activations == [stage["receipt"]["pattern_memory_record_id"]]
     assert publisher.calls[0]["verification_receipt"]
     assert publisher.calls[0]["held_out_receipt"]
     assert publisher.calls[0]["record"]["admission_metadata"]
+    assert publisher.calls[0]["record_id"] == stage["receipt"]["pattern_memory_record_id"]
+    assert len(sink.records) == 1
 
 
-def test_failed_authority_publication_leaves_pattern_record_inert() -> None:
+def test_failed_authority_publication_writes_no_pattern_record() -> None:
     chain_store = _seeded_store()
     sink = FakePatternMemorySink()
 
@@ -275,6 +299,56 @@ def test_failed_authority_publication_leaves_pattern_record_inert() -> None:
                 chain_store=chain_store,
                 sink=sink,
                 evidence_publisher=_EvidencePublisher(fail=True),
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is False
+    assert FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION in result.rejection_reasons
+    assert len(sink.records) == 0
+    assert PATTERN_MEMORY_ADMISSION_STAGE_KEY not in chain_store.load()["stage_results"]
+
+
+def test_failed_authority_activation_rejects_after_exact_admission() -> None:
+    chain_store = _seeded_store()
+    sink = _CanonicalPatternMemorySink()
+    publisher = _EvidencePublisher(activation_fail=True)
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            PATTERN_MEMORY_ADMISSION_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                sink=sink,
+                evidence_publisher=publisher,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is False
+    assert FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION in result.rejection_reasons
+    assert len(sink.records) == 1
+    assert len(publisher.calls) == 1
+    assert len(publisher.activations) == 1
+
+
+def test_noncanonical_sink_record_id_rejects_exact_binding() -> None:
+    chain_store = _seeded_store()
+    sink = FakePatternMemorySink()
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            PATTERN_MEMORY_ADMISSION_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                sink=sink,
+                evidence_publisher=_EvidencePublisher(),
             )
         },
         now_iso=NOW_ISO,

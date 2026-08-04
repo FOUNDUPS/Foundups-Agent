@@ -14,6 +14,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass, field, replace
+from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_runtime_authority import (
@@ -217,6 +218,7 @@ def enrich_readonly_audit_tasks_with_operational_memex(
         return _reject(missing_runtime)
 
     capabilities: list[Any] = []
+    consumption_now_iso = now_iso or issued_at
     if cfg.verified_outcome_references:
         if verified_outcome_runtime_authority is None:
             return _reject("verified_outcome_runtime_authority_required")
@@ -227,6 +229,12 @@ def enrich_readonly_audit_tasks_with_operational_memex(
             ]
         except (RuntimeError, TypeError, ValueError) as exc:
             return _reject(f"verified_outcome_runtime_authority_rejected:{exc}")
+        try:
+            consumption_now_iso = _trusted_runtime_now_iso(
+                verified_outcome_runtime_authority
+            )
+        except (OSError, OverflowError, TypeError, ValueError) as exc:
+            return _reject(f"verified_outcome_trusted_clock_rejected:{exc}")
 
     assembly = assemble_foundup_memex_current_state(
         foundup_id=cfg.foundup_id,
@@ -234,7 +242,7 @@ def enrich_readonly_audit_tasks_with_operational_memex(
         identity=cfg.identity,
         roadmap_state=cfg.roadmap_state,
         verified_outcomes=tuple(capabilities),
-        now_iso=issued_at,
+        now_iso=consumption_now_iso,
         resident_mode=True,
         legacy_single_foundup_compatibility=False,
         policy_foundup_scope=(cfg.foundup_id,),
@@ -255,7 +263,7 @@ def enrich_readonly_audit_tasks_with_operational_memex(
             "foundup_id": cfg.foundup_id,
             "principal_id": cfg.principal_id,
             "work_order_id": assignment_id,
-            "memex_now_iso": issued_at,
+            "memex_now_iso": consumption_now_iso,
             "memex_policy_issued_at": issued_at,
             "memex_policy_expires_at": expires_at,
             "memex_source_scope": f"foundup:{cfg.foundup_id}:lane:{lane_id}",
@@ -425,6 +433,13 @@ def _positive_int(value: Any, *, default: int) -> int:
     except (TypeError, ValueError):
         return default
     return parsed if parsed > 0 else default
+
+
+def _trusted_runtime_now_iso(authority: VerifiedOutcomeRuntimeAuthority) -> str:
+    now_epoch = authority.trusted_now_epoch()
+    if type(now_epoch) is not int or now_epoch <= 0:
+        raise ValueError("trusted_now_epoch_invalid")
+    return datetime.fromtimestamp(now_epoch, timezone.utc).isoformat()
 
 
 def _digest(value: Any) -> str:

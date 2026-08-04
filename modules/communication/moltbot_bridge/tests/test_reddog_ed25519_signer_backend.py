@@ -30,6 +30,8 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISSING,
     REJECT_ED25519_SIGNER_CONTROL_ANCHOR_MISSING,
     REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH,
+    REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING,
+    REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED,
     REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH,
     REJECT_ED25519_SIGNER_REQUEST_INVALID,
     canonical_control_audit_attestation_input,
@@ -76,6 +78,35 @@ class AuditMacBuilder:
 class EmptyAuditMacBuilder:
     def build(self, request: SigningRequest, signature: str, peer: SignerPeerAttestation) -> str:
         return ""
+
+
+class OneUseOutcomeAuthority:
+    def __init__(self, expected_digest: str) -> None:
+        self.expected_digest = expected_digest
+        self.reserved: set[str] = set()
+        self.committed: set[str] = set()
+
+    def reserve(self, **values: object) -> object | None:
+        receipt_id = str(values.get("receipt_id") or "")
+        if (
+            values.get("evidence_digest") != self.expected_digest
+            or not receipt_id
+            or receipt_id in self.reserved
+            or receipt_id in self.committed
+        ):
+            return None
+        self.reserved.add(receipt_id)
+        return receipt_id
+
+    def commit(self, reservation: object) -> None:
+        receipt_id = str(reservation)
+        if receipt_id not in self.reserved:
+            raise ValueError("outcome_reservation_missing")
+        self.reserved.remove(receipt_id)
+        self.committed.add(receipt_id)
+
+    def rollback(self, reservation: object) -> None:
+        self.reserved.discard(str(reservation))
 
 
 def _private_key():
@@ -210,7 +241,7 @@ def test_ed25519_backend_signs_only_exact_verified_outcome_domain() -> None:
         authority_tier="HIGH",
         consensus_receipt_digest=consensus_digest,
     )
-    backend = Ed25519SignerBackend(
+    missing_authority_backend = Ed25519SignerBackend(
         private_key=private_key,
         public_key=public_key,
         key_epoch="epoch-1",
@@ -218,8 +249,15 @@ def test_ed25519_backend_signs_only_exact_verified_outcome_domain() -> None:
         verified_outcome_signer_policy=policy,
         proposal_clock=lambda: 1_800_000_000,
     )
+    missing_authority = missing_authority_backend.sign(request, _peer())
+    authority = OneUseOutcomeAuthority(payload["covered_action_digest"])
+    backend = replace(
+        missing_authority_backend,
+        verified_outcome_signing_authority=authority,
+    )
 
     accepted = backend.sign(request, _peer())
+    replay = backend.sign(request, _peer())
     wrong_digest = backend.sign(
         replace(request, payload_digest="sha256:" + "0" * 64),
         _peer(),
@@ -229,6 +267,11 @@ def test_ed25519_backend_signs_only_exact_verified_outcome_domain() -> None:
         _peer(),
     )
 
+    assert missing_authority.accepted is False
+    assert (
+        missing_authority.rejection_code
+        == REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING
+    )
     assert accepted.accepted is True
     assert Ed25519SignatureVerifier().verify(
         public_key,
@@ -238,6 +281,8 @@ def test_ed25519_backend_signs_only_exact_verified_outcome_domain() -> None:
     assert wrong_digest.accepted is False
     assert wrong_digest.rejection_code == REJECT_ED25519_SIGNER_REQUEST_INVALID
     assert wrong_domain.accepted is False
+    assert replay.accepted is False
+    assert replay.rejection_code == REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED
 
 
 def test_ed25519_signer_backend_round_trips_through_socket_protocol() -> None:

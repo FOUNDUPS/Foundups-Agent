@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any, Mapping, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -42,6 +42,23 @@ class VerifiedOutcomeSignerPolicy:
     authority_tier: str
     consensus_receipt_digest: str
     max_future_skew_seconds: int = 60
+
+
+class VerifiedOutcomeSigningAuthority(Protocol):
+    """Signer-side durable authority for one exact verified evidence bundle."""
+
+    def reserve(
+        self,
+        *,
+        receipt_id: str,
+        work_order_id: str,
+        evidence_digest: str,
+        issued_at: int,
+    ) -> object | None: ...
+
+    def commit(self, reservation: object) -> None: ...
+
+    def rollback(self, reservation: object) -> None: ...
 
 
 def validate_verified_outcome_signing_request(
@@ -114,6 +131,7 @@ __all__ = [
     "VERIFIED_OUTCOME_SIGNER_ROLE",
     "VERIFIED_OUTCOME_SIGNING_OPERATION",
     "VERIFIED_OUTCOME_SIGNING_PREFIX",
+    "VerifiedOutcomeSigningAuthority",
     "VerifiedOutcomeSignerPolicy",
     "validate_verified_outcome_signing_request",
 ]

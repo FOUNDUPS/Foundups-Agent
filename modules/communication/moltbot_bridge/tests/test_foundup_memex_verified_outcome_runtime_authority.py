@@ -39,6 +39,12 @@ from modules.communication.moltbot_bridge.src.foundup_brain_current_state import
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
+    ReadOnlyAuditTaskSpec,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_snapshot_supplier import (
+    enrich_readonly_audit_tasks_with_operational_memex,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
     canonical_signer_audit_attestation_input,
 )
@@ -180,7 +186,7 @@ def _authority(
 ) -> VerifiedOutcomeRuntimeAuthority:
     return VerifiedOutcomeRuntimeAuthority(
         store=store,
-        verifier_key_resolver=key_resolver or _KeyResolver(),
+        outcome_signer_key_resolver=key_resolver or _KeyResolver(),
         signature_verifier=_DigestSignatureVerifier(),
         revocation_oracle=revocation_oracle or _RevocationOracle(),
         issuer_principal_id=PRINCIPAL_ID,
@@ -191,7 +197,7 @@ def _authority(
 
 
 def _publish(
-    tmp_path: Path, *, record: dict | None = None
+    tmp_path: Path, *, record: dict | None = None, activate: bool = True
 ) -> tuple[
     AuthorityRuntimeVerifiedOutcomeStore,
     dict,
@@ -226,7 +232,23 @@ def _publish(
         )
         == record_id
     )
+    assert store.load_envelope(record_id) is None
+    if activate:
+        assert publisher.activate(record_id) == record_id
     return store, record, verifier, held_out, _reference(record)
+
+
+def test_staged_evidence_is_not_consumable_before_activation(tmp_path: Path) -> None:
+    store, _record_value, _verifier, _held_out, reference = _publish(
+        tmp_path,
+        activate=False,
+    )
+
+    with pytest.raises(ValueError, match="durable_source_missing"):
+        _authority(store).issue(reference)
+
+    assert store.activate(reference.record_id) == reference.record_id
+    assert _authority(store).issue(reference) is not None
 
 
 def _consume(capability: object, store: AuthorityRuntimeVerifiedOutcomeStore) -> object:
@@ -250,6 +272,17 @@ def test_durable_source_issues_and_cross_process_replay_is_one_use(
 
     assert _consume(first, store) is not None
     assert _consume(second, second_store) is None
+
+
+def test_durable_batch_replay_consumption_is_all_or_nothing(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+
+    assert store.consume_once("receipt-a") is True
+    assert store.consume_many_once(("receipt-a", "receipt-b")) is False
+    assert store.consume_once("receipt-b") is True
+    assert store.consume_many_once(("receipt-c", "receipt-d")) is True
+    assert store.consume_once("receipt-c") is False
+    assert store.consume_once("receipt-d") is False
 
 
 def test_durable_authority_capability_is_consumed_by_resident_brain(
@@ -286,6 +319,66 @@ def test_durable_authority_capability_is_consumed_by_resident_brain(
     assert assembled.accepted is True
     assert assembled.view is not None
     assert assembled.view.verified_outcomes[0]["outcome_id"] == reference.record_id
+
+
+def test_supplier_consumes_with_authority_clock_not_policy_timestamp(
+    tmp_path: Path,
+) -> None:
+    snapshot = _brain_snapshot()
+    record = _record(
+        binding={
+            "snapshot_id": snapshot.snapshot_receipt_id,
+            "snapshot_content_digest": snapshot.snapshot_content_digest,
+        }
+    )
+    store, _record_value, _verifier, _held_out, reference = _publish(
+        tmp_path,
+        record=record,
+    )
+    authority = _authority(store, now_epoch=NOW)
+    task = ReadOnlyAuditTaskSpec(
+        task_id="task-1",
+        description="Read-only Memex clock regression",
+        required_skills=("reddog_readonly_audit",),
+        estimated_complexity=0.2,
+        priority_score=0.9,
+        context={
+            "assignment": {
+                "assignment_id": "assignment-1",
+                "lane_id": "repo_code_audit",
+                "snapshot_receipt_id": snapshot.snapshot_receipt_id,
+                "snapshot_content_digest": snapshot.snapshot_content_digest,
+            }
+        },
+        origin_continuity_id="determination-1",
+    )
+
+    result = enrich_readonly_audit_tasks_with_operational_memex(
+        tasks=(task,),
+        snapshot=snapshot,
+        config={
+            "foundup_id": FOUNDUP,
+            "principal_id": PRINCIPAL_ID,
+            "identity": {"foundup_id": FOUNDUP, "name": "Foundups Agent"},
+            "roadmap_state": {
+                "foundup_id": FOUNDUP,
+                "roadmap_id": "runtime-authority-roadmap",
+                "version": "phase1",
+                "content_digest": "sha256:roadmap",
+            },
+            "verified_outcome_references": (reference.to_dict(),),
+            "policy_issued_at": "2027-01-15T07:00:00+00:00",
+            "policy_expires_at": "2027-01-15T08:09:00+00:00",
+            "holoindex_generation_id": "generation-1",
+            "source_revision": "revision-1",
+        },
+        verified_outcome_runtime_authority=authority,
+        now_iso="2027-01-15T07:30:00+00:00",
+    )
+
+    assert result.accepted is True
+    assert result.tasks[0].context["memex_now_iso"] == "2027-01-15T08:00:00+00:00"
+    assert result.tasks[0].context["memex_policy_issued_at"] == "2027-01-15T07:00:00+00:00"
 
 
 def test_concurrent_consumers_cannot_both_admit(tmp_path: Path) -> None:
@@ -367,6 +460,7 @@ def test_attacker_rehashed_record_and_envelope_cannot_reuse_signature(
         key_epoch=KEY_EPOCH,
     )
     store.publish(forged)
+    store.activate(forged_id)
 
     with pytest.raises(ValueError, match="signed_digest_mismatch"):
         _authority(store).issue(_reference(forged_record))

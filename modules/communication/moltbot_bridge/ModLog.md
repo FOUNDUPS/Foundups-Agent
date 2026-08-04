@@ -1,16 +1,20 @@
 # ModLog - moltbot_bridge
 
-## 2026-08-04: Verified-outcome runtime authority binding
-- Completed the draft verified-outcome rehydration foundation with a root-confined
-  durable evidence source and replay namespace in the existing authority runtime
-  store. The resident queue now publishes only canonical verifier, held-out, and
-  PatternMemory evidence signed by the isolated RedDog signer.
+## 2026-08-04: Verified-outcome runtime authority binding (partial)
+- Extended the draft verified-outcome rehydration foundation with a root-confined
+  evidence and replay namespace in the existing authority runtime store. Signed
+  publication is staged and non-consumable until exact PatternMemory admission.
 - Added committed-profile key resolution, revocation/freshness checks, exact
   FoundUp/snapshot/head/content/work/slice/job/worker/verifier/runtime lineage, and
   opaque one-use capabilities consumed by resident FoundUp Brain assembly.
-- Wired production construction through the existing signer/runtime dependency
-  bundle and outside-repository runtime paths. Failures leave PatternMemory rows
-  inert and do not advance the resident stage.
+- Added atomic batch capability consumption after complete Brain validation and
+  one trusted runtime clock for issuance and consumption. Missing queue bindings
+  no longer downgrade silently to legacy admission.
+- Security review proved current autonomous-verifier receipts are canonical
+  self-hashes, not independently signed verifier authority. The signer now
+  requires a separately supplied durable authorization boundary and rejects
+  absent or replayed authorization. No production boundary exists yet, so
+  activation remains fail closed: `BLOCKED_BY_DURABLE_AUTHORITY_SOURCE`.
 - Boundary remains narrow: no learning candidates, Brain or roadmap writes,
   HoloIndex mutation, new database, new orchestrator, voting, or CABR governance
   (WSP 00/15/22/50/62/97).

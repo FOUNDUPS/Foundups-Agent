@@ -317,7 +317,7 @@ def _verified_outcome_authority_from_env(
     profile = _runtime_mapping(repo_root, runtime_root, profile_value)
     return VerifiedOutcomeRuntimeAuthority(
         store=AuthorityRuntimeVerifiedOutcomeStore(bundle.authority_store),
-        verifier_key_resolver=CommittedAuthorityProfileOutcomeKeyResolver(
+        outcome_signer_key_resolver=CommittedAuthorityProfileOutcomeKeyResolver(
             work_state_snapshot=work_state,
             authority_profile=profile,
         ),

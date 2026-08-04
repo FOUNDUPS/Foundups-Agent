@@ -71,11 +71,19 @@ class _Source:
 class _ReplayStore:
     def __init__(self):
         self.seen = set()
+        self.batches = []
 
     def consume_once(self, receipt_id):
-        if receipt_id in self.seen:
+        return self.consume_many_once((receipt_id,))
+
+    def consume_many_once(self, receipt_ids):
+        candidates = tuple(receipt_ids)
+        self.batches.append(candidates)
+        if not candidates or len(set(candidates)) != len(candidates):
             return False
-        self.seen.add(receipt_id)
+        if self.seen.intersection(candidates):
+            return False
+        self.seen.update(candidates)
         return True
 
 
@@ -266,11 +274,12 @@ def _signed_receipt(
     held_out_receipt=None,
     issued_at=NOW - 5,
     signature_ok=True,
+    receipt_id="signed-outcome-1",
 ):
     verifier = verification_receipt if verification_receipt is not None else _verifier_receipt()
     held_out = held_out_receipt if held_out_receipt is not None else _held_out_receipt(verifier)
     payload = {
-        "receipt_id": "signed-outcome-1",
+        "receipt_id": receipt_id,
         "work_order_id": record["work_order_id"],
         "reddog_id": REDDOG_ID,
         "prev_receipt_hash": None,
@@ -388,6 +397,7 @@ def _brain_snapshot():
             "signature_digest": "sha256:brain",
             "repo_head_sha": HEAD,
             "work_state_revision": "sha256:resident-work-state",
+            "record_count": 1,
         },
     )
     assert snapshot_result.accepted and snapshot_result.snapshot is not None
@@ -449,6 +459,123 @@ def test_resident_brain_consumes_authoritatively_bound_capability() -> None:
         expected_snapshot_content_digest=snapshot.snapshot_content_digest,
         now_epoch=NOW + 60,
     ) is None
+
+
+def _brain_capability(snapshot, replay, *, receipt_id="signed-outcome-1"):
+    record = _record(
+        binding={
+            "snapshot_id": snapshot.snapshot_receipt_id,
+            "snapshot_content_digest": snapshot.snapshot_content_digest,
+        }
+    )
+    verifier = _verifier_receipt()
+    held_out = _held_out_receipt(verifier)
+    return verify_and_issue_foundup_memex_outcome(
+        source=_Source(record),
+        record_id=reddog_verified_pattern_memory_record_id(record),
+        verification_receipt=verifier,
+        held_out_receipt=held_out,
+        signed_receipts=(_signed_receipt(
+            record,
+            verification_receipt=verifier,
+            held_out_receipt=held_out,
+            receipt_id=receipt_id,
+        ),),
+        reddog_public_key=PUBLIC_KEY,
+        signature_verifier=_SignatureVerifier(),
+        reddog_id=REDDOG_ID,
+        expected_foundup_id=FOUNDUP,
+        expected_snapshot_id=snapshot.snapshot_receipt_id,
+        expected_snapshot_content_digest=snapshot.snapshot_content_digest,
+        replay_store=replay,
+        now_epoch=NOW,
+    )
+
+
+def _assemble_brain(snapshot, capabilities, **overrides):
+    values = {
+        "foundup_id": FOUNDUP,
+        "snapshot": snapshot,
+        "identity": {"foundup_id": FOUNDUP, "name": "Foundups Agent"},
+        "roadmap_state": {
+            "foundup_id": FOUNDUP,
+            "roadmap_id": "foundups-agent-roadmap",
+            "version": "phase1",
+            "content_digest": "sha256:roadmap",
+        },
+        "verified_outcomes": capabilities,
+        "now_iso": "2027-01-15T08:01:00+00:00",
+        "policy_foundup_scope": (FOUNDUP,),
+    }
+    values.update(overrides)
+    return assemble_foundup_brain_current_state(**values)
+
+
+def test_later_invalid_outcome_does_not_partially_burn_valid_capability() -> None:
+    snapshot = _brain_snapshot()
+    replay = _ReplayStore()
+    capability = _brain_capability(snapshot, replay)
+
+    rejected = _assemble_brain(snapshot, (capability, object()))
+
+    assert rejected.accepted is False
+    assert "verified_outcome_runtime_binding_required" in rejected.rejection_reasons
+    assert replay.seen == set()
+    assert replay.batches == []
+    assert _assemble_brain(snapshot, (capability,)).accepted is True
+
+
+def test_brain_admits_all_outcomes_through_one_durable_batch() -> None:
+    snapshot = _brain_snapshot()
+    replay = _ReplayStore()
+    first = _brain_capability(snapshot, replay, receipt_id="signed-outcome-1")
+    second = _brain_capability(snapshot, replay, receipt_id="signed-outcome-2")
+
+    accepted = _assemble_brain(snapshot, (first, second))
+
+    assert accepted.accepted is True
+    assert replay.batches == [("signed-outcome-1", "signed-outcome-2")]
+    assert consume_verified_foundup_memex_outcome(
+        first,
+        expected_foundup_id=FOUNDUP,
+        expected_snapshot_id=snapshot.snapshot_receipt_id,
+        expected_snapshot_content_digest=snapshot.snapshot_content_digest,
+        now_epoch=NOW,
+    ) is None
+    assert consume_verified_foundup_memex_outcome(
+        second,
+        expected_foundup_id=FOUNDUP,
+        expected_snapshot_id=snapshot.snapshot_receipt_id,
+        expected_snapshot_content_digest=snapshot.snapshot_content_digest,
+        now_epoch=NOW,
+    ) is None
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"roadmap_state": {"foundup_id": FOUNDUP}},
+        {"policy_foundup_scope": ("other-foundup",)},
+        {
+            "identity": {
+                "foundup_id": FOUNDUP,
+                "name": "Foundups Agent",
+                "purpose": "Use sk-example-secret in runtime",
+            }
+        },
+    ],
+)
+def test_late_brain_rejection_does_not_burn_outcome(overrides) -> None:
+    snapshot = _brain_snapshot()
+    replay = _ReplayStore()
+    capability = _brain_capability(snapshot, replay)
+
+    rejected = _assemble_brain(snapshot, (capability,), **overrides)
+
+    assert rejected.accepted is False
+    assert replay.seen == set()
+    assert replay.batches == []
+    assert _assemble_brain(snapshot, (capability,)).accepted is True
 
 
 @pytest.mark.parametrize(

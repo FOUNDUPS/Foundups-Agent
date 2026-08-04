@@ -52,6 +52,8 @@ class VerifiedOutcomeEvidencePublisher(Protocol):
         held_out_receipt: Mapping[str, Any],
     ) -> str: ...
 
+    def activate(self, record_id: str) -> str: ...
+
 
 @dataclass(frozen=True)
 class SignedVerifiedOutcomeEvidencePublisher:
@@ -109,6 +111,9 @@ class SignedVerifiedOutcomeEvidencePublisher:
             key_epoch=self.key_epoch,
         )
         return self.store.publish(envelope)
+
+    def activate(self, record_id: str) -> str:
+        return self.store.activate(record_id)
 
 
 def _rehydrate_evidence(

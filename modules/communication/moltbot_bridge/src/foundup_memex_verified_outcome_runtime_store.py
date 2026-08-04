@@ -5,14 +5,14 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AuthorityRuntimeStore,
 )
 
 
-OUTCOME_AUTHORITY_STATE_SCHEMA = "foundup_memex_verified_outcome_authority_state.v1"
+OUTCOME_AUTHORITY_STATE_SCHEMA = "foundup_memex_verified_outcome_authority_state.v2"
 OUTCOME_EVIDENCE_ENVELOPE_SCHEMA = "foundup_memex_verified_outcome_evidence.v1"
 _STATE_KEY = "foundup_memex_verified_outcome_authority"
 
@@ -28,30 +28,62 @@ class AuthorityRuntimeVerifiedOutcomeStore:
         self._store = store
 
     def publish(self, envelope: Mapping[str, Any]) -> str:
+        """Stage signed evidence; staged records are not consumable."""
+
         payload = _validated_envelope(envelope)
         record_id = str(payload["record_id"])
         current = self._store.load()
         state = _state_from(current)
         evidence = dict(state["evidence"])
+        entry = {"status": "STAGED", "envelope": payload}
         existing = evidence.get(record_id)
         if existing is not None:
-            if existing != payload:
+            if not isinstance(existing, Mapping) or existing.get("envelope") != payload:
                 raise ValueError("verified_outcome_evidence_conflict")
             return record_id
-        evidence[record_id] = payload
+        evidence[record_id] = entry
         state["evidence"] = evidence
         updated = dict(current)
         updated[_STATE_KEY] = state
         self._store.commit(updated, expected_revision=current.get("revision"))
         return record_id
 
+    def activate(self, record_id: str) -> str:
+        """Activate one exact staged envelope after durable outcome admission."""
+
+        candidate = str(record_id or "").strip()
+        if not candidate:
+            raise ValueError("verified_outcome_activation_record_id_missing")
+        current = self._store.load()
+        state = _state_from(current)
+        evidence = dict(state["evidence"])
+        raw = evidence.get(candidate)
+        if not isinstance(raw, Mapping):
+            raise ValueError("verified_outcome_activation_stage_missing")
+        entry = dict(raw)
+        envelope = _validated_envelope(entry.get("envelope"))
+        if envelope["record_id"] != candidate:
+            raise ValueError("verified_outcome_activation_binding_mismatch")
+        if entry.get("status") == "ACTIVE":
+            return candidate
+        if set(entry) != {"status", "envelope"} or entry.get("status") != "STAGED":
+            raise ValueError("verified_outcome_activation_state_invalid")
+        evidence[candidate] = {"status": "ACTIVE", "envelope": envelope}
+        state["evidence"] = evidence
+        updated = dict(current)
+        updated[_STATE_KEY] = state
+        self._store.commit(updated, expected_revision=current.get("revision"))
+        return candidate
+
     def load_envelope(self, record_id: str) -> Mapping[str, Any] | None:
         if not str(record_id or "").strip():
             return None
         try:
             state = _state_from(self._store.load())
-            envelope = state["evidence"].get(record_id)
-            return copy.deepcopy(_validated_envelope(envelope))
+            entry = state["evidence"].get(record_id)
+            if not isinstance(entry, Mapping) or entry.get("status") != "ACTIVE":
+                return None
+            return copy.deepcopy(_validated_envelope(entry.get("envelope")))
         except (RuntimeError, TypeError, ValueError):
             return None
 
@@ -62,16 +94,21 @@ class AuthorityRuntimeVerifiedOutcomeStore:
         return copy.deepcopy(envelope["record"])
 
     def consume_once(self, receipt_id: str) -> bool:
-        candidate = str(receipt_id or "").strip()
-        if not candidate:
+        return self.consume_many_once((receipt_id,))
+
+    def consume_many_once(self, receipt_ids: Sequence[str]) -> bool:
+        candidates = tuple(str(value or "").strip() for value in receipt_ids)
+        if not candidates or any(not value for value in candidates):
+            return False
+        if len(set(candidates)) != len(candidates):
             return False
         try:
             current = self._store.load()
             state = _state_from(current)
             consumed = list(state["consumed_receipt_ids"])
-            if candidate in set(consumed):
+            if set(candidates).intersection(map(str, consumed)):
                 return False
-            consumed.append(candidate)
+            consumed.extend(candidates)
             state["consumed_receipt_ids"] = consumed
             updated = dict(current)
             updated[_STATE_KEY] = state
@@ -129,6 +166,15 @@ def _state_from(snapshot: Mapping[str, Any]) -> dict[str, Any]:
         != len(raw["consumed_receipt_ids"])
     ):
         raise ValueError("verified_outcome_authority_state_invalid")
+    for record_id, entry in raw["evidence"].items():
+        if (
+            not isinstance(record_id, str)
+            or not isinstance(entry, Mapping)
+            or set(entry) != {"status", "envelope"}
+            or entry.get("status") not in {"STAGED", "ACTIVE"}
+            or _validated_envelope(entry.get("envelope"))["record_id"] != record_id
+        ):
+            raise ValueError("verified_outcome_authority_state_invalid")
     return copy.deepcopy(dict(raw))
 
 

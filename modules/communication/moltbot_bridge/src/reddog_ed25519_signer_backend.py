@@ -61,6 +61,7 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_sig
     VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
     VERIFIED_OUTCOME_SIGNING_OPERATION,
     VERIFIED_OUTCOME_SIGNING_PREFIX,
+    VerifiedOutcomeSigningAuthority,
     VerifiedOutcomeSignerPolicy,
     validate_verified_outcome_signing_request,
 )
@@ -105,6 +106,12 @@ REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = (
 )
 REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY = (
     "REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY"
+)
+REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING = (
+    "REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING"
+)
+REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED = (
+    "REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED"
 )
 
 CONTROL_LOOP_SIGNING_OPERATION = "attest_control_loop_receipt"
@@ -183,6 +190,9 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
     ) = None
     signer_peer_instance_binding: peer_handshake.SignerPeerInstanceBinding | None = None
     verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None
+    verified_outcome_signing_authority: (
+        VerifiedOutcomeSigningAuthority | None
+    ) = None
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
         reason = _signer_request_rejection(self, request, peer)
@@ -202,7 +212,7 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
         if reason:
             _rollback_proposal_reservation(self, proposal_reservation)
             return _reject(reason)
-        outcome_payload, rejection = _prepare_outcome_or_reject(
+        outcome_payload, outcome_reservation, rejection = _prepare_outcome_or_reject(
             self, request, proposal_reservation, manifest_reservation
         )
         if rejection is not None:
@@ -218,12 +228,14 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
         if reason:
             _rollback_proposal_reservation(self, proposal_reservation)
             _rollback_manifest_reservation(self, manifest_reservation)
+            _rollback_outcome_reservation(self, outcome_reservation)
             return _reject(reason)
         return _finalize_signing(
             self,
             response,
             proposal_reservation,
             manifest_reservation,
+            outcome_reservation,
             control_payload,
             preparation,
         )
@@ -234,6 +246,7 @@ def _finalize_signing(
     response: SigningResponse,
     proposal_reservation: Any,
     manifest_reservation: Any,
+    outcome_reservation: Any,
     control_payload: Mapping[str, Any] | None,
     preparation: Any,
 ) -> SigningResponse:
@@ -244,9 +257,13 @@ def _finalize_signing(
         except Exception:
             _rollback_proposal_reservation(backend, proposal_reservation)
             _rollback_manifest_reservation(backend, manifest_reservation)
+            _rollback_outcome_reservation(backend, outcome_reservation)
             return _reject(REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY)
     if not _commit_manifest_reservation(backend, manifest_reservation):
+        _rollback_outcome_reservation(backend, outcome_reservation)
         return _reject(REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY)
+    if not _commit_outcome_reservation(backend, outcome_reservation):
+        return _reject(REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED)
     if control_payload is not None and preparation is not None:
         try:
             backend.control_loop_anchor_store.commit(
@@ -268,13 +285,15 @@ def _prepare_outcome_or_reject(
     request: SigningRequest,
     proposal_reservation: Any,
     manifest_reservation: Any,
-) -> tuple[Mapping[str, Any] | None, SigningResponse | None]:
-    payload, reason = _prepare_verified_outcome_signing(backend, request)
+) -> tuple[Mapping[str, Any] | None, Any, SigningResponse | None]:
+    payload, reservation, reason = _prepare_verified_outcome_signing(
+        backend, request
+    )
     if not reason:
-        return payload, None
+        return payload, reservation, None
     _rollback_proposal_reservation(backend, proposal_reservation)
     _rollback_manifest_reservation(backend, manifest_reservation)
-    return None, _reject(reason)
+    return None, None, _reject(reason)
 
 
 def _signer_request_rejection(
@@ -367,20 +386,59 @@ def _signing_domain_pairs(
 def _prepare_verified_outcome_signing(
     backend: Ed25519SignerBackend,
     request: SigningRequest,
-) -> tuple[dict[str, Any] | None, str]:
+) -> tuple[dict[str, Any] | None, Any, str]:
     if request.requested_operation != VERIFIED_OUTCOME_SIGNING_OPERATION:
-        return None, ""
+        return None, None, ""
     policy = backend.verified_outcome_signer_policy
     if policy is None:
-        return None, REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
+        return None, None, REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
+    authority = backend.verified_outcome_signing_authority
+    if authority is None:
+        return None, None, REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING
     payload = validate_verified_outcome_signing_request(
         request,
         policy,
         now_epoch=int(backend.proposal_clock()),
     )
     if payload is None:
-        return None, REJECT_ED25519_SIGNER_REQUEST_INVALID
-    return dict(payload), ""
+        return None, None, REJECT_ED25519_SIGNER_REQUEST_INVALID
+    try:
+        reservation = authority.reserve(
+            receipt_id=str(payload["receipt_id"]),
+            work_order_id=str(payload["work_order_id"]),
+            evidence_digest=str(payload["covered_action_digest"]),
+            issued_at=int(payload["issued_at"]),
+        )
+    except Exception:
+        reservation = None
+    if reservation is None:
+        return None, None, REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED
+    return dict(payload), reservation, ""
+
+
+def _commit_outcome_reservation(
+    backend: Ed25519SignerBackend, reservation: Any
+) -> bool:
+    if reservation is None:
+        return True
+    try:
+        assert backend.verified_outcome_signing_authority is not None
+        backend.verified_outcome_signing_authority.commit(reservation)
+        return True
+    except Exception:
+        _rollback_outcome_reservation(backend, reservation)
+        return False
+
+
+def _rollback_outcome_reservation(
+    backend: Ed25519SignerBackend, reservation: Any
+) -> None:
+    if reservation is None or backend.verified_outcome_signing_authority is None:
+        return
+    try:
+        backend.verified_outcome_signing_authority.rollback(reservation)
+    except Exception:
+        return
 
 
 def _prepare_manifest_signing(

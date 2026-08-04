@@ -88,7 +88,7 @@ class VerifiedOutcomeRuntimeReference:
 @dataclass(frozen=True)
 class VerifiedOutcomeRuntimeAuthority:
     store: AuthorityRuntimeVerifiedOutcomeStore
-    verifier_key_resolver: Any
+    outcome_signer_key_resolver: Any
     signature_verifier: Any
     revocation_oracle: Any
     issuer_principal_id: str
@@ -140,7 +140,7 @@ def _resolve_active_public_key(
     authority: VerifiedOutcomeRuntimeAuthority,
     envelope: Mapping[str, Any],
 ) -> str:
-    public_key = authority.verifier_key_resolver.resolve(
+    public_key = authority.outcome_signer_key_resolver.resolve(
         authority.reddog_id,
         str(envelope["key_epoch"]),
     )
@@ -161,7 +161,9 @@ def _validate_authority_dependencies(
     authority: VerifiedOutcomeRuntimeAuthority,
 ) -> None:
     if (
-        not callable(getattr(authority.verifier_key_resolver, "resolve", None))
+        not callable(
+            getattr(authority.outcome_signer_key_resolver, "resolve", None)
+        )
         or not callable(getattr(authority.signature_verifier, "verify", None))
         or not callable(getattr(authority.revocation_oracle, "is_revoked", None))
         or not callable(authority.trusted_now_epoch)

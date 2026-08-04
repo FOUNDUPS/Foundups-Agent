@@ -22,7 +22,8 @@ from datetime import datetime
 from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_authenticity import (
-    consume_verified_foundup_memex_outcome,
+    consume_verified_foundup_memex_outcomes,
+    inspect_verified_foundup_memex_outcome,
     is_verified_foundup_memex_outcome_capability,
 )
 
@@ -279,12 +280,30 @@ def assemble_foundup_brain_current_state(
         },
         assembly_receipt=assembly_receipt,
     )
-    return FoundUpBrainAssemblyResult(
+    accepted_result = FoundUpBrainAssemblyResult(
         accepted=True,
         status=FOUNDUP_BRAIN_VIEW_ACCEPTED,
         view=view,
         rejection_reasons=(),
     )
+    if resident_mode and verified_outcomes:
+        now_epoch = _iso_epoch(now_iso)
+        admitted = now_epoch is not None and consume_verified_foundup_memex_outcomes(
+            verified_outcomes,
+            expected_foundup_id=normalized_foundup_id,
+            expected_snapshot_id=snapshot.snapshot_receipt_id,
+            expected_snapshot_content_digest=snapshot.snapshot_content_digest,
+            now_epoch=now_epoch,
+            expected_projections=outcomes_clean,
+        )
+        if not admitted:
+            return FoundUpBrainAssemblyResult(
+                accepted=False,
+                status=FOUNDUP_BRAIN_VIEW_REJECTED,
+                view=None,
+                rejection_reasons=("verified_outcome_capability_rejected",),
+            )
+    return accepted_result
 
 
 def _normalize_identity(identity: Mapping[str, Any]) -> dict[str, Any]:
@@ -381,7 +400,7 @@ def _verified_outcome_projections(
     resident_mode: bool,
     legacy_single_foundup_compatibility: bool,
 ) -> tuple[dict[str, Any], ...]:
-    """Consume authenticated outcomes, or an explicit non-resident legacy form."""
+    """Inspect authenticated outcomes, or validate a non-resident legacy form."""
 
     projected: list[dict[str, Any]] = []
     for outcome in outcomes:
@@ -393,17 +412,17 @@ def _verified_outcome_projections(
             if now_epoch is None:
                 reasons.append("verified_outcome_trusted_clock_required")
                 continue
-            consumed = consume_verified_foundup_memex_outcome(
+            inspected = inspect_verified_foundup_memex_outcome(
                 outcome,
                 expected_foundup_id=foundup_id,
                 expected_snapshot_id=snapshot_id,
                 expected_snapshot_content_digest=snapshot_content_digest,
                 now_epoch=now_epoch,
             )
-            if consumed is None:
+            if inspected is None:
                 reasons.append("verified_outcome_capability_rejected")
                 continue
-            projected.append(dict(consumed))
+            projected.append(dict(inspected))
             continue
         if not legacy_single_foundup_compatibility or not isinstance(outcome, Mapping):
             reasons.append("verified_outcome_legacy_compatibility_required")
