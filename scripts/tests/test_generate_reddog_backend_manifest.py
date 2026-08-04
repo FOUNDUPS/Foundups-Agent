@@ -106,6 +106,11 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "reddog_signer_system_service_entrypoint.py"
         in generated["required_runtime_sha256"]
     )
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "foundup_memex_verified_outcome_validation.py"
+        in generated["required_runtime_sha256"]
+    )
     assert generator.canonical_manifest_digest(generated) == (
-        "dff7b6bcf45d9bebefe78fe4ad23dd73ccd2b0902e1284753c61a36c612bb38d"
+        "b786d5113788eeffb1920cacb6ebe3ab4e907e191c51cb1dc1d01746e9db44b1"
     )

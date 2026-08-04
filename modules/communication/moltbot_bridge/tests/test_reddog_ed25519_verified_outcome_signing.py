@@ -71,18 +71,18 @@ class OneUseOutcomeAuthority:
         self.reserved.discard(str(reservation))
 
 
-def test_ed25519_backend_signs_only_exact_verified_outcome_domain() -> None:
-    private_key = _private_key()
-    public_key = _public_text(private_key)
-    consensus_digest = "sha256:" + "c" * 64
-    policy = VerifiedOutcomeSignerPolicy(
+def _outcome_policy(public_key: str) -> VerifiedOutcomeSignerPolicy:
+    return VerifiedOutcomeSignerPolicy(
         issuer_principal_id="github:mjtrout",
         reddog_id="reddog-0102",
         signer_public_key=public_key,
         key_epoch="epoch-1",
         authority_tier="HIGH",
-        consensus_receipt_digest=consensus_digest,
+        consensus_receipt_digest="sha256:" + "c" * 64,
     )
+
+
+def _outcome_request(public_key: str) -> tuple[SigningRequest, str, str]:
     payload = build_receipt_payload_for_signing(
         receipt_id="verified-outcome-test",
         work_order_id="wo-1",
@@ -103,18 +103,29 @@ def test_ed25519_backend_signs_only_exact_verified_outcome_domain() -> None:
         key_epoch="epoch-1",
         requested_operation=VERIFIED_OUTCOME_SIGNING_OPERATION,
         authority_tier="HIGH",
-        consensus_receipt_digest=consensus_digest,
+        consensus_receipt_digest="sha256:" + "c" * 64,
     )
-    missing_authority_backend = Ed25519SignerBackend(
+    return request, signing_input, payload["covered_action_digest"]
+
+
+def _outcome_backend(private_key: object, public_key: str) -> Ed25519SignerBackend:
+    return Ed25519SignerBackend(
         private_key=private_key,
         public_key=public_key,
         key_epoch="epoch-1",
         audit_mac_builder=AuditMacBuilder(),
-        verified_outcome_signer_policy=policy,
+        verified_outcome_signer_policy=_outcome_policy(public_key),
         proposal_clock=lambda: 1_800_000_000,
     )
+
+
+def test_ed25519_backend_signs_only_exact_verified_outcome_domain() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request, signing_input, evidence_digest = _outcome_request(public_key)
+    missing_authority_backend = _outcome_backend(private_key, public_key)
     missing_authority = missing_authority_backend.sign(request, _peer())
-    authority = OneUseOutcomeAuthority(payload["covered_action_digest"])
+    authority = OneUseOutcomeAuthority(evidence_digest)
     backend = replace(
         missing_authority_backend,
         verified_outcome_signing_authority=authority,
