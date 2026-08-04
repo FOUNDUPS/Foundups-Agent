@@ -23,6 +23,10 @@
   requires a separately supplied durable authorization boundary and rejects
   absent or replayed authorization. No production boundary exists yet, so
   activation remains fail closed: `BLOCKED_BY_DURABLE_AUTHORITY_SOURCE`.
+- WSP 62 review split outcome schema/lineage validation and signer request
+  validation/reservation into focused helpers. The signer backend, authenticity
+  gate, helpers, and their focused test modules now remain below the 675-line
+  communication threshold without new exemptions.
 - Boundary remains narrow: no learning candidates, Brain or roadmap writes,
   HoloIndex mutation, new database, new orchestrator, voting, or CABR governance
   (WSP 00/15/22/50/62/97).

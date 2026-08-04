@@ -14,8 +14,6 @@ key binding, key epoch, or audit-MAC boundary is missing, it rejects fail-closed
 
 from __future__ import annotations
 
-import hashlib
-import json
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Protocol
@@ -57,13 +55,27 @@ from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation im
     canonical_signer_audit_attestation_input,
 )
 from modules.communication.moltbot_bridge.src import reddog_signer_mutual_peer_handshake as peer_handshake
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_validation import (
+    assert_ascii_deep as _assert_ascii_deep,
+    canonical_control_audit_attestation_input,
+    control_authority_policy_matches,
+    is_ascii as _is_ascii,
+    public_bytes_from_private_key as _public_bytes_from_private_key,
+    valid_control_receipt_signing_payload,
+)
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
     VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
     VERIFIED_OUTCOME_SIGNING_OPERATION,
     VERIFIED_OUTCOME_SIGNING_PREFIX,
     VerifiedOutcomeSigningAuthority,
     VerifiedOutcomeSignerPolicy,
-    validate_verified_outcome_signing_request,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_verified_outcome_signing import (
+    REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING,
+    REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED,
+    commit_outcome_reservation as _commit_outcome_reservation,
+    prepare_verified_outcome_signing,
+    rollback_outcome_reservation as _rollback_outcome_reservation,
 )
 
 
@@ -107,46 +119,9 @@ REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = (
 REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY = (
     "REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY"
 )
-REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING = (
-    "REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING"
-)
-REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED = (
-    "REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED"
-)
-
 CONTROL_LOOP_SIGNING_OPERATION = "attest_control_loop_receipt"
 CONTROL_LOOP_SIGNING_PREFIX = "reddog-control-loop.v2."
 CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX = "reddog-control-loop-audit.v1."
-CONTROL_LOOP_RECEIPT_SCHEMA_VERSION = "reddog_resident_control_loop_receipt.v2"
-_CONTROL_LOOP_SIGNED_FIELDS = frozenset(
-    {
-        "schema_version", "receipt_id", "sequence_number", "cycle_id", "nonce",
-        "previous_receipt_id",
-        "legacy_prefix_digest", "accepted", "status", "rounds", "serial_progress",
-        "claim_progress", "receipt_ids", "source_receipt_ids_digest", "rejection_reasons",
-        "child_execution_receipt_ids",
-        "child_execution_evidence_digests", "child_execution_outcomes",
-        "child_execution_evidence_digest",
-        "child_execution_evidence_count",
-        "created_at", "repo_root_digest", "control_lock_acquired", "dispatched_stages",
-        "authority_issuance_count", "worker_claim_count", "worker_execution_count",
-        "worker_completion_count", "worker_requeue_count", "worker_failure_count",
-        "worktree_creation_count", "bounded_file_edit_count", "slice_verification_count",
-        "draft_pr_publish_count", "pattern_memory_admission_count",
-        "worker_process_spawn_count", "shell_command_count",
-        "worker_effects_unverified_count", "authority_issued",
-        "worker_claim_performed", "worker_execution_performed",
-        "worktree_creation_observed", "bounded_file_edit_observed",
-        "slice_verification_observed", "draft_pr_publish_observed",
-        "pattern_memory_admission_observed", "worker_process_spawn_observed",
-        "shell_command_execution_observed",
-        "issuer_principal_id", "signer_public_key", "signer_key_fingerprint", "key_epoch",
-        "consensus_receipt_digest", "authority_profile_digest",
-        "authority_profile_source_receipt_id", "authentication_status",
-    }
-)
-
-
 class SignerAuditMacBuilder(Protocol):
     """Injected audit-MAC boundary owned by the isolated signer process."""
 
@@ -387,58 +362,12 @@ def _prepare_verified_outcome_signing(
     backend: Ed25519SignerBackend,
     request: SigningRequest,
 ) -> tuple[dict[str, Any] | None, Any, str]:
-    if request.requested_operation != VERIFIED_OUTCOME_SIGNING_OPERATION:
-        return None, None, ""
-    policy = backend.verified_outcome_signer_policy
-    if policy is None:
-        return None, None, REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
-    authority = backend.verified_outcome_signing_authority
-    if authority is None:
-        return None, None, REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING
-    payload = validate_verified_outcome_signing_request(
+    return prepare_verified_outcome_signing(
+        backend,
         request,
-        policy,
-        now_epoch=int(backend.proposal_clock()),
+        domain_mismatch_code=REJECT_ED25519_SIGNER_DOMAIN_MISMATCH,
+        request_invalid_code=REJECT_ED25519_SIGNER_REQUEST_INVALID,
     )
-    if payload is None:
-        return None, None, REJECT_ED25519_SIGNER_REQUEST_INVALID
-    try:
-        reservation = authority.reserve(
-            receipt_id=str(payload["receipt_id"]),
-            work_order_id=str(payload["work_order_id"]),
-            evidence_digest=str(payload["covered_action_digest"]),
-            issued_at=int(payload["issued_at"]),
-        )
-    except Exception:
-        reservation = None
-    if reservation is None:
-        return None, None, REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED
-    return dict(payload), reservation, ""
-
-
-def _commit_outcome_reservation(
-    backend: Ed25519SignerBackend, reservation: Any
-) -> bool:
-    if reservation is None:
-        return True
-    try:
-        assert backend.verified_outcome_signing_authority is not None
-        backend.verified_outcome_signing_authority.commit(reservation)
-        return True
-    except Exception:
-        _rollback_outcome_reservation(backend, reservation)
-        return False
-
-
-def _rollback_outcome_reservation(
-    backend: Ed25519SignerBackend, reservation: Any
-) -> None:
-    if reservation is None or backend.verified_outcome_signing_authority is None:
-        return
-    try:
-        backend.verified_outcome_signing_authority.rollback(reservation)
-    except Exception:
-        return
 
 
 def _prepare_manifest_signing(
@@ -686,110 +615,18 @@ def _sign_peer_response_attestation(
         return "", REJECT_ED25519_SIGNER_SIGN_FAILED
 
 
-def _public_bytes_from_private_key(private_key: Any) -> bytes:
-    from cryptography.hazmat.primitives import serialization
-
-    return private_key.public_key().public_bytes(
-        encoding=serialization.Encoding.Raw,
-        format=serialization.PublicFormat.Raw,
-    )
-
-
 def _valid_control_receipt_signing_payload(
     request: SigningRequest,
 ) -> dict[str, Any] | None:
-    raw = request.signing_input[len(CONTROL_LOOP_SIGNING_PREFIX) :]
-    try:
-        payload = json.loads(raw)
-    except (TypeError, json.JSONDecodeError):
-        return None
-    if not isinstance(payload, dict) or set(payload) != _CONTROL_LOOP_SIGNED_FIELDS:
-        return None
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
-    if raw != canonical:
-        return None
-    unsigned = {key: value for key, value in payload.items() if key != "receipt_id"}
-    expected_id = "reddog_resident_control_loop_v2_" + _sha256_json(unsigned)
-    expected_request_digest = "sha256:" + _sha256_json({"signing_input": request.signing_input})
-    valid = bool(
-        request.signer_role == "reddog_control_loop"
-        and request.authority_tier in {"HIGH", "ULTRA"}
-        and payload.get("schema_version") == CONTROL_LOOP_RECEIPT_SCHEMA_VERSION
-        and payload.get("receipt_id") == expected_id
-        and payload.get("nonce") == request.nonce
-        and payload.get("issuer_principal_id") == request.requester_principal_id
-        and payload.get("signer_public_key") == request.signer_public_key
-        and payload.get("key_epoch") == request.key_epoch
-        and payload.get("consensus_receipt_digest") == request.consensus_receipt_digest
-        and _is_sha256_digest(payload.get("consensus_receipt_digest"))
-        and _is_sha256_digest(payload.get("authority_profile_digest"))
-        and _is_sha256_digest(payload.get("authority_profile_source_receipt_id"))
-        and payload.get("authentication_status") == "AUTHENTICATED"
-        and request.payload_digest == expected_request_digest
-    )
-    return payload if valid else None
+    return valid_control_receipt_signing_payload(request)
 
 
 def _control_authority_policy_matches(
     payload: dict[str, Any], policy: ControlLoopAuthorityPolicy
 ) -> bool:
-    if not isinstance(policy, ControlLoopAuthorityPolicy):
-        return False
-    policy_payload = {
-        "authority_profile_digest": policy.authority_profile_digest,
-        "authority_profile_source_receipt_id": (
-            policy.authority_profile_source_receipt_id
-        ),
-        "consensus_receipt_digest": policy.consensus_receipt_digest,
-        "issuer_principal_id": policy.issuer_principal_id,
-        "key_epoch": policy.key_epoch,
-        "signer_public_key": policy.signer_public_key,
-    }
-    if not _assert_ascii_deep(policy_payload):
-        return False
-    if not all(
-        _is_sha256_digest(policy_payload[field])
-        for field in (
-            "authority_profile_digest",
-            "authority_profile_source_receipt_id",
-            "consensus_receipt_digest",
-        )
-    ):
-        return False
-    return all(payload.get(field) == expected for field, expected in policy_payload.items())
-
-
-def canonical_control_audit_attestation_input(
-    *,
-    signing_input: str,
-    signature: str,
-    audit_mac: str,
-    signer_public_key: str,
-    key_epoch: str,
-    requester_principal_id: str,
-) -> str:
-    """Return the public, deterministic attestation input for a signer audit MAC."""
-
-    return canonical_signer_audit_attestation_input(
-        signing_input=signing_input,
-        signature=signature,
-        audit_mac=audit_mac,
-        signer_public_key=signer_public_key,
-        key_epoch=key_epoch,
-        requester_principal_id=requester_principal_id,
+    return isinstance(policy, ControlLoopAuthorityPolicy) and control_authority_policy_matches(
+        payload, policy
     )
-
-
-def _is_sha256_digest(value: object) -> bool:
-    text = str(value or "")
-    return len(text) == 71 and text.startswith("sha256:") and all(
-        char in "0123456789abcdef" for char in text[7:]
-    )
-
-
-def _sha256_json(value: Any) -> str:
-    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def _reject(code: str) -> SigningResponse:
@@ -798,22 +635,6 @@ def _reject(code: str) -> SigningResponse:
         rejection_code=str(code),
         no_secret_material_returned=True,
     )
-
-
-def _is_ascii(value: object) -> bool:
-    return isinstance(value, str) and all(ord(char) < 128 for char in value)
-
-
-def _assert_ascii_deep(value: object) -> bool:
-    if isinstance(value, str):
-        return _is_ascii(value)
-    if isinstance(value, dict):
-        return all(_is_ascii(key) and _assert_ascii_deep(item) for key, item in value.items())
-    if isinstance(value, (list, tuple)):
-        return all(_assert_ascii_deep(item) for item in value)
-    if value is None or isinstance(value, (bool, int, float)):
-        return True
-    return False
 
 
 __all__ = [
@@ -831,6 +652,8 @@ __all__ = [
     "REJECT_ED25519_SIGNER_DOMAIN_MISMATCH",
     "REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH",
     "REJECT_ED25519_SIGNER_KEY_INVALID",
+    "REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING",
+    "REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED",
     "REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH",
     "REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISMATCH",
     "REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISSING",

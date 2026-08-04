@@ -20,6 +20,9 @@
 - Added direct-store, publisher-free bootstrap, and OpenClaw queue-worker
   regressions. The real PatternMemory sink remains non-activation-ready pending
   an independently revalidated durable authority source.
+- Split signer-domain and adversarial outcome tests into focused modules, and
+  changed legacy full-chain fixtures to assert the production stop before
+  unauthenticated PatternMemory activation. No security assertion was removed.
 
 ## 2026-08-04: Memex supply authenticity regressions
 

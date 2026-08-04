@@ -340,26 +340,20 @@ def test_head_consumed_evidence_tamper_blocks_before_runner(tmp_path: Path) -> N
     assert "control_receipt_prestate_auth_or_integrity_invalid" in receipt.blockers
 
 
-def test_preseeded_complete_chain_cannot_be_relabelled_as_new_live_proof(tmp_path: Path) -> None:
+def test_complete_chain_cannot_be_preseeded_without_durable_outcome_authority(
+    tmp_path: Path,
+) -> None:
     repo, runtime = _roots(tmp_path)
     _write_pre_state(repo, runtime)
-    _runner(repo, runtime)(repo)
-    (runtime / "resident_queue_control_loop_receipts.jsonl").unlink()
-    control = _control_receipt(repo)
+    with pytest.raises(AssertionError):
+        _runner(repo, runtime)(repo)
 
-    def runner(_: Path) -> dict[str, object]:
-        (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
-            json.dumps(control) + "\n", encoding="utf-8"
-        )
-        return {"accepted": True, "status": "PASS", "receipt_id": control["receipt_id"]}
-
-    receipt = run_reddog_resident_live_canary(
-        **_kwargs(repo, runtime), execute=True, confirmation=LIVE_CANARY_CONFIRMATION,
-        queue_item_id=QUEUE_ID, control_loop_runner=runner,
-        now=lambda: __import__("datetime").datetime.fromisoformat(NOW),
+    chain = json.loads(
+        (runtime / "resident_queue_chain_results.json").read_text(encoding="utf-8")
     )
-    assert receipt.live_proof_complete is False
-    assert "control_receipt_prestate_auth_or_integrity_invalid" in receipt.blockers
+    assert "pattern_memory_admission" not in chain["stage_results"]
+    assert not (runtime / "pattern_memory.db").exists()
+    assert not (runtime / "resident_queue_control_loop_receipts.jsonl").exists()
 
 
 def test_canary_rejects_control_receipt_stream_replacement(tmp_path: Path) -> None:

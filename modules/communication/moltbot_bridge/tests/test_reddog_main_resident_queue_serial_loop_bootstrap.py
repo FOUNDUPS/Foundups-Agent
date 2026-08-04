@@ -4711,6 +4711,7 @@ def test_main_serial_loop_preflight_pattern_memory_profile_derives_sink(
 def test_main_serial_loop_preflight_pattern_memory_profile_warns_without_outcome_authority(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     import main
 
@@ -4747,6 +4748,10 @@ def test_main_serial_loop_preflight_pattern_memory_profile_warns_without_outcome
     ):
         assert main.run_reddog_resident_queue_serial_loop_preflight(ctx["repo"]) is True
 
+    captured = capsys.readouterr().out
+    assert "[REDDOG-QUEUE-LOOP] preflight=WARN" in captured
+    assert "FAIL_STAGE_REJECTED:pattern_memory_admission" in captured
+    assert "FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION" in captured
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
     assert "pattern_memory_admission" not in stored["stage_results"]
 

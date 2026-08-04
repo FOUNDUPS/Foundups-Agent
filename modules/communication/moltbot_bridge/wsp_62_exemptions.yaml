@@ -183,16 +183,16 @@ exemptions:
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_openclaw_signed_worker_claim_loop_preflight.py"
     reason: "Inherited startup integration matrix retained while the independent runtime root is threaded."
-    threshold_override: 1736
+    threshold_override: 1730
     function_threshold_override: 257
-    functions: ["test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing", "test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage", "test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation", "test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain"]
-    no_growth_ceiling: {file_lines: 1736, functions: {test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing: 99, test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage: 139, test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation: 173, test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain: 238}}
+    functions: ["test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing", "test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage", "test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation", "test_main_openclaw_signed_worker_claim_loop_stops_before_unauthorized_pattern_memory"]
+    no_growth_ceiling: {file_lines: 1730, functions: {test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing: 99, test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage: 139, test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation: 173, test_main_openclaw_signed_worker_claim_loop_stops_before_unauthorized_pattern_memory: 235}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py"
     reason: "Inherited resident-loop regression matrix retained for cross-stage parity."
-    threshold_override: 4908
-    no_growth_ceiling: {file_lines: 4908, functions: {}}
+    threshold_override: 4867
+    no_growth_ceiling: {file_lines: 4867, functions: {}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_signed_worker_dispatch_task_executor.py"
@@ -418,7 +418,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9447
+    threshold_override: 9451
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -430,7 +430,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1924
+    threshold_override: 1927
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
