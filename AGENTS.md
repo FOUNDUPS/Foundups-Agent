@@ -128,9 +128,18 @@ RIGHT: Simplest layer → Test → Feedback → Course correct → Next layer �
 - The Cube forms through validated layers, not through top-down design.
 
 ### Step 2: HoloIndex Search
-```bash
-python holo_index.py --search "[task]"
+```powershell
+$main = Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Parent
+'{"query":"[task]","limit":5}' | python "$main/scripts/reddog_holoindex_owner_query_once.py"
 ```
+- Derive the canonical main checkout from Git's common directory so the same
+  command works from main and linked worker worktrees. Accept its
+  generation-bound evidence only when `ok=true`, `freshness=CURRENT`, and
+  `index_gap_detected=false`.
+- Do not run raw `holo_index.py --search` from a shared or dirty checkout. Its
+  root-bound freshness proof correctly rejects a different authority root.
+- A query path is read-only. On failure, preserve the exact error and route the
+  existing governed WRE/CI maintenance path; never reindex inside the query.
 - Find existing implementations FIRST
 - Examples: "test orchestration" -> autonomous_refactoring.py
 - NEVER vibecode - always search first
