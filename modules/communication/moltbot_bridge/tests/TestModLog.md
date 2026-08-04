@@ -5,9 +5,9 @@
 - Added promotion-level proofs that fabricated `sha256:` IDs and
   attacker-rehashed Memex substitutions cannot mutate authoritative work state,
   while valid promotion binds the complete canonical Memex receipt digest.
-- Added proposal-builder, resident-handoff, and authority-seed regressions that
-  reject malformed public dataclass instances and forged serialized receipts
-  before signer, artifact, or profile effects.
+- Added proposal-builder, resident-handoff, and authority-seed regressions that reject
+  malformed serialized receipts before signer effects; added outcome-source schema/ID,
+  substitution, rehash, signature, scope/head/freshness/replay, and capability tests.
 
 ## 2026-08-03: Upstream Hermes complete-event-history confinement
 

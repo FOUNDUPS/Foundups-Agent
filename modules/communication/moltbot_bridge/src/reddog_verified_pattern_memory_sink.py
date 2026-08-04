@@ -21,7 +21,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional
 
 from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory, SkillOutcome
 
@@ -68,6 +68,12 @@ def _contains_secret(value: Any) -> bool:
 
 def _record_id(record: Mapping[str, Any]) -> str:
     return "reddog_verified_outcome_" + _digest(record).removeprefix("sha256:")[:16]
+
+
+def reddog_verified_pattern_memory_record_id(record: Mapping[str, Any]) -> str:
+    """Return the canonical record identifier used by the PatternMemory row."""
+
+    return _record_id(record)
 
 
 def reddog_verified_pattern_memory_record_digest(record: Mapping[str, Any]) -> str:
@@ -191,4 +197,5 @@ __all__ = [
     "RedDogVerifiedPatternMemorySink",
     "build_reddog_verified_pattern_memory_sink",
     "reddog_verified_pattern_memory_record_digest",
+    "reddog_verified_pattern_memory_record_id",
 ]
