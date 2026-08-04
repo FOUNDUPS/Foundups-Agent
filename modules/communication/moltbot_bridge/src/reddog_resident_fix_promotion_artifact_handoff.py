@@ -20,8 +20,9 @@ import json
 import os
 import tempfile
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_agentdb_architect_determination_reader import (
     load_agentdb_architect_determination,
@@ -29,13 +30,13 @@ from modules.communication.moltbot_bridge.src.reddog_agentdb_architect_determina
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ACTION_FIX,
     ARCHITECT_DETERMINATION_ACCEPT,
-    AgentDbArchitectDeterminationStore,
-    ArchitectDeterminationStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
     AgentDbResidentArchitectCycleStore,
-    ResidentArchitectCycleStore,
     STATUS_DETERMINED,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    rehydrate_operational_memex_supply_receipt,
 )
 
 
@@ -91,33 +92,27 @@ def run_reddog_resident_fix_promotion_artifact_handoff(
     intent_id: str,
     architect_determination_output_path: Path | str | None,
     memex_supply_receipt_output_path: Path | str | None,
-    cycle_store: ResidentArchitectCycleStore | None = None,
-    architect_store: ArchitectDeterminationStore | None = None,
     expected_claim_binding: Mapping[str, str] | None = None,
+    now_iso: str | None = None,
 ) -> ResidentFixPromotionArtifactHandoffResult:
     """Materialize promotion input artifacts from one determined resident cycle."""
 
-    root = Path(repo_root).resolve()
-    cleaned_intent = _clean(intent_id)
+    root, cleaned_intent = Path(repo_root).resolve(), _clean(intent_id)
     if not cleaned_intent:
         return _reject(cleaned_intent, None, None, (ResidentFixHandoffReason.MISSING_INTENT_ID,))
 
-    cycle_reader = cycle_store or AgentDbResidentArchitectCycleStore()
-    architect_reader = architect_store or AgentDbArchitectDeterminationStore()
+    cycle_reader = AgentDbResidentArchitectCycleStore()
     cycle = cycle_reader.load_cycle_by_intent(cleaned_intent)
     if not isinstance(cycle, Mapping) or not cycle:
         return _reject(cleaned_intent, None, None, (ResidentFixHandoffReason.CYCLE_NOT_FOUND,))
 
     cycle_id = _clean(cycle.get("cycle_id"))
     architect_id = _clean(cycle.get("architect_determination_id"))
-    reasons = _validate_cycle(cycle, require_store_integrity=cycle_store is None)
+    reasons = _validate_cycle(cycle)
     if cycle_id and architect_id and not reasons:
         determination_payload, determination_reasons = _load_determination(
             cycle,
-            cycle_id=cycle_id,
             architect_id=architect_id,
-            architect_reader=architect_reader,
-            direct_agentdb_read=architect_store is None,
             expected_claim_binding=expected_claim_binding,
         )
         reasons.extend(determination_reasons)
@@ -126,7 +121,7 @@ def run_reddog_resident_fix_promotion_artifact_handoff(
         reasons.append(ResidentFixHandoffReason.DETERMINATION_NOT_FOUND)
 
     memex_supply = _memex_supply_receipt(cycle)
-    reasons.extend(_validate_memex_supply(memex_supply, determination_payload))
+    reasons.extend(_validate_memex_supply(memex_supply, determination_payload, cycle=cycle, now_iso=_now_iso(now_iso)))
     determination_path, memex_path, path_reasons = _resolve_output_paths(
         architect_determination_output_path,
         memex_supply_receipt_output_path,
@@ -166,11 +161,9 @@ def run_reddog_resident_fix_promotion_artifact_handoff(
 
 def _validate_cycle(
     cycle: Mapping[str, Any],
-    *,
-    require_store_integrity: bool = False,
 ) -> list[str]:
     reasons: list[str] = []
-    if require_store_integrity and cycle.get("_store_integrity_valid") is not True:
+    if cycle.get("_store_integrity_valid") is not True:
         reasons.append("resident_cycle_integrity_invalid")
     if _clean(cycle.get("status")) != STATUS_DETERMINED:
         reasons.append(ResidentFixHandoffReason.CYCLE_NOT_DETERMINED)
@@ -184,18 +177,10 @@ def _validate_cycle(
 def _load_determination(
     cycle: Mapping[str, Any],
     *,
-    cycle_id: str,
     architect_id: str,
-    architect_reader: ArchitectDeterminationStore,
-    direct_agentdb_read: bool,
     expected_claim_binding: Mapping[str, str] | None,
 ) -> tuple[Mapping[str, Any] | None, list[str]]:
-    if direct_agentdb_read:
-        record = load_agentdb_architect_determination(architect_id)
-    else:
-        record = architect_reader.load_architect_determination_by_cycle(
-            cycle_id
-        )
+    record = load_agentdb_architect_determination(architect_id)
     payload = _mapping(record, "determination")
     if payload is None and isinstance(record, Mapping):
         payload = record
@@ -216,7 +201,7 @@ def _validate_expected_claim_binding(
     expected: Mapping[str, str] | None,
 ) -> list[str]:
     if expected is None:
-        return []
+        return ["fix_claim_binding_missing"]
     candidate = (
         determination.get("queue_candidate")
         if isinstance(determination, Mapping)
@@ -277,31 +262,64 @@ def _memex_supply_receipt(cycle: Mapping[str, Any]) -> Mapping[str, Any] | None:
 def _validate_memex_supply(
     receipt: Mapping[str, Any] | None,
     determination: Mapping[str, Any] | None,
+    *,
+    cycle: Mapping[str, Any],
+    now_iso: str,
 ) -> list[str]:
     if not isinstance(receipt, Mapping) or not receipt:
         return [ResidentFixHandoffReason.MISSING_MEMEX_SUPPLY_RECEIPT]
-    reasons: list[str] = []
-    required = (
-        "schema_version",
-        "receipt_id",
-        "snapshot_receipt_id",
-        "snapshot_content_digest",
-        "memex_view_id",
-        "holoindex_generation_id",
-        "source_revision",
-        "no_holoindex_reindex_performed",
+    if not isinstance(determination, Mapping) or not determination:
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    proposal = determination.get("proposal_admission")
+    intent = cycle.get("intent")
+    expected_view_id = _memex_supply_view_id(cycle)
+    if not isinstance(proposal, Mapping) or not isinstance(intent, Mapping):
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    expected_foundup = _clean(intent.get("foundup_id"))
+    expected_principal = _clean(
+        intent.get("principal_id")
+        or intent.get("principal_ref")
+        or intent.get("origin_principal")
     )
-    missing = [field for field in required if receipt.get(field) in (None, "", ())]
-    if missing or receipt.get("schema_version") != "reddog_operational_memex_snapshot_supply_receipt.v1":
-        reasons.append(ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID)
-    if receipt.get("no_holoindex_reindex_performed") is not True:
-        reasons.append(ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID)
-    if isinstance(determination, Mapping) and determination:
-        if _clean(receipt.get("snapshot_receipt_id")) != _clean(determination.get("snapshot_receipt_id")):
-            reasons.append(ResidentFixHandoffReason.MEMEX_SNAPSHOT_MISMATCH)
-        if _clean(receipt.get("snapshot_content_digest")) != _clean(determination.get("snapshot_content_digest")):
-            reasons.append(ResidentFixHandoffReason.MEMEX_SNAPSHOT_MISMATCH)
-    return reasons
+    if not expected_foundup or not expected_principal or not expected_view_id:
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    if _clean(receipt.get("memex_view_id")) != expected_view_id:
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    if (
+        _clean(receipt.get("snapshot_receipt_id"))
+        != _clean(determination.get("snapshot_receipt_id"))
+        or _clean(receipt.get("snapshot_content_digest"))
+        != _clean(determination.get("snapshot_content_digest"))
+    ):
+        return [ResidentFixHandoffReason.MEMEX_SNAPSHOT_MISMATCH]
+    try:
+        rehydrate_operational_memex_supply_receipt(
+            receipt,
+            expected_foundup_id=expected_foundup,
+            expected_principal_id=expected_principal,
+            expected_snapshot_receipt_id=_clean(determination.get("snapshot_receipt_id")),
+            expected_snapshot_content_digest=_clean(determination.get("snapshot_content_digest")),
+            expected_holoindex_generation_id=_clean(proposal.get("holoindex_generation_id")),
+            expected_source_revision=_clean(proposal.get("work_state_revision")),
+            now_iso=now_iso,
+        )
+    except (TypeError, ValueError):
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    return []
+
+
+def _memex_supply_view_id(cycle: Mapping[str, Any]) -> str:
+    for key in ("initial_bootstrap", "final_bootstrap"):
+        bootstrap = cycle.get(key)
+        if isinstance(bootstrap, Mapping):
+            value = _clean(bootstrap.get("memex_snapshot_supply_view_id"))
+            if value:
+                return value
+    return ""
+
+
+def _now_iso(value: str | None) -> str:
+    return value or datetime.now(timezone.utc).isoformat()
 
 
 def _runtime_output_path(

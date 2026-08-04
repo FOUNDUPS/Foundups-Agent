@@ -79,6 +79,10 @@ from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety im
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     SignerSocketServiceRuntimeWiringConfig,
 )
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    OperationalMemexSupplyReceipt,
+    rehydrate_operational_memex_supply_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PrincipalKeyResolver,
 )
@@ -221,7 +225,10 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         model_runtime_binding_verification_capability,
         reasons,
     )
-    memex_payload = _validate_memex_supply(memex_supply_receipt, determination, reasons)
+    memex_verified = _rehydrate_memex_supply(
+        memex_supply_receipt, determination, authority_profile,
+        current_holoindex_receipt, now_iso, reasons,
+    )
     profile_reasons = _validate_authority_profile(authority_profile)
     reasons.extend(profile_reasons)
     holoindex_evidence = _mapping(authority_profile.get("holoindex_evidence"))
@@ -231,11 +238,8 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     if reasons:
         return _reject(reasons)
 
-    assert freshness_id
-    assert selection_payload
-    assert memex_payload
-    assert proposal_admission is not None
-    assert selected_slice
+    assert freshness_id and selection_payload and memex_verified is not None
+    assert proposal_admission is not None and selected_slice
     now = _parse_iso(now_iso)
     try:
         expires_at = (
@@ -251,6 +255,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
             proposal_admission=proposal_admission.to_dict(),
             determination=determination,
             queue_candidate=candidate,
+            memex_supply_receipt=memex_verified,
             authority_profile=authority_profile,
             signer_runtime_config=signer_runtime_config,
             principal_key_resolver=principal_key_resolver,
@@ -286,7 +291,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
             model_selection=selection_payload,
             model_runtime_binding_receipt=model_runtime_binding_receipt,
             model_runtime_binding=runtime_binding_payload,
-            memex_supply=memex_payload,
+            memex_supply=memex_verified.to_dict(),
             proposal_admission=proposal_admission.to_dict(),
             proposal_authority=proposal_authority,
             selected_slice=selected_slice,
@@ -515,27 +520,40 @@ def _verified_runtime_evidence(
     return verification
 
 
-def _validate_memex_supply(
+def _rehydrate_memex_supply(
     memex_supply: Mapping[str, Any],
     determination: Mapping[str, Any],
+    authority_profile: Mapping[str, Any],
+    current_holoindex_receipt: Any,
+    now_iso: str,
     reasons: list[str],
-) -> Mapping[str, Any]:
+) -> OperationalMemexSupplyReceipt | None:
     if not isinstance(memex_supply, Mapping) or not memex_supply:
         reasons.append(ArchitectFixPromotionReason.MEMEX_SUPPLY_MISSING)
-        return {}
-    if memex_supply.get("schema_version") != "reddog_operational_memex_snapshot_supply_receipt.v1":
+        return None
+    try:
+        proposal = _mapping(determination.get("proposal_admission"))
+        return rehydrate_operational_memex_supply_receipt(
+            memex_supply,
+            expected_foundup_id=str(authority_profile.get("foundup_id") or ""),
+            expected_principal_id=str(authority_profile.get("principal_id") or ""),
+            expected_snapshot_receipt_id=str(
+                determination.get("snapshot_receipt_id") or ""
+            ),
+            expected_snapshot_content_digest=str(
+                determination.get("snapshot_content_digest") or ""
+            ),
+            expected_holoindex_generation_id=str(
+                getattr(current_holoindex_receipt, "generation_id", "") or ""
+            ),
+            expected_source_revision=str(
+                proposal.get("work_state_revision") or ""
+            ),
+            now_iso=now_iso,
+        )
+    except (TypeError, ValueError):
         reasons.append(ArchitectFixPromotionReason.MEMEX_SUPPLY_INVALID)
-    receipt_id = str(memex_supply.get("receipt_id") or "")
-    if not receipt_id.startswith("sha256:"):
-        reasons.append(ArchitectFixPromotionReason.MEMEX_SUPPLY_INVALID)
-    snapshot_receipt_id = str(memex_supply.get("snapshot_receipt_id") or "")
-    if snapshot_receipt_id != str(determination.get("snapshot_receipt_id") or ""):
-        reasons.append(ArchitectFixPromotionReason.MEMEX_SUPPLY_INVALID)
-    if memex_supply.get("no_holoindex_reindex_performed") is not True:
-        reasons.append(ArchitectFixPromotionReason.MEMEX_SUPPLY_INVALID)
-    return {"receipt_id": receipt_id, "snapshot_receipt_id": snapshot_receipt_id}
-
-
+        return None
 def _validate_authority_profile(profile: Mapping[str, Any]) -> list[str]:
     if not isinstance(profile, Mapping) or not profile:
         return [ArchitectFixPromotionReason.AUTHORITY_PROFILE_MISSING]

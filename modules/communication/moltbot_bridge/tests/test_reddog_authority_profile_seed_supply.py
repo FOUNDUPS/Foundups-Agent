@@ -38,7 +38,7 @@ MODULE_PATH = (
     / "src"
     / "reddog_authority_profile_seed_supply.py"
 )
-NOW = 1_800_000_000
+NOW = 1_784_160_000
 
 
 def _supply(tmp_path: Path, **overrides):
@@ -170,6 +170,32 @@ def test_seed_supply_rejects_memex_foundup_mismatch(tmp_path: Path) -> None:
 
     assert result.accepted is False
     assert AuthorityProfileSeedSupplyReason.FOUNDUP_SCOPE_INVALID in result.rejection_reasons
+
+
+def test_seed_supply_rejects_fabricated_memex_receipt_without_writes(tmp_path: Path) -> None:
+    output = tmp_path / "runtime" / "authority_profile_seed.json"
+    result = _supply(
+        tmp_path,
+        output_path=output,
+        memex_supply_receipt=_memex_supply(receipt_id="sha256:" + ("f" * 64)),
+    )
+
+    assert result.accepted is False
+    assert AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID in result.rejection_reasons
+    assert not output.exists()
+
+
+def test_seed_supply_rejects_rehashed_memex_lineage_without_writes(tmp_path: Path) -> None:
+    output = tmp_path / "runtime" / "authority_profile_seed.json"
+    result = _supply(
+        tmp_path,
+        output_path=output,
+        memex_supply_receipt=_memex_supply(source_revision="sha256:attacker-revision"),
+    )
+
+    assert result.accepted is False
+    assert AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID in result.rejection_reasons
+    assert not output.exists()
 
 
 def test_seed_supply_rejects_output_inside_repo(tmp_path: Path) -> None:

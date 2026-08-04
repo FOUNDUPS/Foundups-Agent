@@ -239,6 +239,7 @@ def test_bootstrap_exact_retry_reconstructs_committed_promotion(
     attestation, config, resolver = build_proposal_runtime_inputs(
         determination,
         profile,
+        json.loads(files["memex_supply"].read_text(encoding="utf-8")),
         now_epoch=now_epoch,
         nonce="proposal-promotion-retry-0001",
     )
@@ -400,6 +401,7 @@ def test_crash_after_publication_reclaims_and_reconstructs_exact_promotion(
     attestation, config, resolver = build_proposal_runtime_inputs(
         determination,
         profile,
+        json.loads(files["memex_supply"].read_text(encoding="utf-8")),
         now_epoch=int(datetime.fromisoformat(NOW).timestamp()),
         nonce="proposal-promotion-crash-reclaim-0001",
     )

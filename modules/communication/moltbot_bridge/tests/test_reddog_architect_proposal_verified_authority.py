@@ -28,11 +28,13 @@ from modules.communication.moltbot_bridge.tests.architect_proposal_promotion_tes
     StaticPrincipalKeyResolver,
     build_proposal_runtime_inputs,
     seal_authority_profile,
+    verified_memex_supply_for_test,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     NOW_EPOCH,
     _authority_profile,
     _determination,
+    _memex_supply,
     _promote,
     _work_state,
 )
@@ -63,18 +65,26 @@ def _inputs():
     attestation, runtime_config, resolver = build_proposal_runtime_inputs(
         determination,
         profile,
+        _memex_supply(),
         now_epoch=NOW_EPOCH,
     )
-    return determination, profile, attestation, runtime_config, resolver
+    memex = verified_memex_supply_for_test(
+        determination,
+        profile,
+        _memex_supply(),
+        now_epoch=NOW_EPOCH,
+    )
+    return determination, profile, memex, attestation, runtime_config, resolver
 
 
 def _verify(**overrides: Any):
-    determination, profile, attestation, runtime_config, resolver = _inputs()
+    determination, profile, memex, attestation, runtime_config, resolver = _inputs()
     values = {
         "attestation": attestation,
         "proposal_admission": determination["proposal_admission"],
         "determination": determination,
         "queue_candidate": determination["queue_candidate"],
+        "memex_supply_receipt": memex,
         "authority_profile": profile,
         "signer_runtime_config": runtime_config,
         "principal_key_resolver": resolver,
@@ -94,7 +104,7 @@ def test_untrusted_principal_cannot_self_mint_authority() -> None:
 
 
 def test_tampered_attestation_and_runtime_authorization_fail() -> None:
-    determination, profile, attestation, runtime_config, resolver = _inputs()
+    determination, profile, _, attestation, runtime_config, resolver = _inputs()
     changed_attestation = dict(attestation)
     signature = str(changed_attestation["signature"])
     midpoint = len(signature) // 2
@@ -123,7 +133,7 @@ def test_tampered_attestation_and_runtime_authorization_fail() -> None:
 
 
 def test_tautological_signer_context_is_rejected() -> None:
-    _, _, _, runtime_config, _ = _inputs()
+    _, _, _, _, runtime_config, _ = _inputs()
     authorization = runtime_config.proposal_policy_authorization.to_dict()
     authorization["signer_instance_id"] = "attacker-selected-instance"
     changed = dataclasses.replace(
@@ -135,7 +145,7 @@ def test_tautological_signer_context_is_rejected() -> None:
 
 
 def test_current_determination_profile_and_revocation_are_rechecked() -> None:
-    determination, _, attestation, runtime_config, resolver = _inputs()
+    determination, _, _, attestation, runtime_config, resolver = _inputs()
     changed_determination = json.loads(json.dumps(determination))
     changed_determination["next_slice_name"] = "REDDOG_CHANGED_PHASE1"
     changed_determination["queue_candidate"]["slice_id"] = (
@@ -189,7 +199,7 @@ def test_caller_profile_cannot_substitute_signed_authority_fields(
     changed: Any,
     receipt_mode: str,
 ) -> None:
-    determination, profile, attestation, runtime_config, resolver = _inputs()
+    determination, profile, _, attestation, runtime_config, resolver = _inputs()
     changed_profile = {**profile, field: changed}
     if receipt_mode == "recomputed":
         changed_profile = seal_authority_profile(changed_profile)
@@ -206,7 +216,7 @@ def test_caller_profile_cannot_substitute_signed_authority_fields(
 
 
 def test_caller_cannot_substitute_authority_profile_source_receipt() -> None:
-    determination, profile, attestation, runtime_config, resolver = _inputs()
+    determination, profile, _, attestation, runtime_config, resolver = _inputs()
     result, store = _promote(
         architect_determination=determination,
         authority_profile={
@@ -238,7 +248,7 @@ def test_missing_runtime_trust_cannot_enter_promotion() -> None:
 
 
 def test_failed_profile_write_allows_verified_retry() -> None:
-    determination, profile, attestation, runtime_config, resolver = _inputs()
+    determination, profile, _, attestation, runtime_config, resolver = _inputs()
     common = {
         "architect_determination": determination,
         "authority_profile": profile,
@@ -258,7 +268,7 @@ def test_failed_profile_write_allows_verified_retry() -> None:
 
 
 def test_failed_store_write_allows_verified_retry() -> None:
-    determination, profile, attestation, runtime_config, resolver = _inputs()
+    determination, profile, _, attestation, runtime_config, resolver = _inputs()
     store = InMemoryAuthoritativeWorkStateStore(
         _work_state(), fail_commit=True
     )
@@ -281,7 +291,7 @@ def test_failed_store_write_allows_verified_retry() -> None:
 
 
 def test_success_persists_replay_guard_in_authoritative_store() -> None:
-    determination, profile, attestation, runtime_config, resolver = _inputs()
+    determination, profile, _, attestation, runtime_config, resolver = _inputs()
     first, store = _promote(
         architect_determination=determination,
         authority_profile=profile,
@@ -306,7 +316,7 @@ def test_success_persists_replay_guard_in_authoritative_store() -> None:
 def test_replay_guard_survives_authoritative_store_restart(
     tmp_path: Path,
 ) -> None:
-    determination, profile, attestation, runtime_config, resolver = _inputs()
+    determination, profile, _, attestation, runtime_config, resolver = _inputs()
     store_path = tmp_path / "runtime" / "work-state.json"
     store_path.parent.mkdir()
     store_path.write_text(

@@ -32,10 +32,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PrincipalKeyResolver,
 )
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    OperationalMemexSupplyReceipt,
+)
 
 
 VERIFIED_ARCHITECT_PROPOSAL_AUTHORITY_SCHEMA_VERSION = (
-    "verified_reddog_architect_proposal_promotion_authority.v2"
+    "verified_reddog_architect_proposal_promotion_authority.v3"
 )
 
 
@@ -58,6 +61,8 @@ class ArchitectProposalAuthorityBinding:
     replay_store_binding_digest: str
     security_context_digest: str
     signer_runtime_context_digest: str
+    memex_supply_receipt_id: str
+    memex_supply_digest: str
 
 
 def verify_architect_proposal_promotion_authority(
@@ -66,6 +71,7 @@ def verify_architect_proposal_promotion_authority(
     proposal_admission: Mapping[str, Any],
     determination: Mapping[str, Any],
     queue_candidate: Mapping[str, Any],
+    memex_supply_receipt: OperationalMemexSupplyReceipt,
     authority_profile: Mapping[str, Any],
     signer_runtime_config: SignerSocketServiceRuntimeWiringConfig,
     principal_key_resolver: PrincipalKeyResolver,
@@ -79,6 +85,7 @@ def verify_architect_proposal_promotion_authority(
         proposal_admission=proposal_admission,
         determination=determination,
         queue_candidate=queue_candidate,
+        memex_supply_receipt=memex_supply_receipt,
         authority_profile=authority_profile,
         signer_runtime_config=signer_runtime_config,
         principal_key_resolver=principal_key_resolver,
@@ -119,6 +126,8 @@ def _authority_binding(
         signer_runtime_context_digest=_runtime_context_digest(
             authorization, signer_runtime_config
         ),
+        memex_supply_receipt_id=verified_attestation.payload.memex_supply_receipt_id,
+        memex_supply_digest=verified_attestation.payload.memex_supply_digest,
     )
 
 
@@ -128,6 +137,7 @@ def _verification_inputs(
     proposal_admission: Mapping[str, Any],
     determination: Mapping[str, Any],
     queue_candidate: Mapping[str, Any],
+    memex_supply_receipt: OperationalMemexSupplyReceipt,
     authority_profile: Mapping[str, Any],
     signer_runtime_config: SignerSocketServiceRuntimeWiringConfig,
     principal_key_resolver: PrincipalKeyResolver,
@@ -146,6 +156,7 @@ def _verification_inputs(
         proposal_admission=proposal_admission,
         determination=determination,
         queue_candidate=queue_candidate,
+        memex_supply_receipt=memex_supply_receipt,
         authority_profile=profile,
     )
     policy, authorization = verify_architect_proposal_runtime_authorization(
@@ -248,6 +259,7 @@ def _rebuild_payload(
     proposal_admission: Mapping[str, Any],
     determination: Mapping[str, Any],
     queue_candidate: Mapping[str, Any],
+    memex_supply_receipt: OperationalMemexSupplyReceipt,
     authority_profile: Mapping[str, Any],
 ) -> ArchitectProposalAuthenticityPayload:
     profile = _mapping(authority_profile)
@@ -255,6 +267,7 @@ def _rebuild_payload(
         proposal_admission=_mapping(proposal_admission),
         determination=_mapping(determination),
         queue_candidate=_mapping(queue_candidate),
+        memex_supply_receipt=memex_supply_receipt,
         requester_principal_id=_required_text(profile, "principal_id"),
         reddog_id=_required_text(profile, "reddog_id"),
         signer_public_key=_required_text(profile, "reddog_public_key"),

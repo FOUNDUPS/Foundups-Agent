@@ -33,7 +33,7 @@ MODULE_PATH = (
     / "src"
     / "reddog_authority_profile_seed_supply_bootstrap.py"
 )
-NOW = 1_800_000_000
+NOW = 1_784_160_000
 
 
 def _write_json(root: Path, name: str, payload: object) -> Path:

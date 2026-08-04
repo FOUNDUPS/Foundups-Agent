@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 import time
+from dataclasses import replace
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -35,6 +37,10 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    OperationalMemexSupplyReceipt,
+    operational_memex_supply_receipt_id,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -139,6 +145,33 @@ def _determination(candidate: dict | None = None) -> dict:
     }
 
 
+def _memex_receipt() -> OperationalMemexSupplyReceipt:
+    issued = datetime.fromtimestamp(NOW - 10, timezone.utc)
+    values = {
+        "schema_version": "reddog_operational_memex_snapshot_supply_receipt.v1",
+        "foundup_id": "foundups-agent",
+        "principal_id": "github:012",
+        "snapshot_receipt_id": "snapshot-1",
+        "snapshot_content_digest": "sha256:" + "2" * 64,
+        "memex_view_id": "memex-view-1",
+        "holoindex_generation_id": "generation-1",
+        "source_revision": "revision-1",
+        "policy_issued_at": issued.isoformat(),
+        "policy_expires_at": (issued + timedelta(seconds=600)).isoformat(),
+        "assignment_count": 1,
+        "assignment_ids": ("assignment-1",),
+        "lane_ids": ("lane-1",),
+        "task_ids": ("task-1",),
+        "assignment_receipt_ids": ("assignment-receipt-1",),
+        "max_records": 32,
+        "no_memex_write_performed": True,
+        "no_holoindex_reindex_performed": True,
+        "no_repo_mutation_performed": True,
+    }
+    values["receipt_id"] = operational_memex_supply_receipt_id(values)
+    return OperationalMemexSupplyReceipt(**values)
+
+
 def _payload(public_key: str, *, nonce: str = "proposal-nonce-1"):
     candidate = _candidate()
     determination = _determination(candidate)
@@ -146,6 +179,7 @@ def _payload(public_key: str, *, nonce: str = "proposal-nonce-1"):
         proposal_admission=_proposal(),
         determination=determination,
         queue_candidate=candidate,
+        memex_supply_receipt=_memex_receipt(),
         requester_principal_id="github:012",
         reddog_id="reddog-0102",
         signer_public_key=public_key,
@@ -402,6 +436,8 @@ def test_signer_rolls_back_nonce_reservation_when_audit_mac_fails() -> None:
         ("repo_head_sha", "b" * 40),
         ("wsp15_allocation_digest", "sha256:" + "b" * 64),
         ("holoindex_generation_id", "generation-2"),
+        ("memex_supply_receipt_id", "sha256:" + "c" * 64),
+        ("memex_supply_digest", "sha256:" + "d" * 64),
         ("key_epoch", "epoch-2"),
         ("requester_principal_id", "github:attacker"),
     ],
@@ -431,6 +467,51 @@ def test_verifier_rejects_non_typed_integrity_context() -> None:
         )
 
 
+def test_payload_builder_rejects_unverified_memex_mapping() -> None:
+    private_key = _private_key()
+
+    with pytest.raises(ValueError, match="memex_supply_not_verified"):
+        build_architect_proposal_authenticity_payload(
+            proposal_admission=_proposal(),
+            determination=_determination(),
+            queue_candidate=_candidate(),
+            memex_supply_receipt={"receipt_id": "sha256:" + "a" * 64},
+            requester_principal_id="github:012",
+            reddog_id="reddog-0102",
+            signer_public_key=_public_text(private_key),
+            key_epoch="epoch-1",
+            consensus_receipt_digest="sha256:" + "8" * 64,
+            authority_profile_source_receipt_id="sha256:" + "9" * 64,
+            nonce="unverified-memex",
+            issued_at=NOW - 5,
+            expires_at=NOW + 120,
+        )
+
+
+def test_payload_builder_rehydrates_typed_memex_before_signing() -> None:
+    private_key = _private_key()
+
+    with pytest.raises(ValueError, match="receipt_id_mismatch"):
+        build_architect_proposal_authenticity_payload(
+            proposal_admission=_proposal(),
+            determination=_determination(),
+            queue_candidate=_candidate(),
+            memex_supply_receipt=replace(
+                _memex_receipt(),
+                receipt_id="sha256:" + "a" * 64,
+            ),
+            requester_principal_id="github:012",
+            reddog_id="reddog-0102",
+            signer_public_key=_public_text(private_key),
+            key_epoch="epoch-1",
+            consensus_receipt_digest="sha256:" + "8" * 64,
+            authority_profile_source_receipt_id="sha256:" + "9" * 64,
+            nonce="malformed-typed-memex",
+            issued_at=NOW - 5,
+            expires_at=NOW + 120,
+        )
+
+
 def test_expiry_and_revocation_fail_closed() -> None:
     attestation, _, _ = _attestation()
     with pytest.raises(ValueError):
@@ -446,6 +527,7 @@ def test_verifier_rejects_ttl_above_policy_maximum() -> None:
         proposal_admission=_proposal(),
         determination=_determination(),
         queue_candidate=_candidate(),
+        memex_supply_receipt=_memex_receipt(),
         requester_principal_id="github:012",
         reddog_id="reddog-0102",
         signer_public_key=payload.signer_public_key,

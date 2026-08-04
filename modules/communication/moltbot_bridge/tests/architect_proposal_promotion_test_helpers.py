@@ -7,7 +7,7 @@ import json
 import tempfile
 import uuid
 from dataclasses import replace
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping
 from unittest.mock import patch
@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 )
 from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
     run_reddog_main_architect_fix_promotion_bootstrap as _run_bootstrap,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    rehydrate_operational_memex_supply_receipt,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_proposal_signer_policy_runtime import (
     _policy_authorization,
@@ -101,6 +104,7 @@ def seal_authority_profile(
 def build_proposal_runtime_inputs(
     determination: Mapping[str, Any],
     authority_profile: Mapping[str, Any],
+    memex_supply_receipt: Mapping[str, Any],
     *,
     now_epoch: int,
     nonce: str | None = None,
@@ -109,10 +113,18 @@ def build_proposal_runtime_inputs(
         "proposal-promotion-nonce-"
         f"{next(_NONCE_COUNTER)}-{uuid.uuid4().hex}"
     )
+    proposal = dict(determination["proposal_admission"])
+    verified_memex = verified_memex_supply_for_test(
+        determination,
+        authority_profile,
+        memex_supply_receipt,
+        now_epoch=now_epoch,
+    )
     payload = build_architect_proposal_authenticity_payload(
-        proposal_admission=dict(determination["proposal_admission"]),
+        proposal_admission=proposal,
         determination=determination,
         queue_candidate=dict(determination["queue_candidate"]),
+        memex_supply_receipt=verified_memex,
         requester_principal_id=str(authority_profile["principal_id"]),
         reddog_id=str(authority_profile["reddog_id"]),
         signer_public_key=str(authority_profile["reddog_public_key"]),
@@ -135,6 +147,30 @@ def build_proposal_runtime_inputs(
             now_epoch=now_epoch,
         ),
         StaticPrincipalKeyResolver(),
+    )
+
+
+def verified_memex_supply_for_test(
+    determination: Mapping[str, Any],
+    authority_profile: Mapping[str, Any],
+    memex_supply_receipt: Mapping[str, Any],
+    *,
+    now_epoch: int,
+):
+    proposal = dict(determination["proposal_admission"])
+    return rehydrate_operational_memex_supply_receipt(
+        memex_supply_receipt,
+        expected_foundup_id=str(authority_profile["foundup_id"]),
+        expected_principal_id=str(authority_profile["principal_id"]),
+        expected_snapshot_receipt_id=str(determination["snapshot_receipt_id"]),
+        expected_snapshot_content_digest=str(
+            determination["snapshot_content_digest"]
+        ),
+        expected_holoindex_generation_id=str(
+            proposal["holoindex_generation_id"]
+        ),
+        expected_source_revision=str(proposal["work_state_revision"]),
+        now_iso=datetime.fromtimestamp(now_epoch, timezone.utc).isoformat(),
     )
 
 
@@ -211,12 +247,18 @@ def run_bootstrap_with_test_authority(runner: Any, **kwargs: Any) -> Any:
                     encoding="utf-8"
                 )
             )
+            memex_supply = json.loads(
+                Path(kwargs["memex_supply_receipt_path"]).read_text(
+                    encoding="utf-8"
+                )
+            )
             now_epoch = int(
                 datetime.fromisoformat(str(kwargs["now_iso"])).timestamp()
             )
             attestation, config, resolver = build_proposal_runtime_inputs(
                 determination,
                 authority_profile,
+                memex_supply,
                 now_epoch=now_epoch,
             )
             kwargs["proposal_authenticity_attestation"] = attestation
@@ -245,6 +287,7 @@ def invoke_promotion_with_test_authority(
     values = dict(args)
     default_determination = values["architect_determination"]
     default_authority_profile = values["authority_profile"]
+    default_memex_supply = values["memex_supply_receipt"]
     values.update(overrides)
     if "proposal_authenticity_attestation" not in values:
         determination = values["architect_determination"]
@@ -266,9 +309,20 @@ def invoke_promotion_with_test_authority(
         )
         if not all(profile.get(field) for field in required):
             profile = default_authority_profile
+        memex_supply = values["memex_supply_receipt"]
+        try:
+            verified_memex_supply_for_test(
+                determination,
+                profile,
+                memex_supply,
+                now_epoch=now_epoch,
+            )
+        except (TypeError, ValueError):
+            memex_supply = default_memex_supply
         attestation, runtime_config, resolver = build_proposal_runtime_inputs(
             determination,
             profile,
+            memex_supply,
             now_epoch=now_epoch,
         )
         values.update(
@@ -296,4 +350,5 @@ __all__ = [
     "run_main_bootstrap_with_test_authority",
     "run_bootstrap_with_test_authority",
     "seal_authority_profile",
+    "verified_memex_supply_for_test",
 ]
