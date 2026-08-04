@@ -56,6 +56,11 @@ cannot be copied or serialized. Consumption revalidates while the canonical
 current-generation fence is held and returns only a non-authoritative receipt;
 it does not release signer composition authority or grant an effect.
 RedDog and `main.py` remain clients and cannot spawn the signer.
+The older `reddog_signer_socket_service_runtime_cli` is retained only to return
+a structured retirement rejection. It cannot load authority, construct a
+secret resolver, or bind a socket. The system-service entrypoint also loads the
+exact signer UID/GID from the root-owned v2 owner config and requires the live
+process to match both values before any resolver construction.
 
 Verified-outcome admission also requires the separately supervised root service:
 
@@ -80,7 +85,8 @@ store IDs, and durability receipts for all three state domains. Store rotation
 requires a supervised service restart; a running service never combines a new
 config with stores opened from an older config. Before any production WSP71
 key resolution, the existing isolated-signer entrypoint enforces a distinct
-non-root signer UID, YAMA ptrace protection, absence of `CAP_SYS_PTRACE`,
+non-root signer UID/GID exactly matching the root-owned owner config, YAMA
+ptrace protection, absence of `CAP_SYS_PTRACE`,
 `RLIMIT_CORE=0`, `PR_SET_DUMPABLE=0`, and a cleared inherited environment.
 Test-only dry-run keys remain non-authoritative and do not claim this boundary.
 

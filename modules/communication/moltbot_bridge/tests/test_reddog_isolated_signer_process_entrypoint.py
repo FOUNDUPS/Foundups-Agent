@@ -177,6 +177,8 @@ def _config(public_key: str, **overrides: object) -> IsolatedSignerProcessEntryP
         "socket_path": "O:/tmp/reddog-signer.sock",
         "key_provider_profile": _profile(public_key),
         "peer_policy": _policy(),
+        "expected_signer_uid": 1201,
+        "expected_signer_gid": 1201,
         "provider_mode": PROVIDER_MODE_TEST_ONLY_DRYRUN,
         "allow_test_only_key_material": True,
         "permission_snapshot_fresh": True,
@@ -200,9 +202,15 @@ def _request(public_key: str) -> SigningRequest:
     )
 
 
-def _accepted_isolation(_policy: PeerCredentialPolicy) -> SignerProcessIsolationReceipt:
+def _accepted_isolation(
+    _policy: PeerCredentialPolicy,
+    *,
+    expected_signer_uid: int,
+    expected_signer_gid: int,
+) -> SignerProcessIsolationReceipt:
     return SignerProcessIsolationReceipt(
-        True, (), 1201, 1201, True, True, True, True, True, True, True
+        True, (), expected_signer_uid, expected_signer_gid,
+        True, True, True, True, True, True, True,
     )
 
 
@@ -249,7 +257,7 @@ def test_production_isolation_rejects_before_key_resolution() -> None:
             allow_test_only_key_material=False,
         ),
         resolver,
-        enforce_isolation=lambda _policy: SignerProcessIsolationReceipt(
+        enforce_isolation=lambda _policy, **_expected: SignerProcessIsolationReceipt(
             False, ("failed",), None, None,
             False, False, False, False, False, False, False,
         ),

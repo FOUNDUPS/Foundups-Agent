@@ -61,7 +61,12 @@ def _policy() -> PeerCredentialPolicy:
 
 
 def test_linux_distinct_principal_hardening_passes() -> None:
-    result = enforce_signer_process_isolation(_policy(), backend=FakeIsolationBackend())
+    result = enforce_signer_process_isolation(
+        _policy(),
+        expected_signer_uid=1201,
+        expected_signer_gid=1201,
+        backend=FakeIsolationBackend(),
+    )
 
     assert result.accepted is True
     assert result.signer_uid == 1201
@@ -89,7 +94,12 @@ def test_linux_distinct_principal_hardening_passes() -> None:
     ),
 )
 def test_missing_isolation_invariant_fails_closed(backend: FakeIsolationBackend) -> None:
-    result = enforce_signer_process_isolation(_policy(), backend=backend)
+    result = enforce_signer_process_isolation(
+        _policy(),
+        expected_signer_uid=1201,
+        expected_signer_gid=1201,
+        backend=backend,
+    )
 
     assert result.accepted is False
     assert result.rejection_reasons == (FAIL_ISOLATION_BOUNDARY,)
@@ -97,7 +107,27 @@ def test_missing_isolation_invariant_fails_closed(backend: FakeIsolationBackend)
 
 def test_malformed_proc_evidence_fails_closed() -> None:
     result = enforce_signer_process_isolation(
-        _policy(), backend=FakeIsolationBackend(ptrace_scope="unknown")
+        _policy(),
+        expected_signer_uid=1201,
+        expected_signer_gid=1201,
+        backend=FakeIsolationBackend(ptrace_scope="unknown"),
+    )
+
+    assert result.accepted is False
+
+
+@pytest.mark.parametrize(
+    ("uid", "gid"),
+    ((1202, 1201), (1201, 1202), (0, 1201), (1201, 0)),
+)
+def test_process_must_match_exact_root_owned_signer_identity(
+    uid: int, gid: int
+) -> None:
+    result = enforce_signer_process_isolation(
+        _policy(),
+        expected_signer_uid=uid,
+        expected_signer_gid=gid,
+        backend=FakeIsolationBackend(),
     )
 
     assert result.accepted is False

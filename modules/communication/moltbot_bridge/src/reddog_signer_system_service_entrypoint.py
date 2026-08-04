@@ -31,14 +31,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
     load_system_service_manifest_selection,
+    load_system_service_signer_identity,
     load_system_service_verified_outcome_signing_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
     SignerProcessIsolationReceipt,
     enforce_signer_process_isolation,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
-    PeerCredentialPolicy,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     FailClosedPrincipalKeyResolver,
@@ -117,9 +115,9 @@ def _run_entrypoint_args(
     principal_key_resolver: PrincipalKeyResolver,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None,
     verified_outcome_authority_loader: Callable[..., object] | None = None,
-    process_isolation_gate: Callable[
-        [PeerCredentialPolicy], SignerProcessIsolationReceipt
-    ] = enforce_signer_process_isolation,
+    process_isolation_gate: Callable[..., SignerProcessIsolationReceipt] = (
+        enforce_signer_process_isolation
+    ),
 ) -> int:
     root = Path(args.repo_root).resolve()
     owner_path = Path(args.owner_authority_config).resolve()
@@ -138,6 +136,10 @@ def _run_entrypoint_args(
             if verified_outcome_authority_loader is not None
             else None
         )
+        signer_uid, signer_gid = load_system_service_signer_identity(
+            owner_config_path=owner_path,
+            repo_root=root,
+        )
     except Exception:
         emit(_receipt_json(None, (FAIL_SYSTEM_SERVICE_SELECTION,)))
         return 2
@@ -155,6 +157,8 @@ def _run_entrypoint_args(
         verified_outcome_signing_authority=verified_outcome_authority,
         process_isolation_required=True,
         process_isolation_gate=process_isolation_gate,
+        expected_signer_uid=signer_uid,
+        expected_signer_gid=signer_gid,
         manifest_selection=manifest_selection,
         manifest_selection_boundary=selection_boundary,
     )

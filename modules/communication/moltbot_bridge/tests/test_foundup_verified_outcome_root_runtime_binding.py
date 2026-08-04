@@ -36,6 +36,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshak
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
     SCHEMA_VERSION_V2,
     load_root_authority_service_dependencies,
+    load_system_service_signer_identity,
     load_system_service_verified_outcome_signing_authority,
 )
 from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import (
@@ -170,6 +171,24 @@ def test_v2_root_owned_loader_mints_only_service_backed_authority(
     assert authority is not None
     assert root_verified_outcome_authority_bindings(authority)["owner_config_id"] == owner["config_id"]
     assert _reserve(authority, grant) is None
+
+
+def test_v2_root_owned_loader_supplies_exact_signer_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    descriptor, _grant, _store = _descriptor(tmp_path)
+    path, owner = _v2_owner_config(tmp_path, descriptor)
+    _allow_test_root_reads(monkeypatch)
+
+    identity = load_system_service_signer_identity(
+        owner_config_path=path,
+        repo_root=REPO_ROOT,
+    )
+
+    assert identity == (
+        owner["verified_outcome_authority"]["signer_uid"],
+        owner["verified_outcome_authority"]["signer_gid"],
+    )
 
 
 def test_v2_root_owned_loader_rejects_missing_root_service_response(

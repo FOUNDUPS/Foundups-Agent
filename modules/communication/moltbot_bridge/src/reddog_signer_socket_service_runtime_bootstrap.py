@@ -92,8 +92,6 @@ BootstrapLoadResult = tuple[
     str | None,
     "SignerSocketServiceRuntimeBootstrapResult | None",
 ]
-
-
 def run_reddog_signer_socket_service_runtime_bootstrap(
     *,
     repo_root: Path | str,
@@ -113,6 +111,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
     process_isolation_required: bool = False,
     process_isolation_gate: ProcessIsolationGate = enforce_signer_process_isolation,
+    expected_signer_uid: int | None = None, expected_signer_gid: int | None = None,
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
@@ -131,11 +130,11 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         return rejected
     assert config is not None and path is not None and digest is not None
     isolation = _process_isolation_receipt(
-        config, required=process_isolation_required, gate=process_isolation_gate
+        config, required=process_isolation_required, gate=process_isolation_gate,
+        expected_signer_uid=expected_signer_uid,
+        expected_signer_gid=expected_signer_gid,
     )
-    if process_isolation_required and (
-        isolation is None or isolation.accepted is not True
-    ):
+    if process_isolation_required and (isolation is None or not isolation.accepted):
         return _reject(
             FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION,
             config_path=str(path),

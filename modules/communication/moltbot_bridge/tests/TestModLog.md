@@ -1973,3 +1973,6 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
 - Proved service initialization is explicit, startup failures do not echo raw
   exception content, and the peer policy binds exactly one signer UID/GID and
   principal.
+- Proved the legacy signer CLI always rejects without authority, resolver, or
+  socket effects, and the stable entrypoint passes the exact root-owned signer
+  UID/GID into the pre-key Linux isolation gate.

@@ -81,6 +81,8 @@ class LinuxSignerProcessIsolationBackend:
 def enforce_signer_process_isolation(
     policy: PeerCredentialPolicy,
     *,
+    expected_signer_uid: int,
+    expected_signer_gid: int,
     backend: SignerProcessIsolationBackend | None = None,
 ) -> SignerProcessIsolationReceipt:
     """Apply and verify the signer boundary before any key resolver is called."""
@@ -88,7 +90,14 @@ def enforce_signer_process_isolation(
     source = backend or LinuxSignerProcessIsolationBackend()
     try:
         uid, gid = source.current_uid(), source.current_gid()
-        identity_ok = _identity_valid(source.platform(), policy, uid, gid)
+        identity_ok = _identity_valid(
+            source.platform(),
+            policy,
+            uid,
+            gid,
+            expected_signer_uid=expected_signer_uid,
+            expected_signer_gid=expected_signer_gid,
+        )
         ptrace_ok = _ptrace_scope(source) >= 1
         capability_ok, tracer_ok = _process_status_safe(source)
         if not identity_ok or not ptrace_ok or not capability_ok or not tracer_ok:
@@ -116,7 +125,13 @@ def enforce_signer_process_isolation(
 
 
 def _identity_valid(
-    platform: str, policy: PeerCredentialPolicy, uid: int, gid: int
+    platform: str,
+    policy: PeerCredentialPolicy,
+    uid: int,
+    gid: int,
+    *,
+    expected_signer_uid: int,
+    expected_signer_gid: int,
 ) -> bool:
     return (
         str(platform).startswith("linux")
@@ -125,6 +140,10 @@ def _identity_valid(
         and uid > 0
         and type(gid) is int
         and gid > 0
+        and type(expected_signer_uid) is int
+        and type(expected_signer_gid) is int
+        and uid == expected_signer_uid
+        and gid == expected_signer_gid
         and uid not in policy.uid_to_principal
     )
 

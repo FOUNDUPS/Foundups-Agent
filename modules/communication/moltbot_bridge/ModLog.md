@@ -26,9 +26,12 @@
   receipts opened at startup. A rotated store configuration now requires a
   supervised service restart and cannot silently reuse old open stores.
 - Added the executable E0 pre-key process gate to the existing isolated signer:
-  production WSP71 resolution now requires a distinct non-root UID, YAMA ptrace
-  enforcement, no `CAP_SYS_PTRACE`, disabled core dumps/dumpability, and a
-  cleared inherited environment.
+  production WSP71 resolution now requires the exact root-owned non-root signer
+  UID/GID, YAMA ptrace enforcement, no `CAP_SYS_PTRACE`, disabled core
+  dumps/dumpability, and a cleared inherited environment.
+- Retired the older signer runtime CLI as an unconditional structured reject.
+  The root-owned stable system-service entrypoint is now the only production
+  path and performs isolation before constructing any secret resolver.
 - Production remains fail closed until the root service is deployed with a
   root-owned config and independently co-signed verifier grants. This slice adds
   no learning candidate, Brain/roadmap write, HoloIndex mutation, repository,

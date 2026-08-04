@@ -63,8 +63,20 @@ def _isolation_receipt(accepted: bool) -> SignerProcessIsolationReceipt:
     )
 
 
-def _accepted_isolation(_policy: PeerCredentialPolicy) -> SignerProcessIsolationReceipt:
-    return _isolation_receipt(True)
+def _accepted_isolation(
+    _policy: PeerCredentialPolicy,
+    *,
+    expected_signer_uid: int,
+    expected_signer_gid: int,
+) -> SignerProcessIsolationReceipt:
+    receipt = _isolation_receipt(True)
+    return SignerProcessIsolationReceipt(
+        **{
+            **receipt.__dict__,
+            "signer_uid": expected_signer_uid,
+            "signer_gid": expected_signer_gid,
+        }
+    )
 
 
 def test_stable_entrypoint_selects_current_generation_and_serves_once(
@@ -72,6 +84,11 @@ def test_stable_entrypoint_selects_current_generation_and_serves_once(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        entrypoint_module,
+        "load_system_service_signer_identity",
+        lambda **_kwargs: (1201, 1201),
+    )
     resolver = FakeResolver(
         {
             "op://prod-vault/reddog-signing/private": _private_key_secret(
@@ -83,6 +100,20 @@ def test_stable_entrypoint_selects_current_generation_and_serves_once(
     factory = CapturingResolverFactory(resolver)
     service = CapturingBoundedService()
     emitted: list[str] = []
+    isolation_calls: list[tuple[int, int]] = []
+
+    def isolation_gate(
+        policy: PeerCredentialPolicy,
+        *,
+        expected_signer_uid: int,
+        expected_signer_gid: int,
+    ) -> SignerProcessIsolationReceipt:
+        isolation_calls.append((expected_signer_uid, expected_signer_gid))
+        return _accepted_isolation(
+            policy,
+            expected_signer_uid=expected_signer_uid,
+            expected_signer_gid=expected_signer_gid,
+        )
 
     code = _run_entrypoint_args(
         argparse.Namespace(
@@ -94,7 +125,7 @@ def test_stable_entrypoint_selects_current_generation_and_serves_once(
         emit=emitted.append,
         principal_key_resolver=FailClosedPrincipalKeyResolver(),
         proposal_replay_high_water_store=None,
-        process_isolation_gate=_accepted_isolation,
+        process_isolation_gate=isolation_gate,
     )
 
     payload = json.loads(emitted[0])
@@ -102,6 +133,7 @@ def test_stable_entrypoint_selects_current_generation_and_serves_once(
     assert payload["status"] == SYSTEM_SERVICE_ENTRYPOINT_ACCEPT
     assert len(factory.calls) == 1
     assert len(service.calls) == 1
+    assert isolation_calls == [(1201, 1201)]
     assert payload["no_serialized_argv_executed"] is True
     assert payload["no_signer_process_spawned"] is True
     assert payload["no_shell_invoked"] is True
@@ -111,6 +143,11 @@ def test_system_service_isolation_rejects_before_resolver_or_socket(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        entrypoint_module,
+        "load_system_service_signer_identity",
+        lambda **_kwargs: (1201, 1201),
+    )
     factory = CapturingResolverFactory(FakeResolver({}))
     service = CapturingBoundedService()
     emitted: list[str] = []
@@ -125,7 +162,7 @@ def test_system_service_isolation_rejects_before_resolver_or_socket(
         emit=emitted.append,
         principal_key_resolver=FailClosedPrincipalKeyResolver(),
         proposal_replay_high_water_store=None,
-        process_isolation_gate=lambda _policy: _isolation_receipt(False),
+        process_isolation_gate=lambda _policy, **_expected: _isolation_receipt(False),
     )
 
     assert code == 2

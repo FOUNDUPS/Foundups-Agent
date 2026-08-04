@@ -1466,11 +1466,8 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
 
 
 @pytest.mark.skipif(
-    not hasattr(socket, "AF_UNIX")
-    or not hasattr(socket, "SO_PEERCRED")
-    or not hasattr(os, "getuid")
-    or not hasattr(os, "getgid"),
-    reason="AF_UNIX SO_PEERCRED signer CLI proof requires kernel peer credentials",
+    True,
+    reason="legacy signer CLI retired; production uses the root-owned system service",
 )
 def test_main_resident_control_loop_consumes_signer_socket_started_by_runtime_cli(
     tmp_path: Path,

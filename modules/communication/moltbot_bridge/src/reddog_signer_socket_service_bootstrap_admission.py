@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
     SignerProcessIsolationReceipt,
@@ -17,7 +17,15 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
 
 SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED"
 SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT"
-ProcessIsolationGate = Callable[[PeerCredentialPolicy], SignerProcessIsolationReceipt]
+
+class ProcessIsolationGate(Protocol):
+    def __call__(
+        self,
+        policy: PeerCredentialPolicy,
+        *,
+        expected_signer_uid: int,
+        expected_signer_gid: int,
+    ) -> SignerProcessIsolationReceipt: ...
 
 
 @dataclass(frozen=True)
@@ -49,14 +57,24 @@ def require_process_isolation(
     *,
     required: bool,
     gate: ProcessIsolationGate,
+    expected_signer_uid: int | None,
+    expected_signer_gid: int | None,
 ) -> SignerProcessIsolationReceipt | None:
     if not required:
         return None
     policy = rehydrate_peer_credential_policy(config.peer_policy)
-    if policy is None:
+    if (
+        policy is None
+        or type(expected_signer_uid) is not int
+        or type(expected_signer_gid) is not int
+    ):
         return None
     try:
-        result = gate(policy)
+        result = gate(
+            policy,
+            expected_signer_uid=expected_signer_uid,
+            expected_signer_gid=expected_signer_gid,
+        )
     except Exception:
         return None
     return result if isinstance(result, SignerProcessIsolationReceipt) else None

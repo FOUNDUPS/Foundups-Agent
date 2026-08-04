@@ -67,7 +67,13 @@ class ServeSignerSocketOnce(Protocol):
 
 
 class EnforceSignerProcessIsolation(Protocol):
-    def __call__(self, policy: PeerCredentialPolicy) -> SignerProcessIsolationReceipt:
+    def __call__(
+        self,
+        policy: PeerCredentialPolicy,
+        *,
+        expected_signer_uid: int,
+        expected_signer_gid: int,
+    ) -> SignerProcessIsolationReceipt:
         """Apply and verify the E0 process boundary."""
 
 
@@ -79,6 +85,8 @@ class IsolatedSignerProcessEntryPointConfig:
     socket_path: Path | str | None
     key_provider_profile: SignerKeyProviderProfile
     peer_policy: PeerCredentialPolicy
+    expected_signer_uid: int | None = None
+    expected_signer_gid: int | None = None
     provider_mode: str = PROVIDER_MODE_TEST_ONLY_DRYRUN
     allow_test_only_key_material: bool = False
     permission_snapshot_fresh: bool = False
@@ -196,7 +204,11 @@ def _production_isolation_receipt(
     if config.provider_mode == PROVIDER_MODE_TEST_ONLY_DRYRUN:
         return None
     try:
-        result = enforce_isolation(config.peer_policy)
+        result = enforce_isolation(
+            config.peer_policy,
+            expected_signer_uid=config.expected_signer_uid,
+            expected_signer_gid=config.expected_signer_gid,
+        )
     except Exception:
         return SignerProcessIsolationReceipt(
             False, (FAIL_SIGNER_PROCESS_ISOLATION_REJECTED,), None, None,

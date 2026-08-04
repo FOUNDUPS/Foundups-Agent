@@ -199,6 +199,18 @@ def load_system_service_verified_outcome_signing_authority(
     )
 
 
+def load_system_service_signer_identity(
+    *, owner_config_path: Path | str, repo_root: Path
+) -> tuple[int, int]:
+    """Load the exact root-authorized signer process identity."""
+
+    owner = _load_owner_config(owner_config_path, repo=Path(repo_root).resolve())
+    raw = owner.get("verified_outcome_authority")
+    if not isinstance(raw, Mapping):
+        raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
+    return int(raw["signer_uid"]), int(raw["signer_gid"])
+
+
 def load_root_authority_service_dependencies(
     owner_config_path: Path | str,
     *,

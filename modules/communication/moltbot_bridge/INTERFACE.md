@@ -80,8 +80,11 @@ reservation never reopens. Every current snapshot must match the exact roots,
 paths, store IDs, and durability receipts opened at service startup; state-store
 rotation therefore rejects until a supervised restart. The production isolated
 signer applies its Linux E0 boundary before key resolution: distinct non-root
-UID, YAMA ptrace controls, no `CAP_SYS_PTRACE`, disabled core/dumpable state,
-and a cleared inherited environment. Test-only dry-run mode is non-authoritative.
+UID/GID matching the root-owned v2 owner config, YAMA ptrace controls, no
+`CAP_SYS_PTRACE`, disabled core/dumpable state, and a cleared inherited
+environment. The legacy runtime CLI always rejects before authority, resolver,
+or socket access; only the stable system-service entrypoint is production.
+Test-only dry-run mode is non-authoritative.
 Missing
 authority leaves unrelated signer operations available while every
 verified-outcome request fails closed. Owner, signer-generation, key, expiry,
