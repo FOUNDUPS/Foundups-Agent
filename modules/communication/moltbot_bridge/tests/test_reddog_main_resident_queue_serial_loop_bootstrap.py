@@ -16,10 +16,6 @@ from unittest.mock import patch
 
 import pytest
 
-from modules.communication.moltbot_bridge.src.foundup_memex_pattern_memory_activation import (
-    _mint_pattern_memory_activation,
-    consume_pattern_memory_activation,
-)
 from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
     reddog_verified_pattern_memory_record_id,
 )
@@ -1385,6 +1381,10 @@ class _FakePatternMemoryAdmissionSink:
         self.records: list[dict[str, object]] = []
         self.staged: dict[str, dict[str, object]] = {}
 
+    @property
+    def activation_ready(self) -> bool:
+        return True
+
     def store_verified_outcome(self, record: Mapping[str, object]) -> str:
         raise ValueError("verified_outcome_activation_capability_required")
 
@@ -1394,12 +1394,9 @@ class _FakePatternMemoryAdmissionSink:
         return record_id
 
     def activate_verified_outcome(
-        self, record_id: str, capability: object, record: Mapping[str, object]
+        self, record_id: str, record: Mapping[str, object]
     ) -> str:
         assert self.staged[record_id] == record
-        assert consume_pattern_memory_activation(
-            capability, record_id=record_id, record=record
-        )
         self.records.append(self.staged.pop(record_id))
         return record_id
 
@@ -1414,11 +1411,7 @@ class _FakeVerifiedOutcomePublisher:
         return record_id
 
     def activate(self, record_id: str) -> object:
-        return _mint_pattern_memory_activation(
-            record_id=record_id,
-            record=self.records[record_id],
-            envelope_digest="sha256:" + "a" * 64,
-        )
+        return record_id
 
 
 class _FakeWorkerDispatchTaskWriter:

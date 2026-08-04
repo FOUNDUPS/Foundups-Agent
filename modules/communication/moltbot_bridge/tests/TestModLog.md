@@ -15,12 +15,11 @@
   activation remains blocked because no independently authenticated durable
   verifier-authority source exists.
 - Security re-review removed hash-shaped legacy authorization, proved staged
-  PatternMemory rows are invisible until authority activation, exercises
-  deterministic retry after an activation interruption, and rejects a pre-seeded
-  conflicting row instead of trusting its record identifier.
-- Added direct-store, fabricated-capability, publisher-free bootstrap, and
-  OpenClaw queue-worker regressions. PatternMemory visibility now requires the
-  exact one-use process-local activation proof produced by signed authority.
+  PatternMemory rows are invisible, exercises the injected orchestration retry,
+  and rejects a pre-seeded conflicting row instead of trusting its record identifier.
+- Added direct-store, publisher-free bootstrap, and OpenClaw queue-worker
+  regressions. The real PatternMemory sink remains non-activation-ready pending
+  an independently revalidated durable authority source.
 
 ## 2026-08-04: Memex supply authenticity regressions
 

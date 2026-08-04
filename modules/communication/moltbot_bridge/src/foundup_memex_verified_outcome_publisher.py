@@ -12,9 +12,6 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_rec
     rehydrate_verified_slice_receipt,
     verified_outcome_evidence_bundle_digest,
 )
-from modules.communication.moltbot_bridge.src.foundup_memex_pattern_memory_activation import (
-    _mint_pattern_memory_activation,
-)
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_runtime_store import (
     AuthorityRuntimeVerifiedOutcomeStore,
     build_outcome_evidence_envelope,
@@ -55,7 +52,7 @@ class VerifiedOutcomeEvidencePublisher(Protocol):
         held_out_receipt: Mapping[str, Any],
     ) -> str: ...
 
-    def activate(self, record_id: str) -> Any: ...
+    def activate(self, record_id: str) -> str: ...
 
 
 @dataclass(frozen=True)
@@ -115,7 +112,7 @@ class SignedVerifiedOutcomeEvidencePublisher:
         )
         return self.store.publish(envelope)
 
-    def activate(self, record_id: str) -> Any:
+    def activate(self, record_id: str) -> str:
         activated_id = self.store.activate(record_id)
         envelope = self.store.load_envelope(record_id)
         if (
@@ -126,11 +123,7 @@ class SignedVerifiedOutcomeEvidencePublisher:
             != record_id
         ):
             raise ValueError("verified_outcome_activation_reload_invalid")
-        return _mint_pattern_memory_activation(
-            record_id=record_id,
-            record=envelope["record"],
-            envelope_digest=str(envelope.get("envelope_digest") or ""),
-        )
+        return activated_id
 
 
 def _rehydrate_evidence(

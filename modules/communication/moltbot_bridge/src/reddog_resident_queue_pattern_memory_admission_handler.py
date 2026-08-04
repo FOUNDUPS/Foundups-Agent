@@ -149,6 +149,8 @@ def _publish_then_admit(
     held_out_gate: Mapping[str, Any],
     admission_request: Mapping[str, Any],
 ) -> Mapping[str, Any]:
+    if getattr(sink, "activation_ready", False) is not True:
+        return _reject(FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION)
     capture = _ValidatedRecordCapture()
     validation = invoke_reddog_wre_queue_authorized_pattern_memory_admission(
         explicit_queue_authorized_pattern_memory_admission_requested=True,
@@ -222,8 +224,10 @@ def _activate_published(
     if staged_id != record_id:
         return _publication_reject(payload)
     try:
-        activation_capability = publisher.activate(record_id)
-        activated_id = str(activate(record_id, activation_capability, record) or "")
+        authority_id = str(publisher.activate(record_id) or "")
+        if authority_id != record_id:
+            return _publication_reject(payload)
+        activated_id = str(activate(record_id, record) or "")
     except Exception:
         return _publication_reject(payload)
     if activated_id != record_id:

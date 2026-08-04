@@ -36,7 +36,7 @@ exemptions:
       revocation, bounded renewal, and proposal signer-policy runtime
       boundaries; splitting the historical registry remains separate
       documentation-maintenance work.
-    threshold_override: 1425
+    threshold_override: 1422
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -197,10 +197,10 @@ exemptions:
   - <<: *reddog_security_repair
     file: "tests/test_reddog_signed_worker_dispatch_task_executor.py"
     reason: "Inherited worker-dispatch integration matrix retained while the runtime root is threaded."
-    threshold_override: 3016
-    function_threshold_override: 199
-    functions: ["test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet", "test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues", "test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness"]
-    no_growth_ceiling: {file_lines: 3016, functions: {test_openclaw_queue_stage_does_not_materialize_bounded_artifact: 102, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 189, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 149, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 184, test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues: 199, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 178}}
+    threshold_override: 2957
+    function_threshold_override: 198
+    functions: ["test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet", "test_openclaw_claim_loop_stops_before_pattern_memory_without_authority", "test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness"]
+    no_growth_ceiling: {file_lines: 2957, functions: {test_openclaw_queue_stage_does_not_materialize_bounded_artifact: 102, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 189, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 149, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 184, test_openclaw_claim_loop_stops_before_pattern_memory_without_authority: 198, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 178}}
 
   - file: "scripts/run_task.py"
     reason: >-
@@ -430,7 +430,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1925
+    threshold_override: 1924
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

@@ -14,9 +14,6 @@ import pytest
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_authenticity import (
     consume_verified_foundup_memex_outcome,
 )
-from modules.communication.moltbot_bridge.src.foundup_memex_pattern_memory_activation import (
-    VerifiedOutcomePatternMemoryActivation,
-)
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_publisher import (
     SignedVerifiedOutcomeEvidencePublisher,
 )
@@ -237,9 +234,7 @@ def _publish(
     )
     assert store.load_envelope(record_id) is None
     if activate:
-        assert isinstance(
-            publisher.activate(record_id), VerifiedOutcomePatternMemoryActivation
-        )
+        assert publisher.activate(record_id) == record_id
     return store, record, verifier, held_out, _reference(record)
 
 

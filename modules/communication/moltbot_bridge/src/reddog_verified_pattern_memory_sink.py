@@ -2,9 +2,9 @@
 
 Slice: REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_SINK_BRIDGE_PHASE1
 
-This adapter stages records outside normal recall, then requires a one-use,
-process-local activation capability derived from exact ACTIVE signed authority.
-The legacy direct-store method fails closed.
+This adapter can stage records outside normal recall. The production sink is
+deliberately not activation-ready until an independent durable authority source
+can be revalidated at this boundary. The legacy direct-store method fails closed.
 
 The sink requires an explicit SQLite database path outside the repository
 checkout. It never creates a default PatternMemory client, executes commands,
@@ -21,10 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 
-from modules.communication.moltbot_bridge.src.foundup_memex_pattern_memory_activation import (
-    consume_pattern_memory_activation,
-)
-from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory, SkillOutcome
+from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
 
 
 REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY = "REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY"
@@ -126,6 +123,12 @@ class RedDogVerifiedPatternMemorySink:
     def status(self) -> str:
         return REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY
 
+    @property
+    def activation_ready(self) -> bool:
+        """Remain false until an independent durable authority source is wired."""
+
+        return False
+
     def store_verified_outcome(self, record: Mapping[str, Any]) -> str:
         """Reject direct activation; signed authority capability is mandatory."""
 
@@ -172,116 +175,6 @@ class RedDogVerifiedPatternMemorySink:
             return execution_id
         finally:
             memory.close()
-
-    def activate_verified_outcome(
-        self,
-        record_id: str,
-        activation_capability: Any,
-        record: Mapping[str, Any],
-    ) -> str:
-        """Atomically make one exact staged outcome visible to PatternMemory."""
-
-        candidate = str(record_id or "").strip()
-        if not candidate:
-            raise ValueError("verified_outcome_record_id_missing")
-        payload = _validated_record(record)
-        if _record_id(payload) != candidate or not consume_pattern_memory_activation(
-            activation_capability,
-            record_id=candidate,
-            record=payload,
-        ):
-            raise ValueError("verified_outcome_activation_capability_invalid")
-        memory = PatternMemory(db_path=self.db_path)
-        try:
-            _ensure_staging_table(memory)
-            return self._activate(memory, candidate)
-        finally:
-            memory.close()
-
-    def _activate(self, memory: PatternMemory, record_id: str) -> str:
-        memory.conn.execute("BEGIN IMMEDIATE")
-        try:
-            staged = memory.conn.execute(
-                "SELECT payload, agent, staged_at FROM reddog_verified_outcome_staging "
-                "WHERE record_id = ? LIMIT 1",
-                (record_id,),
-            ).fetchone()
-            active = memory.conn.execute(
-                "SELECT output_result, agent, success FROM skill_outcomes "
-                "WHERE execution_id = ? LIMIT 1",
-                (record_id,),
-            ).fetchone()
-            if staged is None:
-                active_payload = _stored_payload(active)
-                if (
-                    active is None
-                    or active["agent"] != self.agent
-                    or active["success"] != 1
-                    or active_payload is None
-                    or _record_id(active_payload) != record_id
-                ):
-                    raise ValueError("verified_outcome_stage_missing")
-                memory.conn.commit()
-                return record_id
-            payload = _validated_record(json.loads(staged["payload"]))
-            if _record_id(payload) != record_id or staged["agent"] != self.agent:
-                raise ValueError("verified_outcome_staged_record_invalid")
-            if active is not None:
-                if (
-                    active["agent"] != self.agent
-                    or active["success"] != 1
-                    or _stored_payload(active) != payload
-                ):
-                    raise ValueError("verified_outcome_existing_record_conflict")
-            else:
-                self._insert_active(memory, record_id, payload, staged["staged_at"])
-            memory.conn.execute(
-                "DELETE FROM reddog_verified_outcome_staging WHERE record_id = ?",
-                (record_id,),
-            )
-            memory.conn.commit()
-            return record_id
-        except Exception:
-            memory.conn.rollback()
-            raise
-
-    def _insert_active(
-        self, memory: PatternMemory, record_id: str, payload: Mapping[str, Any], timestamp: str
-    ) -> None:
-        outcome = SkillOutcome(
-            execution_id=record_id,
-            skill_name=str(payload.get("slice_name") or "reddog_verified_outcome"),
-            agent=self.agent,
-            timestamp=timestamp,
-            input_context=_canonical_json({
-                key: payload.get(key)
-                for key in (
-                    "work_order_id",
-                    "gate_id",
-                    "ratchet_id",
-                    "verifier_receipt_id",
-                )
-            }),
-            output_result=_canonical_json(payload),
-            success=True,
-            pattern_fidelity=1.0,
-            outcome_quality=1.0,
-            execution_time_ms=0,
-            step_count=0,
-            notes="RedDog verified recursive improvement outcome admitted after held-out gate.",
-        )
-        memory.conn.execute(
-            "INSERT INTO skill_outcomes (execution_id, skill_name, agent, timestamp, "
-            "input_context, output_result, success, pattern_fidelity, outcome_quality, "
-            "execution_time_ms, step_count, failed_at_step, notes) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                outcome.execution_id, outcome.skill_name, outcome.agent, outcome.timestamp,
-                outcome.input_context, outcome.output_result, 1, outcome.pattern_fidelity,
-                outcome.outcome_quality, outcome.execution_time_ms, outcome.step_count,
-                outcome.failed_at_step, outcome.notes,
-            ),
-        )
 
     def load_verified_outcome(self, record_id: str) -> Optional[Dict[str, Any]]:
         """Read back one canonical RedDog outcome through PatternMemory schema."""

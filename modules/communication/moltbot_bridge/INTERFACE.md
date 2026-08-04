@@ -62,13 +62,10 @@ not independently signed on current `main`. The isolated signer therefore
 requires a separately supplied durable outcome-authorization boundary before it
 will attest a bundle; no production implementation exists yet. Staged authority
 envelopes remain non-consumable until exact activation. PatternMemory admission
-uses an invisible staging table in the existing database; it becomes recallable
-only after the matching signed authority activates, and interrupted activation
-retries roll forward from the exact staged record. Conflicting existing rows and
-legacy hash-shaped compatibility markers reject. Final visibility also consumes
-a one-use opaque process-local activation proof minted from the reloaded ACTIVE
-authority envelope; direct sink activation is forbidden. Once an independently authorized
-envelope is activated, consumption reloads
+uses an invisible staging table in the existing database. Conflicting existing
+rows and legacy hash-shaped compatibility markers reject. The real sink is deliberately
+not activation-ready until it can independently revalidate a durable authority
+source; direct sink activation is forbidden. Authority-envelope consumption reloads
 the durable envelope, resolves the key from the current committed authority profile,
 checks revocation, freshness, FoundUp/snapshot/head/content/work/slice/job/worker/
 verifier/runtime lineage, and issues an opaque one-use capability. The FoundUp Brain

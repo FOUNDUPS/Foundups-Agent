@@ -5,13 +5,13 @@
   evidence and replay namespace in the existing authority runtime store. Signed
   publication is staged and non-consumable until its exact activation transition.
 - Removed the unauthenticated legacy queue downgrade. Publisher-backed outcomes
-  now stage in an invisible table inside the existing PatternMemory database,
-  activate signed authority, then atomically become recallable. Retries roll
-  forward deterministically, and conflicting pre-seeded rows fail exact canonical
-  readback instead of satisfying admission by identifier alone.
-- PatternMemory activation requires a one-use opaque process-local proof minted
-  only after the publisher reloads the exact ACTIVE authority envelope. Direct
-  store, caller-known IDs, and fabricated activation objects cannot expose rows.
+  can stage in an invisible table inside the existing PatternMemory database.
+  Conflicting pre-seeded rows fail exact canonical readback instead of satisfying
+  admission by identifier alone.
+- The real PatternMemory sink remains explicitly non-activation-ready until it
+  can independently revalidate a durable authority source. Direct store and
+  caller-known identifiers cannot expose staged rows; injected test sinks do not
+  claim production authority.
 - Added committed-profile key resolution, revocation/freshness checks, exact
   FoundUp/snapshot/head/content/work/slice/job/worker/verifier/runtime lineage, and
   opaque one-use capabilities consumed by resident FoundUp Brain assembly.
