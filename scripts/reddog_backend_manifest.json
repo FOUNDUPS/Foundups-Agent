@@ -1229,7 +1229,7 @@
     "holo_index/freshness_receipt.py": "ebbb46074164914eef7dedd358734e78519ff2ca18f2e708aac168ce0860b8c7",
     "holo_index/index_gap_workitem.py": "c6f153bb86faf9e78b9d7225ffbe9d0d0f90fec38195ec561d05ec4aeee62313",
     "holo_index/intent_classifier.py": "502ae686c1005994f5e311d9b7ea099f06f35ecf4f0281b03714f4cefc41f61d",
-    "holo_index/isolated_collection_snapshot_probe.py": "0dd95ac85b102081b4fe81a316a5e1ab069c55683b56dcf10ecd738bf0eeb612",
+    "holo_index/isolated_collection_snapshot_probe.py": "efabef15fd241288b87b4b93d2c11264fdcec82bb28c9dc39d6f59ff78174d1f",
     "holo_index/maintenance_lock.py": "a7bdc49aef04ecd4ef4173041fd1fe8bb223877d85893c55048339ecd9c2b6ce",
     "holo_index/maintenance_session.py": "ddc1d39e16eea7daa479cd38701efec3464a6cc77837695a0c759f36c86ac6e9",
     "holo_index/mcp_client/holo_mcp_client.py": "07fa996c30fbd0a9f8714bc49e03f141b44dc8a15cb69d38bc6f63b7b0666ed6",

@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-04 - HoloIndex convergence backend manifest
+
+- Updated the exact generated backend-manifest pin after adding bounded,
+  fail-closed vector-segment convergence to the trusted HoloIndex probe.
+- Revalidated generator parity and the extension compatibility contracts.
+
 ## 2026-08-03 - Fusion critic retry route failover (0.4.54)
 
 - Added the blocked-first/usable-second panel regression proving the one bounded

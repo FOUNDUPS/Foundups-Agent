@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-04 - HoloIndex vector-segment convergence manifest pin (0.4.54)
+
+- Pinned the regenerated backend manifest containing the bounded HoloIndex
+  vector-segment cold-start convergence proof.
+- Preserved the thin-client boundary: no extension behavior, authority, or
+  runtime invocation path changed (WSP 00, 15, 22, 50, 97).
+
 ## 2026-08-03 - Fusion critic retry route failover (0.4.54)
 
 - Changed the existing one-shot adversarial critic retry to prefer a configured

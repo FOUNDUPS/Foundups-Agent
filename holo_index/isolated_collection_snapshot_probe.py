@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import subprocess  # nosec B404  # Fixed interpreter/module, never a worker command.
 import sys
 import tempfile
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
@@ -29,6 +31,7 @@ SCHEMA_VERSION = "holoindex_isolated_snapshot_probe.v1"
 MAX_RECEIPT_BYTES = 2_000_000
 MAX_PROCESS_OUTPUT_BYTES = 16_384
 DEFAULT_TIMEOUT_SECONDS = 180.0
+VECTOR_SEGMENT_CONVERGENCE_SUCCESSES = 2
 SUPPORTED_CHROMADB_VERSIONS = frozenset({"1.5.5"})
 
 
@@ -341,19 +344,78 @@ def verify_collection_snapshots_isolated(
 ) -> list[str]:
     """Run the persisted proof in a fresh Python process or fail closed."""
 
-    stdout = _run_isolated_probe(receipt, ssd_path, repo_root, timeout_seconds)
-    response = _validated_probe_response(stdout, receipt.generation_id)
+    deadline = _probe_deadline(timeout_seconds)
+    response = _run_validated_probe(
+        receipt, ssd_path, repo_root, _remaining_timeout(deadline)
+    )
     mismatches = response["mismatched_collections"]
-    if response.get("ok") is True and not mismatches and not response.get("error"):
+    if _probe_succeeded(response):
         return []
-    if response.get("error") in {
-        "COLLECTION_SNAPSHOT_MISMATCH",
-        "VECTOR_SEGMENT_UNAVAILABLE",
-    } and mismatches:
+    if response.get("error") == "COLLECTION_SNAPSHOT_MISMATCH" and mismatches:
         return sorted(mismatches)
+    if response.get("error") == "VECTOR_SEGMENT_UNAVAILABLE" and mismatches:
+        _require_vector_segment_convergence(
+            receipt,
+            ssd_path=ssd_path,
+            repo_root=repo_root,
+            deadline=deadline,
+        )
+        return []
     raise IsolatedSnapshotProbeError(
         str(response.get("error") or "ISOLATED_PROBE_FAILED")
     )
+
+
+def _run_validated_probe(
+    receipt: HoloIndexFreshnessReceipt,
+    ssd_path: Path | str,
+    repo_root: Path | str,
+    timeout_seconds: float,
+) -> Mapping[str, Any]:
+    stdout = _run_isolated_probe(receipt, ssd_path, repo_root, timeout_seconds)
+    return _validated_probe_response(stdout, receipt.generation_id)
+
+
+def _probe_succeeded(response: Mapping[str, Any]) -> bool:
+    return bool(
+        response.get("ok") is True
+        and not response.get("mismatched_collections")
+        and not response.get("error")
+    )
+
+
+def _probe_deadline(timeout_seconds: float) -> float:
+    try:
+        timeout = float(timeout_seconds)
+    except (TypeError, ValueError):
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_TIMEOUT_INVALID") from None
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_TIMEOUT_INVALID")
+    return time.monotonic() + timeout
+
+
+def _remaining_timeout(deadline: float) -> float:
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_TIMEOUT")
+    return remaining
+
+
+def _require_vector_segment_convergence(
+    receipt: HoloIndexFreshnessReceipt,
+    *,
+    ssd_path: Path | str,
+    repo_root: Path | str,
+    deadline: float,
+) -> None:
+    for _attempt in range(VECTOR_SEGMENT_CONVERGENCE_SUCCESSES):
+        response = _run_validated_probe(
+            receipt, ssd_path, repo_root, _remaining_timeout(deadline)
+        )
+        if not _probe_succeeded(response):
+            raise IsolatedSnapshotProbeError(
+                str(response.get("error") or "ISOLATED_PROBE_FAILED")
+            )
 
 
 def _read_receipt() -> HoloIndexFreshnessReceipt:

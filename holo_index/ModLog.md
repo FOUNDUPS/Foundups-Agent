@@ -1,5 +1,14 @@
 # HoloIndex Package ModLog
 
+## [2026-08-04] Vector-segment cold-start convergence proof
+
+- Preserved the isolated probe's distinction between logical collection
+  snapshot mismatches and first-open vector-segment unavailability.
+- A vector cold-start failure may recover only after two consecutive fresh
+  child-process proofs over the same generation-bound receipt; collection
+  snapshot mismatches remain single-shot failures with no retry.
+- All probe attempts share the original timeout budget.
+
 ## [2026-08-04] Test write isolation
 
 - Removed a legacy HoloIndex test's import-time write into the repository root.
