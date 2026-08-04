@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import threading
-from dataclasses import dataclass
-from typing import Any, Callable, Mapping
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -18,9 +16,6 @@ from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     public_key_fingerprint,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
-    _build_process_local_registry,
 )
 
 
@@ -37,6 +32,7 @@ _DESCRIPTOR_FIELDS = frozenset(
         "schema_version",
         "descriptor_id",
         "authority_generation_id",
+        "authority_generation_sequence",
         "issuer_principal_id",
         "reddog_id",
         "foundup_id",
@@ -108,31 +104,6 @@ _DIGEST_FIELDS = frozenset(
 )
 
 
-@dataclass(frozen=True)
-class _AuthorityState:
-    descriptor: Mapping[str, Any]
-    owner_config_id: str
-    grants: Mapping[str, Mapping[str, Any]]
-    replay_store: ProposalReplayHighWaterStore
-    current_descriptor_supplier: Callable[[], Mapping[str, Any]]
-    clock: Callable[[], int]
-    lock: threading.Lock
-    reservation_seal: object
-
-
-@dataclass(frozen=True)
-class _Reservation:
-    authorization_id: str
-    receipt_id: str
-    seal: object
-
-
-_issue_authority, _lookup_authority = _build_process_local_registry(
-    "verified_outcome_root_authority_unverified"
-)
-del _build_process_local_registry
-
-
 class RootVerifiedOutcomeSigningAuthority:
     """Opaque signer capability minted only from verified root-owned input."""
 
@@ -150,54 +121,63 @@ class RootVerifiedOutcomeSigningAuthority:
         work_order_id: str,
         evidence_digest: str,
         issued_at: int,
+        signer_instance_signature: str,
     ) -> object | None:
-        state = _lookup_authority(self)
-        grant = _fresh_grant(state, str(evidence_digest))
-        if grant is None or not _request_matches(
-            grant, receipt_id, work_order_id, issued_at
-        ):
-            return None
-        binding = _digest(
-            {
-                "authorization_id": grant["authorization_id"],
-                "receipt_id": receipt_id,
-                "replay_store_id": state.replay_store.store_id,
-            }
-        )
-        revision = _raw_digest(
-            _canonical_json(
-                {
-                    "authorization_id": grant["authorization_id"],
-                    "evidence_digest": evidence_digest,
-                    "issued_at": issued_at,
-                    "receipt_id": receipt_id,
-                }
-            ).encode("ascii")
-        )[7:]
-        with state.lock:
-            try:
-                if state.replay_store.load(binding) is not None:
-                    return None
-                state.replay_store.advance(
-                    binding,
-                    expected=None,
-                    next_value=ProposalReplayHighWater(1, revision),
-                )
-            except Exception:
-                return None
-        return _Reservation(
-            authorization_id=str(grant["authorization_id"]),
-            receipt_id=str(receipt_id),
-            seal=state.reservation_seal,
+        from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
+            reserve_service_authority,
         )
 
-    def commit(self, reservation: object) -> None:
-        _require_reservation(_lookup_authority(self), reservation)
+        return reserve_service_authority(
+            self,
+            receipt_id=receipt_id,
+            work_order_id=work_order_id,
+            evidence_digest=evidence_digest,
+            issued_at=issued_at,
+            signer_instance_signature=signer_instance_signature,
+        )
+
+    def reserve_proof_input(
+        self, *, receipt_id: str, work_order_id: str,
+        evidence_digest: str, issued_at: int,
+    ) -> str:
+        from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
+            reserve_service_proof_input,
+        )
+
+        return reserve_service_proof_input(
+            self, receipt_id=receipt_id, work_order_id=work_order_id,
+            evidence_digest=evidence_digest, issued_at=issued_at,
+        )
+
+    def commit(
+        self, reservation: object, signature_digest: str,
+        signer_instance_signature: str,
+    ) -> None:
+        from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
+            commit_service_authority,
+        )
+
+        commit_service_authority(
+            self, reservation, signature_digest, signer_instance_signature
+        )
+
+    def commit_proof_input(
+        self, reservation: object, signature_digest: str
+    ) -> str:
+        from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
+            commit_service_proof_input,
+        )
+
+        return commit_service_proof_input(self, reservation, signature_digest)
 
     def rollback(self, reservation: object) -> None:
         # Reservation is deliberately burned before signing. A crash or failed
         # signature cannot reopen independently authorized evidence.
-        _require_reservation(_lookup_authority(self), reservation)
+        from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
+            rollback_service_authority,
+        )
+
+        rollback_service_authority(self, reservation)
 
     def __copy__(self) -> "RootVerifiedOutcomeSigningAuthority":
         raise TypeError("verified_outcome_root_authority_copy_forbidden")
@@ -209,46 +189,6 @@ class RootVerifiedOutcomeSigningAuthority:
         raise TypeError("verified_outcome_root_authority_pickle_forbidden")
 
 
-def create_root_verified_outcome_signing_authority(
-    descriptor: Mapping[str, Any],
-    *,
-    replay_store: ProposalReplayHighWaterStore,
-    now_epoch: int,
-    owner_config_id: str,
-    current_descriptor_supplier: Callable[[], Mapping[str, Any]],
-    clock: Callable[[], int],
-) -> RootVerifiedOutcomeSigningAuthority:
-    """Verify a root-published descriptor and mint one signer-only capability."""
-
-    if (
-        not _sha256(owner_config_id)
-        or not callable(current_descriptor_supplier)
-        or not callable(clock)
-    ):
-        raise ValueError("verified_outcome_root_owner_config_invalid")
-    checked = validate_root_verified_outcome_descriptor(
-        descriptor,
-        replay_store=replay_store,
-        now_epoch=now_epoch,
-    )
-    authority = object.__new__(RootVerifiedOutcomeSigningAuthority)
-    grants = {str(item["evidence_digest"]): item for item in checked["grants"]}
-    _issue_authority(
-        authority,
-        _AuthorityState(
-            descriptor=checked,
-            owner_config_id=owner_config_id,
-            grants=grants,
-            replay_store=replay_store,
-            current_descriptor_supplier=current_descriptor_supplier,
-            clock=clock,
-            lock=threading.Lock(),
-            reservation_seal=object(),
-        ),
-    )
-    return authority
-
-
 def root_verified_outcome_authority_bindings(
     authority: object,
 ) -> Mapping[str, str]:
@@ -256,25 +196,11 @@ def root_verified_outcome_authority_bindings(
 
     if type(authority) is not RootVerifiedOutcomeSigningAuthority:
         raise ValueError("verified_outcome_root_authority_unverified")
-    descriptor = _lookup_authority(authority).descriptor
-    return {
-        "descriptor_id": str(descriptor["descriptor_id"]),
-        "owner_config_id": str(_lookup_authority(authority).owner_config_id),
-        "issuer_principal_id": str(descriptor["issuer_principal_id"]),
-        "reddog_id": str(descriptor["reddog_id"]),
-        "foundup_id": str(descriptor["foundup_id"]),
-        "authority_tier": str(descriptor["authority_tier"]),
-        "consensus_receipt_digest": str(descriptor["consensus_receipt_digest"]),
-        "signer_public_key": str(descriptor["signer_public_key"]),
-        "signer_key_epoch": str(descriptor["signer_key_epoch"]),
-        "signer_run_packet_id": str(descriptor["signer_run_packet_id"]),
-        "signer_config_digest": str(descriptor["signer_config_digest"]),
-        "signer_session_id": str(descriptor["signer_session_id"]),
-        "signer_manifest_id": str(descriptor["signer_manifest_id"]),
-        "signer_artifact_generation_digest": str(
-            descriptor["signer_artifact_generation_digest"]
-        ),
-    }
+    from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
+        client_authority_bindings,
+    )
+
+    return client_authority_bindings(authority)
 
 
 def validate_root_verified_outcome_descriptor(
@@ -285,12 +211,23 @@ def validate_root_verified_outcome_descriptor(
 ) -> dict[str, Any]:
     """Validate exact schema, co-signatures, scope, freshness, and store binding."""
 
+    checked = validate_root_verified_outcome_descriptor_public(
+        value, now_epoch=now_epoch
+    )
+    _require_store_binding(checked, replay_store)
+    return checked
+
+
+def validate_root_verified_outcome_descriptor_public(
+    value: Mapping[str, Any], *, now_epoch: int
+) -> dict[str, Any]:
+    """Validate root descriptor content without acquiring its mutable store."""
+
     if not isinstance(value, Mapping) or set(value) != _DESCRIPTOR_FIELDS:
         raise ValueError("verified_outcome_root_descriptor_shape_invalid")
     checked = dict(value)
     _validate_descriptor_header(checked)
     _require_time_window(checked, now_epoch=now_epoch)
-    _require_store_binding(checked, replay_store)
     checked["grants"] = _validate_grants(checked, now_epoch=now_epoch)
     expected_id = _digest(
         {key: item for key, item in checked.items() if key != "descriptor_id"}
@@ -318,6 +255,11 @@ def _validate_descriptor_header(checked: Mapping[str, Any]) -> None:
         checked.get("replay_store_durability_receipt_id")
     ):
         raise ValueError("verified_outcome_root_descriptor_value_invalid")
+    if (
+        type(checked.get("authority_generation_sequence")) is not int
+        or int(checked["authority_generation_sequence"]) < 1
+    ):
+        raise ValueError("verified_outcome_root_generation_invalid")
     if not _sha256(checked.get("consensus_receipt_digest")):
         raise ValueError("verified_outcome_root_consensus_invalid")
     if any(
@@ -374,6 +316,7 @@ def authority_context_digest_for(descriptor: Mapping[str, Any]) -> str:
 
     excluded = {
         "descriptor_id",
+        "authority_generation_sequence",
         "grants",
         "revoked_authorization_ids",
         "revoked_verifier_fingerprints",
@@ -531,50 +474,6 @@ def _require_store_binding(
         raise ValueError("verified_outcome_root_replay_store_invalid")
 
 
-def _request_matches(
-    grant: Mapping[str, Any], receipt_id: str, work_order_id: str, issued_at: int
-) -> bool:
-    return bool(
-        grant["receipt_id"] == receipt_id
-        and grant["work_order_id"] == work_order_id
-        and type(issued_at) is int
-        and int(grant["issued_at"]) <= issued_at < int(grant["expires_at"])
-    )
-
-
-def _fresh_grant(
-    state: _AuthorityState, evidence_digest: str
-) -> Mapping[str, Any] | None:
-    try:
-        now_epoch = state.clock()
-        if type(now_epoch) is not int:
-            return None
-        current = validate_root_verified_outcome_descriptor(
-            state.current_descriptor_supplier(),
-            replay_store=state.replay_store,
-            now_epoch=now_epoch,
-        )
-        if authority_context_digest_for(current) != authority_context_digest_for(
-            state.descriptor
-        ):
-            return None
-        current_grants = {
-            str(item["evidence_digest"]): item for item in current["grants"]
-        }
-        original = state.grants.get(evidence_digest)
-        return original if current_grants.get(evidence_digest) == original else None
-    except Exception:
-        return None
-
-
-def _require_reservation(state: _AuthorityState, reservation: object) -> None:
-    if (
-        not isinstance(reservation, _Reservation)
-        or reservation.seal is not state.reservation_seal
-    ):
-        raise ValueError("verified_outcome_root_reservation_invalid")
-
-
 def _unsigned_grant(grant: Mapping[str, Any]) -> dict[str, Any]:
     payload = dict(grant)
     payload.pop("verification_signature", None)
@@ -647,8 +546,8 @@ __all__ = [
     "authority_context_digest_for",
     "canonical_held_out_authorization_input",
     "canonical_verifier_authorization_input",
-    "create_root_verified_outcome_signing_authority",
     "descriptor_id_for",
     "root_verified_outcome_authority_bindings",
     "validate_root_verified_outcome_descriptor",
+    "validate_root_verified_outcome_descriptor_public",
 ]

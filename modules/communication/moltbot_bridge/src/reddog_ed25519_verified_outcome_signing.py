@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
@@ -10,6 +11,9 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_sig
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_signature,
 )
 
 
@@ -44,11 +48,19 @@ def prepare_verified_outcome_signing(
     if payload is None:
         return None, None, request_invalid_code
     try:
+        proof_input = authority.reserve_proof_input(
+            receipt_id=str(payload["receipt_id"]),
+            work_order_id=str(payload["work_order_id"]),
+            evidence_digest=str(payload["covered_action_digest"]),
+            issued_at=int(payload["issued_at"]),
+        )
+        proof = _sign_proof(backend, proof_input)
         reservation = authority.reserve(
             receipt_id=str(payload["receipt_id"]),
             work_order_id=str(payload["work_order_id"]),
             evidence_digest=str(payload["covered_action_digest"]),
             issued_at=int(payload["issued_at"]),
+            signer_instance_signature=proof,
         )
     except Exception:
         reservation = None
@@ -57,12 +69,23 @@ def prepare_verified_outcome_signing(
     return dict(payload), reservation, ""
 
 
-def commit_outcome_reservation(backend: Any, reservation: Any) -> bool:
+def commit_outcome_reservation(
+    backend: Any, reservation: Any, signature: str
+) -> bool:
     if reservation is None:
         return True
     try:
         assert backend.verified_outcome_signing_authority is not None
-        backend.verified_outcome_signing_authority.commit(reservation)
+        signature_digest = "sha256:" + hashlib.sha256(
+            signature.encode("ascii")
+        ).hexdigest()
+        proof_input = backend.verified_outcome_signing_authority.commit_proof_input(
+            reservation, signature_digest
+        )
+        proof = _sign_proof(backend, proof_input)
+        backend.verified_outcome_signing_authority.commit(
+            reservation, signature_digest, proof
+        )
         return True
     except Exception:
         rollback_outcome_reservation(backend, reservation)
@@ -76,6 +99,14 @@ def rollback_outcome_reservation(backend: Any, reservation: Any) -> None:
         backend.verified_outcome_signing_authority.rollback(reservation)
     except Exception:
         return
+
+
+def _sign_proof(backend: Any, value: str) -> str:
+    if not isinstance(value, str) or not value.isascii():
+        raise ValueError("verified_outcome_root_proof_input_invalid")
+    return encode_ed25519_signature(
+        backend.private_key.sign(value.encode("ascii"))
+    )
 
 
 __all__ = [

@@ -14,6 +14,11 @@ MODULE_ROOT = Path(__file__).resolve().parents[1]
 DATABASE_ROOT = REPO_ROOT / "modules/infrastructure/database"
 SHARED_UTILITIES_ROOT = REPO_ROOT / "modules/infrastructure/shared_utilities"
 SLICE_DATE = date(2026, 7, 18)
+ROOT_AUTHORITY_EXACT_HOSTS = {
+    "src/reddog_signer_key_provider_dryrun.py",
+    "src/reddog_signer_socket_service_runtime_bootstrap.py",
+    "src/reddog_signer_socket_service_runtime_wiring.py",
+}
 EXPECTED_MODULE_FILES = {
     "src/foundup_job_contract.py",
     "src/reddog_authoritative_work_state_refresh_runtime.py",
@@ -164,6 +169,7 @@ def _assert_exact_temporary_exemption(item: dict, root: Path) -> None:
     assert item["owner"] and item["architect_reviewer"] == "0102 Technical Architect"
     expiry = date.fromisoformat(item["expires_on"])
     assert SLICE_DATE < expiry <= date(2026, 9, 30)
+    assert date.today() < expiry
     assert item["temporary"] is True and item["remediation"]
     target = root / item["file"]
     ceiling = item["no_growth_ceiling"]
@@ -178,6 +184,11 @@ def test_module_security_repair_exemptions_are_exact_and_do_not_grow() -> None:
     assert {item["file"] for item in items} == EXPECTED_MODULE_FILES
     for item in items:
         _assert_exact_temporary_exemption(item, MODULE_ROOT)
+        if item["file"] in ROOT_AUTHORITY_EXACT_HOSTS:
+            target = MODULE_ROOT / item["file"]
+            assert len(target.read_text(encoding="utf-8").splitlines()) == (
+                item["no_growth_ceiling"]["file_lines"]
+            )
 
 
 def test_root_main_exemption_has_an_exact_security_repair_ceiling() -> None:

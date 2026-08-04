@@ -237,7 +237,9 @@ def _finalize_signing(
     if not _commit_manifest_reservation(backend, manifest_reservation):
         _rollback_outcome_reservation(backend, outcome_reservation)
         return _reject(REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY)
-    if not _commit_outcome_reservation(backend, outcome_reservation):
+    if not _commit_outcome_reservation(
+        backend, outcome_reservation, response.signature
+    ):
         return _reject(REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_REJECTED)
     if control_payload is not None and preparation is not None:
         try:

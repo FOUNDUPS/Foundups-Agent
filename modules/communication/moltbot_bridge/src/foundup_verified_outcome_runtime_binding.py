@@ -29,7 +29,7 @@ def verified_outcome_authority_matches_runtime(
     if policy is None:
         return authority is None
     if authority is None:
-        return True
+        return False
     try:
         bindings = root_verified_outcome_authority_bindings(authority)
     except (TypeError, ValueError):

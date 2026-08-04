@@ -54,9 +54,22 @@ class VerifiedOutcomeSigningAuthority(Protocol):
         work_order_id: str,
         evidence_digest: str,
         issued_at: int,
+        signer_instance_signature: str,
     ) -> object | None: ...
 
-    def commit(self, reservation: object) -> None: ...
+    def reserve_proof_input(
+        self, *, receipt_id: str, work_order_id: str,
+        evidence_digest: str, issued_at: int,
+    ) -> str: ...
+
+    def commit(
+        self, reservation: object, signature_digest: str,
+        signer_instance_signature: str,
+    ) -> None: ...
+
+    def commit_proof_input(
+        self, reservation: object, signature_digest: str
+    ) -> str: ...
 
     def rollback(self, reservation: object) -> None: ...
 

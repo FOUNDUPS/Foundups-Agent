@@ -1,5 +1,8 @@
 ## 2026-08-04: Verified-outcome root authority regressions
 
+- Added signer-instance proof, live UID/GID rotation, dual-store reset,
+  one-step crash repair, unsafe ancestry, malformed-client continuity, and
+  production test-mint absence regressions.
 - Added exact descriptor, root-owner, signer-generation, verifier-class,
   co-signature, expiry, revocation, scope, and lineage validation coverage.
 - Proved attacker-rehashed grant changes, unknown verifier classes, authority
@@ -1950,3 +1953,16 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
 - Re-ran the OpenClaw provider and shared upstream-provider bootstrap suites to
   prove the two actual scaffolds share authority and materialization contracts
   without sharing execution implementations.
+## 2026-08-04: Root verified-outcome service regressions
+
+- Proved only a root-UID socket exchange can mint the signer-side authority;
+  caller functions, wrong peers, response substitution, malformed startup, and
+  absent service responses fail before signing authority is usable.
+- Proved exactly one concurrent reservation wins, commit records the exact
+  signature digest, replay stays burned across restart, revocation between
+  reserve and commit rejects, and authority-generation rollback fails closed.
+- Proved one-sided root-state loss repairs from the independent witness while
+  production state construction rejects a non-root principal.
+- Proved service initialization is explicit, startup failures do not echo raw
+  exception content, and the peer policy binds exactly one signer UID/GID and
+  principal.

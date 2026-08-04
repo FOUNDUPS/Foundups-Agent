@@ -5,6 +5,8 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import threading
+from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -18,8 +20,8 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     authority_context_digest_for,
     canonical_held_out_authorization_input,
     canonical_verifier_authorization_input,
-    create_root_verified_outcome_signing_authority,
     descriptor_id_for,
+    validate_root_verified_outcome_descriptor,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     encode_ed25519_public_key,
@@ -39,6 +41,7 @@ from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_
 pytest.importorskip("cryptography")
 REPO_ROOT = Path(__file__).resolve().parents[4]
 NOW = 1_800_000_000
+_SIGNER_KEYS = {}
 
 
 def _private_key():
@@ -94,16 +97,19 @@ def _descriptor(tmp_path: Path, *, grant_overrides: dict[str, object] | None = N
     anchor_binding = _sha("anchor-one")
     anchor = store.load(anchor_binding)
     assert anchor is not None
+    signer_public_key = _public_text(signer_key)
+    _SIGNER_KEYS[signer_public_key] = signer_key
     descriptor = {
         "schema_version": DESCRIPTOR_SCHEMA,
         "descriptor_id": "pending",
         "authority_generation_id": "verified-outcome-authority-generation-1",
+        "authority_generation_sequence": 1,
         "issuer_principal_id": "github:012",
         "reddog_id": "reddog-0102",
         "foundup_id": "foundups-agent",
         "authority_tier": "HIGH",
         "consensus_receipt_digest": _sha("consensus"),
-        "signer_public_key": _public_text(signer_key),
+        "signer_public_key": signer_public_key,
         "signer_key_epoch": "epoch-1",
         "signer_run_packet_id": _sha("run-packet"),
         "signer_config_digest": _sha("signer-config"),
@@ -166,30 +172,112 @@ def _descriptor(tmp_path: Path, *, grant_overrides: dict[str, object] | None = N
 
 
 def _authority(descriptor, store, *, supplier=None, clock=None):
-    return create_root_verified_outcome_signing_authority(
-        descriptor,
-        replay_store=store,
-        now_epoch=NOW,
-        owner_config_id=_sha("owner-config"),
-        current_descriptor_supplier=supplier or (lambda: descriptor),
-        clock=clock or (lambda: NOW),
+    return _TestOutcomeAuthority(
+        descriptor, store, supplier or (lambda: descriptor), clock or (lambda: NOW)
     )
+
+
+@dataclass(frozen=True)
+class _TestReservation:
+    evidence_digest: str
+
+
+class _TestOutcomeAuthority:
+    """Test-only replay fake; production has no process-local mint."""
+
+    def __init__(self, descriptor, store, supplier, clock) -> None:
+        self.descriptor = validate_root_verified_outcome_descriptor(
+            descriptor, replay_store=store, now_epoch=NOW
+        )
+        self.store = store
+        self.supplier = supplier
+        self.clock = clock
+        self.lock = threading.Lock()
+
+    def reserve(self, **values):
+        try:
+            current = validate_root_verified_outcome_descriptor(
+                self.supplier(), replay_store=self.store, now_epoch=self.clock()
+            )
+            grant = next(
+                item for item in current["grants"]
+                if item["evidence_digest"] == values["evidence_digest"]
+            )
+            if (
+                grant["receipt_id"] != values["receipt_id"]
+                or grant["work_order_id"] != values["work_order_id"]
+                or not grant["issued_at"] <= values["issued_at"] < grant["expires_at"]
+            ):
+                return None
+            binding = _sha({"authorization_id": grant["authorization_id"]})
+            next_value = ProposalReplayHighWater(1, hashlib.sha256(binding.encode()).hexdigest())
+            with self.lock:
+                if self.store.load(binding) is not None:
+                    return None
+                self.store.advance(binding, expected=None, next_value=next_value)
+            return _TestReservation(str(values["evidence_digest"]))
+        except Exception:
+            return None
+
+    def commit(self, reservation, _signature_digest, *_proof) -> None:
+        if not isinstance(reservation, _TestReservation):
+            raise ValueError("verified_outcome_root_reservation_invalid")
+        current = validate_root_verified_outcome_descriptor(
+            self.supplier(), replay_store=self.store, now_epoch=self.clock()
+        )
+        if not any(
+            item["evidence_digest"] == reservation.evidence_digest
+            for item in current["grants"]
+        ):
+            raise ValueError("verified_outcome_root_authority_stale")
+
+    def rollback(self, reservation) -> None:
+        if not isinstance(reservation, _TestReservation):
+            raise ValueError("verified_outcome_root_reservation_invalid")
 
 
 def _reserve(authority, grant):
-    return authority.reserve(
-        receipt_id=grant["receipt_id"],
-        work_order_id=grant["work_order_id"],
-        evidence_digest=grant["evidence_digest"],
-        issued_at=NOW,
+    values = {
+        "receipt_id": grant["receipt_id"],
+        "work_order_id": grant["work_order_id"],
+        "evidence_digest": grant["evidence_digest"],
+        "issued_at": NOW,
+    }
+    proof_builder = getattr(authority, "reserve_proof_input", None)
+    if callable(proof_builder):
+        from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+            root_verified_outcome_authority_bindings,
+        )
+
+        public_key = root_verified_outcome_authority_bindings(authority)[
+            "signer_public_key"
+        ]
+        values["signer_instance_signature"] = _sign(
+            _SIGNER_KEYS[public_key], proof_builder(**values)
+        )
+    return authority.reserve(**values)
+
+
+def _commit(authority, reservation, signature_digest):
+    proof_builder = getattr(authority, "commit_proof_input", None)
+    if not callable(proof_builder):
+        return authority.commit(reservation, signature_digest)
+    from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+        root_verified_outcome_authority_bindings,
     )
+
+    public_key = root_verified_outcome_authority_bindings(authority)["signer_public_key"]
+    proof = _sign(
+        _SIGNER_KEYS[public_key], proof_builder(reservation, signature_digest)
+    )
+    return authority.commit(reservation, signature_digest, proof)
 
 
 def test_root_authority_burns_exact_grant_across_instances(tmp_path: Path) -> None:
     descriptor, grant, store = _descriptor(tmp_path)
     first = _authority(descriptor, store)
     reservation = _reserve(first, grant)
-    first.commit(reservation)
+    _commit(first, reservation, _sha("signature"))
 
     reopened = SqliteMonotonicAuthorityStore(
         tmp_path / "replay-one" / "authority.sqlite3",
@@ -484,4 +572,6 @@ def test_unknown_fields_direct_construction_and_forged_reservation_reject(
         RootVerifiedOutcomeSigningAuthority()
     authority = _authority(descriptor, store)
     with pytest.raises(ValueError, match="reservation_invalid"):
-        authority.commit({"receipt_id": grant["receipt_id"]})
+        authority.commit(
+            {"receipt_id": grant["receipt_id"]}, _sha("signature")
+        )

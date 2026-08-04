@@ -7,8 +7,20 @@ import os
 import stat
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
+
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
+    _create_service_backed_outcome_authority,
+    build_root_authority_socket_exchange,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service import (
+    RootAuthoritySnapshot,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
+    RootVerifiedOutcomeAuthorityState,
+)
 
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water_reader import (
     AtomicSignerRuntimeGenerationHighWaterReader,
@@ -46,7 +58,6 @@ from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
     RootVerifiedOutcomeSigningAuthority,
-    create_root_verified_outcome_signing_authority,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
@@ -82,8 +93,33 @@ FIELDS = frozenset(
 )
 V2_FIELDS = FIELDS | {"verified_outcome_authority"}
 _OUTCOME_OWNER_FIELDS = frozenset(
-    {"descriptor", "replay_root", "replay_path", "signer_uid"}
+    {
+        "descriptor",
+        "authority_socket_path",
+        "authority_service_uid",
+        "signer_uid",
+        "signer_gid",
+        "signer_principal_id",
+        "state_root",
+        "state_path",
+        "state_store_id",
+        "state_durability_receipt_id",
+        "state_witness_root",
+        "state_witness_path",
+        "state_witness_store_id",
+        "state_witness_durability_receipt_id",
+    }
 )
+
+
+@dataclass(frozen=True)
+class RootAuthorityServiceDependencies:
+    state: RootVerifiedOutcomeAuthorityState
+    snapshot_supplier: Callable[[], RootAuthoritySnapshot]
+    socket_path: str
+    signer_uid: int
+    signer_gid: int
+    signer_principal_id: str
 
 
 def load_system_service_manifest_selection(
@@ -146,7 +182,7 @@ def load_system_service_verified_outcome_signing_authority(
     repo_root: Path,
     now_epoch: int | None = None,
 ) -> RootVerifiedOutcomeSigningAuthority | None:
-    """Load one signer capability from root-owned v2 owner configuration."""
+    """Load a signer capability backed only by the root authority socket."""
 
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
@@ -154,73 +190,79 @@ def load_system_service_verified_outcome_signing_authority(
     if raw is None:
         return None
     assert isinstance(raw, Mapping)
-    replay_root = validate_runtime_root_path(raw["replay_root"], repo_root=repo)
-    replay_path = validate_runtime_artifact_path(
-        raw["replay_path"], allowed_root=replay_root, repo_root=repo
-    )
-    signer_uid = int(raw["signer_uid"])
-    _require_signer_replay_root(replay_root, replay_path, signer_uid=signer_uid)
     descriptor = raw["descriptor"]
     assert isinstance(descriptor, Mapping)
-    replay = SqliteMonotonicAuthorityStore(
-        replay_path,
-        allowed_root=replay_root,
+    exchange = build_root_authority_socket_exchange(
         repo_root=repo,
-        store_id=str(descriptor.get("replay_store_id") or ""),
-        durability_receipt_id=str(
-            descriptor.get("replay_store_durability_receipt_id") or ""
-        ),
+        socket_path=raw["authority_socket_path"],
+        expected_server_uid=int(raw["authority_service_uid"]),
     )
-    current_descriptor_supplier = _current_outcome_descriptor_supplier(
-        owner_config_path,
-        repo=repo,
-        initial_owner=owner,
-    )
-    clock = (lambda: int(time.time())) if now_epoch is None else (lambda: now_epoch)
-    return create_root_verified_outcome_signing_authority(
+    return _create_service_backed_outcome_authority(
         descriptor,
-        replay_store=replay,
         now_epoch=int(time.time()) if now_epoch is None else now_epoch,
         owner_config_id=str(owner["config_id"]),
-        current_descriptor_supplier=current_descriptor_supplier,
-        clock=clock,
+        exchange=exchange,
     )
 
 
-def _current_outcome_descriptor_supplier(
+def load_root_authority_service_dependencies(
     owner_config_path: Path | str,
     *,
-    repo: Path,
-    initial_owner: Mapping[str, Any],
-) -> Callable[[], Mapping[str, Any]]:
-    expected_context = _owner_revocation_context_digest(initial_owner)
+    repo_root: Path,
+) -> RootAuthorityServiceDependencies:
+    """Build root-owned state and a fresh root-config snapshot supplier."""
 
-    def supply() -> Mapping[str, Any]:
+    repo = Path(repo_root).resolve()
+    owner = _load_owner_config(owner_config_path, repo=repo)
+    raw = owner.get("verified_outcome_authority")
+    if not isinstance(raw, Mapping):
+        raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
+    primary = _outcome_state_store(raw, repo=repo, witness=False)
+    witness = _outcome_state_store(raw, repo=repo, witness=True)
+    state = RootVerifiedOutcomeAuthorityState(
+        primary, witness, repo_root=repo, require_root_ownership=True
+    )
+
+    def supply() -> RootAuthoritySnapshot:
         current = _load_owner_config(owner_config_path, repo=repo)
-        if _owner_revocation_context_digest(current) != expected_context:
-            raise RuntimeArtifactManifestError("verified_outcome_authority_context_changed")
-        raw = current.get("verified_outcome_authority")
-        if not isinstance(raw, Mapping) or not isinstance(raw.get("descriptor"), Mapping):
+        current_raw = current.get("verified_outcome_authority")
+        if not isinstance(current_raw, Mapping) or not isinstance(
+            current_raw.get("descriptor"), Mapping
+        ):
             raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
-        return dict(raw["descriptor"])
+        descriptor = dict(current_raw["descriptor"])
+        return RootAuthoritySnapshot(
+            owner_config_id=str(current["config_id"]),
+            authority_generation_sequence=int(
+                descriptor["authority_generation_sequence"]
+            ),
+            signer_principal_id=str(current_raw["signer_principal_id"]),
+            signer_uid=int(current_raw["signer_uid"]),
+            signer_gid=int(current_raw["signer_gid"]),
+            descriptor=descriptor,
+        )
 
-    return supply
+    return RootAuthorityServiceDependencies(
+        state=state,
+        snapshot_supplier=supply,
+        socket_path=str(raw["authority_socket_path"]),
+        signer_uid=int(raw["signer_uid"]),
+        signer_gid=int(raw["signer_gid"]),
+        signer_principal_id=str(raw["signer_principal_id"]),
+    )
 
 
-def _owner_revocation_context_digest(owner: Mapping[str, Any]) -> str:
-    payload = dict(owner)
-    payload.pop("config_id", None)
-    raw = dict(payload.get("verified_outcome_authority") or {})
-    descriptor = dict(raw.get("descriptor") or {})
-    for field in (
-        "descriptor_id",
-        "revoked_authorization_ids",
-        "revoked_verifier_fingerprints",
-    ):
-        descriptor.pop(field, None)
-    raw["descriptor"] = descriptor
-    payload["verified_outcome_authority"] = raw
-    return digest(payload)
+def _outcome_state_store(
+    raw: Mapping[str, Any], *, repo: Path, witness: bool
+) -> SqliteMonotonicAuthorityStore:
+    prefix = "state_witness" if witness else "state"
+    return SqliteMonotonicAuthorityStore(
+        raw[f"{prefix}_path"],
+        allowed_root=raw[f"{prefix}_root"],
+        repo_root=repo,
+        store_id=str(raw[f"{prefix}_store_id"]),
+        durability_receipt_id=str(raw[f"{prefix}_durability_receipt_id"]),
+    )
 
 
 def _build_generation_reader(
@@ -499,62 +541,78 @@ def _validate_outcome_authority_owner_config(
     raw = value.get("verified_outcome_authority")
     if not isinstance(raw, Mapping) or set(raw) != _OUTCOME_OWNER_FIELDS:
         raise RuntimeArtifactManifestError("verified_outcome_owner_config_invalid")
-    if type(raw.get("signer_uid")) is not int or int(raw["signer_uid"]) <= ROOT_UID:
-        raise RuntimeArtifactManifestError("verified_outcome_owner_signer_uid_invalid")
-    replay_root = validate_runtime_root_path(raw["replay_root"], repo_root=repo)
-    replay_path = validate_runtime_artifact_path(
-        raw["replay_path"], allowed_root=replay_root, repo_root=repo
-    )
-    if replay_path != replay_root / "verified-outcome-replay.sqlite3":
-        raise RuntimeArtifactManifestError("verified_outcome_owner_replay_path_invalid")
-    existing_roots = tuple(
-        Path(value[name]).resolve()
-        for name in ("runtime_root", "high_water_root", "witness_root")
-    ) + (owner_root,)
-    if any(
-        replay_root == other
-        or replay_root in other.parents
-        or other in replay_root.parents
-        for other in existing_roots
+    if (
+        raw.get("authority_service_uid") != ROOT_UID
+        or type(raw.get("signer_uid")) is not int
+        or int(raw["signer_uid"]) <= ROOT_UID
+        or type(raw.get("signer_gid")) is not int
+        or int(raw["signer_gid"]) <= ROOT_UID
+        or not _ascii(raw.get("signer_principal_id"))
     ):
-        raise RuntimeArtifactManifestError("verified_outcome_owner_root_overlap")
+        raise RuntimeArtifactManifestError("verified_outcome_owner_signer_uid_invalid")
+    state_root = validate_runtime_root_path(raw["state_root"], repo_root=repo)
+    witness_root = validate_runtime_root_path(
+        raw["state_witness_root"], repo_root=repo
+    )
+    state_path = validate_runtime_artifact_path(
+        raw["state_path"], allowed_root=state_root, repo_root=repo
+    )
+    witness_path = validate_runtime_artifact_path(
+        raw["state_witness_path"], allowed_root=witness_root, repo_root=repo
+    )
+    socket_path = Path(raw["authority_socket_path"])
+    if (
+        state_path != state_root / "verified-outcome-authority.sqlite3"
+        or witness_path
+        != witness_root / "verified-outcome-authority-witness.sqlite3"
+        or not socket_path.is_absolute()
+        or repo == socket_path.resolve()
+        or repo in socket_path.resolve().parents
+        or any(
+            not _ascii(raw.get(name))
+            for name in ("state_store_id", "state_witness_store_id")
+        )
+        or any(
+            not is_sha256(raw.get(name))
+            for name in (
+                "state_durability_receipt_id",
+                "state_witness_durability_receipt_id",
+            )
+        )
+    ):
+        raise RuntimeArtifactManifestError("verified_outcome_owner_state_invalid")
+    _validate_outcome_authority_root_separation(
+        value,
+        owner_root=owner_root,
+        state_root=state_root,
+        witness_root=witness_root,
+    )
     descriptor = raw.get("descriptor")
     if not isinstance(descriptor, Mapping):
         raise RuntimeArtifactManifestError("verified_outcome_owner_descriptor_invalid")
 
 
-def _require_signer_replay_root(
-    root: Path, target: Path, *, signer_uid: int
+def _validate_outcome_authority_root_separation(
+    value: Mapping[str, Any],
+    *,
+    owner_root: Path,
+    state_root: Path,
+    witness_root: Path,
 ) -> None:
-    if not sys.platform.startswith("linux") or os.geteuid() != signer_uid:
-        raise RuntimeArtifactManifestError("verified_outcome_signer_principal_invalid")
-    try:
-        for directory in (root, *root.parents):
-            metadata = directory.stat(follow_symlinks=False)
-            if (
-                directory.is_symlink()
-                or not stat.S_ISDIR(metadata.st_mode)
-                or metadata.st_uid not in {ROOT_UID, signer_uid}
-                or stat.S_IMODE(metadata.st_mode) & 0o022
-            ):
-                raise RuntimeArtifactManifestError(
-                    "verified_outcome_replay_permissions_invalid"
-                )
-        if target.exists():
-            metadata = target.stat(follow_symlinks=False)
-            if (
-                target.is_symlink()
-                or not stat.S_ISREG(metadata.st_mode)
-                or metadata.st_uid != signer_uid
-                or stat.S_IMODE(metadata.st_mode) & 0o022
-            ):
-                raise RuntimeArtifactManifestError(
-                    "verified_outcome_replay_permissions_invalid"
-                )
-    except OSError as exc:
-        raise RuntimeArtifactManifestError(
-            "verified_outcome_replay_permissions_invalid"
-        ) from exc
+    existing_roots = tuple(
+        Path(value[name]).resolve()
+        for name in ("runtime_root", "high_water_root", "witness_root")
+    ) + (owner_root,)
+    if any(
+        first == second
+        or first in second.parents
+        or second in first.parents
+        for first, second in (
+            (state_root, witness_root),
+            *((root, other) for root in (state_root, witness_root) for other in existing_roots),
+        )
+    ):
+        raise RuntimeArtifactManifestError("verified_outcome_owner_root_overlap")
 
 
 def _require_cli_paths(
@@ -588,8 +646,10 @@ def _ascii(value: object) -> bool:
 
 
 __all__ = [
+    "RootAuthorityServiceDependencies",
     "SCHEMA_VERSION",
     "SCHEMA_VERSION_V2",
     "load_system_service_manifest_selection",
     "load_system_service_verified_outcome_signing_authority",
+    "load_root_authority_service_dependencies",
 ]

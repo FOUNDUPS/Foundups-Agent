@@ -60,12 +60,25 @@ class OneUseOutcomeAuthority:
         self.reserved.add(receipt_id)
         return receipt_id
 
-    def commit(self, reservation: object) -> None:
+    def reserve_proof_input(self, **values: object) -> str:
+        return "test-reserve-proof:" + str(values.get("receipt_id") or "")
+
+    def commit(
+        self, reservation: object, signature_digest: str,
+        signer_instance_signature: str,
+    ) -> None:
+        assert signature_digest.startswith("sha256:")
+        assert signer_instance_signature.startswith("ed25519-sig-v1:")
         receipt_id = str(reservation)
         if receipt_id not in self.reserved:
             raise ValueError("outcome_reservation_missing")
         self.reserved.remove(receipt_id)
         self.committed.add(receipt_id)
+
+    def commit_proof_input(
+        self, reservation: object, signature_digest: str
+    ) -> str:
+        return f"test-commit-proof:{reservation}:{signature_digest}"
 
     def rollback(self, reservation: object) -> None:
         self.reserved.discard(str(reservation))

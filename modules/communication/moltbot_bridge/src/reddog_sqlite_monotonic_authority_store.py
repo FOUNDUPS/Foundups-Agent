@@ -71,6 +71,10 @@ class SqliteMonotonicAuthorityStore:
     def rollback_domain_root(self) -> Path:
         return self._allowed_root
 
+    @property
+    def path(self) -> Path:
+        return self._path
+
     def reader(self) -> "SqliteMonotonicAuthorityReader":
         """Return a separate read-only view with no mutation capability."""
 

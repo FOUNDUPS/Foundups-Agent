@@ -57,25 +57,28 @@ administered principal-key resolver.
 Architect proposal attestation v2 requires a typed `OperationalMemexSupplyReceipt`;
 promotion rehydrates its complete serialized form, recomputes the canonical ID,
 rejects unknown/stale/scope-mismatched inputs, and signs its full digest. Outcome
-rehydration checks canonical verifier/held-out receipts, but resident verifier
-runtimes do not yet sign them independently. The system-service signer can now
-load an exact root-owned v2 outcome-authority descriptor plus a separate
-signer-owned SQLite replay store. Each co-signed grant binds FoundUp, snapshot,
+rehydration checks canonical verifier/held-out receipts. The system-service
+signer loads an exact root-owned v2 outcome-authority descriptor and an opaque
+client for a separately launched root authority service. The service owns
+disjoint primary and witness monotonic stores; the signer owns neither. Each
+co-signed grant binds FoundUp, snapshot,
 work order, slice, job, worker, exact head/content, runtime, PatternMemory record,
 signer key/epoch, and the current signer run packet/config/session/manifest
 generation through an immutable authority-context digest covered by both
-independent signatures. Only a factory-issued process-local authority reaches
-the existing E0 backend; every public key-provider constructor verifies that
-registration before resolving key material, and reservations burn before
-signing. Each reservation re-reads the root-owned descriptor and evaluates its
-grant against a trusted current clock, so live revocation and expiry cannot be
-bypassed by a long-lived signer process or caller-selected request time. Missing
+independent signatures. Only a root-UID-authenticated socket exchange can mint
+the opaque E0 capability; every key-provider constructor verifies that boundary
+before resolving key material. Every reserve and commit additionally carries a
+domain-separated Ed25519 proof from the exact current E0 signer key, while fresh
+kernel UID/GID credentials are checked against the current root config. The
+root service burns a reservation before signing, then re-reads current root
+configuration and rechecks revocation, generation, grant, reservation, signer
+proof, and signature digest before commit. Runtime startup cannot initialize or
+reset replay state. A failed or crashed reservation never reopens. Missing
 authority leaves unrelated signer operations available while every
 verified-outcome request fails closed. Owner, signer-generation, key, expiry,
 revocation, replay-store, and grant mismatches reject before key resolution.
-Resident production admission remains blocked until independent verifier
-runtimes issue both grant signatures and the consumer authenticates that its
-signer was launched with this descriptor. Staged authority
+Resident production admission remains blocked until the root service is deployed
+and independent verifier runtimes issue both grant signatures. Staged authority
 envelopes remain non-consumable until exact activation. PatternMemory admission
 uses an invisible staging table in the existing database. Conflicting existing
 rows and legacy hash-shaped compatibility markers reject. The real sink is deliberately

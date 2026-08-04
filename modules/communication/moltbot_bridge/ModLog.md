@@ -1,5 +1,30 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-04: Verified-outcome root authority service
+- Replaced the signer-owned outcome replay database with a separately launched,
+  root-owned Unix-socket authority service. The root process owns two disjoint
+  monotonic CAS stores and authenticates the non-root E0 signer with kernel peer
+  credentials; the signer verifies the service UID on every connection.
+- Added a separately invoked root provisioning primitive, generation rollback
+  fence, exact one-step witness repair, and `RESERVED_BURNED -> COMMITTED`
+  transition. The runtime service has no state-reset/bootstrap option. The
+  E0 signer buffers its signature and releases it only after root commit rechecks
+  the current descriptor, revocation state, generation, owner config, grant,
+  reservation, and signature digest.
+- Removed caller-injected transport from production authority minting. Only an
+  opaque exchange created by the protected root-socket builder can create the
+  signer capability; non-root exchange identities and recomputed responses fail.
+- Removed the process-local test authority from production code. Reserve and
+  commit now require both fresh kernel UID/GID and a domain-separated E0 signer
+  proof over every request field; malformed clients are isolated per connection.
+- Added a bounded root service entrypoint and extended the existing v2 root owner
+  config with exact socket, signer principal, primary state, and witness bindings.
+- Production remains fail closed until the root service is deployed with a
+  root-owned config and independently co-signed verifier grants. This slice adds
+  no learning candidate, Brain/roadmap write, HoloIndex mutation, repository,
+  OpenClaw/Hermes, PR, merge, reward, or key-custody authority
+  (WSP 00/15/22/50/62/97).
+
 ## 2026-08-04: Verified-outcome root authority supply (partial)
 - Extended the existing E0 signer and root-owned system-service owner config;
   no second signer framework, database abstraction, or orchestrator was added.
@@ -14,9 +39,8 @@
 - Moved registry-backed root-authority verification into the shared signer
   key-provider core, closing alternate production/test constructors and
   unregistered same-type objects before any key material is resolved.
-- Reused the signer-owned SQLite monotonic store. Reservations burn before
-  signing and remain burned on rollback or crash; empty, alternate, identity-
-  mismatched, and concurrent replay stores fail closed.
+- The initial draft reused a signer-owned SQLite monotonic store. Independent
+  review rejected that trust model; the root service above supersedes it.
 - Re-read the root-owned authority descriptor at every reservation and used a
   signer-side trusted clock, so post-launch revocation and expiry fail before
   signing even when a caller supplies an earlier request timestamp.
@@ -28,9 +52,9 @@
 - Hardened the backend manifest generator so Python files named as static
   runtime roots contribute their complete import closure. Signer authority
   dependencies are now content-bound rather than merely reachable.
-- Truth remains `VERIFIED_OUTCOME_RUNTIME_BINDING_PARTIAL`: resident verifier
-  workers do not issue the two independent signatures, and the consumer cannot
-  yet prove its connected signer loaded this descriptor. No PatternMemory,
+- The initial slice truth was `VERIFIED_OUTCOME_RUNTIME_BINDING_PARTIAL`.
+  Root-service deployment and independently issued verifier grants are still
+  required for production activation. No PatternMemory,
   learning, Brain/roadmap, HoloIndex, repository, or merge authority was added
   (WSP 00/15/22/50/62/97).
 

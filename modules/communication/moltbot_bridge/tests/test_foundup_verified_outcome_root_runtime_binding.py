@@ -8,14 +8,18 @@ from pathlib import Path
 import pytest
 
 from modules.communication.moltbot_bridge.src import (
+    foundup_verified_outcome_root_authority_client as client_module,
     reddog_signer_system_service_manifest_selection_loader as loader_module,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
     VerifiedOutcomeSignerPolicy,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
-    descriptor_id_for,
     root_verified_outcome_authority_bindings,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_protocol import (
+    RootAuthorityResponse,
+    request_from_bytes,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_runtime_binding import (
     verified_outcome_authority_matches_runtime,
@@ -34,10 +38,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manif
 from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import (
     NOW,
     REPO_ROOT,
-    _authority,
     _descriptor,
     _reserve,
     _sha,
+)
+from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority_service import (
+    _client_authority,
 )
 
 
@@ -47,7 +53,9 @@ def _v2_owner_config(tmp_path: Path, descriptor) -> tuple[Path, dict]:
         root.mkdir(exist_ok=True)
     value = _owner_config_value(tmp_path, roots, descriptor)
     source = tmp_path / "replay-one" / "authority.sqlite3"
-    source.replace(tmp_path / "replay-one" / "verified-outcome-replay.sqlite3")
+    source.replace(
+        tmp_path / "replay-one" / "verified-outcome-authority.sqlite3"
+    )
     value["config_id"] = digest(
         {key: item for key, item in value.items() if key != "config_id"}
     )
@@ -78,9 +86,27 @@ def _owner_config_value(tmp_path: Path, roots: dict, descriptor) -> dict:
         "witness_durability_receipt_id": _sha("witness-durable"),
         "verified_outcome_authority": {
             "descriptor": descriptor,
-            "replay_root": str(tmp_path / "replay-one"),
-            "replay_path": str(tmp_path / "replay-one" / "verified-outcome-replay.sqlite3"),
+            "authority_socket_path": str(tmp_path / "root-authority.sock"),
+            "authority_service_uid": 0,
             "signer_uid": 1001,
+            "signer_gid": 1001,
+            "signer_principal_id": "reddog-e0-signer",
+            "state_root": str(tmp_path / "replay-one"),
+            "state_path": str(
+                tmp_path / "replay-one" / "verified-outcome-authority.sqlite3"
+            ),
+            "state_store_id": descriptor["replay_store_id"],
+            "state_durability_receipt_id": descriptor[
+                "replay_store_durability_receipt_id"
+            ],
+            "state_witness_root": str(tmp_path / "replay-witness"),
+            "state_witness_path": str(
+                tmp_path
+                / "replay-witness"
+                / "verified-outcome-authority-witness.sqlite3"
+            ),
+            "state_witness_store_id": "verified-outcome-replay-witness",
+            "state_witness_durability_receipt_id": _sha("witness-durable"),
         },
     }
 
@@ -89,55 +115,72 @@ def _allow_test_root_reads(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         loader_module, "_read_root_owned_bytes", lambda target, _root: target.read_bytes()
     )
+    monkeypatch.setattr(client_module, "_require_protected_socket", lambda *_args: None)
     monkeypatch.setattr(
-        loader_module, "_require_signer_replay_root", lambda *_args, **_kwargs: None
+        client_module,
+        "_root_socket_roundtrip",
+        lambda _path, raw, _uid, _timeout: _exchange_builder()(raw),
     )
 
 
-def test_v2_root_owned_loader_mints_owner_bound_authority(
+def _exchange_builder(**_kwargs):
+    def exchange(raw: bytes) -> bytes:
+        request = request_from_bytes(raw)
+        return RootAuthorityResponse(
+            status="REJECT",
+            request_id=request.request_id,
+            descriptor_id=request.descriptor_id,
+            owner_config_id=request.owner_config_id,
+            authorization_id=request.authorization_id,
+            reservation_id=None,
+            state="REJECTED",
+            reason="test_root_service_rejected",
+        ).to_bytes()
+
+    return exchange
+
+
+def test_v2_root_owned_loader_mints_only_service_backed_authority(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     descriptor, grant, _store = _descriptor(tmp_path)
     path, owner = _v2_owner_config(tmp_path, descriptor)
     _allow_test_root_reads(monkeypatch)
     authority = load_system_service_verified_outcome_signing_authority(
-        owner_config_path=path, repo_root=REPO_ROOT, now_epoch=NOW
+        owner_config_path=path,
+        repo_root=REPO_ROOT,
+        now_epoch=NOW,
     )
 
     assert authority is not None
     assert root_verified_outcome_authority_bindings(authority)["owner_config_id"] == owner["config_id"]
-    assert _reserve(authority, grant) is not None
+    assert _reserve(authority, grant) is None
 
 
-def test_v2_root_owned_loader_rechecks_live_revocation(
+def test_v2_root_owned_loader_rejects_missing_root_service_response(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     descriptor, grant, _store = _descriptor(tmp_path)
     path, owner = _v2_owner_config(tmp_path, descriptor)
     _allow_test_root_reads(monkeypatch)
     authority = load_system_service_verified_outcome_signing_authority(
-        owner_config_path=path, repo_root=REPO_ROOT, now_epoch=NOW
+        owner_config_path=path,
+        repo_root=REPO_ROOT,
+        now_epoch=NOW,
     )
-    current = owner["verified_outcome_authority"]["descriptor"]
-    current["revoked_authorization_ids"] = [grant["authorization_id"]]
-    current["descriptor_id"] = descriptor_id_for(current)
-    owner["config_id"] = digest(
-        {key: item for key, item in owner.items() if key != "config_id"}
-    )
-    path.write_text(json.dumps(owner, sort_keys=True, separators=(",", ":")))
 
     assert authority is not None
     assert _reserve(authority, grant) is None
 
 
-def test_v2_loader_rejects_replay_root_overlap_before_store_open(
+def test_v2_loader_rejects_state_root_overlap_before_service_connect(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     descriptor, _grant, _store = _descriptor(tmp_path)
     path, owner = _v2_owner_config(tmp_path, descriptor)
-    owner["verified_outcome_authority"]["replay_root"] = owner["runtime_root"]
-    owner["verified_outcome_authority"]["replay_path"] = str(
-        Path(owner["runtime_root"]) / "verified-outcome-replay.sqlite3"
+    owner["verified_outcome_authority"]["state_root"] = owner["runtime_root"]
+    owner["verified_outcome_authority"]["state_path"] = str(
+        Path(owner["runtime_root"]) / "verified-outcome-authority.sqlite3"
     )
     owner["config_id"] = digest(
         {key: item for key, item in owner.items() if key != "config_id"}
@@ -146,17 +189,25 @@ def test_v2_loader_rejects_replay_root_overlap_before_store_open(
     _allow_test_root_reads(monkeypatch)
     with pytest.raises(Exception, match="root_overlap"):
         load_system_service_verified_outcome_signing_authority(
-            owner_config_path=path, repo_root=REPO_ROOT, now_epoch=NOW
+            owner_config_path=path,
+            repo_root=REPO_ROOT,
+            now_epoch=NOW,
         )
 
 
 def test_runtime_policy_requires_exact_root_owner_and_signer_binding(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    descriptor, _grant, store = _descriptor(tmp_path)
-    authority = _authority(descriptor, store)
-    policy = _policy(descriptor)
+    descriptor, _grant, _store = _descriptor(tmp_path)
     owner_config_id = _sha("owner-config")
+    authority = _client_authority(
+        monkeypatch,
+        descriptor,
+        owner_config_id,
+        lambda _raw: b'{"status":"REJECT"}\n',
+    )
+    policy = _policy(descriptor)
     peer = _peer(descriptor)
 
     assert verified_outcome_authority_matches_runtime(
@@ -171,7 +222,7 @@ def test_runtime_policy_requires_exact_root_owner_and_signer_binding(
         policy, authority, expected_owner_config_id=_sha("attacker-owner"),
         signer_peer_instance_binding=peer,
     )
-    assert verified_outcome_authority_matches_runtime(
+    assert not verified_outcome_authority_matches_runtime(
         policy, None, expected_owner_config_id=owner_config_id,
         signer_peer_instance_binding=peer,
     )

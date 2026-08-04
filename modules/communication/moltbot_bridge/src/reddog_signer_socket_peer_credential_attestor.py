@@ -53,35 +53,62 @@ class PeerCredentialPolicy:
 
 
 @dataclass(frozen=True)
+class KernelPeerIdentity:
+    """Validated kernel identity plus the established signer attestation."""
+
+    attestation: SignerPeerAttestation
+    pid: int
+    uid: int
+    gid: int
+    source: str
+
+
+@dataclass(frozen=True)
 class KernelPeerCredentialAttestor:
     """Attest requester identity from kernel peer credentials."""
 
     policy: PeerCredentialPolicy = field(default_factory=lambda: PeerCredentialPolicy({}))
 
     def attest(self, connection: PeerCredentialSocket) -> SignerPeerAttestation:
-        if not _policy_valid(self.policy):
-            return _reject(FAIL_PEER_CREDENTIAL_POLICY_INVALID, self.policy)
-        credential = _read_peer_credential(connection)
-        if credential is None:
-            return _reject(FAIL_PEER_CREDENTIAL_UNAVAILABLE, self.policy)
-        source, pid, uid, gid = credential
-        if uid < 0 or gid < 0 or pid < 0:
-            return _reject(FAIL_PEER_CREDENTIAL_MALFORMED, self.policy)
-        principal = self.policy.uid_to_principal.get(uid)
-        if not principal:
-            return _reject(FAIL_PEER_CREDENTIAL_UID_NOT_ALLOWED, self.policy)
-        if self.policy.allowed_gids and gid not in self.policy.allowed_gids:
-            return _reject(FAIL_PEER_CREDENTIAL_GID_NOT_ALLOWED, self.policy)
-        if not _is_ascii(principal):
-            return _reject(FAIL_PEER_CREDENTIAL_POLICY_INVALID, self.policy)
-        return SignerPeerAttestation(
-            peer_principal_id=principal,
-            transport=self.policy.transport,
-            credential_source=(
-                f"{self.policy.credential_source_prefix}:{source}:pid={pid}:uid={uid}:gid={gid}"
-            ),
-            boundary_attested=True,
+        identity, error = _attest_identity_or_error(self.policy, connection)
+        return (
+            identity.attestation
+            if identity is not None
+            else _reject(error, self.policy)
         )
+
+    def attest_identity(
+        self, connection: PeerCredentialSocket
+    ) -> KernelPeerIdentity | None:
+        identity, _error = _attest_identity_or_error(self.policy, connection)
+        return identity
+
+
+def _attest_identity_or_error(
+    policy: PeerCredentialPolicy, connection: PeerCredentialSocket
+) -> tuple[KernelPeerIdentity | None, str]:
+    if not _policy_valid(policy):
+        return None, FAIL_PEER_CREDENTIAL_POLICY_INVALID
+    credential = _read_peer_credential(connection)
+    if credential is None:
+        return None, FAIL_PEER_CREDENTIAL_UNAVAILABLE
+    source, pid, uid, gid = credential
+    if uid < 0 or gid < 0 or pid < 0:
+        return None, FAIL_PEER_CREDENTIAL_MALFORMED
+    principal = policy.uid_to_principal.get(uid)
+    if not principal:
+        return None, FAIL_PEER_CREDENTIAL_UID_NOT_ALLOWED
+    if policy.allowed_gids and gid not in policy.allowed_gids:
+        return None, FAIL_PEER_CREDENTIAL_GID_NOT_ALLOWED
+    if not _is_ascii(principal):
+        return None, FAIL_PEER_CREDENTIAL_POLICY_INVALID
+    attestation = SignerPeerAttestation(
+        peer_principal_id=principal, transport=policy.transport,
+        credential_source=(f"{policy.credential_source_prefix}:"
+                           f"{source}:pid={pid}:uid={uid}:gid={gid}"),
+        boundary_attested=True,
+    )
+    return KernelPeerIdentity(attestation, pid, uid, gid, source), ""
 
 
 def _read_peer_credential(connection: PeerCredentialSocket) -> tuple[str, int, int, int] | None:
@@ -145,6 +172,7 @@ __all__ = [
     "FAIL_PEER_CREDENTIAL_UID_NOT_ALLOWED",
     "FAIL_PEER_CREDENTIAL_UNAVAILABLE",
     "KernelPeerCredentialAttestor",
+    "KernelPeerIdentity",
     "PEER_CREDENTIAL_SOURCE_GETPEEREID",
     "PEER_CREDENTIAL_SOURCE_SO_PEERCRED",
     "PeerCredentialPolicy",

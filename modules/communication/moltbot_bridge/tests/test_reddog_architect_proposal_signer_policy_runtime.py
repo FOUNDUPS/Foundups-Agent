@@ -87,6 +87,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     run_reddog_signer_socket_service_runtime_bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
+    FAIL_SIGNER_RUNTIME_CONFIG_INVALID,
     FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
     FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,
@@ -1364,9 +1365,8 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
         )
     )
     assert rejected_in_memory.accepted is False
-    assert (
-        FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID
-        in rejected_in_memory.rejection_reasons
+    assert FAIL_SIGNER_RUNTIME_CONFIG_INVALID in (
+        rejected_in_memory.rejection_reasons
     )
 
     launch_binding = _write_proposal_launch_packet(
@@ -1401,8 +1401,8 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
         ),
         **launch_binding,
     )
-    assert bootstrap.rejection_reasons == ()
-    assert bootstrap.accepted is True
+    assert bootstrap.accepted is False
+    assert FAIL_SIGNER_RUNTIME_CONFIG_INVALID in bootstrap.rejection_reasons
 
 
 def test_config_supply_requires_valid_principal_signed_policy_authorization(
