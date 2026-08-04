@@ -34,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
     run_reddog_signer_socket_service_runtime_bootstrap,
 )
+from modules.communication.moltbot_bridge.src.reddog_verified_outcome_authority_admission import (
+    admit_verified_outcome_authority,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
@@ -301,6 +304,9 @@ def test_bootstrap_reads_outside_repo_config_and_runs_runtime_wiring(tmp_path: P
         config_path=config_path,
         resolver=resolver,
         serve_bounded=service,
+        verified_outcome_signing_authority_supplier=lambda: (_ for _ in ()).throw(
+            AssertionError("dormant_outcome_policy_touched_root_socket")
+        ),
         **_launch_binding(repo, config_path),
     )
 
@@ -318,6 +324,40 @@ def test_bootstrap_reads_outside_repo_config_and_runs_runtime_wiring(tmp_path: P
     ]
     assert result.no_env_parsed is True
     assert result.no_holoindex_reindex_performed is True
+
+
+def test_outcome_authority_supplier_runs_only_for_configured_policy() -> None:
+    calls: list[str] = []
+    authority = object()
+
+    def supply():
+        calls.append("called")
+        return authority
+
+    dormant = admit_verified_outcome_authority(
+        None,
+        None,
+        lambda: (_ for _ in ()).throw(AssertionError("supplier_called")),
+    )
+    active = admit_verified_outcome_authority(
+        {"configured": True},
+        None,
+        supply,
+    )
+
+    assert dormant is None
+    assert active is authority
+    assert calls == ["called"]
+
+
+def test_configured_outcome_policy_fails_closed_when_supplier_fails() -> None:
+    authority = admit_verified_outcome_authority(
+        {"configured": True},
+        None,
+        lambda: (_ for _ in ()).throw(RuntimeError("socket unavailable")),
+    )
+
+    assert authority is None
 
 
 def test_bootstrap_rejects_legacy_selection_downgrade(

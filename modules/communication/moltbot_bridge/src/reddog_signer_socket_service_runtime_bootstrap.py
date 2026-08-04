@@ -69,6 +69,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
+from modules.communication.moltbot_bridge.src.reddog_verified_outcome_authority_admission import admit_verified_outcome_authority
 
 
 FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING"
@@ -86,12 +87,7 @@ FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION = (
 )
 
 ResolverAfterAdmission = Callable[[], SignerKeyResolver]
-BootstrapLoadResult = tuple[
-    Any | None,
-    Path | None,
-    str | None,
-    "SignerSocketServiceRuntimeBootstrapResult | None",
-]
+BootstrapLoadResult = tuple[Any | None, Path | None, str | None, "SignerSocketServiceRuntimeBootstrapResult | None"]
 def run_reddog_signer_socket_service_runtime_bootstrap(
     *,
     repo_root: Path | str,
@@ -109,6 +105,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     principal_key_resolver: PrincipalKeyResolver | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
     verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
+    verified_outcome_signing_authority_supplier: Callable[[], VerifiedOutcomeSigningAuthority] | None = None,
     process_isolation_required: bool = False,
     process_isolation_gate: ProcessIsolationGate = enforce_signer_process_isolation,
     expected_signer_uid: int | None = None, expected_signer_gid: int | None = None,
@@ -148,6 +145,9 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
             config_path=str(path),
             config_digest=digest,
         )
+    outcome_authority = admit_verified_outcome_authority(
+        config.verified_outcome_signer_policy, verified_outcome_signing_authority, verified_outcome_signing_authority_supplier
+    )
 
     runtime = run_reddog_signer_socket_service_runtime_wiring(
         config,
@@ -156,7 +156,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         ready_callback=ready_callback,
         principal_key_resolver=principal_key_resolver,
         proposal_replay_high_water_store=proposal_replay_high_water_store,
-        verified_outcome_signing_authority=verified_outcome_signing_authority,
+        verified_outcome_signing_authority=outcome_authority,
     )
     return _bootstrap_runtime_result(
         runtime, path=path, digest=digest,

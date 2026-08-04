@@ -86,8 +86,8 @@ environment. The legacy CLI and one-shot isolated-process composer reject every
 non-test provider before authority, resolver, or socket access. Only the stable
 service is production; it derives manifest, outcome authority, owner ID, and
 signer UID/GID from one authenticated v2 snapshot. Legacy v1 cannot start it;
-test-only dry-run is non-authoritative. Missing outcome authority leaves
-unrelated signer operations available while every outcome request fails closed.
+test-only dry-run is non-authoritative. An absent outcome policy leaves unrelated
+signer operations available; a configured policy requires matching root authority.
 Owner, generation, key, expiry, revocation, replay, or grant mismatches reject.
 Resident production admission remains blocked until the root service is deployed
 and independent verifier runtimes issue both grant signatures. Staged authority

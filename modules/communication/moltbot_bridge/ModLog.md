@@ -29,9 +29,9 @@
   production WSP71 resolution now requires the exact root-owned non-root signer
   UID/GID, YAMA ptrace enforcement, no `CAP_SYS_PTRACE`, disabled core
   dumps/dumpability, and a cleared inherited environment.
-- Retired the old CLI and one-shot WSP71 composer; only the stable service is production.
-  One immutable v2 read supplies manifest, dormant outcome authority, owner ID, and
-  UID/GID before isolation; v1 is migration-only and policy-absent generations get no capability.
+- Retired the old CLI and one-shot WSP71 composer; only the stable service is
+  production. One v2 read supplies manifest, lazy outcome authority, owner ID,
+  and UID/GID; only selected policy touches the socket and v1 is migration-only.
 - Production remains fail closed until the root service is deployed with a
   root-owned config and independently co-signed verifier grants. This slice adds
   no learning candidate, Brain/roadmap write, HoloIndex mutation, repository,

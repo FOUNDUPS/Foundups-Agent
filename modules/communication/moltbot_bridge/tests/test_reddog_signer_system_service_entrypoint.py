@@ -66,7 +66,11 @@ def _trusted_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW)
     monkeypatch.setattr(loader_module.time, "time", lambda: NOW)
     monkeypatch.setattr(
-        outcome_client_module, "_require_protected_socket", lambda *_args: None
+        outcome_client_module,
+        "_require_protected_socket",
+        lambda *_args: (_ for _ in ()).throw(
+            AssertionError("dormant_outcome_policy_touched_root_socket")
+        ),
     )
 
 
@@ -367,7 +371,9 @@ def test_generation_capability_failure_rejects_before_resolver_or_service(
             owner_config_id=startup.owner_config_id,
             manifest_selection=object(),
             manifest_selection_boundary=RejectedGenerationBoundary(),
-            verified_outcome_authority=startup.verified_outcome_authority,
+            verified_outcome_authority_supplier=(
+                startup.verified_outcome_authority_supplier
+            ),
             signer_uid=startup.signer_uid,
             signer_gid=startup.signer_gid,
         )

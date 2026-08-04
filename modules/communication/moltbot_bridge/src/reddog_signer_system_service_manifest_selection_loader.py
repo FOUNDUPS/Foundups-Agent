@@ -9,7 +9,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
     _create_service_backed_outcome_authority,
@@ -120,11 +120,10 @@ _OUTCOME_OWNER_FIELDS = frozenset(
 @dataclass(frozen=True)
 class SystemServiceStartupSelection:
     """One immutable startup view derived from one authenticated owner read."""
-
     owner_config_id: str
     manifest_selection: object
     manifest_selection_boundary: Any
-    verified_outcome_authority: RootVerifiedOutcomeSigningAuthority
+    verified_outcome_authority_supplier: Callable[[], RootVerifiedOutcomeSigningAuthority]
     signer_uid: int
     signer_gid: int
 
@@ -136,10 +135,11 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
     if owner.get("schema_version") != SCHEMA_VERSION_V2:
         raise RuntimeArtifactManifestError("signer_owner_config_v2_required")
     manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
-    authority = _verified_outcome_authority_from_owner(owner, repo=repo, now_epoch=int(time.time()))
+    def authority_supplier() -> RootVerifiedOutcomeSigningAuthority:
+        return _verified_outcome_authority_from_owner(owner, repo=repo, now_epoch=int(time.time()))
     signer_uid, signer_gid = _signer_identity_from_owner(owner)
     return SystemServiceStartupSelection(
-        str(owner["config_id"]), manifest, boundary, authority, signer_uid, signer_gid
+        str(owner["config_id"]), manifest, boundary, authority_supplier, signer_uid, signer_gid
     )
 
 

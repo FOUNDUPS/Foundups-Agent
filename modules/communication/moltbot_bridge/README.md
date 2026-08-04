@@ -59,8 +59,9 @@ RedDog and `main.py` remain clients and cannot spawn the signer.
 The older `reddog_signer_socket_service_runtime_cli` is retained only to return
 a structured retirement rejection. It cannot load authority, construct a
 secret resolver, or bind a socket. The system-service entrypoint also loads the
-current generation, outcome authority, and exact signer UID/GID from one
-immutable root-owned v2 owner-config read. The live process must match both
+current generation, a lazy outcome-authority supplier, and exact signer UID/GID
+from one immutable v2 read. The supplier runs only for a selected outcome policy;
+the live process must match both
 identity values before resolver construction. The older one-shot
 `reddog_isolated_signer_process_entrypoint` accepts test-only dry-run providers
 only; every WSP71/production provider mode rejects before key resolution.

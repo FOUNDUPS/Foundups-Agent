@@ -138,7 +138,9 @@ def _run_entrypoint_args(
         expected_owner_authority_config_path=owner_path,
         principal_key_resolver=principal_key_resolver,
         proposal_replay_high_water_store=proposal_replay_high_water_store,
-        verified_outcome_signing_authority=startup.verified_outcome_authority,
+        verified_outcome_signing_authority_supplier=(
+            startup.verified_outcome_authority_supplier
+        ),
         process_isolation_required=True,
         process_isolation_gate=process_isolation_gate,
         expected_signer_uid=startup.signer_uid,
