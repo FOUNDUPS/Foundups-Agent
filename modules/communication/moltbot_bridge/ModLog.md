@@ -9,6 +9,9 @@
   activate signed authority, then atomically become recallable. Retries roll
   forward deterministically, and conflicting pre-seeded rows fail exact canonical
   readback instead of satisfying admission by identifier alone.
+- PatternMemory activation requires a one-use opaque process-local proof minted
+  only after the publisher reloads the exact ACTIVE authority envelope. Direct
+  store, caller-known IDs, and fabricated activation objects cannot expose rows.
 - Added committed-profile key resolution, revocation/freshness checks, exact
   FoundUp/snapshot/head/content/work/slice/job/worker/verifier/runtime lineage, and
   opaque one-use capabilities consumed by resident FoundUp Brain assembly.

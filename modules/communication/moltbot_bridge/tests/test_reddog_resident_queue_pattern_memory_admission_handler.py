@@ -5,6 +5,9 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.foundup_memex_pattern_memory_activation import (
+    _mint_pattern_memory_activation,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     CHAIN_RESULTS_SCHEMA_VERSION,
     InMemoryResidentQueueChainResultsStore,
@@ -114,11 +117,16 @@ class _EvidencePublisher:
             raise ValueError("publication rejected")
         return str(payload["record_id"])
 
-    def activate(self, record_id: str) -> str:
+    def activate(self, record_id: str) -> object:
         self.activations.append(record_id)
         if self.activation_fail:
             raise ValueError("activation rejected")
-        return record_id
+        record = self.calls[-1]["record"]
+        return _mint_pattern_memory_activation(
+            record_id=record_id,
+            record=record,
+            envelope_digest="sha256:" + "a" * 64,
+        )
 
 
 class _CanonicalPatternMemorySink(FakePatternMemorySink):
@@ -134,9 +142,10 @@ class _CanonicalPatternMemorySink(FakePatternMemorySink):
         self.staged[record_id] = dict(record)
         return record_id
 
-    def activate_verified_outcome(self, record_id):
+    def activate_verified_outcome(self, record_id, activation_capability, record):
         if self.activation_fail:
             raise RuntimeError("sink activation failed")
+        assert self.staged[record_id] == record
         self.records.append(self.staged.pop(record_id))
         return record_id
 

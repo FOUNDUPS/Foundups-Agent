@@ -2,11 +2,9 @@
 
 Slice: REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_SINK_BRIDGE_PHASE1
 
-This adapter implements the `store_verified_outcome(record) -> record_id`
-protocol required by the queue-authorized PatternMemory admission guard. It
-does not decide whether an outcome is eligible. The resident queue gate chain
-must already have accepted the held-out regression and PatternMemory admission
-stage before this sink is called.
+This adapter stages records outside normal recall, then requires a one-use,
+process-local activation capability derived from exact ACTIVE signed authority.
+The legacy direct-store method fails closed.
 
 The sink requires an explicit SQLite database path outside the repository
 checkout. It never creates a default PatternMemory client, executes commands,
@@ -23,6 +21,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 
+from modules.communication.moltbot_bridge.src.foundup_memex_pattern_memory_activation import (
+    consume_pattern_memory_activation,
+)
 from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory, SkillOutcome
 
 
@@ -126,10 +127,10 @@ class RedDogVerifiedPatternMemorySink:
         return REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY
 
     def store_verified_outcome(self, record: Mapping[str, Any]) -> str:
-        """Store directly for legacy callers through the same staged transition."""
+        """Reject direct activation; signed authority capability is mandatory."""
 
-        record_id = self.stage_verified_outcome(record)
-        return self.activate_verified_outcome(record_id)
+        _validated_record(record)
+        raise ValueError("verified_outcome_activation_capability_required")
 
     def stage_verified_outcome(self, record: Mapping[str, Any]) -> str:
         """Persist an outcome outside normal recall until authority is active."""
@@ -172,12 +173,24 @@ class RedDogVerifiedPatternMemorySink:
         finally:
             memory.close()
 
-    def activate_verified_outcome(self, record_id: str) -> str:
+    def activate_verified_outcome(
+        self,
+        record_id: str,
+        activation_capability: Any,
+        record: Mapping[str, Any],
+    ) -> str:
         """Atomically make one exact staged outcome visible to PatternMemory."""
 
         candidate = str(record_id or "").strip()
         if not candidate:
             raise ValueError("verified_outcome_record_id_missing")
+        payload = _validated_record(record)
+        if _record_id(payload) != candidate or not consume_pattern_memory_activation(
+            activation_capability,
+            record_id=candidate,
+            record=payload,
+        ):
+            raise ValueError("verified_outcome_activation_capability_invalid")
         memory = PatternMemory(db_path=self.db_path)
         try:
             _ensure_staging_table(memory)

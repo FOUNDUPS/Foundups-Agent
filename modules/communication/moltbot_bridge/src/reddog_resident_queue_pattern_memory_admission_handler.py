@@ -222,10 +222,8 @@ def _activate_published(
     if staged_id != record_id:
         return _publication_reject(payload)
     try:
-        authority_id = str(publisher.activate(record_id) or "")
-        if authority_id != record_id:
-            return _publication_reject(payload)
-        activated_id = str(activate(record_id) or "")
+        activation_capability = publisher.activate(record_id)
+        activated_id = str(activate(record_id, activation_capability, record) or "")
     except Exception:
         return _publication_reject(payload)
     if activated_id != record_id:

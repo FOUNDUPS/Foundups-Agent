@@ -8,6 +8,9 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.foundup_memex_pattern_memory_activation import (
+    _mint_pattern_memory_activation,
+)
 from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
     REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY,
     PatternMemorySinkConfigurationError,
@@ -26,6 +29,7 @@ MODULE_PATH = (
     / "src"
     / "reddog_verified_pattern_memory_sink.py"
 )
+SRC_ROOT = MODULE_PATH.parent
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -52,6 +56,14 @@ def _record(**overrides: object) -> dict[str, object]:
     return payload
 
 
+def _activation(record: dict[str, object]):
+    return _mint_pattern_memory_activation(
+        record_id=reddog_verified_pattern_memory_record_id(record),
+        record=record,
+        envelope_digest="sha256:" + "a" * 64,
+    )
+
+
 def test_build_returns_none_when_sink_path_is_not_configured(tmp_path: Path) -> None:
     assert build_reddog_verified_pattern_memory_sink(repo_root=_repo(tmp_path), db_path=None) is None
 
@@ -75,7 +87,9 @@ def test_sink_stores_verified_outcome_in_outside_repo_pattern_memory_db(tmp_path
     assert sink is not None
     assert sink.status == REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY
 
-    record_id = sink.store_verified_outcome(_record())
+    record = _record()
+    record_id = sink.stage_verified_outcome(record)
+    sink.activate_verified_outcome(record_id, _activation(record), record)
 
     memory = PatternMemory(db_path=db_path)
     try:
@@ -103,7 +117,9 @@ def test_sink_readback_rejects_noncanonical_record_id(tmp_path: Path) -> None:
         db_path=tmp_path / "runtime" / "pattern_memory.db",
     )
     assert sink is not None
-    record_id = sink.store_verified_outcome(_record())
+    record = _record()
+    record_id = sink.stage_verified_outcome(record)
+    sink.activate_verified_outcome(record_id, _activation(record), record)
 
     memory = PatternMemory(db_path=sink.db_path)
     try:
@@ -118,7 +134,9 @@ def test_sink_readback_rejects_noncanonical_record_id(tmp_path: Path) -> None:
     assert sink.load_verified_outcome(record_id) is None
 
 
-def test_sink_is_idempotent_for_same_verified_outcome_record(tmp_path: Path) -> None:
+def test_sink_activation_is_idempotent_for_same_verified_outcome_record(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     sink = build_reddog_verified_pattern_memory_sink(
         repo_root=repo,
@@ -126,8 +144,11 @@ def test_sink_is_idempotent_for_same_verified_outcome_record(tmp_path: Path) -> 
     )
     assert sink is not None
 
-    first = sink.store_verified_outcome(_record())
-    second = sink.store_verified_outcome(_record())
+    record = _record()
+    first = sink.stage_verified_outcome(record)
+    sink.activate_verified_outcome(first, _activation(record), record)
+    second = sink.stage_verified_outcome(record)
+    sink.activate_verified_outcome(second, _activation(record), record)
 
     assert second == first
 
@@ -149,7 +170,9 @@ def test_staged_outcome_is_invisible_until_activation(tmp_path: Path) -> None:
         memory.close()
     assert sink.load_verified_outcome(record_id) is None
 
-    assert sink.activate_verified_outcome(record_id) == record_id
+    assert sink.activate_verified_outcome(
+        record_id, _activation(_record()), _record()
+    ) == record_id
     assert sink.load_verified_outcome(record_id) == _record()
 
 
@@ -164,7 +187,8 @@ def test_preseeded_conflicting_record_cannot_satisfy_idempotent_store(
     assert sink is not None
     record = _record()
     record_id = reddog_verified_pattern_memory_record_id(record)
-    sink.store_verified_outcome(record)
+    record_id = sink.stage_verified_outcome(record)
+    sink.activate_verified_outcome(record_id, _activation(record), record)
 
     memory = PatternMemory(db_path=sink.db_path)
     try:
@@ -178,6 +202,43 @@ def test_preseeded_conflicting_record_cannot_satisfy_idempotent_store(
 
     with pytest.raises(ValueError, match="verified_outcome_existing_record_conflict"):
         sink.stage_verified_outcome(record)
+
+
+def test_sink_rejects_direct_store_without_activation_capability(tmp_path: Path) -> None:
+    sink = build_reddog_verified_pattern_memory_sink(
+        repo_root=_repo(tmp_path),
+        db_path=tmp_path / "runtime" / "pattern_memory.db",
+    )
+    assert sink is not None
+
+    with pytest.raises(ValueError, match="verified_outcome_activation_capability_required"):
+        sink.store_verified_outcome(_record())
+
+
+def test_sink_rejects_fabricated_activation_capability(tmp_path: Path) -> None:
+    sink = build_reddog_verified_pattern_memory_sink(
+        repo_root=_repo(tmp_path),
+        db_path=tmp_path / "runtime" / "pattern_memory.db",
+    )
+    assert sink is not None
+    record = _record()
+    record_id = sink.stage_verified_outcome(record)
+
+    with pytest.raises(ValueError, match="verified_outcome_activation_capability_invalid"):
+        sink.activate_verified_outcome(record_id, object(), record)
+
+    assert sink.load_verified_outcome(record_id) is None
+
+
+def test_activation_minter_has_one_production_importer() -> None:
+    importers = []
+    for path in SRC_ROOT.glob("*.py"):
+        if path.name == "foundup_memex_pattern_memory_activation.py":
+            continue
+        if "_mint_pattern_memory_activation" in path.read_text(encoding="utf-8"):
+            importers.append(path.name)
+
+    assert importers == ["foundup_memex_verified_outcome_publisher.py"]
 
 
 def test_sink_rejects_secret_bearing_verified_outcome_record(tmp_path: Path) -> None:

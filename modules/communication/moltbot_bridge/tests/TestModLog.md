@@ -18,6 +18,9 @@
   PatternMemory rows are invisible until authority activation, exercises
   deterministic retry after an activation interruption, and rejects a pre-seeded
   conflicting row instead of trusting its record identifier.
+- Added direct-store, fabricated-capability, publisher-free bootstrap, and
+  OpenClaw queue-worker regressions. PatternMemory visibility now requires the
+  exact one-use process-local activation proof produced by signed authority.
 
 ## 2026-08-04: Memex supply authenticity regressions
 

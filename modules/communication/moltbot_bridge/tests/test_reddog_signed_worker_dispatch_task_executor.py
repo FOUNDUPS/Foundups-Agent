@@ -2188,7 +2188,7 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_held_out_regression_
     assert "pattern_memory_admission" not in stored["stage_results"]
 
 
-def test_openclaw_claim_env_bound_queue_loop_runner_reaches_pattern_memory_admission(
+def test_openclaw_claim_env_bound_queue_loop_rejects_without_outcome_authority(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -2213,29 +2213,15 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_pattern_memory_admis
 
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=ctx["repo"])
 
-    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["accepted"] is False, json.dumps(result, sort_keys=True)
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
     assert result["task_id"] == task_id
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert "FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION" in result["rejection_reasons"]
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
 
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["pattern_memory_admission"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
-    assert stage["pattern_memory_write_performed"] is True
-    assert stage["receipt"]["pattern_memory_record_id"].startswith("reddog_verified_outcome_")
-    assert stage["no_command_execution_performed"] is True
-    assert stage["no_pr_publish_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-
-    with sqlite3.connect(pattern_memory_db) as conn:
-        count = conn.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0]
-        execution_id = conn.execute(
-            "SELECT execution_id FROM skill_outcomes LIMIT 1"
-        ).fetchone()[0]
-    assert count == 1
-    assert execution_id == stage["receipt"]["pattern_memory_record_id"]
+    assert "pattern_memory_admission" not in stored["stage_results"]
+    assert not pattern_memory_db.exists()
     assert not (ctx["repo"] / "runtime" / "pattern_memory.db").exists()
 
 

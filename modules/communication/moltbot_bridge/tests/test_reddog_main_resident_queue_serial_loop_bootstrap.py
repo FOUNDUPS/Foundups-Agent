@@ -16,6 +16,13 @@ from unittest.mock import patch
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.foundup_memex_pattern_memory_activation import (
+    _mint_pattern_memory_activation,
+    consume_pattern_memory_activation,
+)
+from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+    reddog_verified_pattern_memory_record_id,
+)
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
@@ -1376,10 +1383,42 @@ class _FakeModelRuntimeBindingVerifier:
 class _FakePatternMemoryAdmissionSink:
     def __init__(self) -> None:
         self.records: list[dict[str, object]] = []
+        self.staged: dict[str, dict[str, object]] = {}
 
     def store_verified_outcome(self, record: Mapping[str, object]) -> str:
-        self.records.append(dict(record))
-        return "pattern-memory-record-1"
+        raise ValueError("verified_outcome_activation_capability_required")
+
+    def stage_verified_outcome(self, record: Mapping[str, object]) -> str:
+        record_id = reddog_verified_pattern_memory_record_id(record)
+        self.staged[record_id] = dict(record)
+        return record_id
+
+    def activate_verified_outcome(
+        self, record_id: str, capability: object, record: Mapping[str, object]
+    ) -> str:
+        assert self.staged[record_id] == record
+        assert consume_pattern_memory_activation(
+            capability, record_id=record_id, record=record
+        )
+        self.records.append(self.staged.pop(record_id))
+        return record_id
+
+
+class _FakeVerifiedOutcomePublisher:
+    def __init__(self) -> None:
+        self.records: dict[str, dict[str, object]] = {}
+
+    def publish(self, **payload: object) -> str:
+        record_id = str(payload["record_id"])
+        self.records[record_id] = dict(payload["record"])
+        return record_id
+
+    def activate(self, record_id: str) -> object:
+        return _mint_pattern_memory_activation(
+            record_id=record_id,
+            record=self.records[record_id],
+            envelope_digest="sha256:" + "a" * 64,
+        )
 
 
 class _FakeWorkerDispatchTaskWriter:
@@ -3245,18 +3284,25 @@ def test_bootstrap_serial_loop_reaches_pattern_memory_admission_with_injected_si
         _pattern_memory_admission_request(),
     )
     sink = _FakePatternMemoryAdmissionSink()
+    publisher = _FakeVerifiedOutcomePublisher()
 
-    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=ctx["repo"],
-        work_state_path=ctx["state"],
-        chain_results_path=ctx["chain"],
-        authority_profile_path=ctx["profile"],
-        admission_request_path=admission_request,
-        pattern_memory_admission_sink=sink,
-        now_iso=NOW,
-        requested_queue_item_id="queue-1",
-        max_steps=1,
-    )
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_resident_queue_serial_loop_bootstrap."
+        "_outcome_binding.resolve_verified_outcome_publisher",
+        return_value=publisher,
+    ):
+        result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+            repo_root=ctx["repo"],
+            work_state_path=ctx["state"],
+            chain_results_path=ctx["chain"],
+            authority_profile_path=ctx["profile"],
+            admission_request_path=admission_request,
+            pattern_memory_admission_sink=sink,
+            now_iso=NOW,
+            requested_queue_item_id="queue-1",
+            max_steps=1,
+        )
 
     assert result.accepted is True
     assert result.steps_run == 1
@@ -3272,7 +3318,9 @@ def test_bootstrap_serial_loop_reaches_pattern_memory_admission_with_injected_si
     stage = stored["stage_results"]["pattern_memory_admission"]
     assert stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
     assert stage["pattern_memory_write_performed"] is True
-    assert stage["receipt"]["pattern_memory_record_id"] == "pattern-memory-record-1"
+    assert stage["receipt"]["pattern_memory_record_id"].startswith(
+        "reddog_verified_outcome_"
+    )
     assert stage["no_command_execution_performed"] is True
     assert stage["no_pr_publish_performed"] is True
     assert stage["no_merge_performed"] is True
@@ -4667,12 +4715,10 @@ def test_main_serial_loop_preflight_pattern_memory_profile_derives_sink(
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 92
 
 
-def test_main_serial_loop_preflight_pattern_memory_profile_runs_admission_with_default_sink(
+def test_main_serial_loop_preflight_pattern_memory_profile_warns_without_outcome_authority(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    import sqlite3
-
     import main
 
     ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path, monkeypatch)
@@ -4709,21 +4755,11 @@ def test_main_serial_loop_preflight_pattern_memory_profile_runs_admission_with_d
         assert main.run_reddog_resident_queue_serial_loop_preflight(ctx["repo"]) is True
 
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["pattern_memory_admission"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
-    assert stage["pattern_memory_write_performed"] is True
-    assert stage["receipt"]["pattern_memory_record_id"].startswith("reddog_verified_outcome_")
-    assert stage["no_holoindex_reindex_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
+    assert "pattern_memory_admission" not in stored["stage_results"]
 
     db_path = tmp_path / "runtime" / "pattern_memory" / "pattern_memory.db"
-    assert db_path.exists()
+    assert not db_path.exists()
     assert not (Path(ctx["repo"]) / ".reddog").exists()
-    with sqlite3.connect(db_path) as conn:
-        rows = conn.execute(
-            "SELECT execution_id, agent, success FROM skill_outcomes"
-        ).fetchall()
-    assert rows == [(stage["receipt"]["pattern_memory_record_id"], "reddog", 1)]
 
 
 def test_main_serial_loop_preflight_blocks_when_enforced() -> None:
