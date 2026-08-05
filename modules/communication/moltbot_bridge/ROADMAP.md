@@ -1,5 +1,20 @@
 # moltbot_bridge Roadmap
 
+## RedDog conversational work promotion
+
+- COMPLETE: raw provider history is denied by default and continuation
+  telemetry reflects the actual admitted context.
+- COMPLETE: AgentDB-backed authenticated conversation scope with insert-only
+  creation, CAS revisions, expiry, FoundUp and session scope, typed continuity,
+  current grounding, snapshot/HEAD/Holo bindings, opaque one-use session
+  capabilities, authenticated records, and bounded projections.
+- BLOCKED: editor consumption until a production signed-session issuer/source
+  is available. Environment principal/FoundUp values are not authentication.
+- NEXT: bind one immutable pending architect proposal to the exact conversation
+  revision and use the existing principal-signed proposal policy authorization.
+- HELD: OpenClaw/Hermes dispatch until exact proposal authorization and all
+  existing WRE work-order gates pass.
+
 ## Stable External Signer Lifecycle
 
 - COMPLETE: current authenticated signer generation selection.

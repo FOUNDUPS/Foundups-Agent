@@ -1,5 +1,39 @@
 # OpenClaw Bridge Interface
 
+## Authenticated RedDog conversation scope
+
+`authenticate_conversation_scope()` verifies an existing `sess.v1` token and
+derives the principal exclusively from its signed subject. It resolves the
+current `PrincipalAuthorityRecord` and returns an opaque, one-use process-local
+capability. The capability cannot be constructed, copied, pickled, or
+serialized, and no session secret or derived record-MAC key is returned.
+
+`create_authenticated_conversation_scope()`,
+`resume_authenticated_conversation_scope()`, and
+`advance_authenticated_conversation_scope()` persist a bounded scope in the
+existing AgentDB. The record binds principal, transport/session, one active
+FoundUp, discussion FoundUps, typed decisions/questions, repository evidence
+references, operational snapshot, repository HEAD, HoloIndex generation and
+freshness receipt, turn lineage, expiry, and a revision receipt chain. Create
+is insert-only; updates use revision compare-and-swap.
+
+Persisted evidence references must already occur in the verified grounding
+receipt. This state layer does not upgrade a model-supplied path or claim into
+repository evidence.
+
+Every create/resume/update consumes fresh authentication, resolves current
+principal scope, checks the current grounding and registered FoundUp receipt,
+and authenticates the stored record with a derived HMAC. Recomputed local
+hashes cannot replace that authentication. Key rotation accepts the configured
+previous secret only for verification; the next accepted revision is signed
+with the current secret.
+
+The returned projection omits principal identity, token material, public-key
+material, MACs, and raw conversation. It grants no work, worker, repository,
+HoloIndex, proposal, signing, or dispatch authority. The editor is not wired to
+this API until a production-authenticated session source is available;
+`REDDOG_AUTHENTICATED_PRINCIPAL_ID` remains configuration, not authentication.
+
 ## Public API
 ### Architect proposal validity and execution readiness
 
