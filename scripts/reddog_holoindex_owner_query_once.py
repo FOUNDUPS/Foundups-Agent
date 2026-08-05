@@ -26,6 +26,7 @@ from holo_index.query_receipt import (  # noqa: E402
 from holo_index.authority_worktree import (  # noqa: E402
     HoloIndexAuthoritySelection,
     resolve_holoindex_authority_root,
+    resolve_holoindex_runtime_root,
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_owner_query_client import (  # noqa: E402
     query_holoindex_owner,
@@ -169,6 +170,7 @@ def query_once(
     select_authority: Callable[
         [Path], HoloIndexAuthoritySelection
     ] = resolve_holoindex_authority_root,
+    select_runtime_root: Callable[[Path], Path] = resolve_holoindex_runtime_root,
 ) -> Mapping[str, Any]:
     """Execute one owner-bound query and always clean up process-owned state."""
 
@@ -189,10 +191,9 @@ def query_once(
     try:
         while attempts < MAX_OWNER_ATTEMPTS:
             attempts += 1
-            # Authority supplies repository bytes; workspace supplies vetted deps.
             bootstrap = ensure_owner(
                 repo_root=authority_root,
-                runtime_root=repo_root,
+                runtime_root=select_runtime_root(repo_root),
                 requested=True,
             )
             status = str(getattr(bootstrap, "status", ""))

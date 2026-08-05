@@ -1,5 +1,15 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-06 - Linked-worktree owner dependency root
+
+- Corrected the one-shot owner query to resolve the primary same-repository
+  worktree for vetted Python dependencies instead of assuming every linked
+  worktree carries its own `.venv`.
+- Preserved the clean exact-HEAD authority checkout as the only repository
+  evidence source and retained read-only/no-reindex query behavior.
+- Real acceptance moved from `SEMANTIC_BACKEND_UNAVAILABLE` to a generation-
+  bound `CURRENT` result against the post-merge authority receipt.
+
 ## 2026-08-01 - Authority-worktree owner runtime binding
 
 - Bound the one-shot semantic owner to the selected clean authority checkout

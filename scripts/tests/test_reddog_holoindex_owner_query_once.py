@@ -158,6 +158,41 @@ def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
     assert result["semantic_evidence_authority"] == "committed_head_only"
 
 
+def test_linked_workspace_uses_resolved_primary_runtime_root(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    authority = tmp_path / "authority"
+    primary = tmp_path / "primary"
+    for path in (workspace, authority, primary):
+        path.mkdir()
+    selection = HoloIndexAuthoritySelection(
+        accepted=True,
+        selected_root=authority,
+        workspace_head_sha="c" * 40,
+        authority_head_sha="c" * 40,
+        authority_root_digest=repository_root_digest(authority),
+        workspace_overlay_present=False,
+        source="configured",
+    )
+    bootstrap_calls: dict = {}
+
+    def ensure_owner(**kwargs):
+        bootstrap_calls.update(kwargs)
+        return SimpleNamespace(ready=True, status="CONFIGURED", error="")
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=workspace,
+        ensure_owner=ensure_owner,
+        query_owner=lambda **_kwargs: _success(authority),
+        select_authority=lambda _root: selection,
+        select_runtime_root=lambda _root: primary,
+    )
+
+    assert result["ok"] is True
+    assert bootstrap_calls["repo_root"] == authority
+    assert bootstrap_calls["runtime_root"] == primary
+
+
 def test_clean_workspace_is_its_own_trusted_runtime_root(tmp_path: Path) -> None:
     bootstrap_calls: dict = {}
 

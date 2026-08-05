@@ -1,5 +1,14 @@
 # HoloIndex Package ModLog
 
+## [2026-08-06] Linked-worktree runtime dependency resolution
+
+- Added a read-only resolver from a linked worktree to the primary worktree
+  derived from the same Git common directory.
+- The resolver falls back to the caller workspace unless the candidate is a
+  real worktree in the same repository; it performs no checkout or mutation.
+- This lets exact-HEAD authority queries reuse the canonical validated virtual
+  environment without treating that dependency root as repository evidence.
+
 ## [2026-08-04] Vector-segment cold-start convergence proof
 
 - Preserved the isolated probe's distinction between logical collection

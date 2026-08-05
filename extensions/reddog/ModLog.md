@@ -1,5 +1,14 @@
 # RedDog ModLog
 
+## 2026-08-06 - Linked-worktree HoloIndex runtime-root resolution (0.4.58)
+
+- Preserved the authority checkout as the source of indexed repository bytes.
+- Resolved Python dependencies from the same repository's primary worktree so
+  clean linked worktrees do not require duplicate virtual environments.
+- Kept queries generation-bound and read-only; no query-time refresh or
+  re-index authority was added.
+- Regenerated the backend manifest to bind the changed authority/query runtime.
+
 ## 2026-08-06 - Conversation history policy enforcement (0.4.57)
 
 - Separated the sanitized last-packet continuation summary from raw provider

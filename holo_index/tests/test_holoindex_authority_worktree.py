@@ -11,6 +11,7 @@ from holo_index.authority_worktree import (
     AUTHORITY_ROOT_INVALID,
     AUTHORITY_ROOT_UNRELATED,
     resolve_holoindex_authority_root,
+    resolve_holoindex_runtime_root,
 )
 from holo_index.repository_state import RepositoryState, repository_root_digest
 
@@ -176,6 +177,47 @@ def test_dirty_workspace_without_authority_fails_closed(tmp_path: Path) -> None:
     assert result.accepted is False
     assert result.error == AUTHORITY_ROOT_DIRTY
     assert result.workspace_overlay_present is True
+
+
+def test_linked_worktree_uses_same_repository_primary_runtime_root(
+    tmp_path: Path,
+) -> None:
+    primary = tmp_path / "Foundups-Agent"
+    workspace = tmp_path / "worktrees" / "slice"
+    primary.mkdir()
+    workspace.mkdir(parents=True)
+    common = primary / ".git"
+    common.mkdir()
+    (workspace / ".git").write_text("gitdir: linked", encoding="utf-8")
+
+    result = resolve_holoindex_runtime_root(
+        workspace,
+        common_dir_reader=lambda path: (
+            common if path in (workspace, primary) else None
+        ),
+    )
+
+    assert result == primary
+
+
+def test_runtime_root_falls_back_when_primary_is_not_same_repository(
+    tmp_path: Path,
+) -> None:
+    workspace = tmp_path / "worktree"
+    unrelated = tmp_path / "unrelated"
+    workspace.mkdir()
+    unrelated.mkdir()
+    (unrelated / ".git").mkdir()
+    workspace_common = unrelated / "common.git"
+
+    result = resolve_holoindex_runtime_root(
+        workspace,
+        common_dir_reader=lambda path: (
+            workspace_common if path == workspace else tmp_path / "other.git"
+        ),
+    )
+
+    assert result == workspace
 
 
 def test_query_selector_contains_no_mutation_commands() -> None:
