@@ -61,14 +61,50 @@ class CurrentGenerationPrincipalKeyResolver:
         return record.principal_public_key if record is not None else None
 
 
+class CurrentGenerationPrincipalAuthorityResolver:
+    """Resolve full principal records from one manifest-bound generation."""
+
+    def __init__(self, records: Mapping[str, PrincipalAuthorityRecord]) -> None:
+        self._records = dict(records)
+
+    def resolve(
+        self, principal_id: str, principal_provider: str
+    ) -> PrincipalAuthorityRecord | None:
+        return self._records.get(_key(principal_id, principal_provider))
+
+    def resolve_unique(self, principal_id: str) -> PrincipalAuthorityRecord | None:
+        matches = tuple(
+            record
+            for record in self._records.values()
+            if record.principal_id == principal_id
+        )
+        return matches[0] if len(matches) == 1 else None
+
+
 def load_current_generation_principal_key_resolver(
     *, repo_root: Path, selection: Mapping[str, Any]
 ) -> CurrentGenerationPrincipalKeyResolver:
     """Read and verify the principal artifact selected by the signed manifest."""
 
-    runtime = validate_runtime_root_path(
-        selection["runtime_root"], repo_root=repo_root
+    return CurrentGenerationPrincipalKeyResolver(
+        _load_current_generation_records(repo_root, selection)
     )
+
+
+def load_current_generation_principal_authority_resolver(
+    *, repo_root: Path, selection: Mapping[str, Any]
+) -> CurrentGenerationPrincipalAuthorityResolver:
+    """Load full principal authority from the same signed generation seam."""
+
+    return CurrentGenerationPrincipalAuthorityResolver(
+        _load_current_generation_records(repo_root, selection)
+    )
+
+
+def _load_current_generation_records(
+    repo_root: Path, selection: Mapping[str, Any]
+) -> Mapping[str, PrincipalAuthorityRecord]:
+    runtime = validate_runtime_root_path(selection["runtime_root"], repo_root=repo_root)
     target = validate_runtime_artifact_path(
         selection["principal_authority_records_path"],
         repo_root=repo_root,
@@ -84,7 +120,7 @@ def load_current_generation_principal_key_resolver(
         str(selection["principal_authority_records_digest"]),
     ):
         raise ValueError("e0_principal_authority_digest_mismatch")
-    return CurrentGenerationPrincipalKeyResolver(_parse_records(raw))
+    return _parse_records(raw)
 
 
 def _parse_records(raw: bytes) -> Mapping[str, PrincipalAuthorityRecord]:
@@ -186,6 +222,8 @@ def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 
 __all__ = [
+    "CurrentGenerationPrincipalAuthorityResolver",
     "CurrentGenerationPrincipalKeyResolver",
+    "load_current_generation_principal_authority_resolver",
     "load_current_generation_principal_key_resolver",
 ]

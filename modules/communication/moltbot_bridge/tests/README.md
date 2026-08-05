@@ -31,6 +31,7 @@ Optional custom args:
 Focused authenticated conversation-scope runtime:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_authentication.py modules/communication/moltbot_bridge/tests/test_reddog_authenticated_conversation_scope_state.py modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_tamper_and_rotation.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_session_authority_source.py modules/communication/moltbot_bridge/tests/test_reddog_resident_architect_session_bridge.py -q
 ```
 
 This suite uses a temporary SQLite AgentDB-shaped store plus current-checkout

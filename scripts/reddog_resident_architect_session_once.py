@@ -42,6 +42,12 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_run
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (  # noqa: E402
     load_reddog_main_resident_queue_runtime_dependency_bundle,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_session_authority_source import (  # noqa: E402
+    ConversationSessionAuthoritySourceError,
+    VerifiedResidentConversationSession,
+    lease_current_generation_conversation_session,
+    owner_config_from_environment,
+)
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (  # noqa: E402
     read_reddog_runtime_json_mapping,
 )
@@ -196,6 +202,7 @@ def _summarize_result(result: Any) -> Dict[str, Any]:
 
 
 def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
+    payload = dict(payload)
     if payload.get("_bridge_error"):
         return _reject(
             str(payload["_bridge_error"]),
@@ -208,6 +215,11 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
         return _reject("reddog_intent_missing_or_invalid")
     if intent.get("submits_executable_authority") is not False:
         return _reject("reddog_intent_must_not_submit_executable_authority")
+    serialized_credential = _string(
+        payload.pop("conversation_session_credential", "")
+    )
+    if not serialized_credential:
+        return _reject("conversation_session_authority_source_missing")
     work_focus = _string(payload.get("work_focus") or intent.get("work_focus"))
     grounding = validate_grounded_target_receipt(
         intent.get("grounding_receipt") if isinstance(intent.get("grounding_receipt"), Mapping) else None,
@@ -221,14 +233,6 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
 
     repo_root_text = payload.get("repo_root")
     repo_root = Path(str(repo_root_text)).resolve() if repo_root_text else REPO_ROOT
-    principal = str(os.getenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "")).strip()
-    authorized_foundups = tuple(
-        item.strip()
-        for item in str(os.getenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", "")).split(",")
-        if item.strip()
-    )
-    if not principal or not authorized_foundups:
-        return _reject("resident_architect_authenticated_scope_missing")
     try:
         audit_binding, architect_binding, binding_reason = load_resident_model_runtime_bindings(
             repo_root
@@ -238,45 +242,80 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
     if binding_reason or audit_binding is None or architect_binding is None:
         return _reject(binding_reason or "model_runtime_binding_artifact_invalid")
     try:
-        memex_config = _mapping(payload.get("memex_snapshot_supply"))
-        verified_outcome_authority = _verified_outcome_authority_from_env(
-            repo_root,
-            memex_config,
-        )
-        client = RedDogResidentArchitectClient(
+        owner_config_path = owner_config_from_environment(os.environ)
+        with lease_current_generation_conversation_session(
             repo_root=repo_root,
-            authenticated_principal_id=principal,
-            authorized_foundup_ids=authorized_foundups,
-            transport="editor",
-            runtime_defaults={
-                "work_state_path": _string(
-                    payload.get("work_state_path") or os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", "")
-                ),
-                "holoindex_receipt_path": _string(
-                    payload.get("holoindex_receipt_path") or os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", "")
-                ),
-                "holoindex_ssd_path": _string(
-                    payload.get("holoindex_ssd_path") or os.getenv("HOLOINDEX_SSD_PATH", "")
-                ),
-                "requested_operation": "extension_resident_architect_session",
-                "prompt_text": work_focus,
-                "breadcrumbs": _sequence_of_mappings(payload.get("breadcrumbs")),
-                "brain_state": _mapping(payload.get("brain_state")),
-                "workspace_memory_notes": _sequence_of_mappings(payload.get("workspace_memory_notes")),
-                "memex_snapshot_supply_config": memex_config,
-                "verified_outcome_runtime_authority": verified_outcome_authority,
-                "external_research_retriever": _external_retriever_from_env(),
-                "timeout_seconds": _int(payload.get("timeout_seconds"), 60),
-                "audit_model_runtime_binding_receipt": audit_binding,
-                "architect_model_runtime_binding_receipt": architect_binding,
-            },
-        )
-        result = client.submit(intent)
+            intent=intent,
+            grounding_receipt_id=grounding.verified.receipt_id,
+            serialized_credential=serialized_credential,
+            owner_config_path=owner_config_path,
+            now_epoch=int(time.time()),
+        ) as verified_session:
+            result = _submit_authenticated_session(
+                payload=payload,
+                intent=intent,
+                work_focus=work_focus,
+                repo_root=repo_root,
+                verified_session=verified_session,
+                audit_binding=audit_binding,
+                architect_binding=architect_binding,
+            )
+    except ConversationSessionAuthoritySourceError as exc:
+        return _reject(exc.reason)
     except Exception as exc:
         output = _reject("resident_architect_session_bridge_failed", bridge_error_class=type(exc).__name__)
         output["resident_backend_invoked"] = True
         return output
     return _summarize_result(result)
+
+
+def _submit_authenticated_session(
+    *, payload: Mapping[str, Any], intent: Mapping[str, Any], work_focus: str,
+    repo_root: Path, verified_session: VerifiedResidentConversationSession,
+    audit_binding: Mapping[str, Any], architect_binding: Mapping[str, Any],
+) -> Any:
+    memex_config = _mapping(payload.get("memex_snapshot_supply"))
+    verified_outcome_authority = _verified_outcome_authority_from_env(
+        repo_root, memex_config
+    )
+    client = RedDogResidentArchitectClient(
+        repo_root=repo_root,
+        authenticated_principal_id=verified_session.principal_id,
+        authorized_foundup_ids=verified_session.foundup_scope,
+        transport="editor",
+        runtime_defaults=_runtime_defaults(
+            payload, work_focus, memex_config, verified_outcome_authority,
+            audit_binding, architect_binding,
+        ),
+    )
+    bound_intent = dict(intent)
+    bound_intent["conversation_session_authority_receipt"] = dict(
+        verified_session.authority_receipt
+    )
+    return client.submit(bound_intent)
+
+
+def _runtime_defaults(
+    payload: Mapping[str, Any], work_focus: str,
+    memex_config: Mapping[str, Any], verified_outcome_authority: Any,
+    audit_binding: Mapping[str, Any], architect_binding: Mapping[str, Any],
+) -> dict[str, Any]:
+    return {
+        "work_state_path": _string(payload.get("work_state_path") or os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", "")),
+        "holoindex_receipt_path": _string(payload.get("holoindex_receipt_path") or os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", "")),
+        "holoindex_ssd_path": _string(payload.get("holoindex_ssd_path") or os.getenv("HOLOINDEX_SSD_PATH", "")),
+        "requested_operation": "extension_resident_architect_session",
+        "prompt_text": work_focus,
+        "breadcrumbs": _sequence_of_mappings(payload.get("breadcrumbs")),
+        "brain_state": _mapping(payload.get("brain_state")),
+        "workspace_memory_notes": _sequence_of_mappings(payload.get("workspace_memory_notes")),
+        "memex_snapshot_supply_config": memex_config,
+        "verified_outcome_runtime_authority": verified_outcome_authority,
+        "external_research_retriever": _external_retriever_from_env(),
+        "timeout_seconds": _int(payload.get("timeout_seconds"), 60),
+        "audit_model_runtime_binding_receipt": audit_binding,
+        "architect_model_runtime_binding_receipt": architect_binding,
+    }
 
 
 def _verified_outcome_authority_from_env(

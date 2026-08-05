@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import time
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterator, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -48,6 +49,22 @@ def load_owner_e0_current_selection(
     if Path(str(selected.get("repo_root") or "")).resolve() != repo_root.resolve():
         raise ValueError("e0_selection_repo_root_mismatch")
     return selected
+
+
+@contextmanager
+def lease_owner_e0_current_selection(
+    *, owner_config_path: Path | str, repo_root: Path
+) -> Iterator[Mapping[str, Any]]:
+    """Hold the authenticated generation fence through use-time admission."""
+
+    capability, boundary = load_system_service_manifest_selection(
+        owner_config_path=owner_config_path,
+        repo_root=repo_root,
+    )
+    with boundary._lease_current(capability) as selected:
+        if Path(str(selected.get("repo_root") or "")).resolve() != repo_root.resolve():
+            raise ValueError("e0_selection_repo_root_mismatch")
+        yield selected
 
 
 def validate_owner_e0_current_admission(
@@ -123,6 +140,7 @@ def _require_consensus_policy(policy: Mapping[str, Any]) -> None:
 
 
 __all__ = [
+    "lease_owner_e0_current_selection",
     "load_owner_e0_current_selection",
     "validate_owner_e0_current_admission",
 ]

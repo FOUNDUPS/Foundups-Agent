@@ -1,6 +1,16 @@
 # RedDog
 
-Version: 0.4.59
+Version: 0.4.60
+
+Version 0.4.60 adds the first authenticated resident conversation-session
+source. A pre-issued principal-signed credential is stored only in VS Code
+SecretStorage and crosses the one-shot Python stdin boundary, never the child
+environment. Python removes it before model, AgentDB, receipt, or prompt work.
+The signature, repository, audience, transport, TTL, principal and FoundUp
+scope are verified against the root-owned current-generation principal
+artifact while its generation lease is held. This is conversational identity
+input only. It does not mint credentials or grant worker, repository, merge,
+signer, or HoloIndex authority.
 
 Version 0.4.59 pins the backend manifest generated for authenticated
 conversation-to-work proposal promotion. It does not connect editor sessions

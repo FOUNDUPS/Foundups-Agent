@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import secrets
 from typing import Callable
 
 from modules.ai_intelligence.ai_overseer.src.foundup_genesis.intake_auth_provider import (
@@ -24,6 +25,10 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_mac import (
     derive_conversation_scope_mac_key,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_session_credential import (
+    VerifiedConversationSessionCredential,
+    verify_conversation_session_credential,
+)
 
 
 CAPABILITY_TTL_SECONDS = 60
@@ -44,8 +49,8 @@ def authenticate_conversation_scope(
 
     if not all(
         isinstance(value, str) and value.strip()
-        for value in (session_token, principal_provider, transport, session_binding)
-    ):
+        for value in (session_token, transport, session_binding)
+    ) or not isinstance(principal_provider, str):
         return None
     try:
         current, previous = (secret_provider or default_secret_provider)()
@@ -65,16 +70,66 @@ def authenticate_conversation_scope(
     principal_id = str(context.requester_handle or "")
     if context.authenticated is not True or not principal_id:
         return None
+    provider = principal_provider.strip()
     try:
-        record = principal_resolver.resolve(principal_id, principal_provider)
+        if provider:
+            record = principal_resolver.resolve(principal_id, provider)
+        else:
+            resolve_unique = getattr(principal_resolver, "resolve_unique", None)
+            record = resolve_unique(principal_id) if callable(resolve_unique) else None
+            provider = record.principal_provider if record is not None else ""
     except Exception:
         return None
-    if not _valid_principal(record, principal_id, principal_provider):
+    if not _valid_principal(record, principal_id, provider):
         return None
     assert record is not None
     return _issue_conversation_scope_capability(
-        _authority_seal(record, secrets, principal_provider, principal_id, transport, session_binding, now_epoch)
+        _authority_seal(record, secrets, provider, principal_id, transport, session_binding, now_epoch)
     )
+
+
+def authenticate_signed_conversation_scope(
+    *,
+    serialized_credential: str,
+    transport: str,
+    session_binding: str,
+    expected_repo_full_name: str,
+    principal_resolver: PrincipalAuthorityResolver,
+    now_epoch: int,
+) -> tuple[
+    AuthenticatedConversationScopeCapability,
+    VerifiedConversationSessionCredential,
+] | None:
+    """Verify a principal-signed session credential using public material only."""
+
+    if not all(
+        isinstance(value, str) and value.strip()
+        for value in (serialized_credential, transport, session_binding, expected_repo_full_name)
+    ):
+        return None
+    verified = verify_conversation_session_credential(
+        serialized_credential,
+        principal_resolver=principal_resolver,
+        expected_repo_full_name=expected_repo_full_name,
+        expected_transport=transport,
+        now_epoch=int(now_epoch),
+    )
+    if verified is None:
+        return None
+    # This operation-local key protects scoped state records after public-key
+    # authentication. It is intentionally not derivable from the bearer.
+    session_key = secrets.token_bytes(32)
+    seal = _authority_seal(
+        verified.principal_record,
+        (session_key,),
+        verified.principal_provider,
+        verified.principal_id,
+        transport,
+        session_binding,
+        now_epoch,
+        foundup_scope=verified.foundup_scope,
+    )
+    return _issue_conversation_scope_capability(seal), verified
 
 
 def _authority_seal(
@@ -85,6 +140,7 @@ def _authority_seal(
     transport: str,
     session_binding: str,
     now_epoch: int,
+    foundup_scope: tuple[str, ...] | None = None,
 ) -> _ConversationScopeAuthoritySeal:
     return _ConversationScopeAuthoritySeal(
         principal_id=record.principal_id,
@@ -94,7 +150,7 @@ def _authority_seal(
         principal_key_fingerprint=canonical_digest(
             {"principal_public_key": record.principal_public_key}
         ),
-        foundup_scope=tuple(dict.fromkeys(record.foundup_scope)),
+        foundup_scope=tuple(dict.fromkeys(foundup_scope or record.foundup_scope)),
         transport=transport.strip(),
         session_binding_digest=canonical_digest(
             {"transport": transport.strip(), "session_binding": session_binding.strip()}
@@ -125,4 +181,8 @@ def _valid_principal(
     )
 
 
-__all__ = ["AuthenticatedConversationScopeCapability", "authenticate_conversation_scope"]
+__all__ = [
+    "AuthenticatedConversationScopeCapability",
+    "authenticate_conversation_scope",
+    "authenticate_signed_conversation_scope",
+]

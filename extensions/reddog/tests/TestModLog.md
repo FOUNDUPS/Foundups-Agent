@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-06 - Conversation session authority source (0.4.60)
+
+- Added forged, expired, ambiguous-subject, expected-principal, FoundUp-scope,
+  protected-storage, narrow-environment, and no-credential-in-intent regressions.
+- Re-ran the resident bridge/authentication matrix and exhaustive extension
+  contract; no model/client call survives source verification failure.
+
 ## 2026-08-06 - Conversation proposal backend compatibility (0.4.59)
 
 - Regenerated the backend manifest and pinned its canonical digest after P2

@@ -27,6 +27,10 @@ const repoDeepDiveFocusPolicy = require(path.join(extDir, 'repo_deep_dive_focus_
 const startOperationsControlJs = fs.readFileSync(path.join(extDir, 'start_operations_control.js'), 'utf8');
 const startOperationsBridgeJs = fs.readFileSync(path.join(extDir, 'start_operations_bridge.js'), 'utf8');
 const startOperationsEnvironmentJs = fs.readFileSync(path.join(extDir, 'start_operations_environment.js'), 'utf8');
+const conversationSessionAuthoritySourceJs = fs.readFileSync(
+  path.join(extDir, 'conversation_session_authority_source.js'), 'utf8'
+);
+const conversationSessionAuthoritySource = require(path.join(extDir, 'conversation_session_authority_source.js'));
 const startOperationsInterpreterJs = fs.readFileSync(path.join(extDir, 'start_operations_interpreter.js'), 'utf8');
 const runtimeMaterializerJs = fs.readFileSync(
   path.join(extDir, 'backend_compatibility_runtime_materializer.js'), 'utf8'
@@ -224,8 +228,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.59', 'package version must be 0.4.59');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.59'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.60', 'package version must be 0.4.60');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.60'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -368,7 +372,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.59', 'README version mismatch');
+includes(readme, 'Version: 0.4.60', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -2109,7 +2113,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.59', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.60', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [],
@@ -3617,7 +3621,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.59'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.60'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -3631,7 +3635,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.59'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.60'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -3643,7 +3647,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.59'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.60'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -5022,7 +5026,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.59' } }
+      ? { id, packageJSON: { version: '0.4.60' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
@@ -5041,8 +5045,9 @@ includes(extensionJs, 'function runResidentArchitectSessionBridge', 'RAS-001: re
 includes(extensionJs, 'resident_architect_session_result', 'RAS-001: resident session result must attach to review packet');
 includes(extensionJs, 'buildResidentArchitectSessionSection', 'RAS-001: Copy MD resident session section missing');
 includes(residentArchitectBridgePy, 'RedDogResidentArchitectClient', 'RAS-002: bridge must use canonical authenticated resident client');
-includes(residentArchitectBridgePy, 'REDDOG_AUTHENTICATED_PRINCIPAL_ID', 'RAS-002: bridge must require host principal');
-includes(residentArchitectBridgePy, 'REDDOG_AUTHORIZED_FOUNDUP_IDS', 'RAS-002: bridge must require host FoundUp scope');
+includes(residentArchitectBridgePy, 'lease_current_generation_conversation_session', 'RAS-002: bridge must authenticate under the current-generation lease');
+includes(conversationSessionAuthoritySourceJs, 'SECRET_KEY', 'RAS-002: extension secret source missing');
+assert(!conversationSessionAuthoritySourceJs.includes('_make_session_token'), 'RAS-002: production source must never mint session tokens');
 includes(residentArchitectBridgePy, 'explicit_resident_architect_session_requested', 'RAS-002: bridge must require explicit request');
 includes(residentArchitectBridgePy, 'no_holoindex_reindex_performed', 'RAS-002: bridge must surface no-reindex attestation');
 includes(residentArchitectBridgePy, 'no_repo_mutation_performed', 'RAS-002: bridge must surface no-repo-mutation attestation');
@@ -5122,8 +5127,14 @@ assert.strictEqual(residentPayload.payload.red_dog_intent.shell_authority_reques
 assert(residentPayload.payload.intent_id.startsWith('sha256:'), 'RPI-004: resident intent id must be digest-bound');
 
 let residentRunnerPayload = null;
+const testSessionCredential = JSON.stringify({
+  schema_version: conversationSessionAuthoritySource.CREDENTIAL_SCHEMA,
+  principal_id: 'principal-012',
+  foundup_scope: ['foundups_agent']
+});
 const residentBridgeResult = orchestrator.runResidentArchitectSessionBridge(null, 'audit work', Object.assign({}, residentGroundingOptions, {
   explicitResidentArchitectSessionRequested: true,
+  conversationSessionCredential: testSessionCredential,
   sessionRunner: (payload) => {
     residentRunnerPayload = payload;
     return {
@@ -5156,6 +5167,10 @@ const residentBridgeResult = orchestrator.runResidentArchitectSessionBridge(null
     };
   }
 }));
+assert.strictEqual(residentRunnerPayload.conversation_session_credential, testSessionCredential,
+  'RAS-005: credential crosses only the one-shot stdin boundary');
+assert.strictEqual(Object.prototype.hasOwnProperty.call(residentRunnerPayload.red_dog_intent, 'conversation_session_credential'), false,
+  'RAS-005: credential must not enter the durable intent');
 assert.strictEqual(residentRunnerPayload.explicit_resident_architect_session_requested, true, 'RAS-005: runner payload explicit flag');
 assert.strictEqual(residentRunnerPayload.red_dog_intent.schema_version, 'reddog_intent.v2', 'RPI-005: runner receives typed RedDogIntent');
 assert.strictEqual(residentRunnerPayload.red_dog_intent.repo_write_authority_requested, false, 'RPI-005: runner intent does not request repo write authority');
@@ -5164,6 +5179,22 @@ assert.strictEqual(residentBridgeResult.red_dog_intent_submitted, true, 'RPI-005
 assert.strictEqual(residentBridgeResult.intent_id, residentRunnerPayload.intent_id, 'RPI-005: bridge result binds intent id');
 assert.strictEqual(residentBridgeResult.queue_candidate_count, 1, 'RAS-005: queue candidate count preserved');
 assert.strictEqual(residentBridgeResult.no_repo_mutation_performed, true, 'RAS-005: no repo mutation preserved');
+const missingSessionSource = orchestrator.runResidentArchitectSessionBridge(null, 'audit work', Object.assign({}, residentGroundingOptions, {
+  explicitResidentArchitectSessionRequested: true,
+  sessionRunner: () => { throw new Error('must not run'); }
+}));
+assert(missingSessionSource.rejection_reasons.includes('conversation_session_authority_source_missing'),
+  'RAS-005: missing protected session source fails before runner invocation');
+const sessionEnv = conversationSessionAuthoritySource.buildBridgeEnvironment({
+  OPENROUTER_API_KEY: 'synthetic-key',
+  FOUNDUPS_INTAKE_HMAC_SECRET: 'synthetic-secret',
+  REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH: 'O:/runtime/owner.json',
+  UNRELATED_SECRET: 'must-not-cross'
+});
+assert.strictEqual(sessionEnv.REDDOG_CONVERSATION_SESSION_TOKEN, undefined);
+assert.strictEqual(sessionEnv.FOUNDUPS_INTAKE_HMAC_SECRET, undefined);
+assert.strictEqual(sessionEnv.REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH, 'O:/runtime/owner.json');
+assert.strictEqual(sessionEnv.UNRELATED_SECRET, undefined, 'RAS-005: unrelated ambient secret must not cross');
 const residentSection = orchestrator.buildResidentArchitectSessionSection(residentBridgeResult);
 includes(residentSection, '- resident_backend_invoked: true', 'RAS-006: section reports backend invocation');
 includes(residentSection, '- red_dog_intent_submitted: true', 'RPI-006: section reports RedDogIntent submission');
