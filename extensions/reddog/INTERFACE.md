@@ -1,5 +1,12 @@
 # RedDog Interface
 
+Version 0.4.57 separates sanitized packet continuation from raw model history.
+`Use last RedDog packet` remains an advisory-summary opt-in. The extension sends
+zero prior raw turns to Fusion, discards provider-returned history, and reports
+the exact zero-admission policy in Run Trace and Copy MD. Authenticated scoped
+turn admission is deferred to the conversational-scope slice; history never
+supplies work authority.
+
 Version 0.4.54 keeps the single Fusion adversarial retry but deterministically
 prefers a critic with a usable initial response over a route that blocked or
 abstained. Quorum still requires a material framing/evidence/WSP_15 challenge;

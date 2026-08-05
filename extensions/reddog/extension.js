@@ -17,6 +17,7 @@ const backendCompatibility = require('./backend_compatibility_preflight');
 const backendCompatibilityAsync = require('./backend_compatibility_async');
 const backendCompatibilityRender = require('./backend_compatibility_render');
 const continuationPrompt = require('./continuation_prompt');
+const conversationHistoryPolicy = require('./conversation_history_policy');
 const authoritativeWorkStateQuery = require('./authoritative_work_state_query');
 const conversationalDraftPolicy = require('./conversational_draft_policy');
 const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
@@ -27,7 +28,7 @@ const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
-const EXTENSION_VERSION = '0.4.56';
+const EXTENSION_VERSION = '0.4.57';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -2449,6 +2450,9 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     }
   }
   lines.push.apply(lines, formatContinuationTelemetryLines(rp.continuation_telemetry || (result && result.continuation_telemetry)));
+  lines.push.apply(lines, conversationHistoryPolicy.formatTelemetryLines(
+    rp.conversation_history_policy || (result && result.conversation_history_policy)
+  ));
   lines.push('- output_validation: ' + formatOutputValidationStatus(rp.output_validation));
   lines.push.apply(lines, formatJudgmentVerificationLines(rp.output_validation));
   if (rp.runtime_consumption_gate && typeof rp.runtime_consumption_gate === 'object') {
@@ -3955,6 +3959,9 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
     }
   }
   sections.push(buildContinuationTelemetrySection(ctx.continuationTelemetry || packet.continuation_telemetry));
+  sections.push(conversationHistoryPolicy.buildTelemetrySection(
+    ctx.conversationHistoryPolicy || packet.conversation_history_policy
+  ));
   // Gate Copy MD continuation inclusion on the toggle (continuationEnabled), not merely on summary existence.
   if (ctx.continuationEnabled && ctx.continuationSummary) {
     sections.push(buildContinuationSummaryCopySection(ctx.continuationSummary));
@@ -5254,6 +5261,7 @@ function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort
     provider_reasoning_requested: providerReport.provider_reasoning_requested,
     provider_reasoning_applied: providerReport.provider_reasoning_applied,
     provider_reasoning_note: providerReport.provider_reasoning_note,
+    conversation_history_policy: construction.conversation_history_policy,
     unicode_normalization_applied: unicode.unicode_normalization_applied === true,
     unicode_replacements_count: typeof unicode.unicode_replacements_count === 'number' ? unicode.unicode_replacements_count : 0,
     unicode_normalization_sources: typeof unicode.unicode_normalization_sources === 'string' ? unicode.unicode_normalization_sources : '',
@@ -5458,6 +5466,7 @@ function wireFusionWebview(context, webview, worker, state) {
     );
     const wspTaskPrompt = continuation.prompt;
     const continuationTelemetry = continuation.telemetry;
+    const historyAdmission = conversationHistoryPolicy.prepareHistoryAdmission(state, continuationEnabled);
     const promptConstruction = {
       work_focus_digest: redactedDigest(workFocus, 180),
       wsp_prompt_digest: redactedDigest(wspTaskPrompt, 320),
@@ -5576,8 +5585,9 @@ function wireFusionWebview(context, webview, worker, state) {
       postStatusAndProgress(webview, null, 'Grounding preflight blocked Fusion: ' + groundingPreflight.rejection_reasons.join(', '));
       result = buildGroundingPreflightBlockedResult(groundingPreflight);
     } else {
-      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
+      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, state, promptConstruction);
     }
+    conversationHistoryPolicy.discardProviderHistory(historyAdmission, result, promptConstruction);
     fusionProgress.capture(result);
     if (holoScorecard) {
       holoScorecard.audit_context_applied = result && result.audit_context_applied === true;
@@ -5932,9 +5942,6 @@ function wireFusionWebview(context, webview, worker, state) {
           mojibake_markers: mojibake.markers
         });
       }
-    }
-    if (result.ok && Array.isArray(result.history)) {
-      state.history = result.history;
     }
     result = enrichRedactionBlockResult(result);
     if (result.review_packet) {
@@ -8336,6 +8343,10 @@ module.exports = {
   buildContinuationTelemetrySection,
   formatContinuationTelemetryLines,
   normalizeContinuationTelemetry,
+  buildConversationHistoryPolicyTelemetrySection: conversationHistoryPolicy.buildTelemetrySection,
+  enforceConversationHistoryPolicy: conversationHistoryPolicy.enforceHistoryPolicy,
+  formatConversationHistoryPolicyTelemetryLines: conversationHistoryPolicy.formatTelemetryLines,
+  normalizeConversationHistoryPolicyTelemetry: conversationHistoryPolicy.normalizeTelemetry,
   sanitizeContinuationField,
   redactedDigest,
   resolvePythonInterpreter,

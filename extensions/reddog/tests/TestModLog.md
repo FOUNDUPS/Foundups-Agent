@@ -1,5 +1,14 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-06 - Conversation history policy enforcement (0.4.57)
+
+- Added focused zero-admission tests for disabled, enabled-without-authenticated-
+  scope, missing input, cross-FoundUp/secret-shaped raw history, setting changes,
+  provider-history discard, and content-free telemetry.
+- Extended the full extension contract to prove Fusion receives only policy-
+  admitted history, editor state does not retain provider history, and Run Trace
+  reports zero admitted turn IDs.
+
 ## 2026-08-05 - Current-generation trust binding manifest (0.4.56)
 
 - Updated the exact generated backend-manifest pin and RedDog build identity

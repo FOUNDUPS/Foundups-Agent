@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-08-06 - Conversation history policy enforcement (0.4.57)
+
+- Separated the sanitized last-packet continuation summary from raw provider
+  conversation history.
+- Added a zero-admission policy until authenticated FoundUp-scoped conversation
+  state exists; prior raw turns cannot reach Fusion or persist back into editor
+  state.
+- Added truthful Run Trace/Copy MD telemetry for requested inclusion, stored and
+  admitted counts, admitted turn IDs, rejection reason, setting-sensitive prompt
+  policy key, and discarded provider history.
+- Preserved the existing no-authority boundary and deferred persistent scope and
+  work promotion to later slices (WSP 00, 15, 22, 50, 62, 97).
+
 ## 2026-08-05 - Current-generation trust binding manifest pin (0.4.56)
 
 - Pinned the regenerated backend manifest containing the signer
