@@ -1,6 +1,13 @@
 # RedDog
 
-Version: 0.4.56
+Version: 0.4.57
+
+Version 0.4.57 makes the continuation/model-history boundary truthful. The
+existing `Use last RedDog packet` control may append only the sanitized advisory
+summary. Raw provider history is admitted as zero turns until authenticated,
+FoundUp-scoped conversation state exists. Run Trace telemetry reports the
+request, rejection reason, admitted turn IDs, and discarded provider-history
+count. Conversation history grants no work authority.
 
 Version 0.4.56 pins the resident live-canary current-generation trust binding
 and the verified-outcome runtime-binding foundation in the
@@ -406,6 +413,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.56.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.57.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.
