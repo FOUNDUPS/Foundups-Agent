@@ -157,8 +157,9 @@ def test_atomic_publish_is_off_repo_and_preserves_old_file_on_invalid(tmp_path: 
     repo.mkdir()
     runtime.mkdir()
     output = runtime / "compatibility.json"
+    current = datetime.now(timezone.utc)
     evidence = compose_runtime_compatibility_evidence(
-        _supply(), upstream_releases=_releases(), now=NOW
+        _supply(now=current), upstream_releases=_releases(), now=current
     )
     publish_runtime_compatibility_evidence(
         evidence, repo_root=repo, runtime_root=runtime, output_path=output
