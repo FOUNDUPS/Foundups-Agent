@@ -28,6 +28,18 @@ Optional custom args:
 .\modules\communication\moltbot_bridge\tests\run_tests.ps1 -PytestArgs @("-q", "-k", "skill_safety")
 ```
 
+Focused authenticated conversation-scope runtime:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_authentication.py modules/communication/moltbot_bridge/tests/test_reddog_authenticated_conversation_scope_state.py modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_tamper_and_rotation.py -q
+```
+
+This suite uses a temporary SQLite AgentDB-shaped store plus current-checkout
+FoundUp and grounding receipts. It covers restart recovery, one-use opaque
+authentication, HMAC rotation, recomputed-hash tampering, cross-principal,
+cross-session and cross-FoundUp rejection, stale grounding, expiry, CAS and
+concurrent updates. It performs no provider call, dispatch, repository write,
+HoloIndex reindex, signing operation, PR, or merge.
+
 Focused owner-controlled signer E0 admission:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py -q

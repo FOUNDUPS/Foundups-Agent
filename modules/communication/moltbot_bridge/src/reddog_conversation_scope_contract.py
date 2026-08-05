@@ -1,0 +1,197 @@
+"""Typed contract for authenticated, FoundUp-scoped RedDog conversation state."""
+
+from __future__ import annotations
+
+import re
+from typing import Any, Mapping, Sequence
+
+from modules.foundups.agent.src.kanban_plugin_contract import redact_sensitive
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_digest import (
+    canonical_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_revision import (
+    REVISION_RECEIPT_FIELDS,
+    REVISION_RECEIPT_SCHEMA,
+    valid_revision_receipts,
+)
+
+
+SCHEMA_VERSION = "reddog_authenticated_conversation_scope.v1"
+SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+HEAD_RE = re.compile(r"^[0-9a-f]{7,64}$")
+MAX_TEXT = 720
+MAX_ITEMS = 32
+MAX_EVIDENCE_REFS = 64
+ITEM_KINDS = frozenset(
+    {"operator_statement", "repository_fact", "model_inference", "unresolved"}
+)
+IMMUTABLE_FIELDS = frozenset(
+    {
+        "schema_version", "conversation_id", "principal_id", "principal_provider",
+        "verified_subject_digest", "principal_record_digest", "principal_key_fingerprint",
+        "transport", "session_binding_digest", "authorized_foundup_id", "created_at",
+    }
+)
+MUTABLE_FIELDS = frozenset(
+    {
+        "conversation_revision", "turn_id", "parent_turn_id", "discussion_foundup_ids",
+        "active_topic", "current_objective", "accepted_decisions", "rejected_options",
+        "open_questions", "repository_evidence_refs", "source_snapshot_id",
+        "source_snapshot_digest", "last_grounded_head_sha", "holoindex_generation_id",
+        "holoindex_freshness_receipt_id", "grounding_receipt_id", "pending_work_proposal_id",
+        "pending_work_proposal_digest", "updated_at", "expires_at", "revision_receipts",
+        "record_auth_mac", "record_digest",
+    }
+)
+RECORD_FIELDS = IMMUTABLE_FIELDS | MUTABLE_FIELDS
+
+
+def sanitized_text(value: Any, *, limit: int = MAX_TEXT) -> str:
+    text = redact_sensitive(str(value or "")).strip()
+    if "\x00" in text or any(ord(char) < 32 and char not in "\n\r\t" for char in text):
+        raise ValueError("conversation_scope_text_invalid")
+    return text[:limit]
+
+
+def typed_items(values: Any) -> list[dict[str, Any]]:
+    if not isinstance(values, Sequence) or isinstance(values, (str, bytes)):
+        raise ValueError("conversation_scope_items_invalid")
+    if len(values) > MAX_ITEMS:
+        raise ValueError("conversation_scope_items_limit")
+    items: list[dict[str, Any]] = []
+    for raw in values:
+        if not isinstance(raw, Mapping) or set(raw) != {"item_id", "kind", "summary", "evidence_refs"}:
+            raise ValueError("conversation_scope_item_shape_invalid")
+        kind = str(raw["kind"])
+        refs = string_list(raw["evidence_refs"], maximum=MAX_EVIDENCE_REFS)
+        item = {
+            "item_id": str(raw["item_id"]),
+            "kind": kind,
+            "summary": sanitized_text(raw["summary"]),
+            "evidence_refs": refs,
+        }
+        if not SHA256_RE.fullmatch(item["item_id"]) or kind not in ITEM_KINDS or not item["summary"]:
+            raise ValueError("conversation_scope_item_invalid")
+        if kind == "repository_fact" and not refs:
+            raise ValueError("conversation_scope_repository_fact_unreferenced")
+        items.append(item)
+    if len({item["item_id"] for item in items}) != len(items):
+        raise ValueError("conversation_scope_item_duplicate")
+    return items
+
+
+def string_list(values: Any, *, maximum: int) -> list[str]:
+    if not isinstance(values, Sequence) or isinstance(values, (str, bytes)) or len(values) > maximum:
+        raise ValueError("conversation_scope_list_invalid")
+    result = [sanitized_text(item, limit=320) for item in values]
+    if any(not item for item in result) or len(set(result)) != len(result):
+        raise ValueError("conversation_scope_list_invalid")
+    return result
+
+
+def validate_record(record: Mapping[str, Any]) -> tuple[str, ...]:
+    if set(record) != RECORD_FIELDS or record.get("schema_version") != SCHEMA_VERSION:
+        return ("conversation_scope_record_shape_invalid",)
+    reasons = [*_binding_reasons(record), *_state_reasons(record)]
+    return tuple(dict.fromkeys(reasons))
+
+
+def _binding_reasons(record: Mapping[str, Any]) -> list[str]:
+    reasons: list[str] = []
+    digest_payload = dict(record)
+    supplied_digest = str(digest_payload.pop("record_digest", ""))
+    if not SHA256_RE.fullmatch(supplied_digest) or supplied_digest != canonical_digest(digest_payload):
+        reasons.append("conversation_scope_record_digest_invalid")
+    required_digests = (
+        "verified_subject_digest", "principal_record_digest", "principal_key_fingerprint",
+        "session_binding_digest", "grounding_receipt_id",
+    )
+    if any(not SHA256_RE.fullmatch(str(record.get(field) or "")) for field in required_digests):
+        reasons.append("conversation_scope_binding_digest_invalid")
+    if not SHA256_RE.fullmatch(str(record.get("conversation_id") or "")):
+        reasons.append("conversation_scope_id_invalid")
+    if not re.fullmatch(r"hmac-sha256:[0-9a-f]{64}", str(record.get("record_auth_mac") or "")):
+        reasons.append("conversation_scope_record_auth_mac_invalid")
+    if not HEAD_RE.fullmatch(str(record.get("last_grounded_head_sha") or "")):
+        reasons.append("conversation_scope_head_invalid")
+    if not _valid_optional_digest_pair(record, "pending_work_proposal_id", "pending_work_proposal_digest"):
+        reasons.append("conversation_scope_pending_proposal_invalid")
+    if not _valid_optional_digest_pair(record, "source_snapshot_id", "source_snapshot_digest"):
+        reasons.append("conversation_scope_snapshot_binding_invalid")
+    if not _valid_optional_digest_pair(
+        record, "holoindex_generation_id", "holoindex_freshness_receipt_id"
+    ):
+        reasons.append("conversation_scope_holoindex_binding_invalid")
+    return reasons
+
+
+def _state_reasons(record: Mapping[str, Any]) -> list[str]:
+    reasons: list[str] = []
+    if any(not str(record.get(field) or "") for field in (
+        "principal_id", "principal_provider", "transport", "authorized_foundup_id",
+        "turn_id", "active_topic", "current_objective", "created_at", "updated_at",
+    )):
+        reasons.append("conversation_scope_required_value_missing")
+    if not SHA256_RE.fullmatch(str(record.get("turn_id") or "")):
+        reasons.append("conversation_scope_turn_id_invalid")
+    parent_turn_id = str(record.get("parent_turn_id") or "")
+    revision_value = _integer(record.get("conversation_revision"), default=-1)
+    if (
+        (revision_value == 0 and parent_turn_id)
+        or (revision_value > 0 and not SHA256_RE.fullmatch(parent_turn_id))
+    ):
+        reasons.append("conversation_scope_parent_turn_invalid")
+    discussions = record.get("discussion_foundup_ids")
+    try:
+        normalized_discussions = string_list(discussions, maximum=16)
+    except (TypeError, ValueError):
+        normalized_discussions = []
+    if record.get("authorized_foundup_id") not in normalized_discussions:
+        reasons.append("conversation_scope_foundup_set_invalid")
+    created_at = _integer(record.get("created_at"), default=-1)
+    updated_at = _integer(record.get("updated_at"), default=-1)
+    expires_at = _integer(record.get("expires_at"), default=-1)
+    if (
+        revision_value < 0 or created_at < 0 or updated_at < created_at
+        or expires_at <= updated_at
+    ):
+        reasons.append("conversation_scope_revision_or_expiry_invalid")
+    for field in ("accepted_decisions", "rejected_options", "open_questions"):
+        try:
+            typed_items(record.get(field))
+        except (TypeError, ValueError):
+            reasons.append(f"conversation_scope_{field}_invalid")
+    try:
+        string_list(record.get("repository_evidence_refs"), maximum=MAX_EVIDENCE_REFS)
+    except (TypeError, ValueError):
+        reasons.append("conversation_scope_evidence_refs_invalid")
+    if not valid_revision_receipts(record):
+        reasons.append("conversation_scope_revision_receipts_invalid")
+    return reasons
+
+
+def with_record_digest(record: Mapping[str, Any]) -> dict[str, Any]:
+    value = dict(record)
+    value.pop("record_digest", None)
+    value["record_digest"] = canonical_digest(value)
+    return value
+
+
+def _valid_optional_digest_pair(record: Mapping[str, Any], left: str, right: str) -> bool:
+    values = (str(record.get(left) or ""), str(record.get(right) or ""))
+    return values == ("", "") or all(SHA256_RE.fullmatch(value) for value in values)
+
+
+def _integer(value: Any, *, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+__all__ = [
+    "IMMUTABLE_FIELDS", "ITEM_KINDS", "MUTABLE_FIELDS", "RECORD_FIELDS",
+    "REVISION_RECEIPT_FIELDS", "REVISION_RECEIPT_SCHEMA", "SCHEMA_VERSION",
+    "canonical_digest", "sanitized_text",
+    "string_list", "typed_items", "validate_record", "with_record_digest",
+]

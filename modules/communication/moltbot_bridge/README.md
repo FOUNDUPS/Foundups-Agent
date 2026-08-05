@@ -1,5 +1,19 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## RedDog conversational state boundary
+
+RedDog now has an AgentDB-backed authenticated conversation-scope runtime. It
+stores only typed, bounded continuity state and current evidence bindings; raw
+provider history is never stored by this runtime. A fresh signed session proof
+and current principal/FoundUp resolution are required for create, resume, and
+CAS update. Stale HEAD, HoloIndex generation, operational snapshot, expiry,
+principal key, transport/session, or turn lineage fails closed.
+
+This state helps RedDog interpret follow-up requests. It is not work authority.
+Proposal creation, principal authorization, WRE/OpenClaw/Hermes dispatch,
+repository mutation, and merge remain downstream gates. The extension does not
+consume this state until a production authenticated-session source is bound.
+
 ## Upstream Agent Execution Boundary
 
 RedDog's bounded author stage can use the installed upstream agent runtimes,
