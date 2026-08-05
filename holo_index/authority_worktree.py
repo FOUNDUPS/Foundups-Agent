@@ -133,6 +133,27 @@ def _workspace_selection(
     )
 
 
+def resolve_holoindex_runtime_root(
+    workspace_root: Path | str,
+    *,
+    common_dir_reader: Callable[[Path], Path | None] = _git_common_dir,
+) -> Path:
+    """Return the same-repository primary worktree for vetted dependencies."""
+
+    workspace = Path(workspace_root).resolve(strict=False)
+    common_dir = common_dir_reader(workspace)
+    if common_dir is None:
+        return workspace
+    candidate = common_dir.parent.resolve(strict=False)
+    if (
+        not candidate.is_dir()
+        or not (candidate / ".git").exists()
+        or not _same_common_dir(workspace, candidate, common_dir_reader)
+    ):
+        return workspace
+    return candidate
+
+
 def _validate_authority_candidate(
     workspace: Path,
     workspace_state: RepositoryState,
@@ -208,4 +229,5 @@ __all__ = [
     "HoloIndexAuthoritySelection",
     "WORKSPACE_STATE_UNAVAILABLE",
     "resolve_holoindex_authority_root",
+    "resolve_holoindex_runtime_root",
 ]

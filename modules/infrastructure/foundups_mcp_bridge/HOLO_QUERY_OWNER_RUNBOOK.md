@@ -16,6 +16,12 @@ HoloIndex write surface. This is an application contract, not an OS privilege
 boundary; hard isolation requires a worker identity without store-write or
 process-control permissions.
 
+For a linked-worktree caller, repository bytes still come from the selected
+clean same-HEAD authority checkout. Runtime dependencies come from the primary
+worktree proved by the same Git common directory, then pass the existing
+checkout-local virtualenv validation. The primary worktree is dependency
+provenance only; its HEAD and working-tree contents are not retrieval evidence.
+
 ## Main Integration
 
 Both interactive and headless RedDog preflights call

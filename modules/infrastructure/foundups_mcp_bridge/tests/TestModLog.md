@@ -1,5 +1,12 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-06] Linked-worktree owner dependency root
+
+- Proved the query adapter passes a separately resolved primary worktree to
+  owner bootstrap while retaining the selected authority root for query bytes.
+- Proved missing or unrelated primary candidates fall back to the workspace,
+  and the resolver contains no checkout, reset, index, or cleanup mutation.
+
 ## [2026-07-30] Canonical Holo runtime dependency binding
 
 - Proved nonsealed owner and maintenance children accept only the canonical

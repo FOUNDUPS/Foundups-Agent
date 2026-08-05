@@ -1,5 +1,14 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-06 - Linked-worktree HoloIndex runtime-root resolution (0.4.58)
+
+- Added same-repository primary-worktree resolution and unrelated-worktree
+  fail-closed regressions.
+- Added query-owner proof that repository evidence and dependency roots remain
+  distinct.
+- Re-ran owner, maintenance, manifest, compatibility, and extension contract
+  gates plus one real generation-bound semantic query.
+
 ## 2026-08-06 - Conversation history policy enforcement (0.4.57)
 
 - Added focused zero-admission tests for disabled, enabled-without-authenticated-

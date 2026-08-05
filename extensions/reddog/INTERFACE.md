@@ -1,5 +1,9 @@
 # RedDog Interface
 
+Version 0.4.58 separates authority-owned repository bytes from same-repository
+runtime dependency resolution for linked-worktree HoloIndex owner queries. The
+query remains generation-bound and cannot re-index.
+
 Version 0.4.57 separates sanitized packet continuation from raw model history.
 `Use last RedDog packet` remains an advisory-summary opt-in. The extension sends
 zero prior raw turns to Fusion, discards provider-returned history, and reports

@@ -53,6 +53,14 @@ filesystem/process permissions separately when required. Legacy consumers,
 including foundups_mcp_bridge `holo_tools.py`, remain outside this Phase-1
 migration and may still open the store directly.
 
+Linked-worktree owner queries keep repository evidence and dependency
+ownership separate. Repository bytes come from the selected clean exact-HEAD
+authority checkout. Python dependencies come from the primary worktree
+derived from the same Git common directory and are still validated by the
+checkout-local virtualenv contract. Failure to prove that relationship falls
+back to the caller workspace and therefore fails closed when no valid runtime
+exists. The resolver never checks out, updates, or indexes either worktree.
+
 Search response contract:
 ```python
 {
