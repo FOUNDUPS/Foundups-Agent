@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-05: Upstream agent runtime truth registry
+- Upgraded the existing OpenClaw integration manifest to a static provenance
+  v2 ledger with stable integration IDs, exact checked-in implementation and
+  test evidence paths, and explicit upstream CLI/API versus Foundups-local
+  classifications.
+- Bound the only two accepted upstream artifact providers to the canonical
+  `openclaw_gateway` and `hermes_api` runtime modes while recording that both
+  remain default-off, fail-closed, text-only, and tool-free. No upstream hook
+  is currently claimed.
+- Split the previous aggregate Hermes label into the WRE dry-run executor,
+  FoundUp builder, and resident transport surfaces so each records its actual
+  owner, controls, consumers, and capability boundary. The structured registry
+  remains readable and below the WSP 62 configuration threshold.
+- The ledger is explicitly non-authoritative: it does not prove installation,
+  health, version freshness, live execution, or grant any worker authority
+  (WSP 00/15/22/50/62/97). WSP 15 classified the correction P1 at 14/20.
+
 ## 2026-08-04: Verified-outcome root authority service
 - Replaced the signer-owned outcome replay database with a separately launched,
   root-owned Unix-socket authority service. The root process owns disjoint
@@ -101,7 +118,6 @@
 - Boundary remains narrow: no learning candidates, Brain or roadmap writes,
   HoloIndex mutation, new database, new orchestrator, voting, or CABR governance
   (WSP 00/15/22/50/62/97).
-
 ## 2026-08-04: Memex supply authenticity gate
 - Replaced the promotion path's `sha256:` prefix check with exact typed Memex supply
   receipt rehydration, canonical digest verification, scope/lineage and

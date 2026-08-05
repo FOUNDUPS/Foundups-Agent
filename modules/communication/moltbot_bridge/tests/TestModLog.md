@@ -1,3 +1,18 @@
+## 2026-08-05: Upstream agent runtime provenance regressions
+
+- Added a strict v2 schema and independent integration-ID allowlist for the
+  OpenClaw Gateway and Hermes API upstream claims.
+- Added regressions for local-name relabeling, fabricated upstream providers,
+  provider substitution, unknown fields, documentation-only evidence,
+  absolute/traversal/missing paths, and source-marker drift.
+- Proved every existing manifest entry resolves to a checked-in regular file,
+  no current upstream hook is claimed, no production source consumes the
+  static ledger as authority, and local adapters cannot satisfy an upstream
+  runtime requirement. Source invocation checks use AST rather than comments.
+- Added exact owner and runtime-origin definition checks, distinct Hermes-local
+  control contracts, bounded common-field validation, and a repository-wide
+  executable-source scan proving the static ledger has no runtime consumer.
+
 ## 2026-08-04: Verified-outcome root authority regressions
 
 - Added signer-instance proof, live UID/GID rotation, dual-store reset,
@@ -58,7 +73,6 @@
 - Split signer-domain and adversarial outcome tests into focused modules, and
   changed legacy full-chain fixtures to assert the production stop before
   unauthenticated PatternMemory activation. No security assertion was removed.
-
 ## 2026-08-04: Memex supply authenticity regressions
 
 - Added exact receipt round-trip, unknown-field/type, lineage, scope, expiry,

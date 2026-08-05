@@ -1,216 +1,192 @@
 {
-  "$schema": "openclaw_integration_manifest/v1",
-  "description": "Machine-readable ledger of all OpenClaw integration points. Source of truth: docs/audits/openclaw_plugins/OPENCLAW_PLUGIN_LEDGER_AUDIT.md",
-  "generated": "2026-04-05",
-  "maintenance": "When adding a new OPENCLAW_*/IRONCLAW_*/OPENROUTER_* env key to main.py or wre_defaults.env, add it to the owning integration entry here. Run: pytest modules/communication/moltbot_bridge/tests/test_openclaw_integration_manifest.py",
+  "$schema": "openclaw_integration_manifest/v2",
+  "description": "Static, non-authoritative provenance inventory for upstream OpenClaw/Hermes runtimes and Foundups-local integrations that expose related names or controls.",
+  "coverage_scope": "Runtime entrypoints and control-plane integrations. Runtime names and this ledger never prove live upstream execution or grant authority.",
+  "truth_scope": "STATIC_IMPLEMENTATION_PROVENANCE_ONLY",
+  "generated": "2026-08-05",
+  "runtime_origin_values": ["UPSTREAM_CLI","UPSTREAM_API","UPSTREAM_HOOK","FOUNDUPS_LOCAL","LEGACY_ALIAS"],
+  "runtime_origin_definitions": {
+    "UPSTREAM_CLI": "Foundups directly invokes an installed upstream executable.",
+    "UPSTREAM_API": "Foundups directly invokes an installed upstream service API.",
+    "UPSTREAM_HOOK": "Checked-in upstream hook configuration proves upstream dispatch into Foundups.",
+    "FOUNDUPS_LOCAL": "The implementation is owned by this repository, even when it calls an external model or service.",
+    "LEGACY_ALIAS": "A deprecated or compatibility identifier with a required canonical alias_of target; it never proves upstream execution."
+  },
+  "upstream_hook_status": "NO_PROVEN_UPSTREAM_HOOK",
+  "maintenance": "When adding an OpenClaw/Hermes runtime entrypoint or related environment control, classify runtime_origin, bind checked-in implementation_paths, and add upstream_identity only for a directly invoked upstream runtime. Run: pytest modules/communication/moltbot_bridge/tests/test_openclaw_integration_manifest.py",
   "integrations": [
     {
-      "name": "IronClaw Gateway",
-      "type": "conversation_provider",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "off",
-      "env_keys": [
-        "OPENCLAW_CONVERSATION_BACKEND",
-        "OPENCLAW_IRONCLAW_STRICT",
-        "OPENCLAW_IRONCLAW_ALLOW_LOCAL_FALLBACK",
-        "OPENCLAW_IRONCLAW_AUTOSTART",
-        "IRONCLAW_BASE_URL",
-        "IRONCLAW_MODEL"
+      "integration_id": "ironclaw_gateway", "name": "IronClaw Gateway", "type": "conversation_provider",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_conversation_adapter",
+      "implementation_paths": ["modules/communication/moltbot_bridge/src/ironclaw_gateway_client.py","modules/communication/moltbot_bridge/src/openclaw_provider_chain.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "off", "env_keys": ["OPENCLAW_CONVERSATION_BACKEND","OPENCLAW_IRONCLAW_STRICT","OPENCLAW_IRONCLAW_ALLOW_LOCAL_FALLBACK","OPENCLAW_IRONCLAW_AUTOSTART","IRONCLAW_BASE_URL","IRONCLAW_MODEL"], "secret_keys": ["IRONCLAW_AUTH_TOKEN"],
+      "external_service": "local_service", "fail_mode": "fail_closed_strict_or_fail_open_fallback", "consumers": ["openclaw_provider_chain","main.py"]
+    },
+    {
+      "integration_id": "local_ollama_qwen", "name": "Local Ollama / Qwen", "type": "conversation_provider",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_local_model_adapter",
+      "implementation_paths": ["modules/communication/moltbot_bridge/src/openclaw_bootstrap_config.py","modules/communication/moltbot_bridge/src/openclaw_provider_chain.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": ["OPENCLAW_OLLAMA_MODEL"], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_closed", "consumers": ["openclaw_bootstrap_config","openclaw_provider_chain"]
+    },
+    {
+      "integration_id": "openclaw_gateway_artifact_provider", "name": "OpenClaw Gateway Artifact Provider", "type": "artifact_generation_provider",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "UPSTREAM_CLI", "capability_boundary": "text_artifact_only_no_tools", "provider_runtime": "openclaw_gateway", "upstream_invocation_surface": "openclaw agent via the version-matched loopback Gateway",
+      "implementation_paths": [
+        "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_bootstrap.py",
+        "modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_artifact_provider.py",
+        "modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_command_runner.py",
+        "modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_confinement.py"
       ],
-      "secret_keys": ["IRONCLAW_AUTH_TOKEN"],
-      "external_service": "local_service",
-      "fail_mode": "fail_closed_strict_or_fail_open_fallback",
-      "consumers": ["openclaw_provider_chain", "main.py"]
+      "evidence_paths": ["modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py","modules/communication/moltbot_bridge/tests/test_reddog_upstream_artifact_provider_bootstrap.py"], "upstream_identity": {"project":"openclaw/openclaw","runtime_interface":"CLI","runtime_entrypoint":"/usr/local/bin/openclaw","runtime_operation":"agent","canonical_provider_path":"modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_artifact_provider.py","confinement_path":"modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_confinement.py"},
+      "status": "landed", "default": "off", "env_keys": ["REDDOG_ARTIFACT_GENERATOR_MODE"], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_closed", "consumers": ["reddog_artifact_generation_provider_bootstrap"]
     },
     {
-      "name": "Local Ollama / Qwen",
-      "type": "conversation_provider",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "on",
-      "env_keys": ["OPENCLAW_OLLAMA_MODEL"],
-      "secret_keys": [],
-      "external_service": "local_service",
-      "fail_mode": "fail_closed",
-      "consumers": ["openclaw_bootstrap_config", "openclaw_provider_chain"]
-    },
-    {
-      "name": "AI Gateway - OpenAI",
-      "type": "ai_gateway_provider",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "off",
-      "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"],
-      "secret_keys": ["OPENAI_API_KEY"],
-      "external_service": "external_service",
-      "fail_mode": "fail_open",
-      "consumers": ["ai_gateway"]
-    },
-    {
-      "name": "AI Gateway - Anthropic",
-      "type": "ai_gateway_provider",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "off",
-      "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"],
-      "secret_keys": ["ANTHROPIC_API_KEY"],
-      "external_service": "external_service",
-      "fail_mode": "fail_open",
-      "consumers": ["ai_gateway"]
-    },
-    {
-      "name": "AI Gateway - Grok/XAI",
-      "type": "ai_gateway_provider",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "off",
-      "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"],
-      "secret_keys": ["GROK_API_KEY", "XAI_API_KEY"],
-      "external_service": "external_service",
-      "fail_mode": "fail_open",
-      "consumers": ["ai_gateway"]
-    },
-    {
-      "name": "AI Gateway - Google Gemini",
-      "type": "ai_gateway_provider",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "off",
-      "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"],
-      "secret_keys": ["GEMINI_API_KEY"],
-      "external_service": "external_service",
-      "fail_mode": "fail_open",
-      "consumers": ["ai_gateway"]
-    },
-    {
-      "name": "OpenRouter",
-      "type": "standalone_llm_router",
-      "owner_module": "modules/infrastructure/openrouter_client",
-      "status": "parked",
-      "notes": "contract_pending / BLOCKED_PENDING_REDACTION_GATE. Live OpenRouter client is dormant: modules/infrastructure/openrouter_client is an empty/reverted shell. The FusionAdapter contract lives at modules/communication/moltbot_bridge/src/fusion_adapter.py (mock/dry-run only). Status 'parked' is the manifest-schema honest value (enum: landed/planned/parked/removed); it is NOT 'landed'. See docs/audits/architecture/OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1.md.",
-      "default": "off",
-      "env_keys": [
-        "OPENROUTER_BASE_URL",
-        "OPENROUTER_DEFAULT_MODEL",
-        "OPENROUTER_PRESET",
-        "OPENROUTER_FALLBACK_ENABLED",
-        "OPENROUTER_WEB_SEARCH",
-        "OPENROUTER_TIMEOUT_SEC"
+      "integration_id": "hermes_api_artifact_provider", "name": "Hermes API Artifact Provider", "type": "artifact_generation_provider",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "UPSTREAM_API", "capability_boundary": "text_artifact_only_no_tools", "provider_runtime": "hermes_api", "upstream_invocation_surface": "authenticated loopback POST /v1/runs",
+      "implementation_paths": [
+        "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_bootstrap.py",
+        "modules/communication/moltbot_bridge/src/reddog_hermes_api_artifact_provider.py",
+        "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+        "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+        "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+        "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py"
       ],
-      "secret_keys": ["OPENROUTER_API_KEY"],
-      "external_service": "external_service",
-      "fail_mode": "fail_open",
-      "consumers": ["holo_index/skillz/consciousness_migration/executor.py"]
+      "evidence_paths": ["modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py","modules/communication/moltbot_bridge/tests/test_reddog_upstream_artifact_provider_bootstrap.py"], "upstream_identity": {"project":"NousResearch/hermes-agent","runtime_interface":"API","runtime_entrypoint":"http://127.0.0.1:8642/v1/runs","runtime_operation":"POST /v1/runs","canonical_provider_path":"modules/communication/moltbot_bridge/src/reddog_hermes_api_artifact_provider.py","confinement_path":"modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py"},
+      "status": "landed", "default": "off", "env_keys": ["REDDOG_ARTIFACT_GENERATOR_MODE"], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_closed", "consumers": ["reddog_artifact_generation_provider_bootstrap"]
     },
     {
-      "name": "Resident OpenClaw",
-      "type": "service_daemon",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "on",
-      "env_keys": ["OPENCLAW_RESIDENT_ENABLED", "OPENCLAW_RESIDENT_AUTOSTART"],
-      "secret_keys": ["FOUNDUPS_WEBHOOK_TOKEN"],
-      "external_service": "local_service",
-      "fail_mode": "fail_open",
-      "consumers": ["main.py"]
+      "integration_id": "ai_gateway_openai", "name": "AI Gateway - OpenAI", "type": "ai_gateway_provider",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_model_provider_adapter",
+      "implementation_paths": ["modules/ai_intelligence/ai_gateway/src/ai_gateway.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "off", "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"], "secret_keys": ["OPENAI_API_KEY"],
+      "external_service": "external_service", "fail_mode": "fail_open", "consumers": ["ai_gateway"]
     },
     {
-      "name": "Supervisor",
-      "type": "service_daemon",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "on",
-      "env_keys": ["OPENCLAW_SUPERVISOR_ENABLED"],
-      "secret_keys": [],
-      "external_service": "local_service",
-      "fail_mode": "fail_open",
-      "consumers": ["main.py"]
+      "integration_id": "ai_gateway_anthropic", "name": "AI Gateway - Anthropic", "type": "ai_gateway_provider",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_model_provider_adapter",
+      "implementation_paths": ["modules/ai_intelligence/ai_gateway/src/ai_gateway.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "off", "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"], "secret_keys": ["ANTHROPIC_API_KEY"],
+      "external_service": "external_service", "fail_mode": "fail_open", "consumers": ["ai_gateway"]
     },
     {
-      "name": "WRE Orchestrator",
-      "type": "service_daemon",
-      "owner_module": "modules/infrastructure/wre_core",
-      "status": "landed",
-      "default": "on",
-      "env_keys": [],
-      "secret_keys": [],
-      "external_service": "local_service",
-      "fail_mode": "fail_open",
-      "consumers": ["main.py", "openclaw_dae"]
+      "integration_id": "ai_gateway_grok_xai", "name": "AI Gateway - Grok/XAI", "type": "ai_gateway_provider",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_model_provider_adapter",
+      "implementation_paths": ["modules/ai_intelligence/ai_gateway/src/ai_gateway.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "off", "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"], "secret_keys": ["GROK_API_KEY","XAI_API_KEY"],
+      "external_service": "external_service", "fail_mode": "fail_open", "consumers": ["ai_gateway"]
     },
     {
-      "name": "Skill Safety Gate",
-      "type": "security_gate",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "on",
-      "env_keys": [
-        "OPENCLAW_SKILL_SCAN_REQUIRED",
-        "OPENCLAW_SKILL_SCAN_ENFORCED",
-        "OPENCLAW_SKILL_MANIFEST_REQUIRED",
-        "OPENCLAW_SKILL_MANIFEST_ENFORCED"
-      ],
-      "secret_keys": [],
-      "external_service": "local_service",
-      "fail_mode": "fail_closed",
-      "consumers": ["wre_core", "openclaw_dae"]
+      "integration_id": "ai_gateway_google_gemini", "name": "AI Gateway - Google Gemini", "type": "ai_gateway_provider",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_model_provider_adapter",
+      "implementation_paths": ["modules/ai_intelligence/ai_gateway/src/ai_gateway.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "off", "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"], "secret_keys": ["GEMINI_API_KEY"],
+      "external_service": "external_service", "fail_mode": "fail_open", "consumers": ["ai_gateway"]
     },
     {
-      "name": "Permission Manager",
-      "type": "security_gate",
-      "owner_module": "modules/ai_intelligence/agent_permissions",
-      "status": "landed",
-      "default": "on",
-      "env_keys": [],
-      "secret_keys": [],
-      "external_service": "local_service",
-      "fail_mode": "fail_closed",
-      "consumers": ["openclaw_dae"]
+      "integration_id": "openrouter", "name": "OpenRouter", "type": "standalone_llm_router",
+      "owner_module": "modules/infrastructure/openrouter_client", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_router_contract",
+      "implementation_paths": ["modules/communication/moltbot_bridge/src/fusion_adapter.py"],
+      "upstream_identity": null,
+      "status": "parked", "default": "off", "env_keys": ["OPENROUTER_BASE_URL","OPENROUTER_DEFAULT_MODEL","OPENROUTER_PRESET","OPENROUTER_FALLBACK_ENABLED","OPENROUTER_WEB_SEARCH","OPENROUTER_TIMEOUT_SEC"], "secret_keys": ["OPENROUTER_API_KEY"],
+      "external_service": "external_service", "fail_mode": "fail_open", "consumers": ["holo_index/skillz/consciousness_migration/executor.py"],
+      "notes": "contract_pending / BLOCKED_PENDING_REDACTION_GATE. Live OpenRouter client is dormant: modules/infrastructure/openrouter_client is an empty/reverted shell. The FusionAdapter contract lives at modules/communication/moltbot_bridge/src/fusion_adapter.py (mock/dry-run only). Status 'parked' is the manifest-schema honest value (enum: landed/planned/parked/removed); it is NOT 'landed'. See docs/audits/architecture/OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1.md."
     },
     {
-      "name": "Key Isolation",
-      "type": "security_gate",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "on",
-      "env_keys": ["OPENCLAW_NO_API_KEYS", "IRONCLAW_NO_API_KEYS"],
-      "secret_keys": [],
-      "external_service": null,
-      "fail_mode": "fail_closed",
-      "consumers": ["main.py", "openclaw_bootstrap_config"]
+      "integration_id": "resident_openclaw", "name": "Resident OpenClaw", "type": "service_daemon",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_control_plane_dae",
+      "implementation_paths": ["main.py","modules/communication/moltbot_bridge/src/openclaw_dae.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": ["OPENCLAW_RESIDENT_ENABLED","OPENCLAW_RESIDENT_AUTOSTART"], "secret_keys": ["FOUNDUPS_WEBHOOK_TOKEN"],
+      "external_service": "local_service", "fail_mode": "fail_open", "consumers": ["main.py"]
     },
     {
-      "name": "Dep Security Preflight",
-      "type": "security_gate",
-      "owner_module": "modules/communication/moltbot_bridge",
-      "status": "landed",
-      "default": "on",
-      "env_keys": [
-        "OPENCLAW_DEP_SECURITY_PREFLIGHT",
-        "OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED"
-      ],
-      "secret_keys": [],
-      "external_service": "local_service",
-      "fail_mode": "fail_open",
-      "consumers": ["main.py"]
+      "integration_id": "openclaw_supervisor", "name": "Supervisor", "type": "service_daemon",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_resident_supervisor",
+      "implementation_paths": ["modules/communication/moltbot_bridge/src/openclaw_supervisor.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": ["OPENCLAW_SUPERVISOR_ENABLED"], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_open", "consumers": ["main.py"]
     },
     {
-      "name": "Self-Audit Loop",
-      "type": "security_gate",
-      "owner_module": "modules/infrastructure/wre_core",
-      "status": "landed",
-      "default": "on",
-      "env_keys": [
-        "OPENCLAW_SELF_AUDIT_ENABLED",
-        "OPENCLAW_SELF_AUDIT_AUTO_FIX",
-        "OPENCLAW_SELF_AUDIT_INTERVAL_SEC",
-        "OPENCLAW_SELF_AUDIT_RUNTIME_ROOT"
-      ],
-      "secret_keys": [],
-      "external_service": "local_service",
-      "fail_mode": "fail_open",
-      "consumers": ["main.py", "wre_core"]
+      "integration_id": "wre_orchestrator", "name": "WRE Orchestrator", "type": "service_daemon",
+      "owner_module": "modules/infrastructure/wre_core", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_governed_execution_orchestrator",
+      "implementation_paths": ["modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": [], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_open", "consumers": ["main.py","openclaw_dae"]
+    },
+    {
+      "integration_id": "skill_safety_gate", "name": "Skill Safety Gate", "type": "security_gate",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_skill_admission_gate",
+      "implementation_paths": ["modules/communication/moltbot_bridge/src/skill_safety_guard.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": ["OPENCLAW_SKILL_SCAN_REQUIRED","OPENCLAW_SKILL_SCAN_ENFORCED","OPENCLAW_SKILL_MANIFEST_REQUIRED","OPENCLAW_SKILL_MANIFEST_ENFORCED"], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_closed", "consumers": ["wre_core","openclaw_dae"]
+    },
+    {
+      "integration_id": "permission_manager", "name": "Permission Manager", "type": "security_gate",
+      "owner_module": "modules/ai_intelligence/agent_permissions", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_permission_gate",
+      "implementation_paths": ["modules/ai_intelligence/agent_permissions/src/agent_permission_manager.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": [], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_closed", "consumers": ["openclaw_dae"]
+    },
+    {
+      "integration_id": "key_isolation", "name": "Key Isolation", "type": "security_gate",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_secret_isolation_policy",
+      "implementation_paths": ["modules/communication/moltbot_bridge/src/openclaw_bootstrap_config.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": ["OPENCLAW_NO_API_KEYS","IRONCLAW_NO_API_KEYS"], "secret_keys": [],
+      "external_service": null, "fail_mode": "fail_closed", "consumers": ["main.py","openclaw_bootstrap_config"]
+    },
+    {
+      "integration_id": "dependency_security_preflight", "name": "Dep Security Preflight", "type": "security_gate",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_dependency_preflight",
+      "implementation_paths": ["modules/infrastructure/wre_core/src/dependency_security_preflight.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": ["OPENCLAW_DEP_SECURITY_PREFLIGHT","OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED"], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_open", "consumers": ["main.py"]
+    },
+    {
+      "integration_id": "self_audit_loop", "name": "Self-Audit Loop", "type": "security_gate",
+      "owner_module": "modules/infrastructure/wre_core", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_readonly_self_audit",
+      "implementation_paths": ["modules/infrastructure/wre_core/src/daemon_self_audit_loop.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": ["OPENCLAW_SELF_AUDIT_ENABLED","OPENCLAW_SELF_AUDIT_AUTO_FIX","OPENCLAW_SELF_AUDIT_INTERVAL_SEC","OPENCLAW_SELF_AUDIT_RUNTIME_ROOT"], "secret_keys": [],
+      "external_service": "local_service", "fail_mode": "fail_open", "consumers": ["main.py","wre_core"]
+    },
+    {
+      "integration_id": "foundups_hermes_wre_job_executor", "name": "Foundups Hermes WRE Job Executor", "type": "dryrun_worker_adapter",
+      "owner_module": "modules/infrastructure/wre_core", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_local_dryrun_delegation_seam",
+      "implementation_paths": ["modules/infrastructure/wre_core/src/hermes_job_executor.py","modules/infrastructure/wre_core/src/foundup_job_consumer.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "off", "env_keys": ["HERMES_DELEGATE_ENABLED"], "secret_keys": [],
+      "external_service": null, "fail_mode": "fail_closed", "consumers": ["foundup_job_consumer"]
+    },
+    {
+      "integration_id": "foundups_hermes_foundup_builder", "name": "Foundups Hermes FoundUp Builder", "type": "bounded_foundup_builder_adapter",
+      "owner_module": "modules/foundups/agent", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_local_foundup_builder_dryrun_default_double_opt_in_writes",
+      "implementation_paths": ["modules/foundups/agent/src/hermes_adapter.py","modules/foundups/agent/src/hermes_foundup_job_executor.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "on", "env_keys": ["HERMES_BUILDER_ENABLED","HERMES_BUILDER_ALLOW_REAL_WRITES","HERMES_BUILDER_DRY_RUN","HERMES_BUILDER_SECURITY_GATE"], "secret_keys": [],
+      "external_service": null, "fail_mode": "fail_closed", "consumers": ["hermes_foundup_job_executor"]
+    },
+    {
+      "integration_id": "foundups_hermes_resident_client_transport", "name": "Foundups Hermes Resident Client Transport", "type": "resident_client_transport",
+      "owner_module": "modules/foundups/agent", "runtime_origin": "FOUNDUPS_LOCAL", "capability_boundary": "foundups_transport_only_no_model_no_execution",
+      "implementation_paths": ["modules/foundups/agent/src/hermes_reddog_resident_client_adapter.py","scripts/hermes_reddog_resident_client_once.py"],
+      "upstream_identity": null,
+      "status": "landed", "default": "off", "env_keys": [], "secret_keys": [],
+      "external_service": null, "fail_mode": "fail_closed", "consumers": ["hermes_reddog_resident_client_once"]
     }
   ]
 }

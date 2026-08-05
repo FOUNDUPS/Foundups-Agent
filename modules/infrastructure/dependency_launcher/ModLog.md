@@ -7,6 +7,15 @@
 
 ## Change Log
 
+### 2026-08-05: Runtime compatibility test clock consistency
+
+- Removed a calendar-bound fixture failure by composing publication evidence at
+  the test's current instant.
+- Preserved the wall-clock production API and all integrity-only, nonblocking,
+  no-update authority boundaries. (WSP 15/22/50/97)
+
+---
+
 ### 2026-08-02: Trusted WSL resolver exported for upstream agent dispatch
 
 - Exported the existing System32-only WSL executable resolver for reuse by the
