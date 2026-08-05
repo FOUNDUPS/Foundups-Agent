@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -103,6 +104,28 @@ def _bound_model_runtime_receipts() -> tuple[dict, dict, str]:
     )
 
 
+@pytest.fixture(autouse=True)
+def _verified_conversation_session(monkeypatch):
+    @contextmanager
+    def _lease(**_kwargs):
+        yield SimpleNamespace(
+            principal_id="principal-012",
+            principal_provider="principal-signature",
+            foundup_scope=("foundups_agent",),
+            authority_receipt={
+                "schema_version": "reddog_conversation_session_authority_receipt.v1",
+                "receipt_id": "sha256:session-authority",
+            },
+        )
+
+    monkeypatch.setattr(
+        bridge,
+        "lease_current_generation_conversation_session",
+        _lease,
+    )
+    monkeypatch.setattr(bridge, "owner_config_from_environment", lambda _env: "O:/owner.json")
+
+
 def test_resident_architect_session_requires_explicit_request() -> None:
     result = bridge._result({})
 
@@ -136,6 +159,7 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
     result = bridge._result(
         {
             "explicit_resident_architect_session_requested": True,
+            "conversation_session_credential": "synthetic-signed-credential",
             "red_dog_intent": {
                 "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
@@ -170,6 +194,7 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
     assert calls[0]["init"]["authorized_foundup_ids"] == ("foundups_agent",)
     assert calls[0]["init"]["transport"] == "editor"
     assert calls[1]["intent"]["intent_id"] == "sha256:intent"
+    assert calls[1]["intent"]["conversation_session_authority_receipt"]["receipt_id"] == "sha256:session-authority"
     assert runtime["requested_operation"] == "extension_resident_architect_session"
     assert runtime["prompt_text"] == "audit resident loop"
     assert runtime["timeout_seconds"] == 13
@@ -290,6 +315,7 @@ def test_resident_architect_session_bridge_failure_fails_closed(monkeypatch) -> 
     result = bridge._result(
         {
             "explicit_resident_architect_session_requested": True,
+            "conversation_session_credential": "synthetic-signed-credential",
             "red_dog_intent": {
                 "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
@@ -336,6 +362,7 @@ def test_resident_architect_session_rejects_unbound_models_before_client(monkeyp
     result = bridge._result(
         {
             "explicit_resident_architect_session_requested": True,
+            "conversation_session_credential": "synthetic-signed-credential",
             "red_dog_intent": {
                 "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
@@ -381,6 +408,7 @@ def test_resident_architect_session_rejects_binding_loader_failure_before_client
     result = bridge._result(
         {
             "explicit_resident_architect_session_requested": True,
+            "conversation_session_credential": "synthetic-signed-credential",
             "red_dog_intent": {
                 "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
@@ -403,14 +431,28 @@ def test_resident_architect_session_rejects_binding_loader_failure_before_client
     assert client_calls == []
 
 
-def test_resident_architect_session_requires_host_authenticated_scope(monkeypatch) -> None:
-    monkeypatch.delenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", raising=False)
-    monkeypatch.delenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", raising=False)
+def test_resident_architect_session_requires_authenticated_session_source(monkeypatch) -> None:
+    @contextmanager
+    def _reject(**_kwargs):
+        raise bridge.ConversationSessionAuthoritySourceError(
+            "conversation_session_authority_source_missing"
+        )
+        yield
+
+    monkeypatch.setattr(
+        bridge, "lease_current_generation_conversation_session", _reject
+    )
+    monkeypatch.setattr(
+        bridge,
+        "load_resident_model_runtime_bindings",
+        lambda _repo_root: _bound_model_runtime_receipts(),
+    )
     grounding = _grounding_receipt("audit resident loop")
 
     result = bridge._result(
         {
             "explicit_resident_architect_session_requested": True,
+            "conversation_session_credential": "synthetic-signed-credential",
             "red_dog_intent": {
                 "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
@@ -429,4 +471,6 @@ def test_resident_architect_session_requires_host_authenticated_scope(monkeypatc
 
     assert result["accepted"] is False
     assert result["resident_backend_invoked"] is False
-    assert result["rejection_reasons"] == ["resident_architect_authenticated_scope_missing"]
+    assert result["rejection_reasons"] == [
+        "conversation_session_authority_source_missing"
+    ]

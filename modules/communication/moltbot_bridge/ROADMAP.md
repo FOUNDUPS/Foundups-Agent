@@ -8,15 +8,18 @@
   creation, CAS revisions, expiry, FoundUp and session scope, typed continuity,
   current grounding, snapshot/HEAD/Holo bindings, opaque one-use session
   capabilities, authenticated records, and bounded projections.
-- BLOCKED: editor consumption until a production signed-session issuer/source
-  is available. Environment principal/FoundUp values are not authentication.
+- COMPLETE: editor source for pre-issued principal-signed conversation
+  credentials. Verification is public-key-only and binds repository, audience,
+  transport, TTL, principal, FoundUp, current generation, intent and grounding.
+- BLOCKED: principal-side credential issuance UX and P1 durable-scope runtime
+  consumption. Environment principal/FoundUp values are not authentication.
 - COMPLETE: one authenticated scope revision and resident intent can be bound
   to an immutable architect proposal preview. AgentDB CAS stores the exact
   pending proposal; backend determination rejects stale snapshot/HEAD/Holo
   context before Fusion; signed WSP 15 promotion requires a fresh one-use
   pending capability plus the existing principal-signed proposal policy.
-- BLOCKED: editor/runtime conversation-to-proposal consumption until a
-  production authenticated-session issuer supplies the existing P1/P2 APIs.
+- BLOCKED: editor/runtime conversation-to-proposal consumption until the
+  verified session receipt is connected to the existing P1/P2 APIs.
 - HELD: OpenClaw/Hermes dispatch until the editor/runtime binding and all
   existing WRE work-order gates pass.
 

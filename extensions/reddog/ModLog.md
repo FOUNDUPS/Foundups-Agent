@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-08-06 - Conversation session authority source (0.4.60)
+
+- Added VS Code SecretStorage commands for a pre-issued principal-signed
+  conversation credential; no production credential minting was introduced.
+- Replaced environment-label authorization in the resident editor bridge with
+  verified session subject plus signed current-generation principal authority.
+- Passed the credential through one-shot stdin, not environment variables;
+  no HMAC or private signing material enters the resident process.
+- Bound repository, audience, transport, TTL, FoundUp scope, signed principal
+  record, generation lease, intent and grounding digests into admission.
+- Kept conversation identity distinct from principal-signed work authority and
+  added no worker, repository, merge, signer, or HoloIndex effect.
+
 ## 2026-08-06 - Conversation proposal backend compatibility (0.4.59)
 
 - Regenerated and pinned the exact backend dependency graph after authenticated

@@ -1,9 +1,19 @@
 # RedDog Interface
 
+Version 0.4.60 adds `RedDog: Set Conversation Session Credential` and
+`RedDog: Clear Conversation Session Credential`. The extension accepts only a
+pre-issued principal-signed credential through SecretStorage and never mints
+one. The resident bridge passes it only through one-shot stdin; no HMAC or
+other signing material enters the resident process. Python verifies the exact
+repository, audience, transport, TTL, principal signature and FoundUp scope
+against the leased current-generation principal artifact, then removes the
+credential before downstream work.
+Authenticated persistent scope and exact proposal promotion remain separate
+runtime layers; this source grants no execution authority.
+
 Version 0.4.59 pins the exact backend dependency graph for authenticated
 conversation-to-work proposal promotion. This is compatibility metadata only;
-the extension does not yet issue authenticated conversation sessions or invoke
-the P1/P2 conversation runtime.
+the extension does not invoke the P1/P2 conversation runtime.
 
 Version 0.4.58 separates authority-owned repository bytes from same-repository
 runtime dependency resolution for linked-worktree HoloIndex owner queries. The

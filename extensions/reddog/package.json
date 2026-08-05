@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.59",
+  "version": "0.4.60",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -13,7 +13,9 @@
   ],
   "activationEvents": [
     "onCommand:reddog.open",
-    "onCommand:foundupsFusion.open"
+    "onCommand:foundupsFusion.open",
+    "onCommand:reddog.setConversationSessionCredential",
+    "onCommand:reddog.clearConversationSessionCredential"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -27,6 +29,16 @@
         "command": "foundupsFusion.open",
         "title": "Foundups Agent: Open (Legacy)",
         "category": "RedDog"
+      },
+      {
+        "command": "reddog.setConversationSessionCredential",
+        "title": "Set Conversation Session Credential",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.clearConversationSessionCredential",
+        "title": "Clear Conversation Session Credential",
+        "category": "RedDog"
       }
     ],
     "menus": {
@@ -36,6 +48,12 @@
         },
         {
           "command": "foundupsFusion.open"
+        },
+        {
+          "command": "reddog.setConversationSessionCredential"
+        },
+        {
+          "command": "reddog.clearConversationSessionCredential"
         }
       ],
       "editor/title": [

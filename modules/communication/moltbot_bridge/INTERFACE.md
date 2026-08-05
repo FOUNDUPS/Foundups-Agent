@@ -12,7 +12,11 @@ resident intent. Backend determination rejects stale scope before a model call.
 Signed WSP 15 promotion consumes it only after current-record, FoundUp, Memex,
 model, and existing principal-signature checks. Admission schema v2 signs the
 complete conversation/snapshot lineage. Neither state nor capability grants
-work authority; editor use awaits a production authenticated-session source.
+work authority. `authenticate_signed_conversation_scope()` is the production
+editor source: it verifies a strict principal-signed credential using only the
+current-generation public key, enforces repository/audience/transport/TTL and
+FoundUp scope, and yields the same opaque operation-local capability. The
+credential never enters AgentDB, model context, receipts, logs, or child env.
 
 ## Public API
 ### Architect proposal validity and execution readiness

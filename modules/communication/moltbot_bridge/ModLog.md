@@ -1,4 +1,17 @@
 # ModLog - moltbot_bridge
+## 2026-08-06: Current-generation conversation session authority source
+- Replaced the rejected symmetric resident path with a strict principal-signed
+  conversation credential verified by the existing Ed25519 backend and
+  signer-owner E0 principal artifact loader.
+- Resident editor sessions now derive principal and FoundUp scope from a
+  verified subject plus one signed current-generation authority artifact;
+  environment labels are consistency checks only.
+- No HMAC or private signing material enters the resident process. The bearer
+  crosses one-shot stdin, is removed before resident work, and never enters
+  AgentDB, model prompt, durable intent, logs, or output. The current generation
+  remains leased through cycle admission and its public digests are persisted.
+  This grants no work, worker, repository, merge, signer, or HoloIndex authority
+  (WSP 00/15/22/50/62/97).
 ## 2026-08-06: Authenticated conversational scope and proposal promotion
 - Added HMAC-authenticated AgentDB scope, opaque one-use capabilities, snapshot/HEAD/Holo/FoundUp/intent binding, exact proposal-preview CAS, backend pre-model rejection, and signed WSP 15 pending-authority consumption; no editor session issuer, worker dispatch, repository/merge authority, or HoloIndex mutation was added (WSP 00/15/22/50/62/97).
 ## 2026-08-05: Resident live-canary current-generation trust concatenation

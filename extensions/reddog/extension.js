@@ -24,11 +24,13 @@ const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const startOperationsAdapter = require('./start_operations_extension_adapter');
 const startOperationsEnvironment = require('./start_operations_environment');
+const conversationSessionAuthoritySource = require('./conversation_session_authority_source');
+const residentArchitectSessionContract = require('./resident_architect_session_contract');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
-const EXTENSION_VERSION = '0.4.59';
+const EXTENSION_VERSION = '0.4.60';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3700,116 +3702,15 @@ function buildOpenClawLiveEnqueueRuntimeBindingSection(invokeResult) {
 }
 
 function buildResidentArchitectSessionPayload(workFocus, options) {
-  const opts = options && typeof options === 'object' ? options : {};
-  if (opts.explicitResidentArchitectSessionRequested !== true) {
-    return {
-      ok: false,
-      rejection_reasons: ['explicit_resident_architect_session_request_missing'],
-      payload: null
-    };
-  }
-  const focus = String(workFocus || '');
-  const groundingReceipt = groundedTargetContinuity.buildGroundedTargetReceipt(
-    focus, opts.groundingPreflight, opts.holoScorecard, 'editor_thin_client'
+  return residentArchitectSessionContract.buildPayload(
+    workFocus, options, residentArchitectSessionBindings()
   );
-  if (!groundedTargetContinuity.receiptReady(groundingReceipt)) {
-    return { ok: false, rejection_reasons: ['grounded_target_receipt_not_ready'], payload: null };
-  }
-  const residentFoundupTarget = groundingReceipt.registered_foundup_target;
-  if (residentFoundupTarget && !foundupWorkRuntime.verifyAtUse(opts.repoRoot || workspaceRoot(), residentFoundupTarget, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)) return { ok: false, rejection_reasons: ['registered_foundup_target_use_time_verification_failed'], payload: null };
-  const authenticatedPrincipal = String(
-    opts.authenticatedPrincipal || process.env.REDDOG_AUTHENTICATED_PRINCIPAL_ID || ''
-  ).trim();
-  const authorizedFoundupIds = Array.isArray(opts.authorizedFoundupIds)
-    ? opts.authorizedFoundupIds.map((item) => String(item || '').trim()).filter(Boolean)
-    : String(process.env.REDDOG_AUTHORIZED_FOUNDUP_IDS || '').split(',').map((item) => item.trim()).filter(Boolean);
-  const { foundupId, conflict: foundupConflict } = foundupWorkRuntime.residentScope(groundingReceipt, opts.foundupId);
-  if (foundupConflict) {
-    return { ok: false, rejection_reasons: ['resident_architect_grounded_foundup_mismatch'], payload: null };
-  }
-  if (!authenticatedPrincipal || !foundupId || !authorizedFoundupIds.includes(foundupId)) {
-    return { ok: false, rejection_reasons: ['resident_architect_authenticated_scope_missing'], payload: null };
-  }
-  const intentId = 'sha256:' + crypto.createHash('sha256')
-    .update([
-      REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE,
-      EXTENSION_VERSION,
-      groundingReceipt.receipt_id,
-      authenticatedPrincipal,
-      foundupId
-    ].join('|'), 'utf8')
-    .digest('hex');
-  const redDogIntent = {
-    schema_version: 'reddog_intent.v2',
-    intent_id: intentId,
-    origin: 'extension',
-    source_surface: 'editor_thin_client',
-    principal_ref: authenticatedPrincipal,
-    foundup_id: foundupId,
-    extension_id: REDDOG_EXTENSION_ID,
-    extension_version: EXTENSION_VERSION,
-    work_focus: focus,
-    grounding_receipt: groundingReceipt,
-    requested_operation: 'resident_architect_session',
-    submits_executable_authority: false,
-    shell_authority_requested: false,
-    repo_write_authority_requested: false,
-    merge_authority_requested: false
-  };
-  return {
-    ok: true,
-    rejection_reasons: [],
-    payload: {
-      red_dog_intent: redDogIntent,
-      intent_id: intentId,
-      grounding_receipt_id: groundingReceipt.receipt_id,
-      explicit_resident_architect_session_requested: true,
-      work_focus: focus,
-      repo_root: opts.repoRoot ? String(opts.repoRoot) : undefined,
-      work_state_path: opts.workStatePath ? String(opts.workStatePath) : undefined,
-      holoindex_receipt_path: opts.holoindexReceiptPath ? String(opts.holoindexReceiptPath) : undefined,
-      holoindex_ssd_path: opts.holoindexSsdPath ? String(opts.holoindexSsdPath) : undefined,
-      timeout_seconds: Number(opts.timeoutSeconds || 60)
-    }
-  };
 }
 
 function buildResidentArchitectSessionResult(decision, fields) {
-  const payload = fields && typeof fields === 'object' ? fields : {};
-  return Object.assign({
-    product_slice_name: REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE,
-    slice_name: REDDOG_RESIDENT_ARCHITECT_SESSION_RUNTIME_SLICE,
-    decision: decision,
-    accepted: false,
-    resident_backend_invoked: false,
-    red_dog_intent_submitted: false,
-    intent_id: '',
-    cycle_id: '',
-    python_invocation_performed: false,
-    snapshot_id: '',
-    final_snapshot_id: '',
-    swarm_id: '',
-    initial_status: '',
-    final_status: '',
-    task_count: 0,
-    reports_persisted: 0,
-    readonly_audit_tasks_enqueued: false,
-    readonly_audit_tasks_executed: false,
-    architect_action: '',
-    architect_next_slice: '',
-    architect_determination_id: '',
-    queue_candidate_count: 0,
-    no_shell_command_executed: true,
-    no_repo_mutation_performed: true,
-    no_holoindex_reindex_performed: true,
-    no_hermes_dispatch_performed: true,
-    no_worktree_operation_performed: true,
-    no_pr_created: true,
-    no_pattern_memory_promotion_performed: true,
-    no_live_foundup_enqueue_performed: true,
-    coding_worker_spawned: false,
-    rejection_reasons: []
-  }, payload);
+  return residentArchitectSessionContract.buildResult(
+    decision, fields, residentArchitectSessionBindings()
+  );
 }
 
 function runResidentArchitectSessionBridge(context, workFocus, options) {
@@ -3821,8 +3722,17 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
       not_invoked_reason: payloadResult.rejection_reasons[0] || 'resident_architect_session_not_enabled'
     });
   }
+  const sessionCredential = String(opts.conversationSessionCredential || '');
+  if (!conversationSessionAuthoritySource.validSessionCredential(sessionCredential)) {
+    return buildResidentArchitectSessionResult('RESIDENT_ARCHITECT_SESSION_SKIPPED', {
+      rejection_reasons: ['conversation_session_authority_source_missing'],
+      not_invoked_reason: 'conversation_session_authority_source_missing'
+    });
+  }
   if (typeof opts.sessionRunner === 'function') {
-    const runnerResult = opts.sessionRunner(payloadResult.payload);
+    const runnerResult = opts.sessionRunner(Object.assign({}, payloadResult.payload, {
+      conversation_session_credential: sessionCredential
+    }));
     const parsed = typeof runnerResult === 'string' ? JSON.parse(runnerResult) : (runnerResult || {});
     return buildResidentArchitectSessionResult(
       parsed.decision || 'RESIDENT_ARCHITECT_SESSION_BRIDGE_RESULT',
@@ -3839,9 +3749,11 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
   try {
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
       cwd: root,
-      input: JSON.stringify(payloadResult.payload),
+      input: JSON.stringify(Object.assign({}, payloadResult.payload, {
+        conversation_session_credential: sessionCredential
+      })),
       encoding: 'utf8',
-      env: buildBridgePythonEnv(process.env),
+      env: conversationSessionAuthoritySource.buildBridgeEnvironment(process.env),
       windowsHide: true,
       maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
     });
@@ -3865,42 +3777,48 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
   }
 }
 
+async function runConfiguredResidentArchitectSession(context, workFocus, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  if (opts.actionPlanningAllowed !== true || opts.residentArchitectSessionEnabled !== true) {
+    return null;
+  }
+  const credential = await conversationSessionAuthoritySource.read(context.secrets);
+  const claims = conversationSessionAuthoritySource.credentialClaims(credential);
+  if (!claims) {
+    return buildResidentArchitectSessionResult('RESIDENT_ARCHITECT_SESSION_SKIPPED', {
+      rejection_reasons: ['conversation_session_authority_source_missing'],
+      not_invoked_reason: 'conversation_session_authority_source_missing'
+    });
+  }
+  return runResidentArchitectSessionBridge(context, workFocus, {
+    explicitResidentArchitectSessionRequested: true,
+    groundingPreflight: opts.groundingPreflight,
+    holoScorecard: opts.holoScorecard,
+    authenticatedPrincipal: claims.principalId,
+    authorizedFoundupIds: claims.foundupScope,
+    conversationSessionCredential: credential
+  });
+}
+
 function buildResidentArchitectSessionSection(sessionResult) {
-  const r = sessionResult && typeof sessionResult === 'object' ? sessionResult : {};
-  return [
-    '## Resident RedDog Architect Session',
-    '- product_slice_name: ' + (r.product_slice_name || REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE) + ' [OBSERVED]',
-    '- slice_name: ' + (r.slice_name || REDDOG_RESIDENT_ARCHITECT_SESSION_RUNTIME_SLICE) + ' [OBSERVED]',
-    '- red_dog_intent_submitted: ' + (r.red_dog_intent_submitted === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- intent_id: ' + (r.intent_id || 'unknown') + ' [OBSERVED]',
-    '- cycle_id: ' + (r.cycle_id || r.swarm_id || 'unknown') + ' [OBSERVED]',
-    '- decision: ' + (r.decision || 'unknown') + ' [OBSERVED]',
-    '- accepted: ' + (r.accepted === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- resident_backend_invoked: ' + (r.resident_backend_invoked === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- python_invocation_performed: ' + (r.python_invocation_performed === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- snapshot_id: ' + (r.snapshot_id || 'unknown') + ' [OBSERVED]',
-    '- final_snapshot_id: ' + (r.final_snapshot_id || 'unknown') + ' [OBSERVED]',
-    '- swarm_id: ' + (r.swarm_id || 'unknown') + ' [OBSERVED]',
-    '- initial_status: ' + (r.initial_status || 'unknown') + ' [OBSERVED]',
-    '- final_status: ' + (r.final_status || 'unknown') + ' [OBSERVED]',
-    '- task_count: ' + Number(r.task_count || 0) + ' [OBSERVED]',
-    '- reports_persisted: ' + Number(r.reports_persisted || 0) + ' [OBSERVED]',
-    '- readonly_audit_tasks_enqueued: ' + (r.readonly_audit_tasks_enqueued === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- readonly_audit_tasks_executed: ' + (r.readonly_audit_tasks_executed === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- architect_action: ' + (r.architect_action || 'unknown') + ' [OBSERVED]',
-    '- architect_next_slice: ' + (r.architect_next_slice || 'unknown') + ' [OBSERVED]',
-    '- architect_determination_id: ' + (r.architect_determination_id || 'unknown') + ' [OBSERVED]',
-    '- queue_candidate_count: ' + Number(r.queue_candidate_count || 0) + ' [OBSERVED]',
-    '- no_repo_mutation_performed: ' + (r.no_repo_mutation_performed === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- no_holoindex_reindex_performed: ' + (r.no_holoindex_reindex_performed === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- no_hermes_dispatch_performed: ' + (r.no_hermes_dispatch_performed === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- no_worktree_operation_performed: ' + (r.no_worktree_operation_performed === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- no_pr_created: ' + (r.no_pr_created === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- no_live_foundup_enqueue_performed: ' + (r.no_live_foundup_enqueue_performed === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- coding_worker_spawned: ' + (r.coding_worker_spawned === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- rejection_reasons: ' + JSON.stringify(r.rejection_reasons || []) + ' [OBSERVED]',
-    '- not_invoked_reason: ' + (r.not_invoked_reason || 'none') + ' [OBSERVED]'
-  ].join('\n');
+  return residentArchitectSessionContract.renderSection(
+    sessionResult, residentArchitectSessionBindings()
+  );
+}
+
+function residentArchitectSessionBindings() {
+  return {
+    groundedTargetContinuity,
+    foundupWorkRuntime,
+    workspaceRoot,
+    gitOutput,
+    gitOutputTruncatedMarker: GIT_OUTPUT_TRUNCATED_MARKER,
+    environment: process.env,
+    productSlice: REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE,
+    sessionSlice: REDDOG_RESIDENT_ARCHITECT_SESSION_RUNTIME_SLICE,
+    extensionId: REDDOG_EXTENSION_ID,
+    extensionVersion: EXTENSION_VERSION
+  };
 }
 
 function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoScorecard, resolvedEffort, copyContext) {
@@ -5323,7 +5241,23 @@ function activate(context) {
     )),
     vscode.commands.registerCommand('foundupsFusion.open', async () => (
       openFusionEditor(context, await installStatePromise)
-    ))
+    )),
+    vscode.commands.registerCommand('reddog.setConversationSessionCredential', async () => {
+      const result = await conversationSessionAuthoritySource.storeFromPrompt(
+        vscode, context.secrets
+      );
+      if (result.stored) {
+        vscode.window.showInformationMessage('RedDog conversation session credential stored securely.');
+      } else if (result.reason !== 'conversation_session_source_cancelled') {
+        vscode.window.showWarningMessage('RedDog conversation session credential was not stored.');
+      }
+    }),
+    vscode.commands.registerCommand('reddog.clearConversationSessionCredential', async () => {
+      const result = await conversationSessionAuthoritySource.clear(context.secrets);
+      if (result.cleared) {
+        vscode.window.showInformationMessage('RedDog conversation session credential cleared.');
+      }
+    })
   );
 }
 
@@ -5874,13 +5808,9 @@ function wireFusionWebview(context, webview, worker, state) {
     ) {
       state.liveEnqueueKeys.add(String(openClawLiveEnqueueInvokeResult.live_enqueue_key));
     }
-    const residentArchitectSessionResult = (actionPlanningAllowed && residentArchitectSessionEnabled)
-      ? runResidentArchitectSessionBridge(context, workFocus, {
-        explicitResidentArchitectSessionRequested: true,
-        groundingPreflight: groundingPreflight,
-        holoScorecard: holoScorecard
-      })
-      : null;
+    const residentArchitectSessionResult = await runConfiguredResidentArchitectSession(
+      context, workFocus, { actionPlanningAllowed, residentArchitectSessionEnabled, groundingPreflight, holoScorecard }
+    );
     result.review_packet = attachOrchestratorMetadata(
       result.review_packet || {},
       classification,
@@ -8432,6 +8362,7 @@ module.exports = {
   buildRedDogInstallStateSection,
   buildResidentArchitectSessionPayload,
   runResidentArchitectSessionBridge,
+  runConfiguredResidentArchitectSession,
   buildResidentArchitectSessionSection,
   compositePayloadDigest,
   extractHoloIndexScorecard,

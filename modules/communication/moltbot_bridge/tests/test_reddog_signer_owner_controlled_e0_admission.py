@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
     signer_owner_e0_authority_binding_digest,
     signer_owner_e0_policy_id,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_principal_authority import (
+    load_current_generation_principal_authority_resolver,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
@@ -396,6 +399,24 @@ def test_current_signed_generation_and_policy_issue_one_opaque_capability(tmp_pa
     assert receipt.no_composition_authority_released is True
     with pytest.raises(ValueError):
         fixture["boundary"].consume(result.capability)
+
+
+def test_current_generation_full_principal_resolver_reuses_manifest_binding(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    selection = fixture["selection"]
+    assert isinstance(selection, dict)
+
+    resolver = load_current_generation_principal_authority_resolver(
+        repo_root=Path(str(selection["repo_root"])), selection=selection
+    )
+
+    record = resolver.resolve_unique("principal:grant-admin")
+    assert record is not None
+    assert record.principal_provider == "github"
+    assert resolver.resolve("principal:grant-admin", "github") == record
+    assert resolver.resolve_unique("missing") is None
 
 
 @pytest.mark.parametrize(
