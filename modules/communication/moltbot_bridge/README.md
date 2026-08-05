@@ -10,9 +10,17 @@ CAS update. Stale HEAD, HoloIndex generation, operational snapshot, expiry,
 principal key, transport/session, or turn lineage fails closed.
 
 This state helps RedDog interpret follow-up requests. It is not work authority.
-Proposal creation, principal authorization, WRE/OpenClaw/Hermes dispatch,
-repository mutation, and merge remain downstream gates. The extension does not
-consume this state until a production authenticated-session source is bound.
+The backend can now bind one authenticated scope revision and resident intent
+to an immutable architect proposal preview. AgentDB persists the exact pending
+proposal by CAS. Promotion then requires both a fresh one-use pending-proposal
+capability and the existing principal-signed proposal policy authorization.
+The binding covers the operational snapshot, repository HEAD, HoloIndex
+generation/freshness receipt, FoundUp, grounding receipt, and intent.
+
+Conversation state and the pending capability do not grant work authority.
+WRE/OpenClaw/Hermes dispatch, repository mutation, and merge remain downstream
+gates. The extension does not consume this state until a production
+authenticated-session source is bound.
 
 ## Upstream Agent Execution Boundary
 

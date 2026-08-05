@@ -1,25 +1,6 @@
 # ModLog - moltbot_bridge
-
-## 2026-08-06: Authenticated conversational scope state
-- Added a real AgentDB-backed RedDog conversation-scope runtime using
-  create-if-absent, revision CAS, expiry, strict schemas, turn/revision lineage,
-  and current operational-snapshot, repository-HEAD, HoloIndex-generation, and
-  registered-FoundUp grounding bindings.
-- Reused the existing signed `sess.v1` verifier and current
-  `PrincipalAuthorityResolver`. The verified subject, never caller text or an
-  environment principal, selects the record. Authentication is represented by
-  opaque one-use process-local capabilities; session secrets and derived record
-  MAC keys never enter records or projections.
-- Added authenticated record MACs with current/previous secret rotation,
-  exact-field parsing, recomputed-hash tamper rejection, restart recovery,
-  principal/key/transport/session revalidation, stale-grounding rejection, and
-  bounded non-authoritative projections. Typed repository facts may retain
-  only evidence references already admitted by the verified grounding receipt.
-- Kept proposal creation, principal policy authorization, worker dispatch,
-  repository mutation, HoloIndex maintenance, and editor runtime consumption
-  outside this slice. Production editor binding remains blocked on a genuine
-  authenticated-session source (WSP 00/15/22/50/62/97).
-
+## 2026-08-06: Authenticated conversational scope and proposal promotion
+- Added HMAC-authenticated AgentDB scope, opaque one-use capabilities, snapshot/HEAD/Holo/FoundUp/intent binding, exact proposal-preview CAS, backend pre-model rejection, and signed WSP 15 pending-authority consumption; no editor session issuer, worker dispatch, repository/merge authority, or HoloIndex mutation was added (WSP 00/15/22/50/62/97).
 ## 2026-08-05: Resident live-canary current-generation trust concatenation
 - Extended the canonical use-time authority resolver to consume the existing
   root-owned system-service manifest selection after signed work-authority
@@ -36,7 +17,6 @@
   malformed IDs, expiry, or changed config/run-packet bytes fail closed. No signer,
   schema, replay store, provider, lifecycle service, or trust model was added
   (WSP 00/15/22/50/62/97).
-
 ## 2026-08-05: Upstream agent runtime truth registry
 - Upgraded the existing OpenClaw integration manifest to a static provenance
   v2 ledger with stable integration IDs, exact checked-in implementation and

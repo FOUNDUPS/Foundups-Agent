@@ -17,8 +17,9 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
 
 
 PROPOSAL_ADMISSION_SCHEMA_VERSION = (
-    "reddog_architect_proposal_executability_admission.v1"
+    "reddog_architect_proposal_executability_admission.v2"
 )
+CONVERSATION_WORK_BINDING_SCHEMA = "reddog_conversation_work_binding.v1"
 
 VALIDITY_VALID = "VALID"
 VALIDITY_NEEDS_RESEARCH = "NEEDS_RESEARCH"
@@ -170,6 +171,16 @@ class ArchitectProposalExecutabilityReceipt:
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
     policy_digest: str
+    conversation_binding_present: bool
+    conversation_binding_digest: str
+    conversation_id: str
+    conversation_revision: int
+    conversation_revision_receipt_id: str
+    conversation_scope_record_digest: str
+    authorized_foundup_id: str
+    resident_intent_id: str
+    resident_intent_digest: str
+    conversation_grounding_receipt_id: str
     rejection_reasons: tuple[str, ...]
     no_queue_mutation_performed: bool = True
     no_execution_performed: bool = True
@@ -379,6 +390,7 @@ def _valid_receipt_body(data: Mapping[str, Any], receipt_id: str) -> bool:
         and data.get("target_effect_plane") in TARGET_EFFECT_PLANES
         and isinstance(data.get("direct_read_grounded"), bool)
         and isinstance(data.get("holoindex_maintenance_exception_applied"), bool)
+        and _valid_conversation_binding(data)
         and _valid_holoindex_maintenance_exception(data)
         and data.get("accepted")
         is (data.get("proposal_validity") == VALIDITY_VALID)
@@ -392,6 +404,85 @@ def _valid_receipt_body(data: Mapping[str, Any], receipt_id: str) -> bool:
             or (data.get("proposal_validity") != VALIDITY_VALID and bool(rejected))
         )
         and all(data.get(field) is True for field in attestations)
+    )
+
+
+def _valid_conversation_binding(data: Mapping[str, Any]) -> bool:
+    present = data.get("conversation_binding_present")
+    revision = data.get("conversation_revision")
+    fields = (
+        "conversation_binding_digest",
+        "conversation_id",
+        "conversation_revision_receipt_id",
+        "conversation_scope_record_digest",
+        "authorized_foundup_id",
+        "resident_intent_id",
+        "resident_intent_digest",
+        "conversation_grounding_receipt_id",
+    )
+    if present is False:
+        return revision == -1 and all(
+            data.get(field) == "" for field in fields
+        )
+    if (
+        present is not True
+        or isinstance(revision, bool)
+        or not isinstance(revision, int)
+        or revision < 0
+    ):
+        return False
+    digest_fields = fields[:4] + (fields[5],) + fields[6:]
+    if any(not _sha256(data.get(field)) for field in digest_fields):
+        return False
+    binding = {
+        "schema_version": CONVERSATION_WORK_BINDING_SCHEMA,
+        "conversation_id": data["conversation_id"],
+        "conversation_revision": data["conversation_revision"],
+        "conversation_revision_receipt_id": data[
+            "conversation_revision_receipt_id"
+        ],
+        "conversation_scope_record_digest": data[
+            "conversation_scope_record_digest"
+        ],
+        "authorized_foundup_id": data["authorized_foundup_id"],
+        "resident_intent_id": data["resident_intent_id"],
+        "resident_intent_digest": data["resident_intent_digest"],
+        "conversation_grounding_receipt_id": data[
+            "conversation_grounding_receipt_id"
+        ],
+        "snapshot_receipt_id": data["snapshot_receipt_id"],
+        "snapshot_content_digest": data["snapshot_content_digest"],
+        "repo_head_sha": data["repo_head_sha"],
+        "holoindex_generation_id": data["holoindex_generation_id"],
+        "holoindex_freshness_receipt_digest": data[
+            "holoindex_freshness_receipt_digest"
+        ],
+    }
+    source_digests = (
+        "snapshot_receipt_id",
+        "snapshot_content_digest",
+        "holoindex_generation_id",
+        "holoindex_freshness_receipt_digest",
+    )
+    return bool(
+        data.get("authorized_foundup_id")
+        and all(_sha256(data.get(field)) for field in source_digests)
+        and _git_sha(data.get("repo_head_sha"))
+        and data.get("conversation_binding_digest") == _digest(binding)
+    )
+
+
+def _sha256(value: Any) -> bool:
+    text = str(value or "")
+    return len(text) == 71 and text.startswith("sha256:") and all(
+        char in "0123456789abcdef" for char in text[7:]
+    )
+
+
+def _git_sha(value: Any) -> bool:
+    text = str(value or "")
+    return 7 <= len(text) <= 64 and all(
+        char in "0123456789abcdef" for char in text
     )
 
 
@@ -471,6 +562,7 @@ def _digest(value: Any) -> str:
 __all__ = [
     "ArchitectProposalAdmissionPolicy",
     "ArchitectProposalExecutabilityReceipt",
+    "CONVERSATION_WORK_BINDING_SCHEMA",
     "CREATE_NEW",
     "EFFECT_CONFIGURATION_ONLY",
     "EFFECT_DRAFT_PR_PUBLISH",

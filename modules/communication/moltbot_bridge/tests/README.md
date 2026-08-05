@@ -40,6 +40,16 @@ cross-session and cross-FoundUp rejection, stale grounding, expiry, CAS and
 concurrent updates. It performs no provider call, dispatch, repository write,
 HoloIndex reindex, signing operation, PR, or merge.
 
+Focused conversation-to-work promotion:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_work_promotion.py modules/communication/moltbot_bridge/tests/test_reddog_backend_architect_determination_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py -q
+```
+
+This matrix proves backend pre-model context binding, immutable pending proposal
+CAS, one-use capability admission, principal-signature ordering, FoundUp scope,
+stale-record rejection, and compatibility with the existing signed WSP 15
+promotion path. It does not dispatch a worker or mutate repository content.
+
 Focused owner-controlled signer E0 admission:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py -q
