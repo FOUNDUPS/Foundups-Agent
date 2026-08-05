@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.59 pins the exact backend dependency graph for authenticated
+conversation-to-work proposal promotion. This is compatibility metadata only;
+the extension does not yet issue authenticated conversation sessions or invoke
+the P1/P2 conversation runtime.
+
 Version 0.4.58 separates authority-owned repository bytes from same-repository
 runtime dependency resolution for linked-worktree HoloIndex owner queries. The
 query remains generation-bound and cannot re-index.

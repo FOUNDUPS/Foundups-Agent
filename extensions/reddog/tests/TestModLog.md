@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-06 - Conversation proposal backend compatibility (0.4.59)
+
+- Regenerated the backend manifest and pinned its canonical digest after P2
+  added authenticated conversation proposal dependencies.
+- Re-ran manifest generation, compatibility preflight, extension contract, and
+  scoped conversation/promotion gates.
+
 ## 2026-08-06 - Linked-worktree HoloIndex runtime-root resolution (0.4.58)
 
 - Added same-repository primary-worktree resolution and unrelated-worktree
