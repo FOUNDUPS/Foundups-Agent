@@ -2,11 +2,9 @@
 
 Slice: REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_SINK_BRIDGE_PHASE1
 
-This adapter implements the `store_verified_outcome(record) -> record_id`
-protocol required by the queue-authorized PatternMemory admission guard. It
-does not decide whether an outcome is eligible. The resident queue gate chain
-must already have accepted the held-out regression and PatternMemory admission
-stage before this sink is called.
+This adapter can stage records outside normal recall. The production sink is
+deliberately not activation-ready until an independent durable authority source
+can be revalidated at this boundary. The legacy direct-store method fails closed.
 
 The sink requires an explicit SQLite database path outside the repository
 checkout. It never creates a default PatternMemory client, executes commands,
@@ -21,9 +19,9 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional
 
-from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory, SkillOutcome
+from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
 
 
 REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY = "REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY"
@@ -70,6 +68,12 @@ def _record_id(record: Mapping[str, Any]) -> str:
     return "reddog_verified_outcome_" + _digest(record).removeprefix("sha256:")[:16]
 
 
+def reddog_verified_pattern_memory_record_id(record: Mapping[str, Any]) -> str:
+    """Return the canonical record identifier used by the PatternMemory row."""
+
+    return _record_id(record)
+
+
 def reddog_verified_pattern_memory_record_digest(record: Mapping[str, Any]) -> str:
     """Return the canonical digest used by admission receipts."""
 
@@ -78,6 +82,34 @@ def reddog_verified_pattern_memory_record_digest(record: Mapping[str, Any]) -> s
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def _validated_record(record: Mapping[str, Any]) -> Dict[str, Any]:
+    payload = dict(record)
+    if payload.get("record_type") != "reddog_verified_recursive_improvement_outcome":
+        raise ValueError("unsupported_verified_outcome_record_type")
+    if _contains_secret(payload):
+        raise ValueError("secret_in_verified_outcome_record")
+    return payload
+
+
+def _ensure_staging_table(memory: PatternMemory) -> None:
+    memory.conn.execute(
+        "CREATE TABLE IF NOT EXISTS reddog_verified_outcome_staging ("
+        "record_id TEXT PRIMARY KEY, payload TEXT NOT NULL, agent TEXT NOT NULL, "
+        "staged_at TEXT NOT NULL)"
+    )
+    memory.conn.commit()
+
+
+def _stored_payload(row: Any) -> Optional[Dict[str, Any]]:
+    if row is None:
+        return None
+    try:
+        payload = json.loads(row["output_result"])
+    except (json.JSONDecodeError, TypeError):
+        return None
+    return payload if isinstance(payload, dict) else None
 
 
 @dataclass(frozen=True)
@@ -91,46 +123,55 @@ class RedDogVerifiedPatternMemorySink:
     def status(self) -> str:
         return REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY
 
-    def store_verified_outcome(self, record: Mapping[str, Any]) -> str:
-        payload = dict(record)
-        if payload.get("record_type") != "reddog_verified_recursive_improvement_outcome":
-            raise ValueError("unsupported_verified_outcome_record_type")
-        if _contains_secret(payload):
-            raise ValueError("secret_in_verified_outcome_record")
+    @property
+    def activation_ready(self) -> bool:
+        """Remain false until an independent durable authority source is wired."""
 
+        return False
+
+    def store_verified_outcome(self, record: Mapping[str, Any]) -> str:
+        """Reject direct activation; signed authority capability is mandatory."""
+
+        _validated_record(record)
+        raise ValueError("verified_outcome_activation_capability_required")
+
+    def stage_verified_outcome(self, record: Mapping[str, Any]) -> str:
+        """Persist an outcome outside normal recall until authority is active."""
+
+        payload = _validated_record(record)
         execution_id = _record_id(payload)
         memory = PatternMemory(db_path=self.db_path)
         try:
-            cursor = memory.conn.cursor()
-            cursor.execute(
-                "SELECT execution_id FROM skill_outcomes WHERE execution_id = ? LIMIT 1",
+            _ensure_staging_table(memory)
+            active = memory.conn.execute(
+                "SELECT output_result, agent, success FROM skill_outcomes "
+                "WHERE execution_id = ? LIMIT 1",
                 (execution_id,),
-            )
-            if cursor.fetchone() is not None:
+            ).fetchone()
+            if active is not None:
+                if (
+                    active["agent"] != self.agent
+                    or active["success"] != 1
+                    or _stored_payload(active) != payload
+                ):
+                    raise ValueError("verified_outcome_existing_record_conflict")
                 return execution_id
-
-            outcome = SkillOutcome(
-                execution_id=execution_id,
-                skill_name=str(payload.get("slice_name") or "reddog_verified_outcome"),
-                agent=self.agent,
-                timestamp=_utc_now(),
-                input_context=_canonical_json(
-                    {
-                        "work_order_id": payload.get("work_order_id"),
-                        "gate_id": payload.get("gate_id"),
-                        "ratchet_id": payload.get("ratchet_id"),
-                        "verifier_receipt_id": payload.get("verifier_receipt_id"),
-                    }
-                ),
-                output_result=_canonical_json(payload),
-                success=True,
-                pattern_fidelity=1.0,
-                outcome_quality=1.0,
-                execution_time_ms=0,
-                step_count=0,
-                notes="RedDog verified recursive improvement outcome admitted after held-out gate.",
+            staged = memory.conn.execute(
+                "SELECT payload, agent FROM reddog_verified_outcome_staging "
+                "WHERE record_id = ? LIMIT 1",
+                (execution_id,),
+            ).fetchone()
+            canonical = _canonical_json(payload)
+            if staged is not None:
+                if staged["payload"] != canonical or staged["agent"] != self.agent:
+                    raise ValueError("verified_outcome_staged_record_conflict")
+                return execution_id
+            memory.conn.execute(
+                "INSERT INTO reddog_verified_outcome_staging "
+                "(record_id, payload, agent, staged_at) VALUES (?, ?, ?, ?)",
+                (execution_id, canonical, self.agent, _utc_now()),
             )
-            memory.store_outcome(outcome)
+            memory.conn.commit()
             return execution_id
         finally:
             memory.close()
@@ -191,4 +232,5 @@ __all__ = [
     "RedDogVerifiedPatternMemorySink",
     "build_reddog_verified_pattern_memory_sink",
     "reddog_verified_pattern_memory_record_digest",
+    "reddog_verified_pattern_memory_record_id",
 ]

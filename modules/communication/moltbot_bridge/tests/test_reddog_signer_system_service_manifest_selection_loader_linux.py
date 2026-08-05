@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 import sys
 import tempfile
@@ -16,16 +15,8 @@ from modules.communication.moltbot_bridge.src import (
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     RuntimeArtifactManifestError,
 )
-from modules.communication.moltbot_bridge.tests.test_reddog_signer_socket_service_runtime_cli import (
-    CapturingBoundedService,
-    CapturingResolverFactory,
-    FakeResolver,
-    _audit_secret,
-    _private_key_secret,
-)
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_system_service_manifest_selection_loader import (
     _prepare_real_cli_owner,
-    _run_real_cli,
 )
 
 
@@ -40,28 +31,18 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_root_owned_owner_config_runs_cli_to_bootstrap() -> None:
+def test_root_owned_owner_config_selects_current_generation() -> None:
     with tempfile.TemporaryDirectory(dir="/root") as raw:
         prepared = _prepare_real_cli_owner(Path(raw), None)
-        resolver = FakeResolver(
-            {
-                "op://prod-vault/reddog-signing/private": (
-                    _private_key_secret(
-                        prepared["harness"].reddog_private_key
-                    )
-                ),
-                "op://prod-vault/reddog-audit/mac": _audit_secret(),
-            }
+        capability, boundary = loader_module.load_system_service_manifest_selection(
+            owner_config_path=prepared["owner_path"],
+            repo_root=prepared["harness"].repo_root,
+            config_path=prepared["config_path"],
+            run_packet_path=prepared["packet_path"],
         )
-        factory = CapturingResolverFactory(resolver)
-        service = CapturingBoundedService()
-        emitted: list[str] = []
+        selected = boundary.consume(capability)
 
-        result = _run_real_cli(prepared, factory, service, emitted)
-
-        assert result == 0, json.loads(emitted[0])
-        assert len(factory.calls) == 1
-        assert len(service.calls) == 1
+        assert selected["config_path"] == str(prepared["config_path"].resolve())
 
 
 def test_wrong_owner_uid_rejects() -> None:

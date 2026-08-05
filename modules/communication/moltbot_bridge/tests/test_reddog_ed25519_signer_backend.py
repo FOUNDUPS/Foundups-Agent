@@ -39,6 +39,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     InMemorySignerControlLoopAnchorStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
+    ControlLoopReceiptSigningContext,
+    build_resident_control_loop_receipt,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -140,6 +144,56 @@ def _control_policy(
         consensus_receipt_digest="sha256:" + "c" * 64,
         authority_profile_digest=authority_profile_digest,
         authority_profile_source_receipt_id="sha256:" + "e" * 64,
+    )
+
+
+def _control_result() -> dict[str, object]:
+    return {
+        "accepted": True,
+        "status": "PASS",
+        "rounds": 1,
+        "serial_progress": 1,
+        "claim_progress": 0,
+        "receipt_ids": (),
+        "rejection_reasons": (),
+        "control_lock_acquired": True,
+        "dispatched_stages": (),
+    }
+
+
+def _control_signing_context(public_key: str, signer: object) -> ControlLoopReceiptSigningContext:
+    return ControlLoopReceiptSigningContext(
+        signer=signer,
+        signature_verifier=Ed25519SignatureVerifier(),
+        issuer_principal_id="github:mjtrout",
+        signer_public_key=public_key,
+        key_epoch="epoch-1",
+        authority_tier="HIGH",
+        consensus_receipt_digest="sha256:" + "c" * 64,
+        authority_profile_digest="sha256:" + "a" * 64,
+        authority_profile_source_receipt_id="sha256:" + "e" * 64,
+    )
+
+
+def _build_control_receipt(public_key: str, signer: object, *, suffix: str):
+    return build_resident_control_loop_receipt(
+        result=_control_result(),
+        repo_root=Path.cwd(),
+        created_at="2026-07-18T00:00:00Z",
+        cycle_id="cycle-" + suffix,
+        nonce="nonce-" + suffix,
+        signing_context=_control_signing_context(public_key, signer),
+    )
+
+
+def _control_signing_input(receipt: object) -> str:
+    payload = {
+        key: value
+        for key, value in receipt.to_dict().items()
+        if key not in {"signature", "signer_audit_mac", "signer_audit_attestation_signature"}
+    }
+    return CONTROL_LOOP_SIGNING_PREFIX + json.dumps(
+        payload, sort_keys=True, separators=(",", ":")
     )
 
 
@@ -283,81 +337,24 @@ def test_ed25519_signer_backend_signs_control_receipt_only_in_control_domain() -
         control_loop_anchor_store=InMemorySignerControlLoopAnchorStore(),
         control_loop_authority_policy=_control_policy(public_key),
     )
-    from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
-        ControlLoopReceiptSigningContext,
-        build_resident_control_loop_receipt,
-    )
-
     class DirectClient:
         def sign(self, request: SigningRequest):
             return backend.sign(request, _peer())
 
-    receipt = build_resident_control_loop_receipt(
-        result={
-            "accepted": True,
-            "status": "PASS",
-            "rounds": 1,
-            "serial_progress": 1,
-            "claim_progress": 0,
-            "receipt_ids": (),
-            "rejection_reasons": (),
-            "control_lock_acquired": True,
-            "dispatched_stages": (),
-        },
-        repo_root=Path.cwd(),
-        created_at="2026-07-18T00:00:00Z",
-        cycle_id="cycle-1",
-        nonce="nonce-1",
-        signing_context=ControlLoopReceiptSigningContext(
-            signer=DirectClient(),
-            signature_verifier=Ed25519SignatureVerifier(),
-            issuer_principal_id="github:mjtrout",
-            signer_public_key=public_key,
-            key_epoch="epoch-1",
-            authority_tier="HIGH",
-            consensus_receipt_digest="sha256:" + "c" * 64,
-            authority_profile_digest="sha256:" + "a" * 64,
-            authority_profile_source_receipt_id="sha256:" + "e" * 64,
-        ),
-    )
+    receipt = _build_control_receipt(public_key, DirectClient(), suffix="1")
+    signing_input = _control_signing_input(receipt)
 
     assert receipt.authentication_status == "AUTHENTICATED"
     assert receipt.signer_audit_attestation_signature
     assert Ed25519SignatureVerifier().verify(
         public_key,
-        CONTROL_LOOP_SIGNING_PREFIX + json.dumps(
-            {
-                key: value
-                for key, value in receipt.to_dict().items()
-                if key not in {
-                    "signature",
-                    "signer_audit_mac",
-                    "signer_audit_attestation_signature",
-                }
-            },
-            sort_keys=True,
-            separators=(",", ":"),
-        ),
+        signing_input,
         receipt.signature,
     ) is True
     assert Ed25519SignatureVerifier().verify(
         public_key,
         canonical_control_audit_attestation_input(
-            signing_input=CONTROL_LOOP_SIGNING_PREFIX
-            + json.dumps(
-                {
-                    key: value
-                    for key, value in receipt.to_dict().items()
-                    if key
-                    not in {
-                        "signature",
-                        "signer_audit_mac",
-                        "signer_audit_attestation_signature",
-                    }
-                },
-                sort_keys=True,
-                separators=(",", ":"),
-            ),
+            signing_input=signing_input,
             signature=receipt.signature,
             audit_mac=receipt.signer_audit_mac,
             signer_public_key=public_key,
@@ -386,39 +383,7 @@ def test_control_receipt_signer_requires_exact_signer_owned_authority_policy() -
             captured.append(request)
             return trusted.sign(request, _peer())
 
-    from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
-        ControlLoopReceiptSigningContext,
-        build_resident_control_loop_receipt,
-    )
-
-    build_resident_control_loop_receipt(
-        result={
-            "accepted": True,
-            "status": "PASS",
-            "rounds": 1,
-            "serial_progress": 1,
-            "claim_progress": 0,
-            "receipt_ids": (),
-            "rejection_reasons": (),
-            "control_lock_acquired": True,
-            "dispatched_stages": (),
-        },
-        repo_root=Path.cwd(),
-        created_at="2026-07-18T00:00:00Z",
-        cycle_id="cycle-policy",
-        nonce="nonce-policy",
-        signing_context=ControlLoopReceiptSigningContext(
-            signer=CapturingClient(),
-            signature_verifier=Ed25519SignatureVerifier(),
-            issuer_principal_id="github:mjtrout",
-            signer_public_key=public_key,
-            key_epoch="epoch-1",
-            authority_tier="HIGH",
-            consensus_receipt_digest="sha256:" + "c" * 64,
-            authority_profile_digest="sha256:" + "a" * 64,
-            authority_profile_source_receipt_id="sha256:" + "e" * 64,
-        ),
-    )
+    _build_control_receipt(public_key, CapturingClient(), suffix="policy")
 
     missing_policy = Ed25519SignerBackend(
         private_key=private_key,

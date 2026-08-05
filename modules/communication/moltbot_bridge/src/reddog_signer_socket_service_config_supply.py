@@ -291,6 +291,9 @@ def run_reddog_signer_socket_service_config_supply(
         control_loop_authority_policy=unsigned_config.get(
             "control_loop_authority_policy"
         ),
+        verified_outcome_signer_policy=unsigned_config.get(
+            "verified_outcome_signer_policy"
+        ),
         proposal_authority_policy=unsigned_config.get(
             "proposal_authority_policy"
         ),
@@ -690,6 +693,17 @@ def _config(
             "authority_profile_source_receipt_id": str(
                 authority_profile["authority_profile_source_receipt_id"]
             ),
+        },
+        "verified_outcome_signer_policy": {
+            "issuer_principal_id": str(authority_profile["principal_id"]),
+            "reddog_id": str(authority_profile["reddog_id"]),
+            "signer_public_key": reddog_public,
+            "key_epoch": key_epoch,
+            "authority_tier": "HIGH",
+            "consensus_receipt_digest": str(
+                authority_profile["consensus_receipt_digest"]
+            ),
+            "max_future_skew_seconds": 60,
         },
         "max_requests": int(max_requests),
         "timeout_s": float(timeout_s),

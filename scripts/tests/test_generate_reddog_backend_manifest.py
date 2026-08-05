@@ -106,6 +106,28 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "reddog_signer_system_service_entrypoint.py"
         in generated["required_runtime_sha256"]
     )
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "foundup_memex_verified_outcome_validation.py"
+        in generated["required_runtime_sha256"]
+    )
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "foundup_verified_outcome_root_authority.py"
+        in generated["required_runtime_sha256"]
+    )
+    for filename in (
+        "foundup_verified_outcome_root_authority_client.py",
+        "foundup_verified_outcome_root_authority_protocol.py",
+        "foundup_verified_outcome_root_authority_service.py",
+        "foundup_verified_outcome_root_authority_service_entrypoint.py",
+        "foundup_verified_outcome_root_authority_socket_service.py",
+        "foundup_verified_outcome_root_authority_state.py",
+    ):
+        assert (
+            "modules/communication/moltbot_bridge/src/" + filename
+            in generated["required_runtime_sha256"]
+        )
     assert generator.canonical_manifest_digest(generated) == (
-        "a83068208a10218642d4088e806378fdda985b3d8112fe2815a1863831bf5265"
+        "13ab1816e96e27d9feede3ff1572be38b0beed58001fbdb1d11b343ca2a84ab0"
     )

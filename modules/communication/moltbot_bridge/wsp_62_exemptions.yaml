@@ -36,7 +36,7 @@ exemptions:
       revocation, bounded renewal, and proposal signer-policy runtime
       boundaries; splitting the historical registry remains separate
       documentation-maintenance work.
-    threshold_override: 1409
+    threshold_override: 1452
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -119,6 +119,54 @@ exemptions:
     no_growth_ceiling: {file_lines: 737, functions: {issue_delegated_authority_runtime: 285}}
 
   - <<: *reddog_security_repair
+    file: "src/reddog_signer_key_provider_dryrun.py"
+    reason: >-
+      Inherited key-provider transaction host retained while a verified,
+      registry-backed outcome authority is threaded to the existing signer
+      backend. The new authority implementation remains in bounded modules.
+    threshold_override: 682
+    function_threshold_override: 203
+    functions: ["_build_signer_backend_from_provider_core"]
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
+    no_growth_ceiling: {file_lines: 682, functions: {_build_signer_backend_from_provider_core: 203}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_signer_socket_service_runtime_bootstrap.py"
+    reason: >-
+      Inherited signer bootstrap host retained while the authenticated owner
+      configuration identity is carried into runtime admission. The focused
+      binding regression was extracted to a bounded test module.
+    threshold_override: 723
+    function_threshold_override: 176
+    functions: ["rehydrate_signer_socket_service_runtime_config"]
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
+    no_growth_ceiling: {file_lines: 722, functions: {rehydrate_signer_socket_service_runtime_config: 176}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_signer_socket_service_runtime_wiring.py"
+    reason: >-
+      Inherited signer composition host retained while outcome-authority
+      admission delegates to a bounded runtime-binding module. No new
+      oversized function is introduced in this slice.
+    threshold_override: 1318
+    function_threshold_override: 225
+    functions:
+      - "architect_proposal_security_context_digest"
+      - "run_reddog_signer_socket_service_runtime_wiring"
+      - "validate_signer_socket_service_runtime_config"
+      - "_build_backend"
+      - "_proposal_policy_authorization"
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
+    no_growth_ceiling:
+      file_lines: 1318
+      functions:
+        architect_proposal_security_context_digest: 120
+        run_reddog_signer_socket_service_runtime_wiring: 225
+        validate_signer_socket_service_runtime_config: 136
+        _build_backend: 132
+        _proposal_policy_authorization: 84
+
+  - <<: *reddog_security_repair
     file: "src/reddog_resident_queue_slice_verifier_request_binding.py"
     reason: "Inherited queue evidence-request coordinator retained while signed authority is rebound to independently recorded verification state."
     threshold_override: 368
@@ -183,24 +231,24 @@ exemptions:
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_openclaw_signed_worker_claim_loop_preflight.py"
     reason: "Inherited startup integration matrix retained while the independent runtime root is threaded."
-    threshold_override: 1736
+    threshold_override: 1730
     function_threshold_override: 257
-    functions: ["test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing", "test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage", "test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation", "test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain"]
-    no_growth_ceiling: {file_lines: 1736, functions: {test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing: 99, test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage: 139, test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation: 173, test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain: 238}}
+    functions: ["test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing", "test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage", "test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation", "test_main_openclaw_signed_worker_claim_loop_stops_before_unauthorized_pattern_memory"]
+    no_growth_ceiling: {file_lines: 1730, functions: {test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing: 99, test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage: 139, test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation: 173, test_main_openclaw_signed_worker_claim_loop_stops_before_unauthorized_pattern_memory: 235}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py"
     reason: "Inherited resident-loop regression matrix retained for cross-stage parity."
-    threshold_override: 4908
-    no_growth_ceiling: {file_lines: 4908, functions: {}}
+    threshold_override: 4867
+    no_growth_ceiling: {file_lines: 4867, functions: {}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_signed_worker_dispatch_task_executor.py"
     reason: "Inherited worker-dispatch integration matrix retained while the runtime root is threaded."
-    threshold_override: 3016
-    function_threshold_override: 199
-    functions: ["test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet", "test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues", "test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness"]
-    no_growth_ceiling: {file_lines: 3016, functions: {test_openclaw_queue_stage_does_not_materialize_bounded_artifact: 102, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 189, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 149, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 184, test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues: 199, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 178}}
+    threshold_override: 2957
+    function_threshold_override: 198
+    functions: ["test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet", "test_openclaw_claim_loop_stops_before_pattern_memory_without_authority", "test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness"]
+    no_growth_ceiling: {file_lines: 2957, functions: {test_openclaw_queue_stage_does_not_materialize_bounded_artifact: 102, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 189, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 149, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 184, test_openclaw_claim_loop_stops_before_pattern_memory_without_authority: 198, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 178}}
 
   - file: "scripts/run_task.py"
     reason: >-
@@ -244,7 +292,7 @@ exemptions:
       Module-local WSP 62 registry. Provider-evidence review adds exact,
       review-dated ceilings for the touched legacy surfaces; splitting the
       registry would break the canonical module-level exemption lookup.
-    threshold_override: 439
+    threshold_override: 487
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -418,7 +466,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9420
+    threshold_override: 9522
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -430,7 +478,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1901
+    threshold_override: 1978
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

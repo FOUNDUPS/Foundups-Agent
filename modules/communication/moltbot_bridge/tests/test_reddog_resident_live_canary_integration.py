@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -9,6 +10,7 @@ import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
     build_reddog_verified_pattern_memory_sink,
+    reddog_verified_pattern_memory_record_id,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_pattern_memory_admission_invoke import (
     canonical_pattern_memory_admission_identity,
@@ -132,7 +134,19 @@ def test_digest_valid_db_context_must_match_plan_draft_and_git_head(
         record = sink.load_verified_outcome(record_id)
         assert record is not None
         modified = {**record, field: value}
-        new_id = sink.store_verified_outcome(modified)
+        new_id = reddog_verified_pattern_memory_record_id(modified)
+        memory = PatternMemory(db_path=db_path)
+        try:
+            memory.conn.execute(
+                "INSERT INTO skill_outcomes "
+                "SELECT ?, skill_name, agent, timestamp, input_context, ?, success, "
+                "pattern_fidelity, outcome_quality, execution_time_ms, step_count, "
+                "failed_at_step, notes FROM skill_outcomes WHERE execution_id = ?",
+                (new_id, json.dumps(modified, sort_keys=True), record_id),
+            )
+            memory.conn.commit()
+        finally:
+            memory.close()
         admission_id, digest = canonical_pattern_memory_admission_identity(modified, new_id)
         replacement.update(
             admission_id=admission_id,

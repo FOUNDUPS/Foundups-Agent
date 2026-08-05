@@ -4,7 +4,6 @@ import ast
 import hashlib
 import json
 import subprocess
-import sqlite3
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -2188,7 +2187,7 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_held_out_regression_
     assert "pattern_memory_admission" not in stored["stage_results"]
 
 
-def test_openclaw_claim_env_bound_queue_loop_runner_reaches_pattern_memory_admission(
+def test_openclaw_claim_env_bound_queue_loop_rejects_without_outcome_authority(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -2213,33 +2212,19 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_pattern_memory_admis
 
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=ctx["repo"])
 
-    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["accepted"] is False, json.dumps(result, sort_keys=True)
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
     assert result["task_id"] == task_id
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert "FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION" in result["rejection_reasons"]
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
 
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["pattern_memory_admission"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
-    assert stage["pattern_memory_write_performed"] is True
-    assert stage["receipt"]["pattern_memory_record_id"].startswith("reddog_verified_outcome_")
-    assert stage["no_command_execution_performed"] is True
-    assert stage["no_pr_publish_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-
-    with sqlite3.connect(pattern_memory_db) as conn:
-        count = conn.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0]
-        execution_id = conn.execute(
-            "SELECT execution_id FROM skill_outcomes LIMIT 1"
-        ).fetchone()[0]
-    assert count == 1
-    assert execution_id == stage["receipt"]["pattern_memory_record_id"]
+    assert "pattern_memory_admission" not in stored["stage_results"]
+    assert not pattern_memory_db.exists()
     assert not (ctx["repo"] / "runtime" / "pattern_memory.db").exists()
 
 
-def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
+def test_openclaw_claim_loop_stops_before_pattern_memory_without_authority(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -2381,8 +2366,8 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
         repo_root=repo,
         max_claims=6,
     )
-    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT, json.dumps(
+    assert result["accepted"] is False, json.dumps(result, sort_keys=True)
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT, json.dumps(
         result, sort_keys=True
     )
     assert result["claimed_count"] == 5, json.dumps(result, sort_keys=True)
@@ -2392,12 +2377,12 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
         task_id,
         task_id,
     )
-    assert result["completed_task_ids"] == (task_id,)
-    assert result["failed_task_ids"] == ()
-    assert result["idle"] is True
+    assert result["completed_task_ids"] == ()
+    assert result["failed_task_ids"] == (task_id,)
+    assert result["idle"] is False
     assert result["max_claims_reached"] is False
-    assert result["claim_results"][-1]["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
-    assert len(result["receipt_ids"]) == 5
+    assert "stage:pattern_memory_admission" in result["rejection_reasons"]
+    assert len(result["receipt_ids"]) == 4
     assert len(result["child_execution_evidence_digests"]) == 5
     assert all(
         digest.startswith("sha256:")
@@ -2408,9 +2393,9 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
         SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
         SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
         SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
-        SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT,
     ]
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert result["claim_results"][-1]["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
     stored = json.loads(chain.read_text(encoding="utf-8"))
     for stage_name in (
         "bounded_worker_pilot",
@@ -2419,10 +2404,12 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
         "verified_outcome_ratchet",
         "model_feedback_admission",
         "held_out_regression_gate",
-        "pattern_memory_admission",
     ):
         assert stage_name in stored["stage_results"]
-    assert stored["receipts"][-1]["next_action"] == "STOP_QUEUE_CHAIN_COMPLETE"
+    assert "pattern_memory_admission" not in stored["stage_results"]
+    assert stored["receipts"][-1]["next_action"] == (
+        "RUN_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE"
+    )
     assert (worktree / PILOT_ARTIFACT).exists()
     assert not (repo / PILOT_ARTIFACT).exists()
     draft_pr_calls = [
@@ -2433,9 +2420,7 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
     assert draft_pr_calls == ["commit_all", "push_branch", "create_draft_pr"]
     assert outcome_store.exists()
     assert model_feedback_store.exists()
-    with sqlite3.connect(pattern_memory_db) as conn:
-        count = conn.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0]
-    assert count == 1
+    assert not pattern_memory_db.exists()
     assert not (repo / "runtime" / "pattern_memory.db").exists()
 
 def test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness(

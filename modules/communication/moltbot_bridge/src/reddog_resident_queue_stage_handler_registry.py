@@ -248,6 +248,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     held_out_gate_request: Optional[Mapping[str, Any]] = None,
     admission_request: Optional[Mapping[str, Any]] = None,
     pattern_memory_admission_sink: Any = None,
+    verified_outcome_evidence_publisher: Any = None,
     worker_dispatch_writer: Any = None,
     trusted_now_epoch: Optional[Callable[[], int]] = None,
     assurance_reservation_store: Any = None,
@@ -589,6 +590,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             chain_results_store=chain_results_store,
             admission_request=admission_request or {},
             sink=pattern_memory_admission_sink,
+            evidence_publisher=verified_outcome_evidence_publisher,
         ),
     )
     return ResidentQueueStageHandlerRegistry(handlers=handlers, missing_stage_reasons=missing)

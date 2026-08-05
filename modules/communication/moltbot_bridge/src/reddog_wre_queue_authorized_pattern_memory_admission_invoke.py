@@ -182,13 +182,14 @@ def _runtime_binding_ok(
     return all(pair == pairs[0] for pair in pairs[1:])
 
 
-def _record_from_gate(
+def build_queue_authorized_verified_outcome_record(
     *,
     gate_result: Mapping[str, Any],
     gate_receipt: Mapping[str, Any],
     admission_request: Mapping[str, Any],
 ) -> Dict[str, Any]:
     return {
+        "schema_version": "reddog_verified_recursive_improvement_outcome.v1",
         "record_type": "reddog_verified_recursive_improvement_outcome",
         "work_order_id": str(gate_receipt.get("work_order_id") or ""),
         "slice_name": str(gate_receipt.get("slice_name") or ""),
@@ -321,7 +322,7 @@ def invoke_reddog_wre_queue_authorized_pattern_memory_admission(
         )
 
     record = (
-        _record_from_gate(
+        build_queue_authorized_verified_outcome_record(
             gate_result=gate_payload,
             gate_receipt=gate_receipt,
             admission_request=request,
@@ -363,6 +364,7 @@ def invoke_reddog_wre_queue_authorized_pattern_memory_admission(
 __all__ = [
     "PatternMemoryAdmissionSink",
     "canonical_pattern_memory_admission_identity",
+    "build_queue_authorized_verified_outcome_record",
     "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT",
     "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT",
     "QueueAuthorizedPatternMemoryAdmissionInvokeReason",

@@ -16,6 +16,9 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
 )
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    RootVerifiedOutcomeSigningAuthority,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
     public_key_fingerprint,
@@ -239,6 +242,36 @@ def test_wsp71_permissioned_mode_accepts_injected_non_mock_resolver_without_test
         ("op://test-vault/reddog-signing/private", "signer:reddog-authority"),
         ("op://test-vault/reddog-audit/mac", "signer:reddog-authority"),
     ]
+
+
+@pytest.mark.parametrize(
+    "builder,mode,allow_test",
+    (
+        (build_signer_backend_from_provider, PROVIDER_MODE_WSP71_PERMISSIONED, False),
+        (build_test_only_signer_backend_from_provider, PROVIDER_MODE_TEST_ONLY_DRYRUN, True),
+    ),
+)
+def test_all_provider_builders_reject_non_root_outcome_authority(
+    builder, mode: str, allow_test: bool
+) -> None:
+    private_key = _private_key()
+    resolver = _resolver(private_key)
+    forged_same_type = object.__new__(RootVerifiedOutcomeSigningAuthority)
+
+    for authority in (object(), forged_same_type):
+        result = builder(
+            _profile(_public_text(private_key)),
+            resolver,
+            provider_mode=mode,
+            allow_test_only_key_material=allow_test,
+            permission_snapshot_fresh=True,
+            verified_outcome_signing_authority=authority,
+        )
+
+        assert result.ok is False
+        assert result.rejection_code == FAIL_PROVIDER_PROFILE_INVALID
+        assert result.backend is None
+        assert resolver.calls == []
 
 
 def test_wsp71_permissioned_mode_accepts_op_cli_secret_resolver() -> None:

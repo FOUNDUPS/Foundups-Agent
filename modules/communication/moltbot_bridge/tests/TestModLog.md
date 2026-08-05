@@ -13,6 +13,66 @@
   control contracts, bounded common-field validation, and a repository-wide
   executable-source scan proving the static ledger has no runtime consumer.
 
+## 2026-08-04: Verified-outcome root authority regressions
+
+- Added signer-instance proof, live UID/GID rotation, dual-store reset,
+  one-step crash repair, unsafe ancestry, malformed-client continuity, and
+  production test-mint absence regressions.
+- Added third-domain installation replay, validation-before-generation,
+  pre-open ancestry, pre-read peer attestation, cross-process CAS, and one-time
+  provisioning entrypoint regressions. Linux root CI also exercises the real
+  Unix socket with a demoted non-root signer process.
+- Added exact descriptor, root-owner, signer-generation, verifier-class,
+  co-signature, expiry, revocation, scope, and lineage validation coverage.
+- Added all-field three-store rotation rejection, generation-fence preservation,
+  and pre-key Linux signer isolation regressions for UID separation, YAMA,
+  capabilities, core dumps, dumpability, and inherited environment.
+- Proved attacker-rehashed grant changes, unknown verifier classes, authority
+  collapse, wrong owner/session, alternate or reset replay stores, direct
+  capability construction, and forged reservations reject.
+- Proved co-signed grants cannot be transplanted across issuer, RedDog,
+  consensus, signer key epoch, or signer run/config/session/manifest/generation
+  contexts even when the descriptor ID is recomputed.
+- Proved all public key-provider constructors reject non-root and unregistered
+  same-type outcome authority before secret resolution, plus duplicate grants,
+  stale/future signed grants, held-out-key revocation, and wrong reservation
+  scope/time fail closed.
+- Proved one exact grant survives restart and eight concurrent reservations
+  produce exactly one winner.
+- Proved a signer process observes a root-config revocation written after
+  startup, and that grant expiry uses current signer time rather than the
+  caller's signed-request timestamp.
+- Proved one v2 snapshot supplies manifest, lazy authority, owner ID, and UID/GID;
+  absent policy never touches the root socket, configured policy binds after
+  isolation, and missing, raised, or mismatched suppliers reject before service.
+- Proved the checked-in backend manifest includes the root-authority module
+  through the stable signer entrypoint's dependency closure.
+
+## 2026-08-04: Verified-outcome runtime authority regressions
+
+- Added durable publication/rehydration tests for exact verifier and held-out
+  receipts, isolated-signer evidence, committed-profile key resolution, revocation,
+  freshness, and every required FoundUp/snapshot/head/content/work/slice/job/worker/
+  verifier/runtime binding.
+- Proved attacker-rehashed records and envelopes, wrong keys, missing durable
+  sources, caller booleans, stale evidence, replay, and cross-process replay reject.
+- Added resident assembly, queue publication, signer policy, and session-bootstrap
+  tests; concurrent consumers admit exactly one capability.
+- Exact-SHA review added fail-closed regressions for absent signer-side outcome
+  authority, signing-request replay, missing production queue bindings, staged
+  envelope activation, zero PatternMemory writes on publication failure, atomic
+  multi-capability Brain admission, and trusted use-time clocks. Production
+  activation remains blocked because no independently authenticated durable
+  verifier-authority source exists.
+- Security re-review removed hash-shaped legacy authorization, proved staged
+  PatternMemory rows are invisible, exercises the injected orchestration retry,
+  and rejects a pre-seeded conflicting row instead of trusting its record identifier.
+- Added direct-store, publisher-free bootstrap, and OpenClaw queue-worker
+  regressions. The real PatternMemory sink remains non-activation-ready pending
+  an independently revalidated durable authority source.
+- Split signer-domain and adversarial outcome tests into focused modules, and
+  changed legacy full-chain fixtures to assert the production stop before
+  unauthenticated PatternMemory activation. No security assertion was removed.
 ## 2026-08-04: Memex supply authenticity regressions
 
 - Added exact receipt round-trip, unknown-field/type, lineage, scope, expiry,
@@ -20,9 +80,9 @@
 - Added promotion-level proofs that fabricated `sha256:` IDs and
   attacker-rehashed Memex substitutions cannot mutate authoritative work state,
   while valid promotion binds the complete canonical Memex receipt digest.
-- Added proposal-builder, resident-handoff, and authority-seed regressions that
-  reject malformed public dataclass instances and forged serialized receipts
-  before signer, artifact, or profile effects.
+- Added proposal-builder, resident-handoff, and authority-seed regressions that reject
+  malformed serialized receipts before signer effects; added outcome-source schema/ID,
+  substitution, rehash, signature, scope/head/freshness/replay, and capability tests.
 
 ## 2026-08-03: Upstream Hermes complete-event-history confinement
 
@@ -1914,3 +1974,19 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
 - Re-ran the OpenClaw provider and shared upstream-provider bootstrap suites to
   prove the two actual scaffolds share authority and materialization contracts
   without sharing execution implementations.
+## 2026-08-04: Root verified-outcome service regressions
+
+- Proved only a root-UID socket exchange can mint the signer-side authority;
+  caller functions, wrong peers, response substitution, malformed startup, and
+  absent service responses fail before signing authority is usable.
+- Proved exactly one concurrent reservation wins, commit records the exact
+  signature digest, replay stays burned across restart, revocation between
+  reserve and commit rejects, and authority-generation rollback fails closed.
+- Proved one-sided root-state loss repairs from the independent witness while
+  production state construction rejects a non-root principal.
+- Proved service initialization is explicit, startup failures do not echo raw
+  exception content, and the peer policy binds exactly one signer UID/GID and
+  principal.
+- Proved the legacy signer CLI always rejects without authority, resolver, or
+  socket effects, and the stable entrypoint passes the exact root-owned signer
+  UID/GID into the pre-key Linux isolation gate.

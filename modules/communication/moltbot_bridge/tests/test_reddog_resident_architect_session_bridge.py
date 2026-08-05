@@ -6,6 +6,11 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
+    InMemoryAuthorityRuntimeStore,
+)
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
     SCHEMA_VERSION as GROUNDING_SCHEMA_VERSION,
     canonical_digest as grounding_digest,
@@ -196,6 +201,73 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
     assert result["no_repo_mutation_performed"] is True
     assert result["no_holoindex_reindex_performed"] is True
     assert result["coding_worker_spawned"] is False
+
+
+def test_verified_outcome_authority_requires_host_runtime_bindings(monkeypatch) -> None:
+    for name in (
+        "REDDOG_RUNTIME_ARTIFACT_ROOT",
+        "REDDOG_AUTHORITY_RUNTIME_STATE_PATH",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+        "REDDOG_AUTHORITY_PROFILE_PATH",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    with pytest.raises(ValueError, match="runtime_authority_config_missing"):
+        bridge._verified_outcome_authority_from_env(
+            REPO_ROOT,
+            {"verified_outcome_references": [{"record_id": "outcome"}]},
+        )
+
+
+def test_verified_outcome_authority_uses_host_owned_store_and_profile(monkeypatch) -> None:
+    for name, value in {
+        "REDDOG_RUNTIME_ARTIFACT_ROOT": "O:/runtime",
+        "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": "O:/runtime/authority.json",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "O:/runtime/work-state.json",
+        "REDDOG_AUTHORITY_PROFILE_PATH": "O:/runtime/profile.json",
+    }.items():
+        monkeypatch.setenv(name, value)
+    store = InMemoryAuthorityRuntimeStore()
+    verifier = SimpleNamespace(verify=lambda *_args: True)
+    revocation = SimpleNamespace(is_revoked=lambda **_kwargs: False)
+    bundle = SimpleNamespace(
+        accepted=True,
+        authority_store=store,
+        signature_verifier=verifier,
+        revocation_oracle=revocation,
+    )
+    profile = {
+        "principal_id": "principal-012",
+        "principal_provider": "intake-auth",
+        "reddog_id": "reddog-0102",
+    }
+    monkeypatch.setattr(bridge, "validate_runtime_root_path", lambda *_args, **_kwargs: Path("O:/runtime"))
+    monkeypatch.setattr(
+        bridge,
+        "load_reddog_main_resident_queue_runtime_dependency_bundle",
+        lambda **_kwargs: bundle,
+    )
+    monkeypatch.setattr(
+        bridge,
+        "_runtime_mapping",
+        lambda _repo, _root, path: profile if str(path).endswith("profile.json") else {},
+    )
+    monkeypatch.setattr(
+        bridge,
+        "CommittedAuthorityProfileOutcomeKeyResolver",
+        lambda **_kwargs: SimpleNamespace(resolve=lambda *_args: "public-key"),
+    )
+
+    authority = bridge._verified_outcome_authority_from_env(
+        REPO_ROOT,
+        {"verified_outcome_references": [{"record_id": "outcome"}]},
+    )
+
+    assert authority is not None
+    assert authority.store._store is store
+    assert authority.signature_verifier is verifier
+    assert authority.revocation_oracle is revocation
+    assert authority.issuer_principal_id == "principal-012"
 
 
 def test_resident_architect_session_bridge_failure_fails_closed(monkeypatch) -> None:

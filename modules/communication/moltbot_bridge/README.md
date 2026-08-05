@@ -46,8 +46,9 @@ service admission and never executes packet argv. The signer-side E0 boundary
 now verifies one request-bound secret-access grant, atomically consumes durable
 replay state, resolves WSP71 keys for that sign only, and rechecks revocation,
 expiry, provider identity, and the returned signature. The stable entrypoint
-does not yet supply or compose this boundary, so production signing remains
-fail-closed. The owner-controlled E0 admission layer now binds one signed
+now applies the executable OS-isolation boundary before resolver construction.
+Its production WSP71 secret resolver remains unavailable, so production signing
+still fails closed. The owner-controlled E0 admission layer binds one signed
 policy to the exact current signer generation, key-reference digests,
 manifest-bound grant/revocation authorities, disjoint durable-state roots,
 operation/tier consensus rules, and rate limits. Its opaque one-use capability
@@ -55,6 +56,45 @@ cannot be copied or serialized. Consumption revalidates while the canonical
 current-generation fence is held and returns only a non-authoritative receipt;
 it does not release signer composition authority or grant an effect.
 RedDog and `main.py` remain clients and cannot spawn the signer.
+The older `reddog_signer_socket_service_runtime_cli` is retained only to return
+a structured retirement rejection. It cannot load authority, construct a
+secret resolver, or bind a socket. The system-service entrypoint also loads the
+current generation, a lazy outcome-authority supplier, and exact signer UID/GID
+from one immutable v2 read. The supplier runs only for a selected outcome policy;
+the live process must match both
+identity values before resolver construction. The older one-shot
+`reddog_isolated_signer_process_entrypoint` accepts test-only dry-run providers
+only; every WSP71/production provider mode rejects before key resolution.
+Legacy v1 owner configs remain readable by the lower-level manifest migration
+loader but cannot start the production signer service.
+
+Verified-outcome admission also requires the separately supervised root service:
+
+```bash
+python -m modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_provision_entrypoint \
+  --repo-root /srv/foundups-agent \
+  --owner-authority-config /etc/foundups/reddog-signer-owner.json
+
+python -m modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service_entrypoint \
+  --repo-root /srv/foundups-agent \
+  --owner-authority-config /etc/foundups/reddog-signer-owner.json
+```
+
+The primary/witness state and generation anchor are provisioned once by the
+separate root installer. A third disjoint installation witness commits that
+provisioning event; later replay-store deletion cannot invoke the installer to
+reopen consumed grants. Runtime startup has no state-reset or initialization
+switch. The service loads no private signing key and grants no
+repository, queue, worker, PR, or merge authority.
+Each live owner-config reload also binds the resolved roots, database paths,
+store IDs, and durability receipts for all three state domains. Store rotation
+requires a supervised service restart; a running service never combines a new
+config with stores opened from an older config. Before any production WSP71
+key resolution, the existing isolated-signer entrypoint enforces a distinct
+non-root signer UID/GID exactly matching the root-owned owner config, YAMA
+ptrace protection, absence of `CAP_SYS_PTRACE`,
+`RLIMIT_CORE=0`, `PR_SET_DUMPABLE=0`, and a cleared inherited environment.
+Test-only dry-run keys remain non-authoritative and do not claim this boundary.
 
 `start operations` binds the production `reddog_operations` Skillz from the
 manifest-authenticated runtime before model selection or grounding. The

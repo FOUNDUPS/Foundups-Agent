@@ -215,12 +215,37 @@ def test_entrypoint_composes_key_provider_attestor_and_service() -> None:
     assert result.no_process_spawned is True
     assert len(service.calls) == 1
     backend = service.calls[0]["backend"]
-    response = backend.sign(_request(public_key), service.calls[0]["peer_attestor"].attest(_FakePeerCredSocket()))
+    response = backend.sign(
+        _request(public_key),
+        service.calls[0]["peer_attestor"].attest(_FakePeerCredSocket()),
+    )
     assert response.accepted is True
-    assert Ed25519SignatureVerifier().verify(public_key, _request(public_key).signing_input, response.signature) is True
+    assert Ed25519SignatureVerifier().verify(
+        public_key, _request(public_key).signing_input, response.signature
+    ) is True
 
 
-def test_entrypoint_accepts_wsp71_permissioned_provider_mode_without_test_override() -> None:
+def test_production_mode_rejects_before_key_resolution() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    resolver = _resolver(private_key)
+    resolver.resolve = lambda *_args, **_kwargs: pytest.fail("resolver called")  # type: ignore[method-assign]
+
+    result = run_reddog_isolated_signer_process_once(
+        _config(
+            public_key,
+            provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+        ),
+        resolver,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_PROCESS_CONFIG_INVALID in result.rejection_reasons
+    assert result.key_provider_receipt == {}
+
+
+def test_entrypoint_rejects_wsp71_permissioned_provider_mode() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     service = CapturingService()
@@ -236,10 +261,11 @@ def test_entrypoint_accepts_wsp71_permissioned_provider_mode_without_test_overri
         serve_once=service,
     )
 
-    assert result.accepted is True
-    assert result.status == SIGNER_PROCESS_ENTRYPOINT_SERVED
-    assert result.key_provider_receipt["ok"] is True
-    assert len(service.calls) == 1
+    assert result.accepted is False
+    assert result.status == SIGNER_PROCESS_ENTRYPOINT_REJECT
+    assert FAIL_SIGNER_PROCESS_CONFIG_INVALID in result.rejection_reasons
+    assert result.key_provider_receipt == {}
+    assert service.calls == []
 
 
 class _FakePeerCredSocket:

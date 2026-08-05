@@ -46,6 +46,10 @@ STATIC_RUNTIME_FILES = (
     "scripts/reddog_holoindex_owner_service_once.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_system_service_entrypoint.py",
+    "modules/communication/moltbot_bridge/src/"
+    "foundup_verified_outcome_root_authority_service_entrypoint.py",
+    "modules/communication/moltbot_bridge/src/"
+    "foundup_verified_outcome_root_authority_provision_entrypoint.py",
     "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md",
     "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
     "modules/ai_intelligence/ai_overseer/skillz/"
@@ -242,7 +246,11 @@ def _parse_source(path: Path, relative: str) -> ast.AST:
 
 
 def _dependency_closure() -> tuple[str, ...]:
-    queue = [REPO_ROOT / relative for relative in EXECUTABLE_FILES]
+    queue = [
+        REPO_ROOT / relative
+        for relative in (*EXECUTABLE_FILES, *STATIC_RUNTIME_FILES)
+        if relative.endswith(".py")
+    ]
     observed: set[str] = set()
     while queue:
         path = queue.pop()

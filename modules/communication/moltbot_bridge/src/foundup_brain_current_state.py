@@ -21,6 +21,12 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_authenticity import (
+    consume_verified_foundup_memex_outcomes,
+    inspect_verified_foundup_memex_outcome,
+    is_verified_foundup_memex_outcome_capability,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     FRESH,
     SOURCE_BRAIN,
@@ -99,7 +105,7 @@ def assemble_foundup_brain_current_state(
     snapshot: OperationalContextSnapshot,
     identity: Mapping[str, Any],
     roadmap_state: Mapping[str, Any] | None = None,
-    verified_outcomes: Sequence[Mapping[str, Any]] = (),
+    verified_outcomes: Sequence[Any] = (),
     now_iso: str | None = None,
     resident_mode: bool = True,
     legacy_single_foundup_compatibility: bool = False,
@@ -155,15 +161,15 @@ def assemble_foundup_brain_current_state(
         resident_mode=resident_mode,
         legacy_single_foundup_compatibility=legacy_single_foundup_compatibility,
     )
-    outcomes_clean = tuple(
-        _normalize_verified_outcome(
-            outcome,
-            normalized_foundup_id,
-            reasons,
-            resident_mode=resident_mode,
-            legacy_single_foundup_compatibility=legacy_single_foundup_compatibility,
-        )
-        for outcome in verified_outcomes
+    outcomes_clean = _verified_outcome_projections(
+        verified_outcomes,
+        foundup_id=normalized_foundup_id,
+        snapshot_id=snapshot.snapshot_receipt_id,
+        snapshot_content_digest=snapshot.snapshot_content_digest,
+        reasons=reasons,
+        now_iso=now_iso,
+        resident_mode=resident_mode,
+        legacy_single_foundup_compatibility=legacy_single_foundup_compatibility,
     )
     active_work, excluded_active_work = _scope_work_records(
         snapshot.work_state.get("worker_claims", ()),
@@ -274,12 +280,30 @@ def assemble_foundup_brain_current_state(
         },
         assembly_receipt=assembly_receipt,
     )
-    return FoundUpBrainAssemblyResult(
+    accepted_result = FoundUpBrainAssemblyResult(
         accepted=True,
         status=FOUNDUP_BRAIN_VIEW_ACCEPTED,
         view=view,
         rejection_reasons=(),
     )
+    if resident_mode and verified_outcomes:
+        now_epoch = _iso_epoch(now_iso)
+        admitted = now_epoch is not None and consume_verified_foundup_memex_outcomes(
+            verified_outcomes,
+            expected_foundup_id=normalized_foundup_id,
+            expected_snapshot_id=snapshot.snapshot_receipt_id,
+            expected_snapshot_content_digest=snapshot.snapshot_content_digest,
+            now_epoch=now_epoch,
+            expected_projections=outcomes_clean,
+        )
+        if not admitted:
+            return FoundUpBrainAssemblyResult(
+                accepted=False,
+                status=FOUNDUP_BRAIN_VIEW_REJECTED,
+                view=None,
+                rejection_reasons=("verified_outcome_capability_rejected",),
+            )
+    return accepted_result
 
 
 def _normalize_identity(identity: Mapping[str, Any]) -> dict[str, Any]:
@@ -363,6 +387,68 @@ def _normalize_verified_outcome(
         "held_out_passed": held_out_passed,
         "scope_origin": scope_origin,
     }
+
+
+def _verified_outcome_projections(
+    outcomes: Sequence[Any],
+    *,
+    foundup_id: str,
+    snapshot_id: str,
+    snapshot_content_digest: str,
+    reasons: list[str],
+    now_iso: str | None,
+    resident_mode: bool,
+    legacy_single_foundup_compatibility: bool,
+) -> tuple[dict[str, Any], ...]:
+    """Inspect authenticated outcomes, or validate a non-resident legacy form."""
+
+    projected: list[dict[str, Any]] = []
+    for outcome in outcomes:
+        if resident_mode:
+            if not is_verified_foundup_memex_outcome_capability(outcome):
+                reasons.append("verified_outcome_runtime_binding_required")
+                continue
+            now_epoch = _iso_epoch(now_iso)
+            if now_epoch is None:
+                reasons.append("verified_outcome_trusted_clock_required")
+                continue
+            inspected = inspect_verified_foundup_memex_outcome(
+                outcome,
+                expected_foundup_id=foundup_id,
+                expected_snapshot_id=snapshot_id,
+                expected_snapshot_content_digest=snapshot_content_digest,
+                now_epoch=now_epoch,
+            )
+            if inspected is None:
+                reasons.append("verified_outcome_capability_rejected")
+                continue
+            projected.append(dict(inspected))
+            continue
+        if not legacy_single_foundup_compatibility or not isinstance(outcome, Mapping):
+            reasons.append("verified_outcome_legacy_compatibility_required")
+            continue
+        projected.append(
+            _normalize_verified_outcome(
+                outcome,
+                foundup_id,
+                reasons,
+                resident_mode=False,
+                legacy_single_foundup_compatibility=True,
+            )
+        )
+    return tuple(projected)
+
+
+def _iso_epoch(value: str | None) -> int | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return int(parsed.timestamp())
 
 
 def _scope_work_records(

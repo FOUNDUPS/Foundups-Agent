@@ -7,7 +7,6 @@ import base64
 import hashlib
 import inspect
 import json
-import sys
 from pathlib import Path
 
 import pytest
@@ -31,18 +30,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli import (
-    SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT,
+    FAIL_SIGNER_RUNTIME_CLI_RETIRED,
     SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT,
     run_reddog_signer_socket_service_runtime_cli,
-)
-from modules.communication.moltbot_bridge.src import (
-    reddog_signer_socket_service_runtime_cli as cli_module,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
-    FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
-    run_reddog_signer_socket_service_run_packet_supply,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import ResolveResult, hash_reference
 
@@ -167,6 +157,8 @@ def test_public_cli_has_no_manifest_loader_injection() -> None:
     )
 
     assert "manifest_selection_loader" not in signature.parameters
+    assert "resolver_factory" not in signature.parameters
+    assert "serve_bounded" not in signature.parameters
 
 
 def _private_key():
@@ -257,48 +249,13 @@ def _write_json(path: Path, payload: object) -> Path:
     return path
 
 
-def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_cli_is_retired_before_authority_secret_or_socket_access(
+    tmp_path: Path,
 ) -> None:
     repo = _repo(tmp_path)
     runtime = tmp_path / "runtime"
-    private_key = _private_key()
-    public_key = _public_text(private_key)
-    config = _write_json(
-        runtime / "signer-service.json",
-        _config(public_key, socket_path=runtime / "signer.sock"),
-    )
-    resolver = FakeResolver(
-        {
-            "op://prod-vault/reddog-signing/private": _private_key_secret(private_key),
-            "op://prod-vault/reddog-audit/mac": _audit_secret(),
-        }
-    )
-    resolver_factory = CapturingResolverFactory(resolver)
-    service = CapturingBoundedService()
+    config = _write_json(runtime / "signer-service.json", {})
     emitted: list[str] = []
-    payload = json.loads(config.read_text(encoding="utf-8"))
-    payload["key_provider_profiles"] = [payload.pop("key_provider_profile")]
-    _write_json(config, payload)
-    packet = runtime / "signer-run-packet.json"
-    owner_path = tmp_path / "signer-owner" / "owner.json"
-    supplied = run_reddog_signer_socket_service_run_packet_supply(
-        repo_root=repo,
-        config_path=config,
-        output_path=packet,
-        owner_authority_config_path=owner_path,
-        op_executable="C:/Program Files/1Password/op.exe",
-        op_timeout_s=7,
-        ttl_seconds=61,
-        session_id="session-prod",
-        python_executable=sys.executable,
-    )
-    assert supplied.accepted is True
-    monkeypatch.setattr(
-        cli_module,
-        "_resolve_manifest_selection_loader",
-        lambda _path: _manifest_selection_loader,
-    )
 
     code = run_reddog_signer_socket_service_runtime_cli(
         [
@@ -306,74 +263,17 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(
             str(repo),
             "--config",
             str(config),
-            "--expected-config-digest",
-            str(supplied.config_digest),
-            "--run-packet",
-            str(packet),
-            "--owner-authority-config",
-            str(owner_path),
-            "--op-executable",
-            "C:/Program Files/1Password/op.exe",
-            "--op-timeout-s",
-            "7",
-            "--ttl-seconds",
-            "61",
-            "--session-id",
-            "session-prod",
         ],
-        resolver_factory=resolver_factory,
-        serve_bounded=service,
-        emit=emitted.append,
-    )
-
-    assert code == 0
-    payload = json.loads(emitted[0])
-    assert payload["status"] == SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT
-    assert payload["result"]["accepted"] is True
-    assert payload["no_main_runtime_wiring"] is True
-    assert payload["no_holoindex_reindex_performed"] is True
-    assert resolver_factory.calls == [
-        {
-            "op_executable": "C:/Program Files/1Password/op.exe",
-            "timeout_s": 7.0,
-            "ttl_seconds": 61,
-            "session_id": "session-prod",
-        }
-    ]
-    assert resolver.calls == [
-        ("op://prod-vault/reddog-signing/private", "signer:reddog-authority"),
-        ("op://prod-vault/reddog-audit/mac", "signer:reddog-authority"),
-    ]
-    assert len(service.calls) == 1
-    text = emitted[0]
-    assert SIGNING_KEY_PREFIX not in text
-    assert AUDIT_KEY_PREFIX not in text
-    assert "0123456789abcdef" not in text
-
-
-def test_cli_rejects_unsafe_config_before_service_call(tmp_path: Path) -> None:
-    repo = _repo(tmp_path)
-    inside = _write_json(repo / "signer-service.json", {})
-    resolver_factory = CapturingResolverFactory(FakeResolver({}))
-    service = CapturingBoundedService()
-    emitted: list[str] = []
-
-    code = run_reddog_signer_socket_service_runtime_cli(
-        ["--repo-root", str(repo), "--config", str(inside)],
-        resolver_factory=resolver_factory,
-        serve_bounded=service,
         emit=emitted.append,
     )
 
     assert code == 2
     payload = json.loads(emitted[0])
     assert payload["status"] == SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT
-    assert payload["result"]["accepted"] is False
-    assert payload["result"]["rejection_reasons"] == [
-        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION
-    ]
-    assert resolver_factory.calls == []
-    assert service.calls == []
+    assert payload["rejection_reasons"] == [FAIL_SIGNER_RUNTIME_CLI_RETIRED]
+    assert payload["no_authority_loaded"] is True
+    assert payload["no_secret_resolver_constructed"] is True
+    assert payload["no_socket_bound"] is True
 
 
 def test_cli_module_has_no_main_openclaw_hermes_or_repo_mutation_surface() -> None:

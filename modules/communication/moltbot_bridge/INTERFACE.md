@@ -54,13 +54,56 @@ capability. Production startup remains fail closed until it receives the
 attestation, a current signer-runtime configuration, and an independently
 administered principal-key resolver.
 
-Architect proposal attestation v2 additionally requires a typed
-`OperationalMemexSupplyReceipt`. Promotion rehydrates the complete serialized
-receipt, recomputes its canonical ID, rejects unknown fields and stale or
-scope/lineage-mismatched inputs, and rebuilds the signed proposal over the full
-receipt digest. A caller-recomputed Memex self-hash is therefore integrity only;
-it cannot become promotion authority without the independently signed proposal
-attestation matching that exact receipt.
+Architect proposal attestation v2 requires a typed `OperationalMemexSupplyReceipt`;
+promotion rehydrates its complete serialized form, recomputes the canonical ID,
+rejects unknown/stale/scope-mismatched inputs, and signs its full digest. Outcome
+rehydration checks canonical verifier/held-out receipts. The system-service
+signer loads an exact root-owned v2 outcome-authority descriptor and an opaque
+client for a separately launched root authority service. The service owns
+disjoint primary, witness, and one-time installation monotonic stores; the
+signer owns none of them. Each
+co-signed grant binds FoundUp, snapshot,
+work order, slice, job, worker, exact head/content, runtime, PatternMemory record,
+signer key/epoch, and the current signer run packet/config/session/manifest
+generation through an immutable authority-context digest covered by both
+independent signatures. Only a root-UID-authenticated socket exchange can mint
+the opaque E0 capability; every key-provider constructor verifies that boundary
+before resolving key material. Every reserve and commit additionally carries a
+domain-separated Ed25519 proof from the exact current E0 signer key, while fresh
+kernel UID/GID credentials are checked against the current root config. The
+root service burns a reservation before signing, then re-reads current root
+configuration and rechecks revocation, generation, grant, reservation, signer
+proof, and signature digest before commit. Runtime startup cannot initialize or
+reset replay state. The separate installer rejects after its third-domain
+commit, including after both replay stores are deleted. A failed or crashed
+reservation never reopens. Every current snapshot must match the exact roots,
+paths, store IDs, and durability receipts opened at service startup; state-store
+rotation therefore rejects until a supervised restart. The production isolated
+signer applies its Linux E0 boundary before key resolution: distinct non-root
+UID/GID matching the root-owned v2 owner config, YAMA ptrace controls, no
+`CAP_SYS_PTRACE`, disabled core/dumpable state, and a cleared inherited
+environment. The legacy CLI and one-shot isolated-process composer reject every
+non-test provider before authority, resolver, or socket access. Only the stable
+service is production; it derives manifest, outcome authority, owner ID, and
+signer UID/GID from one authenticated v2 snapshot. Legacy v1 cannot start it;
+test-only dry-run is non-authoritative. An absent outcome policy leaves unrelated
+signer operations available; a configured policy requires matching root authority.
+Owner, generation, key, expiry, revocation, replay, or grant mismatches reject.
+Resident production admission remains blocked until the root service is deployed
+and independent verifier runtimes issue both grant signatures. Staged authority
+envelopes remain non-consumable until exact activation. PatternMemory admission
+uses an invisible staging table in the existing database. Conflicting existing
+rows and legacy hash-shaped compatibility markers reject. The real sink is deliberately
+not activation-ready until it can independently revalidate a durable authority
+source; direct sink activation is forbidden. Authority-envelope consumption reloads
+the durable envelope, resolves the key from the current committed authority profile,
+checks revocation, freshness, FoundUp/snapshot/head/content/work/slice/job/worker/
+verifier/runtime lineage, and issues an opaque one-use capability. The FoundUp Brain
+assembler consumes that capability against the same durable replay state. Raw
+booleans, raw receipt IDs, caller-supplied records, and serializable capability
+markers are never authority. Learning candidates, Brain writes, roadmap writes,
+default Memex supply, and HoloIndex mutation remain outside this interface.
+
 `reddog_architect_fix_promotion_transaction.py` isolates record construction and publication; `reddog_architect_fix_promotion_publication.py` confines all artifacts, while `reddog_architect_fix_publication_effect_binding.py` binds current COMMITTED lineage into signer and worker-dispatch admission. Queue authority verification derives a canonical receipt from the recorded signed authority and accepted verification result. The dry-run receipt, each intent, the runtime receipt, and each AgentDB task retain that receipt ID/digest and exact work-authority digest. Immediately before AgentDB publication, the runtime reloads both stages, recomputes the lineage, obtains fresh time from a required production clock, binds the effective work order, FoundUp, operation, and exact worker roles to the signed authority plus authoritative WSP 15 plan, and re-verifies the principal and work-authority signatures, revocation, permission snapshot, scope, paths, freshness, and valve binding. Final admission uses `AUTHORITATIVE_USE` and consumes the durable nonce once before the writer; any later writer failure requires freshly signed authority. Static validation failures do not consume the nonce. Missing verifier/clock dependencies, forged signatures or substituted operations with attacker-recomputed local receipts, role/capability substitution, replay, expired authority reopened with an old environment epoch, synthetic dry-runs, and substituted authority all reject before the writer.
 AgentDB publication persists a canonical `reddog_signed_worker_agentdb_envelope.v1` containing the complete signed authority runtime, authoritative WSP 15 allocation, exact dispatch receipt, and exact worker intent. Both `OpenClawSupervisor` and direct `scripts/run_task.py` execution independently rehydrate and reverify it before runner selection; runner context comes from verified evidence, outer metadata is not authority, and inconsistent routing cannot fall through to generic WRE. The optional signed Memex supply ID/digest pair remains bound through profile materialization, dispatch, restart, claim, executor, read-only 0102 assignment, and independent slice verification; half-pairs, malformed digests, or conflicts reject and absence remains valid. `AuthoritativeWorkStateStore.locked_snapshot()` is the shared mutation fence for refresh, promotion, and AgentDB publication; its file-backed implementation is confined to an explicit outside-repository runtime root and uses a sibling operation lock.
 Canonical rehydration returns an opaque process-local verification proof that

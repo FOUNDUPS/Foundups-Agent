@@ -40,12 +40,6 @@ from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manif
     SCHEMA_VERSION,
     load_system_service_manifest_selection,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli import (
-    SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT,
-    SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT,
-    _resolve_manifest_selection_loader,
-    run_reddog_signer_socket_service_runtime_cli,
-)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
     run_reddog_signer_socket_service_run_packet_supply,
 )
@@ -61,12 +55,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_current_generation_m
     _legacy_values,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_socket_service_runtime_cli import (
-    CapturingBoundedService,
-    CapturingResolverFactory,
-    FakeResolver,
-    _audit_secret,
     _config,
-    _private_key_secret,
     _write_json,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artifact_manifest import (
@@ -110,9 +99,7 @@ def _fixture(
     return harness, owner_path, owner
 
 
-def _generation_owner_config(
-    harness: Any, values: dict[str, Any]
-) -> dict[str, Any]:
+def _generation_owner_config(harness: Any, values: dict[str, Any]) -> dict[str, Any]:
     runtime = harness.runtime_root
     authority_root = runtime.parent / "signer-authority"
     witness_root = runtime.parent / "signer-generation-witness"
@@ -202,15 +189,11 @@ def _owner_mapping(
             binding.signer_public_key_fingerprint
         ),
         "high_water_root": str(authority_root.resolve()),
-        "high_water_path": str(
-            authority_root.resolve() / "high-water.json"
-        ),
+        "high_water_path": str(authority_root.resolve() / "high-water.json"),
         "high_water_store_id": "signer-high-water:v1",
         "high_water_durability_receipt_id": "sha256:" + "8" * 64,
         "witness_root": str(witness_root.resolve()),
-        "witness_path": str(
-            witness_root.resolve() / "generation.sqlite3"
-        ),
+        "witness_path": str(witness_root.resolve() / "generation.sqlite3"),
         "witness_store_id": "signer-generation-witness:v1",
         "witness_durability_receipt_id": "sha256:" + "7" * 64,
     }
@@ -229,9 +212,7 @@ def test_root_owned_config_reconstructs_current_selection(
         owner_config_path=owner_path,
         repo_root=harness.repo_root,
         config_path=harness.runtime_root / "signer_service_config.json",
-        run_packet_path=(
-            harness.runtime_root / "signer_service_run_packet.json"
-        ),
+        run_packet_path=(harness.runtime_root / "signer_service_run_packet.json"),
     )
     selected = boundary.consume(capability)
 
@@ -256,9 +237,7 @@ def test_tampered_owner_config_rejects(
             owner_config_path=owner_path,
             repo_root=harness.repo_root,
             config_path=harness.runtime_root / "signer_service_config.json",
-            run_packet_path=(
-                harness.runtime_root / "signer_service_run_packet.json"
-            ),
+            run_packet_path=(harness.runtime_root / "signer_service_run_packet.json"),
         )
 
 
@@ -274,9 +253,7 @@ def test_caller_paths_must_match_current_runtime(
             owner_config_path=owner_path,
             repo_root=harness.repo_root,
             config_path=tmp_path / "attacker.json",
-            run_packet_path=(
-                harness.runtime_root / "signer_service_run_packet.json"
-            ),
+            run_packet_path=(harness.runtime_root / "signer_service_run_packet.json"),
         )
 
 
@@ -285,9 +262,7 @@ def test_owner_config_root_cannot_overlap_runtime_roots(
 ) -> None:
     harness, owner_path, owner = _fixture(tmp_path, monkeypatch)
     owner["runtime_root"] = str(owner_path.parent.resolve())
-    owner["anchor_path"] = str(
-        owner_path.parent.resolve() / "generation-anchor.json"
-    )
+    owner["anchor_path"] = str(owner_path.parent.resolve() / "generation-anchor.json")
     owner["config_id"] = digest(
         {key: item for key, item in owner.items() if key != "config_id"}
     )
@@ -298,72 +273,27 @@ def test_owner_config_root_cannot_overlap_runtime_roots(
     )
     owner_path.chmod(0o400)
 
-    with pytest.raises(
-        RuntimeArtifactManifestError, match="signer_owner_root_overlap"
-    ):
+    with pytest.raises(RuntimeArtifactManifestError, match="signer_owner_root_overlap"):
         load_system_service_manifest_selection(
             owner_config_path=owner_path,
             repo_root=harness.repo_root,
             config_path=harness.runtime_root / "signer_service_config.json",
-            run_packet_path=(
-                harness.runtime_root / "signer_service_run_packet.json"
-            ),
+            run_packet_path=(harness.runtime_root / "signer_service_run_packet.json"),
         )
 
 
-def test_cli_default_loader_uses_root_owned_owner_config(
+def test_system_service_loader_uses_root_owned_owner_config(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     harness, owner_path, owner = _fixture(tmp_path, monkeypatch)
-    loader = _resolve_manifest_selection_loader(str(owner_path))
-    assert loader is not None
-
-    capability, boundary = loader(
+    capability, boundary = load_system_service_manifest_selection(
+        owner_config_path=owner_path,
         repo_root=harness.repo_root,
         config_path=harness.runtime_root / "signer_service_config.json",
-        run_packet_path=(
-            harness.runtime_root / "signer_service_run_packet.json"
-        ),
+        run_packet_path=(harness.runtime_root / "signer_service_run_packet.json"),
     )
 
     assert boundary.consume(capability)["owner_config_id"] == owner["config_id"]
-
-
-def test_real_cli_owner_path_runs_once_and_stale_rejects(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
-    resolver = FakeResolver(
-        {
-            "op://prod-vault/reddog-signing/private": _private_key_secret(
-                prepared["harness"].reddog_private_key
-            ),
-            "op://prod-vault/reddog-audit/mac": _audit_secret(),
-        }
-    )
-    factory = CapturingResolverFactory(resolver)
-    service = CapturingBoundedService()
-    emitted: list[str] = []
-
-    code = _run_real_cli(prepared, factory, service, emitted)
-    payload = json.loads(emitted[0])
-    assert code == 0, payload["result"]["rejection_reasons"]
-    assert payload["status"] == (
-        SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT
-    )
-    assert len(factory.calls) == 1
-    assert len(service.calls) == 1
-
-    monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW + 121)
-    factory.calls.clear()
-    service.calls.clear()
-    emitted.clear()
-    assert _run_real_cli(prepared, factory, service, emitted) == 2
-    assert json.loads(emitted[0])["status"] == (
-        SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT
-    )
-    assert factory.calls == []
-    assert service.calls == []
 
 
 def test_non_posix_owner_policy_fails_closed(
@@ -415,16 +345,16 @@ def test_owner_read_is_descriptor_bound_and_bounded() -> None:
 def _prepare_real_cli_owner(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch | None,
+    *,
+    include_outcome_policy: bool = False,
 ) -> dict[str, Any]:
     harness = _build_harness(tmp_path)
     config_path = _write_json(
         harness.runtime_root / "signer_service_config.json",
-        _runtime_config(harness),
+        _runtime_config(harness, include_outcome_policy=include_outcome_policy),
     )
     owner_path = tmp_path / "signer-owner" / "owner.json"
-    packet_path, supplied = _runtime_packet(
-        harness, config_path, owner_path
-    )
+    packet_path, supplied = _runtime_packet(harness, config_path, owner_path)
     authority, boundary = _fresh_manifest_authority(harness)
     _sign_and_publish_manifest(harness, authority, boundary)
     selector = create_runtime_artifact_manifest_launch_selection_boundary(
@@ -433,9 +363,7 @@ def _prepare_real_cli_owner(
         signature_verifier=Ed25519SignatureVerifier(),
     )
     values = dict(
-        selector.consume(
-            selector.select(harness.read_manifest(), now_epoch=NOW)
-        )
+        selector.consume(selector.select(harness.read_manifest(), now_epoch=NOW))
     )
     owner = _generation_owner_config(harness, values)
     if monkeypatch is not None:
@@ -450,10 +378,13 @@ def _prepare_real_cli_owner(
         "packet_path": packet_path,
         "owner_path": _write_owner_config(tmp_path, owner),
         "supplied": supplied,
+        "selection": values,
     }
 
 
-def _runtime_config(harness: Any) -> dict[str, Any]:
+def _runtime_config(
+    harness: Any, *, include_outcome_policy: bool = False
+) -> dict[str, Any]:
     value = _config(
         harness.reddog_public_key,
         socket_path=harness.runtime_root / "signer.sock",
@@ -468,12 +399,19 @@ def _runtime_config(harness: Any) -> dict[str, Any]:
         }
     )
     value["key_provider_profiles"] = [value.pop("key_provider_profile")]
+    if include_outcome_policy:
+        value["verified_outcome_signer_policy"] = {
+            "issuer_principal_id": PRINCIPAL_ID,
+            "reddog_id": "reddog-0102",
+            "signer_public_key": harness.reddog_public_key,
+            "key_epoch": KEY_EPOCH,
+            "authority_tier": "HIGH",
+            "consensus_receipt_digest": CONSENSUS_DIGEST,
+        }
     return value
 
 
-def _runtime_packet(
-    harness: Any, config_path: Path, owner_path: Path
-):
+def _runtime_packet(harness: Any, config_path: Path, owner_path: Path):
     packet_path = harness.runtime_root / "signer_service_run_packet.json"
     supplied = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=harness.repo_root,
@@ -509,9 +447,7 @@ def _fresh_manifest_authority(harness: Any):
     return authority, boundary
 
 
-def _sign_and_publish_manifest(
-    harness: Any, authority: Any, boundary: Any
-) -> None:
+def _sign_and_publish_manifest(harness: Any, authority: Any, boundary: Any) -> None:
     _signer, context = _manifest_signing_context(
         authority,
         boundary,
@@ -528,9 +464,7 @@ def _sign_and_publish_manifest(
     assert result.accepted is True
 
 
-def _write_owner_config(
-    tmp_path: Path, owner: dict[str, Any]
-) -> Path:
+def _write_owner_config(tmp_path: Path, owner: dict[str, Any]) -> Path:
     owner_root = tmp_path / "signer-owner"
     owner_root.mkdir()
     owner_path = owner_root / "owner.json"
@@ -539,29 +473,3 @@ def _write_owner_config(
         encoding="ascii",
     )
     return owner_path
-
-
-def _run_real_cli(
-    prepared: dict[str, Any],
-    factory: CapturingResolverFactory,
-    service: CapturingBoundedService,
-    emitted: list[str],
-) -> int:
-    supplied = prepared["supplied"]
-    args = [
-        "--repo-root", str(prepared["harness"].repo_root),
-        "--config", str(prepared["config_path"]),
-        "--expected-config-digest", str(supplied.config_digest),
-        "--run-packet", str(prepared["packet_path"]),
-        "--owner-authority-config", str(prepared["owner_path"]),
-        "--op-executable", "C:/Program Files/1Password/op.exe",
-        "--op-timeout-s", "7",
-        "--ttl-seconds", "61",
-        "--session-id", "session-prod",
-    ]
-    return run_reddog_signer_socket_service_runtime_cli(
-        args,
-        resolver_factory=factory,
-        serve_bounded=service,
-        emit=emitted.append,
-    )

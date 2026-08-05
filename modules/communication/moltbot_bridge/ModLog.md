@@ -17,18 +17,119 @@
   health, version freshness, live execution, or grant any worker authority
   (WSP 00/15/22/50/62/97). WSP 15 classified the correction P1 at 14/20.
 
+## 2026-08-04: Verified-outcome root authority service
+- Replaced the signer-owned outcome replay database with a separately launched,
+  root-owned Unix-socket authority service. The root process owns disjoint
+  primary, witness, and one-time installation CAS stores and authenticates the
+  non-root E0 signer with kernel peer credentials; the signer verifies the
+  service UID on every connection.
+- Added a separately invoked root provisioning primitive, generation rollback
+  fence, exact one-step witness repair, and `RESERVED_BURNED -> COMMITTED`
+  transition. The runtime service has no state-reset/bootstrap option. The
+  E0 signer buffers its signature and releases it only after root commit rechecks
+  the current descriptor, revocation state, generation, owner config, grant,
+  reservation, and signature digest.
+- Removed caller-injected transport from production authority minting. Only an
+  opaque exchange created by the protected root-socket builder can create the
+  signer capability; non-root exchange identities and recomputed responses fail.
+- Removed the process-local test authority from production code. Reserve and
+  commit now require both fresh kernel UID/GID and a domain-separated E0 signer
+  proof over every request field; malformed clients are isolated per connection.
+- Added a bounded root service entrypoint and extended the existing v2 root owner
+  config with exact socket, signer principal, primary, witness, and installation
+  bindings. A separate one-time provisioning entrypoint cannot reopen a committed
+  installation after replay-store loss.
+- Bound every live snapshot to the exact roots, paths, store IDs, and durability
+  receipts opened at startup. A rotated store configuration now requires a
+  supervised service restart and cannot silently reuse old open stores.
+- Added the executable E0 pre-key process gate to the existing isolated signer:
+  production WSP71 resolution now requires the exact root-owned non-root signer
+  UID/GID, YAMA ptrace enforcement, no `CAP_SYS_PTRACE`, disabled core
+  dumps/dumpability, and a cleared inherited environment.
+- Retired the old CLI and one-shot WSP71 composer; only the stable service is
+  production. One v2 read supplies manifest, lazy outcome authority, owner ID,
+  and UID/GID; only selected policy touches the socket and v1 is migration-only.
+- Production remains fail closed until the root service is deployed with a
+  root-owned config and independently co-signed verifier grants. This slice adds
+  no learning candidate, Brain/roadmap write, HoloIndex mutation, repository,
+  OpenClaw/Hermes, PR, merge, reward, or key-custody authority
+  (WSP 00/15/22/50/62/97).
+
+## 2026-08-04: Verified-outcome root authority supply (partial)
+- Extended the existing E0 signer and root-owned system-service owner config;
+  no second signer framework, database abstraction, or orchestrator was added.
+- Added an exact root-published authority descriptor with independent verifier
+  and held-out signatures over FoundUp/snapshot/work/slice/job/head/content,
+  runtime, PatternMemory, key, revocation, freshness, and replay bindings.
+- Bound authority admission to the authenticated owner-config ID and exact
+  signer run packet, config, session, manifest, and artifact generation.
+- Bound both verifier signatures to an immutable digest of the complete root,
+  signer, runtime, replay-anchor, and policy context so a co-signed grant cannot
+  be transplanted into another root-published descriptor.
+- Moved registry-backed root-authority verification into the shared signer
+  key-provider core, closing alternate production/test constructors and
+  unregistered same-type objects before any key material is resolved.
+- The initial draft reused a signer-owned SQLite monotonic store. Independent
+  review rejected that trust model; the root service above supersedes it.
+- Re-read the root-owned authority descriptor at every reservation and used a
+  signer-side trusted clock, so post-launch revocation and expiry fail before
+  signing even when a caller supplies an earlier request timestamp.
+- Extracted exact runtime/policy/peer matching into a bounded module. The new
+  authority modules remain below WSP 62 limits; inherited signer transaction
+  hosts carry exact, expiring no-growth ceilings.
+- Preserved unrelated signer operations when a generation omits the outcome
+  policy; the root-owned v2 config remains mandatory for production OS identity.
+- Hardened the backend manifest generator so Python files named as static
+  runtime roots contribute their complete import closure. Signer authority
+  dependencies are now content-bound rather than merely reachable.
+- The initial slice truth was `VERIFIED_OUTCOME_RUNTIME_BINDING_PARTIAL`.
+  Root-service deployment and independently issued verifier grants are still
+  required for production activation. No PatternMemory,
+  learning, Brain/roadmap, HoloIndex, repository, or merge authority was added
+  (WSP 00/15/22/50/62/97).
+
+## 2026-08-04: Verified-outcome runtime authority binding (partial)
+- Extended the draft verified-outcome rehydration foundation with a root-confined
+  evidence and replay namespace in the existing authority runtime store. Signed
+  publication is staged and non-consumable until its exact activation transition.
+- Removed the unauthenticated legacy queue downgrade. Publisher-backed outcomes
+  can stage in an invisible table inside the existing PatternMemory database.
+  Conflicting pre-seeded rows fail exact canonical readback instead of satisfying
+  admission by identifier alone.
+- The real PatternMemory sink remains explicitly non-activation-ready until it
+  can independently revalidate a durable authority source. Direct store and
+  caller-known identifiers cannot expose staged rows; injected test sinks do not
+  claim production authority.
+- Added committed-profile key resolution, revocation/freshness checks, exact
+  FoundUp/snapshot/head/content/work/slice/job/worker/verifier/runtime lineage, and
+  opaque one-use capabilities consumed by resident FoundUp Brain assembly.
+- Added atomic batch capability consumption after complete Brain validation and
+  one trusted runtime clock for issuance and consumption. Missing queue bindings
+  no longer downgrade silently to legacy admission.
+- Security review proved current autonomous-verifier receipts are canonical
+  self-hashes, not independently signed verifier authority. The signer now
+  requires a separately supplied durable authorization boundary and rejects
+  absent or replayed authorization. No production boundary exists yet, so
+  activation remains fail closed: `BLOCKED_BY_DURABLE_AUTHORITY_SOURCE`.
+- WSP 62 review split outcome schema/lineage validation and signer request
+  validation/reservation into focused helpers. The signer backend, authenticity
+  gate, helpers, and their focused test modules now remain below the 675-line
+  communication threshold without new exemptions.
+- Boundary remains narrow: no learning candidates, Brain or roadmap writes,
+  HoloIndex mutation, new database, new orchestrator, voting, or CABR governance
+  (WSP 00/15/22/50/62/97).
 ## 2026-08-04: Memex supply authenticity gate
-- Replaced the promotion path's `sha256:` prefix check with exact typed Memex
-  supply receipt rehydration, canonical digest verification, scope/lineage and
+- Replaced the promotion path's `sha256:` prefix check with exact typed Memex supply
+  receipt rehydration, canonical digest verification, scope/lineage and
   freshness checks, and strict unknown-field/type rejection.
-- Upgraded architect proposal attestations to v2 so the isolated signer binds
-  the exact full Memex receipt digest. Attacker-rehashed substitutions now fail
-  against independently signed proposal authority before artifact, seed,
+- Upgraded architect proposal attestations to v2 so the isolated signer binds the
+  exact full Memex receipt digest. Attacker-rehashed substitutions now fail against
+  independently signed proposal authority before artifact, seed,
   queue, profile, or state mutation. Proposal signing rehydrates even a
   manually constructed typed receipt; receipt age is capped at 300 seconds and
-  policy lifetime at 600 seconds. No learning-candidate, default-supplier,
-  HoloIndex maintenance, or repository execution behavior was added
-  (WSP 00/15/22/50/62/97).
+  policy lifetime at 600 seconds. Added canonical verifier/held-out rehydration and
+  one-use signed-bundle capability primitives. Resident outcome admission stays
+  fail-closed pending root-owned durable trust/replay wiring (WSP 00/15/22/50/62/97).
 
 ## 2026-08-03: Extension resident model-runtime authority binding
 - Reused the `main.py` authenticated BOUND model-runtime loader in the extension
