@@ -15,8 +15,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, MutableSet, Optional, Sequence, Union
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
     AuthoritativeUseLease,
+    consume_authoritative_use_lease,
+    is_authoritative_use_lease,
 )
 
 from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_selection import (
@@ -195,11 +197,8 @@ def invoke_reddog_extension_wre_operational_spine_explicit_valve(
         intake_target=intake_target,
         permission_ttl_seconds=permission_ttl_seconds,
         permission_expires_at=permission_expires_at,
-        admission_consumer=(
-            authoritative_use_lease.consume
-            if authoritative_use_lease is not None
-            else None
-        ),
+        admission_consumer=(lambda: consume_authoritative_use_lease(authoritative_use_lease))
+        if is_authoritative_use_lease(authoritative_use_lease) else None,
     )
     if spine_result.decision != WORKTREE_SPINE_ACCEPT:
         reasons = [ExtensionWREOperationalSpineInvokeReason.WORKTREE_SPINE_REJECTED]

@@ -1,3 +1,17 @@
+## 2026-08-05: Current-generation use-time trust regressions
+
+- Added real root-owned selection round-trip tests plus changed config,
+  changed run-packet, expiry, and wrong-runtime rejection coverage.
+- Proved the use-time resolver removes only the authenticated-manifest,
+  replay/high-water, and current-generation blockers after a typed accepted
+  receipt. Public mappings, rejected results, absent or malformed receipts,
+  and dependency exceptions remain fail-closed; peer-handshake remains named.
+- Added trusted-clock manifest freshness, malformed binding, external-issuer,
+  changed-byte, wrong-root, and zero-effect regressions.
+- Focused matrix: 17 passed with one platform skip. Changed-module matrix:
+  161 passed with two platform skips. WSP 62 and manifest enforcement:
+  21 passed.
+
 ## 2026-08-05: Upstream agent runtime provenance regressions
 
 - Added a strict v2 schema and independent integration-ID allowlist for the

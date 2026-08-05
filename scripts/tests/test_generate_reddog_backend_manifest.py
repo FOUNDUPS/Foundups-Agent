@@ -73,6 +73,7 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     generated = generator.build_manifest()
 
     assert checked_in == generated
+    assert generator.MANIFEST_PATH.stat().st_size <= 320 * 1024
     assert (
         "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
         in generated["required_runtime_files"]
@@ -128,6 +129,20 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
             "modules/communication/moltbot_bridge/src/" + filename
             in generated["required_runtime_sha256"]
         )
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_signer_current_generation_runtime_binding.py"
+        in generated["required_runtime_sha256"]
+    )
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_signer_current_generation_use_time_gate.py"
+        in generated["required_runtime_sha256"]
+    )
+    assert (
+        "modules/communication/moltbot_bridge/src/reddog_authoritative_use_lease.py"
+        in generated["required_runtime_sha256"]
+    )
     assert generator.canonical_manifest_digest(generated) == (
-        "13ab1816e96e27d9feede3ff1572be38b0beed58001fbdb1d11b343ca2a84ab0"
+        "d9b71c75b88102aec7582dcee1c2bc79d18d9b2d180529ef444b23765a9783ef"
     )

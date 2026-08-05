@@ -387,32 +387,32 @@ rereads the artifacts and reserves a transactional nonce. Canonical artifact
 writers and manifest publication share one runtime-generation fence; the
 manifest binds the exact generation digest and is finalized with OS-level
 no-replace semantics. Verified manifests now mint a signer-process-local,
-immutable, one-shot launch selection. Activation remains blocked pending
-external lifecycle composition with durable replay high-water and
-current-generation verification, plus per-signing-call consumption of the
-mutual peer handshake; use-time execution remains forced closed until they
-exist.
+immutable, one-shot launch selection. Activation remains blocked by the peer
+handshake and six other anchors. The resolver consumes the root-owned selection
+and verifies its manifest/config/run-packet, replay high-water, generation, and
+freshness using the resolver's trusted clock. Its audit receipt cannot become
+effect authority; only the isolated signer peer may issue a future live lease.
 
 Production bootstrap and the resident registry accept only
 `GovernedExecutionValveEnvironment`; legacy token mappings are rejected before
 the dependency bundle or effectful handlers are constructed. The legacy
 evaluator remains available only as an explicit non-effectful compatibility
-API. Authority verification has two typed phases. Queue and canonical use-time
-preflight use `PREFLIGHT_NON_CONSUMING`. Only after all non-mutating gates pass
-does the resolver issue an opaque process-local lease; the final effect boundary
-invokes `AUTHORITATIVE_USE` and transactionally consumes the nonce exactly once.
-That boundary reads a fresh trusted clock first; expiry or clock failure returns
-without consuming the nonce or invoking the effect.
+API. Authority verification retains two typed phases. Queue and use-time
+preflight use `PREFLIGHT_NON_CONSUMING`. Current resolver output is audit
+evidence only: it records the manifest/replay/generation receipt while external
+peer-authenticated effect-lease issuance remains unimplemented. It cannot invoke
+`AUTHORITATIVE_USE`, consume a nonce, or authorize an effect.
 Persisted stage and model-runtime verification mappings are audit evidence and
-cannot recreate either lease. Use-time validation rehydrates signed SINGLE or
-PANEL evidence and binds current revocation plus promoted claim, model, Memex,
-identity, FoundUp, and WSP 15 lineage before issuing a one-shot capability.
+cannot recreate an external lease. Use-time validation rehydrates signed SINGLE
+or PANEL evidence and binds current revocation plus promoted claim, model,
+Memex, identity, FoundUp, and WSP 15 lineage before returning its audit
+decision.
 
 Delegated authority additionally signs the exact explicit `base_ref` and the
 canonical digest of the complete work order. The executor plan carries those
 bindings in its verified plan digest, and the effect runner reads `base_ref`
-only from that validated plan snapshot. Terminal `AUTHORITATIVE_USE`
-verification uses a fresh invocation clock before atomic nonce consumption.
+only from that validated plan snapshot. Future terminal `AUTHORITATIVE_USE`
+must use a fresh invocation clock before atomic nonce consumption.
 
 Worktree creation and live OpenClaw enqueue additionally require digest-bound,
 one-shot in-memory admissions. Fabricated, replayed, restarted, or spliced

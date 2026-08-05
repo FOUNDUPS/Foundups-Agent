@@ -12,7 +12,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,6 +24,9 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment_supply import (
     resolve_reddog_execution_valve_expected_bindings,
+)
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
+    AuthoritativeUseLease,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
@@ -52,6 +54,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verific
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     plan_reddog_wre_queue_consumer_dry_run,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_use_time_gate import (
+    collect_signer_current_generation_use_time_evidence,
+)
 
 
 AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING = (
@@ -62,6 +67,11 @@ DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING = (
 )
 CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING = (
     "canonical_runtime_artifact_manifest_current_generation_verifier_missing"
+)
+CURRENT_GENERATION_TRUST_ANCHOR_REASONS = (
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+    DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING,
+    CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING,
 )
 AUTHORITY_RUNTIME_STAGE_KEY = "authority_runtime"
 AUTHORITY_VERIFICATION_STAGE_KEY = "authority_verification"
@@ -88,35 +98,7 @@ class GovernedValveUseTimeResolution:
     rejection_reasons: tuple[str, ...]
     signed_authority_reverified: bool
     authoritative_use_lease: Optional["AuthoritativeUseLease"] = None
-
-
-class AuthoritativeUseLease:
-    """Opaque one-shot verifier callback consumed only at the side-effect boundary."""
-
-    def __init__(
-        self,
-        consumer: Callable[[], bool],
-        *,
-        expires_at_epoch: int,
-        trusted_now_epoch: Callable[[], int],
-    ) -> None:
-        self._consumer = consumer
-        self.expires_at_epoch = int(expires_at_epoch)
-        self._trusted_now_epoch = trusted_now_epoch
-        self._lock = threading.Lock()
-        self._used = False
-
-    def consume(self) -> bool:
-        with self._lock:
-            if self._used:
-                return False
-            self._used = True
-        try:
-            if int(self._trusted_now_epoch()) >= self.expires_at_epoch:
-                return False
-        except Exception:
-            return False
-        return self._consumer() is True
+    signer_generation_binding_receipt_id: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -168,22 +150,23 @@ class GovernedValveUseTimeAuthorityResolver:
             reasons=reasons,
         )
 
-        # The manifest producer is not an activation authority. This hard blocker
-        # remains until authenticated manifest selection, replay state, current
-        # generation verification, and a trusted peer-handshake receipt are
-        # verified here.
-        reasons.extend(INCOMPLETE_TRUST_ANCHOR_REASONS)
-
-        authoritative_use_lease = None
-        if reverified and not reasons:
-            authoritative_use_lease = AuthoritativeUseLease(
-                lambda: self._consume_authoritative_nonce(
-                    identity=identity,
-                    work_authority=work_authority,
-                ),
-                expires_at_epoch=_integer(work_authority.get("expires_at")) or 0,
-                trusted_now_epoch=self.trusted_now_epoch,
+        generation_evidence = collect_signer_current_generation_use_time_evidence(
+            reverified,
+            self.repo_root,
+            self.runtime_allowed_root,
+            self.trusted_now_epoch,
+        )
+        generation_binding_receipt_id = generation_evidence.receipt_id
+        reasons.extend(
+            generation_evidence.remaining_reasons(
+                INCOMPLETE_TRUST_ANCHOR_REASONS,
+                CURRENT_GENERATION_TRUST_ANCHOR_REASONS,
             )
+        )
+
+        # Current-generation evidence is not effect authority. The external
+        # signer peer remains the only future issuer for a live use lease.
+        authoritative_use_lease = None
 
         expiry_epoch = _integer(work_authority.get("expires_at")) or self.now_epoch
         ttl = max(1, min(3600, expiry_epoch - self.now_epoch))
@@ -198,6 +181,7 @@ class GovernedValveUseTimeAuthorityResolver:
             rejection_reasons=tuple(_dedupe(reasons)),
             signed_authority_reverified=reverified,
             authoritative_use_lease=authoritative_use_lease,
+            signer_generation_binding_receipt_id=generation_binding_receipt_id,
         )
 
     def _reverify_and_bind(

@@ -7,9 +7,13 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
+import pytest
+
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import (
+    StubAuthoritativeUseLease,
+    allow_stub_authoritative_use_lease,
 )
+from modules.communication.moltbot_bridge.src import reddog_extension_wre_operational_spine_invoke as spine_module
 
 from modules.communication.moltbot_bridge.src.reddog_extension_wre_operational_spine_invoke import (
     EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT,
@@ -17,6 +21,11 @@ from modules.communication.moltbot_bridge.src.reddog_extension_wre_operational_s
     ExtensionWREOperationalSpineInvokeReason,
     invoke_reddog_extension_wre_operational_spine_explicit_valve,
 )
+
+
+@pytest.fixture(autouse=True)
+def _allow_stub_lease(monkeypatch) -> None:
+    allow_stub_authoritative_use_lease(monkeypatch, spine_module)
 from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_selection import (
     AUTHORITY_SIGNED_VALVE_REQUIRED,
     WARDROBE_ARCHITECT_AUDIT,
@@ -181,7 +190,7 @@ def test_accepts_only_explicit_sovereign_worktree_selection_and_calls_runner(tmp
         repo_root=repo_root,
         now=fixed,
         locks=set(),
-        authoritative_use_lease=AuthoritativeUseLease(
+        authoritative_use_lease=StubAuthoritativeUseLease(
             lambda: True,
             expires_at_epoch=2_000_000_000,
             trusted_now_epoch=lambda: int(fixed.timestamp()),
@@ -432,7 +441,7 @@ def test_sovereign_token_is_not_emitted(tmp_path: Path) -> None:
         repo_root=repo_root,
         now=fixed,
         locks=set(),
-        authoritative_use_lease=AuthoritativeUseLease(
+        authoritative_use_lease=StubAuthoritativeUseLease(
             lambda: True,
             expires_at_epoch=2_000_000_000,
             trusted_now_epoch=lambda: int(fixed.timestamp()),

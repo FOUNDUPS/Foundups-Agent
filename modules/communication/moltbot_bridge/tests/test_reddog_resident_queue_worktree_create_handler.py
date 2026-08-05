@@ -6,12 +6,21 @@ import ast
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
+import pytest
+
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import (
+    StubAuthoritativeUseLease,
+    allow_stub_authoritative_use_lease,
 )
+from modules.communication.moltbot_bridge.src import reddog_worktree_admission_capability as admission_module
 from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
     InMemoryWorktreeAdmissionRegistry,
 )
+
+
+@pytest.fixture(autouse=True)
+def _allow_stub_lease(monkeypatch) -> None:
+    allow_stub_authoritative_use_lease(monkeypatch, admission_module)
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     CHAIN_RESULTS_SCHEMA_VERSION,
@@ -336,7 +345,7 @@ def _handler(
             executor_plan_result=stage_results[EXECUTOR_PLAN_STAGE_KEY],
             valve_decision=stage_results[EXECUTION_VALVE_STAGE_KEY]["valve_decision"],
             signed_authority_reverified=True,
-            authoritative_use_lease=AuthoritativeUseLease(
+            authoritative_use_lease=StubAuthoritativeUseLease(
                 lambda: True,
                 expires_at_epoch=2_000_000_000,
                 trusted_now_epoch=lambda: 1_000_000_000,
