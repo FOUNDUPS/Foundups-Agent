@@ -71,10 +71,8 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
 from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
     canonical_work_authority_digest,
 )
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
-    GovernedValveUseTimeResolution,
-)
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import GovernedValveUseTimeResolution
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import StubAuthoritativeUseLease
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     ArtifactGenerationModelResult,
     RUNTIME_SURFACE_ARTIFACT_GENERATION,
@@ -248,17 +246,18 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
                 permission_expires_at=EXPIRES,
                 rejection_reasons=(),
                 signed_authority_reverified=True,
-                authoritative_use_lease=AuthoritativeUseLease(
+                authoritative_use_lease=StubAuthoritativeUseLease(
                     lambda: True,
                     expires_at_epoch=2_000_000_000,
                     trusted_now_epoch=lambda: 1_000_000_000,
                 ),
             )
         )
-        with patch(
-            "modules.communication.moltbot_bridge.src."
-            "reddog_main_resident_queue_serial_loop_bootstrap."
-            "GovernedValveUseTimeAuthorityResolver",
+        with patch("modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability.is_authoritative_use_lease", return_value=True), patch(
+            "modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability.consume_authoritative_use_lease",
+            side_effect=lambda value: value.consume(),
+        ), patch(
+            "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.GovernedValveUseTimeAuthorityResolver",
             return_value=injected_resolver,
         ):
             return _run_bootstrap(**kwargs)

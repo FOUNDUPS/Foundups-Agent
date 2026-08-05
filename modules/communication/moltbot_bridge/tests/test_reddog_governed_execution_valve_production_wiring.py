@@ -12,7 +12,6 @@ from modules.communication.moltbot_bridge.src import (
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
     AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
-    AuthoritativeUseLease,
     GovernedValveUseTimeAuthorityResolver,
     _digest,
     _signed_binding_reasons,
@@ -333,9 +332,9 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         work_state_path=runtime / "authoritative_work_state.json",
         authority_profile_path=runtime / "authority_profile.json",
         permission_snapshots_path=runtime / "permission_snapshots.json",
-            principal_authority_records_path=runtime / "principal_authority_records.json",
-            valve_environment_path=runtime / "execution_valve_env.json",
-            runtime_allowed_root=runtime,
+        principal_authority_records_path=runtime / "principal_authority_records.json",
+        valve_environment_path=runtime / "execution_valve_env.json",
+        runtime_allowed_root=runtime,
         signature_verifier=object(),
         principal_key_resolver=object(),
         nonce_store=object(),
@@ -365,62 +364,6 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
     assert "canonical_sovereign_authorization_verifier_missing" in result.rejection_reasons
     assert "canonical_model_selection_signed_evidence_verifier_missing" in result.rejection_reasons
     assert "canonical_memex_supply_signed_evidence_verifier_missing" in result.rejection_reasons
-
-
-@pytest.mark.parametrize(
-    "expiry_boundary",
-    ("identity_expires_at", "permission_snapshot_expires_at"),
-)
-def test_terminal_authoritative_use_verification_receives_fresh_clock(
-    tmp_path, monkeypatch, expiry_boundary: str,
-) -> None:
-    clock = [100]
-    calls: list[dict[str, object]] = []
-
-    def verify(**kwargs):
-        calls.append(kwargs)
-        return VerificationResult(
-            accepted=int(kwargs["now"]) < 150,
-            work_order_id="wo-fresh-clock",
-            reason_codes=[] if int(kwargs["now"]) < 150 else [expiry_boundary],
-        )
-
-    monkeypatch.setattr(
-        "modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority.verify_delegated_work_authority",
-        verify,
-    )
-    resolver = GovernedValveUseTimeAuthorityResolver(
-        repo_root=tmp_path / "repo",
-        work_state_path=None,
-        authority_profile_path=None,
-        permission_snapshots_path=None,
-        principal_authority_records_path=None,
-        valve_environment_path=None,
-        runtime_allowed_root=tmp_path / "runtime",
-        signature_verifier=object(),
-        principal_key_resolver=object(),
-        nonce_store=object(),
-        snapshot_resolver=object(),
-        revocation_oracle=object(),
-        now_epoch=100,
-        required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
-        trusted_now_epoch=lambda: clock[0],
-    )
-    lease = AuthoritativeUseLease(
-        lambda: resolver._consume_authoritative_nonce(
-            identity={"expires_at": 150},
-            work_authority={"work_order_id": "wo-fresh-clock", "expires_at": 200},
-        ),
-        expires_at_epoch=200,
-        trusted_now_epoch=lambda: clock[0],
-    )
-
-    clock[0] = 150
-    assert lease.consume() is False
-    assert len(calls) == 1
-    assert calls[0]["now"] == 150
-    assert calls[0]["verification_phase"] is WorkAuthorityVerificationPhase.AUTHORITATIVE_USE
-
 
 def test_use_time_binding_rejects_base_ref_and_full_work_order_splices() -> None:
     original = {"work_order_id": "wo-bound", "base_ref": "main", "task_summary": "one"}

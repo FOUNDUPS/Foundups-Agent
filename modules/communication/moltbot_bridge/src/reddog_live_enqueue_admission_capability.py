@@ -8,8 +8,10 @@ import threading
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
     AuthoritativeUseLease,
+    consume_authoritative_use_lease,
+    is_authoritative_use_lease,
 )
 
 
@@ -48,7 +50,7 @@ class InMemoryLiveEnqueueAdmissionRegistry:
         if (
             not identifier
             or signed_authority_reverified is not True
-            or authoritative_use_lease is None
+            or not is_authoritative_use_lease(authoritative_use_lease)
         ):
             return False
         capability = LiveEnqueueAdmissionCapability(
@@ -74,7 +76,7 @@ class InMemoryLiveEnqueueAdmissionRegistry:
             return None
         if capability.evidence_digest != _digest(evidence):
             return None
-        if capability._authoritative_use_lease.consume() is not True:
+        if not consume_authoritative_use_lease(capability._authoritative_use_lease):
             return None
         return capability
 

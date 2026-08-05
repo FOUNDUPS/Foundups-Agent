@@ -1,5 +1,17 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-05 - Current-generation trust binding manifest (0.4.56)
+
+- Updated the exact generated backend-manifest pin and RedDog build identity
+  after adding signer current-generation use-time evidence and preserving the
+  external signer peer as the only future effect-authority issuer.
+- Raised only the bounded manifest serialization cap to 320 KiB after the
+  1,194-file closure exceeded 256 KiB, preserving reviewable pretty JSON and
+  the independent 1,250-file and 32 MiB runtime bounds.
+- Revalidated generator parity, backend compatibility, sealed-runtime negative
+  paths, start-operations control, HoloIndex repair, and the complete extension
+  contract.
+
 ## 2026-08-04 - HoloIndex convergence backend manifest
 
 - Updated the exact generated backend-manifest pin after adding bounded,

@@ -13,8 +13,10 @@ import threading
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
     AuthoritativeUseLease,
+    consume_authoritative_use_lease,
+    is_authoritative_use_lease,
 )
 
 
@@ -68,7 +70,7 @@ class InMemoryWorktreeAdmissionRegistry:
         work_order_id = str(work_order.get("work_order_id") or "").strip()
         if not all((queue_id, slice_id, work_order_id)):
             return False
-        if signed_authority_reverified is not True or authoritative_use_lease is None:
+        if signed_authority_reverified is not True or not is_authoritative_use_lease(authoritative_use_lease):
             return False
         capability = WorktreeAdmissionCapability(
             queue_item_id=queue_id,
@@ -106,7 +108,7 @@ class InMemoryWorktreeAdmissionRegistry:
             and capability.executor_plan_digest == _digest(executor_plan_result)
             and capability.valve_decision_digest == _digest(valve_decision)
         )
-        if not expected or capability._authoritative_use_lease.consume() is not True:
+        if not expected or not consume_authoritative_use_lease(capability._authoritative_use_lease):
             return None
         return capability
 

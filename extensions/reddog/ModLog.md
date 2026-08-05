@@ -1,5 +1,16 @@
 # RedDog ModLog
 
+## 2026-08-05 - Current-generation trust binding manifest pin (0.4.56)
+
+- Pinned the regenerated backend manifest containing the signer
+  current-generation use-time evidence and explicit external-issuer blocker.
+- Raised only the manifest serialization cap from 256 to 320 KiB after the
+  bounded 1,194-file dependency closure crossed the old limit. Pretty JSON is
+  retained for reviewable diffs; the 1,250-file and 32 MiB runtime caps remain.
+- Preserved the thin-client boundary: no extension authority or runtime
+  invocation behavior changed. Peer-handshake and six other live-canary trust
+  anchors remain fail-closed (WSP 00, 15, 22, 50, 62, 97).
+
 ## 2026-08-04 - HoloIndex vector-segment convergence manifest pin (0.4.54)
 
 - Pinned the regenerated backend manifest containing the bounded HoloIndex

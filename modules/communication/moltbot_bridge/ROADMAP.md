@@ -91,6 +91,15 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
   fail-closed decision lineage. Persisted results are audit-only. Queue and
   use-time preflight are non-consuming; after every non-mutating gate passes,
   the final worktree/live-enqueue boundary consumes the nonce lease exactly once.
+- Current-generation use-time concatenation is complete for three existing
+  trust primitives. After signed work-authority re-verification, the resolver
+  consumes the root-owned system-service selection boundary, verifies the
+  exact current manifest/config/run-packet generation and durable replay
+  high-water state, and records a non-authoritative audit receipt. Trusted-clock
+  manifest freshness is checked independently of the selection owner's wall
+  clock. No local effect lease is minted. This discharges only
+  the authenticated-manifest, replay/high-water, and current-generation blockers.
+  Failed, stale, malformed, or substituted evidence cannot authorize an effect.
 - Operational status is BLOCKED, not READY. Next gates are independently signed
   descriptor-derived artifact manifests; verified consensus and sovereign
   receipts; authenticated principal/model trust provenance; a fresh client-side
@@ -106,9 +115,12 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
   prevent pre-open descriptor writes or atomic replacement. It remains blocked
   until the external signer owner supplies a distinct-principal activation
   lease and lifecycle supervision.
-  Independently administered production high-water authority issuance, the
-  external system-service deployment/lease owner, and use-time valve consumption remain
-  SPECIFIED_NOT_IMPLEMENTED.
+  Independently administered production high-water authority issuance and the
+  external system-service deployment/lease owner remain
+  SPECIFIED_NOT_IMPLEMENTED. Use-time valve consumption now verifies the
+  current-generation selection, but remains blocked by peer-handshake
+  re-observation, external effect-lease issuance, and the six other named trust
+  anchors.
 - Only after those anchors and adversarial live-path tests are green may an
   operator run the Linux live canary; merge authority remains unavailable.
 

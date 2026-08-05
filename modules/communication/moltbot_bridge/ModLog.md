@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-05: Resident live-canary current-generation trust concatenation
+- Extended the canonical use-time authority resolver to consume the existing
+  root-owned system-service manifest selection after signed work-authority
+  re-verification. The new read-only adapter binds exact manifest, config,
+  run-packet, durable replay/high-water, generation, root, path, and freshness
+  evidence into an audit-only receipt using the resolver's trusted clock.
+- Removed only the three satisfied current-generation blockers. Mutual peer
+  handshake and six other trust anchors remain fail-closed, so this slice
+  cannot issue an authority lease, run a live canary, mutate a repository,
+  enqueue a worker, or grant signer authority.
+- Current-generation evidence cannot mint effect authority. Worktree,
+  live-enqueue, and spine paths now reject every production lease until the
+  isolated signer peer supplies the missing external issuer. Wrong types,
+  malformed IDs, expiry, or changed config/run-packet bytes fail closed. No signer,
+  schema, replay store, provider, lifecycle service, or trust model was added
+  (WSP 00/15/22/50/62/97).
+
 ## 2026-08-05: Upstream agent runtime truth registry
 - Upgraded the existing OpenClaw integration manifest to a static provenance
   v2 ledger with stable integration IDs, exact checked-in implementation and
