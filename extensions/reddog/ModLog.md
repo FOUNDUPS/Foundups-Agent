@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-06 - Conversation proposal backend compatibility (0.4.59)
+
+- Regenerated and pinned the exact backend dependency graph after authenticated
+  conversation-to-work proposal promotion became runtime-reachable.
+- Added no editor session issuer, worker dispatch, repository/merge authority,
+  or HoloIndex mutation.
+
 ## 2026-08-06 - Linked-worktree HoloIndex runtime-root resolution (0.4.58)
 
 - Preserved the authority checkout as the source of indexed repository bytes.

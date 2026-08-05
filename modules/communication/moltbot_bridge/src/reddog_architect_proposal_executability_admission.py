@@ -94,6 +94,7 @@ def evaluate_architect_proposal_executability(
     report_bundle_id: str | None,
     wsp15_allocation_receipt: Mapping[str, Any],
     policy: ArchitectProposalAdmissionPolicy | None = None,
+    conversation_binding: Mapping[str, Any] | None = None,
 ) -> ArchitectProposalExecutabilityReceipt:
     """Validate proposal structure and derive current execution readiness."""
 
@@ -114,6 +115,7 @@ def evaluate_architect_proposal_executability(
         report_bundle_id=report_bundle_id,
         wsp15_allocation_receipt=wsp15_allocation_receipt,
         policy=current_policy,
+        conversation_binding=conversation_binding,
     )
 
 
@@ -341,6 +343,7 @@ def _receipt(
     report_bundle_id: str | None,
     wsp15_allocation_receipt: Mapping[str, Any],
     policy: ArchitectProposalAdmissionPolicy,
+    conversation_binding: Mapping[str, Any] | None,
 ) -> ArchitectProposalExecutabilityReceipt:
     payload = {
         **_receipt_contract(proposal),
@@ -352,6 +355,7 @@ def _receipt(
             report_bundle_id=report_bundle_id,
             wsp15_allocation_receipt=wsp15_allocation_receipt,
             policy=policy,
+            conversation_binding=conversation_binding,
         ),
         "supporting_finding_ids": list(support.finding_ids),
         "supporting_direct_read_paths": list(support.direct_read_paths),
@@ -424,6 +428,7 @@ def _receipt_bindings(
     report_bundle_id: str | None,
     wsp15_allocation_receipt: Mapping[str, Any],
     policy: ArchitectProposalAdmissionPolicy,
+    conversation_binding: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
     return {
         "snapshot_receipt_id": snapshot.snapshot_receipt_id,
@@ -448,6 +453,32 @@ def _receipt_bindings(
         ),
         "wsp15_allocation_digest": _digest(wsp15_allocation_receipt),
         "policy_digest": _digest(policy.to_dict()),
+        **_conversation_bindings(conversation_binding),
+    }
+
+
+def _conversation_bindings(
+    value: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    fields = (
+        "conversation_binding_digest",
+        "conversation_id",
+        "conversation_revision",
+        "conversation_revision_receipt_id",
+        "conversation_scope_record_digest",
+        "authorized_foundup_id",
+        "resident_intent_id",
+        "resident_intent_digest",
+        "conversation_grounding_receipt_id",
+    )
+    if not isinstance(value, Mapping):
+        return {
+            "conversation_binding_present": False,
+            **{field: (-1 if field == "conversation_revision" else "") for field in fields},
+        }
+    return {
+        "conversation_binding_present": True,
+        **{field: value.get(field) for field in fields},
     }
 
 
@@ -462,10 +493,11 @@ def _typed_receipt(payload: Mapping[str, Any]) -> ArchitectProposalExecutability
     )
     for field in tuple_fields:
         values[field] = tuple(values[field])
-    return ArchitectProposalExecutabilityReceipt(
+    receipt = ArchitectProposalExecutabilityReceipt(
         receipt_id=_digest(payload),
         **values,
     )
+    return validate_architect_proposal_executability_receipt(receipt.to_dict())
 
 
 def _proposal_support(

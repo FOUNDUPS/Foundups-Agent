@@ -1,64 +1,30 @@
 # OpenClaw Bridge Interface
-
 ## Authenticated RedDog conversation scope
-
-`authenticate_conversation_scope()` verifies an existing `sess.v1` token and
-derives the principal exclusively from its signed subject. It resolves the
-current `PrincipalAuthorityRecord` and returns an opaque, one-use process-local
-capability. The capability cannot be constructed, copied, pickled, or
-serialized, and no session secret or derived record-MAC key is returned.
-
-`create_authenticated_conversation_scope()`,
-`resume_authenticated_conversation_scope()`, and
-`advance_authenticated_conversation_scope()` persist a bounded scope in the
-existing AgentDB. The record binds principal, transport/session, one active
-FoundUp, discussion FoundUps, typed decisions/questions, repository evidence
-references, operational snapshot, repository HEAD, HoloIndex generation and
-freshness receipt, turn lineage, expiry, and a revision receipt chain. Create
-is insert-only; updates use revision compare-and-swap.
-
-Persisted evidence references must already occur in the verified grounding
-receipt. This state layer does not upgrade a model-supplied path or claim into
-repository evidence.
-
-Every create/resume/update consumes fresh authentication, resolves current
-principal scope, checks the current grounding and registered FoundUp receipt,
-and authenticates the stored record with a derived HMAC. Recomputed local
-hashes cannot replace that authentication. Key rotation accepts the configured
-previous secret only for verification; the next accepted revision is signed
-with the current secret.
-
-The returned projection omits principal identity, token material, public-key
-material, MACs, and raw conversation. It grants no work, worker, repository,
-HoloIndex, proposal, signing, or dispatch authority. The editor is not wired to
-this API until a production-authenticated session source is available;
-`REDDOG_AUTHENTICATED_PRINCIPAL_ID` remains configuration, not authentication.
+`authenticate_conversation_scope()` derives the principal only from a verified
+`sess.v1` subject and returns an opaque one-use capability. Create, resume, and
+advance persist bounded HMAC-authenticated state in AgentDB with insert/CAS,
+expiry, turn lineage, FoundUp, evidence, snapshot, HEAD, and HoloIndex bindings.
+Only evidence already admitted by grounding may persist.
+`prepare_conversation_work_context()` binds one current revision to a verified
+resident intent. Backend determination rejects stale scope before a model call.
+`commit_pending_conversation_work_proposal()` CAS-stores one exact FIX preview;
+`verify_pending_conversation_work_proposal()` issues its one-use capability.
+Signed WSP 15 promotion consumes it only after current-record, FoundUp, Memex,
+model, and existing principal-signature checks. Admission schema v2 signs the
+complete conversation/snapshot lineage. Neither state nor capability grants
+work authority; editor use awaits a production authenticated-session source.
 
 ## Public API
 ### Architect proposal validity and execution readiness
 
-`evaluate_architect_proposal_executability()` runs after backend Fusion output
-validation and before a FIX becomes an architect queue candidate. It requires
-an audit-supported `REUSE_EXISTING`, `EXTEND_EXISTING`, or separately gated
-`CREATE_NEW` decision plus exact paths, tests, policy gates, capabilities,
-expected evidence, and stop conditions.
-
-The resulting
-`reddog_architect_proposal_executability_admission.v1` receipt separates
-proposal validity from current execution readiness. A valid prerequisite slice
-may persist as `BLOCKED_CANDIDATE`; it does not mutate the authoritative queue.
-Model-supplied readiness booleans and capabilities produced by the proposed
-slice are never current authority.
-
-`promote_reddog_architect_fix_to_signed_wsp15_work_order()` canonically
-rehydrates the receipt and rechecks platform, repository HEAD, HoloIndex freshness,
-work-state revision, snapshot, audit bundle, candidate identity, future capabilities,
-and WSP 15 lineage. A valid `BLOCKED_CANDIDATE` may reach promotion because proposal
-authenticity cannot exist before that stage. Promotion rebuilds and verifies the proposal
-before queue mutation. Missing execution capabilities remain fail-closed at
-the use-time valve; promotion grants no ambient authority. The authorized base
-is the immutable admission SHA, not a branch. INDEX_GAP blocks ordinary work;
-the maintenance exception requires exact supporting direct-read paths.
+`evaluate_architect_proposal_executability()` requires audit-supported reuse,
+exact scope/tests/gates/evidence, and emits admission v2. Validity remains
+separate from readiness; model claims and future capabilities are not current
+authority. `promote_reddog_architect_fix_to_signed_wsp15_work_order()` rehydrates
+the receipt and rechecks platform, HEAD, HoloIndex, work state, snapshot,
+candidate, WSP 15, and conversation authority before queue mutation. Missing
+capabilities remain blocked at use time. The immutable admission SHA is the
+authorized base; INDEX_GAP requires the existing maintenance exception.
 
 The receipt's SHA is integrity evidence, not authentication.
 Operational Memex supply receipts are exact-schema rehydrated before resident

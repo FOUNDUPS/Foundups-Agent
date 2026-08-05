@@ -90,6 +90,10 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_work_promotion import (
+    VerifiedPendingConversationProposalCapability,
+    consume_pending_conversation_proposal_capability,
+)
 
 
 ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT = "ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT"
@@ -148,6 +152,9 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     ) = None,
     current_proposal_revoked_key_epochs: frozenset[str] = frozenset(),
     agentdb_fix_promotion_claim_fence: Mapping[str, Any] | None = None,
+    pending_conversation_proposal_capability: (
+        VerifiedPendingConversationProposalCapability | None
+    ) = None,
 ) -> ArchitectFixPromotionResult:
     """Commit one architect FIX queue item and return its signer authority profile."""
     current = work_state_store.load()
@@ -231,6 +238,15 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     )
     profile_reasons = _validate_authority_profile(authority_profile)
     reasons.extend(profile_reasons)
+    if (
+        proposal_admission is not None
+        and proposal_admission.conversation_binding_present
+        and proposal_admission.authorized_foundup_id
+        != str(authority_profile.get("foundup_id") or "")
+    ):
+        reasons.append(
+            ArchitectFixPromotionReason.CONVERSATION_PROPOSAL_AUTHORITY_INVALID
+        )
     holoindex_evidence = _mapping(authority_profile.get("holoindex_evidence"))
     if not holoindex_evidence:
         reasons.append(ArchitectFixPromotionReason.HOLOINDEX_EVIDENCE_MISSING)
@@ -240,6 +256,16 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
 
     assert freshness_id and selection_payload and memex_verified is not None
     assert proposal_admission is not None and selected_slice
+    if (
+        proposal_admission.conversation_binding_present
+        and pending_conversation_proposal_capability is None
+    ) or (
+        not proposal_admission.conversation_binding_present
+        and pending_conversation_proposal_capability is not None
+    ):
+        return _reject(
+            [ArchitectFixPromotionReason.CONVERSATION_PROPOSAL_AUTHORITY_INVALID]
+        )
     now = _parse_iso(now_iso)
     try:
         expires_at = (
@@ -275,6 +301,17 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         for item in current.get("architect_fix_promotions") or ()
     ):
         return _reject([ArchitectFixPromotionReason.DUPLICATE_QUEUE_ITEM])
+    if (
+        proposal_admission.conversation_binding_present
+        and not consume_pending_conversation_proposal_capability(
+            pending_conversation_proposal_capability,
+            proposal_admission=proposal_admission.to_dict(),
+            now_epoch=int(now.timestamp()),
+        )
+    ):
+        return _reject(
+            [ArchitectFixPromotionReason.CONVERSATION_PROPOSAL_AUTHORITY_INVALID]
+        )
     assert authority_profile_publication_publisher is not None
     return execute_architect_fix_promotion_transaction(
         ArchitectFixPromotionTransactionInputs(

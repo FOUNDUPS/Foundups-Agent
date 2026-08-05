@@ -303,20 +303,20 @@ exemptions:
     reason: >-
       Legacy architect transaction boundary spanning guarded model invocation,
       determination validation, canonical receipt composition, persistence,
-      and queue-candidate projection. This repair only binds provider evidence
-      into the accepted receipt identity; transaction extraction is tracked
-      separately to avoid mixing lifecycle refactoring into the safety fix.
-    threshold_override: 1666
-    function_threshold_override: 330
+      and queue-candidate projection. Prompt/context projection and runtime
+      binding normalization are now extracted; the remaining transaction
+      extraction is tracked separately.
+    threshold_override: 1579
+    function_threshold_override: 329
     functions:
       - "run_reddog_backend_architect_determination_runtime"
       - "FoundupsFusionArchitectModelRunner.run_architect_determination"
       - "_receipt"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
     no_growth_ceiling:
-      file_lines: 1666
+      file_lines: 1579
       functions:
-        run_reddog_backend_architect_determination_runtime: 330
+        run_reddog_backend_architect_determination_runtime: 329
         _receipt: 98
         run_architect_determination: 146
 

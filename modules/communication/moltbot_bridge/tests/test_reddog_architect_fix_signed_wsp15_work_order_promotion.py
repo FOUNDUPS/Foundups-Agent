@@ -188,6 +188,16 @@ def _proposal_admission(
             allocation
         ),
         "policy_digest": proposal_admission._digest(policy.to_dict()),
+        "conversation_binding_present": False,
+        "conversation_binding_digest": "",
+        "conversation_id": "",
+        "conversation_revision": -1,
+        "conversation_revision_receipt_id": "",
+        "conversation_scope_record_digest": "",
+        "authorized_foundup_id": "",
+        "resident_intent_id": "",
+        "resident_intent_digest": "",
+        "conversation_grounding_receipt_id": "",
         "rejection_reasons": [],
         "no_queue_mutation_performed": True,
         "no_execution_performed": True,
@@ -566,6 +576,7 @@ def _runtime_binding(
 
 def _promote(**overrides: Any):
     store = overrides.pop("store", InMemoryAuthoritativeWorkStateStore(_work_state()))
+    test_now_epoch = overrides.pop("_test_now_epoch", NOW_EPOCH)
 
     def publish(request):
         return store.commit(
@@ -600,7 +611,7 @@ def _promote(**overrides: Any):
         promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order,
         args=args,
         overrides=overrides,
-        now_epoch=NOW_EPOCH,
+        now_epoch=test_now_epoch,
     )
     return result, store
 

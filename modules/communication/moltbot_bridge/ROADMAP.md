@@ -10,9 +10,14 @@
   capabilities, authenticated records, and bounded projections.
 - BLOCKED: editor consumption until a production signed-session issuer/source
   is available. Environment principal/FoundUp values are not authentication.
-- NEXT: bind one immutable pending architect proposal to the exact conversation
-  revision and use the existing principal-signed proposal policy authorization.
-- HELD: OpenClaw/Hermes dispatch until exact proposal authorization and all
+- COMPLETE: one authenticated scope revision and resident intent can be bound
+  to an immutable architect proposal preview. AgentDB CAS stores the exact
+  pending proposal; backend determination rejects stale snapshot/HEAD/Holo
+  context before Fusion; signed WSP 15 promotion requires a fresh one-use
+  pending capability plus the existing principal-signed proposal policy.
+- BLOCKED: editor/runtime conversation-to-proposal consumption until a
+  production authenticated-session issuer supplies the existing P1/P2 APIs.
+- HELD: OpenClaw/Hermes dispatch until the editor/runtime binding and all
   existing WRE work-order gates pass.
 
 ## Stable External Signer Lifecycle
