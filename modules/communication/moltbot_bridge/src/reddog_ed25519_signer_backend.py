@@ -37,13 +37,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
     ArchitectProposalSignerPolicy,
     PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
-    PROPOSAL_AUTHENTICITY_SIGNING_PREFIX,
     ProposalAuthenticityNonceStore,
     validate_proposal_signing_request,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_manifest import (
     RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
-    RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX,
     RuntimeArtifactManifestAuthority,
     validate_runtime_artifact_manifest_signing_request,
 )
@@ -56,17 +54,20 @@ from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation im
 )
 from modules.communication.moltbot_bridge.src import reddog_signer_mutual_peer_handshake as peer_handshake
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_validation import (
+    CONTROL_LOOP_SIGNING_OPERATION,
+    CONTROL_LOOP_SIGNING_PREFIX,
+    ControlLoopAuthorityPolicy,
     assert_ascii_deep as _assert_ascii_deep,
     canonical_control_audit_attestation_input,
     control_authority_policy_matches,
     is_ascii as _is_ascii,
     public_bytes_from_private_key as _public_bytes_from_private_key,
+    signing_domain_pairs,
     valid_control_receipt_signing_payload,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
     VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
     VERIFIED_OUTCOME_SIGNING_OPERATION,
-    VERIFIED_OUTCOME_SIGNING_PREFIX,
     VerifiedOutcomeSigningAuthority,
     VerifiedOutcomeSignerPolicy,
 )
@@ -76,6 +77,22 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_verified_outcome_si
     commit_outcome_reservation as _commit_outcome_reservation,
     prepare_verified_outcome_signing,
     rollback_outcome_reservation as _rollback_outcome_reservation,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_conversation_scope_backend import (
+    CONVERSATION_SCOPE_AUDIT_ATTESTATION_PREFIX,
+    CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+    CONVERSATION_SCOPE_SIGNING_OPERATION,
+    ConversationScopeSignerPolicy,
+    PrincipalAuthorityResolver,
+    ConversationScopeAnchorStore,
+    REJECT_ED25519_SIGNER_CONVERSATION_ANCHOR_MISSING,
+    REJECT_ED25519_SIGNER_CONVERSATION_POLICY_MISSING,
+    REJECT_ED25519_SIGNER_CONVERSATION_REJECTED,
+    REJECT_ED25519_SIGNER_CONVERSATION_RESOLVER_MISSING,
+    commit_conversation_signing,
+    conversation_replay_response,
+    conversation_signing_configured,
+    prepare_conversation_signing,
 )
 
 
@@ -119,26 +136,12 @@ REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = (
 REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY = (
     "REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY"
 )
-CONTROL_LOOP_SIGNING_OPERATION = "attest_control_loop_receipt"
-CONTROL_LOOP_SIGNING_PREFIX = "reddog-control-loop.v2."
 CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX = "reddog-control-loop-audit.v1."
 class SignerAuditMacBuilder(Protocol):
     """Injected audit-MAC boundary owned by the isolated signer process."""
 
     def build(self, request: SigningRequest, signature: str, peer: SignerPeerAttestation) -> str:
         """Return a signer-side audit MAC. Empty or non-ASCII values reject."""
-
-
-@dataclass(frozen=True)
-class ControlLoopAuthorityPolicy:
-    """Signer-owned authorization bindings for control-loop attestations."""
-
-    issuer_principal_id: str
-    signer_public_key: str
-    key_epoch: str
-    consensus_receipt_digest: str
-    authority_profile_digest: str
-    authority_profile_source_receipt_id: str
 
 
 @dataclass(frozen=True)
@@ -168,6 +171,9 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
     verified_outcome_signing_authority: (
         VerifiedOutcomeSigningAuthority | None
     ) = None
+    conversation_scope_signer_policy: ConversationScopeSignerPolicy | None = None
+    conversation_scope_principal_resolver: PrincipalAuthorityResolver | None = None
+    conversation_scope_anchor_store: ConversationScopeAnchorStore | None = None
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
         reason = _signer_request_rejection(self, request, peer)
@@ -178,6 +184,11 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
         )
         if reason:
             return _reject(reason)
+        conversation_payload, conversation_preparation, early = (
+            _prepare_conversation_or_replay(self, request)
+        )
+        if early is not None:
+            return early
         proposal_reservation, reason = _prepare_proposal_signing(self, request)
         if reason:
             return _reject(reason)
@@ -197,7 +208,10 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
             request,
             peer,
             _requires_audit_attestation(
-                control_payload, manifest_payload, outcome_payload
+                control_payload,
+                manifest_payload,
+                outcome_payload,
+                conversation_payload,
             ),
         )
         if reason:
@@ -213,7 +227,19 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
             outcome_reservation,
             control_payload,
             preparation,
+            conversation_payload,
+            conversation_preparation,
         )
+
+
+def _prepare_conversation_or_replay(
+    backend: Ed25519SignerBackend, request: SigningRequest
+) -> tuple[Mapping[str, Any] | None, Any, SigningResponse | None]:
+    payload, preparation, reason = prepare_conversation_signing(backend, request)
+    if reason:
+        return None, preparation, _reject(reason)
+    replay, reason = conversation_replay_response(backend, request, preparation)
+    return payload, preparation, (_reject(reason) if reason else replay)
 
 
 def _finalize_signing(
@@ -224,6 +250,8 @@ def _finalize_signing(
     outcome_reservation: Any,
     control_payload: Mapping[str, Any] | None,
     preparation: Any,
+    conversation_payload: Mapping[str, Any] | None,
+    conversation_preparation: Any,
 ) -> SigningResponse:
     if proposal_reservation is not None:
         try:
@@ -250,6 +278,11 @@ def _finalize_signing(
             )
         except Exception:
             return _reject(REJECT_ED25519_SIGNER_CONTROL_ANCHOR_REJECTED)
+    conversation_reason = commit_conversation_signing(
+        backend, response, conversation_payload, conversation_preparation
+    )
+    if conversation_reason:
+        return _reject(conversation_reason)
     return response
 
 
@@ -290,13 +323,14 @@ def _signer_request_rejection(
         return REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH
     if not request.signing_input:
         return REJECT_ED25519_SIGNER_REQUEST_INVALID
-    if any(operation is not prefix for operation, prefix in _signing_domain_pairs(request)):
+    if any(operation is not prefix for operation, prefix in signing_domain_pairs(request)):
         return REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
     configured = (
         backend.proposal_authority_policy is not None
         or backend.runtime_artifact_manifest_authority is not None
         or backend.runtime_artifact_manifest_authority_boundary is not None
         or backend.verified_outcome_signer_policy is not None
+        or conversation_signing_configured(backend)
     )
     if configured:
         allowed_operations = {peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION}
@@ -309,6 +343,9 @@ def _signer_request_rejection(
             allowed_operations.add(RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION)
         if backend.verified_outcome_signer_policy is not None:
             allowed_operations.add(VERIFIED_OUTCOME_SIGNING_OPERATION)
+        if backend.conversation_scope_signer_policy is not None:
+            allowed_operations.add(CONVERSATION_SCOPE_SIGNING_OPERATION)
+            allowed_operations.add(CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION)
         if request.requested_operation not in allowed_operations:
             return REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY
     if request.requested_operation == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION:
@@ -322,42 +359,6 @@ def _signer_request_rejection(
     except Exception:
         return REJECT_ED25519_SIGNER_KEY_INVALID
     return "" if derived == backend.public_key else REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH
-
-
-def _signing_domain_pairs(
-    request: SigningRequest,
-) -> tuple[tuple[bool, bool], ...]:
-    return (
-        (
-            request.requested_operation == CONTROL_LOOP_SIGNING_OPERATION,
-            request.signing_input.startswith(CONTROL_LOOP_SIGNING_PREFIX),
-        ),
-        (
-            request.requested_operation
-            == PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
-            request.signing_input.startswith(
-                PROPOSAL_AUTHENTICITY_SIGNING_PREFIX
-            ),
-        ),
-        (
-            request.requested_operation
-            == RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
-            request.signing_input.startswith(
-                RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX
-            ),
-        ),
-        (
-            request.requested_operation
-            == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION,
-            request.signing_input.startswith(
-                peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_PREFIX
-            ),
-        ),
-        (
-            request.requested_operation == VERIFIED_OUTCOME_SIGNING_OPERATION,
-            request.signing_input.startswith(VERIFIED_OUTCOME_SIGNING_PREFIX),
-        ),
-    )
 
 
 def _prepare_verified_outcome_signing(
@@ -571,6 +572,11 @@ def _signer_audit_attestation(
         )
     elif request.requested_operation == VERIFIED_OUTCOME_SIGNING_OPERATION:
         domain_prefix = VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX
+    elif request.requested_operation in {
+        CONVERSATION_SCOPE_SIGNING_OPERATION,
+        CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+    }:
+        domain_prefix = CONVERSATION_SCOPE_AUDIT_ATTESTATION_PREFIX
     try:
         value = canonical_signer_audit_attestation_input(
             signing_input=request.signing_input, signature=signature,
@@ -617,17 +623,15 @@ def _sign_peer_response_attestation(
         return "", REJECT_ED25519_SIGNER_SIGN_FAILED
 
 
-def _valid_control_receipt_signing_payload(
-    request: SigningRequest,
-) -> dict[str, Any] | None:
+def _valid_control_receipt_signing_payload(request: SigningRequest) -> dict[str, Any] | None:
     return valid_control_receipt_signing_payload(request)
 
 
 def _control_authority_policy_matches(
     payload: dict[str, Any], policy: ControlLoopAuthorityPolicy
 ) -> bool:
-    return isinstance(policy, ControlLoopAuthorityPolicy) and control_authority_policy_matches(
-        payload, policy
+    return isinstance(policy, ControlLoopAuthorityPolicy) and (
+        control_authority_policy_matches(payload, policy)
     )
 
 
@@ -641,8 +645,7 @@ def _reject(code: str) -> SigningResponse:
 
 __all__ = [
     "CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX",
-    "CONTROL_LOOP_SIGNING_OPERATION",
-    "CONTROL_LOOP_SIGNING_PREFIX",
+    "CONTROL_LOOP_SIGNING_OPERATION", "CONTROL_LOOP_SIGNING_PREFIX",
     "ControlLoopAuthorityPolicy",
     "canonical_control_audit_attestation_input",
     "Ed25519SignerBackend",
@@ -651,6 +654,10 @@ __all__ = [
     "REJECT_ED25519_SIGNER_CONTROL_ANCHOR_REJECTED",
     "REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISSING",
     "REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISMATCH",
+    "REJECT_ED25519_SIGNER_CONVERSATION_ANCHOR_MISSING",
+    "REJECT_ED25519_SIGNER_CONVERSATION_POLICY_MISSING",
+    "REJECT_ED25519_SIGNER_CONVERSATION_REJECTED",
+    "REJECT_ED25519_SIGNER_CONVERSATION_RESOLVER_MISSING",
     "REJECT_ED25519_SIGNER_DOMAIN_MISMATCH",
     "REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH",
     "REJECT_ED25519_SIGNER_KEY_INVALID",

@@ -21,6 +21,9 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import 
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     RUNTIME_SURFACE_ARTIFACT_GENERATION,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_runtime,
+)
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment_supply import (
     resolve_reddog_execution_valve_expected_bindings,
 )
@@ -111,6 +114,17 @@ def validate_reddog_resident_runtime_artifacts(
     runtime = Path(os.path.abspath(Path(runtime_root).expanduser()))
     payloads, load_reasons = _load_artifacts(root, runtime)
     reasons = {name: list(load_reasons.get(name, ())) for name in REQUIRED_RUNTIME_ARTIFACTS}
+    if not any(reasons.values()):
+        try:
+            payloads["authority_profile.json"] = (
+                rehydrate_authority_profile_runtime(
+                    payloads["authority_profile.json"]
+                )
+            )
+        except (KeyError, TypeError, ValueError):
+            reasons["authority_profile.json"].append(
+                "authority_profile_typed_rehydration_invalid"
+            )
     if not any(reasons.values()):
         _validate_governed_lineage(payloads, queue_item_id, now_epoch, reasons)
         _validate_model_bindings(payloads, reasons)

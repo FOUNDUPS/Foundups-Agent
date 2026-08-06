@@ -4,8 +4,25 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src import reddog_signer_mutual_peer_handshake as peer_handshake
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
+    PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
+    PROPOSAL_AUTHENTICITY_SIGNING_PREFIX,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_conversation_scope_backend import (
+    conversation_signing_domain_pair,
+)
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VERIFIED_OUTCOME_SIGNING_OPERATION,
+    VERIFIED_OUTCOME_SIGNING_PREFIX,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_manifest import (
+    RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
+    RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
 )
@@ -15,6 +32,8 @@ from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation im
 
 
 CONTROL_LOOP_RECEIPT_SCHEMA_VERSION = "reddog_resident_control_loop_receipt.v2"
+CONTROL_LOOP_SIGNING_OPERATION = "attest_control_loop_receipt"
+CONTROL_LOOP_SIGNING_PREFIX = "reddog-control-loop.v2."
 _CONTROL_LOOP_SIGNED_FIELDS = frozenset(
     {
         "schema_version", "receipt_id", "sequence_number", "cycle_id", "nonce",
@@ -39,6 +58,49 @@ _CONTROL_LOOP_SIGNED_FIELDS = frozenset(
         "authentication_status",
     }
 )
+
+
+@dataclass(frozen=True)
+class ControlLoopAuthorityPolicy:
+    """Signer-owned authorization bindings for control-loop attestations."""
+
+    issuer_principal_id: str
+    signer_public_key: str
+    key_epoch: str
+    consensus_receipt_digest: str
+    authority_profile_digest: str
+    authority_profile_source_receipt_id: str
+
+
+def signing_domain_pairs(request: SigningRequest) -> tuple[tuple[bool, bool], ...]:
+    """Return operation/prefix equivalence checks for every signer domain."""
+
+    return (
+        (
+            request.requested_operation == CONTROL_LOOP_SIGNING_OPERATION,
+            request.signing_input.startswith(CONTROL_LOOP_SIGNING_PREFIX),
+        ),
+        (
+            request.requested_operation == PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
+            request.signing_input.startswith(PROPOSAL_AUTHENTICITY_SIGNING_PREFIX),
+        ),
+        (
+            request.requested_operation == RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
+            request.signing_input.startswith(RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX),
+        ),
+        (
+            request.requested_operation
+            == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION,
+            request.signing_input.startswith(
+                peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_PREFIX
+            ),
+        ),
+        (
+            request.requested_operation == VERIFIED_OUTCOME_SIGNING_OPERATION,
+            request.signing_input.startswith(VERIFIED_OUTCOME_SIGNING_PREFIX),
+        ),
+        conversation_signing_domain_pair(request),
+    )
 
 
 def public_bytes_from_private_key(private_key: Any) -> bytes:
@@ -153,10 +215,14 @@ def assert_ascii_deep(value: object) -> bool:
 
 
 __all__ = [
+    "CONTROL_LOOP_SIGNING_OPERATION",
+    "CONTROL_LOOP_SIGNING_PREFIX",
+    "ControlLoopAuthorityPolicy",
     "assert_ascii_deep",
     "canonical_control_audit_attestation_input",
     "control_authority_policy_matches",
     "is_ascii",
     "public_bytes_from_private_key",
+    "signing_domain_pairs",
     "valid_control_receipt_signing_payload",
 ]

@@ -18,6 +18,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_recei
     CONTROL_LOOP_RECEIPT_SCHEMA_VERSION,
     verify_resident_control_loop_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_runtime,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     CHAIN_RESULTS_SCHEMA_VERSION,
     resident_queue_chain_receipt_id,
@@ -263,7 +266,7 @@ def _runtime_authority_profile(runtime_root: Path) -> Mapping[str, Any]:
         value = payload.get(key)
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"authority_profile_{key}_missing")
-    return payload
+    return rehydrate_authority_profile_runtime(dict(payload))
 
 
 def _chain_evidence(

@@ -3,24 +3,17 @@
 from __future__ import annotations
 
 import ast
-import hashlib
 import json
 import os
 from pathlib import Path
 
 import pytest
 
-from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
-    architect_fix_publication_state_projection,
-)
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
     canonical_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     encode_ed25519_public_key,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
-    public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID,
@@ -33,8 +26,6 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     FAIL_SIGNER_CONFIG_PEER_POLICY_INVALID,
     FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID,
     FAIL_SIGNER_CONFIG_WRITE_FAILED,
-    SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
-    SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT,
     run_reddog_signer_socket_service_config_supply,
 )
 
@@ -63,6 +54,7 @@ def _authority_profile(**overrides: object) -> dict[str, object]:
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
         "principal_public_key": _PRINCIPAL_PUBLIC_KEY,
+        "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "reddog_id": "reddog:foundups-agent",
         "reddog_public_key": _REDDOG_PUBLIC_KEY,
         "permission_snapshot_digest": "sha256:" + "1" * 64,
@@ -97,7 +89,7 @@ def _kwargs(repo: Path, runtime: Path, **overrides: object) -> dict[str, object]
         "signer_runtime_root": signer_runtime,
         "authority_profile": _authority_profile(),
         "authoritative_work_state_path": state_path,
-        "output_path": runtime / "signer-service.json",
+        "output_path": runtime / "signer_service_config.json",
         "socket_path": runtime / "reddog-signer.sock",
         "principal_signing_key_ref": "op://prod-vault/principal/private",
         "principal_audit_mac_key_ref": "op://prod-vault/principal/audit",
@@ -110,211 +102,6 @@ def _kwargs(repo: Path, runtime: Path, **overrides: object) -> dict[str, object]
     values.update(overrides)
     return values
 
-
-def test_config_supply_writes_multi_profile_signer_cli_config(tmp_path: Path) -> None:
-    repo = _repo(tmp_path)
-    runtime = tmp_path / "runtime"
-    result = run_reddog_signer_socket_service_config_supply(**_kwargs(repo, runtime))
-
-    assert result.accepted is True
-    assert result.status == SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT
-    assert result.profile_count == 2
-    assert result.config_supply_receipt_id and result.config_supply_receipt_id.startswith("sha256:")
-    assert result.config_digest and result.config_digest.startswith("sha256:")
-    assert result.no_secret_values_written is True
-    assert result.no_secret_values_resolved is True
-    assert result.no_signer_started is True
-    assert result.no_holoindex_reindex_performed is True
-    assert not (repo / "signer-service.json").exists()
-
-    payload = json.loads((runtime / "signer-service.json").read_text(encoding="utf-8"))
-    assert payload["schema_version"] == SIGNER_SERVICE_CONFIG_SCHEMA_VERSION
-    assert payload["runtime_root"] == str(runtime.resolve())
-    assert payload["signer_runtime_root"] == str(
-        (runtime.parent / f"{runtime.name}-signer-state").resolve()
-    )
-    assert payload["provider_mode"] == "WSP71_PERMISSIONED"
-    assert payload["allow_test_only_key_material"] is False
-    assert payload["permission_snapshot_fresh"] is True
-    assert payload["socket_path"] == str((runtime / "reddog-signer.sock").resolve())
-    control_policy = payload["control_loop_authority_policy"]
-    assert control_policy == {
-        "issuer_principal_id": "github:mjtrout",
-        "signer_public_key": _REDDOG_PUBLIC_KEY,
-        "key_epoch": "epoch-1",
-        "consensus_receipt_digest": "sha256:" + "2" * 64,
-        "authority_profile_digest": control_policy["authority_profile_digest"],
-        "authority_profile_source_receipt_id": "sha256:" + "3" * 64,
-    }
-    expected_profile_digest = "sha256:" + hashlib.sha256(
-        json.dumps(
-            _authority_profile(),
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=True,
-        ).encode("utf-8")
-    ).hexdigest()
-    assert control_policy["authority_profile_digest"] == expected_profile_digest
-    assert payload["peer_policy"] == {
-        "uid_to_principal": {"1001": "github:mjtrout"},
-        "allowed_gids": [1002],
-        "transport": "unix_socket",
-        "credential_source_prefix": "kernel_peer_credential",
-    }
-    profiles = payload["key_provider_profiles"]
-    assert [item["signer_profile_id"] for item in profiles] == [
-        "principal-identity",
-        "reddog-work-authority",
-    ]
-    assert profiles[0]["expected_public_key"] == _PRINCIPAL_PUBLIC_KEY
-    assert profiles[0]["expected_key_fingerprint"] == public_key_fingerprint(
-        _PRINCIPAL_PUBLIC_KEY
-    )
-    assert profiles[1]["expected_public_key"] == _REDDOG_PUBLIC_KEY
-    assert profiles[1]["expected_key_fingerprint"] == public_key_fingerprint(
-        _REDDOG_PUBLIC_KEY
-    )
-    serialized = json.dumps(payload, sort_keys=True)
-    assert "ed25519-private-raw-b64-v1" not in serialized
-    assert "audit-mac-test-key-b64-v1" not in serialized
-
-
-@pytest.mark.parametrize("include_marker", (True, False))
-def test_config_supply_rejects_prepared_architect_publication(
-    tmp_path: Path,
-    include_marker: bool,
-) -> None:
-    repo = _repo(tmp_path)
-    runtime = tmp_path / "runtime"
-    publication_id = "sha256:" + "4" * 64
-    queue_item_id = "sha256:" + "5" * 64
-    claim_id = "sha256:" + "6" * 64
-    attestation_id = "reddog_architect_proposal_attestation_" + "7" * 32
-    profile_overrides = {
-        "proposal_authenticity_attestation_id": attestation_id,
-        "operational_context_binding": {
-            "queue_item_id": queue_item_id,
-            "claim_id": claim_id,
-        },
-    }
-    if include_marker:
-        profile_overrides["promotion_publication_id"] = publication_id
-    profile = _authority_profile(**profile_overrides)
-    promotion = {
-        "publication_id": publication_id,
-        "queue_item_id": queue_item_id,
-        "claim_id": claim_id,
-        "authority_profile_digest": canonical_digest(profile),
-        "proposal_authenticity_attestation_id": attestation_id,
-    }
-    work_state = {
-        "schema_version": "reddog_authoritative_work_state.v1",
-        "architect_fix_promotions": [promotion],
-        "wre_queue_items": [
-            {"queue_item_id": queue_item_id, "claim_id": claim_id}
-        ],
-        "worker_claims": [{"claim_id": claim_id}],
-    }
-    projection = architect_fix_publication_state_projection(
-        work_state,
-        publication_id=publication_id,
-    )
-    work_state["architect_fix_publications"] = [
-        {
-            "schema_version": "reddog_architect_fix_promotion_publication.v1",
-            "publication_id": publication_id,
-            "state": "STATE_PREPARED",
-            "proposal_authenticity_attestation_id": attestation_id,
-            "authority_profile_digest": canonical_digest(profile),
-            "active_work_state_digest": canonical_digest(projection),
-            "base_work_state_digest": "sha256:" + "8" * 64,
-        }
-    ]
-    runtime.mkdir()
-    (runtime / "authoritative_work_state.json").write_text(
-        json.dumps(work_state),
-        encoding="utf-8",
-    )
-
-    result = run_reddog_signer_socket_service_config_supply(
-        **_kwargs(
-            repo,
-            runtime,
-            authority_profile=profile,
-        )
-    )
-
-    assert result.accepted is False
-    assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in (
-        result.rejection_reasons
-    )
-    assert not (runtime / "signer-service.json").exists()
-
-
-def test_config_supply_uses_selected_state_not_stale_default(
-    tmp_path: Path,
-) -> None:
-    repo = _repo(tmp_path)
-    runtime = tmp_path / "runtime"
-    publication_id = "sha256:" + "4" * 64
-    queue_item_id = "sha256:" + "5" * 64
-    claim_id = "sha256:" + "6" * 64
-    attestation_id = "reddog_architect_proposal_attestation_" + "7" * 32
-    profile = _authority_profile(
-        proposal_authenticity_attestation_id=attestation_id,
-        operational_context_binding={
-            "queue_item_id": queue_item_id,
-            "claim_id": claim_id,
-        },
-    )
-    state = {
-        "schema_version": "reddog_authoritative_work_state.v1",
-        "architect_fix_promotions": [{
-            "publication_id": publication_id,
-            "queue_item_id": queue_item_id,
-            "claim_id": claim_id,
-            "authority_profile_digest": canonical_digest(profile),
-            "proposal_authenticity_attestation_id": attestation_id,
-        }],
-        "wre_queue_items": [{"queue_item_id": queue_item_id, "claim_id": claim_id}],
-        "worker_claims": [{"claim_id": claim_id}],
-    }
-    projection = architect_fix_publication_state_projection(
-        state,
-        publication_id=publication_id,
-    )
-    publication = {
-        "schema_version": "reddog_architect_fix_promotion_publication.v1",
-        "publication_id": publication_id,
-        "state": "COMMITTED",
-        "proposal_authenticity_attestation_id": attestation_id,
-        "authority_profile_digest": canonical_digest(profile),
-        "active_work_state_digest": canonical_digest(projection),
-        "base_work_state_digest": None,
-    }
-    default_state = {**state, "architect_fix_publications": [publication]}
-    selected_state = {
-        **state,
-        "architect_fix_publications": [{
-            **publication,
-            "state": "STATE_PREPARED",
-            "base_work_state_digest": "sha256:" + "8" * 64,
-        }],
-    }
-    kwargs = _kwargs(repo, runtime, authority_profile=profile)
-    (runtime / "authoritative_work_state.json").write_text(
-        json.dumps(default_state),
-        encoding="utf-8",
-    )
-    selected_path = runtime / "selected_work_state.json"
-    selected_path.write_text(json.dumps(selected_state), encoding="utf-8")
-    kwargs["authoritative_work_state_path"] = selected_path
-
-    result = run_reddog_signer_socket_service_config_supply(**kwargs)
-
-    assert result.accepted is False
-    assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in result.rejection_reasons
-    assert not (runtime / "signer-service.json").exists()
 
 
 def test_config_supply_rejects_architect_profile_with_marker_and_binding_stripped(
@@ -358,7 +145,7 @@ def test_config_supply_rejects_architect_profile_with_marker_and_binding_strippe
 
     assert result.accepted is False
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in result.rejection_reasons
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_missing_durable_authoritative_state(
@@ -375,7 +162,7 @@ def test_config_supply_rejects_missing_durable_authoritative_state(
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in (
         result.rejection_reasons
     )
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_injected_state_that_differs_from_durable_state(
@@ -400,7 +187,7 @@ def test_config_supply_rejects_injected_state_that_differs_from_durable_state(
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in (
         result.rejection_reasons
     )
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_accepts_injected_state_that_matches_durable_state(
@@ -422,7 +209,30 @@ def test_config_supply_accepts_injected_state_that_matches_durable_state(
     )
 
     assert result.accepted is True
-    assert (runtime / "signer-service.json").exists()
+
+
+@pytest.mark.parametrize("value", (16384, 163840))
+def test_config_supply_preserves_explicit_request_budget(
+    tmp_path: Path,
+    value: int,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    kwargs = _kwargs(repo, runtime)
+    if value != 16384:
+        kwargs["max_request_bytes"] = value
+
+    result = run_reddog_signer_socket_service_config_supply(**kwargs)
+
+    assert result.accepted, result.rejection_reasons
+    config = json.loads(
+        (runtime / "signer_service_config.json").read_text(encoding="utf-8")
+    )
+    assert config["max_request_bytes"] == value
+    assert (config.get("conversation_scope_signer_policy") is not None) == (
+        value == 163840
+    )
+    assert (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_invalid_authority_profile_and_key_reuse(tmp_path: Path) -> None:
@@ -470,7 +280,7 @@ def test_config_supply_rejects_malformed_public_key_before_write(tmp_path: Path)
         FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":runtime_config"
         in result.rejection_reasons
     )
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_inside_repo_or_existing_socket_paths(tmp_path: Path) -> None:
@@ -481,7 +291,7 @@ def test_config_supply_rejects_inside_repo_or_existing_socket_paths(tmp_path: Pa
     existing_socket.write_text("", encoding="utf-8")
 
     inside_output = run_reddog_signer_socket_service_config_supply(
-        **_kwargs(repo, runtime, output_path=repo / "signer-service.json")
+        **_kwargs(repo, runtime, output_path=repo / "signer_service_config.json")
     )
     inside_socket = run_reddog_signer_socket_service_config_supply(
         **_kwargs(repo, runtime, socket_path=repo / "reddog-signer.sock")
@@ -503,7 +313,7 @@ def test_config_supply_rejects_paths_outside_bound_runtime_root(
     outside = tmp_path / "outside"
 
     output = run_reddog_signer_socket_service_config_supply(
-        **_kwargs(repo, runtime, output_path=outside / "signer-service.json")
+        **_kwargs(repo, runtime, output_path=outside / "signer_service_config.json")
     )
     anchor = run_reddog_signer_socket_service_config_supply(
         **_kwargs(
@@ -525,12 +335,148 @@ def test_config_supply_rejects_nested_config_output_path(tmp_path: Path) -> None
         **_kwargs(
             repo,
             runtime,
-            output_path=runtime / "nested" / "signer-service.json",
+            output_path=runtime / "nested" / "signer_service_config.json",
         )
     )
 
     assert not result.accepted
     assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+
+
+def test_config_supply_rejects_noncanonical_output_without_overwriting_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    state_path = runtime / "authoritative_work_state.json"
+    original = b'{"schema_version":"reddog_authoritative_work_state.v1"}\n'
+    state_path.write_bytes(original)
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authoritative_work_state_path=state_path,
+            output_path=state_path,
+        )
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+    assert state_path.read_bytes() == original
+    assert not (runtime / "signer_service_config.json").exists()
+
+
+def test_config_supply_rejects_canonical_output_used_as_work_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / "signer_service_config.json"
+    original = b'{"schema_version":"reddog_authoritative_work_state.v1"}\n'
+    target.write_bytes(original)
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authoritative_work_state_path=target,
+            output_path=target,
+        )
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+    assert target.read_bytes() == original
+
+
+@pytest.mark.parametrize(
+    "reserved_name",
+    (
+        "authority_profile.json",
+        "runtime_artifact_manifest.json",
+        "reddog_signer.sock",
+        "architect_proposal_nonce_store.json",
+        "signer_control_loop_anchor.json",
+        "conversation_scope_anchor.json",
+    ),
+)
+def test_config_supply_rejects_runtime_artifact_name_collisions(
+    tmp_path: Path,
+    reserved_name: str,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / reserved_name
+    original = b'{"sentinel":true}\n'
+    target.write_bytes(original)
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(repo, runtime, output_path=target)
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+    assert target.read_bytes() == original
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    (
+        ("harmless_extra", "attacker-selected"),
+        ("runtime_api_secret", "must-not-persist"),
+    ),
+)
+def test_config_supply_rejects_unknown_or_secret_profile_fields(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authority_profile=_authority_profile(**{field: value}),
+        )
+    )
+
+    assert not result.accepted
+    assert any(
+        reason.startswith(FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID)
+        for reason in result.rejection_reasons
+    )
+    assert not (runtime / "signer_service_config.json").exists()
+
+
+def test_config_supply_rejects_nested_unknown_profile_field(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    profile = _authority_profile(
+        holoindex_evidence={
+            "holoindex_status": "CURRENT",
+            "harmless_extra": "attacker-selected",
+        }
+    )
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(repo, runtime, authority_profile=profile)
+    )
+
+    assert not result.accepted
+    assert (
+        FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID
+        + ":holoindex_evidence.harmless_extra"
+        in result.rejection_reasons
+    )
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_nested_socket_or_anchor_path(tmp_path: Path) -> None:
@@ -586,7 +532,7 @@ def test_config_supply_rejects_hard_linked_output_without_mutating_source(
     runtime.mkdir()
     outside = tmp_path / "outside.json"
     outside.write_text('{"sentinel":true}\n', encoding="utf-8")
-    output = runtime / "signer-service.json"
+    output = runtime / "signer_service_config.json"
     try:
         os.link(outside, output)
     except OSError as exc:

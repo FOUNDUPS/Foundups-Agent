@@ -1,4 +1,41 @@
 # ModLog - moltbot_bridge
+## 2026-08-06: Durable E0 conversation-scope authentication
+- Replaced process-local session authentication by extending the existing
+  isolated Ed25519 signer. Exact scope state binds the current credential,
+  signer key epoch, and E0 audit attestation; the bearer is never persisted.
+- Added a signer-owned monotonic conversation head; restarts, rollback, forks,
+  nonce reuse, and concurrent successors fail closed. Runtime requires a current
+  principal resolver, exact policy, confined anchor, kernel peer source, and a
+  reviewed request budget.
+- Added exact AgentDB pre-sign staging and signed atomic finalization. Later-clock
+  recovery can only replay the signer-anchored response and cannot mint a fresh
+  signature; altered pending state fails and principal resolution stays leased.
+- Extended staging to proposal previews. A post-anchor crash leaves active state
+  unchanged, fences other writers, and replays only the anchored response.
+- Preserved legacy HMAC without recovery authority: it signs before direct
+  create/CAS; only E0 state may consume exact signer-anchor replay.
+- Extracted signer config rehydration, principal parsing, and conversation-domain
+  signing from WSP 62 hosts. The bounded supplier and split fixtures retain an
+  AST gate. No state grants work, repository, signer, merge, or HoloIndex writes.
+- Exact-SHA review froze config output, applied the shared public-profile
+  allowlist, unified config/runtime proposal verification, and extended the
+  same gate to exact schemas for embedded model, WSP 15, proposal, and
+  operational-context receipts. Architect FIX promotion now rejects raw nested
+  receipt injection before publication and persists canonical receipts only.
+- Added one shared seed/source/runtime authority-profile rehydrator. It rejects
+  native JSON type confusion before source supply, promotion, publication,
+  signer configuration, valve use, manifest authority, queue materialization,
+  readiness, or live-canary evidence can produce an effect.
+- Preserved the older queue materializer projection through a bounded typed
+  effect view instead of conflating it with the signed public-profile schema.
+- Folded the exact-SHA security review into that boundary: null path sets,
+  false nested `no_*` claims, and malformed runtime digests now fail before
+  publication, queue materialization, or any other effect-bearing consumer.
+- Preserved exact single-model nullable aggregate fields and canonical
+  `panel_topology:<hex>` identifiers without restoring broad null acceptance.
+- Legacy callers retain 16 KiB; only the explicit conversation bootstrap uses
+  160 KiB. Stale v2, nested profile injection, and artifact collisions fail
+  before writes or signer invocation (WSP 00/15/22/50/62/97).
 ## 2026-08-06: Current-generation conversation session authority source
 - Replaced the rejected symmetric resident path with a strict principal-signed
   conversation credential verified by the existing Ed25519 backend and

@@ -61,3 +61,20 @@ def test_rejects_non_artifact_generation_runtime_surface() -> None:
     assert result.accepted is False
     assert promotion.ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_INVALID in result.rejection_reasons
     assert store.load()["wre_queue_items"] == []
+
+
+def test_promotes_canonical_panel_topology_runtime_binding() -> None:
+    selection, runtime = model_selection_and_runtime_binding_receipts(
+        runtime_surface="reddog_artifact_generation",
+        task_family="reddog_architect_fix_promotion",
+        panel_model_ids=("anthropic/claude-sonnet-4.5",),
+    )
+
+    result, store = _promote(
+        model_selection_receipt=selection,
+        model_runtime_binding_receipt=runtime,
+    )
+
+    assert result.accepted is True, result.rejection_reasons
+    assert selection["panel_topology_digest"].startswith("panel_topology:")
+    assert store.load()["wre_queue_items"][0]["model_runtime_binding_receipt_id"] == runtime["receipt_id"]

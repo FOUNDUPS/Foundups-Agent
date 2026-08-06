@@ -137,6 +137,9 @@ def _run_entrypoint_args(
         expected_session_id=None,
         expected_owner_authority_config_path=owner_path,
         principal_key_resolver=principal_key_resolver,
+        conversation_scope_principal_resolver_supplier=(
+            startup.conversation_principal_authority_resolver_supplier
+        ),
         proposal_replay_high_water_store=proposal_replay_high_water_store,
         verified_outcome_signing_authority_supplier=(
             startup.verified_outcome_authority_supplier

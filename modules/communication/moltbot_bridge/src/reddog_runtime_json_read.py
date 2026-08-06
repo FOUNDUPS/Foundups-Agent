@@ -11,6 +11,9 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_bytes,
     validate_runtime_artifact_path,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_effect_scope,
+)
 
 MAX_REDDOG_RUNTIME_JSON_BYTES = 1024 * 1024
 
@@ -73,8 +76,32 @@ def read_reddog_runtime_json_outside_repo(
         return None, (unreadable_reason,)
 
 
+def read_reddog_authority_profile_effect_scope_outside_repo(
+    repo_root: Path,
+    allowed_root: Path,
+    value: Path | str | None,
+    *,
+    missing_reason: str,
+    inside_reason: str,
+    unreadable_reason: str,
+) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
+    """Read and type-check one legacy effect-bearing profile projection."""
+
+    profile, reasons = read_reddog_runtime_json_outside_repo(
+        repo_root, allowed_root, value, missing_reason=missing_reason,
+        inside_reason=inside_reason, unreadable_reason=unreadable_reason,
+    )
+    if reasons or profile is None:
+        return profile, reasons
+    try:
+        return rehydrate_authority_profile_effect_scope(dict(profile)), ()
+    except ValueError:
+        return None, (unreadable_reason,)
+
+
 __all__ = [
     "MAX_REDDOG_RUNTIME_JSON_BYTES",
+    "read_reddog_authority_profile_effect_scope_outside_repo",
     "read_reddog_runtime_json_mapping",
     "read_reddog_runtime_json_outside_repo",
 ]

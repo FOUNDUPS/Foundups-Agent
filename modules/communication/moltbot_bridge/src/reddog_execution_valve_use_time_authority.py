@@ -25,6 +25,9 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment_supply import (
     resolve_reddog_execution_valve_expected_bindings,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_runtime,
+)
 from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
     AuthoritativeUseLease,
 )
@@ -332,6 +335,12 @@ def _read_runtime_artifacts(
             f"canonical_use_time_artifact_snapshot_changed:{name}"
             for name in changed
         ]
+    try:
+        payloads["authority_profile"] = rehydrate_authority_profile_runtime(
+            payloads["authority_profile"]
+        )
+    except (KeyError, TypeError, ValueError):
+        return {}, ["canonical_use_time_authority_profile_invalid"]
     return payloads, []
 
 

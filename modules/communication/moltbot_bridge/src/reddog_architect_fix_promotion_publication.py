@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -37,6 +37,9 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_re
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     atomic_replace_confined_mapping,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_runtime,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
@@ -155,6 +158,17 @@ def _publish_unlocked(
     request: ArchitectFixPromotionPublicationRequest,
 ) -> str:
     _recover_unlocked(publisher)
+    try:
+        request = replace(
+            request,
+            authority_profile=rehydrate_authority_profile_runtime(
+                request.authority_profile
+            ),
+        )
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(
+            "architect_fix_publication_profile_invalid"
+        ) from exc
     profile_digest = canonical_digest(request.authority_profile)
     _validate_request(request, profile_digest=profile_digest)
     stage = _stage_payload(request, profile_digest=profile_digest)
@@ -372,6 +386,12 @@ def _publish_profile_artifact(
     profile = stage.get("authority_profile")
     if not isinstance(profile, Mapping):
         raise RuntimeError("architect_fix_publication_profile_invalid")
+    try:
+        profile = rehydrate_authority_profile_runtime(profile)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(
+            "architect_fix_publication_profile_invalid"
+        ) from exc
     artifact = publisher._profile_artifact_path(
         stage["authority_profile_digest"]
     )

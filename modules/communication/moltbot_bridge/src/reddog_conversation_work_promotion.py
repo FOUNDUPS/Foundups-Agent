@@ -16,12 +16,10 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     VerifiedConversationScopeAuthority,
     consume_conversation_scope_capability,
     conversation_scope_authority_view,
-    sign_record_with_scope_authority,
     verify_record_with_scope_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
     canonical_digest,
-    with_record_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record import (
     AuthenticatedConversationScopeResult,
@@ -32,6 +30,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record i
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_persistence import (
+    persist_authenticated_conversation_record,
 )
 
 
@@ -115,9 +116,9 @@ class _PendingSeal:
 
 
 _LOCK = threading.Lock()
-_CONTEXTS: WeakKeyDictionary[
-    AuthenticatedConversationWorkContext, _ContextSeal
-] = WeakKeyDictionary()
+_CONTEXTS: WeakKeyDictionary[AuthenticatedConversationWorkContext, _ContextSeal] = (
+    WeakKeyDictionary()
+)
 _PENDING: WeakKeyDictionary[
     VerifiedPendingConversationProposalCapability, _PendingSeal
 ] = WeakKeyDictionary()
@@ -183,14 +184,13 @@ def commit_pending_conversation_work_proposal(
     record = current.get("record") if current.get("ok") else None
     if not _same_source_record(record, seal.record, seal.binding):
         return rejected("conversation_work_scope_changed")
-    updated = _pending_record(
-        seal, admission.to_dict(), int(now_epoch)
-    )
+    unsigned = _pending_unsigned_record(seal, admission.to_dict(), int(now_epoch))
     return stored_result(
-        seal.store.compare_and_swap(
-            seal.binding.conversation_id,
+        persist_authenticated_conversation_record(
+            store=seal.store,
+            authority=seal.authority,
+            record=unsigned,
             expected_revision=seal.binding.conversation_revision,
-            next_record=updated,
         )
     )
 
@@ -220,7 +220,9 @@ def verify_pending_conversation_work_proposal(
         return None
     authority = _consume_for_record(capability, record, now_epoch)
     proposal_digest = canonical_digest(admission.to_dict())
-    if authority is None or _pending_reasons(record, admission, proposal_digest, now_epoch):
+    if authority is None or _pending_reasons(
+        record, admission, proposal_digest, now_epoch
+    ):
         return None
     pending = object.__new__(VerifiedPendingConversationProposalCapability)
     with _LOCK:
@@ -259,9 +261,7 @@ def consume_pending_conversation_proposal_capability(
         and seal.proposal_digest == canonical_digest(receipt.to_dict())
         and seal.conversation_id == receipt.conversation_id
         and seal.current_record_digest == current.get("record_digest")
-        and not _pending_reasons(
-            current, receipt, seal.proposal_digest, int(now_epoch)
-        )
+        and not _pending_reasons(current, receipt, seal.proposal_digest, int(now_epoch))
     )
 
 
@@ -291,14 +291,18 @@ def _context_reasons(
     reasons: list[str] = []
     intent = cycle.get("intent") if isinstance(cycle.get("intent"), Mapping) else {}
     principal = str(
-        intent.get("principal_id") or intent.get("principal_ref")
-        or intent.get("origin_principal") or ""
+        intent.get("principal_id")
+        or intent.get("principal_ref")
+        or intent.get("origin_principal")
+        or ""
     )
     if int(record.get("conversation_revision", -1)) != int(revision):
         reasons.append("conversation_work_revision_conflict")
     if int(now_epoch) >= int(record.get("expires_at", 0)):
         reasons.append("conversation_work_scope_expired")
-    if record.get("pending_work_proposal_id") or record.get("pending_work_proposal_digest"):
+    if record.get("pending_work_proposal_id") or record.get(
+        "pending_work_proposal_digest"
+    ):
         reasons.append("conversation_work_proposal_already_pending")
     if cycle.get("_store_integrity_valid") is not True:
         reasons.append("conversation_work_resident_cycle_unverified")
@@ -316,9 +320,7 @@ def _context_reasons(
         reasons.append("conversation_work_snapshot_mismatch")
     grounding = intent.get("grounding_receipt")
     grounding_id = (
-        str(grounding.get("receipt_id") or "")
-        if isinstance(grounding, Mapping)
-        else ""
+        str(grounding.get("receipt_id") or "") if isinstance(grounding, Mapping) else ""
     )
     if grounding_id != record.get("grounding_receipt_id"):
         reasons.append("conversation_work_grounding_mismatch")
@@ -332,7 +334,9 @@ def _binding(
         "schema_version": CONVERSATION_WORK_BINDING_SCHEMA,
         "conversation_id": record["conversation_id"],
         "conversation_revision": int(record["conversation_revision"]),
-        "conversation_revision_receipt_id": record["revision_receipts"][-1]["receipt_id"],
+        "conversation_revision_receipt_id": record["revision_receipts"][-1][
+            "receipt_id"
+        ],
         "conversation_scope_record_digest": record["record_digest"],
         "authorized_foundup_id": record["authorized_foundup_id"],
         "resident_intent_id": cycle["intent_id"],
@@ -342,9 +346,7 @@ def _binding(
         "snapshot_content_digest": record["source_snapshot_digest"],
         "repo_head_sha": record["last_grounded_head_sha"],
         "holoindex_generation_id": record["holoindex_generation_id"],
-        "holoindex_freshness_receipt_digest": record[
-            "holoindex_freshness_receipt_id"
-        ],
+        "holoindex_freshness_receipt_digest": record["holoindex_freshness_receipt_id"],
     }
     return ConversationWorkBinding(
         **payload, conversation_binding_digest=canonical_digest(payload)
@@ -374,16 +376,18 @@ def _bound_admission(
     except (TypeError, ValueError):
         return None, "conversation_work_proposal_invalid"
     expected = binding.to_dict()
-    if any(getattr(admission, key) != expected[key] for key in expected if key != "schema_version"):
+    if any(
+        getattr(admission, key) != expected[key]
+        for key in expected
+        if key != "schema_version"
+    ):
         return None, "conversation_work_proposal_binding_mismatch"
     current_bindings = {
         "snapshot_receipt_id": record["source_snapshot_id"],
         "snapshot_content_digest": record["source_snapshot_digest"],
         "repo_head_sha": record["last_grounded_head_sha"],
         "holoindex_generation_id": record["holoindex_generation_id"],
-        "holoindex_freshness_receipt_digest": record[
-            "holoindex_freshness_receipt_id"
-        ],
+        "holoindex_freshness_receipt_digest": record["holoindex_freshness_receipt_id"],
     }
     if any(getattr(admission, key) != value for key, value in current_bindings.items()):
         return None, "conversation_work_current_binding_mismatch"
@@ -415,7 +419,7 @@ def _same_source_record(
     )
 
 
-def _pending_record(
+def _pending_unsigned_record(
     seal: _ContextSeal, admission: Mapping[str, Any], now_epoch: int
 ) -> Mapping[str, Any]:
     current = dict(seal.record)
@@ -432,6 +436,20 @@ def _pending_record(
             "updated_at": now_epoch,
         }
     )
+    current["previous_record_auth_signature_digest"] = canonical_digest(
+        {"record_auth_signature": seal.record["record_auth_signature"]}
+    )
+    current["record_auth_nonce"] = canonical_digest(
+        {
+            "conversation_id": current["conversation_id"],
+            "conversation_revision": current["conversation_revision"],
+            "turn_id": current["turn_id"],
+            "updated_at": current["updated_at"],
+            "previous_record_auth_signature_digest": current[
+                "previous_record_auth_signature_digest"
+            ],
+        }
+    )
     previous = str(current["revision_receipts"][-1]["receipt_id"])
     current["revision_receipts"] = [
         *current["revision_receipts"],
@@ -441,10 +459,7 @@ def _pending_record(
             revision=seal.binding.conversation_revision + 1,
         ),
     ]
-    current["record_auth_mac"] = sign_record_with_scope_authority(
-        seal.authority, current
-    )
-    return with_record_digest(current)
+    return current
 
 
 def _pending_reasons(
@@ -460,7 +475,10 @@ def _pending_reasons(
         or record.get("pending_work_proposal_digest") != proposal_digest
     ):
         reasons.append("conversation_work_pending_proposal_mismatch")
-    if int(record.get("conversation_revision", -1)) != admission.conversation_revision + 1:
+    if (
+        int(record.get("conversation_revision", -1))
+        != admission.conversation_revision + 1
+    ):
         reasons.append("conversation_work_revision_mismatch")
     receipts = record.get("revision_receipts") or ()
     if (

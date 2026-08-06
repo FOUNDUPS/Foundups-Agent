@@ -1,3 +1,38 @@
+## 2026-08-06: Durable conversation authentication regressions
+
+- Proved E0-signed scope records survive AgentDB and signer-anchor restart while
+  raw principal credentials never enter either durable artifact.
+- Added exact-state tamper, forged/stale credential, wrong signer key/epoch,
+  cross-domain request, unavailable dependency, rollback/fork, nonce replay,
+  concurrent successor, and no-write-on-signing-failure coverage.
+- Added later-clock crash recovery, no-anchor rejection, and exact outage retry.
+  Regressions also cover rehashed pending state, bounded signer heads,
+  kernel-attestor composition, current-generation principal revocation,
+  and lease-active resolver calls.
+- Added proposal-preview crash recovery after signer-anchor commit, including a
+  competing conversation writer denial and proof that restart recovery performs
+  no second signer action before atomic AgentDB finalization.
+- Extended signer config/runtime tests for principal resolution, confined
+  anchors, exact policy binding, and bounded request sizing.
+- Proved legacy HMAC never uses pending recovery; precommit failure leaves no
+  stranded row, retry succeeds, and `require_replay` remains forbidden.
+- Added exact WSP 62 AST coverage for authentication sources and tests.
+- Added review regressions for state overwrite and artifact collisions.
+- Added exact nested-schema regressions for model selection/runtime receipts,
+  WSP 15 allocations, proposal admission, operational context, list members,
+  and malformed present values.
+- Proved nested model-selection and runtime-policy injection cannot publish an
+  authority profile or create a queue item, claim, or promotion record.
+- Proved attacker-rehashed list/map type confusion cannot write a source,
+  publish or recover a profile, reach queue materialization, or pass the live
+  canary profile reader. The source and effect projections do not coerce data.
+- Added security-review regressions for `denied_paths: null`, false nested
+  no-effect assertions, and malformed runtime digests. The resident queue
+  bootstrap preserves authoritative work-state bytes and emits no chain result
+  when the legacy effect projection is malformed.
+- Added real single-model and panel promotion regressions to preserve canonical
+  nullable aggregate and topology bindings under strict profile validation.
+
 ## 2026-08-05: Current-generation use-time trust regressions
 
 - Added real root-owned selection round-trip tests plus changed config,

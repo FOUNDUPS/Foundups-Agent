@@ -13,6 +13,9 @@ from weakref import WeakKeyDictionary
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_publication_effect_binding import (
     committed_publication_effect_binding,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_runtime,
+)
 from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_store import (
     AuthoritativeWorkStateStore,
 )
@@ -429,7 +432,7 @@ def _fresh_authority_values(
 
 def _verified_values(**values: Any) -> Mapping[str, Any]:
     state = _mapping(values["state"])
-    profile = _mapping(values["profile"])
+    profile = rehydrate_authority_profile_runtime(values["profile"])
     config = _mapping(values["config"])
     identity = _mapping(values["identity"])
     work = _mapping(values["work"])

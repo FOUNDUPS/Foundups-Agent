@@ -148,7 +148,7 @@ def _proposal_admission(
         "admissible_to_authoritative_queue": admissible,
         "action": ACTION_FIX,
         "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-        "task_summary_digest": "sha256:task-summary",
+        "task_summary_digest": "sha256:" + ("7" * 64),
         "reuse_decision": "EXTEND_EXISTING",
         "requested_operation": "bounded_code_change",
         "target_runtime": "reddog_resident_queue",

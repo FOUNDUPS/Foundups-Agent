@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-import secrets
 from typing import Callable
 
 from modules.ai_intelligence.ai_overseer.src.foundup_genesis.intake_auth_provider import (
@@ -28,6 +27,10 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_mac impo
 from modules.communication.moltbot_bridge.src.reddog_conversation_session_credential import (
     VerifiedConversationSessionCredential,
     verify_conversation_session_credential,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    CONVERSATION_SCOPE_AUTH_SCHEME,
+    ConversationScopeSigningContext,
 )
 
 
@@ -96,6 +99,7 @@ def authenticate_signed_conversation_scope(
     expected_repo_full_name: str,
     principal_resolver: PrincipalAuthorityResolver,
     now_epoch: int,
+    record_signing_context: ConversationScopeSigningContext | None = None,
 ) -> tuple[
     AuthenticatedConversationScopeCapability,
     VerifiedConversationSessionCredential,
@@ -116,18 +120,26 @@ def authenticate_signed_conversation_scope(
     )
     if verified is None:
         return None
-    # This operation-local key protects scoped state records after public-key
-    # authentication. It is intentionally not derivable from the bearer.
-    session_key = secrets.token_bytes(32)
+    if (
+        record_signing_context is not None
+        and record_signing_context.serialized_session_credential
+        != serialized_credential
+    ):
+        return None
     seal = _authority_seal(
         verified.principal_record,
-        (session_key,),
+        (),
         verified.principal_provider,
         verified.principal_id,
         transport,
         session_binding,
         now_epoch,
         foundup_scope=verified.foundup_scope,
+        record_auth_scheme=CONVERSATION_SCOPE_AUTH_SCHEME,
+        credential_id=verified.credential_id,
+        session_id=verified.session_id,
+        repo_full_name=verified.repo_full_name,
+        record_signing_context=record_signing_context,
     )
     return _issue_conversation_scope_capability(seal), verified
 
@@ -141,7 +153,19 @@ def _authority_seal(
     session_binding: str,
     now_epoch: int,
     foundup_scope: tuple[str, ...] | None = None,
+    record_auth_scheme: str = "hmac-sha256-v1",
+    credential_id: str = "",
+    session_id: str = "",
+    repo_full_name: str = "",
+    record_signing_context: ConversationScopeSigningContext | None = None,
 ) -> _ConversationScopeAuthoritySeal:
+    sign_key = (
+        derive_conversation_scope_mac_key(
+            secrets[0], principal_provider, principal_id
+        )
+        if secrets
+        else b""
+    )
     return _ConversationScopeAuthoritySeal(
         principal_id=record.principal_id,
         principal_provider=record.principal_provider,
@@ -156,13 +180,16 @@ def _authority_seal(
             {"transport": transport.strip(), "session_binding": session_binding.strip()}
         ),
         expires_at=int(now_epoch) + CAPABILITY_TTL_SECONDS,
-        record_sign_key=derive_conversation_scope_mac_key(
-            secrets[0], principal_provider, principal_id
-        ),
+        record_sign_key=sign_key,
         record_verify_keys=tuple(
             derive_conversation_scope_mac_key(secret, principal_provider, principal_id)
             for secret in secrets
         ),
+        record_auth_scheme=record_auth_scheme,
+        credential_id=credential_id,
+        session_id=session_id,
+        repo_full_name=repo_full_name,
+        record_signing_context=record_signing_context,
     )
 
 

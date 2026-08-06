@@ -8,8 +8,14 @@ from typing import Any, Mapping
 from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_mac import (
-    sign_conversation_scope_record,
-    verify_conversation_scope_record,
+    sign_conversation_scope_record as sign_hmac_conversation_scope_record,
+    verify_conversation_scope_record as verify_hmac_conversation_scope_record,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    CONVERSATION_SCOPE_AUTH_SCHEME,
+    ConversationScopeSigningContext,
+    sign_conversation_scope_record as sign_e0_conversation_scope_record,
+    verify_signed_conversation_scope_record,
 )
 
 
@@ -53,6 +59,11 @@ class _ConversationScopeAuthoritySeal:
     expires_at: int
     record_sign_key: bytes
     record_verify_keys: tuple[bytes, ...]
+    record_auth_scheme: str = "hmac-sha256-v1"
+    credential_id: str = ""
+    session_id: str = ""
+    repo_full_name: str = ""
+    record_signing_context: ConversationScopeSigningContext | None = None
 
 
 _LOCK = threading.Lock()
@@ -107,21 +118,55 @@ def conversation_scope_authority_view(authority: Any) -> Mapping[str, Any] | Non
         "foundup_scope": tuple(seal.foundup_scope),
         "transport": seal.transport,
         "session_binding_digest": seal.session_binding_digest,
+        "record_auth_scheme": seal.record_auth_scheme,
+        "credential_id": seal.credential_id,
+        "session_id": seal.session_id,
+        "repo_full_name": seal.repo_full_name,
     }
 
 
 def sign_record_with_scope_authority(
-    authority: Any, record: Mapping[str, Any]
-) -> str:
+    authority: Any,
+    record: Mapping[str, Any],
+    *,
+    require_replay: bool = False,
+) -> Mapping[str, Any] | None:
     seal = _authority_seal(authority)
-    return sign_conversation_scope_record(record, seal.record_sign_key) if seal else ""
+    if seal is None:
+        return None
+    if seal.record_auth_scheme == CONVERSATION_SCOPE_AUTH_SCHEME:
+        if seal.record_signing_context is None:
+            return None
+        return sign_e0_conversation_scope_record(
+            seal.record_signing_context, record, require_replay=require_replay
+        )
+    if require_replay:
+        return None
+    if seal.record_auth_scheme == "hmac-sha256-v1" and seal.record_sign_key:
+        return {
+            "record_auth_signature": sign_hmac_conversation_scope_record(
+                record, seal.record_sign_key
+            ),
+            "record_auth_signer_public_key": "",
+            "record_auth_key_fingerprint": "",
+            "record_auth_key_epoch": "",
+            "record_auth_audit_mac": "",
+            "record_auth_audit_attestation_signature": "",
+        }
+    return None
 
 
 def verify_record_with_scope_authority(
     authority: Any, record: Mapping[str, Any]
 ) -> bool:
     seal = _authority_seal(authority)
-    return bool(seal) and verify_conversation_scope_record(record, seal.record_verify_keys)
+    if seal is None or record.get("record_auth_scheme") != seal.record_auth_scheme:
+        return False
+    if seal.record_auth_scheme == CONVERSATION_SCOPE_AUTH_SCHEME:
+        return bool(seal.record_signing_context) and verify_signed_conversation_scope_record(
+            seal.record_signing_context, record
+        )
+    return verify_hmac_conversation_scope_record(record, seal.record_verify_keys)
 
 
 def discard_conversation_scope_capability(capability: Any) -> None:

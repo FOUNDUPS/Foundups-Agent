@@ -12,6 +12,8 @@
   record, generation lease, intent and grounding digests into admission.
 - Kept conversation identity distinct from principal-signed work authority and
   added no worker, repository, merge, signer, or HoloIndex effect.
+- Pinned the regenerated backend dependency graph after the shared typed
+  authority-profile gate reached every runtime effect boundary.
 
 ## 2026-08-06 - Conversation proposal backend compatibility (0.4.59)
 

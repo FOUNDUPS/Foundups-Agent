@@ -187,9 +187,7 @@ def test_principal_repo_scope_is_enforced(monkeypatch) -> None:
             pass
 
 
-def test_real_manifest_bound_principal_artifact_authenticates_session(
-    monkeypatch, tmp_path: Path
-) -> None:
+def _install_real_manifest_generation(monkeypatch, tmp_path: Path) -> tuple[Path, dict]:
     repo_root = tmp_path / "repo"
     runtime_root = tmp_path / "runtime"
     (repo_root / ".git").mkdir(parents=True)
@@ -198,12 +196,9 @@ def test_real_manifest_bound_principal_artifact_authenticates_session(
         '[remote "origin"]\n\turl = https://github.com/FOUNDUPS/Foundups-Agent.git\n',
         encoding="ascii",
     )
-    record = _record()
     artifact = {
         "schema_version": "reddog_authority_runtime_resolver_supply.v1",
-        "principals": {
-            "principal-signature|principal_012": record.to_dict(),
-        },
+        "principals": {"principal-signature|principal_012": _record().to_dict()},
         "principal_count": 1,
         "resolver_supply_receipt_id": "sha256:" + "7" * 64,
         "no_holoindex_reindex_performed": True,
@@ -235,6 +230,14 @@ def test_real_manifest_bound_principal_artifact_authenticates_session(
         "reddog_conversation_session_authority_source.lease_owner_e0_current_selection",
         _lease_generation,
     )
+    return repo_root, active
+
+
+def test_real_manifest_bound_principal_artifact_authenticates_session(
+    monkeypatch, tmp_path: Path
+) -> None:
+    repo_root, active = _install_real_manifest_generation(monkeypatch, tmp_path)
+    runtime_root = tmp_path / "runtime"
 
     with lease_current_generation_conversation_session(
         repo_root=repo_root,
@@ -252,17 +255,16 @@ def test_real_manifest_bound_principal_artifact_authenticates_session(
     assert active["leased"] is False
 
 
-def test_record_integrity_key_is_operation_local(monkeypatch) -> None:
+def test_signed_session_has_no_process_local_persistence_key(monkeypatch) -> None:
     _install_current_generation(monkeypatch, _record())
     serialized = _credential()
     record = {"scope_record": "same-input"}
     with _lease(monkeypatch, credential=serialized) as first:
-        first_mac = sign_record_with_scope_authority(first.authority, record)
+        first_result = sign_record_with_scope_authority(first.authority, record)
     with _lease(monkeypatch, credential=serialized) as second:
-        second_mac = sign_record_with_scope_authority(second.authority, record)
-    assert first_mac.startswith("hmac-sha256:")
-    assert second_mac.startswith("hmac-sha256:")
-    assert first_mac != second_mac
+        second_result = sign_record_with_scope_authority(second.authority, record)
+    assert first_result is None
+    assert second_result is None
 
 
 def test_production_source_has_no_hmac_or_signing_material() -> None:

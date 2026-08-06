@@ -17,6 +17,19 @@ editor source: it verifies a strict principal-signed credential using only the
 current-generation public key, enforces repository/audience/transport/TTL and
 FoundUp scope, and yields the same opaque operation-local capability. The
 credential never enters AgentDB, model context, receipts, logs, or child env.
+Principal-signed scope v2 persists only through the isolated E0 signer. Each use
+re-verifies current principal authority, signs the complete record and credential,
+and advances a signer-owned monotonic conversation head. AgentDB stages the exact
+unsigned payload as non-authoritative pending state; only a matching E0 response
+may atomically publish it. Exact replay supports crash recovery; altered pending
+content, rollback, fork, nonce replay, stale authority, wrong key epoch, forged
+peer metadata, or missing policy/resolver/anchor fails closed. Restarted consumers
+must present the same valid credential and verify the signature and attestation.
+Legacy intake HMAC remains supported; neither scheme grants work or repository
+authority. Config v3 is the only bootable schema and stale v2 fails before service
+invocation. The public supplier retains its 16 KiB request budget; the conversation
+bootstrap explicitly supplies the reviewed 160 KiB bound. Lower bounds omit
+conversation signing rather than weakening the socket limit.
 
 ## Public API
 ### Architect proposal validity and execution readiness

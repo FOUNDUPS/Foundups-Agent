@@ -119,7 +119,12 @@ def revision_receipt(
     state = {
         key: value
         for key, value in record.items()
-        if key not in {"revision_receipts", "record_auth_mac", "record_digest"}
+        if key not in {
+            "revision_receipts", "record_digest", "record_auth_signature",
+            "record_auth_signer_public_key", "record_auth_key_fingerprint",
+            "record_auth_key_epoch", "record_auth_audit_mac",
+            "record_auth_audit_attestation_signature",
+        }
     }
     payload = {
         "schema_version": REVISION_RECEIPT_SCHEMA,
@@ -140,7 +145,8 @@ def authority_matches(
         for field in (
             "principal_id", "principal_provider", "verified_subject_digest",
             "principal_record_digest", "principal_key_fingerprint", "transport",
-            "session_binding_digest",
+            "session_binding_digest", "credential_id", "session_id",
+            "repo_full_name", "record_auth_scheme",
         )
     )
 
@@ -164,7 +170,9 @@ def accepted(record: Mapping[str, Any]) -> AuthenticatedConversationScopeResult:
             "holoindex_freshness_receipt_id", "grounding_receipt_id",
             "source_snapshot_id", "source_snapshot_digest",
             "pending_work_proposal_id", "pending_work_proposal_digest", "updated_at",
-            "expires_at", "record_digest",
+            "expires_at", "record_digest", "record_auth_scheme",
+            "record_auth_signer_public_key", "record_auth_key_fingerprint",
+            "record_auth_key_epoch",
         )
     }
     projection.update(

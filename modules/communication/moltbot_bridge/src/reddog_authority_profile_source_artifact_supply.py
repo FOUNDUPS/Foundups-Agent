@@ -33,6 +33,10 @@ from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety im
     authority_profile_secret_field_paths,
     authority_profile_unknown_field_paths,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_seed,
+    rehydrate_authority_profile_source,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
 )
@@ -97,6 +101,7 @@ class AuthorityProfileSourceSupplyReason:
     SECRET_FIELD = "authority_profile_secret_field_rejected"
     UNKNOWN_FIELD = "authority_profile_unknown_field_rejected"
     DIGEST_FORMAT = "authority_profile_digest_format_invalid"
+    TYPED_SCHEMA = "authority_profile_typed_schema_invalid"
 
 
 @dataclass(frozen=True)
@@ -158,6 +163,11 @@ def run_reddog_authority_profile_source_artifact_supply(
         f"{AuthorityProfileSourceSupplyReason.DIGEST_FORMAT}:{path}"
         for path in authority_profile_malformed_digest_paths(seed)
     )
+    if seed:
+        try:
+            seed = rehydrate_authority_profile_seed(seed)
+        except ValueError:
+            reasons.append(AuthorityProfileSourceSupplyReason.TYPED_SCHEMA)
     missing = [field for field in _REQUIRED_SEED_FIELDS if field not in seed or seed.get(field) in (None, "", (), [])]
     if missing:
         reasons.extend(
@@ -187,7 +197,12 @@ def run_reddog_authority_profile_source_artifact_supply(
     assert principal is not None
     assert snapshot is not None
     assert output is not None
-    profile = _profile(seed, principal, snapshot)
+    try:
+        profile = rehydrate_authority_profile_source(
+            _profile(seed, principal, snapshot)
+        )
+    except ValueError:
+        return _reject((AuthorityProfileSourceSupplyReason.TYPED_SCHEMA,))
     try:
         _write_json_atomic(output, profile, repo_root=root)
     except Exception:

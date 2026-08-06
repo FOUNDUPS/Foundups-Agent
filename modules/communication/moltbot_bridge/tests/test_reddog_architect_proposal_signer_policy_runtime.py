@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
     architect_proposal_replay_store_binding_digest,
     architect_proposal_signer_instance_id,
 )
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_runtime_authorization import (
+    verify_architect_proposal_runtime_authorization,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY,
     REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY,
@@ -685,7 +688,7 @@ def _config_kwargs(
         "authoritative_work_state_path": (
             runtime / "authoritative_work_state.json"
         ),
-        "output_path": runtime / "signer-service.json",
+        "output_path": runtime / "signer_service_config.json",
         "socket_path": runtime / "reddog-signer.sock",
         "principal_signing_key_ref": "op://prod/principal/private",
         "principal_audit_mac_key_ref": "op://prod/principal/audit",
@@ -1286,7 +1289,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     assert result.proposal_policy_configured is True
     assert result.proposal_attestation_id == policy.expected_payload.attestation_id
     config = json.loads(
-        (runtime / "signer-service.json").read_text(encoding="utf-8")
+        (runtime / "signer_service_config.json").read_text(encoding="utf-8")
     )
     assert (
         config["proposal_authority_policy"]["expected_payload"]
@@ -1311,7 +1314,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     assert not nonce_path.exists()
     run_packet = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=repo,
-        config_path=runtime / "signer-service.json",
+        config_path=runtime / "signer_service_config.json",
         output_path=tmp_path / "proposal-run-packet.json",
         owner_authority_config_path=(
             tmp_path / "signer-owner" / "owner.json"
@@ -1323,7 +1326,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     )
     launch_binding = _write_proposal_launch_packet(
         repo=repo,
-        config_path=runtime / "signer-service.json",
+        config_path=runtime / "signer_service_config.json",
         config_digest=result.config_digest,
         output_path=runtime / "proposal-launch-packet.json",
     )
@@ -1347,7 +1350,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     rejected_in_memory = (
         run_reddog_signer_socket_service_runtime_bootstrap(
             repo_root=repo,
-            config_path=runtime / "signer-service.json",
+            config_path=runtime / "signer_service_config.json",
             resolver=_Resolver(private_key),
             serve_bounded=lambda **kwargs: pytest.fail(
                 "production signer accepted volatile replay authority"
@@ -1371,13 +1374,13 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
 
     launch_binding = _write_proposal_launch_packet(
         repo=repo,
-        config_path=runtime / "signer-service.json",
+        config_path=runtime / "signer_service_config.json",
         config_digest=result.config_digest,
         output_path=runtime / "proposal-launch-packet.json",
     )
     bootstrap = run_reddog_signer_socket_service_runtime_bootstrap(
         repo_root=repo,
-        config_path=runtime / "signer-service.json",
+        config_path=runtime / "signer_service_config.json",
         resolver=_Resolver(private_key),
         serve_bounded=lambda **kwargs: (
             IsolatedSignerSocketResidentServiceResult(
@@ -1630,7 +1633,7 @@ def test_config_supply_rejects_identity_or_nonce_path_substitution(
 
     assert result.accepted is False
     assert reason in result.rejection_reasons
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 class _Resolver:
@@ -2022,7 +2025,7 @@ def test_bootstrap_rejects_tampered_serialized_proposal_policy(
         )
     )
     assert result.accepted is True, result.rejection_reasons
-    config_path = runtime / "signer-service.json"
+    config_path = runtime / "signer_service_config.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
     malformed_digest = run_reddog_signer_socket_service_runtime_bootstrap(
         repo_root=repo,
@@ -2174,4 +2177,48 @@ def test_runtime_config_rejects_partial_or_mismatched_proposal_wiring(
     ) == (FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,)
     assert validate_signer_socket_service_runtime_config(excessive_ttl) == (
         FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,
+    )
+
+
+def test_config_validation_and_runtime_admission_share_proposal_verifier(
+    tmp_path: Path,
+) -> None:
+    private_key = _private_key()
+    principal_private = _private_key()
+    public_key = _public_text(private_key)
+    config = _runtime_proposal_config(
+        repo=tmp_path / "repo",
+        runtime=tmp_path / "runtime",
+        signer_runtime=tmp_path / "signer-state",
+        policy=ArchitectProposalSignerPolicy(_payload(public_key)),
+        principal_private=principal_private,
+        reddog_private=private_key,
+    )
+    config.repo_root.mkdir()
+    resolver = _PrincipalKeyResolver(_public_text(principal_private))
+    now_epoch = int(time.time())
+
+    policy, verified = verify_architect_proposal_runtime_authorization(
+        config,
+        principal_key_resolver=resolver,
+        now_epoch=now_epoch,
+    )
+    assert policy.expected_payload == config.proposal_authority_policy.expected_payload
+    assert verified.to_dict() == config.proposal_policy_authorization.to_dict()
+    assert validate_signer_socket_service_runtime_config(config) == ()
+
+    tampered = config.proposal_policy_authorization.to_dict()
+    tampered["principal_id"] = "github:attacker"
+    changed = dataclasses.replace(
+        config,
+        proposal_policy_authorization=tampered,
+    )
+    with pytest.raises(ValueError):
+        verify_architect_proposal_runtime_authorization(
+            changed,
+            principal_key_resolver=resolver,
+            now_epoch=now_epoch,
+        )
+    assert validate_signer_socket_service_runtime_config(changed) == (
+        FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     )

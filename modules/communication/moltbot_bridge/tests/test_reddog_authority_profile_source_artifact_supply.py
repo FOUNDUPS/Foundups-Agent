@@ -324,6 +324,27 @@ def test_supplier_rejects_unknown_metadata_and_malformed_digest(
     assert not output.exists()
 
 
+def test_supplier_rejects_type_confused_seed_before_write(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "runtime" / "authority_profile_source.json"
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=_seed(allowed_paths={"attacker_extra": "value"}),
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=output,
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert AuthorityProfileSourceSupplyReason.TYPED_SCHEMA in (
+        result.rejection_reasons
+    )
+    assert not output.exists()
+
+
 def test_supplier_rejects_principal_foundup_scope_mismatch(tmp_path: Path) -> None:
     principal = PrincipalAuthorityRecord(
         principal_id="github:mjtrout",

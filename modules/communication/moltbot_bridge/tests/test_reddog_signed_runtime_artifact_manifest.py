@@ -1101,12 +1101,6 @@ def _authority_profile(reddog_public_key: str) -> dict[str, Any]:
         "allowed_paths": [f"modules/foundups/{FOUNDUP}/**"],
         "denied_paths": [],
         "authority_profile_source_receipt_id": SOURCE_RECEIPT_ID,
-        "queue_consumer_receipt_digest": "sha256:" + "7" * 64,
-        "wsp15_allocation_receipt_id": "sha256:" + "8" * 64,
-        "wsp15_allocation_digest": "sha256:" + "9" * 64,
-        "wsp15_priority": "P0",
-        "wsp15_mps_total": 20,
-        "wsp15_reasoning_tier": "ULTRA",
     }
 
 

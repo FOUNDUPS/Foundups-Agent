@@ -8,11 +8,10 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     AuthenticatedConversationScopeCapability,
     consume_conversation_scope_capability,
     conversation_scope_authority_view,
-    sign_record_with_scope_authority,
     verify_record_with_scope_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
-    with_record_digest,
+    canonical_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record import (
     AuthenticatedConversationScopeResult,
@@ -29,6 +28,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_request 
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_persistence import (
+    persist_authenticated_conversation_record,
 )
 
 
@@ -49,12 +51,24 @@ def advance_authenticated_conversation_scope(
         updated = _updated_record(current, grounded, request, now_epoch)
     except (KeyError, TypeError, ValueError):
         return rejected("conversation_scope_input_invalid")
-    updated["record_auth_mac"] = sign_record_with_scope_authority(authority, updated)
+    updated["previous_record_auth_signature_digest"] = canonical_digest(
+        {"record_auth_signature": current["record_auth_signature"]}
+    )
+    updated["record_auth_nonce"] = _record_auth_nonce(updated)
+    updated["revision_receipts"] = [
+        *current["revision_receipts"],
+        revision_receipt(
+            updated,
+            previous=str(current["revision_receipts"][-1]["receipt_id"]),
+            revision=int(request.expected_revision) + 1,
+        ),
+    ]
     return stored_result(
-        store.compare_and_swap(
-            request.conversation_id,
+        persist_authenticated_conversation_record(
+            store=store,
+            authority=authority,
+            record=updated,
             expected_revision=int(request.expected_revision),
-            next_record=with_record_digest(updated),
         )
     )
 
@@ -140,14 +154,21 @@ def _updated_record(
             "updated_at": int(now_epoch),
         }
     )
-    previous = str(current["revision_receipts"][-1]["receipt_id"])
-    updated["revision_receipts"] = [
-        *current["revision_receipts"],
-        revision_receipt(
-            updated, previous=previous, revision=int(request.expected_revision) + 1
-        ),
-    ]
     return updated
+
+
+def _record_auth_nonce(record: Mapping[str, Any]) -> str:
+    return canonical_digest(
+        {
+            "conversation_id": record["conversation_id"],
+            "conversation_revision": record["conversation_revision"],
+            "turn_id": record["turn_id"],
+            "updated_at": record["updated_at"],
+            "previous_record_auth_signature_digest": record[
+                "previous_record_auth_signature_digest"
+            ],
+        }
+    )
 
 
 __all__ = ["advance_authenticated_conversation_scope"]

@@ -3360,7 +3360,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 timeout_s=_reddog_float_env("REDDOG_SIGNER_CONFIG_TIMEOUT_S", 5.0),
                 max_request_bytes=_reddog_positive_int_env(
                     "REDDOG_SIGNER_CONFIG_MAX_REQUEST_BYTES",
-                    16384,
+                    163840,
                 ),
                 max_response_bytes=_reddog_positive_int_env(
                     "REDDOG_SIGNER_CONFIG_MAX_RESPONSE_BYTES",
