@@ -31,7 +31,8 @@ const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
-const EXTENSION_VERSION = '0.4.64';
+const groundingFailureDialogue = require('./grounding_failure_dialogue');
+const EXTENSION_VERSION = '0.4.65';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -274,6 +275,17 @@ function buildRuntimeConsumptionGate(result, validationState, mode, substantiveT
   const rp = result && result.review_packet && typeof result.review_packet === 'object'
     ? result.review_packet
     : {};
+  if (groundingFailureDialogue.isDialogueResult(result)) {
+    return {
+      applied: true,
+      passed: false,
+      rejection_reasons: ['grounding_failure_dialogue_not_actionable'],
+      no_runtime_authority_when_failed: true,
+      requires_output_validation: false,
+      requires_judgment_verification: false,
+      requires_fusion_quorum: false
+    };
+  }
   const validation = validationState && typeof validationState === 'object' ? validationState : {};
   const judgment = validation.judgment_verification && typeof validation.judgment_verification === 'object'
     ? validation.judgment_verification
@@ -1842,38 +1854,19 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   };
 }
 
-function buildGroundingPreflightBlockedResult(preflight) {
-  const p = preflight && typeof preflight === 'object' ? preflight : {};
-  const auditIncomplete = Array.isArray(p.rejection_reasons)
-    && p.rejection_reasons.includes('codebase_audit_evidence_incomplete');
-  return {
-    ok: false,
-    reason: auditIncomplete ? 'codebase_audit_evidence_incomplete' : 'grounding_preflight_blocked',
-    detail: (Array.isArray(p.rejection_reasons) && p.rejection_reasons.length)
-      ? p.rejection_reasons.join(',')
-      : 'grounding_preflight_failed',
-    made_network_call: false,
-    retry_count: 0,
-    grounding_preflight: p,
-    content: [
-      '## Decision',
-      'DEFER',
-      '',
-      '## Evidence Table',
-      '| Check | WSP_97 | Result |',
-      '|---|---|---|',
-      '| Typed grounding preflight | OBSERVED | FAILED |',
-      '| Model call | OBSERVED | skipped before Fusion |',
-      '',
-      '## Residuals',
-      (Array.isArray(p.rejection_reasons) && p.rejection_reasons.length)
-        ? p.rejection_reasons.map((r) => '- ' + r).join('\n')
-        : '- grounding_preflight_failed',
-      '',
-      '## Land Recommendation',
-      'DEFER -- resolve grounding coverage before Fusion synthesis.'
-    ].join('\n')
-  };
+function buildGroundingPreflightBlockedResult(preflight) { return groundingFailureDialogue.buildBlockedResult(preflight, null, false); }
+
+async function runGroundingFailureDialogue(context, worker, workFocus, preflight, scorecard, onProgress, state, trail, webview) {
+  const request = groundingFailureDialogue.buildRequest(workFocus, preflight, scorecard);
+  trail.push('grounding_dialogue_started', request.receipt.receipt_id);
+  postStatusAndProgress(webview, null, 'Grounding blocked evidence-bearing Fusion. RedDog architect is discussing the block without action authority.');
+  const candidate = await callFusion(
+    context, worker, request.prompt, request.context, request.systemPrompt,
+    request.history, request.mode, onProgress, state, request.bridgeMeta, request.callOptions
+  );
+  const result = groundingFailureDialogue.bindModelResult(candidate, preflight, request.receipt);
+  trail.push(result.ok ? 'grounding_dialogue_completed' : 'failed', result.reason);
+  return result;
 }
 
 function isSelfFileLocation(location) {
@@ -2436,6 +2429,13 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     lines.push('- HoloIndex/context summary: ' + sanitizeCopyMdText(String(contextSummary)).slice(0, 500));
   }
   lines.push.apply(lines, formatHoloIndexScorecardLines(holoScorecard || rp.holoindex_scorecard));
+  const groundingDialogue = rp.grounding_failure_dialogue;
+  lines.push('- grounding_failure_dialogue_applied: ' + (groundingDialogue ? 'true' : 'false'));
+  if (groundingDialogue) {
+    lines.push('- grounding_failure_dialogue_status: ' + groundingDialogue.status);
+    lines.push('- grounding_failure_dialogue_receipt: ' + groundingDialogue.receipt_id);
+    lines.push('- grounding_failure_dialogue_no_action_authority: ' + (groundingDialogue.no_action_planning_allowed === true ? 'true' : 'false'));
+  }
   lines.push.apply(lines, formatFusionProgressReceiptLines(rp));
   lines.push('- unicode_normalization_applied: ' + (rp.unicode_normalization_applied === true ? 'true' : rp.unicode_normalization_applied === false ? 'false' : 'unknown'));
   lines.push('- unicode_replacements_count: ' + (typeof rp.unicode_replacements_count === 'number' ? rp.unicode_replacements_count : 'unknown'));
@@ -5514,9 +5514,10 @@ function wireFusionWebview(context, webview, worker, state) {
         workState: runAuthoritativeWorkStateQueryBridge
       });
     } else if (!groundingPreflight.passed) {
-      workTrail.push('failed', 'grounding_preflight_blocked');
-      postStatusAndProgress(webview, null, 'Grounding preflight blocked Fusion: ' + groundingPreflight.rejection_reasons.join(', '));
-      result = buildGroundingPreflightBlockedResult(groundingPreflight);
+      result = await runGroundingFailureDialogue(
+        context, worker, workFocus, groundingPreflight, holoScorecard,
+        onBridgeProgress, state, workTrail, webview
+      );
     } else {
       result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, state, promptConstruction);
     }
@@ -5547,7 +5548,9 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     }
     absorbUnicodeMeta(result);
-    const substantiveTask = isSubstantiveRedDogWorker(workerType) && !localFastPath && !classification.conversationalDraft;
+    const groundingDialogueOnly = groundingFailureDialogue.isDialogueResult(result);
+    const substantiveTask = isSubstantiveRedDogWorker(workerType) && !localFastPath
+      && !classification.conversationalDraft && !groundingDialogueOnly;
     if (result.ok && substantiveTask) {
       workTrail.push('validator_started');
       const outputValidationOptions = {
@@ -5863,7 +5866,9 @@ function wireFusionWebview(context, webview, worker, state) {
     }
     result.work_trail = workTrail.toEvents();
     if (result.ok && result.content) {
-      result.content = (classification.conversationalDraft ? '' : routingSummary(workerType, classification, effort, mode, contextMode, worker) + '\n\n') + result.content;
+      result.content = ((classification.conversationalDraft || groundingDialogueOnly)
+        ? ''
+        : routingSummary(workerType, classification, effort, mode, contextMode, worker) + '\n\n') + result.content;
       const mojibake = detectMojibake(result.content);
       if (mojibake.detected) {
         result.review_packet.output_validation = Object.assign({}, result.review_packet.output_validation || {}, {
