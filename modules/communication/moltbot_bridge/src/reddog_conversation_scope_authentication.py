@@ -140,6 +140,7 @@ def authenticate_signed_conversation_scope(
         session_id=verified.session_id,
         repo_full_name=verified.repo_full_name,
         record_signing_context=record_signing_context,
+        capability_expires_at=verified.expires_at,
     )
     return _issue_conversation_scope_capability(seal), verified
 
@@ -158,6 +159,7 @@ def _authority_seal(
     session_id: str = "",
     repo_full_name: str = "",
     record_signing_context: ConversationScopeSigningContext | None = None,
+    capability_expires_at: int | None = None,
 ) -> _ConversationScopeAuthoritySeal:
     sign_key = (
         derive_conversation_scope_mac_key(
@@ -179,7 +181,11 @@ def _authority_seal(
         session_binding_digest=canonical_digest(
             {"transport": transport.strip(), "session_binding": session_binding.strip()}
         ),
-        expires_at=int(now_epoch) + CAPABILITY_TTL_SECONDS,
+        expires_at=(
+            int(capability_expires_at)
+            if capability_expires_at is not None
+            else int(now_epoch) + CAPABILITY_TTL_SECONDS
+        ),
         record_sign_key=sign_key,
         record_verify_keys=tuple(
             derive_conversation_scope_mac_key(secret, principal_provider, principal_id)

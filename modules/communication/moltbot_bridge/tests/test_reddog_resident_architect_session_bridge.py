@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
@@ -116,6 +117,8 @@ def _verified_conversation_session(monkeypatch):
                 "schema_version": "reddog_conversation_session_authority_receipt.v1",
                 "receipt_id": "sha256:session-authority",
             },
+            repo_full_name="FOUNDUPS/Foundups-Agent",
+            principal_memex_authorization=object(),
         )
 
     monkeypatch.setattr(
@@ -226,6 +229,103 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
     assert result["no_repo_mutation_performed"] is True
     assert result["no_holoindex_reindex_performed"] is True
     assert result["coding_worker_spawned"] is False
+
+
+def test_principal_memex_supply_is_opaque_and_never_enters_intent(monkeypatch) -> None:
+    calls = []
+    opaque_source = object()
+    grounding = _grounding_receipt("audit resident loop")
+
+    class _Client:
+        def __init__(self, **kwargs):
+            calls.append({"init": kwargs})
+
+        def submit(self, intent):
+            calls.append({"intent": dict(intent)})
+            return _accepted_result()
+
+    monkeypatch.setattr(
+        bridge,
+        "load_resident_model_runtime_bindings",
+        lambda _repo_root: _bound_model_runtime_receipts(),
+    )
+    monkeypatch.setattr(bridge, "RedDogResidentArchitectClient", _Client)
+    monkeypatch.setattr(
+        bridge, "_defer_principal_memex_source", lambda **_kwargs: opaque_source
+    )
+    monkeypatch.setattr(
+        bridge, "principal_memex_live_resident_source_pending", lambda _value: True
+    )
+    disclosure = '{"signed":"principal-secret-canary"}'
+    result = bridge._result(
+        {
+            "explicit_resident_architect_session_requested": True,
+            "conversation_session_credential": "synthetic-signed-credential",
+            "principal_memex_source_supply": {
+                "serialized_disclosure": disclosure,
+                "conversation_id": "sha256:" + "a" * 64,
+                "expected_conversation_revision": 0,
+            },
+            "red_dog_intent": {
+                "schema_version": "reddog_intent.v2",
+                "intent_id": "sha256:intent",
+                "origin": "extension",
+                "source_surface": "editor_thin_client",
+                "principal_ref": "principal-012",
+                "foundup_id": "foundups_agent",
+                "work_focus": "audit resident loop",
+                "grounding_receipt": grounding,
+                "submits_executable_authority": False,
+            },
+            "grounding_receipt_id": grounding["receipt_id"],
+            "work_focus": "audit resident loop",
+        }
+    )
+
+    runtime = calls[0]["init"]["runtime_defaults"]
+    assert runtime["principal_memex_source"] is opaque_source
+    assert "principal_memex_source_supply" not in calls[1]["intent"]
+    assert "principal-secret-canary" not in json.dumps(calls[1]["intent"])
+    assert "principal-secret-canary" not in json.dumps(result)
+    assert result["principal_memex_source_consumed"] is False
+
+
+def test_partial_principal_memex_supply_rejects_before_client(monkeypatch) -> None:
+    client_calls = []
+    monkeypatch.setattr(
+        bridge,
+        "load_resident_model_runtime_bindings",
+        lambda _repo_root: _bound_model_runtime_receipts(),
+    )
+    monkeypatch.setattr(
+        bridge,
+        "RedDogResidentArchitectClient",
+        lambda **kwargs: client_calls.append(kwargs),
+    )
+    grounding = _grounding_receipt("audit resident loop")
+
+    result = bridge._result(
+        {
+            "explicit_resident_architect_session_requested": True,
+            "conversation_session_credential": "synthetic-signed-credential",
+            "principal_memex_source_supply": {"serialized_disclosure": "{}"},
+            "red_dog_intent": {
+                "schema_version": "reddog_intent.v2",
+                "intent_id": "sha256:intent",
+                "origin": "extension",
+                "source_surface": "editor_thin_client",
+                "principal_ref": "principal-012",
+                "foundup_id": "foundups_agent",
+                "work_focus": "audit resident loop",
+                "grounding_receipt": grounding,
+                "submits_executable_authority": False,
+            },
+            "grounding_receipt_id": grounding["receipt_id"],
+        }
+    )
+
+    assert result["rejection_reasons"] == ["principal_memex_source_supply_invalid"]
+    assert client_calls == []
 
 
 def test_verified_outcome_authority_requires_host_runtime_bindings(monkeypatch) -> None:

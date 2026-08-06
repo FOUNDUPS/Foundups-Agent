@@ -32,6 +32,7 @@ Focused authenticated conversation-scope runtime:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_authentication.py modules/communication/moltbot_bridge/tests/test_reddog_authenticated_conversation_scope_state.py modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_tamper_and_rotation.py -q
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_conversation_session_authority_source.py modules/communication/moltbot_bridge/tests/test_reddog_resident_architect_session_bridge.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_principal_memex_live_resident_source_supply.py modules/communication/moltbot_bridge/tests/test_reddog_principal_memex_backend_architect_integration.py modules/communication/moltbot_bridge/tests/test_reddog_resident_architect_durable_agentdb_cycle.py -q
 ```
 
 This suite uses a temporary SQLite AgentDB-shaped store plus current-checkout
@@ -40,6 +41,13 @@ authentication, HMAC rotation, recomputed-hash tampering, cross-principal,
 cross-session and cross-FoundUp rejection, stale grounding, expiry, CAS and
 concurrent updates. It performs no provider call, dispatch, repository write,
 HoloIndex reindex, signing operation, PR, or merge.
+
+The Principal Memex matrix additionally proves that a pre-issued disclosure is
+removed before resident intent persistence, uses a distinct one-use Principal
+scope, is not consumed by duplicate/active/cancelled cycles, reaches only the
+final architect model as the signed subset/order of bounded public decisions,
+is expiry-checked immediately before invocation, and cannot grant FoundUp or
+work authority.
 
 Focused conversation-to-work promotion:
 ```powershell

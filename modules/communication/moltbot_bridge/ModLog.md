@@ -1,4 +1,16 @@
 # ModLog - moltbot_bridge
+## 2026-08-06: Principal Memex live resident source supply
+- Bound one pre-issued principal disclosure to the current signed session,
+  AgentDB revision, runtime generation, exact architect cycle, and model
+  binding; no issuer, work authority, or HoloIndex mutation was added.
+- Deferred one-use admission until the final architect checkpoint and kept
+  Principal content out of intents, audit workers, status, logs, and receipts.
+- Hardened durable output after independent review: direct reproduction is
+  rejected, all model-authored free text/proposals are omitted from persistent
+  Memex-informed determinations, and no queue candidate can be emitted.
+- Required explicit negative consumption acknowledgement for retry; unknown or
+  failed bridge outcomes retire the local disclosure fail closed.
+
 ## 2026-08-06: Exact-request signer policy gate
 - Closed the policy-less Ed25519 signing path. Delegated identity and work
   authority now require either a signer-owned policy or one exact E0

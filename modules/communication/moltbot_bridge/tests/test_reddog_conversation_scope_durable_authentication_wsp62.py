@@ -25,6 +25,7 @@ SOURCE_FILES = {
     "src/reddog_conversation_scope_signing_validation.py",
     "src/reddog_conversation_scope_store.py",
     "src/reddog_conversation_session_authority_source.py",
+    "src/reddog_principal_memex_live_resident_source_supply.py",
     "src/reddog_conversation_work_promotion.py",
     "src/reddog_ed25519_conversation_scope_backend.py",
     "src/reddog_ed25519_signer_backend.py",
@@ -58,6 +59,7 @@ TEST_FILES = {
     "tests/test_reddog_conversation_scope_signing.py",
     "tests/test_reddog_authenticated_conversation_scope_state.py",
     "tests/test_reddog_conversation_session_authority_source.py",
+    "tests/test_reddog_principal_memex_live_resident_source_supply.py",
     "tests/test_reddog_conversation_work_promotion_crash_recovery.py",
     "tests/test_reddog_isolated_signer_socket_protocol.py",
     "tests/test_reddog_signer_owner_controlled_e0_admission.py",
@@ -66,6 +68,10 @@ TEST_FILES = {
     "tests/test_reddog_signer_socket_service_config_supply_profiles.py",
     "tests/test_reddog_signer_socket_service_conversation_wiring.py",
     "tests/test_reddog_signer_system_service_manifest_selection_loader.py",
+}
+LEGACY_NO_GROWTH_FILES = {
+    MODULE_ROOT / "src/reddog_main_readonly_operational_bootstrap.py": 857,
+    REPO_ROOT / "extensions/reddog/tests/verify_extension_contract.js": 5205,
 }
 
 
@@ -95,3 +101,8 @@ def test_manifest_contract_test_stays_bounded() -> None:
         REPO_ROOT / "scripts/tests/test_generate_reddog_backend_manifest.py",
         file_limit=675,
     )
+
+
+def test_touched_legacy_hosts_do_not_grow() -> None:
+    for path, ceiling in LEGACY_NO_GROWTH_FILES.items():
+        assert len(path.read_text(encoding="utf-8").splitlines()) <= ceiling, path

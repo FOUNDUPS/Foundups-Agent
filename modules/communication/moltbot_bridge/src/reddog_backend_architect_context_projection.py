@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
+import unicodedata
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     SelectionPurpose,
@@ -36,6 +39,9 @@ from modules.communication.moltbot_bridge.src.reddog_principal_memex_resident_ad
     validate_principal_memex_admission_output,
 )
 
+MAX_PRINCIPAL_MEMEX_MODEL_OUTPUT_CHARS = 64_000
+MAX_PRINCIPAL_MEMEX_DECODED_TEXT_CHARS = 64_000
+
 
 @dataclass(frozen=True)
 class ArchitectRuntimeBindingMetadata:
@@ -62,14 +68,21 @@ def resolve_principal_memex_cycle(
     report_digests: Sequence[str], wsp15_allocation_digest: str | None,
     model_selection_digest: str | None,
     conversation_binding: Mapping[str, Any] | None,
+    now_epoch: Callable[[], int] | None = None,
 ) -> tuple[ArchitectPrincipalMemexAdmission, str | None]:
     admission = ArchitectPrincipalMemexAdmission(None, None, ())
-    if not blocked:
-        admission = resolve_principal_memex_context(
-            context=context, runtime_binding_receipt_id=runtime_binding_receipt_id,
-            runtime_binding_digest=runtime_binding_digest, observed_at=observed_at,
-            rejection_reason=rejection_reason,
-        )
+    if not blocked and context is not None:
+        try:
+            admission = resolve_principal_memex_context(
+                context=context, runtime_binding_receipt_id=runtime_binding_receipt_id,
+                runtime_binding_digest=runtime_binding_digest,
+                now_epoch=_trusted_epoch(now_epoch, _iso_epoch(observed_at)),
+                rejection_reason=rejection_reason,
+            )
+        except Exception:
+            admission = ArchitectPrincipalMemexAdmission(
+                None, None, (rejection_reason,)
+            )
     cycle_id = architect_cycle_id(
         snapshot=snapshot, report_bundle_id=report_bundle_id,
         report_digests=report_digests,
@@ -154,7 +167,7 @@ def resolve_principal_memex_context(
     *, context: AuthenticatedPrincipalMemexContext | None,
     runtime_binding_receipt_id: str | None,
     runtime_binding_digest: str | None,
-    observed_at: str,
+    now_epoch: int,
     rejection_reason: str,
 ) -> ArchitectPrincipalMemexAdmission:
     if context is None:
@@ -163,7 +176,7 @@ def resolve_principal_memex_context(
         context,
         model_runtime_binding_receipt_id=str(runtime_binding_receipt_id or ""),
         model_runtime_binding_digest=str(runtime_binding_digest or ""),
-        now_epoch=_iso_epoch(observed_at),
+        now_epoch=int(now_epoch),
     )
     if not result.accepted:
         return ArchitectPrincipalMemexAdmission(None, None, (rejection_reason,))
@@ -174,6 +187,32 @@ def resolve_principal_memex_context(
         return ArchitectPrincipalMemexAdmission(None, None, (rejection_reason,))
     receipt, context_view = validated
     return ArchitectPrincipalMemexAdmission(context_view, receipt, ())
+
+
+def run_principal_memex_guarded_architect_model(
+    runner: Any, prompt: str, context: Mapping[str, Any], binding: Mapping[str, Any],
+    timeout_seconds: int, receipt: Mapping[str, Any] | None,
+    principal_memex_view: Mapping[str, Any] | None, observed_at: str,
+    now_epoch: Callable[[], int] | None,
+) -> tuple[Any | None, str | None]:
+    """Recheck Principal Memex freshness immediately before the model call."""
+    try:
+        if receipt is not None:
+            expires_at = receipt.get("expires_at")
+            current_epoch = _trusted_epoch(now_epoch, _iso_epoch(observed_at))
+            if type(expires_at) is not int or current_epoch >= expires_at:
+                return None, "principal_memex"
+        result = runner.run_architect_determination(
+            prompt=prompt, context=context, binding=binding,
+            timeout_seconds=timeout_seconds,
+        )
+        if not _principal_memex_output_safe(result, principal_memex_view):
+            return None, "principal_memex"
+        return result, None
+    except TimeoutError:
+        return None, "timeout"
+    except Exception:
+        return None, "failure"
 
 
 def architect_cycle_id(
@@ -243,6 +282,7 @@ def build_architect_context(
         "audit_reports": [report_prompt_view(report) for report in reports],
         "conversation_work_binding": dict(conversation_binding or {}),
         "principal_memex_context": dict(principal_memex_view or {}),
+        "principal_memex_output_policy": "private_context_must_not_be_reproduced",
     }
     encoded = _canonical_json(payload)
     if len(encoded) > max_chars:
@@ -310,6 +350,93 @@ def _normalize_text_list(value: Any) -> tuple[str, ...]:
 
 def _bound_text(value: Any, max_chars: int) -> str:
     return str(value or "")[:max_chars]
+
+
+def principal_memex_durable_determination_fields(
+    *, parsed: Mapping[str, Any], reports: Sequence[Mapping[str, Any]],
+    proposal_admission: Any, principal_memex_view: Mapping[str, Any] | None,
+) -> tuple[str, str | None, str, tuple[str, ...], Any]:
+    """Remove every model-authored free-text field from durable Memex results."""
+
+    action = str(parsed["action"]).upper()
+    next_slice = str(parsed.get("next_slice_name") or "").strip() or None
+    if not principal_memex_view:
+        return (
+            action, next_slice, str(parsed.get("summary") or "").strip(),
+            _normalize_text_list(parsed.get("decision_reasons")), proposal_admission,
+        )
+    supported = {
+        str(finding.get("next_slice_name") or "").strip()
+        for report in reports if isinstance(report, Mapping)
+        for finding in report.get("findings", ()) if isinstance(finding, Mapping)
+    }
+    next_slice = next_slice if next_slice in supported else None
+    if action != "STOP" and next_slice is None:
+        action = "STOP"
+    return (
+        action, next_slice,
+        "Principal Memex informed an advisory determination; model-authored text was not persisted.",
+        ("principal_memex_advisory_only",), None,
+    )
+
+
+def _principal_memex_output_safe(
+    result: Any, principal_memex_view: Mapping[str, Any] | None,
+) -> bool:
+    if not principal_memex_view:
+        return True
+    output_tokens = _decoded_output_tokens(getattr(result, "content", ""))
+    if not output_tokens:
+        return False
+    for item in principal_memex_view.get("items", ()):
+        if not isinstance(item, Mapping):
+            return False
+        tokens = re.findall(r"[a-z0-9]+", str(item.get("statement") or "").casefold())
+        if not tokens:
+            return False
+        output_counts = Counter(output_tokens)
+        if not (Counter(tokens) - output_counts):
+            return False
+    return True
+
+
+def _decoded_output_tokens(content: Any) -> list[str]:
+    if not isinstance(content, str):
+        return []
+    raw_content = content
+    if len(raw_content) > MAX_PRINCIPAL_MEMEX_MODEL_OUTPUT_CHARS:
+        return []
+    try:
+        stack = [json.loads(raw_content)]
+    except (TypeError, ValueError):
+        return []
+    texts: list[str] = []
+    text_chars = 0
+    visited = 0
+    while stack and visited < 1024:
+        value = stack.pop()
+        visited += 1
+        if isinstance(value, str):
+            texts.append(value)
+            text_chars += len(value)
+            if text_chars > MAX_PRINCIPAL_MEMEX_DECODED_TEXT_CHARS:
+                return []
+        elif isinstance(value, Mapping):
+            for key, item in reversed(tuple(value.items())):
+                stack.extend((item, str(key)))
+        elif not isinstance(value, (str, bytes)) and isinstance(value, Sequence):
+            stack.extend(reversed(tuple(value)))
+    if stack:
+        return []
+    if any(
+        unicodedata.category(character).startswith("C")
+        for text in texts for character in text
+    ):
+        return []
+    normalized = unicodedata.normalize("NFKC", " ".join(texts))
+    if any(ord(character) > 127 for character in normalized):
+        return []
+    return re.findall(r"[a-z0-9]+", normalized.casefold())
 
 
 def _canonical_json(value: Mapping[str, Any]) -> str:
@@ -382,6 +509,15 @@ def _iso_epoch(value: str) -> int:
     return int(parsed.timestamp())
 
 
+def _trusted_epoch(
+    now_epoch: Callable[[], int] | None, fallback_epoch: int,
+) -> int:
+    value = fallback_epoch if now_epoch is None else now_epoch()
+    if type(value) is not int or value < 0:
+        raise ValueError("principal_memex_clock_invalid")
+    return value
+
+
 __all__ = [
     "ArchitectPrincipalMemexAdmission",
     "architect_model_binding",
@@ -389,9 +525,11 @@ __all__ = [
     "build_architect_context",
     "conversation_snapshot_matches",
     "model_runtime_binding",
+    "principal_memex_durable_determination_fields",
     "report_prompt_view",
     "resolve_architect_runtime_binding",
     "resolve_conversation_context",
     "resolve_principal_memex_context",
     "resolve_principal_memex_cycle",
+    "run_principal_memex_guarded_architect_model",
 ]

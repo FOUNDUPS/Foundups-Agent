@@ -1,4 +1,27 @@
 # OpenClaw Bridge Interface
+## Principal Memex live resident source
+`lease_current_generation_conversation_session()` can atomically split one
+authenticated session capability into FoundUp-use and Principal-read children.
+The Principal child authorizes only one pre-issued
+`reddog_principal_memex_disclosure.v2` admission. The live supplier binds the
+current principal record, conversation revision, disclosure nonce, runtime
+generation, model binding, grounding receipt, exact cycle, expiry, revocation,
+and durable replay state before exposing the signed accepted-decision subset
+to the final backend architect call.
+Principal Memex-informed model output is decoded in serialized field order,
+NFKC-normalized, and token-counted across all fields. It rejects complete
+statement-token reproduction regardless of field order, plus residual
+non-ASCII or control characters that could disguise reproduction.
+Raw and aggregate decoded output are bounded before admission, and JSON field
+names are inspected with values so unknown-key disclosure cannot bypass it.
+
+The disclosure never enters resident intent, audit-worker context, AgentDB,
+logs, status, or receipts. Memex-informed durable determinations persist only
+a report-bound action/slice, fixed advisory metadata, and opaque digests; no
+model-authored free text, proposal body, or queue candidate survives. This
+interface grants no work, repository, signer, merge, FoundUp projection, or
+HoloIndex authority. Disclosure issuance remains outside this module.
+
 ## Exact-request signer admission
 `Ed25519SignerBackend` rejects policy-less delegated signing. The
 resolve-per-sign E0 boundary consumes the independently authenticated grant,

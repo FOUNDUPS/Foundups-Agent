@@ -13,9 +13,30 @@ open questions, objectives, credentials, raw history, and FoundUp state do not.
 The admitted receipt and context are deeply immutable, revalidated immediately
 before use, and duplicate-cycle identity excludes volatile disclosure metadata.
 
+The editor resident bridge can accept one complete pre-issued Principal Memex
+disclosure tuple. It deletes the tuple from SecretStorage before the bridge
+call and removes it before intent persistence. Python authenticates the current
+session, atomically separates FoundUp and Principal scope capabilities, and
+defers Principal admission until audit collection and the durable cycle's final
+RUNNING checkpoint. The editor retains the packet only in a process-local
+closure and serializes all SecretStorage effects across concurrent calls.
+The editor restores it only when the durable cycle explicitly reports
+`consumed=false`; final admission, an indeterminate result, or bridge failure
+retires it. The bridge returns no disclosure content.
+Only the final backend architect call can consume the
+signed subset of accepted public decisions, in signed order, after a fresh
+expiry check. Audit workers, AgentDB, receipts, logs, and status output never
+receive Principal Memex content.
+
+Direct statement reproduction is rejected before persistence, including
+ordered cross-field, JSON-escaped, and Unicode-disguised forms. A
+Memex-informed run persists no model-authored free text or proposal body; only
+a report-bound action/slice, fixed advisory metadata, and opaque evidence
+digests survive, and no queue candidate is emitted.
+
 This path grants no work, repository, signer, merge, FoundUp-projection, or
-HoloIndex authority. Durable Principal Memex source issuance and automatic
-resident supply remain separate work.
+HoloIndex authority. Principal Memex disclosure issuance, automatic learning,
+and conversation-to-work authorization remain separate work.
 
 The isolated Ed25519 backend also rejects delegated identity or work-authority
 requests unless the backend has a signer-owned domain policy or the existing

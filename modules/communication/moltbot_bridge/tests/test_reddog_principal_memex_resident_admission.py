@@ -19,6 +19,12 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_context_projection import (
     build_architect_context,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capability import (
+    split_conversation_scope_capability,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
+    canonical_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_principal_memex_disclosure import (
     AUDIENCE,
     PURPOSE,
@@ -52,10 +58,22 @@ from modules.communication.moltbot_bridge.tests.reddog_conversation_scope_test_s
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     encode_ed25519_signature,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_session_credential import (
+    canonical_conversation_session_signing_input,
+    credential_id,
+)
 
 
 MODEL_RECEIPT = "reddog_model_runtime_binding:" + "6" * 64
 MODEL_DIGEST = "sha256:" + "7" * 64
+INTENT_ID = "sha256:" + "9" * 64
+GROUNDING_RECEIPT_ID = "sha256:" + "a" * 64
+RESIDENT_CYCLE_ID = "sha256:" + "b" * 64
+SESSION_BINDING_DIGEST = canonical_digest(
+    {"transport": "editor", "session_binding": "window:one"}
+)
+GENERATION_MANIFEST_ID = "sha256:" + "c" * 64
+ARTIFACT_GENERATION_DIGEST = "sha256:" + "d" * 64
 SOURCE_MODULES = (
     Path(__file__).resolve().parents[1] / "src" / "reddog_principal_memex_disclosure.py",
     Path(__file__).resolve().parents[1]
@@ -94,6 +112,35 @@ def _principal_scope(path: Path):
     return serialized, signing_context, record, accepted
 
 
+def _principal_scope_with_two_decisions(path: Path):
+    serialized = credential()
+    signing_context, _ = context(serialized)
+    first = item("Audit before implementation.")
+    second = item("Prefer extending an existing module.")
+    created = create(
+        path,
+        signing_context,
+        serialized,
+        request_overrides={
+            "scope_kind": "principal",
+            "work_focus": "Discuss cross-FoundUp operating principles.",
+            "grounding_receipt": {},
+            "discussion_foundup_ids": (),
+            "active_topic": "Principal operating principles",
+            "current_objective": "Preserve scoped operating principles.",
+            "accepted_decisions": (first, second),
+            "rejected_options": (),
+            "open_questions": (),
+            "repository_evidence_refs": (),
+            "source_snapshot_id": "",
+            "source_snapshot_digest": "",
+        },
+    )
+    assert created.accepted is True, created.rejection_reasons
+    record = store(path).load(created.conversation_id)["record"]
+    return serialized, signing_context, record, first, second
+
+
 def _disclosure(record, decision, **overrides) -> str:
     value = {
         "schema_version": SCHEMA_VERSION,
@@ -114,6 +161,9 @@ def _disclosure(record, decision, **overrides) -> str:
         "runtime_surface": RUNTIME_SURFACE,
         "model_runtime_binding_receipt_id": MODEL_RECEIPT,
         "model_runtime_binding_digest": MODEL_DIGEST,
+        "intent_id": INTENT_ID,
+        "grounding_receipt_id": GROUNDING_RECEIPT_ID,
+        "session_binding_digest": SESSION_BINDING_DIGEST,
         "nonce": "sha256:" + "8" * 64,
         "issued_at": NOW - 1,
         "expires_at": NOW + 60,
@@ -147,14 +197,25 @@ def _prepared(
         "model_runtime_binding_digest": model_digest,
         **disclosure_overrides,
     }
+    children = split_conversation_scope_capability(
+        capability(signing_context, serialized)
+    )
+    assert children is not None
     result = prepare_authenticated_principal_memex_context(
-        store=store(path), capability=capability(signing_context, serialized),
+        store=store(path), capability=children[1],
         serialized_disclosure=_disclosure(record, decision, **disclosure_values),
         principal_resolver=principal_resolver or Resolver(), guard=guard,
         conversation_id=record["conversation_id"], expected_revision=0,
         expected_repo_full_name=REPO, expected_transport="editor",
         model_runtime_binding_receipt_id=model_receipt,
-        model_runtime_binding_digest=model_digest, now_epoch=NOW,
+        model_runtime_binding_digest=model_digest,
+        expected_intent_id=INTENT_ID,
+        expected_grounding_receipt_id=GROUNDING_RECEIPT_ID,
+        expected_resident_cycle_id=RESIDENT_CYCLE_ID,
+        expected_session_binding_digest=SESSION_BINDING_DIGEST,
+        current_generation_manifest_id=GENERATION_MANIFEST_ID,
+        artifact_generation_digest=ARTIFACT_GENERATION_DIGEST,
+        now_epoch=NOW,
     )
     return result, record
 
@@ -219,6 +280,32 @@ def test_only_accepted_operator_decisions_reach_context(tmp_path: Path) -> None:
     assert "credential" not in encoded
 
 
+def test_signed_subset_and_order_are_preserved(tmp_path: Path) -> None:
+    subset = _consume(
+        _prepare_two_decision_selection(
+            tmp_path / "subset.sqlite", subset=True
+        ).context
+    )
+    reordered = _consume(
+        _prepare_two_decision_selection(
+            tmp_path / "order.sqlite", subset=False
+        ).context
+    )
+
+    assert subset.accepted is True
+    assert [item["statement"] for item in subset.context_view["items"]] == [
+        "Prefer extending an existing module."
+    ]
+    assert all(
+        item["statement"] != "Audit before implementation."
+        for item in subset.context_view["items"]
+    )
+    assert [item["statement"] for item in reordered.context_view["items"]] == [
+        "Prefer extending an existing module.",
+        "Audit before implementation.",
+    ]
+
+
 @pytest.mark.parametrize(
     "field,value",
     [
@@ -226,6 +313,9 @@ def test_only_accepted_operator_decisions_reach_context(tmp_path: Path) -> None:
         ("runtime_surface", "worker"),
         ("conversation_revision", 1),
         ("model_runtime_binding_digest", "sha256:" + "9" * 64),
+        ("intent_id", "sha256:" + "e" * 64),
+        ("grounding_receipt_id", "sha256:" + "e" * 64),
+        ("session_binding_digest", "sha256:" + "e" * 64),
         ("expires_at", NOW),
     ],
 )
@@ -237,7 +327,11 @@ def test_disclosure_binding_tamper_fails_closed(tmp_path: Path, field: str, valu
 def test_invalid_projection_does_not_consume_scope_capability(tmp_path: Path) -> None:
     path = tmp_path / "capability-not-burned.sqlite"
     serialized, signing_context, record, decision = _principal_scope(path)
-    scope_capability = capability(signing_context, serialized)
+    children = split_conversation_scope_capability(
+        capability(signing_context, serialized)
+    )
+    assert children is not None
+    scope_capability = children[1]
     guard = AuthorityRuntimePrincipalMemexDisclosureGuard(
         InMemoryAuthorityRuntimeStore({})
     )
@@ -252,6 +346,12 @@ def test_invalid_projection_does_not_consume_scope_capability(tmp_path: Path) ->
         "expected_transport": "editor",
         "model_runtime_binding_receipt_id": MODEL_RECEIPT,
         "model_runtime_binding_digest": MODEL_DIGEST,
+        "expected_intent_id": INTENT_ID,
+        "expected_grounding_receipt_id": GROUNDING_RECEIPT_ID,
+        "expected_resident_cycle_id": RESIDENT_CYCLE_ID,
+        "expected_session_binding_digest": SESSION_BINDING_DIGEST,
+        "current_generation_manifest_id": GENERATION_MANIFEST_ID,
+        "artifact_generation_digest": ARTIFACT_GENERATION_DIGEST,
         "now_epoch": NOW,
     }
     invalid = prepare_authenticated_principal_memex_context(
@@ -267,6 +367,99 @@ def test_invalid_projection_does_not_consume_scope_capability(tmp_path: Path) ->
         **common,
     )
     assert valid.accepted is True
+
+
+def _credential_with_session(session_id: str) -> str:
+    value = json.loads(credential())
+    value["session_id"] = session_id
+    value["credential_id"] = ""
+    value["signature"] = ""
+    value["credential_id"] = credential_id(value)
+    value["signature"] = encode_ed25519_signature(
+        PRINCIPAL_KEY.sign(
+            canonical_conversation_session_signing_input(value).encode("ascii")
+        )
+    )
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def _prepare_two_decision_selection(path: Path, *, subset: bool):
+    serialized, signing_context, record, first, second = (
+        _principal_scope_with_two_decisions(path)
+    )
+    selected = (
+        [second["item_id"]]
+        if subset
+        else [second["item_id"], first["item_id"]]
+    )
+    children = split_conversation_scope_capability(
+        capability(signing_context, serialized)
+    )
+    assert children is not None
+    return prepare_authenticated_principal_memex_context(
+        store=store(path), capability=children[1],
+        serialized_disclosure=_disclosure(
+            record, first, decision_item_ids=selected,
+        ),
+        principal_resolver=Resolver(),
+        guard=AuthorityRuntimePrincipalMemexDisclosureGuard(
+            InMemoryAuthorityRuntimeStore({})
+        ),
+        conversation_id=record["conversation_id"], expected_revision=0,
+        expected_repo_full_name=REPO, expected_transport="editor",
+        model_runtime_binding_receipt_id=MODEL_RECEIPT,
+        model_runtime_binding_digest=MODEL_DIGEST,
+        expected_intent_id=INTENT_ID,
+        expected_grounding_receipt_id=GROUNDING_RECEIPT_ID,
+        expected_resident_cycle_id=RESIDENT_CYCLE_ID,
+        expected_session_binding_digest=SESSION_BINDING_DIGEST,
+        current_generation_manifest_id=GENERATION_MANIFEST_ID,
+        artifact_generation_digest=ARTIFACT_GENERATION_DIGEST,
+        now_epoch=NOW,
+    )
+
+
+def test_fresh_session_reauthorizes_immutable_historical_record(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "new-session.sqlite"
+    _old_serialized, _old_context, record, decision = _principal_scope(path)
+    current_credential = _credential_with_session("sha256:" + "f" * 64)
+    current_signing_context, _ = context(current_credential)
+    children = split_conversation_scope_capability(
+        capability(current_signing_context, current_credential)
+    )
+    assert children is not None
+
+    prepared = prepare_authenticated_principal_memex_context(
+        store=store(path),
+        capability=children[1],
+        serialized_disclosure=_disclosure(record, decision),
+        principal_resolver=Resolver(),
+        guard=AuthorityRuntimePrincipalMemexDisclosureGuard(
+            InMemoryAuthorityRuntimeStore({})
+        ),
+        conversation_id=record["conversation_id"],
+        expected_revision=record["conversation_revision"],
+        expected_repo_full_name=REPO,
+        expected_transport="editor",
+        model_runtime_binding_receipt_id=MODEL_RECEIPT,
+        model_runtime_binding_digest=MODEL_DIGEST,
+        expected_intent_id=INTENT_ID,
+        expected_grounding_receipt_id=GROUNDING_RECEIPT_ID,
+        expected_resident_cycle_id=RESIDENT_CYCLE_ID,
+        expected_session_binding_digest=SESSION_BINDING_DIGEST,
+        current_generation_manifest_id=GENERATION_MANIFEST_ID,
+        artifact_generation_digest=ARTIFACT_GENERATION_DIGEST,
+        now_epoch=NOW,
+    )
+
+    assert prepared.accepted is True
+    admitted = _consume(prepared.context)
+    assert admitted.accepted is True
+    assert admitted.admission_receipt["conversation_record_digest"] == record[
+        "record_digest"
+    ]
 
 
 def test_runtime_binding_substitution_consumes_context_but_not_disclosure(tmp_path: Path) -> None:

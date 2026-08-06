@@ -85,6 +85,13 @@ def test_backend_architect_model_receives_only_authenticated_principal_memex(
     assert "Which FoundUp" not in encoded
     assert "objective canary" not in encoded
     assert runner.calls[0]["binding"]["principal_memex_admission_receipt_id"]
+    assert result.receipt.summary == (
+        "Principal Memex informed an advisory determination; "
+        "model-authored text was not persisted."
+    )
+    assert result.receipt.decision_reasons == ("principal_memex_advisory_only",)
+    assert result.receipt.proposal_admission is None
+    assert result.receipt.queue_candidate is None
 
 
 def test_expired_principal_memex_blocks_backend_model_call(tmp_path: Path) -> None:
@@ -103,6 +110,181 @@ def test_expired_principal_memex_blocks_backend_model_call(tmp_path: Path) -> No
         result.rejection_reasons
     )
     assert runner.calls == []
+
+
+def test_principal_memex_statement_cannot_escape_through_model_output(
+    tmp_path: Path,
+) -> None:
+    inputs, prepared = _prepared_runtime(tmp_path / "output-noninterference")
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    output["summary"] = "Audit carefully before any implementation."
+    runner = FakeArchitectRunner(output)
+    store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs), wsp15_allocation_receipt=inputs["allocation"],
+        store=store, model_runner=runner, now_iso=RUNTIME_NOW,
+        principal_memex_context=prepared.context,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.PRINCIPAL_MEMEX_CONTEXT_INVALID in (
+        result.rejection_reasons
+    )
+    assert store.records == []
+    assert "Audit before implementation." not in json.dumps(result.receipt.to_dict())
+
+
+def test_unicode_escaped_principal_memex_statement_is_rejected(
+    tmp_path: Path,
+) -> None:
+    inputs, prepared = _prepared_runtime(tmp_path / "unicode-escape")
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    output["summary"] = "Audit before implementation."
+    serialized = json.dumps(output).replace("Audit", r"\u0041udit", 1)
+    store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs), wsp15_allocation_receipt=inputs["allocation"],
+        store=store, model_runner=FakeArchitectRunner(serialized),
+        now_iso=RUNTIME_NOW, principal_memex_context=prepared.context,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.PRINCIPAL_MEMEX_CONTEXT_INVALID in (
+        result.rejection_reasons
+    )
+    assert store.records == []
+
+
+def test_principal_memex_statement_split_across_output_fields_is_rejected(
+    tmp_path: Path,
+) -> None:
+    inputs, prepared = _prepared_runtime(tmp_path / "split-fields")
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    output["summary"] = "Audit"
+    output["decision_reasons"] = ["before", "implementation"]
+    store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs), wsp15_allocation_receipt=inputs["allocation"],
+        store=store, model_runner=FakeArchitectRunner(output),
+        now_iso=RUNTIME_NOW, principal_memex_context=prepared.context,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.PRINCIPAL_MEMEX_CONTEXT_INVALID in (
+        result.rejection_reasons
+    )
+    assert store.records == []
+
+
+@pytest.mark.parametrize(
+    "summary",
+    (
+        "Au\u200bdit before implementation.",
+        "Au\u0301dit before implementation.",
+        "\uff21udit before implementation.",
+        "Au\tdit before implementation.",
+    ),
+)
+def test_principal_memex_unicode_or_control_disguises_are_rejected(
+    tmp_path: Path, summary: str,
+) -> None:
+    inputs, prepared = _prepared_runtime(tmp_path / "unicode-disguise")
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    output["summary"] = summary
+    store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs), wsp15_allocation_receipt=inputs["allocation"],
+        store=store, model_runner=FakeArchitectRunner(output),
+        now_iso=RUNTIME_NOW, principal_memex_context=prepared.context,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.PRINCIPAL_MEMEX_CONTEXT_INVALID in (
+        result.rejection_reasons
+    )
+    assert store.records == []
+
+
+@pytest.mark.parametrize(
+    "private_key",
+    ("Audit before implementation.", "\uff21udit before implementation."),
+)
+def test_principal_memex_statement_in_output_key_is_rejected(
+    tmp_path: Path, private_key: str,
+) -> None:
+    inputs, prepared = _prepared_runtime(tmp_path / "private-key")
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    output[private_key] = "ignored"
+    store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs), wsp15_allocation_receipt=inputs["allocation"],
+        store=store, model_runner=FakeArchitectRunner(output),
+        now_iso=RUNTIME_NOW, principal_memex_context=prepared.context,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.PRINCIPAL_MEMEX_CONTEXT_INVALID in (
+        result.rejection_reasons
+    )
+    assert store.records == []
+
+
+def test_oversized_principal_memex_model_output_is_rejected(tmp_path: Path) -> None:
+    inputs, prepared = _prepared_runtime(tmp_path / "oversized-output")
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    output["summary"] = "x" * (
+        context_projection.MAX_PRINCIPAL_MEMEX_MODEL_OUTPUT_CHARS + 1
+    )
+    store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs), wsp15_allocation_receipt=inputs["allocation"],
+        store=store, model_runner=FakeArchitectRunner(output),
+        now_iso=RUNTIME_NOW, principal_memex_context=prepared.context,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.PRINCIPAL_MEMEX_CONTEXT_INVALID in (
+        result.rejection_reasons
+    )
+    assert store.records == []
+
+
+def test_principal_memex_paraphrase_is_never_persisted_or_queued(
+    tmp_path: Path,
+) -> None:
+    inputs, prepared = _prepared_runtime(tmp_path / "paraphrase")
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    output["summary"] = "Review each change prior to coding."
+    output["decision_reasons"] = ["The principal prefers cautious delivery."]
+    runner = FakeArchitectRunner(output)
+    store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs), wsp15_allocation_receipt=inputs["allocation"],
+        store=store, model_runner=runner, now_iso=RUNTIME_NOW,
+        principal_memex_context=prepared.context,
+    )
+
+    persisted = json.dumps([record.determination for record in store.records])
+    assert result.accepted is True
+    assert result.receipt.queue_candidate is None
+    assert result.receipt.proposal_admission is None
+    assert "Review each change" not in persisted
+    assert "principal prefers" not in persisted
+    assert result.receipt.decision_reasons == ("principal_memex_advisory_only",)
 
 
 def test_tampered_admitted_context_blocks_backend_model_call(

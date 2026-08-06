@@ -21,6 +21,7 @@ node extensions/reddog/tests/test_start_operations_control.js
 node extensions/reddog/tests/test_holoindex_incident_repair.js
 node extensions/reddog/tests/test_conversation_history_policy.js
 node extensions/reddog/tests/test_conversation_session_authority_source.js
+node extensions/reddog/tests/test_principal_memex_disclosure_source.js
 git diff --check -- extensions/reddog
 ```
 
@@ -41,6 +42,7 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_backend_compatibility_async.js` | Worker-thread preflight, event-loop availability, and fail-closed invalid-root behavior |
 | `test_authoritative_work_state_query.js` | Local authoritative-work classification, bridge failure handling, and no-Fusion routing |
 | `test_foundup_work_grounding.js` | Canonical registry identity resolution, evidence derivation, runtime binding, WSP 62, failure closure, and non-authority receipt |
+| `test_principal_memex_disclosure_source.js` | Exact disclosure shape, one-use SecretStorage deletion, malformed-source rejection, and no packet retention |
 | `scripts/tests/test_generate_reddog_backend_manifest.py` | Package-initializer resolution, executable roots, dynamic-load sentinels, and checked-in generator parity |
 | `test_start_operations_control.js` | Cross-language receipt parity, request replay, cumulative output, environment allowlist, and durable intent controls |
 | `test_holoindex_incident_repair.js` | Exhausted-owner admission, bounded bridge execution, WRE repair telemetry, version wiring, and no direct model binding |
