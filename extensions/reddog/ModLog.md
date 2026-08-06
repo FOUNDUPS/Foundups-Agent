@@ -1,5 +1,17 @@
 # RedDog ModLog
 
+## 2026-08-07 - Grounding-failure architect dialogue (0.4.65)
+
+- Replaced terminal local `DEFER` behavior after typed-grounding failure with
+  one principal-only, redaction-gated architect diagnosis.
+- Sent only a bounded failure receipt and untrusted work focus; admitted no
+  repository evidence, conversation history, critic panel, or direct-read body.
+- Added an explicit conversation-only runtime gate that prevents validation,
+  wardrobe selection, work orders, resident execution, enqueue, or repository
+  effects regardless of model output.
+- Preserved fail-closed redaction, backend compatibility, timeout, malformed
+  response, and bridge-error behavior.
+
 ## 2026-08-06 - Principal Memex live resident source (0.4.64)
 
 - Added SecretStorage commands for one pre-issued principal-signed disclosure;

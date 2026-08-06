@@ -1,6 +1,16 @@
 # RedDog
 
-Version: 0.4.64
+Version: 0.4.65
+
+Version 0.4.65 keeps the 012/0102 architect conversation available when typed
+grounding blocks evidence-bearing Fusion. RedDog makes one principal-only call
+through the existing redaction-gated bridge with no repository evidence and no
+conversation history. The model receives only a bounded typed failure receipt
+plus the work focus explicitly labeled as untrusted context. Its response is
+conversation-only: output validation, wardrobe selection, work-order creation,
+resident execution, OpenClaw/Hermes enqueue, repository effects, and merge
+authority remain closed. Redaction, backend-integrity, and bridge failures still
+fail closed rather than bypassing their owning safety boundary.
 
 Version 0.4.64 adds a one-use editor source for a pre-issued, principal-signed
 Principal Memex disclosure. The packet is deleted from SecretStorage before

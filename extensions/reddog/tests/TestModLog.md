@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-07 - Grounding-failure architect dialogue (0.4.65)
+
+- Added focused receipt, prompt-boundary, sanitization, fallback, and immutable
+  no-authority tests for the conversation-only grounding diagnosis.
+- Extended the exhaustive extension contract to prove principal-only mode,
+  zero history/repository evidence, stable runtime denial, and no process
+  execution in the focused contract module.
+
 ## 2026-08-06 - Principal Memex live resident source (0.4.64)
 
 - Added one-use SecretStorage source tests for exact shape, delete-before-use,

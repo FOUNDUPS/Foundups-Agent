@@ -1,5 +1,16 @@
 # RedDog Interface
 
+Version 0.4.65 adds a conversation-only grounding-failure route. A failed typed
+grounding receipt still blocks normal Fusion and all runtime consumption, but
+the extension may call the configured principal once through
+`openrouter_single` to explain the block. The call receives no packed repository
+context, no raw/direct-read content, no provider history, and no panel. The
+receipt and system policy prohibit underlying repository conclusions, code,
+worker prompts, authorization, and action planning. Successful output carries
+`grounding_failure_dialogue_only`; the runtime gate always rejects it with
+`grounding_failure_dialogue_not_actionable`. A failed redaction or backend
+compatibility gate is never bypassed by this route.
+
 Version 0.4.64 adds `RedDog: Set One-Use Principal Memex Disclosure` and
 `RedDog: Clear Principal Memex Disclosure`. The extension accepts but never
 mints one exact pre-issued disclosure packet. It deletes the packet from
