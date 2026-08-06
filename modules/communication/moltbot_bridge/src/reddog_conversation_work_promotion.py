@@ -16,7 +16,6 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     VerifiedConversationScopeAuthority,
     consume_conversation_scope_capability,
     conversation_scope_authority_view,
-    sign_record_with_scope_authority,
     verify_record_with_scope_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
@@ -32,8 +31,8 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record i
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
 )
-from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
-    unsigned_conversation_scope_record,
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_persistence import (
+    persist_authenticated_conversation_record,
 )
 
 
@@ -186,25 +185,11 @@ def commit_pending_conversation_work_proposal(
     if not _same_source_record(record, seal.record, seal.binding):
         return rejected("conversation_work_scope_changed")
     unsigned = _pending_unsigned_record(seal, admission.to_dict(), int(now_epoch))
-    transactions = seal.store.pending_transactions()
-    staged = transactions.stage(
-        unsigned_conversation_scope_record(unsigned),
-        expected_revision=seal.binding.conversation_revision,
-    )
-    if not staged.get("ok") or not isinstance(staged.get("record"), Mapping):
-        return rejected(
-            str(staged.get("reason") or "conversation_scope_pending_rejected")
-        )
-    updated = dict(staged["record"])
-    envelope = sign_record_with_scope_authority(
-        seal.authority, updated, require_replay=bool(staged.get("recovery_only"))
-    )
-    if not isinstance(envelope, Mapping):
-        return rejected("conversation_scope_record_authentication_unavailable")
-    updated.update(envelope)
     return stored_result(
-        transactions.finalize(
-            updated,
+        persist_authenticated_conversation_record(
+            store=seal.store,
+            authority=seal.authority,
+            record=unsigned,
             expected_revision=seal.binding.conversation_revision,
         )
     )

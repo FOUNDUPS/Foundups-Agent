@@ -16,7 +16,6 @@ SHARED_UTILITIES_ROOT = REPO_ROOT / "modules/infrastructure/shared_utilities"
 SLICE_DATE = date(2026, 7, 18)
 ROOT_AUTHORITY_EXACT_HOSTS = {
     "src/reddog_signer_key_provider_dryrun.py",
-    "src/reddog_signer_socket_service_runtime_bootstrap.py",
     "src/reddog_signer_socket_service_runtime_wiring.py",
 }
 EXPECTED_MODULE_FILES = {
@@ -35,7 +34,6 @@ EXPECTED_MODULE_FILES = {
     "src/reddog_signed_worker_queue_serial_loop_runner.py",
     "src/reddog_signer_delegated_authority_runtime.py",
     "src/reddog_signer_key_provider_dryrun.py",
-    "src/reddog_signer_socket_service_runtime_bootstrap.py",
     "src/reddog_signer_socket_service_runtime_wiring.py",
     "src/reddog_wre_queue_authority_request_dryrun.py",
     "src/reddog_wre_queue_consumer_dryrun.py",

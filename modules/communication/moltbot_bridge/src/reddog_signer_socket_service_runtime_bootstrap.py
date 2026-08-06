@@ -15,7 +15,7 @@ import hashlib
 import hmac
 import json
 import sys
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
 
@@ -90,6 +90,34 @@ FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION = (
 ResolverAfterAdmission = Callable[[], SignerKeyResolver]
 ConversationResolverAfterAdmission = Callable[[], PrincipalAuthorityResolver]
 BootstrapLoadResult = tuple[Any | None, Path | None, str | None, "SignerSocketServiceRuntimeBootstrapResult | None"]
+
+
+@dataclass(frozen=True)
+class RuntimeBootstrapRequest:
+    repo_root: Path | str
+    config_path: Path | str | None
+    resolver: SignerKeyResolver | None
+    resolver_factory: ResolverAfterAdmission | None
+    serve_bounded: ServeSignerSocketBounded
+    ready_callback: Optional[Callable[[], None]]
+    expected_config_digest: str | None
+    run_packet_path: Path | str | None
+    expected_session_id: str | None
+    expected_owner_authority_config_path: Path | str | None
+    manifest_selection: object | None
+    manifest_selection_boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None
+    principal_key_resolver: PrincipalKeyResolver | None
+    conversation_scope_principal_resolver: PrincipalAuthorityResolver | None
+    conversation_scope_principal_resolver_supplier: ConversationResolverAfterAdmission | None
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None
+    verified_outcome_signing_authority_supplier: Callable[[], VerifiedOutcomeSigningAuthority] | None
+    process_isolation_required: bool
+    process_isolation_gate: ProcessIsolationGate
+    expected_signer_uid: int | None
+    expected_signer_gid: int | None
+
+
 def run_reddog_signer_socket_service_runtime_bootstrap(
     *,
     repo_root: Path | str,
@@ -118,65 +146,48 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
-    root = Path(repo_root).resolve()
+    return _run_runtime_bootstrap(RuntimeBootstrapRequest(**locals()))
+
+
+def _run_runtime_bootstrap(
+    request: RuntimeBootstrapRequest,
+) -> SignerSocketServiceRuntimeBootstrapResult:
+    root = Path(request.repo_root).resolve()
     config, path, digest, rejected = _load_bound_runtime_config(
-        root,
-        config_path,
-        expected_config_digest,
-        run_packet_path,
-        expected_session_id,
-        expected_owner_authority_config_path,
-        manifest_selection,
-        manifest_selection_boundary,
+        root, request.config_path, request.expected_config_digest,
+        request.run_packet_path, request.expected_session_id,
+        request.expected_owner_authority_config_path,
+        request.manifest_selection, request.manifest_selection_boundary,
     )
     if rejected is not None:
         return rejected
     assert config is not None and path is not None and digest is not None
     isolation = _process_isolation_receipt(
-        config, required=process_isolation_required, gate=process_isolation_gate,
-        expected_signer_uid=expected_signer_uid,
-        expected_signer_gid=expected_signer_gid,
+        config, required=request.process_isolation_required,
+        gate=request.process_isolation_gate,
+        expected_signer_uid=request.expected_signer_uid,
+        expected_signer_gid=request.expected_signer_gid,
     )
-    if process_isolation_required and (isolation is None or not isolation.accepted):
+    if request.process_isolation_required and (isolation is None or not isolation.accepted):
         return _reject(
             FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION,
             config_path=str(path),
             config_digest=digest,
             process_isolation_receipt=(isolation.to_dict() if isolation else None),
         )
-    admitted_resolver = _resolver_after_admission(resolver, resolver_factory)
-    if admitted_resolver is None:
-        return _reject(
-            FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
-            config_path=str(path),
-            config_digest=digest,
-        )
-    outcome_authority = admit_verified_outcome_authority(
-        config.verified_outcome_signer_policy, verified_outcome_signing_authority, verified_outcome_signing_authority_supplier
+    dependencies, rejected = _admitted_runtime_dependencies(
+        request, config, path, digest
     )
-    conversation_resolver = _conversation_resolver_after_admission(
-        config,
-        conversation_scope_principal_resolver,
-        conversation_scope_principal_resolver_supplier,
-    )
-    if (
-        config.conversation_scope_signer_policy is not None
-        and conversation_resolver is None
-    ):
-        return _reject(
-            FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
-            config_path=str(path),
-            config_digest=digest,
-        )
-
+    if rejected is not None:
+        return rejected
+    admitted_resolver, outcome_authority, conversation_resolver = dependencies
     runtime = run_reddog_signer_socket_service_runtime_wiring(
-        config,
-        admitted_resolver,
-        serve_bounded=serve_bounded,
-        ready_callback=ready_callback,
-        principal_key_resolver=principal_key_resolver,
+        config, admitted_resolver,
+        serve_bounded=request.serve_bounded,
+        ready_callback=request.ready_callback,
+        principal_key_resolver=request.principal_key_resolver,
         conversation_scope_principal_resolver=conversation_resolver,
-        proposal_replay_high_water_store=proposal_replay_high_water_store,
+        proposal_replay_high_water_store=request.proposal_replay_high_water_store,
         verified_outcome_signing_authority=outcome_authority,
     )
     return _bootstrap_runtime_result(
@@ -561,6 +572,36 @@ def rehydrate_signer_socket_service_runtime_config(
         payload,
         expected_config_digest=expected_config_digest,
     )
+
+
+def _admitted_runtime_dependencies(
+    request: RuntimeBootstrapRequest,
+    config: SignerSocketServiceRuntimeWiringConfig,
+    path: Path,
+    digest: str,
+) -> tuple[tuple[Any, Any, Any] | None, SignerSocketServiceRuntimeBootstrapResult | None]:
+    resolver = _resolver_after_admission(
+        request.resolver, request.resolver_factory
+    )
+    outcome = admit_verified_outcome_authority(
+        config.verified_outcome_signer_policy,
+        request.verified_outcome_signing_authority,
+        request.verified_outcome_signing_authority_supplier,
+    )
+    conversation = _conversation_resolver_after_admission(
+        config, request.conversation_scope_principal_resolver,
+        request.conversation_scope_principal_resolver_supplier,
+    )
+    invalid = resolver is None or (
+        config.conversation_scope_signer_policy is not None
+        and conversation is None
+    )
+    if invalid:
+        return None, _reject(
+            FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
+            config_path=str(path), config_digest=digest,
+        )
+    return (resolver, outcome, conversation), None
 
 
 def _reject_json_constant(value: str) -> None:

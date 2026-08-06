@@ -68,6 +68,37 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     )
 
 
+def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
+    required = generated["required_runtime_sha256"]
+    expected = (
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_signer_mutual_peer_handshake.py",
+        "modules/communication/moltbot_bridge/src/reddog_signer_socket_schema.py",
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_signer_system_service_entrypoint.py",
+        "modules/communication/moltbot_bridge/src/"
+        "foundup_memex_verified_outcome_validation.py",
+        "modules/communication/moltbot_bridge/src/"
+        "foundup_verified_outcome_root_authority.py",
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_signer_current_generation_runtime_binding.py",
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_signer_current_generation_use_time_gate.py",
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_authoritative_use_lease.py",
+    )
+    assert all(path in required for path in expected)
+    for filename in (
+        "foundup_verified_outcome_root_authority_client.py",
+        "foundup_verified_outcome_root_authority_protocol.py",
+        "foundup_verified_outcome_root_authority_service.py",
+        "foundup_verified_outcome_root_authority_service_entrypoint.py",
+        "foundup_verified_outcome_root_authority_socket_service.py",
+        "foundup_verified_outcome_root_authority_state.py",
+    ):
+        assert "modules/communication/moltbot_bridge/src/" + filename in required
+
+
 def test_checked_in_manifest_matches_independent_generation() -> None:
     checked_in = json.loads(generator.MANIFEST_PATH.read_text(encoding="utf-8"))
     generated = generator.build_manifest()
@@ -94,55 +125,7 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "modules/communication/moltbot_bridge/src/reddog_holoindex_task_dispatch.py"
         in generated["required_runtime_sha256"]
     )
-    assert (
-        "modules/communication/moltbot_bridge/src/reddog_signer_mutual_peer_handshake.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/communication/moltbot_bridge/src/reddog_signer_socket_schema.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/communication/moltbot_bridge/src/"
-        "reddog_signer_system_service_entrypoint.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/communication/moltbot_bridge/src/"
-        "foundup_memex_verified_outcome_validation.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/communication/moltbot_bridge/src/"
-        "foundup_verified_outcome_root_authority.py"
-        in generated["required_runtime_sha256"]
-    )
-    for filename in (
-        "foundup_verified_outcome_root_authority_client.py",
-        "foundup_verified_outcome_root_authority_protocol.py",
-        "foundup_verified_outcome_root_authority_service.py",
-        "foundup_verified_outcome_root_authority_service_entrypoint.py",
-        "foundup_verified_outcome_root_authority_socket_service.py",
-        "foundup_verified_outcome_root_authority_state.py",
-    ):
-        assert (
-            "modules/communication/moltbot_bridge/src/" + filename
-            in generated["required_runtime_sha256"]
-        )
-    assert (
-        "modules/communication/moltbot_bridge/src/"
-        "reddog_signer_current_generation_runtime_binding.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/communication/moltbot_bridge/src/"
-        "reddog_signer_current_generation_use_time_gate.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/communication/moltbot_bridge/src/reddog_authoritative_use_lease.py"
-        in generated["required_runtime_sha256"]
-    )
+    _assert_signer_and_memex_runtime_files(generated)
     assert generator.canonical_manifest_digest(generated) == (
-        "605a412f57c224e05dbb446b55ed516255c7ff79746210e68fc51763f5522500"
+        "d603511b5152bbc38f8ff6ebd77edf57f2ac850e4ec3186f372099cbdf43aa07"
     )

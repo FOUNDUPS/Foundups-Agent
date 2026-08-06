@@ -15,10 +15,15 @@
 - Extended the same staged transaction to conversation-bound proposal previews.
   A crash after signer-anchor commit now leaves the active revision unchanged,
   fences competing writers, and recovers by replaying the exact anchored response.
+- Preserved legacy HMAC compatibility without granting it recovery authority:
+  HMAC records sign before direct AgentDB create/CAS and never enter pending
+  recovery, while only E0 records may consume exact signer-anchor replay state.
 - Extracted signer config rehydration, principal parsing, and conversation-domain
-  signing from inherited WSP 62 hosts; security fixtures were split by concern. No state grants
-  work, worker, repository, shell, signer, PR, merge, reward, or HoloIndex write
-  authority (WSP 00/15/22/50/62/97).
+  signing from inherited WSP 62 hosts. The signer configuration supplier is now
+  a bounded contract/composition/materialization facade, and security fixtures
+  are split by concern with a slice-local AST gate. No state grants work, worker,
+  repository, shell, signer, PR, merge, reward, or HoloIndex write authority
+  (WSP 00/15/22/50/62/97).
 ## 2026-08-06: Current-generation conversation session authority source
 - Replaced the rejected symmetric resident path with a strict principal-signed
   conversation credential verified by the existing Ed25519 backend and

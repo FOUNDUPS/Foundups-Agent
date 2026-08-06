@@ -184,18 +184,11 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
         )
         if reason:
             return _reject(reason)
-        conversation_payload, conversation_preparation, reason = (
-            prepare_conversation_signing(self, request)
+        conversation_payload, conversation_preparation, early = (
+            _prepare_conversation_or_replay(self, request)
         )
-        if reason:
-            return _reject(reason)
-        replay, reason = conversation_replay_response(
-            self, request, conversation_preparation
-        )
-        if reason:
-            return _reject(reason)
-        if replay is not None:
-            return replay
+        if early is not None:
+            return early
         proposal_reservation, reason = _prepare_proposal_signing(self, request)
         if reason:
             return _reject(reason)
@@ -237,6 +230,16 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
             conversation_payload,
             conversation_preparation,
         )
+
+
+def _prepare_conversation_or_replay(
+    backend: Ed25519SignerBackend, request: SigningRequest
+) -> tuple[Mapping[str, Any] | None, Any, SigningResponse | None]:
+    payload, preparation, reason = prepare_conversation_signing(backend, request)
+    if reason:
+        return None, preparation, _reject(reason)
+    replay, reason = conversation_replay_response(backend, request, preparation)
+    return payload, preparation, (_reject(reason) if reason else replay)
 
 
 def _finalize_signing(
@@ -620,17 +623,15 @@ def _sign_peer_response_attestation(
         return "", REJECT_ED25519_SIGNER_SIGN_FAILED
 
 
-def _valid_control_receipt_signing_payload(
-    request: SigningRequest,
-) -> dict[str, Any] | None:
+def _valid_control_receipt_signing_payload(request: SigningRequest) -> dict[str, Any] | None:
     return valid_control_receipt_signing_payload(request)
 
 
 def _control_authority_policy_matches(
     payload: dict[str, Any], policy: ControlLoopAuthorityPolicy
 ) -> bool:
-    return isinstance(policy, ControlLoopAuthorityPolicy) and control_authority_policy_matches(
-        payload, policy
+    return isinstance(policy, ControlLoopAuthorityPolicy) and (
+        control_authority_policy_matches(payload, policy)
     )
 
 
@@ -644,8 +645,7 @@ def _reject(code: str) -> SigningResponse:
 
 __all__ = [
     "CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX",
-    "CONTROL_LOOP_SIGNING_OPERATION",
-    "CONTROL_LOOP_SIGNING_PREFIX",
+    "CONTROL_LOOP_SIGNING_OPERATION", "CONTROL_LOOP_SIGNING_PREFIX",
     "ControlLoopAuthorityPolicy",
     "canonical_control_audit_attestation_input",
     "Ed25519SignerBackend",

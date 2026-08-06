@@ -123,20 +123,10 @@ def _bound_context(
     )
 
 
-def test_proposal_signer_commit_crash_recovers_without_anchor_fork(
-    tmp_path: Path,
-) -> None:
-    path = tmp_path / "conversation.sqlite"
-    serialized = credential()
-    audit_builder = ChangingAuditMacBuilder()
-    signer_clock = [NOW]
-    signing_context, anchor = context(
-        serialized, clock=signer_clock, audit_builder=audit_builder
-    )
-    determination = _normalized_determination()
-    created, cycle = _e0_scope_and_cycle(
-        path, signing_context, serialized, determination
-    )
+def _crash_after_signer_commit(
+    path: Path, signing_context: object, serialized: str,
+    determination: dict, created: object, cycle: dict, signer_clock: list[int],
+) -> dict:
     crash_context = _bound_context(
         path,
         _CrashAfterSignerStore(_store(path)),
@@ -161,16 +151,15 @@ def test_proposal_signer_commit_crash_recovers_without_anchor_fork(
             architect_determination=determination,
             now_epoch=NOW + 2,
         )
+    return determination
 
-    assert (
-        _store(path).load(created.conversation_id)["record"]["conversation_revision"]
-        == 0
-    )
-    assert anchor.load()["heads"][created.conversation_id]["conversation_revision"] == 1
-    calls_after_crash = audit_builder.calls
 
+def _assert_pending_blocks_competitor(
+    path: Path, signing_context: object, serialized: str,
+    determination: dict, created: object, cycle: dict,
+    audit_builder: ChangingAuditMacBuilder, expected_audit_calls: int,
+) -> None:
     current = _store(path).load(created.conversation_id)["record"]
-    signer_clock[0] = NOW + 3
     competing = advance_authenticated_conversation_scope(
         store=_store(path),
         capability=capability(signing_context, serialized, NOW + 3),
@@ -188,25 +177,58 @@ def test_proposal_signer_commit_crash_recovers_without_anchor_fork(
     )
     assert competing.accepted is False
     assert competing.rejection_reasons == ("conversation_scope_pending_conflict",)
+    assert _store(path).load(created.conversation_id)["record"][
+        "conversation_revision"
+    ] == 0
+    assert audit_builder.calls == expected_audit_calls
+
+
+def _recover_proposal(
+    path: Path, signing_context: object, serialized: str,
+    determination: dict, created: object, cycle: dict, signer_clock: list[int],
+):
+    retry_context = _bound_context(
+        path, _store(path), signing_context, serialized, created.conversation_id, cycle
+    )
+    signer_clock[0] = NOW + 7
+    return commit_pending_conversation_work_proposal(
+        context=retry_context.context,
+        architect_determination=determination,
+        now_epoch=NOW + 7,
+    )
+
+
+def test_proposal_signer_commit_crash_recovers_without_anchor_fork(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "conversation.sqlite"
+    serialized = credential()
+    audit_builder = ChangingAuditMacBuilder()
+    signer_clock = [NOW]
+    signing_context, anchor = context(
+        serialized, clock=signer_clock, audit_builder=audit_builder
+    )
+    determination = _normalized_determination()
+    created, cycle = _e0_scope_and_cycle(
+        path, signing_context, serialized, determination
+    )
+    determination = _crash_after_signer_commit(
+        path, signing_context, serialized, determination, created, cycle, signer_clock
+    )
+
     assert (
         _store(path).load(created.conversation_id)["record"]["conversation_revision"]
         == 0
     )
-    assert audit_builder.calls == calls_after_crash
-
-    retry_context = _bound_context(
-        path,
-        _store(path),
-        signing_context,
-        serialized,
-        created.conversation_id,
-        cycle,
+    assert anchor.load()["heads"][created.conversation_id]["conversation_revision"] == 1
+    calls_after_crash = audit_builder.calls
+    signer_clock[0] = NOW + 3
+    _assert_pending_blocks_competitor(
+        path, signing_context, serialized, determination,
+        created, cycle, audit_builder, calls_after_crash,
     )
-    signer_clock[0] = NOW + 7
-    recovered = commit_pending_conversation_work_proposal(
-        context=retry_context.context,
-        architect_determination=determination,
-        now_epoch=NOW + 7,
+    recovered = _recover_proposal(
+        path, signing_context, serialized, determination, created, cycle, signer_clock
     )
 
     assert recovered.accepted is True

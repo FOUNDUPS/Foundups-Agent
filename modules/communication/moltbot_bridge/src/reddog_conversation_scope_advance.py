@@ -8,7 +8,6 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     AuthenticatedConversationScopeCapability,
     consume_conversation_scope_capability,
     conversation_scope_authority_view,
-    sign_record_with_scope_authority,
     verify_record_with_scope_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
@@ -30,8 +29,8 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_request 
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
 )
-from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
-    unsigned_conversation_scope_record,
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_persistence import (
+    persist_authenticated_conversation_record,
 )
 
 
@@ -64,23 +63,12 @@ def advance_authenticated_conversation_scope(
             revision=int(request.expected_revision) + 1,
         ),
     ]
-    transactions = store.pending_transactions()
-    staged = transactions.stage(
-        unsigned_conversation_scope_record(updated),
-        expected_revision=int(request.expected_revision),
-    )
-    if not staged.get("ok") or not isinstance(staged.get("record"), Mapping):
-        return rejected(str(staged.get("reason") or "conversation_scope_pending_rejected"))
-    updated = dict(staged["record"])
-    envelope = sign_record_with_scope_authority(
-        authority, updated, require_replay=bool(staged.get("recovery_only"))
-    )
-    if not isinstance(envelope, Mapping):
-        return rejected("conversation_scope_record_authentication_unavailable")
-    updated.update(envelope)
     return stored_result(
-        transactions.finalize(
-            updated, expected_revision=int(request.expected_revision)
+        persist_authenticated_conversation_record(
+            store=store,
+            authority=authority,
+            record=updated,
+            expected_revision=int(request.expected_revision),
         )
     )
 

@@ -10,7 +10,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing_
     MAX_SIGNING_INPUT_BYTES,
     MIN_SOCKET_REQUEST_BYTES,
     RECOVERY_SIGNING_OPERATION as CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
-    SCHEMA_VERSION as CONVERSATION_SCOPE_SIGNING_SCHEMA_VERSION,
+    SCHEMA_VERSION as _CONVERSATION_SCOPE_SIGNING_SCHEMA_VERSION,
     SIGNING_OPERATION as CONVERSATION_SCOPE_SIGNING_OPERATION,
     SIGNING_PREFIX as CONVERSATION_SCOPE_SIGNING_PREFIX,
     ConversationScopeSignerPolicy,
@@ -19,6 +19,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing_
     canonical_conversation_scope_signing_input,
     unsigned_conversation_scope_record,
 )
+
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing_validation import (
     validate_conversation_scope_signing_request,
 )
@@ -33,6 +34,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     SigningRequest,
     SigningResponse,
     public_key_fingerprint,
+)
+
+
+CONVERSATION_SCOPE_SIGNING_SCHEMA_VERSION = (
+    _CONVERSATION_SCOPE_SIGNING_SCHEMA_VERSION
 )
 
 

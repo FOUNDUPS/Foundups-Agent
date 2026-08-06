@@ -14,6 +14,11 @@
   no second signer action before atomic AgentDB finalization.
 - Extended signer config/runtime tests for current principal resolution,
   confined anchor supply, exact policy binding, and bounded request sizing.
+- Proved legacy HMAC create, advance, and proposal persistence never use the
+  E0 pending-recovery store; a simulated precommit crash leaves no stranded row,
+  retries normally, and `require_replay` remains forbidden for HMAC.
+- Added exact WSP 62 AST coverage for the durable conversation-authentication
+  sources, security suites, and backend-manifest contract.
 
 ## 2026-08-05: Current-generation use-time trust regressions
 

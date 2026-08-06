@@ -130,6 +130,26 @@ def _authenticate_and_consume(
     repo_full_name: str, intent: Mapping[str, Any], requested_foundup: str,
     grounding_receipt_id: str, session_binding: str, now_epoch: int,
 ) -> tuple[VerifiedResidentConversationSession, VerifiedConversationScopeAuthority]:
+    capability, credential = _authenticate_scope(
+        repo_root=repo_root, selection=selection,
+        serialized_credential=serialized_credential,
+        repo_full_name=repo_full_name, session_binding=session_binding,
+        now_epoch=now_epoch,
+    )
+    authority = consume_conversation_scope_capability(
+        capability, active_foundup_id=requested_foundup,
+        discussion_foundup_ids=(requested_foundup,), now_epoch=int(now_epoch),
+    )
+    return _verified_session(
+        authority=authority, credential=credential, intent=intent,
+        selection=selection, grounding_receipt_id=grounding_receipt_id,
+    )
+
+
+def _authenticate_scope(
+    *, repo_root: Path, selection: Mapping[str, Any], serialized_credential: str,
+    repo_full_name: str, session_binding: str, now_epoch: int,
+) -> tuple[Any, Any]:
     try:
         resolver = load_current_generation_principal_authority_resolver(
             repo_root=repo_root, selection=selection
@@ -156,13 +176,13 @@ def _authenticate_and_consume(
         raise ConversationSessionAuthoritySourceError(
             "conversation_session_authority_verification_failed"
         )
-    capability, credential = authenticated
-    authority = consume_conversation_scope_capability(
-        capability,
-        active_foundup_id=requested_foundup,
-        discussion_foundup_ids=(requested_foundup,),
-        now_epoch=int(now_epoch),
-    )
+    return authenticated
+
+
+def _verified_session(
+    *, authority: Any, credential: Any, intent: Mapping[str, Any],
+    selection: Mapping[str, Any], grounding_receipt_id: str,
+) -> tuple[VerifiedResidentConversationSession, VerifiedConversationScopeAuthority]:
     if authority is None:
         raise ConversationSessionAuthoritySourceError(
             "conversation_session_authority_scope_rejected"
