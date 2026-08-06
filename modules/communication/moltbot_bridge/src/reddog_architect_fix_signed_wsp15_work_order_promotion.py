@@ -73,6 +73,7 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_verified
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
     authority_profile_malformed_digest_paths,
+    authority_profile_runtime_unknown_field_paths,
     authority_profile_secret_field_paths,
     authority_profile_unknown_field_paths,
 )
@@ -224,11 +225,13 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         reasons,
     )
 
-    selection_payload = _validate_model_selection(model_selection_receipt, reasons)
-    runtime_binding_payload = _validate_model_runtime_binding(
+    selection_payload, canonical_selection_receipt = _validate_model_selection(
+        model_selection_receipt, reasons
+    )
+    runtime_binding_payload, canonical_runtime_binding_receipt = _validate_model_runtime_binding(
         model_runtime_binding_receipt,
         selection_payload,
-        model_selection_receipt,
+        canonical_selection_receipt,
         model_runtime_binding_verification_capability,
         reasons,
     )
@@ -254,7 +257,8 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     if reasons:
         return _reject(reasons)
 
-    assert freshness_id and selection_payload and memex_verified is not None
+    assert freshness_id and selection_payload and canonical_selection_receipt
+    assert memex_verified is not None
     assert proposal_admission is not None and selected_slice
     if (
         proposal_admission.conversation_binding_present
@@ -324,9 +328,9 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
             determination=determination,
             candidate=candidate,
             allocation=allocation,
-            model_selection_receipt=model_selection_receipt,
+            model_selection_receipt=canonical_selection_receipt,
             model_selection=selection_payload,
-            model_runtime_binding_receipt=model_runtime_binding_receipt,
+            model_runtime_binding_receipt=canonical_runtime_binding_receipt,
             model_runtime_binding=runtime_binding_payload,
             memex_supply=memex_verified.to_dict(),
             proposal_admission=proposal_admission.to_dict(),
@@ -439,26 +443,37 @@ def _freshness_receipt_id(snapshot: Mapping[str, Any]) -> str:
     return ""
 
 
-def _validate_model_selection(selection: Mapping[str, Any], reasons: list[str]) -> Mapping[str, Any]:
+def _validate_model_selection(
+    selection: Mapping[str, Any],
+    reasons: list[str],
+) -> tuple[Mapping[str, Any], Mapping[str, Any]]:
     if not isinstance(selection, Mapping) or not selection:
         reasons.append(ArchitectFixPromotionReason.MODEL_SELECTION_MISSING)
-        return {}
+        return {}, {}
+    if authority_profile_runtime_unknown_field_paths(
+        {"model_selection_receipt": selection}
+    ):
+        reasons.append(ArchitectFixPromotionReason.MODEL_SELECTION_INVALID)
+        return {}, {}
     try:
         receipt = rehydrate_model_selection_receipt(selection)
     except Exception:
         reasons.append(ArchitectFixPromotionReason.MODEL_SELECTION_INVALID)
-        return {}
+        return {}, {}
     if receipt.decision != SelectionDecision.SELECTED or not receipt.selected_model_ids:
         reasons.append(ArchitectFixPromotionReason.MODEL_SELECTION_INVALID)
     if receipt.requirements.purpose != SelectionPurpose.PRODUCTION:
         reasons.append(ArchitectFixPromotionReason.MODEL_SELECTION_NOT_PRODUCTION)
-    return {
-        "receipt_id": receipt.receipt_id,
-        "catalog_snapshot_id": receipt.catalog_snapshot_id,
-        "selected_model_ids": tuple(receipt.selected_model_ids),
-        "task_family": receipt.requirements.task_family,
-        "panel_topology_digest": receipt.panel_topology_digest,
-    }
+    return (
+        {
+            "receipt_id": receipt.receipt_id,
+            "catalog_snapshot_id": receipt.catalog_snapshot_id,
+            "selected_model_ids": tuple(receipt.selected_model_ids),
+            "task_family": receipt.requirements.task_family,
+            "panel_topology_digest": receipt.panel_topology_digest,
+        },
+        receipt.to_dict(),
+    )
 
 
 def _validate_model_runtime_binding(
@@ -467,14 +482,19 @@ def _validate_model_runtime_binding(
     model_selection_receipt: Mapping[str, Any],
     verification_capability: VerifiedRuntimeBindingCapability | None,
     reasons: list[str],
-) -> Mapping[str, Any]:
+) -> tuple[Mapping[str, Any], Mapping[str, Any] | None]:
     if not binding:
-        return {}
+        return {}, None
+    if authority_profile_runtime_unknown_field_paths(
+        {"model_runtime_binding_receipt": binding}
+    ):
+        reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_INVALID)
+        return {}, None
     try:
         receipt = rehydrate_model_runtime_binding_receipt(binding)
     except Exception:
         reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_INVALID)
-        return {}
+        return {}, None
     if receipt.decision != ModelRuntimeBindingDecision.BOUND:
         reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_NOT_BOUND)
     if runtime_binding_rejections(
@@ -498,7 +518,14 @@ def _validate_model_runtime_binding(
         or receipt.task_family != str(model_selection.get("task_family") or "")
     ):
         reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_MISMATCH)
-    return _runtime_binding_payload(receipt, binding, verification)
+    payload = _runtime_binding_payload(receipt, binding, verification)
+    canonical = receipt.to_dict()
+    if verification is not None:
+        canonical = {
+            **canonical,
+            "verification_receipt": verification.to_dict(),
+        }
+    return payload, canonical
 
 
 def _runtime_binding_payload(

@@ -21,6 +21,8 @@
 - Added exact nested-schema regressions for model selection/runtime receipts,
   WSP 15 allocations, proposal admission, operational context, list members,
   and malformed present values.
+- Proved nested model-selection and runtime-policy injection cannot publish an
+  authority profile or create a queue item, claim, or promotion record.
 
 ## 2026-08-05: Current-generation use-time trust regressions
 

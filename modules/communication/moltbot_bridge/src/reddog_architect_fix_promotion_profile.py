@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
+    authority_profile_runtime_unknown_field_paths,
+)
+
 
 @dataclass(frozen=True)
 class ArchitectFixPromotionProfileInputs:
@@ -47,6 +51,9 @@ def promoted_authority_profile(
             inputs.model_runtime_binding_receipt,
             inputs.model_runtime_binding,
         ))
+    unknown = authority_profile_runtime_unknown_field_paths(profile)
+    if unknown:
+        raise ValueError(f"architect_fix_authority_profile_invalid:{unknown[0]}")
     return profile
 
 

@@ -90,7 +90,13 @@ def execute_architect_fix_promotion_transaction(
     ):
         return _reconstruct_committed_result(inputs, digests=digests)
     records = _build_records(inputs, digests)
-    profile = _build_profile(inputs, digests, records)
+    try:
+        profile = _build_profile(inputs, digests, records)
+    except (KeyError, TypeError, ValueError):
+        return _reject(
+            inputs,
+            ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE,
+        )
     publication_id = _publication_id(inputs, records)
     profile = {
         **profile,

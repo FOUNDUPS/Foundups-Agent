@@ -20,7 +20,8 @@
 - Exact-SHA review froze config output, applied the shared public-profile
   allowlist, unified config/runtime proposal verification, and extended the
   same gate to exact schemas for embedded model, WSP 15, proposal, and
-  operational-context receipts.
+  operational-context receipts. Architect FIX promotion now rejects raw nested
+  receipt injection before publication and persists canonical receipts only.
 - Legacy callers retain 16 KiB; only the explicit conversation bootstrap uses
   160 KiB. Stale v2, nested profile injection, and artifact collisions fail
   before writes or signer invocation (WSP 00/15/22/50/62/97).
