@@ -2,6 +2,24 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-08-06 - 012 Principal Memex read-only projection
+
+- Added typed Principal Memex items and a deterministic read-only projection
+  for the 0102 Digital Twin.
+- Added structural rehydration, exact digest and native JSON type checks,
+  principal isolation, provenance/sensitivity/supersession policy, and
+  secret-material rejection.
+- Hardened all serialized text, bounded container admission before traversal,
+  enforced multi-generation supersession relationships, and guarded typed
+  projection/result construction with process-local factories and exact native
+  boolean checks.
+- Kept the result non-persistent and ineligible for model context, FoundUp
+  projection, HoloIndex writes, or work authority.
+- Kept the structural API outside the package export and sealed RedDog runtime
+  closure; authenticated resident admission owns that later integration.
+- Clarified that RedDog hosts 0102; the Principal Memex informs the Digital
+  Twin but is not itself the agent.
+
 ## V0.5.0 - WSP_00 Boot Integration (2026-03-23)
 
 ### Added

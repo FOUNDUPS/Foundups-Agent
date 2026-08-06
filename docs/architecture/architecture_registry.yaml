@@ -29,7 +29,9 @@ architectures:
     primary_poc_entity: foundups_agent
     primary_runtime_slice: FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1
     compatibility_runtime_slice: FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1
-    deferred_application: REDDOG_012_PERSONAL_MEMEX_PHASE1
+    principal_memex_owner: modules/ai_intelligence/digital_twin
+    principal_memex_runtime_slice: REDDOG_012_PRINCIPAL_MEMEX_READONLY_PROJECTION_PHASE1
+    principal_memex_status: structural_readonly_projection
     domains:
       - foundup_dae
       - memex
@@ -50,6 +52,7 @@ architectures:
       - research_receipts
       - 0102_public_key_identity
       - reddog_operational_state
+      - principal_memex_readonly_projection
     invariants:
       - foundup_first_implementation
       - brain_is_a_memex_component
@@ -68,6 +71,8 @@ architectures:
       - roadmaps_change_only_through_governed_deltas
       - verified_outcomes_only_for_durable_learning
       - runtime_reddog_does_not_reindex_holoindex
+      - principal_memex_does_not_grant_foundup_or_work_authority
+      - principal_foundup_memex_transfer_is_explicit
       - cabr_influences_policy_but_does_not_directly_grant_access
       - foundup_cabr_and_0102_contribution_profile_are_not_conflated
       - cabr_and_delegate_runtime_authority_remain_deferred
@@ -86,7 +91,8 @@ architectures:
       - FOUNDUP_MEMEX_CABR_CAPABILITY_POLICY_CONTRACT_PHASE1
       - CABR_0102_CONTRIBUTION_PROFILE_CONTRACT_PHASE1
       - FOUNDUPS_COLLECTIVE_MEMEX_EXCHANGE_PHASE1
-      - REDDOG_012_PERSONAL_MEMEX_PHASE1
+      - REDDOG_012_PRINCIPAL_MEMEX_READONLY_PROJECTION_PHASE1
+      - REDDOG_PRINCIPAL_MEMEX_AUTHENTICATED_RESIDENT_ADMISSION_PHASE1
     search_terms:
       - FoundUps Memex
       - FoundUp Memex
@@ -112,3 +118,6 @@ architectures:
       - adaptive roadmap delta
       - verified outcome
       - HoloIndex canonical repo truth
+      - 012 Principal Memex
+      - 0102 Digital Twin cognition
+      - RedDog hosts 0102

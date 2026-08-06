@@ -16,8 +16,22 @@ The earlier Second Brain framing mixed a long-term personal digital-twin vision 
 3. **Breadcrumbs** remain episodic continuity inside the Memex.
 4. **RedDog** orchestrates FoundUps through exact `foundup_id` and `snapshot_id` bindings.
 5. **Foundups Agent** is the first POC entity.
-6. Personal 012/0102 Memex work is deferred.
+6. The 012 Principal Memex is a separate cognition substrate for 0102, not a
+   FoundUp Memex or authority source. Its structural read-only projection is
+   implemented; authenticated resident admission remains deferred.
 7. Multi-RedDog governance, CABR weighting, stakeholders, and delegates are deferred research, not active runtime authority.
+
+## Digital Twin and Principal Memex boundary
+
+RedDog is the application/runtime shell. 0102 is the active Digital Twin hosted
+by RedDog. The Principal Memex informs 0102 with bounded principal cognition.
+It does not grant FoundUp scope, repository truth, execution, or merge
+authority. The existing Digital Twin voice-memory POC remains an application
+and is not relabeled as the canonical Principal Memex.
+
+Principal-to-FoundUp transfer requires a future explicit projection with
+source and destination scope, provenance, classification, timestamp, and
+supersession state. No automatic copying is allowed.
 
 ## Existing boundary preserved
 

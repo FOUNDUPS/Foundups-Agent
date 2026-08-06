@@ -23,7 +23,17 @@ Breadcrumbs
 
 RedDog
 = orchestrator that launches, builds, runs, audits, and improves FoundUps
+
+012 Principal Memex
+= persistent cognition substrate for the 012/0102 relationship
+
+0102 Digital Twin
+= active reasoning and orchestration agent hosted by RedDog
 ```
+
+The Principal Memex is not a FoundUp Memex, conversation log, AgentDB work
+state, or authority source. RedDog hosts the Digital Twin; RedDog is not the
+Digital Twin's memory.
 
 ## WSP_60 relationship
 
@@ -37,6 +47,30 @@ WSP_60 already defines:
 - verified operational outcome writeback.
 
 The FoundUp Memex composes those existing surfaces for one `foundup_id`. It does not replace them and does not introduce a parallel general-purpose memory database.
+
+## Principal vs FoundUp cognition
+
+The 012 Principal Memex contains principal-scoped goals, stable preferences,
+architectural principles, accepted terminology, decision history,
+communication preferences, and long-term unresolved questions. It may inform
+0102 interpretation across FoundUps, but it cannot establish repository truth,
+FoundUp scope, or work authority.
+
+The first implemented Principal Memex layer is:
+
+```text
+REDDOG_012_PRINCIPAL_MEMEX_READONLY_PROJECTION_PHASE1
+```
+
+It is a structural, in-memory projection owned by
+`modules/ai_intelligence/digital_twin`. It is not runtime-admissible and
+performs no persistence, model-context admission, FoundUp projection,
+HoloIndex write, or work authorization. Authenticated source admission is a
+separate required slice.
+
+Information crosses between Principal and FoundUp Memex only through a future
+explicit, provenance-preserving projection. Neither side silently copies or
+promotes the other's cognition.
 
 ## Required Memex sources
 
@@ -85,7 +119,9 @@ The following remain specified but not implemented:
 - CABR-weighted contribution credibility;
 - stakeholder and revocable delegate authority;
 - governance thresholds and Sybil resistance;
-- personal 012/0102 Memex application.
+- authenticated resident Principal Memex admission;
+- governed Principal Memex source issuance and retention;
+- explicit Principal-to-FoundUp and FoundUp-to-Principal projection.
 
 These require separate WSP_97 analysis and tested contracts before runtime authority is granted.
 
@@ -106,6 +142,7 @@ These require separate WSP_97 analysis and tested contracts before runtime autho
 - `docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md`
 - `docs/architecture/architecture_registry.yaml`
 - `modules/communication/moltbot_bridge/src/foundup_memex_current_state.py`
+- `modules/ai_intelligence/digital_twin/src/principal_memex_projection.py`
 - `modules/communication/moltbot_bridge/ROADMAP.md`
 
 ## Framework and knowledge synchronization
