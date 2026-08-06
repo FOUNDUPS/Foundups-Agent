@@ -13,6 +13,8 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
     PROPOSAL_AUTHENTICITY_SIGNING_PREFIX,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_conversation_scope_backend import (
+    CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+    CONVERSATION_SCOPE_SIGNING_OPERATION,
     conversation_signing_domain_pair,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
@@ -29,11 +31,27 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
     canonical_signer_audit_attestation_input,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    PREFIX_IDENTITY,
+    PREFIX_WORKAUTH,
+)
 
 
 CONTROL_LOOP_RECEIPT_SCHEMA_VERSION = "reddog_resident_control_loop_receipt.v2"
 CONTROL_LOOP_SIGNING_OPERATION = "attest_control_loop_receipt"
 CONTROL_LOOP_SIGNING_PREFIX = "reddog-control-loop.v2."
+_RESERVED_SIGNING_OPERATIONS = frozenset(
+    {
+        CONTROL_LOOP_SIGNING_OPERATION,
+        PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
+        RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
+        peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION,
+        VERIFIED_OUTCOME_SIGNING_OPERATION,
+        CONVERSATION_SCOPE_SIGNING_OPERATION,
+        CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+        "delegate_reddog_identity",
+    }
+)
 _CONTROL_LOOP_SIGNED_FIELDS = frozenset(
     {
         "schema_version", "receipt_id", "sequence_number", "cycle_id", "nonce",
@@ -100,6 +118,14 @@ def signing_domain_pairs(request: SigningRequest) -> tuple[tuple[bool, bool], ..
             request.signing_input.startswith(VERIFIED_OUTCOME_SIGNING_PREFIX),
         ),
         conversation_signing_domain_pair(request),
+        (
+            request.requested_operation == "delegate_reddog_identity",
+            request.signing_input.startswith(PREFIX_IDENTITY + "."),
+        ),
+        (
+            request.requested_operation not in _RESERVED_SIGNING_OPERATIONS,
+            request.signing_input.startswith(PREFIX_WORKAUTH + "."),
+        ),
     )
 
 

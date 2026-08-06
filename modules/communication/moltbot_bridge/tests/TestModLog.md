@@ -1,3 +1,13 @@
+## 2026-08-06: Exact-request signer policy regressions
+
+- Replaced arbitrary policy-less signer success fixtures with fail-closed
+  assertions for direct, socket, key-provider, one-shot, and multi-profile
+  runtime paths.
+- Proved exact E0 request binding accepts only the original request, cannot be
+  rebound, and rejects identity/work-authority domain confusion.
+- Preserved grant replay, concurrency, revocation, expiry, specialized policy,
+  public-key verification, and WSP 62 bounds.
+
 ## 2026-08-06: Conversation scope-kind boundary regressions
 
 - Proved principal scope persists and resumes without FoundUp grounding, can

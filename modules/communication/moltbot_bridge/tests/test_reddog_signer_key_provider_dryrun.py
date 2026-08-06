@@ -10,8 +10,10 @@ from pathlib import Path
 import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
-    Ed25519SignatureVerifier,
     encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    REJECT_ED25519_SIGNER_POLICY_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
@@ -348,17 +350,15 @@ def test_acceptance_builds_backend_and_receipt_excludes_secret_values() -> None:
     ]
 
 
-def test_backend_signs_and_public_verifier_accepts() -> None:
+def test_backend_without_domain_policy_rejects_signing() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     result = _build(_profile(public_key), _resolver(private_key))
 
     response = result.backend.sign(_request(public_key), _peer())  # type: ignore[union-attr]
 
-    assert response.accepted is True
-    assert response.audit_mac.startswith("audit-mac-v1:")
-    assert response.no_secret_material_returned is True
-    assert Ed25519SignatureVerifier().verify(public_key, _request(public_key).signing_input, response.signature) is True
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_POLICY_MISSING
 
 
 def test_permission_snapshot_must_be_fresh() -> None:

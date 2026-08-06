@@ -34,6 +34,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     SigningResponse,
     public_key_fingerprint,
 )
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+    REJECT_ED25519_SIGNER_EXACT_REQUEST_MISMATCH,
+    REJECT_ED25519_SIGNER_POLICY_MISSING,
+    bind_exact_signing_request,
+    signer_policy_rejection,
+)
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
     ArchitectProposalSignerPolicy,
     PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
@@ -91,7 +97,6 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_conversation_scope_
     REJECT_ED25519_SIGNER_CONVERSATION_RESOLVER_MISSING,
     commit_conversation_signing,
     conversation_replay_response,
-    conversation_signing_configured,
     prepare_conversation_signing,
 )
 
@@ -174,6 +179,7 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
     conversation_scope_signer_policy: ConversationScopeSignerPolicy | None = None
     conversation_scope_principal_resolver: PrincipalAuthorityResolver | None = None
     conversation_scope_anchor_store: ConversationScopeAnchorStore | None = None
+    exact_signing_request_digest: str | None = None
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
         reason = _signer_request_rejection(self, request, peer)
@@ -323,31 +329,15 @@ def _signer_request_rejection(
         return REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH
     if not request.signing_input:
         return REJECT_ED25519_SIGNER_REQUEST_INVALID
-    if any(operation is not prefix for operation, prefix in signing_domain_pairs(request)):
+    domain_pairs = signing_domain_pairs(request)
+    if (
+        any(operation is not prefix for operation, prefix in domain_pairs)
+        or sum(operation and prefix for operation, prefix in domain_pairs) != 1
+    ):
         return REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
-    configured = (
-        backend.proposal_authority_policy is not None
-        or backend.runtime_artifact_manifest_authority is not None
-        or backend.runtime_artifact_manifest_authority_boundary is not None
-        or backend.verified_outcome_signer_policy is not None
-        or conversation_signing_configured(backend)
-    )
-    if configured:
-        allowed_operations = {peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION}
-        if backend.proposal_authority_policy is not None:
-            allowed_operations.add(PROPOSAL_AUTHENTICITY_SIGNING_OPERATION)
-        if backend.control_loop_authority_policy is not None:
-            allowed_operations.add(CONTROL_LOOP_SIGNING_OPERATION)
-        if (backend.runtime_artifact_manifest_authority is not None
-                and backend.runtime_artifact_manifest_authority_boundary is not None):
-            allowed_operations.add(RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION)
-        if backend.verified_outcome_signer_policy is not None:
-            allowed_operations.add(VERIFIED_OUTCOME_SIGNING_OPERATION)
-        if backend.conversation_scope_signer_policy is not None:
-            allowed_operations.add(CONVERSATION_SCOPE_SIGNING_OPERATION)
-            allowed_operations.add(CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION)
-        if request.requested_operation not in allowed_operations:
-            return REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY
+    policy_reason = signer_policy_rejection(backend, request)
+    if policy_reason:
+        return policy_reason
     if request.requested_operation == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION:
         if not peer_handshake.signer_handshake_request_matches_instance(
             request, backend.signer_peer_instance_binding,
@@ -647,6 +637,7 @@ __all__ = [
     "CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX",
     "CONTROL_LOOP_SIGNING_OPERATION", "CONTROL_LOOP_SIGNING_PREFIX",
     "ControlLoopAuthorityPolicy",
+    "bind_exact_signing_request",
     "canonical_control_audit_attestation_input",
     "Ed25519SignerBackend",
     "REJECT_ED25519_SIGNER_AUDIT_MAC_MISSING",
@@ -659,6 +650,7 @@ __all__ = [
     "REJECT_ED25519_SIGNER_CONVERSATION_REJECTED",
     "REJECT_ED25519_SIGNER_CONVERSATION_RESOLVER_MISSING",
     "REJECT_ED25519_SIGNER_DOMAIN_MISMATCH",
+    "REJECT_ED25519_SIGNER_EXACT_REQUEST_MISMATCH",
     "REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH",
     "REJECT_ED25519_SIGNER_KEY_INVALID",
     "REJECT_ED25519_SIGNER_OUTCOME_AUTHORITY_MISSING",
@@ -669,6 +661,7 @@ __all__ = [
     "REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY",
     "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY",
     "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_STORE_MISSING",
+    "REJECT_ED25519_SIGNER_POLICY_MISSING",
     "REJECT_ED25519_SIGNER_REQUEST_INVALID",
     "REJECT_ED25519_SIGNER_SIGN_FAILED",
     "SignerAuditMacBuilder",

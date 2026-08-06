@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-06 - Explicit signer request authority (0.4.63)
+
+- Pinned the backend dependency closure containing the signer-owned policy
+  gate and its secret-access grant contract.
+- Preserved the thin-client boundary: no signing key, signer, work, repository,
+  merge, or HoloIndex authority was added to the extension.
+
 ## 2026-08-06 - Principal Memex resident-admission backend (0.4.62)
 
 - Pinned the backend dependency closure after authenticated, one-use Principal

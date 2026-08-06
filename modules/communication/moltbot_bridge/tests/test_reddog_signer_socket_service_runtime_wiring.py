@@ -10,7 +10,6 @@ from pathlib import Path
 import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
-    Ed25519SignatureVerifier,
     encode_ed25519_public_key,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
@@ -23,6 +22,8 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     ControlLoopAuthorityPolicy,
+    REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY,
+    REJECT_ED25519_SIGNER_POLICY_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -271,8 +272,8 @@ def test_runtime_wiring_composes_provider_attestor_and_bounded_service() -> None
     assert service.calls[0]["timeout_s"] == 2.5
     backend = service.calls[0]["backend"]
     response = backend.sign(_request(public_key), _peer())
-    assert response.accepted is True
-    assert Ed25519SignatureVerifier().verify(public_key, _request(public_key).signing_input, response.signature) is True
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY
 
 
 def test_runtime_receipt_does_not_overclaim_injected_dependency_effects(
@@ -387,11 +388,15 @@ def test_runtime_wiring_routes_multiple_wsp71_permissioned_profiles() -> None:
     assert result.key_provider_receipt["ok"] is True
     assert result.key_provider_receipt["profile_count"] == 2
     backend = service.calls[0]["backend"]
+    expected_rejections = {
+        principal_public: REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY,
+        reddog_public: REJECT_ED25519_SIGNER_POLICY_MISSING,
+    }
     for public_key in (principal_public, reddog_public):
         request = _request(public_key)
         response = backend.sign(request, _peer())
-        assert response.accepted is True
-        assert Ed25519SignatureVerifier().verify(public_key, request.signing_input, response.signature) is True
+        assert response.accepted is False
+        assert response.rejection_code == expected_rejections[public_key]
     unknown = _request(_public_text(_private_key()))
     assert backend.sign(unknown, _peer()).accepted is False
     assert resolver.calls == [

@@ -9,8 +9,10 @@ from pathlib import Path
 import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
-    Ed25519SignatureVerifier,
     encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    REJECT_ED25519_SIGNER_POLICY_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_process_entrypoint import (
     FAIL_SIGNER_PROCESS_CONFIG_INVALID,
@@ -219,10 +221,8 @@ def test_entrypoint_composes_key_provider_attestor_and_service() -> None:
         _request(public_key),
         service.calls[0]["peer_attestor"].attest(_FakePeerCredSocket()),
     )
-    assert response.accepted is True
-    assert Ed25519SignatureVerifier().verify(
-        public_key, _request(public_key).signing_input, response.signature
-    ) is True
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_POLICY_MISSING
 
 
 def test_production_mode_rejects_before_key_resolution() -> None:

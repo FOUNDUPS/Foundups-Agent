@@ -59,6 +59,7 @@ SOURCES = tuple(
     SOURCE_ROOT / name
     for name in (
         "reddog_signer_resolve_per_sign_backend.py",
+        "reddog_ed25519_signer_policy_gate.py",
         "reddog_signer_resolve_per_sign_validation.py",
         "reddog_signer_secret_grant_durable_nonce_store.py",
         "reddog_signer_secret_grant_revocation_oracle.py",

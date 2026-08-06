@@ -1,4 +1,13 @@
 # OpenClaw Bridge Interface
+## Exact-request signer admission
+`Ed25519SignerBackend` rejects policy-less delegated signing. The
+resolve-per-sign E0 boundary consumes the independently authenticated grant,
+then immutably binds the ephemeral backend to that grant's exact request
+digest. Altered operation, prefix, payload, nonce, peer, tier, or key binding
+cannot reuse the backend. Specialized proposal, control-loop, manifest,
+verified-outcome, conversation, and peer-handshake policies retain their own
+domain-specific validation.
+
 ## Authenticated RedDog conversation scope
 `authenticate_conversation_scope()` derives the principal only from a verified
 `sess.v1` subject and returns an opaque one-use capability. Create, resume, and

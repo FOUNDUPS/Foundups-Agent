@@ -1,4 +1,14 @@
 # ModLog - moltbot_bridge
+## 2026-08-06: Exact-request signer policy gate
+- Closed the policy-less Ed25519 signing path. Delegated identity and work
+  authority now require either a signer-owned policy or one exact E0
+  secret-access-grant request binding.
+- Added explicit identity/work-authority domain separation and immutable
+  request-digest binding for real ephemeral Ed25519 backends.
+- Preserved specialized signer policies and the resolve-per-sign one-use grant
+  boundary; no key generation, Principal Memex issuance, execution, or
+  repository authority was added (WSP 00/15/22/50/62/97).
+
 ## 2026-08-06: Authenticated Principal Memex resident admission
 - Added principal-signed one-use disclosure and opaque resident context
   admission for the backend architect model.

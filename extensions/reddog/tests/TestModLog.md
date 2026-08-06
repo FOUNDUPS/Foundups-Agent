@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-06 - Explicit signer request authority (0.4.63)
+
+- Verified the regenerated 1,238-file backend closure and canonical manifest
+  digest against the thin-client compatibility preflight.
+- Re-ran signer domain, request-substitution, manifest, version, and extension
+  contract regressions without granting extension-side authority.
+
 ## 2026-08-06 - Principal Memex resident-admission backend (0.4.62)
 
 - Re-ran the complete extension contract and backend manifest parity checks.
