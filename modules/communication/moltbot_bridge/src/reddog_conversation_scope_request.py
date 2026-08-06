@@ -22,6 +22,7 @@ class ConversationScopeCreateRequest:
     source_snapshot_id: str = ""
     source_snapshot_digest: str = ""
     ttl_seconds: int = 3600
+    scope_kind: str = "foundup"
 
 
 @dataclass(frozen=True)

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -17,6 +16,12 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store im
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_request import (
     ConversationScopeAdvanceRequest,
     ConversationScopeCreateRequest,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
+    validate_record,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_work_promotion import (
+    prepare_conversation_work_context,
 )
 from modules.communication.moltbot_bridge.tests.reddog_conversation_scope_test_support import (
     FOCUS,
@@ -39,6 +44,7 @@ def _store(path: Path) -> AgentDbConversationScopeStore:
 
 
 def _create(path: Path, **overrides):
+    scope_capability = overrides.pop("_capability", capability())
     values = {
         "work_focus": FOCUS,
         "grounding_receipt": grounding_receipt(),
@@ -56,7 +62,7 @@ def _create(path: Path, **overrides):
     }
     values.update(overrides)
     return create_authenticated_conversation_scope(
-        store=_store(path), capability=capability(),
+        store=_store(path), capability=scope_capability,
         repo_root=Path(__file__).resolve().parents[4],
         request=ConversationScopeCreateRequest(**values), now_epoch=NOW,
     )
@@ -75,6 +81,15 @@ def _resume(path: Path, conversation_id: str, **overrides):
     }
     values.update(overrides)
     return resume_authenticated_conversation_scope(**values)
+
+
+def test_v2_record_is_not_inferred_or_upgraded(tmp_path: Path) -> None:
+    created = _create(tmp_path / "scope.sqlite")
+    stored = _store(tmp_path / "scope.sqlite").load(created.conversation_id)["record"]
+
+    assert validate_record(
+        {**stored, "schema_version": "reddog_authenticated_conversation_scope.v2"}
+    ) == ("conversation_scope_record_shape_invalid",)
 
 
 def test_create_restart_resume_and_projection_are_bounded(tmp_path: Path) -> None:
@@ -251,3 +266,182 @@ def test_invented_repository_evidence_cannot_enter_scope(tmp_path: Path) -> None
     )
     assert result.accepted is False
     assert "conversation_scope_input_invalid" in result.rejection_reasons
+
+
+def _principal_values() -> dict[str, object]:
+    return {
+        "scope_kind": "principal",
+        "work_focus": "Discuss the principal's cross-FoundUp operating principles.",
+        "grounding_receipt": {},
+        "discussion_foundup_ids": (),
+        "active_topic": "Principal operating principles",
+        "current_objective": "Clarify an operator preference without granting work authority.",
+        "accepted_decisions": (item("Audit before implementation."),),
+        "open_questions": (item("Which FoundUp should receive this principle?", "unresolved"),),
+        "repository_evidence_refs": (),
+        "source_snapshot_id": "",
+        "source_snapshot_digest": "",
+    }
+
+
+def test_principal_scope_is_authenticated_durable_and_not_grounded(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "principal.sqlite"
+    created = _create(path, **_principal_values())
+
+    assert created.accepted is True
+    assert created.projection["scope_kind"] == "principal"
+    assert created.projection["authorized_foundup_id"] == ""
+    assert created.projection["discussion_foundup_ids"] == []
+    assert created.projection["repository_evidence_refs"] == []
+    resumed = _resume(
+        path,
+        created.conversation_id,
+        expected_head_sha="",
+        expected_holoindex_generation_id="",
+        expected_source_snapshot_id="",
+        expected_source_snapshot_digest="",
+    )
+    assert resumed.accepted is True
+    assert resumed.no_work_authority_granted is True
+
+
+def test_principal_scope_advances_without_repository_authority(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "principal-advance.sqlite"
+    created = _create(path, **_principal_values())
+    current = _store(path).load(created.conversation_id)["record"]
+    patch = {
+        "turn_id": digest({"turn": "principal-second"}),
+        "parent_turn_id": current["turn_id"],
+        "discussion_foundup_ids": [],
+        "active_topic": "Principal operating principles",
+        "current_objective": "Preserve the clarified preference as conversation state.",
+        "accepted_decisions": [item("Audit before implementation.")],
+        "rejected_options": [],
+        "open_questions": [],
+        "repository_evidence_refs": [],
+    }
+    advanced = advance_authenticated_conversation_scope(
+        store=_store(path),
+        capability=capability(),
+        repo_root=Path(__file__).resolve().parents[4],
+        request=ConversationScopeAdvanceRequest(
+            conversation_id=created.conversation_id,
+            expected_revision=0,
+            work_focus=str(_principal_values()["work_focus"]),
+            grounding_receipt={},
+            state_patch=patch,
+            expected_source_snapshot_id="",
+            expected_source_snapshot_digest="",
+        ),
+        now_epoch=NOW + 2,
+    )
+    assert advanced.accepted is True
+    assert advanced.projection["scope_kind"] == "principal"
+
+
+def test_nonfoundup_scope_rejects_grounding_and_kind_mutation(
+    tmp_path: Path,
+) -> None:
+    values = _principal_values()
+    values["grounding_receipt"] = grounding_receipt()
+    assert _create(tmp_path / "grounded-principal.sqlite", **values).accepted is False
+
+    path = tmp_path / "principal-kind.sqlite"
+    created = _create(path, **_principal_values())
+    current = _store(path).load(created.conversation_id)["record"]
+    changed = advance_authenticated_conversation_scope(
+        store=_store(path), capability=capability(),
+        repo_root=Path(__file__).resolve().parents[4],
+        request=ConversationScopeAdvanceRequest(
+            conversation_id=created.conversation_id, expected_revision=0,
+            work_focus=str(_principal_values()["work_focus"]), grounding_receipt={},
+            state_patch={
+                "scope_kind": "foundup",
+                "turn_id": digest({"turn": "kind-change"}),
+                "parent_turn_id": current["turn_id"],
+                "discussion_foundup_ids": [],
+                "active_topic": "Invalid mutation",
+                "current_objective": "Attempt an authority promotion.",
+                "repository_evidence_refs": [],
+            },
+            expected_source_snapshot_id="", expected_source_snapshot_digest="",
+        ), now_epoch=NOW + 2,
+    )
+    assert changed.accepted is False
+    assert "conversation_scope_input_invalid" in changed.rejection_reasons
+
+
+def test_comparison_scope_requires_two_authorized_foundups_and_grants_no_union(
+    tmp_path: Path,
+) -> None:
+    resolver = Resolver(foundup_scope=("trade", "gotjunk_001"))
+    values = {
+        **_principal_values(),
+        "scope_kind": "comparison",
+        "discussion_foundup_ids": ("trade", "gotjunk_001"),
+        "_capability": capability(resolver=resolver),
+    }
+    created = _create(tmp_path / "comparison.sqlite", **values)
+    assert created.accepted is True
+    assert created.projection["scope_kind"] == "comparison"
+    assert created.projection["authorized_foundup_id"] == ""
+    work = prepare_conversation_work_context(
+        store=_store(tmp_path / "comparison.sqlite"),
+        capability=capability(resolver=resolver),
+        conversation_id=created.conversation_id,
+        expected_revision=0,
+        resident_cycle={},
+        now_epoch=NOW + 1,
+    )
+    assert work.accepted is False
+    assert work.rejection_reasons == (
+        "conversation_work_scope_kind_not_authorized",
+    )
+
+    one = {**values, "discussion_foundup_ids": ("trade",), "_capability": capability(resolver=resolver)}
+    assert _create(tmp_path / "one.sqlite", **one).accepted is False
+    outside = {
+        **values,
+        "_capability": capability(resolver=Resolver(foundup_scope=("trade",))),
+    }
+    assert _create(tmp_path / "outside.sqlite", **outside).accepted is False
+
+
+def test_foundup_scope_rejects_extra_authorized_discussion_foundups(
+    tmp_path: Path,
+) -> None:
+    resolver = Resolver(foundup_scope=("trade", "gotjunk_001"))
+    created = _create(
+        tmp_path / "widened-foundup.sqlite",
+        discussion_foundup_ids=("trade", "gotjunk_001"),
+        _capability=capability(resolver=resolver),
+    )
+
+    assert created.accepted is False
+    assert "conversation_scope_access_denied" in created.rejection_reasons
+    assert _store(tmp_path / "widened-foundup.sqlite").load(
+        created.conversation_id
+    )["record"] is None
+
+
+def test_principal_scope_cannot_enter_conversation_work_promotion(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "principal-work.sqlite"
+    created = _create(path, **_principal_values())
+    result = prepare_conversation_work_context(
+        store=_store(path),
+        capability=capability(),
+        conversation_id=created.conversation_id,
+        expected_revision=0,
+        resident_cycle={},
+        now_epoch=NOW + 1,
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == (
+        "conversation_work_scope_kind_not_authorized",
+    )

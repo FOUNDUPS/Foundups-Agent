@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-06 - Conversation scope-kind backend boundary (0.4.61)
+
+- Re-ran the complete extension contract suite against the new backend manifest
+  pin and scope-kind boundary.
+- Confirmed install version `0.4.61` uniquely identifies the accepted backend
+  digest.
+
 ## 2026-08-06 - Conversation session authority source (0.4.60)
 
 - Added forged, expired, ambiguous-subject, expected-principal, FoundUp-scope,

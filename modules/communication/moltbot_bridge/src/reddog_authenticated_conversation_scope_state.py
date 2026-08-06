@@ -38,6 +38,10 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_persiste
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_request import (
     ConversationScopeCreateRequest,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind import (
+    SCOPE_KIND_FOUNDUP,
+    SCOPE_KINDS,
+)
 
 
 MAX_SCOPE_TTL_SECONDS = 86400
@@ -51,27 +55,40 @@ def create_authenticated_conversation_scope(
     request: ConversationScopeCreateRequest,
     now_epoch: int,
 ) -> AuthenticatedConversationScopeResult:
-    grounded, reason = verified_grounding(
-        repo_root, request.work_focus, request.grounding_receipt
-    )
-    if reason:
-        return rejected(reason)
+    scope_kind = str(request.scope_kind or "").strip()
+    if scope_kind not in SCOPE_KINDS:
+        return rejected("conversation_scope_kind_invalid")
+    if scope_kind == SCOPE_KIND_FOUNDUP:
+        grounded, reason = verified_grounding(
+            repo_root, request.work_focus, request.grounding_receipt
+        )
+        if reason:
+            return rejected(reason)
+    else:
+        grounded = {}
+        if _nonfoundup_grounding_present(request):
+            return rejected("conversation_scope_nonfoundup_grounding_forbidden")
     foundup_id = str(grounded.get("foundup_id") or "")
-    discussions = tuple(
-        dict.fromkeys(str(item) for item in request.discussion_foundup_ids if str(item))
-    )
+    raw_discussions = request.discussion_foundup_ids
+    if any(type(item) is not str or not item for item in raw_discussions):
+        return rejected("conversation_scope_discussion_set_invalid")
+    discussions = tuple(dict.fromkeys(raw_discussions))
+    if len(discussions) != len(raw_discussions):
+        return rejected("conversation_scope_discussion_set_invalid")
     authority = consume_conversation_scope_capability(
         capability,
         active_foundup_id=foundup_id,
         discussion_foundup_ids=discussions,
         now_epoch=now_epoch,
+        scope_kind=scope_kind,
     )
     authority_view = conversation_scope_authority_view(authority)
     if authority is None or authority_view is None:
         return rejected("conversation_scope_access_denied")
     try:
         record = _new_scope_record(
-            request, grounded, authority_view, discussions, now_epoch
+            request, grounded, authority_view, discussions, now_epoch,
+            scope_kind=scope_kind,
         )
     except (TypeError, ValueError):
         return rejected("conversation_scope_input_invalid")
@@ -86,7 +103,7 @@ def create_authenticated_conversation_scope(
 
 def _new_scope_record(
     request: ConversationScopeCreateRequest, grounded: Mapping[str, Any], authority_view: Mapping[str, Any],
-    discussions: tuple[str, ...], now_epoch: int,
+    discussions: tuple[str, ...], now_epoch: int, *, scope_kind: str,
 ) -> dict[str, Any]:
     state = state_values(
         turn_id=request.turn_id, parent_turn_id="", discussions=discussions,
@@ -94,17 +111,24 @@ def _new_scope_record(
         accepted_decisions=request.accepted_decisions,
         rejected_options=request.rejected_options, open_questions=request.open_questions,
         repository_evidence_refs=request.repository_evidence_refs,
-        allowed_evidence_refs=grounding_evidence_refs(grounded),
+        allowed_evidence_refs=(
+            grounding_evidence_refs(grounded)
+            if scope_kind == SCOPE_KIND_FOUNDUP
+            else ()
+        ),
     )
     ttl = int(request.ttl_seconds)
     nonce = sanitized_text(request.conversation_nonce, limit=160)
     if ttl <= 0 or ttl > MAX_SCOPE_TTL_SECONDS or not nonce:
         raise ValueError("conversation_scope_ttl_or_nonce_invalid")
     foundup_id = str(grounded.get("foundup_id") or "")
-    conversation_id = _conversation_id(authority_view, foundup_id, nonce)
+    conversation_id = _conversation_id(
+        authority_view, scope_kind, foundup_id, discussions, nonce
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "conversation_id": conversation_id,
+        "scope_kind": scope_kind,
         **{key: authority_view[key] for key in (
             "principal_id", "principal_provider", "verified_subject_digest",
             "principal_record_digest", "principal_key_fingerprint", "transport",
@@ -118,14 +142,12 @@ def _new_scope_record(
         **state,
         "source_snapshot_id": str(request.source_snapshot_id or ""),
         "source_snapshot_digest": str(request.source_snapshot_digest or ""),
-        "last_grounded_head_sha": str(grounded["holoindex_repo_head_sha"]),
+        "last_grounded_head_sha": str(grounded.get("holoindex_repo_head_sha") or ""),
         "holoindex_generation_id": str(grounded.get("holoindex_generation_id") or ""),
         "holoindex_freshness_receipt_id": str(grounded.get("holoindex_freshness_receipt_digest") or ""),
-        "grounding_receipt_id": str(grounded["receipt_id"]),
-        "pending_work_proposal_id": "",
-        "pending_work_proposal_digest": "",
-        "created_at": int(now_epoch),
-        "updated_at": int(now_epoch),
+        "grounding_receipt_id": str(grounded.get("receipt_id") or ""),
+        "pending_work_proposal_id": "", "pending_work_proposal_digest": "",
+        "created_at": int(now_epoch), "updated_at": int(now_epoch),
         "expires_at": int(now_epoch) + ttl,
         "revision_receipts": [],
         "record_auth_scheme": str(authority_view["record_auth_scheme"]),
@@ -141,14 +163,28 @@ def _new_scope_record(
     }
 
 
-def _conversation_id(authority: Mapping[str, Any], foundup_id: str, nonce: str) -> str:
+def _conversation_id(
+    authority: Mapping[str, Any], scope_kind: str, foundup_id: str,
+    discussions: tuple[str, ...], nonce: str,
+) -> str:
     return canonical_digest(
         {
             "principal_id": authority["principal_id"],
+            "scope_kind": scope_kind,
             "foundup_id": foundup_id,
+            "discussion_foundup_ids": list(discussions),
             "session_binding_digest": authority["session_binding_digest"],
             "conversation_nonce": nonce,
         }
+    )
+
+
+def _nonfoundup_grounding_present(request: ConversationScopeCreateRequest) -> bool:
+    return bool(
+        request.grounding_receipt
+        or request.repository_evidence_refs
+        or request.source_snapshot_id
+        or request.source_snapshot_digest
     )
 
 
@@ -186,6 +222,7 @@ def resume_authenticated_conversation_scope(
         active_foundup_id=str(record["authorized_foundup_id"]),
         discussion_foundup_ids=tuple(str(item) for item in record["discussion_foundup_ids"]),
         now_epoch=now_epoch,
+        scope_kind=str(record.get("scope_kind") or ""),
     )
     authority_view = conversation_scope_authority_view(authority)
     if (
@@ -197,14 +234,40 @@ def resume_authenticated_conversation_scope(
         return rejected("conversation_scope_access_denied")
     if int(now_epoch) >= int(record["expires_at"]):
         return rejected("conversation_scope_expired")
-    if (
-        str(record["last_grounded_head_sha"]) != str(expected_head_sha)
-        or str(record["holoindex_generation_id"]) != str(expected_holoindex_generation_id)
-        or str(record["source_snapshot_id"]) != str(expected_source_snapshot_id)
-        or str(record["source_snapshot_digest"]) != str(expected_source_snapshot_digest)
+    if not _resume_bindings_match(
+        record,
+        expected_head_sha=expected_head_sha,
+        expected_holoindex_generation_id=expected_holoindex_generation_id,
+        expected_source_snapshot_id=expected_source_snapshot_id,
+        expected_source_snapshot_digest=expected_source_snapshot_digest,
     ):
         return rejected("conversation_scope_regrounding_required")
     return accepted(record)
+
+
+def _resume_bindings_match(
+    record: Mapping[str, Any],
+    *,
+    expected_head_sha: str,
+    expected_holoindex_generation_id: str,
+    expected_source_snapshot_id: str,
+    expected_source_snapshot_digest: str,
+) -> bool:
+    expected = (
+        str(expected_head_sha),
+        str(expected_holoindex_generation_id),
+        str(expected_source_snapshot_id),
+        str(expected_source_snapshot_digest),
+    )
+    actual = (
+        str(record["last_grounded_head_sha"]),
+        str(record["holoindex_generation_id"]),
+        str(record["source_snapshot_id"]),
+        str(record["source_snapshot_digest"]),
+    )
+    if record.get("scope_kind") == SCOPE_KIND_FOUNDUP:
+        return actual == expected
+    return actual == ("", "", "", "") and expected == ("", "", "", "")
 
 
 __all__ = [

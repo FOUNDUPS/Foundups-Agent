@@ -8,7 +8,11 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
     PrincipalAuthorityResolver,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
+    SCHEMA_VERSION,
     validate_unsigned_record,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind import (
+    scope_request_authorized,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_digest import (
     canonical_digest,
@@ -76,20 +80,23 @@ def _request_matches(
     now_epoch: int,
 ) -> bool:
     try:
-        scope = set(credential.foundup_scope)
-        discussions = set(map(str, record["discussion_foundup_ids"]))
+        discussions = tuple(map(str, record["discussion_foundup_ids"]))
         updated_at = int(record["updated_at"])
         expires_at = int(record["expires_at"])
         bindings = (
-            record.get("schema_version") == "reddog_authenticated_conversation_scope.v2",
+            record.get("schema_version") == SCHEMA_VERSION,
             record.get("record_auth_scheme") == "ed25519-e0-v1",
             record.get("credential_id") == credential.credential_id,
             record.get("session_id") == credential.session_id,
             record.get("repo_full_name") == credential.repo_full_name,
             record.get("principal_id") == credential.principal_id,
             record.get("principal_provider") == credential.principal_provider,
-            record.get("authorized_foundup_id") in scope,
-            bool(discussions) and discussions.issubset(scope),
+            scope_request_authorized(
+                scope_kind=str(record.get("scope_kind") or ""),
+                active_foundup_id=str(record.get("authorized_foundup_id") or ""),
+                discussion_foundup_ids=discussions,
+                allowed_foundup_ids=credential.foundup_scope,
+            ),
             request.requester_principal_id == credential.principal_id,
             request.signer_public_key == policy.signer_public_key,
             request.key_epoch == policy.key_epoch,

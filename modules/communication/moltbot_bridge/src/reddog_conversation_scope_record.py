@@ -163,7 +163,7 @@ def accepted(record: Mapping[str, Any]) -> AuthenticatedConversationScopeResult:
     projection = {
         key: record[key]
         for key in (
-            "conversation_id", "conversation_revision", "turn_id", "parent_turn_id",
+            "conversation_id", "conversation_revision", "scope_kind", "turn_id", "parent_turn_id",
             "authorized_foundup_id", "discussion_foundup_ids", "active_topic",
             "current_objective", "accepted_decisions", "rejected_options", "open_questions",
             "repository_evidence_refs", "last_grounded_head_sha", "holoindex_generation_id",
@@ -177,7 +177,7 @@ def accepted(record: Mapping[str, Any]) -> AuthenticatedConversationScopeResult:
     }
     projection.update(
         {
-            "schema_version": "reddog_authenticated_conversation_projection.v1",
+            "schema_version": "reddog_authenticated_conversation_projection.v2",
             "authority_effect": "none",
             "revision_receipt_id": receipt["receipt_id"],
         }

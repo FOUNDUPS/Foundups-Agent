@@ -1,5 +1,9 @@
 # RedDog Interface
 
+Version 0.4.61 pins the backend boundary for immutable `foundup`, `principal`,
+and `comparison` scope kinds. Only `foundup` scope may enter the existing work
+promotion path; no new extension command or execution authority is added.
+
 Version 0.4.60 adds `RedDog: Set Conversation Session Credential` and
 `RedDog: Clear Conversation Session Credential`. The extension accepts only a
 pre-issued principal-signed credential through SecretStorage and never mints

@@ -1,4 +1,14 @@
 # ModLog - moltbot_bridge
+## 2026-08-06: Principal and comparison conversation-scope boundary
+- Extended the authenticated conversation contract with immutable `foundup`,
+  `principal`, and `comparison` scope kinds. Principal/comparison state carries
+  no repository, snapshot, HoloIndex, or pending-work bindings; comparison is
+  limited to FoundUps already in the signed principal credential.
+- The existing conversation-work promotion path now explicitly accepts only
+  `foundup` scope. E0 signer validation, AgentDB CAS, resume, and projection all
+  bind the exact scope kind and one-FoundUp discussion set. Native JSON types
+  and the consumed authority seal are checked before signing; no Principal
+  Memex or new authority was added (WSP 00/15/22/50/62/97).
 ## 2026-08-06: Durable E0 conversation-scope authentication
 - Replaced process-local session authentication by extending the existing
   isolated Ed25519 signer. Exact scope state binds the current credential,

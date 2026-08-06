@@ -21,6 +21,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
     canonical_digest,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind import (
+    scope_allows_work,
+)
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record import (
     AuthenticatedConversationScopeResult,
     authority_matches,
@@ -139,6 +142,8 @@ def prepare_conversation_work_context(
     record = loaded.get("record") if loaded.get("ok") else None
     if not isinstance(record, Mapping):
         return _context_rejected("conversation_work_scope_unavailable")
+    if not scope_allows_work(record.get("scope_kind")):
+        return _context_rejected("conversation_work_scope_kind_not_authorized")
     authority = _consume_for_record(capability, record, now_epoch)
     if authority is None:
         return _context_rejected("conversation_work_scope_access_denied")
@@ -273,6 +278,7 @@ def _consume_for_record(
         active_foundup_id=str(record.get("authorized_foundup_id") or ""),
         discussion_foundup_ids=tuple(record.get("discussion_foundup_ids") or ()),
         now_epoch=int(now_epoch),
+        scope_kind=str(record.get("scope_kind") or ""),
     )
     view = conversation_scope_authority_view(authority)
     if (
@@ -289,6 +295,8 @@ def _context_reasons(
     record: Mapping[str, Any], cycle: Mapping[str, Any], revision: int, now_epoch: int
 ) -> tuple[str, ...]:
     reasons: list[str] = []
+    if not scope_allows_work(record.get("scope_kind")):
+        reasons.append("conversation_work_scope_kind_not_authorized")
     intent = cycle.get("intent") if isinstance(cycle.get("intent"), Mapping) else {}
     principal = str(
         intent.get("principal_id")
@@ -466,6 +474,8 @@ def _pending_reasons(
     record: Mapping[str, Any], admission: Any, proposal_digest: str, now_epoch: int
 ) -> tuple[str, ...]:
     reasons: list[str] = []
+    if not scope_allows_work(record.get("scope_kind")):
+        reasons.append("conversation_work_scope_kind_not_authorized")
     if int(now_epoch) < int(record.get("updated_at", 0)):
         reasons.append("conversation_work_clock_rollback")
     if int(now_epoch) >= int(record.get("expires_at", 0)):

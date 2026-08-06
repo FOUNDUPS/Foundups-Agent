@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.60
+Version: 0.4.61
+
+Version 0.4.61 pins the backend boundary for immutable `foundup`, `principal`,
+and `comparison` conversation scope kinds. Principal and comparison scopes do
+not receive work, repository, signer, merge, or HoloIndex authority.
 
 Version 0.4.60 adds the first authenticated resident conversation-session
 source. A pre-issued principal-signed credential is stored only in VS Code
