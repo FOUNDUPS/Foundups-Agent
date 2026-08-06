@@ -1699,7 +1699,7 @@
     "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py": "ccfec49e191b6fa5fdef9c26b9a190247e474df5ba29dbb44c9eadfc41c21ca5",
     "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_refresh_runtime.py": "b1d5993ae51ba4cd50596c5972fed65f22f436fc954a4483af779eab570a3440",
     "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_store.py": "42e3386dbe60cdea8b3b3b4465eef70df38cca298dbd37a0911dbeb3aea5e664",
-    "modules/communication/moltbot_bridge/src/reddog_authority_profile_rehydration.py": "60fb7340ba38186a063df6387e3456bba56beb63ddec6d3f4a487137dd19c52b",
+    "modules/communication/moltbot_bridge/src/reddog_authority_profile_rehydration.py": "f54ffda8b71b65c0e37aeb91746534ff633819d4977850b9a65dbe3bf69147fb",
     "modules/communication/moltbot_bridge/src/reddog_authority_profile_safety.py": "0f77a7657fe8b8d76c51424f8a62ca384c2fd85bba055bb521057c74535b6f8a",
     "modules/communication/moltbot_bridge/src/reddog_authority_runtime_store.py": "b6e92cb30dbd7ae363629f8bd825c0d882b9136566e2b81a3be5e5247fb5aa7b",
     "modules/communication/moltbot_bridge/src/reddog_authority_runtime_store_posix.py": "58c3d066b44029e0a0180a21a7cfc69e5e804826e229542bdcfa770a9089c7ea",

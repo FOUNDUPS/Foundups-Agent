@@ -3870,12 +3870,12 @@ def test_bootstrap_rejects_work_order_materializer_with_explicit_work_orders_pat
     assert "work_order_materializer_conflicts_with_work_orders_path" in result.rejection_reasons
 
 
-def test_bootstrap_rejects_work_order_materializer_without_holoindex_evidence(
+def test_bootstrap_rejects_work_order_materializer_with_empty_holoindex_evidence(
     tmp_path: Path,
 ) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
-    profile = _write_runtime_json(tmp_path, "profile.json", _profile(holoindex_evidence=None))
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile(holoindex_evidence={}))
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
@@ -3887,7 +3887,7 @@ def test_bootstrap_rejects_work_order_materializer_without_holoindex_evidence(
     )
 
     assert result.accepted is False
-    assert "work_order_materializer_missing_holoindex_evidence" in result.rejection_reasons
+    assert "work_order_materializer_malformed_holoindex_evidence:holoindex_query" in result.rejection_reasons
 
 
 def test_bootstrap_rejects_work_order_materializer_without_context_binding(

@@ -26,6 +26,10 @@
 - Proved attacker-rehashed list/map type confusion cannot write a source,
   publish or recover a profile, reach queue materialization, or pass the live
   canary profile reader. The source and effect projections do not coerce data.
+- Added security-review regressions for `denied_paths: null`, false nested
+  no-effect assertions, and malformed runtime digests. The resident queue
+  bootstrap preserves authoritative work-state bytes and emits no chain result
+  when the legacy effect projection is malformed.
 
 ## 2026-08-05: Current-generation use-time trust regressions
 

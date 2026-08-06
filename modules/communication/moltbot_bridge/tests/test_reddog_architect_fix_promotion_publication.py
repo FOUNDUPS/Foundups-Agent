@@ -260,15 +260,26 @@ def test_publication_commits_state_then_profile_and_cleans_journal(
     assert not publisher.stage_path.exists()
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("allowed_paths", {"attacker_extra": "value"}),
+        ("denied_paths", None),
+        ("consensus_receipt_digest", "not-a-digest"),
+        ("proposal_admission", {"no_execution_performed": False}),
+    ),
+)
 def test_publication_rejects_profile_type_confusion_with_zero_effects(
     tmp_path: Path,
+    field: str,
+    value: object,
 ) -> None:
     runtime, store, publisher = _runtime(tmp_path)
     request = _request(store)
     original_state = (runtime / "work_state.json").read_bytes()
     profile = {
         **request.authority_profile,
-        "allowed_paths": {"attacker_extra": "value"},
+        field: value,
     }
     updated = json.loads(json.dumps(request.updated_work_state))
     updated["architect_fix_promotions"][0][

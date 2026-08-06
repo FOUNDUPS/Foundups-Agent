@@ -178,6 +178,16 @@ _NO_EFFECT_FIELDS = frozenset(
         "no_worktree_created",
     }
 )
+_NULLABLE_RUNTIME_SUFFIXES = (
+    "model_selection_receipt.panel_topology_digest",
+    "model_selection_receipt.requirements.max_input_cost_per_million",
+    "model_selection_receipt.requirements.max_output_cost_per_million",
+    "model_selection_receipt.requirements.min_context_window",
+    "model_selection_receipt.requirements.panel_topology_digest",
+    "model_runtime_binding_receipt.policy.required_panel_topology_digest",
+    "model_runtime_binding_receipt.verification_receipt.panel_aggregate_receipt_digest",
+    "model_runtime_binding_receipt.verification_receipt.panel_aggregate_receipt_id",
+)
 
 
 def rehydrate_authority_profile_seed(value: Any) -> dict[str, Any]:
@@ -203,7 +213,7 @@ def rehydrate_authority_profile_effect_scope(value: Any) -> dict[str, Any]:
 
     if type(value) is not dict:
         raise ValueError("authority_profile_not_plain_mapping")
-    unsafe = tuple(_invalid_type_paths(value, allow_none=True)) + tuple(
+    unsafe = tuple(_invalid_type_paths(value)) + tuple(
         field
         for field in _NO_EFFECT_FIELDS
         if field in value and value[field] is not True
@@ -236,12 +246,8 @@ def _rehydrate(value: Any, *, mode: str) -> dict[str, Any]:
     unsafe = (
         tuple(unknown)
         + tuple(authority_profile_secret_field_paths(value))
-        + (
-            ()
-            if mode == "runtime"
-            else tuple(authority_profile_malformed_digest_paths(value))
-        )
-        + tuple(_invalid_type_paths(value, allow_none=mode == "runtime"))
+        + tuple(authority_profile_malformed_digest_paths(value))
+        + tuple(_invalid_type_paths(value))
         + tuple(
             field
             for field in _NO_EFFECT_FIELDS
@@ -264,66 +270,70 @@ def _rehydrate(value: Any, *, mode: str) -> dict[str, Any]:
     return canonical
 
 
-def _invalid_type_paths(value: Any, *, allow_none: bool = False) -> tuple[str, ...]:
+def _invalid_type_paths(value: Any) -> tuple[str, ...]:
     found: list[str] = []
+    for key, child in value.items():
+        _visit_type_paths(child, str(key), str(key), found)
+    return tuple(dict.fromkeys(found))
 
-    def visit(item: Any, path: str, field: str) -> None:
-        if item is None:
-            if not allow_none:
-                found.append(path)
-            return
-        if field != "scoring_rationale" and ".scoring_rationale." in f".{path}.":
-            if type(item) is not str:
-                found.append(path)
-            return
-        if field in _MAPPING_FIELDS:
-            if type(item) is not dict:
-                found.append(path)
-                return
-        elif field in _MAPPING_LIST_FIELDS:
-            if not _is_mapping_list(item):
-                found.append(path)
-                return
-            for index, child in enumerate(item):
-                for key, nested in child.items():
-                    visit(nested, f"{path}[{index}].{key}", str(key))
-            return
-        elif field in _STRING_LIST_FIELDS:
-            if type(item) not in (list, tuple) or any(
-                type(child) is not str for child in item
-            ):
-                found.append(path)
-            return
-        elif field.startswith("no_") or field in _BOOL_FIELDS:
-            if type(item) is not bool:
-                found.append(path)
-            return
-        elif field in _INT_FIELDS:
-            if type(item) is not int:
-                found.append(path)
-            return
-        elif field in _NUMBER_FIELDS:
-            if type(item) not in (int, float) or not math.isfinite(float(item)):
-                found.append(path)
-            return
-        elif type(item) is not str:
+
+def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> None:
+    if item is None:
+        if not any(path.endswith(suffix) for suffix in _NULLABLE_RUNTIME_SUFFIXES):
+            found.append(path)
+        return
+    if field != "scoring_rationale" and ".scoring_rationale." in f".{path}.":
+        if type(item) is not str:
+            found.append(path)
+        return
+    if field in _MAPPING_FIELDS:
+        if type(item) is not dict:
             found.append(path)
             return
-        if isinstance(item, Mapping):
-            for key, child in item.items():
-                if type(key) is not str:
-                    found.append(f"{path}.$key")
-                    continue
-                visit(child, f"{path}.{key}" if path else key, key)
-        elif isinstance(item, Sequence) and not isinstance(
-            item, (str, bytes, bytearray)
+    elif field in _MAPPING_LIST_FIELDS:
+        if not _is_mapping_list(item):
+            found.append(path)
+            return
+        for index, child in enumerate(item):
+            for key, nested in child.items():
+                _visit_type_paths(nested, f"{path}[{index}].{key}", str(key), found)
+        return
+    elif field in _STRING_LIST_FIELDS:
+        if type(item) not in (list, tuple) or any(
+            type(child) is not str for child in item
         ):
-            for index, child in enumerate(item):
-                visit(child, f"{path}[{index}]", "")
-
-    for key, child in value.items():
-        visit(child, str(key), str(key))
-    return tuple(dict.fromkeys(found))
+            found.append(path)
+        return
+    elif field.startswith("no_"):
+        if item is not True:
+            found.append(path)
+        return
+    elif field in _BOOL_FIELDS:
+        if type(item) is not bool:
+            found.append(path)
+        return
+    elif field in _INT_FIELDS:
+        if type(item) is not int:
+            found.append(path)
+        return
+    elif field in _NUMBER_FIELDS:
+        if type(item) not in (int, float) or not math.isfinite(float(item)):
+            found.append(path)
+        return
+    elif type(item) is not str:
+        found.append(path)
+        return
+    if isinstance(item, Mapping):
+        for key, child in item.items():
+            if type(key) is not str:
+                found.append(f"{path}.$key")
+                continue
+            _visit_type_paths(child, f"{path}.{key}" if path else key, key, found)
+    elif isinstance(item, Sequence) and not isinstance(
+        item, (str, bytes, bytearray)
+    ):
+        for index, child in enumerate(item):
+            _visit_type_paths(child, f"{path}[{index}]", "", found)
 
 
 def _is_mapping_list(value: Any) -> bool:
