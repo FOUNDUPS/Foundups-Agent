@@ -2053,6 +2053,8 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
 - Added signature, resolver-substitution, malformed revocation, model-binding,
   expiry, record-mutation, atomic replay, durable replay, opacity, bounded
   content, and no-caller-projection regressions.
+- Added nested mutation, pre-model digest revalidation, and stable-cognition
+  duplicate-cycle regressions for independently reviewed security findings.
 - Added an end-to-end backend architect test proving only the authenticated
   accepted principal decision reaches the model and an expired context prevents
   any model call.

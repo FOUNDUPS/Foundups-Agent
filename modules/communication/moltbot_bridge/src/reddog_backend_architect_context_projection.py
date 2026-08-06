@@ -33,6 +33,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_work_promotion
 from modules.communication.moltbot_bridge.src.reddog_principal_memex_resident_admission import (
     AuthenticatedPrincipalMemexContext,
     consume_authenticated_principal_memex_context,
+    validate_principal_memex_admission_output,
 )
 
 
@@ -166,9 +167,13 @@ def resolve_principal_memex_context(
     )
     if not result.accepted:
         return ArchitectPrincipalMemexAdmission(None, None, (rejection_reason,))
-    return ArchitectPrincipalMemexAdmission(
-        result.context_view, result.admission_receipt, ()
+    validated = validate_principal_memex_admission_output(
+        result.admission_receipt, result.context_view
     )
+    if validated is None:
+        return ArchitectPrincipalMemexAdmission(None, None, (rejection_reason,))
+    receipt, context_view = validated
+    return ArchitectPrincipalMemexAdmission(context_view, receipt, ())
 
 
 def architect_cycle_id(
@@ -190,10 +195,21 @@ def architect_cycle_id(
         "conversation_binding_digest": str(
             (conversation_binding or {}).get("conversation_binding_digest") or ""
         ),
-        "principal_memex_admission_digest": (
-            _digest(principal_memex_receipt) if principal_memex_receipt else ""
+        "principal_memex_context_digest": _principal_memex_cycle_digest(
+            principal_memex_receipt
         ),
     })
+
+
+def _principal_memex_cycle_digest(receipt: Mapping[str, Any] | None) -> str:
+    if not receipt:
+        return ""
+    stable_fields = (
+        "principal_id", "conversation_id", "conversation_revision",
+        "conversation_record_digest", "projection_id", "projection_manifest_digest",
+        "context_view_digest", "source_decision_item_ids", "admitted_item_ids",
+    )
+    return _digest({field: receipt.get(field) for field in stable_fields})
 
 
 def model_runtime_binding(

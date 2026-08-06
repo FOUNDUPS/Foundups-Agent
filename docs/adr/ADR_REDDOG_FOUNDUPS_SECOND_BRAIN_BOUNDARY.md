@@ -18,7 +18,8 @@ The earlier Second Brain framing mixed a long-term personal digital-twin vision 
 5. **Foundups Agent** is the first POC entity.
 6. The 012 Principal Memex is a separate cognition substrate for 0102, not a
    FoundUp Memex or authority source. Its structural read-only projection is
-   implemented; authenticated resident admission remains deferred.
+   implemented. Authenticated one-use backend-architect admission is also
+   implemented; automatic live resident source/disclosure supply remains deferred.
 7. Multi-RedDog governance, CABR weighting, stakeholders, and delegates are deferred research, not active runtime authority.
 
 ## Digital Twin and Principal Memex boundary

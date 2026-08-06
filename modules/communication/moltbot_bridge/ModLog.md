@@ -7,6 +7,8 @@
 - Added atomic revocation plus replay admission to the existing authority store
   and bound the exact model-runtime receipt, accepted decisions, TTL, and
   conversation revision.
+- Deep-froze admitted evidence, bound its canonical context digest, and made
+  duplicate-cycle identity depend on stable cognition rather than disclosure time.
 - Added no worker, repository, signer, merge, FoundUp, or HoloIndex authority.
 
 ## 2026-08-06: Principal and comparison conversation-scope boundary

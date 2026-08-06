@@ -46,6 +46,20 @@ from modules.communication.moltbot_bridge.src.reddog_principal_memex_disclosure 
 ADMISSION_SCHEMA_VERSION = "reddog_principal_memex_admission.v1"
 ADMISSION_ACCEPT = "PRINCIPAL_MEMEX_ADMISSION_ACCEPT"
 ADMISSION_REJECT = "PRINCIPAL_MEMEX_ADMISSION_REJECT"
+_CONTEXT_FIELDS = frozenset({
+    "source_class", "admission_receipt_id", "projection_id", "conversation_id",
+    "conversation_revision", "items", "authority_effect",
+})
+_CONTEXT_ITEM_FIELDS = frozenset({"item_id", "category", "statement"})
+_RECEIPT_FIELDS = frozenset({
+    "schema_version", "principal_id", "conversation_id", "conversation_revision",
+    "conversation_record_digest", "projection_id", "projection_manifest_digest",
+    "context_view_digest", "source_decision_item_ids", "admitted_item_ids",
+    "disclosure_id", "conversation_scope_authority_digest",
+    "model_runtime_binding_receipt_id", "model_runtime_binding_digest",
+    "admitted_at", "expires_at", "authority_effect",
+    "no_work_authority_granted", "no_foundup_projection_performed", "receipt_id",
+})
 
 
 class _OpaqueContext:
@@ -162,11 +176,26 @@ def consume_authenticated_principal_memex_context(
         return _rejected("principal_memex_disclosure_rejected")
     receipt = _admission_receipt(seal, int(now_epoch))
     view = _context_view(seal, receipt)
+    if validate_principal_memex_admission_output(receipt, view) is None:
+        return _rejected("principal_memex_admission_output_invalid")
     return PrincipalMemexAdmissionResult(
         True, ADMISSION_ACCEPT,
-        admission_receipt=MappingProxyType(receipt),
-        context_view=MappingProxyType(view),
+        admission_receipt=_deep_freeze(receipt),
+        context_view=_deep_freeze(view),
     )
+
+
+def validate_principal_memex_admission_output(
+    receipt: Any, context_view: Any,
+) -> tuple[dict[str, Any], dict[str, Any]] | None:
+    try:
+        receipt_value = _deep_thaw(receipt)
+        context_value = _deep_thaw(context_view)
+    except (TypeError, ValueError):
+        return None
+    if not _admission_receipt_valid(receipt_value, context_value):
+        return None
+    return receipt_value, context_value
 
 
 def _consume_authority(
@@ -268,6 +297,7 @@ def _admission_receipt(seal: _ContextSeal, now_epoch: int) -> dict[str, Any]:
         "conversation_record_digest": disclosure.conversation_record_digest,
         "projection_id": projection["projection_id"],
         "projection_manifest_digest": projection["manifest_digest"],
+        "context_view_digest": canonical_digest(_context_payload(seal)),
         "source_decision_item_ids": list(disclosure.decision_item_ids),
         "admitted_item_ids": list(projection["item_ids"]),
         "disclosure_id": disclosure.disclosure_id,
@@ -284,10 +314,16 @@ def _admission_receipt(seal: _ContextSeal, now_epoch: int) -> dict[str, Any]:
 
 
 def _context_view(seal: _ContextSeal, receipt: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        **_context_payload(seal),
+        "admission_receipt_id": receipt["receipt_id"],
+    }
+
+
+def _context_payload(seal: _ContextSeal) -> dict[str, Any]:
     projection = seal.projection
     return {
         "source_class": "principal_memex",
-        "admission_receipt_id": receipt["receipt_id"],
         "projection_id": projection["projection_id"],
         "conversation_id": seal.disclosure.conversation_id,
         "conversation_revision": seal.disclosure.conversation_revision,
@@ -297,6 +333,65 @@ def _context_view(seal: _ContextSeal, receipt: Mapping[str, Any]) -> dict[str, A
         ],
         "authority_effect": "none",
     }
+
+
+def _admission_receipt_valid(
+    receipt: dict[str, Any], context: dict[str, Any],
+) -> bool:
+    if set(context) != _CONTEXT_FIELDS or set(receipt) != _RECEIPT_FIELDS:
+        return False
+    payload = {key: value for key, value in receipt.items() if key != "receipt_id"}
+    items = context.get("items")
+    if type(items) is not list or not items:
+        return False
+    item_ids = [item.get("item_id") for item in items if type(item) is dict]
+    context_payload = {
+        key: value for key, value in context.items() if key != "admission_receipt_id"
+    }
+    return bool(
+        len(item_ids) == len(items)
+        and all(set(item) == _CONTEXT_ITEM_FIELDS for item in items)
+        and all(type(value) is str and value for item in items for value in item.values())
+        and type(receipt.get("conversation_revision")) is int
+        and int(receipt["conversation_revision"]) >= 0
+        and type(receipt.get("admitted_at")) is int
+        and type(receipt.get("expires_at")) is int
+        and int(receipt["admitted_at"]) < int(receipt["expires_at"])
+        and type(receipt.get("source_decision_item_ids")) is list
+        and len(receipt["source_decision_item_ids"])
+        == len(set(receipt["source_decision_item_ids"])) > 0
+        and len(item_ids) == len(set(item_ids))
+        and receipt.get("schema_version") == ADMISSION_SCHEMA_VERSION
+        and receipt.get("receipt_id") == canonical_digest(payload)
+        and receipt.get("context_view_digest") == canonical_digest(context_payload)
+        and context.get("admission_receipt_id") == receipt.get("receipt_id")
+        and context.get("source_class") == "principal_memex"
+        and context.get("authority_effect") == receipt.get("authority_effect") == "none"
+        and context.get("projection_id") == receipt.get("projection_id")
+        and context.get("conversation_id") == receipt.get("conversation_id")
+        and context.get("conversation_revision") == receipt.get("conversation_revision")
+        and item_ids == receipt.get("admitted_item_ids")
+        and receipt.get("no_work_authority_granted") is True
+        and receipt.get("no_foundup_projection_performed") is True
+    )
+
+
+def _deep_freeze(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return MappingProxyType({str(key): _deep_freeze(item) for key, item in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_deep_freeze(item) for item in value)
+    return value
+
+
+def _deep_thaw(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {str(key): _deep_thaw(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_deep_thaw(item) for item in value]
+    if value is None or type(value) in {str, int, bool}:
+        return value
+    raise TypeError("principal_memex_admission_output_type_invalid")
 
 
 def _rejected(*reasons: str) -> PrincipalMemexAdmissionResult:
@@ -309,4 +404,5 @@ __all__ = [
     "ADMISSION_ACCEPT", "ADMISSION_REJECT", "AuthenticatedPrincipalMemexContext",
     "PrincipalMemexAdmissionResult", "consume_authenticated_principal_memex_context",
     "prepare_authenticated_principal_memex_context",
+    "validate_principal_memex_admission_output",
 ]

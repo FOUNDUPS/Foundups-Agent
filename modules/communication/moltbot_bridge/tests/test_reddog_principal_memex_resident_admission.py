@@ -32,6 +32,7 @@ from modules.communication.moltbot_bridge.src.reddog_principal_memex_resident_ad
     AuthenticatedPrincipalMemexContext,
     consume_authenticated_principal_memex_context,
     prepare_authenticated_principal_memex_context,
+    validate_principal_memex_admission_output,
 )
 from modules.communication.moltbot_bridge.tests.reddog_conversation_scope_signing_test_support import (
     NOW,
@@ -184,10 +185,33 @@ def test_signed_principal_decision_is_admitted_once_without_authority(tmp_path: 
     assert _consume(prepared.context).accepted is False
 
 
+def test_accepted_output_is_deeply_immutable_and_digest_bound(tmp_path: Path) -> None:
+    prepared, _ = _prepared(tmp_path / "deep-freeze.sqlite")
+    admitted = _consume(prepared.context)
+    assert admitted.accepted is True
+
+    with pytest.raises(TypeError):
+        admitted.context_view["items"][0]["statement"] = "FORGED_AFTER_ADMISSION"
+    with pytest.raises(AttributeError):
+        admitted.context_view["items"].append({"item_id": "forged"})
+    with pytest.raises(TypeError):
+        admitted.admission_receipt["source_decision_item_ids"][0] = "forged"
+
+    receipt = dict(admitted.admission_receipt)
+    context_view = dict(admitted.context_view)
+    context_view["items"] = [dict(item) for item in context_view["items"]]
+    context_view["items"][0]["statement"] = "FORGED_AFTER_ADMISSION"
+    assert validate_principal_memex_admission_output(receipt, context_view) is None
+
+
 def test_only_accepted_operator_decisions_reach_context(tmp_path: Path) -> None:
     prepared, _ = _prepared(tmp_path / "bounded.sqlite")
     admitted = _consume(prepared.context)
-    encoded = json.dumps(dict(admitted.context_view), sort_keys=True)
+    validated = validate_principal_memex_admission_output(
+        admitted.admission_receipt, admitted.context_view
+    )
+    assert validated is not None
+    encoded = json.dumps(validated[1], sort_keys=True)
     assert "Audit before implementation." in encoded
     assert "Skip verification." not in encoded
     assert "Which FoundUp" not in encoded
@@ -350,13 +374,17 @@ def test_architect_context_contains_only_admitted_principal_memex_view(tmp_path:
     class Evidence:
         evidence_bundle_id = "sha256:" + "3" * 64
 
+    validated = validate_principal_memex_admission_output(
+        admitted.admission_receipt, admitted.context_view
+    )
+    assert validated is not None
     encoded = build_architect_context(
         context_view=Context(), evidence_bundle=Evidence(), reports=(),
         conversation_binding=None, max_chars=20_000,
-        principal_memex_view=admitted.context_view,
+        principal_memex_view=validated[1],
     )
     payload = json.loads(encoded)
-    assert payload["principal_memex_context"] == dict(admitted.context_view)
+    assert payload["principal_memex_context"] == validated[1]
     assert payload["conversation_work_binding"] == {}
 
 

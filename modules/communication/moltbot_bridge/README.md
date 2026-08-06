@@ -10,6 +10,8 @@ rechecks the model-runtime binding, expiry and revocation, then atomically
 consumes the disclosure nonce in the authority runtime store. Only public
 accepted `operator_statement` decisions reach model context. Rejected options,
 open questions, objectives, credentials, raw history, and FoundUp state do not.
+The admitted receipt and context are deeply immutable, revalidated immediately
+before use, and duplicate-cycle identity excludes volatile disclosure metadata.
 
 This path grants no work, repository, signer, merge, FoundUp-projection, or
 HoloIndex authority. Durable Principal Memex source issuance and automatic
