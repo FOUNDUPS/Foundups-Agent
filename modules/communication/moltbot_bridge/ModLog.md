@@ -1,4 +1,14 @@
 # ModLog - moltbot_bridge
+## 2026-08-06: Authenticated Principal Memex resident admission
+- Added principal-signed one-use disclosure and opaque resident context
+  admission for the backend architect model.
+- Derived content only from the current signed principal conversation record;
+  caller-supplied structural projections are not accepted.
+- Added atomic revocation plus replay admission to the existing authority store
+  and bound the exact model-runtime receipt, accepted decisions, TTL, and
+  conversation revision.
+- Added no worker, repository, signer, merge, FoundUp, or HoloIndex authority.
+
 ## 2026-08-06: Principal and comparison conversation-scope boundary
 - Extended the authenticated conversation contract with immutable `foundup`,
   `principal`, and `comparison` scope kinds. Principal/comparison state carries

@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-06 - Principal Memex resident-admission backend (0.4.62)
+
+- Pinned the backend dependency closure after authenticated, one-use Principal
+  Memex context admission reached the resident architect model boundary.
+- Added no extension history source, worker dispatch, repository, signer,
+  merge, FoundUp, or HoloIndex authority.
+
 ## 2026-08-06 - Conversation scope-kind backend boundary (0.4.61)
 
 - Pinned the backend manifest that introduces immutable `foundup`, `principal`,

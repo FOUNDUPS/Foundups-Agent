@@ -86,6 +86,14 @@ def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
         "reddog_signer_current_generation_use_time_gate.py",
         "modules/communication/moltbot_bridge/src/"
         "reddog_authoritative_use_lease.py",
+        "modules/ai_intelligence/digital_twin/src/"
+        "principal_memex_contract.py",
+        "modules/ai_intelligence/digital_twin/src/"
+        "principal_memex_projection.py",
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_principal_memex_disclosure.py",
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_principal_memex_resident_admission.py",
     )
     assert all(path in required for path in expected)
     for filename in (
@@ -127,5 +135,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     assert generator.canonical_manifest_digest(generated) == (
-        "139b480bf856adcc787fe8eceddb5b3502eb688aa1e2186199e0467eda2dd8a1"
+        "fa33316ac0dcb9f1a57fb2326099511df7f2269e8b302fac429a177d6890d41a"
     )

@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-06 - Principal Memex resident-admission backend (0.4.62)
+
+- Re-ran the complete extension contract and backend manifest parity checks.
+- Confirmed version `0.4.62` uniquely pins the Principal Memex admission
+  dependency closure without adding extension-side authority.
+
 ## 2026-08-06 - Conversation scope-kind backend boundary (0.4.61)
 
 - Re-ran the complete extension contract suite against the new backend manifest

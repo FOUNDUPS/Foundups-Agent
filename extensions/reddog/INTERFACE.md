@@ -1,5 +1,11 @@
 # RedDog Interface
 
+Version 0.4.62 pins the backend closure for authenticated Principal Memex
+resident admission. No new extension command or history source is exposed.
+The backend can admit only public accepted decisions from a current signed
+principal conversation through a separate principal-signed one-use disclosure;
+the context grants no execution authority.
+
 Version 0.4.61 pins the backend boundary for immutable `foundup`, `principal`,
 and `comparison` scope kinds. Only `foundup` scope may enter the existing work
 promotion path; no new extension command or execution authority is added.

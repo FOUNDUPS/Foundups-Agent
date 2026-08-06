@@ -1,5 +1,20 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## Principal Memex resident admission
+
+The backend architect can consume one opaque Principal Memex context prepared
+from the current signed `principal` conversation scope. Preparation consumes
+the existing conversation-scope capability and verifies a separate
+principal-signed disclosure. Use time reloads the exact AgentDB revision,
+rechecks the model-runtime binding, expiry and revocation, then atomically
+consumes the disclosure nonce in the authority runtime store. Only public
+accepted `operator_statement` decisions reach model context. Rejected options,
+open questions, objectives, credentials, raw history, and FoundUp state do not.
+
+This path grants no work, repository, signer, merge, FoundUp-projection, or
+HoloIndex authority. Durable Principal Memex source issuance and automatic
+resident supply remain separate work.
+
 ## RedDog conversational state boundary
 
 RedDog has an AgentDB-backed authenticated conversation-scope runtime. It

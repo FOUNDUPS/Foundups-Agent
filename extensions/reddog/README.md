@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.61
+Version: 0.4.62
+
+Version 0.4.62 pins the authenticated Principal Memex resident-admission
+backend. The extension adds no history source or command: only a separately
+authenticated backend context may expose public accepted principal decisions
+to the resident architect model, with no work or repository authority.
 
 Version 0.4.61 pins the backend boundary for immutable `foundup`, `principal`,
 and `comparison` conversation scope kinds. Principal and comparison scopes do

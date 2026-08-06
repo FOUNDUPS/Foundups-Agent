@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import hashlib
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
@@ -29,6 +30,10 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_work_promotion
     AuthenticatedConversationWorkContext,
     conversation_work_binding,
 )
+from modules.communication.moltbot_bridge.src.reddog_principal_memex_resident_admission import (
+    AuthenticatedPrincipalMemexContext,
+    consume_authenticated_principal_memex_context,
+)
 
 
 @dataclass(frozen=True)
@@ -39,6 +44,62 @@ class ArchitectRuntimeBindingMetadata:
     runtime_binding_receipt_id: str | None
     runtime_binding_digest: str | None
     rejection_reasons: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ArchitectPrincipalMemexAdmission:
+    context_view: Mapping[str, Any] | None
+    receipt: Mapping[str, Any] | None
+    rejection_reasons: tuple[str, ...]
+
+
+def resolve_principal_memex_cycle(
+    *, blocked: bool, context: AuthenticatedPrincipalMemexContext | None,
+    runtime_binding_receipt_id: str | None, runtime_binding_digest: str | None,
+    observed_at: str, rejection_reason: str,
+    snapshot: OperationalContextSnapshot | None, report_bundle_id: str | None,
+    report_digests: Sequence[str], wsp15_allocation_digest: str | None,
+    model_selection_digest: str | None,
+    conversation_binding: Mapping[str, Any] | None,
+) -> tuple[ArchitectPrincipalMemexAdmission, str | None]:
+    admission = ArchitectPrincipalMemexAdmission(None, None, ())
+    if not blocked:
+        admission = resolve_principal_memex_context(
+            context=context, runtime_binding_receipt_id=runtime_binding_receipt_id,
+            runtime_binding_digest=runtime_binding_digest, observed_at=observed_at,
+            rejection_reason=rejection_reason,
+        )
+    cycle_id = architect_cycle_id(
+        snapshot=snapshot, report_bundle_id=report_bundle_id,
+        report_digests=report_digests,
+        wsp15_allocation_digest=wsp15_allocation_digest,
+        model_selection_digest=model_selection_digest,
+        conversation_binding=conversation_binding,
+        principal_memex_receipt=admission.receipt,
+    )
+    return admission, cycle_id
+
+
+def architect_model_binding(
+    *, base: Mapping[str, Any], cycle_id: str,
+    model_selection: Mapping[str, Any],
+    conversation_binding: Mapping[str, Any] | None,
+    principal_memex_receipt: Mapping[str, Any] | None,
+) -> Mapping[str, Any]:
+    binding = {**base, "cycle_id": cycle_id}
+    if model_selection:
+        binding = {**binding, "model_selection": dict(model_selection)}
+    if conversation_binding:
+        binding = {**binding, "conversation_work_binding": dict(conversation_binding)}
+    if principal_memex_receipt:
+        binding = {
+            **binding,
+            "principal_memex_admission_receipt_id": str(
+                principal_memex_receipt.get("receipt_id") or ""
+            ),
+            "principal_memex_admission_digest": _digest(principal_memex_receipt),
+        }
+    return binding
 
 
 def resolve_conversation_context(
@@ -88,6 +149,53 @@ def resolve_architect_runtime_binding(
     )
 
 
+def resolve_principal_memex_context(
+    *, context: AuthenticatedPrincipalMemexContext | None,
+    runtime_binding_receipt_id: str | None,
+    runtime_binding_digest: str | None,
+    observed_at: str,
+    rejection_reason: str,
+) -> ArchitectPrincipalMemexAdmission:
+    if context is None:
+        return ArchitectPrincipalMemexAdmission(None, None, ())
+    result = consume_authenticated_principal_memex_context(
+        context,
+        model_runtime_binding_receipt_id=str(runtime_binding_receipt_id or ""),
+        model_runtime_binding_digest=str(runtime_binding_digest or ""),
+        now_epoch=_iso_epoch(observed_at),
+    )
+    if not result.accepted:
+        return ArchitectPrincipalMemexAdmission(None, None, (rejection_reason,))
+    return ArchitectPrincipalMemexAdmission(
+        result.context_view, result.admission_receipt, ()
+    )
+
+
+def architect_cycle_id(
+    *, snapshot: OperationalContextSnapshot | None,
+    report_bundle_id: str | None, report_digests: Sequence[str],
+    wsp15_allocation_digest: str | None, model_selection_digest: str | None,
+    conversation_binding: Mapping[str, Any] | None = None,
+    principal_memex_receipt: Mapping[str, Any] | None = None,
+) -> str | None:
+    if snapshot is None or not report_bundle_id or not wsp15_allocation_digest:
+        return None
+    return _digest({
+        "snapshot_receipt_id": snapshot.snapshot_receipt_id,
+        "snapshot_content_digest": snapshot.snapshot_content_digest,
+        "report_bundle_id": report_bundle_id,
+        "report_digests": tuple(report_digests),
+        "wsp15_allocation_digest": wsp15_allocation_digest,
+        "model_selection_digest": model_selection_digest,
+        "conversation_binding_digest": str(
+            (conversation_binding or {}).get("conversation_binding_digest") or ""
+        ),
+        "principal_memex_admission_digest": (
+            _digest(principal_memex_receipt) if principal_memex_receipt else ""
+        ),
+    })
+
+
 def model_runtime_binding(
     value: Any,
     reasons: list[str],
@@ -109,6 +217,7 @@ def build_architect_context(
     reports: Sequence[Mapping[str, Any]],
     conversation_binding: Mapping[str, Any] | None,
     max_chars: int,
+    principal_memex_view: Mapping[str, Any] | None = None,
 ) -> str:
     payload = {
         "context_view_id": context_view.context_view_id,
@@ -117,6 +226,7 @@ def build_architect_context(
         "context_view_text": _bound_text(context_view.text, 6000),
         "audit_reports": [report_prompt_view(report) for report in reports],
         "conversation_work_binding": dict(conversation_binding or {}),
+        "principal_memex_context": dict(principal_memex_view or {}),
     }
     encoded = _canonical_json(payload)
     if len(encoded) > max_chars:
@@ -188,7 +298,7 @@ def _bound_text(value: Any, max_chars: int) -> str:
 
 def _canonical_json(value: Mapping[str, Any]) -> str:
     return json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        dict(value), sort_keys=True, separators=(",", ":"), ensure_ascii=True
     )
 
 
@@ -246,11 +356,26 @@ def _optional(value: Any) -> str | None:
     return str(value).strip() if str(value or "").strip() else None
 
 
+def _iso_epoch(value: str) -> int:
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return 0
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return int(parsed.timestamp())
+
+
 __all__ = [
+    "ArchitectPrincipalMemexAdmission",
+    "architect_model_binding",
+    "architect_cycle_id",
     "build_architect_context",
     "conversation_snapshot_matches",
     "model_runtime_binding",
     "report_prompt_view",
     "resolve_architect_runtime_binding",
     "resolve_conversation_context",
+    "resolve_principal_memex_context",
+    "resolve_principal_memex_cycle",
 ]

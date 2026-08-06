@@ -2048,3 +2048,12 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
 - Proved the legacy signer CLI always rejects without authority, resolver, or
   socket effects, and the stable entrypoint passes the exact root-owned signer
   UID/GID into the pre-key Linux isolation gate.
+## 2026-08-06 - Authenticated Principal Memex resident admission
+
+- Added signature, resolver-substitution, malformed revocation, model-binding,
+  expiry, record-mutation, atomic replay, durable replay, opacity, bounded
+  content, and no-caller-projection regressions.
+- Added an end-to-end backend architect test proving only the authenticated
+  accepted principal decision reaches the model and an expired context prevents
+  any model call.
+- Added WSP 62 and effect-surface AST guards for the new runtime modules.

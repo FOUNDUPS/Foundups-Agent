@@ -21,12 +21,13 @@ secret-shaped serialized text, and malformed provenance identifiers.
 Rehydration recomputes the complete projection. Public digest recomputation is
 structural integrity, not source authenticity.
 
-This interface grants no trust or authority. Its output remains
-`runtime_admissible=false` until a separate authenticated resident admission
-layer verifies each source receipt and binds the exact principal conversation.
-It never projects data to a FoundUp automatically. This structural API is
-intentionally not exported by `src.__init__` or included in RedDog's sealed
-resident dependency closure until that admission slice is implemented.
+This structural interface grants no trust or authority. Its output remains
+`runtime_admissible=false` when supplied directly. The RedDog resident backend
+now has a separate authenticated admission path that derives this projection
+internally from the exact current signed principal conversation record and a
+principal-signed, one-use disclosure bound to the model runtime. The admission
+path exposes only public accepted operator statements and grants no work or
+FoundUp authority. It never projects data to a FoundUp automatically.
 
 ---
 

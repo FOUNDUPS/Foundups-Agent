@@ -54,11 +54,16 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_work_promotion
     AuthenticatedConversationWorkContext,
 )
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_context_projection import (
+    architect_model_binding,
     build_architect_context as _build_architect_context,
     model_runtime_binding as _model_runtime_binding,
     report_prompt_view as _report_prompt_view,
     resolve_architect_runtime_binding,
     resolve_conversation_context,
+    resolve_principal_memex_cycle,
+)
+from modules.communication.moltbot_bridge.src.reddog_principal_memex_resident_admission import (
+    AuthenticatedPrincipalMemexContext,
 )
 from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
     ProviderCallAttemptError,
@@ -128,6 +133,9 @@ class ArchitectDeterminationReason:
     )
     CONVERSATION_CONTEXT_INVALID = (
         "REJECT_ARCHITECT_DETERMINATION_CONVERSATION_CONTEXT_INVALID"
+    )
+    PRINCIPAL_MEMEX_CONTEXT_INVALID = (
+        "REJECT_ARCHITECT_DETERMINATION_PRINCIPAL_MEMEX_CONTEXT_INVALID"
     )
 
 
@@ -611,9 +619,9 @@ def run_reddog_backend_architect_determination_runtime(
     now_iso: str | None = None,
     timeout_seconds: int = 60,
     conversation_work_context: AuthenticatedConversationWorkContext | None = None,
+    principal_memex_context: AuthenticatedPrincipalMemexContext | None = None,
 ) -> BackendArchitectDeterminationResult:
     """Produce, persist, and queue-candidate one backend architect determination."""
-
     observed_at = now_iso or datetime.now(timezone.utc).isoformat()
     reasons: list[str] = []
     model_result: ArchitectModelResult | None = None
@@ -623,7 +631,6 @@ def run_reddog_backend_architect_determination_runtime(
         ArchitectDeterminationReason.CONVERSATION_CONTEXT_INVALID,
     )
     reasons.extend(conversation_reasons)
-
     _validate_static_inputs(
         snapshot=snapshot,
         context_view=context_view,
@@ -651,14 +658,18 @@ def run_reddog_backend_architect_determination_runtime(
     model_selection_digest = runtime_metadata.model_selection_digest
     model_runtime_binding_receipt_id = runtime_metadata.runtime_binding_receipt_id
     model_runtime_binding_digest = runtime_metadata.runtime_binding_digest
-    cycle_id = _cycle_id(
-        snapshot=snapshot,
-        report_bundle_id=report_bundle_id,
-        report_digests=report_digests,
-        wsp15_allocation_digest=allocation_digest,
+    principal_memex, cycle_id = resolve_principal_memex_cycle(
+        blocked=bool(reasons), context=principal_memex_context,
+        runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+        runtime_binding_digest=model_runtime_binding_digest, observed_at=observed_at,
+        rejection_reason=ArchitectDeterminationReason.PRINCIPAL_MEMEX_CONTEXT_INVALID,
+        snapshot=snapshot, report_bundle_id=report_bundle_id,
+        report_digests=report_digests, wsp15_allocation_digest=allocation_digest,
         model_selection_digest=model_selection_digest,
         conversation_binding=conversation_binding,
     )
+    reasons.extend(principal_memex.rejection_reasons)
+    principal_memex_receipt = principal_memex.receipt
     writer = store if store is not None else AgentDbArchitectDeterminationStore()
     if cycle_id and not reasons:
         try:
@@ -666,7 +677,6 @@ def run_reddog_backend_architect_determination_runtime(
                 reasons.append(ArchitectDeterminationReason.DUPLICATE_CYCLE)
         except Exception:
             reasons.append(ArchitectDeterminationReason.STORE_REJECTED)
-
     if reasons:
         receipt = _receipt(
             accepted=False,
@@ -692,7 +702,6 @@ def run_reddog_backend_architect_determination_runtime(
         )
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
-
     assert snapshot is not None
     assert context_view is not None
     assert evidence_bundle is not None
@@ -716,6 +725,7 @@ def run_reddog_backend_architect_determination_runtime(
             reports=reports,
             conversation_binding=conversation_binding,
             max_chars=DEFAULT_MAX_PROMPT_CHARS,
+            principal_memex_view=principal_memex.context_view,
         )
     except ValueError:
         receipt = _receipt(
@@ -741,15 +751,13 @@ def run_reddog_backend_architect_determination_runtime(
             model_runtime_binding_digest=model_runtime_binding_digest,
         )
         return _result(receipt=receipt, persist_result=_persist_rejected(receipt))
-    binding = fusion_gate.determination_binding.to_dict() if fusion_gate.determination_binding else {}
-    binding = {**binding, "cycle_id": cycle_id}
-    if model_selection:
-        binding = {**binding, "model_selection": dict(model_selection)}
-    if conversation_binding:
-        binding = {
-            **binding,
-            "conversation_work_binding": dict(conversation_binding),
-        }
+    binding = architect_model_binding(
+        base=(fusion_gate.determination_binding.to_dict()
+              if fusion_gate.determination_binding else {}),
+        cycle_id=cycle_id, model_selection=model_selection,
+        conversation_binding=conversation_binding,
+        principal_memex_receipt=principal_memex_receipt,
+    )
     try:
         model_result = runner.run_architect_determination(
             prompt=prompt,
@@ -1474,33 +1482,6 @@ def _load_foundups_fusion_runner():
         if not callable(runner):
             raise ImportError("foundups_fusion_runner_unavailable")
         return runner
-
-
-def _cycle_id(
-    *,
-    snapshot: OperationalContextSnapshot | None,
-    report_bundle_id: Optional[str],
-    report_digests: Sequence[str],
-    wsp15_allocation_digest: Optional[str],
-    model_selection_digest: Optional[str],
-    conversation_binding: Mapping[str, Any] | None = None,
-) -> Optional[str]:
-    if snapshot is None or not report_bundle_id or not wsp15_allocation_digest:
-        return None
-    return _digest(
-        {
-            "snapshot_receipt_id": snapshot.snapshot_receipt_id,
-            "snapshot_content_digest": snapshot.snapshot_content_digest,
-            "report_bundle_id": report_bundle_id,
-            "report_digests": tuple(report_digests),
-            "wsp15_allocation_digest": wsp15_allocation_digest,
-            "model_selection_digest": model_selection_digest,
-            "conversation_binding_digest": str(
-                (conversation_binding or {}).get("conversation_binding_digest")
-                or ""
-            ),
-        }
-    )
 
 
 def _report_bundle_id(collection: ReadOnlyAuditReportCollectionResult | None) -> Optional[str]:

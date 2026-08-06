@@ -88,6 +88,11 @@ class AuthorityRuntimeStore(Protocol):
 
     def consume_verified_work_authority_nonce(self, nonce: str) -> bool: ...
 
+    def admit_principal_memex_disclosure(
+        self, nonce: str, principal_id: str, credential_id: str,
+        session_id: str, disclosure_id: str,
+    ) -> bool: ...
+
     def advance_verified_work_authority_publication(
         self, nonce: str, binding_digest: str, target_status: str
     ) -> str: ...
@@ -128,6 +133,27 @@ class InMemoryAuthorityRuntimeStore:
             committed["revision"] = _canonical_digest(committed)
             self._state = committed
             return True
+
+    def admit_principal_memex_disclosure(
+        self, nonce: str, principal_id: str, credential_id: str,
+        session_id: str, disclosure_id: str,
+    ) -> bool:
+        with self._lock:
+            if principal_memex_disclosure_revoked(
+                self._state, principal_id, credential_id, session_id, disclosure_id
+            ):
+                return False
+            return self._consume_nonce("principal_memex_disclosure_nonces", nonce)
+
+    def _consume_nonce(self, field: str, nonce: str) -> bool:
+        seen = self._state.get(field, [])
+        if not isinstance(seen, list) or nonce in set(map(str, seen)):
+            return False
+        committed = json.loads(json.dumps(self._state, sort_keys=True))
+        committed[field] = [*seen, nonce]
+        committed["revision"] = _canonical_digest(committed)
+        self._state = committed
+        return True
 
     def advance_verified_work_authority_publication(
         self, nonce: str, binding_digest: str, target_status: str
@@ -240,6 +266,24 @@ class AtomicJsonAuthorityRuntimeStore:
             )
             return True
 
+    def admit_principal_memex_disclosure(
+        self, nonce: str, principal_id: str, credential_id: str,
+        session_id: str, disclosure_id: str,
+    ) -> bool:
+        with self._operation_lock():
+            current = self._load_unlocked()
+            if principal_memex_disclosure_revoked(
+                current, principal_id, credential_id, session_id, disclosure_id
+            ):
+                return False
+            seen = current.get("principal_memex_disclosure_nonces", [])
+            if not isinstance(seen, list) or nonce in set(map(str, seen)):
+                return False
+            updated = dict(current)
+            updated["principal_memex_disclosure_nonces"] = [*seen, nonce]
+            self._write_snapshot(updated, expected_revision=current.get("revision"))
+            return True
+
     def advance_verified_work_authority_publication(
         self, nonce: str, binding_digest: str, target_status: str
     ) -> str:
@@ -307,25 +351,7 @@ class AtomicJsonAuthorityRuntimeStore:
         *,
         expected_revision: object,
     ) -> None:
-        if not target.parent.exists():
-            return
-        recovery_revision = (
-            expected_revision
-            if isinstance(expected_revision, str) and expected_revision
-            else None
-        )
-        with _stable_parent_directory(target.parent) as parent_handle:
-            if os.name == "nt":
-                recover_windows_interrupted_files(
-                    target,
-                    expected_revision=recovery_revision,
-                )
-            else:
-                recover_posix_interrupted_files(
-                    parent_handle,
-                    target.name,
-                    expected_revision=recovery_revision,
-                )
+        _recover_authority_runtime_write(target, expected_revision)
 
     def _validated_path(self, path: str | Path) -> Path:
         target = validate_runtime_artifact_path(
@@ -337,6 +363,28 @@ class AtomicJsonAuthorityRuntimeStore:
         if os.path.normcase(str(target)) != os.path.normcase(str(expected)):
             raise ValueError("authority_runtime_store_path_changed")
         return target
+
+
+def _recover_authority_runtime_write(target: Path, expected_revision: object) -> None:
+    if not target.parent.exists():
+        return
+    recovery_revision = (
+        expected_revision
+        if isinstance(expected_revision, str) and expected_revision
+        else None
+    )
+    with _stable_parent_directory(target.parent) as parent_handle:
+        if os.name == "nt":
+            recover_windows_interrupted_files(
+                target,
+                expected_revision=recovery_revision,
+            )
+        else:
+            recover_posix_interrupted_files(
+                parent_handle,
+                target.name,
+                expected_revision=recovery_revision,
+            )
 
 
 def _advanced_publication_snapshot(
@@ -377,6 +425,28 @@ def _advanced_publication_snapshot(
         target_status=target_status,
         order=order,
     )
+
+
+def principal_memex_disclosure_revoked(
+    snapshot: Mapping[str, Any], principal_id: str, credential_id: str,
+    session_id: str, disclosure_id: str,
+) -> bool:
+    revocations = snapshot.get("revocations", {})
+    if not isinstance(revocations, Mapping):
+        return True
+    checks = (
+        ("principal_ids", principal_id),
+        ("conversation_credential_ids", credential_id),
+        ("conversation_session_ids", session_id),
+        ("principal_memex_disclosure_ids", disclosure_id),
+    )
+    for field, value in checks:
+        revoked_values = revocations.get(field, ())
+        if not isinstance(revoked_values, (list, tuple)):
+            return True
+        if value in set(map(str, revoked_values)):
+            return True
+    return False
 
 
 def _advance_existing_publication(
@@ -601,4 +671,5 @@ __all__ = [
     "PrincipalAuthorityResolver",
     "atomic_create_confined_mapping",
     "atomic_replace_confined_mapping",
+    "principal_memex_disclosure_revoked",
 ]

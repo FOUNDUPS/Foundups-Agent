@@ -65,8 +65,16 @@ REDDOG_012_PRINCIPAL_MEMEX_READONLY_PROJECTION_PHASE1
 It is a structural, in-memory projection owned by
 `modules/ai_intelligence/digital_twin`. It is not runtime-admissible and
 performs no persistence, model-context admission, FoundUp projection,
-HoloIndex write, or work authorization. Authenticated source admission is a
-separate required slice.
+HoloIndex write, or work authorization when supplied directly.
+
+The second implemented layer is authenticated resident admission. RedDog may
+derive the structural projection only from the exact current signed
+principal-scoped conversation record and only after consuming both the
+conversation-scope capability and a separate principal-signed disclosure. The
+disclosure binds exact public accepted decision IDs, principal/session,
+conversation revision, model-runtime binding, nonce, TTL, revocation, and
+durable replay state. The admitted view is backend-architect model context only;
+it grants no work, FoundUp, repository, signer, merge, or HoloIndex authority.
 
 Information crosses between Principal and FoundUp Memex only through a future
 explicit, provenance-preserving projection. Neither side silently copies or
@@ -119,8 +127,8 @@ The following remain specified but not implemented:
 - CABR-weighted contribution credibility;
 - stakeholder and revocable delegate authority;
 - governance thresholds and Sybil resistance;
-- authenticated resident Principal Memex admission;
 - governed Principal Memex source issuance and retention;
+- automatic authenticated resident source supply;
 - explicit Principal-to-FoundUp and FoundUp-to-Principal projection.
 
 These require separate WSP_97 analysis and tested contracts before runtime authority is granted.

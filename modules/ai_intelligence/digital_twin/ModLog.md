@@ -2,6 +2,18 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-08-06 - Authenticated resident Principal Memex admission
+
+- Added a resident-only admission path that derives the structural Principal
+  Memex projection from the exact signed principal conversation record.
+- Bound disclosure to principal identity, conversation revision, exact accepted
+  decision IDs, model-runtime receipt, nonce, TTL, revocation, and durable
+  replay state.
+- Exposed only public accepted operator statements to the backend architect
+  model and preserved zero work, FoundUp, repository, and HoloIndex authority.
+- Kept durable Principal Memex source issuance, retention, learning, and
+  Principal-to-FoundUp projection deferred.
+
 ## 2026-08-06 - 012 Principal Memex read-only projection
 
 - Added typed Principal Memex items and a deterministic read-only projection

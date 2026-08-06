@@ -152,19 +152,19 @@ def _work_state() -> dict[str, object]:
     }
 
 
-def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
+def _fresh_holo_receipt(now_iso: str = NOW) -> HoloIndexFreshnessReceipt:
     return build_fresh_holoindex_receipt(
         repo_root=REPO_ROOT,
         head_sha=HEAD,
-        generated_at=NOW,
+        generated_at=now_iso,
     )
 
 
 def _build_inputs(
-    *,
-    include_reports: bool = True,
+    *, include_reports: bool = True,
     include_runtime_binding: bool = True,
     architect_runtime_binding: Mapping[str, Any] | None = None,
+    now_iso: str = NOW,
 ):
     if architect_runtime_binding is None:
         architect_runtime_binding = model_runtime_binding_receipt(
@@ -173,9 +173,9 @@ def _build_inputs(
     snapshot_result = build_operational_context_snapshot(
         repo_state=_repo_state(),
         work_state_snapshot=_work_state(),
-        holoindex_receipt=_fresh_holo_receipt(),
+        holoindex_receipt=_fresh_holo_receipt(now_iso),
         changed_paths=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
-        now_iso=NOW,
+        now_iso=now_iso,
         breadcrumb_scope="REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_PHASE1",
     )
     assert snapshot_result.accepted is True
@@ -195,7 +195,7 @@ def _build_inputs(
         current_work_state_revision=REVISION,
         requested_operation="backend_architect_determination",
         prompt_text="Produce backend architect determination",
-        now_iso=NOW,
+        now_iso=now_iso,
     )
     assert fusion_gate.accepted is True
     plan = plan_reddog_openclaw_readonly_audit_swarm(
