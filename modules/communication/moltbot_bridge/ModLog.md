@@ -18,7 +18,9 @@
   signing from WSP 62 hosts. The bounded supplier and split fixtures retain an
   AST gate. No state grants work, repository, signer, merge, or HoloIndex writes.
 - Exact-SHA review froze config output, applied the shared public-profile
-  allowlist, and unified config/runtime proposal verification.
+  allowlist, unified config/runtime proposal verification, and extended the
+  same gate to exact schemas for embedded model, WSP 15, proposal, and
+  operational-context receipts.
 - Legacy callers retain 16 KiB; only the explicit conversation bootstrap uses
   160 KiB. Stale v2, nested profile injection, and artifact collisions fail
   before writes or signer invocation (WSP 00/15/22/50/62/97).

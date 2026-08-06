@@ -18,7 +18,9 @@
   stranded row, retry succeeds, and `require_replay` remains forbidden.
 - Added exact WSP 62 AST coverage for authentication sources and tests.
 - Added review regressions for state overwrite, artifact collisions, nested
-  profile injection, request budgets, stale v2, and verifier parity.
+- Added exact nested-schema regressions for model selection/runtime receipts,
+  WSP 15 allocations, proposal admission, operational context, list members,
+  and malformed present values.
 
 ## 2026-08-05: Current-generation use-time trust regressions
 
