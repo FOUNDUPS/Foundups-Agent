@@ -41,11 +41,9 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_serv
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
     ArchitectProposalPolicyAuthorization,
     ArchitectProposalSignerPolicy,
+    DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS,
     ProposalAuthenticityNonceStore,
-    architect_proposal_replay_store_binding_digest,
-    architect_proposal_signer_instance_id,
-    rehydrate_architect_proposal_signer_policy,
-    verify_architect_proposal_policy_authorization,
+    rehydrate_architect_proposal_authenticity_payload,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_TEST_ONLY_DRYRUN,
@@ -211,14 +209,12 @@ def architect_proposal_security_context_digest(
         raise ValueError("architect_proposal_security_context_invalid")
     profiles, profile_reasons = _profiles(config)
     peer_policy = _peer_policy(config.peer_policy)
-    proposal_policy = _proposal_authority_policy(config.proposal_authority_policy)
+    proposal_policy = rehydrate_architect_proposal_signer_policy(
+        config.proposal_authority_policy
+    )
     control_policy = _control_loop_authority_policy(config.control_loop_authority_policy)
     outcome_policy = _verified_outcome_signer_policy(config.verified_outcome_signer_policy)
-    if (
-        profile_reasons
-        or peer_policy is None
-        or proposal_policy is None
-    ):
+    if profile_reasons or peer_policy is None or proposal_policy is None:
         raise ValueError("architect_proposal_security_context_invalid")
     repo_root = Path(config.repo_root).resolve()
     runtime_root = validate_runtime_root_path(
@@ -365,13 +361,11 @@ def run_reddog_signer_socket_service_runtime_wiring(
             FAIL_SIGNER_RUNTIME_CONFIG_INVALID,
             injected_dependency_effects_unobserved=(outcome_policy is not None),
         )
-    proposal_policy = _proposal_authority_policy(
+    proposal_policy = rehydrate_architect_proposal_signer_policy(
         config.proposal_authority_policy
     )
     proposal_authorization = _proposal_policy_authorization(
         config,
-        profiles=profiles,
-        proposal_policy=proposal_policy,
         principal_key_resolver=(
             principal_key_resolver
             or FailClosedPrincipalKeyResolver()
@@ -611,7 +605,7 @@ def validate_signer_socket_service_runtime_config(
         and outcome_policy.signer_public_key not in set(profile_public_keys)
     ):
         return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
-    proposal_policy = _proposal_authority_policy(
+    proposal_policy = rehydrate_architect_proposal_signer_policy(
         config.proposal_authority_policy
     )
     if (
@@ -621,8 +615,6 @@ def validate_signer_socket_service_runtime_config(
         return (FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,)
     proposal_authorization = _proposal_policy_authorization(
         config,
-        profiles=profiles,
-        proposal_policy=proposal_policy,
         principal_key_resolver=None,
         require_trusted_principal=False,
     )
@@ -890,98 +882,50 @@ def _bind_peer_instance(
     return replace(backend, signer_peer_instance_binding=binding)
 
 
-def _proposal_authority_policy(
+def rehydrate_architect_proposal_signer_policy(
     value: ArchitectProposalSignerPolicy | Mapping[str, Any] | None,
 ) -> ArchitectProposalSignerPolicy | None:
+    if isinstance(value, ArchitectProposalSignerPolicy):
+        return (
+            value
+            if 0 < int(value.max_ttl_seconds)
+            <= DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
+            else None
+        )
+    if not isinstance(value, Mapping):
+        return None
+    expected = value.get("expected_payload")
     try:
-        return rehydrate_architect_proposal_signer_policy(value)
+        payload = rehydrate_architect_proposal_authenticity_payload(
+            expected if isinstance(expected, Mapping) else {}
+        )
+        max_ttl = int(value.get("max_ttl_seconds"))
     except (TypeError, ValueError):
         return None
+    if not 0 < max_ttl <= DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS:
+        return None
+    return ArchitectProposalSignerPolicy(payload, max_ttl)
 
 
 def _proposal_policy_authorization(
     config: SignerSocketServiceRuntimeWiringConfig,
     *,
-    profiles: list[SignerKeyProviderProfile],
-    proposal_policy: ArchitectProposalSignerPolicy | None,
     principal_key_resolver: PrincipalKeyResolver | None,
     require_trusted_principal: bool,
 ) -> ArchitectProposalPolicyAuthorization | None:
-    value = config.proposal_policy_authorization
-    if proposal_policy is None:
-        return None if value is None else None
-    raw = value.to_dict() if hasattr(value, "to_dict") else value
-    if not isinstance(raw, Mapping):
-        return None
-    proposal_profiles = [
-        profile
-        for profile in profiles
-        if _is_proposal_signer_profile(profile, proposal_policy)
-    ]
-    if len(proposal_profiles) != 1:
-        return None
-    signer_root = Path(config.signer_runtime_root).resolve()
-    nonce_path = config.proposal_nonce_store_path
-    high_water_store_id = str(
-        config.proposal_replay_high_water_store_id or ""
-    ).strip()
-    if nonce_path is None or not high_water_store_id:
-        return None
-    signer_instance_id = architect_proposal_signer_instance_id(
-        signer_root,
-        proposal_profiles[0].expected_public_key,
-        proposal_profiles[0].expected_key_epoch,
-    )
-    replay_binding = architect_proposal_replay_store_binding_digest(
-        signer_instance_id,
-        nonce_path,
-        high_water_store_id,
-    )
-    principal_id = str(raw.get("principal_id") or "")
-    principal_provider = str(raw.get("principal_provider") or "")
-    trusted_principal_key = str(
-        raw.get("principal_public_key") or ""
-    )
-    if require_trusted_principal:
-        if principal_key_resolver is None:
-            return None
-        try:
-            trusted_principal_key = str(
-                principal_key_resolver.resolve(
-                    principal_id,
-                    principal_provider,
-                )
-                or ""
-            )
-        except Exception:
-            return None
-    authority_profile = {
-        "principal_id": proposal_policy.expected_payload.requester_principal_id,
-        "principal_provider": principal_provider,
-        "principal_public_key": str(
-            raw.get("principal_public_key") or ""
-        ),
-        "reddog_id": proposal_policy.expected_payload.reddog_id,
-        "reddog_public_key": proposal_profiles[0].expected_public_key,
-        "key_epoch": proposal_policy.expected_payload.key_epoch,
-        "authority_profile_source_receipt_id": (
-            proposal_policy.expected_payload.authority_profile_source_receipt_id
-        ),
-    }
     try:
-        return verify_architect_proposal_policy_authorization(
-            raw,
-            policy=proposal_policy,
-            authority_profile=authority_profile,
-            trusted_principal_public_key=trusted_principal_key,
-            expected_signer_instance_id=signer_instance_id,
-            expected_replay_store_binding_digest=replay_binding,
-            expected_security_context_digest=str(
-                config.proposal_security_context_digest or ""
-            ),
-            now_epoch=int(time.time()),
+        from modules.communication.moltbot_bridge.src.reddog_architect_proposal_runtime_authorization import (
+            verify_architect_proposal_runtime_authorization,
         )
-    except (TypeError, ValueError):
+
+        _, verified = verify_architect_proposal_runtime_authorization(
+            config,
+            principal_key_resolver=principal_key_resolver,
+            now_epoch=int(time.time()),
+            require_trusted_principal=require_trusted_principal,
+        )
+        return verified
+    except (OSError, TypeError, ValueError):
         return None
 
 
@@ -1201,6 +1145,7 @@ __all__ = [
     "SignerSocketServiceRuntimeWiringConfig",
     "SignerSocketServiceRuntimeWiringResult",
     "architect_proposal_security_context_digest",
+    "rehydrate_architect_proposal_signer_policy",
     "run_reddog_signer_socket_service_runtime_wiring",
     "validate_signer_socket_service_runtime_config",
 ]

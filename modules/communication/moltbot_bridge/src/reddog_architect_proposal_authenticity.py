@@ -575,31 +575,6 @@ def rehydrate_architect_proposal_authenticity_payload(
     return ArchitectProposalAuthenticityPayload(**payload)
 
 
-def rehydrate_architect_proposal_signer_policy(
-    value: ArchitectProposalSignerPolicy | Mapping[str, Any] | None,
-) -> ArchitectProposalSignerPolicy:
-    """Rehydrate one exact bounded signer policy or fail closed."""
-
-    if isinstance(value, ArchitectProposalSignerPolicy):
-        policy = value
-    elif isinstance(value, Mapping):
-        expected = value.get("expected_payload")
-        payload = rehydrate_architect_proposal_authenticity_payload(
-            expected if isinstance(expected, Mapping) else {}
-        )
-        policy = ArchitectProposalSignerPolicy(
-            expected_payload=payload,
-            max_ttl_seconds=int(value.get("max_ttl_seconds")),
-        )
-    else:
-        raise ValueError("architect_proposal_signer_policy_invalid")
-    if not 0 < int(policy.max_ttl_seconds) <= int(
-        DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
-    ):
-        raise ValueError("architect_proposal_signer_policy_invalid")
-    return policy
-
-
 def _validate_policy_authorization_payload(
     payload: Mapping[str, Any],
 ) -> None:
@@ -1029,7 +1004,6 @@ __all__ = [
     "canonical_architect_proposal_signing_input",
     "canonical_architect_proposal_policy_authorization_input",
     "rehydrate_architect_proposal_authenticity_payload",
-    "rehydrate_architect_proposal_signer_policy",
     "validate_proposal_signing_request",
     "verify_architect_proposal_policy_authorization",
     "verify_architect_proposal_attestation_integrity",

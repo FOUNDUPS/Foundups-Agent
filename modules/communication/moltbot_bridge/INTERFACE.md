@@ -17,28 +17,19 @@ editor source: it verifies a strict principal-signed credential using only the
 current-generation public key, enforces repository/audience/transport/TTL and
 FoundUp scope, and yields the same opaque operation-local capability. The
 credential never enters AgentDB, model context, receipts, logs, or child env.
-Principal-signed sessions persist scope v2 only through the existing isolated
-E0 signer. The signer re-verifies the credential against current principal
-authority on every use, signs the complete record plus credential, and advances
-a signer-owned monotonic conversation head. AgentDB first stages the exact
+Principal-signed scope v2 persists only through the isolated E0 signer. Each use
+re-verifies current principal authority, signs the complete record and credential,
+and advances a signer-owned monotonic conversation head. AgentDB stages the exact
 unsigned payload as non-authoritative pending state; only a matching E0 response
-can atomically publish active state and delete the pending row. A crash after the
-signer commits recovers by replaying that exact payload and response. Changed or
-attacker-rehashed pending content fails closed. Restarted consumers must present
-the same still-valid credential and verify the E0 signature and audit attestation.
-Rollback, fork, nonce replay, wrong key epoch, revoked/current-generation authority,
-unavailable signer policy/resolver/anchor, forged kernel-peer metadata, and
-undersized socket limits fail before active state publication. Legacy intake HMAC
-remains supported; no process-local random key is used for durable signed-session state.
-Neither authentication scheme grants work, repository, shell, worker, or merge
-authority.
-Signer service config v3 is the only bootable schema; stale v2 artifacts fail
-before service invocation. The public config supplier keeps its 16 KiB request
-budget unless a caller explicitly supplies a larger reviewed bound. The
-conversation bootstrap supplies 160 KiB explicitly for bounded conversation
-payloads; no other caller inherits that expansion. Conversation signing is
-omitted from configs below that reviewed bound rather than weakening the signer
-socket limit.
+may atomically publish it. Exact replay supports crash recovery; altered pending
+content, rollback, fork, nonce replay, stale authority, wrong key epoch, forged
+peer metadata, or missing policy/resolver/anchor fails closed. Restarted consumers
+must present the same valid credential and verify the signature and attestation.
+Legacy intake HMAC remains supported; neither scheme grants work or repository
+authority. Config v3 is the only bootable schema and stale v2 fails before service
+invocation. The public supplier retains its 16 KiB request budget; the conversation
+bootstrap explicitly supplies the reviewed 160 KiB bound. Lower bounds omit
+conversation signing rather than weakening the socket limit.
 
 ## Public API
 ### Architect proposal validity and execution readiness

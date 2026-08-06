@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
     architect_proposal_replay_store_binding_digest,
     architect_proposal_signer_instance_id,
 )
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_runtime_authorization import (
+    verify_architect_proposal_runtime_authorization,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY,
     REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY,
@@ -2174,4 +2177,48 @@ def test_runtime_config_rejects_partial_or_mismatched_proposal_wiring(
     ) == (FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,)
     assert validate_signer_socket_service_runtime_config(excessive_ttl) == (
         FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,
+    )
+
+
+def test_config_validation_and_runtime_admission_share_proposal_verifier(
+    tmp_path: Path,
+) -> None:
+    private_key = _private_key()
+    principal_private = _private_key()
+    public_key = _public_text(private_key)
+    config = _runtime_proposal_config(
+        repo=tmp_path / "repo",
+        runtime=tmp_path / "runtime",
+        signer_runtime=tmp_path / "signer-state",
+        policy=ArchitectProposalSignerPolicy(_payload(public_key)),
+        principal_private=principal_private,
+        reddog_private=private_key,
+    )
+    config.repo_root.mkdir()
+    resolver = _PrincipalKeyResolver(_public_text(principal_private))
+    now_epoch = int(time.time())
+
+    policy, verified = verify_architect_proposal_runtime_authorization(
+        config,
+        principal_key_resolver=resolver,
+        now_epoch=now_epoch,
+    )
+    assert policy.expected_payload == config.proposal_authority_policy.expected_payload
+    assert verified.to_dict() == config.proposal_policy_authorization.to_dict()
+    assert validate_signer_socket_service_runtime_config(config) == ()
+
+    tampered = config.proposal_policy_authorization.to_dict()
+    tampered["principal_id"] = "github:attacker"
+    changed = dataclasses.replace(
+        config,
+        proposal_policy_authorization=tampered,
+    )
+    with pytest.raises(ValueError):
+        verify_architect_proposal_runtime_authorization(
+            changed,
+            principal_key_resolver=resolver,
+            now_epoch=now_epoch,
+        )
+    assert validate_signer_socket_service_runtime_config(changed) == (
+        FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     )

@@ -12,17 +12,13 @@
 - Added proposal-preview crash recovery after signer-anchor commit, including a
   competing conversation writer denial and proof that restart recovery performs
   no second signer action before atomic AgentDB finalization.
-- Extended signer config/runtime tests for current principal resolution,
-  confined anchor supply, exact policy binding, and bounded request sizing.
-- Proved legacy HMAC create, advance, and proposal persistence never use the
-  E0 pending-recovery store; a simulated precommit crash leaves no stranded row,
-  retries normally, and `require_replay` remains forbidden for HMAC.
-- Added exact WSP 62 AST coverage for the durable conversation-authentication
-  sources, security suites, and backend-manifest contract.
-- Added reviewer-derived regressions for authoritative-state overwrite,
-  reserved runtime-artifact collisions, secret-shaped and unknown profile
-  fields, 16/160 KiB request-budget policy, explicit stale-v2 rejection, and
-  construction/runtime proposal-verifier parity.
+- Extended signer config/runtime tests for principal resolution, confined
+  anchors, exact policy binding, and bounded request sizing.
+- Proved legacy HMAC never uses pending recovery; precommit failure leaves no
+  stranded row, retry succeeds, and `require_replay` remains forbidden.
+- Added exact WSP 62 AST coverage for authentication sources and tests.
+- Added review regressions for state overwrite, artifact collisions, nested
+  profile injection, request budgets, stale v2, and verifier parity.
 
 ## 2026-08-05: Current-generation use-time trust regressions
 

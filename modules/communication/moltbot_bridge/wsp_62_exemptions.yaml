@@ -36,7 +36,7 @@ exemptions:
       revocation, bounded renewal, and proposal signer-policy runtime
       boundaries; splitting the historical registry remains separate
       documentation-maintenance work.
-    threshold_override: 1471
+    threshold_override: 1469
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -136,7 +136,7 @@ exemptions:
       Inherited signer composition host retained while conversation-scope
       authentication reuses its canonical proposal-policy verification and
       security-context bindings. No new oversized function is introduced.
-    threshold_override: 1229
+    threshold_override: 1151
     function_threshold_override: 225
     functions:
       - "architect_proposal_security_context_digest"
@@ -146,7 +146,7 @@ exemptions:
       - "_proposal_policy_authorization"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
     no_growth_ceiling:
-      file_lines: 1229
+      file_lines: 1151
       functions:
         architect_proposal_security_context_digest: 120
         run_reddog_signer_socket_service_runtime_wiring: 225
@@ -454,7 +454,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9593
+    threshold_override: 9591
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

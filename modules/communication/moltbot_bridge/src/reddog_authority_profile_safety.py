@@ -267,6 +267,13 @@ def authority_profile_unknown_field_paths(
     if not isinstance(value, Mapping):
         return ("$",)
     allowed = _SEED_FIELDS if seed else _SOURCE_FIELDS
+    return _unknown_field_paths(value, allowed)
+
+
+def _unknown_field_paths(
+    value: Mapping[str, Any],
+    allowed: frozenset[str],
+) -> tuple[str, ...]:
     found = [str(key) for key in value if str(key) not in allowed]
     for field, nested_allowed in _NESTED_FIELD_SCHEMAS:
         child = _mapping_at_path(value, field)
@@ -286,13 +293,11 @@ def authority_profile_unknown_field_paths(
 def authority_profile_runtime_unknown_field_paths(
     value: Any,
 ) -> tuple[str, ...]:
-    """Return top-level fields outside the public runtime profile schema."""
+    """Return fields outside the exact public runtime profile schema."""
 
     if not isinstance(value, Mapping):
         return ("$",)
-    return tuple(
-        dict.fromkeys(str(key) for key in value if str(key) not in _RUNTIME_FIELDS)
-    )
+    return _unknown_field_paths(value, _RUNTIME_FIELDS)
 
 
 def _mapping_at_path(value: Mapping[str, Any], path: str) -> Any:

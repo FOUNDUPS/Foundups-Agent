@@ -29,6 +29,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import (
     CONVERSATION_SCOPE_MIN_REQUEST_BYTES,
     FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID,
+    FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID,
     FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     FAIL_SIGNER_CONFIG_WRITE_FAILED,
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
@@ -128,6 +129,13 @@ def _preparation_reasons(
         require_principal_provider=request.proposal_authority_policy is not None,
     ))
     reasons.extend(paths.reasons)
+    if paths.output is not None and request.authoritative_work_state_path:
+        try:
+            state_path = Path(request.authoritative_work_state_path).resolve()
+        except (OSError, TypeError, ValueError):
+            state_path = None
+        if state_path is not None and state_path == paths.output:
+            reasons.append(FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID)
     reasons.extend(architect_publication_reasons(
         profile, request.authoritative_work_state, paths.runtime,
         request.authoritative_work_state_path,

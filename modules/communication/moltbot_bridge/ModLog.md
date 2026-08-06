@@ -1,36 +1,27 @@
 # ModLog - moltbot_bridge
 ## 2026-08-06: Durable E0 conversation-scope authentication
-- Replaced process-local signed-session record authentication with an extension
-  of the existing isolated Ed25519 signer. Exact scope state is bound to the
-  current principal-signed session credential, signer key epoch, and an E0 audit
-  attestation; the bearer is never persisted or returned.
-- Added a signer-owned atomic monotonic conversation-head store so restarts,
-  rollback, forks, nonce reuse, and concurrent successors fail closed. Runtime
-  composition now requires a per-use current-generation principal resolver,
-  exact signer policy, confined anchor path, kernel-attested peer source, and a
-  request-size budget sufficient for the worst-case serialized credential payload.
+- Replaced process-local session authentication by extending the existing
+  isolated Ed25519 signer. Exact scope state binds the current credential,
+  signer key epoch, and E0 audit attestation; the bearer is never persisted.
+- Added a signer-owned monotonic conversation head; restarts, rollback, forks,
+  nonce reuse, and concurrent successors fail closed. Runtime requires a current
+  principal resolver, exact policy, confined anchor, kernel peer source, and a
+  reviewed request budget.
 - Added exact AgentDB pre-sign staging and signed atomic finalization. Later-clock
   recovery can only replay the signer-anchored response and cannot mint a fresh
-  signature; rehashed pending state fails and principal resolution stays leased.
-- Extended the same staged transaction to conversation-bound proposal previews.
-  A crash after signer-anchor commit now leaves the active revision unchanged,
-  fences competing writers, and recovers by replaying the exact anchored response.
-- Preserved legacy HMAC compatibility without granting it recovery authority:
-  HMAC records sign before direct AgentDB create/CAS and never enter pending
-  recovery, while only E0 records may consume exact signer-anchor replay state.
+  signature; altered pending state fails and principal resolution stays leased.
+- Extended staging to proposal previews. A post-anchor crash leaves active state
+  unchanged, fences other writers, and replays only the anchored response.
+- Preserved legacy HMAC without recovery authority: it signs before direct
+  create/CAS; only E0 state may consume exact signer-anchor replay.
 - Extracted signer config rehydration, principal parsing, and conversation-domain
-  signing from inherited WSP 62 hosts. The signer configuration supplier is now
-  a bounded contract/composition/materialization facade, and security fixtures
-  are split by concern with a slice-local AST gate. No state grants work, worker,
-  repository, shell, signer, PR, merge, reward, or HoloIndex write authority
-  (WSP 00/15/22/50/62/97).
-- Exact-SHA security review then froze config output to
-  `signer_service_config.json`, applied the shared public-profile allowlist,
-  and routed config admission through the same typed proposal verifier used at
-  runtime. Legacy callers retain the 16 KiB request default; only the explicit
-  160 KiB conversation bootstrap receives conversation signing. Stale v2
-  configs and runtime-artifact filename collisions fail before any write or
-  signer invocation.
+  signing from WSP 62 hosts. The bounded supplier and split fixtures retain an
+  AST gate. No state grants work, repository, signer, merge, or HoloIndex writes.
+- Exact-SHA review froze config output, applied the shared public-profile
+  allowlist, and unified config/runtime proposal verification.
+- Legacy callers retain 16 KiB; only the explicit conversation bootstrap uses
+  160 KiB. Stale v2, nested profile injection, and artifact collisions fail
+  before writes or signer invocation (WSP 00/15/22/50/62/97).
 ## 2026-08-06: Current-generation conversation session authority source
 - Replaced the rejected symmetric resident path with a strict principal-signed
   conversation credential verified by the existing Ed25519 backend and

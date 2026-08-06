@@ -368,6 +368,30 @@ def test_config_supply_rejects_noncanonical_output_without_overwriting_state(
     assert not (runtime / "signer_service_config.json").exists()
 
 
+def test_config_supply_rejects_canonical_output_used_as_work_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / "signer_service_config.json"
+    original = b'{"schema_version":"reddog_authoritative_work_state.v1"}\n'
+    target.write_bytes(original)
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authoritative_work_state_path=target,
+            output_path=target,
+        )
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+    assert target.read_bytes() == original
+
+
 @pytest.mark.parametrize(
     "reserved_name",
     (
@@ -426,6 +450,31 @@ def test_config_supply_rejects_unknown_or_secret_profile_fields(
     assert any(
         reason.startswith(FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID)
         for reason in result.rejection_reasons
+    )
+    assert not (runtime / "signer_service_config.json").exists()
+
+
+def test_config_supply_rejects_nested_unknown_profile_field(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    profile = _authority_profile(
+        holoindex_evidence={
+            "holoindex_status": "CURRENT",
+            "harmless_extra": "attacker-selected",
+        }
+    )
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(repo, runtime, authority_profile=profile)
+    )
+
+    assert not result.accepted
+    assert (
+        FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID
+        + ":holoindex_evidence.harmless_extra"
+        in result.rejection_reasons
     )
     assert not (runtime / "signer_service_config.json").exists()
 
