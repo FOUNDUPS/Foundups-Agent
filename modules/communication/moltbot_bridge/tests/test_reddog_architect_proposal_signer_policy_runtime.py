@@ -685,7 +685,7 @@ def _config_kwargs(
         "authoritative_work_state_path": (
             runtime / "authoritative_work_state.json"
         ),
-        "output_path": runtime / "signer-service.json",
+        "output_path": runtime / "signer_service_config.json",
         "socket_path": runtime / "reddog-signer.sock",
         "principal_signing_key_ref": "op://prod/principal/private",
         "principal_audit_mac_key_ref": "op://prod/principal/audit",
@@ -1286,7 +1286,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     assert result.proposal_policy_configured is True
     assert result.proposal_attestation_id == policy.expected_payload.attestation_id
     config = json.loads(
-        (runtime / "signer-service.json").read_text(encoding="utf-8")
+        (runtime / "signer_service_config.json").read_text(encoding="utf-8")
     )
     assert (
         config["proposal_authority_policy"]["expected_payload"]
@@ -1311,7 +1311,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     assert not nonce_path.exists()
     run_packet = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=repo,
-        config_path=runtime / "signer-service.json",
+        config_path=runtime / "signer_service_config.json",
         output_path=tmp_path / "proposal-run-packet.json",
         owner_authority_config_path=(
             tmp_path / "signer-owner" / "owner.json"
@@ -1323,7 +1323,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     )
     launch_binding = _write_proposal_launch_packet(
         repo=repo,
-        config_path=runtime / "signer-service.json",
+        config_path=runtime / "signer_service_config.json",
         config_digest=result.config_digest,
         output_path=runtime / "proposal-launch-packet.json",
     )
@@ -1347,7 +1347,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     rejected_in_memory = (
         run_reddog_signer_socket_service_runtime_bootstrap(
             repo_root=repo,
-            config_path=runtime / "signer-service.json",
+            config_path=runtime / "signer_service_config.json",
             resolver=_Resolver(private_key),
             serve_bounded=lambda **kwargs: pytest.fail(
                 "production signer accepted volatile replay authority"
@@ -1371,13 +1371,13 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
 
     launch_binding = _write_proposal_launch_packet(
         repo=repo,
-        config_path=runtime / "signer-service.json",
+        config_path=runtime / "signer_service_config.json",
         config_digest=result.config_digest,
         output_path=runtime / "proposal-launch-packet.json",
     )
     bootstrap = run_reddog_signer_socket_service_runtime_bootstrap(
         repo_root=repo,
-        config_path=runtime / "signer-service.json",
+        config_path=runtime / "signer_service_config.json",
         resolver=_Resolver(private_key),
         serve_bounded=lambda **kwargs: (
             IsolatedSignerSocketResidentServiceResult(
@@ -1630,7 +1630,7 @@ def test_config_supply_rejects_identity_or_nonce_path_substitution(
 
     assert result.accepted is False
     assert reason in result.rejection_reasons
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 class _Resolver:
@@ -2022,7 +2022,7 @@ def test_bootstrap_rejects_tampered_serialized_proposal_policy(
         )
     )
     assert result.accepted is True, result.rejection_reasons
-    config_path = runtime / "signer-service.json"
+    config_path = runtime / "signer_service_config.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
     malformed_digest = run_reddog_signer_socket_service_runtime_bootstrap(
         repo_root=repo,

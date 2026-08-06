@@ -24,6 +24,13 @@
   are split by concern with a slice-local AST gate. No state grants work, worker,
   repository, shell, signer, PR, merge, reward, or HoloIndex write authority
   (WSP 00/15/22/50/62/97).
+- Exact-SHA security review then froze config output to
+  `signer_service_config.json`, applied the shared public-profile allowlist,
+  and routed config admission through the same typed proposal verifier used at
+  runtime. Legacy callers retain the 16 KiB request default; only the explicit
+  160 KiB conversation bootstrap receives conversation signing. Stale v2
+  configs and runtime-artifact filename collisions fail before any write or
+  signer invocation.
 ## 2026-08-06: Current-generation conversation session authority source
 - Replaced the rejected symmetric resident path with a strict principal-signed
   conversation credential verified by the existing Ed25519 backend and

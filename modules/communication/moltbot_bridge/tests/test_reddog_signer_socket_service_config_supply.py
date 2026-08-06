@@ -89,7 +89,7 @@ def _kwargs(repo: Path, runtime: Path, **overrides: object) -> dict[str, object]
         "signer_runtime_root": signer_runtime,
         "authority_profile": _authority_profile(),
         "authoritative_work_state_path": state_path,
-        "output_path": runtime / "signer-service.json",
+        "output_path": runtime / "signer_service_config.json",
         "socket_path": runtime / "reddog-signer.sock",
         "principal_signing_key_ref": "op://prod-vault/principal/private",
         "principal_audit_mac_key_ref": "op://prod-vault/principal/audit",
@@ -145,7 +145,7 @@ def test_config_supply_rejects_architect_profile_with_marker_and_binding_strippe
 
     assert result.accepted is False
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in result.rejection_reasons
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_missing_durable_authoritative_state(
@@ -162,7 +162,7 @@ def test_config_supply_rejects_missing_durable_authoritative_state(
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in (
         result.rejection_reasons
     )
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_injected_state_that_differs_from_durable_state(
@@ -187,7 +187,7 @@ def test_config_supply_rejects_injected_state_that_differs_from_durable_state(
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in (
         result.rejection_reasons
     )
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_accepts_injected_state_that_matches_durable_state(
@@ -209,7 +209,30 @@ def test_config_supply_accepts_injected_state_that_matches_durable_state(
     )
 
     assert result.accepted is True
-    assert (runtime / "signer-service.json").exists()
+
+
+@pytest.mark.parametrize("value", (16384, 163840))
+def test_config_supply_preserves_explicit_request_budget(
+    tmp_path: Path,
+    value: int,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    kwargs = _kwargs(repo, runtime)
+    if value != 16384:
+        kwargs["max_request_bytes"] = value
+
+    result = run_reddog_signer_socket_service_config_supply(**kwargs)
+
+    assert result.accepted, result.rejection_reasons
+    config = json.loads(
+        (runtime / "signer_service_config.json").read_text(encoding="utf-8")
+    )
+    assert config["max_request_bytes"] == value
+    assert (config.get("conversation_scope_signer_policy") is not None) == (
+        value == 163840
+    )
+    assert (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_invalid_authority_profile_and_key_reuse(tmp_path: Path) -> None:
@@ -257,7 +280,7 @@ def test_config_supply_rejects_malformed_public_key_before_write(tmp_path: Path)
         FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":runtime_config"
         in result.rejection_reasons
     )
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_inside_repo_or_existing_socket_paths(tmp_path: Path) -> None:
@@ -268,7 +291,7 @@ def test_config_supply_rejects_inside_repo_or_existing_socket_paths(tmp_path: Pa
     existing_socket.write_text("", encoding="utf-8")
 
     inside_output = run_reddog_signer_socket_service_config_supply(
-        **_kwargs(repo, runtime, output_path=repo / "signer-service.json")
+        **_kwargs(repo, runtime, output_path=repo / "signer_service_config.json")
     )
     inside_socket = run_reddog_signer_socket_service_config_supply(
         **_kwargs(repo, runtime, socket_path=repo / "reddog-signer.sock")
@@ -290,7 +313,7 @@ def test_config_supply_rejects_paths_outside_bound_runtime_root(
     outside = tmp_path / "outside"
 
     output = run_reddog_signer_socket_service_config_supply(
-        **_kwargs(repo, runtime, output_path=outside / "signer-service.json")
+        **_kwargs(repo, runtime, output_path=outside / "signer_service_config.json")
     )
     anchor = run_reddog_signer_socket_service_config_supply(
         **_kwargs(
@@ -312,12 +335,99 @@ def test_config_supply_rejects_nested_config_output_path(tmp_path: Path) -> None
         **_kwargs(
             repo,
             runtime,
-            output_path=runtime / "nested" / "signer-service.json",
+            output_path=runtime / "nested" / "signer_service_config.json",
         )
     )
 
     assert not result.accepted
     assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+
+
+def test_config_supply_rejects_noncanonical_output_without_overwriting_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    state_path = runtime / "authoritative_work_state.json"
+    original = b'{"schema_version":"reddog_authoritative_work_state.v1"}\n'
+    state_path.write_bytes(original)
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authoritative_work_state_path=state_path,
+            output_path=state_path,
+        )
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+    assert state_path.read_bytes() == original
+    assert not (runtime / "signer_service_config.json").exists()
+
+
+@pytest.mark.parametrize(
+    "reserved_name",
+    (
+        "authority_profile.json",
+        "runtime_artifact_manifest.json",
+        "reddog_signer.sock",
+        "architect_proposal_nonce_store.json",
+        "signer_control_loop_anchor.json",
+        "conversation_scope_anchor.json",
+    ),
+)
+def test_config_supply_rejects_runtime_artifact_name_collisions(
+    tmp_path: Path,
+    reserved_name: str,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / reserved_name
+    original = b'{"sentinel":true}\n'
+    target.write_bytes(original)
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(repo, runtime, output_path=target)
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+    assert target.read_bytes() == original
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    (
+        ("harmless_extra", "attacker-selected"),
+        ("runtime_api_secret", "must-not-persist"),
+    ),
+)
+def test_config_supply_rejects_unknown_or_secret_profile_fields(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authority_profile=_authority_profile(**{field: value}),
+        )
+    )
+
+    assert not result.accepted
+    assert any(
+        reason.startswith(FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID)
+        for reason in result.rejection_reasons
+    )
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def test_config_supply_rejects_nested_socket_or_anchor_path(tmp_path: Path) -> None:
@@ -373,7 +483,7 @@ def test_config_supply_rejects_hard_linked_output_without_mutating_source(
     runtime.mkdir()
     outside = tmp_path / "outside.json"
     outside.write_text('{"sentinel":true}\n', encoding="utf-8")
-    output = runtime / "signer-service.json"
+    output = runtime / "signer_service_config.json"
     try:
         os.link(outside, output)
     except OSError as exc:

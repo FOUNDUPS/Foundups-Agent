@@ -19,6 +19,10 @@
   retries normally, and `require_replay` remains forbidden for HMAC.
 - Added exact WSP 62 AST coverage for the durable conversation-authentication
   sources, security suites, and backend-manifest contract.
+- Added reviewer-derived regressions for authoritative-state overwrite,
+  reserved runtime-artifact collisions, secret-shaped and unknown profile
+  fields, 16/160 KiB request-budget policy, explicit stale-v2 rejection, and
+  construction/runtime proposal-verifier parity.
 
 ## 2026-08-05: Current-generation use-time trust regressions
 

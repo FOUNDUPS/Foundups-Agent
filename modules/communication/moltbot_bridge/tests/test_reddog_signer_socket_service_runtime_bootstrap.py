@@ -741,7 +741,7 @@ def test_bootstrap_rejects_nested_control_anchor(tmp_path: Path) -> None:
     "missing_key",
     ("control_loop_anchor_path", "control_loop_authority_policy"),
 )
-def test_bootstrap_rejects_v2_config_without_control_authority_binding(
+def test_bootstrap_rejects_current_config_without_control_authority_binding(
     tmp_path: Path,
     missing_key: str,
 ) -> None:
@@ -753,6 +753,33 @@ def test_bootstrap_rejects_v2_config_without_control_authority_binding(
         socket_path=runtime / "signer.sock",
     )
     config.pop(missing_key)
+    path = _write_json(runtime / "signer-service.json", config)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=path,
+        resolver=_resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert result.rejection_reasons == (
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+    )
+    assert service.calls == []
+
+
+def test_bootstrap_rejects_explicit_v2_config_before_service_invocation(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    config = _config(
+        _public_text(private_key),
+        socket_path=runtime / "signer.sock",
+    )
+    config["schema_version"] = "reddog_signer_service_config.v2"
     path = _write_json(runtime / "signer-service.json", config)
     service = CapturingBoundedService()
 

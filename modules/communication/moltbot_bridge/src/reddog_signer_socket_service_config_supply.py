@@ -68,7 +68,7 @@ def run_reddog_signer_socket_service_config_supply(
     allowed_gids: Sequence[int | str] = (),
     max_requests: int = 16,
     timeout_s: float = 5.0,
-    max_request_bytes: int | None = None,
+    max_request_bytes: int = 16384,
     max_response_bytes: int = 16384,
     principal_signer_agent_id: str = "signer:principal",
     reddog_signer_agent_id: str = "signer:reddog",
@@ -86,12 +86,9 @@ def run_reddog_signer_socket_service_config_supply(
 ) -> SignerServiceConfigSupplyResult:
     """Write one signer CLI config from existing authority artifacts."""
 
-    values = locals()
-    if max_request_bytes is None:
-        values["max_request_bytes"] = (
-            16384 if proposal_authority_policy is not None else 163840
-        )
-    return materialize_signer_service_config(SignerServiceConfigSupplyRequest(**values))
+    return materialize_signer_service_config(
+        SignerServiceConfigSupplyRequest(**locals())
+    )
 
 
 __all__ = [name for name in globals() if name.startswith("FAIL_SIGNER_CONFIG_")] + [

@@ -133,9 +133,9 @@ exemptions:
   - <<: *reddog_security_repair
     file: "src/reddog_signer_socket_service_runtime_wiring.py"
     reason: >-
-      Inherited signer composition host retained while outcome-authority
-      admission delegates to a bounded runtime-binding module. No new
-      oversized function is introduced in this slice.
+      Inherited signer composition host retained while conversation-scope
+      authentication reuses its canonical proposal-policy verification and
+      security-context bindings. No new oversized function is introduced.
     threshold_override: 1229
     function_threshold_override: 225
     functions:

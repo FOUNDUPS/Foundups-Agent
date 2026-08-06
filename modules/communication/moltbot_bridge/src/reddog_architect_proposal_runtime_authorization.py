@@ -11,6 +11,7 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
     ArchitectProposalSignerPolicy,
     architect_proposal_replay_store_binding_digest,
     architect_proposal_signer_instance_id,
+    rehydrate_architect_proposal_signer_policy,
     verify_architect_proposal_policy_authorization,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
@@ -87,7 +88,12 @@ def _policy_and_authorization(
         or not config.permission_snapshot_fresh
     ):
         raise ValueError("architect_proposal_runtime_not_production")
-    policy = config.proposal_authority_policy
+    try:
+        policy = rehydrate_architect_proposal_signer_policy(
+            config.proposal_authority_policy
+        )
+    except (TypeError, ValueError):
+        policy = None
     authorization = config.proposal_policy_authorization
     if not isinstance(policy, ArchitectProposalSignerPolicy):
         raise ValueError("architect_proposal_runtime_policy_missing")
@@ -143,8 +149,8 @@ def _proposal_profile(
     )
     profiles = [
         profile
-        for profile in raw_profiles
-        if isinstance(profile, SignerKeyProviderProfile)
+        for raw in raw_profiles
+        if (profile := _typed_profile(raw)) is not None
         and profile.signer_agent_id == REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID
         and profile.expected_public_key
         == policy.expected_payload.signer_public_key
@@ -154,6 +160,19 @@ def _proposal_profile(
     if len(profiles) != 1:
         raise ValueError("architect_proposal_runtime_profile_invalid")
     return profiles[0]
+
+
+def _typed_profile(
+    value: SignerKeyProviderProfile | Mapping[str, object] | None,
+) -> SignerKeyProviderProfile | None:
+    if isinstance(value, SignerKeyProviderProfile):
+        return value
+    if not isinstance(value, Mapping):
+        return None
+    try:
+        return SignerKeyProviderProfile(**dict(value))
+    except (TypeError, ValueError):
+        return None
 
 
 __all__ = ["verify_architect_proposal_runtime_authorization"]

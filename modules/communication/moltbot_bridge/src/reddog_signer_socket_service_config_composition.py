@@ -16,7 +16,11 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
     ArchitectProposalPolicyAuthorization,
     ArchitectProposalSignerPolicy,
     DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS,
-    verify_architect_proposal_policy_authorization,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
+    authority_profile_malformed_digest_paths,
+    authority_profile_runtime_unknown_field_paths,
+    authority_profile_secret_field_paths,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
     ConversationScopeSignerPolicy,
@@ -43,14 +47,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID,
     FAIL_SIGNER_CONFIG_PEER_POLICY_INVALID,
     FAIL_SIGNER_CONFIG_PROPOSAL_NONCE_PATH_INVALID,
-    FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_INVALID,
     FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID,
+    SIGNER_SERVICE_CONFIG_FILENAME,
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
     canonical_config_digest,
-)
-from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
-    PrincipalKeyResolver,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import parse_op_reference
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
@@ -135,6 +136,10 @@ def runtime_artifact_paths(
     )
     anchor, reason = _artifact_path(repo, signer, anchor_value, "anchor")
     reasons.extend(reason)
+    if output and runtime and output != runtime / SIGNER_SERVICE_CONFIG_FILENAME:
+        reasons.append(FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID)
+    if output and socket and output == socket:
+        reasons.append(FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID)
     return RuntimeArtifactPaths(
         runtime, signer, output, socket, anchor, tuple(reasons)
     )
@@ -258,43 +263,6 @@ def _proposal_nonce_path(
     if target.parent != signer_root or target.resolve() != canonical.resolve():
         return None
     return None if target.exists() and not target.is_file() else target
-
-
-def verify_proposal_policy_authorization(
-    profile: Mapping[str, Any],
-    policy: ArchitectProposalSignerPolicy | None,
-    value: ArchitectProposalPolicyAuthorization | Mapping[str, Any] | None,
-    *,
-    principal_key_resolver: PrincipalKeyResolver,
-    signer_instance_id: str,
-    replay_binding_digest: str,
-    security_context_digest: str,
-    now_epoch: int,
-) -> tuple[ArchitectProposalPolicyAuthorization | None, tuple[str, ...]]:
-    if policy is None:
-        reasons = () if value is None else (
-            FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
-        )
-        return None, reasons
-    raw = value.to_dict() if hasattr(value, "to_dict") else value
-    if not isinstance(raw, Mapping):
-        return None, (FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,)
-    try:
-        trusted_key = principal_key_resolver.resolve(
-            str(profile.get("principal_id") or ""),
-            str(profile.get("principal_provider") or ""),
-        )
-        verified = verify_architect_proposal_policy_authorization(
-            raw, policy=policy, authority_profile=profile,
-            trusted_principal_public_key=str(trusted_key or ""),
-            expected_signer_instance_id=signer_instance_id,
-            expected_replay_store_binding_digest=replay_binding_digest,
-            expected_security_context_digest=security_context_digest,
-            now_epoch=now_epoch,
-        )
-    except Exception:
-        return None, (FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,)
-    return verified, ()
 
 
 def config_mapping(**values: Any) -> dict[str, Any]:
@@ -468,6 +436,16 @@ def authority_profile_reasons(
 ) -> tuple[str, ...]:
     if not profile or not ascii_deep(profile):
         return (FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID,)
+    unsafe_paths = (
+        tuple(authority_profile_secret_field_paths(profile))
+        + tuple(authority_profile_runtime_unknown_field_paths(profile))
+        + tuple(authority_profile_malformed_digest_paths(profile))
+    )
+    if unsafe_paths:
+        return tuple(
+            FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":" + path
+            for path in unsafe_paths
+        )
     required = tuple(
         field for field in _REQUIRED_AUTHORITY_FIELDS
         if require_principal_provider or field != "principal_provider"
@@ -594,5 +572,5 @@ __all__ = [
     "ConfigInputs", "RuntimeArtifactPaths", "architect_publication_reasons",
     "authority_profile_reasons", "config_mapping", "conversation_scope_policy",
     "limit_reasons", "op_ref_reasons", "peer_policy", "proposal_runtime_inputs",
-    "runtime_artifact_paths", "verify_proposal_policy_authorization",
+    "runtime_artifact_paths",
 ]

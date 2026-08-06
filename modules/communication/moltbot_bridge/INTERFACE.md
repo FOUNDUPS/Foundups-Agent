@@ -32,6 +32,13 @@ undersized socket limits fail before active state publication. Legacy intake HMA
 remains supported; no process-local random key is used for durable signed-session state.
 Neither authentication scheme grants work, repository, shell, worker, or merge
 authority.
+Signer service config v3 is the only bootable schema; stale v2 artifacts fail
+before service invocation. The public config supplier keeps its 16 KiB request
+budget unless a caller explicitly supplies a larger reviewed bound. The
+conversation bootstrap supplies 160 KiB explicitly for bounded conversation
+payloads; no other caller inherits that expansion. Conversation signing is
+omitted from configs below that reviewed bound rather than weakening the signer
+socket limit.
 
 ## Public API
 ### Architect proposal validity and execution readiness

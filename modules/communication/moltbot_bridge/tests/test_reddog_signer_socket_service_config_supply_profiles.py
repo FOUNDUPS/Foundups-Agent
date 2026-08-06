@@ -42,7 +42,7 @@ def _assert_result(result: object, repo: Path) -> None:
     assert result.no_secret_values_resolved is True
     assert result.no_signer_started is True
     assert result.no_holoindex_reindex_performed is True
-    assert not (repo / "signer-service.json").exists()
+    assert not (repo / "signer_service_config.json").exists()
 
 
 def _assert_policy_payload(payload: dict, runtime: Path) -> None:
@@ -97,9 +97,13 @@ def _assert_authority_and_profiles(payload: dict) -> None:
 def test_config_supply_writes_multi_profile_signer_cli_config(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     runtime = tmp_path / "runtime"
-    result = run_reddog_signer_socket_service_config_supply(**_kwargs(repo, runtime))
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(repo, runtime, max_request_bytes=163840)
+    )
     _assert_result(result, repo)
-    payload = json.loads((runtime / "signer-service.json").read_text(encoding="utf-8"))
+    payload = json.loads(
+        (runtime / "signer_service_config.json").read_text(encoding="utf-8")
+    )
     _assert_policy_payload(payload, runtime)
     _assert_authority_and_profiles(payload)
 
@@ -161,7 +165,7 @@ def test_config_supply_rejects_prepared_architect_publication(
     )
     assert result.accepted is False
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in result.rejection_reasons
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()
 
 
 def _selected_state(profile: dict[str, object]) -> tuple[dict, dict]:
@@ -220,4 +224,4 @@ def test_config_supply_uses_selected_state_not_stale_default(tmp_path: Path) -> 
     result = run_reddog_signer_socket_service_config_supply(**kwargs)
     assert result.accepted is False
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in result.rejection_reasons
-    assert not (runtime / "signer-service.json").exists()
+    assert not (runtime / "signer_service_config.json").exists()

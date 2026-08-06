@@ -20,6 +20,8 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT = "SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT"
 SIGNER_SERVICE_CONFIG_SUPPLY_REJECT = "SIGNER_SERVICE_CONFIG_SUPPLY_REJECT"
 SIGNER_SERVICE_CONFIG_SCHEMA_VERSION = "reddog_signer_service_config.v3"
+SIGNER_SERVICE_CONFIG_FILENAME = "signer_service_config.json"
+CONVERSATION_SCOPE_MIN_REQUEST_BYTES = 163840
 
 FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID = (
     "signer_config_authority_profile_invalid"
@@ -144,6 +146,8 @@ def dedupe_reasons(values: Sequence[str]) -> tuple[str, ...]:
 
 __all__ = [name for name in globals() if name.startswith("FAIL_SIGNER_CONFIG_")] + [
     "SIGNER_SERVICE_CONFIG_SCHEMA_VERSION",
+    "SIGNER_SERVICE_CONFIG_FILENAME",
+    "CONVERSATION_SCOPE_MIN_REQUEST_BYTES",
     "SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT",
     "SIGNER_SERVICE_CONFIG_SUPPLY_REJECT",
     "SignerServiceConfigSupplyRequest",

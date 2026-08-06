@@ -18,10 +18,10 @@ exemptions:
   - file: "main.py"
     reason: >-
       Legacy application entrypoint and RedDog preflight integration boundary.
-      This focused repair adds only the bounded outside-repository runtime-
-      binding artifact preflight ahead of the resident cycle; decomposing
-      unrelated startup and queue control flows here would expand the security
-      review surface.
+      This focused repair retains only the existing explicit 160 KiB signer
+      request budget and conversation-authentication bootstrap calls;
+      decomposing unrelated startup and queue control flows here would expand
+      the security review surface.
     threshold_override: 4978
     function_threshold_override: 954
     functions:

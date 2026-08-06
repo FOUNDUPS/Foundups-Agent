@@ -7,9 +7,8 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Mapping
 
-from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
-    architect_proposal_replay_store_binding_digest,
-    architect_proposal_signer_instance_id,
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_runtime_authorization import (
+    verify_architect_proposal_runtime_authorization,
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     atomic_replace_confined_mapping,
@@ -26,9 +25,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     peer_policy,
     proposal_runtime_inputs,
     runtime_artifact_paths,
-    verify_proposal_policy_authorization,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import (
+    CONVERSATION_SCOPE_MIN_REQUEST_BYTES,
     FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID,
     FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     FAIL_SIGNER_CONFIG_WRITE_FAILED,
@@ -162,7 +161,11 @@ def _provisional(prepared: PreparedConfigSupply) -> ProvisionalConfig | None:
     if not all((paths.runtime, paths.signer_runtime, paths.output, paths.socket, paths.anchor)):
         return None
     conversation_policy = None
-    if request.proposal_authority_policy is None:
+    if (
+        request.proposal_authority_policy is None
+        and int(request.max_request_bytes)
+        >= CONVERSATION_SCOPE_MIN_REQUEST_BYTES
+    ):
         conversation_policy = conversation_scope_policy(prepared.profile)
     conversation_anchor = (
         paths.signer_runtime / "conversation_scope_anchor.json"
@@ -253,46 +256,37 @@ def _authorize(
             architect_proposal_security_context_digest(provisional.runtime)
             if policy is not None else ""
         )
-        signer_id, replay_digest = _signer_replay_bindings(provisional)
         now = int(request.now_epoch if request.now_epoch is not None else time.time())
     except (OSError, TypeError, ValueError):
         return None, (FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,)
-    verified, reasons = verify_proposal_policy_authorization(
-        provisional.prepared.profile, policy,
-        request.proposal_policy_authorization,
-        principal_key_resolver=(request.principal_key_resolver or FailClosedPrincipalKeyResolver()),
-        signer_instance_id=signer_id, replay_binding_digest=replay_digest,
-        security_context_digest=context_digest, now_epoch=now,
-    )
-    if reasons:
-        return None, reasons
+    if policy is None:
+        if request.proposal_policy_authorization is not None:
+            return None, (FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,)
+        return provisional, ()
     mapping = dict(provisional.mapping)
-    runtime = provisional.runtime
-    if verified is not None:
-        mapping["proposal_policy_authorization"] = verified.to_dict()
-        runtime = replace(
+    raw = request.proposal_policy_authorization
+    raw = raw.to_dict() if hasattr(raw, "to_dict") else raw
+    runtime = replace(
+        provisional.runtime,
+        proposal_policy_authorization=raw,
+        proposal_security_context_digest=context_digest,
+    )
+    try:
+        _, verified = verify_architect_proposal_runtime_authorization(
+            runtime,
+            principal_key_resolver=(
+                request.principal_key_resolver or FailClosedPrincipalKeyResolver()
+            ),
+            now_epoch=now,
+        )
+    except (OSError, TypeError, ValueError):
+        return None, (FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,)
+    mapping["proposal_policy_authorization"] = verified.to_dict()
+    runtime = replace(
             runtime, proposal_policy_authorization=verified.to_dict(),
             proposal_security_context_digest=context_digest,
-        )
+    )
     return ProvisionalConfig(provisional.prepared, mapping, runtime), ()
-
-
-def _signer_replay_bindings(
-    provisional: ProvisionalConfig,
-) -> tuple[str, str]:
-    prepared = provisional.prepared
-    if prepared.request.proposal_authority_policy is None:
-        return "", ""
-    profile = prepared.profile
-    signer_id = architect_proposal_signer_instance_id(
-        prepared.paths.signer_runtime,
-        str(profile.get("reddog_public_key") or ""),
-        str(profile.get("key_epoch") or ""),
-    )
-    replay = architect_proposal_replay_store_binding_digest(
-        signer_id, prepared.proposal_nonce_path, prepared.proposal_store_id
-    )
-    return signer_id, replay
 
 
 def _validate_write_and_accept(

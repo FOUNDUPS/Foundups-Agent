@@ -90,6 +90,44 @@ _SOURCE_FIELDS = _SEED_FIELDS | frozenset(
         "source_authority_basis",
     }
 )
+_RUNTIME_FIELDS = _SOURCE_FIELDS | frozenset(
+    {
+        "authorized_base_sha",
+        "context_view_id",
+        "determination_id",
+        "evidence_bundle_id",
+        "identity_ttl_seconds",
+        "memex_supply_digest",
+        "model_runtime_binding_digest",
+        "model_runtime_binding_panel_models",
+        "model_runtime_binding_principal_model",
+        "model_runtime_binding_receipt",
+        "model_runtime_binding_receipt_id",
+        "model_runtime_binding_role_bindings",
+        "model_runtime_binding_runtime_surface",
+        "model_runtime_binding_verification_digest",
+        "model_runtime_binding_verification_receipt",
+        "model_runtime_binding_verification_receipt_id",
+        "model_selection_digest",
+        "model_selection_receipt",
+        "operational_context_binding",
+        "promotion_publication_id",
+        "proposal_admission",
+        "proposal_admission_digest",
+        "proposal_admission_receipt_id",
+        "proposal_authenticity_attestation_digest",
+        "proposal_authenticity_attestation_id",
+        "proposal_policy_authorization_digest",
+        "proposal_policy_authorization_id",
+        "proposal_signer_runtime_context_digest",
+        "readonly_audit_decision_id",
+        "snapshot_receipt_id",
+        "task_summary",
+        "work_authority_ttl_seconds",
+        "work_order_id",
+        "wsp15_allocation_receipt",
+    }
+)
 _HOLOINDEX_FIELDS = frozenset(
     {
         "applicable_wsps",
@@ -245,6 +283,18 @@ def authority_profile_unknown_field_paths(
     return tuple(dict.fromkeys(found))
 
 
+def authority_profile_runtime_unknown_field_paths(
+    value: Any,
+) -> tuple[str, ...]:
+    """Return top-level fields outside the public runtime profile schema."""
+
+    if not isinstance(value, Mapping):
+        return ("$",)
+    return tuple(
+        dict.fromkeys(str(key) for key in value if str(key) not in _RUNTIME_FIELDS)
+    )
+
+
 def _mapping_at_path(value: Mapping[str, Any], path: str) -> Any:
     current: Any = value
     for part in path.split("."):
@@ -285,6 +335,7 @@ def authority_profile_malformed_digest_paths(value: Any) -> tuple[str, ...]:
 
 __all__ = [
     "authority_profile_malformed_digest_paths",
+    "authority_profile_runtime_unknown_field_paths",
     "authority_profile_secret_field_paths",
     "authority_profile_unknown_field_paths",
 ]

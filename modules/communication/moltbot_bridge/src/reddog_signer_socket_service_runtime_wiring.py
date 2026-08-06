@@ -41,11 +41,10 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_serv
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
     ArchitectProposalPolicyAuthorization,
     ArchitectProposalSignerPolicy,
-    DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS,
     ProposalAuthenticityNonceStore,
     architect_proposal_replay_store_binding_digest,
     architect_proposal_signer_instance_id,
-    rehydrate_architect_proposal_authenticity_payload,
+    rehydrate_architect_proposal_signer_policy,
     verify_architect_proposal_policy_authorization,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
@@ -894,32 +893,10 @@ def _bind_peer_instance(
 def _proposal_authority_policy(
     value: ArchitectProposalSignerPolicy | Mapping[str, Any] | None,
 ) -> ArchitectProposalSignerPolicy | None:
-    if isinstance(value, ArchitectProposalSignerPolicy):
-        return (
-            value
-            if 0 < int(value.max_ttl_seconds)
-            <= DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
-            else None
-        )
-    if not isinstance(value, Mapping):
-        return None
-    expected = value.get("expected_payload")
     try:
-        payload = rehydrate_architect_proposal_authenticity_payload(
-            expected if isinstance(expected, Mapping) else {}
-        )
-        max_ttl = int(value.get("max_ttl_seconds"))
+        return rehydrate_architect_proposal_signer_policy(value)
     except (TypeError, ValueError):
         return None
-    if (
-        max_ttl <= 0
-        or max_ttl > DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
-    ):
-        return None
-    return ArchitectProposalSignerPolicy(
-        expected_payload=payload,
-        max_ttl_seconds=max_ttl,
-    )
 
 
 def _proposal_policy_authorization(
