@@ -95,24 +95,15 @@ FIELDS = frozenset(
 V2_FIELDS = FIELDS | {"verified_outcome_authority"}
 _OUTCOME_OWNER_FIELDS = frozenset(
     {
-        "descriptor",
-        "authority_socket_path",
-        "authority_service_uid",
-        "signer_uid",
-        "signer_gid",
-        "signer_principal_id",
-        "state_root",
-        "state_path",
-        "state_store_id",
-        "state_durability_receipt_id",
-        "state_witness_root",
-        "state_witness_path",
-        "state_witness_store_id",
-        "state_witness_durability_receipt_id",
-        "installation_root",
-        "installation_path",
-        "installation_store_id",
-        "installation_durability_receipt_id",
+        "descriptor", "authority_socket_path",
+        "authority_service_uid", "signer_uid",
+        "signer_gid", "signer_principal_id",
+        "state_root", "state_path",
+        "state_store_id", "state_durability_receipt_id",
+        "state_witness_root", "state_witness_path",
+        "state_witness_store_id", "state_witness_durability_receipt_id",
+        "installation_root", "installation_path",
+        "installation_store_id", "installation_durability_receipt_id",
     }
 )
 
@@ -126,6 +117,7 @@ class SystemServiceStartupSelection:
     verified_outcome_authority_supplier: Callable[[], RootVerifiedOutcomeSigningAuthority]
     signer_uid: int
     signer_gid: int
+    conversation_principal_authority_resolver_supplier: Callable[[], Any] | None = None
 
 
 def load_system_service_startup_selection(*, owner_config_path: Path | str, repo_root: Path) -> SystemServiceStartupSelection:
@@ -137,9 +129,16 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
     manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
     def authority_supplier() -> RootVerifiedOutcomeSigningAuthority:
         return _verified_outcome_authority_from_owner(owner, repo=repo, now_epoch=int(time.time()))
+    def principal_authority_supplier() -> Any:
+        from modules.communication.moltbot_bridge.src.reddog_signer_current_principal_authority_resolver import (
+            ManifestBoundCurrentPrincipalAuthorityResolver,
+        )
+
+        return ManifestBoundCurrentPrincipalAuthorityResolver(repo, boundary)
     signer_uid, signer_gid = _signer_identity_from_owner(owner)
     return SystemServiceStartupSelection(
-        str(owner["config_id"]), manifest, boundary, authority_supplier, signer_uid, signer_gid
+        str(owner["config_id"]), manifest, boundary, authority_supplier,
+        signer_uid, signer_gid, principal_authority_supplier
     )
 
 

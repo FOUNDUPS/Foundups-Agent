@@ -24,6 +24,9 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     ControlLoopAuthorityPolicy,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    ConversationScopeSignerPolicy,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
     public_key_fingerprint,
@@ -41,6 +44,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     FAIL_SIGNER_RUNTIME_CONFIG_INVALID,
     FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,
+    FAIL_SIGNER_RUNTIME_CONVERSATION_AUTH_INVALID,
     FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,
     FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
     FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID,
@@ -726,6 +730,63 @@ def test_result_serialization_contains_no_secret_material_or_backend() -> None:
     assert result.no_process_spawned is False
     assert result.no_repo_mutation_performed is False
     assert result.no_holoindex_reindex_performed is False
+
+
+def test_conversation_scope_runtime_requires_current_principal_resolver(
+    tmp_path: Path,
+) -> None:
+    class CurrentResolver:
+        @staticmethod
+        def resolve(_principal_id: str, _principal_provider: str):
+            return None
+
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    signer_runtime = tmp_path / "signer-runtime"
+    repo.mkdir()
+    policy = ConversationScopeSignerPolicy(
+        issuer_principal_id="github:mjtrout",
+        issuer_principal_provider="github",
+        repo_full_name="FOUNDUPS/Foundups-Agent",
+        signer_public_key=public_key,
+        key_epoch="epoch-1",
+    )
+    config = _config(
+        public_key,
+        repo_root=repo,
+        runtime_root=runtime,
+        signer_runtime_root=signer_runtime,
+        socket_path=runtime / "reddog-signer.sock",
+        control_loop_anchor_path=signer_runtime / "control-anchor.json",
+        conversation_scope_anchor_path=(
+            signer_runtime / "conversation-anchor.json"
+        ),
+        conversation_scope_signer_policy=policy,
+        max_request_bytes=163840,
+    )
+
+    missing = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        _resolver(private_key),
+        serve_bounded=CapturingBoundedService(),
+    )
+    service = CapturingBoundedService()
+    accepted = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        _resolver(private_key),
+        serve_bounded=service,
+        conversation_scope_principal_resolver=CurrentResolver(),
+    )
+
+    assert missing.accepted is False
+    assert FAIL_SIGNER_RUNTIME_CONVERSATION_AUTH_INVALID in missing.rejection_reasons
+    assert accepted.accepted is True
+    backend = service.calls[0]["backend"]
+    assert backend.conversation_scope_signer_policy == policy
+    assert backend.conversation_scope_principal_resolver is not None
+    assert backend.conversation_scope_anchor_store is not None
 
 
 def test_module_has_no_env_shell_file_repo_openclaw_hermes_or_holoindex_surface() -> None:

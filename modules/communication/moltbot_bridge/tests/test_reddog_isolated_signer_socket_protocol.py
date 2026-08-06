@@ -4,8 +4,14 @@ from __future__ import annotations
 
 import ast
 import json
+import struct
 from pathlib import Path
 
+import pytest
+
+from modules.communication.moltbot_bridge.src import (
+    reddog_signer_socket_peer_credential_attestor as attestor_module,
+)
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     REJECT_SIGNER_SOCKET_BACKEND_EXCEPTION,
     REJECT_SIGNER_SOCKET_NON_ASCII,
@@ -26,6 +32,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     SigningRequest,
     SigningResponse,
     public_key_fingerprint,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
+    KernelPeerCredentialAttestor,
+    PeerCredentialPolicy,
 )
 
 
@@ -193,6 +203,57 @@ def test_protocol_accepts_attested_peer_and_backend_response() -> None:
     assert response["no_secret_material_returned"] is True
     assert len(backend.requests) == 1
     assert backend.requests[0][1].peer_principal_id == "github:mjtrout"
+
+
+def test_protocol_accepts_real_kernel_source_and_rejects_forged_variants() -> None:
+    real = (
+        "kernel_peer_credential:kernel_so_peercred:"
+        "pid=101:uid=1001:gid=1002"
+    )
+    accepted = _decode(
+        handle_reddog_isolated_signer_socket_request(
+            _request_payload(), peer=_peer(credential_source=real),
+            backend=AcceptingBackend(),
+        )
+    )
+    assert accepted["accepted"] is True
+
+    for forged in (
+        real + ":role=architect",
+        real.replace("uid=1001", "uid=-1"),
+        real.replace("kernel_so_peercred", "request_body"),
+        "kernel_peer_credential:kernel_so_peercred:uid=1001:gid=1002",
+    ):
+        rejected = _decode(
+            handle_reddog_isolated_signer_socket_request(
+                _request_payload(), peer=_peer(credential_source=forged),
+                backend=AcceptingBackend(),
+            )
+        )
+        assert rejected["rejection_code"] == REJECT_SIGNER_SOCKET_PEER_NOT_ATTESTED
+
+
+def test_kernel_peer_attestor_output_is_protocol_admissible(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Socket:
+        def getsockopt(self, _level: int, _name: int, _length: int) -> bytes:
+            return struct.pack("3i", 101, 1001, 1002)
+
+    monkeypatch.setattr(attestor_module, "_SO_PEERCRED", 17)
+    peer = KernelPeerCredentialAttestor(
+        PeerCredentialPolicy(
+            uid_to_principal={1001: "github:mjtrout"},
+            allowed_gids=(1002,),
+        )
+    ).attest(Socket())
+
+    response = _decode(
+        handle_reddog_isolated_signer_socket_request(
+            _request_payload(), peer=peer, backend=AcceptingBackend()
+        )
+    )
+    assert response["accepted"] is True
 
 
 def test_protocol_default_backend_fails_closed() -> None:

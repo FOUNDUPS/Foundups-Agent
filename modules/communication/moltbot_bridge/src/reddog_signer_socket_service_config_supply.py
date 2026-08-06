@@ -58,6 +58,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     FailClosedPrincipalKeyResolver,
     PrincipalKeyResolver,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    ConversationScopeSignerPolicy,
+)
 from modules.infrastructure.secrets_mcp.src.vault_resolver import parse_op_reference
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
@@ -68,7 +71,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 
 SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT = "SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT"
 SIGNER_SERVICE_CONFIG_SUPPLY_REJECT = "SIGNER_SERVICE_CONFIG_SUPPLY_REJECT"
-SIGNER_SERVICE_CONFIG_SCHEMA_VERSION = "reddog_signer_service_config.v2"
+SIGNER_SERVICE_CONFIG_SCHEMA_VERSION = "reddog_signer_service_config.v3"
 
 FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID = "signer_config_authority_profile_invalid"
 FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID = (
@@ -158,7 +161,7 @@ def run_reddog_signer_socket_service_config_supply(
     allowed_gids: Sequence[int | str] = (),
     max_requests: int = 16,
     timeout_s: float = 5.0,
-    max_request_bytes: int = 16384,
+    max_request_bytes: int = 163840,
     max_response_bytes: int = 16384,
     principal_signer_agent_id: str = "signer:principal",
     reddog_signer_agent_id: str = "signer:reddog",
@@ -244,6 +247,16 @@ def run_reddog_signer_socket_service_config_supply(
     assert runtime is not None
     assert signer_runtime is not None
     assert peer_policy is not None
+    conversation_policy = (
+        None
+        if proposal_authority_policy is not None
+        else _conversation_scope_policy(profile)
+    )
+    conversation_anchor = (
+        signer_runtime / "conversation_scope_anchor.json"
+        if conversation_policy is not None
+        else None
+    )
     unsigned_config = _config(
         authority_profile=profile,
         runtime_root=runtime,
@@ -261,6 +274,8 @@ def run_reddog_signer_socket_service_config_supply(
         principal_signer_agent_id=principal_signer_agent_id,
         reddog_signer_agent_id=reddog_signer_agent_id,
         control_loop_anchor_path=anchor,
+        conversation_scope_anchor_path=conversation_anchor,
+        conversation_scope_signer_policy=conversation_policy,
         proposal_authority_policy=proposal_authority_policy,
         proposal_policy_authorization=None,
         proposal_nonce_store_path=proposal_nonce_path,
@@ -290,6 +305,12 @@ def run_reddog_signer_socket_service_config_supply(
         control_loop_anchor_path=anchor,
         control_loop_authority_policy=unsigned_config.get(
             "control_loop_authority_policy"
+        ),
+        conversation_scope_anchor_path=unsigned_config.get(
+            "conversation_scope_anchor_path"
+        ),
+        conversation_scope_signer_policy=unsigned_config.get(
+            "conversation_scope_signer_policy"
         ),
         verified_outcome_signer_policy=unsigned_config.get(
             "verified_outcome_signer_policy"
@@ -663,6 +684,8 @@ def _config(
     principal_signer_agent_id: str,
     reddog_signer_agent_id: str,
     control_loop_anchor_path: Path,
+    conversation_scope_anchor_path: Path | None,
+    conversation_scope_signer_policy: ConversationScopeSignerPolicy | None,
     proposal_authority_policy: ArchitectProposalSignerPolicy | None,
     proposal_policy_authorization: ArchitectProposalPolicyAuthorization | None,
     proposal_nonce_store_path: Path | None,
@@ -735,6 +758,14 @@ def _config(
         ],
         "peer_policy": dict(peer_policy),
     }
+    if conversation_scope_signer_policy is not None:
+        assert conversation_scope_anchor_path is not None
+        config["conversation_scope_anchor_path"] = str(
+            conversation_scope_anchor_path
+        )
+        config["conversation_scope_signer_policy"] = asdict(
+            conversation_scope_signer_policy
+        )
     if proposal_authority_policy is not None:
         assert proposal_nonce_store_path is not None
         assert proposal_replay_high_water_store_id is not None
@@ -767,6 +798,34 @@ def _config(
                 proposal_policy_authorization.to_dict()
             )
     return config
+
+
+def _conversation_scope_policy(
+    authority_profile: Mapping[str, Any],
+) -> ConversationScopeSignerPolicy | None:
+    values = (
+        str(authority_profile.get("principal_id") or "").strip(),
+        str(authority_profile.get("principal_provider") or "").strip(),
+        str(authority_profile.get("repo_full_name") or "").strip(),
+        str(authority_profile.get("reddog_public_key") or "").strip(),
+        str(authority_profile.get("key_epoch") or "").strip(),
+    )
+    if (
+        any(not value or not value.isascii() for value in values)
+        or "/" not in values[2]
+    ):
+        return None
+    ttl = int(authority_profile.get("identity_ttl_seconds") or 300)
+    if ttl <= 0 or ttl > 86400:
+        return None
+    return ConversationScopeSignerPolicy(
+        issuer_principal_id=values[0],
+        issuer_principal_provider=values[1],
+        repo_full_name=values[2],
+        signer_public_key=values[3],
+        key_epoch=values[4],
+        max_scope_ttl_seconds=ttl,
+    )
 
 
 def _authority_profile_reasons(

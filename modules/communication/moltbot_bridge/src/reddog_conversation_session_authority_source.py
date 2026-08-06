@@ -34,6 +34,16 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_principal_authority import (
     load_current_generation_principal_authority_resolver,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_config_loader import (
+    load_current_generation_signer_config,
+)
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
+    build_reddog_isolated_signer_socket_client,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    ConversationScopeSignerPolicy,
+    ConversationScopeSigningContext,
+)
 
 
 OWNER_CONFIG_ENV = "REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH"
@@ -124,6 +134,11 @@ def _authenticate_and_consume(
         resolver = load_current_generation_principal_authority_resolver(
             repo_root=repo_root, selection=selection
         )
+        signing_context = _conversation_signing_context(
+            repo_root=repo_root,
+            selection=selection,
+            serialized_credential=serialized_credential,
+        )
         authenticated = authenticate_signed_conversation_scope(
             serialized_credential=serialized_credential,
             transport="editor",
@@ -131,6 +146,7 @@ def _authenticate_and_consume(
             expected_repo_full_name=repo_full_name,
             principal_resolver=resolver,
             now_epoch=int(now_epoch),
+            record_signing_context=signing_context,
         )
     except Exception as exc:
         raise ConversationSessionAuthoritySourceError(
@@ -181,6 +197,58 @@ def _authenticate_and_consume(
         authority=authority,
     )
     return session, authority
+
+
+def _conversation_signing_context(
+    *,
+    repo_root: Path,
+    selection: Mapping[str, Any],
+    serialized_credential: str,
+) -> ConversationScopeSigningContext | None:
+    try:
+        config = load_current_generation_signer_config(
+            repo_root=repo_root, selection=selection
+        )
+    except Exception:
+        return None
+    policy = config.conversation_scope_signer_policy
+    if isinstance(policy, Mapping):
+        policy = ConversationScopeSignerPolicy(**dict(policy))
+    if not isinstance(policy, ConversationScopeSignerPolicy):
+        return None
+    profiles = tuple(config.key_provider_profiles) or (
+        (config.key_provider_profile,) if config.key_provider_profile else ()
+    )
+    matches = tuple(
+        item
+        for item in profiles
+        if _profile_field(item, "expected_public_key")
+        == policy.signer_public_key
+        and _profile_field(item, "expected_key_epoch")
+        == policy.key_epoch
+    )
+    if len(matches) != 1:
+        return None
+    built = build_reddog_isolated_signer_socket_client(
+        repo_root=repo_root,
+        socket_path=config.socket_path,
+        timeout_s=min(float(config.timeout_s), 30.0),
+        max_response_bytes=int(config.max_response_bytes),
+    )
+    if built.accepted is not True or built.client is None:
+        return None
+    return ConversationScopeSigningContext(
+        signer=built.client,
+        signer_public_key=policy.signer_public_key,
+        key_epoch=policy.key_epoch,
+        serialized_session_credential=serialized_credential,
+    )
+
+
+def _profile_field(profile: Any, name: str) -> str:
+    if isinstance(profile, Mapping):
+        return str(profile.get(name) or "")
+    return str(getattr(profile, name, "") or "")
 
 
 def _authority_receipt(

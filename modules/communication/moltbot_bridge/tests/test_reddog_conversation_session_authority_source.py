@@ -252,17 +252,16 @@ def test_real_manifest_bound_principal_artifact_authenticates_session(
     assert active["leased"] is False
 
 
-def test_record_integrity_key_is_operation_local(monkeypatch) -> None:
+def test_signed_session_has_no_process_local_persistence_key(monkeypatch) -> None:
     _install_current_generation(monkeypatch, _record())
     serialized = _credential()
     record = {"scope_record": "same-input"}
     with _lease(monkeypatch, credential=serialized) as first:
-        first_mac = sign_record_with_scope_authority(first.authority, record)
+        first_result = sign_record_with_scope_authority(first.authority, record)
     with _lease(monkeypatch, credential=serialized) as second:
-        second_mac = sign_record_with_scope_authority(second.authority, record)
-    assert first_mac.startswith("hmac-sha256:")
-    assert second_mac.startswith("hmac-sha256:")
-    assert first_mac != second_mac
+        second_result = sign_record_with_scope_authority(second.authority, record)
+    assert first_result is None
+    assert second_result is None
 
 
 def test_production_source_has_no_hmac_or_signing_material() -> None:

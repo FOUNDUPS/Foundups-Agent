@@ -36,7 +36,7 @@ exemptions:
       revocation, bounded renewal, and proposal signer-policy runtime
       boundaries; splitting the historical registry remains separate
       documentation-maintenance work.
-    threshold_override: 1452
+    threshold_override: 1471
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -136,11 +136,11 @@ exemptions:
       Inherited signer bootstrap host retained while the authenticated owner
       configuration identity is carried into runtime admission. The focused
       binding regression was extracted to a bounded test module.
-    threshold_override: 723
-    function_threshold_override: 176
+    threshold_override: 599
+    function_threshold_override: 15
     functions: ["rehydrate_signer_socket_service_runtime_config"]
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
-    no_growth_ceiling: {file_lines: 722, functions: {rehydrate_signer_socket_service_runtime_config: 176}}
+    no_growth_ceiling: {file_lines: 599, functions: {rehydrate_signer_socket_service_runtime_config: 15}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_signer_socket_service_runtime_wiring.py"
@@ -148,7 +148,7 @@ exemptions:
       Inherited signer composition host retained while outcome-authority
       admission delegates to a bounded runtime-binding module. No new
       oversized function is introduced in this slice.
-    threshold_override: 1318
+    threshold_override: 1229
     function_threshold_override: 225
     functions:
       - "architect_proposal_security_context_digest"
@@ -158,7 +158,7 @@ exemptions:
       - "_proposal_policy_authorization"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
     no_growth_ceiling:
-      file_lines: 1318
+      file_lines: 1229
       functions:
         architect_proposal_security_context_digest: 120
         run_reddog_signer_socket_service_runtime_wiring: 225
@@ -466,7 +466,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9555
+    threshold_override: 9588
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -478,7 +478,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 2006
+    threshold_override: 2023
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

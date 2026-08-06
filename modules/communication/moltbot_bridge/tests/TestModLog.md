@@ -1,3 +1,20 @@
+## 2026-08-06: Durable conversation authentication regressions
+
+- Proved E0-signed scope records survive AgentDB and signer-anchor restart while
+  raw principal credentials never enter either durable artifact.
+- Added exact-state tamper, forged/stale credential, wrong signer key/epoch,
+  cross-domain request, unavailable dependency, rollback/fork, nonce replay,
+  concurrent successor, and no-write-on-signing-failure coverage.
+- Added later-clock crash recovery, no-anchor rejection, and exact outage retry.
+  Regressions also cover rehashed pending state, bounded signer heads,
+  kernel-attestor composition, current-generation principal revocation,
+  and lease-active resolver calls.
+- Added proposal-preview crash recovery after signer-anchor commit, including a
+  competing conversation writer denial and proof that restart recovery performs
+  no second signer action before atomic AgentDB finalization.
+- Extended signer config/runtime tests for current principal resolution,
+  confined anchor supply, exact policy binding, and bounded request sizing.
+
 ## 2026-08-05: Current-generation use-time trust regressions
 
 - Added real root-owned selection round-trip tests plus changed config,

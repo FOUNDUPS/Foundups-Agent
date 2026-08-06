@@ -16,7 +16,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_revision
 )
 
 
-SCHEMA_VERSION = "reddog_authenticated_conversation_scope.v1"
+SCHEMA_VERSION = "reddog_authenticated_conversation_scope.v2"
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 HEAD_RE = re.compile(r"^[0-9a-f]{7,64}$")
 MAX_TEXT = 720
@@ -30,6 +30,7 @@ IMMUTABLE_FIELDS = frozenset(
         "schema_version", "conversation_id", "principal_id", "principal_provider",
         "verified_subject_digest", "principal_record_digest", "principal_key_fingerprint",
         "transport", "session_binding_digest", "authorized_foundup_id", "created_at",
+        "credential_id", "session_id", "repo_full_name",
     }
 )
 MUTABLE_FIELDS = frozenset(
@@ -40,10 +41,22 @@ MUTABLE_FIELDS = frozenset(
         "source_snapshot_digest", "last_grounded_head_sha", "holoindex_generation_id",
         "holoindex_freshness_receipt_id", "grounding_receipt_id", "pending_work_proposal_id",
         "pending_work_proposal_digest", "updated_at", "expires_at", "revision_receipts",
-        "record_auth_mac", "record_digest",
+        "record_auth_scheme", "record_auth_signature",
+        "record_auth_signer_public_key", "record_auth_key_fingerprint",
+        "record_auth_key_epoch", "record_auth_nonce", "record_auth_audit_mac",
+        "record_auth_audit_attestation_signature",
+        "previous_record_auth_signature_digest", "record_digest",
     }
 )
 RECORD_FIELDS = IMMUTABLE_FIELDS | MUTABLE_FIELDS
+AUTH_RESPONSE_FIELDS = frozenset(
+    {
+        "record_auth_signature", "record_auth_signer_public_key",
+        "record_auth_key_fingerprint", "record_auth_key_epoch",
+        "record_auth_audit_mac", "record_auth_audit_attestation_signature",
+    }
+)
+UNSIGNED_RECORD_FIELDS = RECORD_FIELDS - AUTH_RESPONSE_FIELDS - {"record_digest"}
 
 
 def sanitized_text(value: Any, *, limit: int = MAX_TEXT) -> str:
@@ -110,8 +123,7 @@ def _binding_reasons(record: Mapping[str, Any]) -> list[str]:
         reasons.append("conversation_scope_binding_digest_invalid")
     if not SHA256_RE.fullmatch(str(record.get("conversation_id") or "")):
         reasons.append("conversation_scope_id_invalid")
-    if not re.fullmatch(r"hmac-sha256:[0-9a-f]{64}", str(record.get("record_auth_mac") or "")):
-        reasons.append("conversation_scope_record_auth_mac_invalid")
+    reasons.extend(_record_auth_reasons(record))
     if not HEAD_RE.fullmatch(str(record.get("last_grounded_head_sha") or "")):
         reasons.append("conversation_scope_head_invalid")
     if not _valid_optional_digest_pair(record, "pending_work_proposal_id", "pending_work_proposal_digest"):
@@ -122,6 +134,66 @@ def _binding_reasons(record: Mapping[str, Any]) -> list[str]:
         record, "holoindex_generation_id", "holoindex_freshness_receipt_id"
     ):
         reasons.append("conversation_scope_holoindex_binding_invalid")
+    return reasons
+
+
+def _record_auth_reasons(record: Mapping[str, Any]) -> list[str]:
+    scheme = str(record.get("record_auth_scheme") or "")
+    signature = str(record.get("record_auth_signature") or "")
+    nonce = str(record.get("record_auth_nonce") or "")
+    previous = str(record.get("previous_record_auth_signature_digest") or "")
+    revision = _integer(record.get("conversation_revision"), default=-1)
+    reasons: list[str] = []
+    if not SHA256_RE.fullmatch(nonce):
+        reasons.append("conversation_scope_record_auth_nonce_invalid")
+    if (revision == 0 and previous) or (
+        revision > 0 and not SHA256_RE.fullmatch(previous)
+    ):
+        reasons.append("conversation_scope_record_auth_lineage_invalid")
+    if scheme == "hmac-sha256-v1":
+        if not re.fullmatch(r"hmac-sha256:[0-9a-f]{64}", signature):
+            reasons.append("conversation_scope_record_auth_signature_invalid")
+        if any(record.get(field) for field in _E0_ONLY_AUTH_FIELDS):
+            reasons.append("conversation_scope_record_auth_scheme_mismatch")
+    elif scheme == "ed25519-e0-v1":
+        reasons.extend(_e0_auth_reasons(record, signature))
+    else:
+        reasons.append("conversation_scope_record_auth_scheme_invalid")
+    return reasons
+
+
+_E0_ONLY_AUTH_FIELDS = (
+    "record_auth_signer_public_key", "record_auth_key_fingerprint",
+    "record_auth_key_epoch", "record_auth_audit_mac",
+    "record_auth_audit_attestation_signature",
+)
+
+
+def _e0_auth_reasons(record: Mapping[str, Any], signature: str) -> list[str]:
+    reasons: list[str] = []
+    if not re.fullmatch(r"ed25519-sig-v1:[A-Za-z0-9_-]+", signature):
+        reasons.append("conversation_scope_record_auth_signature_invalid")
+    if not re.fullmatch(
+        r"ed25519-pub-v1:[A-Za-z0-9_-]+",
+        str(record.get("record_auth_signer_public_key") or ""),
+    ):
+        reasons.append("conversation_scope_record_auth_public_key_invalid")
+    required_digests = (
+        "record_auth_key_fingerprint", "credential_id", "session_id",
+    )
+    if any(
+        not SHA256_RE.fullmatch(str(record.get(field) or ""))
+        for field in required_digests
+    ):
+        reasons.append("conversation_scope_record_auth_binding_invalid")
+    if any(
+        not isinstance(record.get(field), str) or not record.get(field)
+        for field in (
+            "repo_full_name", "record_auth_key_epoch", "record_auth_audit_mac",
+            "record_auth_audit_attestation_signature",
+        )
+    ):
+        reasons.append("conversation_scope_record_auth_e0_metadata_invalid")
     return reasons
 
 
@@ -177,6 +249,29 @@ def with_record_digest(record: Mapping[str, Any]) -> dict[str, Any]:
     return value
 
 
+def validate_unsigned_record(record: Mapping[str, Any]) -> tuple[str, ...]:
+    """Validate exact pre-sign state without trusting caller auth outputs."""
+
+    if set(record) != UNSIGNED_RECORD_FIELDS:
+        return ("conversation_scope_unsigned_record_shape_invalid",)
+    candidate = dict(record)
+    if candidate.get("record_auth_scheme") == "hmac-sha256-v1":
+        candidate.update({
+            "record_auth_signature": "hmac-sha256:" + "0" * 64,
+            **{field: "" for field in _E0_ONLY_AUTH_FIELDS},
+        })
+    else:
+        candidate.update({
+            "record_auth_signature": "ed25519-sig-v1:fixture",
+            "record_auth_signer_public_key": "ed25519-pub-v1:fixture",
+            "record_auth_key_fingerprint": "sha256:" + "0" * 64,
+            "record_auth_key_epoch": "validation-fixture",
+            "record_auth_audit_mac": "validation-fixture",
+            "record_auth_audit_attestation_signature": "validation-fixture",
+        })
+    return validate_record(with_record_digest(candidate))
+
+
 def _valid_optional_digest_pair(record: Mapping[str, Any], left: str, right: str) -> bool:
     values = (str(record.get(left) or ""), str(record.get(right) or ""))
     return values == ("", "") or all(SHA256_RE.fullmatch(value) for value in values)
@@ -190,8 +285,10 @@ def _integer(value: Any, *, default: int) -> int:
 
 
 __all__ = [
-    "IMMUTABLE_FIELDS", "ITEM_KINDS", "MUTABLE_FIELDS", "RECORD_FIELDS",
+    "AUTH_RESPONSE_FIELDS", "IMMUTABLE_FIELDS", "ITEM_KINDS", "MUTABLE_FIELDS",
+    "RECORD_FIELDS", "UNSIGNED_RECORD_FIELDS",
     "REVISION_RECEIPT_FIELDS", "REVISION_RECEIPT_SCHEMA", "SCHEMA_VERSION",
     "canonical_digest", "sanitized_text",
-    "string_list", "typed_items", "validate_record", "with_record_digest",
+    "string_list", "typed_items", "validate_record", "validate_unsigned_record",
+    "with_record_digest",
 ]

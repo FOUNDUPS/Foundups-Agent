@@ -12,7 +12,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     verify_record_with_scope_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
-    with_record_digest,
+    canonical_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record import (
     AuthenticatedConversationScopeResult,
@@ -29,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_request 
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    unsigned_conversation_scope_record,
 )
 
 
@@ -49,12 +52,35 @@ def advance_authenticated_conversation_scope(
         updated = _updated_record(current, grounded, request, now_epoch)
     except (KeyError, TypeError, ValueError):
         return rejected("conversation_scope_input_invalid")
-    updated["record_auth_mac"] = sign_record_with_scope_authority(authority, updated)
+    updated["previous_record_auth_signature_digest"] = canonical_digest(
+        {"record_auth_signature": current["record_auth_signature"]}
+    )
+    updated["record_auth_nonce"] = _record_auth_nonce(updated)
+    updated["revision_receipts"] = [
+        *current["revision_receipts"],
+        revision_receipt(
+            updated,
+            previous=str(current["revision_receipts"][-1]["receipt_id"]),
+            revision=int(request.expected_revision) + 1,
+        ),
+    ]
+    transactions = store.pending_transactions()
+    staged = transactions.stage(
+        unsigned_conversation_scope_record(updated),
+        expected_revision=int(request.expected_revision),
+    )
+    if not staged.get("ok") or not isinstance(staged.get("record"), Mapping):
+        return rejected(str(staged.get("reason") or "conversation_scope_pending_rejected"))
+    updated = dict(staged["record"])
+    envelope = sign_record_with_scope_authority(
+        authority, updated, require_replay=bool(staged.get("recovery_only"))
+    )
+    if not isinstance(envelope, Mapping):
+        return rejected("conversation_scope_record_authentication_unavailable")
+    updated.update(envelope)
     return stored_result(
-        store.compare_and_swap(
-            request.conversation_id,
-            expected_revision=int(request.expected_revision),
-            next_record=with_record_digest(updated),
+        transactions.finalize(
+            updated, expected_revision=int(request.expected_revision)
         )
     )
 
@@ -140,14 +166,21 @@ def _updated_record(
             "updated_at": int(now_epoch),
         }
     )
-    previous = str(current["revision_receipts"][-1]["receipt_id"])
-    updated["revision_receipts"] = [
-        *current["revision_receipts"],
-        revision_receipt(
-            updated, previous=previous, revision=int(request.expected_revision) + 1
-        ),
-    ]
     return updated
+
+
+def _record_auth_nonce(record: Mapping[str, Any]) -> str:
+    return canonical_digest(
+        {
+            "conversation_id": record["conversation_id"],
+            "conversation_revision": record["conversation_revision"],
+            "turn_id": record["turn_id"],
+            "updated_at": record["updated_at"],
+            "previous_record_auth_signature_digest": record[
+                "previous_record_auth_signature_digest"
+            ],
+        }
+    )
 
 
 __all__ = ["advance_authenticated_conversation_scope"]

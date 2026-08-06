@@ -48,7 +48,12 @@ def valid_revision_receipts(record: Mapping[str, Any]) -> bool:
     state = {
         key: value
         for key, value in record.items()
-        if key not in {"revision_receipts", "record_auth_mac", "record_digest"}
+        if key not in {
+            "revision_receipts", "record_digest", "record_auth_signature",
+            "record_auth_signer_public_key", "record_auth_key_fingerprint",
+            "record_auth_key_epoch", "record_auth_audit_mac",
+            "record_auth_audit_attestation_signature",
+        }
     }
     return bool(receipts) and receipts[-1].get("state_digest") == canonical_digest(state)
 

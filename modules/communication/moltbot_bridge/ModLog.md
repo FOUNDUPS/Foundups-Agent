@@ -1,4 +1,24 @@
 # ModLog - moltbot_bridge
+## 2026-08-06: Durable E0 conversation-scope authentication
+- Replaced process-local signed-session record authentication with an extension
+  of the existing isolated Ed25519 signer. Exact scope state is bound to the
+  current principal-signed session credential, signer key epoch, and an E0 audit
+  attestation; the bearer is never persisted or returned.
+- Added a signer-owned atomic monotonic conversation-head store so restarts,
+  rollback, forks, nonce reuse, and concurrent successors fail closed. Runtime
+  composition now requires a per-use current-generation principal resolver,
+  exact signer policy, confined anchor path, kernel-attested peer source, and a
+  request-size budget sufficient for the worst-case serialized credential payload.
+- Added exact AgentDB pre-sign staging and signed atomic finalization. Later-clock
+  recovery can only replay the signer-anchored response and cannot mint a fresh
+  signature; rehashed pending state fails and principal resolution stays leased.
+- Extended the same staged transaction to conversation-bound proposal previews.
+  A crash after signer-anchor commit now leaves the active revision unchanged,
+  fences competing writers, and recovers by replaying the exact anchored response.
+- Extracted signer config rehydration, principal parsing, and conversation-domain
+  signing from inherited WSP 62 hosts; security fixtures were split by concern. No state grants
+  work, worker, repository, shell, signer, PR, merge, reward, or HoloIndex write
+  authority (WSP 00/15/22/50/62/97).
 ## 2026-08-06: Current-generation conversation session authority source
 - Replaced the rejected symmetric resident path with a strict principal-signed
   conversation credential verified by the existing Ed25519 backend and

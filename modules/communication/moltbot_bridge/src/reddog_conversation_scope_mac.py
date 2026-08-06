@@ -19,8 +19,13 @@ def derive_conversation_scope_mac_key(
 
 def sign_conversation_scope_record(record: Mapping[str, Any], key: bytes) -> str:
     payload = dict(record)
-    payload.pop("record_auth_mac", None)
     payload.pop("record_digest", None)
+    for field in (
+        "record_auth_signature", "record_auth_signer_public_key",
+        "record_auth_key_fingerprint", "record_auth_key_epoch",
+        "record_auth_audit_mac", "record_auth_audit_attestation_signature",
+    ):
+        payload.pop(field, None)
     raw = json.dumps(
         payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
     ).encode("utf-8")
@@ -30,7 +35,7 @@ def sign_conversation_scope_record(record: Mapping[str, Any], key: bytes) -> str
 def verify_conversation_scope_record(
     record: Mapping[str, Any], keys: tuple[bytes, ...]
 ) -> bool:
-    supplied = str(record.get("record_auth_mac") or "")
+    supplied = str(record.get("record_auth_signature") or "")
     return bool(keys) and any(
         hmac.compare_digest(supplied, sign_conversation_scope_record(record, key))
         for key in keys

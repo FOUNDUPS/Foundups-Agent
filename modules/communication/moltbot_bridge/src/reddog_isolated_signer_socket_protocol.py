@@ -16,6 +16,7 @@ backend fails closed.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping, Optional, Protocol
 
@@ -33,6 +34,11 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 
 SIGNER_SOCKET_REQUEST_SCHEMA_VERSION = "reddog_signer_socket_request.v1"
 SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2 = "reddog_signer_socket_request.v2"
+KERNEL_PEER_SOURCE_RE = re.compile(
+    r"^kernel_peer_credential:(?:kernel_so_peercred|kernel_getpeereid):"
+    r"pid=(?:0|[1-9][0-9]*):uid=(?:0|[1-9][0-9]*):"
+    r"gid=(?:0|[1-9][0-9]*)$"
+)
 
 REJECT_SIGNER_SOCKET_REQUEST_TOO_LARGE = "REJECT_SIGNER_SOCKET_REQUEST_TOO_LARGE"
 REJECT_SIGNER_SOCKET_REQUEST_INVALID = "REJECT_SIGNER_SOCKET_REQUEST_INVALID"
@@ -334,7 +340,10 @@ def _valid_peer_attestation(peer: object) -> bool:
     return bool(
         all(type(value) is str and value for value in strings)
         and peer.transport == "unix_socket"
-        and peer.credential_source in {"kernel_peer_credential", "SO_PEERCRED"}
+        and (
+            peer.credential_source in {"kernel_peer_credential", "SO_PEERCRED"}
+            or KERNEL_PEER_SOURCE_RE.fullmatch(peer.credential_source)
+        )
         and type(peer.boundary_attested) is bool
         and peer.boundary_attested is True
     )

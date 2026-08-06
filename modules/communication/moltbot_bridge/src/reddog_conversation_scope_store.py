@@ -87,6 +87,12 @@ class AgentDbConversationScopeStore:
         except Exception:
             return _result(False, "conversation_scope_store_unavailable")
 
+    def pending_transactions(self) -> Any:
+        from modules.communication.moltbot_bridge.src.reddog_conversation_scope_pending_store import (
+            AgentDbConversationScopePendingStore,
+        )
+        return AgentDbConversationScopePendingStore(self._agent_db_factory)
+
     def _compare_and_swap(
         self, conversation_id: str, expected_revision: int, value: Mapping[str, Any]
     ) -> Mapping[str, Any]:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +12,7 @@ import pytest
 
 from modules.communication.moltbot_bridge.src import (
     reddog_current_generation_manifest_launch_selection as selection_module,
+    reddog_signer_current_principal_authority_resolver as current_resolver_module,
     reddog_signer_system_service_manifest_selection_loader as loader_module,
 )
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water import (
@@ -308,6 +310,68 @@ def test_non_posix_owner_policy_fails_closed(
         match="signer_owner_linux_service_required",
     ):
         loader_module._read_root_owned_bytes(target, tmp_path)
+
+
+def test_conversation_principal_resolver_rereads_current_generation_per_use(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    selections = iter(({"generation": 1}, {"generation": 2}))
+    loaded: list[int] = []
+    lease_active = False
+    class Boundary:
+        def select(self, _request: object, *, now_epoch: int):
+            assert now_epoch == NOW
+            return next(selections)
+
+        def _lease_current(self, capability: object):
+            @contextmanager
+            def lease():
+                nonlocal lease_active
+                assert lease_active is False
+                lease_active = True
+                try:
+                    yield capability
+                finally:
+                    lease_active = False
+
+            return lease()
+    class Resolver:
+        def __init__(self, generation: int) -> None:
+            self.generation = generation
+
+        def resolve(self, principal_id: str, principal_provider: str):
+            assert lease_active is True
+            assert (principal_id, principal_provider) == (
+                "principal_012", "principal-signature"
+            )
+            return "current" if self.generation == 1 else None
+
+        def resolve_unique(self, principal_id: str):
+            assert lease_active is True
+            assert principal_id == "principal_012"
+            return "current" if self.generation == 1 else None
+
+    def load(*, repo_root: Path, selection: object):
+        assert repo_root == tmp_path.resolve()
+        generation = int(selection["generation"])
+        loaded.append(generation)
+        return Resolver(generation)
+
+    monkeypatch.setattr(
+        current_resolver_module,
+        "load_current_generation_principal_authority_resolver",
+        load,
+    )
+    resolver = (
+        current_resolver_module.ManifestBoundCurrentPrincipalAuthorityResolver(
+            tmp_path, Boundary(), clock=lambda: NOW
+        )
+    )
+
+    assert resolver.resolve("principal_012", "principal-signature") == "current"
+    assert resolver.resolve("principal_012", "principal-signature") is None
+    assert loaded == [1, 2]
+    assert lease_active is False
 
 
 @pytest.mark.skipif(

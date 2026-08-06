@@ -78,8 +78,23 @@ from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshak
     SignerPeerInstanceBinding,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
-    AtomicSignerControlLoopAnchorStore,
     ControlLoopAnchorStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import PrincipalAuthorityResolver
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import ConversationScopeSignerPolicy
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_authority_policy_runtime import (
+    FAIL_CONTROL_ANCHOR,
+    control_loop_anchor_store as _control_loop_anchor_store,
+    control_loop_authority_policy as _control_loop_authority_policy,
+    verified_outcome_signer_policy as _verified_outcome_signer_policy,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_policy_runtime import (
+    ConversationScopeRuntimeBinding,
+    FAIL_CONVERSATION_AUTH,
+    bind_conversation_scope_backend,
+    build_conversation_scope_runtime_binding,
+    conversation_scope_config_reasons,
+    conversation_scope_security_context,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     KernelPeerCredentialAttestor,
@@ -110,9 +125,8 @@ FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE = "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_D
 FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID = "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID"
 FAIL_SIGNER_RUNTIME_SERVICE_REJECTED = "FAIL_SIGNER_RUNTIME_SERVICE_REJECTED"
 FAIL_SIGNER_RUNTIME_SERVICE_INVALID = "FAIL_SIGNER_RUNTIME_SERVICE_INVALID"
-FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID = (
-    "FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID"
-)
+FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID = FAIL_CONTROL_ANCHOR
+FAIL_SIGNER_RUNTIME_CONVERSATION_AUTH_INVALID = FAIL_CONVERSATION_AUTH
 FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID = (
     "FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID"
 )
@@ -151,6 +165,8 @@ class SignerSocketServiceRuntimeWiringConfig:
     key_provider_profiles: tuple[SignerKeyProviderProfile | Mapping[str, Any], ...] = ()
     control_loop_anchor_path: Path | str | None = None
     control_loop_authority_policy: ControlLoopAuthorityPolicy | Mapping[str, Any] | None = None
+    conversation_scope_anchor_path: Path | str | None = None
+    conversation_scope_signer_policy: ConversationScopeSignerPolicy | Mapping[str, Any] | None = None
     verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | Mapping[str, Any] | None = None
     proposal_authority_policy: ArchitectProposalSignerPolicy | Mapping[str, Any] | None = None
     proposal_policy_authorization: ArchitectProposalPolicyAuthorization | Mapping[str, Any] | None = None
@@ -196,15 +212,9 @@ def architect_proposal_security_context_digest(
         raise ValueError("architect_proposal_security_context_invalid")
     profiles, profile_reasons = _profiles(config)
     peer_policy = _peer_policy(config.peer_policy)
-    proposal_policy = _proposal_authority_policy(
-        config.proposal_authority_policy
-    )
-    control_policy = _control_loop_authority_policy(
-        config.control_loop_authority_policy
-    )
-    outcome_policy = _verified_outcome_signer_policy(
-        config.verified_outcome_signer_policy
-    )
+    proposal_policy = _proposal_authority_policy(config.proposal_authority_policy)
+    control_policy = _control_loop_authority_policy(config.control_loop_authority_policy)
+    outcome_policy = _verified_outcome_signer_policy(config.verified_outcome_signer_policy)
     if (
         profile_reasons
         or peer_policy is None
@@ -247,6 +257,9 @@ def architect_proposal_security_context_digest(
         repo_root=repo_root,
         allowed_root=signer_root,
     )
+    conversation_context = conversation_scope_security_context(
+        config, repo_root, signer_root
+    )
     payload = {
         "schema_version": "reddog_architect_proposal_security_context.v1",
         "repo_root": str(repo_root),
@@ -284,6 +297,8 @@ def architect_proposal_security_context_digest(
         "control_loop_authority_policy": (
             asdict(control_policy) if control_policy is not None else None
         ),
+        "conversation_scope_anchor_path": conversation_context["anchor_path"],
+        "conversation_scope_signer_policy": conversation_context["policy"],
         "verified_outcome_signer_policy": (
             asdict(outcome_policy) if outcome_policy is not None else None
         ),
@@ -318,6 +333,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
     principal_key_resolver: PrincipalKeyResolver | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
     verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
+    conversation_scope_principal_resolver: PrincipalAuthorityResolver | None = None,
 ) -> SignerSocketServiceRuntimeWiringResult:
     """Build a signer backend and serve a bounded signer socket service."""
 
@@ -333,12 +349,13 @@ def run_reddog_signer_socket_service_runtime_wiring(
     anchor_store, anchor_reasons = _control_loop_anchor_store(config)
     if anchor_reasons:
         return _reject(*anchor_reasons)
-    control_authority_policy = _control_loop_authority_policy(
-        config.control_loop_authority_policy
+    control_authority_policy = _control_loop_authority_policy(config.control_loop_authority_policy)
+    outcome_policy = _verified_outcome_signer_policy(config.verified_outcome_signer_policy)
+    conversation_binding, conversation_reasons = (
+        build_conversation_scope_runtime_binding(config, conversation_scope_principal_resolver)
     )
-    outcome_policy = _verified_outcome_signer_policy(
-        config.verified_outcome_signer_policy
-    )
+    if conversation_reasons:
+        return _reject(*conversation_reasons)
     if outcome_policy is not None and not verified_outcome_authority_matches_runtime(
         outcome_policy,
         verified_outcome_signing_authority,
@@ -422,7 +439,6 @@ def run_reddog_signer_socket_service_runtime_wiring(
                 FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
                 injected_dependency_effects_unobserved=True,
             )
-
     backend, proposal_nonce_store, key_receipt, key_reasons = _build_backend(
         profiles,
         resolver,
@@ -433,6 +449,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
         control_loop_authority_policy=control_authority_policy,
         verified_outcome_signer_policy=outcome_policy,
         verified_outcome_signing_authority=verified_outcome_signing_authority if outcome_policy else None,
+        conversation_scope_binding=conversation_binding,
         proposal_authority_policy=proposal_policy,
         proposal_policy_authorization=proposal_authorization,
         proposal_nonce_store_path=proposal_nonce_store_path,
@@ -480,7 +497,6 @@ def run_reddog_signer_socket_service_runtime_wiring(
             max_requests=config.max_requests,
             injected_dependency_effects_unobserved=True,
         )
-
     try:
         service = serve_bounded(
             repo_root=config.repo_root,
@@ -516,7 +532,6 @@ def run_reddog_signer_socket_service_runtime_wiring(
             max_requests=config.max_requests,
             injected_dependency_effects_unobserved=True,
         )
-
     return SignerSocketServiceRuntimeWiringResult(
         accepted=True,
         status=SIGNER_SOCKET_RUNTIME_WIRING_SERVED,
@@ -545,10 +560,9 @@ def validate_signer_socket_service_runtime_config(
         return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
     if not _socket_path_valid(config):
         return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
-    _, profile_reasons = _profiles(config)
+    profiles, profile_reasons = _profiles(config)
     if profile_reasons:
         return profile_reasons
-    profiles, _ = _profiles(config)
     profile_public_keys = [profile.expected_public_key for profile in profiles]
     if len(profile_public_keys) != len(set(profile_public_keys)):
         return (FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,)
@@ -558,12 +572,13 @@ def validate_signer_socket_service_runtime_config(
     anchor_store, anchor_reasons = _control_loop_anchor_store(config)
     if anchor_reasons:
         return anchor_reasons
-    control_authority_policy = _control_loop_authority_policy(
-        config.control_loop_authority_policy
+    control_authority_policy = _control_loop_authority_policy(config.control_loop_authority_policy)
+    outcome_policy = _verified_outcome_signer_policy(config.verified_outcome_signer_policy)
+    conversation_reasons = conversation_scope_config_reasons(
+        config, set(profile_public_keys)
     )
-    outcome_policy = _verified_outcome_signer_policy(
-        config.verified_outcome_signer_policy
-    )
+    if conversation_reasons:
+        return conversation_reasons
     if (
         config.verified_outcome_signer_policy is not None
         and outcome_policy is None
@@ -746,6 +761,7 @@ def _build_backend(
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None,
     verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None,
     verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None,
+    conversation_scope_binding: ConversationScopeRuntimeBinding | None,
     proposal_authority_policy: ArchitectProposalSignerPolicy | None,
     proposal_policy_authorization: ArchitectProposalPolicyAuthorization | None,
     proposal_nonce_store_path: Path | None,
@@ -755,12 +771,8 @@ def _build_backend(
     repo_root: Path,
     signer_runtime_root: Path,
     signer_peer_instance_binding: SignerPeerInstanceBinding | None,
-) -> tuple[
-    Optional[IsolatedSignerBackend],
-    ProposalAuthenticityNonceStore | None,
-    dict[str, Any],
-    tuple[str, ...],
-]:
+) -> tuple[Optional[IsolatedSignerBackend], ProposalAuthenticityNonceStore | None,
+           dict[str, Any], tuple[str, ...]]:
     receipts: list[dict[str, Any]] = []
     backends: dict[str, IsolatedSignerBackend] = {}
     public_keys = [item.expected_public_key for item in profiles]
@@ -840,6 +852,7 @@ def _build_backend(
                     else None
                 ),
             )
+            key_result = bind_conversation_scope_backend(key_result, profile, conversation_scope_binding)
         receipt = key_result.to_receipt()
         receipts.append(receipt)
         if not key_result.ok or key_result.backend is None:
@@ -876,108 +889,6 @@ def _bind_peer_instance(
     if not isinstance(backend, Ed25519SignerBackend):
         return None if binding is not None else backend
     return replace(backend, signer_peer_instance_binding=binding)
-
-
-def _control_loop_anchor_store(
-    config: SignerSocketServiceRuntimeWiringConfig,
-) -> tuple[ControlLoopAnchorStore | None, tuple[str, ...]]:
-    if config.control_loop_anchor_path is None:
-        return None, ()
-    try:
-        repo_root = Path(config.repo_root).resolve()
-        runtime_root = validate_runtime_root_path(
-            config.runtime_root,
-            repo_root=repo_root,
-        )
-        signer_runtime_root = validate_runtime_root_path(
-            config.signer_runtime_root,
-            repo_root=repo_root,
-        )
-        if (
-            signer_runtime_root == runtime_root
-            or runtime_root in signer_runtime_root.parents
-            or signer_runtime_root in runtime_root.parents
-        ):
-            return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
-        path = Path(config.control_loop_anchor_path)
-        if not path.is_absolute():
-            return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
-        resolved = validate_runtime_artifact_path(
-            path,
-            repo_root=repo_root,
-            allowed_root=signer_runtime_root,
-        )
-        if resolved == repo_root or repo_root in resolved.parents:
-            return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
-        return AtomicSignerControlLoopAnchorStore(
-            path,
-            runtime_root=signer_runtime_root,
-            repo_root=repo_root,
-        ), ()
-    except Exception:
-        return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
-
-
-def _control_loop_authority_policy(
-    value: ControlLoopAuthorityPolicy | Mapping[str, Any] | None,
-) -> ControlLoopAuthorityPolicy | None:
-    if isinstance(value, ControlLoopAuthorityPolicy):
-        policy = value
-    elif isinstance(value, Mapping):
-        try:
-            policy = ControlLoopAuthorityPolicy(**dict(value))
-        except Exception:
-            return None
-    else:
-        return None
-    values = (
-        policy.issuer_principal_id,
-        policy.signer_public_key,
-        policy.key_epoch,
-        policy.consensus_receipt_digest,
-        policy.authority_profile_digest,
-        policy.authority_profile_source_receipt_id,
-    )
-    if any(not item or not _ascii(item) for item in values):
-        return None
-    for digest in (
-        policy.consensus_receipt_digest,
-        policy.authority_profile_digest,
-        policy.authority_profile_source_receipt_id,
-    ):
-        if not _is_sha256_digest(digest):
-            return None
-    return policy
-
-
-def _verified_outcome_signer_policy(
-    value: VerifiedOutcomeSignerPolicy | Mapping[str, Any] | None,
-) -> VerifiedOutcomeSignerPolicy | None:
-    if isinstance(value, VerifiedOutcomeSignerPolicy):
-        policy = value
-    elif isinstance(value, Mapping):
-        try:
-            policy = VerifiedOutcomeSignerPolicy(**dict(value))
-        except (TypeError, ValueError):
-            return None
-    else:
-        return None
-    values = (
-        policy.issuer_principal_id,
-        policy.reddog_id,
-        policy.signer_public_key,
-        policy.key_epoch,
-        policy.authority_tier,
-        policy.consensus_receipt_digest,
-    )
-    if (
-        any(not item or not _ascii(item) for item in values)
-        or not _is_sha256_digest(policy.consensus_receipt_digest)
-        or policy.max_future_skew_seconds <= 0
-        or policy.max_future_skew_seconds > 300
-    ):
-        return None
-    return policy
 
 
 def _proposal_authority_policy(

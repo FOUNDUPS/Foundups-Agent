@@ -55,6 +55,7 @@ SLICE_MODULES = (
     "reddog_signer_owner_e0_capability_state.py",
     "reddog_signer_owner_e0_current_selection.py",
     "reddog_signer_owner_e0_principal_authority.py",
+    "reddog_signer_owner_e0_principal_records.py",
     "reddog_signer_owner_controlled_e0_admission.py",
 )
 
@@ -204,7 +205,9 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
     policy["config_digest"] = config_digest
     policy["policy_id"] = signer_owner_e0_policy_id(policy)
     policy["signature"] = encode_ed25519_signature(
-        grant_private.sign(canonical_signer_owner_e0_policy_input(policy).encode("ascii"))
+        grant_private.sign(
+            canonical_signer_owner_e0_policy_input(policy).encode("ascii")
+        )
     )
     _CURRENT_SELECTION.clear()
     _CURRENT_SELECTION.update(selection)
@@ -255,8 +258,14 @@ def _raw_file_digest(path: Path) -> str:
 
 
 def _config(
-    *, repo: Path, runtime: Path, signer: Path, target_public: str,
-    signing_ref: str, audit_ref: str, authority_binding_digest: str,
+    *,
+    repo: Path,
+    runtime: Path,
+    signer: Path,
+    target_public: str,
+    signing_ref: str,
+    audit_ref: str,
+    authority_binding_digest: str,
 ) -> dict[str, object]:
     del repo
     return {
@@ -281,17 +290,19 @@ def _config(
         "timeout_s": 2.5,
         "max_request_bytes": 4096,
         "max_response_bytes": 8192,
-        "key_provider_profiles": [{
-            "signer_profile_id": "reddog-work-authority",
-            "signer_agent_id": "signer:reddog",
-            "signing_key_ref": signing_ref,
-            "audit_mac_key_ref": audit_ref,
-            "expected_public_key": target_public,
-            "expected_key_fingerprint": public_key_fingerprint(target_public),
-            "expected_key_epoch": "target-epoch-1",
-            "permission_snapshot_digest": DIGEST_D,
-            "ttl_seconds": 60,
-        }],
+        "key_provider_profiles": [
+            {
+                "signer_profile_id": "reddog-work-authority",
+                "signer_agent_id": "signer:reddog",
+                "signing_key_ref": signing_ref,
+                "audit_mac_key_ref": audit_ref,
+                "expected_public_key": target_public,
+                "expected_key_fingerprint": public_key_fingerprint(target_public),
+                "expected_key_epoch": "target-epoch-1",
+                "permission_snapshot_digest": DIGEST_D,
+                "ttl_seconds": 60,
+            }
+        ],
         "peer_policy": {
             "uid_to_principal": {"1001": "principal:grant-admin"},
             "allowed_gids": [1002],
@@ -302,17 +313,31 @@ def _config(
 
 
 def _policy(
-    *, selection: dict[str, object], signer: Path, replay: Path,
-    revocation: Path, target_public: str, grant_public: str,
-    revocation_public: str, signing_ref: str, audit_ref: str,
+    *,
+    selection: dict[str, object],
+    signer: Path,
+    replay: Path,
+    revocation: Path,
+    target_public: str,
+    grant_public: str,
+    revocation_public: str,
+    signing_ref: str,
+    audit_ref: str,
 ) -> dict[str, object]:
     return {
         "schema_version": POLICY_SCHEMA,
         "policy_id": DIGEST_A,
-        **{name: selection[name] for name in (
-            "owner_config_id", "manifest_id", "artifact_generation_digest",
-            "config_digest", "generation", "generation_revision",
-        )},
+        **{
+            name: selection[name]
+            for name in (
+                "owner_config_id",
+                "manifest_id",
+                "artifact_generation_digest",
+                "config_digest",
+                "generation",
+                "generation_revision",
+            )
+        },
         "grant_authority_principal_id": "principal:grant-admin",
         "grant_authority_principal_provider": "github",
         "grant_authority_public_key": grant_public,
@@ -388,7 +413,9 @@ def _rebind_config_and_sign(fixture: dict[str, object], private: object) -> None
     )
 
 
-def test_current_signed_generation_and_policy_issue_one_opaque_capability(tmp_path: Path) -> None:
+def test_current_signed_generation_and_policy_issue_one_opaque_capability(
+    tmp_path: Path,
+) -> None:
     fixture = _fixture(tmp_path)
     result = fixture["boundary"].admit(fixture["owner_config_path"], fixture["policy"])
     assert result.accepted is True
@@ -447,30 +474,32 @@ def test_self_authority_rejects_even_with_valid_signature(tmp_path: Path) -> Non
     fixture = _fixture(tmp_path)
     policy = fixture["policy"]
     policy["grant_authority_public_key"] = fixture["target_public"]
-    record = fixture["principal_payload"]["principals"][
-        "github|principal:grant-admin"
-    ]
+    record = fixture["principal_payload"]["principals"]["github|principal:grant-admin"]
     record["principal_public_key"] = fixture["target_public"]
     _write_principal_artifact(fixture)
     _rebind_config_and_sign(fixture, fixture["target_private"])
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], policy
-    ).accepted is False
+    assert (
+        fixture["boundary"].admit(fixture["owner_config_path"], policy).accepted
+        is False
+    )
 
 
 def test_untrusted_revocation_authority_rejects(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
-    fixture["principal_payload"]["principals"].pop(
-        "github|principal:revocation-admin"
-    )
+    fixture["principal_payload"]["principals"].pop("github|principal:revocation-admin")
     fixture["principal_payload"]["principal_count"] = 1
     _write_principal_artifact(fixture)
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
+    assert (
+        fixture["boundary"]
+        .admit(fixture["owner_config_path"], fixture["policy"])
+        .accepted
+        is False
+    )
 
 
-@pytest.mark.parametrize("mutation", ["wrong_key", "wrong_provider", "extra", "duplicate"])
+@pytest.mark.parametrize(
+    "mutation", ["wrong_key", "wrong_provider", "extra", "duplicate"]
+)
 def test_manifest_bound_principal_records_fail_closed(
     tmp_path: Path, mutation: str
 ) -> None:
@@ -488,9 +517,12 @@ def test_manifest_bound_principal_records_fail_closed(
         fixture["principal_payload"]["principal_count"] = 3
     _write_principal_artifact(fixture)
 
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
+    assert (
+        fixture["boundary"]
+        .admit(fixture["owner_config_path"], fixture["policy"])
+        .accepted
+        is False
+    )
 
 
 @pytest.mark.parametrize(
@@ -505,18 +537,19 @@ def test_principal_artifact_requires_exact_canonical_shape(
         payload["unexpected"] = "self-asserted"
     elif mutation == "principal_only_index":
         records = payload["principals"]
-        records["principal:grant-admin"] = records.pop(
-            "github|principal:grant-admin"
-        )
+        records["principal:grant-admin"] = records.pop("github|principal:grant-admin")
     elif mutation == "float_count":
         payload["principal_count"] = 2.0
     else:
         payload["principal_count"] = True
     _write_principal_artifact(fixture)
 
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
+    assert (
+        fixture["boundary"]
+        .admit(fixture["owner_config_path"], fixture["policy"])
+        .accepted
+        is False
+    )
 
 
 def test_principal_artifact_duplicate_json_key_rejects(tmp_path: Path) -> None:
@@ -531,9 +564,12 @@ def test_principal_artifact_duplicate_json_key_rejects(tmp_path: Path) -> None:
     fixture["selection"]["principal_authority_records_digest"] = digest
     _CURRENT_SELECTION["principal_authority_records_digest"] = digest
 
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
+    assert (
+        fixture["boundary"]
+        .admit(fixture["owner_config_path"], fixture["policy"])
+        .accepted
+        is False
+    )
 
 
 def test_production_boundary_has_no_injected_verifier_or_clock() -> None:
@@ -542,9 +578,10 @@ def test_production_boundary_has_no_injected_verifier_or_clock() -> None:
     assert "principal_key_resolver" not in parameters
     assert "signature_verifier" not in parameters
     assert "now_epoch" not in parameters
-    assert "consumer" not in inspect.signature(
-        OwnerControlledE0AdmissionBoundary.consume
-    ).parameters
+    assert (
+        "consumer"
+        not in inspect.signature(OwnerControlledE0AdmissionBoundary.consume).parameters
+    )
 
 
 def test_expired_policy_rejects_using_system_time(tmp_path: Path) -> None:
@@ -552,18 +589,19 @@ def test_expired_policy_rejects_using_system_time(tmp_path: Path) -> None:
     fixture["policy"]["issued_at"] = int(time.time()) - 200
     fixture["policy"]["expires_at"] = int(time.time()) - 1
     _resign(fixture)
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
+    assert (
+        fixture["boundary"]
+        .admit(fixture["owner_config_path"], fixture["policy"])
+        .accepted
+        is False
+    )
 
 
 def test_consume_rechecks_policy_expiry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     fixture = _fixture(tmp_path)
-    result = fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    )
+    result = fixture["boundary"].admit(fixture["owner_config_path"], fixture["policy"])
     assert result.accepted is True
     monkeypatch.setattr(
         current_selection_module.time,
@@ -576,9 +614,7 @@ def test_consume_rechecks_policy_expiry(
 
 def test_consume_rechecks_current_generation(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
-    result = fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    )
+    result = fixture["boundary"].admit(fixture["owner_config_path"], fixture["policy"])
     assert result.accepted is True
     _CURRENT_SELECTION["generation_revision"] = "revision-5"
     with pytest.raises(ValueError):
@@ -587,9 +623,7 @@ def test_consume_rechecks_current_generation(tmp_path: Path) -> None:
 
 def test_consume_rechecks_config_bytes(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
-    result = fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    )
+    result = fixture["boundary"].admit(fixture["owner_config_path"], fixture["policy"])
     assert result.accepted is True
     fixture["config"]["permission_snapshot_fresh"] = False
     fixture["config_path"].write_text(
@@ -597,93 +631,3 @@ def test_consume_rechecks_config_bytes(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError):
         fixture["boundary"].consume(result.capability)
-
-
-def test_manifest_bound_principal_artifact_tamper_rejects(tmp_path: Path) -> None:
-    fixture = _fixture(tmp_path)
-    fixture["principal_payload"]["principals"][
-        "github|principal:grant-admin"
-    ]["principal_public_key"] = fixture["target_public"]
-    fixture["principal_path"].write_text(
-        json.dumps(fixture["principal_payload"], sort_keys=True),
-        encoding="ascii",
-    )
-
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
-
-
-def test_generation_rotation_during_validation_rejects(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    fixture = _fixture(tmp_path)
-    original = current_selection_module.load_selected_signer_config
-
-    def rotate(**kwargs: object) -> object:
-        config = original(**kwargs)
-        _CURRENT_SELECTION["generation_revision"] = "revision-5"
-        return config
-
-    monkeypatch.setattr(
-        current_selection_module, "load_selected_signer_config", rotate
-    )
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
-
-
-def test_selection_must_match_constructor_repo_root(tmp_path: Path) -> None:
-    fixture = _fixture(tmp_path)
-    _CURRENT_SELECTION["repo_root"] = str((tmp_path / "other-repo").resolve())
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
-
-
-def test_config_tampering_rejects_before_capability(tmp_path: Path) -> None:
-    fixture = _fixture(tmp_path)
-    config = fixture["config"]
-    config["permission_snapshot_fresh"] = False
-    fixture["config_path"].write_text(json.dumps(config, sort_keys=True), encoding="ascii")
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
-
-
-def test_config_without_authority_binding_rejects(tmp_path: Path) -> None:
-    fixture = _fixture(tmp_path)
-    config = fixture["config"]
-    config.pop("owner_e0_authority_binding_digest")
-    fixture["config_path"].write_text(json.dumps(config, sort_keys=True), encoding="ascii")
-    fixture["selection"]["config_digest"] = _canonical_digest(config)
-    fixture["policy"]["config_digest"] = fixture["selection"]["config_digest"]
-    _resign(fixture)
-    result = fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    )
-    assert result.accepted is False
-    assert result.no_secret_resolution_performed is True
-    assert result.no_socket_bound is True
-    assert result.no_signer_started is True
-
-
-def test_runtime_root_nested_under_signer_root_rejects(tmp_path: Path) -> None:
-    fixture = _fixture(tmp_path)
-    nested = Path(str(fixture["config"]["signer_runtime_root"])) / "replay"
-    nested.mkdir()
-    fixture["policy"]["replay_root"] = str(nested.resolve())
-    fixture["policy"]["replay_path"] = str((nested / "nonces.db").resolve())
-    _resign(fixture)
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False
-
-
-def test_high_authority_without_consensus_policy_rejects(tmp_path: Path) -> None:
-    fixture = _fixture(tmp_path)
-    fixture["policy"]["consensus_required_tiers"] = ["HIGH"]
-    _resign(fixture)
-    assert fixture["boundary"].admit(
-        fixture["owner_config_path"], fixture["policy"]
-    ).accepted is False

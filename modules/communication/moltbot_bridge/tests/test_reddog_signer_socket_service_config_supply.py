@@ -63,6 +63,7 @@ def _authority_profile(**overrides: object) -> dict[str, object]:
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
         "principal_public_key": _PRINCIPAL_PUBLIC_KEY,
+        "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "reddog_id": "reddog:foundups-agent",
         "reddog_public_key": _REDDOG_PUBLIC_KEY,
         "permission_snapshot_digest": "sha256:" + "1" * 64,
@@ -137,6 +138,21 @@ def test_config_supply_writes_multi_profile_signer_cli_config(tmp_path: Path) ->
     assert payload["allow_test_only_key_material"] is False
     assert payload["permission_snapshot_fresh"] is True
     assert payload["socket_path"] == str((runtime / "reddog-signer.sock").resolve())
+    assert payload["conversation_scope_anchor_path"] == str(
+        (
+            runtime.parent
+            / f"{runtime.name}-signer-state"
+            / "conversation_scope_anchor.json"
+        ).resolve()
+    )
+    assert payload["conversation_scope_signer_policy"] == {
+        "issuer_principal_id": "github:mjtrout",
+        "issuer_principal_provider": "github",
+        "repo_full_name": "FOUNDUPS/Foundups-Agent",
+        "signer_public_key": _REDDOG_PUBLIC_KEY,
+        "key_epoch": "epoch-1",
+        "max_scope_ttl_seconds": 600,
+    }
     control_policy = payload["control_loop_authority_policy"]
     assert control_policy == {
         "issuer_principal_id": "github:mjtrout",

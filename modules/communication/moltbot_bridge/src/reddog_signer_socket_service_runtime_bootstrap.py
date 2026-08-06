@@ -41,18 +41,19 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_boots
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
     VerifiedOutcomeSigningAuthority,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
-    SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_rehydration import (
+    rehydrate_signer_socket_service_runtime_config as _rehydrate_runtime_config,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     ServeSignerSocketBounded,
     SignerSocketServiceRuntimeWiringConfig,
-    architect_proposal_security_context_digest,
     run_reddog_signer_socket_service_runtime_wiring,
-    validate_signer_socket_service_runtime_config,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PrincipalKeyResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
+    PrincipalAuthorityResolver,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_launch_selection import (
     RuntimeArtifactManifestLaunchSelectionBoundary,
@@ -87,6 +88,7 @@ FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION = (
 )
 
 ResolverAfterAdmission = Callable[[], SignerKeyResolver]
+ConversationResolverAfterAdmission = Callable[[], PrincipalAuthorityResolver]
 BootstrapLoadResult = tuple[Any | None, Path | None, str | None, "SignerSocketServiceRuntimeBootstrapResult | None"]
 def run_reddog_signer_socket_service_runtime_bootstrap(
     *,
@@ -103,6 +105,10 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     manifest_selection: object | None = None,
     manifest_selection_boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
+    conversation_scope_principal_resolver: PrincipalAuthorityResolver | None = None,
+    conversation_scope_principal_resolver_supplier: (
+        ConversationResolverAfterAdmission | None
+    ) = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
     verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
     verified_outcome_signing_authority_supplier: Callable[[], VerifiedOutcomeSigningAuthority] | None = None,
@@ -148,6 +154,20 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     outcome_authority = admit_verified_outcome_authority(
         config.verified_outcome_signer_policy, verified_outcome_signing_authority, verified_outcome_signing_authority_supplier
     )
+    conversation_resolver = _conversation_resolver_after_admission(
+        config,
+        conversation_scope_principal_resolver,
+        conversation_scope_principal_resolver_supplier,
+    )
+    if (
+        config.conversation_scope_signer_policy is not None
+        and conversation_resolver is None
+    ):
+        return _reject(
+            FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
+            config_path=str(path),
+            config_digest=digest,
+        )
 
     runtime = run_reddog_signer_socket_service_runtime_wiring(
         config,
@@ -155,6 +175,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         serve_bounded=serve_bounded,
         ready_callback=ready_callback,
         principal_key_resolver=principal_key_resolver,
+        conversation_scope_principal_resolver=conversation_resolver,
         proposal_replay_high_water_store=proposal_replay_high_water_store,
         verified_outcome_signing_authority=outcome_authority,
     )
@@ -216,6 +237,23 @@ def _resolver_after_admission(
         return None
     try:
         return factory()
+    except Exception:
+        return None
+
+
+def _conversation_resolver_after_admission(
+    config: SignerSocketServiceRuntimeWiringConfig,
+    resolver: PrincipalAuthorityResolver | None,
+    supplier: ConversationResolverAfterAdmission | None,
+) -> PrincipalAuthorityResolver | None:
+    if config.conversation_scope_signer_policy is None:
+        return None
+    if resolver is not None:
+        return resolver
+    if supplier is None:
+        return None
+    try:
+        return supplier()
     except Exception:
         return None
 
@@ -514,176 +552,15 @@ def rehydrate_signer_socket_service_runtime_config(
     payload: dict[str, Any],
     *,
     expected_config_digest: str | None = None,
-) -> Optional[SignerSocketServiceRuntimeWiringConfig]:
-    """Validate and rehydrate the canonical schema-v2 signer config."""
+) -> SignerSocketServiceRuntimeWiringConfig | None:
+    """Compatibility seam for the extracted strict config rehydrator."""
 
-    try:
-        canonical = json.dumps(
-            payload,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=True,
-        )
-        actual_digest = (
-            "sha256:"
-            + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-        )
-        if payload.get("proposal_authority_policy") is not None and (
-            expected_config_digest is None
-            or not hmac.compare_digest(
-                expected_config_digest,
-                actual_digest,
-            )
-        ):
-            return None
-        if payload.get("schema_version") != SIGNER_SERVICE_CONFIG_SCHEMA_VERSION:
-            return None
-        if not payload.get("control_loop_anchor_path"):
-            return None
-        if (
-            not isinstance(
-                payload.get("control_loop_authority_policy"),
-                dict,
-            )
-            and payload.get("proposal_authority_policy") is None
-        ):
-            return None
-        runtime_root = validate_runtime_root_path(
-            payload["runtime_root"],
-            repo_root=repo_root,
-        )
-        if runtime_root != expected_runtime_root.resolve():
-            return None
-        signer_runtime_root = validate_runtime_root_path(
-            payload["signer_runtime_root"],
-            repo_root=repo_root,
-        )
-        if (
-            signer_runtime_root == runtime_root
-            or runtime_root in signer_runtime_root.parents
-            or signer_runtime_root in runtime_root.parents
-        ):
-            return None
-        socket_path = validate_runtime_artifact_path(
-            payload["socket_path"],
-            repo_root=repo_root,
-            allowed_root=runtime_root,
-        )
-        anchor_path = validate_runtime_artifact_path(
-            payload["control_loop_anchor_path"],
-            repo_root=repo_root,
-            allowed_root=signer_runtime_root,
-        )
-        if socket_path.parent != runtime_root or anchor_path.parent != signer_runtime_root:
-            return None
-        proposal_policy = payload.get("proposal_authority_policy")
-        proposal_policy_authorization = payload.get(
-            "proposal_policy_authorization"
-        )
-        proposal_nonce_path_value = payload.get("proposal_nonce_store_path")
-        proposal_high_water_store_id = payload.get(
-            "proposal_replay_high_water_store_id"
-        )
-        proposal_high_water_durability_receipt_id = payload.get(
-            "proposal_replay_high_water_durability_receipt_id"
-        )
-        if not (
-            (proposal_policy is None)
-            == (proposal_policy_authorization is None)
-            == (proposal_nonce_path_value is None)
-            == (proposal_high_water_store_id is None)
-            == (
-                proposal_high_water_durability_receipt_id is None
-            )
-        ):
-            return None
-        proposal_nonce_path = None
-        if proposal_policy is not None:
-            if not isinstance(proposal_policy, dict) or not isinstance(
-                proposal_policy_authorization,
-                dict,
-            ):
-                return None
-            proposal_nonce_path = validate_runtime_artifact_path(
-                proposal_nonce_path_value,
-                repo_root=repo_root,
-                allowed_root=signer_runtime_root,
-            )
-            if proposal_nonce_path.parent != signer_runtime_root:
-                return None
-            if (
-                not isinstance(proposal_high_water_store_id, str)
-                or not proposal_high_water_store_id.strip()
-                or not proposal_high_water_store_id.isascii()
-                or not _is_sha256_digest(
-                    proposal_high_water_durability_receipt_id
-                )
-            ):
-                return None
-        else:
-            proposal_high_water_store_id = None
-            proposal_high_water_durability_receipt_id = None
-        peer_policy = payload["peer_policy"]
-        key_profile = payload.get("key_provider_profile")
-        key_profiles = payload.get("key_provider_profiles") or ()
-        if not isinstance(peer_policy, dict):
-            return None
-        if key_profile is not None and key_profiles:
-            return None
-        if key_profile is not None and not isinstance(key_profile, dict):
-            return None
-        if key_profiles:
-            if not isinstance(key_profiles, list) or not all(
-                isinstance(item, dict) for item in key_profiles
-            ):
-                return None
-            key_profiles = tuple(key_profiles)
-        if key_profile is None and not key_profiles:
-            return None
-        config = SignerSocketServiceRuntimeWiringConfig(
-            repo_root=repo_root,
-            runtime_root=runtime_root,
-            signer_runtime_root=signer_runtime_root,
-            socket_path=socket_path,
-            peer_policy=peer_policy,
-            key_provider_profile=key_profile,
-            provider_mode=str(payload.get("provider_mode") or ""),
-            allow_test_only_key_material=payload.get("allow_test_only_key_material") is True,
-            permission_snapshot_fresh=payload.get("permission_snapshot_fresh") is True,
-            max_requests=payload.get("max_requests"),
-            timeout_s=payload.get("timeout_s"),
-            max_request_bytes=payload.get("max_request_bytes"),
-            max_response_bytes=payload.get("max_response_bytes"),
-            key_provider_profiles=key_profiles,
-            control_loop_anchor_path=anchor_path,
-            control_loop_authority_policy=payload.get(
-                "control_loop_authority_policy"
-            ),
-            verified_outcome_signer_policy=payload.get(
-                "verified_outcome_signer_policy"
-            ),
-            proposal_authority_policy=proposal_policy,
-            proposal_policy_authorization=proposal_policy_authorization,
-            proposal_nonce_store_path=proposal_nonce_path,
-            proposal_replay_high_water_store_id=(
-                proposal_high_water_store_id
-            ),
-            proposal_replay_high_water_durability_receipt_id=(
-                proposal_high_water_durability_receipt_id
-            ),
-        )
-        if proposal_policy is not None:
-            config = replace(
-                config,
-                proposal_security_context_digest=(
-                    architect_proposal_security_context_digest(config)
-                ),
-            )
-    except Exception:
-        return None
-    if validate_signer_socket_service_runtime_config(config):
-        return None
-    return config
+    return _rehydrate_runtime_config(
+        repo_root,
+        expected_runtime_root,
+        payload,
+        expected_config_digest=expected_config_digest,
+    )
 
 
 def _reject_json_constant(value: str) -> None:

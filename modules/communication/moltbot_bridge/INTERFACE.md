@@ -17,6 +17,21 @@ editor source: it verifies a strict principal-signed credential using only the
 current-generation public key, enforces repository/audience/transport/TTL and
 FoundUp scope, and yields the same opaque operation-local capability. The
 credential never enters AgentDB, model context, receipts, logs, or child env.
+Principal-signed sessions persist scope v2 only through the existing isolated
+E0 signer. The signer re-verifies the credential against current principal
+authority on every use, signs the complete record plus credential, and advances
+a signer-owned monotonic conversation head. AgentDB first stages the exact
+unsigned payload as non-authoritative pending state; only a matching E0 response
+can atomically publish active state and delete the pending row. A crash after the
+signer commits recovers by replaying that exact payload and response. Changed or
+attacker-rehashed pending content fails closed. Restarted consumers must present
+the same still-valid credential and verify the E0 signature and audit attestation.
+Rollback, fork, nonce replay, wrong key epoch, revoked/current-generation authority,
+unavailable signer policy/resolver/anchor, forged kernel-peer metadata, and
+undersized socket limits fail before active state publication. Legacy intake HMAC
+remains supported; no process-local random key is used for durable signed-session state.
+Neither authentication scheme grants work, repository, shell, worker, or merge
+authority.
 
 ## Public API
 ### Architect proposal validity and execution readiness

@@ -18,7 +18,6 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract
     SCHEMA_VERSION,
     canonical_digest,
     sanitized_text,
-    with_record_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record import (
     AuthenticatedConversationScopeResult,
@@ -33,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record i
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    unsigned_conversation_scope_record,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_request import (
     ConversationScopeCreateRequest,
@@ -74,9 +76,22 @@ def create_authenticated_conversation_scope(
         )
     except (TypeError, ValueError):
         return rejected("conversation_scope_input_invalid")
+    record["record_auth_nonce"] = _record_auth_nonce(record)
     record["revision_receipts"] = [revision_receipt(record, previous="", revision=0)]
-    record["record_auth_mac"] = sign_record_with_scope_authority(authority, record)
-    return stored_result(store.create(with_record_digest(record)))
+    transactions = store.pending_transactions()
+    staged = transactions.stage(
+        unsigned_conversation_scope_record(record), expected_revision=-1
+    )
+    if not staged.get("ok") or not isinstance(staged.get("record"), Mapping):
+        return rejected(str(staged.get("reason") or "conversation_scope_pending_rejected"))
+    record = dict(staged["record"])
+    envelope = sign_record_with_scope_authority(
+        authority, record, require_replay=bool(staged.get("recovery_only"))
+    )
+    if not isinstance(envelope, Mapping):
+        return rejected("conversation_scope_record_authentication_unavailable")
+    record.update(envelope)
+    return stored_result(transactions.finalize(record, expected_revision=-1))
 
 
 def _new_scope_record(
@@ -105,6 +120,9 @@ def _new_scope_record(
             "principal_record_digest", "principal_key_fingerprint", "transport",
             "session_binding_digest",
         )},
+        "credential_id": str(authority_view.get("credential_id") or ""),
+        "session_id": str(authority_view.get("session_id") or ""),
+        "repo_full_name": str(authority_view.get("repo_full_name") or ""),
         "authorized_foundup_id": foundup_id,
         "conversation_revision": 0,
         **state,
@@ -120,7 +138,15 @@ def _new_scope_record(
         "updated_at": int(now_epoch),
         "expires_at": int(now_epoch) + ttl,
         "revision_receipts": [],
-        "record_auth_mac": "",
+        "record_auth_scheme": str(authority_view["record_auth_scheme"]),
+        "record_auth_signature": "",
+        "record_auth_signer_public_key": "",
+        "record_auth_key_fingerprint": "",
+        "record_auth_key_epoch": "",
+        "record_auth_nonce": "",
+        "record_auth_audit_mac": "",
+        "record_auth_audit_attestation_signature": "",
+        "previous_record_auth_signature_digest": "",
         "record_digest": "",
     }
 
@@ -132,6 +158,20 @@ def _conversation_id(authority: Mapping[str, Any], foundup_id: str, nonce: str) 
             "foundup_id": foundup_id,
             "session_binding_digest": authority["session_binding_digest"],
             "conversation_nonce": nonce,
+        }
+    )
+
+
+def _record_auth_nonce(record: Mapping[str, Any]) -> str:
+    return canonical_digest(
+        {
+            "conversation_id": record["conversation_id"],
+            "conversation_revision": record["conversation_revision"],
+            "turn_id": record["turn_id"],
+            "updated_at": record["updated_at"],
+            "previous_record_auth_signature_digest": record[
+                "previous_record_auth_signature_digest"
+            ],
         }
     )
 
