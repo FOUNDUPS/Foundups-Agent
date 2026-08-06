@@ -26,6 +26,9 @@
 ## Stable External Signer Lifecycle
 
 - COMPLETE: current authenticated signer generation selection.
+- COMPLETE: policy-less key profiles cannot sign delegated identity or work
+  authority. Resolve-per-sign binds a real ephemeral backend to the exact
+  independently authenticated E0 grant request.
 - COMPLETE: stable signer-owned system-service entrypoint and v2 packet
   binding.
 - COMPLETE: signer-side socket v2 admission binds one authenticated grant to

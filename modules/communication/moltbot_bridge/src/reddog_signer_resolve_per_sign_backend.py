@@ -1,9 +1,7 @@
 """One-shot grant admission for resolve-per-sign signer backends.
 
-This boundary stores no signing backend or secret material. A verified grant is
-consumed before an injected factory resolves the configured keys, builds one
-ephemeral backend, and signs one exact request. Production grant supply and
-strict native-memory zeroization remain separate deployment gates.
+This boundary stores no signing backend or secret material. One verified grant
+resolves one ephemeral key and authorizes one exact request.
 """
 
 from __future__ import annotations
@@ -15,9 +13,11 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
     IsolatedSignerBackend,
     SignerPeerAttestation,
 )
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    Ed25519SignerBackend, bind_exact_signing_request,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
-    SigningRequest,
-    SigningResponse,
+    SigningRequest, SigningResponse,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     SignerKeyProviderDryRunResult,
@@ -36,9 +36,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_val
     signature_matches,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
-    PrincipalKeyResolver,
-    SignatureVerifier,
-    constant_time_compare,
+    PrincipalKeyResolver, SignatureVerifier, constant_time_compare,
 )
 
 REJECT_SECRET_GRANT_REQUIRED = "REJECT_SIGNER_SECRET_GRANT_REQUIRED"
@@ -145,6 +143,11 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
             or not backend_identity_matches(backend, self.binding)
         ):
             return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
+        if type(backend) is Ed25519SignerBackend:
+            try:
+                backend = bind_exact_signing_request(backend, request)
+            except (TypeError, ValueError):
+                return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
         try:
             response = self.grant_boundary.authorize_consumed_use(
                 consumed_grant, lambda: backend.sign(request, peer)
@@ -182,11 +185,7 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
 
 
 def _reject(code: str) -> SigningResponse:
-    return SigningResponse(
-        accepted=False,
-        rejection_code=code,
-        no_secret_material_returned=True,
-    )
+    return SigningResponse(accepted=False, rejection_code=code, no_secret_material_returned=True)
 
 
 __all__ = [

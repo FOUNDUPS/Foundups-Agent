@@ -17,6 +17,11 @@ This path grants no work, repository, signer, merge, FoundUp-projection, or
 HoloIndex authority. Durable Principal Memex source issuance and automatic
 resident supply remain separate work.
 
+The isolated Ed25519 backend also rejects delegated identity or work-authority
+requests unless the backend has a signer-owned domain policy or the existing
+E0 secret-access grant has bound one ephemeral backend to the exact canonical
+signing-request digest. A loaded key profile is not signing authority.
+
 ## RedDog conversational state boundary
 
 RedDog has an AgentDB-backed authenticated conversation-scope runtime. It

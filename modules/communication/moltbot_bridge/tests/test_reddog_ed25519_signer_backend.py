@@ -19,14 +19,25 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     CONTROL_LOOP_SIGNING_PREFIX,
     ControlLoopAuthorityPolicy,
     Ed25519SignerBackend,
+    bind_exact_signing_request,
     REJECT_ED25519_SIGNER_AUDIT_MAC_MISSING,
     REJECT_ED25519_SIGNER_DOMAIN_MISMATCH,
     REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISMATCH,
     REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISSING,
     REJECT_ED25519_SIGNER_CONTROL_ANCHOR_MISSING,
     REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH,
+    REJECT_ED25519_SIGNER_EXACT_REQUEST_MISMATCH,
+    REJECT_ED25519_SIGNER_POLICY_MISSING,
     REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH,
     canonical_control_audit_attestation_input,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_validation import (
+    signing_domain_pairs,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+    CONVERSATION_SCOPE_SIGNING_OPERATION,
+    CONVERSATION_SCOPE_SIGNING_PREFIX,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SIGNER_SOCKET_REQUEST_SCHEMA_VERSION,
@@ -197,7 +208,7 @@ def _control_signing_input(receipt: object) -> str:
     )
 
 
-def test_ed25519_signer_backend_signs_and_public_verifier_accepts() -> None:
+def test_exact_request_bound_signer_backend_signs_and_public_verifier_accepts() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     request = _request(public_key)
@@ -208,7 +219,7 @@ def test_ed25519_signer_backend_signs_and_public_verifier_accepts() -> None:
         audit_mac_builder=AuditMacBuilder(),
     )
 
-    response = backend.sign(request, _peer())
+    response = bind_exact_signing_request(backend, request).sign(request, _peer())
 
     assert response.accepted is True
     assert response.signer_public_key == public_key
@@ -217,7 +228,7 @@ def test_ed25519_signer_backend_signs_and_public_verifier_accepts() -> None:
     assert Ed25519SignatureVerifier().verify(public_key, request.signing_input, response.signature) is True
 
 
-def test_ed25519_signer_backend_round_trips_through_socket_protocol() -> None:
+def test_exact_request_bound_backend_round_trips_through_socket_protocol() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     request = _request(public_key)
@@ -231,7 +242,7 @@ def test_ed25519_signer_backend_round_trips_through_socket_protocol() -> None:
     raw = handle_reddog_isolated_signer_socket_request(
         _wire_payload(request),
         peer=_peer(),
-        backend=backend,
+        backend=bind_exact_signing_request(backend, request),
     )
     response = json.loads(raw.decode("utf-8"))
 
@@ -271,7 +282,8 @@ def test_ed25519_signer_backend_rejects_if_key_object_does_not_match_public_key(
         key_epoch="epoch-1",
         audit_mac_builder=AuditMacBuilder(),
     )
-    response = backend.sign(_request(backend.public_key), _peer())
+    request = _request(backend.public_key)
+    response = bind_exact_signing_request(backend, request).sign(request, _peer())
 
     assert response.accepted is False
     assert response.rejection_code == REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH
@@ -287,10 +299,155 @@ def test_ed25519_signer_backend_requires_audit_mac() -> None:
         audit_mac_builder=EmptyAuditMacBuilder(),
     )
 
-    response = backend.sign(_request(public_key), _peer())
+    request = _request(public_key)
+    response = bind_exact_signing_request(backend, request).sign(request, _peer())
 
     assert response.accepted is False
     assert response.rejection_code == REJECT_ED25519_SIGNER_AUDIT_MAC_MISSING
+
+
+def test_policyless_backend_rejects_delegated_authority_signing() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    backend = Ed25519SignerBackend(
+        private_key=private_key,
+        public_key=public_key,
+        key_epoch="epoch-1",
+        audit_mac_builder=AuditMacBuilder(),
+    )
+
+    response = backend.sign(_request(public_key), _peer())
+
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_POLICY_MISSING
+
+
+def test_exact_request_binding_rejects_altered_request() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request = _request(public_key)
+    backend = bind_exact_signing_request(
+        Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch="epoch-1",
+            audit_mac_builder=AuditMacBuilder(),
+        ),
+        request,
+    )
+
+    response = backend.sign(replace(request, nonce="attacker-nonce"), _peer())
+
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_EXACT_REQUEST_MISMATCH
+
+
+@pytest.mark.parametrize(
+    ("field_name", "replacement"),
+    [
+        ("signing_input", 'reddog-workauth.v1.{"work_order_id":"wo-2"}'),
+        ("payload_digest", "sha256:" + "b" * 64),
+        ("signer_role", "principal"),
+        ("signer_public_key", "ed25519-pub-v1:" + "A" * 43),
+        ("requester_principal_id", "github:attacker"),
+        ("nonce", "attacker-nonce"),
+        ("key_epoch", "epoch-2"),
+        ("requested_operation", "write_repo"),
+        ("authority_tier", "LOW"),
+        ("consensus_receipt_digest", "sha256:" + "d" * 64),
+    ],
+)
+def test_exact_request_binding_rejects_every_field_substitution(
+    field_name: str, replacement: object
+) -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request = _request(public_key)
+    backend = bind_exact_signing_request(
+        Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch="epoch-1",
+            audit_mac_builder=AuditMacBuilder(),
+        ),
+        request,
+    )
+
+    response = backend.sign(replace(request, **{field_name: replacement}), _peer())
+
+    assert response.accepted is False
+
+
+@pytest.mark.parametrize(
+    ("requested_operation", "signing_input"),
+    [
+        ("delegate_reddog_identity", 'reddog-workauth.v1.{"x":1}'),
+        ("create_foundup", 'reddog-identity.v1.{"x":1}'),
+    ],
+)
+def test_exact_request_binding_rejects_delegated_domain_confusion(
+    requested_operation: str, signing_input: str
+) -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request = _request(
+        public_key,
+        requested_operation=requested_operation,
+        signing_input=signing_input,
+    )
+    backend = bind_exact_signing_request(
+        Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch="epoch-1",
+            audit_mac_builder=AuditMacBuilder(),
+        ),
+        request,
+    )
+
+    response = backend.sign(request, _peer())
+
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
+
+
+def test_exact_request_binding_cannot_be_rebound() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request = _request(public_key)
+    backend = bind_exact_signing_request(
+        Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch="epoch-1",
+            audit_mac_builder=AuditMacBuilder(),
+        ),
+        request,
+    )
+
+    with pytest.raises(ValueError, match="immutable"):
+        bind_exact_signing_request(backend, request)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        CONVERSATION_SCOPE_SIGNING_OPERATION,
+        CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+    ],
+)
+def test_conversation_operations_match_exactly_one_signing_domain(
+    operation: str,
+) -> None:
+    request = _request(
+        "public-key-v1:signer",
+        requested_operation=operation,
+        signing_input=CONVERSATION_SCOPE_SIGNING_PREFIX + "{}",
+    )
+    pairs = signing_domain_pairs(request)
+
+    assert all(operation_match is prefix_match for operation_match, prefix_match in pairs)
+    assert sum(operation_match and prefix_match for operation_match, prefix_match in pairs) == 1
 
 
 @pytest.mark.parametrize(

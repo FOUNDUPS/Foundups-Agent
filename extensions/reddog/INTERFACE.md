@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.63 pins the backend manifest for explicit signer request
+authority. The extension gains no signer or execution authority; it accepts
+only the exact backend closure whose generic signer rejects policy-less
+requests and whose E0 grant binds the complete canonical signing request.
+
 Version 0.4.62 pins the backend closure for authenticated Principal Memex
 resident admission. No new extension command or history source is exposed.
 The backend can admit only public accepted decisions from a current signed

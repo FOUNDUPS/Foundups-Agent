@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.62
+Version: 0.4.63
+
+Version 0.4.63 pins the explicit signer-policy backend closure. Generic
+Ed25519 signing now requires signer-owned static policy or an exact
+request-bound E0 authorization; policy-less key profiles fail closed.
 
 Version 0.4.62 pins the authenticated Principal Memex resident-admission
 backend. The extension adds no history source or command: only a separately
