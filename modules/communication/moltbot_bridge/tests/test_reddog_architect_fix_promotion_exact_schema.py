@@ -9,6 +9,7 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_re
     InMemoryAuthoritativeWorkStateStore,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _authority_profile,
     _model_selection,
     _promote,
     _runtime_binding,
@@ -69,5 +70,27 @@ def test_nested_runtime_binding_injection_rejects_before_publication() -> None:
     assert promotion.ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_INVALID in (
         result.rejection_reasons
     )
+    assert calls == []
+    assert store.load() == before
+
+
+def test_authority_profile_type_confusion_rejects_before_publication() -> None:
+    profile = _authority_profile()
+    profile["allowed_paths"] = {"attacker_extra": "value"}
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+    before = store.load()
+    calls, publish = _publisher_probe(store)
+
+    result, _ = _promote(
+        store=store,
+        authority_profile=profile,
+        authority_profile_publication_publisher=publish,
+    )
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
+        + ":typed_rehydration"
+    ) in result.rejection_reasons
     assert calls == []
     assert store.load() == before

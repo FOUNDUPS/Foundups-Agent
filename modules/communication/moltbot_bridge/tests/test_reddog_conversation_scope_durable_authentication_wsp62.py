@@ -8,6 +8,7 @@ MODULE_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[4]
 SOURCE_FILES = {
     "src/reddog_authenticated_conversation_scope_state.py",
+    "src/reddog_authority_profile_rehydration.py",
     "src/reddog_conversation_scope_advance.py",
     "src/reddog_conversation_scope_authentication.py",
     "src/reddog_conversation_scope_capability.py",
@@ -47,6 +48,8 @@ SOURCE_FILES = {
 }
 TEST_FILES = {
     "tests/reddog_conversation_scope_signing_test_support.py",
+    "tests/test_reddog_architect_fix_promotion_exact_schema.py",
+    "tests/test_reddog_authority_profile_exact_schema.py",
     "tests/test_reddog_conversation_scope_hmac_persistence.py",
     "tests/test_reddog_conversation_scope_revision_anchor.py",
     "tests/test_reddog_conversation_scope_signing.py",

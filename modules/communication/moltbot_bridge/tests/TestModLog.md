@@ -17,12 +17,15 @@
 - Proved legacy HMAC never uses pending recovery; precommit failure leaves no
   stranded row, retry succeeds, and `require_replay` remains forbidden.
 - Added exact WSP 62 AST coverage for authentication sources and tests.
-- Added review regressions for state overwrite, artifact collisions, nested
+- Added review regressions for state overwrite and artifact collisions.
 - Added exact nested-schema regressions for model selection/runtime receipts,
   WSP 15 allocations, proposal admission, operational context, list members,
   and malformed present values.
 - Proved nested model-selection and runtime-policy injection cannot publish an
   authority profile or create a queue item, claim, or promotion record.
+- Proved attacker-rehashed list/map type confusion cannot write a source,
+  publish or recover a profile, reach queue materialization, or pass the live
+  canary profile reader. The source and effect projections do not coerce data.
 
 ## 2026-08-05: Current-generation use-time trust regressions
 

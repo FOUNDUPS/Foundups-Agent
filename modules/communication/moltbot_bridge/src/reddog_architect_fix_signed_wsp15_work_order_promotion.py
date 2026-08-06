@@ -71,6 +71,9 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_pub
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_verified_authority import (
     verify_architect_proposal_promotion_authority,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_source,
+)
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
     authority_profile_malformed_digest_paths,
     authority_profile_runtime_unknown_field_paths,
@@ -235,12 +238,21 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         model_runtime_binding_verification_capability,
         reasons,
     )
+    reasons.extend(_validate_authority_profile(authority_profile))
+    try:
+        authority_profile = rehydrate_authority_profile_source(
+            authority_profile
+        )
+    except (TypeError, ValueError):
+        reasons.append(
+            ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
+            + ":typed_rehydration"
+        )
+        authority_profile = {}
     memex_verified = _rehydrate_memex_supply(
         memex_supply_receipt, determination, authority_profile,
         current_holoindex_receipt, now_iso, reasons,
     )
-    profile_reasons = _validate_authority_profile(authority_profile)
-    reasons.extend(profile_reasons)
     if (
         proposal_admission is not None
         and proposal_admission.conversation_binding_present

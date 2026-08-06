@@ -17,6 +17,11 @@ _FORBIDDEN_FIELD_PARTS = (
     "refresh_token",
     "secret",
 )
+_PUBLIC_REFERENCE_FIELDS = frozenset(
+    {
+        "proposal_policy_authorization_id",
+    }
+)
 _SEED_FIELDS = frozenset(
     {
         "allowed_paths",
@@ -529,6 +534,7 @@ def authority_profile_secret_field_paths(value: Any) -> tuple[str, ...]:
                 child_path = f"{path}.{key}" if path else key
                 if (
                     clean not in {"principal_public_key", "reddog_public_key"}
+                    and clean not in _PUBLIC_REFERENCE_FIELDS
                     and not clean.endswith("_digest")
                     and any(part in clean for part in _FORBIDDEN_FIELD_PARTS)
                 ):
@@ -627,7 +633,7 @@ def authority_profile_malformed_digest_paths(value: Any) -> tuple[str, ...]:
                 child_path = f"{path}.{key}" if path else key
                 if key.lower().replace("-", "_").endswith("_digest"):
                     text = str(child or "")
-                    if (
+                    if text and (
                         len(text) != 71
                         or not text.startswith("sha256:")
                         or any(char not in "0123456789abcdef" for char in text[7:])

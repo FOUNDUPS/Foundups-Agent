@@ -22,6 +22,12 @@
   same gate to exact schemas for embedded model, WSP 15, proposal, and
   operational-context receipts. Architect FIX promotion now rejects raw nested
   receipt injection before publication and persists canonical receipts only.
+- Added one shared seed/source/runtime authority-profile rehydrator. It rejects
+  native JSON type confusion before source supply, promotion, publication,
+  signer configuration, valve use, manifest authority, queue materialization,
+  readiness, or live-canary evidence can produce an effect.
+- Preserved the older queue materializer projection through a bounded typed
+  effect view instead of conflating it with the signed public-profile schema.
 - Legacy callers retain 16 KiB; only the explicit conversation bootstrap uses
   160 KiB. Stale v2, nested profile injection, and artifact collisions fail
   before writes or signer invocation (WSP 00/15/22/50/62/97).

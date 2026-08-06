@@ -22,6 +22,9 @@ from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety im
     authority_profile_runtime_unknown_field_paths,
     authority_profile_secret_field_paths,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_runtime,
+)
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
     ConversationScopeSignerPolicy,
 )
@@ -446,6 +449,10 @@ def authority_profile_reasons(
             FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":" + path
             for path in unsafe_paths
         )
+    try:
+        rehydrate_authority_profile_runtime(profile)
+    except (TypeError, ValueError):
+        return (FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID,)
     required = tuple(
         field for field in _REQUIRED_AUTHORITY_FIELDS
         if require_principal_provider or field != "principal_provider"

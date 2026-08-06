@@ -9,6 +9,10 @@ from typing import Any, Mapping
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
     architect_fix_committed_publication_reasons,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_runtime,
+    rehydrate_authority_profile_source,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
     decode_ed25519_public_key,
@@ -62,6 +66,8 @@ def build_control_loop_receipt_signing_context(
         authoritative_work_state_path,
     )
     fields = _validated_authority_profile_fields(profile)
+    profile = rehydrate_authority_profile_runtime(profile)
+    source_profile = rehydrate_authority_profile_source(source_profile)
     built = build_reddog_isolated_signer_socket_client(
         repo_root=repo_root,
         socket_path=signer_socket_path,

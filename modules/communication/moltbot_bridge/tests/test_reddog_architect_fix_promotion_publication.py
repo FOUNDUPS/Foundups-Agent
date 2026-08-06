@@ -112,7 +112,14 @@ def _request(
     profile = {
         "schema_version": "reddog_authority_profile.v1",
         "promotion_publication_id": publication_id,
-        "queue_item_id": queue_item_id,
+        "operational_context_binding": {
+            "queue_item_id": queue_item_id,
+            "claim_id": claim_id,
+            "architect_determination_receipt_id": "sha256:" + "5" * 64,
+            "wsp15_allocation_receipt": {
+                "receipt_id": "sha256:" + "6" * 64,
+            },
+        },
     }
     profile_digest = canonical_digest(profile)
     updated = json.loads(json.dumps(current, sort_keys=True))
@@ -251,6 +258,39 @@ def test_publication_commits_state_then_profile_and_cleans_journal(
     ) == request.authority_profile
     assert not publisher.journal_path.exists()
     assert not publisher.stage_path.exists()
+
+
+def test_publication_rejects_profile_type_confusion_with_zero_effects(
+    tmp_path: Path,
+) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+    original_state = (runtime / "work_state.json").read_bytes()
+    profile = {
+        **request.authority_profile,
+        "allowed_paths": {"attacker_extra": "value"},
+    }
+    updated = json.loads(json.dumps(request.updated_work_state))
+    updated["architect_fix_promotions"][0][
+        "authority_profile_digest"
+    ] = canonical_digest(profile)
+    malformed = ArchitectFixPromotionPublicationRequest(
+        publication_id=request.publication_id,
+        proposal_authenticity_attestation_id=(
+            request.proposal_authenticity_attestation_id
+        ),
+        authority_profile=profile,
+        updated_work_state=updated,
+        expected_work_state_revision=request.expected_work_state_revision,
+    )
+
+    with pytest.raises(RuntimeError, match="profile_invalid"):
+        publisher.publish(malformed)
+
+    assert (runtime / "work_state.json").read_bytes() == original_state
+    assert not (runtime / "authority_profile.json").exists()
+    assert not publisher.stage_path.exists()
+    assert not publisher.journal_path.exists()
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Windows long-path regression")
@@ -740,7 +780,7 @@ def test_retry_with_altered_profile_fails_closed(tmp_path: Path) -> None:
         expected_work_state_revision=request.expected_work_state_revision,
     )
 
-    with pytest.raises(RuntimeError, match="state_binding_invalid"):
+    with pytest.raises(RuntimeError, match="profile_invalid"):
         publisher.publish(altered)
     assert not publisher.journal_path.exists()
     assert not publisher.stage_path.exists()

@@ -37,6 +37,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handle
     build_reddog_resident_queue_stage_handler_registry,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_authority_profile_effect_scope_outside_repo,
     read_reddog_runtime_json_mapping,
 )
 
@@ -107,7 +108,7 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         return _not_ready(snapshot_reasons, chain_results_path=None)
     assert snapshot is not None
 
-    profile, profile_reasons = _read_json_outside_repo(
+    profile, profile_reasons = read_reddog_authority_profile_effect_scope_outside_repo(
         root,
         runtime_root,
         authority_profile_path,

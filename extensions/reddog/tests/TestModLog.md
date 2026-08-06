@@ -6,6 +6,8 @@
   protected-storage, narrow-environment, and no-credential-in-intent regressions.
 - Re-ran the resident bridge/authentication matrix and exhaustive extension
   contract; no model/client call survives source verification failure.
+- Added backend-manifest parity for the shared authority-profile rehydrator and
+  re-ran compatibility checks after its effect-path integrations.
 
 ## 2026-08-06 - Conversation proposal backend compatibility (0.4.59)
 
