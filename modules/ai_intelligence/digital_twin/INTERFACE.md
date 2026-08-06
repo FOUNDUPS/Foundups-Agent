@@ -4,6 +4,32 @@
 
 ---
 
+## Principal Memex read-only projection
+
+```python
+from modules.ai_intelligence.digital_twin.src.principal_memex_projection import (
+    build_principal_memex_item,
+    project_principal_memex_readonly,
+    rehydrate_principal_memex_projection,
+)
+```
+
+The builder creates structurally verified Principal Memex items from explicit
+provenance. The projector rejects mixed principals, duplicate items,
+inconsistent self-digests, incoherent supersession, unknown schemas,
+secret-shaped serialized text, and malformed provenance identifiers.
+Rehydration recomputes the complete projection. Public digest recomputation is
+structural integrity, not source authenticity.
+
+This interface grants no trust or authority. Its output remains
+`runtime_admissible=false` until a separate authenticated resident admission
+layer verifies each source receipt and binds the exact principal conversation.
+It never projects data to a FoundUp automatically. This structural API is
+intentionally not exported by `src.__init__` or included in RedDog's sealed
+resident dependency closure until that admission slice is implemented.
+
+---
+
 ## boot_digital_twin (V0.5.0)
 
 ### Purpose

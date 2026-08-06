@@ -6,11 +6,23 @@
 
 ## Vision
 
-Train 012's Digital Twin (0102) to autonomously engage across social platforms with 012's authentic voice, using 20 years of 012 video corpus to drive comment drafting, decisioning, and scheduling. Current POC focus: LinkedIn comment processing and scheduling with 012 studio comment style.
+Host 0102 as 012's Digital Twin across FoundUps and bounded applications.
+Social engagement remains one application. Principal cognition is supplied by
+a separate Principal Memex rather than being conflated with voice memory,
+conversation state, AgentDB, or any FoundUp Memex.
+
+## Principal Memex lane
+
+- Complete: structural read-only item and projection contract.
+- Complete: canonical digest, principal isolation, provenance-shape,
+  sensitivity, supersession, and no-authority invariants.
+- Next: authenticated resident admission for `principal` conversation scope.
+- Deferred: durable governed source issuance, explicit learning admission, and
+  explicit Principal-to-FoundUp projection.
 
 ---
 
-## Current State (V0.5.2) - Audited 2026-01-21
+## Current State (V0.6.0) - Audited 2026-08-06
 
 ### Phase 0b: Vision System ✅ COMPLETE
 

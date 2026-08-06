@@ -14,6 +14,13 @@
 - evidence location (log file, screenshot)
 
 ## Entries
+- 2026-08-06
+  - Command: `pytest -q modules/ai_intelligence/digital_twin/tests/test_principal_memex_projection.py`
+  - Result: PASS (32/32)
+  - Coverage: round-trip rehydration, digest tamper, cross-principal and
+    duplicate rejection, exact JSON type policy, secret material,
+    pre-traversal mapping bounds, factory-bound typed results,
+    multi-generation supersession, and no-authority fields.
 - 2026-02-04
   - Command: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest modules/ai_intelligence/digital_twin/tests`
   - Result: PASS (17/17)

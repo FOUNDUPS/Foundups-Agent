@@ -21,9 +21,34 @@ Breadcrumbs
 
 RedDog
 = the orchestrator that launches, builds, runs, audits, and improves FoundUps
+
+012 Principal Memex
+= persistent principal cognition that informs 0102 across FoundUps
+
+0102 Digital Twin
+= active reasoning/orchestration agent hosted by RedDog
 ```
 
-"Second Brain" and personal digital-twin language describe possible later applications. They are not the implementation center of the current lane.
+The FoundUp Memex remains the implementation center of FoundUp cognition. The
+Principal Memex is a separate Digital Twin substrate, not a global FoundUp
+store, conversation transcript, AgentDB queue, or authority source.
+
+## Principal Memex and RedDog
+
+```text
+012 -> Principal Memex -> 0102 Digital Twin -> RedDog interface/runtime
+```
+
+RedDog hosts 0102. The Principal Memex helps 0102 interpret stable 012 goals,
+preferences, terminology, decision history, and cross-FoundUp strategy.
+Current repository evidence remains authoritative for code truth, and signed
+authorization remains authoritative for work.
+
+The structural read-only projection is implemented in
+`modules/ai_intelligence/digital_twin/src/principal_memex_projection.py`. It is
+not resident-admissible and cannot persist, enter model context, project into a
+FoundUp, mutate HoloIndex, or grant authority. Conversation learning and
+cross-Memex transfer remain explicit governed lifecycles.
 
 ## WSP alignment
 
@@ -132,4 +157,6 @@ docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md
 7. FOUNDUP_MEMEX_MULTI_REDDOG_COLLABORATION_PROTOTYPE_PHASE1
 ```
 
-Personal 012/0102 Memex work and collective ecosystem memory remain deferred until the FoundUp-centric contracts are proven.
+Authenticated Principal Memex admission, governed retention, explicit
+cross-Memex projection, and collective ecosystem memory remain deferred until
+their independent trust contracts are proven.

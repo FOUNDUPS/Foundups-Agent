@@ -1,5 +1,22 @@
 # Digital Twin Module
 
+## Product boundary
+
+RedDog is the application/runtime shell. 0102 is the Digital Twin hosted by
+RedDog. The Principal Memex is the bounded cognition substrate that may help
+0102 understand 012; it is neither the Digital Twin nor operational authority.
+
+`principal_memex_projection.py` implements the first structural, read-only
+Principal Memex projection. It validates provenance identifiers, canonical
+content/item/projection digests, principal isolation, sensitivity, and
+projection-level supersession relationships. Public digest recomputation does
+not authenticate a source. The projection is explicitly `STRUCTURAL_ONLY` and
+`runtime_admissible=false`: it performs no persistence, model-context
+admission, FoundUp projection, HoloIndex write, or work authorization.
+
+The existing social comment/voice pipeline below remains a Digital Twin
+application. Its voice memory is not the canonical Principal Memex.
+
 **WSP Compliance**: WSP 49 (Module Structure), WSP 77 (Agent Coordination)
 
 ## Purpose
