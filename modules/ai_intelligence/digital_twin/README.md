@@ -14,6 +14,14 @@ not authenticate a source. The projection is explicitly `STRUCTURAL_ONLY` and
 `runtime_admissible=false`: it performs no persistence, model-context
 admission, FoundUp projection, HoloIndex write, or work authorization.
 
+The resident backend may now admit a projection only when it derives the
+projection from the exact current principal-scoped AgentDB conversation record,
+consumes the matching signed conversation-scope capability, and verifies a
+separate principal-signed one-use disclosure bound to the selected model
+runtime. Only public accepted `operator_statement` decisions are exposed to
+the backend architect model. This is authenticated cognition context, not work
+authority or a durable Principal Memex source.
+
 The existing social comment/voice pipeline below remains a Digital Twin
 application. Its voice memory is not the canonical Principal Memex.
 

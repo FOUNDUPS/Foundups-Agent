@@ -45,10 +45,15 @@ Current repository evidence remains authoritative for code truth, and signed
 authorization remains authoritative for work.
 
 The structural read-only projection is implemented in
-`modules/ai_intelligence/digital_twin/src/principal_memex_projection.py`. It is
-not resident-admissible and cannot persist, enter model context, project into a
-FoundUp, mutate HoloIndex, or grant authority. Conversation learning and
-cross-Memex transfer remain explicit governed lifecycles.
+`modules/ai_intelligence/digital_twin/src/principal_memex_projection.py`. A
+caller-supplied projection remains non-admissible. The resident backend may
+derive and admit one projection from the exact current signed principal
+conversation only after consuming its conversation capability and a separate
+principal-signed disclosure bound to exact decision IDs, model runtime, nonce,
+TTL, revocation, and durable replay state. This admitted context cannot persist,
+project into a FoundUp, mutate HoloIndex, or grant work authority. Governed
+durable source issuance, conversation learning, and cross-Memex transfer remain
+explicit later lifecycles.
 
 ## WSP alignment
 
@@ -157,6 +162,8 @@ docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md
 7. FOUNDUP_MEMEX_MULTI_REDDOG_COLLABORATION_PROTOTYPE_PHASE1
 ```
 
-Authenticated Principal Memex admission, governed retention, explicit
-cross-Memex projection, and collective ecosystem memory remain deferred until
-their independent trust contracts are proven.
+Authenticated admission of current public accepted principal decisions is now
+implemented for the resident backend architect model. Governed durable
+Principal Memex source issuance and retention, automatic resident supply,
+explicit cross-Memex projection, and collective ecosystem memory remain
+deferred until their independent trust contracts are proven.

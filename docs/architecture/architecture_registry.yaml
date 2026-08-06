@@ -30,8 +30,8 @@ architectures:
     primary_runtime_slice: FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1
     compatibility_runtime_slice: FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1
     principal_memex_owner: modules/ai_intelligence/digital_twin
-    principal_memex_runtime_slice: REDDOG_012_PRINCIPAL_MEMEX_READONLY_PROJECTION_PHASE1
-    principal_memex_status: structural_readonly_projection
+    principal_memex_runtime_slice: REDDOG_PRINCIPAL_MEMEX_AUTHENTICATED_RESIDENT_ADMISSION_PHASE1
+    principal_memex_status: authenticated_resident_admission_live_supply_deferred
     domains:
       - foundup_dae
       - memex
@@ -53,6 +53,7 @@ architectures:
       - 0102_public_key_identity
       - reddog_operational_state
       - principal_memex_readonly_projection
+      - principal_memex_authenticated_resident_admission
     invariants:
       - foundup_first_implementation
       - brain_is_a_memex_component

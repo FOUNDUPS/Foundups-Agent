@@ -16,8 +16,11 @@ conversation state, AgentDB, or any FoundUp Memex.
 - Complete: structural read-only item and projection contract.
 - Complete: canonical digest, principal isolation, provenance-shape,
   sensitivity, supersession, and no-authority invariants.
-- Next: authenticated resident admission for `principal` conversation scope.
-- Deferred: durable governed source issuance, explicit learning admission, and
+- Complete: authenticated, one-use resident admission of public accepted
+  decisions from the current signed `principal` conversation scope.
+- Next: governed durable Principal Memex source issuance and default resident
+  supply from the authenticated conversation lifecycle.
+- Deferred: explicit learning admission and
   explicit Principal-to-FoundUp projection.
 
 ---

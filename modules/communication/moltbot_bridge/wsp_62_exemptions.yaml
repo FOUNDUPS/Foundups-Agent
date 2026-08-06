@@ -294,7 +294,7 @@ exemptions:
       and queue-candidate projection. Prompt/context projection and runtime
       binding normalization are now extracted; the remaining transaction
       extraction is tracked separately.
-    threshold_override: 1579
+    threshold_override: 1560
     function_threshold_override: 329
     functions:
       - "run_reddog_backend_architect_determination_runtime"
@@ -302,7 +302,7 @@ exemptions:
       - "_receipt"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
     no_growth_ceiling:
-      file_lines: 1579
+      file_lines: 1560
       functions:
         run_reddog_backend_architect_determination_runtime: 329
         _receipt: 98
@@ -454,7 +454,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9615
+    threshold_override: 9627
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -466,7 +466,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 2050
+    threshold_override: 2061
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
