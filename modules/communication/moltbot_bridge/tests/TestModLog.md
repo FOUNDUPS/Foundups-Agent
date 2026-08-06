@@ -1,3 +1,12 @@
+## 2026-08-06: Conversation scope-kind boundary regressions
+
+- Proved principal scope persists and resumes without FoundUp grounding, can
+  advance only with non-operational state, and cannot enter work promotion.
+- Proved comparison scope requires two credential-authorized FoundUps, creates
+  no union authority, and cannot enter work promotion. E0 signing binds the new
+  scope kind; extra FoundUp scope, seal widening, null/string type coercion,
+  and malformed nested records reject before signing.
+
 ## 2026-08-06: Durable conversation authentication regressions
 
 - Proved E0-signed scope records survive AgentDB and signer-anchor restart while

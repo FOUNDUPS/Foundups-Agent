@@ -263,31 +263,34 @@ def create(
     *,
     store_override: object | None = None,
     store: object | None = None,
+    request_overrides: dict[str, object] | None = None,
     now_epoch: int = NOW,
 ):
     selected_store = store_override or store
+    request_values: dict[str, object] = {
+        "work_focus": FOCUS,
+        "grounding_receipt": grounding_receipt(),
+        "discussion_foundup_ids": ("trade",),
+        "conversation_nonce": "signed-conversation-one",
+        "turn_id": digest({"turn": "signed-first"}),
+        "active_topic": "TRADE runtime",
+        "current_objective": "Identify the next grounded implementation slice.",
+        "accepted_decisions": (
+            item("Use current repository evidence.", "repository_fact"),
+        ),
+        "open_questions": (item("What is next?", "unresolved"),),
+        "repository_evidence_refs": ("code:trade",),
+        "source_snapshot_id": SNAPSHOT_ID,
+        "source_snapshot_digest": SNAPSHOT_DIGEST,
+        "ttl_seconds": 200,
+    }
+    request_values.update(request_overrides or {})
     return create_authenticated_conversation_scope(
         store=selected_store or AgentDbConversationScopeStore(
             lambda: TestAgentDb(path)
         ),
         capability=capability(signing_context, serialized, now_epoch),
         repo_root=REPO_ROOT,
-        request=ConversationScopeCreateRequest(
-            work_focus=FOCUS,
-            grounding_receipt=grounding_receipt(),
-            discussion_foundup_ids=("trade",),
-            conversation_nonce="signed-conversation-one",
-            turn_id=digest({"turn": "signed-first"}),
-            active_topic="TRADE runtime",
-            current_objective="Identify the next grounded implementation slice.",
-            accepted_decisions=(
-                item("Use current repository evidence.", "repository_fact"),
-            ),
-            open_questions=(item("What is next?", "unresolved"),),
-            repository_evidence_refs=("code:trade",),
-            source_snapshot_id=SNAPSHOT_ID,
-            source_snapshot_digest=SNAPSHOT_DIGEST,
-            ttl_seconds=200,
-        ),
+        request=ConversationScopeCreateRequest(**request_values),
         now_epoch=now_epoch,
     )

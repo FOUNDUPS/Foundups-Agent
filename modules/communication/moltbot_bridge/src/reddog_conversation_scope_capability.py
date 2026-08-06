@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Mapping
 from weakref import WeakKeyDictionary
 
@@ -16,6 +16,10 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing 
     ConversationScopeSigningContext,
     sign_conversation_scope_record as sign_e0_conversation_scope_record,
     verify_signed_conversation_scope_record,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind import (
+    SCOPE_KIND_FOUNDUP,
+    scope_request_authorized,
 )
 
 
@@ -64,6 +68,9 @@ class _ConversationScopeAuthoritySeal:
     session_id: str = ""
     repo_full_name: str = ""
     record_signing_context: ConversationScopeSigningContext | None = None
+    authorized_scope_kind: str = ""
+    authorized_active_foundup_id: str = ""
+    authorized_discussion_foundup_ids: tuple[str, ...] = ()
 
 
 _LOCK = threading.Lock()
@@ -86,22 +93,32 @@ def consume_conversation_scope_capability(
     active_foundup_id: str,
     discussion_foundup_ids: tuple[str, ...],
     now_epoch: int,
+    scope_kind: str = SCOPE_KIND_FOUNDUP,
 ) -> VerifiedConversationScopeAuthority | None:
     if type(capability) is not AuthenticatedConversationScopeCapability:
         return None
     with _LOCK:
         seal = _CAPABILITIES.pop(capability, None)
-    allowed = set(seal.foundup_scope) if seal is not None else set()
-    requested = set(discussion_foundup_ids)
     if (
-        seal is None or int(now_epoch) >= seal.expires_at or not active_foundup_id
-        or active_foundup_id not in requested or not requested
-        or not requested.issubset(allowed)
+        seal is None
+        or int(now_epoch) >= seal.expires_at
+        or not scope_request_authorized(
+            scope_kind=scope_kind,
+            active_foundup_id=active_foundup_id,
+            discussion_foundup_ids=discussion_foundup_ids,
+            allowed_foundup_ids=seal.foundup_scope,
+        )
     ):
         return None
     authority = object.__new__(VerifiedConversationScopeAuthority)
+    authority_seal = replace(
+        seal,
+        authorized_scope_kind=scope_kind,
+        authorized_active_foundup_id=active_foundup_id,
+        authorized_discussion_foundup_ids=discussion_foundup_ids,
+    )
     with _LOCK:
-        _AUTHORITIES[authority] = seal
+        _AUTHORITIES[authority] = authority_seal
     return authority
 
 
@@ -132,7 +149,7 @@ def sign_record_with_scope_authority(
     require_replay: bool = False,
 ) -> Mapping[str, Any] | None:
     seal = _authority_seal(authority)
-    if seal is None:
+    if seal is None or not _record_matches_authorized_scope(seal, record):
         return None
     if seal.record_auth_scheme == CONVERSATION_SCOPE_AUTH_SCHEME:
         if seal.record_signing_context is None:
@@ -160,7 +177,11 @@ def verify_record_with_scope_authority(
     authority: Any, record: Mapping[str, Any]
 ) -> bool:
     seal = _authority_seal(authority)
-    if seal is None or record.get("record_auth_scheme") != seal.record_auth_scheme:
+    if (
+        seal is None
+        or not _record_matches_authorized_scope(seal, record)
+        or record.get("record_auth_scheme") != seal.record_auth_scheme
+    ):
         return False
     if seal.record_auth_scheme == CONVERSATION_SCOPE_AUTH_SCHEME:
         return bool(seal.record_signing_context) and verify_signed_conversation_scope_record(
@@ -182,6 +203,19 @@ def _authority_seal(authority: Any) -> _ConversationScopeAuthoritySeal | None:
         return None
     with _LOCK:
         return _AUTHORITIES.get(authority)
+
+
+def _record_matches_authorized_scope(
+    seal: _ConversationScopeAuthoritySeal, record: Mapping[str, Any]
+) -> bool:
+    discussions = record.get("discussion_foundup_ids")
+    return bool(
+        isinstance(discussions, list)
+        and all(type(item) is str for item in discussions)
+        and record.get("scope_kind") == seal.authorized_scope_kind
+        and record.get("authorized_foundup_id") == seal.authorized_active_foundup_id
+        and tuple(discussions) == seal.authorized_discussion_foundup_ids
+    )
 
 
 __all__ = [

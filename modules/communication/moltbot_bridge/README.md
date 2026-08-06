@@ -2,12 +2,14 @@
 
 ## RedDog conversational state boundary
 
-RedDog now has an AgentDB-backed authenticated conversation-scope runtime. It
-stores only typed, bounded continuity state and current evidence bindings; raw
-provider history is never stored by this runtime. A fresh principal-signed
-session proof and current repository/principal/FoundUp resolution are required for create, resume, and
-CAS update. Stale HEAD, HoloIndex generation, operational snapshot, expiry,
-principal key, transport/session, or turn lineage fails closed.
+RedDog has an AgentDB-backed authenticated conversation-scope runtime. It
+stores only typed, bounded continuity state; raw provider history is never
+stored by this runtime. Every scope requires a fresh principal-signed session.
+`foundup` scope additionally requires current repository, FoundUp, snapshot,
+and HoloIndex grounding. `principal` and `comparison` scopes forbid those
+operational bindings and cannot enter work promotion. Comparison permits only
+two or more FoundUps already in the principal credential and never unions their
+authority. Expiry, principal key, transport/session, or turn lineage fails closed.
 
 This state helps RedDog interpret follow-up requests. It is not work authority.
 The backend can now bind one authenticated scope revision and resident intent
@@ -18,6 +20,7 @@ The binding covers the operational snapshot, repository HEAD, HoloIndex
 generation/freshness receipt, FoundUp, grounding receipt, and intent.
 
 Conversation state and the pending capability do not grant work authority.
+Only a `foundup` scope may request the existing proposal-promotion chain.
 WRE/OpenClaw/Hermes dispatch, repository mutation, and merge remain downstream
 gates. The extension now has a public-key-only authenticated-session source.
 Durable conversation-state consumption remains blocked until that source

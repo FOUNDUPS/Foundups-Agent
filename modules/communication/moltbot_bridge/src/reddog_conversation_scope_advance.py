@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store im
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_persistence import (
     persist_authenticated_conversation_record,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind import (
+    SCOPE_KIND_FOUNDUP,
+)
 
 
 def advance_authenticated_conversation_scope(
@@ -84,9 +87,15 @@ def _authorized_current(
     current = loaded.get("record") if loaded.get("ok") else None
     if not isinstance(current, Mapping):
         return {}, {}, None, "conversation_scope_access_denied"
-    grounded, reason = verified_grounding(
-        repo_root, request.work_focus, request.grounding_receipt
-    )
+    scope_kind = str(current.get("scope_kind") or "")
+    if scope_kind == SCOPE_KIND_FOUNDUP:
+        grounded, reason = verified_grounding(
+            repo_root, request.work_focus, request.grounding_receipt
+        )
+    else:
+        grounded, reason = {}, ""
+        if _nonfoundup_grounding_present(request):
+            reason = "conversation_scope_nonfoundup_grounding_forbidden"
     discussions = tuple(
         str(item)
         for item in request.state_patch.get(
@@ -98,11 +107,16 @@ def _authorized_current(
         active_foundup_id=str(grounded.get("foundup_id") or "") if not reason else "",
         discussion_foundup_ids=discussions,
         now_epoch=now_epoch,
+        scope_kind=scope_kind,
     )
     authority_view = conversation_scope_authority_view(authority)
     if (
         reason
-        or str(grounded.get("foundup_id") or "") != str(current["authorized_foundup_id"])
+        or (
+            scope_kind == SCOPE_KIND_FOUNDUP
+            and str(grounded.get("foundup_id") or "")
+            != str(current["authorized_foundup_id"])
+        )
         or str(current["source_snapshot_id"]) != request.expected_source_snapshot_id
         or str(current["source_snapshot_digest"]) != request.expected_source_snapshot_digest
         or authority is None
@@ -124,6 +138,8 @@ def _updated_record(
     request: ConversationScopeAdvanceRequest,
     now_epoch: int,
 ) -> dict[str, Any]:
+    if "scope_kind" in request.state_patch or "authorized_foundup_id" in request.state_patch:
+        raise ValueError("conversation_scope_kind_change_forbidden")
     if str(request.state_patch["parent_turn_id"]) != str(current["turn_id"]):
         raise ValueError("conversation_scope_parent_turn_mismatch")
     state = state_values(
@@ -136,25 +152,45 @@ def _updated_record(
         rejected_options=request.state_patch.get("rejected_options", ()),
         open_questions=request.state_patch.get("open_questions", ()),
         repository_evidence_refs=request.state_patch.get("repository_evidence_refs", ()),
-        allowed_evidence_refs=grounding_evidence_refs(grounded),
+        allowed_evidence_refs=(
+            grounding_evidence_refs(grounded)
+            if current.get("scope_kind") == SCOPE_KIND_FOUNDUP
+            else ()
+        ),
     )
     updated = dict(current)
     updated.update(state)
     updated.update(
         {
             "conversation_revision": int(request.expected_revision) + 1,
-            "last_grounded_head_sha": str(grounded["holoindex_repo_head_sha"]),
+            "last_grounded_head_sha": str(
+                grounded.get("holoindex_repo_head_sha")
+                or current.get("last_grounded_head_sha")
+                or ""
+            ),
             "holoindex_generation_id": str(grounded.get("holoindex_generation_id") or ""),
             "holoindex_freshness_receipt_id": str(
                 grounded.get("holoindex_freshness_receipt_digest") or ""
             ),
-            "grounding_receipt_id": str(grounded["receipt_id"]),
+            "grounding_receipt_id": str(
+                grounded.get("receipt_id") or current.get("grounding_receipt_id") or ""
+            ),
             "pending_work_proposal_id": "",
             "pending_work_proposal_digest": "",
             "updated_at": int(now_epoch),
         }
     )
     return updated
+
+
+def _nonfoundup_grounding_present(request: ConversationScopeAdvanceRequest) -> bool:
+    patch = request.state_patch
+    return bool(
+        request.grounding_receipt
+        or patch.get("repository_evidence_refs")
+        or request.expected_source_snapshot_id
+        or request.expected_source_snapshot_digest
+    )
 
 
 def _record_auth_nonce(record: Mapping[str, Any]) -> str:

@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-06 - Conversation scope-kind backend boundary (0.4.61)
+
+- Pinned the backend manifest that introduces immutable `foundup`, `principal`,
+  and `comparison` conversation scope kinds. Principal and comparison scopes do
+  not receive work or repository authority.
+- Bumped the VSIX version because the accepted backend integrity digest changed.
+
 ## 2026-08-06 - Conversation session authority source (0.4.60)
 
 - Added VS Code SecretStorage commands for a pre-issued principal-signed

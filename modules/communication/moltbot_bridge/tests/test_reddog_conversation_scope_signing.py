@@ -61,6 +61,7 @@ from modules.communication.moltbot_bridge.tests.reddog_conversation_scope_test_s
     TestAgentDb,
     digest,
     grounding_receipt,
+    item,
 )
 from modules.communication.moltbot_bridge.tests.reddog_conversation_scope_signing_test_support import (
     NOW,
@@ -101,6 +102,35 @@ def test_e0_signature_survives_store_restart_and_bearer_is_not_persisted(tmp_pat
         now_epoch=NOW,
     )
     assert resumed.accepted is True
+
+
+def test_e0_signer_authenticates_principal_scope_without_foundup_authority(
+    tmp_path: Path,
+) -> None:
+    serialized = _credential()
+    context, _anchor = _context(serialized)
+    path = tmp_path / "principal-scope.sqlite"
+    created = _create(
+        path,
+        context,
+        serialized,
+        request_overrides={
+            "scope_kind": "principal",
+            "work_focus": "Discuss principal operating principles.",
+            "grounding_receipt": {},
+            "discussion_foundup_ids": (),
+            "accepted_decisions": (item("Audit before implementation."),),
+            "open_questions": (),
+            "repository_evidence_refs": (),
+            "source_snapshot_id": "",
+            "source_snapshot_digest": "",
+        },
+    )
+    assert created.accepted is True
+    stored = _store(path).load(created.conversation_id)["record"]
+    assert stored["scope_kind"] == "principal"
+    assert stored["authorized_foundup_id"] == ""
+    assert verify_signed_conversation_scope_record(context, stored) is True
 
 
 def test_tamper_and_forged_credential_fail_closed(tmp_path: Path) -> None:

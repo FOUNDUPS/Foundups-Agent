@@ -59,10 +59,7 @@ def valid_revision_receipts(record: Mapping[str, Any]) -> bool:
 
 
 def _integer(value: Any, *, default: int) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
+    return value if type(value) is int else default
 
 
 __all__ = [

@@ -14,9 +14,13 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_revision
     REVISION_RECEIPT_SCHEMA,
     valid_revision_receipts,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind import (
+    SCOPE_KIND_FOUNDUP,
+    scope_record_reasons,
+)
 
 
-SCHEMA_VERSION = "reddog_authenticated_conversation_scope.v2"
+SCHEMA_VERSION = "reddog_authenticated_conversation_scope.v3"
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 HEAD_RE = re.compile(r"^[0-9a-f]{7,64}$")
 MAX_TEXT = 720
@@ -27,7 +31,7 @@ ITEM_KINDS = frozenset(
 )
 IMMUTABLE_FIELDS = frozenset(
     {
-        "schema_version", "conversation_id", "principal_id", "principal_provider",
+        "schema_version", "conversation_id", "scope_kind", "principal_id", "principal_provider",
         "verified_subject_digest", "principal_record_digest", "principal_key_fingerprint",
         "transport", "session_binding_digest", "authorized_foundup_id", "created_at",
         "credential_id", "session_id", "repo_full_name",
@@ -57,6 +61,17 @@ AUTH_RESPONSE_FIELDS = frozenset(
     }
 )
 UNSIGNED_RECORD_FIELDS = RECORD_FIELDS - AUTH_RESPONSE_FIELDS - {"record_digest"}
+INTEGER_FIELDS = frozenset(
+    {"conversation_revision", "created_at", "updated_at", "expires_at"}
+)
+STRING_LIST_FIELDS = frozenset(
+    {"discussion_foundup_ids", "repository_evidence_refs"}
+)
+ITEM_LIST_FIELDS = frozenset(
+    {"accepted_decisions", "rejected_options", "open_questions"}
+)
+LIST_FIELDS = STRING_LIST_FIELDS | ITEM_LIST_FIELDS | {"revision_receipts"}
+STRING_FIELDS = RECORD_FIELDS - INTEGER_FIELDS - LIST_FIELDS
 
 
 def sanitized_text(value: Any, *, limit: int = MAX_TEXT) -> str:
@@ -75,10 +90,12 @@ def typed_items(values: Any) -> list[dict[str, Any]]:
     for raw in values:
         if not isinstance(raw, Mapping) or set(raw) != {"item_id", "kind", "summary", "evidence_refs"}:
             raise ValueError("conversation_scope_item_shape_invalid")
-        kind = str(raw["kind"])
+        if any(type(raw[name]) is not str for name in ("item_id", "kind", "summary")):
+            raise ValueError("conversation_scope_item_type_invalid")
+        kind = raw["kind"]
         refs = string_list(raw["evidence_refs"], maximum=MAX_EVIDENCE_REFS)
         item = {
-            "item_id": str(raw["item_id"]),
+            "item_id": raw["item_id"],
             "kind": kind,
             "summary": sanitized_text(raw["summary"]),
             "evidence_refs": refs,
@@ -96,6 +113,8 @@ def typed_items(values: Any) -> list[dict[str, Any]]:
 def string_list(values: Any, *, maximum: int) -> list[str]:
     if not isinstance(values, Sequence) or isinstance(values, (str, bytes)) or len(values) > maximum:
         raise ValueError("conversation_scope_list_invalid")
+    if any(type(item) is not str for item in values):
+        raise ValueError("conversation_scope_list_type_invalid")
     result = [sanitized_text(item, limit=320) for item in values]
     if any(not item for item in result) or len(set(result)) != len(result):
         raise ValueError("conversation_scope_list_invalid")
@@ -103,8 +122,15 @@ def string_list(values: Any, *, maximum: int) -> list[str]:
 
 
 def validate_record(record: Mapping[str, Any]) -> tuple[str, ...]:
-    if set(record) != RECORD_FIELDS or record.get("schema_version") != SCHEMA_VERSION:
+    if (
+        type(record) is not dict
+        or set(record) != RECORD_FIELDS
+        or record.get("schema_version") != SCHEMA_VERSION
+    ):
         return ("conversation_scope_record_shape_invalid",)
+    type_reasons = _exact_json_type_reasons(record)
+    if type_reasons:
+        return tuple(type_reasons)
     reasons = [*_binding_reasons(record), *_state_reasons(record)]
     return tuple(dict.fromkeys(reasons))
 
@@ -115,16 +141,21 @@ def _binding_reasons(record: Mapping[str, Any]) -> list[str]:
     supplied_digest = str(digest_payload.pop("record_digest", ""))
     if not SHA256_RE.fullmatch(supplied_digest) or supplied_digest != canonical_digest(digest_payload):
         reasons.append("conversation_scope_record_digest_invalid")
-    required_digests = (
+    required_digests = [
         "verified_subject_digest", "principal_record_digest", "principal_key_fingerprint",
-        "session_binding_digest", "grounding_receipt_id",
-    )
+        "session_binding_digest",
+    ]
+    if record.get("scope_kind") == SCOPE_KIND_FOUNDUP:
+        required_digests.append("grounding_receipt_id")
     if any(not SHA256_RE.fullmatch(str(record.get(field) or "")) for field in required_digests):
         reasons.append("conversation_scope_binding_digest_invalid")
     if not SHA256_RE.fullmatch(str(record.get("conversation_id") or "")):
         reasons.append("conversation_scope_id_invalid")
     reasons.extend(_record_auth_reasons(record))
-    if not HEAD_RE.fullmatch(str(record.get("last_grounded_head_sha") or "")):
+    if (
+        record.get("scope_kind") == SCOPE_KIND_FOUNDUP
+        and not HEAD_RE.fullmatch(str(record.get("last_grounded_head_sha") or ""))
+    ):
         reasons.append("conversation_scope_head_invalid")
     if not _valid_optional_digest_pair(record, "pending_work_proposal_id", "pending_work_proposal_digest"):
         reasons.append("conversation_scope_pending_proposal_invalid")
@@ -200,7 +231,7 @@ def _e0_auth_reasons(record: Mapping[str, Any], signature: str) -> list[str]:
 def _state_reasons(record: Mapping[str, Any]) -> list[str]:
     reasons: list[str] = []
     if any(not str(record.get(field) or "") for field in (
-        "principal_id", "principal_provider", "transport", "authorized_foundup_id",
+        "principal_id", "principal_provider", "transport",
         "turn_id", "active_topic", "current_objective", "created_at", "updated_at",
     )):
         reasons.append("conversation_scope_required_value_missing")
@@ -215,11 +246,10 @@ def _state_reasons(record: Mapping[str, Any]) -> list[str]:
         reasons.append("conversation_scope_parent_turn_invalid")
     discussions = record.get("discussion_foundup_ids")
     try:
-        normalized_discussions = string_list(discussions, maximum=16)
+        string_list(discussions, maximum=16)
     except (TypeError, ValueError):
-        normalized_discussions = []
-    if record.get("authorized_foundup_id") not in normalized_discussions:
-        reasons.append("conversation_scope_foundup_set_invalid")
+        reasons.append("conversation_scope_discussion_set_invalid")
+    reasons.extend(scope_record_reasons(record))
     created_at = _integer(record.get("created_at"), default=-1)
     updated_at = _integer(record.get("updated_at"), default=-1)
     expires_at = _integer(record.get("expires_at"), default=-1)
@@ -278,10 +308,38 @@ def _valid_optional_digest_pair(record: Mapping[str, Any], left: str, right: str
 
 
 def _integer(value: Any, *, default: int) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
+    return value if type(value) is int else default
+
+
+def _exact_json_type_reasons(record: Mapping[str, Any]) -> list[str]:
+    if any(type(record.get(name)) is not str for name in STRING_FIELDS):
+        return ["conversation_scope_record_string_type_invalid"]
+    if any(type(record.get(name)) is not int for name in INTEGER_FIELDS):
+        return ["conversation_scope_record_integer_type_invalid"]
+    if any(not isinstance(record.get(name), list) for name in LIST_FIELDS):
+        return ["conversation_scope_record_list_type_invalid"]
+    if any(
+        any(type(item) is not str for item in record[name])
+        for name in STRING_LIST_FIELDS
+    ):
+        return ["conversation_scope_record_list_item_type_invalid"]
+    for name in ITEM_LIST_FIELDS:
+        for item in record[name]:
+            if type(item) is not dict:
+                return ["conversation_scope_record_item_type_invalid"]
+    return _revision_receipt_type_reasons(record["revision_receipts"])
+
+
+def _revision_receipt_type_reasons(receipts: Sequence[Any]) -> list[str]:
+    string_fields = REVISION_RECEIPT_FIELDS - {"revision"}
+    for receipt in receipts:
+        if type(receipt) is not dict or set(receipt) != REVISION_RECEIPT_FIELDS:
+            return ["conversation_scope_revision_receipt_type_invalid"]
+        if type(receipt.get("revision")) is not int:
+            return ["conversation_scope_revision_receipt_type_invalid"]
+        if any(type(receipt.get(name)) is not str for name in string_fields):
+            return ["conversation_scope_revision_receipt_type_invalid"]
+    return []
 
 
 __all__ = [

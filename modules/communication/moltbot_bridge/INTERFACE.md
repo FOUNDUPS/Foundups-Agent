@@ -2,9 +2,12 @@
 ## Authenticated RedDog conversation scope
 `authenticate_conversation_scope()` derives the principal only from a verified
 `sess.v1` subject and returns an opaque one-use capability. Create, resume, and
-advance persist bounded HMAC-authenticated state in AgentDB with insert/CAS,
-expiry, turn lineage, FoundUp, evidence, snapshot, HEAD, and HoloIndex bindings.
-Only evidence already admitted by grounding may persist.
+advance persist bounded authenticated state in AgentDB with insert/CAS, expiry,
+and turn lineage. Scope schema v3 adds `foundup`, `principal`, and `comparison`.
+FoundUp scope retains evidence, snapshot, HEAD, and HoloIndex bindings; only
+evidence already admitted by grounding may persist. Principal and comparison
+scope forbid repository/operational bindings, and comparison requires at least
+two FoundUps already present in the principal credential. Neither can promote work.
 `prepare_conversation_work_context()` binds one current revision to a verified
 resident intent. Backend determination rejects stale scope before a model call.
 `commit_pending_conversation_work_proposal()` CAS-stores one exact FIX preview;
@@ -17,9 +20,12 @@ editor source: it verifies a strict principal-signed credential using only the
 current-generation public key, enforces repository/audience/transport/TTL and
 FoundUp scope, and yields the same opaque operation-local capability. The
 credential never enters AgentDB, model context, receipts, logs, or child env.
-Principal-signed scope v2 persists only through the isolated E0 signer. Each use
-re-verifies current principal authority, signs the complete record and credential,
-and advances a signer-owned monotonic conversation head. AgentDB stages the exact
+Principal-signed sessions persist scope v3 only through the existing isolated
+E0 signer. Scope v2 records fail closed and are not inferred or upgraded because
+they lack the immutable kind binding. The signer re-verifies the credential
+against current principal authority on every use, signs the complete record and
+credential, and advances a signer-owned monotonic conversation head. AgentDB
+first stages the exact
 unsigned payload as non-authoritative pending state; only a matching E0 response
 may atomically publish it. Exact replay supports crash recovery; altered pending
 content, rollback, fork, nonce replay, stale authority, wrong key epoch, forged
