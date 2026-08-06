@@ -21,7 +21,7 @@ import os
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Optional, Protocol, Sequence
+from typing import Any, Callable, Mapping, Optional, Protocol, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
     FUSION_ASSIGNMENT_GATE_PASSED,
@@ -56,11 +56,11 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_work_promotion
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_context_projection import (
     architect_model_binding,
     build_architect_context as _build_architect_context,
-    model_runtime_binding as _model_runtime_binding,
+    model_runtime_binding as _model_runtime_binding,  # noqa: F401 - compatibility seam
     report_prompt_view as _report_prompt_view,
     resolve_architect_runtime_binding,
-    resolve_conversation_context,
-    resolve_principal_memex_cycle,
+    resolve_conversation_context, resolve_principal_memex_cycle,
+    run_principal_memex_guarded_architect_model, principal_memex_durable_determination_fields,
 )
 from modules.communication.moltbot_bridge.src.reddog_principal_memex_resident_admission import (
     AuthenticatedPrincipalMemexContext,
@@ -620,6 +620,7 @@ def run_reddog_backend_architect_determination_runtime(
     timeout_seconds: int = 60,
     conversation_work_context: AuthenticatedConversationWorkContext | None = None,
     principal_memex_context: AuthenticatedPrincipalMemexContext | None = None,
+    principal_memex_now_epoch: Callable[[], int] | None = None,
 ) -> BackendArchitectDeterminationResult:
     """Produce, persist, and queue-candidate one backend architect determination."""
     observed_at = now_iso or datetime.now(timezone.utc).isoformat()
@@ -667,6 +668,7 @@ def run_reddog_backend_architect_determination_runtime(
         report_digests=report_digests, wsp15_allocation_digest=allocation_digest,
         model_selection_digest=model_selection_digest,
         conversation_binding=conversation_binding,
+        now_epoch=principal_memex_now_epoch,
     )
     reasons.extend(principal_memex.rejection_reasons)
     principal_memex_receipt = principal_memex.receipt
@@ -758,19 +760,17 @@ def run_reddog_backend_architect_determination_runtime(
         conversation_binding=conversation_binding,
         principal_memex_receipt=principal_memex_receipt,
     )
-    try:
-        model_result = runner.run_architect_determination(
-            prompt=prompt,
-            context=context,
-            binding=binding,
-            timeout_seconds=timeout_seconds,
-        )
-    except TimeoutError:
-        reasons.append(ArchitectDeterminationReason.MODEL_TIMEOUT)
-        model_result = None
-    except Exception:
-        reasons.append(ArchitectDeterminationReason.MODEL_FAILURE)
-        model_result = None
+    model_result, model_failure = run_principal_memex_guarded_architect_model(
+        runner, prompt, context, binding,
+        timeout_seconds,
+        principal_memex_receipt, principal_memex.context_view, observed_at, principal_memex_now_epoch,
+    )
+    if model_failure:
+        model_failure_reasons = {
+            "principal_memex": ArchitectDeterminationReason.PRINCIPAL_MEMEX_CONTEXT_INVALID,
+            "timeout": ArchitectDeterminationReason.MODEL_TIMEOUT,
+        }
+        reasons.append(model_failure_reasons.get(model_failure, ArchitectDeterminationReason.MODEL_FAILURE))
 
     if model_result is None:
         receipt = _receipt(
@@ -842,10 +842,10 @@ def run_reddog_backend_architect_determination_runtime(
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
 
-    action = str(parsed["action"]).upper()
-    next_slice_name = str(parsed.get("next_slice_name") or "").strip() or None
-    summary = str(parsed.get("summary") or "").strip()
-    decision_reasons = _normalize_text_list(parsed.get("decision_reasons"))
+    action, next_slice_name, summary, decision_reasons, proposal_admission = principal_memex_durable_determination_fields(
+        parsed=parsed, reports=reports, proposal_admission=proposal_admission,
+        principal_memex_view=principal_memex.context_view,
+    )
     queue_candidate = None
     accepted_receipt_id = _digest(
         {
@@ -868,7 +868,7 @@ def run_reddog_backend_architect_determination_runtime(
             ),
         }
     )
-    if action == ACTION_FIX:
+    if action == ACTION_FIX and proposal_admission is not None:
         assert next_slice_name is not None
         assert proposal_admission is not None
         queue_candidate = _queue_candidate(

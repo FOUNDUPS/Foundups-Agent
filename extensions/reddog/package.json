@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.63",
+  "version": "0.4.64",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -15,7 +15,9 @@
     "onCommand:reddog.open",
     "onCommand:foundupsFusion.open",
     "onCommand:reddog.setConversationSessionCredential",
-    "onCommand:reddog.clearConversationSessionCredential"
+    "onCommand:reddog.clearConversationSessionCredential",
+    "onCommand:reddog.setPrincipalMemexDisclosure",
+    "onCommand:reddog.clearPrincipalMemexDisclosure"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -39,6 +41,16 @@
         "command": "reddog.clearConversationSessionCredential",
         "title": "Clear Conversation Session Credential",
         "category": "RedDog"
+      },
+      {
+        "command": "reddog.setPrincipalMemexDisclosure",
+        "title": "Set One-Use Principal Memex Disclosure",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.clearPrincipalMemexDisclosure",
+        "title": "Clear Principal Memex Disclosure",
+        "category": "RedDog"
       }
     ],
     "menus": {
@@ -54,6 +66,12 @@
         },
         {
           "command": "reddog.clearConversationSessionCredential"
+        },
+        {
+          "command": "reddog.setPrincipalMemexDisclosure"
+        },
+        {
+          "command": "reddog.clearPrincipalMemexDisclosure"
         }
       ],
       "editor/title": [

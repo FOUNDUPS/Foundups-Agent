@@ -24,8 +24,8 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 )
 
 
-SCHEMA_VERSION = "reddog_principal_memex_disclosure.v1"
-SIGNING_PREFIX = "reddog-principal-memex-disclosure.v1"
+SCHEMA_VERSION = "reddog_principal_memex_disclosure.v2"
+SIGNING_PREFIX = "reddog-principal-memex-disclosure.v2"
 AUDIENCE = "foundups.reddog"
 PURPOSE = "resident_architect_context"
 RUNTIME_SURFACE = "reddog_backend_architect"
@@ -43,6 +43,7 @@ _FIELDS = frozenset(
         "conversation_id", "conversation_revision", "conversation_record_digest",
         "decision_item_ids", "sensitivity", "purpose", "runtime_surface",
         "model_runtime_binding_receipt_id", "model_runtime_binding_digest",
+        "intent_id", "grounding_receipt_id", "session_binding_digest",
         "nonce", "issued_at", "expires_at", "signature",
     }
 )
@@ -69,6 +70,9 @@ class VerifiedPrincipalMemexDisclosure:
     decision_item_ids: tuple[str, ...]
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
+    intent_id: str
+    grounding_receipt_id: str
+    session_binding_digest: str
     nonce: str
     issued_at: int
     expires_at: int
@@ -114,6 +118,9 @@ def verify_principal_memex_disclosure(
     expected_transport: str,
     expected_model_runtime_binding_receipt_id: str,
     expected_model_runtime_binding_digest: str,
+    expected_intent_id: str,
+    expected_grounding_receipt_id: str,
+    expected_session_binding_digest: str,
     now_epoch: int,
 ) -> VerifiedPrincipalMemexDisclosure | None:
     raw = _parse(serialized)
@@ -127,6 +134,9 @@ def verify_principal_memex_disclosure(
         ("purpose", PURPOSE),
         ("model_runtime_binding_receipt_id", expected_model_runtime_binding_receipt_id),
         ("model_runtime_binding_digest", expected_model_runtime_binding_digest),
+        ("intent_id", expected_intent_id),
+        ("grounding_receipt_id", expected_grounding_receipt_id),
+        ("session_binding_digest", expected_session_binding_digest),
     )
     if any(not constant_time_compare(str(raw[field]), str(value)) for field, value in expected):
         return None
@@ -171,6 +181,7 @@ def _shape_valid(value: Mapping[str, Any], now_epoch: int) -> bool:
     sha256_ids = (
         "disclosure_id", "credential_id", "session_id", "conversation_id",
         "conversation_record_digest", "model_runtime_binding_digest", "nonce",
+        "intent_id", "grounding_receipt_id", "session_binding_digest",
     )
     text = ("principal_id", "principal_provider", "repo_full_name", "transport", "signature")
     items = value.get("decision_item_ids")
@@ -229,7 +240,11 @@ def _verified(value: Mapping[str, Any]) -> VerifiedPrincipalMemexDisclosure:
         conversation_record_digest=str(value["conversation_record_digest"]),
         decision_item_ids=tuple(value["decision_item_ids"]),
         model_runtime_binding_receipt_id=str(value["model_runtime_binding_receipt_id"]),
-        model_runtime_binding_digest=str(value["model_runtime_binding_digest"]), nonce=str(value["nonce"]),
+        model_runtime_binding_digest=str(value["model_runtime_binding_digest"]),
+        intent_id=str(value["intent_id"]),
+        grounding_receipt_id=str(value["grounding_receipt_id"]),
+        session_binding_digest=str(value["session_binding_digest"]),
+        nonce=str(value["nonce"]),
         issued_at=int(value["issued_at"]), expires_at=int(value["expires_at"]),
     )
 

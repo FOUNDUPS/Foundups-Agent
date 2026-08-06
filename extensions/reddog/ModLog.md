@@ -1,5 +1,22 @@
 # RedDog ModLog
 
+## 2026-08-06 - Principal Memex live resident source (0.4.64)
+
+- Added SecretStorage commands for one pre-issued principal-signed disclosure;
+  RedDog does not mint or sign the packet.
+- Deleted the packet before one-shot bridge use and kept it out of the resident
+  intent, durable audit tasks, status output, logs, and receipts.
+- Deferred the opaque Principal-context capability until the durable cycle's
+  final model checkpoint, then bound the actual cycle/current generation and
+  rechecked expiry immediately before provider invocation.
+- Preserved the signed accepted-decision subset and order with no work,
+  repository, signer, merge, FoundUp-projection, or HoloIndex authority.
+- Serialized SecretStorage consumption so concurrent calls cannot resurrect a
+  spent disclosure. Memex-informed determinations persist no model-authored
+  free text or proposal and cannot emit a queue candidate.
+- Restored a packet only after explicit `consumed=false`; indeterminate or
+  failed bridge outcomes retire it to avoid resurrecting consumed evidence.
+
 ## 2026-08-06 - Explicit signer request authority (0.4.63)
 
 - Pinned the backend dependency closure containing the signer-owned policy

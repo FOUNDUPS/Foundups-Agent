@@ -19,6 +19,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing 
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind import (
     SCOPE_KIND_FOUNDUP,
+    SCOPE_KIND_PRINCIPAL,
     scope_request_authorized,
 )
 
@@ -41,9 +42,20 @@ class _OpaqueCapability:
     def __reduce__(self) -> Any:
         raise TypeError("conversation_scope_capability_pickle_forbidden")
 
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} opaque>"
+
 
 class AuthenticatedConversationScopeCapability(_OpaqueCapability):
     """One-use authenticated session and principal proof."""
+
+
+class FoundUpConversationScopeCapability(_OpaqueCapability):
+    """One-use child restricted to FoundUp authority consumption."""
+
+
+class PrincipalContextReadConversationScopeCapability(_OpaqueCapability):
+    """One-use child restricted to principal-context read consumption."""
 
 
 class VerifiedConversationScopeAuthority(_OpaqueCapability):
@@ -73,8 +85,17 @@ class _ConversationScopeAuthoritySeal:
     authorized_discussion_foundup_ids: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class _DelegatedConversationScopeSeal:
+    authority: _ConversationScopeAuthoritySeal
+    permitted_scope_kind: str
+
+
 _LOCK = threading.Lock()
 _CAPABILITIES: WeakKeyDictionary[AuthenticatedConversationScopeCapability, _ConversationScopeAuthoritySeal] = WeakKeyDictionary()
+_DELEGATED_CAPABILITIES: WeakKeyDictionary[
+    _OpaqueCapability, _DelegatedConversationScopeSeal
+] = WeakKeyDictionary()
 _AUTHORITIES: WeakKeyDictionary[VerifiedConversationScopeAuthority, _ConversationScopeAuthoritySeal] = WeakKeyDictionary()
 
 
@@ -87,6 +108,45 @@ def _issue_conversation_scope_capability(
     return capability
 
 
+def split_conversation_scope_capability(
+    capability: Any,
+) -> tuple[
+    FoundUpConversationScopeCapability,
+    PrincipalContextReadConversationScopeCapability,
+] | None:
+    """Atomically retire one root and issue two scope-restricted children."""
+
+    if type(capability) is not AuthenticatedConversationScopeCapability:
+        return None
+    foundup = object.__new__(FoundUpConversationScopeCapability)
+    principal = object.__new__(PrincipalContextReadConversationScopeCapability)
+    with _LOCK:
+        seal = _CAPABILITIES.get(capability)
+        if seal is None or not _register_split_children(foundup, principal, seal):
+            return None
+        _CAPABILITIES.pop(capability, None)
+    return foundup, principal
+
+
+def _register_split_children(
+    foundup: FoundUpConversationScopeCapability,
+    principal: PrincipalContextReadConversationScopeCapability,
+    seal: _ConversationScopeAuthoritySeal,
+) -> bool:
+    try:
+        _DELEGATED_CAPABILITIES[foundup] = _DelegatedConversationScopeSeal(
+            seal, SCOPE_KIND_FOUNDUP
+        )
+        _DELEGATED_CAPABILITIES[principal] = _DelegatedConversationScopeSeal(
+            seal, SCOPE_KIND_PRINCIPAL
+        )
+    except Exception:
+        _DELEGATED_CAPABILITIES.pop(foundup, None)
+        _DELEGATED_CAPABILITIES.pop(principal, None)
+        return False
+    return True
+
+
 def consume_conversation_scope_capability(
     capability: Any,
     *,
@@ -95,10 +155,7 @@ def consume_conversation_scope_capability(
     now_epoch: int,
     scope_kind: str = SCOPE_KIND_FOUNDUP,
 ) -> VerifiedConversationScopeAuthority | None:
-    if type(capability) is not AuthenticatedConversationScopeCapability:
-        return None
-    with _LOCK:
-        seal = _CAPABILITIES.pop(capability, None)
+    seal = _consume_capability_seal(capability, scope_kind=scope_kind)
     if (
         seal is None
         or int(now_epoch) >= seal.expires_at
@@ -122,6 +179,23 @@ def consume_conversation_scope_capability(
     return authority
 
 
+def _consume_capability_seal(
+    capability: Any, *, scope_kind: str
+) -> _ConversationScopeAuthoritySeal | None:
+    with _LOCK:
+        if type(capability) is AuthenticatedConversationScopeCapability:
+            return _CAPABILITIES.pop(capability, None)
+        if type(capability) not in {
+            FoundUpConversationScopeCapability,
+            PrincipalContextReadConversationScopeCapability,
+        }:
+            return None
+        delegated = _DELEGATED_CAPABILITIES.pop(capability, None)
+    if delegated is None or delegated.permitted_scope_kind != scope_kind:
+        return None
+    return delegated.authority
+
+
 def conversation_scope_authority_view(authority: Any) -> Mapping[str, Any] | None:
     seal = _authority_seal(authority)
     if seal is None:
@@ -139,6 +213,7 @@ def conversation_scope_authority_view(authority: Any) -> Mapping[str, Any] | Non
         "credential_id": seal.credential_id,
         "session_id": seal.session_id,
         "repo_full_name": seal.repo_full_name,
+        "expires_at": seal.expires_at,
     }
 
 
@@ -194,6 +269,11 @@ def discard_conversation_scope_capability(capability: Any) -> None:
     with _LOCK:
         if type(capability) is AuthenticatedConversationScopeCapability:
             _CAPABILITIES.pop(capability, None)
+        elif type(capability) in {
+            FoundUpConversationScopeCapability,
+            PrincipalContextReadConversationScopeCapability,
+        }:
+            _DELEGATED_CAPABILITIES.pop(capability, None)
         elif type(capability) is VerifiedConversationScopeAuthority:
             _AUTHORITIES.pop(capability, None)
 
@@ -219,8 +299,11 @@ def _record_matches_authorized_scope(
 
 
 __all__ = [
-    "AuthenticatedConversationScopeCapability", "VerifiedConversationScopeAuthority",
+    "AuthenticatedConversationScopeCapability", "FoundUpConversationScopeCapability",
+    "PrincipalContextReadConversationScopeCapability",
+    "VerifiedConversationScopeAuthority",
     "consume_conversation_scope_capability",
     "conversation_scope_authority_view", "discard_conversation_scope_capability",
+    "split_conversation_scope_capability",
     "sign_record_with_scope_authority", "verify_record_with_scope_authority",
 ]

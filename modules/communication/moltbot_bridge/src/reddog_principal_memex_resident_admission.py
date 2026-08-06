@@ -17,21 +17,18 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
     PrincipalAuthorityResolver,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capability import (
-    AuthenticatedConversationScopeCapability,
+    PrincipalContextReadConversationScopeCapability,
     VerifiedConversationScopeAuthority,
     consume_conversation_scope_capability,
     conversation_scope_authority_view,
-    verify_record_with_scope_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
+    SHA256_RE,
     canonical_digest,
     validate_record,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind import (
     SCOPE_KIND_PRINCIPAL,
-)
-from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record import (
-    authority_matches,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
@@ -57,6 +54,8 @@ _RECEIPT_FIELDS = frozenset({
     "context_view_digest", "source_decision_item_ids", "admitted_item_ids",
     "disclosure_id", "conversation_scope_authority_digest",
     "model_runtime_binding_receipt_id", "model_runtime_binding_digest",
+    "resident_cycle_id", "current_generation_manifest_id",
+    "artifact_generation_digest",
     "admitted_at", "expires_at", "authority_effect",
     "no_work_authority_granted", "no_foundup_projection_performed", "receipt_id",
 })
@@ -107,6 +106,10 @@ class _ContextSeal:
     disclosure: VerifiedPrincipalMemexDisclosure
     guard: PrincipalMemexDisclosureGuard
     projection: Mapping[str, Any]
+    context_items: tuple[Mapping[str, str], ...]
+    resident_cycle_id: str
+    current_generation_manifest_id: str
+    artifact_generation_digest: str
 
 
 _LOCK = threading.Lock()
@@ -117,19 +120,35 @@ _CONTEXTS: WeakKeyDictionary[AuthenticatedPrincipalMemexContext, _ContextSeal] =
 
 def prepare_authenticated_principal_memex_context(
     *, store: AgentDbConversationScopeStore,
-    capability: AuthenticatedConversationScopeCapability,
+    capability: PrincipalContextReadConversationScopeCapability,
     serialized_disclosure: str, principal_resolver: PrincipalAuthorityResolver,
     guard: PrincipalMemexDisclosureGuard, conversation_id: str,
     expected_revision: int, expected_repo_full_name: str,
     expected_transport: str, model_runtime_binding_receipt_id: str,
-    model_runtime_binding_digest: str, now_epoch: int,
+    model_runtime_binding_digest: str, expected_intent_id: str,
+    expected_grounding_receipt_id: str, expected_resident_cycle_id: str,
+    expected_session_binding_digest: str,
+    current_generation_manifest_id: str, artifact_generation_digest: str,
+    now_epoch: int,
 ) -> PrincipalMemexAdmissionResult:
+    if not all(
+        SHA256_RE.fullmatch(str(value or ""))
+        for value in (
+            expected_resident_cycle_id,
+            current_generation_manifest_id,
+            artifact_generation_digest,
+        )
+    ):
+        return _rejected("principal_memex_resident_cycle_invalid")
     disclosure = verify_principal_memex_disclosure(
         serialized_disclosure, principal_resolver=principal_resolver,
         expected_repo_full_name=expected_repo_full_name,
         expected_transport=expected_transport,
         expected_model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
         expected_model_runtime_binding_digest=model_runtime_binding_digest,
+        expected_intent_id=expected_intent_id,
+        expected_grounding_receipt_id=expected_grounding_receipt_id,
+        expected_session_binding_digest=expected_session_binding_digest,
         now_epoch=int(now_epoch),
     )
     loaded = store.load(str(conversation_id))
@@ -139,16 +158,19 @@ def prepare_authenticated_principal_memex_context(
     reasons = _record_reasons(record, disclosure, expected_revision, now_epoch)
     if reasons or guard.is_revoked(disclosure):
         return _rejected(*(reasons or ("principal_memex_access_denied",)))
-    projection = _projection_from_record(record, disclosure)
-    if projection is None:
+    projection_result = _projection_from_record(record, disclosure)
+    if projection_result is None:
         return _rejected("principal_memex_decision_projection_invalid")
-    authority = _consume_authority(capability, record, int(now_epoch))
+    projection, context_items = projection_result
+    authority = _consume_authority(capability, disclosure, int(now_epoch))
     if authority is None:
         return _rejected("principal_memex_access_denied")
     context = object.__new__(AuthenticatedPrincipalMemexContext)
     with _LOCK:
         _CONTEXTS[context] = _ContextSeal(
-            store, authority, dict(record), disclosure, guard, projection
+            store, authority, dict(record), disclosure, guard, projection,
+            context_items, expected_resident_cycle_id, current_generation_manifest_id,
+            artifact_generation_digest,
         )
     return PrincipalMemexAdmissionResult(True, ADMISSION_ACCEPT, context=context)
 
@@ -199,7 +221,7 @@ def validate_principal_memex_admission_output(
 
 
 def _consume_authority(
-    capability: Any, record: Mapping[str, Any], now_epoch: int,
+    capability: Any, disclosure: VerifiedPrincipalMemexDisclosure, now_epoch: int,
 ) -> VerifiedConversationScopeAuthority | None:
     authority = consume_conversation_scope_capability(
         capability, active_foundup_id="", discussion_foundup_ids=(),
@@ -207,11 +229,25 @@ def _consume_authority(
     )
     view = conversation_scope_authority_view(authority)
     if (
-        authority is None or view is None or not authority_matches(record, view)
-        or not verify_record_with_scope_authority(authority, record)
+        authority is None
+        or view is None
+        or not _request_authority_matches(view, disclosure)
     ):
         return None
     return authority
+
+
+def _request_authority_matches(
+    authority: Mapping[str, Any], disclosure: VerifiedPrincipalMemexDisclosure,
+) -> bool:
+    expected = {
+        "principal_id": disclosure.principal_id,
+        "principal_provider": disclosure.principal_provider,
+        "repo_full_name": disclosure.repo_full_name,
+        "transport": disclosure.transport,
+        "session_binding_digest": disclosure.session_binding_digest,
+    }
+    return all(authority.get(field) == value for field, value in expected.items())
 
 
 def _record_reasons(
@@ -241,13 +277,13 @@ def _record_reasons(
 
 def _projection_from_record(
     record: Mapping[str, Any], disclosure: VerifiedPrincipalMemexDisclosure,
-) -> Mapping[str, Any] | None:
+) -> tuple[Mapping[str, Any], tuple[Mapping[str, str], ...]] | None:
     decisions = {
         str(item.get("item_id") or ""): item
         for item in record.get("accepted_decisions", ())
         if type(item) is dict and item.get("kind") == "operator_statement"
     }
-    if set(decisions) != set(disclosure.decision_item_ids):
+    if any(item_id not in decisions for item_id in disclosure.decision_item_ids):
         return None
     created_at = datetime.fromtimestamp(int(record["updated_at"]), timezone.utc).isoformat()
     revision_receipt = str(record["revision_receipts"][-1]["receipt_id"])
@@ -267,7 +303,17 @@ def _projection_from_record(
         )
     except (KeyError, TypeError, ValueError):
         return None
-    return result.projection.to_dict() if result.accepted and result.projection else None
+    if not result.accepted or result.projection is None:
+        return None
+    context_items = tuple(
+        {
+            "item_id": item.item_id,
+            "category": item.category,
+            "statement": item.statement,
+        }
+        for item in items
+    )
+    return result.projection.to_dict(), context_items
 
 
 def _current_record_valid(
@@ -279,8 +325,9 @@ def _current_record_valid(
         and current.get("record_digest") == seal.record.get("record_digest")
         and current.get("conversation_revision") == seal.record.get("conversation_revision")
         and int(current.get("expires_at") or 0) > now_epoch
+        and int((conversation_scope_authority_view(seal.authority) or {}).get("expires_at") or 0)
+        > now_epoch
         and not validate_record(current)
-        and verify_record_with_scope_authority(seal.authority, current)
         and not seal.guard.is_revoked(seal.disclosure)
     )
 
@@ -299,11 +346,14 @@ def _admission_receipt(seal: _ContextSeal, now_epoch: int) -> dict[str, Any]:
         "projection_manifest_digest": projection["manifest_digest"],
         "context_view_digest": canonical_digest(_context_payload(seal)),
         "source_decision_item_ids": list(disclosure.decision_item_ids),
-        "admitted_item_ids": list(projection["item_ids"]),
+        "admitted_item_ids": [item["item_id"] for item in seal.context_items],
         "disclosure_id": disclosure.disclosure_id,
         "conversation_scope_authority_digest": canonical_digest(authority_view or {}),
         "model_runtime_binding_receipt_id": disclosure.model_runtime_binding_receipt_id,
         "model_runtime_binding_digest": disclosure.model_runtime_binding_digest,
+        "resident_cycle_id": seal.resident_cycle_id,
+        "current_generation_manifest_id": seal.current_generation_manifest_id,
+        "artifact_generation_digest": seal.artifact_generation_digest,
         "admitted_at": now_epoch,
         "expires_at": min(disclosure.expires_at, int(seal.record["expires_at"])),
         "authority_effect": "none",
@@ -327,10 +377,7 @@ def _context_payload(seal: _ContextSeal) -> dict[str, Any]:
         "projection_id": projection["projection_id"],
         "conversation_id": seal.disclosure.conversation_id,
         "conversation_revision": seal.disclosure.conversation_revision,
-        "items": [
-            {"item_id": item["item_id"], "category": item["category"], "statement": item["statement"]}
-            for item in projection["items"]
-        ],
+        "items": [dict(item) for item in seal.context_items],
         "authority_effect": "none",
     }
 
@@ -358,6 +405,13 @@ def _admission_receipt_valid(
         and type(receipt.get("expires_at")) is int
         and int(receipt["admitted_at"]) < int(receipt["expires_at"])
         and type(receipt.get("source_decision_item_ids")) is list
+        and SHA256_RE.fullmatch(str(receipt.get("resident_cycle_id") or ""))
+        and SHA256_RE.fullmatch(
+            str(receipt.get("current_generation_manifest_id") or "")
+        )
+        and SHA256_RE.fullmatch(
+            str(receipt.get("artifact_generation_digest") or "")
+        )
         and len(receipt["source_decision_item_ids"])
         == len(set(receipt["source_decision_item_ids"])) > 0
         and len(item_ids) == len(set(item_ids))

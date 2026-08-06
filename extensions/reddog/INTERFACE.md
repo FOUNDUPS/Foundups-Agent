@@ -1,5 +1,23 @@
 # RedDog Interface
 
+Version 0.4.64 adds `RedDog: Set One-Use Principal Memex Disclosure` and
+`RedDog: Clear Principal Memex Disclosure`. The extension accepts but never
+mints one exact pre-issued disclosure packet. It deletes the packet from
+SecretStorage before the one-shot stdin bridge call. The Python resident path
+returns only a consumption boolean; the editor restores the unchanged packet
+only for explicit `consumed=false`. Final admission, missing acknowledgement,
+or bridge failure retires it.
+SecretStorage effects are process-serialized across concurrent runs. Python
+authenticates the current session, atomically separates FoundUp and Principal
+capabilities, delays Principal admission until the durable cycle's final model
+checkpoint, binds the real cycle and current generation, and rechecks expiry
+immediately before invocation. Neither the packet nor admitted context enters
+the resident intent, AgentDB audit tasks, worker context, logs, or receipts.
+Direct statement reproduction fails before persistence. Memex-informed
+determinations persist no model-authored free text or proposal body and emit
+no queue candidate. The context is non-authoritative and grants no execution
+effect.
+
 Version 0.4.63 pins the backend manifest for explicit signer request
 authority. The extension gains no signer or execution authority; it accepts
 only the exact backend closure whose generic signer rejects policy-less

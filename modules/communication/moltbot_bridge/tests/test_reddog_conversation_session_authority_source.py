@@ -16,6 +16,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     conversation_scope_authority_view,
     sign_record_with_scope_authority,
 )
+from modules.communication.moltbot_bridge.src.reddog_principal_memex_live_resident_source_supply import (
+    principal_memex_session_runtime_root,
+)
 from modules.communication.moltbot_bridge.src.reddog_conversation_session_authority_source import (
     ConversationSessionAuthoritySourceError,
     lease_current_generation_conversation_session,
@@ -129,7 +132,10 @@ def _install_current_generation(
     return active
 
 
-def _lease(monkeypatch, *, credential: str | None = None, intent: dict | None = None):
+def _lease(
+    monkeypatch, *, credential: str | None = None, intent: dict | None = None,
+    include_principal_scope_capability: bool = False,
+):
     return lease_current_generation_conversation_session(
         repo_root=REPO_ROOT,
         intent=intent or _intent(),
@@ -137,6 +143,7 @@ def _lease(monkeypatch, *, credential: str | None = None, intent: dict | None = 
         serialized_credential=credential or _credential(),
         owner_config_path="O:/runtime/owner.json",
         now_epoch=NOW,
+        include_principal_scope_capability=include_principal_scope_capability,
     )
 
 
@@ -155,6 +162,22 @@ def test_signed_session_is_repo_scoped_and_generation_leased(monkeypatch) -> Non
         assert view and view["principal_provider"] == "principal-signature"
         assert signature not in repr(session)
     assert active["leased"] is False
+
+
+def test_principal_memex_requests_a_distinct_one_use_scope_capability(monkeypatch) -> None:
+    _install_current_generation(monkeypatch, _record())
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_conversation_session_authority_source._conversation_signing_context",
+        lambda **_kwargs: (None, REPO_ROOT),
+    )
+    with _lease(monkeypatch, include_principal_scope_capability=True) as session:
+        authorization = session.principal_memex_authorization
+        assert authorization is not None
+        assert principal_memex_session_runtime_root(authorization) == REPO_ROOT
+        assert not hasattr(session, "principal_scope_capability")
+        assert not hasattr(session, "principal_resolver")
+    assert principal_memex_session_runtime_root(authorization) is None
 
 
 @pytest.mark.parametrize(

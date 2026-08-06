@@ -1,5 +1,18 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-06 - Principal Memex live resident source (0.4.64)
+
+- Added one-use SecretStorage source tests for exact shape, delete-before-use,
+  invalid-packet destruction, cancellation, and unavailable-storage closure.
+- Added extension contract assertions proving source bytes cross only the
+  one-shot bridge packet and never enter resident intent or output state.
+- Re-ran the resident source/admission/durable-cycle matrix, WSP 62, backend
+  manifest parity, and the complete extension contract.
+- Updated and ran the HoloIndex incident-repair version fixture so the full
+  documented extension matrix agrees on 0.4.64.
+- Proved failed resident preflight returns exact rejection reasons with zero
+  bridge invocation or SecretStorage access.
+
 ## 2026-08-06 - Explicit signer request authority (0.4.63)
 
 - Verified the regenerated 1,238-file backend closure and canonical manifest

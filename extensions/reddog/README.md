@@ -1,6 +1,27 @@
 # RedDog
 
-Version: 0.4.63
+Version: 0.4.64
+
+Version 0.4.64 adds a one-use editor source for a pre-issued, principal-signed
+Principal Memex disclosure. The packet is deleted from SecretStorage before
+the one-shot bridge call and removed before intent persistence. If duplicate,
+active, cancelled, or failed-before-admission state returns an explicit
+`consumed=false`, the editor restores the unchanged packet. Final admission,
+an indeterminate response, or a bridge failure retires it. All
+SecretStorage effects are process-serialized so a concurrent run cannot
+restore a disclosure consumed by another run. Python
+authenticates the current conversation session, separates FoundUp and
+Principal scopes, and defers Principal admission until the durable cycle has
+finished its audit work and reached the final architect-model checkpoint. The
+admitted context contains only the signed subset of accepted public principal
+decisions, in signed order, with `authority_effect=none`.
+Direct statement reproduction is rejected before architect determination
+persistence. A Memex-informed run persists only a report-bound action/slice,
+fixed advisory metadata, and opaque evidence digests; it persists no
+model-authored free text or proposal body and emits no queue candidate.
+Automatic disclosure
+issuance and all work, repository, signer, merge, FoundUp-projection, and
+HoloIndex authority remain absent.
 
 Version 0.4.63 pins the explicit signer-policy backend closure. Generic
 Ed25519 signing now requires signer-owned static policy or an exact

@@ -14,7 +14,7 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 from holo_index.freshness_receipt import HoloIndexFreshnessReceipt, freshness_receipt_path
 from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
@@ -54,12 +54,10 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_per
     persist_reddog_readonly_audit_decision,
 )
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
-    AgentDbArchitectDeterminationStore,
-    ArchitectDeterminationStore,
-    ArchitectModelRunner,
-    BackendArchitectDeterminationResult,
-    run_reddog_backend_architect_determination_runtime,
+    AgentDbArchitectDeterminationStore, ArchitectDeterminationStore, ArchitectModelRunner,
+    BackendArchitectDeterminationResult, run_reddog_backend_architect_determination_runtime,
 )
+from modules.communication.moltbot_bridge.src.reddog_principal_memex_resident_admission import AuthenticatedPrincipalMemexContext
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     EvidenceBundle,
     OperationalContextSnapshot,
@@ -190,6 +188,7 @@ def run_reddog_main_readonly_operational_bootstrap(
     architect_model_selection_receipt_override: Mapping[str, Any] | None = None,
     architect_model_runtime_binding_receipt_path: Path | str | None = None,
     architect_model_runtime_binding_receipt_override: Mapping[str, Any] | None = None,
+    principal_memex_context: AuthenticatedPrincipalMemexContext | None = None, principal_memex_now_epoch: Callable[[], int] | None = None,
     architect_determination_store: ArchitectDeterminationStore | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
@@ -470,6 +469,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                     model_selection_receipt=architect_model_selection_receipt,
                     model_runtime_binding_receipt=architect_model_runtime_binding_receipt,
                     now_iso=now_iso,
+                    principal_memex_context=principal_memex_context, principal_memex_now_epoch=principal_memex_now_epoch,
                 )
                 if not architect_result.accepted:
                     return _not_ready(

@@ -1,3 +1,17 @@
+## 2026-08-06: Principal Memex live resident source regressions
+
+- Proved current-generation session splitting, principal-signed disclosure
+  admission, exact cycle/model/revision binding, expiry, revocation, durable
+  replay, duplicate-cycle handling, and no audit-worker disclosure.
+- Proved concurrent editor calls cannot resurrect a consumed packet; only an
+  explicit `consumed=false` acknowledgement permits retry, while missing or
+  failed acknowledgements retire the local packet.
+- Proved direct statement reproduction rejects and paraphrased model text is
+  absent from durable determinations, proposal admission, and queue output.
+- Verification: focused Principal Memex/session/manifest matrix `95 passed`;
+  `node extensions/reddog/tests/test_principal_memex_disclosure_source.js`
+  PASS; exhaustive extension contract PASS; backend manifest `1239` files.
+
 ## 2026-08-06: Exact-request signer policy regressions
 
 - Replaced arbitrary policy-less signer success fixtures with fail-closed

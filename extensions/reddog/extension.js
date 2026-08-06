@@ -25,12 +25,13 @@ const groundedTargetContinuity = require('./grounded_target_continuity');
 const startOperationsAdapter = require('./start_operations_extension_adapter');
 const startOperationsEnvironment = require('./start_operations_environment');
 const conversationSessionAuthoritySource = require('./conversation_session_authority_source');
+const principalMemexDisclosureSource = require('./principal_memex_disclosure_source');
 const residentArchitectSessionContract = require('./resident_architect_session_contract');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
-const EXTENSION_VERSION = '0.4.63';
+const EXTENSION_VERSION = '0.4.64';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3729,10 +3730,9 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
       not_invoked_reason: 'conversation_session_authority_source_missing'
     });
   }
+  const bridgePayload = principalMemexDisclosureSource.bridgePayload(payloadResult.payload, sessionCredential, opts.principalMemexSourceSupply);
   if (typeof opts.sessionRunner === 'function') {
-    const runnerResult = opts.sessionRunner(Object.assign({}, payloadResult.payload, {
-      conversation_session_credential: sessionCredential
-    }));
+    const runnerResult = opts.sessionRunner(bridgePayload);
     const parsed = typeof runnerResult === 'string' ? JSON.parse(runnerResult) : (runnerResult || {});
     return buildResidentArchitectSessionResult(
       parsed.decision || 'RESIDENT_ARCHITECT_SESSION_BRIDGE_RESULT',
@@ -3749,9 +3749,7 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
   try {
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
       cwd: root,
-      input: JSON.stringify(Object.assign({}, payloadResult.payload, {
-        conversation_session_credential: sessionCredential
-      })),
+      input: JSON.stringify(bridgePayload),
       encoding: 'utf8',
       env: conversationSessionAuthoritySource.buildBridgeEnvironment(process.env),
       windowsHide: true,
@@ -3790,13 +3788,13 @@ async function runConfiguredResidentArchitectSession(context, workFocus, options
       not_invoked_reason: 'conversation_session_authority_source_missing'
     });
   }
-  return runResidentArchitectSessionBridge(context, workFocus, {
-    explicitResidentArchitectSessionRequested: true,
-    groundingPreflight: opts.groundingPreflight,
-    holoScorecard: opts.holoScorecard,
-    authenticatedPrincipal: claims.principalId,
-    authorizedFoundupIds: claims.foundupScope,
-    conversationSessionCredential: credential
+  return principalMemexDisclosureSource.runConfigured({
+    secretStorage: context.secrets, workFocus, options: opts, credential, claims,
+    buildPayload: buildResidentArchitectSessionPayload,
+    invoke: (focus, session) => runResidentArchitectSessionBridge(context, focus, session),
+    skip: (reason, reasons) => buildResidentArchitectSessionResult('RESIDENT_ARCHITECT_SESSION_SKIPPED', {
+      rejection_reasons: Array.isArray(reasons) ? reasons : [reason], not_invoked_reason: reason
+    })
   });
 }
 
@@ -5257,7 +5255,8 @@ function activate(context) {
       if (result.cleared) {
         vscode.window.showInformationMessage('RedDog conversation session credential cleared.');
       }
-    })
+    }),
+    ...principalMemexDisclosureSource.registerCommands(vscode, context)
   );
 }
 
