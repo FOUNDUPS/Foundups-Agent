@@ -31,6 +31,8 @@
 - Folded the exact-SHA security review into that boundary: null path sets,
   false nested `no_*` claims, and malformed runtime digests now fail before
   publication, queue materialization, or any other effect-bearing consumer.
+- Preserved exact single-model nullable aggregate fields and canonical
+  `panel_topology:<hex>` identifiers without restoring broad null acceptance.
 - Legacy callers retain 16 KiB; only the explicit conversation bootstrap uses
   160 KiB. Stale v2, nested profile injection, and artifact collisions fail
   before writes or signer invocation (WSP 00/15/22/50/62/97).

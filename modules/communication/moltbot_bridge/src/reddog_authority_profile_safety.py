@@ -22,6 +22,9 @@ _PUBLIC_REFERENCE_FIELDS = frozenset(
         "proposal_policy_authorization_id",
     }
 )
+_PANEL_TOPOLOGY_DIGEST_FIELDS = frozenset(
+    {"panel_topology_digest", "required_panel_topology_digest"}
+)
 _SEED_FIELDS = frozenset(
     {
         "allowed_paths",
@@ -631,13 +634,10 @@ def authority_profile_malformed_digest_paths(value: Any) -> tuple[str, ...]:
             for raw_key, child in item.items():
                 key = str(raw_key)
                 child_path = f"{path}.{key}" if path else key
-                if key.lower().replace("-", "_").endswith("_digest"):
+                normalized_key = key.lower().replace("-", "_")
+                if normalized_key.endswith("_digest"):
                     text = str(child or "")
-                    if text and (
-                        len(text) != 71
-                        or not text.startswith("sha256:")
-                        or any(char not in "0123456789abcdef" for char in text[7:])
-                    ):
+                    if text and not _canonical_digest_value(normalized_key, text):
                         found.append(child_path)
                 visit(child, child_path)
         elif isinstance(item, Sequence) and not isinstance(
@@ -648,6 +648,15 @@ def authority_profile_malformed_digest_paths(value: Any) -> tuple[str, ...]:
 
     visit(value, "")
     return tuple(dict.fromkeys(found))
+
+
+def _canonical_digest_value(field: str, value: str) -> bool:
+    prefix = "panel_topology:" if field in _PANEL_TOPOLOGY_DIGEST_FIELDS else "sha256:"
+    return bool(
+        len(value) == len(prefix) + 64
+        and value.startswith(prefix)
+        and all(char in "0123456789abcdef" for char in value[len(prefix):])
+    )
 
 
 __all__ = [

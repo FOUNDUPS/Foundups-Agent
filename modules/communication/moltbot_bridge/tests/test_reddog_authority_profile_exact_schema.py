@@ -194,6 +194,15 @@ def test_runtime_rehydration_rejects_malformed_profile_digest() -> None:
         rehydrate_authority_profile_runtime(profile)
 
 
+def test_runtime_rehydration_rejects_malformed_panel_topology_digest() -> None:
+    promoted, _ = _promote()
+    profile = json.loads(json.dumps(promoted.authority_profile))
+    profile["model_selection_receipt"]["panel_topology_digest"] = "panel_topology:short"
+
+    with pytest.raises(ValueError, match="authority_profile_invalid"):
+        rehydrate_authority_profile_runtime(profile)
+
+
 def test_queue_bootstrap_rejects_null_widened_profile_without_effects(
     tmp_path,
 ) -> None:

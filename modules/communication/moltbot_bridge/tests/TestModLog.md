@@ -30,6 +30,8 @@
   no-effect assertions, and malformed runtime digests. The resident queue
   bootstrap preserves authoritative work-state bytes and emits no chain result
   when the legacy effect projection is malformed.
+- Added real single-model and panel promotion regressions to preserve canonical
+  nullable aggregate and topology bindings under strict profile validation.
 
 ## 2026-08-05: Current-generation use-time trust regressions
 

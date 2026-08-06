@@ -187,6 +187,8 @@ _NULLABLE_RUNTIME_SUFFIXES = (
     "model_runtime_binding_receipt.policy.required_panel_topology_digest",
     "model_runtime_binding_receipt.verification_receipt.panel_aggregate_receipt_digest",
     "model_runtime_binding_receipt.verification_receipt.panel_aggregate_receipt_id",
+    "model_runtime_binding_verification_receipt.panel_aggregate_receipt_digest",
+    "model_runtime_binding_verification_receipt.panel_aggregate_receipt_id",
 )
 
 
