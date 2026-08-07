@@ -12,6 +12,15 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-08-08 - Lightweight package boundary for post-merge contracts
+
+**WSP Protocol:** WSP 00, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- Replaced eager package exports with the repository's existing lazy-export
+  pattern so importing the pure HoloIndex post-merge contract does not require
+  optional vector dependencies. Public runtime exports remain available on
+  first use.
+
 ### 2026-08-02 - Runtime compatibility evidence publication
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97

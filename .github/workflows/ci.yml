@@ -46,6 +46,9 @@ jobs:
       - name: Run RedDog local diagnostic security gates
         run: |
           node extensions/reddog/tests/test_backend_compatibility_preflight.js
+          node extensions/reddog/tests/test_holoindex_blocked_request_recovery.js
+          python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_holoindex_blocked_request_recovery.py -v --tb=short
+          python -m pytest scripts/tests/test_reddog_holoindex_blocked_request_recovery_once.py -v --tb=short
           python -m pytest tests/test_reddog_model_freshness_query_once.py -v --tb=short
 
   lint:

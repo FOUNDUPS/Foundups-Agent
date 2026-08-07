@@ -4,7 +4,7 @@ const BACKEND_MANIFEST_SCHEMA = 'reddog_backend_manifest.v3';
 const BACKEND_PRODUCT = 'foundups-agent-reddog-backend';
 const BACKEND_API_VERSION = 2;
 const BACKEND_MANIFEST_PATH = 'scripts/reddog_backend_manifest.json';
-const EXPECTED_MANIFEST_SHA256 = 'b9be6fa196ab8ef65232bed844b1838935a810d474ceeb90f0a0f40bdef6b8e6';
+const EXPECTED_MANIFEST_SHA256 = '75436acc98dea5cd0b43d11ef256990ec64b938c84119a019ffea7d9ecd14050';
 const RUNTIME_DEPENDENCY_GRAPH_VERSION = 2;
 const MAX_MANIFEST_BYTES = 320 * 1024;
 const MAX_RUNTIME_FILE_BYTES = 2 * 1024 * 1024;
@@ -17,6 +17,7 @@ const REQUIRED_BRIDGE_FILES = Object.freeze([
   'scripts/reddog_extension_wre_spine_invoke_once.py',
   'scripts/reddog_github_permission_probe_once.py',
   'scripts/reddog_holoindex_incident_repair_once.py',
+  'scripts/reddog_holoindex_blocked_request_recovery_once.py',
   'scripts/reddog_holoindex_owner_query_once.py',
   'scripts/reddog_judgment_verifier_once.py',
   'scripts/reddog_model_freshness_query_once.py',

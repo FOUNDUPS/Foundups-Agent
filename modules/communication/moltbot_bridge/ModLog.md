@@ -10,6 +10,21 @@
   mutation, worker dispatch, HoloIndex maintenance, or execution authority was
   added. (WSP 00/15/22/50/97)
 
+## 2026-08-07: HoloIndex blocked-request recovery binding
+- Added an immutable digest-only stage event before claim admission. The
+  stable request+incident identity rejects timestamp restamping and a
+  rehashed SecretStorage substitution without a matching AgentDB commitment.
+- Added a bounded admission verifier that rehydrates the existing Holo incident
+  receipt, validates the existing AgentDB maintenance task and atomic
+  completion event, and independently verifies the exact active semantic
+  generation before advisory retry admission.
+- Reused the coordination-event primary key for cross-process one-use retry
+  admission and persisted only digests/proof bindings, never the request.
+- Added no recovery table, lifecycle, queue, signer, verifier framework,
+  PatternMemory path, or HoloIndex write authority. The request remains in
+  extension SecretStorage and is not persisted to AgentDB
+  (WSP 00/15/22/50/62/97).
+
 ## 2026-08-06: Principal Memex live resident source supply
 - Bound one pre-issued principal disclosure to the current signed session,
   AgentDB revision, runtime generation, exact architect cycle, and model

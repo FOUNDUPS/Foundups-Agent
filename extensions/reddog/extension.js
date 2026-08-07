@@ -13,6 +13,7 @@ const {
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const holoIncidentRepair = require('./holoindex_incident_repair');
+const holoBlockedRequestRecovery = require('./holoindex_blocked_request_recovery');
 const backendCompatibility = require('./backend_compatibility_preflight');
 const backendCompatibilityAsync = require('./backend_compatibility_async');
 const backendCompatibilityRender = require('./backend_compatibility_render');
@@ -32,7 +33,7 @@ const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
 const groundingFailureDialogue = require('./grounding_failure_dialogue');
-const EXTENSION_VERSION = '0.4.65';
+const EXTENSION_VERSION = '0.4.66';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -5280,6 +5281,8 @@ async function openFusionEditor(context, installState) {
     lastContinuationSummary: null,
     bridgeChild: null,
     disposed: false,
+    requestInFlight: false,
+    holoRecoveryTimer: null,
     liveEnqueueKeys: new Set(),
     operationsIntentId: String(
       context.workspaceState.get('reddog.operationsIntentId', '') || ''
@@ -5289,6 +5292,7 @@ async function openFusionEditor(context, installState) {
   wireFusionWebview(context, panel.webview, worker, state);
   panel.onDidDispose(() => {
     killBridgeChild(state);
+    if (state.holoRecoveryTimer) clearTimeout(state.holoRecoveryTimer);
     state.disposed = true;
   });
   panel.webview.html = renderHtml(worker, 'editor', logoUri.toString(), state.installState);
@@ -5299,11 +5303,14 @@ const reddogConfigValue = (key, fallback) => backendCompatibility.configurationV
   vscode, REDDOG_CONFIG_NAMESPACE, REDDOG_LEGACY_CONFIG_NAMESPACE, key, fallback
 );
 const detectRedDogInstallState = (context) => backendCompatibility.detectInstallState(vscode, context, REDDOG_BACKEND_CLIENT);
-const detectRedDogInstallStateAsync = (context) => backendCompatibilityAsync.detectInstallStateAsync(
-  vscode, context, REDDOG_BACKEND_CLIENT, backendCompatibility
+const detectRedDogInstallStateAsync = (context, root) => backendCompatibilityAsync.detectInstallStateAsync(
+  vscode, context, REDDOG_BACKEND_CLIENT, backendCompatibility, root
 );
 const currentBackendCompatibility = () => backendCompatibilityAsync.runBackendCompatibilityPreflightAsync(
   backendCompatibility.workspaceRoot(vscode, '')
+);
+const currentBackendCompatibilityAtRoot = (root) => (
+  backendCompatibilityAsync.runBackendCompatibilityPreflightAsync(root)
 );
 const currentBackendCompatibilitySync = () => backendCompatibility.runBackendCompatibilityPreflight(
   backendCompatibility.workspaceRoot(vscode, '')
@@ -5313,7 +5320,7 @@ const buildRedDogInstallStateSection = REDDOG_BACKEND_CLIENT.buildInstallStateSe
 const buildBackendCompatibilityBlockedResult = (state) => backendCompatibility.buildBlockedResult(
   state, REDDOG_BACKEND_CLIENT
 );
-const blockIncompatibleBackend = (context, state, webview) => backendCompatibilityAsync.blockIncompatibleBackend(context, state, webview, { detect: detectRedDogInstallStateAsync, build: buildBackendCompatibilityBlockedResult, post: postStatusAndProgress });
+const blockIncompatibleBackend = (context, state, webview, root) => backendCompatibilityAsync.blockIncompatibleBackend(context, state, webview, { detect: (value) => detectRedDogInstallStateAsync(value, root), build: buildBackendCompatibilityBlockedResult, post: postStatusAndProgress });
 const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.runConfiguredQuery({
   workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
 });
@@ -5341,18 +5348,111 @@ function startOperationsOptions(context, message, worker, state, webview) {
     postResult: (result) => webview.postMessage({ command: 'result', result })
   };
 }
-function wireFusionWebview(context, webview, worker, state) {
-  webview.onDidReceiveMessage(async (message) => {
-    if (!message || typeof message !== 'object') {
-      return;
+function holoBlockedRecoveryOptions(context) {
+  const root = workspaceRoot();
+  return {
+    root,
+    secretStorage: context.secrets,
+    interpreterPath: resolvePythonInterpreter(
+      root, reddogConfigValue('pythonPath', 'python')
+    ).path,
+    env: buildBridgePythonEnv(process.env)
+  };
+}
+async function stageBlockedRequestRecovery(options, message, contextPacket, preflight, webview) {
+  if (
+    preflight.passed || preflight.external_research_targets_count !== 0
+    || !holoBlockedRequestRecovery.eligible(contextPacket.holoindex_meta, message)
+  ) return null;
+  const staged = await holoBlockedRequestRecovery.stageAfterCompatibility(
+    options, message, contextPacket.holoindex_meta,
+    async (root) => (await currentBackendCompatibilityAtRoot(root)).passed === true
+  );
+  const text = staged.ok
+    ? 'HoloIndex repair is queued. The original request is held securely and will be retried once after current-generation verification.'
+    : 'HoloIndex repair was queued, but durable request recovery was not admitted: ' + staged.reason;
+  postStatusAndProgress(webview, staged.ok ? null : 'error', text);
+  return staged;
+}
+
+function enforceBlockedRecoveryGeneration(preflight, meta, recoveryContext) {
+  if (!recoveryContext) return;
+  const value = meta && typeof meta === 'object' ? meta : {};
+  if (
+    value.holoindex_generation_id === recoveryContext.generationId
+    && value.holoindex_freshness_receipt_digest === recoveryContext.freshnessReceiptDigest
+  ) return;
+  preflight.passed = false;
+  preflight.rejection_reasons = Array.from(new Set(
+    (preflight.rejection_reasons || []).concat('recovery_generation_binding_mismatch')
+  ));
+}
+
+function bridgeStateForRequest(state, recoveryContext) {
+  return recoveryContext
+    ? { bridgeChild: null, disposed: false, detachedRecovery: true }
+    : state;
+}
+
+function attachBlockedRecovery(result, receipt) {
+  if (!receipt) return;
+  result.holoindex_blocked_request_recovery = receipt;
+  if (result.review_packet) result.review_packet.holoindex_blocked_request_recovery = receipt;
+}
+
+async function finishBlockedRecovery(options, recoveryContext, preflight, dialogueOnly, result) {
+  if (!recoveryContext) return null;
+  const succeeded = preflight.passed === true
+    && dialogueOnly !== true
+    && result.ok === true
+    && result.runtime_consumption_gate
+    && result.runtime_consumption_gate.passed === true;
+  return holoBlockedRequestRecovery.finish(
+    options, recoveryContext.recoveryId, result, succeeded
+  );
+}
+
+async function attemptBlockedRequestRecovery(params) {
+  const { context, state, options, executeAsk, webview } = params;
+  if (state.disposed) return 'STOP';
+  if (state.requestInFlight) return 'BUSY';
+  if (!(await holoBlockedRequestRecovery.hasPending(options.secretStorage))) return 'IDLE';
+  state.requestInFlight = true;
+  try {
+    const claim = await holoBlockedRequestRecovery.claimAfterCompatibility(
+      options, async (root) => !(await blockIncompatibleBackend(context, state, webview, root))
+    );
+    if (!claim.ok || !claim.request) {
+      if (claim.status === 'REJECTED' && claim.reason !== 'recovery_secret_missing') {
+        postStatusAndProgress(webview, 'error', 'HoloIndex request recovery stopped: ' + claim.reason);
+      }
+      return claim.status;
     }
+    // READY is the durable at-most-once admission point. A panel disposal that
+    // races the bridge must not consume the claim and then abandon the retry.
+    postStatusAndProgress(webview, null, 'HoloIndex repair verified at the bound generation. Retrying the original request once.');
+    const retryResult = await executeAsk(claim.request, {
+      recoveryId: claim.recovery_id,
+      generationId: claim.generation_id,
+      freshnessReceiptDigest: claim.freshness_receipt_digest
+    });
+    return retryResult ? 'COMPLETED' : 'FAILED';
+  } catch (err) {
+    postStatusAndProgress(webview, 'error', 'HoloIndex request recovery failed closed.');
+    return 'FAILED';
+  } finally {
+    state.requestInFlight = false;
+  }
+}
+
+function createFusionMessageReceiver(webview, state, executeAsk) {
+  return async (message) => {
+    if (!message || typeof message !== 'object') return;
     if (message.command === 'copyReview') {
       if (state.lastReviewPacket) {
         await vscode.env.clipboard.writeText(JSON.stringify(state.lastReviewPacket, null, 2));
         webview.postMessage({ command: 'status', text: 'Copied redacted review packet for 0102.' });
-      } else {
-        webview.postMessage({ command: 'status', text: 'No review packet available yet.' });
-      }
+      } else webview.postMessage({ command: 'status', text: 'No review packet available yet.' });
       return;
     }
     if (message.command === 'copyMarkdown' && typeof message.text === 'string') {
@@ -5360,14 +5460,45 @@ function wireFusionWebview(context, webview, worker, state) {
       webview.postMessage({ command: 'status', text: 'Copied assistant markdown.' });
       return;
     }
-    if (message.command !== 'ask' || typeof message.text !== 'string') {
+    if (message.command !== 'ask' || typeof message.text !== 'string') return;
+    if (state.requestInFlight) {
+      postStatusAndProgress(webview, null, 'RedDog is already processing one request.');
       return;
     }
+    state.requestInFlight = true;
+    try { await executeAsk(message, null); } finally { state.requestInFlight = false; }
+  };
+}
 
-    if (await blockIncompatibleBackend(context, state, webview)) {
-      return;
-    }
-    if (await startOperationsAdapter.handleMessage(
+function scheduleBlockedRecoveryPoll(state, attempt, delayMs) {
+  if (state.disposed) return;
+  state.holoRecoveryTimer = setTimeout(async () => {
+    state.holoRecoveryTimer = null;
+    const status = await attempt();
+    if (!['WAITING', 'BUSY'].includes(status) || state.disposed) return;
+    const nextDelay = status === 'WAITING' ? Math.min(delayMs * 2, 60000) : delayMs;
+    scheduleBlockedRecoveryPoll(state, attempt, nextDelay);
+  }, delayMs);
+  if (state.holoRecoveryTimer && typeof state.holoRecoveryTimer.unref === 'function') {
+    state.holoRecoveryTimer.unref();
+  }
+}
+
+function startBlockedRecoveryPolling(state, attempt) {
+  scheduleBlockedRecoveryPoll(state, attempt, 1000);
+}
+
+function rearmBlockedRecoveryPolling(state, attempt, staged) {
+  if (staged && staged.ok && !state.holoRecoveryTimer) {
+    scheduleBlockedRecoveryPoll(state, attempt, 15000);
+  }
+}
+
+function wireFusionWebview(context, webview, worker, state) {
+  const recoveryOptions = holoBlockedRecoveryOptions(context);
+  const executeAsk = async (message, recoveryContext) => {
+    if (await blockIncompatibleBackend(context, state, webview)) return;
+    if (!recoveryContext && await startOperationsAdapter.handleMessage(
       startOperationsOptions(context, message, worker, state, webview)
     )) return;
     const workFocus = message.text;
@@ -5439,6 +5570,13 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     );
     const groundingPreflight = buildTypedGroundingPreflight(workFocus, contextMode, contextPacket);
+    enforceBlockedRecoveryGeneration(
+      groundingPreflight, contextPacket.holoindex_meta, recoveryContext
+    );
+    const blockedRequestRecoveryStage = recoveryContext ? null : await stageBlockedRequestRecovery(
+      recoveryOptions, message, contextPacket, groundingPreflight, webview
+    );
+    rearmBlockedRecoveryPolling(state, attempt, blockedRequestRecoveryStage);
     if (holoScorecard) {
       holoScorecard.grounding_preflight_applied = groundingPreflight.applied === true;
       holoScorecard.grounding_preflight_passed = groundingPreflight.passed === true;
@@ -5502,6 +5640,7 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     };
     const fusionProgress = createFusionProgressCollector();
+    const bridgeState = bridgeStateForRequest(state, recoveryContext);
     let result;
     if (localFastPath) {
       workTrail.push('local_fast_path', classification.localFastPath);
@@ -5516,10 +5655,10 @@ function wireFusionWebview(context, webview, worker, state) {
     } else if (!groundingPreflight.passed) {
       result = await runGroundingFailureDialogue(
         context, worker, workFocus, groundingPreflight, holoScorecard,
-        onBridgeProgress, state, workTrail, webview
+        onBridgeProgress, bridgeState, workTrail, webview
       );
     } else {
-      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, state, promptConstruction);
+      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, bridgeState, promptConstruction);
     }
     conversationHistoryPolicy.discardProviderHistory(historyAdmission, result, promptConstruction);
     fusionProgress.capture(result);
@@ -5595,7 +5734,7 @@ function wireFusionWebview(context, webview, worker, state) {
           [],
           'openrouter_single',
           onRepairBridgeProgress,
-          state,
+          bridgeState,
           promptConstruction,
           { promptSource: 'repair_prompt', maxTokens: 2400 }
         );
@@ -5765,9 +5904,10 @@ function wireFusionWebview(context, webview, worker, state) {
       runtimeConsumptionGate,
       await currentBackendCompatibility()
     );
-    const actionPlanningAllowed = runtimeConsumptionGate.passed === true;
+    const actionPlanningAllowed = runtimeConsumptionGate.passed === true && !recoveryContext;
     const residentArchitectSessionEnabled = (
       reddogConfigValue('enableResidentArchitectSession', false) === true
+      && !recoveryContext
     );
     const operatorWardrobeSelectionResult = actionPlanningAllowed
       ? runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, {
@@ -5810,9 +5950,10 @@ function wireFusionWebview(context, webview, worker, state) {
     ) {
       state.liveEnqueueKeys.add(String(openClawLiveEnqueueInvokeResult.live_enqueue_key));
     }
-    const residentArchitectSessionResult = await runConfiguredResidentArchitectSession(
-      context, workFocus, { actionPlanningAllowed, residentArchitectSessionEnabled, groundingPreflight, holoScorecard }
-    );
+    const residentArchitectSessionResult = recoveryContext ? null
+      : await runConfiguredResidentArchitectSession(
+        context, workFocus, { actionPlanningAllowed, residentArchitectSessionEnabled, groundingPreflight, holoScorecard }
+      );
     result.review_packet = attachOrchestratorMetadata(
       result.review_packet || {},
       classification,
@@ -5902,6 +6043,10 @@ function wireFusionWebview(context, webview, worker, state) {
     if (result.review_packet) {
       result.review_packet.continuation_telemetry = continuationTelemetry;
     }
+    attachBlockedRecovery(result, blockedRequestRecoveryStage);
+    attachBlockedRecovery(result, await finishBlockedRecovery(
+      recoveryOptions, recoveryContext, groundingPreflight, groundingDialogueOnly, result
+    ));
     result.copy_markdown = buildCopyMarkdown(result, workerType, contextPacket.summary, workTrail, holoScorecard, effort, {
       promptConstruction: promptConstruction,
       contextMode: contextMode,
@@ -5920,7 +6065,15 @@ function wireFusionWebview(context, webview, worker, state) {
       continuationSummary: continuationTelemetry.continuation_appended ? continuationSummary : null
     });
     webview.postMessage({ command: 'result', result });
-  });
+    return result;
+  };
+
+  const attempt = () => attemptBlockedRequestRecovery({
+    context, state, options: recoveryOptions, executeAsk, webview });
+  webview.onDidReceiveMessage(
+    createFusionMessageReceiver(webview, state, executeAsk)
+  );
+  startBlockedRecoveryPolling(state, attempt);
 }
 
 function killBridgeChild(state) {
@@ -8293,6 +8446,7 @@ module.exports = {
   killBridgeChild,
   bridgeStreamCapExceeded,
   shouldAcceptBridgeCompletion,
+  bridgeStateForRequest,
   BRIDGE_MAX_CONTEXT_CHARS,
   BRIDGE_MAX_PROMPT_CHARS,
   BRIDGE_MAX_STDOUT_BYTES,

@@ -11,6 +11,8 @@ const extensionSource = fs.readFileSync(path.join(extDir, 'extension.js'), 'utf8
 const pkg = JSON.parse(fs.readFileSync(path.join(extDir, 'package.json'), 'utf8'));
 const HEAD = 'a'.repeat(40);
 const ROOT_DIGEST = 'sha256:' + 'b'.repeat(64);
+const INCIDENT_DIGEST = 'sha256:' + 'c'.repeat(64);
+const RECEIPT_DIGEST = 'sha256:' + 'd'.repeat(64);
 
 function failure(changes) {
   return Object.assign({
@@ -45,10 +47,16 @@ try {
     return JSON.stringify({
       accepted: true,
       status: 'QUEUED',
-      incident_id: 'sha256:incident',
+      incident_id: INCIDENT_DIGEST,
       task_id: 'holoindex_postmerge_refresh:' + 'a'.repeat(40),
-      receipt_id: 'sha256:receipt',
+      target_repo_head_sha: HEAD,
+      authority_root_digest: ROOT_DIGEST,
+      generation_id: '',
+      freshness_receipt_digest: '',
+      receipt_id: RECEIPT_DIGEST,
       maintenance_enqueued: true,
+      owner_requery_performed: false,
+      coding_candidate_required: false,
       rejection_reasons: []
     });
   };
@@ -75,6 +83,9 @@ try {
   assert.strictEqual(meta.incident_repair_attempted, true);
   assert.strictEqual(meta.incident_repair_enqueued, true);
   assert.strictEqual(meta.incident_repair_coding_candidate_required, false);
+  assert.strictEqual(meta.incident_repair_receipt.receipt_id, RECEIPT_DIGEST);
+  assert.strictEqual(meta.incident_repair_receipt.target_repo_head_sha, HEAD);
+  assert.notStrictEqual(meta.incident_repair_receipt, result);
 
   const huge = failure({ error: 'x'.repeat(8 * 1024 * 1024) });
   assert.strictEqual(repair.coordinate({
@@ -104,8 +115,8 @@ assert(extensionSource.includes('holoGenerationBoundQuery.isObserved(ownerResult
 assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(ownerResult, ownerObserved)'));
 assert(extensionSource.includes('coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved)'));
 assert((extensionSource.match(/holoIncidentRepair\.metadata\(incidentRepair\)/g) || []).length >= 4);
-assert.strictEqual(pkg.version, '0.4.65');
-assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.65'"));
+assert.strictEqual(pkg.version, '0.4.66');
+assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.66'"));
 assert(!fs.readFileSync(path.join(extDir, 'holoindex_incident_repair.js'), 'utf8').includes('qwen'));
 
 console.log('RedDog HoloIndex incident repair extension tests passed.');

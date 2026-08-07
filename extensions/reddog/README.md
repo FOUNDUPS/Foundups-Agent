@@ -1,6 +1,28 @@
 # RedDog
 
-Version: 0.4.65
+Version: 0.4.66
+
+Version 0.4.66 connects deferred HoloIndex incident repair to one
+restart-persistent, at-most-once advisory retry of the exact blocked editor
+request. The request stays in VS Code SecretStorage. Recovery reads the
+existing AgentDB Holo maintenance task and atomic completion event, then
+requires the semantic owner to expose that exact HEAD, root, generation, and
+freshness receipt. SecretStorage is consumed before the model call, so a crash
+cannot duplicate the retry. An immutable, digest-only AgentDB staging event
+binds the original request before recovery admission; restamping or recomputing a
+stored packet cannot create its missing commitment. A second insert-only event
+prevents concurrent panels or processes from admitting the same request twice.
+Only a digest-bound staging receipt enters review output; the raw request and
+query never leave SecretStorage before the one-shot bridge. Once READY is
+durably admitted, its bounded bridge is detached from panel lifecycle so a
+racing disposal does not kill or suppress the retry.
+Recovered requests rerun grounding, redaction,
+Fusion, and output validation but cannot enter start-operations, wardrobe,
+WRE, OpenClaw enqueue, or resident execution paths. No new database, queue,
+signer, verifier, HoloIndex mutation, merge, or PatternMemory authority was
+added. Both staging and restart recovery check backend manifest integrity for
+the exact immutable bridge root before invoking that workspace bridge; when no
+recovery secret exists, no compatibility scan or bridge is started.
 
 Version 0.4.65 keeps the 012/0102 architect conversation available when typed
 grounding blocks evidence-bearing Fusion. RedDog makes one principal-only call
