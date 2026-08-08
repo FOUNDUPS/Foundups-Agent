@@ -16,12 +16,15 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97
 
-- Extended the canonical exact-SHA post-merge task and request-event contract
-  with an optional typed HoloIndex incident binding.
+- Added an immutable AgentDB association from an authenticated HoloIndex
+  incident to the existing canonical exact-SHA post-merge transaction. The
+  canonical task, request, and completion remain incident-agnostic so an
+  ordinary in-flight or completed maintenance transaction can be reused
+  without rewriting its authority context.
 - The coordinator now rejects unknown incident kinds, target/origin drift, and
-  conflicting stale-HEAD observations before creating a task or event. Existing
-  ordinary post-merge behavior remains compatible and query-time callers gain
-  no indexing authority.
+  tampered incident associations before recovery staging. Existing ordinary
+  post-merge behavior remains compatible and query-time callers gain no
+  indexing authority.
 
 ### 2026-08-08 - Lightweight package boundary for post-merge contracts
 

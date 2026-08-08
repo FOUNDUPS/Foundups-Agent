@@ -340,11 +340,15 @@ def _environment(authority: Path) -> dict[str, str]:
     return {coordinator.AUTHORITY_REPO_ROOT_ENV: str(authority)}
 
 
-def _incident_binding(*, observed_head: str = STALE_HEAD) -> dict[str, str]:
+def _incident_binding(
+    *,
+    observed_head: str = STALE_HEAD,
+    incident_id: str = "sha256:" + ("d" * 64),
+) -> dict[str, str]:
     return {
         "schema_version": contract.INCIDENT_SCHEMA,
         "incident_kind": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
-        "incident_id": "sha256:" + ("d" * 64),
+        "incident_id": incident_id,
         "workspace_repo_head_sha": HEAD,
         "observed_authority_head_sha": observed_head,
     }
@@ -447,12 +451,20 @@ def test_incident_binding_is_durable_and_idempotent(
 
     assert first.accepted and first.status == "QUEUED"
     assert second.accepted and second.status == "PENDING"
-    assert db.tasks[first.task_id]["context"]["incident_binding"] == incident
+    assert "incident_binding" not in db.tasks[first.task_id]["context"]
     request_id = coordinator.REQUEST_EVENT_PREFIX + HEAD
-    assert db.events[request_id]["payload"]["incident_binding"] == incident
+    assert "incident_binding" not in db.events[request_id]["payload"]
+    incident_event_id = contract.incident_binding_event_id(incident)
+    assert contract.incident_binding_event_valid(
+        db.events[incident_event_id],
+        incident_binding=incident,
+        target_repo_head_sha=HEAD,
+        authority_root_digest=first.authority_root_digest,
+    )
+    assert len(db.events) == 2
 
 
-def test_conflicting_incident_binding_rejects_without_new_effect(
+def test_distinct_incidents_share_canonical_maintenance_without_overwrite(
     roots,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -471,18 +483,105 @@ def test_conflicting_incident_binding_rejects_without_new_effect(
     task_before = dict(db.tasks[queued.task_id])
     events_before = {key: dict(value) for key, value in db.events.items()}
 
+    second_incident = _incident_binding(
+        observed_head="e" * 40,
+        incident_id="sha256:" + ("e" * 64),
+    )
+    associated = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=second_incident,
+    )
+
+    assert associated.accepted and associated.status == "PENDING"
+    assert db.tasks[queued.task_id] == task_before
+    request_id = coordinator.REQUEST_EVENT_PREFIX + HEAD
+    assert db.events[request_id] == events_before[request_id]
+    assert db.events[contract.incident_binding_event_id(original)] == (
+        events_before[contract.incident_binding_event_id(original)]
+    )
+    assert contract.incident_binding_event_valid(
+        db.events[contract.incident_binding_event_id(second_incident)],
+        incident_binding=second_incident,
+        target_repo_head_sha=HEAD,
+        authority_root_digest=queued.authority_root_digest,
+    )
+
+
+def test_existing_unbound_maintenance_accepts_authenticated_incident_association(
+    roots,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workspace, authority = roots
+    db = FakeDB()
+    git = FakeGit()
+    _patch_state(monkeypatch, authority, git)
+    queued = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+    )
+    task_before = dict(db.tasks[queued.task_id])
+    request_id = coordinator.REQUEST_EVENT_PREFIX + HEAD
+    request_before = dict(db.events[request_id])
+    incident = _incident_binding()
+
+    associated = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=incident,
+    )
+
+    assert associated.accepted and associated.status == "PENDING"
+    assert db.tasks[queued.task_id] == task_before
+    assert db.events[request_id] == request_before
+    assert contract.incident_binding_event_valid(
+        db.events[contract.incident_binding_event_id(incident)],
+        incident_binding=incident,
+        target_repo_head_sha=HEAD,
+        authority_root_digest=queued.authority_root_digest,
+    )
+
+
+def test_tampered_incident_association_rejects_without_rewrite(
+    roots,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workspace, authority = roots
+    db = FakeDB()
+    git = FakeGit()
+    _patch_state(monkeypatch, authority, git)
+    incident = _incident_binding()
+    queued = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=incident,
+    )
+    event_id = contract.incident_binding_event_id(incident)
+    db.events[event_id]["payload"]["authority_root_digest"] = (
+        "sha256:" + ("0" * 64)
+    )
+    tampered = dict(db.events[event_id])
+
     rejected = coordinator.coordinate_holoindex_postmerge(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
         git_runner=git,
-        incident_binding=_incident_binding(observed_head="e" * 40),
+        incident_binding=incident,
     )
 
     assert not rejected.accepted
-    assert rejected.rejection_reasons == ("request_event_invalid",)
-    assert db.tasks[queued.task_id] == task_before
-    assert db.events == events_before
+    assert rejected.rejection_reasons == ("incident_binding_event_invalid",)
+    assert db.events[event_id] == tampered
+    assert db.tasks[queued.task_id]["context"].get("incident_binding") is None
 
 
 def test_incident_target_must_match_fetched_origin_before_queue_effect(

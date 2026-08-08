@@ -51,19 +51,20 @@ function triState(value) {
 function recoveryStageProof(stage) {
   const s = stage && typeof stage === 'object' ? stage : {};
   const stageDigest = String(s.stage_payload_digest || '');
+  const taskId = String(s.incident_task_id || '');
   const valid = s.ok === true && s.status === 'PENDING_REPAIR'
     && SHA.test(stageDigest) && s.stage_event_id === STAGE_PREFIX + stageDigest.slice(7)
     && SHA.test(String(s.recovery_id || '')) && SHA.test(String(s.incident_id || ''))
     && SHA.test(String(s.incident_repair_receipt_id || ''))
     && GIT_SHA.test(String(s.target_repo_head_sha || ''))
-    && s.task_id === 'holoindex_postmerge_refresh:' + s.target_repo_head_sha
+    && taskId === 'holoindex_postmerge_refresh:' + s.target_repo_head_sha
     && s.request_event_id === 'holoindex_postmerge_requested:' + s.target_repo_head_sha
     && SHA.test(String(s.authority_root_digest || '')) && s.authority_effect === 'none';
   return valid ? Object.freeze({
     stage_event_id: s.stage_event_id, stage_payload_digest: stageDigest,
     recovery_id: s.recovery_id, incident_id: s.incident_id,
     incident_repair_receipt_id: s.incident_repair_receipt_id,
-    task_id: s.task_id, request_event_id: s.request_event_id,
+    task_id: taskId, request_event_id: s.request_event_id,
     target_repo_head_sha: s.target_repo_head_sha,
     authority_root_digest: s.authority_root_digest
   }) : null;

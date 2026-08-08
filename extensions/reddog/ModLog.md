@@ -8,11 +8,17 @@
 - Reused the post-merge coordinator and exact-SHA OpenClaw maintenance task;
   no second queue, lifecycle, signer, database, or query-time reindex path was
   created.
+- Bound each incident through a separate immutable AgentDB association instead
+  of altering the canonical SHA task/request/completion. Recovery therefore
+  accepts maintenance that predated the incident while rejecting a missing or
+  attacker-modified association.
 - Allowed immutable blocked-request staging while maintenance is pending, but
   kept claim and retry current-authority-only and generation-bound.
 - Added deterministic queued-recovery dialogue so RedDog reports internal
   repair status without spending a model call or asking 012 for repository
-  paths. Preserved tri-state target-recall truth.
+  paths. The dialogue consumes the actual extension-stage `incident_task_id`
+  field and rejects legacy or substituted task fields. Preserved tri-state
+  target-recall truth.
 
 ## 2026-08-07 - HoloIndex blocked-request recovery binding (0.4.66)
 

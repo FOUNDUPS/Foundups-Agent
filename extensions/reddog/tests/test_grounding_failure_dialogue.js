@@ -61,7 +61,7 @@ const stage = {
   stage_payload_digest: stageDigest, recovery_id: 'sha256:' + 'b'.repeat(64),
   incident_id: 'sha256:' + 'c'.repeat(64),
   incident_repair_receipt_id: 'sha256:' + 'd'.repeat(64),
-  task_id: 'holoindex_postmerge_refresh:' + 'e'.repeat(40),
+  incident_task_id: 'holoindex_postmerge_refresh:' + 'e'.repeat(40),
   request_event_id: 'holoindex_postmerge_requested:' + 'e'.repeat(40),
   target_repo_head_sha: 'e'.repeat(40), authority_root_digest: 'sha256:' + 'f'.repeat(64),
   authority_effect: 'none'
@@ -91,7 +91,7 @@ assert.strictEqual(queued.review_packet.no_worker_enqueue_performed, true);
 assert.strictEqual(queued.review_packet.holoindex_maintenance_enqueue_performed, true);
 assert.strictEqual(queued.review_packet.enqueue_scope, 'existing_holoindex_maintenance_only');
 for (const mutation of [
-  { task_id: 'forged' },
+  { incident_task_id: 'forged' },
   { request_event_id: 'holoindex_postmerge_requested:' + 'f'.repeat(40) },
   { incident_id: 'sha256:' + 'e'.repeat(64) },
   { authority_root_digest: 'sha256:' + 'e'.repeat(64) }
@@ -101,6 +101,14 @@ for (const mutation of [
     false
   );
 }
+assert.strictEqual(
+  dialogue.buildRecoveryQueuedResult(
+    preflight,
+    unknownRecall,
+    { ...stage, incident_task_id: undefined, task_id: stage.incident_task_id }
+  ).ok,
+  false
+);
 
 const context = JSON.parse(dialogue.buildContext(receipt));
 assert.deepStrictEqual(context.grounding_failure_receipt, receipt);

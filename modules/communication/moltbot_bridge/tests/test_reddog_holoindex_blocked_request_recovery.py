@@ -24,11 +24,14 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_c
 from modules.infrastructure.idle_automation.src.holoindex_postmerge_contract import (
     CLAIM_AGENT_ID,
     COMPLETION_EVENT_PREFIX,
+    INCIDENT_EVENT_TYPE,
     REQUEST_EVENT_PREFIX,
     SCHEMA_VERSION,
     SOURCE,
     TASK_PREFIX,
     _event_payload,
+    incident_binding_event_id,
+    incident_binding_event_payload,
 )
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
@@ -99,7 +102,6 @@ def _task(completed: bool) -> dict:
             "target_repo_head_sha": HEAD,
             "authority_root_digest": ROOT_DIGEST,
             "request_event_id": REQUEST_EVENT_PREFIX + HEAD,
-            "incident_binding": _durable_incident_binding(),
         },
     }
 
@@ -107,18 +109,32 @@ def _task(completed: bool) -> dict:
 def _events() -> dict[str, dict]:
     requested = _event_payload(
         target_repo_head_sha=HEAD, authority_root_digest=ROOT_DIGEST,
-        status="REQUESTED", incident_binding=_durable_incident_binding(),
+        status="REQUESTED",
     )
     completed = _event_payload(
         target_repo_head_sha=HEAD, authority_root_digest=ROOT_DIGEST,
         status="COMPLETED", generation_id=GENERATION,
         freshness_receipt_digest=FRESHNESS,
     )
+    incident = _durable_incident_binding()
+    incident_event_id = incident_binding_event_id(incident)
     return {
         REQUEST_EVENT_PREFIX + HEAD: {
+            "event_id": REQUEST_EVENT_PREFIX + HEAD,
             "event_type": "holoindex_postmerge_maintenance",
             "initiator_agent": "wre", "target_agents": [CLAIM_AGENT_ID],
             "payload": requested,
+        },
+        incident_event_id: {
+            "event_id": incident_event_id,
+            "event_type": INCIDENT_EVENT_TYPE,
+            "initiator_agent": "wre",
+            "target_agents": [CLAIM_AGENT_ID],
+            "payload": incident_binding_event_payload(
+                incident_binding=incident,
+                target_repo_head_sha=HEAD,
+                authority_root_digest=ROOT_DIGEST,
+            ),
         },
         COMPLETION_EVENT_PREFIX + HEAD: {"payload": completed},
     }
@@ -226,7 +242,7 @@ def test_exact_existing_completion_and_current_owner_are_ready(monkeypatch, tmp_
     assert result["freshness_receipt_digest"] == FRESHNESS
     assert result["authority_effect"] == "none"
     assert result["no_holoindex_reindex_performed"] is True
-    assert len(database.reads) == 7
+    assert len(database.reads) == 8
     claim = database.events[result["claim_event_id"]]
     assert QUERY not in str(claim)
     assert claim["payload"]["request_digest"] == _binding()["request_digest"]
@@ -348,14 +364,26 @@ def test_stage_requires_exact_durable_maintenance_task_and_request(
     for mutate in (
         lambda db: setattr(db, "task", None),
         lambda db: db.task["context"].update(source="attacker"),
+        lambda db: db.task["context"].update(
+            incident_binding=_durable_incident_binding()
+        ),
         lambda db: db.task.update(assigned_to="attacker"),
         lambda db: db.events.pop(REQUEST_EVENT_PREFIX + HEAD),
+        lambda db: db.events[REQUEST_EVENT_PREFIX + HEAD]["payload"].update(
+            incident_binding=_durable_incident_binding()
+        ),
         lambda db: db.events[REQUEST_EVENT_PREFIX + HEAD].update(
             initiator_agent="attacker"
         ),
         lambda db: db.events[REQUEST_EVENT_PREFIX + HEAD].update(
             target_agents=["attacker"]
         ),
+        lambda db: db.events.pop(
+            incident_binding_event_id(_durable_incident_binding())
+        ),
+        lambda db: db.events[
+            incident_binding_event_id(_durable_incident_binding())
+        ].update(initiator_agent="attacker"),
     ):
         database = _Database(completed=False)
         mutate(database)

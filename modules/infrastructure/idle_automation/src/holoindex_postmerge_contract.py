@@ -25,6 +25,8 @@ SCHEMA_VERSION = "holoindex_postmerge_coordination_v1"
 TASK_PREFIX = "holoindex_postmerge_refresh:"
 REQUEST_EVENT_PREFIX = "holoindex_postmerge_requested:"
 COMPLETION_EVENT_PREFIX = "holoindex_postmerge_completed:"
+INCIDENT_EVENT_PREFIX = "holoindex_postmerge_incident_bound:"
+INCIDENT_EVENT_TYPE = "holoindex_postmerge_incident_bound"
 SOURCE = "holoindex_postmerge_coordinator"
 CLAIM_AGENT_ID = "openclaw_supervisor"
 AUTHORITY_REPO_ROOT_ENV = "REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT"
@@ -304,7 +306,6 @@ def _event_payload(
     status: str,
     generation_id: str = "",
     freshness_receipt_digest: str = "",
-    incident_binding: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -314,8 +315,6 @@ def _event_payload(
         "generation_id": generation_id,
         "freshness_receipt_digest": freshness_receipt_digest,
     }
-    if incident_binding is not None:
-        payload["incident_binding"] = dict(incident_binding)
     payload["payload_digest"] = _canonical_digest(payload)
     return payload
 
@@ -326,7 +325,6 @@ def _event_payload_valid(
     target_repo_head_sha: str,
     authority_root_digest: str,
     expected_status: str,
-    expected_incident_binding: Mapping[str, str] | None = None,
 ) -> bool:
     if not isinstance(event, Mapping):
         return False
@@ -342,10 +340,7 @@ def _event_payload_valid(
         and unsigned.get("target_repo_head_sha") == target_repo_head_sha
         and unsigned.get("authority_root_digest") == authority_root_digest
         and unsigned.get("status") == expected_status
-        and (
-            expected_incident_binding is None
-            or unsigned.get("incident_binding") == dict(expected_incident_binding)
-        )
+        and "incident_binding" not in unsigned
     )
     if not base_valid:
         return False
@@ -390,12 +385,57 @@ def normalize_holoindex_incident_binding(
     return normalized if valid else None
 
 
+def incident_binding_event_id(incident_binding: Mapping[str, str]) -> str:
+    """Return the immutable event ID for one authenticated incident binding."""
+
+    return INCIDENT_EVENT_PREFIX + incident_binding["incident_id"][7:]
+
+
+def incident_binding_event_payload(
+    *, incident_binding: Mapping[str, str], target_repo_head_sha: str,
+    authority_root_digest: str,
+) -> dict[str, Any]:
+    """Bind one incident to the canonical exact-SHA maintenance transaction."""
+
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "status": "BOUND",
+        "incident_binding": dict(incident_binding),
+        "task_id": TASK_PREFIX + target_repo_head_sha,
+        "request_event_id": REQUEST_EVENT_PREFIX + target_repo_head_sha,
+        "target_repo_head_sha": target_repo_head_sha,
+        "authority_root_digest": authority_root_digest,
+    }
+    payload["payload_digest"] = _canonical_digest(payload)
+    return payload
+
+
+def incident_binding_event_valid(
+    event: Mapping[str, Any] | None, *, incident_binding: Mapping[str, str],
+    target_repo_head_sha: str, authority_root_digest: str,
+) -> bool:
+    """Validate the root-owned incident-to-maintenance association event."""
+
+    expected = incident_binding_event_payload(
+        incident_binding=incident_binding,
+        target_repo_head_sha=target_repo_head_sha,
+        authority_root_digest=authority_root_digest,
+    )
+    return bool(
+        isinstance(event, Mapping)
+        and event.get("event_id") == incident_binding_event_id(incident_binding)
+        and event.get("event_type") == INCIDENT_EVENT_TYPE
+        and event.get("initiator_agent") == "wre"
+        and event.get("target_agents") == [CLAIM_AGENT_ID]
+        and event.get("payload") == expected
+    )
+
+
 def _task_binding_valid(
     task: Mapping[str, Any] | None,
     *,
     target_repo_head_sha: str,
     authority_root_digest: str,
-    expected_incident_binding: Mapping[str, str] | None = None,
 ) -> bool:
     if not isinstance(task, Mapping):
         return False
@@ -413,11 +453,8 @@ def _task_binding_valid(
         and context.get("authority_root_digest") == authority_root_digest
         and context.get("request_event_id")
         == REQUEST_EVENT_PREFIX + target_repo_head_sha
+        and "incident_binding" not in context
         and task.get("required_skills") == ["holo-search"]
-        and (
-            expected_incident_binding is None
-            or context.get("incident_binding") == dict(expected_incident_binding)
-        )
         and (
             (status in assigned and assigned_to == CLAIM_AGENT_ID)
             or (status not in assigned and not assigned_to)
@@ -449,7 +486,6 @@ def validate_holoindex_postmerge_request(
             database.get_autonomous_task_by_id(task_id),
             target_repo_head_sha=target_repo_head_sha,
             authority_root_digest=authority_root_digest,
-            expected_incident_binding=expected_incident,
         )
     ):
         return None
@@ -463,8 +499,16 @@ def validate_holoindex_postmerge_request(
             event, target_repo_head_sha=target_repo_head_sha,
             authority_root_digest=authority_root_digest,
             expected_status="REQUESTED",
-            expected_incident_binding=expected_incident,
         )
+    ):
+        return None
+    incident_event = database.get_coordination_event_by_id(
+        incident_binding_event_id(expected_incident)
+    )
+    if not incident_binding_event_valid(
+        incident_event, incident_binding=expected_incident,
+        target_repo_head_sha=target_repo_head_sha,
+        authority_root_digest=authority_root_digest,
     ):
         return None
     return dict(event["payload"])
@@ -511,6 +555,8 @@ __all__ = [
     "AUTHORITY_REPO_ROOT_ENV",
     "CLAIM_AGENT_ID",
     "COMPLETION_EVENT_PREFIX",
+    "INCIDENT_EVENT_PREFIX",
+    "INCIDENT_EVENT_TYPE",
     "HoloIndexPostMergeCoordinationResult",
     "MAX_RETRIES",
     "REQUEST_EVENT_PREFIX",
@@ -518,6 +564,9 @@ __all__ = [
     "SCHEMA_VERSION",
     "SOURCE",
     "TASK_PREFIX",
+    "incident_binding_event_id",
+    "incident_binding_event_payload",
+    "incident_binding_event_valid",
     "normalize_holoindex_incident_binding",
     "validate_holoindex_postmerge_completion",
     "validate_holoindex_postmerge_request",
