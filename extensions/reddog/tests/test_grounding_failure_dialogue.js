@@ -11,6 +11,16 @@ assert(extensionSource.includes('groundingFailureDialogue.buildRequest(workFocus
 assert(extensionSource.includes('grounding_failure_dialogue_not_actionable'));
 assert(extensionSource.includes('!classification.conversationalDraft && !groundingDialogueOnly'));
 assert(!fs.readFileSync(path.join(__dirname, '..', 'grounding_failure_dialogue.js'), 'utf8').includes('child_process'));
+const trailAllowlist = extensionSource.match(
+  /const WORK_TRAIL_ALLOWLIST = new Set\(\[([\s\S]*?)\]\);/
+)[1];
+for (const eventName of [
+  'grounding_dialogue_started',
+  'grounding_dialogue_completed',
+  'holoindex_recovery_staged'
+]) {
+  assert(trailAllowlist.includes(`'${eventName}'`));
+}
 
 const preflight = {
   rejection_reasons: [
@@ -53,6 +63,12 @@ assert(!prompt.includes('\u0000'));
 assert(dialogue.SYSTEM_PROMPT.includes('do not answer the underlying repository'));
 assert(dialogue.SYSTEM_PROMPT.includes('Do not produce code'));
 assert(dialogue.SYSTEM_PROMPT.includes('do not ask 012 for repository paths'));
+assert(dialogue.SYSTEM_PROMPT.includes(
+  'Only when recovery_state is REPAIR_QUEUED_REQUEST_HELD'
+));
+assert(dialogue.SYSTEM_PROMPT.includes(
+  'maintenance is queued but automatic retry was not admitted'
+));
 
 const stageDigest = 'sha256:' + 'a'.repeat(64);
 const stage = {

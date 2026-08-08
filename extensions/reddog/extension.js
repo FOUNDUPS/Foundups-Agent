@@ -114,6 +114,9 @@ const WORK_TRAIL_ALLOWLIST = new Set([
   'repair_redaction_blocked',
   'repair_single_started',
   'repair_single_done',
+  'grounding_dialogue_started',
+  'grounding_dialogue_completed',
+  'holoindex_recovery_staged',
   'completed',
   'failed'
 ]);
