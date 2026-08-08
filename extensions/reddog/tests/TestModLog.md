@@ -1,5 +1,16 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-07 - HoloIndex blocked-request recovery binding (0.4.66)
+
+- Added Python tests for strict incident rehydration, canonical task identity,
+  the existing atomic Holo completion event, forged completion rejection, and
+  exact generation-bound owner verification. Two real AgentDB clients sharing
+  one SQLite file prove the coordination-event primary key admits one winner.
+- Added extension tests for Unicode canonicalization, full incident binding,
+  SecretStorage tamper detection and pre-call consumption, asynchronous
+  waiting/terminal behavior, stale-packet replacement, post-stage poll re-arm,
+  advisory-only retry, and bounded backoff.
+
 ## 2026-08-07 - Grounding-failure architect dialogue (0.4.65)
 
 - Added focused receipt, prompt-boundary, sanitization, fallback, and immutable

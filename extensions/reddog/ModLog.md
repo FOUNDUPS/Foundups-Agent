@@ -1,5 +1,29 @@
 # RedDog ModLog
 
+## 2026-08-07 - HoloIndex blocked-request recovery binding (0.4.66)
+
+- Bound the pinned backend's integrity-checked Holo incident receipt to the
+  existing AgentDB maintenance task and atomic completion event, then required
+  an independently queried owner result for that exact generation.
+- Kept the request in SecretStorage and consumed it before the advisory model
+  retry. Reused the AgentDB coordination-event primary key as the cross-process
+  one-use admission CAS. Waiting uses bounded asynchronous backoff; invalid
+  and terminal packets are retired without adding another table or lifecycle.
+- Removed raw staged request/query material from review output, continued a
+  durably admitted READY retry across a racing panel disposal, surfaced
+  terminal rejection, and skipped the resident-session wrapper entirely.
+- Bound the original request and incident to an immutable digest-only AgentDB
+  stage event. Recovery IDs no longer contain caller-restampable timestamps;
+  rehashed mutations and restamped packets lack the exact stage commitment.
+  READY model bridges detach from webview disposal while remaining bounded.
+- Re-ran grounding, redaction, Fusion, and output validation while forcing
+  start-operations, wardrobe, WRE, OpenClaw enqueue, and resident execution
+  off. Added no maintenance, signer, repository, merge, HoloIndex mutation, or
+  PatternMemory authority.
+- Required a current backend-manifest preflight against the exact immutable
+  recovery bridge root before stage or claim invocation, while keeping empty
+  startup polling free of that scan.
+
 ## 2026-08-07 - Grounding-failure architect dialogue (0.4.65)
 
 - Replaced terminal local `DEFER` behavior after typed-grounding failure with

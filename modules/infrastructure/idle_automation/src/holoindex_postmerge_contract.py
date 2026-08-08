@@ -346,6 +346,59 @@ def _load_db(db: AgentDbPort | None) -> AgentDbPort:
     return AgentDB()
 
 
+def _completed_task_valid(
+    task: Mapping[str, Any] | None,
+    *,
+    target_repo_head_sha: str,
+    authority_root_digest: str,
+) -> bool:
+    if not isinstance(task, Mapping) or task.get("status") != "completed":
+        return False
+    context = task.get("context")
+    return bool(
+        isinstance(context, Mapping)
+        and context.get("schema_version") == SCHEMA_VERSION
+        and context.get("source") == SOURCE
+        and context.get("target_repo_head_sha") == target_repo_head_sha
+        and context.get("authority_root_digest") == authority_root_digest
+        and context.get("request_event_id")
+        == REQUEST_EVENT_PREFIX + target_repo_head_sha
+        and task.get("assigned_to") == CLAIM_AGENT_ID
+    )
+
+
+def validate_holoindex_postmerge_completion(
+    database: AgentDbPort,
+    *,
+    task_id: str,
+    target_repo_head_sha: str,
+    authority_root_digest: str,
+) -> Mapping[str, Any] | None:
+    """Read one completion proven by the existing atomic task/event transaction."""
+
+    if task_id != TASK_PREFIX + target_repo_head_sha or not _completed_task_valid(
+        database.get_autonomous_task_by_id(task_id),
+        target_repo_head_sha=target_repo_head_sha,
+        authority_root_digest=authority_root_digest,
+    ):
+        return None
+    requested = database.get_coordination_event_by_id(REQUEST_EVENT_PREFIX + target_repo_head_sha)
+    completed = database.get_coordination_event_by_id(COMPLETION_EVENT_PREFIX + target_repo_head_sha)
+    if not _event_payload_valid(
+        requested,
+        target_repo_head_sha=target_repo_head_sha,
+        authority_root_digest=authority_root_digest,
+        expected_status="REQUESTED",
+    ) or not _event_payload_valid(
+        completed,
+        target_repo_head_sha=target_repo_head_sha,
+        authority_root_digest=authority_root_digest,
+        expected_status="COMPLETED",
+    ):
+        return None
+    return dict(completed["payload"])
+
+
 __all__ = [
     "AUTHORITY_REPO_ROOT_ENV",
     "CLAIM_AGENT_ID",
@@ -357,4 +410,5 @@ __all__ = [
     "SCHEMA_VERSION",
     "SOURCE",
     "TASK_PREFIX",
+    "validate_holoindex_postmerge_completion",
 ]

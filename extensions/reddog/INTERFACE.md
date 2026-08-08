@@ -1,5 +1,26 @@
 # RedDog Interface
 
+Version 0.4.66 adds automatic advisory recovery for an ordinary editor request
+blocked by a validated, deferred HoloIndex incident. One pending request is
+held in SecretStorage. The existing AgentDB Holo maintenance task and atomic
+completion event must be complete, and a current owner receipt must match the
+incident's authority HEAD/root plus the completion generation and freshness
+receipt. SecretStorage is consumed before one retry. The retry reruns
+grounding, redaction, Fusion, and validation. An immutable AgentDB stage event
+binds the original request and incident digests before recovery; a separate
+insert-only event admits at most one caller. Neither event carries a raw
+request or grants authority. Review output receives only the staging
+digests and incident identifiers, never the stored request or query. A READY
+claim uses a bounded bridge state detached from panel lifecycle and therefore
+continues through the advisory retry if panel disposal races admission.
+Action planning and all WRE,
+OpenClaw, resident-session, repository, and merge paths are forced off.
+Staging and recovery verify backend manifest compatibility for the same
+immutable root used by their workspace bridge. Recovery performs neither scan
+nor bridge invocation when no request is pending.
+Non-Holo or external-research failures, continuation requests, stale
+authority, invalid receipts, and duplicate retries remain blocked.
+
 Version 0.4.65 adds a conversation-only grounding-failure route. A failed typed
 grounding receipt still blocks normal Fusion and all runtime consumption, but
 the extension may call the configured principal once through

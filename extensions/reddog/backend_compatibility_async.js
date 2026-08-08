@@ -55,11 +55,16 @@ function runBackendCompatibilityPreflightAsync(rootValue) {
   ));
 }
 
-async function detectInstallStateAsync(vscode, context, client, helpers) {
+function resolveCompatibilityRoot(vscode, helpers, rootValue) {
+  return typeof rootValue === 'string' && rootValue.trim()
+    ? path.resolve(rootValue) : helpers.workspaceRoot(vscode, '');
+}
+
+async function detectInstallStateAsync(vscode, context, client, helpers, rootValue) {
   const legacy = vscode.extensions.getExtension(client.legacyExtensionId);
   const current = vscode.extensions.getExtension(client.extensionId);
   const legacyPresent = !!legacy && legacy.id !== context.extension.id;
-  const root = helpers.workspaceRoot(vscode, '');
+  const root = resolveCompatibilityRoot(vscode, helpers, rootValue);
   return {
     extension_id: context.extension.id,
     expected_extension_id: client.extensionId,
@@ -102,5 +107,6 @@ module.exports = {
   blockIncompatibleBackend,
   detectInstallStateAsync,
   failureReceipt,
+  resolveCompatibilityRoot,
   runBackendCompatibilityPreflightAsync
 };

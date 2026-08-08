@@ -28,6 +28,21 @@ HEAD = "a" * 40
 NEWER_HEAD = "b" * 40
 
 
+def test_idle_automation_package_keeps_contract_import_lightweight() -> None:
+    package_source = (
+        Path(__file__).resolve().parents[1] / "__init__.py"
+    ).read_text(encoding="utf-8")
+    tree = ast.parse(package_source)
+    eager_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.level == 1
+    }
+    assert "src.idle_automation_dae" not in eager_modules
+    assert "src.self_research_refresh" not in eager_modules
+    assert "def __getattr__(name: str)" in package_source
+
+
 class FakeDB:
     def __init__(self) -> None:
         self.tasks: dict[str, dict[str, Any]] = {}

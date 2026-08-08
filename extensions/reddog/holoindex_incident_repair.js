@@ -103,6 +103,23 @@ function coordinate(options) {
 
 function metadata(receipt) {
   const value = receipt && typeof receipt === 'object' ? receipt : {};
+  const reasons = Array.isArray(value.rejection_reasons)
+    ? value.rejection_reasons.map(String) : [];
+  const immutableReceipt = {
+    accepted: value.accepted === true,
+    status: String(value.status || 'REJECTED'),
+    incident_id: String(value.incident_id || ''),
+    task_id: String(value.task_id || ''),
+    target_repo_head_sha: String(value.target_repo_head_sha || ''),
+    authority_root_digest: String(value.authority_root_digest || ''),
+    generation_id: String(value.generation_id || ''),
+    freshness_receipt_digest: String(value.freshness_receipt_digest || ''),
+    maintenance_enqueued: value.maintenance_enqueued === true,
+    owner_requery_performed: value.owner_requery_performed === true,
+    coding_candidate_required: value.coding_candidate_required === true,
+    rejection_reasons: reasons,
+    receipt_id: String(value.receipt_id || '')
+  };
   return {
     incident_repair_attempted: true,
     incident_repair_accepted: value.accepted === true,
@@ -110,11 +127,15 @@ function metadata(receipt) {
     incident_repair_id: String(value.incident_id || ''),
     incident_repair_task_id: String(value.task_id || ''),
     incident_repair_receipt_id: String(value.receipt_id || ''),
+    incident_repair_target_repo_head_sha: String(value.target_repo_head_sha || ''),
+    incident_repair_authority_root_digest: String(value.authority_root_digest || ''),
+    incident_repair_generation_id: String(value.generation_id || ''),
+    incident_repair_freshness_receipt_digest: String(value.freshness_receipt_digest || ''),
     incident_repair_enqueued: value.maintenance_enqueued === true,
     incident_repair_owner_requery_performed: value.owner_requery_performed === true,
     incident_repair_coding_candidate_required: value.coding_candidate_required === true,
-    incident_repair_rejection_reasons: Array.isArray(value.rejection_reasons)
-      ? value.rejection_reasons.map(String) : []
+    incident_repair_rejection_reasons: reasons,
+    incident_repair_receipt: immutableReceipt
   };
 }
 
