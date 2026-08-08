@@ -266,7 +266,7 @@ async function main() {
   assert(!moduleSource.includes('execFileSync'));
   assert(!moduleSource.includes('AgentDbHoloBlockedRequestRecoveryStore'));
   const handler = extension.slice(extension.indexOf('function wireFusionWebview'));
-  assert(handler.indexOf('stageBlockedRequestRecovery(') < handler.indexOf('runGroundingFailureDialogue('));
+  assert(handler.indexOf('stageBlockedRequestRecovery(') < handler.indexOf('runBlockedGroundingResponse('));
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
