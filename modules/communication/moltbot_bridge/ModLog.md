@@ -1,4 +1,15 @@
 # ModLog - moltbot_bridge
+## 2026-08-09: RedDog stale Holo authority recovery binding
+- Extended the existing incident and blocked-request contracts for the proven
+  authority-root HEAD mismatch. The deferred receipt now binds the incident
+  kind, independently observed workspace/stale HEADs, exact post-merge task
+  and request event, authority digest, and canonical self-digest.
+- Staging requires the root-owned AgentDB task/request pair and the exact stale
+  authority observation. Claim and one-use retry remain blocked until current
+  authority, completion, generation, and freshness proofs all pass. No new
+  queue, signer, mutation path, or query-time reindex was added.
+  (WSP 00/15/22/50/62/97)
+
 ## 2026-08-08: RedDog startup queue runtime-root contract repair
 - Completed the existing `runtime_allowed_root` startup contract instead of
   dropping the caller's confinement argument. The WRE queue dry-run now

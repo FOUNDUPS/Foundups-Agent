@@ -1,5 +1,14 @@
 # HoloIndex Package ModLog
 
+## [2026-08-09] Stale authority observation for governed repair
+
+- Preserved the independently read authority HEAD and authority-root digest
+  when a clean authority checkout is stale, while keeping the selection
+  rejected for query use.
+- Added an exact stale-target matcher used only by the existing governed
+  repair path. Dirty, unrelated, same-HEAD, missing, or substituted authority
+  bindings remain rejected; no query-time reindex authority was introduced.
+
 ## [2026-08-06] Linked-worktree runtime dependency resolution
 
 - Added a read-only resolver from a linked worktree to the primary worktree

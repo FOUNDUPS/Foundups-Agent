@@ -20,6 +20,7 @@ from .holoindex_postmerge_contract import (
     AUTHORITY_REPO_ROOT_ENV,
     CLAIM_AGENT_ID,
     COMPLETION_EVENT_PREFIX,
+    INCIDENT_EVENT_TYPE,
     MAX_RETRIES,
     REQUEST_EVENT_PREFIX,
     RETRY_DELAY_SECONDS,
@@ -35,12 +36,39 @@ from .holoindex_postmerge_contract import (
     _event_payload_valid,
     _fetch_origin_main,
     _load_db,
+    incident_binding_event_id,
+    incident_binding_event_payload,
+    incident_binding_event_valid,
+    normalize_holoindex_incident_binding,
     _validate_authority_root,
 )
 
 
 def _utc_now() -> datetime:
     return datetime.now(UTC)
+
+
+def _ensure_incident_binding_event(
+    database: AgentDbPort, *, incident_binding: Mapping[str, str],
+    target_repo_head_sha: str, authority_root_digest: str,
+) -> bool:
+    event_id = incident_binding_event_id(incident_binding)
+    payload = incident_binding_event_payload(
+        incident_binding=incident_binding,
+        target_repo_head_sha=target_repo_head_sha,
+        authority_root_digest=authority_root_digest,
+    )
+    existing = database.get_coordination_event_by_id(event_id)
+    if existing is None:
+        database.create_coordination_event(
+            event_id, INCIDENT_EVENT_TYPE, "wre", [CLAIM_AGENT_ID], payload
+        )
+        existing = database.get_coordination_event_by_id(event_id)
+    return incident_binding_event_valid(
+        existing, incident_binding=incident_binding,
+        target_repo_head_sha=target_repo_head_sha,
+        authority_root_digest=authority_root_digest,
+    )
 
 
 def coordinate_holoindex_postmerge(
@@ -51,6 +79,7 @@ def coordinate_holoindex_postmerge(
     git_runner: GitRunner = _default_git_runner,
     now: Callable[[], datetime] = _utc_now,
     prove_operational: Callable[..., Any] | None = None,
+    incident_binding: Mapping[str, Any] | None = None,
 ) -> HoloIndexPostMergeCoordinationResult:
     """Queue or reconcile one exact-``origin/main`` maintenance task."""
 
@@ -78,6 +107,17 @@ def coordinate_holoindex_postmerge(
             authority_root_digest=authority_digest,
             rejection_reasons=(target_error,),
         )
+    normalized_incident = None
+    if incident_binding is not None:
+        normalized_incident = normalize_holoindex_incident_binding(
+            incident_binding, target_sha
+        )
+        if normalized_incident is None:
+            return HoloIndexPostMergeCoordinationResult(
+                False, "REJECTED", target_repo_head_sha=target_sha,
+                authority_root_digest=authority_digest,
+                rejection_reasons=("incident_binding_invalid",),
+            )
 
     database = _load_db(db)
     task_id = TASK_PREFIX + target_sha
@@ -120,6 +160,16 @@ def coordinate_holoindex_postmerge(
                 task_id=task_id,
                 authority_root_digest=authority_digest,
                 rejection_reasons=("completion_transaction_incomplete",),
+            )
+        if normalized_incident is not None and not _ensure_incident_binding_event(
+            database, incident_binding=normalized_incident,
+            target_repo_head_sha=target_sha,
+            authority_root_digest=authority_digest,
+        ):
+            return HoloIndexPostMergeCoordinationResult(
+                False, "REJECTED", target_repo_head_sha=target_sha,
+                task_id=task_id, authority_root_digest=authority_digest,
+                rejection_reasons=("incident_binding_event_invalid",),
             )
         payload = completion["payload"]
         from holo_index.storage_contract import resolve_holoindex_ssd_path
@@ -239,6 +289,20 @@ def coordinate_holoindex_postmerge(
                     authority_root_digest=authority_digest,
                     rejection_reasons=("maintenance_task_create_failed",),
                 )
+        elif normalized_incident is not None and not _ensure_incident_binding_event(
+            database,
+            incident_binding=normalized_incident,
+            target_repo_head_sha=target_sha,
+            authority_root_digest=authority_digest,
+        ):
+            return HoloIndexPostMergeCoordinationResult(
+                False,
+                "REJECTED",
+                target_repo_head_sha=target_sha,
+                task_id=task_id,
+                authority_root_digest=authority_digest,
+                rejection_reasons=("incident_binding_event_invalid",),
+            )
         status = "QUEUED" if created else str(task.get("status") or "pending").upper()
     if task is not None:
         status = str(task.get("status") or "pending")
@@ -256,6 +320,16 @@ def coordinate_holoindex_postmerge(
                 task_id=task_id,
                 authority_root_digest=authority_digest,
                 rejection_reasons=("maintenance_task_binding_invalid",),
+            )
+        if normalized_incident is not None and not _ensure_incident_binding_event(
+            database, incident_binding=normalized_incident,
+            target_repo_head_sha=target_sha,
+            authority_root_digest=authority_digest,
+        ):
+            return HoloIndexPostMergeCoordinationResult(
+                False, "REJECTED", target_repo_head_sha=target_sha,
+                task_id=task_id, authority_root_digest=authority_digest,
+                rejection_reasons=("incident_binding_event_invalid",),
             )
         retry_count = int(context.get("retry_count") or 0)
         if status in {"assigned", "executing"}:

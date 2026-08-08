@@ -5,12 +5,15 @@ const crypto = require('crypto');
 const path = require('path');
 
 const SCHEMA_VERSION = 'reddog_holoindex_blocked_request_recovery.v1';
+const INCIDENT_SCHEMA = 'reddog_holoindex_incident_repair.v2';
 const SECRET_KEY = 'reddog.holoBlockedRequestRecovery.v1';
 const STAGE_EVENT_PREFIX = 'reddog_holoindex_blocked_retry_staged:';
 const CLAIM_EVENT_PREFIX = 'reddog_holoindex_blocked_retry_claimed:';
 const DEFERRED = new Set(['ASSIGNED', 'EXECUTING', 'PENDING', 'QUEUED', 'REQUEUED', 'RETRY_WAIT', 'WAITING_COMPLETION_RECEIPT']);
+const INCIDENT_KINDS = new Set(['HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH', 'HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP', 'QUERY_OWNER_POISONED', 'SEMANTIC_BACKEND_UNAVAILABLE']);
 const SHA = /^sha256:[0-9a-f]{64}$/;
 const GIT_SHA = /^[0-9a-f]{40}$/;
+const REQUEST_EVENT_PREFIX = 'holoindex_postmerge_requested:';
 const MAX_SECRET_BYTES = 32 * 1024;
 const MAX_BRIDGE_BYTES = 256 * 1024;
 const MAX_AGE_MS = 30 * 60 * 1000;
@@ -51,15 +54,29 @@ function incidentReceipt(meta) {
   return receipt && typeof receipt === 'object' && !Array.isArray(receipt) ? stable(receipt) : null;
 }
 
+function deferredIncidentValid(receipt) {
+  if (!receipt || receipt.schema_version !== INCIDENT_SCHEMA) return false;
+  const unsigned = { ...receipt };
+  delete unsigned.receipt_id;
+  const mismatch = receipt.incident_kind === 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH';
+  return receipt.accepted === true && receipt.maintenance_enqueued === true
+    && DEFERRED.has(receipt.status) && SHA.test(String(receipt.incident_id || ''))
+    && receipt.receipt_id === digest(unsigned) && SHA.test(receipt.authority_root_digest || '')
+    && GIT_SHA.test(receipt.target_repo_head_sha || '')
+    && receipt.workspace_repo_head_sha === receipt.target_repo_head_sha
+    && INCIDENT_KINDS.has(receipt.incident_kind)
+    && GIT_SHA.test(receipt.observed_authority_head_sha || '')
+    && (mismatch
+      ? receipt.observed_authority_head_sha !== receipt.target_repo_head_sha
+      : receipt.observed_authority_head_sha === receipt.target_repo_head_sha)
+    && receipt.task_id === 'holoindex_postmerge_refresh:' + receipt.target_repo_head_sha
+    && receipt.request_event_id === REQUEST_EVENT_PREFIX + receipt.target_repo_head_sha;
+}
+
 function eligible(meta, message) {
   const value = meta && typeof meta === 'object' ? meta : {};
   const receipt = incidentReceipt(value);
-  return message && message.useLastPacket !== true && receipt
-    && receipt.accepted === true && receipt.maintenance_enqueued === true
-    && DEFERRED.has(receipt.status) && SHA.test(String(receipt.incident_id || ''))
-    && SHA.test(String(receipt.receipt_id || '')) && String(receipt.task_id || '') !== ''
-    && GIT_SHA.test(String(receipt.target_repo_head_sha || ''))
-    && SHA.test(String(receipt.authority_root_digest || ''))
+  return message && message.useLastPacket !== true && deferredIncidentValid(receipt)
     && value.incident_repair_receipt_id === receipt.receipt_id;
 }
 
@@ -117,8 +134,11 @@ function stageBinding(packet) {
     schema_version: SCHEMA_VERSION, status: 'STAGED',
     recovery_id: packet.recovery_id, request_digest: packet.request_digest,
     query_digest: packet.query_digest, incident_id: receipt.incident_id,
-    incident_receipt_id: receipt.receipt_id, task_id: receipt.task_id,
+    incident_receipt_id: receipt.receipt_id, incident_kind: receipt.incident_kind,
+    task_id: receipt.task_id, request_event_id: receipt.request_event_id,
     target_repo_head_sha: receipt.target_repo_head_sha,
+    workspace_repo_head_sha: receipt.workspace_repo_head_sha,
+    observed_authority_head_sha: receipt.observed_authority_head_sha,
     authority_root_digest: receipt.authority_root_digest,
     created_at_epoch_ms: packet.created_at_epoch_ms,
     expires_at_epoch_ms: packet.expires_at_epoch_ms,
@@ -143,6 +163,9 @@ function stagedReceipt(packet, result) {
     incident_id: packet.incident_receipt.incident_id,
     incident_task_id: packet.incident_receipt.task_id,
     incident_repair_receipt_id: packet.incident_receipt.receipt_id,
+    request_event_id: packet.incident_receipt.request_event_id,
+    target_repo_head_sha: packet.incident_receipt.target_repo_head_sha,
+    authority_root_digest: packet.incident_receipt.authority_root_digest,
     stage_event_id: result.stage_event_id,
     stage_payload_digest: result.stage_payload_digest,
     expires_at_epoch_ms: packet.expires_at_epoch_ms,
@@ -150,13 +173,8 @@ function stagedReceipt(packet, result) {
   };
 }
 
-async function stageLocked(options, message, meta) {
-  if (!eligible(meta, message)) return failure('recovery_not_eligible');
+async function persistStagePacket(options, packet, receipt) {
   const existing = await options.secretStorage.get(SECRET_KEY);
-  const receipt = incidentReceipt(meta);
-  const packet = buildPacket(message, receipt);
-  const requestDigest = packet.request_digest;
-  const recoveryId = packet.recovery_id;
   const raw = JSON.stringify(packet);
   if (Buffer.byteLength(raw, 'utf8') > MAX_SECRET_BYTES) return failure('recovery_secret_too_large');
   let selected = packet;
@@ -164,7 +182,7 @@ async function stageLocked(options, message, meta) {
     const prior = await loadPacket(options.secretStorage);
     if (prior.ok) {
       if (
-        prior.request_digest !== requestDigest
+        prior.request_digest !== packet.request_digest
         || prior.incident_receipt.receipt_id !== receipt.receipt_id
       ) return failure('recovery_secret_already_pending');
       selected = prior;
@@ -176,6 +194,14 @@ async function stageLocked(options, message, meta) {
     }
   }
   if (!existing || selected === packet) await options.secretStorage.store(SECRET_KEY, raw);
+  return selected;
+}
+
+async function stageLocked(options, message, meta) {
+  if (!eligible(meta, message)) return failure('recovery_not_eligible');
+  const receipt = incidentReceipt(meta);
+  const selected = await persistStagePacket(options, buildPacket(message, receipt), receipt);
+  if (selected.ok === false) return selected;
   const result = await bridge(options, 'stage', selected);
   if (!stageResultMatches(result, selected)) {
     await options.secretStorage.delete(SECRET_KEY);
@@ -262,6 +288,13 @@ function stageResultMatches(result, packet) {
     result && result.ok === true && result.status === 'STAGED'
     && result.stage_event_id === STAGE_EVENT_PREFIX + binding.payload_digest.slice(7)
     && result.stage_payload_digest === binding.payload_digest
+    && result.incident_id === packet.incident_receipt.incident_id
+    && result.incident_repair_receipt_id === packet.incident_receipt.receipt_id
+    && result.recovery_id === packet.recovery_id
+    && result.task_id === packet.incident_receipt.task_id
+    && result.request_event_id === packet.incident_receipt.request_event_id
+    && result.target_repo_head_sha === packet.incident_receipt.target_repo_head_sha
+    && result.authority_root_digest === packet.incident_receipt.authority_root_digest
     && result.authority_effect === 'none'
   );
 }
@@ -306,5 +339,5 @@ async function loadPacket(secretStorage) {
 module.exports = {
   SCHEMA_VERSION, SECRET_KEY, claim, claimAfterCompatibility, digest, eligible, exactMessage, finish,
   hasPending, loadPacket, readyResultMatches, stage, stageAfterCompatibility,
-  stageBinding, stageResultMatches
+  stageBinding, stageResultMatches, deferredIncidentValid
 };

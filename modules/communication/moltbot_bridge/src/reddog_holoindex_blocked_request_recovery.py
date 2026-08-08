@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
-import re
 import time
-from dataclasses import fields, replace
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-from holo_index.authority_worktree import resolve_holoindex_authority_root
+from holo_index.authority_worktree import (
+    AUTHORITY_ROOT_HEAD_MISMATCH, authority_selection_matches_target,
+    resolve_holoindex_authority_root,
+)
 from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_contract import (
-    DEFERRED_STATUSES,
     HoloIndexIncidentRepairReceipt,
     canonical_digest,
-    seal_receipt,
+    rehydrate_deferred_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_owner_result_verification import (
     CURRENT,
@@ -26,8 +26,8 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_blocked_request_r
     stage_once,
 )
 from modules.infrastructure.idle_automation.src.holoindex_postmerge_contract import (
-    TASK_PREFIX,
     validate_holoindex_postmerge_completion,
+    validate_holoindex_postmerge_request,
 )
 
 
@@ -35,60 +35,11 @@ READY = "READY"
 WAITING = "WAITING"
 REJECTED = "REJECTED"
 STAGED = "STAGED"
-INCIDENT_FIELDS = frozenset(item.name for item in fields(HoloIndexIncidentRepairReceipt))
-DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
-GIT_SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
 REQUEST_SCHEMA = "reddog_holoindex_blocked_request_recovery.v1"
 MAX_AGE_MS = 30 * 60 * 1000
-REQUEST_FIELDS = frozenset(
-    {"command", "text", "contextMode", "workerType", "effort", "mode", "useLastPacket"}
-)
-
-
-def _incident_types_valid(value: Mapping[str, Any]) -> bool:
-    bool_fields = (
-        "accepted", "maintenance_enqueued", "owner_requery_performed",
-        "coding_candidate_required",
-    )
-    str_fields = (
-        "status", "incident_id", "task_id", "target_repo_head_sha",
-        "authority_root_digest", "generation_id", "freshness_receipt_digest",
-        "receipt_id",
-    )
-    reasons = value.get("rejection_reasons")
-    return bool(
-        all(type(value.get(name)) is bool for name in bool_fields)
-        and all(type(value.get(name)) is str for name in str_fields)
-        and isinstance(reasons, (list, tuple))
-        and all(type(reason) is str for reason in reasons)
-    )
-
-
-def _rehydrate_incident(value: Mapping[str, Any]) -> HoloIndexIncidentRepairReceipt | None:
-    if set(value) != INCIDENT_FIELDS or not _incident_types_valid(value):
-        return None
-    try:
-        receipt = HoloIndexIncidentRepairReceipt(
-            **{**value, "rejection_reasons": tuple(value["rejection_reasons"])}
-        )
-        expected = seal_receipt(replace(receipt, receipt_id=""))
-    except (TypeError, ValueError):
-        return None
-    return receipt if receipt.receipt_id == expected.receipt_id else None
-
-
-def _incident_valid(receipt: HoloIndexIncidentRepairReceipt | None) -> bool:
-    return bool(
-        receipt
-        and receipt.accepted
-        and receipt.status in DEFERRED_STATUSES
-        and receipt.maintenance_enqueued
-        and DIGEST_RE.fullmatch(receipt.incident_id)
-        and DIGEST_RE.fullmatch(receipt.receipt_id)
-        and DIGEST_RE.fullmatch(receipt.authority_root_digest)
-        and GIT_SHA_RE.fullmatch(receipt.target_repo_head_sha)
-        and receipt.task_id == TASK_PREFIX + receipt.target_repo_head_sha
-    )
+REQUEST_FIELDS = frozenset({
+    "command", "text", "contextMode", "workerType", "effort", "mode", "useLastPacket",
+})
 
 
 def _query_runner(value: Callable[..., Mapping[str, Any]] | None) -> Callable:
@@ -133,13 +84,21 @@ def _result(status: str, reason: str = "", **values: Any) -> Mapping[str, Any]:
 
 
 def _authority_selection(
-    repo_root: Path | str, receipt: HoloIndexIncidentRepairReceipt
+    repo_root: Path | str,
+    receipt: HoloIndexIncidentRepairReceipt,
+    *,
+    allow_stale: bool = False,
 ) -> tuple[Any, bool]:
     selection = resolve_holoindex_authority_root(Path(repo_root).resolve(strict=False))
-    matched = bool(
-        selection.accepted
-        and selection.authority_head_sha == receipt.target_repo_head_sha
-        and selection.authority_root_digest == receipt.authority_root_digest
+    matched = authority_selection_matches_target(
+        selection,
+        target_head_sha=receipt.target_repo_head_sha,
+        authority_root_digest=receipt.authority_root_digest,
+        allow_stale=(
+            allow_stale
+            and receipt.incident_kind == AUTHORITY_ROOT_HEAD_MISMATCH
+        ),
+        expected_stale_head_sha=receipt.observed_authority_head_sha,
     )
     return selection, matched
 
@@ -176,7 +135,11 @@ def _stage_payload(
         schema_version=REQUEST_SCHEMA, recovery_id=recovery_id,
         request_digest=request_digest, query_digest=query_digest,
         incident_id=receipt.incident_id, incident_receipt_id=receipt.receipt_id,
-        task_id=receipt.task_id, target_repo_head_sha=receipt.target_repo_head_sha,
+        incident_kind=receipt.incident_kind, task_id=receipt.task_id,
+        request_event_id=receipt.request_event_id,
+        target_repo_head_sha=receipt.target_repo_head_sha,
+        workspace_repo_head_sha=receipt.workspace_repo_head_sha,
+        observed_authority_head_sha=receipt.observed_authority_head_sha,
         authority_root_digest=receipt.authority_root_digest,
         created_at_epoch_ms=created_at_epoch_ms,
         expires_at_epoch_ms=expires_at_epoch_ms,
@@ -202,6 +165,16 @@ def _owner_matches_completion(
     return matches, owner
 
 
+def _incident_binding(receipt: HoloIndexIncidentRepairReceipt) -> dict[str, str]:
+    return {
+        "schema_version": receipt.schema_version,
+        "incident_kind": receipt.incident_kind,
+        "incident_id": receipt.incident_id,
+        "workspace_repo_head_sha": receipt.workspace_repo_head_sha,
+        "observed_authority_head_sha": receipt.observed_authority_head_sha,
+    }
+
+
 def stage_holo_blocked_request_recovery(
     *, repo_root: Path | str, query: str, request: Mapping[str, Any],
     recovery_id: str, request_digest: str, query_digest: str,
@@ -210,11 +183,11 @@ def stage_holo_blocked_request_recovery(
     now_epoch_ms: int | None = None,
 ) -> Mapping[str, Any]:
     """Persist one immutable request commitment without raw prompt material."""
-    receipt = _rehydrate_incident(incident_receipt)
+    receipt = rehydrate_deferred_receipt(incident_receipt)
     now = int(time.time() * 1000) if now_epoch_ms is None else now_epoch_ms
     if type(query) is not str or not query.strip() or len(query) > 16_000:
         return _result(REJECTED, "recovery_query_invalid")
-    if not _incident_valid(receipt) or not _request_binding_valid(
+    if receipt is None or not _request_binding_valid(
         request=request, query=query, request_digest=request_digest,
         query_digest=query_digest, recovery_id=recovery_id,
         incident_receipt_id=receipt.receipt_id if receipt else "",
@@ -222,7 +195,16 @@ def stage_holo_blocked_request_recovery(
         expires_at_epoch_ms=expires_at_epoch_ms, now_epoch_ms=now,
     ):
         return _result(REJECTED, "recovery_stage_binding_invalid")
-    _selection, matched = _authority_selection(repo_root, receipt)
+    database = _load_database(db)
+    durable_request = validate_holoindex_postmerge_request(
+        database, task_id=receipt.task_id, request_event_id=receipt.request_event_id,
+        target_repo_head_sha=receipt.target_repo_head_sha,
+        authority_root_digest=receipt.authority_root_digest,
+        incident_binding=_incident_binding(receipt),
+    )
+    if durable_request is None:
+        return _result(REJECTED, "recovery_maintenance_request_invalid")
+    _selection, matched = _authority_selection(repo_root, receipt, allow_stale=True)
     if not matched:
         return _result(REJECTED, "recovery_authority_binding_changed")
     payload = _stage_payload(
@@ -230,11 +212,19 @@ def stage_holo_blocked_request_recovery(
         query_digest=query_digest, created_at_epoch_ms=created_at_epoch_ms,
         expires_at_epoch_ms=expires_at_epoch_ms,
     )
-    status, event_id = stage_once(_load_database(db), payload)
+    status, event_id = stage_once(database, payload)
     reason = "" if status == STAGED else "recovery_stage_conflict"
-    return _result(status, reason, stage_event_id=event_id,
-                   stage_payload_digest=payload["payload_digest"],
-                   authority_effect="none")
+    return _result(
+        status, reason, stage_event_id=event_id,
+        stage_payload_digest=payload["payload_digest"],
+        incident_id=receipt.incident_id,
+        incident_repair_receipt_id=receipt.receipt_id,
+        recovery_id=recovery_id, task_id=receipt.task_id,
+        request_event_id=receipt.request_event_id,
+        target_repo_head_sha=receipt.target_repo_head_sha,
+        authority_root_digest=receipt.authority_root_digest,
+        authority_effect="none",
+    )
 
 
 def admit_holo_blocked_request_recovery(
@@ -250,8 +240,8 @@ def admit_holo_blocked_request_recovery(
 
     if type(query) is not str or not query.strip() or len(query) > 16_000:
         return _result(REJECTED, "recovery_query_invalid")
-    receipt = _rehydrate_incident(incident_receipt)
-    if not _incident_valid(receipt):
+    receipt = rehydrate_deferred_receipt(incident_receipt)
+    if receipt is None:
         return _result(REJECTED, "recovery_incident_receipt_invalid")
     if not _request_binding_valid(
         request=request, query=query, request_digest=request_digest,
@@ -291,5 +281,6 @@ def admit_holo_blocked_request_recovery(
 
 __all__ = [
     "READY", "REJECTED", "STAGED", "WAITING",
-    "admit_holo_blocked_request_recovery", "stage_holo_blocked_request_recovery",
+    "admit_holo_blocked_request_recovery",
+    "stage_holo_blocked_request_recovery",
 ]

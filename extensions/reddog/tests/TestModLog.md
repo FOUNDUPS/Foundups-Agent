@@ -1,5 +1,17 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-09 - Stale HoloIndex authority recovery admission (0.4.67)
+
+- Added current-versus-stale authority selection tests that preserve the
+  independently read stale HEAD and root digest while rejecting dirty,
+  unrelated, same-HEAD, or substituted authority bindings.
+- Added incident runtime tests for zero-attempt mismatch admission, exact-SHA
+  post-merge coordination, current-generation re-resolution, and fail-closed
+  stale-after-CURRENT behavior.
+- Added blocked-request tests proving staging can precede maintenance while
+  claim/retry cannot, plus deterministic no-model dialogue and tri-state recall
+  regressions.
+
 ## 2026-08-07 - HoloIndex blocked-request recovery binding (0.4.66)
 
 - Added Python tests for strict incident rehydration, canonical task identity,

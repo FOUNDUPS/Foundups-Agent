@@ -179,10 +179,16 @@ def query_once(
         return _failure(request_error)
     selection = select_authority(repo_root)
     if not selection.accepted:
-        return {
-            **_failure(selection.error or "authority_selection_failed", query=query),
-            **_authority_metadata(selection),
-        }
+        return _with_retry_telemetry(
+            {
+                **_failure(
+                    selection.error or "authority_selection_failed", query=query
+                ),
+                **_authority_metadata(selection),
+            },
+            attempts=0,
+            retry_reason="",
+        )
     authority_root = selection.selected_root
 
     started_here = False

@@ -46,11 +46,11 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_principal_memex_disclosure_source.js` | Exact disclosure shape, one-use SecretStorage deletion, malformed-source rejection, and no packet retention |
 | `scripts/tests/test_generate_reddog_backend_manifest.py` | Package-initializer resolution, executable roots, dynamic-load sentinels, and checked-in generator parity |
 | `test_start_operations_control.js` | Cross-language receipt parity, request replay, cumulative output, environment allowlist, and durable intent controls |
-| `test_holoindex_incident_repair.js` | Exhausted-owner admission, bounded bridge execution, WRE repair telemetry, version wiring, and no direct model binding |
+| `test_holoindex_incident_repair.js` | Exhausted-owner and stale-authority admission, bounded bridge execution, WRE repair telemetry, version wiring, and no direct model binding |
 | `test_conversation_history_policy.js` | Raw-history denial, setting-sensitive prompt policy keys, provider-history discard, non-authority telemetry, and extension wiring |
 | `test_conversation_session_authority_source.js` | SecretStorage credential handling, narrow child environment, no ambient-secret crossover, and fail-closed credential shape |
 | `verify_extension_contract.js` | Single contract runner; ADDENDUM E ~line 518+, ADDENDUM F gate probe ~line 595+ |
-| `test_grounding_failure_dialogue.js` | Conversation-only failure receipt, sanitization, no-evidence/no-authority binding, bridge-failure fallback |
+| `test_grounding_failure_dialogue.js` | Conversation-only failure receipt, queued-recovery deterministic status, tri-state recall, sanitization, no-evidence/no-authority binding, bridge-failure fallback |
 | `verify_repo_audit_grounding.js` | Focused alias, receipt, protected-context non-vacuity, local block, repair-provenance, and defensive-prompt contracts |
 
 ## TEST_REGISTRY

@@ -26,6 +26,7 @@ from modules.infrastructure.foundups_mcp_bridge.src import (
 
 HEAD = "a" * 40
 NEWER_HEAD = "b" * 40
+STALE_HEAD = "c" * 40
 
 
 def test_idle_automation_package_keeps_contract_import_lightweight() -> None:
@@ -339,6 +340,20 @@ def _environment(authority: Path) -> dict[str, str]:
     return {coordinator.AUTHORITY_REPO_ROOT_ENV: str(authority)}
 
 
+def _incident_binding(
+    *,
+    observed_head: str = STALE_HEAD,
+    incident_id: str = "sha256:" + ("d" * 64),
+) -> dict[str, str]:
+    return {
+        "schema_version": contract.INCIDENT_SCHEMA,
+        "incident_kind": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "incident_id": incident_id,
+        "workspace_repo_head_sha": HEAD,
+        "observed_authority_head_sha": observed_head,
+    }
+
+
 def _claim(db: FakeDB, task_id: str) -> None:
     context = db.tasks[task_id]["context"]
     assert db.claim_holoindex_postmerge_task(
@@ -407,6 +422,190 @@ def test_exact_sha_task_is_queued_once(
     context = db.tasks[first.task_id]["context"]
     assert context["target_repo_head_sha"] == HEAD
     assert context["authority_root_digest"] == first.authority_root_digest
+
+
+def test_incident_binding_is_durable_and_idempotent(
+    roots,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workspace, authority = roots
+    db = FakeDB()
+    git = FakeGit()
+    _patch_state(monkeypatch, authority, git)
+    incident = _incident_binding()
+
+    first = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=incident,
+    )
+    second = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=incident,
+    )
+
+    assert first.accepted and first.status == "QUEUED"
+    assert second.accepted and second.status == "PENDING"
+    assert "incident_binding" not in db.tasks[first.task_id]["context"]
+    request_id = coordinator.REQUEST_EVENT_PREFIX + HEAD
+    assert "incident_binding" not in db.events[request_id]["payload"]
+    incident_event_id = contract.incident_binding_event_id(incident)
+    assert contract.incident_binding_event_valid(
+        db.events[incident_event_id],
+        incident_binding=incident,
+        target_repo_head_sha=HEAD,
+        authority_root_digest=first.authority_root_digest,
+    )
+    assert len(db.events) == 2
+
+
+def test_distinct_incidents_share_canonical_maintenance_without_overwrite(
+    roots,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workspace, authority = roots
+    db = FakeDB()
+    git = FakeGit()
+    _patch_state(monkeypatch, authority, git)
+    original = _incident_binding()
+    queued = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=original,
+    )
+    task_before = dict(db.tasks[queued.task_id])
+    events_before = {key: dict(value) for key, value in db.events.items()}
+
+    second_incident = _incident_binding(
+        observed_head="e" * 40,
+        incident_id="sha256:" + ("e" * 64),
+    )
+    associated = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=second_incident,
+    )
+
+    assert associated.accepted and associated.status == "PENDING"
+    assert db.tasks[queued.task_id] == task_before
+    request_id = coordinator.REQUEST_EVENT_PREFIX + HEAD
+    assert db.events[request_id] == events_before[request_id]
+    assert db.events[contract.incident_binding_event_id(original)] == (
+        events_before[contract.incident_binding_event_id(original)]
+    )
+    assert contract.incident_binding_event_valid(
+        db.events[contract.incident_binding_event_id(second_incident)],
+        incident_binding=second_incident,
+        target_repo_head_sha=HEAD,
+        authority_root_digest=queued.authority_root_digest,
+    )
+
+
+def test_existing_unbound_maintenance_accepts_authenticated_incident_association(
+    roots,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workspace, authority = roots
+    db = FakeDB()
+    git = FakeGit()
+    _patch_state(monkeypatch, authority, git)
+    queued = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+    )
+    task_before = dict(db.tasks[queued.task_id])
+    request_id = coordinator.REQUEST_EVENT_PREFIX + HEAD
+    request_before = dict(db.events[request_id])
+    incident = _incident_binding()
+
+    associated = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=incident,
+    )
+
+    assert associated.accepted and associated.status == "PENDING"
+    assert db.tasks[queued.task_id] == task_before
+    assert db.events[request_id] == request_before
+    assert contract.incident_binding_event_valid(
+        db.events[contract.incident_binding_event_id(incident)],
+        incident_binding=incident,
+        target_repo_head_sha=HEAD,
+        authority_root_digest=queued.authority_root_digest,
+    )
+
+
+def test_tampered_incident_association_rejects_without_rewrite(
+    roots,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workspace, authority = roots
+    db = FakeDB()
+    git = FakeGit()
+    _patch_state(monkeypatch, authority, git)
+    incident = _incident_binding()
+    queued = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=incident,
+    )
+    event_id = contract.incident_binding_event_id(incident)
+    db.events[event_id]["payload"]["authority_root_digest"] = (
+        "sha256:" + ("0" * 64)
+    )
+    tampered = dict(db.events[event_id])
+
+    rejected = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=incident,
+    )
+
+    assert not rejected.accepted
+    assert rejected.rejection_reasons == ("incident_binding_event_invalid",)
+    assert db.events[event_id] == tampered
+    assert db.tasks[queued.task_id]["context"].get("incident_binding") is None
+
+
+def test_incident_target_must_match_fetched_origin_before_queue_effect(
+    roots,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workspace, authority = roots
+    db = FakeDB()
+    git = FakeGit((NEWER_HEAD,))
+    _patch_state(monkeypatch, authority, git)
+
+    rejected = coordinator.coordinate_holoindex_postmerge(
+        repo_root=workspace,
+        db=db,
+        environment=_environment(authority),
+        git_runner=git,
+        incident_binding=_incident_binding(),
+    )
+
+    assert not rejected.accepted
+    assert rejected.target_repo_head_sha == NEWER_HEAD
+    assert rejected.rejection_reasons == ("incident_binding_invalid",)
+    assert db.tasks == {}
+    assert db.events == {}
 
 
 def test_tampered_completion_event_fails_closed(
