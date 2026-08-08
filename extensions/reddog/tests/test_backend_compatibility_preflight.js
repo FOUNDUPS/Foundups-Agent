@@ -305,7 +305,10 @@ for (const relativePath of [
   'backend_compatibility_runtime_materializer.js',
   'backend_compatibility_manifest.js',
   'backend_compatibility_filesystem.js',
-  'backend_compatibility_render.js'
+  'backend_compatibility_render.js',
+  'holoindex_blocked_request_recovery.js',
+  'holoindex_incident_repair.js',
+  'grounding_failure_dialogue.js'
 ]) {
   const source = fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8');
   assert(source.split(/\r?\n/).length <= 400, relativePath + ' exceeds WSP_62 file limit');

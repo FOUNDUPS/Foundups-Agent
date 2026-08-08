@@ -1,5 +1,19 @@
 # RedDog ModLog
 
+## 2026-08-09 - Stale HoloIndex authority recovery admission (0.4.67)
+
+- Extended the existing Holo incident contract to admit an independently
+  inspected clean authority checkout at an older HEAD. Preserved its actual
+  HEAD and root digest instead of erasing the evidence on selection failure.
+- Reused the post-merge coordinator and exact-SHA OpenClaw maintenance task;
+  no second queue, lifecycle, signer, database, or query-time reindex path was
+  created.
+- Allowed immutable blocked-request staging while maintenance is pending, but
+  kept claim and retry current-authority-only and generation-bound.
+- Added deterministic queued-recovery dialogue so RedDog reports internal
+  repair status without spending a model call or asking 012 for repository
+  paths. Preserved tri-state target-recall truth.
+
 ## 2026-08-07 - HoloIndex blocked-request recovery binding (0.4.66)
 
 - Bound the pinned backend's integrity-checked Holo incident receipt to the

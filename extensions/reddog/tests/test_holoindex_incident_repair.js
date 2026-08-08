@@ -13,6 +13,7 @@ const HEAD = 'a'.repeat(40);
 const ROOT_DIGEST = 'sha256:' + 'b'.repeat(64);
 const INCIDENT_DIGEST = 'sha256:' + 'c'.repeat(64);
 const RECEIPT_DIGEST = 'sha256:' + 'd'.repeat(64);
+const STALE_HEAD = 'e'.repeat(40);
 
 function failure(changes) {
   return Object.assign({
@@ -29,10 +30,25 @@ function failure(changes) {
 }
 
 assert.strictEqual(repair.shouldCoordinate(failure(), true), true);
+assert.strictEqual(repair.shouldCoordinate(failure({
+  error: 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH',
+  owner_attempts: 0,
+  authority_repo_head_sha: STALE_HEAD
+}), true), true);
 assert.strictEqual(repair.shouldCoordinate(failure(), false), false);
 assert.strictEqual(repair.shouldCoordinate(failure({ owner_attempts: 1 }), true), false);
 assert.strictEqual(repair.shouldCoordinate(failure({ error: 'forged' }), true), false);
 assert.strictEqual(repair.shouldCoordinate(failure({ ok: true }), true), false);
+assert.strictEqual(repair.shouldCoordinate(failure({
+  error: 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH',
+  owner_attempts: 2,
+  authority_repo_head_sha: STALE_HEAD
+}), true), false);
+assert.strictEqual(repair.shouldCoordinate(failure({
+  error: 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH',
+  owner_attempts: 0,
+  authority_repo_head_sha: HEAD
+}), true), false);
 assert.strictEqual(repair.shouldCoordinate(failure({
   workspace_repo_head_sha: new String(HEAD)
 }), true), false);
@@ -47,9 +63,14 @@ try {
     return JSON.stringify({
       accepted: true,
       status: 'QUEUED',
+      schema_version: 'reddog_holoindex_incident_repair.v2',
+      incident_kind: 'SEMANTIC_BACKEND_UNAVAILABLE',
       incident_id: INCIDENT_DIGEST,
       task_id: 'holoindex_postmerge_refresh:' + 'a'.repeat(40),
+      request_event_id: 'holoindex_postmerge_requested:' + HEAD,
       target_repo_head_sha: HEAD,
+      workspace_repo_head_sha: HEAD,
+      observed_authority_head_sha: HEAD,
       authority_root_digest: ROOT_DIGEST,
       generation_id: '',
       freshness_receipt_digest: '',
@@ -79,6 +100,31 @@ try {
   assert.strictEqual(payload.owner_failure.error, 'SEMANTIC_BACKEND_UNAVAILABLE');
   assert.strictEqual(Object.keys(payload.owner_failure).length, 9);
 
+  const mismatchResult = repair.coordinate({
+    root: 'O:/repo',
+    query: 'repair stale authority',
+    ownerResult: failure({
+      error: 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH',
+      owner_attempts: 0,
+      authority_repo_head_sha: STALE_HEAD
+    }),
+    ownerObserved: true,
+    interpreterPath: 'python',
+    env: { SAFE: '1' }
+  });
+  assert.strictEqual(mismatchResult.status, 'QUEUED');
+  assert.strictEqual(calls, 2);
+  const mismatchPayload = JSON.parse(invocation.options.input);
+  assert.strictEqual(
+    mismatchPayload.owner_failure.error,
+    'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH'
+  );
+  assert.strictEqual(mismatchPayload.owner_failure.owner_attempts, 0);
+  assert.strictEqual(
+    mismatchPayload.owner_failure.authority_repo_head_sha,
+    STALE_HEAD
+  );
+
   const meta = repair.metadata(result);
   assert.strictEqual(meta.incident_repair_attempted, true);
   assert.strictEqual(meta.incident_repair_enqueued, true);
@@ -92,7 +138,7 @@ try {
     root: 'O:/repo', query: 'bounded', ownerResult: huge,
     ownerObserved: true, interpreterPath: 'python'
   }).accepted, false);
-  assert.strictEqual(calls, 1);
+  assert.strictEqual(calls, 2);
 
   const cyclic = failure();
   cyclic.untrusted = cyclic;
@@ -100,7 +146,7 @@ try {
     root: 'O:/repo', query: 'bounded', ownerResult: cyclic,
     ownerObserved: true, interpreterPath: 'python'
   }).accepted, false);
-  assert.strictEqual(calls, 1);
+  assert.strictEqual(calls, 2);
 } finally {
   cp.execFileSync = original;
 }
@@ -115,8 +161,8 @@ assert(extensionSource.includes('holoGenerationBoundQuery.isObserved(ownerResult
 assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(ownerResult, ownerObserved)'));
 assert(extensionSource.includes('coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved)'));
 assert((extensionSource.match(/holoIncidentRepair\.metadata\(incidentRepair\)/g) || []).length >= 4);
-assert.strictEqual(pkg.version, '0.4.66');
-assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.66'"));
+assert.strictEqual(pkg.version, '0.4.67');
+assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.67'"));
 assert(!fs.readFileSync(path.join(extDir, 'holoindex_incident_repair.js'), 'utf8').includes('qwen'));
 
 console.log('RedDog HoloIndex incident repair extension tests passed.');

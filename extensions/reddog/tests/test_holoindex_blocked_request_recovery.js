@@ -21,12 +21,20 @@ const message = {
   workerType: 'architect', effort: 'high', mode: 'foundups_fusion', useLastPacket: false
 };
 const incident = {
-  accepted: true, status: 'QUEUED', incident_id: DIGEST('1'),
+  accepted: true, status: 'QUEUED',
+  schema_version: 'reddog_holoindex_incident_repair.v2',
+  incident_kind: 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH',
+  incident_id: DIGEST('1'),
   task_id: 'holoindex_postmerge_refresh:' + HEAD, target_repo_head_sha: HEAD,
+  request_event_id: 'holoindex_postmerge_requested:' + HEAD,
+  workspace_repo_head_sha: HEAD, observed_authority_head_sha: 'f'.repeat(40),
   authority_root_digest: DIGEST('3'), generation_id: '', freshness_receipt_digest: '',
   maintenance_enqueued: true, owner_requery_performed: false,
-  coding_candidate_required: false, rejection_reasons: [], receipt_id: DIGEST('2')
+  coding_candidate_required: false, rejection_reasons: [], receipt_id: ''
 };
+const incidentUnsigned = { ...incident };
+delete incidentUnsigned.receipt_id;
+incident.receipt_id = recovery.digest(incidentUnsigned);
 const meta = {
   incident_repair_accepted: true, incident_repair_enqueued: true,
   incident_repair_status: 'QUEUED', incident_repair_id: incident.incident_id,
@@ -70,7 +78,14 @@ function stageResult(packet) {
   return {
     ok: true, status: 'STAGED', reason: '',
     stage_event_id: 'reddog_holoindex_blocked_retry_staged:' + stage.payload_digest.slice(7),
-    stage_payload_digest: stage.payload_digest, authority_effect: 'none'
+    stage_payload_digest: stage.payload_digest,
+    incident_id: packet.incident_receipt.incident_id,
+    incident_repair_receipt_id: packet.incident_receipt.receipt_id,
+    recovery_id: packet.recovery_id, task_id: packet.incident_receipt.task_id,
+    request_event_id: packet.incident_receipt.request_event_id,
+    target_repo_head_sha: packet.incident_receipt.target_repo_head_sha,
+    authority_root_digest: packet.incident_receipt.authority_root_digest,
+    authority_effect: 'none'
   };
 }
 

@@ -35,6 +35,7 @@ from .holoindex_postmerge_contract import (
     _event_payload_valid,
     _fetch_origin_main,
     _load_db,
+    normalize_holoindex_incident_binding,
     _validate_authority_root,
 )
 
@@ -51,6 +52,7 @@ def coordinate_holoindex_postmerge(
     git_runner: GitRunner = _default_git_runner,
     now: Callable[[], datetime] = _utc_now,
     prove_operational: Callable[..., Any] | None = None,
+    incident_binding: Mapping[str, Any] | None = None,
 ) -> HoloIndexPostMergeCoordinationResult:
     """Queue or reconcile one exact-``origin/main`` maintenance task."""
 
@@ -78,6 +80,17 @@ def coordinate_holoindex_postmerge(
             authority_root_digest=authority_digest,
             rejection_reasons=(target_error,),
         )
+    normalized_incident = None
+    if incident_binding is not None:
+        normalized_incident = normalize_holoindex_incident_binding(
+            incident_binding, target_sha
+        )
+        if normalized_incident is None:
+            return HoloIndexPostMergeCoordinationResult(
+                False, "REJECTED", target_repo_head_sha=target_sha,
+                authority_root_digest=authority_digest,
+                rejection_reasons=("incident_binding_invalid",),
+            )
 
     database = _load_db(db)
     task_id = TASK_PREFIX + target_sha
@@ -89,7 +102,8 @@ def coordinate_holoindex_postmerge(
             completion,
             target_repo_head_sha=target_sha,
             authority_root_digest=authority_digest,
-            expected_status="COMPLETED",
+                expected_status="COMPLETED",
+                expected_incident_binding=normalized_incident,
         ):
             return HoloIndexPostMergeCoordinationResult(
                 False,
@@ -110,6 +124,7 @@ def coordinate_holoindex_postmerge(
                 target_repo_head_sha=target_sha,
                 authority_root_digest=authority_digest,
                 expected_status="REQUESTED",
+                expected_incident_binding=normalized_incident,
             )
             or str(request.get("resolution_status") or "") != "completed"
         ):
@@ -172,6 +187,7 @@ def coordinate_holoindex_postmerge(
             target_repo_head_sha=target_sha,
             authority_root_digest=authority_digest,
             status="REQUESTED",
+            incident_binding=normalized_incident,
         )
         if not database.create_coordination_event(
             request_event_id,
@@ -186,6 +202,7 @@ def coordinate_holoindex_postmerge(
                 target_repo_head_sha=target_sha,
                 authority_root_digest=authority_digest,
                 expected_status="REQUESTED",
+                expected_incident_binding=normalized_incident,
             ):
                 return HoloIndexPostMergeCoordinationResult(
                     False,
@@ -200,6 +217,7 @@ def coordinate_holoindex_postmerge(
         target_repo_head_sha=target_sha,
         authority_root_digest=authority_digest,
         expected_status="REQUESTED",
+        expected_incident_binding=normalized_incident,
     ):
         return HoloIndexPostMergeCoordinationResult(
             False,
@@ -220,6 +238,8 @@ def coordinate_holoindex_postmerge(
             "request_event_id": request_event_id,
             "retry_count": 0,
         }
+        if normalized_incident is not None:
+            context["incident_binding"] = normalized_incident
         created = database.create_holoindex_postmerge_task_if_absent(
             task_id=task_id,
             description=f"Refresh canonical HoloIndex for origin/main {target_sha}",
@@ -248,6 +268,10 @@ def coordinate_holoindex_postmerge(
             or context.get("target_repo_head_sha") != target_sha
             or context.get("authority_root_digest") != authority_digest
             or context.get("source") != SOURCE
+            or (
+                normalized_incident is not None
+                and context.get("incident_binding") != normalized_incident
+            )
         ):
             return HoloIndexPostMergeCoordinationResult(
                 False,

@@ -12,6 +12,17 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-08-09 - Incident-bound post-merge maintenance admission
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97
+
+- Extended the canonical exact-SHA post-merge task and request-event contract
+  with an optional typed HoloIndex incident binding.
+- The coordinator now rejects unknown incident kinds, target/origin drift, and
+  conflicting stale-HEAD observations before creating a task or event. Existing
+  ordinary post-merge behavior remains compatible and query-time callers gain
+  no indexing authority.
+
 ### 2026-08-08 - Lightweight package boundary for post-merge contracts
 
 **WSP Protocol:** WSP 00, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97

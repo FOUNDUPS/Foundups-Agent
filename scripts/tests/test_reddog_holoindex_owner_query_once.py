@@ -549,6 +549,40 @@ def test_authority_selection_failure_precedes_owner_bootstrap(
     assert result["no_authority_worktree_mutation_performed"] is True
 
 
+def test_head_mismatch_failure_preserves_verified_authority_binding(
+    tmp_path: Path,
+) -> None:
+    workspace_head = "c" * 40
+    authority_head = "d" * 40
+    authority_digest = "sha256:" + "e" * 64
+    selection = HoloIndexAuthoritySelection(
+        accepted=False,
+        selected_root=tmp_path,
+        workspace_head_sha=workspace_head,
+        authority_head_sha=authority_head,
+        authority_root_digest=authority_digest,
+        workspace_overlay_present=False,
+        source="deterministic_sibling",
+        rejection_reasons=("HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",),
+    )
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("owner must not start against stale authority")
+        ),
+        select_authority=lambda _root: selection,
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH"
+    assert result["owner_attempts"] == 0
+    assert result["workspace_repo_head_sha"] == workspace_head
+    assert result["authority_repo_head_sha"] == authority_head
+    assert result["authority_repo_root_digest"] == authority_digest
+    assert result["no_authority_worktree_mutation_performed"] is True
+
+
 def test_authority_change_after_query_discards_result(tmp_path: Path) -> None:
     accepted = _selection(tmp_path)
     changed = HoloIndexAuthoritySelection(

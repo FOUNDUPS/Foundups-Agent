@@ -20,11 +20,25 @@ DIGEST = "sha256:" + ("b" * 64)
 GENERATION = "sha256:" + ("c" * 64)
 FRESHNESS = "sha256:" + ("d" * 64)
 TASK_ID = "holoindex_postmerge_refresh:" + HEAD
+STALE_HEAD = "e" * 40
 
 
 def _selection(root: Path) -> HoloIndexAuthoritySelection:
     return HoloIndexAuthoritySelection(
         True, root, HEAD, HEAD, DIGEST, True, "authority_worktree"
+    )
+
+
+def _stale_selection(root: Path) -> HoloIndexAuthoritySelection:
+    return HoloIndexAuthoritySelection(
+        False,
+        root,
+        HEAD,
+        STALE_HEAD,
+        DIGEST,
+        True,
+        "authority_worktree",
+        ("HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",),
     )
 
 
@@ -40,6 +54,17 @@ def _failure(**changes):
         "authority_repo_root_digest": DIGEST,
         "no_authority_worktree_mutation_performed": True,
     }
+    value.update(changes)
+    return value
+
+
+def _stale_failure(**changes):
+    value = _failure()
+    value.update(
+        error="HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        owner_attempts=0,
+        authority_repo_head_sha=STALE_HEAD,
+    )
     value.update(changes)
     return value
 
@@ -128,6 +153,102 @@ def test_valid_incident_enqueues_existing_postmerge_task(tmp_path: Path) -> None
     assert result.receipt_id.startswith("sha256:")
     assert len(called) == 1
     assert called[0]["repo_root"] == tmp_path.resolve()
+
+
+def test_stale_authority_enqueues_existing_postmerge_task(
+    tmp_path: Path,
+) -> None:
+    called = []
+
+    def coordinator(**kwargs):
+        called.append(kwargs)
+        return _coordinate()
+
+    result = coordinate_holoindex_incident_repair(
+        repo_root=tmp_path,
+        query="repair HoloIndex authority",
+        owner_failure=_stale_failure(),
+        db=object(),
+        environment={"SAFE": "1"},
+        select_authority=lambda _root: _stale_selection(tmp_path),
+        coordinator=coordinator,
+        query_runner=lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("stale authority must route to postmerge first")
+        ),
+    )
+
+    assert result.accepted is True
+    assert result.status == "QUEUED"
+    assert result.target_repo_head_sha == HEAD
+    assert result.authority_root_digest == DIGEST
+    assert result.maintenance_enqueued is True
+    assert len(called) == 1
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        _stale_failure(owner_attempts=False),
+        _stale_failure(owner_attempts="0"),
+        _stale_failure(owner_attempts=1),
+        _stale_failure(authority_repo_head_sha="f" * 40),
+        _stale_failure(authority_repo_root_digest="sha256:" + "f" * 64),
+        _stale_failure(authority_repo_head_sha=HEAD),
+    ],
+)
+def test_forged_stale_authority_failure_never_coordinates(
+    tmp_path: Path, failure: dict
+) -> None:
+    called = []
+    result = coordinate_holoindex_incident_repair(
+        repo_root=tmp_path,
+        query="repair HoloIndex authority",
+        owner_failure=failure,
+        select_authority=lambda _root: _stale_selection(tmp_path),
+        coordinator=lambda **kwargs: called.append(kwargs),
+        query_runner=lambda *_args, **_kwargs: _verified_owner_result(),
+    )
+
+    assert result.accepted is False
+    assert called == []
+
+
+def test_stale_authority_current_requires_fresh_selection_and_owner_receipt(
+    tmp_path: Path,
+) -> None:
+    selections = iter((_stale_selection(tmp_path), _selection(tmp_path)))
+    result = coordinate_holoindex_incident_repair(
+        repo_root=tmp_path,
+        query="repair HoloIndex owner",
+        owner_failure=_stale_failure(),
+        select_authority=lambda _root: next(selections),
+        coordinator=lambda **_kwargs: _coordinate("CURRENT"),
+        query_runner=lambda *_args, **_kwargs: _verified_owner_result(current=True),
+    )
+
+    assert result.accepted is True
+    assert result.status == "OWNER_READY"
+    assert result.target_repo_head_sha == HEAD
+    assert result.owner_requery_performed is True
+
+
+def test_stale_authority_current_rejects_still_stale_selection(
+    tmp_path: Path,
+) -> None:
+    result = coordinate_holoindex_incident_repair(
+        repo_root=tmp_path,
+        query="repair HoloIndex owner",
+        owner_failure=_stale_failure(),
+        select_authority=lambda _root: _stale_selection(tmp_path),
+        coordinator=lambda **_kwargs: _coordinate("CURRENT"),
+        query_runner=lambda *_args, **_kwargs: _verified_owner_result(current=True),
+    )
+
+    assert result.accepted is False
+    assert result.status == "ESCALATE"
+    assert result.rejection_reasons == (
+        "holoindex_authority_still_stale_after_current_proof",
+    )
 
 
 @pytest.mark.parametrize("status", ["ASSIGNED", "EXECUTING"])

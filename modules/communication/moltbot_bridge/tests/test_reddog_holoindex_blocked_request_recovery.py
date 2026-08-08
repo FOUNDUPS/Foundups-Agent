@@ -7,7 +7,10 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from types import SimpleNamespace
 
-from holo_index.authority_worktree import HoloIndexAuthoritySelection
+from holo_index.authority_worktree import (
+    AUTHORITY_ROOT_HEAD_MISMATCH,
+    HoloIndexAuthoritySelection,
+)
 from holo_index.query_receipt import build_query_receipt, canonical_semantic_evidence
 from modules.communication.moltbot_bridge.src import (
     reddog_holoindex_blocked_request_recovery as recovery,
@@ -36,6 +39,7 @@ ROOT_DIGEST = "sha256:" + "b" * 64
 GENERATION = "sha256:" + "c" * 64
 FRESHNESS = "sha256:" + "d" * 64
 INCIDENT = "sha256:" + "e" * 64
+STALE_HEAD = "f" * 40
 QUERY = "audit HoloIndex"
 TASK_ID = TASK_PREFIX + HEAD
 NOW_MS = 1_786_083_200_000
@@ -44,6 +48,16 @@ REQUEST = {
     "workerType": "architect", "effort": "high", "mode": "foundups_fusion",
     "useLastPacket": False,
 }
+
+
+def _durable_incident_binding() -> dict[str, str]:
+    return {
+        "schema_version": "reddog_holoindex_incident_repair.v2",
+        "incident_kind": AUTHORITY_ROOT_HEAD_MISMATCH,
+        "incident_id": INCIDENT,
+        "workspace_repo_head_sha": HEAD,
+        "observed_authority_head_sha": STALE_HEAD,
+    }
 
 
 class _Database:
@@ -78,12 +92,14 @@ def _task(completed: bool) -> dict:
     return {
         "status": "completed" if completed else "executing",
         "assigned_to": CLAIM_AGENT_ID,
+        "required_skills": ["holo-search"],
         "context": {
             "schema_version": SCHEMA_VERSION,
             "source": SOURCE,
             "target_repo_head_sha": HEAD,
             "authority_root_digest": ROOT_DIGEST,
             "request_event_id": REQUEST_EVENT_PREFIX + HEAD,
+            "incident_binding": _durable_incident_binding(),
         },
     }
 
@@ -91,7 +107,7 @@ def _task(completed: bool) -> dict:
 def _events() -> dict[str, dict]:
     requested = _event_payload(
         target_repo_head_sha=HEAD, authority_root_digest=ROOT_DIGEST,
-        status="REQUESTED",
+        status="REQUESTED", incident_binding=_durable_incident_binding(),
     )
     completed = _event_payload(
         target_repo_head_sha=HEAD, authority_root_digest=ROOT_DIGEST,
@@ -99,7 +115,11 @@ def _events() -> dict[str, dict]:
         freshness_receipt_digest=FRESHNESS,
     )
     return {
-        REQUEST_EVENT_PREFIX + HEAD: {"payload": requested},
+        REQUEST_EVENT_PREFIX + HEAD: {
+            "event_type": "holoindex_postmerge_maintenance",
+            "initiator_agent": "wre", "target_agents": [CLAIM_AGENT_ID],
+            "payload": requested,
+        },
         COMPLETION_EVENT_PREFIX + HEAD: {"payload": completed},
     }
 
@@ -110,13 +130,30 @@ def _selection(root: Path) -> HoloIndexAuthoritySelection:
     )
 
 
+def _stale_selection(root: Path) -> HoloIndexAuthoritySelection:
+    return HoloIndexAuthoritySelection(
+        False,
+        root,
+        HEAD,
+        STALE_HEAD,
+        ROOT_DIGEST,
+        False,
+        "deterministic_sibling",
+        (AUTHORITY_ROOT_HEAD_MISMATCH,),
+    )
+
+
 def _incident() -> dict:
     return seal_receipt(HoloIndexIncidentRepairReceipt(
         accepted=True,
         status="QUEUED",
+        incident_kind=AUTHORITY_ROOT_HEAD_MISMATCH,
         incident_id=INCIDENT,
         task_id=TASK_ID,
+        request_event_id=REQUEST_EVENT_PREFIX + HEAD,
         target_repo_head_sha=HEAD,
+        workspace_repo_head_sha=HEAD,
+        observed_authority_head_sha=STALE_HEAD,
         authority_root_digest=ROOT_DIGEST,
         maintenance_enqueued=True,
     )).to_dict()
@@ -189,7 +226,7 @@ def test_exact_existing_completion_and_current_owner_are_ready(monkeypatch, tmp_
     assert result["freshness_receipt_digest"] == FRESHNESS
     assert result["authority_effect"] == "none"
     assert result["no_holoindex_reindex_performed"] is True
-    assert len(database.reads) == 5
+    assert len(database.reads) == 7
     claim = database.events[result["claim_event_id"]]
     assert QUERY not in str(claim)
     assert claim["payload"]["request_digest"] == _binding()["request_digest"]
@@ -237,6 +274,134 @@ def test_incomplete_maintenance_waits_without_owner_query(monkeypatch, tmp_path)
     assert result["status"] == recovery.WAITING
     assert result["reason"] == "recovery_maintenance_not_completed"
     assert called == []
+
+
+def test_stale_authority_can_stage_but_cannot_claim_before_refresh(
+    monkeypatch, tmp_path
+):
+    database = _Database(completed=False)
+    binding = _binding()
+    monkeypatch.setattr(
+        recovery, "resolve_holoindex_authority_root", _stale_selection
+    )
+
+    staged = recovery.stage_holo_blocked_request_recovery(
+        repo_root=tmp_path,
+        query=QUERY,
+        incident_receipt=_incident(),
+        **binding,
+        now_epoch_ms=NOW_MS,
+        db=database,
+    )
+    claimed = recovery.admit_holo_blocked_request_recovery(
+        repo_root=tmp_path,
+        query=QUERY,
+        incident_receipt=_incident(),
+        **binding,
+        now_epoch_ms=NOW_MS,
+        db=database,
+        query_runner=lambda *_args, **_kwargs: _owner_result(),
+    )
+
+    assert staged["status"] == recovery.STAGED
+    assert claimed["status"] == recovery.REJECTED
+    assert claimed["reason"] == "recovery_authority_binding_changed"
+
+
+def test_stale_stage_rejects_wrong_workspace_head_or_authority_digest(
+    monkeypatch, tmp_path
+):
+    binding = _binding()
+    for selection in (
+        HoloIndexAuthoritySelection(
+            False, tmp_path, "0" * 40, STALE_HEAD, ROOT_DIGEST, False,
+            "deterministic_sibling", (AUTHORITY_ROOT_HEAD_MISMATCH,),
+        ),
+        HoloIndexAuthoritySelection(
+            False, tmp_path, HEAD, STALE_HEAD, "sha256:" + "0" * 64,
+            False, "deterministic_sibling",
+            (AUTHORITY_ROOT_HEAD_MISMATCH,),
+        ),
+    ):
+        monkeypatch.setattr(
+            recovery,
+            "resolve_holoindex_authority_root",
+            lambda _root, value=selection: value,
+        )
+        result = recovery.stage_holo_blocked_request_recovery(
+            repo_root=tmp_path,
+            query=QUERY,
+            incident_receipt=_incident(),
+            **binding,
+            now_epoch_ms=NOW_MS,
+            db=_Database(completed=False),
+        )
+        assert result["status"] == recovery.REJECTED
+        assert result["reason"] == "recovery_authority_binding_changed"
+
+
+def test_stage_requires_exact_durable_maintenance_task_and_request(
+    monkeypatch, tmp_path
+):
+    monkeypatch.setattr(recovery, "resolve_holoindex_authority_root", _stale_selection)
+    binding = _binding()
+    for mutate in (
+        lambda db: setattr(db, "task", None),
+        lambda db: db.task["context"].update(source="attacker"),
+        lambda db: db.task.update(assigned_to="attacker"),
+        lambda db: db.events.pop(REQUEST_EVENT_PREFIX + HEAD),
+        lambda db: db.events[REQUEST_EVENT_PREFIX + HEAD].update(
+            initiator_agent="attacker"
+        ),
+        lambda db: db.events[REQUEST_EVENT_PREFIX + HEAD].update(
+            target_agents=["attacker"]
+        ),
+    ):
+        database = _Database(completed=False)
+        mutate(database)
+        before = set(database.events)
+        result = recovery.stage_holo_blocked_request_recovery(
+            repo_root=tmp_path, query=QUERY, incident_receipt=_incident(),
+            **binding, now_epoch_ms=NOW_MS, db=database,
+        )
+        assert result["status"] == recovery.REJECTED
+        assert result["reason"] == "recovery_maintenance_request_invalid"
+        assert set(database.events) == before
+
+
+def test_rehashed_stale_head_substitution_lacks_durable_binding(
+    monkeypatch, tmp_path
+):
+    substituted = "c" * 40
+    monkeypatch.setattr(
+        recovery, "resolve_holoindex_authority_root",
+        lambda root: HoloIndexAuthoritySelection(
+            False, root, HEAD, substituted, ROOT_DIGEST, False,
+            "deterministic_sibling", (AUTHORITY_ROOT_HEAD_MISMATCH,),
+        ),
+    )
+    forged = _incident()
+    forged["observed_authority_head_sha"] = substituted
+    forged["rejection_reasons"] = tuple(forged["rejection_reasons"])
+    forged = seal_receipt(HoloIndexIncidentRepairReceipt(
+        **{**forged, "receipt_id": ""}
+    )).to_dict()
+    binding = _binding()
+    binding["recovery_id"] = canonical_digest({
+        "request_digest": binding["request_digest"],
+        "incident_receipt_id": forged["receipt_id"],
+    })
+    database = _Database(completed=False)
+    before = set(database.events)
+
+    result = recovery.stage_holo_blocked_request_recovery(
+        repo_root=tmp_path, query=QUERY, incident_receipt=forged,
+        **binding, now_epoch_ms=NOW_MS, db=database,
+    )
+
+    assert result["status"] == recovery.REJECTED
+    assert result["reason"] == "recovery_maintenance_request_invalid"
+    assert set(database.events) == before
 
 
 def test_forged_completion_payload_rejects(monkeypatch, tmp_path):
@@ -311,8 +476,11 @@ def test_real_agentdb_clients_enforce_one_claim(tmp_path, monkeypatch):
     try:
         clients = (AgentDB(), AgentDB())
         receipt = seal_receipt(HoloIndexIncidentRepairReceipt(
-            accepted=True, status="QUEUED", incident_id=INCIDENT,
-            task_id=TASK_ID, target_repo_head_sha=HEAD,
+            accepted=True, status="QUEUED",
+            incident_kind=AUTHORITY_ROOT_HEAD_MISMATCH, incident_id=INCIDENT,
+            task_id=TASK_ID, request_event_id=REQUEST_EVENT_PREFIX + HEAD,
+            target_repo_head_sha=HEAD, workspace_repo_head_sha=HEAD,
+            observed_authority_head_sha=STALE_HEAD,
             authority_root_digest=ROOT_DIGEST, maintenance_enqueued=True,
         ))
         binding = _binding()

@@ -1,5 +1,17 @@
 # RedDog Interface
 
+Version 0.4.67 extends the existing incident and blocked-request interfaces for
+`HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`. A clean stale authority checkout may
+stage the exact request and enqueue the canonical post-merge task for the
+workspace HEAD. The mismatch must expose independently read workspace and
+authority HEADs plus the authority-root digest; forged, dirty, unrelated,
+same-HEAD, or substituted bindings reject. The request cannot be claimed or
+retried until authority resolution becomes current and the owner proves the
+completion generation and freshness receipt. A queued incident uses a
+deterministic no-model status packet and never asks 012 to supply repository
+paths. No query-time reindex, extension-side worktree mutation, new queue, or
+execution authority is introduced.
+
 Version 0.4.66 adds automatic advisory recovery for an ordinary editor request
 blocked by a validated, deferred HoloIndex incident. One pending request is
 held in SecretStorage. The existing AgentDB Holo maintenance task and atomic

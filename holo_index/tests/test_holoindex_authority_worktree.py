@@ -10,6 +10,7 @@ from holo_index.authority_worktree import (
     AUTHORITY_ROOT_HEAD_MISMATCH,
     AUTHORITY_ROOT_INVALID,
     AUTHORITY_ROOT_UNRELATED,
+    authority_selection_matches_target,
     resolve_holoindex_authority_root,
     resolve_holoindex_runtime_root,
 )
@@ -137,15 +138,33 @@ def test_dirty_authority_is_rejected(tmp_path: Path) -> None:
 
 def test_different_head_authority_is_rejected(tmp_path: Path) -> None:
     workspace, authority = _roots(tmp_path)
+    stale_head = "c" * 40
     result = resolve_holoindex_authority_root(
         workspace,
         environment={AUTHORITY_REPO_ROOT_ENV: str(authority)},
-        state_reader=_state_reader(workspace, authority, _state("c" * 40)),
+        state_reader=_state_reader(workspace, authority, _state(stale_head)),
         common_dir_reader=lambda _path: tmp_path / "common.git",
     )
 
     assert result.accepted is False
     assert result.error == AUTHORITY_ROOT_HEAD_MISMATCH
+    assert result.selected_root == workspace
+    assert result.workspace_head_sha == SHA
+    assert result.authority_head_sha == stale_head
+    assert result.authority_root_digest == repository_root_digest(authority)
+    assert result.workspace_overlay_present is False
+    assert authority_selection_matches_target(
+        result,
+        target_head_sha=SHA,
+        authority_root_digest=repository_root_digest(authority),
+        allow_stale=True,
+        expected_stale_head_sha=stale_head,
+    ) is True
+    assert authority_selection_matches_target(
+        result,
+        target_head_sha=SHA,
+        authority_root_digest=repository_root_digest(authority),
+    ) is False
 
 
 def test_missing_sibling_preserves_clean_workspace_behavior(tmp_path: Path) -> None:

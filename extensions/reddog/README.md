@@ -1,6 +1,19 @@
 # RedDog
 
-Version: 0.4.66
+Version: 0.4.67
+
+Version 0.4.67 admits a clean, independently inspected stale HoloIndex
+authority checkout into the existing exact-SHA post-merge maintenance path.
+Authority-root HEAD mismatch is now a repairable incident with zero owner
+attempts because the query owner cannot start before authority selection. The
+extension stages the immutable blocked request while maintenance is pending,
+but claim and retry still require the authority checkout and semantic owner to
+prove the current workspace HEAD, authority digest, generation, and freshness
+receipt. A queued repair returns deterministic operator-visible status without
+spending a model call or asking 012 for repository paths. Query-time reindex,
+extension-side worktree mutation, and retries against stale authority remain
+forbidden. Run-trace target-recall truth now preserves `unknown` rather than
+coercing it to `false`.
 
 Version 0.4.66 connects deferred HoloIndex incident repair to one
 restart-persistent, at-most-once advisory retry of the exact blocked editor

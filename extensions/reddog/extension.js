@@ -33,7 +33,7 @@ const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
 const groundingFailureDialogue = require('./grounding_failure_dialogue');
-const EXTENSION_VERSION = '0.4.66';
+const EXTENSION_VERSION = '0.4.67';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -5494,6 +5494,29 @@ function rearmBlockedRecoveryPolling(state, attempt, staged) {
   }
 }
 
+function bindBlockedRecoveryScorecard(scorecard, stage) {
+  if (!scorecard || !stage) return;
+  scorecard.blocked_request_recovery_status = stage.status || 'REJECTED';
+  scorecard.blocked_request_recovery_admitted = stage.ok === true;
+}
+
+async function runBlockedGroundingResponse(params) {
+  const p = params;
+  if (p.stage && p.stage.ok === true) {
+    const receipt = groundingFailureDialogue.buildReceipt(
+      p.preflight, p.scorecard, p.stage
+    );
+    p.trail.push('holoindex_recovery_staged', p.stage.status);
+    return groundingFailureDialogue.buildRecoveryQueuedResult(
+      p.preflight, receipt, p.stage
+    );
+  }
+  return runGroundingFailureDialogue(
+    p.context, p.worker, p.workFocus, p.preflight, p.scorecard,
+    p.onProgress, p.bridgeState, p.trail, p.webview
+  );
+}
+
 function wireFusionWebview(context, webview, worker, state) {
   const recoveryOptions = holoBlockedRecoveryOptions(context);
   const executeAsk = async (message, recoveryContext) => {
@@ -5545,7 +5568,6 @@ function wireFusionWebview(context, webview, worker, state) {
         : []
     };
     const systemPrompt = classification.conversationalDraft ? conversationalDraftPolicy.systemPrompt() : buildSystemPrompt(workerType, effort, contextPacket.quality);
-
     postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + (classification.conversationalDraft ? '' : ' panel=' + worker.panel.join(' + ')) + ' model_source=' + worker.modelBindingSource + ' (' + classification.reasons.join(', ') + ')');
     const localStatus = authoritativeWorkStateQuery.statusText(classification.localFastPath);
     const routeStatus = localStatus || (classification.conversationalDraft ? conversationalDraftPolicy.statusText() : '');
@@ -5577,6 +5599,7 @@ function wireFusionWebview(context, webview, worker, state) {
       recoveryOptions, message, contextPacket, groundingPreflight, webview
     );
     rearmBlockedRecoveryPolling(state, attempt, blockedRequestRecoveryStage);
+    bindBlockedRecoveryScorecard(holoScorecard, blockedRequestRecoveryStage);
     if (holoScorecard) {
       holoScorecard.grounding_preflight_applied = groundingPreflight.applied === true;
       holoScorecard.grounding_preflight_passed = groundingPreflight.passed === true;
@@ -5653,10 +5676,10 @@ function wireFusionWebview(context, webview, worker, state) {
         workState: runAuthoritativeWorkStateQueryBridge
       });
     } else if (!groundingPreflight.passed) {
-      result = await runGroundingFailureDialogue(
-        context, worker, workFocus, groundingPreflight, holoScorecard,
-        onBridgeProgress, bridgeState, workTrail, webview
-      );
+      result = await runBlockedGroundingResponse({
+        context, worker, workFocus, preflight: groundingPreflight, scorecard: holoScorecard,
+        onProgress: onBridgeProgress, bridgeState, trail: workTrail, webview, stage: blockedRequestRecoveryStage
+      });
     } else {
       result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, bridgeState, promptConstruction);
     }

@@ -87,6 +87,27 @@ def _failure(
     )
 
 
+def _head_mismatch_failure(
+    workspace: Path,
+    workspace_state: RepositoryState,
+    authority: Path,
+    authority_state: RepositoryState,
+    source: str,
+) -> HoloIndexAuthoritySelection:
+    """Expose a verified stale-authority binding without accepting it."""
+
+    return HoloIndexAuthoritySelection(
+        accepted=False,
+        selected_root=workspace,
+        workspace_head_sha=workspace_state.head_sha,
+        authority_head_sha=authority_state.head_sha,
+        authority_root_digest=repository_root_digest(authority),
+        workspace_overlay_present=not workspace_state.proven_clean,
+        source=source,
+        rejection_reasons=(AUTHORITY_ROOT_HEAD_MISMATCH,),
+    )
+
+
 def _candidate(
     workspace: Path,
     environment: Mapping[str, str],
@@ -170,8 +191,12 @@ def _validate_authority_candidate(
     if not authority_state.proven_clean:
         return _failure(workspace, workspace_state, AUTHORITY_ROOT_DIRTY, source)
     if authority_state.head_sha != workspace_state.head_sha:
-        return _failure(
-            workspace, workspace_state, AUTHORITY_ROOT_HEAD_MISMATCH, source
+        return _head_mismatch_failure(
+            workspace,
+            workspace_state,
+            authority,
+            authority_state,
+            source,
         )
     return HoloIndexAuthoritySelection(
         accepted=True,
@@ -220,6 +245,36 @@ def resolve_holoindex_authority_root(
     )
 
 
+def authority_selection_matches_target(
+    selection: HoloIndexAuthoritySelection,
+    *,
+    target_head_sha: str,
+    authority_root_digest: str,
+    allow_stale: bool = False,
+    expected_stale_head_sha: str = "",
+) -> bool:
+    """Match a current authority or one exact repair-pending stale binding."""
+
+    common = bool(
+        selection.authority_root_digest == authority_root_digest
+        and selection.workspace_head_sha == target_head_sha
+    )
+    return common and bool(
+        (
+            selection.accepted
+            and selection.authority_head_sha == target_head_sha
+        )
+        or (
+            allow_stale
+            and not selection.accepted
+            and selection.error == AUTHORITY_ROOT_HEAD_MISMATCH
+            and bool(expected_stale_head_sha)
+            and selection.authority_head_sha == expected_stale_head_sha
+            and selection.authority_head_sha != target_head_sha
+        )
+    )
+
+
 __all__ = [
     "AUTHORITY_REPO_ROOT_ENV",
     "AUTHORITY_ROOT_DIRTY",
@@ -228,6 +283,7 @@ __all__ = [
     "AUTHORITY_ROOT_UNRELATED",
     "HoloIndexAuthoritySelection",
     "WORKSPACE_STATE_UNAVAILABLE",
+    "authority_selection_matches_target",
     "resolve_holoindex_authority_root",
     "resolve_holoindex_runtime_root",
 ]
