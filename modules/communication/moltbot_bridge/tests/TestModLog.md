@@ -1,3 +1,10 @@
+## 2026-08-08: Startup queue runtime-root regressions
+
+- Proved the WRE queue bootstrap requires a valid runtime root, rejects
+  out-of-root state, and receives the exact root/path pair from `main.py`.
+- Focused queue-consumer and dependency-preflight matrix: 49 passed with two
+  platform symlink skips.
+
 ## 2026-08-06: Principal Memex live resident source regressions
 
 - Proved current-generation session splitting, principal-signed disclosure

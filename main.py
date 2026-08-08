@@ -676,17 +676,32 @@ def run_dependency_security_preflight(repo_root: Path) -> bool:
         print(f"[DEP-SECURITY] Preflight warning: {exc}")
         return True
 
-    totals = status.get("totals", {}) if isinstance(status, dict) else {}
+    return _report_dependency_security_status(status, enforced=enforced)
+
+
+def _report_dependency_security_status(
+    status: Mapping[str, Any], *, enforced: bool,
+) -> bool:
+    totals = status.get("totals", {})
     critical = int(totals.get("critical", 0) or 0)
     high = int(totals.get("high", 0) or 0)
     unknown = int(totals.get("unknown", 0) or 0)
     tool_failures = int(status.get("tool_failures", 0) or 0)
+    evidence_failures = int(status.get("evidence_failures", 0) or 0)
     cached = bool(status.get("cached", False))
     passed = bool(status.get("passed", False))
+    degraded = bool(status.get("degraded", False))
     cache_state = "cached" if cached else "fresh"
+    decision = "PASS" if passed else ("WARN" if degraded else "FAIL")
+    findings = (
+        "counts=WITHHELD"
+        if status.get("counts_withheld", False)
+        else f"critical={critical} high={high} unknown={unknown}"
+    )
     print(
-        f"[DEP-SECURITY] preflight={'PASS' if passed else 'FAIL'} ({cache_state}) "
-        f"critical={critical} high={high} unknown={unknown} tool_failures={tool_failures}"
+        f"[DEP-SECURITY] preflight={decision} ({cache_state}) "
+        f"{findings} "
+        f"tool_failures={tool_failures} evidence_failures={evidence_failures}"
     )
 
     if not passed:
@@ -695,18 +710,15 @@ def run_dependency_security_preflight(repo_root: Path) -> bool:
                 on_preflight_fail,
             )
 
-            severity = "critical" if critical > 0 else ("high" if high > 0 else "medium")
+            severity, payload = _dependency_failure_payload(
+                status, critical=critical, high=high, unknown=unknown,
+                tool_failures=tool_failures, evidence_failures=evidence_failures,
+                cache_state=cache_state, enforced=enforced,
+            )
             on_preflight_fail(
                 component="dep_security",
                 severity=severity,
-                payload={
-                    "critical": critical,
-                    "high": high,
-                    "unknown": unknown,
-                    "tool_failures": tool_failures,
-                    "cache_state": cache_state,
-                    "enforced": enforced,
-                },
+                payload=payload,
                 source="main.py:run_dep_security_preflight",
             )
         except Exception as exc:
@@ -716,6 +728,22 @@ def run_dependency_security_preflight(repo_root: Path) -> bool:
         print("[DEP-SECURITY] Startup blocked by OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED=1")
         return False
     return True
+
+
+def _dependency_failure_payload(
+    status: Mapping[str, Any], **values: object,
+) -> tuple[str, dict[str, object]]:
+    payload = dict(values)
+    if bool(status.get("counts_withheld", False)):
+        payload.pop("critical", None)
+        payload.pop("high", None)
+        payload.pop("unknown", None)
+        payload["counts_withheld"] = True
+        payload["cache_authority"] = str(status.get("cache_authority", "ADVISORY_ONLY"))
+        return "medium", payload
+    critical = int(payload.get("critical", 0) or 0)
+    high = int(payload.get("high", 0) or 0)
+    return ("critical" if critical > 0 else "high" if high > 0 else "medium"), payload
 
 
 def run_env_hygiene_preflight(repo_root: Path) -> bool:
@@ -1628,7 +1656,11 @@ def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
         print(f"[REDDOG-WRE-QUEUE] preflight=WARN error={type(exc).__name__}")
         return True
 
-    status = "PASS" if result.ready else "WARN"
+    return _report_reddog_wre_queue_consumer_result(result, enforced=enforced)
+
+
+def _report_reddog_wre_queue_consumer_result(result, *, enforced: bool) -> bool:
+    status = "PASS" if result.ready else ("FAIL" if enforced else "WARN")
     reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
     print(
         f"[REDDOG-WRE-QUEUE] preflight={status} status={result.status} "

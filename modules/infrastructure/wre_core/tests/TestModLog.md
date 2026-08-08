@@ -1,4 +1,11 @@
 # TestModLog - wre_core/tests
+## 2026-08-08: Dependency preflight Windows decoding regression
+- Added strict UTF-8 subprocess coverage, npm/cargo schema and exit validation,
+  summary-consistency checks, cache replay/config/input invalidation, a UTF-8
+  advisory fixture, and legacy-cache invalidation; paired focused startup
+  suites pass 49 tests
+  with two platform symlink skips.
+
 ## 2026-08-01: Test impact and differential receipt
 - Proved unchanged and resolved baseline failures accept while new failures,
   errors, skips, removed tests, execution-binding drift, and insufficient full

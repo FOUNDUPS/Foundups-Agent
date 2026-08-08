@@ -1,5 +1,11 @@
 # TestModLog - shared tests
 
+## 2026-08-08: Startup dependency-evidence enforcement
+
+- Proved malformed dependency scanner evidence remains visible in startup
+  telemetry and blocks when enforcement is active. Incomplete optional scans
+  are reported as `WARN`, never `PASS`; the 28-test startup matrix passes.
+
 ## 2026-07-24: WSP 97 repository-evidence receipt v1.1
 
 - Files: `tests/test_wsp97_execution_validator.py`, `tests/test_wsp97_repository_evidence.py`
