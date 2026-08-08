@@ -1,4 +1,15 @@
 # ModLog - moltbot_bridge
+## 2026-08-08: RedDog startup queue runtime-root contract repair
+- Completed the existing `runtime_allowed_root` startup contract instead of
+  dropping the caller's confinement argument. The WRE queue dry-run now
+  validates an external runtime root and reads work state through the shared
+  descriptor-confined runtime-artifact helper.
+- Added regressions for missing roots, out-of-root work state, and the exact
+  `main.py` root/path forwarding pair. Enforced rejection is now reported as
+  `FAIL`, while non-enforced degraded startup remains `WARN`. No queue
+  mutation, worker dispatch, HoloIndex maintenance, or execution authority was
+  added. (WSP 00/15/22/50/97)
+
 ## 2026-08-06: Principal Memex live resident source supply
 - Bound one pre-issued principal disclosure to the current signed session,
   AgentDB revision, runtime generation, exact architect cycle, and model

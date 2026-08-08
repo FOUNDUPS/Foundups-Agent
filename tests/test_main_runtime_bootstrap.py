@@ -12,6 +12,102 @@ main = importlib.util.module_from_spec(_MAIN_SPEC)
 _MAIN_SPEC.loader.exec_module(main)
 
 
+def test_dependency_evidence_failure_warns_when_not_enforced(monkeypatch, capsys):
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED", "0")
+    status = {
+        "totals": {"critical": 0, "high": 0, "unknown": 0},
+        "tool_failures": 1,
+        "evidence_failures": 1,
+        "cached": False,
+        "passed": False,
+    }
+
+    with patch(
+        "modules.infrastructure.wre_core.src.dependency_security_preflight.run_dependency_security_preflight",
+        return_value=status,
+    ):
+        assert main.run_dependency_security_preflight(Path.cwd()) is True
+
+    output = capsys.readouterr().out
+    assert "preflight=FAIL" in output
+    assert "evidence_failures=1" in output
+
+
+def test_dependency_incomplete_optional_scan_reports_warn(monkeypatch, capsys):
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED", "0")
+    status = {
+        "totals": {"critical": 0, "high": 0, "unknown": 0},
+        "tool_failures": 1,
+        "evidence_failures": 0,
+        "cached": False,
+        "passed": False,
+        "degraded": True,
+    }
+
+    with patch(
+        "modules.infrastructure.wre_core.src.dependency_security_preflight.run_dependency_security_preflight",
+        return_value=status,
+    ):
+        assert main.run_dependency_security_preflight(Path.cwd()) is True
+
+    assert "preflight=WARN" in capsys.readouterr().out
+
+
+def test_dependency_cached_advisory_withholds_counts(monkeypatch, capsys):
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED", "0")
+    status = {
+        "totals": {"critical": 99, "high": 99, "unknown": 99},
+        "tool_failures": 0,
+        "evidence_failures": 1,
+        "cached": True,
+        "passed": False,
+        "degraded": True,
+        "counts_withheld": True,
+    }
+
+    with patch(
+        "modules.infrastructure.wre_core.src.dependency_security_preflight.run_dependency_security_preflight",
+        return_value=status,
+    ), patch(
+        "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+    ) as on_fail:
+        assert main.run_dependency_security_preflight(Path.cwd()) is True
+
+    output = capsys.readouterr().out
+    assert "preflight=WARN (cached) counts=WITHHELD" in output
+    assert "critical=99" not in output
+    payload = on_fail.call_args.kwargs["payload"]
+    assert payload["counts_withheld"] is True
+    assert payload["cache_authority"] == "ADVISORY_ONLY"
+    assert "critical" not in payload
+    assert "high" not in payload
+    assert "unknown" not in payload
+
+
+def test_dependency_evidence_failure_blocks_when_enforced(monkeypatch, capsys):
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED", "1")
+    status = {
+        "totals": {"critical": 0, "high": 0, "unknown": 0},
+        "tool_failures": 1,
+        "evidence_failures": 1,
+        "cached": False,
+        "passed": False,
+    }
+
+    with patch(
+        "modules.infrastructure.wre_core.src.dependency_security_preflight.run_dependency_security_preflight",
+        return_value=status,
+    ):
+        assert main.run_dependency_security_preflight(Path.cwd()) is False
+
+    output = capsys.readouterr().out
+    assert "Startup blocked" in output
+
+
 def test_bootstrap_runtime_dae_launches_registers_openclaw(monkeypatch):
     daemon = MagicMock()
     daemon.running = True

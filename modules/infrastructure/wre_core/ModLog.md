@@ -1,5 +1,24 @@
 # WRE Core - ModLog
 ## Chronological Change Log
+### [2026-08-08] - DEPENDENCY PREFLIGHT EVIDENCE INTEGRITY
+
+- Captured scanner output as bytes and required strict UTF-8 JSON evidence,
+  preventing Windows host-codepage reader failures and silent loss of npm
+  findings. Human-readable stderr alone permits replacement decoding.
+- Required the pip, npm, and cargo schema plus allowed exit status before
+  counts are trusted. Invalid encoding, empty/malformed JSON, missing schema,
+  and cargo exit 101 are now evidence failures rather than zero findings.
+- Recovered the live `clerk-nextjs` npm evidence that the former reader lost:
+  2 critical and 7 high findings now reach the startup policy unchanged.
+- Required npm and cargo summary totals to agree with their detailed evidence.
+- Audited every discovered Rust lockfile from its own crate directory so one
+  clean crate cannot hide a vulnerable nested crate.
+- Added evidence-failure telemetry without changing vulnerability thresholds
+  or startup enforcement policy. Cache v3 binds scanner policy, installed
+  Python packages, tool identity, and lockfile content; it is advisory-only,
+  withholds unsigned counts, and enforced startup always performs a live scan.
+  (WSP 00/15/22/50/97)
+
 ### [2026-08-02] - LEGACY SELF-AUDIT PROCESS DISPATCH MASTER GATE
 
 - Added a common fail-closed master gate at both legacy self-audit process
