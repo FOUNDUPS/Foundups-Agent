@@ -7,6 +7,42 @@
 
 ## Change Log
 
+### 2026-08-09 - Context-Grounded Replies and Local-Qwen Default
+
+**By:** 0102
+**WSP References:** WSP 00, WSP 15 (P0 score 18), WSP 22, WSP 34, WSP 50, WSP 97
+
+**Runtime evidence:** The active daemon posted generic replies after Grok was unavailable, LM Studio consumed most of the 10-second generation budget, embedded Qwen returned an empty result, and BanterEngine fell through to templates. Studio rows reported `video_id=None`, VoiceMemory queried only the comment, and source telemetry mislabeled template output as `skill_2:llm_contextual`.
+
+**Root causes:**
+
+1. The DOM row extractor did not retain the exact video title/ID/URL.
+2. Semantic guidance replaced the original comment, while tier-2 prompting forced unrelated #FFCPLN promotion.
+3. Personalization and VoiceMemory grounding were omitted from semantic and tier-2 routes.
+4. Embedded replies used the code-role Qwen model and rebuilt a reduced prompt that dropped context.
+5. LM Studio could consume 8 of the processor's 10 seconds before embedded Qwen ran.
+6. Provider source receipts were stale or overwritten, allowing templates to appear contextual.
+
+**Change:**
+
+- Extract and propagate per-row video context and receiving-channel personality.
+- Preserve the original comment in every semantic prompt; make #FFCPLN context-sensitive rather than a troll label.
+- Supply comment history, verified VoiceMemory, raw video title, and content analysis to the same prompt used by every provider.
+- Resolve the general-language Qwen role, retain the full prompt, and avoid the empty-output double-newline stop sequence.
+- Make LM Studio/general Qwen the default route with a 3-second service timeout. Grok is legacy opt-in only.
+- Fail closed when only generic/template output exists; legacy fallback requires `YT_ALLOW_GENERIC_REPLY_FALLBACK=true`.
+- Record the real provider beneath the skill-routing receipt.
+
+**OpenRouter decision:** The existing RedDog/OpenRouter bridge is advisory-only and guarded by explicit typed 012 authorization. This autonomous daemon does not import or bypass it. A future phase can add OpenRouter after the governed autonomous execution contract lands.
+
+**WSP memory retrieval evaluation:** Noise was low and ordering was useful. Tier-0 module artifacts were present (`README.md`, `INTERFACE.md`, `ROADMAP.md`, `ModLog.md`, `tests/README.md`). `tests/TestModLog.md`, `memory/README.md`, and `requirements.txt` were missing at retrieval time; this slice creates the required test log. A follow-up Holo query detected repository state movement and was rejected as stale; no query-side reindex or mutation was attempted.
+
+**Validation:** `test_reply_context_pipeline.py` (7 passed) and `test_ytr1_runtime_hardening.py` (11 passed).
+
+**Files:** `src/intelligent_reply_generator.py`, `skillz/tars_like_heart_reply/src/comment_processor.py`, `skillz/tars_like_heart_reply/comment_engagement_dae.py`, module docs, focused tests.
+
+---
+
 ### 2026-04-19 - YTR1: YouTube Reply Runtime Hardening Phase 1
 
 **By:** 0102 (CW5)

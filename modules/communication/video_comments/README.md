@@ -65,7 +65,9 @@ This module enables autonomous YouTube comment engagement through quantum-entang
 - [x] **Troll Classification**: MAGA troll detection via GrokGreetingGenerator + heuristics
 - [x] **Hostile Pattern Detection**: Sentiment-based classification for non-MAGA hostility ("don't come back", "gtfo", etc.)
 - [x] **Whack-a-MAGA Responses**: Uses troll mockery responses for trolls
-- [x] **Dynamic Reply Generation**: Context-aware replies via Grok (preferred) or LM Studio fallback
+- [x] **Grounded Reply Generation**: Exact Studio-row comment/video context through LM Studio or embedded general Qwen
+- [x] **Context Integrity Gate**: Skip posting when only a generic template is available (legacy opt-in: `YT_ALLOW_GENERIC_REPLY_FALLBACK=true`)
+- [ ] **Governed OpenRouter Execution**: Adopt RedDog/OpenRouter after its typed autonomous execution contract is available; the current advisory route is not imported by this daemon
 
 ### Phase 3: YouTube DAE Integration 📋 PLANNED
 - [ ] **AutoModeratorDAE Hook**: When YouTube DAE launches, trigger comment check
@@ -75,7 +77,7 @@ This module enables autonomous YouTube comment engagement through quantum-entang
 - [ ] **Launch via main.py**: Option to enable comment engagement with YouTube DAE
 
 ### Phase 4: Autonomous Intelligence 🔮 FUTURE
-- [ ] **LLM Response Generation**: Use GPT/Claude for contextual replies
+- [x] **Local LLM Response Generation**: General Qwen receives the full grounded prompt
 - [ ] **Sentiment Analysis**: Classify comment sentiment before responding
 - [ ] **Pattern Learning**: Learn from successful engagement patterns
 - [ ] **Cross-Platform Memory**: Remember users across YouTube, X, LinkedIn
@@ -199,7 +201,8 @@ dae.close()
 
 ## [DEPENDENCIES] Prerequisites
 
-- **LM Studio** serving `ui-tars-1.5-7b` on `http://127.0.0.1:1234`
+- **LM Studio** on `http://127.0.0.1:1234` for the local model service (general Qwen for replies; UI-TARS remains a vision role)
+- **Embedded fallback model** resolved by `resolve_general_model_path()` when LM Studio is unavailable
 - **Chrome** with `--remote-debugging-port=9222`
 - **Signed into** YouTube Studio with target channel
 - **Selenium WebDriver** (ChromeDriver)
