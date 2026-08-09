@@ -49,6 +49,9 @@ def build_signed_worker_dispatch_task(
         queue_consumer_receipt=queue_consumer_receipt,
         work_order_materialization_binding=work_order_materialization_binding,
         task_binding=_task_binding(core),
+        model_runtime_binding_receipt=mapping(
+            queue_item.get("model_runtime_binding_receipt")
+        ),
     )
     context = _task_context(
         core=core,
@@ -200,6 +203,9 @@ def _base_context(
         "authorized_principal_id": str(authority["principal_id"]),
         "authorized_reddog_id": str(authority["reddog_id"]),
         "wsp15_allocation_receipt": dict(mapping(queue_item.get("wsp15_allocation_receipt"))),
+        "model_runtime_binding_receipt": dict(
+            mapping(queue_item.get("model_runtime_binding_receipt"))
+        ),
     }
 
 

@@ -99,6 +99,9 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admis
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     FakeAssuranceReservationStore,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
     admit_bounded_execution,
 )
@@ -290,17 +293,28 @@ def _assert_bootstrap_yielded_at_assurance(
     assert "slice_verifier" not in stored["stage_results"]
 
 
-def _queue_wsp15_allocation_receipt() -> dict[str, object]:
+def _queue_wsp15_allocation_receipt(
+    *,
+    requested_operation: str = "edit_foundup_module",
+    changed_path: str = PILOT_ARTIFACT,
+) -> dict[str, object]:
     return allocate_reddog_wsp15_receipt(
-        requested_operation="edit_foundup_module",
+        requested_operation=requested_operation,
         prompt_text="Fix one bounded FoundUp module defect",
-        changed_paths=("modules/foundups/paccess_001/README.md",),
-        allowed_read_targets=("modules/foundups/paccess_001/README.md",),
+        changed_paths=(changed_path,),
+        allowed_read_targets=(changed_path,),
     ).to_dict()
 
 
-def _snapshot() -> dict[str, object]:
-    allocation = _queue_wsp15_allocation_receipt()
+def _snapshot(
+    *,
+    requested_operation: str = "edit_foundup_module",
+    changed_path: str = PILOT_ARTIFACT,
+) -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt(
+        requested_operation=requested_operation,
+        changed_path=changed_path,
+    )
     determination_id = "sha256:determination-1"
     selection_id = "sha256:model-selection-1"
     memex_id = "sha256:memex-1"
@@ -308,7 +322,7 @@ def _snapshot() -> dict[str, object]:
         determination_action="FIX",
         allocation=allocation,
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
-        requested_operation="edit_foundup_module",
+        requested_operation=requested_operation,
         changed_paths=tuple(allocation["changed_paths"]),
         task_prompt_text="Fix one bounded FoundUp module defect",
     )
@@ -374,8 +388,8 @@ def _profile(**overrides: object) -> dict[str, object]:
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": FOUNDUP_ID,
         "base_ref": "main",
-        "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
-        "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
         "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": PERMISSION_DIGEST,
         "identity_nonce": "identity-nonce-0001",
@@ -416,6 +430,14 @@ def _profile(**overrides: object) -> dict[str, object]:
         },
     }
     profile.update(overrides)
+    if (
+        profile["requested_operation"] == PILOT_OPERATION
+        and "wsp15_allocation_receipt" not in overrides
+    ):
+        profile["wsp15_allocation_receipt"] = _queue_wsp15_allocation_receipt(
+            requested_operation=PILOT_OPERATION,
+            changed_path=PILOT_ARTIFACT,
+        )
     return profile
 
 
@@ -438,8 +460,8 @@ def _work_order(**overrides: object) -> dict[str, object]:
         "requested_operation": "edit_foundup_module",
         "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
         "authority_tier": "source",
-        "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
-        "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
         "branch_name": "feat/paccess-001-resident-queue",
         "base_ref": "main",
         "task_summary": "Resident queue startup reaches the execution valve only.",
@@ -539,7 +561,7 @@ def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> 
     )
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=profile,
         requested_queue_item_id="queue-1",
         now_iso=NOW,
@@ -555,7 +577,7 @@ def test_authority_profile_materializer_rejects_bounded_worker_plan_outside_scop
     plan["planned_artifacts"] = ["modules/foundups/other_foundup/README.md"]
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=_profile(
             requested_operation=PILOT_OPERATION,
             allowed_paths=_pilot_allowed_paths(),
@@ -574,7 +596,7 @@ def test_authority_profile_materializer_rejects_bounded_worker_plan_domain_misma
     plan["domain_id"] = "other_foundup"
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=_profile(
             requested_operation=PILOT_OPERATION,
             allowed_paths=_pilot_allowed_paths(),
@@ -675,7 +697,7 @@ def _valve_environment(**overrides: object) -> dict[str, object]:
 
 
 def _pilot_allowed_paths() -> list[str]:
-    return [f"modules/foundups/{PILOT_DOMAIN_ID}/**"]
+    return [PILOT_ARTIFACT]
 
 
 def _pilot_domain_profile() -> GenericAgentWorktreeDomainProfile:
@@ -701,8 +723,12 @@ def _pilot_domain_profile() -> GenericAgentWorktreeDomainProfile:
 def _pilot_path_overrides() -> dict[str, object]:
     return {
         "requested_operation": PILOT_OPERATION,
-        "allowed_paths": _pilot_allowed_paths(),
-        "denied_paths": [f"modules/foundups/{PILOT_DOMAIN_ID}/secrets/**"],
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": _queue_wsp15_allocation_receipt(
+            requested_operation=PILOT_OPERATION,
+            changed_path=PILOT_ARTIFACT,
+        ),
         "required_tests": [
             "python -m pytest "
             "modules/communication/moltbot_bridge/tests/"
@@ -1220,6 +1246,10 @@ class _SwitchingSignerBackend:
         self._backends = dict(backends)
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
+        from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+            bind_exact_signing_request,
+        )
+
         backend = self._backends.get(request.signer_public_key)
         if backend is None:
             return SigningResponse(
@@ -1227,7 +1257,7 @@ class _SwitchingSignerBackend:
                 rejection_code=RuntimeRejectCode.SIGNER_NOT_CONFIGURED,
                 no_secret_material_returned=True,
             )
-        return backend.sign(request, peer)
+        return bind_exact_signing_request(backend, request).sign(request, peer)
 
 
 class _FakeWorktreeRunner:
@@ -1481,12 +1511,18 @@ def _ed25519_signing_material(*, principal_key=None, reddog_key=None):
     }
 
     def connector(socket_path: Path, request_bytes: bytes, timeout_s: float, max_response_bytes: int) -> bytes:
+        from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+            bind_exact_signing_request,
+        )
+
         assert socket_path.is_absolute()
         assert timeout_s > 0
         assert max_response_bytes >= 1024
         decoded = json.loads(request_bytes.decode("utf-8").strip())
         request = SigningRequest(**decoded["request"])
-        response = backends[request.signer_public_key].sign(request, peer)
+        response = bind_exact_signing_request(
+            backends[request.signer_public_key], request
+        ).sign(request, peer)
         return json.dumps(response.to_dict(), sort_keys=True).encode("utf-8")
 
     return principal_public, reddog_public, connector
@@ -1556,6 +1592,12 @@ def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
     }
     snapshot = _snapshot()
     queue = snapshot["wre_queue_items"][0]
+    progressive = signed_stage_binding(
+        requested_operation=PILOT_OPERATION,
+        changed_paths=(PILOT_ARTIFACT,),
+    )
+    allocation = progressive["wsp15_allocation_receipt"]
+    queue.update(progressive)
     queue.update(lineage)
     snapshot["worker_claims"][0].update(
         {
@@ -1564,6 +1606,12 @@ def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
             "model_runtime_binding_verification_receipt_id": verification.receipt_id,
         }
     )
+    queue["evidence_refs"] = [
+        item
+        for item in queue["evidence_refs"]
+        if not str(item).startswith("wsp15_allocation:")
+    ]
+    queue["evidence_refs"].append(f"wsp15_allocation:{allocation['receipt_id']}")
     queue["evidence_refs"].extend(
         f"{kind}:{value}"
         for kind, value in (
@@ -1581,14 +1629,22 @@ def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
         principal_public_key=principal_public,
         reddog_public_key=reddog_public,
         requested_operation=PILOT_OPERATION,
-        allowed_paths=_pilot_allowed_paths(),
-        denied_paths=overrides["denied_paths"],
+        allowed_paths=[PILOT_ARTIFACT],
+        denied_paths=[],
+        wsp15_allocation_receipt=allocation,
         **common,
     )
-    work_order = _work_order(
+    work_order_values = {
         **overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
+        "requested_operation": PILOT_OPERATION,
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": allocation,
+        "bounded_worker_plan": _pilot_bounded_worker_plan(),
         **common,
+    }
+    work_order = _work_order(
+        **work_order_values,
     )
     return snapshot, profile, work_order
 
@@ -2341,7 +2397,11 @@ def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_p
 ) -> None:
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2474,7 +2534,11 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2482,8 +2546,11 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
             principal_public_key=principal_public,
             reddog_public_key=reddog_public,
             requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides[
+                "wsp15_allocation_receipt"
+            ],
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
@@ -2557,7 +2624,7 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2641,7 +2708,7 @@ def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2729,7 +2796,7 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2818,7 +2885,7 @@ def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2910,7 +2977,7 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3008,7 +3075,7 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3102,7 +3169,11 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3110,8 +3181,11 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
             principal_public_key=principal_public,
             reddog_public_key=reddog_public,
             requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides[
+                "wsp15_allocation_receipt"
+            ],
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
@@ -3362,15 +3436,38 @@ def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_arti
 ) -> None:
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides[
+                "wsp15_allocation_receipt"
+            ],
+            bounded_worker_plan=_pilot_bounded_worker_plan(),
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
     principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    work_order = _work_order(
+        **pilot_overrides,
+        bounded_worker_plan=_pilot_bounded_worker_plan(),
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
@@ -3408,7 +3505,7 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3491,7 +3588,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3586,7 +3683,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",

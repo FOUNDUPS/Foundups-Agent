@@ -57,6 +57,11 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
     ))
     profile = _profile(
         wsp15_allocation_receipt=queue_item["wsp15_allocation_receipt"],
+        requested_operation=queue_item["wsp15_allocation_receipt"][
+            "requested_operation"
+        ],
+        allowed_paths=list(queue_item["wsp15_allocation_receipt"]["changed_paths"]),
+        denied_paths=[],
         model_selection_receipt=selection,
         model_runtime_binding_receipt=binding,
         model_runtime_binding_verification_receipt=verification.to_dict(),

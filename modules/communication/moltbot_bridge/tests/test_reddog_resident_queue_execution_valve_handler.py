@@ -67,6 +67,9 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
     _roots as _canonical_runtime_roots,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
     signed_stage_binding,
 )
@@ -273,18 +276,29 @@ def _executor_plan_result(**overrides: object) -> dict[str, object]:
 
 
 def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResultsStore:
+    work_authority = signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(TARGET_PATH,),
+    )
+    work_authority.update(
+        requested_operation="edit_foundup_module",
+        allowed_paths=(TARGET_PATH,),
+        denied_paths=(),
+    )
     stage_results: dict[str, object] = {
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
         "authority_runtime": {
             "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
             "authority_result": {
-                "work_authority": signed_stage_binding(
-                    requested_operation="edit_foundup_module",
-                    changed_paths=(TARGET_PATH,),
-                )
+                "work_authority": work_authority
             },
         },
-        "authority_verification": {"decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT},
+        "authority_verification": {
+            "decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+            "verified_work_authority_digest": canonical_work_authority_digest(
+                work_authority
+            ),
+        },
         "worker_dispatch_dryrun": WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
         "worker_dispatch_runtime": WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
         WORK_ORDER_INVOCATION_STAGE_KEY: _work_order_invocation_result(),

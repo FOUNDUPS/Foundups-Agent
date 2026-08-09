@@ -69,9 +69,14 @@ def signed_stage_binding(
     }
 
 
-def signed_audit_stage_binding() -> dict[str, object]:
+def signed_audit_stage_binding(
+    *, runtime_binding: Mapping[str, object] | None = None
+) -> dict[str, object]:
     operation = "signed_0102_readonly_review:foundup_module"
-    allocation = readonly_allocation(requested_operation=operation)
+    allocation = readonly_allocation(
+        requested_operation=operation,
+        runtime_binding=runtime_binding,
+    )
     unsigned: dict[str, object] = {
         "schema_version": stage_policy.SCHEMA_VERSION,
         "receipt_id": "",

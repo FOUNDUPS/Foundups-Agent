@@ -9,7 +9,6 @@ import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
     DECISION_AUDIT_CONTINUES,
-    DECISION_BOUNDED_EXECUTION_ADMITTED,
     DECISION_REJECT,
     DECISION_WOULD_BLOCK,
     REJECT_PRODUCTION_CLOSED,
@@ -258,13 +257,30 @@ def test_safe_operation_and_path_cannot_hide_authority_prompt() -> None:
     assert receipt.no_effect_authority is True
 
 
-def test_foundup_identifier_is_not_misclassified_as_operation_risk() -> None:
+def test_protected_foundup_identifier_blocks_bounded_execution() -> None:
     path = "modules/foundups/trade/src/worker.py"
     allocation, receipt = _admit(path=path)
 
     assert allocation["changed_paths"] == (path,)
-    assert receipt.decision == DECISION_BOUNDED_EXECUTION_ADMITTED
-    assert receipt.risk_classes == ()
+    assert receipt.decision == DECISION_WOULD_BLOCK
+    assert "PROTECTED_SURFACE" in receipt.risk_classes
+    assert receipt.no_effect_authority is True
+
+
+def test_protected_selected_slice_blocks_bounded_execution() -> None:
+    allocation, _ = _admit(path=LOW_PATH)
+    receipt = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_AUTHORITY_POLICY_FIX_PHASE1",
+        requested_operation="bounded_module_fix",
+        changed_paths=(LOW_PATH,),
+        task_prompt_text=LOW_PROMPT,
+    )
+
+    assert receipt.decision == DECISION_WOULD_BLOCK
+    assert "AUTHORITY" in receipt.risk_classes
+    assert receipt.no_effect_authority is True
 
 
 @pytest.mark.parametrize(

@@ -56,6 +56,7 @@ _ENVELOPE_FIELDS = frozenset(
         "schema_version",
         "queue_authority_runtime_result",
         "wsp15_allocation_receipt",
+        "model_runtime_binding_receipt",
         "signed_authority_worker_dispatch_receipt",
         "worker_dispatch_intent",
         "queue_consumer_receipt",
@@ -167,6 +168,7 @@ def build_reddog_signed_worker_agentdb_envelope(
     queue_consumer_receipt: Mapping[str, Any],
     work_order_materialization_binding: Mapping[str, Any],
     task_binding: Mapping[str, Any],
+    model_runtime_binding_receipt: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any]:
     """Build the restart envelope without inventing a second trust primitive."""
 
@@ -178,6 +180,9 @@ def build_reddog_signed_worker_agentdb_envelope(
             queue_authority_runtime_result
         ),
         "wsp15_allocation_receipt": dict(wsp15_allocation_receipt),
+        "model_runtime_binding_receipt": dict(
+            model_runtime_binding_receipt or {}
+        ),
         "signed_authority_worker_dispatch_receipt": _canonical_receipt(
             dispatch_receipt
         ),
@@ -516,6 +521,9 @@ def _canonical_context(
         "authorized_principal_id": str(work_authority["principal_id"]),
         "authorized_reddog_id": str(work_authority["reddog_id"]),
         "wsp15_allocation_receipt": dict(allocation),
+        "model_runtime_binding_receipt": dict(
+            _mapping(envelope.get("model_runtime_binding_receipt"))
+        ),
         "model_runtime_binding_receipt_id": str(receipt["model_runtime_binding_receipt_id"]),
         "model_runtime_binding_digest": str(receipt["model_runtime_binding_digest"]),
         **_memex_context(receipt),

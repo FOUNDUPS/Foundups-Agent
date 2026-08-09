@@ -29,6 +29,14 @@
   exists. Signed no-effect audits use the dry-run valve at claim-time restart;
   bounded authority remains exact-path, separately verified, and unavailable
   from the editor setting alone.
+- Closed independent-review findings by including FoundUp and selected-slice
+  identity in risk classification and by requiring the effect valve to match
+  an independently verified work-authority digest before revalidating the
+  complete allocation, stage, operation, and exact path set.
+- Preserved the authenticated model-runtime receipt in the signed AgentDB
+  restart envelope. A full signer -> verifier -> AgentDB -> OpenClaw claim ->
+  read-only 0102 audit regression now proves pathless audit completion with no
+  work-order invocation, repository mutation, shell, worktree, or PR effect.
 
 ## 2026-08-09: RedDog stale Holo authority recovery binding
 - Extended the existing incident and blocked-request contracts for the proven

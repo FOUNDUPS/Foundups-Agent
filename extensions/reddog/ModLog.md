@@ -20,6 +20,10 @@
 - Hardened the backend contract so signer and verifier recompute the complete
   canonical WSP_15 allocation, reject glob effect paths, and preserve a signed
   audit task through restart re-verification without granting effect authority.
+- Added exact-chain assurance for the backend audit path: FoundUp/slice risk
+  identity cannot be omitted, effect admission requires the independently
+  verified authority digest, and the authenticated model-runtime receipt
+  survives AgentDB restart reconstruction for the real read-only 0102 worker.
 
 ## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
 

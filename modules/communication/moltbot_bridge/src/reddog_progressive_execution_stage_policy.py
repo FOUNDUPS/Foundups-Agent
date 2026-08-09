@@ -58,6 +58,7 @@ _BOUNDED_OPERATION_CLASSES = frozenset(
         "bounded_code_change",
         "bounded_docs_patch",
         "edit_foundup_module",
+        "queue_bounded_pilot_docs_patch",
     }
 )
 _BOUNDED_FOUNDUP_SURFACES = frozenset({"src", "tests", "docs"})
@@ -558,10 +559,15 @@ def classify_high_risk_work(
     *, selected_slice: str, requested_operation: str, changed_paths: Sequence[str],
     task_prompt_text: str = "",
 ) -> tuple[str, ...]:
-    del selected_slice
-    corpus = " ".join(
-        (str(requested_operation or ""), str(task_prompt_text or ""), *map(str, changed_paths))
+    raw_corpus = " ".join(
+        (
+            str(selected_slice or ""),
+            str(requested_operation or ""),
+            str(task_prompt_text or ""),
+            *map(str, changed_paths),
+        )
     )
+    corpus = f"{raw_corpus} {re.sub(r'[^A-Za-z0-9]+', ' ', raw_corpus)}"
     risks = [name for name, pattern in _HIGH_RISK_PATTERNS.items() if pattern.search(corpus)]
     operation = str(requested_operation or "").strip().lower()
     if operation not in _BOUNDED_OPERATION_CLASSES:
@@ -582,7 +588,7 @@ def _bounded_path_risks(path: str) -> tuple[str, ...]:
         return ("PROTECTED_SURFACE",)
     if any(
         protected in token
-        for token in re.split(r"[^a-z0-9]+", "/".join(parts[3:]))
+        for token in re.split(r"[^a-z0-9]+", "/".join(parts[2:]))
         for protected in _PROTECTED_PATH_SEGMENTS
     ):
         return ("PROTECTED_SURFACE",)

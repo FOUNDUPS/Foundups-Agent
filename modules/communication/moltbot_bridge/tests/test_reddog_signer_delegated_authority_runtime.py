@@ -1424,6 +1424,7 @@ def _attacker_rehashed_stage_binding(path: str) -> dict[str, object]:
     (
         f"modules/foundups/{_FID}/src/**",
         f"modules/foundups/{_FID}/src/security_policy.py",
+        "modules/foundups/trade/src/scoring_integration.py",
     ),
 )
 def test_attacker_rehashed_stage_cannot_reach_signer(path: str) -> None:
