@@ -1777,6 +1777,26 @@ for (const syntheticValue of [
 }
 assert.strictEqual(authorizationProjection.secret_redactions_applied, 5,
   'DOLA-020: authorization omission must remain auditable');
+const authorizationBlankBoundary = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR Authorization:',
+  '',
+  'ERROR unrelated root cause remains visible'
+].join('\n'));
+assert(authorizationBlankBoundary.focus.includes('unrelated root cause remains visible'),
+  'DOLA-020: a blank line must terminate authorization continuation state');
+assert.strictEqual(authorizationBlankBoundary.secret_redactions_applied, 1,
+  'DOLA-020: unrelated evidence after a blank boundary cannot inflate omissions');
+const privateKeyAfterAuthorization = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR Authorization:',
+  'ERROR -----BEGIN PRIVATE KEY-----',
+  'ERROR SYNTHETIC_KEY_AFTER_AUTH_BODY',
+  'ERROR -----END PRIVATE KEY-----',
+  'status: stopped'
+].join('\n'));
+assert(!privateKeyAfterAuthorization.focus.includes('SYNTHETIC_KEY_AFTER_AUTH_BODY'),
+  'DOLA-020: authorization continuation state cannot consume private-key delimiters');
+assert.strictEqual(privateKeyAfterAuthorization.secret_redactions_applied, 4,
+  'DOLA-020: authorization and following private-key block must all be counted');
 const multilinePrivateKeyProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
   'ERROR -----BEGIN PGP PRIVATE KEY BLOCK-----',
   'ERROR SYNTHETIC_PGP_PRIVATE_KEY_BODY',

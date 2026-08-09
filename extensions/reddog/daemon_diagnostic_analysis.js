@@ -165,20 +165,33 @@ function omitSecretLines(lines) {
   let privateKeyBlock = false;
   for (const rawLine of lines) {
     const line = String(rawLine || '');
-    if (authorizationContinuation) {
+    if (/-----BEGIN [A-Z0-9 ]*PRIVATE KEY[A-Z0-9 ]*-----/i.test(line)) privateKeyBlock = true;
+    if (privateKeyBlock) {
       omitted += 1;
       authorizationContinuation = false;
+      if (/-----END [A-Z0-9 ]*PRIVATE KEY[A-Z0-9 ]*-----/i.test(line)) privateKeyBlock = false;
       continue;
+    }
+    if (authorizationContinuation) {
+      if (!line.trim()) {
+        authorizationContinuation = false;
+        safe.push(line);
+        continue;
+      }
+      if (/^\s+/.test(line)) {
+        omitted += 1;
+        authorizationContinuation = false;
+        continue;
+      }
+      authorizationContinuation = false;
     }
     if (AUTHORIZATION_HEADER.test(line)) {
       omitted += 1;
       authorizationContinuation = /(?::|=>|=)\s*$/.test(line);
       continue;
     }
-    if (/-----BEGIN [A-Z0-9 ]*PRIVATE KEY[A-Z0-9 ]*-----/i.test(line)) privateKeyBlock = true;
-    if (privateKeyBlock || containsSecret(line)) {
+    if (containsSecret(line)) {
       omitted += 1;
-      if (/-----END [A-Z0-9 ]*PRIVATE KEY[A-Z0-9 ]*-----/i.test(line)) privateKeyBlock = false;
       continue;
     }
     safe.push(line);
@@ -225,10 +238,10 @@ function summarize(d, lines, admitted, omitted) {
 function parse(d, text) {
     const src = String(text || '');
     const shape = d.analyzeOperationalDiagnosticShape(src);
-    const rawLines = src.split(/\r?\n/).filter((line) => line.trim());
-    const lines = rawLines.map((line) => line.trim());
+    const rawLines = src.split(/\r?\n/);
+    const lines = rawLines.map((line) => line.trim()).filter(Boolean);
     const admitted = omitSecretLines(rawLines);
-    const safeLines = admitted.lines.map((line) => line.trim());
+    const safeLines = admitted.lines.map((line) => line.trim()).filter(Boolean);
     const summary = summarize(d, lines, safeLines, admitted.omitted);
     const safeSource = safeLines.join('\n');
     const field = (name) => {
