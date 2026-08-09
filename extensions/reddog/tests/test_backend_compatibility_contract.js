@@ -156,10 +156,62 @@ function assertSafeBlockedProjection() {
   assert(!serialized.includes('secret-extension-id'));
 }
 
+function assertConfigurationMigrationPrecedence() {
+  const configuration = (namespace) => ({
+    get: () => namespace === 'reddog' ? true : false,
+    inspect: () => namespace === 'foundupsFusion'
+      ? { globalValue: false, defaultValue: true }
+      : { defaultValue: true }
+  });
+  const vscode = { workspace: { getConfiguration: configuration } };
+  assert.strictEqual(
+    preflight.configurationValue(
+      vscode, 'reddog', 'foundupsFusion', 'enableResidentArchitectSession', true
+    ),
+    false,
+    'an explicitly configured legacy opt-out must outrank a new canonical default'
+  );
+  const canonical = {
+    workspace: {
+      getConfiguration: (namespace) => ({
+        get: () => namespace === 'reddog' ? true : false,
+        inspect: () => namespace === 'reddog'
+          ? { workspaceValue: true, defaultValue: true }
+          : { globalValue: false, defaultValue: true }
+      })
+    }
+  };
+  assert.strictEqual(
+    preflight.configurationValue(
+      canonical, 'reddog', 'foundupsFusion', 'enableResidentArchitectSession', true
+    ),
+    true,
+    'an explicitly configured canonical value must outrank the legacy namespace'
+  );
+  const emptyCanonical = {
+    workspace: {
+      getConfiguration: (namespace) => ({
+        get: () => namespace === 'reddog' ? '' : 'legacy-python',
+        inspect: () => namespace === 'reddog'
+          ? { globalValue: '', defaultValue: 'python' }
+          : { globalValue: 'legacy-python', defaultValue: 'python' }
+      })
+    }
+  };
+  assert.strictEqual(
+    preflight.configurationValue(
+      emptyCanonical, 'reddog', 'foundupsFusion', 'pythonPath', 'python'
+    ),
+    'legacy-python',
+    'an explicitly empty string must not suppress legacy or fallback resolution'
+  );
+}
+
 assertManifestContract();
 assertPinnedDigest();
 assertRuntimeOrdering();
 assertSafeBlockedProjection();
+assertConfigurationMigrationPrecedence();
 assert(functionLineCount('wireFusionWebview') <= 581);
 assert(interfaceSource.includes(
   'before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation'

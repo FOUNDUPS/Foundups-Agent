@@ -1,6 +1,22 @@
 # RedDog
 
-Version: 0.4.69
+Version: 0.4.70
+
+Version 0.4.70 restores one conversational input. Enter sends and Shift+Enter
+adds a line; diagnostic logs and the operator request are pasted together.
+RedDog deterministically separates an explicit leading assessment or action
+from following diagnostic-shaped data. The data remains inert and cannot
+request work. A diagnostic-shaped first line is never inferred as operator
+intent, and merely mentioning a fix in a question is not an action.
+Assessment-only diagnostics remain non-actionable. An explicit
+operator action such as `fix`, `implement`, or `harden` may pass the ordinary
+grounding, Fusion quorum, output-validation, Wardrobe, WSP_15, and resident
+runtime gates without requiring a second promotion phrase. After those gates,
+the extension automatically submits the action to the existing durable
+AgentDB/OpenClaw resident architect cycle when its authenticated conversation
+source is available. That cycle may produce one FIX queue candidate; signed
+promotion, Hermes artifact generation, worktree effects, verification, and
+draft-PR publication remain owned by the existing backend runtime.
 
 Version 0.4.69 separates raw DAEmon log inspection from explicit architect
 diagnosis. A bare log dump remains on the local no-network summary path. When
@@ -10,7 +26,7 @@ and sends only that inert projection through current HoloIndex grounding and
 Fusion. Raw logs never enter the model prompt. Diagnostic analysis remains
 non-actionable even after quorum; a separate explicit work promotion is
 required before Wardrobe, WRE, OpenClaw, Hermes, or repository effects can run.
-The UI carries work focus and diagnostic evidence as separate fields. Legacy
+The 0.4.69 UI carried work focus and diagnostic evidence as separate fields. Legacy
 single-field pastes are split only at an explicit `DAEmon output:` or
 `## Run Trace` boundary; arbitrary payload prose cannot promote itself.
 

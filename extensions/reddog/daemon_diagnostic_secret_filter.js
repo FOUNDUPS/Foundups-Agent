@@ -136,7 +136,7 @@ function omitSecretLines(lines) {
   return { lines: safe, omitted };
 }
 
-function sanitizeLine(sanitizeCopyMdText, line) {
+function sanitizeLine(sanitizeCopyMdText, line, maxChars) {
   let out = sanitizeCopyMdText(String(line || ''));
   out = out.replace(/\bghp_[A-Za-z0-9_]+\b/g, 'ghp_[REDACTED]');
   out = out.replace(/\bgithub_pat_[A-Za-z0-9_]+\b/g, 'github_pat_[REDACTED]');
@@ -144,7 +144,8 @@ function sanitizeLine(sanitizeCopyMdText, line) {
   out = out.replace(/\b(?:proxy[\s_-]+)?authorization(?:[\s_-]+header)?\s*(?::|=>|=)\s*[^\r\n]+/gi, 'authorization: [REDACTED]');
   out = out.replace(/\b(?:api[_-]?key|token|secret|password|passwd)\s*[:=]\s*[^,\s\]]+/gi, '[REDACTED_CREDENTIAL]');
   out = out.replace(/\s+/g, ' ').trim();
-  return out.length > 220 ? out.slice(0, 220) + '...[truncated]' : out;
+  const limit = Number.isInteger(maxChars) && maxChars > 0 ? maxChars : 220;
+  return out.length > limit ? out.slice(0, limit) + '...[truncated]' : out;
 }
 
 module.exports = { containsSecret, omitSecretLines, sanitizeLine };

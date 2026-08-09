@@ -1,5 +1,21 @@
 # RedDog Interface
 
+Version 0.4.70 exposes one `012 conversation with RedDog` textarea. Enter sends
+and Shift+Enter inserts a newline. A bounded deterministic parser separates a
+leading assessment/action paragraph from following diagnostic-shaped lines;
+the evidence portion is always inert and cannot influence action
+classification. Action admission requires directive syntax, preserves a
+bounded sanitized requested scope, and honors canonical or legacy explicit
+resident-session opt-outs. Assessment-only diagnostics retain
+`daemon_diagnostic_analysis_requires_explicit_work_promotion`. Explicit
+operator action language sets `governed_action_requested=true` and may proceed
+through the existing runtime-consumption gate after grounding, validation and
+Fusion quorum pass. It then requests the existing authenticated resident
+AgentDB/OpenClaw architect session automatically. The editor does not mint
+authority: signed WSP_15 promotion, Hermes provider selection, isolated
+worktree effects, independent verification and draft-PR publication remain
+backend-owned contracts.
+
 Version 0.4.69 defines two DAEmon diagnostic routes. A raw log dump without an
 operator request remains a local, no-network summary. An explicit analysis,
 diagnosis, or repair request is converted into a bounded evidence projection:
@@ -11,7 +27,7 @@ The runtime-consumption gate always rejects this route with
 `daemon_diagnostic_analysis_requires_explicit_work_promotion`; diagnostic
 output cannot directly select Wardrobe, enqueue OpenClaw/Hermes, or mutate the
 repository.
-`012 work focus` and `diagnostic evidence` are separate webview message fields.
+In 0.4.69, `012 work focus` and `diagnostic evidence` were separate webview message fields.
 Only the work-focus field supplies operator intent. For compatibility, a
 single-field paste may supply intent before an explicit `DAEmon output:` or
 `## Run Trace` boundary. Without either typed evidence or that boundary, the
