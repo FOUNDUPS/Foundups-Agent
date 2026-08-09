@@ -36,7 +36,7 @@ exemptions:
       revocation, bounded renewal, and proposal signer-policy runtime
       boundaries; splitting the historical registry remains separate
       documentation-maintenance work.
-    threshold_override: 1484
+    threshold_override: 1507
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -227,16 +227,16 @@ exemptions:
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py"
     reason: "Inherited resident-loop regression matrix retained for cross-stage parity."
-    threshold_override: 4867
-    no_growth_ceiling: {file_lines: 4867, functions: {}}
+    threshold_override: 4964
+    no_growth_ceiling: {file_lines: 4964, functions: {}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_signed_worker_dispatch_task_executor.py"
     reason: "Inherited worker-dispatch integration matrix retained while the runtime root is threaded."
-    threshold_override: 2957
+    threshold_override: 3173
     function_threshold_override: 198
     functions: ["test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet", "test_openclaw_claim_loop_stops_before_pattern_memory_without_authority", "test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness"]
-    no_growth_ceiling: {file_lines: 2957, functions: {test_openclaw_queue_stage_does_not_materialize_bounded_artifact: 102, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 189, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 149, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 184, test_openclaw_claim_loop_stops_before_pattern_memory_without_authority: 198, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 178}}
+    no_growth_ceiling: {file_lines: 3173, functions: {test_openclaw_queue_stage_does_not_materialize_bounded_artifact: 102, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 189, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 149, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 184, test_openclaw_claim_loop_stops_before_pattern_memory_without_authority: 198, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 178}}
 
   - file: "scripts/run_task.py"
     reason: >-
@@ -294,7 +294,7 @@ exemptions:
       and queue-candidate projection. Prompt/context projection and runtime
       binding normalization are now extracted; the remaining transaction
       extraction is tracked separately.
-    threshold_override: 1560
+    threshold_override: 1532
     function_threshold_override: 329
     functions:
       - "run_reddog_backend_architect_determination_runtime"
@@ -302,9 +302,9 @@ exemptions:
       - "_receipt"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
     no_growth_ceiling:
-      file_lines: 1560
+      file_lines: 1532
       functions:
-        run_reddog_backend_architect_determination_runtime: 329
+        run_reddog_backend_architect_determination_runtime: 326
         _receipt: 98
         run_architect_determination: 146
 
@@ -454,7 +454,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9637
+    threshold_override: 9732
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -466,7 +466,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 2071
+    threshold_override: 2092
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

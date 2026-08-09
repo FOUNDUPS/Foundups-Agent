@@ -6,7 +6,7 @@ import hashlib
 import hmac
 import json
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -22,10 +22,14 @@ from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dis
     WORKER_DISPATCH_RECEIPT_FIELDS,
     plan_reddog_signed_authority_worker_dispatch_dry_run,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+)
 from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
     WorkerDispatchAuthorityVerificationContext,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    VALVE_OPEN_DRYRUN_ONLY,
     VALVE_OPEN_WORKTREE_CREATE,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
@@ -52,6 +56,7 @@ _ENVELOPE_FIELDS = frozenset(
         "schema_version",
         "queue_authority_runtime_result",
         "wsp15_allocation_receipt",
+        "model_runtime_binding_receipt",
         "signed_authority_worker_dispatch_receipt",
         "worker_dispatch_intent",
         "queue_consumer_receipt",
@@ -163,6 +168,7 @@ def build_reddog_signed_worker_agentdb_envelope(
     queue_consumer_receipt: Mapping[str, Any],
     work_order_materialization_binding: Mapping[str, Any],
     task_binding: Mapping[str, Any],
+    model_runtime_binding_receipt: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any]:
     """Build the restart envelope without inventing a second trust primitive."""
 
@@ -174,6 +180,9 @@ def build_reddog_signed_worker_agentdb_envelope(
             queue_authority_runtime_result
         ),
         "wsp15_allocation_receipt": dict(wsp15_allocation_receipt),
+        "model_runtime_binding_receipt": dict(
+            model_runtime_binding_receipt or {}
+        ),
         "signed_authority_worker_dispatch_receipt": _canonical_receipt(
             dispatch_receipt
         ),
@@ -210,7 +219,9 @@ def verify_reddog_signed_worker_agentdb_envelope(
         work_order_binding,
         binding,
     ) = _envelope_components(envelope)
-    verification = _fresh_verification(runtime, authority_context)
+    verification = _fresh_verification(
+        runtime, _context_for_signed_stage(runtime, authority_context)
+    )
     planned_receipt = _regenerated_receipt(runtime, verification, allocation)
     if not _constant_mapping_equal(recorded_receipt, planned_receipt):
         raise SignedWorkerAgentDbEnvelopeError("dispatch_receipt_mismatch")
@@ -370,6 +381,18 @@ def _fresh_verification(
     return result
 
 
+def _context_for_signed_stage(
+    runtime: Mapping[str, Any],
+    context: WorkerDispatchAuthorityVerificationContext,
+) -> WorkerDispatchAuthorityVerificationContext:
+    authority = _mapping(_mapping(runtime).get("authority_result"))
+    work_authority = _mapping(authority.get("work_authority"))
+    stage = _mapping(work_authority.get("progressive_policy_stage_receipt"))
+    if stage.get("stage") != STAGE_AUDIT:
+        return context
+    return replace(context, required_valve_state=VALVE_OPEN_DRYRUN_ONLY)
+
+
 def _regenerated_receipt(
     runtime: Mapping[str, Any],
     verification: Mapping[str, Any],
@@ -482,6 +505,12 @@ def _canonical_context(
         "work_order_id": str(receipt["work_order_id"]),
         "operational_snapshot_id": str(queue_receipt["operational_snapshot_id"]),
         "wsp15_allocation_receipt_id": str(receipt["wsp15_allocation_receipt_id"]),
+        "progressive_policy_stage_receipt_id": str(
+            receipt["progressive_policy_stage_receipt_id"]
+        ),
+        "progressive_policy_stage_digest": str(
+            receipt["progressive_policy_stage_digest"]
+        ),
         "selected_slice": str(queue_receipt["slice_id"]),
         "worker_runtime": str(intent["worker_runtime"]),
         "worker_role": str(intent["role"]),
@@ -492,6 +521,9 @@ def _canonical_context(
         "authorized_principal_id": str(work_authority["principal_id"]),
         "authorized_reddog_id": str(work_authority["reddog_id"]),
         "wsp15_allocation_receipt": dict(allocation),
+        "model_runtime_binding_receipt": dict(
+            _mapping(envelope.get("model_runtime_binding_receipt"))
+        ),
         "model_runtime_binding_receipt_id": str(receipt["model_runtime_binding_receipt_id"]),
         "model_runtime_binding_digest": str(receipt["model_runtime_binding_digest"]),
         **_memex_context(receipt),

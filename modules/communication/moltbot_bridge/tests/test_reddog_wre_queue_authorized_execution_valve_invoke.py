@@ -28,6 +28,17 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authorit
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT,
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_REJECT,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_progressive_execution_stage_policy as stage_policy,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    bounded_allocation,
+    signed_audit_stage_binding,
+    signed_stage_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -43,6 +54,7 @@ NOW = datetime(2026, 7, 14, 13, 0, 0, tzinfo=timezone.utc)
 WORK_ORDER_ID = "wre-queue-authorized-valve-001"
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
+TARGET = f"modules/foundups/{FID}/README.md"
 INVOCATION_DIGEST = "sha256:" + ("e" * 64)
 POLICY_DIGEST = "sha256:" + ("f" * 64)
 
@@ -69,9 +81,9 @@ def _work_order(**overrides):
             "source": "mock",
             "digest": "sha256:snap-1",
         },
-        "requested_operation": "feature_slice",
+        "requested_operation": "edit_foundup_module",
         "authority_tier": "source",
-        "allowed_paths": [f"modules/foundups/{FID}/**"],
+        "allowed_paths": [TARGET],
         "denied_paths": [".env", ".git/**"],
         "branch_name": "feat/paccess-001-valve",
         "base_ref": "main",
@@ -152,7 +164,7 @@ def _executor_payload(**overrides):
             "proposed_branch_name": "feat/paccess-001-valve",
             "proposed_worktree_path": "/tmp/.reddog/worktrees/repo/work/nonce/",
             "lock_key": WORK_ORDER_ID,
-            "allowed_paths": [f"modules/foundups/{FID}/**"],
+            "allowed_paths": [TARGET],
             "denied_paths": [".env", ".git/**"],
             "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
             "cleanup_plan": {"on_failure": "remove_worktree_delete_branch"},
@@ -188,12 +200,33 @@ def _open_env() -> ExecutionValveEnvironment:
     )
 
 
+def _signed_authority(**overrides):
+    payload = signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(TARGET,),
+    )
+    payload.update(
+        requested_operation="edit_foundup_module",
+        allowed_paths=(TARGET,),
+        denied_paths=(),
+        selected_slice=payload["progressive_policy_stage_receipt"][
+            "selected_slice"
+        ],
+    )
+    payload.update(overrides)
+    return payload
+
+
 def test_queue_authorized_chain_opens_expected_worktree_valve_only() -> None:
     result = invoke_reddog_wre_queue_authorized_execution_valve(
         explicit_queue_authorized_execution_valve_requested=True,
         queue_work_order_invocation_result=_queue_work_order_result(),
         queue_executor_plan_result=_queue_executor_result(),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=_open_env(),
         now=NOW,
     )
@@ -218,6 +251,10 @@ def test_explicit_invoke_missing_rejects() -> None:
         queue_work_order_invocation_result=_queue_work_order_result(),
         queue_executor_plan_result=_queue_executor_result(),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=_open_env(),
     )
 
@@ -232,6 +269,10 @@ def test_default_closed_valve_rejects_with_decision() -> None:
         queue_work_order_invocation_result=_queue_work_order_result(),
         queue_executor_plan_result=_queue_executor_result(),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=ExecutionValveEnvironment(),
         now=NOW,
     )
@@ -249,6 +290,10 @@ def test_worktree_valve_without_token_rejects() -> None:
         queue_work_order_invocation_result=_queue_work_order_result(),
         queue_executor_plan_result=_queue_executor_result(),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=ExecutionValveEnvironment(valve_worktree_create_enabled=True),
         now=NOW,
     )
@@ -267,6 +312,10 @@ def test_rejected_queue_work_order_invocation_blocks_before_valve() -> None:
         ),
         queue_executor_plan_result=_queue_executor_result(),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=_open_env(),
         now=NOW,
     )
@@ -287,6 +336,10 @@ def test_rejected_queue_executor_plan_blocks_before_valve() -> None:
             decision=QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_REJECT
         ),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=_open_env(),
         now=NOW,
     )
@@ -305,6 +358,10 @@ def test_receipt_chain_mismatch_rejects_through_valve() -> None:
         queue_work_order_invocation_result=_queue_work_order_result(),
         queue_executor_plan_result=_queue_executor_result(executor_plan_result=bad_executor),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=_open_env(),
         now=NOW,
     )
@@ -321,6 +378,10 @@ def test_forbidden_assignment_dispatcher_target_rejects() -> None:
         queue_work_order_invocation_result=_queue_work_order_result(),
         queue_executor_plan_result=_queue_executor_result(),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=_open_env(),
         intake_target=INTAKE_ASSIGNMENT_DISPATCHER,
         now=NOW,
@@ -336,6 +397,10 @@ def test_result_is_json_serializable() -> None:
         queue_work_order_invocation_result=_queue_work_order_result(),
         queue_executor_plan_result=_queue_executor_result(),
         work_order=_work_order(),
+        signed_work_authority=_signed_authority(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            _signed_authority()
+        ),
         valve_environment=_open_env(),
         intake_target=INTAKE_FOUNDUP_JOB,
         now=NOW,
@@ -345,6 +410,100 @@ def test_result_is_json_serializable() -> None:
     assert payload["decision"] == QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT
     assert payload["valve_decision"]["valve_state"] == VALVE_OPEN_WORKTREE_CREATE
     json.dumps(payload)
+
+
+def test_signed_audit_authority_cannot_open_effect_valve() -> None:
+    result = invoke_reddog_wre_queue_authorized_execution_valve(
+        explicit_queue_authorized_execution_valve_requested=True,
+        queue_work_order_invocation_result=_queue_work_order_result(),
+        queue_executor_plan_result=_queue_executor_result(),
+        work_order=_work_order(),
+        signed_work_authority=signed_audit_stage_binding(),
+        verified_work_authority_digest=canonical_work_authority_digest(
+            signed_audit_stage_binding()
+        ),
+        valve_environment=_open_env(),
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_REJECT
+    assert result.rejection_reasons == [
+        QueueAuthorizedExecutionValveInvokeReason.BOUNDED_EXECUTION_STAGE_REQUIRED
+    ]
+    assert result.valve_decision is None
+
+
+def test_attacker_rehashed_protected_foundup_stage_cannot_open_effect_valve() -> None:
+    path = "modules/foundups/trade/src/scoring_integration.py"
+    allocation = bounded_allocation(changed_paths=(path,))
+    authority = signed_stage_binding()
+    authority.update(
+        requested_operation="edit_foundup_module",
+        allowed_paths=(TARGET,),
+        denied_paths=(),
+    )
+    trusted_digest = canonical_work_authority_digest(authority)
+    stage = dict(authority["progressive_policy_stage_receipt"])
+    stage.update(
+        changed_paths=(path,),
+        wsp15_allocation_receipt_id=allocation["receipt_id"],
+        wsp15_allocation_digest=(
+            stage_policy.canonical_reddog_wsp15_allocation_digest(allocation)
+        ),
+        complexity=allocation["complexity"],
+        risk_classes=(),
+        would_block_reasons=(),
+        rejection_reasons=(),
+    )
+    stage["receipt_id"] = stage_policy._digest(stage_policy._unsigned(stage))
+    authority.update(
+        wsp15_allocation_receipt=allocation,
+        wsp15_allocation_receipt_id=allocation["receipt_id"],
+        wsp15_allocation_digest=stage["wsp15_allocation_digest"],
+        wsp15_priority=allocation["priority"],
+        wsp15_mps_total=allocation["mps_total"],
+        wsp15_reasoning_tier=allocation["reasoning_tier"],
+        progressive_policy_stage_receipt_id=stage["receipt_id"],
+        progressive_policy_stage_digest=stage_policy._digest(stage),
+        progressive_policy_stage_receipt=stage,
+        requested_operation=allocation["requested_operation"],
+        allowed_paths=(path,),
+        denied_paths=(),
+    )
+
+    result = invoke_reddog_wre_queue_authorized_execution_valve(
+        explicit_queue_authorized_execution_valve_requested=True,
+        queue_work_order_invocation_result=_queue_work_order_result(),
+        queue_executor_plan_result=_queue_executor_result(),
+        work_order=_work_order(allowed_paths=[path]),
+        signed_work_authority=authority,
+        verified_work_authority_digest=trusted_digest,
+        valve_environment=_open_env(),
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_REJECT
+    assert result.rejection_reasons == [
+        QueueAuthorizedExecutionValveInvokeReason.VERIFIED_AUTHORITY_DIGEST_MISMATCH
+    ]
+    assert result.valve_decision is None
+
+    rehashed = invoke_reddog_wre_queue_authorized_execution_valve(
+        explicit_queue_authorized_execution_valve_requested=True,
+        queue_work_order_invocation_result=_queue_work_order_result(),
+        queue_executor_plan_result=_queue_executor_result(),
+        work_order=_work_order(allowed_paths=[path]),
+        signed_work_authority=authority,
+        verified_work_authority_digest=canonical_work_authority_digest(authority),
+        valve_environment=_open_env(),
+        now=NOW,
+    )
+
+    assert rehashed.decision == QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_REJECT
+    assert rehashed.rejection_reasons == [
+        QueueAuthorizedExecutionValveInvokeReason.BOUNDED_EXECUTION_STAGE_REQUIRED
+    ]
+    assert rehashed.valve_decision is None
 
 
 def test_module_has_no_worktree_shell_openclaw_hermes_or_holoindex_imports() -> None:

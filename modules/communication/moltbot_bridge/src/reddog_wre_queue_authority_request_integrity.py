@@ -15,6 +15,13 @@ _REQUEST_FIELDS = frozenset(
     field.name for field in fields(DelegatedAuthorityRuntimeRequest)
 )
 _SEQUENCE_FIELDS = frozenset({"allowed_paths", "denied_paths"})
+_MAPPING_FIELDS = frozenset(
+    {
+        "progressive_policy_stage_receipt",
+        "queue_consumer_receipt",
+        "wsp15_allocation_receipt",
+    }
+)
 _INTEGER_FIELDS = frozenset(
     {"wsp15_mps_total", "issued_at", "identity_expires_at", "work_authority_expires_at"}
 )
@@ -43,13 +50,18 @@ def rehydrate_delegated_authority_request(
     for name in _INTEGER_FIELDS:
         if type(values[name]) is not int:
             raise ValueError(f"invalid delegated authority request field: {name}")
+    for name in _MAPPING_FIELDS:
+        if not isinstance(values[name], Mapping) or not values[name]:
+            raise ValueError(f"invalid delegated authority request field: {name}")
+        values[name] = dict(values[name])
     for name in _OPTIONAL_FIELDS:
         if values[name] is not None and (
             not isinstance(values[name], str) or not values[name]
         ):
             raise ValueError(f"invalid delegated authority request field: {name}")
     text_fields = (
-        _REQUEST_FIELDS - _SEQUENCE_FIELDS - _INTEGER_FIELDS - _OPTIONAL_FIELDS
+        _REQUEST_FIELDS - _SEQUENCE_FIELDS - _MAPPING_FIELDS - _INTEGER_FIELDS
+        - _OPTIONAL_FIELDS
     )
     for name in text_fields:
         if not isinstance(values[name], str) or not values[name]:

@@ -267,6 +267,37 @@ function buildBlockedResult(installState, client) {
   };
 }
 
+function buildAuditDegradedResult(installState, client) {
+  const source = installState && typeof installState === 'object' ? installState : {};
+  const compatibility = projectBackendCompatibility(source.backend_compatibility);
+  const safeState = safeInstallState(source, compatibility, client);
+  const reasons = compatibility.rejection_reasons;
+  const content = [
+    '## RedDog Audit Dialogue',
+    '',
+    'The repository backend failed its integrity check, so I did not run workspace code or contact a model.',
+    '',
+    '- audit dialogue remains available for this verified local diagnosis [OBSERVED]',
+    '- repository grounding and code claims are unavailable until compatibility is restored [OBSERVED]',
+    '- execution authority remains disabled [OBSERVED]',
+    '- reasons: ' + reasons.join(', ') + ' [OBSERVED]',
+    '- next action: restore or install the backend matching this RedDog build, then retry the original request [INFERRED]'
+  ].join('\n');
+  const reviewPacket = blockedReviewPacket(compatibility);
+  reviewPacket.schema_version = 'reddog_backend_compatibility_audit_degraded.v1';
+  reviewPacket.decision = 'AUDIT_DEGRADED_LOCALLY';
+  reviewPacket.audit_dialogue_available = true;
+  return { ok: true,
+    reason: 'backend_compatibility_audit_degraded',
+    detail: reasons.join(', '),
+    content,
+    history: [],
+    review_packet: reviewPacket,
+    install_state: safeState,
+    copy_markdown: content + '\n\n' + client.buildInstallStateSection(safeState)
+  };
+}
+
 function installStatusMessage(state) {
   const value = state && typeof state === 'object' ? state : {};
   const compatibility = value.backend_compatibility;
@@ -307,6 +338,7 @@ function enforceRuntimeGate(runtimeGate, compatibility) {
 module.exports = {
   ...constants,
   activationWarning,
+  buildAuditDegradedResult,
   buildBlockedResult,
   configurationValue,
   detectInstallState,

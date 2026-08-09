@@ -221,10 +221,10 @@ def _build_inputs(
     if include_runtime_binding:
         allocation_kwargs["architect_model_runtime_binding_receipt"] = architect_runtime_binding
     allocation = allocate_reddog_wsp15_receipt(
-        requested_operation="backend_architect_determination",
-        prompt_text="RedDog backend architect determination runtime",
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
+        requested_operation="edit_foundup_module",
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=("modules/foundups/demo/src/worker.py",),
+        allowed_read_targets=("modules/foundups/demo/src/worker.py",),
         **allocation_kwargs,
     ).to_dict()
     return {

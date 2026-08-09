@@ -36,6 +36,12 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
     QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT,
     invoke_reddog_wre_queue_authority_runtime,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    _admit_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    rehydrate_delegated_authority_request,
+)
 
 
 AUTHORITY_RUNTIME_STAGE_KEY = "authority_runtime"
@@ -124,6 +130,38 @@ def _publication_binding_valid(
     )
 
 
+def _authoritative_queue_item(
+    state: Mapping[str, Any], authority_request: Mapping[str, Any]
+) -> Mapping[str, Any]:
+    receipt = _mapping(authority_request.get("receipt"))
+    queue_item_id = str(receipt.get("queue_item_id") or "")
+    return next(
+        (
+            item
+            for item in state.get("wre_queue_items") or ()
+            if isinstance(item, Mapping)
+            and str(item.get("queue_item_id") or "") == queue_item_id
+        ),
+        {},
+    )
+
+
+def _queue_authority_admission(
+    state: Mapping[str, Any], authority_request: Mapping[str, Any]
+):
+    payload = _mapping(authority_request.get("delegated_authority_request"))
+    try:
+        request = rehydrate_delegated_authority_request(payload)
+    except (TypeError, ValueError):
+        return None
+    return _admit_current_queue_authority(
+        request=request,
+        authoritative_queue_item=_authoritative_queue_item(
+            state, authority_request
+        ),
+    )
+
+
 @dataclass(frozen=True)
 class ResidentQueueAuthorityRuntimeStageHandler:
     """Callable handler for the resident queue `authority_runtime` stage."""
@@ -175,6 +213,10 @@ class ResidentQueueAuthorityRuntimeStageHandler:
         return invoke_reddog_wre_queue_authority_runtime(
             explicit_queue_authority_runtime_requested=True,
             queue_authority_request_dryrun=authority_request,
+            queue_authority_admission=_queue_authority_admission(
+                current_state,
+                authority_request,
+            ),
             store=self.authority_store,
             signer=self.signer,
             principal_resolver=self.principal_resolver,

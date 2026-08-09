@@ -1,4 +1,50 @@
 # ModLog - moltbot_bridge
+## 2026-08-09: Progressive RedDog execution-stage authority binding
+- Added a signed, canonical stage receipt spanning architect proposal, queue,
+  signer request, delegated work authority, and worker-dispatch equality.
+- Audit-stage queue admission accepts only signed strict read-only audit tasks
+  with canonical WSP_15 allocation, empty changed paths, and no effect
+  authority. Audit/review failures project as `WOULD_BLOCK` without effects.
+  Only valid low-complexity WSP_15 `FIX` work can enter bounded execution;
+  high-risk, create-new, merge, external, and production work remain blocked.
+- Kept the editor-selected stage as a requested ceiling and enforced a
+  separate root-owned runtime ceiling at the valve. Neither ceiling is an
+  authority source.
+- Corrected WSP_15 complexity so module names and authority sensitivity affect
+  priority/reasoning without falsely making every one-file RedDog repair
+  complexity 5. Independent verification remains mandatory. (WSP 00/15/22/50/62/97)
+- Hardened the exact signed stage receipt through queue consumption, signer
+  materialization, work-authority verification, and use-time valve admission.
+  Read-only audit chains now terminate after signed worker dispatch; every
+  effect valve requires a rehydrated admitted `BOUNDED_EXECUTION` receipt.
+- Narrowed delegated effect authority to the exact stage-admitted paths;
+  broader profile globs cannot survive signer materialization. Traversal paths
+  and non-empty audit allow/deny lists fail closed. Legacy dispatch tests now
+  construct genuine signed envelopes instead of rewriting intents after signing.
+- Carried the complete canonical WSP_15 allocation through queue consumption,
+  signer materialization, work authority, and use-time verification. Signer
+  and verifier independently recompute its digest and stage decision; scalar
+  IDs or attacker-rehashed wildcard/protected-path stages cannot authorize work.
+- Kept resident editor activation at audit until a root-owned runtime ceiling
+  exists. Signed no-effect audits use the dry-run valve at claim-time restart;
+  bounded authority remains exact-path, separately verified, and unavailable
+  from the editor setting alone.
+- Closed independent-review findings by including FoundUp and selected-slice
+  identity in risk classification and by requiring the effect valve to match
+  an independently verified work-authority digest before revalidating the
+  complete allocation, stage, operation, and exact path set.
+- Preserved the authenticated model-runtime receipt in the signed AgentDB
+  restart envelope. A full signer -> verifier -> AgentDB -> OpenClaw claim ->
+  read-only 0102 audit regression now proves pathless audit completion with no
+  work-order invocation, repository mutation, shell, worktree, or PR effect.
+- Bound `selected_slice` to the current authoritative queue item before signer
+  admission and carried it in the signed work authority through use-time valve
+  verification. The resident handler alone mints a one-use opaque admission;
+  caller-rehashed stage and queue receipts, missing admission, and replayed
+  admission all reject before signing or authority-store effects.
+- Recompute the complete current queue receipt immediately before effects and
+  reject queue metadata, selected-slice, or progressive-stage substitution.
+
 ## 2026-08-09: RedDog stale Holo authority recovery binding
 - Extended the existing incident and blocked-request contracts for the proven
   authority-root HEAD mismatch. The deferred receipt now binds the incident

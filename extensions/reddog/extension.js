@@ -35,7 +35,8 @@ const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
 const groundingFailureDialogue = require('./grounding_failure_dialogue');
-const EXTENSION_VERSION = '0.4.71';
+const progressiveExecutionStage = require('./progressive_execution_stage');
+const EXTENSION_VERSION = '0.4.72';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -2482,6 +2483,10 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     lines.push('- runtime_consumption_gate_passed: ' + (rp.runtime_consumption_gate.passed === true ? 'true' : 'false'));
     lines.push('- runtime_consumption_gate_rejection_reasons: ' + (Array.isArray(rp.runtime_consumption_gate.rejection_reasons) && rp.runtime_consumption_gate.rejection_reasons.length ? rp.runtime_consumption_gate.rejection_reasons.join(', ') : '(none)'));
   }
+  lines.push.apply(
+    lines,
+    progressiveExecutionStage.runTraceLines(rp.progressive_execution_stage)
+  );
   if (rp.output_validation && rp.output_validation.repair_attempted) {
     lines.push('- repair_context_mode: ' + (rp.output_validation.repair_context_mode || 'unknown'));
     lines.push('- repair_mode: ' + (rp.output_validation.repair_mode || 'unknown'));
@@ -3731,7 +3736,8 @@ function buildResidentArchitectSessionResult(decision, fields) {
 }
 function runResidentArchitectSessionBridge(context, workFocus, options) {
   const opts = options && typeof options === 'object' ? options : {};
-  const proofRejection = operatorWardrobeSelectionProof.rejection(opts.wardrobeSelectionResult, opts.actionPlanningAllowed === true, buildResidentArchitectSessionResult, 'RESIDENT_ARCHITECT_SESSION_SKIPPED');
+  const readonlyAuditAllowed = opts.readonlyAuditPlanningAllowed === true;
+  const proofRejection = readonlyAuditAllowed ? null : operatorWardrobeSelectionProof.rejection(opts.wardrobeSelectionResult, opts.actionPlanningAllowed === true, buildResidentArchitectSessionResult, 'RESIDENT_ARCHITECT_SESSION_SKIPPED');
   if (proofRejection) return proofRejection;
   const payloadResult = buildResidentArchitectSessionPayload(workFocus, opts);
   if (!payloadResult.ok) {
@@ -3794,7 +3800,8 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
 
 async function runConfiguredResidentArchitectSession(context, workFocus, options) {
   const opts = options && typeof options === 'object' ? options : {};
-  if (opts.actionPlanningAllowed !== true || opts.residentArchitectSessionEnabled !== true) {
+  if ((opts.actionPlanningAllowed !== true && opts.readonlyAuditPlanningAllowed !== true)
+      || opts.residentArchitectSessionEnabled !== true) {
     return null;
   }
   const credential = await conversationSessionAuthoritySource.read(context.secrets);
@@ -4167,6 +4174,10 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
   let conversationalDraft = false;
   let daemonDiagnosticAnalysis = false;
   const governedActionRequested = hasDaemonDiagnosticActionIntent(operatorControlText);
+  const repoAuditIntent = repoAuditGrounding.detectRepoAuditIntent(operatorControlText);
+  const readonlyAuditRequested = progressiveExecutionStage.isReadonlyAuditRequest(
+    operatorControlText, repoAuditIntent.audit_intent
+  );
   const daemonDiagnosticActionRequested = Boolean(daemonIngress.operator_intent_source)
     && governedActionRequested;
   const promptAuthoringRequested = isPromptAuthoringRequest(operatorControlText);
@@ -4233,6 +4244,7 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
     daemonDiagnosticAnalysis,
     daemonDiagnosticActionRequested,
     governedActionRequested,
+    readonlyAuditRequested,
     promptAuthoringRequested,
     determineListRequested,
     preferManualPanel,
@@ -5045,6 +5057,9 @@ const buildRedDogInstallStateSection = REDDOG_BACKEND_CLIENT.buildInstallStateSe
 const buildBackendCompatibilityBlockedResult = (state) => backendCompatibility.buildBlockedResult(
   state, REDDOG_BACKEND_CLIENT
 );
+const buildBackendCompatibilityAuditDegradedResult = (state) => backendCompatibility.buildAuditDegradedResult(
+  state, REDDOG_BACKEND_CLIENT
+);
 const blockIncompatibleBackend = (context, state, webview, root) => backendCompatibilityAsync.blockIncompatibleBackend(context, state, webview, { detect: (value) => detectRedDogInstallStateAsync(value, root), build: buildBackendCompatibilityBlockedResult, post: postStatusAndProgress });
 const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.runConfiguredQuery({
   workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
@@ -5285,13 +5300,59 @@ function prepareFusionRequest(message, worker) {
   };
 }
 
+function configuredProgressiveExecutionStage() {
+  return progressiveExecutionStage.resolveStage(
+    reddogConfigValue('progressiveExecutionStage', progressiveExecutionStage.AUDIT)
+  );
+}
+
+function progressiveActionStageEnabled() {
+  return progressiveExecutionStage.allowsActionPlanning(
+    configuredProgressiveExecutionStage()
+  );
+}
+
+function progressiveStageForRuntime(runtimeConsumptionGate) {
+  const configured = configuredProgressiveExecutionStage();
+  return {
+    configured,
+    receipt: progressiveExecutionStage.project(
+      configured, runtimeConsumptionGate.passed === true
+    )
+  };
+}
+
+function residentSessionStagePolicy(runtimeGate, progressiveStage, classification, recoveryContext) {
+  const available = runtimeGate.passed === true && !recoveryContext;
+  const explicitRequested = classification.governedActionRequested === true
+    || classification.readonlyAuditRequested === true;
+  return {
+    actionPlanningAllowed: available
+      && progressiveExecutionStage.allowsActionPlanning(progressiveStage.configured),
+    readonlyAuditPlanningAllowed: available
+      && progressiveStage.configured === progressiveExecutionStage.AUDIT
+      && classification.readonlyAuditRequested === true,
+    residentArchitectSessionEnabled: explicitRequested
+      && reddogConfigValue('enableResidentArchitectSession', true) === true,
+    explicitResidentArchitectSessionRequested: explicitRequested
+  };
+}
+
+function attachRuntimePolicy(result, runtimeGate, progressiveReceipt) {
+  result.review_packet.progressive_execution_stage = progressiveReceipt;
+  result.progressive_execution_stage = progressiveReceipt;
+  result.runtime_consumption_gate = runtimeGate;
+  result.review_packet.runtime_consumption_gate = runtimeGate;
+}
+
 function wireFusionWebview(context, webview, worker, state) {
   const recoveryOptions = holoBlockedRecoveryOptions(context);
   const executeAsk = async (message, recoveryContext) => {
-    if (await blockIncompatibleBackend(context, state, webview)) return;
-    if (!recoveryContext && await startOperationsAdapter.handleMessage(
-      startOperationsOptions(context, message, worker, state, webview)
-    )) return;
+    const actionStageEnabled = progressiveActionStageEnabled();
+    if (actionStageEnabled && await blockIncompatibleBackend(context, state, webview)) return;
+    const compatibility = await currentBackendCompatibility(); const auditDegraded = !actionStageEnabled && compatibility.passed !== true;
+    if (actionStageEnabled && !recoveryContext && await startOperationsAdapter.handleMessage(
+      startOperationsOptions(context, message, worker, state, webview))) return;
     const {
       workFocus, workerType, classification, promptHasDetermineList,
       daemonDiagnosticProjection, governedWorkFocus, continuationEnabled, localFastPath,
@@ -5301,7 +5362,7 @@ function wireFusionWebview(context, webview, worker, state) {
       postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);
       return;
     }
-    const contextPacket = localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : (classification.conversationalDraft ? conversationalDraftPolicy.emptyContextPacket() : buildBoundedRepoContext(contextMode, governedWorkFocus));
+    const contextPacket = auditDegraded || localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : (classification.conversationalDraft ? conversationalDraftPolicy.emptyContextPacket() : buildBoundedRepoContext(contextMode, governedWorkFocus));
     const basePrompt = classification.conversationalDraft ? conversationalDraftPolicy.buildUserPrompt(workFocus) : constructWspTaskPrompt(governedWorkFocus, classification, contextPacket.quality, workerType);
     const continuation = continuationPrompt.prepareContinuationPrompt(
       basePrompt, continuationEnabled, state.lastContinuationSummary, {
@@ -5446,7 +5507,7 @@ function wireFusionWebview(context, webview, worker, state) {
         onProgress: onBridgeProgress, bridgeState, trail: workTrail, webview, stage: blockedRequestRecoveryStage
       });
     } else {
-      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, bridgeState, promptConstruction);
+      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, bridgeState, promptConstruction, { backendCompatibility: compatibility });
     }
     conversationHistoryPolicy.discardProviderHistory(historyAdmission, result, promptConstruction);
     fusionProgress.capture(result);
@@ -5524,7 +5585,7 @@ function wireFusionWebview(context, webview, worker, state) {
           onRepairBridgeProgress,
           bridgeState,
           promptConstruction,
-          { promptSource: 'repair_prompt', maxTokens: 2400 }
+          { promptSource: 'repair_prompt', maxTokens: 2400, backendCompatibility: compatibility }
         );
         fusionProgress.capture(repairResult);
         absorbUnicodeMeta(repairResult);
@@ -5692,9 +5753,11 @@ function wireFusionWebview(context, webview, worker, state) {
       runtimeConsumptionGate,
       await currentBackendCompatibility()
     );
-    const actionPlanningAllowed = runtimeConsumptionGate.passed === true && !recoveryContext;
-    const residentArchitectSessionEnabled = classification.governedActionRequested === true
-      && reddogConfigValue('enableResidentArchitectSession', true) === true && !recoveryContext;
+    const progressiveStage = progressiveStageForRuntime(runtimeConsumptionGate);
+    const sessionPolicy = residentSessionStagePolicy(
+      runtimeConsumptionGate, progressiveStage, classification, recoveryContext
+    );
+    const { actionPlanningAllowed } = sessionPolicy;
     const operatorWardrobeSelectionResult = actionPlanningAllowed
       ? runOperatorWardrobeSelectionBridge(context, governedWorkFocus, holoScorecard, promptConstruction, handoffRecommendation, {
         groundingPreflight: groundingPreflight
@@ -5739,9 +5802,10 @@ function wireFusionWebview(context, webview, worker, state) {
     }
     const residentArchitectSessionResult = recoveryContext ? null : await runConfiguredResidentArchitectSession(
       context, governedWorkFocus, {
-        actionPlanningAllowed, wardrobeSelectionResult: operatorWardrobeSelectionResult, residentArchitectSessionEnabled,
-        explicitResidentArchitectSessionRequested: classification.governedActionRequested === true,
-        groundingPreflight, holoScorecard
+        ...sessionPolicy,
+        wardrobeSelectionResult: operatorWardrobeSelectionResult,
+        groundingPreflight, holoScorecard,
+        progressiveExecutionStage: progressiveStage.configured
       }
     );
     result.review_packet = attachOrchestratorMetadata(
@@ -5757,8 +5821,7 @@ function wireFusionWebview(context, webview, worker, state) {
       workTrail,
       unicodeMeta
     );
-    result.runtime_consumption_gate = runtimeConsumptionGate;
-    result.review_packet.runtime_consumption_gate = runtimeConsumptionGate;
+    attachRuntimePolicy(result, runtimeConsumptionGate, progressiveStage.receipt);
     result.review_packet.fusion_progress_receipts = fusionProgressReceipts;
     result.review_packet.fusion_progress_receipt_validation = fusionProgressValidation;
     result.install_state = state.installState || null;
@@ -5860,9 +5923,7 @@ function wireFusionWebview(context, webview, worker, state) {
   };
   const attempt = () => attemptBlockedRequestRecovery({
     context, state, options: recoveryOptions, executeAsk, webview });
-  webview.onDidReceiveMessage(
-    createFusionMessageReceiver(webview, state, executeAsk)
-  );
+  webview.onDidReceiveMessage(createFusionMessageReceiver(webview, state, executeAsk));
   startBlockedRecoveryPolling(state, attempt);
 }
 
@@ -5939,18 +6000,22 @@ function attachBridgeMetadata(reviewPacket, bridgeMeta) {
 }
 
 async function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptionsArg) {
-  const compatibility = await currentBackendCompatibility();
+  const callOptions = callOptionsArg && typeof callOptionsArg === 'object' ? callOptionsArg : {};
+  const compatibility = callOptions.backendCompatibility || await currentBackendCompatibility();
+  const auditDialogueOnly = !progressiveActionStageEnabled();
   if (compatibility.passed !== true) {
-    return Promise.resolve(buildBackendCompatibilityBlockedResult({
-      backend_compatibility: compatibility
-    }));
+    const state = { backend_compatibility: compatibility };
+    return Promise.resolve(
+      auditDialogueOnly
+        ? buildBackendCompatibilityAuditDegradedResult(state)
+        : buildBackendCompatibilityBlockedResult(state)
+    );
   }
   return new Promise((resolve) => {
     const root = workspaceRoot();
     const script = path.join(root, 'scripts', 'advisory_model_once.py');
       const configuredPython = reddogConfigValue('pythonPath', 'python');
     const interpreter = resolvePythonInterpreter(root, configuredPython);
-    const callOptions = callOptionsArg && typeof callOptionsArg === 'object' ? callOptionsArg : {};
     const promptSource = callOptions.promptSource ? callOptions.promptSource : 'prompt';
     const promptNorm = normalizeBridgeTextForUnicode(prompt, promptSource);
     const contextNorm = normalizeBridgeTextForUnicode(boundedContext, 'context');
@@ -8317,6 +8382,7 @@ module.exports = {
   buildResidentArchitectSessionPayload,
   runResidentArchitectSessionBridge,
   runConfiguredResidentArchitectSession,
+  residentSessionStagePolicy,
   buildResidentArchitectSessionSection,
   compositePayloadDigest,
   extractHoloIndexScorecard,

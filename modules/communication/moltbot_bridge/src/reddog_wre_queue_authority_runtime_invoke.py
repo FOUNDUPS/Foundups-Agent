@@ -27,6 +27,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     PrincipalAuthorityResolver,
     issue_delegated_authority_runtime,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    VerifiedQueueAuthorityAdmission,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
 )
@@ -99,6 +102,7 @@ def invoke_reddog_wre_queue_authority_runtime(
     *,
     explicit_queue_authority_runtime_requested: bool,
     queue_authority_request_dryrun: Mapping[str, Any],
+    queue_authority_admission: VerifiedQueueAuthorityAdmission | None = None,
     store: AuthorityRuntimeStore,
     signer: Optional[IsolatedSignerClient],
     principal_resolver: Optional[PrincipalAuthorityResolver],
@@ -153,6 +157,7 @@ def invoke_reddog_wre_queue_authority_runtime(
         signer=signer,
         principal_resolver=principal_resolver,
         snapshot_resolver=snapshot_resolver,
+        queue_authority_admission=queue_authority_admission,
         now=now,
         leeway_s=leeway_s,
     )

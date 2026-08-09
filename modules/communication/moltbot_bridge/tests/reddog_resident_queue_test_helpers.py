@@ -7,10 +7,14 @@ import hmac
 from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+    evaluate_proposal_stage,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import (
     architect_fix_publication_state_projection,
@@ -157,18 +161,29 @@ class FakeAssuranceReservationStore:
         return {"accepted": True, "status": "STAGED"}
 
 
-def queue_wsp15_allocation_receipt(*, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
+_BOUNDED_TEST_PROMPT = "Fix one bounded FoundUp module defect"
+
+
+def queue_wsp15_allocation_receipt(*, prompt_text: str = _BOUNDED_TEST_PROMPT) -> dict[str, Any]:
     return allocate_reddog_wsp15_receipt(
-        requested_operation="create_foundup",
+        requested_operation="edit_foundup_module",
         prompt_text=prompt_text,
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
+        changed_paths=("modules/foundups/paccess_001/src/worker.py",),
+        allowed_read_targets=("modules/foundups/paccess_001/src/worker.py",),
     ).to_dict()
 
 
-def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
+def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str = _BOUNDED_TEST_PROMPT) -> dict[str, Any]:
     allocation = queue_wsp15_allocation_receipt(prompt_text=prompt_text)
     item = dict(queue_item)
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice=str(item.get("slice_id") or ""),
+        requested_operation="edit_foundup_module",
+        changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text=prompt_text,
+    )
     refs = [str(ref) for ref in item.get("evidence_refs") or ()]
     refs.extend(
         [
@@ -177,11 +192,17 @@ def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str 
     )
     item["evidence_refs"] = list(dict.fromkeys(refs))
     item["wsp15_allocation_receipt"] = allocation
+    item["progressive_policy_stage_receipt_id"] = stage.receipt_id
+    item["progressive_policy_stage_digest"] = canonical_digest(stage.to_dict())
+    item["progressive_policy_stage_receipt"] = stage.to_dict()
+    item["independent_verifier_required"] = True
     return item
 
 
 def governed_worker_dispatch_snapshot(
     snapshot: dict[str, Any],
+    *,
+    task_prompt_text: str = _BOUNDED_TEST_PROMPT,
 ) -> dict[str, Any]:
     """Add the minimum real queue lineage required by the signed worker path."""
     governed = deepcopy(snapshot)
@@ -199,6 +220,31 @@ def governed_worker_dispatch_snapshot(
     queue.setdefault("memex_supply_receipt_id", _TEST_MEMEX_SUPPLY_ID)
     queue.setdefault("memex_supply_digest", _TEST_MEMEX_SUPPLY_DIGEST)
     allocation = queue.get("wsp15_allocation_receipt") or {}
+    if not queue.get("progressive_policy_stage_receipt") and allocation:
+        operation = str(allocation.get("requested_operation") or "")
+        changed_paths = tuple(allocation.get("changed_paths") or ())
+        if operation.startswith("signed_0102_readonly_review:") and not changed_paths:
+            stage = evaluate_proposal_stage(
+                action="RESEARCH_MORE", reuse_decision="REUSE_EXISTING",
+                effect_plane="READ_ONLY_AUDIT", allocation=allocation,
+                selected_slice=str(queue.get("slice_id") or ""),
+                requested_operation=operation, changed_paths=(),
+                task_prompt_text=task_prompt_text,
+                stage_ceiling="AUDIT_NO_EFFECT",
+            )
+        else:
+            stage = admit_bounded_execution(
+                determination_action="FIX",
+                allocation=allocation,
+                selected_slice=str(queue.get("slice_id") or ""),
+                requested_operation=operation or "bounded_code_change",
+                changed_paths=changed_paths,
+                task_prompt_text=task_prompt_text,
+            )
+        queue["progressive_policy_stage_receipt_id"] = stage.receipt_id
+        queue["progressive_policy_stage_digest"] = canonical_digest(stage.to_dict())
+        queue["progressive_policy_stage_receipt"] = stage.to_dict()
+        queue["independent_verifier_required"] = True
     allocation_id = str(allocation.get("receipt_id") or "")
     runtime = model_runtime_authority_fields(queue)
     runtime_id = runtime["model_runtime_binding_receipt_id"]
@@ -281,6 +327,21 @@ def worker_dispatch_queue_receipt_digest(
     *,
     queue_item_id: str = "queue-1",
 ) -> str:
+    return canonical_full_work_order_digest(
+        worker_dispatch_queue_receipt(
+            snapshot,
+            queue_item_id=queue_item_id,
+        )
+    )
+
+
+def worker_dispatch_queue_receipt(
+    snapshot: dict[str, Any],
+    *,
+    queue_item_id: str = "queue-1",
+) -> dict[str, Any]:
+    """Return the canonical consumer receipt for signer integration tests."""
+
     result = plan_reddog_wre_queue_consumer_dry_run(
         snapshot,
         now_iso="2026-07-16T00:00:00+00:00",
@@ -289,7 +350,7 @@ def worker_dispatch_queue_receipt_digest(
     )
     if not result.accepted or result.receipt is None:
         raise AssertionError(result.rejection_reasons)
-    return canonical_full_work_order_digest(result.receipt.to_dict())
+    return result.receipt.to_dict()
 
 
 def worker_dispatch_authority_stages(
@@ -318,6 +379,22 @@ def worker_dispatch_authority_stages(
                 "memex_supply_digest",
             )
             or ""
+        )
+    for field in (
+        "progressive_policy_stage_receipt_id",
+        "progressive_policy_stage_digest",
+    ):
+        if field not in work_authority_overrides:
+            work_authority_overrides[field] = _queue_binding_value(
+                work_state_snapshot, queue_item_id, field
+            ) or ""
+    if "progressive_policy_stage_receipt" not in work_authority_overrides:
+        work_authority_overrides["progressive_policy_stage_receipt"] = (
+            _queue_binding_mapping(
+                work_state_snapshot,
+                queue_item_id,
+                "progressive_policy_stage_receipt",
+            )
         )
     identity = {
         "principal_id": "github:mjtrout",
@@ -357,11 +434,28 @@ def worker_dispatch_authority_stages(
         "reddog_id": "reddog:worker-dispatch",
         "repo_full_name": _TEST_REPO,
         "foundup_id": _TEST_FOUNDUP,
-        "allowed_paths": [f"modules/foundups/{_TEST_FOUNDUP}/**"],
+        "allowed_paths": list(allocation.get("changed_paths") or ()),
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": str(
+            allocation.get("requested_operation") or "bounded_code_change"
+        ),
         "permission_snapshot_digest": _TEST_PERMISSION_SNAPSHOT_DIGEST,
         "queue_consumer_receipt_digest": queue_receipt_digest,
+        "selected_slice": str(
+            work_authority_overrides.get("selected_slice")
+            or _queue_binding_mapping(
+                work_state_snapshot,
+                queue_item_id,
+                "progressive_policy_stage_receipt",
+            ).get("selected_slice")
+            or _mapping_selected_slice(
+                work_authority_overrides.get(
+                    "progressive_policy_stage_receipt"
+                )
+            )
+            or "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+        ),
+        "wsp15_allocation_receipt": dict(allocation),
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "wsp15_allocation_digest": canonical_digest(allocation),
         "wsp15_priority": allocation["priority"],
@@ -370,7 +464,11 @@ def worker_dispatch_authority_stages(
         "nonce": "worker-dispatch-nonce-0001",
         "issued_at": _TEST_NOW - 5,
         "expires_at": _TEST_NOW + 300,
-        "valve_state_required": "VALVE_OPEN_WORKTREE_CREATE",
+        "valve_state_required": (
+            "VALVE_OPEN_DRYRUN_ONLY"
+            if not tuple(allocation.get("changed_paths") or ())
+            else "VALVE_OPEN_WORKTREE_CREATE"
+        ),
         "key_epoch": "epoch-1",
         **work_authority_overrides,
     }
@@ -423,7 +521,25 @@ def _queue_binding_value(
     return ""
 
 
-def worker_dispatch_authority_verification_context():
+def _queue_binding_mapping(
+    snapshot: dict[str, Any] | None, queue_item_id: str, field: str
+) -> dict[str, Any]:
+    if snapshot is None:
+        return {}
+    for item in snapshot.get("wre_queue_items", ()):
+        if str(item.get("queue_item_id") or "") == queue_item_id:
+            value = item.get(field)
+            return dict(value) if isinstance(value, dict) else {}
+    return {}
+
+
+def _mapping_selected_slice(value: Any) -> str:
+    return str(value.get("selected_slice") or "") if isinstance(value, Mapping) else ""
+
+
+def worker_dispatch_authority_verification_context(
+    *, required_valve_state: str = "VALVE_OPEN_WORKTREE_CREATE"
+):
     return WorkerDispatchAuthorityVerificationContext(
         signature_verifier=_WorkerDispatchSignatureVerifier(),
         principal_key_resolver=_WorkerDispatchPrincipalResolver(),
@@ -431,7 +547,7 @@ def worker_dispatch_authority_verification_context():
         snapshot_resolver=_WorkerDispatchSnapshotResolver(),
         revocation_oracle=_WorkerDispatchNoRevocation(),
         trusted_now_epoch=lambda: _TEST_NOW,
-        required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
+        required_valve_state=required_valve_state,
     )
 
 
@@ -605,7 +721,13 @@ def publish_bound_worker_dispatch(**kwargs: Any):
         worker_dispatch_dryrun_result=dryrun,
         queue_authority_runtime_result=authority_runtime,
         queue_authority_verification_result=authority_verification,
-        authority_verification_context=worker_dispatch_authority_verification_context(),
+        authority_verification_context=worker_dispatch_authority_verification_context(
+            required_valve_state=str(
+                authority_runtime["authority_result"]["work_authority"][
+                    "valve_state_required"
+                ]
+            )
+        ),
     )
 
 
@@ -625,34 +747,13 @@ def publish_agentdb_task_for_intent(
     )
 
     requested_role = str(intent_overrides.get("role") or "")
-    requested_intent_id = str(intent_overrides.get("intent_id") or "")
-    if requested_intent_id:
-        allocation = {
-            **allocation,
-            "receipt_id": digest_builder(
-                {
-                    "base_receipt_id": allocation["receipt_id"],
-                    "requested_intent_id": requested_intent_id,
-                }
-            ),
-        }
-    if requested_role == "openclaw_candidate":
-        allocation = {
-            **allocation,
-            "worker_plan": {
-                **dict(allocation["worker_plan"]),
-                "coding_worker_count": 0,
-                "independent_verifier_required": False,
-                "openclaw_candidate": True,
-            },
-        }
     result = publish_bound_worker_dispatch(
         worker_dispatch_dryrun_result=dryrun_builder(allocation=allocation),
         work_state_snapshot=snapshot_builder(allocation),
         queue_item_id="queue-1",
         writer=_CollectingAgentDbSpecWriter(),
     )
-    assert result.accepted is True and result.receipt is not None
+    assert result.accepted is True and result.receipt is not None, result.to_dict()
     matching = [
         task
         for task in result.tasks

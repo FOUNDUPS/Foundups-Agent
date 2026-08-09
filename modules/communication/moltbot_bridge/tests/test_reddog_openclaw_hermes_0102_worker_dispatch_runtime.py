@@ -29,6 +29,12 @@ from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dis
 from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
     recorded_authority_verification_binding,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+)
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
@@ -116,25 +122,12 @@ def _digest(value: object) -> str:
 
 
 def _allocation(**overrides):
-    payload = {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 1,
-            "coding_worker_count": 1,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "hermes_execution_allowed": False,
-            "queue_mutation_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
+    payload = allocate_reddog_wsp15_receipt(
+        requested_operation="bounded_code_change",
+        prompt_text="Fix one bounded RedDog FoundUp module defect",
+        changed_paths=("modules/foundups/paccess_001/src/worker.py",),
+        allowed_read_targets=("modules/foundups/paccess_001/src/worker.py",),
+    ).to_dict()
     payload.update(overrides)
     return payload
 
@@ -174,6 +167,21 @@ def _authority_refs(allocation=None):
     }
 
 
+def _stage_refs(allocation):
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+        requested_operation=str(allocation["requested_operation"]),
+        changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text="Fix one bounded RedDog FoundUp module defect",
+    )
+    return {
+        "progressive_policy_stage_receipt_id": stage.receipt_id,
+        "progressive_policy_stage_digest": _digest(stage.to_dict()),
+    }
+
+
 def _intent(role: str, runtime_name: str, capability: str, allocation=None, **overrides):
     allocation = allocation or _allocation()
     payload = {
@@ -183,9 +191,10 @@ def _intent(role: str, runtime_name: str, capability: str, allocation=None, **ov
         "capability": capability,
         "work_order_id": "wo-1",
         "foundup_id": "paccess_001",
-        "requested_operation": "create_foundup",
+        "requested_operation": str(allocation["requested_operation"]),
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "wsp15_allocation_digest": _digest(allocation),
+        **_stage_refs(allocation),
         "model_runtime_binding_receipt_id": "",
         "model_runtime_binding_digest": "",
         "model_runtime_binding_verification_receipt_id": "",
@@ -220,12 +229,13 @@ def _dryrun_result(allocation=None, intents=None, **overrides):
         "receipt_id": "signed_authority_worker_dispatch_abc",
         "work_order_id": "wo-1",
         "foundup_id": "paccess_001",
-        "requested_operation": "create_foundup",
+        "requested_operation": str(allocation["requested_operation"]),
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "wsp15_allocation_digest": _digest(allocation),
         "wsp15_priority": allocation["priority"],
         "wsp15_mps_total": allocation["mps_total"],
         "wsp15_reasoning_tier": allocation["reasoning_tier"],
+        **_stage_refs(allocation),
         "model_runtime_binding_receipt_id": "",
         "model_runtime_binding_digest": "",
         "model_runtime_binding_verification_receipt_id": "",
@@ -300,10 +310,13 @@ def _snapshot(allocation=None, **queue_overrides):
         **_memex_refs(),
     }
     queue_item.update(queue_overrides)
-    return governed_worker_dispatch_snapshot({
-        "schema_version": "reddog_authoritative_work_state.v1",
-        "wre_queue_items": [queue_item],
-    })
+    return governed_worker_dispatch_snapshot(
+        {
+            "schema_version": "reddog_authoritative_work_state.v1",
+            "wre_queue_items": [queue_item],
+        },
+        task_prompt_text="Fix one bounded RedDog FoundUp module defect",
+    )
 
 
 def test_publishes_signed_worker_dispatch_intents_as_pending_tasks() -> None:
@@ -1322,11 +1335,39 @@ def test_rejects_unsafe_intent_before_writer_call() -> None:
     assert writer.calls == []
 
 
+def test_effect_runtime_rejects_empty_progressive_stage_before_writer() -> None:
+    injected = _dryrun_result()
+    receipt = injected["receipt"]
+    receipt["progressive_policy_stage_receipt_id"] = ""
+    receipt["progressive_policy_stage_digest"] = ""
+    for intent in receipt["dispatch_intents"]:
+        intent["progressive_policy_stage_receipt_id"] = ""
+        intent["progressive_policy_stage_digest"] = ""
+    writer = _FakeWriter()
+
+    result = _publish(
+        worker_dispatch_dryrun_result=injected,
+        work_state_snapshot=_snapshot(),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+
+    assert result.accepted is False
+    assert runtime.WorkerDispatchRuntimeReason.PROGRESSIVE_STAGE_BINDING_MISMATCH in result.rejection_reasons
+    assert writer.calls == []
+
+
 def test_rejects_wsp15_queue_binding_mismatch_and_seen_replay() -> None:
     allocation = _allocation()
     other = _allocation(receipt_id="sha256:other-allocation")
-    mismatch = _publish(
+    authority_runtime, authority_verification = _authority_stages(
+        allocation, work_state_snapshot=_snapshot(allocation)
+    )
+    mismatch = runtime.publish_reddog_signed_worker_dispatch_runtime(
         worker_dispatch_dryrun_result=_dryrun_result(allocation),
+        queue_authority_runtime_result=authority_runtime,
+        queue_authority_verification_result=authority_verification,
+        authority_verification_context=worker_dispatch_authority_verification_context(),
         work_state_snapshot=_snapshot(other),
         queue_item_id="queue-1",
         writer=_FakeWriter(),

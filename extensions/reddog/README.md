@@ -1,6 +1,17 @@
 # RedDog
 
-Version: 0.4.71
+Version: 0.4.72
+
+Version 0.4.72 adds a progressive effect-stage ceiling. The default `audit`
+stage keeps conversation, research, review, and proposal output usable. It may
+admit only signed strict read-only audit tasks with no changed paths and no
+effect authority. The optional `boundedExecution` setting requests a future
+action ceiling, but the resident editor runtime remains clamped to `audit`
+until a root-owned activation source is implemented. The backend bounded
+contract already requires a complete authenticated low-complexity WSP_15
+receipt, exact paths, no high-risk effect class, and an independent verifier;
+it cannot be activated by the editor setting. Neither ceiling grants
+authority, and production remains unavailable.
 
 Version 0.4.71 closes the remaining single-input authority ambiguities found
 by exact-SHA review. Plain work requests are now identified by the ingress

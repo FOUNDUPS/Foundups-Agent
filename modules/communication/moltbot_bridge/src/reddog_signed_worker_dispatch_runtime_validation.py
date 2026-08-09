@@ -149,6 +149,8 @@ def _queue_binding_reasons(request: ValidatedDispatchRequest) -> tuple[str, ...]
     reasons: list[str] = []
     if not _wsp15_matches(request.receipt, request.queue_item):
         reasons.append(WorkerDispatchRuntimeReason.WSP15_BINDING_MISMATCH)
+    if not _progressive_stage_matches(request.receipt, request.queue_item):
+        reasons.append(WorkerDispatchRuntimeReason.PROGRESSIVE_STAGE_BINDING_MISMATCH)
     if not _model_binding_matches(request.receipt, request.queue_item):
         reasons.append(WorkerDispatchRuntimeReason.MODEL_RUNTIME_BINDING_MISMATCH)
     if not _memex_binding_matches(request.receipt, request.queue_item):
@@ -210,6 +212,8 @@ def _intent_safe(intent: Mapping[str, Any], receipt: Mapping[str, Any]) -> bool:
         "requested_operation",
         "wsp15_allocation_receipt_id",
         "wsp15_allocation_digest",
+        "progressive_policy_stage_receipt_id",
+        "progressive_policy_stage_digest",
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
         "model_runtime_binding_verification_receipt_id",
@@ -265,6 +269,28 @@ def _wsp15_matches(receipt: Mapping[str, Any], queue_item: Mapping[str, Any]) ->
         and str(receipt.get("wsp15_allocation_digest") or "")
         == canonical_digest(allocation)
     )
+
+
+def _progressive_stage_matches(
+    receipt: Mapping[str, Any], queue_item: Mapping[str, Any]
+) -> bool:
+    fields = (
+        "progressive_policy_stage_receipt_id",
+        "progressive_policy_stage_digest",
+    )
+    return all(
+        _is_sha256(str(receipt.get(field) or ""))
+        and hmac.compare_digest(
+            str(receipt.get(field) or ""), str(queue_item.get(field) or "")
+        )
+        for field in fields
+    )
+
+
+def _is_sha256(value: str) -> bool:
+    return bool(len(value) == 71 and value.startswith("sha256:") and all(
+        char in "0123456789abcdef" for char in value[7:]
+    ))
 
 
 def _model_binding_matches(

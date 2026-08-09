@@ -49,6 +49,9 @@ def build_signed_worker_dispatch_task(
         queue_consumer_receipt=queue_consumer_receipt,
         work_order_materialization_binding=work_order_materialization_binding,
         task_binding=_task_binding(core),
+        model_runtime_binding_receipt=mapping(
+            queue_item.get("model_runtime_binding_receipt")
+        ),
     )
     context = _task_context(
         core=core,
@@ -184,6 +187,12 @@ def _base_context(
         "work_order_id": str(receipt.get("work_order_id") or ""),
         "operational_snapshot_id": core["operational_snapshot_id"],
         "wsp15_allocation_receipt_id": str(receipt.get("wsp15_allocation_receipt_id") or ""),
+        "progressive_policy_stage_receipt_id": str(
+            receipt.get("progressive_policy_stage_receipt_id") or ""
+        ),
+        "progressive_policy_stage_digest": str(
+            receipt.get("progressive_policy_stage_digest") or ""
+        ),
         "selected_slice": core["selected_slice"],
         "worker_runtime": core["runtime"],
         "worker_role": core["role"],
@@ -194,6 +203,9 @@ def _base_context(
         "authorized_principal_id": str(authority["principal_id"]),
         "authorized_reddog_id": str(authority["reddog_id"]),
         "wsp15_allocation_receipt": dict(mapping(queue_item.get("wsp15_allocation_receipt"))),
+        "model_runtime_binding_receipt": dict(
+            mapping(queue_item.get("model_runtime_binding_receipt"))
+        ),
     }
 
 
@@ -205,6 +217,8 @@ def _authority_context(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "memex_supply_digest",
         "architect_fix_publication_receipt_id",
         "architect_fix_publication_binding_digest",
+        "progressive_policy_stage_receipt_id",
+        "progressive_policy_stage_digest",
         "verified_work_authority_digest",
         "authority_verification_receipt_id",
         "authority_verification_receipt_digest",
@@ -280,6 +294,8 @@ def _receipt_identity_fields(
         "requested_operation",
         "wsp15_allocation_receipt_id",
         "wsp15_allocation_digest",
+        "progressive_policy_stage_receipt_id",
+        "progressive_policy_stage_digest",
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
         "memex_supply_receipt_id",

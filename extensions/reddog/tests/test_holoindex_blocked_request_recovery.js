@@ -279,8 +279,11 @@ async function main() {
   assert(extension.includes('currentBackendCompatibilityAtRoot(root)'));
   assert(extension.includes('holoBlockedRequestRecovery.claimAfterCompatibility('));
   assert(extension.includes('blockedRecoveryOutcomeVerified(result, classification, validation)'));
-  assert(extension.includes('runtimeConsumptionGate.passed === true && !recoveryContext'));
-  assert(extension.includes("if (!recoveryContext && await startOperationsAdapter.handleMessage("));
+  assert(extension.includes('const { actionPlanningAllowed } = sessionPolicy;'));
+  assert(extension.includes('residentSessionStagePolicy('));
+  assert(extension.includes('progressiveExecutionStage.allowsActionPlanning(progressiveStage.configured)'));
+  assert(extension.includes('&& !recoveryContext'));
+  assert(extension.includes("if (actionStageEnabled && !recoveryContext && await startOperationsAdapter.handleMessage("));
   assert(extension.includes('const residentArchitectSessionResult = recoveryContext ? null'));
   assert(extension.includes('const bridgeState = bridgeStateForRequest(state, recoveryContext)'));
   assert(extension.includes('onBridgeProgress, bridgeState, promptConstruction'));

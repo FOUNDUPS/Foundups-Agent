@@ -68,6 +68,10 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
     plan_reddog_wre_queue_consumer_dry_run,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+    validate_signed_progressive_stage_binding,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authority_work_order_invoke import (
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT,
 )
@@ -261,6 +265,21 @@ _CHAIN: Tuple[ResidentQueueStage, ...] = (
 )
 
 _STAGE_KEYS = tuple(stage.key for stage in _CHAIN)
+_AUDIT_CHAIN = _CHAIN[:5]
+
+
+def _chain_for_queue_consumer(
+    queue_consumer: Mapping[str, Any],
+) -> Tuple[ResidentQueueStage, ...]:
+    receipt = _mapping(queue_consumer.get("receipt"))
+    stage_receipt = _mapping(receipt.get("progressive_policy_stage_receipt"))
+    if validate_signed_progressive_stage_binding(
+        stage_receipt,
+        expected_receipt_id=receipt.get("progressive_policy_stage_receipt_id"),
+        expected_digest=receipt.get("progressive_policy_stage_digest"),
+    ) and stage_receipt.get("stage") == STAGE_AUDIT:
+        return _AUDIT_CHAIN
+    return _CHAIN
 
 
 def _canonical_digest(payload: Any) -> str:
@@ -417,10 +436,12 @@ def plan_reddog_resident_queue_orchestration(
         )
 
     accepted_stages: List[str] = ["queue_consumer"]
-    for index, stage in enumerate(_CHAIN):
+    active_chain = _chain_for_queue_consumer(queue_consumer)
+    for index, stage in enumerate(active_chain):
         supplied = _mapping(results.get(stage.key))
         if not supplied:
-            future_supplied = [key for key in _STAGE_KEYS[index + 1 :] if _mapping(results.get(key))]
+            future_keys = tuple(item.key for item in active_chain[index + 1 :])
+            future_supplied = [key for key in future_keys if _mapping(results.get(key))]
             if future_supplied:
                 return _reject(
                     reasons=(
@@ -459,6 +480,23 @@ def plan_reddog_resident_queue_orchestration(
                 queue_consumer=queue_consumer,
             )
         accepted_stages.append(stage.key)
+
+    disallowed_effect_results = [
+        key for key in _STAGE_KEYS[len(active_chain):] if _mapping(results.get(key))
+    ]
+    if disallowed_effect_results:
+        return _reject(
+            reasons=tuple(
+                f"{FAIL_OUT_OF_ORDER_STAGE_RESULT}:{key}"
+                for key in disallowed_effect_results
+            ),
+            selected_queue_item_id=selected_queue_item_id,
+            selected_slice=selected_slice,
+            current_stage=None,
+            next_action="REJECT",
+            accepted_stages=accepted_stages,
+            queue_consumer=queue_consumer,
+        )
 
     return _ready(
         selected_queue_item_id=selected_queue_item_id,

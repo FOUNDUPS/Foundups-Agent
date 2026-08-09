@@ -375,6 +375,27 @@ _WSP15_WORKER_PLAN_FIELDS = frozenset(
 _WSP15_SCORING_RATIONALE_FIELDS = frozenset(
     {"complexity", "deferability", "impact", "importance"}
 )
+_PROGRESSIVE_EXECUTION_STAGE_FIELDS = frozenset(
+    {
+        "changed_paths",
+        "complexity",
+        "decision",
+        "determination_action",
+        "independent_verifier_required",
+        "no_effect_authority",
+        "production_authority_granted",
+        "receipt_id",
+        "rejection_reasons",
+        "requested_operation",
+        "risk_classes",
+        "schema_version",
+        "selected_slice",
+        "stage",
+        "would_block_reasons",
+        "wsp15_allocation_digest",
+        "wsp15_allocation_receipt_id",
+    }
+)
 
 
 def _field_set(value: str) -> frozenset[str]:
@@ -393,11 +414,15 @@ _PROPOSAL_ADMISSION_FIELDS = _field_set(
     no_execution_performed no_holoindex_reindex_performed no_queue_mutation_performed
     no_repo_mutation_performed policy_digest produced_capabilities proposal_validity
     receipt_id rejection_reasons repo_head_sha report_bundle_id requested_operation
+    progressive_policy_decision progressive_policy_stage
+    progressive_policy_stage_receipt progressive_policy_stage_receipt_id
+    progressive_policy_would_block_reasons independent_verifier_required
     required_capabilities required_policy_gates required_tests resident_intent_digest
     resident_intent_id reuse_decision schema_version slice_id snapshot_content_digest
     snapshot_receipt_id stop_conditions supporting_direct_read_paths
     supporting_finding_ids target_effect_plane target_runtime task_summary_digest
     work_state_revision wsp15_allocation_digest wsp15_allocation_receipt_id
+    wsp15_complexity
     """
 )
 _OPERATIONAL_CONTEXT_BINDING_FIELDS = _field_set(
@@ -491,6 +516,14 @@ _NESTED_FIELD_SCHEMAS = (
     (
         "operational_context_binding.proposal_admission",
         _PROPOSAL_ADMISSION_FIELDS,
+    ),
+    (
+        "proposal_admission.progressive_policy_stage_receipt",
+        _PROGRESSIVE_EXECUTION_STAGE_FIELDS,
+    ),
+    (
+        "operational_context_binding.proposal_admission.progressive_policy_stage_receipt",
+        _PROGRESSIVE_EXECUTION_STAGE_FIELDS,
     ),
 )
 _SEQUENCE_MAPPING_SCHEMAS = (

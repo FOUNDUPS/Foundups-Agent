@@ -1,5 +1,30 @@
 # RedDog ModLog
 
+## 2026-08-09 - Progressive audit and bounded-execution stages (0.4.72)
+
+- Added an explicit `audit` / `boundedExecution` setting as a maximum effect
+  stage. Audit remains conversational and may admit only signed strict
+  read-only tasks with no changed paths or effect authority; the setting
+  itself grants no authority.
+- Bound the extension planning path to both the selected ceiling and the
+  existing runtime-consumption gate. The resident editor backend clamps every
+  requested ceiling to audit until a root-owned activation source exists.
+  Production remains unavailable, and redaction, signature, replay, scope,
+  and secret controls are not switchable.
+- Added Run Trace truth for the configured stage, audit availability, action
+  ceiling, and no-authority invariant. (WSP 00/15/22/50/62/97)
+- Explicit repository audits can now submit the existing authenticated
+  resident session while mutation planning is disabled. This path bypasses
+  Wardrobe effect selection, carries the audit ceiling, and cannot enter the
+  work-order, valve, worktree, shell, commit, or PR stages.
+- Hardened the backend contract so signer and verifier recompute the complete
+  canonical WSP_15 allocation, reject glob effect paths, and preserve a signed
+  audit task through restart re-verification without granting effect authority.
+- Added exact-chain assurance for the backend audit path: FoundUp/slice risk
+  identity cannot be omitted, effect admission requires the independently
+  verified authority digest, and the authenticated model-runtime receipt
+  survives AgentDB restart reconstruction for the real read-only 0102 worker.
+
 ## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
 
 - Moved plain operator-only classification into the diagnostic ingress parser,

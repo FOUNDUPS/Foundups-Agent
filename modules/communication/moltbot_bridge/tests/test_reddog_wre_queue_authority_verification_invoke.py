@@ -39,6 +39,15 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    _admit_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    rehydrate_delegated_authority_request,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -53,6 +62,7 @@ MODULE_PATH = (
 NOW = 1000
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
+TARGET = f"modules/foundups/{FID}/README.md"
 
 
 class _MockSignerVerifier:
@@ -131,18 +141,29 @@ class _NoRevocation:
 
 
 def _queue_result():
+    binding = signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(TARGET,),
+    )
+    selected_slice = binding["progressive_policy_stage_receipt"][
+        "selected_slice"
+    ]
     receipt = {
         "receipt_id": "wre_queue_consumer_1234",
         "queue_item_id": "queue-1",
-        "slice_id": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "slice_id": selected_slice,
         "claim_id": "claim-1",
         "worker_id": "reddog-main-bootstrap",
         "freshness_receipt_id": "fresh-1",
-        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
-        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
-        "wsp15_priority": "P0",
-        "wsp15_mps_total": 20,
-        "reasoning_tier": "ULTRA",
+        "wsp15_allocation_receipt": binding["wsp15_allocation_receipt"],
+        "wsp15_allocation_receipt_id": binding["wsp15_allocation_receipt_id"],
+        "wsp15_allocation_digest": binding["wsp15_allocation_digest"],
+        "wsp15_priority": binding["wsp15_priority"],
+        "wsp15_mps_total": binding["wsp15_mps_total"],
+        "reasoning_tier": binding["wsp15_reasoning_tier"],
+        "progressive_policy_stage_receipt_id": binding["progressive_policy_stage_receipt_id"],
+        "progressive_policy_stage_digest": binding["progressive_policy_stage_digest"],
+        "progressive_policy_stage_receipt": binding["progressive_policy_stage_receipt"],
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }
@@ -152,10 +173,32 @@ def _queue_result():
         "rejection_reasons": [],
         "receipt": receipt,
         "selected_queue_item_id": "queue-1",
-        "selected_slice": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "selected_slice": selected_slice,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }
+
+
+def _authoritative_queue_item():
+    item = dict(_queue_result()["receipt"])
+    item.update(
+        status="QUEUED",
+        no_execution_performed=True,
+        independent_verifier_required=item[
+            "progressive_policy_stage_receipt"
+        ]["independent_verifier_required"],
+    )
+    return item
+
+
+def _queue_authority_admission(dryrun):
+    request = rehydrate_delegated_authority_request(
+        dryrun.to_dict()["delegated_authority_request"]
+    )
+    return _admit_current_queue_authority(
+        request=request,
+        authoritative_queue_item=_authoritative_queue_item(),
+    )
 
 
 def _profile(**overrides):
@@ -169,7 +212,7 @@ def _profile(**overrides):
         "foundup_id": FID,
         "allowed_paths": [f"modules/foundups/{FID}/**"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "base_ref": "main",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",
@@ -204,6 +247,7 @@ def _runtime_result(**profile_overrides):
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
         queue_authority_request_dryrun=dryrun.to_dict(),
+        queue_authority_admission=_queue_authority_admission(dryrun),
         store=InMemoryAuthorityRuntimeStore(),
         signer=signer,
         principal_resolver=_PrincipalResolver(),

@@ -6,6 +6,7 @@ import ast
 import json
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src import reddog_wsp15_allocation_receipt as allocation_module
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     PRIORITY_P0,
     PRIORITY_P3,
@@ -45,17 +46,31 @@ def test_allocation_scores_reddog_runtime_authority_work_as_p0_ultra() -> None:
     assert receipt.input_digest.startswith("sha256:")
     assert receipt.priority == PRIORITY_P0
     assert receipt.reasoning_tier == REASONING_ULTRA
-    assert receipt.complexity == 5
+    assert receipt.complexity == 3
     assert receipt.importance == 5
     assert receipt.deferability == 5
     assert receipt.impact == 5
-    assert receipt.mps_total == 20
+    assert receipt.mps_total == 18
     assert receipt.worker_plan["fusion_required"] is True
     assert receipt.worker_plan["independent_verifier_required"] is True
     assert receipt.worker_plan["hermes_execution_allowed"] is False
     assert receipt.no_model_call_performed is True
     assert receipt.no_worker_spawn_performed is True
     assert receipt.no_holoindex_reindex_performed is True
+
+
+def test_sensitive_module_name_does_not_inflate_bounded_complexity() -> None:
+    receipt = allocate_reddog_wsp15_receipt(
+        requested_operation="bounded_module_fix",
+        prompt_text="Fix one bounded module defect.",
+        changed_paths=(
+            "modules/communication/moltbot_bridge/src/reddog_next_slice.py",
+        ),
+    )
+
+    assert receipt.complexity == 2
+    assert receipt.importance == 5
+    assert receipt.reasoning_tier == REASONING_ULTRA
 
 
 def test_allocation_can_emit_regular_low_priority_receipt_for_simple_prompt() -> None:
@@ -151,6 +166,35 @@ def test_validator_recomputes_input_digest_and_receipt_id() -> None:
     assert "input_digest_mismatch" in score_result.rejection_reasons
     assert receipt_result.accepted is False
     assert "receipt_id_mismatch" in receipt_result.rejection_reasons
+
+
+def test_validator_counts_read_targets_when_rechecking_complexity() -> None:
+    changed = ("modules/foundups/demo/src/worker.py",)
+    targets = tuple(f"modules/foundups/demo/docs/source_{index}.md" for index in range(9))
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="bounded_module_fix",
+        prompt_text="Inspect the bounded evidence set.",
+        changed_paths=changed,
+        allowed_read_targets=targets,
+    ).to_dict()
+    allocation["complexity"] = 2
+    allocation["mps_total"] = sum(
+        allocation[name] for name in ("complexity", "importance", "deferability", "impact")
+    )
+    allocation["priority"] = allocation_module.priority_for_mps_total(
+        allocation["mps_total"]
+    )
+    allocation["input_digest"] = allocation_module._digest(
+        allocation_module._allocation_input_payload(allocation)
+    )
+    allocation["receipt_id"] = allocation_module._digest(
+        {"receipt": allocation["input_digest"], "type": allocation["schema_version"]}
+    )
+
+    result = validate_reddog_wsp15_allocation_receipt(allocation)
+
+    assert result.accepted is False
+    assert "complexity_below_observable_minimum" in result.rejection_reasons
 
 
 def test_allocation_module_has_no_execution_or_indexing_imports() -> None:

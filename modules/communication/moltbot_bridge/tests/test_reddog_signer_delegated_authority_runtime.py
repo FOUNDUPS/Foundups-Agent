@@ -13,6 +13,9 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src import (
+    reddog_progressive_execution_stage_policy as stage_policy,
+)
 from modules.communication.moltbot_bridge.src import reddog_signer_delegated_authority_runtime as r
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
@@ -33,6 +36,32 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     RevocationOracle,
     SignatureVerifier,
     verify_delegated_work_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    _admit_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
+    plan_reddog_signed_authority_worker_dispatch_dry_run,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    recorded_authority_verification_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
+    QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
+    QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    bounded_allocation,
+    signed_audit_stage_binding,
+    signed_stage_binding,
 )
 
 _NOW = 1000
@@ -154,16 +183,19 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": _REPO,
         "foundup_id": _FID,
-        "allowed_paths": (f"modules/foundups/{_FID}/**",),
+        "allowed_paths": (f"modules/foundups/{_FID}/src/worker.py",),
         "denied_paths": (),
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": "sha256:snap-1",
-        "queue_consumer_receipt_digest": "sha256:" + ("b" * 64),
         "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
         "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "wsp15_reasoning_tier": "ULTRA",
+        **signed_stage_binding(
+            requested_operation="edit_foundup_module",
+            changed_paths=(f"modules/foundups/{_FID}/src/worker.py",),
+        ),
         "model_selection_receipt_id": "sha256:model-selection",
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
@@ -183,6 +215,50 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "sovereign_authorization_digest": "sha256:012-dao-token",
     }
     payload.update(overrides)
+    if "queue_consumer_receipt" not in overrides:
+        stage = payload["progressive_policy_stage_receipt"]
+        payload["queue_consumer_receipt"] = {
+            "queue_item_id": "queue-1",
+            "slice_id": stage["selected_slice"],
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "wsp15_allocation_receipt": dict(
+                payload["wsp15_allocation_receipt"]
+            ),
+            "wsp15_allocation_receipt_id": payload[
+                "wsp15_allocation_receipt_id"
+            ],
+            "wsp15_allocation_digest": payload["wsp15_allocation_digest"],
+            "progressive_policy_stage_receipt_id": payload[
+                "progressive_policy_stage_receipt_id"
+            ],
+            "progressive_policy_stage_digest": payload[
+                "progressive_policy_stage_digest"
+            ],
+            "progressive_policy_stage_receipt": dict(stage),
+            "model_selection_receipt_id": payload[
+                "model_selection_receipt_id"
+            ],
+            "model_selection_digest": payload["model_selection_digest"],
+            "model_runtime_binding_receipt_id": payload[
+                "model_runtime_binding_receipt_id"
+            ],
+            "model_runtime_binding_digest": payload[
+                "model_runtime_binding_digest"
+            ],
+            "model_runtime_binding_verification_receipt_id": payload[
+                "model_runtime_binding_verification_receipt_id"
+            ],
+            "model_runtime_binding_verification_digest": payload[
+                "model_runtime_binding_verification_digest"
+            ],
+            "memex_supply_receipt_id": payload["memex_supply_receipt_id"],
+            "memex_supply_digest": payload["memex_supply_digest"],
+        }
+    if "queue_consumer_receipt_digest" not in overrides:
+        payload["queue_consumer_receipt_digest"] = (
+            canonical_full_work_order_digest(payload["queue_consumer_receipt"])
+        )
     return DelegatedAuthorityRuntimeRequest(**payload)
 
 
@@ -197,11 +273,15 @@ def _snapshot(can_write=True, digest="sha256:snap-1", expires_at=_NOW + 600):
 
 
 def _issue(**overrides):
+    if not any(key.startswith("progressive_policy_stage_") for key in overrides):
+        operation = str(overrides.get("requested_operation", "edit_foundup_module"))
+        paths = tuple(overrides.get("allowed_paths", (f"modules/foundups/{_FID}/src/worker.py",)))
+        overrides = {**signed_stage_binding(requested_operation=operation, changed_paths=paths), **overrides}
     request = _request(**overrides)
     signer = _MockSigner()
     store = InMemoryAuthorityRuntimeStore()
     snapshot_resolver = _SnapshotResolver({request.permission_snapshot_digest: _snapshot()})
-    result = issue_delegated_authority_runtime(
+    result = _issue_authority(
         request=request,
         store=store,
         signer=signer,
@@ -223,15 +303,31 @@ def test_runtime_issues_records_accepted_by_existing_verifier() -> None:
     assert result.receipt.no_openclaw_enqueue_performed is True
     assert signer.requests[0].signer_role == "principal"
     assert signer.requests[1].signer_role == "reddog"
-    assert result.work_authority["wsp15_allocation_receipt_id"] == "sha256:wsp15-allocation"
+    assert result.work_authority["wsp15_allocation_receipt_id"] == (
+        result.work_authority["wsp15_allocation_receipt"]["receipt_id"]
+    )
     assert result.work_authority["work_order_digest"] == "sha256:" + ("a" * 64)
     assert result.work_authority["base_ref"] == "main"
-    assert result.work_authority["wsp15_allocation_digest"] == "sha256:wsp15-allocation-digest"
-    assert result.work_authority["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:abc123"
-    assert result.work_authority["model_runtime_binding_digest"] == "sha256:model-runtime-binding"
-    assert result.work_authority["model_selection_receipt_id"] == "sha256:model-selection"
-    assert result.work_authority["model_selection_digest"] == "sha256:model-selection-digest"
-    assert result.work_authority["memex_supply_receipt_id"] == "sha256:memex-supply"
+    assert result.work_authority["wsp15_allocation_digest"] == (
+        result.work_authority["progressive_policy_stage_receipt"][
+            "wsp15_allocation_digest"
+        ]
+    )
+    assert result.work_authority["model_runtime_binding_receipt_id"] == (
+        "reddog_model_runtime_binding:abc123"
+    )
+    assert result.work_authority["model_runtime_binding_digest"] == (
+        "sha256:model-runtime-binding"
+    )
+    assert result.work_authority["model_selection_receipt_id"] == (
+        "sha256:model-selection"
+    )
+    assert result.work_authority["model_selection_digest"] == (
+        "sha256:model-selection-digest"
+    )
+    assert result.work_authority["memex_supply_receipt_id"] == (
+        "sha256:memex-supply"
+    )
     assert result.work_authority["memex_supply_digest"] == _MEMEX_DIGEST
 
     verified = verify_delegated_work_authority(
@@ -246,6 +342,56 @@ def test_runtime_issues_records_accepted_by_existing_verifier() -> None:
         required_valve_state=_VALVE,
     )
     assert verified.accepted is True, verified.reason_codes
+
+
+def _authoritative_queue_item(request):
+    receipt = request.queue_consumer_receipt
+    return {
+        "queue_item_id": receipt["queue_item_id"],
+        "slice_id": receipt["slice_id"],
+        "claim_id": receipt["claim_id"],
+        "worker_id": receipt["worker_id"],
+        "status": "QUEUED",
+        "wsp15_allocation_receipt": dict(request.wsp15_allocation_receipt),
+        "progressive_policy_stage_receipt_id": (
+            request.progressive_policy_stage_receipt_id
+        ),
+        "progressive_policy_stage_digest": (
+            request.progressive_policy_stage_digest
+        ),
+        "progressive_policy_stage_receipt": dict(
+            request.progressive_policy_stage_receipt
+        ),
+        "independent_verifier_required": request.progressive_policy_stage_receipt[
+            "independent_verifier_required"
+        ],
+        "no_execution_performed": True,
+        **{
+            field: receipt.get(field)
+            for field in (
+                "model_selection_receipt_id",
+                "model_selection_digest",
+                "model_runtime_binding_receipt_id",
+                "model_runtime_binding_digest",
+                "model_runtime_binding_verification_receipt_id",
+                "model_runtime_binding_verification_digest",
+                "memex_supply_receipt_id",
+                "memex_supply_digest",
+            )
+        },
+    }
+
+
+def _issue_authority(*, request, **kwargs):
+    admission = _admit_current_queue_authority(
+        request=request,
+        authoritative_queue_item=_authoritative_queue_item(request),
+    )
+    return issue_delegated_authority_runtime(
+        request=request,
+        queue_authority_admission=admission,
+        **kwargs,
+    )
 
 
 def test_changed_signed_wsp15_allocation_digest_rejects() -> None:
@@ -268,7 +414,7 @@ def test_changed_signed_wsp15_allocation_digest_rejects() -> None:
     )
 
     assert verified.accepted is False
-    assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
+    assert ReasonCode.MALFORMED_PAYLOAD in verified.reason_codes
 
 
 def test_changed_signed_work_order_lineage_rejects() -> None:
@@ -376,7 +522,7 @@ def test_malformed_memex_binding_rejects_before_signing() -> None:
 
 def test_default_signer_fails_closed() -> None:
     request = _request()
-    result = issue_delegated_authority_runtime(
+    result = _issue_authority(
         request=request,
         store=InMemoryAuthorityRuntimeStore(),
         principal_resolver=_PrincipalResolver(_principal()),
@@ -389,7 +535,7 @@ def test_default_signer_fails_closed() -> None:
 
 def test_unknown_principal_fails_closed() -> None:
     request = _request(principal_id="github:attacker")
-    result = issue_delegated_authority_runtime(
+    result = _issue_authority(
         request=request,
         store=InMemoryAuthorityRuntimeStore(),
         signer=_MockSigner(),
@@ -409,7 +555,6 @@ def test_high_authority_requires_consensus_and_sovereign_authorization() -> None
 
 def test_worktree_valve_intent_is_high_authority_even_for_low_operation() -> None:
     result, _, _, _ = _issue(
-        requested_operation="inspect_repo",
         consensus_receipt_digest=None,
         sovereign_authorization_digest=None,
     )
@@ -419,7 +564,6 @@ def test_worktree_valve_intent_is_high_authority_even_for_low_operation() -> Non
 
 def test_live_enqueue_valve_intent_is_high_authority_even_for_low_operation() -> None:
     result, _, _, _ = _issue(
-        requested_operation="inspect_repo",
         valve_state_required="VALVE_OPEN_LIVE_ENQUEUE",
         consensus_receipt_digest=None,
         sovereign_authorization_digest=None,
@@ -436,7 +580,6 @@ def test_high_authority_rejects_consensus_without_sovereign_authorization() -> N
 
 def test_low_authority_can_issue_without_cosign() -> None:
     result, _, _, _ = _issue(
-        requested_operation="inspect_repo",
         valve_state_required="VALVE_OPEN_DRYRUN_ONLY",
         consensus_receipt_digest=None,
         sovereign_authorization_digest=None,
@@ -447,7 +590,7 @@ def test_low_authority_can_issue_without_cosign() -> None:
 
 def test_stale_permission_snapshot_rejects() -> None:
     request = _request()
-    result = issue_delegated_authority_runtime(
+    result = _issue_authority(
         request=request,
         store=InMemoryAuthorityRuntimeStore(),
         signer=_MockSigner(),
@@ -461,7 +604,7 @@ def test_stale_permission_snapshot_rejects() -> None:
 
 def test_permission_snapshot_must_grant_operation() -> None:
     request = _request()
-    result = issue_delegated_authority_runtime(
+    result = _issue_authority(
         request=request,
         store=InMemoryAuthorityRuntimeStore(),
         signer=_MockSigner(),
@@ -474,9 +617,12 @@ def test_permission_snapshot_must_grant_operation() -> None:
 
 
 def test_scope_and_path_validation_fail_closed() -> None:
-    result, _, _, _ = _issue(allowed_paths=(".github/workflows/deploy.yml",))
+    binding = signed_stage_binding()
+    result, _, _, _ = _issue(
+        **binding, allowed_paths=(".github/workflows/deploy.yml",)
+    )
     assert result.accepted is False
-    assert RuntimeRejectCode.PATH_OUT_OF_SCOPE in result.receipt.rejection_reasons
+    assert RuntimeRejectCode.MALFORMED_REQUEST in result.receipt.rejection_reasons
 
     result, _, _, _ = _issue(foundup_id="other_002")
     assert result.accepted is False
@@ -493,8 +639,8 @@ def test_nonce_replay_rejects_before_second_issue() -> None:
         snapshot_resolver=_SnapshotResolver({request.permission_snapshot_digest: _snapshot()}),
         now=_NOW,
     )
-    first = issue_delegated_authority_runtime(request=request, **kwargs)
-    second = issue_delegated_authority_runtime(request=request, **kwargs)
+    first = _issue_authority(request=request, **kwargs)
+    second = _issue_authority(request=request, **kwargs)
     assert first.accepted is True
     assert second.accepted is False
     assert RuntimeRejectCode.NONCE_REPLAY in second.receipt.rejection_reasons
@@ -513,7 +659,7 @@ def test_revoked_reddog_or_epoch_rejects() -> None:
         }
     )
     request = _request()
-    result = issue_delegated_authority_runtime(
+    result = _issue_authority(
         request=request,
         store=store,
         signer=_MockSigner(),
@@ -527,7 +673,7 @@ def test_revoked_reddog_or_epoch_rejects() -> None:
 
 def test_signer_boundary_attestation_is_required() -> None:
     request = _request()
-    result = issue_delegated_authority_runtime(
+    result = _issue_authority(
         request=request,
         store=InMemoryAuthorityRuntimeStore(),
         signer=_BoundarylessSigner(),
@@ -545,7 +691,7 @@ def test_json_store_commits_authority_receipt(tmp_path) -> None:
     repo.mkdir()
     runtime = tmp_path / "runtime"
     path = runtime / "authority-state.json"
-    result = issue_delegated_authority_runtime(
+    result = _issue_authority(
         request=request,
         store=AtomicJsonAuthorityRuntimeStore(
             path,
@@ -1292,6 +1438,265 @@ def test_result_contains_no_secret_or_signing_material_labels() -> None:
     assert "test-reddog-secret" not in blob
     assert "private_key" not in blob
     assert result.receipt.no_signing_material_observed is True
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("progressive_policy_stage_receipt_id", "progressive_policy_stage_digest"),
+)
+def test_malformed_progressive_stage_digest_is_rejected(field: str) -> None:
+    result, _, _, _ = _issue(**{field: "sha256:not-canonical"})
+
+    assert result.accepted is False
+    assert result.receipt.status == "DELEGATED_AUTHORITY_REJECTED"
+    assert result.receipt.rejection_reasons == ("REJECT_MALFORMED_REQUEST",)
+
+
+def test_audit_stage_can_sign_only_pathless_readonly_authority() -> None:
+    binding = signed_audit_stage_binding()
+    receipt = binding["progressive_policy_stage_receipt"]
+    overrides = {
+        **binding,
+        "requested_operation": receipt["requested_operation"],
+        "allowed_paths": (),
+        "wsp15_allocation_receipt_id": receipt["wsp15_allocation_receipt_id"],
+        "wsp15_allocation_digest": receipt["wsp15_allocation_digest"],
+        "valve_state_required": "VALVE_OPEN_DRYRUN_ONLY",
+        "consensus_receipt_digest": None,
+        "sovereign_authorization_digest": None,
+    }
+
+    accepted, signer, _, _ = _issue(**overrides)
+    widened = f"modules/foundups/{_FID}/**"
+    rejected, rejected_signer, _, _ = _issue(
+        **{**overrides, "allowed_paths": (widened,), "denied_paths": (widened,)}
+    )
+
+    assert accepted.accepted is True
+    assert len(signer.requests) == 2
+    assert accepted.work_authority["allowed_paths"] == []
+    assert rejected.accepted is False
+    assert RuntimeRejectCode.MALFORMED_REQUEST in rejected.receipt.rejection_reasons
+    assert rejected_signer.requests == []
+
+
+def test_bounded_stage_cannot_widen_signed_authority_paths() -> None:
+    exact = f"modules/foundups/{_FID}/src/worker.py"
+    binding = signed_stage_binding(
+        requested_operation="bounded_module_fix",
+        changed_paths=(exact,),
+    )
+    receipt = binding["progressive_policy_stage_receipt"]
+
+    result, signer, _, _ = _issue(
+        **binding,
+        requested_operation=receipt["requested_operation"],
+        allowed_paths=(f"modules/foundups/{_FID}/**",),
+    )
+
+    assert result.accepted is False
+    assert RuntimeRejectCode.MALFORMED_REQUEST in result.receipt.rejection_reasons
+    assert signer.requests == []
+
+
+def _attacker_rehashed_stage_binding(path: str) -> dict[str, object]:
+    allocation = bounded_allocation(changed_paths=(path,))
+    stage = dict(signed_stage_binding()["progressive_policy_stage_receipt"])
+    stage.update(
+        requested_operation=allocation["requested_operation"],
+        changed_paths=(path,),
+        wsp15_allocation_receipt_id=allocation["receipt_id"],
+        wsp15_allocation_digest=(
+            stage_policy.canonical_reddog_wsp15_allocation_digest(allocation)
+        ),
+        complexity=allocation["complexity"],
+        risk_classes=(),
+        would_block_reasons=(),
+        rejection_reasons=(),
+    )
+    stage["receipt_id"] = stage_policy._digest(stage_policy._unsigned(stage))
+    return {
+        "wsp15_allocation_receipt": allocation,
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": stage["wsp15_allocation_digest"],
+        "wsp15_priority": allocation["priority"],
+        "wsp15_mps_total": allocation["mps_total"],
+        "wsp15_reasoning_tier": allocation["reasoning_tier"],
+        "progressive_policy_stage_receipt_id": stage["receipt_id"],
+        "progressive_policy_stage_digest": stage_policy._digest(stage),
+        "progressive_policy_stage_receipt": stage,
+    }
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        f"modules/foundups/{_FID}/src/**",
+        f"modules/foundups/{_FID}/src/security_policy.py",
+        "modules/foundups/trade/src/scoring_integration.py",
+    ),
+)
+def test_attacker_rehashed_stage_cannot_reach_signer(path: str) -> None:
+    binding = _attacker_rehashed_stage_binding(path)
+    result, signer, store, _ = _issue(
+        **binding,
+        requested_operation=binding["wsp15_allocation_receipt"][
+            "requested_operation"
+        ],
+        allowed_paths=(path,),
+    )
+
+    assert result.accepted is False
+    assert RuntimeRejectCode.MALFORMED_REQUEST in result.receipt.rejection_reasons
+    assert signer.requests == []
+    assert store.load().get("issued_authorities", []) == []
+
+
+def test_rehashed_selected_slice_cannot_replace_authoritative_queue_truth() -> None:
+    original = _request()
+    authoritative_item = _authoritative_queue_item(original)
+    payload = original.to_dict()
+    stage = dict(payload["progressive_policy_stage_receipt"])
+    stage["selected_slice"] = "REDDOG_BOUNDED_FIX_PHASE1"
+    stage["receipt_id"] = stage_policy._digest(stage_policy._unsigned(stage))
+    payload["progressive_policy_stage_receipt"] = stage
+    payload["progressive_policy_stage_receipt_id"] = stage["receipt_id"]
+    payload["progressive_policy_stage_digest"] = stage_policy._digest(stage)
+    queue_receipt = dict(payload["queue_consumer_receipt"])
+    queue_receipt.update(
+        slice_id=stage["selected_slice"],
+        progressive_policy_stage_receipt=stage,
+        progressive_policy_stage_receipt_id=stage["receipt_id"],
+        progressive_policy_stage_digest=payload[
+            "progressive_policy_stage_digest"
+        ],
+    )
+    payload["queue_consumer_receipt"] = queue_receipt
+    payload["queue_consumer_receipt_digest"] = canonical_full_work_order_digest(
+        queue_receipt
+    )
+    attacker_request = DelegatedAuthorityRuntimeRequest(**payload)
+    admission = _admit_current_queue_authority(
+        request=attacker_request,
+        authoritative_queue_item=authoritative_item,
+    )
+    signer = _MockSigner()
+    store = InMemoryAuthorityRuntimeStore()
+
+    result = issue_delegated_authority_runtime(
+        request=attacker_request,
+        queue_authority_admission=admission,
+        store=store,
+        signer=signer,
+        principal_resolver=_PrincipalResolver(_principal()),
+        snapshot_resolver=_SnapshotResolver(
+            {attacker_request.permission_snapshot_digest: _snapshot()}
+        ),
+        now=_NOW,
+    )
+
+    assert admission is None
+    assert result.accepted is False
+    assert RuntimeRejectCode.MALFORMED_REQUEST in result.receipt.rejection_reasons
+    assert signer.requests == []
+    assert store.load().get("issued_authorities", []) == []
+
+
+def test_signer_runtime_rejects_missing_or_replayed_queue_admission() -> None:
+    request = _request()
+    admission = _admit_current_queue_authority(
+        request=request,
+        authoritative_queue_item=_authoritative_queue_item(request),
+    )
+    kwargs = {
+        "request": request,
+        "store": InMemoryAuthorityRuntimeStore(),
+        "signer": _MockSigner(),
+        "principal_resolver": _PrincipalResolver(_principal()),
+        "snapshot_resolver": _SnapshotResolver(
+            {request.permission_snapshot_digest: _snapshot()}
+        ),
+        "now": _NOW,
+    }
+
+    first = issue_delegated_authority_runtime(
+        queue_authority_admission=admission,
+        **kwargs,
+    )
+    signer_requests_after_first = list(kwargs["signer"].requests)
+    store_after_first = kwargs["store"].load()
+    replay = issue_delegated_authority_runtime(
+        queue_authority_admission=admission,
+        **kwargs,
+    )
+    missing = issue_delegated_authority_runtime(
+        queue_authority_admission=None,
+        **kwargs,
+    )
+
+    assert first.accepted is True
+    assert replay.accepted is False
+    assert missing.accepted is False
+    assert replay.receipt.rejection_reasons == (
+        RuntimeRejectCode.MALFORMED_REQUEST,
+    )
+    assert missing.receipt.rejection_reasons == (
+        RuntimeRejectCode.MALFORMED_REQUEST,
+    )
+    assert kwargs["signer"].requests == signer_requests_after_first
+    assert kwargs["store"].load() == store_after_first
+
+
+def test_audit_authority_signs_verifies_and_reaches_readonly_dispatch() -> None:
+    binding = signed_audit_stage_binding()
+    stage = binding["progressive_policy_stage_receipt"]
+    issued, signer, _, snapshot_resolver = _issue(
+        **binding,
+        requested_operation=stage["requested_operation"],
+        allowed_paths=(),
+        denied_paths=(),
+        valve_state_required="VALVE_OPEN_DRYRUN_ONLY",
+        consensus_receipt_digest=None,
+        sovereign_authorization_digest=None,
+    )
+    assert issued.accepted and issued.identity and issued.work_authority
+    verified = verify_delegated_work_authority(
+        work_authority=issued.work_authority,
+        identity=issued.identity,
+        signature_verifier=signer,
+        principal_key_resolver=_PrincipalKeyResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=snapshot_resolver,
+        revocation_oracle=_NoRevocation(),
+        now=_NOW,
+        required_valve_state="VALVE_OPEN_DRYRUN_ONLY",
+    )
+    assert verified.accepted is True, verified.reason_codes
+    runtime = {
+        "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
+        "authority_result": issued.to_dict(),
+    }
+    verification = {
+        "decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+        "verified_work_authority_digest": canonical_work_authority_digest(
+            issued.work_authority
+        ),
+        "verification_result": verified.to_dict(),
+    }
+    verification.update(recorded_authority_verification_binding(runtime, verification))
+    dispatch = plan_reddog_signed_authority_worker_dispatch_dry_run(
+        explicit_signed_authority_worker_dispatch_dryrun_requested=True,
+        queue_authority_verification_result=verification,
+        queue_authority_runtime_result=runtime,
+        wsp15_allocation_receipt=binding["wsp15_allocation_receipt"],
+    )
+
+    assert dispatch.accepted is True, dispatch.rejection_reasons
+    assert dispatch.no_worker_spawn_performed is True
+    assert dispatch.receipt is not None
+    assert dispatch.receipt.requested_operation.startswith(
+        "signed_0102_readonly_review:"
+    )
 
 
 def test_ast_denies_execution_crypto_keygen_network_and_runtime_wiring() -> None:

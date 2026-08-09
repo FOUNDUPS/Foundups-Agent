@@ -46,6 +46,12 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_admissio
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     OperationalContextSnapshot,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    DECISION_BOUNDED_EXECUTION_ADMITTED,
+    ProgressiveExecutionStageReceipt,
+    STAGE_AUDIT,
+    evaluate_proposal_stage,
+)
 
 
 @dataclass(frozen=True)
@@ -95,6 +101,8 @@ def evaluate_architect_proposal_executability(
     wsp15_allocation_receipt: Mapping[str, Any],
     policy: ArchitectProposalAdmissionPolicy | None = None,
     conversation_binding: Mapping[str, Any] | None = None,
+    task_prompt_text: str = "",
+    progressive_execution_stage_ceiling: str = STAGE_AUDIT,
 ) -> ArchitectProposalExecutabilityReceipt:
     """Validate proposal structure and derive current execution readiness."""
 
@@ -116,6 +124,8 @@ def evaluate_architect_proposal_executability(
         wsp15_allocation_receipt=wsp15_allocation_receipt,
         policy=current_policy,
         conversation_binding=conversation_binding,
+        task_prompt_text=task_prompt_text,
+        progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
     )
 
 
@@ -344,10 +354,24 @@ def _receipt(
     wsp15_allocation_receipt: Mapping[str, Any],
     policy: ArchitectProposalAdmissionPolicy,
     conversation_binding: Mapping[str, Any] | None,
+    task_prompt_text: str,
+    progressive_execution_stage_ceiling: str,
 ) -> ArchitectProposalExecutabilityReceipt:
+    stage = evaluate_proposal_stage(
+        action=proposal.action,
+        reuse_decision=proposal.reuse_decision,
+        effect_plane=proposal.effect_plane,
+        allocation=wsp15_allocation_receipt,
+        selected_slice=proposal.slice_id or "",
+        requested_operation=proposal.requested_operation,
+        changed_paths=proposal.allowed_paths,
+        task_prompt_text=task_prompt_text,
+        stage_ceiling=progressive_execution_stage_ceiling,
+        would_block_reasons=decision.missing_preconditions,
+    )
     payload = {
         **_receipt_contract(proposal),
-        **_receipt_decision(proposal, decision),
+        **_receipt_decision(proposal, decision, stage),
         **_receipt_bindings(
             proposal=proposal,
             support=support,
@@ -359,6 +383,7 @@ def _receipt(
         ),
         "supporting_finding_ids": list(support.finding_ids),
         "supporting_direct_read_paths": list(support.direct_read_paths),
+        **_stage_fields(stage),
         "rejection_reasons": (
             [] if decision.validity == VALIDITY_VALID else list(decision.validity_reasons)
         ),
@@ -394,6 +419,7 @@ def _receipt_contract(proposal: _Proposal) -> dict[str, Any]:
 def _receipt_decision(
     proposal: _Proposal,
     decision: _Decision,
+    stage: ProgressiveExecutionStageReceipt,
 ) -> dict[str, Any]:
     produced_warnings = (
         "produced_capability_is_output_not_current_authority:" + capability
@@ -405,7 +431,10 @@ def _receipt_decision(
         "accepted": decision.validity == VALIDITY_VALID,
         "proposal_validity": decision.validity,
         "execution_readiness": decision.readiness,
-        "admissible_to_authoritative_queue": decision.admissible,
+        "admissible_to_authoritative_queue": (
+            decision.admissible
+            and stage.decision == DECISION_BOUNDED_EXECUTION_ADMITTED
+        ),
         "missing_preconditions": list(decision.missing_preconditions),
         "decision_reasons": list(
             _dedupe(
@@ -452,8 +481,26 @@ def _receipt_bindings(
             wsp15_allocation_receipt.get("receipt_id")
         ),
         "wsp15_allocation_digest": _digest(wsp15_allocation_receipt),
+        "wsp15_complexity": wsp15_allocation_receipt.get("complexity"),
         "policy_digest": _digest(policy.to_dict()),
         **_conversation_bindings(conversation_binding),
+    }
+
+
+def _stage_fields(
+    stage: ProgressiveExecutionStageReceipt,
+) -> dict[str, Any]:
+    return {
+        "progressive_policy_stage": stage.stage,
+        "progressive_policy_decision": stage.decision,
+        "progressive_policy_stage_receipt_id": stage.receipt_id,
+        "progressive_policy_stage_receipt": stage.to_dict(),
+        "progressive_policy_would_block_reasons": list(
+            stage.would_block_reasons
+        ),
+        "independent_verifier_required": (
+            stage.independent_verifier_required
+        ),
     }
 
 
@@ -490,6 +537,7 @@ def _typed_receipt(payload: Mapping[str, Any]) -> ArchitectProposalExecutability
         "stop_conditions", "missing_preconditions", "decision_reasons",
         "supporting_finding_ids", "rejection_reasons",
         "supporting_direct_read_paths",
+        "progressive_policy_would_block_reasons",
     )
     for field in tuple_fields:
         values[field] = tuple(values[field])

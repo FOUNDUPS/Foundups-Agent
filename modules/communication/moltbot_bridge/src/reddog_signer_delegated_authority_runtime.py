@@ -13,7 +13,6 @@ The purpose is to bridge the gap after the E0/E1 contracts:
 * This module prepares authority records by validating scope, freshness,
   revocation, nonce uniqueness, and high-authority co-sign evidence before
   requesting signatures from an injected signer client.
-
 The signer response is treated as authority only when it carries the boundary
 attestations required by E0. All emitted receipts are evidence for later gates;
 they do not execute work by themselves.
@@ -54,6 +53,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_b
 )
 from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
     canonical_work_authority_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    VerifiedQueueAuthorityAdmission,
+    consume_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_authority_validation import (
+    validate_progressive_runtime_request,
 )
 
 AUTHORITY_ISSUED = "DELEGATED_AUTHORITY_ISSUED"
@@ -133,6 +139,8 @@ def public_key_fingerprint(public_key: str) -> str:
 
 
 def _path_within_foundup(path: str, foundup_id: str) -> bool:
+    if isinstance(path, str) and any(char in path for char in "*?[]"):
+        return False
     if not isinstance(path, str) or not path or not _is_ascii(path):
         return False
     if "\x00" in path or "\\" in path or ":" in path or path.startswith("/"):
@@ -219,11 +227,16 @@ class DelegatedAuthorityRuntimeRequest:
     requested_operation: str
     permission_snapshot_digest: str
     queue_consumer_receipt_digest: str
+    queue_consumer_receipt: Mapping[str, Any]
+    wsp15_allocation_receipt: Mapping[str, Any]
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
     wsp15_priority: str
     wsp15_mps_total: int
     wsp15_reasoning_tier: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
+    progressive_policy_stage_receipt: Mapping[str, Any]
     identity_nonce: str
     work_authority_nonce: str
     issued_at: int
@@ -377,6 +390,21 @@ def _validate_signing_response(
     return None
 
 
+def _effective_paths_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
+    from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+        STAGE_AUDIT,
+    )
+
+    audit_only = request.progressive_policy_stage_receipt.get("stage") == STAGE_AUDIT
+    if audit_only:
+        return not request.allowed_paths and not request.denied_paths
+    return bool(
+        request.allowed_paths
+        and not request.denied_paths
+        and all(_path_within_foundup(path, request.foundup_id) for path in request.allowed_paths)
+    )
+
+
 def issue_delegated_authority_runtime(
     *,
     request: DelegatedAuthorityRuntimeRequest,
@@ -384,6 +412,7 @@ def issue_delegated_authority_runtime(
     signer: Optional[IsolatedSignerClient] = None,
     principal_resolver: Optional[PrincipalAuthorityResolver] = None,
     snapshot_resolver: PermissionSnapshotResolver,
+    queue_authority_admission: Optional[VerifiedQueueAuthorityAdmission] = None,
     now: int,
     leeway_s: int = 60,
 ) -> DelegatedAuthorityRuntimeResult:
@@ -393,12 +422,20 @@ def issue_delegated_authority_runtime(
     receipt and nonce reservation through the provided store after both signing
     responses pass the E0 boundary-attestation checks.
     """
-
     signer_client = signer or FailClosedSignerClient()
     principal_lookup = principal_resolver or FailClosedPrincipalAuthorityResolver()
 
     if not isinstance(request, DelegatedAuthorityRuntimeRequest):
         return _rejection_result(now=now, request=None, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
+    if not consume_current_queue_authority(
+        queue_authority_admission,
+        request=request,
+    ):
+        return _rejection_result(
+            now=now,
+            request=request,
+            reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
+        )
     if not _assert_ascii_deep(request.to_dict()):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.NON_ASCII])
     if request.issued_at > now + leeway_s:
@@ -452,20 +489,10 @@ def issue_delegated_authority_runtime(
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_DIGEST_MISMATCH])
     if not snapshot.grants(request.requested_operation, request.repo_full_name):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_INSUFFICIENT])
-    if (
-        not request.queue_consumer_receipt_digest.startswith("sha256:")
-        or len(request.queue_consumer_receipt_digest) != 71
-        or not all(
-            char in "0123456789abcdef"
-            for char in request.queue_consumer_receipt_digest.removeprefix("sha256:")
+    if not validate_progressive_runtime_request(request):
+        return _rejection_result(
+            now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST]
         )
-        or not request.wsp15_allocation_receipt_id.startswith("sha256:")
-        or not request.wsp15_allocation_digest.startswith("sha256:")
-        or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
-        or type(request.wsp15_mps_total) is not int
-        or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
-    ):
-        return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
     has_runtime_binding = runtime_binding_request_valid(request)
     if has_runtime_binding is None:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
@@ -476,8 +503,7 @@ def issue_delegated_authority_runtime(
             reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
         )
 
-    effective_paths = set(request.allowed_paths) - set(request.denied_paths)
-    if not effective_paths or not all(_path_within_foundup(path, request.foundup_id) for path in effective_paths):
+    if not _effective_paths_valid(request):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.PATH_OUT_OF_SCOPE])
 
     authority_tier = (
@@ -570,11 +596,20 @@ def issue_delegated_authority_runtime(
         "requested_operation": request.requested_operation,
         "permission_snapshot_digest": request.permission_snapshot_digest,
         "queue_consumer_receipt_digest": request.queue_consumer_receipt_digest,
+        "selected_slice": str(request.queue_consumer_receipt["slice_id"]),
+        "wsp15_allocation_receipt": dict(request.wsp15_allocation_receipt),
         "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
         "wsp15_allocation_digest": request.wsp15_allocation_digest,
         "wsp15_priority": request.wsp15_priority,
         "wsp15_mps_total": request.wsp15_mps_total,
         "wsp15_reasoning_tier": request.wsp15_reasoning_tier,
+        "progressive_policy_stage_receipt_id": (
+            request.progressive_policy_stage_receipt_id
+        ),
+        "progressive_policy_stage_digest": request.progressive_policy_stage_digest,
+        "progressive_policy_stage_receipt": dict(
+            request.progressive_policy_stage_receipt
+        ),
         "nonce": request.work_authority_nonce,
         "issued_at": request.issued_at,
         "expires_at": request.work_authority_expires_at,

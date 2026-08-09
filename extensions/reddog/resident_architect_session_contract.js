@@ -31,11 +31,17 @@ function buildPayload(workFocus, options, bindings) {
   if (!authenticatedPrincipal || !scope.foundupId || !authorizedFoundupIds.includes(scope.foundupId)) {
     return rejected('resident_architect_authenticated_scope_missing');
   }
-  const intentId = digestIntent(groundingReceipt, authenticatedPrincipal, scope.foundupId, deps);
+  const stageCeiling = executionStageCeiling(opts.progressiveExecutionStage);
+  const intentId = digestIntent(
+    groundingReceipt, authenticatedPrincipal, scope.foundupId, stageCeiling, deps
+  );
   return {
     ok: true,
     rejection_reasons: [],
-    payload: buildIntentPayload(focus, groundingReceipt, authenticatedPrincipal, scope.foundupId, intentId, opts, deps)
+    payload: buildIntentPayload(
+      focus, groundingReceipt, authenticatedPrincipal, scope.foundupId,
+      intentId, stageCeiling, opts, deps
+    )
   };
 }
 
@@ -46,17 +52,20 @@ function authorizedFoundups(options, environment) {
   return String(environment.REDDOG_AUTHORIZED_FOUNDUP_IDS || '').split(',').map(clean).filter(Boolean);
 }
 
-function digestIntent(groundingReceipt, principalId, foundupId, bindings) {
+function digestIntent(groundingReceipt, principalId, foundupId, stageCeiling, bindings) {
   return 'sha256:' + crypto.createHash('sha256').update([
     bindings.productSlice,
     bindings.extensionVersion,
     groundingReceipt.receipt_id,
     principalId,
-    foundupId
+    foundupId,
+    stageCeiling
   ].join('|'), 'utf8').digest('hex');
 }
 
-function buildIntentPayload(focus, groundingReceipt, principalId, foundupId, intentId, options, bindings) {
+function buildIntentPayload(
+  focus, groundingReceipt, principalId, foundupId, intentId, stageCeiling, options, bindings
+) {
   return {
     red_dog_intent: {
       schema_version: 'reddog_intent.v2',
@@ -69,6 +78,7 @@ function buildIntentPayload(focus, groundingReceipt, principalId, foundupId, int
       extension_version: bindings.extensionVersion,
       work_focus: focus,
       grounding_receipt: groundingReceipt,
+      progressive_execution_stage_ceiling: stageCeiling,
       requested_operation: 'resident_architect_session',
       submits_executable_authority: false,
       shell_authority_requested: false,
@@ -85,6 +95,10 @@ function buildIntentPayload(focus, groundingReceipt, principalId, foundupId, int
     holoindex_ssd_path: options.holoindexSsdPath ? String(options.holoindexSsdPath) : undefined,
     timeout_seconds: Number(options.timeoutSeconds || 60)
   };
+}
+
+function executionStageCeiling(value) {
+  return value === 'boundedExecution' ? 'boundedExecution' : 'audit';
 }
 
 function buildResult(decision, fields, bindings) {

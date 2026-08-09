@@ -99,6 +99,15 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admis
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     FakeAssuranceReservationStore,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
     verify_autonomous_slice_runtime,
@@ -187,6 +196,7 @@ def _test_governed_environment(
         "valve_dryrun_enabled": True,
         "valve_live_enqueue_enabled": False,
         "valve_worktree_create_enabled": True,
+        "progressive_execution_stage_ceiling": "BOUNDED_EXECUTION",
     }
     provenance = {
         "schema_version": "reddog_execution_valve_environment_supply_receipt.v1",
@@ -283,37 +293,67 @@ def _assert_bootstrap_yielded_at_assurance(
     assert "slice_verifier" not in stored["stage_results"]
 
 
-def _queue_wsp15_allocation_receipt() -> dict[str, object]:
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation-queue",
-        "complexity": 5,
-        "importance": 5,
-        "deferability": 5,
-        "impact": 5,
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 2,
-            "coding_worker_count": 2,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "queue_mutation_allowed": False,
-            "hermes_execution_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
+def _queue_wsp15_allocation_receipt(
+    *,
+    requested_operation: str = "edit_foundup_module",
+    changed_path: str = PILOT_ARTIFACT,
+) -> dict[str, object]:
+    return allocate_reddog_wsp15_receipt(
+        requested_operation=requested_operation,
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=(changed_path,),
+        allowed_read_targets=(changed_path,),
+    ).to_dict()
 
 
-def _snapshot() -> dict[str, object]:
-    allocation = _queue_wsp15_allocation_receipt()
+def _snapshot(
+    *,
+    requested_operation: str = "edit_foundup_module",
+    changed_path: str = PILOT_ARTIFACT,
+) -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt(
+        requested_operation=requested_operation,
+        changed_path=changed_path,
+    )
     determination_id = "sha256:determination-1"
     selection_id = "sha256:model-selection-1"
     memex_id = "sha256:memex-1"
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        requested_operation=requested_operation,
+        changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+    )
+    queue_item = {
+            "queue_item_id": "queue-1",
+            "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": [
+                "claim:claim-1",
+                "freshness:fresh-1",
+                f"wsp15_allocation:{allocation['receipt_id']}",
+                f"architect_determination:{determination_id}",
+                f"model_selection:{selection_id}",
+                f"memex_supply:{memex_id}",
+            ],
+            "source_determination_receipt_id": determination_id,
+            "model_selection_receipt_id": selection_id,
+            "model_selection_digest": "sha256:model-selection-digest",
+            "model_runtime_binding_receipt_id": "",
+            "model_runtime_binding_digest": "",
+            "memex_supply_receipt_id": memex_id,
+            "memex_supply_digest": "sha256:" + ("d" * 64),
+            "wsp15_allocation_receipt": allocation,
+            "progressive_policy_stage_receipt_id": stage.receipt_id,
+            "progressive_policy_stage_digest": _canonical_digest(stage.to_dict()),
+            "progressive_policy_stage_receipt": stage.to_dict(),
+            "independent_verifier_required": True,
+            "no_execution_performed": True,
+        }
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -333,32 +373,7 @@ def _snapshot() -> dict[str, object]:
                 "memex_supply_receipt_id": memex_id,
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": [
-                    "claim:claim-1",
-                    "freshness:fresh-1",
-                    f"wsp15_allocation:{allocation['receipt_id']}",
-                    f"architect_determination:{determination_id}",
-                    f"model_selection:{selection_id}",
-                    f"memex_supply:{memex_id}",
-                ],
-                "wsp15_allocation_receipt": allocation,
-                "source_determination_receipt_id": determination_id,
-                "model_selection_receipt_id": selection_id,
-                "model_selection_digest": "sha256:model-selection-digest",
-                "model_runtime_binding_receipt_id": "",
-                "model_runtime_binding_digest": "",
-                "memex_supply_receipt_id": memex_id,
-                "memex_supply_digest": "sha256:" + ("d" * 64),
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -373,9 +388,9 @@ def _profile(**overrides: object) -> dict[str, object]:
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": FOUNDUP_ID,
         "base_ref": "main",
-        "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
-        "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
-        "requested_operation": "feature_slice",
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": PERMISSION_DIGEST,
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
@@ -415,6 +430,14 @@ def _profile(**overrides: object) -> dict[str, object]:
         },
     }
     profile.update(overrides)
+    if (
+        profile["requested_operation"] == PILOT_OPERATION
+        and "wsp15_allocation_receipt" not in overrides
+    ):
+        profile["wsp15_allocation_receipt"] = _queue_wsp15_allocation_receipt(
+            requested_operation=PILOT_OPERATION,
+            changed_path=PILOT_ARTIFACT,
+        )
     return profile
 
 
@@ -434,11 +457,11 @@ def _work_order(**overrides: object) -> dict[str, object]:
             "source": "test",
             "digest": PERMISSION_DIGEST,
         },
-        "requested_operation": "feature_slice",
+        "requested_operation": "edit_foundup_module",
         "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
         "authority_tier": "source",
-        "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
-        "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
         "branch_name": "feat/paccess-001-resident-queue",
         "base_ref": "main",
         "task_summary": "Resident queue startup reaches the execution valve only.",
@@ -538,7 +561,7 @@ def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> 
     )
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=profile,
         requested_queue_item_id="queue-1",
         now_iso=NOW,
@@ -554,7 +577,7 @@ def test_authority_profile_materializer_rejects_bounded_worker_plan_outside_scop
     plan["planned_artifacts"] = ["modules/foundups/other_foundup/README.md"]
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=_profile(
             requested_operation=PILOT_OPERATION,
             allowed_paths=_pilot_allowed_paths(),
@@ -573,7 +596,7 @@ def test_authority_profile_materializer_rejects_bounded_worker_plan_domain_misma
     plan["domain_id"] = "other_foundup"
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=_profile(
             requested_operation=PILOT_OPERATION,
             allowed_paths=_pilot_allowed_paths(),
@@ -674,7 +697,7 @@ def _valve_environment(**overrides: object) -> dict[str, object]:
 
 
 def _pilot_allowed_paths() -> list[str]:
-    return [f"modules/foundups/{PILOT_DOMAIN_ID}/**"]
+    return [PILOT_ARTIFACT]
 
 
 def _pilot_domain_profile() -> GenericAgentWorktreeDomainProfile:
@@ -700,8 +723,12 @@ def _pilot_domain_profile() -> GenericAgentWorktreeDomainProfile:
 def _pilot_path_overrides() -> dict[str, object]:
     return {
         "requested_operation": PILOT_OPERATION,
-        "allowed_paths": _pilot_allowed_paths(),
-        "denied_paths": [f"modules/foundups/{PILOT_DOMAIN_ID}/secrets/**"],
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": _queue_wsp15_allocation_receipt(
+            requested_operation=PILOT_OPERATION,
+            changed_path=PILOT_ARTIFACT,
+        ),
         "required_tests": [
             "python -m pytest "
             "modules/communication/moltbot_bridge/tests/"
@@ -804,7 +831,7 @@ def _pilot_bounded_worker_plan() -> dict[str, object]:
         "domain_id": PILOT_DOMAIN_ID,
         "domain_profile": _pilot_domain_profile().to_dict(),
         "planned_artifacts": [PILOT_ARTIFACT],
-        "requested_allowed_paths": _pilot_allowed_paths(),
+        "requested_allowed_paths": [PILOT_ARTIFACT],
         "shell_profile": _pilot_shell_profile().to_dict(),
         "shell_argv": [
             "python",
@@ -1219,6 +1246,10 @@ class _SwitchingSignerBackend:
         self._backends = dict(backends)
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
+        from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+            bind_exact_signing_request,
+        )
+
         backend = self._backends.get(request.signer_public_key)
         if backend is None:
             return SigningResponse(
@@ -1226,7 +1257,7 @@ class _SwitchingSignerBackend:
                 rejection_code=RuntimeRejectCode.SIGNER_NOT_CONFIGURED,
                 no_secret_material_returned=True,
             )
-        return backend.sign(request, peer)
+        return bind_exact_signing_request(backend, request).sign(request, peer)
 
 
 class _FakeWorktreeRunner:
@@ -1480,12 +1511,18 @@ def _ed25519_signing_material(*, principal_key=None, reddog_key=None):
     }
 
     def connector(socket_path: Path, request_bytes: bytes, timeout_s: float, max_response_bytes: int) -> bytes:
+        from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+            bind_exact_signing_request,
+        )
+
         assert socket_path.is_absolute()
         assert timeout_s > 0
         assert max_response_bytes >= 1024
         decoded = json.loads(request_bytes.decode("utf-8").strip())
         request = SigningRequest(**decoded["request"])
-        response = backends[request.signer_public_key].sign(request, peer)
+        response = bind_exact_signing_request(
+            backends[request.signer_public_key], request
+        ).sign(request, peer)
         return json.dumps(response.to_dict(), sort_keys=True).encode("utf-8")
 
     return principal_public, reddog_public, connector
@@ -1555,6 +1592,12 @@ def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
     }
     snapshot = _snapshot()
     queue = snapshot["wre_queue_items"][0]
+    progressive = signed_stage_binding(
+        requested_operation=PILOT_OPERATION,
+        changed_paths=(PILOT_ARTIFACT,),
+    )
+    allocation = progressive["wsp15_allocation_receipt"]
+    queue.update(progressive)
     queue.update(lineage)
     snapshot["worker_claims"][0].update(
         {
@@ -1563,6 +1606,12 @@ def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
             "model_runtime_binding_verification_receipt_id": verification.receipt_id,
         }
     )
+    queue["evidence_refs"] = [
+        item
+        for item in queue["evidence_refs"]
+        if not str(item).startswith("wsp15_allocation:")
+    ]
+    queue["evidence_refs"].append(f"wsp15_allocation:{allocation['receipt_id']}")
     queue["evidence_refs"].extend(
         f"{kind}:{value}"
         for kind, value in (
@@ -1580,14 +1629,22 @@ def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
         principal_public_key=principal_public,
         reddog_public_key=reddog_public,
         requested_operation=PILOT_OPERATION,
-        allowed_paths=_pilot_allowed_paths(),
-        denied_paths=overrides["denied_paths"],
+        allowed_paths=[PILOT_ARTIFACT],
+        denied_paths=[],
+        wsp15_allocation_receipt=allocation,
         **common,
     )
-    work_order = _work_order(
+    work_order_values = {
         **overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
+        "requested_operation": PILOT_OPERATION,
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": allocation,
+        "bounded_worker_plan": _pilot_bounded_worker_plan(),
         **common,
+    }
+    work_order = _work_order(
+        **work_order_values,
     )
     return snapshot, profile, work_order
 
@@ -2340,7 +2397,11 @@ def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_p
 ) -> None:
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2473,7 +2534,11 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2481,8 +2546,11 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
             principal_public_key=principal_public,
             reddog_public_key=reddog_public,
             requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides[
+                "wsp15_allocation_receipt"
+            ],
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
@@ -2556,7 +2624,7 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2640,7 +2708,7 @@ def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2728,7 +2796,7 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2817,7 +2885,7 @@ def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2909,7 +2977,7 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3007,7 +3075,7 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3101,7 +3169,11 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3109,8 +3181,11 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
             principal_public_key=principal_public,
             reddog_public_key=reddog_public,
             requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides[
+                "wsp15_allocation_receipt"
+            ],
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
@@ -3361,15 +3436,38 @@ def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_arti
 ) -> None:
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides[
+                "wsp15_allocation_receipt"
+            ],
+            bounded_worker_plan=_pilot_bounded_worker_plan(),
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
     principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    work_order = _work_order(
+        **pilot_overrides,
+        bounded_worker_plan=_pilot_bounded_worker_plan(),
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
@@ -3407,7 +3505,7 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3490,7 +3588,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3585,7 +3683,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION))
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",

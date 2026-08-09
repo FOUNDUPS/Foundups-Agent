@@ -45,6 +45,10 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_runtime_invocati
 from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
     EXECUTOR_PLAN_ACCEPT,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+    STAGE_BOUNDED_EXECUTION,
+)
 
 VALVE_CLOSED = "VALVE_CLOSED"
 VALVE_OPEN_DRYRUN_ONLY = "VALVE_OPEN_DRYRUN_ONLY"
@@ -98,6 +102,7 @@ _CANONICAL_ENVIRONMENT_FIELDS = CANONICAL_BINDING_FIELDS | {
     "valve_dryrun_enabled",
     "valve_live_enqueue_enabled",
     "valve_worktree_create_enabled",
+    "progressive_execution_stage_ceiling",
     "supply_provenance",
 }
 
@@ -146,6 +151,10 @@ class GovernedExecutionValveEnvironment:
             raise ValueError("canonical_environment_field_set_mismatch")
         if any(key in value for key in ("sovereign_live_enqueue_token", "sovereign_worktree_token")):
             raise ValueError("canonical_environment_token_key_forbidden")
+        if value.get("progressive_execution_stage_ceiling") not in {
+            STAGE_AUDIT, STAGE_BOUNDED_EXECUTION,
+        }:
+            raise ValueError("canonical_progressive_stage_ceiling_invalid")
         return cls(values=dict(value))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -465,6 +474,8 @@ def evaluate_reddog_execution_valve_canonical(
     if type(permission_ttl_seconds) is not int or not 1 <= permission_ttl_seconds <= 3600:
         reasons.append("canonical_permission_ttl_invalid")
     state = str(env.get("requested_valve_state") or "")
+    if env.get("progressive_execution_stage_ceiling") != STAGE_BOUNDED_EXECUTION:
+        reasons.append("progressive_execution_stage_ceiling_closed")
     internal = {
         "valve_dryrun_enabled": env.get("valve_dryrun_enabled") is True,
         "valve_live_enqueue_enabled": env.get("valve_live_enqueue_enabled") is True,
@@ -513,6 +524,10 @@ def _validate_canonical_environment(
         reasons.append("canonical_environment_schema_mismatch")
     if environment.get("authorization_mode") != CANONICAL_AUTHORIZATION_MODE:
         reasons.append("canonical_authorization_mode_mismatch")
+    if environment.get("progressive_execution_stage_ceiling") not in {
+        STAGE_AUDIT, STAGE_BOUNDED_EXECUTION,
+    }:
+        reasons.append("canonical_progressive_stage_ceiling_invalid")
     if set(expected) != CANONICAL_BINDING_FIELDS:
         reasons.append("canonical_expected_binding_field_set_mismatch")
     for field in CANONICAL_BINDING_FIELDS:

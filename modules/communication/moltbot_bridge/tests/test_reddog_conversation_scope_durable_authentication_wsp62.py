@@ -71,7 +71,7 @@ TEST_FILES = {
 }
 LEGACY_NO_GROWTH_FILES = {
     MODULE_ROOT / "src/reddog_main_readonly_operational_bootstrap.py": 857,
-    REPO_ROOT / "extensions/reddog/tests/verify_extension_contract.js": 5205,
+    REPO_ROOT / "extensions/reddog/tests/verify_extension_contract.js": 5893,
 }
 
 

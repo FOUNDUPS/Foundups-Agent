@@ -9,7 +9,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src import (
     openclaw_supervisor as supervisor_module,
@@ -33,6 +32,20 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task
     SignedWorkerDispatchTaskExecutorReason,
     execute_reddog_signed_worker_dispatch_task,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
+    plan_reddog_signed_authority_worker_dispatch_dry_run,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    InMemoryNonceStore,
+    verify_delegated_work_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    WorkerDispatchAuthorityVerificationContext,
+    recorded_authority_verification_binding,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
     resident_queue_runtime_file_path,
 )
@@ -42,9 +55,6 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
 )
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     RUNTIME_SURFACE_ARTIFACT_GENERATION,
-)
-from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
-    allocate_reddog_wsp15_receipt,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_serial_loop_bootstrap import (
     NOW as BOOTSTRAP_NOW,
@@ -80,9 +90,24 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import worker_dispatch_dryrun_result
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     configure_signed_worker_claim_authority_env,
-    governed_worker_dispatch_snapshot,
     install_signed_worker_envelope_test_authority,
     publish_agentdb_task_for_intent,
+    worker_dispatch_queue_receipt,
+    worker_dispatch_queue_receipt_digest,
+    worker_dispatch_work_order_digest,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    bounded_allocation as _allocation,
+    governed_snapshot as _snapshot,
+    openclaw_candidate_allocation as _openclaw_candidate_allocation,
+    readonly_allocation as _valid_readonly_allocation,
+    signed_audit_stage_binding,
+    signed_stage_binding,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_signer_delegated_authority_runtime import (
+    _NoRevocation as _SignerNoRevocation,
+    _PrincipalKeyResolver as _SignerPrincipalKeyResolver,
+    _issue as _issue_delegated_authority,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_test_capability,
@@ -102,7 +127,6 @@ from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime i
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
-
 REPO_ROOT = Path(__file__).resolve().parents[4]
 EXECUTOR_PATH = (
     REPO_ROOT
@@ -121,6 +145,15 @@ def _artifact_runtime_snapshot() -> dict[str, object]:
     snapshot = _bootstrap_snapshot()
     queue_item = snapshot["wre_queue_items"][0]
     worker_claim = snapshot["worker_claims"][0]
+    progressive = _artifact_progressive_binding()
+    allocation = progressive["wsp15_allocation_receipt"]
+    queue_item.update(progressive)
+    queue_item["evidence_refs"] = [
+        item
+        for item in queue_item["evidence_refs"]
+        if not str(item).startswith("wsp15_allocation:")
+    ]
+    queue_item["evidence_refs"].append(f"wsp15_allocation:{allocation['receipt_id']}")
     queue_item["model_selection_receipt_id"] = selection["receipt_id"]
     queue_item["model_selection_digest"] = _mapping_digest(selection)
     queue_item["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
@@ -153,41 +186,72 @@ def _artifact_runtime_profile(**overrides: object) -> dict[str, object]:
     selection, runtime_binding = _artifact_model_lineage()
     verification = verified_runtime_binding_receipt(runtime_binding)
     assert verification is not None
-    return _bootstrap_profile(
-        model_selection_receipt=selection,
-        model_selection_receipt_id=selection["receipt_id"],
-        model_selection_digest=_mapping_digest(selection),
-        model_runtime_binding_receipt=runtime_binding,
-        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-        model_runtime_binding_digest=canonical_model_runtime_binding_digest(
+    progressive = _artifact_progressive_binding()
+    values = {
+        "requested_operation": PILOT_OPERATION,
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": progressive["wsp15_allocation_receipt"],
+        "model_selection_receipt": selection,
+        "model_selection_receipt_id": selection["receipt_id"],
+        "model_selection_digest": _mapping_digest(selection),
+        "model_runtime_binding_receipt": runtime_binding,
+        "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
+        "model_runtime_binding_digest": canonical_model_runtime_binding_digest(
             runtime_binding
         ),
-        model_runtime_binding_verification_receipt_id=verification.receipt_id,
-        model_runtime_binding_verification_digest=verification_receipt_digest(
+        "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+        "model_runtime_binding_verification_digest": verification_receipt_digest(
             verification
         ),
-        **overrides,
+    }
+    values.update(overrides)
+    values.update(
+        requested_operation=PILOT_OPERATION,
+        allowed_paths=[PILOT_ARTIFACT],
+        denied_paths=[],
+        wsp15_allocation_receipt=progressive["wsp15_allocation_receipt"],
     )
+    return _bootstrap_profile(**values)
 
 
 def _artifact_runtime_work_order(**overrides: object) -> dict[str, object]:
     selection, runtime_binding = _artifact_model_lineage()
     verification = verified_runtime_binding_receipt(runtime_binding)
     assert verification is not None
-    return _work_order(
-        model_selection_receipt=selection,
-        model_selection_receipt_id=selection["receipt_id"],
-        model_selection_digest=_mapping_digest(selection),
-        model_runtime_binding_receipt=runtime_binding,
-        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-        model_runtime_binding_digest=canonical_model_runtime_binding_digest(
+    progressive = _artifact_progressive_binding()
+    values = {
+        "requested_operation": PILOT_OPERATION,
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": progressive["wsp15_allocation_receipt"],
+        "model_selection_receipt": selection,
+        "model_selection_receipt_id": selection["receipt_id"],
+        "model_selection_digest": _mapping_digest(selection),
+        "model_runtime_binding_receipt": runtime_binding,
+        "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
+        "model_runtime_binding_digest": canonical_model_runtime_binding_digest(
             runtime_binding
         ),
-        model_runtime_binding_verification_receipt_id=verification.receipt_id,
-        model_runtime_binding_verification_digest=verification_receipt_digest(
+        "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+        "model_runtime_binding_verification_digest": verification_receipt_digest(
             verification
         ),
-        **overrides,
+    }
+    values.update(overrides)
+    values.update(
+        requested_operation=PILOT_OPERATION,
+        allowed_paths=[PILOT_ARTIFACT],
+        denied_paths=[],
+        wsp15_allocation_receipt=progressive["wsp15_allocation_receipt"],
+    )
+    return _work_order(**values)
+
+
+def _artifact_progressive_binding() -> dict[str, object]:
+    return signed_stage_binding(
+        requested_operation=PILOT_OPERATION,
+        changed_paths=(PILOT_ARTIFACT,),
     )
 
 
@@ -212,6 +276,7 @@ def _mapping_digest(value: dict[str, object]) -> str:
 def isolated_agent_db(tmp_path, monkeypatch):
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
     monkeypatch.setenv("OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED", "1")
+    monkeypatch.setenv("OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED", "1")
     DatabaseManager.reset_for_tests()
     _patch_assurance_store(monkeypatch)
     install_signed_worker_envelope_test_authority(monkeypatch)
@@ -437,80 +502,22 @@ def _digest(value: object) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
-def _allocation(**overrides):
-    payload = {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 1,
-            "coding_worker_count": 1,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "hermes_execution_allowed": False,
-            "queue_mutation_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
-    payload.update(overrides)
-    return payload
-
-
-def _valid_readonly_allocation(
-    *,
-    targets=("docs/work_ledger.schema.json",),
-    runtime_binding=None,
-):
-    return allocate_reddog_wsp15_receipt(
-        requested_operation="signed_0102_readonly_review:redDog_runtime_security",
-        prompt_text="RedDog OpenClaw signed 0102 read-only review runtime security audit.",
-        allowed_read_targets=targets,
-        model_runtime_binding_receipt=runtime_binding,
-    ).to_dict()
-
-
 def _dryrun_result(allocation=None, intent=None):
     assert intent is None
     return worker_dispatch_dryrun_result(allocation or _allocation())
 
 
-def _snapshot(allocation=None, **queue_overrides):
-    allocation = allocation or _allocation()
-    queue_item = {
-        "queue_item_id": "queue-1",
-        "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-        "status": "QUEUED",
-        "wsp15_allocation_receipt": allocation,
-    }
-    queue_item.update(queue_overrides)
-    return governed_worker_dispatch_snapshot({
-        "schema_version": "reddog_authoritative_work_state.v1",
-        "wre_queue_items": [queue_item],
-    })
-
-
 def _task_context():
     result = publish_bound_worker_dispatch(
-        worker_dispatch_dryrun_result=_dryrun_result(),
-        work_state_snapshot=_snapshot(),
+        worker_dispatch_dryrun_result=_dryrun_result(
+            allocation=_openclaw_candidate_allocation()
+        ),
+        work_state_snapshot=_snapshot(_openclaw_candidate_allocation()),
         queue_item_id="queue-1",
         writer=_CollectingWriter(),
     )
     assert result.accepted is True
-    return _context_with_intent_overrides(
-        result.tasks[0].context,
-        {
-            "intent_id": "worker_dispatch_intent_openclaw_candidate",
-            "role": "openclaw_candidate",
-            "worker_runtime": "openclaw",
-            "capability": "candidate_queue_review",
-        },
-    )
+    return result.tasks[0].context
 
 
 def _context_with_intent_overrides(context, overrides):
@@ -580,8 +587,9 @@ def _publish_agentdb_task(**intent_overrides) -> str:
         "worker_runtime": "openclaw",
         "capability": "candidate_queue_review",
     }
+    requested = str(intent_overrides.get("intent_id") or defaults["intent_id"])
     return _publish_agentdb_task_with_allocation(
-        _allocation(),
+        _openclaw_candidate_allocation(prompt_suffix=requested),
         **{**defaults, **intent_overrides},
     )
 
@@ -594,6 +602,16 @@ def _publish_agentdb_task_with_allocation(allocation, **intent_overrides) -> str
         snapshot_builder=_snapshot,
         context_override_builder=_context_with_intent_overrides,
         digest_builder=_digest,
+    )
+
+
+def _publish_readonly_agentdb_task() -> str:
+    return _publish_agentdb_task_with_allocation(
+        _valid_readonly_allocation(),
+        intent_id="worker_dispatch_intent_fusion_lead",
+        role="fusion_lead",
+        worker_runtime="0102",
+        capability="architect_review",
     )
 
 
@@ -903,7 +921,14 @@ def test_signed_worker_executor_rejects_incomplete_or_inconsistent_effect_eviden
 def test_run_task_routes_signed_worker_before_wre_fallback(tmp_path: Path, monkeypatch) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_signed_worker_task(task_id)
+    row = db.db.execute_query(
+        "SELECT status, discovered_by, assigned_to, context, required_skills "
+        "FROM agents_autonomous_tasks WHERE task_id = ?",
+        (task_id,),
+    )
+
+
+    assert db.assign_signed_worker_task(task_id), row
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
 
     result = execute_task(task_id, repo_root=tmp_path, signed_worker_runner=_FakeRunner())
@@ -988,7 +1013,7 @@ def test_openclaw_signed_worker_healthcheck_blocks_before_agentdb_claim(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK", "1")
     from modules.communication.moltbot_bridge.src import (
         reddog_signer_socket_service_healthcheck as healthcheck_module,
@@ -1026,7 +1051,7 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK", "1")
     from modules.communication.moltbot_bridge.src import (
         reddog_signer_socket_service_healthcheck as healthcheck_module,
@@ -1050,7 +1075,7 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
         signed_worker_runner=runner,
     )
 
-    assert result["accepted"] is True
+    assert result["accepted"] is True, json.dumps(result, sort_keys=True, default=str)
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
     assert result["task_id"] == task_id
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
@@ -1059,8 +1084,8 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
     assert receipt["claim_status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
     assert receipt["accepted"] is True
     assert receipt["receipt_id"] == result["receipt_id"]
-    assert receipt["worker_runtime"] == "openclaw"
-    assert receipt["capability"] == "candidate_queue_review"
+    assert receipt["worker_runtime"] == "0102"
+    assert receipt["capability"] == "architect_review"
     assert str(receipt["run_result_digest"]).startswith("sha256:")
     assert str(receipt["runner_result_digest"]).startswith("sha256:")
 
@@ -1068,7 +1093,7 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
 def test_openclaw_signed_worker_claim_persists_failure_result_receipt(
     tmp_path: Path,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
 
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
 
@@ -1081,7 +1106,7 @@ def test_openclaw_signed_worker_claim_persists_failure_result_receipt(
     assert SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED in receipt[
         "rejection_reasons"
     ]
-    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_MISSING in receipt[
+    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED in receipt[
         "rejection_reasons"
     ]
 
@@ -1090,7 +1115,7 @@ def test_openclaw_signed_worker_claim_fails_terminally_on_binding_exception(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
 
     def _raise_binding_error(**_kwargs):
         raise RuntimeError("binding failed")
@@ -1112,7 +1137,7 @@ def test_openclaw_signed_worker_claim_fails_terminally_on_binding_exception(
 def test_openclaw_signed_worker_claim_persists_requeue_result_receipt(
     tmp_path: Path,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
 
     result = claim_reddog_signed_worker_dispatch_task_once(
         repo_root=tmp_path,
@@ -1134,7 +1159,7 @@ def test_openclaw_signed_worker_claim_rejects_when_result_persistence_fails(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
     from modules.communication.moltbot_bridge.src import openclaw_supervisor
 
     monkeypatch.setattr(
@@ -1165,7 +1190,7 @@ def test_openclaw_signed_worker_claim_rejects_when_task_transition_fails(
     monkeypatch,
     requeue_required: bool,
 ) -> None:
-    _publish_agentdb_task()
+    _publish_readonly_agentdb_task()
     from modules.communication.moltbot_bridge.src import openclaw_supervisor
 
     monkeypatch.setattr(
@@ -1191,7 +1216,7 @@ def test_openclaw_signed_worker_rejection_surfaces_failed_failure_transition(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    _publish_agentdb_task()
+    _publish_readonly_agentdb_task()
     from modules.communication.moltbot_bridge.src import openclaw_supervisor
 
     monkeypatch.setattr(
@@ -1206,7 +1231,7 @@ def test_openclaw_signed_worker_rejection_surfaces_failed_failure_transition(
     )
 
     assert result["accepted"] is False
-    assert result["worker_execution_performed"] is False
+    assert result["worker_execution_performed"] is True
     assert result["effect_evidence_complete"] is True
     assert (
         SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED
@@ -1243,6 +1268,198 @@ def test_openclaw_claim_executes_0102_readonly_task_when_env_enabled(
     assert result["capability"] == "architect_review"
     assert runner.calls[0]["task_id"] == task_id
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+
+
+def test_signer_issued_audit_reaches_real_readonly_worker_without_effects(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
+    )
+    runtime_verification = verified_runtime_binding_receipt(runtime_binding)
+    assert runtime_verification is not None
+    binding = signed_audit_stage_binding(runtime_binding=runtime_binding)
+    allocation = binding["wsp15_allocation_receipt"]
+    snapshot = _snapshot(
+        allocation,
+        slice_id="REDDOG_READONLY_AUDIT_PHASE1",
+        model_selection_receipt=selection,
+        model_selection_receipt_id=selection["receipt_id"],
+        model_selection_digest=_mapping_digest(selection),
+        model_runtime_binding_receipt=runtime_binding,
+        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
+        model_runtime_binding_digest=canonical_model_runtime_binding_digest(
+            runtime_binding
+        ),
+        model_runtime_binding_verification_receipt_id=(
+            runtime_verification.receipt_id
+        ),
+        model_runtime_binding_verification_digest=verification_receipt_digest(
+            runtime_verification
+        ),
+        **{
+            key: binding[key]
+            for key in (
+                "progressive_policy_stage_receipt_id",
+                "progressive_policy_stage_digest",
+                "progressive_policy_stage_receipt",
+            )
+        },
+    )
+    queue_item = snapshot["wre_queue_items"][0]
+    issued, signer, _, snapshot_resolver = _issue_delegated_authority(
+        **binding,
+        work_order_id="wo-1",
+        work_order_digest=worker_dispatch_work_order_digest(snapshot),
+        queue_consumer_receipt_digest=worker_dispatch_queue_receipt_digest(snapshot),
+        queue_consumer_receipt=worker_dispatch_queue_receipt(snapshot),
+        requested_operation=allocation["requested_operation"],
+        allowed_paths=(),
+        denied_paths=(),
+        model_selection_receipt_id=queue_item["model_selection_receipt_id"],
+        model_selection_digest=queue_item["model_selection_digest"],
+        model_runtime_binding_receipt_id=queue_item[
+            "model_runtime_binding_receipt_id"
+        ],
+        model_runtime_binding_digest=queue_item["model_runtime_binding_digest"],
+        model_runtime_binding_verification_receipt_id=queue_item[
+            "model_runtime_binding_verification_receipt_id"
+        ],
+        model_runtime_binding_verification_digest=queue_item[
+            "model_runtime_binding_verification_digest"
+        ],
+        memex_supply_receipt_id=queue_item["memex_supply_receipt_id"],
+        memex_supply_digest=queue_item["memex_supply_digest"],
+        valve_state_required="VALVE_OPEN_DRYRUN_ONLY",
+        consensus_receipt_digest=None,
+        sovereign_authorization_digest=None,
+    )
+    assert issued.accepted and issued.identity and issued.work_authority
+    verified = verify_delegated_work_authority(
+        work_authority=issued.work_authority,
+        identity=issued.identity,
+        signature_verifier=signer,
+        principal_key_resolver=_SignerPrincipalKeyResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=snapshot_resolver,
+        revocation_oracle=_SignerNoRevocation(),
+        now=1000,
+        required_valve_state="VALVE_OPEN_DRYRUN_ONLY",
+    )
+    assert verified.accepted is True, verified.reason_codes
+    authority_runtime = {
+        "decision": "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT",
+        "authority_result": issued.to_dict(),
+    }
+    authority_verification = {
+        "decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT",
+        "verified_work_authority_digest": canonical_work_authority_digest(
+            issued.work_authority
+        ),
+        "verification_result": verified.to_dict(),
+    }
+    authority_verification.update(
+        recorded_authority_verification_binding(
+            authority_runtime,
+            authority_verification,
+        )
+    )
+    dryrun = plan_reddog_signed_authority_worker_dispatch_dry_run(
+        explicit_signed_authority_worker_dispatch_dryrun_requested=True,
+        queue_authority_verification_result=authority_verification,
+        queue_authority_runtime_result=authority_runtime,
+        wsp15_allocation_receipt=allocation,
+    ).to_dict()
+    context = WorkerDispatchAuthorityVerificationContext(
+        signature_verifier=signer,
+        principal_key_resolver=_SignerPrincipalKeyResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=snapshot_resolver,
+        revocation_oracle=_SignerNoRevocation(),
+        trusted_now_epoch=lambda: 1000,
+        required_valve_state="VALVE_OPEN_DRYRUN_ONLY",
+    )
+    published = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=dryrun,
+        queue_authority_runtime_result=authority_runtime,
+        queue_authority_verification_result=authority_verification,
+        authority_verification_context=context,
+        work_state_snapshot=snapshot,
+        queue_item_id="queue-1",
+        writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
+    )
+    assert published.accepted and len(published.tasks) == 1
+    assert published.tasks[0].context["model_runtime_binding_receipt"] == runtime_binding
+
+    repo = _repo_with_readonly_target(tmp_path)
+    target = repo / "modules" / "foundups" / "paccess_001" / "src" / "worker.py"
+    target.parent.mkdir(parents=True)
+    target.write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-m", "test: add audit target"],
+        check=True,
+        capture_output=True,
+    )
+    head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_0102_readonly_review_binding as review_binding,
+        reddog_signed_worker_agentdb_envelope as envelope_module,
+    )
+
+    model_runner = _EchoEvidenceModelRunner()
+    readonly_runner = review_binding.Signed0102ReadOnlyReviewRunner(
+        model_runner=model_runner,
+        holoindex_adapter=_FakeQueryAdapter(head),
+        codeindex_adapter=_FakeQueryAdapter(head),
+    )
+    monkeypatch.setattr(
+        review_binding,
+        "Signed0102ReadOnlyReviewRunner",
+        lambda: readonly_runner,
+    )
+    monkeypatch.setattr(
+        envelope_module,
+        "build_worker_dispatch_authority_context_from_env",
+        lambda **_: WorkerDispatchAuthorityVerificationContext(
+            signature_verifier=signer,
+            principal_key_resolver=_SignerPrincipalKeyResolver(),
+            nonce_store=InMemoryNonceStore(),
+            snapshot_resolver=snapshot_resolver,
+            revocation_oracle=_SignerNoRevocation(),
+            trusted_now_epoch=lambda: 1000,
+            required_valve_state="VALVE_OPEN_DRYRUN_ONLY",
+        ),
+    )
+    before = subprocess.run(
+        ["git", "-C", str(repo), "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+
+    claimed = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
+
+    assert claimed["accepted"] is True, json.dumps(claimed, sort_keys=True)
+    assert claimed["capability"] == "architect_review"
+    assert model_runner.calls
+    assert subprocess.run(
+        ["git", "-C", str(repo), "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout == before == ""
+    assert not (repo / "artifact_generation_request.json").exists()
+    assert "work_order_invocation" not in claimed
+    assert AgentDB().get_autonomous_task_by_id(published.tasks[0].task_id)[
+        "status"
+    ] == "completed"
 
 
 def test_openclaw_claim_does_not_claim_0102_bounded_code_change_even_when_readonly_enabled(
@@ -2954,4 +3171,3 @@ def test_signed_worker_executor_ast_has_no_shell_network_or_runtime_mutation() -
     assert "exec" not in calls
     assert "system" not in attrs
     assert "popen" not in attrs
-    governed_worker_dispatch_snapshot,

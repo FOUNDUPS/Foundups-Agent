@@ -1,14 +1,4 @@
-"""RedDog signed-authority worker dispatch dry-run planner.
-
-Slice: REDDOG_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_PHASE1
-
-This module consumes an accepted queue authority verification result, the
-signed authority runtime payload, and the authoritative WSP15 allocation
-receipt. It emits deterministic worker-dispatch intents only. It does not
-register workers, spawn workers, enqueue OpenClaw, dispatch Hermes, run shell
-commands, mutate the repository, publish PRs, settle rewards, or re-index
-HoloIndex.
-"""
+"""Plan worker intents from verified signed authority without side effects."""
 
 from __future__ import annotations
 
@@ -26,6 +16,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
     optional_authority_binding_values_valid,
+    progressive_stage_authority_fields,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
@@ -37,6 +28,10 @@ from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_b
     authority_verification_binding_matches,
     recorded_authority_verification_binding,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocation_changed_paths_match,
+    priority_for_mps_total,
+)
 
 
 SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT = (
@@ -45,8 +40,6 @@ SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT = (
 SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_REJECT = (
     "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_REJECT"
 )
-
-
 class SignedAuthorityWorkerDispatchDryRunReason:
     EXPLICIT_REQUEST_MISSING = "REJECT_EXPLICIT_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_MISSING"
     AUTHORITY_VERIFICATION_NOT_ACCEPTED = "REJECT_AUTHORITY_VERIFICATION_NOT_ACCEPTED"
@@ -62,10 +55,14 @@ class SignedAuthorityWorkerDispatchDryRunReason:
     WSP15_PRIORITY_MISMATCH = "REJECT_WSP15_PRIORITY_MISMATCH"
     WSP15_MPS_TOTAL_MISMATCH = "REJECT_WSP15_MPS_TOTAL_MISMATCH"
     WSP15_REASONING_TIER_MISMATCH = "REJECT_WSP15_REASONING_TIER_MISMATCH"
+    WSP15_CHANGED_PATHS_MISMATCH = "REJECT_WSP15_CHANGED_PATHS_MISMATCH"
     MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_MODEL_RUNTIME_BINDING_MISMATCH"
     MEMEX_SUPPLY_BINDING_MISMATCH = "REJECT_MEMEX_SUPPLY_BINDING_MISMATCH"
     ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH = (
         "REJECT_ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH"
+    )
+    PROGRESSIVE_STAGE_BINDING_MISMATCH = (
+        "REJECT_PROGRESSIVE_STAGE_BINDING_MISMATCH"
     )
     QUEUE_MUTATION_NOT_ALLOWED = "REJECT_QUEUE_MUTATION_NOT_ALLOWED"
     HERMES_EXECUTION_NOT_ALLOWED = "REJECT_HERMES_EXECUTION_NOT_ALLOWED"
@@ -75,7 +72,6 @@ class SignedAuthorityWorkerDispatchDryRunReason:
 @dataclass(frozen=True)
 class WorkerDispatchIntent:
     """One planned worker assignment intent. This is not a worker invocation."""
-
     intent_id: str
     role: str
     worker_runtime: str
@@ -85,6 +81,8 @@ class WorkerDispatchIntent:
     requested_operation: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
     model_runtime_binding_receipt_id: str = ""
     model_runtime_binding_digest: str = ""
     model_runtime_binding_verification_receipt_id: str = ""
@@ -116,6 +114,8 @@ class SignedAuthorityWorkerDispatchDryRunReceipt:
     wsp15_priority: str
     wsp15_mps_total: int
     wsp15_reasoning_tier: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
     model_runtime_binding_verification_receipt_id: str
@@ -203,18 +203,6 @@ def _reject(
     )
 
 
-def _valid_priority_for_mps(priority: str, mps_total: int) -> bool:
-    if mps_total >= 18:
-        return priority == "P0"
-    if mps_total >= 14:
-        return priority == "P1"
-    if mps_total >= 10:
-        return priority == "P2"
-    if mps_total >= 7:
-        return priority == "P3"
-    return priority == "P4"
-
-
 def _validate_allocation(allocation: Mapping[str, Any]) -> List[str]:
     reasons: List[str] = []
     if not allocation:
@@ -229,7 +217,7 @@ def _validate_allocation(allocation: Mapping[str, Any]) -> List[str]:
         or priority not in {"P0", "P1", "P2", "P3", "P4"}
         or tier not in {"REGULAR", "HIGH", "ULTRA"}
         or type(total) is not int
-        or not _valid_priority_for_mps(priority, total)
+        or priority != priority_for_mps_total(total)
         or not worker_plan
     ):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_ALLOCATION_MALFORMED)
@@ -253,6 +241,7 @@ def _build_intents(
         "requested_operation": str(work_authority["requested_operation"]),
         "wsp15_allocation_receipt_id": str(allocation["receipt_id"]),
         "wsp15_allocation_digest": _digest(allocation),
+        **progressive_stage_authority_fields(work_authority),
         **model_runtime_authority_fields(work_authority),
         "memex_supply_receipt_id": str(work_authority.get("memex_supply_receipt_id") or ""),
         "memex_supply_digest": str(work_authority.get("memex_supply_digest") or ""),
@@ -311,12 +300,18 @@ def _optional_authority_fields(
         )
     ):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH)
+    stage_fields = progressive_stage_authority_fields(work_authority)
+    if not stage_fields:
+        reasons.append(
+            SignedAuthorityWorkerDispatchDryRunReason.PROGRESSIVE_STAGE_BINDING_MISMATCH
+        )
     return {
         **model_fields,
         "memex_supply_receipt_id": str(memex_id or ""),
         "memex_supply_digest": str(memex_digest or ""),
         "architect_fix_publication_receipt_id": publication_id,
         "architect_fix_publication_binding_digest": publication_digest,
+        **stage_fields,
     }
 
 
@@ -357,13 +352,11 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
     wsp15_allocation_receipt: Mapping[str, Any],
 ) -> SignedAuthorityWorkerDispatchDryRunResult:
     """Plan worker dispatch from accepted signed authority without dispatching workers."""
-
     if explicit_signed_authority_worker_dispatch_dryrun_requested is not True:
         return _reject(
             [SignedAuthorityWorkerDispatchDryRunReason.EXPLICIT_REQUEST_MISSING],
             explicit_requested=False,
         )
-
     verification = _mapping(queue_authority_verification_result)
     verification_result = _mapping(verification.get("verification_result"))
     if (
@@ -374,7 +367,6 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
             [SignedAuthorityWorkerDispatchDryRunReason.AUTHORITY_VERIFICATION_NOT_ACCEPTED],
             explicit_requested=True,
         )
-
     runtime = _mapping(queue_authority_runtime_result)
     authority = _mapping(runtime.get("authority_result"))
     receipt = _mapping(authority.get("receipt"))
@@ -387,7 +379,6 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
             [SignedAuthorityWorkerDispatchDryRunReason.AUTHORITY_RUNTIME_NOT_ACCEPTED],
             explicit_requested=True,
         )
-
     work_authority = _mapping(authority.get("work_authority"))
     if not work_authority:
         return _reject(
@@ -426,6 +417,10 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_MPS_TOTAL_MISMATCH)
     if str(work_authority.get("wsp15_reasoning_tier") or "") != str(allocation["reasoning_tier"]):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_REASONING_TIER_MISMATCH)
+    if not allocation_changed_paths_match(work_authority, allocation):
+        reasons.append(
+            SignedAuthorityWorkerDispatchDryRunReason.WSP15_CHANGED_PATHS_MISMATCH
+        )
     optional_fields = _optional_authority_fields(work_authority, reasons)
     if reasons:
         return _reject(reasons, explicit_requested=True)

@@ -173,9 +173,11 @@ class GovernedValveUseTimeAuthorityResolver:
 
         expiry_epoch = _integer(work_authority.get("expires_at")) or self.now_epoch
         ttl = max(1, min(3600, expiry_epoch - self.now_epoch))
-        expires = datetime.fromtimestamp(expiry_epoch, tz=timezone.utc).replace(
-            microsecond=0
-        ).isoformat()
+        expires = (
+            datetime.fromtimestamp(expiry_epoch, tz=timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+        )
         return GovernedValveUseTimeResolution(
             environment=environment,
             expected_bindings=expected,
@@ -307,7 +309,9 @@ class GovernedValveUseTimeAuthorityResolver:
             principal_authority_records=artifacts["principal_authority_records"],
             queue_item_id=str(queue_item_id),
         )
-        reasons.extend(f"canonical_use_time_binding:{reason}" for reason in binding_reasons)
+        reasons.extend(
+            f"canonical_use_time_binding:{reason}" for reason in binding_reasons
+        )
         return expected or {}
 
 
@@ -332,8 +336,7 @@ def _read_runtime_artifacts(
     ]
     if changed:
         return {}, [
-            f"canonical_use_time_artifact_snapshot_changed:{name}"
-            for name in changed
+            f"canonical_use_time_artifact_snapshot_changed:{name}" for name in changed
         ]
     try:
         payloads["authority_profile"] = rehydrate_authority_profile_runtime(
@@ -374,7 +377,10 @@ def _read_json_no_follow(
     try:
         with runtime_operation_lock(str(candidate) + ".operation"):
             resolved_for_repo_check = candidate.resolve(strict=True)
-            if resolved_for_repo_check == root or root in resolved_for_repo_check.parents:
+            if (
+                resolved_for_repo_check == root
+                or root in resolved_for_repo_check.parents
+            ):
                 return None, "inside_repo"
             raw, _ = secure_read_confined_bytes(
                 candidate,
@@ -384,7 +390,9 @@ def _read_json_no_follow(
         if len(raw) >= 1024 * 1024:
             return None, "not_bounded_regular_file"
         payload = json.loads(raw.decode("utf-8"))
-        return (payload, None) if isinstance(payload, Mapping) else (None, "not_mapping")
+        return (
+            (payload, None) if isinstance(payload, Mapping) else (None, "not_mapping")
+        )
     except (OSError, ValueError, UnicodeError, json.JSONDecodeError):
         return None, "unreadable"
 
@@ -427,13 +435,17 @@ def _validate_recorded_authority(
         or checked.get("accepted") is not True
     ):
         reasons.append("canonical_recorded_authority_verification_not_accepted")
-    if checked.get("work_order_id") != _mapping(authority_result.get("work_authority")).get(
-        "work_order_id"
-    ):
+    if checked.get("work_order_id") != _mapping(
+        authority_result.get("work_authority")
+    ).get("work_order_id"):
         reasons.append("canonical_recorded_authority_work_order_mismatch")
     required_receipt_fields = {
-        "receipt_id", "status", "work_order_id", "identity_digest",
-        "work_authority_digest", "generated_at",
+        "receipt_id",
+        "status",
+        "work_order_id",
+        "identity_digest",
+        "work_authority_digest",
+        "generated_at",
     }
     if not required_receipt_fields.issubset(receipt) or any(
         receipt.get(field) in (None, "") for field in required_receipt_fields
@@ -443,7 +455,9 @@ def _validate_recorded_authority(
         reasons.append("canonical_authority_receipt_work_order_mismatch")
     if identity and receipt.get("identity_digest") != _digest(identity):
         reasons.append("canonical_identity_receipt_digest_mismatch")
-    if work_authority and not work_authority_digest_matches(work_authority, receipt.get("work_authority_digest")):
+    if work_authority and not work_authority_digest_matches(
+        work_authority, receipt.get("work_authority_digest")
+    ):
         reasons.append("canonical_work_authority_receipt_digest_mismatch")
     identity_bindings = {
         "principal_id": identity.get("principal_id"),
@@ -494,7 +508,9 @@ def _signed_binding_reasons(
         "wsp15_reasoning_tier": work_order.get("wsp15_reasoning_tier"),
         "model_selection_receipt_id": work_order.get("model_selection_receipt_id"),
         "model_selection_digest": work_order.get("model_selection_digest"),
-        "model_runtime_binding_receipt_id": work_order.get("model_runtime_binding_receipt_id"),
+        "model_runtime_binding_receipt_id": work_order.get(
+            "model_runtime_binding_receipt_id"
+        ),
         "model_runtime_binding_digest": work_order.get("model_runtime_binding_digest"),
         "memex_supply_receipt_id": work_order.get("memex_supply_receipt_id"),
         "memex_supply_digest": work_order.get("memex_supply_digest"),
@@ -530,28 +546,57 @@ def _signed_binding_reasons(
     return reasons
 
 
-def _queue_receipt_binding_reasons(
+def _queue_current_truth_checks(
     receipt: Mapping[str, Any],
     authority: Mapping[str, Any],
     work_order: Mapping[str, Any],
     selected_slice: Optional[str],
-) -> list[str]:
-    if not receipt:
-        return ["canonical_queue_consumer_receipt_missing"]
-    checks = {
-        "work_order_id": (authority.get("work_order_id"), work_order.get("work_order_id")),
-        "slice_id": (receipt.get("slice_id"), selected_slice),
+) -> dict[str, tuple[Any, Any]]:
+    return {
+        "queue_consumer_receipt_digest": (
+            _canonical_queue_receipt_digest(receipt),
+            authority.get("queue_consumer_receipt_digest"),
+        ),
+        "work_order_id": (
+            authority.get("work_order_id"),
+            work_order.get("work_order_id"),
+        ),
+        "slice_id": (receipt.get("slice_id"), authority.get("selected_slice")),
+        "selected_slice": (selected_slice, authority.get("selected_slice")),
+        "progressive_policy_stage_receipt_id": (
+            receipt.get("progressive_policy_stage_receipt_id"),
+            authority.get("progressive_policy_stage_receipt_id"),
+        ),
+        "progressive_policy_stage_digest": (
+            receipt.get("progressive_policy_stage_digest"),
+            authority.get("progressive_policy_stage_digest"),
+        ),
+    }
+
+
+def _queue_optional_binding_checks(
+    receipt: Mapping[str, Any], authority: Mapping[str, Any]
+) -> dict[str, tuple[Any, Any]]:
+    return {
         "wsp15_allocation_receipt_id": (
             receipt.get("wsp15_allocation_receipt_id"),
             authority.get("wsp15_allocation_receipt_id"),
         ),
         "wsp15_allocation_digest": (
-            receipt.get("wsp15_allocation_digest"), authority.get("wsp15_allocation_digest")
+            receipt.get("wsp15_allocation_digest"),
+            authority.get("wsp15_allocation_digest"),
         ),
-        "wsp15_priority": (receipt.get("wsp15_priority"), authority.get("wsp15_priority")),
-        "wsp15_mps_total": (receipt.get("wsp15_mps_total"), authority.get("wsp15_mps_total")),
+        "wsp15_priority": (
+            receipt.get("wsp15_priority"),
+            authority.get("wsp15_priority"),
+        ),
+        "wsp15_mps_total": (
+            receipt.get("wsp15_mps_total"),
+            authority.get("wsp15_mps_total"),
+        ),
         "wsp15_reasoning_tier": (
-            receipt.get("reasoning_tier"), authority.get("wsp15_reasoning_tier")
+            receipt.get("reasoning_tier"),
+            authority.get("wsp15_reasoning_tier"),
         ),
         "model_runtime_binding_receipt_id": (
             receipt.get("model_runtime_binding_receipt_id"),
@@ -566,20 +611,42 @@ def _queue_receipt_binding_reasons(
             authority.get("model_selection_receipt_id"),
         ),
         "model_selection_digest": (
-            receipt.get("model_selection_digest"), authority.get("model_selection_digest")
+            receipt.get("model_selection_digest"),
+            authority.get("model_selection_digest"),
         ),
         "memex_supply_receipt_id": (
-            receipt.get("memex_supply_receipt_id"), authority.get("memex_supply_receipt_id")
+            receipt.get("memex_supply_receipt_id"),
+            authority.get("memex_supply_receipt_id"),
         ),
         "memex_supply_digest": (
-            receipt.get("memex_supply_digest"), authority.get("memex_supply_digest")
+            receipt.get("memex_supply_digest"),
+            authority.get("memex_supply_digest"),
         ),
     }
+
+
+def _queue_receipt_binding_reasons(
+    receipt: Mapping[str, Any],
+    authority: Mapping[str, Any],
+    work_order: Mapping[str, Any],
+    selected_slice: Optional[str],
+) -> list[str]:
+    if not receipt:
+        return ["canonical_queue_consumer_receipt_missing"]
+    checks = _queue_current_truth_checks(receipt, authority, work_order, selected_slice)
+    checks.update(_queue_optional_binding_checks(receipt, authority))
     return [
         f"canonical_queue_authority_binding_mismatch:{field}"
         for field, (left, right) in checks.items()
         if left != right
     ]
+
+
+def _canonical_queue_receipt_digest(receipt: Mapping[str, Any]) -> Optional[str]:
+    try:
+        return canonical_full_work_order_digest(receipt)
+    except (TypeError, ValueError):
+        return None
 
 
 def _stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
@@ -607,7 +674,11 @@ def _select(values: Any, field: str, expected: Any) -> Mapping[str, Any]:
     if not isinstance(values, list):
         return {}
     return next(
-        (item for item in values if isinstance(item, Mapping) and item.get(field) == expected),
+        (
+            item
+            for item in values
+            if isinstance(item, Mapping) and item.get(field) == expected
+        ),
         {},
     )
 

@@ -19,6 +19,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -47,6 +50,7 @@ def _queue_result(**overrides):
         "wsp15_priority": "P0",
         "wsp15_mps_total": 18,
         "reasoning_tier": "ULTRA",
+        **signed_stage_binding(requested_operation="edit_foundup_module"),
         "model_selection_receipt_id": "sha256:model-selection",
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
@@ -89,7 +93,7 @@ def _profile(**overrides):
         "base_ref": "main",
         "allowed_paths": ["modules/foundups/paccess_001/**"],
         "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
@@ -100,13 +104,6 @@ def _profile(**overrides):
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
-        "wsp15_allocation_receipt": {
-            "receipt_id": "sha256:wsp15-allocation",
-            "priority": "P0",
-            "mps_total": 18,
-            "reasoning_tier": "ULTRA",
-            "worker_plan": {"fusion_required": True},
-        },
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
         "model_runtime_binding_verification_receipt_id": (
@@ -125,7 +122,7 @@ def _work_order(**overrides):
         "work_order_id": "wre-queue-" + hashlib.sha256(b"queue-1").hexdigest()[:16],
         "base_ref": "main",
         "branch_name": "feat/reddog-bound-work-order",
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
     }
     work_order.update(overrides)
     return work_order
@@ -160,24 +157,41 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert request["base_ref"] == "main"
     assert request["work_order_digest"] == canonical_full_work_order_digest(_work_order())
     assert request["foundup_id"] == "paccess_001"
-    assert request["allowed_paths"] == ("modules/foundups/paccess_001/**",)
-    assert request["requested_operation"] == "create_foundup"
+    assert request["allowed_paths"] == (
+        "modules/foundups/paccess_001/src/worker.py",
+    )
+    assert request["requested_operation"] == "edit_foundup_module"
     assert request["valve_state_required"] == VALVE_OPEN_WORKTREE_CREATE
-    assert request["wsp15_allocation_receipt_id"] == "sha256:wsp15-allocation"
-    assert request["wsp15_allocation_digest"] == "sha256:wsp15-allocation-digest"
-    assert request["wsp15_priority"] == "P0"
-    assert request["wsp15_mps_total"] == 18
-    assert request["wsp15_reasoning_tier"] == "ULTRA"
+    expected_stage = _queue_result()["receipt"]
+    assert request["wsp15_allocation_receipt"] == expected_stage[
+        "wsp15_allocation_receipt"
+    ]
+    assert request["wsp15_allocation_receipt_id"] == expected_stage[
+        "wsp15_allocation_receipt_id"
+    ]
+    assert request["progressive_policy_stage_receipt_id"] == expected_stage[
+        "progressive_policy_stage_receipt_id"
+    ]
+    assert request["progressive_policy_stage_digest"] == expected_stage[
+        "progressive_policy_stage_digest"
+    ]
+    assert request["progressive_policy_stage_receipt"] == expected_stage[
+        "progressive_policy_stage_receipt"
+    ]
     assert request["model_selection_receipt_id"] == "sha256:model-selection"
     assert request["model_selection_digest"] == "sha256:model-selection-digest"
     assert request["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:abc123"
     assert request["model_runtime_binding_digest"] == "sha256:model-runtime-binding"
     assert request["memex_supply_receipt_id"] == MEMEX_SUPPLY_RECEIPT_ID
     assert request["memex_supply_digest"] == MEMEX_SUPPLY_DIGEST
-    assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
-    assert result.receipt.wsp15_allocation_digest == "sha256:wsp15-allocation-digest"
+    assert result.receipt.wsp15_allocation_receipt_id == expected_stage[
+        "wsp15_allocation_receipt_id"
+    ]
+    assert result.receipt.wsp15_allocation_digest == expected_stage[
+        "wsp15_allocation_digest"
+    ]
     assert result.receipt.wsp15_priority == "P0"
-    assert result.receipt.wsp15_mps_total == 18
+    assert result.receipt.wsp15_mps_total == expected_stage["wsp15_mps_total"]
     assert result.receipt.reasoning_tier == "ULTRA"
     assert result.receipt.model_selection_receipt_id == "sha256:model-selection"
     assert result.receipt.model_selection_digest == "sha256:model-selection-digest"
@@ -402,10 +416,15 @@ def test_rejects_repo_wide_authority_until_generic_contract_exists() -> None:
     assert planner.FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY in result.rejection_reasons
 
 
-def test_rejects_high_authority_without_consensus_and_sovereign_digest() -> None:
+def test_rejects_operation_widening_before_cosign_evaluation() -> None:
     result = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=_queue_result(),
-        authority_profile=_profile(consensus_receipt_digest=None, sovereign_authorization_digest=None),
+        authority_profile=_profile(
+            requested_operation="create_foundup",
+            consensus_receipt_digest=None,
+            sovereign_authorization_digest=None,
+        ),
+        work_order=_work_order(requested_operation="create_foundup"),
     )
 
     assert result.accepted is False
@@ -416,16 +435,16 @@ def test_low_authority_does_not_require_cosign() -> None:
     result = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=_queue_result(),
         authority_profile=_profile(
-            requested_operation="inspect_repo",
+            valve_state_required="VALVE_OPEN_DRYRUN_ONLY",
             consensus_receipt_digest=None,
             sovereign_authorization_digest=None,
         ),
-        work_order=_work_order(requested_operation="inspect_repo"),
+        work_order=_work_order(),
     )
 
     assert result.accepted is True
     assert result.delegated_authority_request is not None
-    assert result.delegated_authority_request["requested_operation"] == "inspect_repo"
+    assert result.delegated_authority_request["requested_operation"] == "edit_foundup_module"
 
 
 def test_module_has_no_shell_network_signing_state_or_runtime_invocation_imports() -> None:

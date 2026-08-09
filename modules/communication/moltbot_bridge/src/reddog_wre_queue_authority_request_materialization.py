@@ -87,6 +87,10 @@ def _receipt_fields(
         "queue_consumer_receipt_digest": canonical_full_work_order_digest(
             queue_receipt
         ),
+        "queue_consumer_receipt": dict(queue_receipt),
+        "wsp15_allocation_receipt": dict(
+            queue_receipt.get("wsp15_allocation_receipt") or {}
+        ),
         "wsp15_allocation_receipt_id": _text(
             queue_receipt, "wsp15_allocation_receipt_id"
         ),
@@ -96,6 +100,15 @@ def _receipt_fields(
         "wsp15_priority": _text(queue_receipt, "wsp15_priority"),
         "wsp15_mps_total": int(queue_receipt.get("wsp15_mps_total")),
         "wsp15_reasoning_tier": _text(queue_receipt, "reasoning_tier"),
+        "progressive_policy_stage_receipt_id": _text(
+            queue_receipt, "progressive_policy_stage_receipt_id"
+        ),
+        "progressive_policy_stage_digest": _text(
+            queue_receipt, "progressive_policy_stage_digest"
+        ),
+        "progressive_policy_stage_receipt": dict(
+            queue_receipt.get("progressive_policy_stage_receipt") or {}
+        ),
         "model_selection_receipt_id": _optional(
             queue_receipt, "model_selection_receipt_id"
         ),

@@ -258,6 +258,12 @@ def _queue_seed(
         "determination_receipt_id": inputs.determination_id,
         "authorized_base_sha": inputs.authorized_base_sha,
         "wsp15_allocation_receipt_id": inputs.allocation["receipt_id"],
+        "progressive_policy_stage_receipt_id": inputs.candidate[
+            "progressive_policy_stage_receipt_id"
+        ],
+        "progressive_policy_stage_digest": inputs.candidate[
+            "progressive_policy_stage_digest"
+        ],
         "foundup_id": str(inputs.memex_supply["foundup_id"]),
         "snapshot_id": str(inputs.memex_supply["snapshot_receipt_id"]),
         "snapshot_content_digest": str(
@@ -351,6 +357,10 @@ def _evidence_refs(
         f"claim:{claim_id}",
         f"freshness:{inputs.freshness_receipt_id}",
         f"wsp15_allocation:{inputs.allocation['receipt_id']}",
+        (
+            "progressive_policy_stage:"
+            f"{inputs.candidate['progressive_policy_stage_receipt_id']}"
+        ),
         f"architect_determination:{inputs.determination_id}",
         f"proposal_admission:{inputs.proposal_admission_receipt_id}",
         (
@@ -384,6 +394,16 @@ def _queue_item(
         "enqueued_at": inputs.now_iso,
         "evidence_refs": list(evidence_refs),
         "wsp15_allocation_receipt": dict(inputs.allocation),
+        "progressive_policy_stage_receipt_id": inputs.candidate[
+            "progressive_policy_stage_receipt_id"
+        ],
+        "progressive_policy_stage_digest": inputs.candidate[
+            "progressive_policy_stage_digest"
+        ],
+        "progressive_policy_stage_receipt": dict(
+            inputs.candidate["progressive_policy_stage_receipt"]
+        ),
+        "independent_verifier_required": True,
         "source_determination_receipt_id": inputs.determination_id,
         "source_queue_candidate_id": str(
             inputs.candidate.get("queue_candidate_id") or ""

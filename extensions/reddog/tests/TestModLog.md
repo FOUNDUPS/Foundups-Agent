@@ -1,5 +1,18 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-09 - Progressive effect-stage regressions (0.4.72)
+
+- Proved invalid and production settings resolve to audit, audit never opens
+  action planning, the resident editor clamps bounded requests to audit, and
+  the UI setting never grants authority.
+- Proved the complete stage receipt survives queue consumption and signing,
+  audit chains terminate after read-only worker dispatch, and audit authority
+  cannot open the execution valve under a bounded root ceiling.
+- Added explicit audit-versus-mutation editor classification coverage and
+  canonical WSP_15 recomputation, exact-path attacker regressions, restart
+  re-verification for no-effect audits, and regenerated backend-manifest
+  coverage.
+
 ## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
 
 - Proved false-valued diagnostic fields and terse command-result logs cannot

@@ -67,6 +67,12 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
     _roots as _canonical_runtime_roots,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -84,6 +90,7 @@ EXPIRES = "2026-07-14T01:00:00+00:00"
 WORK_ORDER_ID = "wre-queue-resident-execution-valve-001"
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
+TARGET_PATH = f"modules/foundups/{FID}/README.md"
 INVOCATION_DIGEST = "sha256:" + ("e" * 64)
 POLICY_DIGEST = "sha256:" + ("f" * 64)
 
@@ -123,7 +130,7 @@ def _snapshot() -> dict[str, object]:
             "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
             "no_execution_performed": True,
         },
-        prompt_text="RedDog resident queue execution valve worktree authority",
+        prompt_text="Fix one bounded FoundUp module defect",
     )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
@@ -156,9 +163,9 @@ def _work_order(**overrides: object) -> dict[str, object]:
             "source": "mock",
             "digest": "sha256:snap-1",
         },
-        "requested_operation": "feature_slice",
+        "requested_operation": "edit_foundup_module",
         "authority_tier": "source",
-        "allowed_paths": [f"modules/foundups/{FID}/**"],
+        "allowed_paths": [TARGET_PATH],
         "denied_paths": [".env", ".git/**"],
         "branch_name": "feat/paccess-001-valve",
         "base_ref": "main",
@@ -239,7 +246,7 @@ def _executor_payload(**overrides: object) -> dict[str, object]:
             "proposed_branch_name": "feat/paccess-001-valve",
             "proposed_worktree_path": "/tmp/.reddog/worktrees/repo/work/nonce/",
             "lock_key": WORK_ORDER_ID,
-            "allowed_paths": [f"modules/foundups/{FID}/**"],
+            "allowed_paths": [TARGET_PATH],
             "denied_paths": [".env", ".git/**"],
             "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
             "cleanup_plan": {"on_failure": "remove_worktree_delete_branch"},
@@ -269,10 +276,32 @@ def _executor_plan_result(**overrides: object) -> dict[str, object]:
 
 
 def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResultsStore:
+    work_authority = signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(TARGET_PATH,),
+    )
+    work_authority.update(
+        requested_operation="edit_foundup_module",
+        allowed_paths=(TARGET_PATH,),
+        denied_paths=(),
+        selected_slice=work_authority[
+            "progressive_policy_stage_receipt"
+        ]["selected_slice"],
+    )
     stage_results: dict[str, object] = {
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
-        "authority_runtime": {"decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT},
-        "authority_verification": {"decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT},
+        "authority_runtime": {
+            "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
+            "authority_result": {
+                "work_authority": work_authority
+            },
+        },
+        "authority_verification": {
+            "decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+            "verified_work_authority_digest": canonical_work_authority_digest(
+                work_authority
+            ),
+        },
         "worker_dispatch_dryrun": WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
         "worker_dispatch_runtime": WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
         WORK_ORDER_INVOCATION_STAGE_KEY: _work_order_invocation_result(),
@@ -308,6 +337,7 @@ def _closed_governed_env() -> GovernedExecutionValveEnvironment:
             "valve_dryrun_enabled": False,
             "valve_live_enqueue_enabled": False,
             "valve_worktree_create_enabled": False,
+            "progressive_execution_stage_ceiling": "AUDIT_NO_EFFECT",
             "supply_provenance": {},
         }
     )
