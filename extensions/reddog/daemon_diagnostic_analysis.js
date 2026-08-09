@@ -57,7 +57,7 @@ const QUALIFIED_KEY_PARTS = new Set([
   'api', 'access', 'aws', 'client', 'private', 'secret', 'session', 'signing'
 ]);
 const AUTHORIZATION_HEADER = /\b(?:proxy[\s_-]+)?authorization(?:[\s_-]+header)?\s*(?::|=>|=)/i;
-
+const DETACHED_AUTH_VALUE = /(?:^|[\s:=-])(?:Basic|Digest|Negotiate|NTLM|AWS4-HMAC-SHA256|ApiKey|Token)\s+\S{4,}/i;
 function splitInput(operatorText, diagnosticEvidence) {
   const operator = String(operatorText || '').trim();
   const evidence = String(diagnosticEvidence || '').trim();
@@ -157,7 +157,6 @@ function containsSecret(line) {
   return AUTHORIZATION_HEADER.test(source) || hasSensitiveAssignment(source)
     || SECRETS.some((pattern) => pattern.test(source));
 }
-
 function omitSecretLines(lines) {
   const safe = [];
   let omitted = 0;
@@ -179,6 +178,11 @@ function omitSecretLines(lines) {
         continue;
       }
       if (/^\s+/.test(line)) {
+        omitted += 1;
+        authorizationContinuation = false;
+        continue;
+      }
+      if (DETACHED_AUTH_VALUE.test(line)) {
         omitted += 1;
         authorizationContinuation = false;
         continue;

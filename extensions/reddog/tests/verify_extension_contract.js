@@ -1786,6 +1786,15 @@ assert(authorizationBlankBoundary.focus.includes('unrelated root cause remains v
   'DOLA-020: a blank line must terminate authorization continuation state');
 assert.strictEqual(authorizationBlankBoundary.secret_redactions_applied, 1,
   'DOLA-020: unrelated evidence after a blank boundary cannot inflate omissions');
+const prefixedAuthorizationContinuation = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR Authorization:',
+  'ERROR Basic SYNTHETIC_PREFIXED_BASIC_CREDENTIAL',
+  'status: stopped'
+].join('\n'));
+assert(!prefixedAuthorizationContinuation.focus.includes('SYNTHETIC_PREFIXED_BASIC_CREDENTIAL'),
+  'DOLA-020: log-prefixed detached authorization values must be omitted');
+assert.strictEqual(prefixedAuthorizationContinuation.secret_redactions_applied, 2,
+  'DOLA-020: prefixed authorization continuation must count both lines');
 const privateKeyAfterAuthorization = projectTypedDiagnostic('Analyze this DAEmon output.', [
   'ERROR Authorization:',
   'ERROR -----BEGIN PRIVATE KEY-----',
