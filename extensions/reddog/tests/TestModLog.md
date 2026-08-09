@@ -1,5 +1,20 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-09 - Single conversation input and governed action routing (0.4.70)
+
+- Proved the webview exposes exactly one textarea, Enter sends, and the legacy
+  diagnostic bridge field is always empty.
+- Proved one-input action-plus-log messages separate operator intent from
+  diagnostic evidence without allowing evidence text to request action.
+- Proved assessment-only diagnostic output remains non-actionable while an
+  explicit operator action can pass the runtime-consumption gate after valid
+  output and Fusion quorum.
+- Proved generic implementation language sets the governed-action flag used to
+  request the existing resident AgentDB/OpenClaw architect session.
+- Added independent-review regressions for action words in raw log headers,
+  assessment questions mentioning a fix, requested-path preservation, shared
+  action vocabulary, and legacy resident-session opt-out precedence.
+
 ## 2026-08-09 - Governed DAEmon architect diagnosis (0.4.69)
 
 - Proved explicit diagnostic intent reaches HIGH-tier HoloIndex/Fusion

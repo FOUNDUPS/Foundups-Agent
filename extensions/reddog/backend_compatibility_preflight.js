@@ -149,12 +149,33 @@ function workspaceRoot(vscode, fallback) {
     : fallback;
 }
 
+function explicitConfigurationValue(configuration, key) {
+  if (!configuration || typeof configuration.inspect !== 'function') return undefined;
+  const inspected = configuration.inspect(key);
+  if (!inspected || typeof inspected !== 'object') return undefined;
+  for (const field of [
+    'workspaceFolderLanguageValue', 'workspaceFolderValue',
+    'workspaceLanguageValue', 'workspaceValue',
+    'globalLanguageValue', 'globalValue'
+  ]) {
+    const value = inspected[field];
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return undefined;
+}
+
 function configurationValue(vscode, currentNamespace, legacyNamespace, key, fallback) {
-  const currentValue = vscode.workspace.getConfiguration(currentNamespace).get(key);
+  const current = vscode.workspace.getConfiguration(currentNamespace);
+  const legacy = vscode.workspace.getConfiguration(legacyNamespace);
+  const explicitCurrent = explicitConfigurationValue(current, key);
+  if (explicitCurrent !== undefined) return explicitCurrent;
+  const explicitLegacy = explicitConfigurationValue(legacy, key);
+  if (explicitLegacy !== undefined) return explicitLegacy;
+  const currentValue = current.get(key);
   if (currentValue !== undefined && currentValue !== null && currentValue !== '') {
     return currentValue;
   }
-  const legacyValue = vscode.workspace.getConfiguration(legacyNamespace).get(key);
+  const legacyValue = legacy.get(key);
   return legacyValue !== undefined && legacyValue !== null && legacyValue !== ''
     ? legacyValue
     : fallback;

@@ -1,5 +1,26 @@
 # RedDog ModLog
 
+## 2026-08-09 - Single conversation input and governed action routing (0.4.70)
+
+- Removed the duplicate diagnostic-evidence textarea. The single conversation
+  input sends on Enter and supports multiline input with Shift+Enter.
+- Added bounded inference of an intent/evidence boundary for a leading
+  assessment or action followed by diagnostic-shaped lines. Bare log dumps
+  remain local, and action text inside evidence remains inert.
+- Distinguished assessment diagnostics from explicit operator action.
+  Assessment output remains non-actionable; an explicit action no longer
+  requires 012 to repeat the same request as a separate promotion phrase.
+- Made explicit governed actions automatically request the existing
+  authenticated resident AgentDB/OpenClaw architect cycle after grounding,
+  validation, and Fusion quorum pass. No signer, queue, worker, worktree,
+  verifier, PR, merge, or Hermes authority was duplicated in the extension.
+- Added Run Trace truth for diagnostic and generic governed action requests.
+- Hardened action admission after independent review: only imperative operator
+  directives request work, diagnostic-shaped first lines cannot become intent,
+  bounded requested paths remain in the evidence projection, all supported
+  action verbs use the same resident-routing decision, and an explicit legacy
+  resident-session opt-out survives the canonical setting migration.
+
 ## 2026-08-09 - Governed DAEmon architect diagnosis (0.4.69)
 
 - Split DAEmon routing by operator intent: an unaccompanied raw log dump stays

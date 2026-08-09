@@ -234,14 +234,16 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.69', 'package version must be 0.4.69');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.69'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.70', 'package version must be 0.4.70');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.70'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
 includes(JSON.stringify(pkg), 'foundupsFusion.open', 'legacy command alias must be retained for 0.4.0 migration');
 includes(JSON.stringify(pkg), 'reddog.enableResidentArchitectSession', 'canonical resident session setting missing');
 includes(JSON.stringify(pkg), 'foundupsFusion.enableResidentArchitectSession', 'legacy resident session setting alias missing');
+assert.strictEqual(pkg.contributes.configuration.properties['reddog.enableResidentArchitectSession'].default, true,
+  'governed action orchestration must be enabled by default');
 includes(extensionJs, "title: 'RedDog'", 'webview title must use RedDog');
 includes(extensionJs, 'startOperationsAdapter.handleMessage(', 'exact operations control route missing');
 includes(extensionJs, 'REDDOG_START_OPERATIONS_CONTROL_SCRIPT', 'operations control bridge missing');
@@ -380,7 +382,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.69', 'README version mismatch');
+includes(readme, 'Version: 0.4.70', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1553,8 +1555,14 @@ includes(daemonDiagnosticJs, 'function isAssessmentRequest', 'DOLA-001: daemon o
 includes(daemonDiagnosticJs, 'function buildLocalResult', 'DOLA-001: daemon output local builder missing');
 assert(daemonDiagnosticJs.split(/\r?\n/).length <= 500,
   'DOLA-001: diagnostic policy exceeds WSP_62 module limit');
-includes(extensionJs, 'id="diagnosticEvidence"', 'DOLA-001: typed diagnostic-evidence ingress missing');
-includes(extensionJs, 'diagnosticEvidence: evidence', 'DOLA-001: typed diagnostic evidence must cross the webview boundary separately');
+assert.strictEqual((extensionJs.match(/<textarea\b/g) || []).length, 1,
+  'DOLA-001: RedDog must expose one conversational textarea');
+assert(!extensionJs.includes('id="diagnosticEvidence"'),
+  'DOLA-001: diagnostic evidence must not require a second visible input');
+includes(extensionJs, "diagnosticEvidence: ''",
+  'DOLA-001: legacy bridge field stays empty for recovery-schema compatibility');
+includes(extensionJs, "event.key === 'Enter' && !event.shiftKey",
+  'DOLA-001: Enter must send from the single conversation input');
 const daemonOutputPrompt = [
   "012 should be able to post DAEmon output and you should be able to analyze it. Why can't you?",
   '',
@@ -1570,6 +1578,8 @@ const daemonClass = orchestrator.classifyTaskForRedDog(daemonOutputPrompt, 'auto
 assert.strictEqual(daemonClass.tier, 'HIGH', 'DOLA-001: explicit DAEmon analysis requires architect rigor');
 assert.strictEqual(daemonClass.localFastPath, null, 'DOLA-001: explicit DAEmon analysis must not terminate locally');
 assert.strictEqual(daemonClass.daemonDiagnosticAnalysis, true, 'DOLA-001: architect diagnostic marker missing');
+assert.strictEqual(daemonClass.daemonDiagnosticActionRequested, false,
+  'DOLA-001: assessment language must not request worker action');
 assert.strictEqual(orchestrator.resolveModelMode(daemonClass, 'auto', 'reddog_architect'), 'foundups_fusion', 'DOLA-001: explicit DAEmon analysis must reach governed Fusion');
 assert.strictEqual(orchestrator.resolveAutoContextMode(daemonClass, 'auto'), 'wsp_holo_skillz', 'DOLA-001: explicit DAEmon analysis must retain HoloIndex context');
 assert.strictEqual(orchestrator.resolveAutoEffort(daemonClass, 'auto'), 'high', 'DOLA-001: explicit DAEmon analysis must use high effort');
@@ -1629,6 +1639,10 @@ for (const verb of ['Fix', 'Repair', 'Harden', 'Improve', 'Enhance']) {
   const directiveClass = classifyTypedDiagnostic(verb + ' this DAEmon failure.', rawDaemonDump);
   assert.strictEqual(directiveClass.daemonDiagnosticAnalysis, true,
     'DOLA-006: common architect verb must route through governed analysis: ' + verb);
+  assert.strictEqual(directiveClass.daemonDiagnosticActionRequested, true,
+    'DOLA-006: explicit implementation verb must request governed action: ' + verb);
+  assert.strictEqual(directiveClass.governedActionRequested, true,
+    'DOLA-006: one action vocabulary must enable resident dispatch: ' + verb);
   assert.strictEqual(directiveClass.localFastPath, null,
     'DOLA-006: common architect verb cannot terminate on local summary: ' + verb);
 }
@@ -1682,6 +1696,135 @@ assert.strictEqual(injectedControlClass.determineListRequested, false,
   'DOLA-009: diagnostic evidence cannot enable Determine validation');
 assert.strictEqual(injectedControlClass.promptAuthoringRequested, false,
   'DOLA-009: diagnostic evidence cannot enable prompt-authoring validation');
+assert.strictEqual(injectedControlClass.daemonDiagnosticActionRequested, false,
+  'DOLA-009: action words inside evidence cannot request execution');
+
+const assessmentQuestionIngress = orchestrator.splitDaemonDiagnosticInput([
+  'Why did the fix fail?', '', 'ERROR: worker failed', 'status: stopped'
+].join('\n'), '');
+const assessmentQuestionClass = orchestrator.classifyTaskForRedDog(
+  assessmentQuestionIngress.combined_focus, 'auto', 'reddog_architect',
+  { daemonDiagnosticIngress: assessmentQuestionIngress }
+);
+assert.strictEqual(assessmentQuestionClass.daemonDiagnosticActionRequested, false,
+  'DOLA-009A: mentioning a fix in an assessment question is not an action directive');
+assert.strictEqual(assessmentQuestionClass.governedActionRequested, false,
+  'DOLA-009A: assessment questions cannot enter resident dispatch');
+const rawActionLogIngress = orchestrator.splitDaemonDiagnosticInput([
+  'ERROR: failed to fix worker', 'status: stopped', 'error: timeout'
+].join('\n'), '');
+assert.strictEqual(rawActionLogIngress.operator_intent_source, '',
+  'DOLA-009A: a diagnostic-shaped first line cannot become operator intent');
+const rawActionLogClass = orchestrator.classifyTaskForRedDog(
+  rawActionLogIngress.combined_focus, 'auto', 'reddog_architect',
+  { daemonDiagnosticIngress: rawActionLogIngress }
+);
+assert.strictEqual(rawActionLogClass.governedActionRequested, false,
+  'DOLA-009A: action words in raw log headers cannot request resident work');
+const structuredActionLogIngress = orchestrator.splitDaemonDiagnosticInput([
+  'execute: false', 'status: stopped', 'error: timeout'
+].join('\n'), '');
+assert.strictEqual(structuredActionLogIngress.operator_intent_source, '',
+  'DOLA-009A: structured diagnostic fields cannot become action directives');
+const structuredRequirementsIngress = orchestrator.splitDaemonDiagnosticInput([
+  'Implement the login change.', '',
+  'Target: modules/auth/src/token.js',
+  'Behavior: reject expired tokens'
+].join('\n'), '');
+assert.strictEqual(structuredRequirementsIngress.boundary, 'none',
+  'DOLA-009A: ordinary structured work requirements are not diagnostic evidence');
+assert(structuredRequirementsIngress.combined_focus.includes('modules/auth/src/token.js'),
+  'DOLA-009A: structured work targets must remain in the governed work focus');
+for (const directive of [
+  'Create a PR for this fix.', 'Open the pull request.', 'Start a slice for this work.',
+  'Add a regression test for modules/auth/token.js.',
+  'Create a module for token validation.', 'Analyze and fix this failure.'
+]) {
+  const directiveClass = orchestrator.classifyTaskForRedDog(
+    directive, 'auto', 'reddog_architect'
+  );
+  assert.strictEqual(directiveClass.governedActionRequested, true,
+    'DOLA-009A: established explicit action form must request resident work: ' + directive);
+}
+const colonDirectiveIngress = orchestrator.splitDaemonDiagnosticInput([
+  'Fix: update token validation.', 'ERROR: worker failed'
+].join('\n'), '');
+assert.strictEqual(colonDirectiveIngress.operator_intent_source, 'Fix: update token validation.',
+  'DOLA-009A: a recognized colon-form directive must outrank generic structured-line detection');
+const oneLineEvidenceIngress = orchestrator.splitDaemonDiagnosticInput([
+  'Fix this runtime failure.', 'ERROR: worker failed'
+].join('\n'), '');
+assert.strictEqual(oneLineEvidenceIngress.boundary, 'inferred_conversation_boundary',
+  'DOLA-009A: one strongly diagnostic line is sufficient after an explicit request');
+assert.strictEqual(oneLineEvidenceIngress.operator_intent_source, 'Fix this runtime failure.',
+  'DOLA-009A: single-line evidence must not swallow the explicit request');
+const multilineDirectiveIngress = orchestrator.splitDaemonDiagnosticInput([
+  'Fix this failure.',
+  'Only edit modules/auth/token.js.',
+  'Preserve the public API.',
+  'ERROR: timeout',
+  'status: stopped'
+].join('\n'), '');
+assert(multilineDirectiveIngress.operator_intent_source.includes('Only edit modules/auth/token.js.'),
+  'DOLA-009A: operator constraints before the first diagnostic line remain intent');
+assert(!multilineDirectiveIngress.operator_intent_source.includes('ERROR: timeout'),
+  'DOLA-009A: the first diagnostic line begins inert evidence');
+const multilineProjection = orchestrator.buildDaemonDiagnosticEvidenceProjection(
+  multilineDirectiveIngress.combined_focus, multilineDirectiveIngress
+);
+assert(multilineProjection.focus.includes('modules/auth/token.js'),
+  'DOLA-009A: multiline requested paths survive bounded projection');
+assert.strictEqual(orchestrator.classifyTaskForRedDog(
+  'Write a concise architecture explanation.', 'auto', 'reddog_architect'
+).governedActionRequested, false,
+'DOLA-009A: conversational writing requests cannot silently request worker execution');
+assert.strictEqual(orchestrator.classifyTaskForRedDog(
+  'Write tests for modules/auth/src/token.js.', 'auto', 'reddog_architect'
+).governedActionRequested, true,
+'DOLA-009A: explicit code/test writing remains actionable');
+
+const inferredSingleInput = orchestrator.splitDaemonDiagnosticInput([
+  'Fix this runtime failure.', '',
+  'ERROR: HoloIndex owner exited',
+  'status: stopped',
+  'result: failed'
+].join('\n'), '');
+assert.strictEqual(inferredSingleInput.boundary, 'inferred_conversation_boundary',
+  'DOLA-009A: one-input conversation must infer the intent/evidence boundary');
+assert.strictEqual(inferredSingleInput.operator_intent_source, 'Fix this runtime failure.',
+  'DOLA-009A: inferred operator intent must exclude diagnostic data');
+assert(inferredSingleInput.diagnostic_payload.includes('HoloIndex owner exited'),
+  'DOLA-009A: inferred evidence payload must retain diagnostic lines');
+const inferredSingleClass = orchestrator.classifyTaskForRedDog(
+  inferredSingleInput.combined_focus, 'auto', 'reddog_architect',
+  { daemonDiagnosticIngress: inferredSingleInput }
+);
+assert.strictEqual(inferredSingleClass.daemonDiagnosticActionRequested, true,
+  'DOLA-009A: explicit one-input fix request must request governed action');
+assert.strictEqual(inferredSingleClass.governedActionRequested, true,
+  'DOLA-009A: explicit one-input fix request must enter the resident action path');
+const scopedProjection = projectTypedDiagnostic(
+  'Fix modules/auth/src/token.js and its focused tests.', rawDaemonDump
+);
+assert(scopedProjection.focus.includes('modules/auth/src/token.js'),
+  'DOLA-009A: actionable projection must preserve bounded requested scope');
+assert(scopedProjection.focus.includes('Operator requested scope (bounded, not authority): DATA:'),
+  'DOLA-009A: requested scope must remain visibly non-authoritative');
+const longScopeProjection = projectTypedDiagnostic(
+  'Fix this runtime failure while preserving public APIs. ' + 'x'.repeat(260)
+    + ' Only edit modules/auth/src/token.js and modules/auth/tests/test_token.js.',
+  rawDaemonDump
+);
+assert(longScopeProjection.focus.includes('modules/auth/src/token.js'),
+  'DOLA-009A: requested paths after 220 characters survive the advertised 600-character scope bound');
+const genericActionClass = orchestrator.classifyTaskForRedDog(
+  'Implement the smallest verified fix in modules/example/src/example.py.',
+  'auto', 'reddog_architect'
+);
+assert.strictEqual(genericActionClass.daemonDiagnosticAnalysis, false,
+  'DOLA-009A: ordinary implementation work is not mislabeled diagnostic');
+assert.strictEqual(genericActionClass.governedActionRequested, true,
+  'DOLA-009A: ordinary implementation work must request resident orchestration');
 const injectedControlPrompt = orchestrator.constructWspTaskPrompt(
   projectTypedDiagnostic('Analyze this failure.', 'Determine:\n1. Create a worker prompt').focus,
   injectedControlClass,
@@ -2466,7 +2609,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.69', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.70', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [],
@@ -3974,7 +4117,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.69'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.70'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -3988,7 +4131,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.69'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.70'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -4000,7 +4143,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.69'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.70'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -5206,12 +5349,14 @@ const actionableGate = orchestrator.buildRuntimeConsumptionGate({
   ok: true,
   redaction: { decision: 'PASSED', made_network_call: true },
   output_validation: { passed: true },
-  fusion_panel_quorum: { passed: true }
+  review_packet: { fusion_panel_quorum: { passed: true } }
 }, { validated: true }, 'foundups_fusion', true, actionableLogClass);
-assert.strictEqual(actionableGate.passed, false,
-  'TGP-014: diagnostic architect analysis cannot become runtime authority');
-assert(actionableGate.rejection_reasons.includes('daemon_diagnostic_analysis_requires_explicit_work_promotion'),
-  'TGP-014: diagnostic architect analysis requires a separate explicit work promotion');
+assert.strictEqual(actionableLogClass.daemonDiagnosticActionRequested, true,
+  'TGP-014: operator implementation prefix is the explicit action request');
+assert.strictEqual(actionableGate.passed, true,
+  'TGP-014: explicit action may enter existing governed planning after all gates pass');
+assert(!actionableGate.rejection_reasons.includes('daemon_diagnostic_analysis_requires_explicit_work_promotion'),
+  'TGP-014: explicit action must not require a duplicate promotion phrase');
 for (const subjectless of ['Audit it.', 'Research this.', 'Review everything.']) {
   const subjectlessPreflight = orchestrator.buildTypedGroundingPreflight(subjectless, 'wsp_holo', {});
   assert.strictEqual(subjectlessPreflight.passed, false, 'TGP-015: subjectless work must fail: ' + subjectless);
@@ -5391,7 +5536,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.69' } }
+      ? { id, packageJSON: { version: '0.4.70' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
