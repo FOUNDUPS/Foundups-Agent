@@ -230,8 +230,6 @@ def plan_reddog_wre_queue_consumer_dry_run(
         or not allocation_worker_plan
     ):
         reasons.append(FAIL_WSP15_ALLOCATION_RECEIPT)
-    stage_receipt_id = str(selected.get("progressive_policy_stage_receipt_id") or "")
-    stage_digest = str(selected.get("progressive_policy_stage_digest") or "")
     if not validate_queue_progressive_stage_binding(selected, wsp15_allocation):
         reasons.append(FAIL_PROGRESSIVE_POLICY_STAGE)
 
@@ -275,7 +273,9 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "wsp15_priority": allocation_priority,
         "wsp15_mps_total": allocation_total,
         "reasoning_tier": allocation_tier,
-        "progressive_policy_stage_receipt_id": stage_receipt_id, "progressive_policy_stage_digest": stage_digest,
+        "progressive_policy_stage_receipt_id": str(selected.get("progressive_policy_stage_receipt_id") or ""),
+        "progressive_policy_stage_digest": str(selected.get("progressive_policy_stage_digest") or ""),
+        "progressive_policy_stage_receipt": dict(_mapping(selected.get("progressive_policy_stage_receipt"))),
         "model_selection_receipt_id": str(selected.get("model_selection_receipt_id") or ""),
         "model_selection_digest": str(selected.get("model_selection_digest") or ""),
         **model_runtime_authority_fields(selected),

@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     canonical_signing_input,
     verify_delegated_work_authority,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_work_order_policy_gate import (
     POLICY_ACCEPT,
     POLICY_REJECT,
@@ -125,6 +128,10 @@ def _build(now: int = 1000):
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "wsp15_reasoning_tier": "ULTRA",
+        **signed_stage_binding(
+            requested_operation="create_foundup",
+            changed_paths=(f"modules/foundups/{_FID}/**",),
+        ),
         "nonce": "nonce-unique-0001",
         "issued_at": now - 5,
         "expires_at": now + 120,
@@ -184,12 +191,10 @@ def test_memex_authority_binding_is_optional_but_must_be_canonical() -> None:
 )
 def test_progressive_stage_binding_requires_canonical_sha256(field: str) -> None:
     crypto, identity, workauth, ctx = _build()
-    workauth.update(
-        {
-            "progressive_policy_stage_receipt_id": "sha256:" + ("e" * 64),
-            "progressive_policy_stage_digest": "sha256:" + ("f" * 64),
-        }
-    )
+    workauth.update(signed_stage_binding(
+        requested_operation="create_foundup",
+        changed_paths=(f"modules/foundups/{_FID}/**",),
+    ))
     workauth[field] = "sha256:not-canonical"
     _resign_wa(crypto, identity, workauth)
 

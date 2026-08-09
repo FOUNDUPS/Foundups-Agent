@@ -35,6 +35,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -124,8 +127,10 @@ def _queue_result():
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "reasoning_tier": "ULTRA",
-        "progressive_policy_stage_receipt_id": "sha256:" + "d" * 64,
-        "progressive_policy_stage_digest": "sha256:" + "e" * 64,
+        **signed_stage_binding(
+            requested_operation="create_foundup",
+            changed_paths=(f"modules/foundups/{FID}/**",),
+        ),
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:" + "a" * 64,
         "model_runtime_binding_verification_receipt_id": (
@@ -396,6 +401,9 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
         ),
         progressive_policy_stage_digest=str(
             request["progressive_policy_stage_digest"]
+        ),
+        progressive_policy_stage_receipt=dict(
+            request["progressive_policy_stage_receipt"]
         ),
             model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
             model_runtime_binding_digest=str(request["model_runtime_binding_digest"]),

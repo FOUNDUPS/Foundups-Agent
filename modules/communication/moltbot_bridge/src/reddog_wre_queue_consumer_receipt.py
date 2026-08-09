@@ -26,6 +26,7 @@ class WREQueueConsumerDryRunReceipt:
     reasoning_tier: str
     progressive_policy_stage_receipt_id: str
     progressive_policy_stage_digest: str
+    progressive_policy_stage_receipt: Mapping[str, Any]
     next_required_gate: str
     model_selection_receipt_id: Optional[str] = None
     model_selection_digest: Optional[str] = None
@@ -85,6 +86,9 @@ def build_queue_consumer_receipt(
         ),
         progressive_policy_stage_digest=str(
             seed["progressive_policy_stage_digest"]
+        ),
+        progressive_policy_stage_receipt=dict(
+            seed["progressive_policy_stage_receipt"]
         ),
         next_required_gate=str(seed["next_required_gate"]),
         **values,

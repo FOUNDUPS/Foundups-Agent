@@ -5,6 +5,11 @@
 - Proved invalid and production settings resolve to audit, audit never opens
   action planning, bounded execution still depends on the runtime gate, and
   the UI setting never grants authority.
+- Proved the complete stage receipt survives queue consumption and signing,
+  audit chains terminate after read-only worker dispatch, and audit authority
+  cannot open the execution valve under a bounded root ceiling.
+- Added explicit audit-versus-mutation editor classification coverage and
+  regenerated the 1,244-file backend manifest.
 
 ## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
 

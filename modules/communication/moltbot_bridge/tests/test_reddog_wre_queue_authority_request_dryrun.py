@@ -19,6 +19,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -47,8 +50,7 @@ def _queue_result(**overrides):
         "wsp15_priority": "P0",
         "wsp15_mps_total": 18,
         "reasoning_tier": "ULTRA",
-        "progressive_policy_stage_receipt_id": "sha256:" + ("e" * 64),
-        "progressive_policy_stage_digest": "sha256:" + ("f" * 64),
+        **signed_stage_binding(requested_operation="create_foundup"),
         "model_selection_receipt_id": "sha256:model-selection",
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
@@ -170,8 +172,16 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert request["wsp15_priority"] == "P0"
     assert request["wsp15_mps_total"] == 18
     assert request["wsp15_reasoning_tier"] == "ULTRA"
-    assert request["progressive_policy_stage_receipt_id"] == "sha256:" + ("e" * 64)
-    assert request["progressive_policy_stage_digest"] == "sha256:" + ("f" * 64)
+    expected_stage = _queue_result()["receipt"]
+    assert request["progressive_policy_stage_receipt_id"] == expected_stage[
+        "progressive_policy_stage_receipt_id"
+    ]
+    assert request["progressive_policy_stage_digest"] == expected_stage[
+        "progressive_policy_stage_digest"
+    ]
+    assert request["progressive_policy_stage_receipt"] == expected_stage[
+        "progressive_policy_stage_receipt"
+    ]
     assert request["model_selection_receipt_id"] == "sha256:model-selection"
     assert request["model_selection_digest"] == "sha256:model-selection-digest"
     assert request["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:abc123"

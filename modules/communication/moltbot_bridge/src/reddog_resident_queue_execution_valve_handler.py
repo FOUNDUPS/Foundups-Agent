@@ -145,6 +145,9 @@ class ResidentQueueExecutionValveStageHandler:
 
         chain_state = _mapping(self.chain_results_store.load())
         stage_results = _stage_results(chain_state)
+        authority_runtime = _mapping(stage_results.get("authority_runtime"))
+        authority_result = _mapping(authority_runtime.get("authority_result"))
+        signed_work_authority = _mapping(authority_result.get("work_authority"))
         work_order_invocation = _mapping(stage_results.get(WORK_ORDER_INVOCATION_STAGE_KEY))
         if not work_order_invocation:
             return _reject(FAIL_WORK_ORDER_INVOCATION_STAGE_MISSING)
@@ -179,6 +182,7 @@ class ResidentQueueExecutionValveStageHandler:
             queue_work_order_invocation_result=work_order_invocation,
             queue_executor_plan_result=executor_plan,
             work_order=work_order,
+            signed_work_authority=signed_work_authority,
             valve_environment=self.valve_environment,
             governed_use_time_resolution=use_time_resolution,
             now=self.now,

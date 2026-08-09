@@ -335,15 +335,25 @@ def _validate_authority_structure(
 def _valid_work_authority_receipt_fields(
     work_authority: Mapping[str, Any],
 ) -> bool:
+    from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+        validate_signed_progressive_stage_binding,
+    )
     runtime_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
     runtime_digest = str(work_authority.get("model_runtime_binding_digest") or "")
     memex_id = work_authority.get("memex_supply_receipt_id")
     memex_digest = work_authority.get("memex_supply_digest")
     stage_id = work_authority.get("progressive_policy_stage_receipt_id")
     stage_digest = work_authority.get("progressive_policy_stage_digest")
-    stage_valid = not (stage_id or stage_digest) or (
+    stage_receipt = work_authority.get("progressive_policy_stage_receipt")
+    stage_valid = bool(
         is_sha256_digest(stage_id)
         and is_sha256_digest(stage_digest)
+        and isinstance(stage_receipt, Mapping)
+        and validate_signed_progressive_stage_binding(
+            stage_receipt,
+            expected_receipt_id=stage_id,
+            expected_digest=stage_digest,
+        )
     )
     required_valid = (
         is_sha256_digest(work_authority.get("queue_consumer_receipt_digest"))

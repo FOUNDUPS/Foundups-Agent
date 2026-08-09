@@ -13,6 +13,10 @@
 - Corrected WSP_15 complexity so module names and authority sensitivity affect
   priority/reasoning without falsely making every one-file RedDog repair
   complexity 5. Independent verification remains mandatory. (WSP 00/15/22/50/62/97)
+- Hardened the exact signed stage receipt through queue consumption, signer
+  materialization, work-authority verification, and use-time valve admission.
+  Read-only audit chains now terminate after signed worker dispatch; every
+  effect valve requires a rehydrated admitted `BOUNDED_EXECUTION` receipt.
 
 ## 2026-08-09: RedDog stale Holo authority recovery binding
 - Extended the existing incident and blocked-request contracts for the proven

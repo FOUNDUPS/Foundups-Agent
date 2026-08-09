@@ -31,6 +31,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
     GovernedValveUseTimeResolution,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    validate_signed_progressive_stage_binding,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_executor_plan_dryrun import (
     QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT,
 )
@@ -51,6 +54,7 @@ class QueueAuthorizedExecutionValveInvokeReason:
     EXECUTOR_PLAN_PAYLOAD_MISSING = "REJECT_EXECUTOR_PLAN_PAYLOAD_MISSING"
     VALVE_STATE_NOT_EXPECTED = "REJECT_EXECUTION_VALVE_STATE_NOT_EXPECTED"
     GOVERNED_USE_TIME_AUTHORITY_MISSING = "REJECT_GOVERNED_USE_TIME_AUTHORITY_MISSING"
+    BOUNDED_EXECUTION_STAGE_REQUIRED = "REJECT_SIGNED_BOUNDED_EXECUTION_STAGE_REQUIRED"
 
 
 @dataclass(frozen=True)
@@ -164,6 +168,7 @@ def invoke_reddog_wre_queue_authorized_execution_valve(
     queue_work_order_invocation_result: Mapping[str, Any],
     queue_executor_plan_result: Mapping[str, Any],
     work_order: Mapping[str, Any],
+    signed_work_authority: Mapping[str, Any],
     valve_environment: ExecutionValveEnvironment | GovernedExecutionValveEnvironment | Mapping[str, Any],
     governed_use_time_resolution: Optional[GovernedValveUseTimeResolution] = None,
     now: Optional[datetime] = None,
@@ -176,6 +181,18 @@ def invoke_reddog_wre_queue_authorized_execution_valve(
         return _reject(
             [QueueAuthorizedExecutionValveInvokeReason.EXPLICIT_INVOKE_MISSING],
             explicit_requested=False,
+        )
+
+    authority = _mapping(signed_work_authority)
+    if not validate_signed_progressive_stage_binding(
+        _mapping(authority.get("progressive_policy_stage_receipt")),
+        expected_receipt_id=authority.get("progressive_policy_stage_receipt_id"),
+        expected_digest=authority.get("progressive_policy_stage_digest"),
+        require_bounded_effects=True,
+    ):
+        return _reject(
+            [QueueAuthorizedExecutionValveInvokeReason.BOUNDED_EXECUTION_STAGE_REQUIRED],
+            explicit_requested=True,
         )
 
     invocation_payload, executor_payload, payload_reason = _accepted_queue_payloads(

@@ -7,6 +7,9 @@ from collections.abc import Mapping, Sequence
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.src import (
+    reddog_progressive_execution_stage_policy as stage_policy,
+)
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     governed_worker_dispatch_snapshot,
 )
@@ -15,6 +18,81 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 _DEFAULT_PROMPT = "Fix one bounded RedDog FoundUp module defect"
 _DEFAULT_TARGET = "modules/foundups/paccess_001/src/worker.py"
 _ALLOCATION_PROMPTS: dict[str, str] = {}
+
+
+def signed_bounded_stage_receipt(
+    *,
+    requested_operation: str = "bounded_module_fix",
+    changed_paths: Sequence[str] = (_DEFAULT_TARGET,),
+) -> dict[str, object]:
+    """Build a self-consistent admitted stage for authority-chain tests."""
+
+    unsigned: dict[str, object] = {
+        "schema_version": stage_policy.SCHEMA_VERSION,
+        "receipt_id": "",
+        "stage": stage_policy.STAGE_BOUNDED_EXECUTION,
+        "decision": stage_policy.DECISION_BOUNDED_EXECUTION_ADMITTED,
+        "determination_action": "FIX",
+        "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+        "requested_operation": requested_operation,
+        "changed_paths": tuple(changed_paths),
+        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
+        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
+        "complexity": 2,
+        "risk_classes": (),
+        "would_block_reasons": (),
+        "rejection_reasons": (),
+        "no_effect_authority": False,
+        "independent_verifier_required": True,
+        "production_authority_granted": False,
+    }
+    unsigned["receipt_id"] = stage_policy._digest(stage_policy._unsigned(unsigned))
+    return unsigned
+
+
+def signed_stage_binding(
+    *,
+    requested_operation: str = "bounded_module_fix",
+    changed_paths: Sequence[str] = (_DEFAULT_TARGET,),
+) -> dict[str, object]:
+    receipt = signed_bounded_stage_receipt(
+        requested_operation=requested_operation,
+        changed_paths=changed_paths,
+    )
+    return {
+        "progressive_policy_stage_receipt_id": receipt["receipt_id"],
+        "progressive_policy_stage_digest": stage_policy._digest(receipt),
+        "progressive_policy_stage_receipt": receipt,
+    }
+
+
+def signed_audit_stage_binding() -> dict[str, object]:
+    operation = "signed_0102_readonly_review:foundup_module"
+    unsigned: dict[str, object] = {
+        "schema_version": stage_policy.SCHEMA_VERSION,
+        "receipt_id": "",
+        "stage": stage_policy.STAGE_AUDIT,
+        "decision": stage_policy.DECISION_AUDIT_CONTINUES,
+        "determination_action": "AUDIT",
+        "selected_slice": "REDDOG_READONLY_AUDIT_PHASE1",
+        "requested_operation": operation,
+        "changed_paths": (),
+        "wsp15_allocation_receipt_id": "sha256:wsp15-readonly",
+        "wsp15_allocation_digest": "sha256:wsp15-readonly-digest",
+        "complexity": 1,
+        "risk_classes": (),
+        "would_block_reasons": (),
+        "rejection_reasons": (),
+        "no_effect_authority": True,
+        "independent_verifier_required": False,
+        "production_authority_granted": False,
+    }
+    unsigned["receipt_id"] = stage_policy._digest(stage_policy._unsigned(unsigned))
+    return {
+        "progressive_policy_stage_receipt_id": unsigned["receipt_id"],
+        "progressive_policy_stage_digest": stage_policy._digest(unsigned),
+        "progressive_policy_stage_receipt": unsigned,
+    }
 
 
 def bounded_allocation(*, prompt_suffix: str = "", **overrides: object) -> dict[str, object]:

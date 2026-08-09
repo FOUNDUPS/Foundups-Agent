@@ -227,6 +227,7 @@ class DelegatedAuthorityRuntimeRequest:
     wsp15_reasoning_tier: str
     progressive_policy_stage_receipt_id: str
     progressive_policy_stage_digest: str
+    progressive_policy_stage_receipt: Mapping[str, Any]
     identity_nonce: str
     work_authority_nonce: str
     issued_at: int
@@ -380,6 +381,49 @@ def _validate_signing_response(
     return None
 
 
+def _progressive_stage_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
+    from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+        validate_signed_progressive_stage_binding,
+    )
+
+    receipt = request.progressive_policy_stage_receipt
+    return validate_signed_progressive_stage_binding(
+        receipt,
+        expected_receipt_id=request.progressive_policy_stage_receipt_id,
+        expected_digest=request.progressive_policy_stage_digest,
+    ) and (
+        receipt.get("requested_operation") == request.requested_operation
+        and tuple(receipt.get("changed_paths") or ()) == tuple(request.allowed_paths)
+        and receipt.get("wsp15_allocation_receipt_id") == request.wsp15_allocation_receipt_id
+        and receipt.get("wsp15_allocation_digest") == request.wsp15_allocation_digest
+    )
+
+
+def _effective_paths_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
+    from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+        STAGE_AUDIT,
+    )
+
+    paths = set(request.allowed_paths) - set(request.denied_paths)
+    audit_only = request.progressive_policy_stage_receipt.get("stage") == STAGE_AUDIT
+    if audit_only:
+        return not paths
+    return bool(paths and all(_path_within_foundup(path, request.foundup_id) for path in paths))
+
+
+def _request_receipt_bindings_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
+    return bool(
+        is_sha256_digest(request.queue_consumer_receipt_digest)
+        and request.wsp15_allocation_receipt_id.startswith("sha256:")
+        and request.wsp15_allocation_digest.startswith("sha256:")
+        and request.wsp15_priority in {"P0", "P1", "P2", "P3", "P4"}
+        and type(request.wsp15_mps_total) is int
+        and request.wsp15_reasoning_tier in {"REGULAR", "HIGH", "ULTRA"}
+        and is_sha256_digest(request.progressive_policy_stage_receipt_id)
+        and is_sha256_digest(request.progressive_policy_stage_digest)
+    )
+
+
 def issue_delegated_authority_runtime(
     *,
     request: DelegatedAuthorityRuntimeRequest,
@@ -455,22 +499,12 @@ def issue_delegated_authority_runtime(
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_DIGEST_MISMATCH])
     if not snapshot.grants(request.requested_operation, request.repo_full_name):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_INSUFFICIENT])
-    if (
-        not request.queue_consumer_receipt_digest.startswith("sha256:")
-        or len(request.queue_consumer_receipt_digest) != 71
-        or not all(
-            char in "0123456789abcdef"
-            for char in request.queue_consumer_receipt_digest.removeprefix("sha256:")
-        )
-        or not request.wsp15_allocation_receipt_id.startswith("sha256:")
-        or not request.wsp15_allocation_digest.startswith("sha256:")
-        or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
-        or type(request.wsp15_mps_total) is not int
-        or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
-        or not is_sha256_digest(request.progressive_policy_stage_receipt_id)
-        or not is_sha256_digest(request.progressive_policy_stage_digest)
-    ):
+    if not _request_receipt_bindings_valid(request):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
+    if not _progressive_stage_valid(request):
+        return _rejection_result(
+            now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST]
+        )
     has_runtime_binding = runtime_binding_request_valid(request)
     if has_runtime_binding is None:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
@@ -481,8 +515,7 @@ def issue_delegated_authority_runtime(
             reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
         )
 
-    effective_paths = set(request.allowed_paths) - set(request.denied_paths)
-    if not effective_paths or not all(_path_within_foundup(path, request.foundup_id) for path in effective_paths):
+    if not _effective_paths_valid(request):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.PATH_OUT_OF_SCOPE])
 
     authority_tier = (
@@ -584,6 +617,9 @@ def issue_delegated_authority_runtime(
             request.progressive_policy_stage_receipt_id
         ),
         "progressive_policy_stage_digest": request.progressive_policy_stage_digest,
+        "progressive_policy_stage_receipt": dict(
+            request.progressive_policy_stage_receipt
+        ),
         "nonce": request.work_authority_nonce,
         "issued_at": request.issued_at,
         "expires_at": request.work_authority_expires_at,

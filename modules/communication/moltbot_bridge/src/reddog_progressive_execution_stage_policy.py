@@ -429,6 +429,50 @@ def validate_queue_progressive_stage_binding(
     )
 
 
+def validate_signed_progressive_stage_binding(
+    receipt: Mapping[str, Any],
+    *,
+    expected_receipt_id: Any,
+    expected_digest: Any,
+    require_bounded_effects: bool = False,
+) -> bool:
+    """Rehydrate the complete signed stage receipt at an authority boundary."""
+
+    if not isinstance(receipt, Mapping) or set(receipt) != set(
+        ProgressiveExecutionStageReceipt.__dataclass_fields__
+    ):
+        return False
+    if (
+        receipt.get("schema_version") != SCHEMA_VERSION
+        or receipt.get("receipt_id") != expected_receipt_id
+        or receipt.get("receipt_id") != _digest(_unsigned(receipt))
+        or _digest(receipt) != expected_digest
+        or receipt.get("production_authority_granted") is not False
+    ):
+        return False
+    stage = receipt.get("stage")
+    if stage == STAGE_BOUNDED_EXECUTION:
+        return bool(
+            receipt.get("decision") == DECISION_BOUNDED_EXECUTION_ADMITTED
+            and receipt.get("no_effect_authority") is False
+            and receipt.get("independent_verifier_required") is True
+            and not tuple(receipt.get("would_block_reasons") or ())
+            and not tuple(receipt.get("rejection_reasons") or ())
+        )
+    if require_bounded_effects or stage != STAGE_AUDIT:
+        return False
+    return bool(
+        receipt.get("decision") == DECISION_AUDIT_CONTINUES
+        and receipt.get("no_effect_authority") is True
+        and receipt.get("independent_verifier_required") is False
+        and not tuple(receipt.get("changed_paths") or ())
+        and str(receipt.get("requested_operation") or "").startswith(
+            "signed_0102_readonly_review:"
+        )
+        and not tuple(receipt.get("rejection_reasons") or ())
+    )
+
+
 def validate_proposal_stage_projection(proposal: Mapping[str, Any]) -> bool:
     """Verify an embedded stage receipt against its proposal receipt fields."""
 
@@ -609,4 +653,5 @@ __all__ = [
     "reject_unavailable_stage", "validate_bounded_execution_receipt",
     "validate_proposal_stage_projection", "validate_queue_bounded_stage_binding",
     "validate_queue_progressive_stage_binding",
+    "validate_signed_progressive_stage_binding",
 ]

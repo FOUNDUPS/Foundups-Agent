@@ -3736,7 +3736,8 @@ function buildResidentArchitectSessionResult(decision, fields) {
 }
 function runResidentArchitectSessionBridge(context, workFocus, options) {
   const opts = options && typeof options === 'object' ? options : {};
-  const proofRejection = operatorWardrobeSelectionProof.rejection(opts.wardrobeSelectionResult, opts.actionPlanningAllowed === true, buildResidentArchitectSessionResult, 'RESIDENT_ARCHITECT_SESSION_SKIPPED');
+  const readonlyAuditAllowed = opts.readonlyAuditPlanningAllowed === true;
+  const proofRejection = readonlyAuditAllowed ? null : operatorWardrobeSelectionProof.rejection(opts.wardrobeSelectionResult, opts.actionPlanningAllowed === true, buildResidentArchitectSessionResult, 'RESIDENT_ARCHITECT_SESSION_SKIPPED');
   if (proofRejection) return proofRejection;
   const payloadResult = buildResidentArchitectSessionPayload(workFocus, opts);
   if (!payloadResult.ok) {
@@ -3799,7 +3800,8 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
 
 async function runConfiguredResidentArchitectSession(context, workFocus, options) {
   const opts = options && typeof options === 'object' ? options : {};
-  if (opts.actionPlanningAllowed !== true || opts.residentArchitectSessionEnabled !== true) {
+  if ((opts.actionPlanningAllowed !== true && opts.readonlyAuditPlanningAllowed !== true)
+      || opts.residentArchitectSessionEnabled !== true) {
     return null;
   }
   const credential = await conversationSessionAuthoritySource.read(context.secrets);
@@ -4172,6 +4174,9 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
   let conversationalDraft = false;
   let daemonDiagnosticAnalysis = false;
   const governedActionRequested = hasDaemonDiagnosticActionIntent(operatorControlText);
+  const repoAuditIntent = repoAuditGrounding.detectRepoAuditIntent(operatorControlText);
+  const readonlyAuditRequested = repoAuditIntent.audit_intent === true
+    && !/\b(?:fix|implement|edit|write|create|delete|merge|publish|release|deploy|execute|run\s+(?:shell|command))\b/i.test(operatorControlText);
   const daemonDiagnosticActionRequested = Boolean(daemonIngress.operator_intent_source)
     && governedActionRequested;
   const promptAuthoringRequested = isPromptAuthoringRequest(operatorControlText);
@@ -4238,6 +4243,7 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
     daemonDiagnosticAnalysis,
     daemonDiagnosticActionRequested,
     governedActionRequested,
+    readonlyAuditRequested,
     promptAuthoringRequested,
     determineListRequested,
     preferManualPanel,
@@ -5315,6 +5321,22 @@ function progressiveStageForRuntime(runtimeConsumptionGate) {
   };
 }
 
+function residentSessionStagePolicy(runtimeGate, progressiveStage, classification, recoveryContext) {
+  const available = runtimeGate.passed === true && !recoveryContext;
+  const explicitRequested = classification.governedActionRequested === true
+    || classification.readonlyAuditRequested === true;
+  return {
+    actionPlanningAllowed: available
+      && progressiveExecutionStage.allowsActionPlanning(progressiveStage.configured),
+    readonlyAuditPlanningAllowed: available
+      && progressiveStage.configured === progressiveExecutionStage.AUDIT
+      && classification.readonlyAuditRequested === true,
+    residentArchitectSessionEnabled: explicitRequested
+      && reddogConfigValue('enableResidentArchitectSession', true) === true,
+    explicitResidentArchitectSessionRequested: explicitRequested
+  };
+}
+
 function attachRuntimePolicy(result, runtimeGate, progressiveReceipt) {
   result.review_packet.progressive_execution_stage = progressiveReceipt;
   result.progressive_execution_stage = progressiveReceipt;
@@ -5731,10 +5753,10 @@ function wireFusionWebview(context, webview, worker, state) {
       await currentBackendCompatibility()
     );
     const progressiveStage = progressiveStageForRuntime(runtimeConsumptionGate);
-    const actionPlanningAllowed = runtimeConsumptionGate.passed === true
-      && progressiveExecutionStage.allowsActionPlanning(progressiveStage.configured) && !recoveryContext;
-    const residentArchitectSessionEnabled = classification.governedActionRequested === true
-      && reddogConfigValue('enableResidentArchitectSession', true) === true && !recoveryContext;
+    const sessionPolicy = residentSessionStagePolicy(
+      runtimeConsumptionGate, progressiveStage, classification, recoveryContext
+    );
+    const { actionPlanningAllowed } = sessionPolicy;
     const operatorWardrobeSelectionResult = actionPlanningAllowed
       ? runOperatorWardrobeSelectionBridge(context, governedWorkFocus, holoScorecard, promptConstruction, handoffRecommendation, {
         groundingPreflight: groundingPreflight
@@ -5779,8 +5801,8 @@ function wireFusionWebview(context, webview, worker, state) {
     }
     const residentArchitectSessionResult = recoveryContext ? null : await runConfiguredResidentArchitectSession(
       context, governedWorkFocus, {
-        actionPlanningAllowed, wardrobeSelectionResult: operatorWardrobeSelectionResult, residentArchitectSessionEnabled,
-        explicitResidentArchitectSessionRequested: classification.governedActionRequested === true,
+        ...sessionPolicy,
+        wardrobeSelectionResult: operatorWardrobeSelectionResult,
         groundingPreflight, holoScorecard,
         progressiveExecutionStage: progressiveStage.configured
       }
@@ -8359,6 +8381,7 @@ module.exports = {
   buildResidentArchitectSessionPayload,
   runResidentArchitectSessionBridge,
   runConfiguredResidentArchitectSession,
+  residentSessionStagePolicy,
   buildResidentArchitectSessionSection,
   compositePayloadDigest,
   extractHoloIndexScorecard,

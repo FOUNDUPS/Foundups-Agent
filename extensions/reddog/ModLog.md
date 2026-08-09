@@ -12,6 +12,10 @@
   signature, replay, scope, and secret controls are not switchable.
 - Added Run Trace truth for the configured stage, audit availability, action
   ceiling, and no-authority invariant. (WSP 00/15/22/50/62/97)
+- Explicit repository audits can now submit the existing authenticated
+  resident session while mutation planning is disabled. This path bypasses
+  Wardrobe effect selection, carries the audit ceiling, and cannot enter the
+  work-order, valve, worktree, shell, commit, or PR stages.
 
 ## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
 

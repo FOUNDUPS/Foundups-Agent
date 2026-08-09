@@ -34,6 +34,10 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     SignatureVerifier,
     verify_delegated_work_authority,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_audit_stage_binding,
+    signed_stage_binding,
+)
 
 _NOW = 1000
 _REPO = "FOUNDUPS/Foundups-Agent"
@@ -164,8 +168,10 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "wsp15_reasoning_tier": "ULTRA",
-        "progressive_policy_stage_receipt_id": "sha256:" + ("e" * 64),
-        "progressive_policy_stage_digest": "sha256:" + ("f" * 64),
+        **signed_stage_binding(
+            requested_operation="create_foundup",
+            changed_paths=(f"modules/foundups/{_FID}/**",),
+        ),
         "model_selection_receipt_id": "sha256:model-selection",
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
@@ -199,6 +205,10 @@ def _snapshot(can_write=True, digest="sha256:snap-1", expires_at=_NOW + 600):
 
 
 def _issue(**overrides):
+    if not any(key.startswith("progressive_policy_stage_") for key in overrides):
+        operation = str(overrides.get("requested_operation", "create_foundup"))
+        paths = tuple(overrides.get("allowed_paths", (f"modules/foundups/{_FID}/**",)))
+        overrides = {**signed_stage_binding(requested_operation=operation, changed_paths=paths), **overrides}
     request = _request(**overrides)
     signer = _MockSigner()
     store = InMemoryAuthorityRuntimeStore()
@@ -1306,6 +1316,33 @@ def test_malformed_progressive_stage_digest_is_rejected(field: str) -> None:
     assert result.accepted is False
     assert result.receipt.status == "DELEGATED_AUTHORITY_REJECTED"
     assert result.receipt.rejection_reasons == ("REJECT_MALFORMED_REQUEST",)
+
+
+def test_audit_stage_can_sign_only_pathless_readonly_authority() -> None:
+    binding = signed_audit_stage_binding()
+    receipt = binding["progressive_policy_stage_receipt"]
+    overrides = {
+        **binding,
+        "requested_operation": receipt["requested_operation"],
+        "allowed_paths": (),
+        "wsp15_allocation_receipt_id": receipt["wsp15_allocation_receipt_id"],
+        "wsp15_allocation_digest": receipt["wsp15_allocation_digest"],
+        "valve_state_required": "VALVE_OPEN_DRYRUN_ONLY",
+        "consensus_receipt_digest": None,
+        "sovereign_authorization_digest": None,
+    }
+
+    accepted, signer, _, _ = _issue(**overrides)
+    rejected, rejected_signer, _, _ = _issue(
+        **{**overrides, "allowed_paths": (f"modules/foundups/{_FID}/**",)}
+    )
+
+    assert accepted.accepted is True
+    assert len(signer.requests) == 2
+    assert accepted.work_authority["allowed_paths"] == []
+    assert rejected.accepted is False
+    assert RuntimeRejectCode.MALFORMED_REQUEST in rejected.receipt.rejection_reasons
+    assert rejected_signer.requests == []
 
 
 def test_ast_denies_execution_crypto_keygen_network_and_runtime_wiring() -> None:

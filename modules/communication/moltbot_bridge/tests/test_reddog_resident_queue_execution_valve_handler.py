@@ -67,6 +67,9 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
     _roots as _canonical_runtime_roots,
 )
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -271,7 +274,15 @@ def _executor_plan_result(**overrides: object) -> dict[str, object]:
 def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResultsStore:
     stage_results: dict[str, object] = {
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
-        "authority_runtime": {"decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT},
+        "authority_runtime": {
+            "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
+            "authority_result": {
+                "work_authority": signed_stage_binding(
+                    requested_operation="feature_slice",
+                    changed_paths=(f"modules/foundups/{FID}/**",),
+                )
+            },
+        },
         "authority_verification": {"decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT},
         "worker_dispatch_dryrun": WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
         "worker_dispatch_runtime": WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
