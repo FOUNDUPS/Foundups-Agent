@@ -30,6 +30,9 @@
   credential assignments before any model request.
 - Omitted all authorization-header schemes and complete multiline private-key
   blocks, including log-prefixed body lines, before evidence sampling.
+- Extracted diagnostic secret filtering into a focused module and replaced
+  polynomial assignment and private-key regexes with bounded scanning after
+  CodeQL identified uncontrolled-input performance risks.
 
 ## 2026-08-09 - Defensive Fusion critic failover (0.4.68)
 

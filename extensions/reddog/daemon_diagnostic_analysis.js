@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const diagnosticSecretFilter = require('./daemon_diagnostic_secret_filter');
 
 const LOCAL_SLICE = 'REDDOG_DAEMON_OUTPUT_LOCAL_ASSESSMENT_PHASE1';
 const RUN_TRACE_SLICE = 'REDDOG_RUN_TRACE_LOCAL_ASSESSMENT_PHASE1';
@@ -31,33 +32,6 @@ const ACTION = [
   /\b(?:implement|fix|repair|harden|improve|enhance|patch|author|create\s+pr|open\s+pr|merge|land|dispatch|assign|spawn|execute|start\s+slice|write\s+code)\b/i,
   /\b(?:prompt|worker\s+prompt|slice\s+prompt|next\s+prompt|m2m\s+prompt)\b/i
 ];
-const SECRETS = [
-  /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/i,
-  /\bsk-(?:or-|ant-api)?[A-Za-z0-9_-]{16,}/i,
-  /\bsk_(?:live|test)_[A-Za-z0-9]{16,}/i,
-  /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{6,}/,
-  /\b(?:xai-|AIza|ya29\.|AKIA|gh[posru]_|github_pat_|xox[baprs]-)[A-Za-z0-9_.\/-]{10,}/i,
-  /\b1\/\/[0-9A-Za-z._-]{10,}/,
-  /\bBearer\s+[A-Za-z0-9._-]{8,}/i,
-  /\bOPENROUTER_[A-Z_]*\s*[:=]\s*\S+/i,
-  /[?&](?:code|access_token|refresh_token|id_token|token)=[^\s&"'}]+/i,
-  /\b(?:access_token|refresh_token|id_token|client_secret|client_id|user_code|authorization_code|password|passwd|api_key|apikey|token|secret)\b\s*["']?\s*[:=]/i,
-  /\b[A-Z0-9_]*(?:TOKEN|SECRET|PASSWORD|API_KEY|APIKEY|CREDENTIAL)\b\s*[:=]/,
-  /\b(?:set-cookie|cookie|session[_-]?id|sessionid)\b\s*[:=]/i,
-  /[?&](?:signature|sig|x-amz-signature|x-goog-signature|x-amz-credential)=[^\s&"'}]+/i,
-  /https?:\/\/[^\s/:]+:[^\s/@]+@/i,
-  /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/,
-  /(?:<\s*think(?:ing)?\b|<\s*scratchpad|chain[\s_-]?of[\s_-]?thought|hidden[\s_-]?reasoning|private[\s_-]?reasoning)/i
-];
-const ASSIGNMENT_KEY = /\b([A-Za-z][A-Za-z0-9_-]{1,80})\s*["']?\s*[:=]/g;
-const SECRET_KEY_PARTS = new Set([
-  'authorization', 'credential', 'credentials', 'password', 'passwd', 'secret', 'token'
-]);
-const QUALIFIED_KEY_PARTS = new Set([
-  'api', 'access', 'aws', 'client', 'private', 'secret', 'session', 'signing'
-]);
-const AUTHORIZATION_HEADER = /\b(?:proxy[\s_-]+)?authorization(?:[\s_-]+header)?\s*(?::|=>|=)/i;
-const DETACHED_AUTH_VALUE = /\b(?:Basic|Digest|Negotiate|NTLM|AWS4-HMAC-SHA256|ApiKey|Token)\s+\S{4,}/i;
 function splitInput(operatorText, diagnosticEvidence) {
   const operator = String(operatorText || '').trim();
   const evidence = String(diagnosticEvidence || '').trim();
@@ -127,91 +101,19 @@ function isAssessmentRequest(d, text) {
 }
 
 function sanitizeLine(d, line) {
-    let out = d.sanitizeCopyMdText(String(line || ''));
-    out = out.replace(/\bghp_[A-Za-z0-9_]+\b/g, 'ghp_[REDACTED]');
-    out = out.replace(/\bgithub_pat_[A-Za-z0-9_]+\b/g, 'github_pat_[REDACTED]');
-    out = out.replace(/\bgho_[A-Za-z0-9_]+\b/g, 'gho_[REDACTED]');
-    out = out.replace(/\b(?:proxy[\s_-]+)?authorization(?:[\s_-]+header)?\s*(?::|=>|=)\s*[^\r\n]+/gi, 'authorization: [REDACTED]');
-    out = out.replace(/\b(?:api[_-]?key|token|secret|password|passwd)\s*[:=]\s*[^,\s\]]+/gi, '[REDACTED_CREDENTIAL]');
-    out = out.replace(/\s+/g, ' ').trim();
-    return out.length > 220 ? out.slice(0, 220) + '...[truncated]' : out;
-}
-
-function hasSensitiveAssignment(line) {
-  const source = String(line || '');
-  ASSIGNMENT_KEY.lastIndex = 0;
-  let match;
-  while ((match = ASSIGNMENT_KEY.exec(source)) !== null) {
-    const normalized = match[1]
-      .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
-      .toLowerCase().replace(/[^a-z0-9]+/g, '_');
-    const parts = normalized.split('_').filter(Boolean);
-    if (parts.some((part) => SECRET_KEY_PARTS.has(part))) return true;
-    if (parts.includes('key') && parts.some((part) => QUALIFIED_KEY_PARTS.has(part))) return true;
-  }
-  return false;
-}
-
-function containsSecret(line) {
-  const source = String(line || '');
-  return AUTHORIZATION_HEADER.test(source) || hasSensitiveAssignment(source)
-    || SECRETS.some((pattern) => pattern.test(source));
-}
-function omitSecretLines(lines) {
-  const safe = [];
-  let omitted = 0;
-  let authorizationContinuation = false;
-  let privateKeyBlock = false;
-  for (const rawLine of lines) {
-    const line = String(rawLine || '');
-    if (/-----BEGIN [A-Z0-9 ]*PRIVATE KEY[A-Z0-9 ]*-----/i.test(line)) privateKeyBlock = true;
-    if (privateKeyBlock) {
-      omitted += 1;
-      authorizationContinuation = false;
-      if (/-----END [A-Z0-9 ]*PRIVATE KEY[A-Z0-9 ]*-----/i.test(line)) privateKeyBlock = false;
-      continue;
-    }
-    if (authorizationContinuation) {
-      if (!line.trim()) {
-        authorizationContinuation = false;
-        safe.push(line);
-        continue;
-      }
-      if (/^\s+/.test(line)) {
-        omitted += 1;
-        authorizationContinuation = false;
-        continue;
-      }
-      if (DETACHED_AUTH_VALUE.test(line)) {
-        omitted += 1;
-        authorizationContinuation = false;
-        continue;
-      }
-      authorizationContinuation = false;
-    }
-    if (AUTHORIZATION_HEADER.test(line)) {
-      omitted += 1;
-      authorizationContinuation = /(?::|=>|=)\s*$/.test(line);
-      continue;
-    }
-    if (containsSecret(line)) {
-      omitted += 1;
-      continue;
-    }
-    safe.push(line);
-  }
-  return { lines: safe, omitted };
+  return diagnosticSecretFilter.sanitizeLine(d.sanitizeCopyMdText, line);
 }
 
 function sanitizeField(d, value) {
-  return containsSecret(value) ? '[OMITTED_SECRET_BEARING_FIELD]' : sanitizeLine(d, value);
+  return diagnosticSecretFilter.containsSecret(value)
+    ? '[OMITTED_SECRET_BEARING_FIELD]' : sanitizeLine(d, value);
 }
 
 function sample(d, lines, pattern, limit) {
     const matches = [];
     const seen = new Set();
     for (const line of lines) {
-      if (!pattern.test(line) || containsSecret(line)) continue;
+      if (!pattern.test(line) || diagnosticSecretFilter.containsSecret(line)) continue;
       const value = sanitizeLine(d, line);
       if (value && !seen.has(value.toLowerCase())) {
         seen.add(value.toLowerCase());
@@ -244,7 +146,7 @@ function parse(d, text) {
     const shape = d.analyzeOperationalDiagnosticShape(src);
     const rawLines = src.split(/\r?\n/);
     const lines = rawLines.map((line) => line.trim()).filter(Boolean);
-    const admitted = omitSecretLines(rawLines);
+    const admitted = diagnosticSecretFilter.omitSecretLines(rawLines);
     const safeLines = admitted.lines.map((line) => line.trim()).filter(Boolean);
     const summary = summarize(d, lines, safeLines, admitted.omitted);
     const safeSource = safeLines.join('\n');
