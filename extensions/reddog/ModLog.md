@@ -23,6 +23,11 @@
 - Made every separately typed diagnostic payload use the bounded projection,
   independent of operator phrasing. Determine and prompt-deliverable controls
   now derive only from the work-focus field, never from diagnostic data.
+- Advanced blocked-request recovery to schema v2 so the JavaScript client and
+  Python authority runtime both require and digest-bind diagnostic evidence.
+  Internally rehashed v1 packets are rejected and retired.
+- Extended evidence omission to compound snake_case, kebab-case, and camelCase
+  credential assignments before any model request.
 
 ## 2026-08-09 - Defensive Fusion critic failover (0.4.68)
 

@@ -1766,7 +1766,7 @@
     "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py": "0a590588d493066e4adc0f4bf20298a968a66587e4608afe04b3e3414db1b6e8",
     "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py": "5e1961277548e5038f4aa7cb7c87a5f8da2792009bf6951f68026db6721a2d7f",
     "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py": "e8d4db8f008fbad14964f17e36ff5044706c88025b3429bc383b0cf28b6b3d69",
-    "modules/communication/moltbot_bridge/src/reddog_holoindex_blocked_request_recovery.py": "f27f14c34e7dc462a4c3932d40a6a12c3a52a66fd1d0a8957be8baeeae16447a",
+    "modules/communication/moltbot_bridge/src/reddog_holoindex_blocked_request_recovery.py": "df9d30a732332b0cf2bb91d26211629b0e32f9333142f3dd3b9b808ecb03b3b3",
     "modules/communication/moltbot_bridge/src/reddog_holoindex_blocked_request_recovery_events.py": "1589f84ff0d80d77ac384e489306a4f4150b45dad60e053aa0d2bde453ac4da4",
     "modules/communication/moltbot_bridge/src/reddog_holoindex_first_external_research_grounding_adapter.py": "997de51a7e46604fb78561f34ad480620227c0287604436be62d2542889db79e",
     "modules/communication/moltbot_bridge/src/reddog_holoindex_incident_repair_contract.py": "cf487c1ff0306a222c1a2324060c411c854e147da24ef22b87c8d840a2663328",

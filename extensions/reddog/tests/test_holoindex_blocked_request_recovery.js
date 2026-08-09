@@ -237,6 +237,24 @@ async function main() {
   assert.strictEqual((await recovery.claim({ secretStorage: evidenceTampered })).ok, false);
   assert.strictEqual(await evidenceTampered.get(recovery.SECRET_KEY), undefined);
 
+  const legacy = new SecretStorage();
+  cp.execFile = fakeExecFile((envelope) => stageResult(envelope.packet), []);
+  try { await stageWith(legacy); } finally { cp.execFile = original; }
+  const legacyPacket = JSON.parse(await legacy.get(recovery.SECRET_KEY));
+  legacyPacket.schema_version = 'reddog_holoindex_blocked_request_recovery.v1';
+  legacyPacket.request_digest = recovery.digest({
+    schema_version: legacyPacket.schema_version,
+    request: legacyPacket.request
+  });
+  legacyPacket.recovery_id = recovery.digest({
+    request_digest: legacyPacket.request_digest,
+    incident_receipt_id: legacyPacket.incident_receipt.receipt_id
+  });
+  await legacy.store(recovery.SECRET_KEY, JSON.stringify(legacyPacket));
+  assert.strictEqual((await recovery.loadPacket(legacy)).ok, false);
+  assert.strictEqual((await recovery.claim({ secretStorage: legacy })).ok, false);
+  assert.strictEqual(await legacy.get(recovery.SECRET_KEY), undefined);
+
   const replaced = new SecretStorage();
   await replaced.store(recovery.SECRET_KEY, '{invalid');
   cp.execFile = fakeExecFile((envelope) => stageResult(envelope.packet), []);

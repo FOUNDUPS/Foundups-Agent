@@ -49,6 +49,13 @@ const SECRETS = [
   /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/,
   /(?:<\s*think(?:ing)?\b|<\s*scratchpad|chain[\s_-]?of[\s_-]?thought|hidden[\s_-]?reasoning|private[\s_-]?reasoning)/i
 ];
+const ASSIGNMENT_KEY = /\b([A-Za-z][A-Za-z0-9_-]{1,80})\s*["']?\s*[:=]/g;
+const SECRET_KEY_PARTS = new Set([
+  'credential', 'credentials', 'password', 'passwd', 'secret', 'token'
+]);
+const QUALIFIED_KEY_PARTS = new Set([
+  'api', 'access', 'aws', 'client', 'private', 'secret', 'session', 'signing'
+]);
 
 function splitInput(operatorText, diagnosticEvidence) {
   const operator = String(operatorText || '').trim();
@@ -128,8 +135,25 @@ function sanitizeLine(d, line) {
     return out.length > 220 ? out.slice(0, 220) + '...[truncated]' : out;
 }
 
+function hasSensitiveAssignment(line) {
+  const source = String(line || '');
+  ASSIGNMENT_KEY.lastIndex = 0;
+  let match;
+  while ((match = ASSIGNMENT_KEY.exec(source)) !== null) {
+    const normalized = match[1]
+      .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+      .toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    const parts = normalized.split('_').filter(Boolean);
+    if (parts.some((part) => SECRET_KEY_PARTS.has(part))) return true;
+    if (parts.includes('key') && parts.some((part) => QUALIFIED_KEY_PARTS.has(part))) return true;
+  }
+  return false;
+}
+
 function containsSecret(line) {
-  return SECRETS.some((pattern) => pattern.test(String(line || '')));
+  const source = String(line || '');
+  return hasSensitiveAssignment(source)
+    || SECRETS.some((pattern) => pattern.test(source));
 }
 
 function sanitizeField(d, value) {

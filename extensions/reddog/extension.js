@@ -5250,6 +5250,30 @@ async function runBlockedGroundingResponse(params) {
   );
 }
 
+function prepareFusionRequest(message, worker) {
+  const ingress = splitDaemonDiagnosticInput(message.text, message.diagnosticEvidence);
+  const workFocus = ingress.combined_focus;
+  const selectedContextMode = cleanContextMode(message.contextMode);
+  const workerType = cleanWorkerType(message.workerType);
+  const classification = classifyTaskForRedDog(
+    workFocus, selectedContextMode, workerType, { daemonDiagnosticIngress: ingress }
+  );
+  const projection = classification.daemonDiagnosticAnalysis
+    ? buildDaemonDiagnosticEvidenceProjection(workFocus, ingress) : null;
+  return {
+    workFocus, workerType, classification,
+    promptHasDetermineList: classification.determineListRequested === true,
+    daemonDiagnosticProjection: projection,
+    governedWorkFocus: projection ? projection.focus : workFocus,
+    continuationEnabled: message.useLastPacket === true && !classification.conversationalDraft,
+    localFastPath: authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath),
+    modelBindingBlock: modelRuntimeBindingQuery.blockedReason(worker),
+    effort: resolveAutoEffort(classification, cleanEffort(message.effort)),
+    mode: resolveModelMode(classification, cleanMode(message.mode), workerType),
+    contextMode: resolveAutoContextMode(classification, selectedContextMode)
+  };
+}
+
 function wireFusionWebview(context, webview, worker, state) {
   const recoveryOptions = holoBlockedRecoveryOptions(context);
   const executeAsk = async (message, recoveryContext) => {
@@ -5257,34 +5281,15 @@ function wireFusionWebview(context, webview, worker, state) {
     if (!recoveryContext && await startOperationsAdapter.handleMessage(
       startOperationsOptions(context, message, worker, state, webview)
     )) return;
-    const daemonDiagnosticIngress = splitDaemonDiagnosticInput(message.text, message.diagnosticEvidence);
-    const workFocus = daemonDiagnosticIngress.combined_focus;
-    const selectedContextMode = cleanContextMode(message.contextMode);
-    const workerType = cleanWorkerType(message.workerType);
-    const selectedEffort = cleanEffort(message.effort);
-    const selectedMode = cleanMode(message.mode);
-    // Fail-closed: continuation is included this run ONLY when 012 explicitly enabled it.
-    // Missing/stale useLastPacket => OFF (do not carry a stale packet into redaction/acceptance scoring).
-    const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType, {
-      daemonDiagnosticIngress
-    });
-    const promptHasDetermineList = classification.determineListRequested === true;
-    const daemonDiagnosticProjection = classification.daemonDiagnosticAnalysis
-      ? buildDaemonDiagnosticEvidenceProjection(workFocus, daemonDiagnosticIngress)
-      : null;
-    const governedWorkFocus = daemonDiagnosticProjection
-      ? daemonDiagnosticProjection.focus
-      : workFocus;
-    const continuationEnabled = message.useLastPacket === true && !classification.conversationalDraft;
-    const localFastPath = authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath);
-    const modelBindingBlock = modelRuntimeBindingQuery.blockedReason(worker);
+    const {
+      workFocus, workerType, classification, promptHasDetermineList,
+      daemonDiagnosticProjection, governedWorkFocus, continuationEnabled, localFastPath,
+      modelBindingBlock, effort, mode, contextMode
+    } = prepareFusionRequest(message, worker);
     if (modelBindingBlock && !localFastPath) {
       postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);
       return;
     }
-    const effort = resolveAutoEffort(classification, selectedEffort);
-    const mode = resolveModelMode(classification, selectedMode, workerType);
-    const contextMode = resolveAutoContextMode(classification, selectedContextMode);
     const contextPacket = localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : (classification.conversationalDraft ? conversationalDraftPolicy.emptyContextPacket() : buildBoundedRepoContext(contextMode, governedWorkFocus));
     const basePrompt = classification.conversationalDraft ? conversationalDraftPolicy.buildUserPrompt(workFocus) : constructWspTaskPrompt(governedWorkFocus, classification, contextPacket.quality, workerType);
     const continuation = continuationPrompt.prepareContinuationPrompt(

@@ -1742,6 +1742,24 @@ assert(!sessionCredentialProjection.focus.includes('SYNTHETIC_SESSION_VALUE_1234
   'DOLA-017: session cookies must be omitted before projection');
 assert(!sessionCredentialProjection.focus.includes('synthetic-signature-value'),
   'DOLA-017: signed URL credentials must be omitted before projection');
+const compoundCredentialProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR aws_secret_access_key=SYNTHETIC_AWS_CREDENTIAL',
+  'WARNING private_key=SYNTHETIC_PRIVATE_CREDENTIAL',
+  'status clientSecret=SYNTHETIC_CLIENT_CREDENTIAL',
+  'result: stopped'
+].join('\n'));
+for (const syntheticValue of [
+  'SYNTHETIC_AWS_CREDENTIAL',
+  'SYNTHETIC_PRIVATE_CREDENTIAL',
+  'SYNTHETIC_CLIENT_CREDENTIAL'
+]) {
+  assert(!compoundCredentialProjection.focus.includes(syntheticValue),
+    'DOLA-019: compound credential assignments must be omitted: ' + syntheticValue);
+}
+assert.strictEqual(compoundCredentialProjection.secret_redactions_applied, 3,
+  'DOLA-019: compound credential omissions must remain auditable');
+assertFusionRedactionGatePasses(compoundCredentialProjection.focus,
+  'DOLA-019: compound credential diagnostics must remain analyzable after omission');
 const recoveredAdvisoryResult = {
   ok: true,
   runtime_consumption_gate: {
@@ -4049,7 +4067,7 @@ includes(continuationCopy, 'Continuation from last RedDog packet', 'Copy MD may 
 // ADDENDUM H - deterministic Use-last-packet toggle + continuation telemetry
 // (REDDOG_CONTINUATION_TOGGLE_HARDENING_PHASE1)
 // Backend fail-closed default: continuation is included ONLY on explicit useLastPacket === true.
-includes(extensionJs, 'const continuationEnabled = message.useLastPacket === true', 'backend must fail closed (useLastPacket === true)');
+includes(extensionJs, 'continuationEnabled: message.useLastPacket === true', 'backend must fail closed (useLastPacket === true)');
 assert(!extensionJs.includes('message.useLastPacket !== false'), 'legacy permissive default must be removed');
 includes(continuationPromptJs, 'const appended = enabled && !!summary', 'single continuation_appended boolean must gate inclusion');
 includes(extensionJs, 'Continuation: disabled for this run.', 'UI must show disabled status line');

@@ -4,7 +4,7 @@ const cp = require('child_process');
 const crypto = require('crypto');
 const path = require('path');
 
-const SCHEMA_VERSION = 'reddog_holoindex_blocked_request_recovery.v1';
+const SCHEMA_VERSION = 'reddog_holoindex_blocked_request_recovery.v2';
 const INCIDENT_SCHEMA = 'reddog_holoindex_incident_repair.v2';
 const SECRET_KEY = 'reddog.holoBlockedRequestRecovery.v1';
 const STAGE_EVENT_PREFIX = 'reddog_holoindex_blocked_retry_staged:';
