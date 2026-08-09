@@ -1623,6 +1623,8 @@ def test_signer_runtime_rejects_missing_or_replayed_queue_admission() -> None:
         queue_authority_admission=admission,
         **kwargs,
     )
+    signer_requests_after_first = list(kwargs["signer"].requests)
+    store_after_first = kwargs["store"].load()
     replay = issue_delegated_authority_runtime(
         queue_authority_admission=admission,
         **kwargs,
@@ -1641,6 +1643,8 @@ def test_signer_runtime_rejects_missing_or_replayed_queue_admission() -> None:
     assert missing.receipt.rejection_reasons == (
         RuntimeRejectCode.MALFORMED_REQUEST,
     )
+    assert kwargs["signer"].requests == signer_requests_after_first
+    assert kwargs["store"].load() == store_after_first
 
 
 def test_audit_authority_signs_verifies_and_reaches_readonly_dispatch() -> None:
