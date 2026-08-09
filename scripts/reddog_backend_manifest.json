@@ -1757,7 +1757,7 @@
     "modules/communication/moltbot_bridge/src/reddog_ed25519_verified_outcome_signing.py": "ebf460e4003916775a03ec0bbf0fe2a5faf8e3b5a3052fa2c0fda4b7e65b8eca",
     "modules/communication/moltbot_bridge/src/reddog_effect_commit_outcome.py": "828db009cd7eba03903b3147223fe111fc84b433427c2652bcd0c4b2ee53f31e",
     "modules/communication/moltbot_bridge/src/reddog_execution_valve_environment_supply.py": "18518dc32906c56ace01bac5a5905508992e9c5fc2721d5e15389eeae527eaf9",
-    "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "7b600192002b3d72642a53076d41b76738079a8ae0e6b0cd81e05d64819b0f63",
+    "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "9ad70d2e00bef407eaffd5ac97e3cab1e9a751070c1e0a26c9c99b98f896bc15",
     "modules/communication/moltbot_bridge/src/reddog_extension_live_enqueue_invoke.py": "4786227cbc2c2a60adfeb2abd12ea845a4fe78c2001ca9911b8ec6dfb67b7101",
     "modules/communication/moltbot_bridge/src/reddog_extension_wre_operational_spine_invoke.py": "73c05dd00d6cfdcca72d3ba4d404d4f936af6df88ec848c2529a9a1355e3c942",
     "modules/communication/moltbot_bridge/src/reddog_foundups_fusion_artifact_provider.py": "42b3ca76b31bbb2aa11d0ca27be48d2fbc73740efbb8d351baba41a9df5241ca",

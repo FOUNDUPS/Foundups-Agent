@@ -42,6 +42,8 @@
   verification. The resident handler alone mints a one-use opaque admission;
   caller-rehashed stage and queue receipts, missing admission, and replayed
   admission all reject before signing or authority-store effects.
+- Recompute the complete current queue receipt immediately before effects and
+  reject queue metadata, selected-slice, or progressive-stage substitution.
 
 ## 2026-08-09: RedDog stale Holo authority recovery binding
 - Extended the existing incident and blocked-request contracts for the proven
