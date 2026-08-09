@@ -406,7 +406,7 @@ def _synthesis_user_prompt(
     """Assemble the bounded lead and panel evidence for synthesis."""
 
     panel_text = "\n\n".join(
-        _model_label(model) + " critique:\n" + text[:8000]
+        _model_label(model) + " critique:\n" + text[:SYNTHESIS_CRITIC_CHAR_LIMIT]
         for model, text in panel_results.items()
     )
     return (
@@ -449,10 +449,12 @@ _FRAMING_TERMS = (
     "evidence", "claim", "finding",
 )
 _PRIORITY_TERMS = ("priority", "wsp_15", "p0", "p1", "p2", "next safest", "sequence", "order")
+SYNTHESIS_CRITIC_CHAR_LIMIT = 8000
+MAX_DEFENSIVE_CRITIC_RETRY_MODELS = 2
 
 
 def _critic_challenges_framing_and_priority(text: object) -> bool:
-    lowered = str(text or "").lower()
+    lowered = str(text or "")[:SYNTHESIS_CRITIC_CHAR_LIMIT].lower()
     if _none_like_model_text(lowered) or not lowered.lstrip().startswith("challenge:"):
         return False
     return (
@@ -506,17 +508,57 @@ def _fusion_quorum_fields(
     }
 
 
-def _adversarial_critic_retry_messages(
+def _defensive_critic_retry_messages(
     critic_messages: list[dict[str, str]],
 ) -> list[dict[str, str]]:
     messages = [dict(item) for item in critic_messages]
     messages[0]["content"] += (
-        "\n\nAdversarial retry: identify one concrete falsifiable evidence gap, "
+        "\n\nIndependent defensive evidence review: identify one concrete falsifiable evidence gap, "
         "unsupported framing assumption, or alternative WSP_15 priority/order. "
         "Start with `Challenge:`. If no defensible challenge exists, start with "
         "`No material challenge:`; never fabricate a defect."
     )
     return messages
+
+
+def _request_defensive_critic_review(
+    api_key: str,
+    model: str,
+    critic_messages: list[dict[str, str]],
+    max_tokens: int,
+    temperature: float,
+    timeout: int,
+) -> tuple[str, bool]:
+    _progress(
+        "panel_start", "Targeted defensive critic review started: " + model,
+        role="panel", model=model,
+    )
+    try:
+        text, _retry = _chat_completion(
+            api_key, model, _defensive_critic_retry_messages(critic_messages),
+            max_tokens=max_tokens, temperature=temperature, timeout=timeout,
+            role="critic",
+        )
+    except (
+        urllib.error.HTTPError, urllib.error.URLError, TimeoutError, KeyError,
+        IndexError, TypeError, json.JSONDecodeError,
+    ):
+        _progress(
+            "panel_blocked", "Targeted defensive critic review blocked: " + model,
+            role="critic", model=model,
+        )
+        return "[blocked: defensive_review_unavailable]", False
+    if _none_like_model_text(text):
+        _progress(
+            "panel_blocked", "Targeted defensive critic review abstained: " + model,
+            role="critic", model=model,
+        )
+        return "[abstained: defensive_review_empty_or_none]", True
+    _progress(
+        "panel_done", "Targeted defensive critic review received: " + model,
+        role="critic", model=model,
+    )
+    return text, False
 
 
 def _retry_challenging_critic(
@@ -528,24 +570,29 @@ def _retry_challenging_critic(
     panel_max_tokens: dict[str, int],
     temperature: float,
     timeout: int,
-) -> tuple[str, str, bool]:
+) -> tuple[dict[str, str], list[str], str, list[str]]:
     candidates = _critic_retry_candidates(panel_models, panel_results, abstaining_critics)
-    model = candidates[0]
-    _progress("panel_retry", "No material critic challenge; one bounded adversarial retry is starting.", role="critic", model=model)
-    _progress("panel_start", "Targeted adversarial critic retry started: " + model, role="panel", model=model)
-    try:
-        text, _retry = _chat_completion(
-            api_key, model, _adversarial_critic_retry_messages(critic_messages),
-            max_tokens=panel_max_tokens[model], temperature=temperature, timeout=timeout, role="critic",
+    retry_results: dict[str, str] = {}
+    attempted_models: list[str] = []
+    retry_abstentions: list[str] = []
+    for model in candidates[:MAX_DEFENSIVE_CRITIC_RETRY_MODELS]:
+        attempted_models.append(model)
+        _progress(
+            "panel_retry",
+            "No material critic challenge; bounded defensive evidence review is starting.",
+            role="critic",
+            model=model,
         )
-    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, KeyError, IndexError, TypeError, json.JSONDecodeError):
-        _progress("panel_blocked", "Targeted adversarial critic retry blocked: " + model, role="critic", model=model)
-        return model, "[blocked: adversarial_retry_unavailable]", False
-    if _none_like_model_text(text):
-        _progress("panel_blocked", "Targeted adversarial critic retry abstained: " + model, role="critic", model=model)
-        return model, "[abstained: adversarial_retry_empty_or_none]", False
-    _progress("panel_done", "Targeted adversarial critic retry received: " + model, role="critic", model=model)
-    return model, text, _critic_challenges_framing_and_priority(text)
+        text, abstained = _request_defensive_critic_review(
+            api_key, model, critic_messages, panel_max_tokens[model],
+            temperature, timeout,
+        )
+        retry_results[model] = text
+        if abstained:
+            retry_abstentions.append(model)
+        if _critic_challenges_framing_and_priority(text):
+            return retry_results, attempted_models, model, retry_abstentions
+    return retry_results, attempted_models, "", retry_abstentions
 
 
 def _critic_retry_candidates(
@@ -562,7 +609,7 @@ def _critic_retry_candidates(
         if model not in abstaining and _usable_panel_result(panel_results.get(model, ""))
     ]
     available = [model for model in panel_models if model not in abstaining]
-    return usable or available or panel_models
+    return list(dict.fromkeys([*usable, *available, *panel_models]))
 
 
 def _usable_panel_result(value: str) -> bool:
@@ -845,18 +892,20 @@ def _run_foundups_fusion_core(
     ]
     critic_challenge_retry_models: list[str] = []
     if not challenging_critics:
-        retry_model, retry_text, retry_challenged = _retry_challenging_critic(
+        retry_results, retry_models, challenging_model, retry_abstentions = _retry_challenging_critic(
             api_key, panel_models, panel_results, abstaining_critics, critic_messages,
             panel_max_tokens, temperature, timeout,
         )
-        critic_challenge_retry_models.append(retry_model)
-        panel_results[retry_model] = (
-            panel_results.get(retry_model, "")[:8000]
-            + "\n\nAdversarial retry:\n"
-            + retry_text
-        )
-        if retry_challenged:
-            challenging_critics = [retry_model]
+        critic_challenge_retry_models.extend(retry_models)
+        abstaining_critics = list(dict.fromkeys([*abstaining_critics, *retry_abstentions]))
+        for retry_model, retry_text in retry_results.items():
+            panel_results[retry_model] = (
+                retry_text[:SYNTHESIS_CRITIC_CHAR_LIMIT]
+                + "\n\nInitial critic response:\n"
+                + panel_results.get(retry_model, "")
+            )
+        if challenging_model:
+            challenging_critics = [challenging_model]
     if not challenging_critics:
         return _fusion_quorum_packet(
             ok=False,

@@ -1,5 +1,14 @@
 # RedDog Interface
 
+Version 0.4.68 preserves the existing Fusion challenging-critic gate and adds
+a bounded provider failover inside that same seam. A defensive evidence-review
+retry first targets the best usable critic. If that call blocks, abstains, or
+returns no qualifying challenge, one different configured critic may be tried.
+The gate accepts neither agreement nor empty output as dissent, and synthesis
+still requires a `Challenge:` that addresses framing/evidence and WSP_15
+priority. `critic_challenge_retry_models` records all attempts;
+`abstaining_critics` records initial or retry abstentions.
+
 Version 0.4.67 extends the existing incident and blocked-request interfaces for
 `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`. A clean stale authority checkout may
 stage the exact request and enqueue the canonical post-merge task for the
