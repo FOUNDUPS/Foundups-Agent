@@ -109,6 +109,30 @@ def bounded_allocation(*, prompt_suffix: str = "", **overrides: object) -> dict[
     return payload
 
 
+def openclaw_candidate_allocation(*, prompt_suffix: str = "") -> dict[str, object]:
+    """Build the canonical legacy non-code OpenClaw candidate allocation."""
+
+    from modules.communication.moltbot_bridge.src import (
+        reddog_wsp15_allocation_receipt as allocation_contract,
+    )
+
+    payload = bounded_allocation(prompt_suffix=prompt_suffix)
+    payload["worker_plan"] = {
+        **dict(payload["worker_plan"]),
+        "coding_worker_count": 0,
+    }
+    input_digest = allocation_contract._digest(
+        allocation_contract._allocation_input_payload(payload)
+    )
+    payload["input_digest"] = input_digest
+    payload["receipt_id"] = allocation_contract._digest(
+        {"receipt": input_digest, "type": allocation_contract.SCHEMA_VERSION}
+    )
+    prompt = f"{_DEFAULT_PROMPT} {prompt_suffix}".strip()
+    _ALLOCATION_PROMPTS[str(payload["receipt_id"])] = prompt
+    return payload
+
+
 def readonly_allocation(
     *,
     targets: Sequence[str] = (_DEFAULT_TARGET,),

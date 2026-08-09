@@ -13,7 +13,6 @@ The purpose is to bridge the gap after the E0/E1 contracts:
 * This module prepares authority records by validating scope, freshness,
   revocation, nonce uniqueness, and high-authority co-sign evidence before
   requesting signatures from an injected signer client.
-
 The signer response is treated as authority only when it carries the boundary
 attestations required by E0. All emitted receipts are evidence for later gates;
 they do not execute work by themselves.
@@ -24,6 +23,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, dataclass
+from fnmatch import fnmatchcase
 from typing import Any, Dict, Mapping, Optional, Protocol, Sequence, Tuple
 
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
@@ -393,9 +393,20 @@ def _progressive_stage_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
         expected_digest=request.progressive_policy_stage_digest,
     ) and (
         receipt.get("requested_operation") == request.requested_operation
-        and tuple(receipt.get("changed_paths") or ()) == tuple(request.allowed_paths)
+        and _stage_paths_within_request(receipt, request)
         and receipt.get("wsp15_allocation_receipt_id") == request.wsp15_allocation_receipt_id
         and receipt.get("wsp15_allocation_digest") == request.wsp15_allocation_digest
+    )
+
+
+def _stage_paths_within_request(receipt: Mapping[str, Any], request: DelegatedAuthorityRuntimeRequest) -> bool:
+    paths = tuple(str(path) for path in receipt.get("changed_paths") or ())
+    allowed = tuple(str(pattern) for pattern in request.allowed_paths)
+    denied = tuple(str(pattern) for pattern in request.denied_paths)
+    return all(
+        any(fnmatchcase(path, pattern) for pattern in allowed)
+        and not any(fnmatchcase(path, pattern) for pattern in denied)
+        for path in paths
     )
 
 

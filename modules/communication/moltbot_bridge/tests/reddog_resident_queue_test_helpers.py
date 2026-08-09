@@ -373,6 +373,14 @@ def worker_dispatch_authority_stages(
             work_authority_overrides[field] = _queue_binding_value(
                 work_state_snapshot, queue_item_id, field
             ) or ""
+    if "progressive_policy_stage_receipt" not in work_authority_overrides:
+        work_authority_overrides["progressive_policy_stage_receipt"] = (
+            _queue_binding_mapping(
+                work_state_snapshot,
+                queue_item_id,
+                "progressive_policy_stage_receipt",
+            )
+        )
     identity = {
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
@@ -481,6 +489,18 @@ def _queue_binding_value(
         if str(item.get("queue_item_id") or "") == queue_item_id:
             return str(item.get(field) or "")
     return ""
+
+
+def _queue_binding_mapping(
+    snapshot: dict[str, Any] | None, queue_item_id: str, field: str
+) -> dict[str, Any]:
+    if snapshot is None:
+        return {}
+    for item in snapshot.get("wre_queue_items", ()):
+        if str(item.get("queue_item_id") or "") == queue_item_id:
+            value = item.get(field)
+            return dict(value) if isinstance(value, dict) else {}
+    return {}
 
 
 def worker_dispatch_authority_verification_context():

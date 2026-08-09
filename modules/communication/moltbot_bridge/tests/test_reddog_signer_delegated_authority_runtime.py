@@ -1341,7 +1341,7 @@ def test_audit_stage_can_sign_only_pathless_readonly_authority() -> None:
     assert len(signer.requests) == 2
     assert accepted.work_authority["allowed_paths"] == []
     assert rejected.accepted is False
-    assert RuntimeRejectCode.MALFORMED_REQUEST in rejected.receipt.rejection_reasons
+    assert RuntimeRejectCode.PATH_OUT_OF_SCOPE in rejected.receipt.rejection_reasons
     assert rejected_signer.requests == []
 
 

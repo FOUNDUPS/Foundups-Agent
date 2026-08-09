@@ -8,6 +8,7 @@ import hmac
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src import (
+    reddog_progressive_execution_stage_policy as stage_policy,
     reddog_wre_queue_authority_request_dryrun as planner,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
@@ -38,6 +39,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verific
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_bounded_stage_receipt,
 )
 
 
@@ -131,6 +135,10 @@ class _NoRevocation:
 
 
 def _queue_result():
+    stage = signed_bounded_stage_receipt(
+        requested_operation="create_foundup",
+        changed_paths=(f"modules/foundups/{FID}/**",),
+    )
     receipt = {
         "receipt_id": "wre_queue_consumer_1234",
         "queue_item_id": "queue-1",
@@ -143,8 +151,9 @@ def _queue_result():
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "reasoning_tier": "ULTRA",
-        "progressive_policy_stage_receipt_id": "sha256:" + "d" * 64,
-        "progressive_policy_stage_digest": "sha256:" + "e" * 64,
+        "progressive_policy_stage_receipt_id": stage["receipt_id"],
+        "progressive_policy_stage_digest": stage_policy._digest(stage),
+        "progressive_policy_stage_receipt": stage,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }

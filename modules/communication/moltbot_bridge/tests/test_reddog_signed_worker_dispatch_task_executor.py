@@ -83,6 +83,7 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
     bounded_allocation as _allocation,
     governed_snapshot as _snapshot,
+    openclaw_candidate_allocation as _openclaw_candidate_allocation,
     readonly_allocation as _valid_readonly_allocation,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
@@ -446,21 +447,15 @@ def _dryrun_result(allocation=None, intent=None):
 
 def _task_context():
     result = publish_bound_worker_dispatch(
-        worker_dispatch_dryrun_result=_dryrun_result(),
-        work_state_snapshot=_snapshot(),
+        worker_dispatch_dryrun_result=_dryrun_result(
+            allocation=_openclaw_candidate_allocation()
+        ),
+        work_state_snapshot=_snapshot(_openclaw_candidate_allocation()),
         queue_item_id="queue-1",
         writer=_CollectingWriter(),
     )
     assert result.accepted is True
-    return _context_with_intent_overrides(
-        result.tasks[0].context,
-        {
-            "intent_id": "worker_dispatch_intent_openclaw_candidate",
-            "role": "openclaw_candidate",
-            "worker_runtime": "openclaw",
-            "capability": "candidate_queue_review",
-        },
-    )
+    return result.tasks[0].context
 
 
 def _context_with_intent_overrides(context, overrides):
@@ -525,14 +520,14 @@ def _task_context_with_model_runtime_binding(
 
 def _publish_agentdb_task(**intent_overrides) -> str:
     defaults = {
-        "intent_id": "worker_dispatch_intent_queue_stage_worker",
-        "role": "queue_stage_worker",
+        "intent_id": "worker_dispatch_intent_openclaw_candidate",
+        "role": "openclaw_candidate",
         "worker_runtime": "openclaw",
-        "capability": "queue_stage_progress",
+        "capability": "candidate_queue_review",
     }
     requested = str(intent_overrides.get("intent_id") or defaults["intent_id"])
     return _publish_agentdb_task_with_allocation(
-        _allocation(prompt_suffix=requested),
+        _openclaw_candidate_allocation(prompt_suffix=requested),
         **{**defaults, **intent_overrides},
     )
 
