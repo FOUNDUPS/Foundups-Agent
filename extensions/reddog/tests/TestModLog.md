@@ -1,5 +1,14 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-09 - Defensive Fusion critic failover (0.4.68)
+
+- Proved defensive retry wording contains no adversarial instruction language.
+- Proved one provider abstention fails over to one distinct critic, records
+  both attempts, and admits synthesis only when the second critic supplies a
+  qualifying framing/evidence and WSP_15 priority challenge.
+- Proved two non-challenging retries remain bounded and fail closed, while Copy
+  MD exposes retry and abstention identities.
+
 ## 2026-08-09 - Stale HoloIndex authority recovery admission (0.4.67)
 
 - Added current-versus-stale authority selection tests that preserve the

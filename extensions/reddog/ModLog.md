@@ -1,5 +1,16 @@
 # RedDog ModLog
 
+## 2026-08-09 - Defensive Fusion critic failover (0.4.68)
+
+- Reframed the targeted critic retry as an independent defensive evidence
+  review so provider safety handling does not confuse defensive assurance with
+  an offensive request.
+- Extended the existing bounded retry to one distinct critic failover when the
+  first retry is unavailable, abstains, or returns no qualifying challenge.
+  Quorum and synthesis remain fail closed; no model agreement is converted into
+  fabricated dissent.
+- Added retry-attempt and abstaining-critic telemetry to Copy MD and Run Trace.
+
 ## 2026-08-09 - Stale HoloIndex authority recovery admission (0.4.67)
 
 - Extended the existing Holo incident contract to admit an independently

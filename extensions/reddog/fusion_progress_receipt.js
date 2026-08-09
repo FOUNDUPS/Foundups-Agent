@@ -119,9 +119,13 @@ function formatFusionProgressReceiptLines(reviewPacket) {
   const retryModels = Array.isArray(quorum.critic_challenge_retry_models)
     ? quorum.critic_challenge_retry_models.map(String).filter(Boolean)
     : [];
+  const abstainingCritics = Array.isArray(quorum.abstaining_critics)
+    ? quorum.abstaining_critics.map(String).filter(Boolean)
+    : [];
   const quorumLines = [
     '- fusion_lead_semantic_retries: ' + (Number(quorum.lead_semantic_retry_count) || 0),
-    '- fusion_critic_challenge_retry_models: ' + (retryModels.length ? retryModels.join(', ') : '(none)')
+    '- fusion_critic_challenge_retry_models: ' + (retryModels.length ? retryModels.join(', ') : '(none)'),
+    '- fusion_abstaining_critics: ' + (abstainingCritics.length ? abstainingCritics.join(', ') : '(none)')
   ];
   const validation = rp.fusion_progress_receipt_validation && typeof rp.fusion_progress_receipt_validation === 'object'
     ? rp.fusion_progress_receipt_validation

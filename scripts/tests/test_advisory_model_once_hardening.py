@@ -339,10 +339,15 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         )
 
     def test_fusion_quorum_requires_critic_challenge_to_framing_and_priority(self) -> None:
+        retry_models: list[str] = []
+
         def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
             system = str(messages[0]["content"])
             if "Lead pass" in system:
                 return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Independent defensive evidence review" in system:
+                retry_models.append(model)
+                return "Looks generally reasonable.", {"retry_count": 0}
             if "Panel critic pass" in system:
                 return "Looks generally reasonable.", {"retry_count": 0}
             return "Synthesis should not run", {"retry_count": 0}
@@ -363,14 +368,15 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(result["reason"], "fusion_quorum_challenging_critic_missing")
         quorum = result["review_packet"]["fusion_panel_quorum"]
         self.assertEqual(quorum["challenging_critics"], [])
-        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a"])
+        self.assertEqual(retry_models, ["critic-a", "critic-b"])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a", "critic-b"])
 
     def test_fusion_quorum_targeted_critic_retry_can_recover(self) -> None:
         def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
             system = str(messages[0]["content"])
             if "Lead pass" in system:
                 return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
-            if "Adversarial retry" in system:
+            if "Independent defensive evidence review" in system:
                 return (
                     "Challenge: the framing assumes complete evidence and the WSP_15 "
                     "priority order should defer execution pending verification.",
@@ -397,6 +403,49 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(quorum["challenging_critics"], ["critic-a"])
         self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a"])
 
+    def test_fusion_quorum_preserves_retry_challenge_after_long_initial_response(self) -> None:
+        synthesis_prompts: list[str] = []
+        accepted_challenge = (
+            "Challenge: the evidence framing lacks an exact receipt, so the WSP_15 "
+            "priority order must verify it before implementation."
+        )
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Independent defensive evidence review" in system:
+                return accepted_challenge, {"retry_count": 0}
+            if "Panel critic pass" in system:
+                return "No material challenge: " + ("x" * 9000), {"retry_count": 0}
+            synthesis_prompts.append(str(messages[1]["content"]))
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(len(synthesis_prompts), 1)
+        self.assertIn(accepted_challenge, synthesis_prompts[0])
+
+    def test_challenge_outside_synthesis_bound_never_satisfies_quorum(self) -> None:
+        hidden_challenge = (
+            "Challenge: "
+            + ("x" * bridge.SYNTHESIS_CRITIC_CHAR_LIMIT)
+            + " evidence WSP_15 priority"
+        )
+        self.assertFalse(bridge._critic_challenges_framing_and_priority(hidden_challenge))
+
     def test_fusion_quorum_retry_prefers_critic_with_usable_initial_response(self) -> None:
         retry_models: list[str] = []
 
@@ -404,7 +453,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             system = str(messages[0]["content"])
             if "Lead pass" in system:
                 return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
-            if "Adversarial retry" in system:
+            if "Independent defensive evidence review" in system:
                 retry_models.append(model)
                 return (
                     "Challenge: the evidence is incomplete and WSP_15 should defer "
@@ -435,6 +484,46 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         quorum = result["review_packet"]["fusion_panel_quorum"]
         self.assertEqual(quorum["challenging_critics"], ["critic-b"])
         self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-b"])
+
+    def test_fusion_quorum_retry_fails_over_after_provider_abstention(self) -> None:
+        retry_models: list[str] = []
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Independent defensive evidence review" in system:
+                retry_models.append(model)
+                if model == "critic-a":
+                    return "None", {"retry_count": 0}
+                return (
+                    "Challenge: the evidence framing lacks a runtime receipt, so the "
+                    "WSP_15 priority order must verify that receipt before implementation.",
+                    {"retry_count": 0},
+                )
+            if "Panel critic pass" in system:
+                return "No material challenge: framing and priority appear sound.", {"retry_count": 0}
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a", "critic-b", "critic-c"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(retry_models, ["critic-a", "critic-b"])
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["challenging_critics"], ["critic-b"])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a", "critic-b"])
+        self.assertEqual(quorum["abstaining_critics"], ["critic-a"])
 
     def test_no_material_challenge_prefix_never_satisfies_quorum(self) -> None:
         self.assertFalse(

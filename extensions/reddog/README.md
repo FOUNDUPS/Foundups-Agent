@@ -1,6 +1,14 @@
 # RedDog
 
-Version: 0.4.67
+Version: 0.4.68
+
+Version 0.4.68 keeps Fusion's challenging-critic quorum fail closed while
+making its bounded recovery provider-safe. The retry is framed as an
+independent defensive evidence review, not an adversarial operation. If the
+first selected critic is unavailable, abstains, or cannot provide the required
+framing/evidence and WSP_15 priority challenge, one distinct critic may be
+tried. Synthesis still cannot run without a material challenge. Run Trace and
+Copy MD expose every retry model and every abstaining critic.
 
 Version 0.4.67 admits a clean, independently inspected stale HoloIndex
 authority checkout into the existing exact-SHA post-merge maintenance path.
@@ -275,7 +283,7 @@ Version 0.4.21 can route semantic queries from a dirty developer checkout to a s
 
 Version 0.4.17 consumes the existing receipt-bound RedDog architect model runtime binding when its outside-repo artifact is configured. The extension rehydrates the deterministic receipt through Python, checks production policy/evidence counts and role topology, then exposes the principal, panel, roles, catalog, selection, and binding IDs in Run Trace. Missing configuration remains an explicitly labeled evaluation fallback; partial or invalid configuration blocks before OpenRouter.
 
-Version 0.4.16 gives Fusion one bounded semantic retry when the lead returns empty/`None` and one bounded targeted adversarial retry when the initial panel supplies no material challenge. Synthesis remains blocked unless required evidence, a substantive lead, and an actual framing/evidence/WSP_15 challenge are present; retry attempts remain visible in progress and Copy MD receipts.
+Version 0.4.16 introduced one bounded semantic retry when the lead returns empty/`None` and one bounded targeted critic retry when the initial panel supplies no material challenge. Version 0.4.68 extends that retry with defensive wording and one distinct-model failover. Synthesis remains blocked unless required evidence, a substantive lead, and an actual framing/evidence/WSP_15 challenge are present; retry attempts remain visible in progress and Copy MD receipts.
 
 Version 0.4.15 routes anchored conversational reply and message-drafting requests through a redaction-gated single-model path. The route treats pasted text as untrusted data, skips HoloIndex/repository grounding and Fusion, emits only the requested draft, and cannot produce runtime or worker authority.
 
