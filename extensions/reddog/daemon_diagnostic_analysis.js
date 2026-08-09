@@ -56,6 +56,7 @@ const SECRET_KEY_PARTS = new Set([
 const QUALIFIED_KEY_PARTS = new Set([
   'api', 'access', 'aws', 'client', 'private', 'secret', 'session', 'signing'
 ]);
+const AUTHORIZATION_HEADER = /\b(?:proxy[\s_-]+)?authorization(?:[\s_-]+header)?\s*(?::|=>|=)/i;
 
 function splitInput(operatorText, diagnosticEvidence) {
   const operator = String(operatorText || '').trim();
@@ -130,7 +131,7 @@ function sanitizeLine(d, line) {
     out = out.replace(/\bghp_[A-Za-z0-9_]+\b/g, 'ghp_[REDACTED]');
     out = out.replace(/\bgithub_pat_[A-Za-z0-9_]+\b/g, 'github_pat_[REDACTED]');
     out = out.replace(/\bgho_[A-Za-z0-9_]+\b/g, 'gho_[REDACTED]');
-    out = out.replace(/\bauthorization\s*:\s*[^\r\n]+/gi, 'authorization: [REDACTED]');
+    out = out.replace(/\b(?:proxy[\s_-]+)?authorization(?:[\s_-]+header)?\s*(?::|=>|=)\s*[^\r\n]+/gi, 'authorization: [REDACTED]');
     out = out.replace(/\b(?:api[_-]?key|token|secret|password|passwd)\s*[:=]\s*[^,\s\]]+/gi, '[REDACTED_CREDENTIAL]');
     out = out.replace(/\s+/g, ' ').trim();
     return out.length > 220 ? out.slice(0, 220) + '...[truncated]' : out;
@@ -153,19 +154,31 @@ function hasSensitiveAssignment(line) {
 
 function containsSecret(line) {
   const source = String(line || '');
-  return hasSensitiveAssignment(source)
+  return AUTHORIZATION_HEADER.test(source) || hasSensitiveAssignment(source)
     || SECRETS.some((pattern) => pattern.test(source));
 }
 
 function omitSecretLines(lines) {
   const safe = [];
   let omitted = 0;
+  let authorizationContinuation = false;
   let privateKeyBlock = false;
-  for (const line of lines) {
-    if (/-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/i.test(line)) privateKeyBlock = true;
+  for (const rawLine of lines) {
+    const line = String(rawLine || '');
+    if (authorizationContinuation) {
+      omitted += 1;
+      authorizationContinuation = false;
+      continue;
+    }
+    if (AUTHORIZATION_HEADER.test(line)) {
+      omitted += 1;
+      authorizationContinuation = /(?::|=>|=)\s*$/.test(line);
+      continue;
+    }
+    if (/-----BEGIN [A-Z0-9 ]*PRIVATE KEY[A-Z0-9 ]*-----/i.test(line)) privateKeyBlock = true;
     if (privateKeyBlock || containsSecret(line)) {
       omitted += 1;
-      if (/-----END [A-Z0-9 ]*PRIVATE KEY-----/i.test(line)) privateKeyBlock = false;
+      if (/-----END [A-Z0-9 ]*PRIVATE KEY[A-Z0-9 ]*-----/i.test(line)) privateKeyBlock = false;
       continue;
     }
     safe.push(line);
@@ -212,10 +225,12 @@ function summarize(d, lines, admitted, omitted) {
 function parse(d, text) {
     const src = String(text || '');
     const shape = d.analyzeOperationalDiagnosticShape(src);
-    const lines = src.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-    const admitted = omitSecretLines(lines);
-    const summary = summarize(d, lines, admitted.lines, admitted.omitted);
-    const safeSource = admitted.lines.join('\n');
+    const rawLines = src.split(/\r?\n/).filter((line) => line.trim());
+    const lines = rawLines.map((line) => line.trim());
+    const admitted = omitSecretLines(rawLines);
+    const safeLines = admitted.lines.map((line) => line.trim());
+    const summary = summarize(d, lines, safeLines, admitted.omitted);
+    const safeSource = safeLines.join('\n');
     const field = (name) => {
       const safeValue = d.extractRunTraceField(safeSource, name);
       if (!safeValue && d.extractRunTraceField(src, name)) return '[OMITTED_SECRET_BEARING_FIELD]';

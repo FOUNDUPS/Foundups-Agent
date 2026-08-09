@@ -1762,25 +1762,39 @@ assertFusionRedactionGatePasses(compoundCredentialProjection.focus,
   'DOLA-019: compound credential diagnostics must remain analyzable after omission');
 const authorizationProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
   'ERROR Authorization: Basic SYNTHETIC_BASIC_CREDENTIAL',
+  'ERROR Authorization header: Digest SYNTHETIC_DIGEST_CREDENTIAL',
+  'ERROR Proxy-Authorization: Negotiate SYNTHETIC_PROXY_CREDENTIAL',
+  'ERROR Authorization:',
+  '  Basic SYNTHETIC_CONTINUED_CREDENTIAL',
   'status: stopped'
 ].join('\n'));
-assert(!authorizationProjection.focus.includes('SYNTHETIC_BASIC_CREDENTIAL'),
-  'DOLA-020: non-Bearer authorization credentials must be omitted');
-assert.strictEqual(authorizationProjection.secret_redactions_applied, 1,
+for (const syntheticValue of [
+  'SYNTHETIC_BASIC_CREDENTIAL', 'SYNTHETIC_DIGEST_CREDENTIAL',
+  'SYNTHETIC_PROXY_CREDENTIAL', 'SYNTHETIC_CONTINUED_CREDENTIAL'
+]) {
+  assert(!authorizationProjection.focus.includes(syntheticValue),
+    'DOLA-020: authorization credential variants must be omitted: ' + syntheticValue);
+}
+assert.strictEqual(authorizationProjection.secret_redactions_applied, 5,
   'DOLA-020: authorization omission must remain auditable');
 const multilinePrivateKeyProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
-  'ERROR -----BEGIN PRIVATE KEY-----',
-  'ERROR SYNTHETIC_PRIVATE_KEY_BODY_LINE',
-  'ERROR -----END PRIVATE KEY-----',
+  'ERROR -----BEGIN PGP PRIVATE KEY BLOCK-----',
+  'ERROR SYNTHETIC_PGP_PRIVATE_KEY_BODY',
+  'ERROR -----END PGP PRIVATE KEY BLOCK-----',
+  'WARNING -----BEGIN SSH2 ENCRYPTED PRIVATE KEY-----',
+  'WARNING SYNTHETIC_SSH2_PRIVATE_KEY_BODY',
+  'WARNING -----END SSH2 ENCRYPTED PRIVATE KEY-----',
   'WARNING final root cause remains visible'
 ].join('\n'));
-assert(!multilinePrivateKeyProjection.focus.includes('SYNTHETIC_PRIVATE_KEY_BODY_LINE'),
-  'DOLA-021: complete multiline private-key blocks must be omitted');
+assert(!multilinePrivateKeyProjection.focus.includes('SYNTHETIC_PGP_PRIVATE_KEY_BODY'),
+  'DOLA-021: PGP private-key blocks must be omitted');
+assert(!multilinePrivateKeyProjection.focus.includes('SYNTHETIC_SSH2_PRIVATE_KEY_BODY'),
+  'DOLA-021: SSH2 private-key blocks must be omitted');
 assert(!multilinePrivateKeyProjection.focus.includes('BEGIN PRIVATE KEY'),
   'DOLA-021: private-key block markers must be omitted');
 assert(multilinePrivateKeyProjection.focus.includes('final root cause remains visible'),
   'DOLA-021: evidence after a closed private-key block must remain available');
-assert.strictEqual(multilinePrivateKeyProjection.secret_redactions_applied, 3,
+assert.strictEqual(multilinePrivateKeyProjection.secret_redactions_applied, 6,
   'DOLA-021: every private-key block line must be counted');
 assertFusionRedactionGatePasses(multilinePrivateKeyProjection.focus,
   'DOLA-021: multiline private-key diagnostics must remain analyzable after omission');
