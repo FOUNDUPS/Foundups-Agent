@@ -11,6 +11,12 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    is_sha256_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
 
 
 def validate_progressive_authority_binding(
@@ -40,6 +46,7 @@ def validate_progressive_authority_binding(
         and tuple(allocation.get("changed_paths") or ())
         == tuple(authority.get("allowed_paths") or ())
         and stage.get("requested_operation") == authority.get("requested_operation")
+        and stage.get("selected_slice") == authority.get("selected_slice")
         and tuple(stage.get("changed_paths") or ())
         == tuple(authority.get("allowed_paths") or ())
         and validate_queue_progressive_stage_binding(
@@ -56,4 +63,57 @@ def validate_progressive_authority_binding(
     )
 
 
-__all__ = ["validate_progressive_authority_binding"]
+def _request_receipt_bindings_valid(request: Any) -> bool:
+    queue_receipt = request.queue_consumer_receipt
+    stage = request.progressive_policy_stage_receipt
+    return bool(
+        isinstance(queue_receipt, Mapping)
+        and canonical_full_work_order_digest(queue_receipt)
+        == request.queue_consumer_receipt_digest
+        and str(queue_receipt.get("slice_id") or "")
+        == str(stage.get("selected_slice") or "")
+        and queue_receipt.get("wsp15_allocation_receipt_id")
+        == request.wsp15_allocation_receipt_id
+        and queue_receipt.get("wsp15_allocation_digest")
+        == request.wsp15_allocation_digest
+        and queue_receipt.get("progressive_policy_stage_receipt_id")
+        == request.progressive_policy_stage_receipt_id
+        and queue_receipt.get("progressive_policy_stage_digest")
+        == request.progressive_policy_stage_digest
+        and is_sha256_digest(request.queue_consumer_receipt_digest)
+        and request.wsp15_allocation_receipt_id.startswith("sha256:")
+        and request.wsp15_allocation_digest.startswith("sha256:")
+        and request.wsp15_priority in {"P0", "P1", "P2", "P3", "P4"}
+        and type(request.wsp15_mps_total) is int
+        and request.wsp15_reasoning_tier in {"REGULAR", "HIGH", "ULTRA"}
+        and is_sha256_digest(request.progressive_policy_stage_receipt_id)
+        and is_sha256_digest(request.progressive_policy_stage_digest)
+    )
+
+
+def validate_progressive_runtime_request(request: Any) -> bool:
+    """Validate queue receipt, allocation, stage, and selected-slice lineage."""
+
+    try:
+        authority = request.to_dict()
+        authority["selected_slice"] = str(
+            request.queue_consumer_receipt.get("slice_id") or ""
+        )
+        return bool(
+            _request_receipt_bindings_valid(request)
+            and validate_progressive_authority_binding(
+                authority,
+                expected_stage_receipt_id=(
+                    request.progressive_policy_stage_receipt_id
+                ),
+                expected_stage_digest=request.progressive_policy_stage_digest,
+            )
+        )
+    except (AttributeError, TypeError, ValueError):
+        return False
+
+
+__all__ = [
+    "validate_progressive_authority_binding",
+    "validate_progressive_runtime_request",
+]

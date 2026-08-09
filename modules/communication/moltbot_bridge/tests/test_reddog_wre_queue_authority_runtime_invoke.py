@@ -35,6 +35,12 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    _admit_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    rehydrate_delegated_authority_request,
+)
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
     signed_stage_binding,
 )
@@ -118,7 +124,7 @@ def _queue_result():
     receipt = {
         "receipt_id": "wre_queue_consumer_1234",
         "queue_item_id": "queue-1",
-        "slice_id": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "slice_id": "REDDOG_TEST_SLICE_PHASE1",
         "claim_id": "claim-1",
         "worker_id": "reddog-main-bootstrap",
         "freshness_receipt_id": "fresh-1",
@@ -147,10 +153,32 @@ def _queue_result():
         "rejection_reasons": [],
         "receipt": receipt,
         "selected_queue_item_id": "queue-1",
-        "selected_slice": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }
+
+
+def _authoritative_queue_item():
+    item = dict(_queue_result()["receipt"])
+    item.update(
+        status="QUEUED",
+        no_execution_performed=True,
+        independent_verifier_required=item[
+            "progressive_policy_stage_receipt"
+        ]["independent_verifier_required"],
+    )
+    return item
+
+
+def _queue_admission():
+    request = rehydrate_delegated_authority_request(
+        _dryrun()["delegated_authority_request"]
+    )
+    return _admit_current_queue_authority(
+        request=request,
+        authoritative_queue_item=_authoritative_queue_item(),
+    )
 
 
 def _profile(**overrides):
@@ -317,6 +345,7 @@ def test_default_signer_rejection_is_preserved() -> None:
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
         queue_authority_request_dryrun=_dryrun(),
+        queue_authority_admission=_queue_admission(),
         store=InMemoryAuthorityRuntimeStore(),
         signer=None,
         principal_resolver=_PrincipalResolver(),
@@ -338,6 +367,7 @@ def test_invokes_injected_signer_and_issues_authority_without_execution() -> Non
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
         queue_authority_request_dryrun=_dryrun(),
+        queue_authority_admission=_queue_admission(),
         store=store,
         signer=signer,
         principal_resolver=_PrincipalResolver(),
@@ -391,6 +421,7 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
         requested_operation=str(request["requested_operation"]),
         permission_snapshot_digest=str(request["permission_snapshot_digest"]),
         queue_consumer_receipt_digest=str(request["queue_consumer_receipt_digest"]),
+        queue_consumer_receipt=dict(request["queue_consumer_receipt"]),
         wsp15_allocation_receipt=dict(request["wsp15_allocation_receipt"]),
         wsp15_allocation_receipt_id=str(request["wsp15_allocation_receipt_id"]),
         wsp15_allocation_digest=str(request["wsp15_allocation_digest"]),

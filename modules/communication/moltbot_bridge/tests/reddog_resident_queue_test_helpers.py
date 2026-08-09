@@ -7,7 +7,7 @@ import hmac
 from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
@@ -327,6 +327,21 @@ def worker_dispatch_queue_receipt_digest(
     *,
     queue_item_id: str = "queue-1",
 ) -> str:
+    return canonical_full_work_order_digest(
+        worker_dispatch_queue_receipt(
+            snapshot,
+            queue_item_id=queue_item_id,
+        )
+    )
+
+
+def worker_dispatch_queue_receipt(
+    snapshot: dict[str, Any],
+    *,
+    queue_item_id: str = "queue-1",
+) -> dict[str, Any]:
+    """Return the canonical consumer receipt for signer integration tests."""
+
     result = plan_reddog_wre_queue_consumer_dry_run(
         snapshot,
         now_iso="2026-07-16T00:00:00+00:00",
@@ -335,7 +350,7 @@ def worker_dispatch_queue_receipt_digest(
     )
     if not result.accepted or result.receipt is None:
         raise AssertionError(result.rejection_reasons)
-    return canonical_full_work_order_digest(result.receipt.to_dict())
+    return result.receipt.to_dict()
 
 
 def worker_dispatch_authority_stages(
@@ -426,6 +441,20 @@ def worker_dispatch_authority_stages(
         ),
         "permission_snapshot_digest": _TEST_PERMISSION_SNAPSHOT_DIGEST,
         "queue_consumer_receipt_digest": queue_receipt_digest,
+        "selected_slice": str(
+            work_authority_overrides.get("selected_slice")
+            or _queue_binding_mapping(
+                work_state_snapshot,
+                queue_item_id,
+                "progressive_policy_stage_receipt",
+            ).get("selected_slice")
+            or _mapping_selected_slice(
+                work_authority_overrides.get(
+                    "progressive_policy_stage_receipt"
+                )
+            )
+            or "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+        ),
         "wsp15_allocation_receipt": dict(allocation),
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "wsp15_allocation_digest": canonical_digest(allocation),
@@ -502,6 +531,10 @@ def _queue_binding_mapping(
             value = item.get(field)
             return dict(value) if isinstance(value, dict) else {}
     return {}
+
+
+def _mapping_selected_slice(value: Any) -> str:
+    return str(value.get("selected_slice") or "") if isinstance(value, Mapping) else ""
 
 
 def worker_dispatch_authority_verification_context(

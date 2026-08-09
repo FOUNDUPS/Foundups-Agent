@@ -87,6 +87,7 @@ def _receipt_fields(
         "queue_consumer_receipt_digest": canonical_full_work_order_digest(
             queue_receipt
         ),
+        "queue_consumer_receipt": dict(queue_receipt),
         "wsp15_allocation_receipt": dict(
             queue_receipt.get("wsp15_allocation_receipt") or {}
         ),

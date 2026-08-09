@@ -257,6 +257,8 @@ def _runtime_handler(
         principal_resolver=_PrincipalResolver(),
         snapshot_resolver=_SnapshotResolver(),
         now=NOW,
+        work_state_snapshot=_snapshot(),
+        authority_profile=_profile(),
     )
 
 

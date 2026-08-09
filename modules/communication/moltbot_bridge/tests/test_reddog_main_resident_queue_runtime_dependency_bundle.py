@@ -31,6 +31,16 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
     canonical_delegated_authority_request_digest,
+    rehydrate_delegated_authority_request,
+)
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    _admit_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
 )
 
 
@@ -154,6 +164,32 @@ def _principals(principal_public_key: str = "pub:principal") -> dict[str, object
 
 
 def _authority_request_result() -> dict[str, object]:
+    target = f"modules/foundups/{FID}/src/worker.py"
+    binding = signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(target,),
+    )
+    stage = binding["progressive_policy_stage_receipt"]
+    queue_receipt = {
+        "queue_item_id": "queue-1",
+        "slice_id": stage["selected_slice"],
+        "claim_id": "claim-1",
+        "worker_id": "reddog-0102",
+        "wsp15_allocation_receipt": binding[
+            "wsp15_allocation_receipt"
+        ],
+        "wsp15_allocation_receipt_id": binding[
+            "wsp15_allocation_receipt_id"
+        ],
+        "wsp15_allocation_digest": binding["wsp15_allocation_digest"],
+        "progressive_policy_stage_receipt_id": binding[
+            "progressive_policy_stage_receipt_id"
+        ],
+        "progressive_policy_stage_digest": binding[
+            "progressive_policy_stage_digest"
+        ],
+        "progressive_policy_stage_receipt": stage,
+    }
     request = {
         "work_order_id": "wre-queue-1",
         "work_order_digest": "sha256:" + ("a" * 64),
@@ -165,11 +201,14 @@ def _authority_request_result() -> dict[str, object]:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": REPO,
         "foundup_id": FID,
-        "allowed_paths": [f"modules/foundups/{FID}/**"],
+        "allowed_paths": [target],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": "sha256:snap-1",
-        "queue_consumer_receipt_digest": "sha256:" + ("4" * 64),
+        "queue_consumer_receipt_digest": canonical_full_work_order_digest(
+            queue_receipt
+        ),
+        "queue_consumer_receipt": queue_receipt,
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
         "issued_at": NOW - 5,
@@ -179,11 +218,7 @@ def _authority_request_result() -> dict[str, object]:
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
-        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
-        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
-        "wsp15_priority": "P1",
-        "wsp15_mps_total": 10,
-        "wsp15_reasoning_tier": "HIGH",
+        **binding,
         "model_selection_receipt_id": None,
         "model_selection_digest": None,
         "model_runtime_binding_receipt_id": None,
@@ -205,6 +240,29 @@ def _authority_request_result() -> dict[str, object]:
             ),
         },
     }
+
+
+def _authoritative_queue_item() -> dict[str, object]:
+    request = _authority_request_result()["delegated_authority_request"]
+    item = dict(request["queue_consumer_receipt"])
+    item.update(
+        status="QUEUED",
+        no_execution_performed=True,
+        independent_verifier_required=item[
+            "progressive_policy_stage_receipt"
+        ]["independent_verifier_required"],
+    )
+    return item
+
+
+def _queue_authority_admission():
+    request = rehydrate_delegated_authority_request(
+        _authority_request_result()["delegated_authority_request"]
+    )
+    return _admit_current_queue_authority(
+        request=request,
+        authoritative_queue_item=_authoritative_queue_item(),
+    )
 
 
 def _accepted_socket_signer(
@@ -302,6 +360,7 @@ def test_bundle_loads_outside_repo_resolvers_and_fail_closed_signer(tmp_path: Pa
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
         queue_authority_request_dryrun=_authority_request_result(),
+        queue_authority_admission=_queue_authority_admission(),
         store=bundle.authority_store,
         signer=bundle.signer,
         principal_resolver=bundle.principal_resolver,
@@ -342,6 +401,7 @@ def test_bundle_uses_isolated_socket_signer_when_explicitly_configured(tmp_path:
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
         queue_authority_request_dryrun=_authority_request_result(),
+        queue_authority_admission=_queue_authority_admission(),
         store=bundle.authority_store,
         signer=bundle.signer,
         principal_resolver=bundle.principal_resolver,

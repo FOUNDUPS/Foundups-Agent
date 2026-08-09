@@ -37,6 +37,11 @@
   restart envelope. A full signer -> verifier -> AgentDB -> OpenClaw claim ->
   read-only 0102 audit regression now proves pathless audit completion with no
   work-order invocation, repository mutation, shell, worktree, or PR effect.
+- Bound `selected_slice` to the current authoritative queue item before signer
+  admission and carried it in the signed work authority through use-time valve
+  verification. The resident handler alone mints a one-use opaque admission;
+  caller-rehashed stage and queue receipts, missing admission, and replayed
+  admission all reject before signing or authority-store effects.
 
 ## 2026-08-09: RedDog stale Holo authority recovery binding
 - Extended the existing incident and blocked-request contracts for the proven

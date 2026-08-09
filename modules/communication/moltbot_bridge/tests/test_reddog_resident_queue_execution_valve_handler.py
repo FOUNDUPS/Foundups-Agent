@@ -284,6 +284,9 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         requested_operation="edit_foundup_module",
         allowed_paths=(TARGET_PATH,),
         denied_paths=(),
+        selected_slice=work_authority[
+            "progressive_policy_stage_receipt"
+        ]["selected_slice"],
     )
     stage_results: dict[str, object] = {
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},

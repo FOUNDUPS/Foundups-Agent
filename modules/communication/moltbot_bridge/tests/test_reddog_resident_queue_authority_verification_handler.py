@@ -266,6 +266,8 @@ def _seed_runtime(chain_store: InMemoryResidentQueueChainResultsStore, signer: _
         principal_resolver=_PrincipalResolver(),
         snapshot_resolver=_SnapshotResolver(),
         now=NOW,
+        work_state_snapshot=_snapshot(),
+        authority_profile=_profile(),
     )
     runtime_result = invoke_reddog_resident_queue_next_stage_dispatch(
         explicit_resident_queue_stage_dispatch_requested=True,

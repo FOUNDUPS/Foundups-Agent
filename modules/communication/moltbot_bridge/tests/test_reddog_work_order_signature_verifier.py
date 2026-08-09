@@ -138,6 +138,9 @@ def _build(now: int = 1000):
         "valve_state_required": _VALVE,
         "key_epoch": "epoch-1",
     }
+    workauth["selected_slice"] = workauth[
+        "progressive_policy_stage_receipt"
+    ]["selected_slice"]
     workauth["signature"] = crypto.sign(rpub, canonical_signing_input(workauth, PREFIX_WORKAUTH))
     snap = PermissionSnapshot(evidence_digest=digest, expires_at=now + 300, can_write=True, repo_full_name=_REPO)
     ctx = dict(

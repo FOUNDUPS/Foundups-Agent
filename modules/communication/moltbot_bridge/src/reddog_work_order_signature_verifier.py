@@ -293,6 +293,7 @@ _REQUIRED_WORKAUTH_FIELDS = (
     "work_order_id", "work_order_digest", "base_ref", "principal_id", "reddog_id", "repo_full_name", "foundup_id",
     "allowed_paths", "denied_paths", "requested_operation", "permission_snapshot_digest",
     "queue_consumer_receipt_digest",
+    "selected_slice",
     "wsp15_allocation_receipt", "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
     "wsp15_mps_total", "wsp15_reasoning_tier",
     "nonce", "issued_at", "expires_at", "valve_state_required", "key_epoch", "signature",

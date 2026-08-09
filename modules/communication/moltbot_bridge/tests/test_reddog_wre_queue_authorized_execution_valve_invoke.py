@@ -209,6 +209,9 @@ def _signed_authority(**overrides):
         requested_operation="edit_foundup_module",
         allowed_paths=(TARGET,),
         denied_paths=(),
+        selected_slice=payload["progressive_policy_stage_receipt"][
+            "selected_slice"
+        ],
     )
     payload.update(overrides)
     return payload

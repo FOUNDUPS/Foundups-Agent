@@ -9,7 +9,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src import (
     openclaw_supervisor as supervisor_module,
@@ -93,6 +92,7 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
     configure_signed_worker_claim_authority_env,
     install_signed_worker_envelope_test_authority,
     publish_agentdb_task_for_intent,
+    worker_dispatch_queue_receipt,
     worker_dispatch_queue_receipt_digest,
     worker_dispatch_work_order_digest,
 )
@@ -126,7 +126,6 @@ from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime i
 )
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
-
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 EXECUTOR_PATH = (
@@ -1314,6 +1313,7 @@ def test_signer_issued_audit_reaches_real_readonly_worker_without_effects(
         work_order_id="wo-1",
         work_order_digest=worker_dispatch_work_order_digest(snapshot),
         queue_consumer_receipt_digest=worker_dispatch_queue_receipt_digest(snapshot),
+        queue_consumer_receipt=worker_dispatch_queue_receipt(snapshot),
         requested_operation=allocation["requested_operation"],
         allowed_paths=(),
         denied_paths=(),
