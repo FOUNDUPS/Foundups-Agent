@@ -28,6 +28,8 @@
   Internally rehashed v1 packets are rejected and retired.
 - Extended evidence omission to compound snake_case, kebab-case, and camelCase
   credential assignments before any model request.
+- Omitted all authorization-header schemes and complete multiline private-key
+  blocks, including log-prefixed body lines, before evidence sampling.
 
 ## 2026-08-09 - Defensive Fusion critic failover (0.4.68)
 

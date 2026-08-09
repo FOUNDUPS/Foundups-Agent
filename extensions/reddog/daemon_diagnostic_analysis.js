@@ -51,7 +51,7 @@ const SECRETS = [
 ];
 const ASSIGNMENT_KEY = /\b([A-Za-z][A-Za-z0-9_-]{1,80})\s*["']?\s*[:=]/g;
 const SECRET_KEY_PARTS = new Set([
-  'credential', 'credentials', 'password', 'passwd', 'secret', 'token'
+  'authorization', 'credential', 'credentials', 'password', 'passwd', 'secret', 'token'
 ]);
 const QUALIFIED_KEY_PARTS = new Set([
   'api', 'access', 'aws', 'client', 'private', 'secret', 'session', 'signing'
@@ -130,7 +130,8 @@ function sanitizeLine(d, line) {
     out = out.replace(/\bghp_[A-Za-z0-9_]+\b/g, 'ghp_[REDACTED]');
     out = out.replace(/\bgithub_pat_[A-Za-z0-9_]+\b/g, 'github_pat_[REDACTED]');
     out = out.replace(/\bgho_[A-Za-z0-9_]+\b/g, 'gho_[REDACTED]');
-    out = out.replace(/\b(?:api[_-]?key|token|secret|password|passwd|authorization)\s*[:=]\s*[^,\s\]]+/gi, '$1=[REDACTED]');
+    out = out.replace(/\bauthorization\s*:\s*[^\r\n]+/gi, 'authorization: [REDACTED]');
+    out = out.replace(/\b(?:api[_-]?key|token|secret|password|passwd)\s*[:=]\s*[^,\s\]]+/gi, '[REDACTED_CREDENTIAL]');
     out = out.replace(/\s+/g, ' ').trim();
     return out.length > 220 ? out.slice(0, 220) + '...[truncated]' : out;
 }
@@ -156,6 +157,22 @@ function containsSecret(line) {
     || SECRETS.some((pattern) => pattern.test(source));
 }
 
+function omitSecretLines(lines) {
+  const safe = [];
+  let omitted = 0;
+  let privateKeyBlock = false;
+  for (const line of lines) {
+    if (/-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/i.test(line)) privateKeyBlock = true;
+    if (privateKeyBlock || containsSecret(line)) {
+      omitted += 1;
+      if (/-----END [A-Z0-9 ]*PRIVATE KEY-----/i.test(line)) privateKeyBlock = false;
+      continue;
+    }
+    safe.push(line);
+  }
+  return { lines: safe, omitted };
+}
+
 function sanitizeField(d, value) {
   return containsSecret(value) ? '[OMITTED_SECRET_BEARING_FIELD]' : sanitizeLine(d, value);
 }
@@ -176,18 +193,18 @@ function sample(d, lines, pattern, limit) {
     return matches.slice(0, head).concat(matches.slice(-(limit - head)));
 }
 
-function summarize(d, lines) {
+function summarize(d, lines, admitted, omitted) {
     const error = /\b(?:error|exception|traceback|failed|failure|fatal|timeout|blocked_locally)\b/i;
     const warning = /\b(?:warn|warning)\b/i;
     const state = /\b(?:blocked_locally|redaction gate status|made_network_call|operator message|runtime_consumption_gate_rejection_reasons|status|exit code|stopped|blocked|skipped)\b/i;
-    const signals = sample(d, lines, error, 8).concat(
-      sample(d, lines, warning, 4), sample(d, lines, state, 4)
+    const signals = sample(d, admitted, error, 8).concat(
+      sample(d, admitted, warning, 4), sample(d, admitted, state, 4)
     );
     return {
       error_count: lines.filter((line) => error.test(line)).length,
       warning_count: lines.filter((line) => warning.test(line)).length,
       diagnostic_signals: Array.from(new Set(signals)).slice(0, 16),
-      secret_redactions_applied: lines.filter(containsSecret).length,
+      secret_redactions_applied: omitted,
       has_signal: lines.some((line) => error.test(line) || warning.test(line) || state.test(line))
     };
 }
@@ -196,8 +213,14 @@ function parse(d, text) {
     const src = String(text || '');
     const shape = d.analyzeOperationalDiagnosticShape(src);
     const lines = src.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-    const summary = summarize(d, lines);
-    const field = (name) => sanitizeField(d, d.extractRunTraceField(src, name) || 'unknown');
+    const admitted = omitSecretLines(lines);
+    const summary = summarize(d, lines, admitted.lines, admitted.omitted);
+    const safeSource = admitted.lines.join('\n');
+    const field = (name) => {
+      const safeValue = d.extractRunTraceField(safeSource, name);
+      if (!safeValue && d.extractRunTraceField(src, name)) return '[OMITTED_SECRET_BEARING_FIELD]';
+      return sanitizeField(d, safeValue || 'unknown');
+    };
     const gate = field('redaction gate status');
     const reasons = field('runtime_consumption_gate_rejection_reasons');
     return {

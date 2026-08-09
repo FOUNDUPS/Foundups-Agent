@@ -1760,6 +1760,30 @@ assert.strictEqual(compoundCredentialProjection.secret_redactions_applied, 3,
   'DOLA-019: compound credential omissions must remain auditable');
 assertFusionRedactionGatePasses(compoundCredentialProjection.focus,
   'DOLA-019: compound credential diagnostics must remain analyzable after omission');
+const authorizationProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR Authorization: Basic SYNTHETIC_BASIC_CREDENTIAL',
+  'status: stopped'
+].join('\n'));
+assert(!authorizationProjection.focus.includes('SYNTHETIC_BASIC_CREDENTIAL'),
+  'DOLA-020: non-Bearer authorization credentials must be omitted');
+assert.strictEqual(authorizationProjection.secret_redactions_applied, 1,
+  'DOLA-020: authorization omission must remain auditable');
+const multilinePrivateKeyProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR -----BEGIN PRIVATE KEY-----',
+  'ERROR SYNTHETIC_PRIVATE_KEY_BODY_LINE',
+  'ERROR -----END PRIVATE KEY-----',
+  'WARNING final root cause remains visible'
+].join('\n'));
+assert(!multilinePrivateKeyProjection.focus.includes('SYNTHETIC_PRIVATE_KEY_BODY_LINE'),
+  'DOLA-021: complete multiline private-key blocks must be omitted');
+assert(!multilinePrivateKeyProjection.focus.includes('BEGIN PRIVATE KEY'),
+  'DOLA-021: private-key block markers must be omitted');
+assert(multilinePrivateKeyProjection.focus.includes('final root cause remains visible'),
+  'DOLA-021: evidence after a closed private-key block must remain available');
+assert.strictEqual(multilinePrivateKeyProjection.secret_redactions_applied, 3,
+  'DOLA-021: every private-key block line must be counted');
+assertFusionRedactionGatePasses(multilinePrivateKeyProjection.focus,
+  'DOLA-021: multiline private-key diagnostics must remain analyzable after omission');
 const recoveredAdvisoryResult = {
   ok: true,
   runtime_consumption_gate: {
