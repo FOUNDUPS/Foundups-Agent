@@ -35,10 +35,11 @@ READY = "READY"
 WAITING = "WAITING"
 REJECTED = "REJECTED"
 STAGED = "STAGED"
-REQUEST_SCHEMA = "reddog_holoindex_blocked_request_recovery.v1"
+REQUEST_SCHEMA = "reddog_holoindex_blocked_request_recovery.v2"
 MAX_AGE_MS = 30 * 60 * 1000
 REQUEST_FIELDS = frozenset({
-    "command", "text", "contextMode", "workerType", "effort", "mode", "useLastPacket",
+    "command", "text", "diagnosticEvidence", "contextMode", "workerType",
+    "effort", "mode", "useLastPacket",
 })
 
 

@@ -1,5 +1,39 @@
 # RedDog ModLog
 
+## 2026-08-09 - Governed DAEmon architect diagnosis (0.4.69)
+
+- Split DAEmon routing by operator intent: an unaccompanied raw log dump stays
+  local, while an explicit analysis, diagnosis, or repair request reaches the
+  existing HoloIndex and Fusion architect path.
+- Added a bounded digest-bound evidence projection that omits secret-bearing
+  lines and labels retained signals as inert untrusted data. Raw diagnostic
+  text is not forwarded to the model or action-planning paths.
+- Added separate work-focus and diagnostic-evidence ingress fields. Legacy
+  combined pastes require an explicit evidence boundary, preventing JSON,
+  logfmt, cookies, signed URLs, or payload prose from self-promoting to Fusion.
+- Added Run Trace projection telemetry and a mandatory explicit-work-promotion
+  rejection at runtime consumption. No queue, signer, database, orchestrator,
+  repository, PR, or merge authority was added.
+- Bound typed diagnostic evidence into blocked-request recovery, gave explicit
+  typed diagnostic intent precedence over local Run Trace summarization, and
+  allowed a recovered advisory to complete only when validation and Fusion
+  quorum pass while runtime action remains denied.
+- Extracted DAEmon and Run Trace policy into a focused module so the legacy
+  thin-client integration file remains below its WSP 62 no-growth ceiling.
+- Made every separately typed diagnostic payload use the bounded projection,
+  independent of operator phrasing. Determine and prompt-deliverable controls
+  now derive only from the work-focus field, never from diagnostic data.
+- Advanced blocked-request recovery to schema v2 so the JavaScript client and
+  Python authority runtime both require and digest-bind diagnostic evidence.
+  Internally rehashed v1 packets are rejected and retired.
+- Extended evidence omission to compound snake_case, kebab-case, and camelCase
+  credential assignments before any model request.
+- Omitted all authorization-header schemes and complete multiline private-key
+  blocks, including log-prefixed body lines, before evidence sampling.
+- Extracted diagnostic secret filtering into a focused module and replaced
+  polynomial assignment and private-key regexes with bounded scanning after
+  CodeQL identified uncontrolled-input performance risks.
+
 ## 2026-08-09 - Defensive Fusion critic failover (0.4.68)
 
 - Reframed the targeted critic retry as an independent defensive evidence

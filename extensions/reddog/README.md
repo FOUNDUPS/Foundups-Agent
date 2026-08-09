@@ -1,6 +1,18 @@
 # RedDog
 
-Version: 0.4.68
+Version: 0.4.69
+
+Version 0.4.69 separates raw DAEmon log inspection from explicit architect
+diagnosis. A bare log dump remains on the local no-network summary path. When
+012 asks RedDog to analyze, diagnose, or fix pasted runtime output, RedDog now
+drops secret-bearing lines, builds a bounded digest-bound evidence projection,
+and sends only that inert projection through current HoloIndex grounding and
+Fusion. Raw logs never enter the model prompt. Diagnostic analysis remains
+non-actionable even after quorum; a separate explicit work promotion is
+required before Wardrobe, WRE, OpenClaw, Hermes, or repository effects can run.
+The UI carries work focus and diagnostic evidence as separate fields. Legacy
+single-field pastes are split only at an explicit `DAEmon output:` or
+`## Run Trace` boundary; arbitrary payload prose cannot promote itself.
 
 Version 0.4.68 keeps Fusion's challenging-critic quorum fail closed while
 making its bounded recovery provider-safe. The retry is framed as an

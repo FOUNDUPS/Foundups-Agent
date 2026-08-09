@@ -15,12 +15,15 @@ SPEC.loader.exec_module(bridge)
 
 def _packet() -> dict:
     return {
-        "schema_version": "reddog_holoindex_blocked_request_recovery.v1",
+        "schema_version": "reddog_holoindex_blocked_request_recovery.v2",
         "recovery_id": "sha256:" + "1" * 64,
         "request_digest": "sha256:" + "2" * 64,
         "query_digest": "sha256:" + "3" * 64,
         "query": "audit HoloIndex",
-        "request": {"command": "ask"},
+        "request": {
+            "command": "ask",
+            "diagnosticEvidence": "ERROR: semantic backend unavailable",
+        },
         "incident_receipt": {"receipt_id": "sha256:" + "4" * 64},
         "created_at_epoch_ms": 1,
         "expires_at_epoch_ms": 2,
@@ -49,6 +52,7 @@ def test_bridge_dispatches_strict_operation(monkeypatch, capsys, operation, work
     assert output["status"] == operation.upper()
     assert len(calls) == 1
     assert calls[0]["query"] == "audit HoloIndex"
+    assert calls[0]["request"]["diagnosticEvidence"].startswith("ERROR:")
 
 
 def test_bridge_rejects_unknown_operation(monkeypatch, capsys):

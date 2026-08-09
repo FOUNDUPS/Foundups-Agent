@@ -47,7 +47,9 @@ QUERY = "audit HoloIndex"
 TASK_ID = TASK_PREFIX + HEAD
 NOW_MS = 1_786_083_200_000
 REQUEST = {
-    "command": "ask", "text": QUERY, "contextMode": "wsp_holo",
+    "command": "ask", "text": QUERY,
+    "diagnosticEvidence": "ERROR: semantic backend unavailable",
+    "contextMode": "wsp_holo",
     "workerType": "architect", "effort": "high", "mode": "foundups_fusion",
     "useLastPacket": False,
 }
@@ -560,6 +562,30 @@ def test_tampered_or_expired_request_binding_fails_before_selection(monkeypatch,
     assert recovery.admit_holo_blocked_request_recovery(
         repo_root=tmp_path, query=QUERY, incident_receipt=_incident(),
         **tampered, now_epoch_ms=NOW_MS, db=_Database(),
+    )["reason"] == "recovery_request_binding_invalid"
+
+    missing_evidence = _binding()
+    missing_evidence["request"] = {
+        key: value for key, value in REQUEST.items()
+        if key != "diagnosticEvidence"
+    }
+    assert recovery.admit_holo_blocked_request_recovery(
+        repo_root=tmp_path, query=QUERY, incident_receipt=_incident(),
+        **missing_evidence, now_epoch_ms=NOW_MS, db=_Database(),
+    )["reason"] == "recovery_request_binding_invalid"
+
+    legacy = _binding()
+    legacy["request_digest"] = canonical_digest({
+        "schema_version": "reddog_holoindex_blocked_request_recovery.v1",
+        "request": legacy["request"],
+    })
+    legacy["recovery_id"] = canonical_digest({
+        "request_digest": legacy["request_digest"],
+        "incident_receipt_id": _incident()["receipt_id"],
+    })
+    assert recovery.admit_holo_blocked_request_recovery(
+        repo_root=tmp_path, query=QUERY, incident_receipt=_incident(),
+        **legacy, now_epoch_ms=NOW_MS, db=_Database(),
     )["reason"] == "recovery_request_binding_invalid"
     expired = _binding()
     assert recovery.admit_holo_blocked_request_recovery(

@@ -1,5 +1,24 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-09 - Governed DAEmon architect diagnosis (0.4.69)
+
+- Proved explicit diagnostic intent reaches HIGH-tier HoloIndex/Fusion
+  analysis while a bare raw log dump remains local and cannot self-promote.
+- Proved secret-bearing lines never enter the model evidence projection, late
+  root-cause errors survive bounded sampling, and routine INFO noise cannot
+  displace them.
+- Proved diagnostic architect output cannot become runtime authority and must
+  be promoted through a separate explicit work request.
+- Proved typed intent remains independent of evidence length/position, while
+  raw JSON/logfmt prose, private keys, cookies, and signed URLs cannot
+  self-promote or cross the evidence projection boundary.
+- Proved prompt-authoring diagnostics cannot bypass projection, typed Run
+  Traces take the architect path, recovery binds evidence against tampering,
+  and recovered advisory output still grants no runtime action authority.
+- Proved unfamiliar operator wording still projects separately typed evidence,
+  while injected `Determine:` and worker-prompt text cannot alter validation
+  or repair controls.
+
 ## 2026-08-09 - Defensive Fusion critic failover (0.4.68)
 
 - Proved defensive retry wording contains no adversarial instruction language.

@@ -1,5 +1,22 @@
 # RedDog Interface
 
+Version 0.4.69 defines two DAEmon diagnostic routes. A raw log dump without an
+operator request remains a local, no-network summary. An explicit analysis,
+diagnosis, or repair request is converted into a bounded evidence projection:
+secret-bearing lines are omitted, the original payload is represented only by
+its SHA-256 digest and counts, and retained signals are marked as untrusted
+data whose imperative text is inert. Only the projection reaches HoloIndex and
+Fusion. Run Trace exposes the payload/projection digests and omission counts.
+The runtime-consumption gate always rejects this route with
+`daemon_diagnostic_analysis_requires_explicit_work_promotion`; diagnostic
+output cannot directly select Wardrobe, enqueue OpenClaw/Hermes, or mutate the
+repository.
+`012 work focus` and `diagnostic evidence` are separate webview message fields.
+Only the work-focus field supplies operator intent. For compatibility, a
+single-field paste may supply intent before an explicit `DAEmon output:` or
+`## Run Trace` boundary. Without either typed evidence or that boundary, the
+entire value is treated as untrusted diagnostic data and stays local.
+
 Version 0.4.68 preserves the existing Fusion challenging-critic gate and adds
 a bounded provider failover inside that same seam. A defensive evidence-review
 retry first targets the best usable critic. If that call blocks, abstains, or

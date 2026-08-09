@@ -18,6 +18,7 @@ const HEAD = 'a'.repeat(40);
 const DIGEST = (char) => 'sha256:' + char.repeat(64);
 const message = {
   command: 'ask', text: 'audit HoloIndex \ud83d\udd0e', contextMode: 'wsp_holo',
+  diagnosticEvidence: 'ERROR: semantic backend unavailable',
   workerType: 'architect', effort: 'high', mode: 'foundups_fusion', useLastPacket: false
 };
 const incident = {
@@ -152,6 +153,10 @@ async function main() {
     assert.deepStrictEqual(claimed.request, recovery.exactMessage(message));
     assert.strictEqual(calls[1].operation, 'claim');
     assert.strictEqual(calls[1].packet.query, message.text);
+    assert.strictEqual(
+      calls[1].packet.request.diagnosticEvidence,
+      message.diagnosticEvidence
+    );
     assert.deepStrictEqual(calls[1].packet.incident_receipt, incident);
     assert.deepStrictEqual(calls[1].packet.request, recovery.exactMessage(message));
     assert.strictEqual(await secretStorage.get(recovery.SECRET_KEY), undefined);
@@ -222,6 +227,34 @@ async function main() {
   assert.strictEqual((await recovery.claim({ secretStorage: tampered })).ok, false);
   assert.strictEqual(await tampered.get(recovery.SECRET_KEY), undefined);
 
+  const evidenceTampered = new SecretStorage();
+  cp.execFile = fakeExecFile((envelope) => stageResult(envelope.packet), []);
+  try { await stageWith(evidenceTampered); } finally { cp.execFile = original; }
+  const evidencePacket = JSON.parse(await evidenceTampered.get(recovery.SECRET_KEY));
+  evidencePacket.request.diagnosticEvidence = 'attacker replacement';
+  await evidenceTampered.store(recovery.SECRET_KEY, JSON.stringify(evidencePacket));
+  assert.strictEqual((await recovery.loadPacket(evidenceTampered)).ok, false);
+  assert.strictEqual((await recovery.claim({ secretStorage: evidenceTampered })).ok, false);
+  assert.strictEqual(await evidenceTampered.get(recovery.SECRET_KEY), undefined);
+
+  const legacy = new SecretStorage();
+  cp.execFile = fakeExecFile((envelope) => stageResult(envelope.packet), []);
+  try { await stageWith(legacy); } finally { cp.execFile = original; }
+  const legacyPacket = JSON.parse(await legacy.get(recovery.SECRET_KEY));
+  legacyPacket.schema_version = 'reddog_holoindex_blocked_request_recovery.v1';
+  legacyPacket.request_digest = recovery.digest({
+    schema_version: legacyPacket.schema_version,
+    request: legacyPacket.request
+  });
+  legacyPacket.recovery_id = recovery.digest({
+    request_digest: legacyPacket.request_digest,
+    incident_receipt_id: legacyPacket.incident_receipt.receipt_id
+  });
+  await legacy.store(recovery.SECRET_KEY, JSON.stringify(legacyPacket));
+  assert.strictEqual((await recovery.loadPacket(legacy)).ok, false);
+  assert.strictEqual((await recovery.claim({ secretStorage: legacy })).ok, false);
+  assert.strictEqual(await legacy.get(recovery.SECRET_KEY), undefined);
+
   const replaced = new SecretStorage();
   await replaced.store(recovery.SECRET_KEY, '{invalid');
   cp.execFile = fakeExecFile((envelope) => stageResult(envelope.packet), []);
@@ -245,7 +278,7 @@ async function main() {
   assert(extension.includes('holoBlockedRequestRecovery.stageAfterCompatibility('));
   assert(extension.includes('currentBackendCompatibilityAtRoot(root)'));
   assert(extension.includes('holoBlockedRequestRecovery.claimAfterCompatibility('));
-  assert(extension.includes('runtime_consumption_gate.passed === true'));
+  assert(extension.includes('blockedRecoveryOutcomeVerified(result, classification, validation)'));
   assert(extension.includes('runtimeConsumptionGate.passed === true && !recoveryContext'));
   assert(extension.includes("if (!recoveryContext && await startOperationsAdapter.handleMessage("));
   assert(extension.includes('const residentArchitectSessionResult = recoveryContext ? null'));

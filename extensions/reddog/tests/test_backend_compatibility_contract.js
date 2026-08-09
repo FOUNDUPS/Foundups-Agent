@@ -78,8 +78,8 @@ function assertRuntimeOrdering() {
   const gate = askSource.indexOf('blockIncompatibleBackend');
   assert(askStart >= 0 && askEnd > askStart);
   assert(gate >= 0);
-  assert(gate < askSource.indexOf('const workFocus = message.text'));
-  assert(gate < askSource.indexOf('classifyTaskForRedDog'));
+  assert(gate < askSource.indexOf('prepareFusionRequest(message, worker)'));
+  assert(namedFunctionSource('prepareFusionRequest').includes('classifyTaskForRedDog'));
   assert(gate < askSource.indexOf('buildBoundedRepoContext'));
   assert(askSource.includes('backendCompatibility.enforceRuntimeGate'));
   assert(
