@@ -1760,6 +1760,14 @@ assert.strictEqual(compoundCredentialProjection.secret_redactions_applied, 3,
   'DOLA-019: compound credential omissions must remain auditable');
 assertFusionRedactionGatePasses(compoundCredentialProjection.focus,
   'DOLA-019: compound credential diagnostics must remain analyzable after omission');
+const commandLineCredentialProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR worker launched --private-key=SYNTHETIC_CLI_PRIVATE_KEY',
+  'status: stopped'
+].join('\n'));
+assert(!commandLineCredentialProjection.focus.includes('SYNTHETIC_CLI_PRIVATE_KEY'),
+  'DOLA-019: dash-prefixed credential options must be omitted');
+assert.strictEqual(commandLineCredentialProjection.secret_redactions_applied, 1,
+  'DOLA-019: command-line credential omission must remain auditable');
 const authorizationProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
   'ERROR Authorization: Basic SYNTHETIC_BASIC_CREDENTIAL',
   'ERROR Authorization header: Digest SYNTHETIC_DIGEST_CREDENTIAL',
@@ -1836,6 +1844,14 @@ assert.strictEqual(multilinePrivateKeyProjection.secret_redactions_applied, 6,
   'DOLA-021: every private-key block line must be counted');
 assertFusionRedactionGatePasses(multilinePrivateKeyProjection.focus,
   'DOLA-021: multiline private-key diagnostics must remain analyzable after omission');
+const serializedArmorProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR -----BEGIN CERTIFICATE----- SYNTHETIC_CERT -----END CERTIFICATE----- -----BEGIN PRIVATE KEY----- SYNTHETIC_SERIALIZED_PRIVATE_KEY -----END PRIVATE KEY-----',
+  'status: stopped'
+].join('\n'));
+assert(!serializedArmorProjection.focus.includes('SYNTHETIC_SERIALIZED_PRIVATE_KEY'),
+  'DOLA-021: every armor marker on a serialized line must be scanned');
+assert.strictEqual(serializedArmorProjection.secret_redactions_applied, 1,
+  'DOLA-021: serialized private-key armor omission must remain auditable');
 const recoveredAdvisoryResult = {
   ok: true,
   runtime_consumption_gate: {

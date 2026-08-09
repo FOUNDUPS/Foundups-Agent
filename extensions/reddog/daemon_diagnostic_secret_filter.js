@@ -40,7 +40,7 @@ function hasSensitiveAssignment(line) {
   let match;
   while ((match = IDENTIFIER.exec(source)) !== null) {
     const before = match.index ? source[match.index - 1] : '';
-    if (/[A-Za-z0-9_-]/.test(before) || !assignmentDelimiter(source, IDENTIFIER.lastIndex)) continue;
+    if (/[A-Za-z0-9_]/.test(before) || !assignmentDelimiter(source, IDENTIFIER.lastIndex)) continue;
     const normalized = match[0].replace(/([a-z0-9])([A-Z])/g, '$1_$2')
       .toLowerCase().replace(/[^a-z0-9]+/g, '_');
     const parts = normalized.split('_').filter(Boolean);
@@ -53,11 +53,17 @@ function hasSensitiveAssignment(line) {
 function privateKeyArmor(line, marker) {
   const source = String(line || '').toUpperCase();
   const prefix = '-----' + marker + ' ';
-  const start = source.indexOf(prefix);
-  if (start < 0) return false;
-  const labelStart = start + prefix.length;
-  const labelEnd = source.indexOf('-----', labelStart);
-  return labelEnd >= labelStart && source.slice(labelStart, labelEnd).includes('PRIVATE KEY');
+  let cursor = 0;
+  while (cursor < source.length) {
+    const start = source.indexOf(prefix, cursor);
+    if (start < 0) return false;
+    const labelStart = start + prefix.length;
+    const labelEnd = source.indexOf('-----', labelStart);
+    if (labelEnd < 0) return source.slice(labelStart).includes('PRIVATE KEY');
+    if (source.slice(labelStart, labelEnd).includes('PRIVATE KEY')) return true;
+    cursor = labelEnd + 5;
+  }
+  return false;
 }
 
 function containsSecret(line) {
