@@ -609,8 +609,9 @@ VARIATION GUIDANCE:
         self._voice_memory_enabled = _env_truthy("YT_012_VOICE_MEMORY_ENABLED", default="true")
 
         # Grok is a legacy, explicit opt-in fallback. The autonomous default is
-        # the local Qwen route; RedDog/OpenRouter remains behind its governed
-        # authorization boundary and is intentionally not imported here.
+        # the local Qwen route. RedDog already performs governed OpenRouter calls
+        # without per-call 012 involvement, but its public production surfaces
+        # are not yet typed for short-form YouTube reply generation.
         if _env_truthy("YT_ENABLE_GROK_REPLIES"):
             try:
                 from modules.ai_intelligence.rESP_o1o2.src.llm_connector import LLMConnector

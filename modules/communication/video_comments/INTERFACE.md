@@ -20,7 +20,7 @@ The default provider order is:
 2. Embedded general Qwen resolved by `resolve_general_model_path()`
 3. Grok only when `YT_ENABLE_GROK_REPLIES=true` and credentials are configured
 
-RedDog/OpenRouter is not called from this module yet. Its current live route is advisory and requires explicit typed 012 authorization; autonomous reply execution must wait for a governed transport contract.
+RedDog/OpenRouter is not called from this module yet. RedDog's production Fusion calls are autonomous: policy, signed runtime/model bindings, and durable provider-call evidence replace any per-call 012 approval. The currently exposed production runners are typed for repository audits, backend-architect decisions, and bounded artifact generation rather than short-form YouTube replies. Integration should therefore add a provider-neutral reply runner that consumes the daemon's preconfigured policy and emits a content-free call receipt; it must not import the private script bridge.
 
 Every generated reply carries a source receipt. Template, BanterEngine, unknown, or stale sources are not posted by default. Set `YT_ALLOW_GENERIC_REPLY_FALLBACK=true` only to restore the legacy generic-template behavior.
 

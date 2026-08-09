@@ -67,7 +67,7 @@ This module enables autonomous YouTube comment engagement through quantum-entang
 - [x] **Whack-a-MAGA Responses**: Uses troll mockery responses for trolls
 - [x] **Grounded Reply Generation**: Exact Studio-row comment/video context through LM Studio or embedded general Qwen
 - [x] **Context Integrity Gate**: Skip posting when only a generic template is available (legacy opt-in: `YT_ALLOW_GENERIC_REPLY_FALLBACK=true`)
-- [ ] **Governed OpenRouter Execution**: Adopt RedDog/OpenRouter after its typed autonomous execution contract is available; the current advisory route is not imported by this daemon
+- [ ] **Governed OpenRouter Reply Runner**: Extend RedDog's autonomous policy/runtime-binding/provider-evidence pattern to short-form replies; no per-comment 012 approval
 
 ### Phase 3: YouTube DAE Integration 📋 PLANNED
 - [ ] **AutoModeratorDAE Hook**: When YouTube DAE launches, trigger comment check

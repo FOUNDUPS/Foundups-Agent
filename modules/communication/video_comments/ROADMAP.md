@@ -62,7 +62,7 @@ Transform YouTube comment engagement from manual interaction to fully autonomous
 - [x] LM Studio/general-Qwen contextual route (primary)
 - [x] Embedded general-Qwen fallback
 - [x] Grok removed from the default route; explicit legacy opt-in only
-- [ ] Governed RedDog/OpenRouter execution after typed autonomous authorization is defined
+- [ ] Provider-neutral RedDog/OpenRouter reply runner using daemon policy, signed runtime/model binding, and durable call evidence (no per-call 012 approval)
 - [x] Pattern responses (song → #FFCPLN, FFCPLN → ICE promo)
 - [x] Emoji-to-emoji replies (✊✋🖐️ sequences)
 

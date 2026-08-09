@@ -33,7 +33,7 @@
 - Fail closed when only generic/template output exists; legacy fallback requires `YT_ALLOW_GENERIC_REPLY_FALLBACK=true`.
 - Record the real provider beneath the skill-routing receipt.
 
-**OpenRouter decision:** The existing RedDog/OpenRouter bridge is advisory-only and guarded by explicit typed 012 authorization. This autonomous daemon does not import or bypass it. A future phase can add OpenRouter after the governed autonomous execution contract lands.
+**OpenRouter decision (corrected):** RedDog's production Fusion paths do not require 012 to approve individual calls. They autonomously consume policy and signed runtime/model bindings and persist durable provider-call evidence. This daemon does not import the private script bridge because the current public production runners are typed for repository audits, backend-architect decisions, and bounded artifact generation—not short YouTube replies. A future slice should add a provider-neutral reply runner with daemon-policy admission and content-free call receipts.
 
 **WSP memory retrieval evaluation:** Noise was low and ordering was useful. Tier-0 module artifacts were present (`README.md`, `INTERFACE.md`, `ROADMAP.md`, `ModLog.md`, `tests/README.md`). `tests/TestModLog.md`, `memory/README.md`, and `requirements.txt` were missing at retrieval time; this slice creates the required test log. A follow-up Holo query detected repository state movement and was rejected as stale; no query-side reindex or mutation was attempted.
 
