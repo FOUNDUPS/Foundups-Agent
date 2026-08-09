@@ -49,6 +49,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_authority_store_comm
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
     attach_optional_authority_bindings,
+    is_sha256_digest,
     optional_authority_bindings_valid,
     runtime_binding_request_valid,
 )
@@ -466,8 +467,8 @@ def issue_delegated_authority_runtime(
         or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
         or type(request.wsp15_mps_total) is not int
         or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
-        or not request.progressive_policy_stage_receipt_id.startswith("sha256:")
-        or not request.progressive_policy_stage_digest.startswith("sha256:")
+        or not is_sha256_digest(request.progressive_policy_stage_receipt_id)
+        or not is_sha256_digest(request.progressive_policy_stage_digest)
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
     has_runtime_binding = runtime_binding_request_valid(request)

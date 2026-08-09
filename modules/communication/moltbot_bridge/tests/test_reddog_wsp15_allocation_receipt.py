@@ -6,6 +6,7 @@ import ast
 import json
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src import reddog_wsp15_allocation_receipt as allocation_module
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     PRIORITY_P0,
     PRIORITY_P3,
@@ -165,6 +166,35 @@ def test_validator_recomputes_input_digest_and_receipt_id() -> None:
     assert "input_digest_mismatch" in score_result.rejection_reasons
     assert receipt_result.accepted is False
     assert "receipt_id_mismatch" in receipt_result.rejection_reasons
+
+
+def test_validator_counts_read_targets_when_rechecking_complexity() -> None:
+    changed = ("modules/foundups/demo/src/worker.py",)
+    targets = tuple(f"modules/foundups/demo/docs/source_{index}.md" for index in range(9))
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="bounded_module_fix",
+        prompt_text="Inspect the bounded evidence set.",
+        changed_paths=changed,
+        allowed_read_targets=targets,
+    ).to_dict()
+    allocation["complexity"] = 2
+    allocation["mps_total"] = sum(
+        allocation[name] for name in ("complexity", "importance", "deferability", "impact")
+    )
+    allocation["priority"] = allocation_module.priority_for_mps_total(
+        allocation["mps_total"]
+    )
+    allocation["input_digest"] = allocation_module._digest(
+        allocation_module._allocation_input_payload(allocation)
+    )
+    allocation["receipt_id"] = allocation_module._digest(
+        {"receipt": allocation["input_digest"], "type": allocation["schema_version"]}
+    )
+
+    result = validate_reddog_wsp15_allocation_receipt(allocation)
+
+    assert result.accepted is False
+    assert "complexity_below_observable_minimum" in result.rejection_reasons
 
 
 def test_allocation_module_has_no_execution_or_indexing_imports() -> None:

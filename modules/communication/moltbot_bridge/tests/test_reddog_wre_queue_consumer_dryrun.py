@@ -63,6 +63,7 @@ def _snapshot(**overrides):
         selected_slice="REDDOG_SAMPLE_SLICE_PHASE1",
         requested_operation="edit_foundup_module",
         changed_paths=("modules/foundups/demo/src/worker.py",),
+        task_prompt_text="Fix one bounded FoundUp module defect",
     )
     determination_id = "sha256:determination"
     selection_id = "sha256:model-selection"

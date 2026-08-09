@@ -32,6 +32,10 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_OPEN_LIVE_ENQUEUE,
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+    STAGE_BOUNDED_EXECUTION,
+)
 from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
     reddog_runtime_artifact_generation_lock,
 )
@@ -82,6 +86,7 @@ def run_reddog_execution_valve_environment_supply(
     queue_item_id: str = "",
     now_epoch: int | None = None,
     permission_ttl_seconds: int = 300,
+    progressive_execution_stage_ceiling: str = STAGE_AUDIT,
 ) -> ExecutionValveEnvironmentSupplyResult:
     """Validate governed inputs and atomically write a canonical valve artifact."""
     root = Path(repo_root).resolve()
@@ -90,6 +95,11 @@ def run_reddog_execution_valve_environment_supply(
     reasons = list(path_reasons)
     if state not in _STATES:
         reasons.append("requested_valve_state_invalid")
+    stage_ceiling = str(progressive_execution_stage_ceiling or "")
+    if stage_ceiling not in {STAGE_AUDIT, STAGE_BOUNDED_EXECUTION}:
+        reasons.append("progressive_execution_stage_ceiling_invalid")
+    if state != VALVE_CLOSED and stage_ceiling != STAGE_BOUNDED_EXECUTION:
+        reasons.append("progressive_execution_stage_ceiling_closed")
     lineage, lineage_reasons = _lineage(
         work_state, authority_profile, permission_snapshots, principal_authority_records, queue_item_id
     )
@@ -108,15 +118,20 @@ def run_reddog_execution_valve_environment_supply(
     if expires_epoch <= epoch:
         return _reject(("permission_snapshot_expired",))
     return _materialize_environment(
-        target, state, lineage, ttl, expires_epoch, repo_root=root
+        target, state, lineage, ttl, expires_epoch,
+        progressive_execution_stage_ceiling=stage_ceiling, repo_root=root,
     )
 
 
 def _materialize_environment(
     target: Path, state: str, lineage: Mapping[str, Any], ttl: int,
-    expires_epoch: int, *, repo_root: Path,
+    expires_epoch: int, *, progressive_execution_stage_ceiling: str,
+    repo_root: Path,
 ) -> ExecutionValveEnvironmentSupplyResult:
-    core = _environment_core(state, lineage, ttl, expires_epoch)
+    core = _environment_core(
+        state, lineage, ttl, expires_epoch,
+        progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
+    )
     environment_digest = _digest(core)
     receipt = _supply_receipt(core, lineage, environment_digest)
     payload = dict(core)
@@ -340,7 +355,10 @@ def _cross_bind(
     return reasons
 
 
-def _environment_core(state: str, lineage: Mapping[str, Any], ttl: int, expires: int) -> dict[str, Any]:
+def _environment_core(
+    state: str, lineage: Mapping[str, Any], ttl: int, expires: int,
+    *, progressive_execution_stage_ceiling: str,
+) -> dict[str, Any]:
     flags = {
         "valve_dryrun_enabled": state != VALVE_CLOSED,
         "valve_live_enqueue_enabled": state == VALVE_OPEN_LIVE_ENQUEUE,
@@ -367,6 +385,7 @@ def _environment_core(state: str, lineage: Mapping[str, Any], ttl: int, expires:
         "authorization_mode": authorization_mode,
         "authorization_binding_digest": authorization_binding_digest,
         "requested_valve_state": state,
+        "progressive_execution_stage_ceiling": progressive_execution_stage_ceiling,
         **flags,
         **bindings,
     }

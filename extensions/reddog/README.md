@@ -3,12 +3,15 @@
 Version: 0.4.72
 
 Version 0.4.72 adds a progressive effect-stage ceiling. The default `audit`
-stage keeps conversation, audit, research, review, and proposal output usable
-without action planning. The optional `boundedExecution` stage may open action
+stage keeps conversation, research, review, and proposal output usable. It may
+admit only signed strict read-only audit tasks with no changed paths and no
+effect authority. The optional `boundedExecution` stage may open action
 planning only after existing runtime gates pass; backend promotion still
 requires an authenticated low-complexity WSP_15 receipt, bounded paths, no
-high-risk effect class, and an independent verifier. The setting grants no
-authority and production remains unavailable.
+high-risk effect class, and an independent verifier. The editor setting is
+only a requested ceiling. A separate root-owned runtime ceiling is
+authoritative, neither ceiling grants authority, and production remains
+unavailable.
 
 Version 0.4.71 closes the remaining single-input authority ambiguities found
 by exact-SHA review. Plain work requests are now identified by the ingress

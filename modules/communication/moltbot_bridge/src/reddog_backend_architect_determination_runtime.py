@@ -50,6 +50,15 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     validate_reddog_wsp15_allocation_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    DECISION_BOUNDED_EXECUTION_ADMITTED,
+    STAGE_AUDIT,
+)
+from modules.communication.moltbot_bridge.src.reddog_backend_architect_queue_candidate import (
+    ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION as ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
+    ArchitectQueueCandidate,
+    build_architect_queue_candidate,
+)
 from modules.communication.moltbot_bridge.src.reddog_conversation_work_promotion import (
     AuthenticatedConversationWorkContext,
 )
@@ -85,7 +94,6 @@ from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
 ARCHITECT_DETERMINATION_ACCEPT = "ARCHITECT_DETERMINATION_ACCEPT"
 ARCHITECT_DETERMINATION_REJECT = "ARCHITECT_DETERMINATION_REJECT"
 ARCHITECT_DETERMINATION_SCHEMA_VERSION = "reddog_architect_determination_receipt.v1"
-ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION = "reddog_architect_queue_candidate.v2"
 
 ACTION_FIX = "FIX"
 ACTION_RESEARCH_MORE = "RESEARCH_MORE"
@@ -331,34 +339,6 @@ class FoundupsFusionArchitectModelRunner:
             rejection_reasons=(),
             provider_call_evidence=evidence_payload,
         )
-
-
-@dataclass(frozen=True)
-class ArchitectQueueCandidate:
-    """Queue candidate emitted by a FIX determination."""
-
-    schema_version: str
-    queue_candidate_id: str
-    source_determination_receipt_id: str
-    slice_id: str
-    status: str
-    evidence_refs: tuple[str, ...]
-    wsp15_allocation_receipt: Mapping[str, Any]
-    proposal_admission_receipt_id: str
-    proposal_admission_digest: str
-    progressive_policy_stage_receipt_id: str
-    progressive_policy_stage_digest: str
-    progressive_policy_stage_receipt: Mapping[str, Any]
-    independent_verifier_required: bool
-    no_queue_mutation_performed: bool = True
-    no_execution_performed: bool = True
-    no_worker_spawn_performed: bool = True
-    no_openclaw_enqueue_performed: bool = True
-    no_hermes_dispatch_performed: bool = True
-    no_repo_mutation_performed: bool = True
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
 
 
 @dataclass(frozen=True)
@@ -624,6 +604,8 @@ def run_reddog_backend_architect_determination_runtime(
     conversation_work_context: AuthenticatedConversationWorkContext | None = None,
     principal_memex_context: AuthenticatedPrincipalMemexContext | None = None,
     principal_memex_now_epoch: Callable[[], int] | None = None,
+    task_prompt_text: str = "",
+    progressive_execution_stage_ceiling: str = STAGE_AUDIT,
 ) -> BackendArchitectDeterminationResult:
     """Produce, persist, and queue-candidate one backend architect determination."""
     observed_at = now_iso or datetime.now(timezone.utc).isoformat()
@@ -816,6 +798,8 @@ def run_reddog_backend_architect_determination_runtime(
         report_bundle_id=report_bundle_id, allocation=wsp15_allocation_receipt,
         allocation_receipt_id=allocation_receipt_id, policy=proposal_policy,
         conversation_binding=conversation_binding,
+        task_prompt_text=task_prompt_text,
+        progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
     )
     reasons.extend(proposal_reasons)
     if reasons:
@@ -849,7 +833,6 @@ def run_reddog_backend_architect_determination_runtime(
         parsed=parsed, reports=reports, proposal_admission=proposal_admission,
         principal_memex_view=principal_memex.context_view,
     )
-    queue_candidate = None
     accepted_receipt_id = _digest(
         {
             "cycle_id": cycle_id,
@@ -871,17 +854,11 @@ def run_reddog_backend_architect_determination_runtime(
             ),
         }
     )
-    if action == ACTION_FIX and proposal_admission is not None:
-        assert next_slice_name is not None
-        assert proposal_admission is not None
-        queue_candidate = _queue_candidate(
-            source_determination_receipt_id=accepted_receipt_id,
-            next_slice_name=next_slice_name,
-            snapshot=snapshot,
-            report_bundle_id=report_bundle_id,
-            wsp15_allocation_receipt=wsp15_allocation_receipt,
-            proposal_admission=proposal_admission,
-        )
+    queue_candidate = _candidate_for_determination(
+        action=action, next_slice_name=next_slice_name, snapshot=snapshot,
+        report_bundle_id=report_bundle_id, allocation=wsp15_allocation_receipt,
+        proposal_admission=proposal_admission, receipt_id=accepted_receipt_id,
+    )
     receipt = _receipt(
         accepted=True,
         action=action,
@@ -1144,6 +1121,8 @@ def _validated_proposal(
     allocation_receipt_id: str | None,
     policy: ArchitectProposalAdmissionPolicy,
     conversation_binding: Mapping[str, Any] | None,
+    task_prompt_text: str,
+    progressive_execution_stage_ceiling: str,
 ) -> tuple[Mapping[str, Any], ArchitectProposalExecutabilityReceipt | None, tuple[str, ...]]:
     parsed = _parse_model_output(model_result.content)
     validation = validate_architect_proposal_output(
@@ -1163,6 +1142,8 @@ def _validated_proposal(
             report_bundle_id=report_bundle_id, wsp15_allocation_receipt=allocation,
             policy=policy,
             conversation_binding=conversation_binding,
+            task_prompt_text=task_prompt_text,
+            progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
         )
     except (TypeError, ValueError):
         return parsed, None, (
@@ -1179,41 +1160,32 @@ def _fusion_quorum_passed(review_packet: Mapping[str, Any]) -> bool:
     return isinstance(quorum, Mapping) and quorum.get("passed") is True
 
 
-def _queue_candidate(
+def _candidate_for_determination(
     *,
-    source_determination_receipt_id: str,
-    next_slice_name: str,
+    action: str,
+    next_slice_name: str | None,
     snapshot: OperationalContextSnapshot,
     report_bundle_id: Optional[str],
-    wsp15_allocation_receipt: Mapping[str, Any],
-    proposal_admission: ArchitectProposalExecutabilityReceipt,
-) -> ArchitectQueueCandidate:
-    payload = {
-        "source_determination_receipt_id": source_determination_receipt_id,
-        "slice_id": next_slice_name,
-        "snapshot_receipt_id": snapshot.snapshot_receipt_id,
-        "report_bundle_id": report_bundle_id,
-        "wsp15_allocation_receipt_id": wsp15_allocation_receipt.get("receipt_id"),
-        "proposal_admission_receipt_id": proposal_admission.receipt_id,
-    }
-    return ArchitectQueueCandidate(
-        schema_version=ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
-        queue_candidate_id=_digest(payload),
-        source_determination_receipt_id=source_determination_receipt_id,
-        slice_id=next_slice_name,
-        status="CANDIDATE" if proposal_admission.admissible_to_authoritative_queue else "BLOCKED_CANDIDATE",
-        evidence_refs=(
-            f"architect_determination:{source_determination_receipt_id}", f"snapshot:{snapshot.snapshot_receipt_id}",
-            f"report_bundle:{report_bundle_id}", f"wsp15_allocation:{wsp15_allocation_receipt.get('receipt_id')}",
-            f"proposal_admission:{proposal_admission.receipt_id}",
-        ),
-        wsp15_allocation_receipt=dict(wsp15_allocation_receipt),
-        proposal_admission_receipt_id=proposal_admission.receipt_id,
-        proposal_admission_digest=_digest(proposal_admission.to_dict()),
-        progressive_policy_stage_receipt_id=proposal_admission.progressive_policy_stage_receipt_id,
-        progressive_policy_stage_digest=_digest(proposal_admission.progressive_policy_stage_receipt),
-        progressive_policy_stage_receipt=dict(proposal_admission.progressive_policy_stage_receipt),
-        independent_verifier_required=proposal_admission.independent_verifier_required,
+    allocation: Mapping[str, Any],
+    proposal_admission: ArchitectProposalExecutabilityReceipt | None,
+    receipt_id: str,
+) -> ArchitectQueueCandidate | None:
+    admitted = (
+        action == ACTION_FIX
+        and proposal_admission is not None
+        and proposal_admission.progressive_policy_decision
+        == DECISION_BOUNDED_EXECUTION_ADMITTED
+    )
+    if not admitted:
+        return None
+    assert next_slice_name is not None and proposal_admission is not None
+    return build_architect_queue_candidate(
+        source_determination_receipt_id=receipt_id,
+        next_slice_name=next_slice_name,
+        snapshot_receipt_id=snapshot.snapshot_receipt_id,
+        report_bundle_id=report_bundle_id,
+        wsp15_allocation_receipt=allocation,
+        proposal_admission=proposal_admission,
     )
 
 def _canonical_provider_call_evidence(value: Any) -> dict[str, Any]:

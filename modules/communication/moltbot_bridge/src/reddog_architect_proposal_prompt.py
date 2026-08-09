@@ -48,6 +48,14 @@ def build_architect_proposal_prompt(
             "bundle_id": report_bundle_id,
         },
         "wsp15_allocation_receipt_id": wsp15_allocation_receipt.get("receipt_id"),
+        "wsp15_execution_binding": {
+            "requested_operation": wsp15_allocation_receipt.get("requested_operation"),
+            "changed_paths": list(wsp15_allocation_receipt.get("changed_paths") or ()),
+            "allowed_read_targets": list(
+                wsp15_allocation_receipt.get("allowed_read_targets") or ()
+            ),
+            "prompt_digest": wsp15_allocation_receipt.get("prompt_digest"),
+        },
         "proposal_admission_policy": proposal_admission_prompt_policy(
             snapshot=snapshot,
             policy=proposal_admission_policy,

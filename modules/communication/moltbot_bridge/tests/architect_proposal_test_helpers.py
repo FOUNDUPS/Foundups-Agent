@@ -14,6 +14,12 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executab
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ACTION_FIX,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_BOUNDED_EXECUTION,
+)
+
+
+BOUNDED_TASK_PROMPT = "Fix one bounded FoundUp module defect"
 
 
 def architect_model_output(
@@ -39,7 +45,8 @@ def architect_model_output(
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "reuse_decision": "EXTEND_EXISTING",
         "requested_operation": (
-            "bounded_code_change" if action == ACTION_FIX else "readonly_research"
+            str(allocation.get("requested_operation") or "")
+            if action == ACTION_FIX else "readonly_research"
         ),
         "target_runtime": "reddog_resident_queue",
         "target_effect_plane": effect,
@@ -75,6 +82,8 @@ def runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
         "report_collection": inputs["report_collection"],
         "reports": inputs["reports"],
         "proposal_admission_policy": ready_proposal_policy(),
+        "task_prompt_text": BOUNDED_TASK_PROMPT,
+        "progressive_execution_stage_ceiling": STAGE_BOUNDED_EXECUTION,
     }
     if inputs["architect_runtime_binding"] is not None:
         kwargs["model_runtime_binding_receipt"] = inputs[

@@ -153,7 +153,7 @@ def _proposal_admission(
         "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
         "task_summary_digest": "sha256:" + ("7" * 64),
         "reuse_decision": "EXTEND_EXISTING",
-        "requested_operation": "bounded_code_change",
+        "requested_operation": str(allocation.get("requested_operation") or ""),
         "target_runtime": "reddog_resident_queue",
         "target_effect_plane": "REPOSITORY_CODE_CHANGE",
         "allowed_paths": [
@@ -216,6 +216,7 @@ def _proposal_admission(
         selected_slice=payload["slice_id"],
         requested_operation=payload["requested_operation"],
         changed_paths=payload["allowed_paths"],
+        task_prompt_text="Fix one bounded module defect",
         would_block_reasons=payload["missing_preconditions"],
     )
     payload.update(
@@ -413,6 +414,7 @@ def _rebound_progressive_stage(
         selected_slice=str(admission.get("slice_id") or ""),
         requested_operation=str(admission.get("requested_operation") or ""),
         changed_paths=tuple(admission.get("allowed_paths") or ()),
+        task_prompt_text="Fix one bounded module defect",
         would_block_reasons=tuple(admission.get("missing_preconditions") or ()),
     )
     return {

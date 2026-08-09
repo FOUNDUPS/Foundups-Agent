@@ -5327,6 +5327,7 @@ function wireFusionWebview(context, webview, worker, state) {
   const executeAsk = async (message, recoveryContext) => {
     const actionStageEnabled = progressiveActionStageEnabled();
     if (actionStageEnabled && await blockIncompatibleBackend(context, state, webview)) return;
+    const compatibility = await currentBackendCompatibility(); const auditDegraded = !actionStageEnabled && compatibility.passed !== true;
     if (actionStageEnabled && !recoveryContext && await startOperationsAdapter.handleMessage(
       startOperationsOptions(context, message, worker, state, webview))) return;
     const {
@@ -5338,7 +5339,7 @@ function wireFusionWebview(context, webview, worker, state) {
       postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);
       return;
     }
-    const contextPacket = localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : (classification.conversationalDraft ? conversationalDraftPolicy.emptyContextPacket() : buildBoundedRepoContext(contextMode, governedWorkFocus));
+    const contextPacket = auditDegraded || localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : (classification.conversationalDraft ? conversationalDraftPolicy.emptyContextPacket() : buildBoundedRepoContext(contextMode, governedWorkFocus));
     const basePrompt = classification.conversationalDraft ? conversationalDraftPolicy.buildUserPrompt(workFocus) : constructWspTaskPrompt(governedWorkFocus, classification, contextPacket.quality, workerType);
     const continuation = continuationPrompt.prepareContinuationPrompt(
       basePrompt, continuationEnabled, state.lastContinuationSummary, {
@@ -5483,7 +5484,7 @@ function wireFusionWebview(context, webview, worker, state) {
         onProgress: onBridgeProgress, bridgeState, trail: workTrail, webview, stage: blockedRequestRecoveryStage
       });
     } else {
-      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, bridgeState, promptConstruction);
+      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, bridgeState, promptConstruction, { backendCompatibility: compatibility });
     }
     conversationHistoryPolicy.discardProviderHistory(historyAdmission, result, promptConstruction);
     fusionProgress.capture(result);
@@ -5561,7 +5562,7 @@ function wireFusionWebview(context, webview, worker, state) {
           onRepairBridgeProgress,
           bridgeState,
           promptConstruction,
-          { promptSource: 'repair_prompt', maxTokens: 2400 }
+          { promptSource: 'repair_prompt', maxTokens: 2400, backendCompatibility: compatibility }
         );
         fusionProgress.capture(repairResult);
         absorbUnicodeMeta(repairResult);
@@ -5780,7 +5781,8 @@ function wireFusionWebview(context, webview, worker, state) {
       context, governedWorkFocus, {
         actionPlanningAllowed, wardrobeSelectionResult: operatorWardrobeSelectionResult, residentArchitectSessionEnabled,
         explicitResidentArchitectSessionRequested: classification.governedActionRequested === true,
-        groundingPreflight, holoScorecard
+        groundingPreflight, holoScorecard,
+        progressiveExecutionStage: progressiveStage.configured
       }
     );
     result.review_packet = attachOrchestratorMetadata(
@@ -5898,9 +5900,7 @@ function wireFusionWebview(context, webview, worker, state) {
   };
   const attempt = () => attemptBlockedRequestRecovery({
     context, state, options: recoveryOptions, executeAsk, webview });
-  webview.onDidReceiveMessage(
-    createFusionMessageReceiver(webview, state, executeAsk)
-  );
+  webview.onDidReceiveMessage(createFusionMessageReceiver(webview, state, executeAsk));
   startBlockedRecoveryPolling(state, attempt);
 }
 
@@ -5977,7 +5977,8 @@ function attachBridgeMetadata(reviewPacket, bridgeMeta) {
 }
 
 async function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptionsArg) {
-  const compatibility = await currentBackendCompatibility();
+  const callOptions = callOptionsArg && typeof callOptionsArg === 'object' ? callOptionsArg : {};
+  const compatibility = callOptions.backendCompatibility || await currentBackendCompatibility();
   const auditDialogueOnly = !progressiveActionStageEnabled();
   if (compatibility.passed !== true) {
     const state = { backend_compatibility: compatibility };
@@ -5992,7 +5993,6 @@ async function callFusion(context, worker, prompt, boundedContext, systemPrompt,
     const script = path.join(root, 'scripts', 'advisory_model_once.py');
       const configuredPython = reddogConfigValue('pythonPath', 'python');
     const interpreter = resolvePythonInterpreter(root, configuredPython);
-    const callOptions = callOptionsArg && typeof callOptionsArg === 'object' ? callOptionsArg : {};
     const promptSource = callOptions.promptSource ? callOptions.promptSource : 'prompt';
     const promptNorm = normalizeBridgeTextForUnicode(prompt, promptSource);
     const contextNorm = normalizeBridgeTextForUnicode(boundedContext, 'context');

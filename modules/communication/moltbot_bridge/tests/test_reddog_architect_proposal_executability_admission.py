@@ -31,6 +31,7 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
 from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
     DECISION_BOUNDED_EXECUTION_ADMITTED,
     DECISION_WOULD_BLOCK,
+    STAGE_BOUNDED_EXECUTION,
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
@@ -65,6 +66,7 @@ def _evaluate(
     policy: ArchitectProposalAdmissionPolicy | None = None,
     index_gap: bool = False,
     allocation: dict | None = None,
+    task_prompt_text: str = "Fix one bounded FoundUp module defect",
 ):
     inputs = _build_inputs()
     allocation = allocation or inputs["allocation"]
@@ -90,6 +92,8 @@ def _evaluate(
         report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
         wsp15_allocation_receipt=allocation,
         policy=policy,
+        task_prompt_text=task_prompt_text,
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
     return receipt, inputs, output
 
@@ -194,7 +198,10 @@ def test_all_current_capabilities_do_not_override_complexity_ceiling() -> None:
             "modules/foundups/demo/src/c.py",
         ),
     ).to_dict()
-    receipt, _, _ = _evaluate(policy=_policy(), allocation=allocation)
+    receipt, _, _ = _evaluate(
+        policy=_policy(), allocation=allocation,
+        task_prompt_text="Repair one cross-module data flow.",
+    )
 
     assert receipt.proposal_validity == VALIDITY_VALID
     assert receipt.execution_readiness == READINESS_READY
@@ -227,7 +234,7 @@ def test_index_gap_blocks_arbitrary_repository_change() -> None:
 def test_index_gap_allows_only_direct_read_grounded_holo_maintenance() -> None:
     inputs = _build_inputs()
     allocation = allocate_reddog_wsp15_receipt(
-        requested_operation="cross-module holoindex maintenance",
+        requested_operation="holoindex_maintenance",
         prompt_text="Repair one cross-module retrieval path.",
         changed_paths=("holo_index/query_owner.py",),
     ).to_dict()
@@ -271,6 +278,8 @@ def test_index_gap_allows_only_direct_read_grounded_holo_maintenance() -> None:
         report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
         wsp15_allocation_receipt=allocation,
         policy=_policy(),
+        task_prompt_text="Repair one cross-module retrieval path.",
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
 
     assert receipt.proposal_validity == VALIDITY_VALID
@@ -300,6 +309,8 @@ def test_complexity_two_low_risk_fix_is_admitted() -> None:
         report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
         wsp15_allocation_receipt=allocation,
         policy=_policy(),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
 
     assert allocation["complexity"] == 2
@@ -350,6 +361,8 @@ def test_unrelated_holo_reference_does_not_unlock_maintenance_exception() -> Non
         report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
         wsp15_allocation_receipt=inputs["allocation"],
         policy=_policy(),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
 
     assert receipt.proposal_validity == VALIDITY_VALID
@@ -400,6 +413,8 @@ def test_holo_maintenance_direct_read_cannot_widen_to_directory_wildcard() -> No
         report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
         wsp15_allocation_receipt=inputs["allocation"],
         policy=_policy(),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
 
     assert receipt.proposal_validity == VALIDITY_VALID

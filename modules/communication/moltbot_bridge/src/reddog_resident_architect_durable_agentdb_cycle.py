@@ -74,6 +74,10 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
     AgentDbReadOnlyAuditReportStore,
     ReadOnlyAuditReportStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+    STAGE_BOUNDED_EXECUTION,
+)
 
 
 REDDOG_RESIDENT_CYCLE_ACCEPT = "REDDOG_RESIDENT_CYCLE_ACCEPT"
@@ -167,6 +171,7 @@ class ResidentCycleReason:
     ARCHITECT_MODEL_RUNTIME_BINDING = "REJECT_RESIDENT_CYCLE_ARCHITECT_MODEL_RUNTIME_BINDING"
     PRINCIPAL_MEMEX_SOURCE_CONFLICT = "REJECT_RESIDENT_CYCLE_PRINCIPAL_MEMEX_SOURCE_CONFLICT"
     PRINCIPAL_MEMEX_SOURCE_REJECTED = "REJECT_RESIDENT_CYCLE_PRINCIPAL_MEMEX_SOURCE_REJECTED"
+    PROGRESSIVE_STAGE_INVALID = "REJECT_RESIDENT_CYCLE_PROGRESSIVE_STAGE_INVALID"
 
 
 class ResidentArchitectCycleStore(Protocol):
@@ -766,6 +771,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             ),
             grounding_receipt=red_dog_intent.get("grounding_receipt"),
             grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
+            progressive_execution_stage_ceiling=_intent_stage_ceiling(red_dog_intent),
             audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
             require_audit_model_runtime_binding=True,
             architect_model_runtime_binding_receipt_override=(
@@ -927,6 +933,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         workspace_memory_notes=workspace_memory_notes,
         grounding_receipt=red_dog_intent.get("grounding_receipt"),
         grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
+        progressive_execution_stage_ceiling=_intent_stage_ceiling(red_dog_intent),
         audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
         require_audit_model_runtime_binding=True,
         audit_lanes=audit_lanes,
@@ -1064,6 +1071,8 @@ def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
         reasons.append(ResidentCycleReason.INTENT_INVALID)
     if intent.get("submits_executable_authority") is not False:
         reasons.append(ResidentCycleReason.EXECUTABLE_AUTHORITY_REQUESTED)
+    if _intent_stage_ceiling(intent) not in {STAGE_AUDIT, STAGE_BOUNDED_EXECUTION}:
+        reasons.append(ResidentCycleReason.PROGRESSIVE_STAGE_INVALID)
     if isinstance(intent, Mapping) and schema == "reddog_intent.v2":
         grounding = validate_grounded_target_receipt(
             intent.get("grounding_receipt") if isinstance(intent.get("grounding_receipt"), Mapping) else None,
@@ -1071,6 +1080,16 @@ def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
         )
         reasons.extend(grounding.rejection_reasons)
     return tuple(dict.fromkeys(reasons))
+
+
+def _intent_stage_ceiling(intent: Mapping[str, Any]) -> str:
+    value = str(intent.get("progressive_execution_stage_ceiling") or "audit")
+    return {
+        "audit": STAGE_AUDIT,
+        "boundedExecution": STAGE_BOUNDED_EXECUTION,
+        STAGE_AUDIT: STAGE_AUDIT,
+        STAGE_BOUNDED_EXECUTION: STAGE_BOUNDED_EXECUTION,
+    }.get(value, value)
 
 
 def _intent_bound_memex_config(

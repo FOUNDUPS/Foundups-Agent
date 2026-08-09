@@ -124,7 +124,7 @@ def _digest(value: object) -> str:
 def _allocation(**overrides):
     payload = allocate_reddog_wsp15_receipt(
         requested_operation="bounded_code_change",
-        prompt_text="Fix one urgent authority-bound FoundUp module defect.",
+        prompt_text="Fix one bounded RedDog FoundUp module defect",
         changed_paths=("modules/foundups/paccess_001/src/worker.py",),
         allowed_read_targets=("modules/foundups/paccess_001/src/worker.py",),
     ).to_dict()
@@ -174,6 +174,7 @@ def _stage_refs(allocation):
         selected_slice="REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
         requested_operation=str(allocation["requested_operation"]),
         changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text="Fix one bounded RedDog FoundUp module defect",
     )
     return {
         "progressive_policy_stage_receipt_id": stage.receipt_id,
@@ -309,10 +310,13 @@ def _snapshot(allocation=None, **queue_overrides):
         **_memex_refs(),
     }
     queue_item.update(queue_overrides)
-    return governed_worker_dispatch_snapshot({
-        "schema_version": "reddog_authoritative_work_state.v1",
-        "wre_queue_items": [queue_item],
-    })
+    return governed_worker_dispatch_snapshot(
+        {
+            "schema_version": "reddog_authoritative_work_state.v1",
+            "wre_queue_items": [queue_item],
+        },
+        task_prompt_text="Fix one bounded RedDog FoundUp module defect",
+    )
 
 
 def test_publishes_signed_worker_dispatch_intents_as_pending_tasks() -> None:

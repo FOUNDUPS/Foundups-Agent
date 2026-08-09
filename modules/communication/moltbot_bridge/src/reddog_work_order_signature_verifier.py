@@ -342,8 +342,8 @@ def _valid_work_authority_receipt_fields(
     stage_id = work_authority.get("progressive_policy_stage_receipt_id")
     stage_digest = work_authority.get("progressive_policy_stage_digest")
     stage_valid = not (stage_id or stage_digest) or (
-        str(stage_id).startswith("sha256:")
-        and str(stage_digest).startswith("sha256:")
+        is_sha256_digest(stage_id)
+        and is_sha256_digest(stage_digest)
     )
     required_valid = (
         is_sha256_digest(work_authority.get("queue_consumer_receipt_digest"))

@@ -20,6 +20,10 @@ from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage
     evaluate_proposal_stage,
     reject_unavailable_stage,
     validate_bounded_execution_receipt,
+    validate_queue_progressive_stage_binding,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_progressive_execution_stage_policy as stage_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
@@ -32,6 +36,7 @@ MODULE_PATH = Path(__file__).resolve().parents[1] / "src" / (
     "reddog_progressive_execution_stage_policy.py"
 )
 LOW_PATH = "modules/foundups/demo/src/worker.py"
+LOW_PROMPT = "Fix one bounded module defect."
 
 
 def _allocation(
@@ -39,7 +44,7 @@ def _allocation(
 ) -> dict:
     return allocate_reddog_wsp15_receipt(
         requested_operation=operation,
-        prompt_text="Fix one bounded module defect.",
+        prompt_text=LOW_PROMPT,
         changed_paths=(path,),
         allowed_read_targets=(path,),
     ).to_dict()
@@ -53,6 +58,7 @@ def _admit(*, operation: str = "bounded_module_fix", path: str = LOW_PATH):
         selected_slice="FOUNDUP_BOUNDED_FIX_PHASE1",
         requested_operation=operation,
         changed_paths=(path,),
+        task_prompt_text=LOW_PROMPT,
     )
 
 
@@ -91,6 +97,7 @@ def test_malformed_wsp15_receipt_is_hard_rejected() -> None:
         selected_slice="FOUNDUP_BOUNDED_FIX_PHASE1",
         requested_operation="bounded_module_fix",
         changed_paths=(LOW_PATH,),
+        task_prompt_text=LOW_PROMPT,
     )
 
     assert receipt.decision == DECISION_REJECT
@@ -128,8 +135,9 @@ def test_complexity_above_two_would_block() -> None:
         determination_action="FIX",
         allocation=allocation,
         selected_slice="FOUNDUP_CROSS_MODULE_FIX_PHASE1",
-        requested_operation="bounded change",
+        requested_operation="cross-module repair",
         changed_paths=(LOW_PATH,),
+        task_prompt_text="Repair a cross-module data flow.",
     )
 
     assert allocation["complexity"] == 5
@@ -152,6 +160,7 @@ def test_unavailable_effect_classes_would_block(
         selected_slice="FOUNDUP_BOUNDED_FIX_PHASE1",
         requested_operation="bounded_module_fix",
         changed_paths=(LOW_PATH,),
+        task_prompt_text=LOW_PROMPT,
     )
 
     assert receipt.decision == DECISION_WOULD_BLOCK
@@ -203,9 +212,78 @@ def test_allocation_paths_must_equal_progressive_stage_paths() -> None:
         selected_slice="FOUNDUP_BOUNDED_FIX_PHASE1",
         requested_operation="bounded_module_fix",
         changed_paths=("modules/foundups/other/src/worker.py",),
+        task_prompt_text=LOW_PROMPT,
     )
 
     assert receipt.decision == DECISION_REJECT
+    assert receipt.no_effect_authority is True
+
+
+def test_allocation_operation_must_equal_progressive_stage_operation() -> None:
+    allocation = _allocation(operation="run shell command")
+    receipt = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="FOUNDUP_BOUNDED_FIX_PHASE1",
+        requested_operation="bounded_module_fix",
+        changed_paths=(LOW_PATH,),
+        task_prompt_text=LOW_PROMPT,
+    )
+
+    assert receipt.decision == DECISION_REJECT
+    assert receipt.no_effect_authority is True
+    assert "REJECT_PROGRESSIVE_OPERATION_BINDING" in receipt.rejection_reasons
+
+
+def test_safe_operation_and_path_cannot_hide_authority_prompt() -> None:
+    prompt = "Change signer authority and merge policy."
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="bounded_module_fix",
+        prompt_text=prompt,
+        changed_paths=(LOW_PATH,),
+        allowed_read_targets=(LOW_PATH,),
+    ).to_dict()
+
+    receipt = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="FOUNDUP_BOUNDED_FIX_PHASE1",
+        requested_operation="bounded_module_fix",
+        changed_paths=(LOW_PATH,),
+        task_prompt_text=prompt,
+    )
+
+    assert receipt.decision == DECISION_WOULD_BLOCK
+    assert {"AUTHORITY", "SIGNING", "MERGE"}.issubset(receipt.risk_classes)
+    assert receipt.no_effect_authority is True
+
+
+def test_foundup_identifier_is_not_misclassified_as_operation_risk() -> None:
+    path = "modules/foundups/trade/src/worker.py"
+    allocation, receipt = _admit(path=path)
+
+    assert allocation["changed_paths"] == (path,)
+    assert receipt.decision == DECISION_BOUNDED_EXECUTION_ADMITTED
+    assert receipt.risk_classes == ()
+
+
+@pytest.mark.parametrize(
+    "filename",
+    (
+        "signer_runtime.py",
+        "security_policy.py",
+        "permissions_manager.py",
+        "oauth_client.py",
+        "payment_service.py",
+        "trade_executor.py",
+    ),
+)
+def test_compound_sensitive_filename_is_not_low_risk(filename: str) -> None:
+    path = f"modules/foundups/demo/src/{filename}"
+    _, receipt = _admit(path=path)
+
+    assert receipt.decision == DECISION_WOULD_BLOCK
+    assert "PROTECTED_SURFACE" in receipt.risk_classes
     assert receipt.no_effect_authority is True
 
 
@@ -215,6 +293,58 @@ def test_production_stage_is_explicitly_closed() -> None:
     assert receipt.decision == DECISION_REJECT
     assert receipt.rejection_reasons == (REJECT_PRODUCTION_CLOSED,)
     assert receipt.production_authority_granted is False
+
+
+def _audit_queue_binding(*, operation: str, changed_paths=()):
+    prompt = "Review one FoundUp module without source effects."
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation=operation,
+        prompt_text=prompt,
+        changed_paths=changed_paths,
+        allowed_read_targets=(LOW_PATH,),
+    ).to_dict()
+    receipt = evaluate_proposal_stage(
+        action="RESEARCH_MORE",
+        reuse_decision="REUSE_EXISTING",
+        effect_plane="READ_ONLY_AUDIT",
+        allocation=allocation,
+        selected_slice="FOUNDUP_READONLY_AUDIT_PHASE1",
+        requested_operation=operation,
+        changed_paths=changed_paths,
+        task_prompt_text=prompt,
+        stage_ceiling=STAGE_AUDIT,
+    )
+    queue = {
+        "progressive_policy_stage_receipt_id": receipt.receipt_id,
+        "progressive_policy_stage_digest": stage_policy._digest(receipt.to_dict()),
+        "progressive_policy_stage_receipt": receipt.to_dict(),
+        "independent_verifier_required": False,
+    }
+    return queue, allocation
+
+
+def test_signed_readonly_audit_queue_binding_is_admitted_without_effects() -> None:
+    queue, allocation = _audit_queue_binding(
+        operation="signed_0102_readonly_review:foundup_module",
+    )
+
+    assert validate_queue_progressive_stage_binding(queue, allocation) is True
+    assert queue["progressive_policy_stage_receipt"]["no_effect_authority"] is True
+
+
+def test_signed_readonly_audit_queue_binding_rejects_changed_paths() -> None:
+    queue, allocation = _audit_queue_binding(
+        operation="signed_0102_readonly_review:foundup_module",
+        changed_paths=(LOW_PATH,),
+    )
+
+    assert validate_queue_progressive_stage_binding(queue, allocation) is False
+
+
+def test_audit_stage_cannot_admit_a_non_readonly_operation() -> None:
+    queue, allocation = _audit_queue_binding(operation="bounded_module_fix")
+
+    assert validate_queue_progressive_stage_binding(queue, allocation) is False
 
 
 def test_policy_module_has_no_execution_or_holoindex_mutation_surface() -> None:

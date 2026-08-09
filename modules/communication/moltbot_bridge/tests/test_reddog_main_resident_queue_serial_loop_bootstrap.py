@@ -99,6 +99,12 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admis
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     FakeAssuranceReservationStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
     verify_autonomous_slice_runtime,
@@ -187,6 +193,7 @@ def _test_governed_environment(
         "valve_dryrun_enabled": True,
         "valve_live_enqueue_enabled": False,
         "valve_worktree_create_enabled": True,
+        "progressive_execution_stage_ceiling": "BOUNDED_EXECUTION",
     }
     provenance = {
         "schema_version": "reddog_execution_valve_environment_supply_receipt.v1",
@@ -284,29 +291,12 @@ def _assert_bootstrap_yielded_at_assurance(
 
 
 def _queue_wsp15_allocation_receipt() -> dict[str, object]:
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation-queue",
-        "complexity": 5,
-        "importance": 5,
-        "deferability": 5,
-        "impact": 5,
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 2,
-            "coding_worker_count": 2,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "queue_mutation_allowed": False,
-            "hermes_execution_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
+    return allocate_reddog_wsp15_receipt(
+        requested_operation="edit_foundup_module",
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=("modules/foundups/paccess_001/README.md",),
+        allowed_read_targets=("modules/foundups/paccess_001/README.md",),
+    ).to_dict()
 
 
 def _snapshot() -> dict[str, object]:
@@ -314,6 +304,42 @@ def _snapshot() -> dict[str, object]:
     determination_id = "sha256:determination-1"
     selection_id = "sha256:model-selection-1"
     memex_id = "sha256:memex-1"
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        requested_operation="edit_foundup_module",
+        changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+    )
+    queue_item = {
+            "queue_item_id": "queue-1",
+            "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": [
+                "claim:claim-1",
+                "freshness:fresh-1",
+                f"wsp15_allocation:{allocation['receipt_id']}",
+                f"architect_determination:{determination_id}",
+                f"model_selection:{selection_id}",
+                f"memex_supply:{memex_id}",
+            ],
+            "source_determination_receipt_id": determination_id,
+            "model_selection_receipt_id": selection_id,
+            "model_selection_digest": "sha256:model-selection-digest",
+            "model_runtime_binding_receipt_id": "",
+            "model_runtime_binding_digest": "",
+            "memex_supply_receipt_id": memex_id,
+            "memex_supply_digest": "sha256:" + ("d" * 64),
+            "wsp15_allocation_receipt": allocation,
+            "progressive_policy_stage_receipt_id": stage.receipt_id,
+            "progressive_policy_stage_digest": _canonical_digest(stage.to_dict()),
+            "progressive_policy_stage_receipt": stage.to_dict(),
+            "independent_verifier_required": True,
+            "no_execution_performed": True,
+        }
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -333,32 +359,7 @@ def _snapshot() -> dict[str, object]:
                 "memex_supply_receipt_id": memex_id,
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": [
-                    "claim:claim-1",
-                    "freshness:fresh-1",
-                    f"wsp15_allocation:{allocation['receipt_id']}",
-                    f"architect_determination:{determination_id}",
-                    f"model_selection:{selection_id}",
-                    f"memex_supply:{memex_id}",
-                ],
-                "wsp15_allocation_receipt": allocation,
-                "source_determination_receipt_id": determination_id,
-                "model_selection_receipt_id": selection_id,
-                "model_selection_digest": "sha256:model-selection-digest",
-                "model_runtime_binding_receipt_id": "",
-                "model_runtime_binding_digest": "",
-                "memex_supply_receipt_id": memex_id,
-                "memex_supply_digest": "sha256:" + ("d" * 64),
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -375,7 +376,7 @@ def _profile(**overrides: object) -> dict[str, object]:
         "base_ref": "main",
         "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
         "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
-        "requested_operation": "feature_slice",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": PERMISSION_DIGEST,
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
@@ -434,7 +435,7 @@ def _work_order(**overrides: object) -> dict[str, object]:
             "source": "test",
             "digest": PERMISSION_DIGEST,
         },
-        "requested_operation": "feature_slice",
+        "requested_operation": "edit_foundup_module",
         "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
         "authority_tier": "source",
         "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],

@@ -302,7 +302,7 @@ class _ArchitectRunner:
         parsed = json.loads(prompt)
         evidence_ref = parsed["reports"][0]["evidence_refs"][0]
         content = architect_model_output(
-            {"receipt_id": parsed["wsp15_allocation_receipt_id"]},
+            {"receipt_id": parsed["wsp15_allocation_receipt_id"], **parsed["wsp15_execution_binding"]},
             evidence_ref,
             slice_name="REDDOG_RESIDENT_RUNTIME_NEXT_PHASE1",
         )
@@ -421,7 +421,7 @@ def test_durable_cycle_submits_agentdb_tasks_openclaw_claims_reports_and_determi
     assert all(claim["accepted"] is True for claim in result.openclaw_claims)
     assert result.architect_determination_id
     assert result.architect_action == "FIX"
-    assert result.queue_candidate_count == 1
+    assert result.queue_candidate_count == 0
     assert result.read_only_authority_only is True
     assert result.no_repo_mutation_performed is True
     assert result.no_holoindex_reindex_performed is True

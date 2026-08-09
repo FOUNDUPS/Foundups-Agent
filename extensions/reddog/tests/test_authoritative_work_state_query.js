@@ -122,7 +122,8 @@ async function main() {
   const wireStart = extensionSource.indexOf('function wireFusionWebview');
   const wireEnd = extensionSource.indexOf('function killBridgeChild', wireStart);
   const wireSource = extensionSource.slice(wireStart, wireEnd);
-  assert(wireSource.includes('const contextPacket = localFastPath ?'));
+  assert(wireSource.includes('const contextPacket = auditDegraded || localFastPath ?'));
+  assert(wireSource.includes('const compatibility = await currentBackendCompatibility()'));
   assert(wireSource.indexOf('if (localFastPath)')
     < wireSource.indexOf('result = await callFusion'));
   assert(wireSource.indexOf('resolveLocalResult')

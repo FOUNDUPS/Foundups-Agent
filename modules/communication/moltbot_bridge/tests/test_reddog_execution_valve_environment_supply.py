@@ -29,6 +29,10 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_OPEN_WORKTREE_CREATE,
     evaluate_reddog_execution_valve_canonical,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+    STAGE_BOUNDED_EXECUTION,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _authority_profile,
     _promote,
@@ -125,6 +129,7 @@ def _supply(tmp_path: Path, **overrides):
         "requested_valve_state": VALVE_OPEN_WORKTREE_CREATE,
         "queue_item_id": work_state["wre_queue_items"][0]["queue_item_id"],
         "now_epoch": NOW,
+        "progressive_execution_stage_ceiling": STAGE_BOUNDED_EXECUTION,
     }
     params.update(overrides)
     return run_reddog_execution_valve_environment_supply(**params)
@@ -137,6 +142,7 @@ def test_supply_writes_allowlisted_token_free_governed_environment(tmp_path: Pat
     payload = json.loads(Path(result.output_path or "").read_text(encoding="utf-8"))
     assert payload["schema_version"] == SCHEMA_VERSION
     assert payload["requested_valve_state"] == VALVE_OPEN_WORKTREE_CREATE
+    assert payload["progressive_execution_stage_ceiling"] == STAGE_BOUNDED_EXECUTION
     assert payload["authorization_binding_digest"].startswith("sha256:")
     assert payload["supply_provenance"]["environment_digest"] == result.environment_digest
     assert not any("token" in key.lower() for key in payload)
@@ -152,6 +158,15 @@ def test_supply_defaults_fail_closed_without_explicit_open_request(tmp_path: Pat
     payload = json.loads(Path(result.output_path or "").read_text(encoding="utf-8"))
     assert payload["valve_dryrun_enabled"] is False
     assert payload["valve_worktree_create_enabled"] is False
+
+
+def test_audit_stage_cannot_supply_an_open_effect_valve(tmp_path: Path) -> None:
+    result = _supply(
+        tmp_path, progressive_execution_stage_ceiling=STAGE_AUDIT
+    )
+
+    assert result.accepted is False
+    assert "progressive_execution_stage_ceiling_closed" in result.rejection_reasons
 
 
 def test_supply_rejects_authority_splicing(tmp_path: Path) -> None:
@@ -304,6 +319,7 @@ def test_bootstrap_reads_distinct_outside_repo_inputs(tmp_path: Path) -> None:
         requested_valve_state=VALVE_OPEN_WORKTREE_CREATE,
         queue_item_id=work_state["wre_queue_items"][0]["queue_item_id"],
         now_epoch=NOW,
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
 
     assert result.accepted is True, result.rejection_reasons
@@ -341,6 +357,7 @@ def test_cli_supplies_canonical_environment(tmp_path: Path, capsys) -> None:
         "--principal-authority-records", str(paths["principal_authority_records"]),
         "--output", str(paths["output"]),
         "--requested-valve-state", VALVE_OPEN_WORKTREE_CREATE,
+        "--progressive-execution-stage-ceiling", STAGE_BOUNDED_EXECUTION,
         "--queue-item-id", work_state["wre_queue_items"][0]["queue_item_id"],
         "--now-epoch", str(NOW),
     ])

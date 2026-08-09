@@ -36,8 +36,11 @@ REJECT_COMPLEXITY = "REJECT_PROGRESSIVE_COMPLEXITY_ABOVE_TWO"
 REJECT_NOT_FIX = "REJECT_PROGRESSIVE_DETERMINATION_NOT_FIX"
 REJECT_HIGH_RISK = "REJECT_PROGRESSIVE_HIGH_RISK_WORK"
 REJECT_CHANGED_PATH_BINDING = "REJECT_PROGRESSIVE_CHANGED_PATH_BINDING"
+REJECT_OPERATION_BINDING = "REJECT_PROGRESSIVE_OPERATION_BINDING"
+REJECT_PROMPT_BINDING = "REJECT_PROGRESSIVE_PROMPT_BINDING"
 REJECT_EFFECT_PLANE = "REJECT_PROGRESSIVE_EFFECT_PLANE"
 REJECT_CREATE_NEW = "REJECT_PROGRESSIVE_CREATE_NEW"
+REJECT_STAGE_CEILING = "REJECT_PROGRESSIVE_STAGE_CEILING"
 
 _HIGH_RISK_PATTERNS = {
     "AUTHORITY": re.compile(r"\b(authorit(?:y|ies)|permission|privilege|sovereign)\b", re.I),
@@ -127,34 +130,17 @@ def admit_bounded_execution(
     selected_slice: str,
     requested_operation: str,
     changed_paths: Sequence[str],
+    task_prompt_text: str,
 ) -> ProgressiveExecutionStageReceipt:
     """Admit only low-complexity, low-risk, authenticated FIX work."""
 
-    rejection: list[str] = []
-    validation = validate_reddog_wsp15_allocation_receipt(allocation)
-    if not validation.accepted:
-        rejection.append(REJECT_WSP15)
     action = str(determination_action or "").upper()
-    if action != "FIX":
-        rejection.append(REJECT_NOT_FIX)
-    complexity = allocation.get("complexity")
-    if type(complexity) is not int or complexity not in {1, 2}:
-        rejection.append(REJECT_COMPLEXITY)
-    normalized_paths = _normalize_paths(changed_paths)
-    allocation_paths = _normalize_paths(allocation.get("changed_paths") or ())
-    if normalized_paths != allocation_paths:
-        rejection.append(REJECT_CHANGED_PATH_BINDING)
-    risk_classes = classify_high_risk_work(
-        selected_slice=selected_slice,
-        requested_operation=requested_operation,
-        changed_paths=changed_paths,
+    rejection, risk_classes = _bounded_admission_rejections(
+        action=action, allocation=allocation, selected_slice=selected_slice,
+        requested_operation=requested_operation, changed_paths=changed_paths,
+        task_prompt_text=task_prompt_text,
     )
-    if risk_classes:
-        rejection.append(REJECT_HIGH_RISK)
-    hard_rejection = tuple(
-        reason for reason in rejection
-        if reason in {REJECT_WSP15, REJECT_CHANGED_PATH_BINDING}
-    )
+    hard_rejection = tuple(reason for reason in rejection if reason in _HARD_REJECTIONS)
     soft_rejection = tuple(reason for reason in rejection if reason not in hard_rejection)
     return _receipt(
         stage=STAGE_BOUNDED_EXECUTION,
@@ -176,16 +162,61 @@ def admit_bounded_execution(
     )
 
 
+_HARD_REJECTIONS = frozenset(
+    {REJECT_WSP15, REJECT_CHANGED_PATH_BINDING, REJECT_OPERATION_BINDING,
+     REJECT_PROMPT_BINDING}
+)
+
+
+def _bounded_admission_rejections(
+    *, action: str, allocation: Mapping[str, Any], selected_slice: str,
+    requested_operation: str, changed_paths: Sequence[str], task_prompt_text: str,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    rejection: list[str] = []
+    if not validate_reddog_wsp15_allocation_receipt(allocation).accepted:
+        rejection.append(REJECT_WSP15)
+    if action != "FIX":
+        rejection.append(REJECT_NOT_FIX)
+    if type(allocation.get("complexity")) is not int or allocation.get("complexity") not in {1, 2}:
+        rejection.append(REJECT_COMPLEXITY)
+    if _normalize_paths(changed_paths) != _normalize_paths(allocation.get("changed_paths") or ()):
+        rejection.append(REJECT_CHANGED_PATH_BINDING)
+    if str(requested_operation or "") != str(allocation.get("requested_operation") or ""):
+        rejection.append(REJECT_OPERATION_BINDING)
+    if _digest(str(task_prompt_text or "")) != str(allocation.get("prompt_digest") or ""):
+        rejection.append(REJECT_PROMPT_BINDING)
+    risks = classify_high_risk_work(
+        selected_slice=selected_slice, requested_operation=requested_operation,
+        changed_paths=changed_paths, task_prompt_text=task_prompt_text,
+    )
+    if risks:
+        rejection.append(REJECT_HIGH_RISK)
+    return tuple(rejection), risks
+
+
 def evaluate_proposal_stage(
     *, action: str, reuse_decision: str, effect_plane: str,
     allocation: Mapping[str, Any], selected_slice: str,
     requested_operation: str, changed_paths: Sequence[str],
+    task_prompt_text: str,
+    stage_ceiling: str = STAGE_BOUNDED_EXECUTION,
     would_block_reasons: Sequence[str] = (),
 ) -> ProgressiveExecutionStageReceipt:
     """Project a valid proposal onto the progressive effect ceiling."""
 
     normalized_action = str(action or "").upper()
     normalized_effect = str(effect_plane or "").upper()
+    if stage_ceiling not in {STAGE_AUDIT, STAGE_BOUNDED_EXECUTION}:
+        return reject_unavailable_stage(str(stage_ceiling or ""))
+    if stage_ceiling == STAGE_AUDIT:
+        return _audit_proposal_receipt(
+            action=normalized_action,
+            allocation=allocation,
+            selected_slice=selected_slice,
+            requested_operation=requested_operation,
+            changed_paths=changed_paths,
+            would_block_reasons=(*would_block_reasons, REJECT_STAGE_CEILING),
+        )
     if normalized_action != "FIX" or normalized_effect in {"NONE", "READ_ONLY_AUDIT"}:
         return _audit_proposal_receipt(
             action=normalized_action,
@@ -195,30 +226,60 @@ def evaluate_proposal_stage(
             changed_paths=changed_paths,
             would_block_reasons=would_block_reasons,
         )
+    return _bounded_proposal_stage(
+        action=normalized_action, effect=normalized_effect,
+        reuse_decision=reuse_decision, allocation=allocation,
+        selected_slice=selected_slice, requested_operation=requested_operation,
+        changed_paths=changed_paths, task_prompt_text=task_prompt_text,
+    )
+
+
+def _bounded_proposal_stage(
+    *, action: str, effect: str, reuse_decision: str,
+    allocation: Mapping[str, Any], selected_slice: str,
+    requested_operation: str, changed_paths: Sequence[str], task_prompt_text: str,
+) -> ProgressiveExecutionStageReceipt:
     receipt = admit_bounded_execution(
-        determination_action=normalized_action,
+        determination_action=action,
+        allocation=allocation,
+        selected_slice=selected_slice,
+        requested_operation=requested_operation,
+        changed_paths=changed_paths,
+        task_prompt_text=task_prompt_text,
+    )
+    extra: list[str] = []
+    if str(reuse_decision or "").upper() == "CREATE_NEW":
+        extra.append(REJECT_CREATE_NEW)
+    if effect != "REPOSITORY_CODE_CHANGE":
+        extra.append(REJECT_EFFECT_PLANE)
+    if not extra:
+        return receipt
+    return _blocked_proposal_receipt(
+        receipt=receipt,
+        reasons=extra,
+        action=action,
         allocation=allocation,
         selected_slice=selected_slice,
         requested_operation=requested_operation,
         changed_paths=changed_paths,
     )
-    extra: list[str] = []
-    if str(reuse_decision or "").upper() == "CREATE_NEW":
-        extra.append(REJECT_CREATE_NEW)
-    if normalized_effect != "REPOSITORY_CODE_CHANGE":
-        extra.append(REJECT_EFFECT_PLANE)
-    if not extra:
-        return receipt
+
+
+def _blocked_proposal_receipt(
+    *, receipt: ProgressiveExecutionStageReceipt, reasons: Sequence[str],
+    action: str, allocation: Mapping[str, Any], selected_slice: str,
+    requested_operation: str, changed_paths: Sequence[str],
+) -> ProgressiveExecutionStageReceipt:
     return _receipt(
         stage=STAGE_BOUNDED_EXECUTION,
         decision=DECISION_WOULD_BLOCK,
-        action=normalized_action,
+        action=action,
         selected_slice=str(selected_slice or ""),
         requested_operation=str(requested_operation or ""),
         changed_paths=tuple(map(str, changed_paths)),
         allocation=allocation,
         risk_classes=receipt.risk_classes,
-        would_block_reasons=_texts((*receipt.would_block_reasons, *extra)),
+        would_block_reasons=_texts((*receipt.would_block_reasons, *reasons)),
         rejection_reasons=(),
         no_effect_authority=True,
         independent_verifier_required=True,
@@ -272,7 +333,8 @@ def reject_unavailable_stage(stage: str) -> ProgressiveExecutionStageReceipt:
 
 
 def validate_bounded_execution_receipt(
-    receipt: Mapping[str, Any], allocation: Mapping[str, Any]
+    receipt: Mapping[str, Any], allocation: Mapping[str, Any],
+    *, task_prompt_text: str | None = None,
 ) -> bool:
     """Rehydrate a bounded receipt by recomputing policy and its receipt id."""
 
@@ -282,20 +344,28 @@ def validate_bounded_execution_receipt(
         return False
     if receipt.get("stage") != STAGE_BOUNDED_EXECUTION:
         return False
-    rebuilt = admit_bounded_execution(
-        determination_action=str(receipt.get("determination_action") or ""),
-        allocation=allocation,
+    expected_risk = classify_high_risk_work(
         selected_slice=str(receipt.get("selected_slice") or ""),
         requested_operation=str(receipt.get("requested_operation") or ""),
         changed_paths=tuple(receipt.get("changed_paths") or ()),
+        task_prompt_text=str(task_prompt_text or ""),
+    )
+    prompt_binding_ok = task_prompt_text is None or (
+        _digest(str(task_prompt_text or "")) == allocation.get("prompt_digest")
     )
     return bool(
-        rebuilt.decision == DECISION_BOUNDED_EXECUTION_ADMITTED
+        validate_reddog_wsp15_allocation_receipt(allocation).accepted
+        and prompt_binding_ok
         and receipt.get("decision") == DECISION_BOUNDED_EXECUTION_ADMITTED
+        and str(receipt.get("requested_operation") or "")
+        == str(allocation.get("requested_operation") or "")
+        and tuple(receipt.get("changed_paths") or ())
+        == _normalize_paths(allocation.get("changed_paths") or ())
         and receipt.get("wsp15_allocation_receipt_id") == allocation.get("receipt_id")
         and receipt.get("wsp15_allocation_digest")
         == canonical_reddog_wsp15_allocation_digest(allocation)
         and receipt.get("complexity") == allocation.get("complexity")
+        and expected_risk == ()
         and receipt.get("risk_classes") in ((), [])
         and receipt.get("would_block_reasons") in ((), [])
         and receipt.get("rejection_reasons") in ((), [])
@@ -320,6 +390,42 @@ def validate_queue_bounded_stage_binding(
         == receipt.get("receipt_id")
         and queue_item.get("progressive_policy_stage_digest") == _digest(receipt)
         and queue_item.get("independent_verifier_required") is True
+    )
+
+
+def validate_queue_progressive_stage_binding(
+    queue_item: Mapping[str, Any], allocation: Mapping[str, Any]
+) -> bool:
+    """Admit bounded effects or a strictly read-only signed 0102 audit."""
+
+    receipt = queue_item.get("progressive_policy_stage_receipt")
+    if not isinstance(receipt, Mapping):
+        return False
+    common = bool(
+        queue_item.get("progressive_policy_stage_receipt_id")
+        == receipt.get("receipt_id")
+        and queue_item.get("progressive_policy_stage_digest") == _digest(receipt)
+    )
+    if not common:
+        return False
+    if receipt.get("stage") == STAGE_BOUNDED_EXECUTION:
+        return validate_queue_bounded_stage_binding(queue_item, allocation)
+    operation = str(allocation.get("requested_operation") or "")
+    return bool(
+        operation.startswith("signed_0102_readonly_review:")
+        and not tuple(allocation.get("changed_paths") or ())
+        and validate_reddog_wsp15_allocation_receipt(allocation).accepted
+        and receipt.get("stage") == STAGE_AUDIT
+        and receipt.get("decision") == DECISION_AUDIT_CONTINUES
+        and receipt.get("requested_operation") == operation
+        and tuple(receipt.get("changed_paths") or ()) == ()
+        and receipt.get("wsp15_allocation_receipt_id") == allocation.get("receipt_id")
+        and receipt.get("wsp15_allocation_digest")
+        == canonical_reddog_wsp15_allocation_digest(allocation)
+        and receipt.get("no_effect_authority") is True
+        and receipt.get("independent_verifier_required") is False
+        and receipt.get("production_authority_granted") is False
+        and receipt.get("receipt_id") == _digest(_unsigned(receipt))
     )
 
 
@@ -353,7 +459,7 @@ def validate_proposal_stage_projection(proposal: Mapping[str, Any]) -> bool:
         requested_operation=bindings["requested_operation"],
         changed_paths=bindings["changed_paths"],
     )
-    if tuple(stage.get("risk_classes") or ()) != expected_risk:
+    if not set(expected_risk).issubset(set(stage.get("risk_classes") or ())):
         return False
     if stage.get("production_authority_granted") is not False:
         return False
@@ -365,10 +471,15 @@ def _valid_projected_stage_decision(
 ) -> bool:
     action = str(proposal.get("action") or "").upper()
     effect = str(proposal.get("target_effect_plane") or "").upper()
+    if stage.get("stage") == STAGE_AUDIT:
+        return bool(
+            stage.get("decision") == DECISION_AUDIT_CONTINUES
+            and stage.get("no_effect_authority") is True
+            and stage.get("independent_verifier_required") is False
+        )
     if action != "FIX" or effect in {"NONE", "READ_ONLY_AUDIT"}:
         return bool(
-            stage.get("stage") == STAGE_AUDIT
-            and stage.get("decision") == DECISION_AUDIT_CONTINUES
+            stage.get("decision") == DECISION_AUDIT_CONTINUES
             and stage.get("no_effect_authority") is True
             and stage.get("independent_verifier_required") is False
         )
@@ -395,10 +506,13 @@ def _valid_projected_stage_decision(
 
 
 def classify_high_risk_work(
-    *, selected_slice: str, requested_operation: str, changed_paths: Sequence[str]
+    *, selected_slice: str, requested_operation: str, changed_paths: Sequence[str],
+    task_prompt_text: str = "",
 ) -> tuple[str, ...]:
     del selected_slice
-    corpus = " ".join((str(requested_operation or ""), *map(str, changed_paths)))
+    corpus = " ".join(
+        (str(requested_operation or ""), str(task_prompt_text or ""), *map(str, changed_paths))
+    )
     risks = [name for name, pattern in _HIGH_RISK_PATTERNS.items() if pattern.search(corpus)]
     operation = str(requested_operation or "").strip().lower()
     if operation not in _BOUNDED_OPERATION_CLASSES:
@@ -414,7 +528,11 @@ def _bounded_path_risks(path: str) -> tuple[str, ...]:
     parts = tuple(part.lower() for part in path.split("/") if part)
     if len(parts) < 4 or parts[:2] != ("modules", "foundups"):
         return ("PROTECTED_SURFACE",)
-    if any(part in _PROTECTED_PATH_SEGMENTS for part in parts):
+    if any(
+        protected in token
+        for token in re.split(r"[^a-z0-9]+", "/".join(parts[3:]))
+        for protected in _PROTECTED_PATH_SEGMENTS
+    ):
         return ("PROTECTED_SURFACE",)
     leaf = parts[-1]
     if parts[3] not in _BOUNDED_FOUNDUP_SURFACES and leaf not in _BOUNDED_FOUNDUP_DOCS:
@@ -490,4 +608,5 @@ __all__ = [
     "evaluate_proposal_stage",
     "reject_unavailable_stage", "validate_bounded_execution_receipt",
     "validate_proposal_stage_projection", "validate_queue_bounded_stage_binding",
+    "validate_queue_progressive_stage_binding",
 ]

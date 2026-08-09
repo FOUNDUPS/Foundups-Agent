@@ -84,7 +84,7 @@ _DEFAULT_SIGNER = object()
 def _queue_wsp15_allocation_receipt() -> dict[str, object]:
     return allocate_reddog_wsp15_receipt(
         requested_operation="edit_foundup_module",
-        prompt_text="RedDog resident queue authority runtime worktree authority",
+        prompt_text="Fix one bounded FoundUp module defect",
         changed_paths=(f"modules/foundups/{FID}/src/worker.py",),
         allowed_read_targets=(f"modules/foundups/{FID}/src/worker.py",),
     ).to_dict()
@@ -158,6 +158,7 @@ def _snapshot() -> dict[str, object]:
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
         requested_operation="edit_foundup_module",
         changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text="Fix one bounded FoundUp module defect",
     )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",

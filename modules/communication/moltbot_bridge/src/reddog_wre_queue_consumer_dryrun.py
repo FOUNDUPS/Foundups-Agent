@@ -24,7 +24,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_receipt 
 from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
     model_runtime_authority_fields,
 )
-from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import validate_queue_bounded_stage_binding
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import validate_queue_progressive_stage_binding
 WRE_QUEUE_CONSUMER_DRYRUN_READY = "WRE_QUEUE_CONSUMER_DRYRUN_READY"
 WRE_QUEUE_CONSUMER_DRYRUN_REJECT = "WRE_QUEUE_CONSUMER_DRYRUN_REJECT"
 
@@ -230,10 +230,9 @@ def plan_reddog_wre_queue_consumer_dry_run(
         or not allocation_worker_plan
     ):
         reasons.append(FAIL_WSP15_ALLOCATION_RECEIPT)
-    stage_receipt = _mapping(selected.get("progressive_policy_stage_receipt"))
     stage_receipt_id = str(selected.get("progressive_policy_stage_receipt_id") or "")
     stage_digest = str(selected.get("progressive_policy_stage_digest") or "")
-    if not validate_queue_bounded_stage_binding(selected, wsp15_allocation):
+    if not validate_queue_progressive_stage_binding(selected, wsp15_allocation):
         reasons.append(FAIL_PROGRESSIVE_POLICY_STAGE)
 
     expected_refs = {

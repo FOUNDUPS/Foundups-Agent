@@ -2,9 +2,14 @@
 ## 2026-08-09: Progressive RedDog execution-stage authority binding
 - Added a signed, canonical stage receipt spanning architect proposal, queue,
   signer request, delegated work authority, and worker-dispatch equality.
-- Audit/review failures project as `WOULD_BLOCK` without effects. Only valid
-  low-complexity WSP_15 `FIX` work can enter bounded execution; high-risk,
-  create-new, merge, external, and production work remain blocked.
+- Audit-stage queue admission accepts only signed strict read-only audit tasks
+  with canonical WSP_15 allocation, empty changed paths, and no effect
+  authority. Audit/review failures project as `WOULD_BLOCK` without effects.
+  Only valid low-complexity WSP_15 `FIX` work can enter bounded execution;
+  high-risk, create-new, merge, external, and production work remain blocked.
+- Kept the editor-selected stage as a requested ceiling and enforced a
+  separate root-owned runtime ceiling at the valve. Neither ceiling is an
+  authority source.
 - Corrected WSP_15 complexity so module names and authority sensitivity affect
   priority/reasoning without falsely making every one-file RedDog repair
   complexity 5. Independent verification remains mandatory. (WSP 00/15/22/50/62/97)

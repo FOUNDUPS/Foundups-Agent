@@ -49,6 +49,7 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
 from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
     DECISION_BOUNDED_EXECUTION_ADMITTED,
     ProgressiveExecutionStageReceipt,
+    STAGE_AUDIT,
     evaluate_proposal_stage,
 )
 
@@ -100,6 +101,8 @@ def evaluate_architect_proposal_executability(
     wsp15_allocation_receipt: Mapping[str, Any],
     policy: ArchitectProposalAdmissionPolicy | None = None,
     conversation_binding: Mapping[str, Any] | None = None,
+    task_prompt_text: str = "",
+    progressive_execution_stage_ceiling: str = STAGE_AUDIT,
 ) -> ArchitectProposalExecutabilityReceipt:
     """Validate proposal structure and derive current execution readiness."""
 
@@ -121,6 +124,8 @@ def evaluate_architect_proposal_executability(
         wsp15_allocation_receipt=wsp15_allocation_receipt,
         policy=current_policy,
         conversation_binding=conversation_binding,
+        task_prompt_text=task_prompt_text,
+        progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
     )
 
 
@@ -349,6 +354,8 @@ def _receipt(
     wsp15_allocation_receipt: Mapping[str, Any],
     policy: ArchitectProposalAdmissionPolicy,
     conversation_binding: Mapping[str, Any] | None,
+    task_prompt_text: str,
+    progressive_execution_stage_ceiling: str,
 ) -> ArchitectProposalExecutabilityReceipt:
     stage = evaluate_proposal_stage(
         action=proposal.action,
@@ -358,6 +365,8 @@ def _receipt(
         selected_slice=proposal.slice_id or "",
         requested_operation=proposal.requested_operation,
         changed_paths=proposal.allowed_paths,
+        task_prompt_text=task_prompt_text,
+        stage_ceiling=progressive_execution_stage_ceiling,
         would_block_reasons=decision.missing_preconditions,
     )
     payload = {

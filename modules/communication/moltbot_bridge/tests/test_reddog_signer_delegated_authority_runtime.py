@@ -1296,6 +1296,18 @@ def test_result_contains_no_secret_or_signing_material_labels() -> None:
     assert result.receipt.no_signing_material_observed is True
 
 
+@pytest.mark.parametrize(
+    "field",
+    ("progressive_policy_stage_receipt_id", "progressive_policy_stage_digest"),
+)
+def test_malformed_progressive_stage_digest_is_rejected(field: str) -> None:
+    result, _, _, _ = _issue(**{field: "sha256:not-canonical"})
+
+    assert result.accepted is False
+    assert result.receipt.status == "DELEGATED_AUTHORITY_REJECTED"
+    assert result.receipt.rejection_reasons == ("REJECT_MALFORMED_REQUEST",)
+
+
 def test_ast_denies_execution_crypto_keygen_network_and_runtime_wiring() -> None:
     src = Path(r.__file__).read_text(encoding="utf-8")
     tree = ast.parse(src)

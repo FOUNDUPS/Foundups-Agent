@@ -40,6 +40,7 @@ from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authori
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     governed_worker_dispatch_snapshot,
+    queue_wsp15_allocation_receipt,
     worker_dispatch_authority_verification_context,
     worker_dispatch_authority_stages,
 )
@@ -69,23 +70,7 @@ def _digest(value: object) -> str:
 
 
 def _allocation():
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 14,
-        "priority": "P1",
-        "reasoning_tier": "HIGH",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "critic_count": 1,
-            "coding_worker_count": 1,
-            "independent_verifier_required": True,
-            "openclaw_candidate": False,
-            "hermes_execution_allowed": False,
-            "queue_mutation_allowed": False,
-        },
-    }
+    return queue_wsp15_allocation_receipt()
 
 
 def _snapshot():
@@ -107,6 +92,13 @@ def _dryrun_stage():
     allocation = _allocation()
     _, verification = _authority_stages()
     queue_item = _snapshot()["wre_queue_items"][0]
+    stage_refs = {
+        key: queue_item[key]
+        for key in (
+            "progressive_policy_stage_receipt_id",
+            "progressive_policy_stage_digest",
+        )
+    }
     refs = {
         key: verification[key]
         for key in (
@@ -124,7 +116,7 @@ def _dryrun_stage():
             "capability": capability,
             "work_order_id": "wo-1",
             "foundup_id": "paccess_001",
-            "requested_operation": "create_foundup",
+            "requested_operation": allocation["requested_operation"],
             "wsp15_allocation_receipt_id": allocation["receipt_id"],
             "wsp15_allocation_digest": _digest(allocation),
             **model_runtime,
@@ -132,6 +124,7 @@ def _dryrun_stage():
             "memex_supply_digest": queue_item["memex_supply_digest"],
             "architect_fix_publication_receipt_id": "",
             "architect_fix_publication_binding_digest": "",
+            **stage_refs,
             **refs,
             "dry_run_only": True,
             "no_worker_spawn_performed": True,
@@ -147,7 +140,7 @@ def _dryrun_stage():
             "receipt_id": "signed_authority_worker_dispatch_abc",
             "work_order_id": "wo-1",
             "foundup_id": "paccess_001",
-            "requested_operation": "create_foundup",
+            "requested_operation": allocation["requested_operation"],
             "wsp15_allocation_receipt_id": allocation["receipt_id"],
             "wsp15_allocation_digest": _digest(allocation),
             "wsp15_priority": allocation["priority"],
@@ -158,6 +151,7 @@ def _dryrun_stage():
             "memex_supply_digest": queue_item["memex_supply_digest"],
             "architect_fix_publication_receipt_id": "",
             "architect_fix_publication_binding_digest": "",
+            **stage_refs,
             **refs,
             "dispatch_intent_count": len(intents),
             "dispatch_intents": intents,
@@ -228,7 +222,8 @@ def test_runtime_handler_publishes_signed_worker_tasks() -> None:
     assert result["decision"] == SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT
     assert result["receipt"]["agentdb_tasks_enqueued"] is True
     assert result["tasks"][0]["context"]["worker_runtime"] == "0102"
-    assert writer.calls and len(writer.calls[0][0]) == 3
+    assert writer.calls
+    assert len(writer.calls[0][0]) == len(derive_worker_dispatch_roles(_allocation()))
 
 
 def test_runtime_handler_rejects_wrong_stage_or_action() -> None:

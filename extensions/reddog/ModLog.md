@@ -3,11 +3,13 @@
 ## 2026-08-09 - Progressive audit and bounded-execution stages (0.4.72)
 
 - Added an explicit `audit` / `boundedExecution` setting as a maximum effect
-  stage. Audit remains conversational and useful while action planning stays
-  closed; the setting itself grants no authority.
+  stage. Audit remains conversational and may admit only signed strict
+  read-only tasks with no changed paths or effect authority; the setting
+  itself grants no authority.
 - Bound the extension planning path to both the selected ceiling and the
-  existing runtime-consumption gate. Production remains unavailable, and
-  redaction, signature, replay, scope, and secret controls are not switchable.
+  existing runtime-consumption gate. The root-owned runtime ceiling remains
+  independently authoritative. Production remains unavailable, and redaction,
+  signature, replay, scope, and secret controls are not switchable.
 - Added Run Trace truth for the configured stage, audit availability, action
   ceiling, and no-authority invariant. (WSP 00/15/22/50/62/97)
 

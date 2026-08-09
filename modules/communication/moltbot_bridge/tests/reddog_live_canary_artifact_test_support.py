@@ -28,6 +28,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_p
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_BOUNDED_EXECUTION,
+)
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_selection_and_runtime_binding_receipts,
 )
@@ -170,6 +173,7 @@ def _write_valve(repo: Path, runtime: Path, work: dict, profile: dict, queue_id:
         principal_authority_records=_read(runtime / "principal_authority_records.json"),
         output_path=runtime / "execution_valve_env.json",
         requested_valve_state=VALVE_OPEN_WORKTREE_CREATE, queue_item_id=queue_id, now_epoch=now,
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
     assert result.accepted, result.rejection_reasons
 

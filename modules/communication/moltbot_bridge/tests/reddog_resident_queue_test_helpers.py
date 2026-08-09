@@ -14,6 +14,7 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
 )
 from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
     admit_bounded_execution,
+    evaluate_proposal_stage,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import (
     architect_fix_publication_state_projection,
@@ -160,7 +161,10 @@ class FakeAssuranceReservationStore:
         return {"accepted": True, "status": "STAGED"}
 
 
-def queue_wsp15_allocation_receipt(*, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
+_BOUNDED_TEST_PROMPT = "Fix one bounded FoundUp module defect"
+
+
+def queue_wsp15_allocation_receipt(*, prompt_text: str = _BOUNDED_TEST_PROMPT) -> dict[str, Any]:
     return allocate_reddog_wsp15_receipt(
         requested_operation="edit_foundup_module",
         prompt_text=prompt_text,
@@ -169,7 +173,7 @@ def queue_wsp15_allocation_receipt(*, prompt_text: str = "RedDog resident queue 
     ).to_dict()
 
 
-def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
+def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str = _BOUNDED_TEST_PROMPT) -> dict[str, Any]:
     allocation = queue_wsp15_allocation_receipt(prompt_text=prompt_text)
     item = dict(queue_item)
     stage = admit_bounded_execution(
@@ -178,6 +182,7 @@ def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str 
         selected_slice=str(item.get("slice_id") or ""),
         requested_operation="edit_foundup_module",
         changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text=prompt_text,
     )
     refs = [str(ref) for ref in item.get("evidence_refs") or ()]
     refs.extend(
@@ -196,6 +201,8 @@ def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str 
 
 def governed_worker_dispatch_snapshot(
     snapshot: dict[str, Any],
+    *,
+    task_prompt_text: str = _BOUNDED_TEST_PROMPT,
 ) -> dict[str, Any]:
     """Add the minimum real queue lineage required by the signed worker path."""
     governed = deepcopy(snapshot)
@@ -214,15 +221,26 @@ def governed_worker_dispatch_snapshot(
     queue.setdefault("memex_supply_digest", _TEST_MEMEX_SUPPLY_DIGEST)
     allocation = queue.get("wsp15_allocation_receipt") or {}
     if not queue.get("progressive_policy_stage_receipt") and allocation:
-        stage = admit_bounded_execution(
-            determination_action="FIX",
-            allocation=allocation,
-            selected_slice=str(queue.get("slice_id") or ""),
-            requested_operation=str(
-                allocation.get("requested_operation") or "bounded_code_change"
-            ),
-            changed_paths=tuple(allocation.get("changed_paths") or ()),
-        )
+        operation = str(allocation.get("requested_operation") or "")
+        changed_paths = tuple(allocation.get("changed_paths") or ())
+        if operation.startswith("signed_0102_readonly_review:") and not changed_paths:
+            stage = evaluate_proposal_stage(
+                action="RESEARCH_MORE", reuse_decision="REUSE_EXISTING",
+                effect_plane="READ_ONLY_AUDIT", allocation=allocation,
+                selected_slice=str(queue.get("slice_id") or ""),
+                requested_operation=operation, changed_paths=(),
+                task_prompt_text=task_prompt_text,
+                stage_ceiling="AUDIT_NO_EFFECT",
+            )
+        else:
+            stage = admit_bounded_execution(
+                determination_action="FIX",
+                allocation=allocation,
+                selected_slice=str(queue.get("slice_id") or ""),
+                requested_operation=operation or "bounded_code_change",
+                changed_paths=changed_paths,
+                task_prompt_text=task_prompt_text,
+            )
         queue["progressive_policy_stage_receipt_id"] = stage.receipt_id
         queue["progressive_policy_stage_digest"] = canonical_digest(stage.to_dict())
         queue["progressive_policy_stage_receipt"] = stage.to_dict()
@@ -393,7 +411,11 @@ def worker_dispatch_authority_stages(
         "reddog_id": "reddog:worker-dispatch",
         "repo_full_name": _TEST_REPO,
         "foundup_id": _TEST_FOUNDUP,
-        "allowed_paths": list(allocation.get("changed_paths") or ()),
+        "allowed_paths": list(
+            allocation.get("changed_paths")
+            or allocation.get("allowed_read_targets")
+            or ()
+        ),
         "denied_paths": [],
         "requested_operation": str(
             allocation.get("requested_operation") or "bounded_code_change"
@@ -663,34 +685,13 @@ def publish_agentdb_task_for_intent(
     )
 
     requested_role = str(intent_overrides.get("role") or "")
-    requested_intent_id = str(intent_overrides.get("intent_id") or "")
-    if requested_intent_id:
-        allocation = {
-            **allocation,
-            "receipt_id": digest_builder(
-                {
-                    "base_receipt_id": allocation["receipt_id"],
-                    "requested_intent_id": requested_intent_id,
-                }
-            ),
-        }
-    if requested_role == "openclaw_candidate":
-        allocation = {
-            **allocation,
-            "worker_plan": {
-                **dict(allocation["worker_plan"]),
-                "coding_worker_count": 0,
-                "independent_verifier_required": False,
-                "openclaw_candidate": True,
-            },
-        }
     result = publish_bound_worker_dispatch(
         worker_dispatch_dryrun_result=dryrun_builder(allocation=allocation),
         work_state_snapshot=snapshot_builder(allocation),
         queue_item_id="queue-1",
         writer=_CollectingAgentDbSpecWriter(),
     )
-    assert result.accepted is True and result.receipt is not None
+    assert result.accepted is True and result.receipt is not None, result.to_dict()
     matching = [
         task
         for task in result.tasks

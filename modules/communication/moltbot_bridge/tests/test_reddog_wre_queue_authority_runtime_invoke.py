@@ -124,8 +124,8 @@ def _queue_result():
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "reasoning_tier": "ULTRA",
-        "progressive_policy_stage_receipt_id": "sha256:progressive-stage",
-        "progressive_policy_stage_digest": "sha256:progressive-stage-digest",
+        "progressive_policy_stage_receipt_id": "sha256:" + "d" * 64,
+        "progressive_policy_stage_digest": "sha256:" + "e" * 64,
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:" + "a" * 64,
         "model_runtime_binding_verification_receipt_id": (

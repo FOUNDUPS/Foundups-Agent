@@ -143,8 +143,8 @@ def _queue_result():
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "reasoning_tier": "ULTRA",
-        "progressive_policy_stage_receipt_id": "sha256:progressive-stage",
-        "progressive_policy_stage_digest": "sha256:progressive-stage-digest",
+        "progressive_policy_stage_receipt_id": "sha256:" + "d" * 64,
+        "progressive_policy_stage_digest": "sha256:" + "e" * 64,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }

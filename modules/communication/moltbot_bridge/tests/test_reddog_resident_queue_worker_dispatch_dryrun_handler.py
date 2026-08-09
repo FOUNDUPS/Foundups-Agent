@@ -100,6 +100,7 @@ def _stage(allocation: dict[str, object]):
         selected_slice=SLICE_ID,
         requested_operation=REQUESTED_OPERATION,
         changed_paths=(CHANGED_PATH,),
+        task_prompt_text="Fix the bounded RedDog runtime pAccess test artifact.",
     )
 
 

@@ -375,14 +375,16 @@ def validate_reddog_wsp15_allocation_receipt(
 
     if "malformed_changed_paths" not in reasons and type(allocation.get("complexity")) is int:
         paths = tuple(allocation.get("changed_paths") or ())
+        targets = tuple(allocation.get("allowed_read_targets") or ())
         observable_corpus = _corpus(
             requested_operation=str(allocation.get("requested_operation") or ""),
             prompt_text="",
             changed_paths=paths,
-            allowed_read_targets=tuple(allocation.get("allowed_read_targets") or ()),
+            allowed_read_targets=targets,
         )
         minimum_complexity = _score_complexity(
-            path_count=len(paths), corpus=observable_corpus
+            path_count=len(tuple(dict.fromkeys((*paths, *targets)))),
+            corpus=observable_corpus,
         )
         if int(allocation["complexity"]) < minimum_complexity:
             reasons.append("complexity_below_observable_minimum")
@@ -591,11 +593,13 @@ def _normalize_paths(paths: Sequence[str]) -> tuple[str, ...]:
 def allocation_changed_paths_match(
     authority: Mapping[str, Any], allocation: Mapping[str, Any]
 ) -> bool:
-    """Require signed effect paths to equal the canonical WSP 15 allocation."""
+    """Require signed scope to equal effect paths or read-only review targets."""
 
-    return tuple(authority.get("allowed_paths") or ()) == tuple(
-        allocation.get("changed_paths") or ()
-    )
+    expected = tuple(allocation.get("changed_paths") or ())
+    operation = str(allocation.get("requested_operation") or "")
+    if not expected and operation.startswith("signed_0102_readonly_review:"):
+        expected = tuple(allocation.get("allowed_read_targets") or ())
+    return tuple(authority.get("allowed_paths") or ()) == expected
 
 
 def _canonical_json(value: Any) -> str:

@@ -178,6 +178,26 @@ def test_memex_authority_binding_is_optional_but_must_be_canonical() -> None:
     assert ReasonCode.MALFORMED_PAYLOAD in result.reason_codes
 
 
+@pytest.mark.parametrize(
+    "field",
+    ("progressive_policy_stage_receipt_id", "progressive_policy_stage_digest"),
+)
+def test_progressive_stage_binding_requires_canonical_sha256(field: str) -> None:
+    crypto, identity, workauth, ctx = _build()
+    workauth.update(
+        {
+            "progressive_policy_stage_receipt_id": "sha256:" + ("e" * 64),
+            "progressive_policy_stage_digest": "sha256:" + ("f" * 64),
+        }
+    )
+    workauth[field] = "sha256:not-canonical"
+    _resign_wa(crypto, identity, workauth)
+
+    result = _run(identity, workauth, ctx)
+
+    assert result.accepted is False
+    assert ReasonCode.MALFORMED_PAYLOAD in result.reason_codes
+
 def _policy_order_from_workauth(workauth, now: int = 1000, **overrides):
     captured = datetime.fromtimestamp(now - 60, timezone.utc).replace(microsecond=0).isoformat()
     expiry = datetime.fromtimestamp(now + 3600, timezone.utc).replace(microsecond=0).isoformat()

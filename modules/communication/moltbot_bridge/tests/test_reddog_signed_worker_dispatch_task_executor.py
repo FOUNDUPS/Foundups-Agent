@@ -43,9 +43,6 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     RUNTIME_SURFACE_ARTIFACT_GENERATION,
 )
-from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
-    allocate_reddog_wsp15_receipt,
-)
 from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_serial_loop_bootstrap import (
     NOW as BOOTSTRAP_NOW,
     PILOT_ARTIFACT,
@@ -80,9 +77,13 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import worker_dispatch_dryrun_result
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     configure_signed_worker_claim_authority_env,
-    governed_worker_dispatch_snapshot,
     install_signed_worker_envelope_test_authority,
     publish_agentdb_task_for_intent,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    bounded_allocation as _allocation,
+    governed_snapshot as _snapshot,
+    readonly_allocation as _valid_readonly_allocation,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_test_capability,
@@ -212,6 +213,7 @@ def _mapping_digest(value: dict[str, object]) -> str:
 def isolated_agent_db(tmp_path, monkeypatch):
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
     monkeypatch.setenv("OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED", "1")
+    monkeypatch.setenv("OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED", "1")
     DatabaseManager.reset_for_tests()
     _patch_assurance_store(monkeypatch)
     install_signed_worker_envelope_test_authority(monkeypatch)
@@ -437,61 +439,9 @@ def _digest(value: object) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
-def _allocation(**overrides):
-    payload = {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 1,
-            "coding_worker_count": 1,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "hermes_execution_allowed": False,
-            "queue_mutation_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
-    payload.update(overrides)
-    return payload
-
-
-def _valid_readonly_allocation(
-    *,
-    targets=("docs/work_ledger.schema.json",),
-    runtime_binding=None,
-):
-    return allocate_reddog_wsp15_receipt(
-        requested_operation="signed_0102_readonly_review:redDog_runtime_security",
-        prompt_text="RedDog OpenClaw signed 0102 read-only review runtime security audit.",
-        allowed_read_targets=targets,
-        model_runtime_binding_receipt=runtime_binding,
-    ).to_dict()
-
-
 def _dryrun_result(allocation=None, intent=None):
     assert intent is None
     return worker_dispatch_dryrun_result(allocation or _allocation())
-
-
-def _snapshot(allocation=None, **queue_overrides):
-    allocation = allocation or _allocation()
-    queue_item = {
-        "queue_item_id": "queue-1",
-        "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-        "status": "QUEUED",
-        "wsp15_allocation_receipt": allocation,
-    }
-    queue_item.update(queue_overrides)
-    return governed_worker_dispatch_snapshot({
-        "schema_version": "reddog_authoritative_work_state.v1",
-        "wre_queue_items": [queue_item],
-    })
 
 
 def _task_context():
@@ -575,13 +525,14 @@ def _task_context_with_model_runtime_binding(
 
 def _publish_agentdb_task(**intent_overrides) -> str:
     defaults = {
-        "intent_id": "worker_dispatch_intent_openclaw_candidate",
-        "role": "openclaw_candidate",
+        "intent_id": "worker_dispatch_intent_queue_stage_worker",
+        "role": "queue_stage_worker",
         "worker_runtime": "openclaw",
-        "capability": "candidate_queue_review",
+        "capability": "queue_stage_progress",
     }
+    requested = str(intent_overrides.get("intent_id") or defaults["intent_id"])
     return _publish_agentdb_task_with_allocation(
-        _allocation(),
+        _allocation(prompt_suffix=requested),
         **{**defaults, **intent_overrides},
     )
 
@@ -594,6 +545,16 @@ def _publish_agentdb_task_with_allocation(allocation, **intent_overrides) -> str
         snapshot_builder=_snapshot,
         context_override_builder=_context_with_intent_overrides,
         digest_builder=_digest,
+    )
+
+
+def _publish_readonly_agentdb_task() -> str:
+    return _publish_agentdb_task_with_allocation(
+        _valid_readonly_allocation(),
+        intent_id="worker_dispatch_intent_fusion_lead",
+        role="fusion_lead",
+        worker_runtime="0102",
+        capability="architect_review",
     )
 
 
@@ -903,7 +864,14 @@ def test_signed_worker_executor_rejects_incomplete_or_inconsistent_effect_eviden
 def test_run_task_routes_signed_worker_before_wre_fallback(tmp_path: Path, monkeypatch) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_signed_worker_task(task_id)
+    row = db.db.execute_query(
+        "SELECT status, discovered_by, assigned_to, context, required_skills "
+        "FROM agents_autonomous_tasks WHERE task_id = ?",
+        (task_id,),
+    )
+
+
+    assert db.assign_signed_worker_task(task_id), row
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
 
     result = execute_task(task_id, repo_root=tmp_path, signed_worker_runner=_FakeRunner())
@@ -988,7 +956,7 @@ def test_openclaw_signed_worker_healthcheck_blocks_before_agentdb_claim(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK", "1")
     from modules.communication.moltbot_bridge.src import (
         reddog_signer_socket_service_healthcheck as healthcheck_module,
@@ -1026,7 +994,7 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK", "1")
     from modules.communication.moltbot_bridge.src import (
         reddog_signer_socket_service_healthcheck as healthcheck_module,
@@ -1050,7 +1018,7 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
         signed_worker_runner=runner,
     )
 
-    assert result["accepted"] is True
+    assert result["accepted"] is True, json.dumps(result, sort_keys=True, default=str)
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
     assert result["task_id"] == task_id
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
@@ -1059,8 +1027,8 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
     assert receipt["claim_status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
     assert receipt["accepted"] is True
     assert receipt["receipt_id"] == result["receipt_id"]
-    assert receipt["worker_runtime"] == "openclaw"
-    assert receipt["capability"] == "candidate_queue_review"
+    assert receipt["worker_runtime"] == "0102"
+    assert receipt["capability"] == "architect_review"
     assert str(receipt["run_result_digest"]).startswith("sha256:")
     assert str(receipt["runner_result_digest"]).startswith("sha256:")
 
@@ -1068,7 +1036,7 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
 def test_openclaw_signed_worker_claim_persists_failure_result_receipt(
     tmp_path: Path,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
 
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
 
@@ -1081,7 +1049,7 @@ def test_openclaw_signed_worker_claim_persists_failure_result_receipt(
     assert SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED in receipt[
         "rejection_reasons"
     ]
-    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_MISSING in receipt[
+    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED in receipt[
         "rejection_reasons"
     ]
 
@@ -1090,7 +1058,7 @@ def test_openclaw_signed_worker_claim_fails_terminally_on_binding_exception(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
 
     def _raise_binding_error(**_kwargs):
         raise RuntimeError("binding failed")
@@ -1112,7 +1080,7 @@ def test_openclaw_signed_worker_claim_fails_terminally_on_binding_exception(
 def test_openclaw_signed_worker_claim_persists_requeue_result_receipt(
     tmp_path: Path,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
 
     result = claim_reddog_signed_worker_dispatch_task_once(
         repo_root=tmp_path,
@@ -1134,7 +1102,7 @@ def test_openclaw_signed_worker_claim_rejects_when_result_persistence_fails(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    task_id = _publish_readonly_agentdb_task()
     from modules.communication.moltbot_bridge.src import openclaw_supervisor
 
     monkeypatch.setattr(
@@ -1165,7 +1133,7 @@ def test_openclaw_signed_worker_claim_rejects_when_task_transition_fails(
     monkeypatch,
     requeue_required: bool,
 ) -> None:
-    _publish_agentdb_task()
+    _publish_readonly_agentdb_task()
     from modules.communication.moltbot_bridge.src import openclaw_supervisor
 
     monkeypatch.setattr(
@@ -1191,7 +1159,7 @@ def test_openclaw_signed_worker_rejection_surfaces_failed_failure_transition(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    _publish_agentdb_task()
+    _publish_readonly_agentdb_task()
     from modules.communication.moltbot_bridge.src import openclaw_supervisor
 
     monkeypatch.setattr(
@@ -1206,7 +1174,7 @@ def test_openclaw_signed_worker_rejection_surfaces_failed_failure_transition(
     )
 
     assert result["accepted"] is False
-    assert result["worker_execution_performed"] is False
+    assert result["worker_execution_performed"] is True
     assert result["effect_evidence_complete"] is True
     assert (
         SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED
@@ -2954,4 +2922,3 @@ def test_signed_worker_executor_ast_has_no_shell_network_or_runtime_mutation() -
     assert "exec" not in calls
     assert "system" not in attrs
     assert "popen" not in attrs
-    governed_worker_dispatch_snapshot,
