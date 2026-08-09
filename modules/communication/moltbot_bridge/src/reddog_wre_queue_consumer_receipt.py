@@ -19,6 +19,7 @@ class WREQueueConsumerDryRunReceipt:
     worker_id: str
     freshness_receipt_id: str
     operational_snapshot_id: str
+    wsp15_allocation_receipt: Mapping[str, Any]
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
     wsp15_priority: str
@@ -76,6 +77,7 @@ def build_queue_consumer_receipt(
         worker_id=str(seed["worker_id"]),
         freshness_receipt_id=str(seed["freshness_receipt_id"]),
         operational_snapshot_id=str(seed["operational_snapshot_id"]),
+        wsp15_allocation_receipt=dict(seed["wsp15_allocation_receipt"]),
         wsp15_allocation_receipt_id=str(seed["wsp15_allocation_receipt_id"]),
         wsp15_allocation_digest=str(seed["wsp15_allocation_digest"]),
         wsp15_priority=str(seed["wsp15_priority"]),

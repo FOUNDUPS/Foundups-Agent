@@ -15,7 +15,9 @@ _REQUEST_FIELDS = frozenset(
     field.name for field in fields(DelegatedAuthorityRuntimeRequest)
 )
 _SEQUENCE_FIELDS = frozenset({"allowed_paths", "denied_paths"})
-_MAPPING_FIELDS = frozenset({"progressive_policy_stage_receipt"})
+_MAPPING_FIELDS = frozenset(
+    {"progressive_policy_stage_receipt", "wsp15_allocation_receipt"}
+)
 _INTEGER_FIELDS = frozenset(
     {"wsp15_mps_total", "issued_at", "identity_expires_at", "work_authority_expires_at"}
 )

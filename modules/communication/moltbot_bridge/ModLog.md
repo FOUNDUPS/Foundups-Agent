@@ -21,6 +21,14 @@
   broader profile globs cannot survive signer materialization. Traversal paths
   and non-empty audit allow/deny lists fail closed. Legacy dispatch tests now
   construct genuine signed envelopes instead of rewriting intents after signing.
+- Carried the complete canonical WSP_15 allocation through queue consumption,
+  signer materialization, work authority, and use-time verification. Signer
+  and verifier independently recompute its digest and stage decision; scalar
+  IDs or attacker-rehashed wildcard/protected-path stages cannot authorize work.
+- Kept resident editor activation at audit until a root-owned runtime ceiling
+  exists. Signed no-effect audits use the dry-run valve at claim-time restart;
+  bounded authority remains exact-path, separately verified, and unavailable
+  from the editor setting alone.
 
 ## 2026-08-09: RedDog stale Holo authority recovery binding
 - Extended the existing incident and blocked-request contracts for the proven

@@ -771,7 +771,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             ),
             grounding_receipt=red_dog_intent.get("grounding_receipt"),
             grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
-            progressive_execution_stage_ceiling=_intent_stage_ceiling(red_dog_intent),
+            progressive_execution_stage_ceiling=_runtime_stage_ceiling(red_dog_intent),
             audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
             require_audit_model_runtime_binding=True,
             architect_model_runtime_binding_receipt_override=(
@@ -933,7 +933,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         workspace_memory_notes=workspace_memory_notes,
         grounding_receipt=red_dog_intent.get("grounding_receipt"),
         grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
-        progressive_execution_stage_ceiling=_intent_stage_ceiling(red_dog_intent),
+        progressive_execution_stage_ceiling=_runtime_stage_ceiling(red_dog_intent),
         audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
         require_audit_model_runtime_binding=True,
         audit_lanes=audit_lanes,
@@ -1090,6 +1090,13 @@ def _intent_stage_ceiling(intent: Mapping[str, Any]) -> str:
         STAGE_AUDIT: STAGE_AUDIT,
         STAGE_BOUNDED_EXECUTION: STAGE_BOUNDED_EXECUTION,
     }.get(value, value)
+
+
+def _runtime_stage_ceiling(intent: Mapping[str, Any]) -> str:
+    """Keep editor stage selection advisory until root-owned activation exists."""
+
+    _ = _intent_stage_ceiling(intent)
+    return STAGE_AUDIT
 
 
 def _intent_bound_memex_config(

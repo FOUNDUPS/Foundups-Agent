@@ -268,6 +268,7 @@ def plan_reddog_wre_queue_consumer_dry_run(
             or snapshot.get("operational_snapshot_id")
             or _digest(snapshot)
         ),
+        "wsp15_allocation_receipt": dict(wsp15_allocation),
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
         "wsp15_priority": allocation_priority,

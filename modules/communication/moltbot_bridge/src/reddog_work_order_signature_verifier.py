@@ -265,6 +265,8 @@ def require_authorized(result: VerificationResult) -> None:
 
 
 def _path_within_foundup(path: str, foundup_id: str) -> bool:
+    if isinstance(path, str) and any(char in path for char in "*?[]"):
+        return False
     """True iff `path` is a safe, in-scope path under modules/foundups/<foundup_id>/.
 
     Rejects absolute, backslash, drive-colon, NUL, device-prefix, and any '..'/'.' or
@@ -291,7 +293,7 @@ _REQUIRED_WORKAUTH_FIELDS = (
     "work_order_id", "work_order_digest", "base_ref", "principal_id", "reddog_id", "repo_full_name", "foundup_id",
     "allowed_paths", "denied_paths", "requested_operation", "permission_snapshot_digest",
     "queue_consumer_receipt_digest",
-    "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
+    "wsp15_allocation_receipt", "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
     "wsp15_mps_total", "wsp15_reasoning_tier",
     "nonce", "issued_at", "expires_at", "valve_state_required", "key_epoch", "signature",
 )
@@ -335,8 +337,8 @@ def _validate_authority_structure(
 def _valid_work_authority_receipt_fields(
     work_authority: Mapping[str, Any],
 ) -> bool:
-    from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
-        validate_signed_progressive_stage_binding,
+    from modules.communication.moltbot_bridge.src.reddog_progressive_authority_validation import (
+        validate_progressive_authority_binding,
     )
     runtime_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
     runtime_digest = str(work_authority.get("model_runtime_binding_digest") or "")
@@ -344,15 +346,13 @@ def _valid_work_authority_receipt_fields(
     memex_digest = work_authority.get("memex_supply_digest")
     stage_id = work_authority.get("progressive_policy_stage_receipt_id")
     stage_digest = work_authority.get("progressive_policy_stage_digest")
-    stage_receipt = work_authority.get("progressive_policy_stage_receipt")
     stage_valid = bool(
         is_sha256_digest(stage_id)
         and is_sha256_digest(stage_digest)
-        and isinstance(stage_receipt, Mapping)
-        and validate_signed_progressive_stage_binding(
-            stage_receipt,
-            expected_receipt_id=stage_id,
-            expected_digest=stage_digest,
+        and validate_progressive_authority_binding(
+            work_authority,
+            expected_stage_receipt_id=stage_id,
+            expected_stage_digest=stage_digest,
         )
     )
     required_valid = (
@@ -516,6 +516,19 @@ def _verify_authority_scope_and_effect(
     operation = str(work_authority["requested_operation"])
     if operation in {str(value) for value in forbidden_operations}:
         return ReasonCode.FORBIDDEN_OPERATION
+    stage = work_authority.get("progressive_policy_stage_receipt")
+    if isinstance(stage, Mapping) and stage.get("stage") == "AUDIT_NO_EFFECT":
+        if allowed or denied or stage.get("no_effect_authority") is not True:
+            return ReasonCode.PATH_OUT_OF_SCOPE
+        if not operation.startswith("signed_0102_readonly_review:"):
+            return ReasonCode.FORBIDDEN_OPERATION
+        if not constant_time_compare(
+            str(work_authority["valve_state_required"]), "VALVE_OPEN_DRYRUN_ONLY"
+        ) or not constant_time_compare(
+            str(work_authority["valve_state_required"]), str(required_valve_state)
+        ):
+            return ReasonCode.VALVE_STATE
+        return None
     effective = allowed - denied
     if not effective:
         return ReasonCode.EMPTY_EFFECTIVE_PATHS

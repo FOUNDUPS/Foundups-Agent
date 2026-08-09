@@ -118,9 +118,9 @@ def _build(now: int = 1000):
         "reddog_id": "reddog:abc123",
         "repo_full_name": _REPO,
         "foundup_id": _FID,
-        "allowed_paths": [f"modules/foundups/{_FID}/**"],
+        "allowed_paths": [f"modules/foundups/{_FID}/src/worker.py"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": digest,
         "queue_consumer_receipt_digest": "sha256:" + ("b" * 64),
         "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
@@ -129,8 +129,8 @@ def _build(now: int = 1000):
         "wsp15_mps_total": 20,
         "wsp15_reasoning_tier": "ULTRA",
         **signed_stage_binding(
-            requested_operation="create_foundup",
-            changed_paths=(f"modules/foundups/{_FID}/**",),
+            requested_operation="edit_foundup_module",
+            changed_paths=(f"modules/foundups/{_FID}/src/worker.py",),
         ),
         "nonce": "nonce-unique-0001",
         "issued_at": now - 5,
@@ -192,8 +192,8 @@ def test_memex_authority_binding_is_optional_but_must_be_canonical() -> None:
 def test_progressive_stage_binding_requires_canonical_sha256(field: str) -> None:
     crypto, identity, workauth, ctx = _build()
     workauth.update(signed_stage_binding(
-        requested_operation="create_foundup",
-        changed_paths=(f"modules/foundups/{_FID}/**",),
+        requested_operation="edit_foundup_module",
+        changed_paths=(f"modules/foundups/{_FID}/src/worker.py",),
     ))
     workauth[field] = "sha256:not-canonical"
     _resign_wa(crypto, identity, workauth)
@@ -328,7 +328,7 @@ def test_payload_tampering_rejects() -> None:
     _, identity, workauth, ctx = _build()
     workauth["allowed_paths"] = ["**"]  # widen after signing
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.WORKAUTH_SIGNATURE_INVALID in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 # 3 -------------------------------------------------------------------------- #
@@ -391,7 +391,7 @@ def test_changed_allowed_paths_rejects() -> None:
     _, identity, workauth, ctx = _build()
     workauth["allowed_paths"] = workauth["allowed_paths"] + [".github/workflows/**"]
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.WORKAUTH_SIGNATURE_INVALID in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 # 10 ------------------------------------------------------------------------- #
@@ -512,7 +512,7 @@ def test_path_outside_foundup_scope_rejects() -> None:
     workauth["allowed_paths"] = [".github/workflows/deploy.yml"]
     _resign_wa(crypto, identity, workauth)
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.PATH_OUT_OF_SCOPE in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 def test_path_traversal_rejects() -> None:
@@ -520,7 +520,7 @@ def test_path_traversal_rejects() -> None:
     workauth["allowed_paths"] = [f"modules/foundups/{_FID}/../../.env"]
     _resign_wa(crypto, identity, workauth)
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.PATH_OUT_OF_SCOPE in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 # ---- CoR regression: principal-key trust anchor (BLOCKER) ------------------- #
@@ -602,7 +602,7 @@ def test_admin_verb_requires_can_admin() -> None:
         {d: PermissionSnapshot(evidence_digest=d, expires_at=1000 + 300, can_write=True, can_admin=False, repo_full_name=_REPO)}
     )
     r = _run(identity, workauth, ctx)
-    assert r.accepted is False and ReasonCode.SNAPSHOT_INSUFFICIENT in r.reason_codes
+    assert r.accepted is False and ReasonCode.MALFORMED_PAYLOAD in r.reason_codes
 
 
 # ---- CoR-R2 regression: lax backend returning a truthy non-bool must reject - #

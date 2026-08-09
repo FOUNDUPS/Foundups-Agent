@@ -596,6 +596,7 @@ def _bounded_path_shape_safe(path: str) -> bool:
     parts = tuple(path.split("/"))
     return bool(
         path and "\\" not in path and ":" not in path and "\x00" not in path
+        and not any(char in path for char in "*?[]")
         and not path.startswith("/")
         and not any(part in {"", ".", ".."} for part in parts)
     )

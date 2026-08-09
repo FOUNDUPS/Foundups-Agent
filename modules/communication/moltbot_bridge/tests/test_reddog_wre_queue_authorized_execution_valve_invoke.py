@@ -47,6 +47,7 @@ NOW = datetime(2026, 7, 14, 13, 0, 0, tzinfo=timezone.utc)
 WORK_ORDER_ID = "wre-queue-authorized-valve-001"
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
+TARGET = f"modules/foundups/{FID}/README.md"
 INVOCATION_DIGEST = "sha256:" + ("e" * 64)
 POLICY_DIGEST = "sha256:" + ("f" * 64)
 
@@ -73,9 +74,9 @@ def _work_order(**overrides):
             "source": "mock",
             "digest": "sha256:snap-1",
         },
-        "requested_operation": "feature_slice",
+        "requested_operation": "edit_foundup_module",
         "authority_tier": "source",
-        "allowed_paths": [f"modules/foundups/{FID}/**"],
+        "allowed_paths": [TARGET],
         "denied_paths": [".env", ".git/**"],
         "branch_name": "feat/paccess-001-valve",
         "base_ref": "main",
@@ -156,7 +157,7 @@ def _executor_payload(**overrides):
             "proposed_branch_name": "feat/paccess-001-valve",
             "proposed_worktree_path": "/tmp/.reddog/worktrees/repo/work/nonce/",
             "lock_key": WORK_ORDER_ID,
-            "allowed_paths": [f"modules/foundups/{FID}/**"],
+            "allowed_paths": [TARGET],
             "denied_paths": [".env", ".git/**"],
             "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
             "cleanup_plan": {"on_failure": "remove_worktree_delete_branch"},
@@ -194,8 +195,8 @@ def _open_env() -> ExecutionValveEnvironment:
 
 def _signed_authority(**overrides):
     payload = signed_stage_binding(
-        requested_operation="feature_slice",
-        changed_paths=(f"modules/foundups/{FID}/**",),
+        requested_operation="edit_foundup_module",
+        changed_paths=(TARGET,),
     )
     payload.update(overrides)
     return payload

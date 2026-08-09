@@ -22,44 +22,47 @@ _ALLOCATION_PROMPTS: dict[str, str] = {}
 
 def signed_bounded_stage_receipt(
     *,
-    requested_operation: str = "bounded_module_fix",
+    requested_operation: str = "edit_foundup_module",
     changed_paths: Sequence[str] = (_DEFAULT_TARGET,),
 ) -> dict[str, object]:
     """Build a self-consistent admitted stage for authority-chain tests."""
 
-    unsigned: dict[str, object] = {
-        "schema_version": stage_policy.SCHEMA_VERSION,
-        "receipt_id": "",
-        "stage": stage_policy.STAGE_BOUNDED_EXECUTION,
-        "decision": stage_policy.DECISION_BOUNDED_EXECUTION_ADMITTED,
-        "determination_action": "FIX",
-        "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
-        "requested_operation": requested_operation,
-        "changed_paths": tuple(changed_paths),
-        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
-        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
-        "complexity": 2,
-        "risk_classes": (),
-        "would_block_reasons": (),
-        "rejection_reasons": (),
-        "no_effect_authority": False,
-        "independent_verifier_required": True,
-        "production_authority_granted": False,
-    }
-    unsigned["receipt_id"] = stage_policy._digest(stage_policy._unsigned(unsigned))
-    return unsigned
+    allocation = bounded_allocation(
+        requested_operation=requested_operation,
+        changed_paths=changed_paths,
+    )
+    receipt = stage_policy.admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        requested_operation=requested_operation,
+        changed_paths=changed_paths,
+        task_prompt_text=_ALLOCATION_PROMPTS[str(allocation["receipt_id"])],
+    ).to_dict()
+    assert receipt["decision"] == stage_policy.DECISION_BOUNDED_EXECUTION_ADMITTED
+    return receipt
 
 
 def signed_stage_binding(
     *,
-    requested_operation: str = "bounded_module_fix",
+    requested_operation: str = "edit_foundup_module",
     changed_paths: Sequence[str] = (_DEFAULT_TARGET,),
 ) -> dict[str, object]:
+    allocation = bounded_allocation(
+        requested_operation=requested_operation,
+        changed_paths=changed_paths,
+    )
     receipt = signed_bounded_stage_receipt(
         requested_operation=requested_operation,
         changed_paths=changed_paths,
     )
     return {
+        "wsp15_allocation_receipt": allocation,
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": stage_policy.canonical_reddog_wsp15_allocation_digest(allocation),
+        "wsp15_priority": allocation["priority"],
+        "wsp15_mps_total": allocation["mps_total"],
+        "wsp15_reasoning_tier": allocation["reasoning_tier"],
         "progressive_policy_stage_receipt_id": receipt["receipt_id"],
         "progressive_policy_stage_digest": stage_policy._digest(receipt),
         "progressive_policy_stage_receipt": receipt,
@@ -68,6 +71,7 @@ def signed_stage_binding(
 
 def signed_audit_stage_binding() -> dict[str, object]:
     operation = "signed_0102_readonly_review:foundup_module"
+    allocation = readonly_allocation(requested_operation=operation)
     unsigned: dict[str, object] = {
         "schema_version": stage_policy.SCHEMA_VERSION,
         "receipt_id": "",
@@ -77,9 +81,9 @@ def signed_audit_stage_binding() -> dict[str, object]:
         "selected_slice": "REDDOG_READONLY_AUDIT_PHASE1",
         "requested_operation": operation,
         "changed_paths": (),
-        "wsp15_allocation_receipt_id": "sha256:wsp15-readonly",
-        "wsp15_allocation_digest": "sha256:wsp15-readonly-digest",
-        "complexity": 1,
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": stage_policy.canonical_reddog_wsp15_allocation_digest(allocation),
+        "complexity": allocation["complexity"],
         "risk_classes": (),
         "would_block_reasons": (),
         "rejection_reasons": (),
@@ -89,20 +93,31 @@ def signed_audit_stage_binding() -> dict[str, object]:
     }
     unsigned["receipt_id"] = stage_policy._digest(stage_policy._unsigned(unsigned))
     return {
+        "wsp15_allocation_receipt": allocation,
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": stage_policy.canonical_reddog_wsp15_allocation_digest(allocation),
+        "wsp15_priority": allocation["priority"],
+        "wsp15_mps_total": allocation["mps_total"],
+        "wsp15_reasoning_tier": allocation["reasoning_tier"],
         "progressive_policy_stage_receipt_id": unsigned["receipt_id"],
         "progressive_policy_stage_digest": stage_policy._digest(unsigned),
         "progressive_policy_stage_receipt": unsigned,
     }
 
 
-def bounded_allocation(*, prompt_suffix: str = "", **overrides: object) -> dict[str, object]:
+def bounded_allocation(
+    *, prompt_suffix: str = "",
+    requested_operation: str = "edit_foundup_module",
+    changed_paths: Sequence[str] = (_DEFAULT_TARGET,),
+    **overrides: object,
+) -> dict[str, object]:
     """Build a canonical bounded allocation and retain its exact prompt."""
     prompt = f"{_DEFAULT_PROMPT} {prompt_suffix}".strip()
     payload = allocate_reddog_wsp15_receipt(
-        requested_operation="edit_foundup_module",
+        requested_operation=requested_operation,
         prompt_text=prompt,
-        changed_paths=(_DEFAULT_TARGET,),
-        allowed_read_targets=(_DEFAULT_TARGET,),
+        changed_paths=changed_paths,
+        allowed_read_targets=changed_paths,
     ).to_dict()
     payload.update(overrides)
     _ALLOCATION_PROMPTS[str(payload.get("receipt_id") or "")] = prompt
@@ -137,11 +152,12 @@ def readonly_allocation(
     *,
     targets: Sequence[str] = (_DEFAULT_TARGET,),
     runtime_binding: Mapping[str, object] | None = None,
+    requested_operation: str = "signed_0102_readonly_review:redDog_runtime_security",
 ) -> dict[str, object]:
     """Build a canonical no-effects allocation for a signed 0102 audit."""
     prompt = "RedDog OpenClaw signed 0102 read-only review runtime security audit."
     allocation = allocate_reddog_wsp15_receipt(
-        requested_operation="signed_0102_readonly_review:redDog_runtime_security",
+        requested_operation=requested_operation,
         prompt_text=prompt,
         allowed_read_targets=targets,
         model_runtime_binding_receipt=runtime_binding,

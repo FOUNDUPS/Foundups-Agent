@@ -133,6 +133,8 @@ def public_key_fingerprint(public_key: str) -> str:
 
 
 def _path_within_foundup(path: str, foundup_id: str) -> bool:
+    if isinstance(path, str) and any(char in path for char in "*?[]"):
+        return False
     if not isinstance(path, str) or not path or not _is_ascii(path):
         return False
     if "\x00" in path or "\\" in path or ":" in path or path.startswith("/"):
@@ -219,6 +221,7 @@ class DelegatedAuthorityRuntimeRequest:
     requested_operation: str
     permission_snapshot_digest: str
     queue_consumer_receipt_digest: str
+    wsp15_allocation_receipt: Mapping[str, Any]
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
     wsp15_priority: str
@@ -381,20 +384,14 @@ def _validate_signing_response(
 
 
 def _progressive_stage_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
-    from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
-        validate_signed_progressive_stage_binding,
+    from modules.communication.moltbot_bridge.src.reddog_progressive_authority_validation import (
+        validate_progressive_authority_binding,
     )
 
-    receipt = request.progressive_policy_stage_receipt
-    return validate_signed_progressive_stage_binding(
-        receipt,
-        expected_receipt_id=request.progressive_policy_stage_receipt_id,
-        expected_digest=request.progressive_policy_stage_digest,
-    ) and (
-        receipt.get("requested_operation") == request.requested_operation
-        and tuple(receipt.get("changed_paths") or ()) == tuple(request.allowed_paths)
-        and receipt.get("wsp15_allocation_receipt_id") == request.wsp15_allocation_receipt_id
-        and receipt.get("wsp15_allocation_digest") == request.wsp15_allocation_digest
+    return validate_progressive_authority_binding(
+        request.to_dict(),
+        expected_stage_receipt_id=request.progressive_policy_stage_receipt_id,
+        expected_stage_digest=request.progressive_policy_stage_digest,
     )
 
 
@@ -610,6 +607,7 @@ def issue_delegated_authority_runtime(
         "requested_operation": request.requested_operation,
         "permission_snapshot_digest": request.permission_snapshot_digest,
         "queue_consumer_receipt_digest": request.queue_consumer_receipt_digest,
+        "wsp15_allocation_receipt": dict(request.wsp15_allocation_receipt),
         "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
         "wsp15_allocation_digest": request.wsp15_allocation_digest,
         "wsp15_priority": request.wsp15_priority,

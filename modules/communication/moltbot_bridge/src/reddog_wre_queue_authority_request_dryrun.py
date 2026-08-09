@@ -240,7 +240,6 @@ def _path_within_foundup(path: str, foundup_id: str) -> bool:
             return False
     return True
 
-
 def _narrow_stage_paths(profile: Mapping[str, Any], queue_receipt: Mapping[str, Any], foundup_id: str) -> tuple[Tuple[str, ...], Tuple[str, ...], Tuple[str, ...]]:
     profile_allowed = _string_tuple(profile.get("allowed_paths"))
     profile_denied = _string_tuple(profile.get("denied_paths"))
@@ -252,6 +251,7 @@ def _narrow_stage_paths(profile: Mapping[str, Any], queue_receipt: Mapping[str, 
         reasons.append(FAIL_DENIED_PATH_SCOPE)
     if any(
         not _path_within_foundup(path, foundup_id)
+        or any(char in path for char in "*?[]")
         or not any(fnmatchcase(path, pattern) for pattern in profile_allowed)
         or any(fnmatchcase(path, pattern) for pattern in profile_denied)
         for path in stage_paths

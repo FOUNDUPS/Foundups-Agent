@@ -8,7 +8,6 @@ import hmac
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src import (
-    reddog_progressive_execution_stage_policy as stage_policy,
     reddog_wre_queue_authority_request_dryrun as planner,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
@@ -41,7 +40,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
-    signed_bounded_stage_receipt,
+    signed_stage_binding,
 )
 
 
@@ -57,6 +56,7 @@ MODULE_PATH = (
 NOW = 1000
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
+TARGET = f"modules/foundups/{FID}/README.md"
 
 
 class _MockSignerVerifier:
@@ -135,9 +135,9 @@ class _NoRevocation:
 
 
 def _queue_result():
-    stage = signed_bounded_stage_receipt(
-        requested_operation="create_foundup",
-        changed_paths=(f"modules/foundups/{FID}/**",),
+    binding = signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(TARGET,),
     )
     receipt = {
         "receipt_id": "wre_queue_consumer_1234",
@@ -146,14 +146,15 @@ def _queue_result():
         "claim_id": "claim-1",
         "worker_id": "reddog-main-bootstrap",
         "freshness_receipt_id": "fresh-1",
-        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
-        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
-        "wsp15_priority": "P0",
-        "wsp15_mps_total": 20,
-        "reasoning_tier": "ULTRA",
-        "progressive_policy_stage_receipt_id": stage["receipt_id"],
-        "progressive_policy_stage_digest": stage_policy._digest(stage),
-        "progressive_policy_stage_receipt": stage,
+        "wsp15_allocation_receipt": binding["wsp15_allocation_receipt"],
+        "wsp15_allocation_receipt_id": binding["wsp15_allocation_receipt_id"],
+        "wsp15_allocation_digest": binding["wsp15_allocation_digest"],
+        "wsp15_priority": binding["wsp15_priority"],
+        "wsp15_mps_total": binding["wsp15_mps_total"],
+        "reasoning_tier": binding["wsp15_reasoning_tier"],
+        "progressive_policy_stage_receipt_id": binding["progressive_policy_stage_receipt_id"],
+        "progressive_policy_stage_digest": binding["progressive_policy_stage_digest"],
+        "progressive_policy_stage_receipt": binding["progressive_policy_stage_receipt"],
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }
@@ -180,7 +181,7 @@ def _profile(**overrides):
         "foundup_id": FID,
         "allowed_paths": [f"modules/foundups/{FID}/**"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "base_ref": "main",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",

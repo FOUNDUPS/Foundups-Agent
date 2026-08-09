@@ -419,17 +419,14 @@ def worker_dispatch_authority_stages(
         "reddog_id": "reddog:worker-dispatch",
         "repo_full_name": _TEST_REPO,
         "foundup_id": _TEST_FOUNDUP,
-        "allowed_paths": list(
-            allocation.get("changed_paths")
-            or allocation.get("allowed_read_targets")
-            or ()
-        ),
+        "allowed_paths": list(allocation.get("changed_paths") or ()),
         "denied_paths": [],
         "requested_operation": str(
             allocation.get("requested_operation") or "bounded_code_change"
         ),
         "permission_snapshot_digest": _TEST_PERMISSION_SNAPSHOT_DIGEST,
         "queue_consumer_receipt_digest": queue_receipt_digest,
+        "wsp15_allocation_receipt": dict(allocation),
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "wsp15_allocation_digest": canonical_digest(allocation),
         "wsp15_priority": allocation["priority"],
@@ -438,7 +435,11 @@ def worker_dispatch_authority_stages(
         "nonce": "worker-dispatch-nonce-0001",
         "issued_at": _TEST_NOW - 5,
         "expires_at": _TEST_NOW + 300,
-        "valve_state_required": "VALVE_OPEN_WORKTREE_CREATE",
+        "valve_state_required": (
+            "VALVE_OPEN_DRYRUN_ONLY"
+            if not tuple(allocation.get("changed_paths") or ())
+            else "VALVE_OPEN_WORKTREE_CREATE"
+        ),
         "key_epoch": "epoch-1",
         **work_authority_overrides,
     }
@@ -503,7 +504,9 @@ def _queue_binding_mapping(
     return {}
 
 
-def worker_dispatch_authority_verification_context():
+def worker_dispatch_authority_verification_context(
+    *, required_valve_state: str = "VALVE_OPEN_WORKTREE_CREATE"
+):
     return WorkerDispatchAuthorityVerificationContext(
         signature_verifier=_WorkerDispatchSignatureVerifier(),
         principal_key_resolver=_WorkerDispatchPrincipalResolver(),
@@ -511,7 +514,7 @@ def worker_dispatch_authority_verification_context():
         snapshot_resolver=_WorkerDispatchSnapshotResolver(),
         revocation_oracle=_WorkerDispatchNoRevocation(),
         trusted_now_epoch=lambda: _TEST_NOW,
-        required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
+        required_valve_state=required_valve_state,
     )
 
 
@@ -685,7 +688,13 @@ def publish_bound_worker_dispatch(**kwargs: Any):
         worker_dispatch_dryrun_result=dryrun,
         queue_authority_runtime_result=authority_runtime,
         queue_authority_verification_result=authority_verification,
-        authority_verification_context=worker_dispatch_authority_verification_context(),
+        authority_verification_context=worker_dispatch_authority_verification_context(
+            required_valve_state=str(
+                authority_runtime["authority_result"]["work_authority"][
+                    "valve_state_required"
+                ]
+            )
+        ),
     )
 
 

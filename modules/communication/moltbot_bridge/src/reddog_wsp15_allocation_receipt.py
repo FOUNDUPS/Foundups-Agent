@@ -597,7 +597,9 @@ def allocation_changed_paths_match(
 
     expected = tuple(allocation.get("changed_paths") or ())
     operation = str(allocation.get("requested_operation") or "")
-    if not expected and operation.startswith("signed_0102_readonly_review:"):
+    stage = authority.get("progressive_policy_stage_receipt")
+    audit_no_effect = isinstance(stage, Mapping) and stage.get("stage") == "AUDIT_NO_EFFECT"
+    if not expected and operation.startswith("signed_0102_readonly_review:") and not audit_no_effect:
         expected = tuple(allocation.get("allowed_read_targets") or ())
     return tuple(authority.get("allowed_paths") or ()) == expected
 
