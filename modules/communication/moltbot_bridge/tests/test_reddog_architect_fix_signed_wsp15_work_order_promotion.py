@@ -83,6 +83,9 @@ from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_re
     canonical_operational_memex_supply_digest,
     operational_memex_supply_receipt_id,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    evaluate_proposal_stage,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -110,11 +113,11 @@ def _holo_receipt():
 
 def _allocation() -> dict[str, Any]:
     return allocate_reddog_wsp15_receipt(
-        requested_operation="architect_fix_promotion",
-        prompt_text="RedDog architect FIX promotion runtime authority",
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
+        requested_operation="bounded_module_fix",
+        prompt_text="Fix one bounded module defect",
+        changed_paths=("modules/foundups/paccess_001/src/worker.py",),
         allowed_read_targets=(
-            "modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",
+            "modules/foundups/paccess_001/src/worker.py",
         ),
     ).to_dict()
 
@@ -154,7 +157,7 @@ def _proposal_admission(
         "target_runtime": "reddog_resident_queue",
         "target_effect_plane": "REPOSITORY_CODE_CHANGE",
         "allowed_paths": [
-            "modules/communication/moltbot_bridge/src/reddog_next_operational_slice.py"
+            "modules/foundups/paccess_001/src/worker.py"
         ],
         "denied_paths": [".github/workflows/**", ".env"],
         "required_tests": [
@@ -187,6 +190,7 @@ def _proposal_admission(
         "wsp15_allocation_digest": canonical_reddog_wsp15_allocation_digest(
             allocation
         ),
+        "wsp15_complexity": allocation["complexity"],
         "policy_digest": proposal_admission._digest(policy.to_dict()),
         "conversation_binding_present": False,
         "conversation_binding_digest": "",
@@ -204,6 +208,33 @@ def _proposal_admission(
         "no_repo_mutation_performed": True,
         "no_holoindex_reindex_performed": True,
     }
+    stage = evaluate_proposal_stage(
+        action=payload["action"],
+        reuse_decision=payload["reuse_decision"],
+        effect_plane=payload["target_effect_plane"],
+        allocation=allocation,
+        selected_slice=payload["slice_id"],
+        requested_operation=payload["requested_operation"],
+        changed_paths=payload["allowed_paths"],
+        would_block_reasons=payload["missing_preconditions"],
+    )
+    payload.update(
+        {
+            "progressive_policy_stage": stage.stage,
+            "progressive_policy_decision": stage.decision,
+            "progressive_policy_stage_receipt_id": stage.receipt_id,
+            "progressive_policy_stage_receipt": stage.to_dict(),
+            "progressive_policy_would_block_reasons": list(
+                stage.would_block_reasons
+            ),
+            "independent_verifier_required": (
+                stage.independent_verifier_required
+            ),
+            "admissible_to_authoritative_queue": (
+                admissible and not stage.no_effect_authority
+            ),
+        }
+    )
     payload["receipt_id"] = proposal_admission._digest(payload)
     return payload
 
@@ -290,6 +321,16 @@ def _determination(
         "wsp15_allocation_receipt": dict(allocation),
         "proposal_admission_receipt_id": admission["receipt_id"],
         "proposal_admission_digest": proposal_admission._digest(admission),
+        "progressive_policy_stage_receipt_id": admission[
+            "progressive_policy_stage_receipt_id"
+        ],
+        "progressive_policy_stage_digest": proposal_admission._digest(
+            admission["progressive_policy_stage_receipt"]
+        ),
+        "progressive_policy_stage_receipt": dict(
+            admission["progressive_policy_stage_receipt"]
+        ),
+        "independent_verifier_required": True,
         "no_queue_mutation_performed": True,
         "no_execution_performed": True,
         "no_worker_spawn_performed": True,
@@ -312,6 +353,8 @@ def _rebind_determination_admission(
     rebound = json.loads(json.dumps(determination, sort_keys=True))
     admission = dict(rebound["proposal_admission"])
     admission.update(admission_updates)
+    allocation = rebound["queue_candidate"]["wsp15_allocation_receipt"]
+    admission.update(_rebound_progressive_stage(admission, allocation))
     admission.pop("receipt_id", None)
     admission["receipt_id"] = proposal_admission._digest(admission)
     determination_seed = {
@@ -332,6 +375,15 @@ def _rebind_determination_admission(
     candidate["source_determination_receipt_id"] = determination_id
     candidate["proposal_admission_receipt_id"] = admission["receipt_id"]
     candidate["proposal_admission_digest"] = proposal_admission._digest(admission)
+    candidate["progressive_policy_stage_receipt_id"] = admission[
+        "progressive_policy_stage_receipt_id"
+    ]
+    candidate["progressive_policy_stage_digest"] = proposal_admission._digest(
+        admission["progressive_policy_stage_receipt"]
+    )
+    candidate["progressive_policy_stage_receipt"] = dict(
+        admission["progressive_policy_stage_receipt"]
+    )
     candidate["queue_candidate_id"] = proposal_admission._digest(
         {
             "source_determination_receipt_id": determination_id,
@@ -350,6 +402,30 @@ def _rebind_determination_admission(
     return rebound
 
 
+def _rebound_progressive_stage(
+    admission: Mapping[str, Any], allocation: Mapping[str, Any]
+) -> dict[str, Any]:
+    stage = evaluate_proposal_stage(
+        action=str(admission.get("action") or ""),
+        reuse_decision=str(admission.get("reuse_decision") or ""),
+        effect_plane=str(admission.get("target_effect_plane") or ""),
+        allocation=allocation,
+        selected_slice=str(admission.get("slice_id") or ""),
+        requested_operation=str(admission.get("requested_operation") or ""),
+        changed_paths=tuple(admission.get("allowed_paths") or ()),
+        would_block_reasons=tuple(admission.get("missing_preconditions") or ()),
+    )
+    return {
+        "progressive_policy_stage": stage.stage,
+        "progressive_policy_decision": stage.decision,
+        "progressive_policy_stage_receipt_id": stage.receipt_id,
+        "progressive_policy_stage_receipt": stage.to_dict(),
+        "progressive_policy_would_block_reasons": list(stage.would_block_reasons),
+        "independent_verifier_required": stage.independent_verifier_required,
+        "admissible_to_authoritative_queue": not stage.no_effect_authority,
+    }
+
+
 def _authority_profile(**overrides: Any) -> dict[str, Any]:
     profile = {
         "principal_id": "github:mjtrout",
@@ -360,7 +436,7 @@ def _authority_profile(**overrides: Any) -> dict[str, Any]:
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
         "base_ref": "main",
-        "allowed_paths": ["modules/communication/moltbot_bridge/**"],
+        "allowed_paths": ["modules/foundups/paccess_001/src/worker.py"],
         "denied_paths": ["modules/communication/moltbot_bridge/secrets/**"],
         "requested_operation": "feature_slice",
         "permission_snapshot_digest": "sha256:" + ("a" * 64),
@@ -881,14 +957,18 @@ def test_authenticates_then_promotes_valid_execution_blocked_candidate() -> None
         architect_determination=_determination(proposal_ready=False),
     )
 
-    assert result.accepted is True
-    assert result.receipt is not None
-    assert len(store.load()["wre_queue_items"]) == 1
+    assert result.accepted is False
+    assert result.receipt is None
+    assert (
+        promotion.ArchitectFixPromotionReason.PROPOSAL_ADMISSION_INVALID
+        in result.rejection_reasons
+    )
+    assert store.load() == _work_state()
 
 
 def test_blocked_candidate_with_forged_authenticity_still_rejects() -> None:
     store = InMemoryAuthoritativeWorkStateStore(_work_state())
-    determination = _determination(proposal_ready=False)
+    determination = _determination()
     profile = _authority_profile()
     attestation, runtime_config, resolver = build_proposal_runtime_inputs(
         determination,
@@ -932,6 +1012,44 @@ def test_rejects_tampered_proposal_admission_before_store_mutation() -> None:
         in result.rejection_reasons
     )
     assert store.load()["wre_queue_items"] == []
+
+
+def test_rejects_rehashed_stage_that_understates_allocation_complexity() -> None:
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="cross-module repair",
+        prompt_text="Repair a cross-module data flow.",
+        changed_paths=(
+            "modules/foundups/demo/src/a.py",
+            "modules/foundups/demo/src/b.py",
+            "modules/foundups/demo/src/c.py",
+        ),
+    ).to_dict()
+    determination = _determination(allocation=allocation)
+    candidate = dict(determination["queue_candidate"])
+    stage = dict(candidate["progressive_policy_stage_receipt"])
+    stage.update(
+        complexity=2,
+        decision="BOUNDED_EXECUTION_ADMITTED",
+        would_block_reasons=[],
+        no_effect_authority=False,
+    )
+    stage["receipt_id"] = proposal_admission._digest(
+        {key: value for key, value in stage.items() if key != "receipt_id"}
+    )
+    candidate["progressive_policy_stage_receipt"] = stage
+    candidate["progressive_policy_stage_receipt_id"] = stage["receipt_id"]
+    candidate["progressive_policy_stage_digest"] = proposal_admission._digest(stage)
+    determination["queue_candidate"] = candidate
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(store=store, architect_determination=determination)
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED
+        in result.rejection_reasons
+    )
+    assert store.load() == _work_state()
 
 
 def test_rejects_rehashed_underdeclared_effect_capabilities() -> None:

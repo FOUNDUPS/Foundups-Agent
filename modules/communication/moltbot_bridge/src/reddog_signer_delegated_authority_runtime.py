@@ -224,6 +224,8 @@ class DelegatedAuthorityRuntimeRequest:
     wsp15_priority: str
     wsp15_mps_total: int
     wsp15_reasoning_tier: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
     identity_nonce: str
     work_authority_nonce: str
     issued_at: int
@@ -464,6 +466,8 @@ def issue_delegated_authority_runtime(
         or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
         or type(request.wsp15_mps_total) is not int
         or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
+        or not request.progressive_policy_stage_receipt_id.startswith("sha256:")
+        or not request.progressive_policy_stage_digest.startswith("sha256:")
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
     has_runtime_binding = runtime_binding_request_valid(request)
@@ -575,6 +579,10 @@ def issue_delegated_authority_runtime(
         "wsp15_priority": request.wsp15_priority,
         "wsp15_mps_total": request.wsp15_mps_total,
         "wsp15_reasoning_tier": request.wsp15_reasoning_tier,
+        "progressive_policy_stage_receipt_id": (
+            request.progressive_policy_stage_receipt_id
+        ),
+        "progressive_policy_stage_digest": request.progressive_policy_stage_digest,
         "nonce": request.work_authority_nonce,
         "issued_at": request.issued_at,
         "expires_at": request.work_authority_expires_at,

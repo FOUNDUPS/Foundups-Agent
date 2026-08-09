@@ -17,6 +17,9 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executab
     reevaluate_architect_proposal_promotion_preconditions,
     validate_architect_proposal_executability_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    validate_bounded_execution_receipt,
+)
 
 
 CANDIDATE_MALFORMED = "candidate_malformed"
@@ -49,6 +52,8 @@ def validate_architect_fix_candidate(
             ),
         }
     )
+    allocation = candidate.get("wsp15_allocation_receipt")
+    stage = candidate.get("progressive_policy_stage_receipt")
     expected = (
         candidate
         and candidate.get("schema_version") == schema_version
@@ -60,8 +65,15 @@ def validate_architect_fix_candidate(
         and str(candidate.get("status") or "").upper()
         in {"CANDIDATE", "BLOCKED_CANDIDATE"}
         and candidate.get("no_execution_performed") is True
-        and isinstance(candidate.get("wsp15_allocation_receipt"), Mapping)
-        and bool(candidate.get("wsp15_allocation_receipt"))
+        and isinstance(allocation, Mapping)
+        and bool(allocation)
+        and isinstance(stage, Mapping)
+        and candidate.get("progressive_policy_stage_receipt_id")
+        == candidate.get("progressive_policy_stage_receipt", {}).get("receipt_id")
+        and candidate.get("progressive_policy_stage_digest")
+        == _digest(candidate.get("progressive_policy_stage_receipt"))
+        and candidate.get("independent_verifier_required") is True
+        and validate_bounded_execution_receipt(stage, allocation)
     )
     return () if expected else (CANDIDATE_MALFORMED,)
 
@@ -169,6 +181,11 @@ def _receipt_candidate_lineage_matches(
         == str(candidate.get("proposal_admission_receipt_id") or "")
         and _digest(receipt.to_dict())
         == str(candidate.get("proposal_admission_digest") or "")
+        and receipt.progressive_policy_stage_receipt_id
+        == str(candidate.get("progressive_policy_stage_receipt_id") or "")
+        and _digest(receipt.progressive_policy_stage_receipt)
+        == str(candidate.get("progressive_policy_stage_digest") or "")
+        and receipt.independent_verifier_required is True
     )
 
 

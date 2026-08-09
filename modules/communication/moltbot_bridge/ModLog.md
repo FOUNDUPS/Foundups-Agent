@@ -1,4 +1,14 @@
 # ModLog - moltbot_bridge
+## 2026-08-09: Progressive RedDog execution-stage authority binding
+- Added a signed, canonical stage receipt spanning architect proposal, queue,
+  signer request, delegated work authority, and worker-dispatch equality.
+- Audit/review failures project as `WOULD_BLOCK` without effects. Only valid
+  low-complexity WSP_15 `FIX` work can enter bounded execution; high-risk,
+  create-new, merge, external, and production work remain blocked.
+- Corrected WSP_15 complexity so module names and authority sensitivity affect
+  priority/reasoning without falsely making every one-file RedDog repair
+  complexity 5. Independent verification remains mandatory. (WSP 00/15/22/50/62/97)
+
 ## 2026-08-09: RedDog stale Holo authority recovery binding
 - Extended the existing incident and blocked-request contracts for the proven
   authority-root HEAD mismatch. The deferred receipt now binds the incident

@@ -47,6 +47,8 @@ def _queue_result(**overrides):
         "wsp15_priority": "P0",
         "wsp15_mps_total": 18,
         "reasoning_tier": "ULTRA",
+        "progressive_policy_stage_receipt_id": "sha256:" + ("e" * 64),
+        "progressive_policy_stage_digest": "sha256:" + ("f" * 64),
         "model_selection_receipt_id": "sha256:model-selection",
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
@@ -168,6 +170,8 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert request["wsp15_priority"] == "P0"
     assert request["wsp15_mps_total"] == 18
     assert request["wsp15_reasoning_tier"] == "ULTRA"
+    assert request["progressive_policy_stage_receipt_id"] == "sha256:" + ("e" * 64)
+    assert request["progressive_policy_stage_digest"] == "sha256:" + ("f" * 64)
     assert request["model_selection_receipt_id"] == "sha256:model-selection"
     assert request["model_selection_digest"] == "sha256:model-selection-digest"
     assert request["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:abc123"

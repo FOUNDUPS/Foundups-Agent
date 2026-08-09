@@ -35,7 +35,8 @@ const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
 const groundingFailureDialogue = require('./grounding_failure_dialogue');
-const EXTENSION_VERSION = '0.4.71';
+const progressiveExecutionStage = require('./progressive_execution_stage');
+const EXTENSION_VERSION = '0.4.72';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -2482,6 +2483,10 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     lines.push('- runtime_consumption_gate_passed: ' + (rp.runtime_consumption_gate.passed === true ? 'true' : 'false'));
     lines.push('- runtime_consumption_gate_rejection_reasons: ' + (Array.isArray(rp.runtime_consumption_gate.rejection_reasons) && rp.runtime_consumption_gate.rejection_reasons.length ? rp.runtime_consumption_gate.rejection_reasons.join(', ') : '(none)'));
   }
+  lines.push.apply(
+    lines,
+    progressiveExecutionStage.runTraceLines(rp.progressive_execution_stage)
+  );
   if (rp.output_validation && rp.output_validation.repair_attempted) {
     lines.push('- repair_context_mode: ' + (rp.output_validation.repair_context_mode || 'unknown'));
     lines.push('- repair_mode: ' + (rp.output_validation.repair_mode || 'unknown'));
@@ -5045,6 +5050,9 @@ const buildRedDogInstallStateSection = REDDOG_BACKEND_CLIENT.buildInstallStateSe
 const buildBackendCompatibilityBlockedResult = (state) => backendCompatibility.buildBlockedResult(
   state, REDDOG_BACKEND_CLIENT
 );
+const buildBackendCompatibilityAuditDegradedResult = (state) => backendCompatibility.buildAuditDegradedResult(
+  state, REDDOG_BACKEND_CLIENT
+);
 const blockIncompatibleBackend = (context, state, webview, root) => backendCompatibilityAsync.blockIncompatibleBackend(context, state, webview, { detect: (value) => detectRedDogInstallStateAsync(value, root), build: buildBackendCompatibilityBlockedResult, post: postStatusAndProgress });
 const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.runConfiguredQuery({
   workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
@@ -5285,13 +5293,42 @@ function prepareFusionRequest(message, worker) {
   };
 }
 
+function configuredProgressiveExecutionStage() {
+  return progressiveExecutionStage.resolveStage(
+    reddogConfigValue('progressiveExecutionStage', progressiveExecutionStage.AUDIT)
+  );
+}
+
+function progressiveActionStageEnabled() {
+  return progressiveExecutionStage.allowsActionPlanning(
+    configuredProgressiveExecutionStage()
+  );
+}
+
+function progressiveStageForRuntime(runtimeConsumptionGate) {
+  const configured = configuredProgressiveExecutionStage();
+  return {
+    configured,
+    receipt: progressiveExecutionStage.project(
+      configured, runtimeConsumptionGate.passed === true
+    )
+  };
+}
+
+function attachRuntimePolicy(result, runtimeGate, progressiveReceipt) {
+  result.review_packet.progressive_execution_stage = progressiveReceipt;
+  result.progressive_execution_stage = progressiveReceipt;
+  result.runtime_consumption_gate = runtimeGate;
+  result.review_packet.runtime_consumption_gate = runtimeGate;
+}
+
 function wireFusionWebview(context, webview, worker, state) {
   const recoveryOptions = holoBlockedRecoveryOptions(context);
   const executeAsk = async (message, recoveryContext) => {
-    if (await blockIncompatibleBackend(context, state, webview)) return;
-    if (!recoveryContext && await startOperationsAdapter.handleMessage(
-      startOperationsOptions(context, message, worker, state, webview)
-    )) return;
+    const actionStageEnabled = progressiveActionStageEnabled();
+    if (actionStageEnabled && await blockIncompatibleBackend(context, state, webview)) return;
+    if (actionStageEnabled && !recoveryContext && await startOperationsAdapter.handleMessage(
+      startOperationsOptions(context, message, worker, state, webview))) return;
     const {
       workFocus, workerType, classification, promptHasDetermineList,
       daemonDiagnosticProjection, governedWorkFocus, continuationEnabled, localFastPath,
@@ -5692,7 +5729,9 @@ function wireFusionWebview(context, webview, worker, state) {
       runtimeConsumptionGate,
       await currentBackendCompatibility()
     );
-    const actionPlanningAllowed = runtimeConsumptionGate.passed === true && !recoveryContext;
+    const progressiveStage = progressiveStageForRuntime(runtimeConsumptionGate);
+    const actionPlanningAllowed = runtimeConsumptionGate.passed === true
+      && progressiveExecutionStage.allowsActionPlanning(progressiveStage.configured) && !recoveryContext;
     const residentArchitectSessionEnabled = classification.governedActionRequested === true
       && reddogConfigValue('enableResidentArchitectSession', true) === true && !recoveryContext;
     const operatorWardrobeSelectionResult = actionPlanningAllowed
@@ -5757,8 +5796,7 @@ function wireFusionWebview(context, webview, worker, state) {
       workTrail,
       unicodeMeta
     );
-    result.runtime_consumption_gate = runtimeConsumptionGate;
-    result.review_packet.runtime_consumption_gate = runtimeConsumptionGate;
+    attachRuntimePolicy(result, runtimeConsumptionGate, progressiveStage.receipt);
     result.review_packet.fusion_progress_receipts = fusionProgressReceipts;
     result.review_packet.fusion_progress_receipt_validation = fusionProgressValidation;
     result.install_state = state.installState || null;
@@ -5940,10 +5978,14 @@ function attachBridgeMetadata(reviewPacket, bridgeMeta) {
 
 async function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptionsArg) {
   const compatibility = await currentBackendCompatibility();
+  const auditDialogueOnly = !progressiveActionStageEnabled();
   if (compatibility.passed !== true) {
-    return Promise.resolve(buildBackendCompatibilityBlockedResult({
-      backend_compatibility: compatibility
-    }));
+    const state = { backend_compatibility: compatibility };
+    return Promise.resolve(
+      auditDialogueOnly
+        ? buildBackendCompatibilityAuditDegradedResult(state)
+        : buildBackendCompatibilityBlockedResult(state)
+    );
   }
   return new Promise((resolve) => {
     const root = workspaceRoot();

@@ -24,8 +24,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_receipt 
 from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
     model_runtime_authority_fields,
 )
-
-
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import validate_queue_bounded_stage_binding
 WRE_QUEUE_CONSUMER_DRYRUN_READY = "WRE_QUEUE_CONSUMER_DRYRUN_READY"
 WRE_QUEUE_CONSUMER_DRYRUN_REJECT = "WRE_QUEUE_CONSUMER_DRYRUN_REJECT"
 
@@ -42,6 +41,7 @@ FAIL_CLAIM_EXPIRED = "FAIL_CLAIM_EXPIRED"
 FAIL_FRESHNESS_RECEIPT = "FAIL_FRESHNESS_RECEIPT"
 FAIL_QUEUE_EVIDENCE_REFS = "FAIL_QUEUE_EVIDENCE_REFS"
 FAIL_WSP15_ALLOCATION_RECEIPT = "FAIL_WSP15_ALLOCATION_RECEIPT"
+FAIL_PROGRESSIVE_POLICY_STAGE = "FAIL_PROGRESSIVE_POLICY_STAGE"
 FAIL_REQUESTED_QUEUE_NOT_FOUND = "FAIL_REQUESTED_QUEUE_NOT_FOUND"
 FAIL_QUEUE_GOVERNED_LINEAGE = "FAIL_QUEUE_GOVERNED_LINEAGE"
 
@@ -230,6 +230,11 @@ def plan_reddog_wre_queue_consumer_dry_run(
         or not allocation_worker_plan
     ):
         reasons.append(FAIL_WSP15_ALLOCATION_RECEIPT)
+    stage_receipt = _mapping(selected.get("progressive_policy_stage_receipt"))
+    stage_receipt_id = str(selected.get("progressive_policy_stage_receipt_id") or "")
+    stage_digest = str(selected.get("progressive_policy_stage_digest") or "")
+    if not validate_queue_bounded_stage_binding(selected, wsp15_allocation):
+        reasons.append(FAIL_PROGRESSIVE_POLICY_STAGE)
 
     expected_refs = {
         f"claim:{claim_id}",
@@ -271,6 +276,7 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "wsp15_priority": allocation_priority,
         "wsp15_mps_total": allocation_total,
         "reasoning_tier": allocation_tier,
+        "progressive_policy_stage_receipt_id": stage_receipt_id, "progressive_policy_stage_digest": stage_digest,
         "model_selection_receipt_id": str(selected.get("model_selection_receipt_id") or ""),
         "model_selection_digest": str(selected.get("model_selection_digest") or ""),
         **model_runtime_authority_fields(selected),

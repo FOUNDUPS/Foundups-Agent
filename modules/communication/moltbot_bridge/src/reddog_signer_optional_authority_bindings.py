@@ -38,6 +38,20 @@ def optional_authority_binding_values_valid(receipt_id: Any, digest: Any) -> boo
     return is_sha256_digest(digest)
 
 
+def progressive_stage_authority_fields(authority: Mapping[str, Any]) -> dict[str, str]:
+    """Return a complete canonical progressive-stage binding or no fields."""
+
+    fields = {
+        "progressive_policy_stage_receipt_id": str(
+            authority.get("progressive_policy_stage_receipt_id") or ""
+        ),
+        "progressive_policy_stage_digest": str(
+            authority.get("progressive_policy_stage_digest") or ""
+        ),
+    }
+    return fields if all(is_sha256_digest(value) for value in fields.values()) else {}
+
+
 def optional_authority_binding_values_match(
     receipt_id: Any,
     digest: Any,
@@ -157,6 +171,7 @@ __all__ = [
     "optional_memex_authority_sources_match",
     "optional_authority_binding_values_match",
     "optional_authority_binding_values_valid",
+    "progressive_stage_authority_fields",
     "optional_authority_bindings_valid",
     "runtime_binding_request_valid",
 ]

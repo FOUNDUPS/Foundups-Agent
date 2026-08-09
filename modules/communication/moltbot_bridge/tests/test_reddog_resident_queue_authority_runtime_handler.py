@@ -53,6 +53,12 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    canonical_digest,
+)
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     with_architect_fix_publication,
 )
@@ -77,10 +83,10 @@ _DEFAULT_SIGNER = object()
 
 def _queue_wsp15_allocation_receipt() -> dict[str, object]:
     return allocate_reddog_wsp15_receipt(
-        requested_operation="create_foundup",
+        requested_operation="edit_foundup_module",
         prompt_text="RedDog resident queue authority runtime worktree authority",
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_authority_runtime_handler.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_authority_runtime_handler.py",),
+        changed_paths=(f"modules/foundups/{FID}/src/worker.py",),
+        allowed_read_targets=(f"modules/foundups/{FID}/src/worker.py",),
     ).to_dict()
 
 
@@ -146,6 +152,13 @@ class _SnapshotResolver:
 
 def _snapshot() -> dict[str, object]:
     allocation = _queue_wsp15_allocation_receipt()
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        requested_operation="edit_foundup_module",
+        changed_paths=tuple(allocation["changed_paths"]),
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -172,6 +185,10 @@ def _snapshot() -> dict[str, object]:
                     f"wsp15_allocation:{allocation['receipt_id']}",
                 ],
                 "wsp15_allocation_receipt": allocation,
+                "progressive_policy_stage_receipt_id": stage.receipt_id,
+                "progressive_policy_stage_digest": canonical_digest(stage.to_dict()),
+                "progressive_policy_stage_receipt": stage.to_dict(),
+                "independent_verifier_required": True,
                 "no_execution_performed": True,
             }
         ],
@@ -188,9 +205,9 @@ def _profile() -> dict[str, object]:
         "repo_full_name": REPO,
         "foundup_id": FID,
         "base_ref": "main",
-        "allowed_paths": [f"modules/foundups/{FID}/**"],
+        "allowed_paths": [f"modules/foundups/{FID}/src/worker.py"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",

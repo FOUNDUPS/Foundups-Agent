@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.71",
+  "version": "0.4.72",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -117,6 +117,19 @@
           "type": "boolean",
           "default": true,
           "description": "Submit explicit governed action requests to the resident RedDog audit/research/architect decision cycle after local runtime gates pass. Disable only to pause resident orchestration."
+        },
+        "reddog.progressiveExecutionStage": {
+          "type": "string",
+          "enum": [
+            "audit",
+            "boundedExecution"
+          ],
+          "default": "audit",
+          "enumDescriptions": [
+            "Allow conversation, audit, research, review, and proposal output with no action planning.",
+            "Allow action planning only after all runtime gates pass; backend authority remains limited to signed low-complexity WSP_15 work."
+          ],
+          "description": "Maximum RedDog effect stage. This setting never grants repository, worker, shell, signer, PR, merge, or production authority."
         },
         "foundupsFusion.pythonPath": {
           "type": "string",

@@ -482,6 +482,12 @@ def _canonical_context(
         "work_order_id": str(receipt["work_order_id"]),
         "operational_snapshot_id": str(queue_receipt["operational_snapshot_id"]),
         "wsp15_allocation_receipt_id": str(receipt["wsp15_allocation_receipt_id"]),
+        "progressive_policy_stage_receipt_id": str(
+            receipt["progressive_policy_stage_receipt_id"]
+        ),
+        "progressive_policy_stage_digest": str(
+            receipt["progressive_policy_stage_digest"]
+        ),
         "selected_slice": str(queue_receipt["slice_id"]),
         "worker_runtime": str(intent["worker_runtime"]),
         "worker_role": str(intent["role"]),

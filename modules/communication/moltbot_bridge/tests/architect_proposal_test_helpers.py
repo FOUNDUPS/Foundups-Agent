@@ -43,9 +43,7 @@ def architect_model_output(
         ),
         "target_runtime": "reddog_resident_queue",
         "target_effect_plane": effect,
-        "allowed_paths": [
-            "modules/communication/moltbot_bridge/src/reddog_next_runtime_slice.py"
-        ],
+        "allowed_paths": list(allocation.get("changed_paths") or ()),
         "denied_paths": [".github/workflows/**", ".env"],
         "required_tests": [
             "pytest modules/communication/moltbot_bridge/tests/test_reddog_next_runtime_slice.py"

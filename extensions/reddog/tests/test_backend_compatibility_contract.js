@@ -154,6 +154,23 @@ function assertSafeBlockedProjection() {
   assert(!serialized.includes('secret-product-value'));
   assert(!serialized.includes('secret value must not cross'));
   assert(!serialized.includes('secret-extension-id'));
+
+  const audit = preflight.buildAuditDegradedResult({
+    extension_id: 'secret-extension-id',
+    backend_compatibility: {
+      checked: true,
+      passed: false,
+      rejection_reasons: ['backend_manifest_integrity_mismatch', 'secret value must not cross']
+    }
+  }, client);
+  const auditSerialized = JSON.stringify(audit);
+  assert.strictEqual(audit.ok, true);
+  assert.strictEqual(audit.reason, 'backend_compatibility_audit_degraded');
+  assert.strictEqual(audit.review_packet.no_model_call_performed, true);
+  assert.strictEqual(audit.review_packet.made_network_call, false);
+  assert.strictEqual(audit.review_packet.no_work_order_emitted, true);
+  assert(!auditSerialized.includes('secret value must not cross'));
+  assert(!auditSerialized.includes('secret-extension-id'));
 }
 
 function assertConfigurationMigrationPrecedence() {

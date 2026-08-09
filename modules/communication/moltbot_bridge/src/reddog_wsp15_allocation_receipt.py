@@ -73,6 +73,18 @@ _SYSTEM_KEYWORDS = (
     "wsp",
 )
 
+_COMPLEXITY_KEYWORDS = (
+    "breaking change",
+    "concurrency",
+    "cross-module",
+    "cryptograph",
+    "distributed",
+    "major integration",
+    "migration",
+    "multi-module",
+    "schema change",
+)
+
 
 @dataclass(frozen=True)
 class RedDogWSP15AllocationReceipt:
@@ -144,12 +156,12 @@ def allocate_reddog_wsp15_receipt(
     ultra_hit = _contains_any(corpus, _ULTRA_KEYWORDS)
     urgency_hit = _contains_any(corpus, _URGENCY_KEYWORDS)
     system_hit = _contains_any(corpus, _SYSTEM_KEYWORDS)
-    complexity = _score_complexity(path_count=path_count, corpus=corpus, ultra_hit=ultra_hit)
+    complexity = _score_complexity(path_count=path_count, corpus=corpus)
     importance = _score_importance(ultra_hit=ultra_hit, system_hit=system_hit, path_count=path_count)
     deferability = _score_deferability(ultra_hit=ultra_hit, urgency_hit=urgency_hit)
     impact = _score_impact(ultra_hit=ultra_hit, system_hit=system_hit, urgency_hit=urgency_hit)
     mps_total = complexity + importance + deferability + impact
-    priority = _priority_for_total(mps_total)
+    priority = priority_for_mps_total(mps_total)
     reasoning_tier = _reasoning_tier(priority=priority, ultra_hit=ultra_hit, path_count=path_count)
     worker_plan = _worker_plan(priority=priority, reasoning_tier=reasoning_tier, ultra_hit=ultra_hit)
     scoring_rationale = {
@@ -299,7 +311,7 @@ def validate_reddog_wsp15_allocation_receipt(
     priority = str(allocation.get("priority") or "")
     if priority not in {PRIORITY_P0, PRIORITY_P1, PRIORITY_P2, PRIORITY_P3, PRIORITY_P4}:
         reasons.append("malformed_priority")
-    elif type(total) is int and priority != _priority_for_total(total):
+    elif type(total) is int and priority != priority_for_mps_total(total):
         reasons.append("priority_mps_total_mismatch")
 
     reasoning_tier = str(allocation.get("reasoning_tier") or "")
@@ -347,10 +359,33 @@ def validate_reddog_wsp15_allocation_receipt(
         allocation.get("changed_paths"), (str, bytes)
     ):
         reasons.append("malformed_changed_paths")
+    else:
+        declared_paths = tuple(allocation.get("changed_paths") or ())
+        normalized_paths = _normalize_paths(declared_paths)
+        if declared_paths != normalized_paths:
+            reasons.append("noncanonical_changed_paths")
     if not isinstance(allocation.get("allowed_read_targets"), Sequence) or isinstance(
         allocation.get("allowed_read_targets"), (str, bytes)
     ):
         reasons.append("malformed_allowed_read_targets")
+    else:
+        declared_targets = tuple(allocation.get("allowed_read_targets") or ())
+        if declared_targets != _normalize_paths(declared_targets):
+            reasons.append("noncanonical_allowed_read_targets")
+
+    if "malformed_changed_paths" not in reasons and type(allocation.get("complexity")) is int:
+        paths = tuple(allocation.get("changed_paths") or ())
+        observable_corpus = _corpus(
+            requested_operation=str(allocation.get("requested_operation") or ""),
+            prompt_text="",
+            changed_paths=paths,
+            allowed_read_targets=tuple(allocation.get("allowed_read_targets") or ()),
+        )
+        minimum_complexity = _score_complexity(
+            path_count=len(paths), corpus=observable_corpus
+        )
+        if int(allocation["complexity"]) < minimum_complexity:
+            reasons.append("complexity_below_observable_minimum")
 
     if "malformed_worker_plan" not in reasons:
         expected_input_digest = _digest(_allocation_input_payload(allocation))
@@ -373,8 +408,13 @@ def canonical_reddog_wsp15_allocation_digest(allocation: Mapping[str, Any]) -> s
     return _digest(dict(allocation))
 
 
-def _score_complexity(*, path_count: int, corpus: str, ultra_hit: bool) -> int:
-    if ultra_hit or "runtime" in corpus or "integration" in corpus:
+def _score_complexity(*, path_count: int, corpus: str) -> int:
+    # WSP 15 complexity measures implementation difficulty, not importance or
+    # authority sensitivity. Sensitive terms still raise importance, impact,
+    # priority, and reasoning tier through ``ultra_hit``; they must not turn a
+    # one-file bounded repair into complexity 5 merely because its path names
+    # RedDog or runtime.
+    if path_count >= 10 or _contains_any(corpus, _COMPLEXITY_KEYWORDS):
         return 5
     if path_count >= 6:
         return 4
@@ -411,7 +451,9 @@ def _score_impact(*, ultra_hit: bool, system_hit: bool, urgency_hit: bool) -> in
     return 3
 
 
-def _priority_for_total(total: int) -> str:
+def priority_for_mps_total(total: int) -> str:
+    """Return the single canonical WSP 15 priority for an MPS total."""
+
     if total >= 16:
         return PRIORITY_P0
     if total >= 13:
@@ -486,9 +528,8 @@ def _allocation_input_payload(allocation: Mapping[str, Any]) -> Mapping[str, Any
 
 
 def _complexity_rationale(*, path_count: int, ultra_hit: bool) -> str:
-    if ultra_hit:
-        return "Very high because the work focus touches RedDog/WRE/security/runtime authority terms."
-    return f"Derived from {path_count} unique repo targets and no authority-sensitive keyword hit."
+    del ultra_hit
+    return f"Implementation complexity derived from {path_count} unique repo targets and structural work terms."
 
 
 def _importance_rationale(*, ultra_hit: bool, system_hit: bool) -> str:
@@ -547,6 +588,16 @@ def _normalize_paths(paths: Sequence[str]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(normalized))
 
 
+def allocation_changed_paths_match(
+    authority: Mapping[str, Any], allocation: Mapping[str, Any]
+) -> bool:
+    """Require signed effect paths to equal the canonical WSP 15 allocation."""
+
+    return tuple(authority.get("allowed_paths") or ()) == tuple(
+        allocation.get("changed_paths") or ()
+    )
+
+
 def _canonical_json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
 
@@ -567,6 +618,8 @@ __all__ = [
     "RedDogWSP15AllocationReceipt",
     "RedDogWSP15AllocationValidationResult",
     "allocate_reddog_wsp15_receipt",
+    "allocation_changed_paths_match",
     "canonical_reddog_wsp15_allocation_digest",
+    "priority_for_mps_total",
     "validate_reddog_wsp15_allocation_receipt",
 ]

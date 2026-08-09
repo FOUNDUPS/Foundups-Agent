@@ -339,6 +339,12 @@ def _valid_work_authority_receipt_fields(
     runtime_digest = str(work_authority.get("model_runtime_binding_digest") or "")
     memex_id = work_authority.get("memex_supply_receipt_id")
     memex_digest = work_authority.get("memex_supply_digest")
+    stage_id = work_authority.get("progressive_policy_stage_receipt_id")
+    stage_digest = work_authority.get("progressive_policy_stage_digest")
+    stage_valid = not (stage_id or stage_digest) or (
+        str(stage_id).startswith("sha256:")
+        and str(stage_digest).startswith("sha256:")
+    )
     required_valid = (
         is_sha256_digest(work_authority.get("queue_consumer_receipt_digest"))
         and str(work_authority.get("wsp15_allocation_receipt_id") or "").startswith("sha256:")
@@ -346,6 +352,7 @@ def _valid_work_authority_receipt_fields(
         and str(work_authority.get("wsp15_priority") or "") in {"P0", "P1", "P2", "P3", "P4"}
         and type(work_authority.get("wsp15_mps_total")) is int
         and str(work_authority.get("wsp15_reasoning_tier") or "") in {"REGULAR", "HIGH", "ULTRA"}
+        and stage_valid
     )
     runtime_valid = not (runtime_id or runtime_digest) or (
         runtime_id.startswith("reddog_model_runtime_binding:")

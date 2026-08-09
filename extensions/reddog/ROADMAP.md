@@ -7,6 +7,7 @@ Phase: RedDog 0.4.6 resident architect thin-client surface.
 Current implementation:
 
 - REDDOG_SINGLE_INPUT_AUTHORITY_BOUNDARY_HARDENING_PHASE1 (v0.4.71): operator-only input is classified at ingress; unmarked mixed text and timestamped/JSON/logfmt/command-result diagnostics remain inert; explicit one-field evidence boundaries are supported; resident submission requires a digest-verified process-local Wardrobe owner proof.
+- REDDOG_PROGRESSIVE_POLICY_STAGE_RUNTIME_PHASE1 (v0.4.72): audit dialogue remains available without action planning; bounded execution is an explicit UI ceiling and requires the existing authenticated low-complexity WSP_15, signed authority, and independent-verifier chain; high-risk and production effects remain blocked.
 
 - REDDOG_SINGLE_CONVERSATION_INPUT_AND_GOVERNED_ACTION_ROUTING_PHASE1 (v0.4.70): one conversational textarea; bounded intent/evidence separation; assessment-only diagnostics remain advisory; explicit action requests automatically submit to the existing authenticated resident AgentDB/OpenClaw architect cycle after all local gates pass. Signed worker promotion and effects remain backend-owned.
 

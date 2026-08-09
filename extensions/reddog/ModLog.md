@@ -1,5 +1,16 @@
 # RedDog ModLog
 
+## 2026-08-09 - Progressive audit and bounded-execution stages (0.4.72)
+
+- Added an explicit `audit` / `boundedExecution` setting as a maximum effect
+  stage. Audit remains conversational and useful while action planning stays
+  closed; the setting itself grants no authority.
+- Bound the extension planning path to both the selected ceiling and the
+  existing runtime-consumption gate. Production remains unavailable, and
+  redaction, signature, replay, scope, and secret controls are not switchable.
+- Added Run Trace truth for the configured stage, audit availability, action
+  ceiling, and no-authority invariant. (WSP 00/15/22/50/62/97)
+
 ## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
 
 - Moved plain operator-only classification into the diagnostic ingress parser,

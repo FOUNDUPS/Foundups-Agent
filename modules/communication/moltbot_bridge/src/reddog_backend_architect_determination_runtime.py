@@ -82,11 +82,10 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     rehydrate_model_selection_receipt,
 )
-
 ARCHITECT_DETERMINATION_ACCEPT = "ARCHITECT_DETERMINATION_ACCEPT"
 ARCHITECT_DETERMINATION_REJECT = "ARCHITECT_DETERMINATION_REJECT"
 ARCHITECT_DETERMINATION_SCHEMA_VERSION = "reddog_architect_determination_receipt.v1"
-ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION = "reddog_architect_queue_candidate.v1"
+ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION = "reddog_architect_queue_candidate.v2"
 
 ACTION_FIX = "FIX"
 ACTION_RESEARCH_MORE = "RESEARCH_MORE"
@@ -347,6 +346,10 @@ class ArchitectQueueCandidate:
     wsp15_allocation_receipt: Mapping[str, Any]
     proposal_admission_receipt_id: str
     proposal_admission_digest: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
+    progressive_policy_stage_receipt: Mapping[str, Any]
+    independent_verifier_required: bool
     no_queue_mutation_performed: bool = True
     no_execution_performed: bool = True
     no_worker_spawn_performed: bool = True
@@ -1198,23 +1201,20 @@ def _queue_candidate(
         queue_candidate_id=_digest(payload),
         source_determination_receipt_id=source_determination_receipt_id,
         slice_id=next_slice_name,
-        status=(
-            "CANDIDATE"
-            if proposal_admission.admissible_to_authoritative_queue
-            else "BLOCKED_CANDIDATE"
-        ),
+        status="CANDIDATE" if proposal_admission.admissible_to_authoritative_queue else "BLOCKED_CANDIDATE",
         evidence_refs=(
-            f"architect_determination:{source_determination_receipt_id}",
-            f"snapshot:{snapshot.snapshot_receipt_id}",
-            f"report_bundle:{report_bundle_id}",
-            f"wsp15_allocation:{wsp15_allocation_receipt.get('receipt_id')}",
+            f"architect_determination:{source_determination_receipt_id}", f"snapshot:{snapshot.snapshot_receipt_id}",
+            f"report_bundle:{report_bundle_id}", f"wsp15_allocation:{wsp15_allocation_receipt.get('receipt_id')}",
             f"proposal_admission:{proposal_admission.receipt_id}",
         ),
         wsp15_allocation_receipt=dict(wsp15_allocation_receipt),
         proposal_admission_receipt_id=proposal_admission.receipt_id,
         proposal_admission_digest=_digest(proposal_admission.to_dict()),
+        progressive_policy_stage_receipt_id=proposal_admission.progressive_policy_stage_receipt_id,
+        progressive_policy_stage_digest=_digest(proposal_admission.progressive_policy_stage_receipt),
+        progressive_policy_stage_receipt=dict(proposal_admission.progressive_policy_stage_receipt),
+        independent_verifier_required=proposal_admission.independent_verifier_required,
     )
-
 
 def _canonical_provider_call_evidence(value: Any) -> dict[str, Any]:
     try:

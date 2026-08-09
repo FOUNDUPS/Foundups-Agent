@@ -1,21 +1,17 @@
 """Canonical signed-authority binding for RedDog worker dispatch."""
-
 from __future__ import annotations
-
 import hashlib
 import hmac
 import json
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
-
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     WorkAuthorityVerificationPhase,
     verify_delegated_work_authority,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import is_sha256_digest
 from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import canonical_work_authority_digest, work_authority_digest_matches
-
 AUTHORITY_VERIFICATION_BINDING_SCHEMA = "reddog_worker_dispatch_authority_verification_binding.v1"
-
 _AUTHORITY_RUNTIME_ACCEPT = "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
 _AUTHORITY_VERIFICATION_ACCEPT = "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
 _AUTHORITY_ISSUED = "DELEGATED_AUTHORITY_ISSUED"
@@ -23,12 +19,11 @@ _SIGNED_EFFECT_FIELDS = (
     "work_order_id", "foundup_id", "requested_operation",
     "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
     "wsp15_mps_total", "wsp15_reasoning_tier", "model_runtime_binding_receipt_id",
+    "progressive_policy_stage_receipt_id", "progressive_policy_stage_digest",
     "model_runtime_binding_digest", "memex_supply_receipt_id", "memex_supply_digest",
     "architect_fix_publication_receipt_id",
     "architect_fix_publication_binding_digest",
 )
-
-
 @dataclass(frozen=True)
 class WorkerDispatchAuthorityVerificationContext:
     """Configured use-time dependencies for worker-dispatch authority admission."""
@@ -42,8 +37,6 @@ class WorkerDispatchAuthorityVerificationContext:
     forbidden_operations: tuple[str, ...] = ()
     revoked_key_epochs: tuple[str, ...] = ()
     leeway_s: int = 60
-
-
 def recorded_authority_verification_binding(
     authority_runtime_result: Mapping[str, Any],
     authority_verification_result: Mapping[str, Any],
@@ -140,6 +133,12 @@ def _signed_effect_matches(
     dryrun_receipt: Mapping[str, Any],
 ) -> bool:
     return bool(work_authority) and all(
+        is_sha256_digest(work_authority.get(field))
+        for field in (
+            "progressive_policy_stage_receipt_id",
+            "progressive_policy_stage_digest",
+        )
+    ) and all(
         hmac.compare_digest(
             str(work_authority.get(field) or ""),
             str(dryrun_receipt.get(field) or ""),

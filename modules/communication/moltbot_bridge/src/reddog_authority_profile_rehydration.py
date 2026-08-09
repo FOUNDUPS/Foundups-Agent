@@ -27,6 +27,7 @@ _MAPPING_FIELDS = frozenset(
         "operational_context_binding",
         "policy",
         "proposal_admission",
+        "progressive_policy_stage_receipt",
         "repo_permission_snapshot",
         "requirements",
         "scoring_rationale",
@@ -77,8 +78,10 @@ _STRING_LIST_FIELDS = frozenset(
         "principal_repo_scope",
         "produced_capabilities",
         "promotion_evidence_receipt_ids",
+        "progressive_policy_would_block_reasons",
         "reasons",
         "rejection_reasons",
+        "risk_classes",
         "requested_allowed_paths",
         "required_capabilities",
         "required_modalities",
@@ -93,6 +96,7 @@ _STRING_LIST_FIELDS = frozenset(
         "stop_conditions",
         "supporting_direct_read_paths",
         "supporting_finding_ids",
+        "would_block_reasons",
         "wsp_applicability",
         "wsp_hits",
         "selected_model_ids",
@@ -114,10 +118,12 @@ _BOOL_FIELDS = frozenset(
         "holoindex_maintenance_exception_applied",
         "index_gap_detected",
         "independent_verifier_required",
+        "no_effect_authority",
         "permission_snapshot_can_admin",
         "permission_snapshot_can_write",
         "openclaw_candidate",
         "queue_mutation_allowed",
+        "production_authority_granted",
         "repo_sensitive",
         "require_reasoning",
         "require_structured_output",
@@ -152,6 +158,7 @@ _INT_FIELDS = frozenset(
         "verified_at",
         "work_authority_expires_at",
         "work_authority_ttl_seconds",
+        "wsp15_complexity",
     }
 )
 _NUMBER_FIELDS = frozenset(
@@ -306,12 +313,12 @@ def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> Non
         ):
             found.append(path)
         return
-    elif field.startswith("no_"):
-        if item is not True:
-            found.append(path)
-        return
     elif field in _BOOL_FIELDS:
         if type(item) is not bool:
+            found.append(path)
+        return
+    elif field.startswith("no_"):
+        if item is not True:
             found.append(path)
         return
     elif field in _INT_FIELDS:

@@ -93,6 +93,8 @@ class QueueAuthorityRequestDryRunReceipt:
     wsp15_priority: str
     wsp15_mps_total: int
     reasoning_tier: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
     model_selection_receipt_id: Optional[str]
     model_selection_digest: Optional[str]
     model_runtime_binding_receipt_id: Optional[str]
@@ -385,6 +387,12 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
         wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
         reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
+        progressive_policy_stage_receipt_id=str(
+            queue_receipt.get("progressive_policy_stage_receipt_id") or ""
+        ),
+        progressive_policy_stage_digest=str(
+            queue_receipt.get("progressive_policy_stage_digest") or ""
+        ),
         model_selection_receipt_id=model_selection_receipt_id or None,
         model_selection_digest=model_selection_digest or None,
         **{field: value or None for field, value in runtime_fields.items()},

@@ -35,6 +35,9 @@ MODULE_PATH = (
 )
 MEMEX_SUPPLY_ID = "sha256:memex-supply"
 MEMEX_SUPPLY_DIGEST = "sha256:" + ("7" * 64)
+STAGE_ID = "sha256:" + ("e" * 64)
+STAGE_DIGEST = "sha256:" + ("f" * 64)
+BOUNDED_PATH = "modules/foundups/paccess_001/src/app.py"
 
 
 def _digest(value: dict) -> str:
@@ -49,6 +52,7 @@ def _allocation(**overrides):
         "mps_total": 20,
         "priority": "P0",
         "reasoning_tier": "ULTRA",
+        "changed_paths": [BOUNDED_PATH],
         "worker_plan": {
             "schema_version": "reddog_wsp15_worker_plan.v1",
             "fusion_required": True,
@@ -74,7 +78,7 @@ def _work_authority(allocation=None, **overrides):
         "reddog_id": "reddog:abc123",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
-        "allowed_paths": ["modules/foundups/paccess_001/src/app.py"],
+        "allowed_paths": list(allocation["changed_paths"]),
         "denied_paths": [],
         "requested_operation": "create_foundup",
         "permission_snapshot_digest": "sha256:permission-snapshot",
@@ -83,6 +87,8 @@ def _work_authority(allocation=None, **overrides):
         "wsp15_priority": allocation["priority"],
         "wsp15_mps_total": allocation["mps_total"],
         "wsp15_reasoning_tier": allocation["reasoning_tier"],
+        "progressive_policy_stage_receipt_id": STAGE_ID,
+        "progressive_policy_stage_digest": STAGE_DIGEST,
         "nonce": "nonce-1",
         "issued_at": 1000,
         "expires_at": 1100,
@@ -221,6 +227,47 @@ def test_accepts_verified_signed_authority_and_emits_wsp15_worker_intents() -> N
     assert result.receipt.no_worker_spawn_performed is True
     assert result.receipt.no_openclaw_enqueue_performed is True
     assert result.receipt.no_hermes_dispatch_performed is True
+
+
+def test_effect_dispatch_rejects_missing_progressive_stage_binding() -> None:
+    allocation = _allocation()
+    runtime = _runtime_result(allocation)
+    authority = runtime["authority_result"]["work_authority"]
+    authority["progressive_policy_stage_receipt_id"] = ""
+    authority["progressive_policy_stage_digest"] = ""
+    runtime["authority_result"]["receipt"]["work_authority_digest"] = _digest(authority)
+
+    result = _plan(
+        allocation,
+        queue_authority_runtime_result=runtime,
+        queue_authority_verification_result=_verification_result(authority),
+    )
+
+    assert result.accepted is False
+    assert (
+        dispatch.SignedAuthorityWorkerDispatchDryRunReason.PROGRESSIVE_STAGE_BINDING_MISMATCH
+        in result.rejection_reasons
+    )
+
+
+def test_effect_dispatch_rejects_signed_paths_outside_allocation() -> None:
+    allocation = _allocation()
+    runtime = _runtime_result(allocation)
+    authority = runtime["authority_result"]["work_authority"]
+    authority["allowed_paths"] = ["modules/foundups/other/src/attacker.py"]
+    runtime["authority_result"]["receipt"]["work_authority_digest"] = _digest(authority)
+
+    result = _plan(
+        allocation,
+        queue_authority_runtime_result=runtime,
+        queue_authority_verification_result=_verification_result(authority),
+    )
+
+    assert result.accepted is False
+    assert (
+        dispatch.SignedAuthorityWorkerDispatchDryRunReason.WSP15_CHANGED_PATHS_MISMATCH
+        in result.rejection_reasons
+    )
 
 
 def test_carries_model_runtime_binding_from_signed_authority() -> None:

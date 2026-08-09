@@ -21,6 +21,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _profile,
     _snapshot,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    with_queue_wsp15_allocation,
+)
 
 
 def test_authority_profile_materializer_carries_model_runtime_binding_receipt() -> None:
@@ -38,7 +41,9 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
         "model_runtime_binding_verification_digest": verification_receipt_digest(verification),
     }
     snapshot = _snapshot()
-    queue_item, claim = snapshot["wre_queue_items"][0], snapshot["worker_claims"][0]
+    queue_item = with_queue_wsp15_allocation(snapshot["wre_queue_items"][0])
+    snapshot["wre_queue_items"][0] = queue_item
+    claim = snapshot["worker_claims"][0]
     queue_item.update(lineage)
     claim.update({key: lineage[key] for key in (
         "model_selection_receipt_id",
@@ -51,6 +56,7 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
         f"model_runtime_binding_verification:{verification.receipt_id}",
     ))
     profile = _profile(
+        wsp15_allocation_receipt=queue_item["wsp15_allocation_receipt"],
         model_selection_receipt=selection,
         model_runtime_binding_receipt=binding,
         model_runtime_binding_verification_receipt=verification.to_dict(),

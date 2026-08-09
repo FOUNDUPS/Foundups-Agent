@@ -12,6 +12,9 @@ from typing import Any
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+)
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import (
     architect_fix_publication_state_projection,
 )
@@ -159,16 +162,23 @@ class FakeAssuranceReservationStore:
 
 def queue_wsp15_allocation_receipt(*, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
     return allocate_reddog_wsp15_receipt(
-        requested_operation="create_foundup",
+        requested_operation="edit_foundup_module",
         prompt_text=prompt_text,
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
+        changed_paths=("modules/foundups/paccess_001/src/worker.py",),
+        allowed_read_targets=("modules/foundups/paccess_001/src/worker.py",),
     ).to_dict()
 
 
 def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
     allocation = queue_wsp15_allocation_receipt(prompt_text=prompt_text)
     item = dict(queue_item)
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice=str(item.get("slice_id") or ""),
+        requested_operation="edit_foundup_module",
+        changed_paths=tuple(allocation["changed_paths"]),
+    )
     refs = [str(ref) for ref in item.get("evidence_refs") or ()]
     refs.extend(
         [
@@ -177,6 +187,10 @@ def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str 
     )
     item["evidence_refs"] = list(dict.fromkeys(refs))
     item["wsp15_allocation_receipt"] = allocation
+    item["progressive_policy_stage_receipt_id"] = stage.receipt_id
+    item["progressive_policy_stage_digest"] = canonical_digest(stage.to_dict())
+    item["progressive_policy_stage_receipt"] = stage.to_dict()
+    item["independent_verifier_required"] = True
     return item
 
 
@@ -199,6 +213,20 @@ def governed_worker_dispatch_snapshot(
     queue.setdefault("memex_supply_receipt_id", _TEST_MEMEX_SUPPLY_ID)
     queue.setdefault("memex_supply_digest", _TEST_MEMEX_SUPPLY_DIGEST)
     allocation = queue.get("wsp15_allocation_receipt") or {}
+    if not queue.get("progressive_policy_stage_receipt") and allocation:
+        stage = admit_bounded_execution(
+            determination_action="FIX",
+            allocation=allocation,
+            selected_slice=str(queue.get("slice_id") or ""),
+            requested_operation=str(
+                allocation.get("requested_operation") or "bounded_code_change"
+            ),
+            changed_paths=tuple(allocation.get("changed_paths") or ()),
+        )
+        queue["progressive_policy_stage_receipt_id"] = stage.receipt_id
+        queue["progressive_policy_stage_digest"] = canonical_digest(stage.to_dict())
+        queue["progressive_policy_stage_receipt"] = stage.to_dict()
+        queue["independent_verifier_required"] = True
     allocation_id = str(allocation.get("receipt_id") or "")
     runtime = model_runtime_authority_fields(queue)
     runtime_id = runtime["model_runtime_binding_receipt_id"]
@@ -319,6 +347,14 @@ def worker_dispatch_authority_stages(
             )
             or ""
         )
+    for field in (
+        "progressive_policy_stage_receipt_id",
+        "progressive_policy_stage_digest",
+    ):
+        if field not in work_authority_overrides:
+            work_authority_overrides[field] = _queue_binding_value(
+                work_state_snapshot, queue_item_id, field
+            ) or ""
     identity = {
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
@@ -357,9 +393,11 @@ def worker_dispatch_authority_stages(
         "reddog_id": "reddog:worker-dispatch",
         "repo_full_name": _TEST_REPO,
         "foundup_id": _TEST_FOUNDUP,
-        "allowed_paths": [f"modules/foundups/{_TEST_FOUNDUP}/**"],
+        "allowed_paths": list(allocation.get("changed_paths") or ()),
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": str(
+            allocation.get("requested_operation") or "bounded_code_change"
+        ),
         "permission_snapshot_digest": _TEST_PERMISSION_SNAPSHOT_DIGEST,
         "queue_consumer_receipt_digest": queue_receipt_digest,
         "wsp15_allocation_receipt_id": allocation["receipt_id"],

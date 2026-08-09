@@ -1,5 +1,12 @@
 # RedDog Interface
 
+Version 0.4.72 adds `reddog.progressiveExecutionStage` as an effect ceiling,
+not an authority source. `audit` is the default and permits useful dialogue
+with no action planning. `boundedExecution` permits planning only after the
+existing runtime-consumption gate passes; the backend independently requires
+the signed bounded-stage receipt before queue, signer, or worker effects.
+Production authority is not exposed.
+
 Version 0.4.71 hardens the single-input authority boundary. Plain operator
 requests are classified inside the ingress parser; diagnostic-shaped content
 never falls back to whole-message action classification. Timestamped, JSON,

@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-09 - Progressive effect-stage regressions (0.4.72)
+
+- Proved invalid and production settings resolve to audit, audit never opens
+  action planning, bounded execution still depends on the runtime gate, and
+  the UI setting never grants authority.
+
 ## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
 
 - Proved false-valued diagnostic fields and terse command-result logs cannot

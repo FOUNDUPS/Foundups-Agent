@@ -16,6 +16,12 @@ from modules.communication.moltbot_bridge.src.reddog_main_wre_queue_consumer_boo
     REDDOG_WRE_QUEUE_BOOTSTRAP_READY,
     run_reddog_main_wre_queue_consumer_bootstrap,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    evaluate_proposal_stage,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -39,25 +45,25 @@ NOW = "2026-07-14T00:00:00+00:00"
 
 
 def _allocation_receipt():
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 18,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "fusion_required": True,
-            "independent_verifier_required": True,
-            "queue_mutation_allowed": False,
-            "hermes_execution_allowed": False,
-        },
-    }
+    return allocate_reddog_wsp15_receipt(
+        requested_operation="edit_foundup_module",
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=("modules/foundups/demo/src/worker.py",),
+        allowed_read_targets=("modules/foundups/demo/src/worker.py",),
+    ).to_dict()
 
 
 def _snapshot(**overrides):
     claim_id = "claim-1"
     freshness_id = "fresh-1"
     allocation = _allocation_receipt()
+    stage = evaluate_proposal_stage(
+        action="FIX", reuse_decision="EXTEND_EXISTING",
+        effect_plane="REPOSITORY_CODE_CHANGE", allocation=allocation,
+        selected_slice="REDDOG_SAMPLE_SLICE_PHASE1",
+        requested_operation="edit_foundup_module",
+        changed_paths=("modules/foundups/demo/src/worker.py",),
+    )
     determination_id = "sha256:determination"
     selection_id = "sha256:model-selection"
     runtime_id = "reddog_model_runtime_binding:abc123"
@@ -105,6 +111,12 @@ def _snapshot(**overrides):
                     f"memex_supply:{memex_id}",
                 ],
                 "wsp15_allocation_receipt": allocation,
+                "progressive_policy_stage_receipt_id": stage.receipt_id,
+                "progressive_policy_stage_digest": consumer._digest(
+                    stage.to_dict()
+                ),
+                "progressive_policy_stage_receipt": stage.to_dict(),
+                "independent_verifier_required": True,
                 "source_determination_receipt_id": determination_id,
                 "model_selection_receipt_id": selection_id,
                 "model_selection_digest": "sha256:model-selection",
@@ -133,11 +145,12 @@ def test_accepts_one_fresh_queued_item_without_execution() -> None:
     assert result.next_required_gate == consumer.NEXT_GATE_SIGNED_AUTHORITY_REQUIRED
     assert result.execution_ready is False
     assert result.receipt is not None
-    assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
+    allocation = _allocation_receipt()
+    assert result.receipt.wsp15_allocation_receipt_id == allocation["receipt_id"]
     assert result.receipt.wsp15_allocation_digest.startswith("sha256:")
-    assert result.receipt.wsp15_priority == "P0"
-    assert result.receipt.wsp15_mps_total == 18
-    assert result.receipt.reasoning_tier == "ULTRA"
+    assert result.receipt.wsp15_priority == allocation["priority"]
+    assert result.receipt.wsp15_mps_total == allocation["mps_total"]
+    assert result.receipt.reasoning_tier == allocation["reasoning_tier"]
     assert result.receipt.model_selection_receipt_id == "sha256:model-selection"
     assert result.receipt.model_selection_digest == "sha256:model-selection"
     assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"

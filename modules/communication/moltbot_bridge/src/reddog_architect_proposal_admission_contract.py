@@ -14,10 +14,14 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_au
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     OperationalContextSnapshot,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    DECISION_BOUNDED_EXECUTION_ADMITTED,
+    validate_proposal_stage_projection,
+)
 
 
 PROPOSAL_ADMISSION_SCHEMA_VERSION = (
-    "reddog_architect_proposal_executability_admission.v2"
+    "reddog_architect_proposal_executability_admission.v3"
 )
 CONVERSATION_WORK_BINDING_SCHEMA = "reddog_conversation_work_binding.v1"
 
@@ -170,6 +174,13 @@ class ArchitectProposalExecutabilityReceipt:
     report_bundle_id: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
+    wsp15_complexity: int
+    progressive_policy_stage: str
+    progressive_policy_decision: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_receipt: Mapping[str, Any]
+    progressive_policy_would_block_reasons: tuple[str, ...]
+    independent_verifier_required: bool
     policy_digest: str
     conversation_binding_present: bool
     conversation_binding_digest: str
@@ -324,6 +335,13 @@ def reevaluate_architect_proposal_promotion_preconditions(
         or receipt.proposal_validity != VALIDITY_VALID
     ):
         reasons.append("proposal_not_valid_for_promotion")
+    if (
+        receipt.admissible_to_authoritative_queue is not True
+        or receipt.progressive_policy_decision
+        != DECISION_BOUNDED_EXECUTION_ADMITTED
+        or receipt.independent_verifier_required is not True
+    ):
+        reasons.append("progressive_policy_stage_not_admitted")
     if not required.issubset(set(receipt.required_capabilities)):
         reasons.append("effect_capability_requirements_underdeclared")
     if receipt.policy_digest != _digest(current.to_dict()):
@@ -364,6 +382,7 @@ _TUPLE_FIELDS = (
     "supporting_finding_ids",
     "supporting_direct_read_paths",
     "rejection_reasons",
+    "progressive_policy_would_block_reasons",
 )
 
 
@@ -372,6 +391,8 @@ def _valid_receipt_body(data: Mapping[str, Any], receipt_id: str) -> bool:
         data.get("action") == "FIX"
         and data.get("proposal_validity") == VALIDITY_VALID
         and data.get("execution_readiness") == READINESS_READY
+        and data.get("progressive_policy_decision")
+        == DECISION_BOUNDED_EXECUTION_ADMITTED
     )
     attestations = (
         "no_queue_mutation_performed",
@@ -390,6 +411,20 @@ def _valid_receipt_body(data: Mapping[str, Any], receipt_id: str) -> bool:
         and data.get("target_effect_plane") in TARGET_EFFECT_PLANES
         and isinstance(data.get("direct_read_grounded"), bool)
         and isinstance(data.get("holoindex_maintenance_exception_applied"), bool)
+        and type(data.get("wsp15_complexity")) is int
+        and 1 <= data.get("wsp15_complexity") <= 5
+        and isinstance(data.get("independent_verifier_required"), bool)
+        and validate_proposal_stage_projection(data)
+        and data.get("progressive_policy_stage")
+        == data.get("progressive_policy_stage_receipt", {}).get("stage")
+        and data.get("progressive_policy_decision")
+        == data.get("progressive_policy_stage_receipt", {}).get("decision")
+        and data.get("progressive_policy_stage_receipt_id")
+        == data.get("progressive_policy_stage_receipt", {}).get("receipt_id")
+        and tuple(data.get("progressive_policy_would_block_reasons") or ())
+        == tuple(data.get("progressive_policy_stage_receipt", {}).get("would_block_reasons") or ())
+        and data.get("independent_verifier_required")
+        is data.get("progressive_policy_stage_receipt", {}).get("independent_verifier_required")
         and _valid_conversation_binding(data)
         and _valid_holoindex_maintenance_exception(data)
         and data.get("accepted")

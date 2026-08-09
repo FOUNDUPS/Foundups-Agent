@@ -24,6 +24,8 @@ class WREQueueConsumerDryRunReceipt:
     wsp15_priority: str
     wsp15_mps_total: int
     reasoning_tier: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
     next_required_gate: str
     model_selection_receipt_id: Optional[str] = None
     model_selection_digest: Optional[str] = None
@@ -78,6 +80,12 @@ def build_queue_consumer_receipt(
         wsp15_priority=str(seed["wsp15_priority"]),
         wsp15_mps_total=int(seed["wsp15_mps_total"]),
         reasoning_tier=str(seed["reasoning_tier"]),
+        progressive_policy_stage_receipt_id=str(
+            seed["progressive_policy_stage_receipt_id"]
+        ),
+        progressive_policy_stage_digest=str(
+            seed["progressive_policy_stage_digest"]
+        ),
         next_required_gate=str(seed["next_required_gate"]),
         **values,
     )

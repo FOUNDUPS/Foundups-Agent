@@ -28,6 +28,13 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executab
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ArchitectDeterminationReason,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    DECISION_BOUNDED_EXECUTION_ADMITTED,
+    DECISION_WOULD_BLOCK,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_backend_architect_determination_runtime import (
     NOW,
     FakeArchitectRunner,
@@ -57,10 +64,12 @@ def _evaluate(
     output_updates: dict | None = None,
     policy: ArchitectProposalAdmissionPolicy | None = None,
     index_gap: bool = False,
+    allocation: dict | None = None,
 ):
     inputs = _build_inputs()
+    allocation = allocation or inputs["allocation"]
     output = _model_output(
-        inputs["allocation"],
+        allocation,
         inputs["reports"][0]["evidence_refs"][0],
     )
     output.update(output_updates or {})
@@ -79,7 +88,7 @@ def _evaluate(
         snapshot=snapshot,
         reports=inputs["reports"],
         report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
-        wsp15_allocation_receipt=inputs["allocation"],
+        wsp15_allocation_receipt=allocation,
         policy=policy,
     )
     return receipt, inputs, output
@@ -175,12 +184,32 @@ def test_model_supplied_readiness_boolean_has_no_authority() -> None:
     assert receipt.admissible_to_authoritative_queue is False
 
 
-def test_all_current_capabilities_admit_repository_change() -> None:
-    receipt, _, _ = _evaluate(policy=_policy())
+def test_all_current_capabilities_do_not_override_complexity_ceiling() -> None:
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="cross-module bounded fix",
+        prompt_text="Repair one cross-module data flow.",
+        changed_paths=(
+            "modules/foundups/demo/src/a.py",
+            "modules/foundups/demo/src/b.py",
+            "modules/foundups/demo/src/c.py",
+        ),
+    ).to_dict()
+    receipt, _, _ = _evaluate(policy=_policy(), allocation=allocation)
 
     assert receipt.proposal_validity == VALIDITY_VALID
     assert receipt.execution_readiness == READINESS_READY
-    assert receipt.admissible_to_authoritative_queue is True
+    assert receipt.admissible_to_authoritative_queue is False
+    assert receipt.progressive_policy_decision == DECISION_WOULD_BLOCK
+    rehydrated = validate_architect_proposal_executability_receipt(
+        receipt.to_dict()
+    )
+    assert (
+        reevaluate_architect_proposal_execution_readiness(
+            rehydrated,
+            policy=_policy(),
+        )
+        == ()
+    )
     assert validate_architect_proposal_executability_receipt(
         receipt.to_dict()
     ) == receipt
@@ -197,6 +226,11 @@ def test_index_gap_blocks_arbitrary_repository_change() -> None:
 
 def test_index_gap_allows_only_direct_read_grounded_holo_maintenance() -> None:
     inputs = _build_inputs()
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="cross-module holoindex maintenance",
+        prompt_text="Repair one cross-module retrieval path.",
+        changed_paths=("holo_index/query_owner.py",),
+    ).to_dict()
     reports = [dict(report) for report in inputs["reports"]]
     reports[0] = {
         **reports[0],
@@ -212,7 +246,7 @@ def test_index_gap_allows_only_direct_read_grounded_holo_maintenance() -> None:
         ],
     }
     output = _model_output(
-        inputs["allocation"],
+        allocation,
         reports[0]["evidence_refs"][0],
     )
     output.update(
@@ -235,25 +269,43 @@ def test_index_gap_allows_only_direct_read_grounded_holo_maintenance() -> None:
         snapshot=snapshot,
         reports=reports,
         report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
-        wsp15_allocation_receipt=inputs["allocation"],
+        wsp15_allocation_receipt=allocation,
         policy=_policy(),
     )
 
     assert receipt.proposal_validity == VALIDITY_VALID
     assert receipt.execution_readiness == READINESS_READY
-    assert receipt.admissible_to_authoritative_queue is True
+    assert receipt.admissible_to_authoritative_queue is False
+    assert receipt.progressive_policy_decision == DECISION_WOULD_BLOCK
     assert receipt.direct_read_grounded is True
     assert receipt.holoindex_maintenance_exception_applied is True
-    rehydrated = validate_architect_proposal_executability_receipt(
-        receipt.to_dict()
+
+
+def test_complexity_two_low_risk_fix_is_admitted() -> None:
+    inputs = _build_inputs()
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="edit_foundup_module",
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=("modules/foundups/demo/src/worker.py",),
+        allowed_read_targets=("modules/foundups/demo/src/worker.py",),
+    ).to_dict()
+    output = _model_output(
+        allocation, inputs["reports"][0]["evidence_refs"][0]
     )
-    assert (
-        reevaluate_architect_proposal_execution_readiness(
-            rehydrated,
-            policy=_policy(),
-        )
-        == ()
+
+    receipt = evaluate_architect_proposal_executability(
+        model_output=output,
+        snapshot=inputs["snapshot"],
+        reports=inputs["reports"],
+        report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
+        wsp15_allocation_receipt=allocation,
+        policy=_policy(),
     )
+
+    assert allocation["complexity"] == 2
+    assert receipt.progressive_policy_decision == DECISION_BOUNDED_EXECUTION_ADMITTED
+    assert receipt.admissible_to_authoritative_queue is True
+    assert receipt.independent_verifier_required is True
 
 
 def test_unrelated_holo_reference_does_not_unlock_maintenance_exception() -> None:

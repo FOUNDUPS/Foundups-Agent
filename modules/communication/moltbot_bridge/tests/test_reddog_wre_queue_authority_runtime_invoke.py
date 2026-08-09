@@ -124,6 +124,8 @@ def _queue_result():
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "reasoning_tier": "ULTRA",
+        "progressive_policy_stage_receipt_id": "sha256:progressive-stage",
+        "progressive_policy_stage_digest": "sha256:progressive-stage-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:" + "a" * 64,
         "model_runtime_binding_verification_receipt_id": (
@@ -389,6 +391,12 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
         wsp15_priority=str(request["wsp15_priority"]),
         wsp15_mps_total=int(request["wsp15_mps_total"]),
         wsp15_reasoning_tier=str(request["wsp15_reasoning_tier"]),
+        progressive_policy_stage_receipt_id=str(
+            request["progressive_policy_stage_receipt_id"]
+        ),
+        progressive_policy_stage_digest=str(
+            request["progressive_policy_stage_digest"]
+        ),
             model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
             model_runtime_binding_digest=str(request["model_runtime_binding_digest"]),
             model_runtime_binding_verification_receipt_id=str(

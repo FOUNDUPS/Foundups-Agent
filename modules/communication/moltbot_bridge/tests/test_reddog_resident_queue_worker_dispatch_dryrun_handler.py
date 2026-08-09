@@ -11,7 +11,6 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_result
     InMemoryResidentQueueChainResultsStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
-    FAIL_RECORD_REJECTED,
     RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT,
     ResidentQueueStageDispatchRequest,
     invoke_reddog_resident_queue_next_stage_dispatch,
@@ -19,6 +18,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_WORKER_DISPATCH_DRYRUN,
     NEXT_QUEUE_WORKER_DISPATCH_RUNTIME,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_dryrun_handler import (
     AUTHORITY_RUNTIME_STAGE_KEY,
@@ -35,7 +37,6 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispa
 from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
     SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
     SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_REJECT,
-    SignedAuthorityWorkerDispatchDryRunReason,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
@@ -48,6 +49,12 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
+    FAIL_PROGRESSIVE_POLICY_STAGE,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
     recorded_authority_verification_binding,
@@ -65,6 +72,9 @@ MODULE_PATH = (
 )
 NOW_ISO = "2026-07-14T00:00:00+00:00"
 EXPIRES = "2026-07-14T01:00:00+00:00"
+SLICE_ID = "REDDOG_TEST_SLICE_PHASE1"
+REQUESTED_OPERATION = "edit_foundup_module"
+CHANGED_PATH = "modules/foundups/paccess_001/src/app.py"
 
 
 def _digest(value: dict) -> str:
@@ -73,46 +83,46 @@ def _digest(value: dict) -> str:
 
 
 def _allocation(**overrides: object) -> dict[str, object]:
-    payload: dict[str, object] = {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 2,
-            "coding_worker_count": 2,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "hermes_execution_allowed": False,
-            "queue_mutation_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
+    payload = allocate_reddog_wsp15_receipt(
+        requested_operation=REQUESTED_OPERATION,
+        prompt_text="Fix the bounded RedDog runtime pAccess test artifact.",
+        changed_paths=(CHANGED_PATH,),
+        allowed_read_targets=(CHANGED_PATH,),
+    ).to_dict()
     payload.update(overrides)
     return payload
 
 
+def _stage(allocation: dict[str, object]):
+    return admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice=SLICE_ID,
+        requested_operation=REQUESTED_OPERATION,
+        changed_paths=(CHANGED_PATH,),
+    )
+
+
 def _work_authority(allocation: dict[str, object] | None = None, **overrides: object) -> dict[str, object]:
     allocation = allocation or _allocation()
+    stage = _stage(allocation)
     payload: dict[str, object] = {
         "work_order_id": "wo-1",
         "principal_id": "github:mjtrout",
         "reddog_id": "reddog:abc123",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
-        "allowed_paths": ["modules/foundups/paccess_001/src/app.py"],
+        "allowed_paths": [CHANGED_PATH],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": REQUESTED_OPERATION,
         "permission_snapshot_digest": "sha256:permission-snapshot",
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "wsp15_allocation_digest": _digest(allocation),
         "wsp15_priority": allocation["priority"],
         "wsp15_mps_total": allocation["mps_total"],
         "wsp15_reasoning_tier": allocation["reasoning_tier"],
+        "progressive_policy_stage_receipt_id": stage.receipt_id,
+        "progressive_policy_stage_digest": _digest(stage.to_dict()),
         "nonce": "nonce-1",
         "issued_at": 1000,
         "expires_at": 1100,
@@ -161,13 +171,14 @@ def _verification_result(
 
 def _snapshot(allocation: dict[str, object] | None = None, *, queue_item_id: str = "queue-1") -> dict[str, object]:
     allocation = allocation or _allocation()
+    stage = _stage(allocation)
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
         "worker_claims": [
             {
                 "claim_id": "claim-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+                "slice_id": SLICE_ID,
                 "worker_id": "reddog-0102",
                 "status": "ACTIVE",
                 "expires_at": EXPIRES,
@@ -177,7 +188,7 @@ def _snapshot(allocation: dict[str, object] | None = None, *, queue_item_id: str
         "wre_queue_items": [
             {
                 "queue_item_id": queue_item_id,
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+                "slice_id": SLICE_ID,
                 "claim_id": "claim-1",
                 "worker_id": "reddog-0102",
                 "status": "QUEUED",
@@ -187,6 +198,10 @@ def _snapshot(allocation: dict[str, object] | None = None, *, queue_item_id: str
                     f"wsp15_allocation:{allocation['receipt_id']}",
                 ],
                 "wsp15_allocation_receipt": allocation,
+                "progressive_policy_stage_receipt_id": stage.receipt_id,
+                "progressive_policy_stage_digest": _digest(stage.to_dict()),
+                "progressive_policy_stage_receipt": stage.to_dict(),
+                "independent_verifier_required": True,
                 "no_execution_performed": True,
             }
         ],
@@ -350,8 +365,7 @@ def test_allocation_tamper_is_not_recorded_by_dispatcher() -> None:
     )
 
     assert result.accepted is False
-    assert FAIL_RECORD_REJECTED in result.rejection_reasons
-    assert SignedAuthorityWorkerDispatchDryRunReason.WSP15_DIGEST_MISMATCH in result.rejection_reasons
+    assert FAIL_PROGRESSIVE_POLICY_STAGE in result.rejection_reasons
     assert WORKER_DISPATCH_DRYRUN_STAGE_KEY not in store.load()["stage_results"]
 
 

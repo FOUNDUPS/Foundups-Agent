@@ -25,6 +25,9 @@ class WorkerDispatchRuntimeReason:
     DISPATCH_SCHEMA_MISMATCH = "REJECT_WORKER_DISPATCH_SCHEMA_MISMATCH"
     QUEUE_ITEM_MISSING = "REJECT_WORKER_DISPATCH_QUEUE_ITEM_MISSING"
     WSP15_BINDING_MISMATCH = "REJECT_WORKER_DISPATCH_WSP15_BINDING_MISMATCH"
+    PROGRESSIVE_STAGE_BINDING_MISMATCH = (
+        "REJECT_WORKER_DISPATCH_PROGRESSIVE_STAGE_BINDING_MISMATCH"
+    )
     MODEL_RUNTIME_BINDING_MISMATCH = (
         "REJECT_WORKER_DISPATCH_MODEL_RUNTIME_BINDING_MISMATCH"
     )
@@ -79,6 +82,8 @@ class SignedWorkerDispatchRuntimeReceipt:
     requested_operation: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
     memex_supply_receipt_id: str

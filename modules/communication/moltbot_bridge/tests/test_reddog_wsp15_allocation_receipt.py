@@ -45,17 +45,31 @@ def test_allocation_scores_reddog_runtime_authority_work_as_p0_ultra() -> None:
     assert receipt.input_digest.startswith("sha256:")
     assert receipt.priority == PRIORITY_P0
     assert receipt.reasoning_tier == REASONING_ULTRA
-    assert receipt.complexity == 5
+    assert receipt.complexity == 3
     assert receipt.importance == 5
     assert receipt.deferability == 5
     assert receipt.impact == 5
-    assert receipt.mps_total == 20
+    assert receipt.mps_total == 18
     assert receipt.worker_plan["fusion_required"] is True
     assert receipt.worker_plan["independent_verifier_required"] is True
     assert receipt.worker_plan["hermes_execution_allowed"] is False
     assert receipt.no_model_call_performed is True
     assert receipt.no_worker_spawn_performed is True
     assert receipt.no_holoindex_reindex_performed is True
+
+
+def test_sensitive_module_name_does_not_inflate_bounded_complexity() -> None:
+    receipt = allocate_reddog_wsp15_receipt(
+        requested_operation="bounded_module_fix",
+        prompt_text="Fix one bounded module defect.",
+        changed_paths=(
+            "modules/communication/moltbot_bridge/src/reddog_next_slice.py",
+        ),
+    )
+
+    assert receipt.complexity == 2
+    assert receipt.importance == 5
+    assert receipt.reasoning_tier == REASONING_ULTRA
 
 
 def test_allocation_can_emit_regular_low_priority_receipt_for_simple_prompt() -> None:
