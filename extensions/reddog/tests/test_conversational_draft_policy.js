@@ -44,13 +44,16 @@ const extensionSource = fs.readFileSync(path.join(__dirname, '..', 'extension.js
 const wireStart = extensionSource.indexOf('function wireFusionWebview');
 const wireEnd = extensionSource.indexOf('function killBridgeChild', wireStart);
 const wire = extensionSource.slice(wireStart, wireEnd);
+const prepareStart = extensionSource.indexOf('function prepareFusionRequest');
+const prepareEnd = extensionSource.indexOf('function wireFusionWebview', prepareStart);
+const prepare = extensionSource.slice(prepareStart, prepareEnd);
 assert(extensionSource.includes('conversationalDraft'));
 assert(wire.includes('conversationalDraftPolicy.emptyContextPacket()'));
 assert(wire.includes('conversationalDraftPolicy.buildUserPrompt(workFocus)'));
 assert(wire.includes('conversationalDraftPolicy.systemPrompt()'));
 assert(wire.includes('!classification.conversationalDraft'));
 assert(wire.includes("classification.conversationalDraft ? ''"));
-assert(wire.includes('message.useLastPacket === true && !classification.conversationalDraft'));
+assert(prepare.includes('message.useLastPacket === true && !classification.conversationalDraft'));
 assert(wire.includes("classification.conversationalDraft ? '' : ' panel='"));
 
 console.log('conversational draft policy tests passed');
