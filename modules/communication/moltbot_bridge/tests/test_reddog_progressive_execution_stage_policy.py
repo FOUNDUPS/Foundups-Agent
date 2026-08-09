@@ -347,6 +347,21 @@ def test_audit_stage_cannot_admit_a_non_readonly_operation() -> None:
     assert validate_queue_progressive_stage_binding(queue, allocation) is False
 
 
+def test_recomputed_bounded_stage_with_traversal_path_is_rejected() -> None:
+    _, receipt = _admit()
+    forged = receipt.to_dict()
+    forged["changed_paths"] = (
+        "modules/foundups/demo/src/../../outside.py",
+    )
+    forged["receipt_id"] = stage_policy._digest(stage_policy._unsigned(forged))
+
+    assert stage_policy.validate_signed_progressive_stage_binding(
+        forged,
+        expected_receipt_id=forged["receipt_id"],
+        expected_digest=stage_policy._digest(forged),
+    ) is False
+
+
 def test_policy_module_has_no_execution_or_holoindex_mutation_surface() -> None:
     tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
     imports = {

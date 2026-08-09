@@ -456,6 +456,11 @@ def validate_signed_progressive_stage_binding(
             receipt.get("decision") == DECISION_BOUNDED_EXECUTION_ADMITTED
             and receipt.get("no_effect_authority") is False
             and receipt.get("independent_verifier_required") is True
+            and tuple(receipt.get("changed_paths") or ())
+            and all(
+                _bounded_path_shape_safe(str(path))
+                for path in receipt.get("changed_paths") or ()
+            )
             and not tuple(receipt.get("would_block_reasons") or ())
             and not tuple(receipt.get("rejection_reasons") or ())
         )
@@ -569,7 +574,10 @@ def classify_high_risk_work(
 
 
 def _bounded_path_risks(path: str) -> tuple[str, ...]:
-    parts = tuple(part.lower() for part in path.split("/") if part)
+    if not _bounded_path_shape_safe(path):
+        return ("PATH_TRAVERSAL",)
+    raw_parts = tuple(path.split("/"))
+    parts = tuple(part.lower() for part in raw_parts)
     if len(parts) < 4 or parts[:2] != ("modules", "foundups"):
         return ("PROTECTED_SURFACE",)
     if any(
@@ -582,6 +590,15 @@ def _bounded_path_risks(path: str) -> tuple[str, ...]:
     if parts[3] not in _BOUNDED_FOUNDUP_SURFACES and leaf not in _BOUNDED_FOUNDUP_DOCS:
         return ("UNKNOWN_FOUNDUP_SURFACE",)
     return ()
+
+
+def _bounded_path_shape_safe(path: str) -> bool:
+    parts = tuple(path.split("/"))
+    return bool(
+        path and "\\" not in path and ":" not in path and "\x00" not in path
+        and not path.startswith("/")
+        and not any(part in {"", ".", ".."} for part in parts)
+    )
 
 
 def _normalize_paths(values: Sequence[Any]) -> tuple[str, ...]:

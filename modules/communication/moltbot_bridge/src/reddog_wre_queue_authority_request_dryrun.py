@@ -14,6 +14,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, dataclass
+from fnmatch import fnmatchcase
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
@@ -240,6 +241,25 @@ def _path_within_foundup(path: str, foundup_id: str) -> bool:
     return True
 
 
+def _narrow_stage_paths(profile: Mapping[str, Any], queue_receipt: Mapping[str, Any], foundup_id: str) -> tuple[Tuple[str, ...], Tuple[str, ...], Tuple[str, ...]]:
+    profile_allowed = _string_tuple(profile.get("allowed_paths"))
+    profile_denied = _string_tuple(profile.get("denied_paths"))
+    stage_paths = _string_tuple(_mapping(queue_receipt.get("progressive_policy_stage_receipt")).get("changed_paths"))
+    reasons: list[str] = []
+    if profile_allowed and not all(_path_within_foundup(path, foundup_id) for path in profile_allowed):
+        reasons.append(FAIL_ALLOWED_PATH_SCOPE)
+    if profile_denied and not all(_path_within_foundup(path, foundup_id) for path in profile_denied):
+        reasons.append(FAIL_DENIED_PATH_SCOPE)
+    if any(
+        not _path_within_foundup(path, foundup_id)
+        or not any(fnmatchcase(path, pattern) for pattern in profile_allowed)
+        or any(fnmatchcase(path, pattern) for pattern in profile_denied)
+        for path in stage_paths
+    ):
+        reasons.append(FAIL_ALLOWED_PATH_SCOPE)
+    return stage_paths, (), tuple(reasons)
+
+
 def _work_order_id(queue_item_id: str) -> str:
     return "wre-queue-" + hashlib.sha256(queue_item_id.encode("utf-8")).hexdigest()[:16]
 
@@ -312,12 +332,10 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         reasons.extend(f"{FAIL_REQUIRED_FIELD}:{field}" for field in missing)
 
     foundup_id = str(profile.get("foundup_id") or "")
-    allowed_paths = _string_tuple(profile.get("allowed_paths"))
-    denied_paths = _string_tuple(profile.get("denied_paths"))
-    if allowed_paths and foundup_id and not all(_path_within_foundup(path, foundup_id) for path in allowed_paths):
-        reasons.append(FAIL_ALLOWED_PATH_SCOPE)
-    if denied_paths and foundup_id and not all(_path_within_foundup(path, foundup_id) for path in denied_paths):
-        reasons.append(FAIL_DENIED_PATH_SCOPE)
+    allowed_paths, denied_paths, path_reasons = _narrow_stage_paths(
+        profile, queue_receipt, foundup_id
+    )
+    reasons.extend(path_reasons)
     if not foundup_id or foundup_id in {"*", "repo", "root", "all"}:
         reasons.append(FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY)
 

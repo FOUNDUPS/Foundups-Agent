@@ -4175,8 +4175,9 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
   let daemonDiagnosticAnalysis = false;
   const governedActionRequested = hasDaemonDiagnosticActionIntent(operatorControlText);
   const repoAuditIntent = repoAuditGrounding.detectRepoAuditIntent(operatorControlText);
-  const readonlyAuditRequested = repoAuditIntent.audit_intent === true
-    && !/\b(?:fix|implement|edit|write|create|delete|merge|publish|release|deploy|execute|run\s+(?:shell|command))\b/i.test(operatorControlText);
+  const readonlyAuditRequested = progressiveExecutionStage.isReadonlyAuditRequest(
+    operatorControlText, repoAuditIntent.audit_intent
+  );
   const daemonDiagnosticActionRequested = Boolean(daemonIngress.operator_intent_source)
     && governedActionRequested;
   const promptAuthoringRequested = isPromptAuthoringRequest(operatorControlText);

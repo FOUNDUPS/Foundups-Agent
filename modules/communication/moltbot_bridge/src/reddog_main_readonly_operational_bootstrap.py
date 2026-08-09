@@ -70,11 +70,6 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
-from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
-    STAGE_AUDIT,
-)
-
-
 REDDOG_MAIN_BOOTSTRAP_READY = "REDDOG_MAIN_BOOTSTRAP_READY"
 REDDOG_MAIN_BOOTSTRAP_NOT_READY = "REDDOG_MAIN_BOOTSTRAP_NOT_READY"
 REDDOG_MAIN_BOOTSTRAP_DISABLED = "REDDOG_MAIN_BOOTSTRAP_DISABLED"
@@ -192,8 +187,7 @@ def run_reddog_main_readonly_operational_bootstrap(
     architect_model_runtime_binding_receipt_path: Path | str | None = None,
     architect_model_runtime_binding_receipt_override: Mapping[str, Any] | None = None,
     principal_memex_context: AuthenticatedPrincipalMemexContext | None = None, principal_memex_now_epoch: Callable[[], int] | None = None,
-    architect_determination_store: ArchitectDeterminationStore | None = None,
-    progressive_execution_stage_ceiling: str = STAGE_AUDIT,
+    architect_determination_store: ArchitectDeterminationStore | None = None, progressive_execution_stage_ceiling: str = "AUDIT",
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
 
@@ -473,9 +467,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                     model_selection_receipt=architect_model_selection_receipt,
                     model_runtime_binding_receipt=architect_model_runtime_binding_receipt,
                     now_iso=now_iso,
-                    principal_memex_context=principal_memex_context, principal_memex_now_epoch=principal_memex_now_epoch,
-                    task_prompt_text=prompt_text,
-                    progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
+                    principal_memex_context=principal_memex_context, principal_memex_now_epoch=principal_memex_now_epoch, task_prompt_text=prompt_text, progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
                 )
                 if not architect_result.accepted:
                     return _not_ready(

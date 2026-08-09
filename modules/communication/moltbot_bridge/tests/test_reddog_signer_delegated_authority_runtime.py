@@ -1333,16 +1333,38 @@ def test_audit_stage_can_sign_only_pathless_readonly_authority() -> None:
     }
 
     accepted, signer, _, _ = _issue(**overrides)
+    widened = f"modules/foundups/{_FID}/**"
     rejected, rejected_signer, _, _ = _issue(
-        **{**overrides, "allowed_paths": (f"modules/foundups/{_FID}/**",)}
+        **{**overrides, "allowed_paths": (widened,), "denied_paths": (widened,)}
     )
 
     assert accepted.accepted is True
     assert len(signer.requests) == 2
     assert accepted.work_authority["allowed_paths"] == []
     assert rejected.accepted is False
-    assert RuntimeRejectCode.PATH_OUT_OF_SCOPE in rejected.receipt.rejection_reasons
+    assert RuntimeRejectCode.MALFORMED_REQUEST in rejected.receipt.rejection_reasons
     assert rejected_signer.requests == []
+
+
+def test_bounded_stage_cannot_widen_signed_authority_paths() -> None:
+    exact = f"modules/foundups/{_FID}/src/worker.py"
+    binding = signed_stage_binding(
+        requested_operation="bounded_module_fix",
+        changed_paths=(exact,),
+    )
+    receipt = binding["progressive_policy_stage_receipt"]
+
+    result, signer, _, _ = _issue(
+        **binding,
+        requested_operation=receipt["requested_operation"],
+        allowed_paths=(f"modules/foundups/{_FID}/**",),
+        wsp15_allocation_receipt_id=receipt["wsp15_allocation_receipt_id"],
+        wsp15_allocation_digest=receipt["wsp15_allocation_digest"],
+    )
+
+    assert result.accepted is False
+    assert RuntimeRejectCode.MALFORMED_REQUEST in result.receipt.rejection_reasons
+    assert signer.requests == []
 
 
 def test_ast_denies_execution_crypto_keygen_network_and_runtime_wiring() -> None:

@@ -4,6 +4,7 @@ const AUDIT = 'audit';
 const BOUNDED_EXECUTION = 'boundedExecution';
 const PRODUCTION = 'production';
 const SUPPORTED = new Set([AUDIT, BOUNDED_EXECUTION]);
+const MUTATION_REQUEST = /\b(?:fix|implement|edit|write|create|delete|merge|publish|release|deploy|execute|run\s+(?:shell|command))\b/i;
 
 function resolveStage(value) {
   const candidate = typeof value === 'string' ? value.trim() : '';
@@ -12,6 +13,10 @@ function resolveStage(value) {
 
 function allowsActionPlanning(stage) {
   return resolveStage(stage) === BOUNDED_EXECUTION;
+}
+
+function isReadonlyAuditRequest(text, auditIntentDetected) {
+  return auditIntentDetected === true && !MUTATION_REQUEST.test(String(text || ''));
 }
 
 function project(stage, runtimeGatePassed) {
@@ -43,6 +48,7 @@ module.exports = {
   BOUNDED_EXECUTION,
   PRODUCTION,
   allowsActionPlanning,
+  isReadonlyAuditRequest,
   project,
   resolveStage,
   runTraceLines

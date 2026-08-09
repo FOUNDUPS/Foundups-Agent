@@ -11,6 +11,12 @@ assert.strictEqual(stage.resolveStage(stage.PRODUCTION), stage.AUDIT);
 assert.strictEqual(stage.resolveStage(stage.BOUNDED_EXECUTION), stage.BOUNDED_EXECUTION);
 assert.strictEqual(stage.allowsActionPlanning(stage.AUDIT), false);
 assert.strictEqual(stage.allowsActionPlanning(stage.BOUNDED_EXECUTION), true);
+assert.strictEqual(stage.isReadonlyAuditRequest(
+  'Audit the FoundUps repository and cite direct file evidence.', true
+), true);
+assert.strictEqual(stage.isReadonlyAuditRequest(
+  'Audit and fix the FoundUps repository.', true
+), false);
 
 const audit = stage.project(stage.AUDIT, true);
 assert.strictEqual(audit.audit_dialogue_allowed, true);

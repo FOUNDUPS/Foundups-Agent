@@ -164,7 +164,9 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert request["base_ref"] == "main"
     assert request["work_order_digest"] == canonical_full_work_order_digest(_work_order())
     assert request["foundup_id"] == "paccess_001"
-    assert request["allowed_paths"] == ("modules/foundups/paccess_001/**",)
+    assert request["allowed_paths"] == (
+        "modules/foundups/paccess_001/src/worker.py",
+    )
     assert request["requested_operation"] == "create_foundup"
     assert request["valve_state_required"] == VALVE_OPEN_WORKTREE_CREATE
     assert request["wsp15_allocation_receipt_id"] == "sha256:wsp15-allocation"

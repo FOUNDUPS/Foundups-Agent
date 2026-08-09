@@ -17,9 +17,10 @@
   materialization, work-authority verification, and use-time valve admission.
   Read-only audit chains now terminate after signed worker dispatch; every
   effect valve requires a rehydrated admitted `BOUNDED_EXECUTION` receipt.
-- Required every stage effect path to remain inside the signed delegated
-  allowlist and outside its denylist. Legacy dispatch tests now construct
-  genuine signed stage envelopes instead of rewriting intents after signing.
+- Narrowed delegated effect authority to the exact stage-admitted paths;
+  broader profile globs cannot survive signer materialization. Traversal paths
+  and non-empty audit allow/deny lists fail closed. Legacy dispatch tests now
+  construct genuine signed envelopes instead of rewriting intents after signing.
 
 ## 2026-08-09: RedDog stale Holo authority recovery binding
 - Extended the existing incident and blocked-request contracts for the proven

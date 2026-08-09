@@ -5810,8 +5810,7 @@ const testSessionCredential = JSON.stringify({
   foundup_scope: ['foundups_agent']
 });
 const residentBridgeResult = orchestrator.runResidentArchitectSessionBridge(null, 'audit work', Object.assign({}, residentGroundingOptions, {
-  explicitResidentArchitectSessionRequested: true,
-  readonlyAuditPlanningAllowed: true,
+  explicitResidentArchitectSessionRequested: true, readonlyAuditPlanningAllowed: true,
   conversationSessionCredential: testSessionCredential,
   sessionRunner: (payload) => {
     residentRunnerPayload = payload;
@@ -5857,16 +5856,6 @@ assert.strictEqual(residentBridgeResult.red_dog_intent_submitted, true, 'RPI-005
 assert.strictEqual(residentBridgeResult.intent_id, residentRunnerPayload.intent_id, 'RPI-005: bridge result binds intent id');
 assert.strictEqual(residentBridgeResult.queue_candidate_count, 1, 'RAS-005: queue candidate count preserved');
 assert.strictEqual(residentBridgeResult.no_repo_mutation_performed, true, 'RAS-005: no repo mutation preserved');
-const readonlyClassification = orchestrator.classifyTaskForRedDog(
-  'Audit the FoundUps repository and cite direct file evidence.', 'wsp_holo_skillz', 'reddog_architect'
-);
-assert.strictEqual(readonlyClassification.readonlyAuditRequested, true,
-  'RAS-006: explicit repository audit is classified for signed read-only planning');
-const mutationClassification = orchestrator.classifyTaskForRedDog(
-  'Audit and fix the FoundUps repository.', 'wsp_holo_skillz', 'reddog_architect'
-);
-assert.strictEqual(mutationClassification.readonlyAuditRequested, false,
-  'RAS-006: mutation request cannot enter the read-only planning path');
 let unprovedActionRunnerCalled = false;
 const unprovedActionSession = orchestrator.runResidentArchitectSessionBridge(null, 'fix work', Object.assign({}, residentGroundingOptions, {
   explicitResidentArchitectSessionRequested: true,

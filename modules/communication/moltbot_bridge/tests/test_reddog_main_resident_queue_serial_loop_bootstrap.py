@@ -805,7 +805,7 @@ def _pilot_bounded_worker_plan() -> dict[str, object]:
         "domain_id": PILOT_DOMAIN_ID,
         "domain_profile": _pilot_domain_profile().to_dict(),
         "planned_artifacts": [PILOT_ARTIFACT],
-        "requested_allowed_paths": _pilot_allowed_paths(),
+        "requested_allowed_paths": [PILOT_ARTIFACT],
         "shell_profile": _pilot_shell_profile().to_dict(),
         "shell_argv": [
             "python",

@@ -23,7 +23,6 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, dataclass
-from fnmatch import fnmatchcase
 from typing import Any, Dict, Mapping, Optional, Protocol, Sequence, Tuple
 
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
@@ -393,20 +392,9 @@ def _progressive_stage_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
         expected_digest=request.progressive_policy_stage_digest,
     ) and (
         receipt.get("requested_operation") == request.requested_operation
-        and _stage_paths_within_request(receipt, request)
+        and tuple(receipt.get("changed_paths") or ()) == tuple(request.allowed_paths)
         and receipt.get("wsp15_allocation_receipt_id") == request.wsp15_allocation_receipt_id
         and receipt.get("wsp15_allocation_digest") == request.wsp15_allocation_digest
-    )
-
-
-def _stage_paths_within_request(receipt: Mapping[str, Any], request: DelegatedAuthorityRuntimeRequest) -> bool:
-    paths = tuple(str(path) for path in receipt.get("changed_paths") or ())
-    allowed = tuple(str(pattern) for pattern in request.allowed_paths)
-    denied = tuple(str(pattern) for pattern in request.denied_paths)
-    return all(
-        any(fnmatchcase(path, pattern) for pattern in allowed)
-        and not any(fnmatchcase(path, pattern) for pattern in denied)
-        for path in paths
     )
 
 
@@ -415,11 +403,14 @@ def _effective_paths_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
         STAGE_AUDIT,
     )
 
-    paths = set(request.allowed_paths) - set(request.denied_paths)
     audit_only = request.progressive_policy_stage_receipt.get("stage") == STAGE_AUDIT
     if audit_only:
-        return not paths
-    return bool(paths and all(_path_within_foundup(path, request.foundup_id) for path in paths))
+        return not request.allowed_paths and not request.denied_paths
+    return bool(
+        request.allowed_paths
+        and not request.denied_paths
+        and all(_path_within_foundup(path, request.foundup_id) for path in request.allowed_paths)
+    )
 
 
 def _request_receipt_bindings_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
