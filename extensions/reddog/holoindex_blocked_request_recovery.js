@@ -43,6 +43,7 @@ function digest(value) {
 function exactMessage(message) {
   return {
     command: 'ask', text: String(message.text || ''),
+    diagnosticEvidence: String(message.diagnosticEvidence || ''),
     contextMode: String(message.contextMode || ''), workerType: String(message.workerType || ''),
     effort: String(message.effort || ''), mode: String(message.mode || ''),
     useLastPacket: false
