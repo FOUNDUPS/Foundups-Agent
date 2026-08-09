@@ -10,9 +10,6 @@ const RUN_TRACE_ASSESSMENT = [
   /\brun trace\b[\s\S]{0,160}\b(?:assess|evaluate|review|diagnose|score|rate|why|blocked|slow|failed)\b/i,
   /\bwhy\b[\s\S]{0,120}\b(?:blocked|slow|failed|took forever)\b/i
 ];
-const RUN_TRACE_ACTION = [
-  /\b(?:implement|fix|patch|author|provide|create|draft|enhance|write|merge|land|dispatch|assign|spawn|execute|start)\b/i
-];
 const OUTPUT_TERMS = [
   /\bdae?mon\b/i, /\bdaemon\b/i, /\bdae\b/i, /\bbrowser\b/i,
   /\bpage\b/i, /\byoutube\b/i, /\bstudio\.youtube\.com\b/i,
@@ -31,7 +28,7 @@ const ASSESSMENT = [
 const ACTION_VERB = '(?:implement|fix|repair|harden|improve|enhance|patch|author|merge|land|dispatch|assign|spawn|execute|run|build|edit|add|create)';
 const ACTION = [
   new RegExp('^(?:(?:0102|reddog)[,:]?\\s+)?(?:please\\s+)?' + ACTION_VERB + '\\b', 'i'),
-  new RegExp('^(?:(?:0102|reddog)[,:]?\\s+)?(?:analy[sz]e|diagnose|assess|review)\\s+and\\s+' + ACTION_VERB + '\\b', 'i'),
+  new RegExp('^(?:(?:0102|reddog)[,:]?\\s+)?(?:please\\s+)?(?:analy[sz]e|diagnose|assess|review)\\s+and\\s+' + ACTION_VERB + '\\b', 'i'),
   new RegExp('^(?:(?:0102|reddog)[,:]?\\s+)?(?:i\\s+(?:want|need)\\s+you\\s+to|you\\s+(?:need|must|should)\\s+|(?:can|could|would)\\s+you\\s+|go\\s+ahead\\s+and\\s+)(?:please\\s+)?(?:(?:analy[sz]e|diagnose|assess|review)\\s+and\\s+)?' + ACTION_VERB + '\\b', 'i'),
   /^(?:(?:0102|reddog)[,:]?\s+)?(?:continue|proceed|do\s+it|start\s+operations|start\s+work)\b/i,
   /^(?:(?:0102|reddog)[,:]?\s+)?(?:please\s+)?(?:create|open|draft)\s+(?:a\s+|the\s+)?(?:pr|pull\s+request)\b/i,
@@ -40,42 +37,83 @@ const ACTION = [
   /^(?:(?:0102|reddog)[,:]?\s+)?(?:please\s+)?(?:create|write|provide|author)\s+(?:the\s+)?(?:(?:worker|slice|next|m2m)\s+)?prompt\b/i
 ];
 
-const DIAGNOSTIC_LINE = /^(?:[-*]\s*)?(?:status|error|warning|warn|traceback|exception|failed|failure|blocked|exit code|extension_version|mode|made_network_call|runtime_consumption_gate_rejection_reasons)\s*[:=]|^\[[A-Z0-9_-]+\]|\b(?:Traceback \(most recent call last\)|BLOCKED_LOCALLY|HOLOINDEX_[A-Z0-9_]+|Error:|Exception:)\b/i;
+const DIAGNOSTIC_LINE = /^(?:[-*]\s*)?(?:status|error|warning|warn|traceback|exception|failed|failure|blocked|exit code|extension_version|mode|made_network_call|runtime_consumption_gate_rejection_reasons)\s*[:=]|^\[[A-Z0-9_-]+\]|^npm\s+ERR!|(?:Traceback \(most recent call last\)|BLOCKED_LOCALLY|HOLOINDEX_[A-Z0-9_]+|Error:\s|Exception:\s)/i;
+const TIMESTAMP_PREFIX = /^(?:\[?\d{4}[-\/]\d{2}[-\/]\d{2}[T ]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:Z|[+-]\d{2}:?\d{2})?\]?|\d{2}:\d{2}:\d{2}(?:[.,]\d+)?|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+/i;
+const DIAGNOSTIC_SEVERITY = /(?:^|[\s[\]-])(?:TRACE|DEBUG|INFO|WARN|WARNING|ERROR|FATAL|CRITICAL)(?=$|[\s:\]-])/i;
+const JSON_DIAGNOSTIC_LINE = /^\s*\{[^\r\n]{0,400}"(?:level|severity|status|error|exception|message|msg|timestamp|time)"\s*:/i;
+const LOGFMT_DIAGNOSTIC_LINE = /^(?=[^\r\n]{0,500}$)(?=.*\b(?:level|severity|status|error|exception|msg|message|time|timestamp)=)(?=.*\b(?:error|warn|warning|fatal|critical|failed|blocked|timeout|info|debug|trace)\b)/i;
+const COMMAND_RESULT_LINE = /^[A-Za-z][A-Za-z0-9_.-]{0,40}\s+(?:(?:[A-Za-z-]{2,36}(?:ed|en|ful|less))|ok|pass|fail|error|blocked|done|timeout|timed\s+out)[.!]?$/i;
 const STRUCTURED_LINE = /^(?:[-*]\s*)?[A-Za-z][A-Za-z0-9_. -]{1,64}\s*[:=]\s*\S/;
-const COLON_ACTION_DIRECTIVE = /^(?:(?:0102|reddog)[,:]?\s+)?(?:please\s+)?(?:implement|fix|repair|harden|improve|enhance|patch|build|edit)\s*:\s+(?!(?:false|true|null|none|unknown|\d+)\b)\S/i;
-
+const COLON_ACTION_DIRECTIVE = new RegExp(
+  '^(?:(?:0102|reddog)[,:]?\\s+)?(?:please\\s+)?' + ACTION_VERB
+  + '\\s*:\\s+\\S',
+  'i'
+);
+const COLON_ACTION_PREFIX = new RegExp(
+  '^(?:(?:0102|reddog)[,:]?\\s+)?(?:please\\s+)?' + ACTION_VERB + '\\s*:', 'i'
+);
+const ACTION_TARGET_WORD = /^(?:(?:bug|code|contract|dependency|documentation|failure|file|fix|function|issue|migration|module|parser|prompt|queue|receipt|runtime|test|validation|validator|worker|worktree)s?|pr)$/i;
+function hasColonActionTarget(value) {
+  const target = String(value || '').trim();
+  const parts = target.split(/\s+/); const token = parts[parts.length - 1].replace(/[.,;:!?]+$/, '');
+  if (ACTION_TARGET_WORD.test(token)) return true;
+  if (token.includes(':') || token.startsWith('/') || token.startsWith('\\')) return false;
+  const pathParts = token.replace(/\\/g, '/').split('/'); const fileName = pathParts[pathParts.length - 1];
+  return pathParts.length > 1 && pathParts.every((part) => part && part !== '.' && part !== '..')
+    && fileName.lastIndexOf('.') > 0;
+}
 function hasActionIntent(text) {
   const source = String(text || '').trim().slice(0, 1200);
+  const colonPrefix = COLON_ACTION_PREFIX.exec(source);
+  if (colonPrefix) {
+    const directive = source.slice(colonPrefix[0].length).trim();
+    return COLON_ACTION_DIRECTIVE.test(source) && hasColonActionTarget(directive);
+  }
+  if (!source.includes('\n') && COMMAND_RESULT_LINE.test(source)) return false;
   return ACTION.some((pattern) => pattern.test(source));
+}
+
+function isDiagnosticLine(line) {
+  const value = String(line || '').trim();
+  return DIAGNOSTIC_LINE.test(value)
+    || isTimestampedDiagnosticLine(value)
+    || JSON_DIAGNOSTIC_LINE.test(value)
+    || LOGFMT_DIAGNOSTIC_LINE.test(value)
+    || COMMAND_RESULT_LINE.test(value);
+}
+
+function isTimestampedDiagnosticLine(value) {
+  const prefix = TIMESTAMP_PREFIX.exec(value);
+  return Boolean(prefix && DIAGNOSTIC_SEVERITY.test(
+    value.slice(prefix[0].length, prefix[0].length + 120)
+  ));
 }
 
 function resemblesDiagnosticPayload(text) {
   const value = String(text || '').trim();
   if (!value) return false;
   const lines = value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  if (lines.length === 1) return DIAGNOSTIC_LINE.test(lines[0]);
-  return lines.some((line) => DIAGNOSTIC_LINE.test(line));
+  if (lines.length === 1) return isDiagnosticLine(lines[0]);
+  return lines.some((line) => isDiagnosticLine(line));
 }
 
-function inferConversationBoundary(operator) {
-  const lines = /(^|\r?\n)([^\r\n]*)/g;
-  let match;
-  while ((match = lines.exec(operator)) !== null) {
-    const lineStart = match.index + match[1].length;
-    if (lineStart === 0 || !DIAGNOSTIC_LINE.test(match[2].trim())) continue;
-    const intent = operator.slice(0, lineStart).trim();
-    const payload = operator.slice(lineStart).trim();
-    const action = hasActionIntent(intent);
-    const assessment = ASSESSMENT.some((pattern) => pattern.test(intent));
-    const structuredIntentAllowed = !STRUCTURED_LINE.test(intent)
-      || COLON_ACTION_DIRECTIVE.test(intent);
-    if (
-      intent && !DIAGNOSTIC_LINE.test(intent)
-      && structuredIntentAllowed && (action || assessment)
-      && resemblesDiagnosticPayload(payload)
-    ) {
-      return { intent, payload };
-    }
+function isExplicitDiagnosticBoundary(line) {
+  const value = String(line || '').trim().toLowerCase();
+  if (value === '## run trace' || value === '## run trace:') return true;
+  if (!value.endsWith(':')) return false;
+  const words = value.slice(0, -1).trim().split(/\s+/);
+  return words.length === 2 && words[0] === 'daemon' && words[1] === 'output';
+}
+
+function findExplicitDiagnosticBoundary(text) {
+  let lineStart = 0;
+  while (lineStart <= text.length) {
+    const lineEnd = text.indexOf('\n', lineStart);
+    const end = lineEnd === -1 ? text.length : lineEnd;
+    const line = text.slice(lineStart, end).replace(/\r$/, '');
+    if (isExplicitDiagnosticBoundary(line)) return { index: lineStart };
+    if (lineEnd === -1) break;
+    lineStart = lineEnd + 1;
   }
   return null;
 }
@@ -89,16 +127,11 @@ function splitInput(operatorText, diagnosticEvidence) {
     combined_focus: operator + '\n\nDAEmon output:\n' + evidence,
     boundary: 'typed_diagnostic_evidence'
   };
-  const marker = /^(?:\s*#{1,6}\s*(?:Run Trace|DAEmon Output|Diagnostic Evidence)|\s*(?:DAEmon|runtime|browser|worker|service)\s+(?:output|logs?|trace|diagnostics?)\s*:)/im.exec(operator);
-  const inline = /\b(?:DAEmon|runtime|browser|worker|service)\s+(?:output|logs?|trace|diagnostics?)\s*:/i.exec(operator);
-  const boundary = marker && (!inline || marker.index <= inline.index) ? marker : inline;
+  const boundary = findExplicitDiagnosticBoundary(operator);
   if (!boundary) {
-    const inferred = inferConversationBoundary(operator);
-    if (inferred) return {
-      operator_intent_source: inferred.intent,
-      diagnostic_payload: inferred.payload,
-      combined_focus: operator,
-      boundary: 'inferred_conversation_boundary'
+    if (!resemblesDiagnosticPayload(operator)) return {
+      operator_intent_source: operator, diagnostic_payload: '',
+      combined_focus: operator, boundary: 'operator_only'
     };
     return {
       operator_intent_source: '', diagnostic_payload: operator,
@@ -272,10 +305,10 @@ function buildLocalResult(d, workFocus) {
 }
 
 function isRunTraceRequest(text) {
-    const raw = String(text || '');
+    const raw = String(text || ''); const intent = splitInput(raw, '').operator_intent_source;
     if (!/##\s*Run Trace\b/i.test(raw) || !/\bextension_version\s*:/i.test(raw)) return false;
-    if (RUN_TRACE_ACTION.some((pattern) => pattern.test(raw.slice(0, 1200)))) return false;
-    return RUN_TRACE_ASSESSMENT.some((pattern) => pattern.test(raw.slice(0, 2000)))
+    if (hasActionIntent(intent)) return false;
+    return RUN_TRACE_ASSESSMENT.some((pattern) => pattern.test(intent.slice(0, 2000)))
       || /\bredaction gate status\s*:\s*BLOCKED_LOCALLY/i.test(raw);
 }
 

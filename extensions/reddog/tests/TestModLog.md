@@ -1,5 +1,27 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
+
+- Proved false-valued diagnostic fields and terse command-result logs cannot
+  request resident work.
+- Proved timestamped, JSON, and logfmt evidence starts at the exact diagnostic
+  boundary while preceding operator constraints remain authoritative input.
+- Proved timestamped logger prefixes (`[worker] ERROR`, dashed logger names),
+  and `npm ERR!` remain inert without an explicit boundary, while inline prose
+  such as `Fix runtime output formatting` remains ordinary operator scope.
+- Proved accepted Wardrobe output requires a receipt and that resident
+  submission consumes the Wardrobe admission result rather than the earlier
+  generic runtime gate.
+- Proved the canonical selector digest and process-local owner proof reject
+  copied, mutated, injected, or malformed Wardrobe mappings.
+- Proved selector execution rejects an unapproved interpreter, uses sealed
+  `-I -S -B` startup with a materialized bootstrap, and that WRE, live-enqueue,
+  and action-bearing resident consumers cannot advance when called directly
+  without the immutable selector proof.
+- Proved unmarked mixed action-looking text plus diagnostics cannot infer
+  operator authority; the one-input route requires an explicit evidence marker.
+- Proved polite compound implementation directives remain actionable.
+
 ## 2026-08-09 - Single conversation input and governed action routing (0.4.70)
 
 - Proved the webview exposes exactly one textarea, Enter sends, and the legacy

@@ -6,6 +6,8 @@ Phase: RedDog 0.4.6 resident architect thin-client surface.
 
 Current implementation:
 
+- REDDOG_SINGLE_INPUT_AUTHORITY_BOUNDARY_HARDENING_PHASE1 (v0.4.71): operator-only input is classified at ingress; unmarked mixed text and timestamped/JSON/logfmt/command-result diagnostics remain inert; explicit one-field evidence boundaries are supported; resident submission requires a digest-verified process-local Wardrobe owner proof.
+
 - REDDOG_SINGLE_CONVERSATION_INPUT_AND_GOVERNED_ACTION_ROUTING_PHASE1 (v0.4.70): one conversational textarea; bounded intent/evidence separation; assessment-only diagnostics remain advisory; explicit action requests automatically submit to the existing authenticated resident AgentDB/OpenClaw architect cycle after all local gates pass. Signed worker promotion and effects remain backend-owned.
 
 - Semantic HoloIndex grounding is generation-bound to the authenticated owner service. Stale, lexical, unreceipted, or repository-mismatched owner results are withheld and surfaced as an index gap; RedDog never re-indexes during a reasoning run.

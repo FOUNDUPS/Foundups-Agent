@@ -1,5 +1,21 @@
 # RedDog Interface
 
+Version 0.4.71 hardens the single-input authority boundary. Plain operator
+requests are classified inside the ingress parser; diagnostic-shaped content
+never falls back to whole-message action classification. Timestamped, JSON,
+logfmt, and terse command-result logs remain inert evidence. Resident
+AgentDB/OpenClaw submission additionally requires an accepted receipt-bearing
+Wardrobe selection with no execution or enqueue effects.
+The accepted selector result must carry the canonical digest produced for the
+exact input and an immutable process-local owner proof. Serialized copies and
+injected mappings are not admission capabilities. Selector execution uses the
+approved workspace `.venv`, isolated `-I -S -B` startup, and the existing
+manifest-materialized sealed runtime. The explicit WRE valve, live enqueue,
+and resident session independently require the process-local proof. Mixed
+intent and logs use
+an explicit `DAEmon output:` or `## Run Trace` delimiter in the one textarea;
+unmarked mixed text remains evidence-only.
+
 Version 0.4.70 exposes one `012 conversation with RedDog` textarea. Enter sends
 and Shift+Enter inserts a newline. A bounded deterministic parser separates a
 leading assessment/action paragraph from following diagnostic-shaped lines;
