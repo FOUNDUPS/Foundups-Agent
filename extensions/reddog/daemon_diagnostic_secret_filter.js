@@ -50,20 +50,26 @@ function hasSensitiveAssignment(line) {
   return false;
 }
 
-function privateKeyArmor(line, marker) {
+function scanArmorEvents(line, visit) {
   const source = String(line || '').toUpperCase();
-  const prefix = '-----' + marker + ' ';
-  let cursor = 0;
-  while (cursor < source.length) {
-    const start = source.indexOf(prefix, cursor);
-    if (start < 0) return false;
+  const beginPrefix = '-----BEGIN ';
+  const endPrefix = '-----END ';
+  for (let start = 0; start < source.length; start += 1) {
+    const isBegin = source.startsWith(beginPrefix, start);
+    const isEnd = !isBegin && source.startsWith(endPrefix, start);
+    if (!isBegin && !isEnd) continue;
+    const prefix = isBegin ? beginPrefix : endPrefix;
     const labelStart = start + prefix.length;
-    const labelEnd = source.indexOf('-----', labelStart);
-    if (labelEnd < 0) return source.slice(labelStart).includes('PRIVATE KEY');
-    if (source.slice(labelStart, labelEnd).includes('PRIVATE KEY')) return true;
-    cursor = labelEnd + 5;
+    let labelEnd = labelStart;
+    while (labelEnd < source.length && !source.startsWith('-----', labelEnd)) {
+      labelEnd += 1;
+    }
+    visit({
+      kind: isBegin ? 'BEGIN' : 'END',
+      label: source.slice(labelStart, labelEnd),
+      complete: labelEnd < source.length
+    });
   }
-  return false;
 }
 
 function containsSecret(line) {
@@ -76,14 +82,31 @@ function omitSecretLines(lines) {
   const safe = [];
   let omitted = 0;
   let authorizationContinuation = false;
-  let privateKeyBlock = false;
+  let privateKeyLabel = '';
+  let malformedPrivateKeyBlock = false;
   for (const rawLine of lines) {
     const line = String(rawLine || '');
-    if (privateKeyArmor(line, 'BEGIN')) privateKeyBlock = true;
-    if (privateKeyBlock) {
+    const wasPrivateKeyBlock = Boolean(privateKeyLabel) || malformedPrivateKeyBlock;
+    let privateKeyMarker = false;
+    scanArmorEvents(line, (event) => {
+      if (event.kind === 'BEGIN' && event.label.includes('PRIVATE KEY')) {
+        privateKeyMarker = true;
+        if (privateKeyLabel || malformedPrivateKeyBlock || !event.complete) {
+          privateKeyLabel = '';
+          malformedPrivateKeyBlock = true;
+        } else {
+          privateKeyLabel = event.label;
+        }
+      } else if (event.kind === 'END' && (privateKeyLabel || malformedPrivateKeyBlock)) {
+        privateKeyMarker = true;
+        if (!malformedPrivateKeyBlock && event.complete && event.label === privateKeyLabel) {
+          privateKeyLabel = '';
+        }
+      }
+    });
+    if (wasPrivateKeyBlock || privateKeyMarker || privateKeyLabel || malformedPrivateKeyBlock) {
       omitted += 1;
       authorizationContinuation = false;
-      if (privateKeyArmor(line, 'END')) privateKeyBlock = false;
       continue;
     }
     if (authorizationContinuation) {

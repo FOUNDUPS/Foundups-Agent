@@ -18,6 +18,9 @@ const extensionJs = fs.readFileSync(path.join(extDir, 'extension.js'), 'utf8');
 const daemonDiagnosticJs = fs.readFileSync(
   path.join(extDir, 'daemon_diagnostic_analysis.js'), 'utf8'
 );
+const daemonDiagnosticSecretFilter = require(
+  path.join(extDir, 'daemon_diagnostic_secret_filter.js')
+);
 const continuationPromptJs = fs.readFileSync(path.join(extDir, 'continuation_prompt.js'), 'utf8');
 const conversationHistoryPolicyJs = fs.readFileSync(path.join(extDir, 'conversation_history_policy.js'), 'utf8');
 const conversationHistoryPolicy = require(path.join(extDir, 'conversation_history_policy.js'));
@@ -1852,6 +1855,50 @@ assert(!serializedArmorProjection.focus.includes('SYNTHETIC_SERIALIZED_PRIVATE_K
   'DOLA-021: every armor marker on a serialized line must be scanned');
 assert.strictEqual(serializedArmorProjection.secret_redactions_applied, 1,
   'DOLA-021: serialized private-key armor omission must remain auditable');
+const malformedArmorEndProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR -----BEGIN PRIVATE KEY-----',
+  'ERROR SYNTHETIC_BODY_BEFORE_MALFORMED_END',
+  'ERROR -----END CERTIFICATE failed while reading PRIVATE KEY',
+  'ERROR SYNTHETIC_BODY_AFTER_MALFORMED_END',
+  'ERROR -----END PRIVATE KEY-----',
+  'status: stopped'
+].join('\n'));
+assert(!malformedArmorEndProjection.focus.includes('SYNTHETIC_BODY_AFTER_MALFORMED_END'),
+  'DOLA-021: malformed unrelated END markers cannot close a private-key block');
+assert.strictEqual(malformedArmorEndProjection.secret_redactions_applied, 5,
+  'DOLA-021: private-key state must remain active through a malformed END marker');
+const laterTruncatedArmorProjection = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR -----BEGIN CERTIFICATE----- SYNTHETIC_CERT -----END CERTIFICATE----- -----BEGIN PRIVATE KEY',
+  'ERROR SYNTHETIC_PRIVATE_KEY_BODY_AFTER_LATER_TRUNCATED_BEGIN',
+  'ERROR -----END PRIVATE KEY-----',
+  'status: stopped'
+].join('\n'));
+assert(!laterTruncatedArmorProjection.focus.includes('SYNTHETIC_PRIVATE_KEY_BODY_AFTER_LATER_TRUNCATED_BEGIN'),
+  'DOLA-021: every BEGIN marker must be scanned for a later truncated private-key opener');
+assert.strictEqual(laterTruncatedArmorProjection.secret_redactions_applied, 4,
+  'DOLA-021: later truncated private-key armor must keep the remainder fail-closed');
+const armorStressLine = '-----BEGIN PRIVATE KEY-----x'.repeat(16000);
+const armorStressStartedAt = Date.now();
+const armorStressResult = daemonDiagnosticSecretFilter.omitSecretLines([armorStressLine]);
+assert(Date.now() - armorStressStartedAt < 500,
+  'DOLA-021: armor scanning must remain linear on bounded marker-heavy evidence');
+assert.strictEqual(armorStressResult.omitted, 1,
+  'DOLA-021: marker-heavy private-key evidence remains omitted');
+const nestedArmorStressResult = daemonDiagnosticSecretFilter.omitSecretLines([
+  armorStressLine,
+  '-----END PRIVATE KEY-----',
+  'SYNTHETIC_AFTER_INVALID_NESTING'
+]);
+assert.strictEqual(nestedArmorStressResult.omitted, 3,
+  'DOLA-021: invalid nested armor collapses to constant-memory fail-closed state');
+const forgedMalformedEndResult = daemonDiagnosticSecretFilter.omitSecretLines([
+  '-----BEGIN PRIVATE KEY-----',
+  '-----BEGIN PRIVATE KEY-----',
+  '-----END __MALFORMED_PRIVATE_KEY_BLOCK__-----',
+  'SYNTHETIC_AFTER_FORGED_MALFORMED_END'
+]);
+assert.strictEqual(forgedMalformedEndResult.omitted, 4,
+  'DOLA-021: no input-derived END label can clear malformed fail-closed state');
 const recoveredAdvisoryResult = {
   ok: true,
   runtime_consumption_gate: {
