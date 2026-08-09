@@ -57,7 +57,7 @@ const QUALIFIED_KEY_PARTS = new Set([
   'api', 'access', 'aws', 'client', 'private', 'secret', 'session', 'signing'
 ]);
 const AUTHORIZATION_HEADER = /\b(?:proxy[\s_-]+)?authorization(?:[\s_-]+header)?\s*(?::|=>|=)/i;
-const DETACHED_AUTH_VALUE = /(?:^|[\s:=-])(?:Basic|Digest|Negotiate|NTLM|AWS4-HMAC-SHA256|ApiKey|Token)\s+\S{4,}/i;
+const DETACHED_AUTH_VALUE = /\b(?:Basic|Digest|Negotiate|NTLM|AWS4-HMAC-SHA256|ApiKey|Token)\s+\S{4,}/i;
 function splitInput(operatorText, diagnosticEvidence) {
   const operator = String(operatorText || '').trim();
   const evidence = String(diagnosticEvidence || '').trim();

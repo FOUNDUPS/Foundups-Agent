@@ -1795,6 +1795,15 @@ assert(!prefixedAuthorizationContinuation.focus.includes('SYNTHETIC_PREFIXED_BAS
   'DOLA-020: log-prefixed detached authorization values must be omitted');
 assert.strictEqual(prefixedAuthorizationContinuation.secret_redactions_applied, 2,
   'DOLA-020: prefixed authorization continuation must count both lines');
+const structuredAuthorizationContinuation = projectTypedDiagnostic('Analyze this DAEmon output.', [
+  'ERROR Authorization:',
+  'ERROR auth="Basic SYNTHETIC_STRUCTURED_BASIC_CREDENTIAL"',
+  'status: stopped'
+].join('\n'));
+assert(!structuredAuthorizationContinuation.focus.includes('SYNTHETIC_STRUCTURED_BASIC_CREDENTIAL'),
+  'DOLA-020: punctuation-prefixed structured authorization values must be omitted');
+assert.strictEqual(structuredAuthorizationContinuation.secret_redactions_applied, 2,
+  'DOLA-020: structured authorization continuation must count both lines');
 const privateKeyAfterAuthorization = projectTypedDiagnostic('Analyze this DAEmon output.', [
   'ERROR Authorization:',
   'ERROR -----BEGIN PRIVATE KEY-----',
