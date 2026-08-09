@@ -127,6 +127,8 @@ async function invokeStoredExclusive(secretStorage, invoke) {
 async function runConfigured(input) {
   const sessionOptions = {
     explicitResidentArchitectSessionRequested: true,
+    actionPlanningAllowed: input.options.actionPlanningAllowed === true,
+    wardrobeSelectionResult: input.options.wardrobeSelectionResult,
     groundingPreflight: input.options.groundingPreflight,
     holoScorecard: input.options.holoScorecard,
     authenticatedPrincipal: input.claims.principalId,

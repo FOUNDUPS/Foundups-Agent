@@ -42,7 +42,7 @@ function launch(options) {
   );
   try {
     const args = [
-      '-I', '-S', '-B', PYTHON_BOOTSTRAP,
+      '-I', '-S', '-B', source.scriptPath(PYTHON_BOOTSTRAP),
       source.scriptPath(options.script), source.runtimeRoot,
       source.targetRepoRoot, runtime.sitePackages,
       source.manifestPath, source.manifestDigest
@@ -205,5 +205,6 @@ module.exports = {
   MAX_FRAMES,
   PYTHON_BOOTSTRAP,
   consumeLines,
+  sealedEnvironment,
   run
 };

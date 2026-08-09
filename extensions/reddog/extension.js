@@ -1,6 +1,8 @@
 const vscode = require('vscode');
 const cp = require('child_process');
 const crypto = require('crypto');
+const sealedPythonJsonOnce = require('./sealed_python_json_once').createSealedPythonJsonRunner();
+const operatorWardrobeSelectionProof = require('./operator_wardrobe_selection_proof').createWardrobeSelectionProof(sealedPythonJsonOnce.isAccepted);
 const path = require('path');
 const fs = require('fs');
 const {
@@ -33,7 +35,7 @@ const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
 const groundingFailureDialogue = require('./grounding_failure_dialogue');
-const EXTENSION_VERSION = '0.4.70';
+const EXTENSION_VERSION = '0.4.71';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3200,21 +3202,17 @@ function runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, p
   const configuredPython = reddogConfigValue('pythonPath', 'python');
   const interpreter = resolvePythonInterpreter(root, configuredPython);
   try {
-    const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
-      cwd: root,
-      input: JSON.stringify(payload),
-      encoding: 'utf8',
-      env: buildBridgePythonEnv(process.env),
-      windowsHide: true,
+    const result = sealedPythonJsonOnce.run({
+      repoRoot: root, interpreter: interpreter.path, script,
+      request: payload, env: buildBridgePythonEnv(process.env),
+      mapResult: (selected) => Object.assign({
+        slice_name: REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE,
+        python_invocation_performed: true, python_interpreter_source: interpreter.source,
+        no_execution_performed: true, no_enqueue_performed: true
+      }, selected),
       maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
     });
-    return Object.assign({
-      slice_name: REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE,
-      python_invocation_performed: true,
-      python_interpreter_source: interpreter.source,
-      no_execution_performed: true,
-      no_enqueue_performed: true
-    }, JSON.parse(stdout));
+    return operatorWardrobeSelectionProof.verifyAndObserve(payload, result);
   } catch (err) {
     return {
       slice_name: REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE,
@@ -3228,7 +3226,6 @@ function runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, p
     };
   }
 }
-
 function buildOperatorWardrobeSelectionSection(selectionResult) {
   const r = selectionResult && typeof selectionResult === 'object' ? selectionResult : {};
   const receipt = r.receipt && typeof r.receipt === 'object' ? r.receipt : {};
@@ -3469,9 +3466,10 @@ function buildWreOperationalSpineInvokeResult(decision, fields) {
     rejection_reasons: []
   }, payload);
 }
-
 function invokeWreOperationalSpineExplicitValveBridge(context, preview, options) {
   const opts = options && typeof options === 'object' ? options : {};
+  const proofRejection = operatorWardrobeSelectionProof.rejection(opts.selectionResult, true, buildWreOperationalSpineInvokeResult, 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_SKIPPED');
+  if (proofRejection) return proofRejection;
   const payloadResult = buildWreOperationalSpineInvokePayload(preview, opts);
   if (!payloadResult.ok) {
     return buildWreOperationalSpineInvokeResult('EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_SKIPPED', {
@@ -3645,9 +3643,10 @@ function buildOpenClawLiveEnqueueRuntimeBindingResult(decision, fields) {
     rejection_reasons: []
   }, payload);
 }
-
 function invokeOpenClawLiveEnqueueRuntimeBindingBridge(context, packet, selectionResult, runtimeGate, options) {
   const opts = options && typeof options === 'object' ? options : {};
+  const proofRejection = operatorWardrobeSelectionProof.rejection(selectionResult, true, buildOpenClawLiveEnqueueRuntimeBindingResult, 'EXTENSION_OPENCLAW_LIVE_ENQUEUE_SKIPPED');
+  if (proofRejection) return proofRejection;
   const payloadResult = buildOpenClawLiveEnqueueRuntimeBindingPayload(
     packet,
     selectionResult,
@@ -3725,15 +3724,15 @@ function buildResidentArchitectSessionPayload(workFocus, options) {
     workFocus, options, residentArchitectSessionBindings()
   );
 }
-
 function buildResidentArchitectSessionResult(decision, fields) {
   return residentArchitectSessionContract.buildResult(
     decision, fields, residentArchitectSessionBindings()
   );
 }
-
 function runResidentArchitectSessionBridge(context, workFocus, options) {
   const opts = options && typeof options === 'object' ? options : {};
+  const proofRejection = operatorWardrobeSelectionProof.rejection(opts.wardrobeSelectionResult, opts.actionPlanningAllowed === true, buildResidentArchitectSessionResult, 'RESIDENT_ARCHITECT_SESSION_SKIPPED');
+  if (proofRejection) return proofRejection;
   const payloadResult = buildResidentArchitectSessionPayload(workFocus, opts);
   if (!payloadResult.ok) {
     return buildResidentArchitectSessionResult('RESIDENT_ARCHITECT_SESSION_SKIPPED', {
@@ -4158,8 +4157,7 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
   const text = String(prompt || '');
   const opts = options && typeof options === 'object' ? options : {};
   const daemonIngress = opts.daemonDiagnosticIngress || splitDaemonDiagnosticInput(text, '');
-  const operatorControlText = daemonIngress.boundary === 'none'
-    ? text : daemonIngress.operator_intent_source;
+  const operatorControlText = daemonIngress.operator_intent_source;
   const worker = cleanWorkerType(workerType);
   const mode = cleanContextMode(contextMode);
   const haystack = text + ' ' + mode + ' ' + worker;
@@ -5400,7 +5398,6 @@ function wireFusionWebview(context, webview, worker, state) {
       workTrail.push('holoindex_result', 'wsp_hits=' + holoScorecard.wsp_hits + '; code_hits=' + holoScorecard.code_hits);
     }
     workTrail.push('wsp_prompt_assembled');
-
     let validationState = { validated: false, skipped: true, reason: 'not_validated' };
     let unicodeMeta = emptyUnicodeNormalizationMeta();
     const absorbUnicodeMeta = (bridgeResult) => {
@@ -5717,6 +5714,7 @@ function wireFusionWebview(context, webview, worker, state) {
       : null;
     const wreSpineInvokeResult = wreSpineDryRunPreview
       ? invokeWreOperationalSpineExplicitValveBridge(context, wreSpineDryRunPreview, {
+        selectionResult: operatorWardrobeSelectionResult,
         selectionReceipt: operatorWardrobeSelectionResult && operatorWardrobeSelectionResult.receipt
       })
       : null;
@@ -5741,7 +5739,7 @@ function wireFusionWebview(context, webview, worker, state) {
     }
     const residentArchitectSessionResult = recoveryContext ? null : await runConfiguredResidentArchitectSession(
       context, governedWorkFocus, {
-        actionPlanningAllowed, residentArchitectSessionEnabled,
+        actionPlanningAllowed, wardrobeSelectionResult: operatorWardrobeSelectionResult, residentArchitectSessionEnabled,
         explicitResidentArchitectSessionRequested: classification.governedActionRequested === true,
         groundingPreflight, holoScorecard
       }
@@ -5860,7 +5858,6 @@ function wireFusionWebview(context, webview, worker, state) {
     webview.postMessage({ command: 'result', result });
     return result;
   };
-
   const attempt = () => attemptBlockedRequestRecovery({
     context, state, options: recoveryOptions, executeAsk, webview });
   webview.onDidReceiveMessage(

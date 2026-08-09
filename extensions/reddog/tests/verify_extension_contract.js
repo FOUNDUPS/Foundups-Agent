@@ -37,6 +37,10 @@ const conversationSessionAuthoritySourceJs = fs.readFileSync(
   path.join(extDir, 'conversation_session_authority_source.js'), 'utf8'
 );
 const conversationSessionAuthoritySource = require(path.join(extDir, 'conversation_session_authority_source.js'));
+const testWardrobeSourceProof = require(path.join(extDir, 'holoindex_owner_proof.js'))
+  .createOwnerProof((value) => Boolean(value && typeof value === 'object'));
+const testWardrobeProof = require(path.join(extDir, 'operator_wardrobe_selection_proof.js'))
+  .createWardrobeSelectionProof(testWardrobeSourceProof.isAccepted);
 const startOperationsInterpreterJs = fs.readFileSync(path.join(extDir, 'start_operations_interpreter.js'), 'utf8');
 const runtimeMaterializerJs = fs.readFileSync(
   path.join(extDir, 'backend_compatibility_runtime_materializer.js'), 'utf8'
@@ -234,8 +238,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.70', 'package version must be 0.4.70');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.70'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.71', 'package version must be 0.4.71');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.71'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -382,7 +386,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.70', 'README version mismatch');
+includes(readme, 'Version: 0.4.71', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1546,7 +1550,22 @@ const traceGate = orchestrator.buildRuntimeConsumptionGate(
 assert.strictEqual(traceGate.passed, false, 'RTLA-001: trace assessment must not enable runtime consumption');
 assert(traceGate.rejection_reasons.includes('local_run_trace_assessment_not_actionable'), 'RTLA-001: runtime gate must name trace assessment rejection');
 const actionTracePrompt = blockedTracePrompt + '\n\nImplement the fix.';
-assert.strictEqual(orchestrator.isRunTraceAssessmentRequest(actionTracePrompt), false, 'RTLA-002: action-oriented trace prompt must use governed path');
+assert.strictEqual(orchestrator.isRunTraceAssessmentRequest(actionTracePrompt), true,
+  'RTLA-002: action words inside bounded trace evidence remain inert');
+const explicitActionTracePrompt = 'Implement the fix.\n\n'
+  + blockedTracePrompt.slice(blockedTracePrompt.indexOf('## Run Trace'));
+assert.strictEqual(orchestrator.isRunTraceAssessmentRequest(explicitActionTracePrompt), false,
+  'RTLA-002: operator action before the trace boundary must use governed path');
+for (const actionVerb of [
+  'Implement', 'Fix', 'Repair', 'Harden', 'Improve', 'Enhance', 'Patch',
+  'Author', 'Merge', 'Land', 'Dispatch', 'Assign', 'Spawn', 'Execute', 'Run',
+  'Build', 'Edit', 'Add', 'Create'
+]) {
+  const actionPrompt = actionVerb + ' the runtime module.\n\n'
+    + blockedTracePrompt.slice(blockedTracePrompt.indexOf('## Run Trace'));
+  assert.strictEqual(orchestrator.isRunTraceAssessmentRequest(actionPrompt), false,
+    'RTLA-002: canonical action must not route locally: ' + actionVerb);
+}
 
 // REDDOG_DAEMON_DIAGNOSTIC_ARCHITECT_ANALYSIS_PHASE1: pasted DAEmon/log
 // diagnostics are data, not instructions. Bare dumps stay local; an explicit
@@ -1726,19 +1745,43 @@ const structuredActionLogIngress = orchestrator.splitDaemonDiagnosticInput([
 ].join('\n'), '');
 assert.strictEqual(structuredActionLogIngress.operator_intent_source, '',
   'DOLA-009A: structured diagnostic fields cannot become action directives');
+const structuredActionLogClass = orchestrator.classifyTaskForRedDog(
+  structuredActionLogIngress.combined_focus, 'auto', 'reddog_architect',
+  { daemonDiagnosticIngress: structuredActionLogIngress }
+);
+assert.strictEqual(structuredActionLogClass.governedActionRequested, false,
+  'DOLA-009B: false-valued diagnostic fields cannot request resident work');
+const buildFailureClass = orchestrator.classifyTaskForRedDog(
+  'Build failed', 'auto', 'reddog_architect'
+);
+assert.strictEqual(buildFailureClass.governedActionRequested, false,
+  'DOLA-009B: terse command-result diagnostics cannot request resident work');
+for (const diagnosticResult of [
+  'Build succeeded', 'Build successful', 'Run completed', 'Run finished',
+  'Execute denied', 'Fix resolved', 'Create generated', 'Patch accepted',
+  'Run OK', 'execute: false', 'fix: false', 'create: completed'
+]) {
+  assert.strictEqual(orchestrator.classifyTaskForRedDog(
+    diagnosticResult, 'auto', 'reddog_architect'
+  ).governedActionRequested, false,
+  'DOLA-009C: result-shaped text cannot request resident work: ' + diagnosticResult);
+}
 const structuredRequirementsIngress = orchestrator.splitDaemonDiagnosticInput([
   'Implement the login change.', '',
   'Target: modules/auth/src/token.js',
   'Behavior: reject expired tokens'
 ].join('\n'), '');
-assert.strictEqual(structuredRequirementsIngress.boundary, 'none',
+assert.strictEqual(structuredRequirementsIngress.boundary, 'operator_only',
   'DOLA-009A: ordinary structured work requirements are not diagnostic evidence');
 assert(structuredRequirementsIngress.combined_focus.includes('modules/auth/src/token.js'),
   'DOLA-009A: structured work targets must remain in the governed work focus');
 for (const directive of [
   'Create a PR for this fix.', 'Open the pull request.', 'Start a slice for this work.',
   'Add a regression test for modules/auth/token.js.',
-  'Create a module for token validation.', 'Analyze and fix this failure.'
+  'Create a module for token validation.', 'Analyze and fix this failure.',
+  'Please analyze and fix this failure.', 'Fix failed tests',
+  'Create: a PR for this fix.', 'Run: the focused tests.',
+  'Execute: the migration.'
 ]) {
   const directiveClass = orchestrator.classifyTaskForRedDog(
     directive, 'auto', 'reddog_architect'
@@ -1747,21 +1790,64 @@ for (const directive of [
     'DOLA-009A: established explicit action form must request resident work: ' + directive);
 }
 const colonDirectiveIngress = orchestrator.splitDaemonDiagnosticInput([
-  'Fix: update token validation.', 'ERROR: worker failed'
+  'Fix: update token validation.', 'DAEmon output:', 'ERROR: worker failed'
 ].join('\n'), '');
 assert.strictEqual(colonDirectiveIngress.operator_intent_source, 'Fix: update token validation.',
   'DOLA-009A: a recognized colon-form directive must outrank generic structured-line detection');
 const oneLineEvidenceIngress = orchestrator.splitDaemonDiagnosticInput([
   'Fix this runtime failure.', 'ERROR: worker failed'
 ].join('\n'), '');
-assert.strictEqual(oneLineEvidenceIngress.boundary, 'inferred_conversation_boundary',
-  'DOLA-009A: one strongly diagnostic line is sufficient after an explicit request');
-assert.strictEqual(oneLineEvidenceIngress.operator_intent_source, 'Fix this runtime failure.',
-  'DOLA-009A: single-line evidence must not swallow the explicit request');
+assert.strictEqual(oneLineEvidenceIngress.boundary, 'none',
+  'DOLA-009A: untyped mixed text cannot infer authority from an action-looking preamble');
+assert.strictEqual(oneLineEvidenceIngress.operator_intent_source, '',
+  'DOLA-009A: untyped diagnostic evidence cannot mint operator intent');
+for (const evidenceLine of [
+  '2026-08-09T10:01:00Z ERROR: worker failed',
+  '2026-08-09 10:01:00,123 ERROR worker failed',
+  '2026-08-09 10:01:00.123 [ERROR] worker failed',
+  '2026-08-09T10:01:00Z [worker] ERROR failed',
+  '2026-08-09 10:01:00,123 - worker - ERROR - failed',
+  '[2026-08-09T10:01:00Z] [worker] ERROR failed',
+  '2026/08/09 10:01:00 [worker] ERROR failed',
+  'Aug 09 10:01:00 host worker[123]: ERROR failed',
+  'npm ERR! lifecycle command failed',
+  '{"timestamp":"2026-08-09T10:01:00Z","level":"error","message":"worker failed"}',
+  'timestamp=2026-08-09T10:01:00Z level=error msg="worker failed"'
+]) {
+  const unmarked = orchestrator.splitDaemonDiagnosticInput(
+    'Fix this runtime failure.\n' + evidenceLine, ''
+  );
+  assert.strictEqual(unmarked.boundary, 'none',
+    'DOLA-009B: unmarked common log format must remain wholly inert: ' + evidenceLine);
+  assert.strictEqual(unmarked.operator_intent_source, '',
+    'DOLA-009B: unmarked common log format cannot mint operator intent: ' + evidenceLine);
+  const ingress = orchestrator.splitDaemonDiagnosticInput(
+    'Fix this runtime failure.\nDAEmon output:\n' + evidenceLine, ''
+  );
+  assert.strictEqual(ingress.operator_intent_source, 'Fix this runtime failure.',
+    'DOLA-009B: common log format must start inert evidence: ' + evidenceLine);
+  assert(ingress.diagnostic_payload.includes(evidenceLine),
+    'DOLA-009B: common log format remains evidence: ' + evidenceLine);
+}
+for (const ordinaryRequest of [
+  'Fix runtime output: formatting in the status table.',
+  'Improve worker logs: alignment in the dashboard.'
+]) {
+  const ingress = orchestrator.splitDaemonDiagnosticInput(ordinaryRequest, '');
+  assert.strictEqual(ingress.boundary, 'operator_only',
+    'DOLA-009D: inline prose is not an explicit evidence boundary: ' + ordinaryRequest);
+  assert.strictEqual(ingress.operator_intent_source, ordinaryRequest,
+    'DOLA-009D: ordinary requested scope must remain intact: ' + ordinaryRequest);
+  assert.strictEqual(orchestrator.classifyTaskForRedDog(
+    ordinaryRequest, 'auto', 'reddog_architect'
+  ).governedActionRequested, true,
+  'DOLA-009D: ordinary inline-colon request must remain actionable: ' + ordinaryRequest);
+}
 const multilineDirectiveIngress = orchestrator.splitDaemonDiagnosticInput([
   'Fix this failure.',
   'Only edit modules/auth/token.js.',
   'Preserve the public API.',
+  'DAEmon output:',
   'ERROR: timeout',
   'status: stopped'
 ].join('\n'), '');
@@ -1782,19 +1868,57 @@ assert.strictEqual(orchestrator.classifyTaskForRedDog(
   'Write tests for modules/auth/src/token.js.', 'auto', 'reddog_architect'
 ).governedActionRequested, true,
 'DOLA-009A: explicit code/test writing remains actionable');
+for (const terminalResult of [
+  'Fix: failed', 'Execute: error', 'Build: succeeded', 'Run: timeout',
+  'Create: blocked', 'Patch: 0.4.71', 'Fix: failed.', 'Execute: error!',
+  'Build: succeeded.', 'Patch: 0.4.71.', 'Fix: "failed"',
+  'Execute: [error]', "Build: 'succeeded'", 'Fix: !!!', 'Execute: []',
+  'Build: ""', 'Patch: (...?)', 'Patch: rejected', 'Run: aborted',
+  'Build: finished', 'Execute: cancelled', 'Create: skipped', 'Fix: unsuccessful',
+  'Run: pass/fail', 'Build: 1/2', 'Patch: N/A',
+  'Execute: https://ci.example/job/123', 'Build: validation failed',
+  'Fix: tests failed', 'Execute: runtime blocked', 'Patch: module rejected',
+  'Create: worker cancelled', 'Patch: ../outside/token.py',
+  'Patch: /tmp/token.py', 'Patch: C:\\temp\\token.py',
+  'Patch: \\\\server\\share\\token.py', 'Patch: //host/share/token.py',
+  'Patch: file:\\temp\\token.py'
+]) {
+  assert.strictEqual(orchestrator.classifyTaskForRedDog(
+    terminalResult, 'auto', 'reddog_architect'
+  ).governedActionRequested, false,
+  'DOLA-009D: terminal colon result cannot mint action: ' + terminalResult);
+}
+for (const explicitDirective of [
+  'Fix: failed tests', 'Run: the focused tests',
+  'Patch: modules/auth/token.py', 'Edit: modules\\auth\\token.py'
+]) {
+  assert.strictEqual(orchestrator.classifyTaskForRedDog(
+    explicitDirective, 'auto', 'reddog_architect'
+  ).governedActionRequested, true,
+  'DOLA-009D: explicit colon directive remains actionable: ' + explicitDirective);
+}
 
 const inferredSingleInput = orchestrator.splitDaemonDiagnosticInput([
-  'Fix this runtime failure.', '',
+  'Fix this runtime failure.', '', 'DAEmon output:',
   'ERROR: HoloIndex owner exited',
   'status: stopped',
   'result: failed'
 ].join('\n'), '');
-assert.strictEqual(inferredSingleInput.boundary, 'inferred_conversation_boundary',
-  'DOLA-009A: one-input conversation must infer the intent/evidence boundary');
+assert.strictEqual(inferredSingleInput.boundary, 'explicit_text_boundary',
+  'DOLA-009A: one-input conversation uses an explicit intent/evidence boundary');
 assert.strictEqual(inferredSingleInput.operator_intent_source, 'Fix this runtime failure.',
-  'DOLA-009A: inferred operator intent must exclude diagnostic data');
+  'DOLA-009A: explicitly bounded operator intent must exclude diagnostic data');
 assert(inferredSingleInput.diagnostic_payload.includes('HoloIndex owner exited'),
   'DOLA-009A: inferred evidence payload must retain diagnostic lines');
+const longBoundaryPrefix = '## Run Trace' + '\t'.repeat(200000);
+const longBoundaryStarted = Date.now();
+const longBoundaryIngress = orchestrator.splitDaemonDiagnosticInput(
+  'Fix this runtime failure.\n' + longBoundaryPrefix + '\nERROR: failed', ''
+);
+assert.strictEqual(longBoundaryIngress.boundary, 'explicit_text_boundary',
+  'DOLA-009D: canonical boundary semantics survive an oversized whitespace suffix');
+assert(Date.now() - longBoundaryStarted < 500,
+  'DOLA-009D: explicit boundary scanning must remain bounded on oversized input');
 const inferredSingleClass = orchestrator.classifyTaskForRedDog(
   inferredSingleInput.combined_focus, 'auto', 'reddog_architect',
   { daemonDiagnosticIngress: inferredSingleInput }
@@ -2609,7 +2733,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.70', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.71', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [],
@@ -2774,15 +2898,28 @@ assert.strictEqual(fakeWardrobeSelection.python_invocation_performed, false, 'fa
 assert.strictEqual(fakeWardrobeSelection.no_execution_performed, true, 'fake wardrobe bridge performs no execution');
 assert.strictEqual(fakeWardrobeSelection.no_enqueue_performed, true, 'fake wardrobe bridge performs no enqueue');
 assert.strictEqual(fakeWardrobeSelection.receipt.authority_boundary, 'sovereign_token_required', 'fake wardrobe receipt requires sovereign boundary');
+assert.strictEqual(testWardrobeProof.isAccepted({
+  decision: 'WARDROBE_SELECTION_REJECT', receipt: null,
+  no_execution_performed: true, no_enqueue_performed: true
+}), false, 'rejected wardrobe selection cannot admit resident submission');
+assert.strictEqual(testWardrobeProof.isAccepted({
+  decision: 'WARDROBE_SELECTION_ACCEPT', receipt: null,
+  no_execution_performed: true, no_enqueue_performed: true
+}), false, 'receipt-less wardrobe acceptance cannot admit resident submission');
+assert.strictEqual(testWardrobeProof.isAccepted({
+  decision: 'WARDROBE_SELECTION_ACCEPT', receipt: {},
+  no_execution_performed: true, no_enqueue_performed: true
+}), false, 'empty wardrobe receipts cannot admit resident submission');
+includes(extensionJs,
+  'wardrobeSelectionResult: operatorWardrobeSelectionResult, residentArchitectSessionEnabled',
+  'resident submission must consume the receipt-bearing wardrobe admission result');
 const fakeWardrobeSection = orchestrator.buildOperatorWardrobeSelectionSection(fakeWardrobeSelection);
 includes(fakeWardrobeSection, '## RedDog Operator Wardrobe Selection', 'wardrobe selection section header');
 includes(fakeWardrobeSection, 'selected_wardrobe: wsp97_sovereign_execution [OBSERVED]', 'wardrobe selection section shows selected wardrobe');
 includes(fakeWardrobeSection, 'no_execution_performed: true [OBSERVED]', 'wardrobe selection section shows no execution');
 
 const realWardrobeSelection = JSON.parse(cp.execFileSync('python', ['-B', path.join(root, 'scripts', 'reddog_operator_wardrobe_selection_once.py')], {
-  cwd: root,
-  input: JSON.stringify(wardrobePayload),
-  encoding: 'utf8',
+  cwd: root, input: JSON.stringify(wardrobePayload), encoding: 'utf8',
   env: Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' }),
   maxBuffer: 262144
 }));
@@ -2792,6 +2929,28 @@ assert.strictEqual(realWardrobeSelection.no_enqueue_performed, true, 'one-shot w
 assert.strictEqual(realWardrobeSelection.receipt.selected_wardrobe, 'wsp97_sovereign_execution', 'one-shot wardrobe bridge selects sovereign wardrobe');
 assert.strictEqual(realWardrobeSelection.receipt.authority_boundary, 'sovereign_token_required', 'one-shot wardrobe bridge preserves sovereign boundary');
 assert.strictEqual(realWardrobeSelection.receipt.wre_required, true, 'one-shot wardrobe bridge marks WRE required for worktree authority');
+testWardrobeSourceProof.observe(realWardrobeSelection);
+testWardrobeProof.verifyAndObserve(wardrobePayload, realWardrobeSelection);
+assert.strictEqual(testWardrobeProof.isAccepted(realWardrobeSelection), true,
+  'canonical receipt-bearing wardrobe selection admits resident submission');
+const unsafeWardrobeReceipt = JSON.parse(JSON.stringify(realWardrobeSelection));
+unsafeWardrobeReceipt.receipt.no_execution_performed = false;
+unsafeWardrobeReceipt.receipt.no_enqueue_performed = false;
+unsafeWardrobeReceipt.receipt.rejection_reasons = ['unsafe'];
+assert.strictEqual(testWardrobeProof.isAccepted(unsafeWardrobeReceipt), false,
+  'receipt-level side effects or rejection must block resident submission');
+const extendedWardrobeReceipt = JSON.parse(JSON.stringify(realWardrobeSelection));
+extendedWardrobeReceipt.receipt.attacker_extra = true;
+assert.strictEqual(testWardrobeProof.isAccepted(extendedWardrobeReceipt), false,
+  'unknown wardrobe receipt fields fail closed');
+const recomputedWardrobeReceipt = JSON.parse(JSON.stringify(realWardrobeSelection));
+recomputedWardrobeReceipt.receipt.foundup_id = 'attacker-selected';
+recomputedWardrobeReceipt.receipt.selection_id = require('crypto').createHash('sha256').update(
+  JSON.stringify({ attacker: true }), 'utf8'
+).digest('hex');
+assert.strictEqual(testWardrobeProof.verifyAndObserve(wardrobePayload, recomputedWardrobeReceipt), recomputedWardrobeReceipt);
+assert.strictEqual(testWardrobeProof.isAccepted(recomputedWardrobeReceipt), false,
+  'recomputed receipt without sealed source proof cannot acquire admission');
 
 // REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1:
 // extension may reach the explicit live-enqueue invoke guard only after runtime gating,
@@ -2927,7 +3086,10 @@ const fakeLiveInvoke = orchestrator.invokeOpenClawLiveEnqueueRuntimeBindingBridg
     }
   }
 );
-assert.strictEqual(fakeLiveInvoke.decision, 'EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT', 'fake live enqueue bridge preserves guard rejection');
+assert.strictEqual(fakeLiveInvoke.decision, 'EXTENSION_OPENCLAW_LIVE_ENQUEUE_SKIPPED',
+  'direct live enqueue call without process-local selector proof is skipped');
+assert(fakeLiveInvoke.rejection_reasons.includes('selection_proof_missing'),
+  'direct live enqueue call exposes the missing proof');
 assert.strictEqual(fakeLiveInvoke.openclaw_enqueue_performed, false, 'fake live enqueue bridge performs no enqueue');
 assert.strictEqual(fakeLiveInvoke.concrete_writer_enabled, false, 'fake live enqueue bridge keeps writer disabled');
 const fakeLiveInvokeSection = orchestrator.buildOpenClawLiveEnqueueRuntimeBindingSection(fakeLiveInvoke);
@@ -3125,7 +3287,8 @@ assert(!authorityBoundSection.includes('must-not-leak'), 'candidate section must
 const skippedInvoke = orchestrator.invokeWreOperationalSpineExplicitValveBridge(null, spinePreview, {});
 assert.strictEqual(skippedInvoke.decision, 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_SKIPPED', 'runtime wire must skip without explicit invoke metadata');
 assert.strictEqual(skippedInvoke.python_invocation_performed, false, 'skipped runtime wire must not invoke Python');
-assert(skippedInvoke.rejection_reasons.includes('explicit_wre_operational_spine_request_missing'), 'skipped runtime wire must cite missing explicit request');
+assert(skippedInvoke.rejection_reasons.includes('selection_proof_missing'),
+  'skipped runtime wire must reject before payload assembly without selector proof');
 const skippedInvokeSection = orchestrator.buildWreOperationalSpineInvokeSection(skippedInvoke);
 includes(skippedInvokeSection, '## WRE Operational Spine Runtime Wire', 'runtime wire section header');
 includes(skippedInvokeSection, 'python_invocation_performed: false [OBSERVED]', 'runtime wire skipped section must show no Python invocation');
@@ -3202,8 +3365,11 @@ const fakeInvoke = orchestrator.invokeWreOperationalSpineExplicitValveBridge(nul
     };
   }
 });
-assert.strictEqual(fakeInvoke.decision, 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT', 'runtime wire should accept fake bridge result');
-assert.strictEqual(fakeInvoke.wre_spine_invoked, true, 'runtime wire fake bridge should mark spine invoked');
+assert.strictEqual(fakeInvoke.decision, 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_SKIPPED',
+  'direct WRE call without process-local selector proof is skipped');
+assert(fakeInvoke.rejection_reasons.includes('selection_proof_missing'),
+  'direct WRE call exposes the missing proof');
+assert.strictEqual(fakeInvoke.wre_spine_invoked, false, 'unproved WRE call cannot invoke the spine');
 const fakeInvokeSection = orchestrator.buildWreOperationalSpineInvokeSection(fakeInvoke);
 assert(!fakeInvokeSection.includes('must-not-leak'), 'runtime wire section must not leak sovereign token or signature');
 
@@ -4117,7 +4283,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.70'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.71'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -4131,7 +4297,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.70'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.71'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -4143,7 +4309,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.70'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.71'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -5326,7 +5492,8 @@ assert.strictEqual(diagnosticPreflight.grounding_target_universe_required, false
 assert(!/runtime[^\n]{0,80}(?:reindex|--index)/i.test(extensionJs.slice(extensionJs.indexOf('function buildTypedGroundingPreflight'), extensionJs.indexOf('function buildGroundingPreflightBlockedResult'))),
   'TGP-013: grounding preflight remains query-only and never triggers runtime reindex');
 const actionableLogPrompt = [
-  'Implement a fix for this runtime output:',
+  'Implement a fix for this runtime failure.',
+  'DAEmon output:',
   '- runtime status: stopped',
   '- stderr: timeout',
   '- warning: worker failed',
@@ -5536,7 +5703,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.70' } }
+      ? { id, packageJSON: { version: '0.4.71' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
@@ -5689,6 +5856,17 @@ assert.strictEqual(residentBridgeResult.red_dog_intent_submitted, true, 'RPI-005
 assert.strictEqual(residentBridgeResult.intent_id, residentRunnerPayload.intent_id, 'RPI-005: bridge result binds intent id');
 assert.strictEqual(residentBridgeResult.queue_candidate_count, 1, 'RAS-005: queue candidate count preserved');
 assert.strictEqual(residentBridgeResult.no_repo_mutation_performed, true, 'RAS-005: no repo mutation preserved');
+let unprovedActionRunnerCalled = false;
+const unprovedActionSession = orchestrator.runResidentArchitectSessionBridge(null, 'fix work', Object.assign({}, residentGroundingOptions, {
+  explicitResidentArchitectSessionRequested: true,
+  actionPlanningAllowed: true,
+  conversationSessionCredential: testSessionCredential,
+  sessionRunner: () => { unprovedActionRunnerCalled = true; return {}; }
+}));
+assert.strictEqual(unprovedActionSession.not_invoked_reason, 'selection_proof_missing',
+  'RAS-005: action session requires process-local selector proof at the admission seam');
+assert.strictEqual(unprovedActionRunnerCalled, false,
+  'RAS-005: action session runner is never called without selector proof');
 const missingSessionSource = orchestrator.runResidentArchitectSessionBridge(null, 'audit work', Object.assign({}, residentGroundingOptions, {
   explicitResidentArchitectSessionRequested: true,
   sessionRunner: () => { throw new Error('must not run'); }

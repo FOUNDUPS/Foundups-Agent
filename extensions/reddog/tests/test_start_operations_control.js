@@ -10,6 +10,8 @@ const path = require('path');
 
 const protocol = require(path.join('..', 'start_operations_control.js'));
 const bridge = require(path.join('..', 'start_operations_bridge.js'));
+const sealedJsonOnce = require(path.join('..', 'sealed_python_json_once.js'))
+  .createSealedPythonJsonRunner();
 const runtimeMaterializer = require(
   path.join('..', 'backend_compatibility_runtime_materializer.js')
 );
@@ -105,7 +107,7 @@ function fakeMaterializer(runtime) {
     targetRepoRoot: runtime.repoRoot,
     manifestPath: path.join(runtime.repoRoot, 'runtime-manifest.json'),
     manifestDigest: '0'.repeat(64),
-    scriptPath: (value) => value,
+    scriptPath: (value) => path.join(runtime.repoRoot, 'sealed', path.basename(value)),
     cleanup() {}
   });
 }
@@ -334,6 +336,27 @@ async function main() {
   assert.strictEqual(approved.interpreter, fs.realpathSync(runtime.interpreter));
   assert.strictEqual(approved.sitePackages, fs.realpathSync(runtime.sitePackages));
   assert.strictEqual(interpreterPolicy.approved('python', runtime.repoRoot), '');
+  let sealedInvocation = null;
+  const sealedResult = sealedJsonOnce.run({
+    interpreter: runtime.interpreter, repoRoot: runtime.repoRoot,
+    script: 'selector.py', request: { action: 'select' }, env: {},
+    materialize: fakeMaterializer(runtime),
+    execFileSync: (command, args, options) => {
+      sealedInvocation = { command, args, options };
+      return JSON.stringify({ accepted: true });
+    }
+  });
+  assert.deepStrictEqual(sealedResult, { accepted: true });
+  assert.strictEqual(sealedJsonOnce.isAccepted(sealedResult), true);
+  assert.strictEqual(sealedJsonOnce.isAccepted(Object.assign({}, sealedResult)), false);
+  assert.strictEqual(sealedInvocation.command, fs.realpathSync(runtime.interpreter));
+  assert.deepStrictEqual(sealedInvocation.args.slice(0, 3), ['-I', '-S', '-B']);
+  assert(sealedInvocation.args[3].startsWith(runtime.repoRoot));
+  assert.strictEqual(sealedInvocation.options.env.REDDOG_SEALED_RUNTIME_REQUIRED, '1');
+  assert.throws(() => sealedJsonOnce.run({
+    interpreter: process.execPath, repoRoot: runtime.repoRoot,
+    script: 'selector.py', request: {}
+  }), /unapproved_interpreter/);
   assertStartupHooksExcluded();
   assertRedirectedVenvRejected();
   const result = await bridge.run({

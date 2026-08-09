@@ -1,11 +1,25 @@
 # RedDog
 
-Version: 0.4.70
+Version: 0.4.71
+
+Version 0.4.71 closes the remaining single-input authority ambiguities found
+by exact-SHA review. Plain work requests are now identified by the ingress
+parser itself; diagnostic payloads never fall back to whole-message action
+classification. Timestamped, JSON, logfmt, and terse command-result logs stay
+in inert evidence. The durable resident cycle is requested only after the
+existing Wardrobe selector returns an accepted receipt with explicit
+no-execution and no-enqueue attestations. The selector receipt is digest-
+verified and held by an immutable process-local owner proof; copied or
+caller-constructed mappings cannot admit resident work. The selector runs
+only through the approved workspace `.venv` interpreter with `-I -S -B` and
+the existing manifest-materialized sealed source boundary. WRE invocation,
+live enqueue, and resident submission each consume that same process-local
+proof before they can advance.
 
 Version 0.4.70 restores one conversational input. Enter sends and Shift+Enter
-adds a line; diagnostic logs and the operator request are pasted together.
-RedDog deterministically separates an explicit leading assessment or action
-from following diagnostic-shaped data. The data remains inert and cannot
+adds a line. Version 0.4.71 requires mixed operator intent and diagnostic logs
+to use an explicit `DAEmon output:` or `## Run Trace` boundary in that one
+input. Unmarked mixed text is evidence-only. The data remains inert and cannot
 request work. A diagnostic-shaped first line is never inferred as operator
 intent, and merely mentioning a fix in a question is not an action.
 Assessment-only diagnostics remain non-actionable. An explicit

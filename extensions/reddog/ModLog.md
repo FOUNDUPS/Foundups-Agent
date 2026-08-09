@@ -1,5 +1,28 @@
 # RedDog ModLog
 
+## 2026-08-09 - Single-input authority boundary hardening (0.4.71)
+
+- Moved plain operator-only classification into the diagnostic ingress parser,
+  removing the whole-message action fallback that could promote diagnostic
+  fields such as `fix: false` or terse command-failure text.
+- Added bounded recognition for timestamped, JSON, and logfmt diagnostics so
+  common log formats begin inert evidence instead of entering operator scope.
+- Required an accepted receipt-bearing Wardrobe selection, with no execution
+  or enqueue side effects, before the resident AgentDB/OpenClaw session can be
+  submitted. The receipt digest is recomputed against the exact selector input
+  and admitted through the existing immutable process-local owner-proof
+  pattern. Rejected, copied, injected, or malformed selections fail closed.
+- Routed both the Python bootstrap and selector through the approved workspace
+  `.venv`, isolated `-I -S -B` startup, and manifest-materialized source. A
+  private per-runner capability binds canonical output to the Wardrobe proof;
+  WRE invocation, live enqueue, and action-bearing resident submission each
+  reject direct calls without it.
+- Added the common `Please analyze and fix ...` imperative without weakening
+  assessment-only questions or evidence isolation.
+- Removed ambiguous intent inference from unmarked mixed text. One-field
+  request-plus-log pastes require `DAEmon output:` or `## Run Trace`; otherwise
+  diagnostic-shaped content remains evidence-only.
+
 ## 2026-08-09 - Single conversation input and governed action routing (0.4.70)
 
 - Removed the duplicate diagnostic-evidence textarea. The single conversation
