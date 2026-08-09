@@ -279,7 +279,8 @@ async function main() {
   assert(extension.includes('currentBackendCompatibilityAtRoot(root)'));
   assert(extension.includes('holoBlockedRequestRecovery.claimAfterCompatibility('));
   assert(extension.includes('blockedRecoveryOutcomeVerified(result, classification, validation)'));
-  assert(extension.includes('const actionPlanningAllowed = runtimeConsumptionGate.passed === true'));
+  assert(extension.includes('const { actionPlanningAllowed } = sessionPolicy;'));
+  assert(extension.includes('residentSessionStagePolicy('));
   assert(extension.includes('progressiveExecutionStage.allowsActionPlanning(progressiveStage.configured)'));
   assert(extension.includes('&& !recoveryContext'));
   assert(extension.includes("if (actionStageEnabled && !recoveryContext && await startOperationsAdapter.handleMessage("));
