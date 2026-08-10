@@ -317,7 +317,7 @@ function parseRunTrace(d, text) {
     const get = (field) => d.extractRunTraceField(src, field) || 'unknown';
     const version = get('extension_version');
     const mode = get('mode');
-    const tier = get('WSP_15 tier');
+    const tier = d.extractRunTraceField(src, 'reasoning_tier') || get('WSP_15 tier');
     const gate = get('redaction gate status');
     const reasons = get('runtime_consumption_gate_rejection_reasons');
     return {

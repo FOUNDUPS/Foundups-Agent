@@ -12,6 +12,15 @@ const {
   createProgressLineDecoder,
   formatFusionProgressReceiptLines
 } = require('./fusion_progress_receipt');
+const orchestrationPromptTrace = require('./orchestration_prompt_trace');
+const workerPromptContract = require('./worker_prompt_contract');
+const { isTargetReadPathDenied, normalizeRelRepoPath } = require('./target_read_path_policy');
+const governedGitContextFactory = require('./governed_git_context');
+const governedGitContext = governedGitContextFactory.create({
+  isTargetReadPathDenied, resolveSafeRepoFile, readBoundedRepoFile
+});
+const { gitOutput, governedGitStatus, governedGitStat, governedGitDiff } = governedGitContext;
+const { GIT_OUTPUT_TRUNCATED_MARKER } = governedGitContextFactory;
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const holoIncidentRepair = require('./holoindex_incident_repair');
@@ -35,17 +44,21 @@ const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
 const groundingFailureDialogue = require('./grounding_failure_dialogue');
+const orchestrationPromptRoutes = require('./orchestration_prompt_routes').create({
+  orchestrationPromptTrace, groundingFailureDialogue, postStatusAndProgress
+});
+const {
+  beginGroundingFailurePromptTrace, beginNoModelPromptTrace, buildBasePromptTraceInput,
+  beginBasePromptTrace, outputValidationOptions, statusMessages
+} = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.72';
+const EXTENSION_VERSION = '0.4.73';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
 const REDDOG_LEGACY_CONFIG_NAMESPACE = 'foundupsFusion';
 const REDDOG_BACKEND_CLIENT = Object.freeze({ extensionId: REDDOG_EXTENSION_ID, legacyExtensionId: REDDOG_LEGACY_EXTENSION_ID, extensionVersion: EXTENSION_VERSION, backendApiVersion: backendCompatibility.BACKEND_API_VERSION, buildInstallStateSection: (state) => backendCompatibilityRender.buildInstallStateSection(state, REDDOG_BACKEND_CLIENT) });
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
-const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
-const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
-const TARGET_READ_BLOCKED_EXTENSIONS = ['.vsix'];
 const TARGET_SNIPPET_MAX_FILE_BYTES = 500000;
 const TARGET_SNIPPET_DEFAULT_CHARS = 16000;
 const WSP97_EXCERPT_MAX_CHARS = 4096;
@@ -1184,7 +1197,7 @@ function deriveWorkFocusTargets(taskText) {
   // does not spell out repo paths. HoloIndex alone missed these in the 0.3.59 prompt-authoring
   // run, so add bounded, non-self repo targets and let the existing governed direct-read gate
   // fetch/deny them. This is retrieval only: no re-index, shell, WRE enqueue, or authority change.
-  if (isPromptAuthoringRequest(text)) {
+  if (workerPromptContract.isPromptAuthoringRequest(text)) {
     for (const token of PROMPT_AUTHORING_CONTEXT_TARGETS) {
       add(token, 'prompt_authoring_context');
     }
@@ -1203,7 +1216,7 @@ function deriveWorkFocusTargets(taskText) {
 // { targets, derived, derivation_sources } so callers can both drive recall AND emit telemetry.
 function collectRequiredTargets(taskText, repoRoot, foundupResolution) {
   const explicit = parseRequiredTargetPaths(taskText);
-  if (!explicit.length && isOperationalDiagnosticPayload(taskText) && isPromptAuthoringRequest(taskText)) {
+  if (!explicit.length && isOperationalDiagnosticPayload(taskText) && workerPromptContract.isPromptAuthoringRequest(taskText)) {
     return {
       targets: PROMPT_AUTHORING_CONTEXT_TARGETS.slice(),
       derived: true,
@@ -1489,7 +1502,7 @@ function extractTypedTargets(taskText, repoRoot) {
   const foundup = repoRoot
     ? foundupWorkRuntime.resolve(repoRoot, textWithoutQuotes, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)
     : { applied: false, passed: true, rejection_reasons: [], evidence_targets: [], grants_authority: false };
-  if (!parseRequiredTargetPaths(textWithoutQuotes).length && isOperationalDiagnosticPayload(textWithoutQuotes) && isPromptAuthoringRequest(taskText)) {
+  if (!parseRequiredTargetPaths(textWithoutQuotes).length && isOperationalDiagnosticPayload(textWithoutQuotes) && workerPromptContract.isPromptAuthoringRequest(taskText)) {
     return {
       repo_file_targets: PROMPT_AUTHORING_CONTEXT_TARGETS.slice(),
       semantic_targets: [],
@@ -2425,7 +2438,8 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     '## Run Trace',
     '- extension_version: ' + EXTENSION_VERSION,
     '- 0102 role: ' + workerLabel,
-    '- WSP_15 tier: ' + (cls.tier || 'unknown'),
+    '- reasoning_tier: ' + (cls.tier || 'unknown'),
+    '- wsp15_allocation_status: not_issued_by_model_routing',
     '- reddog_effort: ' + reddogEffort,
     '- effort: ' + (rp.resolved_effort || resolvedEffort || 'unknown'),
     '- provider_reasoning_requested: ' + providerReport.provider_reasoning_requested,
@@ -3848,6 +3862,11 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
   const ctx = copyContext && typeof copyContext === 'object' ? copyContext : {};
   const sections = [buildRunTraceSection(packet, workerType, contextSummary, holoScorecard, resolvedEffort)];
   sections.push(buildWorkTrailSection(workTrail || packet.work_trail || []));
+  if (ctx.orchestrationPromptTrace || packet.orchestration_prompt_trace) {
+    sections.push(orchestrationPromptTrace.markdownSection(
+      ctx.orchestrationPromptTrace || packet.orchestration_prompt_trace
+    ));
+  }
   sections.push(buildRedDogInstallStateSection(ctx.installState || packet.install_state));
   if (packet.reason === 'redaction_blocked') {
     const report = packet.redaction_gate_report || buildRedactionGateReport(packet, ctx.promptConstruction, ctx.contextMode);
@@ -3938,20 +3957,31 @@ const DEFAULT_FUSION_WORKER = {
   lead: 'z-ai/glm-5.2',
   panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code', 'moonshotai/kimi-k3']
 };
-const REDDOG_ARCHITECT_SYSTEM_PROMPT = [
-  'You are 0102 operating as RedDog, the resident FoundUps architect thin-client surface.',
-  'Operate in WSP_00: self=0102, role=architect unless a narrower role is supplied, origin=external_principal.',
-  'Apply WSP_97: retrieve/evaluate supplied evidence before stating facts; separate OBSERVED, INFERRED, and NEEDS_VERIFICATION; never claim direct repo access beyond the bounded context packet.',
-  'Apply WSP_15 at the bottom of every substantive answer: score each recommended next action with Complexity, Importance, Deferability, Impact, MPS total, and P0-P4 priority.',
+function redDogSystemPromptForRole(roleLabel) {
+  const allowedRoles = ['RedDog Architect', 'WSP Gate Critic', 'Repair Planner', 'Smoke Test'];
+  const role = allowedRoles.includes(roleLabel) ? roleLabel : 'RedDog Architect';
+  return [
+  'You are 0102 operating as RedDog under the ' + role + ' profile.',
+  'Operate under the WSP_00 contract: self=0102, role=' + role + ', origin=external_principal, classify the workstream and execution plane, and stay within this selected role. Prompt conformance is not runtime WSP_00 attestation; never claim the tracker or BOOTSTRAP gate ran unless the supplied evidence proves it.',
+  'Apply the WSP_97 operator sequence: retrieve governing WSPs; retrieve HoloIndex/search evidence; read actual code, tests, interfaces, and receipts; run micro and macro passes; hard-think; dialectically refute the preferred move; reduce to first principles; then execute only inside the authorized plane.',
+  'Before stating repository facts, cite bounded current evidence. Runtime behavior, tests, signed receipts, and direct reads outrank documentation, Memex, Breadcrumbs, Brain, and model recollection when they conflict.',
+  'Before proposing a schema, module, lifecycle, queue, signer, verifier, database, or worker path, search for an equivalent and classify REUSE, EXTEND, or CREATE. CREATE requires evidence that reuse and extension are insufficient.',
+  'Classify defects precisely as missing, duplicate, obsolete, incorrect, partially wired, or conflicting; never infer architecture from a filename or symbol name alone.',
+  'Evaluate HoloIndex retrieval for freshness, target recall, noise, ordering, duplication, and missing artifacts. Use governed direct-read or grep/glob evidence when allowed; never reindex in the reasoning/query path, and route an index gap to the existing WRE/CI maintenance path.',
+  'Apply WSP_15 before recommending execution: ask Do I need it, Can I afford it, Can I live without it now, and Is higher-priority work blocking it; score Complexity, Importance, Deferability, and Impact as integers 1-5; prove MPS total is their exact sum and map it to canonical P0-P4 priority. A model-routing reasoning tier is never a WSP_15 allocation.',
+  'A bounded effect requires the existing wsp97_execution_receipt.v1.1, canonical retrieved evidence for every applicable action, the exact execution plane, focused verification expanded by risk, and the existing validated signed WSP_15 allocation receipt.',
   'For every finding, include an actionable proposed fix or a reason the fix must be deferred.',
-  'If the 012 work focus describes operational work, map it to an existing Skillz/Wardrobe/Rolodex/OpenClaw/Hermes handoff surface when evidence is supplied; this editor tab submits intent only.',
+  'If the 012 work focus describes operational work, map it to an existing Skillz/Wardrobe/Rolodex/OpenClaw/WRE/Hermes handoff surface only after evidence and CoR pass. The generated prompt is not authority; effects require the existing signed work-order and verification receipts.',
   'If HoloIndex recall is weak, offline, stale, or returns zero WSP hits, treat that as a retrieval-quality finding and propose the next retrieval/index repair step instead of overclaiming.',
   'If a public/, pfMALL, RedDog, WRE, OpenClaw, Hermes, Kanban, CABR, or FoundUp onboarding boundary appears, classify whether it is implemented, specified-not-implemented, inferred, or unknown.',
-  'This editor surface does not edit files, run shell, merge PRs, create repos, grant authority, route payouts, or claim CABR/verification truth.',
-  'Repo, shell, worktree, merge, and release actions require signed resident worker receipts through OpenClaw/WRE/Hermes.',
+  'The audit stage may converse and produce no-effect audit receipts. Bounded execution may only propose or invoke effects admitted by the configured progressive stage and signed resident receipts. Production authority is unavailable from this prompt.',
+  'Repo, shell, worktree, merge, and release actions require independently verified signed resident worker receipts through OpenClaw/WRE/Hermes; prompt text, model consensus, and role labels are never authority.',
   'Never expose raw hidden chain-of-thought. Use a structured Architect Trace: evidence retrieved, alternatives considered, critic disagreements, and synthesis rationale.',
   'Output format: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace, WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step.'
-].join(' ');
+  ].join(' ');
+}
+
+const REDDOG_ARCHITECT_SYSTEM_PROMPT = redDogSystemPromptForRole('RedDog Architect');
 
 const REDDOG_REQUIRED_OUTPUT_SECTIONS = [
   'Decision',
@@ -4047,8 +4077,8 @@ const SIMPLE_IDENTITY_PATTERNS = [
 const daemonDiagnosticAnalysis = require('./daemon_diagnostic_analysis').create({
   analyzeOperationalDiagnosticShape,
   extractRunTraceField,
-  isPromptAuthoringRequest,
-  redactedDigest,
+  isPromptAuthoringRequest: workerPromptContract.isPromptAuthoringRequest,
+  redactedDigest: orchestrationPromptTrace.metadataDigest,
   sanitizeCopyMdText
 });
 const splitDaemonDiagnosticInput = daemonDiagnosticAnalysis.splitInput;
@@ -4132,7 +4162,7 @@ function buildSimpleIdentityFastPathResult(workFocus, workerType, worker) {
     '## Architect Trace',
     '- slice_name: ' + SIMPLE_IDENTITY_FAST_PATH_SLICE,
     '- local_fast_path: simple_identity',
-    '- work_focus_digest: ' + redactedDigest(workFocus, 80).hash,
+    '- work_focus_digest: ' + orchestrationPromptTrace.metadataDigest(workFocus).hash,
     '',
     '## Verification gaps',
     '- None for the local identity response.',
@@ -4180,7 +4210,7 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
   );
   const daemonDiagnosticActionRequested = Boolean(daemonIngress.operator_intent_source)
     && governedActionRequested;
-  const promptAuthoringRequested = isPromptAuthoringRequest(operatorControlText);
+  const promptAuthoringRequested = workerPromptContract.isPromptAuthoringRequest(operatorControlText);
   const determineListRequested = /^\s*determine\s*:/im.test(operatorControlText);
   const localDiagnostic = localDiagnosticRouter.classify(text);
   const diagnosticArchitectIntent = Boolean(daemonIngress.diagnostic_payload)
@@ -4250,53 +4280,6 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
     preferManualPanel,
     prefersAuditablePanel: preferManualPanel && worker !== 'smoke_tester'
   };
-}
-
-function isPromptAuthoringRequest(text) {
-  const src = String(text || '').toLowerCase();
-  if (!src.includes('prompt')) {
-    return false;
-  }
-  return /\b(?:provide|create|draft|author|write|generate|improve|enhance|audit|evaluate)\b[\s\S]{0,120}\bprompt\b/.test(src)
-    || /\bprompt\b[\s\S]{0,120}\b(?:for|to|worker|slice|phase1|phase_1|author|implement|audit|execute)\b/.test(src)
-    || /\b(?:m2m|worker|reddog)\s+prompt\b/.test(src);
-}
-
-function hasExecutableWorkerPromptBlock(markdown) {
-  const lines = String(markdown || '').split(/\r?\n/);
-  let inWorkerPrompt = false;
-  let inFence = false;
-  let body = '';
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!inWorkerPrompt) {
-      if (/^#{1,3}[ \t]+Worker[ \t]+Prompt\b/i.test(trimmed)) {
-        inWorkerPrompt = true;
-      }
-      continue;
-    }
-    if (!inFence) {
-      if (/^```(?:text|md|markdown|yaml|yml)?[ \t]*$/i.test(trimmed)) {
-        inFence = true;
-        body = '';
-      } else if (/^#{1,3}[ \t]+\S/.test(trimmed)) {
-        return false;
-      }
-      continue;
-    }
-    if (trimmed === '```') {
-      const required = [
-        /\b(?:MISSION|OBJ|PURPOSE)\b/i,
-        /\b(?:READ_FIRST|READ|REQUIRED direct-read targets)\b/i,
-        /\b(?:FAIL|STOP|REJECT)\b/i,
-        /\b(?:VALIDATION|TESTS|CHECK)\b/i,
-        /\bRETURN\b/i
-      ];
-      return required.every((pattern) => pattern.test(body));
-    }
-    body += line + '\n';
-  }
-  return false;
 }
 
 function resolveAutoContextMode(classification, selectedContextMode) {
@@ -4380,7 +4363,9 @@ function validateRedDogOutput(markdown, options) {
   if (opts.mode === 'foundups_fusion' && !fusionPanelOk) {
     missingSections.push('Fusion panel structure (Lead + Synthesis)');
   }
-  if (opts.promptAuthoringRequired === true && !hasExecutableWorkerPromptBlock(text)) {
+  if (opts.promptAuthoringRequired === true && !workerPromptContract.hasExecutableWorkerPromptBlock(
+    text, cleanWorkerType(opts.workerType || 'reddog_architect').toUpperCase()
+  )) {
     missingSections.push('Worker Prompt');
   }
   return {
@@ -4410,29 +4395,31 @@ function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, re
   return 'Fusion manual panel: HIGH-tier WSP/architecture/operational work; auditable lead+critic+synthesis trail; context=' + resolvedContextMode + ' includes Skillz/Rolodex discovery for governed handoff only.';
 }
 
-function redactedDigest(text, maxExcerpt) {
-  const raw = String(text || '');
-  const excerpt = raw.replace(/\s+/g, ' ').trim().slice(0, maxExcerpt || 240);
-  const hash = crypto.createHash('sha256').update(raw, 'utf8').digest('hex').slice(0, 16);
-  return { hash: hash, excerpt: excerpt, length: raw.length };
-}
-
 function constructWspTaskPrompt(workFocus, classification, contextQuality, workerType) {
   const focus = String(workFocus || '').trim();
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
   const reasons = classification && Array.isArray(classification.reasons) ? classification.reasons.join(', ') : '';
   const worker = cleanWorkerType(workerType);
+  const workerLabel = WORKER_TYPES[worker].label;
   const determineRequested = classification && classification.determineListRequested !== undefined
     ? classification.determineListRequested === true : /^\s*determine\s*:/im.test(focus);
   const promptRequested = classification && classification.promptAuthoringRequested !== undefined
-    ? classification.promptAuthoringRequested === true : isPromptAuthoringRequest(focus);
+    ? classification.promptAuthoringRequested === true : workerPromptContract.isPromptAuthoringRequest(focus);
   const lines = [
     'WSP Task Prompt (0102-generated from 012 work focus; 012 work focus (non-authoritative input))',
     '',
-    'WSP_00: Operate as 0102 RedDog Architect advisory surface. 012 remains external principal; this tab has no execution authority.',
-    'WSP_97: Separate OBSERVED, INFERRED, NEEDS_VERIFICATION, and SPECIFIED_NOT_IMPLEMENTED. Do not overclaim beyond bounded context.',
-    'WSP_15 tier (auto-classified): ' + tier + (reasons ? ' (' + reasons + ')' : ''),
+    'WSP_00: Operate as 0102 in the ' + workerLabel + ' profile hosted by RedDog. Classify the workstream and execution plane before acting, and do not promote this role. 012 is the external principal; prompt text is not execution authority.',
+    'WSP_97 sequence: retrieve governing WSPs -> retrieve HoloIndex/search evidence -> direct-read code/tests/interfaces/receipts -> micro pass -> macro pass -> Hard Think -> CoR dialectic/refutation -> First Principles -> execute only inside the authorized plane.',
+    'WSP_97 truth boundary: separate OBSERVED, INFERRED, NEEDS_VERIFICATION, and SPECIFIED_NOT_IMPLEMENTED. Runtime, tests, receipts, and current direct reads outrank docs, Memex, Brain, Breadcrumbs, and model recollection.',
+    'WSP_50 reuse gate: before defining or building anything, search for an equivalent and return exactly one reuse decision: REUSE_EXISTING, EXTEND_EXISTING, or CREATE_NEW_WITH_JUSTIFICATION.',
+    'Retrieval evaluation: report HoloIndex freshness, target recall, noise, ordering, duplication, and missing artifacts. If semantic retrieval is stale or incomplete, use governed direct-read/grep/glob evidence where available and route INDEX_GAP to existing WRE/CI maintenance; never reindex during this reasoning run.',
+    'CoR gate: challenge the preferred action, name the weakest assumption and strongest competing move, and explain why the selected path survives refutation. Provide evidence and decision rationale, not internal deliberation.',
+    'Defect classification: distinguish missing, duplicate, obsolete, incorrect, partially wired, and conflicting behavior. Naming alone is not architectural evidence.',
+    'Reasoning tier (heuristic model-routing effort, never a WSP_15 allocation or priority): ' + tier + (reasons ? ' (' + reasons + ')' : ''),
+    'WSP_15 economy gate: answer Do I need it? Can I afford it? Can I live without it now? Is more important work blocking it? Score Complexity, Importance, Deferability, and Impact as integers 1-5; MPS total must equal their exact sum; map that score to canonical P0-P4 priority and verification scope. Execution requires the existing validated signed WSP_15 allocation receipt.',
+    'WSP_97 execution gate: a bounded effect requires the existing wsp97_execution_receipt.v1.1, canonical evidence for each applicable action, the exact execution_plane, and focused verification expanded according to risk. Missing, stale, or incomplete evidence must fail closed or escalate.',
     'Worker mode: ' + worker,
+    'Authority boundary: this task prompt may drive dialogue and no-effect audit. Any OpenClaw/WRE/Hermes effect requires an immutable signed work order, bounded permissions, independent verification, and the configured progressive execution stage.',
     '',
     '012 work focus (non-authoritative):',
     focus.slice(0, 4000)
@@ -4449,7 +4436,7 @@ function constructWspTaskPrompt(workFocus, classification, contextQuality, worke
   if (promptRequested) {
     lines.push(
       '',
-      'Prompt authoring deliverable contract: the 012 work focus asks for a prompt. You MUST include a section exactly named `## Worker Prompt` containing one fenced `text` block with an executable worker prompt. The fenced prompt must include MISSION/OBJ, READ_FIRST or READ, FAIL/REJECT conditions, VALIDATION/TESTS/CHECK, and RETURN. If definitions are missing, put a `DEFINITION_GAP` block INSIDE the fenced prompt and still provide the bounded prompt; do not replace the deliverable with a request for clarification.'
+      'Prompt authoring deliverable contract: the 012 work focus asks for a prompt. You MUST include a section exactly named `## Worker Prompt` containing one fenced `text` block with an executable worker prompt. The fenced prompt must include exact `AUTHOR_PROFILE: ' + worker.toUpperCase() + '`, `WSP_00: self=0102; role=WORKER_ROLE; origin=external_principal; role_lock=immutable`, `WSP_97: retrieve_before_claim=required; truth_labels=required; cor=required; evidence_invention=forbidden`, `WSP_15: economy_gate=required; score=C+I+D+Impact; priority=P0-P4`, EXECUTION_PLANE, exact `AUTHORITY_BOUNDARY: PROMPT_IS_NON_AUTHORITATIVE`, exact `FAIL_POLICY: FAIL_CLOSED`, MISSION/OBJ, an empty READ_FIRST or READ header followed only by `- READ_PATH: repo/relative/path` entries, a FAIL/REJECT section containing only `- REJECT_ON: UPPER_SNAKE_CASE_REASON` entries, VALIDATION/TESTS/CHECK, and RETURN. If definitions are missing, put a `DEFINITION_GAP` block INSIDE the fenced prompt and still provide the bounded prompt; do not replace the deliverable with a request for clarification.'
     );
   }
   if (classification && classification.daemonDiagnosticAnalysis === true) {
@@ -4556,7 +4543,7 @@ function buildSanitizedContinuationSummary(params) {
     previous_run_id: continuationPreviousRunId(reviewPacket, p.promptConstruction, timestamp),
     timestamp: timestamp,
     role_0102: workerLabel,
-    wsp15_tier: cls.tier || reviewPacket.resolved_effort || 'unknown',
+    reasoning_tier: cls.tier || reviewPacket.resolved_effort || 'unknown',
     mode: reviewPacket.resolved_mode || p.mode || 'unknown',
     context_mode: reviewPacket.resolved_context || p.contextMode || 'unknown',
     blocked_locally: blocked,
@@ -4618,7 +4605,7 @@ function formatContinuationSummaryBlock(summary) {
     '- previous_run_id: ' + (s.previous_run_id || 'unknown'),
     '- timestamp: ' + (s.timestamp || 'unknown'),
     '- 0102 role: ' + (s.role_0102 || 'unknown'),
-    '- WSP_15 tier: ' + (s.wsp15_tier || 'unknown'),
+    '- reasoning_tier: ' + (s.reasoning_tier || s.wsp15_tier || 'unknown'),
     '- mode: ' + (s.mode || 'unknown'),
     '- context_mode: ' + (s.context_mode || 'unknown'),
     '- blocked_locally: ' + (s.blocked_locally ? 'true' : 'false'),
@@ -4714,7 +4701,7 @@ function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
       '',
       'Worker Prompt repair requirement:',
       'Under `## Worker Prompt`, include exactly one fenced `text` block containing the executable worker prompt.',
-      'The fenced prompt must include MISSION/OBJ, READ_FIRST or READ, FAIL/REJECT, VALIDATION/TESTS/CHECK, and RETURN.',
+      'The fenced prompt must preserve the exact AUTHOR_PROFILE required by the original task prompt and include immutable WSP_00 role binding, retrieve-before-claim WSP_97 truth/CoR/evidence rules, the WSP_15 economy and C+I+D+Impact/P0-P4 rule, EXECUTION_PLANE, exact `AUTHORITY_BOUNDARY: PROMPT_IS_NON_AUTHORITATIVE`, exact `FAIL_POLICY: FAIL_CLOSED`, MISSION/OBJ, an empty READ_FIRST or READ header followed only by `- READ_PATH: repo/relative/path` entries, a FAIL/REJECT section containing only `- REJECT_ON: UPPER_SNAKE_CASE_REASON` entries, VALIDATION/TESTS/CHECK, and RETURN.',
       'If definitions are missing, include a DEFINITION_GAP block inside the fenced prompt; do not omit the prompt artifact.'
     ].join('\n')
     : '';
@@ -4928,7 +4915,8 @@ function routingSummary(workerType, classification, resolvedEffort, resolvedMode
   return [
     '## RedDog Routing',
     '- 0102 role: ' + resolvedWorker.label,
-    '- WSP_15 tier: ' + (classification && classification.tier ? classification.tier : 'HIGH'),
+    '- Reasoning tier: ' + (classification && classification.tier ? classification.tier : 'HIGH'),
+    '- WSP_15 allocation: not issued by model routing',
     '- Effort: ' + resolvedEffort,
     '- Mode: ' + resolvedMode,
     '- Mode selection: ' + modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode),
@@ -4946,15 +4934,15 @@ const WORKER_TYPES = {
   },
   wsp_gate_critic: {
     label: 'WSP Gate Critic',
-    prompt: REDDOG_ARCHITECT_SYSTEM_PROMPT + ' Emphasize gate failure modes, WSP_97 truth boundaries, missing evidence, non-vacuity, and exact return-to-author criteria.'
+    prompt: redDogSystemPromptForRole('WSP Gate Critic') + ' Emphasize gate failure modes, WSP_97 truth boundaries, missing evidence, non-vacuity, and exact return-to-author criteria.'
   },
   repair_planner: {
     label: 'Repair Planner',
-    prompt: REDDOG_ARCHITECT_SYSTEM_PROMPT + ' Emphasize smallest valid repair slices, test contracts, ModLog/TestModLog memory, and PR-ready work breakdowns.'
+    prompt: redDogSystemPromptForRole('Repair Planner') + ' Emphasize smallest valid repair slices, test contracts, ModLog/TestModLog memory, and PR-ready work breakdowns.'
   },
   smoke_tester: {
     label: 'Smoke Test',
-    prompt: REDDOG_ARCHITECT_SYSTEM_PROMPT + ' Emphasize bounded smoke tests, expected output, failure reasons, and no destructive/live actions unless explicitly authorized.'
+    prompt: redDogSystemPromptForRole('Smoke Test') + ' Emphasize bounded smoke tests, expected output, failure reasons, and no destructive/live actions unless explicitly authorized.'
   }
 };
 
@@ -5345,6 +5333,7 @@ function attachRuntimePolicy(result, runtimeGate, progressiveReceipt) {
   result.review_packet.runtime_consumption_gate = runtimeGate;
 }
 
+
 function wireFusionWebview(context, webview, worker, state) {
   const recoveryOptions = holoBlockedRecoveryOptions(context);
   const executeAsk = async (message, recoveryContext) => {
@@ -5373,36 +5362,24 @@ function wireFusionWebview(context, webview, worker, state) {
     const wspTaskPrompt = continuation.prompt;
     const continuationTelemetry = continuation.telemetry;
     const historyAdmission = conversationHistoryPolicy.prepareHistoryAdmission(state, continuationEnabled);
-    const promptConstruction = {
-      work_focus_digest: redactedDigest(governedWorkFocus, 180),
-      daemon_diagnostic_payload_digest: daemonDiagnosticProjection && daemonDiagnosticProjection.payload_digest,
-      daemon_diagnostic_projection_digest: daemonDiagnosticProjection && daemonDiagnosticProjection.projection_digest,
-      daemon_diagnostic_line_count: daemonDiagnosticProjection && daemonDiagnosticProjection.line_count,
-      daemon_diagnostic_signal_count: daemonDiagnosticProjection && daemonDiagnosticProjection.signal_count,
-      daemon_diagnostic_secret_redactions_applied: daemonDiagnosticProjection && daemonDiagnosticProjection.secret_redactions_applied,
-      wsp_prompt_digest: redactedDigest(wspTaskPrompt, 320),
-      audit_context_requested: contextPacket.audit_context === true,
-      // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: the AUTHORITATIVE set of
-      // required-target paths the packer actually packed. Threaded to the Python redaction
-      // gate so marker-delimited sections are only treated as required-target sections when
-      // their path is authoritative; phantom markers (path not in this list) are ordinary
-      // content and cannot inflate the per-target isolation counts / blocked_paths.
-      required_targets_authoritative_paths: Array.isArray(contextPacket.required_targets_authoritative_paths)
-        ? contextPacket.required_targets_authoritative_paths.slice()
-        : []
-    };
+    const promptConstruction = orchestrationPromptTrace.buildPromptConstructionMetadata(
+      governedWorkFocus, wspTaskPrompt, daemonDiagnosticProjection, contextPacket
+    );
     const systemPrompt = classification.conversationalDraft ? conversationalDraftPolicy.systemPrompt() : buildSystemPrompt(workerType, effort, contextPacket.quality);
-    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + (classification.conversationalDraft ? '' : ' panel=' + worker.panel.join(' + ')) + ' model_source=' + worker.modelBindingSource + ' (' + classification.reasons.join(', ') + ')');
+    const basePromptTraceInput = buildBasePromptTraceInput(systemPrompt, wspTaskPrompt, mode,
+      workerType, classification.tier, contextMode, classification.governedActionRequested === true);
+    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' reasoning_tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + (classification.conversationalDraft ? '' : ' panel=' + worker.panel.join(' + ')) + ' model_source=' + worker.modelBindingSource + ' (' + classification.reasons.join(', ') + ')');
     const localStatus = authoritativeWorkStateQuery.statusText(classification.localFastPath);
-    const routeStatus = localStatus || (classification.conversationalDraft ? conversationalDraftPolicy.statusText() : '');
-    postStatusAndProgress(webview, null, routeStatus || 'Bridge started. Redaction gate runs before any OpenRouter API call.');
+    const routeMessages = statusMessages(auditDegraded, localStatus,
+      conversationalDraftPolicy.statusText(), classification.conversationalDraft);
+    postStatusAndProgress(webview, null, routeMessages.route || 'Bridge started. Redaction gate runs before any OpenRouter API call.');
     if (daemonDiagnosticProjection) {
       postStatusAndProgress(webview, null, 'DAEmon output was reduced to a bounded redacted evidence projection. Raw diagnostic text will not be sent to the model or treated as authority.');
     }
     if (contextPacket.summary) {
       postStatusAndProgress(webview, null, contextPacket.summary);
     }
-    postStatusAndProgress(webview, null, classification.conversationalDraft ? '0102 isolated the supplied message as untrusted drafting data.' : '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP task prompt, not raw focus alone).');
+    postStatusAndProgress(webview, null, routeMessages.assembly);
     const holoScorecard = Object.assign(
       {},
       contextPacket.holoindex_scorecard || extractHoloIndexScorecard(contextMode, contextPacket.holoindex_meta),
@@ -5491,7 +5468,9 @@ function wireFusionWebview(context, webview, worker, state) {
     const fusionProgress = createFusionProgressCollector();
     const bridgeState = bridgeStateForRequest(state, recoveryContext);
     let result;
+    let localPromptTrace;
     if (localFastPath) {
+      localPromptTrace = beginNoModelPromptTrace(webview, promptConstruction, 'local_no_model', 'local_authoritative_query');
       workTrail.push('local_fast_path', classification.localFastPath);
       result = await authoritativeWorkStateQuery.resolveLocalResult(classification.localFastPath, {
         identity: () => buildSimpleIdentityFastPathResult(workFocus, workerType, worker),
@@ -5501,12 +5480,20 @@ function wireFusionWebview(context, webview, worker, state) {
         modelFreshness: () => runLocalDiagnosticQuery('model_freshness', worker),
         workState: runAuthoritativeWorkStateQueryBridge
       });
+    } else if (auditDegraded) {
+      localPromptTrace = beginNoModelPromptTrace(webview, promptConstruction, 'backend_compatibility_audit_degraded_no_model', 'backend_compatibility_receipt');
+      result = buildBackendCompatibilityAuditDegradedResult({ backend_compatibility: compatibility });
     } else if (!groundingPreflight.passed) {
+      localPromptTrace = beginGroundingFailurePromptTrace(
+        webview, basePromptTraceInput, promptConstruction, blockedRequestRecoveryStage,
+        governedWorkFocus, groundingPreflight, holoScorecard
+      );
       result = await runBlockedGroundingResponse({
         context, worker, workFocus: governedWorkFocus, preflight: groundingPreflight, scorecard: holoScorecard,
         onProgress: onBridgeProgress, bridgeState, trail: workTrail, webview, stage: blockedRequestRecoveryStage
       });
     } else {
+      localPromptTrace = beginBasePromptTrace(webview, basePromptTraceInput, promptConstruction);
       result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, historyAdmission.admittedHistory, mode, onBridgeProgress, bridgeState, promptConstruction, { backendCompatibility: compatibility });
     }
     conversationHistoryPolicy.discardProviderHistory(historyAdmission, result, promptConstruction);
@@ -5541,12 +5528,9 @@ function wireFusionWebview(context, webview, worker, state) {
       && !classification.conversationalDraft && !groundingDialogueOnly;
     if (result.ok && substantiveTask) {
       workTrail.push('validator_started');
-      const outputValidationOptions = {
-        substantiveArchitect: true,
-        mode: mode,
-        promptAuthoringRequired: classification.promptAuthoringRequested === true
-      };
-      const validation = validateRedDogOutput(result.content || '', outputValidationOptions);
+      const validation = validateRedDogOutput(result.content || '', outputValidationOptions(
+        workerType, mode, classification.promptAuthoringRequested === true
+      ));
       validationState = {
         validated: validation.valid,
         missing_sections: validation.missingSections,
@@ -5901,8 +5885,13 @@ function wireFusionWebview(context, webview, worker, state) {
       recoveryOptions, recoveryContext, groundingPreflight, groundingDialogueOnly, result,
       classification, validationState
     ));
+    const confirmedPromptTrace = orchestrationPromptTrace.finishTrace(
+      webview, result, localPromptTrace, sanitizeCopyMdText
+    );
+    postStatusAndProgress(webview, null, 'Orchestration prompt trace: ' + confirmedPromptTrace.outbound_confirmation + '.');
     result.copy_markdown = buildCopyMarkdown(result, workerType, contextPacket.summary, workTrail, holoScorecard, effort, {
       promptConstruction: promptConstruction,
+      orchestrationPromptTrace: confirmedPromptTrace,
       contextMode: contextMode,
       substantive: substantiveTask,
       handoffRecommendation: handoffRecommendation,
@@ -6552,9 +6541,9 @@ function buildBoundedRepoContext(mode, taskText) {
     lowerSections.push(neutralizeRequiredTargetMarker(active));
   }
   if (mode === 'git_diff' || mode === 'wsp_holo_git' || mode === 'wsp_holo_git_skillz') {
-    const status = gitOutput(root, ['status', '--short'], 8000);
-    const stat = gitOutput(root, ['diff', '--stat'], 8000);
-    const diff = gitOutput(root, ['diff', '--', '.'], 24000);
+    const status = governedGitStatus(root, 8000);
+    const stat = governedGitStat(root, 8000);
+    const diff = governedGitDiff(root, 24000);
     // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (defense-in-depth): neutralize any
     // literal required-target marker inside the raw git-diff body. A MODIFIED required file whose
     // OWN content contains its authoritative marker line renders that marker verbatim in the diff;
@@ -6620,7 +6609,13 @@ function activeEditorContext(root) {
     return '';
   }
   const filePath = doc.uri.fsPath;
-  const rel = relativePath(root, filePath);
+  const rel = path.relative(path.resolve(root), path.resolve(filePath)).replace(/\\/g, '/');
+  if (!rel || rel.startsWith('../') || path.isAbsolute(rel)) {
+    return '';
+  }
+  if (!resolveSafeRepoFile(root, rel).ok) {
+    return '';
+  }
   const selected = editor.selection && !editor.selection.isEmpty;
   const raw = selected ? doc.getText(editor.selection) : doc.getText();
   const max = selected ? 16000 : 24000;
@@ -6628,7 +6623,6 @@ function activeEditorContext(root) {
   return '### active editor ' + (selected ? 'selection' : 'file') + ': ' + rel + '\n```' + (doc.languageId || 'text') + '\n' + clipped + '\n```';
 }
 
-const GIT_OUTPUT_TRUNCATED_MARKER = '[REDDOG_GIT_OUTPUT_TRUNCATED]';
 
 function repoFileIndex(root, maxFiles) {
   const gitFiles = gitOutput(root, ['ls-files'], 1000000);
@@ -6664,17 +6658,30 @@ const REPO_DEEP_DIVE_TEXT_EXTENSIONS = new Set([
   '.yaml', '.yml'
 ]);
 const REPO_DEEP_DIVE_STOP_WORDS = new Set([
-  'agent', 'analyze', 'and', 'apply', 'architecture', 'audit', 'behavior', 'cite', 'codebase', 'complete',
+  'agent', 'analyze', 'and', 'apply', 'architecture', 'at', 'attention', 'audit', 'behavior', 'cite', 'codebase', 'complete',
   'deep', 'direct', 'dive', 'entire', 'evidence', 'file', 'focusing', 'foundups',
-  'foundupsagent', 'full', 'identify', 'implemented', 'into', 'missing', 'next',
-  'recommended', 'repository', 'repo', 'system', 'the', 'trace', 'versus', 'work'
+  'foundupsagent', 'full', 'health', 'identify', 'implemented', 'into', 'look', 'missing', 'needs', 'next',
+  'recommended', 'repository', 'repo', 'system', 'the', 'trace', 'versus', 'what', 'which', 'work'
 ]);
 
 function isRepoDeepDiveRequest(taskText) {
   const text = String(taskText || '').toLowerCase();
+  const words = text.match(/[a-z0-9]+/g) || [];
   const repositoryIntent = /\b(?:repo(?:sitory)?|codebase|foundups[\s_-]?agent)\b/.test(text);
   const inspectionIntent = /\b(?:deep\s+dive|full\s+audit|complete\s+audit|architecture\s+audit|map\s+the\s+repo|inspect\s+the\s+repo|trace\s+end[\s_-]?to[\s_-]?end)\b/.test(text);
-  return repositoryIntent && inspectionIntent;
+  let sawWhat = false;
+  let requestedWork = false;
+  for (let index = 0; index < words.length && !requestedWork; index += 1) {
+    if (words[index] === 'what') sawWhat = true;
+    if (sawWhat && ['need', 'needs', 'requires'].includes(words[index])) requestedWork =
+      words.slice(index + 1, index + 4).some((word) => ['attention', 'work', 'fixing', 'hardening', 'improvement'].includes(word));
+  }
+  const repoSignal = words.some((word, index) => ['repo', 'repository', 'codebase'].includes(word)
+    && ['health', 'attention', 'weakness'].includes(words[index + 1]));
+  const technicalDebt = words.some((word, index) => ['repo', 'repository', 'codebase'].includes(word)
+    && words[index + 1] === 'technical' && words[index + 2] === 'debt');
+  const attentionIntent = requestedWork || repoSignal || technicalDebt;
+  return repositoryIntent && (inspectionIntent || attentionIntent);
 }
 
 function repoDeepDiveConcepts(taskText) {
@@ -7038,42 +7045,6 @@ function scoreSkillzPath(file, tokens) {
   return score;
 }
 
-function normalizeRelRepoPath(relPath) {
-  return String(relPath || '').replace(/\\/g, '/').replace(/^\/+/, '');
-}
-
-function isTargetReadPathDenied(relPath) {
-  const normalized = normalizeRelRepoPath(relPath);
-  if (!normalized) {
-    return 'path_missing';
-  }
-  if (path.isAbsolute(normalized) || /^[a-zA-Z]:/.test(normalized)) {
-    return 'outside_root';
-  }
-  if (normalized.includes('..')) {
-    return 'outside_root';
-  }
-  const lower = normalized.toLowerCase();
-  const parts = lower.split('/');
-  for (const seg of TARGET_READ_BLOCKED_SEGMENTS) {
-    if (parts.includes(seg)) {
-      return 'outside_root';
-    }
-  }
-  const base = path.basename(lower);
-  for (const name of TARGET_READ_BLOCKED_BASENAMES) {
-    if (base === name || base.startsWith(name + '.')) {
-      return 'outside_root';
-    }
-  }
-  for (const ext of TARGET_READ_BLOCKED_EXTENSIONS) {
-    if (lower.endsWith(ext)) {
-      return 'outside_root';
-    }
-  }
-  return null;
-}
-
 function resolveSafeRepoFile(root, relPath) {
   const deny = isTargetReadPathDenied(relPath);
   if (deny) {
@@ -7090,6 +7061,14 @@ function resolveSafeRepoFile(root, relPath) {
     const realRoot = realpathFn(resolvedRoot);
     if (real !== realRoot && !real.startsWith(realRoot + path.sep)) {
       return { ok: false, reason: 'outside_root' };
+    }
+    const resolvedRel = path.relative(realRoot, real).split(path.sep).join('/');
+    const resolvedDeny = isTargetReadPathDenied(resolvedRel);
+    if (resolvedDeny) {
+      return { ok: false, reason: resolvedDeny };
+    }
+    if (fs.statSync(real).nlink > 1) {
+      return { ok: false, reason: 'hardlink_denied' };
     }
     return { ok: true, full: real };
   } catch (err) {
@@ -7298,16 +7277,15 @@ function applyWsp97SanitizationMeta(holoMeta, wsp97Meta) {
 
 function readBoundedRepoFile(root, relPath, maxChars) {
   try {
-    const full = path.resolve(root, relPath);
-    const resolvedRoot = path.resolve(root);
-    if (full !== resolvedRoot && !full.startsWith(resolvedRoot + path.sep)) {
+    const resolved = resolveSafeRepoFile(root, relPath);
+    if (!resolved.ok) {
       return '';
     }
-    const stat = fs.statSync(full);
+    const stat = fs.statSync(resolved.full);
     if (!stat.isFile() || stat.size > 500000) {
       return '';
     }
-    return fs.readFileSync(full, 'utf8').slice(0, maxChars);
+    return fs.readFileSync(resolved.full, 'utf8').slice(0, maxChars);
   } catch (err) {
     return '';
   }
@@ -7832,24 +7810,6 @@ function summarizeHoloBundle(output) {
   }
 }
 
-function gitOutput(root, args, maxChars) {
-  try {
-    if (!fs.existsSync(path.join(root, '.git'))) {
-      return '';
-    }
-    const output = cp.execFileSync('git', args, {
-      cwd: root,
-      encoding: 'utf8',
-      timeout: 5000,
-      maxBuffer: Math.max(maxChars * 4, 65536),
-      windowsHide: true
-    });
-    const text = String(output || '');
-    return text.length > maxChars ? text.slice(0, maxChars) + '\n' + GIT_OUTPUT_TRUNCATED_MARKER : text;
-  } catch (err) {
-    return '[git context unavailable: ' + (err && err.message ? err.message.slice(0, 180) : 'unknown') + ']';
-  }
-}
 
 function cleanMode(value) {
   if (value === 'auto' || value === 'openrouter_single' || value === 'openrouter_fusion_alias' || value === 'foundups_fusion') {
@@ -7894,6 +7854,9 @@ function renderHtml(worker, surface, logoUri, installState) {
     #log { min-height: 0; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
     .entry { border: 1px solid var(--vscode-panel-border); border-radius: 6px; padding: 8px; white-space: pre-wrap; line-height: 1.45; font-size: 12px; overflow-wrap: anywhere; }
     .entry .label { display: block; margin-bottom: 5px; color: var(--vscode-descriptionForeground); font-size: 10px; text-transform: uppercase; letter-spacing: 0; }
+    .prompt-trace { border: 1px solid var(--vscode-panel-border); border-radius: 6px; padding: 8px; font-size: 12px; }
+    .prompt-trace summary { cursor: pointer; color: var(--vscode-descriptionForeground); }
+    .prompt-trace pre { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--vscode-editor-font-family); }
     .user { border-left: 3px solid var(--vscode-charts-blue); }
     .assistant { border-left: 3px solid var(--vscode-charts-green); }
     .status { border-left: 3px solid var(--vscode-descriptionForeground); color: var(--vscode-descriptionForeground); background: var(--vscode-sideBar-background); }
@@ -7940,7 +7903,7 @@ function renderHtml(worker, surface, logoUri, installState) {
       </div>
       <div class="toolbar">
         <label for="workerType">0102 Role</label><select id="workerType"><option value="reddog_architect" selected>RedDog Architect</option><option value="wsp_gate_critic">WSP Gate Critic</option><option value="repair_planner">Repair Planner</option><option value="smoke_tester">Smoke Test</option></select>
-        <span class="pill">Routing: Auto via WSP_15</span>
+        <span class="pill">Routing: Auto task-fit heuristic</span>
         <span class="pill">Context: Auto WSP + HoloIndex + Skillz/Rolodex</span>
         <label for="testWorkFocus">Tests</label><select id="testWorkFocus"><option value="">Select test...</option><option value="regular">Regular smoke</option><option value="fusion">Fusion smoke</option><option value="wsp97">WSP_97 repo review</option><option value="reddog">RedDog architect review</option></select>
         <label for="useLastPacket"><input id="useLastPacket" type="checkbox"> Use last RedDog packet</label>
@@ -8076,6 +8039,20 @@ function renderHtml(worker, surface, logoUri, installState) {
       add('status', text + elapsed(), 'status');
     }
 
+    function addOrchestrationPrompt(text) {
+      const details = document.createElement('details');
+      details.className = 'prompt-trace';
+      details.open = true;
+      const summary = document.createElement('summary');
+      summary.textContent = '0102 orchestration contract and gate-redacted task prompt';
+      const body = document.createElement('pre');
+      body.textContent = String(text || '');
+      details.appendChild(summary);
+      details.appendChild(body);
+      log.appendChild(details);
+      log.scrollTop = log.scrollHeight;
+    }
+
     function setRunning(value, result) {
       if (terminalTimer) {
         clearTimeout(terminalTimer);
@@ -8190,6 +8167,7 @@ function renderHtml(worker, surface, logoUri, installState) {
       if (!msg) return;
       if (msg.command === 'status') addStatus(msg.text);
       if (msg.command === 'progress') applyProgressEvent(msg);
+      if (msg.command === 'orchestrationPrompt') addOrchestrationPrompt(msg.text);
       if (msg.command === 'result') {
         setRunning(false, msg.result);
         const copyPayload = (msg.result && msg.result.copy_markdown) || (msg.result && msg.result.content) || '';
@@ -8267,6 +8245,7 @@ module.exports = {
   normalizeRepairBridgeStageToWorkTrail,
   BRIDGE_REPAIR_STAGE_WORK_TRAIL,
   constructWspTaskPrompt,
+  buildSystemPrompt,
   isSimpleIdentityQuestion,
   buildSimpleIdentityFastPathResult,
   analyzeOperationalDiagnosticShape,
@@ -8295,7 +8274,7 @@ module.exports = {
   formatConversationHistoryPolicyTelemetryLines: conversationHistoryPolicy.formatTelemetryLines,
   normalizeConversationHistoryPolicyTelemetry: conversationHistoryPolicy.normalizeTelemetry,
   sanitizeContinuationField,
-  redactedDigest,
+  redactedDigest: orchestrationPromptTrace.metadataDigest,
   resolvePythonInterpreter,
   buildBridgePythonEnv,
   fusionWorkerFromConfig,
@@ -8333,8 +8312,8 @@ module.exports = {
   REDDOG_REQUIRED_OUTPUT_SECTIONS,
   formatElapsed,
   matchReddogProgress,
-  isPromptAuthoringRequest,
-  hasExecutableWorkerPromptBlock,
+  isPromptAuthoringRequest: workerPromptContract.isPromptAuthoringRequest,
+  hasExecutableWorkerPromptBlock: workerPromptContract.hasExecutableWorkerPromptBlock,
   REDDOG_STAGE_ACTIONS,
   REDDOG_PROGRESS_ACTIONS,
   REDDOG_TERMINAL_HOLD_MS,
@@ -8351,6 +8330,9 @@ module.exports = {
   appendValidationFailureContent,
   formatOutputValidationStatus,
   sanitizeCopyMdText,
+  buildOrchestrationPromptTrace: orchestrationPromptTrace.buildTrace,
+  confirmOrchestrationPromptTrace: orchestrationPromptTrace.confirmOutbound,
+  buildOrchestrationPromptTraceSection: orchestrationPromptTrace.markdownSection,
   createWorkTrail,
   buildRedactionGateReport,
   buildRedactionGateReportSection,
@@ -8410,12 +8392,16 @@ module.exports = {
   mergeGenerationBoundHoloResult,
   resolveHoloRetrievalMode,
   buildHoloQueryEnv,
+  governedGitStatus,
+  governedGitStat,
+  governedGitDiff,
   summarizeHoloBundle,
   buildMustIncludeArgs,
   classifyDirectReadFetchError,
   buildDirectReadContentSection,
   isTargetReadPathDenied,
   resolveSafeRepoFile,
+  readBoundedRepoFile,
   readBoundedTargetSnippet,
   readBoundedTargetSnippets,
   buildTargetRecallContentSection,
@@ -8423,6 +8409,7 @@ module.exports = {
   buildWsp97ProtocolExcerpt,
   mergeTargetContentMeta,
   applyWsp97SanitizationMeta,
+  activeEditorContext,
   sanitizeTargetSnippetForRedaction,
   mergeSanitizedCategories,
   TARGET_SNIPPET_BLOCK_SANITIZERS,

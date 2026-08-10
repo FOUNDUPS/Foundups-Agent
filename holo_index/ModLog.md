@@ -1,5 +1,16 @@
 # HoloIndex Package ModLog
 
+## [2026-08-10] Source-aware governed direct-read policy
+
+- Preserved hard denials for environment, key-container, repository metadata,
+  dependency, and secret-like data paths.
+- Allowed recognized source and documentation basenames containing words such
+  as `credential`, `secret`, or `token`, while keeping secret-like parent
+  directories denied. This permits grounded security-code audits without
+  weakening the content redaction gate.
+- Added cross-language admission checks so RedDog prompt/direct-read policy
+  cannot drift from the authoritative Python bundle gate.
+
 ## [2026-08-09] Stale authority observation for governed repair
 
 - Preserved the independently read authority HEAD and authority-root digest

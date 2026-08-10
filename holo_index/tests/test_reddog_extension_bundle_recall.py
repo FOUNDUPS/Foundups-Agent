@@ -270,8 +270,38 @@ def test_direct_read_deny_reason_lexical_gate():
     assert _direct_read_deny_reason("home/id_rsa") == "denied_basename"
     assert _direct_read_deny_reason(".git/config") == "denied_segment"
     assert _direct_read_deny_reason("config/my_secret_thing.py") == "denied_secret_like"
+    assert _direct_read_deny_reason("auth/credentials.py") == "denied_secret_like"
+    assert _direct_read_deny_reason("secrets/api_keys.py") == "denied_segment"
+    assert _direct_read_deny_reason("credentials/token_manager.py") == "denied_segment"
+    assert _direct_read_deny_reason("secrets_store/values.py") == "denied_segment"
+    assert _direct_read_deny_reason("credential_cache/client.py") == "denied_segment"
+    assert _direct_read_deny_reason("token_data/state.py") == "denied_segment"
+    assert _direct_read_deny_reason("prod-secrets/db.py") == "denied_segment"
+    assert _direct_read_deny_reason("auth/token_manager.py") is None
+    assert _direct_read_deny_reason("modules/infrastructure/token_efficiency/src/telemetry_service.py") is None
+    assert _direct_read_deny_reason("docs/token_rotation.md") is None
     assert _direct_read_deny_reason("auth/access_token.json") == "denied_secret_like"
     assert _direct_read_deny_reason("vault/user_credential.yaml") == "denied_secret_like"
+    assert _direct_read_deny_reason(".git./config") == "denied_segment"
+    assert _direct_read_deny_reason(".venv./pyvenv.cfg") == "denied_segment"
+    assert _direct_read_deny_reason("node_modules./package.json") == "denied_segment"
+    assert _direct_read_deny_reason("COM\u00b9/payload.txt") == "denied_segment"
+    assert _direct_read_deny_reason("LPT\u00b2.txt/payload.txt") == "denied_segment"
+    assert _direct_read_deny_reason("keys/private.pem.bak") == "denied_extension"
+    assert _direct_read_deny_reason("keys/store.keystore.backup") == "denied_extension"
+    assert _direct_read_deny_reason("home/.npmrc.backup") == "denied_basename"
+    assert _direct_read_deny_reason("home/.pypirc.bak") == "denied_basename"
+    assert _direct_read_deny_reason("home/.netrc.old") == "denied_basename"
+    assert _direct_read_deny_reason("home/.dockerconfigjson.backup") == "denied_basename"
+    assert _direct_read_deny_reason("keys/id_dsa") == "denied_basename"
+    assert _direct_read_deny_reason("keys/id_ecdsa.pub") == "denied_basename"
+    assert _direct_read_deny_reason("keys/id_rsa_backup") == "denied_basename"
+    assert _direct_read_deny_reason("keys/id_ecdsa-old") == "denied_basename"
+    assert _direct_read_deny_reason("keys/key") == "denied_extension"
+    assert _direct_read_deny_reason("keys/key.backup") == "denied_extension"
+    assert _direct_read_deny_reason("keys/private.pem.py") == "denied_extension"
+    assert _direct_read_deny_reason("keys/id_rsa.py") == "denied_basename"
+    assert _direct_read_deny_reason("artifacts/reddog.vsix.bak") == "denied_extension"
     # A benign in-repo source file passes the lexical gate.
     assert _direct_read_deny_reason("modules/foundups/agent/src/source_authority.py") is None
 
@@ -364,8 +394,8 @@ def test_direct_read_windows_namespace_and_ads_rejected(tmp_path):
     )
 
 
-def test_direct_read_secret_fixtures_never_read(tmp_path, monkeypatch):
-    """.env and *.key synthetic fixtures are hard-denied and never read."""
+def test_direct_read_secret_data_and_secret_named_source_are_denied(tmp_path, monkeypatch):
+    """Secret containers and secret-named source stay outside model egress."""
     # Build a synthetic repo root so real repo secrets are never touched.
     fake_root = tmp_path / "repo"
     (fake_root / "modules").mkdir(parents=True)
@@ -381,6 +411,7 @@ def test_direct_read_secret_fixtures_never_read(tmp_path, monkeypatch):
     assert reasons.get(".env") == "denied_basename"
     assert reasons.get("server.key") == "denied_extension"
     assert reasons.get("app_secret.py") == "denied_secret_like"
+    assert "app_secret.py" not in tel["direct_read_paths"]
     # No secret content ever appears in any fetched hit.
     joined = "\n".join(h.get("content", "") for h in result["hits"])
     assert "synthetic-not-a-real-secret" not in joined
@@ -439,6 +470,24 @@ def test_direct_read_symlink_escape_rejected(tmp_path):
     assert reasons.get("escape_link.txt") == "outside_root"
     joined = "\n".join(h.get("content", "") for h in result["hits"])
     assert "SYNTHETIC-outside-do-not-read" not in joined
+
+
+def test_direct_read_hardlink_escape_rejected(tmp_path):
+    """A hard-linked external file is not repository-owned direct-read evidence."""
+    fake_root = tmp_path / "repo"
+    fake_root.mkdir(parents=True)
+    outside = tmp_path / "outside_hardlink.md"
+    outside.write_text("SYNTHETIC-hardlink-do-not-read\n", encoding="utf-8")
+    alias = fake_root / "innocent.md"
+    try:
+        os.link(outside, alias)
+    except (OSError, NotImplementedError):
+        pytest.skip("hard links unavailable on this runner")
+    result = _direct_read_fetch(fake_root, ["innocent.md"])
+    reasons = _rejected_reasons(result["telemetry"])
+    assert reasons.get("innocent.md") == "hardlink_denied"
+    joined = "\n".join(hit.get("content", "") for hit in result["hits"])
+    assert "SYNTHETIC-hardlink-do-not-read" not in joined
 
 
 # --- REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1 (slice 3/3): symbol line windows ----------------

@@ -1,5 +1,75 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-10 - Orchestration prompt transparency regressions (0.4.73)
+
+- Proved pre-gate projections contain no prompt body, blocked runs disclose no
+  prompt, unsuccessful provider calls disclose only a digest, and only a
+  successful bridge result with a matching prompt digest can display a body.
+- Proved pre-gate metadata uses a process-local keyed correlation value rather
+  than a raw prompt digest, and a local sanitizer mismatch withholds the body.
+- Proved no-model routes identify themselves explicitly and never claim to be
+  waiting for a redaction gate or inherit a speculative model role/context.
+- Proved compatibility degradation wins over grounding rejection and remains a
+  truthful no-model route with no provider/network call, including the
+  pre-route progress messages.
+- Proved context/composite review packets cannot impersonate the task prompt,
+  dynamic Markdown fences neutralize headings, links, HTML, and embedded
+  backticks, and provider identifiers stay absent.
+- Proved every generated WSP task prompt requires retrieval, runtime-truth
+  precedence, reuse-first classification, CoR refutation, WSP_15 economy,
+  query/maintenance separation, and signed execution authority.
+- Proved generic `look at the codebase what needs attention` requests enter the
+  existing deep-dive manifest/direct-read gate, while prose slash fragments do
+  not become fake repository targets.
+- Proved generated worker prompts are rejected unless they bind WSP_00,
+  WSP_97, WSP_15, selected author profile, execution plane, and authority boundary in addition to the
+  mission, reads, failures, validation, and return contract.
+- Proved role promotion, evidence invention, WSP bypass wording, and selected
+  author-profile mismatch reject even when all required labels are present.
+- Proved collapsed keyword-presence text and empty required sections cannot
+  impersonate an executable worker prompt; required fields are line-anchored,
+  and line/block comments, placeholders, or case-insensitive nested labels
+  without values are rejected.
+- Required sections now satisfy affirmative executable grammar: substantive
+  mission, concrete read path, failure condition, validation action, and return
+  artifact. Keyword-only and placeholder-only prompts fail, while novel task
+  verbs remain valid without a hardcoded mission vocabulary.
+- Governance fields require their own domain vocabulary, affirmative fields
+  reject embedded skip/bypass wording, and lexically padded unrelated text
+  cannot pass. Authority and failure policy use closed canonical values;
+  self-grants, duplicate fields, embedded modal negation, and forward/reverse
+  continue-on-invalid conditions reject. Indented duplicate-label smuggling,
+  repeated Worker Prompt headings, non-text fences, and multiple prompt fences
+  also reject. Failure conditions now use canonical uppercase `REJECT_ON`
+  reason codes instead of attempting security decisions from open prose.
+- Proved secret-shaped source filenames are denied consistently by JavaScript
+  and Python target policies, and a nested Git ref changed to a hardlink after
+  cache fill invalidates governed context.
+- Proved compound secret-container names reject, safe token-management source
+  remains readable, and `READ_PATH` parsing preserves a leading `t` instead of
+  accidentally consuming it as whitespace.
+- Added CodeQL regressions for 200KB spacing, trailing-dot/space suffixes,
+  adversarial execution-plane input, and the alternate `--!>` HTML comment
+  terminator, plus a multiple-need-token deep-dive bypass regression.
+- Added both extracted 0.4.73 modules to the WSP_62 gate: each file is at most
+  400 lines and each function is at most 30 lines.
+  Comment syntax is forbidden inside the artifact so validation and worker
+  consumption cannot disagree or synthesize tokens through comment stripping;
+  list-marker-prefixed comments reject too. Canonical reason codes remain an
+  open structural vocabulary rather than a hidden semantic allowlist, with no
+  leading, trailing, or repeated underscore segments.
+- Read targets use canonical `READ_PATH` entries. Natural-language denials such
+  as avoid/without/prohibited/refrain cannot satisfy retrieval requirements;
+  traversal, absolute, drive, UNC, device, and noncanonical separators reject.
+- Worker-prompt `READ_PATH` and governed direct-read consumption now share one
+  deny policy for repository metadata, environments, dependencies, VSIX,
+  secret-like paths, and private-key containers. Regression probes preserve
+  the authoritative Python bundle gate's stricter segment policy.
+- Proved current `reasoning_tier` Run Trace packets and legacy `WSP_15 tier`
+  packets both parse correctly, while continuation output emits only the new
+  non-authoritative field name.
+- Added WSP_62 file/function-span enforcement for both extracted prompt modules.
+
 ## 2026-08-09 - Progressive effect-stage regressions (0.4.72)
 
 - Proved invalid and production settings resolve to audit, audit never opens

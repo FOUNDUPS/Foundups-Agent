@@ -166,6 +166,11 @@ class FusionPanelInputHardeningTests(unittest.TestCase):
                         panel_models=expected,
                         truncated=truncated,
                     )
+                    self.assertTrue(out["redacted_task_prompt_digest"].startswith("sha256:"))
+                    if expected:
+                        self.assertEqual(out["redacted_task_prompt"], "redacted-prompt")
+                    else:
+                        self.assertNotIn("redacted_task_prompt", out)
                     self.assertEqual(out["review_packet"]["fusion_panel_quorum"]["passed"], bool(expected))
         post_mock.assert_not_called()
 
@@ -190,6 +195,11 @@ class FusionPanelInputHardeningTests(unittest.TestCase):
                         panel_models=expected,
                         truncated=truncated,
                     )
+                    self.assertTrue(out["redacted_task_prompt_digest"].startswith("sha256:"))
+                    if expected:
+                        self.assertEqual(out["redacted_task_prompt"], "redacted-prompt")
+                    else:
+                        self.assertNotIn("redacted_task_prompt", out)
                     self.assertNotIn("fusion_panel_quorum", out["review_packet"])
                     if expected:
                         self.assertEqual(post_mock.call_args.args[1]["plugins"][0]["analysis_models"], expected)
@@ -218,6 +228,19 @@ class FusionPanelInputHardeningTests(unittest.TestCase):
                 packet = out["review_packet"]
                 self.assertEqual(packet["panel_models"], sentinel[: bridge.MAX_PANEL_MODELS])
                 self.assertTrue(packet["panel_models_truncated"])
+
+    def test_exact_redacted_task_prompt_excludes_context_in_manual_fusion(self) -> None:
+        gate = _passed_gate()
+        gate.redacted_prompt = "task-only-sentinel"
+        gate.redacted_context = "context-only-sentinel"
+        with mock.patch.object(bridge, "evaluate_redaction_gate", return_value=gate), mock.patch.object(
+            bridge, "_chat_completion", side_effect=self._fusion_chat
+        ):
+            _rc, out = _invoke_main(self._payload("foundups_fusion", ["critic-model"]))
+        self.assertEqual(out["redacted_task_prompt"], "task-only-sentinel")
+        self.assertTrue(out["redacted_task_prompt_digest"].startswith("sha256:"))
+        self.assertNotIn("context-only-sentinel", out["redacted_task_prompt"])
+        self.assertIn("context-only-sentinel", out["review_packet"]["redacted_prompt"])
 
     def test_fusion_alias_function_stays_within_fifty_lines(self) -> None:
         source_lines, _line = inspect.getsourcelines(bridge._openrouter_fusion_alias)

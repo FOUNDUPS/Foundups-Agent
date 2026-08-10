@@ -19,6 +19,7 @@ node extensions/reddog/tests/verify_repo_audit_grounding.js
 node extensions/reddog/tests/verify_extension_contract.js
 node extensions/reddog/tests/test_start_operations_control.js
 node extensions/reddog/tests/test_holoindex_incident_repair.js
+node extensions/reddog/tests/test_orchestration_prompt_trace.js
 node extensions/reddog/tests/test_conversation_history_policy.js
 node extensions/reddog/tests/test_conversation_session_authority_source.js
 node extensions/reddog/tests/test_principal_memex_disclosure_source.js
@@ -47,6 +48,7 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `scripts/tests/test_generate_reddog_backend_manifest.py` | Package-initializer resolution, executable roots, dynamic-load sentinels, and checked-in generator parity |
 | `test_start_operations_control.js` | Cross-language receipt parity, request replay, cumulative output, environment allowlist, and durable intent controls |
 | `test_holoindex_incident_repair.js` | Exhausted-owner and stale-authority admission, bounded bridge execution, WRE repair telemetry, version wiring, and no direct model binding |
+| `test_orchestration_prompt_trace.js` | Content-free pre-gate policy trace, exact task-prompt gate confirmation, composite/context exclusion, blocked-run non-disclosure, and Markdown-safe export |
 | `test_conversation_history_policy.js` | Raw-history denial, setting-sensitive prompt policy keys, provider-history discard, non-authority telemetry, and extension wiring |
 | `test_conversation_session_authority_source.js` | SecretStorage credential handling, narrow child environment, no ambient-secret crossover, and fail-closed credential shape |
 | `verify_extension_contract.js` | Single contract runner; ADDENDUM E ~line 518+, ADDENDUM F gate probe ~line 595+ |

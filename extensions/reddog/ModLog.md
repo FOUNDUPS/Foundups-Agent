@@ -1,5 +1,68 @@
 # RedDog ModLog
 
+## 2026-08-10 - Orchestration prompt transparency and WSP execution contract (0.4.73)
+
+- Added a collapsible local prompt trace that is content-free before the
+  authoritative redaction gate and shows only the exact gate-redacted task
+  prompt afterward. System text, context, history, provider IDs, blocked prompt
+  bodies, unsuccessful prompt bodies, and raw work-focus excerpts are excluded.
+  Successful disclosure requires a matching bridge-provided SHA-256 and an
+  unchanged local Copy-MD sanitization pass; otherwise the body remains hidden.
+  Pre-gate correlation uses a process-local keyed value so low-entropy operator
+  prompts cannot be fingerprinted offline. Dynamic Markdown fencing keeps
+  admitted text inert in Copy MD.
+- Hardened RedDog prompting to require WSP_00 workstream/execution-plane
+  classification, WSP_97 retrieval and CoR refutation, runtime-truth
+  precedence, reuse-first design, explicit defect classes, HoloIndex quality
+  evaluation, and the WSP_15 economy questions.
+- Kept prompt text non-authoritative: audit and bounded effects remain governed
+  by the existing progressive stage, signed work orders, and independent
+  verification. Query-time reindexing remains forbidden. (WSP 00/15/22/50/97)
+- Promoted generic repository-health questions into the existing deep-dive
+  grounding path so missing target discovery or direct-read evidence blocks
+  Fusion instead of producing an expensive ungrounded architecture answer.
+- Renamed the heuristic model-routing value to `reasoning_tier`; it no longer
+  masquerades as a WSP_15 allocation. Worker prompts must carry WSP_00,
+  WSP_97, WSP_15, execution-plane, closed non-authoritative authority, and
+  closed fail-policy fields. Failure conditions use canonical `REJECT_ON`
+  reason codes; each prompt binds the selected author profile, and self-grants,
+  role promotion, evidence invention, WSP bypasses, and natural-language policy
+  inversions reject.
+- Extracted the prompt-artifact validator and trace lifecycle from
+  `extension.js`, preserving the existing API while restoring WSP_62 no-growth
+  compliance without increasing an exemption.
+- Extracted the governed target-read path policy and reused it in worker-prompt
+  validation so repository metadata, environments, dependencies, packaged
+  artifacts, secret-like paths, and private-key containers cannot pass the
+  prompt contract while remaining unreadable at execution time. The shared
+  JavaScript policy now preserves the existing authoritative Python bundle
+  gate's stricter segment rules, including secret-shaped source filenames.
+- Bound prompt-trace metadata to the route that actually ran. Local/no-model,
+  grounding-failure fallback, and queued-recovery paths no longer inherit a
+  speculative Fusion role or context label. Completed no-model routes now state
+  that no prompt exists instead of implying a redaction gate is pending.
+- Made compatibility-degraded no-model routing precede grounding rejection.
+  A locally resolved compatibility receipt can no longer be relabeled as a
+  model/network attempt when degraded context would also fail grounding. Its
+  pre-route status messages likewise state that no bridge, model, or network
+  call occurs.
+- Hardened governed Git-context caching so control files, refs, pack metadata,
+  and tree identity invalidate cached storage validation. Nested ref hardlink
+  replacement after cache fill is rejected; current working-file content stays
+  the only source content admitted to model context.
+- Extracted governed Git projection and prompt-route construction into cohesive
+  modules. `extension.js` is below its frozen WSP_62 ceiling; both new modules
+  stay below 400 lines and every function stays below 30 lines.
+- Fixed the worker-prompt path grammar so a leading `t` is not consumed as
+  whitespace. Compound secret containers such as `secrets_store`,
+  `credential_cache`, `token_data`, and `prod-secrets` now reject consistently
+  without denying ordinary `auth/token_manager.py` or `token_efficiency` code.
+- Replaced four CodeQL-reported regex decisions with linear token, suffix, and
+  comment-marker checks. Adversarial long-spacing, long execution-plane, and
+  alternate HTML comment terminator inputs remain bounded and fail closed.
+  Repository-attention detection scans every need token so benign prefix text
+  cannot bypass the deep-dive evidence gate.
+
 ## 2026-08-09 - Progressive audit and bounded-execution stages (0.4.72)
 
 - Added an explicit `audit` / `boundedExecution` setting as a maximum effect

@@ -68,6 +68,12 @@ def _confined_repo_path(
         return None
     if not directory and not resolved.is_file():
         return None
+    if not directory:
+        try:
+            if os.stat(resolved, follow_symlinks=False).st_nlink > 1:
+                return None
+        except OSError:
+            return None
     return resolved
 
 

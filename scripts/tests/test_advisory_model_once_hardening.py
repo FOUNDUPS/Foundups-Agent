@@ -187,6 +187,25 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(out.get("reason"), "http_error")
         self.assertNotEqual(out.get("reason"), "retry_exhausted")
         self.assertEqual(out.get("retry_count", 0), 0)
+        self.assertNotIn("redacted_task_prompt", out)
+        self.assertTrue(out.get("redacted_task_prompt_digest", "").startswith("sha256:"))
+
+    def test_single_timeout_returns_only_gate_redacted_task_prompt_digest(self) -> None:
+        gate_mock = mock.Mock(return_value=_passed_gate(prompt="task-only-sentinel"))
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch.object(
+            bridge, "_chat_completion", side_effect=TimeoutError("timed out")
+        ):
+            _rc, out = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 work focus",
+                    "lead_model": "z-ai/glm-5.2",
+                }
+            )
+        self.assertFalse(out.get("ok"))
+        self.assertEqual(out.get("reason"), "timeout")
+        self.assertNotIn("redacted_task_prompt", out)
+        self.assertTrue(out.get("redacted_task_prompt_digest", "").startswith("sha256:"))
 
     def test_redaction_blocked_zero_network_calls(self) -> None:
         gate_mock = mock.Mock(
@@ -219,6 +238,8 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertFalse(out.get("ok"))
         self.assertEqual(out.get("reason"), "redaction_blocked")
         self.assertEqual(out.get("retry_count"), 0)
+        self.assertNotIn("redacted_task_prompt", out)
+        self.assertNotIn("redacted_task_prompt_digest", out)
 
     def test_main_panel_models_truncated_in_review_packet(self) -> None:
         gate_mock = mock.Mock(return_value=_passed_gate())
