@@ -24,6 +24,7 @@ from holo_index.isolated_collection_snapshot_probe import (
 )
 from holo_index.vector_segment_durability import (
     HNSW_SEGMENT_TYPE,
+    collection_uses_durable_hnsw_policy,
     durable_hnsw_configuration,
     non_durable_vector_segments,
 )
@@ -110,6 +111,27 @@ def test_legacy_subthreshold_generation_is_not_durable(tmp_path: Path) -> None:
         ssd,
         collection_names=BASELINE_QUERY_COLLECTIONS,
     ) == tuple(sorted(BASELINE_QUERY_COLLECTIONS))
+
+
+def test_live_collection_policy_requires_complete_schema(tmp_path: Path) -> None:
+    durable_ssd = tmp_path / "live-durable" / "ssd"
+    legacy_ssd = tmp_path / "live-legacy" / "ssd"
+    _build_generation(durable_ssd, durable=True)
+    _build_generation(legacy_ssd, durable=False)
+    durable_client = _client(durable_ssd / "vectors", validate_only=True)
+    try:
+        assert collection_uses_durable_hnsw_policy(
+            durable_client.get_collection("navigation_code")
+        )
+    finally:
+        finalize_chroma_client(durable_client)
+    legacy_client = _client(legacy_ssd / "vectors", validate_only=True)
+    try:
+        assert not collection_uses_durable_hnsw_policy(
+            legacy_client.get_collection("navigation_code")
+        )
+    finally:
+        finalize_chroma_client(legacy_client)
 
 
 def test_durable_generation_survives_four_cleared_client_opens(

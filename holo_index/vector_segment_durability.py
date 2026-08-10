@@ -39,21 +39,38 @@ def durable_hnsw_configuration() -> dict[str, dict[str, int]]:
     }
 
 
-def _hnsw_policy_matches(schema_text: str) -> bool:
-    if not schema_text or len(schema_text.encode("utf-8")) > MAX_SCHEMA_BYTES:
+def collection_uses_durable_hnsw_policy(collection: object) -> bool:
+    """Return whether a pinned Chroma collection exposes the complete policy."""
+
+    model = getattr(collection, "_model", None)
+    schema = getattr(model, "serialized_schema", None)
+    if not isinstance(schema, Mapping):
         return False
+    return _schema_hnsw_policy_matches(schema)
+
+
+def _schema_hnsw_policy_matches(schema: Mapping[str, object]) -> bool:
     try:
-        schema = json.loads(schema_text)
         hnsw = schema["keys"]["#embedding"]["float_list"]["vector_index"][
             "config"
         ]["hnsw"]
-    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+    except (KeyError, TypeError):
         return False
     return bool(
         isinstance(hnsw, Mapping)
         and hnsw.get("batch_size") == HNSW_BATCH_SIZE
         and hnsw.get("sync_threshold") == HNSW_SYNC_THRESHOLD
     )
+
+
+def _hnsw_policy_matches(schema_text: str) -> bool:
+    if not schema_text or len(schema_text.encode("utf-8")) > MAX_SCHEMA_BYTES:
+        return False
+    try:
+        schema = json.loads(schema_text)
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return False
+    return isinstance(schema, Mapping) and _schema_hnsw_policy_matches(schema)
 
 
 def _segment_rows(vector_path: Path) -> dict[str, tuple[str, str]]:
@@ -146,6 +163,7 @@ def non_durable_vector_segments(
 __all__ = [
     "HNSW_BATCH_SIZE",
     "HNSW_SYNC_THRESHOLD",
+    "collection_uses_durable_hnsw_policy",
     "durable_hnsw_configuration",
     "non_durable_vector_segments",
 ]
