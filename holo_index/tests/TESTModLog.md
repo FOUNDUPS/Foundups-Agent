@@ -1,20 +1,25 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-11] Durable vector-segment publication regressions
+
+- Proved with Chroma 1.5.5 that legacy sub-threshold collections are not
+  durable and that policy-bound collections survive four cleared-client
+  opens plus a real subprocess proof under migration-validation mode.
+- Added exact rejection for a missing persisted metadata artifact and a
+  tampered HNSW persistence policy, plus an actual Windows junction escape.
+- Added checkpoint-plus-tail coverage so a post-checkpoint WAL tail remains
+  available to the independent subprocess verifier.
+- Replaced transient-success convergence tests with fail-closed publication
+  tests: no later reopen can override `VECTOR_SEGMENT_UNAVAILABLE`.
+- Preserved write-mode configuration coverage and the existing maintenance,
+  owner, freshness, transport, and startup admission matrices.
+
 ## [2026-08-04] Sandboxed write-probe regression
 
 - Replaced the import-time, checkout-specific `test_write.txt` write with a
   pytest `tmp_path` probe.
 - Added source-level regression coverage preventing module-import filesystem
   effects and a return of any absolute Windows checkout target.
-
-## [2026-08-04] Vector-segment convergence regressions
-
-- Added first-open vector failure followed by two-success acceptance coverage.
-- Proved collection snapshot mismatches are never retried, interrupted
-  convergence fails closed, all child processes receive identical receipts,
-  and the original total timeout budget is preserved.
-- Proved maintenance reports vector-segment failure separately from logical
-  collection snapshot mismatch.
 
 ## [2026-08-02] Persisted vector-segment cold-start gate
 

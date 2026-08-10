@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
+import uuid
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,6 +24,7 @@ from holo_index.isolated_collection_snapshot_probe import (
     probe_collection_snapshots,
     verify_collection_snapshots_isolated,
 )
+from holo_index.vector_segment_durability import HNSW_ARTIFACTS, HNSW_SEGMENT_TYPE
 
 
 FINGERPRINT = "sha256:" + ("1" * 64)
@@ -109,6 +112,50 @@ def test_default_client_rejects_unsupported_chromadb_version(
         probe_module._default_client_factory(tmp_path / "ssd")
 
 
+def _write_durable_segment_fixture(ssd_path: Path, names: tuple[str, ...]) -> None:
+    vectors = ssd_path / "vectors"
+    vectors.mkdir(parents=True)
+    schema = json.dumps(
+        {
+            "keys": {
+                "#embedding": {
+                    "float_list": {
+                        "vector_index": {
+                            "config": {
+                                "hnsw": {"batch_size": 2, "sync_threshold": 3}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    database = sqlite3.connect(vectors / "chroma.sqlite3")
+    database.execute("CREATE TABLE collections (id TEXT, name TEXT, schema_str TEXT)")
+    database.execute(
+        "CREATE TABLE segments (id TEXT, type TEXT, scope TEXT, collection TEXT)"
+    )
+    for name in names:
+        collection_id = str(uuid.uuid4())
+        segment_id = str(uuid.uuid4())
+        database.execute(
+            "INSERT INTO collections VALUES (?, ?, ?)",
+            (collection_id, name, schema),
+        )
+        database.execute(
+            "INSERT INTO segments VALUES (?, ?, ?, ?)",
+            (segment_id, HNSW_SEGMENT_TYPE, "VECTOR", collection_id),
+        )
+        segment = vectors / segment_id
+        segment.mkdir()
+        for filename in HNSW_ARTIFACTS:
+            (segment / filename).write_bytes(b"durable")
+    database.commit()
+    database.close()
+
+
 def _fixture(tmp_path: Path):
     attr_map = {
         "navigation_code": "code_collection",
@@ -122,6 +169,7 @@ def _fixture(tmp_path: Path):
         "navigation_vocabulary": "vocabulary_collection",
     }
     collections = {name: _Collection(name) for name in ALL_COLLECTIONS}
+    _write_durable_segment_fixture(tmp_path / "ssd", tuple(collections))
     holo = SimpleNamespace(
         **{attr: collections[name] for name, attr in attr_map.items()},
         index_embedding_backend="test-embedding",
@@ -411,19 +459,17 @@ def test_parent_rejects_persistently_unqueryable_vector_segment(
         )
 
 
-def test_parent_requires_two_successes_after_vector_cold_start(
+def test_parent_rejects_transient_successes_after_vector_failure(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     receipt, _collections, _client = _fixture(tmp_path)
     responses = [
-        _probe_response(receipt, False, ["navigation_code"], "VECTOR_SEGMENT_UNAVAILABLE"),
-        _probe_response(receipt, True, [], ""),
-        _probe_response(receipt, True, [], ""),
+        _probe_response(receipt, False, ["navigation_code"], "VECTOR_SEGMENT_UNAVAILABLE")
     ]
     calls = []
     timeouts = []
-    moments = iter((100.0, 101.0, 102.0, 103.0))
+    moments = iter((100.0, 101.0))
     monkeypatch.setattr(probe_module.time, "monotonic", lambda: next(moments))
 
     def run_probe(*_args, **kwargs):
@@ -436,17 +482,16 @@ def test_parent_requires_two_successes_after_vector_cold_start(
         run_probe,
     )
 
-    failures = verify_collection_snapshots_isolated(
-        receipt,
-        ssd_path=tmp_path / "ssd",
-        repo_root=tmp_path / "repo",
-        timeout_seconds=10.0,
-    )
+    with pytest.raises(IsolatedSnapshotProbeError, match="VECTOR_SEGMENT_UNAVAILABLE"):
+        verify_collection_snapshots_isolated(
+            receipt,
+            ssd_path=tmp_path / "ssd",
+            repo_root=tmp_path / "repo",
+            timeout_seconds=10.0,
+        )
 
-    assert failures == []
-    assert len(calls) == 3
-    assert len(set(calls)) == 1
-    assert timeouts == [9.0, 8.0, 7.0]
+    assert len(calls) == 1
+    assert timeouts == [9.0]
 
 
 def test_parent_does_not_retry_collection_snapshot_mismatch(
@@ -474,7 +519,7 @@ def test_parent_does_not_retry_collection_snapshot_mismatch(
     assert len(calls) == 1
 
 
-def test_parent_stops_when_vector_retry_finds_snapshot_mismatch(
+def test_parent_does_not_retry_vector_failure_for_later_snapshot_result(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -490,16 +535,14 @@ def test_parent_stops_when_vector_retry_finds_snapshot_mismatch(
         or SimpleNamespace(returncode=0, stdout=responses.pop(0), stderr=""),
     )
 
-    with pytest.raises(
-        IsolatedSnapshotProbeError, match="COLLECTION_SNAPSHOT_MISMATCH"
-    ):
+    with pytest.raises(IsolatedSnapshotProbeError, match="VECTOR_SEGMENT_UNAVAILABLE"):
         verify_collection_snapshots_isolated(
             receipt,
             ssd_path=tmp_path / "ssd",
             repo_root=tmp_path / "repo",
         )
 
-    assert len(calls) == 2
+    assert len(calls) == 1
 
 
 def test_parent_rejects_interrupted_vector_convergence(

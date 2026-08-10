@@ -25,13 +25,13 @@ from holo_index.freshness_receipt import (
 )
 from holo_index.storage_contract import storage_path_identity
 from holo_index.persisted_vector_segment_probe import unqueryable_vector_segments
+from holo_index.vector_segment_durability import non_durable_vector_segments
 
 
 SCHEMA_VERSION = "holoindex_isolated_snapshot_probe.v1"
 MAX_RECEIPT_BYTES = 2_000_000
 MAX_PROCESS_OUTPUT_BYTES = 16_384
 DEFAULT_TIMEOUT_SECONDS = 180.0
-VECTOR_SEGMENT_CONVERGENCE_SUCCESSES = 2
 SUPPORTED_CHROMADB_VERSIONS = frozenset({"1.5.5"})
 
 
@@ -177,6 +177,17 @@ def probe_collection_snapshots(
         return IsolatedSnapshotProbeResult(
             False, receipt.generation_id, (), "BASELINE_COLLECTIONS_INCOMPLETE"
         )
+    non_durable = non_durable_vector_segments(
+        ssd,
+        collection_names=BASELINE_QUERY_COLLECTIONS,
+    )
+    if non_durable:
+        return IsolatedSnapshotProbeResult(
+            False,
+            receipt.generation_id,
+            non_durable,
+            "VECTOR_SEGMENT_UNAVAILABLE",
+        )
     try:
         client = (client_factory or _default_client_factory)(ssd)
         mismatches = _snapshot_mismatches(client, entries)
@@ -194,6 +205,7 @@ def probe_collection_snapshots(
     unqueryable = unqueryable_vector_segments(
         client,
         entries,
+        ssd_path=ssd,
         collection_names=BASELINE_QUERY_COLLECTIONS,
     )
     return IsolatedSnapshotProbeResult(
@@ -354,13 +366,7 @@ def verify_collection_snapshots_isolated(
     if response.get("error") == "COLLECTION_SNAPSHOT_MISMATCH" and mismatches:
         return sorted(mismatches)
     if response.get("error") == "VECTOR_SEGMENT_UNAVAILABLE" and mismatches:
-        _require_vector_segment_convergence(
-            receipt,
-            ssd_path=ssd_path,
-            repo_root=repo_root,
-            deadline=deadline,
-        )
-        return []
+        raise IsolatedSnapshotProbeError("VECTOR_SEGMENT_UNAVAILABLE")
     raise IsolatedSnapshotProbeError(
         str(response.get("error") or "ISOLATED_PROBE_FAILED")
     )
@@ -399,23 +405,6 @@ def _remaining_timeout(deadline: float) -> float:
     if remaining <= 0:
         raise IsolatedSnapshotProbeError("ISOLATED_PROBE_TIMEOUT")
     return remaining
-
-
-def _require_vector_segment_convergence(
-    receipt: HoloIndexFreshnessReceipt,
-    *,
-    ssd_path: Path | str,
-    repo_root: Path | str,
-    deadline: float,
-) -> None:
-    for _attempt in range(VECTOR_SEGMENT_CONVERGENCE_SUCCESSES):
-        response = _run_validated_probe(
-            receipt, ssd_path, repo_root, _remaining_timeout(deadline)
-        )
-        if not _probe_succeeded(response):
-            raise IsolatedSnapshotProbeError(
-                str(response.get("error") or "ISOLATED_PROBE_FAILED")
-            )
 
 
 def _read_receipt() -> HoloIndexFreshnessReceipt:

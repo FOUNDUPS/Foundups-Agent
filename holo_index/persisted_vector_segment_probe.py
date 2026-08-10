@@ -1,12 +1,14 @@
-"""Read-only durability probe for persisted Chroma vector segments."""
+"""Read-only query proof for persisted Chroma vector segments."""
 
 from __future__ import annotations
 
 import math
 import numbers
+from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from holo_index.freshness_receipt import CollectionFreshness
+from holo_index.vector_segment_durability import non_durable_vector_segments
 
 
 MAX_EMBEDDING_DIMENSIONS = 8192
@@ -80,20 +82,24 @@ def unqueryable_vector_segments(
     client: Any,
     entries: Mapping[str, CollectionFreshness],
     *,
+    ssd_path: Path | str,
     collection_names: Iterable[str],
 ) -> tuple[str, ...]:
-    """Return collections whose persisted nearest-neighbor index cannot reopen."""
+    """Return collections lacking durable files or a valid self-query."""
 
-    failures: list[str] = []
-    for name in sorted(collection_names):
+    names = tuple(sorted(collection_names))
+    failures = set(
+        non_durable_vector_segments(ssd_path, collection_names=names)
+    )
+    for name in names:
         try:
             collection = client.get_collection(name, embedding_function=None)
             queryable = _queryable(collection, count=entries[name].count)
         except Exception:
             queryable = False
         if not queryable:
-            failures.append(name)
-    return tuple(failures)
+            failures.add(name)
+    return tuple(sorted(failures))
 
 
 __all__ = ["unqueryable_vector_segments"]

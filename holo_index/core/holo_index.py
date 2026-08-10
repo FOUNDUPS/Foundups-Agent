@@ -43,6 +43,7 @@ from holo_index.storage_contract import (
     resolve_holoindex_ssd_path,
     storage_path_identity,
 )
+from holo_index.vector_segment_durability import durable_hnsw_configuration
 
 # Dependency bootstrap for this module
 # HOLOINDEX_AUTO_PIP_OPT_IN_PHASE1: Auto-install is now EXPLICIT OPT-IN only.
@@ -575,7 +576,10 @@ class HoloIndex:
                     detail=f"{type(exc).__name__}: {str(exc).strip()}",
                 ) from exc
         try:
-            return self.client.get_or_create_collection(name)
+            return self.client.get_or_create_collection(
+                name,
+                configuration=durable_hnsw_configuration(),
+            )
         except Exception as exc:
             raise classify_storage_exception(
                 exc,
@@ -597,7 +601,11 @@ class HoloIndex:
             "embedding_model": self.index_embedding_model_id,
             "embedding_space_fingerprint": self.index_embedding_space_fingerprint,
         }
-        return self.client.create_collection(name, metadata=metadata)
+        return self.client.create_collection(
+            name,
+            metadata=metadata,
+            configuration=durable_hnsw_configuration(),
+        )
 
     # --------- Data Loading --------- #
 

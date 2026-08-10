@@ -33,9 +33,11 @@ class _Collection:
 class _MaintenanceClient:
     def __init__(self) -> None:
         self.names: list[str] = []
+        self.configurations: list[dict] = []
 
-    def get_or_create_collection(self, name: str):
+    def get_or_create_collection(self, name: str, *, configuration):
         self.names.append(name)
+        self.configurations.append(configuration)
         return _Collection()
 
 
@@ -198,6 +200,10 @@ def test_maintenance_creates_layout_and_gets_or_creates_collections(tmp_path: Pa
         "navigation_knowledge",
         "navigation_work_ledger",
     ]
+    assert all(
+        value == {"hnsw": {"batch_size": 2, "sync_threshold": 3}}
+        for value in client.configurations
+    )
 
 
 def test_initialized_store_rejects_different_path(tmp_path: Path, monkeypatch) -> None:
