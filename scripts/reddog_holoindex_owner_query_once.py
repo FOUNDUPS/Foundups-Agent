@@ -43,7 +43,7 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_boots
 
 MAX_QUERY_CHARS = 16_000
 MAX_LIMIT = 20
-MAX_OWNER_ATTEMPTS = 2
+MAX_OWNER_ATTEMPTS = 3
 PROCESS_OWNED_STATUSES = frozenset({OWNER_STARTED, OWNER_REUSED})
 TRANSIENT_OWNER_ERRORS = frozenset(
     {
@@ -207,7 +207,7 @@ def query_once(
                 error = str(
                     getattr(bootstrap, "error", "") or "owner_bootstrap_failed"
                 )
-                if attempts == 1 and error in TRANSIENT_OWNER_ERRORS:
+                if attempts < MAX_OWNER_ATTEMPTS and error in TRANSIENT_OWNER_ERRORS:
                     retry_reason = error
                     cleanup_owner()
                     continue
@@ -255,7 +255,7 @@ def query_once(
                 )
             error = str(result.get("error") or "")
             if (
-                attempts == 1
+                attempts < MAX_OWNER_ATTEMPTS
                 and process_owned
                 and error in TRANSIENT_OWNER_ERRORS
             ):

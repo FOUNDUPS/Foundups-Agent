@@ -1,6 +1,7 @@
 'use strict';
 
 const SAFE_TOKEN = /^[A-Za-z0-9_:-]{1,96}$/;
+const MAX_OWNER_ATTEMPTS = 3;
 
 function safeToken(value, fallback) {
   const token = String(value || '');
@@ -33,7 +34,7 @@ function buildOwnerFallbackBundle() {
 function rejectedOwnerMetadata(value) {
   const source = value && typeof value === 'object' ? value : {};
   const attempts = Number.isInteger(source.owner_attempts)
-    ? Math.max(0, Math.min(source.owner_attempts, 2))
+    ? Math.max(0, Math.min(source.owner_attempts, MAX_OWNER_ATTEMPTS))
     : 0;
   return {
     owner_query_required: true,

@@ -21,7 +21,7 @@ function failure(changes) {
     error: 'SEMANTIC_BACKEND_UNAVAILABLE',
     index_gap_detected: true,
     no_holoindex_reindex_performed: true,
-    owner_attempts: 2,
+    owner_attempts: 3,
     workspace_repo_head_sha: HEAD,
     authority_repo_head_sha: HEAD,
     authority_repo_root_digest: ROOT_DIGEST,
@@ -37,11 +37,13 @@ assert.strictEqual(repair.shouldCoordinate(failure({
 }), true), true);
 assert.strictEqual(repair.shouldCoordinate(failure(), false), false);
 assert.strictEqual(repair.shouldCoordinate(failure({ owner_attempts: 1 }), true), false);
+assert.strictEqual(repair.shouldCoordinate(failure({ owner_attempts: 2 }), true), false);
+assert.strictEqual(repair.shouldCoordinate(failure({ owner_attempts: 4 }), true), false);
 assert.strictEqual(repair.shouldCoordinate(failure({ error: 'forged' }), true), false);
 assert.strictEqual(repair.shouldCoordinate(failure({ ok: true }), true), false);
 assert.strictEqual(repair.shouldCoordinate(failure({
   error: 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH',
-  owner_attempts: 2,
+  owner_attempts: 3,
   authority_repo_head_sha: STALE_HEAD
 }), true), false);
 assert.strictEqual(repair.shouldCoordinate(failure({
@@ -161,8 +163,8 @@ assert(extensionSource.includes('holoGenerationBoundQuery.isObserved(ownerResult
 assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(ownerResult, ownerObserved)'));
 assert(extensionSource.includes('coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved)'));
 assert((extensionSource.match(/holoIncidentRepair\.metadata\(incidentRepair\)/g) || []).length >= 4);
-assert.strictEqual(pkg.version, '0.4.73');
-assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.73'"));
+assert.strictEqual(pkg.version, '0.4.74');
+assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.74'"));
 assert(!fs.readFileSync(path.join(extDir, 'holoindex_incident_repair.js'), 'utf8').includes('qwen'));
 
 console.log('RedDog HoloIndex incident repair extension tests passed.');

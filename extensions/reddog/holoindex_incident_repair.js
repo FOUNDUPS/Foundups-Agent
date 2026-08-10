@@ -12,6 +12,7 @@ const REPAIRABLE_ERRORS = Object.freeze([
 const MAX_OUTPUT_BYTES = 256 * 1024;
 const MAX_INPUT_BYTES = 64 * 1024;
 const MAX_QUERY_CHARS = 16000;
+const EXHAUSTED_OWNER_ATTEMPTS = 3;
 
 function shouldCoordinate(ownerResult, ownerObserved) {
   const value = ownerResult && typeof ownerResult === 'object' ? ownerResult : {};
@@ -19,7 +20,7 @@ function shouldCoordinate(ownerResult, ownerObserved) {
   const staleAuthority = value.error === 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH';
   const attemptsValid = staleAuthority
     ? value.owner_attempts === 0
-    : value.owner_attempts === 2;
+    : value.owner_attempts === EXHAUSTED_OWNER_ATTEMPTS;
   return ownerObserved === true
     && value.ok === false
     && typeof value.error === 'string'

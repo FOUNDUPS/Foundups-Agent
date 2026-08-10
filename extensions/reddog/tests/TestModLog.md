@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-11 - HoloIndex owner convergence regressions (0.4.74)
+
+- Proved a process-owned semantic query may recover on its third bounded start,
+  while three failures produce truthful exhaustion telemetry and remain
+  query-only.
+- Proved configured owners are still never restarted and the incident bridge
+  rejects partial, excessive, and stale-authority attempt counts.
+
 ## 2026-08-10 - Orchestration prompt transparency regressions (0.4.73)
 
 - Proved pre-gate projections contain no prompt body, blocked runs disclose no

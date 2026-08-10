@@ -1,6 +1,13 @@
 # RedDog
 
-Version: 0.4.73
+Version: 0.4.74
+
+Version 0.4.74 gives the process-owned HoloIndex semantic owner one additional
+bounded cold-open attempt before the existing incident-repair route. All three
+attempts remain query-only, use the same exact-HEAD authority selection, and
+clean up process-owned state between starts. A configured external owner is
+never restarted. Exhaustion telemetry and incident admission now agree on the
+three-attempt ceiling; no query-time reindex or new repair framework was added.
 
 Version 0.4.73 makes RedDog's generated orchestration contract inspectable
 without creating a second receipt or redaction system. Before Fusion starts,

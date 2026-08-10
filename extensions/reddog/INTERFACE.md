@@ -1,5 +1,11 @@
 # RedDog Interface
 
+Version 0.4.74 treats three process-owned semantic-owner starts as the bounded
+runtime-convergence ceiling. Transient bootstrap or query failures restart only
+process-owned state; configured owners fail without cleanup. The incident
+bridge accepts a non-stale owner failure only after all three attempts, while
+stale-authority admission remains the existing zero-attempt case.
+
 Version 0.4.73 adds `reddog_orchestration_prompt_trace.v1`. The extension emits
 one content-free policy projection before model invocation, using a
 process-local keyed correlation value rather than a raw prompt digest, and stores a

@@ -1,5 +1,15 @@
 # RedDog ModLog
 
+## 2026-08-11 - HoloIndex owner runtime convergence (0.4.74)
+
+- Extended the existing process-owned semantic-owner retry ceiling from two to
+  three bounded starts after live exact-generation queries reproduced a second
+  transient HNSW cold-open failure followed by a successful fresh start.
+- Kept configured owners outside extension lifecycle control and preserved the
+  existing WRE incident route after exhaustion. Updated rejected-owner
+  telemetry and incident admission to the same ceiling. No indexing authority
+  or additional repair framework was introduced. (WSP 00/15/22/50/97)
+
 ## 2026-08-10 - Orchestration prompt transparency and WSP execution contract (0.4.73)
 
 - Added a collapsible local prompt trace that is content-free before the
