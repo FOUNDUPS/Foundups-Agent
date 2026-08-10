@@ -1,3 +1,17 @@
+## 2026-08-11: Bounded iterative grounding regressions
+
+- Added deterministic refinement, deadline, root/generation drift, conservative
+  broad-scope classification, v1 passive compatibility, and v2 rehydration.
+- Proved replacement objects, hostile PATH/Git state, duplicate evidence,
+  fabricated ledgers, budget abuse, and unscoped query hits fail closed.
+- Proved exact-HEAD content reaches Fusion while dirty overlays, path widening,
+  stale generations, or post-model proof changes cannot become evidence.
+- Proved absent grounding, semantic scope widening, post-grounding WSP_15
+  drift, rejected-byte budget abuse, and rehydration-module growth fail closed.
+- Proved the E2E and signed-review adapters create genuine exact-HEAD grounding
+  from their authorized target sets and reject missing or over-limit targets.
+- Focused affected matrix is rerun and recorded at the exact reviewed SHA.
+
 ## 2026-08-08: Startup queue runtime-root regressions
 
 - Proved the WRE queue bootstrap requires a valid runtime root, rejects

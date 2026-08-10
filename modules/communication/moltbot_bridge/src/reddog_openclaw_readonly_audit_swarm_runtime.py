@@ -267,7 +267,7 @@ def plan_reddog_openclaw_readonly_audit_swarm(
         else:
             grounding_id = grounding_validation.verified.receipt_id
             grounding_receipt_digest = grounding_digest(grounding_data)
-            targets = _normalize_targets((*targets, *grounding_validation.verified.repo_file_targets))
+            targets = _normalize_targets((*targets, *grounding_validation.verified.allowed_read_targets))
     if len(targets) > MAX_ASSIGNMENT_TARGETS:
         reasons.append("too_many_allowed_read_targets")
 

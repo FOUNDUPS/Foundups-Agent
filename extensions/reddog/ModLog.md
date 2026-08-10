@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-11 - Bounded iterative repository grounding pin (0.4.74)
+
+- Regenerated and pinned the backend dependency manifest after adding
+  deterministic two-round Holo refinement and immutable exact-HEAD evidence.
+- No editor authority or new orchestration path was added; this build aligns
+  the thin client with the changed backend trust boundary.
+
 ## 2026-08-10 - Orchestration prompt transparency and WSP execution contract (0.4.73)
 
 - Added a collapsible local prompt trace that is content-free before the

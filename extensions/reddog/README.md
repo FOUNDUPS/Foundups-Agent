@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.73
+Version: 0.4.74
+
+[OBSERVED] Version 0.4.74 pins bounded iterative repository grounding. HoloIndex
+locates candidate paths, while active model evidence comes only from rehydrated
+exact-HEAD blobs under fixed query, time, and byte budgets. Dirty overlays,
+unscoped query hits, and query-time reindexing cannot enter the model path.
 
 Version 0.4.73 makes RedDog's generated orchestration contract inspectable
 without creating a second receipt or redaction system. Before Fusion starts,

@@ -998,20 +998,20 @@ Resident RedDog live-canary contract:
 - `READY_FOR_EXECUTION` does not claim that a live canary ran. Missing authority artifacts, signer socket, Git/GitHub readiness, or OpenRouter key presence returns `BLOCKED` without exposing values.
 - The surface has no signer launch, secret resolution, PR-ready, merge, reward, or HoloIndex re-index authority.
 
-Transport-neutral grounding additionally supports a fail-closed repository
-audit fallback for entity-scoped audits (including `pfmall`, `p.fMALL`,
-`p-fmall`, and `PFMALL`). The owner query runs first. Only when that evidence is
-unavailable, stale, or insufficient does the service use the shared bounded
-repository discovery reader. Acceptance requires entity-bound paths, exact
-fixed-policy limits, one implementation-source read, and one independent
-test/contract read. The resulting `reddog_repo_audit_fallback.v1` records the
-creation-time HEAD and evidence digests and is nested in the canonical
-`reddog_grounded_target_receipt.v1`. At consumption, both deterministic and
-model-backed audit executors reopen every selected path with the confined
-reader and match path, digest, bytes, and truncation; the model-backed executor
-checks again after the model returns. Thus an unstaged content change rejects
-even when HEAD is unchanged. Selected paths replace the unresolved semantic
-target only after these checks.
+Transport-neutral grounding runs at most two deterministic HoloIndex owner
+queries per semantic target under one shared 16-query, 30-second budget.
+Refinement derives only from the original target; model or result content cannot
+choose a later query. Holo hits are candidate locators, not evidence. Selected
+paths must be regular current-HEAD Git blobs with verified object IDs; broad
+audits require implementation plus test, contract, or WSP corroboration.
+Receipt v2 binds evidence, generation, root, HEAD, and resource bounds; model
+consumption rehydrates it. Legacy producers retain receipt v1.
+
+Entity-scoped audits may use the existing fail-closed repository fallback only
+after bounded owner evidence remains unavailable, stale, or insufficient. Exact
+fixed-policy limits require implementation plus test/contract evidence. Selection
+and consumption read exact Git HEAD; dirty overlays are ignored and untracked
+candidates reject. Grounding integrity never replaces signed work-order authority.
 
 ### OpenClaw Supervisor Contract
 

@@ -1,4 +1,29 @@
 # ModLog - moltbot_bridge
+## 2026-08-11: Bounded iterative repository grounding
+- Extended the existing transport-neutral grounding service with at most two
+  deterministic HoloIndex owner queries per semantic target under one global
+  16-query, 30-second budget. Repeated evidence, stale generations, root or
+  HEAD drift, and evaluator failures stop fail closed before any model call.
+- Converted semantic Holo hits into candidate paths read from verified regular
+  current-HEAD Git blobs. Broad audits require implementation plus independent
+  test, contract, or WSP evidence; one target-bound ledger consumes the shared
+  byte budget even when content is rejected or a query round is repeated.
+- Preserved legacy receipt v1 and introduced bounded receipt v2 with selected
+  evidence, retrieval attempts, generation, root, exact HEAD, Git mode, blob
+  OID, and resource policy. The worker rehydrates and passes only v2 exact-HEAD
+  content to Fusion; legacy v1 remains passive compatibility data.
+- Reused the existing entity-audit fallback only after bounded semantic
+  retrieval fails. Git is resolved from an OS-owned path; no model-selected
+  query, query-time index, repository mutation, or new orchestrator was added.
+- Bound every explicit and semantic direct-read path into the assignment and
+  canonical WSP_15 allocation before worker planning. Model-backed audits now
+  require verified v2 grounding; missing or widened scope stops before Fusion.
+- Split exact-HEAD evidence rehydration into a bounded cohesive module and
+  charged rejected binary/prefix reads against the same signed 96 KB ledger.
+- Reused the transport-neutral service to ground already-authorized explicit
+  target sets before E2E WSP_15 allocation and at signed 0102 review use time;
+  missing or over-limit exact-HEAD targets stop before model execution.
+
 ## 2026-08-09: Progressive RedDog execution-stage authority binding
 - Added a signed, canonical stage receipt spanning architect proposal, queue,
   signer request, delegated work authority, and worker-dispatch equality.

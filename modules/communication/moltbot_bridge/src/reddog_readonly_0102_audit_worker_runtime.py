@@ -52,14 +52,20 @@ from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence impo
 from modules.communication.moltbot_bridge.src.reddog_typed_evidence_citation_policy import (
     validate_typed_evidence_citations,
 )
-from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
-    canonical_digest as grounding_digest,
-    validate_grounded_target_receipt,
+from modules.communication.moltbot_bridge.src.reddog_verified_grounding_model_evidence import (
+    ValidatedTaskGrounding,
+    grounding_changed_after_model,
+    holo_receipt_matches_grounding,
+    optional_model_binding_fields,
+    validate_task_grounding,
+    verified_grounding_snapshots,
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_first_external_research_grounding_adapter import (
     ExternalResearchRetriever,
     ground_reddog_holoindex_first_external_research,
 )
+
+
 from modules.communication.moltbot_bridge.src.reddog_memex_snapshot_projection_supplier import (
     supply_assignment_bound_memex_projection,
 )
@@ -156,40 +162,6 @@ class ReadOnlyEvidenceQueryAdapter(Protocol):
         allowed_paths: Sequence[str],
         limit: int,
     ) -> Mapping[str, Any]: ...
-
-
-def _validated_task_grounding(
-    task_context: Mapping[str, Any],
-    assignment: Mapping[str, Any],
-) -> tuple[Any | None, tuple[str, ...]]:
-    receipt = task_context.get("grounding_receipt")
-    grounding_present = bool(
-        receipt
-        or task_context.get("grounding_receipt_id")
-        or assignment.get("grounding_receipt_id")
-    )
-    if not grounding_present:
-        return None, ()
-    validation = validate_grounded_target_receipt(
-        receipt if isinstance(receipt, Mapping) else None,
-        work_focus=str(task_context.get("work_focus") or ""),
-    )
-    if not validation.accepted or validation.verified is None:
-        return None, tuple(validation.rejection_reasons or ("grounding_receipt_rejected",))
-    verified = validation.verified
-    expected_digest = grounding_digest(verified.receipt)
-    bindings = (
-        (task_context.get("grounding_receipt_id"), verified.receipt_id),
-        (assignment.get("grounding_receipt_id"), verified.receipt_id),
-        (task_context.get("grounding_receipt_digest"), expected_digest),
-        (assignment.get("grounding_receipt_digest"), expected_digest),
-    )
-    if any(str(value or "") != expected for value, expected in bindings):
-        return None, ("grounding_assignment_binding_mismatch",)
-    typed = task_context.get("typed_targets")
-    if not isinstance(typed, Mapping) or grounding_digest(typed) != verified.typed_targets_digest:
-        return None, ("grounding_typed_targets_binding_mismatch",)
-    return verified, ()
 
 
 @dataclass(frozen=True)
@@ -507,7 +479,7 @@ def execute_model_backed_repo_code_audit(
     external_research_retriever: ExternalResearchRetriever | None = None,
     timeout_seconds: int = 60,
 ) -> ReadOnlyAuditTaskExecutionResult:
-    grounding, grounding_reasons = _validated_task_grounding(task_context, assignment)
+    grounding, grounding_reasons = validate_task_grounding(task_context, assignment, repo_root)
     if grounding_reasons:
         return _reject(grounding_reasons)
     bound_snapshots, bound_reject = _bound_fallback_snapshots(
@@ -517,6 +489,10 @@ def execute_model_backed_repo_code_audit(
     )
     if bound_reject:
         return _reject([bound_reject])
+    verified_snapshots, verified_snapshot_reject = verified_grounding_snapshots(
+        grounding, repo_root=repo_root, bound_snapshots=bound_snapshots or ())
+    if verified_snapshot_reject:
+        return _reject([verified_snapshot_reject])
     allocation = task_context.get("wsp15_allocation_receipt") or assignment.get("wsp15_allocation_receipt")
     validation = validate_reddog_wsp15_allocation_receipt(allocation if isinstance(allocation, Mapping) else None)
     if validation.rejection_reasons == ("missing_wsp15_allocation",):
@@ -556,18 +532,17 @@ def execute_model_backed_repo_code_audit(
     worker_plan = allocation.get("worker_plan") if isinstance(allocation.get("worker_plan"), Mapping) else {}
     if worker_plan.get("fusion_required") is not True:
         return _reject([ReadOnlyAuditTaskRejectReason.WSP15_FUSION_REQUIRED])
-
     query = _repo_audit_query(
         assignment=assignment,
         seed_targets=seed_targets,
-        semantic_targets=grounding.semantic_targets if grounding is not None else (),
+        semantic_targets=grounding.receipt.semantic_targets if grounding is not None else (),
     )
-    discovery_targets = tuple(dict.fromkeys(
-        (
-            *tuple(seed_targets),
-            *tuple(str(value) for value in assignment.get("allowed_read_targets", ())),
-        )
-    ))
+    discovery_targets = tuple(
+        item.evidence.path for item in verified_snapshots
+    ) if verified_snapshots is not None else tuple(dict.fromkeys((
+        *tuple(seed_targets),
+        *tuple(str(value) for value in assignment.get("allowed_read_targets", ())),
+    )))
     holo_receipt = _query_index(
         adapter=holoindex_adapter or HoloIndexReadOnlyQueryAdapter(repo_root),
         source="holoindex",
@@ -577,21 +552,11 @@ def execute_model_backed_repo_code_audit(
     holo_reject = _query_rejection_reason(holo_receipt)
     if holo_reject:
         return _reject([holo_reject])
-
-    candidate_paths = _candidate_paths(
-        seed_targets=(
-            *tuple(item.evidence.path for item in (bound_snapshots or ())),
-            *tuple(seed_targets),
-        ),
-        discovered_paths=paths_from_query_receipt(holo_receipt),
-    )
-    if not candidate_paths:
-        return _reject([ReadOnlyAuditTaskRejectReason.INDEX_QUERY_NO_CANDIDATES])
-    snapshots, read_reject = _read_candidate_snapshots(
-        repo_root=repo_root,
-        seed_targets=seed_targets,
-        candidate_paths=candidate_paths,
-        allowed_targets=discovery_targets,
+    if not holo_receipt_matches_grounding(holo_receipt, grounding):
+        return _reject([ReadOnlyAuditTaskRejectReason.REPOSITORY_STATE_CHANGED])
+    snapshots, read_reject = _select_audit_snapshots(
+        verified_snapshots=verified_snapshots, repo_root=repo_root, seed_targets=seed_targets,
+        holo_receipt=holo_receipt, discovery_targets=discovery_targets,
         bound_snapshots=bound_snapshots or (),
     )
     if read_reject:
@@ -664,6 +629,7 @@ def execute_model_backed_repo_code_audit(
         external_research_evidence_bundle=external_research_evidence_bundle,
         model_selection=model_selection,
         repo_head=repository_state.head_sha,
+        grounding=grounding,
     )
     try:
         prompt = _build_repo_audit_model_prompt(assignment=assignment, allocation=allocation)
@@ -758,6 +724,12 @@ def execute_model_backed_repo_code_audit(
             provider_call_evidence=model_result.provider_call_evidence,
             no_model_call_performed=False,
         )
+    if grounding_changed_after_model(grounding, task_context, assignment, repo_root):
+        return _reject(
+            [ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED],
+            provider_call_evidence=model_result.provider_call_evidence,
+            no_model_call_performed=False,
+        )
 
     report = _build_model_report(
         assignment=assignment,
@@ -843,6 +815,14 @@ def _query_index(
         result = {"ok": False, "source": source, "query": query, "hits": [], "error": "query_exception"}
     if not isinstance(result, Mapping):
         result = {"ok": False, "source": source, "query": query, "hits": [], "error": "query_not_mapping"}
+    if any(
+        not path_is_allowed(str(item.get("path") or ""), allowed_paths)
+        for item in result.get("hits", ())
+        if isinstance(item, Mapping)
+    ):
+        result = {
+            **dict(result), "ok": False, "hits": [], "error": "query_result_scope_violation",
+        }
     source_class = SOURCE_CLASS_HOLOINDEX if source == "holoindex" else SOURCE_CLASS_CODEINDEX
     return build_query_receipt(
         source=source,
@@ -1340,6 +1320,24 @@ def _read_candidate_snapshots(
     return tuple(snapshots), ""
 
 
+def _select_audit_snapshots(
+    *, verified_snapshots, repo_root, seed_targets, holo_receipt,
+    discovery_targets, bound_snapshots,
+):
+    if verified_snapshots is not None:
+        return verified_snapshots, ""
+    candidate_paths = _candidate_paths(
+        seed_targets=(*tuple(item.evidence.path for item in bound_snapshots), *tuple(seed_targets)),
+        discovered_paths=paths_from_query_receipt(holo_receipt),
+    )
+    if not candidate_paths:
+        return (), ReadOnlyAuditTaskRejectReason.INDEX_QUERY_NO_CANDIDATES
+    return _read_candidate_snapshots(
+        repo_root=repo_root, seed_targets=seed_targets, candidate_paths=candidate_paths,
+        allowed_targets=discovery_targets, bound_snapshots=bound_snapshots,
+    )
+
+
 def _module_roots_from_paths(paths: Sequence[str]) -> list[str]:
     roots: list[str] = []
     for item in paths:
@@ -1571,6 +1569,7 @@ def _model_binding(
     external_research_evidence_bundle: Mapping[str, Any] | None = None,
     model_selection: Mapping[str, Any] | None = None,
     repo_head: str,
+    grounding: ValidatedTaskGrounding | None = None,
 ) -> Mapping[str, Any]:
     payload = {
         "schema_version": READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA,
@@ -1592,20 +1591,10 @@ def _model_binding(
         "holoindex_query_receipt_id": holo_receipt.get("receipt_id"),
         "codeindex_query_receipt_id": code_receipt.get("receipt_id"),
     }
-    if memex_receipt is not None:
-        payload["memex_query_receipt_id"] = memex_receipt.get("receipt_id")
-    if memex_evidence_bundle is not None:
-        payload["memex_evidence_bundle_id"] = memex_evidence_bundle.get("bundle_id")
-    if external_research_receipt is not None:
-        payload["external_research_query_receipt_id"] = external_research_receipt.get("receipt_id")
-    if external_research_evidence_bundle is not None:
-        payload["external_research_evidence_bundle_id"] = external_research_evidence_bundle.get("bundle_id")
-    if model_selection:
-        payload["model_selection"] = dict(model_selection)
-        payload["model_selection_receipt_id"] = model_selection.get("receipt_id")
-        payload["model_selection_digest"] = model_selection.get("digest")
-        payload["model_runtime_binding_receipt_id"] = model_selection.get("model_runtime_binding_receipt_id")
-        payload["model_runtime_binding_digest"] = model_selection.get("model_runtime_binding_digest")
+    payload.update(optional_model_binding_fields(
+        grounding, memex_receipt, memex_evidence_bundle, external_research_receipt,
+        external_research_evidence_bundle, model_selection,
+    ))
     return payload
 
 
