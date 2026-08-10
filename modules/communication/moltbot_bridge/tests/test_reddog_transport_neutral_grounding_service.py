@@ -11,6 +11,9 @@ import subprocess
 import pytest
 
 from modules.communication.moltbot_bridge.src import (
+    reddog_bounded_iterative_retrieval as bounded_retrieval,
+)
+from modules.communication.moltbot_bridge.src import (
     reddog_repo_audit_fallback_grounding as repo_audit_fallback,
 )
 from modules.communication.moltbot_bridge.src import (
@@ -24,9 +27,14 @@ from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding
     GroundingServiceReason,
     ground_transport_work_focus,
 )
+from holo_index.repository_state import repository_root_digest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_HEAD = subprocess.run(
+    ["git", "-C", str(REPO_ROOT), "rev-parse", "HEAD"],
+    capture_output=True, text=True, check=True,
+).stdout.strip()
 MODULE_PATH = (
     REPO_ROOT
     / "modules"
@@ -64,7 +72,8 @@ def _owner_result(*, query: str = "target", current: bool = True, hits=None, gen
         "stale_reasons": [] if current else ["stale_repo_head_sha"],
         "freshness_generation_id": generation,
         "freshness_receipt_digest": FRESHNESS_RECEIPT,
-        "repo_head_sha": "a" * 40,
+        "repo_head_sha": REPO_HEAD,
+        "repo_root_digest": repository_root_digest(REPO_ROOT),
         "retrieval_mode": "semantic",
         "no_holoindex_reindex_performed": True,
     }
@@ -103,11 +112,67 @@ def test_default_owner_query_uses_process_private_handoff(
         service_url=None,
         service_token=None,
         timeout_seconds=3.0,
+        deadline_monotonic=10**12,
     )
 
     assert query("RedDog resident architecture")["ok"] is True
     assert calls[0]["service_url"] == "http://127.0.0.1:8123"
     assert calls[0]["service_token"] == "process-private-token"
+
+
+def test_default_owner_query_clamps_call_to_remaining_global_deadline(
+    monkeypatch,
+) -> None:
+    calls = []
+    monkeypatch.setattr(grounding_service.time, "monotonic", lambda: 8.0)
+    monkeypatch.setattr(
+        grounding_service,
+        "query_holoindex_owner",
+        lambda **kwargs: calls.append(kwargs) or {},
+    )
+    query = grounding_service._owner_query(
+        repo_root=REPO_ROOT,
+        service_url="http://127.0.0.1:8123",
+        service_token="process-private-token",
+        timeout_seconds=15.0,
+        deadline_monotonic=10.0,
+    )
+
+    query("target")
+
+    assert calls[0]["timeout_seconds"] == 2.0
+
+
+def test_more_than_sixteen_explicit_targets_reject_instead_of_truncating() -> None:
+    target = "modules/communication/moltbot_bridge/src/reddog_resident_architect_client.py"
+    focus = "Audit the exact targets.\nRead first:\n" + "\n".join(
+        f"- {target}#Symbol{index}" for index in range(17)
+    )
+    result = _ground(
+        focus,
+        owner_query=lambda _query: (_ for _ in ()).throw(
+            AssertionError("explicit target overflow must not query HoloIndex")
+        ),
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == (GroundingServiceReason.TARGET_LIMIT,)
+    assert result.no_model_call_performed is True
+
+
+def test_mixed_target_categories_share_one_aggregate_limit() -> None:
+    target = "modules/communication/moltbot_bridge/src/reddog_resident_architect_client.py"
+    focus = "Read first:\n" + "\n".join(
+        f"- {target}#Symbol{index}" for index in range(16)
+    ) + "\nSemantic targets: resident architecture"
+    result = _ground(
+        focus,
+        owner_query=lambda _query: (_ for _ in ()).throw(
+            AssertionError("aggregate overflow must reject before HoloIndex")
+        ),
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == (GroundingServiceReason.TARGET_LIMIT,)
+    assert result.no_model_call_performed is True
 
 
 def test_default_owner_query_fails_closed_when_handoff_is_invalid(
@@ -130,6 +195,7 @@ def test_default_owner_query_fails_closed_when_handoff_is_invalid(
         service_url=None,
         service_token=None,
         timeout_seconds=3.0,
+        deadline_monotonic=10**12,
     )
 
     assert query("RedDog resident architecture") == {}
@@ -151,10 +217,11 @@ def _seed_repo_audit_fixture(root: Path, *, include_test: bool = True) -> None:
     generated = root / "build" / "pfmall_generated.py"
     generated.parent.mkdir(parents=True)
     generated.write_text("GENERATED = True\n", encoding="utf-8")
-    ref = root / ".git" / "refs" / "heads" / "main"
-    ref.parent.mkdir(parents=True)
-    (root / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
-    ref.write_text("a" * 40 + "\n", encoding="utf-8")
+    subprocess.run(["git", "init", "-q", str(root)], check=True)
+    subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.invalid"], check=True)
+    subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
+    subprocess.run(["git", "-C", str(root), "add", "modules"], check=True)
+    subprocess.run(["git", "-C", str(root), "commit", "-qm", "fixture"], check=True)
 
 
 def _ground_at(repo_root: Path, work_focus: str, owner_query):
@@ -253,10 +320,13 @@ def test_semantic_audit_requires_current_generation_and_corroborated_hits() -> N
     result = _ground(focus)
 
     assert result.accepted is True
+    assert result.grounding_receipt["schema_version"] == "reddog_grounded_target_receipt.v2"
     assert result.typed_targets["semantic_targets"] == [focus]
     assert result.grounding_receipt["holoindex_owner_query_ok"] is True
     assert result.grounding_receipt["holoindex_freshness"] == "CURRENT"
     assert result.grounding_receipt["holoindex_generation_id"] == GENERATION
+    assert result.grounding_receipt["repo_state_head_sha"] == REPO_HEAD
+    assert result.grounding_receipt["repo_state_root_digest"] == repository_root_digest(REPO_ROOT)
     coverage = result.grounding_receipt["semantic_target_coverage"][0]
     assert coverage["verdict"] == "SUFFICIENT"
     assert set(coverage["evidence_quality"]["categories"]) == {"implementation", "verification"}
@@ -325,7 +395,7 @@ def test_owner_unavailable_scoped_audit_uses_bounded_repo_evidence(
     assert all(not path.startswith((".memory/", "build/")) for path in paths)
     fallback_receipt = result.grounding_receipt["repo_audit_fallback"]
     assert fallback_receipt["holo_owner_attempted_first"] is True
-    assert fallback_receipt["repo_head_sha"] == "a" * 40
+    assert len(fallback_receipt["repo_head_sha"]) in {40, 64}
     assert fallback_receipt["repo_audit_grounding"]["coverage"]["verdict"] == "PASS"
     assert validate_grounded_target_receipt(
         result.grounding_receipt,
@@ -354,6 +424,263 @@ def test_sufficient_current_owner_evidence_does_not_run_repo_fallback(monkeypatc
     assert result.accepted is True
     assert result.grounding_receipt["repo_audit_fallback_used"] is False
     assert result.typed_targets["semantic_targets"] == ["Audit p.fMALL codebase."]
+
+
+def test_poisoned_holo_summary_cannot_substitute_for_direct_file_support() -> None:
+    target = "Audit resident RedDog authority."
+    result = _owner_result(query=target, hits=[{
+        "path": "modules/foundups/pfmall/api.py",
+        "title": "Resident RedDog authority implementation and verification",
+    }])
+
+    coverage = bounded_retrieval.evaluate_semantic_coverage(
+        REPO_ROOT, target, result, broad_request=True
+    )
+
+    assert coverage["verdict"] == "UNSAFE_TO_ACT"
+    assert coverage["evidence_refs"] == []
+    assert coverage["read_rejections"][0]["reason"] == "content_not_supportive"
+
+
+def test_supporting_documents_alone_cannot_ground_broad_audit(monkeypatch) -> None:
+    target = "Audit resident RedDog authority."
+    monkeypatch.setattr(
+        bounded_retrieval,
+        "secure_read_repo_head_file",
+        lambda _root, path, **_kwargs: {
+            "ok": True,
+            "content": "resident RedDog authority evidence",
+            "path": path,
+            "digest": "sha256:" + "8" * 64,
+            "bytes": 32,
+            "truncated": False,
+            "repo_head_sha": REPO_HEAD,
+            "git_mode": "100644",
+            "blob_oid": "a" * 40,
+        },
+    )
+    result = _owner_result(query=target, hits=[
+        {"path": "docs/a.md", "title": "resident RedDog authority"},
+        {"path": "docs/b.md", "title": "resident RedDog authority"},
+    ])
+
+    coverage = bounded_retrieval.evaluate_semantic_coverage(
+        REPO_ROOT, target, result, broad_request=True
+    )
+
+    assert coverage["verdict"] == "UNSAFE_TO_ACT"
+    assert coverage["evidence_quality"]["categories"] == ["supporting"]
+
+
+def test_full_work_focus_blocks_semantic_header_broad_audit_bypass(monkeypatch) -> None:
+    monkeypatch.setattr(
+        bounded_retrieval,
+        "secure_read_repo_head_file",
+        lambda _root, path, **_kwargs: {
+            "ok": True,
+            "content": "resident RedDog authority implementation",
+            "path": path,
+            "digest": "sha256:" + "8" * 64,
+            "bytes": 41,
+            "truncated": False,
+            "repo_head_sha": REPO_HEAD,
+            "git_mode": "100644",
+            "blob_oid": "a" * 40,
+        },
+    )
+    focus = "Audit the architecture.\nSemantic: resident RedDog authority"
+    hits = [{
+        "path": "modules/example/src/reddog_authority.py",
+        "title": "resident RedDog authority implementation",
+    }]
+
+    result = _ground(
+        focus, owner_query=lambda query: _owner_result(query=query, hits=hits)
+    )
+
+    assert result.accepted is False
+    coverage = result.grounding_receipt["semantic_target_coverage"][0]
+    assert coverage["evidence_quality"]["required"] is True
+    assert coverage["evidence_quality"]["categories"] == ["implementation"]
+    assert GroundingServiceReason.SEMANTIC_EVIDENCE in result.rejection_reasons
+
+
+def test_unsupported_reads_consume_and_report_the_global_byte_budget(monkeypatch) -> None:
+    calls: list[tuple[str, int]] = []
+
+    def read(_root, path, *, remaining_budget, **_kwargs):
+        calls.append((path, remaining_budget))
+        if remaining_budget <= 0:
+            return {"ok": False, "path": path, "reason": "budget_exhausted"}
+        read_bytes = min(12_000, remaining_budget)
+        return {
+            "ok": True,
+            "content": "unrelated filler",
+            "path": path,
+            "digest": "sha256:" + "7" * 64,
+            "bytes": read_bytes,
+            "truncated": False,
+            "repo_head_sha": REPO_HEAD,
+            "git_mode": "100644",
+            "blob_oid": "b" * 40,
+        }
+
+    monkeypatch.setattr(bounded_retrieval, "secure_read_repo_head_file", read)
+    hits = [
+        {
+            "path": f"modules/example/src/candidate_{index}.py",
+            "title": "target alpha beta implementation",
+        }
+        for index in range(12)
+    ]
+    result = _ground(
+        "Inspect repository behavior.\nSemantic: target alpha beta",
+        owner_query=lambda query: _owner_result(query=query, hits=hits),
+    )
+
+    receipt = result.grounding_receipt
+    attempts = receipt["semantic_direct_read_attempts"]
+    assert result.accepted is False
+    assert receipt["semantic_direct_read_bytes_total"] == 96_000
+    assert receipt["semantic_direct_read_budget_bytes"] == 96_000
+    assert sum(item["bytes"] for item in attempts) == 96_000
+    assert all(item["reason"] == "content_not_supportive" for item in attempts)
+    assert all(item["bytes"] > 0 for item in attempts)
+    assert max(remaining for _path, remaining in calls) <= 96_000
+    assert min(remaining for _path, remaining in calls) == 0
+
+
+def test_failed_binary_reads_consume_the_shared_byte_budget(monkeypatch) -> None:
+    def read(_root, path, *, remaining_budget, **_kwargs):
+        attempted = min(12_000, remaining_budget)
+        return {
+            "ok": False, "path": path, "reason": "blob_read_rejected",
+            "attempted_bytes": attempted,
+        }
+
+    monkeypatch.setattr(bounded_retrieval, "secure_read_repo_head_file", read)
+    hits = [
+        {"path": f"modules/example/src/binary_{index}.py", "title": "target alpha beta"}
+        for index in range(12)
+    ]
+    result = _ground(
+        "Inspect repository behavior.\nSemantic: target alpha beta",
+        owner_query=lambda query: _owner_result(query=query, hits=hits),
+    )
+
+    attempts = result.grounding_receipt["semantic_direct_read_attempts"]
+    assert result.accepted is False
+    assert result.grounding_receipt["semantic_direct_read_bytes_total"] == 96_000
+    assert sum(item["bytes"] for item in attempts) == 96_000
+    assert all(item["reason"] == "blob_read_rejected" for item in attempts)
+
+
+def test_semantic_grounding_uses_bounded_query_refinement() -> None:
+    calls = []
+
+    def owner(query):
+        calls.append(query)
+        hits = [] if len(calls) == 1 else [
+            {
+                "path": "modules/communication/moltbot_bridge/src/reddog_transport_neutral_grounding_service.py",
+                "title": "Resident RedDog authority implementation",
+            },
+            {
+                "path": "modules/communication/moltbot_bridge/tests/test_reddog_transport_neutral_grounding_service.py",
+                "title": "Resident RedDog authority verification",
+            },
+        ]
+        return _owner_result(query=query, hits=hits)
+
+    result = _ground("Audit resident RedDog authority.", owner_query=owner)
+
+    assert result.accepted is True
+    assert len(calls) == 2
+    trace = result.grounding_receipt["semantic_retrieval_traces"][0]
+    assert trace["accepted"] is True
+    assert trace["selected_round"] == 2
+    assert validate_grounded_target_receipt(
+        result.grounding_receipt,
+        work_focus="Audit resident RedDog authority.",
+    ).accepted is True
+
+
+def test_grounding_receipt_rejects_rehashed_query_budget_tampering() -> None:
+    focus = "Audit p.fMALL codebase."
+    hits = [
+        {"path": "modules/foundups/pfmall/api.py", "title": "p.fMALL implementation"},
+        {
+            "path": "modules/foundups/pfmall/tests/test_http_api.py",
+            "title": "p.fMALL verification",
+        },
+    ]
+    result = _ground(focus, owner_query=lambda query: _owner_result(query=query, hits=hits))
+    receipt = deepcopy(result.grounding_receipt)
+    receipt["semantic_owner_query_attempts_total"] = 99
+    payload = dict(receipt)
+    payload.pop("receipt_id")
+    receipt["receipt_id"] = canonical_digest(payload)
+
+    validation = validate_grounded_target_receipt(receipt, work_focus=focus)
+
+    assert validation.accepted is False
+    assert "grounding_semantic_retrieval_trace_invalid" in validation.rejection_reasons
+
+
+def test_grounding_receipt_rejects_rehashed_coverage_digest_tampering() -> None:
+    focus = "Audit p.fMALL codebase."
+    hits = [
+        {"path": "modules/foundups/pfmall/api.py", "title": "p.fMALL implementation"},
+        {
+            "path": "modules/foundups/pfmall/tests/test_http_api.py",
+            "title": "p.fMALL verification",
+        },
+    ]
+    result = _ground(focus, owner_query=lambda query: _owner_result(query=query, hits=hits))
+    receipt = deepcopy(result.grounding_receipt)
+    trace = receipt["semantic_retrieval_traces"][0]
+    selected = trace["selected_round"] - 1
+    trace["attempts"][selected]["coverage_digest"] = "sha256:" + "f" * 64
+    trace_payload = dict(trace)
+    trace_payload.pop("receipt_id")
+    trace["receipt_id"] = canonical_digest(trace_payload)
+    receipt["semantic_retrieval_traces_digest"] = canonical_digest({
+        "semantic_retrieval_traces": receipt["semantic_retrieval_traces"]
+    })
+    payload = dict(receipt)
+    payload.pop("receipt_id")
+    receipt["receipt_id"] = canonical_digest(payload)
+
+    validation = validate_grounded_target_receipt(receipt, work_focus=focus)
+
+    assert validation.accepted is False
+    assert "grounding_semantic_retrieval_trace_invalid" in validation.rejection_reasons
+
+
+def test_refinement_generation_change_fails_before_model() -> None:
+    calls = []
+
+    def owner(query):
+        calls.append(query)
+        generation = GENERATION if len(calls) == 1 else "sha256:" + "3" * 64
+        hits = [] if len(calls) == 1 else [
+            {
+                "path": "modules/communication/moltbot_bridge/src/reddog_transport_neutral_grounding_service.py",
+                "title": "Resident RedDog authority implementation",
+            },
+            {
+                "path": "modules/communication/moltbot_bridge/tests/test_reddog_transport_neutral_grounding_service.py",
+                "title": "Resident RedDog authority verification",
+            },
+        ]
+        return _owner_result(query=query, hits=hits, generation=generation)
+
+    result = _ground("Audit resident RedDog authority.", owner_query=owner)
+
+    assert result.accepted is False
+    assert len(calls) == 2
+    assert GroundingServiceReason.HOLOINDEX_STALE in result.rejection_reasons
+    assert result.no_model_call_performed is True
 
 
 def test_repo_fallback_without_independent_verification_fails_before_model(tmp_path: Path) -> None:
@@ -687,6 +1014,18 @@ def test_grounding_service_has_no_model_shell_index_or_write_surface() -> None:
             "HermesFoundUpBuilder",
         ):
             assert forbidden not in source
+
+
+def test_transport_grounding_service_stays_within_wsp62_limits() -> None:
+    source = MODULE_PATH.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    assert len(source.splitlines()) <= 600
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        size = node.end_lineno - node.lineno + 1
+        limit = 180 if node.name == "ground_transport_work_focus" else 60
+        assert size <= limit, f"{node.name} is {size} lines; limit is {limit}"
 
 
 def test_backend_target_classes_match_editor_extractor_on_shared_fixtures() -> None:

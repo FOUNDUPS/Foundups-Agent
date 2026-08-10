@@ -1,5 +1,19 @@
 # HoloIndex Package ModLog
 
+## [2026-08-11] Immutable repository-audit evidence reads
+
+- Extended the existing repository-audit discovery seam so final selected
+  evidence is read from the exact current Git HEAD object rather than a
+  mutable working-tree file. Discovery may scan the checkout, but uncommitted
+  candidates cannot enter an accepted evidence receipt.
+- Added hardlink rejection to the generic confined reader. The immutable
+  reader disables Git replacement objects and inherited Git controls, admits
+  only regular tree modes, reads by blob OID, recomputes that OID, and retains
+  no write or re-index authority.
+- Streamed only the policy-bounded prefix from large Git blobs under one
+  absolute deadline. Rejected binary prefixes expose attempted-byte counts so callers
+  cannot evade the signed retrieval budget through failed reads.
+
 ## [2026-08-11] Legacy symbol persistence-policy upgrade
 
 - Extended the existing symbol reconciliation eligibility check to require the

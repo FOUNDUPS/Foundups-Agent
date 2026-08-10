@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-11 - Backend grounding manifest regressions (0.4.74)
+
+- Pinned the regenerated 1,252-file backend manifest and canonical build ID.
+- Revalidated backend compatibility and the complete extension contract after
+  immutable repository evidence and bounded refinement entered the closure.
+
 ## 2026-08-10 - Orchestration prompt transparency regressions (0.4.73)
 
 - Proved pre-gate projections contain no prompt body, blocked runs disclose no

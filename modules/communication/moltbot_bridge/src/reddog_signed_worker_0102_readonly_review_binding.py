@@ -21,6 +21,9 @@ from typing import Any, Mapping
 from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
     SIGNED_WORKER_DISPATCH_TASK_SOURCE,
 )
+from modules.communication.moltbot_bridge.src.reddog_explicit_read_target_grounding import (
+    ground_explicit_read_targets,
+)
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     MODEL_WORKER_MODE,
     REPO_CODE_AUDIT_LANE,
@@ -58,6 +61,7 @@ class Signed0102ReadOnlyReviewBindingReason:
     MEMEX_SUPPLY_BINDING_MISMATCH = (
         "REJECT_SIGNED_0102_READONLY_MEMEX_SUPPLY_BINDING_MISMATCH"
     )
+    GROUNDING_FAILED = "REJECT_SIGNED_0102_READONLY_GROUNDING_FAILED"
     READONLY_WORKER_REJECTED = "REJECT_SIGNED_0102_READONLY_WORKER_REJECTED"
 
 
@@ -112,8 +116,19 @@ class Signed0102ReadOnlyReviewRunner:
                     Signed0102ReadOnlyReviewBindingReason.MEMEX_SUPPLY_BINDING_MISMATCH,
                 ),
             )
+        grounded_context = _ground_readonly_context(
+            readonly_context=readonly_context,
+            repo_root=repo_root,
+            task_id=task_id,
+            targets=targets,
+        )
+        if grounded_context is None:
+            return _runner_reject(
+                task_id=task_id,
+                reasons=(Signed0102ReadOnlyReviewBindingReason.GROUNDING_FAILED,),
+            )
         readonly_result = execute_reddog_readonly_audit_task(
-            task_context=readonly_context,
+            task_context=grounded_context,
             repo_root=repo_root,
             task_id=task_id,
             model_runner=self.model_runner,
@@ -136,10 +151,10 @@ class Signed0102ReadOnlyReviewRunner:
         return {
             "accepted": True,
             "decision": SIGNED_0102_READONLY_REVIEW_BINDING_ACCEPT,
-            "receipt_id": _receipt_id(task_id, readonly_context, payload),
+            "receipt_id": _receipt_id(task_id, grounded_context, payload),
             "worker_runtime": SIGNED_0102_WORKER_RUNTIME,
             "capability": str(task_context.get("capability") or ""),
-            "readonly_context_digest": _digest(readonly_context),
+            "readonly_context_digest": _digest(grounded_context),
             "readonly_result": payload,
             "rejection_reasons": [],
             "no_source_repo_mutation_performed": True,
@@ -154,6 +169,43 @@ class Signed0102ReadOnlyReviewRunner:
             "worker_process_spawn_count": 0,
             "shell_command_count": 0,
         }
+
+
+def _ground_readonly_context(
+    *,
+    readonly_context: Mapping[str, Any],
+    repo_root: Path,
+    task_id: str,
+    targets: tuple[str, ...],
+) -> Mapping[str, Any] | None:
+    grounding = ground_explicit_read_targets(
+        repo_root=repo_root,
+        targets=targets,
+        foundup_id=str(readonly_context.get("foundup_id") or "foundups_agent"),
+        principal_id=str(readonly_context.get("principal_id") or "reddog-signed-0102"),
+        source_surface="main_resident_host",
+        request_id=f"signed-readonly-{task_id}",
+        action="Review the signed, authorized repository targets.",
+    )
+    if not grounding.accepted:
+        return None
+    receipt = dict(grounding.receipt)
+    receipt_digest = _digest(receipt)
+    context = dict(readonly_context)
+    assignment = dict(_mapping(context.get("assignment")))
+    assignment.update(
+        grounding_receipt_id=str(receipt.get("receipt_id") or ""),
+        grounding_receipt_digest=receipt_digest,
+    )
+    context.update(
+        grounding_receipt=receipt,
+        grounding_receipt_id=str(receipt.get("receipt_id") or ""),
+        grounding_receipt_digest=receipt_digest,
+        work_focus=grounding.work_focus,
+        typed_targets=dict(_mapping(receipt.get("typed_targets"))),
+        assignment=assignment,
+    )
+    return context
 
 
 def _try_build_readonly_context(

@@ -1,5 +1,14 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-11] Immutable repository-audit evidence regressions
+
+- Proved dirty tracked overlays are ignored, untracked candidates reject,
+  hardlinks reject, and final accepted bytes remain bound to exact Git HEAD.
+- Preserved path pruning, fixed resource ceilings, no-shell execution, and
+  WSP 62 function-size enforcement.
+- Proved size and prefix reads share one deadline; oversized blobs stream only
+  bounded prefixes and binary rejection charges exact attempted bytes.
+
 ## [2026-08-11] Legacy symbol persistence-policy upgrade regression
 
 - Proved matching embedding metadata cannot preserve a legacy symbol

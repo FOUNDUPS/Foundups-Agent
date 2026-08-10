@@ -12,6 +12,10 @@ import hashlib
 import os
 import re
 import stat
+import subprocess
+import sys
+import threading
+import time
 import unicodedata
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -181,6 +185,8 @@ def _secure_open(repo_root: Path, rel_path: str, byte_cap: int, remaining_budget
         before = os.lstat(components[-1])
         if not stat.S_ISREG(before.st_mode):
             return {"ok": False, "path": rel_path, "reason": "not_regular_file"}
+        if before.st_nlink > 1:
+            return {"ok": False, "path": rel_path, "reason": "hardlink_rejected"}
         if before.st_size > MAX_FILE_SIZE_BYTES:
             return {"ok": False, "path": rel_path, "reason": "oversize"}
         cap = min(max(0, int(byte_cap)), max(0, int(remaining_budget)))
@@ -204,6 +210,8 @@ def _validate_open_identity(opened_file: Dict[str, Any], post_open_hook=None) ->
     opened = os.fstat(fd)
     if not stat.S_ISREG(opened.st_mode) or not _same_identity(before, opened):
         return "identity_changed", opened
+    if opened.st_nlink > 1:
+        return "hardlink_rejected", opened
     if post_open_hook is not None:
         try:
             post_open_hook()
@@ -224,6 +232,269 @@ def _validate_open_identity(opened_file: Dict[str, Any], post_open_hook=None) ->
     except ValueError:
         return "outside_root", opened
     return None, opened
+
+
+def secure_read_repo_head_file(
+    repo_root: Path,
+    raw_path: str,
+    *,
+    byte_cap: int = PER_FILE_READ_BYTES,
+    remaining_budget: int = TOTAL_READ_BUDGET_BYTES,
+    timeout_seconds: float | None = None,
+) -> Dict[str, Any]:
+    """Read one immutable Git blob from the exact current HEAD."""
+
+    rel_path = str(raw_path or "").replace("\\", "/")
+    setup = _prepare_head_read(repo_root, rel_path, timeout_seconds)
+    if isinstance(setup, dict):
+        return setup
+    root, head, deadline = setup
+    cap = min(max(0, int(byte_cap)), max(0, int(remaining_budget)))
+    if cap <= 0:
+        return {"ok": False, "path": rel_path, "reason": "budget_exhausted"}
+    entry = _git_tree_entry(root, head, rel_path, timeout_seconds=_remaining(deadline))
+    if entry is None:
+        return {"ok": False, "path": rel_path, "reason": "not_committed"}
+    git_mode, blob_oid = entry
+    if git_mode not in {"100644", "100755"}:
+        return {"ok": False, "path": rel_path, "reason": "git_mode_rejected"}
+    raw, file_size, reason = _read_git_blob(
+        root, blob_oid, byte_cap=cap, deadline_monotonic=deadline
+    )
+    if reason:
+        return {
+            "ok": False, "path": rel_path, "reason": reason,
+            "attempted_bytes": len(raw),
+        }
+    if file_size <= cap and _git_blob_oid(raw, len(blob_oid)) != blob_oid:
+        return {"ok": False, "path": rel_path, "reason": "blob_oid_mismatch"}
+    return {
+        "ok": True,
+        "path": rel_path,
+        "content": raw.decode("utf-8", errors="replace"),
+        "bytes": len(raw),
+        "attempted_bytes": len(raw),
+        "digest": "sha256:" + hashlib.sha256(raw).hexdigest(),
+        "truncated": file_size > cap,
+        "repo_head_sha": head,
+        "git_mode": git_mode,
+        "blob_oid": blob_oid,
+    }
+
+
+def _prepare_head_read(
+    repo_root: Path, rel_path: str, timeout_seconds: float | None
+) -> tuple[Path, str, float] | Dict[str, Any]:
+    denied = _path_deny_reason(rel_path)
+    if denied:
+        return {"ok": False, "path": rel_path, "reason": denied}
+    from holo_index.freshness_receipt import read_git_head_sha
+
+    root = Path(repo_root).resolve(strict=False)
+    requested_timeout = 5.0 if timeout_seconds is None else float(timeout_seconds)
+    if requested_timeout <= 0:
+        return {"ok": False, "path": rel_path, "reason": "git_timeout"}
+    deadline = time.monotonic() + min(5.0, requested_timeout)
+    head = read_git_head_sha(root)
+    if not re.fullmatch(r"[0-9a-f]{40}(?:[0-9a-f]{24})?", head):
+        return {"ok": False, "path": rel_path, "reason": "repo_head_unavailable"}
+    return root, head, deadline
+
+
+def _read_git_blob(
+    root: Path, blob_oid: str, *, byte_cap: int, deadline_monotonic: float
+) -> tuple[bytes, int, str]:
+    remaining = _remaining(deadline_monotonic)
+    if remaining <= 0:
+        return b"", -1, "git_timeout"
+    size = _run_git(
+        root, ("cat-file", "-s", blob_oid), text=True,
+        timeout_seconds=remaining,
+    )
+    try:
+        file_size = int(str(size.stdout or "").strip()) if size.returncode == 0 else -1
+    except ValueError:
+        file_size = -1
+    if file_size < 0:
+        return b"", file_size, "not_committed"
+    if file_size > MAX_FILE_SIZE_BYTES:
+        return b"", file_size, "oversize"
+    if _remaining(deadline_monotonic) <= 0:
+        return b"", file_size, "git_timeout"
+    raw, complete = _read_git_blob_prefix(
+        root, blob_oid, min(file_size, byte_cap), deadline_monotonic
+    )
+    if not complete or len(raw) != min(file_size, byte_cap) or b"\x00" in raw:
+        return raw, file_size, "blob_read_rejected"
+    return raw, file_size, ""
+
+
+def _read_git_blob_prefix(
+    root: Path, blob_oid: str, limit: int, deadline_monotonic: float
+) -> tuple[bytes, bool]:
+    command = _git_command(root, ("cat-file", "blob", blob_oid))
+    if not command or limit <= 0 or _remaining(deadline_monotonic) <= 0:
+        return b"", False
+    process = None
+    chunks: list[bytes] = []
+    try:
+        process = subprocess.Popen(  # nosec B603 - fixed trusted Git argv.
+            command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            shell=False, env=_git_environment(),
+        )
+        reader = threading.Thread(
+            target=_read_prefix, args=(process.stdout, limit, chunks), daemon=True
+        )
+        reader.start()
+        reader.join(_remaining(deadline_monotonic))
+        if reader.is_alive():
+            process.kill()
+            return b"", False
+        remaining = _remaining(deadline_monotonic)
+        if remaining <= 0:
+            process.kill()
+            return b"", False
+        process.wait(timeout=remaining)
+        raw = b"".join(chunks)
+        return raw, len(raw) == limit
+    except (OSError, subprocess.SubprocessError, ValueError):
+        if process is not None:
+            process.kill()
+        return b"", False
+
+
+def _read_prefix(stream, limit: int, chunks: list[bytes]) -> None:
+    if stream is None:
+        return
+    try:
+        chunks.append(stream.read(limit))
+    finally:
+        stream.close()
+
+
+def _git_tree_entry(
+    root: Path, head: str, rel_path: str, *, timeout_seconds: float = 5.0
+) -> tuple[str, str] | None:
+    result = _run_git(
+        root, ("ls-tree", "-z", "--full-tree", head, "--", rel_path),
+        text=False, timeout_seconds=timeout_seconds,
+    )
+    raw = bytes(result.stdout or b"") if result.returncode == 0 else b""
+    records = raw[:-1].split(b"\x00") if raw.endswith(b"\x00") else []
+    if len(records) != 1 or b"\t" not in records[0]:
+        return None
+    metadata, encoded_path = records[0].split(b"\t", 1)
+    fields = metadata.split()
+    try:
+        listed_path = encoded_path.decode("utf-8", errors="strict")
+        mode, object_type, oid = (item.decode("ascii") for item in fields)
+    except (UnicodeDecodeError, ValueError):
+        return None
+    if (
+        listed_path != rel_path
+        or object_type != "blob"
+        or re.fullmatch(r"[0-9a-f]{40}(?:[0-9a-f]{24})?", oid) is None
+    ):
+        return None
+    return mode, oid
+
+
+def _git_blob_oid(raw: bytes, oid_length: int) -> str:
+    framed = b"blob " + str(len(raw)).encode("ascii") + b"\x00" + raw
+    if oid_length == 40:
+        return hashlib.sha1(framed).hexdigest()  # nosec B324 - Git SHA-1 object ID.
+    if oid_length == 64:
+        return hashlib.sha256(framed).hexdigest()
+    return ""
+
+
+def _git_environment() -> dict[str, str]:
+    environment = {
+        key: value for key, value in os.environ.items()
+        if not key.upper().startswith("GIT_")
+    }
+    environment["GIT_CONFIG_NOSYSTEM"] = "1"
+    environment["GIT_CONFIG_GLOBAL"] = os.devnull
+    return environment
+
+
+def resolve_trusted_git_executable() -> str | None:
+    """Resolve Git from an OS-owned location without consulting caller PATH."""
+
+    candidates: list[Path] = []
+    if sys.platform == "win32":
+        try:
+            import winreg
+
+            views = (winreg.KEY_WOW64_64KEY, winreg.KEY_WOW64_32KEY)
+            for view in views:
+                try:
+                    with winreg.OpenKey(
+                        winreg.HKEY_LOCAL_MACHINE,
+                        r"SOFTWARE\GitForWindows",
+                        0,
+                        winreg.KEY_READ | view,
+                    ) as key:
+                        install_path = str(winreg.QueryValueEx(key, "InstallPath")[0])
+                except OSError:
+                    continue
+                candidates.extend((
+                    Path(install_path) / "cmd" / "git.exe",
+                    Path(install_path) / "bin" / "git.exe",
+                ))
+        except (ImportError, OSError, ValueError):
+            return None
+    else:
+        candidates.extend((
+            Path("/usr/bin/git"),
+            Path("/usr/local/bin/git"),
+            Path("/opt/homebrew/bin/git"),
+        ))
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve(strict=True)
+            if stat.S_ISREG(resolved.stat().st_mode):
+                return str(resolved)
+        except (OSError, RuntimeError):
+            continue
+    return None
+
+
+_trusted_git_path = resolve_trusted_git_executable
+
+
+def _git_command(root: Path, args: Sequence[str]) -> list[str]:
+    git_executable = _trusted_git_path()
+    return ([
+        git_executable, "--no-replace-objects", "-c", "core.useReplaceRefs=false",
+        "-C", str(root), *args,
+    ] if git_executable else [])
+
+
+def _remaining(deadline: float) -> float:
+    return max(0.0, deadline - time.monotonic())
+
+
+def _run_git(
+    root: Path, args: Sequence[str], *, text: bool, timeout_seconds: float = 5.0
+) -> subprocess.CompletedProcess:
+    command = _git_command(root, args)
+    if not command or timeout_seconds <= 0:
+        return subprocess.CompletedProcess([], 1, "" if text else b"", "" if text else b"")
+    try:
+        return subprocess.run(  # nosec B603 - fixed git argv, shell disabled.
+            command,
+            capture_output=True,
+            text=text,
+            encoding="utf-8" if text else None,
+            errors="strict" if text else None,
+            timeout=min(5.0, timeout_seconds),
+            check=False,
+            shell=False,
+            env=_git_environment(),
+        )
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return subprocess.CompletedProcess([], 1, "" if text else b"", "" if text else b"")
 
 
 def secure_read_repo_file(
@@ -482,7 +753,7 @@ def _read_selected(
     rejected: List[Dict[str, str]] = []
     remaining = TOTAL_READ_BUDGET_BYTES
     for item in selected_candidates:
-        read = secure_read_repo_file(
+        read = secure_read_repo_head_file(
             repo_root, item["path"], byte_cap=PER_FILE_READ_BYTES, remaining_budget=remaining
         )
         if not read.get("ok"):
@@ -498,6 +769,8 @@ def _read_selected(
         record = {
             "path": item["path"], "digest": read["digest"], "bytes": read["bytes"],
             "category": item["category"], "truncated": read["truncated"],
+            "repo_head_sha": read["repo_head_sha"], "git_mode": read["git_mode"],
+            "blob_oid": read["blob_oid"],
         }
         selected.append(record)
         hits.append({

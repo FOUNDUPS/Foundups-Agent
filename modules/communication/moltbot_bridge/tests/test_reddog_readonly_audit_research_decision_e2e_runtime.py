@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
+from holo_index.freshness_receipt import HoloIndexFreshnessReceipt, read_git_head_sha
 from holo_index.repository_state import RepositoryState
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ARCHITECT_DETERMINATION_ACCEPT,
@@ -65,7 +65,7 @@ MODULE_PATH = (
     / "reddog_readonly_audit_research_decision_e2e_runtime.py"
 )
 NOW = "2026-07-16T00:00:00+00:00"
-HEAD = "da7bb6d20"
+HEAD = read_git_head_sha(REPO_ROOT)
 REVISION = "sha256:e2e-work-state"
 
 

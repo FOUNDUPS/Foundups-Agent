@@ -67,9 +67,8 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
     load_existing_holoindex_receipt,
     observe_repo_state,
 )
-from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
-    allocate_reddog_wsp15_receipt,
-)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import allocate_reddog_wsp15_receipt
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import resolve_grounding_read_targets
 REDDOG_MAIN_BOOTSTRAP_READY = "REDDOG_MAIN_BOOTSTRAP_READY"
 REDDOG_MAIN_BOOTSTRAP_NOT_READY = "REDDOG_MAIN_BOOTSTRAP_NOT_READY"
 REDDOG_MAIN_BOOTSTRAP_DISABLED = "REDDOG_MAIN_BOOTSTRAP_DISABLED"
@@ -193,7 +192,8 @@ def run_reddog_main_readonly_operational_bootstrap(
 
     root = Path(repo_root).resolve()
     paths = _normalize_paths(changed_paths)
-    targets = _normalize_paths(allowed_read_targets)
+    grounded_targets, grounding_reasons = resolve_grounding_read_targets(grounding_receipt, work_focus=grounding_work_focus)
+    targets = _normalize_paths((*allowed_read_targets, *grounded_targets))
     wsp15_allocation_receipt = allocate_reddog_wsp15_receipt(
         requested_operation=requested_operation,
         prompt_text=prompt_text,
@@ -201,7 +201,7 @@ def run_reddog_main_readonly_operational_bootstrap(
         allowed_read_targets=targets,
         model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
     ).to_dict()
-    reasons: list[str] = []
+    reasons: list[str] = list(grounding_reasons)
     architect_model_selection_receipt = architect_model_selection_receipt_override
     architect_model_runtime_binding_receipt = architect_model_runtime_binding_receipt_override
     if architect_model_runtime_binding_receipt is None and architect_model_runtime_binding_receipt_path:

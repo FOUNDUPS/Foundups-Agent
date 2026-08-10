@@ -1,6 +1,7 @@
 """Focused signed-worker model-runtime boundary regressions."""
 
 from pathlib import Path
+import subprocess
 
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
     canonical_model_runtime_binding_digest,
@@ -101,7 +102,7 @@ def test_signed_worker_rejects_tampered_model_runtime_context(
 def test_signed_0102_readonly_runner_executes_bound_review(
     tmp_path: Path,
 ) -> None:
-    repo = _repo_with_readonly_target(tmp_path)
+    repo = _repo_with_architect_review_target(tmp_path)
     context, _ = _architect_review_context()
     allocation = context["wsp15_allocation_receipt"]
     model_runner = _EchoEvidenceModelRunner()
@@ -122,7 +123,7 @@ def test_signed_0102_readonly_runner_executes_bound_review(
     readonly = result.runner_result["readonly_result"]
     assert readonly["report"]["model_backed_0102_worker_performed"] is True
     assert readonly["report"]["target_evidence"][0]["path"] == (
-        "docs/work_ledger.schema.json"
+        "modules/foundups/paccess_001/src/worker.py"
     )
     assert model_runner.calls[0]["binding"]["wsp15_allocation_receipt_id"] == (
         allocation["receipt_id"]
@@ -132,7 +133,7 @@ def test_signed_0102_readonly_runner_executes_bound_review(
 def test_signed_0102_runner_receives_model_runtime_binding(
     tmp_path: Path,
 ) -> None:
-    repo = _repo_with_readonly_target(tmp_path)
+    repo = _repo_with_architect_review_target(tmp_path)
     context, binding = _architect_review_context()
     model_runner = _EchoEvidenceModelRunner()
     result = execute_reddog_signed_worker_dispatch_task(
@@ -150,6 +151,24 @@ def test_signed_0102_runner_receives_model_runtime_binding(
     assert selected["model_runtime_binding_receipt_id"] == binding["receipt_id"]
     worker = result.runner_result["readonly_result"]["report"]["worker_receipt"]
     assert worker["model_runtime_binding_receipt_id"] == binding["receipt_id"]
+
+
+def test_signed_0102_runner_rejects_before_model_when_exact_target_is_missing(
+    tmp_path: Path,
+) -> None:
+    context, _ = _architect_review_context()
+    model_runner = _EchoEvidenceModelRunner()
+    result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id="task-0102-missing-grounding-target",
+        repo_root=tmp_path,
+        runner=Signed0102ReadOnlyReviewRunner(model_runner=model_runner),
+    )
+    assert result.accepted is False
+    assert Signed0102ReadOnlyReviewBindingReason.GROUNDING_FAILED in (
+        result.rejection_reasons
+    )
+    assert model_runner.calls == []
 
 
 def test_signed_0102_readonly_runner_rejects_code_change(
@@ -188,3 +207,17 @@ def _architect_review_context():
             "capability": "architect_review",
         }
     )
+
+
+def _repo_with_architect_review_target(tmp_path: Path) -> Path:
+    repo = _repo_with_readonly_target(tmp_path)
+    target = repo / "modules" / "foundups" / "paccess_001" / "src" / "worker.py"
+    target.parent.mkdir(parents=True)
+    target.write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-m", "test: add review target"],
+        check=True,
+        capture_output=True,
+    )
+    return repo

@@ -1,5 +1,11 @@
 # RedDog Interface
 
+Version 0.4.74 pins the backend manifest for bounded iterative repository
+grounding. Semantic HoloIndex hits are candidate locators only; exact current
+HEAD content, retrieval trace, repository root, generation, and resource policy
+must validate before Fusion. No query-time index or execution authority is
+added.
+
 Version 0.4.73 adds `reddog_orchestration_prompt_trace.v1`. The extension emits
 one content-free policy projection before model invocation, using a
 process-local keyed correlation value rather than a raw prompt digest, and stores a

@@ -5,13 +5,14 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+import subprocess
 from typing import Any, Mapping
 
 import pytest
 
 from holo_index.memex_access_policy_receipt import build_memex_access_policy_receipt
 from holo_index.memex_projection_adapter import project_foundup_memex_to_holoindex_shadow
-from holo_index.repository_state import RepositoryState
+from holo_index.repository_state import RepositoryState, repository_root_digest
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     READONLY_AUDIT_TASK_SKILL,
@@ -48,9 +49,7 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executo
     ReadOnlyAuditTaskRejectReason,
     execute_reddog_readonly_audit_task,
 )
-from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import (
-    ground_transport_work_focus,
-)
+from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import ground_transport_work_focus
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
     canonical_reddog_wsp15_allocation_digest,
@@ -61,6 +60,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
 )
+from modules.communication.moltbot_bridge.tests.grounding_v2_test_helpers import attach_exact_head_fixture_grounding
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -123,7 +123,6 @@ class _FakeQueryAdapter:
         self.generation_id = generation_id
         self.freshness_digest = freshness_digest
         self.calls = []
-
     def query(self, *, query: str, allowed_paths, limit: int):
         self.calls.append({"query": query, "allowed_paths": tuple(allowed_paths), "limit": limit})
         path = allowed_paths[0] if allowed_paths else "modules/communication/moltbot_bridge/src/sample.py"
@@ -146,7 +145,8 @@ class _FakeQueryAdapter:
             "freshness_generation_id": self.generation_id,
             "freshness_receipt_digest": self.freshness_digest,
             "freshness_receipt_path": "E:/HoloIndex/indexes/holoindex_freshness_receipt.json",
-            "repo_head_sha": "abc123",
+            "repo_head_sha": getattr(self, "repo_head_sha", "abc123"),
+            "repo_root_digest": getattr(self, "repo_root_digest", ""),
         }
 
 
@@ -323,8 +323,23 @@ def _repo(tmp_path: Path) -> Path:
     target.write_text('{"schema": "work-ledger", "version": 1}\n', encoding="utf-8")
     other = root / "modules" / "communication" / "moltbot_bridge" / "src" / "sample.py"
     other.parent.mkdir(parents=True)
-    other.write_text("VALUE = 1\n", encoding="utf-8")
+    other.write_text(
+        '"""RedDog worker grounding implementation fixture."""\nVALUE = 1\n',
+        encoding="utf-8",
+    )
+    test_dir = root / "modules" / "communication" / "moltbot_bridge" / "tests"
+    test_dir.mkdir(parents=True)
+    (test_dir / "test_sample.py").write_text('"""RedDog worker verification."""\n', encoding="utf-8")
+    _commit_repo(root, "initial fixture")
     return root
+
+
+def _commit_repo(root: Path, message: str) -> None:
+    if not (root / ".git").exists():
+        subprocess.run(["git", "init", "-q", str(root)], check=True)
+    subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+    command = ["git", "-C", str(root), "-c", "user.name=RedDog Tests", "-c", "user.email=reddog-tests@example.invalid", "commit", "-qm", message]
+    subprocess.run(command, check=True)
 
 
 def _repo_with_ledgers(tmp_path: Path) -> Path:
@@ -400,10 +415,7 @@ def _fallback_grounding_context(root: Path, *, model_backed: bool) -> dict:
     test = root / "modules" / "foundups" / "pfmall" / "tests" / "test_pfmall_runtime.py"
     test.parent.mkdir(parents=True, exist_ok=True)
     test.write_text("def test_pfmall():\n    assert True\n", encoding="utf-8")
-    ref = root / ".git" / "refs" / "heads" / "main"
-    ref.parent.mkdir(parents=True, exist_ok=True)
-    (root / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
-    ref.write_text("a" * 40 + "\n", encoding="utf-8")
+    _commit_repo(root, "add pfmall fixture")
     focus = "Audit p.fMALL codebase and recommend defensive improvements."
     grounding = ground_transport_work_focus(
         repo_root=root,
@@ -424,7 +436,7 @@ def _fallback_grounding_context(root: Path, *, model_backed: bool) -> dict:
     assert grounding.accepted is True
     targets = tuple(grounding.typed_targets["repo_file_targets"])
     context = (
-        _model_context(allowed_read_targets=targets)
+        _model_context(root, allowed_read_targets=targets)
         if model_backed
         else _context()
     )
@@ -484,8 +496,7 @@ def _rehash_fallback_context(context: dict) -> None:
     context["assignment"]["grounding_receipt_digest"] = digest
 
 
-def _model_context(
-    *,
+def _model_context(repo_root: Path, *,
     allowed_read_targets: tuple[str, ...] | None = None,
     lane_id: str = REPO_CODE_AUDIT_LANE,
     requested_operation: str = "repo_code_audit",
@@ -534,68 +545,55 @@ def _model_context(
     context["assignment"]["memex_source_revision"] = MEMEX_SOURCE_REVISION
     context["assignment"]["memex_holoindex_generation_id"] = MEMEX_GENERATION_ID
     context["assignment"]["memex_policy_expires_at"] = MEMEX_POLICY_EXPIRES_AT
+    attach_exact_head_fixture_grounding(context, repo_root)
     return context
 
 
-def _grounded_model_context() -> dict:
-    focus = "Audit work ledger continuity and RedDog worker grounding."
-    semantic_target = "RedDog worker grounding"
+def _grounded_model_context(root: Path) -> dict:
+    focus = (
+        "Read first: docs/work_ledger.schema.json\n"
+        "Semantic: RedDog worker grounding\n"
+        "Audit grounded worker behavior."
+    )
     repo_target = "docs/work_ledger.schema.json"
-    context = _model_context(allowed_read_targets=(repo_target,))
-    typed = {
-        "repo_file_targets": [repo_target],
-        "semantic_targets": [semantic_target],
-        "external_research_targets": [],
-        "quoted_reference_blocks_count": 0,
-        "quoted_reference_blocks_digest": grounding_digest([]),
-    }
-    coverage = [
-        {
-            "target": semantic_target,
-            "verdict": "SUFFICIENT",
-            "evidence_refs": ["code:docs/work_ledger.schema.json"],
-        }
+    context = _model_context(root, allowed_read_targets=(repo_target,))
+    head = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    grounding = ground_transport_work_focus(
+        repo_root=root, work_focus=focus, foundup_id="foundups_agent",
+        authenticated_principal_id="principal-012",
+        source_surface="editor_thin_client", client_request_id="grounded-model-1",
+        owner_query=lambda query: {
+            "ok": True, "query": query, "freshness": "CURRENT",
+            "raw_result": {"code_hits": [
+                {"path": "modules/communication/moltbot_bridge/src/sample.py", "title": "RedDog worker grounding implementation"},
+                {"path": "modules/communication/moltbot_bridge/tests/test_sample.py", "title": "RedDog worker grounding verification"},
+            ]},
+            "index_gap_detected": False, "no_holoindex_reindex_performed": True,
+            "freshness_generation_id": "sha256:" + "1" * 64,
+            "freshness_receipt_digest": "sha256:" + "2" * 64,
+            "repo_head_sha": head, "repo_root_digest": repository_root_digest(root),
+        },
+    )
+    assert grounding.accepted is True
+    assert grounding.typed_targets["semantic_targets"] == [
+        "RedDog worker grounding"
     ]
-    receipt = {
-        "schema_version": GROUNDING_SCHEMA_VERSION,
-        "source_surface": "editor_thin_client",
-        "work_focus_digest": grounding_digest({"work_focus": focus}),
-        "typed_targets": typed,
-        "typed_targets_digest": grounding_digest(typed),
-        "grounding_preflight_applied": True,
-        "grounding_preflight_passed": True,
-        "grounding_preflight_rejection_reasons": [],
-        "grounding_target_universe_required": True,
-        "repo_file_targets_count": 1,
-        "semantic_targets_count": 1,
-        "external_research_targets_count": 0,
-        "quoted_reference_blocks_count": 0,
-        "semantic_target_coverage": coverage,
-        "semantic_target_coverage_digest": grounding_digest(
-            {"semantic_target_coverage": coverage}
-        ),
-        "target_recall_ok": True,
-        "required_targets_missing": [],
-        "direct_read_paths": [repo_target],
-        "holoindex_owner_query_ok": True,
-        "holoindex_freshness": "CURRENT",
-        "holoindex_generation_id": "sha256:" + "1" * 64,
-        "holoindex_freshness_receipt_digest": "sha256:" + "2" * 64,
-        "holoindex_repo_head_sha": "abc123",
-        "holoindex_query_receipt_id": "sha256:" + "3" * 64,
-        "holoindex_index_gap_detected": False,
-        "no_holoindex_reindex_performed": True,
-    }
-    receipt["receipt_id"] = grounding_digest(receipt)
+    assert grounding.grounding_receipt["semantic_owner_query_attempts_total"] == 1
+    assert grounding.grounding_receipt["semantic_owner_query_budget"] == 16
+    assert grounding.grounding_receipt["semantic_grounding_deadline_seconds"] == 30.0
+    receipt = dict(grounding.grounding_receipt)
+    typed = dict(grounding.typed_targets)
     context["grounding_receipt"] = receipt
     context["grounding_receipt_id"] = receipt["receipt_id"]
     context["grounding_receipt_digest"] = grounding_digest(receipt)
     context["work_focus"] = focus
     context["typed_targets"] = typed
-    context["semantic_targets"] = [semantic_target]
-    context["assignment"] = dict(context["assignment"])
-    context["assignment"]["grounding_receipt_id"] = receipt["receipt_id"]
-    context["assignment"]["grounding_receipt_digest"] = context["grounding_receipt_digest"]
+    context["semantic_targets"] = list(typed["semantic_targets"])
+    context["assignment"] = {**context["assignment"], "grounding_receipt_id": receipt["receipt_id"], "grounding_receipt_digest": context["grounding_receipt_digest"], "allowed_read_targets": tuple(dict.fromkeys((*context["assignment"]["allowed_read_targets"], *receipt["semantic_direct_read_paths"])))}
+    _replace_model_runtime_binding(context, context["model_runtime_binding_receipt"])
     return context
 
 
@@ -731,7 +729,7 @@ def test_readonly_audit_executor_reads_only_allowlisted_targets(tmp_path: Path) 
     assert set(finding["evidence_refs"]) == set(result.report["evidence_refs"])
 
 
-def test_deterministic_fallback_rejects_unstaged_content_change_at_consuming_read(
+def test_deterministic_fallback_ignores_unstaged_overlay_at_consuming_read(
     tmp_path: Path,
 ) -> None:
     root = _repo(tmp_path)
@@ -740,8 +738,7 @@ def test_deterministic_fallback_rejects_unstaged_content_change_at_consuming_rea
 
     result = execute_reddog_readonly_audit_task(task_context=context, repo_root=root)
 
-    assert result.accepted is False
-    assert ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED in result.rejection_reasons
+    assert result.accepted is True
     assert result.no_model_call_performed is True
 
 
@@ -770,7 +767,7 @@ def test_deterministic_consumer_requires_exact_selected_read_receipt(
     assert ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED in result.rejection_reasons
 
 
-def test_model_fallback_rejects_changed_content_before_index_or_model(tmp_path: Path) -> None:
+def test_model_fallback_ignores_dirty_overlay_before_index_or_model(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     context = _fallback_grounding_context(root, model_backed=True)
     _fallback_source_path(root, context).write_text("CHANGED = True\n", encoding="utf-8")
@@ -787,14 +784,11 @@ def test_model_fallback_rejects_changed_content_before_index_or_model(tmp_path: 
         codeindex_adapter=code,
     )
 
-    assert result.accepted is False
-    assert ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED in result.rejection_reasons
-    assert runner.calls == []
-    assert holo.calls == []
-    assert code.calls == []
+    assert result.accepted is True
+    assert runner.calls
 
 
-def test_model_fallback_rechecks_content_after_model_even_when_head_is_unchanged(
+def test_model_fallback_remains_bound_to_head_when_overlay_changes_during_model(
     tmp_path: Path,
 ) -> None:
     root = _repo(tmp_path)
@@ -817,10 +811,12 @@ def test_model_fallback_rechecks_content_after_model_even_when_head_is_unchanged
         codeindex_adapter=_FakeQueryAdapter(),
     )
 
-    assert result.accepted is False
-    assert ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED in result.rejection_reasons
+    assert result.accepted is True
     assert runner.calls
-    assert context["grounding_receipt"]["repo_state_head_sha"] == "a" * 40
+    assert context["grounding_receipt"]["repo_state_head_sha"] == subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
 
 
 def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_path: Path) -> None:
@@ -830,7 +826,7 @@ def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_p
     code = _FakeQueryAdapter()
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=runner,
@@ -872,7 +868,7 @@ def test_model_failure_result_carries_provider_call_evidence(tmp_path: Path) -> 
             )
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id=task_id,
         model_runner=_FailedEvidenceModelRunner(),
@@ -944,16 +940,14 @@ def test_audit_rejects_missing_or_mismatched_provider_evidence_before_acceptance
                     "provider_call_evidence": evidence_factory(kwargs["binding"]),
                 }
             )
-
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-provider-gate",
         model_runner=_ForgedEvidenceRunner(),
         holoindex_adapter=_FakeQueryAdapter(),
         codeindex_adapter=_FakeQueryAdapter(),
     )
-
     assert result.accepted is False
     assert result.no_model_call_performed is False
     assert ReadOnlyAuditTaskRejectReason.PROVIDER_CALL_EVIDENCE in (
@@ -962,13 +956,16 @@ def test_audit_rejects_missing_or_mismatched_provider_evidence_before_acceptance
     assert result.provider_call_evidence == {}
 
 
-def test_model_backed_audit_consumes_bound_semantic_and_repo_targets(tmp_path: Path) -> None:
+def test_model_backed_audit_consumes_bound_semantic_and_repo_targets(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    holo = _FakeQueryAdapter()
     code = _FakeQueryAdapter()
-    context = _grounded_model_context()
-
+    context = _grounded_model_context(root)
+    receipt = context["grounding_receipt"]
+    holo = _FakeQueryAdapter(freshness="CURRENT", generation_id=receipt["holoindex_generation_id"],
+                             freshness_digest=receipt["holoindex_freshness_receipt_digest"])
+    holo.repo_head_sha, holo.repo_root_digest = receipt["holoindex_repo_head_sha"], receipt["holoindex_repo_root_digest"]
+    monkeypatch.setattr(readonly_worker_runtime, "read_repository_state", lambda *args, **kwargs: RepositoryState(head_sha=receipt["holoindex_repo_head_sha"], clean=True, state_digest="sha256:test-clean"))
     result = execute_reddog_readonly_audit_task(
         task_context=context,
         repo_root=root,
@@ -977,7 +974,6 @@ def test_model_backed_audit_consumes_bound_semantic_and_repo_targets(tmp_path: P
         holoindex_adapter=holo,
         codeindex_adapter=code,
     )
-
     assert result.accepted is True
     assert holo.calls and "RedDog worker grounding" in holo.calls[0]["query"]
     assert "docs/work_ledger.schema.json" in holo.calls[0]["allowed_paths"]
@@ -987,7 +983,7 @@ def test_model_backed_audit_consumes_bound_semantic_and_repo_targets(tmp_path: P
     assert worker_receipt["grounding_receipt_digest"] == context["grounding_receipt_digest"]
 
 
-@pytest.mark.parametrize("mutation", ["work_focus", "receipt_id", "typed_targets"])
+@pytest.mark.parametrize("mutation", ["work_focus", "receipt_id", "typed_targets", "head"])
 def test_grounding_substitution_rejects_before_index_or_model(
     tmp_path: Path,
     mutation: str,
@@ -996,15 +992,17 @@ def test_grounding_substitution_rejects_before_index_or_model(
     runner = _EchoEvidenceModelRunner()
     holo = _FakeQueryAdapter()
     code = _FakeQueryAdapter()
-    context = _grounded_model_context()
+    context = _grounded_model_context(root)
     if mutation == "work_focus":
         context["work_focus"] = "substituted focus"
     elif mutation == "receipt_id":
         context["grounding_receipt_id"] = "sha256:substituted"
-    else:
+    elif mutation == "typed_targets":
         context["typed_targets"] = dict(context["typed_targets"])
         context["typed_targets"]["repo_file_targets"] = ["modules/attacker.py"]
-
+    else:
+        (root / "HEAD_CHANGED.txt").write_text("changed\n", encoding="utf-8")
+        _commit_repo(root, "changed head")
     result = execute_reddog_readonly_audit_task(
         task_context=context,
         repo_root=root,
@@ -1027,7 +1025,7 @@ def test_runtime_binding_is_authoritative_over_readonly_model_selection_metadata
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
     selection = _model_selection()
-    context = _model_context()
+    context = _model_context(root)
     context["model_selection_receipt"] = selection
 
     result = execute_reddog_readonly_audit_task(
@@ -1059,7 +1057,7 @@ def test_model_selection_receipt_cannot_replace_required_runtime_binding(
 ) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     _remove_model_runtime_binding(context)
     context["model_selection_receipt"] = _model_selection()
     holo = _FakeQueryAdapter()
@@ -1090,7 +1088,7 @@ def test_model_runtime_binding_receipt_is_bound_to_readonly_audit_runner(tmp_pat
         model_id="z-ai/glm-5.2",
         panel_model_ids=("moonshotai/kimi-k3",),
     )
-    context = _model_context()
+    context = _model_context(root)
     _replace_model_runtime_binding(context, runtime_binding)
 
     result = execute_reddog_readonly_audit_task(
@@ -1121,7 +1119,7 @@ def test_mismatched_model_runtime_binding_receipt_rejects_before_readonly_model_
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
     runtime_binding = model_runtime_binding_receipt(runtime_surface="wrong_surface")
-    context = _model_context()
+    context = _model_context(root)
     context["model_runtime_binding_receipt"] = runtime_binding
     holo = _FakeQueryAdapter()
     code = _FakeQueryAdapter()
@@ -1148,7 +1146,7 @@ def test_same_surface_runtime_binding_substitution_rejects_before_any_call(
 ) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     substituted = model_runtime_binding_receipt(
         runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
         model_id="moonshotai/kimi-k3",
@@ -1181,7 +1179,7 @@ def test_production_audit_rejects_absent_runtime_binding_before_provider_or_inde
     holo = _FakeQueryAdapter()
     code = _FakeQueryAdapter()
 
-    context = _model_context()
+    context = _model_context(root)
     _remove_model_runtime_binding(context)
 
     result = execute_reddog_readonly_audit_task(
@@ -1207,7 +1205,7 @@ def test_tampered_selection_metadata_cannot_override_readonly_runtime_binding(
     runner = _EchoEvidenceModelRunner()
     selection = _model_selection()
     selection["selected_model_ids"] = ["attacker/model"]
-    context = _model_context()
+    context = _model_context(root)
     context["model_selection_receipt"] = selection
     holo = _FakeQueryAdapter()
     code = _FakeQueryAdapter()
@@ -1233,7 +1231,7 @@ def test_tampered_selection_metadata_cannot_override_readonly_runtime_binding(
 def test_model_backed_runtime_freshness_lane_uses_same_guarded_path(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context(
+    context = _model_context(root,
         lane_id="runtime_freshness_audit",
         requested_operation="runtime_freshness_audit",
         prompt_text="Run model-backed runtime freshness audit.",
@@ -1262,7 +1260,7 @@ def test_model_backed_runtime_freshness_lane_uses_same_guarded_path(tmp_path: Pa
 def test_model_backed_external_research_lane_consumes_grounded_external_evidence(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner(external_only_ref=True)
-    context = _model_context(
+    context = _model_context(root,
         lane_id="external_research_audit",
         requested_operation="external_research_audit",
         prompt_text="Run model-backed external research audit.",
@@ -1302,7 +1300,7 @@ def test_model_backed_external_research_lane_consumes_grounded_external_evidence
 def test_model_backed_external_research_target_requires_retriever_before_model(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner(external_only_ref=True)
-    context = _model_context(
+    context = _model_context(root,
         lane_id="external_research_audit",
         requested_operation="external_research_audit",
         prompt_text="Run model-backed external research audit.",
@@ -1327,7 +1325,7 @@ def test_model_backed_external_research_target_requires_retriever_before_model(t
 def test_model_backed_rejects_external_targets_outside_external_research_lane(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner(include_external_ref=True)
-    context = _model_context()
+    context = _model_context(root)
     context["external_research_targets"] = ["https://github.com/karpathy/autoresearch"]
     context["external_research_now_s"] = 1100
 
@@ -1349,7 +1347,7 @@ def test_model_backed_rejects_external_targets_outside_external_research_lane(tm
 def test_model_backed_external_research_context_sanitizes_prompt_injection(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner(external_only_ref=True)
-    context = _model_context(
+    context = _model_context(root,
         lane_id="external_research_audit",
         requested_operation="external_research_audit",
         prompt_text="Run model-backed external research audit.",
@@ -1389,7 +1387,7 @@ def test_model_backed_external_research_context_sanitizes_prompt_injection(tmp_p
 def test_model_backed_discovers_index_candidate_before_direct_read(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context(allowed_read_targets=("docs/work_ledger.schema.json",))
+    context = _model_context(root, allowed_read_targets=("docs/work_ledger.schema.json",))
 
     result = execute_reddog_readonly_audit_task(
         task_context=context,
@@ -1414,7 +1412,7 @@ def test_model_backed_repo_code_audit_rejects_unknown_evidence_ref(tmp_path: Pat
     root = _repo(tmp_path)
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=_EchoEvidenceModelRunner(unknown_ref=True),
@@ -1431,7 +1429,7 @@ def test_model_backed_rejects_stale_holoindex_receipt_before_model_call(tmp_path
     runner = _EchoEvidenceModelRunner()
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=runner,
@@ -1449,7 +1447,7 @@ def test_model_backed_rejects_holoindex_error_before_model_call(tmp_path: Path) 
     runner = _EchoEvidenceModelRunner()
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=runner,
@@ -1467,7 +1465,7 @@ def test_model_backed_rejects_fresh_holoindex_without_generation_before_model_ca
     runner = _EchoEvidenceModelRunner()
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=runner,
@@ -1484,7 +1482,7 @@ def test_model_backed_binds_holoindex_generation_into_worker_receipt(tmp_path: P
     root = _repo(tmp_path)
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=_EchoEvidenceModelRunner(),
@@ -1505,7 +1503,7 @@ def test_model_backed_binds_holoindex_generation_into_worker_receipt(tmp_path: P
 def test_model_backed_includes_optional_memex_query_receipt(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
     context["memex_projection"] = _memex_projection(
         access_policy_receipt=context["memex_access_policy_receipt"]
@@ -1545,7 +1543,7 @@ def test_model_backed_includes_optional_memex_query_receipt(tmp_path: Path) -> N
 def test_model_backed_supplies_assignment_bound_memex_projection_from_view(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     context["memex_view"] = _memex_view()
 
     result = execute_reddog_readonly_audit_task(
@@ -1575,7 +1573,7 @@ def test_model_backed_supplies_assignment_bound_memex_projection_from_view(tmp_p
 def test_model_backed_rejects_memex_view_without_supplier_expiry_before_model(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     context["assignment"] = dict(context["assignment"])
     context["assignment"].pop("memex_policy_expires_at")
     context["memex_view"] = _memex_view()
@@ -1597,7 +1595,7 @@ def test_model_backed_rejects_memex_view_without_supplier_expiry_before_model(tm
 def test_model_backed_allows_memex_refs_only_as_supplemental_citations(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner(include_memex_ref=True)
-    context = _model_context()
+    context = _model_context(root)
     context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
     context["memex_projection"] = _memex_projection(
         access_policy_receipt=context["memex_access_policy_receipt"]
@@ -1622,7 +1620,7 @@ def test_model_backed_allows_memex_refs_only_as_supplemental_citations(tmp_path:
 def test_model_backed_rejects_memex_only_citation_for_repo_audit_finding(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner(memex_only_ref=True)
-    context = _model_context()
+    context = _model_context(root)
     context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
     context["memex_projection"] = _memex_projection(
         access_policy_receipt=context["memex_access_policy_receipt"]
@@ -1647,7 +1645,7 @@ def test_model_backed_rejects_memex_only_citation_for_repo_audit_finding(tmp_pat
 def test_model_backed_rejects_invalid_supplied_memex_projection_before_model(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
     context["memex_projection"] = {"accepted": True, "records": [], "receipt": None}
 
@@ -1668,7 +1666,7 @@ def test_model_backed_rejects_invalid_supplied_memex_projection_before_model(tmp
 def test_model_backed_rejects_tampered_memex_projection_before_model(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
     projection = _memex_projection(access_policy_receipt=context["memex_access_policy_receipt"])
     projection["records"][0]["text"] = projection["records"][0]["text"] + " tampered"
@@ -1691,7 +1689,7 @@ def test_model_backed_rejects_tampered_memex_projection_before_model(tmp_path: P
 def test_model_backed_rejects_memex_projection_without_policy_receipt(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     context["memex_projection"] = _memex_projection()
 
     result = execute_reddog_readonly_audit_task(
@@ -1711,7 +1709,7 @@ def test_model_backed_rejects_memex_projection_without_policy_receipt(tmp_path: 
 def test_model_backed_rejects_memex_policy_work_order_mismatch(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     bad_policy = build_memex_access_policy_receipt(
         principal_id="principal-012",
         work_order_id="other-assignment",
@@ -1745,7 +1743,7 @@ def test_model_backed_rejects_memex_policy_work_order_mismatch(tmp_path: Path) -
 def test_model_backed_rejects_memex_projection_snapshot_binding_mismatch(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
     projection = _memex_projection(access_policy_receipt=context["memex_access_policy_receipt"])
     projection["records"][0]["metadata"] = dict(projection["records"][0]["metadata"])
@@ -1769,7 +1767,7 @@ def test_model_backed_rejects_memex_projection_snapshot_binding_mismatch(tmp_pat
 def test_model_backed_rejects_replayed_memex_projection_receipt(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    context = _model_context()
+    context = _model_context(root)
     context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
     projection = _memex_projection(access_policy_receipt=context["memex_access_policy_receipt"])
     context["memex_projection"] = projection
@@ -1791,7 +1789,7 @@ def test_model_backed_rejects_replayed_memex_projection_receipt(tmp_path: Path) 
 
 def test_model_backed_rejects_wsp15_binding_digest_mismatch(tmp_path: Path) -> None:
     root = _repo(tmp_path)
-    context = _model_context()
+    context = _model_context(root)
     context["assignment"] = dict(context["assignment"])
     context["assignment"]["wsp15_allocation_digest"] = "sha256:tampered"
 
@@ -1812,12 +1810,13 @@ def test_model_backed_rejects_read_scope_outside_wsp15_allocation(
     tmp_path: Path,
 ) -> None:
     root = _repo(tmp_path)
-    context = _model_context(
+    context = _model_context(root,
         allowed_read_targets=("docs/work_ledger.schema.json",)
     )
     context["assignment"] = dict(context["assignment"])
     context["assignment"]["allowed_read_targets"] = [
-        "modules/communication/moltbot_bridge/src/sample.py"
+        "docs/work_ledger.schema.json",
+        "modules/communication/moltbot_bridge/src/sample.py",
     ]
 
     result = execute_reddog_readonly_audit_task(
@@ -1838,7 +1837,7 @@ def test_model_backed_rejects_read_scope_outside_wsp15_allocation(
 
 def test_model_backed_rejects_regular_allocation_without_fusion_requirement(tmp_path: Path) -> None:
     root = _repo(tmp_path)
-    context = _model_context()
+    context = _model_context(root)
     allocation = allocate_reddog_wsp15_receipt(
         requested_operation="answer_simple_question",
         prompt_text="Say hello.",
@@ -1907,7 +1906,7 @@ def test_model_backed_rejects_repo_change_after_direct_reads(
     )
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=runner,
@@ -1950,7 +1949,7 @@ def test_model_backed_rejects_repo_change_before_report_acceptance(
     )
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=_EchoEvidenceModelRunner(),
@@ -1989,7 +1988,7 @@ def test_model_backed_rejects_invalid_recommended_action_enum(tmp_path: Path) ->
             )
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=BadActionRunner(),
@@ -2026,7 +2025,7 @@ def test_model_backed_rejects_stop_with_next_slice(tmp_path: Path) -> None:
             )
 
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=_model_context(root),
         repo_root=root,
         task_id="task-1",
         model_runner=StopWithSliceRunner(),
@@ -2077,7 +2076,7 @@ def test_production_runner_uses_fusion_synthesis_excerpt_for_json(tmp_path: Path
 
     monkeypatch.setattr(readonly_worker_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
 
-    task_context = _model_context()
+    task_context = _model_context(root)
     _replace_model_runtime_binding(
         task_context,
         model_runtime_binding_receipt(
@@ -2154,7 +2153,7 @@ def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
 
 def test_model_backed_requires_valid_wsp15_receipt(tmp_path: Path) -> None:
     root = _repo(tmp_path)
-    context = _model_context()
+    context = _model_context(root)
     context["wsp15_allocation_receipt"] = dict(context["wsp15_allocation_receipt"])
     context["wsp15_allocation_receipt"]["complexity"] = False
 
@@ -2302,7 +2301,7 @@ def test_run_task_model_backed_task_fails_closed_without_runtime_mode(tmp_path: 
     _patch_default_query_adapters(monkeypatch)
     db = AgentDB()
     task_id = "readonly-audit-model-task-1"
-    context = _model_context()
+    context = _model_context(root)
     _replace_model_runtime_binding(
         context,
         model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT),
@@ -2366,7 +2365,7 @@ def test_agentdb_openclaw_claim_run_task_model_worker_persists_report(tmp_path: 
     monkeypatch.setattr(FoundupsFusionRepoAuditModelRunner, "run_repo_code_audit", fake_run)
     db = AgentDB()
     task_id = "readonly-audit-model-task-2"
-    context = _model_context()
+    context = _model_context(root)
     _replace_model_runtime_binding(
         context,
         model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT),
