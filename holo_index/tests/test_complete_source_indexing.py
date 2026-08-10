@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -37,6 +38,24 @@ class _BatchModel:
 class _StatefulCollection:
     def __init__(self, metadata: dict[str, str]) -> None:
         self.metadata = dict(metadata)
+        self._model = SimpleNamespace(
+            serialized_schema={
+                "keys": {
+                    "#embedding": {
+                        "float_list": {
+                            "vector_index": {
+                                "config": {
+                                    "hnsw": {
+                                        "batch_size": 2,
+                                        "sync_threshold": 3,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        )
         self.records: dict[str, dict[str, Any]] = {}
         self.upsert_calls: list[list[str]] = []
         self.delete_calls: list[list[str]] = []
@@ -395,6 +414,32 @@ def test_embedding_space_mismatch_forces_reset_and_reembedding(tmp_path: Path) -
     holo.symbol_collection.metadata["embedding_space_fingerprint"] = (
         "sha256:" + ("b" * 64)
     )
+
+    result = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert result.reused_count == 0
+    assert len(model.calls) == 1
+    assert holo.reset_count == 1
+
+
+@pytest.mark.parametrize("batch_size", [100, None])
+def test_incomplete_hnsw_policy_forces_reset_and_reembedding(
+    tmp_path: Path,
+    batch_size: int | None,
+) -> None:
+    source = tmp_path / "source.py"
+    source.write_text("def stable():\n    return True\n", encoding="utf-8")
+    model = _BatchModel()
+    holo = _StatefulHolo(tmp_path, model)
+    index_symbol_entries(holo, roots=[tmp_path])
+    model.calls.clear()
+    hnsw = holo.symbol_collection._model.serialized_schema["keys"]["#embedding"][
+        "float_list"
+    ]["vector_index"]["config"]["hnsw"]
+    if batch_size is None:
+        hnsw.pop("batch_size")
+    else:
+        hnsw["batch_size"] = batch_size
 
     result = index_symbol_entries(holo, roots=[tmp_path])
 

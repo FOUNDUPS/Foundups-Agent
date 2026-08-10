@@ -1,5 +1,13 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-11] Legacy symbol persistence-policy upgrade regression
+
+- Proved matching embedding metadata cannot preserve a legacy symbol
+  collection whose complete HNSW batch/sync policy is not pinned, including
+  wrong and missing `batch_size` values.
+- Proved the legacy collection resets and re-embeds, while compliant
+  collections continue to use the existing reconciliation path.
+
 ## [2026-08-11] Durable vector-segment publication regressions
 
 - Proved with Chroma 1.5.5 that legacy sub-threshold collections are not

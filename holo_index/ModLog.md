@@ -1,5 +1,14 @@
 # HoloIndex Package ModLog
 
+## [2026-08-11] Legacy symbol persistence-policy upgrade
+
+- Extended the existing symbol reconciliation eligibility check to require the
+  pinned durable HNSW policy as well as matching embedding space.
+- Legacy `navigation_symbols` collections now reset once under governed
+  maintenance instead of preserving the default `sync_threshold=1000`.
+- Already-compliant collections retain bounded record reconciliation; no new
+  indexer or query-time mutation path was added.
+
 ## [2026-08-11] Durable vector-segment publication
 
 - Pinned write-mode baseline collections to a bounded Chroma HNSW persistence

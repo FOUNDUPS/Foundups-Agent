@@ -22,6 +22,9 @@ from holo_index.source_scope import (
     filter_git_tracked_files,
     normalized_relative_roots,
 )
+from holo_index.vector_segment_durability import (
+    collection_uses_durable_hnsw_policy,
+)
 
 
 SKIP_DIRS = frozenset(
@@ -439,7 +442,11 @@ def _publish_records(
     metadatas: list[dict[str, Any]],
 ) -> int:
     current = getattr(holo, "symbol_collection", None)
-    if _embedding_space_matches(holo, current) and _reconciliation_capable(current):
+    if (
+        _embedding_space_matches(holo, current)
+        and collection_uses_durable_hnsw_policy(current)
+        and _reconciliation_capable(current)
+    ):
         return _reconcile_records(holo, current, ids, documents, metadatas)
     holo.symbol_collection = holo._reset_collection("navigation_symbols")
     if ids:
