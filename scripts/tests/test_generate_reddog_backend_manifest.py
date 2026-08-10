@@ -53,6 +53,7 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     assert "modules/platform_integration/linkedin_agent/src/linkedin_agent.py" in runtime
     assert "holo_index/maintenance_lock.py" in runtime
     assert "holo_index/query_admission.py" in runtime
+    assert "holo_index/vector_segment_durability.py" in runtime
     assert "modules/communication/moltbot_bridge/scripts/run_task.py" in runtime
     assert "modules/communication/moltbot_bridge/src/openclaw_supervisor.py" in runtime
     assert "modules/infrastructure/database/src/agent_db.py" in runtime
@@ -137,5 +138,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     assert generator.canonical_manifest_digest(generated) == (
-        "c51772a626bb6e645535f3f6e1d012ca52baa68460cd6e63ab032763c1af350b"
+        "3c13c1bbd68631dbc48408d6b583fad9f8338f45cc41de30fc007480f1073cdc"
     )

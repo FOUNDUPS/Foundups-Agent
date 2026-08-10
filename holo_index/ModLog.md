@@ -1,5 +1,21 @@
 # HoloIndex Package ModLog
 
+## [2026-08-11] Durable vector-segment publication
+
+- Pinned write-mode baseline collections to a bounded Chroma HNSW persistence
+  policy so sub-threshold collections reach disk-backed segment state.
+- Added a read-only SQLite and filesystem proof for exact policy, canonical
+  segment ownership, path confinement, and complete nonempty HNSW artifacts.
+- Removed transient-reopen convergence as a publication criterion. Missing
+  durable artifacts now remain `VECTOR_SEGMENT_UNAVAILABLE` until governed
+  maintenance rebuilds the generation.
+- Added real Chroma 1.5.5 cold-open, artifact-loss, and policy-tamper
+  regressions. Query paths retain zero reindex authority.
+- Measured the strict `2/3` policy against `32/64` on Chroma 1.5.5 before
+  publication: 5,000 synthetic 64-dimensional vectors in 100-row writes took
+  1.509s versus 1.472s locally. The bounded sync cost buys deterministic disk
+  state for small canonical collections without a private force-persist API.
+
 ## [2026-08-10] Source-aware governed direct-read policy
 
 - Preserved hard denials for environment, key-container, repository metadata,
@@ -28,15 +44,6 @@
   real worktree in the same repository; it performs no checkout or mutation.
 - This lets exact-HEAD authority queries reuse the canonical validated virtual
   environment without treating that dependency root as repository evidence.
-
-## [2026-08-04] Vector-segment cold-start convergence proof
-
-- Preserved the isolated probe's distinction between logical collection
-  snapshot mismatches and first-open vector-segment unavailability.
-- A vector cold-start failure may recover only after two consecutive fresh
-  child-process proofs over the same generation-bound receipt; collection
-  snapshot mismatches remain single-shot failures with no retry.
-- All probe attempts share the original timeout budget.
 
 ## [2026-08-04] Test write isolation
 

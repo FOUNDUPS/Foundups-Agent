@@ -144,6 +144,13 @@ consumers fail closed
 with HOLOINDEX_MAINTENANCE_ACTIVE or
 HOLOINDEX_MAINTENANCE_LOCK_UNPROVEN.
 
+Generation publication additionally requires the pinned HNSW collection
+configuration and a complete persisted artifact set for each baseline vector
+segment. This proof reads Chroma's SQLite catalog and segment files without
+loading pickle content or invoking a mutation API. Missing policy or files
+returns VECTOR_SEGMENT_UNAVAILABLE before snapshot comparison. Repeated
+successful process opens do not override this durability failure.
+
 ### Module Compliance Helper
 ```python
 status = holo.check_module_exists("modules/communication/livechat")

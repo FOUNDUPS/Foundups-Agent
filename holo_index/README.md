@@ -185,6 +185,14 @@ repository-writer window during full refresh. The lease coordinates migrated
 writers only; unleased legacy collection writers and a transient edit/revert
 remain cooperative-writer limitations.
 
+Baseline collections are created with the pinned Chroma HNSW persistence
+policy. Publication verifies that SQLite records that exact policy and that
+every baseline vector segment has a complete, non-symlinked persisted HNSW
+artifact set before running its cold-open nearest-neighbor proof. A transient
+successful reopen cannot certify a segment that lacks those durable files;
+the maintenance generation remains unpublished and must be rebuilt by the
+governed writer.
+
 This POC scope covers the RedDog operational consumers wired to the owner
 adapter. The legacy `modules/infrastructure/foundups_mcp_bridge/src/holo_tools.py`
 surface still opens the persistent store directly and is registered for a
