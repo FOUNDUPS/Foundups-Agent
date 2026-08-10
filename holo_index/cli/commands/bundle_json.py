@@ -24,6 +24,10 @@ from holo_index.cli.bundle_path_confinement import (
     _read_confined_text,
     _resolve_module_dir,
 )
+from holo_index.cli.direct_read_path_policy import (
+    direct_read_deny_reason as _direct_read_deny_reason,
+    normalize_direct_read_path as _normalize_direct_read_path,
+)
 from holo_index.query_admission import evaluate_readonly_query_admission
 
 
@@ -86,107 +90,6 @@ LEXICAL_WSP_READ_BYTES = 16384
 # search key (no regex-injection, no path traversal via the '#' suffix).
 _SYMBOL_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,127}$")
 
-# HARD-DENY basenames (exact match, case-insensitive).
-DIRECT_READ_DENY_BASENAMES = frozenset({
-    ".env",
-    "id_rsa",
-    "id_ed25519",
-})
-
-# HARD-DENY path segments: any path traversing one of these dirs is rejected.
-DIRECT_READ_DENY_SEGMENTS = frozenset({
-    ".git",
-    ".ssh",
-    ".gnupg",
-    ".aws",
-    ".azure",
-    ".gcloud",
-    "node_modules",
-    "__pycache__",
-    ".venv",
-})
-
-# HARD-DENY glob-ish suffix / substring rules applied to the lowercased basename
-# (and, for the *secret*/*credential*/*token* rules, any path segment).
-DIRECT_READ_DENY_SUFFIXES = (
-    ".pem",
-    ".key",
-    ".p12",
-    ".keystore",
-    ".pfx",
-    ".vsix",
-)
-# basename prefixes that hard-deny (covers .env.local, id_rsa.pub, etc.).
-DIRECT_READ_DENY_PREFIXES = (
-    ".env",
-    "id_rsa",
-    "id_ed25519",
-)
-# substring markers that hard-deny anywhere in a path segment.
-DIRECT_READ_DENY_SUBSTRINGS = (
-    "secret",
-    "credential",
-    "token",
-)
-
-
-def _direct_read_deny_reason(rel_norm: str) -> Optional[str]:
-    """Return a deny reason string for a normalized repo-relative path, else None.
-
-    Pure lexical gate (no filesystem access). Absolute paths, drive-letters and
-    `..` traversal are rejected here; realpath containment is checked separately.
-    """
-    if not rel_norm:
-        return "path_missing"
-    # Absolute POSIX path or Windows drive-letter path -> reject.
-    if rel_norm.startswith("/") or (len(rel_norm) >= 2 and rel_norm[1] == ":"):
-        return "absolute_path"
-    # A colon anywhere else can address an NTFS alternate data stream on Windows
-    # (for example safe.py:payload). Repository evidence paths never need ADS.
-    if ":" in rel_norm:
-        return "alternate_data_stream"
-    parts = rel_norm.lower().split("/")
-    if any(p == ".." for p in parts):
-        return "traversal"
-    # Deny by path segment (credential dirs, .git, caches).
-    for seg in parts:
-        if seg in DIRECT_READ_DENY_SEGMENTS:
-            return "denied_segment"
-        for marker in DIRECT_READ_DENY_SUBSTRINGS:
-            if marker in seg:
-                return "denied_secret_like"
-    base = parts[-1]
-    if base in DIRECT_READ_DENY_BASENAMES:
-        return "denied_basename"
-    for pref in DIRECT_READ_DENY_PREFIXES:
-        if base == pref or base.startswith(pref + "."):
-            return "denied_basename"
-    for suf in DIRECT_READ_DENY_SUFFIXES:
-        if base.endswith(suf):
-            return "denied_extension"
-    return None
-
-
-def _normalize_direct_read_path(raw: str) -> str:
-    """Normalize a requested target into a candidate path string.
-
-    IMPORTANT: this MUST preserve a leading '/' or a drive-letter prefix so the
-    deny gate can reject absolute paths. It only trims quotes/whitespace and
-    collapses a leading './'. It never strips a leading slash (doing so would
-    silently turn '/etc/passwd' into a relative 'etc/passwd' and defeat the
-    absolute-path rejection).
-    """
-    norm = str(raw or "").strip().replace("\\", "/")
-    # Strip surrounding quotes/backticks a prompt might carry through.
-    norm = norm.strip("`'\"")
-    if norm in ("", "."):
-        return ""
-    # Collapse a leading ./ but keep the rest verbatim (do NOT resolve here).
-    while norm.startswith("./"):
-        norm = norm[2:]
-    return norm
-
-
 def _resolve_within_repo(repo_root, rel_norm: str):
     """Resolve rel_norm against repo_root and verify realpath containment.
 
@@ -204,6 +107,11 @@ def _resolve_within_repo(repo_root, rel_norm: str):
         real.relative_to(root_real)
     except ValueError:
         return None, "outside_root"
+    try:
+        if real.is_file() and os.stat(real, follow_symlinks=False).st_nlink > 1:
+            return None, "hardlink_denied"
+    except OSError:
+        return None, "path_missing"
     return real, None
 
 

@@ -6,6 +6,7 @@ Phase: RedDog 0.4.6 resident architect thin-client surface.
 
 Current implementation:
 
+- REDDOG_ORCHESTRATION_PROMPT_TRANSPARENCY_AND_WSP_CONTRACT_PHASE1 (v0.4.73): content-free pre-gate policy projection; exact gate-redacted task-prompt display after admission; generic repository-health prompts use the existing deep-dive manifest/direct-read gate; worker prompt artifacts require WSP_00/WSP_97/WSP_15, execution plane, closed non-authoritative prompt boundary, and closed fail policy. Prompt text remains advisory and effect authority remains receipt-bound.
 - REDDOG_SINGLE_INPUT_AUTHORITY_BOUNDARY_HARDENING_PHASE1 (v0.4.71): operator-only input is classified at ingress; unmarked mixed text and timestamped/JSON/logfmt/command-result diagnostics remain inert; explicit one-field evidence boundaries are supported; resident submission requires a digest-verified process-local Wardrobe owner proof.
 - REDDOG_PROGRESSIVE_POLICY_STAGE_RUNTIME_PHASE1 (v0.4.72): audit dialogue remains available without action planning; bounded execution is an explicit UI request but the resident editor runtime remains clamped to audit pending a root-owned activation source. The bounded contract requires complete canonical WSP_15 evidence, exact paths, signed authority, and an independent verifier; high-risk and production effects remain blocked.
 

@@ -1,6 +1,33 @@
 # RedDog
 
-Version: 0.4.72
+Version: 0.4.73
+
+Version 0.4.73 makes RedDog's generated orchestration contract inspectable
+without creating a second receipt or redaction system. Before Fusion starts,
+the UI shows content-free policy metadata and a process-local keyed correlation
+value, not a guessable digest of operator text. Only after the
+authoritative Python redaction gate passes does it show the exact redacted task
+prompt admitted by that gate and unchanged by the local Copy-MD sanitizer. If
+the local sanitizer would alter it, the body stays withheld. System text, history, repository context,
+provider identifiers, and blocked prompt bodies stay out of the projection.
+The trace is display-only evidence, not authority. Prompt construction encodes the
+full WSP_00 -> retrieval -> WSP_97 CoT/CoR -> WSP_15 economy -> authorized
+execution-plane sequence, including runtime-truth precedence, retrieval
+quality assessment, REUSE/EXTEND/CREATE classification, and the prohibition
+on query-time reindexing. Generic repository-health questions now require the
+same discovered-target manifest, governed direct reads, and recall gate as an
+explicit deep-dive request instead of spending a Fusion run on ungrounded
+lexical context. Worker-prompt `READ_PATH` entries reuse the same target-read
+deny policy as the extension fetch path, so prompt validation cannot admit
+repository metadata, environments, dependencies, or packaged extension
+artifacts that the governed reader would reject. The shared policy also denies
+secret-like paths and private-key containers before content is read, matching
+the authoritative HoloIndex bundle gate. Each generated worker artifact also
+binds the selected author profile and canonical WSP_00, WSP_97, and WSP_15
+clauses; contradictory prose cannot weaken those fields. Route metadata records
+the route that actually handled the request, including local/no-model and
+grounding-failure fallback paths. Completed no-model routes explicitly say that
+no task prompt existed; they do not imply a redaction gate is still pending.
 
 Version 0.4.72 adds a progressive effect-stage ceiling. The default `audit`
 stage keeps conversation, research, review, and proposal output usable. It may
@@ -402,7 +429,7 @@ The extension is a bounded 0102 advisory surface:
 - Free-form target derivation (v0.3.44): repo-relative paths named with read-intent anywhere in the work focus are promoted to required direct-read targets, not only paths under the exact `Required direct-read targets:` header. Recognized read-intent shapes are: the explicit required-targets header, `Read first:` / `READ BEFORE EDITING` blocks, WSP_99 M2M `READ:` arrays, M2M `CTX.FILES` / `CTX: FILES:` arrays, markdown bullet lists of paths, and inline or backticked paths in prose. When a path is named this way it drives the SAME governed direct-read fetch, so it is retrieved even when HoloIndex semantic recall misses. Command/validation fences (```powershell / ```bash with `git diff --check`, `node --check`, `python holo_index.py ...`) and scope-out / "Do NOT touch" sections are excluded, and derivation prefers precision when read-intent is ambiguous.
 - Flowing-prose read-capture tokenization + tiered strictness (v0.3.45): a `Read first:` prompt that names files in flowing PROSE (e.g. `Read first: a.md, b.json, and c.py. Determine ... the breadcrumb/handoff layer`) is now tokenized with the bounded path-token regex, so a path followed by prose (`c.py. Determine ...`) and an embedded-slash English fragment (`breadcrumb/handoff`) no longer corrupt the derived targets. Confidence tiers: FLOWING-PROSE-derived tokens (Read-first prose, inline prose, backtick prose) become required targets ONLY if they have a lowercase file extension (a file shape); a prose token with a slash but no extension is dropped from the required list and reported in the new `work_focus_targets_dropped_low_confidence` telemetry field, so it can never flip `target_recall_ok` to false. The explicit `Required direct-read targets:` header, M2M `READ:` / `CTX.FILES`, and CLEAN BULLETS keep the broader slash-OR-extension behavior (a named directory path is still accepted) -- only flowing prose is stricter. Trailing prose punctuation (`.` `,` `;` `:` `)` `]` `}`) is trimmed from derived paths. The governed direct-read gate (`bundle_json.py`) is unchanged; derived paths still flow through it.
 - Determine-block target derivation guard (v0.3.59): `Determine:` numbered questions are treated as answer/output obligations, not repo-file target intent. Slash-bearing conceptual phrases inside questions (for example `ledger/runtime`) no longer become `repo_file_targets` or block typed grounding. Explicit `Read first:` / required-target sections still drive direct read normally.
-- Prompt-authoring deliverable contract (v0.3.60): when 012 asks RedDog to create/evaluate/provide a worker prompt, RedDog receives bounded direct-read context for its prompt/judgment surfaces and must return a `## Worker Prompt` section with one fenced executable prompt. Missing definitions become a `DEFINITION_GAP` inside that prompt rather than a reason to omit the prompt artifact.
+- Prompt-authoring deliverable contract (v0.4.73): when 012 asks RedDog to create/evaluate/provide a worker prompt, RedDog receives bounded direct-read context for its prompt/judgment surfaces and must return a `## Worker Prompt` section with one fenced executable prompt. Security boundaries use the closed values `AUTHORITY_BOUNDARY: PROMPT_IS_NON_AUTHORITATIVE` and `FAIL_POLICY: FAIL_CLOSED`; reads use only canonical `READ_PATH: repo/relative/path` entries and failures use only `REJECT_ON: UPPER_SNAKE_CASE_REASON` entries. Contradictory natural-language policy is inadmissible. Comment syntax is forbidden inside the artifact so validated and consumed text cannot diverge. Missing definitions become a `DEFINITION_GAP` inside that prompt rather than a reason to omit the prompt artifact.
 - Simple identity fast path (v0.3.61): short identity/status questions such as "are you RedDog?" are answered locally with audited Run Trace telemetry. The fast path skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; substantive RedDog audit/work prompts still route through the governed path.
 - Run Trace local assessment (v0.3.62): pasted `## Run Trace` diagnostics are parsed locally and scored with WSP_97 labels so raw trace text no longer needs to pass through Fusion/redaction just to explain why a run blocked or routed slowly. The path remains non-actionable and cannot trigger runtime planning.
 - DAEmon/log local assessment (v0.3.63): pasted DAEmon, daemon, service, worker, or runtime output can be interpreted locally as diagnostic data. The path redacts secret-shaped values, skips HoloIndex/OpenRouter/Fusion/repair, and remains non-actionable so logs cannot become instructions or authority.
@@ -476,7 +503,7 @@ The webview follows the VS Code terminal/chat shape:
 ## Controls
 
 - Worker: RedDog Architect, WSP Gate Critic, Repair Planner, Smoke Test.
-- Routing: automatic via WSP_15-style task classification; 012 no longer picks Mode/Effort/Context for normal use.
+- Routing: automatic via a task-fit reasoning-tier heuristic; it is not a WSP_15 allocation. 012 no longer picks Mode/Effort/Context for normal use.
 - Context: automatic. ULTRA tasks attach WSP + HoloIndex + active editor + git diff + Skillz/Wardrobe/Rolodex discovery; HIGH tasks attach WSP + HoloIndex + active editor + Skillz/Wardrobe/Rolodex discovery; REGULAR attaches WSP + HoloIndex only (`wsp_holo`, no Skillz/git).
 - Tests: regular smoke, Fusion smoke, WSP_97 repo review, RedDog architect review.
 

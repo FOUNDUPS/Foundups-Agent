@@ -11,6 +11,7 @@ The caller should store only the returned redacted history/review packet.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -103,6 +104,18 @@ def _json_result(**fields: Any) -> int:
     sys.stdout.write(json.dumps(fields, ensure_ascii=True, sort_keys=True))
     sys.stdout.write("\n")
     return 0
+
+
+def _task_prompt_confirmation(prompt: str, *, successful: bool) -> dict[str, str]:
+    """Expose the redacted body only after a successful provider result."""
+
+    fields = {
+        "redacted_task_prompt_digest": "sha256:"
+        + hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+    }
+    if successful:
+        fields["redacted_task_prompt"] = prompt
+    return fields
 
 
 def _progress(stage: str, text: str, *, role: str = "", model: str = "") -> None:
@@ -1149,6 +1162,7 @@ def main() -> int:
 
     if payload.get("mode") == "openrouter_fusion_alias":
         result = _openrouter_fusion_alias(api_key, redacted_user_message, history, model_payload)
+        result.update(_task_prompt_confirmation(gate.redacted_prompt, successful=result.get("ok") is True))
         if bridge_meta:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
@@ -1157,6 +1171,7 @@ def main() -> int:
 
     if payload.get("mode") == "foundups_fusion":
         result = _run_foundups_fusion(api_key, redacted_user_message, history, model_payload)
+        result.update(_task_prompt_confirmation(gate.redacted_prompt, successful=result.get("ok") is True))
         if bridge_meta:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
@@ -1167,7 +1182,10 @@ def main() -> int:
         model = payload.get("lead_model") or model
 
     if not isinstance(model, str) or not model:
-        return _json_result(ok=False, reason="missing_model")
+        return _json_result(
+            ok=False, reason="missing_model",
+            **_task_prompt_confirmation(gate.redacted_prompt, successful=False),
+        )
 
     max_tokens = _bounded_int(payload.get("max_tokens"), 2048, 1, 4096)
     effective_max_tokens = _effective_max_tokens(model, max_tokens)
@@ -1186,11 +1204,20 @@ def main() -> int:
             role="single",
         )
     except urllib.error.HTTPError as exc:
-        return _json_result(**_http_failure_reason(exc))
+        return _json_result(
+            **_http_failure_reason(exc),
+            **_task_prompt_confirmation(gate.redacted_prompt, successful=False),
+        )
     except (urllib.error.URLError, TimeoutError):
-        return _json_result(ok=False, reason="timeout")
+        return _json_result(
+            ok=False, reason="timeout",
+            **_task_prompt_confirmation(gate.redacted_prompt, successful=False),
+        )
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
-        return _json_result(ok=False, reason="malformed_response")
+        return _json_result(
+            ok=False, reason="malformed_response",
+            **_task_prompt_confirmation(gate.redacted_prompt, successful=False),
+        )
 
     _progress("single_done", "Regular OpenRouter response received: " + model, role="single", model=model)
     assistant_text = str(content)
@@ -1202,6 +1229,7 @@ def main() -> int:
         ok=True,
         reason="ok",
         model=model,
+        **_task_prompt_confirmation(gate.redacted_prompt, successful=True),
         redacted_prompt=redacted_user_message,
         content=assistant_text,
         history=next_history[-20:],

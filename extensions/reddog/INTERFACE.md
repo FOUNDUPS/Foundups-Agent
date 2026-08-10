@@ -1,5 +1,41 @@
 # RedDog Interface
 
+Version 0.4.73 adds `reddog_orchestration_prompt_trace.v1`. The extension emits
+one content-free policy projection before model invocation, using a
+process-local keyed correlation value rather than a raw prompt digest, and stores a
+confirmed copy in Copy MD after the bridge returns. The trace binds the task-prompt
+digest, actual route, worker, context, reasoning tier, policy state, and the exact
+redacted task prompt admitted by the authoritative bridge gate. If the local
+Copy-MD sanitizer would change that text, the body is withheld rather than
+displayed as exact. Provider model
+identifiers, repository context, history, and system-prompt text are excluded.
+Local queries, compatibility-degraded audit receipts, and queued HoloIndex
+recovery use `model_call_expected: false`, `role: none`, and route-specific
+context instead of inheriting a planned Fusion profile.
+Compatibility-degraded routing is resolved before grounding rejection, so a
+local receipt cannot report a provider call merely because its empty degraded
+context would also fail the grounding preflight. All pre-route status messages
+on that path explicitly identify the local receipt and no-call behavior.
+On a blocked or failed gate, no prompt body is shown. It never grants authority, includes no hidden
+chain-of-thought, and does not replace the signed OpenClaw/WRE/Hermes work
+order or the existing `reddog_provider_call_evidence.v1` transaction. The model prompt requests WSP_00 classification, HoloIndex/search plus
+governed direct-read evidence, WSP_97 CoR, reuse-first classification, WSP_15
+economy, and execution-plane resolution. Worker-prompt artifacts mechanically
+require those WSP and authority fields plus the selected author profile;
+contradictory natural-language clauses reject. Actual effects remain receipt-gated.
+Generic repository-health requests are admitted as deep dives and fail before
+Fusion unless a discovered-target manifest and governed direct-read evidence
+pass the existing recall gate. Worker-prompt `READ_PATH` validation imports
+the extension's canonical target-read deny policy. The prompt contract and
+governed reader therefore reject the same metadata, environment, dependency,
+VSIX, secret-like, and private-key paths. This preserves the stricter
+authoritative Python bundle policy instead of admitting source-looking names
+that later grounding would reject.
+`governed_git_context.js` owns bounded current-worktree status/stat/content
+projection, and `orchestration_prompt_routes.js` owns model versus no-model
+trace construction. `extension.js` consumes those modules and remains below
+its frozen WSP_62 no-growth ceiling.
+
 Version 0.4.72 adds `reddog.progressiveExecutionStage` as an effect ceiling,
 not an authority source. `audit` is the default and permits useful dialogue
 plus signed strict read-only audit tasks with no changed paths or effect
@@ -391,7 +427,7 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 | Capability | Status | Boundary |
 |---|---|---|
 | Advisory model review | YES | OpenRouter request after Fusion redaction gate passes |
-| Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by WSP_15 tier and sends it through redaction gate |
+| Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by reasoning tier and sends it through redaction gate |
 | HoloIndex recall | YES | Semantic evidence comes from the authenticated HoloIndex owner service and requires a current generation-bound query receipt. Legacy `--bundle-json` supplies bounded direct-read/context structure only; its unbound semantic hits are discarded. Explicit lexical opt-down remains diagnostic-only. |
 | Repository audit fallback | YES, READ-ONLY | Generation-bound semantic recall remains authoritative; structured Holo candidates must also survive secure direct read. Missing source or independent test/contract evidence triggers bounded deterministic discovery, never shell/model paths, writes, or execution authority. |
 | WSP_00/WSP_97/WSP_15 prompting | YES | System prompt requires role lock, truth labels, proposed fixes, and MPS priority |
@@ -667,7 +703,7 @@ Model and context routing:
 - Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token floor for every direct completion call. An explicit direct selection or receipt-backed signed promotion may place K3 in single, principal, or synthesis roles; this bridge does not itself promote a champion, change defaults, open an OpenClaw execution valve, or dispatch Hermes.
 - REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and `wsp_holo` HoloIndex grounding (no Fusion panel, Skillz, or git).
 - Substantive audit/research/implementation prompts must produce a non-empty typed target universe. When no explicit path, external source, or semantic header exists, RedDog derives a generic semantic subject and requires content-bearing HoloIndex evidence for it; broad audits require two references across implementation/authority and verification/authority categories. Unparseable work fails before Fusion with `grounding_target_universe_empty`.
-- Context is not a 012-facing selector; it is resolved from WSP_15 tier.
+- Context is not a 012-facing selector; it is resolved from the reasoning tier. That heuristic is not a WSP_15 allocation.
 - Skillz/Wardrobe/Rolodex/OpenClaw/Hermes discovery is context only. RedDog may recommend a governed handoff, but this extension cannot execute it.
 - `openrouter_fusion_alias` remains implemented for future explicit use, but is not the RedDog default because critic traces are not exposed.
 - Repair pass: at most one; uses the same redaction-gated bridge; must not invent evidence.
