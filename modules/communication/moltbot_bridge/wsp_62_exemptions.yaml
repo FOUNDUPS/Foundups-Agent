@@ -280,7 +280,7 @@ exemptions:
       Module-local WSP 62 registry. Provider-evidence review adds exact,
       review-dated ceilings for the touched legacy surfaces; splitting the
       registry would break the canonical module-level exemption lookup.
-    threshold_override: 487
+    threshold_override: 475
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -450,38 +450,22 @@ exemptions:
         test_production_runner_uses_fusion_synthesis_excerpt_for_json: 63
         test_agentdb_openclaw_claim_run_task_model_worker_persists_report: 64
 
-  - file: "ModLog.md"
-    reason: >-
-      Legacy module WSP_22 reverse-chronological journal. This slice adds one
-      bounded boundary record and preserves the historical audit sequence.
+  - <<: *reddog_security_repair
+    file: "ModLog.md"
+    reason: "Legacy reverse-chronological WSP_22 journal retained for audit."
     threshold_override: 1000
     function_threshold_override: 0
     functions: []
-    temporary: true
-    owner: "MoltbotBridge"
-    architect_reviewer: "0102 Technical Architect"
-    review_date: "2026-Q3"
-    reviewer: "0102 Technical Architect"
-    remediation: >-
-      Archive historical journal epochs only through a dedicated WSP_22
-      traceability-maintenance slice.
+    remediation: "Archive only through a dedicated WSP_22 traceability slice."
     enforcement_mode: "advisory_archive"
     advisory_archive_threshold: 1000
 
-  - file: "tests/TestModLog.md"
-    reason: >-
-      Legacy WSP_22 test journal. Current entries record focused validation;
-      historical test evidence is not split during a runtime-security slice.
+  - <<: *reddog_security_repair
+    file: "tests/TestModLog.md"
+    reason: "Legacy WSP_22 test journal retained for verification lineage."
     threshold_override: 1000
     function_threshold_override: 0
     functions: []
-    temporary: true
-    owner: "MoltbotBridge"
-    architect_reviewer: "0102 Technical Architect"
-    review_date: "2026-Q3"
-    reviewer: "0102 Technical Architect"
-    remediation: >-
-      Archive historical test-journal epochs only through a dedicated WSP_22
-      traceability-maintenance slice.
+    remediation: "Archive only through a dedicated WSP_22 traceability slice."
     enforcement_mode: "advisory_archive"
     advisory_archive_threshold: 1000
