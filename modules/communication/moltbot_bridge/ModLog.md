@@ -1,13 +1,12 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: External-signer authoritative-use lease primitive
+- Added a strict exact-effect request and opaque one-shot process capability; admission verifies external signer and audit signatures, consumes injected durable replay evidence, and rechecks time plus parent authority at use.
+- Extended the existing socket client v2 grant envelope and signer-instance/profile/generation binding; the existing E0 exact-request grant remains the only signing authority.
+- No issuer, resolver activation, worker, repository, PR, merge, HoloIndex, or live-canary effect was added; other effects and crash recovery remain blocked. (WSP 00/15/22/50/62/71/97)
 ## 2026-08-11: Architect and verifier contract reconciliation
-- Replaced the retired literal `AUDIT` bootstrap default with the canonical
-  `AUDIT_NO_EFFECT` progressive-stage constant. Read-only architect `FIX`
-  determinations remain audit evidence; signed plans can carry exact test scope.
-- Forwarded exact work order, commit, signed policy, and resolved test scope into
-  the independent producer and verifier without changing execution authority.
-- Local differential evidence is diagnostic only; autonomous admission still
-  requires an external verifier authority and reservation. (WSP 00/15/22/50/62/97)
-
+- Replaced retired `AUDIT` with canonical `AUDIT_NO_EFFECT`; read-only `FIX` determinations remain evidence and signed plans carry exact test scope.
+- Forwarded exact work order, commit, policy, and test scope into the independent producer/verifier without authority expansion.
+- Local differential evidence remains diagnostic; autonomous admission requires external verifier authority and reservation. (WSP 00/15/22/50/62/97)
 ## 2026-08-11: Bounded iterative repository grounding
 - Extended the existing transport-neutral grounding service with at most two
   deterministic HoloIndex owner queries per semantic target under one global

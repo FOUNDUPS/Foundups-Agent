@@ -17,7 +17,7 @@ import json
 import socket
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Any, Callable, Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     IsolatedSignerClient,
@@ -78,11 +78,26 @@ class RedDogIsolatedSignerSocketClient(IsolatedSignerClient):
 
         if not isinstance(request, SigningRequest):
             return _reject(RuntimeRejectCode.MALFORMED_REQUEST)
+        return self._roundtrip({
+            "schema_version": "reddog_signer_socket_request.v1",
+            "request": request.to_dict(),
+        })
+
+    def sign_with_secret_grant(
+        self, request: SigningRequest, secret_access_grant: Mapping[str, Any]
+    ) -> SigningResponse:
+        """Send one strict v2 request carrying an externally signed grant."""
+
+        if not isinstance(request, SigningRequest) or not isinstance(secret_access_grant, Mapping):
+            return _reject(RuntimeRejectCode.MALFORMED_REQUEST)
+        return self._roundtrip({
+            "schema_version": "reddog_signer_socket_request.v2",
+            "request": request.to_dict(),
+            "secret_access_grant": dict(secret_access_grant),
+        })
+
+    def _roundtrip(self, payload: Mapping[str, Any]) -> SigningResponse:
         try:
-            payload = {
-                "schema_version": "reddog_signer_socket_request.v1",
-                "request": request.to_dict(),
-            }
             request_bytes = (
                 json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
                 + "\n"

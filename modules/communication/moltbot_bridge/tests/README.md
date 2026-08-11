@@ -1,5 +1,14 @@
 # Tests - OpenClaw Bridge
 
+## External authoritative-use lease
+
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_external_signer_authoritative_use_lease.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_client.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_ed25519_signer_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py modules/communication/moltbot_bridge/tests/test_reddog_external_signer_lifecycle_admission.py modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_queue_use_time_binding.py -q
+```
+
+This matrix validates the external-signer exact-effect primitive without
+activating any repository, worker, queue, shell, PR, merge, or indexing effect.
+
 ## Coverage Goals
 - Intent classification and routing behavior.
 - WSP preflight + permission gates.

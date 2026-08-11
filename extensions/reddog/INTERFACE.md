@@ -1,7 +1,7 @@
 # RedDog Interface
 
-Version 0.4.79 pins the backend manifest after registering the canonical
-test-registry and bounded exact-SHA shard projection Skillz workflow. The
+Version 0.4.80 pins the backend manifest after adding the external signer
+exact-effect lease primitive and strict socket-v2 client transport. The
 projection reuses the canonical WRE impact plan and never imports candidate
 tests or invokes pytest; autonomous execution remains
 blocked pending an authenticated OS-isolated runner.

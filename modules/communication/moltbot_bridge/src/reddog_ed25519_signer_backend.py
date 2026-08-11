@@ -55,8 +55,14 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_a
     RuntimeArtifactManifestAuthorityBoundary,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
+    AUTHORITATIVE_USE_LEASE_AUDIT_ATTESTATION_PREFIX,
     RUNTIME_ARTIFACT_MANIFEST_AUDIT_ATTESTATION_PREFIX,
     canonical_signer_audit_attestation_input,
+)
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import (
+    AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
+    digest_text,
+    validate_authoritative_use_lease_request,
 )
 from modules.communication.moltbot_bridge.src import reddog_signer_mutual_peer_handshake as peer_handshake
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_validation import (
@@ -335,7 +341,7 @@ def _signer_request_rejection(
         or sum(operation and prefix for operation, prefix in domain_pairs) != 1
     ):
         return REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
-    policy_reason = signer_policy_rejection(backend, request)
+    policy_reason = signer_policy_rejection(backend, request) or _lease_request_rejection(backend, request)
     if policy_reason:
         return policy_reason
     if request.requested_operation == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION:
@@ -349,6 +355,22 @@ def _signer_request_rejection(
     except Exception:
         return REJECT_ED25519_SIGNER_KEY_INVALID
     return "" if derived == backend.public_key else REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH
+
+
+def _lease_request_rejection(
+    backend: Ed25519SignerBackend, request: SigningRequest
+) -> str:
+    if request.requested_operation != AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION:
+        return ""
+    payload = validate_authoritative_use_lease_request(
+        request, now_epoch=int(backend.proposal_clock())
+    )
+    return (
+        ""
+        if payload is not None
+        and _lease_matches_peer_instance(payload, backend.signer_peer_instance_binding)
+        else REJECT_ED25519_SIGNER_REQUEST_INVALID
+    )
 
 
 def _prepare_verified_outcome_signing(
@@ -550,7 +572,10 @@ def _signer_audit_attestation(
         return _sign_peer_response_attestation(
             backend, request, signature, audit_mac, peer
         )
-    if not is_control:
+    if (
+        not is_control
+        and request.requested_operation != AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION
+    ):
         return "", ""
     domain_prefix = CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX
     if (
@@ -567,6 +592,8 @@ def _signer_audit_attestation(
         CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
     }:
         domain_prefix = CONVERSATION_SCOPE_AUDIT_ATTESTATION_PREFIX
+    elif request.requested_operation == AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION:
+        domain_prefix = AUTHORITATIVE_USE_LEASE_AUDIT_ATTESTATION_PREFIX
     try:
         value = canonical_signer_audit_attestation_input(
             signing_input=request.signing_input, signature=signature,
@@ -580,6 +607,35 @@ def _signer_audit_attestation(
         ), ""
     except Exception:
         return "", REJECT_ED25519_SIGNER_SIGN_FAILED
+
+
+def _lease_matches_peer_instance(
+    payload: Mapping[str, Any],
+    binding: peer_handshake.SignerPeerInstanceBinding | None,
+) -> bool:
+    if binding is None:
+        return False
+    profile = next(
+        (
+            item
+            for item in binding.signer_profiles
+            if item.signer_profile_id == payload.get("signer_profile_id")
+        ),
+        None,
+    )
+    return profile is not None and all(
+        (
+            payload.get("manifest_id") == binding.manifest_id,
+            payload.get("artifact_generation_digest")
+            == binding.artifact_generation_digest,
+            payload.get("run_packet_id") == binding.run_packet_id,
+            payload.get("config_digest") == binding.config_digest,
+            payload.get("session_id") == binding.session_id,
+            payload.get("socket_path_digest") == digest_text(binding.socket_path),
+            payload.get("signer_public_key") == profile.signer_public_key,
+            payload.get("key_epoch") == profile.key_epoch,
+        )
+    )
 
 
 def _sign_peer_response_attestation(

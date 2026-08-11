@@ -1,9 +1,9 @@
 # RedDog ModLog
 
-## 2026-08-11 - Canonical shard projection compatibility pin (0.4.79)
+## 2026-08-12 - External signer lease compatibility pin (0.4.80)
 
-- Regenerated the backend manifest after registering the WRE canonical
-  test-registry and bounded exact-SHA shard projection Skillz workflow.
+- Regenerated the backend manifest for the external exact-effect lease and
+  strict socket-v2 client transport.
 - Preserved thin-client behavior and every signed execution gate; the new
   projection reuses the canonical WRE impact plan, performs no test execution,
   and remains non-authoritative.

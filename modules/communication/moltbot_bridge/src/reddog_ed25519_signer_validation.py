@@ -12,6 +12,10 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
     PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
     PROPOSAL_AUTHENTICITY_SIGNING_PREFIX,
 )
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import (
+    AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
+    AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_conversation_scope_backend import (
     CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
     CONVERSATION_SCOPE_SIGNING_OPERATION,
@@ -49,6 +53,7 @@ _RESERVED_SIGNING_OPERATIONS = frozenset(
         VERIFIED_OUTCOME_SIGNING_OPERATION,
         CONVERSATION_SCOPE_SIGNING_OPERATION,
         CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+        AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
         "delegate_reddog_identity",
     }
 )
@@ -118,6 +123,10 @@ def signing_domain_pairs(request: SigningRequest) -> tuple[tuple[bool, bool], ..
             request.signing_input.startswith(VERIFIED_OUTCOME_SIGNING_PREFIX),
         ),
         conversation_signing_domain_pair(request),
+        (
+            request.requested_operation == AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
+            request.signing_input.startswith(AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX),
+        ),
         (
             request.requested_operation == "delegate_reddog_identity",
             request.signing_input.startswith(PREFIX_IDENTITY + "."),

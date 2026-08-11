@@ -1,5 +1,21 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## External signer exact-effect authority
+
+The bridge now contains the smallest reusable authoritative-use lease primitive.
+It extends the existing E0 secret-grant and isolated signer socket instead of
+adding a signer or trust store. A strict signed request can be rehydrated into
+one opaque, process-local, one-shot capability for an exact worktree-create or
+live-enqueue request. The capability cannot be directly constructed, copied,
+pickled, or replayed, and it rechecks trusted time plus parent authority when
+consumed.
+
+This is a foundation, not production activation. The repository supplies no
+local grant issuer, does not relax the resident resolver, and does not connect
+the capability to queue, OpenClaw, Hermes, shell, worktree, PR, merge, learning,
+or HoloIndex effects. Those paths remain fail closed until their independent
+exact-effect and crash-recovery gates exist.
+
 ## Principal Memex resident admission
 
 The backend architect can consume one opaque Principal Memex context prepared

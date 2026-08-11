@@ -25,6 +25,17 @@
 
 ## Stable External Signer Lifecycle
 
+- COMPLETE: the external signer can sign one canonical authoritative-use lease
+  for an exact `worktree_create` or `live_enqueue` request through the existing
+  strict socket-v2 secret-grant boundary. The consumer rehydrates only verified
+  signature and audit evidence into an opaque process-local one-shot capability.
+- BLOCKED: production lease issuance and effect activation. There is no local
+  grant issuer, and the resident resolver still requires all current lifecycle,
+  generation, authority, and deployment anchors. Queue dispatch, assurance,
+  model/artifact generation, commit, verification, PR publication, learning,
+  and merge each require their own exact-effect admission before autonomous
+  production use. Crash recovery must distinguish authorized, applied, and
+  indeterminate effects without replay.
 - COMPLETE: current authenticated signer generation selection.
 - COMPLETE: policy-less key profiles cannot sign delegated identity or work
   authority. Resolve-per-sign binds a real ephemeral backend to the exact
