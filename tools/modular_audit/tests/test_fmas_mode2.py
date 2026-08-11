@@ -556,6 +556,12 @@ class TestCommandLineIntegration(unittest.TestCase):
         
         # Run the main function
         with patch('modular_audit.audit_with_baseline_comparison') as mock_audit:
+            authority = patch(
+                'modular_audit.validate_authoritative_baseline',
+                return_value=(True, ""),
+            )
+            authority.start()
+            self.addCleanup(authority.stop)
             # Set up the mock to return a successful result with no changes
             mock_audit.return_value = {
                 "status": "success",
@@ -569,7 +575,9 @@ class TestCommandLineIntegration(unittest.TestCase):
             mock_audit.assert_called_once()
             
             # Verify that mode 2 was activated (check logs)
-            mock_logging_info.assert_any_call("Running FMAS Mode 2: Baseline Comparison")
+            mock_logging_info.assert_any_call(
+                f"Running FMAS Mode 2: Baseline Comparison against {self.baseline_dir.resolve()}"
+            )
     
     def test_main_with_invalid_baseline(self):
         """Test the main function with an invalid baseline argument."""
@@ -598,4 +606,4 @@ class TestCommandLineIntegration(unittest.TestCase):
                         mock_exit.assert_called_once_with(2)
 
 if __name__ == "__main__":
-    unittest.main() 
+    unittest.main()

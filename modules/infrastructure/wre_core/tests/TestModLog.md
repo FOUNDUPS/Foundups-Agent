@@ -1,4 +1,39 @@
 # TestModLog - wre_core/tests
+## 2026-08-11: WSP 62 differential enforcement reconciliation
+- Proved inherited no-growth ceilings are upper bounds, allowing reductions
+  while rejecting growth beyond the registered ceiling.
+- Proved required append-only audit logs use an explicit advisory archival
+  policy and cannot silently regain a blocking no-growth ceiling.
+- Proved FMAS rejects candidate growth and production-code archive bypasses
+  while reporting unchanged inherited debt without misattribution.
+- Restored the previously failing Mode 2 CLI tests for mapping-based baseline
+  results and invalid-baseline exit behavior.
+- Proved candidate-authored file/function ceiling raises and new-file
+  exemptions fail before their relaxed limits can be applied.
+- Proved exact-base missing expiry metadata is advisory, while candidate expiry
+  removal and malformed replacement remain blocking.
+- Proved severity parsing cannot mistake `ERROR` embedded in a filename for a
+  blocking WSP 62 finding.
+- Proved generic Mode 1 structural errors still exit nonzero after separating
+  their severity vocabulary from WSP 62 findings.
+- Added adversarial regressions for baseline substitution, file/function
+  renames, composed ceiling removal, archive-threshold ratchets, and expiry
+  policy erasure.
+- Added composed regressions for whole-exemption removal plus function rename,
+  strict-ceiling file rename, and duplicate method names in separate classes.
+- Proved byte-identical malformed Python does not block unrelated work while a
+  candidate-introduced parse failure remains blocking.
+- Added regressions for wrapped Mode 1 security failures, valid candidates over
+  malformed baselines, and exempt files with empty function maps.
+- Added delimiter-injection and byte-identical malformed exempt-file cases.
+- Added byte-identical malformed Python with a non-empty named ceiling map.
+- Added low-severity security path-marker and bounded malformed-baseline repair
+  regressions.
+- Added malformed exempt baseline plus new oversized candidate function.
+- Added bounded same-name repair plus named-ceiling removal over malformed base.
+- Validation: 119 affected tests pass and FMAS Mode 2 accepts the exact candidate
+  against the merged policy baseline.
+
 ## 2026-08-11: Canonical shard projection / Live API quarantine
 - Proved planning-only exact-SHA shard projection, portable Git materialization,
   immutable scope evidence, and a repository fixture where import-time LiveChat
