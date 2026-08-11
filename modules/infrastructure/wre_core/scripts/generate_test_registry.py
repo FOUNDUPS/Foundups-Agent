@@ -40,10 +40,15 @@ def tracked_test_paths(repo_root: Path) -> tuple[str, ...]:
     return tuple(sorted(paths))
 
 
-def build_registry(repo_root: Path) -> dict[str, Any]:
+def build_registry(
+    repo_root: Path, *, test_paths: Sequence[str] | None = None
+) -> dict[str, Any]:
     """Build deterministic registry content from tracked source."""
     entries = []
-    for path in tracked_test_paths(repo_root):
+    paths = tracked_test_paths(repo_root) if test_paths is None else tuple(test_paths)
+    if paths != tuple(sorted(set(paths))):
+        raise ValueError("test_registry_input_paths_not_canonical")
+    for path in paths:
         classified = classify_test_file(repo_root, path)
         entries.append({
             "id": "test::" + path.removesuffix(".py").replace("/", "::"),

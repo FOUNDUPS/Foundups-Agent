@@ -20,7 +20,10 @@ FAIL_COVERAGE = "FAIL_TEST_SCOPE_COVERAGE"
 
 _SYSTEMIC_PREFIXES = (
     ".github/",
+    "WSP_agentic/",
     "WSP_framework/",
+    "WSP_knowledge/",
+    "docs/",
     "holo_index/",
     "scripts/",
     "tests/",

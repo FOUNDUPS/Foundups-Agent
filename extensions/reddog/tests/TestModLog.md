@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-11 - Canonical shard projection compatibility (0.4.79)
+
+- Pinned the regenerated backend manifest after WRE test-registry Skillz
+  registration and retained existing extension/runtime contract assertions.
+- No thin-client behavior or execution authority changed; pytest and candidate
+  code remain outside this planning slice.
+
 ## 2026-08-11 - Live API test quarantine compatibility (0.4.78)
 
 - Re-pinned the backend manifest and version fixtures after WRE registry

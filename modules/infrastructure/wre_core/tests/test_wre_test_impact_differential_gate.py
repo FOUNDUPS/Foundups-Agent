@@ -64,6 +64,14 @@ def test_same_failures_and_added_passing_tests_are_clean_analysis_only() -> None
     assert receipt.added_passing_tests == ("tests/test_new.py::test_new",)
 
 
+def test_sha256_object_ids_are_valid_plan_and_snapshot_bindings() -> None:
+    base_sha, candidate_sha = "a" * 64, "b" * 64
+    impact_plan = plan(base_sha=base_sha, candidate_sha=candidate_sha)
+    assert gate.validate_test_impact_plan(impact_plan) == []
+    assert snapshot(base_sha)["head_sha"] == base_sha
+    assert snapshot(candidate_sha)["head_sha"] == candidate_sha
+
+
 def test_reported_4618_vs_4589_same_40_failures_is_exactly_proven() -> None:
     passed = [f"tests/test_base.py::test_{index:04d}" for index in range(4589)]
     failed = [f"tests/test_known.py::test_{index:02d}" for index in range(40)]

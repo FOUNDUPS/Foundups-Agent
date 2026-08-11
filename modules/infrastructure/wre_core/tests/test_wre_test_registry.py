@@ -19,6 +19,7 @@ from modules.infrastructure.wre_core.src.wre_test_registry import (
     registry_payload,
 )
 from modules.infrastructure.wre_core.src.wre_test_registry_classification import (
+    MAX_TEST_SOURCE_BYTES,
     classify_test_file,
 )
 
@@ -202,6 +203,15 @@ def test_main_guard_else_effect_is_quarantined(tmp_path: Path) -> None:
     assert result.capabilities == ("network",)
 
 
+def test_oversized_test_source_is_quarantined_without_parsing(tmp_path: Path) -> None:
+    target = tmp_path / "tests/test_oversized.py"
+    target.parent.mkdir()
+    target.write_bytes(b"#" * (MAX_TEST_SOURCE_BYTES + 1))
+    result = classify_test_file(tmp_path, "tests/test_oversized.py")
+    assert result.collectable is False
+    assert result.quarantine_reasons == ("test_source_size_exceeded",)
+
+
 def test_loader_rejects_unknown_fields_missing_files_and_count_tampering(
     tmp_path: Path,
 ) -> None:
@@ -242,15 +252,42 @@ def test_registry_bytes_are_ascii_clean() -> None:
     assert all(value < 128 for value in data)
 
 
+def test_registry_plan_runtime_has_no_candidate_execution_surface() -> None:
+    path = ROOT / (
+        "modules/infrastructure/wre_core/src/"
+        "wre_test_registry_differential_plan_runtime.py"
+    )
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    imports = {
+        alias.name for node in ast.walk(tree) if isinstance(node, ast.Import)
+        for alias in node.names
+    }
+    imported_from = {
+        node.module or "" for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    }
+    assert "pytest" not in imports
+    assert not any("collector" in name for name in imported_from)
+    assert "test_execution_performed\": False" in source
+    assert "candidate_code_executed\": False" in source
+
+
 def test_new_registry_runtime_respects_wsp62_limits() -> None:
     paths = [
         ROOT / "modules/infrastructure/wre_core/src/wre_test_registry.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_test_registry_ast.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_test_registry_classification.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_git_commit_archive.py",
+        ROOT / "modules/infrastructure/wre_core/src/wre_git_bounded_io.py",
+        ROOT / "modules/infrastructure/wre_core/src/wre_git_tree_manifest.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_pytest_collection_collector.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_python_environment_fingerprint.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_test_shard_collection_runtime.py",
+        ROOT / "modules/infrastructure/wre_core/src/wre_recognized_dependency_binding.py",
+        ROOT / "modules/infrastructure/wre_core/src/wre_test_registry_differential_plan_runtime.py",
+        ROOT / "modules/infrastructure/wre_core/src/wre_test_registry_git_binding.py",
+        ROOT / "modules/infrastructure/wre_core/src/wre_test_registry_impact_binding.py",
+        ROOT / "modules/infrastructure/wre_core/src/wre_test_registry_scope_plan.py",
         ROOT / "modules/infrastructure/wre_core/scripts/generate_test_registry.py",
     ]
     for path in paths:

@@ -1,5 +1,13 @@
 # RedDog ModLog
 
+## 2026-08-11 - Canonical shard projection compatibility pin (0.4.79)
+
+- Regenerated the backend manifest after registering the WRE canonical
+  test-registry and bounded exact-SHA shard projection Skillz workflow.
+- Preserved thin-client behavior and every signed execution gate; the new
+  projection reuses the canonical WRE impact plan, performs no test execution,
+  and remains non-authoritative.
+
 ## 2026-08-11 - Live API test quarantine compatibility pin (0.4.78)
 
 - Advanced the client/backend manifest pin after the canonical WRE test

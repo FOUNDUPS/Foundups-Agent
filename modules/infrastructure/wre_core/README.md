@@ -82,6 +82,36 @@ remain distinct from code failures. Use the
 `auto_test_registry_audit` Skillz workflow to verify or regenerate the registry.
 Broad `pytest .` discovery is not canonical test evidence.
 
+`produce_registry_scope_projection(...)` provides canonical per-commit shard
+resolution without importing candidate code or invoking pytest. It verifies
+that each archived registry is the deterministic projection of every archived
+`test_*.py` file, requires the request's changed paths to equal the Git diff,
+requires unchanged recognized dependency/config files, and emits only explicit
+bounded shard paths and deterministic SYSTEMIC batches. Oversized test sources,
+forged registries, changed-path substitution, and policy bounds fail closed.
+The request is detached before Git inspection; output is recursively immutable.
+Cross-owner renames expose both source and destination. Changed quarantined
+tests reject rather than being replaced by sibling tests. Git commit identity
+and bounded output are enforced before archive or diff data can be trusted.
+Every archive file is checked against the exact Git-tree blob ID, so committed
+export attributes and case-colliding paths cannot hide or rewrite evidence.
+Tracked gitlinks are path-validated and collision-accounted but their external
+content is not materialized; tracked symlinks reject the projection.
+Missing/stale retrieval evidence and protected, release, or health-audit work
+escalate to SYSTEMIC. The projection creates and validates the existing
+`wre_test_impact_plan.v1`; it does not define a second impact-plan contract.
+Selection and dependency digests are derived from projected shards and the
+inspected dependency set. The plan also binds runner, environment, WSP_15, and
+lineage digests but
+does not authenticate them.
+
+This Phase 1 path is projection-only. It sets test execution, candidate-code
+execution, pytest invocation, signed authority, collector integrity, OS
+isolation, execution authority, and verification capability to false. Actual
+autonomous execution remains `BLOCKED_BY_OS_ISOLATED_RUNNER`; the existing
+Docker isolation module is not treated as operational until its runner and
+live environment are independently proven.
+
 ### create_foundup Dry-Run Routing
 
 `FoundUpJob(requested_action="create_foundup")` routes only to
