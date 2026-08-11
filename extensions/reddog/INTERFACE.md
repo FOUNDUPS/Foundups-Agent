@@ -1,8 +1,8 @@
 # RedDog Interface
 
-Version 0.4.82 pins the signer E0 authority-separation backend manifest. It
-adds no thin-client behavior or execution authority; the independent revocation
-contract is not a durable supply and remains uncomposed by the stable service.
+Version 0.4.83 pins the durable signer-revocation foundation backend manifest.
+It adds no thin-client behavior or execution authority; production revocation
+remains uncomposed by the stable service.
 
 Version 0.4.81 pins the reconciled signer/live-canary backend manifest without
 changing thin-client behavior or execution authority.

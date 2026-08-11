@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import multiprocessing
 import sqlite3
 import threading
 from dataclasses import fields, replace
@@ -125,8 +126,7 @@ def _snapshot(
     return value
 
 
-def _runtime(tmp_path: Path):
-    policy = _policy(tmp_path)
+def _open_runtime(policy: Mapping[str, Any]):
     binding = revocation_authority_binding_from_policy(
         policy, repo_root=REPO_ROOT, signer_runtime_root=policy["signer_runtime_root"]
     )
@@ -140,7 +140,38 @@ def _runtime(tmp_path: Path):
         binding=binding, policy=policy, store=store, witness=witness,
         principal_key_resolver=_Resolver(), signature_verifier=_Verifier(),
     )
-    return policy, binding, store, witness, supply
+    return binding, store, witness, supply
+
+
+def _runtime(tmp_path: Path):
+    policy = _policy(tmp_path)
+    return (policy, *_open_runtime(policy))
+
+
+def _recover_in_process(
+    policy: Mapping[str, Any], now_epoch: int, output: Any,
+) -> None:
+    try:
+        _binding, _store, _witness, supply = _open_runtime(policy)
+        recovered = supply.recover(now_epoch=now_epoch)
+        output.put(("ok", None if recovered is None else recovered["snapshot_id"]))
+    except Exception as exc:
+        output.put(("error", type(exc).__name__))
+
+
+def _publish_in_process(
+    policy: Mapping[str, Any], snapshot: Mapping[str, Any],
+    attempting: Any, done: Any, output: Any,
+) -> None:
+    try:
+        _binding, _store, _witness, supply = _open_runtime(policy)
+        attempting.set()
+        published = supply.publish(snapshot, now_epoch=NOW)
+        output.put(("ok", published["snapshot_id"]))
+    except Exception as exc:
+        output.put(("error", type(exc).__name__))
+    finally:
+        done.set()
 
 
 def _oracle(policy, binding, store, witness, *, now: int = NOW):
@@ -207,7 +238,15 @@ def test_crash_recovery_rolls_forward_exact_pending_snapshot(
             binding.witness_binding_digest(), expected=None,
             next_value=_high_water(pending),
         )
-    assert supply.recover(now_epoch=NOW) == pending
+    context = multiprocessing.get_context("spawn")
+    output = context.Queue()
+    process = context.Process(
+        target=_recover_in_process, args=(policy, NOW, output)
+    )
+    process.start()
+    process.join(10)
+    assert process.exitcode == 0
+    assert output.get(timeout=5) == ("ok", pending["snapshot_id"])
     assert store.state().pending is None
     assert supply.recover(now_epoch=NOW) == pending
 
@@ -372,17 +411,11 @@ def test_oracle_holds_publication_lock_across_action(tmp_path: Path) -> None:
     policy, binding, store, witness, supply = _runtime(tmp_path)
     supply.publish(_snapshot(policy, binding), now_epoch=NOW)
     oracle = _oracle(policy, binding, store, witness)
-    action_started, release_action, publish_done = (
-        threading.Event(), threading.Event(), threading.Event()
-    )
+    action_started, release_action = threading.Event(), threading.Event()
 
     def action() -> None:
         action_started.set()
         assert release_action.wait(5)
-
-    def publish() -> None:
-        supply.publish(_snapshot(policy, binding, sequence=2), now_epoch=NOW)
-        publish_done.set()
 
     action_thread = threading.Thread(
         target=lambda: oracle.authorize_use(
@@ -392,13 +425,24 @@ def test_oracle_holds_publication_lock_across_action(tmp_path: Path) -> None:
     )
     action_thread.start()
     assert action_started.wait(5)
-    publish_thread = threading.Thread(target=publish)
-    publish_thread.start()
-    assert publish_done.wait(0.1) is False
+    context = multiprocessing.get_context("spawn")
+    attempting, publish_done, output = context.Event(), context.Event(), context.Queue()
+    publish_process = context.Process(
+        target=_publish_in_process,
+        args=(
+            policy, _snapshot(policy, binding, sequence=2),
+            attempting, publish_done, output,
+        ),
+    )
+    publish_process.start()
+    assert attempting.wait(5)
+    assert publish_done.wait(0.2) is False
     release_action.set()
     action_thread.join(5)
-    publish_thread.join(5)
+    publish_process.join(10)
+    assert publish_process.exitcode == 0
     assert publish_done.is_set()
+    assert output.get(timeout=5)[0] == "ok"
 
 
 def test_reader_and_oracle_expose_no_mutation_surface(tmp_path: Path) -> None:

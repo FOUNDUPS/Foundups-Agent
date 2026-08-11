@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-12 - Durable revocation compatibility pin (0.4.83)
+
+- Revalidated backend compatibility and extension contracts against the
+  regenerated manifest digest and canonical 0.4.83 build identity.
+
 ## 2026-08-12 - Signer authority-separation compatibility (0.4.82)
 
 - Pinned the regenerated backend manifest and version fixtures after signer E0
