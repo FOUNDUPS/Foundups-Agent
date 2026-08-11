@@ -6,6 +6,7 @@ Phase: RedDog 0.4.6 resident architect thin-client surface.
 
 Current implementation:
 
+- REDDOG_BASELINE_CONTRACT_RECONCILIATION_PHASE1 (v0.4.75): canonical read-only `AUDIT_NO_EFFECT` bootstrap stage; prompt-bound WSP_15 architect fixtures; platform-independent Copy-MD sanitizer proof; digest-bound signed worker intent assertions.
 - REDDOG_BOUNDED_ITERATIVE_REPOSITORY_RETRIEVAL_CONTROLLER_PHASE1 (v0.4.74): deterministic two-round Holo owner refinement; exact-HEAD direct evidence; global query/deadline budgets; no-progress, root, generation, and poisoned-summary fail-closed gates; no query-time reindex authority.
 - REDDOG_ORCHESTRATION_PROMPT_TRANSPARENCY_AND_WSP_CONTRACT_PHASE1 (v0.4.73): content-free pre-gate policy projection; exact gate-redacted task-prompt display after admission; generic repository-health prompts use the existing deep-dive manifest/direct-read gate; worker prompt artifacts require WSP_00/WSP_97/WSP_15, execution plane, closed non-authoritative prompt boundary, and closed fail policy. Prompt text remains advisory and effect authority remains receipt-bound.
 - REDDOG_SINGLE_INPUT_AUTHORITY_BOUNDARY_HARDENING_PHASE1 (v0.4.71): operator-only input is classified at ingress; unmarked mixed text and timestamped/JSON/logfmt/command-result diagnostics remain inert; explicit one-field evidence boundaries are supported; resident submission requires a digest-verified process-local Wardrobe owner proof.

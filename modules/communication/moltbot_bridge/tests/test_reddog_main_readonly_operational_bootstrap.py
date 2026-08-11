@@ -205,7 +205,7 @@ class _FakeArchitectRunner:
         prompt_payload = json.loads(prompt)
         evidence_ref = prompt_payload["reports"][0]["evidence_refs"][0]
         content = architect_model_output(
-            {"receipt_id": prompt_payload["wsp15_allocation_receipt_id"]},
+            {"receipt_id": prompt_payload["wsp15_allocation_receipt_id"], **prompt_payload["wsp15_execution_binding"]},
             evidence_ref,
             slice_name="REDDOG_RUNTIME_RECONCILER_PHASE1",
         )
@@ -435,7 +435,7 @@ def test_bootstrap_runs_backend_architect_determination_when_enabled() -> None:
     assert result.backend_architect_determination_action == ACTION_FIX
     assert result.backend_architect_determination_next_slice == "REDDOG_RUNTIME_RECONCILER_PHASE1"
     assert result.backend_architect_determination_id
-    assert result.backend_architect_determination_queue_candidate_count == 1
+    assert result.backend_architect_determination_queue_candidate_count == 0
     assert result.backend_architect_determination_persist_stored is True
     assert result.backend_architect_determination_rejection_reasons == ()
     assert result.no_model_call_performed is False

@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-11 - Read-only architect stage compatibility pin (0.4.75)
+
+- Regenerated and pinned the backend manifest after replacing the invalid
+  read-only bootstrap stage literal with canonical `AUDIT_NO_EFFECT`.
+- Reconciled platform line endings and digest-bound intent test contracts; no
+  editor execution authority or model-routing behavior changed.
+
 ## 2026-08-11 - Bounded iterative repository grounding pin (0.4.74)
 
 - Regenerated and pinned the backend dependency manifest after adding

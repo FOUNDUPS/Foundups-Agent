@@ -1,6 +1,7 @@
 """Focused signed-worker model-runtime boundary regressions."""
 
 from pathlib import Path
+import re
 import subprocess
 
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
@@ -37,9 +38,10 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispat
 def test_signed_worker_accepts_valid_task_with_injected_runner(
     tmp_path: Path,
 ) -> None:
+    task_context = _task_context()
     runner = _FakeRunner()
     result = execute_reddog_signed_worker_dispatch_task(
-        task_context=_task_context(),
+        task_context=task_context,
         task_id="task-1",
         repo_root=tmp_path,
         runner=runner,
@@ -53,9 +55,12 @@ def test_signed_worker_accepts_valid_task_with_injected_runner(
     assert result.worker_execution_performed is True
     assert result.worker_process_spawn_count == 0
     assert result.shell_command_count == 0
-    assert runner.calls[0]["worker_dispatch_intent"]["intent_id"] == (
-        "worker_dispatch_intent_openclaw_candidate"
-    )
+    intent_id = runner.calls[0]["worker_dispatch_intent"]["intent_id"]
+    assert intent_id == task_context["worker_dispatch_intent"]["intent_id"]
+    assert intent_id == task_context["signed_authority_worker_dispatch_receipt"][
+        "dispatch_intents"
+    ][0]["intent_id"]
+    assert re.fullmatch(r"worker_dispatch_intent_[0-9a-f]{16}", intent_id)
 
 
 def test_signed_worker_preserves_model_runtime_metadata(tmp_path: Path) -> None:

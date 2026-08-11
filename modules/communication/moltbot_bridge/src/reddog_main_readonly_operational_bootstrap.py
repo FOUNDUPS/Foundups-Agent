@@ -15,7 +15,6 @@ import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
-
 from holo_index.freshness_receipt import HoloIndexFreshnessReceipt, freshness_receipt_path
 from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
     FusionAssignmentGateDecision,
@@ -67,6 +66,7 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
     load_existing_holoindex_receipt,
     observe_repo_state,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import STAGE_AUDIT
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import allocate_reddog_wsp15_receipt
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import resolve_grounding_read_targets
 REDDOG_MAIN_BOOTSTRAP_READY = "REDDOG_MAIN_BOOTSTRAP_READY"
@@ -186,7 +186,7 @@ def run_reddog_main_readonly_operational_bootstrap(
     architect_model_runtime_binding_receipt_path: Path | str | None = None,
     architect_model_runtime_binding_receipt_override: Mapping[str, Any] | None = None,
     principal_memex_context: AuthenticatedPrincipalMemexContext | None = None, principal_memex_now_epoch: Callable[[], int] | None = None,
-    architect_determination_store: ArchitectDeterminationStore | None = None, progressive_execution_stage_ceiling: str = "AUDIT",
+    architect_determination_store: ArchitectDeterminationStore | None = None, progressive_execution_stage_ceiling: str = STAGE_AUDIT,
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
 

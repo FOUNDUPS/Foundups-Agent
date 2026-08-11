@@ -1,3 +1,12 @@
+## 2026-08-11: Baseline contract reconciliation
+
+- Proved the read-only bootstrap uses canonical `AUDIT_NO_EFFECT`, persists a
+  valid architect `FIX` determination, and emits zero executable queue
+  candidates.
+- Updated architect fixtures to consume the prompt-bound WSP_15 execution
+  allocation and signed-worker tests to verify one digest-bound intent across
+  task context, signed receipt, and runner input.
+
 ## 2026-08-11: Bounded iterative grounding regressions
 
 - Added deterministic refinement, deadline, root/generation drift, conservative

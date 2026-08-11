@@ -1,4 +1,13 @@
 # ModLog - moltbot_bridge
+## 2026-08-11: Read-only architect stage contract reconciliation
+- Replaced the retired literal `AUDIT` bootstrap default with the canonical
+  `AUDIT_NO_EFFECT` progressive-stage constant. Read-only architect `FIX`
+  determinations now persist as audit evidence without creating an executable
+  queue candidate.
+- Reconciled E2E architect fixtures with the WSP_15 execution binding already
+  present in the model prompt and preserved the existing conversation and
+  bounded-execution authority gates. (WSP 00/15/22/50/97)
+
 ## 2026-08-11: Bounded iterative repository grounding
 - Extended the existing transport-neutral grounding service with at most two
   deterministic HoloIndex owner queries per semantic target under one global

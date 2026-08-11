@@ -234,7 +234,7 @@ class _ArchitectRunner:
         parsed = json.loads(prompt)
         evidence_ref = parsed["reports"][0]["evidence_refs"][0]
         content = architect_model_output(
-            {"receipt_id": parsed["wsp15_allocation_receipt_id"]},
+            {"receipt_id": parsed["wsp15_allocation_receipt_id"], **parsed["wsp15_execution_binding"]},
             evidence_ref,
             slice_name="REDDOG_RESIDENT_RUNTIME_NEXT_PHASE1",
         )
@@ -318,7 +318,7 @@ def test_e2e_runs_enqueued_readonly_tasks_persists_reports_and_architect_decides
     assert result.final_bootstrap.report_collection_report_count == 5
     assert result.final_bootstrap.readonly_audit_decision_persist_status == READONLY_AUDIT_DECISION_PERSIST_ACCEPT
     assert result.final_bootstrap.backend_architect_determination_status == ARCHITECT_DETERMINATION_ACCEPT
-    assert result.final_bootstrap.backend_architect_determination_queue_candidate_count == 1
+    assert result.final_bootstrap.backend_architect_determination_queue_candidate_count == 0
     assert len(result.task_runs) == 5
     assert all(item.accepted and item.persist_accepted for item in result.task_runs)
     assert len(report_store.records) == 5
