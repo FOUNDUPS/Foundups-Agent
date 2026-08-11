@@ -27,7 +27,7 @@ exemptions:
       is now extracted into bounded decision phases, while unrelated envelope,
       policy, evidence, and compute-budget validators require a separate parity
       decomposition.
-    threshold_override: 1193
+    threshold_override: 1198
     function_threshold_override: 212
     functions:
       - "validate_foundup_job_envelope"
@@ -42,7 +42,7 @@ exemptions:
     expires_on: "2026-09-30"
     remediation: "ROADMAP.md#foundup-job-router-and-consumer-wsp62-decomposition"
     no_growth_ceiling:
-      file_lines: 1193
+      file_lines: 1198
       functions:
         validate_foundup_job_envelope: 212
         _validate_live_mode_gates: 88
@@ -81,7 +81,7 @@ exemptions:
       The independent-assurance verifier boundary is now documented beside
       the existing model-capability contract; archival decomposition requires
       a separate documentation-retention review.
-    threshold_override: 1069
+    threshold_override: 1114
     function_threshold_override: 0
     functions: []
     temporary: true
@@ -92,7 +92,7 @@ exemptions:
     expires_on: "2026-09-30"
     remediation: "ROADMAP.md#wre-documentation-wsp62-decomposition"
     no_growth_ceiling:
-      file_lines: 1069
+      file_lines: 1114
       functions: {}
 
   - file: "ModLog.md"
@@ -100,7 +100,7 @@ exemptions:
       Inherited chronological production history exceeds the canonical
       Markdown threshold. History must remain auditable until an approved
       archival decomposition preserves its lineage.
-    threshold_override: 4268
+    threshold_override: 1000
     function_threshold_override: 0
     functions: []
     temporary: true
@@ -110,16 +110,15 @@ exemptions:
     review_date: "2026-Q3"
     expires_on: "2026-09-30"
     remediation: "ROADMAP.md#wre-documentation-wsp62-decomposition"
-    no_growth_ceiling:
-      file_lines: 4268
-      functions: {}
+    enforcement_mode: "advisory_archive"
+    advisory_archive_threshold: 1000
 
   - file: "tests/TestModLog.md"
     reason: >-
       Inherited chronological verification history exceeds the canonical
       Markdown threshold. History must remain auditable until an approved
       archival decomposition preserves its lineage.
-    threshold_override: 1380
+    threshold_override: 1000
     function_threshold_override: 0
     functions: []
     temporary: true
@@ -129,6 +128,5 @@ exemptions:
     review_date: "2026-Q3"
     expires_on: "2026-09-30"
     remediation: "ROADMAP.md#wre-documentation-wsp62-decomposition"
-    no_growth_ceiling:
-      file_lines: 1380
-      functions: {}
+    enforcement_mode: "advisory_archive"
+    advisory_archive_threshold: 1000

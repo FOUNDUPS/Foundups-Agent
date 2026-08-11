@@ -16294,7 +16294,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Exact, non-ratcheting WSP62 debt authority for WRE inherited files."
+      "description": "Differential, non-ratcheting WSP62 authority for WRE inherited files."
     },
     {
       "id": "test::modules::infrastructure::wre_core::tests::test_foundup_scaffold_adapter",

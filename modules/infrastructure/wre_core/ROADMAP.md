@@ -52,8 +52,10 @@ provenance/signature contract and is outside Phase 1.
 ## WRE documentation WSP62 decomposition
 
 `INTERFACE.md`, `ModLog.md`, and `tests/TestModLog.md` contain inherited
-chronological/API history above the canonical Markdown threshold. They are
-governed by exact temporary no-growth ceilings in `wsp_62_exemptions.yaml`.
-Before 2026-09-30, archive superseded history through an approved
-documentation-retention workflow, preserve current interfaces and audit
-lineage, and remove each exemption once the canonical threshold is met.
+chronological/API history above the canonical Markdown threshold.
+`INTERFACE.md` remains governed by a temporary no-growth ceiling.
+The two required append-only audit logs use non-blocking archival advisories;
+their history cannot block unrelated functional or security work. Before
+2026-09-30, archive superseded history through an approved retention workflow,
+preserve current interfaces and audit lineage, and remove each temporary
+exception once the canonical threshold is met.

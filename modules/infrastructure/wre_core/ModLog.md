@@ -1,5 +1,57 @@
 # WRE Core - ModLog
 ## Chronological Change Log
+### [2026-08-11] - WSP 62 DIFFERENTIAL ENFORCEMENT RECONCILIATION
+
+- Reconciled the WRE inherited-debt authority with current `main` after the
+  security hardening in PR #1442 and subsequent interface growth.
+- Defined no-growth ceilings as maxima so debt reduction never fails merely
+  because the exemption still records the older upper bound.
+- Made required append-only ModLog history advisory for archival rather than a
+  functional merge blocker. Candidate-created code growth remains fail-closed.
+- Clarified WSP 62 attribution: unchanged exact-base debt is reported but is
+  not assigned to unrelated work. (WSP 00/15/22/50/62/97)
+- Replaced FMAS's filename-only exemption bypass with contract-aware ceiling,
+  exact-baseline, override, permanent, and audit-archive evaluation.
+- Repaired inherited FMAS Mode 2 result handling and invalid-baseline exit
+  semantics so exact-base WSP 62 errors now participate in the CLI exit gate.
+- Bound candidate exemption ceilings to exact-baseline policy and observed
+  baseline size so code and function growth cannot self-authorize a ratchet.
+- Downgraded unchanged exact-base expiry metadata defects to inherited
+  advisories while preserving fail-closed handling for candidate removals and
+  newly malformed expiry values.
+- Replaced substring severity detection with WSP 62 prefix parsing so filenames
+  containing words such as `ERROR` cannot forge a blocking classification.
+- Preserved the independent structural-audit severity vocabulary so existing
+  WSP 4 `ERROR:` and security-failure findings remain blocking in Mode 1.
+- Bound Mode 2 CLI admission to a clean checkout of the candidate's Git merge
+  base, rejecting caller-selected or candidate-self baselines.
+- Closed file/function rename, ceiling-removal, archive-threshold ratchet, and
+  temporary-expiry erasure bypasses found by independent security review.
+- Added Git rename evidence and qualified lexical function identities so
+  stricter baseline contracts survive path changes and duplicate method names.
+- Applied the standard 50-line function-growth rule to unexempt Python files,
+  including candidates that remove an entire exemption while renaming code.
+- Skipped byte-identical exact-base Python before AST inspection, preserving
+  legacy malformed fixtures as non-blocking while rejecting candidate-created
+  parse failures and keeping the real differential near 15 seconds.
+- Split candidate-file evaluation and CLI mode orchestration into bounded
+  helpers; no newly introduced function exceeds the current WSP 62 limit.
+- Preserved blocking security severity through the existing `SECURITY:` module
+  envelope and closed malformed-baseline and empty-function-map fail-open paths.
+- Made wrapped security classification independent of module-path delimiters
+  and skipped authority AST parsing only when bytes and ceiling maps are both
+  unchanged at the exact base.
+- Applied the same exact-byte and identical-map skip during named function
+  enforcement so malformed inherited code is never reparsed in a later phase.
+- Bound security severity before adding module-path context, eliminating
+  delimiter ambiguity, and allowed bounded valid repairs over malformed base
+  Python while still checking every candidate function against its ceilings.
+- Kept inherited metadata advisories non-terminal and treated malformed base
+  function identity as unknown, so candidate functions above 50 lines cannot
+  inherit authority merely by reusing a ceiling name.
+- Allowed named-ceiling removal over an unparseable base only when the repaired
+  candidate function is at or below 50 lines; measurable growth still blocks.
+
 ### [2026-08-11] - CANONICAL SHARD PROJECTION / LIVE API QUARANTINE
 
 - Added planning-only exact-SHA bounded shard projection and extended the
