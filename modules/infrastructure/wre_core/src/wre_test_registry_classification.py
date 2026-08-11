@@ -15,6 +15,7 @@ from .wre_test_registry_ast import (
 )
 
 SUITE_CLASSES = {"unit", "integration", "manual", "operational"}
+MAX_TEST_SOURCE_BYTES = 2 * 1024 * 1024
 _ARCHIVE_PARTS = {"_archive", "archive", "archived", "modules_archive"}
 _DANGEROUS_CALLS = {
     "exit", "quit", "sys.exit", "os._exit",
@@ -50,11 +51,16 @@ def classify_test_file(repo_root: Path, relative_path: str) -> TestFileClassific
     description = ""
     tree: ast.Module | None = None
     try:
+        if target.stat().st_size > MAX_TEST_SOURCE_BYTES:
+            reasons.add("test_source_size_exceeded")
+            raise _SourceSizeExceeded
         source = target.read_text(encoding="utf-8", errors="strict")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", SyntaxWarning)
             tree = ast.parse(source, filename=relative_path)
         description = (ast.get_docstring(tree) or "").strip()[:500]
+    except _SourceSizeExceeded:
+        pass
     except UnicodeError:
         reasons.add("non_utf8_source")
     except SyntaxError:
@@ -100,6 +106,10 @@ def _apply_effects(
     if "logging.basicConfig" in effects.calls:
         capabilities.add("logging_configuration")
     capabilities.update(_capabilities(tree))
+
+
+class _SourceSizeExceeded(Exception):
+    """Internal control flow for bounded static source inspection."""
 
 
 def owner_for_path(path: PurePosixPath) -> str:
@@ -163,6 +173,6 @@ def _capabilities(tree: ast.Module) -> set[str]:
 
 
 __all__ = [
-    "SUITE_CLASSES", "TestFileClassification", "classify_test_file",
+    "MAX_TEST_SOURCE_BYTES", "SUITE_CLASSES", "TestFileClassification", "classify_test_file",
     "owner_for_path", "shard_slug",
 ]

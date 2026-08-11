@@ -1,9 +1,10 @@
 # RedDog Interface
 
-Version 0.4.78 pins the backend manifest after hardening the canonical module-owned
-test registry against import-time live API programs. Imported test modules can
-execute arbitrary code even in collection mode, so local evidence remains
-unauthenticated and non-authoritative.
+Version 0.4.79 pins the backend manifest after registering the canonical
+test-registry and bounded exact-SHA shard projection Skillz workflow. The
+projection reuses the canonical WRE impact plan and never imports candidate
+tests or invokes pytest; autonomous execution remains
+blocked pending an authenticated OS-isolated runner.
 
 Version 0.4.74 pins the backend manifest for bounded iterative repository
 grounding. Semantic HoloIndex hits are candidate locators only; exact current

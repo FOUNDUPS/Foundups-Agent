@@ -30,7 +30,7 @@ FAIL_SUITE_SCOPE = "FAIL_REQUIRED_TEST_SUITE_SCOPE"
 FAIL_SECURITY_CLOSURE = "FAIL_SECURITY_CLOSURE_REQUIRED"
 FAIL_HELD_OUT_CLOSURE = "FAIL_HELD_OUT_CLOSURE_REQUIRED"
 
-_SHA_LENGTH = 40
+_SHA_LENGTHS = {40, 64}
 _DIGEST_PREFIX = "sha256:"
 _SUITE_RANK = {
     "FOCUSED": 1,
@@ -110,7 +110,7 @@ def evaluate_test_differential(
     safe_plan = _mapping(plan)
     safe_base = _mapping(base)
     safe_candidate = _mapping(candidate)
-    reasons = _validate_plan(safe_plan)
+    reasons = validate_test_impact_plan(safe_plan)
     reasons.extend(_validate_snapshot(safe_base))
     reasons.extend(_validate_snapshot(safe_candidate))
     reasons.extend(_binding_reasons(safe_plan, safe_base, safe_candidate))
@@ -193,7 +193,7 @@ def _required_suite_kind(impact_class: str, **signals: bool) -> str:
     return "FOCUSED"
 
 
-def _validate_plan(plan: Mapping[str, Any]) -> list[str]:
+def validate_test_impact_plan(plan: Mapping[str, Any]) -> list[str]:
     expected = "wre_test_plan_" + _safe_digest_hex(_without(plan, "plan_id"))
     digest_fields = (
         "changed_paths_digest", "suite_scope_digest", "runner_digest",
@@ -363,7 +363,10 @@ def _ids_are_canonical(value: Any) -> bool:
 
 
 def _is_sha(value: Any) -> bool:
-    return isinstance(value, str) and len(value) == _SHA_LENGTH and all(char in "0123456789abcdef" for char in value)
+    return (
+        isinstance(value, str) and len(value) in _SHA_LENGTHS
+        and all(char in "0123456789abcdef" for char in value)
+    )
 
 
 def _is_digest(value: Any) -> bool:
@@ -393,4 +396,5 @@ def _safe_digest_hex(value: Any) -> str:
 __all__ = [
     "PLAN_SCHEMA", "RECEIPT_SCHEMA", "SCHEMA", "TestDifferentialReceipt",
     "evaluate_test_differential", "make_test_impact_plan", "make_test_run_snapshot",
+    "validate_test_impact_plan",
 ]

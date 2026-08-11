@@ -1,10 +1,10 @@
 # WRE Core - ModLog
 ## Chronological Change Log
-### [2026-08-11] - LIVE API TEST QUARANTINE HARDENING
+### [2026-08-11] - CANONICAL SHARD PROJECTION / LIVE API QUARANTINE
 
-- Extended the canonical registry classifier to quarantine module-scope Google
-  API client construction as an external effect, including aliased imports in
-  module-executed control-flow and Google discovery star imports.
+- Added planning-only exact-SHA bounded shard projection and extended the
+  registry classifier to quarantine module-scope Google API construction,
+  including aliased imports and Google discovery star imports.
 - Kept pure Google authentication request construction collectable and added
   adversarial false-negative/false-positive regressions.
 - Inspect import-time `else` branches under `__main__` guards while continuing

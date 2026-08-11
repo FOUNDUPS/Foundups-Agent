@@ -46,6 +46,8 @@ STATIC_RUNTIME_FILES = (
     "extensions/reddog/start_operations_python_bootstrap.py",
     "scripts/reddog_holoindex_owner_service_once.py",
     "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py",
+    "modules/infrastructure/wre_core/src/"
+    "wre_test_registry_differential_plan_runtime.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_system_service_entrypoint.py",
     "modules/communication/moltbot_bridge/src/"
@@ -54,6 +56,8 @@ STATIC_RUNTIME_FILES = (
     "foundup_verified_outcome_root_authority_provision_entrypoint.py",
     "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md",
     "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
+    "modules/infrastructure/wre_core/skillz/"
+    "auto_test_registry_audit/SKILLz.md",
     "modules/ai_intelligence/ai_overseer/skillz/"
     "m2m_holo_retrieval_benchmark/retrieval_corpus_v1.json",
 )

@@ -14,3 +14,6 @@
 # repo-wide normalization policy is being introduced here.
 modules/foundups/kosei/frontend/** text eol=lf
 public/kosei/**                    text eol=lf
+
+# Canonical generated registry is byte-compared on every platform.
+WSP_knowledge/WSP_Test_Registry.json text eol=lf

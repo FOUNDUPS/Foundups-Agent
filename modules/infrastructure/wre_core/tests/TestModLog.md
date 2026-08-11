@@ -1,8 +1,8 @@
 # TestModLog - wre_core/tests
-## 2026-08-11: Live API registry quarantine
-- Added alias-aware network capability classification and a repository fixture
-  proving the import-time LiveChat Google API program remains visible but cannot
-  enter an automatic test shard.
+## 2026-08-11: Canonical shard projection / Live API quarantine
+- Proved planning-only exact-SHA shard projection, portable Git materialization,
+  immutable scope evidence, and a repository fixture where import-time LiveChat
+  API code remains visible but cannot enter an automatic test shard.
 - Added module alias, nested `try`/`if`, discovery star-import, and harmless
   authentication-constructor cases after independent security review.
 - Proved a `__main__` body remains excluded while its import-time `else` branch

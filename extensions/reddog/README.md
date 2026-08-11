@@ -1,11 +1,12 @@
 # RedDog
 
-Version: 0.4.78
+Version: 0.4.79
 
-[OBSERVED] Version 0.4.78 pins the backend manifest after hardening the canonical
-module-owned test registry against import-time live API programs. Pytest runs
-in collection mode, but imported modules can execute arbitrary code; local
-diagnostics cannot authorize autonomous promotion.
+[OBSERVED] Version 0.4.79 pins the backend manifest after registering the
+canonical test-registry and bounded exact-SHA shard projection Skillz workflow.
+The projection reuses the canonical WRE impact plan and never imports candidate
+tests or invokes pytest. Autonomous test
+execution remains blocked pending an authenticated OS-isolated runner.
 
 [OBSERVED] Version 0.4.74 pins bounded iterative repository grounding. HoloIndex
 locates candidate paths, while active model evidence comes only from rehydrated

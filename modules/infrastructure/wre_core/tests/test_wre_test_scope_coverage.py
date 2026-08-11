@@ -50,6 +50,9 @@ def test_module_changes_require_whole_module_tests(changed, root) -> None:
     [
         ["main.py"],
         ["WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md"],
+        ["WSP_knowledge/src/WSP_6_Test_Audit_Coverage_Verification.md"],
+        ["WSP_agentic/src/example.py"],
+        ["docs/architecture/example.md"],
         ["holo_index/holo_index.py"],
         ["modules/infrastructure/shared_utilities/runtime_artifact_safety.py"],
         ["modules/infrastructure/wre_core/src/pattern_memory.py"],

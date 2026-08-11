@@ -128,6 +128,17 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py"
         in generated["required_runtime_sha256"]
     )
+    for relative in (
+        "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md",
+        "modules/infrastructure/wre_core/src/wre_test_registry_differential_plan_runtime.py",
+        "modules/infrastructure/wre_core/src/wre_git_bounded_io.py",
+        "modules/infrastructure/wre_core/src/wre_git_tree_manifest.py",
+        "modules/infrastructure/wre_core/src/wre_test_registry_git_binding.py",
+        "modules/infrastructure/wre_core/src/wre_test_registry_impact_binding.py",
+        "modules/infrastructure/wre_core/src/wre_test_registry_scope_plan.py",
+        "modules/infrastructure/wre_core/src/wre_recognized_dependency_binding.py",
+    ):
+        assert relative in generated["required_runtime_sha256"]
     assert (
         "extensions/reddog/start_operations_python_bootstrap.py"
         in generated["required_runtime_sha256"]
@@ -142,5 +153,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     assert generator.canonical_manifest_digest(generated) == (
-        "ed57fb76286104435538c6aa3a294d28a54d12ab88552aea1ad367c2bbc1f85e"
+        "381744129235c3dabe0a02841ad60d6bb2dc8e5c7ec7627a8425909c3ab09fcf"
     )
