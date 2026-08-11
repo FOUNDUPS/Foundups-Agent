@@ -1,3 +1,17 @@
+## 2026-08-12: Live-canary contract reconciliation regressions
+- Replaced stale work-authority and serial-loop fixtures with canonical signed
+  stage and queue WSP_15 projections while preserving exact-path scope and the
+  independent-verifier requirement.
+- Updated the arbitrary-domain regression to assert the current earlier global
+  domain-mismatch rejection, and derived selected-slice identity from the
+  signed stage receipt rather than a duplicate literal.
+- Windows CPython 3.12.2 final matrix covered the Ed25519 signer, signed
+  manifest, external lease, atomic provisioning/recovery/WSP 62, service
+  entrypoint, live-canary unit/integration, and runtime-readiness files:
+  173 passed with three platform skips. The backend manifest generator/check,
+  1,483-test registry check, 19 static/WSP tests, and exhaustive RedDog
+  extension contract also pass.
+
 ## 2026-08-12: External authoritative-use lease regressions
 - Proved exact grant-bound signing, typed effect-digest recomputation, strict request/instance/generation/TTL checks, signer and audit verification, durable replay denial, expiry, and opaque capability behavior.
 - Proved noncanonical and duplicate-key JSON rejection, socket-v1 downgrade denial, cross-effect and generation substitution denial, and one real lease through the direct WRE spine without monkeypatching.

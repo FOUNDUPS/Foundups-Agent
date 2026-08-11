@@ -1,4 +1,15 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Live-canary contract fixture reconciliation
+- Reprojected the resident live-canary fixtures through the current canonical
+  queue WSP_15 allocation and progressive-stage binding instead of retaining
+  pre-stage scalar authority fields. The manifest fixture now binds one exact
+  edit operation, selected slice, and file path.
+- Kept signer behavior unchanged while extracting the prepared-response call
+  below the WSP 62 function limit. Regenerated the checked-in RedDog backend
+  manifest for that exact source digest.
+- Restored the current signer/manifest/provisioning/canary matrix without
+  activating a signer, issuing authority, mutating a repository, publishing a
+  PR, or claiming that the production live canary ran. (WSP 00/15/22/50/62/97)
 ## 2026-08-12: External-signer authoritative-use lease primitive
 - Added a strict typed exact-effect request and opaque one-shot process capability; the signer recomputes effect identity, rejects noncanonical JSON, and binds current manifest, generation, owner config, run packet, session, socket, profile, and key.
 - Extended the existing socket client v2 grant envelope and durable E0 replay store. Lease-domain socket v1 rejects, and client rehydration has no injected verifier, replay, time, or parent-authority verdict; the existing E0 exact-request grant remains the only signing authority.

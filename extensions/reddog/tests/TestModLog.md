@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-12 - Live-canary reconciliation compatibility (0.4.81)
+
+- Pinned the regenerated backend manifest and version fixtures after the
+  signer/live-canary contract matrix was reconciled to current WSP_15 policy.
+- Revalidated backend compatibility and exhaustive extension contracts without
+  adding client or execution authority.
+
 ## 2026-08-12 - External signer lease compatibility (0.4.80)
 
 - Pinned the regenerated external signer lease backend manifest and retained
