@@ -1,3 +1,14 @@
+## 2026-08-12: Durable signer revocation authority regressions
+- Proved signed policy-v2 topology, append-only monotonic publication, fresh
+  read-only visibility, exact witness binding, both crash-window recoveries,
+  and idempotent restart recovery.
+- Proved attacker-rehashed unsigned pending state, row-status and metadata
+  tamper, witness rollback, unrevocation, wrong sequence, expired snapshots,
+  substituted paths, and concurrent first publication fail closed.
+- Proved the shared operation lock covers the complete protected callback and
+  that detached readers/oracles expose no mutation methods. Production E0 and
+  coordinated two-local-domain rollback resistance remain outside this suite.
+
 ## 2026-08-12: Independent signer revocation-contract regressions
 - Proved exact schema, canonical identifier, signature, authority, policy,
   generation, target-signer, store, freshness, and bounded-list validation for

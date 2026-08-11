@@ -29,6 +29,9 @@ from .reddog_signer_owner_e0_policy_contract import (
     canonical_signer_owner_e0_policy_input,
     signer_key_reference_digest,
 )
+from .reddog_signer_secret_grant_revocation_authority_binding import (
+    revocation_authority_binding_from_policy,
+)
 
 
 def load_selected_signer_config(
@@ -161,6 +164,16 @@ def require_policy_runtime_paths(
         roots.append(root)
     if roots[0] == roots[1] or roots[0] in roots[1].parents or roots[1] in roots[0].parents:
         raise ValueError("e0_policy_runtime_roots_not_disjoint")
+    binding = revocation_authority_binding_from_policy(
+        policy, repo_root=repo_root, signer_runtime_root=signer_runtime_root
+    )
+    if any(_paths_overlap(binding.witness_root, root) for root in roots):
+        raise ValueError("e0_policy_runtime_roots_not_disjoint")
+
+
+def _paths_overlap(left: str | Path, right: str | Path) -> bool:
+    first, second = Path(left).resolve(), Path(right).resolve()
+    return first == second or first in second.parents or second in first.parents
 
 
 def _profiles(config: Any) -> tuple[SignerKeyProviderProfile, ...]:

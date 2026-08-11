@@ -31,6 +31,27 @@ cannot reuse the backend. Specialized proposal, control-loop, manifest,
 verified-outcome, conversation, and peer-handshake policies retain their own
 domain-specific validation.
 
+### Durable grant-revocation authority foundation
+
+`UncomposedDurableSignerGrantRevocationAuthoritySupply` publishes only contiguous,
+independently signed revocation snapshots into an append-only SQLite primary
+log. A separately rooted `SqliteMonotonicAuthorityStore` witnesses the exact
+sequence and snapshot ID. Policy v2 signs both store identities, durability
+receipts, roots, paths, schemas, and the shared operation-lock path.
+
+Publication is `PREPARED -> witness advance -> COMMITTED`. Recovery validates
+the signed pending snapshot before deterministic roll-forward from either crash
+window. Detached readers open fresh read-only SQLite connections and reject
+status, metadata, pending-state, witness, freshness, or topology mismatch.
+`UncomposedDurableSignerGrantRevocationOracle` is deliberately uncomposed and exposes no
+mutation methods. It is not accepted by the current E0 grant boundary.
+
+This interface does not establish production revocation authority. The primary
+and witness remain two local rollback domains; coordinated restoration is not
+detectable without an external anchor. Independent grant-authority issuance,
+E0-only factory admission, stable signer composition, and production activation
+remain fail closed.
+
 ## Authenticated RedDog conversation scope
 `authenticate_conversation_scope()` derives the principal only from a verified
 `sess.v1` subject and returns an opaque one-use capability. Create, resume, and

@@ -32,6 +32,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
     signer_owner_e0_authority_binding_digest,
     signer_owner_e0_policy_id,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
+    STORE_SCHEMA,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_contract import (
+    SNAPSHOT_SCHEMA,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_principal_authority import (
     load_current_generation_principal_authority_resolver,
 )
@@ -115,7 +121,10 @@ def _canonical_digest(value: object) -> str:
 def _fixture_roots(tmp_path: Path) -> dict[str, Path]:
     roots = {
         name: tmp_path / name
-        for name in ("repo", "runtime", "signer", "replay", "revocation")
+        for name in (
+            "repo", "runtime", "signer", "replay", "revocation",
+            "revocation_witness",
+        )
     }
     for path in roots.values():
         path.mkdir()
@@ -189,6 +198,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
         signer=roots["signer"],
         replay=roots["replay"],
         revocation=roots["revocation"],
+        revocation_witness=roots["revocation_witness"],
         target_public=target_public,
         grant_public=grant_public,
         revocation_public=revocation_public,
@@ -318,6 +328,7 @@ def _policy(
     signer: Path,
     replay: Path,
     revocation: Path,
+    revocation_witness: Path,
     target_public: str,
     grant_public: str,
     revocation_public: str,
@@ -358,10 +369,7 @@ def _policy(
         "replay_path": str((replay / "grant-nonces.db").resolve()),
         "replay_store_id": "signer-grant-replay",
         "replay_store_durability_receipt_id": DIGEST_A,
-        "revocation_root": str(revocation.resolve()),
-        "revocation_path": str((revocation / "revocations.db").resolve()),
-        "revocation_store_id": "signer-grant-revocations",
-        "revocation_store_durability_receipt_id": DIGEST_B,
+        **_revocation_topology(revocation, revocation_witness),
         "allowed_operations": ["issue_work_authority"],
         "allowed_authority_tiers": ["HIGH", "SOVEREIGN"],
         "consensus_required_tiers": ["HIGH", "SOVEREIGN"],
@@ -370,6 +378,28 @@ def _policy(
         "issued_at": int(time.time()) - 10,
         "expires_at": int(time.time()) + 200,
         "signature": "pending",
+    }
+
+
+def _revocation_topology(
+    primary: Path, witness: Path
+) -> dict[str, object]:
+    return {
+        "revocation_root": str(primary.resolve()),
+        "revocation_path": str((primary / "revocations.db").resolve()),
+        "revocation_store_id": "signer-grant-revocations",
+        "revocation_store_durability_receipt_id": DIGEST_B,
+        "revocation_snapshot_schema": SNAPSHOT_SCHEMA,
+        "revocation_store_schema": STORE_SCHEMA,
+        "revocation_witness_root": str(witness.resolve()),
+        "revocation_witness_path": str(
+            (witness / "revocation-witness.sqlite3").resolve()
+        ),
+        "revocation_witness_store_id": "signer-grant-revocation-witness",
+        "revocation_witness_store_durability_receipt_id": DIGEST_C,
+        "revocation_lock_path": str(
+            (primary / "revocations.db.authority.lock").resolve()
+        ),
     }
 
 
