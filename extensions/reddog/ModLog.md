@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-08-12 - Signer authority-separation compatibility pin (0.4.82)
+
+- Re-pinned the exact backend manifest after grant/revocation authority
+  independence was added to signer E0 admission.
+- Added no thin-client behavior, signer activation, or execution authority.
+
 ## 2026-08-12 - Live-canary reconciliation compatibility pin (0.4.81)
 
 - Re-pinned the exact backend manifest after current-policy live-canary fixture

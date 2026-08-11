@@ -1935,7 +1935,7 @@
     "modules/communication/moltbot_bridge/src/reddog_signer_mutual_peer_handshake.py": "ba24793e973d522610dfa603344e670fa01b3d1d3d497a824f1eb7a0da8fd2fe",
     "modules/communication/moltbot_bridge/src/reddog_signer_optional_authority_bindings.py": "0425bf26feb1ad1c69fae0b56b1fd9b37e33a7337bf2a50c5f1db9d342d51617",
     "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_admission_contract.py": "054ffc0e2b5fe23989555c4549d724ccab9b247b7cac5e6b7b962743dfa24573",
-    "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_admission_validation.py": "4fa2ab8b12e909613af6a8559cc01b4135a85c87ff1c46779c7bc38d36df90c5",
+    "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_admission_validation.py": "18073f0f3e2e27d0f699d36703fed3e2757ccd8c8e752c6a36186597f9c04ddf",
     "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_capability_state.py": "45e6797816a201fd5db6b1218e3685f236b4beefb0c028cc5dd6c17e824a68be",
     "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_current_selection.py": "0000acb40e6f17711ca701d3b9af1e119adc675c8b38fa926de4448d272dea79",
     "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_policy_contract.py": "717e9fa092ea6d66d31cce0121fa6ae7787d24c20adfe845255a5be8b6cca904",

@@ -19,6 +19,35 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signer_owner_control
 from modules.communication.moltbot_bridge.src import (
     reddog_signer_owner_e0_current_selection as current_selection_module,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_admission_validation import (
+    require_policy_authorities,
+)
+
+
+class _AuthorityResolver:
+    def __init__(self, values: dict[tuple[str, str], str]) -> None:
+        self._values = values
+
+    def resolve(self, principal_id: str, principal_provider: str) -> str | None:
+        return self._values.get((principal_id, principal_provider))
+
+
+class _AcceptingSignatureVerifier:
+    @staticmethod
+    def verify(_public_key: str, _message: str, _signature: str) -> bool:
+        return True
+
+
+def _authority_resolver(policy: dict[str, object]) -> _AuthorityResolver:
+    return _AuthorityResolver(
+        {
+            (
+                str(policy[f"{prefix}_principal_id"]),
+                str(policy[f"{prefix}_principal_provider"]),
+            ): str(policy[f"{prefix}_public_key"])
+            for prefix in ("grant_authority", "revocation_authority")
+        }
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -32,6 +61,42 @@ def _root_owned_selection_loader(monkeypatch: pytest.MonkeyPatch) -> None:
         "load_system_service_manifest_selection",
         load,
     )
+
+
+@pytest.mark.parametrize(
+    "mutation,reason",
+    [
+        ("valid", None),
+        ("same_principal", "e0_policy_authorities_not_independent"),
+        ("same_key", "e0_policy_authorities_not_independent"),
+        ("grant_target", "e0_policy_self_authority_rejected"),
+        ("revocation_target", "e0_policy_self_authority_rejected"),
+    ],
+)
+def test_authority_independence_matrix(
+    tmp_path: Path, mutation: str, reason: str | None
+) -> None:
+    fixture = _fixture(tmp_path)
+    policy = fixture["policy"]
+    if mutation == "same_principal":
+        policy["revocation_authority_principal_id"] = policy[
+            "grant_authority_principal_id"
+        ]
+        policy["revocation_authority_principal_provider"] = "gitlab"
+    elif mutation == "same_key":
+        policy["revocation_authority_public_key"] = policy["grant_authority_public_key"]
+    elif mutation.endswith("_target"):
+        prefix = mutation.removesuffix("_target") + "_authority_public_key"
+        policy[prefix] = fixture["target_public"]
+    kwargs = {
+        "principal_key_resolver": _authority_resolver(policy),
+        "signature_verifier": _AcceptingSignatureVerifier(),
+    }
+    if reason is None:
+        require_policy_authorities(policy, **kwargs)
+    else:
+        with pytest.raises(ValueError, match=f"^{reason}$"):
+            require_policy_authorities(policy, **kwargs)
 
 
 def test_caller_cannot_mutate_policy_after_admission(tmp_path: Path) -> None:

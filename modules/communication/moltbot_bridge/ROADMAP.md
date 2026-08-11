@@ -60,10 +60,14 @@
   process-local capability. Capability consumption revalidates under the
   shared generation fence and returns only a non-authoritative receipt. It
   performs no secret resolution, socket binding, or signer start.
-- NEXT: independently administered grant and revocation supply, WSP 71
-  permissioned resolver composition, and native-memory zeroization evidence
-  entrypoint. Socket v1 remains compatible but cannot reach the resolve-per-sign
-  backend.
+- COMPLETE: an independently signed revocation-snapshot contract binds the
+  exact current E0 policy, generation, authority, target signer, and durable
+  store. Grant/revocation/target-signer authority collapse rejects.
+- NEXT: durable append-only revocation supply using the existing monotonic
+  high-water/witness pattern and a cross-process use fence; independently
+  administered grant issuance; E0-only oracle/backend composition; WSP 71
+  permissioned resolution; and native-memory zeroization evidence. Socket v1
+  remains compatible but cannot reach the resolve-per-sign backend.
 - BLOCKED: durable system-service deployment and no-work-authority Linux
   canary until grant/revocation supply, secret resolution, zeroization, and lifecycle
   supervision slices pass.

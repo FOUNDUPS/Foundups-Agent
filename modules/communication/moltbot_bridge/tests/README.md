@@ -111,8 +111,13 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_executio
 
 Focused signer resolve-per-sign E0 boundary:
 ```powershell
-python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_contract.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py -q
 ```
+
+The revocation-contract cases use only signed test fixtures. They prove exact
+authority/generation/store binding and attacker-rehash rejection. They do not
+provide durable revocation supply, issue grants, resolve secrets, start a
+signer, bind a socket, mutate the repository, or reindex HoloIndex.
 
 Focused architect-FIX two-phase publication:
 ```powershell
