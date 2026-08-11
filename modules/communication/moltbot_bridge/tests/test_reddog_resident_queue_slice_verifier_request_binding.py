@@ -467,6 +467,24 @@ def test_head_sha_is_not_required_in_pre_execution_plan(tmp_path: Path) -> None:
     assert result.evidence_producer_request["head_sha"] == "a" * 40
 
 
+def test_signed_test_impact_policy_is_forwarded_without_derivation(tmp_path: Path) -> None:
+    policy = {"schema_version": "wre_test_impact_policy.v1", "impact_class": "MODULAR"}
+    plan = _slice_verifier_plan(test_impact_policy=policy)
+    work_order = _work_order(slice_verifier_plan=plan)
+    result = build_resident_queue_slice_verifier_request(
+        work_order=work_order,
+        stage_results=_stage_results(tmp_path, bound_work_order=work_order),
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
+    )
+    assert result.accepted is True
+    assert result.evidence_producer_request["test_impact_policy"] == policy
+    assert result.evidence_producer_request["bound_work_order"] == work_order
+    assert result.evidence_producer_request["exact_sha_commit_receipt"] == (
+        _stage_results(tmp_path, bound_work_order=work_order)["exact_sha_commit"]["commit_receipt"]
+    )
+
+
 def test_uses_pilot_written_artifacts_when_plan_expected_paths_are_absent(tmp_path: Path) -> None:
     plan = _slice_verifier_plan(expected_changed_paths=[])
     work_order = _work_order(slice_verifier_plan=plan)

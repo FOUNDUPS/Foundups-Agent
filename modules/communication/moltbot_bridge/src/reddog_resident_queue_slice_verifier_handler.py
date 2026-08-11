@@ -238,6 +238,7 @@ class ResidentQueueSliceVerifierStageHandler:
                 request=evidence_producer_request,
                 diff_evidence=produced.diff_evidence,
                 test_evidence=produced.test_evidence,
+                test_differential_capability=produced.test_differential_capability,
             )
         verifier_request = {
             **dict(verifier_request),
@@ -321,6 +322,7 @@ def _verifier_request_from_evidence(
     request: Mapping[str, Any],
     diff_evidence: Mapping[str, Any],
     test_evidence: Mapping[str, Any],
+    test_differential_capability: object | None = None,
 ) -> dict[str, Any]:
     verifier_request = {
         "work_order_id": str(request.get("work_order_id") or ""),
@@ -347,6 +349,12 @@ def _verifier_request_from_evidence(
         "bounded_worker_pilot_receipt": dict(
             _mapping(request.get("bounded_worker_pilot_receipt"))
         ),
+        "exact_sha_commit_receipt": dict(
+            _mapping(request.get("exact_sha_commit_receipt"))
+        ),
+        "bound_work_order": dict(_mapping(request.get("bound_work_order"))),
+        "test_impact_policy": dict(_mapping(request.get("test_impact_policy"))),
+        "test_differential_capability": test_differential_capability,
         "holoindex_evidence": dict(_mapping(request.get("holoindex_evidence"))),
         "pattern_memory_write_performed": bool(request.get("pattern_memory_write_performed")),
         "draft_pr_published": bool(request.get("draft_pr_published")),

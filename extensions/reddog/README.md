@@ -1,10 +1,10 @@
 # RedDog
 
-Version: 0.4.75
+Version: 0.4.76
 
-[OBSERVED] Version 0.4.75 pins the backend manifest after reconciling the
-read-only architect bootstrap with the canonical `AUDIT_NO_EFFECT` stage.
-Valid audit findings can persist without becoming executable queue work.
+[OBSERVED] Version 0.4.76 pins the backend manifest after adding diagnostic
+exact-ID test differential and deterministic scope coverage. Locally produced
+test evidence cannot authorize autonomous promotion.
 
 [OBSERVED] Version 0.4.74 pins bounded iterative repository grounding. HoloIndex
 locates candidate paths, while active model evidence comes only from rehydrated

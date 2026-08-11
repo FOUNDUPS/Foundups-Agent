@@ -1,12 +1,12 @@
 # ModLog - moltbot_bridge
-## 2026-08-11: Read-only architect stage contract reconciliation
+## 2026-08-11: Architect and verifier contract reconciliation
 - Replaced the retired literal `AUDIT` bootstrap default with the canonical
   `AUDIT_NO_EFFECT` progressive-stage constant. Read-only architect `FIX`
-  determinations now persist as audit evidence without creating an executable
-  queue candidate.
-- Reconciled E2E architect fixtures with the WSP_15 execution binding already
-  present in the model prompt and preserved the existing conversation and
-  bounded-execution authority gates. (WSP 00/15/22/50/97)
+  determinations remain audit evidence; signed plans can carry exact test scope.
+- Forwarded exact work order, commit, signed policy, and resolved test scope into
+  the independent producer and verifier without changing execution authority.
+- Local differential evidence is diagnostic only; autonomous admission still
+  requires an external verifier authority and reservation. (WSP 00/15/22/50/62/97)
 
 ## 2026-08-11: Bounded iterative repository grounding
 - Extended the existing transport-neutral grounding service with at most two

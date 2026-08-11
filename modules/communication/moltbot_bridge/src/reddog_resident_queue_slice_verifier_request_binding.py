@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
-from modules.communication.moltbot_bridge.src.reddog_resident_queue_exact_sha_commit_handler import (
+from modules.communication.moltbot_bridge.src.reddog_exact_sha_commit_receipt import (
     validate_exact_sha_commit_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
@@ -46,7 +46,6 @@ FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH = "FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH
 FAIL_SIGNED_RECEIPT_CHAIN_MISSING = "FAIL_SIGNED_RECEIPT_CHAIN_MISSING"
 FAIL_ASSURANCE_RESERVATION_MISSING = "FAIL_ASSURANCE_RESERVATION_MISSING"
 FAIL_ASSURANCE_RESERVATION_MISMATCH = "FAIL_ASSURANCE_RESERVATION_MISMATCH"
-
 
 @dataclass(frozen=True)
 class ResidentQueueSliceVerifierRequestBindingResult:
@@ -230,7 +229,6 @@ def build_resident_queue_slice_verifier_request(
 
     if reasons:
         return _reject(reasons)
-
     signed_authority = recorded_signed_authority
     evidence = _mapping(holoindex_evidence) or _mapping(work_order.get("holoindex_evidence"))
     expected_paths = commit_paths
@@ -268,8 +266,9 @@ def build_resident_queue_slice_verifier_request(
         "signed_receipt_chain": dict(signed_receipt_chain),
         "worktree_receipt": dict(pilot_receipt),
         "bounded_worker_pilot_receipt": dict(pilot_receipt),
-        "exact_sha_commit_receipt": dict(commit_receipt),
+        "exact_sha_commit_receipt": dict(commit_receipt), "bound_work_order": dict(work_order),
         "holoindex_evidence": dict(evidence),
+        "test_impact_policy": dict(_mapping(plan.get("test_impact_policy"))),
         "pattern_memory_write_performed": False,
         "draft_pr_published": False,
         "merge_performed": False,
@@ -341,6 +340,7 @@ def _dedupe(values: list[str]) -> list[str]:
             seen.add(text)
             ordered.append(text)
     return ordered
+
 
 
 __all__ = [

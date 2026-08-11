@@ -23,6 +23,10 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Protocol, Sequence
 
+from modules.infrastructure.wre_core.src.wre_independent_test_evidence_runtime import (
+    execute_independent_test_evidence,
+)
+
 EVIDENCE_PRODUCER_ACCEPT = "INDEPENDENT_EVIDENCE_PRODUCER_ACCEPT"
 EVIDENCE_PRODUCER_REJECT = "INDEPENDENT_EVIDENCE_PRODUCER_REJECT"
 
@@ -183,6 +187,7 @@ class IndependentEvidenceProducerResult:
     test_evidence: Dict[str, Any]
     receipt: EvidenceProducerReceipt
     command_results: List[Dict[str, Any]] = field(default_factory=list)
+    test_differential_capability: object | None = None
     no_file_edit_performed: bool = True
     no_worktree_created: bool = True
     no_github_call_performed: bool = True
@@ -193,7 +198,10 @@ class IndependentEvidenceProducerResult:
     no_holoindex_reindex_performed: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
-        payload = asdict(self)
+        payload = {
+            name: getattr(self, name) for name in self.__dataclass_fields__
+            if name != "test_differential_capability"
+        }
         payload["receipt"] = self.receipt.to_dict()
         return payload
 
@@ -288,47 +296,21 @@ def produce_independent_slice_evidence(
         if _diff_contains_secret(diff_text):
             reasons.append(FAIL_SECRET_IN_DIFF)
 
-    checks = _list(req.get("required_checks"))
     test_records: List[Dict[str, Any]] = []
-    if not checks:
-        reasons.append(FAIL_REQUIRED_CHECKS)
-    elif len(checks) > MAX_CHECKS:
-        reasons.append(FAIL_REQUIRED_CHECKS)
-    elif _terminal_reasons(reasons):
-        # Unsafe diff/path state: do not proceed to caller commands.
-        pass
-    else:
+    differential_evidence: Dict[str, Any] = {}
+    test_differential_capability: object | None = None
+    if not _terminal_reasons(reasons):
         assert operation_cwd is not None
-        for check in checks:
-            check_map = _mapping(check)
-            name = str(check_map.get("name") or "")
-            argv = check_map.get("argv")
-            timeout_s = _bounded_timeout(check_map.get("timeout_s"))
-            if not _allowed_check_argv(argv):
-                reasons.append(FAIL_CHECK_COMMAND_REJECTED)
-                continue
-            argv_tuple = tuple(str(item) for item in argv)
-            try:
-                result = command_runner.run(argv_tuple, cwd=operation_cwd, timeout_s=timeout_s)
-            except Exception:
-                reasons.append(FAIL_RUNNER_EXCEPTION)
-                continue
-            command_results.append(_command_record(name or "required_check", argv_tuple, result))
-            conclusion = "success" if result.returncode == 0 and result.timed_out is False else "failure"
-            record = {
-                "name": name or argv_tuple[0],
-                "head_sha": head_sha,
-                "conclusion": conclusion,
-                "returncode": result.returncode,
-                "timed_out": result.timed_out,
-                "argv_digest": _digest(list(argv_tuple)),
-                "stdout_digest": _digest(result.stdout),
-                "stderr_digest": _digest(result.stderr),
-                "duration_ms": result.duration_ms,
-            }
-            test_records.append(record)
-            if conclusion != "success":
-                reasons.append(FAIL_CHECK_FAILED)
+        assert worktree_path is not None and repo_root is not None
+        executed = execute_independent_test_evidence(
+            req, runner=command_runner, operation_cwd=operation_cwd,
+            worktree_path=worktree_path, repo_root=repo_root, head_sha=head_sha,
+        )
+        test_records.extend(executed.records)
+        command_results.extend(executed.command_records)
+        reasons.extend(executed.rejection_reasons)
+        differential_evidence = executed.differential_evidence
+        test_differential_capability = executed.differential_capability
 
     diff_digest = _digest(diff_text)
     diff_evidence = {
@@ -341,11 +323,15 @@ def produce_independent_slice_evidence(
         "added_lines": added_lines[:50],
         "diff_text_sample": _truncate(diff_text, MAX_DIFF_SAMPLE_BYTES),
     }
-    test_evidence_digest = _digest(test_records)
+    test_evidence_digest = _digest({
+        "required_checks": test_records,
+        "differential_evidence": differential_evidence,
+    })
     test_evidence = {
         "head_sha": head_sha,
         "test_evidence_digest": test_evidence_digest,
         "required_checks": test_records,
+        "differential_evidence": differential_evidence,
     }
 
     deduped = _dedupe(reasons)
@@ -385,6 +371,7 @@ def produce_independent_slice_evidence(
         test_evidence=test_evidence,
         receipt=receipt,
         command_results=command_results,
+        test_differential_capability=test_differential_capability,
     )
 
 
@@ -535,28 +522,6 @@ def _terminal_reasons(reasons: Sequence[str]) -> bool:
         FAIL_RUNNER_EXCEPTION,
     }
     return any(reason in blocked for reason in reasons)
-
-
-def _bounded_timeout(value: Any) -> int:
-    try:
-        parsed = int(value)
-    except Exception:
-        parsed = DEFAULT_TIMEOUT_S
-    return max(1, min(parsed, 300))
-
-
-def _allowed_check_argv(value: Any) -> bool:
-    if not isinstance(value, list) or not value or len(value) > MAX_ARGV:
-        return False
-    argv = [str(item) for item in value]
-    if any((not item or "\x00" in item or "\n" in item or "\r" in item) for item in argv):
-        return False
-    first = argv[0].lower()
-    if first in {"python", "python3", "py"}:
-        return len(argv) >= 3 and argv[1] == "-m" and argv[2] in {"pytest", "ruff", "mypy"}
-    if first in {"pytest", "ruff", "mypy"}:
-        return True
-    return False
 
 
 def _command_record(name: str, argv: Sequence[str], result: CommandResult) -> Dict[str, Any]:
