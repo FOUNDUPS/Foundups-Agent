@@ -60,11 +60,9 @@ class ExternalSignerAuthoritativeUseLeaseIssuer:
             ):
                 return None
             now_epoch = int(time.time())
-            current_generation = self.current_generation_authority.resolve(
-                now_epoch=now_epoch
-            )
             request = build_authoritative_use_lease_request(
-                payload, authority_tier=authority_tier
+                _bind_replay_store(payload, self.replay_store),
+                authority_tier=authority_tier,
             )
             grant = self.grant_provider(request)
             if not isinstance(grant, Mapping):
@@ -75,10 +73,25 @@ class ExternalSignerAuthoritativeUseLeaseIssuer:
         return _rehydrate_external_authoritative_use_lease(
             request=request,
             response=response,
-            current_generation=current_generation,
+            current_generation_authority=self.current_generation_authority,
             replay_store=self.replay_store,
             now_epoch=now_epoch,
         )
+
+
+def _bind_replay_store(
+    payload: Mapping[str, Any], store: DurableSignerSecretGrantNonceStore
+) -> dict[str, Any]:
+    binding = {
+        "replay_store_binding_digest": store.replay_store_binding_digest,
+        "replay_store_id": store.replay_store_id,
+        "replay_store_durability_receipt_id": store.durability_receipt_id,
+        "replay_store_instance_digest": store.replay_store_instance_digest,
+    }
+    for key, value in binding.items():
+        if key in payload and payload[key] != value:
+            raise ValueError("authoritative_use_replay_store_mismatch")
+    return {**dict(payload), **binding}
 
 
 __all__ = [

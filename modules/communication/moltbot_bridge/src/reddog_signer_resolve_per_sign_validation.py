@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import (
+    AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
     SigningResponse,
@@ -96,8 +99,7 @@ def response_matches(
         and response.signer_loads_no_untrusted_code is True
         and type(response.rejection_code) is str
         and response.rejection_code == ""
-        and type(response.audit_attestation_signature) is str
-        and response.audit_attestation_signature == ""
+        and _audit_attestation_shape_matches(response, request)
         and _valid_audit_mac(response.audit_mac)
         and all(_same(actual, expected) for actual, expected in pairs)
     )
@@ -146,6 +148,15 @@ def _valid_audit_mac(value: object) -> bool:
         return False
     digest = value[len(_AUDIT_MAC_PREFIX):]
     return len(digest) == 64 and all(char in "0123456789abcdef" for char in digest)
+
+
+def _audit_attestation_shape_matches(
+    response: SigningResponse, request: SigningRequest
+) -> bool:
+    value = response.audit_attestation_signature
+    if request.requested_operation == AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION:
+        return type(value) is str and bool(value)
+    return type(value) is str and value == ""
 
 
 __all__ = [

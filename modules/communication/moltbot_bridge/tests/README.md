@@ -8,6 +8,9 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_external
 
 This matrix validates the external-signer exact-effect primitive without
 activating any repository, worker, queue, shell, PR, merge, or indexing effect.
+It includes a composed socket-v2/E0/resolve-per-sign/issuer/WRE regression and
+attacks for local signer substitution, split replay roots, generation overrun,
+clock rollback, canonicalization, replay, and effect substitution.
 
 ## Coverage Goals
 - Intent classification and routing behavior.

@@ -10,6 +10,10 @@ from typing import Any, Mapping
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import (
+    authoritative_use_effect_digest,
+    build_authoritative_use_lease_request,
+)
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2,
     SignerPeerAttestation,
@@ -88,6 +92,51 @@ def _request(**overrides: Any) -> SigningRequest:
     }
     values.update(overrides)
     return SigningRequest(**values)
+
+
+def _lease_request(
+    nonce_store: DurableSignerSecretGrantNonceStore, **overrides: Any
+) -> SigningRequest:
+    effect = {
+        "work_order_id": "work-order-lease-1",
+        "evidence_digest": _digest("e"),
+    }
+    binding = _binding(nonce_store)
+    payload = {
+        "schema_version": "reddog_authoritative_use_lease.v1",
+        "lease_nonce": "a" * 64,
+        "effect_kind": "live_enqueue",
+        "effect_payload": effect,
+        "effect_request_digest": authoritative_use_effect_digest(
+            "live_enqueue", effect
+        ),
+        "requester_principal_id": "principal:founder",
+        "signer_profile_id": binding.signer_profile_id,
+        "signer_public_key": binding.signer_public_key,
+        "key_epoch": binding.key_epoch,
+        "manifest_id": _digest("a"),
+        "artifact_generation_digest": _digest("b"),
+        "generation": 1,
+        "generation_revision": "revision-1",
+        "owner_config_id": binding.owner_config_id,
+        "run_packet_id": _digest("c"),
+        "config_digest": _digest("d"),
+        "session_id": "session-1",
+        "socket_path_digest": _digest("e"),
+        "replay_store_binding_digest": binding.replay_store_binding_digest,
+        "replay_store_id": binding.replay_store_id,
+        "replay_store_durability_receipt_id": (
+            binding.replay_store_durability_receipt_id
+        ),
+        "replay_store_instance_digest": binding.replay_store_instance_digest,
+        "work_authority_digest": _digest("f"),
+        "identity_digest": _digest("1"),
+        "expected_bindings_digest": _digest("2"),
+        "issued_at": NOW,
+        "expires_at": NOW + 20,
+    }
+    payload.update(overrides)
+    return build_authoritative_use_lease_request(payload, authority_tier="HIGH")
 
 
 def _binding(
@@ -460,6 +509,20 @@ def test_resolution_failure_burns_one_shot_grant(nonce_store) -> None:
     assert first.rejection_code == REJECT_SECRET_RESOLUTION_FAILED
     assert second.rejection_code == REJECT_SECRET_GRANT_INVALID
     assert factory.calls == 1
+
+
+def test_signer_rejects_lease_bound_to_another_replay_root(nonce_store) -> None:
+    request = _lease_request(
+        nonce_store, replay_store_instance_digest=_digest("f")
+    )
+    grant = _grant(request, nonce_store)
+    factory = _Factory(_EphemeralBackend())
+    backend = _backend(grant, factory, nonce_store)
+
+    result = backend.sign_with_secret_grant(request, _peer(), grant)
+
+    assert result.rejection_code == REJECT_SECRET_GRANT_INVALID
+    assert factory.calls == 0
 
 
 def test_factory_exception_is_sanitized_and_grant_is_burned(nonce_store) -> None:

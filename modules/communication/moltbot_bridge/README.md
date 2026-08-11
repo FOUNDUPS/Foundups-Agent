@@ -11,8 +11,12 @@ pickled, or replayed. The signer recomputes the complete typed effect digest,
 requires socket v2 plus the exact one-use E0 grant, and checks the root-selected
 manifest, generation, owner config, run packet, session, and socket identity.
 Client rehydration uses the same durable E0 replay root and current root-owned
-generation artifacts; callers cannot inject verifier, replay, time, or parent
-authority verdicts.
+generation artifacts. The current config selects the exact signer profile,
+public key, and key epoch; all four E0 replay-store identities are signed and
+checked both signer-side and client-side. Lease expiry cannot exceed the current
+generation and process-local monotonic expiry prevents wall-clock rollback
+revival. Callers cannot inject verifier, replay, time, or parent-authority
+verdicts.
 
 This is a foundation, not production activation. The repository supplies no
 local grant issuer, does not relax the resident resolver, and does not connect

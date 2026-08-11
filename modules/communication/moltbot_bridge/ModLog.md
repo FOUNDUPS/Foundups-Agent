@@ -2,6 +2,8 @@
 ## 2026-08-12: External-signer authoritative-use lease primitive
 - Added a strict typed exact-effect request and opaque one-shot process capability; the signer recomputes effect identity, rejects noncanonical JSON, and binds current manifest, generation, owner config, run packet, session, socket, profile, and key.
 - Extended the existing socket client v2 grant envelope and durable E0 replay store. Lease-domain socket v1 rejects, and client rehydration has no injected verifier, replay, time, or parent-authority verdict; the existing E0 exact-request grant remains the only signing authority.
+- Root current-generation resolution now selects the exact signer profile, public key, and key epoch from the authenticated config. The signed request binds all four E0 replay identities, both signer and client enforce the same store, lease expiry cannot exceed selection expiry, and monotonic process-local deadlines prevent clock-rollback revival.
+- Added a composed socket-v2 -> durable E0 grant -> resolve-per-sign Ed25519 signer -> external issuer -> real WRE effect regression, plus local-key, split-root, generation-overrun, and rollback attacks.
 - Bound real leases through both worktree admission registries and the direct WRE spine using the exact executor-plan and valve-decision digests.
 - No issuer, resolver activation, worker, repository, PR, merge, HoloIndex, or live-canary effect was added; other effects and crash recovery remain blocked. (WSP 00/15/22/50/62/71/97)
 ## 2026-08-11: Architect and verifier contract reconciliation

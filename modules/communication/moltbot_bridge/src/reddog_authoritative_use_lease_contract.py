@@ -42,6 +42,10 @@ _FIELDS = frozenset(
         "config_digest",
         "session_id",
         "socket_path_digest",
+        "replay_store_binding_digest",
+        "replay_store_id",
+        "replay_store_durability_receipt_id",
+        "replay_store_instance_digest",
         "work_authority_digest",
         "identity_digest",
         "expected_bindings_digest",
@@ -58,6 +62,9 @@ _DIGEST_FIELDS = frozenset(
         "run_packet_id",
         "config_digest",
         "socket_path_digest",
+        "replay_store_binding_digest",
+        "replay_store_durability_receipt_id",
+        "replay_store_instance_digest",
         "work_authority_digest",
         "identity_digest",
         "expected_bindings_digest",
@@ -109,7 +116,18 @@ def validate_authoritative_use_lease_request(
 ) -> dict[str, Any] | None:
     """Return the exact payload only for a fresh canonical request."""
 
-    if type(request) is not SigningRequest or type(now_epoch) is not int:
+    if type(now_epoch) is not int:
+        return None
+    checked = validate_authoritative_use_lease_request_payload(request)
+    return checked if checked is not None and _fresh(checked, now_epoch) else None
+
+
+def validate_authoritative_use_lease_request_payload(
+    request: object,
+) -> dict[str, Any] | None:
+    """Return the exact canonical payload without granting freshness."""
+
+    if type(request) is not SigningRequest:
         return None
     prefix = AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX
     if not request.signing_input.startswith(prefix):
@@ -126,7 +144,7 @@ def validate_authoritative_use_lease_request(
         or not _request_matches(request, checked)
     ):
         return None
-    return checked if _fresh(checked, now_epoch) else None
+    return checked
 
 
 def validate_authoritative_use_lease_payload(
@@ -200,6 +218,52 @@ def authoritative_use_effect_digest(
         raise ValueError("authoritative_use_effect_invalid")
     return digest_mapping(
         {"effect_kind": effect_kind, "effect_payload": checked}
+    )
+
+
+def authoritative_use_replay_binding(
+    payload: Mapping[str, Any],
+) -> dict[str, str] | None:
+    """Return the four signed E0 replay identities or fail closed."""
+
+    values = {
+        "replay_store_binding_digest": payload.get("replay_store_binding_digest"),
+        "replay_store_id": payload.get("replay_store_id"),
+        "replay_store_durability_receipt_id": payload.get(
+            "replay_store_durability_receipt_id"
+        ),
+        "replay_store_instance_digest": payload.get("replay_store_instance_digest"),
+    }
+    if not _ascii(values["replay_store_id"]):
+        return None
+    digest_fields = set(values) - {"replay_store_id"}
+    if any(not is_sha256(values[field]) for field in digest_fields):
+        return None
+    return {key: str(value) for key, value in values.items()}
+
+
+def authoritative_use_request_replay_matches(
+    request: object, expected: Mapping[str, Any]
+) -> bool:
+    """Compare a canonical lease request with the signer-owned E0 binding."""
+
+    if (
+        type(request) is SigningRequest
+        and request.requested_operation
+        != AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION
+    ):
+        return True
+    payload = validate_authoritative_use_lease_request_payload(request)
+    signed = authoritative_use_replay_binding(payload or {})
+    fields = {
+        "replay_store_binding_digest",
+        "replay_store_id",
+        "replay_store_durability_receipt_id",
+        "replay_store_instance_digest",
+    }
+    return bool(
+        signed is not None
+        and all(signed[field] == expected.get(field) for field in fields)
     )
 
 
@@ -307,6 +371,8 @@ __all__ = [
     "SUPPORTED_AUTHORITY_TIERS",
     "SUPPORTED_EFFECT_KINDS",
     "authoritative_use_effect_digest",
+    "authoritative_use_replay_binding",
+    "authoritative_use_request_replay_matches",
     "build_authoritative_use_lease_request",
     "canonical_payload",
     "digest_mapping",
@@ -314,4 +380,5 @@ __all__ = [
     "is_sha256",
     "validate_authoritative_use_lease_payload",
     "validate_authoritative_use_lease_request",
+    "validate_authoritative_use_lease_request_payload",
 ]
