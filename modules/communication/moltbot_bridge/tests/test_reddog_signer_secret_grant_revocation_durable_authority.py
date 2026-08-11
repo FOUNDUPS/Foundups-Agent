@@ -44,6 +44,7 @@ SLICE_MODULES = (
     "reddog_signer_secret_grant_revocation_authority_store.py",
     "reddog_signer_secret_grant_revocation_authority_supply.py",
     "reddog_signer_secret_grant_revocation_durable_oracle.py",
+    "reddog_signer_secret_grant_revocation_snapshot_validation.py",
     "reddog_signer_secret_grant_revocation_store_codec.py",
 )
 UNCOMPOSED_MODULES = (
@@ -333,6 +334,43 @@ def test_expired_pending_snapshot_never_rolls_forward(tmp_path: Path) -> None:
     assert store.state().pending == pending
 
 
+def test_expired_current_can_be_superseded_by_fresh_snapshot(
+    tmp_path: Path,
+) -> None:
+    policy, binding, _store, _witness, supply = _runtime(tmp_path)
+    first = _snapshot(
+        policy, binding, grant_ids=(_digest("grant-a"),), expires_at=NOW + 1,
+    )
+    supply.publish(first, now_epoch=NOW)
+    second = _snapshot(
+        policy, binding, sequence=2,
+        grant_ids=(_digest("grant-a"), _digest("grant-b")),
+    )
+    assert supply.publish(second, now_epoch=NOW + 2) == second
+
+
+@pytest.mark.parametrize("witness_advanced", [False, True])
+def test_publish_recovers_expired_pending_before_fresh_successor(
+    tmp_path: Path, witness_advanced: bool,
+) -> None:
+    policy, binding, store, witness, supply = _runtime(tmp_path)
+    pending = _snapshot(
+        policy, binding, grant_ids=(_digest("grant-a"),), expires_at=NOW + 1,
+    )
+    store._prepare_under_lock(pending)
+    if witness_advanced:
+        witness.advance(
+            binding.witness_binding_digest(), expected=None,
+            next_value=_high_water(pending),
+        )
+    successor = _snapshot(
+        policy, binding, sequence=2,
+        grant_ids=(_digest("grant-a"), _digest("grant-b")),
+    )
+    assert supply.publish(successor, now_epoch=NOW + 2) == successor
+    assert store.state().pending is None
+
+
 def test_store_metadata_substitution_fails_before_read(tmp_path: Path) -> None:
     policy, binding, store, _witness, supply = _runtime(tmp_path)
     supply.publish(_snapshot(policy, binding), now_epoch=NOW)
@@ -503,6 +541,13 @@ def test_slice_is_bounded_effect_free_and_not_production_composed() -> None:
         if any(name.removesuffix(".py") in text for name in UNCOMPOSED_MODULES):
             references.append(path.name)
     assert references == []
+    freshness_bypass = [
+        path.name for path in SOURCE_ROOT.glob("*.py")
+        if "require_freshness=False" in path.read_text(encoding="utf-8")
+    ]
+    assert freshness_bypass == [
+        "reddog_signer_secret_grant_revocation_authority_supply.py"
+    ]
 
 
 def _high_water(snapshot: Mapping[str, Any]):

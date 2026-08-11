@@ -155,7 +155,10 @@ target signer key. Policy v2 additionally freezes the exact primary store,
 separate local monotonic witness, and shared cross-process operation-lock
 topology. The append-only SQLite supply can recover either publication crash
 window without unrevocation, and its detached oracle revalidates signed current
-state under the same lock. This is an uncomposed durability foundation, not
+state under the same lock. Expired state remains unusable, while a locked
+publisher may authenticate an expired predecessor solely to append its fresh,
+monotonic successor. Canonical snapshot validation remains a separate bounded
+module from authority/signature verification. This is an uncomposed durability foundation, not
 production authority: an independently administered grant authority, external
 rollback anchor, E0-only oracle factory, and stable-service composition remain
 absent. Coordinated rollback of both local domains is therefore not claimed.

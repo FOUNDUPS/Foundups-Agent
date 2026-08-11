@@ -61,7 +61,7 @@ class UncomposedDurableSignerGrantRevocationAuthoritySupply:
         self, snapshot: Mapping[str, Any], *, now_epoch: int
     ) -> Mapping[str, Any]:
         with self._lock():
-            state = self._recover(now_epoch)
+            state = self._recover(now_epoch, allow_expired=True)
             checked = self._verify(snapshot, now_epoch)
             if checked["sequence"] != _next_sequence(state.current):
                 raise ValueError("revocation_supply_sequence_invalid")
@@ -79,18 +79,24 @@ class UncomposedDurableSignerGrantRevocationAuthoritySupply:
 
     def recover(self, *, now_epoch: int) -> Mapping[str, Any] | None:
         with self._lock():
-            return self._recover(now_epoch).current
+            return self._recover(now_epoch, allow_expired=False).current
 
-    def _recover(self, now_epoch: int) -> RevocationAuthorityStoreState:
+    def _recover(
+        self, now_epoch: int, *, allow_expired: bool,
+    ) -> RevocationAuthorityStoreState:
         state = self.store.state()
         current = (
-            None if state.current is None else self._verify(state.current, now_epoch)
+            None if state.current is None else self._verify_recovery_value(
+                state.current, now_epoch, allow_expired=allow_expired,
+            )
         )
         if state.pending is None:
             return self._require_consensus(
                 RevocationAuthorityStoreState(current=current, pending=None)
             )
-        pending = self._verify(state.pending, now_epoch)
+        pending = self._verify_recovery_value(
+            state.pending, now_epoch, allow_expired=allow_expired,
+        )
         require_monotonic(current, pending)
         current_high = _high_water(current)
         pending_high = _required_high_water(pending)
@@ -121,6 +127,23 @@ class UncomposedDurableSignerGrantRevocationAuthoritySupply:
             principal_key_resolver=self.resolver,
             signature_verifier=self.verifier, now_epoch=now_epoch,
         )
+
+    def _verify_integrity(
+        self, value: Mapping[str, Any], now_epoch: int,
+    ) -> dict[str, Any]:
+        return verify_signer_grant_revocation_snapshot(
+            value, expected=self.expected,
+            principal_key_resolver=self.resolver,
+            signature_verifier=self.verifier, now_epoch=now_epoch,
+            require_freshness=False,
+        )
+
+    def _verify_recovery_value(
+        self, value: Mapping[str, Any], now_epoch: int, *, allow_expired: bool,
+    ) -> dict[str, Any]:
+        if allow_expired:
+            return self._verify_integrity(value, now_epoch)
+        return self._verify(value, now_epoch)
 
     def _lock(self):
         return confined_runtime_operation_lock(

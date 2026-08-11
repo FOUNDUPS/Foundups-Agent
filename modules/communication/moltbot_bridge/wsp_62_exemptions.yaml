@@ -33,10 +33,10 @@ exemptions:
     reason: >-
       Legacy module interface registry. The independent-assurance public
       contract records the required yield, separate author/verifier claims,
-      revocation, bounded renewal, proposal signer-policy runtime, and the
-      uncomposed durable-revocation foundation boundaries; splitting the
-      historical registry remains separate documentation-maintenance work.
-    threshold_override: 1532
+      revocation, bounded renewal, and proposal signer-policy runtime
+      boundaries; splitting the historical registry remains separate
+      documentation-maintenance work.
+    threshold_override: 1511
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

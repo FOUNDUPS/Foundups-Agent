@@ -7,7 +7,11 @@
   witness publication, deterministic recovery across both crash windows, and
   an uncomposed read-only oracle that holds the same lock across protected use.
 - Rejected status/metadata/topology substitution, unrevocation, sequence forks,
-  unsigned pending recovery, expiry, and witness rollback. This slice does not
+  unsigned pending recovery, expired use, and witness rollback. Locked
+  publication can authenticate an expired predecessor only to append a fresh
+  monotonic successor, preventing expiry from wedging the authority log.
+  Canonical validation and authority verification remain bounded modules.
+  This slice does not
   compose E0, activate the stable signer, or claim coordinated two-domain
   rollback resistance; independent grant authority and an external anchor are
   still required. (WSP 00/15/22/50/62/71/97)
