@@ -62,6 +62,18 @@ def test_known_collection_destroyers_are_explicitly_quarantined() -> None:
     )
 
 
+def test_live_api_program_is_never_an_automated_test() -> None:
+    registry = load_canonical_test_registry(ROOT)
+    by_path = {entry.path: entry for entry in registry.entries}
+    live_api = by_path[
+        "modules/communication/livechat/tests/integration/test_simple_message.py"
+    ]
+    assert live_api.collectable is False
+    assert live_api.suite_class == "operational"
+    assert live_api.capabilities == ("import_path_mutation", "network")
+    assert live_api.quarantine_reasons == ("module_scope_external_effect",)
+
+
 def test_main_guard_effect_is_not_quarantined(tmp_path: Path) -> None:
     target = tmp_path / "tests/test_guarded.py"
     target.parent.mkdir()
@@ -81,6 +93,35 @@ def test_main_guard_effect_is_not_quarantined(tmp_path: Path) -> None:
         ("import sys\nsys.exit(1)\n", "module_scope_external_effect"),
         (
             "from subprocess import run as go\ngo(['echo', 'x'])\n",
+            "module_scope_external_effect",
+        ),
+        (
+            "from googleapiclient.discovery import build\n"
+            "service = build('youtube', 'v3')\n",
+            "module_scope_external_effect",
+        ),
+        (
+            "import googleapiclient.discovery as discovery\n"
+            "service = discovery.build('youtube', 'v3')\n",
+            "module_scope_external_effect",
+        ),
+        (
+            "try:\n"
+            "    from googleapiclient.discovery import build\n"
+            "except ImportError:\n"
+            "    build = None\n"
+            "if build:\n"
+            "    service = build('youtube', 'v3')\n",
+            "module_scope_external_effect",
+        ),
+        (
+            "if True:\n"
+            "    from googleapiclient.discovery import build\n"
+            "    service = build('youtube', 'v3')\n",
+            "module_scope_external_effect",
+        ),
+        (
+            "from googleapiclient.discovery import *\n",
             "module_scope_external_effect",
         ),
         ("import sys\nsys.stdout = object()\n", "module_scope_process_stream_mutation"),
@@ -126,6 +167,39 @@ def test_module_scope_process_effects_quarantine(
     result = classify_test_file(tmp_path, "tests/test_effect.py")
     assert result.collectable is False
     assert reason in result.quarantine_reasons
+
+
+def test_google_auth_request_constructor_is_not_an_external_effect(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "tests/test_request.py"
+    target.parent.mkdir()
+    target.write_text(
+        "from google.auth.transport.requests import Request\n"
+        "request = Request()\n"
+        "def test_request(): assert request is not None\n",
+        encoding="utf-8",
+    )
+    result = classify_test_file(tmp_path, "tests/test_request.py")
+    assert result.collectable is True
+    assert result.quarantine_reasons == ()
+
+
+def test_main_guard_else_effect_is_quarantined(tmp_path: Path) -> None:
+    target = tmp_path / "tests/test_guarded_else.py"
+    target.parent.mkdir()
+    target.write_text(
+        "if __name__ == '__main__':\n"
+        "    pass\n"
+        "else:\n"
+        "    from googleapiclient.discovery import build\n"
+        "    service = build('youtube', 'v3')\n",
+        encoding="utf-8",
+    )
+    result = classify_test_file(tmp_path, "tests/test_guarded_else.py")
+    assert result.collectable is False
+    assert result.quarantine_reasons == ("module_scope_external_effect",)
+    assert result.capabilities == ("network",)
 
 
 def test_loader_rejects_unknown_fields_missing_files_and_count_tampering(

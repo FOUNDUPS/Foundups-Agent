@@ -2,7 +2,7 @@
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
   "total_tests": 1479,
-  "quarantined_tests": 263,
+  "quarantined_tests": 264,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -4372,7 +4372,9 @@
       "owner": "modules/ai_intelligence/video_indexer",
       "suite_class": "unit",
       "shard_id": "modules-ai-intelligence-video-indexer-unit",
-      "capabilities": [],
+      "capabilities": [
+        "browser"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -4424,7 +4426,9 @@
       "owner": "modules/ai_intelligence/video_indexer",
       "suite_class": "unit",
       "shard_id": "modules-ai-intelligence-video-indexer-unit",
-      "capabilities": [],
+      "capabilities": [
+        "browser"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -4628,7 +4632,9 @@
       "owner": "modules/communication/live_chat_poller",
       "suite_class": "unit",
       "shard_id": "modules-communication-live-chat-poller-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -4655,7 +4661,8 @@
       "suite_class": "manual",
       "shard_id": "modules-communication-livechat-manual",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
       "execution_type": "manual",
       "collectable": false,
@@ -4741,13 +4748,15 @@
       "suite_class": "manual",
       "shard_id": "modules-communication-livechat-manual",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
       "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "archived_source"
+        "archived_source",
+        "module_scope_external_effect"
       ],
       "description": "Send a simple test message to verify bot visibility"
     },
@@ -5006,7 +5015,9 @@
       "owner": "modules/communication/livechat",
       "suite_class": "manual",
       "shard_id": "modules-communication-livechat-manual",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
@@ -5098,7 +5109,9 @@
       "owner": "modules/communication/livechat",
       "suite_class": "manual",
       "shard_id": "modules-communication-livechat-manual",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
@@ -5128,7 +5141,9 @@
       "owner": "modules/communication/livechat",
       "suite_class": "manual",
       "shard_id": "modules-communication-livechat-manual",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
@@ -5158,7 +5173,9 @@
       "owner": "modules/communication/livechat",
       "suite_class": "manual",
       "shard_id": "modules-communication-livechat-manual",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "manual",
       "collectable": false,
       "timeout_s": 900,
@@ -5378,7 +5395,8 @@
       "suite_class": "integration",
       "shard_id": "modules-communication-livechat-integration",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
       "execution_type": "integration",
       "collectable": true,
@@ -5451,15 +5469,18 @@
       "id": "test::modules::communication::livechat::tests::integration::test_simple_message",
       "path": "modules/communication/livechat/tests/integration/test_simple_message.py",
       "owner": "modules/communication/livechat",
-      "suite_class": "integration",
-      "shard_id": "modules-communication-livechat-integration",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-livechat-operational",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
-      "execution_type": "integration",
-      "collectable": true,
-      "timeout_s": 600,
-      "quarantine_reasons": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_external_effect"
+      ],
       "description": "Send a simple test message to verify bot visibility"
     },
     {
@@ -5880,7 +5901,9 @@
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
       "shard_id": "modules-communication-livechat-unit-part-01",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -5960,7 +5983,9 @@
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
       "shard_id": "modules-communication-livechat-unit-part-02",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -5986,7 +6011,9 @@
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
       "shard_id": "modules-communication-livechat-unit-part-02",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -6012,7 +6039,9 @@
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
       "shard_id": "modules-communication-livechat-unit-part-02",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -6800,9 +6829,7 @@
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
       "shard_id": "modules-communication-moltbot-bridge-unit-part-01",
-      "capabilities": [
-        "network"
-      ],
+      "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -8216,7 +8243,9 @@
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
       "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -11063,6 +11092,7 @@
       "suite_class": "unit",
       "shard_id": "modules-communication-video-comments-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -11093,6 +11123,7 @@
       "suite_class": "unit",
       "shard_id": "modules-communication-video-comments-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -11108,6 +11139,7 @@
       "suite_class": "unit",
       "shard_id": "modules-communication-video-comments-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -11123,6 +11155,7 @@
       "suite_class": "unit",
       "shard_id": "modules-communication-video-comments-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -11184,6 +11217,7 @@
       "suite_class": "unit",
       "shard_id": "modules-communication-video-comments-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -11229,6 +11263,7 @@
       "suite_class": "unit",
       "shard_id": "modules-communication-video-comments-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -11293,6 +11328,7 @@
       "suite_class": "unit",
       "shard_id": "modules-communication-video-comments-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -14356,6 +14392,7 @@
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-browser-actions-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -14371,6 +14408,7 @@
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-browser-actions-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -15110,6 +15148,7 @@
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-foundups-selenium-unit",
       "capabilities": [
+        "browser",
         "logging_configuration"
       ],
       "execution_type": "unit",
@@ -15306,6 +15345,7 @@
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-human-interaction-unit",
       "capabilities": [
+        "browser",
         "import_path_mutation"
       ],
       "execution_type": "unit",
@@ -18271,7 +18311,8 @@
       "shard_id": "modules-platform-integration-social-media-orchestrator-unit",
       "capabilities": [
         "browser",
-        "import_path_mutation"
+        "import_path_mutation",
+        "interactive"
       ],
       "execution_type": "unit",
       "collectable": true,
@@ -18305,7 +18346,8 @@
       "shard_id": "modules-platform-integration-social-media-orchestrator-unit",
       "capabilities": [
         "browser",
-        "import_path_mutation"
+        "import_path_mutation",
+        "interactive"
       ],
       "execution_type": "unit",
       "collectable": true,
@@ -18864,7 +18906,9 @@
       "owner": "modules/platform_integration/stream_resolver",
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-stream-resolver-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -18937,6 +18981,7 @@
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-stream-resolver-unit",
       "capabilities": [
+        "network",
         "process"
       ],
       "execution_type": "unit",
@@ -19076,7 +19121,8 @@
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-utilities-unit",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
       "execution_type": "unit",
       "collectable": true,
@@ -19386,7 +19432,8 @@
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-youtube-auth-unit",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
       "execution_type": "unit",
       "collectable": true,
@@ -19434,7 +19481,8 @@
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-youtube-auth-unit",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
       "execution_type": "unit",
       "collectable": true,
@@ -19680,7 +19728,8 @@
       "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
       "capabilities": [
         "browser",
-        "logging_configuration"
+        "logging_configuration",
+        "network"
       ],
       "execution_type": "unit",
       "collectable": true,
@@ -19696,7 +19745,8 @@
       "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
       "capabilities": [
         "browser",
-        "logging_configuration"
+        "logging_configuration",
+        "network"
       ],
       "execution_type": "unit",
       "collectable": true,
@@ -20384,7 +20434,8 @@
       "suite_class": "unit",
       "shard_id": "scripts-unit",
       "capabilities": [
-        "import_path_mutation"
+        "import_path_mutation",
+        "network"
       ],
       "execution_type": "unit",
       "collectable": true,

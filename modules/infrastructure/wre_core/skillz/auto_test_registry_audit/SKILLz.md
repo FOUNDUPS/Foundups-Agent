@@ -50,6 +50,9 @@ The generator assigns every file exactly one owner, suite class, shard, timeout,
 and quarantine status. Unit and integration files may be automatically
 collected. Manual, operational, archived, malformed, or process-mutating files
 remain registered but cannot enter automatic pytest collection.
+Module-scope external API client construction, including Google API clients,
+is operational and quarantined even when imported through module-executed
+control-flow. Pure authentication request construction remains collectable.
 
 ## Boundaries
 

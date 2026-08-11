@@ -1,7 +1,7 @@
 # RedDog Interface
 
-Version 0.4.77 pins the backend manifest after adding the canonical module-owned
-test registry and exact-commit collection diagnostics. Imported test modules can
+Version 0.4.78 pins the backend manifest after hardening the canonical module-owned
+test registry against import-time live API programs. Imported test modules can
 execute arbitrary code even in collection mode, so local evidence remains
 unauthenticated and non-authoritative.
 

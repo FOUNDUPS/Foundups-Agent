@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-11 - Live API test quarantine compatibility (0.4.78)
+
+- Re-pinned the backend manifest and version fixtures after WRE registry
+  classifier hardening; no extension authority behavior changed.
+
 ## 2026-08-11 - Canonical test registry compatibility (0.4.77)
 
 - Pinned the regenerated backend manifest including the shared bounded Git

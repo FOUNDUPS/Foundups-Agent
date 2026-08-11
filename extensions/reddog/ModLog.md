@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-08-11 - Live API test quarantine compatibility pin (0.4.78)
+
+- Advanced the client/backend manifest pin after the canonical WRE test
+  classifier began quarantining module-scope Google API programs.
+- No RedDog authority or execution behavior changed.
+
 ## 2026-08-11 - Canonical test registry compatibility pin (0.4.77)
 
 - Pinned the backend closure after WRE gained exact-commit, module-owned test
