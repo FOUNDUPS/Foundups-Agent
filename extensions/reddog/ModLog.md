@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-08-11 - Diagnostic test differential compatibility pin (0.4.76)
+
+- Regenerated and pinned the backend manifest after adding exact-ID diagnostic
+  test differential and deterministic test-scope coverage to WRE.
+- Local test evidence remains non-authoritative and cannot promote code.
+
 ## 2026-08-11 - Exhaustive contract suite modularization
 
 - Replaced the oversized exhaustive test host with a <=200-line integrity

@@ -20,6 +20,10 @@ from typing import Any, Mapping, Optional, Protocol, Sequence
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     ResidentQueueChainResultsStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_exact_sha_commit_receipt import (
+    EXACT_SHA_COMMIT_RECEIPT_SCHEMA,
+    validate_exact_sha_commit_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     ResidentQueueStageDispatchRequest,
 )
@@ -46,10 +50,6 @@ EXACT_SHA_COMMIT_STAGE_KEY = "exact_sha_commit"
 BOUNDED_WORKER_PILOT_STAGE_KEY = "bounded_worker_pilot"
 WORKTREE_CREATE_STAGE_KEY = "worktree_create"
 EXECUTOR_PLAN_STAGE_KEY = "executor_plan"
-EXACT_SHA_COMMIT_RECEIPT_SCHEMA = (
-    "reddog_resident_queue_exact_sha_commit_receipt.v1"
-)
-
 FAIL_DISPATCH_STAGE_MISMATCH = "FAIL_DISPATCH_STAGE_MISMATCH"
 FAIL_DISPATCH_NEXT_ACTION_MISMATCH = "FAIL_DISPATCH_NEXT_ACTION_MISMATCH"
 FAIL_WORKTREE_CREATE_STAGE_MISSING = "FAIL_WORKTREE_CREATE_STAGE_MISSING"
@@ -193,29 +193,6 @@ def _canonical_digest(value: Mapping[str, Any]) -> str:
         ensure_ascii=True,
     ).encode("ascii")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
-
-
-def validate_exact_sha_commit_receipt(value: Any) -> bool:
-    """Recompute the canonical receipt identity before downstream trust."""
-
-    receipt = dict(_mapping(value))
-    receipt_id = str(receipt.pop("receipt_id", "") or "")
-    return (
-        receipt.get("schema_version") == EXACT_SHA_COMMIT_RECEIPT_SCHEMA
-        and _SHA_RE.fullmatch(str(receipt.get("base_sha") or "")) is not None
-        and _SHA_RE.fullmatch(str(receipt.get("head_sha") or "")) is not None
-        and _SHA_RE.fullmatch(str(receipt.get("parent_sha") or "")) is not None
-        and _SHA_RE.fullmatch(str(receipt.get("tree_sha") or "")) is not None
-        and receipt.get("base_sha") == receipt.get("parent_sha")
-        and receipt.get("base_sha") != receipt.get("head_sha")
-        and receipt.get("effect_commit_state") == EFFECT_COMMITTED
-        and receipt.get("reconciliation_required") is False
-        and receipt.get("main_checkout_untouched") is True
-        and receipt.get("no_push_performed") is True
-        and receipt.get("no_pr_created") is True
-        and receipt.get("no_merge_performed") is True
-        and receipt_id == _canonical_digest(receipt)
-    )
 
 
 def _text_digest(value: str) -> str:

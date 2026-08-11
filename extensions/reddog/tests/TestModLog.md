@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-11 - Diagnostic differential compatibility (0.4.76)
+
+- Pinned the regenerated 1,259-file backend manifest and canonical digest.
+- Revalidated manifest generation, backend preflight, and extension contracts.
+
 ## 2026-08-11 - Exhaustive contract suite modularization
 
 - Mechanically partitioned the unchanged 6,857-line exhaustive contract body

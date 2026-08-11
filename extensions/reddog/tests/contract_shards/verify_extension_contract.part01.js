@@ -252,8 +252,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.75', 'package version must be 0.4.75');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.75'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.76', 'package version must be 0.4.76');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.76'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');

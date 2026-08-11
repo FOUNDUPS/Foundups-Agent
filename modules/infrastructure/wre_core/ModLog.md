@@ -26,16 +26,18 @@
   explicit compatibility master is also enabled; safe in-process repairs keep
   their existing behavior. (WSP 15/22/50/97)
 
-### [2026-08-01] - TEST IMPACT AND DIFFERENTIAL RECEIPT
-- Added pure parent/candidate differential analysis that compares exact test IDs
-  instead of aggregate pass/fail counts.
-- Bound reusable parent baselines to commit, suite scope, runner, selection,
-  lineage, dependency lock, environment, and exact collection manifests;
-  rejected removed tests and newly non-passing or deselected IDs.
-- Kept authority and promotion false until a future independently authenticated
-  evidence integration consumes the analysis.
-- Kept execution and authentication in the existing independent evidence and
-  signed work-order planes. (WSP 5/6/15/22/48/50/62/97)
+### [2026-08-11] - TEST IMPACT DIFFERENTIAL RUNTIME BINDING
+- Activated the existing pure parent/candidate analyzer for local WRE diagnostic
+  evidence using exact pytest node IDs, not aggregate counts.
+- Materialized exact parent and candidate Git objects in external bounded
+  runtime directories; source drift, hostile collector mutation, and inherited
+  Python path or plugin environment fail closed.
+- Bound collection, environment, dependency locks, lineage, WSP_15 allocation,
+  exact work order and commit, runner, signed policy, and deterministic scope.
+- Accepted only unchanged baseline failures and added passes; missing, removed,
+  newly nonpassing, incomplete, drifted, or under-scoped evidence fails closed.
+- Local evidence explicitly lacks execution authority and cannot satisfy the
+  autonomous verifier; external isolated test authority remains future work.
 
 ### [2026-07-28] - MEMEX_VERIFIER_LINEAGE + CHECKOUT_LOCAL_SKILL_RESOLUTION
 - Bound Memex lineage to the independently recorded authority digest at verifier admission; retained checkout-local Skillz resolution and rejection.

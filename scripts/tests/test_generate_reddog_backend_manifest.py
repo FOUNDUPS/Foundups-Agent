@@ -125,6 +125,10 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         in generated["required_runtime_sha256"]
     )
     assert (
+        "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py"
+        in generated["required_runtime_sha256"]
+    )
+    assert (
         "extensions/reddog/start_operations_python_bootstrap.py"
         in generated["required_runtime_sha256"]
     )
@@ -138,5 +142,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     assert generator.canonical_manifest_digest(generated) == (
-        "502bee5c0f3cbc84519442296046b9c383be35690b86d8998a496389b32976f6"
+        "6aa4e69cfcbd795952e77eaa1f2d362b039633574ef842fe98e9856e020ce98a"
     )

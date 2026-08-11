@@ -9,24 +9,21 @@ fail-closed REJECT decision for downstream draft-PR publishing.
 """
 
 from __future__ import annotations
-
 import fnmatch
 import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
-
+from modules.infrastructure.wre_core.src.wre_test_differential_verification import verify_test_differential_evidence
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
     optional_authority_binding_values_valid,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
     signed_authority_envelope_digest_matches,
 )
-
 AUTONOMOUS_SLICE_VERIFIER_ACCEPT = "AUTONOMOUS_SLICE_VERIFIER_ACCEPT"
 AUTONOMOUS_SLICE_VERIFIER_REJECT = "AUTONOMOUS_SLICE_VERIFIER_REJECT"
-
 FAIL_REQUIRED_FIELD = "FAIL_REQUIRED_FIELD"
 FAIL_SELF_VERIFICATION = "FAIL_SELF_VERIFICATION"
 FAIL_HEAD_SHA = "FAIL_HEAD_SHA"
@@ -46,7 +43,6 @@ FAIL_PR_OR_MERGE_ALREADY_PERFORMED = "FAIL_PR_OR_MERGE_ALREADY_PERFORMED"
 
 HEAD_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
-
 PROTECTED_PATH_PREFIXES = (
     ".github/workflows/",
     "WSP_framework/",
@@ -247,14 +243,12 @@ def _diff_evidence_ok(
     return bool(_changed_paths(diff_evidence))
 
 
-def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str) -> bool:
+def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str, request: Mapping[str, Any]) -> bool:
     if test_evidence.get("head_sha") != head_sha:
         return False
     if not _is_digest(test_evidence.get("test_evidence_digest")):
         return False
     checks = _list(test_evidence.get("required_checks"))
-    if not checks:
-        return False
     for check in checks:
         if not isinstance(check, Mapping):
             return False
@@ -262,8 +256,14 @@ def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str) -> bool:
             return False
         if check.get("conclusion") not in ("success", "pass"):
             return False
-    return True
-
+    differential = _mapping(test_evidence.get("differential_evidence"))
+    if not differential:
+        return bool(checks)
+    if differential.get("execution_authority_verified") is not True:
+        return False
+    expected_digest = _digest({"required_checks": checks, "differential_evidence": differential})
+    verified, _, _ = verify_test_differential_evidence(differential, request=request)
+    return verified and test_evidence.get("test_evidence_digest") == expected_digest
 
 def _receipt_chain_ok(receipt_chain: Mapping[str, Any]) -> bool:
     if receipt_chain.get("accepted") is not True:
@@ -460,7 +460,7 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any], *, trusted_work_
         reasons.append(FAIL_PROTECTED_SURFACE)
     if _diff_contains_secret(diff_evidence):
         reasons.append(FAIL_SECRET_IN_DIFF)
-    if not _test_evidence_ok(test_evidence, head_sha):
+    if not _test_evidence_ok(test_evidence, head_sha, req):
         reasons.append(FAIL_TEST_EVIDENCE)
     if not signed_authority_envelope_digest_matches(signed_authority, trusted_work_authority_digest):
         reasons.append(FAIL_SIGNED_AUTHORITY)

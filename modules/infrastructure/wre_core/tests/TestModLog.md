@@ -6,16 +6,17 @@
   suites pass 49 tests
   with two platform symlink skips.
 
-## 2026-08-01: Test impact and differential receipt
-- Proved unchanged and resolved baseline failures accept while new failures,
-  errors, skips, removed tests, execution-binding drift, and insufficient full
-  suite evidence reject.
-- Proved added passing tests are retained by ID and parent baselines can be
-  reused only under exact scope/runner/environment bindings.
-- Locked WSP 6 tiered verification, WSP 15 economy questions in WSP 97, and
-  framework/knowledge mirror parity.
-- Repaired the pre-existing production-gate test so it validates canonical WRE
-  config and runbook files read-only instead of rewriting tracked source files.
+## 2026-08-11: Exact-ID differential runtime and collector
+- Proved pass, failure, setup/teardown error, skip, xfail, xpass, deselection,
+  collection error, no-tests, early-stop, and hostile item-removal behavior.
+- Proved unchanged baseline failures plus new passes accept while exact-ID or
+  collection drift rejects even when aggregate counts could remain unchanged.
+- Proved immutable Git materialization, source manifests, scrubbed environment,
+  exact policy/work-order/commit binding, and deterministic scope escalation.
+- Proved direct, copied, pickled, replayed, rehashed, deeply nested, substituted,
+  or locally produced authority evidence cannot pass autonomous admission.
+- Added module/shared/systemic scope regressions; unsafe dependency closure and
+  protected surfaces deterministically require the full suite. (WSP 5/6/15/97)
 
 ## 2026-07-28: Memex verifier lineage + checkout-local Skillz resolution
 - Proved rehashed authority cannot replace the recorded verification digest; retained local Skillz escape, fallback, and linked-worktree checks.
