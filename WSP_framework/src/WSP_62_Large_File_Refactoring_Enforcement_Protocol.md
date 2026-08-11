@@ -79,9 +79,29 @@ module_overrides:
 #### 3.1.1. Size Threshold Exceeded
 When a file exceeds its threshold:
 1. **IMMEDIATE**: Log violation in WSP_MODULE_VIOLATIONS.md (WSP 47)
-2. **BLOCK**: Prevent pre-commit if no exemption exists
-3. **WARN**: Display refactoring requirement in WRE UI
-4. **SUGGEST**: Provide automated refactoring recommendations
+2. **BLOCK NEW DEBT**: Prevent integration when the candidate creates a new
+   violation or grows a touched file beyond its documented temporary ceiling.
+3. **DO NOT MISATTRIBUTE BASELINE DEBT**: An unchanged violation already
+   present at the exact comparison base is advisory to an unrelated candidate.
+   It must remain registered with an owner and remediation target, but it must
+   not make unrelated work fail.
+4. **ALLOW DEBT REDUCTION**: A registered no-growth ceiling is a maximum, not
+   an exact line-count snapshot. A candidate may reduce a file or function
+   without first rewriting the exemption.
+5. **WARN**: Display refactoring requirements and inherited debt in WRE output.
+6. **SUGGEST**: Provide automated refactoring recommendations.
+
+Candidate attribution must use an exact base/candidate comparison. A broad
+repository scan may report inherited debt, but it cannot attribute that debt
+to the current candidate without evidence that the candidate touched and
+worsened the affected path.
+
+Required append-only audit records at the canonical module-relative paths
+`ModLog.md` and `tests/TestModLog.md` use advisory archival thresholds. This
+allowlist is exhaustive and must not use basename or glob matching. Their
+growth must trigger bounded archival work, not block otherwise valid
+functional or security work. Non-historical documentation such as `README.md`
+and `INTERFACE.md` remains subject to normal candidate-growth enforcement.
 
 #### 3.1.2. Growth Rate Monitoring
 Monitor files approaching thresholds:
@@ -97,9 +117,11 @@ Monitor files approaching thresholds:
 def enforce_file_sizes():
     violations = []
     for file_path in get_modified_files():
-        if exceeds_threshold(file_path):
-            if not has_exemption(file_path):
-                violations.append(create_violation(file_path))
+        decision = evaluate_size_contract(file_path, exact_base_file(file_path))
+        if decision.invalid_contract or decision.candidate_created_growth:
+            violations.append(create_violation(file_path, decision))
+        elif decision.inherited_debt or decision.advisory_archive:
+            report_advisory(file_path, decision)
     
     if violations:
         block_commit(violations)
@@ -207,6 +229,9 @@ exemptions:
   - file: "src/legacy_integration.py"
     reason: "Legacy system integration - gradual refactoring planned"
     threshold_override: 800
+    no_growth_ceiling:
+      file_lines: 800
+      functions: {}
     review_date: "2024-Q2"
     reviewer: "TechnicalArchitect"
   
@@ -214,12 +239,31 @@ exemptions:
     reason: "Auto-generated code from external API"
     permanent: true
     generation_tool: "OpenAPI Generator v6.2.1"
+
+  - file: "ModLog.md"
+    reason: "Required append-only audit history"
+    enforcement_mode: "advisory_archive"
+    advisory_archive_threshold: 1000
+    owner: "Module Maintainers"
+    remediation: "ROADMAP.md#documentation-archive"
 ```
 
 #### 5.1.2. Exemption Validation
 - **Documented Justification**: All exemptions must have clear reasons
 - **Review Requirements**: Periodic review of temporary exemptions
 - **Approval Process**: Technical architect approval for large exemptions
+- **Expiry Handling**: Expired temporary exemptions emit remediation warnings.
+  Expiry alone does not attribute unchanged debt to an unrelated candidate;
+  candidate growth remains governed by the recorded ceiling and exact base.
+- **Advisory Archive Allowlist**: `advisory_archive` applies only to the exact
+  canonical module-relative paths `ModLog.md` and `tests/TestModLog.md`.
+  Basename and glob matching are forbidden. The mode is invalid for source,
+  configuration, interface, or ordinary documentation files.
+- **Two-Stage Policy Migration**: A new exemption mode or allowlist must land
+  as policy before runtime or module metadata may consume it. The consuming
+  candidate must prove that its exact comparison base already contains the
+  policy. A candidate cannot authorize a new mode by changing this protocol
+  and consuming that mode in the same diff.
 
 ### 5.2. Automatic Exemptions
 
@@ -345,4 +389,4 @@ def test_exemption_handling():
 ---
 
 **WSP 62 Status**: Active and ready for implementation across all WRE systems.
-**Next Steps**: Integrate with WSP 4, WSP 47, WSP 54, and enhance modular_audit.py with size validation capabilities. 
+**Next Steps**: Integrate with WSP 4, WSP 47, WSP 54, and enhance modular_audit.py with size validation capabilities.
