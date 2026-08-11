@@ -20,6 +20,9 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_i
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
     load_system_service_manifest_selection,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_rehydration import (
+    rehydrate_signer_socket_service_runtime_config,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_bytes,
     validate_runtime_artifact_path,
@@ -50,7 +53,13 @@ class SignerCurrentGenerationRuntimeBinding:
     owner_config_id: str | None = None
     config_digest: str | None = None
     config_raw_digest: str | None = None
+    run_packet_id: str | None = None
     run_packet_digest: str | None = None
+    session_id: str | None = None
+    socket_path_digest: str | None = None
+    signer_profile_id: str | None = None
+    signer_public_key: str | None = None
+    key_epoch: str | None = None
     selection_expires_at: int | None = None
     authority_granted: bool = False
     effect_capability_issued: bool = False
@@ -61,15 +70,33 @@ class SignerCurrentGenerationRuntimeBinding:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class SignerCurrentGenerationRuntimeAuthority:
+    """Resolve current generation only from root-owned runtime artifacts."""
+
+    repo_root: Path
+    runtime_root: Path
+
+    def resolve(
+        self, *, now_epoch: int, signer_profile_id: str
+    ) -> SignerCurrentGenerationRuntimeBinding:
+        return verify_signer_current_generation_runtime_binding(
+            repo_root=self.repo_root,
+            runtime_root=self.runtime_root,
+            now_epoch=now_epoch,
+            signer_profile_id=signer_profile_id,
+        )
+
+
 def verify_signer_current_generation_runtime_binding(
     *,
     repo_root: Path | str,
     runtime_root: Path | str,
     now_epoch: int,
     run_packet_path: Path | str | None = None,
+    signer_profile_id: str | None = None,
 ) -> SignerCurrentGenerationRuntimeBinding:
     """Verify root-owned current selection against trusted time and bytes."""
-
     try:
         if type(now_epoch) is not int or now_epoch <= 0:
             raise ValueError("trusted_time_invalid")
@@ -103,13 +130,9 @@ def verify_signer_current_generation_runtime_binding(
             repo=repo,
             runtime=runtime,
             now_epoch=now_epoch,
+            signer_profile_id=signer_profile_id,
         )
-        return SignerCurrentGenerationRuntimeBinding(
-            accepted=True,
-            rejection_reasons=(),
-            receipt_id=_digest(values),
-            **values,
-        )
+        return _accepted_binding(values)
     except Exception:
         return SignerCurrentGenerationRuntimeBinding(
             accepted=False,
@@ -126,7 +149,48 @@ def _validated_values(
     repo: Path,
     runtime: Path,
     now_epoch: int,
+    signer_profile_id: str | None,
 ) -> dict[str, Any]:
+    config_raw = _read_bound_config(
+        selection=selection,
+        packet=packet,
+        packet_path=packet_path,
+        packet_raw=packet_raw,
+        repo=repo,
+        runtime=runtime,
+    )
+    generation, revision, expires_at = _validated_selection_identity(
+        selection, now_epoch=now_epoch
+    )
+    _validate_manifest_freshness(
+        selection=selection, repo=repo, runtime=runtime, now_epoch=now_epoch
+    )
+    signer_identity = _selected_signer_identity(
+        config_raw=config_raw,
+        config_digest=str(selection["config_digest"]),
+        repo=repo,
+        runtime=runtime,
+        signer_profile_id=signer_profile_id,
+    )
+    return _binding_values(
+        selection=selection,
+        packet=packet,
+        generation=generation,
+        revision=revision,
+        expires_at=expires_at,
+        signer_identity=signer_identity,
+    )
+
+
+def _read_bound_config(
+    *,
+    selection: Mapping[str, Any],
+    packet: Mapping[str, Any],
+    packet_path: Path,
+    packet_raw: bytes,
+    repo: Path,
+    runtime: Path,
+) -> bytes:
     config_path = validate_runtime_artifact_path(
         packet.get("config_path"),
         repo_root=repo,
@@ -151,28 +215,98 @@ def _validated_values(
         for key, value in expected.items()
     ):
         raise ValueError("selection_artifact_binding_mismatch")
-    generation, revision, expires_at = _validated_selection_identity(
-        selection, now_epoch=now_epoch
+    return config_raw
+
+
+def _accepted_binding(
+    values: Mapping[str, Any],
+) -> SignerCurrentGenerationRuntimeBinding:
+    return SignerCurrentGenerationRuntimeBinding(
+        accepted=True,
+        rejection_reasons=(),
+        receipt_id=_digest(values),
+        **dict(values),
     )
-    _validate_manifest_freshness(
-        selection=selection,
-        repo=repo,
-        runtime=runtime,
-        now_epoch=now_epoch,
-    )
+
+
+def _binding_values(
+    *,
+    selection: Mapping[str, Any],
+    packet: Mapping[str, Any],
+    generation: int,
+    revision: str,
+    expires_at: int,
+    signer_identity: Mapping[str, Any],
+) -> dict[str, Any]:
     return {
         "manifest_id": str(selection["manifest_id"]),
-        "artifact_generation_digest": str(
-            selection["artifact_generation_digest"]
-        ),
+        "artifact_generation_digest": str(selection["artifact_generation_digest"]),
         "generation": generation,
         "generation_revision": revision,
         "owner_config_id": str(selection["owner_config_id"]),
         "config_digest": str(selection["config_digest"]),
         "config_raw_digest": str(selection["config_raw_digest"]),
         "run_packet_digest": str(selection["run_packet_digest"]),
+        **_runtime_identity(packet),
+        **signer_identity,
         "selection_expires_at": expires_at,
     }
+
+
+def _selected_signer_identity(
+    *,
+    config_raw: bytes,
+    config_digest: str,
+    repo: Path,
+    runtime: Path,
+    signer_profile_id: str | None,
+) -> dict[str, str | None]:
+    if signer_profile_id is None:
+        return {
+            "signer_profile_id": None,
+            "signer_public_key": None,
+            "key_epoch": None,
+        }
+    config = rehydrate_signer_socket_service_runtime_config(
+        repo,
+        runtime,
+        dict(_mapping(config_raw)),
+        expected_config_digest=config_digest,
+    )
+    if config is None:
+        raise ValueError("signer_runtime_config_invalid")
+    profiles = (
+        config.key_provider_profiles
+        if config.key_provider_profiles
+        else (config.key_provider_profile,)
+    )
+    selected = next(
+        (
+            profile
+            for profile in profiles
+            if profile is not None
+            and _profile_value(profile, "signer_profile_id") == signer_profile_id
+        ),
+        None,
+    )
+    if selected is None:
+        raise ValueError("signer_profile_not_current")
+    return {
+        "signer_profile_id": signer_profile_id,
+        "signer_public_key": _profile_value(selected, "expected_public_key"),
+        "key_epoch": _profile_value(selected, "expected_key_epoch"),
+    }
+
+
+def _profile_value(profile: object, field: str) -> str:
+    value = (
+        profile.get(field)
+        if isinstance(profile, Mapping)
+        else getattr(profile, field, None)
+    )
+    if not isinstance(value, str) or not value or not value.isascii():
+        raise ValueError("signer_profile_value_invalid")
+    return value
 
 
 def _validate_manifest_freshness(
@@ -203,6 +337,14 @@ def _validate_manifest_freshness(
         now_epoch=now_epoch,
         max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS,
     )
+
+
+def _runtime_identity(packet: Mapping[str, Any]) -> dict[str, str]:
+    return {
+        "run_packet_id": str(packet["run_packet_id"]),
+        "session_id": str(packet["session_id"]),
+        "socket_path_digest": _text_digest(str(packet["socket_path"])),
+    }
 
 
 def _validated_selection_identity(
@@ -258,6 +400,10 @@ def _bytes_digest(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
 
 
+def _text_digest(value: str) -> str:
+    return _bytes_digest(value.encode("utf-8"))
+
+
 def _digest(value: Mapping[str, Any]) -> str:
     raw = json.dumps(
         {
@@ -275,5 +421,6 @@ __all__ = [
     "SIGNER_CURRENT_GENERATION_BINDING_REJECTED",
     "SIGNER_CURRENT_GENERATION_BINDING_SCHEMA_VERSION",
     "SignerCurrentGenerationRuntimeBinding",
+    "SignerCurrentGenerationRuntimeAuthority",
     "verify_signer_current_generation_runtime_binding",
 ]

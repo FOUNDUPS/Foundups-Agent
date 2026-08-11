@@ -168,6 +168,31 @@ def test_client_sends_signing_request_and_returns_attested_response(tmp_path: Pa
     assert payload["request"]["signer_role"] == "reddog"
 
 
+def test_client_v2_binds_exact_secret_access_grant(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    socket_path = _socket_path(tmp_path)
+    observed: dict[str, object] = {}
+
+    def connector(_path: Path, payload: bytes, _timeout_s: float, _limit: int) -> bytes:
+        observed.update(json.loads(payload.decode("utf-8")))
+        return _accepted_response()
+
+    built = build_reddog_isolated_signer_socket_client(
+        repo_root=repo, socket_path=socket_path, connector=connector,
+    )
+    assert built.client is not None
+    grant = {"schema_version": "reddog_signer_secret_access_grant.v1"}
+
+    response = built.client.sign_with_secret_grant(_request(), grant)
+
+    assert response.accepted is True
+    assert observed == {
+        "schema_version": "reddog_signer_socket_request.v2",
+        "request": _request().to_dict(),
+        "secret_access_grant": grant,
+    }
+
+
 def test_client_rejects_malformed_oversized_and_connector_failures(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     socket_path = _socket_path(tmp_path)

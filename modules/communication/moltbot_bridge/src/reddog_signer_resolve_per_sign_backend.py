@@ -13,6 +13,7 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
     IsolatedSignerBackend,
     SignerPeerAttestation,
 )
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import authoritative_use_request_replay_matches
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     Ed25519SignerBackend, bind_exact_signing_request,
 )
@@ -102,6 +103,10 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
             )
         ):
             return _reject(REJECT_SECRET_GRANT_INVALID)
+        if not authoritative_use_request_replay_matches(
+            request, asdict(self.binding)
+        ):
+            return _reject(REJECT_SECRET_GRANT_INVALID)
         if not factory_binding_matches(self.backend_factory, self.binding):
             return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
         expected = self._expected(request, peer)
@@ -186,14 +191,10 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
 
 def _reject(code: str) -> SigningResponse:
     return SigningResponse(accepted=False, rejection_code=code, no_secret_material_returned=True)
-
-
 __all__ = [
-    "EphemeralSignerBackendFactory",
-    "REJECT_EPHEMERAL_BACKEND_INVALID",
+    "EphemeralSignerBackendFactory", "REJECT_EPHEMERAL_BACKEND_INVALID",
     "REJECT_SECRET_GRANT_INVALID",
     "REJECT_SECRET_GRANT_REQUIRED",
-    "REJECT_SECRET_RESOLUTION_FAILED",
-    "ResolvePerSignBinding",
+    "REJECT_SECRET_RESOLUTION_FAILED", "ResolvePerSignBinding",
     "ResolvePerSignSignerBackend",
 ]

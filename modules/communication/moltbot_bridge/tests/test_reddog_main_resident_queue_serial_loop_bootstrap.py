@@ -265,7 +265,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
         )
         with patch("modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability.is_authoritative_use_lease", return_value=True), patch(
             "modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability.consume_authoritative_use_lease",
-            side_effect=lambda value: value.consume(),
+            side_effect=lambda value, **_expected: value.consume(),
         ), patch(
             "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.GovernedValveUseTimeAuthorityResolver",
             return_value=injected_resolver,

@@ -98,6 +98,9 @@ class SignerPeerInstanceBinding:
     signer_profiles: tuple[SignerPeerProfileBinding, ...]
     manifest_id: str
     artifact_generation_digest: str
+    generation: int | None = None
+    generation_revision: str | None = None
+    owner_config_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -330,6 +333,9 @@ def _peer_instance_binding(
         ),
         manifest_id=str(selection["manifest_id"]),
         artifact_generation_digest=str(selection["artifact_generation_digest"]),
+        generation=int(selection["generation"]),
+        generation_revision=str(selection["generation_revision"]),
+        owner_config_id=str(selection["owner_config_id"]),
     )
 
 

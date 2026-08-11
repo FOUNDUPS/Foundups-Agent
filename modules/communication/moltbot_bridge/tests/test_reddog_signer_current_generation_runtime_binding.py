@@ -21,6 +21,8 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease imp
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_runtime_binding import (
     SIGNER_CURRENT_GENERATION_BINDING_REJECTED,
+    SignerCurrentGenerationRuntimeAuthority,
+    SignerCurrentGenerationRuntimeBinding,
     verify_signer_current_generation_runtime_binding,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_use_time_gate import (
@@ -167,6 +169,68 @@ def test_external_authority_lease_remains_unavailable() -> None:
     fabricated = object.__new__(AuthoritativeUseLease)
     assert is_authoritative_use_lease(fabricated) is False
     assert consume_authoritative_use_lease(fabricated) is False
+
+
+def test_root_authority_forwards_exact_signer_profile(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    observed: list[dict[str, object]] = []
+    expected = SignerCurrentGenerationRuntimeBinding(True, ())
+
+    def verify(**values):
+        observed.append(values)
+        return expected
+
+    monkeypatch.setattr(
+        binding_module, "verify_signer_current_generation_runtime_binding", verify
+    )
+    authority = SignerCurrentGenerationRuntimeAuthority(tmp_path, tmp_path / "runtime")
+
+    assert authority.resolve(
+        now_epoch=NOW, signer_profile_id="reddog-work-authority"
+    ) is expected
+    assert observed[0]["signer_profile_id"] == "reddog-work-authority"
+
+
+def test_selected_signer_identity_comes_from_rehydrated_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class Config:
+        key_provider_profile = None
+        key_provider_profiles = (
+            {
+                "signer_profile_id": "reddog-work-authority",
+                "expected_public_key": "ed25519-public-raw-b64-v1:test",
+                "expected_key_epoch": "epoch-7",
+            },
+        )
+
+    monkeypatch.setattr(
+        binding_module,
+        "rehydrate_signer_socket_service_runtime_config",
+        lambda *_args, **_kwargs: Config(),
+    )
+    result = binding_module._selected_signer_identity(
+        config_raw=b"{}",
+        config_digest="sha256:" + "1" * 64,
+        repo=tmp_path,
+        runtime=tmp_path / "runtime",
+        signer_profile_id="reddog-work-authority",
+    )
+
+    assert result == {
+        "signer_profile_id": "reddog-work-authority",
+        "signer_public_key": "ed25519-public-raw-b64-v1:test",
+        "key_epoch": "epoch-7",
+    }
+    with pytest.raises(ValueError, match="signer_profile_not_current"):
+        binding_module._selected_signer_identity(
+            config_raw=b"{}",
+            config_digest="sha256:" + "1" * 64,
+            repo=tmp_path,
+            runtime=tmp_path / "runtime",
+            signer_profile_id="attacker-profile",
+        )
 
 
 def test_slice_preserves_no_effect_and_wsp62_boundaries() -> None:

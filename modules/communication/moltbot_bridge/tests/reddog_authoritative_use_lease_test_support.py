@@ -33,12 +33,12 @@ def allow_stub_authoritative_use_lease(monkeypatch: Any, *modules: Any) -> None:
         monkeypatch.setattr(
             module,
             "is_authoritative_use_lease",
-            lambda value: isinstance(value, StubAuthoritativeUseLease),
+            lambda value, **_expected: isinstance(value, StubAuthoritativeUseLease),
         )
         monkeypatch.setattr(
             module,
             "consume_authoritative_use_lease",
-            lambda value: value.consume() is True,
+            lambda value, **_expected: value.consume() is True,
         )
 
 

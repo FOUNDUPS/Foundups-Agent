@@ -1,9 +1,9 @@
 # Foundups(R)Agent TestModLog
 
-## 2026-08-11 - Canonical shard projection compatibility (0.4.79)
+## 2026-08-12 - External signer lease compatibility (0.4.80)
 
-- Pinned the regenerated backend manifest after WRE test-registry Skillz
-  registration and retained existing extension/runtime contract assertions.
+- Pinned the regenerated external signer lease backend manifest and retained
+  existing extension/runtime contract assertions.
 - No thin-client behavior or execution authority changed; pytest and candidate
   code remain outside this planning slice.
 

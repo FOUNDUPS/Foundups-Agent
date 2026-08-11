@@ -1,12 +1,11 @@
+## 2026-08-12: External authoritative-use lease regressions
+- Proved exact grant-bound signing, typed effect-digest recomputation, strict request/instance/generation/TTL checks, signer and audit verification, durable replay denial, expiry, and opaque capability behavior.
+- Proved noncanonical and duplicate-key JSON rejection, socket-v1 downgrade denial, cross-effect and generation substitution denial, and one real lease through the direct WRE spine without monkeypatching.
+- Proved strict socket v2 grant transport and retained grant-unaware/malformed rejection; the focused signer matrix and WSP 62 differential pass.
+- Proved root-selected signer identity, signer/client equality across all four E0 replay-store identities, selection-bounded expiry, and irreversible process-local expiry. Added the composed socket-v2 -> E0 -> resolve-per-sign -> external issuer -> WRE acceptance path and split contract/adversarial cases into bounded siblings.
 ## 2026-08-11: Baseline contract reconciliation
-
-- Proved the read-only bootstrap uses canonical `AUDIT_NO_EFFECT`, persists a
-  valid architect `FIX` determination, and emits zero executable queue
-  candidates.
-- Updated architect fixtures to consume the prompt-bound WSP_15 execution
-  allocation and signed-worker tests to verify one digest-bound intent across
-  task context, signed receipt, and runner input.
-
+- Proved the read-only bootstrap uses `AUDIT_NO_EFFECT`, persists a valid architect `FIX`, and emits zero executable queue candidates.
+- Updated architect fixtures for prompt-bound WSP_15 allocation and one digest-bound intent across task, receipt, and runner.
 ## 2026-08-11: Bounded iterative grounding regressions
 
 - Added deterministic refinement, deadline, root/generation drift, conservative
