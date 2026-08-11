@@ -18,11 +18,11 @@ generation and process-local monotonic expiry prevents wall-clock rollback
 revival. Callers cannot inject verifier, replay, time, or parent-authority
 verdicts.
 
-This is a foundation, not production activation. The repository supplies no
-local grant issuer, does not relax the resident resolver, and does not connect
-the capability to queue, OpenClaw, Hermes, shell, worktree, PR, merge, learning,
-or HoloIndex effects. Those paths remain fail closed until their independent
-exact-effect and crash-recovery gates exist.
+This is a foundation, not production activation. Worktree admission and direct
+WRE integration seams accept the capability, but the repository supplies no
+local grant issuer and the resident resolver never supplies a production lease.
+Queue, OpenClaw, Hermes, shell, PR, merge, learning, and HoloIndex effects remain
+fail closed until their independent exact-effect and crash-recovery gates exist.
 
 ## Principal Memex resident admission
 

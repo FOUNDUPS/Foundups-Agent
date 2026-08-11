@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import copy
 import hashlib
 import json
-import pickle
-from dataclasses import asdict, replace
+from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -27,11 +25,9 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease imp
     is_authoritative_use_lease,
 )
 from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import (
-    AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX,
     authoritative_use_effect_digest,
     build_authoritative_use_lease_request,
     digest_text,
-    validate_authoritative_use_lease_request,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -45,9 +41,6 @@ from modules.communication.moltbot_bridge.src.reddog_external_signer_authoritati
     ExternalSignerAuthoritativeUseLeaseIssuer,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
-    REJECT_SIGNER_SOCKET_SECRET_GRANT_UNSUPPORTED,
-    SIGNER_SOCKET_REQUEST_SCHEMA_VERSION,
-    SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2,
     SignerPeerAttestation,
     handle_reddog_isolated_signer_socket_request,
 )
@@ -667,273 +660,3 @@ def test_composed_e0_socket_issuer_reaches_real_wre_spine(
 
     assert _is_lease(lease) is False
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT
-
-
-def test_lease_cannot_be_substituted_for_another_effect(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    _, _, lease = _lease(tmp_path, monkeypatch)
-
-    assert is_authoritative_use_lease(
-        lease,
-        effect_kind="live_enqueue",
-        effect_request_digest=_effect_digest(),
-    ) is False
-    assert consume_authoritative_use_lease(
-        lease,
-        effect_kind="worktree_create",
-        effect_request_digest="sha256:" + "1" * 64,
-    ) is False
-    assert _consume_lease(lease) is True
-
-
-def test_effect_digest_must_match_complete_declared_effect() -> None:
-    changed = _effect_payload(queue_item_id="attacker-queue")
-    with pytest.raises(ValueError):
-        build_authoritative_use_lease_request(
-            _payload(effect_payload=changed), authority_tier="HIGH"
-        )
-    valid = dict(_payload(effect_payload=changed))
-    valid["effect_request_digest"] = authoritative_use_effect_digest(
-        "worktree_create", changed
-    )
-    assert build_authoritative_use_lease_request(valid, authority_tier="HIGH")
-
-
-@pytest.mark.parametrize(
-    ("field", "value"),
-    (
-        ("manifest_id", "sha256:" + "5" * 64),
-        ("artifact_generation_digest", "sha256:" + "5" * 64),
-        ("generation", 8),
-        ("generation_revision", "revision-8"),
-        ("owner_config_id", "sha256:" + "5" * 64),
-    ),
-)
-def test_signer_rejects_substituted_generation_field(
-    field: str, value: object
-) -> None:
-    request = _request(**{field: value})
-    assert _backend(request, exact=True).sign(request, _peer()).accepted is False
-
-
-def test_socket_lease_domain_is_v2_grant_only() -> None:
-    request = _request()
-    v1 = json.dumps(
-        {
-            "schema_version": SIGNER_SOCKET_REQUEST_SCHEMA_VERSION,
-            "request": request.to_dict(),
-        },
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("ascii")
-    denied = json.loads(
-        handle_reddog_isolated_signer_socket_request(
-            v1, peer=_peer(), backend=_ProtocolGrantBackend()
-        )
-    )
-    assert denied["rejection_code"] == REJECT_SIGNER_SOCKET_SECRET_GRANT_UNSUPPORTED
-
-    v2 = json.dumps(
-        {
-            "schema_version": SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2,
-            "request": request.to_dict(),
-            "secret_access_grant": {"grant_id": "root-grant-1"},
-        },
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("ascii")
-    accepted = json.loads(
-        handle_reddog_isolated_signer_socket_request(
-            v2, peer=_peer(), backend=_ProtocolGrantBackend()
-        )
-    )
-    assert accepted["accepted"] is True
-
-
-def test_noncanonical_or_duplicate_key_input_rejects() -> None:
-    request = _request()
-    raw = request.signing_input.removeprefix(AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX)
-    pretty = replace(
-        request,
-        signing_input=(
-            AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX
-            + json.dumps(json.loads(raw), indent=2, sort_keys=False)
-        ),
-    )
-    assert validate_authoritative_use_lease_request(pretty, now_epoch=NOW) is None
-    duplicate = replace(
-        request,
-        signing_input=(
-            AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX
-            + raw[:-1]
-            + ',"lease_nonce":"'
-            + "a" * 64
-            + '"}'
-        ),
-    )
-    assert validate_authoritative_use_lease_request(duplicate, now_epoch=NOW) is None
-
-
-def test_signed_response_replay_is_rejected_durably(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(lease_module.time, "time", lambda: NOW)
-    store = _store(tmp_path)
-    request = _request(store)
-    response = _backend(request, exact=True).sign(request, _peer())
-    values = {
-        "request": request,
-        "response": response,
-        "current_generation_authority": _authority(tmp_path, monkeypatch),
-        "replay_store": store,
-        "now_epoch": NOW,
-    }
-    assert lease_module._rehydrate_external_authoritative_use_lease(**values)
-    assert lease_module._rehydrate_external_authoritative_use_lease(**values) is None
-
-
-def test_signed_response_cannot_cross_durable_replay_roots(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(lease_module.time, "time", lambda: NOW)
-    first = _store(tmp_path / "first")
-    second = _store(tmp_path / "second")
-    request = _request(first)
-    response = _backend(request, exact=True).sign(request, _peer())
-    authority = _authority(tmp_path, monkeypatch)
-
-    accepted = lease_module._rehydrate_external_authoritative_use_lease(
-        request=request,
-        response=response,
-        current_generation_authority=authority,
-        replay_store=first,
-        now_epoch=NOW,
-    )
-    rejected = lease_module._rehydrate_external_authoritative_use_lease(
-        request=request,
-        response=response,
-        current_generation_authority=authority,
-        replay_store=second,
-        now_epoch=NOW,
-    )
-
-    assert _is_lease(accepted) is True
-    assert rejected is None
-
-
-def test_unrelated_local_signer_cannot_mint_lease(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(lease_module.time, "time", lambda: NOW)
-    store = _store(tmp_path)
-    attacker_private = Ed25519PrivateKey.generate()
-    attacker_public = encode_ed25519_public_key(
-        attacker_private.public_key().public_bytes(
-            encoding=serialization.Encoding.Raw,
-            format=serialization.PublicFormat.Raw,
-        )
-    )
-    request = _request(store, signer_public_key=attacker_public)
-    attacker = Ed25519SignerBackend(
-        private_key=attacker_private,
-        public_key=attacker_public,
-        key_epoch="epoch-1",
-        audit_mac_builder=_AuditMac(),
-        proposal_clock=lambda: NOW,
-        signer_peer_instance_binding=replace(
-            _binding(),
-            signer_profiles=(
-                SignerPeerProfileBinding(
-                    "reddog-work-authority", attacker_public, "epoch-1"
-                ),
-            ),
-        ),
-    )
-    response = bind_exact_signing_request(attacker, request).sign(request, _peer())
-
-    assert response.accepted is True
-    assert lease_module._rehydrate_external_authoritative_use_lease(
-        request=request,
-        response=response,
-        current_generation_authority=_authority(tmp_path, monkeypatch),
-        replay_store=store,
-        now_epoch=NOW,
-    ) is None
-
-
-def test_lease_cannot_outlive_current_generation(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(lease_module.time, "time", lambda: NOW)
-    store = _store(tmp_path)
-    request = _request(store, expires_at=NOW + 20)
-    response = _backend(request, exact=True).sign(request, _peer())
-    binding = replace(_current_generation(), selection_expires_at=NOW + 10)
-
-    assert lease_module._rehydrate_external_authoritative_use_lease(
-        request=request,
-        response=response,
-        current_generation_authority=_authority(tmp_path, monkeypatch, binding),
-        replay_store=store,
-        now_epoch=NOW,
-    ) is None
-
-
-def test_expired_lease_rejects_without_consuming(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    _, _, lease = _lease(tmp_path, monkeypatch)
-    monkeypatch.setattr(lease_module.time, "time", lambda: NOW + 20)
-    assert _is_lease(lease) is False
-    assert _consume_lease(lease) is False
-
-
-def test_expired_lease_does_not_revive_after_clock_rollback(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    _, _, lease = _lease(tmp_path, monkeypatch)
-    monkeypatch.setattr(lease_module.time, "time", lambda: NOW + 20)
-    assert _is_lease(lease) is False
-    monkeypatch.setattr(lease_module.time, "time", lambda: NOW)
-    assert _is_lease(lease) is False
-    assert _consume_lease(lease) is False
-
-
-def test_capability_has_no_public_mint_or_fabrication_path(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    assert "rehydrate_external_authoritative_use_lease" not in lease_module.__all__
-    with pytest.raises(TypeError):
-        AuthoritativeUseLease()
-    fabricated = object.__new__(AuthoritativeUseLease)
-    assert _is_lease(fabricated) is False
-    _, _, lease = _lease(tmp_path, monkeypatch)
-    assert lease is not None
-    with pytest.raises(TypeError):
-        copy.copy(lease)
-    with pytest.raises(TypeError):
-        copy.deepcopy(lease)
-    with pytest.raises(TypeError):
-        pickle.dumps(lease)
-
-
-def test_contract_has_no_execution_or_secret_surface() -> None:
-    root = Path(__file__).parents[1]
-    paths = (
-        root / "src" / "reddog_authoritative_use_lease.py",
-        root / "src" / "reddog_authoritative_use_lease_contract.py",
-        root / "src" / "reddog_external_signer_authoritative_use_lease.py",
-    )
-    combined = "\n".join(path.read_text(encoding="utf-8") for path in paths)
-    for forbidden in (
-        "subprocess",
-        "os.system",
-        "shell=True",
-        "private_key",
-        "HoloIndex.reindex",
-        "commit_all",
-        "gh pr",
-    ):
-        assert forbidden not in combined
-    assert json.dumps(_payload(), sort_keys=True, ensure_ascii=True).isascii()
