@@ -69,9 +69,9 @@ PROVIDER_EVIDENCE_EXACT_FILES = {
     "tests/test_reddog_readonly_audit_research_decision_e2e_runtime.py",
     "tests/test_reddog_readonly_audit_task_executor.py",
     "tests/test_reddog_resident_architect_durable_agentdb_cycle.py",
-    "wsp_62_exemptions.yaml",
 }
 AUDIT_LOG_FILES = {"ModLog.md", "tests/TestModLog.md"}
+EXEMPTION_REGISTRY_CEILING = 475
 PUBLICATION_MODULE_FILES = {
     "src/reddog_architect_fix_promotion_publication.py",
     "src/reddog_architect_fix_promotion_publication_validation.py",
@@ -255,6 +255,18 @@ def test_required_audit_logs_use_non_blocking_archival_policy() -> None:
         assert item["owner"] and item["architect_reviewer"]
         assert item["remediation"]
         assert "no_growth_ceiling" not in item
+
+
+def test_exemption_registry_preserves_inherited_ceiling_and_allows_reduction() -> None:
+    path = MODULE_ROOT / "wsp_62_exemptions.yaml"
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    item = next(
+        entry
+        for entry in payload["exemptions"]
+        if entry.get("file") == "wsp_62_exemptions.yaml"
+    )
+    assert item["threshold_override"] == EXEMPTION_REGISTRY_CEILING
+    assert len(path.read_text(encoding="utf-8").splitlines()) <= EXEMPTION_REGISTRY_CEILING
 
 
 def test_architect_publication_modules_need_no_wsp62_exemption() -> None:
