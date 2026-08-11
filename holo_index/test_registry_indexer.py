@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,15 @@ def _load_entries(
     registry_path: Path,
 ) -> tuple[Any, list[dict[str, Any]], int, int]:
     registry_data = json.loads(registry_path.read_text(encoding="utf-8"))
+    if isinstance(registry_data, dict) and registry_data.get(
+        "schema_version"
+    ) == "wsp_test_registry.v2":
+        from modules.infrastructure.wre_core.src.wre_test_registry import (
+            load_canonical_test_registry,
+        )
+        verified = load_canonical_test_registry(registry_path.parents[1])
+        entries = [asdict(entry) for entry in verified.entries]
+        return registry_data, entries, len(entries), 0
     raw_entries: Any = None
     if isinstance(registry_data, dict):
         if "tests" in registry_data:
@@ -54,10 +64,24 @@ def _record(holo: Any, entry: dict[str, Any], idx: int) -> tuple[str, list[float
         else str(raw_capabilities or "")
     )
     execution_type = str(entry.get("execution_type") or "unknown")
+    owner = str(entry.get("owner") or entry.get("owner_module") or "unknown")
+    suite_class = str(entry.get("suite_class") or execution_type)
+    shard_id = str(entry.get("shard_id") or entry.get("suite_id") or "")
+    collectable = bool(entry.get("collectable", True))
+    raw_reasons = entry.get("quarantine_reasons", [])
+    quarantine_reasons = (
+        ", ".join(str(value) for value in raw_reasons)
+        if isinstance(raw_reasons, list) else str(raw_reasons or "")
+    )
     document = chr(10).join(
         (
             f"Test: {test_id}",
             f"Type: {execution_type}",
+            f"Owner: {owner}",
+            f"Suite: {suite_class}",
+            f"Shard: {shard_id}",
+            f"Collectable: {collectable}",
+            f"Quarantine: {quarantine_reasons}",
             f"Capabilities: {capabilities}",
             f"Description: {description}",
         )
@@ -70,6 +94,11 @@ def _record(holo: Any, entry: dict[str, Any], idx: int) -> tuple[str, list[float
         "path": path,
         "description": description[:1000],
         "capabilities": capabilities,
+        "owner": owner,
+        "suite_class": suite_class,
+        "shard_id": shard_id,
+        "collectable": collectable,
+        "quarantine_reasons": quarantine_reasons,
         "type": "test",
         "priority": 8,
         "source_content_digest": digest,

@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-11 - Canonical test registry compatibility (0.4.77)
+
+- Pinned the regenerated backend manifest including the shared bounded Git
+  archive helper used by WRE collection and differential diagnostics.
+- Revalidated manifest generation, backend preflight, extension contracts, and
+  source-worktree non-execution invariants.
+
 ## 2026-08-11 - Diagnostic differential compatibility (0.4.76)
 
 - Pinned the regenerated 1,259-file backend manifest and canonical digest.

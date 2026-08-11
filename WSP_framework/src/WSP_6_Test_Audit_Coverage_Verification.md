@@ -26,8 +26,12 @@ The rigor of this audit should be scaled based on a module's LLME score, with fo
 -   **Goal**: Remediate all `STRUCTURE_ERROR` and `NO_TEST` warnings. Every source file must have a corresponding test file.
 
 ### C. Step 2: Test Suite Execution Sweep
--   **Action**: Run the entire test suite, paying close attention to failures, errors, and warnings.
--   **Command**: `pytest -ra modules/`
+-   **Action**: Verify the canonical registry, then execute its explicit automated
+    module shards with the environment and exact node IDs bound into evidence.
+-   **Registry command**: `python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check`
+-   **Prohibition**: Do not use `pytest .` or `pytest -ra modules/` as repository
+    evidence. Until a trusted registry-driven execution runner is implemented,
+    execute the registry's explicit paths per module using normal pytest.
 -   **Goal**: A clean run with zero `F` (Failures), `E` (Errors), or unaddressed `W` (Warnings). Skips (`s`) and expected failures (`x`/`X`) should be reviewed to ensure they are still valid.
 
 #### C.1 Tiered Verification During Development
@@ -48,6 +52,21 @@ requires it:
 5. **Full repository promotion**: the complete suite for SYSTEMIC changes,
    uncertain/stale dependency closure, protected authority surfaces, release
    candidates, and periodic health audits.
+
+The complete automated suite MUST be resolved from the Git-tracked canonical
+registry at `WSP_knowledge/WSP_Test_Registry.json`. It is the aggregate of
+explicit module-owned shards; `pytest .` is not an acceptable proof because
+repository discovery includes manual and operational programs with import-time
+effects. Every tracked `test_*.py` file remains visible in the registry.
+Manual, operational, archived, or malformed files are explicit quarantined
+entries with an owner and reason, never a silent ignore list. Their required
+execution receipts are separate from the automated pytest aggregate.
+
+Shard collection and execution are isolated. A collection failure in one shard
+MUST be reported for that shard without erasing valid evidence from other
+shards. Aggregate counts are telemetry; exact node IDs and per-shard receipts
+remain the comparison evidence. Registry generation and `--check` validation
+MUST be deterministic from Git-tracked source.
 
 An impact plan MUST bind the changed-path digest, impact class, selected test
 scope, omitted-scope rationale, WSP 15 allocation receipt, runner digest, and

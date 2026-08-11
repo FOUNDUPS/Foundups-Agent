@@ -26,6 +26,31 @@
 
 ### Test impact differential verification
 
+`load_canonical_test_registry(repo_root)` validates the exact
+`wsp_test_registry.v2` envelope and returns immutable entries plus the canonical
+registry digest. `CanonicalTestRegistry.automated_shards()` partitions every
+collectable file exactly once into deterministic, module-owned shards of at
+most 32 files.
+
+`collect_registered_test_shards(repo_root, head_sha=..., shard_ids=...)`
+materializes the exact commit into a disposable external directory and performs
+isolated collection-only diagnostics for explicit shard IDs. It returns per-shard
+status, exact reported node IDs, errors, plan and collector digests. Pytest is
+invoked in collection mode, but module imports may execute arbitrary code. The
+unauthenticated diagnostic cannot provide external execution authority. It binds
+the invoking Python version, executable digest, and installed-package set digest.
+Unknown, duplicate, missing,
+or excessive shard selections fail before pytest starts. Isolated Python startup
+and an import guard reject modules resolved outside the archived commit and
+interpreter libraries. Because collection executes module imports, the receipt
+does not claim OS-level non-execution of arbitrary side effects.
+
+The canonical generator supports only explicit `--check` and `--write` modes:
+
+```text
+python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
+```
+
 `make_test_impact_plan(...)` binds impact, changed paths, WSP 15 allocation,
 suite scope, runner, environment, dependency lock, selection policy, selection
 arguments, and base-lineage receipt. It derives the minimum suite tier from

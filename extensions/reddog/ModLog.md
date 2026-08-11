@@ -1,5 +1,13 @@
 # RedDog ModLog
 
+## 2026-08-11 - Canonical test registry compatibility pin (0.4.77)
+
+- Pinned the backend closure after WRE gained exact-commit, module-owned test
+  collection diagnostics and a shared bounded Git archive helper.
+- Collection runs only in a disposable archive. Test-module imports can still
+  execute arbitrary code, so the diagnostic remains unauthenticated and cannot
+  authorize code promotion.
+
 ## 2026-08-11 - Diagnostic test differential compatibility pin (0.4.76)
 
 - Regenerated and pinned the backend manifest after adding exact-ID diagnostic

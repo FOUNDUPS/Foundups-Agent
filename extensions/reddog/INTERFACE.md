@@ -1,8 +1,9 @@
 # RedDog Interface
 
-Version 0.4.76 pins the backend manifest after adding diagnostic exact-ID test
-differential and deterministic scope coverage. Local test evidence remains
-non-authoritative and cannot satisfy autonomous verifier admission.
+Version 0.4.77 pins the backend manifest after adding the canonical module-owned
+test registry and exact-commit collection diagnostics. Imported test modules can
+execute arbitrary code even in collection mode, so local evidence remains
+unauthenticated and non-authoritative.
 
 Version 0.4.74 pins the backend manifest for bounded iterative repository
 grounding. Semantic HoloIndex hits are candidate locators only; exact current
