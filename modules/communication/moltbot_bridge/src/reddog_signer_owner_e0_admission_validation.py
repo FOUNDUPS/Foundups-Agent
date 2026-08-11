@@ -69,6 +69,7 @@ def require_policy_authorities(
     principal_key_resolver: PrincipalKeyResolver,
     signature_verifier: SignatureVerifier,
 ) -> None:
+    authorities: list[tuple[str, str]] = []
     for prefix in ("grant_authority", "revocation_authority"):
         principal = str(policy[f"{prefix}_principal_id"])
         provider = str(policy[f"{prefix}_principal_provider"])
@@ -81,6 +82,13 @@ def require_policy_authorities(
             raise ValueError("e0_policy_authority_untrusted")
         if constant_time_compare(public_key, str(policy["target_signer_public_key"])):
             raise ValueError("e0_policy_self_authority_rejected")
+        authorities.append((principal, public_key))
+    grant_authority, revocation_authority = authorities
+    if (
+        grant_authority[0] == revocation_authority[0]
+        or constant_time_compare(grant_authority[1], revocation_authority[1])
+    ):
+        raise ValueError("e0_policy_authorities_not_independent")
     try:
         verified = signature_verifier.verify(
             str(policy["grant_authority_public_key"]),

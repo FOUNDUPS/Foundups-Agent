@@ -148,6 +148,12 @@ operation/tier consensus rules, and rate limits. Its opaque one-use capability
 cannot be copied or serialized. Consumption revalidates while the canonical
 current-generation fence is held and returns only a non-authoritative receipt;
 it does not release signer composition authority or grant an effect.
+The E0 path also has an exact independently signed revocation-snapshot contract
+bound to the current policy, generation, store, and target signer. Grant and
+revocation authority identities remain separate from one another and from the
+target signer key. A durable rollback-witnessed store, cross-process fence, and
+E0-only oracle factory are not yet implemented, so this contract is not a live
+revocation supply and the stable service cannot consume it.
 RedDog and `main.py` remain clients and cannot spawn the signer.
 The older `reddog_signer_socket_service_runtime_cli` is retained only to return
 a structured retirement rejection. It cannot load authority, construct a

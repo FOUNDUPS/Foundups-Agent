@@ -1,3 +1,14 @@
+## 2026-08-12: Independent signer revocation-contract regressions
+- Proved exact schema, canonical identifier, signature, authority, policy,
+  generation, target-signer, store, freshness, and bounded-list validation for
+  independently published revocation snapshots.
+- Proved attacker rehash, key substitution, authority collapse, unknown fields,
+  oversized values, and malformed scope/time values fail closed.
+- Added static effect/import guards and preserved the existing E0 grant,
+  resolve-per-sign, socket, system-service, generation, and authoritative-use
+  lease boundaries without claiming durable revocation supply or activating
+  production signing.
+
 ## 2026-08-12: Live-canary contract reconciliation regressions
 - Replaced stale work-authority and serial-loop fixtures with canonical signed
   stage and queue WSP_15 projections while preserving exact-path scope and the

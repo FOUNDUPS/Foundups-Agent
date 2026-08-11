@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-12 - Signer authority-separation compatibility (0.4.82)
+
+- Pinned the regenerated backend manifest and version fixtures after signer E0
+  authority-separation hardening.
+- Revalidated backend compatibility and extension contracts without adding
+  client behavior or execution authority.
+
 ## 2026-08-12 - Live-canary reconciliation compatibility (0.4.81)
 
 - Pinned the regenerated backend manifest and version fixtures after the

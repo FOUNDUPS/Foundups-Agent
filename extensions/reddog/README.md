@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.81
+Version: 0.4.82
+
+[OBSERVED] Version 0.4.82 pins the backend manifest after signer E0 authority
+separation was tightened. The client behavior and execution authority are
+unchanged; the independent revocation contract remains backend-only and
+durable supply is unimplemented.
 
 [OBSERVED] Version 0.4.81 pins the reconciled signer/live-canary backend
 manifest. The client behavior and execution authority are unchanged.

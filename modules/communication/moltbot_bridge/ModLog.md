@@ -1,4 +1,14 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Independent signer revocation contract prerequisite
+- Extended the existing owner-controlled E0 boundary with an exact signed
+  revocation snapshot contract bound to the current policy,
+  generation, authority, target signer, and durable store identities.
+- Required grant authority, revocation authority, and target signer keys to be
+  distinct, and required grant and revocation authority principals to differ.
+- Added no revocation store/reader/oracle, grant issuer, WSP 71 resolver
+  activation, stable-service composition, secret resolution, signer start,
+  worker/repository/PR/merge effect, or HoloIndex mutation. Production signing
+  remains blocked. (WSP 00/15/22/50/62/71/97)
 ## 2026-08-12: Live-canary contract fixture reconciliation
 - Reprojected the resident live-canary fixtures through the current canonical
   queue WSP_15 allocation and progressive-stage binding instead of retaining
