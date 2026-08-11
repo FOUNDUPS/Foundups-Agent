@@ -8,7 +8,6 @@ import os
 import platform
 import subprocess
 import sys
-import tarfile
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -25,6 +24,9 @@ from modules.infrastructure.wre_core.src.wre_test_differential_capability import
 from modules.infrastructure.wre_core.src.wre_test_scope_coverage import (
     resolve_test_scope_coverage,
 )
+from modules.infrastructure.wre_core.src.wre_git_commit_archive import (
+    materialize_git_commit,
+)
 
 SCHEMA = "wre_test_differential_runtime_receipt.v1"
 POLICY_SCHEMA = "wre_test_impact_policy.v1"
@@ -40,8 +42,6 @@ _LOCK_NAMES = {
     "Cargo.lock", "package-lock.json", "pnpm-lock.yaml", "poetry.lock",
     "pyproject.toml", "requirements.txt", "uv.lock", "yarn.lock",
 }
-_MAX_ARCHIVE_ENTRIES = 100_000
-_MAX_ARCHIVE_BYTES = 2 * 1024 * 1024 * 1024
 _MAX_REPORT_BYTES = 64 * 1024 * 1024
 _MAX_LOCK_BYTES = 64 * 1024 * 1024
 
@@ -93,15 +93,15 @@ def produce_test_differential_evidence(
                 raise ValueError("runtime artifacts must be outside repository roots")
             base_root = runtime_root / "base"
             candidate_root = runtime_root / "candidate"
-            _materialize_base(worktree_path, base_sha, base_root, runtime_root)
-            _materialize_base(worktree_path, head_sha, candidate_root, runtime_root)
+            materialize_git_commit(worktree_path, base_sha, base_root, runtime_root)
+            materialize_git_commit(worktree_path, head_sha, candidate_root, runtime_root)
             result = _run_pair(
                 req=req, policy=policy, base_root=base_root,
                 candidate_root=candidate_root, runtime_root=runtime_root,
                 collector=collector, lineage_digest=lineage_digest,
                 collector_digest=collector_digest,
             )
-    except (OSError, ValueError, tarfile.TarError, subprocess.SubprocessError):
+    except (OSError, ValueError, subprocess.SubprocessError):
         return _reject([FAIL_BASE_MATERIALIZATION])
     return result
 
@@ -273,26 +273,6 @@ def _canonical_ids(value: Any) -> bool:
         value == sorted(set(value))
         and all(item.strip() == item and item for item in value)
     )
-
-
-def _materialize_base(
-    repo: Path, sha: str, destination: Path, runtime_root: Path
-) -> None:
-    archive = runtime_root / f"{destination.name}.tar"
-    subprocess.run(
-        ["git", "-C", str(repo), "archive", "--format=tar", f"--output={archive}", sha],
-        capture_output=True, timeout=300, shell=False, check=True,
-    )
-    destination.mkdir()
-    with tarfile.open(archive, "r:") as handle:
-        members = handle.getmembers()
-        if len(members) > _MAX_ARCHIVE_ENTRIES or sum(item.size for item in members) > _MAX_ARCHIVE_BYTES:
-            raise ValueError("archive bounds exceeded")
-        for member in members:
-            target = (destination / PurePosixPath(member.name)).resolve()
-            if destination not in target.parents or not (member.isfile() or member.isdir()):
-                raise ValueError("unsafe archive member")
-        handle.extractall(destination, members=members, filter="data")
 
 
 def _policy_reasons(policy: Mapping[str, Any]) -> list[str]:

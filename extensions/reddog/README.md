@@ -1,10 +1,11 @@
 # RedDog
 
-Version: 0.4.76
+Version: 0.4.77
 
-[OBSERVED] Version 0.4.76 pins the backend manifest after adding diagnostic
-exact-ID test differential and deterministic scope coverage. Locally produced
-test evidence cannot authorize autonomous promotion.
+[OBSERVED] Version 0.4.77 pins the backend manifest after adding the canonical
+module-owned test registry and exact-commit collection diagnostics. Pytest runs
+in collection mode, but imported modules can execute arbitrary code; local
+diagnostics cannot authorize autonomous promotion.
 
 [OBSERVED] Version 0.4.74 pins bounded iterative repository grounding. HoloIndex
 locates candidate paths, while active model evidence comes only from rehydrated

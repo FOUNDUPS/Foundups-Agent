@@ -35,6 +35,10 @@ jobs:
           pip install pytest pytest-cov
           pip install -r requirements.txt
 
+      - name: Verify canonical test registry
+        run: |
+          python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
+
       - name: Run simulator tests
         run: |
           python -m pytest modules/foundups/simulator/tests/ -v --tb=short --ignore=modules/foundups/simulator/tests/test_sse_server.py

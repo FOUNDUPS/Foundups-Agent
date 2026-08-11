@@ -60,6 +60,28 @@ own evidence provenance.
 Focused and module-closure tests remain the development loop, while systemic,
 uncertain, security-sensitive, and promotion work escalates to the full suite.
 
+### Canonical Test Registry and Shards
+
+`WSP_knowledge/WSP_Test_Registry.json` is the deterministic Git-tracked test
+inventory. `wre_test_registry.py` validates its exact schema and partitions
+automatic unit/integration files into bounded module-owned shards. Manual,
+operational, archived, malformed, and module-scope-effect files remain visible
+with explicit quarantine reasons; they are never silently ignored.
+
+`wre_test_shard_collection_runtime.py` invokes the trusted collection-only
+collector separately for selected shards inside a disposable exact-commit Git
+archive. Isolated Python startup and an archive-root import guard reject Python
+modules resolved from another checkout. Collection still executes test-module
+import code, so it is diagnostic rather than an OS sandbox or non-effect proof.
+It invokes pytest only in collection mode, but module imports can call arbitrary
+functions, including test functions. Exact node IDs and failed shard diagnostics
+are retained while every local receipt remains unauthenticated and
+`execution_authority_verified=false`. Receipts bind a content-free digest of the
+invoking Python runtime and installed package versions so environment failures
+remain distinct from code failures. Use the
+`auto_test_registry_audit` Skillz workflow to verify or regenerate the registry.
+Broad `pytest .` discovery is not canonical test evidence.
+
 ### create_foundup Dry-Run Routing
 
 `FoundUpJob(requested_action="create_foundup")` routes only to

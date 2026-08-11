@@ -1,5 +1,13 @@
 # HoloIndex Package ModLog
 
+## [2026-08-11] Canonical test-suite topology metadata
+
+- Extended the existing test-registry indexer to retain canonical owner, suite
+  class, runnable final shard, collectability, and quarantine metadata. Canonical
+  v2 input uses WRE's strict loader while legacy input remains compatible. This
+  makes module-owned test topology retrievable by
+  RedDog without granting query-time index mutation. (WSP 6/22/50/60/97)
+
 ## [2026-08-11] Immutable repository-audit evidence reads
 
 - Extended the existing repository-audit discovery seam so final selected

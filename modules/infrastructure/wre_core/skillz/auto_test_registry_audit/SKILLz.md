@@ -1,71 +1,61 @@
 ---
 name: auto_test_registry_audit
-description: Scans codebase for test files and updates the WSP Test Registry
-version: 1.0_prototype
+description: Verify or regenerate the canonical module-owned Python test registry
+version: 2.0
 author: 0102
-created: 2025-12-06
-agents: [qwen]
+agents: [qwen, gemma]
 primary_agent: qwen
 intent_type: TELEMETRY
-promotion_state: prototype
+promotion_state: production
 pattern_fidelity_threshold: 0.95
-
 dependencies:
   scripts:
     - path: modules/infrastructure/wre_core/scripts/generate_test_registry.py
-      purpose: Scans file system and parses AST
-
+      purpose: Deterministic Git-tracked test registry projection
 metrics:
   pattern_fidelity_scoring:
     enabled: true
 category: workflow
-evals: []
+evals:
+  - canonical_bytes_match_git_projection
+  - every_tracked_python_test_has_one_owner
+  - quarantined_programs_remain_visible
 ---
 # Auto Test Registry Audit
 
-**Purpose**: Maintains the Single Source of Truth for verification capabilities by scanning the codebase and updating `WSP_knowledge/WSP_Test_Registry.json`.
+Maintain the single test source of truth at
+`WSP_knowledge/WSP_Test_Registry.json` without broad pytest discovery.
 
-**Intent Type**: TELEMETRY
+## Verify
 
-**Agent**: Qwen (Partner)
+Run from the repository root:
 
----
+```text
+python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
+```
 
-## Task
+The command passes only when the checked-in ASCII registry is byte-identical to
+the deterministic projection of Git-tracked `test_*.py` files.
 
-Execute the registry generation script to index all `test_*.py` files, identifying their capabilities (Selenium, Vision, Unit) and docstrings. This specifically solves the "test amnesia" problem by creating a searchable catalog.
+## Regenerate
 
-## Instructions
+Use `--write` only in a bounded registry-maintenance worktree:
 
-### 1. EXECUTE AUDIT SCRIPT
-**Rule**: ALWAYS run the python script to ensure fresh data.
-**Expected Pattern**: script_execution=True
+```text
+python modules/infrastructure/wre_core/scripts/generate_test_registry.py --write
+python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
+```
 
-**Steps**:
-1. Run `python modules/infrastructure/wre_core/scripts/generate_test_registry.py`
-2. Verify exit code is 0
-3. Log output summary (e.g., "Found 45 tests")
+The generator assigns every file exactly one owner, suite class, shard, timeout,
+and quarantine status. Unit and integration files may be automatically
+collected. Manual, operational, archived, malformed, or process-mutating files
+remain registered but cannot enter automatic pytest collection.
 
-### 2. VALIDATE REGISTRY
-**Rule**: IF registry file exists AND size > 0 THEN validation_pass=True
-**Expected Pattern**: registry_validation=True
+## Boundaries
 
-**Steps**:
-1. Read `WSP_knowledge/WSP_Test_Registry.json`
-2. Confirm "tests" array is not empty
-3. Confirm `test_live_engagement_full` is present with "012_protocol" capability
-
----
-
-## Benchmark Test Cases
-
-1. Input: `run_audit` → Expected: Script runs, file updated, returns "Success"
-2. Input: `run_audit` (with syntax error in a test file) → Expected: Script logs error but finishes registry for valid files
-
----
-
-## Success Criteria
-
-- ✅ Registry file updated
-- ✅ `test_live_engagement_full.py` indexed correctly
-- ✅ Zero script errors
+- Do not run `pytest .`.
+- Do not delete or silently ignore a quarantined file.
+- Do not treat local shard evidence as external execution authority.
+- Do not mutate HoloIndex during verification. Post-merge indexing belongs to
+  the governed HoloIndex authority transaction.
+- A failed shard does not invalidate or erase other shard reports.

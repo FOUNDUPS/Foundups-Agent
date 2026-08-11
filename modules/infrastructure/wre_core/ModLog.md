@@ -1,5 +1,25 @@
 # WRE Core - ModLog
 ## Chronological Change Log
+### [2026-08-11] - CANONICAL TEST REGISTRY AND COLLECTION HYGIENE
+
+- Upgraded the existing Holo-indexed test registry to a deterministic
+  Git-tracked projection with explicit module owners, suite classes, bounded
+  shards, timeouts, capabilities, and quarantine reasons.
+- Replaced the stale permissive generator with explicit `--check`/`--write`
+  modes, strict UTF-8/AST classification, atomic writes, and no repository log.
+- Added isolated collection-only shard diagnostics over disposable exact-commit
+  Git archives. One broken collector cannot erase other shard evidence. Isolated
+  startup and an import guard reject ordinary imports from another checkout.
+  Module imports can still execute arbitrary code, including test functions, so
+  exact node IDs and environment fingerprints remain unauthenticated diagnostics
+  with no execution authority.
+- Added archive traversal/device/link/bounds regressions, module-scope decorator,
+  default, annotation, class-body and test-function-call quarantine, runnable
+  final shard IDs, strict Holo v2 loading, and a CI registry freshness check.
+- Classified the Chrome-at-import and stdout-replacement scripts as explicit
+  operational quarantine entries instead of allowing broad pytest discovery to
+  terminate the repository run. (WSP 00/5/6/15/22/50/62/97)
+
 ### [2026-08-08] - DEPENDENCY PREFLIGHT EVIDENCE INTEGRITY
 
 - Captured scanner output as bytes and required strict UTF-8 JSON evidence,
