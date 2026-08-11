@@ -1,0 +1,156 @@
+{
+  "schema_version": "reddog_extension_contract_shards.v1",
+  "source_path": "extensions/reddog/tests/verify_extension_contract.js",
+  "source_sha256": "sha256:1ca09d142d3548303b94cdf38913a3542f7319e4a0e351c24ade1b376d9efe9d",
+  "source_line_count": 6857,
+  "assertion_call_count": 1213,
+  "canonical_line_endings": "LF",
+  "max_shard_lines": 400,
+  "max_orchestrator_lines": 200,
+  "shards": [
+    {
+      "order": 1,
+      "path": "contract_shards/verify_extension_contract.part01.js",
+      "source_line_start": 1,
+      "source_line_end": 400,
+      "line_count": 400,
+      "sha256": "sha256:d7228b0164f9053eaebf2cd283ba81b41f8bf06f2af2cd31c6d5bf2d1c91d8da"
+    },
+    {
+      "order": 2,
+      "path": "contract_shards/verify_extension_contract.part02.js",
+      "source_line_start": 401,
+      "source_line_end": 798,
+      "line_count": 398,
+      "sha256": "sha256:5c75050977f20583e2dc0c920707b313069b629593232eb2f97b1541a67a577c"
+    },
+    {
+      "order": 3,
+      "path": "contract_shards/verify_extension_contract.part03.js",
+      "source_line_start": 799,
+      "source_line_end": 1182,
+      "line_count": 384,
+      "sha256": "sha256:d747a4b9df3f247f72b5a3415a450f6036178a1c568068b93625ddf596bce34d"
+    },
+    {
+      "order": 4,
+      "path": "contract_shards/verify_extension_contract.part04.js",
+      "source_line_start": 1183,
+      "source_line_end": 1574,
+      "line_count": 392,
+      "sha256": "sha256:cc5f1b7ba54ba313d14526af4ed131da6b2eeb853eec34823c7040637f49cfd2"
+    },
+    {
+      "order": 5,
+      "path": "contract_shards/verify_extension_contract.part05.js",
+      "source_line_start": 1575,
+      "source_line_end": 1974,
+      "line_count": 400,
+      "sha256": "sha256:0a1beaf076463392806cac5b43907f426253a1c4a2ff643a56b900f475dc31f0"
+    },
+    {
+      "order": 6,
+      "path": "contract_shards/verify_extension_contract.part06.js",
+      "source_line_start": 1975,
+      "source_line_end": 2368,
+      "line_count": 394,
+      "sha256": "sha256:046fdb69d5f78e284fde7d136b9b185e2abdc4d67271aa8c8a7b24f5d17b4a90"
+    },
+    {
+      "order": 7,
+      "path": "contract_shards/verify_extension_contract.part07.js",
+      "source_line_start": 2369,
+      "source_line_end": 2762,
+      "line_count": 394,
+      "sha256": "sha256:de176c1a0eb69f30b2a60dfc73f62bf5676cb40193ac450f8da2b8ae580f073b"
+    },
+    {
+      "order": 8,
+      "path": "contract_shards/verify_extension_contract.part08.js",
+      "source_line_start": 2763,
+      "source_line_end": 3160,
+      "line_count": 398,
+      "sha256": "sha256:0b1798d9f8c79113e92d48c09d8e7196bb6d4caf94650394ad0307c114a530cd"
+    },
+    {
+      "order": 9,
+      "path": "contract_shards/verify_extension_contract.part09.js",
+      "source_line_start": 3161,
+      "source_line_end": 3559,
+      "line_count": 399,
+      "sha256": "sha256:c6fcdd92aaff6e54ee63b78cc61b3796371de8fdd695dabd71d98f7a754a375d"
+    },
+    {
+      "order": 10,
+      "path": "contract_shards/verify_extension_contract.part10.js",
+      "source_line_start": 3560,
+      "source_line_end": 3945,
+      "line_count": 386,
+      "sha256": "sha256:59231011990d4161f0876455f90ac2a5df6c5b340f21c5083414743e08b7364d"
+    },
+    {
+      "order": 11,
+      "path": "contract_shards/verify_extension_contract.part11.js",
+      "source_line_start": 3946,
+      "source_line_end": 4345,
+      "line_count": 400,
+      "sha256": "sha256:9210009fdc435950aa00350efe4d949e166df5fdd00e79935830443f65b10fd6"
+    },
+    {
+      "order": 12,
+      "path": "contract_shards/verify_extension_contract.part12.js",
+      "source_line_start": 4346,
+      "source_line_end": 4740,
+      "line_count": 395,
+      "sha256": "sha256:e2cc45e43253da60e5d746e5e53c8cfcaf379f813e33c5931a8865914ecf4b9a"
+    },
+    {
+      "order": 13,
+      "path": "contract_shards/verify_extension_contract.part13.js",
+      "source_line_start": 4741,
+      "source_line_end": 5135,
+      "line_count": 395,
+      "sha256": "sha256:d68a2d9ade44a2b7408744169d3bbca56bd77d585abbfa0f9e28854a27efa8dd"
+    },
+    {
+      "order": 14,
+      "path": "contract_shards/verify_extension_contract.part14.js",
+      "source_line_start": 5136,
+      "source_line_end": 5535,
+      "line_count": 400,
+      "sha256": "sha256:53c96401e9c34d37513d7288e09e2dac8622e2fed4bc1b86cb0d04bde939f45d"
+    },
+    {
+      "order": 15,
+      "path": "contract_shards/verify_extension_contract.part15.js",
+      "source_line_start": 5536,
+      "source_line_end": 5935,
+      "line_count": 400,
+      "sha256": "sha256:bb507d30c4d2f183e27c727cd95ce67a5af384c35d99e5ad8a240444636d0d23"
+    },
+    {
+      "order": 16,
+      "path": "contract_shards/verify_extension_contract.part16.js",
+      "source_line_start": 5936,
+      "source_line_end": 6334,
+      "line_count": 399,
+      "sha256": "sha256:dc9b9eb264dc5af796d9d932c916beafbd325543887f0e439619e46b4552c104"
+    },
+    {
+      "order": 17,
+      "path": "contract_shards/verify_extension_contract.part17.js",
+      "source_line_start": 6335,
+      "source_line_end": 6706,
+      "line_count": 372,
+      "sha256": "sha256:ab79c229cbe94762b9deb911dd46e419c781937c6bafb6182a2f7ae6a9f2ae94"
+    },
+    {
+      "order": 18,
+      "path": "contract_shards/verify_extension_contract.part18.js",
+      "source_line_start": 6707,
+      "source_line_end": 6857,
+      "line_count": 151,
+      "sha256": "sha256:4cf616bb6765aa63e6708d7429ad3e246d76ae90d72708c6056334a7f4f4f328"
+    }
+  ]
+}

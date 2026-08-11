@@ -16,6 +16,7 @@ node extensions/reddog/tests/test_foundup_work_grounding.js
 node extensions/reddog/tests/test_backend_compatibility_preflight.js
 pytest -q scripts/tests/test_generate_reddog_backend_manifest.py
 node extensions/reddog/tests/verify_repo_audit_grounding.js
+node extensions/reddog/tests/test_extension_contract_shards.js
 node extensions/reddog/tests/verify_extension_contract.js
 node extensions/reddog/tests/test_start_operations_control.js
 node extensions/reddog/tests/test_holoindex_incident_repair.js
@@ -51,7 +52,9 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_orchestration_prompt_trace.js` | Content-free pre-gate policy trace, exact task-prompt gate confirmation, composite/context exclusion, blocked-run non-disclosure, and Markdown-safe export |
 | `test_conversation_history_policy.js` | Raw-history denial, setting-sensitive prompt policy keys, provider-history discard, non-authority telemetry, and extension wiring |
 | `test_conversation_session_authority_source.js` | SecretStorage credential handling, narrow child environment, no ambient-secret crossover, and fail-closed credential shape |
-| `verify_extension_contract.js` | Single contract runner; ADDENDUM E ~line 518+, ADDENDUM F gate probe ~line 595+ |
+| `verify_extension_contract.js` | Integrity-checking orchestrator for the ordered exhaustive-contract shards |
+| `contract_shards/manifest.json` | Exact original-source digest, ordered shard digests, line ranges, and WSP_62 ceilings |
+| `test_extension_contract_shards.js` | Fast reconstruction, no-loss, syntax, ordering, uniqueness, and line-ceiling regression |
 | `test_grounding_failure_dialogue.js` | Conversation-only failure receipt, queued-recovery deterministic status, tri-state recall, sanitization, no-evidence/no-authority binding, bridge-failure fallback |
 | `verify_repo_audit_grounding.js` | Focused alias, receipt, protected-context non-vacuity, local block, repair-provenance, and defensive-prompt contracts |
 
@@ -72,3 +75,7 @@ See `TestModLog.md` for TCI-001 through TCI-010, THG-001 through THG-006, UNI-00
 
 - VSCode API mocked via `node_modules/vscode` stub in contract runner.
 - Workspace root = repo root (three levels above `tests/`).
+- Exhaustive shards execute in one ordered VM context so lexical declarations,
+  assertion order, side effects, and the final process result match the original
+  monolithic test. Each shard is at most 400 lines; the orchestrator is at most
+  200 lines.

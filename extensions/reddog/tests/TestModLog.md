@@ -1,5 +1,16 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-11 - Exhaustive contract suite modularization
+
+- Mechanically partitioned the unchanged 6,857-line exhaustive contract body
+  into 18 ordered, syntax-safe shards of at most 400 lines.
+- Added a manifest-bound shared-VM orchestrator that verifies every shard and
+  the exact aggregate digest before preserving the original execution order.
+- Added a fast structural regression for shard uniqueness, complete source
+  reconstruction, 1,213 retained assertion calls, syntax, and WSP_62 ceilings.
+- No extension runtime, backend manifest, package version, or test assertion
+  behavior changed.
+
 ## 2026-08-11 - Baseline compatibility regressions (0.4.75)
 
 - Normalized source line endings only for the static Copy-MD sanitizer
