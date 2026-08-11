@@ -99,6 +99,11 @@ injected no-network test double. One bounded Python subprocess proves
 interprocess lock exclusion. It does not start a signer, call OpenRouter, push
 a branch, or create a PR.
 
+Current-policy fixtures must project the legacy serial-loop snapshot through
+the canonical queue WSP_15 allocation and governed progressive-stage helpers.
+Manifest authority uses one exact edit operation, selected slice, and file
+path; scalar or wildcard stand-ins are not valid live-canary evidence.
+
 Focused canonical execution-valve supplier/evaluator:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py modules/communication/moltbot_bridge/tests/test_reddog_wre_execution_valve.py -q

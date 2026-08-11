@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-08-12 - Live-canary reconciliation compatibility pin (0.4.81)
+
+- Re-pinned the exact backend manifest after current-policy live-canary fixture
+  reconciliation and a no-growth signer method decomposition.
+- No thin-client behavior, signer activation, or execution authority changed.
+
 ## 2026-08-12 - External signer lease compatibility pin (0.4.80)
 
 - Regenerated the backend manifest for the external exact-effect lease and

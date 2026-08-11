@@ -36,9 +36,6 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     _CHAIN,
     plan_reddog_resident_queue_orchestration,
 )
-from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_serial_loop import (
-    _snapshot,
-)
 from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
     NOW,
     QUEUE_ID,
@@ -48,6 +45,7 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test
     _kwargs,
     _roots,
     _runner,
+    _snapshot,
     _write_pre_state,
     _write_control_receipt_and_head,
 )

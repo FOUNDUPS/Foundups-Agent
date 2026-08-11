@@ -215,17 +215,10 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
         )
         if rejection is not None:
             return rejection
-        response, reason = _sign_response(
-            self,
-            request,
-            peer,
-            _requires_audit_attestation(
-                control_payload,
-                manifest_payload,
-                outcome_payload,
-                conversation_payload,
-            ),
+        requires_attestation = _requires_audit_attestation(
+            control_payload, manifest_payload, outcome_payload, conversation_payload
         )
+        response, reason = _sign_response(self, request, peer, requires_attestation)
         if reason:
             _rollback_proposal_reservation(self, proposal_reservation)
             _rollback_manifest_reservation(self, manifest_reservation)

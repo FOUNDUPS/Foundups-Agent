@@ -1783,7 +1783,7 @@
     "modules/communication/moltbot_bridge/src/reddog_determine_answer_contract.py": "bf0c1287722099233aa2cbe105ed364aadfff1f2a18ab3beac79b517f4e687a8",
     "modules/communication/moltbot_bridge/src/reddog_ed25519_conversation_scope_backend.py": "cdd04bf07c9a175a00d7d5eec107689f77d69ff1356c35a584b46ba66c937582",
     "modules/communication/moltbot_bridge/src/reddog_ed25519_signature_verifier_backend.py": "99b96642ba7851d32322f88ff3f08eaec459e4c1db668bccd3819d017037708e",
-    "modules/communication/moltbot_bridge/src/reddog_ed25519_signer_backend.py": "bd8469c68461ba0b2627541f7e98f052231a3683373f32c53e03fd888be38e99",
+    "modules/communication/moltbot_bridge/src/reddog_ed25519_signer_backend.py": "2c07e728f0703b110e09cc459e2223809ffdb0f450fac7fb1b5baecef940b05f",
     "modules/communication/moltbot_bridge/src/reddog_ed25519_signer_policy_gate.py": "3da613668677aa07fefb8c96f8ad8fdfd3e4a9c81b0ec067b7f7e27fd8e4b13c",
     "modules/communication/moltbot_bridge/src/reddog_ed25519_signer_validation.py": "3c816dc9f4b689412d1f949c63f54fc173d2bf493e31936847e31142f445ce4d",
     "modules/communication/moltbot_bridge/src/reddog_ed25519_verified_outcome_signing.py": "ebf460e4003916775a03ec0bbf0fe2a5faf8e3b5a3052fa2c0fda4b7e65b8eca",

@@ -35,7 +35,7 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY,
-    REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY,
+    REJECT_ED25519_SIGNER_DOMAIN_MISMATCH,
     Ed25519SignerBackend,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
@@ -84,6 +84,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     PREFIX_WORKAUTH,
     PermissionSnapshot,
     canonical_signing_input,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     with_architect_fix_publication,
@@ -790,9 +793,7 @@ def test_manifest_configured_signer_rejects_arbitrary_domain(
     response = harness.signer.backend.sign(request, _peer())
 
     assert response.accepted is False
-    assert response.rejection_code == (
-        REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY
-    )
+    assert response.rejection_code == REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
 
 
 def test_verified_manifest_mints_one_shot_process_local_launch_selection(
@@ -1048,6 +1049,10 @@ def _work_authority(
     publication_receipt_id: str,
     publication_binding_digest: str,
 ) -> dict[str, Any]:
+    stage_binding = signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(f"modules/foundups/{FOUNDUP}/src/worker.py",),
+    )
     value = {
         "work_order_id": "work-order-runtime-manifest-1",
         "work_order_digest": "sha256:" + "6" * 64,
@@ -1056,16 +1061,15 @@ def _work_authority(
         "reddog_id": REDDOG_ID,
         "repo_full_name": REPO,
         "foundup_id": FOUNDUP,
-        "allowed_paths": [f"modules/foundups/{FOUNDUP}/**"],
+        "allowed_paths": [f"modules/foundups/{FOUNDUP}/src/worker.py"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": SNAPSHOT_DIGEST,
         "queue_consumer_receipt_digest": "sha256:" + "7" * 64,
-        "wsp15_allocation_receipt_id": "sha256:" + "8" * 64,
-        "wsp15_allocation_digest": "sha256:" + "9" * 64,
-        "wsp15_priority": "P0",
-        "wsp15_mps_total": 20,
-        "wsp15_reasoning_tier": "ULTRA",
+        "selected_slice": stage_binding["progressive_policy_stage_receipt"][
+            "selected_slice"
+        ],
+        **stage_binding,
         "nonce": "work-authority-nonce-1",
         "issued_at": NOW - 30,
         "expires_at": NOW + 300,
@@ -1095,10 +1099,10 @@ def _authority_profile(reddog_public_key: str) -> dict[str, Any]:
         "work_order_id": "work-order-runtime-manifest-1",
         "repo_full_name": REPO,
         "foundup_id": FOUNDUP,
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": SNAPSHOT_DIGEST,
         "valve_state_required": VALVE,
-        "allowed_paths": [f"modules/foundups/{FOUNDUP}/**"],
+        "allowed_paths": [f"modules/foundups/{FOUNDUP}/src/worker.py"],
         "denied_paths": [],
         "authority_profile_source_receipt_id": SOURCE_RECEIPT_ID,
     }

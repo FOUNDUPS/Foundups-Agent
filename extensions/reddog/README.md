@@ -1,8 +1,11 @@
 # RedDog
 
-Version: 0.4.80
+Version: 0.4.81
 
-[OBSERVED] Version 0.4.80 pins the backend manifest after adding the external
+[OBSERVED] Version 0.4.81 pins the reconciled signer/live-canary backend
+manifest. The client behavior and execution authority are unchanged.
+
+[OBSERVED] Version 0.4.80 pinned the backend manifest after adding the external
 signer exact-effect lease primitive and strict socket-v2 client transport.
 The projection reuses the canonical WRE impact plan and never imports candidate
 tests or invokes pytest. Autonomous test
