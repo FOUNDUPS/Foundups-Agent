@@ -1,4 +1,13 @@
 # TestModLog - wre_core/tests
+## 2026-08-11: Live API registry quarantine
+- Added alias-aware network capability classification and a repository fixture
+  proving the import-time LiveChat Google API program remains visible but cannot
+  enter an automatic test shard.
+- Added module alias, nested `try`/`if`, discovery star-import, and harmless
+  authentication-constructor cases after independent security review.
+- Proved a `__main__` body remains excluded while its import-time `else` branch
+  is classified and quarantined.
+
 ## 2026-08-08: Dependency preflight Windows decoding regression
 - Added strict UTF-8 subprocess coverage, npm/cargo schema and exit validation,
   summary-consistency checks, cache replay/config/input invalidation, a UTF-8

@@ -9,6 +9,7 @@ import re
 import warnings
 
 from .wre_test_registry_ast import (
+    import_aliases,
     module_effects,
     node_name,
 )
@@ -17,6 +18,7 @@ SUITE_CLASSES = {"unit", "integration", "manual", "operational"}
 _ARCHIVE_PARTS = {"_archive", "archive", "archived", "modules_archive"}
 _DANGEROUS_CALLS = {
     "exit", "quit", "sys.exit", "os._exit",
+    "googleapiclient.discovery.build",
     "subprocess.call", "subprocess.check_call", "subprocess.check_output",
     "subprocess.run", "subprocess.Popen", "uvicorn.run",
     "webdriver.Chrome", "webdriver.Firefox", "webdriver.Edge",
@@ -24,6 +26,7 @@ _DANGEROUS_CALLS = {
 _DANGEROUS_PREFIXES = (
     "requests.", "httpx.", "socket.", "urllib.request.",
 )
+_DANGEROUS_STAR_IMPORTS = {"googleapiclient.discovery"}
 _SLUG = re.compile(r"[^a-z0-9]+")
 
 
@@ -80,7 +83,7 @@ def _apply_effects(
         or call.endswith((".Chrome", ".Firefox", ".Edge"))
         or call.startswith(_DANGEROUS_PREFIXES)
         for call in effects.calls
-    ):
+    ) or effects.star_imports & _DANGEROUS_STAR_IMPORTS:
         reasons.add("module_scope_external_effect")
     for active, reason in (
         (effects.stdout_mutated, "module_scope_process_stream_mutation"),
@@ -142,11 +145,15 @@ def _has_pytest_mark(tree: ast.Module, marks: set[str]) -> bool:
 
 
 def _capabilities(tree: ast.Module) -> set[str]:
-    names = {node_name(node) for node in ast.walk(tree)}
+    aliases = import_aliases(tree)
+    names = {node_name(node, aliases) for node in ast.walk(tree)}
     result = set()
     if any(name.startswith(("selenium", "webdriver", "playwright")) for name in names):
         result.add("browser")
-    if any(name.startswith(("requests", "httpx", "socket", "urllib")) for name in names):
+    if any(name.startswith((
+        "google.auth.transport.requests", "googleapiclient",
+        "requests", "httpx", "socket", "urllib",
+    )) for name in names):
         result.add("network")
     if any(name.startswith("subprocess") for name in names):
         result.add("process")

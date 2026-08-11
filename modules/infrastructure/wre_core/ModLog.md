@@ -1,5 +1,19 @@
 # WRE Core - ModLog
 ## Chronological Change Log
+### [2026-08-11] - LIVE API TEST QUARANTINE HARDENING
+
+- Extended the canonical registry classifier to quarantine module-scope Google
+  API client construction as an external effect, including aliased imports in
+  module-executed control-flow and Google discovery star imports.
+- Kept pure Google authentication request construction collectable and added
+  adversarial false-negative/false-positive regressions.
+- Inspect import-time `else` branches under `__main__` guards while continuing
+  to ignore effects confined to the guarded script body.
+- Added a repository regression proving the legacy LiveChat API program cannot
+  enter automatic pytest shards.
+- Preserved collection receipts as diagnostic-only; this change grants no test
+  execution or import-isolation authority.
+
 ### [2026-08-11] - CANONICAL TEST REGISTRY AND COLLECTION HYGIENE
 
 - Upgraded the existing Holo-indexed test registry to a deterministic

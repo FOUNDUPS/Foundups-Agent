@@ -1,9 +1,9 @@
 # RedDog
 
-Version: 0.4.77
+Version: 0.4.78
 
-[OBSERVED] Version 0.4.77 pins the backend manifest after adding the canonical
-module-owned test registry and exact-commit collection diagnostics. Pytest runs
+[OBSERVED] Version 0.4.78 pins the backend manifest after hardening the canonical
+module-owned test registry against import-time live API programs. Pytest runs
 in collection mode, but imported modules can execute arbitrary code; local
 diagnostics cannot authorize autonomous promotion.
 

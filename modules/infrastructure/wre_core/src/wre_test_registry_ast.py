@@ -15,6 +15,7 @@ _WRITE_METHODS = {
 @dataclass(frozen=True)
 class ModuleEffects:
     calls: frozenset[str]
+    star_imports: frozenset[str]
     stdout_mutated: bool
     environment_mutated: bool
     module_raise: bool
@@ -56,7 +57,6 @@ class _Visitor(ast.NodeVisitor):
                 self.visit(value)
 
     visit_AsyncFunctionDef = visit_FunctionDef
-
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         for value in (*node.decorator_list, *node.bases):
             self.visit(value)
@@ -64,10 +64,9 @@ class _Visitor(ast.NodeVisitor):
             self.visit(keyword.value)
         for statement in node.body:
             self.visit(statement)
-
     def visit_If(self, node: ast.If) -> None:
-        if not is_main_guard(node.test):
-            self.generic_visit(node)
+        for statement in import_time_if_body(node):
+            self.visit(statement)
 
     def visit_Assign(self, node: ast.Assign) -> None:
         for target in node.targets:
@@ -101,6 +100,7 @@ def module_effects(tree: ast.Module) -> ModuleEffects:
     visitor.visit(tree)
     return ModuleEffects(
         calls=frozenset(visitor.calls),
+        star_imports=module_star_imports(tree),
         stdout_mutated=visitor.stdout_mutated,
         environment_mutated=visitor.environment_mutated,
         module_raise=visitor.module_raise,
@@ -122,15 +122,46 @@ def node_name(node: Any, aliases: dict[str, str] | None = None) -> str:
 
 
 def import_aliases(tree: ast.Module) -> dict[str, str]:
-    result: dict[str, str] = {}
-    for node in tree.body:
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                result[alias.asname or alias.name.split(".")[0]] = alias.name
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            for alias in node.names:
-                result[alias.asname or alias.name] = f"{node.module}.{alias.name}"
-    return result
+    visitor = _ImportVisitor()
+    visitor.visit(tree)
+    return visitor.aliases
+
+
+def module_star_imports(tree: ast.Module) -> frozenset[str]:
+    visitor = _ImportVisitor()
+    visitor.visit(tree)
+    return frozenset(visitor.star_imports)
+
+
+class _ImportVisitor(ast.NodeVisitor):
+    """Collect imports executed while the module or class body is loading."""
+
+    def __init__(self) -> None:
+        self.aliases: dict[str, str] = {}
+        self.star_imports: set[str] = set()
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        return
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+    visit_Lambda = visit_FunctionDef
+    def visit_If(self, node: ast.If) -> None:
+        for statement in import_time_if_body(node):
+            self.visit(statement)
+    def visit_Import(self, node: ast.Import) -> None:
+        for alias in node.names:
+            self.aliases[alias.asname or alias.name.split(".")[0]] = alias.name
+
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        if not node.module:
+            return
+        for alias in node.names:
+            if alias.name == "*":
+                self.star_imports.add(node.module)
+            else:
+                self.aliases[alias.asname or alias.name] = (
+                    f"{node.module}.{alias.name}"
+                )
 
 
 def open_call_writes(node: ast.Call) -> bool:
@@ -154,6 +185,10 @@ def is_main_guard(node: ast.expr) -> bool:
     }
 
 
+def import_time_if_body(node: ast.If) -> tuple[ast.stmt, ...]:
+    return tuple(node.orelse if is_main_guard(node.test) else (*node.body, *node.orelse))
+
+
 def _literal(node: ast.expr) -> str:
     if isinstance(node, ast.Name):
         return node.id
@@ -161,5 +196,5 @@ def _literal(node: ast.expr) -> str:
         return node.value
     return ""
 
-
-__all__ = ["ModuleEffects", "module_effects", "node_name"]
+__all__ = ["ModuleEffects", "import_aliases", "module_effects",
+           "module_star_imports", "node_name"]
