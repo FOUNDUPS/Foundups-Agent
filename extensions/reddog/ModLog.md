@@ -1,5 +1,13 @@
 # RedDog ModLog
 
+## 2026-08-11 - Exhaustive contract suite modularization
+
+- Replaced the oversized exhaustive test host with a <=200-line integrity
+  orchestrator and 18 ordered <=400-line shards in one shared VM context.
+- Bound the exact pre-refactor source body, shard order, line ranges, and
+  assertion count in a checked-in structural regression. Runtime code,
+  backend compatibility, package version, and authority behavior are unchanged.
+
 ## 2026-08-11 - Read-only architect stage compatibility pin (0.4.75)
 
 - Regenerated and pinned the backend manifest after replacing the invalid
