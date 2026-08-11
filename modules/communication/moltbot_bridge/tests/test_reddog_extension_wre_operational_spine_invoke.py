@@ -23,9 +23,6 @@ from modules.communication.moltbot_bridge.src.reddog_extension_wre_operational_s
 )
 
 
-@pytest.fixture(autouse=True)
-def _allow_stub_lease(monkeypatch) -> None:
-    allow_stub_authoritative_use_lease(monkeypatch, spine_module)
 from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_selection import (
     AUTHORITY_SIGNED_VALVE_REQUIRED,
     WARDROBE_ARCHITECT_AUDIT,
@@ -34,6 +31,11 @@ from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_sele
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     ExecutionValveEnvironment,
 )
+
+
+@pytest.fixture(autouse=True)
+def _allow_stub_lease(monkeypatch) -> None:
+    allow_stub_authoritative_use_lease(monkeypatch, spine_module)
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 MODULE_PATH = (
@@ -165,6 +167,13 @@ def _accepted_signature(order):
     }
 
 
+def _queue_receipt():
+    return {
+        "queue_item_id": "queue-extension-wre-spine-001",
+        "slice_id": "REDDOG_EXTENSION_WRE_SPINE_TEST_PHASE1",
+    }
+
+
 def _open_worktree_env():
     return ExecutionValveEnvironment(
         valve_worktree_create_enabled=True,
@@ -176,7 +185,7 @@ def test_accepts_only_explicit_sovereign_worktree_selection_and_calls_runner(tmp
     fixed = datetime(2026, 7, 12, 12, 0, 0, tzinfo=timezone.utc)
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
-    order = _base_order(fixed)
+    order = _base_order(fixed, queue_consumer_receipt=_queue_receipt())
     runner = FakeRunner()
 
     result = invoke_reddog_extension_wre_operational_spine_explicit_valve(
@@ -428,7 +437,11 @@ def test_sovereign_token_is_not_emitted(tmp_path: Path) -> None:
     fixed = datetime(2026, 7, 12, 12, 35, 0, tzinfo=timezone.utc)
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
-    order = _base_order(fixed, nonce="nonce-extension-wre-spine-token")
+    order = _base_order(
+        fixed,
+        nonce="nonce-extension-wre-spine-token",
+        queue_consumer_receipt=_queue_receipt(),
+    )
 
     result = invoke_reddog_extension_wre_operational_spine_explicit_valve(
         order,

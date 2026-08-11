@@ -20,6 +20,9 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease imp
     consume_authoritative_use_lease,
     is_authoritative_use_lease,
 )
+from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
+    authoritative_worktree_lease_digest,
+)
 
 from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_selection import (
     AUTHORITY_SOVEREIGN_TOKEN_REQUIRED,
@@ -141,6 +144,31 @@ def _validate_selection_receipt(selection_receipt: Mapping[str, Any]) -> List[st
     return list(dict.fromkeys(reasons))
 
 
+def _lease_consumer_factory(
+    lease: Optional[AuthoritativeUseLease], work_order: Mapping[str, Any]
+):
+    def build(executor: Mapping[str, Any], valve: Mapping[str, Any]):
+        receipt = _mapping(work_order.get("queue_consumer_receipt"))
+        queue_item_id = str(receipt.get("queue_item_id") or "")
+        selected_slice = str(receipt.get("slice_id") or "")
+        digest = authoritative_worktree_lease_digest(
+            queue_item_id, selected_slice, work_order, executor, valve
+        )
+        if not is_authoritative_use_lease(
+            lease,
+            effect_kind="worktree_create",
+            effect_request_digest=digest,
+        ):
+            return None
+        return lambda: consume_authoritative_use_lease(
+            lease,
+            effect_kind="worktree_create",
+            effect_request_digest=digest,
+        )
+
+    return build
+
+
 def invoke_reddog_extension_wre_operational_spine_explicit_valve(
     work_order: Mapping[str, Any],
     *,
@@ -197,8 +225,7 @@ def invoke_reddog_extension_wre_operational_spine_explicit_valve(
         intake_target=intake_target,
         permission_ttl_seconds=permission_ttl_seconds,
         permission_expires_at=permission_expires_at,
-        admission_consumer=(lambda: consume_authoritative_use_lease(authoritative_use_lease))
-        if is_authoritative_use_lease(authoritative_use_lease) else None,
+        admission_consumer_factory=_lease_consumer_factory(authoritative_use_lease, work_order),
     )
     if spine_result.decision != WORKTREE_SPINE_ACCEPT:
         reasons = [ExtensionWREOperationalSpineInvokeReason.WORKTREE_SPINE_REJECTED]

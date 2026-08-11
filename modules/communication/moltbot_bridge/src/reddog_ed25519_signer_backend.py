@@ -628,6 +628,9 @@ def _lease_matches_peer_instance(
             payload.get("manifest_id") == binding.manifest_id,
             payload.get("artifact_generation_digest")
             == binding.artifact_generation_digest,
+            payload.get("generation") == binding.generation,
+            payload.get("generation_revision") == binding.generation_revision,
+            payload.get("owner_config_id") == binding.owner_config_id,
             payload.get("run_packet_id") == binding.run_packet_id,
             payload.get("config_digest") == binding.config_digest,
             payload.get("session_id") == binding.session_id,

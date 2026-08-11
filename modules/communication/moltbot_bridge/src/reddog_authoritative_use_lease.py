@@ -4,23 +4,32 @@ from __future__ import annotations
 
 import secrets
 import threading
-from typing import Any, Callable
+import time
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import (
     digest_mapping,
     validate_authoritative_use_lease_request,
 )
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    Ed25519SignatureVerifier,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
     AUTHORITATIVE_USE_LEASE_AUDIT_ATTESTATION_PREFIX,
     canonical_signer_audit_attestation_input,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_runtime_binding import (
+    SignerCurrentGenerationRuntimeBinding,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
     SigningResponse,
     public_key_fingerprint,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_nonce_store import (
+    DurableSignerSecretGrantNonceStore,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
-    SignatureVerifier,
     constant_time_compare,
 )
 
@@ -60,24 +69,11 @@ class _LeaseRegistry:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._records: dict[
-            str,
-            tuple[
-                AuthoritativeUseLease,
-                int,
-                str,
-                str,
-                Callable[[], bool],
-                Callable[[], int],
-            ],
+            str, tuple[AuthoritativeUseLease, int, str, str]
         ] = {}
 
     def issue(
-        self,
-        expires_at: int,
-        effect_kind: str,
-        effect_request_digest: str,
-        consume_authority: Callable[[], bool],
-        trusted_now_epoch: Callable[[], int],
+        self, expires_at: int, effect_kind: str, effect_request_digest: str
     ) -> AuthoritativeUseLease:
         token = secrets.token_urlsafe(32)
         capability = object.__new__(AuthoritativeUseLease)
@@ -88,26 +84,14 @@ class _LeaseRegistry:
                 expires_at,
                 effect_kind,
                 effect_request_digest,
-                consume_authority,
-                trusted_now_epoch,
             )
         return capability
 
     def inspect(self, capability: object) -> tuple[int, str, str] | None:
-        if type(capability) is not AuthoritativeUseLease:
+        record = self._record(capability)
+        if record is None or int(time.time()) >= record[1]:
             return None
-        try:
-            token = _token(capability)
-        except AttributeError:
-            return None
-        with self._lock:
-            record = self._records.get(token)
-        if record is None or record[0] is not capability:
-            return None
-        try:
-            return (record[1], record[2], record[3]) if record[5]() < record[1] else None
-        except Exception:
-            return None
+        return record[1], record[2], record[3]
 
     def consume(
         self,
@@ -128,64 +112,95 @@ class _LeaseRegistry:
                 record, capability, effect_kind, effect_request_digest
             ):
                 return False
+            if int(time.time()) >= record[1]:
+                self._records.pop(token, None)
+                return False
             self._records.pop(token, None)
+        return True
+
+    def _record(self, capability: object) -> tuple[Any, ...] | None:
+        if type(capability) is not AuthoritativeUseLease:
+            return None
         try:
-            return record[5]() < record[1] and record[4]() is True
-        except Exception:
-            return False
+            token = _token(capability)
+        except AttributeError:
+            return None
+        with self._lock:
+            record = self._records.get(token)
+        return record if record is not None and record[0] is capability else None
 
 
 _LEASES = _LeaseRegistry()
 
 
-def rehydrate_external_authoritative_use_lease(
+def _rehydrate_external_authoritative_use_lease(
     *,
     request: SigningRequest,
     response: SigningResponse,
-    signature_verifier: SignatureVerifier,
-    consume_evidence_once: Callable[[str], bool],
-    consume_authority_once: Callable[[], bool],
-    trusted_now_epoch: Callable[[], int],
+    current_generation: SignerCurrentGenerationRuntimeBinding,
+    replay_store: DurableSignerSecretGrantNonceStore,
+    now_epoch: int,
 ) -> AuthoritativeUseLease | None:
     """Verify external evidence and release one non-serializable capability."""
 
-    try:
-        now_epoch = trusted_now_epoch()
-    except Exception:
+    if type(replay_store) is not DurableSignerSecretGrantNonceStore:
         return None
     payload = validate_authoritative_use_lease_request(request, now_epoch=now_epoch)
-    if payload is None or not _response_valid(request, response, signature_verifier):
+    if (
+        payload is None
+        or not _current_generation_matches(payload, current_generation, now_epoch)
+        or not _response_valid(request, response)
+    ):
         return None
     evidence_digest = digest_mapping(
         {"request": request.to_dict(), "response": response.to_dict()}
     )
-    try:
-        if consume_evidence_once(evidence_digest) is not True:
-            return None
-    except Exception:
+    if not replay_store.consume_authoritative_use_lease(
+        evidence_digest=evidence_digest,
+        lease_nonce=str(payload["lease_nonce"]),
+        expires_at=int(payload["expires_at"]),
+    ):
         return None
     return _LEASES.issue(
         int(payload["expires_at"]),
         str(payload["effect_kind"]),
         str(payload["effect_request_digest"]),
-        consume_authority_once,
-        trusted_now_epoch,
     )
 
 
-def _response_valid(
-    request: SigningRequest,
-    response: SigningResponse,
-    verifier: SignatureVerifier,
+def _current_generation_matches(
+    payload: Mapping[str, Any],
+    binding: SignerCurrentGenerationRuntimeBinding,
+    now_epoch: int,
 ) -> bool:
+    if (
+        type(binding) is not SignerCurrentGenerationRuntimeBinding
+        or binding.accepted is not True
+        or binding.selection_expires_at is None
+        or now_epoch >= binding.selection_expires_at
+    ):
+        return False
+    expected = {
+        "manifest_id": binding.manifest_id,
+        "artifact_generation_digest": binding.artifact_generation_digest,
+        "generation": binding.generation,
+        "generation_revision": binding.generation_revision,
+        "owner_config_id": binding.owner_config_id,
+        "run_packet_id": binding.run_packet_id,
+        "config_digest": binding.config_digest,
+        "session_id": binding.session_id,
+        "socket_path_digest": binding.socket_path_digest,
+    }
+    return all(payload.get(key) == value for key, value in expected.items())
+
+
+def _response_valid(request: SigningRequest, response: SigningResponse) -> bool:
     if type(response) is not SigningResponse or response.accepted is not True:
         return False
     expected_fingerprint = public_key_fingerprint(request.signer_public_key)
-    public_bindings = all(
+    if not all(
         (
-            constant_time_compare(
-                response.signer_public_key, request.signer_public_key
-            ),
+            constant_time_compare(response.signer_public_key, request.signer_public_key),
             constant_time_compare(response.key_epoch, request.key_epoch),
             constant_time_compare(response.key_fingerprint, expected_fingerprint),
             bool(response.audit_mac),
@@ -195,9 +210,9 @@ def _response_valid(
             response.signer_loads_no_untrusted_code is True,
             response.no_secret_material_returned is True,
         )
-    )
-    if not public_bindings:
+    ):
         return False
+    verifier = Ed25519SignatureVerifier()
     try:
         attestation = canonical_signer_audit_attestation_input(
             signing_input=request.signing_input,
@@ -272,5 +287,4 @@ __all__ = [
     "AuthoritativeUseLease",
     "consume_authoritative_use_lease",
     "is_authoritative_use_lease",
-    "rehydrate_external_authoritative_use_lease",
 ]

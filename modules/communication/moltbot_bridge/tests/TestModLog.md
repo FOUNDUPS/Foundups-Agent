@@ -1,5 +1,6 @@
 ## 2026-08-12: External authoritative-use lease regressions
-- Proved exact grant-bound signing, strict request/instance/TTL checks, signer and audit verification, durable replay denial, expiry, one-shot parent authority, and opaque capability behavior.
+- Proved exact grant-bound signing, typed effect-digest recomputation, strict request/instance/generation/TTL checks, signer and audit verification, durable replay denial, expiry, and opaque capability behavior.
+- Proved noncanonical and duplicate-key JSON rejection, socket-v1 downgrade denial, cross-effect and generation substitution denial, and one real lease through the direct WRE spine without monkeypatching.
 - Proved strict socket v2 grant transport and retained grant-unaware/malformed rejection; the focused signer matrix and WSP 62 differential pass.
 ## 2026-08-11: Baseline contract reconciliation
 - Proved the read-only bootstrap uses `AUDIT_NO_EFFECT`, persists a valid architect `FIX`, and emits zero executable queue candidates.

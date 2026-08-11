@@ -93,6 +93,34 @@ class DurableSignerSecretGrantNonceStore:
         except Exception:
             return False
 
+    def consume_authoritative_use_lease(
+        self, *, evidence_digest: str, lease_nonce: str, expires_at: int
+    ) -> bool:
+        """Consume one client-side signer response through the same replay root."""
+
+        try:
+            _require_store_files(self._config)
+            if not is_sha256(evidence_digest):
+                return False
+            if (
+                type(lease_nonce) is not str
+                or len(lease_nonce) != 64
+                or any(char not in "0123456789abcdef" for char in lease_nonce)
+                or type(expires_at) is not int
+            ):
+                return False
+            reservation = self._store.reserve(
+                "authoritative-use-lease:" + lease_nonce,
+                expires_at=expires_at,
+                subject=evidence_digest,
+            )
+            if not reservation:
+                return False
+            self._store.commit(reservation)
+            return True
+        except Exception:
+            return False
+
 
 def _validate_config(config: object) -> None:
     if not isinstance(config, SignerGrantReplayStoreConfig):

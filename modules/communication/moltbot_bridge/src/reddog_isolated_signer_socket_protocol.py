@@ -20,6 +20,9 @@ import re
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping, Optional, Protocol
 
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import (
+    AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     FailClosedSignerClient,
     RuntimeRejectCode,
@@ -146,23 +149,41 @@ def handle_reddog_isolated_signer_socket_request(
     ):
         return _response_bytes(_reject(REJECT_SIGNER_SOCKET_PEER_MISMATCH))
 
-    signer = backend or FailClosedSignerBackend()
+    response = _dispatch_signer(
+        request,
+        peer,
+        backend or FailClosedSignerBackend(),
+        secret_grant,
+    )
+    checked = _validate_response(response, request)
+    return _response_bytes(checked)
+
+
+def _dispatch_signer(
+    request: SigningRequest,
+    peer: SignerPeerAttestation,
+    signer: IsolatedSignerBackend,
+    secret_grant: Mapping[str, Any] | None,
+) -> SigningResponse:
     try:
+        if (
+            request.requested_operation
+            == AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION
+            and secret_grant is None
+        ):
+            return _reject(REJECT_SIGNER_SOCKET_SECRET_GRANT_UNSUPPORTED)
         if secret_grant is None:
             response = signer.sign(request, peer)
         else:
             grant_signer = getattr(signer, "sign_with_secret_grant", None)
             if not callable(grant_signer):
-                return _response_bytes(
-                    _reject(REJECT_SIGNER_SOCKET_SECRET_GRANT_UNSUPPORTED)
-                )
+                return _reject(REJECT_SIGNER_SOCKET_SECRET_GRANT_UNSUPPORTED)
             response = grant_signer(request, peer, secret_grant)
     except Exception:
-        return _response_bytes(_reject(REJECT_SIGNER_SOCKET_BACKEND_EXCEPTION))
+        return _reject(REJECT_SIGNER_SOCKET_BACKEND_EXCEPTION)
     if type(response) is not SigningResponse:
-        return _response_bytes(_reject(REJECT_SIGNER_SOCKET_RESPONSE_INVALID))
-    checked = _validate_response(response, request)
-    return _response_bytes(checked)
+        return _reject(REJECT_SIGNER_SOCKET_RESPONSE_INVALID)
+    return response
 
 
 def _parse_request(

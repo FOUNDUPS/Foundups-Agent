@@ -7,8 +7,12 @@ It extends the existing E0 secret-grant and isolated signer socket instead of
 adding a signer or trust store. A strict signed request can be rehydrated into
 one opaque, process-local, one-shot capability for an exact worktree-create or
 live-enqueue request. The capability cannot be directly constructed, copied,
-pickled, or replayed, and it rechecks trusted time plus parent authority when
-consumed.
+pickled, or replayed. The signer recomputes the complete typed effect digest,
+requires socket v2 plus the exact one-use E0 grant, and checks the root-selected
+manifest, generation, owner config, run packet, session, and socket identity.
+Client rehydration uses the same durable E0 replay root and current root-owned
+generation artifacts; callers cannot inject verifier, replay, time, or parent
+authority verdicts.
 
 This is a foundation, not production activation. The repository supplies no
 local grant issuer, does not relax the resident resolver, and does not connect

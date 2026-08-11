@@ -1,7 +1,8 @@
 # ModLog - moltbot_bridge
 ## 2026-08-12: External-signer authoritative-use lease primitive
-- Added a strict exact-effect request and opaque one-shot process capability; admission verifies external signer and audit signatures, consumes injected durable replay evidence, and rechecks time plus parent authority at use.
-- Extended the existing socket client v2 grant envelope and signer-instance/profile/generation binding; the existing E0 exact-request grant remains the only signing authority.
+- Added a strict typed exact-effect request and opaque one-shot process capability; the signer recomputes effect identity, rejects noncanonical JSON, and binds current manifest, generation, owner config, run packet, session, socket, profile, and key.
+- Extended the existing socket client v2 grant envelope and durable E0 replay store. Lease-domain socket v1 rejects, and client rehydration has no injected verifier, replay, time, or parent-authority verdict; the existing E0 exact-request grant remains the only signing authority.
+- Bound real leases through both worktree admission registries and the direct WRE spine using the exact executor-plan and valve-decision digests.
 - No issuer, resolver activation, worker, repository, PR, merge, HoloIndex, or live-canary effect was added; other effects and crash recovery remain blocked. (WSP 00/15/22/50/62/71/97)
 ## 2026-08-11: Architect and verifier contract reconciliation
 - Replaced retired `AUDIT` with canonical `AUDIT_NO_EFFECT`; read-only `FIX` determinations remain evidence and signed plans carry exact test scope.

@@ -28,7 +28,9 @@
 - COMPLETE: the external signer can sign one canonical authoritative-use lease
   for an exact `worktree_create` or `live_enqueue` request through the existing
   strict socket-v2 secret-grant boundary. The consumer rehydrates only verified
-  signature and audit evidence into an opaque process-local one-shot capability.
+  signature and audit evidence against current root-owned generation artifacts
+  and the existing durable E0 replay store. The signed typed effect payload is
+  recomputed signer-side; socket v1 and noncanonical JSON reject.
 - BLOCKED: production lease issuance and effect activation. There is no local
   grant issuer, and the resident resolver still requires all current lifecycle,
   generation, authority, and deployment anchors. Queue dispatch, assurance,

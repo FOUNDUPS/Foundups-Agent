@@ -27,6 +27,7 @@ _FIELDS = frozenset(
         "schema_version",
         "lease_nonce",
         "effect_kind",
+        "effect_payload",
         "effect_request_digest",
         "requester_principal_id",
         "signer_profile_id",
@@ -41,14 +42,8 @@ _FIELDS = frozenset(
         "config_digest",
         "session_id",
         "socket_path_digest",
-        "current_generation_receipt_id",
-        "lifecycle_admission_receipt_id",
         "work_authority_digest",
         "identity_digest",
-        "work_order_id",
-        "work_order_digest",
-        "queue_item_id",
-        "selected_slice",
         "expected_bindings_digest",
         "issued_at",
         "expires_at",
@@ -63,13 +58,26 @@ _DIGEST_FIELDS = frozenset(
         "run_packet_id",
         "config_digest",
         "socket_path_digest",
-        "current_generation_receipt_id",
-        "lifecycle_admission_receipt_id",
         "work_authority_digest",
         "identity_digest",
-        "work_order_digest",
         "expected_bindings_digest",
     }
+)
+_EFFECT_FIELDS = {
+    "worktree_create": frozenset(
+        {
+            "queue_item_id",
+            "selected_slice",
+            "work_order_id",
+            "work_order_digest",
+            "executor_plan_digest",
+            "valve_decision_digest",
+        }
+    ),
+    "live_enqueue": frozenset({"work_order_id", "evidence_digest"}),
+}
+_EFFECT_DIGEST_FIELDS = frozenset(
+    {"work_order_digest", "executor_plan_digest", "valve_decision_digest", "evidence_digest"}
 )
 
 
@@ -106,12 +114,17 @@ def validate_authoritative_use_lease_request(
     prefix = AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX
     if not request.signing_input.startswith(prefix):
         return None
+    raw_payload = request.signing_input[len(prefix) :]
     try:
-        payload = json.loads(request.signing_input[len(prefix) :])
-    except (TypeError, json.JSONDecodeError):
+        payload = json.loads(raw_payload, object_pairs_hook=_reject_duplicate_keys)
+    except (TypeError, json.JSONDecodeError, ValueError):
         return None
     checked = validate_authoritative_use_lease_payload(payload)
-    if checked is None or not _request_matches(request, checked):
+    if (
+        checked is None
+        or raw_payload != canonical_payload(checked)
+        or not _request_matches(request, checked)
+    ):
         return None
     return checked if _fresh(checked, now_epoch) else None
 
@@ -134,11 +147,29 @@ def validate_authoritative_use_lease_payload(
         return None
     if payload.get("effect_kind") not in SUPPORTED_EFFECT_KINDS:
         return None
+    effect_payload = _validate_effect_payload(
+        str(payload["effect_kind"]), payload.get("effect_payload")
+    )
+    if effect_payload is None:
+        return None
+    try:
+        expected_effect_digest = authoritative_use_effect_digest(
+            str(payload["effect_kind"]), effect_payload
+        )
+    except ValueError:
+        return None
+    if payload.get("effect_request_digest") != expected_effect_digest:
+        return None
     if not _NONCE_RE.fullmatch(str(payload.get("lease_nonce") or "")):
         return None
     if any(not is_sha256(payload.get(field)) for field in _DIGEST_FIELDS):
         return None
-    text_fields = _FIELDS - _DIGEST_FIELDS - {"generation", "issued_at", "expires_at"}
+    text_fields = _FIELDS - _DIGEST_FIELDS - {
+        "effect_payload",
+        "generation",
+        "issued_at",
+        "expires_at",
+    }
     if any(not _ascii(payload.get(field)) for field in text_fields):
         return None
     checked = dict(payload)
@@ -164,14 +195,11 @@ def authoritative_use_effect_digest(
 ) -> str:
     """Bind one supported effect kind to its complete canonical input."""
 
-    if effect_kind not in SUPPORTED_EFFECT_KINDS or not isinstance(
-        effect_payload, Mapping
-    ):
+    checked = _validate_effect_payload(effect_kind, effect_payload)
+    if checked is None:
         raise ValueError("authoritative_use_effect_invalid")
-    if not _ascii_deep(effect_payload):
-        raise ValueError("authoritative_use_effect_non_ascii")
     return digest_mapping(
-        {"effect_kind": effect_kind, "effect_payload": dict(effect_payload)}
+        {"effect_kind": effect_kind, "effect_payload": checked}
     )
 
 
@@ -221,6 +249,35 @@ def _canonical_round_trip(payload: Mapping[str, Any]) -> bool:
         return json.loads(canonical_payload(payload)) == dict(payload)
     except (TypeError, ValueError):
         return False
+
+
+def _validate_effect_payload(
+    effect_kind: str, effect_payload: object
+) -> dict[str, Any] | None:
+    fields = _EFFECT_FIELDS.get(effect_kind)
+    if fields is None or not isinstance(effect_payload, Mapping):
+        return None
+    if set(effect_payload) != fields or not _ascii_deep(effect_payload):
+        return None
+    if any(
+        not is_sha256(effect_payload.get(field))
+        for field in fields & _EFFECT_DIGEST_FIELDS
+    ):
+        return None
+    text_fields = fields - _EFFECT_DIGEST_FIELDS
+    if any(not _ascii(effect_payload.get(field)) for field in text_fields):
+        return None
+    checked = dict(effect_payload)
+    return checked if _canonical_round_trip(checked) else None
+
+
+def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError("duplicate_json_key")
+        value[key] = item
+    return value
 
 
 def _ascii(value: object) -> bool:

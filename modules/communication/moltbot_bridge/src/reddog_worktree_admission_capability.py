@@ -34,7 +34,7 @@ def _digest(value: Mapping[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def _lease_digest(
+def authoritative_worktree_lease_digest(
     queue_id: str,
     slice_id: str,
     work_order: Mapping[str, Any],
@@ -46,6 +46,7 @@ def _lease_digest(
         {
             "queue_item_id": queue_id,
             "selected_slice": slice_id,
+            "work_order_id": str(work_order.get("work_order_id") or ""),
             "work_order_digest": _digest(work_order),
             "executor_plan_digest": _digest(executor_plan),
             "valve_decision_digest": _digest(valve_decision),
@@ -92,7 +93,7 @@ class InMemoryWorktreeAdmissionRegistry:
         work_order_id = str(work_order.get("work_order_id") or "").strip()
         if not all((queue_id, slice_id, work_order_id)):
             return False
-        lease_digest = _lease_digest(
+        lease_digest = authoritative_worktree_lease_digest(
             queue_id, slice_id, work_order, executor_plan_result, valve_decision
         )
         if signed_authority_reverified is not True or not is_authoritative_use_lease(
@@ -137,7 +138,7 @@ class InMemoryWorktreeAdmissionRegistry:
             and capability.executor_plan_digest == _digest(executor_plan_result)
             and capability.valve_decision_digest == _digest(valve_decision)
         )
-        lease_digest = _lease_digest(
+        lease_digest = authoritative_worktree_lease_digest(
             queue_id,
             str(selected_slice or "").strip(),
             work_order,
@@ -154,6 +155,7 @@ class InMemoryWorktreeAdmissionRegistry:
 
 
 __all__ = [
+    "authoritative_worktree_lease_digest",
     "InMemoryWorktreeAdmissionRegistry",
     "WorktreeAdmissionCapability",
 ]

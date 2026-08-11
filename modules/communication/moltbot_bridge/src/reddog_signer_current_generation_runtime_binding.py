@@ -50,7 +50,10 @@ class SignerCurrentGenerationRuntimeBinding:
     owner_config_id: str | None = None
     config_digest: str | None = None
     config_raw_digest: str | None = None
+    run_packet_id: str | None = None
     run_packet_digest: str | None = None
+    session_id: str | None = None
+    socket_path_digest: str | None = None
     selection_expires_at: int | None = None
     authority_granted: bool = False
     effect_capability_issued: bool = False
@@ -59,6 +62,21 @@ class SignerCurrentGenerationRuntimeBinding:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class SignerCurrentGenerationRuntimeAuthority:
+    """Resolve current generation only from root-owned runtime artifacts."""
+
+    repo_root: Path
+    runtime_root: Path
+
+    def resolve(self, *, now_epoch: int) -> SignerCurrentGenerationRuntimeBinding:
+        return verify_signer_current_generation_runtime_binding(
+            repo_root=self.repo_root,
+            runtime_root=self.runtime_root,
+            now_epoch=now_epoch,
+        )
 
 
 def verify_signer_current_generation_runtime_binding(
@@ -162,15 +180,14 @@ def _validated_values(
     )
     return {
         "manifest_id": str(selection["manifest_id"]),
-        "artifact_generation_digest": str(
-            selection["artifact_generation_digest"]
-        ),
+        "artifact_generation_digest": str(selection["artifact_generation_digest"]),
         "generation": generation,
         "generation_revision": revision,
         "owner_config_id": str(selection["owner_config_id"]),
         "config_digest": str(selection["config_digest"]),
         "config_raw_digest": str(selection["config_raw_digest"]),
         "run_packet_digest": str(selection["run_packet_digest"]),
+        **_runtime_identity(packet),
         "selection_expires_at": expires_at,
     }
 
@@ -203,6 +220,14 @@ def _validate_manifest_freshness(
         now_epoch=now_epoch,
         max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS,
     )
+
+
+def _runtime_identity(packet: Mapping[str, Any]) -> dict[str, str]:
+    return {
+        "run_packet_id": str(packet["run_packet_id"]),
+        "session_id": str(packet["session_id"]),
+        "socket_path_digest": _text_digest(str(packet["socket_path"])),
+    }
 
 
 def _validated_selection_identity(
@@ -258,6 +283,10 @@ def _bytes_digest(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
 
 
+def _text_digest(value: str) -> str:
+    return _bytes_digest(value.encode("utf-8"))
+
+
 def _digest(value: Mapping[str, Any]) -> str:
     raw = json.dumps(
         {
@@ -275,5 +304,6 @@ __all__ = [
     "SIGNER_CURRENT_GENERATION_BINDING_REJECTED",
     "SIGNER_CURRENT_GENERATION_BINDING_SCHEMA_VERSION",
     "SignerCurrentGenerationRuntimeBinding",
+    "SignerCurrentGenerationRuntimeAuthority",
     "verify_signer_current_generation_runtime_binding",
 ]
