@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-11 - Baseline compatibility regressions (0.4.75)
+
+- Normalized source line endings only for the static Copy-MD sanitizer
+  assertion so the same security contract is enforced on Windows and Unix.
+- Revalidated the regenerated backend manifest and version pin. No extension
+  runtime behavior or disclosure policy changed.
+
 ## 2026-08-11 - Backend grounding manifest regressions (0.4.74)
 
 - Pinned the regenerated 1,252-file backend manifest and canonical build ID.

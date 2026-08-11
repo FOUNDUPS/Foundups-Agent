@@ -1,5 +1,9 @@
 # RedDog Interface
 
+Version 0.4.75 pins the backend manifest after the read-only architect
+bootstrap adopted the canonical `AUDIT_NO_EFFECT` stage. Audit determinations
+remain evidence only and produce no executable queue candidate.
+
 Version 0.4.74 pins the backend manifest for bounded iterative repository
 grounding. Semantic HoloIndex hits are candidate locators only; exact current
 HEAD content, retrieval trace, repository root, generation, and resource policy
