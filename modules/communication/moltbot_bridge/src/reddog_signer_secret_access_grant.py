@@ -37,6 +37,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_oracle import (
     AtomicSignerSecretGrantRevocationOracle,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_root_protected_use_oracle import RootAuthorizedSignerGrantRevocationOracle
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     NonceStore,
     PrincipalKeyResolver,
@@ -96,7 +97,7 @@ class SignerSecretAccessGrantBoundary:
 
     @property
     def atomic_revocation(self) -> bool:
-        return type(self._revocation_oracle) is AtomicSignerSecretGrantRevocationOracle
+        return type(self._revocation_oracle) in {AtomicSignerSecretGrantRevocationOracle, RootAuthorizedSignerGrantRevocationOracle}
 
     def verify(
         self, grant: Mapping[str, Any], *, expected: ExpectedSignerSecretGrantBinding,
@@ -159,11 +160,12 @@ class SignerSecretAccessGrantBoundary:
             return result
 
         try:
+            if type(self._revocation_oracle) is RootAuthorizedSignerGrantRevocationOracle:
+                return self._revocation_oracle.authorize_grant_use(validated, checked_action)
             return self._revocation_oracle.authorize_use(
                 grant_id=str(validated["grant_id"]),
                 key_epoch=str(validated["key_epoch"]),
-                at_epoch=self._now(),
-                action=checked_action,
+                at_epoch=self._now(), action=checked_action,
             )
         except SignerSecretAccessGrantRejected:
             raise

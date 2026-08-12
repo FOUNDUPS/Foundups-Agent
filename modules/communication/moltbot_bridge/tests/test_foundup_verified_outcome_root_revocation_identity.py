@@ -13,9 +13,15 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service import (
     validated_root_authority_snapshot,
 )
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_protected_use_client import (
+    RootProtectedUseAuthority,
+)
 from modules.communication.moltbot_bridge.src import (
     foundup_verified_outcome_root_authority_client as root_client_module,
     reddog_signer_system_service_manifest_selection_loader as loader_module,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_signer_system_service_root_protected_use_loader as protected_loader,
 )
 from modules.communication.moltbot_bridge.tests.root_revocation_service_fixtures import (
     runtime,
@@ -80,6 +86,7 @@ def test_public_owner_loader_mints_only_service_backed_client(
         },
     }
     monkeypatch.setattr(loader_module, "_load_owner_config", lambda *_a, **_k: owner)
+    monkeypatch.setattr(protected_loader, "_load_owner_config", lambda *_a, **_k: owner)
     monkeypatch.setattr(root_client_module, "_require_protected_socket", lambda *_: None)
     monkeypatch.setattr(
         root_client_module, "_root_socket_roundtrip",
@@ -91,3 +98,9 @@ def test_public_owner_loader_mints_only_service_backed_client(
         request_signer=lambda value: _sign(values["target_private"], value),
     )
     assert client.load() is None
+    protected = protected_loader.load_system_service_root_protected_use_authority(
+        owner_config_path=tmp_path / "owner.json", repo_root=values["repo"],
+        policy=values["policy"], binding=values["binding"],
+        request_signer=lambda value: _sign(values["target_private"], value),
+    )
+    assert type(protected) is RootProtectedUseAuthority

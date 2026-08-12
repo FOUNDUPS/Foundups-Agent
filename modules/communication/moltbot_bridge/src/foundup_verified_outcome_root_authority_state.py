@@ -26,6 +26,9 @@ GENERATION_BINDING = "sha256:" + hashlib.sha256(
 INSTALLATION_BINDING = "sha256:" + hashlib.sha256(
     b"foundup-verified-outcome-root-authority-installation.v1"
 ).hexdigest()
+PROTECTED_USE_BINDING = "sha256:" + hashlib.sha256(
+    b"foundup-root-signer-protected-use.v1"
+).hexdigest()
 _STATE_BINDING_NAMES = ("state", "state_witness", "installation")
 _STATE_BINDING_FIELDS = ("root", "path", "store_id", "durability_receipt_id")
 
@@ -125,6 +128,108 @@ class RootVerifiedOutcomeAuthorityState:
             self._require_installed()
             current = self._current(binding_digest)
             if current != expected:
+                raise RuntimeError("root_authority_state_conflict")
+            self._advance_pair(binding_digest, expected, next_value)
+
+    def acquire_protected_use(
+        self,
+        *,
+        expected_generation: ProposalReplayHighWater,
+        revocation_binding: str,
+        expected_revocation: ProposalReplayHighWater,
+        protected_use_binding: str,
+        use_revision: str,
+    ) -> ProposalReplayHighWater:
+        """Atomically linearize one signer use after exact revocation state."""
+
+        _require_revision(use_revision)
+        with self._lock():
+            self._require_installed()
+            if self._current(GENERATION_BINDING) != expected_generation:
+                raise RuntimeError("root_protected_use_generation_conflict")
+            if self._current(revocation_binding) != expected_revocation:
+                raise RuntimeError("root_protected_use_revocation_conflict")
+            marker = self._current(protected_use_binding)
+            current = self._current(PROTECTED_USE_BINDING)
+            wanted_marker = ProposalReplayHighWater(1, use_revision)
+            if marker is not None:
+                return self._resume_protected_use(
+                    protected_use_binding, use_revision,
+                    marker=marker, current=current,
+                )
+            if current is not None and current.sequence % 2 == 1:
+                raise RuntimeError("root_protected_use_active")
+            if current is not None and current.sequence % 2 != 0:
+                raise RuntimeError("root_protected_use_state_invalid")
+            sequence = 1 if current is None else current.sequence + 1
+            wanted = ProposalReplayHighWater(sequence, use_revision)
+            self._advance_pair(protected_use_binding, None, wanted_marker)
+            self._advance_pair(PROTECTED_USE_BINDING, current, wanted)
+            self._advance_pair(
+                protected_use_binding,
+                wanted_marker,
+                ProposalReplayHighWater(2, use_revision),
+            )
+            return wanted
+
+    def _resume_protected_use(
+        self, binding: str, revision: str, *,
+        marker: ProposalReplayHighWater,
+        current: ProposalReplayHighWater | None,
+    ) -> ProposalReplayHighWater:
+        prepared = ProposalReplayHighWater(1, revision)
+        active = ProposalReplayHighWater(2, revision)
+        if marker not in {prepared, active}:
+            raise RuntimeError("root_protected_use_replay")
+        if current is not None and current.sequence % 2 == 1:
+            if current.state_revision != revision:
+                raise RuntimeError("root_protected_use_active")
+            if marker == prepared:
+                self._advance_pair(binding, prepared, active)
+            return current
+        if marker == active:
+            raise RuntimeError("root_protected_use_replay")
+        sequence = 1 if current is None else current.sequence + 1
+        wanted = ProposalReplayHighWater(sequence, revision)
+        self._advance_pair(PROTECTED_USE_BINDING, current, wanted)
+        self._advance_pair(binding, prepared, active)
+        return wanted
+
+    def finish_protected_use(
+        self,
+        *,
+        expected: ProposalReplayHighWater,
+        finish_revision: str,
+    ) -> ProposalReplayHighWater:
+        """Close one exact active use; repeated completion is idempotent."""
+
+        _require_revision(finish_revision)
+        with self._lock():
+            self._require_installed()
+            current = self._current(PROTECTED_USE_BINDING)
+            finished = ProposalReplayHighWater(expected.sequence + 1, finish_revision)
+            if current == finished:
+                return current
+            if current != expected or expected.sequence % 2 != 1:
+                raise RuntimeError("root_protected_use_finish_conflict")
+            self._advance_pair(PROTECTED_USE_BINDING, expected, finished)
+            return finished
+
+    def advance_revocation(
+        self,
+        binding_digest: str,
+        *,
+        expected: ProposalReplayHighWater | None,
+        next_value: ProposalReplayHighWater,
+    ) -> None:
+        """Advance revocation only when no protected signing use is active."""
+
+        with self._lock():
+            self._require_installed()
+            active = self._current(PROTECTED_USE_BINDING)
+            if active is not None and active.sequence % 2 == 1:
+                raise RuntimeError("root_protected_use_active")
+            if self._current(binding_digest) != expected:
                 raise RuntimeError("root_authority_state_conflict")
             self._advance_pair(binding_digest, expected, next_value)
 
@@ -374,9 +479,17 @@ def _sha256(value: Any) -> bool:
     )
 
 
+def _require_revision(value: str) -> None:
+    if not isinstance(value, str) or len(value) != 64 or any(
+        character not in "0123456789abcdef" for character in value
+    ):
+        raise ValueError("root_protected_use_revision_invalid")
+
+
 __all__ = [
     "GENERATION_BINDING",
     "INSTALLATION_BINDING",
+    "PROTECTED_USE_BINDING",
     "RootVerifiedOutcomeAuthorityState",
     "authorization_binding",
     "root_authority_state_binding_digest",

@@ -86,6 +86,28 @@ def materialize_revocation_anchor_authority(
     )
 
 
+def materialize_root_protected_use_authority(
+    *, owner: Mapping[str, Any], repo: Path, policy: Mapping[str, Any],
+    binding: SignerGrantRevocationAuthorityBinding,
+    request_signer: Callable[[str], str], now_epoch: int | None,
+) -> Any:
+    from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_protected_use_client import (
+        _create_root_protected_use_authority,
+    )
+
+    raw = _root_policy(owner)
+    exchange = build_root_authority_socket_exchange(
+        repo_root=repo, socket_path=raw["authority_socket_path"],
+        expected_server_uid=int(raw["authority_service_uid"]),
+    )
+    return _create_root_protected_use_authority(
+        raw["descriptor"], owner_config_id=str(owner["config_id"]),
+        policy=policy, binding=binding, exchange=exchange,
+        request_signer=request_signer,
+        now_epoch=int(time.time()) if now_epoch is None else now_epoch,
+    )
+
+
 def _root_policy(owner: Mapping[str, Any]) -> Mapping[str, Any]:
     raw = owner.get("verified_outcome_authority")
     if not isinstance(raw, Mapping) or not isinstance(raw.get("descriptor"), Mapping):
@@ -95,5 +117,6 @@ def _root_policy(owner: Mapping[str, Any]) -> Mapping[str, Any]:
 
 __all__ = [
     "materialize_revocation_anchor_authority",
+    "materialize_root_protected_use_authority",
     "materialize_root_authority_service_dependencies",
 ]

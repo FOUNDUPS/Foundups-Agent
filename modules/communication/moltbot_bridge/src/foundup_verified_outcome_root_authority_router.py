@@ -9,6 +9,12 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
     RootVerifiedOutcomeAuthorityState,
 )
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_protected_use_protocol import (
+    is_protected_use_wire_message,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_protected_use_service import (
+    handle_root_protected_use_request,
+)
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_protocol import (
     is_revocation_wire_message,
 )
@@ -33,6 +39,12 @@ def handle_root_authority_wire_request(
         peer=peer, state=state, snapshot_supplier=snapshot_supplier,
         now_epoch=now_epoch,
     )
+    if is_protected_use_wire_message(raw):
+        if revocation_authority is None:
+            return b'{"status":"REJECT"}\n'
+        return handle_root_protected_use_request(
+            raw, revocation_authority=revocation_authority, **common
+        )
     if is_revocation_wire_message(raw):
         if revocation_authority is None:
             return b'{"status":"REJECT"}\n'

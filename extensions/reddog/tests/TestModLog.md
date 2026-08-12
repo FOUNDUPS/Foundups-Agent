@@ -1,6 +1,11 @@
 # Foundups(R)Agent TestModLog
 
-## 2026-08-12 - Root-service revocation compatibility pin (0.4.85)
+## 2026-08-12 - Root protected-use compatibility pin (0.4.86)
+
+- Re-pinned the backend integrity manifest to the root protected-use protocol,
+  client, service, state, loader and signer-boundary sources.
+- Kept the extension behavior unchanged and retained fail-closed production
+  signer activation.
 
 - Updated current build assertions and backend-manifest parity for the exact
   root-anchor foundation runtime files.

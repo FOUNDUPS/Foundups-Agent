@@ -85,7 +85,9 @@ def _advance(state, current, operation) -> ProposalReplayHighWater:
     if current != operation.expected:
         raise RuntimeError("root_revocation_cas_conflict")
     try:
-        state.advance(operation.binding_digest, expected=current, next_value=wanted)
+        state.advance_revocation(
+            operation.binding_digest, expected=current, next_value=wanted
+        )
     except RuntimeError:
         if state.load(operation.binding_digest) != wanted:
             raise
