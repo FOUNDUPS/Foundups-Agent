@@ -1,6 +1,6 @@
 # RedDog Interface
 
-Version 0.4.83 pins the durable signer-revocation foundation backend manifest.
+Version 0.4.84 pins the root-anchored signer-revocation backend manifest.
 It adds no thin-client behavior or execution authority; production revocation
 remains uncomposed by the stable service.
 

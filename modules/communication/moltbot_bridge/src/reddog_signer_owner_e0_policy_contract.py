@@ -13,9 +13,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     canonical_signing_input,
 )
-
-
-POLICY_SCHEMA = "reddog-signer-owner-e0-policy.v2"
+POLICY_SCHEMA = "reddog-signer-owner-e0-policy.v3"
 POLICY_PREFIX = POLICY_SCHEMA
 MAX_POLICY_TTL_SECONDS = 900
 POLICY_FIELDS = frozenset(
@@ -55,6 +53,8 @@ POLICY_FIELDS = frozenset(
         "revocation_snapshot_schema", "revocation_store_schema", "revocation_witness_root",
         "revocation_witness_path", "revocation_witness_store_id", "revocation_lock_path",
         "revocation_witness_store_durability_receipt_id",
+        "revocation_anchor_store_id", "revocation_anchor_store_durability_receipt_id",
+        "revocation_anchor_state_binding_digest",
         "allowed_operations",
         "allowed_authority_tiers",
         "consensus_required_tiers",
@@ -79,6 +79,8 @@ _DIGEST_FIELDS = (
     "permission_snapshot_receipt_id",
     "replay_store_durability_receipt_id",
     "revocation_store_durability_receipt_id", "revocation_witness_store_durability_receipt_id",
+    "revocation_anchor_store_durability_receipt_id",
+    "revocation_anchor_state_binding_digest",
 )
 _LIST_FIELDS = ("allowed_operations", "allowed_authority_tiers", "consensus_required_tiers")
 _AUTHORITY_BINDING_FIELDS = POLICY_FIELDS - {

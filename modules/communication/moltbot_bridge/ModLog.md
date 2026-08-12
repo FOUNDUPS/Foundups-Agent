@@ -1,4 +1,21 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Root-anchored signer revocation foundation
+- Extended owner E0 policy to v3, binding the root anchor store identity,
+  durability receipt, and existing three-domain state topology digest.
+- Reused the root-owned verified-outcome monotonic state as a domain-separated
+  revocation high-water anchor. Publication now orders primary prepare, local
+  witness advance, root-anchor advance, and primary finalize; recovery handles
+  each exact crash window and the oracle requires three-way equality before
+  and after protected use.
+- Added coordinated primary+witness rollback, anchor-substitution,
+  self-asserted look-alike, and rollback-domain-overlap regressions. This
+  remains an uncomposed foundation: root-service transport,
+  independently administered grant issuance, E0 factory composition, WSP 71
+  secret resolution, and signer activation remain unavailable. (WSP
+  00/15/22/50/62/71/97)
+  The root authority has two mutable high-water mirrors plus a static
+  installation witness; coordinated rollback of both mutable root mirrors is
+  explicitly retained as root-authority compromise outside this slice.
 ## 2026-08-12: Durable signer revocation authority foundation
 - Extended the signed owner E0 policy to v2 so it freezes the revocation
   snapshot/store schemas, separate local witness identity and path, both

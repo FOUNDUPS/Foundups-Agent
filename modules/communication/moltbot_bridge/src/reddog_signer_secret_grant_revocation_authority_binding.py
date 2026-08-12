@@ -37,6 +37,9 @@ class SignerGrantRevocationAuthorityBinding:
     witness_path: str
     witness_store_id: str
     witness_durability_receipt_id: str
+    anchor_store_id: str
+    anchor_durability_receipt_id: str
+    anchor_state_binding_digest: str
     operation_lock_path: str
 
     def context_digest(self) -> str:
@@ -48,6 +51,15 @@ class SignerGrantRevocationAuthorityBinding:
                 "schema_version": BINDING_SCHEMA,
                 "context_digest": self.context_digest(),
                 "purpose": "revocation-sequence-witness",
+            }
+        )
+
+    def anchor_binding_digest(self) -> str:
+        return _digest(
+            {
+                "schema_version": BINDING_SCHEMA,
+                "context_digest": self.context_digest(),
+                "purpose": "revocation-root-high-water",
             }
         )
 
@@ -83,7 +95,15 @@ def revocation_authority_binding_from_policy(
         witness_store_id=_ascii(policy["revocation_witness_store_id"]),
         witness_durability_receipt_id=_sha(
             policy["revocation_witness_store_durability_receipt_id"]
-        ), operation_lock_path=str(lock_path),
+        ),
+        anchor_store_id=_ascii(policy["revocation_anchor_store_id"]),
+        anchor_durability_receipt_id=_sha(
+            policy["revocation_anchor_store_durability_receipt_id"]
+        ),
+        anchor_state_binding_digest=_sha(
+            policy["revocation_anchor_state_binding_digest"]
+        ),
+        operation_lock_path=str(lock_path),
     )
     binding.context_digest()
     return binding

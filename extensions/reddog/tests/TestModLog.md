@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-12 - Root-anchored revocation compatibility pin (0.4.84)
+
+- Updated current build assertions and backend-manifest parity for the exact
+  root-anchor foundation runtime files.
+
 ## 2026-08-12 - Durable revocation compatibility pin (0.4.83)
 
 - Revalidated backend compatibility and extension contracts against the

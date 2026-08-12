@@ -1,9 +1,9 @@
 # RedDog
 
-Version: 0.4.83
+Version: 0.4.84
 
-[OBSERVED] Version 0.4.83 pins the backend manifest after durable signer
-revocation topology and local rollback-witness foundation changes. The client
+[OBSERVED] Version 0.4.84 pins the backend manifest after root-anchored signer
+revocation policy and three-domain high-water foundation. The client
 behavior and execution authority are unchanged; production revocation remains
 uncomposed.
 

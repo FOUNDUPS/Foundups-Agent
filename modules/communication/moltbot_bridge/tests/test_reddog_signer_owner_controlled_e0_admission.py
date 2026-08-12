@@ -397,6 +397,9 @@ def _revocation_topology(
         ),
         "revocation_witness_store_id": "signer-grant-revocation-witness",
         "revocation_witness_store_durability_receipt_id": DIGEST_C,
+        "revocation_anchor_store_id": "signer-grant-revocation-root-anchor",
+        "revocation_anchor_store_durability_receipt_id": DIGEST_D,
+        "revocation_anchor_state_binding_digest": DIGEST_E,
         "revocation_lock_path": str(
             (primary / "revocations.db.authority.lock").resolve()
         ),

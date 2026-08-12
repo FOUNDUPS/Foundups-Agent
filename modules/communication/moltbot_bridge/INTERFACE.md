@@ -190,10 +190,10 @@ high-water store, with exact absolute paths bound into the store-instance
 digest. Production composition rejects missing, mismatched, alternate-path, or
 volatile stores. An exact signed revocation-snapshot contract now binds the
 current E0 policy, generation, authority, target signer, and durable store.
-An uncomposed local witness, crash recovery, and cross-process fence now exist.
-The external anchor and E0-only factory remain unimplemented; the stable signer
-does not issue the authenticated grant or compose a revocation source with WSP71
-resolve-per-sign; production signing remains fail-closed.
+An uncomposed local witness and policy v3 bind the root-state anchor; the oracle
+requires three-way agreement. Its two mutable root mirrors can be rolled back while
+the static installation domain remains unchanged. Transport and the E0-only factory
+remain absent, so production signing fails closed.
 Native-memory zeroization and complete signer lifecycle supervision remain
 SPECIFIED_NOT_IMPLEMENTED.
 No private key, resolved secret, grant signature, or audit key is serialized.

@@ -6,6 +6,7 @@ from typing import Any, Callable, Mapping, TypeVar
 
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     ProposalReplayHighWater,
+    ProposalReplayHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
     SignerGrantRevocationAuthorityBinding,
@@ -16,6 +17,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocat
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_contract import (
     verify_signer_grant_revocation_snapshot,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_root_anchor import (
+    require_revocation_root_anchor,
 )
 from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
     SqliteMonotonicAuthorityReader,
@@ -38,6 +42,7 @@ class UncomposedDurableSignerGrantRevocationOracle:
         self, *, binding: SignerGrantRevocationAuthorityBinding,
         policy: Mapping[str, Any], reader: SignerGrantRevocationAuthorityReader,
         witness: SqliteMonotonicAuthorityReader,
+        anchor: ProposalReplayHighWaterStore,
         principal_key_resolver: PrincipalKeyResolver,
         signature_verifier: SignatureVerifier,
         clock: Callable[[], int],
@@ -49,10 +54,12 @@ class UncomposedDurableSignerGrantRevocationOracle:
         ):
             raise ValueError("durable_revocation_oracle_dependency_invalid")
         _require_reader_topology(binding, reader, witness)
+        require_revocation_root_anchor(binding, anchor)
         self.binding = binding
         self.expected = expected_snapshot_binding(policy, binding)
         self.reader = reader.detached()
         self.witness = witness.detached()
+        self.anchor = anchor
         self.resolver = principal_key_resolver
         self.verifier = signature_verifier
         self.clock = clock
@@ -86,6 +93,8 @@ class UncomposedDurableSignerGrantRevocationOracle:
         )
         if self.witness.load(self.binding.witness_binding_digest()) != expected:
             raise RuntimeError("durable_revocation_oracle_witness_mismatch")
+        if self.anchor.load(self.binding.anchor_binding_digest()) != expected:
+            raise RuntimeError("durable_revocation_oracle_anchor_mismatch")
         return verify_signer_grant_revocation_snapshot(
             state.current, expected=self.expected,
             principal_key_resolver=self.resolver,

@@ -11,6 +11,14 @@ from typing import Any, Mapping
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
+    INSTALLATION_BINDING,
+    RootVerifiedOutcomeAuthorityState,
+    root_authority_state_binding_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    ProposalReplayHighWater,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
     STORE_SCHEMA,
     SignerGrantRevocationAuthorityBinding,
@@ -31,6 +39,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocat
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_durable_oracle import (
     UncomposedDurableSignerGrantRevocationOracle,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_root_anchor import (
+    require_revocation_root_anchor,
+)
 from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
     SqliteMonotonicAuthorityStore,
 )
@@ -44,6 +55,7 @@ SLICE_MODULES = (
     "reddog_signer_secret_grant_revocation_authority_store.py",
     "reddog_signer_secret_grant_revocation_authority_supply.py",
     "reddog_signer_secret_grant_revocation_durable_oracle.py",
+    "reddog_signer_secret_grant_revocation_root_anchor.py",
     "reddog_signer_secret_grant_revocation_snapshot_validation.py",
     "reddog_signer_secret_grant_revocation_store_codec.py",
 )
@@ -61,8 +73,22 @@ def _policy(tmp_path: Path) -> dict[str, Any]:
     primary, witness, signer = (
         tmp_path / "primary", tmp_path / "witness", tmp_path / "signer"
     )
-    for root in (primary, witness, signer):
+    anchor_roots = {
+        "state": tmp_path / "anchor-primary",
+        "state_witness": tmp_path / "anchor-witness",
+        "installation": tmp_path / "anchor-installation",
+    }
+    for root in (primary, witness, signer, *anchor_roots.values()):
         root.mkdir()
+    anchor_bindings = {
+        name: {
+            "root": str(root.resolve()),
+            "path": str((root / f"{name}.sqlite3").resolve()),
+            "store_id": f"revocation-anchor-{name}",
+            "durability_receipt_id": _digest(f"anchor-{name}-durable"),
+        }
+        for name, root in anchor_roots.items()
+    }
     return {
         "policy_id": _digest("policy"), "owner_config_id": _digest("owner"),
         "manifest_id": _digest("manifest"),
@@ -85,6 +111,13 @@ def _policy(tmp_path: Path) -> dict[str, Any]:
         "revocation_witness_path": str((witness / "high-water.sqlite3").resolve()),
         "revocation_witness_store_id": "signer-grant-revocation-witness",
         "revocation_witness_store_durability_receipt_id": _digest("witness-durable"),
+        "revocation_anchor_store_id": anchor_bindings["state"]["store_id"],
+        "revocation_anchor_store_durability_receipt_id": (
+            anchor_bindings["state"]["durability_receipt_id"]
+        ),
+        "revocation_anchor_state_binding_digest": (
+            root_authority_state_binding_digest(anchor_bindings)
+        ),
         "revocation_lock_path": str(
             (primary / "revocations.sqlite3.authority.lock").resolve()
         ),
@@ -137,11 +170,44 @@ def _open_runtime(policy: Mapping[str, Any]):
         repo_root=REPO_ROOT, store_id=binding.witness_store_id,
         durability_receipt_id=binding.witness_durability_receipt_id,
     )
+    anchor = _open_anchor(policy)
     supply = UncomposedDurableSignerGrantRevocationAuthoritySupply(
-        binding=binding, policy=policy, store=store, witness=witness,
+        binding=binding, policy=policy, store=store, witness=witness, anchor=anchor,
         principal_key_resolver=_Resolver(), signature_verifier=_Verifier(),
     )
-    return binding, store, witness, supply
+    return binding, store, witness, anchor, supply
+
+
+def _open_anchor(policy: Mapping[str, Any]) -> RootVerifiedOutcomeAuthorityState:
+    parent = Path(policy["revocation_root"]).parent
+    values = []
+    root_names = {
+        "state": "anchor-primary",
+        "state_witness": "anchor-witness",
+        "installation": "anchor-installation",
+    }
+    for name in ("state", "state_witness", "installation"):
+        root = parent / root_names[name]
+        values.append(
+            SqliteMonotonicAuthorityStore(
+                root / f"{name}.sqlite3", allowed_root=root,
+                repo_root=REPO_ROOT, store_id=f"revocation-anchor-{name}",
+                durability_receipt_id=_digest(f"anchor-{name}-durable"),
+            )
+        )
+    state = RootVerifiedOutcomeAuthorityState(
+        *values, repo_root=REPO_ROOT, require_root_ownership=False,
+    )
+    if values[2].load(INSTALLATION_BINDING) is None:
+        state.initialize(
+            generation=ProposalReplayHighWater(1, _digest("anchor-owner")[7:]),
+            replay_binding=_digest("anchor-bootstrap-binding"),
+            replay_anchor=ProposalReplayHighWater(
+                1, _digest("anchor-bootstrap")[7:]
+            ),
+            installation_revision=_digest("anchor-installation")[7:],
+        )
+    return state
 
 
 def _runtime(tmp_path: Path):
@@ -153,7 +219,7 @@ def _recover_in_process(
     policy: Mapping[str, Any], now_epoch: int, output: Any,
 ) -> None:
     try:
-        _binding, _store, _witness, supply = _open_runtime(policy)
+        _binding, _store, _witness, _anchor, supply = _open_runtime(policy)
         recovered = supply.recover(now_epoch=now_epoch)
         output.put(("ok", None if recovered is None else recovered["snapshot_id"]))
     except Exception as exc:
@@ -165,7 +231,7 @@ def _publish_in_process(
     attempting: Any, done: Any, output: Any,
 ) -> None:
     try:
-        _binding, _store, _witness, supply = _open_runtime(policy)
+        _binding, _store, _witness, _anchor, supply = _open_runtime(policy)
         attempting.set()
         published = supply.publish(snapshot, now_epoch=NOW)
         output.put(("ok", published["snapshot_id"]))
@@ -175,16 +241,16 @@ def _publish_in_process(
         done.set()
 
 
-def _oracle(policy, binding, store, witness, *, now: int = NOW):
+def _oracle(policy, binding, store, witness, anchor, *, now: int = NOW):
     return UncomposedDurableSignerGrantRevocationOracle(
         binding=binding, policy=policy, reader=store.reader(),
-        witness=witness.reader(), principal_key_resolver=_Resolver(),
+        witness=witness.reader(), anchor=anchor, principal_key_resolver=_Resolver(),
         signature_verifier=_Verifier(), clock=lambda: now,
     )
 
 
 def test_signed_policy_freezes_exact_disjoint_topology(tmp_path: Path) -> None:
-    policy, binding, store, witness, _supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, _supply = _runtime(tmp_path)
     assert store.path == Path(policy["revocation_path"])
     assert witness.path == Path(policy["revocation_witness_path"])
     assert binding.operation_lock_path == policy["revocation_lock_path"]
@@ -200,7 +266,7 @@ def test_signed_policy_freezes_exact_disjoint_topology(tmp_path: Path) -> None:
 
 
 def test_publish_is_monotonic_and_visible_to_fresh_reader(tmp_path: Path) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     first = _snapshot(policy, binding, grant_ids=(_digest("grant-a"),))
     assert supply.publish(first, now_epoch=NOW) == first
     assert store.reader().state().current == first
@@ -209,13 +275,13 @@ def test_publish_is_monotonic_and_visible_to_fresh_reader(tmp_path: Path) -> Non
         grant_ids=(_digest("grant-a"), _digest("grant-b")),
     )
     assert supply.publish(second, now_epoch=NOW) == second
-    assert _oracle(policy, binding, store, witness).is_revoked(
+    assert _oracle(policy, binding, store, witness, anchor).is_revoked(
         grant_id=_digest("grant-b"), key_epoch="other", at_epoch=NOW
     ) is True
 
 
 def test_unrevocation_and_wrong_sequence_fail_closed(tmp_path: Path) -> None:
-    policy, binding, _store, _witness, supply = _runtime(tmp_path)
+    policy, binding, _store, _witness, _anchor, supply = _runtime(tmp_path)
     first = _snapshot(policy, binding, grant_ids=(_digest("grant-a"),))
     supply.publish(first, now_epoch=NOW)
     with pytest.raises(ValueError, match="unrevocation"):
@@ -227,16 +293,21 @@ def test_unrevocation_and_wrong_sequence_fail_closed(tmp_path: Path) -> None:
         )
 
 
-@pytest.mark.parametrize("witness_first", [False, True])
+@pytest.mark.parametrize("crash_stage", ["prepared", "witness", "anchor"])
 def test_crash_recovery_rolls_forward_exact_pending_snapshot(
-    tmp_path: Path, witness_first: bool,
+    tmp_path: Path, crash_stage: str,
 ) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     pending = _snapshot(policy, binding)
     store._prepare_under_lock(pending)
-    if witness_first:
+    if crash_stage in {"witness", "anchor"}:
         witness.advance(
             binding.witness_binding_digest(), expected=None,
+            next_value=_high_water(pending),
+        )
+    if crash_stage == "anchor":
+        anchor.advance(
+            binding.anchor_binding_digest(), expected=None,
             next_value=_high_water(pending),
         )
     context = multiprocessing.get_context("spawn")
@@ -253,7 +324,7 @@ def test_crash_recovery_rolls_forward_exact_pending_snapshot(
 
 
 def test_reader_rejects_status_tamper_and_witness_rollback(tmp_path: Path) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     current = _snapshot(policy, binding)
     supply.publish(current, now_epoch=NOW)
     with sqlite3.connect(store.path) as connection:
@@ -265,13 +336,156 @@ def test_reader_rejects_status_tamper_and_witness_rollback(tmp_path: Path) -> No
     with sqlite3.connect(witness.path) as connection:
         connection.execute("DELETE FROM high_water")
     with pytest.raises(RuntimeError, match="witness_mismatch"):
-        _oracle(policy, binding, store, witness).is_revoked(
+        _oracle(policy, binding, store, witness, anchor).is_revoked(
             grant_id=_digest("none"), key_epoch="none", at_epoch=NOW
         )
 
 
+def test_coordinated_local_rollback_rejects_against_root_anchor(
+    tmp_path: Path,
+) -> None:
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
+    first = _snapshot(policy, binding, grant_ids=(_digest("grant-a"),))
+    second = _snapshot(
+        policy, binding, sequence=2,
+        grant_ids=(_digest("grant-a"), _digest("grant-b")),
+    )
+    supply.publish(first, now_epoch=NOW)
+    supply.publish(second, now_epoch=NOW)
+    with sqlite3.connect(store.path) as connection:
+        connection.execute("DELETE FROM snapshots WHERE sequence=2")
+        connection.execute(
+            "UPDATE state SET current_snapshot_id=?, pending_snapshot_id=NULL "
+            "WHERE singleton=1",
+            (first["snapshot_id"],),
+        )
+    with sqlite3.connect(witness.path) as connection:
+        connection.execute("DELETE FROM high_water")
+    reset_witness = SqliteMonotonicAuthorityStore(
+        binding.witness_path, allowed_root=binding.witness_root,
+        repo_root=REPO_ROOT, store_id=binding.witness_store_id,
+        durability_receipt_id=binding.witness_durability_receipt_id,
+    )
+    reset_witness.advance(
+        binding.witness_binding_digest(), expected=None,
+        next_value=_high_water(first),
+    )
+    with pytest.raises(RuntimeError, match="anchor_mismatch"):
+        supply.recover(now_epoch=NOW)
+    assert anchor.load(binding.anchor_binding_digest()) == _high_water(second)
+
+
+def test_coordinated_root_mirror_rollback_is_explicit_residual(
+    tmp_path: Path,
+) -> None:
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
+    first = _snapshot(policy, binding, grant_ids=(_digest("grant-a"),))
+    second = _snapshot(
+        policy, binding, sequence=2,
+        grant_ids=(_digest("grant-a"), _digest("grant-b")),
+    )
+    supply.publish(first, now_epoch=NOW)
+    supply.publish(second, now_epoch=NOW)
+    installation_path = tmp_path / "anchor-installation/installation.sqlite3"
+    installation_before = _sqlite_high_water(
+        installation_path, INSTALLATION_BINDING,
+    )
+    with sqlite3.connect(store.path) as connection:
+        connection.execute("DELETE FROM snapshots WHERE sequence=2")
+        connection.execute(
+            "UPDATE state SET current_snapshot_id=?, pending_snapshot_id=NULL",
+            (first["snapshot_id"],),
+        )
+    _overwrite_high_water(
+        witness.path, binding.witness_binding_digest(), _high_water(first),
+    )
+    for path in (
+        tmp_path / "anchor-primary/state.sqlite3",
+        tmp_path / "anchor-witness/state_witness.sqlite3",
+    ):
+        _overwrite_high_water(
+            path, binding.anchor_binding_digest(), _high_water(first),
+        )
+    assert _sqlite_high_water(installation_path, INSTALLATION_BINDING) == installation_before
+    assert anchor.load(binding.anchor_binding_digest()) == _high_water(first)
+    assert _oracle(policy, binding, store, witness, anchor).is_revoked(
+        grant_id=_digest("grant-b"), key_epoch="other", at_epoch=NOW,
+    ) is False
+
+
+def test_substituted_root_anchor_identity_rejects_before_publication(
+    tmp_path: Path,
+) -> None:
+    policy, binding, store, witness, anchor, _supply = _runtime(tmp_path)
+    other_root = tmp_path / "other"
+    other_root.mkdir()
+    substituted = _open_anchor(_policy(other_root))
+    with pytest.raises(ValueError, match="root_anchor_invalid"):
+        UncomposedDurableSignerGrantRevocationAuthoritySupply(
+            binding=binding, policy=policy, store=store, witness=witness,
+            anchor=substituted, principal_key_resolver=_Resolver(),
+            signature_verifier=_Verifier(),
+        )
+    assert store.state().current is None
+
+
+def test_self_asserted_anchor_interface_rejects_before_publication(
+    tmp_path: Path,
+) -> None:
+    policy, binding, store, witness, _anchor, _supply = _runtime(tmp_path)
+    asserted = type(
+        "SelfAssertedAnchor",
+        (),
+        {
+            "durable": True,
+            "store_id": binding.anchor_store_id,
+            "durability_receipt_id": binding.anchor_durability_receipt_id,
+            "state_binding_digest": binding.anchor_state_binding_digest,
+            "rollback_domain_roots": (),
+        },
+    )()
+    with pytest.raises(ValueError, match="root_anchor_invalid"):
+        UncomposedDurableSignerGrantRevocationAuthoritySupply(
+            binding=binding, policy=policy, store=store, witness=witness,
+            anchor=asserted, principal_key_resolver=_Resolver(),
+            signature_verifier=_Verifier(),
+        )
+    assert store.state().current is None
+
+
+def test_root_anchor_rollback_domain_must_not_overlap_revocation_state(
+    tmp_path: Path,
+) -> None:
+    policy, binding, _store, _witness, _anchor, _supply = _runtime(tmp_path)
+    roots = (
+        Path(binding.primary_root) / "overlapping-root-state",
+        tmp_path / "independent-root-witness",
+        tmp_path / "independent-root-installation",
+    )
+    stores = []
+    for index, root in enumerate(roots):
+        root.mkdir()
+        stores.append(
+            SqliteMonotonicAuthorityStore(
+                root / "state.sqlite3", allowed_root=root,
+                repo_root=REPO_ROOT, store_id=f"overlap-anchor-{index}",
+                durability_receipt_id=_digest(f"overlap-anchor-{index}"),
+            )
+        )
+    overlapping = RootVerifiedOutcomeAuthorityState(
+        *stores, repo_root=REPO_ROOT, require_root_ownership=False,
+    )
+    matching = replace(
+        binding, anchor_store_id=overlapping.store_id,
+        anchor_durability_receipt_id=overlapping.durability_receipt_id,
+        anchor_state_binding_digest=overlapping.state_binding_digest,
+    )
+    with pytest.raises(ValueError, match="root_anchor_invalid"):
+        require_revocation_root_anchor(matching, overlapping)
+
+
 def test_recovery_rejects_attacker_rehashed_unsigned_pending(tmp_path: Path) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     pending = _snapshot(policy, binding)
     pending["revoked_grant_ids"] = [_digest("attacker")]
     pending["snapshot_id"] = signer_grant_revocation_snapshot_id(pending)
@@ -283,7 +497,7 @@ def test_recovery_rejects_attacker_rehashed_unsigned_pending(tmp_path: Path) -> 
 
 
 def test_recovery_revalidates_committed_payload_before_consensus(tmp_path: Path) -> None:
-    policy, binding, store, _witness, supply = _runtime(tmp_path)
+    policy, binding, store, _witness, _anchor, supply = _runtime(tmp_path)
     current = _snapshot(policy, binding)
     supply.publish(current, now_epoch=NOW)
     forged = dict(current)
@@ -301,7 +515,7 @@ def test_recovery_revalidates_committed_payload_before_consensus(tmp_path: Path)
 def test_recovery_cannot_remove_committed_revocation(
     tmp_path: Path, witness_advanced: bool,
 ) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     first = _snapshot(policy, binding, grant_ids=(_digest("grant-a"),))
     supply.publish(first, now_epoch=NOW)
     pending = _snapshot(policy, binding, sequence=2)
@@ -325,7 +539,7 @@ def test_recovery_cannot_remove_committed_revocation(
 
 
 def test_expired_pending_snapshot_never_rolls_forward(tmp_path: Path) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     pending = _snapshot(policy, binding, expires_at=NOW + 1)
     store._prepare_under_lock(pending)
     with pytest.raises(ValueError, match="time_invalid"):
@@ -337,7 +551,7 @@ def test_expired_pending_snapshot_never_rolls_forward(tmp_path: Path) -> None:
 def test_expired_current_can_be_superseded_by_fresh_snapshot(
     tmp_path: Path,
 ) -> None:
-    policy, binding, _store, _witness, supply = _runtime(tmp_path)
+    policy, binding, _store, _witness, _anchor, supply = _runtime(tmp_path)
     first = _snapshot(
         policy, binding, grant_ids=(_digest("grant-a"),), expires_at=NOW + 1,
     )
@@ -353,7 +567,7 @@ def test_expired_current_can_be_superseded_by_fresh_snapshot(
 def test_publish_recovers_expired_pending_before_fresh_successor(
     tmp_path: Path, witness_advanced: bool,
 ) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     pending = _snapshot(
         policy, binding, grant_ids=(_digest("grant-a"),), expires_at=NOW + 1,
     )
@@ -372,7 +586,7 @@ def test_publish_recovers_expired_pending_before_fresh_successor(
 
 
 def test_store_metadata_substitution_fails_before_read(tmp_path: Path) -> None:
-    policy, binding, store, _witness, supply = _runtime(tmp_path)
+    policy, binding, store, _witness, _anchor, supply = _runtime(tmp_path)
     supply.publish(_snapshot(policy, binding), now_epoch=NOW)
     with sqlite3.connect(store.path) as connection:
         connection.execute("UPDATE metadata SET store_id='attacker-store'")
@@ -381,7 +595,7 @@ def test_store_metadata_substitution_fails_before_read(tmp_path: Path) -> None:
 
 
 def test_orphan_or_deleted_history_fails_graph_validation(tmp_path: Path) -> None:
-    policy, binding, store, _witness, supply = _runtime(tmp_path)
+    policy, binding, store, _witness, _anchor, supply = _runtime(tmp_path)
     first = _snapshot(policy, binding)
     supply.publish(first, now_epoch=NOW)
     orphan = _snapshot(policy, binding, sequence=2)
@@ -400,9 +614,9 @@ def test_orphan_or_deleted_history_fails_graph_validation(tmp_path: Path) -> Non
 
 
 def test_expired_current_snapshot_blocks_oracle(tmp_path: Path) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     supply.publish(_snapshot(policy, binding, expires_at=NOW + 1), now_epoch=NOW)
-    oracle = _oracle(policy, binding, store, witness, now=NOW + 2)
+    oracle = _oracle(policy, binding, store, witness, anchor, now=NOW + 2)
     with pytest.raises(ValueError, match="time_invalid"):
         oracle.is_revoked(
             grant_id=_digest("none"), key_epoch="none", at_epoch=NOW + 2
@@ -410,17 +624,18 @@ def test_expired_current_snapshot_blocks_oracle(tmp_path: Path) -> None:
 
 
 def test_exact_topology_rejects_substituted_witness_path(tmp_path: Path) -> None:
-    policy, binding, store, witness, _supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, _supply = _runtime(tmp_path)
     forged = replace(binding, witness_path=str(tmp_path / "other.sqlite3"))
     with pytest.raises(ValueError, match="topology_invalid"):
         UncomposedDurableSignerGrantRevocationAuthoritySupply(
             binding=forged, policy=policy, store=store, witness=witness,
+            anchor=anchor,
             principal_key_resolver=_Resolver(), signature_verifier=_Verifier(),
         )
 
 
 def test_concurrent_publishers_cannot_both_commit(tmp_path: Path) -> None:
-    policy, binding, store, _witness, supply = _runtime(tmp_path)
+    policy, binding, store, _witness, _anchor, supply = _runtime(tmp_path)
     snapshots = (
         _snapshot(policy, binding, grant_ids=(_digest("grant-a"),)),
         _snapshot(policy, binding, grant_ids=(_digest("grant-b"),)),
@@ -446,9 +661,9 @@ def test_concurrent_publishers_cannot_both_commit(tmp_path: Path) -> None:
 
 
 def test_oracle_holds_publication_lock_across_action(tmp_path: Path) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     supply.publish(_snapshot(policy, binding), now_epoch=NOW)
-    oracle = _oracle(policy, binding, store, witness)
+    oracle = _oracle(policy, binding, store, witness, anchor)
     action_started, release_action = threading.Event(), threading.Event()
 
     def action() -> None:
@@ -484,10 +699,10 @@ def test_oracle_holds_publication_lock_across_action(tmp_path: Path) -> None:
 
 
 def test_reader_and_oracle_expose_no_mutation_surface(tmp_path: Path) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     supply.publish(_snapshot(policy, binding), now_epoch=NOW)
     reader = store.reader()
-    oracle = _oracle(policy, binding, store, witness)
+    oracle = _oracle(policy, binding, store, witness, anchor)
     for name in ("prepare", "finalize", "advance", "revoke", "replace_revocations"):
         assert not hasattr(store, name)
         assert not hasattr(reader, name)
@@ -495,7 +710,7 @@ def test_reader_and_oracle_expose_no_mutation_surface(tmp_path: Path) -> None:
 
 
 def test_oracle_samples_clock_once_per_validation(tmp_path: Path) -> None:
-    policy, binding, store, witness, supply = _runtime(tmp_path)
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
     supply.publish(_snapshot(policy, binding), now_epoch=NOW)
     calls: list[int] = []
 
@@ -505,7 +720,8 @@ def test_oracle_samples_clock_once_per_validation(tmp_path: Path) -> None:
 
     oracle = UncomposedDurableSignerGrantRevocationOracle(
         binding=binding, policy=policy, reader=store.reader(),
-        witness=witness.reader(), principal_key_resolver=_Resolver(),
+        witness=witness.reader(), anchor=anchor,
+        principal_key_resolver=_Resolver(),
         signature_verifier=_Verifier(), clock=clock,
     )
     assert oracle.is_revoked(
@@ -559,6 +775,24 @@ def _high_water(snapshot: Mapping[str, Any]):
         sequence=int(snapshot["sequence"]),
         state_revision=str(snapshot["snapshot_id"]).removeprefix("sha256:"),
     )
+
+
+def _overwrite_high_water(path: Path, binding: str, value: Any) -> None:
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "UPDATE high_water SET sequence=?, state_revision=? "
+            "WHERE binding_digest=?",
+            (value.sequence, value.state_revision, binding),
+        )
+
+
+def _sqlite_high_water(path: Path, binding: str) -> tuple[int, str] | None:
+    with sqlite3.connect(path) as connection:
+        row = connection.execute(
+            "SELECT sequence, state_revision FROM high_water "
+            "WHERE binding_digest=?", (binding,),
+        ).fetchone()
+    return None if row is None else (int(row[0]), str(row[1]))
 
 
 def _canonical(value: Mapping[str, Any]) -> str:
