@@ -47,7 +47,7 @@ def validate_protected_use_acquire(
     state: RootVerifiedOutcomeAuthorityState, authority: object,
     now_epoch: int,
 ) -> Iterator[ValidatedProtectedUseAcquire]:
-    """Hold the revocation writer fence through root ACQUIRE linearization."""
+    """Observe local consensus before root-locked generation/revocation CAS."""
 
     with lease_root_revocation_policy(authority, request.policy) as lease:
         binding = lease.revocation_binding

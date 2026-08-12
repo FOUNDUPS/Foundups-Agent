@@ -1711,7 +1711,7 @@
     "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_socket_service.py": "53852204c8a5b62364857ff3d0312d56f9e31a228453d7bea643f65e53e5e664",
     "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_state.py": "43e1e163d25480fef5ba6275f46516e9b383af5a508a6be22f69c21edcfd6864",
     "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_authority_wire_codec.py": "7a1bf2e4f73c7907dda57f6cbae901382505c7ee00cc16de5173aac90bde8b65",
-    "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_protected_use_authority_validation.py": "27c60a95f76039e4016fd0db9fccdd90430ad69b0493aa5cffc85cd6b776efc8",
+    "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_protected_use_authority_validation.py": "ea373ff4bd1928ce6fc1894bd2ebf5acca005ba2512e9b71d364fa67be3de773",
     "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_protected_use_client.py": "c3df029a651ff37dcf46340a02cc1667c506423a9b1dd57177ea2da4bb061a46",
     "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_protected_use_client_exchange.py": "f1388b7c16e6da0033178317912ae3eea217d300d4bce4d0ecb642909af4b87f",
     "modules/communication/moltbot_bridge/src/foundup_verified_outcome_root_protected_use_protocol.py": "162d370948d1d1b8920ba4fa64f52dd96f4c1bef4e27bd2b26c9263e7ecee5b6",
