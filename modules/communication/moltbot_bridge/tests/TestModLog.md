@@ -1,3 +1,10 @@
+## 2026-08-12: Grant-authority key-epoch binding regressions
+- Proved owner policy v5 rejects missing and look-alike epoch fields, and that
+  attacker-recomputed policy drift cannot bypass the owner-config binding.
+- Proved a same-public-key stale epoch rejects before the independent grant
+  client is called and post-validation epoch rotation rejects the response;
+  retained owner-admission, provider and WSP 62 matrices.
+
 ## 2026-08-12: Root-linearized protected-use composition regressions
 - Proved root generation and revocation CAS under one authority lock, exact
   lost-ACQUIRE/lost-FINISH convergence, marker-only crash reconciliation,

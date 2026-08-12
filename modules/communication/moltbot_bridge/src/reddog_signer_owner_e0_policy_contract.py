@@ -10,10 +10,8 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     ascii_deep,
     is_sha256,
 )
-from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
-    canonical_signing_input,
-)
-POLICY_SCHEMA = POLICY_PREFIX = "reddog-signer-owner-e0-policy.v4"
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import canonical_signing_input
+POLICY_SCHEMA = POLICY_PREFIX = "reddog-signer-owner-e0-policy.v5"
 MAX_POLICY_TTL_SECONDS = 900
 CANONICAL_AUTHORITY_TIERS = frozenset({"LOW", "HIGH", "ULTRA"})
 POLICY_FIELDS = frozenset(
@@ -29,6 +27,7 @@ POLICY_FIELDS = frozenset(
         "grant_authority_principal_id",
         "grant_authority_principal_provider",
         "grant_authority_public_key",
+        "grant_authority_key_epoch",
         "grant_requester_principal_id",
         "revocation_authority_principal_id",
         "revocation_authority_principal_provider",

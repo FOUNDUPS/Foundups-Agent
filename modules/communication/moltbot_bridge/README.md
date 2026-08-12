@@ -2,6 +2,11 @@
 
 ## Independent signer secret-grant provider
 
+[OBSERVED] Signed owner policy v5 binds the independent grant authority's key
+epoch as well as its principal, provider and public key. The provider rejects
+an unchanged key presented under a stale or substituted epoch before calling
+the grant signer.
+
 [OBSERVED] The bounded provider foundation can obtain a LOW-tier secret grant
 from a separately bound Ed25519 grant signer while one current-generation E0
 lease remains held through target-signature rehydration. It reuses the isolated
@@ -11,9 +16,8 @@ store.
 [SPECIFIED_NOT_IMPLEMENTED] This foundation cannot activate the production
 authoritative-use path: that contract accepts HIGH/ULTRA while this provider
 rejects every elevated tier until canonical consensus supplies an opaque,
-verified capability. Grant-authority key-epoch binding, root-owned service
-provisioning, distinct-OS-principal supervision and the live canary also remain
-unimplemented.
+verified capability. Root-owned service provisioning, distinct-OS-principal
+supervision and the live canary also remain unimplemented.
 
 ## Root-served signer-revocation anchor
 

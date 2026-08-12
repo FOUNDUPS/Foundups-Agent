@@ -6,7 +6,8 @@
 
 The matrix covers canonical signing, durable concurrent rate limits, distinct
 caller and beneficiary identities, generation lease lifetime, authority and
-replay-store substitution, audit-attestation tampering, elevated-tier closure
+replay-store substitution, signed grant-authority key-epoch substitution,
+exact owner-policy schema, audit-attestation tampering, elevated-tier closure
 and WSP 62 boundaries.
 
 ## Root-served signer revocation

@@ -52,7 +52,7 @@ const {
   beginBasePromptTrace, outputValidationOptions, statusMessages
 } = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.87';
+const EXTENSION_VERSION = '0.4.88';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -6411,7 +6411,7 @@ function buildBoundedRepoContext(mode, taskText) {
     '## BOUNDED_REPO_CONTEXT',
     'The model cannot read the filesystem. The following context was gathered by the local Cursor extension and redaction-gated before egress.',
     'Context mode: ' + mode,
-    'Workspace root: ' + root
+    'Workspace root: [LOCAL_REPO_ROOT_REDACTED]'
   ];
   let quality = 'No HoloIndex requested for this context mode.';
   let holoindex_meta = null;

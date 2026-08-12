@@ -132,6 +132,19 @@ def test_owner_policy_rejects_noncanonical_authority_tier(tmp_path: Path) -> Non
         validated_signer_owner_e0_policy(policy, now_epoch=int(time.time()))
 
 
+@pytest.mark.parametrize("mutation", ["missing", "extra"])
+def test_owner_policy_requires_exact_grant_authority_epoch_schema(
+    tmp_path: Path, mutation: str
+) -> None:
+    policy = _fixture(tmp_path)["policy"]
+    if mutation == "missing":
+        policy.pop("grant_authority_key_epoch")
+    else:
+        policy["grant_authority_epoch"] = policy["grant_authority_key_epoch"]
+    with pytest.raises(ValueError, match="policy_malformed"):
+        validated_signer_owner_e0_policy(policy, now_epoch=int(time.time()))
+
+
 def test_admission_capability_is_one_use(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     result = fixture["boundary"].admit(

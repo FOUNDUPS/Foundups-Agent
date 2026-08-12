@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-12 - Grant-authority epoch compatibility pin (0.4.88)
+
+- Pinned the regenerated backend manifest and current version fixtures after
+  owner E0 policy v5 added the grant-authority key epoch.
+- Added a full-context regression proving the absolute checkout path is
+  replaced before Fusion redaction, including policy-shaped worktree names.
+- Revalidated extension contracts without adding client execution authority.
+
 ## 2026-08-12 - Root protected-use compatibility pin (0.4.86)
 
 - Re-pinned the backend integrity manifest to the root protected-use transport,
