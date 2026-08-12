@@ -59,7 +59,9 @@ def validate_root_revocation_operation(
 ) -> Iterator[ValidatedRootRevocationOperation]:
     with lease_root_revocation_policy(authority, request.policy) as lease:
         binding = lease.revocation_binding
-        _require_context(request, snapshot, state, lease.policy, binding)
+        require_root_revocation_context(
+            request, snapshot, state, lease.policy, binding
+        )
         if request.operation != OP_ADVANCE:
             yield ValidatedRootRevocationOperation(
                 binding.anchor_binding_digest(), None, None
@@ -72,8 +74,8 @@ def validate_root_revocation_operation(
         )
 
 
-def _require_context(
-    request: RootRevocationRequest, snapshot: RootAuthoritySnapshot,
+def require_root_revocation_context(
+    request: object, snapshot: RootAuthoritySnapshot,
     state: RootVerifiedOutcomeAuthorityState, policy: Mapping[str, Any],
     binding: Any,
 ) -> None:
@@ -104,14 +106,18 @@ def _derive_advance(
     resolver: Any, repo: Any, now_epoch: int,
 ) -> ValidatedRootRevocationOperation:
     local = SignerGrantRevocationAuthorityReader(binding, repo_root=repo).state()
-    current = _verify(local.current, binding, policy, resolver, now_epoch, fresh=False)
-    pending = _verify(local.pending, binding, policy, resolver, now_epoch, fresh=True)
+    current = verified_root_revocation_snapshot(
+        local.current, binding, policy, resolver, now_epoch, fresh=False
+    )
+    pending = verified_root_revocation_snapshot(
+        local.pending, binding, policy, resolver, now_epoch, fresh=True
+    )
     requested = request.snapshot_id
     if pending is not None and pending["snapshot_id"] == requested:
         require_monotonic(current, pending)
-        expected, wanted = _high(current), _high(pending)
+        expected, wanted = revocation_high_water(current), revocation_high_water(pending)
     elif pending is None and current is not None and current["snapshot_id"] == requested:
-        expected, wanted = None, _high(current)
+        expected, wanted = None, revocation_high_water(current)
     else:
         raise ValueError("root_revocation_pending_snapshot_mismatch")
     witness = SqliteMonotonicAuthorityReader(
@@ -132,7 +138,7 @@ def _overlap(left: object, right: object) -> bool:
     return first == second or first in second.parents or second in first.parents
 
 
-def _verify(
+def verified_root_revocation_snapshot(
     value: Mapping[str, Any] | None, binding: Any, policy: Mapping[str, Any],
     resolver: Any, now_epoch: int, *, fresh: bool,
 ) -> dict[str, Any] | None:
@@ -150,7 +156,9 @@ def _verify(
     )
 
 
-def _high(value: Mapping[str, Any] | None) -> ProposalReplayHighWater | None:
+def revocation_high_water(
+    value: Mapping[str, Any] | None,
+) -> ProposalReplayHighWater | None:
     if value is None:
         return None
     return ProposalReplayHighWater(
@@ -158,4 +166,8 @@ def _high(value: Mapping[str, Any] | None) -> ProposalReplayHighWater | None:
     )
 
 
-__all__ = ["ValidatedRootRevocationOperation", "validate_root_revocation_operation"]
+__all__ = [
+    "ValidatedRootRevocationOperation", "require_root_revocation_context",
+    "revocation_high_water", "validate_root_revocation_operation",
+    "verified_root_revocation_snapshot",
+]

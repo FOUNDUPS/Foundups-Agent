@@ -1,4 +1,17 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Root-linearized signer protected use
+- Extended the existing root authority socket/state and durable revocation
+  foundation with signed ACQUIRE/FINISH operations. Each exact grant, key
+  epoch, request digest, policy/generation, peer and expiry binding receives a
+  durable one-use marker; one global odd/even high-water blocks revocation
+  advancement while the signing callback may execute.
+- Composed only the factory-issued root capability into the secret-grant
+  boundary. A lost exact ACQUIRE response converges while post-finish replay,
+  substituted replies, generation rotation, revocation-first/acquire-first
+  races, and unfinished-use restart states fail closed. No new database,
+  queue, signer, key, secret resolver, repository
+  effect, PR/merge authority, or HoloIndex mutation was added. (WSP
+  00/15/22/50/62/71/97)
 ## 2026-08-12: Root-service signer-revocation transport
 - Extended the existing root verified-outcome Unix service with an exact,
   domain-separated revocation load/advance protocol and opaque process-local

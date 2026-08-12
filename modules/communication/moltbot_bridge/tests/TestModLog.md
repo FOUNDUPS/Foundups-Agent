@@ -1,3 +1,16 @@
+## 2026-08-12: Root-linearized protected-use composition regressions
+- Proved root generation and revocation CAS under one authority lock, exact
+  lost-ACQUIRE/lost-FINISH convergence, marker-only crash reconciliation,
+  post-finish replay rejection, and substituted response suppression.
+- Proved both race orderings through durable grant consumption,
+  `ResolvePerSignSignerBackend`, ephemeral backend resolution, and actual
+  signature response emission or suppression.
+- Windows signer/root differential: `239 passed, 8 skipped`. Real WSL
+  Linux-root socket matrix: `7 passed`, including the publisher-lock/root-RPC
+  inversion regression. RedDog extension contract and backend
+  compatibility manifest checks passed. Production grant issuance, WSP71
+  resolution, signer startup composition, and live canary remain blocked.
+
 ## 2026-08-12: Root-service signer-revocation transport regressions
 - Added integrated service/client tests using a real signed current E0 policy,
   signed revocation snapshots, durable primary/witness stores and the existing
@@ -2167,3 +2180,12 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
   accepted principal decision reaches the model and an expired context prevents
   any model call.
 - Added WSP 62 and effect-surface AST guards for the new runtime modules.
+## 2026-08-12: Root protected-use composition regressions
+- Proved both revocation/sign race orderings, durable use-ID replay rejection,
+  exact ACQUIRE/FINISH context, lost FINISH response convergence, fail-closed
+  unfinished-use restart, factory-only capability identity, unchanged legacy
+  revocation routing, loader construction, and WSP 62/effect boundaries.
+- Added a Linux-root Unix-socket proof for one ACQUIRE/callback/FINISH cycle;
+  non-root platforms record the explicit skip. Production grant issuance,
+  WSP 71 resolution, signer lifecycle and repository effects remain outside
+  the test claim.

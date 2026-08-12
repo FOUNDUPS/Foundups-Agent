@@ -708,7 +708,7 @@ def test_oracle_samples_clock_once_per_validation(tmp_path: Path) -> None:
     assert calls == [NOW]
 
 
-def test_slice_is_bounded_effect_free_and_not_production_composed() -> None:
+def test_slice_is_bounded_and_composed_only_by_root_protected_use() -> None:
     banned_imports = {"subprocess", "socket", "requests", "httpx", "cryptography"}
     for filename in SLICE_MODULES:
         source = (SOURCE_ROOT / filename).read_text(encoding="ascii")
@@ -734,7 +734,7 @@ def test_slice_is_bounded_effect_free_and_not_production_composed() -> None:
         text = path.read_text(encoding="utf-8")
         if any(name.removesuffix(".py") in text for name in UNCOMPOSED_MODULES):
             references.append(path.name)
-    assert references == []
+    assert references == ["reddog_signer_secret_grant_root_protected_use_oracle.py"]
     freshness_bypass = [
         path.name for path in SOURCE_ROOT.glob("*.py")
         if "require_freshness=False" in path.read_text(encoding="utf-8")

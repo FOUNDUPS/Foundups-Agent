@@ -14,15 +14,16 @@ statement-token reproduction regardless of field order, plus residual
 non-ASCII or control characters that could disguise reproduction.
 Raw and aggregate decoded output are bounded before admission, and JSON field
 names are inspected with values so unknown-key disclosure cannot bypass it.
-
 The disclosure never enters resident intent, audit-worker context, AgentDB,
 logs, status, or receipts. Memex-informed durable determinations persist only
 a report-bound action/slice, fixed advisory metadata, and opaque digests; no
 model-authored free text, proposal body, or queue candidate survives. This
 interface grants no work, repository, signer, merge, FoundUp projection, or
 HoloIndex authority. Disclosure issuance remains outside this module.
-
 ## Exact-request signer admission
+`load_system_service_root_protected_use_authority()` derives an opaque client from the existing root owner configuration and Unix transport. Only that exact factory-issued capability may compose the durable revocation oracle.
+Root ACQUIRE must precede the callback and exact FINISH must succeed before its result is returned; durable per-use replay markers and the global active-use high-water remain in the existing mirrored root state.
+No caller can construct, copy, pickle, or substitute the capability.
 `Ed25519SignerBackend` rejects policy-less delegated signing. The
 resolve-per-sign E0 boundary consumes the independently authenticated grant,
 then immutably binds the ephemeral backend to that grant's exact request
@@ -30,7 +31,6 @@ digest. Altered operation, prefix, payload, nonce, peer, tier, or key binding
 cannot reuse the backend. Specialized proposal, control-loop, manifest,
 verified-outcome, conversation, and peer-handshake policies retain their own
 domain-specific validation.
-
 ## Authenticated RedDog conversation scope
 `authenticate_conversation_scope()` derives the principal only from a verified
 `sess.v1` subject and returns an opaque one-use capability. Create, resume, and
@@ -142,7 +142,7 @@ non-test provider before authority, resolver, or socket access. Only the stable
 service is production; it derives manifest, outcome authority, owner ID, and
 signer UID/GID from one authenticated v2 snapshot. Legacy v1 cannot start it;
 test-only dry-run is non-authoritative. The same root service optionally routes opaque `RootRevocationAnchorAuthority.load()`/`advance_snapshot()` operations with no caller-selected CAS state, holding `lease_validated_owner_e0_current_admission()` through signed policy, topology, snapshot, witness, and monotonic validation.
-An absent outcome policy leaves unrelated signer operations available; protected-use E0 composition remains blocked until revocation checking and effect are atomic.
+An absent outcome policy leaves unrelated signer operations available. The root protected-use protocol can atomically order revocation and one callback, but production E0 activation remains blocked until the service startup factory supplies that capability with authenticated grants and WSP71 resolution.
 Owner, generation, key, expiry, revocation, replay, or grant mismatches reject.
 Resident production admission remains blocked until the root service is deployed
 and independent verifier runtimes issue both grant signatures. Staged authority
@@ -192,8 +192,8 @@ volatile stores. An exact signed revocation-snapshot contract now binds the
 current E0 policy, generation, authority, target signer, and durable store.
 An uncomposed local witness and policy v3 bind the root-state anchor; the oracle
 requires three-way agreement; two mutable root mirrors can be rolled back while the
-static installation domain remains unchanged. Root-service transport exists, but the
-atomic protected-use E0 lease and production factory remain absent, so signing fails closed.
+static installation domain remains unchanged. Root-service transport, protected-use client,
+and composed oracle exist; the production backend factory, grant issuer, and WSP71 resolver remain absent, so system-service signing still fails closed.
 Native-memory zeroization and complete signer lifecycle supervision remain
 SPECIFIED_NOT_IMPLEMENTED.
 No private key, resolved secret, grant signature, or audit key is serialized.

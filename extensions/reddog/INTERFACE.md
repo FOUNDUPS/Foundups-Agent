@@ -1,8 +1,9 @@
 # RedDog Interface
 
-Version 0.4.85 pins the root-service signer-revocation transport backend
+Version 0.4.86 pins the root-linearized signer protected-use backend
 manifest. It adds no thin-client behavior or execution authority; protected-use
-E0 composition remains unavailable.
+E0 composition is backend-only and production signer activation remains
+unavailable.
 
 Version 0.4.81 pins the reconciled signer/live-canary backend manifest without
 changing thin-client behavior or execution authority.

@@ -76,10 +76,16 @@
   coordinated rollback of both is root-authority compromise and remains
   outside this slice. The static installation domain does not witness each
   high-water update.
-- NEXT: root-service protocol/client binding for that anchor, independently
-  administered grant issuance, E0-only oracle/backend composition, WSP 71
-  permissioned resolution, and native-memory zeroization evidence. The client
-  must admit an opaque root-owned service result, not a caller-created state.
+- COMPLETE: the existing root service now admits an opaque protected-use
+  client and atomically orders signed use-ID consumption, ACQUIRE, one exact
+  signer callback, FINISH, and revocation advancement. Both race orderings,
+  replay, lost FINISH response, active-use crash, peer/policy/context
+  substitution, and Linux-root socket transport fail closed.
+- NEXT: independently administered grant issuance, production E0 backend
+  factory composition, WSP 71 permissioned resolution, native-memory
+  zeroization evidence, and supervised handling of a crashed active use.
+  The protected-use client is available through the current owner-config
+  loader, but no production grant issuer or service startup path consumes it.
   Socket v1
   remains compatible but cannot reach the resolve-per-sign backend.
 - BLOCKED: durable system-service deployment and no-work-authority Linux

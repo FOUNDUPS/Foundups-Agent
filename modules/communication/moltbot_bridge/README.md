@@ -13,11 +13,18 @@ or construct/copy/serialize either service authority. Signed request nonces,
 kernel peer credentials, signer-key proofs, bounded ASCII messages, exact
 response context, CAS convergence, and lost-response retry are fail closed.
 
-This proves root-service revocation-anchor transport, not production E0 use.
-The durable oracle remains uncomposed until a root-authorized protected-use
-lease closes the revocation-check-to-sign race. Independent grant issuance,
-WSP 71 secret resolution, signer lifecycle activation, worker/repository/PR/
-merge effects, and HoloIndex mutation remain unavailable.
+The same root service now also linearizes one exact signer callback against
+revocation. It consumes a signed, request-bound protected-use ID durably,
+marks one global odd-sequence use active, blocks revocation advancement until
+an exact FINISH, and retains replay evidence after completion. The signer
+boundary accepts only the factory-issued root capability; the older durable
+oracle alone remains explicitly non-atomic. A lost FINISH response retries
+idempotently, while a crashed active use remains fail closed.
+
+This closes the revocation-check-to-sign race but does not activate production
+signing. Independent grant issuance, WSP 71 secret resolution, signer lifecycle
+activation, worker/repository/PR/merge effects, and HoloIndex mutation remain
+unavailable.
 
 ## External signer exact-effect authority
 
@@ -183,9 +190,9 @@ therefore rejects while the root anchor remains intact. Expired state remains un
 publisher may authenticate an expired predecessor solely to append its fresh,
 monotonic successor. Canonical snapshot validation remains a separate bounded
 module from authority/signature verification. This is a partially composed durability
-foundation, not production authority: root-service transport/client now exist;
-independently administered grant issuance, the atomic protected-use E0 oracle/factory,
-and stable signer lifecycle composition remain absent. Root compromise or coordinated rollback of both
+foundation, not production authority: root-service transport/client and the atomic
+protected-use oracle now exist; independently administered grant issuance, production
+backend-factory wiring, and stable signer lifecycle composition remain absent. Root compromise or coordinated rollback of both
 mutable root-state mirrors is outside this foundation's claim; leaving the
 static installation store unchanged does not detect that rollback. Future
 composition must consume the opaque root-owned service boundary rather than a

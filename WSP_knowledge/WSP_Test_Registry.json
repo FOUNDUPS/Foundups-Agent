@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1489,
+  "total_tests": 1491,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -6837,6 +6837,21 @@
       "description": "Startup boundary tests for the root verified-outcome authority service."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_foundup_verified_outcome_root_protected_use_linux",
+      "path": "modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_protected_use_linux.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Linux-root socket proof for signer protected-use acquire/finish."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_foundup_verified_outcome_root_revocation_hardening",
       "path": "modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_revocation_hardening.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -6938,7 +6953,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_fusion_redaction_gate.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-01",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
       "capabilities": [
         "network"
       ],
@@ -7385,7 +7400,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_quorum_verification_engine.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -7820,7 +7835,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_durable_authentication_wsp62.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8281,7 +8296,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_first_external_research_grounding_adapter.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8790,7 +8805,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_openclaw_live_enqueue_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9262,7 +9277,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_fix_promotion_artifact_handoff.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9878,7 +9893,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_execution_security.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10086,6 +10101,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_signer_root_protected_use_composition",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial proof for root-linearized signer protected use."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_signer_runtime_atomic_provisioning",
@@ -10404,7 +10432,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader_linux.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10417,7 +10445,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10882,7 +10910,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_verified_outcome_ratchet_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10910,7 +10938,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_consumer_dryrun.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

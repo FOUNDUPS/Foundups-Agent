@@ -1,11 +1,12 @@
 # RedDog ModLog
 
-## 2026-08-12 - Root-service revocation compatibility pin (0.4.85)
+## 2026-08-12 - Root protected-use compatibility pin (0.4.86)
 
 - Regenerated the exact backend manifest after the existing root Unix service
-  gained opaque current-policy revocation-anchor transport.
-- Added no thin-client behavior, protected-use composition, signer activation,
-  or execution authority.
+  gained opaque current-policy ACQUIRE/FINISH protection for one exact signer
+  callback.
+- Added no thin-client behavior, grant issuer, secret resolver, signer
+  activation, or execution authority.
 
 ## 2026-08-12 - Durable revocation foundation compatibility pin (0.4.83)
 
