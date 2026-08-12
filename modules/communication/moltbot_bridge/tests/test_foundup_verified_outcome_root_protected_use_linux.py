@@ -1,8 +1,8 @@
 """Linux-root socket proof for signer protected-use acquire/finish."""
-
 from __future__ import annotations
 
 import os
+import select
 import shutil
 import time
 
@@ -37,7 +37,6 @@ from modules.communication.moltbot_bridge.tests.root_revocation_snapshot_fixture
     signed_snapshot,
     stage,
 )
-
 pytestmark = pytest.mark.skipif(
     os.name != "posix" or not hasattr(os, "geteuid") or os.geteuid() != 0,
     reason="real root-owned protected-use service requires Linux root",
@@ -88,14 +87,16 @@ def test_real_socket_publisher_lock_does_not_invert_with_acquire(monkeypatch) ->
         acquire_r, acquire_w = os.pipe()
         acquirer = _fork_rejected_acquire(values, socket_path, acquire_r, acquire_w)
         os.close(acquire_w)
-        time.sleep(0.25)
+        completed_before_release = bool(select.select([acquire_r], [], [], 3.0)[0])
         os.write(go_w, b"G"); os.close(go_w)
-        assert os.read(acquire_r, 4) == b"PASS"
+        acquire_result = os.read(acquire_r, 4)
         publisher_result = os.read(pub_r, 128)
-        assert publisher_result == b"PASS", publisher_result
         os.close(acquire_r); os.close(pub_r)
         os.waitpid(acquirer, 0); os.waitpid(publisher, 0)
         server.join(timeout=10)
+        assert completed_before_release
+        assert acquire_result == b"PASS"
+        assert publisher_result == b"PASS", publisher_result
         assert len(results) == 1 and results[0].accepted is True
         assert results[0].requests_handled == 3
     finally:
