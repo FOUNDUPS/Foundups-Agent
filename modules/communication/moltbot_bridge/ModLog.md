@@ -1,4 +1,17 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Root-service signer-revocation transport
+- Extended the existing root verified-outcome Unix service with an exact,
+  domain-separated revocation load/advance protocol and opaque process-local
+  client. The root independently revalidates the current E0 lease, signed
+  policy, authorities, topology, signed local snapshot, witness and monotonic
+  transition; callers supply no expected/next root state.
+- Added signed per-request nonces, bounded strict wire decoding, response
+  context binding, lost-response idempotency, concurrent exact-request
+  convergence, and factory-only non-copyable service/client authorities.
+- Production E0 protected use remains uncomposed until a root-authorized use
+  lease closes the revocation-check race. No key generation, secret resolution,
+  signer activation, worker/repository/PR/merge effect, or HoloIndex mutation
+  was added. (WSP 00/15/22/50/62/71/97)
 ## 2026-08-12: Root-anchored signer revocation foundation
 - Extended owner E0 policy to v3, binding the root anchor store identity,
   durability receipt, and existing three-domain state topology digest.

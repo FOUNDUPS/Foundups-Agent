@@ -31,6 +31,7 @@ class RootAuthorityServiceDependencies:
     signer_uid: int
     signer_gid: int
     signer_principal_id: str
+    revocation_authority: object | None
 
 
 def build_root_authority_service_dependencies(
@@ -38,6 +39,7 @@ def build_root_authority_service_dependencies(
     *,
     repo: Path,
     snapshot_supplier: Callable[[], RootAuthoritySnapshot],
+    revocation_authority: object | None = None,
 ) -> RootAuthorityServiceDependencies:
     paths = _state_paths(raw, repo=repo)
     validate_root_authority_state_paths(
@@ -66,6 +68,7 @@ def build_root_authority_service_dependencies(
         signer_uid=int(raw["signer_uid"]),
         signer_gid=int(raw["signer_gid"]),
         signer_principal_id=str(raw["signer_principal_id"]),
+        revocation_authority=revocation_authority,
     )
 
 

@@ -34,6 +34,7 @@ class _Connection:
 
 
 def _dependencies():
+    revocation_authority = object()
     return SimpleNamespace(
         state=_State(),
         snapshot_supplier=lambda: "snapshot",
@@ -41,6 +42,7 @@ def _dependencies():
         signer_uid=1001,
         signer_gid=1002,
         signer_principal_id="reddog-e0-signer",
+        revocation_authority=revocation_authority,
     )
 
 
@@ -82,6 +84,7 @@ def test_entrypoint_builds_single_signer_peer_policy_and_serves(
     assert policy.uid_to_principal == {1001: "reddog-e0-signer"}
     assert policy.allowed_gids == (1002,)
     assert captured["max_requests"] == 7
+    assert captured["revocation_authority"] is not None
     assert json.loads(emitted[0])["accepted"] is True
 
 

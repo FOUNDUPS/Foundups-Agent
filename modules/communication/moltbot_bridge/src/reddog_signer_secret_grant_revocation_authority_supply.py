@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
-    ProposalReplayHighWaterStore,
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_client import (
+    RootRevocationAnchorAuthority,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
     SignerGrantRevocationAuthorityBinding,
@@ -46,7 +46,7 @@ class UncomposedDurableSignerGrantRevocationAuthoritySupply:
         self, *, binding: SignerGrantRevocationAuthorityBinding,
         policy: Mapping[str, Any], store: SignerGrantRevocationAuthorityStore,
         witness: SqliteMonotonicAuthorityStore,
-        anchor: ProposalReplayHighWaterStore,
+        anchor: RootRevocationAnchorAuthority,
         principal_key_resolver: PrincipalKeyResolver,
         signature_verifier: SignatureVerifier,
     ) -> None:
@@ -80,11 +80,10 @@ class UncomposedDurableSignerGrantRevocationAuthoritySupply:
                 expected=revocation_high_water(state.current),
                 next_value=required_revocation_high_water(checked),
             )
-            self.anchor.advance(
-                self.binding.anchor_binding_digest(),
-                expected=revocation_high_water(state.current),
-                next_value=required_revocation_high_water(checked),
-            )
+            if self.anchor.advance_snapshot(str(checked["snapshot_id"])) != (
+                required_revocation_high_water(checked)
+            ):
+                raise RuntimeError("revocation_supply_anchor_commit_invalid")
             self.store._finalize_under_lock(str(checked["snapshot_id"]))
             committed = self._require_consensus(self.store.state())
             if committed.current != checked:
@@ -115,7 +114,7 @@ class UncomposedDurableSignerGrantRevocationAuthoritySupply:
         current_high = revocation_high_water(current)
         pending_high = required_revocation_high_water(pending)
         observed = self.witness.load(self.binding.witness_binding_digest())
-        anchored = self.anchor.load(self.binding.anchor_binding_digest())
+        anchored = self.anchor.load()
         if observed == current_high:
             self.witness.advance(
                 self.binding.witness_binding_digest(),
@@ -124,10 +123,8 @@ class UncomposedDurableSignerGrantRevocationAuthoritySupply:
         elif observed != pending_high:
             raise RuntimeError("revocation_supply_recovery_divergence")
         if anchored == current_high:
-            self.anchor.advance(
-                self.binding.anchor_binding_digest(),
-                expected=current_high, next_value=pending_high,
-            )
+            if self.anchor.advance_snapshot(str(pending["snapshot_id"])) != pending_high:
+                raise RuntimeError("revocation_supply_anchor_commit_invalid")
         elif anchored != pending_high:
             raise RuntimeError("revocation_supply_anchor_divergence")
         self.store._finalize_under_lock(str(pending["snapshot_id"]))
@@ -141,7 +138,7 @@ class UncomposedDurableSignerGrantRevocationAuthoritySupply:
         observed = self.witness.load(self.binding.witness_binding_digest())
         if observed != revocation_high_water(state.current):
             raise RuntimeError("revocation_supply_witness_mismatch")
-        anchored = self.anchor.load(self.binding.anchor_binding_digest())
+        anchored = self.anchor.load()
         if anchored != revocation_high_water(state.current):
             raise RuntimeError("revocation_supply_anchor_mismatch")
         return state

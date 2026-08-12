@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator, Mapping
 
@@ -36,6 +37,20 @@ from .reddog_signer_owner_e0_policy_contract import (
 from .reddog_signer_owner_e0_principal_authority import (
     load_current_generation_principal_key_resolver,
 )
+from .reddog_signer_secret_grant_revocation_authority_binding import (
+    SignerGrantRevocationAuthorityBinding,
+    revocation_authority_binding_from_policy,
+)
+
+
+@dataclass(frozen=True)
+class ValidatedOwnerE0Lease:
+    receipt: OwnerControlledE0ConsumptionReceipt
+    policy: Mapping[str, Any]
+    selection: Mapping[str, Any]
+    config: Any
+    resolver: Any
+    revocation_binding: SignerGrantRevocationAuthorityBinding
 
 
 def load_owner_e0_current_selection(
@@ -85,11 +100,36 @@ def validate_owner_e0_current_admission(
         return _validate_selected(repo_root.resolve(), selected, policy)
 
 
+@contextmanager
+def lease_validated_owner_e0_current_admission(
+    *, owner_config_path: Path | str, repo_root: Path,
+    policy: Mapping[str, Any],
+) -> Iterator[ValidatedOwnerE0Lease]:
+    """Hold the current-generation fence through one privileged use."""
+
+    capability, boundary = load_system_service_manifest_selection(
+        owner_config_path=owner_config_path, repo_root=repo_root,
+    )
+    with boundary._lease_current(capability) as selected:
+        if Path(str(selected.get("repo_root") or "")).resolve() != repo_root.resolve():
+            raise ValueError("e0_selection_repo_root_mismatch")
+        yield _validated_selected_lease(repo_root.resolve(), selected, policy)
+
+
 def _validate_selected(
     repo_root: Path,
     selection: Mapping[str, Any],
     policy: Mapping[str, Any],
 ) -> tuple[OwnerControlledE0ConsumptionReceipt, Mapping[str, Any]]:
+    lease = _validated_selected_lease(repo_root, selection, policy)
+    return lease.receipt, lease.policy
+
+
+def _validated_selected_lease(
+    repo_root: Path,
+    selection: Mapping[str, Any],
+    policy: Mapping[str, Any],
+) -> ValidatedOwnerE0Lease:
     checked = validated_signer_owner_e0_policy(
         thaw_owner_e0_policy(policy), now_epoch=int(time.time())
     )
@@ -116,7 +156,16 @@ def _validate_selected(
         signer_runtime_root=Path(config.signer_runtime_root).resolve(),
     )
     _require_consensus_policy(checked)
-    return _receipt(checked, selection, profile), freeze_owner_e0_policy(checked)
+    binding = revocation_authority_binding_from_policy(
+        checked, repo_root=repo_root,
+        signer_runtime_root=Path(config.signer_runtime_root).resolve(),
+    )
+    return ValidatedOwnerE0Lease(
+        receipt=_receipt(checked, selection, profile),
+        policy=freeze_owner_e0_policy(checked),
+        selection=dict(selection), config=config, resolver=resolver,
+        revocation_binding=binding,
+    )
 
 
 def _receipt(
@@ -140,7 +189,9 @@ def _require_consensus_policy(policy: Mapping[str, Any]) -> None:
 
 
 __all__ = [
+    "ValidatedOwnerE0Lease",
     "lease_owner_e0_current_selection",
+    "lease_validated_owner_e0_current_admission",
     "load_owner_e0_current_selection",
     "validate_owner_e0_current_admission",
 ]

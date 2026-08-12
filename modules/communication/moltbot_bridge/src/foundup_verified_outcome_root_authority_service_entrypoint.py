@@ -56,6 +56,7 @@ def run_entrypoint(
             signer_gid=dependencies.signer_gid,
             state=dependencies.state,
             snapshot_supplier=dependencies.snapshot_supplier,
+            revocation_authority=getattr(dependencies, "revocation_authority", None),
             peer_attestor=attestor,
             max_requests=args.max_requests,
         )

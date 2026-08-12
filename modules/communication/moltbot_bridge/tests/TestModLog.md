@@ -1,3 +1,20 @@
+## 2026-08-12: Root-service signer-revocation transport regressions
+- Added integrated service/client tests using a real signed current E0 policy,
+  signed revocation snapshots, durable primary/witness stores and the existing
+  three-domain root state.
+- Proved arbitrary binding/policy/snapshot substitution, forged and
+  cross-operation signatures, stale time, wrong peer, missing witness,
+  snapshot tamper, old replay, response substitution and fabricated opaque
+  capabilities reject without root mutation.
+- Proved lost-response retry and two concurrent identical advances converge,
+  request nonces are unique and signed, absent service composition rejects,
+  and every new production/test module and function stays within WSP 62.
+- Added a Linux-root platform gate for real Unix socket `LOAD` and `ADVANCE`,
+  legacy reserve/commit through the composed router, kernel UID/GID rejection,
+  and live non-root listener substitution. WSL Ubuntu 24.04 root result: `5 passed`;
+  Windows records the explicit platform skip rather than claiming execution.
+- Focused security/integration command: `python -m pytest test_foundup_verified_outcome_root_revocation_service.py test_foundup_verified_outcome_root_revocation_hardening.py test_foundup_verified_outcome_root_revocation_identity.py test_reddog_signer_secret_grant_revocation_durable_authority.py test_foundup_verified_outcome_root_authority_service.py test_foundup_verified_outcome_root_authority_service_entrypoint.py test_reddog_signer_owner_controlled_e0_admission.py -q`; result: `102 passed, 1 skipped` (Linux root socket case).
+
 ## 2026-08-12: Durable signer revocation authority regressions
 - Proved signed policy-v2 topology, append-only monotonic publication, fresh
   read-only visibility, exact witness binding, both crash-window recoveries,

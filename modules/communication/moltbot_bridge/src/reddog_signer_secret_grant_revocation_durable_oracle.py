@@ -6,7 +6,9 @@ from typing import Any, Callable, Mapping, TypeVar
 
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     ProposalReplayHighWater,
-    ProposalReplayHighWaterStore,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_client import (
+    RootRevocationAnchorAuthority,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
     SignerGrantRevocationAuthorityBinding,
@@ -42,7 +44,7 @@ class UncomposedDurableSignerGrantRevocationOracle:
         self, *, binding: SignerGrantRevocationAuthorityBinding,
         policy: Mapping[str, Any], reader: SignerGrantRevocationAuthorityReader,
         witness: SqliteMonotonicAuthorityReader,
-        anchor: ProposalReplayHighWaterStore,
+        anchor: RootRevocationAnchorAuthority,
         principal_key_resolver: PrincipalKeyResolver,
         signature_verifier: SignatureVerifier,
         clock: Callable[[], int],
@@ -93,7 +95,7 @@ class UncomposedDurableSignerGrantRevocationOracle:
         )
         if self.witness.load(self.binding.witness_binding_digest()) != expected:
             raise RuntimeError("durable_revocation_oracle_witness_mismatch")
-        if self.anchor.load(self.binding.anchor_binding_digest()) != expected:
+        if self.anchor.load() != expected:
             raise RuntimeError("durable_revocation_oracle_anchor_mismatch")
         return verify_signer_grant_revocation_snapshot(
             state.current, expected=self.expected,

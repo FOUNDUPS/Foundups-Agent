@@ -1,5 +1,19 @@
 # Tests - OpenClaw Bridge
 
+## Root-served signer revocation
+
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_revocation_service.py modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_revocation_hardening.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_durable_authority.py -q
+```
+
+The matrix integrates current signed E0 policy admission, signed revocation
+snapshots, durable primary/witness state, root high-water state, opaque client
+transport and kernel-peer/root-service validation. It rejects arbitrary
+bindings, policy drift, forged/cross-operation proofs, wrong peers, stale time,
+missing witnesses, tampered snapshots, stale replay, response substitution and
+fabricated capabilities. It proves exact retry and concurrent convergence and
+enforces WSP 62 without an exemption. It does not activate protected signing.
+
 ## External authoritative-use lease
 
 ```powershell

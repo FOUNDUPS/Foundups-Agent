@@ -8,6 +8,7 @@ from typing import Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
     validate_root_verified_outcome_descriptor,
+    validate_root_verified_outcome_descriptor_identity,
     validate_root_verified_outcome_descriptor_public,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_protocol import (
@@ -113,10 +114,10 @@ def handle_root_authority_request(
 
     try:
         request = request_from_bytes(raw)
-        snapshot = _current_snapshot(
+        snapshot = validated_root_authority_snapshot(
             state, snapshot_supplier=snapshot_supplier, now_epoch=now_epoch
         )
-        _require_peer(peer, snapshot)
+        require_root_authority_peer(peer, snapshot)
         grant = _matching_grant(request, snapshot)
         response = (
             _commit(request, grant, snapshot, state)
@@ -130,7 +131,7 @@ def handle_root_authority_request(
     return response.to_bytes()
 
 
-def _current_snapshot(
+def validated_root_authority_snapshot(
     state: RootVerifiedOutcomeAuthorityState,
     *,
     snapshot_supplier: SnapshotSupplier,
@@ -140,6 +141,33 @@ def _current_snapshot(
     if not isinstance(snapshot, RootAuthoritySnapshot):
         raise ValueError("root_authority_snapshot_invalid")
     descriptor = validate_root_verified_outcome_descriptor(
+        snapshot.descriptor, replay_store=state, now_epoch=now_epoch
+    )
+    _require_snapshot_identity(snapshot, descriptor, state=state)
+    state.observe_generation(
+        snapshot.authority_generation_sequence, snapshot.owner_config_id
+    )
+    return RootAuthoritySnapshot(
+        owner_config_id=snapshot.owner_config_id,
+        authority_generation_sequence=snapshot.authority_generation_sequence,
+        state_binding_digest=snapshot.state_binding_digest,
+        signer_principal_id=snapshot.signer_principal_id,
+        signer_uid=snapshot.signer_uid,
+        signer_gid=snapshot.signer_gid,
+        descriptor=descriptor,
+    )
+
+
+def validated_root_authority_identity_snapshot(
+    state: RootVerifiedOutcomeAuthorityState, *,
+    snapshot_supplier: SnapshotSupplier, now_epoch: int,
+) -> RootAuthoritySnapshot:
+    """Validate current root signer identity without outcome-grant admission."""
+
+    snapshot = snapshot_supplier()
+    if not isinstance(snapshot, RootAuthoritySnapshot):
+        raise ValueError("root_authority_snapshot_invalid")
+    descriptor = validate_root_verified_outcome_descriptor_identity(
         snapshot.descriptor, replay_store=state, now_epoch=now_epoch
     )
     _require_snapshot_identity(snapshot, descriptor, state=state)
@@ -186,12 +214,11 @@ def _matching_grant(
         or request.owner_config_id != snapshot.owner_config_id
     ):
         raise ValueError("root_authority_request_context_mismatch")
-    if not Ed25519SignatureVerifier().verify(
-        str(descriptor["signer_public_key"]),
+    require_root_authority_signer_proof(
+        snapshot,
         canonical_signer_instance_input(request),
         request.signer_instance_signature,
-    ):
-        raise ValueError("root_authority_signer_proof_invalid")
+    )
     grant = next(
         (
             item
@@ -266,7 +293,9 @@ def _reservation_payload(
     }
 
 
-def _require_peer(peer: KernelPeerIdentity, snapshot: RootAuthoritySnapshot) -> None:
+def require_root_authority_peer(
+    peer: KernelPeerIdentity, snapshot: RootAuthoritySnapshot
+) -> None:
     if (
         not isinstance(peer, KernelPeerIdentity)
         or peer.attestation.boundary_attested is not True
@@ -276,6 +305,15 @@ def _require_peer(peer: KernelPeerIdentity, snapshot: RootAuthoritySnapshot) -> 
         or "kernel" not in peer.attestation.credential_source.lower()
     ):
         raise ValueError("root_authority_signer_peer_invalid")
+
+
+def require_root_authority_signer_proof(
+    snapshot: RootAuthoritySnapshot, signing_input: str, signature: str
+) -> None:
+    if not Ed25519SignatureVerifier().verify(
+        str(snapshot.descriptor["signer_public_key"]), signing_input, signature
+    ):
+        raise ValueError("root_authority_signer_proof_invalid")
 
 
 def _accept(
@@ -308,6 +346,9 @@ def _reject(request: RootAuthorityRequest, reason: str) -> RootAuthorityResponse
     )
 
 
+_current_snapshot = validated_root_authority_snapshot
+
+
 __all__ = [
     "RootAuthoritySnapshot",
     "STATE_COMMITTED",
@@ -315,4 +356,8 @@ __all__ = [
     "STATE_RESERVED",
     "handle_root_authority_request",
     "initialize_root_authority_state",
+    "require_root_authority_peer",
+    "require_root_authority_signer_proof",
+    "validated_root_authority_identity_snapshot",
+    "validated_root_authority_snapshot",
 ]

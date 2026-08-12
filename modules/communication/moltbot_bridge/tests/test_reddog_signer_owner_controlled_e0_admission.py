@@ -183,7 +183,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
     roots = _fixture_roots(tmp_path)
     target_private, target_public = _keypair()
     grant_private, grant_public = _keypair()
-    _, revocation_public = _keypair()
+    revocation_private, revocation_public = _keypair()
     signing_ref = "op://Foundups/reddog-signing/private"
     audit_ref = "op://Foundups/reddog-signing/audit"
     policy = _policy(
@@ -232,6 +232,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
         "principal_path": principal_path,
         "grant_private": grant_private,
         "grant_public": grant_public,
+        "revocation_private": revocation_private,
         "target_private": target_private,
         "target_public": target_public,
     }
