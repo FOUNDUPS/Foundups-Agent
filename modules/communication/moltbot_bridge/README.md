@@ -151,17 +151,21 @@ it does not release signer composition authority or grant an effect.
 The E0 path also has an exact independently signed revocation-snapshot contract
 bound to the current policy, generation, store, and target signer. Grant and
 revocation authority identities remain separate from one another and from the
-target signer key. Policy v2 additionally freezes the exact primary store,
+target signer key. Policy v3 additionally freezes the exact primary store,
 separate local monotonic witness, and shared cross-process operation-lock
-topology. The append-only SQLite supply can recover either publication crash
-window without unrevocation, and its detached oracle revalidates signed current
-state under the same lock. Expired state remains unusable, while a locked
+topology plus the identity, durability receipt, and three-domain topology
+digest of a root-owned monotonic anchor. The append-only SQLite supply orders
+prepare, local witness, root anchor, and finalize; it recovers each publication
+crash window without unrevocation. Its detached oracle requires three-way
+agreement under the same lock. Coordinated rollback of the two local domains
+therefore rejects while the root anchor remains intact. Expired state remains unusable, while a locked
 publisher may authenticate an expired predecessor solely to append its fresh,
 monotonic successor. Canonical snapshot validation remains a separate bounded
 module from authority/signature verification. This is an uncomposed durability foundation, not
 production authority: an independently administered grant authority, external
-rollback anchor, E0-only oracle factory, and stable-service composition remain
-absent. Coordinated rollback of both local domains is therefore not claimed.
+root-service transport/client, E0-only oracle factory, and stable-service
+composition remain absent. Root compromise or coordinated rollback of all
+three root-state domains is outside this foundation's claim.
 RedDog and `main.py` remain clients and cannot spawn the signer.
 The older `reddog_signer_socket_service_runtime_cli` is retained only to return
 a structured retirement rejection. It cannot load authority, construct a

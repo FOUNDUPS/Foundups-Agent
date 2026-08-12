@@ -102,6 +102,13 @@ class RootVerifiedOutcomeAuthorityState:
     def state_binding_digest(self) -> str:
         return self._state_binding_digest
 
+    @property
+    def rollback_domain_roots(self) -> tuple[Path, Path, Path]:
+        return tuple(
+            store.rollback_domain_root
+            for store in (self._primary, self._witness, self._installation)
+        )
+
     def load(self, binding_digest: str) -> ProposalReplayHighWater | None:
         with self._lock():
             self._require_installed()

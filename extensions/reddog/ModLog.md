@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-08-12 - Root-anchored revocation compatibility pin (0.4.84)
+
+- Regenerated the exact backend manifest after owner policy v3 and the
+  uncomposed three-domain revocation anchor foundation.
+- Added no thin-client behavior, signer activation, or execution authority.
+
 ## 2026-08-12 - Durable revocation foundation compatibility pin (0.4.83)
 
 - Pinned the regenerated backend manifest after owner E0 policy v2 added exact

@@ -68,10 +68,15 @@
   topology, spawned-process crash recovery, and a cross-process use fence. It
   detects primary-only rollback but does not claim coordinated local-domain
   rollback resistance or production authority.
-- NEXT: independently administered grant issuance, an external rollback
-  anchor, E0-only oracle/backend composition, WSP 71 permissioned resolution,
-  and native-memory zeroization evidence. Socket v1 remains compatible but
-  cannot reach the resolve-per-sign backend.
+- COMPLETE: owner policy v3 binds the identity, durability receipt, and
+  three-domain topology digest of the existing root-owned monotonic state.
+  The uncomposed publisher and oracle require that domain-separated anchor, so
+  coordinated rollback of the two revocation-local domains rejects while the
+  root state remains intact.
+- NEXT: root-service protocol/client binding for that anchor, independently
+  administered grant issuance, E0-only oracle/backend composition, WSP 71
+  permissioned resolution, and native-memory zeroization evidence. Socket v1
+  remains compatible but cannot reach the resolve-per-sign backend.
 - BLOCKED: durable system-service deployment and no-work-authority Linux
   canary until production grant/revocation authority, secret resolution,
   zeroization, and lifecycle supervision slices pass.
