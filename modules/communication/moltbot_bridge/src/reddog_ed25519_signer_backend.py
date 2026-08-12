@@ -48,8 +48,12 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_manifest import (
     RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
+    REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY,
+    REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING as _MANIFEST_STORE_MISSING,
     RuntimeArtifactManifestAuthority,
-    validate_runtime_artifact_manifest_signing_request,
+    commit_runtime_artifact_manifest_reservation as _commit_manifest_reservation,
+    prepare_runtime_artifact_manifest_signing as _prepare_manifest_signing,
+    rollback_runtime_artifact_manifest_reservation as _rollback_manifest_reservation,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_authority import (
     RuntimeArtifactManifestAuthorityBoundary,
@@ -71,9 +75,8 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authori
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_rate_authority import (
     DurableSignerSecretGrantRateAuthority,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_signer_admission import (
-    secret_grant_signer_rejection,
-)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_signer_admission import prepare_secret_grant_signer_admission
+from modules.communication.moltbot_bridge.src import reddog_ed25519_elevated_consensus_flow as consensus_flow
 from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
     SECRET_GRANT_AUDIT_ATTESTATION_PREFIX,
 )
@@ -151,16 +154,11 @@ REJECT_ED25519_SIGNER_PROPOSAL_NONCE_STORE_MISSING = (
 REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY = (
     "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY"
 )
-REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY = (
-    "REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY"
-)
-REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = (
-    "REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING"
-)
-REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY = (
-    "REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY"
-)
+REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY = "REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY"
 CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX = "reddog-control-loop-audit.v1."
+REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = _MANIFEST_STORE_MISSING
+
+
 class SignerAuditMacBuilder(Protocol):
     """Injected audit-MAC boundary owned by the isolated signer process."""
 
@@ -200,60 +198,77 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
     conversation_scope_anchor_store: ConversationScopeAnchorStore | None = None
     secret_grant_authority_policy: SignerSecretGrantAuthorityPolicy | None = None
     secret_grant_rate_authority: DurableSignerSecretGrantRateAuthority | None = None
+    elevated_consensus_signer_authority: Any | None = None
     exact_signing_request_digest: str | None = None
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
         reason = _signer_request_rejection(self, request, peer)
         if reason:
             return _reject(reason)
+        consensus_reason, consensus_reservation = prepare_secret_grant_signer_admission(
+            self, request, now_epoch=int(self.proposal_clock()))
+        if consensus_reason:
+            return _reject(consensus_reason)
         control_payload, preparation, reason = _prepare_control_signing(
             self, request
         )
         if reason:
-            return _reject(reason)
+            return consensus_flow.consensus_signing_rejection(consensus_reservation, reason)
         conversation_payload, conversation_preparation, early = (
             _prepare_conversation_or_replay(self, request)
         )
         if early is not None:
+            consensus_flow.rollback_elevated_consensus_nonce(consensus_reservation)
             return early
         proposal_reservation, reason = _prepare_proposal_signing(self, request)
         if reason:
-            return _reject(reason)
+            return consensus_flow.consensus_signing_rejection(consensus_reservation, reason)
         manifest_payload, manifest_reservation, reason = (
             _prepare_manifest_signing(self, request)
         )
         if reason:
             _rollback_proposal_reservation(self, proposal_reservation)
-            return _reject(reason)
+            return consensus_flow.consensus_signing_rejection(consensus_reservation, reason)
         outcome_payload, outcome_reservation, rejection = _prepare_outcome_or_reject(
             self, request, proposal_reservation, manifest_reservation
         )
         if rejection is not None:
+            consensus_flow.rollback_elevated_consensus_nonce(consensus_reservation)
             return rejection
-        requires_attestation = _requires_audit_attestation(
-            request,
-            control_payload,
-            manifest_payload,
-            outcome_payload,
-            conversation_payload,
-        )
-        response, reason = _sign_response(self, request, peer, requires_attestation)
-        if reason:
-            _rollback_proposal_reservation(self, proposal_reservation)
-            _rollback_manifest_reservation(self, manifest_reservation)
-            _rollback_outcome_reservation(self, outcome_reservation)
-            return _reject(reason)
-        return _finalize_signing(
-            self,
-            response,
-            proposal_reservation,
-            manifest_reservation,
-            outcome_reservation,
-            control_payload,
-            preparation,
-            conversation_payload,
+        return _sign_prepared_payloads(
+            self, request, peer, consensus_reservation, control_payload, preparation,
+            proposal_reservation, manifest_payload, manifest_reservation,
+            outcome_payload, outcome_reservation, conversation_payload,
             conversation_preparation,
         )
+
+
+def _sign_prepared_payloads(
+    backend, request, peer, consensus_reservation, control_payload, preparation,
+    proposal_reservation, manifest_payload, manifest_reservation, outcome_payload,
+    outcome_reservation, conversation_payload, conversation_preparation,
+) -> SigningResponse:
+    payloads = (control_payload, manifest_payload, outcome_payload, conversation_payload)
+    requires_attestation = consensus_flow.requires_signer_audit_attestation(
+        request, *payloads
+    )
+    response, reason = _sign_response(backend, request, peer, requires_attestation)
+    if reason:
+        _rollback_proposal_reservation(backend, proposal_reservation)
+        _rollback_manifest_reservation(backend, manifest_reservation)
+        _rollback_outcome_reservation(backend, outcome_reservation)
+        return consensus_flow.consensus_signing_rejection(
+            consensus_reservation, reason
+        )
+    finalized = _finalize_signing(
+        backend, response, proposal_reservation, manifest_reservation,
+        outcome_reservation, control_payload, preparation, conversation_payload,
+        conversation_preparation,
+    )
+    return consensus_flow.complete_elevated_consensus_signing(
+        consensus_reservation, finalized,
+        commit_failure_code=REJECT_ED25519_SIGNER_REQUEST_INVALID,
+    )
 
 
 def _prepare_conversation_or_replay(
@@ -310,15 +325,6 @@ def _finalize_signing(
     return response
 
 
-def _requires_audit_attestation(
-    request: SigningRequest, *payloads: Mapping[str, Any] | None
-) -> bool:
-    return bool(
-        request.requested_operation == SECRET_GRANT_SIGNING_OPERATION
-        or any(payload is not None for payload in payloads)
-    )
-
-
 def _prepare_outcome_or_reject(
     backend: Ed25519SignerBackend,
     request: SigningRequest,
@@ -361,9 +367,6 @@ def _signer_request_rejection(
     policy_reason = (
         signer_policy_rejection(backend, request)
         or _lease_request_rejection(backend, request)
-        or secret_grant_signer_rejection(
-            backend, request, now_epoch=int(backend.proposal_clock())
-        )
     )
     if policy_reason:
         return policy_reason
@@ -406,56 +409,6 @@ def _prepare_verified_outcome_signing(
         domain_mismatch_code=REJECT_ED25519_SIGNER_DOMAIN_MISMATCH,
         request_invalid_code=REJECT_ED25519_SIGNER_REQUEST_INVALID,
     )
-
-
-def _prepare_manifest_signing(
-    backend: Ed25519SignerBackend,
-    request: SigningRequest,
-) -> tuple[dict[str, Any] | None, str | None, str]:
-    if (
-        request.requested_operation
-        != RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION
-    ):
-        return None, None, ""
-    if (
-        backend.runtime_artifact_manifest_authority is None
-        or backend.runtime_artifact_manifest_authority_boundary is None
-    ):
-        return None, None, REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
-    payload = validate_runtime_artifact_manifest_signing_request(
-        request,
-        backend.runtime_artifact_manifest_authority,
-        backend.runtime_artifact_manifest_authority_boundary,
-        now_epoch=int(backend.proposal_clock()),
-    )
-    if payload is None:
-        return None, None, REJECT_ED25519_SIGNER_REQUEST_INVALID
-    store = backend.runtime_artifact_manifest_nonce_store
-    if store is None:
-        return (
-            None,
-            None,
-            REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING,
-        )
-    try:
-        reservation = store.reserve(
-            str(payload["nonce"]),
-            expires_at=int(payload["expires_at"]),
-            subject=":".join(
-                (
-                    "runtime-artifact-manifest",
-                    public_key_fingerprint(backend.public_key),
-                    str(payload["issuer_principal_id"]),
-                    str(payload["queue_item_id"]),
-                    str(payload["work_state_revision"]),
-                )
-            ),
-        )
-    except Exception:
-        reservation = None
-    if not reservation:
-        return None, None, REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY
-    return payload, reservation, ""
 
 
 def _prepare_control_signing(
@@ -519,36 +472,6 @@ def _rollback_proposal_reservation(
         backend.proposal_nonce_store.rollback(reservation)
     except Exception:
         pass
-
-
-def _rollback_manifest_reservation(
-    backend: Ed25519SignerBackend,
-    reservation: str | None,
-) -> None:
-    store = backend.runtime_artifact_manifest_nonce_store
-    if reservation is None or store is None:
-        return
-    try:
-        store.rollback(reservation)
-    except Exception:
-        pass
-
-
-def _commit_manifest_reservation(
-    backend: Ed25519SignerBackend,
-    reservation: str | None,
-) -> bool:
-    if reservation is None:
-        return True
-    store = backend.runtime_artifact_manifest_nonce_store
-    if store is None:
-        return False
-    try:
-        store.commit(reservation)
-        return True
-    except Exception:
-        _rollback_manifest_reservation(backend, reservation)
-        return False
 
 
 def _sign_response(

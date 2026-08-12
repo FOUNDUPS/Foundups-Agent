@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-12 - Elevated-consensus compatibility pin (0.4.89)
+
+- Revalidated the generated 1311-file runtime closure and backend compatibility
+  preflight after the canonical elevated-consensus hardening.
+- Preserved fail-closed production composition and added no extension execution
+  authority.
+
 ## 2026-08-12 - Grant-authority epoch compatibility pin (0.4.88)
 
 - Pinned the regenerated backend manifest and current version fixtures after

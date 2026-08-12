@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 from pathlib import Path
 
 
@@ -152,6 +153,8 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         in generated["required_runtime_sha256"]
     )
     _assert_signer_and_memex_runtime_files(generated)
-    assert generator.canonical_manifest_digest(generated) == (
-        "3f21bd74f189adf292636194025c97bede2d1c424c9d639ab84c5e3d158d4af9"
-    )
+    digest = generator.canonical_manifest_digest(generated)
+    assert digest == "fccfacbd0bc1530d766afa28bb806ef8c368430598e0e20f47742e5a10c35edb"
+    constants = (REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js").read_text(encoding="utf-8")
+    match = re.search(r"EXPECTED_MANIFEST_SHA256 = '([a-f0-9]{64})'", constants)
+    assert match is not None and match.group(1) == digest

@@ -42,6 +42,9 @@ from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission i
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
     rehydrate_delegated_authority_request,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    delegated_authority_tier,
+)
 
 
 AUTHORITY_RUNTIME_STAGE_KEY = "authority_runtime"
@@ -176,6 +179,7 @@ class ResidentQueueAuthorityRuntimeStageHandler:
     work_state_snapshot: Mapping[str, Any] = field(default_factory=dict)
     authority_profile: Mapping[str, Any] = field(default_factory=dict)
     work_state_supplier: Optional[Callable[[], Mapping[str, Any]]] = None
+    elevated_consensus_capability_supplier: Optional[Callable[[Any], Any]] = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != AUTHORITY_RUNTIME_STAGE_KEY:
@@ -195,21 +199,11 @@ class ResidentQueueAuthorityRuntimeStageHandler:
         authority_request = _mapping(stage_results.get(AUTHORITY_REQUEST_STAGE_KEY))
         if not authority_request:
             return _reject(FAIL_AUTHORITY_REQUEST_STAGE_MISSING)
-        try:
-            current_state = (
-                self.work_state_supplier()
-                if self.work_state_supplier is not None
-                else _mapping(self.work_state_snapshot)
-            )
-        except Exception:
+        current_state, consensus_capability = _authority_runtime_inputs(
+            self, authority_request
+        )
+        if current_state is None:
             return _reject(FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED)
-        if not _publication_binding_valid(
-            current_state,
-            _mapping(self.authority_profile),
-            authority_request,
-        ):
-            return _reject(FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED)
-
         return invoke_reddog_wre_queue_authority_runtime(
             explicit_queue_authority_runtime_requested=True,
             queue_authority_request_dryrun=authority_request,
@@ -217,6 +211,7 @@ class ResidentQueueAuthorityRuntimeStageHandler:
                 current_state,
                 authority_request,
             ),
+            elevated_consensus_capability=consensus_capability,
             store=self.authority_store,
             signer=self.signer,
             principal_resolver=self.principal_resolver,
@@ -224,6 +219,38 @@ class ResidentQueueAuthorityRuntimeStageHandler:
             now=self.now,
             leeway_s=self.leeway_s,
         ).to_dict()
+
+
+def _authority_runtime_inputs(handler, authority_request):
+    try:
+        typed_request = rehydrate_delegated_authority_request(
+            _mapping(authority_request.get("delegated_authority_request"))
+        )
+        if (
+            delegated_authority_tier(typed_request) == "HIGH"
+            and handler.work_state_supplier is None
+        ):
+            return None, None
+        current_state = (
+            handler.work_state_supplier()
+            if handler.work_state_supplier is not None
+            else _mapping(handler.work_state_snapshot)
+        )
+    except Exception:
+        return None, None
+    if not _publication_binding_valid(
+        current_state, _mapping(handler.authority_profile), authority_request
+    ):
+        return None, None
+    try:
+        capability = (
+            handler.elevated_consensus_capability_supplier(typed_request)
+            if handler.elevated_consensus_capability_supplier is not None
+            else None
+        )
+        return current_state, capability
+    except Exception:
+        return current_state, None
 
 
 def build_reddog_resident_queue_authority_runtime_stage_handler(
@@ -240,6 +267,9 @@ def build_reddog_resident_queue_authority_runtime_stage_handler(
     work_state_supplier: Optional[
         Callable[[], Mapping[str, Any]]
     ] = None,
+    elevated_consensus_capability_supplier: Optional[
+        Callable[[Any], Any]
+    ] = None,
 ) -> ResidentQueueAuthorityRuntimeStageHandler:
     """Build the injected handler for the resident queue dispatcher."""
 
@@ -254,6 +284,9 @@ def build_reddog_resident_queue_authority_runtime_stage_handler(
         work_state_snapshot=work_state_snapshot or {},
         authority_profile=authority_profile or {},
         work_state_supplier=work_state_supplier,
+        elevated_consensus_capability_supplier=(
+            elevated_consensus_capability_supplier
+        ),
     )
 
 

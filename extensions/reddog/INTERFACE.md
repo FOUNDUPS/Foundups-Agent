@@ -1,5 +1,9 @@
 # RedDog Interface
 
+Version 0.4.89 pins the canonical elevated-consensus capability and its complete
+strict signer dependency closure. Elevated production authority remains
+uncomposed and fail-closed.
+
 Version 0.4.88 pins owner E0 policy v5 and exact independent grant-authority
 key-epoch binding. It adds no thin-client behavior or execution authority.
 

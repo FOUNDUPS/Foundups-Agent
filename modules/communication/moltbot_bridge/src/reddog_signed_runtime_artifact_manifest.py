@@ -51,6 +51,12 @@ RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION = SCHEMA_VERSION
 RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION = SIGNING_OPERATION
 RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX = SIGNING_PREFIX
 DEFAULT_MANIFEST_MAX_TTL_SECONDS = DEFAULT_MAX_TTL_SECONDS
+REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = (
+    "REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING"
+)
+REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY = (
+    "REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY"
+)
 
 
 @dataclass(frozen=True)
@@ -207,6 +213,74 @@ def validate_runtime_artifact_manifest_signing_request(
         return unsigned
     except Exception:
         return None
+
+
+def prepare_runtime_artifact_manifest_signing(
+    backend: Any,
+    request: SigningRequest,
+) -> tuple[dict[str, Any] | None, str | None, str]:
+    """Validate a manifest request and reserve its signer-side nonce."""
+    if request.requested_operation != RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION:
+        return None, None, ""
+    authority = backend.runtime_artifact_manifest_authority
+    boundary = backend.runtime_artifact_manifest_authority_boundary
+    if authority is None or boundary is None:
+        return None, None, "REJECT_ED25519_SIGNER_DOMAIN_MISMATCH"
+    payload = validate_runtime_artifact_manifest_signing_request(
+        request, authority, boundary, now_epoch=int(backend.proposal_clock())
+    )
+    if payload is None:
+        return None, None, "REJECT_ED25519_SIGNER_REQUEST_INVALID"
+    store = backend.runtime_artifact_manifest_nonce_store
+    if store is None:
+        return None, None, REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING
+    try:
+        reservation = store.reserve(
+            str(payload["nonce"]),
+            expires_at=int(payload["expires_at"]),
+            subject=":".join(
+                (
+                    "runtime-artifact-manifest",
+                    public_key_fingerprint(backend.public_key),
+                    str(payload["issuer_principal_id"]),
+                    str(payload["queue_item_id"]),
+                    str(payload["work_state_revision"]),
+                )
+            ),
+        )
+    except Exception:
+        reservation = None
+    if not reservation:
+        return None, None, REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY
+    return payload, reservation, ""
+
+
+def rollback_runtime_artifact_manifest_reservation(
+    backend: Any, reservation: str | None
+) -> None:
+    store = backend.runtime_artifact_manifest_nonce_store
+    if reservation is None or store is None:
+        return
+    try:
+        store.rollback(reservation)
+    except Exception:
+        pass
+
+
+def commit_runtime_artifact_manifest_reservation(
+    backend: Any, reservation: str | None
+) -> bool:
+    if reservation is None:
+        return True
+    store = backend.runtime_artifact_manifest_nonce_store
+    if store is None:
+        return False
+    try:
+        store.commit(reservation)
+        return True
+    except Exception:
+        rollback_runtime_artifact_manifest_reservation(backend, reservation)
+        return False
 
 
 def _unsigned_manifest(

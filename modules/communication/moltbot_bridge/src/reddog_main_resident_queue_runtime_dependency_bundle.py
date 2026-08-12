@@ -147,6 +147,7 @@ class RedDogMainResidentQueueRuntimeDependencyBundle:
     principal_key_resolver: Any = None
     nonce_store: Any = None
     revocation_oracle: Any = None
+    elevated_consensus_capability_supplier: Any = None
     now_epoch: Optional[int] = None
     authority_state_path: Optional[str] = None
     signer_socket_path: Optional[str] = None
@@ -181,10 +182,10 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
     signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     signer_socket_connector: Optional[SignerSocketConnector] = None,
     signature_verifier_backend: str | None = None,
+    elevated_consensus_capability_supplier: Any = None,
     now_epoch: int | None = None,
 ) -> RedDogMainResidentQueueRuntimeDependencyBundle:
     """Load safe queue-loop dependencies from outside-repo runtime artifacts."""
-
     root = Path(repo_root).resolve()
     if not authority_state_path:
         if (
@@ -192,6 +193,7 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
             or principal_authority_records_path
             or signer_socket_path
             or signature_verifier_backend
+            or elevated_consensus_capability_supplier is not None
             or now_epoch is not None
         ):
             return _reject("runtime_dependency_bundle_partial_configuration")
@@ -204,12 +206,13 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
 
     if runtime_allowed_root is None:
         return _reject("missing_runtime_artifact_root")
+    if elevated_consensus_capability_supplier is not None and not callable(elevated_consensus_capability_supplier):
+        return _reject("elevated_consensus_capability_supplier_invalid")
     runtime_root = Path(os.path.abspath(Path(runtime_allowed_root).expanduser()))
     try:
         validate_runtime_root_path(runtime_root, repo_root=root)
     except ValueError:
         return _reject("invalid_runtime_artifact_root")
-
     authority_path, authority_reasons = _resolve_path_outside_repo(
         root,
         runtime_root,
@@ -221,19 +224,16 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
     if authority_reasons:
         return _reject(*authority_reasons)
     assert authority_path is not None
-
     snapshots, snapshot_reasons = _load_permission_snapshots(
         root, runtime_root, permission_snapshots_path
     )
     if snapshot_reasons:
         return _reject(*snapshot_reasons)
-
     principals, principal_reasons = _load_principal_records(
         root, runtime_root, principal_authority_records_path
     )
     if principal_reasons:
         return _reject(*principal_reasons)
-
     authority_store = AtomicJsonAuthorityRuntimeStore(
         authority_path, allowed_root=runtime_root, repo_root=root
     )
@@ -268,7 +268,6 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
         signer_mode = "isolated_socket"
         signer_socket_resolved = signer_result.socket_path
         no_real_signer_configured = False
-
     (
         signature_verifier,
         principal_key_resolver,
@@ -284,7 +283,6 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
     )
     if verifier_reasons:
         return _reject(*verifier_reasons)
-
     return RedDogMainResidentQueueRuntimeDependencyBundle(
         accepted=True,
         status=REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY,
@@ -302,6 +300,7 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
         principal_key_resolver=principal_key_resolver,
         nonce_store=nonce_store,
         revocation_oracle=revocation_oracle,
+        elevated_consensus_capability_supplier=elevated_consensus_capability_supplier,
         now_epoch=now_epoch,
         authority_state_path=str(authority_path),
         signer_socket_path=signer_socket_resolved,

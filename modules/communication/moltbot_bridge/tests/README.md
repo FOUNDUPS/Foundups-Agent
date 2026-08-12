@@ -1,5 +1,23 @@
 # Tests - OpenClaw Bridge
 
+## Canonical elevated-authority consensus capability
+
+```powershell
+python -m pytest `
+  modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_capability.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_verification.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_signer.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_elevated_authority_consensus_structure.py -q
+```
+
+The matrix proves exact two-child capability use, strict proof rehydration,
+reviewer/key/model/runtime independence, current policy and sovereign binding,
+signer-side full-grant verification, replay and concurrent admission closure,
+and bounded production/test modules and functions without shell, network, or
+crypto-key generation.
+It does not claim authenticated production authority supply or signer-service
+composition.
+
 ## Independent signer secret-grant provider
 
 `python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py -q`

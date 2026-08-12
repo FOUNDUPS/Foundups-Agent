@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from typing import Any
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     ControlLoopAuthorityPolicy,
@@ -35,6 +36,7 @@ class Wsp71EphemeralSignerBackendFactory:
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None
     secret_grant_authority_policy: SignerSecretGrantAuthorityPolicy | None = None
     secret_grant_rate_authority: DurableSignerSecretGrantRateAuthority | None = None
+    elevated_consensus_signer_authority: Any | None = None
 
     @property
     def signer_agent_id(self) -> str:
@@ -60,6 +62,9 @@ class Wsp71EphemeralSignerBackendFactory:
             result.backend,
             secret_grant_authority_policy=self.secret_grant_authority_policy,
             secret_grant_rate_authority=self.secret_grant_rate_authority,
+            elevated_consensus_signer_authority=(
+                self.elevated_consensus_signer_authority
+            ),
         )
         return replace(result, backend=backend)
 

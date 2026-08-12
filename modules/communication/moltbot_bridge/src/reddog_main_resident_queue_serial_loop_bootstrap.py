@@ -197,6 +197,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     signer_socket_connector: Optional[SignerSocketConnector] = None,
     signature_verifier_backend: str | None = None,
+    elevated_consensus_capability_supplier: Any = None,
     worktree_runner: Any = None,
     pilot_dryrun_binding_enabled: bool = False,
     worktree_runner_mode: str | None = None,
@@ -302,8 +303,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(
             ("governed_execution_valve_environment_required",),
             chain_results_path=None,
-        )
-
+    )
     generic_writer_dryrun_result, generic_writer_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -315,7 +315,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if generic_writer_reasons:
         return _not_ready(generic_writer_reasons, chain_results_path=None)
-
     governed_shell_dryrun_result, governed_shell_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -327,7 +326,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if governed_shell_reasons:
         return _not_ready(governed_shell_reasons, chain_results_path=None)
-
     artifact_contents, artifact_contents_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -506,6 +504,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         signer_socket_max_response_bytes=signer_socket_max_response_bytes,
         signer_socket_connector=signer_socket_connector,
         signature_verifier_backend=signature_verifier_backend,
+        elevated_consensus_capability_supplier=elevated_consensus_capability_supplier,
         now_epoch=(fresh_now_epoch if authority_state_path else None),
     )
     if dependency_bundle.accepted is not True:
@@ -562,6 +561,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         principal_key_resolver=dependency_bundle.principal_key_resolver,
         nonce_store=dependency_bundle.nonce_store,
         revocation_oracle=dependency_bundle.revocation_oracle,
+        elevated_consensus_capability_supplier=dependency_bundle.elevated_consensus_capability_supplier,
         work_order_resolver=(
             JsonResidentQueueWorkOrderResolver(work_orders) if work_orders is not None else None
         ),
