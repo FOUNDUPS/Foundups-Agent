@@ -39,10 +39,15 @@ from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission i
     _admit_current_queue_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    canonical_delegated_authority_request_digest,
     rehydrate_delegated_authority_request,
 )
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
     signed_stage_binding,
+)
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_test_support import (
+    sign_with_test_consensus,
+    verified_consensus_for_request,
 )
 
 
@@ -91,6 +96,9 @@ class _MockSigner:
             no_secret_material_returned=True,
         )
 
+    def sign_with_elevated_consensus(self, request, permit):
+        return sign_with_test_consensus(self, request, permit, now=NOW)
+
 
 class _PrincipalResolver:
     def resolve(self, principal_id: str, principal_provider: str):
@@ -137,6 +145,8 @@ def _queue_result():
             requested_operation="edit_foundup_module",
             changed_paths=(f"modules/foundups/{FID}/src/worker.py",),
         ),
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + "d" * 64,
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:" + "a" * 64,
         "model_runtime_binding_verification_receipt_id": (
@@ -171,9 +181,9 @@ def _authoritative_queue_item():
     return item
 
 
-def _queue_admission():
+def _queue_admission(dryrun=None):
     request = rehydrate_delegated_authority_request(
-        _dryrun()["delegated_authority_request"]
+        (dryrun or _dryrun())["delegated_authority_request"]
     )
     return _admit_current_queue_authority(
         request=request,
@@ -204,6 +214,8 @@ def _profile(**overrides):
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + "d" * 64,
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:" + "a" * 64,
         "model_runtime_binding_verification_receipt_id": (
@@ -226,6 +238,20 @@ def _dryrun():
         authority_profile=_profile(),
         work_order=work_order,
     ).to_dict()
+
+
+def _authorized_dryrun():
+    dryrun = _dryrun()
+    request = rehydrate_delegated_authority_request(
+        dryrun["delegated_authority_request"]
+    )
+    request, capability, _ = verified_consensus_for_request(request, now=NOW)
+    payload = request.to_dict()
+    dryrun["delegated_authority_request"] = payload
+    dryrun["receipt"]["delegated_authority_request_digest"] = (
+        canonical_delegated_authority_request_digest(payload)
+    )
+    return dryrun, capability
 
 
 def test_explicit_invoke_missing_rejects_before_signer_call() -> None:
@@ -342,10 +368,12 @@ def test_falsy_non_string_request_substitution_rejects_without_effect() -> None:
 
 
 def test_default_signer_rejection_is_preserved() -> None:
+    dryrun, consensus = _authorized_dryrun()
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
-        queue_authority_request_dryrun=_dryrun(),
-        queue_authority_admission=_queue_admission(),
+        queue_authority_request_dryrun=dryrun,
+        queue_authority_admission=_queue_admission(dryrun),
+        elevated_consensus_capability=consensus,
         store=InMemoryAuthorityRuntimeStore(),
         signer=None,
         principal_resolver=_PrincipalResolver(),
@@ -363,11 +391,13 @@ def test_default_signer_rejection_is_preserved() -> None:
 def test_invokes_injected_signer_and_issues_authority_without_execution() -> None:
     signer = _MockSigner()
     store = InMemoryAuthorityRuntimeStore()
+    dryrun, consensus = _authorized_dryrun()
 
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
-        queue_authority_request_dryrun=_dryrun(),
-        queue_authority_admission=_queue_admission(),
+        queue_authority_request_dryrun=dryrun,
+        queue_authority_admission=_queue_admission(dryrun),
+        elevated_consensus_capability=consensus,
         store=store,
         signer=signer,
         principal_resolver=_PrincipalResolver(),
@@ -434,10 +464,12 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
         progressive_policy_stage_digest=str(
             request["progressive_policy_stage_digest"]
         ),
-        progressive_policy_stage_receipt=dict(
-            request["progressive_policy_stage_receipt"]
-        ),
-            model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
+            progressive_policy_stage_receipt=dict(
+                request["progressive_policy_stage_receipt"]
+            ),
+            model_selection_receipt_id=str(request["model_selection_receipt_id"]),
+            model_selection_digest=str(request["model_selection_digest"]),
+                model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
             model_runtime_binding_digest=str(request["model_runtime_binding_digest"]),
             model_runtime_binding_verification_receipt_id=str(
                 request["model_runtime_binding_verification_receipt_id"]

@@ -1,12 +1,19 @@
 # moltbot_bridge Roadmap
 
+- COMPLETE: canonical HIGH-tier consensus capability binds the exact delegated
+  request, author model/runtime evidence, sovereign authorization, reviewer
+  principal/provider/role membership, distinct reviewer keys/models/runtime
+  bindings, and the exact two signer requests. Signer admission reserves replay
+  state transactionally and commits only after accepted signing.
+- BLOCKED: production HIGH authority composition until signed E0 supplies the
+  authoritative author/reviewer/runtime/policy/sovereign resolvers and a durable
+  consensus nonce authority. ULTRA and the production live canary remain closed.
 - COMPLETE: LOW-tier independent signer secret-grant provider foundation and strict grant
   domain with durable signed-policy rate admission, distinct caller/beneficiary
   identity, public response verification and one generation lease.
 - COMPLETE: root-bound owner policy v5 freezes the grant-authority key epoch;
   same-key stale-epoch substitution rejects before signer invocation.
-- BLOCKED: authoritative-use composition because it requires HIGH/ULTRA and
-  digest shape is not verified consensus. Production grant-service isolation,
+- BLOCKED: authoritative-use production composition, grant-service isolation,
   lifecycle supervision and live canary remain next.
 
 ## RedDog conversational work promotion

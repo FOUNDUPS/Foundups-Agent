@@ -42,6 +42,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
     signed_stage_binding,
 )
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_test_support import (
+    verified_consensus_for_request,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -219,26 +222,25 @@ def _authority_request_result() -> dict[str, object]:
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
         **binding,
-        "model_selection_receipt_id": None,
-        "model_selection_digest": None,
-        "model_runtime_binding_receipt_id": None,
-        "model_runtime_binding_digest": None,
-        "model_runtime_binding_verification_receipt_id": None,
-        "model_runtime_binding_verification_digest": None,
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + ("b" * 64),
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+        "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:author"
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
         "memex_supply_receipt_id": None,
         "memex_supply_digest": None,
         "architect_fix_publication_receipt_id": None,
         "architect_fix_publication_binding_digest": None,
     }
+    receipt_digest = canonical_delegated_authority_request_digest(request)
     return {
         "accepted": True,
         "status": "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT",
         "delegated_authority_request": request,
-        "receipt": {
-            "delegated_authority_request_digest": (
-                canonical_delegated_authority_request_digest(request)
-            ),
-        },
+        "receipt": {"delegated_authority_request_digest": receipt_digest},
     }
 
 
@@ -255,14 +257,28 @@ def _authoritative_queue_item() -> dict[str, object]:
     return item
 
 
-def _queue_authority_admission():
+def _queue_authority_admission(result=None):
+    result = result or _authority_request_result()
     request = rehydrate_delegated_authority_request(
-        _authority_request_result()["delegated_authority_request"]
+        result["delegated_authority_request"]
     )
     return _admit_current_queue_authority(
         request=request,
         authoritative_queue_item=_authoritative_queue_item(),
     )
+
+
+def _authorized_authority_request_result():
+    result = _authority_request_result()
+    request = rehydrate_delegated_authority_request(
+        result["delegated_authority_request"]
+    )
+    request, capability, _ = verified_consensus_for_request(request, now=NOW)
+    result["delegated_authority_request"] = request.to_dict()
+    result["receipt"]["delegated_authority_request_digest"] = (
+        canonical_delegated_authority_request_digest(request.to_dict())
+    )
+    return result, capability
 
 
 def _accepted_socket_signer(
@@ -318,6 +334,44 @@ def test_bundle_rejects_partial_configuration(tmp_path: Path) -> None:
     assert "runtime_dependency_bundle_partial_configuration" in bundle.rejection_reasons
 
 
+def test_bundle_threads_only_explicit_consensus_capability_supplier(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    authority_state = tmp_path / "runtime" / "authority-state.json"
+
+    def supplier(request: object) -> object:
+        return request
+
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
+        authority_state_path=authority_state,
+        elevated_consensus_capability_supplier=supplier,
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is True
+    assert bundle.elevated_consensus_capability_supplier is supplier
+
+
+def test_bundle_rejects_noncallable_consensus_capability_supplier(
+    tmp_path: Path,
+) -> None:
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=_repo(tmp_path),
+        runtime_allowed_root=tmp_path / "runtime",
+        authority_state_path=tmp_path / "runtime" / "authority-state.json",
+        elevated_consensus_capability_supplier=object(),
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is False
+    assert "elevated_consensus_capability_supplier_invalid" in (
+        bundle.rejection_reasons
+    )
+
+
 def test_bundle_rejects_paths_inside_repo(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     inside = repo / "authority.json"
@@ -357,10 +411,12 @@ def test_bundle_loads_outside_repo_resolvers_and_fail_closed_signer(tmp_path: Pa
     assert bundle.no_private_key_loaded is True
     assert bundle.no_holoindex_reindex_performed is True
 
+    authority_request, consensus = _authorized_authority_request_result()
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
-        queue_authority_request_dryrun=_authority_request_result(),
-        queue_authority_admission=_queue_authority_admission(),
+        queue_authority_request_dryrun=authority_request,
+        queue_authority_admission=_queue_authority_admission(authority_request),
+        elevated_consensus_capability=consensus,
         store=bundle.authority_store,
         signer=bundle.signer,
         principal_resolver=bundle.principal_resolver,
@@ -372,7 +428,7 @@ def test_bundle_loads_outside_repo_resolvers_and_fail_closed_signer(tmp_path: Pa
     assert result.no_repo_mutation_performed is True
 
 
-def test_bundle_uses_isolated_socket_signer_when_explicitly_configured(tmp_path: Path) -> None:
+def test_plain_isolated_socket_cannot_issue_elevated_authority(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     authority_state = tmp_path / "runtime" / "authority-state.json"
     socket_path = tmp_path / "runtime" / "signer.sock"
@@ -398,23 +454,23 @@ def test_bundle_uses_isolated_socket_signer_when_explicitly_configured(tmp_path:
     assert bundle.no_private_key_loaded is True
     assert bundle.no_worker_spawn_performed is True
 
+    authority_request, consensus = _authorized_authority_request_result()
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
-        queue_authority_request_dryrun=_authority_request_result(),
-        queue_authority_admission=_queue_authority_admission(),
+        queue_authority_request_dryrun=authority_request,
+        queue_authority_admission=_queue_authority_admission(authority_request),
+        elevated_consensus_capability=consensus,
         store=bundle.authority_store,
         signer=bundle.signer,
         principal_resolver=bundle.principal_resolver,
         snapshot_resolver=bundle.snapshot_resolver,
         now=NOW,
     )
-    assert result.decision == "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
+    assert result.decision == "QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT"
     assert result.authority_result is not None
-    assert result.authority_result.accepted is True
+    assert result.authority_result.accepted is False
     assert result.no_openclaw_enqueue_performed is True
-    assert authority_state.exists()
-    stored = json.loads(authority_state.read_text(encoding="utf-8"))
-    assert stored["issued_authorities"]["wre-queue-1"]["status"] == "DELEGATED_AUTHORITY_ISSUED"
+    assert not authority_state.exists()
 
 
 def test_bundle_configures_ed25519_verification_dependencies_when_explicit(tmp_path: Path) -> None:

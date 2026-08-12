@@ -43,10 +43,15 @@ from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission i
     _admit_current_queue_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    canonical_delegated_authority_request_digest,
     rehydrate_delegated_authority_request,
 )
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
     signed_stage_binding,
+)
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_test_support import (
+    sign_with_test_consensus,
+    verified_consensus_for_request,
 )
 
 
@@ -93,6 +98,9 @@ class _MockSignerVerifier:
             signer_loads_no_untrusted_code=True,
             no_secret_material_returned=True,
         )
+
+    def sign_with_elevated_consensus(self, request, permit):
+        return sign_with_test_consensus(self, request, permit, now=NOW)
 
     def verify(self, public_key: str, signing_input: str, signature: str) -> bool:
         secret = self.secrets.get(public_key)
@@ -166,6 +174,14 @@ def _queue_result():
         "progressive_policy_stage_receipt": binding["progressive_policy_stage_receipt"],
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + ("b" * 64),
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+        "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:author"
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
     }
     return {
         "accepted": True,
@@ -192,8 +208,9 @@ def _authoritative_queue_item():
 
 
 def _queue_authority_admission(dryrun):
+    payload = dryrun.to_dict() if hasattr(dryrun, "to_dict") else dryrun
     request = rehydrate_delegated_authority_request(
-        dryrun.to_dict()["delegated_authority_request"]
+        payload["delegated_authority_request"]
     )
     return _admit_current_queue_authority(
         request=request,
@@ -224,6 +241,14 @@ def _profile(**overrides):
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + ("b" * 64),
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+        "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:author"
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
     }
     profile.update(overrides)
     return profile
@@ -244,10 +269,26 @@ def _runtime_result(**profile_overrides):
         work_order=_work_order(),
     )
     assert dryrun.accepted is True, dryrun.rejection_reasons
+    dryrun_payload = dryrun.to_dict()
+    request = rehydrate_delegated_authority_request(
+        dryrun_payload["delegated_authority_request"]
+    )
+    request, consensus, _ = verified_consensus_for_request(
+        request,
+        now=NOW,
+        principal=_PrincipalResolver().resolve(
+            request.principal_id, request.principal_provider
+        ),
+    )
+    dryrun_payload["delegated_authority_request"] = request.to_dict()
+    dryrun_payload["receipt"]["delegated_authority_request_digest"] = (
+        canonical_delegated_authority_request_digest(request.to_dict())
+    )
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
-        queue_authority_request_dryrun=dryrun.to_dict(),
-        queue_authority_admission=_queue_authority_admission(dryrun),
+        queue_authority_request_dryrun=dryrun_payload,
+        queue_authority_admission=_queue_authority_admission(dryrun_payload),
+        elevated_consensus_capability=consensus,
         store=InMemoryAuthorityRuntimeStore(),
         signer=signer,
         principal_resolver=_PrincipalResolver(),

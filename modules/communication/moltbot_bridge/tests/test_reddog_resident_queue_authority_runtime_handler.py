@@ -62,6 +62,14 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_rec
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     with_architect_fix_publication,
 )
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_test_support import (
+    sign_with_test_consensus,
+    verified_consensus_for_request,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    canonical_delegated_authority_request_digest,
+    rehydrate_delegated_authority_request,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -120,6 +128,9 @@ class _MockSigner:
             signer_loads_no_untrusted_code=True,
             no_secret_material_returned=True,
         )
+
+    def sign_with_elevated_consensus(self, request, permit):
+        return sign_with_test_consensus(self, request, permit, now=NOW)
 
 
 class _PrincipalResolver:
@@ -191,6 +202,18 @@ def _snapshot() -> dict[str, object]:
                 "progressive_policy_stage_receipt": stage.to_dict(),
                 "independent_verifier_required": True,
                 "no_execution_performed": True,
+                "model_selection_receipt_id": "selection:author",
+                "model_selection_digest": "sha256:" + ("b" * 64),
+                "model_runtime_binding_receipt_id": (
+                    "reddog_model_runtime_binding:author"
+                ),
+                "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+                "model_runtime_binding_verification_receipt_id": (
+                    "model_runtime_binding_verification:author"
+                ),
+                "model_runtime_binding_verification_digest": (
+                    "sha256:" + ("e" * 64)
+                ),
             }
         ],
     }
@@ -219,6 +242,14 @@ def _profile() -> dict[str, object]:
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + ("b" * 64),
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+        "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:author"
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
     }
 
 
@@ -227,7 +258,7 @@ class _WorkOrderResolver:
         return {"work_order_id": work_order_id, "base_ref": "main"}
 
 
-def _seed_authority_request(store: InMemoryResidentQueueChainResultsStore) -> None:
+def _seed_authority_request(store: InMemoryResidentQueueChainResultsStore):
     handler = build_reddog_resident_queue_authority_request_stage_handler(
         work_state_snapshot=_snapshot(),
         authority_profile=_profile(),
@@ -242,6 +273,25 @@ def _seed_authority_request(store: InMemoryResidentQueueChainResultsStore) -> No
         now_iso=NOW_ISO,
     )
     assert result.accepted is True
+    state = dict(store.load())
+    bound, supplier = _bind_consensus_result(
+        dict(state["stage_results"][AUTHORITY_REQUEST_STAGE_KEY])
+    )
+    state["stage_results"][AUTHORITY_REQUEST_STAGE_KEY] = bound
+    store.commit(state, expected_revision=state.get("revision"))
+    return supplier
+
+
+def _bind_consensus_result(result):
+    request = rehydrate_delegated_authority_request(
+        result["delegated_authority_request"]
+    )
+    request, capability, _ = verified_consensus_for_request(request, now=NOW)
+    result["delegated_authority_request"] = request.to_dict()
+    result["receipt"]["delegated_authority_request_digest"] = (
+        canonical_delegated_authority_request_digest(request.to_dict())
+    )
+    return result, lambda candidate: capability
 
 
 def _runtime_handler(
@@ -249,6 +299,8 @@ def _runtime_handler(
     chain_store: InMemoryResidentQueueChainResultsStore,
     authority_store: InMemoryAuthorityRuntimeStore | None = None,
     signer: object | None = _DEFAULT_SIGNER,
+    consensus_supplier=None,
+    work_state_supplier=_snapshot,
 ):
     return build_reddog_resident_queue_authority_runtime_stage_handler(
         chain_results_store=chain_store,
@@ -259,12 +311,14 @@ def _runtime_handler(
         now=NOW,
         work_state_snapshot=_snapshot(),
         authority_profile=_profile(),
+        work_state_supplier=work_state_supplier,
+        elevated_consensus_capability_supplier=consensus_supplier,
     )
 
 
 def test_dispatcher_records_authority_runtime_result_and_advances_to_verification() -> None:
     chain_store = InMemoryResidentQueueChainResultsStore()
-    _seed_authority_request(chain_store)
+    consensus_supplier = _seed_authority_request(chain_store)
     authority_store = InMemoryAuthorityRuntimeStore()
     signer = _MockSigner()
 
@@ -277,6 +331,7 @@ def test_dispatcher_records_authority_runtime_result_and_advances_to_verificatio
                 chain_store=chain_store,
                 authority_store=authority_store,
                 signer=signer,
+                consensus_supplier=consensus_supplier,
             )
         },
         now_iso=NOW_ISO,
@@ -294,6 +349,31 @@ def test_dispatcher_records_authority_runtime_result_and_advances_to_verificatio
     assert stage["no_worker_spawn_performed"] is True
     assert stage["no_openclaw_enqueue_performed"] is True
     assert state["no_repo_mutation_performed"] is True
+
+
+def test_high_authority_rejects_without_current_work_state_supplier() -> None:
+    chain_store = InMemoryResidentQueueChainResultsStore()
+    consensus_supplier = _seed_authority_request(chain_store)
+    signer = _MockSigner()
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            AUTHORITY_RUNTIME_STAGE_KEY: _runtime_handler(
+                chain_store=chain_store,
+                signer=signer,
+                consensus_supplier=consensus_supplier,
+                work_state_supplier=None,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is False
+    assert FAIL_RECORD_REJECTED in result.rejection_reasons
+    assert signer.requests == []
 
 
 def test_runtime_revalidates_committed_publication_before_signing() -> None:
@@ -323,6 +403,7 @@ def test_runtime_revalidates_committed_publication_before_signing() -> None:
             accepted_stages=(),
         )
     )
+    request_result, consensus_supplier = _bind_consensus_result(dict(request_result))
     chain_store = InMemoryResidentQueueChainResultsStore({
         "schema_version": "reddog_resident_queue_chain_results.v1",
         "stage_results": {AUTHORITY_REQUEST_STAGE_KEY: request_result},
@@ -339,7 +420,6 @@ def test_runtime_revalidates_committed_publication_before_signing() -> None:
         authority_profile=profile,
         work_state_supplier=lambda: prepared,
     )
-
     result = handler(
         ResidentQueueStageDispatchRequest(
             stage_key=AUTHORITY_RUNTIME_STAGE_KEY,
@@ -350,7 +430,6 @@ def test_runtime_revalidates_committed_publication_before_signing() -> None:
             accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY,),
         )
     )
-
     assert result["decision"] == QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT
     assert FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED in result[
         "rejection_reasons"
@@ -380,6 +459,7 @@ def test_runtime_signs_current_committed_publication_binding() -> None:
             accepted_stages=(),
         )
     )
+    request_result, consensus_supplier = _bind_consensus_result(dict(request_result))
     chain_store = InMemoryResidentQueueChainResultsStore({
         "schema_version": "reddog_resident_queue_chain_results.v1",
         "stage_results": {AUTHORITY_REQUEST_STAGE_KEY: request_result},
@@ -395,8 +475,8 @@ def test_runtime_signs_current_committed_publication_binding() -> None:
         work_state_snapshot=committed,
         authority_profile=profile,
         work_state_supplier=lambda: committed,
+        elevated_consensus_capability_supplier=consensus_supplier,
     )
-
     result = handler(
         ResidentQueueStageDispatchRequest(
             stage_key=AUTHORITY_RUNTIME_STAGE_KEY,
@@ -407,7 +487,6 @@ def test_runtime_signs_current_committed_publication_binding() -> None:
             accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY,),
         )
     )
-
     work_authority = result["authority_result"]["work_authority"]
     assert result["decision"] == QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT
     assert work_authority["architect_fix_publication_receipt_id"] == profile[
@@ -472,7 +551,7 @@ def test_wrong_next_action_rejects_direct_handler_call() -> None:
 
 def test_runtime_rejection_is_not_recorded_by_dispatcher() -> None:
     chain_store = InMemoryResidentQueueChainResultsStore()
-    _seed_authority_request(chain_store)
+    consensus_supplier = _seed_authority_request(chain_store)
 
     result = invoke_reddog_resident_queue_next_stage_dispatch(
         explicit_resident_queue_stage_dispatch_requested=True,
@@ -481,7 +560,8 @@ def test_runtime_rejection_is_not_recorded_by_dispatcher() -> None:
         handlers={
             AUTHORITY_RUNTIME_STAGE_KEY: _runtime_handler(
                 chain_store=chain_store,
-                signer=None,
+                    signer=None,
+                    consensus_supplier=consensus_supplier,
             )
         },
         now_iso=NOW_ISO,

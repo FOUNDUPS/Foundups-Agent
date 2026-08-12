@@ -116,12 +116,7 @@ def optional_authority_bindings_valid(request: Any) -> bool:
     for receipt_field, digest_field in _OPTIONAL_BINDING_FIELDS:
         receipt_id = getattr(request, receipt_field)
         digest = getattr(request, digest_field)
-        if receipt_field == "memex_supply_receipt_id":
-            valid = optional_authority_binding_values_valid(receipt_id, digest)
-        else:
-            valid = bool(receipt_id) == bool(digest) and (
-                not digest or str(digest).startswith("sha256:")
-            )
+        valid = optional_authority_binding_values_valid(receipt_id, digest)
         if not valid:
             return False
     return True
@@ -144,9 +139,9 @@ def runtime_binding_request_valid(request: Any) -> bool | None:
         all(runtime)
         and all(verification)
         and str(runtime[0]).startswith("reddog_model_runtime_binding:")
-        and str(runtime[1]).startswith("sha256:")
+        and is_sha256_digest(runtime[1])
         and str(verification[0]).startswith("model_runtime_binding_verification:")
-        and str(verification[1]).startswith("sha256:")
+        and is_sha256_digest(verification[1])
     )
     return True if valid else None
 

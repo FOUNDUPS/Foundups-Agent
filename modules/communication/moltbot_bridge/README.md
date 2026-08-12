@@ -1,5 +1,28 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## Canonical elevated-authority consensus capability
+
+[OBSERVED] HIGH delegated-authority requests can now be projected onto exact
+identity and work-authority signer requests, verified against current policy,
+sovereign authorization, distinct signed reviewer decisions, model/runtime
+evidence, and signer-side transactional replay admission. The resulting process-local
+capability is non-constructible, non-copyable, non-serializable, and usable only
+for its exact two child requests. The signer re-verifies the complete proof at
+the independent secret-grant boundary before key resolution.
+
+[OBSERVED] Signed child inputs must be byte-canonical JSON with no duplicate
+keys, and their payload digest is recomputed before consensus projection.
+Elevated grant-authority transport is socket v2 only. Principal and RedDog
+children use distinct target-bound grant-provider identities. Signer replay state is
+reserved before policy/signing and committed only after an accepted signature;
+every prior rejection rolls it back.
+
+[SPECIFIED_NOT_IMPLEMENTED] Production HIGH authority remains fail closed. The
+signed E0 generation does not yet supply authenticated author runtime evidence,
+reviewer provider membership, reviewer keys/runtime evidence, exact sovereign
+delegated-request authorization, or the durable consensus nonce authority. Production signer
+composition therefore does not instantiate this path. ULTRA remains closed.
+
 ## Independent signer secret-grant provider
 
 [OBSERVED] Signed owner policy v5 binds the independent grant authority's key
@@ -14,10 +37,10 @@ signer, WSP 71 backend factory, signed owner policy and durable replay/high-wate
 store.
 
 [SPECIFIED_NOT_IMPLEMENTED] This foundation cannot activate the production
-authoritative-use path: that contract accepts HIGH/ULTRA while this provider
-rejects every elevated tier until canonical consensus supplies an opaque,
-verified capability. Root-owned service provisioning, distinct-OS-principal
-supervision and the live canary also remain unimplemented.
+authoritative-use path: HIGH now accepts only the canonical opaque consensus
+capability, but authenticated production authority suppliers and signer-service
+composition remain absent. ULTRA, root-owned service provisioning,
+distinct-OS-principal supervision and the live canary remain unimplemented.
 
 ## Root-served signer-revocation anchor
 

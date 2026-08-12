@@ -19,25 +19,59 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_issuance import (
     validate_secret_grant_signing_request,
 )
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_verification import (
+    ElevatedConsensusSignerAuthority,
+)
+from modules.communication.moltbot_bridge.src.reddog_elevated_consensus_signer_reservation import (
+    VerifiedElevatedConsensusSignerReservation,
+    rollback_elevated_consensus_nonce,
+)
 
 REJECT_POLICY_MISSING = "REJECT_ED25519_SIGNER_POLICY_MISSING"
 REJECT_REQUEST_INVALID = "REJECT_ED25519_SIGNER_REQUEST_INVALID"
 
 
-def secret_grant_signer_rejection(
+def prepare_secret_grant_signer_admission(
     backend: Any, request: SigningRequest, *, now_epoch: int
-) -> str:
-    """Validate grant domain and atomically enforce signed rate policy."""
+) -> tuple[str, VerifiedElevatedConsensusSignerReservation | None]:
+    """Validate grant/rate policy and reserve elevated replay state."""
 
     if request.requested_operation != SECRET_GRANT_SIGNING_OPERATION:
-        return ""
+        return "", None
     policy = backend.secret_grant_authority_policy
     if policy is None:
-        return REJECT_POLICY_MISSING
-    if validate_secret_grant_signing_request(
+        return REJECT_POLICY_MISSING, None
+    grant = validate_secret_grant_signing_request(
         request, policy, now_epoch=now_epoch
-    ) is None:
-        return REJECT_REQUEST_INVALID
+    )
+    if grant is None:
+        return REJECT_REQUEST_INVALID, None
+    reservation = _reserve_elevated(backend, request, grant, now_epoch)
+    if str(grant["authority_tier"]) != "LOW" and reservation is None:
+        return REJECT_REQUEST_INVALID, None
+    rejection = _rate_rejection(backend, policy, now_epoch)
+    if rejection:
+        rollback_elevated_consensus_nonce(reservation)
+        return rejection, None
+    return "", reservation
+
+
+def _reserve_elevated(
+    backend: Any, request: SigningRequest, grant: Any, now_epoch: int
+) -> VerifiedElevatedConsensusSignerReservation | None:
+    if str(grant["authority_tier"]) == "LOW":
+        return None
+    authority = backend.elevated_consensus_signer_authority
+    if type(authority) is not ElevatedConsensusSignerAuthority:
+        return None
+    return authority.reserve(
+        request.elevated_consensus_proof,
+        signing_request_digest=str(grant["signing_request_digest"]),
+        now=now_epoch,
+    )
+
+
+def _rate_rejection(backend: Any, policy: Any, now_epoch: int) -> str:
     rate = backend.secret_grant_rate_authority
     if (
         type(rate) is not DurableSignerSecretGrantRateAuthority
@@ -63,4 +97,4 @@ def secret_grant_signer_rejection(
     return "" if admitted else REJECT_REQUEST_INVALID
 
 
-__all__ = ["secret_grant_signer_rejection"]
+__all__ = ["prepare_secret_grant_signer_admission"]

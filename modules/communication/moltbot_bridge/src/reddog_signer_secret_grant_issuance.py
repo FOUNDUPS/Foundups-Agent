@@ -38,6 +38,7 @@ def build_secret_grant_signing_request(
     *,
     policy: SignerSecretGrantAuthorityPolicy,
     consensus_receipt_digest: str | None,
+    elevated_consensus_proof: Mapping[str, Any] | None = None,
 ) -> SigningRequest:
     """Build one canonical request for the independently hosted grant signer."""
 
@@ -47,7 +48,8 @@ def build_secret_grant_signing_request(
     ):
         raise ValueError("secret_grant_signing_request_invalid")
     if secret_grant_consensus_rejected(
-        str(checked["authority_tier"]), consensus_receipt_digest
+        str(checked["authority_tier"]), consensus_receipt_digest,
+        verified_consensus=elevated_consensus_proof is not None,
     ):
         raise ValueError("secret_grant_signing_consensus_invalid")
     return SigningRequest(
@@ -61,6 +63,11 @@ def build_secret_grant_signing_request(
         requested_operation=SECRET_GRANT_SIGNING_OPERATION,
         authority_tier=str(checked["authority_tier"]),
         consensus_receipt_digest=consensus_receipt_digest,
+        elevated_consensus_proof=(
+            dict(elevated_consensus_proof)
+            if elevated_consensus_proof is not None
+            else None
+        ),
     )
 
 
@@ -77,7 +84,10 @@ def validate_secret_grant_signing_request(
     grant = _grant_from_signing_input(request.signing_input, now_epoch)
     if grant is None or secret_grant_binding_rejected(grant, policy):
         return None
-    expected = _request_for_comparison(grant, policy, request.consensus_receipt_digest)
+    expected = _request_for_comparison(
+        grant, policy, request.consensus_receipt_digest,
+        request.elevated_consensus_proof,
+    )
     if expected is None or request.to_dict() != expected.to_dict():
         return None
     return grant
@@ -87,10 +97,14 @@ def _request_for_comparison(
     grant: Mapping[str, Any],
     policy: SignerSecretGrantAuthorityPolicy,
     consensus: str | None,
+    elevated_consensus_proof: Mapping[str, Any] | None,
 ) -> SigningRequest | None:
     try:
         return build_secret_grant_signing_request(
-            grant, policy=policy, consensus_receipt_digest=consensus
+            grant,
+            policy=policy,
+            consensus_receipt_digest=consensus,
+            elevated_consensus_proof=elevated_consensus_proof,
         )
     except (KeyError, TypeError, ValueError):
         return None

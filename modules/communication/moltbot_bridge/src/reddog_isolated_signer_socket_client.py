@@ -43,7 +43,7 @@ REJECT_SIGNER_SOCKET_RESPONSE_TOO_LARGE = "REJECT_SIGNER_SOCKET_RESPONSE_TOO_LAR
 REJECT_SIGNER_SOCKET_RESPONSE_INVALID = "REJECT_SIGNER_SOCKET_RESPONSE_INVALID"
 
 DEFAULT_SIGNER_SOCKET_TIMEOUT_S = 5.0
-DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES = 16384
+DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES = 32768
 
 SignerSocketConnector = Callable[[Path, bytes, float, int], bytes]
 
@@ -78,10 +78,18 @@ class RedDogIsolatedSignerSocketClient(IsolatedSignerClient):
 
         if not isinstance(request, SigningRequest):
             return _reject(RuntimeRejectCode.MALFORMED_REQUEST)
-        return self._roundtrip({
-            "schema_version": "reddog_signer_socket_request.v1",
+        elevated = request.elevated_consensus_proof is not None
+        payload = {
+            "schema_version": (
+                "reddog_signer_socket_request.v2"
+                if elevated
+                else "reddog_signer_socket_request.v1"
+            ),
             "request": request.to_dict(),
-        })
+        }
+        if elevated:
+            payload["secret_access_grant"] = None
+        return self._roundtrip(payload)
 
     def sign_with_secret_grant(
         self, request: SigningRequest, secret_access_grant: Mapping[str, Any]

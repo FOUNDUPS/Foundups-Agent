@@ -1,7 +1,5 @@
 """Current-generation provider for independently signed secret grants."""
-
 from __future__ import annotations
-
 import secrets
 import time
 from contextlib import contextmanager
@@ -42,8 +40,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_issuanc
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authority_policy import (
     SignerSecretGrantAuthorityPolicy,
 )
-
-
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
+    VerifiedElevatedAuthoritySigningPermit,
+)
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_client import (
+    ElevatedConsensusGrantProviderIdentity,
+    admit_secret_grant_consensus,
+)
 @dataclass(frozen=True, slots=True)
 class IndependentGrantAuthorityBinding:
     """Public client binding for a separately hosted grant signer service."""
@@ -69,21 +72,36 @@ class IndependentSignerSecretGrantProvider:
     nonce_factory: Callable[[], str] = lambda: secrets.token_hex(32)
     ttl_seconds: int = 30
 
+    def elevated_consensus_provider_identity(self):
+        authority = self.grant_authority
+        return ElevatedConsensusGrantProviderIdentity(
+            authority.principal_id, authority.principal_provider,
+            authority.public_key, authority.key_epoch,
+            str(self.owner_config_path.resolve()),
+        )
     @contextmanager
-    def lease(self, request: SigningRequest) -> Iterator[Mapping[str, Any]]:
+    def lease(
+        self,
+        request: SigningRequest,
+        *,
+        elevated_consensus_signing_permit: VerifiedElevatedAuthoritySigningPermit
+        | None = None,
+    ) -> Iterator[Mapping[str, Any]]:
         """Keep E0 current-generation admission pinned through target use."""
 
         if type(request) is not SigningRequest:
             raise ValueError("secret_grant_request_invalid")
+        consensus_proof = admit_secret_grant_consensus(
+            request, elevated_consensus_signing_permit, now=self._now()
+        )
         with lease_validated_owner_e0_current_admission(
             owner_config_path=self.owner_config_path,
             repo_root=self.repo_root.resolve(),
             policy=self.owner_policy,
         ) as owner:
-            grant = self._issue(request, owner)
+            grant = self._issue(request, owner, consensus_proof)
             yield grant
-
-    def _issue(self, request: SigningRequest, owner: Any) -> Mapping[str, Any]:
+    def _issue(self, request: SigningRequest, owner: Any, consensus_proof: Mapping[str, Any] | None) -> Mapping[str, Any]:
         now = self._now()
         binding = self._resolve_binding(owner)
         policy = self._authority_policy(owner, binding)
@@ -92,6 +110,7 @@ class IndependentSignerSecretGrantProvider:
             grant,
             policy=policy,
             consensus_receipt_digest=request.consensus_receipt_digest,
+            elevated_consensus_proof=consensus_proof,
         )
         response = self.grant_authority.client.sign(sign_request)
         require_secret_grant_signer_response(
@@ -178,7 +197,4 @@ class IndependentSignerSecretGrantProvider:
         ):
             raise ValueError("secret_grant_nonce_invalid")
         return value
-__all__ = [
-    "IndependentGrantAuthorityBinding",
-    "IndependentSignerSecretGrantProvider",
-]
+__all__ = ["IndependentGrantAuthorityBinding", "IndependentSignerSecretGrantProvider"]

@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import ast
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
+    DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     FAIL_SIGNER_SOCKET_DEVICE_PREFIX,
     FAIL_SIGNER_SOCKET_PATH_INSIDE_REPO,
     FAIL_SIGNER_SOCKET_PATH_MISSING,
@@ -191,6 +193,32 @@ def test_client_v2_binds_exact_secret_access_grant(tmp_path: Path) -> None:
         "request": _request().to_dict(),
         "secret_access_grant": grant,
     }
+
+
+def test_elevated_grant_authority_request_uses_strict_v2(tmp_path: Path) -> None:
+    observed: dict[str, object] = {}
+
+    def connector(_path: Path, payload: bytes, _timeout: float, limit: int) -> bytes:
+        observed.update(json.loads(payload.decode("utf-8")))
+        observed["limit"] = limit
+        return _accepted_response()
+
+    built = build_reddog_isolated_signer_socket_client(
+        repo_root=_repo(tmp_path),
+        socket_path=_socket_path(tmp_path),
+        connector=connector,
+    )
+    assert built.client is not None
+    request = replace(
+        _request(),
+        requested_operation="issue_signer_secret_access_grant",
+        elevated_consensus_proof={"schema_version": "proof-fixture"},
+    )
+
+    assert built.client.sign(request).accepted is True
+    assert observed["schema_version"] == "reddog_signer_socket_request.v2"
+    assert observed["secret_access_grant"] is None
+    assert observed["limit"] == DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES == 32768
 
 
 def test_client_rejects_malformed_oversized_and_connector_failures(tmp_path: Path) -> None:

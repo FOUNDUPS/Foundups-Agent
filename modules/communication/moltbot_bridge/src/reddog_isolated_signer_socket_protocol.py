@@ -33,6 +33,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     constant_time_compare,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authority_policy import (
+    SECRET_GRANT_SIGNING_OPERATION,
+)
 
 
 SIGNER_SOCKET_REQUEST_SCHEMA_VERSION = "reddog_signer_socket_request.v1"
@@ -55,8 +58,9 @@ REJECT_SIGNER_SOCKET_SECRET_GRANT_UNSUPPORTED = (
     "REJECT_SIGNER_SOCKET_SECRET_GRANT_UNSUPPORTED"
 )
 
-DEFAULT_SIGNER_SOCKET_MAX_REQUEST_BYTES = 16384
+DEFAULT_SIGNER_SOCKET_MAX_REQUEST_BYTES = 32768
 _REQUEST_FIELDS = frozenset(SigningRequest.__dataclass_fields__)
+_REQUEST_BASE_FIELDS = _REQUEST_FIELDS - {"elevated_consensus_proof"}
 _PUBLIC_REJECTION_CODES = frozenset(
     {
         REJECT_SIGNER_SOCKET_REQUEST_TOO_LARGE,
@@ -203,11 +207,19 @@ def _parse_request(
         return _reject(REJECT_SIGNER_SOCKET_REQUEST_INVALID)
     strict = schema == SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2
     expected_envelope = {"schema_version", "request", "secret_access_grant"}
-    if strict and (set(payload) != expected_envelope or set(raw) != _REQUEST_FIELDS):
+    if strict and (
+        set(payload) != expected_envelope
+        or set(raw) not in {_REQUEST_BASE_FIELDS, _REQUEST_FIELDS}
+    ):
         return _reject(REJECT_SIGNER_SOCKET_REQUEST_INVALID)
     request = _build_signing_request(raw, strict=strict)
     if isinstance(request, SigningResponse):
         return request
+    if not strict and (
+        set(payload) != {"schema_version", "request"}
+        or request.elevated_consensus_proof is not None
+    ):
+        return _reject(REJECT_SIGNER_SOCKET_REQUEST_INVALID)
     return _parse_request_grant(payload, request, strict=strict)
 
 
@@ -247,6 +259,11 @@ def _build_signing_request(
                 if raw.get("consensus_receipt_digest")
                 else None
             ),
+            elevated_consensus_proof=(
+                dict(raw["elevated_consensus_proof"])
+                if isinstance(raw.get("elevated_consensus_proof"), Mapping)
+                else None
+            ),
         )
     except Exception:
         return _reject(REJECT_SIGNER_SOCKET_REQUEST_INVALID)
@@ -260,9 +277,15 @@ def _parse_request_grant(
 ) -> tuple[SigningRequest, Mapping[str, Any] | None] | SigningResponse:
     grant = payload.get("secret_access_grant")
     if strict:
-        if not isinstance(grant, Mapping) or not _assert_ascii_deep(grant):
-            return _reject(REJECT_SIGNER_SOCKET_REQUEST_INVALID)
-        return request, dict(grant)
+        if isinstance(grant, Mapping) and _assert_ascii_deep(grant):
+            return request, dict(grant)
+        if (
+            grant is None
+            and request.requested_operation == SECRET_GRANT_SIGNING_OPERATION
+            and isinstance(request.elevated_consensus_proof, Mapping)
+        ):
+            return request, None
+        return _reject(REJECT_SIGNER_SOCKET_REQUEST_INVALID)
     if grant is not None:
         return _reject(REJECT_SIGNER_SOCKET_REQUEST_INVALID)
     return request, None
@@ -392,6 +415,7 @@ def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 def _strict_request_types(raw: Mapping[str, Any]) -> bool:
     return all(
         (key == "consensus_receipt_digest" and value is None)
+        or (key == "elevated_consensus_proof" and isinstance(value, Mapping))
         or isinstance(value, str)
         for key, value in raw.items()
     )

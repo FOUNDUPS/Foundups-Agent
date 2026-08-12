@@ -1,5 +1,14 @@
 # RedDog ModLog
 
+## 2026-08-12 - Canonical elevated-consensus capability pin (0.4.89)
+
+- Pinned the complete generated backend closure for canonical elevated
+  consensus, strict socket-v2 transport and transactional signer nonce use.
+- Raised the bounded manifest file-count ceiling to 1400 after the generated
+  closure reached 1310 files; byte and total-size limits remain unchanged.
+- Added no thin-client execution path and did not compose elevated production
+  authority.
+
 ## 2026-08-12 - Grant-authority key-epoch compatibility pin (0.4.88)
 
 - Regenerated the exact backend manifest after owner E0 policy v5 bound the

@@ -115,14 +115,16 @@ def secret_grant_binding_rejected(
     )
 
 
-def secret_grant_consensus_rejected(tier: str, consensus: str | None) -> bool:
-    """Keep elevated issuance closed until verified consensus is available."""
+def secret_grant_consensus_rejected(
+    tier: str, consensus: str | None, *, verified_consensus: bool = False
+) -> bool:
+    """Require opaque verifier admission, never a digest alone."""
 
     if consensus is not None and not is_sha256_digest(consensus):
         return True
-    # A digest-shaped value is not authenticated consensus. A later slice must
-    # supply an opaque capability from the canonical consensus verifier.
-    return consensus is not None if tier == "LOW" else True
+    if tier == "LOW":
+        return consensus is not None or verified_consensus
+    return consensus is None or not verified_consensus
 
 
 def _ascii_item(value: object) -> bool:

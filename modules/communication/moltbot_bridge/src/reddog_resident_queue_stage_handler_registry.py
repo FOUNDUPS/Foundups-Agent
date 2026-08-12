@@ -250,6 +250,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     pattern_memory_admission_sink: Any = None,
     verified_outcome_evidence_publisher: Any = None,
     worker_dispatch_writer: Any = None,
+    elevated_consensus_capability_supplier: Any = None,
     trusted_now_epoch: Optional[Callable[[], int]] = None,
     assurance_reservation_store: Any = None,
     worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
@@ -264,11 +265,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     ):
         return ResidentQueueStageHandlerRegistry(
             handlers={},
-            missing_stage_reasons={
-                "production_environment": (
-                    "governed_execution_valve_environment_required",
-                )
-            },
+            missing_stage_reasons={"production_environment": ("governed_execution_valve_environment_required",)},
         )
     _add_if_ready(
         handlers,
@@ -306,6 +303,8 @@ def build_reddog_resident_queue_stage_handler_registry(
             leeway_s=leeway_s,
             work_state_snapshot=work_state_snapshot,
             authority_profile=authority_profile or {},
+            work_state_supplier=getattr(authoritative_work_state_store, "load", None),
+            elevated_consensus_capability_supplier=elevated_consensus_capability_supplier,
         ),
     )
     _add_if_ready(

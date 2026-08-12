@@ -146,6 +146,31 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
     assert registry.missing_stage_reasons == {}
 
 
+def test_registry_threads_current_state_and_consensus_supplier_to_runtime() -> None:
+    dummy = Dummy()
+
+    def capability_supplier(request: object) -> object:
+        return request
+
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authoritative_work_state_store=dummy,
+        authority_profile={"principal_id": "github:mjtrout"},
+        authority_store=dummy,
+        signer=dummy,
+        principal_resolver=dummy,
+        snapshot_resolver=dummy,
+        now_epoch=1783984309,
+        elevated_consensus_capability_supplier=capability_supplier,
+        now_iso=NOW_ISO,
+    )
+
+    handler = registry.handlers["authority_runtime"]
+    assert handler.work_state_supplier == dummy.load
+    assert handler.elevated_consensus_capability_supplier is capability_supplier
+
+
 @pytest.mark.parametrize(
     "missing_name",
     (

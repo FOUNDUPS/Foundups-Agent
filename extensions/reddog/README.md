@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.88
+Version: 0.4.89
+
+[OBSERVED] Version 0.4.89 pins the canonical elevated-consensus capability,
+strict signer transport, transactional signer nonce, and complete generated
+runtime dependency closure. It does not activate elevated production authority.
 
 [OBSERVED] Version 0.4.88 pins owner E0 policy v5 and the independent
 grant-authority key-epoch binding. Thin-client behavior and execution authority

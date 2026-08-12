@@ -1,3 +1,42 @@
+## 2026-08-12: Canonical elevated-authority consensus regressions
+- Review hardening rejects noncanonical or duplicate signed JSON, payload
+  digest substitution, socket-v1 proof downgrade, missing author-runtime
+  evidence, and unsigned production composition. Consensus nonce admission is
+  now reserve -> sign/finalize -> commit, with rollback on rate rejection or
+  signing failure.
+- A composed production-seam test covers capability -> role-specific grant
+  provider -> strict socket v2 -> Ed25519 grant admission -> resolve-per-sign
+  target signer -> durable authority commit. The inherited authority runtime
+  was decomposed from 926 to 667 lines under its 737-line no-growth ceiling.
+- Proved exact two-child signer binding, wrong-request non-consumption, one
+  winner under concurrent capability and signer admission, and no nonce burn at
+  outer verification.
+- Rejected stale/revoked reviewer keys, reviewer identity/key/model/runtime
+  aliasing, weak policy substitution, sovereign substitution, malformed proof,
+  child replay and plain-socket elevated signing. Locked all 13 production
+  and 15 test modules to 200 lines and functions to 50 lines.
+- Independent-review regressions additionally reject an approved reviewer ID
+  under an unapproved provider, substituted or malformed author-runtime
+  evidence, one grant provider reused for both roles, and repeated malformed
+  proofs before rate/private-key use. The composed E2E now reconstructs the
+  atomic authority store and proves the issued authority survives restart.
+- Final exact-SHA review removed the commit-on-admit API, moved concurrency to
+  the real Ed25519 path, rejects same-authority providers despite requester
+  aliases, and locks all three modified runtime host functions to 60 lines.
+- Trust-review regressions reject one declared authority controlling two
+  otherwise distinct keys/services, prove current-state and explicit supplier
+  threading through the registry/bundle, and keep WSP 62 at its existing
+  no-growth ceilings. The composed fixture now uses role-scoped authorities.
+- HIGH composition without a current-state supplier rejects before signer use.
+  Backend manifest tests bind the Python-generated digest to the JavaScript
+  extension pin so the installed compatibility gate cannot silently drift.
+- The final changed-file matrix, including author-runtime, provider-
+  independence, inherited resident-queue/OpenClaw integration, WSP 62, and
+  manifest and WSP_62 regressions, passes `329 passed, 3 skipped`. Inherited
+  HIGH-path
+  tests consume real opaque permits through a test-only adapter; production
+  composition remains fail closed and cannot import that adapter.
+
 ## 2026-08-12: Grant-authority key-epoch binding regressions
 - Proved owner policy v5 rejects missing and look-alike epoch fields, and that
   attacker-recomputed policy drift cannot bypass the owner-config binding.

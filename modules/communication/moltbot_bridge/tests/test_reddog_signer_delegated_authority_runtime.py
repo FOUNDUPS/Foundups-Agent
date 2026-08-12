@@ -63,6 +63,12 @@ from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_te
     signed_audit_stage_binding,
     signed_stage_binding,
 )
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_test_support import (
+    verified_consensus_for_request,
+)
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
+    consume_elevated_authority_signing_permit,
+)
 
 _NOW = 1000
 _REPO = "FOUNDUPS/Foundups-Agent"
@@ -102,6 +108,17 @@ class _MockSigner(SignatureVerifier):
             signer_loads_no_untrusted_code=True,
             no_secret_material_returned=True,
         )
+
+    def sign_with_elevated_consensus(self, request, permit):
+        proof = consume_elevated_authority_signing_permit(
+            permit, signing_request=request, now=_NOW
+        )
+        if proof is None:
+            return SigningResponse(
+                accepted=False,
+                rejection_code=RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED,
+            )
+        return self.sign(request)
 
     def verify(self, public_key: str, signing_input: str, signature: str) -> bool:
         secret = self._secrets.get(public_key)
@@ -197,11 +214,11 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
             changed_paths=(f"modules/foundups/{_FID}/src/worker.py",),
         ),
         "model_selection_receipt_id": "sha256:model-selection",
-        "model_selection_digest": "sha256:model-selection-digest",
+        "model_selection_digest": "sha256:" + ("b" * 64),
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
-        "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_digest": "sha256:" + ("c" * 64),
         "model_runtime_binding_verification_receipt_id": "model_runtime_binding_verification:abc123",
-        "model_runtime_binding_verification_digest": "sha256:model-runtime-binding-verification",
+        "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
         "memex_supply_receipt_id": "sha256:memex-supply",
         "memex_supply_digest": _MEMEX_DIGEST,
         "identity_nonce": "identity-nonce-0001",
@@ -272,7 +289,10 @@ def _snapshot(can_write=True, digest="sha256:snap-1", expires_at=_NOW + 600):
     )
 
 
-def _issue(**overrides):
+_AUTO_CONSENSUS = object()
+
+
+def _issue(*, _consensus_capability=_AUTO_CONSENSUS, **overrides):
     if not any(key.startswith("progressive_policy_stage_") for key in overrides):
         operation = str(overrides.get("requested_operation", "edit_foundup_module"))
         paths = tuple(overrides.get("allowed_paths", (f"modules/foundups/{_FID}/src/worker.py",)))
@@ -281,6 +301,10 @@ def _issue(**overrides):
     signer = _MockSigner()
     store = InMemoryAuthorityRuntimeStore()
     snapshot_resolver = _SnapshotResolver({request.permission_snapshot_digest: _snapshot()})
+    consensus = (
+        {} if _consensus_capability is _AUTO_CONSENSUS
+        else {"elevated_consensus_capability": _consensus_capability}
+    )
     result = _issue_authority(
         request=request,
         store=store,
@@ -288,6 +312,7 @@ def _issue(**overrides):
         principal_resolver=_PrincipalResolver(_principal()),
         snapshot_resolver=snapshot_resolver,
         now=_NOW,
+        **consensus,
     )
     return result, signer, store, snapshot_resolver
 
@@ -316,14 +341,14 @@ def test_runtime_issues_records_accepted_by_existing_verifier() -> None:
     assert result.work_authority["model_runtime_binding_receipt_id"] == (
         "reddog_model_runtime_binding:abc123"
     )
-    assert result.work_authority["model_runtime_binding_digest"] == (
-        "sha256:model-runtime-binding"
+    assert result.work_authority["model_runtime_binding_digest"] == "sha256:" + (
+        "c" * 64
     )
     assert result.work_authority["model_selection_receipt_id"] == (
         "sha256:model-selection"
     )
     assert result.work_authority["model_selection_digest"] == (
-        "sha256:model-selection-digest"
+        "sha256:" + ("b" * 64)
     )
     assert result.work_authority["memex_supply_receipt_id"] == (
         "sha256:memex-supply"
@@ -383,6 +408,18 @@ def _authoritative_queue_item(request):
 
 
 def _issue_authority(*, request, **kwargs):
+    consensus_capability = kwargs.pop("elevated_consensus_capability", None)
+    if (
+        consensus_capability is None
+        and request.consensus_receipt_digest
+        and request.sovereign_authorization_digest
+    ):
+        try:
+            request, consensus_capability, _ = verified_consensus_for_request(
+                request, now=kwargs["now"]
+            )
+        except ValueError:
+            consensus_capability = None
     admission = _admit_current_queue_authority(
         request=request,
         authoritative_queue_item=_authoritative_queue_item(request),
@@ -390,6 +427,7 @@ def _issue_authority(*, request, **kwargs):
     return issue_delegated_authority_runtime(
         request=request,
         queue_authority_admission=admission,
+        elevated_consensus_capability=consensus_capability,
         **kwargs,
     )
 
@@ -551,6 +589,22 @@ def test_high_authority_requires_consensus_and_sovereign_authorization() -> None
     result, _, _, _ = _issue(consensus_receipt_digest=None)
     assert result.accepted is False
     assert RuntimeRejectCode.HIGH_AUTHORITY_NEEDS_COSIGN in result.receipt.rejection_reasons
+
+
+def test_high_authority_requires_bound_author_model_runtime_evidence() -> None:
+    result, signer, _, _ = _issue(
+        _consensus_capability=object(),
+        model_runtime_binding_receipt_id=None,
+        model_runtime_binding_digest=None,
+        model_runtime_binding_verification_receipt_id=None,
+        model_runtime_binding_verification_digest=None,
+    )
+
+    assert result.accepted is False
+    assert RuntimeRejectCode.ELEVATED_AUTHOR_RUNTIME_EVIDENCE_REQUIRED in (
+        result.receipt.rejection_reasons
+    )
+    assert signer.requests == []
 
 
 def test_worktree_valve_intent_is_high_authority_even_for_low_operation() -> None:
@@ -1604,6 +1658,9 @@ def test_rehashed_selected_slice_cannot_replace_authoritative_queue_truth() -> N
 
 def test_signer_runtime_rejects_missing_or_replayed_queue_admission() -> None:
     request = _request()
+    request, consensus_capability, _ = verified_consensus_for_request(
+        request, now=_NOW
+    )
     admission = _admit_current_queue_authority(
         request=request,
         authoritative_queue_item=_authoritative_queue_item(request),
@@ -1621,6 +1678,7 @@ def test_signer_runtime_rejects_missing_or_replayed_queue_admission() -> None:
 
     first = issue_delegated_authority_runtime(
         queue_authority_admission=admission,
+        elevated_consensus_capability=consensus_capability,
         **kwargs,
     )
     signer_requests_after_first = list(kwargs["signer"].requests)

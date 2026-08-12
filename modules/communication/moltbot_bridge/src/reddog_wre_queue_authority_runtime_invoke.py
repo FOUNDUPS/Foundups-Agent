@@ -30,6 +30,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
     VerifiedQueueAuthorityAdmission,
 )
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
+    VerifiedElevatedAuthorityConsensusCapability,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
 )
@@ -103,6 +106,9 @@ def invoke_reddog_wre_queue_authority_runtime(
     explicit_queue_authority_runtime_requested: bool,
     queue_authority_request_dryrun: Mapping[str, Any],
     queue_authority_admission: VerifiedQueueAuthorityAdmission | None = None,
+    elevated_consensus_capability: (
+        VerifiedElevatedAuthorityConsensusCapability | None
+    ) = None,
     store: AuthorityRuntimeStore,
     signer: Optional[IsolatedSignerClient],
     principal_resolver: Optional[PrincipalAuthorityResolver],
@@ -118,39 +124,14 @@ def invoke_reddog_wre_queue_authority_runtime(
             explicit_requested=False,
         )
 
-    dryrun = _mapping(queue_authority_request_dryrun)
-    if dryrun.get("accepted") is not True or dryrun.get("status") != QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT:
+    request, rejection = _validated_dryrun_request(
+        _mapping(queue_authority_request_dryrun)
+    )
+    if rejection:
         return _reject(
-            [QueueAuthorityRuntimeInvokeReason.REQUEST_DRYRUN_NOT_ACCEPTED],
+            [rejection],
             explicit_requested=True,
         )
-    request_payload = _mapping(dryrun.get("delegated_authority_request"))
-    if not request_payload:
-        return _reject(
-            [QueueAuthorityRuntimeInvokeReason.REQUEST_PAYLOAD_MISSING],
-            explicit_requested=True,
-        )
-    receipt = _mapping(dryrun.get("receipt"))
-    recorded_digest = receipt.get("delegated_authority_request_digest")
-    try:
-        current_digest = canonical_delegated_authority_request_digest(
-            request_payload
-        )
-        request = rehydrate_delegated_authority_request(request_payload)
-    except Exception:
-        return _reject(
-            [QueueAuthorityRuntimeInvokeReason.REQUEST_PAYLOAD_INVALID],
-            explicit_requested=True,
-        )
-    if not isinstance(recorded_digest, str) or not hmac.compare_digest(
-        current_digest,
-        recorded_digest,
-    ):
-        return _reject(
-            [QueueAuthorityRuntimeInvokeReason.REQUEST_DIGEST_MISMATCH],
-            explicit_requested=True,
-        )
-
     authority = issue_delegated_authority_runtime(
         request=request,
         store=store,
@@ -158,6 +139,7 @@ def invoke_reddog_wre_queue_authority_runtime(
         principal_resolver=principal_resolver,
         snapshot_resolver=snapshot_resolver,
         queue_authority_admission=queue_authority_admission,
+        elevated_consensus_capability=elevated_consensus_capability,
         now=now,
         leeway_s=leeway_s,
     )
@@ -177,6 +159,28 @@ def invoke_reddog_wre_queue_authority_runtime(
         authority_result=authority,
         explicit_queue_authority_runtime_requested=True,
     )
+
+
+def _validated_dryrun_request(dryrun):
+    if (
+        dryrun.get("accepted") is not True
+        or dryrun.get("status") != QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT
+    ):
+        return None, QueueAuthorityRuntimeInvokeReason.REQUEST_DRYRUN_NOT_ACCEPTED
+    payload = _mapping(dryrun.get("delegated_authority_request"))
+    if not payload:
+        return None, QueueAuthorityRuntimeInvokeReason.REQUEST_PAYLOAD_MISSING
+    recorded = _mapping(dryrun.get("receipt")).get(
+        "delegated_authority_request_digest"
+    )
+    try:
+        current = canonical_delegated_authority_request_digest(payload)
+        request = rehydrate_delegated_authority_request(payload)
+    except Exception:
+        return None, QueueAuthorityRuntimeInvokeReason.REQUEST_PAYLOAD_INVALID
+    if not isinstance(recorded, str) or not hmac.compare_digest(current, recorded):
+        return None, QueueAuthorityRuntimeInvokeReason.REQUEST_DIGEST_MISMATCH
+    return request, ""
 
 
 __all__ = [

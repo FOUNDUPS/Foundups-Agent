@@ -1,4 +1,38 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Canonical HIGH-tier consensus capability foundation
+- Review hardening verifies exact canonical signed bytes, rejects duplicate
+  JSON keys and socket-v1 proof downgrade, requires author model-runtime
+  evidence, routes principal and RedDog children through distinct grant
+  providers, and commits signer-owned consensus replay only after an accepted
+  signature. Rate and signing failures roll back the reservation.
+- Independent review then hardened provider-qualified reviewer membership,
+  authoritative author-runtime resolution, false-reservation rejection before
+  rate/private-key use, distinct grant-provider identities, restart-persistent
+  authority-store composition, and broader queue/runtime regressions.
+- Final trust review requires the two grant services to represent distinct
+  declared authority identities as well as distinct keys and service IDs.
+  The resident registry reloads authoritative work state at signing use time,
+  and the existing dependency bundle now threads only an explicitly injected
+  consensus-capability supplier. Missing production supply remains fail closed.
+- HIGH authority now requires the current-state supplier at handler use time;
+  only LOW preserves the inherited startup-snapshot fallback. Authority-tier
+  derivation is shared with the signer runtime rather than duplicated.
+- Extracted bounded signing-plan and execution modules from the inherited
+  delegated-authority runtime. A composed regression reaches role-specific E0
+  grant authorities, strict socket v2, Ed25519 signing, resolve-per-sign and an
+  atomic authority-store commit that survives store reconstruction. Production
+  composition remains blocked.
+- Extended delegated-authority signing with exact identity/work-authority child
+  request binding and a process-local, non-copyable two-use capability. Signed
+  reviewer decisions, reviewer/model/runtime independence, sovereign request
+  binding, policy/TTL checks, strict wire rehydration and signer-side durable
+  replay admission all fail closed at the independent secret-grant boundary.
+- Split contract, rehydration, policy, receipt authority, reviewer evidence,
+  capability, client and signer verification into bounded modules. Production
+  authority remains unavailable until signed E0 supplies authenticated reviewer,
+  runtime, sovereign and nonce authority and composes the signer service. No
+  worker, repository, PR, merge, key-generation, or HoloIndex authority was
+  added. (WSP 00/15/22/50/62/71/97)
 ## 2026-08-12: Root-bound grant-authority key epoch
 - Extended the exact signed owner E0 policy to v5 with the independent grant
   authority key epoch. Policy identity and the owner-config authority-binding

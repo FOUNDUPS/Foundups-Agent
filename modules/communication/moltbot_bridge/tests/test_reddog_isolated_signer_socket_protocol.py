@@ -325,6 +325,35 @@ def test_protocol_v1_rejects_smuggled_secret_grant() -> None:
     assert response["rejection_code"] == REJECT_SIGNER_SOCKET_REQUEST_INVALID
 
 
+def test_protocol_v1_rejects_elevated_consensus_downgrade() -> None:
+    payload = json.loads(
+        _request_payload(elevated_consensus_proof={"schema_version": "proof"})
+    )
+
+    response = _decode(handle_reddog_isolated_signer_socket_request(
+        json.dumps(payload).encode("utf-8"), peer=_peer(), backend=AcceptingBackend()
+    ))
+
+    assert response["rejection_code"] == REJECT_SIGNER_SOCKET_REQUEST_INVALID
+
+
+def test_protocol_v2_accepts_proved_grant_authority_without_target_grant() -> None:
+    payload = json.loads(_request_payload(
+        requested_operation="issue_signer_secret_access_grant",
+        elevated_consensus_proof={"schema_version": "proof"},
+    ))
+    payload["schema_version"] = SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2
+    payload["secret_access_grant"] = None
+    backend = AcceptingBackend()
+
+    response = _decode(handle_reddog_isolated_signer_socket_request(
+        json.dumps(payload).encode("utf-8"), peer=_peer(), backend=backend
+    ))
+
+    assert response["accepted"] is True
+    assert len(backend.requests) == 1
+
+
 def test_protocol_v2_rejects_duplicate_unknown_or_coerced_fields() -> None:
     base = json.loads(_request_payload())
     base["schema_version"] = SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2

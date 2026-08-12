@@ -73,6 +73,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_authority_digest impor
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import GovernedValveUseTimeResolution
 from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import StubAuthoritativeUseLease
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_downstream_test_support import with_downstream_test_consensus
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     ArtifactGenerationModelResult,
     RUNTIME_SURFACE_ARTIFACT_GENERATION,
@@ -115,7 +116,6 @@ from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime i
 from modules.infrastructure.wre_core.src.wre_independent_evidence_producer_runtime import (
     CommandResult,
 )
-
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 MODULE_PATH = (
@@ -213,7 +213,7 @@ def _test_governed_environment(
     provenance["receipt_id"] = _sha256_json(provenance)
     return {**core, "supply_provenance": provenance}, expected
 
-
+@with_downstream_test_consensus
 def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
     """Exercise downstream stages with an explicitly injected governed resolution."""
 
