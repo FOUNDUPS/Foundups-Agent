@@ -184,7 +184,7 @@ def _receipt(
 def _require_consensus_policy(policy: Mapping[str, Any]) -> None:
     tiers = set(policy["allowed_authority_tiers"])
     consensus = set(policy["consensus_required_tiers"])
-    if tiers.intersection({"HIGH", "SOVEREIGN"}) - consensus:
+    if tiers - {"LOW"} - consensus:
         raise ValueError("signer_owner_e0_consensus_policy_invalid")
 
 

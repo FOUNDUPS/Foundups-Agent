@@ -13,9 +13,9 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     canonical_signing_input,
 )
-POLICY_SCHEMA = "reddog-signer-owner-e0-policy.v3"
-POLICY_PREFIX = POLICY_SCHEMA
+POLICY_SCHEMA = POLICY_PREFIX = "reddog-signer-owner-e0-policy.v4"
 MAX_POLICY_TTL_SECONDS = 900
+CANONICAL_AUTHORITY_TIERS = frozenset({"LOW", "HIGH", "ULTRA"})
 POLICY_FIELDS = frozenset(
     {
         "schema_version",
@@ -29,6 +29,7 @@ POLICY_FIELDS = frozenset(
         "grant_authority_principal_id",
         "grant_authority_principal_provider",
         "grant_authority_public_key",
+        "grant_requester_principal_id",
         "revocation_authority_principal_id",
         "revocation_authority_principal_provider",
         "revocation_authority_public_key",
@@ -183,12 +184,12 @@ def _require_lists(raw: Mapping[str, Any]) -> None:
             or any(type(item) is not str or not item or not item.isascii() for item in values)
         ):
             raise ValueError("signer_owner_e0_policy_scope_invalid")
-    if not set(raw["consensus_required_tiers"]).issubset(
-        raw["allowed_authority_tiers"]
-    ):
+    if not set(raw["consensus_required_tiers"]).issubset(raw["allowed_authority_tiers"]):
         raise ValueError("signer_owner_e0_policy_scope_invalid")
-
+    if not set(raw["allowed_authority_tiers"]).issubset(CANONICAL_AUTHORITY_TIERS):
+        raise ValueError("signer_owner_e0_policy_scope_invalid")
 __all__ = [
+    "CANONICAL_AUTHORITY_TIERS",
     "POLICY_FIELDS",
     "POLICY_SCHEMA",
     "canonical_signer_owner_e0_policy_input",

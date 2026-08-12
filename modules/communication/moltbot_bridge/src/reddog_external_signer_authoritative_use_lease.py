@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import time
+from contextlib import AbstractContextManager
 from typing import Any, Mapping, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
@@ -33,8 +34,10 @@ class GrantAwareExternalSigner(Protocol):
 
 
 class AuthoritativeUseLeaseGrantProvider(Protocol):
-    def __call__(self, request: SigningRequest) -> Mapping[str, Any] | None:
-        """Return a root-authorized grant bound to this exact request."""
+    def lease(
+        self, request: SigningRequest
+    ) -> AbstractContextManager[Mapping[str, Any]]:
+        """Hold current-generation admission through exact target use."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,19 +67,20 @@ class ExternalSignerAuthoritativeUseLeaseIssuer:
                 _bind_replay_store(payload, self.replay_store),
                 authority_tier=authority_tier,
             )
-            grant = self.grant_provider(request)
-            if not isinstance(grant, Mapping):
-                return None
-            response = self.signer.sign_with_secret_grant(request, grant)
+            with self.grant_provider.lease(request) as grant:
+                if not isinstance(grant, Mapping):
+                    return None
+                response = self.signer.sign_with_secret_grant(request, grant)
+                return _rehydrate_external_authoritative_use_lease(
+                    request=request,
+                    response=response,
+                    current_generation_authority=self.current_generation_authority,
+                    replay_store=self.replay_store,
+                    now_epoch=now_epoch,
+                )
         except Exception:
             return None
-        return _rehydrate_external_authoritative_use_lease(
-            request=request,
-            response=response,
-            current_generation_authority=self.current_generation_authority,
-            replay_store=self.replay_store,
-            now_epoch=now_epoch,
-        )
+        return None
 
 
 def _bind_replay_store(

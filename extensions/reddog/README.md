@@ -1,11 +1,13 @@
 # RedDog
 
-Version: 0.4.86
+Version: 0.4.87
 
-[OBSERVED] Version 0.4.86 pins the backend manifest after the existing root
-authority service gained opaque, signed ACQUIRE/FINISH protection around one
-exact signer callback. The client behavior and execution authority are
-unchanged; production grants, secret resolution and signer startup remain
+[OBSERVED] Version 0.4.87 pins the backend manifest after adding the bounded
+independent LOW-tier grant-provider foundation. The client behavior and
+execution authority are unchanged.
+
+[SPECIFIED_NOT_IMPLEMENTED] Elevated grants, authenticated consensus,
+grant-authority key-epoch binding and production signer startup remain
 unavailable.
 
 [OBSERVED] Version 0.4.81 pins the reconciled signer/live-canary backend

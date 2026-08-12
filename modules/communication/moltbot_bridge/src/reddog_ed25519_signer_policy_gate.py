@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant_contract import (
     signer_secret_access_request_digest,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authority_policy import (
+    SECRET_GRANT_SIGNING_OPERATION,
+)
 
 
 REJECT_ED25519_SIGNER_POLICY_MISSING = "REJECT_ED25519_SIGNER_POLICY_MISSING"
@@ -120,6 +123,7 @@ def _policy_configured(backend: Any) -> bool:
         or backend.signer_peer_instance_binding is not None
         or backend.verified_outcome_signer_policy is not None
         or conversation_signing_configured(backend)
+        or backend.secret_grant_authority_policy is not None
     )
 
 
@@ -145,6 +149,8 @@ def _allowed_operations(backend: Any) -> set[str]:
                 CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
             }
         )
+    if backend.secret_grant_authority_policy is not None:
+        allowed.add(SECRET_GRANT_SIGNING_OPERATION)
     return allowed
 
 

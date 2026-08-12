@@ -64,6 +64,19 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_con
     digest_text,
     validate_authoritative_use_lease_request,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authority_policy import (
+    SECRET_GRANT_SIGNING_OPERATION,
+    SignerSecretGrantAuthorityPolicy,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_rate_authority import (
+    DurableSignerSecretGrantRateAuthority,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_signer_admission import (
+    secret_grant_signer_rejection,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
+    SECRET_GRANT_AUDIT_ATTESTATION_PREFIX,
+)
 from modules.communication.moltbot_bridge.src import reddog_signer_mutual_peer_handshake as peer_handshake
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_validation import (
     CONTROL_LOOP_SIGNING_OPERATION,
@@ -185,6 +198,8 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
     conversation_scope_signer_policy: ConversationScopeSignerPolicy | None = None
     conversation_scope_principal_resolver: PrincipalAuthorityResolver | None = None
     conversation_scope_anchor_store: ConversationScopeAnchorStore | None = None
+    secret_grant_authority_policy: SignerSecretGrantAuthorityPolicy | None = None
+    secret_grant_rate_authority: DurableSignerSecretGrantRateAuthority | None = None
     exact_signing_request_digest: str | None = None
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
@@ -216,7 +231,11 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
         if rejection is not None:
             return rejection
         requires_attestation = _requires_audit_attestation(
-            control_payload, manifest_payload, outcome_payload, conversation_payload
+            request,
+            control_payload,
+            manifest_payload,
+            outcome_payload,
+            conversation_payload,
         )
         response, reason = _sign_response(self, request, peer, requires_attestation)
         if reason:
@@ -291,8 +310,13 @@ def _finalize_signing(
     return response
 
 
-def _requires_audit_attestation(*payloads: Mapping[str, Any] | None) -> bool:
-    return any(payload is not None for payload in payloads)
+def _requires_audit_attestation(
+    request: SigningRequest, *payloads: Mapping[str, Any] | None
+) -> bool:
+    return bool(
+        request.requested_operation == SECRET_GRANT_SIGNING_OPERATION
+        or any(payload is not None for payload in payloads)
+    )
 
 
 def _prepare_outcome_or_reject(
@@ -334,7 +358,13 @@ def _signer_request_rejection(
         or sum(operation and prefix for operation, prefix in domain_pairs) != 1
     ):
         return REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
-    policy_reason = signer_policy_rejection(backend, request) or _lease_request_rejection(backend, request)
+    policy_reason = (
+        signer_policy_rejection(backend, request)
+        or _lease_request_rejection(backend, request)
+        or secret_grant_signer_rejection(
+            backend, request, now_epoch=int(backend.proposal_clock())
+        )
+    )
     if policy_reason:
         return policy_reason
     if request.requested_operation == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION:
@@ -587,6 +617,8 @@ def _signer_audit_attestation(
         domain_prefix = CONVERSATION_SCOPE_AUDIT_ATTESTATION_PREFIX
     elif request.requested_operation == AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION:
         domain_prefix = AUTHORITATIVE_USE_LEASE_AUDIT_ATTESTATION_PREFIX
+    elif request.requested_operation == SECRET_GRANT_SIGNING_OPERATION:
+        domain_prefix = SECRET_GRANT_AUDIT_ATTESTATION_PREFIX
     try:
         value = canonical_signer_audit_attestation_input(
             signing_input=request.signing_input, signature=signature,

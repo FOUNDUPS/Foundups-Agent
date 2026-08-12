@@ -35,6 +35,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
     canonical_signer_audit_attestation_input,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authority_policy import (
+    SECRET_GRANT_SIGNING_OPERATION,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_issuance import (
+    SECRET_GRANT_SIGNING_PREFIX,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PREFIX_IDENTITY,
     PREFIX_WORKAUTH,
@@ -54,6 +60,7 @@ _RESERVED_SIGNING_OPERATIONS = frozenset(
         CONVERSATION_SCOPE_SIGNING_OPERATION,
         CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
         AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
+        SECRET_GRANT_SIGNING_OPERATION,
         "delegate_reddog_identity",
     }
 )
@@ -126,6 +133,10 @@ def signing_domain_pairs(request: SigningRequest) -> tuple[tuple[bool, bool], ..
         (
             request.requested_operation == AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
             request.signing_input.startswith(AUTHORITATIVE_USE_LEASE_SIGNING_PREFIX),
+        ),
+        (
+            request.requested_operation == SECRET_GRANT_SIGNING_OPERATION,
+            request.signing_input.startswith(SECRET_GRANT_SIGNING_PREFIX),
         ),
         (
             request.requested_operation == "delegate_reddog_identity",

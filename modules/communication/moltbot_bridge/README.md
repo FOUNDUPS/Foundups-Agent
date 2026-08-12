@@ -1,5 +1,20 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## Independent signer secret-grant provider
+
+[OBSERVED] The bounded provider foundation can obtain a LOW-tier secret grant
+from a separately bound Ed25519 grant signer while one current-generation E0
+lease remains held through target-signature rehydration. It reuses the isolated
+signer, WSP 71 backend factory, signed owner policy and durable replay/high-water
+store.
+
+[SPECIFIED_NOT_IMPLEMENTED] This foundation cannot activate the production
+authoritative-use path: that contract accepts HIGH/ULTRA while this provider
+rejects every elevated tier until canonical consensus supplies an opaque,
+verified capability. Grant-authority key-epoch binding, root-owned service
+provisioning, distinct-OS-principal supervision and the live canary also remain
+unimplemented.
+
 ## Root-served signer-revocation anchor
 
 The existing root verified-outcome Unix service now routes a domain-separated

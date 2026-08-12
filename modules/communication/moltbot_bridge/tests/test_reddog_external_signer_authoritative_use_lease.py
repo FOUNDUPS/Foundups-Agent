@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from contextlib import contextmanager
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -118,6 +119,15 @@ class _GrantAwareSigner:
         if secret_access_grant != {"grant_id": "root-grant-1"}:
             raise ValueError("grant mismatch")
         return _backend(request, exact=True).sign(request, _peer())
+
+
+class _LeasedGrantProvider:
+    def __init__(self, factory):
+        self._factory = factory
+
+    @contextmanager
+    def lease(self, request: SigningRequest):
+        yield self._factory(request)
 
 
 class _ProtocolGrantBackend:
@@ -564,7 +574,9 @@ def test_external_issuer_uses_root_generation_and_durable_replay(
     store = _store(tmp_path)
     issuer = ExternalSignerAuthoritativeUseLeaseIssuer(
         signer=_GrantAwareSigner(),
-        grant_provider=lambda _request: {"grant_id": "root-grant-1"},
+        grant_provider=_LeasedGrantProvider(
+            lambda _request: {"grant_id": "root-grant-1"}
+        ),
         replay_store=store,
         current_generation_authority=_authority(tmp_path, monkeypatch),
     )
@@ -646,7 +658,9 @@ def test_composed_e0_socket_issuer_reaches_real_wre_spine(
     )
     issuer = ExternalSignerAuthoritativeUseLeaseIssuer(
         signer=client,
-        grant_provider=lambda request: _root_grant(request, store),
+        grant_provider=_LeasedGrantProvider(
+            lambda request: _root_grant(request, store)
+        ),
         replay_store=store,
         current_generation_authority=_authority(tmp_path, monkeypatch),
     )

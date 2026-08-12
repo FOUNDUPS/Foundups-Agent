@@ -1,5 +1,14 @@
 # Tests - OpenClaw Bridge
 
+## Independent signer secret-grant provider
+
+`python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py -q`
+
+The matrix covers canonical signing, durable concurrent rate limits, distinct
+caller and beneficiary identities, generation lease lifetime, authority and
+replay-store substitution, audit-attestation tampering, elevated-tier closure
+and WSP 62 boundaries.
+
 ## Root-served signer revocation
 
 ```powershell
