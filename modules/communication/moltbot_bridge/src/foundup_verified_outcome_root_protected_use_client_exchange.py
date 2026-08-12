@@ -12,6 +12,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_prot
     OP_ACQUIRE,
     RootProtectedUseRequest,
     canonical_signer_input,
+    finish_revision_for,
     protected_use_id_for,
     request_id_for,
     response_from_bytes,
@@ -103,7 +104,17 @@ def _matches(response: Any, request: RootProtectedUseRequest, state: str) -> boo
     )
     if state == "ACQUIRED":
         return base and response.revision == request.protected_use_id[7:]
-    return base
+    if request.acquired_sequence is None or request.acquired_revision is None:
+        return False
+    return bool(
+        base
+        and response.sequence == request.acquired_sequence + 1
+        and response.revision == finish_revision_for(
+            request.protected_use_id,
+            request.acquired_sequence,
+            request.acquired_revision,
+        )
+    )
 
 
 def _placeholder() -> str:

@@ -33,9 +33,6 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocat
 from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
     SqliteMonotonicAuthorityReader,
 )
-from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    confined_runtime_operation_lock,
-)
 
 
 @dataclass(frozen=True)
@@ -57,16 +54,12 @@ def validate_protected_use_acquire(
         require_root_revocation_context(
             request, snapshot, state, lease.policy, binding
         )
-        repo = root_revocation_authority_repo(authority)
-        with confined_runtime_operation_lock(
-            binding.operation_lock_path, repo_root=repo,
-            allowed_root=binding.primary_root,
-        ):
-            yield _validated_acquire(
-                request, state=state, binding=binding, repo=repo,
-                policy=lease.policy, resolver=lease.resolver,
-                now_epoch=now_epoch,
-            )
+        yield _validated_acquire(
+            request, state=state, binding=binding,
+            repo=root_revocation_authority_repo(authority),
+            policy=lease.policy, resolver=lease.resolver,
+            now_epoch=now_epoch,
+        )
 
 
 def _validated_acquire(

@@ -500,8 +500,9 @@ def test_substituted_acquire_response_suppresses_callback(
     assert active is not None and active.sequence % 2 == 1
 
 
+@pytest.mark.parametrize("field", ("request_id", "revision", "sequence"))
 def test_substituted_finish_response_suppresses_callback_result(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, field
 ) -> None:
     values = runtime(tmp_path, monkeypatch)
     _install_current(values, signed_snapshot(values))
@@ -510,7 +511,15 @@ def test_substituted_finish_response_suppresses_callback_result(
     def substitute(_path, raw, _uid, _timeout):
         response = protected_response_from_bytes(_route(values, raw))
         if b'"operation":"PROTECTED_USE_FINISH"' in raw:
-            return replace(response, request_id=_sha("substitute")).to_bytes()
+            altered = (
+                response.sequence + 2 if field == "sequence"
+                else (
+                    _sha("substitute")[7:]
+                    if field == "revision"
+                    else _sha("substitute")
+                )
+            )
+            return replace(response, **{field: altered}).to_bytes()
         return response.to_bytes()
 
     monkeypatch.setattr(root_client_module, "_root_socket_roundtrip", substitute)
@@ -547,6 +556,10 @@ def test_protected_use_slice_obeys_effect_and_wsp62_boundaries() -> None:
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 assert (node.end_lineno or node.lineno) - node.lineno + 1 <= 50
+    validator = (
+        source / "foundup_verified_outcome_root_protected_use_authority_validation.py"
+    ).read_text(encoding="ascii")
+    assert "confined_runtime_operation_lock" not in validator
 
 
 def test_backend_manifest_binds_every_protected_use_runtime_module() -> None:

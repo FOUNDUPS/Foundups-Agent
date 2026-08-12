@@ -5,8 +5,9 @@
 - Proved both race orderings through durable grant consumption,
   `ResolvePerSignSignerBackend`, ephemeral backend resolution, and actual
   signature response emission or suppression.
-- Windows signer/root differential: `237 passed, 7 skipped`. Real WSL
-  Linux-root socket matrix: `6 passed`. RedDog extension contract and backend
+- Windows signer/root differential: `239 passed, 8 skipped`. Real WSL
+  Linux-root socket matrix: `7 passed`, including the publisher-lock/root-RPC
+  inversion regression. RedDog extension contract and backend
   compatibility manifest checks passed. Production grant issuance, WSP71
   resolution, signer startup composition, and live canary remain blocked.
 

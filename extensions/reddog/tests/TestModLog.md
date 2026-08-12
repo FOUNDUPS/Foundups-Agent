@@ -2,8 +2,8 @@
 
 ## 2026-08-12 - Root protected-use compatibility pin (0.4.86)
 
-- Re-pinned the backend integrity manifest to the root protected-use protocol,
-  client, service, state, loader and signer-boundary sources.
+- Re-pinned the backend integrity manifest to the root protected-use transport,
+  protocol, client, service, and root-state closure.
 - Kept the extension behavior unchanged and retained fail-closed production
   signer activation.
 
