@@ -151,9 +151,17 @@ it does not release signer composition authority or grant an effect.
 The E0 path also has an exact independently signed revocation-snapshot contract
 bound to the current policy, generation, store, and target signer. Grant and
 revocation authority identities remain separate from one another and from the
-target signer key. A durable rollback-witnessed store, cross-process fence, and
-E0-only oracle factory are not yet implemented, so this contract is not a live
-revocation supply and the stable service cannot consume it.
+target signer key. Policy v2 additionally freezes the exact primary store,
+separate local monotonic witness, and shared cross-process operation-lock
+topology. The append-only SQLite supply can recover either publication crash
+window without unrevocation, and its detached oracle revalidates signed current
+state under the same lock. Expired state remains unusable, while a locked
+publisher may authenticate an expired predecessor solely to append its fresh,
+monotonic successor. Canonical snapshot validation remains a separate bounded
+module from authority/signature verification. This is an uncomposed durability foundation, not
+production authority: an independently administered grant authority, external
+rollback anchor, E0-only oracle factory, and stable-service composition remain
+absent. Coordinated rollback of both local domains is therefore not claimed.
 RedDog and `main.py` remain clients and cannot spawn the signer.
 The older `reddog_signer_socket_service_runtime_cli` is retained only to return
 a structured retirement rejection. It cannot load authority, construct a

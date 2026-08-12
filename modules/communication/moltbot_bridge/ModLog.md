@@ -1,4 +1,20 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Durable signer revocation authority foundation
+- Extended the signed owner E0 policy to v2 so it freezes the revocation
+  snapshot/store schemas, separate local witness identity and path, both
+  durability receipts, and one shared cross-process operation lock.
+- Added an append-only SQLite primary log, detached read-only reader, monotonic
+  witness publication, deterministic recovery across both crash windows, and
+  an uncomposed read-only oracle that holds the same lock across protected use.
+- Rejected status/metadata/topology substitution, unrevocation, sequence forks,
+  unsigned pending recovery, expired use, and witness rollback. Locked
+  publication can authenticate an expired predecessor only to append a fresh
+  monotonic successor, preventing expiry from wedging the authority log.
+  Canonical validation and authority verification remain bounded modules.
+  This slice does not
+  compose E0, activate the stable signer, or claim coordinated two-domain
+  rollback resistance; independent grant authority and an external anchor are
+  still required. (WSP 00/15/22/50/62/71/97)
 ## 2026-08-12: Independent signer revocation contract prerequisite
 - Extended the existing owner-controlled E0 boundary with an exact signed
   revocation snapshot contract bound to the current policy,

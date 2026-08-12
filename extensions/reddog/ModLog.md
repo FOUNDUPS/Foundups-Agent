@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-12 - Durable revocation foundation compatibility pin (0.4.83)
+
+- Pinned the regenerated backend manifest after owner E0 policy v2 added exact
+  revocation primary/witness/lock topology and the uncomposed local durability
+  foundation.
+- Added no thin-client behavior, signer activation, or execution authority.
+
 ## 2026-08-12 - Signer authority-separation compatibility pin (0.4.82)
 
 - Re-pinned the exact backend manifest after grant/revocation authority

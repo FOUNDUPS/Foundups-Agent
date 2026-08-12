@@ -153,5 +153,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     assert generator.canonical_manifest_digest(generated) == (
-        "e00a3e95df693e91aaf7dbb7ba2604d136cf5a8084d49be6e0a5d4d785ac35f0"
+        "8fd92b34dde0d7f20e7c006ec28abf822c0052d206c6d2cac99b2fb1807c532b"
     )

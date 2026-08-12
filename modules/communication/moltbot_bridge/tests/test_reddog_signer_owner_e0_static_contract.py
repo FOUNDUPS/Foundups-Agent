@@ -133,6 +133,39 @@ def test_runtime_roots_must_be_disjoint(tmp_path: Path) -> None:
     ).accepted is False
 
 
+@pytest.mark.parametrize(
+    "field",
+    [
+        "revocation_snapshot_schema", "revocation_store_schema",
+        "revocation_witness_root", "revocation_witness_path",
+        "revocation_witness_store_id",
+        "revocation_witness_store_durability_receipt_id",
+        "revocation_lock_path",
+    ],
+)
+def test_revocation_topology_is_inside_signed_policy(
+    tmp_path: Path, field: str,
+) -> None:
+    fixture = _fixture(tmp_path)
+    fixture["policy"][field] = str(fixture["policy"][field]) + "-attacker"
+    assert fixture["boundary"].admit(
+        fixture["owner_config_path"], fixture["policy"]
+    ).accepted is False
+
+
+def test_witness_root_cannot_overlap_replay_domain(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    replay_root = Path(str(fixture["policy"]["replay_root"]))
+    fixture["policy"]["revocation_witness_root"] = str(replay_root)
+    fixture["policy"]["revocation_witness_path"] = str(
+        replay_root / "revocation-witness.sqlite3"
+    )
+    _resign(fixture)
+    assert fixture["boundary"].admit(
+        fixture["owner_config_path"], fixture["policy"]
+    ).accepted is False
+
+
 def test_capability_cannot_be_copied_or_pickled(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     result = fixture["boundary"].admit(
