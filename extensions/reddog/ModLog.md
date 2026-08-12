@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-12 - PowerShell Holo owner-query transport fix (0.4.90)
+
+- Accepted the leading UTF-8 BOM emitted by PowerShell's native pipeline for
+  the documented owner-query command while retaining strict byte decoding.
+- Regenerated and pinned the exact backend manifest; no HoloIndex authority,
+  maintenance or execution boundary changed.
+
 ## 2026-08-12 - Canonical elevated-consensus capability pin (0.4.89)
 
 - Pinned the complete generated backend closure for canonical elevated

@@ -1,5 +1,9 @@
 # RedDog Interface
 
+Version 0.4.90 makes the documented Windows PowerShell owner-query transport
+compatible with its leading UTF-8 BOM. The bridge still rejects malformed
+UTF-8 and does not add query-time maintenance authority.
+
 Version 0.4.89 pins the canonical elevated-consensus capability and its complete
 strict signer dependency closure. Elevated production authority remains
 uncomposed and fail-closed.

@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.89
+Version: 0.4.90
+
+[OBSERVED] Version 0.4.90 accepts the leading UTF-8 BOM emitted by Windows
+PowerShell when it pipes the documented owner-query JSON. Decoding remains
+strict, and all HoloIndex freshness, authority and maintenance gates are
+unchanged.
 
 [OBSERVED] Version 0.4.89 pins the canonical elevated-consensus capability,
 strict signer transport, transactional signer nonce, and complete generated

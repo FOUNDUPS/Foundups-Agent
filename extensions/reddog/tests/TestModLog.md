@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-12 - PowerShell Holo owner-query transport (0.4.90)
+
+- Added direct regressions for a leading UTF-8 BOM and malformed UTF-8.
+- Revalidated the generated 1311-file runtime closure and extension version
+  pin without granting query-time maintenance authority.
+
 ## 2026-08-12 - Elevated-consensus compatibility pin (0.4.89)
 
 - Revalidated the generated 1311-file runtime closure and backend compatibility
