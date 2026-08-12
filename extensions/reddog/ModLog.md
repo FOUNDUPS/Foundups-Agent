@@ -1,5 +1,14 @@
 # RedDog ModLog
 
+## 2026-08-12 - Grant-authority key-epoch compatibility pin (0.4.88)
+
+- Regenerated the exact backend manifest after owner E0 policy v5 bound the
+  independent grant authority public key and key epoch.
+- Replaced the absolute local checkout path in bounded model context with a
+  fixed placeholder so local path names cannot trigger policy redaction or
+  disclose host layout.
+- Added no thin-client behavior, signer activation or execution authority.
+
 ## 2026-08-12 - Root protected-use compatibility pin (0.4.86)
 
 - Regenerated the exact backend manifest after the existing root Unix service

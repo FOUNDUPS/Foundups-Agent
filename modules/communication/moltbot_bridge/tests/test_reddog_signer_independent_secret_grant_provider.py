@@ -25,6 +25,7 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     Ed25519SignerBackend,
+    REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH,
     bind_exact_signing_request,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
@@ -494,6 +495,7 @@ def _owner_policy(binding: ResolvePerSignBinding) -> dict[str, Any]:
         "grant_authority_principal_id": binding.issuer_principal_id,
         "grant_authority_principal_provider": binding.issuer_principal_provider,
         "grant_authority_public_key": binding.issuer_public_key,
+        "grant_authority_key_epoch": "grant-epoch-1",
         "grant_requester_principal_id": "provider:grant-client",
         "revocation_authority_principal_id": "revocation:owner",
         "revocation_authority_principal_provider": "local",
@@ -626,6 +628,72 @@ def test_provider_rejects_invalid_audit_attestation(
             pass
 
 
+def test_provider_rejects_grant_authority_epoch_rotation_after_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class _CountingAuditMac:
+        calls = 0
+
+        def build(self, request, signature, peer):
+            self.calls += 1
+            return "audit:must-not-run"
+
+    class _BackendClient:
+        response: SigningResponse | None = None
+
+        def __init__(self, backend: Ed25519SignerBackend) -> None:
+            self.backend = backend
+
+        def sign(self, request: SigningRequest) -> SigningResponse:
+            self.response = self.backend.sign(request, _peer())
+            return self.response
+
+    store = _store(tmp_path)
+    private = Ed25519PrivateKey.generate()
+    binding = _binding(store, _public(private))
+    policy = replace(_policy(binding), rate_limit_max_requests=1)
+    audit = _CountingAuditMac()
+    client = _BackendClient(
+        Ed25519SignerBackend(
+            private_key=private,
+            public_key=_public(private),
+            key_epoch="grant-epoch-2",
+            audit_mac_builder=audit,
+            proposal_clock=lambda: NOW,
+            secret_grant_authority_policy=policy,
+            secret_grant_rate_authority=DurableSignerSecretGrantRateAuthority(store),
+        )
+    )
+    owner_policy = _owner_policy(binding)
+    owner_policy["rate_limit_max_requests"] = 1
+    provider = _provider_for(
+        tmp_path,
+        monkeypatch,
+        store=store,
+        private=private,
+        client=client,
+        policy=owner_policy,
+    )
+
+    with pytest.raises(ValueError, match="signer_rejected"):
+        with provider.lease(_target_request()):
+            pytest.fail("rotated authority epoch must not yield a grant")
+    assert client.response is not None
+    assert client.response.accepted is False
+    assert client.response.rejection_code == REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH
+    assert client.response.signature == ""
+    assert client.response.audit_mac == ""
+    assert audit.calls == 0
+
+    valid_request = build_secret_grant_signing_request(
+        _grant(_target_request(), binding, nonce="grant-after-rotation-reject"),
+        policy=policy,
+        consensus_receipt_digest=None,
+    )
+    valid_backend = replace(client.backend, key_epoch="grant-epoch-1")
+    assert valid_backend.sign(valid_request, _peer()).accepted is True
+
+
 def test_provider_rejects_replay_store_policy_mismatch_before_signing(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -655,6 +723,7 @@ def test_provider_rejects_replay_store_policy_mismatch_before_signing(
     [
         ("principal_id", "revocation:owner"),
         ("public_key", "revocation-key"),
+        ("key_epoch", "grant-epoch-stale"),
         ("requester_principal_id", "provider:attacker"),
     ],
 )
@@ -676,8 +745,9 @@ def test_provider_rejects_authority_substitution(
     monkeypatch.setattr(
         provider_module, "lease_validated_owner_e0_current_admission", lease
     )
+    client = _GrantClient(private)
     values = {
-        "client": _GrantClient(private),
+        "client": client,
         "principal_id": "grant:owner",
         "principal_provider": "local",
         "public_key": _public(private),
@@ -698,6 +768,7 @@ def test_provider_rejects_authority_substitution(
     with pytest.raises(ValueError):
         with provider.lease(_target_request()):
             pass
+    assert client.calls == 0
 
 
 def test_new_secret_grant_modules_are_bounded_and_keyless() -> None:

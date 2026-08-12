@@ -1,4 +1,13 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Root-bound grant-authority key epoch
+- Extended the exact signed owner E0 policy to v5 with the independent grant
+  authority key epoch. Policy identity and the owner-config authority-binding
+  digest now cover public key plus epoch.
+- The provider compares its immutable runtime binding to the signed epoch and
+  fails before signer invocation on same-key stale-epoch substitution. Missing
+  and look-alike schema fields also fail closed. No key, signer lifecycle,
+  consensus, worker, repository, PR, merge or HoloIndex authority was added.
+  (WSP 00/15/22/50/62/71/97)
 ## 2026-08-12: Independent LOW-tier signer secret-grant provider
 - Extended the existing E0 signer with a strict grant domain and context-managed
   provider. Signed owner policy drives exact target, replay, operation, tier,

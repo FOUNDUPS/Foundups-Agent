@@ -1,6 +1,6 @@
 const wftdBrace = orchestrator.extractProsePathTokens('see ${docs/a/b.py} for details');
 assert.deepStrictEqual(wftdBrace.accepted, ['docs/a/b.py'], 'WFTD-018: ${docs/a/b.py} brace wrapper trimmed to clean path');
-
+const noRepoContext = orchestrator.buildBoundedRepoContext('none', extAcc001Prompt); assert([boundedContext, noRepoContext].every((ctx) => ctx.text.includes('Workspace root: [LOCAL_REPO_ROOT_REDACTED]') && !ctx.text.includes(root)), 'EXT-ACC-001 all bounded context modes must replace the absolute local workspace root with the fixed placeholder');
 // WFTD-019: Option-3 REGRESSION -- a BULLETED "Read first:" list (one path per line) still derives all 3
 // cleanly (the prose-branch tightening must not regress the bullet branch).
 const wftdBullet = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_PROSE_READ_FIRST_BULLET_PROMPT);

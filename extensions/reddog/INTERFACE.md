@@ -1,5 +1,8 @@
 # RedDog Interface
 
+Version 0.4.88 pins owner E0 policy v5 and exact independent grant-authority
+key-epoch binding. It adds no thin-client behavior or execution authority.
+
 Version 0.4.87 pins the independent LOW-tier grant-provider foundation in the
 backend manifest. It adds no thin-client behavior or execution authority;
 HIGH/ULTRA authoritative-use composition and production signer activation

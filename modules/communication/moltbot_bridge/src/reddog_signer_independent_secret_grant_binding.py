@@ -65,6 +65,7 @@ def build_secret_grant_authority_policy(
         (authority_principal_id, owner_policy["grant_authority_principal_id"]),
         (authority_principal_provider, owner_policy["grant_authority_principal_provider"]),
         (authority_public_key, owner_policy["grant_authority_public_key"]),
+        (authority_key_epoch, owner_policy["grant_authority_key_epoch"]),
         (
             requester_principal_id,
             owner_policy["grant_requester_principal_id"],
@@ -79,7 +80,7 @@ def build_secret_grant_authority_policy(
         raise ValueError("secret_grant_authority_binding_invalid")
     return SignerSecretGrantAuthorityPolicy(
         **asdict(binding),
-        issuer_key_epoch=authority_key_epoch,
+        issuer_key_epoch=str(owner_policy["grant_authority_key_epoch"]),
         requester_principal_id=requester_principal_id,
         allowed_operations=tuple(owner_policy["allowed_operations"]),
         allowed_authority_tiers=tuple(owner_policy["allowed_authority_tiers"]),

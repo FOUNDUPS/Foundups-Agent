@@ -1,14 +1,17 @@
 # RedDog
 
-Version: 0.4.87
+Version: 0.4.88
+
+[OBSERVED] Version 0.4.88 pins owner E0 policy v5 and the independent
+grant-authority key-epoch binding. Thin-client behavior and execution authority
+are unchanged.
 
 [OBSERVED] Version 0.4.87 pins the backend manifest after adding the bounded
 independent LOW-tier grant-provider foundation. The client behavior and
 execution authority are unchanged.
 
-[SPECIFIED_NOT_IMPLEMENTED] Elevated grants, authenticated consensus,
-grant-authority key-epoch binding and production signer startup remain
-unavailable.
+[SPECIFIED_NOT_IMPLEMENTED] Elevated grants, authenticated consensus and
+production signer startup remain unavailable.
 
 [OBSERVED] Version 0.4.81 pins the reconciled signer/live-canary backend
 manifest. The client behavior and execution authority are unchanged.
