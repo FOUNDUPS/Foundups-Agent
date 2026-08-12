@@ -13,6 +13,9 @@
   independently administered grant issuance, E0 factory composition, WSP 71
   secret resolution, and signer activation remain unavailable. (WSP
   00/15/22/50/62/71/97)
+  The root authority has two mutable high-water mirrors plus a static
+  installation witness; coordinated rollback of both mutable root mirrors is
+  explicitly retained as root-authority compromise outside this slice.
 ## 2026-08-12: Durable signer revocation authority foundation
 - Extended the signed owner E0 policy to v2 so it freezes the revocation
   snapshot/store schemas, separate local witness identity and path, both

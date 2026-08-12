@@ -154,7 +154,9 @@ revocation authority identities remain separate from one another and from the
 target signer key. Policy v3 additionally freezes the exact primary store,
 separate local monotonic witness, and shared cross-process operation-lock
 topology plus the identity, durability receipt, and three-domain topology
-digest of a root-owned monotonic anchor. The append-only SQLite supply orders
+digest of a root-owned monotonic anchor. The revocation high-water is mirrored
+by that authority's primary and witness stores; its third installation store
+authenticates initialization but does not witness each high-water update. The append-only SQLite supply orders
 prepare, local witness, root anchor, and finalize; it recovers each publication
 crash window without unrevocation. Its detached oracle requires three-way
 agreement under the same lock. Coordinated rollback of the two local domains
@@ -164,8 +166,11 @@ monotonic successor. Canonical snapshot validation remains a separate bounded
 module from authority/signature verification. This is an uncomposed durability foundation, not
 production authority: an independently administered grant authority, external
 root-service transport/client, E0-only oracle factory, and stable-service
-composition remain absent. Root compromise or coordinated rollback of all
-three root-state domains is outside this foundation's claim.
+composition remain absent. Root compromise or coordinated rollback of both
+mutable root-state mirrors is outside this foundation's claim; leaving the
+static installation store unchanged does not detect that rollback. Future
+composition must expose an opaque root-owned service boundary rather than a
+caller-constructed state object.
 RedDog and `main.py` remain clients and cannot spawn the signer.
 The older `reddog_signer_socket_service_runtime_cli` is retained only to return
 a structured retirement rejection. It cannot load authority, construct a

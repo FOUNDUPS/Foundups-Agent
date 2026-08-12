@@ -375,6 +375,44 @@ def test_coordinated_local_rollback_rejects_against_root_anchor(
     assert anchor.load(binding.anchor_binding_digest()) == _high_water(second)
 
 
+def test_coordinated_root_mirror_rollback_is_explicit_residual(
+    tmp_path: Path,
+) -> None:
+    policy, binding, store, witness, anchor, supply = _runtime(tmp_path)
+    first = _snapshot(policy, binding, grant_ids=(_digest("grant-a"),))
+    second = _snapshot(
+        policy, binding, sequence=2,
+        grant_ids=(_digest("grant-a"), _digest("grant-b")),
+    )
+    supply.publish(first, now_epoch=NOW)
+    supply.publish(second, now_epoch=NOW)
+    installation_path = tmp_path / "anchor-installation/installation.sqlite3"
+    installation_before = _sqlite_high_water(
+        installation_path, INSTALLATION_BINDING,
+    )
+    with sqlite3.connect(store.path) as connection:
+        connection.execute("DELETE FROM snapshots WHERE sequence=2")
+        connection.execute(
+            "UPDATE state SET current_snapshot_id=?, pending_snapshot_id=NULL",
+            (first["snapshot_id"],),
+        )
+    _overwrite_high_water(
+        witness.path, binding.witness_binding_digest(), _high_water(first),
+    )
+    for path in (
+        tmp_path / "anchor-primary/state.sqlite3",
+        tmp_path / "anchor-witness/state_witness.sqlite3",
+    ):
+        _overwrite_high_water(
+            path, binding.anchor_binding_digest(), _high_water(first),
+        )
+    assert _sqlite_high_water(installation_path, INSTALLATION_BINDING) == installation_before
+    assert anchor.load(binding.anchor_binding_digest()) == _high_water(first)
+    assert _oracle(policy, binding, store, witness, anchor).is_revoked(
+        grant_id=_digest("grant-b"), key_epoch="other", at_epoch=NOW,
+    ) is False
+
+
 def test_substituted_root_anchor_identity_rejects_before_publication(
     tmp_path: Path,
 ) -> None:
@@ -737,6 +775,24 @@ def _high_water(snapshot: Mapping[str, Any]):
         sequence=int(snapshot["sequence"]),
         state_revision=str(snapshot["snapshot_id"]).removeprefix("sha256:"),
     )
+
+
+def _overwrite_high_water(path: Path, binding: str, value: Any) -> None:
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "UPDATE high_water SET sequence=?, state_revision=? "
+            "WHERE binding_digest=?",
+            (value.sequence, value.state_revision, binding),
+        )
+
+
+def _sqlite_high_water(path: Path, binding: str) -> tuple[int, str] | None:
+    with sqlite3.connect(path) as connection:
+        row = connection.execute(
+            "SELECT sequence, state_revision FROM high_water "
+            "WHERE binding_digest=?", (binding,),
+        ).fetchone()
+    return None if row is None else (int(row[0]), str(row[1]))
 
 
 def _canonical(value: Mapping[str, Any]) -> str:

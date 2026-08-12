@@ -72,10 +72,15 @@
   three-domain topology digest of the existing root-owned monotonic state.
   The uncomposed publisher and oracle require that domain-separated anchor, so
   coordinated rollback of the two revocation-local domains rejects while the
-  root state remains intact.
+  root state remains intact. The dynamic high-water has two root-owned mirrors;
+  coordinated rollback of both is root-authority compromise and remains
+  outside this slice. The static installation domain does not witness each
+  high-water update.
 - NEXT: root-service protocol/client binding for that anchor, independently
   administered grant issuance, E0-only oracle/backend composition, WSP 71
-  permissioned resolution, and native-memory zeroization evidence. Socket v1
+  permissioned resolution, and native-memory zeroization evidence. The client
+  must admit an opaque root-owned service result, not a caller-created state.
+  Socket v1
   remains compatible but cannot reach the resolve-per-sign backend.
 - BLOCKED: durable system-service deployment and no-work-authority Linux
   canary until production grant/revocation authority, secret resolution,
