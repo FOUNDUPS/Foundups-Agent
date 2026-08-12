@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+from io import BytesIO
+import sys
 from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
 
 from holo_index.authority_worktree import HoloIndexAuthoritySelection
 from holo_index.repository_state import repository_root_digest
 from scripts.reddog_holoindex_owner_query_once import (
     MAX_QUERY_CHARS,
+    _read_payload,
     query_once,
 )
 
@@ -43,6 +48,24 @@ def _success(root: Path) -> dict:
         "retrieval_mode": "semantic",
         "no_holoindex_reindex_performed": True,
     }
+
+
+def test_read_payload_accepts_powershell_utf8_bom(monkeypatch) -> None:
+    raw = b'\xef\xbb\xbf{"query":"audit pfmall","limit":5}\r\n'
+    monkeypatch.setattr(sys, "stdin", SimpleNamespace(buffer=BytesIO(raw)))
+
+    assert _read_payload() == {"query": "audit pfmall", "limit": 5}
+
+
+def test_read_payload_still_rejects_malformed_utf8(monkeypatch) -> None:
+    monkeypatch.setattr(
+        sys,
+        "stdin",
+        SimpleNamespace(buffer=BytesIO(b'{"query":"audit\xff"}')),
+    )
+
+    with pytest.raises(UnicodeDecodeError):
+        _read_payload()
 
 
 def test_started_owner_uses_private_handoff_and_cleans_up(tmp_path: Path) -> None:

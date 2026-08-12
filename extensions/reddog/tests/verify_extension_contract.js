@@ -4,7 +4,7 @@ const ContractRunnerModule = require('module');
 const contractRunnerPath = require('path');
 const contractRunnerVm = require('vm');
 
-const CONTRACT_RUNNER_SOURCE_SHA256 = 'sha256:68c1de893c51883bd1e7a57ee10ed2a389ee3cec2f7dfd864dd5e9acbf86321f';
+const CONTRACT_RUNNER_SOURCE_SHA256 = 'sha256:8fcdd2c913eb3937d507f375727c3a88dd0e088d229fc0fd26dbaef0fe54ab8a';
 const CONTRACT_RUNNER_SOURCE_LINES = 6857;
 const CONTRACT_RUNNER_ASSERTION_CALLS = 1214;
 

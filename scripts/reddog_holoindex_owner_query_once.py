@@ -84,7 +84,7 @@ def _with_retry_telemetry(
 
 def _read_payload() -> Mapping[str, Any]:
     raw = sys.stdin.buffer.read()
-    value = json.loads(raw.decode("utf-8", errors="strict"))
+    value = json.loads(raw.decode("utf-8-sig", errors="strict"))
     if not isinstance(value, Mapping):
         raise ValueError("payload_not_object")
     return value
