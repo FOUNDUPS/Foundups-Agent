@@ -64,8 +64,6 @@ def require_policy_selection_binding(
     }
     if any(policy[left] != selection[right] for left, right in bindings.items()):
         raise ValueError("e0_policy_generation_binding_mismatch")
-
-
 def require_policy_authorities(
     policy: Mapping[str, Any],
     *,
@@ -92,6 +90,13 @@ def require_policy_authorities(
         or constant_time_compare(grant_authority[1], revocation_authority[1])
     ):
         raise ValueError("e0_policy_authorities_not_independent")
+    requester = str(policy["grant_requester_principal_id"])
+    if requester in {
+        grant_authority[0],
+        revocation_authority[0],
+        str(policy["target_signer_agent_id"]),
+    }:
+        raise ValueError("e0_policy_requester_not_independent")
     try:
         verified = signature_verifier.verify(
             str(policy["grant_authority_public_key"]),
@@ -102,8 +107,6 @@ def require_policy_authorities(
         verified = False
     if not verified:
         raise ValueError("e0_policy_signature_invalid")
-
-
 def require_policy_config_binding(policy: Mapping[str, Any], config: Any) -> Any:
     if (
         config.provider_mode != PROVIDER_MODE_WSP71_PERMISSIONED

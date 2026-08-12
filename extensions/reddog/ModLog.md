@@ -2192,3 +2192,7 @@ WSP: WSP_00, WSP_15, WSP_22, WSP_97, WSP_109.
 - Added Tier-0/Tier-1 memory files for HoloIndex discoverability: `INTERFACE.md`, `ROADMAP.md`, `ModLog.md`, and `tests/TestModLog.md`.
 
 WSP: WSP_00, WSP_15, WSP_22, WSP_87, WSP_97, WSP_109.
+## 2026-08-12 - Independent grant-provider compatibility pin (0.4.87)
+- Regenerated the backend compatibility manifest for the bounded LOW-tier
+  independent signer grant-provider modules. No client execution authority was
+  added; elevated issuance remains blocked on verified consensus.

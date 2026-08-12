@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const EXPECTED_SOURCE_SHA256 = 'sha256:70ae22d9b953aad838305aed6dd02213bd70fc37d0cb81cade8d59a4ec353733';
+const EXPECTED_SOURCE_SHA256 = 'sha256:ea2be890d34f8debb0f676aae9781219c814515c015c111464696a911733cc7b';
 const EXPECTED_SOURCE_LINES = 6857;
 const EXPECTED_ASSERTION_CALLS = 1213;
 const MAX_SHARD_LINES = 400;

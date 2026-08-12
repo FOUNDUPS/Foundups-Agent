@@ -2189,3 +2189,10 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
   non-root platforms record the explicit skip. Production grant issuance,
   WSP 71 resolution, signer lifecycle and repository effects remain outside
   the test claim.
+## 2026-08-12: Independent grant-provider security regressions
+- Proved strict grant-domain validation, durable restart/concurrency rate limits,
+  distinct socket caller and beneficiary, audit-attestation tamper rejection,
+  replay and authority substitution rejection, and generation-lease lifetime.
+  Every new security module is at most 200 lines with functions at most 50.
+- Added owner-policy v4 tier/requester regressions and a real signer-socket check
+  proving only the signed provider principal reaches grant signing.

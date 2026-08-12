@@ -1084,3 +1084,5 @@ Command:
 ```powershell
 node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
 ```
+## 2026-08-12 - Independent grant-provider compatibility pin (0.4.87)
+- Updated exhaustive contract fixtures to the exact extension/backend version.

@@ -1,4 +1,15 @@
 # ModLog - moltbot_bridge
+## 2026-08-12: Independent LOW-tier signer secret-grant provider
+- Extended the existing E0 signer with a strict grant domain and context-managed
+  provider. Signed owner policy drives exact target, replay, operation, tier,
+  TTL and durable rate admission; caller and beneficiary remain distinct, and
+  both response signatures are verified before use.
+- Reused Ed25519, WSP 71 and durable nonce/high-water components. Elevated tiers
+  remain closed because digest shape is not consensus. No worker, repository,
+  PR, merge or HoloIndex effect was added. (WSP 00/15/22/50/62/71/97)
+- Review hardening advanced signed owner policy to v4, binding the actual grant
+  requester principal and canonical LOW/HIGH/ULTRA tiers. Socket admission now
+  proves the requester is distinct from grant authority, target and beneficiary.
 ## 2026-08-12: Root-linearized signer protected use
 - Extended the existing root authority socket/state and durable revocation
   foundation with signed ACQUIRE/FINISH operations. Each exact grant, key

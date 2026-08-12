@@ -80,16 +80,11 @@ class DurableSignerSecretGrantNonceStore:
 
     def consume_grant(self, grant: Mapping[str, Any]) -> bool:
         try:
-            _require_store_files(self._config)
-            reservation = self._store.reserve(
-                str(grant["nonce"]),
+            return self.consume_scoped_nonce(
+                nonce=str(grant["nonce"]),
                 expires_at=int(grant["expires_at"]),
                 subject=str(grant["grant_id"]),
             )
-            if not reservation:
-                return False
-            self._store.commit(reservation)
-            return True
         except Exception:
             return False
 
@@ -109,10 +104,23 @@ class DurableSignerSecretGrantNonceStore:
                 or type(expires_at) is not int
             ):
                 return False
-            reservation = self._store.reserve(
-                "authoritative-use-lease:" + lease_nonce,
+            return self.consume_scoped_nonce(
+                nonce="authoritative-use-lease:" + lease_nonce,
                 expires_at=expires_at,
                 subject=evidence_digest,
+            )
+        except Exception:
+            return False
+
+    def consume_scoped_nonce(
+        self, *, nonce: str, expires_at: int, subject: str
+    ) -> bool:
+        """Atomically consume one caller-validated nonce in this store."""
+
+        try:
+            _require_store_files(self._config)
+            reservation = self._store.reserve(
+                nonce, expires_at=expires_at, subject=subject
             )
             if not reservation:
                 return False

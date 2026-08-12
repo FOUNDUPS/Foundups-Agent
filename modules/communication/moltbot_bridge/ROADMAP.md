@@ -1,5 +1,13 @@
 # moltbot_bridge Roadmap
 
+- COMPLETE: LOW-tier independent signer secret-grant provider foundation and strict grant
+  domain with durable signed-policy rate admission, distinct caller/beneficiary
+  identity, public response verification and one generation lease.
+- BLOCKED: authoritative-use composition because it requires HIGH/ULTRA and
+  digest shape is not verified consensus. Grant-authority key-epoch binding,
+  production grant-service isolation, lifecycle supervision and live canary
+  remain next.
+
 ## RedDog conversational work promotion
 
 - COMPLETE: raw provider history is denied by default and continuation

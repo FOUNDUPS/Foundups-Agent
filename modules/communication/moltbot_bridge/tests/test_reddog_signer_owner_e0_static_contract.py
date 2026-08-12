@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import copy
 import pickle
+import time
 from pathlib import Path
 
 import pytest
@@ -21,6 +22,10 @@ from modules.communication.moltbot_bridge.src import (
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_admission_validation import (
     require_policy_authorities,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
+    signer_owner_e0_policy_id,
+    validated_signer_owner_e0_policy,
 )
 
 
@@ -71,6 +76,8 @@ def _root_owned_selection_loader(monkeypatch: pytest.MonkeyPatch) -> None:
         ("same_key", "e0_policy_authorities_not_independent"),
         ("grant_target", "e0_policy_self_authority_rejected"),
         ("revocation_target", "e0_policy_self_authority_rejected"),
+        ("requester_grant", "e0_policy_requester_not_independent"),
+        ("requester_target", "e0_policy_requester_not_independent"),
     ],
 )
 def test_authority_independence_matrix(
@@ -85,6 +92,12 @@ def test_authority_independence_matrix(
         policy["revocation_authority_principal_provider"] = "gitlab"
     elif mutation == "same_key":
         policy["revocation_authority_public_key"] = policy["grant_authority_public_key"]
+    elif mutation == "requester_grant":
+        policy["grant_requester_principal_id"] = policy[
+            "grant_authority_principal_id"
+        ]
+    elif mutation == "requester_target":
+        policy["grant_requester_principal_id"] = policy["target_signer_agent_id"]
     elif mutation.endswith("_target"):
         prefix = mutation.removesuffix("_target") + "_authority_public_key"
         policy[prefix] = fixture["target_public"]
@@ -108,6 +121,15 @@ def test_caller_cannot_mutate_policy_after_admission(tmp_path: Path) -> None:
     fixture["policy"]["allowed_operations"].append("issue_principal_identity")
     receipt = fixture["boundary"].consume(result.capability)
     assert receipt.policy_id == result.policy_id
+
+
+def test_owner_policy_rejects_noncanonical_authority_tier(tmp_path: Path) -> None:
+    policy = _fixture(tmp_path)["policy"]
+    policy["allowed_authority_tiers"] = ["HIGH", "SOVEREIGN"]
+    policy["consensus_required_tiers"] = ["HIGH", "SOVEREIGN"]
+    policy["policy_id"] = signer_owner_e0_policy_id(policy)
+    with pytest.raises(ValueError, match="scope_invalid"):
+        validated_signer_owner_e0_policy(policy, now_epoch=int(time.time()))
 
 
 def test_admission_capability_is_one_use(tmp_path: Path) -> None:
