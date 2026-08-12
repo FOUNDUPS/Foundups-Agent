@@ -12,12 +12,18 @@ from typing import Any
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_protocol import (
     MAX_MESSAGE_BYTES,
 )
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_router import (
+    handle_root_authority_wire_request,
+)
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service import (
     SnapshotSupplier,
     handle_root_authority_request,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
     RootVerifiedOutcomeAuthorityState,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_authority import (
+    RootRevocationServiceAuthority,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
     _bound_server,
@@ -58,6 +64,7 @@ def serve_root_authority_bounded(
     signer_gid: int,
     state: RootVerifiedOutcomeAuthorityState,
     snapshot_supplier: SnapshotSupplier,
+    revocation_authority: RootRevocationServiceAuthority | None = None,
     peer_attestor: KernelPeerCredentialAttestor,
     max_requests: int = 128,
     timeout_s: float = 5.0,
@@ -82,6 +89,9 @@ def serve_root_authority_bounded(
         return _reject("root_authority_service_principal_invalid")
     if not isinstance(state, RootVerifiedOutcomeAuthorityState) or not isinstance(
         peer_attestor, KernelPeerCredentialAttestor
+    ) or (
+        revocation_authority is not None
+        and type(revocation_authority) is not RootRevocationServiceAuthority
     ):
         return _reject("root_authority_service_dependency_invalid")
     assert resolved is not None
@@ -90,6 +100,7 @@ def serve_root_authority_bounded(
         signer_gid=signer_gid,
         state=state,
         snapshot_supplier=snapshot_supplier,
+        revocation_authority=revocation_authority,
         peer_attestor=peer_attestor,
         max_requests=max_requests,
         timeout_s=timeout_s,
@@ -102,6 +113,7 @@ def _serve_validated(
     signer_gid: int,
     state: RootVerifiedOutcomeAuthorityState,
     snapshot_supplier: SnapshotSupplier,
+    revocation_authority: RootRevocationServiceAuthority | None = None,
     peer_attestor: KernelPeerCredentialAttestor,
     max_requests: int,
     timeout_s: float,
@@ -126,6 +138,7 @@ def _serve_validated(
                     timeout_s=timeout_s,
                     state=state,
                     snapshot_supplier=snapshot_supplier,
+                    revocation_authority=revocation_authority,
                     peer_attestor=peer_attestor,
                 )
                 handled += 1
@@ -159,6 +172,7 @@ def _serve_connection(
     timeout_s: float,
     state: RootVerifiedOutcomeAuthorityState,
     snapshot_supplier: SnapshotSupplier,
+    revocation_authority: RootRevocationServiceAuthority | None = None,
     peer_attestor: KernelPeerCredentialAttestor,
 ) -> None:
     try:
@@ -168,12 +182,16 @@ def _serve_connection(
             return
         connection.settimeout(timeout_s)
         raw = _read_bounded(connection, MAX_MESSAGE_BYTES)
-        response = handle_root_authority_request(
-            raw,
-            peer=peer,
-            state=state,
-            snapshot_supplier=snapshot_supplier,
+        common = dict(
+            peer=peer, state=state, snapshot_supplier=snapshot_supplier,
             now_epoch=_now_epoch(),
+        )
+        response = (
+            handle_root_authority_request(raw, **common)
+            if revocation_authority is None
+            else handle_root_authority_wire_request(
+                raw, revocation_authority=revocation_authority, **common
+            )
         )
         connection.sendall(response)
     except Exception:

@@ -1,5 +1,24 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## Root-served signer-revocation anchor
+
+The existing root verified-outcome Unix service now routes a domain-separated
+revocation protocol. An opaque signer-side client sends the current signed E0
+policy and requested signed snapshot ID; the root service independently holds
+the current-generation selection lease, validates policy authorities and exact
+topology, reads the local durable snapshot and witness, derives the monotonic
+high-water value, and advances the existing three-domain root state. Callers
+cannot supply arbitrary expected or next values, receive a root-state object,
+or construct/copy/serialize either service authority. Signed request nonces,
+kernel peer credentials, signer-key proofs, bounded ASCII messages, exact
+response context, CAS convergence, and lost-response retry are fail closed.
+
+This proves root-service revocation-anchor transport, not production E0 use.
+The durable oracle remains uncomposed until a root-authorized protected-use
+lease closes the revocation-check-to-sign race. Independent grant issuance,
+WSP 71 secret resolution, signer lifecycle activation, worker/repository/PR/
+merge effects, and HoloIndex mutation remain unavailable.
+
 ## External signer exact-effect authority
 
 The bridge now contains the smallest reusable authoritative-use lease primitive.
@@ -163,13 +182,13 @@ agreement under the same lock. Coordinated rollback of the two local domains
 therefore rejects while the root anchor remains intact. Expired state remains unusable, while a locked
 publisher may authenticate an expired predecessor solely to append its fresh,
 monotonic successor. Canonical snapshot validation remains a separate bounded
-module from authority/signature verification. This is an uncomposed durability foundation, not
-production authority: an independently administered grant authority, external
-root-service transport/client, E0-only oracle factory, and stable-service
-composition remain absent. Root compromise or coordinated rollback of both
+module from authority/signature verification. This is a partially composed durability
+foundation, not production authority: root-service transport/client now exist;
+independently administered grant issuance, the atomic protected-use E0 oracle/factory,
+and stable signer lifecycle composition remain absent. Root compromise or coordinated rollback of both
 mutable root-state mirrors is outside this foundation's claim; leaving the
 static installation store unchanged does not detect that rollback. Future
-composition must expose an opaque root-owned service boundary rather than a
+composition must consume the opaque root-owned service boundary rather than a
 caller-constructed state object.
 RedDog and `main.py` remain clients and cannot spawn the signer.
 The older `reddog_signer_socket_service_runtime_cli` is retained only to return

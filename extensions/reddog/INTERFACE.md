@@ -1,8 +1,8 @@
 # RedDog Interface
 
-Version 0.4.84 pins the root-anchored signer-revocation backend manifest.
-It adds no thin-client behavior or execution authority; production revocation
-remains uncomposed by the stable service.
+Version 0.4.85 pins the root-service signer-revocation transport backend
+manifest. It adds no thin-client behavior or execution authority; protected-use
+E0 composition remains unavailable.
 
 Version 0.4.81 pins the reconciled signer/live-canary backend manifest without
 changing thin-client behavior or execution authority.

@@ -15,13 +15,18 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     _create_service_backed_outcome_authority,
     build_root_authority_socket_exchange,
 )
-from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service import (
-    RootAuthoritySnapshot,
-)
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_dependency import (
     RootAuthorityServiceDependencies,
-    build_root_authority_service_dependencies,
-    state_binding_from_owner_config,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_runtime_materializer import (
+    materialize_revocation_anchor_authority,
+    materialize_root_authority_service_dependencies,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_client import (
+    RootRevocationAnchorAuthority,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
+    SignerGrantRevocationAuthorityBinding,
 )
 
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water_reader import (
@@ -259,38 +264,25 @@ def load_root_authority_service_dependencies(
     *,
     repo_root: Path,
 ) -> RootAuthorityServiceDependencies:
-    """Build root-owned state and a fresh root-config snapshot supplier."""
+    repo = Path(repo_root).resolve()
+    return materialize_root_authority_service_dependencies(
+        owner_config_path=owner_config_path, repo=repo,
+        owner_supplier=lambda: _load_owner_config(owner_config_path, repo=repo),
+    )
+
+
+def load_system_service_revocation_anchor_authority(
+    *, owner_config_path: Path | str, repo_root: Path,
+    policy: Mapping[str, Any], binding: SignerGrantRevocationAuthorityBinding,
+    request_signer: Callable[[str], str], now_epoch: int | None = None,
+) -> RootRevocationAnchorAuthority:
+    """Mint an RPC-only root-anchor client from current owner configuration."""
 
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
-    raw = owner.get("verified_outcome_authority")
-    if not isinstance(raw, Mapping):
-        raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
-
-    def supply() -> RootAuthoritySnapshot:
-        current = _load_owner_config(owner_config_path, repo=repo)
-        current_raw = current.get("verified_outcome_authority")
-        if not isinstance(current_raw, Mapping) or not isinstance(
-            current_raw.get("descriptor"), Mapping
-        ):
-            raise RuntimeArtifactManifestError("verified_outcome_authority_missing")
-        descriptor = dict(current_raw["descriptor"])
-        return RootAuthoritySnapshot(
-            owner_config_id=str(current["config_id"]),
-            authority_generation_sequence=int(
-                descriptor["authority_generation_sequence"]
-            ),
-            state_binding_digest=state_binding_from_owner_config(
-                current_raw, repo=repo
-            ),
-            signer_principal_id=str(current_raw["signer_principal_id"]),
-            signer_uid=int(current_raw["signer_uid"]),
-            signer_gid=int(current_raw["signer_gid"]),
-            descriptor=descriptor,
-        )
-
-    return build_root_authority_service_dependencies(
-        raw, repo=repo, snapshot_supplier=supply
+    return materialize_revocation_anchor_authority(
+        owner=owner, repo=repo, policy=policy, binding=binding,
+        request_signer=request_signer, now_epoch=now_epoch,
     )
 
 
@@ -667,6 +659,7 @@ __all__ = [
     "SCHEMA_VERSION_V2",
     "SystemServiceStartupSelection",
     "load_system_service_manifest_selection",
+    "load_system_service_revocation_anchor_authority",
     "load_system_service_signer_identity",
     "load_system_service_startup_selection",
     "load_system_service_verified_outcome_signing_authority",

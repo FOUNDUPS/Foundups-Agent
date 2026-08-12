@@ -141,8 +141,8 @@ environment. The legacy CLI and one-shot isolated-process composer reject every
 non-test provider before authority, resolver, or socket access. Only the stable
 service is production; it derives manifest, outcome authority, owner ID, and
 signer UID/GID from one authenticated v2 snapshot. Legacy v1 cannot start it;
-test-only dry-run is non-authoritative. An absent outcome policy leaves unrelated
-signer operations available; a configured policy requires matching root authority.
+test-only dry-run is non-authoritative. The same root service optionally routes opaque `RootRevocationAnchorAuthority.load()`/`advance_snapshot()` operations with no caller-selected CAS state, holding `lease_validated_owner_e0_current_admission()` through signed policy, topology, snapshot, witness, and monotonic validation.
+An absent outcome policy leaves unrelated signer operations available; protected-use E0 composition remains blocked until revocation checking and effect are atomic.
 Owner, generation, key, expiry, revocation, replay, or grant mismatches reject.
 Resident production admission remains blocked until the root service is deployed
 and independent verifier runtimes issue both grant signatures. Staged authority
@@ -191,9 +191,9 @@ digest. Production composition rejects missing, mismatched, alternate-path, or
 volatile stores. An exact signed revocation-snapshot contract now binds the
 current E0 policy, generation, authority, target signer, and durable store.
 An uncomposed local witness and policy v3 bind the root-state anchor; the oracle
-requires three-way agreement. Its two mutable root mirrors can be rolled back while
-the static installation domain remains unchanged. Transport and the E0-only factory
-remain absent, so production signing fails closed.
+requires three-way agreement; two mutable root mirrors can be rolled back while the
+static installation domain remains unchanged. Root-service transport exists, but the
+atomic protected-use E0 lease and production factory remain absent, so signing fails closed.
 Native-memory zeroization and complete signer lifecycle supervision remain
 SPECIFIED_NOT_IMPLEMENTED.
 No private key, resolved secret, grant signature, or audit key is serialized.

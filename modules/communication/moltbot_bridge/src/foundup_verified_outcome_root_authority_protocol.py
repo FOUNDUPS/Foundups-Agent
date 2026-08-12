@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping
+
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
+    MAX_MESSAGE_BYTES,
+    canonical_bytes,
+    decode_message,
+    digest_mapping,
+    encode_message,
+)
 
 
 SCHEMA_VERSION = "foundup_verified_outcome_root_authority_service.v1"
@@ -14,7 +20,6 @@ OP_RESERVE = "RESERVE"
 OP_COMMIT = "COMMIT"
 STATUS_ACCEPT = "ACCEPT"
 STATUS_REJECT = "REJECT"
-MAX_MESSAGE_BYTES = 64 * 1024
 
 
 @dataclass(frozen=True)
@@ -34,7 +39,7 @@ class RootAuthorityRequest:
 
     def to_bytes(self) -> bytes:
         validate_request(self)
-        return _encode({"schema_version": SCHEMA_VERSION, **asdict(self)})
+        return encode_message({"schema_version": SCHEMA_VERSION, **asdict(self)})
 
 
 @dataclass(frozen=True)
@@ -54,11 +59,11 @@ class RootAuthorityResponse:
 
     def to_bytes(self) -> bytes:
         validate_response(self)
-        return _encode({"schema_version": SCHEMA_VERSION, **asdict(self)})
+        return encode_message({"schema_version": SCHEMA_VERSION, **asdict(self)})
 
 
 def request_from_bytes(value: bytes) -> RootAuthorityRequest:
-    data = _decode(value)
+    data = decode_message(value)
     expected = {"schema_version", *RootAuthorityRequest.__dataclass_fields__}
     if set(data) != expected or data.pop("schema_version") != SCHEMA_VERSION:
         raise ValueError("root_authority_request_shape_invalid")
@@ -68,7 +73,7 @@ def request_from_bytes(value: bytes) -> RootAuthorityRequest:
 
 
 def response_from_bytes(value: bytes) -> RootAuthorityResponse:
-    data = _decode(value)
+    data = decode_message(value)
     expected = {"schema_version", *RootAuthorityResponse.__dataclass_fields__}
     if set(data) != expected or data.pop("schema_version") != SCHEMA_VERSION:
         raise ValueError("root_authority_response_shape_invalid")
@@ -138,7 +143,7 @@ def validate_response(value: RootAuthorityResponse) -> None:
 def request_id_for(value: Mapping[str, Any]) -> str:
     payload = dict(value)
     payload.pop("request_id", None)
-    return _digest(payload)
+    return digest_mapping(payload)
 
 
 def canonical_signer_instance_input(value: RootAuthorityRequest) -> str:
@@ -147,32 +152,7 @@ def canonical_signer_instance_input(value: RootAuthorityRequest) -> str:
     payload = asdict(value)
     payload.pop("request_id", None)
     payload.pop("signer_instance_signature", None)
-    return SIGNER_PROOF_PREFIX + json.dumps(
-        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
-        allow_nan=False,
-    )
-
-
-def _encode(value: Mapping[str, Any]) -> bytes:
-    raw = json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
-        allow_nan=False,
-    ).encode("ascii") + b"\n"
-    if len(raw) > MAX_MESSAGE_BYTES:
-        raise ValueError("root_authority_message_too_large")
-    return raw
-
-
-def _decode(value: bytes) -> dict[str, Any]:
-    if not isinstance(value, bytes) or not value or len(value) > MAX_MESSAGE_BYTES:
-        raise ValueError("root_authority_message_invalid")
-    try:
-        data = json.loads(value.decode("ascii").strip())
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ValueError("root_authority_message_invalid") from exc
-    if not isinstance(data, dict):
-        raise ValueError("root_authority_message_invalid")
-    return data
+    return SIGNER_PROOF_PREFIX + canonical_bytes(payload).decode("ascii")
 
 
 def _text(value: Any) -> bool:
@@ -188,14 +168,6 @@ def _sha256(value: Any) -> bool:
 
 def _signature(value: Any) -> bool:
     return isinstance(value, str) and value.startswith("ed25519-sig-v1:") and value.isascii()
-
-
-def _digest(value: Mapping[str, Any]) -> str:
-    raw = json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
-        allow_nan=False,
-    ).encode("ascii")
-    return "sha256:" + hashlib.sha256(raw).hexdigest()
 
 
 __all__ = [

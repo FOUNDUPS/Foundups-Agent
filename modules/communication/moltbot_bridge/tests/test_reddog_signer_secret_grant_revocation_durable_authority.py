@@ -16,6 +16,12 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     RootVerifiedOutcomeAuthorityState,
     root_authority_state_binding_digest,
 )
+from modules.communication.moltbot_bridge.tests.durable_revocation_anchor_client_fixture import (
+    anchor_client as _anchor_client,
+    high_water as _high_water,
+    open_anchor_state as _open_anchor_state,
+    raw_anchor as _raw_anchor,
+)
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     ProposalReplayHighWater,
 )
@@ -170,44 +176,13 @@ def _open_runtime(policy: Mapping[str, Any]):
         repo_root=REPO_ROOT, store_id=binding.witness_store_id,
         durability_receipt_id=binding.witness_durability_receipt_id,
     )
-    anchor = _open_anchor(policy)
+    root_state = _open_anchor_state(policy, REPO_ROOT)
+    anchor = _anchor_client(policy, binding, store, root_state)
     supply = UncomposedDurableSignerGrantRevocationAuthoritySupply(
         binding=binding, policy=policy, store=store, witness=witness, anchor=anchor,
         principal_key_resolver=_Resolver(), signature_verifier=_Verifier(),
     )
     return binding, store, witness, anchor, supply
-
-
-def _open_anchor(policy: Mapping[str, Any]) -> RootVerifiedOutcomeAuthorityState:
-    parent = Path(policy["revocation_root"]).parent
-    values = []
-    root_names = {
-        "state": "anchor-primary",
-        "state_witness": "anchor-witness",
-        "installation": "anchor-installation",
-    }
-    for name in ("state", "state_witness", "installation"):
-        root = parent / root_names[name]
-        values.append(
-            SqliteMonotonicAuthorityStore(
-                root / f"{name}.sqlite3", allowed_root=root,
-                repo_root=REPO_ROOT, store_id=f"revocation-anchor-{name}",
-                durability_receipt_id=_digest(f"anchor-{name}-durable"),
-            )
-        )
-    state = RootVerifiedOutcomeAuthorityState(
-        *values, repo_root=REPO_ROOT, require_root_ownership=False,
-    )
-    if values[2].load(INSTALLATION_BINDING) is None:
-        state.initialize(
-            generation=ProposalReplayHighWater(1, _digest("anchor-owner")[7:]),
-            replay_binding=_digest("anchor-bootstrap-binding"),
-            replay_anchor=ProposalReplayHighWater(
-                1, _digest("anchor-bootstrap")[7:]
-            ),
-            installation_revision=_digest("anchor-installation")[7:],
-        )
-    return state
 
 
 def _runtime(tmp_path: Path):
@@ -306,7 +281,7 @@ def test_crash_recovery_rolls_forward_exact_pending_snapshot(
             next_value=_high_water(pending),
         )
     if crash_stage == "anchor":
-        anchor.advance(
+        _raw_anchor(anchor).advance(
             binding.anchor_binding_digest(), expected=None,
             next_value=_high_water(pending),
         )
@@ -372,7 +347,7 @@ def test_coordinated_local_rollback_rejects_against_root_anchor(
     )
     with pytest.raises(RuntimeError, match="anchor_mismatch"):
         supply.recover(now_epoch=NOW)
-    assert anchor.load(binding.anchor_binding_digest()) == _high_water(second)
+    assert _raw_anchor(anchor).load(binding.anchor_binding_digest()) == _high_water(second)
 
 
 def test_coordinated_root_mirror_rollback_is_explicit_residual(
@@ -407,7 +382,7 @@ def test_coordinated_root_mirror_rollback_is_explicit_residual(
             path, binding.anchor_binding_digest(), _high_water(first),
         )
     assert _sqlite_high_water(installation_path, INSTALLATION_BINDING) == installation_before
-    assert anchor.load(binding.anchor_binding_digest()) == _high_water(first)
+    assert _raw_anchor(anchor).load(binding.anchor_binding_digest()) == _high_water(first)
     assert _oracle(policy, binding, store, witness, anchor).is_revoked(
         grant_id=_digest("grant-b"), key_epoch="other", at_epoch=NOW,
     ) is False
@@ -419,7 +394,10 @@ def test_substituted_root_anchor_identity_rejects_before_publication(
     policy, binding, store, witness, anchor, _supply = _runtime(tmp_path)
     other_root = tmp_path / "other"
     other_root.mkdir()
-    substituted = _open_anchor(_policy(other_root))
+    other_policy = _policy(other_root)
+    _other_binding, _other_store, _other_witness, substituted, _other_supply = (
+        _open_runtime(other_policy)
+    )
     with pytest.raises(ValueError, match="root_anchor_invalid"):
         UncomposedDurableSignerGrantRevocationAuthoritySupply(
             binding=binding, policy=policy, store=store, witness=witness,
@@ -764,17 +742,6 @@ def test_slice_is_bounded_effect_free_and_not_production_composed() -> None:
     assert freshness_bypass == [
         "reddog_signer_secret_grant_revocation_authority_supply.py"
     ]
-
-
-def _high_water(snapshot: Mapping[str, Any]):
-    from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
-        ProposalReplayHighWater,
-    )
-
-    return ProposalReplayHighWater(
-        sequence=int(snapshot["sequence"]),
-        state_revision=str(snapshot["snapshot_id"]).removeprefix("sha256:"),
-    )
 
 
 def _overwrite_high_water(path: Path, binding: str, value: Any) -> None:

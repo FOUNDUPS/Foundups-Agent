@@ -1,11 +1,11 @@
 # RedDog
 
-Version: 0.4.84
+Version: 0.4.85
 
-[OBSERVED] Version 0.4.84 pins the backend manifest after root-anchored signer
-revocation policy and three-domain high-water foundation. The client
-behavior and execution authority are unchanged; production revocation remains
-uncomposed.
+[OBSERVED] Version 0.4.85 pins the backend manifest after the existing root
+authority service gained opaque, signed, current-policy revocation-anchor
+transport. The client behavior and execution authority are unchanged;
+protected-use E0 composition remains unavailable.
 
 [OBSERVED] Version 0.4.81 pins the reconciled signer/live-canary backend
 manifest. The client behavior and execution authority are unchanged.

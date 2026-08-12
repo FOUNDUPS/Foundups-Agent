@@ -223,12 +223,43 @@ def validate_root_verified_outcome_descriptor_public(
 ) -> dict[str, Any]:
     """Validate root descriptor content without acquiring its mutable store."""
 
+    checked = validate_root_verified_outcome_descriptor_identity_public(
+        value, now_epoch=now_epoch
+    )
+    checked["grants"] = _validate_grants(checked, now_epoch=now_epoch)
+    return checked
+
+
+def validate_root_verified_outcome_descriptor_identity(
+    value: Mapping[str, Any], *, replay_store: ProposalReplayHighWaterStore,
+    now_epoch: int,
+) -> dict[str, Any]:
+    """Validate root signer/generation identity without grant admission."""
+
+    checked = validate_root_verified_outcome_descriptor_identity_public(
+        value, now_epoch=now_epoch
+    )
+    _require_store_binding(checked, replay_store)
+    return checked
+
+
+def validate_root_verified_outcome_descriptor_identity_public(
+    value: Mapping[str, Any], *, now_epoch: int
+) -> dict[str, Any]:
+    """Validate exact root descriptor identity without using outcome grants."""
+
     if not isinstance(value, Mapping) or set(value) != _DESCRIPTOR_FIELDS:
         raise ValueError("verified_outcome_root_descriptor_shape_invalid")
     checked = dict(value)
     _validate_descriptor_header(checked)
     _require_time_window(checked, now_epoch=now_epoch)
-    checked["grants"] = _validate_grants(checked, now_epoch=now_epoch)
+    if (
+        not isinstance(checked["grants"], list)
+        or len(checked["grants"]) > MAX_GRANTS
+    ):
+        raise ValueError("verified_outcome_root_grants_invalid")
+    _text_set(checked["revoked_authorization_ids"])
+    _digest_set(checked["revoked_verifier_fingerprints"])
     expected_id = _digest(
         {key: item for key, item in checked.items() if key != "descriptor_id"}
     )
@@ -549,5 +580,7 @@ __all__ = [
     "descriptor_id_for",
     "root_verified_outcome_authority_bindings",
     "validate_root_verified_outcome_descriptor",
+    "validate_root_verified_outcome_descriptor_identity",
+    "validate_root_verified_outcome_descriptor_identity_public",
     "validate_root_verified_outcome_descriptor_public",
 ]
