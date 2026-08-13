@@ -11,6 +11,27 @@
 
 ---
 
+## 2026-08-13 - WSP 62 Differential Flexibility Clarified
+
+**WSP References**: WSP 15, WSP 22, WSP 62, WSP 87, WSP 97
+
+**WSP 81 Governance**: `NOTIFICATION_REQUIRED`; 012 notified in the initiating
+request. Exact base: `b0344c4e3a6ba8a45b921b16aabab865a6341bfc`.
+Validation: framework/knowledge byte equality, 65 focused WSP 62 and modular-
+audit tests, GitHub CI, CodeQL, security, red-team observation, and HoloIndex
+freshness. Recovery: revert the focused Git commit; no archive is required.
+
+**Changes Made**:
+- Aligned the Python hard limit with WSP 87 and the implemented modular-audit
+  threshold of 1500 lines.
+- Defined warning and critical thresholds as review signals, not unconditional
+  integration blockers.
+- Preserved hard rejection for candidate-attributed new debt, exemption
+  ratchets, and growth beyond authoritative no-growth ceilings.
+- Synced the canonical `WSP_knowledge` mirror and added a static regression.
+
+---
+
 ## 2026-04-18 - WSP 50 HoloIndex + WSP 97 Integration
 
 **WSP References**: WSP 22, WSP 50, WSP 97

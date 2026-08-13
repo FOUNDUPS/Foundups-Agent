@@ -160,3 +160,23 @@ def test_no_growth_ceiling_rejects_candidate_growth(tmp_path: Path) -> None:
 
 def test_wsp62_framework_and_knowledge_mirrors_are_byte_identical() -> None:
     assert WSP62_FRAMEWORK.read_bytes() == WSP62_KNOWLEDGE.read_bytes()
+
+
+def test_wsp62_is_differential_and_uses_one_python_hard_limit() -> None:
+    protocol = WSP62_FRAMEWORK.read_text(encoding="utf-8")
+
+    for required in (
+        "differential debt-control protocol",
+        "candidate-attributed new debt",
+        "unexempt new file created at or above its warning threshold",
+        "inherited baseline debt remains advisory",
+        ">=1500 lines: Hard limit",
+        "Candidate exceeds no-growth ceiling",
+    ):
+        assert required in protocol
+    for obsolete in (
+        ">=2000 lines: Violation",
+        "1500-2000 lines: Critical window",
+        "80% of 2000 hard limit",
+    ):
+        assert obsolete not in protocol
