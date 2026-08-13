@@ -8,6 +8,30 @@
 - The Linux socket-chain fixture now reuses the canonical model-bound queue
   input helper so selection, runtime verification, queue, claim, profile and
   materialized work order carry one consistent authority lineage.
+- The same fixture injects the existing exact-SHA evidence and draft-PR runner
+  seams, proving commit and publication stages without granting live GitHub
+  authority to the test process.
+- Authority-profile materialization now carries the existing ASCII-safe
+  `slice_verifier_plan`; focused regressions reject malformed and non-ASCII
+  plans before any queue effect.
+- Authority-profile validation now accepts only allowlisted environment-variable
+  references, never secret values, and the queue binding derives an integer
+  trusted epoch consistently for signer and revocation checks.
+- The OpenClaw child-outcome projection now records each actual claim attempt;
+  a later successful retry no longer rewrites earlier requeues as completions.
+  Control receipts permit ordered retries only until the first terminal result.
+- Removed an unreachable verified-outcome dependency precheck. The existing
+  committed signer policy and one-use signing authority remain the fail-closed
+  production gate and are exercised by the Linux socket fixture.
+- Worktree evidence now canonicalizes the complete receipt when no explicit
+  receipt digest exists; a receipt ID is no longer treated as its content
+  digest. Parent control receipts bind only directly observed execution stages,
+  while downstream stage effects remain proven by the authoritative queue-chain
+  artifact.
+- The Linux fixture proves exactly four signer requests: delegated authority,
+  exact-SHA evidence, verified outcome, and parent control receipt. It uses
+  controlled fake repository/PatternMemory effects and does not claim live Git,
+  GitHub, external signer, HoloIndex, or production memory authority.
 
 ## 2026-08-12: Canonical elevated-authority consensus regressions
 - Review hardening rejects noncanonical or duplicate signed JSON, payload

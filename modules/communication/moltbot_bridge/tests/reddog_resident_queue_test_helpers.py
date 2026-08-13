@@ -837,14 +837,22 @@ def with_architect_fix_publication(
     queue_item_id = "sha256:" + "5" * 64
     claim_id = "sha256:" + "6" * 64
     attestation_id = "reddog_architect_proposal_attestation_" + "7" * 32
+    queue_candidate = snapshot["wre_queue_items"][0]
+    operational_context: dict[str, Any] = {
+        "queue_item_id": queue_item_id,
+        "claim_id": claim_id,
+    }
+    determination_id = queue_candidate.get("source_determination_receipt_id")
+    if determination_id:
+        operational_context["architect_determination_receipt_id"] = determination_id
+    allocation = authority_profile.get("wsp15_allocation_receipt")
+    if isinstance(allocation, Mapping):
+        operational_context["wsp15_allocation_receipt"] = dict(allocation)
     profile = {
         **authority_profile,
         "promotion_publication_id": publication_id,
         "proposal_authenticity_attestation_id": attestation_id,
-        "operational_context_binding": {
-            "queue_item_id": queue_item_id,
-            "claim_id": claim_id,
-        },
+        "operational_context_binding": operational_context,
     }
     current = _replace_queue_claim_ids(
         snapshot,

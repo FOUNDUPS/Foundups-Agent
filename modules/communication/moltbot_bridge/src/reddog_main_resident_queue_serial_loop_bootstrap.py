@@ -767,6 +767,10 @@ def _materialize_work_orders_from_authority_profile(
     )
     if bounded_worker_plan_reasons:
         return None, bounded_worker_plan_reasons
+    slice_verifier_plan, slice_verifier_plan_reasons = _optional_profile_plan(
+        authority_profile, "slice_verifier_plan")
+    if slice_verifier_plan_reasons:
+        return None, slice_verifier_plan_reasons
 
     evidence_seed = {
         "queue_receipt": queue_receipt,
@@ -844,7 +848,26 @@ def _materialize_work_orders_from_authority_profile(
     }
     if bounded_worker_plan:
         work_order["bounded_worker_plan"] = bounded_worker_plan
+    if slice_verifier_plan:
+        work_order["slice_verifier_plan"] = slice_verifier_plan
     return {work_order_id: work_order}, ()
+
+
+def _optional_profile_plan(
+    authority_profile: Mapping[str, Any],
+    field_name: str,
+) -> tuple[dict[str, Any], tuple[str, ...]]:
+    raw_plan = authority_profile.get(field_name)
+    if raw_plan is None:
+        return {}, ()
+    if not isinstance(raw_plan, Mapping):
+        return {}, (f"work_order_materializer_{field_name}_invalid:type",)
+    plan = dict(raw_plan)
+    if not plan:
+        return {}, ()
+    if not _is_ascii_json_safe(plan):
+        return {}, (f"work_order_materializer_{field_name}_non_ascii",)
+    return plan, ()
 
 
 def _bounded_worker_plan_from_authority_profile(

@@ -3589,8 +3589,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             if candidate_valve_path.exists():
                 valve_environment_path = profile_valve_environment_path
 
-        trusted_authority_clock = time.time
-        now_epoch = int(trusted_authority_clock()) if authority_state_path else None
+        trusted_authority_clock = lambda: int(time.time())
+        now_epoch = trusted_authority_clock() if authority_state_path else None
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),

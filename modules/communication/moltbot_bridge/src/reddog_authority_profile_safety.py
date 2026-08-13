@@ -20,6 +20,7 @@ _FORBIDDEN_FIELD_PARTS = (
 _PUBLIC_REFERENCE_FIELDS = frozenset(
     {
         "proposal_policy_authorization_id",
+        "secret_env_refs",
     }
 )
 _PANEL_TOPOLOGY_DIGEST_FIELDS = frozenset(
@@ -63,6 +64,7 @@ _SEED_FIELDS = frozenset(
         "requested_operation",
         "required_policy_gates",
         "required_tests",
+        "slice_verifier_plan",
         "schema_version",
         "seed_supply_receipt_id",
         "source_determination_receipt_id",
@@ -205,6 +207,7 @@ _SHELL_PROFILE_FIELDS = frozenset(
         "repo_sensitive",
         "requires_cwd_guard",
         "requires_worktree",
+        "secret_env_refs",
         "timeout_seconds",
     }
 )
@@ -225,6 +228,22 @@ _PLAN_RECEIPT_CHAIN_FIELDS = frozenset(
         "terminal_receipt_hash",
     }
 )
+_SLICE_VERIFIER_PLAN_FIELDS = frozenset(
+    {
+        "allowed_path_patterns",
+        "base_sha",
+        "expected_changed_paths",
+        "forbidden_path_patterns",
+        "head_sha",
+        "operation_cwd",
+        "required_checks",
+        "signed_receipt_chain",
+        "slice_name",
+        "verifier_id",
+        "worker_id",
+    }
+)
+_SLICE_VERIFIER_CHECK_FIELDS = frozenset({"argv", "name", "timeout_s"})
 _MODEL_SELECTION_FIELDS = frozenset(
     {
         "catalog_snapshot_id",
@@ -453,6 +472,8 @@ _NESTED_FIELD_SCHEMAS = (
     ("bounded_worker_plan.selection_receipt", _PLAN_SELECTION_FIELDS),
     ("bounded_worker_plan.signed_receipt_chain", _PLAN_RECEIPT_CHAIN_FIELDS),
     ("bounded_worker_plan.env_policy", frozenset({"scrubbed"})),
+    ("slice_verifier_plan", _SLICE_VERIFIER_PLAN_FIELDS),
+    ("slice_verifier_plan.signed_receipt_chain", _PLAN_RECEIPT_CHAIN_FIELDS),
     ("model_selection_receipt", _MODEL_SELECTION_FIELDS),
     ("model_selection_receipt.requirements", _MODEL_TASK_REQUIREMENTS_FIELDS),
     ("model_runtime_binding_receipt", _MODEL_RUNTIME_BINDING_FIELDS),
@@ -527,6 +548,7 @@ _NESTED_FIELD_SCHEMAS = (
     ),
 )
 _SEQUENCE_MAPPING_SCHEMAS = (
+    ("slice_verifier_plan.required_checks", _SLICE_VERIFIER_CHECK_FIELDS),
     ("model_selection_receipt.rankings", _MODEL_CANDIDATE_RANKING_FIELDS),
     (
         "model_selection_receipt.role_assignments",

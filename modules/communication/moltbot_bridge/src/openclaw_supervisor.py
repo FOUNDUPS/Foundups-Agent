@@ -1402,14 +1402,24 @@ def _signed_worker_child_execution_outcomes(
         task_id = str(result.get("task_id") or "")
         if task_id not in classified:
             continue
-        status = "completed" if task_id in completed else "requeued"
-        if task_id in failed:
-            status = "failed"
+        claim_status = str(result.get("status") or "")
+        status = {
+            SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT: "completed",
+            SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED: "requeued",
+            SIGNED_WORKER_OPENCLAW_CLAIM_REJECT: "failed",
+        }.get(claim_status, "")
+        expected_ids = {
+            "completed": completed,
+            "requeued": requeued,
+            "failed": failed,
+        }.get(status, frozenset())
+        if task_id not in expected_ids:
+            continue
         outcomes.append(
             {
                 "task_id": task_id,
                 "status": status,
-                "receipt_id": "" if task_id in failed else str(result.get("receipt_id") or ""),
+                "receipt_id": "" if status == "failed" else str(result.get("receipt_id") or ""),
                 "evidence_digest": str(result.get("execution_result_digest") or ""),
                 "worker_execution_performed": (
                     result.get("worker_execution_performed") is True

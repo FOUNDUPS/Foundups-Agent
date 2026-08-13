@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from pathlib import Path
 
@@ -45,6 +46,11 @@ ARTIFACT = "modules/communication/moltbot_bridge/tests/fixtures/reddog_queue_pil
 
 def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
+
+
+def _mapping_digest(value: object) -> str:
+    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def _queue_pilot_result(*, decision: str | None = None, pilot_decision: str | None = None) -> dict:
@@ -171,7 +177,9 @@ def test_invokes_autonomous_verifier_from_accepted_bounded_pilot() -> None:
     assert result.verifier_result is not None
     assert result.verifier_result.decision == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
     assert result.verifier_result.receipt.changed_paths == [ARTIFACT]
-    assert result.verifier_result.receipt.worktree_receipt_digest == "bounded_wt_pilot_1234"
+    assert result.verifier_result.receipt.worktree_receipt_digest == _mapping_digest(
+        {"accepted": True, "receipt_id": "bounded_wt_pilot_1234"}
+    )
     assert result.verifier_result.receipt.no_command_execution_performed is True
     assert result.no_command_execution_performed is True
     assert result.no_github_call_performed is True

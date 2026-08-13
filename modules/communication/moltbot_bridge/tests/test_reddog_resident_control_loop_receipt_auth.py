@@ -45,6 +45,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor 
     InMemorySignerControlLoopAnchorStore,
 )
 from modules.communication.moltbot_bridge.src import openclaw_supervisor
+from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_outcomes import (
+    strict_child_outcomes,
+)
 
 
 def _claim_evidence(
@@ -178,6 +181,71 @@ def _result(**overrides: object) -> dict[str, object]:
         for outcome, item in zip(outcomes, generated):
             outcome["evidence_digest"] = item["execution_result_digest"]
     return result
+
+
+def test_child_outcomes_allow_unique_requeue_attempts_before_completion() -> None:
+    outcomes = []
+    for index, status in enumerate(("requeued", "requeued", "completed"), start=1):
+        outcomes.append(
+            {
+                "task_id": "task-progressive",
+                "status": status,
+                "receipt_id": f"child-receipt-{index}",
+                "evidence_digest": "sha256:" + str(index) * 64,
+                "worker_execution_performed": True,
+                "effect_evidence_complete": True,
+                "worker_process_spawn_count": 0,
+                "shell_command_count": 0,
+            }
+        )
+
+    assert strict_child_outcomes(outcomes) == tuple(outcomes)
+
+
+def test_openclaw_projects_requeue_then_completion_for_same_task() -> None:
+    requeued = _claim_evidence(
+        task_id="task-progressive",
+        status="requeued",
+        receipt_id="child-receipt-1",
+    )
+    completed = _claim_evidence(
+        task_id="task-progressive",
+        status="completed",
+        receipt_id="child-receipt-2",
+    )
+
+    outcomes = openclaw_supervisor._signed_worker_child_execution_outcomes(
+        results=(requeued, completed),
+        completed_task_ids=("task-progressive",),
+        requeued_task_ids=("task-progressive",),
+        failed_task_ids=(),
+    )
+
+    assert tuple(item["status"] for item in outcomes) == (
+        "requeued",
+        "completed",
+    )
+    assert strict_child_outcomes(outcomes) == outcomes
+
+
+def test_child_outcomes_reject_attempt_after_terminal_result() -> None:
+    outcomes = []
+    for index, status in enumerate(("completed", "requeued"), start=1):
+        outcomes.append(
+            {
+                "task_id": "task-replayed",
+                "status": status,
+                "receipt_id": f"child-receipt-{index}",
+                "evidence_digest": "sha256:" + str(index) * 64,
+                "worker_execution_performed": True,
+                "effect_evidence_complete": True,
+                "worker_process_spawn_count": 0,
+                "shell_command_count": 0,
+            }
+        )
+
+    with pytest.raises(ValueError, match="child_task_replay"):
+        strict_child_outcomes(outcomes)
 
 
 def test_signed_receipt_requires_valid_signature_and_expected_key(tmp_path: Path) -> None:

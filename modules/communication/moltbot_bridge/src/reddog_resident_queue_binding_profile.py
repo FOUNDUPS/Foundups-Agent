@@ -15,6 +15,7 @@ reward settlement, merge authority, or HoloIndex re-indexing.
 from __future__ import annotations
 
 import re
+import time
 from pathlib import Path
 from typing import Mapping
 
@@ -381,6 +382,23 @@ def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
     return ""
 
 
+def resident_queue_now_epoch(env: Mapping[str, str]) -> tuple[int | None, bool]:
+    """Return an optional nonnegative trusted test/runtime epoch."""
+
+    raw = str(env.get("REDDOG_RESIDENT_QUEUE_NOW_EPOCH") or "").strip()
+    if not raw:
+        return None, True
+    try:
+        value = int(raw)
+    except ValueError:
+        return None, False
+    return value, value >= 0
+
+
+def resident_queue_integer_epoch() -> int:
+    return int(time.time())
+
+
 def _repo_slug(root: Path) -> str:
     raw = root.name or "repo"
     slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", raw).strip(".-_")
@@ -404,7 +422,9 @@ __all__ = [
     "resident_queue_draft_pr_runner_mode",
     "resident_queue_evidence_command_runner_mode",
     "resident_queue_materializer_mode",
+    "resident_queue_integer_epoch",
     "resident_queue_model_feedback_ledger_store_path",
+    "resident_queue_now_epoch",
     "resident_queue_outcome_ratchet_store_path",
     "resident_queue_pattern_memory_admission_db_path",
     "resident_queue_runtime_file_path",
