@@ -57,7 +57,7 @@ jobs:
 
       - name: Run RedDog bounded resident-chain regression
         run: |
-          python -m pip install "chromadb==1.5.5"
+          python -m pip install "chromadb==1.5.5" "pytz>=2023.3"
           python -m pytest \
             modules/communication/moltbot_bridge/tests/test_reddog_openclaw_hermes_0102_worker_dispatch_runtime.py \
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_worker_dispatch_runtime_handler.py \

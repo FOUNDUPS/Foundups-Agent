@@ -1,7 +1,7 @@
 """Fail-closed tests for the real OpenClaw Gateway CLI adapter."""
 from __future__ import annotations
 import ast, json, sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from types import SimpleNamespace
 from unittest.mock import patch
 import pytest
@@ -185,12 +185,29 @@ def test_redaction_block_precedes_binding_file_and_process(tmp_path):
 def test_system_transport_uses_trusted_wsl_and_rejects_other_commands(tmp_path, monkeypatch):
     trusted = tmp_path / "wsl.exe"
     trusted.write_bytes(b"")
+    monkeypatch.setattr(command_module, "os", SimpleNamespace(name="nt"))
+    monkeypatch.setattr(command_module, "Path", PureWindowsPath)
     monkeypatch.setattr(command_module, "resolve_trusted_wsl_executable", lambda: trusted)
     runner = SystemOpenClawCommandRunner(distro="Ubuntu-24.04")
     command = runner._command(("openclaw", "agent", "--message-file", "E:/Agents/task.md"))
     assert command[:5] == [str(trusted), "--distribution", "Ubuntu-24.04", "--exec", "/usr/local/bin/openclaw"]
     assert command[-1] == "/mnt/e/Agents/task.md"
     assert runner._command(("powershell", "-c", "unsafe")) == []
+
+
+def test_system_transport_invokes_openclaw_directly_on_posix(monkeypatch):
+    monkeypatch.setattr(command_module, "os", SimpleNamespace(name="posix"))
+    runner = SystemOpenClawCommandRunner(executable="/usr/local/bin/openclaw")
+    command = runner._command(
+        ("openclaw", "agent", "--message-file", "/srv/agents/task.md")
+    )
+    assert command == [
+        "/usr/local/bin/openclaw",
+        "agent",
+        "--message-file",
+        "/srv/agents/task.md",
+    ]
+    assert runner._command(("sh", "-c", "unsafe")) == []
 
 
 def test_system_transport_bounds_output_and_confirms_process_termination(monkeypatch):
