@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1501,
+  "total_tests": 1502,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -7541,6 +7541,19 @@
       "description": "Security tests for architect-proposal promotion authority verification."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_artifact_generation_request_ownership",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_artifact_generation_request_ownership.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Architecture boundary for resident artifact-request derivation."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_atomic_signer_runtime_generation_high_water",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_atomic_signer_runtime_generation_high_water.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -7822,7 +7835,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_authentication.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8281,7 +8294,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_generic_agent_worktree_write_spine_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8790,7 +8803,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_memex_snapshot_projection_supplier.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9277,7 +9290,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_registered_foundup_target_verifier.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9888,7 +9901,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_runtime_json_read.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [
         "process"
       ],
@@ -10345,7 +10358,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_provisioning_signing_boundary.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10880,7 +10893,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_operational_spine.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
