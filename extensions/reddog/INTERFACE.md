@@ -1,5 +1,9 @@
 # RedDog Interface
 
+Version 0.4.91 pins the backend manifest after resident artifact-generation
+request derivation was consolidated in the bounded-worker stage. No thin-client
+API or execution-authority change was introduced.
+
 Version 0.4.90 makes the documented Windows PowerShell owner-query transport
 compatible with its leading UTF-8 BOM. The bridge still rejects malformed
 UTF-8 and does not add query-time maintenance authority.

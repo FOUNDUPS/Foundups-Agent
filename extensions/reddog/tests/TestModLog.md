@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-14 - Resident artifact-request ownership pin (0.4.91)
+
+- Pinned the regenerated backend manifest and current build fixtures after
+  consolidating artifact-request derivation in the bounded-worker stage.
+- Retained extension contract, backend integrity and no-authority regressions.
+
 ## 2026-08-12 - PowerShell Holo owner-query transport (0.4.90)
 
 - Added direct regressions for a leading UTF-8 BOM and malformed UTF-8.
