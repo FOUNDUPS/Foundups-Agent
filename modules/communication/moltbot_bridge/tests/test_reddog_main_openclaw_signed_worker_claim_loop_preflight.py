@@ -39,6 +39,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _snapshots,
     _slice_verifier_request,
     _StaticSocketPeerAttestor,
+    _test_governed_environment,
     _valve_environment,
     _work_order,
     _write_runtime_json,
@@ -65,6 +66,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli import (
     run_reddog_signer_socket_service_runtime_cli,
 )
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import inject_stub_governed_valve_use_time_authority
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
     build_reddog_signed_worker_queue_loop_runner_from_env,
 )
@@ -1227,9 +1229,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     principal_public, reddog_public, signer_backend = _ed25519_signing_material_with_socket_backend()
     pilot_overrides = _pilot_path_overrides()
     state_payload = _bootstrap_snapshot(requested_operation=PILOT_OPERATION)
-    state_payload["worker_claims"][0]["expires_at"] = (
-        "2099-01-01T00:00:00+00:00"
-    )
+    state_payload["worker_claims"][0]["expires_at"] = "2099-01-01T00:00:00+00:00"
     state = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")),
         state_payload,
@@ -1265,11 +1265,15 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
         ),
         _principals(principal_public),
     )
+    materialized_work_order = _work_order(
+        **pilot_overrides, bounded_worker_plan=_pilot_bounded_worker_plan(),
+        nonce="work-order:workauth-nonce-0001")
+    governed_valve_environment, expected_valve_bindings = (
+        _test_governed_environment(materialized_work_order)
+    )
     valve_env = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_EXECUTION_VALVE_ENV_PATH")),
-        _valve_environment(
-            permission_expires_at="2099-01-01T00:00:00+00:00",
-        ),
+        governed_valve_environment,
     )
     chain = Path(
         resident_queue_runtime_file_path(
@@ -1282,11 +1286,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
         resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITY_RUNTIME_STATE_PATH")
     )
     socket_path = Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_SIGNER_SOCKET_PATH"))
-    materialized_work_order = _work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-        nonce="work-order:workauth-nonce-0001",
-    )
     worktree = _pilot_worktree_path(repo, materialized_work_order)
     verifier_request = _write_json(
         runtime_root / "slice_verifier_request.json",
@@ -1311,7 +1310,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
             timeout_s=5,
             ready_callback=ready.set,
         )
-
     signer_thread = threading.Thread(target=_serve_signer, daemon=True)
     signer_thread.start()
     assert ready.wait(5)
@@ -1348,9 +1346,10 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
     monkeypatch.delenv("REDDOG_WORK_ORDERS_PATH", raising=False)
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ
-
     try:
-        assert main.run_reddog_resident_queue_control_loop_preflight(repo) is True
+        with inject_stub_governed_valve_use_time_authority(
+            governed_valve_environment, expected_valve_bindings):
+            assert main.run_reddog_resident_queue_control_loop_preflight(repo) is True
     finally:
         signer_thread.join(5)
 
@@ -1359,7 +1358,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     assert result.status == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
     assert result.requests_handled == 3
     assert not socket_path.exists()
-
     captured = capsys.readouterr().out
     assert "[REDDOG-QUEUE-CONTROL] preflight=PASS" in captured
     assert "[REDDOG-QUEUE-LOOP] preflight=PASS" in captured
@@ -1413,7 +1411,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     )
     assert main.run_reddog_resident_queue_control_loop_preflight.last_result["control_lock_acquired"] is True
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ
-
     pending = [
         task
         for task in AgentDB().get_autonomous_tasks(status="pending", limit=10)
