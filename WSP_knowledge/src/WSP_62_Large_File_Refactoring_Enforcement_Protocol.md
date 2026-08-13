@@ -20,10 +20,11 @@ This protocol implements comprehensive file size management and refactoring enfo
 
 #### 2.1.1. Code Files
 - **Python Files (.py)** (aligned with WSP 87, updated for 0102 agentic growth):
-  - < 1200 lines: OK (allows agentic evolution and AI verbosity)
-  - 1200-1500 lines: Guideline range - plan refactor
-  - 1500-2000 lines: Critical window - document remediation
-  - >=2000 lines: Violation; mandatory split
+  - < 800 lines: OK
+  - 800-1000 lines: Guideline range - review cohesion and growth
+  - >1000 and <1500 lines: Critical window - document remediation
+  - >=1500 lines: Hard limit; candidate-attributed growth requires a split or
+    a pre-existing bounded exemption
 - **JavaScript/TypeScript (.js/.ts)**: 400 lines
 - **Configuration Files (.json/.yaml/.toml)**: 200 lines
 - **Shell Scripts (.sh/.ps1)**: 300 lines
@@ -59,7 +60,12 @@ thresholds:
     function_limit: 60     # Message processing functions
 ```
 
-**Note**: DAE modules (`*_dae.py`, `*dae*.py` in infrastructure/) are **complex orchestrators** managing state machines, sub-agents, and workflows. They follow the **full Python threshold of 1200/1500/2000** (OK/Guideline/Hard limit) per WSP 87, NOT the lean infrastructure 600-line limit.
+**Note**: DAE modules (`*_dae.py`, `*dae*.py` in infrastructure/) are complex
+orchestrators managing state machines, sub-agents, and workflows. Their
+domain warning threshold may be 1200 lines, but the default Python hard limit
+remains 1500 lines per WSP 87 unless a pre-existing bounded exemption or
+module-specific contract says otherwise. A DAE name is not an automatic
+exemption.
 
 #### 2.2.2. Module-Specific Overrides
 ```yaml
@@ -96,6 +102,17 @@ repository scan may report inherited debt, but it cannot attribute that debt
 to the current candidate without evidence that the candidate touched and
 worsened the affected path.
 
+WSP 62 is a differential debt-control protocol, not a mandate to split a
+cohesive module solely because a review threshold was crossed. Warning and
+critical thresholds trigger analysis. Integration blocks only for
+candidate-attributed new debt, growth beyond an authoritative no-growth
+ceiling, an invalid exemption contract, or an applicable hard-limit breach.
+An unexempt new file created at or above its warning threshold is
+candidate-attributed new debt even when it remains below the hard limit.
+Necessary functional or security work must not be blocked by unrelated
+inherited debt. A candidate may reduce debt, or remain at or below an existing
+ceiling, while a separately owned decomposition remains scheduled.
+
 Required append-only audit records at the canonical module-relative paths
 `ModLog.md` and `tests/TestModLog.md` use advisory archival thresholds. This
 allowlist is exhaustive and must not use basename or glob matching. Their
@@ -105,9 +122,9 @@ and `INTERFACE.md` remains subject to normal candidate-growth enforcement.
 
 #### 3.1.2. Growth Rate Monitoring
 Monitor files approaching thresholds:
-- **>=1600 lines (80% of 2000 hard limit)**: Display warning during development
-- **>=1800 lines (90% of hard limit)**: Require documented remediation plan
-- **>=1900 lines (95% of hard limit)**: Mandatory refactoring review
+- **>=1200 lines (80% of 1500 hard limit)**: Display warning during development
+- **>=1350 lines (90% of hard limit)**: Require documented remediation plan
+- **>=1425 lines (95% of hard limit)**: Mandatory refactoring review
 
 ### 3.2. Enforcement Actions
 
@@ -129,18 +146,22 @@ def enforce_file_sizes():
 ```
 
 #### 3.2.2. CI/CD Pipeline Integration
-- **Build Blocking**: Fail builds with oversized files
-- **Quality Gates**: Require size compliance before deployment
+- **Build Blocking**: Fail only candidate-attributed violations and invalid
+  exemption contracts; inherited baseline debt remains advisory
+- **Quality Gates**: Require exact base/candidate attribution before deployment
 - **Automated Reporting**: Generate size compliance reports
 
 ### 3.3. Refactoring Requirements
 
 #### 3.3.1. Mandatory Refactoring Triggers
-- **File > 1000 lines**: Enter critical remediation window; plan decomposition
-- **File >= 1500 lines**: Immediate refactoring required (hard limit per WSP 87)
-- **Class > 300 lines**: Split into multiple classes
-- **Function > 75 lines**: Extract sub-functions
-- **Config > 250 lines**: Modularize configuration
+- **File > 1000 lines**: Enter the critical review window and plan decomposition
+- **File >= 1500 lines**: Candidate-attributed hard-limit breach; split or use
+  a pre-existing bounded exemption
+- **Candidate exceeds no-growth ceiling**: Reject the candidate
+- **Candidate changes or ratchets its own exemption**: Reject the candidate
+- **Class/function/config review threshold exceeded**: Review cohesion and
+  extract only when doing so creates a clearer owned boundary; enforce a hard
+  stop only when a configured limit or no-growth ceiling is exceeded
 
 #### 3.3.2. Refactoring Strategies
 1. **Functional Decomposition**: Break large functions into smaller ones
