@@ -1236,7 +1236,7 @@ class _StaticSocketPeerAttestor:
         return SignerPeerAttestation(
             peer_principal_id="github:mjtrout",
             transport="unix_socket",
-            credential_source="test_peer_credential",
+            credential_source="SO_PEERCRED",
             boundary_attested=True,
         )
 
