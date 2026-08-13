@@ -1232,6 +1232,14 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
         "run_reddog_main_resident_queue_serial_loop_bootstrap",
         _fixed_policy_time_bootstrap,
     )
+    monkeypatch.setattr(
+        serial_bootstrap,
+        "_build_worktree_runner",
+        lambda repo_root, **_: (
+            _FakeProfileWorktreeRunner(repo_root=repo_root, timeout_s=77),
+            (),
+        ),
+    )
     _FakeProfileWorktreeRunner.instances.clear()
     monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeProfileWorktreeRunner)
     repo = _repo(tmp_path)
