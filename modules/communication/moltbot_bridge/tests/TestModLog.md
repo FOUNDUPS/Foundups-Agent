@@ -1,3 +1,11 @@
+## 2026-08-14: Progressive resident-chain CI regression
+- Added a Linux-visible end-to-end fixture for the signed progressive chain and
+  extracted its fake worktree/PR runner into bounded test support. The legacy
+  preflight test remains at its existing WSP 62 ceiling; no exemption grew.
+- Locked artifact-generation request ownership to the bounded-worker stage so
+  bootstrap cannot pre-derive a competing schema. Explicit supplied requests
+  retain the existing fail-closed conflict regression.
+
 ## 2026-08-12: Canonical elevated-authority consensus regressions
 - Review hardening rejects noncanonical or duplicate signed JSON, payload
   digest substitution, socket-v1 proof downgrade, missing author-runtime

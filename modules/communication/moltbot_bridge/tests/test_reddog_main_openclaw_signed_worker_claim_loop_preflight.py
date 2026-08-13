@@ -72,6 +72,7 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queu
     build_reddog_signed_worker_queue_loop_runner_from_env,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispatch_task_executor import _FakeEnvDraftPrRunner
+from modules.communication.moltbot_bridge.tests.reddog_progressive_chain_e2e_test_support import FakeProfileWorktreeRunner as _FakeProfileWorktreeRunner
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     configure_signed_worker_claim_test_authority,
     install_signed_worker_envelope_test_authority,
@@ -91,34 +92,6 @@ CLAIM_LOOP = (
     "modules.communication.moltbot_bridge.src.openclaw_supervisor."
     "claim_reddog_signed_worker_dispatch_tasks_until_idle"
 )
-
-
-class _FakeProfileWorktreeRunner:
-    instances: list["_FakeProfileWorktreeRunner"] = []
-
-    def __init__(self, *, repo_root: Path, timeout_s: int) -> None:
-        self.repo_root = Path(repo_root)
-        self.timeout_s = timeout_s
-        self.calls: list[tuple[str, str, str | None, str | None]] = []
-        self.__class__.instances.append(self)
-
-    def create_worktree(self, *, worktree_path: Path, branch_name: str, base_ref: str):
-        self.calls.append(("create_worktree", str(worktree_path), branch_name, base_ref))
-        Path(worktree_path).mkdir(parents=True, exist_ok=True)
-        return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
-
-    def cleanup_worktree(self, *, worktree_path: Path):
-        self.calls.append(("cleanup_worktree", str(worktree_path), None, None))
-        return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
-
-    def push_branch(self, *, worktree_path: Path, branch_name: str):
-        self.calls.append(("push_branch", str(worktree_path), branch_name, None))
-        return {"ok": True, "branch_name": branch_name}
-
-    def create_draft_pr(self, *, branch_name: str, base_branch: str, title: str, body: str):
-        self.calls.append(("create_draft_pr", branch_name, base_branch, title))
-        _ = body
-        return "https://github.com/FOUNDUPS/Foundups-Agent/pull/4242"
 
 
 class _FakeEnvCommitDraftPrRunner(_FakeEnvDraftPrRunner):

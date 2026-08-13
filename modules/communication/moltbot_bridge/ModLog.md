@@ -18,7 +18,10 @@
   an explicit test clock, uses a future claim, canonical work-order-bound
   governed valve environment, and the existing test-only consensus and one-use
   authority-lease seams; it does not claim the external production trust anchor
-  is implemented.
+  is implemented. Artifact-generation request ownership now remains solely in
+  the bounded-worker stage at use time; the bootstrap no longer pre-derives a
+  competing request schema, while explicit caller input still receives the
+  existing fail-closed conflict check.
   (WSP 00/15/22/50/62/97)
 ## 2026-08-12: Canonical HIGH-tier consensus capability foundation
 - Review hardening verifies exact canonical signed bytes, rejects duplicate
