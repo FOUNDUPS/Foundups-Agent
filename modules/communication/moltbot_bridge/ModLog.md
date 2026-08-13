@@ -14,8 +14,9 @@
   HoloIndex vector-store, scheduler timezone and process-monitor dependencies
   needed to collect the real promotion and `main.py` preflight paths. OpenClaw
   transport coverage now verifies Windows/WSL and POSIX command construction
-  explicitly, and the Linux socket-chain fixture uses an explicit future claim
-  lease instead of depending on wall-clock proximity to its historical epoch.
+  explicitly, and the Linux socket-chain fixture uses explicit future claim and
+  valve-permission leases instead of depending on wall-clock proximity to its
+  historical epoch.
   (WSP 00/15/22/50/62/97)
 ## 2026-08-12: Canonical HIGH-tier consensus capability foundation
 - Review hardening verifies exact canonical signed bytes, rejects duplicate

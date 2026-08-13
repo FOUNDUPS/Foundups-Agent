@@ -1267,7 +1267,9 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     )
     valve_env = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_EXECUTION_VALVE_ENV_PATH")),
-        _valve_environment(),
+        _valve_environment(
+            permission_expires_at="2099-01-01T00:00:00+00:00",
+        ),
     )
     chain = Path(
         resident_queue_runtime_file_path(
