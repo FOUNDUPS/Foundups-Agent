@@ -1215,6 +1215,8 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
 ) -> None:
     import main
     from modules.foundups.agent.src import worktree_pr_runner
+    monkeypatch.setattr(
+        main, "time", type("_TestClock", (), {"time": staticmethod(lambda: 1000)}))
     _FakeProfileWorktreeRunner.instances.clear()
     monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeProfileWorktreeRunner)
     repo = _repo(tmp_path)
@@ -1268,9 +1270,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     materialized_work_order = _work_order(
         **pilot_overrides, bounded_worker_plan=_pilot_bounded_worker_plan(),
         nonce="work-order:workauth-nonce-0001")
-    governed_valve_environment, expected_valve_bindings = (
-        _test_governed_environment(materialized_work_order)
-    )
+    governed_valve_environment, expected_valve_bindings = _test_governed_environment(materialized_work_order)
     valve_env = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_EXECUTION_VALVE_ENV_PATH")),
         governed_valve_environment,

@@ -14,10 +14,10 @@
   HoloIndex vector-store, scheduler timezone and process-monitor dependencies
   needed to collect the real promotion and `main.py` preflight paths. OpenClaw
   transport coverage now verifies Windows/WSL and POSIX command construction
-  explicitly. The Linux socket-chain fixture uses an explicit future claim,
-  canonical work-order-bound governed valve environment, and test-only one-use
-  authority lease injection; it does not claim the external production trust
-  anchor is implemented.
+  explicitly. The Linux socket-chain fixture pins its historical authority to
+  an explicit test clock, uses a future claim, canonical work-order-bound
+  governed valve environment, and test-only one-use authority lease injection;
+  it does not claim the external production trust anchor is implemented.
   (WSP 00/15/22/50/62/97)
 ## 2026-08-12: Canonical HIGH-tier consensus capability foundation
 - Review hardening verifies exact canonical signed bytes, rejects duplicate
