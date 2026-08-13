@@ -5,12 +5,15 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 from modules.communication.moltbot_bridge.src import reddog_resident_queue_orchestration_plan as planner
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     governed_worker_dispatch_snapshot,
+    with_queue_wsp15_allocation,
 )
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
     governed_snapshot,
@@ -29,6 +32,17 @@ MODULE_PATH = (
 )
 NOW = "2026-07-14T00:00:00+00:00"
 EXPIRES = "2026-07-14T01:00:00+00:00"
+
+
+def test_bounded_queue_fixture_rejects_high_risk_prompt() -> None:
+    with pytest.raises(
+        AssertionError,
+        match="bounded queue test fixture was rejected by progressive policy",
+    ):
+        with_queue_wsp15_allocation(
+            {"slice_id": "REDDOG_TEST_SLICE_PHASE1"},
+            prompt_text="Publish signer authority changes",
+        )
 
 
 def _queue_wsp15_allocation_receipt() -> dict[str, object]:

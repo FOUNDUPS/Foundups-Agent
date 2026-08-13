@@ -2,10 +2,8 @@
 
 Slice: REDDOG_SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_PHASE1
 
-This adapter implements the runner protocol consumed by
-reddog_signed_worker_dispatch_task_executor. It accepts only the OpenClaw
-candidate signed-worker task and advances the already-built resident queue
-serial loop for the bound queue item through the existing bootstrap.
+Accept only signed worker tasks and advance the bound queue item through the
+existing resident serial-loop bootstrap.
 
 The adapter creates no tasks, performs no signing, creates no worktree, runs no
 shell commands, publishes no PR, settles no rewards, writes no PatternMemory,
@@ -17,7 +15,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
@@ -29,6 +26,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_state_r
 from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_modes import (
     normalize_artifact_generator_mode,
     production_artifact_generator_mode,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+    resident_queue_integer_epoch,
 )
 
 
@@ -108,7 +108,7 @@ class SignedWorkerQueueSerialLoopRunnerConfig:
     repo_root: Optional[Path | str] = None
     now_iso: Optional[str] = None
     now_epoch: Optional[int] = None
-    trusted_now_epoch: Callable[[], int] = time.time
+    trusted_now_epoch: Callable[[], int] = resident_queue_integer_epoch
     max_steps: int = 1
     bootstrap_kwargs: Mapping[str, Any] = field(default_factory=dict)
 

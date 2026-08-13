@@ -1,4 +1,28 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Progressive-policy resident-chain regression repair
+- Reconciled resident-chain test fixtures with the existing signed progressive
+  execution-stage policy. Valid fixtures now model genuinely bounded FoundUp
+  work, include the exact-SHA stage before verification, and reject accidental
+  no-effect progressive receipts during fixture construction.
+- Added a CI-visible modular regression covering the bounded chain from real
+  OpenClaw/Hermes artifact providers through dispatch, isolated worktree work,
+  exact-SHA commit, independent verification, draft PR, verified outcome,
+  held-out admission and PatternMemory. Promotion integration now carries one
+  authenticated allocation through determination, profile publication, queue
+  materialization and provider invocation. Runtime policy was not weakened and
+  no execution authority was added. The CI slice installs the canonical pinned
+  HoloIndex vector-store, scheduler timezone and process-monitor dependencies
+  needed to collect the real promotion and `main.py` preflight paths. OpenClaw
+  transport coverage now verifies Windows/WSL and POSIX command construction
+  explicitly. The Linux socket-chain fixture pins its historical authority to
+  an explicit test clock, uses a future claim, canonical work-order-bound
+  governed valve environment, and the existing test-only consensus and one-use
+  authority-lease seams; it does not claim the external production trust anchor
+  is implemented. Artifact-generation request ownership now remains solely in
+  the bounded-worker stage at use time; the bootstrap no longer pre-derives a
+  competing request schema, while explicit caller input still receives the
+  existing fail-closed conflict check.
+  (WSP 00/15/22/50/62/97)
 ## 2026-08-12: Canonical HIGH-tier consensus capability foundation
 - Review hardening verifies exact canonical signed bytes, rejects duplicate
   JSON keys and socket-v1 proof downgrade, requires author model-runtime

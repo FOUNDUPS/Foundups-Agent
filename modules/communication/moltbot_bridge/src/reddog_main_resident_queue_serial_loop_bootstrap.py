@@ -435,17 +435,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(admission_request_reasons, chain_results_path=None)
 
     chain_state = _read_existing_chain_state(chain_path, runtime_root)
-    if (
-        artifact_generation_request_binding_enabled
-        and artifact_contents is None
-        and artifact_generation_request is None
-    ):
-        artifact_generation_request = _derive_artifact_generation_request_from_chain(
-            chain_state=chain_state,
-            work_orders=work_orders,
-            repo_root=root,
-            holoindex_evidence=holoindex_evidence,
-        )
     if outcome_ratchet_request_binding_enabled and ratchet_request is None:
         ratchet_request = _derive_outcome_ratchet_request_from_chain(
             chain_state,
@@ -778,6 +767,10 @@ def _materialize_work_orders_from_authority_profile(
     )
     if bounded_worker_plan_reasons:
         return None, bounded_worker_plan_reasons
+    slice_verifier_plan, slice_verifier_plan_reasons = _optional_profile_plan(
+        authority_profile, "slice_verifier_plan")
+    if slice_verifier_plan_reasons:
+        return None, slice_verifier_plan_reasons
 
     evidence_seed = {
         "queue_receipt": queue_receipt,
@@ -855,7 +848,26 @@ def _materialize_work_orders_from_authority_profile(
     }
     if bounded_worker_plan:
         work_order["bounded_worker_plan"] = bounded_worker_plan
+    if slice_verifier_plan:
+        work_order["slice_verifier_plan"] = slice_verifier_plan
     return {work_order_id: work_order}, ()
+
+
+def _optional_profile_plan(
+    authority_profile: Mapping[str, Any],
+    field_name: str,
+) -> tuple[dict[str, Any], tuple[str, ...]]:
+    raw_plan = authority_profile.get(field_name)
+    if raw_plan is None:
+        return {}, ()
+    if not isinstance(raw_plan, Mapping):
+        return {}, (f"work_order_materializer_{field_name}_invalid:type",)
+    plan = dict(raw_plan)
+    if not plan:
+        return {}, ()
+    if not _is_ascii_json_safe(plan):
+        return {}, (f"work_order_materializer_{field_name}_non_ascii",)
+    return plan, ()
 
 
 def _bounded_worker_plan_from_authority_profile(
@@ -980,93 +992,6 @@ def _read_existing_chain_state(
 def _chain_stage_results(chain_state: Mapping[str, Any]) -> Mapping[str, Any]:
     stages = chain_state.get("stage_results")
     return stages if isinstance(stages, Mapping) else {}
-
-
-def _derive_artifact_generation_request_from_chain(
-    *,
-    chain_state: Mapping[str, Any],
-    work_orders: Mapping[str, Mapping[str, Any]] | None,
-    repo_root: Path,
-    holoindex_evidence: Mapping[str, Any] | None,
-) -> Mapping[str, Any] | None:
-    if not work_orders:
-        return None
-    stages = _chain_stage_results(chain_state)
-    worktree_stage = _nested_mapping(stages, "worktree_create")
-    worktree_result = _nested_mapping(worktree_stage, "worktree_create_result")
-    work_order_id = str(worktree_result.get("work_order_id") or "")
-    worktree_path = str(worktree_result.get("worktree_path") or "")
-    if not work_order_id or not worktree_path:
-        return None
-    work_order = JsonResidentQueueWorkOrderResolver(work_orders).resolve(
-        work_order_id=work_order_id,
-        queue_item_id=None,
-        selected_slice=None,
-    )
-    plan = _nested_mapping(work_order, "bounded_worker_plan")
-    planned_artifacts = _string_list(plan.get("planned_artifacts"))
-    signed_receipt_chain = _nested_mapping(plan, "signed_receipt_chain")
-    authority_stage = _nested_mapping(stages, "authority_runtime")
-    authority_result = _nested_mapping(authority_stage, "authority_result")
-    work_authority = _nested_mapping(authority_result, "work_authority")
-    authority_receipt = _nested_mapping(authority_result, "receipt")
-    if (
-        not plan
-        or not planned_artifacts
-        or not signed_receipt_chain
-        or authority_result.get("accepted") is not True
-        or not work_authority
-    ):
-        return None
-    evidence = (
-        (holoindex_evidence if isinstance(holoindex_evidence, Mapping) else {})
-        or _nested_mapping(work_order, "holoindex_evidence")
-        or _derived_holoindex_evidence(stages)
-    )
-    task_summary = str(work_order.get("task_summary") or "")
-    if not task_summary:
-        return None
-    signed_authority = {
-        **dict(work_authority),
-        "accepted": True,
-        "signature_gate_digest": str(
-            authority_receipt.get("work_authority_digest")
-            or authority_receipt.get("receipt_id")
-            or ""
-        ),
-    }
-    request = {
-        "explicit_artifact_generation_requested": True,
-        "work_order_id": work_order_id,
-        "slice_name": str(work_order.get("requested_operation") or plan.get("operation") or ""),
-        "task_summary": task_summary,
-        "planned_artifacts": planned_artifacts,
-        "evidence_context": json.dumps(
-            {
-                "task_summary": task_summary,
-                "holoindex_evidence": dict(evidence),
-                "holoindex_evidence_refs": _string_list(
-                    work_order.get("holoindex_evidence_refs")
-                ),
-            },
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=True,
-        ),
-        "repo_root": str(repo_root),
-        "worktree_path": worktree_path,
-        "holoindex_evidence": dict(evidence),
-        "signed_authority": signed_authority,
-        "signed_receipt_chain": dict(signed_receipt_chain),
-        "timeout_seconds": 30,
-    }
-    model_runtime_binding = _nested_mapping(work_order, "model_runtime_binding_receipt")
-    if model_runtime_binding:
-        request["model_runtime_binding_receipt"] = dict(model_runtime_binding)
-    model_selection = _nested_mapping(work_order, "model_selection_receipt")
-    if model_selection:
-        request["model_selection_receipt"] = dict(model_selection)
-    return request
 
 
 def _derive_outcome_ratchet_request_from_chain(

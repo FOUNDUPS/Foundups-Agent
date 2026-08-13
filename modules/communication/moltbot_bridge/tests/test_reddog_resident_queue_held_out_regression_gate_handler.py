@@ -27,6 +27,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_HELD_OUT_REGRESSION_GATE_INVOKE,
     NEXT_QUEUE_PATTERN_MEMORY_ADMISSION_INVOKE,
+    RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
@@ -105,7 +106,6 @@ def _snapshot() -> dict[str, object]:
             "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
             "no_execution_performed": True,
         },
-        prompt_text="RedDog resident queue held out regression gate worktree authority",
     )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
@@ -137,6 +137,7 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "worktree_create": {"decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT},
         "assurance_capacity_admission": ASSURANCE_CAPACITY_ADMISSION_STAGE_RESULT,
         "bounded_worker_pilot": _queue_pilot_result(),
+        "exact_sha_commit": {"decision": RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT},
         "slice_verifier": _queue_verifier_result(),
         "verified_draft_pr_publish": _queue_publish_result(),
         VERIFIED_OUTCOME_RATCHET_STAGE_KEY: _queue_ratchet_result(),

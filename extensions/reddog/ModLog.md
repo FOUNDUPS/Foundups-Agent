@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-14 - Resident artifact-request ownership pin (0.4.91)
+
+- Regenerated and pinned the exact backend manifest after removing duplicate
+  bootstrap-side artifact-request derivation. The bounded-worker stage remains
+  the canonical use-time owner and caller conflicts still fail closed.
+- Added no thin-client behavior, HoloIndex authority or execution authority.
+
 ## 2026-08-12 - PowerShell Holo owner-query transport fix (0.4.90)
 
 - Accepted the leading UTF-8 BOM emitted by PowerShell's native pipeline for

@@ -184,6 +184,11 @@ def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str 
         changed_paths=tuple(allocation["changed_paths"]),
         task_prompt_text=prompt_text,
     )
+    if stage.no_effect_authority:
+        raise AssertionError(
+            "bounded queue test fixture was rejected by progressive policy: "
+            f"{stage.risk_classes or stage.rejection_reasons or stage.would_block_reasons}"
+        )
     refs = [str(ref) for ref in item.get("evidence_refs") or ()]
     refs.extend(
         [
@@ -558,14 +563,32 @@ def install_signed_worker_envelope_test_authority(monkeypatch: Any) -> None:
         reddog_signed_worker_agentdb_envelope as envelope_module,
     )
 
-    original = envelope_module.build_worker_dispatch_authority_context_from_env
+    original_configured = envelope_module.build_worker_dispatch_authority_context
+    original_from_env = envelope_module.build_worker_dispatch_authority_context_from_env
 
-    def _context(**kwargs: Any):
+    def _configured_context(**kwargs: Any):
         try:
-            return replace(original(**kwargs), trusted_now_epoch=lambda: _TEST_NOW)
+            return replace(
+                original_configured(**kwargs),
+                trusted_now_epoch=lambda: _TEST_NOW,
+            )
         except Exception:
             return worker_dispatch_authority_verification_context()
 
+    def _context(**kwargs: Any):
+        try:
+            return replace(
+                original_from_env(**kwargs),
+                trusted_now_epoch=lambda: _TEST_NOW,
+            )
+        except Exception:
+            return worker_dispatch_authority_verification_context()
+
+    monkeypatch.setattr(
+        envelope_module,
+        "build_worker_dispatch_authority_context",
+        _configured_context,
+    )
     monkeypatch.setattr(
         envelope_module,
         "build_worker_dispatch_authority_context_from_env",
@@ -814,14 +837,22 @@ def with_architect_fix_publication(
     queue_item_id = "sha256:" + "5" * 64
     claim_id = "sha256:" + "6" * 64
     attestation_id = "reddog_architect_proposal_attestation_" + "7" * 32
+    queue_candidate = snapshot["wre_queue_items"][0]
+    operational_context: dict[str, Any] = {
+        "queue_item_id": queue_item_id,
+        "claim_id": claim_id,
+    }
+    determination_id = queue_candidate.get("source_determination_receipt_id")
+    if determination_id:
+        operational_context["architect_determination_receipt_id"] = determination_id
+    allocation = authority_profile.get("wsp15_allocation_receipt")
+    if isinstance(allocation, Mapping):
+        operational_context["wsp15_allocation_receipt"] = dict(allocation)
     profile = {
         **authority_profile,
         "promotion_publication_id": publication_id,
         "proposal_authenticity_attestation_id": attestation_id,
-        "operational_context_binding": {
-            "queue_item_id": queue_item_id,
-            "claim_id": claim_id,
-        },
+        "operational_context_binding": operational_context,
     }
     current = _replace_queue_claim_ids(
         snapshot,

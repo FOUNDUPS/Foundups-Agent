@@ -31,6 +31,10 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_
     SignedWorkerQueueSerialLoopRunnerConfig,
     SignedWorkerQueueSerialLoopRunnerReason,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    queue_wsp15_allocation_receipt,
+    with_queue_wsp15_allocation,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -103,25 +107,7 @@ def _runtime_paths_env(tmp_path: Path) -> dict[str, str]:
 
 
 def _allocation():
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 1,
-            "coding_worker_count": 1,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "hermes_execution_allowed": False,
-            "queue_mutation_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
+    return queue_wsp15_allocation_receipt()
 
 
 def _intent(allocation=None, **overrides):
@@ -233,7 +219,17 @@ def _bootstrap_payload(**overrides):
 
 
 def _snapshot() -> dict[str, object]:
-    allocation = _allocation()
+    queue_item = with_queue_wsp15_allocation(
+        {
+            "queue_item_id": "queue-1",
+            "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+            "no_execution_performed": True,
+        }
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -247,22 +243,7 @@ def _snapshot() -> dict[str, object]:
                 "freshness_receipt_id": "fresh-1",
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": [
-                    "claim:claim-1",
-                    "freshness:fresh-1",
-                    f"wsp15_allocation:{allocation['receipt_id']}",
-                ],
-                "wsp15_allocation_receipt": allocation,
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -409,9 +390,9 @@ def test_runtime_binding_builds_runner_from_explicit_env(tmp_path: Path) -> None
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert bootstrap.calls[0]["requested_queue_item_id"] == "queue-1"
     assert bootstrap.calls[0]["work_order_materializer_mode"] == "authority_profile"
-    assert bootstrap.calls[0]["now_epoch"] is None
+    assert bootstrap.calls[0]["now_epoch"] == 1000
     assert callable(bootstrap.calls[0]["trusted_now_epoch"])
-    assert bootstrap.calls[0]["trusted_now_epoch"]() != 1000
+    assert bootstrap.calls[0]["trusted_now_epoch"]() == 1000
 
 
 def test_runtime_binding_profile_enables_runner_without_explicit_runner_flag(tmp_path: Path) -> None:
@@ -917,6 +898,7 @@ def test_runtime_binding_profile_derives_existing_optional_runtime_paths(
         runtime_root / "principal_authority_records.json"
     )
     assert bootstrap.calls[0]["signer_socket_path"] == str(runtime_root / "reddog_signer.sock")
+    assert bootstrap.calls[0]["signature_verifier_backend"] == "ed25519"
 
 
 def test_runtime_binding_profile_respects_explicit_binding_disable(tmp_path: Path) -> None:

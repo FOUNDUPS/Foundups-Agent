@@ -77,8 +77,6 @@ def resolve_verified_outcome_publisher(
 ) -> Any:
     if not getattr(dependency_bundle, "requested", False):
         return None
-    if getattr(dependency_bundle, "verified_outcome_signing_authority", None) is None:
-        return None
     inputs = _publisher_inputs(authority_profile)
     try:
         resolver = CommittedAuthorityProfileOutcomeKeyResolver(

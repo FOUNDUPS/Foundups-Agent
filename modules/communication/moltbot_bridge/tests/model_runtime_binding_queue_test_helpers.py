@@ -47,7 +47,7 @@ def model_bound_queue_inputs(
 
 
 def model_bound_snapshot(selection, binding, verification) -> dict:
-    snapshot = _snapshot()
+    snapshot = _snapshot(requested_operation=PILOT_OPERATION)
     queue = snapshot["wre_queue_items"][0]
     claim = snapshot["worker_claims"][0]
     queue.update(_model_lineage(selection, binding, verification))

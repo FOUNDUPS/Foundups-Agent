@@ -106,6 +106,51 @@ def test_runtime_profile_rejects_malformed_nested_values(
     )
 
 
+def test_runtime_profile_accepts_exact_slice_verifier_plan_schema() -> None:
+    profile = _authority_profile()
+    profile["slice_verifier_plan"] = {
+        "slice_name": "REDDOG_TEST_SLICE_PHASE1",
+        "worker_id": "worker:author",
+        "verifier_id": "worker:verifier",
+        "base_sha": "b" * 40,
+        "head_sha": "a" * 40,
+        "allowed_path_patterns": ["modules/foundups/test/**"],
+        "expected_changed_paths": ["modules/foundups/test/README.md"],
+        "forbidden_path_patterns": ["**/.env"],
+        "required_checks": [{"name": "pytest", "argv": ["pytest", "-q"], "timeout_s": 30}],
+        "signed_receipt_chain": {"accepted": True, "terminal_receipt_hash": "sha256:" + "a" * 64},
+    }
+
+    assert authority_profile_runtime_unknown_field_paths(profile) == ()
+    assert rehydrate_authority_profile_runtime(profile) == profile
+
+
+def test_runtime_profile_rejects_unknown_slice_verifier_check_field() -> None:
+    profile = _authority_profile()
+    profile["slice_verifier_plan"] = {
+        "required_checks": [{"name": "pytest", "argv": ["pytest"], "timeout_s": 30, "shell": True}],
+    }
+
+    assert authority_profile_runtime_unknown_field_paths(profile) == (
+        "slice_verifier_plan.required_checks[0].shell",
+    )
+
+
+def test_runtime_profile_accepts_env_names_but_rejects_secret_values() -> None:
+    profile = _authority_profile()
+    profile["bounded_worker_plan"] = {
+        "shell_profile": {"secret_env_refs": ["OPENROUTER_API_KEY"]},
+    }
+
+    assert rehydrate_authority_profile_runtime(profile) == profile
+
+    profile["bounded_worker_plan"]["shell_profile"]["secret_env_refs"] = [
+        "sk-attacker-value",
+    ]
+    with pytest.raises(ValueError, match="secret_env_refs"):
+        rehydrate_authority_profile_runtime(profile)
+
+
 def test_authority_profile_typed_rehydration_preserves_canonical_source() -> None:
     profile = _authority_profile()
 

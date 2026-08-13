@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -34,6 +35,7 @@ _MAPPING_FIELDS = frozenset(
         "selection_receipt",
         "shell_profile",
         "signed_receipt_chain",
+        "slice_verifier_plan",
         "source_authority_basis",
         "verification_receipt",
         "worker_plan",
@@ -44,6 +46,7 @@ _MAPPING_LIST_FIELDS = frozenset(
     {
         "model_runtime_binding_role_bindings",
         "rankings",
+        "required_checks",
         "role_assignments",
         "role_bindings",
     }
@@ -56,6 +59,7 @@ _STRING_LIST_FIELDS = frozenset(
         "allowed_providers",
         "allowed_read_targets",
         "applicable_wsps",
+        "argv",
         "argv_prefix",
         "benchmark_evidence_receipt_ids",
         "changed_paths",
@@ -66,6 +70,8 @@ _STRING_LIST_FIELDS = frozenset(
         "denied_paths",
         "denied_providers",
         "evidence_refs",
+        "expected_changed_paths",
+        "forbidden_path_patterns",
         "holoindex_evidence_refs",
         "expected_evidence",
         "missing_preconditions",
@@ -154,6 +160,7 @@ _INT_FIELDS = frozenset(
         "mps_total",
         "permission_snapshot_expires_at",
         "timeout_seconds",
+        "timeout_s",
         "valid_until",
         "verified_at",
         "work_authority_expires_at",
@@ -169,6 +176,7 @@ _NUMBER_FIELDS = frozenset(
         "score",
     }
 )
+_ENV_REFERENCE = re.compile(r"^[A-Z][A-Z0-9_]{1,127}$")
 _NO_EFFECT_FIELDS = frozenset(
     {
         "no_hermes_dispatch_performed",
@@ -310,6 +318,10 @@ def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> Non
     elif field in _STRING_LIST_FIELDS:
         if type(item) not in (list, tuple) or any(
             type(child) is not str for child in item
+        ):
+            found.append(path)
+        elif field == "secret_env_refs" and any(
+            _ENV_REFERENCE.fullmatch(child) is None for child in item
         ):
             found.append(path)
         return

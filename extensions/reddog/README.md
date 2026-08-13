@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.90
+Version: 0.4.91
+
+[OBSERVED] Version 0.4.91 pins the backend manifest after resident artifact-
+generation request derivation was consolidated in the bounded-worker stage.
+Thin-client behavior and execution authority are unchanged.
 
 [OBSERVED] Version 0.4.90 accepts the leading UTF-8 BOM emitted by Windows
 PowerShell when it pipes the documented owner-query JSON. Decoding remains

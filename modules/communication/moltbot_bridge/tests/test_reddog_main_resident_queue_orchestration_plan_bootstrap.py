@@ -45,7 +45,6 @@ def _snapshot() -> dict[str, object]:
             "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
             "no_execution_performed": True,
         },
-        prompt_text="RedDog main resident queue orchestration plan bootstrap worktree authority",
     )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
@@ -320,7 +319,8 @@ def test_main_resident_queue_plan_preflight_preserves_explicit_chain_path(
 ) -> None:
     import main
 
-    explicit_chain = tmp_path / "runtime" / "missing-chain-results.json"
+    runtime_root = tmp_path / "resident-runtime"
+    explicit_chain = runtime_root / "nested" / "missing-chain-results.json"
     with patch(
         "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_orchestration_plan_bootstrap.run_reddog_main_resident_queue_orchestration_plan_bootstrap",
         return_value=type(
@@ -345,7 +345,7 @@ def test_main_resident_queue_plan_preflight_preserves_explicit_chain_path(
             {
                 "REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN": "1",
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
-                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path / "resident-runtime"),
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
                 "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(explicit_chain),
             },
             clear=True,

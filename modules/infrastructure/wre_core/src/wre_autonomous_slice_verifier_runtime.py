@@ -279,12 +279,16 @@ def _worktree_receipt_ok(worktree_receipt: Mapping[str, Any]) -> bool:
         return False
     if worktree_receipt.get("decision") in {"REJECT", "WORKTREE_CREATE_REJECT"}:
         return False
-    digest = (
-        worktree_receipt.get("receipt_digest")
-        or worktree_receipt.get("worktree_write_receipt_digest")
-        or worktree_receipt.get("receipt_id")
+    return bool(_worktree_receipt_digest(worktree_receipt))
+
+
+def _worktree_receipt_digest(worktree_receipt: Mapping[str, Any]) -> str:
+    explicit = worktree_receipt.get("receipt_digest") or worktree_receipt.get(
+        "worktree_write_receipt_digest"
     )
-    return bool(str(digest or "").strip())
+    if explicit:
+        return str(explicit) if _is_digest(explicit) else ""
+    return _digest(worktree_receipt) if worktree_receipt.get("receipt_id") else ""
 
 
 def _holoindex_evidence_ok(holoindex_evidence: Mapping[str, Any]) -> bool:
@@ -487,12 +491,7 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any], *, trusted_work_
         or receipt_chain.get("signed_receipt_chain_terminal_hash")
         or ""
     )
-    worktree_digest = (
-        worktree_receipt.get("receipt_digest")
-        or worktree_receipt.get("worktree_write_receipt_digest")
-        or worktree_receipt.get("receipt_id")
-        or ""
-    )
+    worktree_digest = _worktree_receipt_digest(worktree_receipt)
     signed_digest = signed_authority.get("signature_gate_digest") or signed_authority.get(
         "signed_work_authority_digest"
     )

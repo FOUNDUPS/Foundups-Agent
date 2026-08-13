@@ -2,16 +2,7 @@
 
 Slice: REDDOG_SIGNED_WORKER_OPENCLAW_QUEUE_LOOP_RUNTIME_BINDING_PHASE1
 
-This module builds the narrow OpenClaw queue-loop runner used by signed
-worker-dispatch tasks. It is disabled unless explicitly requested through
-environment/configuration, accepts only the OpenClaw candidate queue-review
-capability, and delegates all queue advancement to the existing bounded
-resident queue serial-loop bootstrap.
-
-It does not execute shell commands, mutate repository files, dispatch Hermes,
-settle rewards, or re-index HoloIndex. Higher resident profiles can supply
-existing guarded worktree, draft-PR, outcome-ratchet, and PatternMemory sinks;
-those effects remain downstream of their own queue-stage gates.
+Delegate signed worker tasks to the existing bounded resident serial loop.
 """
 
 from __future__ import annotations
@@ -28,7 +19,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_prof
     resident_queue_draft_pr_runner_mode,
     resident_queue_evidence_command_runner_mode,
     resident_queue_materializer_mode,
+    resident_queue_integer_epoch,
     resident_queue_model_feedback_ledger_store_path,
+    resident_queue_now_epoch,
     resident_queue_outcome_ratchet_store_path,
     resident_queue_pattern_memory_admission_db_path,
     resident_queue_runtime_file_path,
@@ -61,6 +54,7 @@ class SignedWorkerOpenClawQueueLoopBindingReason:
     CHAIN_RESULTS_PATH_MISSING = "REJECT_SIGNED_WORKER_QUEUE_LOOP_CHAIN_RESULTS_PATH_MISSING"
     AUTHORITY_PROFILE_PATH_MISSING = "REJECT_SIGNED_WORKER_QUEUE_LOOP_AUTHORITY_PROFILE_PATH_MISSING"
     MAX_STEPS_INVALID = "REJECT_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS_INVALID"
+    NOW_EPOCH_INVALID = "REJECT_SIGNED_WORKER_QUEUE_LOOP_NOW_EPOCH_INVALID"
     DRAFT_PR_RUNNER_MODE_UNSUPPORTED = (
         "REJECT_SIGNED_WORKER_QUEUE_LOOP_DRAFT_PR_RUNNER_MODE_UNSUPPORTED"
     )
@@ -201,6 +195,9 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         max_steps = 0
     if max_steps < 1:
         reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.MAX_STEPS_INVALID)
+    now_epoch, now_epoch_valid = resident_queue_now_epoch(env)
+    if not now_epoch_valid:
+        reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.NOW_EPOCH_INVALID)
 
     draft_pr_runner, draft_pr_reasons = _build_draft_pr_runner(
         repo_root=repo_root,
@@ -244,7 +241,8 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         runtime_allowed_root=resident_queue_runtime_root_path(env, repo_root),
         repo_root=Path(repo_root).resolve(),
         now_iso=_stripped(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO")) or None,
-        now_epoch=None,
+        now_epoch=now_epoch,
+        trusted_now_epoch=(lambda value=now_epoch: value) if now_epoch is not None else resident_queue_integer_epoch,
         max_steps=max_steps,
         bootstrap_kwargs=bootstrap_kwargs,
     )
@@ -321,6 +319,8 @@ def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[
         value = _optional_runtime_file_path(env, repo_root=repo_root, env_name=env_name)
         if value:
             payload[key] = value
+    if payload.get("signer_socket_path"):
+        payload.setdefault("signature_verifier_backend", "ed25519")
     if artifact_generator_mode:
         payload["artifact_generator_mode"] = artifact_generator_mode
     if worktree_runner_mode:
