@@ -1216,7 +1216,22 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
 ) -> None:
     import main
     from modules.foundups.agent.src import worktree_pr_runner
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_resident_queue_serial_loop_bootstrap as serial_bootstrap,
+    )
+
     monkeypatch.setattr(main, "time", type("_TestClock", (), {"time": staticmethod(lambda: 1000)}))
+    real_serial_bootstrap = serial_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap
+
+    def _fixed_policy_time_bootstrap(**kwargs: object):
+        kwargs["now_iso"] = BOOTSTRAP_NOW
+        return real_serial_bootstrap(**kwargs)
+
+    monkeypatch.setattr(
+        serial_bootstrap,
+        "run_reddog_main_resident_queue_serial_loop_bootstrap",
+        _fixed_policy_time_bootstrap,
+    )
     _FakeProfileWorktreeRunner.instances.clear()
     monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeProfileWorktreeRunner)
     repo = _repo(tmp_path)
@@ -1325,7 +1340,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "7")
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "1000")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S", "77")
     monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S", "88")
