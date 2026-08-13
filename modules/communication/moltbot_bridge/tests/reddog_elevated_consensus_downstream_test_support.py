@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from functools import wraps
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 from unittest.mock import patch
 
 from modules.communication.moltbot_bridge.src import (
@@ -82,35 +83,55 @@ def with_downstream_test_consensus(function: Any) -> Any:
 
     @wraps(function)
     def wrapped(*args: Any, **kwargs: Any) -> Any:
-        _bind_runtime_files(kwargs)
-        original = (
-            registry_module.build_reddog_resident_queue_authority_runtime_stage_handler
-        )
-
-        def build_handler(**handler_kwargs: Any) -> Any:
-            now = int(handler_kwargs["now"])
-            handler_kwargs["signer"] = PermitAwareDownstreamTestSigner(
-                handler_kwargs["signer"], now=now
-            )
-            resolver = handler_kwargs["principal_resolver"]
-            handler_kwargs["elevated_consensus_capability_supplier"] = lambda request: (
-                downstream_test_consensus_capability(
-                    request, now=now,
-                    principal=resolver.resolve(
-                        request.principal_id, request.principal_provider
-                    ),
-                )
-            )
-            return original(**handler_kwargs)
-
-        with patch.object(
-            registry_module,
-            "build_reddog_resident_queue_authority_runtime_stage_handler",
-            side_effect=build_handler,
-        ):
+        with downstream_test_consensus(**_runtime_paths(kwargs)):
             return function(*args, **kwargs)
 
     return wrapped
+
+
+@contextmanager
+def downstream_test_consensus(
+    *, work_state_path: Any = None, authority_profile_path: Any = None
+) -> Iterator[None]:
+    """Bind fixture evidence and one opaque permit within one test context."""
+
+    _bind_runtime_files(
+        {
+            "work_state_path": work_state_path,
+            "authority_profile_path": authority_profile_path,
+        }
+    )
+    original = registry_module.build_reddog_resident_queue_authority_runtime_stage_handler
+
+    def build_handler(**handler_kwargs: Any) -> Any:
+        now = int(handler_kwargs["now"])
+        handler_kwargs["signer"] = PermitAwareDownstreamTestSigner(
+            handler_kwargs["signer"], now=now
+        )
+        resolver = handler_kwargs["principal_resolver"]
+        handler_kwargs["elevated_consensus_capability_supplier"] = lambda request: (
+            downstream_test_consensus_capability(
+                request, now=now,
+                principal=resolver.resolve(
+                    request.principal_id, request.principal_provider
+                ),
+            )
+        )
+        return original(**handler_kwargs)
+
+    with patch.object(
+        registry_module,
+        "build_reddog_resident_queue_authority_runtime_stage_handler",
+        side_effect=build_handler,
+    ):
+        yield
+
+
+def _runtime_paths(kwargs: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "work_state_path": kwargs.get("work_state_path"),
+        "authority_profile_path": kwargs.get("authority_profile_path"),
+    }
 
 
 def _bind_runtime_files(kwargs: dict[str, Any]) -> None:
@@ -151,6 +172,7 @@ def _bind_runtime_files(kwargs: dict[str, Any]) -> None:
 
 __all__ = [
     "PermitAwareDownstreamTestSigner",
+    "downstream_test_consensus",
     "downstream_test_consensus_capability",
     "with_downstream_test_consensus",
 ]

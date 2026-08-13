@@ -16,8 +16,9 @@
   transport coverage now verifies Windows/WSL and POSIX command construction
   explicitly. The Linux socket-chain fixture pins its historical authority to
   an explicit test clock, uses a future claim, canonical work-order-bound
-  governed valve environment, and test-only one-use authority lease injection;
-  it does not claim the external production trust anchor is implemented.
+  governed valve environment, and the existing test-only consensus and one-use
+  authority-lease seams; it does not claim the external production trust anchor
+  is implemented.
   (WSP 00/15/22/50/62/97)
 ## 2026-08-12: Canonical HIGH-tier consensus capability foundation
 - Review hardening verifies exact canonical signed bytes, rejects duplicate

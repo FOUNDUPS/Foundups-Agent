@@ -67,6 +67,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     run_reddog_signer_socket_service_runtime_cli,
 )
 from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import inject_stub_governed_valve_use_time_authority
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_downstream_test_support import downstream_test_consensus
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
     build_reddog_signed_worker_queue_loop_runner_from_env,
 )
@@ -1215,8 +1216,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
 ) -> None:
     import main
     from modules.foundups.agent.src import worktree_pr_runner
-    monkeypatch.setattr(
-        main, "time", type("_TestClock", (), {"time": staticmethod(lambda: 1000)}))
+    monkeypatch.setattr(main, "time", type("_TestClock", (), {"time": staticmethod(lambda: 1000)}))
     _FakeProfileWorktreeRunner.instances.clear()
     monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeProfileWorktreeRunner)
     repo = _repo(tmp_path)
@@ -1348,11 +1348,11 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ
     try:
         with inject_stub_governed_valve_use_time_authority(
-            governed_valve_environment, expected_valve_bindings):
+            governed_valve_environment, expected_valve_bindings
+        ), downstream_test_consensus(work_state_path=state, authority_profile_path=profile):
             assert main.run_reddog_resident_queue_control_loop_preflight(repo) is True
     finally:
         signer_thread.join(5)
-
     result = service_result["result"]
     assert result.accepted is True
     assert result.status == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
