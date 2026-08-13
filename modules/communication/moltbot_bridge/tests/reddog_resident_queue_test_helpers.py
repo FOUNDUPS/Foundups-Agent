@@ -563,14 +563,32 @@ def install_signed_worker_envelope_test_authority(monkeypatch: Any) -> None:
         reddog_signed_worker_agentdb_envelope as envelope_module,
     )
 
-    original = envelope_module.build_worker_dispatch_authority_context_from_env
+    original_configured = envelope_module.build_worker_dispatch_authority_context
+    original_from_env = envelope_module.build_worker_dispatch_authority_context_from_env
 
-    def _context(**kwargs: Any):
+    def _configured_context(**kwargs: Any):
         try:
-            return replace(original(**kwargs), trusted_now_epoch=lambda: _TEST_NOW)
+            return replace(
+                original_configured(**kwargs),
+                trusted_now_epoch=lambda: _TEST_NOW,
+            )
         except Exception:
             return worker_dispatch_authority_verification_context()
 
+    def _context(**kwargs: Any):
+        try:
+            return replace(
+                original_from_env(**kwargs),
+                trusted_now_epoch=lambda: _TEST_NOW,
+            )
+        except Exception:
+            return worker_dispatch_authority_verification_context()
+
+    monkeypatch.setattr(
+        envelope_module,
+        "build_worker_dispatch_authority_context",
+        _configured_context,
+    )
     monkeypatch.setattr(
         envelope_module,
         "build_worker_dispatch_authority_context_from_env",
