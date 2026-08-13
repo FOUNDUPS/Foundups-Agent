@@ -1226,9 +1226,13 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     }
     principal_public, reddog_public, signer_backend = _ed25519_signing_material_with_socket_backend()
     pilot_overrides = _pilot_path_overrides()
+    state_payload = _bootstrap_snapshot(requested_operation=PILOT_OPERATION)
+    state_payload["worker_claims"][0]["expires_at"] = (
+        "2099-01-01T00:00:00+00:00"
+    )
     state = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")),
-        _bootstrap_snapshot(requested_operation=PILOT_OPERATION),
+        state_payload,
     )
     profile = _write_json(
         Path(
