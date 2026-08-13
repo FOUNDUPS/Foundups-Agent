@@ -366,7 +366,7 @@ def test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_so
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
         "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
     }
-    state_payload = _bootstrap_snapshot()
+    state_payload = _bootstrap_snapshot(requested_operation=PILOT_OPERATION)
     state_payload["worker_claims"][0]["expires_at"] = "2099-01-01T00:00:00+00:00"
     state = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")),
@@ -1228,7 +1228,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     pilot_overrides = _pilot_path_overrides()
     state = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")),
-        _bootstrap_snapshot(),
+        _bootstrap_snapshot(requested_operation=PILOT_OPERATION),
     )
     profile = _write_json(
         Path(
@@ -1505,7 +1505,7 @@ def test_main_resident_control_loop_consumes_signer_socket_started_by_runtime_cl
     pilot_overrides = _pilot_path_overrides()
     state = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")),
-        _bootstrap_snapshot(),
+        _bootstrap_snapshot(requested_operation=PILOT_OPERATION),
     )
     profile = _write_json(
         Path(

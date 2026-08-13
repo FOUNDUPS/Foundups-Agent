@@ -55,6 +55,33 @@ jobs:
           python -m pytest scripts/tests/test_reddog_holoindex_blocked_request_recovery_once.py -v --tb=short
           python -m pytest tests/test_reddog_model_freshness_query_once.py -v --tb=short
 
+      - name: Run RedDog bounded resident-chain regression
+        run: |
+          python -m pytest \
+            modules/communication/moltbot_bridge/tests/test_reddog_openclaw_hermes_0102_worker_dispatch_runtime.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_worker_dispatch_runtime_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_worktree_create_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_bounded_worker_pilot_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_exact_sha_commit_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_verified_draft_pr_publish_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_verified_outcome_ratchet_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_held_out_regression_gate_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pattern_memory_admission_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_progressive_execution_stage_policy.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_consumer_dryrun.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_orchestration_plan.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_work_order_invocation_handler.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_model_runtime_artifact_integration.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_main_openclaw_signed_worker_claim_loop_preflight.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_next_stage_dispatch_bootstrap.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_orchestration_plan_bootstrap.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_executor_plan_handler.py \
+            -q --tb=short
+
   lint:
     runs-on: ubuntu-latest
     steps:

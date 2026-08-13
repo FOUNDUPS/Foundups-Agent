@@ -62,18 +62,17 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     PermissionSnapshot,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
-    VALVE_OPEN_WORKTREE_CREATE,
+    VALVE_OPEN_DRYRUN_ONLY,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authority_work_order_invoke import (
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT,
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_REJECT,
     QueueVerifiedAuthorityWorkOrderInvokeReason,
 )
-from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
-    allocate_reddog_wsp15_receipt,
-)
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
+    with_architect_fix_publication,
+    with_queue_wsp15_allocation,
 )
 
 
@@ -93,18 +92,11 @@ EXPIRES = "2026-07-14T01:00:00+00:00"
 WORK_ORDER_ID = "wre-queue-work-order-invocation-001"
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
-ALLOWED = [f"modules/foundups/{FID}/**"]
+ALLOWED = [f"modules/foundups/{FID}/src/worker.py"]
 DENIED: list[str] = []
-OPERATION = "create_foundup"
-
-
-def _queue_wsp15_allocation_receipt() -> dict[str, object]:
-    return allocate_reddog_wsp15_receipt(
-        requested_operation=OPERATION,
-        prompt_text="RedDog resident queue work order invocation worktree authority",
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_work_order_invocation_handler.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_work_order_invocation_handler.py",),
-    ).to_dict()
+OPERATION = "edit_foundup_module"
+QUEUE_ITEM_ID = "sha256:" + ("5" * 64)
+CLAIM_ID = "sha256:" + ("6" * 64)
 
 
 class _MockSignerVerifier:
@@ -208,14 +200,24 @@ def _fresh_captured() -> str:
     return (NOW_DT - timedelta(seconds=30)).replace(microsecond=0).isoformat()
 
 
-def _snapshot() -> dict[str, object]:
-    allocation = _queue_wsp15_allocation_receipt()
+def _base_snapshot() -> dict[str, object]:
+    queue_item = with_queue_wsp15_allocation(
+        {
+            "queue_item_id": QUEUE_ITEM_ID,
+            "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+            "claim_id": CLAIM_ID,
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": [f"claim:{CLAIM_ID}", "freshness:fresh-1"],
+            "no_execution_performed": True,
+        }
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
         "worker_claims": [
             {
-                "claim_id": "claim-1",
+                "claim_id": CLAIM_ID,
                 "slice_id": "REDDOG_TEST_SLICE_PHASE1",
                 "worker_id": "reddog-0102",
                 "status": "ACTIVE",
@@ -223,26 +225,11 @@ def _snapshot() -> dict[str, object]:
                 "freshness_receipt_id": "fresh-1",
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": [
-                    "claim:claim-1",
-                    "freshness:fresh-1",
-                    f"wsp15_allocation:{allocation['receipt_id']}",
-                ],
-                "wsp15_allocation_receipt": allocation,
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
-def _profile() -> dict[str, object]:
+def _base_profile() -> dict[str, object]:
     return {
         "work_order_id": WORK_ORDER_ID,
         "principal_id": "github:mjtrout",
@@ -262,11 +249,24 @@ def _profile() -> dict[str, object]:
         "issued_at": NOW_SECONDS - 5,
         "identity_expires_at": NOW_SECONDS + 3600,
         "work_authority_expires_at": NOW_SECONDS + 300,
-        "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
+        "valve_state_required": VALVE_OPEN_DRYRUN_ONLY,
         "key_epoch": "epoch-1",
-        "consensus_receipt_digest": "sha256:consensus",
-        "sovereign_authorization_digest": "sha256:012-token",
     }
+
+
+def _published_inputs() -> tuple[dict[str, object], dict[str, object]]:
+    snapshot, profile, _, _ = with_architect_fix_publication(
+        _base_snapshot(), _base_profile()
+    )
+    return snapshot, profile
+
+
+def _snapshot() -> dict[str, object]:
+    return _published_inputs()[0]
+
+
+def _profile() -> dict[str, object]:
+    return _published_inputs()[1]
 
 
 def _work_order(**overrides: object) -> dict[str, object]:
@@ -357,6 +357,9 @@ def _seed_verified_authority(chain_store: InMemoryResidentQueueChainResultsStore
         signer=signer,
         principal_resolver=_PrincipalResolver(),
         snapshot_resolver=_SnapshotResolver(),
+        work_state_snapshot=_snapshot(),
+        authority_profile=_profile(),
+        work_state_supplier=_snapshot,
         now=NOW_SECONDS,
     )
     runtime_result = invoke_reddog_resident_queue_next_stage_dispatch(
@@ -376,7 +379,7 @@ def _seed_verified_authority(chain_store: InMemoryResidentQueueChainResultsStore
         snapshot_resolver=_SnapshotResolver(),
         revocation_oracle=_NoRevocation(),
         now=NOW_SECONDS,
-        required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
+        required_valve_state=VALVE_OPEN_DRYRUN_ONLY,
     )
     verification_result = invoke_reddog_resident_queue_next_stage_dispatch(
         explicit_resident_queue_stage_dispatch_requested=True,
@@ -449,7 +452,7 @@ def test_dispatcher_records_work_order_invocation_and_advances_to_executor_plan(
     assert resolver.calls == [
         {
             "work_order_id": WORK_ORDER_ID,
-            "queue_item_id": "queue-1",
+            "queue_item_id": QUEUE_ITEM_ID,
             "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
         }
     ]
@@ -470,7 +473,7 @@ def test_missing_authority_runtime_stage_rejects_direct_handler_call() -> None:
     request = ResidentQueueStageDispatchRequest(
         stage_key=WORK_ORDER_INVOCATION_STAGE_KEY,
         next_action=NEXT_QUEUE_WORK_ORDER_INVOCATION,
-        queue_item_id="queue-1",
+        queue_item_id=QUEUE_ITEM_ID,
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
         plan_id="plan-1",
         accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY,),
@@ -504,6 +507,9 @@ def test_missing_authority_verification_stage_rejects_direct_handler_call() -> N
         signer=signer,
         principal_resolver=_PrincipalResolver(),
         snapshot_resolver=_SnapshotResolver(),
+        work_state_snapshot=_snapshot(),
+        authority_profile=_profile(),
+        work_state_supplier=_snapshot,
         now=NOW_SECONDS,
     )
     assert invoke_reddog_resident_queue_next_stage_dispatch(
@@ -517,7 +523,7 @@ def test_missing_authority_verification_stage_rejects_direct_handler_call() -> N
     request = ResidentQueueStageDispatchRequest(
         stage_key=WORK_ORDER_INVOCATION_STAGE_KEY,
         next_action=NEXT_QUEUE_WORK_ORDER_INVOCATION,
-        queue_item_id="queue-1",
+        queue_item_id=QUEUE_ITEM_ID,
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
         plan_id="plan-1",
         accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY, AUTHORITY_RUNTIME_STAGE_KEY),
@@ -537,7 +543,7 @@ def test_missing_work_order_rejects_direct_handler_call() -> None:
     request = ResidentQueueStageDispatchRequest(
         stage_key=WORK_ORDER_INVOCATION_STAGE_KEY,
         next_action=NEXT_QUEUE_WORK_ORDER_INVOCATION,
-        queue_item_id="queue-1",
+        queue_item_id=QUEUE_ITEM_ID,
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
         plan_id="plan-1",
         accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY, AUTHORITY_RUNTIME_STAGE_KEY, AUTHORITY_VERIFICATION_STAGE_KEY),
@@ -555,7 +561,7 @@ def test_wrong_stage_rejects_direct_handler_call() -> None:
     request = ResidentQueueStageDispatchRequest(
         stage_key=AUTHORITY_VERIFICATION_STAGE_KEY,
         next_action=NEXT_QUEUE_WORK_ORDER_INVOCATION,
-        queue_item_id="queue-1",
+        queue_item_id=QUEUE_ITEM_ID,
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
         plan_id="plan-1",
         accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY, AUTHORITY_RUNTIME_STAGE_KEY),
@@ -572,7 +578,7 @@ def test_wrong_next_action_rejects_direct_handler_call() -> None:
     request = ResidentQueueStageDispatchRequest(
         stage_key=WORK_ORDER_INVOCATION_STAGE_KEY,
         next_action="RUN_QUEUE_AUTHORITY_VERIFICATION_INVOKE",
-        queue_item_id="queue-1",
+        queue_item_id=QUEUE_ITEM_ID,
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
         plan_id="plan-1",
         accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY, AUTHORITY_RUNTIME_STAGE_KEY),

@@ -39,6 +39,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_bounded_work
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     invoke_reddog_resident_queue_next_stage_dispatch,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
 )
@@ -328,11 +331,21 @@ def _promote_claimed_work_order(
         runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
         task_family="reddog_architect_fix_promotion",
     )
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation=PILOT_OPERATION,
+        prompt_text="Fix one bounded module defect",
+        changed_paths=(PILOT_ARTIFACT,),
+        allowed_read_targets=(PILOT_ARTIFACT,),
+    ).to_dict()
+    denied_paths = [
+        f"modules/foundups/{PILOT_DOMAIN_ID}/**/.env",
+        f"modules/foundups/{PILOT_DOMAIN_ID}/**/secrets/**",
+    ]
     determination = _rebind_determination_admission(
-        _determination(),
+        _determination(allocation=allocation),
         {
             "allowed_paths": _pilot_allowed_paths(),
-            "denied_paths": [f"modules/foundups/{PILOT_DOMAIN_ID}/secrets/**"],
+            "denied_paths": denied_paths,
             "requested_operation": PILOT_OPERATION,
         },
     )
@@ -355,6 +368,7 @@ def _promote_claimed_work_order(
         model_runtime_binding_receipt=binding,
         authority_profile=_promoted_authority_profile(
             _promoted_bounded_worker_plan(),
+            denied_paths=denied_paths,
         ),
         architect_determination=determination,
         authority_profile_publication_publisher=publisher.publish,
@@ -388,10 +402,14 @@ def _promoted_bounded_worker_plan():
 
 def _promoted_authority_profile(
     plan,
+    *,
+    denied_paths,
 ):
     path_overrides = _pilot_path_overrides()
     path_overrides.pop("task_summary", None)
     path_overrides.pop("rollback_plan", None)
+    path_overrides.pop("wsp15_allocation_receipt", None)
+    path_overrides["denied_paths"] = list(denied_paths)
     return _authority_profile(
         foundup_id=PILOT_DOMAIN_ID,
         permission_snapshot_digest=PERMISSION_DIGEST,

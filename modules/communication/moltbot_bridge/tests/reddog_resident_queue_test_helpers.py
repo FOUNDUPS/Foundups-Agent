@@ -184,6 +184,11 @@ def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str 
         changed_paths=tuple(allocation["changed_paths"]),
         task_prompt_text=prompt_text,
     )
+    if stage.no_effect_authority:
+        raise AssertionError(
+            "bounded queue test fixture was rejected by progressive policy: "
+            f"{stage.risk_classes or stage.rejection_reasons or stage.would_block_reasons}"
+        )
     refs = [str(ref) for ref in item.get("evidence_refs") or ()]
     refs.extend(
         [
