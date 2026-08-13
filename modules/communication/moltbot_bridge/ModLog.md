@@ -11,9 +11,10 @@
   authenticated allocation through determination, profile publication, queue
   materialization and provider invocation. Runtime policy was not weakened and
   no execution authority was added. The CI slice installs the canonical pinned
-  HoloIndex vector-store and declared scheduler timezone dependencies needed to
-  collect the real promotion and `main.py` preflight paths. OpenClaw transport
-  coverage now verifies Windows/WSL and POSIX command construction explicitly.
+  HoloIndex vector-store, scheduler timezone and process-monitor dependencies
+  needed to collect the real promotion and `main.py` preflight paths. OpenClaw
+  transport coverage now verifies Windows/WSL and POSIX command construction
+  explicitly.
   (WSP 00/15/22/50/62/97)
 ## 2026-08-12: Canonical HIGH-tier consensus capability foundation
 - Review hardening verifies exact canonical signed bytes, rejects duplicate
