@@ -1230,8 +1230,11 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     }
     principal_public, reddog_public, signer_backend = _ed25519_signing_material_with_socket_backend()
     pilot_overrides = _pilot_path_overrides()
-    state_payload = _bootstrap_snapshot(requested_operation=PILOT_OPERATION)
+    state_payload, profile_payload, materialized_work_order = model_bound_queue_inputs(
+        principal_public, reddog_public, pilot_overrides
+    )
     state_payload["worker_claims"][0]["expires_at"] = "2099-01-01T00:00:00+00:00"
+    profile_payload["bounded_worker_plan"] = _pilot_bounded_worker_plan()
     state = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")),
         state_payload,
@@ -1244,14 +1247,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
                 "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
             )
         ),
-        _bootstrap_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-            bounded_worker_plan=_pilot_bounded_worker_plan(),
-        ),
+        profile_payload,
     )
     snapshots = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_PERMISSION_SNAPSHOTS_PATH")),
@@ -1267,9 +1263,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
         ),
         _principals(principal_public),
     )
-    materialized_work_order = _work_order(
-        **pilot_overrides, bounded_worker_plan=_pilot_bounded_worker_plan(),
-        nonce="work-order:workauth-nonce-0001")
     governed_valve_environment, expected_valve_bindings = _test_governed_environment(materialized_work_order)
     valve_env = _write_json(
         Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_EXECUTION_VALVE_ENV_PATH")),

@@ -5,6 +5,9 @@
 - Locked artifact-generation request ownership to the bounded-worker stage so
   bootstrap cannot pre-derive a competing schema. Explicit supplied requests
   retain the existing fail-closed conflict regression.
+- The Linux socket-chain fixture now reuses the canonical model-bound queue
+  input helper so selection, runtime verification, queue, claim, profile and
+  materialized work order carry one consistent authority lineage.
 
 ## 2026-08-12: Canonical elevated-authority consensus regressions
 - Review hardening rejects noncanonical or duplicate signed JSON, payload
