@@ -72,10 +72,7 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queu
     build_reddog_signed_worker_queue_loop_runner_from_env,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispatch_task_executor import _FakeEnvDraftPrRunner
-from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
-    FakeAssuranceReservationStore,
-    configure_signed_worker_claim_test_authority,
-)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import configure_signed_worker_claim_test_authority
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
     PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE, PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
     resident_queue_materializer_mode,
@@ -1228,7 +1225,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
 
     def _fixed_policy_time_bootstrap(**kwargs: object):
         kwargs["now_iso"] = BOOTSTRAP_NOW
-        kwargs["assurance_reservation_store"] = FakeAssuranceReservationStore()
+        kwargs["assurance_reservation_store"] = _assurance_store()
         return real_serial_bootstrap(**kwargs)
 
     monkeypatch.setattr(
@@ -1347,7 +1344,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     )
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "2")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "8")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "9")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "7")
