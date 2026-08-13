@@ -10,7 +10,9 @@
   held-out admission and PatternMemory. Promotion integration now carries one
   authenticated allocation through determination, profile publication, queue
   materialization and provider invocation. Runtime policy was not weakened and
-  no execution authority was added. (WSP 00/15/22/50/62/97)
+  no execution authority was added. The CI slice installs the canonical pinned
+  HoloIndex vector-store dependency needed to collect the real promotion path.
+  (WSP 00/15/22/50/62/97)
 ## 2026-08-12: Canonical HIGH-tier consensus capability foundation
 - Review hardening verifies exact canonical signed bytes, rejects duplicate
   JSON keys and socket-v1 proof downgrade, requires author model-runtime
