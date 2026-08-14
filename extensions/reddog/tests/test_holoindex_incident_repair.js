@@ -161,8 +161,8 @@ assert(extensionSource.includes('holoGenerationBoundQuery.isObserved(ownerResult
 assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(ownerResult, ownerObserved)'));
 assert(extensionSource.includes('coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved)'));
 assert((extensionSource.match(/holoIncidentRepair\.metadata\(incidentRepair\)/g) || []).length >= 4);
-assert.strictEqual(pkg.version, '0.4.91');
-assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.91'"));
+assert.strictEqual(pkg.version, '0.4.92');
+assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.92'"));
 assert(!fs.readFileSync(path.join(extDir, 'holoindex_incident_repair.js'), 'utf8').includes('qwen'));
 
 console.log('RedDog HoloIndex incident repair extension tests passed.');

@@ -36,10 +36,17 @@ lease remains held through target-signature rehydration. It reuses the isolated
 signer, WSP 71 backend factory, signed owner policy and durable replay/high-water
 store.
 
+[OBSERVED] Owner config v3 can now bind a disjoint grant-authority root, fixed
+Unix socket, and exact non-root UID/GID. The uncomposed client supply verifies
+authenticated current-generation E0 admission, rejects link components, pins
+the protected socket identity, verifies `SO_PEERCRED`, rejects overlap with
+target, outcome, replay, and revocation authority, and derives the public grant
+identity only from authenticated signed owner policy v5.
+
 [SPECIFIED_NOT_IMPLEMENTED] This foundation cannot activate the production
 authoritative-use path: HIGH now accepts only the canonical opaque consensus
-capability, but authenticated production authority suppliers and signer-service
-composition remain absent. ULTRA, root-owned service provisioning,
+capability, but grant-service lifecycle and signer-service composition remain
+absent. ULTRA, root-owned service provisioning,
 distinct-OS-principal supervision and the live canary remain unimplemented.
 
 ## Root-served signer-revocation anchor

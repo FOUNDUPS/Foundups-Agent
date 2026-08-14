@@ -8,12 +8,14 @@ from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
-    IsolatedSignerClient,
     SigningRequest,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_grant_binding import (
     build_secret_grant_authority_policy,
     resolve_secret_grant_target_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_independent_grant_authority_binding import (
+    IndependentGrantAuthorityBinding,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_grant_verification import (
     require_final_secret_grant,
@@ -47,18 +49,6 @@ from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensu
     ElevatedConsensusGrantProviderIdentity,
     admit_secret_grant_consensus,
 )
-@dataclass(frozen=True, slots=True)
-class IndependentGrantAuthorityBinding:
-    """Public client binding for a separately hosted grant signer service."""
-
-    client: IsolatedSignerClient
-    principal_id: str
-    principal_provider: str
-    public_key: str
-    key_epoch: str
-    requester_principal_id: str
-
-
 @dataclass(frozen=True, slots=True)
 class IndependentSignerSecretGrantProvider:
     """Issue one grant while holding the target signer's generation fence."""

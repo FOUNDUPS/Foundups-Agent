@@ -193,7 +193,7 @@ current E0 policy, generation, authority, target signer, and durable store.
 An uncomposed local witness and policy v3 bind the root-state anchor; the oracle
 requires three-way agreement; two mutable root mirrors can be rolled back while the
 static installation domain remains unchanged. Root-service transport, protected-use client,
-and composed oracle exist. A root-owned WSP71 resolver factory exists but remains uncomposed; the production backend and grant issuer remain absent, so system-service signing fails closed.
+and composed oracle exist. Owner config v3 plus the uncomposed independent-grant client supply bind a disjoint Unix socket, exact non-root peer UID/GID, and signed policy identity; the WSP71 resolver factory and client remain uncomposed, so system-service signing fails closed.
 Native-memory zeroization and complete signer lifecycle supervision remain
 SPECIFIED_NOT_IMPLEMENTED.
 No private key, resolved secret, grant signature, or audit key is serialized.

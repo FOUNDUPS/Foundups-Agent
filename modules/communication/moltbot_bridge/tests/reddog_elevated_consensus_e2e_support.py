@@ -157,7 +157,8 @@ def _grant_provider(
         repo_root=root, owner_config_path=root / f"owner-{role}.json",
         owner_policy=policy, replay_store=store,
         grant_authority=IndependentGrantAuthorityBinding(
-            client=grant_client, principal_id=binding.issuer_principal_id,
+            client=grant_client, authority_root=str((root / "grant-authority").resolve()),
+            principal_id=binding.issuer_principal_id,
             principal_provider=binding.issuer_principal_provider, public_key=grant_public,
             key_epoch="grant-epoch-1", requester_principal_id="provider:grant-client",
         ), clock=lambda: NOW, nonce_factory=lambda: f"grant-nonce-{role}-0001",

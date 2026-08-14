@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1504,
+  "total_tests": 1506,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -8547,6 +8547,21 @@
       "description": "Tests for REDDOG_ISOLATED_SIGNER_SOCKET_CLIENT_PHASE1."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_isolated_signer_socket_client_linux",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_client_linux.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Linux transport proof for peer-authenticated isolated signer clients."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_isolated_signer_socket_protocol",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -8788,7 +8803,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_signer_service_config_supply_preflight.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [
         "network"
       ],
@@ -9260,7 +9275,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_readonly_audit_research_decision_e2e_runtime.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9888,7 +9903,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_confinement.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10125,6 +10140,19 @@
       "description": "Tests for REDDOG_SIGNER_AND_DELEGATED_AUTHORITY_RUNTIME_PHASE1."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_signer_independent_grant_authority_client_supply",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_grant_authority_client_supply.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for root-authorized independent grant signer client supply."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_signer_independent_secret_grant_provider",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -10332,7 +10360,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_commit_guard.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10345,7 +10373,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_reader.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10867,7 +10895,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_executor_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10880,7 +10908,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_executor_dryrun.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

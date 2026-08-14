@@ -13,6 +13,8 @@
   identity, public response verification and one generation lease.
 - COMPLETE: root-bound owner policy v5 freezes the grant-authority key epoch;
   same-key stale-epoch substitution rejects before signer invocation.
+- COMPLETE: owner config v3 and the uncomposed independent-grant client supply
+  bind a disjoint Unix socket plus exact non-root peer UID/GID to signed policy.
 - BLOCKED: authoritative-use production composition, grant-service isolation,
   lifecycle supervision and live canary remain next.
 
@@ -99,8 +101,8 @@
   substitution, and Linux-root socket transport fail closed.
 - COMPLETE: an uncomposed WSP 71 op CLI resolver factory requires a fixed,
   root-owned executable with secure ancestry and no group/other write access.
-- NEXT: independently administered grant issuance, production E0 backend
-  factory composition, WSP 71 resolve-per-sign composition, native-memory
+- NEXT: independently administered grant-service lifecycle, production E0
+  provider/backend composition, WSP 71 resolve-per-sign composition, native-memory
   zeroization evidence, and supervised handling of a crashed active use.
   The protected-use client is available through the current owner-config
   loader, but no production grant issuer or service startup path consumes it.
