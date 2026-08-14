@@ -842,6 +842,16 @@ def with_architect_fix_publication(
         "queue_item_id": queue_item_id,
         "claim_id": claim_id,
     }
+    authorized_base_sha = authority_profile.get("authorized_base_sha")
+    if isinstance(authorized_base_sha, str) and authorized_base_sha:
+        operational_context.update(
+            {
+                "authorized_base_sha": authorized_base_sha,
+                "proposal_admission": {
+                    "repo_head_sha": authorized_base_sha,
+                },
+            }
+        )
     determination_id = queue_candidate.get("source_determination_receipt_id")
     if determination_id:
         operational_context["architect_determination_receipt_id"] = determination_id

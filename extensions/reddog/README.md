@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.96
+Version: 0.4.97
+
+[OBSERVED] Version 0.4.97 pins signed owner policy v7, signed runtime manifest
+v3, and exact-Git provenance revalidation at the grant-authority WSP 71 effect
+boundary. Legacy v6/v2 grant manifests remain diagnostic-only.
 
 [OBSERVED] Version 0.4.96 pins the shared bounded-Git runtime hardening used by
 the exact archive foundation. The new v2 provenance builder and verifier remain

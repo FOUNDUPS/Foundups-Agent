@@ -6,6 +6,7 @@ import ast
 import inspect
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 import pytest
@@ -28,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_arc
     ARCHIVE_MAIN,
     build_grant_service_archive,
 )
+from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_git_archive_builder import (
+    build_grant_service_archive_from_git,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
 )
@@ -37,6 +41,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     GRANT_AUTHORITY_SERVICE_RUN_PACKET,
     MAX_SERVICE_ARCHIVE_BYTES,
     RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
+    RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE,
     SIGNING_PREFIX,
     SIGNING_PREFIX_V2,
     RuntimeArtifactManifestError,
@@ -57,6 +62,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
     POLICY_FIELDS_V5,
     POLICY_FIELDS_V6,
     POLICY_SCHEMA_V5,
+    POLICY_SCHEMA_V7,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artifact_manifest import (
     NOW,
@@ -504,11 +510,30 @@ def _setup(
     runtime_profile: str | None = RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
     archive: bytes | None = None,
 ) -> dict[str, Any]:
-    archive = archive if archive is not None else _valid_archive()
     e0 = _fixture_at(tmp_path / "e0")
     grant_path = tmp_path / "grant"
     grant_path.mkdir()
-    harness = _build_harness(grant_path)
+    git_provenance = (
+        runtime_profile
+        == RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE
+    )
+    harness = _build_harness(
+        grant_path,
+        repo_root=(e0["boundary"]._repo_root if git_provenance else None),
+        repo_initializer=(
+            _initialize_grant_git_repository if git_provenance else None
+        ),
+    )
+    if archive is None:
+        if git_provenance:
+            authority = harness.authority_boundary.require(harness.authority)
+            archive = build_grant_service_archive_from_git(
+                repo_root=harness.repo_root,
+                source_commit_sha=str(authority["authorized_base_sha"]),
+                sources=_GIT_SOURCES,
+            )
+        else:
+            archive = _valid_archive()
     archive_digest = raw_digest(archive)
     config = _config(e0, archive_digest)
     config_raw = canonical_json(config).encode("ascii")
@@ -524,8 +549,22 @@ def _setup(
         context=harness.context,
         runtime_profile=runtime_profile,
     )
-    assert result.accepted is True
+    assert result.accepted is True, result.rejection_reasons
     manifest = harness.read_manifest()
+    if git_provenance:
+        e0["policy"]["schema_version"] = POLICY_SCHEMA_V7
+        e0["policy"].update(
+            {
+                name: manifest[name]
+                for name in (
+                    "grant_authority_source_repo_root_digest",
+                    "grant_authority_source_commit_sha",
+                    "grant_authority_source_object_format",
+                    "grant_authority_source_policy_digest",
+                    "grant_authority_archive_source_descriptor_digest",
+                )
+            }
+        )
     _bind_target_signer(e0, manifest)
     _rebind_config_and_sign(e0, e0["grant_private"])
     _align_manifest_authority(e0, harness, manifest)
@@ -692,6 +731,39 @@ def _valid_archive() -> bytes:
         },
         source_commit_sha="1" * 40,
     )
+
+
+_GIT_SOURCES = {
+    "reddog_grant_authority_service.py": (
+        "service/reddog_grant_authority_service.py"
+    ),
+}
+
+
+def _initialize_grant_git_repository(repo: Path) -> str:
+    service = repo / _GIT_SOURCES["reddog_grant_authority_service.py"]
+    service.parent.mkdir(parents=True, exist_ok=True)
+    service.write_bytes(
+        b"import argparse\n\n"
+        b"def main(argv=None):\n"
+        b"    argparse.ArgumentParser().parse_args(argv)\n"
+        b"    return 2\n"
+    )
+    attacker = repo / "service/attacker_selected_service.py"
+    attacker.write_bytes(b"def main(argv=None):\n    return 0\n")
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "tests@example.invalid")
+    _git(repo, "config", "user.name", "Grant Authority Tests")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-m", "fixture")
+    return _git(repo, "rev-parse", "HEAD").strip()
+
+
+def _git(repo: Path, *args: str) -> str:
+    return subprocess.run(
+        ("git", *args), cwd=repo, check=True, capture_output=True,
+        text=True, timeout=30,
+    ).stdout
 
 
 def _install_e0_selection(monkeypatch: pytest.MonkeyPatch) -> None:

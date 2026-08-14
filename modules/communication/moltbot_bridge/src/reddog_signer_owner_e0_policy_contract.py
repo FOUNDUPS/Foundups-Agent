@@ -20,6 +20,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_v6 i
     POLICY_SCHEMA_V6,
     require_grant_service_bindings,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_v7 import (
+    GRANT_SERVICE_GIT_PROVENANCE_DIGEST_FIELDS,
+    POLICY_FIELDS_V7,
+    POLICY_PREFIX_V7,
+    POLICY_SCHEMA_V7,
+    require_grant_service_git_provenance_bindings,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import canonical_signing_input
 POLICY_SCHEMA_V5 = POLICY_PREFIX_V5 = "reddog-signer-owner-e0-policy.v5"
 POLICY_SCHEMA = POLICY_PREFIX = POLICY_SCHEMA_V6
@@ -28,6 +35,9 @@ CANONICAL_AUTHORITY_TIERS = frozenset({"LOW", "HIGH", "ULTRA"})
 POLICY_FIELDS_V6 = POLICY_FIELDS_V5 | GRANT_SERVICE_FIELDS
 POLICY_FIELDS = POLICY_FIELDS_V6
 _DIGEST_FIELDS_V6 = POLICY_DIGEST_FIELDS_V5 + GRANT_SERVICE_DIGEST_FIELDS
+_DIGEST_FIELDS_V7 = (
+    _DIGEST_FIELDS_V6 + GRANT_SERVICE_GIT_PROVENANCE_DIGEST_FIELDS
+)
 _LIST_FIELDS = ("allowed_operations", "allowed_authority_tiers", "consensus_required_tiers")
 _AUTHORITY_BINDING_EXCLUDED_FIELDS = {
     "schema_version",
@@ -75,7 +85,13 @@ def signer_owner_e0_authority_binding_digest(value: Mapping[str, Any]) -> str:
 def canonical_signer_owner_e0_policy_input(value: Mapping[str, Any]) -> str:
     schema = value.get("schema_version")
     _policy_fields(schema)
-    prefix = POLICY_PREFIX_V6 if schema == POLICY_SCHEMA_V6 else POLICY_PREFIX_V5
+    prefix = {
+        POLICY_SCHEMA_V5: POLICY_PREFIX_V5,
+        POLICY_SCHEMA_V6: POLICY_PREFIX_V6,
+        POLICY_SCHEMA_V7: POLICY_PREFIX_V7,
+    }.get(schema)
+    if prefix is None:
+        raise ValueError("signer_owner_e0_policy_schema_invalid")
     return canonical_signing_input(value, prefix)
 
 
@@ -91,19 +107,21 @@ def validated_signer_owner_e0_policy(value: Mapping[str, Any], *, now_epoch: int
         raise ValueError("signer_owner_e0_policy_malformed")
     if not ascii_deep(raw) or not _types_valid(raw, fields):
         raise ValueError("signer_owner_e0_policy_malformed")
-    digest_fields = (
-        _DIGEST_FIELDS_V6
-        if raw["schema_version"] == POLICY_SCHEMA_V6
-        else POLICY_DIGEST_FIELDS_V5
-    )
+    digest_fields = {
+        POLICY_SCHEMA_V5: POLICY_DIGEST_FIELDS_V5,
+        POLICY_SCHEMA_V6: _DIGEST_FIELDS_V6,
+        POLICY_SCHEMA_V7: _DIGEST_FIELDS_V7,
+    }[raw["schema_version"]]
     if any(not is_sha256(str(raw[name])) for name in digest_fields):
         raise ValueError("signer_owner_e0_policy_digest_invalid")
     if raw["policy_id"] != signer_owner_e0_policy_id(raw):
         raise ValueError("signer_owner_e0_policy_id_invalid")
     _require_time(raw, now_epoch)
     _require_lists(raw)
-    if raw["schema_version"] == POLICY_SCHEMA_V6:
+    if raw["schema_version"] in {POLICY_SCHEMA_V6, POLICY_SCHEMA_V7}:
         require_grant_service_bindings(raw)
+    if raw["schema_version"] == POLICY_SCHEMA_V7:
+        require_grant_service_git_provenance_bindings(raw)
     return raw
 
 
@@ -157,15 +175,19 @@ def _policy_fields(schema: object) -> frozenset[str]:
         return POLICY_FIELDS_V5
     if schema == POLICY_SCHEMA_V6:
         return POLICY_FIELDS_V6
+    if schema == POLICY_SCHEMA_V7:
+        return POLICY_FIELDS_V7
     raise ValueError("signer_owner_e0_policy_schema_invalid")
 __all__ = [
     "CANONICAL_AUTHORITY_TIERS",
     "POLICY_FIELDS",
     "POLICY_FIELDS_V5",
     "POLICY_FIELDS_V6",
+    "POLICY_FIELDS_V7",
     "POLICY_SCHEMA",
     "POLICY_SCHEMA_V5",
     "POLICY_SCHEMA_V6",
+    "POLICY_SCHEMA_V7",
     "canonical_signer_owner_e0_policy_input",
     "signer_key_reference_digest",
     "signer_owner_e0_authority_binding_digest",

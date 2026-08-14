@@ -44,6 +44,7 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_authority import (
     RuntimeArtifactManifestAuthority,
     RuntimeArtifactManifestAuthorityBoundary,
+    _verified_authorized_base_sha,
     create_runtime_artifact_manifest_authority_boundary,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
@@ -282,7 +283,12 @@ def harness(tmp_path: Path) -> ManifestHarness:
     return _build_harness(tmp_path)
 
 
-def _build_harness(tmp_path: Path) -> ManifestHarness:
+def _build_harness(
+    tmp_path: Path,
+    *,
+    repo_root: Path | None = None,
+    repo_initializer: Callable[[Path], str] | None = None,
+) -> ManifestHarness:
     (
         repo_root,
         runtime_root,
@@ -290,9 +296,16 @@ def _build_harness(tmp_path: Path) -> ManifestHarness:
         reddog_private,
         principal_public,
         reddog_public,
-    ) = _harness_roots_and_keys(tmp_path)
+    ) = _harness_roots_and_keys(tmp_path, repo_root=repo_root)
+    authorized_base_sha = (
+        repo_initializer(repo_root)
+        if repo_initializer is not None
+        else None
+    )
     identity = _identity(principal_private, principal_public, reddog_public)
     profile = _authority_profile(reddog_public)
+    if authorized_base_sha is not None:
+        profile["authorized_base_sha"] = authorized_base_sha
     state, profile, queue_id, claim_id = with_architect_fix_publication(
         _work_state(), profile
     )
@@ -361,10 +374,12 @@ def _issue_harness_authority(
 
 def _harness_roots_and_keys(
     tmp_path: Path,
+    *,
+    repo_root: Path | None = None,
 ) -> tuple[Path, Path, Any, Any, str, str]:
-    repo_root = tmp_path / "repo"
+    repo_root = repo_root.resolve() if repo_root is not None else tmp_path / "repo"
     runtime_root = tmp_path / "runtime"
-    repo_root.mkdir()
+    repo_root.mkdir(parents=True, exist_ok=True)
     runtime_root.mkdir()
     principal_private = _private_key()
     reddog_private = _private_key()
@@ -394,6 +409,26 @@ def test_valid_manifest_is_created_and_verifies(
     assert verified["manifest_id"] == result.manifest_id
     assert verified["revision"] == result.manifest_id[7:]
     assert verified["artifact_count"] == len(REQUIRED_RUNTIME_ARTIFACTS)
+
+
+def test_git_commit_authority_must_match_all_three_profile_bindings() -> None:
+    commit = "a" * 40
+    profile = {
+        "authorized_base_sha": commit,
+        "operational_context_binding": {
+            "authorized_base_sha": commit,
+            "proposal_admission": {"repo_head_sha": commit},
+        },
+    }
+    assert _verified_authorized_base_sha(profile) == commit
+
+    profile["operational_context_binding"]["proposal_admission"][
+        "repo_head_sha"
+    ] = "b" * 40
+    with pytest.raises(
+        ValueError, match="manifest_authority_source_commit_invalid"
+    ):
+        _verified_authorized_base_sha(profile)
 
 
 def test_preseeded_manifest_is_never_overwritten(

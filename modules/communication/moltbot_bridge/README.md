@@ -25,6 +25,20 @@ composition therefore does not instantiate this path. ULTRA remains closed.
 
 ## Independent signer secret-grant provider
 
+[OBSERVED] Production grant-authority effects now require signed owner policy
+v7 and signed runtime-artifact manifest v3. Both bind one exact repository-root
+digest, authorized Git commit, Git object format, canonical source-policy
+digest, and archive source-descriptor digest. Manifest production, isolated
+signer admission, current E0 rehydration, and the final WSP 71 callback each
+re-verify the exact committed archive lineage. Legacy v6/v2 remains readable
+for diagnostics but cannot reach the WSP 71 effect callback.
+
+[OBSERVED] The authorized commit must agree across the top-level authority
+profile, operational-context binding, and embedded proposal admission. Dirty
+checkout bytes, alternate committed sources, attacker-selected source maps,
+replacement refs, inherited Git authority variables, rehashed artifacts, and
+re-signed legacy manifests do not establish effect authority.
+
 [OBSERVED] Grant-authority service archive bytes now use one deterministic,
 uncompressed zipapp representation. Production manifest creation and use-time
 grant-manifest rehydration both reject noncanonical ZIP metadata, traversal,
@@ -45,11 +59,9 @@ overrides are disabled; aggregate blob reads use one bounded batch process.
 The verifier also requires independent expected repository-root, commit,
 object-format, and source-policy digests.
 
-[SPECIFIED_NOT_IMPLEMENTED] This is inert executable validation, not a service
-launcher, Python sandbox, or hermetic-runtime claim. Python reflection is not
-certified safe by AST inspection. The current production owner policy and
-runtime manifest do not yet require the v2 Git provenance proof, so v1
-`claimed_source_commit_sha` remains metadata rather than authority. Interpreter,
+[SPECIFIED_NOT_IMPLEMENTED] This remains archive admission, not a Python
+sandbox or hermetic-runtime claim. Python reflection is not certified safe by
+AST inspection. Interpreter,
 standard-library, external executable, OS-principal, resolver, socket,
 supervision, crash-recovery, pinned-descriptor execution, and production
 archive-build authority remain unimplemented and block all execution.
