@@ -35,7 +35,7 @@ def build_grant_service_archive(
     files: Mapping[str, bytes], *, source_commit_sha: str
 ) -> bytes:
     """Build the only canonical ZIP_STORED archive accepted by the verifier."""
-    payloads = _validated_payloads(files)
+    payloads = validated_archive_payloads(files)
     descriptors = tuple(
         {
             "path": path,
@@ -133,7 +133,7 @@ def valid_archive_path(value: object) -> bool:
     )
 
 
-def _validated_payloads(files: Mapping[str, bytes]) -> dict[str, bytes]:
+def validated_archive_payloads(files: Mapping[str, bytes]) -> dict[str, bytes]:
     raw = dict(files) if isinstance(files, Mapping) else {}
     if set(raw) == {ARCHIVE_MANIFEST} or ARCHIVE_MANIFEST in raw:
         raise RuntimeArtifactManifestError("grant_service_archive_files_invalid")
@@ -196,5 +196,5 @@ def _commit_sha(value: object) -> bool:
 __all__ = [
     "ARCHIVE_ENTRYPOINT", "ARCHIVE_MAIN", "ARCHIVE_MANIFEST", "ARCHIVE_SCHEMA",
     "MAX_ARCHIVE_BYTES", "MAX_ARCHIVE_CONTENT_BYTES", "MAX_ARCHIVE_FILE_BYTES", "MAX_ARCHIVE_FILES",
-    "build_grant_service_archive", "canonical_archive_bytes", "validate_archive_manifest", "valid_archive_path",
+    "build_grant_service_archive", "canonical_archive_bytes", "validate_archive_manifest", "valid_archive_path", "validated_archive_payloads",
 ]

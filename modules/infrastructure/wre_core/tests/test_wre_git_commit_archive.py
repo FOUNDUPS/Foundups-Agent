@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 import subprocess
 
@@ -7,6 +8,7 @@ import pytest
 
 from modules.infrastructure.wre_core.src import wre_git_commit_archive as archive
 from modules.infrastructure.wre_core.src import wre_git_bounded_io as bounded
+from modules.infrastructure.wre_core.src import wre_git_blob_batch_reader as batch
 from modules.infrastructure.wre_core.src import wre_git_tree_manifest as tree
 
 
@@ -45,6 +47,50 @@ def test_regular_files_materialize_as_exact_blob_bytes(tmp_path: Path) -> None:
     destination = _materialize(repo, sha, tmp_path)
     expected = _git(repo, "show", f"{sha}:tests/test_ok.py", text=False)
     assert (destination / "tests/test_ok.py").read_bytes() == expected
+
+
+def test_selected_blobs_read_in_one_bounded_batch(tmp_path: Path) -> None:
+    repo, sha = _repository(tmp_path, {"a.py": b"a = 1\n", "b.py": b"b = 2\n"})
+    manifest = tree.exact_git_tree_manifest(repo, sha)
+    values = batch.read_exact_git_blobs(
+        repo, manifest.blobs, object_format=manifest.object_format,
+        max_blob_bytes=64, max_total_bytes=128,
+    )
+
+    assert dict(values) == {"a.py": b"a = 1\n", "b.py": b"b = 2\n"}
+
+
+def test_batch_aggregate_bound_fails_before_return(tmp_path: Path) -> None:
+    repo, sha = _repository(tmp_path, {"a.py": b"a" * 32, "b.py": b"b" * 32})
+    manifest = tree.exact_git_tree_manifest(repo, sha)
+
+    with pytest.raises(ValueError, match="bounds_exceeded"):
+        batch.read_exact_git_blobs(
+            repo, manifest.blobs, object_format=manifest.object_format,
+            max_blob_bytes=32, max_total_bytes=40,
+        )
+
+
+def test_git_read_environment_removes_authority_overrides() -> None:
+    result = bounded.git_read_environment({
+        "PATH": "safe", "GIT_DIR": "attacker", "git_work_tree": "attacker",
+    })
+
+    assert result["PATH"] == "safe"
+    assert "GIT_DIR" not in result
+    assert "git_work_tree" not in result
+    assert result["GIT_CONFIG_NOSYSTEM"] == "1"
+
+
+def test_git_provenance_io_modules_remain_bounded() -> None:
+    root = Path(__file__).parents[1] / "src"
+    for name in ("wre_git_bounded_io.py", "wre_git_blob_batch_reader.py"):
+        source = (root / name).read_text(encoding="ascii")
+        assert len(source.splitlines()) <= 200
+        for node in ast.walk(ast.parse(source)):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                assert node.end_lineno is not None
+                assert node.end_lineno - node.lineno + 1 <= 50
 
 
 def test_materialization_ignores_export_attributes(tmp_path: Path) -> None:

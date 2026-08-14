@@ -1,3 +1,13 @@
+## 2026-08-14: Grant-authority exact-Git provenance regressions
+
+- Proved canonical v2 round trips against an exact commit tree while dirty
+  checkout substitutions are ignored and uncommitted sources cannot enter.
+- Added source-policy substitution, forged-member/real-object-ID, legacy-v1
+  downgrade, alternate-commit, Git replacement-ref, root-digest, malformed
+  manifest, aggregate-bound, duplicate source, and object-lineage coverage.
+- Retained the original archive and WRE Git materialization matrices and all
+  200-line archive-module ceilings.
+
 ## 2026-08-14: Grant-authority executable archive regressions
 
 - Added canonical ZIP, path, link, compression, duplicate-member, trailing-byte,

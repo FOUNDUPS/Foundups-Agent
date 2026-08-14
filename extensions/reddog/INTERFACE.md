@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.96 pins shared bounded-Git runtime hardening. The inert v2 archive
+builder and verifier remain outside the executable closure pending a production
+admission consumer. It adds no UI API, signer lifecycle, production provenance
+admission, or execution authority.
+
 Version 0.4.95 pins executable-archive validation; 0.4.94 pinned the reachable
 owner-E0 selection closure. The WSP 71 rehydrator remains uncomposed. No UI,
 service-lifecycle, or execution authority is added.

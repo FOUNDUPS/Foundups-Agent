@@ -1,6 +1,12 @@
 # RedDog
 
-Version: 0.4.95
+Version: 0.4.96
+
+[OBSERVED] Version 0.4.96 pins the shared bounded-Git runtime hardening used by
+the exact archive foundation. The new v2 provenance builder and verifier remain
+outside the executable backend closure until a production admission consumer
+is implemented. Production provenance admission, signing, launch, and
+execution authority remain fail closed.
 
 [OBSERVED] Version 0.4.95 pins the reachable grant-service executable archive
 validation dependencies. Version 0.4.94 pinned the owner-E0 generation-key selection

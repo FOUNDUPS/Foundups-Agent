@@ -8,7 +8,11 @@ from types import MappingProxyType
 from typing import Mapping
 import unicodedata
 
-from .wre_git_bounded_io import resolve_exact_commit, run_bounded_stdout
+from .wre_git_bounded_io import (
+    git_read_environment,
+    resolve_exact_commit,
+    run_bounded_stdout,
+)
 
 MAX_TREE_LIST_BYTES = 64 * 1024 * 1024
 MAX_TREE_ENTRIES = 100_000
@@ -33,8 +37,10 @@ def exact_git_tree_manifest(repo: Path, sha: str) -> ExactGitTreeManifest:
     commit = resolve_exact_commit(repo, sha)
     object_format = _object_format(repo)
     raw = run_bounded_stdout(
-        ("git", "-C", str(repo), "ls-tree", "-rz", "--full-tree", commit),
+        ("git", "--no-replace-objects", "-C", str(repo), "ls-tree", "-rz",
+         "--full-tree", commit),
         cwd=repo, max_bytes=MAX_TREE_LIST_BYTES, timeout_s=120,
+        environment=git_read_environment(),
     )
     blobs: dict[str, str] = {}
     spellings: dict[tuple[str, ...], dict[str, str]] = {}
@@ -116,8 +122,10 @@ def _tree_record(record: bytes, object_format: str) -> tuple[str, str, bool]:
 
 def _object_format(repo: Path) -> str:
     raw = run_bounded_stdout(
-        ("git", "-C", str(repo), "rev-parse", "--show-object-format"),
+        ("git", "--no-replace-objects", "-C", str(repo), "rev-parse",
+         "--show-object-format"),
         cwd=repo, max_bytes=32, timeout_s=30,
+        environment=git_read_environment(),
     )
     value = raw.decode("ascii", errors="strict").strip()
     if value not in {"sha1", "sha256"}:
