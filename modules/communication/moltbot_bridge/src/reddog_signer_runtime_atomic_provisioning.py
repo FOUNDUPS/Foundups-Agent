@@ -11,10 +11,10 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
     atomic_create_confined_mapping,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
-    REQUIRED_RUNTIME_ARTIFACTS,
     RuntimeArtifactManifestError,
     canonical_signing_input,
     digest,
+    required_runtime_artifacts_for,
     validate_freshness,
     validate_signed_payload,
 )
@@ -44,14 +44,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_atomic_provi
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
     SignerRuntimeGenerationActivation,
     SignerRuntimeGenerationBinding,
+    signer_runtime_generation_binding_from_manifest,
 )
 from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
     REDDOG_RUNTIME_ARTIFACT_GENERATION_SEAL,
 )
-
-
-CONFIG_FILENAME = "signer_service_config.json"
-RUN_PACKET_FILENAME = "signer_service_run_packet.json"
 
 
 def provision_signer_runtime_generation(
@@ -67,40 +64,34 @@ def provision_signer_runtime_generation(
     runtime_root: Path | None = None
     try:
         runtime_root = _validated_roots(context)
-        signing = context.require_signing_context()
-        issued_at = _trusted_now()
-        signing.authority_boundary.revalidate(
-            signing.authority,
-            now_epoch=issued_at,
-        )
-        produced = produce_signed_runtime_artifact_manifest(
-            manifest_directory=runtime_root / MANIFEST_DIRECTORY_NAME,
-            nonce=nonce,
-            issued_at=issued_at,
-            expires_at=issued_at + int(ttl_seconds),
-            context=signing,
-        )
-        if not produced.accepted:
-            return _recover_or_reject_production(
-                context,
-                runtime_root=runtime_root,
-                nonce=nonce,
-                manifest_id=produced.manifest_id,
-                rejection_reasons=produced.rejection_reasons,
+        with context.source_policy_fence():
+            signing = context.require_signing_context()
+            issued_at = _trusted_now()
+            signing.authority_boundary.revalidate(
+                signing.authority, now_epoch=issued_at,
             )
-        manifest_path = produced.output_path
-        manifest_id = produced.manifest_id
-        activation, recovered = _activate_manifest(
-            context,
-            runtime_root=runtime_root,
-            manifest_path=manifest_path,
-        )
-        return _accepted(
-            activation,
-            manifest_path=manifest_path,
-            manifest_id=manifest_id,
-            recovered=recovered,
-        )
+            produced = produce_signed_runtime_artifact_manifest(
+                manifest_directory=runtime_root / MANIFEST_DIRECTORY_NAME,
+                nonce=nonce, issued_at=issued_at,
+                expires_at=issued_at + int(ttl_seconds), context=signing,
+                runtime_profile=context.runtime_profile,
+            )
+            if not produced.accepted:
+                return _recover_or_reject_production(
+                    context, runtime_root=runtime_root, nonce=nonce,
+                    manifest_id=produced.manifest_id,
+                    rejection_reasons=produced.rejection_reasons,
+                )
+            manifest_path = produced.output_path
+            manifest_id = produced.manifest_id
+            activation, recovered = _activate_manifest(
+                context, runtime_root=runtime_root,
+                manifest_path=manifest_path,
+            )
+            return _accepted(
+                activation, manifest_path=manifest_path,
+                manifest_id=manifest_id, recovered=recovered,
+            )
     except (OSError, RuntimeError, TypeError, ValueError) as exc:
         return _reject(
             (str(exc) or "signer_runtime_provisioning_rejected",),
@@ -206,12 +197,18 @@ def _verified_manifest(
             now_epoch=now_epoch,
             max_ttl_seconds=int(authority["max_ttl_seconds"]),
         )
+    required_artifacts = required_runtime_artifacts_for(payload)
     current = tuple(
         item.to_dict()
-        for item in _describe_runtime_artifacts_unlocked(authority)
+        for item in _describe_runtime_artifacts_unlocked(
+            authority,
+            required_artifacts=required_artifacts,
+            git_provenance_archive=context.runtime_profile is not None,
+        )
     )
     if tuple(payload["artifacts"]) != current:
         raise RuntimeArtifactManifestError("manifest_artifacts_changed")
+    context.revalidate_source_policy(payload)
     _verify_signatures(
         payload,
         canonical_signing_input(payload),
@@ -271,7 +268,11 @@ def _activate_manifest(
                 repo_root=Path(authority["repo_root"]),
             )
             with runtime_artifact_activation_lease(
-                _activation_paths(runtime_root, manifest_path),
+                _activation_paths(
+                    runtime_root,
+                    manifest_path,
+                    required_runtime_artifacts_for(initial),
+                ),
                 repo_root=authority["repo_root"],
                 allowed_root=runtime_root,
             ):
@@ -412,7 +413,7 @@ def _activation_guard(
         )
         if checked["manifest_id"] != manifest_id:
             raise ValueError("runtime_artifact_manifest_changed")
-        binding = _binding_from_manifest(
+        binding = signer_runtime_generation_binding_from_manifest(
             checked,
             generation=candidate.generation,
         )
@@ -426,11 +427,12 @@ def _activation_guard(
 def _activation_paths(
     runtime_root: Path,
     manifest_path: str | None,
+    required_artifacts: tuple[str, ...],
 ) -> tuple[Path, ...]:
     if not manifest_path:
         raise ValueError("manifest_output_missing")
     return (
-        *(runtime_root / name for name in REQUIRED_RUNTIME_ARTIFACTS),
+        *(runtime_root / name for name in required_artifacts),
         Path(manifest_path),
     )
 
@@ -481,7 +483,7 @@ def _current_matches_manifest(
 ) -> bool:
     if current is None or current.manifest_id != manifest["manifest_id"]:
         return False
-    binding = _binding_from_manifest(
+    binding = signer_runtime_generation_binding_from_manifest(
         manifest,
         generation=current.generation,
     )
@@ -498,37 +500,9 @@ def _generation_binding(
         == manifest["artifact_generation_digest"]
     ):
         raise ValueError("signer_runtime_generation_replay")
-    return _binding_from_manifest(
+    return signer_runtime_generation_binding_from_manifest(
         manifest,
         generation=1 if current is None else current.generation + 1,
-    )
-
-
-def _binding_from_manifest(
-    manifest: Mapping[str, Any],
-    *,
-    generation: int,
-) -> SignerRuntimeGenerationBinding:
-    descriptors = {
-        str(item.get("filename") or ""): item
-        for item in manifest["artifacts"]
-        if isinstance(item, Mapping)
-    }
-    config = descriptors.get(CONFIG_FILENAME)
-    run_packet = descriptors.get(RUN_PACKET_FILENAME)
-    if not config or not run_packet:
-        raise RuntimeArtifactManifestError(
-            "manifest_launch_artifacts_missing"
-        )
-    return SignerRuntimeGenerationBinding(
-        generation=generation,
-        manifest_id=str(manifest["manifest_id"]),
-        artifact_generation_digest=str(
-            manifest["artifact_generation_digest"]
-        ),
-        config_digest=str(manifest["signer_service_config_digest"]),
-        config_raw_digest=str(config["content_digest"]),
-        run_packet_digest=str(run_packet["content_digest"]),
     )
 
 
@@ -543,6 +517,7 @@ def _recover_existing_activation(
             runtime_root,
             current=None,
             nonce=nonce,
+            runtime_profile=context.runtime_profile,
         )
         if len(paths) != 1:
             return None
@@ -570,6 +545,7 @@ def _recovery_manifest_paths(
     *,
     current: SignerRuntimeGenerationActivation | None,
     nonce: str,
+    runtime_profile: str | None,
 ) -> tuple[Path, ...]:
     directory = runtime_root / MANIFEST_DIRECTORY_NAME
     if current is not None:
@@ -581,7 +557,12 @@ def _recovery_manifest_paths(
             )
         except (OSError, TypeError, ValueError):
             return ()
-        return (path,) if payload.get("nonce") == nonce else ()
+        return (
+            (path,)
+            if payload.get("nonce") == nonce
+            and payload.get("runtime_profile") == runtime_profile
+            else ()
+        )
     if not directory.is_dir() or directory.is_symlink():
         return ()
     candidates = tuple(sorted(directory.glob("*.json")))
@@ -596,7 +577,10 @@ def _recovery_manifest_paths(
             )
         except (OSError, TypeError, ValueError):
             continue
-        if payload.get("nonce") == nonce:
+        if (
+            payload.get("nonce") == nonce
+            and payload.get("runtime_profile") == runtime_profile
+        ):
             matches.append(path)
     if len(matches) > 1:
         raise ValueError("manifest_recovery_ambiguous")

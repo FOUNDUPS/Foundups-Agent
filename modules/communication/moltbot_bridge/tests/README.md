@@ -1,5 +1,22 @@
 # Tests - OpenClaw Bridge
 
+## Grant-profile atomic runtime provisioning
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_runtime_atomic_provisioning.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning_recovery.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning_wsp62.py
+```
+
+The matrix proves the existing atomic provisioner can admit exactly one
+source-policy-capability-bound grant profile, activate only its three artifacts,
+bind config/run-packet bytes into durable generation state, reject config-v1
+downgrade and alternate committed source maps, detect owner replacement during
+commit, and serialize compliant rotation. It starts no service and grants no
+secret, worker, repository, PR, or merge authority.
+
 ## Root-owned grant-service source-policy authority
 
 ```powershell

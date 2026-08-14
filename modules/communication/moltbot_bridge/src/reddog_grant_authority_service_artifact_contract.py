@@ -20,6 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_v6 i
 
 
 CONFIG_SCHEMA = "reddog_grant_authority_service_config.v1"
+CONFIG_SCHEMA_V2 = "reddog_grant_authority_service_config.v2"
 RUN_PACKET_SCHEMA = "reddog_grant_authority_service_run_packet.v1"
 SERVICE_ID = "reddog-grant-authority"
 ENTRYPOINT = "reddog_grant_authority_service:main"
@@ -32,6 +33,14 @@ CONFIG_FIELDS = frozenset(
         "archive_digest",
     }
 )
+SOURCE_POLICY_CONFIG_FIELDS = frozenset(
+    {
+        "source_policy_owner_config_id",
+        "source_policy_repo_root_digest",
+        "source_policy_digest",
+    }
+)
+CONFIG_FIELDS_V2 = CONFIG_FIELDS | SOURCE_POLICY_CONFIG_FIELDS
 RUN_PACKET_FIELDS = frozenset(
     {
         "schema_version", "service_id", "config_filename", "config_digest",
@@ -44,10 +53,17 @@ RUN_PACKET_FIELDS = frozenset(
 def validate_grant_service_config(value: Mapping[str, Any]) -> dict[str, str]:
     """Validate the exact public config; secret references are never allowed."""
 
-    raw = _exact_text_mapping(value, CONFIG_FIELDS, "config")
-    if raw["schema_version"] != CONFIG_SCHEMA or raw["service_id"] != SERVICE_ID:
+    schema = value.get("schema_version") if isinstance(value, Mapping) else None
+    fields = {
+        CONFIG_SCHEMA: CONFIG_FIELDS,
+        CONFIG_SCHEMA_V2: CONFIG_FIELDS_V2,
+    }.get(schema)
+    if fields is None:
         raise RuntimeArtifactManifestError("grant_service_config_invalid")
-    digest_fields = CONFIG_FIELDS - {
+    raw = _exact_text_mapping(value, fields, "config")
+    if raw["service_id"] != SERVICE_ID:
+        raise RuntimeArtifactManifestError("grant_service_config_invalid")
+    digest_fields = fields - {
         "schema_version", "service_id", "signer_agent_id",
         "signer_profile_id", "public_key", "key_epoch",
     }
@@ -115,7 +131,8 @@ def _exact_text_mapping(
 
 
 __all__ = [
-    "CONFIG_FIELDS", "CONFIG_SCHEMA", "ENTRYPOINT", "RUN_PACKET_FIELDS",
+    "CONFIG_FIELDS", "CONFIG_FIELDS_V2", "CONFIG_SCHEMA", "CONFIG_SCHEMA_V2",
+    "ENTRYPOINT", "RUN_PACKET_FIELDS", "SOURCE_POLICY_CONFIG_FIELDS",
     "RUN_PACKET_SCHEMA", "SERVICE_ID", "validate_grant_service_config",
     "validate_grant_service_run_packet",
 ]

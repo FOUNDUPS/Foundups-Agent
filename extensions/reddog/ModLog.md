@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-15 - Grant-profile atomic provisioning pin (0.4.99)
+
+- Regenerated the backend manifest for config-v2, owner-policy-bound atomic
+  grant generation activation and recovery.
+- Added no thin-client behavior, service launch, secret use, worker dispatch,
+  repository write, or merge authority.
+
 ## 2026-08-14 - Root-owned source-policy authority pin (0.4.98)
 
 - Regenerated the backend manifest for owner config v4 and its opaque,

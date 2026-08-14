@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.98
+Version: 0.4.99
+
+[OBSERVED] Version 0.4.99 pins the uncomposed grant-profile atomic
+provisioning foundation. It adds no thin-client behavior, service launch,
+worker dispatch, repository write, or merge authority.
 
 [OBSERVED] Version 0.4.98 pins owner config v4 and the root-owned canonical
 grant-service source-policy capability in the exact backend closure. It adds no

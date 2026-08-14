@@ -102,10 +102,22 @@ owner configuration, so caller-selected or stale source policies cannot
 become build authority. V3 remains readable for the existing grant client but
 cannot issue source-policy authority.
 
-[SPECIFIED_NOT_IMPLEMENTED] The v4 capability does not build an archive,
-select a commit, launch the grant service, resolve a secret, or activate a
-runtime generation. Production v7/v3 provisioning remains blocked until it
-consumes this exact capability.
+[OBSERVED] The existing atomic signer-generation provisioner now has one fixed
+grant-authority profile factory. It consumes the v4 source-policy capability,
+requires grant config v2 to bind the owner-config, repository-root, and source-
+policy digests, revalidates exact-Git provenance during manifest production,
+commit guarding, and recovery, and activates only the three profile-specific
+artifacts. A root-owner operation fence serializes compliant owner rotation;
+replacement observed by the final transactional commit guard rolls back both
+anchor and high-water state. Later replacement makes the generation stale at
+the existing use-time authority boundary.
+
+[SPECIFIED_NOT_IMPLEMENTED] Atomic activation is not service launch or live
+authority. External lifecycle supervision, pinned-descriptor execution,
+interpreter/OS-principal isolation, secret resolution, and the production live
+canary remain blocked. Legacy config v1 remains readable for established
+diagnostic paths but cannot enter the new grant-profile provisioner. No
+production bootstrap invokes this provisioning foundation yet.
 
 [OBSERVED] Grant-service WSP 71 permission evidence is now an exact canonical
 receipt, not a SHA-shaped identifier. Admission securely reads the fixed

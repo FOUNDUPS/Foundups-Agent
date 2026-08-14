@@ -25,6 +25,12 @@
   existing root-owned configuration and exposes it only through an opaque,
   revalidatable process capability. V3 retains grant-client compatibility but
   cannot authorize a build source policy.
+- COMPLETE (UNCOMPOSED): the existing atomic signer-generation provisioner can
+  consume that capability through a fixed grant-profile context, config v2, a
+  shared root-owner operation fence, profile-derived three-artifact leases,
+  source-policy revalidation at production/commit/recovery, and durable
+  generation binding. No production bootstrap calls it yet. WSP 15: C4 + I5 +
+  D5 + Im5 = 19/20, P0.
 - COMPLETE: deterministic grant-service zipapp validation at manifest
   production and use time. Canonical ZIP bytes, exact member digests, package
   structure, direct static-import references, common loader defenses, and the
@@ -41,10 +47,10 @@
   trust chain. One callback runs only while the current E0 lease and matching
   durable revocation fence remain held; no reusable permission object escapes.
   Root-generation, grant, revocation and target-signer keys are role-distinct.
-- BLOCKED: v4-capability-bound production v7 artifact provisioning, pinned-byte launch,
-  grant-service isolation, resolver composition, lifecycle supervision and the
-  live canary remain next. Exact-Git admission alone does not launch a service,
-  resolve a secret, execute repository work or prove production readiness.
+- BLOCKED: pinned-byte launch, grant-service isolation, resolver composition,
+  external lifecycle supervision and the live canary remain next. Atomic
+  provisioning does not launch a service, resolve a secret, execute repository
+  work or prove production readiness.
 
 ## RedDog conversational work promotion
 

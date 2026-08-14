@@ -9,6 +9,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 FILES = (
     "modules/communication/moltbot_bridge/src/"
+    "reddog_grant_authority_service_artifact_contract.py",
+    "modules/communication/moltbot_bridge/src/"
+    "reddog_grant_authority_service_owner_binding.py",
+    "modules/communication/moltbot_bridge/src/"
     "reddog_current_generation_manifest_launch_selection.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_system_service_manifest_selection_loader.py",
@@ -54,6 +58,8 @@ FILES = (
     "reddog_signer_runtime_generation_witness_binding.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_sqlite_monotonic_authority_store.py",
+    "modules/communication/moltbot_bridge/tests/"
+    "test_reddog_grant_runtime_atomic_provisioning.py",
     "modules/communication/moltbot_bridge/tests/"
     "test_reddog_current_generation_manifest_launch_selection.py",
     "modules/communication/moltbot_bridge/tests/"
