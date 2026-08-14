@@ -1,3 +1,15 @@
+## 2026-08-14: Authenticated grant-service manifest regressions
+
+- Added signed manifest v2 production and verification coverage with the
+  existing signer backend, current E0 lease, and runtime-generation lock.
+- Added fail-closed cases for v1 downgrade, config/run/archive replacement,
+  same-prefix archive-tail mutation, signed-policy disagreement, unknown public
+  config fields, secret-reference-shaped public identity, cross-role
+  key-reference aliasing, current repository/signer-config disagreement,
+  legacy-selector v2 rejection, and owner-root substitution.
+- Preserved the complete v1 manifest and v5 E0 matrices and existing WSP 62
+  ceilings without exemptions.
+
 ## 2026-08-14: Independent grant-authority transport regressions
 
 - Added owner-config v3 digest, schema, path, disjoint-root, socket-alias,

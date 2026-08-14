@@ -12,11 +12,15 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_a
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     DEFAULT_MAX_TTL_SECONDS,
+    REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS,
     REQUIRED_RUNTIME_ARTIFACTS,
+    RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
     SCHEMA_VERSION,
+    SCHEMA_VERSION_V2,
     SIGNER_ROLE,
     SIGNING_OPERATION,
     SIGNING_PREFIX,
+    SIGNING_PREFIX_V2,
     RuntimeArtifactManifestError,
     canonical_json,
     canonical_signing_input,
@@ -24,6 +28,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     manifest_id_for,
     raw_digest,
     require_text,
+    required_runtime_artifacts_for,
     validate_freshness,
     validate_signed_payload,
     validate_unsigned_payload,
@@ -48,8 +53,10 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 
 
 RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION = SCHEMA_VERSION
+RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION_V2 = SCHEMA_VERSION_V2
 RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION = SIGNING_OPERATION
 RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX = SIGNING_PREFIX
+RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V2 = SIGNING_PREFIX_V2
 DEFAULT_MANIFEST_MAX_TTL_SECONDS = DEFAULT_MAX_TTL_SECONDS
 REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = (
     "REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING"
@@ -89,6 +96,7 @@ def produce_signed_runtime_artifact_manifest(
     issued_at: int,
     expires_at: int,
     context: RuntimeArtifactManifestSigningContext,
+    runtime_profile: str | None = None,
 ) -> SignedRuntimeArtifactManifestResult:
     """Build, sign, verify, and create one content-addressed manifest."""
 
@@ -101,6 +109,7 @@ def produce_signed_runtime_artifact_manifest(
             nonce=nonce,
             issued_at=issued_at,
             expires_at=expires_at,
+            runtime_profile=runtime_profile,
         )
         signing_input = canonical_signing_input(payload)
         response = context.signer.sign(
@@ -150,9 +159,14 @@ def verify_signed_runtime_artifact_manifest(
         now_epoch=now_epoch,
         max_ttl_seconds=int(checked["max_ttl_seconds"]),
     )
+    required_artifacts = required_runtime_artifacts_for(payload)
     current = tuple(
         item.to_dict()
-        for item in describe_runtime_artifacts(authority, authority_boundary)
+        for item in describe_runtime_artifacts(
+            authority,
+            authority_boundary,
+            required_artifacts=required_artifacts,
+        )
     )
     if tuple(payload["artifacts"]) != current:
         raise RuntimeArtifactManifestError("manifest_artifacts_changed")
@@ -174,27 +188,13 @@ def validate_runtime_artifact_manifest_signing_request(
 
     try:
         checked = authority_boundary.require(authority)
-        if not request.signing_input.startswith(SIGNING_PREFIX):
+        raw = _unsigned_input_json(request.signing_input)
+        if raw is None:
             return None
-        raw = request.signing_input[len(SIGNING_PREFIX) :]
         import json
 
         payload = json.loads(raw)
-        if (
-            not isinstance(payload, Mapping)
-            or raw != canonical_json(payload)
-            or request.requested_operation != SIGNING_OPERATION
-            or request.signer_role != SIGNER_ROLE
-            or request.signer_public_key != checked["signer_public_key"]
-            or request.requester_principal_id
-            != checked["issuer_principal_id"]
-            or request.key_epoch != checked["key_epoch"]
-            or request.consensus_receipt_digest
-            != checked["consensus_receipt_digest"]
-            or request.nonce != payload.get("nonce")
-            or request.payload_digest
-            != digest({"signing_input": request.signing_input})
-        ):
+        if not _request_matches(request, payload, raw, checked):
             return None
         unsigned = validate_unsigned_payload(payload)
         _validate_bindings(unsigned, checked)
@@ -203,16 +203,43 @@ def validate_runtime_artifact_manifest_signing_request(
             now_epoch=now_epoch,
             max_ttl_seconds=int(checked["max_ttl_seconds"]),
         )
+        required_artifacts = required_runtime_artifacts_for(unsigned)
         if tuple(unsigned["artifacts"]) != tuple(
             item.to_dict()
             for item in describe_runtime_artifacts(
-                authority, authority_boundary
+                authority,
+                authority_boundary,
+                required_artifacts=required_artifacts,
             )
         ):
             return None
         return unsigned
     except Exception:
         return None
+
+
+def _request_matches(
+    request: SigningRequest,
+    payload: object,
+    raw: str,
+    authority: Mapping[str, Any],
+) -> bool:
+    if not isinstance(payload, Mapping):
+        return False
+    return bool(
+        raw == canonical_json(payload)
+        and request.signing_input == canonical_signing_input(payload)
+        and request.requested_operation == SIGNING_OPERATION
+        and request.signer_role == SIGNER_ROLE
+        and request.signer_public_key == authority["signer_public_key"]
+        and request.requester_principal_id == authority["issuer_principal_id"]
+        and request.key_epoch == authority["key_epoch"]
+        and request.consensus_receipt_digest
+        == authority["consensus_receipt_digest"]
+        and request.nonce == payload.get("nonce")
+        and request.payload_digest
+        == digest({"signing_input": request.signing_input})
+    )
 
 
 def prepare_runtime_artifact_manifest_signing(
@@ -291,10 +318,12 @@ def _unsigned_manifest(
     nonce: str,
     issued_at: int,
     expires_at: int,
+    runtime_profile: str | None = None,
 ) -> dict[str, Any]:
-    artifacts = _artifact_descriptors(authority, boundary)
+    schema_version, required_artifacts = _manifest_profile(runtime_profile)
+    artifacts = _artifact_descriptors(authority, boundary, required_artifacts=required_artifacts)
     payload = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": schema_version,
         "manifest_id": "",
         "revision": "",
         "repo_root_digest": raw_digest(
@@ -313,20 +342,18 @@ def _unsigned_manifest(
         "artifacts": artifacts,
         "issuer_principal_id": values["issuer_principal_id"],
         "signer_public_key": values["signer_public_key"],
-        "signer_key_fingerprint": public_key_fingerprint(
-            values["signer_public_key"]
-        ),
+        "signer_key_fingerprint": public_key_fingerprint(values["signer_public_key"]),
         "key_epoch": values["key_epoch"],
         "consensus_receipt_digest": values["consensus_receipt_digest"],
         "authority_profile_digest": values["authority_profile_digest"],
-        "authority_profile_source_receipt_id":
-            values["authority_profile_source_receipt_id"],
-        "signer_service_config_digest":
-            values["signer_service_config_digest"],
+        "authority_profile_source_receipt_id": values["authority_profile_source_receipt_id"],
+        "signer_service_config_digest": values["signer_service_config_digest"],
         "nonce": require_text(nonce),
         "issued_at": issued_at,
         "expires_at": expires_at,
     }
+    if runtime_profile is not None:
+        payload["runtime_profile"] = runtime_profile
     payload["manifest_id"] = manifest_id_for(payload)
     payload["revision"] = payload["manifest_id"][7:]
     return validate_unsigned_payload(payload)
@@ -335,11 +362,32 @@ def _unsigned_manifest(
 def _artifact_descriptors(
     authority: RuntimeArtifactManifestAuthority,
     boundary: RuntimeArtifactManifestAuthorityBoundary,
+    *,
+    required_artifacts: tuple[str, ...] = REQUIRED_RUNTIME_ARTIFACTS,
 ) -> tuple[dict[str, Any], ...]:
     return tuple(
         item.to_dict()
-        for item in describe_runtime_artifacts(authority, boundary)
+        for item in describe_runtime_artifacts(
+            authority, boundary, required_artifacts=required_artifacts
+        )
     )
+
+
+def _manifest_profile(
+    runtime_profile: str | None,
+) -> tuple[str, tuple[str, ...]]:
+    if runtime_profile is None:
+        return SCHEMA_VERSION, REQUIRED_RUNTIME_ARTIFACTS
+    if runtime_profile == RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE:
+        return SCHEMA_VERSION_V2, REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS
+    raise RuntimeArtifactManifestError("manifest_schema_invalid")
+
+
+def _unsigned_input_json(signing_input: str) -> str | None:
+    for prefix in (SIGNING_PREFIX, SIGNING_PREFIX_V2):
+        if signing_input.startswith(prefix):
+            return signing_input[len(prefix) :]
+    return None
 
 
 def _validate_bindings(
@@ -467,8 +515,10 @@ __all__ = [
     "MANIFEST_DIRECTORY_NAME",
     "REQUIRED_RUNTIME_ARTIFACTS",
     "RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION",
+    "RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION_V2",
     "RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION",
     "RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX",
+    "RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V2",
     "RuntimeArtifactManifestAuthority",
     "RuntimeArtifactManifestError",
     "RuntimeArtifactManifestSigningContext",

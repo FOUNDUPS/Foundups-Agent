@@ -45,6 +45,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
 
+from modules.communication.moltbot_bridge.tests.reddog_grant_authority_service_policy_test_support import (
+    grant_service_policy_fields,
+)
 
 pytest.importorskip("cryptography")
 
@@ -354,6 +357,7 @@ def _policy(
         "grant_authority_principal_provider": "github",
         "grant_authority_public_key": grant_public,
         "grant_authority_key_epoch": "grant-epoch-1",
+        **grant_service_policy_fields(grant_public, DIGEST_A, DIGEST_B, DIGEST_C, DIGEST_D, DIGEST_E),
         "grant_requester_principal_id": "principal:grant-provider",
         "revocation_authority_principal_id": "principal:revocation-admin",
         "revocation_authority_principal_provider": "github",

@@ -1,6 +1,13 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-08-14 - Exact Confined Byte Reads
+
+- Extracted the confined byte reader behind its existing public function so the
+  no-growth runtime-artifact safety host shrank rather than gained an exemption.
+- Removed the silent one-MiB cap: reads now honor the caller's explicit bound
+  through one verified descriptor, including tails of bounded service archives.
+
 ## 2026-07-31 - RedDog Runtime Artifact Generation Fence
 
 - Added a bounded shared generation fence for canonical RedDog runtime

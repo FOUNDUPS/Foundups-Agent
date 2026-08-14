@@ -25,10 +25,20 @@ composition therefore does not instantiate this path. ULTRA remains closed.
 
 ## Independent signer secret-grant provider
 
-[OBSERVED] Signed owner policy v5 binds the independent grant authority's key
-epoch as well as its principal, provider and public key. The provider rejects
-an unchanged key presented under a stale or substituted epoch before calling
-the grant signer.
+[OBSERVED] Signed owner policy v6 preserves v5 validation while adding an exact
+grant-service signer profile, public identity, pairwise-distinct key-reference
+hashes, permission evidence identifiers, manifest generation, config, and run
+packet. Signed runtime-artifact manifest v2 covers exactly one bounded
+content-addressed service archive, one exact public config, and one inert run
+packet. Each binding reloads current signed E0 and securely re-reads every
+artifact under the existing runtime-generation lock. The immutable result
+contains hashes only. Public agent, profile, and epoch fields use exact inert
+grammars; URI-shaped or raw vault references are rejected by this boundary.
+
+[OBSERVED] Downgraded v1 manifests, altered bytes including archive tails past
+one MiB, substituted profile identity or key references, policy/manifest
+disagreement, unknown config fields, and run-packet/archive disagreement reject
+before service start or WSP 71 resolution.
 
 [OBSERVED] The bounded provider foundation can obtain a LOW-tier secret grant
 from a separately bound Ed25519 grant signer while one current-generation E0
@@ -43,7 +53,11 @@ the protected socket identity, verifies `SO_PEERCRED`, rejects overlap with
 target, outcome, replay, and revocation authority, and derives the public grant
 identity only from authenticated signed owner policy v5.
 
-[SPECIFIED_NOT_IMPLEMENTED] This foundation cannot activate the production
+[SPECIFIED_NOT_IMPLEMENTED] The content-addressed archive is not claimed to be
+a valid or dependency-closed zipapp by this slice. The permission receipt
+identifier is authenticated by signed E0 policy but is not independently
+rehydrated. This
+foundation cannot activate the production
 authoritative-use path: HIGH now accepts only the canonical opaque consensus
 capability, but grant-service lifecycle and signer-service composition remain
 absent. ULTRA, root-owned service provisioning,

@@ -363,43 +363,13 @@ def secure_read_confined_bytes(
 ) -> tuple[bytes, int]:
     """Read a source file only after its descriptor proves root confinement."""
 
-    raw = str(path or "").strip()
-    if not raw or "\x00" in raw or _UNSAFE_RUNTIME_NAMESPACE.match(raw.replace("\\", "/")):
-        raise ValueError("confined_read_path_invalid")
-    root_candidate = Path(os.path.abspath(Path(allowed_root).expanduser()))
-    expected_candidate = Path(raw).expanduser()
-    if not expected_candidate.is_absolute():
-        expected_candidate = root_candidate / expected_candidate
-    expected_candidate = Path(os.path.abspath(expected_candidate))
-    if not _is_relative_to(expected_candidate, root_candidate):
-        raise ValueError("confined_read_path_outside_root")
-    if _contains_link_component(root_candidate) or _contains_link_component(
-        expected_candidate
-    ):
-        raise ValueError("confined_read_path_link_rejected")
+    from .runtime_artifact_confined_byte_reader import (
+        secure_read_confined_bytes_impl,
+    )
 
-    root = _resolve_runtime_path(root_candidate, strict=True)
-    expected = _resolve_runtime_path(expected_candidate, strict=True)
-    if not _is_relative_to(expected, root):
-        raise ValueError("confined_read_path_outside_root")
-
-    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
-    descriptor = os.open(_runtime_open_path(expected), flags)
-    try:
-        metadata = os.fstat(descriptor)
-        _require_private_regular_file(metadata)
-        final_path = _descriptor_final_path(descriptor)
-        final_resolved = _resolve_runtime_path(final_path, strict=True)
-        if not _is_relative_to(final_resolved, root):
-            raise ValueError("confined_read_descriptor_outside_root")
-        if os.path.normcase(str(final_resolved)) != os.path.normcase(str(expected)):
-            raise ValueError("confined_read_descriptor_path_mismatch")
-        position = min(max(int(offset), 0), int(metadata.st_size))
-        os.lseek(descriptor, position, os.SEEK_SET)
-        data = os.read(descriptor, max(min(int(max_bytes), 1024 * 1024), 0))
-        return data, int(os.lseek(descriptor, 0, os.SEEK_CUR))
-    finally:
-        os.close(descriptor)
+    return secure_read_confined_bytes_impl(
+        path, allowed_root=allowed_root, offset=offset, max_bytes=max_bytes
+    )
 
 
 def secure_read_confined_text(

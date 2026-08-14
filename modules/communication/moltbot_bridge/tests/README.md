@@ -1,5 +1,22 @@
 # Tests - OpenClaw Bridge
 
+## Authenticated grant-service manifest binding
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signed_runtime_artifact_manifest.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py
+```
+
+The matrix proves v1/v5 compatibility, v2/v6 grant-service binding, central
+signer-domain admission, exact config/run-packet schemas, all-artifact use-time
+rehydration, archive-tail replacement rejection, pairwise key-reference
+separation, signed-policy substitution rejection, and secret-free output. It
+does not start a grant service, validate archive closure, resolve WSP 71 values,
+rehydrate permission evidence, dispatch a worker, or grant repository authority.
+
 ## Independent grant-authority client supply
 
 ```powershell

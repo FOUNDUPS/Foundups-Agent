@@ -6,7 +6,7 @@ exemptions:
       correctness to the existing descriptor, confinement, redaction, and
       POSIX locking host. Splitting these coupled primitives requires a
       dedicated parity migration across every runtime-artifact consumer.
-    threshold_override: 786
+    threshold_override: 756
     function_threshold_override: 76
     functions:
       - "secure_append_runtime_text"

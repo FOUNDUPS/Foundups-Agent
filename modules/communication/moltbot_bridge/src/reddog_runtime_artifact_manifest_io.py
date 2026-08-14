@@ -11,6 +11,9 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_a
     RuntimeArtifactManifestAuthorityBoundary,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
+    GRANT_AUTHORITY_SERVICE_ARCHIVE,
+    GRANT_AUTHORITY_SERVICE_CONFIG,
+    GRANT_AUTHORITY_SERVICE_RUN_PACKET,
     MAX_ARTIFACT_BYTES,
     REQUIRED_RUNTIME_ARTIFACTS,
     RuntimeArtifactDescriptor,
@@ -18,6 +21,8 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     canonical_json,
     digest,
     raw_digest,
+    required_runtime_artifacts_for,
+    runtime_artifact_size_limit,
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     atomic_create_confined_mapping,
@@ -37,6 +42,8 @@ MANIFEST_DIRECTORY_NAME = "signed_runtime_artifact_manifests"
 def describe_runtime_artifacts(
     authority: RuntimeArtifactManifestAuthority,
     boundary: RuntimeArtifactManifestAuthorityBoundary,
+    *,
+    required_artifacts: tuple[str, ...] = REQUIRED_RUNTIME_ARTIFACTS,
 ) -> tuple[RuntimeArtifactDescriptor, ...]:
     """Read the exact canonical artifact set under one shared lock."""
 
@@ -47,15 +54,20 @@ def describe_runtime_artifacts(
         repo_root=values["repo_root"],
         allow_sealed=True,
     ):
-        return _describe_runtime_artifacts_unlocked(values)
+        return _describe_runtime_artifacts_unlocked(
+            values, required_artifacts=required_artifacts
+        )
 
 
 def _describe_runtime_artifacts_unlocked(
     values: Mapping[str, Any],
+    *,
+    required_artifacts: tuple[str, ...] = REQUIRED_RUNTIME_ARTIFACTS,
 ) -> tuple[RuntimeArtifactDescriptor, ...]:
     runtime = Path(values["runtime_root"]).resolve()
     descriptors: list[RuntimeArtifactDescriptor] = []
-    for filename in REQUIRED_RUNTIME_ARTIFACTS:
+    mappings: dict[str, dict[str, Any]] = {}
+    for filename in required_artifacts:
         path = _artifact_path(values, filename)
         if path.is_symlink() or not path.is_file():
             raise RuntimeArtifactManifestError(
@@ -64,10 +76,12 @@ def _describe_runtime_artifacts_unlocked(
         raw, _ = secure_read_confined_bytes(
             path,
             allowed_root=runtime,
-            max_bytes=MAX_ARTIFACT_BYTES,
+            max_bytes=runtime_artifact_size_limit(filename),
         )
-        mapping = _json_mapping(raw, filename)
-        _validate_bound_artifact(values, filename, mapping)
+        if filename != GRANT_AUTHORITY_SERVICE_ARCHIVE:
+            mapping = _json_mapping(raw, filename)
+            _validate_bound_artifact(values, filename, mapping)
+            mappings[filename] = mapping
         descriptors.append(
             RuntimeArtifactDescriptor(
                 filename=filename,
@@ -75,7 +89,10 @@ def _describe_runtime_artifacts_unlocked(
                 content_digest=raw_digest(raw),
             )
         )
-    return tuple(descriptors)
+    result = tuple(descriptors)
+    if GRANT_AUTHORITY_SERVICE_ARCHIVE in required_artifacts:
+        _validate_grant_artifact_set(result, mappings)
+    return result
 
 
 def publish_content_addressed_manifest(
@@ -124,13 +141,16 @@ def _publish_current_generation(
     authority: Mapping[str, Any],
 ) -> None:
     runtime = Path(authority["runtime_root"]).resolve()
+    required_artifacts = required_runtime_artifacts_for(manifest)
     try:
         with reddog_runtime_artifact_generation_lock(
             runtime, repo_root=authority["repo_root"]
         ):
             current = tuple(
                 item.to_dict()
-                for item in _describe_runtime_artifacts_unlocked(authority)
+                for item in _describe_runtime_artifacts_unlocked(
+                    authority, required_artifacts=required_artifacts
+                )
             )
             if tuple(manifest.get("artifacts") or ()) != current:
                 raise RuntimeArtifactManifestError(
@@ -183,6 +203,33 @@ def _validate_bound_artifact(
         ]
         if len(matches) != 1:
             raise RuntimeArtifactManifestError("manifest_queue_changed")
+    elif filename == GRANT_AUTHORITY_SERVICE_CONFIG:
+        from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_artifact_contract import (
+            validate_grant_service_config,
+        )
+
+        validate_grant_service_config(value)
+
+
+def _validate_grant_artifact_set(
+    descriptors: tuple[RuntimeArtifactDescriptor, ...],
+    mappings: Mapping[str, Mapping[str, Any]],
+) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_artifact_contract import (
+        validate_grant_service_run_packet,
+    )
+
+    by_name = {item.filename: item.content_digest for item in descriptors}
+    config = mappings.get(GRANT_AUTHORITY_SERVICE_CONFIG, {})
+    if config.get("archive_digest") != by_name.get(
+        GRANT_AUTHORITY_SERVICE_ARCHIVE
+    ):
+        raise RuntimeArtifactManifestError("grant_service_config_invalid")
+    validate_grant_service_run_packet(
+        mappings.get(GRANT_AUTHORITY_SERVICE_RUN_PACKET, {}),
+        config_digest=by_name.get(GRANT_AUTHORITY_SERVICE_CONFIG, ""),
+        archive_digest=by_name.get(GRANT_AUTHORITY_SERVICE_ARCHIVE, ""),
+    )
 
 
 def _json_mapping(raw: bytes, filename: str) -> dict[str, Any]:
