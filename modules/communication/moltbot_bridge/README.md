@@ -208,8 +208,11 @@ now verifies one request-bound secret-access grant, atomically consumes durable
 replay state, resolves WSP71 keys for that sign only, and rechecks revocation,
 expiry, provider identity, and the returned signature. The stable entrypoint
 now applies the executable OS-isolation boundary before resolver construction.
-Its production WSP71 secret resolver remains unavailable, so production signing
-still fails closed. The owner-controlled E0 admission layer binds one signed
+An uncomposed WSP71 factory reuses `OpCliSecretResolver` and accepts only a
+fixed root-owned, executable, non-writable `/usr/bin/op`. The production
+entrypoint retains its unavailable resolver until the existing grant-aware
+resolve-per-sign backend is composed, so system-service signing fails closed.
+The owner-controlled E0 admission layer binds one signed
 policy to the exact current signer generation, key-reference digests,
 manifest-bound grant/revocation authorities, disjoint durable-state roots,
 operation/tier consensus rules, and rate limits. Its opaque one-use capability

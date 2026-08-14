@@ -1,5 +1,19 @@
 # Tests - OpenClaw Bridge
 
+## Signer system-service WSP 71 resolver
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_entrypoint.py `
+  modules/infrastructure/secrets_mcp/tests/test_op_cli_secret_resolver.py
+```
+
+The matrix proves owner-ID binding, fixed executable policy, fail-closed
+unsafe/missing executable handling, in-memory secret use, and no shell or
+secret persistence. The supply remains uncomposed and claims no grant issuance,
+service deployment, or live worker authority.
+
 ## Canonical elevated-authority consensus capability
 
 ```powershell
