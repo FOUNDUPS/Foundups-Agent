@@ -73,6 +73,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 
 SCHEMA_VERSION = "reddog_signer_system_service_owner_config.v1"
 SCHEMA_VERSION_V2 = "reddog_signer_system_service_owner_config.v2"
+SCHEMA_VERSION_V3 = "reddog_signer_system_service_owner_config.v3"
 MAX_OWNER_CONFIG_BYTES = 64 * 1024
 ROOT_UID = 0
 FIELDS = frozenset(
@@ -98,6 +99,7 @@ FIELDS = frozenset(
     }
 )
 V2_FIELDS = FIELDS | {"verified_outcome_authority"}
+V3_FIELDS = V2_FIELDS | {"independent_grant_authority"}
 _OUTCOME_OWNER_FIELDS = frozenset(
     {
         "descriptor", "authority_socket_path",
@@ -129,9 +131,10 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
     """Load all production signer authority from one root-owned v2 snapshot."""
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
-    if owner.get("schema_version") != SCHEMA_VERSION_V2:
+    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}:
         raise RuntimeArtifactManifestError("signer_owner_config_v2_required")
     manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
+
     def authority_supplier() -> RootVerifiedOutcomeSigningAuthority:
         return _verified_outcome_authority_from_owner(owner, repo=repo, now_epoch=int(time.time()))
     def principal_authority_supplier() -> Any:
@@ -140,6 +143,7 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
         )
 
         return ManifestBoundCurrentPrincipalAuthorityResolver(repo, boundary)
+
     signer_uid, signer_gid = _signer_identity_from_owner(owner)
     return SystemServiceStartupSelection(
         str(owner["config_id"]), manifest, boundary, authority_supplier,
@@ -452,11 +456,9 @@ def _validate_owner_config(
     if not isinstance(value, Mapping) or not ascii_deep(value):
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     schema = value.get("schema_version")
-    expected_fields = FIELDS if schema == SCHEMA_VERSION else V2_FIELDS
-    if (
-        schema not in {SCHEMA_VERSION, SCHEMA_VERSION_V2}
-        or set(value) != expected_fields
-    ):
+    expected_fields = {SCHEMA_VERSION: FIELDS, SCHEMA_VERSION_V2: V2_FIELDS,
+                       SCHEMA_VERSION_V3: V3_FIELDS}.get(schema)
+    if expected_fields is None or set(value) != expected_fields:
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     checked = dict(value)
     expected_id = digest(
@@ -468,10 +470,13 @@ def _validate_owner_config(
         raise RuntimeArtifactManifestError("signer_owner_repo_binding_mismatch")
     _validate_owner_text_and_digests(checked)
     _validate_owner_paths(checked, repo=repo, owner_root=owner_root)
-    if schema == SCHEMA_VERSION_V2:
+    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}:
         _validate_outcome_authority_owner_config(
             checked, repo=repo, owner_root=owner_root
         )
+    if schema == SCHEMA_VERSION_V3:
+        from modules.communication.moltbot_bridge.src.reddog_signer_independent_grant_authority_client_supply import validate_independent_grant_authority_owner_config
+        validate_independent_grant_authority_owner_config(checked, repo=repo, owner_root=owner_root)
     return checked
 
 
@@ -657,6 +662,7 @@ __all__ = [
     "RootAuthorityServiceDependencies",
     "SCHEMA_VERSION",
     "SCHEMA_VERSION_V2",
+    "SCHEMA_VERSION_V3",
     "SystemServiceStartupSelection",
     "load_system_service_manifest_selection",
     "load_system_service_revocation_anchor_authority",

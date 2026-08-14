@@ -1,4 +1,20 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Independent grant-authority client supply
+
+- Extended the existing signer owner configuration to v3 with one disjoint,
+  root-bound grant-authority Unix transport and exact non-root UID/GID.
+- Hardened the shared isolated-signer client with link-component rejection,
+  protected ancestry, pinned socket identity, and connected Linux `SO_PEERCRED`
+  verification; authenticated mode forbids injected connectors.
+- Added an uncomposed supply that holds authenticated current-generation E0
+  admission while binding transport to owner policy v5. It rejects overlap with
+  signer, outcome, replay, and revocation authority before any request. No signer,
+  secret resolution, worker, repository, HoloIndex, or activation effect was
+  added; service lifecycle and production composition remain fail closed.
+- Extracted the provider's existing public binding into a shared contract so
+  transport validation does not pull the resolve-per-sign effect plane into
+  RedDog's backend compatibility closure; the provider re-exports it unchanged.
+
 ## 2026-08-14: Signer system-service WSP 71 resolver supply
 - Reused the existing `OpCliSecretResolver` behind a signer-owned factory
   that binds an authenticated owner-configuration identifier.

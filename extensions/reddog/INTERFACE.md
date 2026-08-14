@@ -1,5 +1,8 @@
 # RedDog Interface
 
+Version 0.4.92 pins the backend dependency closure for the uncomposed
+independent grant-authority client supply. It adds no UI or execution authority.
+
 Version 0.4.91 pins the backend manifest after resident artifact-generation
 request derivation was consolidated in the bounded-worker stage. No thin-client
 API or execution-authority change was introduced.

@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-08-14 - Grant-authority client manifest pin (0.4.92)
+
+- Pinned the expanded signer dependency closure after owner config v3 and the
+  uncomposed peer-authenticated grant-authority client supply were added.
+- Added no thin-client behavior, signer lifecycle, or execution authority.
+
 ## 2026-08-14 - Resident artifact-request ownership pin (0.4.91)
 
 - Regenerated and pinned the exact backend manifest after removing duplicate

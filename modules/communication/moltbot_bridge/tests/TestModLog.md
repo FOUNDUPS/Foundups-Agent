@@ -1,3 +1,16 @@
+## 2026-08-14: Independent grant-authority transport regressions
+
+- Added owner-config v3 digest, schema, path, disjoint-root, socket-alias,
+  signer-identity separation, and signed-policy binding tests.
+- Added shared-client rejection tests for unattested connectors, regular files,
+  invalid UID/GID and connected-peer mismatch, plus a real Linux Unix-socket
+  `SO_PEERCRED` acceptance proof.
+- Added attacker-rehashed policy, configured socket symlink, socket inode
+  replacement, protected ancestry, and E0 replay/revocation root overlap
+  regressions.
+- Proved client construction performs no request and the supply contains no
+  shell, subprocess, secret resolver, HoloIndex, repository, or worker effect.
+
 ## 2026-08-14: Signer system-service WSP 71 resolver supply
 - Added Windows and Linux coverage for fixed root-owned `op` executable
   admission, invalid authority rejection before executable observation,

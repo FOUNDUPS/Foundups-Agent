@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-14 - Grant-authority client manifest pin (0.4.92)
+
+- Updated current-version contract assertions and the backend manifest closure.
+- Thin-client behavior and authority remain unchanged.
+
 ## 2026-08-14 - Resident artifact-request ownership pin (0.4.91)
 
 - Pinned the regenerated backend manifest and current build fixtures after

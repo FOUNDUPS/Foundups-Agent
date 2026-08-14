@@ -546,6 +546,7 @@ def _provider_for(
         replay_store=store,
         grant_authority=IndependentGrantAuthorityBinding(
             client=client,
+            authority_root=str((tmp_path / "grant-authority").resolve()),
             principal_id="grant:owner",
             principal_provider="local",
             public_key=_public(private),
@@ -585,6 +586,7 @@ def test_provider_holds_generation_lease_through_caller_use(
         replay_store=store,
         grant_authority=IndependentGrantAuthorityBinding(
             client=client,
+            authority_root=str((tmp_path / "grant-authority").resolve()),
             principal_id="grant:owner",
             principal_provider="local",
             public_key=_public(private),
@@ -748,6 +750,7 @@ def test_provider_rejects_authority_substitution(
     client = _GrantClient(private)
     values = {
         "client": client,
+        "authority_root": str((tmp_path / "grant-authority").resolve()),
         "principal_id": "grant:owner",
         "principal_provider": "local",
         "public_key": _public(private),

@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.91
+Version: 0.4.92
+
+[OBSERVED] Version 0.4.92 pins the backend manifest after adding the
+uncomposed, peer-authenticated independent grant-authority client supply.
+Signer-service lifecycle and production composition remain fail closed.
 
 [OBSERVED] Version 0.4.91 pins the backend manifest after resident artifact-
 generation request derivation was consolidated in the bounded-worker stage.

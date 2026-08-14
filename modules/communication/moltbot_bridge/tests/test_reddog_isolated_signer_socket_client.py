@@ -4,16 +4,23 @@ from __future__ import annotations
 
 import ast
 import json
+import struct
 from dataclasses import replace
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src import (
+    reddog_isolated_signer_socket_client as client_module,
+)
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
     DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
+    FAIL_SIGNER_SOCKET_CONNECTOR_UNATTESTED,
     FAIL_SIGNER_SOCKET_DEVICE_PREFIX,
+    FAIL_SIGNER_SOCKET_OWNERSHIP_INVALID,
     FAIL_SIGNER_SOCKET_PATH_INSIDE_REPO,
     FAIL_SIGNER_SOCKET_PATH_MISSING,
     FAIL_SIGNER_SOCKET_PATH_RELATIVE,
     FAIL_SIGNER_SOCKET_PATH_UNAVAILABLE,
+    FAIL_SIGNER_SOCKET_SERVER_IDENTITY_INVALID,
     REJECT_SIGNER_SOCKET_CONNECT_FAILED,
     REJECT_SIGNER_SOCKET_RESPONSE_INVALID,
     REJECT_SIGNER_SOCKET_RESPONSE_TOO_LARGE,
@@ -85,28 +92,40 @@ def _accepted_response() -> bytes:
     ).encode("utf-8")
 
 
-def test_build_rejects_missing_relative_inside_repo_and_device_paths(tmp_path: Path) -> None:
+def test_build_rejects_missing_relative_inside_repo_and_device_paths(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
 
-    missing = build_reddog_isolated_signer_socket_client(repo_root=repo, socket_path=None)
+    missing = build_reddog_isolated_signer_socket_client(
+        repo_root=repo, socket_path=None
+    )
     assert missing.accepted is False
     assert missing.status == SIGNER_SOCKET_CLIENT_REJECT
     assert FAIL_SIGNER_SOCKET_PATH_MISSING in missing.rejection_reasons
 
-    relative = build_reddog_isolated_signer_socket_client(repo_root=repo, socket_path="signer.sock")
+    relative = build_reddog_isolated_signer_socket_client(
+        repo_root=repo, socket_path="signer.sock"
+    )
     assert relative.accepted is False
     assert FAIL_SIGNER_SOCKET_PATH_RELATIVE in relative.rejection_reasons
 
-    inside = build_reddog_isolated_signer_socket_client(repo_root=repo, socket_path=repo / "signer.sock")
+    inside = build_reddog_isolated_signer_socket_client(
+        repo_root=repo, socket_path=repo / "signer.sock"
+    )
     assert inside.accepted is False
     assert FAIL_SIGNER_SOCKET_PATH_INSIDE_REPO in inside.rejection_reasons
 
-    device = build_reddog_isolated_signer_socket_client(repo_root=repo, socket_path="\\\\?\\C:\\tmp\\signer.sock")
+    device = build_reddog_isolated_signer_socket_client(
+        repo_root=repo, socket_path="\\\\?\\C:\\tmp\\signer.sock"
+    )
     assert device.accepted is False
     assert FAIL_SIGNER_SOCKET_DEVICE_PREFIX in device.rejection_reasons
 
 
-def test_build_rejects_unavailable_production_socket_without_connector(tmp_path: Path) -> None:
+def test_build_rejects_unavailable_production_socket_without_connector(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     socket_path = _socket_path(tmp_path)
 
@@ -120,7 +139,9 @@ def test_build_rejects_unavailable_production_socket_without_connector(tmp_path:
     assert FAIL_SIGNER_SOCKET_PATH_UNAVAILABLE in built.rejection_reasons
 
 
-def test_injected_connector_may_own_transport_availability_for_tests(tmp_path: Path) -> None:
+def test_injected_connector_may_own_transport_availability_for_tests(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     socket_path = _socket_path(tmp_path)
 
@@ -135,12 +156,76 @@ def test_injected_connector_may_own_transport_availability_for_tests(tmp_path: P
     assert built.client is not None
 
 
-def test_client_sends_signing_request_and_returns_attested_response(tmp_path: Path) -> None:
+def test_peer_authenticated_mode_rejects_invalid_or_injected_transport(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    socket_path = _socket_path(tmp_path)
+    invalid_uid = build_reddog_isolated_signer_socket_client(
+        repo_root=repo,
+        socket_path=socket_path,
+        connector=lambda *_: _accepted_response(),
+        expected_server_uid=-1,
+        expected_server_gid=1202,
+    )
+    injected = build_reddog_isolated_signer_socket_client(
+        repo_root=repo,
+        socket_path=socket_path,
+        connector=lambda *_: _accepted_response(),
+        expected_server_uid=1202,
+        expected_server_gid=1202,
+    )
+
+    assert invalid_uid.rejection_reasons == (
+        FAIL_SIGNER_SOCKET_SERVER_IDENTITY_INVALID,
+    )
+    assert injected.rejection_reasons == (FAIL_SIGNER_SOCKET_CONNECTOR_UNATTESTED,)
+
+
+def test_peer_authenticated_mode_rejects_non_socket_artifact(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    socket_path = _socket_path(tmp_path)
+    socket_path.write_text("not-a-socket", encoding="ascii")
+
+    built = build_reddog_isolated_signer_socket_client(
+        repo_root=repo,
+        socket_path=socket_path,
+        expected_server_uid=1202,
+        expected_server_gid=1202,
+    )
+
+    assert built.rejection_reasons == (FAIL_SIGNER_SOCKET_OWNERSHIP_INVALID,)
+
+
+def test_connected_peer_identity_must_match_kernel_credential(monkeypatch) -> None:
+    class FakeSocket:
+        def __init__(self, uid: int) -> None:
+            self.uid = uid
+
+        def getsockopt(self, *_args):
+            return struct.pack("3i", 10, self.uid, 20)
+
+    monkeypatch.setattr(client_module.socket, "SO_PEERCRED", 17, raising=False)
+    client_module._require_connected_peer_identity(FakeSocket(1202), 1202, 20)
+
+    try:
+        client_module._require_connected_peer_identity(FakeSocket(1203), 1202, 20)
+    except OSError as exc:
+        assert str(exc) == "signer_socket_server_identity_mismatch"
+    else:
+        raise AssertionError("mismatched peer UID must reject")
+
+
+def test_client_sends_signing_request_and_returns_attested_response(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     socket_path = _socket_path(tmp_path)
     observed: dict[str, object] = {}
 
-    def connector(path: Path, payload: bytes, timeout_s: float, max_response_bytes: int) -> bytes:
+    def connector(
+        path: Path, payload: bytes, timeout_s: float, max_response_bytes: int
+    ) -> bytes:
         observed["path"] = str(path)
         observed["timeout_s"] = timeout_s
         observed["max_response_bytes"] = max_response_bytes
@@ -180,7 +265,9 @@ def test_client_v2_binds_exact_secret_access_grant(tmp_path: Path) -> None:
         return _accepted_response()
 
     built = build_reddog_isolated_signer_socket_client(
-        repo_root=repo, socket_path=socket_path, connector=connector,
+        repo_root=repo,
+        socket_path=socket_path,
+        connector=connector,
     )
     assert built.client is not None
     grant = {"schema_version": "reddog_signer_secret_access_grant.v1"}
@@ -221,7 +308,9 @@ def test_elevated_grant_authority_request_uses_strict_v2(tmp_path: Path) -> None
     assert observed["limit"] == DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES == 32768
 
 
-def test_client_rejects_malformed_oversized_and_connector_failures(tmp_path: Path) -> None:
+def test_client_rejects_malformed_oversized_and_connector_failures(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     socket_path = _socket_path(tmp_path)
 
@@ -231,7 +320,10 @@ def test_client_rejects_malformed_oversized_and_connector_failures(tmp_path: Pat
         connector=lambda *_: b"not-json",
     )
     assert malformed.client is not None
-    assert malformed.client.sign(_request()).rejection_code == REJECT_SIGNER_SOCKET_RESPONSE_INVALID
+    assert (
+        malformed.client.sign(_request()).rejection_code
+        == REJECT_SIGNER_SOCKET_RESPONSE_INVALID
+    )
 
     oversized = build_reddog_isolated_signer_socket_client(
         repo_root=repo,
@@ -240,7 +332,10 @@ def test_client_rejects_malformed_oversized_and_connector_failures(tmp_path: Pat
         connector=lambda *_: b"{" + (b" " * 2048) + b"}",
     )
     assert oversized.client is not None
-    assert oversized.client.sign(_request()).rejection_code == REJECT_SIGNER_SOCKET_RESPONSE_TOO_LARGE
+    assert (
+        oversized.client.sign(_request()).rejection_code
+        == REJECT_SIGNER_SOCKET_RESPONSE_TOO_LARGE
+    )
 
     def failing_connector(*_: object) -> bytes:
         raise OSError("connect failed")
@@ -251,17 +346,24 @@ def test_client_rejects_malformed_oversized_and_connector_failures(tmp_path: Pat
         connector=failing_connector,
     )
     assert failed.client is not None
-    assert failed.client.sign(_request()).rejection_code == REJECT_SIGNER_SOCKET_CONNECT_FAILED
+    assert (
+        failed.client.sign(_request()).rejection_code
+        == REJECT_SIGNER_SOCKET_CONNECT_FAILED
+    )
 
 
-def test_client_preserves_signer_rejection_without_secret_material(tmp_path: Path) -> None:
+def test_client_preserves_signer_rejection_without_secret_material(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     socket_path = _socket_path(tmp_path)
 
     built = build_reddog_isolated_signer_socket_client(
         repo_root=repo,
         socket_path=socket_path,
-        connector=lambda *_: b'{"accepted":false,"rejection_code":"REJECT_RATE_LIMIT"}\n',
+        connector=lambda *_: (
+            b'{"accepted":false,"rejection_code":"REJECT_RATE_LIMIT"}\n'
+        ),
     )
 
     assert built.client is not None
@@ -314,10 +416,14 @@ def test_module_has_no_shell_env_holoindex_openclaw_hermes_or_key_loading() -> N
         if isinstance(node, ast.Import):
             for alias in node.names:
                 assert alias.name.split(".", 1)[0] not in banned_import_roots
-                assert all(fragment not in alias.name for fragment in banned_import_fragments)
+                assert all(
+                    fragment not in alias.name for fragment in banned_import_fragments
+                )
         if isinstance(node, ast.ImportFrom) and node.module:
             assert node.module.split(".", 1)[0] not in banned_import_roots
-            assert all(fragment not in node.module for fragment in banned_import_fragments)
+            assert all(
+                fragment not in node.module for fragment in banned_import_fragments
+            )
         if isinstance(node, ast.Call):
             if isinstance(node.func, ast.Name):
                 assert node.func.id not in banned_calls

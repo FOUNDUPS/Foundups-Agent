@@ -1,5 +1,22 @@
 # Tests - OpenClaw Bridge
 
+## Independent grant-authority client supply
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_grant_authority_client_supply.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_client.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_client_linux.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py
+```
+
+The matrix proves authenticated current-generation policy admission, exact
+owner-config binding, disjoint signer/outcome/replay/revocation roots, socket
+link rejection and inode pinning, protected ancestry, Linux connected-peer
+UID/GID, attacker-rehashed policy rejection, and no request during client
+construction. It does not start a grant service, resolve a secret, compose a
+signer, or grant work.
+
 ## Signer system-service WSP 71 resolver
 
 ```powershell
