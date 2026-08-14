@@ -1,3 +1,8 @@
+## 2026-08-14: Signer system-service WSP 71 resolver supply
+- Added Windows and Linux coverage for fixed root-owned `op` executable
+  admission, invalid authority rejection before executable observation,
+  secret-free audit output, and the uncomposed production boundary.
+
 ## 2026-08-14: Progressive resident-chain CI regression
 - Added a Linux-visible end-to-end fixture for the signed progressive chain and
   extracted its fake worktree/PR runner into bounded test support. The legacy

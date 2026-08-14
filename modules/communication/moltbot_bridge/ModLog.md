@@ -1,4 +1,15 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Signer system-service WSP 71 resolver supply
+- Reused the existing `OpCliSecretResolver` behind a signer-owned factory
+  that binds an authenticated owner-configuration identifier.
+- Production accepts only the fixed `/usr/bin/op` executable when it is a
+  root-owned regular executable with secure ancestry and no group/other write
+  bits. Invalid owner identity, missing binary, unsafe permissions, and vault
+  failures remain fail closed without secret persistence or shell execution.
+- The production entrypoint remains fail closed. Grant-aware resolve-per-sign
+  composition, lifecycle deployment, live worker authority, merge authority,
+  and HoloIndex mutation remain unavailable.
+  (WSP 00/15/22/50/62/71/97)
 ## 2026-08-14: Progressive-policy resident-chain regression repair
 - Reconciled resident-chain test fixtures with the existing signed progressive
   execution-stage policy. Valid fixtures now model genuinely bounded FoundUp

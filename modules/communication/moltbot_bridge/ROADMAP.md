@@ -97,8 +97,10 @@
   signer callback, FINISH, and revocation advancement. Both race orderings,
   replay, lost FINISH response, active-use crash, peer/policy/context
   substitution, and Linux-root socket transport fail closed.
+- COMPLETE: an uncomposed WSP 71 op CLI resolver factory requires a fixed,
+  root-owned executable with secure ancestry and no group/other write access.
 - NEXT: independently administered grant issuance, production E0 backend
-  factory composition, WSP 71 permissioned resolution, native-memory
+  factory composition, WSP 71 resolve-per-sign composition, native-memory
   zeroization evidence, and supervised handling of a crashed active use.
   The protected-use client is available through the current owner-config
   loader, but no production grant issuer or service startup path consumes it.
