@@ -11,6 +11,7 @@ from typing import Any
 import pytest
 
 from modules.communication.moltbot_bridge.src import (
+    reddog_grant_authority_service_archive_validation as archive_validation_module,
     reddog_grant_authority_service_manifest_verifier as verifier_module,
     reddog_signer_owner_e0_current_selection as current_selection_module,
 )
@@ -22,6 +23,10 @@ from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_art
 )
 from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_authenticated_manifest_binding import (
     bind_grant_authority_service_manifest,
+)
+from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_archive_contract import (
+    ARCHIVE_MAIN,
+    build_grant_service_archive,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -186,7 +191,7 @@ def test_artifact_replacement_rejects_at_use_time(
 def test_archive_tail_after_one_megabyte_is_signed_and_reverified(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    archive = b"a" * (1024 * 1024) + b"legitimate-tail"
+    archive = _valid_archive()
     setup = _setup(tmp_path, monkeypatch, archive=archive)
     target = setup["harness"].runtime_root / GRANT_AUTHORITY_SERVICE_ARCHIVE
     target.write_bytes(archive[:-1] + b"X")
@@ -242,7 +247,7 @@ def test_legacy_process_local_selector_rejects_v2_manifest(
     manifest_root.mkdir()
     harness = _build_harness(manifest_root)
     e0 = _fixture_at(tmp_path / "e0")
-    archive = b"content-addressed-grant-service"
+    archive = _valid_archive()
     archive_digest = raw_digest(archive)
     config = _config(e0, archive_digest)
     config_raw = canonical_json(config).encode("ascii")
@@ -287,7 +292,7 @@ def test_config_unknown_field_rejects_before_manifest_signing(
     tmp_path: Path
 ) -> None:
     harness = _build_harness(tmp_path)
-    archive = b"content-addressed-grant-service"
+    archive = _valid_archive()
     archive_digest = raw_digest(archive)
     config = _config(_fixture_at(tmp_path / "e0"), archive_digest)
     config["unexpected"] = "attacker"
@@ -316,7 +321,7 @@ def test_secret_reference_shaped_config_rejects_before_manifest_signing(
     tmp_path: Path, field: str
 ) -> None:
     harness = _build_harness(tmp_path)
-    archive = b"content-addressed-grant-service"
+    archive = _valid_archive()
     archive_digest = raw_digest(archive)
     config = _config(_fixture_at(tmp_path / "e0"), archive_digest)
     config[field] = "op://vault/item/secret"
@@ -344,7 +349,7 @@ def test_run_packet_archive_substitution_rejects_before_signing(
 ) -> None:
     harness = _build_harness(tmp_path)
     e0 = _fixture_at(tmp_path / "e0")
-    archive = b"content-addressed-grant-service"
+    archive = _valid_archive()
     archive_digest = raw_digest(archive)
     config = _config(e0, archive_digest)
     config_digest = raw_digest(canonical_json(config).encode("ascii"))
@@ -363,6 +368,59 @@ def test_run_packet_archive_substitution_rejects_before_signing(
         runtime_profile=RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
     )
     assert result.accepted is False
+
+
+def test_non_executable_archive_rejects_before_manifest_signing(
+    tmp_path: Path,
+) -> None:
+    harness = _build_harness(tmp_path)
+    e0 = _fixture_at(tmp_path / "e0")
+    archive = b"attacker-controlled-not-a-zipapp"
+    archive_digest = raw_digest(archive)
+    config = _config(e0, archive_digest)
+    config_raw = canonical_json(config).encode("ascii")
+    _write(harness.runtime_root / GRANT_AUTHORITY_SERVICE_ARCHIVE, archive)
+    _write(harness.runtime_root / GRANT_AUTHORITY_SERVICE_CONFIG, config_raw)
+    _write_json(
+        harness.runtime_root / GRANT_AUTHORITY_SERVICE_RUN_PACKET,
+        _run_packet(raw_digest(config_raw), archive_digest),
+    )
+
+    result = produce_signed_runtime_artifact_manifest(
+        manifest_directory=harness.manifest_directory,
+        nonce="grant-service-non-executable-archive",
+        issued_at=NOW,
+        expires_at=NOW + 120,
+        context=harness.context,
+        runtime_profile=RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
+    )
+
+    assert result.accepted is False
+    assert not harness.manifest_directory.exists()
+
+
+def test_use_time_gate_rejects_archive_when_production_gate_is_bypassed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = archive_validation_module.validate_grant_service_archive
+    monkeypatch.setattr(
+        archive_validation_module,
+        "validate_grant_service_archive",
+        lambda _raw: {},
+    )
+    setup = _setup(
+        tmp_path,
+        monkeypatch,
+        archive=b"attacker-controlled-not-a-zipapp",
+    )
+    monkeypatch.setattr(
+        archive_validation_module,
+        "validate_grant_service_archive",
+        original,
+    )
+
+    with pytest.raises(RuntimeArtifactManifestError, match="archive_invalid"):
+        _bind(setup)
 
 
 def test_v1_manifest_downgrade_rejects(
@@ -444,8 +502,9 @@ def _setup(
     monkeypatch: pytest.MonkeyPatch,
     *,
     runtime_profile: str | None = RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
-    archive: bytes = b"content-addressed-grant-service-v1",
+    archive: bytes | None = None,
 ) -> dict[str, Any]:
+    archive = archive if archive is not None else _valid_archive()
     e0 = _fixture_at(tmp_path / "e0")
     grant_path = tmp_path / "grant"
     grant_path.mkdir()
@@ -617,6 +676,22 @@ def _write_json(path: Path, value: dict[str, Any]) -> None:
 
 def _write(path: Path, value: bytes) -> None:
     path.write_bytes(value)
+
+
+def _valid_archive() -> bytes:
+    return build_grant_service_archive(
+        {
+            "__main__.py": ARCHIVE_MAIN,
+            "reddog_grant_authority_service.py": (
+                b"import argparse\n\n"
+                b"def main(argv=None):\n"
+                b"    parser = argparse.ArgumentParser()\n"
+                b"    parser.parse_args(argv)\n"
+                b"    return 2\n"
+            ),
+        },
+        source_commit_sha="1" * 40,
+    )
 
 
 def _install_e0_selection(monkeypatch: pytest.MonkeyPatch) -> None:

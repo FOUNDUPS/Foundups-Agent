@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-14 - Grant-service archive validation closure (0.4.95)
+
+- Pinned the deterministic archive contract, ZIP/use-time validator, exact
+  non-generator entrypoint ABI, printable module paths, and static
+  import-reference dependencies in the backend
+  compatibility manifest. No thin-client or live-authority behavior changed.
+
 ## 2026-08-14 - Owner-E0 generation-selection pin (0.4.94)
 
 - Regenerated the exact backend manifest for the reachable owner-E0

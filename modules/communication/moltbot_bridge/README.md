@@ -25,6 +25,24 @@ composition therefore does not instantiate this path. ULTRA remains closed.
 
 ## Independent signer secret-grant provider
 
+[OBSERVED] Grant-authority service archive bytes now use one deterministic,
+uncompressed zipapp representation. Production manifest creation and use-time
+grant-manifest rehydration both reject noncanonical ZIP metadata, traversal,
+links, duplicate members, compression, trailing bytes, changed member digests,
+missing package initializers, unresolved direct archive-local imports, common
+dynamic-loader spellings, standard-library shadowing, and an entrypoint that the fixed shim
+cannot call. Every Python member and the complete claimed-source descriptor are
+bound by the inner manifest; the signed outer runtime manifest still binds the
+exact archive bytes.
+
+[SPECIFIED_NOT_IMPLEMENTED] This is inert executable validation, not a service
+launcher, Python sandbox, or hermetic-runtime claim. Python reflection is not
+certified safe by AST inspection. `claimed_source_commit_sha` is
+signer-attested metadata, not independently verified Git provenance. Interpreter,
+standard-library, external executable, OS-principal, resolver, socket,
+supervision, crash-recovery, pinned-descriptor execution, and production
+archive-build authority remain unimplemented and block all execution.
+
 [OBSERVED] Signed owner policy v6 preserves v5 validation while adding an exact
 grant-service signer profile, public identity, pairwise-distinct key-reference
 hashes, permission evidence identifiers, manifest generation, config, and run
@@ -68,9 +86,8 @@ Repository-write permission snapshots, grant-authority-only rehashes,
 wrong-policy oracles, oversized canonical-prefix tails, noncanonical JSON, and
 detached authority reject.
 
-[SPECIFIED_NOT_IMPLEMENTED] The content-addressed archive is not claimed to be
-a valid or dependency-closed zipapp by this slice. Permission-receipt
-rehydration is implemented, but receipt-specific revocation is not added to the
+[SPECIFIED_NOT_IMPLEMENTED] Permission-receipt rehydration is implemented, but
+receipt-specific revocation is not added to the
 secret-grant ID namespace; rotation, expiry, and issuer-key revocation remain
 the admitted controls. This foundation cannot activate the production
 authoritative-use path: HIGH now accepts only the canonical opaque consensus

@@ -1,5 +1,21 @@
 # Tests - OpenClaw Bridge
 
+## Grant-authority executable archive validation
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_archive_validation.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py
+```
+
+The matrix proves deterministic archive bytes, production and use-time
+validation, exact member/manifest binding, direct static-import reference
+checks, common loader-alias rejection, standard-library shadow rejection,
+beyond-top-level relative-import and control-path rejection, and the fixed
+non-generator callable entrypoint ABI. It does not prove Git provenance, interpreter
+identity, Python sandboxing, hermetic process isolation, service lifecycle, secret resolution, or
+live authority.
+
 ## Grant-authority WSP 71 permission rehydration
 
 ```powershell
@@ -31,7 +47,7 @@ The matrix proves v1/v5 compatibility, v2/v6 grant-service binding, central
 signer-domain admission, exact config/run-packet schemas, all-artifact use-time
 rehydration, archive-tail replacement rejection, pairwise key-reference
 separation, signed-policy substitution rejection, and secret-free output. It
-does not start a grant service, validate archive closure, resolve WSP 71 values,
+does not start a grant service, resolve WSP 71 values,
 dispatch a worker, or grant repository authority.
 
 ## Independent grant-authority client supply

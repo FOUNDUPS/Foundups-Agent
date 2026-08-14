@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-14 - Grant-service archive closure pin (0.4.95)
+
+- Updated version and backend-manifest assertions for the executable archive
+  validation dependency closure, including relative-import, generator, and
+  control-path rejection. Runtime behavior remains unchanged.
+
 ## 2026-08-14 - Owner-E0 generation-selection pin (0.4.94)
 
 - Updated current-version assertions and the reachable canonical backend

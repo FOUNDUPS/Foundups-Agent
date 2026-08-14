@@ -1,3 +1,14 @@
+## 2026-08-14: Grant-authority executable archive regressions
+
+- Added canonical ZIP, path, link, compression, duplicate-member, trailing-byte,
+  member-digest, package-parent, relative/absolute import, standard-library
+  shadow, common loader-alias, beyond-top-level relative-import, control-path,
+  generator-entrypoint, and fixed-entrypoint ABI rejection coverage.
+- Proved invalid archives reject before manifest signing and independently at
+  use time even when the production gate is test-bypassed.
+- Added bounded-module and no-effect static checks; no service, socket, resolver,
+  worker, repository, or HoloIndex effect is exercised.
+
 ## 2026-08-14: Grant-authority WSP 71 permission regressions
 
 - Added exact receipt shape, canonical-byte, root-generation binding, expiry,
