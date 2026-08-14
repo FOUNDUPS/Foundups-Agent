@@ -94,6 +94,19 @@ the protected socket identity, verifies `SO_PEERCRED`, rejects overlap with
 target, outcome, replay, and revocation authority, and derives the public grant
 identity only from authenticated signed owner policy v5.
 
+[OBSERVED] Owner config v4 additively binds the complete canonical
+grant-service archive-to-repository source map and its digest to the existing
+root-owned signer configuration. The loader returns only an opaque,
+process-local capability whose sole admission method re-reads the current
+owner configuration, so caller-selected or stale source policies cannot
+become build authority. V3 remains readable for the existing grant client but
+cannot issue source-policy authority.
+
+[SPECIFIED_NOT_IMPLEMENTED] The v4 capability does not build an archive,
+select a commit, launch the grant service, resolve a secret, or activate a
+runtime generation. Production v7/v3 provisioning remains blocked until it
+consumes this exact capability.
+
 [OBSERVED] Grant-service WSP 71 permission evidence is now an exact canonical
 receipt, not a SHA-shaped identifier. Admission securely reads the fixed
 root-confined artifact and recomputes both its full-byte digest and receipt ID

@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-14 - Root-owned source-policy authority pin (0.4.98)
+
+- Regenerated the backend manifest for owner config v4 and its opaque,
+  revalidatable canonical grant-service source-policy capability.
+- Added no thin-client behavior, archive build, signer launch, secret use,
+  repository write, worker dispatch, or merge authority.
+
 ## 2026-08-14 - Exact-Git grant-authority effect admission pin (0.4.97)
 
 - Pinned backend compatibility to signed E0 policy v7, signed runtime manifest

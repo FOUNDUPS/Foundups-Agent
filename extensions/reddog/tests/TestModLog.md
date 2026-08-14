@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-14 - Root-owned source-policy compatibility pin (0.4.98)
+
+- Updated extension and backend-manifest assertions for owner config v4 and
+  its canonical grant-service source-policy authority.
+
 ## 2026-08-14 - Exact-Git effect-admission compatibility pin (0.4.97)
 
 - Updated extension and backend-manifest assertions for signed v7/v3

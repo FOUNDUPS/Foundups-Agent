@@ -1,5 +1,18 @@
 # Tests - OpenClaw Bridge
 
+## Root-owned grant-service source-policy authority
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_source_policy_authority.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_grant_authority_client_supply.py
+```
+
+The matrix proves exact owner-config v4 source-map binding, cross-repository
+and stale-policy rejection, opaque capability confinement, and continued v3/v4
+grant-client support. It performs no archive build, service launch, secret
+resolution, repository effect, or HoloIndex mutation.
+
 ## Grant-authority executable archive validation
 
 ```powershell

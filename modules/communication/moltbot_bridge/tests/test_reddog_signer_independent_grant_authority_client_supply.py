@@ -21,6 +21,11 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_clie
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     RuntimeArtifactManifestError,
     digest,
+    raw_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_git_source_policy import (
+    SOURCE_POLICY_SCHEMA,
+    grant_service_git_source_policy_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_independent_grant_authority_client_supply import (
     load_system_service_independent_grant_authority_client,
@@ -31,6 +36,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
     SCHEMA_VERSION_V3,
+    SCHEMA_VERSION_V4,
     load_system_service_startup_selection,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_independent_secret_grant_provider import (
@@ -53,11 +59,13 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artif
 )
 
 
-def _owner(tmp_path: Path, *, config_id: str) -> dict:
+def _owner(
+    tmp_path: Path, *, config_id: str, schema_version: str = SCHEMA_VERSION_V3
+) -> dict:
     grant_root = tmp_path / "grant-authority"
     grant_root.mkdir()
     return {
-        "schema_version": SCHEMA_VERSION_V3,
+        "schema_version": schema_version,
         "config_id": config_id,
         "runtime_root": str((tmp_path / "owner-runtime").resolve()),
         "high_water_root": str((tmp_path / "owner-high-water").resolve()),
@@ -116,14 +124,15 @@ def _policy_value(tmp_path: Path, *, owner_config_id: str, grant_public: str) ->
     return value
 
 
+@pytest.mark.parametrize("owner_schema", [SCHEMA_VERSION_V3, SCHEMA_VERSION_V4])
 def test_supply_binds_root_transport_to_signed_policy(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, owner_schema: str
 ) -> None:
     admission_root = tmp_path / "admission"
     admission_root.mkdir()
     fixture = _fixture(admission_root)
     owner_id = str(fixture["selection"]["owner_config_id"])
-    owner = _owner(tmp_path, config_id=owner_id)
+    owner = _owner(tmp_path, config_id=owner_id, schema_version=owner_schema)
     grant_key = Ed25519PrivateKey.generate()
     client = _GrantClient(grant_key)
     observed = {}
@@ -297,6 +306,60 @@ def test_owner_v3_accepts_disjoint_grant_transport(
     selected = load_system_service_startup_selection(
         owner_config_path=prepared["owner_path"],
         repo_root=prepared["harness"].repo_root,
+    )
+
+    assert selected.owner_config_id == owner["config_id"]
+
+
+def test_owner_v4_accepts_root_bound_source_policy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    owner = _upgrade_prepared_owner_to_v2(prepared, tmp_path)
+    grant_root = tmp_path / "grant-authority"
+    grant_root.mkdir()
+    sources = {
+        "reddog_grant_authority_service.py": (
+            "modules/communication/moltbot_bridge/src/"
+            "reddog_isolated_signer_socket_resident_service.py"
+        )
+    }
+    repo = prepared["harness"].repo_root.resolve()
+    owner.update(
+        schema_version=SCHEMA_VERSION_V4,
+        independent_grant_authority={
+            "authority_root": str(grant_root.resolve()),
+            "authority_socket_path": str(
+                (grant_root / "grant-authority.sock").resolve()
+            ),
+            "authority_service_uid": 1202,
+            "authority_service_gid": 1203,
+        },
+        grant_authority_source_policy={
+            "schema_version": SOURCE_POLICY_SCHEMA,
+            "repo_root_digest": raw_digest(str(repo).encode("utf-8")),
+            "sources": sources,
+            "source_policy_digest": grant_service_git_source_policy_digest(
+                sources
+            ),
+        },
+    )
+    owner["config_id"] = digest(
+        {key: value for key, value in owner.items() if key != "config_id"}
+    )
+    Path(prepared["owner_path"]).write_text(
+        json.dumps(owner, sort_keys=True, separators=(",", ":")),
+        encoding="ascii",
+    )
+    import modules.communication.moltbot_bridge.src.reddog_current_generation_manifest_launch_selection as selection
+    import modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader as loader
+
+    monkeypatch.setattr(selection, "_now_epoch", lambda: MANIFEST_NOW)
+    monkeypatch.setattr(loader.time, "time", lambda: MANIFEST_NOW)
+
+    selected = load_system_service_startup_selection(
+        owner_config_path=prepared["owner_path"],
+        repo_root=repo,
     )
 
     assert selected.owner_config_id == owner["config_id"]

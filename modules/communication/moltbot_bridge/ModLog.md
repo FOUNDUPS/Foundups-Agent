@@ -1,4 +1,17 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Root-owned grant-service source-policy authority
+
+- Extended the existing root-owned signer configuration to v4 with the exact
+  canonical archive-to-repository source map, repository-root digest, and
+  source-policy digest.
+- Added an opaque, non-copyable, non-serializable capability whose use-time
+  revalidation rejects root-config replacement, cross-repository use, source
+  substitution, stale digests, and capabilities from another boundary.
+- Preserved v3 grant-client compatibility while preventing v3 from issuing
+  build-source authority. Archive construction, signer launch, secrets,
+  repository effects, and HoloIndex mutation remain blocked.
+  (WSP 00/15/22/50/62/71/97)
+
 ## 2026-08-14: Grant-authority exact-Git effect admission
 
 - Extended signed owner E0 policy to v7 and runtime-artifact manifests to v3,

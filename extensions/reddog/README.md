@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.97
+Version: 0.4.98
+
+[OBSERVED] Version 0.4.98 pins owner config v4 and the root-owned canonical
+grant-service source-policy capability in the exact backend closure. It adds no
+archive build, service launch, signer, worker, repository, or merge authority.
 
 [OBSERVED] Version 0.4.97 pins signed owner policy v7, signed runtime manifest
 v3, and exact-Git provenance revalidation at the grant-authority WSP 71 effect

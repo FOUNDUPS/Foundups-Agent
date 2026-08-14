@@ -1,3 +1,12 @@
+## 2026-08-14: Root-owned source-policy authority regressions
+
+- Proved exact canonical source-map and repository-root binding through owner
+  config v4, plus stale root replacement, source/digest substitution,
+  cross-repository use, unknown fields, copy, pickle, and cross-boundary
+  capability rejection.
+- Preserved the existing independent grant-authority client under both v3 and
+  v4 without adding archive, signer, secret, worker, or repository effects.
+
 ## 2026-08-14: Grant-authority exact-Git effect-admission regressions
 
 - Added a production-shaped v7/v3 fixture sharing one real temporary Git root
