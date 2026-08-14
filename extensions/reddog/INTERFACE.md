@@ -1,6 +1,7 @@
 # RedDog Interface
 
-Version 0.4.98 pins owner-config v4 and the root-owned grant-service source
+Version 0.4.99 pins the uncomposed grant-profile atomic provisioning backend
+closure. Version 0.4.98 pinned owner-config v4 and the root-owned grant-service source
 policy authority. It adds no editor API or execution authority.
 
 Version 0.4.97 pins the exact-Git grant-authority effect admission chain. The

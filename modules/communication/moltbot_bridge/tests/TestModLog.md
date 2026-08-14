@@ -1,3 +1,13 @@
+## 2026-08-15: Grant-profile atomic provisioning regressions
+
+- Added exact three-artifact v3 activation and durable launch-digest coverage
+  through the existing atomic provisioner.
+- Proved config-v1 downgrade, alternate committed source maps, root-owner
+  replacement during commit, and concurrent compliant owner rotation reject or
+  serialize without partial activation.
+- Added the owner-binding and grant-profile files to the exact WSP 62 slice
+  gate; no exemption or duplicate test harness was introduced.
+
 ## 2026-08-14: Root-owned source-policy authority regressions
 
 - Proved exact canonical source-map and repository-root binding through owner

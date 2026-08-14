@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
-from typing import Any
+from pathlib import Path
+from typing import Any, Iterator, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -19,6 +21,17 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_a
     RuntimeArtifactManifestAuthority,
     RuntimeArtifactManifestAuthorityBoundary,
 )
+from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_owner_binding import (
+    grant_authority_owner_operation_fence,
+    require_grant_authority_provisioning_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_grant_authority_source_policy_authority import (
+    load_grant_authority_source_policy_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
+    RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE,
+    RuntimeArtifactManifestError,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
     DurableSignerRuntimeGenerationAnchor,
 )
@@ -33,6 +46,8 @@ class SignerRuntimeAtomicProvisioningContext:
     authority_boundary: RuntimeArtifactManifestAuthorityBoundary
     authority_tier: str
     generation_anchor: DurableSignerRuntimeGenerationAnchor
+    runtime_profile: str | None = None
+    owner_config_path: str | None = None
 
     def require_signing_context(self) -> RuntimeArtifactManifestSigningContext:
         values = self.authority_boundary.require(self.authority)
@@ -52,6 +67,64 @@ class SignerRuntimeAtomicProvisioningContext:
             authority_boundary=self.authority_boundary,
             authority_tier=self.authority_tier,
         )
+
+    @contextmanager
+    def source_policy_fence(self) -> Iterator[None]:
+        """Hold the root-owner fence for one complete grant activation."""
+
+        if self.runtime_profile is None:
+            if self.owner_config_path is not None:
+                raise RuntimeArtifactManifestError(
+                    "grant_source_policy_context_invalid"
+                )
+            yield
+            return
+        values = self.authority_boundary.require(self.authority)
+        with grant_authority_owner_operation_fence(
+            self._owner_path(), repo_root=Path(values["repo_root"])
+        ):
+            self.revalidate_source_policy()
+            yield
+
+    def revalidate_source_policy(
+        self, manifest: Mapping[str, Any] | None = None
+    ) -> Mapping[str, Any] | None:
+        """Revalidate current owner and exact grant artifact lineage."""
+
+        if self.runtime_profile is None:
+            return None
+        if (
+            self.runtime_profile
+            != RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE
+        ):
+            raise RuntimeArtifactManifestError(
+                "grant_source_policy_context_invalid"
+            )
+        runtime = self.authority_boundary.require(self.authority)
+        source_authority, source_boundary = (
+            load_grant_authority_source_policy_authority(
+                owner_config_path=self._owner_path(),
+                repo_root=runtime["repo_root"],
+            )
+        )
+        policy = source_boundary.revalidate(source_authority)
+        require_grant_authority_provisioning_binding(
+            owner_config_path=self._owner_path(),
+            repo_root=runtime["repo_root"],
+            runtime_root=runtime["runtime_root"],
+            source_policy=policy,
+            manifest_authority=self.authority,
+            manifest_boundary=self.authority_boundary,
+            manifest=manifest,
+        )
+        return policy
+
+    def _owner_path(self) -> Path:
+        if not self.owner_config_path:
+            raise RuntimeArtifactManifestError(
+                "grant_source_policy_owner_path_missing"
+            )
+        return Path(self.owner_config_path).resolve()
 
 
 @dataclass(frozen=True)
@@ -92,8 +165,35 @@ def create_signer_runtime_atomic_provisioning_context(
     )
 
 
+def create_grant_runtime_atomic_provisioning_context(
+    *, manifest_signing: RuntimeArtifactManifestSigningContext,
+    generation_anchor: DurableSignerRuntimeGenerationAnchor,
+    owner_config_path: Path | str,
+) -> SignerRuntimeAtomicProvisioningContext:
+    """Issue a grant-v3 context without caller-selected profile authority."""
+
+    base = create_signer_runtime_atomic_provisioning_context(
+        manifest_signing=manifest_signing,
+        generation_anchor=generation_anchor,
+    )
+    context = SignerRuntimeAtomicProvisioningContext(
+        signer=base.signer,
+        authority=base.authority,
+        authority_boundary=base.authority_boundary,
+        authority_tier=base.authority_tier,
+        generation_anchor=base.generation_anchor,
+        runtime_profile=(
+            RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE
+        ),
+        owner_config_path=str(Path(owner_config_path).resolve()),
+    )
+    context.revalidate_source_policy()
+    return context
+
+
 __all__ = [
     "SignerRuntimeAtomicProvisioningContext",
     "SignerRuntimeAtomicProvisioningResult",
+    "create_grant_runtime_atomic_provisioning_context",
     "create_signer_runtime_atomic_provisioning_context",
 ]

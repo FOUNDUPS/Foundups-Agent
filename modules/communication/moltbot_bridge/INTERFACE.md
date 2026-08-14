@@ -1,12 +1,12 @@
 # OpenClaw Bridge Interface
 ## Exact-Git grant-authority effect admission
 
-`produce_signed_runtime_artifact_manifest()` accepts the additive
-`grant_authority_service_git_provenance` profile only when its v2 archive is
-reconstructed from the authority-bound repository and commit. The resulting
-v3 manifest signs the repository-root, commit, object-format, source-policy,
-and source-descriptor bindings. The isolated signer recognizes the v3 domain
-and independently revalidates those bindings before signing.
+`create_grant_runtime_atomic_provisioning_context()` fixes the exact-Git profile,
+loads owner-config-v4 policy internally, and requires config v2. The existing
+provisioner derives three-artifact leases, activation and recovery from the v3
+manifest; its final transactional guard can roll back. Manifest production
+signs repository, commit, object-format, source-policy and source-descriptor
+bindings. No production bootstrap calls this foundation or gains work authority.
 
 `authorize_current_grant_authority_wsp71_use()` is the final effect boundary.
 It requires signed E0 policy v7, re-reads the current v3 manifest and all three

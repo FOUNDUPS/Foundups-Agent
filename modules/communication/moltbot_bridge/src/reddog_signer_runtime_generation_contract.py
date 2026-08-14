@@ -5,8 +5,17 @@ from __future__ import annotations
 import threading
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Mapping, Protocol, runtime_checkable
 from weakref import WeakKeyDictionary
+
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
+    GRANT_AUTHORITY_SERVICE_CONFIG,
+    GRANT_AUTHORITY_SERVICE_RUN_PACKET,
+    REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS,
+    REQUIRED_RUNTIME_ARTIFACTS,
+    RuntimeArtifactManifestError,
+    required_runtime_artifacts_for,
+)
 
 
 def _build_process_local_registry(error: str):
@@ -169,6 +178,38 @@ class SignerRuntimeGenerationRecoveryOutcome:
     committed_witness_recovered: bool
 
 
+def signer_runtime_generation_binding_from_manifest(
+    manifest: Mapping[str, Any], *, generation: int
+) -> SignerRuntimeGenerationBinding:
+    """Project one validated profile's launch digests into generation state."""
+
+    required = required_runtime_artifacts_for(manifest)
+    if required == REQUIRED_RUNTIME_ARTIFACTS:
+        config_name, run_packet_name = required[-2:]
+    elif required == REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS:
+        config_name = GRANT_AUTHORITY_SERVICE_CONFIG
+        run_packet_name = GRANT_AUTHORITY_SERVICE_RUN_PACKET
+    else:
+        raise RuntimeArtifactManifestError("manifest_launch_artifacts_missing")
+    descriptors = {
+        str(item.get("filename") or ""): item
+        for item in manifest["artifacts"]
+        if isinstance(item, Mapping)
+    }
+    config = descriptors.get(config_name)
+    run_packet = descriptors.get(run_packet_name)
+    if not config or not run_packet:
+        raise RuntimeArtifactManifestError("manifest_launch_artifacts_missing")
+    return SignerRuntimeGenerationBinding(
+        generation=generation,
+        manifest_id=str(manifest["manifest_id"]),
+        artifact_generation_digest=str(manifest["artifact_generation_digest"]),
+        config_digest=str(manifest["signer_service_config_digest"]),
+        config_raw_digest=str(config["content_digest"]),
+        run_packet_digest=str(run_packet["content_digest"]),
+    )
+
+
 __all__ = [
     "SignerRuntimeGenerationActivation",
     "SignerRuntimeGenerationBinding",
@@ -179,6 +220,7 @@ __all__ = [
     "SignerRuntimeGenerationRecoveryOutcome",
     "SignerRuntimeGenerationSigner",
     "SignerRuntimeGenerationVerifier",
+    "signer_runtime_generation_binding_from_manifest",
     "TransactionalSignerRuntimeGenerationHighWaterStore",
     "VerifiedSignerRuntimeGenerationHighWater",
 ]

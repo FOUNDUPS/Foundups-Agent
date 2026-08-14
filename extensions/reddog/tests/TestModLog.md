@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-15 - Grant-profile atomic provisioning pin (0.4.99)
+
+- Updated version and backend-manifest assertions for the uncomposed atomic
+  grant-profile provisioning closure.
+- Retained backend-integrity and no-authority regressions.
+
 ## 2026-08-14 - Root-owned source-policy compatibility pin (0.4.98)
 
 - Updated extension and backend-manifest assertions for owner config v4 and

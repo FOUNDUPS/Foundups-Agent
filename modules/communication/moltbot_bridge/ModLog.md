@@ -1,4 +1,22 @@
 # ModLog - moltbot_bridge
+## 2026-08-15: Grant-profile atomic runtime provisioning
+
+- Extended the existing atomic signer-generation transaction with one fixed
+  exact-Git grant-authority context; no second provisioner or trust model was
+  created.
+- Bound owner config v4 and grant config v2 through exact repository/source-
+  policy evidence into manifest v3 and durable generation activation. Dynamic
+  profile artifacts now drive leases, activation, and recovery.
+- Added a shared root-owner operation fence plus source-policy revalidation at
+  production, commit guard, and recovery. Alternate committed source maps,
+  config downgrade, owner replacement at the final commit guard, and concurrent
+  compliant rotation fail closed; the transactional guard proves rollback.
+- This is artifact provisioning only. Service launch, secret resolution,
+  external lifecycle supervision, live authority, repository work, and merge
+  remain blocked, and no production bootstrap invokes the foundation. WSP 15
+  score: C4 + I5 + D5 + Im5 = 19/20, P0.
+  (WSP 00/15/22/50/62/71/97)
+
 ## 2026-08-14: Root-owned grant-service source-policy authority
 
 - Extended the existing root-owned signer configuration to v4 with the exact
