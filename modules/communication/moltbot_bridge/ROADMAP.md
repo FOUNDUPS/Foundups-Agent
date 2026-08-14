@@ -21,6 +21,10 @@
   service start.
 - COMPLETE: owner config v3 and the uncomposed independent-grant client supply
   bind a disjoint Unix socket plus exact non-root peer UID/GID to signed policy.
+- COMPLETE: owner config v4 binds the canonical grant-service source map to the
+  existing root-owned configuration and exposes it only through an opaque,
+  revalidatable process capability. V3 retains grant-client compatibility but
+  cannot authorize a build source policy.
 - COMPLETE: deterministic grant-service zipapp validation at manifest
   production and use time. Canonical ZIP bytes, exact member digests, package
   structure, direct static-import references, common loader defenses, and the
@@ -37,7 +41,7 @@
   trust chain. One callback runs only while the current E0 lease and matching
   durable revocation fence remain held; no reusable permission object escapes.
   Root-generation, grant, revocation and target-signer keys are role-distinct.
-- BLOCKED: production v7 artifact provisioning, pinned-byte launch,
+- BLOCKED: v4-capability-bound production v7 artifact provisioning, pinned-byte launch,
   grant-service isolation, resolver composition, lifecycle supervision and the
   live canary remain next. Exact-Git admission alone does not launch a service,
   resolve a secret, execute repository work or prove production readiness.

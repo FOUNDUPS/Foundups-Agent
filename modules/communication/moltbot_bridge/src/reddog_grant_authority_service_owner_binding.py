@@ -1,4 +1,4 @@
-"""Root-owned grant-service runtime assignment from owner config v3."""
+"""Root-owned grant-service runtime assignment from owner config v3/v4."""
 
 from __future__ import annotations
 
@@ -21,13 +21,14 @@ def grant_authority_owner_runtime_root(
     )
     from .reddog_signer_system_service_manifest_selection_loader import (
         SCHEMA_VERSION_V3,
+        SCHEMA_VERSION_V4,
         _load_owner_config,
     )
 
     path = Path(owner_config_path).resolve()
     owner = _load_owner_config(path, repo=repo_root)
     if (
-        owner.get("schema_version") != SCHEMA_VERSION_V3
+        owner.get("schema_version") not in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4}
         or owner.get("config_id") != expected_owner_config_id
     ):
         raise RuntimeArtifactManifestError(

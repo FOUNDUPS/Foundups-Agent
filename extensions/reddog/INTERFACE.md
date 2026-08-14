@@ -1,5 +1,8 @@
 # RedDog Interface
 
+Version 0.4.98 pins owner-config v4 and the root-owned grant-service source
+policy authority. It adds no editor API or execution authority.
+
 Version 0.4.97 pins the exact-Git grant-authority effect admission chain. The
 backend requires signed E0 policy v7 and signed manifest v3 before WSP 71 may
 invoke a callback; v6/v2 remains diagnostic-only. Version 0.4.96 introduced

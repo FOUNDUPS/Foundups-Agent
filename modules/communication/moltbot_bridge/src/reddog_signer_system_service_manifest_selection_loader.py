@@ -70,10 +70,10 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_root_path,
 )
 
-
 SCHEMA_VERSION = "reddog_signer_system_service_owner_config.v1"
 SCHEMA_VERSION_V2 = "reddog_signer_system_service_owner_config.v2"
 SCHEMA_VERSION_V3 = "reddog_signer_system_service_owner_config.v3"
+SCHEMA_VERSION_V4 = "reddog_signer_system_service_owner_config.v4"
 MAX_OWNER_CONFIG_BYTES = 64 * 1024
 ROOT_UID = 0
 FIELDS = frozenset(
@@ -100,6 +100,7 @@ FIELDS = frozenset(
 )
 V2_FIELDS = FIELDS | {"verified_outcome_authority"}
 V3_FIELDS = V2_FIELDS | {"independent_grant_authority"}
+V4_FIELDS = V3_FIELDS | {"grant_authority_source_policy"}
 _OUTCOME_OWNER_FIELDS = frozenset(
     {
         "descriptor", "authority_socket_path",
@@ -131,7 +132,7 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
     """Load all production signer authority from one root-owned v2 snapshot."""
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
-    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}:
+    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4}:
         raise RuntimeArtifactManifestError("signer_owner_config_v2_required")
     manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
 
@@ -159,14 +160,11 @@ def load_system_service_manifest_selection(
     run_packet_path: Path | None = None,
 ) -> tuple[object, Any]:
     """Load root-owned trust, reconstruct read-only readers, and select current."""
-
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
     return _manifest_selection_from_owner(
         owner, repo=repo, config_path=config_path, run_packet_path=run_packet_path
     )
-
-
 def _manifest_selection_from_owner(
     owner: Mapping[str, Any], *, repo: Path,
     config_path: Path | None = None, run_packet_path: Path | None = None,
@@ -458,7 +456,7 @@ def _validate_owner_config(
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     schema = value.get("schema_version")
     expected_fields = {SCHEMA_VERSION: FIELDS, SCHEMA_VERSION_V2: V2_FIELDS,
-                       SCHEMA_VERSION_V3: V3_FIELDS}.get(schema)
+                       SCHEMA_VERSION_V3: V3_FIELDS, SCHEMA_VERSION_V4: V4_FIELDS}.get(schema)
     if expected_fields is None or set(value) != expected_fields:
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     checked = dict(value)
@@ -471,15 +469,17 @@ def _validate_owner_config(
         raise RuntimeArtifactManifestError("signer_owner_repo_binding_mismatch")
     _validate_owner_text_and_digests(checked)
     _validate_owner_paths(checked, repo=repo, owner_root=owner_root)
-    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}:
+    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4}:
         _validate_outcome_authority_owner_config(
             checked, repo=repo, owner_root=owner_root
         )
-    if schema == SCHEMA_VERSION_V3:
+    if schema in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4}:
         from modules.communication.moltbot_bridge.src.reddog_signer_independent_grant_authority_client_supply import validate_independent_grant_authority_owner_config
         validate_independent_grant_authority_owner_config(checked, repo=repo, owner_root=owner_root)
+    if schema == SCHEMA_VERSION_V4:
+        from modules.communication.moltbot_bridge.src.reddog_grant_authority_source_policy_authority import validate_grant_authority_source_policy_owner_config
+        validate_grant_authority_source_policy_owner_config(checked, repo=repo)
     return checked
-
 
 def _validate_owner_text_and_digests(value: Mapping[str, Any]) -> None:
     text_fields = (
@@ -664,6 +664,7 @@ __all__ = [
     "SCHEMA_VERSION",
     "SCHEMA_VERSION_V2",
     "SCHEMA_VERSION_V3",
+    "SCHEMA_VERSION_V4",
     "SystemServiceStartupSelection",
     "load_system_service_manifest_selection",
     "load_system_service_revocation_anchor_authority",

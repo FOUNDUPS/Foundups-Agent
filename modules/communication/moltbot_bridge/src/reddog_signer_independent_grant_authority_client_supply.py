@@ -97,6 +97,7 @@ def load_system_service_independent_grant_authority_client(
 
     from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
         SCHEMA_VERSION_V3,
+        SCHEMA_VERSION_V4,
         _load_owner_config,
     )
 
@@ -109,16 +110,16 @@ def load_system_service_independent_grant_authority_client(
         owner = _load_owner_config(owner_config_path, repo=repo)
         return _build_authenticated_supply(
             owner=owner, policy=admission.policy, owner_config_path=owner_config_path,
-            repo=repo, required_schema=SCHEMA_VERSION_V3,
+            repo=repo, required_schemas={SCHEMA_VERSION_V3, SCHEMA_VERSION_V4},
         )
 
 
 def _build_authenticated_supply(
     *, owner: Mapping[str, Any], policy: Mapping[str, Any],
-    owner_config_path: Path | str, repo: Path, required_schema: str,
+    owner_config_path: Path | str, repo: Path, required_schemas: set[str],
 ) -> IndependentGrantAuthorityClientSupply:
-    if owner.get("schema_version") != required_schema:
-        raise RuntimeArtifactManifestError("signer_owner_config_v3_required")
+    if owner.get("schema_version") not in required_schemas:
+        raise RuntimeArtifactManifestError("signer_owner_config_grant_authority_required")
     if policy["owner_config_id"] != owner["config_id"]:
         raise RuntimeArtifactManifestError("grant_authority_owner_binding_mismatch")
     _require_policy_key(policy)

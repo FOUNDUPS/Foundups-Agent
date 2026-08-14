@@ -154,7 +154,7 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "f8249d8331fb3f0c06266cd844f7102b16b87ed42d90dfa3881784ae3dd5210c"
+    assert digest == "dcebe0db6b5db5d6a773d4e6483b0f086c654a848ccc5136eb6d91e7d4713bb2"
     constants = (REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js").read_text(encoding="utf-8")
     match = re.search(r"EXPECTED_MANIFEST_SHA256 = '([a-f0-9]{64})'", constants)
     assert match is not None and match.group(1) == digest
