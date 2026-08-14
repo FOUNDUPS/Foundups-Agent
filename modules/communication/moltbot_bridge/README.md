@@ -35,10 +35,21 @@ cannot call. Every Python member and the complete claimed-source descriptor are
 bound by the inner manifest; the signed outer runtime manifest still binds the
 exact archive bytes.
 
+[OBSERVED] A separate v2 build-provenance foundation can construct the archive
+only from exact committed Git blobs and independently verify every
+non-synthetic member against the same commit tree and an explicit source-path
+policy. Dirty checkout bytes, uncommitted files, arbitrary committed source
+paths, object-ID substitution, and v1 claimed-commit metadata do not satisfy
+that verifier. Git replacement objects and inherited `GIT_*` authority
+overrides are disabled; aggregate blob reads use one bounded batch process.
+The verifier also requires independent expected repository-root, commit,
+object-format, and source-policy digests.
+
 [SPECIFIED_NOT_IMPLEMENTED] This is inert executable validation, not a service
 launcher, Python sandbox, or hermetic-runtime claim. Python reflection is not
-certified safe by AST inspection. `claimed_source_commit_sha` is
-signer-attested metadata, not independently verified Git provenance. Interpreter,
+certified safe by AST inspection. The current production owner policy and
+runtime manifest do not yet require the v2 Git provenance proof, so v1
+`claimed_source_commit_sha` remains metadata rather than authority. Interpreter,
 standard-library, external executable, OS-principal, resolver, socket,
 supervision, crash-recovery, pinned-descriptor execution, and production
 archive-build authority remain unimplemented and block all execution.

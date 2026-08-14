@@ -1,5 +1,13 @@
 # RedDog ModLog
 
+## 2026-08-14 - Shared exact-Git runtime hardening pin (0.4.96)
+
+- Pinned the reachable exact-commit Git readers with replacement refs and
+  inherited Git configuration disabled. The inert v2 builder, verifier, source
+  policy, and batch reader remain outside the executable backend closure.
+- Added no thin-client behavior, production provenance admission, signing,
+  launch, or execution authority.
+
 ## 2026-08-14 - Grant-service archive validation closure (0.4.95)
 
 - Pinned the deterministic archive contract, ZIP/use-time validator, exact

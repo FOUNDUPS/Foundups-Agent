@@ -407,6 +407,10 @@ def test_archive_modules_remain_bounded_and_effect_free() -> None:
     for name in (
         "reddog_grant_authority_service_archive_contract.py",
         "reddog_grant_authority_service_archive_validation.py",
+        "reddog_grant_authority_service_git_archive_builder.py",
+        "reddog_grant_authority_service_git_archive_contract.py",
+        "reddog_grant_authority_service_git_archive_validation.py",
+        "reddog_grant_authority_service_git_source_policy.py",
         "reddog_grant_authority_service_entrypoint_validation.py",
         "reddog_grant_authority_service_import_closure.py",
         "reddog_grant_authority_service_import_member_validation.py",

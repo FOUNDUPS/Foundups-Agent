@@ -9,6 +9,7 @@ import subprocess
 import threading
 
 from .wre_git_tree_manifest import ExactGitTreeManifest, exact_git_tree_manifest
+from .wre_git_bounded_io import git_read_environment
 
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_ARCHIVE_BYTES = 2 * 1024 * 1024 * 1024
@@ -38,9 +39,9 @@ def _materialize_manifest(
     repo: Path, target: Path, manifest: ExactGitTreeManifest,
 ) -> None:
     process = subprocess.Popen(
-        ["git", "-C", str(repo), "cat-file", "--batch"],
+        ["git", "--no-replace-objects", "-C", str(repo), "cat-file", "--batch"],
         stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL, shell=False,
+        stderr=subprocess.DEVNULL, shell=False, env=git_read_environment(),
     )
     state: dict[str, BaseException] = {}
     worker = threading.Thread(

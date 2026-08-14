@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-14 - Shared exact-Git runtime hardening pin (0.4.96)
+
+- Updated the canonical build and backend-manifest assertions for the shared
+  bounded-Git hardening reachable from the current runtime closure.
+- Retained no-authority, backend-integrity, replacement-ref, and bounded-read
+  regressions.
+
 ## 2026-08-14 - Grant-service archive closure pin (0.4.95)
 
 - Updated version and backend-manifest assertions for the executable archive

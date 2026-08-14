@@ -1,4 +1,21 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Grant-authority exact-Git archive provenance foundation
+
+- Extended the canonical archive contract with a separate v2 provenance block
+  whose non-synthetic members bind archive path, repository path, exact commit,
+  Git object format, blob object ID, byte count, and content digest.
+- Reused the WRE exact-tree and bounded Git-object readers; archive construction
+  reads committed blobs rather than checkout files, and independent validation
+  compares every member with the object database under an exact source policy.
+- Disabled Git replacement refs, sanitized inherited Git authority variables,
+  batch-bounded aggregate reads, and required independently supplied repository
+  root, commit, object-format, and source-policy bindings. Generic production
+  validation rejects v2 until those inputs are bound by signed owner policy.
+- Preserved legacy v1 validation without treating its claimed commit as
+  provenance. Production owner-policy admission, manifest activation, service
+  launch, secret resolution, and repository authority remain blocked.
+  (WSP 00/15/22/50/62/71/97)
+
 ## 2026-08-14: Grant-authority executable archive validation
 
 - Replaced arbitrary service-archive bytes with one deterministic ZIP_STORED
