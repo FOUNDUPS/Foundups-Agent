@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-14 - Authenticated grant-service artifact pin (0.4.93)
+
+- Updated current-version assertions and the canonical backend closure.
+- Retained backend-integrity and no-authority behavior.
+
 ## 2026-08-14 - Grant-authority client manifest pin (0.4.92)
 
 - Updated current-version contract assertions and the backend manifest closure.

@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.92
+Version: 0.4.93
+
+[OBSERVED] Version 0.4.93 pins the authenticated grant-service artifact
+contract, signed E0 v6 policy, and exact confined-byte reader dependency
+closure. It adds no thin-client behavior or live signer authority.
 
 [OBSERVED] Version 0.4.92 pins the backend manifest after adding the
 uncomposed, peer-authenticated independent grant-authority client supply.

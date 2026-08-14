@@ -1,5 +1,8 @@
 # RedDog Interface
 
+Version 0.4.93 pins the authenticated grant-service artifact dependency
+closure. It adds no UI API, service lifecycle, or execution authority.
+
 Version 0.4.92 pins the backend dependency closure for the uncomposed
 independent grant-authority client supply. It adds no UI or execution authority.
 

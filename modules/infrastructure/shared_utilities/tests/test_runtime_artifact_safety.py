@@ -371,6 +371,21 @@ def test_confined_read_rejects_descriptor_final_path_outside_root(
         secure_read_confined_bytes(source, allowed_root=repo)
 
 
+def test_confined_bytes_read_honors_bound_above_one_megabyte(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "large.bin"
+    payload = b"a" * (1024 * 1024) + b"tail-evidence"
+    source.write_bytes(payload)
+
+    actual, offset = secure_read_confined_bytes(
+        source, allowed_root=tmp_path, max_bytes=len(payload)
+    )
+
+    assert actual == payload
+    assert offset == len(payload)
+
+
 def test_confined_text_read_uses_one_descriptor_and_enforces_size_limit(
     tmp_path: Path,
     monkeypatch,

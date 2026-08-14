@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-08-14 - Authenticated grant-service artifact pin (0.4.93)
+
+- Regenerated the exact backend manifest for signed E0 v6 grant-service
+  artifacts and full bounded confined-byte reads.
+- Added no thin-client behavior, service lifecycle, or execution authority.
+
 ## 2026-08-14 - Grant-authority client manifest pin (0.4.92)
 
 - Pinned the expanded signer dependency closure after owner config v3 and the

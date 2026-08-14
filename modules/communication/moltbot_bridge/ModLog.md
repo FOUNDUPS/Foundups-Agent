@@ -1,4 +1,30 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Authenticated grant-service manifest binding
+
+- Extended the existing runtime-artifact manifest additively: v1 remains
+  compatible, while v2 binds the grant-authority service profile and a bounded
+  content-addressed archive plus exact public config and inert run packet under
+  the same signer, nonce, and signed E0 generation fence.
+- Extended signed owner E0 policy to v6 with grant signer/profile identity,
+  public fingerprint, distinct key-reference hashes, permission evidence, and
+  exact manifest/config/run-packet bindings. V5 remains verifiable, but the new
+  grant-service adapter requires v6 plus manifest v2.
+- Added a hash-only immutable binding that reloads current authenticated E0,
+  the exact manifest, and all artifact bytes under the existing runtime lock.
+  It returns no raw secret references and performs no
+  secret resolution, socket, process, worker, repository, PR, merge, or
+  HoloIndex effect. Permission-receipt rehydration and lifecycle composition
+  remain fail closed. (WSP 00/15/22/50/62/71/97)
+- Removed silent one-MiB truncation from the shared confined byte reader so
+  callers' explicit bounds are honored; same-prefix archive-tail substitution
+  now rejects. Target and grant signing/audit key references are pairwise
+  distinct, including cross-role aliases.
+- Constrained public service agent, profile, and epoch fields to exact inert
+  grammars so secret-reference-shaped values cannot enter a public binding.
+- Kept grant-manifest selection fields in the full signed E0 policy but out of
+  the target signer's config-binding digest, avoiding a hash dependency cycle
+  while preserving identity, key-reference, permission, and target authority.
+
 ## 2026-08-14: Independent grant-authority client supply
 
 - Extended the existing signer owner configuration to v3 with one disjoint,

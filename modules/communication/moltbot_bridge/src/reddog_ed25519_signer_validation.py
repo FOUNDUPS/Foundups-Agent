@@ -28,6 +28,7 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_sig
 from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_manifest import (
     RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
     RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX,
+    RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V2,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -116,7 +117,12 @@ def signing_domain_pairs(request: SigningRequest) -> tuple[tuple[bool, bool], ..
         ),
         (
             request.requested_operation == RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
-            request.signing_input.startswith(RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX),
+            request.signing_input.startswith(
+                (
+                    RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX,
+                    RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V2,
+                )
+            ),
         ),
         (
             request.requested_operation

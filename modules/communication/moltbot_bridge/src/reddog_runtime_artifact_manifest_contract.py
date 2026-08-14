@@ -9,11 +9,14 @@ from typing import Any, Mapping
 
 
 SCHEMA_VERSION = "reddog_signed_runtime_artifact_manifest.v1"
+SCHEMA_VERSION_V2 = "reddog_signed_runtime_artifact_manifest.v2"
 SIGNING_OPERATION = "attest_reddog_runtime_artifact_manifest"
 SIGNING_PREFIX = "reddog-runtime-artifact-manifest.v1."
+SIGNING_PREFIX_V2 = "reddog-runtime-artifact-manifest.v2."
 SIGNER_ROLE = "reddog_runtime_artifact_manifest"
 DEFAULT_MAX_TTL_SECONDS = 300
 MAX_ARTIFACT_BYTES = 1024 * 1024
+MAX_SERVICE_ARCHIVE_BYTES = 16 * 1024 * 1024
 REQUIRED_RUNTIME_ARTIFACTS = (
     "authoritative_work_state.json",
     "authority_profile.json",
@@ -22,6 +25,15 @@ REQUIRED_RUNTIME_ARTIFACTS = (
     "principal_authority_records.json",
     "signer_service_config.json",
     "signer_service_run_packet.json",
+)
+GRANT_AUTHORITY_SERVICE_CONFIG = "grant_authority_service_config.json"
+GRANT_AUTHORITY_SERVICE_RUN_PACKET = "grant_authority_service_run_packet.json"
+GRANT_AUTHORITY_SERVICE_ARCHIVE = "grant_authority_service.pyz"
+RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE = "grant_authority_service"
+REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS = (
+    GRANT_AUTHORITY_SERVICE_CONFIG,
+    GRANT_AUTHORITY_SERVICE_RUN_PACKET,
+    GRANT_AUTHORITY_SERVICE_ARCHIVE,
 )
 SIGNATURE_FIELDS = frozenset(
     {
@@ -58,6 +70,7 @@ UNSIGNED_FIELDS = frozenset(
         "expires_at",
     }
 )
+UNSIGNED_FIELDS_V2 = UNSIGNED_FIELDS | {"runtime_profile"}
 
 
 class RuntimeArtifactManifestError(ValueError):
@@ -83,7 +96,7 @@ def canonical_signing_input(payload: Mapping[str, Any]) -> str:
         if key not in SIGNATURE_FIELDS
     }
     validate_unsigned_payload(unsigned)
-    return SIGNING_PREFIX + canonical_json(unsigned)
+    return signing_prefix_for(unsigned) + canonical_json(unsigned)
 
 
 def validate_signed_payload(value: Mapping[str, Any]) -> dict[str, Any]:
@@ -109,10 +122,11 @@ def validate_unsigned_payload(value: Mapping[str, Any]) -> dict[str, Any]:
     """Validate exact unsigned schema, descriptors, ID, and ASCII boundary."""
 
     payload = dict(value)
-    if set(payload) != UNSIGNED_FIELDS or not ascii_deep(payload):
+    schema = payload.get("schema_version")
+    fields = _unsigned_fields_for(schema)
+    if set(payload) != fields or not ascii_deep(payload):
         raise RuntimeArtifactManifestError("manifest_fields_invalid")
-    if payload["schema_version"] != SCHEMA_VERSION:
-        raise RuntimeArtifactManifestError("manifest_schema_invalid")
+    required_runtime_artifacts_for(payload)
     _validate_descriptors(payload)
     for field in _digest_fields():
         if not is_sha256(payload.get(field)):
@@ -138,6 +152,38 @@ def manifest_id_for(payload: Mapping[str, Any]) -> str:
     for field in SIGNATURE_FIELDS:
         body.pop(field, None)
     return digest(body)
+
+
+def signing_prefix_for(payload: Mapping[str, Any]) -> str:
+    schema = payload.get("schema_version")
+    if schema == SCHEMA_VERSION:
+        return SIGNING_PREFIX
+    if schema == SCHEMA_VERSION_V2:
+        return SIGNING_PREFIX_V2
+    raise RuntimeArtifactManifestError("manifest_schema_invalid")
+
+
+def required_runtime_artifacts_for(
+    payload: Mapping[str, Any],
+) -> tuple[str, ...]:
+    schema = payload.get("schema_version")
+    if schema == SCHEMA_VERSION:
+        return REQUIRED_RUNTIME_ARTIFACTS
+    if (
+        schema == SCHEMA_VERSION_V2
+        and payload.get("runtime_profile")
+        == RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE
+    ):
+        return REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS
+    raise RuntimeArtifactManifestError("manifest_schema_invalid")
+
+
+def runtime_artifact_size_limit(filename: str) -> int:
+    return (
+        MAX_SERVICE_ARCHIVE_BYTES
+        if filename == GRANT_AUTHORITY_SERVICE_ARCHIVE
+        else MAX_ARTIFACT_BYTES
+    )
 
 
 def validate_freshness(
@@ -218,12 +264,13 @@ def ascii_deep(value: Any) -> bool:
 
 
 def _validate_descriptors(payload: Mapping[str, Any]) -> None:
+    required = required_runtime_artifacts_for(payload)
     artifacts = payload.get("artifacts")
     if (
         type(payload.get("artifact_count")) is not int
-        or payload["artifact_count"] != len(REQUIRED_RUNTIME_ARTIFACTS)
+        or payload["artifact_count"] != len(required)
         or not isinstance(artifacts, (list, tuple))
-        or len(artifacts) != len(REQUIRED_RUNTIME_ARTIFACTS)
+        or len(artifacts) != len(required)
     ):
         raise RuntimeArtifactManifestError("manifest_artifacts_invalid")
     names: list[str] = []
@@ -238,10 +285,11 @@ def _validate_descriptors(payload: Mapping[str, Any]) -> None:
         if (
             type(item["byte_count"]) is not int
             or item["byte_count"] <= 0
+            or item["byte_count"] >= runtime_artifact_size_limit(names[-1])
             or not is_sha256(item["content_digest"])
         ):
             raise RuntimeArtifactManifestError("manifest_descriptor_invalid")
-    if tuple(names) != REQUIRED_RUNTIME_ARTIFACTS:
+    if tuple(names) != required:
         raise RuntimeArtifactManifestError("manifest_artifact_set_invalid")
     if payload.get("artifact_generation_digest") != digest(artifacts):
         raise RuntimeArtifactManifestError(
@@ -276,17 +324,33 @@ def _text_fields() -> tuple[str, ...]:
     )
 
 
+def _unsigned_fields_for(schema: object) -> frozenset[str]:
+    if schema == SCHEMA_VERSION:
+        return UNSIGNED_FIELDS
+    if schema == SCHEMA_VERSION_V2:
+        return UNSIGNED_FIELDS_V2
+    raise RuntimeArtifactManifestError("manifest_schema_invalid")
+
+
 __all__ = [
     "DEFAULT_MAX_TTL_SECONDS",
     "MAX_ARTIFACT_BYTES",
+    "MAX_SERVICE_ARCHIVE_BYTES",
+    "GRANT_AUTHORITY_SERVICE_CONFIG",
+    "GRANT_AUTHORITY_SERVICE_RUN_PACKET",
+    "GRANT_AUTHORITY_SERVICE_ARCHIVE",
+    "REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS",
     "REQUIRED_RUNTIME_ARTIFACTS",
+    "RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE",
     "RuntimeArtifactDescriptor",
     "RuntimeArtifactManifestError",
     "SCHEMA_VERSION",
+    "SCHEMA_VERSION_V2",
     "SIGNATURE_FIELDS",
     "SIGNER_ROLE",
     "SIGNING_OPERATION",
     "SIGNING_PREFIX",
+    "SIGNING_PREFIX_V2",
     "ascii_deep",
     "canonical_json",
     "canonical_signing_input",
@@ -295,7 +359,10 @@ __all__ = [
     "is_sha256",
     "manifest_id_for",
     "raw_digest",
+    "required_runtime_artifacts_for",
     "require_text",
+    "runtime_artifact_size_limit",
+    "signing_prefix_for",
     "validate_freshness",
     "validate_signed_payload",
     "validate_unsigned_payload",
