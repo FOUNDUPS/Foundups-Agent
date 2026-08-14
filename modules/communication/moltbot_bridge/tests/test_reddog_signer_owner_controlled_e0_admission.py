@@ -169,6 +169,7 @@ def _fixture_selection(
 ) -> dict[str, object]:
     return {
         "owner_config_id": DIGEST_A,
+        "generation_public_key": "public-key-v1:generation-authority",
         "manifest_id": DIGEST_B,
         "artifact_generation_digest": DIGEST_C,
         "config_digest": config_digest,

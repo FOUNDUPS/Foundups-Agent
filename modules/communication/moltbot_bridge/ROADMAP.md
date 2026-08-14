@@ -21,6 +21,11 @@
   service start.
 - COMPLETE: owner config v3 and the uncomposed independent-grant client supply
   bind a disjoint Unix socket plus exact non-root peer UID/GID to signed policy.
+- COMPLETE: grant-service WSP 71 permission receipt rehydration. Exact canonical
+  bytes and receipt ID follow the acyclic receipt -> config -> manifest -> E0
+  trust chain. One callback runs only while the current E0 lease and matching
+  durable revocation fence remain held; no reusable permission object escapes.
+  Root-generation, grant, revocation and target-signer keys are role-distinct.
 - BLOCKED: authoritative-use production composition, grant-service isolation,
   lifecycle supervision and live canary remain next.
 
@@ -108,8 +113,8 @@
 - COMPLETE: an uncomposed WSP 71 op CLI resolver factory requires a fixed,
   root-owned executable with secure ancestry and no group/other write access.
 - NEXT: independently administered grant-service composition and lifecycle,
-  including independent permission-receipt rehydration, production E0
-  provider/backend composition, WSP 71 resolve-per-sign composition, native-memory
+  including production E0 provider/backend composition, WSP 71
+  resolve-per-sign composition, native-memory
   zeroization evidence, and supervised handling of a crashed active use.
   The protected-use client is available through the current owner-config
   loader, but no production grant issuer or service startup path consumes it.

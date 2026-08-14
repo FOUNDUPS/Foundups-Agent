@@ -1,4 +1,20 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Grant-authority WSP 71 permission rehydration
+
+- Replaced trust in two SHA-shaped permission identifiers with an exact
+  canonical `SECRETS_READ` receipt bound through the root-selected signer
+  config, current E0 authority digest, and grant-service manifest.
+- Removed the draft's cyclic receipt/manifest binding and public mint path. The
+  acyclic chain is receipt -> config -> manifest -> E0; one callback runs under
+  the same current-generation lease and matching durable revocation lock.
+- Extended the existing root-composed revocation oracle with domain-correct,
+  pre/post issuer-key-epoch and expiry checks; permission receipt IDs are not
+  inserted into the secret-grant revocation namespace.
+- Bound the root-owned generation public key into private current selection and
+  require it to differ from grant, revocation and target-signer keys.
+- Added no vault resolution, socket, service startup, worker dispatch,
+  repository effect, or HoloIndex mutation. (WSP 00/15/22/50/62/71/97)
+
 ## 2026-08-14: Authenticated grant-service manifest binding
 
 - Extended the existing runtime-artifact manifest additively: v1 remains

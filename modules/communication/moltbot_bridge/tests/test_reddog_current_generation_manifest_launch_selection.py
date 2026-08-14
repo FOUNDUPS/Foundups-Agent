@@ -493,6 +493,7 @@ def _owner_authority(
             activation.high_water_durability_receipt_id
         ),
         owner_config_id=OWNER_CONFIG_ID,
+        generation_public_key="public-key-v1:generation-authority",
     )
 
 

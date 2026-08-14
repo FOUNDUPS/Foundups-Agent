@@ -71,6 +71,38 @@ class UncomposedDurableSignerGrantRevocationOracle:
             current = self._current(self._checked_now(at_epoch))
             return _revoked(current, grant_id, key_epoch)
 
+    def is_key_epoch_revoked(self, *, key_epoch: str, at_epoch: int) -> bool:
+        """Check issuer-key revocation without confusing another ID domain."""
+
+        with self._lock():
+            current = self._current(self._checked_now(at_epoch))
+            return key_epoch in current["revoked_key_epochs"]
+
+    def authorize_key_epoch_use(
+        self, *, key_epoch: str, at_epoch: int, expires_at: int,
+        action: Callable[[], _T],
+    ) -> _T:
+        """Run one non-grant action under the durable revocation fence."""
+
+        with self._lock():
+            current_epoch = self._checked_now(at_epoch)
+            current = self._current(current_epoch)
+            if (
+                type(expires_at) is not int
+                or current_epoch >= expires_at
+                or key_epoch in current["revoked_key_epochs"]
+            ):
+                raise RuntimeError("signer_key_epoch_use_rejected")
+            result = action()
+            after_epoch = self._now()
+            after = self._current(after_epoch)
+            if (
+                after_epoch >= expires_at
+                or key_epoch in after["revoked_key_epochs"]
+            ):
+                raise RuntimeError("signer_key_epoch_use_rejected")
+            return result
+
     def authorize_use(
         self, *, grant_id: str, key_epoch: str, at_epoch: int,
         action: Callable[[], _T],

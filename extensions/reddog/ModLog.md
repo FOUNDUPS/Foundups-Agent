@@ -1,5 +1,13 @@
 # RedDog ModLog
 
+## 2026-08-14 - Owner-E0 generation-selection pin (0.4.94)
+
+- Regenerated the exact backend manifest for the reachable owner-E0
+  generation-key selection and role-separation path.
+- Kept the tested WSP 71 permission rehydrator outside the runtime closure until
+  a governed production consumer composes it.
+- Added no thin-client behavior, service lifecycle, or execution authority.
+
 ## 2026-08-14 - Authenticated grant-service artifact pin (0.4.93)
 
 - Regenerated the exact backend manifest for signed E0 v6 grant-service

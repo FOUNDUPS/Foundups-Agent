@@ -38,6 +38,24 @@ class RootAuthorizedSignerGrantRevocationOracle:
             grant_id=grant_id, key_epoch=key_epoch, at_epoch=at_epoch
         )
 
+    def is_key_epoch_revoked(self, *, key_epoch: str, at_epoch: int) -> bool:
+        return self._durable.is_key_epoch_revoked(
+            key_epoch=key_epoch, at_epoch=at_epoch
+        )
+
+    @property
+    def binding(self):
+        return self._durable.binding
+
+    def authorize_key_epoch_use(
+        self, *, key_epoch: str, at_epoch: int, expires_at: int,
+        action: Callable[[], _T],
+    ) -> _T:
+        return self._durable.authorize_key_epoch_use(
+            key_epoch=key_epoch, at_epoch=at_epoch,
+            expires_at=expires_at, action=action,
+        )
+
     def authorize_grant_use(
         self, grant: Mapping[str, Any], action: Callable[[], _T]
     ) -> _T:

@@ -183,7 +183,6 @@ def test_acquire_finish_and_lost_finish_retry_are_root_linearized(
 ) -> None:
     values = runtime(tmp_path, monkeypatch)
     _install_current(values, signed_snapshot(values))
-    revocation = _lookup_revocation_client(values["client"])
     attempts = {"finish": 0}
     acquire_packets: list[bytes] = []
 
@@ -463,12 +462,29 @@ def test_root_composed_oracle_is_the_only_new_atomic_boundary(
         clock=lambda: int(time.time()),
     )
     assert boundary.atomic_revocation is True
+    assert composed.is_key_epoch_revoked(
+        key_epoch="epoch-not-revoked", at_epoch=int(time.time())
+    ) is False
     grant = {
         "grant_id": _sha("grant"), "key_epoch": "epoch-1",
         "signing_request_digest": _sha("request"),
         "expires_at": int(time.time()) + 120,
     }
     assert composed.authorize_grant_use(grant, lambda: "signed") == "signed"
+    assert composed.binding == values["binding"]
+
+    def reject_grant_domain(*_args, **_kwargs):
+        raise AssertionError("grant_domain_must_not_handle_permission_use")
+
+    monkeypatch.setattr(
+        RootProtectedUseAuthority, "authorize_use", reject_grant_domain
+    )
+    assert composed.authorize_key_epoch_use(
+        key_epoch="epoch-not-revoked",
+        at_epoch=int(time.time()),
+        expires_at=int(time.time()) + 120,
+        action=lambda: "permissioned",
+    ) == "permissioned"
 
     class FakeComposed(RootAuthorizedSignerGrantRevocationOracle):
         pass

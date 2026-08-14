@@ -22,9 +22,6 @@ from modules.communication.moltbot_bridge.tests.durable_revocation_anchor_client
     open_anchor_state as _open_anchor_state,
     raw_anchor as _raw_anchor,
 )
-from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
-    ProposalReplayHighWater,
-)
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
     STORE_SCHEMA,
     SignerGrantRevocationAuthorityBinding,

@@ -1,3 +1,15 @@
+## 2026-08-14: Grant-authority WSP 71 permission regressions
+
+- Added exact receipt shape, canonical-byte, root-generation binding, expiry,
+  real manifest/config rehydration, and same-lease callback coverage under the
+  matching durable issuer-key revocation fence.
+- Added attacker self-rehash, repository-write snapshot substitution,
+  cross-agent/profile/key/operation/generation substitution, duplicate key,
+  trailing byte, canonical-prefix tail, non-ASCII, oversized, symlink,
+  wrong-policy oracle, public mint, and detached-authority rejection.
+- Added root-generation/grant/revocation/target key-separation tests and atomic
+  non-grant key-epoch use tests on the existing durable oracle.
+
 ## 2026-08-14: Authenticated grant-service manifest regressions
 
 - Added signed manifest v2 production and verification coverage with the
