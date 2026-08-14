@@ -69,6 +69,7 @@ class _OwnerAuthorityValues:
     runtime: Path
     trust: tuple[str, str, str, str]
     owner_config_id: str
+    generation_public_key: str
 
 
 class CurrentGenerationLaunchOwnerAuthorityBoundary(Protocol):
@@ -110,6 +111,7 @@ def _issue_current_generation_launch_owner_authority(
     high_water_store_id: str,
     high_water_durability_receipt_id: str,
     owner_config_id: str,
+    generation_public_key: str,
 ) -> tuple[object, CurrentGenerationLaunchOwnerAuthorityBoundary]:
     """Mint owner authority after the external loader verifies durable policy."""
 
@@ -124,6 +126,9 @@ def _issue_current_generation_launch_owner_authority(
             high_water_durability_receipt_id,
         ),
         owner_config_id=_sha256(owner_config_id, "owner_config_id"),
+        generation_public_key=_ascii(
+            generation_public_key, "generation_public_key"
+        ),
     )
     authority = object()
     boundary = _OwnerAuthorityBoundary()
@@ -156,6 +161,7 @@ def create_current_generation_manifest_launch_selection_boundary(
         ),
         trust=owner.trust,
         owner_config_id=owner.owner_config_id,
+        generation_public_key=owner.generation_public_key,
     )
     return _Boundary(state.select, state.consume, state.current_selection_lease)
 
@@ -173,7 +179,8 @@ def _require_owner_authority(
 
 class _SelectionState:
     __slots__ = (
-        "repo", "runtime", "reader", "trust", "owner_config_id", "seal",
+        "repo", "runtime", "reader", "trust", "owner_config_id",
+        "generation_public_key", "seal",
         "issued", "issue_lock", "capability_type",
     )
 
@@ -185,12 +192,14 @@ class _SelectionState:
         reader: SignerRuntimeGenerationReader,
         trust: tuple[str, str, str, str],
         owner_config_id: str,
+        generation_public_key: str,
     ) -> None:
         self.repo = repo
         self.runtime = runtime
         self.reader = reader
         self.trust = trust
         self.owner_config_id = owner_config_id
+        self.generation_public_key = generation_public_key
         self.seal = object()
         self.issued: WeakKeyDictionary[object, Mapping[str, Any]] = (
             WeakKeyDictionary()
@@ -271,6 +280,7 @@ class _SelectionState:
             self.runtime,
             selected_at=selected_at,
             owner_config_id=self.owner_config_id,
+            generation_public_key=self.generation_public_key,
         )
 
 
@@ -449,6 +459,7 @@ def _launch_values(
     *,
     selected_at: int,
     owner_config_id: str,
+    generation_public_key: str,
 ) -> Mapping[str, Any]:
     descriptors = {
         str(item["filename"]): item for item in manifest["artifacts"]
@@ -466,6 +477,7 @@ def _launch_values(
             "selection_issued_at": selected_at,
             "selection_expires_at": selected_at + SELECTION_TTL_SECONDS,
             "owner_config_id": owner_config_id,
+            "generation_public_key": generation_public_key,
             "repo_root": str(repo),
             "runtime_root": str(runtime),
             "config_path": str(runtime / CONFIG_FILENAME),
@@ -507,6 +519,7 @@ def _legacy_launch_values(value: Mapping[str, Any]) -> Mapping[str, Any]:
     hidden = {
         "principal_authority_records_path",
         "principal_authority_records_digest",
+        "generation_public_key",
     }
     return MappingProxyType(
         {key: item for key, item in value.items() if key not in hidden}

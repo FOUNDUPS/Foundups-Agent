@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.94 pins the reachable owner-E0 generation-key selection dependency
+closure. The tested WSP 71 permission rehydrator is not yet runtime-composed or
+covered by backend preflight. No UI API, service lifecycle, or execution
+authority is added.
+
 Version 0.4.93 pins the authenticated grant-service artifact dependency
 closure. It adds no UI API, service lifecycle, or execution authority.
 

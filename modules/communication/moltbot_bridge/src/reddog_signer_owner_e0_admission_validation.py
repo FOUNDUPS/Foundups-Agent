@@ -29,6 +29,9 @@ from .reddog_signer_owner_e0_policy_contract import (
     canonical_signer_owner_e0_policy_input,
     signer_key_reference_digest,
 )
+from .reddog_signer_owner_e0_selection_binding import (
+    require_policy_selection_binding,
+)
 from .reddog_signer_secret_grant_revocation_authority_binding import (
     revocation_authority_binding_from_policy,
 )
@@ -51,19 +54,6 @@ def load_selected_signer_config(
     return config
 
 
-def require_policy_selection_binding(
-    policy: Mapping[str, Any], selection: Mapping[str, Any]
-) -> None:
-    bindings = {
-        "owner_config_id": "owner_config_id",
-        "manifest_id": "manifest_id",
-        "artifact_generation_digest": "artifact_generation_digest",
-        "config_digest": "config_digest",
-        "generation": "generation",
-        "generation_revision": "generation_revision",
-    }
-    if any(policy[left] != selection[right] for left, right in bindings.items()):
-        raise ValueError("e0_policy_generation_binding_mismatch")
 def require_policy_authorities(
     policy: Mapping[str, Any],
     *,

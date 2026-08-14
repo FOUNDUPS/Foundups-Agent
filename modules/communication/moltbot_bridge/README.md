@@ -53,11 +53,26 @@ the protected socket identity, verifies `SO_PEERCRED`, rejects overlap with
 target, outcome, replay, and revocation authority, and derives the public grant
 identity only from authenticated signed owner policy v5.
 
+[OBSERVED] Grant-service WSP 71 permission evidence is now an exact canonical
+receipt, not a SHA-shaped identifier. Admission securely reads the fixed
+root-confined artifact and recomputes both its full-byte digest and receipt ID
+while the authenticated current-generation E0 lease remains held. The acyclic
+chain is receipt -> service config -> authenticated service manifest -> signed
+E0 policy. The receipt binds the root-selected generation, issuer,
+agent/profile, key-reference hashes, `SECRETS_READ`, and `get_secret`. No
+reusable permission object is released. One callback runs while both the E0
+lease and matching durable revocation writer fence remain held, with key-epoch
+revocation and expiry checked before and after use. Generation, grant,
+revocation, and target-signer public keys must remain role-distinct.
+Repository-write permission snapshots, grant-authority-only rehashes,
+wrong-policy oracles, oversized canonical-prefix tails, noncanonical JSON, and
+detached authority reject.
+
 [SPECIFIED_NOT_IMPLEMENTED] The content-addressed archive is not claimed to be
-a valid or dependency-closed zipapp by this slice. The permission receipt
-identifier is authenticated by signed E0 policy but is not independently
-rehydrated. This
-foundation cannot activate the production
+a valid or dependency-closed zipapp by this slice. Permission-receipt
+rehydration is implemented, but receipt-specific revocation is not added to the
+secret-grant ID namespace; rotation, expiry, and issuer-key revocation remain
+the admitted controls. This foundation cannot activate the production
 authoritative-use path: HIGH now accepts only the canonical opaque consensus
 capability, but grant-service lifecycle and signer-service composition remain
 absent. ULTRA, root-owned service provisioning,

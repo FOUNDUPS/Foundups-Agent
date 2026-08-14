@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.93
+Version: 0.4.94
+
+[OBSERVED] Version 0.4.94 pins the reachable owner-E0 generation-key selection
+dependency closure. The WSP 71 permission rehydrator remains a tested,
+non-runtime library outside the backend preflight closure; this release adds no
+thin-client behavior or live signer authority.
 
 [OBSERVED] Version 0.4.93 pins the authenticated grant-service artifact
 contract, signed E0 v6 policy, and exact confined-byte reader dependency

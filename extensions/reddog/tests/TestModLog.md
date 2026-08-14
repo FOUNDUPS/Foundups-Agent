@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-14 - Owner-E0 generation-selection pin (0.4.94)
+
+- Updated current-version assertions and the reachable canonical backend
+  closure while retaining separate permission-rehydrator coverage.
+- Retained backend-integrity and no-authority behavior.
+
 ## 2026-08-14 - Authenticated grant-service artifact pin (0.4.93)
 
 - Updated current-version assertions and the canonical backend closure.

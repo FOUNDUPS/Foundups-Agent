@@ -1,5 +1,22 @@
 # Tests - OpenClaw Bridge
 
+## Grant-authority WSP 71 permission rehydration
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_durable_authority.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py
+```
+
+The matrix proves root-generation binding, canonical receipt rehydration,
+real config/manifest verification, same-lease callback use under the matching
+durable revocation fence, role-separated generation authority, and rejection
+of self-rehash, wrong-policy oracle use, repository-permission substitution,
+path/symlink replacement, duplicate keys, trailing bytes, canonical-prefix
+tails, non-ASCII and oversized input. It performs no secret resolution, service
+startup, socket connection, or worker effect.
+
 ## Authenticated grant-service manifest binding
 
 ```powershell
@@ -15,7 +32,7 @@ signer-domain admission, exact config/run-packet schemas, all-artifact use-time
 rehydration, archive-tail replacement rejection, pairwise key-reference
 separation, signed-policy substitution rejection, and secret-free output. It
 does not start a grant service, validate archive closure, resolve WSP 71 values,
-rehydrate permission evidence, dispatch a worker, or grant repository authority.
+dispatch a worker, or grant repository authority.
 
 ## Independent grant-authority client supply
 

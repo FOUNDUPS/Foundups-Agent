@@ -198,6 +198,7 @@ def _manifest_selection_from_owner(
         high_water_store_id=str(owner["high_water_store_id"]),
         high_water_durability_receipt_id=str(owner["high_water_durability_receipt_id"]),
         owner_config_id=str(owner["config_id"]),
+        generation_public_key=str(owner["generation_public_key"]),
     )
     boundary = create_current_generation_manifest_launch_selection_boundary(
         owner_authority=owner_authority,
