@@ -1,4 +1,19 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Grant-authority executable archive validation
+
+- Replaced arbitrary service-archive bytes with one deterministic ZIP_STORED
+  contract whose canonical inner manifest binds every Python member, exact
+  entrypoint shim, claimed source commit metadata, and source-descriptor digest.
+- Enforced the same validator before signed runtime-manifest production and
+  again during current E0-bound use-time rehydration.
+- Added fail-closed ZIP metadata, package/static-import reference, common
+  loader-alias, standard-library shadowing, beyond-top-level relative-import,
+  control-path, and non-generator callable-entrypoint checks. This remains an
+  inert validation layer: it launches no process, resolves no secret, opens no
+  socket, and grants no worker or repository effect. Claimed source metadata is
+  not independently verified Git provenance, and AST inspection is not a
+  Python sandbox. (WSP 00/15/22/50/62/71/97)
+
 ## 2026-08-14: Grant-authority WSP 71 permission rehydration
 
 - Replaced trust in two SHA-shaped permission identifiers with an exact

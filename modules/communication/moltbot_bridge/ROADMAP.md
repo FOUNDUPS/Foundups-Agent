@@ -21,13 +21,20 @@
   service start.
 - COMPLETE: owner config v3 and the uncomposed independent-grant client supply
   bind a disjoint Unix socket plus exact non-root peer UID/GID to signed policy.
+- COMPLETE: deterministic grant-service zipapp validation at manifest
+  production and use time. Canonical ZIP bytes, exact member digests, package
+  structure, direct static-import references, common loader defenses, and the
+  fixed synchronous `main()` ABI fail closed. This is not a Python sandbox.
+  Claimed source metadata is not Git
+  provenance, and the archive is never launched by this layer.
 - COMPLETE: grant-service WSP 71 permission receipt rehydration. Exact canonical
   bytes and receipt ID follow the acyclic receipt -> config -> manifest -> E0
   trust chain. One callback runs only while the current E0 lease and matching
   durable revocation fence remain held; no reusable permission object escapes.
   Root-generation, grant, revocation and target-signer keys are role-distinct.
-- BLOCKED: authoritative-use production composition, grant-service isolation,
-  lifecycle supervision and live canary remain next.
+- BLOCKED: authenticated archive build provenance, pinned-byte launch,
+  authoritative-use production composition, grant-service isolation, resolver
+  composition, lifecycle supervision and live canary remain next.
 
 ## RedDog conversational work promotion
 

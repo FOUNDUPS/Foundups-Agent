@@ -78,7 +78,13 @@ def _describe_runtime_artifacts_unlocked(
             allowed_root=runtime,
             max_bytes=runtime_artifact_size_limit(filename),
         )
-        if filename != GRANT_AUTHORITY_SERVICE_ARCHIVE:
+        if filename == GRANT_AUTHORITY_SERVICE_ARCHIVE:
+            from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_archive_validation import (
+                validate_grant_service_archive,
+            )
+
+            validate_grant_service_archive(raw)
+        else:
             mapping = _json_mapping(raw, filename)
             _validate_bound_artifact(values, filename, mapping)
             mappings[filename] = mapping

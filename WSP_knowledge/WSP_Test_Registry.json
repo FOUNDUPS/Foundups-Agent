@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1510,
+  "total_tests": 1511,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -8381,6 +8381,19 @@
       "description": "Tests for RedDog governed repo work-order dry-run validator."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_grant_authority_service_archive_validation",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_archive_validation.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial tests for canonical grant-authority service archives."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_grant_authority_service_authenticated_manifest_binding",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -8771,7 +8784,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_orchestration_plan_bootstrap.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9262,7 +9275,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_readonly_audit_decision_persistence.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9875,7 +9888,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_worker_dispatch_runtime_handler.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10330,7 +10343,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10882,7 +10895,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_work_order_runtime_invocation.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

@@ -15,6 +15,9 @@ from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_art
 from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_manifest_signature import (
     verify_grant_service_manifest_signatures,
 )
+from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_archive_validation import (
+    validate_grant_service_archive,
+)
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     DEFAULT_MAX_TTL_SECONDS,
     GRANT_AUTHORITY_SERVICE_ARCHIVE,
@@ -124,6 +127,9 @@ def _read_artifacts(
     )
     config_digest = raw_digest(raw[GRANT_AUTHORITY_SERVICE_CONFIG])
     archive_digest = raw_digest(raw[GRANT_AUTHORITY_SERVICE_ARCHIVE])
+    archive_manifest = validate_grant_service_archive(
+        raw[GRANT_AUTHORITY_SERVICE_ARCHIVE]
+    )
     if config["archive_digest"] != archive_digest:
         raise RuntimeArtifactManifestError("grant_service_config_invalid")
     run_packet = validate_grant_service_run_packet(
@@ -138,6 +144,7 @@ def _read_artifacts(
             raw[GRANT_AUTHORITY_SERVICE_RUN_PACKET]
         ),
         "archive_digest": archive_digest,
+        "archive_manifest": archive_manifest,
     }
 
 
