@@ -1,6 +1,6 @@
 {
   "spec_id": "holo_index.machine_language.v1",
-  "version": "2026-07-18",
+  "version": "2026-08-15",
   "scope": "runtime architecture, contracts, and scoring semantics",
   "source_of_truth_policy": {
     "authoritative_machine_contract": "holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json",
@@ -133,8 +133,24 @@
       "limit": "integer",
       "doc_type_filter": "all|code|test|wsp_protocol|module_readme|interface|documentation|roadmap|modlog"
     },
-    "search_response_required_keys": ["code_hits", "wsp_hits", "test_hits", "code", "wsps", "tests", "skills", "skill_hits", "symbol_hits", "docs_hits", "knowledge_hits", "docs", "knowledge", "work_ledger_hits", "work_ledger", "metadata"],
-    "search_metadata_keys": ["query", "code_count", "wsp_count", "test_count", "skill_count", "symbol_count", "docs_count", "knowledge_count", "work_ledger_count", "timestamp", "cached", "retrieval_mode", "embedding_backend", "backend_quality", "quality_gate", "routing_active", "collection_backend_map", "collection_embedding_space_map"],
+    "search_response_contract": {
+      "response_keys": ["code_hits", "wsp_hits", "test_hits", "code", "wsps", "tests", "skills", "skill_hits", "symbol_hits", "docs_hits", "knowledge_hits", "docs", "knowledge", "work_ledger_hits", "work_ledger", "metadata"],
+      "metadata_keys": ["query", "code_count", "wsp_count", "test_count", "skill_count", "symbol_count", "docs_count", "knowledge_count", "work_ledger_count", "timestamp", "cached", "retrieval_mode", "embedding_backend", "backend_quality", "quality_gate", "routing_active", "collection_backend_map", "collection_embedding_space_map"],
+      "collection_names": ["navigation_code", "navigation_wsp", "navigation_tests", "navigation_skills", "navigation_symbols", "navigation_vocabulary", "navigation_docs", "navigation_knowledge", "navigation_work_ledger"],
+      "collection_backends": ["sentence_transformers", "turboquant_onnx_int8"],
+      "aliases": {"code": "code_hits", "wsps": "wsp_hits", "tests": "test_hits", "skills": "skill_hits", "docs": "docs_hits", "knowledge": "knowledge_hits", "work_ledger": "work_ledger_hits"},
+      "counts": {"code_count": "code_hits", "wsp_count": "wsp_hits", "test_count": "test_hits", "skill_count": "skill_hits", "symbol_count": "symbol_hits", "docs_count": "docs_hits", "knowledge_count": "knowledge_hits", "work_ledger_count": "work_ledger_hits"},
+      "hit_schemas": {
+        "code": {"required": ["need", "location", "similarity", "cube", "type", "priority"], "optional": ["confidence", "path", "line", "preview"]},
+        "test": {"required": ["test_id", "path", "description", "capabilities", "similarity", "type", "priority"], "optional": ["confidence"]},
+        "skill": {"required": ["skill_name", "description", "primary_agent", "intent_type", "promotion_state", "path", "similarity", "type", "priority"], "optional": ["confidence"]},
+        "document": {"required": ["title", "summary", "path", "slice_id", "similarity", "type", "priority"], "optional": ["confidence"]},
+        "wsp": {"required": ["wsp", "title", "summary", "path", "similarity", "cube", "type", "priority"], "optional": ["confidence"]}
+      },
+      "bucket_schemas": {"code_hits": ["code", "wsp"], "code": ["code", "wsp"], "test_hits": ["test"], "tests": ["test"], "skill_hits": ["skill"], "skills": ["skill"], "docs_hits": ["document"], "docs": ["document"], "knowledge_hits": ["document"], "knowledge": ["document"], "wsp_hits": ["wsp"], "wsps": ["wsp"], "symbol_hits": ["wsp"], "work_ledger_hits": ["wsp"], "work_ledger": ["wsp"]},
+      "hit_value_rules": {"priority": "finite_number", "line": "positive_integer", "similarity": "percent_string_0_100", "confidence": "finite_number_0_1", "default": "string_or_null"},
+      "metadata_value_rules": {"field_rules": {"code_count": "nonnegative_integer", "wsp_count": "nonnegative_integer", "test_count": "nonnegative_integer", "skill_count": "nonnegative_integer", "symbol_count": "nonnegative_integer", "docs_count": "nonnegative_integer", "knowledge_count": "nonnegative_integer", "work_ledger_count": "nonnegative_integer", "cached": "boolean", "routing_active": "boolean", "collection_backend_map": "map:collection_backend", "collection_embedding_space_map": "map:embedding_fingerprint"}, "default": "string"}
+    },
     "bundle_json_schema_id": "wsp_memory_bundle_v1",
     "bundle_json_top_keys": ["schema_version", "generated_at", "ok", "task", "module_hint", "module_path", "structured_memory", "task_retrieval"]
   },
@@ -172,29 +188,9 @@
     "partial, raced, dirty-worktree, lexical, or receipt-write failures cannot publish CURRENT"
   ],
   "current_drift_and_status": [
-    {
-      "id": "DRIFT-001",
-      "area": "OutputComposer API compatibility",
-      "status": "resolved",
-      "resolution": "compose() now accepts intent_classification and legacy intent argument"
-    },
-    {
-      "id": "DRIFT-002",
-      "area": "Intent-router component names vs executable stubs",
-      "status": "resolved",
-      "resolution": "component_router now returns component names implemented by orchestrator stub execution"
-    },
-    {
-      "id": "DRIFT-003",
-      "area": "search() robustness under partial initialization",
-      "status": "resolved",
-      "resolution": "search() and _search_collection() now guard missing attrs/collections"
-    },
-    {
-      "id": "DRIFT-004",
-      "area": "docs-to-cli command parity",
-      "status": "open",
-      "resolution_target": "keep CLI_REFERENCE as menu snapshot; maintain exhaustive machine contract in this spec"
-    }
+    {"id": "DRIFT-001", "area": "OutputComposer API compatibility", "status": "resolved", "resolution": "compose() now accepts intent_classification and legacy intent argument"},
+    {"id": "DRIFT-002", "area": "Intent-router component names vs executable stubs", "status": "resolved", "resolution": "component_router now returns component names implemented by orchestrator stub execution"},
+    {"id": "DRIFT-003", "area": "search() robustness under partial initialization", "status": "resolved", "resolution": "search() and _search_collection() now guard missing attrs/collections"},
+    {"id": "DRIFT-004", "area": "docs-to-cli command parity", "status": "open", "resolution_target": "keep CLI_REFERENCE as menu snapshot; maintain exhaustive machine contract in this spec"}
   ]
 }

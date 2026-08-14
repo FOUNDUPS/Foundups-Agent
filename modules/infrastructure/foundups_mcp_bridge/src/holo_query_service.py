@@ -32,10 +32,13 @@ from .holo_query_freshness_gate import (
     FreshnessSnapshot as _FreshnessSnapshot,
     HoloQueryFreshnessGate as _FreshnessGate,
     maintenance_reason_for_error,
-    normalize_binding as _binding,
-    snapshot_error as _snapshot_error,
 )
-from .holo_query_service_response import flatten_hits as _flatten_hits
+from .holo_query_service_response import (
+    build_response as _response,
+    failure_reason as _failure_reason,
+    flatten_hits as _flatten_hits,  # noqa: F401 - legacy test/import surface
+    semantic_canary_empty_response as _empty_canary_response,
+)
 
 
 SCHEMA_VERSION = "holoindex_query_service.v1"
@@ -58,59 +61,6 @@ EXPECTED_ROOT_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 def _default_backend_factory(ssd_path: Path) -> Any:
     from holo_index.core.holo_index import HoloIndex
     return HoloIndex(ssd_path=ssd_path, quiet=True)
-
-
-def _dedupe(values: Sequence[str]) -> tuple[str, ...]:
-    return tuple(dict.fromkeys(value for value in values if value))
-
-
-def _failure_reason(error: str) -> str:
-    """Map service errors to stable, low-cardinality stale reasons."""
-    exact = {
-        "QUERY_TIMEOUT": "holoindex_query_timeout",
-        "QUERY_OWNER_POISONED": "query_owner_poisoned",
-        "QUERY_QUEUE_TIMEOUT": "query_owner_queue_timeout",
-        "OWNER_BUSY": "query_owner_busy",
-        "SEMANTIC_BACKEND_UNAVAILABLE": "semantic_backend_unavailable",
-    }
-    if error in exact:
-        return exact[error]
-    if error.startswith("REPOSITORY") or error.startswith("REPO_"):
-        return "repository_state_unproven"
-    if error in {"UNAUTHORIZED", "AUTH_NOT_CONFIGURED", TOKEN_TOO_SHORT_ERROR}:
-        return "query_owner_authentication_failed"
-    return "holoindex_owner_query_failed"
-
-
-def _response(
-    *,
-    ok: bool,
-    query: str,
-    freshness: str,
-    error: str,
-    reasons: Sequence[str] = (),
-    binding: Mapping[str, Any] | None = None,
-    raw: Mapping[str, Any] | None = None,
-    hits: Sequence[Mapping[str, Any]] = (),
-    mode: str = "unknown",
-    latency_ms: int = 0,
-) -> dict[str, Any]:
-    stale = list(_dedupe([str(value) for value in reasons]))
-    normalized_freshness = str(freshness or "UNKNOWN").upper()
-    if not ok and normalized_freshness != "UNKNOWN":
-        normalized_freshness = "STALE"
-    if not ok and not stale:
-        stale = [_failure_reason(error)]
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "ok": ok, "source": "holoindex", "query": query,
-        "freshness": normalized_freshness, "hits": list(hits), "error": error,
-        "stale_reasons": stale, "index_gap_detected": bool(stale or not ok),
-        "retrieval_mode": mode, "raw_result": dict(raw or {}),
-        "latency_ms": max(0, int(latency_ms)),
-        "no_holoindex_reindex_performed": True,
-        **_binding(binding),
-    }
 
 
 def _validate_payload(
@@ -480,14 +430,7 @@ def _health_result(
     if result.get("ok") is not True:
         return result
     if not result.get("hits"):
-        return {
-            **result,
-            "ok": False,
-            "freshness": "STALE",
-            "error": "SEMANTIC_CANARY_EMPTY",
-            "stale_reasons": ["semantic_canary_empty"],
-            "index_gap_detected": True,
-        }
+        return _empty_canary_response(result)
     owner._warmed.set()
     return {**result, "query": "", "hits": [], "raw_result": {}}
 
@@ -538,7 +481,7 @@ __all__ = [
     "HoloIndexQueryOwnerService", "MAX_LIMIT", "MAX_QUERY_CHARS",
     "MAX_REQUEST_BYTES", "MAX_STARTUP_WARMUP_TIMEOUT_SECONDS",
     "MIN_BEARER_TOKEN_CHARS", "QUERY_PATH",
-    "TOKEN_ENV", "TOKEN_TOO_SHORT_ERROR", "app",
+    "TOKEN_ENV", "TOKEN_TOO_SHORT_ERROR", "app",  # noqa: F822
     "create_holo_query_app", "create_stdlib_server", "main",
     "validate_bind_host",
 ]

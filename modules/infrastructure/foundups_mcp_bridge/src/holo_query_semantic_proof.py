@@ -15,7 +15,11 @@ from .holo_query_embedding_space_proof import (
     embedding_space_evidence,
     pin_backend_generation,
 )
-from .holo_query_service_response import build_response, flatten_hits
+from .holo_query_service_response import (
+    build_response,
+    flatten_hits,
+    normalize_result_paths,
+)
 
 
 def _semantic_evidence(
@@ -393,20 +397,33 @@ def _post_query_proof(
 
 def _success_response(
     *,
+    owner: Any,
     query: str,
     limit: int,
     raw: Mapping[str, Any],
     after: FreshnessSnapshot,
     started: float,
 ) -> Mapping[str, Any]:
+    try:
+        normalized_raw = normalize_result_paths(
+            raw, owner.repo_root, expected_query=query
+        )
+    except ValueError as exc:
+        error = {
+            "query_evidence_copy_failed": "QUERY_EVIDENCE_COPY_FAILED",
+            "query_evidence_path_outside_repository": (
+                "QUERY_EVIDENCE_PATH_OUTSIDE_REPOSITORY"
+            ),
+        }.get(str(exc), "QUERY_EVIDENCE_INVALID")
+        return owner._failure(error, query=query)
     return build_response(
         ok=True,
         query=query,
         freshness="CURRENT",
         error="",
         binding=after.binding,
-        raw=raw,
-        hits=flatten_hits(raw, limit),
+        raw=normalized_raw,
+        hits=flatten_hits(normalized_raw, limit),
         mode="semantic",
         latency_ms=int((time.monotonic() - started) * 1000),
     )
@@ -456,6 +473,7 @@ def run_semantic_proof(
     if failure or after is None:
         return failure or owner._failure("STALE_INDEX", query=query)
     return _success_response(
+        owner=owner,
         query=query, limit=limit, raw=raw, after=after, started=started
     )
 

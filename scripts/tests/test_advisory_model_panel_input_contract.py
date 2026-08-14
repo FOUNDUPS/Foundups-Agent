@@ -46,6 +46,20 @@ def _invoke_main(payload: dict) -> tuple[int, dict]:
 class FusionPanelInputHardeningTests(unittest.TestCase):
     _MISSING = object()
 
+    def test_system_prompt_always_retains_one_terminal_evidence_rule(self) -> None:
+        rule = bridge.UNTRUSTED_EVIDENCE_SYSTEM_RULE
+        prompts = (
+            "a" * 6001 + rule,
+            "b" * (6000 - len(rule) // 2) + rule,
+            rule + "\n" + ("c" * 6001) + rule,
+        )
+        for prompt in prompts:
+            with self.subTest(length=len(prompt)):
+                assembled = bridge._system_prompt({"system": prompt})
+                self.assertLessEqual(len(assembled), 6000)
+                self.assertTrue(assembled.endswith(rule))
+                self.assertEqual(assembled.count(rule), 1)
+
     @staticmethod
     def _fusion_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG004
         system = str(messages[0]["content"])
@@ -203,6 +217,16 @@ class FusionPanelInputHardeningTests(unittest.TestCase):
                     self.assertNotIn("fusion_panel_quorum", out["review_packet"])
                     if expected:
                         self.assertEqual(post_mock.call_args.args[1]["plugins"][0]["analysis_models"], expected)
+                        system = post_mock.call_args.args[1]["messages"][0]
+                        self.assertEqual(system["role"], "system")
+                        self.assertIn("untrusted evidence", system["content"])
+                        self.assertEqual(
+                            out["review_packet"]["evidence_boundary_scope"],
+                            "outer_request_system_and_user_evidence_only",
+                        )
+                        self.assertFalse(
+                            out["review_packet"]["internal_panel_role_prompts_observable"]
+                        )
         chat_mock.assert_not_called()
 
     def test_extension_overflow_sentinel_yields_truthful_final_receipts(self) -> None:

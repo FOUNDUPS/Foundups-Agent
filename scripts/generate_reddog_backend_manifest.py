@@ -43,6 +43,8 @@ BRIDGE_FILES = (
 )
 EXECUTABLE_FILES = (*BRIDGE_FILES, "holo_index.py")
 STATIC_RUNTIME_FILES = (
+    "holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json",
+    "holo_index/query_result_contract_schema.py",
     "extensions/reddog/start_operations_python_bootstrap.py",
     "scripts/reddog_holoindex_owner_service_once.py",
     "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py",

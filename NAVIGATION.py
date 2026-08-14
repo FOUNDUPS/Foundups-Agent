@@ -340,7 +340,7 @@ NEED_TO = {
     # Foundups(R)Agent / RedDog external extension lane (012-facing)
     "foundups agent extension Copy MD Work Trail Run Trace": "extensions/foundups_advisory_workers/extension.js",
     "foundups advisory workers extension Copy MD": "extensions/foundups_advisory_workers/extension.js",
-    "buildCopyMarkdown Redaction Gate Report Governed Handoff": "extensions/foundups_advisory_workers/extension.js:buildCopyMarkdown",
+    "buildCopyMarkdown Redaction Gate Report Governed Handoff": "extensions/foundups_advisory_workers/extension.js:buildCopyMarkdown symbol",
     "extension.js WSP_97 truth label compliance review": "extensions/foundups_advisory_workers/extension.js",
     "RedDog external worker acceptance baseline": "extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md",
     "advisory_model_once redaction gate bridge OpenRouter": "scripts/advisory_model_once.py",

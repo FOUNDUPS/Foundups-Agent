@@ -62,6 +62,18 @@ back to the caller workspace and therefore fails closed when no valid runtime
 exists. The resolver never checks out, updates, or indexes either worktree.
 
 Search response contract:
+
+The JSON machine specification is authoritative. Its complete response schema
+is structurally compiled by `holo_index.query_result_contract_schema` and
+enforced by `holo_index.query_result_contract`: successful owner
+consumers require the exact response and metadata key sets, per-bucket hit
+schemas, alias/count/query agreement, finite typed ranking fields, and
+canonical collection/backend mappings before evidence can be projected or
+cited. Malformed structures and rule declarations fail with one stable
+contract-invalid boundary before owner startup. The machine specification is
+content-bound in the RedDog runtime manifest, so a missing or modified
+authority fails compatibility.
+
 ```python
 {
   "code_hits": [

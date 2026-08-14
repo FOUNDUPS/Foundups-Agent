@@ -22,6 +22,7 @@ const governedGitContext = governedGitContextFactory.create({
 const { gitOutput, governedGitStatus, governedGitStat, governedGitDiff } = governedGitContext;
 const { GIT_OUTPUT_TRUNCATED_MARKER } = governedGitContextFactory;
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
+const holoIndexEvidenceBoundary = require('./holoindex_evidence_boundary');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const holoIncidentRepair = require('./holoindex_incident_repair');
 const holoBlockedRequestRecovery = require('./holoindex_blocked_request_recovery');
@@ -52,7 +53,7 @@ const {
   beginBasePromptTrace, outputValidationOptions, statusMessages
 } = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.99';
+const EXTENSION_VERSION = '0.4.100';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3965,6 +3966,7 @@ function redDogSystemPromptForRole(roleLabel) {
   'Operate under the WSP_00 contract: self=0102, role=' + role + ', origin=external_principal, classify the workstream and execution plane, and stay within this selected role. Prompt conformance is not runtime WSP_00 attestation; never claim the tracker or BOOTSTRAP gate ran unless the supplied evidence proves it.',
   'Apply the WSP_97 operator sequence: retrieve governing WSPs; retrieve HoloIndex/search evidence; read actual code, tests, interfaces, and receipts; run micro and macro passes; hard-think; dialectically refute the preferred move; reduce to first principles; then execute only inside the authorized plane.',
   'Before stating repository facts, cite bounded current evidence. Runtime behavior, tests, signed receipts, and direct reads outrank documentation, Memex, Breadcrumbs, Brain, and model recollection when they conflict.',
+  holoIndexEvidenceBoundary.SYSTEM_RULE,
   'Before proposing a schema, module, lifecycle, queue, signer, verifier, database, or worker path, search for an equivalent and classify REUSE, EXTEND, or CREATE. CREATE requires evidence that reuse and extension are insufficient.',
   'Classify defects precisely as missing, duplicate, obsolete, incorrect, partially wired, or conflicting; never infer architecture from a filename or symbol name alone.',
   'Evaluate HoloIndex retrieval for freshness, target recall, noise, ordering, duplication, and missing artifacts. Use governed direct-read or grep/glob evidence when allowed; never reindex in the reasoning/query path, and route an index gap to the existing WRE/CI maintenance path.',
@@ -6449,11 +6451,10 @@ function buildBoundedRepoContext(mode, taskText) {
       requiredTargets = repoAuditProjection.effective_repo_file_targets.slice();
     }
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
-    // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (defense-in-depth): neutralize any
-    // literal required-target marker embedded in the HoloIndex recall JSON blob so a recall payload
-    // whose text echoes "### Required direct-read target: <path>" cannot reach the Python isolation
-    // splitter as a real marker section. Dedup in Python is the robust closure; this is belt-and-braces.
-    lowerSections.push('### HoloIndex recall (WSP_00 semantic bundle first; lexical fallback only if needed)\n```text\n' + neutralizeRequiredTargetMarker(holo.output || '(no HoloIndex output)') + '\n```');
+    // Neutralize protected-target markers before wrapping indexed text in the
+    // shared untrusted-evidence boundary; neither text class is authority.
+    lowerSections.push(holoIndexEvidenceBoundary.wrapHoloIndexEvidence(
+      neutralizeRequiredTargetMarker(holo.output || '(no HoloIndex output)')));
     directReadSection = holo.direct_read_section || null;
     // REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1: preserve audit_context from slice-3
     // direct-read section so the bridge can run audit-mode redaction on egress.

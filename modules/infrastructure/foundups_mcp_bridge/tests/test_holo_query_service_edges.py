@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import ast
 from concurrent.futures import TimeoutError as FutureTimeoutError
+from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -12,14 +14,52 @@ import pytest
 from modules.infrastructure.foundups_mcp_bridge.src import (
     holo_query_service as core,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_response import (
+    normalize_result_paths,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_path_projection import (
+    project_repository_location,
+    project_repository_path,
+)
 from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_service import (
+    QUERY,
     SHA,
     TOKEN,
     _Backend,
     _query,
+    _raw_result,
     _receipt,
     _service,
 )
+
+
+_ALIASES = {
+    "code_hits": "code", "wsp_hits": "wsps", "test_hits": "tests",
+    "skill_hits": "skills", "docs_hits": "docs",
+    "knowledge_hits": "knowledge", "work_ledger_hits": "work_ledger",
+}
+
+
+def _canonical_with(bucket: str, hits: list[dict[str, Any]]) -> dict[str, Any]:
+    raw = deepcopy(dict(_raw_result()))
+    raw[bucket] = hits
+    if alias := _ALIASES.get(bucket):
+        raw[alias] = hits
+    metadata = dict(raw["metadata"])
+    metadata[bucket.removesuffix("_hits") + "_count"] = len(hits)
+    raw["metadata"] = metadata
+    return raw
+
+
+def _normalize(raw: dict[str, Any], root: str = r"E:\Agents\root") -> dict[str, Any]:
+    return normalize_result_paths(raw, root, expected_query=QUERY)
+
+
+def _changed_hit(bucket: str, **changes: Any) -> dict[str, Any]:
+    raw = deepcopy(dict(_raw_result()))
+    hit = dict(raw[bucket][0])
+    hit.update(changes)
+    return _canonical_with(bucket, [hit])
 
 
 @pytest.mark.parametrize(
@@ -108,7 +148,8 @@ def test_backend_exception_and_post_query_staleness_fail_closed(
             "missing_collection_receipt:navigation_knowledge"
             in result["stale_reasons"]
         )
-        assert result["raw_result"]
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
     finally:
         owner.close()
 
@@ -248,6 +289,284 @@ def test_flatten_hits_uses_global_score_across_typed_buckets() -> None:
         "low.py",
     ]
     assert hits[1]["type"] == "wsp"
+
+
+def test_success_projects_physical_result_paths_before_receipt_use(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = deepcopy(dict(_raw_result()))
+    docs = dict(raw["docs_hits"][0])
+    docs["path"] = str(tmp_path / "docs" / "README.md")
+    code = dict(raw["code_hits"][0])
+    code.update(path=str(tmp_path / "module.py"), location="module.py:example()")
+    raw["docs_hits"] = raw["docs"] = [docs]
+    raw["code_hits"] = raw["code"] = [code]
+    owner = _service(tmp_path, monkeypatch, backend=_Backend(raw))
+    try:
+        result = _query(owner)
+    finally:
+        owner.close()
+    assert result["ok"] is True
+    assert result["raw_result"]["docs_hits"][0]["path"] == "docs/README.md"
+    assert result["raw_result"]["docs"][0]["path"] == "docs/README.md"
+    assert result["raw_result"]["code_hits"][0]["path"] == "module.py"
+    projected_hits = {
+        hit.get("path") or hit.get("file") for hit in result["hits"]
+    }
+    assert {"docs/README.md", "module.py"} <= projected_hits
+    assert not any(Path(str(path)).is_absolute() for path in projected_hits)
+
+
+def test_absolute_result_path_outside_repository_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = deepcopy(dict(_raw_result()))
+    docs = dict(raw["docs_hits"][0])
+    docs["path"] = str(tmp_path.parent / "outside.md")
+    raw["docs_hits"] = raw["docs"] = [docs]
+    owner = _service(tmp_path, monkeypatch, backend=_Backend(raw))
+    try:
+        result = _query(owner)
+    finally:
+        owner.close()
+    assert result["ok"] is False
+    assert result["error"] == "QUERY_EVIDENCE_PATH_OUTSIDE_REPOSITORY"
+    assert result["hits"] == []
+    assert result["raw_result"] == {}
+
+
+def test_relative_result_path_traversal_fails_closed() -> None:
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        _normalize(_changed_hit("docs_hits", path="../outside.md"), str(Path("repo").resolve()))
+
+
+def test_windows_authority_path_projects_cross_platform() -> None:
+    result = _normalize(
+        _changed_hit(
+            "code_hits", path=r"E:\Agents\root\module.py", location="module.py:example()"
+        )
+    )
+    assert result["code_hits"][0]["path"] == "module.py"
+
+
+@pytest.mark.parametrize(
+    "candidate",
+    ["/etc/passwd", r"\rooted\escape.txt", r"C:drive-relative\escape.txt"],
+)
+def test_foreign_or_qualified_path_forms_fail_closed(candidate: str) -> None:
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_path(candidate, r"E:\Agents\root")
+
+
+def test_posix_authority_path_projects_without_host_path_semantics() -> None:
+    assert project_repository_path("/srv/repo/docs/a.md", "/srv/repo") == "docs/a.md"
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_path("/srv/other/a.md", "/srv/repo")
+
+
+@pytest.mark.parametrize("root", ["repo", r"\rooted"])
+def test_repository_root_must_be_fully_qualified(root: str) -> None:
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_path("docs/a.md", root)
+
+
+def test_backend_aliases_and_location_are_projected() -> None:
+    test_hit = {
+        "test_id": "test_a", "path": r"E:\Agents\root\tests\test_a.py",
+        "description": "test", "capabilities": "unit", "similarity": "80.0%",
+        "type": "test", "priority": 3,
+    }
+    skill_hit = {
+        "skill_name": "a", "description": "skill", "primary_agent": "0102",
+        "intent_type": "implementation", "promotion_state": "promoted",
+        "path": r"E:\Agents\root\skillz\a\SKILLz.md", "similarity": "80.0%",
+        "type": "skillz", "priority": 3,
+    }
+    raw = deepcopy(dict(_raw_result()))
+    code_hit = dict(raw["code_hits"][0])
+    code_hit.update(path=r"E:\Agents\root\modules\a.py", location="modules/a.py:Agent.run()")
+    for bucket, alias, hits in (
+        ("test_hits", "tests", [test_hit]),
+        ("skill_hits", "skills", [skill_hit]),
+        ("code_hits", "code", [code_hit]),
+    ):
+        raw[bucket] = raw[alias] = hits
+    metadata = dict(raw["metadata"])
+    metadata.update(test_count=1, skill_count=1, code_count=1)
+    raw["metadata"] = metadata
+    result = _normalize(raw)
+    assert result["tests"][0]["path"] == "tests/test_a.py"
+    assert result["skills"][0]["path"] == "skillz/a/SKILLz.md"
+    assert result["code_hits"][0]["location"] == "modules/a.py:Agent.run()"
+
+
+@pytest.mark.parametrize("invalid", [None, "", 7])
+def test_malformed_path_values_fail_closed(invalid: object) -> None:
+    with pytest.raises(ValueError, match="query_evidence_(?:schema|path)_invalid"):
+        _normalize(_changed_hit("docs_hits", path=invalid))
+
+
+@pytest.mark.parametrize(
+    "candidate",
+    [
+        "docs/evil\x00.py",
+        "docs/evil\n.py",
+        "docs/evil\r.py",
+        "docs/evil\x7f.py",
+        "docs/file.txt:stream",
+        "docs/NUL.txt",
+        "docs/NUL .txt",
+        "docs/trailing. ",
+        "docs/wild*.py",
+        "docs/trailing.py ",
+        "docs/trailing.py\t",
+        "docs/trailing.py\n",
+        "docs/next-line.py\u0085",
+        "docs/nonbreaking.py\u00a0",
+        "docs/bidi-\u202eevil.py",
+    ],
+)
+def test_malformed_or_ambiguous_windows_paths_fail_closed(candidate: str) -> None:
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_path(candidate, r"E:\Agents\root")
+
+
+def test_posix_path_case_and_windows_case_rules_are_explicit() -> None:
+    assert (
+        project_repository_path(
+            r"e:\agents\ROOT\Dir\b.py", r"E:\Agents\root"
+        )
+        == "Dir/b.py"
+    )
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_path("/SRV/repo/a.py", "/srv/repo")
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_path(r"\srv\repo\a.py", "/srv/repo")
+
+
+def test_location_descriptor_is_bound_to_projected_code_path() -> None:
+    assert project_repository_location(
+        "modules/a.py:Agent.run()",
+        r"E:\Agents\root",
+        expected_path="modules/a.py",
+    ) == "modules/a.py:Agent.run()"
+    assert project_repository_location(
+        r"E:\Agents\root\modules\a.py:17", r"E:\Agents\root"
+    ) == "modules/a.py:17"
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_location(
+            "docs/a.txt:stream", r"E:\Agents\root", expected_path="docs/a.txt"
+        )
+    for candidate in ("docs/a.py:stream", "docs/a.md:stream"):
+        with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+            project_repository_location(candidate, r"E:\Agents\root")
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_location(
+            "modules/b.py:Agent.run()",
+            r"E:\Agents\root",
+            expected_path="modules/a.py",
+        )
+
+
+def test_navigation_annotations_are_removed_from_location_identity() -> None:
+    assert project_repository_location(
+        "modules/foundups/gotjunk/frontend/App.tsx:handleClassify() - "
+        "isProcessingClassification guard",
+        r"E:\Agents\root",
+    ) == "modules/foundups/gotjunk/frontend/App.tsx:handleClassify()"
+    assert project_repository_location(
+        ".claude/skills/m2m/SKILL.md - /m2m skill commands",
+        r"E:\Agents\root",
+    ) == ".claude/skills/m2m/SKILL.md"
+    assert project_repository_location(
+        "modules/foundups/gotjunk/frontend/App.tsx:onClassify prop",
+        r"E:\Agents\root",
+    ) == "modules/foundups/gotjunk/frontend/App.tsx:onClassify()"
+    assert project_repository_location(
+        "modules/voice/index_channel.py:index_channel(channel_key, max_videos)",
+        r"E:\Agents\root",
+    ) == "modules/voice/index_channel.py:index_channel()"
+    assert project_repository_location(
+        "modules/foundups/agent_market/INTERFACE.md:FoundupRegistryService",
+        r"E:\Agents\root",
+    ) == "modules/foundups/agent_market/INTERFACE.md:FoundupRegistryService"
+
+
+def test_canonical_navigation_location_corpus_remains_projectable() -> None:
+    repo_root = Path(__file__).resolve().parents[4]
+    tree = ast.parse((repo_root / "NAVIGATION.py").read_text(encoding="utf-8"))
+    candidates: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Dict):
+            continue
+        for value in node.values:
+            try:
+                candidate = ast.literal_eval(value)
+            except (ValueError, TypeError):
+                continue
+            if isinstance(candidate, str) and "/" in candidate:
+                candidates.append(candidate)
+    assert len(candidates) >= 250 and all(project_repository_location(value, str(repo_root)) for value in candidates)
+
+
+@pytest.mark.parametrize(
+    "candidate",
+    [
+        "modules/a.py:run() - ",
+        "modules/a.py:run() - annotation\ncommand",
+        "modules/a.py:run()evil",
+        "modules/a.py:run(arg)evil",
+    ],
+)
+def test_malformed_navigation_annotations_fail_closed(candidate: str) -> None:
+    with pytest.raises(ValueError, match="query_evidence_path_outside_repository"):
+        project_repository_location(candidate, r"E:\Agents\root")
+
+
+def test_unknown_backend_bucket_returns_no_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = dict(_raw_result())
+    raw["unknown_hits"] = [{"path": str(tmp_path / "leak.py")}]
+    owner = _service(tmp_path, monkeypatch, backend=_Backend(raw))
+    try:
+        result = _query(owner)
+    finally:
+        owner.close()
+    assert result["ok"] is False
+    assert result["error"] == "QUERY_EVIDENCE_INVALID"
+    assert result["hits"] == []
+    assert result["raw_result"] == {}
+
+
+def test_normalized_result_does_not_alias_backend_evidence() -> None:
+    raw = deepcopy(dict(_raw_result()))
+    hit = raw["docs_hits"][0]
+    backend_map = raw["metadata"]["collection_backend_map"]
+    result = _normalize(raw)
+    hit["path"] = "docs/changed.md"
+    backend_map["navigation_code"] = "changed"
+    assert result["docs_hits"][0]["path"] == "modules/example/README.md"
+    assert result["docs_hits"][0]["summary"] == "module"
+    assert result["docs"][0]["summary"] == "module"
+    assert result["metadata"]["collection_backend_map"]["navigation_code"] == (
+        "sentence_transformers"
+    )
+
+
+def test_uncopyable_backend_evidence_fails_with_truthful_reason() -> None:
+    class _UncopyableMap(dict[str, str]):
+        def __deepcopy__(self, _memo: object) -> object:
+            raise TypeError("denied")
+
+    raw = deepcopy(dict(_raw_result()))
+    metadata = dict(raw["metadata"])
+    metadata["collection_backend_map"] = _UncopyableMap(
+        metadata["collection_backend_map"]
+    )
+    raw["metadata"] = metadata
+    with pytest.raises(ValueError, match="query_evidence_copy_failed"):
+        _normalize(raw)
 
 
 def test_default_factory_and_transport_wrapper_delegate(
