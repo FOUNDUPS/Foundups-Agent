@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-14 - Exact-Git grant-authority effect admission pin (0.4.97)
+
+- Pinned backend compatibility to signed E0 policy v7, signed runtime manifest
+  v3, v3 signer-domain admission, and exact-Git WSP 71 use-time verification.
+- Added no editor authority, worker dispatch, repository write, or merge
+  behavior.
+
 ## 2026-08-14 - Shared exact-Git runtime hardening pin (0.4.96)
 
 - Pinned the reachable exact-commit Git readers with replacement refs and

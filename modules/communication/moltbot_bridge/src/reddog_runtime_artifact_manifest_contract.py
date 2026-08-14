@@ -10,9 +10,11 @@ from typing import Any, Mapping
 
 SCHEMA_VERSION = "reddog_signed_runtime_artifact_manifest.v1"
 SCHEMA_VERSION_V2 = "reddog_signed_runtime_artifact_manifest.v2"
+SCHEMA_VERSION_V3 = "reddog_signed_runtime_artifact_manifest.v3"
 SIGNING_OPERATION = "attest_reddog_runtime_artifact_manifest"
 SIGNING_PREFIX = "reddog-runtime-artifact-manifest.v1."
 SIGNING_PREFIX_V2 = "reddog-runtime-artifact-manifest.v2."
+SIGNING_PREFIX_V3 = "reddog-runtime-artifact-manifest.v3."
 SIGNER_ROLE = "reddog_runtime_artifact_manifest"
 DEFAULT_MAX_TTL_SECONDS = 300
 MAX_ARTIFACT_BYTES = 1024 * 1024
@@ -30,6 +32,9 @@ GRANT_AUTHORITY_SERVICE_CONFIG = "grant_authority_service_config.json"
 GRANT_AUTHORITY_SERVICE_RUN_PACKET = "grant_authority_service_run_packet.json"
 GRANT_AUTHORITY_SERVICE_ARCHIVE = "grant_authority_service.pyz"
 RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE = "grant_authority_service"
+RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE = (
+    "grant_authority_service_git_provenance"
+)
 REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS = (
     GRANT_AUTHORITY_SERVICE_CONFIG,
     GRANT_AUTHORITY_SERVICE_RUN_PACKET,
@@ -71,6 +76,16 @@ UNSIGNED_FIELDS = frozenset(
     }
 )
 UNSIGNED_FIELDS_V2 = UNSIGNED_FIELDS | {"runtime_profile"}
+GRANT_SERVICE_GIT_PROVENANCE_FIELDS = frozenset(
+    {
+        "grant_authority_source_repo_root_digest",
+        "grant_authority_source_commit_sha",
+        "grant_authority_source_object_format",
+        "grant_authority_source_policy_digest",
+        "grant_authority_archive_source_descriptor_digest",
+    }
+)
+UNSIGNED_FIELDS_V3 = UNSIGNED_FIELDS_V2 | GRANT_SERVICE_GIT_PROVENANCE_FIELDS
 
 
 class RuntimeArtifactManifestError(ValueError):
@@ -128,13 +143,15 @@ def validate_unsigned_payload(value: Mapping[str, Any]) -> dict[str, Any]:
         raise RuntimeArtifactManifestError("manifest_fields_invalid")
     required_runtime_artifacts_for(payload)
     _validate_descriptors(payload)
-    for field in _digest_fields():
+    for field in _digest_fields(schema):
         if not is_sha256(payload.get(field)):
             raise RuntimeArtifactManifestError("manifest_digest_invalid")
     if not is_revision(payload.get("work_state_revision")):
         raise RuntimeArtifactManifestError("manifest_revision_invalid")
     for field in _text_fields():
         require_text(payload.get(field))
+    if schema == SCHEMA_VERSION_V3:
+        _validate_grant_service_git_provenance(payload)
     if type(payload["issued_at"]) is not int or type(
         payload["expires_at"]
     ) is not int:
@@ -160,6 +177,8 @@ def signing_prefix_for(payload: Mapping[str, Any]) -> str:
         return SIGNING_PREFIX
     if schema == SCHEMA_VERSION_V2:
         return SIGNING_PREFIX_V2
+    if schema == SCHEMA_VERSION_V3:
+        return SIGNING_PREFIX_V3
     raise RuntimeArtifactManifestError("manifest_schema_invalid")
 
 
@@ -170,10 +189,22 @@ def required_runtime_artifacts_for(
     if schema == SCHEMA_VERSION:
         return REQUIRED_RUNTIME_ARTIFACTS
     if (
-        schema == SCHEMA_VERSION_V2
-        and payload.get("runtime_profile")
-        == RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE
+        schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}
+        and payload.get("runtime_profile") in {
+            RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
+            RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE,
+        }
     ):
+        if (
+            schema == SCHEMA_VERSION_V2
+            and payload.get("runtime_profile")
+            != RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE
+        ) or (
+            schema == SCHEMA_VERSION_V3
+            and payload.get("runtime_profile")
+            != RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE
+        ):
+            raise RuntimeArtifactManifestError("manifest_schema_invalid")
         return REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS
     raise RuntimeArtifactManifestError("manifest_schema_invalid")
 
@@ -297,8 +328,8 @@ def _validate_descriptors(payload: Mapping[str, Any]) -> None:
         )
 
 
-def _digest_fields() -> tuple[str, ...]:
-    return (
+def _digest_fields(schema: object) -> tuple[str, ...]:
+    fields = (
         "repo_root_digest",
         "runtime_root_digest",
         "work_authority_digest",
@@ -310,6 +341,13 @@ def _digest_fields() -> tuple[str, ...]:
         "signer_service_config_digest",
         "artifact_generation_digest",
     )
+    if schema == SCHEMA_VERSION_V3:
+        fields += (
+            "grant_authority_source_repo_root_digest",
+            "grant_authority_source_policy_digest",
+            "grant_authority_archive_source_descriptor_digest",
+        )
+    return fields
 
 
 def _text_fields() -> tuple[str, ...]:
@@ -329,7 +367,26 @@ def _unsigned_fields_for(schema: object) -> frozenset[str]:
         return UNSIGNED_FIELDS
     if schema == SCHEMA_VERSION_V2:
         return UNSIGNED_FIELDS_V2
+    if schema == SCHEMA_VERSION_V3:
+        return UNSIGNED_FIELDS_V3
     raise RuntimeArtifactManifestError("manifest_schema_invalid")
+
+
+def _validate_grant_service_git_provenance(
+    payload: Mapping[str, Any],
+) -> None:
+    commit = payload.get("grant_authority_source_commit_sha")
+    object_format = payload.get("grant_authority_source_object_format")
+    expected_length = 40 if object_format == "sha1" else 64
+    if (
+        object_format not in {"sha1", "sha256"}
+        or not isinstance(commit, str)
+        or len(commit) != expected_length
+        or any(char not in "0123456789abcdef" for char in commit)
+    ):
+        raise RuntimeArtifactManifestError(
+            "manifest_git_provenance_invalid"
+        )
 
 
 __all__ = [
@@ -342,15 +399,18 @@ __all__ = [
     "REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS",
     "REQUIRED_RUNTIME_ARTIFACTS",
     "RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE",
+    "RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE",
     "RuntimeArtifactDescriptor",
     "RuntimeArtifactManifestError",
     "SCHEMA_VERSION",
     "SCHEMA_VERSION_V2",
+    "SCHEMA_VERSION_V3",
     "SIGNATURE_FIELDS",
     "SIGNER_ROLE",
     "SIGNING_OPERATION",
     "SIGNING_PREFIX",
     "SIGNING_PREFIX_V2",
+    "SIGNING_PREFIX_V3",
     "ascii_deep",
     "canonical_json",
     "canonical_signing_input",

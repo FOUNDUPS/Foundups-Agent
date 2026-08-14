@@ -15,6 +15,11 @@ from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_art
 from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_manifest_signature import (
     verify_grant_service_manifest_signatures,
 )
+from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_git_provenance_admission import (
+    PROVENANCE_BINDING_FIELDS,
+    derive_grant_service_git_provenance,
+    require_matching_git_provenance,
+)
 from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_archive_validation import (
     validate_grant_service_archive,
 )
@@ -25,8 +30,10 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     GRANT_AUTHORITY_SERVICE_RUN_PACKET,
     MAX_ARTIFACT_BYTES,
     REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS,
+    RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE,
     RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
     SCHEMA_VERSION_V2,
+    SCHEMA_VERSION_V3,
     RuntimeArtifactManifestError,
     raw_digest,
     runtime_artifact_size_limit,
@@ -43,6 +50,9 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_bytes,
     validate_runtime_artifact_path,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
+    POLICY_SCHEMA_V7,
+)
 
 
 def verify_current_grant_service_artifacts(
@@ -56,7 +66,9 @@ def verify_current_grant_service_artifacts(
         manifest = _read_manifest(repo_root, grant_root, policy)
         _verify_manifest_bindings(manifest, repo_root, grant_root, policy)
         verify_grant_service_manifest_signatures(manifest)
-        artifacts = _read_artifacts(manifest, repo_root, grant_root)
+        artifacts = _read_artifacts(
+            manifest, repo_root, grant_root, policy
+        )
         return MappingProxyType(_verified_values(manifest, artifacts, policy))
 def _read_manifest(
     repo: Path, root: Path, policy: Mapping[str, Any]
@@ -79,9 +91,16 @@ def _verify_manifest_bindings(
     manifest: Mapping[str, Any], repo: Path, root: Path,
     policy: Mapping[str, Any],
 ) -> None:
+    provenance = policy.get("schema_version") == POLICY_SCHEMA_V7
     expected = {
-        "schema_version": SCHEMA_VERSION_V2,
-        "runtime_profile": RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
+        "schema_version": (
+            SCHEMA_VERSION_V3 if provenance else SCHEMA_VERSION_V2
+        ),
+        "runtime_profile": (
+            RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE
+            if provenance
+            else RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE
+        ),
         "manifest_id": policy["grant_authority_manifest_id"],
         "artifact_generation_digest": policy[
             "grant_authority_artifact_generation_digest"
@@ -95,6 +114,10 @@ def _verify_manifest_bindings(
         "signer_key_fingerprint": policy["target_signer_key_fingerprint"],
         "key_epoch": policy["target_signer_key_epoch"],
     }
+    if provenance:
+        expected.update(
+            {name: policy[name] for name in PROVENANCE_BINDING_FIELDS}
+        )
     if any(manifest.get(name) != value for name, value in expected.items()):
         raise RuntimeArtifactManifestError("grant_service_manifest_binding_mismatch")
     validate_freshness(
@@ -104,7 +127,8 @@ def _verify_manifest_bindings(
 
 
 def _read_artifacts(
-    manifest: Mapping[str, Any], repo: Path, root: Path
+    manifest: Mapping[str, Any], repo: Path, root: Path,
+    policy: Mapping[str, Any],
 ) -> dict[str, Any]:
     descriptors = tuple(manifest["artifacts"])
     if tuple(item["filename"] for item in descriptors) != (
@@ -127,8 +151,8 @@ def _read_artifacts(
     )
     config_digest = raw_digest(raw[GRANT_AUTHORITY_SERVICE_CONFIG])
     archive_digest = raw_digest(raw[GRANT_AUTHORITY_SERVICE_ARCHIVE])
-    archive_manifest = validate_grant_service_archive(
-        raw[GRANT_AUTHORITY_SERVICE_ARCHIVE]
+    provenance = _verify_archive_provenance(
+        raw[GRANT_AUTHORITY_SERVICE_ARCHIVE], repo, policy
     )
     if config["archive_digest"] != archive_digest:
         raise RuntimeArtifactManifestError("grant_service_config_invalid")
@@ -144,8 +168,28 @@ def _read_artifacts(
             raw[GRANT_AUTHORITY_SERVICE_RUN_PACKET]
         ),
         "archive_digest": archive_digest,
-        "archive_manifest": archive_manifest,
+        "git_provenance": provenance,
     }
+
+
+def _verify_archive_provenance(
+    raw: bytes, repo: Path, policy: Mapping[str, Any]
+) -> Mapping[str, Any]:
+    if policy.get("schema_version") != POLICY_SCHEMA_V7:
+        validate_grant_service_archive(raw)
+        return {}
+    provenance = derive_grant_service_git_provenance(
+        raw,
+        repo_root=repo,
+        expected_repo_root_digest=str(
+            policy["grant_authority_source_repo_root_digest"]
+        ),
+        expected_source_commit_sha=str(
+            policy["grant_authority_source_commit_sha"]
+        ),
+    )
+    require_matching_git_provenance(provenance, policy)
+    return provenance
 
 
 def _verified_values(
@@ -165,6 +209,7 @@ def _verified_values(
         "artifact_generation_digest": manifest["artifact_generation_digest"],
         "config": config, "run_packet": run_packet,
         "service_archive_digest": artifacts["archive_digest"],
+        **dict(artifacts["git_provenance"]),
     }
 
 

@@ -33,4 +33,26 @@ def grant_service_policy_fields(
     }
 
 
-__all__ = ["grant_service_policy_fields"]
+def grant_service_git_provenance_policy_fields(
+    *,
+    repo_root_digest: str,
+    source_commit_sha: str,
+    object_format: str,
+    source_policy_digest: str,
+    source_descriptor_digest: str,
+) -> dict[str, str]:
+    return {
+        "grant_authority_source_repo_root_digest": repo_root_digest,
+        "grant_authority_source_commit_sha": source_commit_sha,
+        "grant_authority_source_object_format": object_format,
+        "grant_authority_source_policy_digest": source_policy_digest,
+        "grant_authority_archive_source_descriptor_digest": (
+            source_descriptor_digest
+        ),
+    }
+
+
+__all__ = [
+    "grant_service_git_provenance_policy_fields",
+    "grant_service_policy_fields",
+]

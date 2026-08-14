@@ -15,12 +15,15 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS,
     REQUIRED_RUNTIME_ARTIFACTS,
     RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE,
+    RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE,
     SCHEMA_VERSION,
     SCHEMA_VERSION_V2,
+    SCHEMA_VERSION_V3,
     SIGNER_ROLE,
     SIGNING_OPERATION,
     SIGNING_PREFIX,
     SIGNING_PREFIX_V2,
+    SIGNING_PREFIX_V3,
     RuntimeArtifactManifestError,
     canonical_json,
     canonical_signing_input,
@@ -54,9 +57,11 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 
 RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION = SCHEMA_VERSION
 RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION_V2 = SCHEMA_VERSION_V2
+RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION_V3 = SCHEMA_VERSION_V3
 RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION = SIGNING_OPERATION
 RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX = SIGNING_PREFIX
 RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V2 = SIGNING_PREFIX_V2
+RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V3 = SIGNING_PREFIX_V3
 DEFAULT_MANIFEST_MAX_TTL_SECONDS = DEFAULT_MAX_TTL_SECONDS
 REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = (
     "REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING"
@@ -160,16 +165,21 @@ def verify_signed_runtime_artifact_manifest(
         max_ttl_seconds=int(checked["max_ttl_seconds"]),
     )
     required_artifacts = required_runtime_artifacts_for(payload)
+    git_provenance = payload.get("schema_version") == SCHEMA_VERSION_V3
     current = tuple(
         item.to_dict()
         for item in describe_runtime_artifacts(
             authority,
             authority_boundary,
             required_artifacts=required_artifacts,
+            git_provenance_archive=git_provenance,
         )
     )
     if tuple(payload["artifacts"]) != current:
         raise RuntimeArtifactManifestError("manifest_artifacts_changed")
+    _require_current_git_provenance(
+        payload, authority, authority_boundary
+    )
     signing_input = canonical_signing_input(payload)
     _verify_signatures(
         payload, signing_input, checked, signature_verifier
@@ -204,15 +214,20 @@ def validate_runtime_artifact_manifest_signing_request(
             max_ttl_seconds=int(checked["max_ttl_seconds"]),
         )
         required_artifacts = required_runtime_artifacts_for(unsigned)
+        git_provenance = unsigned.get("schema_version") == SCHEMA_VERSION_V3
         if tuple(unsigned["artifacts"]) != tuple(
             item.to_dict()
             for item in describe_runtime_artifacts(
                 authority,
                 authority_boundary,
                 required_artifacts=required_artifacts,
+                git_provenance_archive=git_provenance,
             )
         ):
             return None
+        _require_current_git_provenance(
+            unsigned, authority, authority_boundary
+        )
         return unsigned
     except Exception:
         return None
@@ -321,8 +336,36 @@ def _unsigned_manifest(
     runtime_profile: str | None = None,
 ) -> dict[str, Any]:
     schema_version, required_artifacts = _manifest_profile(runtime_profile)
-    artifacts = _artifact_descriptors(authority, boundary, required_artifacts=required_artifacts)
-    payload = {
+    git_provenance = schema_version == SCHEMA_VERSION_V3
+    artifacts = _artifact_descriptors(
+        authority,
+        boundary,
+        required_artifacts=required_artifacts,
+        git_provenance_archive=git_provenance,
+    )
+    payload = _base_unsigned_payload(
+        values,
+        schema_version=schema_version,
+        artifacts=artifacts,
+        nonce=nonce,
+        issued_at=issued_at,
+        expires_at=expires_at,
+    )
+    if runtime_profile is not None:
+        payload["runtime_profile"] = runtime_profile
+    if git_provenance:
+        payload.update(_current_git_provenance(authority, boundary))
+    payload["manifest_id"] = manifest_id_for(payload)
+    payload["revision"] = payload["manifest_id"][7:]
+    return validate_unsigned_payload(payload)
+
+
+def _base_unsigned_payload(
+    values: Mapping[str, Any], *, schema_version: str,
+    artifacts: tuple[dict[str, Any], ...], nonce: str,
+    issued_at: int, expires_at: int,
+) -> dict[str, Any]:
+    return {
         "schema_version": schema_version,
         "manifest_id": "",
         "revision": "",
@@ -352,11 +395,19 @@ def _unsigned_manifest(
         "issued_at": issued_at,
         "expires_at": expires_at,
     }
-    if runtime_profile is not None:
-        payload["runtime_profile"] = runtime_profile
-    payload["manifest_id"] = manifest_id_for(payload)
-    payload["revision"] = payload["manifest_id"][7:]
-    return validate_unsigned_payload(payload)
+
+
+def _current_git_provenance(
+    authority: RuntimeArtifactManifestAuthority,
+    boundary: RuntimeArtifactManifestAuthorityBoundary,
+) -> Mapping[str, Any]:
+    from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_git_provenance_admission import (
+        derive_current_grant_service_git_provenance,
+    )
+
+    return derive_current_grant_service_git_provenance(
+        authority, boundary
+    )
 
 
 def _artifact_descriptors(
@@ -364,11 +415,15 @@ def _artifact_descriptors(
     boundary: RuntimeArtifactManifestAuthorityBoundary,
     *,
     required_artifacts: tuple[str, ...] = REQUIRED_RUNTIME_ARTIFACTS,
+    git_provenance_archive: bool = False,
 ) -> tuple[dict[str, Any], ...]:
     return tuple(
         item.to_dict()
         for item in describe_runtime_artifacts(
-            authority, boundary, required_artifacts=required_artifacts
+            authority,
+            boundary,
+            required_artifacts=required_artifacts,
+            git_provenance_archive=git_provenance_archive,
         )
     )
 
@@ -380,11 +435,16 @@ def _manifest_profile(
         return SCHEMA_VERSION, REQUIRED_RUNTIME_ARTIFACTS
     if runtime_profile == RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE:
         return SCHEMA_VERSION_V2, REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS
+    if (
+        runtime_profile
+        == RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE
+    ):
+        return SCHEMA_VERSION_V3, REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS
     raise RuntimeArtifactManifestError("manifest_schema_invalid")
 
 
 def _unsigned_input_json(signing_input: str) -> str | None:
-    for prefix in (SIGNING_PREFIX, SIGNING_PREFIX_V2):
+    for prefix in (SIGNING_PREFIX, SIGNING_PREFIX_V2, SIGNING_PREFIX_V3):
         if signing_input.startswith(prefix):
             return signing_input[len(prefix) :]
     return None
@@ -414,6 +474,24 @@ def _validate_bindings(
     }
     if any(payload.get(key) != value for key, value in expected.items()):
         raise RuntimeArtifactManifestError("manifest_binding_mismatch")
+
+
+def _require_current_git_provenance(
+    payload: Mapping[str, Any],
+    authority: RuntimeArtifactManifestAuthority,
+    boundary: RuntimeArtifactManifestAuthorityBoundary,
+) -> None:
+    if payload.get("schema_version") != SCHEMA_VERSION_V3:
+        return
+    from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_git_provenance_admission import (
+        derive_current_grant_service_git_provenance,
+        require_matching_git_provenance,
+    )
+
+    require_matching_git_provenance(
+        payload,
+        derive_current_grant_service_git_provenance(authority, boundary),
+    )
 
 
 def _signing_request(
@@ -516,9 +594,11 @@ __all__ = [
     "REQUIRED_RUNTIME_ARTIFACTS",
     "RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION",
     "RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION_V2",
+    "RUNTIME_ARTIFACT_MANIFEST_SCHEMA_VERSION_V3",
     "RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION",
     "RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX",
     "RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V2",
+    "RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V3",
     "RuntimeArtifactManifestAuthority",
     "RuntimeArtifactManifestError",
     "RuntimeArtifactManifestSigningContext",

@@ -1,3 +1,15 @@
+## 2026-08-14: Grant-authority exact-Git effect-admission regressions
+
+- Added a production-shaped v7/v3 fixture sharing one real temporary Git root
+  across manifest authority and E0 admission, and proved the WSP 71 callback
+  executes only under exact provenance and revocation fences.
+- Proved v6 downgrade, every signed provenance-field substitution, mismatched
+  authority-profile commit bindings, and an alternate committed source map
+  reject before effects even after config, run packet, descriptors, manifest,
+  and owner policy are rehashed and re-signed.
+- The focused signer/provenance/effect matrix passes 175 tests with one
+  platform skip.
+
 ## 2026-08-14: Grant-authority exact-Git provenance regressions
 
 - Proved canonical v2 round trips against an exact commit tree while dirty

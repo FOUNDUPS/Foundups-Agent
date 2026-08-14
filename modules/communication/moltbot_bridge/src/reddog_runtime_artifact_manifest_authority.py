@@ -25,6 +25,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     digest,
     is_revision,
     is_sha256,
+    raw_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
@@ -441,8 +442,13 @@ def _verified_values(**values: Any) -> Mapping[str, Any]:
     revision = _validate_work_state(state, profile, queue_id)
     _validate_signer_config(config, profile)
     publication = _verified_publication(state, profile, work, queue_id)
+    authorized_base_sha = _verified_authorized_base_sha(profile)
     return {
         "repo_root": values["root"], "runtime_root": values["runtime"],
+        "repo_root_digest": raw_digest(
+            str(Path(values["root"]).resolve()).encode("utf-8")
+        ),
+        "authorized_base_sha": authorized_base_sha,
         "issuer_principal_id": identity["principal_id"],
         "signer_public_key": identity["reddog_public_key"],
         "key_epoch": work["key_epoch"],
@@ -458,6 +464,27 @@ def _verified_values(**values: Any) -> Mapping[str, Any]:
         "publication_binding_digest": publication["binding_digest"],
         "max_ttl_seconds": DEFAULT_MAX_TTL_SECONDS,
     }
+
+
+def _verified_authorized_base_sha(profile: Mapping[str, Any]) -> str:
+    binding = _mapping(profile.get("operational_context_binding"))
+    proposal = _mapping(binding.get("proposal_admission"))
+    values = (
+        profile.get("authorized_base_sha"),
+        binding.get("authorized_base_sha"),
+        proposal.get("repo_head_sha"),
+    )
+    if all(value is None for value in values):
+        return ""
+    commit = values[0]
+    if (
+        not isinstance(commit, str)
+        or len(commit) not in {40, 64}
+        or any(char not in "0123456789abcdef" for char in commit)
+        or any(value != commit for value in values[1:])
+    ):
+        raise ValueError("manifest_authority_source_commit_invalid")
+    return commit
 
 
 def _verify_work_authority(**values: Any) -> None:

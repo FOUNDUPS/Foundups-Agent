@@ -1,4 +1,18 @@
 # ModLog - moltbot_bridge
+## 2026-08-14: Grant-authority exact-Git effect admission
+
+- Extended signed owner E0 policy to v7 and runtime-artifact manifests to v3,
+  binding the exact repository root, authorized commit, Git object format,
+  canonical source policy, and archive source descriptor.
+- Reused the existing exact-Git archive validator at manifest production,
+  signer request admission, current E0 use-time rehydration, and the final WSP
+  71 effect fence. The authorized commit must match all three authority-profile
+  locations; v6/v2 remains diagnostic-only and cannot invoke the callback.
+- Added v3 signer-domain support and corrected binary archive description so
+  provenance zipapps are never treated as JSON. No service, socket, secret,
+  worker, repository, PR, merge, or HoloIndex effect was added.
+  (WSP 00/15/22/50/62/71/97)
+
 ## 2026-08-14: Grant-authority exact-Git archive provenance foundation
 
 - Extended the canonical archive contract with a separate v2 provenance block

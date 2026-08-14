@@ -1,6 +1,9 @@
 # RedDog Interface
 
-Version 0.4.96 pins shared bounded-Git runtime hardening. The inert v2 archive
+Version 0.4.97 pins the exact-Git grant-authority effect admission chain. The
+backend requires signed E0 policy v7 and signed manifest v3 before WSP 71 may
+invoke a callback; v6/v2 remains diagnostic-only. Version 0.4.96 introduced
+shared bounded-Git runtime hardening. The inert v2 archive
 builder and verifier remain outside the executable closure pending a production
 admission consumer. It adds no UI API, signer lifecycle, production provenance
 admission, or execution authority.

@@ -29,6 +29,7 @@ from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_man
     RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
     RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX,
     RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V2,
+    RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V3,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -121,6 +122,7 @@ def signing_domain_pairs(request: SigningRequest) -> tuple[tuple[bool, bool], ..
                 (
                     RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX,
                     RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V2,
+                    RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX_V3,
                 )
             ),
         ),

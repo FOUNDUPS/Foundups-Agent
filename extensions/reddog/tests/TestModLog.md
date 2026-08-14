@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-14 - Exact-Git effect-admission compatibility pin (0.4.97)
+
+- Updated extension and backend-manifest assertions for signed v7/v3
+  grant-authority provenance admission.
+
 ## 2026-08-14 - Shared exact-Git runtime hardening pin (0.4.96)
 
 - Updated the canonical build and backend-manifest assertions for the shared

@@ -30,7 +30,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
     lease_validated_owner_e0_current_admission,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V6,
+    POLICY_SCHEMA_V7,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_root_protected_use_oracle import (
     RootAuthorizedSignerGrantRevocationOracle,
@@ -61,7 +61,7 @@ def authorize_current_grant_authority_wsp71_use(
         owner_config_path=owner_config_path, repo_root=repo, policy=owner_policy,
     ) as admission:
         policy = admission.policy
-        if policy.get("schema_version") != POLICY_SCHEMA_V6:
+        if policy.get("schema_version") != POLICY_SCHEMA_V7:
             raise RuntimeArtifactManifestError("grant_permission_e0_schema_invalid")
         root = grant_authority_owner_runtime_root(
             owner_config_path, repo, str(policy["owner_config_id"])

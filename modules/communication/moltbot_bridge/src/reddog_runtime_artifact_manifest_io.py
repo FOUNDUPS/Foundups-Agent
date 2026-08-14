@@ -16,6 +16,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     GRANT_AUTHORITY_SERVICE_RUN_PACKET,
     MAX_ARTIFACT_BYTES,
     REQUIRED_RUNTIME_ARTIFACTS,
+    SCHEMA_VERSION_V3,
     RuntimeArtifactDescriptor,
     RuntimeArtifactManifestError,
     canonical_json,
@@ -44,6 +45,7 @@ def describe_runtime_artifacts(
     boundary: RuntimeArtifactManifestAuthorityBoundary,
     *,
     required_artifacts: tuple[str, ...] = REQUIRED_RUNTIME_ARTIFACTS,
+    git_provenance_archive: bool = False,
 ) -> tuple[RuntimeArtifactDescriptor, ...]:
     """Read the exact canonical artifact set under one shared lock."""
 
@@ -55,7 +57,9 @@ def describe_runtime_artifacts(
         allow_sealed=True,
     ):
         return _describe_runtime_artifacts_unlocked(
-            values, required_artifacts=required_artifacts
+            values,
+            required_artifacts=required_artifacts,
+            git_provenance_archive=git_provenance_archive,
         )
 
 
@@ -63,6 +67,7 @@ def _describe_runtime_artifacts_unlocked(
     values: Mapping[str, Any],
     *,
     required_artifacts: tuple[str, ...] = REQUIRED_RUNTIME_ARTIFACTS,
+    git_provenance_archive: bool = False,
 ) -> tuple[RuntimeArtifactDescriptor, ...]:
     runtime = Path(values["runtime_root"]).resolve()
     descriptors: list[RuntimeArtifactDescriptor] = []
@@ -79,11 +84,12 @@ def _describe_runtime_artifacts_unlocked(
             max_bytes=runtime_artifact_size_limit(filename),
         )
         if filename == GRANT_AUTHORITY_SERVICE_ARCHIVE:
-            from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_archive_validation import (
-                validate_grant_service_archive,
-            )
+            if not git_provenance_archive:
+                from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_archive_validation import (
+                    validate_grant_service_archive,
+                )
 
-            validate_grant_service_archive(raw)
+                validate_grant_service_archive(raw)
         else:
             mapping = _json_mapping(raw, filename)
             _validate_bound_artifact(values, filename, mapping)
@@ -155,7 +161,11 @@ def _publish_current_generation(
             current = tuple(
                 item.to_dict()
                 for item in _describe_runtime_artifacts_unlocked(
-                    authority, required_artifacts=required_artifacts
+                    authority,
+                    required_artifacts=required_artifacts,
+                    git_provenance_archive=(
+                        manifest.get("schema_version") == SCHEMA_VERSION_V3
+                    ),
                 )
             )
             if tuple(manifest.get("artifacts") or ()) != current:

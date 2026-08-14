@@ -27,20 +27,20 @@
   fixed synchronous `main()` ABI fail closed. This is not a Python sandbox.
   Claimed source metadata is not Git
   provenance, and the archive is never launched by this layer.
-- COMPLETE: exact-Git archive provenance foundation. A separate v2 inner
-  manifest and builder bind each non-synthetic member to one exact commit-tree
-  blob and one explicit source-path policy. Verification re-reads bounded Git
-  objects and rejects dirty-checkout, uncommitted, remapped, or forged content.
-  Production policy and manifest paths do not yet require v2.
+- COMPLETE: exact-Git grant-authority effect admission. The v2 inner archive,
+  owner policy v7 and runtime manifest v3 bind each non-synthetic member to one
+  exact commit-tree blob, explicit source-path policy and authority repository.
+  Signing, current-generation rehydration and final WSP 71 use re-read bounded
+  Git objects; legacy v6/v2 remains inspection-only and cannot produce effects.
 - COMPLETE: grant-service WSP 71 permission receipt rehydration. Exact canonical
   bytes and receipt ID follow the acyclic receipt -> config -> manifest -> E0
   trust chain. One callback runs only while the current E0 lease and matching
   durable revocation fence remain held; no reusable permission object escapes.
   Root-generation, grant, revocation and target-signer keys are role-distinct.
-- BLOCKED: production enforcement of authenticated archive provenance,
-  pinned-byte launch,
-  authoritative-use production composition, grant-service isolation, resolver
-  composition, lifecycle supervision and live canary remain next.
+- BLOCKED: production v7 artifact provisioning, pinned-byte launch,
+  grant-service isolation, resolver composition, lifecycle supervision and the
+  live canary remain next. Exact-Git admission alone does not launch a service,
+  resolve a secret, execute repository work or prove production readiness.
 
 ## RedDog conversational work promotion
 

@@ -1,4 +1,20 @@
 # OpenClaw Bridge Interface
+## Exact-Git grant-authority effect admission
+
+`produce_signed_runtime_artifact_manifest()` accepts the additive
+`grant_authority_service_git_provenance` profile only when its v2 archive is
+reconstructed from the authority-bound repository and commit. The resulting
+v3 manifest signs the repository-root, commit, object-format, source-policy,
+and source-descriptor bindings. The isolated signer recognizes the v3 domain
+and independently revalidates those bindings before signing.
+
+`authorize_current_grant_authority_wsp71_use()` is the final effect boundary.
+It requires signed E0 policy v7, re-reads the current v3 manifest and all three
+grant artifacts, revalidates the exact Git objects and signed provenance under
+the current-generation lease, and only then invokes one callback under the
+durable revocation fence. V6/v2 may be inspected through the hash-only binding
+API but cannot authorize an effect.
+
 ## Principal Memex live resident source
 `lease_current_generation_conversation_session()` can atomically split one
 authenticated session capability into FoundUp-use and Principal-read children.

@@ -20,6 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
     POLICY_SCHEMA_V6,
+    POLICY_SCHEMA_V7,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     constant_time_compare,
@@ -43,6 +44,11 @@ class GrantAuthorityServiceManifestBinding:
     key_epoch: str
     permission_snapshot_digest: str
     permission_snapshot_receipt_id: str
+    source_repo_root_digest: str
+    source_commit_sha: str
+    source_object_format: str
+    source_policy_digest: str
+    archive_source_descriptor_digest: str
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -63,7 +69,10 @@ def bind_grant_authority_service_manifest(
         policy=owner_policy,
     ) as admission:
         policy = admission.policy
-        if policy.get("schema_version") != POLICY_SCHEMA_V6:
+        if policy.get("schema_version") not in {
+            POLICY_SCHEMA_V6,
+            POLICY_SCHEMA_V7,
+        }:
             raise RuntimeArtifactManifestError(
                 "grant_authority_service_binding_invalid"
             )
@@ -106,6 +115,23 @@ def _binding(
         permission_snapshot_receipt_id=str(
             config["permission_snapshot_receipt_id"]
         ),
+        source_repo_root_digest=str(
+            verified.get("grant_authority_source_repo_root_digest") or ""
+        ),
+        source_commit_sha=str(
+            verified.get("grant_authority_source_commit_sha") or ""
+        ),
+        source_object_format=str(
+            verified.get("grant_authority_source_object_format") or ""
+        ),
+        source_policy_digest=str(
+            verified.get("grant_authority_source_policy_digest") or ""
+        ),
+        archive_source_descriptor_digest=str(
+            verified.get(
+                "grant_authority_archive_source_descriptor_digest"
+            ) or ""
+        ),
     )
 
 
@@ -142,6 +168,17 @@ def _expected_bindings(
         (
             config["permission_snapshot_receipt_id"],
             policy["grant_authority_permission_snapshot_receipt_id"],
+        ),
+        *tuple(
+            (verified[name], policy[name])
+            for name in (
+                "grant_authority_source_repo_root_digest",
+                "grant_authority_source_commit_sha",
+                "grant_authority_source_object_format",
+                "grant_authority_source_policy_digest",
+                "grant_authority_archive_source_descriptor_digest",
+            )
+            if name in verified or name in policy
         ),
     )
 
