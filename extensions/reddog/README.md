@@ -1,10 +1,15 @@
 # RedDog
 
-Version: 0.4.99
+Version: 0.4.100
 
-[OBSERVED] Version 0.4.99 pins the uncomposed grant-profile atomic
-provisioning foundation. It adds no thin-client behavior, service launch,
-worker dispatch, repository write, or merge authority.
+[OBSERVED] Version 0.4.100 pins repository-relative Holo owner evidence plus
+the uncomposed grant-profile atomic provisioning foundation. Successful owner
+results must satisfy the producer-owned exact query-result contract before
+RedDog consumes them. Indexed HoloIndex, repository, Skillz, documentation,
+Memex, Brain, and Breadcrumb text is then enclosed in an explicit untrusted-
+evidence boundary; imperative text and embedded boundary markers cannot become
+instructions or authority. It adds no index mutation, service launch, worker
+dispatch, repository write, or merge authority.
 
 [OBSERVED] Version 0.4.98 pins owner config v4 and the root-owned canonical
 grant-service source-policy capability in the exact backend closure. It adds no

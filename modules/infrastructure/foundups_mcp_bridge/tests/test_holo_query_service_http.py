@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 import http.client
 import json
 import os
@@ -31,8 +32,14 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     HoloIndexQueryOwnerService,
     main,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_response import (
+    flatten_hits,
+)
 from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_service import (
     _receipt as _service_receipt,
+)
+from modules.infrastructure.foundups_mcp_bridge.tests.holo_query_service_fixtures import (
+    _raw_result,
 )
 
 
@@ -61,29 +68,38 @@ class _Backend:
         limit: int,
         doc_type_filter: str,
     ) -> Mapping[str, Any]:
-        return {
-            "wsp_hits": [{"path": "WSP_framework/src/WSP_97.md"}],
-            "knowledge_hits": [{"path": "WSP_knowledge/docs/Papers/example.md"}],
-            "metadata": {
-                "retrieval_mode": "semantic",
-                "embedding_backend": "sentence_transformers",
-                "collection_embedding_space_map": {
-                    name: SPACE_FINGERPRINT for name in BASELINE_COLLECTIONS
-                },
-            },
-        }
+        result = deepcopy(dict(_raw_result()))
+        wsp = dict(result["wsp_hits"][0])
+        wsp["path"] = "WSP_framework/src/WSP_97.md"
+        result["wsp_hits"] = result["wsps"] = [wsp]
+        result["metadata"] = {**result["metadata"], "query": query}
+        return result
+
+
+class _OversizedScalarBackend(_Backend):
+    def __init__(self, field: str) -> None:
+        self.field = field
+
+    def search(self, query: str, *, limit: int, doc_type_filter: str) -> Mapping[str, Any]:
+        result = dict(super().search(query, limit=limit, doc_type_filter=doc_type_filter))
+        hits = deepcopy(result["code_hits"])
+        hits[0][self.field] = 10**10000
+        result["code_hits"] = result["code"] = hits
+        return result
 
 
 def _owner(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    *,
+    backend: Any | None = None,
 ) -> HoloIndexQueryOwnerService:
     monkeypatch.setenv("HOLOINDEX_QUERY_SERVICE_TOKEN", TOKEN)
     ssd_path = tmp_path / "holo-store"
     return HoloIndexQueryOwnerService(
         repo_root=tmp_path,
         ssd_path=ssd_path,
-        backend_factory=lambda _path: _Backend(),
+        backend_factory=lambda _path: backend or _Backend(),
         receipt_loader=lambda _path: _receipt(tmp_path, ssd_path),
         repository_state_reader=lambda _root: SimpleNamespace(
             proven_clean=True,
@@ -91,6 +107,36 @@ def _owner(
             error="",
         ),
     )
+
+
+def test_work_ledger_hits_participate_in_global_flattening() -> None:
+    raw = deepcopy(dict(_raw_result()))
+    ledger = dict(raw["wsp_hits"][0])
+    for bucket in (
+        "code_hits", "wsp_hits", "docs_hits", "knowledge_hits", "test_hits",
+        "skill_hits", "symbol_hits",
+    ):
+        raw[bucket] = []
+    raw["work_ledger_hits"] = [ledger]
+    assert flatten_hits(raw, limit=1) == [ledger]
+
+
+@pytest.mark.parametrize("field", ["priority", "confidence"])
+def test_oversized_numeric_evidence_returns_scrubbed_owner_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, field: str
+) -> None:
+    owner = _owner(tmp_path, monkeypatch, backend=_OversizedScalarBackend(field))
+    try:
+        result = owner.handle_query(
+            {"query": "contract", "limit": 8, "doc_type_filter": "all", "expected_repo_head_sha": SHA},
+            authorization=f"Bearer {TOKEN}",
+        )
+    finally:
+        owner.close()
+    assert result["ok"] is False
+    assert result["error"] == "QUERY_EVIDENCE_INVALID"
+    assert result["hits"] == []
+    assert result["raw_result"] == {}
 
 
 def test_stdlib_runtime_serves_authenticated_generation_bound_query(

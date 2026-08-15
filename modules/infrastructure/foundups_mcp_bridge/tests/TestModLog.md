@@ -1,5 +1,43 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-15] Owner-response repository path projection
+
+- Proved typed semantic buckets become repository-relative before flattened,
+  raw, semantic-evidence, and receipt use.
+- Proved absolute outside-root evidence fails closed with no returned payload.
+- Added host-independent Windows/POSIX, backend-alias, `location`, traversal,
+  drive-qualified, and backend-mutation isolation regressions.
+- Proved null, empty, and non-string path fields fail closed rather than
+  becoming fabricated string evidence.
+- Proved control characters plus Windows ADS, reserved-device, wildcard, and
+  trailing-dot/space path forms fail closed before evidence use.
+- Proved live-shaped `path` plus `location=path:Symbol()` evidence remains
+  citable only when both fields identify the same repository-relative file.
+- Proved canonical NAVIGATION symbol and plain-path annotations are removed
+  from location identity while empty or control-bearing annotations reject.
+- Proved unknown buckets, malformed bucket types, non-mapping/pathless hits,
+  and malformed metadata fail closed with no raw or flattened evidence.
+- Proved unknown or nested hit fields, non-scalar hit values, unknown
+  collection-map keys, invalid backend identifiers, and forged embedding
+  fingerprints cannot cross the canonical producer schema.
+- Proved the producer contract exactly matches the checked-in machine-language
+  specification, including aliases, counts, query identity, ranking fields,
+  per-bucket shapes, and finite numeric values.
+- Extracted one shared canonical response fixture after WSP 62 review; existing
+  service, edge, embedding, HTTP, receipt, and machine-contract suites retain
+  ownership of their behavior instead of duplicating a new test module.
+- Proved every failed owner response is evidence-free, including lexical,
+  stale-repository, changed-generation, timeout, and malformed-evidence paths.
+- Added terminal-space/tab/newline and Windows-root-on-POSIX regressions after
+  independent security review found permissive pre-validation normalization.
+- Added C1, non-breaking-space, and bidirectional-format regressions after the
+  final security review found non-ASCII control channels.
+- Added real producer-float parity, work-ledger global flattening, evidence-free
+  empty-canary failure, and ambiguous lowercase ADS-suffix regressions after
+  exact-SHA security review.
+- Added owner-boundary regressions proving oversized priority/confidence values
+  return `QUERY_EVIDENCE_INVALID` with no raw or flattened evidence.
+
 ## [2026-08-06] Linked-worktree owner dependency root
 
 - Proved the query adapter passes a separately resolved primary worktree to

@@ -539,7 +539,8 @@ def test_maintenance_starting_after_backend_rejects_query_evidence(
         assert result["ok"] is False
         assert result["error"] == "HOLOINDEX_MAINTENANCE_ACTIVE"
         assert result["stale_reasons"] == ["holoindex_maintenance_active"]
-        assert result["raw_result"] == _raw_result()
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
         assert backend.search_calls == 1
     finally:
         owner.close()

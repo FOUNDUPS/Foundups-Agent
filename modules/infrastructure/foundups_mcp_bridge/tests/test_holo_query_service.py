@@ -19,17 +19,20 @@ from holo_index.freshness_receipt import (
 from holo_index.repository_state import repository_root_digest
 from holo_index.source_scope import canonical_source_scope_id
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
-    BASELINE_COLLECTIONS,
     HoloIndexQueryOwnerService,
     TOKEN_TOO_SHORT_ERROR,
     main,
     validate_bind_host,
 )
+from modules.infrastructure.foundups_mcp_bridge.tests.holo_query_service_fixtures import (
+    QUERY,
+    SHA,
+    SPACE_FINGERPRINT,
+    TOKEN,
+    _Backend,
+    _raw_result,
+)
 
-
-TOKEN = "owner-service-test-token-with-strong-length"
-SHA = "a" * 40
-SPACE_FINGERPRINT = "sha256:" + ("1" * 64)
 
 
 def _test_digest(value: str) -> str:
@@ -99,54 +102,9 @@ def _receipt(
     return _bind_receipt_generation(receipt) if generation else receipt
 
 
-def _raw_result(*, mode: str = "semantic", error: str = "") -> Mapping[str, Any]:
-    metadata: dict[str, Any] = {
-        "retrieval_mode": mode,
-        "embedding_backend": "sentence_transformers" if mode == "semantic" else "none",
-    }
-    if mode == "semantic":
-        metadata["collection_embedding_space_map"] = {
-            name: SPACE_FINGERPRINT for name in BASELINE_COLLECTIONS
-        }
-    if error:
-        metadata["error"] = error
-    return {
-        "code_hits": [{"path": "modules/example/src/example.py", "score": 0.91}],
-        "wsp_hits": [{"path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"}],
-        "wsps": [{"path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"}],
-        "docs_hits": [{"path": "modules/example/README.md"}],
-        "knowledge_hits": [{"path": "WSP_knowledge/docs/Papers/example.md"}],
-        "knowledge": [{"path": "WSP_knowledge/docs/Papers/example.md"}],
-        "metadata": metadata,
-    }
-
-
-class _Backend:
-    def __init__(self, result: Mapping[str, Any] | None = None, *, mode: str = "semantic") -> None:
-        self.result = result or _raw_result(mode=mode)
-        self.retrieval_mode = mode
-        self.collection_embedding_space_map = {
-            name: SPACE_FINGERPRINT for name in BASELINE_COLLECTIONS
-        }
-        self.search_calls = 0
-        self.index_calls = 0
-
-    def search(self, query: str, *, limit: int, doc_type_filter: str) -> Mapping[str, Any]:
-        self.search_calls += 1
-        return self.result
-
-    def index_code_entries(self) -> None:  # pragma: no cover - must never execute
-        self.index_calls += 1
-        raise AssertionError("query owner attempted indexing")
-
-    def index_wsp_entries(self) -> None:  # pragma: no cover - must never execute
-        self.index_calls += 1
-        raise AssertionError("query owner attempted indexing")
-
-
 def _request(**overrides: Any) -> Mapping[str, Any]:
     request = {
-        "query": "find the operational contract",
+        "query": QUERY,
         "limit": 8,
         "doc_type_filter": "all",
         "expected_repo_head_sha": SHA,
@@ -234,23 +192,26 @@ def test_health_rejects_semantic_backend_with_zero_canary_hits(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    backend = _Backend(
-        {
-            "metadata": {
-                "retrieval_mode": "semantic",
-                "embedding_backend": "sentence_transformers",
-                "collection_embedding_space_map": {
-                    name: SPACE_FINGERPRINT for name in BASELINE_COLLECTIONS
-                },
-            }
-        }
-    )
+    raw = dict(_raw_result())
+    for key in (
+        "code_hits", "wsp_hits", "test_hits", "code", "wsps", "tests",
+        "skills", "skill_hits", "symbol_hits", "docs_hits", "knowledge_hits",
+        "docs", "knowledge", "work_ledger_hits", "work_ledger",
+    ):
+        raw[key] = []
+    metadata = dict(raw["metadata"])
+    for key in tuple(name for name in metadata if name.endswith("_count")):
+        metadata[key] = 0
+    raw["metadata"] = metadata
+    backend = _Backend(raw)
     owner = _service(tmp_path, monkeypatch, backend=backend)
     try:
         result = owner.handle_health(authorization=f"Bearer {TOKEN}")
         assert result["ok"] is False
         assert result["error"] == "SEMANTIC_CANARY_EMPTY"
         assert result["status"] == "unavailable"
+        assert result["hits"] == []
+        assert result["raw_result"] == {}
     finally:
         owner.close()
 
@@ -537,7 +498,7 @@ def test_stable_semantic_generation_preserves_complete_raw_wsp_and_knowledge(
 
 
 @pytest.mark.parametrize("mode", ["lexical", "failed", "unknown"])
-def test_nonsemantic_modes_are_rejected_with_raw_truth_preserved(
+def test_nonsemantic_modes_are_rejected_without_untrusted_evidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str
 ) -> None:
     raw = _raw_result(mode=mode)
@@ -548,7 +509,8 @@ def test_nonsemantic_modes_are_rejected_with_raw_truth_preserved(
         assert result["ok"] is False
         assert result["error"] == "SEMANTIC_BACKEND_UNAVAILABLE"
         assert result["retrieval_mode"] == mode
-        assert result["raw_result"] == raw
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
     finally:
         owner.close()
 
@@ -592,7 +554,8 @@ def test_repository_is_reproven_after_semantic_retrieval(
     try:
         result = _query(owner)
         assert result["error"] == "REPO_HEAD_MISMATCH"
-        assert result["raw_result"] == _raw_result()
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
         assert backend.search_calls == 1
         assert receipt_reads == 1
     finally:
@@ -627,7 +590,8 @@ def test_repository_is_reproven_after_final_freshness_snapshot(
     try:
         result = _query(owner)
         assert result["error"] == "HOLOINDEX_REPOSITORY_DIRTY"
-        assert result["raw_result"] == _raw_result()
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
         assert backend.search_calls == 1
         assert receipt_reads == 2
     finally:

@@ -1,5 +1,18 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-15 - Holo owner path projection pin (0.4.100)
+
+- Updated version and backend-manifest assertions for repository-relative
+  semantic evidence while retaining no-authority and integrity regressions.
+- Added HUEB-001 through HUEB-009 proving indexed imperative text remains inert,
+  embedded evidence-boundary markers are neutralized, and every model role
+  prompt receives the untrusted-evidence system rule. The Fusion alias proves
+  its outer system boundary and records internal provider roles as unobservable.
+- Proved custom prompts always retain exactly one terminal evidence rule even
+  when supplied rules occur beyond or across the 6,000-character boundary.
+- Revalidated the sharded extension contract after adding the bounded evidence
+  wrapper without creating a second retrieval or redaction system.
+
 ## 2026-08-15 - Grant-profile atomic provisioning pin (0.4.99)
 
 - Updated version and backend-manifest assertions for the uncomposed atomic

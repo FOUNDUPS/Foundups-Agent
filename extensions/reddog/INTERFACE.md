@@ -1,8 +1,16 @@
 # RedDog Interface
 
-Version 0.4.99 pins the uncomposed grant-profile atomic provisioning backend
-closure. Version 0.4.98 pinned owner-config v4 and the root-owned grant-service source
-policy authority. It adds no editor API or execution authority.
+Version 0.4.100 pins repository-relative Holo owner evidence and the uncomposed
+grant-profile atomic provisioning closure. Successful owner results first pass
+the producer-owned exact result contract. RedDog then frames all indexed
+HoloIndex, repository, Skillz, documentation, Memex, Brain, and Breadcrumb text
+as untrusted evidence, neutralizes embedded boundary markers, and supplies the
+same inert-evidence system rule to every RedDog role prompt. The OpenRouter
+Fusion alias receives that rule at its outer system-message boundary; provider-
+internal role prompts remain opaque and are explicitly reported as unobservable
+rather than independently proven. Version 0.4.98 pinned owner-config v4 and the
+root-owned grant-service source policy authority. It adds no editor API or
+execution authority.
 
 Version 0.4.97 pins the exact-Git grant-authority effect admission chain. The
 backend requires signed E0 policy v7 and signed manifest v3 before WSP 71 may

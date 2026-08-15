@@ -1,5 +1,19 @@
 # RedDog ModLog
 
+## 2026-08-15 - Holo owner path projection pin (0.4.100)
+
+- Pinned the backend closure that projects authority-worktree hit paths to
+  repository-relative evidence before RedDog receipt consumption.
+- Added a process-local prompt boundary that labels all HoloIndex, repository,
+  Skillz, documentation, Memex, Brain, and Breadcrumb text as untrusted
+  evidence. Embedded boundary markers are neutralized before Fusion.
+- Made the Fusion-alias receipt explicit that only the outer system/user
+  evidence boundary is observable; provider-internal role prompts are opaque.
+- Bound successful owner responses to the producer-owned exact result schema;
+  malformed aliases, counts, queries, ranking fields, and bucket shapes fail
+  before path projection or model use.
+- Added no index mutation, repository effect, or worker authority.
+
 ## 2026-08-15 - Grant-profile atomic provisioning pin (0.4.99)
 
 - Regenerated the backend manifest for config-v2, owner-policy-bound atomic

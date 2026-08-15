@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 import math
 from typing import Any, Mapping, Sequence
 
+from holo_index.query_result_contract import validate_search_result
+
+from .holo_query_path_projection import project_result_hit
 
 SCHEMA_VERSION = "holoindex_query_service.v1"
 
@@ -28,12 +32,34 @@ def failure_reason(error: str) -> str:
     if error.startswith("REPOSITORY") or error.startswith("REPO_"):
         return "repository_state_unproven"
     if error in {
-        "UNAUTHORIZED",
-        "AUTH_NOT_CONFIGURED",
+        "UNAUTHORIZED", "AUTH_NOT_CONFIGURED",
         "HOLOINDEX_QUERY_SERVICE_TOKEN_TOO_SHORT",
     }:
         return "query_owner_authentication_failed"
     return "holoindex_owner_query_failed"
+
+
+def normalize_result_paths(
+    result: Mapping[str, Any], repo_root: str, *, expected_query: str
+) -> dict[str, Any]:
+    """Validate the canonical result schema and project all hit paths."""
+    validate_search_result(result, expected_query=expected_query)
+    normalized: dict[str, Any] = {}
+    try:
+        for key, values in result.items():
+            if key == "metadata":
+                if not isinstance(values, Mapping):
+                    raise ValueError("query_evidence_schema_invalid")
+                normalized[key] = deepcopy(dict(values))
+                continue
+            normalized[key] = [
+                project_result_hit(item, str(repo_root)) for item in values
+            ]
+    except ValueError:
+        raise
+    except Exception as exc:
+        raise ValueError("query_evidence_copy_failed") from exc
+    return normalized
 
 
 def flatten_hits(
@@ -50,6 +76,7 @@ def flatten_hits(
         ("test_hits", "test"),
         ("skill_hits", "skill"),
         ("symbol_hits", "symbol"),
+        ("work_ledger_hits", "work_ledger"),
     )
     for bucket_index, (key, kind) in enumerate(buckets):
         values = result.get(key)
@@ -124,22 +151,37 @@ def build_response(
         normalized_freshness = "STALE"
     if not ok and not stale:
         stale = [failure_reason(error)]
+    response_hits = [] if not ok else list(hits)
+    response_raw = {} if not ok else dict(raw or {})
     return {
         "schema_version": SCHEMA_VERSION,
         "ok": ok,
         "source": "holoindex",
         "query": query,
         "freshness": normalized_freshness,
-        "hits": list(hits),
+        "hits": response_hits,
         "error": error,
         "stale_reasons": stale,
         "index_gap_detected": bool(stale or not ok),
         "retrieval_mode": mode,
-        "raw_result": dict(raw or {}),
+        "raw_result": response_raw,
         "latency_ms": max(0, int(latency_ms)),
         "no_holoindex_reindex_performed": True,
         **normalize_binding(binding),
     }
 
 
-__all__ = ["SCHEMA_VERSION", "build_response", "failure_reason", "flatten_hits"]
+def semantic_canary_empty_response(result: Mapping[str, Any]) -> dict[str, Any]:
+    """Convert an empty successful canary into an evidence-free failure."""
+    return build_response(
+        ok=False, query="", freshness="STALE", error="SEMANTIC_CANARY_EMPTY",
+        reasons=("semantic_canary_empty",), binding=result,
+        mode=str(result.get("retrieval_mode") or "unknown"),
+        latency_ms=int(result.get("latency_ms") or 0),
+    )
+
+
+__all__ = [
+    "SCHEMA_VERSION", "build_response", "failure_reason", "flatten_hits",
+    "normalize_result_paths", "semantic_canary_empty_response",
+]

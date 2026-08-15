@@ -19,6 +19,9 @@ from holo_index.query_receipt import (
     canonical_semantic_evidence,
     load_generation_binding,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_path_projection import (
+    project_result_hit,
+)
 
 
 def _freshness_receipt() -> HoloIndexFreshnessReceipt:
@@ -107,6 +110,23 @@ def test_canonical_semantic_evidence_binds_buckets_metadata_and_count() -> None:
     assert f'"schema_version":"{SEMANTIC_EVIDENCE_SCHEMA_VERSION}"' in serialized
     assert '"untrusted_extra"' not in serialized
     assert digest.startswith("sha256:")
+    assert count == 2
+
+
+def test_semantic_evidence_uses_projected_owner_paths() -> None:
+    test_hit = project_result_hit(
+        {"location": r"E:\Agents\root\tests\test_a.py"}, r"E:\Agents\root"
+    )
+    skill_hit = project_result_hit(
+        {"path": r"E:\Agents\root\skillz\a\SKILLz.md"}, r"E:\Agents\root"
+    )
+    raw = {"tests": [test_hit], "skills": [skill_hit],
+           "test_hits": [test_hit], "skill_hits": [skill_hit]}
+    serialized, _digest, count = canonical_semantic_evidence(raw)
+    assert "E:/Agents/root" not in serialized
+    assert "E:\\\\Agents\\\\root" not in serialized
+    assert '"location":"tests/test_a.py"' in serialized
+    assert '"path":"skillz/a/SKILLz.md"' in serialized
     assert count == 2
 
 

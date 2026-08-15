@@ -1,5 +1,27 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-15] Owner-evidence path projection receipt regression
+
+- Proved the producer-owned executable result contract exactly matches the
+  authoritative machine specification and rejects missing/unknown fields,
+  alias/count/query divergence, cross-bucket fields, score injection,
+  nonfinite ranking values, and forged backend/fingerprint maps.
+- Moved the complete executable response schema into the authoritative machine
+  JSON and made the runtime validator load and dispatch every declared value
+  rule from that content-bound source; unknown, nested-map, and extraneous
+  declarations fail closed during contract initialization.
+- Added direct producer coverage for code, test, skill, docs, knowledge, WSP,
+  symbol, and work-ledger hit families, including finite float priorities.
+- Proved oversized integers reject as canonical schema failures rather than
+  escaping as `OverflowError`, and that declared rule changes alter validation.
+- Extracted the 85-line structural loader after WSP 62 review; its largest
+  function is 29 lines. Proved malformed top-level lists, schema families,
+  aliases, counts, and list/object/null/numeric declarations normalize to one
+  startup failure before owner evidence is admitted.
+- Proved canonical semantic evidence receives only repository-relative paths
+  for backend `tests`/`skills` aliases and their typed hit buckets.
+- Preserved generation-bound receipt construction with no query-time reindex.
+
 ## [2026-08-11] Immutable repository-audit evidence regressions
 
 - Proved dirty tracked overlays are ignored, untracked candidates reject,

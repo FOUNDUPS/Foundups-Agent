@@ -33,6 +33,8 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     assert runtime.issubset(tracked)
     assert set(generator.EXECUTABLE_FILES).issubset(runtime)
     assert "holo_index.py" in runtime
+    assert "holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json" in runtime
+    assert "holo_index/query_result_contract_schema.py" in runtime
     assert "scripts/reddog_authoritative_work_state_query_once.py" in runtime
     assert "scripts/reddog_holoindex_incident_repair_once.py" in runtime
     assert "scripts/reddog_start_operations_control_once.py" in runtime
@@ -154,7 +156,7 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "7398db18fa40082040419585b74cc2941f7d5efc13b27f14ee8b76cb760bfdd9"
+    assert digest == "5b1ed164872b901bb712af4b4b9779b8812949dc2d48b1295c3cf82163a2e7e2"
     constants = (REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js").read_text(encoding="utf-8")
     match = re.search(r"EXPECTED_MANIFEST_SHA256 = '([a-f0-9]{64})'", constants)
     assert match is not None and match.group(1) == digest

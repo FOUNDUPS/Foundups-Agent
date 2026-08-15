@@ -8,6 +8,13 @@ Read-only promotion-time proof that the already-running private query owner
 serves the exact repository root, repository HEAD, HoloIndex generation, and
 on-disk freshness-receipt digest supplied by the caller. It never starts an
 owner or re-indexes; absent or mismatched owner state returns `False`.
+Successful owner evidence is deep-copied and projected onto repository-relative
+POSIX paths before raw, flattened, semantic-evidence, or receipt use. Unknown
+rooted, drive-qualified, traversal, and outside-root paths fail closed. The
+owner imports the producer-owned executable contract and accepts only
+canonical search-result fields, scalar hit values, known collection/backend
+mappings, and digest-shaped embedding fingerprints.
+Unknown or nested evidence fields reject the complete response.
 
 ### FoundUpsMCPBridge
 
@@ -56,6 +63,15 @@ Get bridge status and capabilities.
 ---
 
 ### HoloIndexQueryOwnerService
+
+Successful semantic responses project physical `path` and `file` metadata
+under the proven repository root to POSIX repository-relative values before
+flattening, evidence hashing, or receipt construction. Absolute evidence
+outside that root rejects the query. Failed responses always contain empty
+raw and flattened evidence, so stale or malformed backend results cannot leak
+unprojected paths. Unicode control, formatting, and alternate-whitespace path
+characters also reject before projection. This does not mutate or reindex the
+store.
 
 Supported private owner for the RedDog operational consumers migrated in this
 POC:

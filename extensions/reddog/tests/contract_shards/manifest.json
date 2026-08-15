@@ -1,9 +1,9 @@
 {
   "schema_version": "reddog_extension_contract_shards.v1",
   "source_path": "extensions/reddog/tests/verify_extension_contract.js",
-  "source_sha256": "sha256:6345bacc15b8db9c72d3a09941ef7b745cfc56519fa42fd2ec1c2653f7289d91",
-  "source_line_count": 6857,
-  "assertion_call_count": 1214,
+  "source_sha256": "sha256:a801620843d4f84d66a936b72e76baf71c4a71fd3374deed582c78d29a375eba",
+  "source_line_count": 6893,
+  "assertion_call_count": 1216,
   "canonical_line_endings": "LF",
   "max_shard_lines": 400,
   "max_orchestrator_lines": 200,
@@ -14,7 +14,7 @@
       "source_line_start": 1,
       "source_line_end": 400,
       "line_count": 400,
-      "sha256": "sha256:36afb153e1061ce57b558fbdcafb5004975d0e8702c1872a23d8f66ec4a70e32"
+      "sha256": "sha256:d178507b118dc9ce196abc302471292837675c9a2ba3b87d4d76cac8c9b8bda1"
     },
     {
       "order": 2,
@@ -22,7 +22,7 @@
       "source_line_start": 401,
       "source_line_end": 798,
       "line_count": 398,
-      "sha256": "sha256:5e4d55d7a59d8b2c547539229d56635a08ff7dad00f281a686304cd7200b8bd0"
+      "sha256": "sha256:7f4f5f350f15012395f9e75db6cd91106e54aa2aa94d9c01aea70ca9587c7511"
     },
     {
       "order": 3,
@@ -78,7 +78,7 @@
       "source_line_start": 3161,
       "source_line_end": 3559,
       "line_count": 399,
-      "sha256": "sha256:06a971c8383e9862a25523b5c3c35030667d59832f2a5dfcd2227123264217da"
+      "sha256": "sha256:d1ecbc8473c11ca1069a80e41230b4d5f9591de13404ba8d09e63de7c81b9e04"
     },
     {
       "order": 10,
@@ -110,7 +110,7 @@
       "source_line_start": 4741,
       "source_line_end": 5135,
       "line_count": 395,
-      "sha256": "sha256:50959b1bcf0417a2fef8204fc28c898fffe29b387e9b27b76d74dd97a74965d9"
+      "sha256": "sha256:e64aa54af741bab59f83182a2682d889d4114f885014c1054a4c3622c60dc131"
     },
     {
       "order": 14,
@@ -142,15 +142,15 @@
       "source_line_start": 6335,
       "source_line_end": 6706,
       "line_count": 372,
-      "sha256": "sha256:4a69ebbd61ef1819ecccf8365eea86a63cd341e762154f6eb57645a5dde7ff8a"
+      "sha256": "sha256:892b3e27689afdc3d66e15f072d81af549bbb867a3ed8bd15802cd07fe4d3f6a"
     },
     {
       "order": 18,
       "path": "contract_shards/verify_extension_contract.part18.js",
       "source_line_start": 6707,
-      "source_line_end": 6857,
-      "line_count": 151,
-      "sha256": "sha256:4cf616bb6765aa63e6708d7429ad3e246d76ae90d72708c6056334a7f4f4f328"
+      "source_line_end": 6893,
+      "line_count": 187,
+      "sha256": "sha256:e419e7e92b99f909cd3e541a646715bef176d903e997508b42c502c2f67d0390"
     }
   ]
 }

@@ -154,6 +154,13 @@ HEAD before and after retrieval; health also requires a non-empty semantic
 canary. FastAPI is optional; the same command uses the stdlib HTTP runtime when
 FastAPI is unavailable.
 
+Successful responses first pass the producer-owned executable HoloIndex result
+contract, then project every canonical path/location under the proven
+repository root to repository-relative POSIX form. Unknown, incomplete,
+cross-bucket, alias/count-divergent, or Unicode-control-bearing evidence fails
+closed with empty raw and flattened results. Indexed text remains untrusted
+evidence, never instructions, and query handling never reindexes the store.
+
 The owner forces the authoritative sentence_transformers backend, discovers
 complete flat and Hugging Face models--.../snapshots/<revision> caches for
 offline startup, and disables the generation-unbound legacy SearchCache. Cold

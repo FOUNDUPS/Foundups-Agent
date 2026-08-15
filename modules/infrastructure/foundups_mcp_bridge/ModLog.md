@@ -1,5 +1,37 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-15 - Repository-relative Holo owner evidence
+
+- Extended the existing owner-response normalizer so physical hit paths under
+  the proven authority root become repository-relative before response and
+  receipt use; absolute outside-root evidence now fails closed.
+- Extracted host-independent lexical projection into the bounded
+  `holo_query_path_projection` helper. It covers backend aliases plus
+  `path`/`file`/`location`, rejects POSIX, rooted, drive-relative, traversal,
+  foreign-root, control-character, ADS, and device-path ambiguity, and
+  deep-copies backend evidence before use.
+- Preserved canonical numeric and code-symbol location descriptors only when
+  they bind to the same projected path; mismatched or ADS-like descriptors
+  fail closed.
+- Preserved the existing NAVIGATION `path[:descriptor] - annotation` producer
+  grammar while discarding annotation prose from canonical path identity.
+- Enforced the producer-owned executable search-result contract with explicit
+  top-level,
+  hit-field, scalar-type, collection, backend, and embedding-fingerprint
+  allowlists. Unknown or nested fields cannot bypass path projection.
+- Loaded that complete contract from the authoritative machine JSON, accepted
+  the producer's finite float priorities, and content-bound the schema in the
+  exact RedDog runtime manifest.
+- Included work-ledger hits in global flattening and rebuilt empty semantic
+  canaries as evidence-free failures rather than mutating success payloads.
+- Consolidated owner responses onto the existing response builder so every
+  failed query returns empty raw and flattened evidence. Stale, lexical,
+  changed-generation, and malformed results cannot leak unprojected paths.
+- Rejected terminal whitespace, Unicode control/format/alternate-whitespace
+  characters, and cross-flavor rooted paths before lexical projection instead
+  of normalizing ambiguous evidence into a valid path.
+- Retained read-only query behavior with no index or repository mutation.
+
 ## 2026-08-06 - Linked-worktree owner dependency root
 
 - Corrected the one-shot owner query to resolve the primary same-repository
