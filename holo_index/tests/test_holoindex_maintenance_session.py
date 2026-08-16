@@ -507,6 +507,47 @@ def test_final_snapshot_recheck_blocks_post_proof_mutation(tmp_path: Path) -> No
     assert code.verification == "IN_PROGRESS"
 
 
+def test_dirty_repository_at_publication_boundary_never_publishes_pass(
+    tmp_path: Path,
+) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    states = iter(
+        (
+            _clean_state(HEAD_SHA),
+            _clean_state(HEAD_SHA),
+            SimpleNamespace(
+                proven_clean=False,
+                head_sha=HEAD_SHA,
+                error="HOLOINDEX_REPOSITORY_DIRTY",
+            ),
+        )
+    )
+    session._repository_state_reader = lambda _root: next(states)
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_REPOSITORY_DIRTY",
+    ):
+        session.complete(
+            _holo(),
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+    invalidation = load_freshness_receipt(freshness_receipt_path(tmp_path / "ssd"))
+    code = next(
+        entry for entry in invalidation.collections if entry.name == "navigation_code"
+    )
+    assert code.verification == "IN_PROGRESS"
+
+
 def test_real_client_routes_final_snapshot_check_to_isolated_probe(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

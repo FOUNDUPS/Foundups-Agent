@@ -172,7 +172,10 @@ publish atomic IN_PROGRESS invalidation before collection access. Final PASS
 requires the same clean HEAD, exact declared collection scope, non-empty
 manifests, the canonical source_scope_id for every baseline collection, zero
 recorded source-read, cap, or Python-AST failures, and a durable atomic receipt
-write. Canonical proofs cover Git-tracked sources and full raw source content.
+write. The clean exact HEAD is checked again after final collection snapshot
+verification and immediately before that write; dirty/change failure preserves
+the IN_PROGRESS invalidation. Canonical proofs cover Git-tracked sources and
+full raw source content.
 They do not assert zero failures for every legacy format parser. Query
 consumers fail closed
 with HOLOINDEX_MAINTENANCE_ACTIVE or

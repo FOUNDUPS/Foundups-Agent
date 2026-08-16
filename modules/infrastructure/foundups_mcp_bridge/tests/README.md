@@ -19,6 +19,12 @@ the disposable process fixture.
   startup, and platform behavior.
 - `test_holo_query_service_runtime_safety.py`: runtime confinement and
   mutation-safety boundaries.
+- `test_reddog_holoindex_maintenance_handshake.py`: trusted refresh command,
+  repository/receipt validation, and owner restart orchestration.
+- `test_reddog_holoindex_maintenance_diagnostics.py`: bounded child-output
+  capture, strict stable-error propagation, cooperative descendant containment,
+  failed-`taskkill`/escaped-session limits, exact-PID test cleanup, and secret-free
+  failure behavior.
 
 ## Focused execution
 

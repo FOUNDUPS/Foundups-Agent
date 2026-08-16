@@ -7,11 +7,14 @@ index transaction, prove its exact-HEAD receipt, and restart the owner.
 
 from __future__ import annotations
 
+import json
 import os
+import re
+import signal
 import subprocess
 import sys
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Mapping
 
@@ -44,12 +47,10 @@ from .reddog_sealed_holo_runtime import (
 
 AUTO_MAINTENANCE_ENV = "REDDOG_HOLOINDEX_AUTO_MAINTENANCE"
 MAINTENANCE_TIMEOUT_ENV = "REDDOG_HOLOINDEX_MAINTENANCE_TIMEOUT_SECONDS"
-
 OPERATIONAL_NOT_REQUESTED = "NOT_REQUESTED"
 OPERATIONAL_READY = "READY"
 OPERATIONAL_REFRESHED = "REFRESHED"
 OPERATIONAL_FAILED = "FAILED"
-
 DIRTY_ERROR = "HOLOINDEX_MAINTENANCE_REPOSITORY_DIRTY"
 EXTERNAL_OWNER_ERROR = "HOLOINDEX_MAINTENANCE_EXTERNAL_OWNER_UNSUPPORTED"
 MAINTENANCE_REQUIRED_ERROR = "HOLOINDEX_MAINTENANCE_REQUIRED"
@@ -58,9 +59,21 @@ REFRESH_TIMEOUT_ERROR = "HOLOINDEX_MAINTENANCE_REFRESH_TIMEOUT"
 RECEIPT_INVALID_ERROR = "HOLOINDEX_MAINTENANCE_RECEIPT_INVALID"
 REPOSITORY_CHANGED_ERROR = "HOLOINDEX_MAINTENANCE_REPOSITORY_CHANGED"
 TIMEOUT_INVALID_ERROR = "HOLOINDEX_MAINTENANCE_TIMEOUT_INVALID"
-
 _HANDSHAKE_LOCK = threading.Lock()
-
+_REFRESH_STDOUT_MAX_BYTES = 16 * 1024
+_REFRESH_STDOUT_LINE_MAX_BYTES = 4 * 1024
+_REFRESH_STDOUT_CHUNK_BYTES = 4096
+_REFRESH_CAPTURE_CLEANUP_SECONDS = 1.0
+_STABLE_MAINTENANCE_ERROR_PATTERN = re.compile(r"HOLOINDEX_[A-Z0-9_]{1,96}\Z")
+_STABLE_MAINTENANCE_ERRORS = frozenset(
+    "HOLOINDEX_" + suffix for suffix in """BASE_FRESHNESS_RECEIPT_BINDING_MISMATCH BASE_FRESHNESS_RECEIPT_INVALID
+    CARRY_FORWARD_PROOF_FAILED FINAL_COLLECTION_SNAPSHOT_MISMATCH FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED
+    MAINTENANCE_BACKEND_UNAVAILABLE MAINTENANCE_INCOMPLETE MAINTENANCE_INVALIDATION_FAILED MAINTENANCE_LEASE_UNAVAILABLE
+    MAINTENANCE_PLAN_EMPTY MAINTENANCE_PROOF_FAILED MAINTENANCE_RECEIPT_WRITE_FAILED MAINTENANCE_REPO_MUTATION_FORBIDDEN
+    MAINTENANCE_SEMANTIC_BACKEND_REQUIRED MAINTENANCE_SOURCE_PROOF_INCOMPLETE NONCANONICAL_SOURCE_SCOPE
+    PERSISTED_COLLECTION_VIEW_FAILED REFRESH_SOURCE_MANIFEST_MISMATCH REFRESH_SOURCE_PROBE_FAILED REPOSITORY_DIRTY
+    REPOSITORY_HEAD_CHANGED REPOSITORY_STATE_UNAVAILABLE WRITER_STORE_FINALIZATION_FAILED""".split()
+)
 _REFRESH_ENV_EXACT_DENY = frozenset(
     {
         "HOLO_FAST_SEARCH",
@@ -81,7 +94,6 @@ _REFRESH_ENV_PREFIX_DENY = (
     "HOLOINDEX_WSP_",
 )
 
-
 @dataclass(frozen=True)
 class RedDogHoloIndexOperationalResult:
     """Secret-free operational proof returned to the trusted host."""
@@ -94,6 +106,164 @@ class RedDogHoloIndexOperationalResult:
     generation_id: str = ""
     freshness_receipt_digest: str = ""
     freshness_reasons: tuple[str, ...] = ()
+
+
+@dataclass
+class _BoundedRefreshCapture:
+    """Bounded secret-bearing output retained only for local parsing."""
+    stdout: bytearray = field(default_factory=bytearray)
+    oversized: bool = False
+    read_failed: bool = False
+
+
+@dataclass(frozen=True)
+class _BoundedRefreshResult:
+    returncode: int
+    stdout: bytes
+    output_oversized: bool = False
+    output_read_failed: bool = False
+
+
+def _drain_refresh_stdout(stream, capture: _BoundedRefreshCapture) -> None:
+    try:
+        while True:
+            chunk = stream.read(_REFRESH_STDOUT_CHUNK_BYTES)
+            if not chunk:
+                return
+            remaining = _REFRESH_STDOUT_MAX_BYTES - len(capture.stdout)
+            if remaining > 0:
+                capture.stdout.extend(chunk[:remaining])
+            if len(chunk) > remaining:
+                capture.oversized = True
+    except (OSError, ValueError):
+        capture.read_failed = True
+    finally:
+        try:
+            stream.close()
+        except (OSError, ValueError):
+            pass
+
+
+def _terminate_refresh_tree(process) -> None:
+    """Boundedly terminate only the exact refresh PID and its descendants."""
+    if process.poll() is not None:
+        return
+    if os.name == "nt":
+        try:
+            subprocess.run(
+                ["taskkill", "/PID", str(int(process.pid)), "/T", "/F"],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                shell=False,
+                timeout=_REFRESH_CAPTURE_CLEANUP_SECONDS,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError, ValueError):
+            pass
+    else:
+        try:
+            os.killpg(int(process.pid), signal.SIGKILL)
+        except (OSError, ProcessLookupError, ValueError):
+            pass
+    if process.poll() is None:
+        try:
+            process.kill()
+        except OSError:
+            pass
+    try:
+        process.wait(timeout=_REFRESH_CAPTURE_CLEANUP_SECONDS)
+    except subprocess.TimeoutExpired:
+        pass
+
+
+def _bounded_refresh_runner(command, **kwargs) -> _BoundedRefreshResult:
+    """Run one child with bounded memory/time and no stderr or disk capture."""
+    timeout = float(kwargs.pop("timeout"))
+    kwargs.pop("check", None)
+    if kwargs.get("stdout") is not subprocess.PIPE:
+        raise ValueError("bounded refresh requires stdout=PIPE")
+    kwargs["bufsize"] = 0
+    if os.name == "nt":
+        kwargs["creationflags"] = int(kwargs.get("creationflags", 0)) | int(
+            subprocess.CREATE_NEW_PROCESS_GROUP
+        )
+    else:
+        kwargs["start_new_session"] = True
+    process = subprocess.Popen(command, **kwargs)
+    if process.stdout is None:
+        _terminate_refresh_tree(process)
+        raise OSError("bounded refresh stdout unavailable")
+    capture = _BoundedRefreshCapture()
+    reader = threading.Thread(
+        target=_drain_refresh_stdout,
+        args=(process.stdout, capture),
+        name="reddog-holo-refresh-output",
+        daemon=True,
+    )
+    reader.start()
+    try:
+        returncode = process.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _terminate_refresh_tree(process)
+        reader.join(timeout=_REFRESH_CAPTURE_CLEANUP_SECONDS)
+        raise
+    reader.join(timeout=_REFRESH_CAPTURE_CLEANUP_SECONDS)
+    if reader.is_alive():
+        capture.read_failed = True
+    return _BoundedRefreshResult(
+        returncode=returncode,
+        stdout=bytes(capture.stdout),
+        output_oversized=capture.oversized,
+        output_read_failed=capture.read_failed or reader.is_alive(),
+    )
+
+def _unique_json_object(pairs) -> dict:
+    payload: dict = {}
+    for key, value in pairs:
+        if key in payload:
+            raise ValueError("duplicate JSON key")
+        payload[key] = value
+    return payload
+
+
+def _stable_child_maintenance_error(completed) -> str:
+    """Extract only an allowlisted code from the child's final JSON line."""
+    if getattr(completed, "output_oversized", False) or getattr(
+        completed, "output_read_failed", False
+    ):
+        return ""
+    stdout = getattr(completed, "stdout", b"")
+    if isinstance(stdout, bytes):
+        try:
+            text = stdout.decode("utf-8", errors="strict")
+        except UnicodeDecodeError:
+            return ""
+    elif isinstance(stdout, str):
+        text = stdout
+    else:
+        return ""
+    lines = text.splitlines()
+    if not lines or len(lines[-1].encode("utf-8")) > _REFRESH_STDOUT_LINE_MAX_BYTES:
+        return ""
+    try:
+        payload = json.loads(lines[-1], object_pairs_hook=_unique_json_object)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return ""
+    if not isinstance(payload, dict) or set(payload) not in (
+        {"ok", "error"},
+        {"ok", "error", "detail"},
+    ):
+        return ""
+    error = payload.get("error")
+    detail = payload.get("detail", "")
+    if payload.get("ok") is not False or type(error) is not str:
+        return ""
+    if type(detail) is not str or len(detail.encode("utf-8")) > 2048:
+        return ""
+    if not _STABLE_MAINTENANCE_ERROR_PATTERN.fullmatch(error):
+        return ""
+    return error if error in _STABLE_MAINTENANCE_ERRORS else ""
 
 
 def _path_identity(path: Path | str) -> str:
@@ -213,7 +383,7 @@ def _run_full_refresh(
             cwd=str(repo_root),
             env=child_environment,
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             shell=False,
             timeout=timeout,
@@ -223,7 +393,9 @@ def _run_full_refresh(
         return REFRESH_TIMEOUT_ERROR
     except (OSError, subprocess.SubprocessError, ValueError):
         return REFRESH_FAILED_ERROR
-    return "" if completed.returncode == 0 else REFRESH_FAILED_ERROR
+    if completed.returncode == 0:
+        return ""
+    return _stable_child_maintenance_error(completed) or REFRESH_FAILED_ERROR
 
 
 def _ready_result(
@@ -384,7 +556,7 @@ def ensure_reddog_holoindex_operational(
     auto_maintenance: bool | None = None,
     timeout_seconds: float | None = None,
     environ: Mapping[str, str] | None = None,
-    runner=subprocess.run,
+    runner=None,
 ) -> RedDogHoloIndexOperationalResult:
     """Ensure a clean exact-HEAD index and authenticated semantic owner."""
     if not requested:
@@ -397,6 +569,7 @@ def ensure_reddog_holoindex_operational(
     )
     root = Path(repo_root).resolve(strict=False)
     runtime_root = Path(owner_runtime_root or root).resolve(strict=False)
+    refresh_runner = _bounded_refresh_runner if runner is None else runner
     with _HANDSHAKE_LOCK:
         return _ensure_locked(
             repo_root=root,
@@ -404,7 +577,7 @@ def ensure_reddog_holoindex_operational(
             environ=env,
             auto_maintenance=maintenance_enabled,
             timeout_seconds=timeout_seconds,
-            runner=runner,
+            runner=refresh_runner,
         )
 
 

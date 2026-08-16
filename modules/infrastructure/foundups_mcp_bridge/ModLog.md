@@ -11,6 +11,28 @@
 - Added comprehensive unit tests in `tests/test_mcp_server_sse.py` (11/11 passed).
   (WSP 22/34/50/80/96/97)
 
+## 2026-08-16 - Maintenance failure diagnostic hardening
+
+- Replaced discarded refresh stdout with a bounded 16 KiB in-memory capture;
+  stderr remains discarded and no diagnostic file is written.
+- Propagated only an allowlisted stable maintenance error from the child's
+  final schema-validated JSON line. Detail, paths, logs, malformed/forged
+  payloads, and oversized output never cross the result boundary.
+- Bounded descendant-retained stdout timeout amplification on cooperative hosts:
+  Windows attempts exact-PID `taskkill /T /F` before bounded direct-child fallback,
+  while POSIX signals the new process group; the reader alone closes its pipe.
+- Documented and tested the containment limit: failed Windows `taskkill` or a
+  POSIX descendant that starts a new session may retain stdout and the daemon
+  reader until that escaped descendant exits. This is not a hostile-process or
+  OS-privilege guarantee, and callers must not assume the whole tree is gone.
+- Documented the exact `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` dedicated,
+  immutable authority-checkout rule and exclusive repository-writer window.
+- Regenerated the 1,516-test registry and 1,336-file RedDog backend manifest;
+  the compatibility digest is
+  `c477253ea6fdf2748ffd9f79d72d8fd22bfa95749416b0493f8cb2ec8e91821d`.
+  No freshness, lease, semantic, extension API, or package-version contract
+  changed.
+
 ## 2026-08-16 - Zero-limit reconciliation
 
 - Closed the internal flattening edge where `limit=0` admitted one candidate.

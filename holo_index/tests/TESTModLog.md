@@ -1,5 +1,13 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-16] Final publication dirty-worktree falsification
+
+- Injected clean/clean/dirty repository states across receipt construction,
+  snapshot verification, and the final publication boundary.
+- Proved the stable dirty error is returned and the atomic receipt remains
+  IN_PROGRESS rather than publishing PASS. Combined focused maintenance
+  suites: **53 passed**.
+
 ## [2026-08-16] Tier-0 R4 WSP 62 correction
 
 - Removed candidate-authored `<=1500` and `<=225` allowances.

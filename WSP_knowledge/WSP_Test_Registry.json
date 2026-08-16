@@ -15581,6 +15581,21 @@
       "description": "Main-preflight integration tests for RedDog's private HoloIndex owner."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_maintenance_diagnostics",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial tests for bounded RedDog maintenance child diagnostics."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_maintenance_handshake",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_handshake.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",

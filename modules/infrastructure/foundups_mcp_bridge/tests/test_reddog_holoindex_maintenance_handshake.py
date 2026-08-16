@@ -152,7 +152,7 @@ def _publishing_refresh_runner(repo_root: Path, ssd_path: Path):
         assert kwargs["env"]["HOLO_OFFLINE"] == "1"
         assert kwargs["env"]["HOLO_USE_TURBOQUANT"] == "0"
         assert _SCOPE_OVERRIDE_NAMES.isdisjoint(kwargs["env"])
-        assert kwargs["stdout"] is subprocess.DEVNULL
+        assert kwargs["stdout"] is subprocess.PIPE
         _publish(repo_root, ssd_path)
         return SimpleNamespace(returncode=0)
 

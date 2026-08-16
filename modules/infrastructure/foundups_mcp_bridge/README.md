@@ -174,6 +174,22 @@ with the trusted host. It never stops a stale externally configured owner.
 A legacy blank embedding-space fingerprint is not accepted as historical
 compatibility: it makes the receipt stale and triggers this maintenance path.
 
+For one-shot owner routing, `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` must name a
+dedicated clean authority checkout, not the active caller worktree. Keep that
+checkout immutable and reserve an exclusive repository-writer window through
+refresh and final receipt publication. The parent retains at most 16 KiB of
+child stdout in memory, writes no capture file, discards stderr and diagnostic
+detail, and propagates only an allowlisted stable error from the final JSON
+line; every untrusted shape falls back to the generic refresh-failed code.
+On Windows, timeout makes a bounded exact-PID `taskkill /T /F` attempt. If
+`taskkill` is missing, denied, or times out, bounded direct-child kill/wait is
+the fallback; an escaped descendant can retain stdout and the daemon reader
+until that descendant exits. POSIX signals the exact isolated process group,
+but a descendant that starts a new session escapes it. The reader exclusively
+owns pipe closure. This is cooperative trusted-host best-effort containment,
+not a hostile-process or OS-privilege guarantee; never assume the whole tree is
+gone.
+
 For manual diagnostics only, set a strong shared token outside the repository,
 then launch the host-owned process:
 
@@ -221,6 +237,8 @@ isolation is required. The legacy `src/holo_tools.py` MCP surface remains a
 direct-store consumer outside this Phase-1 migration. Full refresh also
 requires an exclusive writer window because unleased legacy writers and a
 transient edit/revert are not excluded by the cooperative maintenance lease.
+Maintenance re-proves clean exact HEAD at the final publication boundary; a
+dirty or changed checkout leaves the IN_PROGRESS receipt in place.
 After a successful refresh, owner lifecycle failure can leave the receipt
 CURRENT while preflight remains non-operational. Abrupt host death can leave an
 orphan owner until verified process cleanup and token rotation.

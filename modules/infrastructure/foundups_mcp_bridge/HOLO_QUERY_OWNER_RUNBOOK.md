@@ -35,6 +35,14 @@ Defaults:
 - REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1
 - HOLOINDEX_SSD_PATH resolves through the canonical storage contract
 
+`REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` must identify a dedicated clean
+authority checkout, never the active caller worktree. Keep that checkout
+immutable for the complete query/maintenance proof window. Full refresh also
+requires an exclusive repository-writer window: do not edit, switch, merge,
+or run an unleased writer against that checkout while maintenance is active.
+The maintenance lease serializes participating store writers; it is not a
+repository lock and cannot prove away a transient edit-and-revert.
+
 Set either flag to 0 only for an explicit diagnostic or externally supervised
 deployment. If operational preflight fails, the Holo-dependent path fails
 closed before worker dispatch.
@@ -130,16 +138,28 @@ The maintenance handshake performs this exact sequence:
    `VECTOR_SEGMENT_UNAVAILABLE` result may continue only after two consecutive
    fresh-process proofs of the unchanged receipt, including collection
    snapshots and nearest-neighbor queries, within the original probe timeout.
-10. Re-prove the same clean HEAD, reload the atomic receipt, and validate its
-    repository/store identities and generation.
+10. Re-prove the same clean HEAD after receipt construction and once more at
+    the final publication boundary, then atomically publish/reload the receipt
+    and validate its repository/store identities and generation.
 11. Start the private owner with the exact SHA, repository-root digest,
     generation, and receipt digest supplied to one authenticated semantic
     startup exchange. Retain the actual returned binding with the live process;
     do not launch a duplicate semantic canary merely to export the
     process-private handoff.
 
-Refresh/index/proof failures preserve a non-current state and return a stable
-secret-free code. If refresh and receipt publication succeed but subsequent
+Refresh/index/proof failures preserve a non-current state. Child stdout is
+drained into a bounded 16 KiB in-memory buffer, stderr is discarded, and no
+capture file is created. For a nonzero exit, only an allowlisted stable error
+code in the final JSON line may cross the parent boundary; optional detail is
+validated but discarded. Malformed, forged, oversized, or free-text output
+returns `HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. On Windows, timeout makes a
+bounded exact-PID `taskkill /T /F` attempt. If `taskkill` is missing, denied, or
+times out, bounded direct-child kill/wait is the fallback; an escaped descendant
+may retain stdout and the daemon reader until that descendant exits. POSIX signals
+the exact isolated process group, but cannot contain a descendant that starts a
+new session. Only the reader closes its pipe. This is cooperative trusted-host
+best-effort containment, not a hostile-process or OS-privilege guarantee; never
+assume the whole tree is gone. If refresh and receipt publication succeed but subsequent
 owner startup or health fails, the persisted receipt can remain CURRENT while
 the operational preflight still returns false. A snapshot-only incremental
 receipt cannot satisfy this sequence.

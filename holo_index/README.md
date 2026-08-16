@@ -202,7 +202,10 @@ publishes an IN_PROGRESS receipt before opening mutable collections. Query
 owners probe that lease before and after retrieval. A final PASS receipt is
 published only after the entire declared collection plan succeeds at the same
 Git HEAD; incomplete plans and receipt-write failures leave the invalidation
-in place and return a nonzero/FAILED result. Phase 1 also assumes an exclusive
+in place and return a nonzero/FAILED result. Clean exact HEAD is re-proved
+again after final collection snapshot verification and immediately before
+PASS publication; a last-boundary dirty/change result leaves IN_PROGRESS in
+place. Phase 1 also assumes an exclusive
 repository-writer window during full refresh. The lease coordinates migrated
 writers only; unleased legacy collection writers and a transient edit/revert
 remain cooperative-writer limitations.

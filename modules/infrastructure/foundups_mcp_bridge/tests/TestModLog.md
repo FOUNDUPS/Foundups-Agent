@@ -17,6 +17,17 @@
   - Duplicate start protection and idempotent stop verified.
 - Test results: **11 passed in 11.81s** (100% pass rate).
 
+## [2026-08-16] Maintenance failure diagnostic hardening
+
+- Proved in-memory stdout capture bounds memory consumption at 16 KiB, discards
+  trailing bytes deterministically, and surfaces only allowlisted maintenance
+  errors.
+- Proved malformed, non-JSON, and non-allowlisted child outputs fail closed to
+  the generic refresh failure contract.
+- Proved cooperative process trees receive SIGTERM/SIGKILL on timeout and the
+  reader thread joins cleanly.
+- Added comprehensive unit tests in `test_holo_query_service_edges.py`.
+
 ## [2026-08-16] Zero-limit falsification
 
 - Reproduced `flatten_hits(..., 0)` returning one item and pinned the repaired

@@ -1,5 +1,11 @@
 # RedDog ModLog
 
+## 2026-08-16 - Maintenance backend closure refresh
+
+- Rebound the compatibility constant to the regenerated 1,336-file backend
+  manifest digest after maintenance-handshake hardening. No extension API,
+  package version, VSIX artifact, or publication changed. (WSP 22/62/97)
+
 ## 2026-08-16 - R7 Windows projection identity and WSP_62 containment
 
 - RED: a real Windows Git index containing `Foo.txt` and `foo.txt` resolved both

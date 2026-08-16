@@ -1,5 +1,14 @@
 # HoloIndex Package ModLog
 
+## [2026-08-16] Final maintenance publication clean-state proof
+
+- Added a clean exact-HEAD proof immediately before completed receipt write,
+  after the final collection snapshot comparison.
+- A dirty or changed repository at that last boundary now fails closed while
+  preserving the published IN_PROGRESS invalidation. Freshness, lease,
+  semantic, and collection proof semantics are otherwise unchanged.
+  (WSP 15/22/50/62/87/97)
+
 ## [2026-08-16] Tier-0 R4 WSP 62 correction
 
 - Reproduced `search_engine.py` growth from HEAD 1,465 lines to exactly 1,500
