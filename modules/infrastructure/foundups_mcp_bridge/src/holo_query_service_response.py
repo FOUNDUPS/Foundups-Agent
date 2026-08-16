@@ -8,6 +8,10 @@ import math
 from typing import Any, Mapping, Sequence
 
 from holo_index.query_result_contract import validate_search_result
+from holo_index.tier0_retrieval import (
+    infer_explicit_module_target,
+    module_tier0_paths,
+)
 
 from .holo_query_path_projection import project_result_hit
 
@@ -65,6 +69,8 @@ def normalize_result_paths(
 def flatten_hits(
     result: Mapping[str, Any],
     limit: int,
+    *,
+    query: str = "",
 ) -> list[Mapping[str, Any]]:
     """Flatten typed buckets into one deterministic global score order."""
     candidates: list[tuple[float, int, int, str, Mapping[str, Any]]] = []
@@ -95,7 +101,29 @@ def flatten_hits(
                 (_hit_score(item), bucket_index, item_index, identity, normalized)
             )
     candidates.sort(key=lambda value: (-value[0], value[1], value[2], value[3]))
+    candidates = _reserve_module_tier0(candidates, query)
     return _deduplicated_hits(candidates, limit)
+
+
+def _reserve_module_tier0(
+    candidates: list[tuple[float, int, int, str, Mapping[str, Any]]],
+    query: str,
+) -> list[tuple[float, int, int, str, Mapping[str, Any]]]:
+    target = infer_explicit_module_target(
+        query, (candidate[4] for candidate in candidates)
+    )
+    if not target:
+        return candidates
+    expected = module_tier0_paths(target)
+    by_path = {
+        candidate[3].replace("\\", "/").lower(): candidate
+        for candidate in candidates
+    }
+    reserved = [
+        by_path[path.lower()] for path in expected if path.lower() in by_path
+    ]
+    reserved_ids = {candidate[3] for candidate in reserved}
+    return [*reserved, *(c for c in candidates if c[3] not in reserved_ids)]
 
 
 def _hit_score(item: Mapping[str, Any]) -> float:
@@ -117,6 +145,8 @@ def _deduplicated_hits(
     candidates: Sequence[tuple[float, int, int, str, Mapping[str, Any]]],
     limit: int,
 ) -> list[Mapping[str, Any]]:
+    if limit <= 0:
+        return []
     hits: list[Mapping[str, Any]] = []
     seen: set[str] = set()
     for _score, _bucket, _position, identity, normalized in candidates:

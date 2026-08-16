@@ -143,31 +143,31 @@ includes(extensionJs, 'neutralizeRequiredTargetMarker(diff || \'(no diff)\')', '
 // four call sites MUST route its section through neutralizeRequiredTargetMarker before push. A
 // future edit dropping any one of these anchors fails the runner (forgery reopened).
 includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(targetSection.text))', 'MFH-J-007b: target-recall section (raw file bodies) must be marker-neutralized before push');
-includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(wsp97.text))', 'MFH-J-007b: WSP_97 excerpt (raw protocol body) must be marker-neutralized before push');
+includes(extensionJs, 'lowerSections.unshift(neutralizeRequiredTargetMarker(wsp97.text))', 'MFH-J-007b: WSP_97 excerpt must be marker-neutralized before priority insertion');
 includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(skillz))', 'MFH-J-007b: Skillz/Wardrobe/Rolodex section (raw file bodies) must be marker-neutralized before push');
 includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(directReadSection.text))', 'MFH-J-007b: plain direct-read section (raw fetched bodies) must be marker-neutralized before push');
 
-// MFH-J-008 (COMPLETENESS / FORWARD-SAFETY GUARD): ENUMERATE every lowerSections.push call site in
+// MFH-J-008 (COMPLETENESS / FORWARD-SAFETY GUARD): ENUMERATE every lowerSections insertion in
 // the extension source and assert EVERY ONE routes through neutralizeRequiredTargetMarker. The
 // protected required-target block is assembled SEPARATELY (via assembleFinalBoundedContext with
-// protectedInfo.text) and is the AUTHORITATIVE source -- it is NOT a lowerSections.push, and its
+// protectedInfo.text) and is the AUTHORITATIVE source -- it is not a lowerSections insertion, and its
 // own excerpt bodies are neutralized inside buildRequiredTargetProtectedSection. Therefore the
-// invariant is: 100% of lowerSections.push arguments are neutralizeRequiredTargetMarker(...). A
+// invariant is: 100% of lowerSections insertion arguments are neutralizeRequiredTargetMarker(...). A
 // FUTURE new raw-body section pushed WITHOUT neutralization fails THIS test rather than silently
 // reopening the forgery vector.
-const mfhLowerPushRe = /lowerSections\.push\(/g;
-const mfhLowerPushes = (extensionJs.match(mfhLowerPushRe) || []).length;
-assert(mfhLowerPushes >= 9, 'MFH-J-008: expected at least the 9 known lowerSections.push sites (enumeration guard sanity)');
-// Split on the push token; each following chunk begins with the pushed expression. Assert every
-// pushed section either IS a neutralizeRequiredTargetMarker(...) call or wraps its body in one.
-const mfhPushChunks = extensionJs.split('lowerSections.push(').slice(1);
-assert.strictEqual(mfhPushChunks.length, mfhLowerPushes, 'MFH-J-008: push-site split count must equal regex count');
-mfhPushChunks.forEach((chunk, idx) => {
+const mfhLowerInsertions = [...extensionJs.matchAll(/lowerSections\.(?:push|unshift)\(/g)];
+assert(mfhLowerInsertions.length >= 9, 'MFH-J-008: expected at least the 9 known lowerSections insertion sites');
+// Required WSP_97 policy precedes ordinary indexed evidence after the protected target block.
+const mfhWspInsertion = extensionJs.indexOf('lowerSections.unshift(neutralizeRequiredTargetMarker(wsp97.text))');
+const mfhHoloInsertion = extensionJs.indexOf('lowerSections.push(holoIndexEvidenceBoundary.wrapHoloIndexEvidence(');
+assert(mfhWspInsertion >= 0 && mfhHoloInsertion >= 0,
+  'MFH-J-008: WSP_97 and Holo evidence insertion anchors must remain explicit');
+mfhLowerInsertions.forEach((site, idx) => {
   // Look only at the pushed argument expression (up to the end of this statement / next push).
-  const arg = chunk.slice(0, 400);
+  const arg = extensionJs.slice(site.index, site.index + 400);
   assert(
     arg.indexOf('neutralizeRequiredTargetMarker(') !== -1,
-    'MFH-J-008: lowerSections.push site #' + (idx + 1) + ' does NOT route its body through '
+    'MFH-J-008: lowerSections insertion #' + (idx + 1) + ' does NOT route its body through '
       + 'neutralizeRequiredTargetMarker -- a raw file-body section can mint a forged required-target '
       + 'marker. Neutralize it (or, if it is provably marker-free, add an explicit allowlist anchor).'
   );

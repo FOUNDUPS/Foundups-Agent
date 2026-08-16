@@ -29,6 +29,7 @@ from holo_index.cli.direct_read_path_policy import (
     normalize_direct_read_path as _normalize_direct_read_path,
 )
 from holo_index.query_admission import evaluate_readonly_query_admission
+from holo_index.tier0_retrieval import TIER0_REQUIRED_DOCS
 
 
 def _env_truthy(key: str, default: str = "false") -> bool:
@@ -394,7 +395,7 @@ def _artifact_snapshot(repo_root, module_dir) -> Dict[str, Any]:
     tiers: Dict[str, Dict[str, Any]] = {
         "0": {
             "name": "Contract/Guardrails",
-            "required": ["README.md", "INTERFACE.md"],
+            "required": list(TIER0_REQUIRED_DOCS),
             "optional": ["SPEC.md", "PRD.md", "PROMPTS.md", "prompts/", "RUNBOOK.md"],
         },
         "1": {

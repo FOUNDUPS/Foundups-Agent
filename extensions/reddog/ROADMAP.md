@@ -6,6 +6,35 @@ Phase: RedDog 0.4.6 resident architect thin-client surface.
 
 Current implementation:
 
+- R7 Windows projection identity and WSP_62 containment correction (v0.4.101):
+  rejects normalized path aliases, ignored case/prefix/separator aliases, and
+  duplicate canonical existing-file identities before content capture while
+  preserving Linux case-sensitive names. `extension.js` is exactly 8,425 lines,
+  equal to HEAD and below the unchanged 8,428-line hard ceiling. This does not
+  claim that inherited exempt functions satisfy the ordinary function limit.
+- HOLOINDEX_TIER0_RETRIEVAL_HARDENING_PHASE1 (v0.4.101): pins the generated
+  backend closure for bounded exact README/INTERFACE retrieval, explicit
+  non-vector provenance, strict pair completeness, and truthful non-strict
+  warning degradation. The reconciliation also restores complete repo-audit
+  manifests under host ownership mismatch through an exact command-scoped
+  `safe.directory` plus explicit readiness evidence, and preserves bounded
+  WSP_97 excerpts ahead of ordinary evidence. No execution authority is added.
+  R4 adds start/end Git-storage receipts around the single projection and
+  rejects before-first, between-command, and before-final control mutations.
+  Validation is O(N), capped at 20,000 entries, and intentionally performs two
+  receipts per released snapshot to close the observed TOCTOU window. Related
+  FoundUp authority reads are grouped into one bounded four-command snapshot,
+  retaining the same two-receipt rule while eliminating six redundant full
+  metadata traversals per context. The exhaustive contract passes in 289.65
+  seconds under the unchanged 420-second release ceiling.
+  R5 removes arbitrary batch argv and adds an atomic four-name operation map.
+  Worktree projections now use stable bounded byte captures plus a
+  point-in-time projection receipt; ignored entries are excluded with
+  count/set-digest proof rather than making an ordinary checkout unusable.
+  A 500-changed/5,000-ignored cap fixture measured 589 ms for the fixed
+  four-operation batch and 5.340 seconds for the captured snapshot.
+  The final expanded R5 exhaustive contract passed in 303.7 seconds under its unchanged
+  420-second ceiling; independent WSP_97 verification remains required.
 - WRE_TEST_IMPACT_DIFFERENTIAL_RUNTIME_BINDING_PHASE1 (v0.4.76): exact-ID parent/candidate diagnostics, deterministic focused/module/systemic scope, and exact work-order/commit/policy binding; local test evidence cannot authorize promotion.
 - REDDOG_EXTENSION_CONTRACT_SUITE_MODULARIZATION_PHASE1: test-only WSP_62 repair; the exact 6,857-line exhaustive body is integrity-bound across 18 ordered <=400-line shards executed in one shared VM context by a <=200-line orchestrator. No runtime, package, manifest, or authority change.
 - REDDOG_BASELINE_CONTRACT_RECONCILIATION_PHASE1 (v0.4.75): canonical read-only `AUDIT_NO_EFFECT` bootstrap stage; prompt-bound WSP_15 architect fixtures; platform-independent Copy-MD sanitizer proof; digest-bound signed worker intent assertions.
@@ -140,7 +169,7 @@ P2/P3
 
 - **Owner:** RedDog Maintainers.
 - **Temporary exemption expiry:** 2026-09-30 (2026-Q3 technical-architect review).
-- **Current boundary:** `extension.js` is a legacy 8,428-line thin-client integration file. The temporary exact-file threshold is 8,428 lines with `no_growth: true`; this is a hard containment ceiling. Generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`.
+- **Current boundary:** `extension.js` is a measured 8,425-line legacy thin-client integration file, exactly equal to HEAD. The temporary exact-file threshold remains 8,428 lines with `no_growth: true`; this is a hard containment ceiling, not permission to grow from the 8,425-line baseline. Generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`. This measurement does not assert that every inherited touched function is within the ordinary WSP_62 function limit; `callFusion` retains its exact temporary exemption.
 - **Remediation:** extract model configuration plus stdin bridge invocation first, then UI rendering, retrieval/context assembly, and governed work-order receipt composition into separately tested JavaScript modules of at most 400 lines.
 - **Parity gate:** retain the focused Fusion panel ingress/payload contract and exhaustive extension contract across each extraction; preserve no-network, stdin-only model payloads and review-packet truth.
 - **Exit criterion:** remove `extensions/reddog/wsp_62_exemptions.yaml` once `extension.js` and its touched functions comply with WSP_62 limits. If the expiry arrives first, block additional extension feature work and renew only through a new architect-reviewed remediation slice.

@@ -158,6 +158,31 @@ def test_executable_search_contract_matches_authoritative_machine_spec() -> None
     validate_search_result(_canonical_result(), expected_query="contract")
 
 
+def test_exact_metadata_document_provenance_is_schema_supported() -> None:
+    raw = _canonical_result()
+    raw["code_hits"] = raw["code"] = []
+    raw["metadata"]["code_count"] = 0
+    exact = {
+        "title": "Moltbot Bridge",
+        "summary": "Module contract",
+        "path": "modules/communication/moltbot_bridge/README.md",
+        "slice_id": None,
+        "similarity": None,
+        "retrieval_provenance": "exact_metadata",
+        "type": "module_readme",
+        "priority": 8.0,
+    }
+    raw["docs_hits"] = raw["docs"] = [exact]
+    raw["metadata"]["docs_count"] = 1
+
+    validate_search_result(raw, expected_query="contract")
+
+    forged = deepcopy(raw)
+    forged["docs_hits"][0].pop("retrieval_provenance")
+    with pytest.raises(ValueError, match="query_evidence_schema_invalid"):
+        validate_search_result(forged, expected_query="contract")
+
+
 @pytest.mark.parametrize(
     ("kind", "bucket", "alias", "count", "metadata", "document"),
     [

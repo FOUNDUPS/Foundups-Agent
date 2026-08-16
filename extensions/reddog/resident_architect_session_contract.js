@@ -18,7 +18,7 @@ function buildPayload(workFocus, options, bindings) {
   const residentFoundupTarget = groundingReceipt.registered_foundup_target;
   const root = opts.repoRoot || deps.workspaceRoot();
   if (residentFoundupTarget && !deps.foundupWorkRuntime.verifyAtUse(
-    root, residentFoundupTarget, deps.gitOutput, deps.gitOutputTruncatedMarker
+    root, residentFoundupTarget, deps.gitOutput, deps.gitOutputTruncatedMarker, deps.gitOutputs
   )) {
     return rejected('registered_foundup_target_use_time_verification_failed');
   }

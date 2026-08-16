@@ -1,3 +1,5 @@
+assert.strictEqual(orchestrator.isRepoDeepDiveRequest(rddAttentionPrompt), true,
+  'RDD-001A: generic codebase-attention request is a repository deep dive');
 assert.strictEqual(orchestrator.isRepoDeepDiveRequest(
   'I need advice: what in the codebase needs attention?'
 ), true, 'RDD-001A: an earlier need token cannot hide a later deep-dive request');

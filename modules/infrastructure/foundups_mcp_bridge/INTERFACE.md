@@ -20,18 +20,6 @@ Unknown or nested evidence fields reject the complete response.
 For a positive limit and one explicit module, it reserves exact module-root
 README/INTERFACE evidence before filling remaining slots by global score.
 
-### `build_mcp_server(repo_root: Optional[Path] = None, server_name: str = "FoundUps MCP Bridge") -> FastMCP`
-
-Builds and returns a configured FastMCP server instance wrapping all 33 perception and read tools from `FoundUpsMCPBridge`. Strips the `repo_root` parameter from tool signatures and exposes standard MCP JSON schemas.
-
-### `run_mcp_bridge_sse(host: Optional[str] = None, port: Optional[int] = None, repo_root: Optional[Path] = None, blocking: bool = True) -> Dict[str, Any]`
-
-Launches the FastMCP SSE server on `http://<host>:<port>/sse`. Supports in-process ASGI execution if `fastmcp` is available, or fallback subprocess execution via `foundups-mcp-env`.
-
-### `stop_mcp_bridge_sse() -> Dict[str, Any]`
-
-Requests graceful shutdown of the broker-managed MCP Bridge SSE server.
-
 ### FoundUpsMCPBridge
 
 Main bridge class for MCP tool access.
@@ -88,6 +76,14 @@ raw and flattened evidence, so stale or malformed backend results cannot leak
 unprojected paths. Unicode control, formatting, and alternate-whitespace path
 characters also reject before projection. This does not mutate or reindex the
 store.
+
+After projection and score ordering, `flatten_hits(result, limit, query=...)`
+reserves the canonical root README/INTERFACE order only when the query
+names an exact basename uniquely evidenced by returned paths or supplies one
+validated full module path. Reservation is limited by the caller's existing K
+and does not create fields or hits. Producer-owned `exact_metadata`
+provenance and null similarity survive flattening. Ambiguous/no-module queries
+preserve global score order; nested `tests/README.md` is never Tier-0.
 
 Supported private owner for the RedDog operational consumers migrated in this
 POC:

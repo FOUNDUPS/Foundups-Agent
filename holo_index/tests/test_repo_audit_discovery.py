@@ -7,6 +7,7 @@ import inspect
 import os
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -278,6 +279,25 @@ def test_head_reader_sanitizes_inherited_git_control_environment(tmp_path, monke
 
     assert result["ok"] is True
     assert "list_items" in result["content"]
+
+
+def test_head_reader_uses_exact_command_scoped_ownership_and_read_guards(
+    tmp_path, monkeypatch
+):
+    trusted_git = str(tmp_path / "trusted-git")
+    monkeypatch.setattr(discovery, "_trusted_git_path", lambda: trusted_git)
+
+    command = discovery._git_command(tmp_path, ("cat-file", "blob", "a" * 40))
+
+    assert command[0] == trusted_git
+    assert "--no-replace-objects" in command
+    assert "--no-optional-locks" in command
+    assert f"safe.directory={tmp_path}" in command
+    null_path = "NUL" if sys.platform == "win32" else os.devnull
+    assert f"core.hooksPath={null_path}" in command
+    assert f"core.attributesFile={null_path}" in command
+    assert f"core.excludesFile={null_path}" in command
+    assert "diff.external=" in command
 
 
 def test_head_reader_ignores_attacker_git_on_path(tmp_path, monkeypatch):

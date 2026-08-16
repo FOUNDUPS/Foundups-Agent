@@ -7,15 +7,15 @@ try {
   cp.execFileSync('git', ['config', '--local', 'core.trustctime', 'false'], { cwd: weakenedStatRoot });
   includes(orchestrator.governedGitDiff(weakenedStatRoot, 24000), '[git context unavailable:',
     'core.trustctime weakening must fail governed context collection closed');
-  includes(governedGitContextJs, 'core.checkStat=default',
+  includes(governedGitReadinessJs, 'core.checkStat=default',
     'governed Git commands must pin full stat checking');
-  includes(governedGitContextJs, 'core.trustctime=true',
+  includes(governedGitReadinessJs, 'core.trustctime=true',
     'governed Git commands must pin ctime trust');
   cp.execFileSync('git', ['config', '--local', '--unset-all', 'core.trustctime'], { cwd: weakenedStatRoot });
   cp.execFileSync('git', ['config', '--local', 'extensions.partialClone', 'origin'], { cwd: weakenedStatRoot });
   includes(orchestrator.governedGitDiff(weakenedStatRoot, 24000), '[git context unavailable:',
     'partial-clone configuration must fail governed context collection closed');
-  includes(governedGitContextJs, "GIT_NO_LAZY_FETCH: '1'",
+  includes(governedGitReadinessJs, "GIT_NO_LAZY_FETCH: '1'",
     'governed Git environment must disable lazy object fetches');
   cp.execFileSync('git', ['config', '--local', '--unset-all', 'extensions.partialClone'],
     { cwd: weakenedStatRoot });
@@ -50,9 +50,9 @@ try {
   const replacementProof = orchestrator.governedGitDiff(replacementRefRoot, 24000);
   includes(replacementProof, 'authentic = 2',
     'replacement refs must not make an attacker-selected staged change appear clean');
-  includes(governedGitContextJs, "GIT_NO_REPLACE_OBJECTS: '1'",
+  includes(governedGitReadinessJs, "GIT_NO_REPLACE_OBJECTS: '1'",
     'governed Git environment must disable replacement objects');
-  includes(governedGitContextJs, "'--no-replace-objects'",
+  includes(governedGitReadinessJs, "'--no-replace-objects'",
     'every governed Git command must explicitly disable replacement objects');
   const headControl = path.join(replacementRefRoot, '.git', 'HEAD');
   fs.writeFileSync(replacementHeadSource, fs.readFileSync(headControl));

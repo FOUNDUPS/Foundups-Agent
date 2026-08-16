@@ -11,6 +11,22 @@
 - Added comprehensive unit tests in `tests/test_mcp_server_sse.py` (11/11 passed).
   (WSP 22/34/50/80/96/97)
 
+## 2026-08-16 - Zero-limit reconciliation
+
+- Closed the internal flattening edge where `limit=0` admitted one candidate.
+- Added a direct regression while preserving positive-K Tier-0 reservation,
+  global ordering, schema, freshness, and authentication behavior. (WSP 22/97)
+
+## 2026-08-16 - Bounded Tier-0 owner-result reservation
+
+- Added query-aware reservation for existing generation-bound module-root
+  README/INTERFACE evidence after global score ordering and path projection.
+- Required explicit query intent plus one uniquely evidenced module; ambiguous
+  or implicit queries preserve existing score order.
+- Kept reservation bounded by the caller limit, excluded nested test docs, and
+  preserved response schema, authentication, receipt, admission, and service
+  lifecycle contracts. (WSP 22/50/60/84/97)
+
 ## 2026-08-15 - Repository-relative Holo owner evidence
 
 - Extended the existing owner-response normalizer so physical hit paths under

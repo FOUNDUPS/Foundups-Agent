@@ -1,5 +1,54 @@
 # RedDog Interface
 
+R7 rejects ambiguous worktree projection identities. Path comparison converts
+separators to `/`, normalizes NFC, and folds case only on Windows; Linux remains
+case-sensitive. Changed/untracked and ignored-prefix comparisons share that
+rule. Every existing admitted file is independently canonicalized inside the
+root and must be a unique regular, non-link, single-link identity before any
+content capture. Deleted entries carry no canonical file identity and are not
+content-read. `extension.js` measures exactly 8,425 lines, equal to HEAD and
+below the unchanged 8,428-line `no_growth: true` ceiling. This containment
+statement does not claim that all inherited touched functions meet WSP_62's
+ordinary function limit; the existing exact `callFusion` exemption remains.
+
+R6 removes the module-global governed projection. `create(options)` copies and
+freezes the two admitted policy callables and returns a frozen API whose
+snapshot/status/stat/diff closures cannot be changed by later factory calls.
+Direct module exports use one canonical-policy default API constructed once.
+The third content capture now precedes the forced uncached final Git receipt;
+no enumeration, capture, worktree read, or Git command occurs after that
+absolute proof. Receipt construction is pure and point-in-time only.
+
+Version 0.4.101 R5 replaces caller-supplied Git argv with four exact immutable
+operation identities (`HEAD_SHA`, `FOUNDUP_REGISTRY_STATUS`, `TRACKED_PATHS`,
+and `DIRTY_PATHS`) and makes the named batch atomic. Snapshot projections are
+rendered only from stable captured bytes and released with a point-in-time
+receipt binding root/path/content/ignored-exclusion/time/Git fingerprints.
+Ignored paths are counted and digested but never read or returned; only an
+intersection with projected paths fails closed. The receipt does not promise
+post-return filesystem atomicity.
+
+Version 0.4.101 pins the authenticated backend closure for bounded module
+Tier-0 retrieval. Exact README/INTERFACE metadata hits declare
+`retrieval_provenance: exact_metadata` with a null vector similarity; strict
+owner mode requires both rows. The extension remains a thin client and gains
+no index, service, worker, repository-write, or merge authority. Governed Git
+admits only its already validated canonical root through a per-command exact
+`safe.directory` when ownership requires it, exposes override readiness,
+binds object/ref and Git-control metadata, rejects graft/alternate/traversal/
+control/symlink-reparse/wildcard/config-write variants, and retains all risky-
+config gates. One governed snapshot supplies status/stat/diff from one change
+enumeration. A start storage receipt and forced uncached final receipt bind the
+result; any intervening Git storage/control change makes all three projections
+unavailable. The fixed storage cap is 20,000 entries and each receipt is one
+O(N) invariant-validating fingerprint traversal. `gitOutputs()` admits at most
+16 unique names from the fixed operation map and executes the FoundUp
+authority-context quartet between
+one start receipt and one forced-uncached final receipt. If the fingerprint
+changes, every output fails closed; no final-receipt cache or waiver is used.
+The bounded WSP_97 excerpt is placed ahead of ordinary
+indexed evidence after protected required targets so it cannot be tail-cut.
+
 Version 0.4.100 pins repository-relative Holo owner evidence and the uncomposed
 grant-profile atomic provisioning closure. Successful owner results first pass
 the producer-owned exact result contract. RedDog then frames all indexed

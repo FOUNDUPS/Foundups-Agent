@@ -1,5 +1,148 @@
 # RedDog ModLog
 
+## 2026-08-16 - R7 Windows projection identity and WSP_62 containment
+
+- RED: a real Windows Git index containing `Foo.txt` and `foo.txt` resolved both
+  names to one NTFS file, but the projection minted a READY receipt with count
+  two. Added slash/NFC comparison keys, Windows-only case folding, duplicate
+  repo-key rejection, prefix-safe ignored intersections, and unique canonical
+  existing-file identities under the existing confinement/type/link gates.
+- Deleted entries remain content-unread; Linux retains case-sensitive path
+  semantics. Added case, ignored case/directory/separator, Unicode, canonical
+  alias, hardlink, and ignored-junction regression coverage.
+- RED: HEAD was 8,425 lines, the candidate was 8,429, and the unchanged hard
+  ceiling was 8,428. Readable formatting restored `extension.js` to exactly
+  8,425 lines without changing the exemption or weakening the focused contract.
+- Focused hardening passes in 37.5 seconds, direct Fusion WSP_62 passes, and
+  backend/preflight passes in 36.9 seconds. The exact clean, uninstrumented
+  exhaustive contract passes in 297.6 seconds under the unchanged 420-second
+  ceiling; author evidence remains `NEEDS_VERIFICATION`.
+
+## 2026-08-16 - R6 instance isolation and absolute-last Git proof (0.4.101)
+
+- Reproduced that constructing a deny-policy API changed a previously created
+  allow-policy API from one projected path to zero.
+- Reproduced a third-capture `info/exclude` mutation after the forced final Git
+  receipt that still minted a successful projection receipt.
+- Removed the mutable module-global projection. Every factory result is frozen
+  around its own copied/frozen policy and projection; a canonical-policy
+  default API is constructed once and remains READY across custom factories.
+- Moved the third stable capture before the forced uncached Git receipt. The
+  receipt is now the absolute last protected read; only pure in-memory work
+  follows. Post-return mutation remains allowed under truthful point-in-time
+  semantics and cannot retroactively change the returned receipt.
+- Focused Git/factory/order hardening passes in 32.8 seconds; backend/WSP_62
+  preflight passes in 36.8 seconds. The exact clean, uninstrumented exhaustive
+  contract passes in 290.9 seconds under the unchanged 420-second ceiling.
+- No build, publish, commit, push, reindex, restart, persistent configuration
+  write, worker dispatch, or authority expansion occurred.
+
+## 2026-08-16 - R5 governed Git projection authority hardening (0.4.101)
+
+- Reproduced mixed-success batch disclosure, caller-controlled Git argv,
+  unbound worktree bytes, canonical ignored-entry rejection, and nonpositive
+  collection-limit backend calls before editing.
+- Replaced public arbitrary batch argv with four exact immutable operation
+  identities: `HEAD_SHA`, `FOUNDUP_REGISTRY_STATUS`, `TRACKED_PATHS`, and
+  `DIRTY_PATHS`. The full name list is copied and validated before execution;
+  any invalid name, duplicate, option-shaped/object request, command failure,
+  or receipt change makes every output unavailable.
+- Bound snapshot status/stat/diff to stable lstat/open/fstat/read/fstat/lstat
+  captures under 500-path, 2 MiB/file, and 16 MiB/snapshot caps. The
+  point-in-time receipt binds root, path set, captured bytes, content, ignored
+  exclusion, time, and start/final Git fingerprints. It promises no
+  post-return filesystem atomicity.
+- Ignored entries are enumerated under a 5,000-entry cap, excluded without
+  content reads, and represented only by count and set digest. A collision
+  with a projected path fails closed. The canonical candidate admitted 60
+  changed paths and excluded 1,674 ignored records in 3.622 seconds.
+- Added the immediate `limit <= 0` empty-result guard before collection or
+  model access. Regenerated the 1,336-file backend manifest at digest
+  `932c35752db3f99a84ca31ee3d90eb2508f8ccac0193ab67d208b8357364cb81`.
+- A maximum-bound fixture with 500 changed files and 5,000 ignored entries
+  completed the four-operation batch in 589 ms and the captured snapshot in
+  5.340 seconds. The current 60-path candidate completed in 3.622 seconds.
+- Deterministic regressions also cover new, removed, renamed, and index
+  mutations at the second enumeration plus an ignored junction to an outside
+  sentinel. Every mutation fails the whole snapshot; the ignored junction is
+  neither traversed nor returned.
+- Focused/WSP_62 tests and the clean 18-shard exhaustive contract are green;
+  final expanded exhaustive time was 303.7 seconds under the 420-second ceiling.
+  No VSIX build/publication, commit, push, reindex, restart, config write,
+  worker dispatch, or authority expansion occurred.
+
+## 2026-08-16 - R4 governed Git TOCTOU closure (0.4.101)
+
+- Reproduced a race where `.git/HEAD` became a two-link file after validation
+  and before the first content command while status/stat/diff were still
+  released.
+- Added matching start and forced-uncached final Git-storage receipts around
+  the single change enumeration/projection. Any receipt change makes the whole
+  snapshot unavailable; no Git storage/control read follows the final gate.
+- Combined fingerprinting and invariant validation into one O(N) traversal
+  with a fixed 20,000-entry cap. Measured current-repository cold/warm/final
+  receipts at 505/464/483 ms and a 5,000-entry fixture at 650/633/643 ms.
+- Added deterministic before-first HEAD hardlink, between-command config
+  hardlink, and immediately-before-final exclude mutation regressions.
+- Reproduced the exhaustive-suite scale failure and isolated repeated FoundUp
+  authority contexts: four independent Git reads caused eight full metadata
+  traversals per context. Added a bounded `gitOutputs()` snapshot so those four
+  commands share one start and one forced-final receipt. A between-command
+  control mutation invalidates every batch output; no final receipt is cached.
+- Measured repeated FoundUp target extraction falling from 5.07-5.30 seconds
+  to 1.73-1.93 seconds. The clean, uninstrumented exhaustive suite passed in
+  289.65 seconds under the unchanged 420-second ceiling.
+- Version remains 0.4.101; no build, publish, config write, service launch,
+  worker dispatch, repository write, or merge authority was added.
+
+## 2026-08-16 - R3 authenticated manifest-closure correction (0.4.101)
+
+- Reproduced an author-handoff release blocker: `search_engine.py` imported the
+  extracted `collection_injections.py`, but that runtime module was untracked
+  and absent from the authenticated backend manifest.
+- Staged only the missing runtime module and refreshed the already-staged
+  Tier-0 helper so its index blob matches the final case-normalization fix.
+- Regenerated the canonical closure at 1,335 files and rebound digest
+  `4e173152775ebff0d58dd421b9de14446d0c6f05ad509c12c30afe3be7cde796`.
+- Added a generator regression binding the import, Git-tracked source,
+  manifest membership, and exact content digest. Candidate remains
+  `NEEDS_VERIFICATION`; no version bump, build, publication, commit, push,
+  reindex, restart, or persistent Git configuration occurred.
+
+## 2026-08-16 - R2 Git and immutable-grounding reconciliation (0.4.101)
+
+- Reproduced the fresh verifier's cached-hardlink, Git-control, readiness,
+  immutable-HEAD ownership, and WSP_62 findings before repair.
+- Added package-included `governed_git_storage.js`: metadata-only fingerprints
+  cover every object/ref plus HEAD/index/packed-refs/config/config.worktree/
+  shallow/info attributes/exclude; grafts and alternate stores fail closed.
+- Applied `safe.directory` to content commands only when ownership requires it;
+  fixed commands disable hooks, attributes/excludes, external diff, replacement
+  objects, lazy fetch, optional locks, and inherited Git controls.
+- Reused one validated snapshot/change enumeration for status/stat/diff and
+  regenerated the then-observed 1,334-file backend manifest. R3 found that the
+  extracted collection-injection dependency was untracked and therefore
+  omitted; the R3 receipt above supersedes that closure claim.
+- Kept the unpublished slice at 0.4.101; no VSIX build/publication, config
+  write, repository effect, service restart, or authority expansion occurred.
+
+## 2026-08-16 - Module Tier-0 retrieval compatibility pin (0.4.101)
+
+- Regenerated the authenticated backend closure for bounded module-root
+  README/INTERFACE retrieval and its canonical producer schema.
+- Pinned explicit exact-metadata provenance, null non-vector similarity, and
+  strict complete-pair semantics without adding thin-client behavior.
+- Reconciled sanitized Git ownership admission with one validated-root,
+  per-command `safe.directory`; readiness exposes ownership mismatch and no
+  wildcard or configuration write is permitted.
+- Extracted canonical-root/readiness/config probing into the package-included
+  `governed_git_readiness.js` boundary so both governed Git modules satisfy
+  WSP_62 file/function limits without weakening the fail-closed gates.
+- Prioritized the bounded WSP_97 excerpt ahead of ordinary Holo/Skillz evidence
+  after the protected required-target block, closing audit-context tail loss.
+- Added no index mutation, service launch, worker dispatch, repository write,
+  or merge authority.
+
 ## 2026-08-15 - Holo owner path projection pin (0.4.100)
 
 - Pinned the backend closure that projects authority-worktree hit paths to

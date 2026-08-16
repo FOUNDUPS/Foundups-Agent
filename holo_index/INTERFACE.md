@@ -22,6 +22,18 @@ Source-of-truth policy:
 - Human-facing interface contract: this file
 - Menu/operator atlas: `holo_index/CLI_REFERENCE.md` (non-normative)
 
+Exact module Tier-0 injection is implemented by the bounded
+`core/collection_injections.py` seam. Strict semantic owners replace initial
+vector README/INTERFACE rows with exact metadata-filtered rows and require one
+of each. Interactive/non-strict lookup failures preserve other hits and emit
+the complete missing-path warning. Full explicit module paths are
+case-normalized before lookup.
+Vector query/model/fallback/order orchestration is implemented by
+`core/collection_search.py`; `core/search_engine.py::_search_collection`
+remains the public-compatible internal seam. Both the wrapper and every new
+or touched extraction helper are constrained to at most 50 lines, while
+`search_engine.py` is strictly below the 1,500-line WSP 62 hard limit.
+
 ## Programmatic API
 
 ### Core Retrieval
@@ -62,6 +74,16 @@ back to the caller workspace and therefore fails closed when no valid runtime
 exists. The resolver never checks out, updates, or indexes either worktree.
 
 Search response contract:
+
+For an exact module basename that resolves uniquely against initial collection
+metadata, or one validated full `modules/<domain>/<module>` query path, docs
+retrieval performs zero-to-two exact metadata gets for module-root `README.md`
+and `INTERFACE.md`. Their Tier-0 order is README then INTERFACE. Exact rows use
+`retrieval_provenance: exact_metadata` and `similarity: null`; they are not
+fabricated vector results and do not pass through the vector similarity floor.
+Strict owner mode rejects an incomplete or corrupt pair. Non-strict search
+preserves available evidence and emits a bounded incomplete-Tier0 warning.
+Ambiguous or implicit module intent preserves ordinary score ordering.
 
 The JSON machine specification is authoritative. Its complete response schema
 is structurally compiled by `holo_index.query_result_contract_schema` and

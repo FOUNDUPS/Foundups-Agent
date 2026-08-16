@@ -4,6 +4,10 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+The owner response flattener treats `limit <= 0` as an empty result and never
+admits a first hit through the loop termination check. Explicit module Tier-0
+reservation remains bounded by positive caller K.
+
 ## Purpose
 
 This module provides the **perception layer** for the AI architect workflow:
@@ -141,6 +145,14 @@ Automatic in-process startup keeps the URL/token in a
 private handoff resolved by resolve_reddog_holoindex_owner_handoff(); it never
 exports the generated secret to the parent environment. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
+
+For queries that name one uniquely evidenced module basename or one validated
+full module path, the owner reserves at most two flattened slots for root
+`README.md` and `INTERFACE.md` hits already returned by HoloIndex. It does not
+synthesize evidence, promote nested test docs, or change global ordering for
+ambiguous or implicit module queries. Exact metadata hits retain their
+producer-owned null-similarity provenance rather than receiving a synthetic
+flattening score.
 
 The RedDog read-only operational preflight now calls the process-lifetime
 bootstrap automatically for E2E, report collection, audit enqueue, and

@@ -267,6 +267,7 @@ def test_internal_normalizers_reject_bad_payloads_and_dedupe_hits() -> None:
     )
     assert len(hits) == 2
     assert core._flatten_hits({"code_hits": [{"path": "one.py"}]}, 1)
+    assert core._flatten_hits({"code_hits": [{"path": "one.py"}]}, 0) == []
 
 
 def test_flatten_hits_uses_global_score_across_typed_buckets() -> None:
@@ -289,6 +290,86 @@ def test_flatten_hits_uses_global_score_across_typed_buckets() -> None:
         "low.py",
     ]
     assert hits[1]["type"] == "wsp"
+
+
+def test_flatten_hits_reserves_exact_module_root_tier0_for_explicit_module() -> None:
+    module = "modules/communication/moltbot_bridge"
+    hits = core._flatten_hits(
+        {
+            "symbol_hits": [
+                {"path": f"{module}/src/worker.py", "similarity": "95.0%"},
+            ],
+            "test_hits": [
+                {"path": f"{module}/tests/test_worker.py", "similarity": "90.0%"},
+            ],
+            "docs_hits": [
+                {"path": f"{module}/tests/README.md", "similarity": "99.0%"},
+                {"path": f"{module}/INTERFACE.md", "similarity": "42.0%"},
+                {"path": f"{module}/README.md", "similarity": "41.0%"},
+            ],
+        },
+        4,
+        query="RedDog moltbot_bridge worker architecture",
+    )
+    assert [item["path"] for item in hits] == [
+        f"{module}/README.md",
+        f"{module}/INTERFACE.md",
+        f"{module}/tests/README.md",
+        f"{module}/src/worker.py",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("limit", "expected"),
+    [
+        (1, ["README.md"]),
+        (2, ["README.md", "INTERFACE.md"]),
+        (3, ["README.md", "INTERFACE.md", "worker.py"]),
+    ],
+)
+def test_flatten_hits_tier0_reservation_is_bounded_at_low_k(
+    limit: int, expected: list[str]
+) -> None:
+    module = "modules/communication/example_bridge"
+    hits = core._flatten_hits(
+        {
+            "code_hits": [
+                {"path": f"{module}/src/worker.py", "similarity": "95.0%"},
+            ],
+            "docs_hits": [
+                {"path": f"{module}/INTERFACE.md", "similarity": "42.0%"},
+                {"path": f"{module}/README.md", "similarity": "41.0%"},
+            ],
+        },
+        limit,
+        query="example_bridge worker",
+    )
+    assert [item["path"].rsplit("/", 1)[-1] for item in hits] == expected
+
+
+def test_flatten_hits_preserves_global_order_without_unique_explicit_module() -> None:
+    hits = core._flatten_hits(
+        {
+            "code_hits": [
+                {
+                    "path": "modules/communication/example/src/high.py",
+                    "similarity": "95.0%",
+                },
+            ],
+            "docs_hits": [
+                {
+                    "path": "modules/communication/example/README.md",
+                    "similarity": "41.0%",
+                },
+            ],
+        },
+        2,
+        query="generic architecture research",
+    )
+    assert [item["path"].rsplit("/", 1)[-1] for item in hits] == [
+        "high.py",
+        "README.md",
+    ]
 
 
 def test_success_projects_physical_result_paths_before_receipt_use(

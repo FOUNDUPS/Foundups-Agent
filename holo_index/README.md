@@ -1,5 +1,27 @@
 # HoloIndex - Brain Surgeon Level Code Intelligence System
 
+## Module Tier-0 retrieval
+
+Vector collection orchestration is split into
+`core/collection_search.py`; `core/search_engine.py` retains the compatible
+`_search_collection` entry point without carrying the 205-line implementation.
+The engine is 1,368 lines and the wrapper is 9 lines; every new extraction
+helper is at most 50 lines.
+
+When a semantic query names one module by an exact basename supported by
+initial hits, or supplies one validated full module path, HoloIndex performs
+zero-to-two bounded exact metadata lookups in the admitted
+`navigation_docs` collection for that module's root `README.md` and
+`INTERFACE.md` (rows already present are deduplicated). Exact metadata rows
+declare `retrieval_provenance: exact_metadata` and a null vector similarity;
+they are ordered ahead of nested docs and are exempt from the vector floor.
+Strict owner mode replaces any vector-returned root rows with exactly one
+exact-filtered row for each contract; duplicates cannot satisfy completeness.
+All remaining evidence keeps the existing ranking. Ambiguous or implicit
+module queries do not receive Tier-0 promotion. Strict owner mode requires the
+complete pair; non-strict mode warns when incomplete. Query paths never read
+the working tree or reindex the store.
+
 ## [ALERT] REVOLUTIONARY EVOLUTION (2025-10-17): WSP 97 System Execution Prompting Protocol
 
 HoloIndex has evolved from module finder to **brain surgeon level code intelligence** with **baked-in WSP 97 execution prompting**:

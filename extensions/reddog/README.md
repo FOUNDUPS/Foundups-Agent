@@ -1,6 +1,43 @@
 # RedDog
 
-Version: 0.4.100
+Version: 0.4.101
+
+[OBSERVED] R7 makes projection identity platform-aware without changing Linux
+case sensitivity. Repository-relative comparison keys normalize separators and
+NFC, and case-fold only on Windows. Duplicate keys are rejected before capture;
+existing files must also have unique canonical confined identities after the
+regular-file, no-link, and single-link gates. Ignored intersections use the same
+prefix-safe keys, while deleted records are represented without content reads.
+`extension.js` is restored to its exact 8,425-line HEAD baseline under the
+unchanged 8,428-line hard ceiling.
+
+[OBSERVED] R6 makes every `create()` result instance-local: each frozen API
+closes over its own copied/frozen policy and projection, while the direct
+module exports are one stable canonical-policy default API. Later factories
+cannot change earlier or default behavior. Snapshot processing completes all
+three stable content captures before the forced uncached Git metadata receipt;
+that receipt is the absolute last protected filesystem/Git read. Only pure
+in-memory comparison, receipt formatting from captured values, and return
+follow it. The receipt remains point-in-time evidence and promises no
+post-return filesystem atomicity.
+
+[OBSERVED] Version 0.4.101 pins the R2-reconciled authenticated backend closure for bounded
+module Tier-0 retrieval. Exact README/INTERFACE metadata rows carry explicit
+provenance instead of a fabricated vector similarity, and strict owner mode
+requires the complete Tier-0 pair. Governed Git uses an exact command-scoped
+`safe.directory` only when its ownership probe proves it necessary,
+fingerprints every object/ref and named control file, rejects grafts/alternates,
+and exposes override readiness; wildcard or config writes are forbidden.
+Status/stat/diff reuse one enumeration but are released only after a second,
+uncached storage receipt matches the start receipt. The full snapshot fails
+closed if Git storage or controls change during enumeration or projection.
+Related FoundUp authority reads use one bounded four-command batch under the
+same start/final receipt rule; a changed final fingerprint invalidates every
+batch result. This avoids eight full metadata traversals per authority context
+without caching or weakening use-time verification.
+Required WSP_97 evidence precedes ordinary indexed evidence within
+the bounded lower tier. This release adds no editor execution, index mutation,
+service launch, worker dispatch, repository write, or merge authority.
 
 [OBSERVED] Version 0.4.100 pins repository-relative Holo owner evidence plus
 the uncomposed grant-profile atomic provisioning foundation. Successful owner
@@ -674,6 +711,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.59.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.101.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

@@ -184,4 +184,51 @@ includes(bridgePy, '"internal_panel_role_prompts_observable": False',
 includes(bridgePy, holoEvidenceBoundary.SYSTEM_RULE,
   'HUEB-009: Python bridge and RedDog extension share the same evidence rule');
 
+// REDDOG_GOVERNED_GIT_SAFE_DIRECTORY_RECONCILIATION_PHASE1 (GGSD-001..008)
+const safeDirectoryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-git--c-safe-directory-star-'));
+try {
+  cp.execFileSync('git', ['init', '-q'], { cwd: safeDirectoryRoot });
+  fs.writeFileSync(path.join(safeDirectoryRoot, 'allowed.py'), 'safe = true\n', 'utf8');
+  cp.execFileSync('git', ['add', 'allowed.py'], { cwd: safeDirectoryRoot });
+  const safeStatus = orchestrator.governedGitStatus(safeDirectoryRoot, 8000);
+  assert(!safeStatus.includes('[git context unavailable:'),
+    'GGSD-001: option-shaped path text remains one validated safe.directory value');
+  const safeReadiness = orchestrator.governedGitReadiness(safeDirectoryRoot);
+  assert.strictEqual(safeReadiness.schema_version, 'reddog_governed_git_readiness.v1');
+  assert.strictEqual(safeReadiness.canonical_root_validated, true, 'GGSD-002: canonical root is proven');
+  assert.strictEqual(safeReadiness.git_metadata_validated, true, 'GGSD-003: Git metadata is proven');
+  assert.strictEqual(safeReadiness.safe_directory_wildcard, false, 'GGSD-004: wildcard trust is forbidden');
+  assert.strictEqual(safeReadiness.config_write_performed, false, 'GGSD-005: no Git config is written');
+  assert.strictEqual(safeReadiness.safe_directory_override_applied,
+    safeReadiness.ownership_mismatch_observed, 'GGSD-006: any ownership override stays explicit');
+  assert(['none', 'command'].includes(safeReadiness.safe_directory_scope),
+    'GGSD-006: override scope is closed to none or one command');
+  const traversedRoot = safeDirectoryRoot + path.sep + '..' + path.sep + path.basename(safeDirectoryRoot);
+  includes(orchestrator.governedGitStatus(traversedRoot, 8000), '[git context unavailable:',
+    'GGSD-007: traversal-bearing workspace roots fail closed before Git');
+  assert.strictEqual(orchestrator.governedGitReadiness(traversedRoot).reason, 'canonical_root_invalid');
+  const linkedRoot = safeDirectoryRoot + '-link';
+  try {
+    fs.symlinkSync(safeDirectoryRoot, linkedRoot, process.platform === 'win32' ? 'junction' : 'dir');
+    includes(orchestrator.governedGitStatus(linkedRoot, 8000), '[git context unavailable:',
+      'GGSD-007: symlink or reparse workspace roots fail closed before Git');
+    assert.strictEqual(orchestrator.governedGitReadiness(linkedRoot).reason, 'canonical_root_invalid');
+  } finally {
+    if (fs.existsSync(linkedRoot)) fs.rmSync(linkedRoot, { recursive: true, force: true });
+  }
+  const controlRoot = safeDirectoryRoot + '\n-c safe.directory=*';
+  includes(orchestrator.governedGitStatus(controlRoot, 8000), '[git context unavailable:',
+    'GGSD-008: control-bearing option injection fails closed');
+  assert.strictEqual(orchestrator.governedGitReadiness(controlRoot).reason, 'canonical_root_invalid');
+  const governedGitSources = governedGitContextJs + governedGitReadinessJs;
+  assert((governedGitSources.match(/safe\.directory=/g) || []).length >= 3,
+    'GGSD-008: config probes and content commands all bind an exact safe directory');
+  assert(!governedGitSources.includes('safe.directory=*'),
+    'GGSD-008: governed Git source contains no wildcard trust');
+} finally {
+  fs.rmSync(safeDirectoryRoot, { recursive: true, force: true });
+}
+
+require('./test_governed_git_context_hardening');
+
 console.log('RedDog extension contract checks passed.');
