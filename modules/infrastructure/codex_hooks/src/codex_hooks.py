@@ -166,13 +166,11 @@ def handle_user_prompt_submit(event: Mapping[str, Any]) -> dict[str, Any] | None
             "decision": "block",
             "reason": "Prompt rejected because its wire value is not text.",
         }
-    classifications = scan_prompt_for_secrets(prompt)
-    if not classifications:
+    if not scan_prompt_for_secrets(prompt):
         return None
-    labels = ", ".join(sorted(classifications))
     return {
         "decision": "block",
-        "reason": f"Potential secret detected ({labels}). Redact the value and submit again.",
+        "reason": "Potential secret detected. Redact the value and submit again.",
     }
 
 
@@ -296,11 +294,9 @@ def handle_session_start(
     if tracker_result.returncode != 0 or not gate or not gate.get("is_zen_compliant"):
         return _session_stop("FoundUps strict WSP_00 compliance gate failed; repository work is halted.")
 
-    source = str(event.get("source", "unknown"))
     additional_context = (
         "FoundUps lifecycle gate passed. "
-        f"WSP_00 is_zen_compliant=true; session_source={source}; "
-        f"branch={context.branch}; head={context.head}; worktree={context.worktree_kind}. "
+        "WSP_00 is_zen_compliant=true. "
         "Apply WSP_97 retrieval and evidence gates before edits. "
         "Never expose credential files or mutate shared main."
     )

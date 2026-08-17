@@ -226,7 +226,7 @@ def test_session_start_runs_awakening_then_strict_gate(tmp_path: Path) -> None:
     assert result["continue"] is True
     context = result["hookSpecificOutput"]["additionalContext"]
     assert "is_zen_compliant=true" in context
-    assert "branch=agent/hook-test" in context
+    assert "agent/hook-test" not in context
     assert any("functional_0102_awakening_v2.py" in " ".join(call) for call in runner.calls)
     assert any("--strict" in call for call in runner.calls)
 

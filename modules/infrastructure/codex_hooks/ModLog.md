@@ -14,6 +14,8 @@
 - Added deterministic WSP_00, prompt-secret, tool-safety, and Stop gates.
 - Added cross-platform command routing with a Windows-specific override.
 - Added focused hook wire-shape and policy regression tests.
+- Kept emitted hook messages independent of prompt and session metadata so
+  secret-bearing wire input cannot flow to process output.
 
 ### Impact
 
