@@ -1,5 +1,16 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-17] Codex WSP Lifecycle Hooks Phase 1
+
+**WSP Protocol**: WSP 00, 3, 5, 22, 49, 50, 84, 97
+
+- Added repository-discovered ChatGPT/Codex lifecycle hooks for WSP_00 startup,
+  prompt secret rejection, unsafe local tool denial, and Stop-time diff checks.
+- Kept the adapter independent of RedDog routing, MCP availability, WRE
+  execution, transcripts, and automatic Git mutation.
+- Validated Windows Git-root command routing, real WSP_00 hook execution, all
+  four wire protocols, 34 focused tests, and 96% branch-aware coverage.
+
 ## [2026-07-25] Deterministic Codex Tooling Projection
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 97
