@@ -129,6 +129,9 @@ READONLY_GUARD_CODE = "HOLOINDEX_READONLY_QUERY_GUARD"
 MAINTENANCE_JSON_ONLY_ENV = "HOLOINDEX_MAINTENANCE_JSON_ONLY"
 STORAGE_ERROR_EXIT_CODE = 3
 QUERY_ADMISSION_EXIT_CODE = 4
+_MAINTENANCE_RESULT_STREAM = sys.stdout
+if _env_truthy(MAINTENANCE_JSON_ONLY_ENV):
+    sys.stdout = open(os.devnull, "w", encoding="utf-8")
 
 
 def safe_print(text: str, **kwargs) -> None:
@@ -136,6 +139,12 @@ def safe_print(text: str, **kwargs) -> None:
 
     if not _env_truthy(MAINTENANCE_JSON_ONLY_ENV):
         _safe_print(text, **kwargs)
+
+
+def _emit_machine_result(text: str) -> None:
+    """Emit only the terminal bounded result on the preserved child pipe."""
+
+    _safe_print(text, file=_MAINTENANCE_RESULT_STREAM, flush=True)
 
 
 def _query_only_requested(args) -> bool:
@@ -172,17 +181,17 @@ def _auto_refresh_allowed(args) -> bool:
 def _exit_storage_error(exc: HoloIndexStorageError) -> None:
     """Emit one stable machine-readable failure and stop before query/index work."""
 
-    _safe_print(json.dumps(exc.to_dict(), sort_keys=True))
+    _emit_machine_result(json.dumps(exc.to_dict(), sort_keys=True))
     raise SystemExit(STORAGE_ERROR_EXIT_CODE)
 
 
 def _exit_maintenance_error(exc: MaintenanceSessionError) -> None:
-    _safe_print(json.dumps(exc.to_dict(), sort_keys=True))
+    _emit_machine_result(json.dumps(exc.to_dict(), sort_keys=True))
     raise SystemExit(MAINTENANCE_FAILURE_EXIT_CODE)
 
 
 def _exit_query_admission_error(result: Any) -> None:
-    _safe_print(json.dumps(result.to_dict(), sort_keys=True))
+    _emit_machine_result(json.dumps(result.to_dict(), sort_keys=True))
     raise SystemExit(QUERY_ADMISSION_EXIT_CODE)
 
 # 0102 speed knob: allow bundle-json/offline/fast-search fastpath without importing Chroma/model stack.
