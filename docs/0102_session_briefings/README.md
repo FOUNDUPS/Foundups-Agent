@@ -10,6 +10,7 @@ Purpose: session-start onboarding briefs for 0102 agents. These are read-once op
 ## Other Canonical Files
 - `SESSION_BRIEFING_2026_02_07.md`
 - `YOUTUBE_DOMAIN_AUDIT_PROMPT.md` (audit-first prompt for the YouTube vertical)
+- `MAIN_PY_MCP_REMOTE_OPERATIONS_PREFLIGHT_PROMPT_2026-08-17.md` (MCP-only implementation work order for remote 0102 operation)
 
 ## SoftProto Prompt Set
 - `SOFTPROTO_A_GATEWAY_AUDIT_PROMPT_2026-04-01.md`
