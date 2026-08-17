@@ -127,6 +127,7 @@ def _env_truthy(name: str, default: str = "false") -> bool:
 
 READONLY_GUARD_CODE = "HOLOINDEX_READONLY_QUERY_GUARD"
 MAINTENANCE_JSON_ONLY_ENV = "HOLOINDEX_MAINTENANCE_JSON_ONLY"
+MAINTENANCE_STAGE_TRACE_ENV = "HOLOINDEX_MAINTENANCE_STAGE_TRACE"
 STORAGE_ERROR_EXIT_CODE = 3
 QUERY_ADMISSION_EXIT_CODE = 4
 _MAINTENANCE_RESULT_STREAM = sys.stdout
@@ -145,6 +146,13 @@ def _emit_machine_result(text: str) -> None:
     """Emit only the terminal bounded result on the preserved child pipe."""
 
     _safe_print(text, file=_MAINTENANCE_RESULT_STREAM, flush=True)
+
+
+def _trace_maintenance_stage(stage: str) -> None:
+    """Emit a bounded static stage marker only for supervised diagnostics."""
+
+    if _env_truthy(MAINTENANCE_STAGE_TRACE_ENV):
+        _emit_machine_result(json.dumps({"stage": stage}, sort_keys=True))
 
 
 def _query_only_requested(args) -> bool:
@@ -1138,7 +1146,9 @@ def main():
         holo = None
     else:
         try:
+            _trace_maintenance_stage("holo_initialize_started")
             holo = HoloIndex(ssd_path=args.ssd, quiet=not verbose)
+            _trace_maintenance_stage("holo_initialize_completed")
         except HoloIndexStorageError as exc:
             if maintenance_session is not None:
                 maintenance_session.close()
@@ -1187,8 +1197,10 @@ def main():
     refreshed_collections: set[str] = set()
     refresh_proofs: dict[str, Any] = {}
     if index_code:
+        _trace_maintenance_stage("navigation_code_started")
         start_time = time.time()
         code_result = holo.index_code_entries()
+        _trace_maintenance_stage("navigation_code_completed")
         duration = time.time() - start_time
 
         # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
@@ -1227,7 +1239,9 @@ def main():
                 # resolution. None means modules + scripts + holo_index.
                 symbol_roots = None
             start_time = time.time()
+            _trace_maintenance_stage("navigation_symbols_started")
             symbol_result = holo.index_symbol_entries(roots=symbol_roots)
+            _trace_maintenance_stage("navigation_symbols_completed")
             duration = time.time() - start_time
             if not _index_result_successful(symbol_result):
                 warning = symbol_result.warning if symbol_result is not None else "Indexer returned no result"
@@ -1253,9 +1267,11 @@ def main():
             refreshed_collections.add("navigation_symbols")
             refresh_proofs["navigation_symbols"] = symbol_result
     if index_wsp:
+        _trace_maintenance_stage("navigation_wsp_started")
         start_time = time.time()
         wsp_dirs = [Path(p) for p in args.wsp_path] if args.wsp_path else None
         wsp_result = holo.index_wsp_entries(paths=wsp_dirs)
+        _trace_maintenance_stage("navigation_wsp_completed")
         duration = time.time() - start_time
 
         # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
@@ -1282,8 +1298,10 @@ def main():
     # WSP 98: Index the canonical test registry as a first-class collection.
     index_tests = "navigation_tests" in selected_collections
     if index_tests:
+        _trace_maintenance_stage("navigation_tests_started")
         start_time = time.time()
         test_result = holo.index_test_registry()
+        _trace_maintenance_stage("navigation_tests_completed")
         duration = time.time() - start_time
         if not _index_result_successful(test_result):
             warning = test_result.warning if test_result is not None else "Indexer returned no result"
@@ -1302,8 +1320,10 @@ def main():
     # to avoid awarding reward when zero docs are discovered/indexed.
     index_docs = "navigation_docs" in selected_collections
     if index_docs:
+        _trace_maintenance_stage("navigation_docs_started")
         start_time = time.time()
         docs_result = holo.index_docs_entries()
+        _trace_maintenance_stage("navigation_docs_completed")
         duration = time.time() - start_time
         if not _index_result_successful(docs_result):
             # Zero docs discovered or indexed — emit warning, DO NOT award reward
@@ -1324,8 +1344,10 @@ def main():
     # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
     index_knowledge = "navigation_knowledge" in selected_collections
     if index_knowledge:
+        _trace_maintenance_stage("navigation_knowledge_started")
         start_time = time.time()
         knowledge_result = holo.index_knowledge_entries()
+        _trace_maintenance_stage("navigation_knowledge_completed")
         duration = time.time() - start_time
         if not _index_result_successful(knowledge_result):
             warning = knowledge_result.warning if knowledge_result is not None else "Indexer returned no result"
@@ -1341,8 +1363,10 @@ def main():
     # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
     index_skills = "navigation_skills" in selected_collections
     if index_skills:
+        _trace_maintenance_stage("navigation_skills_started")
         start_time = time.time()
         skills_result = holo.index_skillz_entries()
+        _trace_maintenance_stage("navigation_skills_completed")
         duration = time.time() - start_time
         if not _index_result_successful(skills_result):
             warning = skills_result.warning if skills_result is not None else "Indexer returned no result"
@@ -1391,12 +1415,14 @@ def main():
 
     if selected_collections:
         try:
+            _trace_maintenance_stage("freshness_proof_started")
             maintenance_session.complete(
                 holo,
                 refreshed_collections=refreshed_collections,
                 source="manual_index",
                 refresh_proofs=refresh_proofs,
             )
+            _trace_maintenance_stage("freshness_proof_completed")
         except MaintenanceSessionError as exc:
             _exit_maintenance_error(exc)
         finally:

@@ -49,6 +49,22 @@ def test_normal_cli_output_is_unchanged(monkeypatch: pytest.MonkeyPatch) -> None
     assert emitted == ["normal progress"]
 
 
+def test_stage_trace_is_static_json_and_default_off(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    emitted: list[str] = []
+    monkeypatch.setattr(cli, "_emit_machine_result", emitted.append)
+    monkeypatch.delenv(cli.MAINTENANCE_STAGE_TRACE_ENV, raising=False)
+    cli._trace_maintenance_stage("navigation_code_started")
+    assert emitted == []
+
+    monkeypatch.setenv(cli.MAINTENANCE_STAGE_TRACE_ENV, "1")
+    cli._trace_maintenance_stage("navigation_code_started")
+    assert [json.loads(value) for value in emitted] == [
+        {"stage": "navigation_code_started"}
+    ]
+
+
 def test_json_only_subprocess_hides_direct_prints_and_preserves_error() -> None:
     environment = os.environ.copy()
     environment[cli.MAINTENANCE_JSON_ONLY_ENV] = "1"
