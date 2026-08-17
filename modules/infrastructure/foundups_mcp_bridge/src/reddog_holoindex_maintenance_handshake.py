@@ -47,6 +47,7 @@ from .reddog_sealed_holo_runtime import (
 
 AUTO_MAINTENANCE_ENV = "REDDOG_HOLOINDEX_AUTO_MAINTENANCE"
 MAINTENANCE_TIMEOUT_ENV = "REDDOG_HOLOINDEX_MAINTENANCE_TIMEOUT_SECONDS"
+MAINTENANCE_JSON_ONLY_ENV = "HOLOINDEX_MAINTENANCE_JSON_ONLY"
 OPERATIONAL_NOT_REQUESTED = "NOT_REQUESTED"
 OPERATIONAL_READY = "READY"
 OPERATIONAL_REFRESHED = "REFRESHED"
@@ -80,6 +81,7 @@ _REFRESH_ENV_EXACT_DENY = frozenset(
         "HOLO_INDEX_SYMBOLS",
         "HOLO_INDEX_WEB",
         "HOLO_SKIP_MODEL",
+        MAINTENANCE_JSON_ONLY_ENV,
         READONLY_QUERY_ENV,
         SERVICE_TOKEN_ENV,
         SERVICE_URL_ENV,
@@ -340,6 +342,7 @@ def _refresh_environment(
             child_environment.pop(name, None)
     child_environment[HOLOINDEX_SSD_PATH_ENV] = str(ssd_path)
     child_environment["HOLO_USE_TURBOQUANT"] = "0"
+    child_environment[MAINTENANCE_JSON_ONLY_ENV] = "1"
     child_environment["PYTHONDONTWRITEBYTECODE"] = "1"
     if runtime_root is not None and not sealed_runtime_required(environ):
         entries = trusted_holo_site_packages(runtime_root)

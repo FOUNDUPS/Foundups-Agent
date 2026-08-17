@@ -54,7 +54,7 @@ from holo_index.cli_index_plan import (
     _indexing_flags_requested,
     _selected_index_collections,
 )
-from holo_index.utils.helpers import safe_print
+from holo_index.utils.helpers import safe_print as _safe_print
 from holo_index.storage_contract import (
     HoloIndexStorageError,
     READONLY_QUERY_ENV,
@@ -126,8 +126,16 @@ def _env_truthy(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "y", "on")
 
 READONLY_GUARD_CODE = "HOLOINDEX_READONLY_QUERY_GUARD"
+MAINTENANCE_JSON_ONLY_ENV = "HOLOINDEX_MAINTENANCE_JSON_ONLY"
 STORAGE_ERROR_EXIT_CODE = 3
 QUERY_ADMISSION_EXIT_CODE = 4
+
+
+def safe_print(text: str, **kwargs) -> None:
+    """Suppress human progress output for the trusted maintenance child."""
+
+    if not _env_truthy(MAINTENANCE_JSON_ONLY_ENV):
+        _safe_print(text, **kwargs)
 
 
 def _query_only_requested(args) -> bool:
@@ -164,17 +172,17 @@ def _auto_refresh_allowed(args) -> bool:
 def _exit_storage_error(exc: HoloIndexStorageError) -> None:
     """Emit one stable machine-readable failure and stop before query/index work."""
 
-    safe_print(json.dumps(exc.to_dict(), sort_keys=True))
+    _safe_print(json.dumps(exc.to_dict(), sort_keys=True))
     raise SystemExit(STORAGE_ERROR_EXIT_CODE)
 
 
 def _exit_maintenance_error(exc: MaintenanceSessionError) -> None:
-    safe_print(json.dumps(exc.to_dict(), sort_keys=True))
+    _safe_print(json.dumps(exc.to_dict(), sort_keys=True))
     raise SystemExit(MAINTENANCE_FAILURE_EXIT_CODE)
 
 
 def _exit_query_admission_error(result: Any) -> None:
-    safe_print(json.dumps(result.to_dict(), sort_keys=True))
+    _safe_print(json.dumps(result.to_dict(), sort_keys=True))
     raise SystemExit(QUERY_ADMISSION_EXIT_CODE)
 
 # 0102 speed knob: allow bundle-json/offline/fast-search fastpath without importing Chroma/model stack.
