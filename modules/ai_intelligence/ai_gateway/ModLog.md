@@ -1,5 +1,16 @@
 # AI Gateway Module Change Log
 
+## [2026-08-19] - Independent Repair Verifier & Context Firewall (Issue #1522 / Slice 2)
+
+**Who/Type/Slice:** 0102 architect / Feature / `feat/independent-repair-verifier`
+
+**What:** Implemented `independent_repair_verifier.py` extending existing AutoResearch verification contracts.
+- Defined `VerifierEvidencePacket` for structured evidence transmission behind `VerifierContextFirewall`.
+- Context firewall strips builder thoughts, reasoning, and persuasive rhetoric to ensure neutral evaluation.
+- Implemented `ModelIndependencePolicy` enforcing `builder_identity != verifier_identity` and model family separation for elevated risk tiers.
+- Implemented `IndependentVerifierReceipt` with canonical SHA-256 digest sealing and structured `CounterexampleReceipt` emission on rejection.
+- Added comprehensive unit tests in `test_independent_repair_verifier.py`. (WSP_00, WSP_50, WSP_80, WSP_97)
+
 ## [2026-07-30] - Shared Model-Evidence Authority Validation
 
 **Who/Type/Slice:** 0102 architect / Defensive /

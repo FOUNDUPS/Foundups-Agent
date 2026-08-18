@@ -1,5 +1,13 @@
 # WRE Core - ModLog
 ## Chronological Change Log
+
+### [2026-08-19] - SCIENTIFIC AUTONOMOUS SELF-HEALING OPERATION CONTRACT & CANARY (ISSUE #1522)
+
+- Implemented durable `ScientificRepairOperation` state ledger in `repair_operation_contract.py` covering 19 explicit canonical states: `OBSERVED -> REPRODUCING -> REPRODUCED -> BASELINED -> RESEARCHING -> HYPOTHESIS_DEFINED -> ADMISSION_PENDING -> ADMITTED -> SANDBOX_PREPARING -> EXPERIMENTING -> DETERMINISTIC_VERIFY -> INDEPENDENT_VERIFY -> FUSION_REVIEW -> ACCEPTED -> REVERTED -> ABANDONED -> ESCALATED -> LEARNED`.
+- Enforced fail-closed state transition table with zero authority self-expansion.
+- Implemented `attempt_failure_reproduction` in `repair_baseline_verifier.py` enforcing independent reproduction and sealing `BaselineReceipt` before any mutation authority is granted.
+- Implemented `ScientificRepairCanaryOrchestrator` in `scientific_repair_canary_orchestrator.py` enabling complete closed-loop autonomous repair execution without intervening human prompts.
+- Added comprehensive unit tests and e2e canary tests in `test_repair_operation_contract.py` and `test_scientific_repair_canary_e2e.py`. (WSP_00, WSP_15, WSP_50, WSP_80, WSP_97, WSP_109)
 ### [2026-08-11] - WSP 62 DIFFERENTIAL ENFORCEMENT RECONCILIATION
 
 - Reconciled the WRE inherited-debt authority with current `main` after the
