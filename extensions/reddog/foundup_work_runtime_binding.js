@@ -15,12 +15,17 @@ function number(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function authorityContext(root, gitOutput, unavailableMarker) {
-  const head = gitOutput(root, ['rev-parse', 'HEAD'], 128).trim();
-  const status = gitOutput(root, ['status', '--porcelain=v1', '--',
-    grounding.REGISTRY_PATH, grounding.REGISTRY_SCHEMA_PATH], 4096);
-  const tracked = gitOutput(root, ['ls-files'], 4 * 1024 * 1024);
-  const dirty = gitOutput(root, ['diff', '--name-only', 'HEAD'], 4 * 1024 * 1024);
+function authorityContext(root, gitOutput, unavailableMarker, gitOutputs) {
+  const operations = Object.freeze([
+    'HEAD_SHA', 'FOUNDUP_REGISTRY_STATUS', 'TRACKED_PATHS', 'DIRTY_PATHS'
+  ]);
+  const values = typeof gitOutputs === 'function'
+    ? gitOutputs(root, operations)
+    : operations.map((name) => gitOutput(root, name));
+  const head = values[0].trim();
+  const status = values[1];
+  const tracked = values[2];
+  const dirty = values[3];
   const unavailable = [head, status, tracked, dirty]
     .some((value) => value.startsWith('[git context unavailable:'));
   return {
@@ -31,23 +36,23 @@ function authorityContext(root, gitOutput, unavailableMarker) {
   };
 }
 
-function resolve(root, taskText, gitOutput, unavailableMarker) {
+function resolve(root, taskText, gitOutput, unavailableMarker, gitOutputs) {
   return grounding.resolveFoundupWorkGrounding(
-    root, taskText, authorityContext(root, gitOutput, unavailableMarker)
+    root, taskText, authorityContext(root, gitOutput, unavailableMarker, gitOutputs)
   );
 }
 
-function verifyAtUse(root, receipt, gitOutput, unavailableMarker) {
+function verifyAtUse(root, receipt, gitOutput, unavailableMarker, gitOutputs) {
   return grounding.verifyFoundupWorkGroundingReceipt(
-    root, receipt, authorityContext(root, gitOutput, unavailableMarker)
+    root, receipt, authorityContext(root, gitOutput, unavailableMarker, gitOutputs)
   );
 }
 
-function preflightState(root, receipt, scorecard, gitOutput, unavailableMarker) {
+function preflightState(root, receipt, scorecard, gitOutput, unavailableMarker, gitOutputs) {
   const value = receipt && typeof receipt === 'object' ? receipt
     : { applied: false, passed: true, rejection_reasons: [], evidence_targets: [] };
   const verified = value.applied !== true || (value.passed === true
-    && verifyAtUse(root, value, gitOutput, unavailableMarker));
+    && verifyAtUse(root, value, gitOutput, unavailableMarker, gitOutputs));
   const reasons = [];
   if (value.applied === true && value.passed !== true) {
     reasons.push('foundup_work_grounding_failed', ...strings(value.rejection_reasons));

@@ -20,18 +20,6 @@ Unknown or nested evidence fields reject the complete response.
 For a positive limit and one explicit module, it reserves exact module-root
 README/INTERFACE evidence before filling remaining slots by global score.
 
-### `build_mcp_server(repo_root: Optional[Path] = None, server_name: str = "FoundUps MCP Bridge") -> FastMCP`
-
-Builds and returns a configured FastMCP server instance wrapping all 33 perception and read tools from `FoundUpsMCPBridge`. Strips the `repo_root` parameter from tool signatures and exposes standard MCP JSON schemas.
-
-### `run_mcp_bridge_sse(host: Optional[str] = None, port: Optional[int] = None, repo_root: Optional[Path] = None, blocking: bool = True) -> Dict[str, Any]`
-
-Launches the FastMCP SSE server on `http://<host>:<port>/sse`. Supports in-process ASGI execution if `fastmcp` is available, or fallback subprocess execution via `foundups-mcp-env`.
-
-### `stop_mcp_bridge_sse() -> Dict[str, Any]`
-
-Requests graceful shutdown of the broker-managed MCP Bridge SSE server.
-
 ### FoundUpsMCPBridge
 
 Main bridge class for MCP tool access.
@@ -88,6 +76,14 @@ raw and flattened evidence, so stale or malformed backend results cannot leak
 unprojected paths. Unicode control, formatting, and alternate-whitespace path
 characters also reject before projection. This does not mutate or reindex the
 store.
+
+After projection and score ordering, `flatten_hits(result, limit, query=...)`
+reserves the canonical root README/INTERFACE order only when the query
+names an exact basename uniquely evidenced by returned paths or supplies one
+validated full module path. Reservation is limited by the caller's existing K
+and does not create fields or hits. Producer-owned `exact_metadata`
+provenance and null similarity survive flattening. Ambiguous/no-module queries
+preserve global score order; nested `tests/README.md` is never Tier-0.
 
 Supported private owner for the RedDog operational consumers migrated in this
 POC:
@@ -241,41 +237,38 @@ never edits the environment.
 ### RedDog HoloIndex Trusted Maintenance Handshake
 
 Interactive/headless operational preflights and startup maintenance dispatch
-use:
+call `ensure_reddog_holoindex_operational(repo_root=..., owner_runtime_root=...,
+requested=...)`. With `REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1` (default), the
+trusted host may refresh a stale canonical store only from a clean exact Git
+HEAD. It stops only an auto-owned owner, strips semantic bypass and source
+narrowing, runs one bounded argv-only full refresh, proves all seven baseline
+collections, rechecks HEAD, and starts the owner bound to that generation.
+Governed WRE may route the request but never acquires maintenance authority.
 
-    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_handshake import (
-        ensure_reddog_holoindex_operational,
-    )
+The one-shot owner wrapper accepts authority only from the checkout named by
+`REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`: a dedicated clean checkout, immutable
+under an exclusive repository-writer window through refresh/publication. The
+active caller worktree is invalid. Child stdout is drained to at most 16 KiB
+in memory; stderr and disk capture are disabled. Only an explicitly
+allowlisted stable code from the final JSON line crosses the boundary; detail,
+forged/malformed/oversized output, paths, and logs reduce to
+`HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. Windows timeout makes a bounded exact-PID
+`taskkill /T /F` attempt; missing, denied, or timed-out `taskkill` falls back to bounded direct-child kill/wait. POSIX signals the exact new process group but cannot
+contain a descendant that starts a new session. Such an escaped descendant may retain
+stdout and the daemon reader until it exits. This is cooperative trusted-host
+best-effort containment, not a hostile-process or OS-privilege guarantee; never
+assume the whole tree is gone.
 
-    result = ensure_reddog_holoindex_operational(
-        repo_root=repo_root,
-        owner_runtime_root=canonical_workspace_root,
-        requested=holo_dependent_work_requested,
-    )
+Optional `owner_runtime_root` identifies the trusted workspace whose `.venv`
+supplies nonsealed refresh/owner dependencies and defaults to `repo_root`; the
+same validated path spans refresh/start. Inherited `PYTHONPATH` and user-site
+packages stay disabled; sealed refresh uses only its bridge-validated path.
 
-The default REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1 permits the trusted host path
-to refresh a stale canonical store. It requires a clean exact Git HEAD, stops
-only an auto-owned owner, runs one bounded argv-only index-all command with
-semantic bypass/source narrowing removed, validates complete canonical source
-scope for all seven baseline collections, rechecks HEAD, and then starts the
-owner bound to the resulting generation. Startup may route the maintenance
-request through governed WRE dispatch, but the trusted host remains the
-maintenance authority.
-
-The optional `owner_runtime_root` identifies the trusted canonical workspace
-whose `.venv` supplies dependencies to nonsealed refresh and owner children;
-it defaults to the already trusted `repo_root`. The same resolved and validated
-path is used on both sides of the refresh/start boundary.
-Arbitrary inherited `PYTHONPATH` and user-site packages remain disabled.
-Sealed refresh continues to use only its separately bridge-validated
-dependency path.
-
-Phase 1 requires an exclusive repository-writer window during full refresh.
-The canonical lease coordinates migrated writers; it does not constrain an
-unleased legacy collection writer or eliminate the transient edit/revert
-TOCTOU risk. A successful refresh can leave a valid CURRENT receipt even if
-subsequent owner startup/health fails; in that case this operational result is
-still false.
+The SSD lease coordinates migrated writers, not unleased legacy writers or a
+transient edit/revert. Clean exact HEAD is therefore re-proved after final
+snapshot verification immediately before PASS publication; failure preserves
+IN_PROGRESS. Later owner startup/health failure may leave CURRENT persisted
+while the operational result remains false.
 
 ### Exact-SHA Authority Worktree Transaction
 

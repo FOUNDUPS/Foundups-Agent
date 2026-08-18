@@ -151,8 +151,9 @@ def _publishing_refresh_runner(repo_root: Path, ssd_path: Path):
         assert "HOLOINDEX_QUERY_READONLY" not in kwargs["env"]
         assert kwargs["env"]["HOLO_OFFLINE"] == "1"
         assert kwargs["env"]["HOLO_USE_TURBOQUANT"] == "0"
+        assert kwargs["env"][handshake.MAINTENANCE_JSON_ONLY_ENV] == "1"
         assert _SCOPE_OVERRIDE_NAMES.isdisjoint(kwargs["env"])
-        assert kwargs["stdout"] is subprocess.DEVNULL
+        assert kwargs["stdout"] is subprocess.PIPE
         _publish(repo_root, ssd_path)
         return SimpleNamespace(returncode=0)
 
@@ -273,6 +274,7 @@ def test_refresh_environment_strips_secrets_and_casefolded_scope_overrides(
             "holo_web_index_roots": "public/partial",
             "holoindex_wsp_roots": "WSP_framework/src/partial",
             "HOLO_OFFLINE": "1",
+            "holoindex_maintenance_json_only": "0",
         },
         ssd_path=ssd_path,
         runtime_root=None,
@@ -287,6 +289,7 @@ def test_refresh_environment_strips_secrets_and_casefolded_scope_overrides(
     assert child["HOLO_OFFLINE"] == "1"
     assert child["HOLOINDEX_SSD_PATH"] == str(ssd_path)
     assert child["HOLO_USE_TURBOQUANT"] == "0"
+    assert child[handshake.MAINTENANCE_JSON_ONLY_ENV] == "1"
 
 
 def test_refresh_environment_restores_only_validated_runtime_packages(

@@ -423,7 +423,7 @@ def _success_response(
         error="",
         binding=after.binding,
         raw=normalized_raw,
-        hits=flatten_hits(normalized_raw, limit),
+        hits=flatten_hits(normalized_raw, limit, query=query),
         mode="semantic",
         latency_ms=int((time.monotonic() - started) * 1000),
     )

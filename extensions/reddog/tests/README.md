@@ -12,10 +12,12 @@ From repo root:
 
 ```powershell
 node --check extensions/reddog/extension.js
+node extensions/reddog/tests/verify_fusion_panel_input_contract.js
 node extensions/reddog/tests/test_foundup_work_grounding.js
 node extensions/reddog/tests/test_backend_compatibility_preflight.js
 pytest -q scripts/tests/test_generate_reddog_backend_manifest.py
 node extensions/reddog/tests/verify_repo_audit_grounding.js
+node extensions/reddog/tests/test_governed_git_context_hardening.js
 node extensions/reddog/tests/test_extension_contract_shards.js
 node extensions/reddog/tests/verify_extension_contract.js
 node extensions/reddog/tests/test_start_operations_control.js
@@ -27,6 +29,31 @@ node extensions/reddog/tests/test_principal_memex_disclosure_source.js
 node extensions/reddog/tests/test_grounding_failure_dialogue.js
 git diff --check -- extensions/reddog
 ```
+
+`test_governed_git_context_hardening.js` includes deterministic snapshot races
+and R6 factory/order isolation. R7 adds real Windows case-alias index coverage,
+platform-aware ignored exact/prefix/separator intersections, NFC aliases,
+canonical full-path uniqueness, and hardlink/reparse preservation. On Linux it
+proves case-distinct paths and ignored names remain distinct. The focused Fusion
+panel contract is an explicit release companion to the exhaustive runner and
+must run separately because it is not one of the exhaustive shards. R6 proves allow/deny instances remain isolated
+under interleaving, the canonical default remains output-equivalent before and
+after custom construction, invalid construction fails closed, and no protected
+read follows the final Git proof. A Git-control mutation during the third
+capture must be caught by that later proof.
+
+The suite also includes deterministic snapshot races
+before the first content command, between commands, and immediately before the
+final receipt. Each mutation must make status/stat/diff unavailable together.
+It also mutates `info/exclude` between two batched content commands and requires
+every batch output to fail closed. The prior R4 exhaustive measurement was
+289.65 seconds under its unchanged 420-second release ceiling.
+R5 adds exact-name/atomic-batch rejection, caller-array mutation, stable
+worktree-read mutation, ignored-exclusion/non-read, forced ignored collision,
+ignored-junction non-traversal, second-enumeration new/removed/renamed/index
+mutation, and point-in-time receipt coverage.
+The final expanded R5 exhaustive run passed in 303.7 seconds under the unchanged
+420-second ceiling.
 
 HoloIndex bundle recall (separate module tests):
 
@@ -57,6 +84,7 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_extension_contract_shards.js` | Fast reconstruction, no-loss, syntax, ordering, uniqueness, and line-ceiling regression |
 | `test_grounding_failure_dialogue.js` | Conversation-only failure receipt, queued-recovery deterministic status, tri-state recall, sanitization, no-evidence/no-authority binding, bridge-failure fallback |
 | `verify_repo_audit_grounding.js` | Focused alias, receipt, protected-context non-vacuity, local block, repair-provenance, and defensive-prompt contracts |
+| `test_governed_git_context_hardening.js` | Temp-only named atomic Git batch, captured-byte projection receipt, ignored exclusion, loose-object cache, Git control-file, and ownership hardening |
 
 ## TEST_REGISTRY
 

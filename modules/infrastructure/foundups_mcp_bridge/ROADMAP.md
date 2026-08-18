@@ -1,5 +1,15 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-16: Explicit-Module Tier-0 Owner Projection
+
+**Complete:** global owner flattening now reserves at most two existing exact
+root README/INTERFACE hits for explicit uniquely evidenced module queries,
+after generation-bound Holo retrieval and path projection. Low-K,
+ambiguous-query, and adversarial lookup behavior is pinned by focused tests.
+
+**Deferred:** post-commit exact-SHA maintenance/publication and live governed
+owner acceptance. The resident owner is not restarted by this change.
+
 ## Current P0: HoloIndex / RedDog Operational Truth Boundary POC
 
 **Priority:** 20 / P0 under WSP_15

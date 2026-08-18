@@ -1,5 +1,51 @@
 # HoloIndex Package ModLog
 
+## [2026-08-16] Final maintenance publication clean-state proof
+
+- Added a clean exact-HEAD proof immediately before completed receipt write,
+  after the final collection snapshot comparison.
+- A dirty or changed repository at that last boundary now fails closed while
+  preserving the published IN_PROGRESS invalidation. Freshness, lease,
+  semantic, and collection proof semantics are otherwise unchanged.
+  (WSP 15/22/50/62/87/97)
+
+## [2026-08-16] Tier-0 R4 WSP 62 correction
+
+- Reproduced `search_engine.py` growth from HEAD 1,465 lines to exactly 1,500
+  and the 205-line `_search_collection` candidate self-exemption.
+- Extracted vector collection orchestration into `core/collection_search.py`.
+  Final ceilings: engine 1,368 lines, wrapper 9 lines, largest new extraction
+  helper 37 lines, largest Tier-0 injection helper 45 lines.
+- Replaced permissive `<=1500`/`<=225` assertions with protocol limits
+  `<1500`/`<=50`; no new exemption was introduced.
+
+## [2026-08-16] Tier-0 R2 verifier reconciliation
+
+- Reproduced and closed duplicate initial-vector Tier-0 admission, missing
+  non-strict exception warnings, and full-path case instability.
+- Extracted exact Tier-0 and WSP-alias collection injection so
+  `search_engine.py` is exactly 1,500 lines and `_search_collection` remains
+  within its exact WSP_62 exemption.
+- Added exact command-scoped ownership and fixed read guards to immutable-HEAD
+  repository-audit Git reads; no wildcard, config write, checkout read, or
+  mutable overlay admission was added. (WSP 22/50/62/97)
+
+## [2026-08-16] Bounded module Tier-0 semantic retrieval
+
+- Reused one shared README/INTERFACE Tier-0 contract across bundle and
+  semantic retrieval rather than adding a RedDog-specific query special case.
+- For an exact basename uniquely evidenced by initial hits, or one validated
+  full module path, added zero-to-two exact metadata
+  gets against the admitted `navigation_docs` collection and deterministic
+  root-doc ordering. No filesystem evidence or query-time reindex was added.
+- Added schema-bound `exact_metadata` provenance with null vector similarity;
+  exact rows bypass the vector floor without inventing a score.
+- Added strict-owner fail-closed checks for incomplete pairs, lookup errors,
+  malformed cardinality, and returned-path mismatch. Interactive search warns
+  while preserving available results.
+- Rejected traversal, hidden, whitespace, control-bearing, and terminal-dot
+  module components before constructing exact paths. (WSP 22/50/60/84/97)
+
 ## [2026-08-11] Canonical test-suite topology metadata
 
 - Extended the existing test-registry indexer to retain canonical owner, suite

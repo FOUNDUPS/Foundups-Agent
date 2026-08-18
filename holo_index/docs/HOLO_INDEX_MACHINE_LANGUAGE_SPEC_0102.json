@@ -144,11 +144,11 @@
         "code": {"required": ["need", "location", "similarity", "cube", "type", "priority"], "optional": ["confidence", "path", "line", "preview"]},
         "test": {"required": ["test_id", "path", "description", "capabilities", "similarity", "type", "priority"], "optional": ["confidence"]},
         "skill": {"required": ["skill_name", "description", "primary_agent", "intent_type", "promotion_state", "path", "similarity", "type", "priority"], "optional": ["confidence"]},
-        "document": {"required": ["title", "summary", "path", "slice_id", "similarity", "type", "priority"], "optional": ["confidence"]},
+        "document": {"required": ["title", "summary", "path", "slice_id", "similarity", "type", "priority"], "optional": ["confidence", "retrieval_provenance"]},
         "wsp": {"required": ["wsp", "title", "summary", "path", "similarity", "cube", "type", "priority"], "optional": ["confidence"]}
       },
       "bucket_schemas": {"code_hits": ["code", "wsp"], "code": ["code", "wsp"], "test_hits": ["test"], "tests": ["test"], "skill_hits": ["skill"], "skills": ["skill"], "docs_hits": ["document"], "docs": ["document"], "knowledge_hits": ["document"], "knowledge": ["document"], "wsp_hits": ["wsp"], "wsps": ["wsp"], "symbol_hits": ["wsp"], "work_ledger_hits": ["wsp"], "work_ledger": ["wsp"]},
-      "hit_value_rules": {"priority": "finite_number", "line": "positive_integer", "similarity": "percent_string_0_100", "confidence": "finite_number_0_1", "default": "string_or_null"},
+      "hit_value_rules": {"priority": "finite_number", "line": "positive_integer", "similarity": "percent_string_0_100_or_null", "confidence": "finite_number_0_1", "retrieval_provenance": "exact_metadata_provenance", "default": "string_or_null"},
       "metadata_value_rules": {"field_rules": {"code_count": "nonnegative_integer", "wsp_count": "nonnegative_integer", "test_count": "nonnegative_integer", "skill_count": "nonnegative_integer", "symbol_count": "nonnegative_integer", "docs_count": "nonnegative_integer", "knowledge_count": "nonnegative_integer", "work_ledger_count": "nonnegative_integer", "cached": "boolean", "routing_active": "boolean", "collection_backend_map": "map:collection_backend", "collection_embedding_space_map": "map:embedding_fingerprint"}, "default": "string"}
     },
     "bundle_json_schema_id": "wsp_memory_bundle_v1",

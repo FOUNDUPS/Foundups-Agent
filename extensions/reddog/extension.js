@@ -19,7 +19,7 @@ const governedGitContextFactory = require('./governed_git_context');
 const governedGitContext = governedGitContextFactory.create({
   isTargetReadPathDenied, resolveSafeRepoFile, readBoundedRepoFile
 });
-const { gitOutput, governedGitStatus, governedGitStat, governedGitDiff } = governedGitContext;
+const { gitOutput, gitOutputs, governedGitStatus, governedGitStat, governedGitDiff, governedGitSnapshot, governedGitReadiness } = governedGitContext;
 const { GIT_OUTPUT_TRUNCATED_MARKER } = governedGitContextFactory;
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoIndexEvidenceBoundary = require('./holoindex_evidence_boundary');
@@ -53,7 +53,7 @@ const {
   beginBasePromptTrace, outputValidationOptions, statusMessages
 } = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.100';
+const EXTENSION_VERSION = '0.4.101';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -1235,7 +1235,7 @@ function collectRequiredTargets(taskText, repoRoot, foundupResolution) {
   }
   const derivedInfo = deriveWorkFocusTargets(taskText);
   const foundup = foundupResolution || (repoRoot
-    ? foundupWorkRuntime.resolve(repoRoot, taskText, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)
+    ? foundupWorkRuntime.resolve(repoRoot, taskText, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER, gitOutputs)
     : null);
   const targets = [];
   const seen = new Set();
@@ -1501,7 +1501,7 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
 function extractTypedTargets(taskText, repoRoot) {
   const textWithoutQuotes = removeQuotedReferenceBlocks(taskText);
   const foundup = repoRoot
-    ? foundupWorkRuntime.resolve(repoRoot, textWithoutQuotes, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)
+    ? foundupWorkRuntime.resolve(repoRoot, textWithoutQuotes, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER, gitOutputs)
     : { applied: false, passed: true, rejection_reasons: [], evidence_targets: [], grants_authority: false };
   if (!parseRequiredTargetPaths(textWithoutQuotes).length && isOperationalDiagnosticPayload(textWithoutQuotes) && workerPromptContract.isPromptAuthoringRequest(taskText)) {
     return {
@@ -1764,7 +1764,7 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   const scorecard = (contextPacket && contextPacket.holoindex_scorecard)
     || extractHoloIndexScorecard(contextMode, contextPacket && contextPacket.holoindex_meta);
   const foundupState = foundupWorkRuntime.preflightState(root, typedTargets.foundup_work_grounding,
-    scorecard, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER);
+    scorecard, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER, gitOutputs);
   const foundup = foundupState.receipt;
   const rejectionReasons = [];
   const repoAuditCoverage = repoAuditGrounding.evaluateRepoAuditContext(taskText, contextPacket);
@@ -3425,7 +3425,7 @@ function buildWreOperationalSpineInvokePayload(preview, options) {
     rejectionReasons.push('registered_foundup_target_selection_mismatch');
   }
   const workOrderFoundupTarget = workOrder && workOrder.registered_foundup_target_receipt;
-  if (workOrderFoundupTarget && !foundupWorkRuntime.verifyAtUse(opts.repoRoot || workspaceRoot(), workOrderFoundupTarget, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)) rejectionReasons.push('registered_foundup_target_use_time_verification_failed');
+  if (workOrderFoundupTarget && !foundupWorkRuntime.verifyAtUse(opts.repoRoot || workspaceRoot(), workOrderFoundupTarget, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER, gitOutputs)) rejectionReasons.push('registered_foundup_target_use_time_verification_failed');
   const valveEnvironment = opts.valveEnvironment || opts.executionValveEnvironment || null;
   if (!valveEnvironment || typeof valveEnvironment !== 'object') {
     rejectionReasons.push('valve_environment_missing');
@@ -3592,7 +3592,7 @@ function buildOpenClawLiveEnqueueRuntimeBindingPayload(packet, selectionResult, 
   }
   const foundupTarget = opts.registeredFoundupTargetReceipt || null;
   reasons.push.apply(reasons, foundupWorkRuntime.targetSelectionRejections(foundupTarget, receipt));
-  if (foundupTarget && !foundupWorkRuntime.verifyAtUse(opts.repoRoot || workspaceRoot(), foundupTarget, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER)) reasons.push('registered_foundup_target_use_time_verification_failed');
+  if (foundupTarget && !foundupWorkRuntime.verifyAtUse(opts.repoRoot || workspaceRoot(), foundupTarget, gitOutput, GIT_OUTPUT_TRUNCATED_MARKER, gitOutputs)) reasons.push('registered_foundup_target_use_time_verification_failed');
   const adapterResult = _firstRuntimeArtifact(pkt, opts, ['adapterResult', 'openclaw_adapter_result', 'adapter_result']);
   const policyGateReceipt = _firstRuntimeArtifact(pkt, opts, ['policyGateReceipt', 'policy_gate_receipt']);
   const signedReceiptChainResult = _firstRuntimeArtifact(
@@ -3849,6 +3849,7 @@ function residentArchitectSessionBindings() {
     foundupWorkRuntime,
     workspaceRoot,
     gitOutput,
+    gitOutputs,
     gitOutputTruncatedMarker: GIT_OUTPUT_TRUNCATED_MARKER,
     environment: process.env,
     productSlice: REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE,
@@ -6516,7 +6517,7 @@ function buildBoundedRepoContext(mode, taskText) {
         // WSP_97 excerpt embeds the RAW protocol file body ("```markdown\n<snippet.content>```").
         // Neutralize any literal required-target marker in the excerpt body so a WSP file that
         // documents/echoes the marker line cannot mint a phantom splitter marker section.
-        lowerSections.push(neutralizeRequiredTargetMarker(wsp97.text));
+        lowerSections.unshift(neutralizeRequiredTargetMarker(wsp97.text));
         holoindex_meta = applyWsp97SanitizationMeta(holoindex_meta, wsp97.meta);
         holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
       }
@@ -6542,9 +6543,7 @@ function buildBoundedRepoContext(mode, taskText) {
     lowerSections.push(neutralizeRequiredTargetMarker(active));
   }
   if (mode === 'git_diff' || mode === 'wsp_holo_git' || mode === 'wsp_holo_git_skillz') {
-    const status = governedGitStatus(root, 8000);
-    const stat = governedGitStat(root, 8000);
-    const diff = governedGitDiff(root, 24000);
+    const { status, stat, diff } = governedGitSnapshot(root);
     // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (defense-in-depth): neutralize any
     // literal required-target marker inside the raw git-diff body. A MODIFIED required file whose
     // OWN content contains its authoritative marker line renders that marker verbatim in the diff;
@@ -6624,9 +6623,11 @@ function activeEditorContext(root) {
   return '### active editor ' + (selected ? 'selection' : 'file') + ': ' + rel + '\n```' + (doc.languageId || 'text') + '\n' + clipped + '\n```';
 }
 
-
 function repoFileIndex(root, maxFiles) {
-  const gitFiles = gitOutput(root, ['ls-files'], 1000000);
+  const trackedPaths = gitOutput(root, 'TRACKED_PATHS');
+  const marker = '\n' + GIT_OUTPUT_TRUNCATED_MARKER;
+  const gitFiles = trackedPaths.length > 1000000
+    ? trackedPaths.slice(0, 1000000 - marker.length) + marker : trackedPaths;
   if (gitFiles && !gitFiles.startsWith('[git context unavailable')) {
     const outputTruncated = gitFiles.includes(GIT_OUTPUT_TRUNCATED_MARKER);
     const files = gitFiles.split(/\r?\n/).map((line) => line.trim())
@@ -6847,6 +6848,7 @@ function discoverRepoDeepDiveTargets(root, taskText, bundleOutput, maxTargets) {
     manifest_source_count: Number(indexedFiles.manifest_source_count || manifest.length),
     manifest_truncated: indexedFiles.manifest_truncated === true,
     manifest_complete: indexedFiles.manifest_truncated !== true,
+    git_readiness: governedGitReadiness(root),
     concepts,
     semantic_paths: semanticPaths,
     targets: selected,
@@ -6862,7 +6864,6 @@ function discoverRepoDeepDiveTargets(root, taskText, bundleOutput, maxTargets) {
     focus_coverage_passed: focusCoverage.passed
   };
 }
-
 function taskTextWithDiscoveredRepoTargets(taskText, targets) {
   const paths = Array.isArray(targets) ? targets.filter(Boolean) : [];
   if (!paths.length) {
@@ -6881,6 +6882,7 @@ function applyRepoDeepDiveDiscoveryMeta(meta, discovery) {
   target.repo_manifest_source_count = Number(d.manifest_source_count || 0);
   target.repo_manifest_truncated = d.manifest_truncated === true;
   target.repo_manifest_complete = d.manifest_complete === true;
+  target.repo_git_readiness = d.git_readiness && typeof d.git_readiness === 'object' ? d.git_readiness : null;
   target.repo_deep_dive_concepts = Array.isArray(d.concepts) ? d.concepts.slice() : [];
   target.repo_deep_dive_semantic_paths = Array.isArray(d.semantic_paths) ? d.semantic_paths.slice() : [];
   target.repo_deep_dive_targets = Array.isArray(d.targets) ? d.targets.slice() : [];
@@ -8393,9 +8395,7 @@ module.exports = {
   mergeGenerationBoundHoloResult,
   resolveHoloRetrievalMode,
   buildHoloQueryEnv,
-  governedGitStatus,
-  governedGitStat,
-  governedGitDiff,
+  governedGitStatus, governedGitStat, governedGitDiff, governedGitSnapshot, governedGitReadiness,
   summarizeHoloBundle,
   buildMustIncludeArgs,
   classifyDirectReadFetchError,

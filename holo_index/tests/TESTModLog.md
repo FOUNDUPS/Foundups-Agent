@@ -1,5 +1,66 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-16] Final publication dirty-worktree falsification
+
+- Injected clean/clean/dirty repository states across receipt construction,
+  snapshot verification, and the final publication boundary.
+- Proved the stable dirty error is returned and the atomic receipt remains
+  IN_PROGRESS rather than publishing PASS. Combined focused maintenance
+  suites: **53 passed**.
+
+## [2026-08-16] Tier-0 R4 WSP 62 correction
+
+- Removed candidate-authored `<=1500` and `<=225` allowances.
+- Added strict `<1500` engine and `<=50` touched/new function checks across
+  `search_engine.py`, `collection_search.py`, and `collection_injections.py`.
+- Updated the vector slice-ID structural test to inspect the delegated scorer.
+- Focused Tier-0 plus slice-ID suite: **55 passed**.
+
+## [2026-08-16] Tier-0 R3 manifest-closure correction
+
+- Reproduced that the extracted collection-injection runtime was imported by
+  the search engine but absent from both Git tracking and the authenticated
+  RedDog backend manifest.
+- Bound the newly tracked dependency to import resolution, runtime membership,
+  and its exact normalized digest in the canonical generator regression.
+- Refreshed the staged Tier-0 helper to eliminate the R2 index/worktree split.
+  Candidate remains `NEEDS_VERIFICATION` pending an independent verifier.
+- Generator **4 passed**; focused Tier-0/MCP **86 passed**; exact WSP_62 and
+  canonical backend manifest/preflight checks passed. The exhaustive extension
+  shards were not rerun because no shard/reconstructed extension source changed
+  and those shards do not exercise this generator dependency edge.
+
+## [2026-08-16] Tier-0 R2 falsification
+
+- Added RED-to-GREEN contracts proving strict owners discard duplicate vector
+  root rows and replace them with exactly one exact README and INTERFACE.
+- Proved collection exceptions reach the non-strict warning surface, uppercase
+  explicit paths normalize, and exact WSP_62 file/function ceilings hold.
+- Proved immutable-HEAD Git commands carry exact ownership and fixed
+  no-hook/no-filter/no-replacement controls; repository-audit grounding now
+  passes on the ownership-mismatched canonical checkout.
+
+## [2026-08-16] Module Tier-0 retrieval falsification
+
+- Proved explicit unique module intent retrieves only root README/INTERFACE in
+  canonical order, excludes nested test README, stays bounded/deduplicated,
+  and leaves ambiguous or implicit queries unchanged.
+- Proved strict owner mode rejects exact-lookup failure, malformed
+  cardinality, path mismatch, and either missing Tier-0 row; non-strict mode
+  emits a truthful warning while preserving available evidence.
+- Proved full-path precedence, exact basename boundaries, docs-only inference,
+  bounded resources, anchored hit paths, and invalid-component rejection.
+- Proved exact metadata rows carry schema-bound provenance with null similarity
+  and survive vector floors without a fabricated score.
+- Revalidated the expanded Holo ranking, bundle, audit-slice, extension, and
+  machine-contract closure: 190 passed, 4 skipped (optional/environmental),
+  with two known pytest configuration warnings under plugin-disabled mode.
+- WSP 50/97 learning: an early manual Chroma exact-filter probe omitted
+  supplied embeddings and caused Chroma to download a 79.3 MB ONNX model into
+  the user cache. It changed no repository, persistent index, service, or
+  dependency state. The cache was not deleted without authority; all
+  subsequent validation uses deterministic fakes/supplied embeddings.
+
 ## [2026-08-15] Owner-evidence path projection receipt regression
 
 - Proved the producer-owned executable result contract exactly matches the

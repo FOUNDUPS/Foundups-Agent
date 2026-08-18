@@ -415,6 +415,11 @@ def _git_environment() -> dict[str, str]:
     }
     environment["GIT_CONFIG_NOSYSTEM"] = "1"
     environment["GIT_CONFIG_GLOBAL"] = os.devnull
+    environment["GIT_ATTR_NOSYSTEM"] = "1"
+    environment["GIT_EXTERNAL_DIFF"] = ""
+    environment["GIT_NO_LAZY_FETCH"] = "1"
+    environment["GIT_NO_REPLACE_OBJECTS"] = "1"
+    environment["GIT_OPTIONAL_LOCKS"] = "0"
     return environment
 
 
@@ -465,8 +470,15 @@ _trusted_git_path = resolve_trusted_git_executable
 
 def _git_command(root: Path, args: Sequence[str]) -> list[str]:
     git_executable = _trusted_git_path()
+    null_path = "NUL" if sys.platform == "win32" else os.devnull
     return ([
-        git_executable, "--no-replace-objects", "-c", "core.useReplaceRefs=false",
+        git_executable, "--no-replace-objects", "--no-optional-locks",
+        "-c", f"safe.directory={root}",
+        "-c", "core.useReplaceRefs=false",
+        "-c", f"core.hooksPath={null_path}",
+        "-c", f"core.attributesFile={null_path}",
+        "-c", f"core.excludesFile={null_path}",
+        "-c", "diff.external=",
         "-C", str(root), *args,
     ] if git_executable else [])
 

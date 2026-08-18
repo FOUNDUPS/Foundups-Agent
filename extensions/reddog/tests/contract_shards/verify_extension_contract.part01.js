@@ -27,6 +27,9 @@ const orchestrationPromptRoutesJs = fs.readFileSync(
 const governedGitContextJs = fs.readFileSync(
   path.join(extDir, 'governed_git_context.js'), 'utf8'
 );
+const governedGitReadinessJs = fs.readFileSync(
+  path.join(extDir, 'governed_git_readiness.js'), 'utf8'
+);
 const orchestrationPromptTrace = require(path.join(extDir, 'orchestration_prompt_trace.js'));
 const workerPromptContractJs = fs.readFileSync(
   path.join(extDir, 'worker_prompt_contract.js'), 'utf8'
@@ -252,8 +255,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.100', 'package version must be 0.4.100');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.100'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.101', 'package version must be 0.4.101');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.101'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -395,6 +398,3 @@ assert(!secretProgress.text.includes('sk-or-v1-'), 'progress UI must redact secr
 assert.strictEqual(secretProgress.model, undefined, 'progress UI must drop secret-like metadata');
 assert.strictEqual(fusionProgress.buildProgressMessage('lead_start', 'attacker-controlled text', {}).text, 'Lead request started.', 'known stages must use canonical UI text');
 includes(extensionJs, 'Stopped before OpenRouter. Nothing left the machine.', 'redaction operator message missing');
-assert(!extensionJs.includes("command: 'status', stage"), 'status must not carry stage field');
-includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
-includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');

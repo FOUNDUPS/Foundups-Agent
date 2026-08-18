@@ -1,5 +1,22 @@
 # HoloIndex Development Roadmap
 
+## [2026-08-16] Explicit-Module Tier-0 Retrieval Hardening
+
+R4 removes the verifier-found WSP 62 self-exemption: vector collection search
+is extracted to bounded helpers, `search_engine.py` is 1,368 lines (<1,500),
+and `_search_collection` is 9 lines (<=50). No exemption was added.
+
+**Complete in this slice:** explicit, uniquely evidenced module queries reuse
+the shared bundle Tier-0 contract and make zero-to-two exact generation-bound
+docs lookups for root README/INTERFACE. Full explicit paths take precedence;
+docs-only queries can resolve from initial docs metadata. Exact rows carry
+non-vector provenance, strict-owner mode requires both, interactive failure
+warns and degrades, and ambiguous queries retain prior ranking.
+
+**Deferred:** live owner acceptance requires the candidate to be committed and
+published into a new exact-SHA generation. No resident service restart or
+query-time reindex belongs to this slice.
+
 ## [2026-07-26] Exact-SHA Post-Merge Authority Coordination
 
 **Complete in this slice:** separate authority-update and SSD-maintenance

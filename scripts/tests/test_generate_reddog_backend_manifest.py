@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -70,6 +72,33 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
         "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py"
         in runtime
     )
+
+
+def test_newly_tracked_imported_runtime_dependency_cannot_be_omitted() -> None:
+    importer_relative = "holo_index/core/search_engine.py"
+    dependency_relative = "holo_index/core/collection_injections.py"
+    importer = REPO_ROOT / importer_relative
+    dependency = REPO_ROOT / dependency_relative
+
+    tree = generator._parse_source(importer, importer_relative)
+    import_names, _ = generator._imports(tree, importer)
+    resolved = generator._resolve_local_module(
+        "holo_index.core.collection_injections"
+    )
+    generated = generator.build_manifest()
+
+    assert "holo_index.core.collection_injections" in import_names
+    assert dependency_relative in generator._tracked_file_set()
+    assert resolved == dependency
+    assert dependency_relative in generated["required_runtime_files"]
+    assert (
+        generated["required_runtime_sha256"][dependency_relative]
+        == generator._digest(dependency)
+    )
+    assert "holo_index.core.collection_search" in import_names
+    assert "holo_index/core/collection_search.py" in generated[
+        "required_runtime_sha256"
+    ]
 
 
 def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
@@ -156,7 +185,58 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "8adb4037af3f187d7f44d40f1f5b84ea182a07999c5a14c00047fcc797612f61"
+    assert digest == "f05d91f3e9714c5c4ec6e58bbee62f6b7ee6d0cc49ad8cf104c09bdd29c8ec49"
     constants = (REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js").read_text(encoding="utf-8")
     match = re.search(r"EXPECTED_MANIFEST_SHA256 = '([a-f0-9]{64})'", constants)
     assert match is not None and match.group(1) == digest
+
+
+def _index_blob(relative: str) -> bytes:
+    return subprocess.check_output(
+        ["git", "show", f":{relative}"], cwd=REPO_ROOT
+    )
+
+
+def _index_blobs(relatives: list[str]) -> dict[str, bytes]:
+    process = subprocess.Popen(
+        ["git", "cat-file", "--batch"], cwd=REPO_ROOT,
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+    )
+    request = b"".join(f":{relative}\n".encode("utf-8") for relative in relatives)
+    output, _ = process.communicate(request)
+    assert process.returncode == 0
+    blobs = {}
+    offset = 0
+    for relative in relatives:
+        header_end = output.index(b"\n", offset)
+        header = output[offset:header_end].decode("ascii").split()
+        assert len(header) == 3 and header[1] == "blob"
+        size = int(header[2])
+        start = header_end + 1
+        blobs[relative] = output[start:start + size]
+        offset = start + size + 1
+    assert offset == len(output)
+    return blobs
+
+
+def test_staged_index_manifest_is_self_consistent() -> None:
+    """Prove promotion closure from index blobs, independent of the worktree."""
+    manifest_relative = "scripts/reddog_backend_manifest.json"
+    manifest = json.loads(_index_blob(manifest_relative).decode("utf-8"))
+    staged = subprocess.check_output(
+        ["git", "ls-files", "-z"], cwd=REPO_ROOT
+    ).decode("utf-8").split("\0")
+    tracked = {path for path in staged if path}
+    required = manifest["required_runtime_sha256"]
+
+    assert set(required).issubset(tracked)
+    assert "holo_index/core/collection_search.py" in required
+    blobs = _index_blobs(list(required))
+    for relative, expected in required.items():
+        normalized = blobs[relative].replace(b"\r\n", b"\n")
+        assert hashlib.sha256(normalized).hexdigest() == expected
+    digest = generator.canonical_manifest_digest(manifest)
+    constants = _index_blob(
+        "extensions/reddog/backend_compatibility_constants.js"
+    ).decode("utf-8")
+    assert f"EXPECTED_MANIFEST_SHA256 = '{digest}'" in constants

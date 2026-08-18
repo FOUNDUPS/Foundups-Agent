@@ -11,6 +11,49 @@
 - Validated Windows Git-root command routing, real WSP_00 hook execution, all
   four wire protocols, 34 focused tests, and 96% branch-aware coverage.
 
+## [2026-08-16] RedDog R4 verifier correction
+
+- Closed the governed Git snapshot TOCTOU release window with matching start
+  and forced final receipts and adversarial three-phase mutation coverage.
+- Preserved that fail-closed boundary while batching the four FoundUp authority
+  reads under one start/final receipt pair. Repeated target extraction improved
+  from 5.07-5.30 seconds to 1.73-1.93 seconds; the clean exhaustive contract
+  passed in 289.65 seconds under the unchanged 420-second ceiling.
+- Removed the HoloIndex Tier-0 WSP 62 self-exemption by extracting bounded
+  collection-search orchestration; engine 1,368 lines, wrapper 9 lines.
+- Preserved version 0.4.101 and the no-build/no-publish/no-execution boundary.
+
+## [2026-08-16] Tier-0 / Governed Git R2 Falsification
+
+**WSP Protocol**: WSP 00, 05, 06, 15, 22, 34, 50, 60, 62, 76, 77, 84, 87, 97, 108
+
+- Reproduced all fresh verifier RED findings before repair; the earlier green
+  suites lacked the duplicate-vector, cache-hardlink, Git-control, zero-limit,
+  exact-size, and immutable-ownership adversaries.
+- Closed those contracts with exact Tier-0 replacement, bounded extraction,
+  zero-limit/case/warning fixes, metadata-bound Git storage/control validation,
+  conditional exact ownership admission, and one-session Git projections.
+- Regenerated the authenticated 1,334-file runtime closure without changing
+  the unpublished 0.4.101 package identity or exercising commit, push, reindex,
+  service restart, VSIX publication, or merge authority.
+
+## [2026-08-16] HoloIndex Tier-0 / RedDog Grounding Reconciliation
+
+**WSP Protocol**: WSP 00, 05, 06, 15, 22, 34, 50, 60, 62, 76, 77, 84, 87, 97, 108
+
+- Added bounded, exact module-root README/INTERFACE retrieval with explicit
+  non-vector provenance, strict pair completeness, and truthful non-strict
+  warning behavior across HoloIndex and its owner response.
+- Regenerated the authenticated RedDog backend closure at extension 0.4.101
+  and hardened governed Git ownership admission to one canonical,
+  command-scoped `safe.directory` with explicit readiness evidence.
+- Preserved required WSP_97 audit evidence ahead of ordinary bounded evidence,
+  split the Git readiness boundary to satisfy WSP_62, and added adversarial
+  confinement, schema, resource-bound, and regression coverage.
+- No index publication, service restart, worker dispatch, repository-write,
+  merge, commit, push, or release authority was exercised.
+>>>>>>> 8a77f0574 (fix(reddog): harden governed Holo and Git context)
+
 ## [2026-07-25] Deterministic Codex Tooling Projection
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 97

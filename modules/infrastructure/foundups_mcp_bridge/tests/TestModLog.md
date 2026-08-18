@@ -17,6 +17,32 @@
   - Duplicate start protection and idempotent stop verified.
 - Test results: **11 passed in 11.81s** (100% pass rate).
 
+## [2026-08-16] Maintenance failure diagnostic hardening
+
+- Proved in-memory stdout capture bounds memory consumption at 16 KiB, discards
+  trailing bytes deterministically, and surfaces only allowlisted maintenance
+  errors.
+- Proved malformed, non-JSON, and non-allowlisted child outputs fail closed to
+  the generic refresh failure contract.
+- Proved cooperative process trees receive SIGTERM/SIGKILL on timeout and the
+  reader thread joins cleanly.
+- Added comprehensive unit tests in `test_holo_query_service_edges.py`.
+
+## [2026-08-16] Zero-limit falsification
+
+- Reproduced `flatten_hits(..., 0)` returning one item and pinned the repaired
+  empty-result contract alongside positive-limit and Tier-0 ordering tests.
+
+## [2026-08-16] Tier-0 owner-result reservation
+
+- Proved explicit unique module queries reserve root README then INTERFACE at
+  K=1/K=2 while larger K retains score-ranked implementation evidence.
+- Proved nested test README is not substituted and no-module queries retain
+  prior global score order.
+- Revalidated owner semantic proof, service edges, supervisor/query boundary,
+  transport, receipt binding, and adjacent RedDog/OpenClaw closures: 165
+  owner tests passed with 1 optional skip; 82 adjacent tests passed.
+
 ## [2026-08-15] Owner-response repository path projection
 
 - Proved typed semantic buckets become repository-relative before flattened,

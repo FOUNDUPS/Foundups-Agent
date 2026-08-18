@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1516,
+  "total_tests": 1519,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -783,6 +783,21 @@
       "description": "Tests for deterministic HoloIndex CLI collection selection."
     },
     {
+      "id": "test::holo_index::tests::test_cli_maintenance_output",
+      "path": "holo_index/tests/test_cli_maintenance_output.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Trusted maintenance child output isolation regressions."
+    },
+    {
       "id": "test::holo_index::tests::test_codeindex_monitor",
       "path": "holo_index/tests/test_codeindex_monitor.py",
       "owner": "holo_index",
@@ -880,7 +895,7 @@
       "path": "holo_index/tests/test_confidence_scoring.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-01",
+      "shard_id": "holo-index-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1361,7 +1376,7 @@
       "path": "holo_index/tests/test_holoindex_query_admission.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-02",
+      "shard_id": "holo-index-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1846,7 +1861,7 @@
       "path": "holo_index/tests/test_simple.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -1868,6 +1883,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Slice-ID metadata precedence \u2014 search-time ranking quality tests.\n\nSlice: HOLOINDEX_T1_RANKING_QUALITY_PHASE1\nWorker: W7\n\nThe rule under test is generic:\n\n    When a query carries a literal slice-ID token AND a document's\n    ``meta_slice_id`` is exactly that token, the document outranks any\n    other document on the same query \u2014 including a sibling that benefits\n    from the Trade module path / alias boosts \u2014 purely by composition of\n    keyword-score boosts (no reindex, no Chroma writes).\n\nThe"
+    },
+    {
+      "id": "test::holo_index::tests::test_tier0_retrieval_hardening",
+      "path": "holo_index/tests/test_tier0_retrieval_hardening.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-04",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Generic module Tier-0 retrieval hardening regressions.\n\nSlice: HOLOINDEX_TIER0_RETRIEVAL_HARDENING_PHASE1\n\nAll collection behavior is deterministic and in-memory. No persistent store,\nmodel, network, reindex, or filesystem mutation is used."
     },
     {
       "id": "test::holo_index::tests::test_tq_corpus_freeze",
@@ -15581,6 +15609,21 @@
       "description": "Main-preflight integration tests for RedDog's private HoloIndex owner."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_maintenance_diagnostics",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial tests for bounded RedDog maintenance child diagnostics."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_maintenance_handshake",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_handshake.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
@@ -20959,7 +21002,9 @@
       "owner": "scripts",
       "suite_class": "unit",
       "shard_id": "scripts-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

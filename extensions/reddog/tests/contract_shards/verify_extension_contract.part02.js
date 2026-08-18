@@ -1,6 +1,9 @@
+assert(!extensionJs.includes("command: 'status', stage"), 'status must not carry stage field');
+includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
+includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.100', 'README version mismatch');
+includes(readme, 'Version: 0.4.101', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -394,5 +397,3 @@ const rddHostPrompt = 'Complete a deep dive into the FoundUps-Agent repository, 
   + 'implemented versus missing behavior, and apply WSP_15 to the recommended next work.';
 assert.strictEqual(orchestrator.isRepoDeepDiveRequest(rddPrompt), true, 'RDD-001: broad repository deep dive detected');
 const rddAttentionPrompt = 'look at the codebase what needs attention?';
-assert.strictEqual(orchestrator.isRepoDeepDiveRequest(rddAttentionPrompt), true,
-  'RDD-001A: generic codebase-attention request is a repository deep dive');

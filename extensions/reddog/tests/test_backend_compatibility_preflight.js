@@ -312,6 +312,9 @@ for (const relativePath of [
   'orchestration_prompt_trace.js',
   'orchestration_prompt_routes.js',
   'governed_git_context.js',
+  'governed_git_projection.js',
+  'governed_git_readiness.js',
+  'governed_git_storage.js',
   'worker_prompt_contract.js',
   'target_read_path_policy.js'
 ]) {

@@ -29,6 +29,7 @@ _VALUE_RULE_IDS = frozenset({
     "finite_number", "finite_number_0_1", "positive_integer",
     "nonnegative_integer", "percent_string_0_100", "boolean",
     "collection_backend", "embedding_fingerprint", "string", "string_or_null",
+    "percent_string_0_100_or_null", "exact_metadata_provenance",
 })
 
 
@@ -60,6 +61,9 @@ def _validate_bucket(value: Any, families: Sequence[tuple[frozenset[str], frozen
 def _validate_hit_values(item: Mapping[str, Any]) -> None:
     for key, value in item.items():
         _validate_value(_HIT_RULES.get(key, _HIT_RULES["default"]), value)
+    exact_metadata = item.get("retrieval_provenance") == "exact_metadata"
+    if (item.get("similarity") is None) != exact_metadata:
+        _reject()
 
 
 def _validate_metadata(value: Any, expected_query: str) -> Mapping[str, Any]:
@@ -99,6 +103,12 @@ def _validate_value(rule: str, value: Any) -> None:
         if not isinstance(value, str) or not re.fullmatch(r"[0-9]+(?:\.[0-9]+)?%", value):
             _reject()
         if not 0.0 <= float(value[:-1]) <= 100.0:
+            _reject()
+    elif rule == "percent_string_0_100_or_null":
+        if value is not None:
+            _validate_value("percent_string_0_100", value)
+    elif rule == "exact_metadata_provenance":
+        if value != "exact_metadata":
             _reject()
     elif rule == "boolean":
         if not isinstance(value, bool):

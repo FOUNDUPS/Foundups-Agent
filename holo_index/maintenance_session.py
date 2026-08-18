@@ -576,6 +576,16 @@ class MaintenanceSession:
                 "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_MISMATCH",
                 f"collections={snapshot_failures}",
             )
+        publication_head = _clean_repository_head(
+            self.repo_root,
+            self._repository_state_reader,
+            require_head=False,
+        )
+        if publication_head != self.starting_head_sha:
+            raise MaintenanceSessionError(
+                "HOLOINDEX_REPOSITORY_HEAD_CHANGED",
+                f"expected={self.starting_head_sha}; actual={publication_head}",
+            )
         _write_completed_receipt(self, receipt)
         return receipt
 

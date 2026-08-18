@@ -1,5 +1,133 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-16 - Maintenance backend closure refresh
+
+- Revalidated canonical manifest generation, digest pinning, runtime closure,
+  and extension compatibility constant: **5 passed**. No VSIX was built or
+  published.
+
+## 2026-08-16 - R7 path identity and exact WSP_62 containment
+
+- RED: a real Windows index with `Foo.txt`/`foo.txt` minted one READY receipt,
+  counted two paths, and projected the same NTFS file twice. Added Windows-case,
+  ignored-case, ignored-directory-prefix, separator, NFC, canonical-full-path,
+  hardlink, ignored-junction, and Linux case-sensitive regressions.
+- RED: the direct Fusion WSP_62 contract measured HEAD 8,425, candidate 8,429,
+  and hard ceiling 8,428, then failed. `extension.js` now measures exactly 8,425
+  without a ceiling/exemption change; the direct contract passes.
+- Full Git hardening passes in 37.5 seconds; backend/WSP_62 preflight passes in
+  36.9 seconds. The direct Fusion contract is listed as a separate required
+  release companion because it is not in the exhaustive shards. The exact
+  clean, uninstrumented exhaustive contract passes in 297.6 seconds under the
+  unchanged 420-second ceiling; author candidate remains `NEEDS_VERIFICATION`.
+
+## 2026-08-16 - R6 instance isolation and absolute-last-read regressions
+
+- RED: A allow-policy API changed from one path to zero after B deny-policy
+  construction. RED: third-capture control mutation still minted a receipt.
+- Added both policy orders, third/interleaved instances, mutable option object,
+  failed/throwing construction, stable default canonical output equivalence,
+  per-instance receipt counts, and cross-repo root-digest isolation.
+- Added third-capture control mutation plus runtime call-order instrumentation:
+  exactly three receipt starts and no worktree lstat, numeric file capture, or
+  Git command after the final proof begins.
+- Focused hardening **PASS** in 32.8 seconds; backend/WSP_62 preflight **PASS**
+  in 36.8 seconds. The exact clean, uninstrumented exhaustive contract passes
+  in 290.9 seconds under the unchanged 420-second ceiling; the author candidate
+  remains `NEEDS_VERIFICATION` pending independent verification.
+
+## 2026-08-16 - R5 named batch, projection receipt, ignored viability, and K guard
+
+- REDs proved partial batch disclosure, accepted raw `-c` argv, released stale
+  captured worktree bytes, 1,674-entry canonical ignored rejection, and model/
+  collection calls for limits zero and negative.
+- Added exact named-operation validation and whole-batch failure for unknown,
+  duplicate, object, option-shaped, oversized, per-command failure, storage
+  mutation, and caller-array mutation cases.
+- Added stable-read mutation, ignored non-read/non-return, forced ignored-path
+  collision, ignored-junction non-traversal, second-enumeration new/removed/
+  renamed/index mutation, receipt-field, and canonical snapshot proofs. The
+  expanded focused Git hardening suite passes in 25.2 seconds.
+- Added direct `limit=0/-1` backend-untouchable cases; Tier-0 focused suite is
+  **29 passed**. Manifest generator is **5 passed** and check reports 1,336
+  runtime files at digest `932c35752db3f99a84ca31ee3d90eb2508f8ccac0193ab67d208b8357364cb81`.
+- Shard structure is rebound at 18 shards, 6,944 lines, 1,230 assertions.
+  WSP_62 split the runtime into 255-line context and 216-line projection
+  modules; exact <=400-file/<=30-function gates pass. The maximum-bound
+  500-changed/5,000-ignored fixture passed in 5.340 seconds; its named batch
+  completed in 589 ms.
+  Final expanded exhaustive execution is **PASS** in 303.7 seconds under the 420-second
+  ceiling; the author candidate remains `NEEDS_VERIFICATION`.
+
+## 2026-08-16 - Governed Git snapshot TOCTOU regressions
+
+- Added adversarial `.git/HEAD` and config hardlink mutations plus an
+  `info/exclude` mutation at three distinct snapshot phases.
+- Pinned whole-snapshot failure with the truthful
+  `Git storage changed during snapshot` reason.
+- Retained exact command-scoped `safe.directory` and sanitized Git environment
+  assertions. Focused hardening suite passes.
+- Added a bounded multi-command receipt regression: mutation after the first
+  command invalidates every result at the forced-uncached final gate.
+- Isolated repeated FoundUp authority contexts as the exhaustive-suite long
+  pole. Four independent commands previously caused eight full Git-storage
+  traversals; the batched path retains two receipts and removes six traversals.
+- Clean exhaustive result: **PASS**, 18 shards, 6,944 source lines, 1,229
+  assertions, 289.65 seconds under the unchanged 420-second ceiling.
+
+## 2026-08-16 - R3 manifest-closure author correction (0.4.101)
+
+- RED: `git ls-files --error-unmatch` rejected
+  `holo_index/core/collection_injections.py` while tracked
+  `search_engine.py` imported it, and the checked-in manifest omitted it.
+- Added a generator regression proving the tracked relative import resolves
+  into `required_runtime_files` with its exact normalized SHA-256.
+- Canonical generation now reports 1,335 runtime files and digest
+  `4e173152775ebff0d58dd421b9de14446d0c6f05ad509c12c30afe3be7cde796`.
+- This corrects the R2 author handoff; final evidence remains author-only and
+  the candidate remains `NEEDS_VERIFICATION`.
+- Validation: generator **4 passed**; focused Tier-0/MCP **86 passed**;
+  canonical manifest check and backend compatibility/preflight PASS; exact
+  WSP_62 measurements PASS; staged and unstaged diff checks PASS.
+- Exhaustive was not rerun because R3 changed no shard/reconstructed extension
+  source and the exhaustive runner does not reference this manifest edge. The
+  direct generator, manifest, backend-preflight, and Python behavior gates are
+  the WSP_97 equivalent evidence for this correction.
+
+## 2026-08-16 - R2 verifier reconciliation (0.4.101)
+
+- Added temp-only adversarial coverage for cached loose-object hardlinks,
+  graft/shallow/info attributes/info exclude/config/config.worktree controls,
+  owned-repo override disclosure, and fixed-command execution guards.
+- Re-bound the exhaustive contract at 18 shards, 6,944 source lines, and 1,229
+  assertions; the new Git hardening suite executes inside the final shard.
+- `vsce ls --tree` includes readiness, storage, and hardening-test files.
+- Measured metadata fingerprint and one-session snapshot costs; retained the
+  20,000-entry fail-closed cap. Results are author evidence pending independent
+  verification.
+- Final exhaustive result: PASS in 370.4 seconds under the 420-second release
+  ceiling, including repair-evidence, judgment-verifier, and governed-Git
+  hardening end-to-end contracts.
+
+## 2026-08-16 - Module Tier-0 retrieval compatibility pin (0.4.101)
+
+- Updated package, runtime-build, backend-manifest, and sharded exhaustive
+  contract identities for the authenticated Tier-0 retrieval closure.
+- Added GGSD-001..008 adversarial contracts for canonical-root confinement,
+  traversal/control/symlink-reparse rejection, option-shaped paths, exact
+  per-command scope, ownership-readiness disclosure, no wildcard, and no
+  config writes.
+- Added `governed_git_readiness.js` to the WSP_62 preflight surface and proved
+  package enumeration includes it; the split modules are 367/131 lines and
+  every scanned function remains within 30 lines.
+- Retained the runtime WSP_97 excerpt survival and marker-neutralization gates
+  after moving the excerpt ahead of ordinary bounded evidence.
+- Retained backend integrity, exact source reconstruction, and no-authority
+  regressions.
+- Final exhaustive result: 18 shards, 6,943 source lines, 1,229 assertions,
+  PASS in 283.4 seconds. This remains a serial release/CI gate, not a fast
+  per-query validation path.
+
 ## 2026-08-15 - Holo owner path projection pin (0.4.100)
 
 - Updated version and backend-manifest assertions for repository-relative
