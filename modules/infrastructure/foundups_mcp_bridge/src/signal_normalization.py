@@ -91,9 +91,9 @@ def get_overseer_summary(repo_root: Path) -> Dict[str, Any]:
         status_data = _get_data(status)
         summary["system_posture"] = _determine_system_posture(status_data)
 
-        if status_data.get("wsp_audit_status"):
+        if isinstance(status_data.get("wsp_audit_status"), dict):
             audit = status_data["wsp_audit_status"]
-            if audit.get("drift_count", 0) > 0:
+            if isinstance(audit, dict) and audit.get("drift_count", 0) > 0:
                 summary["top_concerns"].append({
                     "type": "drift_risk",
                     "summary": f"WSP drift detected: {audit['drift_count']} issues",
@@ -181,7 +181,7 @@ def _determine_system_posture(status_data: Dict) -> str:
     if not status_data.get("available"):
         return "degraded"
 
-    audit = status_data.get("wsp_audit_status", {})
+    audit = status_data.get("wsp_audit_status") or {}
     if audit.get("severity") == "critical":
         return "critical"
     if audit.get("drift_count", 0) > 5:
@@ -434,7 +434,7 @@ def get_repeated_failures(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
     if holo_failures.get("status") == "ok":
         sources_used.append("holo_failure_memory")
         confidence += 0.1
-        for f in holo__get_data(failures).get("failures", []):
+        for f in _get_data(holo_failures).get("failures", []):
             # Normalize to common shape
             all_failures.append({
                 "type": f.get("source", "holo"),
@@ -593,8 +593,8 @@ def get_active_risks(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
         sources_used.append("overseer_status")
         confidence += 0.1
 
-        audit = _get_data(status).get("wsp_audit_status", {})
-        if audit.get("drift_count", 0) > 0:
+        audit = _get_data(status).get("wsp_audit_status") or {}
+        if isinstance(audit, dict) and audit.get("drift_count", 0) > 0:
             risks.append({
                 "risk_type": "drift_risk",
                 "scope": "WSP framework",
@@ -714,8 +714,8 @@ def get_recommended_focus(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
             repo_root, target_type="module", target=module
         )
         if impact.get("status") == "ok":
-            coverage = _get_data(impact).get("test_coverage", {})
-            gaps = coverage.get("gaps", [])
+            coverage = _get_data(impact).get("test_coverage") or {}
+            gaps = coverage.get("gaps") or [] if isinstance(coverage, dict) else []
             if gaps:
                 sources_used.append("test_coverage")
                 focus_items.append({
