@@ -44,6 +44,7 @@ from . import diff_tools
 from . import impact_scoring
 from . import holo_tools
 from . import signal_normalization
+from . import reddog_tools
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +122,10 @@ class FoundUpsMCPBridge:
         self._tools["get_active_risks"] = self._wrap(signal_normalization.get_active_risks)
         self._tools["get_recommended_focus"] = self._wrap(signal_normalization.get_recommended_focus)
         self._tools["get_prompt_context_packet"] = self._wrap(signal_normalization.get_prompt_context_packet)
+
+        # RedDog & Fusion perception tools
+        self._tools["get_reddog_state"] = self._wrap(reddog_tools.get_reddog_state)
+        self._tools["reddog_analyze"] = self._wrap(reddog_tools.reddog_analyze)
 
         # Execution stubs (disabled in v1)
         self._tools["coordinate_mission"] = execution_stubs.coordinate_mission

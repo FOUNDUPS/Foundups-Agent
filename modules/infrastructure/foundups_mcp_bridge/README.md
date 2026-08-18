@@ -96,6 +96,33 @@ The bridge allows 0102 (ChatGPT) to:
 
 ## Usage
 
+### FastMCP SSE Remote Server (ChatGPT Connector)
+
+The bridge can be exposed as a standard Model Context Protocol (MCP) server over SSE (Server-Sent Events) on port 8128 (configurable via `FOUNDUPS_MCP_PORT`).
+
+#### Starting the Server Standalone
+```powershell
+python -m modules.infrastructure.foundups_mcp_bridge.scripts.launch
+```
+
+#### Starting via main.py DAE Broker
+When `python main.py` is started, `mcp_bridge_sse` is automatically registered as a launchable DAE spec in the broker. It starts by default unless disabled with `FOUNDUPS_MCP_AUTOSTART=0`.
+
+#### Exposing to ChatGPT via Secure Tunnel (e.g. ngrok)
+1. Start the server (default port `8128`).
+2. Expose the port via a secure tunnel:
+   ```bash
+   ngrok http 8128
+   ```
+3. In ChatGPT Web:
+   - Navigate to **Settings → Connectors → Advanced**.
+   - Enable **Developer Mode**.
+   - Click **Create Connector**.
+   - Set Name to `FoundUps MCP Bridge`.
+   - Set Server URL to `https://<your-ngrok-subdomain>.ngrok-free.app/sse`.
+   - Click **Create**.
+4. In a new ChatGPT conversation, select the **FoundUps MCP Bridge** app to gain access to all 37 perception and read tools.
+
 ### Private HoloIndex Query Owner
 
 The RedDog operational consumers migrated in this POC use this module's owner

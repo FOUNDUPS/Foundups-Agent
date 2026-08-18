@@ -1,5 +1,15 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-18] FastMCP SSE Server & Launch Lifecycle Verification
+
+- Added `test_mcp_server_sse.py` verifying:
+  - All 37 bridge tools registered on FastMCP.
+  - Parameter signatures and annotations dynamically strip `repo_root`.
+  - Tool execution through FastMCP returns valid perception results.
+  - Disabled stubs return expected `disabled_in_v1` status.
+  - `launch.py` lifecycle and status queries return structured state.
+- Test results: **5 passed in 2.38s**.
+
 ## [2026-08-15] Owner-response repository path projection
 
 - Proved typed semantic buckets become repository-relative before flattened,

@@ -16,6 +16,22 @@ canonical search-result fields, scalar hit values, known collection/backend
 mappings, and digest-shaped embedding fingerprints.
 Unknown or nested evidence fields reject the complete response.
 
+`flatten_hits(result, limit, query=...)` returns no hits when `limit <= 0`.
+For a positive limit and one explicit module, it reserves exact module-root
+README/INTERFACE evidence before filling remaining slots by global score.
+
+### `build_mcp_server(repo_root: Optional[Path] = None, server_name: str = "FoundUps MCP Bridge") -> FastMCP`
+
+Builds and returns a configured FastMCP server instance wrapping all 37 perception and read tools from `FoundUpsMCPBridge`. Strips the `repo_root` parameter from tool signatures and exposes standard MCP JSON schemas.
+
+### `run_mcp_bridge_sse(host: Optional[str] = None, port: Optional[int] = None, repo_root: Optional[Path] = None, blocking: bool = True) -> Dict[str, Any]`
+
+Launches the FastMCP SSE server on `http://<host>:<port>/sse`. Supports in-process ASGI execution if `fastmcp` is available, or fallback subprocess execution via `foundups-mcp-env`.
+
+### `stop_mcp_bridge_sse() -> Dict[str, Any]`
+
+Requests graceful shutdown of the broker-managed MCP Bridge SSE server.
+
 ### FoundUpsMCPBridge
 
 Main bridge class for MCP tool access.
