@@ -16,6 +16,22 @@ canonical search-result fields, scalar hit values, known collection/backend
 mappings, and digest-shaped embedding fingerprints.
 Unknown or nested evidence fields reject the complete response.
 
+`flatten_hits(result, limit, query=...)` returns no hits when `limit <= 0`.
+For a positive limit and one explicit module, it reserves exact module-root
+README/INTERFACE evidence before filling remaining slots by global score.
+
+### `build_mcp_server(repo_root: Optional[Path] = None, server_name: str = "FoundUps MCP Bridge") -> FastMCP`
+
+Builds and returns a configured FastMCP server instance wrapping all 33 perception and read tools from `FoundUpsMCPBridge`. Strips the `repo_root` parameter from tool signatures and exposes standard MCP JSON schemas.
+
+### `run_mcp_bridge_sse(host: Optional[str] = None, port: Optional[int] = None, repo_root: Optional[Path] = None, blocking: bool = True) -> Dict[str, Any]`
+
+Launches the FastMCP SSE server on `http://<host>:<port>/sse`. Supports in-process ASGI execution if `fastmcp` is available, or fallback subprocess execution via `foundups-mcp-env`.
+
+### `stop_mcp_bridge_sse() -> Dict[str, Any]`
+
+Requests graceful shutdown of the broker-managed MCP Bridge SSE server.
+
 ### FoundUpsMCPBridge
 
 Main bridge class for MCP tool access.
@@ -928,6 +944,107 @@ Assemble compressed context for Windsurf prompt.
 **Use case:** Auto-prepare state for next Windsurf prompt. Answers: what should I worry about? what is unstable? what should I load first?
 
 ---
+
+
+### RedDog Context Tools (v1.5)
+
+#### `get_reddog_state()`
+
+Retrieve current RedDog external state snapshot including active worker lanes, open research threads, recent slice lineage, and live Git HEAD commit/branch.
+
+**Returns:**
+```python
+{
+    "status": "ok",
+    "data": {
+        "git": {"commit": str, "branch": str},
+        "state_dir_exists": bool,
+        "active_context_summary": str,
+        "active_research_threads": str,
+        "work_to_work_lineage": str,
+    },
+    "meta": {"source": "reddog"}
+}
+```
+
+#### `get_reddog_analysis_context(prompt, target_module=None)`
+
+Assemble grounded RedDog contextual evidence packet for 0102 analysis (read-only context assembly).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| prompt | str | - | Task or problem statement to assemble context for |
+| target_module | str | None | Optional module name to scope documentation |
+
+**Returns:**
+```python
+{
+    "status": "ok",
+    "data": {
+        "prompt": str,
+        "target_module": str | None,
+        "git_state": {"commit": str, "branch": str},
+        "system_posture": str,
+        "active_context": str,
+        "module_doc_snippet": str | None,
+    },
+    "meta": {"source": "reddog_context", "prompt": str}
+}
+```
+
+---
+
+### FastMCP Remote SSE Server (v1.5)
+
+Exposes strictly allowlisted perception tools over SSE transport with fail-closed Bearer authentication and truthful protocol readiness canary.
+
+```python
+from modules.infrastructure.foundups_mcp_bridge.src.mcp_server import (
+    REMOTE_READ_ONLY_ALLOWLIST,
+    build_mcp_server,
+    build_asgi_app,
+)
+from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
+    run_mcp_bridge_sse,
+    stop_mcp_bridge_sse,
+    get_mcp_bridge_status,
+    verify_mcp_readiness,
+)
+```
+
+#### Functions & API
+
+##### `build_mcp_server(repo_root: Optional[Path] = None) -> FastMCP`
+Builds FastMCP server instance registering only tools from `REMOTE_READ_ONLY_ALLOWLIST` (33 pure read-only perception tools). Strips internal `repo_root` parameter from tool signatures to produce standard MCP JSON Schemas.
+
+##### `build_asgi_app(repo_root: Optional[Path] = None, auth_token: Optional[str] = None, require_auth: bool = True) -> Any`
+Builds Starlette ASGI application for FastMCP SSE server wrapped with `AuthMiddleware`.
+- Fails closed: raises `ValueError` if `require_auth=True` and `auth_token` is empty.
+- Public `/health` probe returns 200 with service and auth status.
+- Protected `/sse` and `/message/` endpoints strictly require `Authorization: Bearer <token>` header (`?token=` URL query param is rejected).
+
+##### `run_mcp_bridge_sse(host: Optional[str] = None, port: Optional[int] = None, auth_token: Optional[str] = None, require_auth: Optional[bool] = None, repo_root: Optional[Path] = None, blocking: bool = True) -> Dict[str, Any]`
+Runs FoundUps MCP SSE Server with instance locking and protocol-level readiness canary.
+- Invariant: `instance lock held <=> process owns live MCP server`. Fails closed if lock cannot be acquired.
+- Multi-mode execution: in-process if FastMCP is available; fallback subprocess via `foundups-mcp-env`.
+- Secret leak prevention: passes `auth_token` via environment variable only (never argv or process logs).
+- Truthful readiness: calls `verify_mcp_readiness()` before returning `{"status": "running"}`.
+
+##### `stop_mcp_bridge_sse(timeout_sec: float = 5.0) -> Dict[str, Any]`
+Requests graceful, verified shutdown of active server.
+- Idempotent: returns `{"status": "already_stopped"}` if not running.
+- Termination failure propagation: if shutdown times out, lock and runtime handle are retained, returning `{"status": "error", "error": "stop_timeout_still_running"}`.
+
+##### `get_mcp_bridge_status() -> Dict[str, Any]`
+Returns current truthful runtime status of the active MCP SSE server.
+
+##### `verify_mcp_readiness(host: str, port: int, auth_token: Optional[str] = None, timeout_sec: float = 15.0) -> Dict[str, Any]`
+Performs protocol-level readiness verification over SSE transport:
+1. Connects to `/sse` stream.
+2. Performs JSON-RPC `initialize` handshake.
+3. Performs JSON-RPC `tools/list` request and verifies all required tools exist and mutation tools are absent.
+4. Performs JSON-RPC `tools/call` for `get_wsp_docs` and validates inner result payload `status == "ok"`.
+
 
 ### Execution Stubs (v1 Disabled)
 

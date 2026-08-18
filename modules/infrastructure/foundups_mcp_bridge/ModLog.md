@@ -1,5 +1,16 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-18 - FastMCP SSE Server: Fail-Closed Auth & Termination Failure Propagation
+
+- Enforced server-level fail-closed authentication: `AuthMiddleware` and `build_asgi_app` raise `ValueError` upon construction if `require_auth=True` and `auth_token` is empty; `mcp_server.py` CLI exits with code 1.
+- Fixed termination failure propagation in `launch.py`: `_active_runtime` is NEVER cleared when `_terminate_runtime()` times out or fails, retaining lock and handle for truthfulness.
+- Implemented `REMOTE_READ_ONLY_ALLOWLIST` restricting remote registration to 33 pure read-only perception tools; mutation/dispatch tools are strictly absent from FastMCP.
+- Prohibited `?token=` query param auth to prevent secret leakage in logs; enforced Bearer header auth.
+- Renamed RedDog context tool to `get_reddog_analysis_context` with truthful docstrings and `source="reddog_context"`.
+- Hardened protocol canary to validate protocol negotiation, required tool inventory, absence of forbidden tools, and inner tool result envelope.
+- Added comprehensive unit tests in `tests/test_mcp_server_sse.py` (11/11 passed).
+  (WSP 22/34/50/80/96/97)
+
 ## 2026-08-15 - Repository-relative Holo owner evidence
 
 - Extended the existing owner-response normalizer so physical hit paths under

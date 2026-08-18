@@ -196,6 +196,12 @@ from modules.infrastructure.git_push_dae.scripts.launch import (
 # Extracted to modules/infrastructure/dae_infrastructure/foundups_vision_dae/scripts/launch.py per WSP 62
 from modules.infrastructure.dae_infrastructure.foundups_vision_dae.scripts.launch import run_vision_dae
 
+# Extracted to modules/infrastructure/foundups_mcp_bridge/scripts/launch.py per WSP 62
+from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
+    run_mcp_bridge_sse,
+    stop_mcp_bridge_sse,
+)
+
 # Extracted to modules/ai_intelligence/training_system/scripts/launch.py per WSP 62
 from modules.ai_intelligence.training_system.scripts.launch import run_training_system
 
@@ -4516,6 +4522,15 @@ def bootstrap_runtime_dae_launches() -> None:
             heartbeat_interval_sec=15.0,
             description="Broker-managed PQN simulation against the theory archive.",
         ),
+        DAELaunchSpec(
+            dae_id="mcp_bridge_sse",
+            dae_name="FoundUps MCP Bridge SSE Server",
+            domain="infrastructure",
+            module_path="modules.infrastructure.foundups_mcp_bridge.scripts.launch",
+            start_callable=run_mcp_bridge_sse,
+            stop_callable=stop_mcp_bridge_sse,
+            description="FastMCP SSE remote endpoint for ChatGPT and remote agents.",
+        ),
     ])
     for spec in specs:
         broker.register_launch_spec(spec)
@@ -4537,6 +4552,14 @@ def bootstrap_runtime_dae_launches() -> None:
             result = broker.start_dae("openclaw_supervisor", actor_id="0102")
             launch_status = result.get("status", result.get("error", "unknown"))
             print(f"[OPENCLAW-SUPERVISOR] bootstrap={launch_status}")
+
+    mcp_bridge_autostart = os.getenv("FOUNDUPS_MCP_AUTOSTART", "1") != "0"
+    if mcp_bridge_autostart:
+        status = broker.get_runtime_status("mcp_bridge_sse")
+        if not status.get("running"):
+            result = broker.start_dae("mcp_bridge_sse", actor_id="0102")
+            launch_status = result.get("status", result.get("error", "unknown"))
+            print(f"[MCP-BRIDGE-SSE] bootstrap={launch_status}")
 
 
 def run_runtime_compatibility_advisory_preflight(repo_root: Path) -> bool:
