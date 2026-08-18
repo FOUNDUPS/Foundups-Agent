@@ -118,6 +118,17 @@ class TestMCPServerSSE:
         assert start_res.get("status") == "running"
         assert start_res.get("readiness", {}).get("verified") is True
 
+        # Test duplicate start protection
+        dup_res = run_mcp_bridge_sse(
+            host="127.0.0.1",
+            port=port,
+            auth_token=auth_token,
+            repo_root=repo_root,
+            blocking=False,
+        )
+        assert dup_res.get("status") == "running"
+        assert dup_res.get("already_running") is True
+
         # Test unauthenticated request to /sse -> 401
         try:
             req = urllib.request.Request(f"http://127.0.0.1:{port}/sse")
@@ -146,5 +157,8 @@ class TestMCPServerSSE:
 
         # Stop server cleanly
         stop_res = stop_mcp_bridge_sse()
-        assert stop_res.get("status") in ("stopping", "stopped")
-        time.sleep(1)
+        assert stop_res.get("status") == "stopped"
+
+        # Verify idempotency of stop
+        second_stop = stop_mcp_bridge_sse()
+        assert second_stop.get("status") == "already_stopped"

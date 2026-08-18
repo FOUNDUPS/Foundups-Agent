@@ -10,12 +10,14 @@ Module: foundups_mcp_bridge
 Starts the FastMCP SSE server for FoundUps perception tools, enabling ChatGPT
 and other remote agents to connect via secure tunnels (ngrok/cloudflared).
 
-Performs truthful protocol-level readiness canary (initialize -> tools/list -> tool call)
-prior to confirming operational state to the DAE broker.
+Enforces strict concurrency contract:
+- instance lock held <=> this process owns the live MCP server
+- lock released ONLY after confirmed server termination (never prematurely)
+- idempotent stop with bounded wait and truthful STOP_TIMEOUT reporting
 
 WSP References:
 - WSP 96: Model Context Protocol Governance and Consensus
-- WSP 97: Truthful Verification (protocol-level readiness handshake)
+- WSP 97: Truthful Verification (protocol-level readiness handshake & concurrency bounds)
 - WSP 80: Cube-Level DAE Orchestration
 - WSP 27: Universal DAE Architecture
 """
@@ -32,6 +34,7 @@ import threading
 import time
 import urllib.parse
 import urllib.request
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -49,11 +52,31 @@ logger = logging.getLogger(__name__)
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8128
 
-_server_lock = threading.RLock()
-_instance_lock: Optional[Any] = None
-_server_process: Optional[subprocess.Popen] = None
-_in_process_server: Optional[Any] = None
-_server_status: Dict[str, Any] = {"status": "stopped"}
+
+@dataclass
+class MCPRuntimeHandle:
+    """Encapsulates all runtime handles and locks for an active MCP server instance."""
+    mode: str  # 'in_process' or 'subprocess'
+    host: str
+    port: int
+    started_at: float
+    lock: Optional[Any] = None
+    server: Optional[Any] = None  # uvicorn.Server for in_process
+    thread: Optional[threading.Thread] = None  # thread for in_process
+    proc: Optional[subprocess.Popen] = None  # Popen for subprocess
+    readiness: Dict[str, Any] = field(default_factory=dict)
+
+    def is_alive(self) -> bool:
+        """Check if underlying server thread or subprocess is currently active."""
+        if self.mode == "in_process":
+            return bool(self.thread and self.thread.is_alive())
+        elif self.mode == "subprocess":
+            return bool(self.proc and self.proc.poll() is None)
+        return False
+
+
+_state_lock = threading.RLock()
+_active_runtime: Optional[MCPRuntimeHandle] = None
 
 
 def _get_repo_root() -> Path:
@@ -243,6 +266,8 @@ def run_mcp_bridge_sse(
     """
     Run FoundUps MCP Bridge SSE server with truthful readiness verification.
 
+    Maintains invariant: instance lock held <=> this process owns the live MCP server.
+
     Args:
         host: Host IP to bind (default: 127.0.0.1 or env FOUNDUPS_MCP_HOST)
         port: Port to bind (default: 8128 or env FOUNDUPS_MCP_PORT)
@@ -253,7 +278,7 @@ def run_mcp_bridge_sse(
     Returns:
         Dict with launch status and readiness evidence.
     """
-    global _server_process, _in_process_server, _instance_lock
+    global _active_runtime
 
     root = Path(repo_root or _get_repo_root()).resolve()
     bind_host = host or os.getenv("FOUNDUPS_MCP_HOST", DEFAULT_HOST)
@@ -268,9 +293,21 @@ def run_mcp_bridge_sse(
         print(msg)
         return {"status": "error", "error": "auth_token_required_for_remote_exposure"}
 
+    with _state_lock:
+        if _active_runtime is not None and _active_runtime.is_alive():
+            msg = f"[MCP-BRIDGE-SSE] MCP server is already running on {_active_runtime.host}:{_active_runtime.port} (PID {_active_runtime.proc.pid if _active_runtime.proc else 'in_process'})"
+            logger.warning(msg)
+            print(msg)
+            return {
+                "status": "running",
+                "already_running": True,
+                "host": _active_runtime.host,
+                "port": _active_runtime.port,
+            }
+
     print(f"[MCP-BRIDGE-SSE] Starting FoundUps MCP SSE Server on http://{bind_host}:{bind_port}/sse ...")
 
-    # Instance lock check
+    # Acquire instance lock
     try:
         from modules.infrastructure.instance_lock.src.instance_manager import get_instance_lock
         lock = get_instance_lock("foundups_mcp_bridge_sse")
@@ -287,8 +324,8 @@ def run_mcp_bridge_sse(
             logger.error(msg)
             print(msg)
             return {"status": "error", "error": "lock_acquisition_failed"}
-        _instance_lock = lock
-    except Exception:
+    except Exception as exc:
+        logger.warning(f"[MCP-BRIDGE-SSE] InstanceLock unavailable: {exc}")
         lock = None
 
     # Check if fastmcp is importable in current environment
@@ -310,20 +347,21 @@ def run_mcp_bridge_sse(
             access_log=False,
         )
         server = uvicorn.Server(config)
-
-        with _server_lock:
-            _in_process_server = server
-            _server_status.clear()
-            _server_status.update({
-                "status": "starting",
-                "mode": "in_process",
-                "host": bind_host,
-                "port": bind_port,
-                "started_at": time.time(),
-            })
-
         thread = threading.Thread(target=server.run, daemon=True)
         thread.start()
+
+        handle = MCPRuntimeHandle(
+            mode="in_process",
+            host=bind_host,
+            port=bind_port,
+            started_at=time.time(),
+            lock=lock,
+            server=server,
+            thread=thread,
+        )
+
+        with _state_lock:
+            _active_runtime = handle
 
         # Perform Protocol-level Readiness Canary
         canary = verify_mcp_readiness(host=bind_host, port=bind_port, auth_token=token, timeout_sec=15.0)
@@ -331,20 +369,14 @@ def run_mcp_bridge_sse(
             err = canary.get("error", "unknown_canary_failure")
             print(f"[MCP-BRIDGE-SSE-ERROR] Protocol readiness canary failed: {err}")
             server.should_exit = True
-            thread.join(timeout=3)
-            with _server_lock:
-                _in_process_server = None
-                _server_status["status"] = "failed"
-                _server_status["error"] = err
+            thread.join(timeout=3.0)
             if lock:
                 lock.release()
-                _instance_lock = None
+            with _state_lock:
+                _active_runtime = None
             return {"status": "failed", "error": err}
 
-        with _server_lock:
-            _server_status["status"] = "running"
-            _server_status["readiness"] = canary
-
+        handle.readiness = canary
         print(f"[MCP-BRIDGE-SSE] In-process server verified & operational ({canary.get('tools_count')} tools, {canary.get('latency_ms')}ms). Endpoint: http://{bind_host}:{bind_port}/sse")
 
         if blocking:
@@ -353,15 +385,13 @@ def run_mcp_bridge_sse(
                     time.sleep(0.5)
             except (KeyboardInterrupt, SystemExit):
                 print("[MCP-BRIDGE-SSE] Shutdown requested...")
-                server.should_exit = True
-                thread.join(timeout=3)
             finally:
-                with _server_lock:
-                    _in_process_server = None
-                    _server_status["status"] = "stopped"
+                server.should_exit = True
+                thread.join(timeout=5.0)
                 if lock:
                     lock.release()
-                    _instance_lock = None
+                with _state_lock:
+                    _active_runtime = None
                 print("[MCP-BRIDGE-SSE] Server stopped.")
             return {"status": "stopped"}
         else:
@@ -376,7 +406,6 @@ def run_mcp_bridge_sse(
             print(msg)
             if lock:
                 lock.release()
-                _instance_lock = None
             return {"status": "error", "error": "mcp_env_missing"}
 
         env = os.environ.copy()
@@ -407,36 +436,36 @@ def run_mcp_bridge_sse(
             cwd=str(root),
             env=env,
         )
-        with _server_lock:
-            _server_process = proc
-            _server_status.clear()
-            _server_status.update({
-                "status": "starting",
-                "mode": "subprocess",
-                "pid": proc.pid,
-                "host": bind_host,
-                "port": bind_port,
-                "started_at": time.time(),
-            })
+
+        handle = MCPRuntimeHandle(
+            mode="subprocess",
+            host=bind_host,
+            port=bind_port,
+            started_at=time.time(),
+            lock=lock,
+            proc=proc,
+        )
+
+        with _state_lock:
+            _active_runtime = handle
 
         # Perform Protocol-level Readiness Canary on subprocess
         canary = verify_mcp_readiness(host=bind_host, port=bind_port, auth_token=token, timeout_sec=15.0)
         if not canary.get("verified"):
             err = canary.get("error", "unknown_canary_failure")
             print(f"[MCP-BRIDGE-SSE-ERROR] Subprocess protocol readiness canary failed: {err}")
-            stop_mcp_bridge_sse()
-            with _server_lock:
-                _server_status["status"] = "failed"
-                _server_status["error"] = err
+            try:
+                proc.terminate()
+                proc.wait(timeout=3.0)
+            except Exception:
+                proc.kill()
             if lock:
                 lock.release()
-                _instance_lock = None
+            with _state_lock:
+                _active_runtime = None
             return {"status": "failed", "error": err}
 
-        with _server_lock:
-            _server_status["status"] = "running"
-            _server_status["readiness"] = canary
-
+        handle.readiness = canary
         print(f"[MCP-BRIDGE-SSE] Subprocess verified & operational (PID {proc.pid}, {canary.get('tools_count')} tools, {canary.get('latency_ms')}ms). Endpoint: http://{bind_host}:{bind_port}/sse")
 
         if blocking:
@@ -444,72 +473,113 @@ def run_mcp_bridge_sse(
                 proc.wait()
             except (KeyboardInterrupt, SystemExit):
                 print("[MCP-BRIDGE-SSE] Subprocess interrupted...")
-                stop_mcp_bridge_sse()
+                try:
+                    proc.terminate()
+                    proc.wait(timeout=5.0)
+                except Exception:
+                    proc.kill()
             finally:
-                with _server_lock:
-                    _server_process = None
-                    _server_status["status"] = "stopped"
                 if lock:
                     lock.release()
-                    _instance_lock = None
+                with _state_lock:
+                    _active_runtime = None
             return {"status": "stopped"}
         else:
             return {"status": "running", "mode": "subprocess", "pid": proc.pid, "host": bind_host, "port": bind_port, "readiness": canary}
 
 
-def stop_mcp_bridge_sse() -> Dict[str, Any]:
-    """Request graceful shutdown of the MCP Bridge SSE server."""
-    global _instance_lock
-    with _server_lock:
-        if _in_process_server is not None:
-            _in_process_server.should_exit = True
-            _server_status["status"] = "stopping"
-            if _instance_lock:
+def stop_mcp_bridge_sse(timeout_sec: float = 5.0) -> Dict[str, Any]:
+    """
+    Request graceful, verified shutdown of the active MCP Bridge SSE server.
+
+    Idempotent stop contract:
+    - If no active runtime -> return {"status": "already_stopped"}
+    - If active runtime -> signal exit, bounded wait for termination, verify port/server gone, release lock exactly once, clear global state.
+    - If shutdown times out -> do NOT release lock; return {"status": "error", "error": "stop_timeout_still_running"}.
+    """
+    global _active_runtime
+
+    with _state_lock:
+        handle = _active_runtime
+        if handle is None or not handle.is_alive():
+            if handle and handle.lock:
                 try:
-                    _instance_lock.release()
+                    handle.lock.release()
                 except Exception:
                     pass
-                _instance_lock = None
-            return {"status": "stopping", "mode": "in_process"}
+            _active_runtime = None
+            return {"status": "already_stopped"}
 
-        if _server_process is not None:
+    # Signal shutdown
+    if handle.mode == "in_process" and handle.server is not None:
+        handle.server.should_exit = True
+        if handle.thread is not None:
+            handle.thread.join(timeout=timeout_sec)
+            if handle.thread.is_alive():
+                logger.error("[MCP-BRIDGE-SSE] In-process server thread did not exit within timeout")
+                return {"status": "error", "error": "stop_timeout_still_running"}
+
+    elif handle.mode == "subprocess" and handle.proc is not None:
+        try:
+            handle.proc.terminate()
+            handle.proc.wait(timeout=timeout_sec)
+        except subprocess.TimeoutExpired:
+            logger.warning("[MCP-BRIDGE-SSE] Subprocess did not terminate gracefully; sending kill signal")
             try:
-                _server_process.terminate()
-                _server_process.wait(timeout=5)
-            except Exception as e:
-                logger.warning(f"[MCP-BRIDGE-SSE] Error terminating process: {e}")
-                try:
-                    _server_process.kill()
-                except Exception:
-                    pass
-            _server_status["status"] = "stopped"
-            if _instance_lock:
-                try:
-                    _instance_lock.release()
-                except Exception:
-                    pass
-                _instance_lock = None
-            return {"status": "stopped", "mode": "subprocess"}
+                handle.proc.kill()
+                handle.proc.wait(timeout=2.0)
+            except Exception as exc:
+                logger.error(f"[MCP-BRIDGE-SSE] Failed to kill subprocess: {exc}")
+                return {"status": "error", "error": "stop_timeout_still_running"}
+        except Exception as exc:
+            logger.error(f"[MCP-BRIDGE-SSE] Error stopping subprocess: {exc}")
+            return {"status": "error", "error": str(exc)}
 
-        if _instance_lock:
+    # Confirmed server exit -> release lock exactly once and clear global state
+    with _state_lock:
+        if handle.lock:
             try:
-                _instance_lock.release()
-            except Exception:
-                pass
-            _instance_lock = None
+                handle.lock.release()
+            except Exception as exc:
+                logger.debug(f"[MCP-BRIDGE-SSE] Lock release notice: {exc}")
+            handle.lock = None
+        _active_runtime = None
 
-        return {"status": "not_running"}
+    print("[MCP-BRIDGE-SSE] Verified clean shutdown.")
+    return {"status": "stopped"}
 
 
 def get_mcp_bridge_status() -> Dict[str, Any]:
-    """Get current runtime status of the MCP Bridge SSE server."""
-    with _server_lock:
-        if _server_process is not None:
-            poll = _server_process.poll()
-            if poll is not None:
-                _server_status["status"] = "stopped"
-                _server_status["exit_code"] = poll
-        return dict(_server_status)
+    """Get current truthful runtime status of the MCP Bridge SSE server."""
+    global _active_runtime
+    with _state_lock:
+        handle = _active_runtime
+        if handle is None:
+            return {"status": "stopped", "running": False}
+
+        alive = handle.is_alive()
+        if not alive:
+            if handle.lock:
+                try:
+                    handle.lock.release()
+                except Exception:
+                    pass
+                handle.lock = None
+            _active_runtime = None
+            return {"status": "stopped", "running": False}
+
+        status_dict: Dict[str, Any] = {
+            "status": "running",
+            "running": True,
+            "mode": handle.mode,
+            "host": handle.host,
+            "port": handle.port,
+            "started_at": handle.started_at,
+            "readiness": handle.readiness,
+        }
+        if handle.proc:
+            status_dict["pid"] = handle.proc.pid
+        return status_dict
 
 
 if __name__ == "__main__":

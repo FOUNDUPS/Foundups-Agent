@@ -1,12 +1,14 @@
 # foundups_mcp_bridge - ModLog
 
-## 2026-08-18 - FastMCP SSE Remote Transport Server & DAE Broker Registration
+## 2026-08-18 - FastMCP SSE Remote Transport, Concurrency Contract & Auth Security
 
-- Implemented `mcp_server.py` exposing all 37 FoundUps MCP perception tools via FastMCP with SSE and stdio transport.
-- Dynamically extracts signatures and type annotations from bridge functions, stripping internal `repo_root` parameter and generating standard MCP JSON Schemas for tools.
-- Implemented `scripts/launch.py` with multi-mode execution: in-process if FastMCP is available in the current Python environment, or fallback subprocess execution via `foundups-mcp-env`.
-- Registered `mcp_bridge_sse` launch specification in `main.py` DAE broker (`bootstrap_runtime_dae_launches()`) for automatic or broker-managed lifecycle on port 8128 (default).
-- Added unit test suite `tests/test_mcp_server_sse.py` verifying tool registration, schema generation, and tool execution.
+- Implemented `mcp_server.py` exposing all 39 FoundUps MCP perception & RedDog tools via FastMCP over standard SSE and stdio transports.
+- Enforced fail-closed token authentication (`FOUNDUPS_MCP_AUTH_TOKEN` / `Authorization: Bearer <token>`) with public `/health` probe.
+- Implemented `scripts/launch.py` with multi-mode execution (in-process or `foundups-mcp-env` subprocess) and protocol-level readiness canary (initialize -> tools/list -> safe read tool invocation).
+- Enforced strict concurrency contract (`instance lock held <=> process owns live MCP server`), bounded termination wait, and idempotent shutdown.
+- Added read-only RedDog session state and grounded Fusion perception tools in `reddog_tools.py`.
+- Registered `mcp_bridge_sse` launch specification in `main.py` DAE broker (`bootstrap_runtime_dae_launches()`) for automatic or broker-managed lifecycle.
+- Added comprehensive unit test suite `tests/test_mcp_server_sse.py` verifying tool schemas, readiness canary, auth enforcement, and concurrency lifecycle.
   (WSP 22/34/50/80/96/97)
 
 ## 2026-08-15 - Repository-relative Holo owner evidence

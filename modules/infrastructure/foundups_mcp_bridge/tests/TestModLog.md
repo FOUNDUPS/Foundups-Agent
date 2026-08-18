@@ -1,14 +1,16 @@
 # foundups_mcp_bridge TestModLog
 
-## [2026-08-18] FastMCP SSE Server & Launch Lifecycle Verification
+## [2026-08-18] FastMCP SSE Server, Protocol Readiness Canary & Concurrency Verification
 
 - Added `test_mcp_server_sse.py` verifying:
-  - All 37 bridge tools registered on FastMCP.
+  - All 39 bridge tools registered on FastMCP.
   - Parameter signatures and annotations dynamically strip `repo_root`.
   - Tool execution through FastMCP returns valid perception results.
-  - Disabled stubs return expected `disabled_in_v1` status.
-  - `launch.py` lifecycle and status queries return structured state.
-- Test results: **5 passed in 2.38s**.
+  - Read-only `get_reddog_state` and `reddog_analyze` tools return structured context.
+  - Protocol-level readiness canary verifies initialize, tools/list, and tool call over SSE stream.
+  - Fail-closed token authentication rejects unauthenticated requests with 401 while `/health` succeeds.
+  - Duplicate start protection and idempotent stop verified.
+- Test results: **7 passed in 6.27s**.
 
 ## [2026-08-15] Owner-response repository path projection
 
