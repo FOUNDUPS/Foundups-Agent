@@ -104,18 +104,41 @@ class VerifierEvidencePacket:
 
 
 class VerifierContextFirewall:
-    """Sanitizes builder output and ensures Model B receives only neutral evidence."""
+    """
+    Verifier Context Firewall.
+
+    Architectural Invariant:
+    VerifierEvidencePacket is constructed strictly from an ALLOWLIST of observable artifacts.
+    There is no pathway from builder scratchpads, reasoning chains, or persuasive conclusions
+    to the verifier prompt.
+    """
+
+    ALLOWED_FIELDS = frozenset({
+        "pain",
+        "desired_outcome",
+        "baseline_receipt_id",
+        "candidate_diff",
+        "changed_files",
+        "before_measurements",
+        "after_measurements",
+        "required_tests",
+        "test_results",
+        "research_evidence",
+        "prior_failed_hypotheses",
+        "wsp_constraints",
+        "mutation_budget_consumed",
+    })
 
     @classmethod
-    def sanitize_text(cls, text: str) -> str:
-        """Strip builder reasoning, thoughts, and persuasive phrases."""
-        sanitized = text
+    def sanitize_field(cls, text: str) -> str:
+        """Strip any embedded persuasive formatting."""
+        sanitized = str(text)
         for pattern in _PERSUASIVE_PATTERNS:
             sanitized = pattern.sub("", sanitized)
         return sanitized.strip()
 
     @classmethod
-    def build_evidence_packet(
+    def project_evidence_packet(
         cls,
         *,
         pain: str,
@@ -123,21 +146,23 @@ class VerifierContextFirewall:
         baseline_receipt_id: str,
         candidate_diff: str,
         changed_files: Sequence[str],
-        before_measurements: Mapping[str, Any] = None,
-        after_measurements: Mapping[str, Any] = None,
+        before_measurements: Mapping[str, Any] | None = None,
+        after_measurements: Mapping[str, Any] | None = None,
         required_tests: Sequence[str] = (),
-        test_results: Mapping[str, Any] = None,
+        test_results: Mapping[str, Any] | None = None,
         research_evidence: Sequence[str] = (),
         prior_failed_hypotheses: Sequence[str] = (),
         wsp_constraints: Sequence[str] = (),
-        mutation_budget_consumed: Mapping[str, Any] = None,
-        raw_builder_narrative: str = "",
+        mutation_budget_consumed: Mapping[str, Any] | None = None,
     ) -> VerifierEvidencePacket:
-        """Create sanitized evidence packet, strictly rejecting un-sanitized builder reasoning."""
+        """
+        Pure allowlist projection into VerifierEvidencePacket.
+        Only explicitly approved, typed evidence fields are projected.
+        """
         return VerifierEvidencePacket(
             schema_version=EVIDENCE_PACKET_SCHEMA,
-            pain=cls.sanitize_text(str(pain)),
-            desired_outcome=cls.sanitize_text(str(desired_outcome)),
+            pain=cls.sanitize_field(pain),
+            desired_outcome=cls.sanitize_field(desired_outcome),
             baseline_receipt_id=str(baseline_receipt_id).strip(),
             candidate_diff=str(candidate_diff),
             changed_files=tuple(sorted(dict.fromkeys(str(f) for f in changed_files))),
@@ -145,8 +170,8 @@ class VerifierContextFirewall:
             after_measurements=dict(after_measurements or {}),
             required_tests=tuple(sorted(dict.fromkeys(str(t) for t in required_tests))),
             test_results=dict(test_results or {}),
-            research_evidence=tuple(cls.sanitize_text(str(r)) for r in research_evidence),
-            prior_failed_hypotheses=tuple(cls.sanitize_text(str(h)) for h in prior_failed_hypotheses),
+            research_evidence=tuple(cls.sanitize_field(r) for r in research_evidence),
+            prior_failed_hypotheses=tuple(cls.sanitize_field(h) for h in prior_failed_hypotheses),
             wsp_constraints=tuple(str(w) for w in wsp_constraints),
             mutation_budget_consumed=dict(mutation_budget_consumed or {}),
             builder_identity="builder_model_a",

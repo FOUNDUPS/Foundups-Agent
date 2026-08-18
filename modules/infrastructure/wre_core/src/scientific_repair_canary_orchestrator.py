@@ -226,7 +226,7 @@ class ScientificRepairCanaryOrchestrator:
             verifier_identity="gemma-270m",
         )
 
-        evidence_packet = VerifierContextFirewall.build_evidence_packet(
+        evidence_packet = VerifierContextFirewall.project_evidence_packet(
             pain=operation.pain,
             desired_outcome=operation.desired_outcome,
             baseline_receipt_id=baseline_receipt.receipt_digest,

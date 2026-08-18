@@ -24,7 +24,7 @@ def test_verifier_context_firewall_strips_persuasive_narrative() -> None:
     raw_outcome = "FastMCP fails closed. <thought>I am confident this is optimal</thought>"
     research = ["FastMCP 0.4.x docs. Model A concluded this resolves it."]
 
-    packet = VerifierContextFirewall.build_evidence_packet(
+    packet = VerifierContextFirewall.project_evidence_packet(
         pain=raw_pain,
         desired_outcome=raw_outcome,
         baseline_receipt_id="sha256:11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff",
