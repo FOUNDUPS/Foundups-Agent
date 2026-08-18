@@ -1,13 +1,13 @@
 """
-RedDog & Fusion Perception Tools for FoundUps MCP Bridge.
-=========================================================
+RedDog Context & Perception Tools for FoundUps MCP Bridge.
+==========================================================
 
 Provides read-only access to RedDog external state, worker lane assignments,
-research threads, and grounded Fusion analysis packets for 0102.
+research threads, and grounded context evidence packets for 0102.
 
 WSP References:
-- WSP 97: Truthful Verification (curated state boundaries)
-- WSP 50: Pre-Action Verification (HoloIndex grounding)
+- WSP 97: Truthful Verification (curated state boundaries and accurate labeling)
+- WSP 50: Pre-Action Verification (contextual grounding prior to action)
 - WSP 48: Recursive Self-Improvement (pattern memory)
 """
 
@@ -90,24 +90,25 @@ def get_reddog_state(repo_root: Path) -> Dict[str, Any]:
         return error_response(str(exc))
 
 
-def reddog_analyze(
+def get_reddog_analysis_context(
     repo_root: Path,
     prompt: str,
     target_module: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Run grounded RedDog Fusion analysis for a problem statement.
+    Assemble grounded RedDog contextual evidence packet for 0102 analysis.
 
     Combines live Git state, active worker lane state, target module documentation,
-    and overseer posture into a structured Fusion packet for 0102 reasoning.
+    and overseer posture into a structured perception packet for 0102 reasoning.
+    (Note: This is a read-only context assembler; model execution occurs in 0102).
 
     Args:
         repo_root: Repository root path
-        prompt: Task or problem statement to analyze
-        target_module: Optional module name to scope the analysis
+        prompt: Task or problem statement to assemble context for
+        target_module: Optional module name to scope the documentation lookup
 
     Returns:
-        MCPResponse with grounded Fusion analysis packet.
+        MCPResponse with grounded context packet.
     """
     if not prompt or not prompt.strip():
         return error_response("Prompt cannot be empty")
@@ -128,7 +129,7 @@ def reddog_analyze(
             if doc_res.get("status") == "ok":
                 module_doc = doc_res.get("data", {}).get("readme", "")[:1000]
 
-        fusion_packet = {
+        context_packet = {
             "prompt": prompt.strip(),
             "target_module": target_module,
             "git_state": git_info,
@@ -137,7 +138,7 @@ def reddog_analyze(
             "module_doc_snippet": module_doc,
         }
 
-        return ok_response(fusion_packet, source="reddog_fusion", prompt=prompt)
+        return ok_response(context_packet, source="reddog_context", prompt=prompt)
     except Exception as exc:
-        logger.error(f"[REDDOG] reddog_analyze error: {exc}")
+        logger.error(f"[REDDOG] get_reddog_analysis_context error: {exc}")
         return error_response(str(exc))

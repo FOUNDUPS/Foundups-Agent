@@ -1,14 +1,14 @@
 # foundups_mcp_bridge - ModLog
 
-## 2026-08-18 - FastMCP SSE Remote Transport, Concurrency Contract & Auth Security
+## 2026-08-18 - FastMCP SSE Remote Transport, Strict Allowlist & Concurrency Hardening
 
-- Implemented `mcp_server.py` exposing all 39 FoundUps MCP perception & RedDog tools via FastMCP over standard SSE and stdio transports.
-- Enforced fail-closed token authentication (`FOUNDUPS_MCP_AUTH_TOKEN` / `Authorization: Bearer <token>`) with public `/health` probe.
-- Implemented `scripts/launch.py` with multi-mode execution (in-process or `foundups-mcp-env` subprocess) and protocol-level readiness canary (initialize -> tools/list -> safe read tool invocation).
-- Enforced strict concurrency contract (`instance lock held <=> process owns live MCP server`), bounded termination wait, and idempotent shutdown.
-- Added read-only RedDog session state and grounded Fusion perception tools in `reddog_tools.py`.
-- Registered `mcp_bridge_sse` launch specification in `main.py` DAE broker (`bootstrap_runtime_dae_launches()`) for automatic or broker-managed lifecycle.
-- Added comprehensive unit test suite `tests/test_mcp_server_sse.py` verifying tool schemas, readiness canary, auth enforcement, and concurrency lifecycle.
+- Implemented `REMOTE_READ_ONLY_ALLOWLIST` restricting remote registration to 33 pure read-only perception tools; mutation/dispatch tools (`coordinate_mission`, `write_file`, `spawn_agent_team`, `trigger_skill`, `create_branch`, `create_pr`) are strictly excluded.
+- Enforced fail-closed Bearer authentication (`FOUNDUPS_MCP_AUTH_TOKEN` / `Authorization: Bearer <token>`) with public `/health` probe. URL query tokens (`?token=`) prohibited to prevent secret leakage in proxy/tunnel logs.
+- Removed `--auth-token` CLI argument and logging of secrets; auth token passed strictly via environment.
+- Enforced strict concurrency invariant (`instance lock held <=> process owns live MCP server`); startup fails closed if lock cannot be acquired. Centralized shutdown (`_terminate_runtime`) releases lock ONLY after confirmed server termination.
+- Truthfully renamed RedDog context tool to `get_reddog_analysis_context` (`source="reddog_context"`).
+- Hardened protocol-level readiness canary (`verify_mcp_readiness`) over SSE transport: verifies protocol negotiation, required tool inventory, absence of forbidden tools, and parses inner tool result status.
+- Added comprehensive unit tests in `tests/test_mcp_server_sse.py` testing happy paths, auth boundaries, fail-closed lock behavior, and canary failure rejection (9/9 passed).
   (WSP 22/34/50/80/96/97)
 
 ## 2026-08-15 - Repository-relative Holo owner evidence

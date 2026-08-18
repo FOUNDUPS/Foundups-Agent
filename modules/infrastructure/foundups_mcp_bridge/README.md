@@ -409,3 +409,21 @@ Disabled tool responses:
 - Gated execution capabilities
 - Agent team spawning
 - Skill dispatch with approval workflow
+
+
+## FastMCP Remote SSE Server & ChatGPT Tunneling
+
+The FoundUps MCP Bridge provides an SSE server (`mcp_server.py`) for remote agents (e.g. ChatGPT Developer Mode / Custom Apps) over secure tunnels:
+
+```bash
+# Start standalone with auth enforcement
+export FOUNDUPS_MCP_AUTH_TOKEN="your-secure-token"
+export FOUNDUPS_MCP_REQUIRE_AUTH="1"
+python -m modules.infrastructure.foundups_mcp_bridge.scripts.launch
+```
+
+### Security & Invariants
+- **Remote Read-Only Allowlist**: Exposes exactly 33 pure perception tools (`REMOTE_READ_ONLY_ALLOWLIST`). All execution/mutation tools are strictly excluded.
+- **Fail-Closed Bearer Auth**: Rejects unauthenticated requests with `401 Unauthorized`. URL query tokens (`?token=`) are deliberately rejected to prevent secret leakage in proxy/tunnel logs.
+- **Strict Lock Invariant**: `instance lock held <=> process owns live MCP server`. Lock released only after confirmed server termination.
+- **Protocol Readiness Canary**: Validates live SSE handshake, tool list allowlist enforcement, and tool call payload verification before reporting operational status.

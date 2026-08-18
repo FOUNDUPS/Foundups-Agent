@@ -1,22 +1,27 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-FoundUps MCP Bridge Remote Server (FastMCP SSE Transport).
-==========================================================
+FastMCP Server for FoundUps Perception Bridge.
+==============================================
 
-Exposes the private FoundUps MCP perception layer over standard Model Context
-Protocol (MCP) transport (SSE and stdio) for remote agents such as ChatGPT
-via secure tunnels (ngrok/cloudflared).
+Domain: infrastructure
+Module: foundups_mcp_bridge
+
+Exposes FoundUps MCP perception tools via FastMCP over SSE and stdio transports.
+Enforces:
+1. Strict Remote Read-Only Allowlist (mutation/execution tools strictly excluded).
+2. Fail-closed Token Authentication (Bearer token header only; URL tokens prohibited).
+3. Public /health probe for tunnel monitoring.
 
 WSP References:
 - WSP 96: Model Context Protocol Governance and Consensus
-- WSP 97: Truthful Verification (perception-only read boundary)
-- WSP 50: Pre-Action Verification (HoloIndex search prior to modification)
+- WSP 97: Truthful Verification (explicit read-only perception boundary)
+- WSP 80: Cube-Level DAE Orchestration
 """
 
 from __future__ import annotations
 
 import argparse
+import asyncio
+import hmac
 import inspect
 import io
 import json
@@ -24,7 +29,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 # === UTF-8 ENFORCEMENT (WSP 90) ===
 if __name__ == "__main__" and sys.platform.startswith("win"):
@@ -35,259 +40,290 @@ if __name__ == "__main__" and sys.platform.startswith("win"):
         pass
 # === END UTF-8 ENFORCEMENT ===
 
-from fastmcp import FastMCP
-from fastmcp.server.http import create_sse_app
-from starlette.responses import JSONResponse
-
-from .bridge_server import FoundUpsMCPBridge
-
 logger = logging.getLogger(__name__)
 
-DEFAULT_HOST = "127.0.0.1"
-DEFAULT_PORT = 8128
+# Explicit Remote Read-Only Allowlist per WSP 97
+# Mutation, execution, or dispatch tools are strictly prohibited from remote registration.
+REMOTE_READ_ONLY_ALLOWLIST: Tuple[str, ...] = (
+    # Repo Perception
+    "get_repo_tree",
+    "read_file",
+    "search_repo",
+    "get_recent_changes",
+    # Documentation Access
+    "get_wsp_docs",
+    "get_module_docs",
+    "get_interface_doc",
+    "get_test_docs",
+    "get_modlog",
+    "get_violations",
+    # AI Overseer Perception
+    "get_mission_history",
+    "get_pattern_memory",
+    "get_overseer_status",
+    "get_coordination_state",
+    "get_known_failure_patterns",
+    # Dependency Analysis
+    "get_module_dependencies",
+    "get_reverse_dependencies",
+    # Diff and Verification
+    "get_file_diff",
+    "get_diff_summary",
+    "get_change_impact_score",
+    # HoloIndex Recall
+    "holo_search",
+    "holo_related",
+    "holo_failure_memory",
+    "holo_pattern_search",
+    "holo_task_packet",
+    # Signal Normalization (State Compression)
+    "get_overseer_summary",
+    "get_hot_modules",
+    "get_repeated_failures",
+    "get_active_risks",
+    "get_recommended_focus",
+    "get_prompt_context_packet",
+    # RedDog State & Context
+    "get_reddog_state",
+    "get_reddog_analysis_context",
+)
 
 
-def get_original_function(wrapped_func: Callable) -> Callable:
-    """Extract original unwrapped function from bridge wrapper closure if present."""
+def _get_repo_root() -> Path:
+    """Resolve repository root."""
+    return Path(__file__).resolve().parent.parent.parent.parent.parent
+
+
+def get_original_function(wrapped_func: Any) -> Any:
+    """Extract underlying original function from closures or wrappers."""
+    if hasattr(wrapped_func, "__wrapped__"):
+        return get_original_function(wrapped_func.__wrapped__)
     if hasattr(wrapped_func, "__closure__") and wrapped_func.__closure__:
         for cell in wrapped_func.__closure__:
-            val = cell.cell_contents
-            if callable(val) and not isinstance(val, FoundUpsMCPBridge):
-                return val
+            try:
+                contents = cell.cell_contents
+                if callable(contents) and contents is not wrapped_func:
+                    return get_original_function(contents)
+            except ValueError:
+                pass
     return wrapped_func
+
+
+def _make_tool_wrapper(bridge_func: Callable, orig_func: Callable) -> Callable:
+    """
+    Create a clean tool wrapper without repo_root in its signature.
+
+    Dynamically matches original parameter types and default values so FastMCP
+    generates accurate JSON Schemas for MCP clients.
+    """
+    orig_sig = inspect.signature(orig_func)
+    clean_params = [
+        p for name, p in orig_sig.parameters.items()
+        if name != "repo_root"
+    ]
+    clean_sig = orig_sig.replace(parameters=clean_params)
+
+    def tool_impl(*args, **kwargs):
+        bound = clean_sig.bind_partial(*args, **kwargs)
+        bound.apply_defaults()
+        return bridge_func(**bound.arguments)
+
+    tool_impl.__name__ = orig_func.__name__
+    tool_impl.__doc__ = orig_func.__doc__ or bridge_func.__doc__
+    tool_impl.__signature__ = clean_sig
+    tool_impl.__annotations__ = {
+        name: p.annotation
+        for name, p in clean_sig.parameters.items()
+        if p.annotation != inspect.Parameter.empty
+    }
+    if orig_sig.return_annotation != inspect.Signature.empty:
+        tool_impl.__annotations__["return"] = orig_sig.return_annotation
+
+    return tool_impl
+
+
+def build_mcp_server(repo_root: Optional[Path] = None) -> Any:
+    """
+    Build FastMCP server with strictly allowlisted FoundUps perception tools.
+
+    Args:
+        repo_root: Optional repository root path
+
+    Returns:
+        FastMCP server instance.
+    """
+    try:
+        from fastmcp import FastMCP
+    except ImportError as exc:
+        raise ImportError(
+            "fastmcp is required to build the FastMCP server. "
+            "Please run within foundups-mcp-env or install fastmcp."
+        ) from exc
+
+    from .bridge_server import FoundUpsMCPBridge
+
+    root = Path(repo_root or _get_repo_root()).resolve()
+    bridge = FoundUpsMCPBridge(repo_root=root)
+
+    mcp = FastMCP(
+        name="FoundUps Perception Bridge",
+        instructions=(
+            "FoundUps Perception MCP Bridge provides read-only repository, "
+            "architecture, documentation, and RedDog context awareness to 0102."
+        ),
+    )
+
+    # Register ONLY allowlisted read-only tools
+    for tool_name in REMOTE_READ_ONLY_ALLOWLIST:
+        if tool_name not in bridge._tools:
+            logger.warning(f"[MCP-SERVER] Allowlisted tool '{tool_name}' not found in bridge._tools")
+            continue
+
+        bridge_func = bridge._tools[tool_name]
+        orig_func = get_original_function(bridge_func)
+        wrapper = _make_tool_wrapper(bridge_func, orig_func)
+        mcp.tool(name=tool_name, description=orig_func.__doc__ or tool_name)(wrapper)
+
+    return mcp
 
 
 class AuthMiddleware:
     """
-    Enforce token-based authentication on remote MCP endpoints.
+    ASGI Middleware enforcing Authorization: Bearer <token> for remote access.
 
-    Validates 'Authorization: Bearer <token>' header or '?token=<token>' query parameter.
-    Fails closed (401 Unauthorized) when token is configured but invalid.
+    Public endpoints:
+    - /health: unauthenticated health check probe
+
+    Protected endpoints:
+    - /sse, /message/: strictly require Authorization: Bearer <token> header.
+      (?token= query parameter is deliberately rejected to prevent logging secrets).
     """
 
-    def __init__(
-        self,
-        app: Any,
-        auth_token: Optional[str] = None,
-        require_auth: bool = False,
-        tools_count: int = 0,
-    ):
+    def __init__(self, app: Any, auth_token: str = "", require_auth: bool = True):
         self.app = app
-        self.auth_token = (auth_token or "").strip()
-        self.require_auth = require_auth
-        self.tools_count = tools_count
+        self.auth_token = auth_token.strip() if auth_token else ""
+        self.require_auth = require_auth and bool(self.auth_token)
 
-    async def __call__(self, scope: Dict[str, Any], receive: Callable, send: Callable) -> None:
-        if scope["type"] == "http":
-            path = scope.get("path", "")
+    async def __call__(self, scope: Dict[str, Any], receive: Any, send: Any):
+        if scope.get("type") not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
 
-            # Public unauthenticated health probe
-            if path == "/health":
-                resp = JSONResponse({
-                    "status": "ok",
-                    "service": "foundups_mcp_bridge",
-                    "tools_count": self.tools_count,
-                    "auth_required": bool(self.auth_token or self.require_auth),
-                })
-                await resp(scope, receive, send)
-                return
+        path = scope.get("path", "")
+        if path in ("/health", "/health/"):
+            await self._handle_health(scope, receive, send)
+            return
 
-            # Check authentication
-            if self.auth_token:
-                headers = dict(scope.get("headers", []))
-                auth_header = headers.get(b"authorization", b"").decode("utf-8", errors="replace").strip()
-                query_string = scope.get("query_string", b"").decode("utf-8", errors="replace")
+        if self.require_auth:
+            headers = dict(scope.get("headers", []))
+            auth_header = headers.get(b"authorization", b"").decode("utf-8", errors="replace")
 
-                token_from_query = ""
-                for param in query_string.split("&"):
-                    if param.startswith("token=") or param.startswith("auth_token="):
-                        token_from_query = param.split("=", 1)[1].strip()
-                        break
+            authenticated = False
+            if auth_header.startswith("Bearer "):
+                token = auth_header[7:].strip()
+                if hmac.compare_digest(token, self.auth_token):
+                    authenticated = True
 
-                valid = False
-                if auth_header.startswith("Bearer "):
-                    token = auth_header[7:].strip()
-                    if token == self.auth_token:
-                        valid = True
-                elif token_from_query == self.auth_token:
-                    valid = True
-
-                if not valid:
-                    logger.warning("[MCP-AUTH] Rejected unauthenticated request to %s", path)
-                    resp = JSONResponse(
-                        {"error": "Unauthorized - valid Bearer token required"},
-                        status_code=401,
-                    )
-                    await resp(scope, receive, send)
-                    return
-
-            elif self.require_auth:
-                logger.error("[MCP-AUTH] Remote auth required but no FOUNDUPS_MCP_AUTH_TOKEN configured")
-                resp = JSONResponse(
-                    {"error": "Server misconfigured - auth required but no token configured"},
-                    status_code=500,
+            if not authenticated:
+                await self._send_response(
+                    send,
+                    status=401,
+                    headers=[(b"content-type", b"application/json")],
+                    body=json.dumps({"error": "Unauthorized", "detail": "Valid Bearer token required"}).encode("utf-8"),
                 )
-                await resp(scope, receive, send)
                 return
 
         await self.app(scope, receive, send)
 
+    async def _handle_health(self, scope: Dict[str, Any], receive: Any, send: Any):
+        """Unauthenticated health probe reporting service and auth status."""
+        body = json.dumps({
+            "status": "ok",
+            "service": "foundups_mcp_bridge_sse",
+            "auth_required": self.require_auth,
+            "tool_count": len(REMOTE_READ_ONLY_ALLOWLIST),
+        }).encode("utf-8")
+        await self._send_response(
+            send,
+            status=200,
+            headers=[(b"content-type", b"application/json")],
+            body=body,
+        )
 
-def build_mcp_server(
-    repo_root: Optional[Path] = None,
-    server_name: str = "FoundUps MCP Bridge",
-) -> FastMCP:
-    """
-    Create and configure FastMCP server instance wrapping FoundUpsMCPBridge.
-
-    Dynamically extracts signatures and type annotations from original functions,
-    stripping the internal `repo_root` parameter and binding it to the bridge instance.
-
-    Args:
-        repo_root: Repository root path (auto-detected if None)
-        server_name: MCP server name reported to connecting clients
-
-    Returns:
-        Configured FastMCP server instance
-    """
-    bridge = FoundUpsMCPBridge(repo_root=repo_root)
-    mcp = FastMCP(name=server_name)
-
-    for name, wrapped in bridge._tools.items():
-        original_func = get_original_function(wrapped)
-
-        sig = inspect.signature(original_func)
-        params = list(sig.parameters.values())
-        has_repo_root = bool(params and params[0].name == "repo_root")
-
-        if has_repo_root:
-            new_params = params[1:]
-            new_sig = sig.replace(parameters=new_params)
-
-            def _make_tool_fn(orig_fn):
-                def _tool_fn(*args, **kwargs):
-                    return orig_fn(bridge.repo_root, *args, **kwargs)
-                return _tool_fn
-
-            tool_callable = _make_tool_fn(original_func)
-        else:
-            new_sig = sig
-            tool_callable = original_func
-
-        tool_callable.__name__ = name
-        tool_callable.__doc__ = (original_func.__doc__ or "").strip()
-        tool_callable.__signature__ = new_sig
-
-        annotations = getattr(original_func, "__annotations__", {}).copy()
-        if "repo_root" in annotations:
-            del annotations["repo_root"]
-        tool_callable.__annotations__ = annotations
-
-        # Register tool with FastMCP
-        mcp.tool(name=name)(tool_callable)
-
-    logger.info(f"[MCP-SERVER] FastMCP initialized with {len(bridge._tools)} tools")
-    return mcp
+    async def _send_response(self, send: Any, status: int, headers: List[Tuple[bytes, bytes]], body: bytes):
+        """Helper to send ASGI HTTP response."""
+        await send({
+            "type": "http.response.start",
+            "status": status,
+            "headers": headers,
+        })
+        await send({
+            "type": "http.response.body",
+            "body": body,
+        })
 
 
 def build_asgi_app(
     repo_root: Optional[Path] = None,
-    server_name: str = "FoundUps MCP Bridge",
     auth_token: Optional[str] = None,
-    require_auth: bool = False,
+    require_auth: bool = True,
 ) -> Any:
     """
-    Build Starlette ASGI application with FastMCP SSE transport and AuthMiddleware.
-    """
-    mcp = build_mcp_server(repo_root=repo_root, server_name=server_name)
-    token = auth_token or os.getenv("FOUNDUPS_MCP_AUTH_TOKEN", "")
-    req_auth = require_auth or (os.getenv("FOUNDUPS_MCP_REQUIRE_AUTH", "0") == "1")
+    Build Starlette ASGI application for FastMCP SSE server wrapped with AuthMiddleware.
 
-    base_app = create_sse_app(mcp, message_path="/message/", sse_path="/sse")
-    app = AuthMiddleware(
-        app=base_app,
-        auth_token=token,
-        require_auth=req_auth,
-        tools_count=len(mcp._tool_manager._tools) if hasattr(mcp, "_tool_manager") else 39,
-    )
-    return app
+    Args:
+        repo_root: Optional repository root path
+        auth_token: Bearer auth token string
+        require_auth: Whether auth is enforced
+
+    Returns:
+        ASGI application.
+    """
+    mcp = build_mcp_server(repo_root=repo_root)
+    token = auth_token if auth_token is not None else os.getenv("FOUNDUPS_MCP_AUTH_TOKEN", "")
+
+    try:
+        from fastmcp.server.http import create_sse_app
+        raw_app = create_sse_app(mcp, message_path="/message/", sse_path="/sse")
+    except (ImportError, TypeError):
+        raw_app = mcp.sse_app()
+
+    return AuthMiddleware(raw_app, auth_token=token, require_auth=require_auth)
 
 
 def main():
-    """CLI entrypoint to run the FoundUps MCP server."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-    )
-
-    parser = argparse.ArgumentParser(description="FoundUps MCP Bridge Server")
+    """CLI entrypoint for running FastMCP server."""
+    parser = argparse.ArgumentParser(description="FoundUps MCP Bridge FastMCP Server")
     parser.add_argument(
         "--transport",
-        choices=["sse", "stdio"],
+        choices=["stdio", "sse"],
         default="sse",
-        help="Transport type (default: sse)",
+        help="Transport protocol (default: sse)",
     )
     parser.add_argument(
         "--host",
-        type=str,
-        default=os.getenv("FOUNDUPS_MCP_HOST", DEFAULT_HOST),
-        help=f"Host to bind SSE server (default: {DEFAULT_HOST})",
+        default=os.getenv("FOUNDUPS_MCP_HOST", "127.0.0.1"),
+        help="Host to bind for SSE transport (default: 127.0.0.1)",
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=int(os.getenv("FOUNDUPS_MCP_PORT", str(DEFAULT_PORT))),
-        help=f"Port to bind SSE server (default: {DEFAULT_PORT})",
+        default=int(os.getenv("FOUNDUPS_MCP_PORT", "8128")),
+        help="Port to bind for SSE transport (default: 8128)",
     )
-    parser.add_argument(
-        "--auth-token",
-        type=str,
-        default=os.getenv("FOUNDUPS_MCP_AUTH_TOKEN", ""),
-        help="Optional auth token required for requests (Bearer token)",
-    )
-    parser.add_argument(
-        "--repo-root",
-        type=str,
-        default=None,
-        help="Repository root path override",
-    )
-
     args = parser.parse_args()
-    repo_root = Path(args.repo_root) if args.repo_root else None
 
-    # Fail closed check for remote exposure
-    is_loopback = args.host in ("127.0.0.1", "localhost", "::1")
-    auth_token = (args.auth_token or "").strip()
-    if not is_loopback and not auth_token:
-        print("[MCP-SERVER-ERROR] Refusing to bind to non-loopback host without --auth-token or FOUNDUPS_MCP_AUTH_TOKEN (fail closed per WSP 97).", file=sys.stderr)
-        sys.exit(1)
+    root = _get_repo_root()
+    token = os.getenv("FOUNDUPS_MCP_AUTH_TOKEN", "")
+    require_auth = bool(os.getenv("FOUNDUPS_MCP_REQUIRE_AUTH", "1" if token else "0") == "1")
 
-    if args.transport == "sse":
-        import uvicorn
-        asgi_app = build_asgi_app(
-            repo_root=repo_root,
-            auth_token=auth_token,
-            require_auth=not is_loopback,
-        )
-        print(f"[MCP-SERVER] Starting SSE server on http://{args.host}:{args.port}/sse")
-        if auth_token:
-            print("[MCP-SERVER] Authentication enabled (Bearer token enforced)")
-        else:
-            print("[MCP-SERVER] Running unauthenticated (loopback only)")
-
-        config = uvicorn.Config(
-            asgi_app,
-            host=args.host,
-            port=args.port,
-            log_level="info",
-            access_log=False,
-        )
-        server = uvicorn.Server(config)
-        server.run()
+    if args.transport == "stdio":
+        mcp = build_mcp_server(repo_root=root)
+        mcp.run(transport="stdio")
     else:
-        app = build_mcp_server(repo_root=repo_root)
-        print("[MCP-SERVER] Starting stdio server")
-        app.run(transport="stdio")
+        import uvicorn
+        asgi_app = build_asgi_app(repo_root=root, auth_token=token, require_auth=require_auth)
+        uvicorn.run(asgi_app, host=args.host, port=args.port, log_level="info", access_log=False)
 
 
 if __name__ == "__main__":

@@ -12,12 +12,15 @@ and other remote agents to connect via secure tunnels (ngrok/cloudflared).
 
 Enforces strict concurrency contract:
 - instance lock held <=> this process owns the live MCP server
-- lock released ONLY after confirmed server termination (never prematurely)
-- idempotent stop with bounded wait and truthful STOP_TIMEOUT reporting
+- fail-closed: startup aborted if instance lock cannot be acquired
+- centralized termination: signal -> bounded wait -> confirm dead -> release lock exactly once
+- idempotent stop with truthful STOP_TIMEOUT reporting (lock not released on timeout)
+- fail-closed remote authentication (secret passed via env only; never argv/logs)
+- truthful protocol-level readiness canary (initialize -> tools/list validation -> tool call parsing)
 
 WSP References:
 - WSP 96: Model Context Protocol Governance and Consensus
-- WSP 97: Truthful Verification (protocol-level readiness handshake & concurrency bounds)
+- WSP 97: Truthful Verification (protocol readiness canary & perception boundaries)
 - WSP 80: Cube-Level DAE Orchestration
 - WSP 27: Universal DAE Architecture
 """
@@ -36,7 +39,7 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set, Tuple
 
 # === UTF-8 ENFORCEMENT (WSP 90) ===
 if __name__ == "__main__" and sys.platform.startswith("win"):
@@ -51,6 +54,23 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8128
+
+REQUIRED_CANARY_TOOLS: Set[str] = {
+    "get_repo_tree",
+    "read_file",
+    "get_wsp_docs",
+    "get_reddog_state",
+    "get_reddog_analysis_context",
+}
+
+FORBIDDEN_CANARY_TOOLS: Set[str] = {
+    "coordinate_mission",
+    "spawn_agent_team",
+    "trigger_skill",
+    "write_file",
+    "create_branch",
+    "create_pr",
+}
 
 
 @dataclass
@@ -93,6 +113,58 @@ def _get_mcp_env_python(repo_root: Path) -> Path:
     return python_exe
 
 
+def _terminate_runtime(handle: Optional[MCPRuntimeHandle], timeout_sec: float = 5.0) -> Tuple[bool, str]:
+    """
+    Centralized shutdown helper enforcing the strict lifecycle contract:
+    1. Signal shutdown to server / process.
+    2. Bounded wait for thread exit or process exit.
+    3. Confirm dead. If still running, return failure without releasing lock.
+    4. Release lock exactly once.
+    5. Return success status.
+    """
+    if handle is None:
+        return True, "already_stopped"
+
+    # 1. Signal shutdown
+    if handle.mode == "in_process" and handle.server is not None:
+        handle.server.should_exit = True
+        if handle.thread is not None:
+            handle.thread.join(timeout=timeout_sec)
+            if handle.thread.is_alive():
+                logger.error("[MCP-BRIDGE-SSE] In-process server thread did not exit within timeout")
+                return False, "stop_timeout_still_running"
+
+    elif handle.mode == "subprocess" and handle.proc is not None:
+        try:
+            handle.proc.terminate()
+            handle.proc.wait(timeout=timeout_sec)
+        except subprocess.TimeoutExpired:
+            logger.warning("[MCP-BRIDGE-SSE] Subprocess did not terminate gracefully; sending kill signal")
+            try:
+                handle.proc.kill()
+                handle.proc.wait(timeout=2.0)
+            except Exception as exc:
+                logger.error(f"[MCP-BRIDGE-SSE] Failed to kill subprocess: {exc}")
+                return False, "stop_timeout_still_running"
+        except Exception as exc:
+            logger.error(f"[MCP-BRIDGE-SSE] Subprocess termination error: {exc}")
+            return False, str(exc)
+
+    # 2. Confirm dead
+    if handle.is_alive():
+        return False, "stop_timeout_still_running"
+
+    # 3. Release lock exactly once
+    if handle.lock:
+        try:
+            handle.lock.release()
+        except Exception as exc:
+            logger.debug(f"[MCP-BRIDGE-SSE] Lock release notice: {exc}")
+        handle.lock = None
+
+    return True, "stopped"
+
+
 def verify_mcp_readiness(
     host: str,
     port: int,
@@ -103,11 +175,11 @@ def verify_mcp_readiness(
     Perform truthful protocol-level readiness canary over SSE transport.
 
     Steps:
-    1. Connect to /sse stream (with Auth token if required).
+    1. Connect to /sse stream (with Auth header if required).
     2. Extract session message endpoint.
-    3. Send MCP JSON-RPC 'initialize' request and await response.
-    4. Send MCP JSON-RPC 'tools/list' request and verify tool inventory >= 30.
-    5. Send MCP JSON-RPC 'tools/call' for safe read tool ('get_wsp_docs') and verify 'ok' result.
+    3. Send MCP JSON-RPC 'initialize' request -> verify response & capabilities.
+    4. Send MCP JSON-RPC 'tools/list' request -> verify required read tools present and mutation tools absent.
+    5. Send MCP JSON-RPC 'tools/call' for 'get_wsp_docs' -> parse result and assert inner status == 'ok'.
 
     Args:
         host: Server host
@@ -177,15 +249,18 @@ def verify_mcp_readiness(
             if resp.status not in (200, 202):
                 return {"verified": False, "error": f"Initialize POST returned {resp.status}"}
 
-        init_ok = False
+        init_data = None
         for _ in range(20):
             line = sse_resp.readline().decode("utf-8", errors="replace").strip()
             if line.startswith("data: ") and '"id":1' in line.replace(" ", ""):
-                init_ok = True
+                try:
+                    init_data = json.loads(line.replace("data: ", "", 1))
+                except Exception:
+                    pass
                 break
 
-        if not init_ok:
-            return {"verified": False, "error": "Initialize response not received on SSE stream"}
+        if not init_data or "error" in init_data or "result" not in init_data:
+            return {"verified": False, "error": f"Invalid initialize response: {init_data}"}
 
         # Step 3: Tools List
         list_req = json.dumps({
@@ -200,19 +275,31 @@ def verify_mcp_readiness(
             if resp.status not in (200, 202):
                 return {"verified": False, "error": f"tools/list POST returned {resp.status}"}
 
-        tools_count = 0
-        tools_list_ok = False
+        tools_data = None
         for _ in range(20):
             line = sse_resp.readline().decode("utf-8", errors="replace").strip()
             if line.startswith("data: ") and '"id":2' in line.replace(" ", ""):
-                data_json = json.loads(line.replace("data: ", "", 1))
-                tools = data_json.get("result", {}).get("tools", [])
-                tools_count = len(tools)
-                tools_list_ok = tools_count >= 30
+                try:
+                    tools_data = json.loads(line.replace("data: ", "", 1))
+                except Exception:
+                    pass
                 break
 
-        if not tools_list_ok:
-            return {"verified": False, "error": f"tools/list returned insufficient tools ({tools_count})"}
+        if not tools_data or "error" in tools_data or "result" not in tools_data:
+            return {"verified": False, "error": f"Invalid tools/list response: {tools_data}"}
+
+        tools_list = tools_data.get("result", {}).get("tools", [])
+        tool_names = {t.get("name") for t in tools_list if isinstance(t, dict)}
+
+        # Verify required perception tools exist
+        missing_required = REQUIRED_CANARY_TOOLS - tool_names
+        if missing_required:
+            return {"verified": False, "error": f"Missing required perception tools: {sorted(missing_required)}"}
+
+        # Verify forbidden mutation tools are absent
+        present_forbidden = FORBIDDEN_CANARY_TOOLS & tool_names
+        if present_forbidden:
+            return {"verified": False, "error": f"Disallowed mutation tools exposed: {sorted(present_forbidden)}"}
 
         # Step 4: Tool Call Canary (get_wsp_docs - safe read tool)
         call_req = json.dumps({
@@ -230,20 +317,40 @@ def verify_mcp_readiness(
             if resp.status not in (200, 202):
                 return {"verified": False, "error": f"tools/call POST returned {resp.status}"}
 
-        tool_call_ok = False
+        call_data = None
         for _ in range(30):
             line = sse_resp.readline().decode("utf-8", errors="replace").strip()
             if line.startswith("data: ") and '"id":3' in line.replace(" ", ""):
-                tool_call_ok = True
+                try:
+                    call_data = json.loads(line.replace("data: ", "", 1))
+                except Exception:
+                    pass
                 break
 
-        if not tool_call_ok:
-            return {"verified": False, "error": "Tool call response not received on SSE stream"}
+        if not call_data or "error" in call_data or "result" not in call_data:
+            return {"verified": False, "error": f"Tool call error response: {call_data}"}
+
+        # Parse and verify inner bridge result envelope
+        result_content = call_data.get("result", {}).get("content", [])
+        inner_status_ok = False
+        for item in result_content:
+            if isinstance(item, dict) and item.get("type") == "text":
+                try:
+                    inner_json = json.loads(item.get("text", "{}"))
+                    if inner_json.get("status") == "ok" and "wsp_docs" in inner_json.get("data", {}):
+                        inner_status_ok = True
+                        break
+                except Exception:
+                    pass
+
+        if not inner_status_ok:
+            return {"verified": False, "error": f"Tool call returned invalid or error payload: {call_data}"}
 
         elapsed_ms = round((time.time() - start_time) * 1000, 2)
         return {
             "verified": True,
-            "tools_count": tools_count,
+            "tools_count": len(tool_names),
+            "tool_names": sorted(tool_names),
             "latency_ms": elapsed_ms,
         }
 
@@ -260,6 +367,7 @@ def run_mcp_bridge_sse(
     host: Optional[str] = None,
     port: Optional[int] = None,
     auth_token: Optional[str] = None,
+    require_auth: Optional[bool] = None,
     repo_root: Optional[Path] = None,
     blocking: bool = True,
 ) -> Dict[str, Any]:
@@ -267,11 +375,13 @@ def run_mcp_bridge_sse(
     Run FoundUps MCP Bridge SSE server with truthful readiness verification.
 
     Maintains invariant: instance lock held <=> this process owns the live MCP server.
+    Fails closed if instance lock cannot be acquired or if remote exposure lacks auth.
 
     Args:
         host: Host IP to bind (default: 127.0.0.1 or env FOUNDUPS_MCP_HOST)
         port: Port to bind (default: 8128 or env FOUNDUPS_MCP_PORT)
         auth_token: Optional auth token (default: env FOUNDUPS_MCP_AUTH_TOKEN)
+        require_auth: Explicit flag to enforce authentication (default: True if tunnel/remote/token configured)
         repo_root: Optional repo root override
         blocking: If True, blocks until server shutdown; if False, runs in background.
 
@@ -285,17 +395,29 @@ def run_mcp_bridge_sse(
     bind_port = port or int(os.getenv("FOUNDUPS_MCP_PORT", str(DEFAULT_PORT)))
     token = auth_token if auth_token is not None else os.getenv("FOUNDUPS_MCP_AUTH_TOKEN", "")
 
-    # Fail closed for non-loopback exposure without auth token
+    # Determine auth enforcement: fail closed for remote exposure or explicit tunnel mode
     is_loopback = bind_host in ("127.0.0.1", "localhost", "::1")
-    if not is_loopback and not token:
-        msg = f"[MCP-BRIDGE-SSE] Refusing to bind to non-loopback host {bind_host} without auth token (fail closed per WSP 97)."
+    is_tunnel_mode = os.getenv("FOUNDUPS_MCP_TUNNEL_MODE", "0") == "1"
+
+    if require_auth is not None:
+        auth_enforced = require_auth
+    else:
+        # Default: require auth if token present, non-loopback, or tunnel mode
+        auth_enforced = bool(token or is_tunnel_mode or not is_loopback)
+
+    if auth_enforced and not token:
+        msg = (
+            f"[MCP-BRIDGE-SSE] Refusing to start MCP server without auth token when "
+            f"auth enforcement is enabled (host={bind_host}, tunnel_mode={is_tunnel_mode}). "
+            f"Failing closed per WSP 97."
+        )
         logger.error(msg)
         print(msg)
         return {"status": "error", "error": "auth_token_required_for_remote_exposure"}
 
     with _state_lock:
         if _active_runtime is not None and _active_runtime.is_alive():
-            msg = f"[MCP-BRIDGE-SSE] MCP server is already running on {_active_runtime.host}:{_active_runtime.port} (PID {_active_runtime.proc.pid if _active_runtime.proc else 'in_process'})"
+            msg = f"[MCP-BRIDGE-SSE] MCP server is already running on {_active_runtime.host}:{_active_runtime.port}"
             logger.warning(msg)
             print(msg)
             return {
@@ -307,15 +429,15 @@ def run_mcp_bridge_sse(
 
     print(f"[MCP-BRIDGE-SSE] Starting FoundUps MCP SSE Server on http://{bind_host}:{bind_port}/sse ...")
 
-    # Acquire instance lock
+    # Acquire instance lock (fail-closed if unavailable)
     try:
         from modules.infrastructure.instance_lock.src.instance_manager import get_instance_lock
         lock = get_instance_lock("foundups_mcp_bridge_sse")
 
         duplicates = lock.check_duplicates()
         if duplicates:
-            msg = f"[MCP-BRIDGE-SSE] Duplicate instance detected: {duplicates}"
-            logger.warning(msg)
+            msg = f"[MCP-BRIDGE-SSE] Duplicate instance detected: {duplicates} (failing closed per WSP 97)."
+            logger.error(msg)
             print(msg)
             return {"status": "error", "error": "duplicate_instance_running"}
 
@@ -325,8 +447,10 @@ def run_mcp_bridge_sse(
             print(msg)
             return {"status": "error", "error": "lock_acquisition_failed"}
     except Exception as exc:
-        logger.warning(f"[MCP-BRIDGE-SSE] InstanceLock unavailable: {exc}")
-        lock = None
+        msg = f"[MCP-BRIDGE-SSE] Instance lock system failure: {exc} (failing closed per WSP 97)."
+        logger.error(msg)
+        print(msg)
+        return {"status": "error", "error": "lock_system_unavailable"}
 
     # Check if fastmcp is importable in current environment
     try:
@@ -336,7 +460,7 @@ def run_mcp_bridge_sse(
         asgi_app = build_asgi_app(
             repo_root=root,
             auth_token=token,
-            require_auth=not is_loopback,
+            require_auth=auth_enforced,
         )
 
         config = uvicorn.Config(
@@ -368,16 +492,13 @@ def run_mcp_bridge_sse(
         if not canary.get("verified"):
             err = canary.get("error", "unknown_canary_failure")
             print(f"[MCP-BRIDGE-SSE-ERROR] Protocol readiness canary failed: {err}")
-            server.should_exit = True
-            thread.join(timeout=3.0)
-            if lock:
-                lock.release()
+            _terminate_runtime(handle, timeout_sec=3.0)
             with _state_lock:
                 _active_runtime = None
             return {"status": "failed", "error": err}
 
         handle.readiness = canary
-        print(f"[MCP-BRIDGE-SSE] In-process server verified & operational ({canary.get('tools_count')} tools, {canary.get('latency_ms')}ms). Endpoint: http://{bind_host}:{bind_port}/sse")
+        print(f"[MCP-BRIDGE-SSE] In-process server verified & operational ({canary.get('tools_count')} allowlisted tools, {canary.get('latency_ms')}ms). Endpoint: http://{bind_host}:{bind_port}/sse")
 
         if blocking:
             try:
@@ -386,10 +507,7 @@ def run_mcp_bridge_sse(
             except (KeyboardInterrupt, SystemExit):
                 print("[MCP-BRIDGE-SSE] Shutdown requested...")
             finally:
-                server.should_exit = True
-                thread.join(timeout=5.0)
-                if lock:
-                    lock.release()
+                _terminate_runtime(handle, timeout_sec=5.0)
                 with _state_lock:
                     _active_runtime = None
                 print("[MCP-BRIDGE-SSE] Server stopped.")
@@ -414,7 +532,10 @@ def run_mcp_bridge_sse(
         env["FOUNDUPS_MCP_PORT"] = str(bind_port)
         if token:
             env["FOUNDUPS_MCP_AUTH_TOKEN"] = token
+        if auth_enforced:
+            env["FOUNDUPS_MCP_REQUIRE_AUTH"] = "1"
 
+        # Notice: auth_token is passed strictly via environment, NEVER on argv or logs
         cmd = [
             str(python_exe),
             "-m",
@@ -426,10 +547,8 @@ def run_mcp_bridge_sse(
             "--port",
             str(bind_port),
         ]
-        if token:
-            cmd.extend(["--auth-token", token])
 
-        logger.info(f"[MCP-BRIDGE-SSE] Launching subprocess: {' '.join(cmd)}")
+        logger.info(f"[MCP-BRIDGE-SSE] Launching subprocess on {bind_host}:{bind_port}")
 
         proc = subprocess.Popen(
             cmd,
@@ -454,33 +573,21 @@ def run_mcp_bridge_sse(
         if not canary.get("verified"):
             err = canary.get("error", "unknown_canary_failure")
             print(f"[MCP-BRIDGE-SSE-ERROR] Subprocess protocol readiness canary failed: {err}")
-            try:
-                proc.terminate()
-                proc.wait(timeout=3.0)
-            except Exception:
-                proc.kill()
-            if lock:
-                lock.release()
+            _terminate_runtime(handle, timeout_sec=3.0)
             with _state_lock:
                 _active_runtime = None
             return {"status": "failed", "error": err}
 
         handle.readiness = canary
-        print(f"[MCP-BRIDGE-SSE] Subprocess verified & operational (PID {proc.pid}, {canary.get('tools_count')} tools, {canary.get('latency_ms')}ms). Endpoint: http://{bind_host}:{bind_port}/sse")
+        print(f"[MCP-BRIDGE-SSE] Subprocess verified & operational (PID {proc.pid}, {canary.get('tools_count')} allowlisted tools, {canary.get('latency_ms')}ms). Endpoint: http://{bind_host}:{bind_port}/sse")
 
         if blocking:
             try:
                 proc.wait()
             except (KeyboardInterrupt, SystemExit):
                 print("[MCP-BRIDGE-SSE] Subprocess interrupted...")
-                try:
-                    proc.terminate()
-                    proc.wait(timeout=5.0)
-                except Exception:
-                    proc.kill()
             finally:
-                if lock:
-                    lock.release()
+                _terminate_runtime(handle, timeout_sec=5.0)
                 with _state_lock:
                     _active_runtime = None
             return {"status": "stopped"}
@@ -510,39 +617,11 @@ def stop_mcp_bridge_sse(timeout_sec: float = 5.0) -> Dict[str, Any]:
             _active_runtime = None
             return {"status": "already_stopped"}
 
-    # Signal shutdown
-    if handle.mode == "in_process" and handle.server is not None:
-        handle.server.should_exit = True
-        if handle.thread is not None:
-            handle.thread.join(timeout=timeout_sec)
-            if handle.thread.is_alive():
-                logger.error("[MCP-BRIDGE-SSE] In-process server thread did not exit within timeout")
-                return {"status": "error", "error": "stop_timeout_still_running"}
+    success, message = _terminate_runtime(handle, timeout_sec=timeout_sec)
+    if not success:
+        return {"status": "error", "error": message}
 
-    elif handle.mode == "subprocess" and handle.proc is not None:
-        try:
-            handle.proc.terminate()
-            handle.proc.wait(timeout=timeout_sec)
-        except subprocess.TimeoutExpired:
-            logger.warning("[MCP-BRIDGE-SSE] Subprocess did not terminate gracefully; sending kill signal")
-            try:
-                handle.proc.kill()
-                handle.proc.wait(timeout=2.0)
-            except Exception as exc:
-                logger.error(f"[MCP-BRIDGE-SSE] Failed to kill subprocess: {exc}")
-                return {"status": "error", "error": "stop_timeout_still_running"}
-        except Exception as exc:
-            logger.error(f"[MCP-BRIDGE-SSE] Error stopping subprocess: {exc}")
-            return {"status": "error", "error": str(exc)}
-
-    # Confirmed server exit -> release lock exactly once and clear global state
     with _state_lock:
-        if handle.lock:
-            try:
-                handle.lock.release()
-            except Exception as exc:
-                logger.debug(f"[MCP-BRIDGE-SSE] Lock release notice: {exc}")
-            handle.lock = None
         _active_runtime = None
 
     print("[MCP-BRIDGE-SSE] Verified clean shutdown.")

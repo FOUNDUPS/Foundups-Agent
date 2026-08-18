@@ -945,6 +945,79 @@ Assemble compressed context for Windsurf prompt.
 
 ---
 
+
+### RedDog Context Tools (v1.5)
+
+#### `get_reddog_state()`
+
+Retrieve current RedDog external state snapshot including active worker lanes, open research threads, recent slice lineage, and live Git HEAD commit/branch.
+
+**Returns:**
+```python
+{
+    "status": "ok",
+    "data": {
+        "git": {"commit": str, "branch": str},
+        "state_dir_exists": bool,
+        "active_context_summary": str,
+        "active_research_threads": str,
+        "work_to_work_lineage": str,
+    },
+    "meta": {"source": "reddog"}
+}
+```
+
+#### `get_reddog_analysis_context(prompt, target_module=None)`
+
+Assemble grounded RedDog contextual evidence packet for 0102 analysis (read-only context assembly).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| prompt | str | - | Task or problem statement to assemble context for |
+| target_module | str | None | Optional module name to scope documentation |
+
+**Returns:**
+```python
+{
+    "status": "ok",
+    "data": {
+        "prompt": str,
+        "target_module": str | None,
+        "git_state": {"commit": str, "branch": str},
+        "system_posture": str,
+        "active_context": str,
+        "module_doc_snippet": str | None,
+    },
+    "meta": {"source": "reddog_context", "prompt": str}
+}
+```
+
+---
+
+### FastMCP Remote SSE Server (v1.5)
+
+Exposes strictly allowlisted perception tools over SSE transport with fail-closed Bearer authentication and truthful protocol readiness canary.
+
+```python
+from modules.infrastructure.foundups_mcp_bridge.src.mcp_server import (
+    REMOTE_READ_ONLY_ALLOWLIST,
+    build_mcp_server,
+    build_asgi_app,
+)
+from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
+    run_mcp_bridge_sse,
+    stop_mcp_bridge_sse,
+    get_mcp_bridge_status,
+    verify_mcp_readiness,
+)
+```
+
+- `REMOTE_READ_ONLY_ALLOWLIST`: Frozen tuple of 33 pure read-only perception tools. Mutation/dispatch tools are strictly omitted.
+- `build_mcp_server(repo_root=None)`: Builds FastMCP server registering only allowlisted perception tools.
+- `run_mcp_bridge_sse(host=None, port=None, auth_token=None, require_auth=None, repo_root=None, blocking=True)`: Runs SSE server with instance lock invariant and protocol readiness canary.
+- `stop_mcp_bridge_sse(timeout_sec=5.0)`: Centralized idempotent stop. Signals shutdown, waits for termination, and releases lock only upon confirmed server exit.
+- `verify_mcp_readiness(host, port, auth_token=None, timeout_sec=15.0)`: Protocol canary verifying initialize -> tools/list validation -> safe tool call envelope parsing.
+
 ### Execution Stubs (v1 Disabled)
 
 These tools return `{"status": "disabled_in_v1"}` with schema information.

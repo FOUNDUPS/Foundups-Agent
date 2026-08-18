@@ -125,7 +125,7 @@ class FoundUpsMCPBridge:
 
         # RedDog & Fusion perception tools
         self._tools["get_reddog_state"] = self._wrap(reddog_tools.get_reddog_state)
-        self._tools["reddog_analyze"] = self._wrap(reddog_tools.reddog_analyze)
+        self._tools["get_reddog_analysis_context"] = self._wrap(reddog_tools.get_reddog_analysis_context)
 
         # Execution stubs (disabled in v1)
         self._tools["coordinate_mission"] = execution_stubs.coordinate_mission
