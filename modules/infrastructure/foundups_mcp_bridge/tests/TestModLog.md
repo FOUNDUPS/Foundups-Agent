@@ -1,19 +1,21 @@
 # foundups_mcp_bridge TestModLog
 
-## [2026-08-18] FastMCP SSE Server, Read-Only Allowlist, Concurrency & Security Verification
+## [2026-08-18] FastMCP SSE Server: Fail-Closed Auth & Termination Failure Verification
 
-- Added `test_mcp_server_sse.py` verifying:
+- Added regression tests in `test_mcp_server_sse.py` verifying:
+  - `build_asgi_app` raises `ValueError` if `require_auth=True` and `auth_token` is empty.
+  - `_terminate_runtime` failure retains lock and runtime handle.
   - All 33 allowlisted perception tools registered on FastMCP.
   - Mutation and execution tools are completely absent from remote registration.
-  - Parameter signatures and annotations dynamically strip `repo_root`.
+  - Parameter signatures dynamically strip `repo_root`.
   - Read tool execution returns valid perception envelope.
-  - Truthful `get_reddog_state` and `get_reddog_analysis_context` return structured context with `source="reddog_context"`.
-  - Protocol-level readiness canary verifies initialize, tools/list, and tool call over SSE stream.
+  - `get_reddog_state` and `get_reddog_analysis_context` return structured context with `source="reddog_context"`.
+  - Protocol canary verifies initialize, tools/list, and tool call over SSE stream.
   - Fail-closed token authentication rejects unauthenticated requests (401) and URL query tokens (401) while `/health` succeeds (200).
   - Server fails closed when auth is required without token.
-  - Protocol canary fails closed on unauthorized connection.
+  - Canary fails closed on unauthorized connection.
   - Duplicate start protection and idempotent stop verified.
-- Test results: **9 passed in 11.33s** (100% pass rate).
+- Test results: **11 passed in 11.81s** (100% pass rate).
 
 ## [2026-08-15] Owner-response repository path projection
 

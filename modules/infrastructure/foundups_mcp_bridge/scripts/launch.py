@@ -14,7 +14,7 @@ Enforces strict concurrency contract:
 - instance lock held <=> this process owns the live MCP server
 - fail-closed: startup aborted if instance lock cannot be acquired
 - centralized termination: signal -> bounded wait -> confirm dead -> release lock exactly once
-- idempotent stop with truthful STOP_TIMEOUT reporting (lock not released on timeout)
+- failure propagation: _active_runtime and lock retained if termination times out (never cleared)
 - fail-closed remote authentication (secret passed via env only; never argv/logs)
 - truthful protocol-level readiness canary (initialize -> tools/list validation -> tool call parsing)
 
@@ -492,26 +492,36 @@ def run_mcp_bridge_sse(
         if not canary.get("verified"):
             err = canary.get("error", "unknown_canary_failure")
             print(f"[MCP-BRIDGE-SSE-ERROR] Protocol readiness canary failed: {err}")
-            _terminate_runtime(handle, timeout_sec=3.0)
-            with _state_lock:
-                _active_runtime = None
-            return {"status": "failed", "error": err}
+            term_ok, term_msg = _terminate_runtime(handle, timeout_sec=3.0)
+            if term_ok:
+                with _state_lock:
+                    _active_runtime = None
+            return {"status": "failed", "error": err, "termination": term_msg}
 
         handle.readiness = canary
         print(f"[MCP-BRIDGE-SSE] In-process server verified & operational ({canary.get('tools_count')} allowlisted tools, {canary.get('latency_ms')}ms). Endpoint: http://{bind_host}:{bind_port}/sse")
 
         if blocking:
+            term_ok = False
+            term_err = ""
             try:
                 while not server.should_exit and thread.is_alive():
                     time.sleep(0.5)
             except (KeyboardInterrupt, SystemExit):
                 print("[MCP-BRIDGE-SSE] Shutdown requested...")
             finally:
-                _terminate_runtime(handle, timeout_sec=5.0)
-                with _state_lock:
-                    _active_runtime = None
-                print("[MCP-BRIDGE-SSE] Server stopped.")
-            return {"status": "stopped"}
+                term_ok, term_err = _terminate_runtime(handle, timeout_sec=5.0)
+                if term_ok:
+                    with _state_lock:
+                        _active_runtime = None
+                    print("[MCP-BRIDGE-SSE] Server stopped.")
+                else:
+                    logger.error(f"[MCP-BRIDGE-SSE] In-process server termination timed out: {term_err}")
+
+            if term_ok:
+                return {"status": "stopped"}
+            else:
+                return {"status": "error", "error": term_err}
         else:
             return {"status": "running", "mode": "in_process", "host": bind_host, "port": bind_port, "readiness": canary}
 
@@ -573,24 +583,35 @@ def run_mcp_bridge_sse(
         if not canary.get("verified"):
             err = canary.get("error", "unknown_canary_failure")
             print(f"[MCP-BRIDGE-SSE-ERROR] Subprocess protocol readiness canary failed: {err}")
-            _terminate_runtime(handle, timeout_sec=3.0)
-            with _state_lock:
-                _active_runtime = None
-            return {"status": "failed", "error": err}
+            term_ok, term_msg = _terminate_runtime(handle, timeout_sec=3.0)
+            if term_ok:
+                with _state_lock:
+                    _active_runtime = None
+            return {"status": "failed", "error": err, "termination": term_msg}
 
         handle.readiness = canary
         print(f"[MCP-BRIDGE-SSE] Subprocess verified & operational (PID {proc.pid}, {canary.get('tools_count')} allowlisted tools, {canary.get('latency_ms')}ms). Endpoint: http://{bind_host}:{bind_port}/sse")
 
         if blocking:
+            term_ok = False
+            term_err = ""
             try:
                 proc.wait()
             except (KeyboardInterrupt, SystemExit):
                 print("[MCP-BRIDGE-SSE] Subprocess interrupted...")
             finally:
-                _terminate_runtime(handle, timeout_sec=5.0)
-                with _state_lock:
-                    _active_runtime = None
-            return {"status": "stopped"}
+                term_ok, term_err = _terminate_runtime(handle, timeout_sec=5.0)
+                if term_ok:
+                    with _state_lock:
+                        _active_runtime = None
+                    print("[MCP-BRIDGE-SSE] Subprocess stopped.")
+                else:
+                    logger.error(f"[MCP-BRIDGE-SSE] Subprocess termination timed out: {term_err}")
+
+            if term_ok:
+                return {"status": "stopped"}
+            else:
+                return {"status": "error", "error": term_err}
         else:
             return {"status": "running", "mode": "subprocess", "pid": proc.pid, "host": bind_host, "port": bind_port, "readiness": canary}
 
@@ -602,7 +623,7 @@ def stop_mcp_bridge_sse(timeout_sec: float = 5.0) -> Dict[str, Any]:
     Idempotent stop contract:
     - If no active runtime -> return {"status": "already_stopped"}
     - If active runtime -> signal exit, bounded wait for termination, verify port/server gone, release lock exactly once, clear global state.
-    - If shutdown times out -> do NOT release lock; return {"status": "error", "error": "stop_timeout_still_running"}.
+    - If shutdown times out -> do NOT release lock; do NOT clear _active_runtime; return {"status": "error", "error": "stop_timeout_still_running"}.
     """
     global _active_runtime
 
@@ -619,6 +640,7 @@ def stop_mcp_bridge_sse(timeout_sec: float = 5.0) -> Dict[str, Any]:
 
     success, message = _terminate_runtime(handle, timeout_sec=timeout_sec)
     if not success:
+        logger.error(f"[MCP-BRIDGE-SSE] Shutdown failed ({message}); retaining lock and runtime handle.")
         return {"status": "error", "error": message}
 
     with _state_lock:

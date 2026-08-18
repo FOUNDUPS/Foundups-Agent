@@ -11,10 +11,12 @@ WSP References:
 import asyncio
 import json
 import pytest
+import threading
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from unittest.mock import MagicMock
 
 # FastMCP may only be installed in foundups-mcp-env
 pytest.importorskip("fastmcp")
@@ -28,6 +30,8 @@ from modules.infrastructure.foundups_mcp_bridge.src.mcp_server import (
 from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
     FORBIDDEN_CANARY_TOOLS,
     REQUIRED_CANARY_TOOLS,
+    MCPRuntimeHandle,
+    _terminate_runtime,
     get_mcp_bridge_status,
     verify_mcp_readiness,
     run_mcp_bridge_sse,
@@ -195,6 +199,14 @@ class TestMCPServerSSE:
 class TestMCPServerFailureBoundaries:
     """Test fail-closed security and canary error rejection boundaries."""
 
+    def test_build_asgi_app_refuses_empty_token_when_auth_required(self, repo_root):
+        """P0 Server Boundary: build_asgi_app raises ValueError if require_auth=True and token is empty."""
+        with pytest.raises(ValueError, match="auth_token is required when require_auth=True"):
+            build_asgi_app(repo_root=repo_root, auth_token="", require_auth=True)
+
+        with pytest.raises(ValueError, match="auth_token is required when require_auth=True"):
+            build_asgi_app(repo_root=repo_root, auth_token="   ", require_auth=True)
+
     def test_fail_closed_without_token_when_auth_required(self, repo_root):
         """P0 Security: Server refuses to start without auth token when auth is required."""
         res = run_mcp_bridge_sse(
@@ -235,3 +247,26 @@ class TestMCPServerFailureBoundaries:
             assert "401" in bad_canary.get("error", "") or "Failed to establish" in bad_canary.get("error", "")
         finally:
             stop_mcp_bridge_sse()
+
+    def test_failed_termination_retains_runtime_and_lock(self):
+        """P0 Concurrency: If termination times out, _terminate_runtime retains lock and returns failure."""
+        mock_lock = MagicMock()
+        mock_thread = MagicMock()
+        mock_thread.is_alive.return_value = True  # Simulates thread hanging
+
+        handle = MCPRuntimeHandle(
+            mode="in_process",
+            host="127.0.0.1",
+            port=8999,
+            started_at=time.time(),
+            lock=mock_lock,
+            server=MagicMock(),
+            thread=mock_thread,
+        )
+
+        success, err = _terminate_runtime(handle, timeout_sec=0.1)
+        assert success is False
+        assert err == "stop_timeout_still_running"
+        # Verify lock was NOT released
+        mock_lock.release.assert_not_called()
+        assert handle.lock is not None

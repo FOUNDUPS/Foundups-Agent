@@ -9,11 +9,12 @@ Exposes FoundUps MCP perception tools via FastMCP over SSE and stdio transports.
 Enforces:
 1. Strict Remote Read-Only Allowlist (mutation/execution tools strictly excluded).
 2. Fail-closed Token Authentication (Bearer token header only; URL tokens prohibited).
+   Refuses construction/startup if require_auth=True but token is empty.
 3. Public /health probe for tunnel monitoring.
 
 WSP References:
 - WSP 96: Model Context Protocol Governance and Consensus
-- WSP 97: Truthful Verification (explicit read-only perception boundary)
+- WSP 97: Truthful Verification (explicit read-only perception boundary & fail-closed auth)
 - WSP 80: Cube-Level DAE Orchestration
 """
 
@@ -201,8 +202,17 @@ class AuthMiddleware:
 
     def __init__(self, app: Any, auth_token: str = "", require_auth: bool = True):
         self.app = app
-        self.auth_token = auth_token.strip() if auth_token else ""
-        self.require_auth = require_auth and bool(self.auth_token)
+        if require_auth:
+            token_clean = auth_token.strip() if auth_token else ""
+            if not token_clean:
+                raise ValueError(
+                    "auth_token is required when require_auth=True (fail-closed per WSP 97)"
+                )
+            self.auth_token = token_clean
+            self.require_auth = True
+        else:
+            self.auth_token = ""
+            self.require_auth = False
 
     async def __call__(self, scope: Dict[str, Any], receive: Any, send: Any):
         if scope.get("type") not in ("http", "websocket"):
@@ -271,6 +281,8 @@ def build_asgi_app(
     """
     Build Starlette ASGI application for FastMCP SSE server wrapped with AuthMiddleware.
 
+    Fails closed: raises ValueError if require_auth=True and auth_token is empty.
+
     Args:
         repo_root: Optional repository root path
         auth_token: Bearer auth token string
@@ -279,8 +291,11 @@ def build_asgi_app(
     Returns:
         ASGI application.
     """
-    mcp = build_mcp_server(repo_root=repo_root)
     token = auth_token if auth_token is not None else os.getenv("FOUNDUPS_MCP_AUTH_TOKEN", "")
+    if require_auth and not (token and token.strip()):
+        raise ValueError("auth_token is required when require_auth=True (fail-closed per WSP 97)")
+
+    mcp = build_mcp_server(repo_root=repo_root)
 
     try:
         from fastmcp.server.http import create_sse_app
@@ -315,7 +330,14 @@ def main():
 
     root = _get_repo_root()
     token = os.getenv("FOUNDUPS_MCP_AUTH_TOKEN", "")
-    require_auth = bool(os.getenv("FOUNDUPS_MCP_REQUIRE_AUTH", "1" if token else "0") == "1")
+    is_loopback = args.host in ("127.0.0.1", "localhost", "::1")
+    is_tunnel_mode = os.getenv("FOUNDUPS_MCP_TUNNEL_MODE", "0") == "1"
+    require_auth = bool(os.getenv("FOUNDUPS_MCP_REQUIRE_AUTH", "1" if (token or is_tunnel_mode or not is_loopback) else "0") == "1")
+
+    if require_auth and not token:
+        logger.error("[MCP-SERVER] Refusing to start: auth_token required when require_auth=True (fail-closed per WSP 97).")
+        print("[MCP-SERVER] Error: auth_token required when require_auth=True (fail-closed per WSP 97).", file=sys.stderr)
+        sys.exit(1)
 
     if args.transport == "stdio":
         mcp = build_mcp_server(repo_root=root)
