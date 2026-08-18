@@ -185,15 +185,9 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     )
     _assert_signer_and_memex_runtime_files(generated)
     digest = generator.canonical_manifest_digest(generated)
-<<<<<<< HEAD
-<<<<<<< HEAD
-    assert digest == "8adb4037af3f187d7f44d40f1f5b84ea182a07999c5a14c00047fcc797612f61"
-=======
-    assert digest == "932c35752db3f99a84ca31ee3d90eb2508f8ccac0193ab67d208b8357364cb81"
->>>>>>> 8a77f0574 (fix(reddog): harden governed Holo and Git context)
-=======
-    assert digest == "c477253ea6fdf2748ffd9f79d72d8fd22bfa95749416b0493f8cb2ec8e91821d"
->>>>>>> 03c332294 (fix(holo): bound maintenance failure diagnostics)
+    assert digest == "f05d91f3e9714c5c4ec6e58bbee62f6b7ee6d0cc49ad8cf104c09bdd29c8ec49"
+    assert digest == "f05d91f3e9714c5c4ec6e58bbee62f6b7ee6d0cc49ad8cf104c09bdd29c8ec49"
+    assert digest == "f05d91f3e9714c5c4ec6e58bbee62f6b7ee6d0cc49ad8cf104c09bdd29c8ec49"
     constants = (REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js").read_text(encoding="utf-8")
     match = re.search(r"EXPECTED_MANIFEST_SHA256 = '([a-f0-9]{64})'", constants)
     assert match is not None and match.group(1) == digest
