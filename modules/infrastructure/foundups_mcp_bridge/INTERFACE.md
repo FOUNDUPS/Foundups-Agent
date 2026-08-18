@@ -22,7 +22,7 @@ README/INTERFACE evidence before filling remaining slots by global score.
 
 ### `build_mcp_server(repo_root: Optional[Path] = None, server_name: str = "FoundUps MCP Bridge") -> FastMCP`
 
-Builds and returns a configured FastMCP server instance wrapping all 37 perception and read tools from `FoundUpsMCPBridge`. Strips the `repo_root` parameter from tool signatures and exposes standard MCP JSON schemas.
+Builds and returns a configured FastMCP server instance wrapping all 33 perception and read tools from `FoundUpsMCPBridge`. Strips the `repo_root` parameter from tool signatures and exposes standard MCP JSON schemas.
 
 ### `run_mcp_bridge_sse(host: Optional[str] = None, port: Optional[int] = None, repo_root: Optional[Path] = None, blocking: bool = True) -> Dict[str, Any]`
 
@@ -1012,11 +1012,39 @@ from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
 )
 ```
 
-- `REMOTE_READ_ONLY_ALLOWLIST`: Frozen tuple of 33 pure read-only perception tools. Mutation/dispatch tools are strictly omitted.
-- `build_mcp_server(repo_root=None)`: Builds FastMCP server registering only allowlisted perception tools.
-- `run_mcp_bridge_sse(host=None, port=None, auth_token=None, require_auth=None, repo_root=None, blocking=True)`: Runs SSE server with instance lock invariant and protocol readiness canary.
-- `stop_mcp_bridge_sse(timeout_sec=5.0)`: Centralized idempotent stop. Signals shutdown, waits for termination, and releases lock only upon confirmed server exit.
-- `verify_mcp_readiness(host, port, auth_token=None, timeout_sec=15.0)`: Protocol canary verifying initialize -> tools/list validation -> safe tool call envelope parsing.
+#### Functions & API
+
+##### `build_mcp_server(repo_root: Optional[Path] = None) -> FastMCP`
+Builds FastMCP server instance registering only tools from `REMOTE_READ_ONLY_ALLOWLIST` (33 pure read-only perception tools). Strips internal `repo_root` parameter from tool signatures to produce standard MCP JSON Schemas.
+
+##### `build_asgi_app(repo_root: Optional[Path] = None, auth_token: Optional[str] = None, require_auth: bool = True) -> Any`
+Builds Starlette ASGI application for FastMCP SSE server wrapped with `AuthMiddleware`.
+- Fails closed: raises `ValueError` if `require_auth=True` and `auth_token` is empty.
+- Public `/health` probe returns 200 with service and auth status.
+- Protected `/sse` and `/message/` endpoints strictly require `Authorization: Bearer <token>` header (`?token=` URL query param is rejected).
+
+##### `run_mcp_bridge_sse(host: Optional[str] = None, port: Optional[int] = None, auth_token: Optional[str] = None, require_auth: Optional[bool] = None, repo_root: Optional[Path] = None, blocking: bool = True) -> Dict[str, Any]`
+Runs FoundUps MCP SSE Server with instance locking and protocol-level readiness canary.
+- Invariant: `instance lock held <=> process owns live MCP server`. Fails closed if lock cannot be acquired.
+- Multi-mode execution: in-process if FastMCP is available; fallback subprocess via `foundups-mcp-env`.
+- Secret leak prevention: passes `auth_token` via environment variable only (never argv or process logs).
+- Truthful readiness: calls `verify_mcp_readiness()` before returning `{"status": "running"}`.
+
+##### `stop_mcp_bridge_sse(timeout_sec: float = 5.0) -> Dict[str, Any]`
+Requests graceful, verified shutdown of active server.
+- Idempotent: returns `{"status": "already_stopped"}` if not running.
+- Termination failure propagation: if shutdown times out, lock and runtime handle are retained, returning `{"status": "error", "error": "stop_timeout_still_running"}`.
+
+##### `get_mcp_bridge_status() -> Dict[str, Any]`
+Returns current truthful runtime status of the active MCP SSE server.
+
+##### `verify_mcp_readiness(host: str, port: int, auth_token: Optional[str] = None, timeout_sec: float = 15.0) -> Dict[str, Any]`
+Performs protocol-level readiness verification over SSE transport:
+1. Connects to `/sse` stream.
+2. Performs JSON-RPC `initialize` handshake.
+3. Performs JSON-RPC `tools/list` request and verifies all required tools exist and mutation tools are absent.
+4. Performs JSON-RPC `tools/call` for `get_wsp_docs` and validates inner result payload `status == "ok"`.
+
 
 ### Execution Stubs (v1 Disabled)
 

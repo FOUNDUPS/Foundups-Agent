@@ -121,7 +121,7 @@ When `python main.py` is started, `mcp_bridge_sse` is automatically registered a
    - Set Name to `FoundUps MCP Bridge`.
    - Set Server URL to `https://<your-ngrok-subdomain>.ngrok-free.app/sse`.
    - Click **Create**.
-4. In a new ChatGPT conversation, select the **FoundUps MCP Bridge** app to gain access to all 37 perception and read tools.
+4. In a new ChatGPT conversation, select the **FoundUps MCP Bridge** app to gain access to all 33 perception and read tools.
 
 ### Private HoloIndex Query Owner
 
@@ -413,17 +413,36 @@ Disabled tool responses:
 
 ## FastMCP Remote SSE Server & ChatGPT Tunneling
 
-The FoundUps MCP Bridge provides an SSE server (`mcp_server.py`) for remote agents (e.g. ChatGPT Developer Mode / Custom Apps) over secure tunnels:
+The FoundUps MCP Bridge provides an SSE server (`mcp_server.py`) for remote agents (e.g. ChatGPT Developer Mode / Custom Apps) over secure tunnels.
+
+### ⚠️ Security First: Mandatory Authentication for Tunneling
+Local loopback bindings do not require authentication by default for development. **When exposing the server via a tunnel (ngrok, Cloudflare Tunnel, or OpenAI Secure MCP Tunnel), authentication MUST be configured before starting the server or tunnel.**
 
 ```bash
-# Start standalone with auth enforcement
-export FOUNDUPS_MCP_AUTH_TOKEN="your-secure-token"
+# 1. Set secure auth token and enforce authentication
+export FOUNDUPS_MCP_AUTH_TOKEN="your-secure-random-token"
 export FOUNDUPS_MCP_REQUIRE_AUTH="1"
+
+# 2. Launch the MCP Bridge SSE server (binds to 127.0.0.1:8128 by default)
 python -m modules.infrastructure.foundups_mcp_bridge.scripts.launch
+
+# 3. In a separate terminal, start your secure tunnel to port 8128
+# Recommended: Cloudflare Tunnel or OpenAI Secure MCP Tunnel
+cloudflared tunnel --url http://127.0.0.1:8128
+# or: ngrok http 8128
 ```
 
-### Security & Invariants
-- **Remote Read-Only Allowlist**: Exposes exactly 33 pure perception tools (`REMOTE_READ_ONLY_ALLOWLIST`). All execution/mutation tools are strictly excluded.
+### ChatGPT Custom MCP App Configuration (Developer Mode)
+OpenAI supports connecting remote MCP endpoints in ChatGPT (Web):
+1. In ChatGPT Web, ensure **Developer Mode** is enabled under **Settings → Connected apps / Developer Mode**.
+2. Navigate to **Apps → Create App** (or custom MCP connector).
+3. Set **Authentication** to **Bearer Token** and paste your `FOUNDUPS_MCP_AUTH_TOKEN`.
+4. Enter the public SSE endpoint: `https://<your-tunnel-domain>/sse`.
+5. Click **Scan Tools** → confirms discovery of all 33 allowlisted perception tools.
+6. Open a chat, select the FoundUps MCP app, and interact with 0102.
+
+### Security Invariants (WSP 97)
+- **Remote Read-Only Allowlist**: Exposes exactly 33 pure perception tools (`REMOTE_READ_ONLY_ALLOWLIST`). All execution/mutation tools are strictly excluded from remote registration.
 - **Fail-Closed Bearer Auth**: Rejects unauthenticated requests with `401 Unauthorized`. URL query tokens (`?token=`) are deliberately rejected to prevent secret leakage in proxy/tunnel logs.
-- **Strict Lock Invariant**: `instance lock held <=> process owns live MCP server`. Lock released only after confirmed server termination.
-- **Protocol Readiness Canary**: Validates live SSE handshake, tool list allowlist enforcement, and tool call payload verification before reporting operational status.
+- **Strict Lock Invariant**: `instance lock held <=> process owns live MCP server`. Lock is released only after confirmed server termination.
+- **Protocol Readiness Canary**: Validates live SSE handshake, tool inventory against allowlist, and safe tool invocation before reporting operational status.
