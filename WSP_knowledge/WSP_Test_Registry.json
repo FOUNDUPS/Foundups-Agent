@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1515,
+  "total_tests": 1516,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -15551,6 +15551,21 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for FoundUps MCP Bridge.\n\nVerifies:\n- Response schema consistency\n- Repo perception tools\n- Doc access tools\n- Overseer read hooks\n- Execution stubs return disabled status"
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_mcp_server_sse",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_server_sse.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for FoundUps MCP Bridge FastMCP SSE Server.\n=================================================\n\nWSP References:\n- WSP 96: Model Context Protocol Governance and Consensus\n- WSP 97: Truthful Verification (explicit perception boundary & protocol canary)\n- WSP 34: Test Coverage Standards"
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_main_preflight",
