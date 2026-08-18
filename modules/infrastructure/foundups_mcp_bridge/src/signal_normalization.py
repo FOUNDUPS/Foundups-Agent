@@ -97,7 +97,7 @@ def get_overseer_summary(repo_root: Path) -> Dict[str, Any]:
                 summary["top_concerns"].append({
                     "type": "drift_risk",
                     "summary": f"WSP drift detected: {audit['drift_count']} issues",
-                    "severity": audit.get("severity", "medium"),
+                    "severity": _normalize_severity(audit.get("severity", "medium")),
                 })
 
     # Source 2: Mission history
@@ -229,6 +229,18 @@ def _cluster_failures(failures: List[Dict]) -> List[Dict]:
     # Sort by count descending
     result.sort(key=lambda x: x["count"], reverse=True)
     return result
+
+
+def _normalize_severity(sev: Any) -> str:
+    """Normalize arbitrary severity strings to standard taxonomy."""
+    s = str(sev).lower().strip()
+    if s in ("critical", "fatal"):
+        return "critical"
+    if s in ("high", "error"):
+        return "high"
+    if s in ("medium", "warning", "warn"):
+        return "medium"
+    return "low"
 
 
 def _infer_failure_severity(failures: List[Dict]) -> str:
@@ -559,7 +571,7 @@ def get_active_risks(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
                 risks.append({
                     "risk_type": "repeated_failure_risk",
                     "scope": ", ".join(cluster.get("modules", ["unknown"])[:3]),
-                    "severity": cluster.get("severity", "medium"),
+                    "severity": _normalize_severity(cluster.get("severity", "medium")),
                     "confidence": 0.6,
                     "evidence_sources": ["failure_clustering"],
                     "why_it_matters": f"Failure pattern occurred {cluster['count']} times",
@@ -577,7 +589,7 @@ def get_active_risks(repo_root: Path, limit: int = 10) -> Dict[str, Any]:
             risks.append({
                 "risk_type": "drift_risk",
                 "scope": "WSP framework",
-                "severity": audit.get("severity", "medium"),
+                "severity": _normalize_severity(audit.get("severity", "medium")),
                 "confidence": 0.7,
                 "evidence_sources": ["wsp_audit"],
                 "why_it_matters": f"{audit['drift_count']} WSP compliance issues detected",
