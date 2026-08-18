@@ -107,3 +107,48 @@ def test_canary_e2e_model_b_rejection_halts_and_emits_counterexample(tmp_path: P
     assert receipt.all_stages_passed is False
     assert len(op.counterexamples) == 1
     assert op.counterexamples[0].objection_id == "obj-canary-01"
+
+
+def test_canary_e2e_pattern_memory_persistence(tmp_path: Path) -> None:
+    """Proves that canary repair outcomes are durably persisted to SQLite PatternMemory."""
+    from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+
+    db_file = tmp_path / "test_pattern_memory.db"
+    memory = PatternMemory(db_path=db_file)
+    orchestrator = ScientificRepairCanaryOrchestrator(repo_root=tmp_path, pattern_memory=memory)
+
+    def mock_builder_patch(sandbox: Path) -> str:
+        (sandbox / "fix.py").write_text("def ok(): return True\n")
+        return "diff --git a/fix.py b/fix.py\n+ def ok(): return True"
+
+    def mock_deterministic_tests(sandbox: Path) -> tuple[bool, str]:
+        return True, "tests pass"
+
+    def mock_independent_verifier(packet) -> tuple[VerifierDisposition, str, CounterexampleReceipt | None]:
+        return VerifierDisposition.ACCEPT, "Verified", None
+
+    op, receipt = orchestrator.run_autonomous_repair_cycle(
+        failure_id="fail-persistence-check",
+        pain="Need durable memory verification",
+        desired_outcome="Stored in SQLite",
+        reproduction_command=["python", "-c", "import sys; sys.stderr.write('PERSIST_INVARIANT'); sys.exit(1)"],
+        failing_invariant="PERSIST_INVARIANT",
+        builder_patch_fn=mock_builder_patch,
+        deterministic_test_fn=mock_deterministic_tests,
+        independent_verifier_fn=mock_independent_verifier,
+        scratch_dir=tmp_path / "sandbox",
+    )
+
+    assert receipt.all_stages_passed is True
+
+    # Re-open the database with a fresh instance to prove durable disk persistence
+    fresh_memory = PatternMemory(db_path=db_file)
+    cursor = fresh_memory.conn.cursor()
+    cursor.execute("SELECT execution_id, skill_name, agent, success, notes FROM skill_outcomes WHERE execution_id = ?", (op.operation_id,))
+    row = cursor.fetchone()
+
+    assert row is not None
+    assert row["execution_id"] == op.operation_id
+    assert row["skill_name"] == "scientific_autonomous_repair"
+    assert row["success"] == 1
+    assert "Canary repair fail-persistence-check: ACCEPT" in row["notes"]

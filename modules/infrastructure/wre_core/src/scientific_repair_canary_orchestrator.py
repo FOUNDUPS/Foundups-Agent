@@ -45,6 +45,12 @@ from modules.ai_intelligence.ai_gateway.src.independent_repair_verifier import (
 )
 
 
+from modules.infrastructure.wre_core.src.pattern_memory import (
+    PatternMemory,
+    SkillOutcome,
+)
+
+
 @dataclass
 class CanaryExecutionReceipt:
     """Tamper-evident receipt proving the complete end-to-end autonomous canary run."""
@@ -70,11 +76,13 @@ class ScientificRepairCanaryOrchestrator:
         builder_model: str = "qwen-coder-7b",
         verifier_model: str = "gemma-270m",
         scaffold: str = "openclaw",
+        pattern_memory: PatternMemory | None = None,
     ) -> None:
         self.repo_root = Path(repo_root)
         self.builder_model = builder_model
         self.verifier_model = verifier_model
         self.scaffold = scaffold
+        self.pattern_memory = pattern_memory
 
     def run_autonomous_repair_cycle(
         self,
@@ -266,6 +274,22 @@ class ScientificRepairCanaryOrchestrator:
             operation.final_disposition = FinalDisposition.ABANDON
             operation.transition_to(RepairOperationState.ABANDONED, reason=f"Model B rejected: {v_summary}")
             operation.transition_to(RepairOperationState.LEARNED)
+        if self.pattern_memory is not None:
+            outcome = SkillOutcome(
+                execution_id=operation.operation_id,
+                skill_name="scientific_autonomous_repair",
+                agent=self.builder_model,
+                timestamp=datetime.now(UTC).isoformat(),
+                input_context=json.dumps({"failure_id": failure_id, "pain": operation.pain, "baseline": baseline_receipt.receipt_digest}),
+                output_result=json.dumps({"disposition": operation.final_disposition.value, "verifier_receipt": verifier_receipt.receipt_digest}),
+                success=(operation.final_disposition == FinalDisposition.ACCEPT),
+                pattern_fidelity=1.0 if operation.final_disposition == FinalDisposition.ACCEPT else 0.0,
+                outcome_quality=1.0 if operation.final_disposition == FinalDisposition.ACCEPT else 0.0,
+                execution_time_ms=100,
+                step_count=len(operation.state_history),
+                notes=f"Canary repair {failure_id}: {operation.final_disposition.value}",
+            )
+            self.pattern_memory.store_outcome(outcome)
 
         receipt = CanaryExecutionReceipt(
             schema_version="scientific_repair_canary_receipt.v1",

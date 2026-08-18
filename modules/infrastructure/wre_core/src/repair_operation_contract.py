@@ -458,8 +458,13 @@ class ScientificRepairOperation:
     candidate_diff_digest: str = ""
     final_disposition: FinalDisposition | None = None
     disposition_reason: str = ""
+    state_history: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+
+    def __post_init__(self) -> None:
+        if not self.state_history and self.state:
+            self.state_history.append(self.state.value)
 
     def can_transition_to(self, new_state: RepairOperationState) -> bool:
         """Check if transition from current state to new_state is allowed."""
@@ -473,6 +478,7 @@ class ScientificRepairOperation:
                 f"for operation {self.operation_id}. Allowed: {[s.value for s in VALID_STATE_TRANSITIONS.get(self.state, set())]}"
             )
         self.state = new_state
+        self.state_history.append(new_state.value)
         self.updated_at = datetime.now(UTC).isoformat()
         if reason:
             self.disposition_reason = reason
