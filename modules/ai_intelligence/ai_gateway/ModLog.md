@@ -1,5 +1,43 @@
 # AI Gateway Module Change Log
 
+## [2026-08-21] - Production Binding Restart and Reservation Closure
+
+- Moved supplier writes off deterministic claim markers onto fresh per-attempt
+  paths. Process death before either seal no longer wedges retry; unproved
+  orphan files are preserved, while terminal v3 durably binds each sealed
+  source path and exact device/inode/size/content proof for recovery.
+- Reserved the exact authority nonce/binding before provider entry and keyed
+  the runtime lock by authority nonce. Competing output bindings now permit one
+  provider callback; an unreadable existing provider receipt fails closed and
+  cannot be collapsed into absence or trigger another callback.
+- Added exact POSIX restart repair for death between hard-link publication and
+  source unlink, plus the corresponding two-link pending/target state in
+  immutable record creation. Repair removes only the exact proven sibling link
+  and flushes affected directories under the documented controlled-principal
+  boundary. Validation: complete AI Gateway suite 828 passed, 5 platform
+  skips; crash/WSP-62 matrix 15 passed, 3 platform skips; WSP-62 and
+  diff-check passed. WSP 00/15/22/50/62/97.
+
+## [2026-08-21] - Production Binding Ownership and Crash-Safety Correction
+
+- Replaced consumable zero-byte final claims with durable tokenized hidden-stage
+  claims. The provider bundle is persisted immediately after callback;
+  pre-terminal retry resumes it with zero callback and repeats current
+  authority, signature, evidence, runtime, and pure-time verification.
+- Retained exact stage descriptors through terminal digest and non-replacing
+  publication. Terminal v3 receipts bind source path/device/inode/size/content proofs.
+  Same-content replacement, hard links, symlinks, foreign stage swaps, and
+  occupied finals fail closed without deleting the foreign object.
+- Cleanup now removes or quarantines only an exact owned identity/content proof.
+  Windows publication renames the verified object by handle. POSIX uses an
+  exact non-replacing link commit under the documented same-principal runtime
+  directory boundary; it does not claim arbitrary same-UID exclusion.
+- Changed immutable receipt/publication creation to same-directory temporary,
+  file fsync, identity verification, non-replacing commit, and lineage fsync.
+  Midwrite process death can leave only a hidden pending file, not a partial
+  final record. Current validation is recorded in the 2026-08-21 corrective
+  entry above. WSP 00/15/22/50/62/97.
+
 ## [2026-08-21] - Production Binding Terminal Recovery Hardening
 
 - Derived exact authority-use identity before the external evidence callback,

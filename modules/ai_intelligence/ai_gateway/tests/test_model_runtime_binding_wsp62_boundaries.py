@@ -9,12 +9,17 @@ from pathlib import Path
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 BOUNDED_MODULES = (
     "model_autoresearch_production_authority_use.py",
+    "model_autoresearch_configured_gateway_atomic_create.py",
+    "model_autoresearch_configured_gateway_posix_recovery.py",
     "model_autoresearch_production_binding_artifact_durability.py",
+    "model_autoresearch_production_binding_artifact_identity.py",
+    "model_autoresearch_production_binding_claims.py",
     "model_autoresearch_production_binding_execution.py",
     "model_autoresearch_production_binding_finalization.py",
     "model_autoresearch_production_binding_freshness.py",
     "model_autoresearch_production_binding_json.py",
     "model_autoresearch_production_binding_outputs.py",
+    "model_autoresearch_production_binding_output_cleanup.py",
     "model_autoresearch_production_binding_preflight.py",
     "model_autoresearch_production_binding_recovery.py",
     "model_autoresearch_production_binding_rehydration.py",

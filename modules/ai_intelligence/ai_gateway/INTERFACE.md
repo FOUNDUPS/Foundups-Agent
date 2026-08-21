@@ -506,19 +506,40 @@ stored signed authority, issuance TTL bounds, and its already-APPLIED upstream
 publication through a non-mutating exact-status read at use time. Missing,
 RESERVED, or AUTHORIZED state rejects without advancing a marker; a public
 `VerifiedCampaignPromotionAuthority` dataclass alone is insufficient.
+For production binding, the injected receipt store must implement immutable
+`append`, exact `load`, and non-mutating `contains_receipt`. Presence must
+distinguish a provably absent ID from an occupied but unreadable/corrupt record;
+unknown presence fails closed before any external callback.
 
 The preview is deterministic and non-authoritative. The binding adapter asks
 an external boundary for independently signed benchmark and promotion evidence
 that binds the exact preview, policy, and authenticated promotion receipt. It
 then reproduces the preview selection ID through the existing verifier before
 supplying the existing selection and runtime-binding artifacts. Both outputs
-must be distinct outside-repository paths acquired with exclusive-create claims
-and rollback if the complete claim set cannot be acquired. Malformed runtime
+must be distinct outside-repository paths. A durable, concurrency-idempotent
+token claim owns hidden stages while final paths remain absent until APPLIED.
+The authority nonce/binding is durably RESERVED before provider entry, and the
+nonce-level runtime lock serializes competing bindings. Supplier output uses a
+fresh per-attempt path instead of overwriting the durable marker; pre-seal
+death leaves only a non-authoritative orphan. Terminal v3 records the exact
+sealed source paths and retained identity proofs.
+The external bundle is persisted immediately after callback; retry consumes it
+with zero callback and repeats current trust/time/evidence verification.
+An unreadable or corrupt existing provider receipt fails closed as unreadable,
+never as a missing receipt that could authorize another callback.
+Malformed runtime
 policy, untrusted/revoked keys, expired authority, and unclaimable output paths
 reject before that external callback. Durable exact-use publication permits an
 identical retry from RESERVED/AUTHORIZED state and rejects APPLIED replay. The
 adapter has no signer, private key, provider, subprocess, or network authority,
-and PANEL candidates fail closed.
+and PANEL candidates fail closed. Terminal receipts bind source path, device,
+inode, size, and content proofs. Publication is non-replacing and retains the sealed
+descriptor; cleanup removes only exact owned proofs and preserves foreign
+replacements with an ownership-conflict error. Windows uses exact handle
+rename. POSIX uses a non-replacing link commit and requires a same-principal
+controlled output directory; arbitrary same-UID writers are outside that
+pathname boundary. Exact terminal-proof nlink=2 state is restart-repaired after
+death between POSIX link creation and source unlink.
 
 #### Configured campaign runtime assembly
 

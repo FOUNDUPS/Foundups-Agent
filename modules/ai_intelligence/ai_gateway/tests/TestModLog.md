@@ -1,5 +1,38 @@
 # AI Gateway TestModLog
 
+## [2026-08-21] - Restart, Provider-Presence, and POSIX Link Regressions
+
+- Added real subprocess death at selection-only and selection-plus-runtime
+  pre-seal points. Retry completes from the durable provider bundle with zero
+  callback and leaves unproved isolated attempt artifacts untouched.
+- Added unreadable durable provider-receipt and concurrent conflicting-binding
+  regressions. Corruption/transient read failure is not absence, and only the
+  nonce-reservation winner reaches provider code.
+- Added POSIX-only subprocess coverage for death after final hard-link creation
+  and after immutable target-link creation. Recovery accepts only the exact
+  proof-bound nlink=2 state and durably removes the corresponding owned source
+  or pending link. Invalid interrupted-publication payload recovery also proves
+  the retained descriptor closes before fallback continues. Extended WSP-62
+  guards to both extracted helper modules.
+  Validation: crash/WSP-62 matrix 15 passed, 3 platform skips; complete AI
+  Gateway suite 828 passed, 5 platform skips; WSP-62 and diff-check passed.
+
+## [2026-08-21] - Production ownership and process-crash regressions
+
+- Added claim-race winner-token convergence and real subprocess death after an
+  exact claim. Retry reuses the owned claim; a provider bundle persisted
+  immediately after callback resumes with zero provider callback and fresh
+  trust/time/evidence/runtime verification.
+- Added foreign cleanup replacement and occupied-final probes, plus post-seal
+  same-content inode replacement, hard-link, and symlink substitution. Foreign
+  objects survive with explicit ownership conflict and never become finals.
+- Added a real subprocess midwrite death against the immutable configured store.
+  The final receipt remains absent, retry commits a complete record, and only a
+  hidden pending temporary may remain from the killed process.
+- Extended WSP-62 guards to atomic-create, claim, and retained artifact-identity
+  modules. Current validation is recorded in the 2026-08-21 corrective entry
+  above. WSP 00/15/22/50/62/97.
+
 ## [2026-08-21] - Production transaction immutable-audit regressions
 
 - Added zero-callback exact/conflicting replay, APPLIED directory-flush

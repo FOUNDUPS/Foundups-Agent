@@ -1583,7 +1583,7 @@
     "modules/ai_intelligence/ai_gateway/src/model_panel_signed_evidence.py": "5e1d31a9480c0f614f0b6c52497de73a612705fa64f5f68c5516d3f609ade781",
     "modules/ai_intelligence/ai_gateway/src/model_promotion_gate.py": "3da9d2d2dfda1b4522e6bb80d9a8f39008a6143351057c176be5e6b04fa66359",
     "modules/ai_intelligence/ai_gateway/src/model_provider_catalog_artifact_store.py": "8e9863fda9b517364f57cb1a7373ba1cd391fe81a183a22dbb169d41393c6666",
-    "modules/ai_intelligence/ai_gateway/src/model_provider_catalog_atomic_io.py": "d9b10952ca55ab7fef2cadaa0d011059e2a279457d6ab59b713b18763a9ac268",
+    "modules/ai_intelligence/ai_gateway/src/model_provider_catalog_atomic_io.py": "59e25e1a657053daa7a6317dab9630aa4477bf3064237783d8db4d5826a4ccdc",
     "modules/ai_intelligence/ai_gateway/src/model_provider_catalog_replay_state.py": "149764df5c668b5e2aa2cda7be4be8dc35630d6b2f08a8968d785c610aa0da09",
     "modules/ai_intelligence/ai_gateway/src/model_provider_catalog_snapshot.py": "f39e2bb5e9d608b2798ccc489145613f4bcd5f2d166547d2a3234b1e7434c4f6",
     "modules/ai_intelligence/ai_gateway/src/model_provider_execution_control_projection.py": "106b9c0a1ffdccc885b1738a70087062f6992d31815a52cf08f83756b50b710e",

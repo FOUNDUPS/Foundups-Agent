@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from .model_autoresearch_production_binding_freshness import (
     refresh_production_authority,
 )
-from .model_autoresearch_production_binding_json import read_production_json
+from .model_autoresearch_production_binding_artifact_durability import (
+    HeldProductionArtifact,
+    read_held_json,
+)
 from .model_autoresearch_production_binding_temporal import (
     pure_recheck_production_time,
 )
@@ -18,13 +20,13 @@ from .model_autoresearch_production_binding_transaction import advance_publicati
 def verify_current_production_time(
     inputs: dict[str, Any],
     bundle: Mapping[str, Any],
-    runtime_path: Path,
+    runtime_artifact: HeldProductionArtifact,
     verifier: Callable[[Mapping[str, Any], Mapping[str, Any]], tuple[Any, ...]],
 ) -> None:
     refresh_production_authority(inputs)
     values = verifier(inputs, bundle)
-    runtime = read_production_json(
-        runtime_path, "single_model_production_runtime_artifact_invalid"
+    runtime = read_held_json(
+        runtime_artifact, "single_model_production_runtime_artifact_invalid"
     )
     pure_recheck_production_time(inputs, values, runtime)
 
@@ -36,7 +38,7 @@ def complete_production_publication(
     verifier: Callable[[Mapping[str, Any], Mapping[str, Any]], tuple[Any, ...]],
 ) -> None:
     verify_current_production_time(
-        inputs, bundle, inputs["output_transaction"].runtime_stage, verifier
+        inputs, bundle, inputs["sealed_artifacts"][1], verifier
     )
     nonce, binding, _evidence = publication
     advance_publication(

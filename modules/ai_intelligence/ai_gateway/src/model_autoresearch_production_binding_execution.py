@@ -5,18 +5,13 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Any, Mapping
 
-from . import (
-    model_autoresearch_production_binding_artifact_durability as artifact_durability,
-)
+from . import model_autoresearch_production_binding_artifact_durability as durability
 from .model_autoresearch_production_binding_finalization import (
     complete_production_publication,
     verify_current_production_time,
 )
 from .model_autoresearch_production_binding_outputs import publish_staged_outputs
-from .model_autoresearch_production_binding_json import (
-    canonical_json_mapping,
-    read_production_json,
-)
+from .model_autoresearch_production_binding_json import canonical_json_mapping
 from .model_autoresearch_production_binding_recovery import persist_terminal_receipt
 from .model_autoresearch_production_binding_transaction import (
     advance_publication,
@@ -46,19 +41,14 @@ def execute_production_binding(
     publication = _reserve_binding_publications(
         inputs, benchmark_signature, promotion_signature
     )
-    selection, runtime = _supply_binding_artifacts(
+    selection, runtime, sealed = _supply_binding_artifacts(
         inputs, bundle, evidence, benchmark, promotion
     )
     transaction = inputs["output_transaction"]
-    artifact_durability.seal_staged_artifacts(
-        transaction.selection_stage, transaction.runtime_stage
-    )
-    verify_current_production_time(
-        inputs, bundle, transaction.runtime_stage, _verify_binding_inputs
-    )
-    persist_terminal_receipt(inputs, bundle, transaction)
+    verify_current_production_time(inputs, bundle, sealed[1], _verify_binding_inputs)
+    persist_terminal_receipt(inputs, bundle, transaction, sealed)
     complete_production_publication(inputs, bundle, publication, _verify_binding_inputs)
-    publish_staged_outputs(transaction)
+    publish_staged_outputs(transaction, sealed)
     selection = replace(selection, output_path=str(inputs["selection_output"]))
     runtime = replace(runtime, output_path=str(inputs["runtime_output"]))
     return selection, runtime
@@ -144,36 +134,26 @@ def _supply_binding_artifacts(
     evidence: Any,
     benchmark: Any,
     promotion: Any,
-) -> tuple[Any, Any]:
+) -> tuple[Any, Any, tuple[Any, Any]]:
     preview = inputs["preview"]
     selection = run_reddog_model_selection_artifact_supply(
         repo_root=inputs["root"],
         catalog_snapshot=inputs["catalog_snapshot"],
         verified_evidence_bundle=evidence,
         requirements=inputs["requirements"],
-        output_path=inputs["output_transaction"].selection_stage,
+        output_path=inputs["output_transaction"].selection_supply,
     )
     if (
         not selection.accepted
         or selection.selection_receipt_id != preview.selection_receipt_id
     ):
         raise ValueError("single_model_production_selection_supply_rejected")
-    runtime = run_reddog_model_runtime_binding_artifact_supply(
-        repo_root=inputs["root"],
-        catalog_snapshot=inputs["catalog_snapshot"],
-        model_selection_receipt=read_production_json(
-            inputs["output_transaction"].selection_stage,
-            "single_model_production_selection_artifact_invalid",
-        ),
-        benchmark_evidence_receipts=(benchmark.to_dict(),),
-        promotion_evidence_receipts=(promotion.to_dict(),),
-        verified_evidence_bundle=bundle,
-        trusted_keys_payload=inputs["trusted_keys"],
-        runtime_policy=inputs["runtime_policy"],
-        output_path=inputs["output_transaction"].runtime_stage,
-        key_resolver=inputs["key_resolver"],
-        signature_verifier=inputs["signature_verifier"],
-        now=inputs["now"],
+    selection_held = durability._fsync_regular_file(
+        inputs["output_transaction"].selection_supply
+    )
+    inputs["sealed_artifacts"] = (selection_held,)
+    runtime = _supply_runtime_artifact(
+        inputs, bundle, benchmark, promotion, selection_held
     )
     if not runtime.accepted:
         raise ValueError(
@@ -182,7 +162,38 @@ def _supply_binding_artifacts(
         )
     if runtime.selection_receipt_id != preview.selection_receipt_id:
         raise ValueError("single_model_production_runtime_selection_mismatch")
-    return selection, runtime
+    runtime_held = durability._fsync_regular_file(
+        inputs["output_transaction"].runtime_supply
+    )
+    inputs["sealed_artifacts"] = (selection_held, runtime_held)
+    return selection, runtime, (selection_held, runtime_held)
+
+
+def _supply_runtime_artifact(
+    inputs: Mapping[str, Any],
+    bundle: Mapping[str, Any],
+    benchmark: Any,
+    promotion: Any,
+    selection_held: Any,
+) -> Any:
+    runtime = run_reddog_model_runtime_binding_artifact_supply(
+        repo_root=inputs["root"],
+        catalog_snapshot=inputs["catalog_snapshot"],
+        model_selection_receipt=durability.read_held_json(
+            selection_held,
+            "single_model_production_selection_artifact_invalid",
+        ),
+        benchmark_evidence_receipts=(benchmark.to_dict(),),
+        promotion_evidence_receipts=(promotion.to_dict(),),
+        verified_evidence_bundle=bundle,
+        trusted_keys_payload=inputs["trusted_keys"],
+        runtime_policy=inputs["runtime_policy"],
+        output_path=inputs["output_transaction"].runtime_supply,
+        key_resolver=inputs["key_resolver"],
+        signature_verifier=inputs["signature_verifier"],
+        now=inputs["now"],
+    )
+    return runtime
 
 
 __all__ = ["execute_production_binding"]

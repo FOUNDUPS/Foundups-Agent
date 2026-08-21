@@ -1,16 +1,28 @@
-"""Staged output ownership and explicit quarantine for production binding."""
+"""Durable staged-output claims with identity-owned cleanup."""
 
 from __future__ import annotations
 
-import os
+import json
+import secrets
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Mapping
 
-from . import (
-    model_autoresearch_production_binding_artifact_durability as artifact_durability,
+from .model_autoresearch_configured_gateway_atomic_create import atomic_create_bytes
+from .model_autoresearch_production_binding_artifact_durability import (
+    HeldProductionArtifact,
+    ProductionArtifactProof,
+    cleanup_owned_artifact,
+    publish_held_artifact,
+    seal_staged_artifact,
+    verify_held_artifact,
 )
-from .model_autoresearch_production_binding_transaction import (
-    ProductionPublicationIdentity,
+from .model_autoresearch_production_binding_output_cleanup import (
+    cleanup_output_transaction,
+)
+from .model_autoresearch_production_binding_claims import (
+    ProductionBindingClaimReceipt,
+    load_or_create_claim,
 )
 
 
@@ -20,107 +32,138 @@ class ProductionOutputTransaction:
     runtime_output: Path
     selection_stage: Path
     runtime_stage: Path
-
-    @property
-    def owned_paths(self) -> tuple[Path, ...]:
-        return (
-            self.selection_output,
-            self.runtime_output,
-            self.selection_stage,
-            self.runtime_stage,
-        )
+    selection_claim: ProductionArtifactProof | None
+    runtime_claim: ProductionArtifactProof | None
+    selection_supply: Path | None
+    runtime_supply: Path | None
 
 
-def claim_output_transaction(
-    selection_output: Path,
-    runtime_output: Path,
-    identity: ProductionPublicationIdentity,
-) -> ProductionOutputTransaction:
-    transaction = output_transaction_for(selection_output, runtime_output, identity)
-    claimed: list[Path] = []
+def claim_output_transaction(inputs: Mapping[str, Any]) -> ProductionOutputTransaction:
+    selection, runtime = inputs["selection_output"], inputs["runtime_output"]
+    if _occupied(selection) or _occupied(runtime):
+        raise ValueError("single_model_production_output_claim_failed")
+    claim = load_or_create_claim(inputs)
+    paths = (Path(claim.selection_stage), Path(claim.runtime_stage))
+    proofs: list[ProductionArtifactProof] = []
     try:
-        for path in transaction.owned_paths:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            os.close(fd)
-            claimed.append(path)
+        proofs.append(_claim_stage(paths[0], claim, "selection"))
+        proofs.append(_claim_stage(paths[1], claim, "runtime"))
     except Exception:
-        try:
-            cleanup_output_paths(tuple(claimed))
-        except ValueError:
-            raise ValueError(
-                "single_model_production_output_claim_cleanup_failed"
-            ) from None
-        raise ValueError("single_model_production_output_claim_failed") from None
-    return transaction
-
-
-def output_transaction_for(
-    selection_output: Path,
-    runtime_output: Path,
-    identity: ProductionPublicationIdentity,
-) -> ProductionOutputTransaction:
-    suffix = identity.binding_digest.removeprefix("sha256:")[:16]
+        for path, proof in zip(paths, proofs):
+            _cleanup_one(path, proof)
+        raise
     return ProductionOutputTransaction(
-        selection_output=selection_output,
-        runtime_output=runtime_output,
-        selection_stage=_stage_path(selection_output, suffix),
-        runtime_stage=_stage_path(runtime_output, suffix),
+        selection,
+        runtime,
+        *paths,
+        proofs[0],
+        proofs[1],
+        _supply_path(selection, "selection"),
+        _supply_path(runtime, "runtime"),
     )
 
 
-def publish_staged_outputs(transaction: ProductionOutputTransaction) -> None:
+def transaction_for_claim(
+    inputs: Mapping[str, Any], claim: ProductionBindingClaimReceipt
+) -> ProductionOutputTransaction:
+    paths = (Path(claim.selection_stage), Path(claim.runtime_stage))
+    return ProductionOutputTransaction(
+        inputs["selection_output"],
+        inputs["runtime_output"],
+        *paths,
+        None,
+        None,
+        None,
+        None,
+    )
+
+
+def close_sealed_artifacts(values: tuple[HeldProductionArtifact, ...]) -> None:
+    for value in values:
+        value.close()
+
+
+def publish_staged_outputs(
+    transaction: ProductionOutputTransaction,
+    sealed: tuple[HeldProductionArtifact, HeldProductionArtifact],
+) -> None:
+    publish_held_artifact(sealed[0], transaction.selection_output)
+    publish_held_artifact(sealed[1], transaction.runtime_output)
+    cleanup_claim_markers(transaction)
+
+
+def cleanup_claim_markers(transaction: ProductionOutputTransaction) -> None:
+    for path, proof in (
+        (transaction.selection_stage, transaction.selection_claim),
+        (transaction.runtime_stage, transaction.runtime_claim),
+    ):
+        if proof is not None:
+            cleanup_owned_artifact(path, proof)
+
+
+def _claim_stage(
+    path: Path, claim: ProductionBindingClaimReceipt, role: str
+) -> ProductionArtifactProof:
+    marker = stage_claim_bytes(claim, role)
     try:
-        os.replace(transaction.selection_stage, transaction.selection_output)
-        artifact_durability.fsync_published_parent(transaction.selection_output)
-        os.replace(transaction.runtime_stage, transaction.runtime_output)
-        artifact_durability.fsync_published_parent(transaction.runtime_output)
-    except OSError:
-        raise ValueError("single_model_production_output_publication_failed") from None
+        atomic_create_bytes(path, marker, root=path.parent)
+    except Exception:
+        raise ValueError("single_model_production_output_claim_failed") from None
+    return _proof_existing_claim(path, claim, role)
 
 
-def cleanup_output_transaction(transaction: ProductionOutputTransaction) -> None:
-    cleanup_output_paths(transaction.owned_paths)
-
-
-def cleanup_output_paths(paths: tuple[Path, ...]) -> None:
-    quarantined: list[Path] = []
-    failures: list[Path] = []
-    for path in paths:
-        if not path.exists():
-            continue
+def _proof_existing_claim(
+    path: Path, claim: ProductionBindingClaimReceipt, role: str
+) -> ProductionArtifactProof:
+    try:
+        held = seal_staged_artifact(path)
         try:
-            path.unlink()
-        except OSError:
-            try:
-                quarantine = _available_quarantine_path(path)
-                os.replace(path, quarantine)
-                quarantined.append(quarantine)
-            except OSError:
-                failures.append(path)
-    if failures:
-        raise ValueError("single_model_production_cleanup_failed")
-    if quarantined:
-        raise ValueError("single_model_production_cleanup_quarantined")
+            payload = verify_held_artifact(held)
+            if payload != stage_claim_bytes(claim, role):
+                raise ValueError("single_model_production_output_ownership_conflict")
+            return held.proof
+        finally:
+            held.close()
+    except ValueError:
+        raise
+    except Exception:
+        raise ValueError("single_model_production_output_ownership_conflict") from None
 
 
-def _stage_path(path: Path, suffix: str) -> Path:
-    return path.with_name("." + path.name + "." + suffix + ".staging")
+def stage_claim_bytes(claim: ProductionBindingClaimReceipt, role: str) -> bytes:
+    payload = {
+        "schema_version": "single_model_production_stage_claim.v1",
+        "claim_receipt_id": claim.receipt_id,
+        "binding_digest": claim.binding_digest,
+        "token": claim.token,
+        "role": role,
+    }
+    return (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def _available_quarantine_path(path: Path) -> Path:
-    for index in range(100):
-        candidate = path.with_name(path.name + f".invalid.{index:02d}")
-        if not candidate.exists():
-            return candidate
-    raise OSError("single_model_production_quarantine_exhausted")
+def _occupied(path: Path) -> bool:
+    return path.exists() or path.is_symlink()
+
+
+def _cleanup_one(path: Path, proof: ProductionArtifactProof) -> None:
+    try:
+        cleanup_owned_artifact(path, proof)
+    except Exception:
+        pass
+
+
+def _supply_path(output: Path, role: str) -> Path:
+    token = secrets.token_hex(16)
+    return output.with_name(f".{output.name}.{role}.{token}.supply")
 
 
 __all__ = [
     "ProductionOutputTransaction",
     "claim_output_transaction",
-    "cleanup_output_paths",
+    "cleanup_claim_markers",
     "cleanup_output_transaction",
-    "output_transaction_for",
+    "close_sealed_artifacts",
     "publish_staged_outputs",
+    "stage_claim_bytes",
+    "transaction_for_claim",
 ]

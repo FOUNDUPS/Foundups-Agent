@@ -13,6 +13,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Mapping, Protocol, Sequence
 
+from .model_autoresearch_configured_gateway_atomic_create import atomic_create_bytes
 from .model_autoresearch_configured_gateway_durability import _fsync_store_lineage
 
 
@@ -204,7 +205,9 @@ class ConfiguredGatewayModelBudgetEvidenceBundle:
             "allowed_providers": list(providers),
             "model_budgets": [item.to_dict() for item in budgets],
         }
-        if digest_payload(body) != require_sha256("evidence_digest", self.evidence_digest):
+        if digest_payload(body) != require_sha256(
+            "evidence_digest", self.evidence_digest
+        ):
             raise ValueError("model_budget_evidence_digest_mismatch")
         return ConfiguredGatewayModelBudgetEvidenceBundle(
             allowed_providers=providers,
@@ -299,7 +302,9 @@ class PromptGuardApprovalReceipt:
         return PromptGuardApprovalReceipt(
             passed=self.passed,
             prompt=self.prompt,
-            contract_digest=require_sha256("guard_contract_digest", self.contract_digest),
+            contract_digest=require_sha256(
+                "guard_contract_digest", self.contract_digest
+            ),
             profile_digest=require_sha256("guard_profile_digest", self.profile_digest),
             report_digest=require_sha256("guard_report_digest", self.report_digest),
         )
@@ -396,8 +401,9 @@ class ConfiguredGatewayRunnerReceipt:
 
 
 class ConfiguredGatewayReceiptStore(Protocol):
-    def append(self, receipt: object) -> str:
-        """Append one canonical receipt and return its ID."""
+    def append(self, receipt: object) -> str: ...
+    def load(self, receipt_id: str) -> Mapping[str, object]: ...
+    def contains_receipt(self, receipt_id: str) -> bool: ...
 
 
 class DurableExactPublicationStore(Protocol):
@@ -413,9 +419,7 @@ class DurableExactPublicationStore(Protocol):
         self, nonce: str, binding_digest: str, target_status: str
     ) -> str: ...
 
-    def publication_status(
-        self, nonce: str, binding_digest: str
-    ) -> str | None: ...
+    def publication_status(self, nonce: str, binding_digest: str) -> str | None: ...
 
 
 class JsonlConfiguredGatewayReceiptStore:
@@ -479,32 +483,19 @@ class DirectoryConfiguredGatewayReceiptStore:
         receipt_id = payload.get("attempt_receipt_id") or payload.get("receipt_id")
         if not isinstance(receipt_id, str) or not receipt_id.strip():
             raise ValueError("configured_gateway_receipt_id_invalid")
-        encoded = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+        encoded = (
+            json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n"
+        ).encode("utf-8")
         if len(encoded) > self.MAX_RECEIPT_BYTES:
             raise ValueError("configured_gateway_receipt_too_large")
         path = self._path(receipt_id)
         self.root.mkdir(parents=True, exist_ok=True)
         with self._lock:
-            try:
-                fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            except FileExistsError:
+            if not atomic_create_bytes(path, encoded, root=self.root):
                 stored = self.load(receipt_id)
                 if digest_payload(stored) != digest_payload(payload):
                     raise ValueError("configured_gateway_receipt_store_collision")
                 _fsync_store_lineage(path.parent, self.root)
-                return receipt_id
-            try:
-                with os.fdopen(fd, "wb") as handle:
-                    handle.write(encoded)
-                    handle.flush()
-                    os.fsync(handle.fileno())
-            except BaseException:
-                try:
-                    path.unlink(missing_ok=True)
-                except OSError:
-                    pass
-                raise
-            _fsync_store_lineage(path.parent, self.root)
         return receipt_id
 
     def load(self, receipt_id: str) -> Mapping[str, object]:
@@ -522,6 +513,9 @@ class DirectoryConfiguredGatewayReceiptStore:
             raise ValueError("configured_gateway_receipt_id_mismatch")
         return payload
 
+    def contains_receipt(self, receipt_id: str) -> bool:
+        return self._path(receipt_id).exists() or self._path(receipt_id).is_symlink()
+
     def advance_publication(
         self, nonce: str, binding_digest: str, target_status: str
     ) -> str:
@@ -538,16 +532,20 @@ class DirectoryConfiguredGatewayReceiptStore:
                     return ""
                 self._write_publication_marker(clean_nonce, binding, "RESERVED")
                 return "RESERVED"
-            if self._PUBLICATION_ORDER[target_status] > self._PUBLICATION_ORDER[current] + 1:
+            if (
+                self._PUBLICATION_ORDER[target_status]
+                > self._PUBLICATION_ORDER[current] + 1
+            ):
                 return ""
-            if self._PUBLICATION_ORDER[target_status] > self._PUBLICATION_ORDER[current]:
+            if (
+                self._PUBLICATION_ORDER[target_status]
+                > self._PUBLICATION_ORDER[current]
+            ):
                 self._write_publication_marker(clean_nonce, binding, target_status)
                 return target_status
             return current
 
-    def publication_status(
-        self, nonce: str, binding_digest: str
-    ) -> str | None:
+    def publication_status(self, nonce: str, binding_digest: str) -> str | None:
         """Read one exact publication status without advancing it."""
 
         clean_nonce = self._publication_nonce(nonce)
@@ -596,31 +594,15 @@ class DirectoryConfiguredGatewayReceiptStore:
             "binding_digest": binding_digest,
             "status": status,
         }
-        encoded = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode(
-            "utf-8"
-        )
+        encoded = (
+            json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n"
+        ).encode("utf-8")
         path = self._publication_path(nonce, status)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        except FileExistsError:
+        if not atomic_create_bytes(path, encoded, root=self.root):
             existing = self._read_publication_marker(path)
             if digest_payload(existing) != digest_payload(payload):
                 raise ValueError("configured_gateway_publication_binding_conflict")
             _fsync_store_lineage(path.parent, self.root)
-            return
-        try:
-            with os.fdopen(fd, "wb") as handle:
-                handle.write(encoded)
-                handle.flush()
-                os.fsync(handle.fileno())
-        except BaseException:
-            try:
-                path.unlink(missing_ok=True)
-            except OSError:
-                pass
-            raise
-        _fsync_store_lineage(path.parent, self.root)
 
     def _read_publication_marker(self, path: Path) -> Mapping[str, object]:
         try:
@@ -658,7 +640,8 @@ def build_attempt_receipt(
         "terminal_reason": terminal_reason,
     }
     return ConfiguredGatewayCallAttemptReceipt(
-        attempt_receipt_id="configured_gateway_call_attempt:" + digest_payload(body)[7:],
+        attempt_receipt_id="configured_gateway_call_attempt:"
+        + digest_payload(body)[7:],
         attempt_group_id=attempt_group_id,
         status=status,
         terminal_reason=terminal_reason,
@@ -711,7 +694,9 @@ def build_runner_receipt(
 def rehydrate_call_attempt_receipt(
     payload: Mapping[str, object],
 ) -> ConfiguredGatewayCallAttemptReceipt:
-    _require_exact_keys(payload, set(ConfiguredGatewayCallAttemptReceipt.__dataclass_fields__))
+    _require_exact_keys(
+        payload, set(ConfiguredGatewayCallAttemptReceipt.__dataclass_fields__)
+    )
     if payload.get("schema_version") != ATTEMPT_RECEIPT_SCHEMA_VERSION:
         raise ValueError("invalid_attempt_receipt_schema_version")
     status, terminal_reason = _attempt_status(payload)
@@ -777,7 +762,9 @@ def _attempt_fields_from_payload(payload: Mapping[str, object]) -> dict[str, obj
 def rehydrate_runner_receipt(
     payload: Mapping[str, object],
 ) -> ConfiguredGatewayRunnerReceipt:
-    _require_exact_keys(payload, set(ConfiguredGatewayRunnerReceipt.__dataclass_fields__))
+    _require_exact_keys(
+        payload, set(ConfiguredGatewayRunnerReceipt.__dataclass_fields__)
+    )
     if payload.get("schema_version") != RUNNER_RECEIPT_SCHEMA_VERSION:
         raise ValueError("invalid_runner_receipt_schema_version")
     raw_calls = payload.get("calls")
@@ -815,7 +802,9 @@ def rehydrate_runner_receipt(
 def _rehydrate_runner_call(payload: object) -> ConfiguredGatewayRunnerCallReceipt:
     if not isinstance(payload, Mapping):
         raise ValueError("invalid_runner_receipt_call")
-    _require_exact_keys(payload, set(ConfiguredGatewayRunnerCallReceipt.__dataclass_fields__))
+    _require_exact_keys(
+        payload, set(ConfiguredGatewayRunnerCallReceipt.__dataclass_fields__)
+    )
     evidence_id = payload.get("output_evidence_record_id")
     if evidence_id is not None:
         evidence_id = exact_model_id("output_evidence_record_id", evidence_id)

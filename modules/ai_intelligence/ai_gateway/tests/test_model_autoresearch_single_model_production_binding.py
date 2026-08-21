@@ -501,10 +501,21 @@ def test_panel_and_evidence_splices_fail_closed_before_runtime_output(tmp_path):
         )
     assert not runtime_path.exists()
 
+    policy_root = tmp_path / "policy-case"
+    policy_auth, policy_benchmark, policy, policy_authority = _authenticated_gate(
+        policy_root
+    )
+    policy_preview = build_authenticated_single_model_production_selection_preview(
+        repo_root=REPO_ROOT,
+        authenticated_promotion=policy_auth,
+        catalog_snapshot=snapshot.to_dict(),
+        requirements=_requirements(),
+        authority_use=policy_authority,
+    )
     policy_spliced = _external_bundle(
-        preview,
-        authenticated,
-        benchmark,
+        policy_preview,
+        policy_auth,
+        policy_benchmark,
         policy,
         signed_policy_digest="sha256:" + "2" * 64,
     )
@@ -512,15 +523,15 @@ def test_panel_and_evidence_splices_fail_closed_before_runtime_output(tmp_path):
     with pytest.raises(ValueError, match="policy_signature_mismatch"):
         bind_authenticated_single_model_promotion_to_runtime(
             repo_root=REPO_ROOT,
-            authenticated_promotion=authenticated,
+            authenticated_promotion=policy_auth,
             catalog_snapshot=snapshot.to_dict(),
             requirements=_requirements(),
-            authority_use=authority_use,
+            authority_use=policy_authority,
             signed_evidence_provider=lambda _preview: policy_spliced,
             evidence_key_resolver=_resolver(),
             evidence_signature_verifier=DeterministicSignatureVerifier(),
             trusted_keys_payload=_trusted_keys(),
-            runtime_policy=_runtime_policy(benchmark, authenticated),
+            runtime_policy=_runtime_policy(policy_benchmark, policy_auth),
             selection_output_path=tmp_path / "policy-splice-selection.json",
             runtime_binding_output_path=policy_runtime_path,
         )
@@ -866,21 +877,21 @@ def test_partial_final_publication_recovers_after_applied(tmp_path, monkeypatch)
     authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
     import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_outputs as outputs
 
-    original = outputs.os.replace
+    original = outputs.publish_held_artifact
     injected = []
 
     def fail_runtime_publish(source, destination):
-        source_path = Path(source)
+        source_path = source.path
         if (
             not injected
             and source_path.name.startswith(".binding.json.")
-            and source_path.name.endswith(".staging")
+            and source_path.name.endswith(".supply")
         ):
             injected.append(True)
             raise OSError("runtime-final-publication-failed")
         return original(source, destination)
 
-    monkeypatch.setattr(outputs.os, "replace", fail_runtime_publish)
+    monkeypatch.setattr(outputs, "publish_held_artifact", fail_runtime_publish)
     calls = []
 
     def provider(preview):
@@ -907,7 +918,7 @@ def test_stage_fsync_failure_has_no_terminal_applied_or_final_artifact(
     def fail_stage_fsync(_path):
         raise OSError("stage-fsync-failed")
 
-    monkeypatch.setattr(durability, "_fsync_regular_file", fail_stage_fsync)
+    monkeypatch.setattr(durability, "seal_staged_artifact", fail_stage_fsync)
     calls = []
 
     def provider(preview):
@@ -924,7 +935,7 @@ def test_stage_fsync_failure_has_no_terminal_applied_or_final_artifact(
     assert not Path(inputs["runtime_binding_output_path"]).exists()
     payloads = _stored_payloads(authority_use)
     assert not any(
-        item.get("schema_version") == "single_model_production_terminal.v1"
+        item.get("schema_version") == "single_model_production_terminal.v3"
         for item in payloads
     )
     assert not _production_applied(payloads)
@@ -955,7 +966,7 @@ def test_final_directory_fsync_failure_retries_without_provider_callback(
         bind_authenticated_single_model_promotion_to_runtime(**inputs)
     assert _production_applied(_stored_payloads(authority_use))
     assert Path(inputs["selection_output_path"]).stat().st_size > 0
-    assert Path(inputs["runtime_binding_output_path"]).stat().st_size == 0
+    assert not Path(inputs["runtime_binding_output_path"]).exists()
 
     monkeypatch.setattr(durability, "fsync_published_parent", original)
     recovered = bind_authenticated_single_model_promotion_to_runtime(**inputs)
@@ -991,8 +1002,8 @@ def test_authorized_terminal_retry_completes_without_provider_replay(
     )
     with pytest.raises(ValueError, match="publication_failed"):
         bind_authenticated_single_model_promotion_to_runtime(**inputs)
-    assert Path(inputs["selection_output_path"]).is_file()
-    assert Path(inputs["runtime_binding_output_path"]).is_file()
+    assert not Path(inputs["selection_output_path"]).exists()
+    assert not Path(inputs["runtime_binding_output_path"]).exists()
 
     monkeypatch.setattr(store_type, "_write_publication_marker", original)
     recovered = bind_authenticated_single_model_promotion_to_runtime(**inputs)
@@ -1012,7 +1023,9 @@ def test_unlink_denial_quarantines_partial_stage_and_surfaces_cleanup(
     original_unlink = Path.unlink
 
     def deny_selection_stage(self, *args, **kwargs):
-        if self.name.startswith(".selection.json.") and self.name.endswith(".staging"):
+        if self.name.startswith(".selection.json.selection.") and self.name.endswith(
+            ".supply"
+        ):
             raise PermissionError("unlink-denied")
         return original_unlink(self, *args, **kwargs)
 
@@ -1054,11 +1067,10 @@ def test_callback_time_advance_rejects_before_publication_or_artifacts(tmp_path)
     inputs = _production_inputs(
         tmp_path, authenticated, benchmark, authority_use, provider
     )
-    before = _durable_files(authority_use.publication_store)
     with pytest.raises(ValueError, match="authority_expired"):
         bind_authenticated_single_model_promotion_to_runtime(**inputs)
     assert len(calls) == 1
-    assert _durable_files(authority_use.publication_store) == before
+    assert not _production_applied(_stored_payloads(authority_use))
     assert not Path(inputs["selection_output_path"]).exists()
     assert not Path(inputs["runtime_binding_output_path"]).exists()
 
@@ -1100,7 +1112,7 @@ def test_authority_callback_time_advance_rechecks_pure_before_terminal(tmp_path)
     assert not Path(inputs["runtime_binding_output_path"]).exists()
     payloads = _stored_payloads(authority_use)
     assert not any(
-        item.get("schema_version") == "single_model_production_terminal.v1"
+        item.get("schema_version") == "single_model_production_terminal.v3"
         for item in payloads
     )
     assert not _production_applied(payloads)
@@ -1138,8 +1150,8 @@ def test_second_refresh_expiry_keeps_final_artifacts_nonconsumable(
     assert len(refreshes) == 2
     selection = Path(inputs["selection_output_path"])
     runtime = Path(inputs["runtime_binding_output_path"])
-    assert selection.stat().st_size == 0
-    assert runtime.stat().st_size == 0
+    assert not selection.exists()
+    assert not runtime.exists()
     assert len(list(selection.parent.glob("*.staging"))) == 2
     payloads = []
     for path in authority_use.publication_store.root.rglob("*.json"):
@@ -1183,7 +1195,7 @@ def test_applied_terminal_recovery_verifies_before_stage_publication(
         bind_authenticated_single_model_promotion_to_runtime(**inputs)
     selection = Path(inputs["selection_output_path"])
     runtime = Path(inputs["runtime_binding_output_path"])
-    assert selection.stat().st_size == 0 and runtime.stat().st_size == 0
+    assert not selection.exists() and not runtime.exists()
     assert len(list(selection.parent.glob("*.staging"))) == 2
     markers = [
         __import__("json").loads(path.read_text(encoding="utf-8"))
@@ -1246,7 +1258,7 @@ def test_recovery_evidence_callback_time_advance_blocks_zero_callback_publish(
     assert evidence_verifier.calls >= 1
     assert len(provider_calls) == 1
     assert Path(inputs["selection_output_path"]).stat().st_size > 0
-    assert Path(inputs["runtime_binding_output_path"]).stat().st_size == 0
+    assert not Path(inputs["runtime_binding_output_path"]).exists()
 
 
 def _production_inputs(tmp_path, authenticated, benchmark, authority_use, provider):

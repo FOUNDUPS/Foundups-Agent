@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1562,
+  "total_tests": 1563,
   "quarantined_tests": 267,
   "tests": [
     {
@@ -2530,6 +2530,21 @@
       "description": "Tests for REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1."
     },
     {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_autoresearch_production_binding_crash_security",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_production_binding_crash_security.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Crash, ownership, and retained-identity production-binding regressions."
+    },
+    {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_autoresearch_semantic_verifier",
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_semantic_verifier.py",
       "owner": "modules/ai_intelligence/ai_gateway",
@@ -2744,7 +2759,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_provider_catalog_artifact_store.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
