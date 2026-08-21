@@ -47,6 +47,10 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_boots
     ensure_reddog_holoindex_owner,
     resolve_reddog_holoindex_owner_handoff,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (  # noqa: E402
+    QUERY_REPLICA_REQUIRED_ERROR,
+    resolve_query_replica_owner_route,
+)
 
 
 MAX_QUERY_CHARS = 16_000
@@ -68,6 +72,9 @@ TRANSIENT_OWNER_ERRORS = frozenset(
         "HOLOINDEX_TIER0_LOOKUP_FAILED",
     }
 )
+OwnerHandoffResolver = Callable[[], tuple[str, str] | None]
+AuthoritySelector = Callable[[Path], HoloIndexAuthoritySelection]
+Preflight = Callable[..., ReadonlyQueryAdmission]
 
 
 def _failure(error: str, *, query: str = "") -> dict[str, Any]:
@@ -209,12 +216,12 @@ def _preflight_authority(
     query: str,
     *,
     preflight: Callable[..., ReadonlyQueryAdmission],
-    resolve_ssd_path: Callable[[], Path],
+    ssd_path: Path,
 ) -> Mapping[str, Any] | None:
     try:
         admission = preflight(
             repo_root=selection.selected_root,
-            ssd_path=resolve_ssd_path(),
+            ssd_path=ssd_path,
             expected_repo_head_sha=selection.authority_head_sha,
         )
     except Exception as exc:
@@ -248,11 +255,21 @@ class _OwnerQueryState:
 
 def _owner_attempt(
     *, query: str, limit: int, authority_root: Path, runtime_root: Path,
+    ssd_path: Path,
     ensure_owner: Callable[..., Any], resolve_handoff: Callable[..., Any],
     query_owner: Callable[..., Mapping[str, Any]], state: _OwnerQueryState,
+    resolve_replica_route: Callable[..., Any],
 ) -> tuple[Mapping[str, Any], bool, bool]:
+    try:
+        route = resolve_replica_route(
+            canonical_repo_root=authority_root,
+            canonical_ssd_path=ssd_path,
+        )
+    except Exception:
+        return _failure(QUERY_REPLICA_REQUIRED_ERROR, query=query), False, False
     bootstrap = ensure_owner(
-        repo_root=authority_root, runtime_root=runtime_root, requested=True
+        repo_root=authority_root, runtime_root=runtime_root, requested=True,
+        query_replica_route=route,
     )
     status = str(getattr(bootstrap, "status", ""))
     if getattr(bootstrap, "ready", False) is not True:
@@ -282,16 +299,19 @@ def _owner_attempt(
 
 def _query_with_retry(
     *, query: str, limit: int, authority_root: Path, runtime_root: Path,
+    ssd_path: Path,
     ensure_owner: Callable[..., Any], resolve_handoff: Callable[..., Any],
     query_owner: Callable[..., Mapping[str, Any]], cleanup_owner: Callable[[], None],
-    state: _OwnerQueryState,
+    state: _OwnerQueryState, resolve_replica_route: Callable[..., Any],
 ) -> tuple[Mapping[str, Any], bool]:
     while state.attempts < MAX_OWNER_ATTEMPTS:
         state.attempts += 1
         result, retryable, bindable = _owner_attempt(
             query=query, limit=limit, authority_root=authority_root,
-            runtime_root=runtime_root, ensure_owner=ensure_owner,
+            runtime_root=runtime_root, ssd_path=ssd_path,
+            ensure_owner=ensure_owner,
             resolve_handoff=resolve_handoff, query_owner=query_owner, state=state,
+            resolve_replica_route=resolve_replica_route,
         )
         if state.attempts != 1 or not retryable:
             return result, bindable or retryable
@@ -331,7 +351,7 @@ def _admit_query(
     request: _QueryRequest, repo_root: Path,
     *, select_authority: Callable[..., HoloIndexAuthoritySelection],
     preflight: Callable[..., ReadonlyQueryAdmission],
-    resolve_ssd_path: Callable[[], Path],
+    ssd_path: Path,
 ) -> tuple[str, int, HoloIndexAuthoritySelection | None, Mapping[str, Any] | None]:
     query, limit = request.query, request.limit
     selection = select_authority(repo_root)
@@ -343,7 +363,7 @@ def _admit_query(
     else:
         failure = _preflight_authority(
             selection, query, preflight=preflight,
-            resolve_ssd_path=resolve_ssd_path,
+            ssd_path=ssd_path,
         )
     if failure is not None:
         failure = _with_retry_telemetry(failure, attempts=0, retry_reason="")
@@ -400,15 +420,18 @@ def _execute_admitted_query(
     selection: HoloIndexAuthoritySelection, ensure_owner: Callable[..., Any],
     resolve_handoff: Callable[..., Any], query_owner: Callable[..., Any],
     cleanup_owner: Callable[[], None], select_authority: Callable[..., Any],
-    select_runtime_root: Callable[[Path], Path],
+    select_runtime_root: Callable[[Path], Path], ssd_path: Path,
+    resolve_replica_route: Callable[..., Any],
 ) -> Mapping[str, Any]:
     state = _OwnerQueryState()
     try:
         result, bindable = _query_with_retry(
             query=query, limit=limit, authority_root=selection.selected_root,
-            runtime_root=select_runtime_root(repo_root), ensure_owner=ensure_owner,
+            runtime_root=select_runtime_root(repo_root), ssd_path=ssd_path,
+            ensure_owner=ensure_owner,
             resolve_handoff=resolve_handoff, query_owner=query_owner,
             cleanup_owner=cleanup_owner, state=state,
+            resolve_replica_route=resolve_replica_route,
         )
         if bindable:
             result = _bind_query_receipt(
@@ -428,24 +451,31 @@ def _execute_admitted_query(
             cleanup_owner()
 
 
+def _resolve_query_ssd_path(
+    resolver: Callable[[], Path], query: str,
+) -> tuple[Path | None, Mapping[str, Any] | None]:
+    try:
+        return resolver(), None
+    except Exception as exc:
+        return None, _with_retry_telemetry(
+            _failure(type(exc).__name__, query=query),
+            attempts=0, retry_reason="",
+        )
+
+
 def query_once(
     payload: Mapping[str, Any],
     *,
     repo_root: Path = REPO_ROOT,
     ensure_owner: Callable[..., Any] = ensure_reddog_holoindex_owner,
-    resolve_handoff: Callable[[], tuple[str, str] | None] = (
-        resolve_reddog_holoindex_owner_handoff
-    ),
+    resolve_handoff: OwnerHandoffResolver = resolve_reddog_holoindex_owner_handoff,
     query_owner: Callable[..., Mapping[str, Any]] = query_holoindex_owner,
     cleanup_owner: Callable[..., None] = cleanup_reddog_holoindex_owner,
-    select_authority: Callable[
-        [Path], HoloIndexAuthoritySelection
-    ] = resolve_holoindex_authority_root,
+    select_authority: AuthoritySelector = resolve_holoindex_authority_root,
     select_runtime_root: Callable[[Path], Path] = resolve_holoindex_runtime_root,
-    preflight: Callable[..., ReadonlyQueryAdmission] = (
-        rehydrate_canonical_freshness_proof
-    ),
+    preflight: Preflight = rehydrate_canonical_freshness_proof,
     resolve_ssd_path: Callable[[], Path] = resolve_holoindex_ssd_path,
+    resolve_replica_route: Callable[..., Any] = resolve_query_replica_owner_route,
     bundle_builder: Callable[..., Mapping[str, Any]] = build_wsp_memory_bundle,
 ) -> Mapping[str, Any]:
     """Execute one owner-bound query and always clean up process-owned state."""
@@ -459,9 +489,13 @@ def query_once(
     )
     if request.bundle_only or request.retrieval_mode == "lexical":
         return _lexical_result(request, selection, bundle_fields)
+    ssd_path, failure = _resolve_query_ssd_path(resolve_ssd_path, request.query)
+    if failure is not None:
+        return {**failure, **(bundle_fields or {}), "no_reindex": True}
+    assert ssd_path is not None
     query, limit, selection, failure = _admit_query(
         request, repo_root, select_authority=lambda _root: selection,
-        preflight=preflight, resolve_ssd_path=resolve_ssd_path,
+        preflight=preflight, ssd_path=ssd_path,
     )
     if failure is not None:
         return {**failure, **(bundle_fields or {}), "no_reindex": True}
@@ -471,7 +505,8 @@ def query_once(
         ensure_owner=ensure_owner, resolve_handoff=resolve_handoff,
         query_owner=query_owner, cleanup_owner=cleanup_owner,
         select_authority=select_authority,
-        select_runtime_root=select_runtime_root,
+        select_runtime_root=select_runtime_root, ssd_path=ssd_path,
+        resolve_replica_route=resolve_replica_route,
     )
     return {**result, **(bundle_fields or {}), "no_reindex": True}
 

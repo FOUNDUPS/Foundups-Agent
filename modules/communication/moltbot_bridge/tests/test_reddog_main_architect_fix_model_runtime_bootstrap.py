@@ -34,6 +34,11 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_architect_fix_p
 def _current_holo_owner_binding(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap.resolve_query_replica_owner_route",
+        lambda **_kwargs: object(),
+    )
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
         "reddog_main_architect_fix_promotion_bootstrap.verify_reddog_holoindex_owner_binding",
         lambda **_kwargs: True,
     )

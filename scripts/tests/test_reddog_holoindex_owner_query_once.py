@@ -71,6 +71,7 @@ def query_once(payload, *, repo_root, **kwargs):
         lambda **values: _admission(Path(values["repo_root"])),
     )
     kwargs.setdefault("resolve_ssd_path", lambda: Path("E:/HoloIndex-test"))
+    kwargs.setdefault("resolve_replica_route", lambda **_values: object())
     return _query_once(payload, repo_root=repo_root, **kwargs)
 
 
@@ -212,6 +213,8 @@ def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
     )
     calls: dict = {}
     bootstrap_calls: dict = {}
+    route_calls: dict = {}
+    route = object()
 
     def query_owner(**kwargs):
         calls.update(kwargs)
@@ -225,20 +228,48 @@ def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
             error="",
         )
 
+    def resolve_replica_route(**kwargs):
+        route_calls.update(kwargs)
+        return route
+
     result = query_once(
         {"query": "audit pfmall"},
         repo_root=tmp_path,
         ensure_owner=ensure_owner,
         query_owner=query_owner,
         select_authority=lambda _root: selection,
+        resolve_replica_route=resolve_replica_route,
     )
 
     assert result["ok"] is True
     assert bootstrap_calls["repo_root"] == authority
     assert bootstrap_calls["runtime_root"] == tmp_path
+    assert bootstrap_calls["query_replica_route"] is route
+    assert route_calls == {
+        "canonical_repo_root": authority,
+        "canonical_ssd_path": Path("E:/HoloIndex-test"),
+    }
     assert calls["repo_root"] == authority
     assert result["workspace_overlay_present"] is True
     assert result["semantic_evidence_authority"] == "committed_head_only"
+
+
+def test_missing_query_replica_route_fails_before_owner_query(tmp_path: Path) -> None:
+    calls: list[str] = []
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        select_authority=_selection,
+        resolve_replica_route=lambda **_kwargs: (_ for _ in ()).throw(ValueError()),
+        ensure_owner=lambda **_kwargs: calls.append("owner"),
+        query_owner=lambda **_kwargs: calls.append("query"),
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "HOLOINDEX_QUERY_REPLICA_REQUIRED"
+    assert result["owner_attempts"] == 1
+    assert calls == []
 
 
 def test_linked_workspace_uses_resolved_primary_runtime_root(tmp_path: Path) -> None:

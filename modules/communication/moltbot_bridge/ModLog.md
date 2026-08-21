@@ -19,6 +19,16 @@
   state to 1,169 lines; its two exempt functions are now 189 and 176 lines,
   below the unchanged 1,200/201 containment ceilings. WSP 15/22/62/97.
 
+## 2026-08-21: Promotion-time query-replica owner proof
+
+- Architect FIX promotion now snapshots its supplied environment, resolves the
+  active query replica against the freshness receipt's canonical SSD, and
+  passes the sealed route into exact owner binding verification.
+- Missing/stale route proof rejects before owner verification and profile/queue
+  publication. The resident claim runtime forwards its already closed
+  environment; no materialization, re-index, or fallback was added.
+  (WSP 00/5/6/15/22/50/64/84/97)
+
 ## 2026-08-21: Current upstream Hermes/OpenClaw worker proof
 
 - Upgraded the production Hermes contract from API `0.19.1` text-only inference

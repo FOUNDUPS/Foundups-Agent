@@ -24,6 +24,16 @@ formatting for `scripts/advisory_model_once.py`. Provider calls, environment
 access, redaction admission, and stdin/stdout lifecycle remain in the one-shot
 script. The extraction adds no model, worker, repository, or fallback authority.
 
+## RedDog architect FIX promotion HoloIndex proof
+
+`run_reddog_main_architect_fix_promotion_bootstrap(..., environment=...)`
+snapshots the supplied host environment and resolves the explicit
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` against the freshness receipt's canonical
+SSD root. `_run_locked_promotion` passes that sealed capability to
+`verify_reddog_holoindex_owner_binding`; resolution failure returns
+`holoindex_query_replica_route_not_current` before owner verification or
+publication. The bootstrap does not materialize or re-index.
+
 ## Governed repository-state intake
 
 `observe_repo_state(repo_root, governed_receipt)` accepts only

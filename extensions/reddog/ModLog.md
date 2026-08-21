@@ -30,6 +30,15 @@
   evaluation catalog admitted two four-role proposals in 36.7 seconds. Live
   configured panel AutoResearch remains halted. Version 0.4.102 -> 0.4.103.
   WSP 15/22/50/62/97.
+## 2026-08-21 - HoloIndex query-replica closed-profile plumbing (0.4.104)
+
+- Added `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` only to the closed
+  `holoindex_owner` and `resident_architect` Python profiles so semantic query
+  and promotion verification can prove the same explicit active replica.
+- No package surface, raw Holo fallback, materialization, or re-index behavior
+  was added. The isolated repair was composed only after model authority was
+  green; the final closure is regenerated from the integrated tree.
+  WSP 00/15/22/50/97.
 
 ## 2026-08-21 - Mainline release gate repair (0.4.102)
 

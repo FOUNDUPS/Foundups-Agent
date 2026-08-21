@@ -98,6 +98,9 @@ and virtual-environment keys plus `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`, and
 `holo_query`, `holoindex_owner`, and `resident_architect`; `default` adds none.
 Unknown or caller-constructed profiles fail to `default`. OpenRouter, Holo
 owner, and resident authority credentials never cross into another profile.
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` is admitted only by `holoindex_owner`
+and `resident_architect`, allowing their Python boundaries to prove the same
+explicit active replica without exposing it to unrelated bridge children.
 `buildHoloQueryEnv(envLike, retrievalMode)` composes `holo_query`, which admits
 only `HOLOINDEX_SSD_PATH`, legacy `HOLO_SSD_PATH`, and explicit `HOLO_OFFLINE`,
 then forces `HOLOINDEX_QUERY_READONLY=1`. Lexical mode additionally synthesizes

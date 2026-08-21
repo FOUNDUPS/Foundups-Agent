@@ -272,7 +272,13 @@ def run_bootstrap_with_test_authority(runner: Any, **kwargs: Any) -> Any:
 def run_main_bootstrap_with_test_authority(**kwargs: Any) -> Any:
     """Invoke the production main bootstrap with valid test authority."""
 
-    return run_bootstrap_with_test_authority(_run_bootstrap, **kwargs)
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "resolve_query_replica_owner_route",
+        return_value=object(),
+    ):
+        return run_bootstrap_with_test_authority(_run_bootstrap, **kwargs)
 
 
 def invoke_promotion_with_test_authority(

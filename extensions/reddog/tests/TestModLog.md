@@ -19,6 +19,13 @@
   incumbent-comparison coverage before release promotion.
 - Regenerated the 1,365-file backend closure after advisory decomposition and
   aligned the independent generator's exact golden digest fixture.
+## 2026-08-21 - Query-replica profile confinement
+
+- Added the query-replica root fixture and proved it crosses only the
+  `holoindex_owner` and `resident_architect` closed profiles.
+- The existing ambient secret and arbitrary-key exclusions remain unchanged.
+  Integrated Node environment, backend-manifest, package, contract, and release
+  gates are regenerated and rerun from the final 0.4.104 tree.
 
 ## 2026-08-21 - Mainline release/candidate gate separation
 

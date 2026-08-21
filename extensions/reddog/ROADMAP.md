@@ -86,6 +86,12 @@ Current implementation:
   configured/system interpreter needs per-user NumPy; universal isolation waits
   on a sealed/configured Holo interpreter closure, while explicit Python
   injection variables and credentials remain denied now.
+- Query-replica production plumbing (0.4.102 source candidate): the closed
+  `holoindex_owner` and `resident_architect` profiles carry only the explicit
+  `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` needed by the one-shot query and
+  promotion boundaries. Host-side code proves an existing exact-generation
+  active replica and fails closed before owner use. Live materialization,
+  retention, and ChatGPT-app acceptance remain separate pending work.
 - R9 shared-store-independent Git authority (v0.4.101): replaces recursive
   whole-common-store identity with canonical topology, relevant-control, exact
   current-ref, and A/B requested-output binding. Linked reads survive unrelated

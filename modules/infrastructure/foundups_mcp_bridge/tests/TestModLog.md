@@ -1,5 +1,15 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-21] Query-replica route propagation regressions
+
+- Added direct resolver coverage for missing/relative roots, exact proof/build
+  propagation, and stable redaction of store-proof failure.
+- Added one-shot and maintenance contracts proving the exact canonical repo/SSD
+  inputs and sealed route reach owner startup, while missing route proof stops
+  before owner/query effects.
+- Combined route, query, maintenance, and promotion selection: **110 passed**.
+  Dependent owner/dispatch/postmerge/moltbot selection: **75 passed**.
+
 ## [2026-08-21] Remote surface and lifecycle hardening verification
 
 - Classified all 16 prior remote names by transitive effects, confinement,

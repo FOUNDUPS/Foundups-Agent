@@ -315,6 +315,11 @@ Focused architect-FIX two-phase publication:
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_publication.py modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py modules/communication/moltbot_bridge/tests/test_reddog_architect_proposal_verified_authority.py modules/communication/moltbot_bridge/tests/test_reddog_authoritative_work_state_refresh_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_authority_profile_source_artifact_supply.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_runtime_artifact_locking.py modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply.py modules/communication/moltbot_bridge/tests/test_reddog_resident_control_loop_signing_context.py modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py -q
 ```
 
+The main-bootstrap selection proves the exact query-replica capability reaches
+owner binding verification and that route-resolution failure occurs before
+verification or publication. Fixtures that exercise later promotion authority
+inject an inert route capability rather than weakening production resolution.
+
 Cross-process resident FIX promotion claim:
 
 ```bash

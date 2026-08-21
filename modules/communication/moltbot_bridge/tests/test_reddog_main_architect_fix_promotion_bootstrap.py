@@ -6,7 +6,7 @@ import ast
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -14,6 +14,7 @@ import modules.communication.moltbot_bridge.src.reddog_agentdb_fix_promotion_cla
 from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
     REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
     REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_NOT_READY,
+    run_reddog_main_architect_fix_promotion_bootstrap as _production_bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_agentdb_fix_promotion_claim_fence import (
     FixPromotionClaimFenceLost,
@@ -52,10 +53,17 @@ MODULE_PATH = (
     / "reddog_main_architect_fix_promotion_bootstrap.py"
 )
 NOW = "2026-07-16T00:00:00+00:00"
+QUERY_REPLICA_ROUTE = object()
 
 
 @pytest.fixture(autouse=True)
 def _current_holo_owner_binding(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "resolve_query_replica_owner_route",
+        lambda **_kwargs: QUERY_REPLICA_ROUTE,
+    )
     monkeypatch.setattr(
         "modules.communication.moltbot_bridge.src."
         "reddog_main_architect_fix_promotion_bootstrap."
@@ -587,6 +595,88 @@ def test_bootstrap_rejects_when_active_holo_owner_serves_another_generation(
     assert result.accepted is False
     assert "holoindex_owner_binding_not_current" in result.rejection_reasons
     assert not files["authority_profile_output"].exists()
+
+
+def test_bootstrap_passes_exact_replica_route_to_owner_verifier(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    route = object()
+    verifier_calls: dict = {}
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "resolve_query_replica_owner_route",
+        lambda **_kwargs: route,
+    )
+
+    def verify(**kwargs):
+        verifier_calls.update(kwargs)
+        return False
+
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "verify_reddog_holoindex_owner_binding",
+        verify,
+    )
+
+    result = _production_bootstrap(
+        repo_root=repo,
+        runtime_root=tmp_path / "runtime",
+        work_state_path=files["work_state"],
+        architect_determination_path=files["determination"],
+        model_selection_receipt_path=files["model_selection"],
+        memex_supply_receipt_path=files["memex_supply"],
+        authority_profile_source_path=files["authority_profile_source"],
+        authority_profile_output_path=files["authority_profile_output"],
+        holoindex_receipt_path=files["holoindex_receipt"],
+        worker_id="reddog-main-test",
+        now_iso=NOW,
+        environment={"REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT": "configured"},
+    )
+
+    assert result.accepted is False
+    assert verifier_calls["query_replica_route"] is route
+
+
+def test_bootstrap_rejects_missing_replica_route_before_owner_verification(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    verifier = Mock(side_effect=AssertionError("owner must not be verified"))
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "resolve_query_replica_owner_route",
+        Mock(side_effect=ValueError("HOLOINDEX_QUERY_REPLICA_REQUIRED")),
+    )
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "verify_reddog_holoindex_owner_binding",
+        verifier,
+    )
+
+    result = _production_bootstrap(
+        repo_root=repo,
+        runtime_root=tmp_path / "runtime",
+        work_state_path=files["work_state"],
+        architect_determination_path=files["determination"],
+        model_selection_receipt_path=files["model_selection"],
+        memex_supply_receipt_path=files["memex_supply"],
+        authority_profile_source_path=files["authority_profile_source"],
+        authority_profile_output_path=files["authority_profile_output"],
+        holoindex_receipt_path=files["holoindex_receipt"],
+        worker_id="reddog-main-test",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "holoindex_query_replica_route_not_current" in result.rejection_reasons
+    verifier.assert_not_called()
 
 
 def test_bootstrap_preserves_previous_profile_when_promotion_rejects(

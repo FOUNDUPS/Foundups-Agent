@@ -10,6 +10,9 @@
   supplied signed production evidence, trust/revocation inputs, current runtime
   binding artifacts, and provider credentials. This bridge does not sign,
   select champions, or make aggregate panel promotion authoritative.
+- COMPLETE: architect FIX promotion resolves the explicit active HoloIndex
+  query-replica capability and passes it into exact owner binding verification.
+  Live replica materialization and retention remain outside promotion.
 
 - COMPLETE: RedDog repository-state v2 intake consumes only the extension's
   digest-only executable v1 public projection and strictly validates bounded

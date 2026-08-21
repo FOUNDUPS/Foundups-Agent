@@ -372,6 +372,12 @@ def test_production_bootstrap_without_authority_fails_before_side_effects(
         ),
         patch(
             "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap."
+            "resolve_query_replica_owner_route",
+            return_value=object(),
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
             "reddog_architect_proposal_admission_contract."
             "current_architect_proposal_admission_policy",
             return_value=ready_proposal_policy(),

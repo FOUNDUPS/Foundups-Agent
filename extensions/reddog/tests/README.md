@@ -50,6 +50,10 @@ including license text canonically matching the repository authority.
 
 **Reuse rule (WSP 50):** Before adding tests, read `fixtures.js`, `TestModLog.md` TEST_REGISTRY, and `verify_extension_contract.js`. Extend existing fixtures and assertions; do not duplicate prompt strings or EXT-ACC probes.
 
+`test_bridge_python_environment.js` also proves
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` is confined to the `holoindex_owner` and
+`resident_architect` profiles and remains absent from every unrelated child.
+
 ## How to run
 
 Canonical package tiers from `extensions/reddog`:

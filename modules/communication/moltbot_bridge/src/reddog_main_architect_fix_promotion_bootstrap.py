@@ -55,6 +55,9 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_bootstrap import (
     verify_reddog_holoindex_owner_binding,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (
+    resolve_query_replica_owner_route,
+)
 
 
 REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED = (
@@ -125,6 +128,7 @@ class _PromotionBootstrapInputs:
     worker_id: str
     now_iso: str
     promotion_claim_fence_executor: Callable | None
+    environment: Mapping[str, str]
 
 
 def run_reddog_main_architect_fix_promotion_bootstrap(
@@ -148,6 +152,7 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     promotion_claim_fence_executor: Callable | None = None,
     worker_id: str = "reddog-main-architect-fix-promotion",
     now_iso: str | None = None,
+    environment: Mapping[str, str] | None = None,
 ) -> RedDogMainArchitectFixPromotionBootstrapResult:
     """Promote one backend architect FIX determination into the resident queue."""
     root = Path(repo_root).resolve()
@@ -215,7 +220,6 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     reasons.extend(_bootstrap_path_reasons(
         root, trusted_runtime_root, work_state_file, output_path, locals()
     ))
-
     if reasons:
         return _not_ready(reasons)
     runtime_capability, found = _resolve_runtime_capability(
@@ -224,7 +228,6 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     )
     if found:
         return _not_ready(found)
-
     assert work_state_file is not None
     assert output_path is not None
     assert determination is not None
@@ -256,6 +259,7 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
             worker_id=worker_id,
             now_iso=now_iso or datetime.now(timezone.utc).isoformat(),
             promotion_claim_fence_executor=promotion_claim_fence_executor,
+            environment=dict(os.environ if environment is None else environment),
         )
     )
 
@@ -272,6 +276,14 @@ def _run_locked_promotion(
         owner = generation_binding_from_receipt(
             receipt, receipt_path=inputs.holoindex_file
         )
+        try:
+            route = resolve_query_replica_owner_route(
+                canonical_repo_root=inputs.root,
+                canonical_ssd_path=receipt.ssd_path,
+                environment=inputs.environment,
+            )
+        except Exception:
+            return _not_ready(("holoindex_query_replica_route_not_current",))
         if not verify_reddog_holoindex_owner_binding(
             repo_root=inputs.root,
             expected_repo_head_sha=repo_head,
@@ -279,6 +291,7 @@ def _run_locked_promotion(
             expected_receipt_digest=str(
                 owner.get("freshness_receipt_digest") or ""
             ),
+            query_replica_route=route,
         ):
             return _not_ready(("holoindex_owner_binding_not_current",))
         return _run_profile_transaction(inputs, repo_head, receipt)

@@ -39,6 +39,16 @@ private key. Production activation still requires independently configured
 external signer, trust, revocation, durable replay, and runtime artifacts.
 Aggregate panel promotion remains shadow-only.
 
+## Governed HoloIndex query replica
+
+Semantic owner queries require the trusted host to configure an absolute
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` containing an already materialized,
+exact-generation active replica. The closed `holoindex_owner` and
+`resident_architect` child profiles carry this field only to the routes that
+prove or verify the owner. Missing, relative, stale, or unprovable replicas
+fail closed; the extension does not create a replica, re-index, or fall back to
+the writable canonical store.
+
 ## Workspace and package boundary
 
 RedDog declares both untrusted workspaces and virtual workspaces unsupported.

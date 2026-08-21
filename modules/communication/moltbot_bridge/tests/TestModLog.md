@@ -11,6 +11,16 @@
 - Revalidated panel normalization, system-prompt evidence rule, Qwen fallback,
   hostile bridge metadata, and advisory hardening after pure-helper extraction.
 
+## 2026-08-21: Promotion query-replica route regressions
+
+- Proved the exact sealed route reaches owner verification and missing route
+  proof rejects before verification/publication.
+- Updated shared proposal and model-runtime fixtures to supply only an inert
+  route capability when the test's subject is downstream authority behavior.
+- Focused combined implementation selection passed **110 tests**; dependent
+  promotion/authority/dispatch/postmerge selection passed **75 tests** in the
+  isolated transaction and is rerun after final composition.
+
 ## 2026-08-21: Native upstream worker regressions
 
 - Added Hermes API `0.20.4` capability/toolset checks and exact stable-child

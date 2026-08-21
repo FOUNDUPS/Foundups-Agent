@@ -124,6 +124,7 @@ def _run_promotion(repo_root, environment, inputs, claim, store):
             "reddog-main-architect-fix-promotion",
         ),
         promotion_claim_fence_executor=fence_executor,
+        environment=environment,
     )
 
 
