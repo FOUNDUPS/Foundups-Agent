@@ -19,6 +19,10 @@
 - Pre-release composition gates passed: AI Gateway 786/786 with 2 skips,
   runtime consumers 272/272 with 1 skip, advisory 83 plus 20 subtests, and the
   six-shard HoloIndex route/promotion selection 152/152.
+- The exhaustive extension owner exposed and closed a mirrored-contract drift:
+  `model_runtime_blocked` was emitted by the bridge but absent from the UI stage
+  map and fixed-count assertion. The final authenticated contract now binds all
+  19 stages.
 
 ## [2026-08-21] Isolated RedDog HoloIndex Query-Replica Route Plumbing
 

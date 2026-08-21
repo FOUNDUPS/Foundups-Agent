@@ -14,6 +14,9 @@
 - Exercised two exact local Nemotron calls through the governed configured
   runner and retained content-free call/evidence receipts. The static roster
   remains explicit evaluation fallback only. WSP 00/15/22/50/62/87/97.
+- Closed the release-only advisory-stage grounding drift: the emitted
+  `model_runtime_blocked` stage now has an explicit barking action and the
+  authenticated exhaustive contract binds all 19 bridge stages.
 
 ## 2026-08-21 - Nemotron shadow routing and Qwen challenger fallback (0.4.103)
 

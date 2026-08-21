@@ -8,6 +8,8 @@
   and isolated Holo replica-route inputs without widening credential profiles.
 - Backend manifest, package surface, and exhaustive release receipts are
   regenerated only from the final composed RedDog/Holo tree.
+- Added the missing `model_runtime_blocked` stage action and updated the exact
+  19-stage exhaustive assertion plus authenticated shard/aggregate hashes.
 
 ## 2026-08-21 - Nemotron/Qwen routing contract refresh (0.4.103)
 

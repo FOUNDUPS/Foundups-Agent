@@ -192,6 +192,7 @@ const REDDOG_STAGE_ACTIONS = {
   redaction_pass: { action: 'nosing', pixel: '<rd>' },
   fusion_alias_start: { action: 'fetching', pixel: '<rd>' },
   fusion_alias_done: { action: 'crystallizing', pixel: '<rd>' },
+  model_runtime_blocked: { action: 'barking', pixel: '!rd!' },
   lead_start: { action: 'fetching', pixel: '<rd>' }, lead_done: { action: 'herding', pixel: '<rd>' },
   lead_retry: { action: 'fetching', pixel: '<rd>' },
   panel_start: { action: 'herding', pixel: '<rd>' }, panel_done: { action: 'herding', pixel: '<rd>' },
