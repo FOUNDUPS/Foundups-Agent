@@ -1,4 +1,18 @@
 # OpenClaw Bridge Interface
+## Governed repository-state intake
+
+`observe_repo_state(repo_root, governed_receipt)` accepts only
+`reddog_governed_git_repo_state.v2`. It validates the exact root digest, HEAD,
+sorted normalized dirty paths, state digests, readiness v2, and digest-only
+`reddog_governed_git_executable.v1` public receipt. The executable validator
+rejects unknown/missing keys, bool-as-int values, invalid digest/size/link
+bounds, partial or unequal portable/native identities, and platform signature
+shape drift. Windows additionally requires signer/thumbprint digests and a
+separately identity/hash-bound fixed-SystemRoot verifier containment proof;
+non-Windows accepts exactly `status: not_applicable`. No raw absolute executable
+path is accepted or returned. The unkeyed receipt digest is necessary but not
+an independent origin authenticator; Git DLL/helper closure is outside scope.
+
 ## Exact-Git grant-authority effect admission
 
 `create_grant_runtime_atomic_provisioning_context()` fixes the exact-Git profile,
@@ -343,13 +357,17 @@ model substitution fails before `foundups_fusion`, sandbox-verified upstream
 `openclaw agent`, or the upstream Hermes API; actual invocation effects remain
 receipt-bound. `hermes_api` consumes the signed principal model/provider route,
 uses the fixed authenticated loopback `/v1/runs` surface, and requires exact
-version/profile identity, bearer enforcement, all API-server toolsets disabled,
-zero skills, an effect-free complete `/events` history, and unchanged tool/skill
-state after the run. The terminal event and polled output must match. Because upstream
-Hermes reports `tool_execution=server` and `split_runtime=false`, this adapter
-never grants Hermes shell or repository authority. Approval, tool, subagent,
-timeout, uncertain stop, malformed output, or confinement drift fails closed.
-Each returns only an artifact map to the existing Foundups materializer, and commit rejects pre-staged, undeclared, changed, protected, or base-mismatched state.
+version/profile identity, bearer enforcement, the sole `delegation` toolset
+with exactly `delegate_task`, zero skills, one stable completed leaf lifecycle,
+explicit empty child file-read/write arrays, ordered delegate completion, and
+unchanged tool/skill state after the run. The final terminal event and polled
+output must match. Because upstream Hermes reports
+`tool_execution=server` and `split_runtime=false`, the leaf receives no shell,
+file, web, browser, MCP, memory, or approval tool. A second child, other tool,
+approval, timeout, uncertain stop, malformed output, or confinement drift fails closed.
+Each returns only an artifact map accepted by the shared bounded relative-path,
+non-empty UTF-8 content validator to the existing Foundups materializer, and
+commit rejects pre-staged, undeclared, changed, protected, or base-mismatched state.
 
 The resulting `reddog_resident_queue_exact_sha_commit_receipt.v1` is
 canonically revalidated before the verifier request is built. The stage does

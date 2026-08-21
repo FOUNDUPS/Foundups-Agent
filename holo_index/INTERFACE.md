@@ -1,10 +1,32 @@
 # HoloIndex Public Interface
 
+## Package import boundary
+
+Importing `holo_index.cli.commands.bundle_json` is a bounded, closed-environment
+operation and does not import `holo_index._cli_main` or the vector backend.
+The compatible `holo_index.cli` exports (`main`, `HoloIndex`, `QwenAdvisor`, and
+the two fast-search helpers) remain available through deferred loading. Calling
+`main`, or requesting a semantic export, still requires the normal full CLI
+dependencies. This separation grants no model, network, index, or maintenance
+authority to command-only consumers.
+
 ## Scope
 This document is the stable public contract for consuming HoloIndex programmatically and via CLI.
 For exhaustive machine-level semantics, use:
 - `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.md`
 - `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json`
+
+### Query storage isolation boundary
+
+HoloIndex continues to accept one explicit storage root and does not discover
+or trust `holoindex_query_replica.v1` descriptors itself. The bridge-owned
+Phase-1 materializer can prove/copy one immutable vector + model generation,
+retaining the existing authority then maintenance sentinels plus receipt proof
+through final active publication. It requires direct-root model markers and
+sealed production primitives; failure paths preserve rather than delete temps,
+staging, and active-name objects. The owner is not replica-backed until a follow-on validates the descriptor,
+supplies only the generation directory, and restarts on generation change.
+Canonical freshness evidence remains authoritative.
 
 ### Tool boundary (truth-recorded by PR #704)
 HoloIndex is a **semantic retrieval system**. It **complements** `grep`/`glob`; it does not replace them. Choose the right tool for the query:
@@ -75,15 +97,30 @@ exists. The resolver never checks out, updates, or indexes either worktree.
 
 Search response contract:
 
-For an exact module basename that resolves uniquely against initial collection
-metadata, or one validated full `modules/<domain>/<module>` query path, docs
+For an exact module basename that resolves uniquely against the complete,
+HEAD-pinned Git module-directory catalog, or one validated full
+`modules/<domain>/<module>` query path, docs
 retrieval performs zero-to-two exact metadata gets for module-root `README.md`
 and `INTERFACE.md`. Their Tier-0 order is README then INTERFACE. Exact rows use
 `retrieval_provenance: exact_metadata` and `similarity: null`; they are not
 fabricated vector results and do not pass through the vector similarity floor.
-Strict owner mode rejects an incomplete or corrupt pair. Non-strict search
-preserves available evidence and emits a bounded incomplete-Tier0 warning.
+Canonical result metadata includes nullable `tier0_module_target`, set from
+the same generation-stable intent before docs retrieval. Consumers must not
+treat `exact_metadata` alone as proof that the query targeted that module.
+Strict owner mode rejects an unavailable catalog or incomplete/corrupt pair.
+Non-strict search logs a stable catalog warning and suppresses basename Tier-0
+promotion when catalog proof is unavailable; it never reverts to vector-hit
+singularity. Full paths do not require the catalog. Stable producer errors are
+`HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE`,
+`HOLOINDEX_TIER0_INCOMPLETE`, and `HOLOINDEX_TIER0_LOOKUP_FAILED`; all other
+exception text is reduced to `HOLOINDEX_SEARCH_FAILED` before leaving HoloIndex.
 Ambiguous or implicit module intent preserves ordinary score ordering.
+The catalog requires a final NUL and validates every record before depth
+filtering. Every path rejects Unicode `Cc`, `Cf`, and `Cs` categories, and
+duplicate identity is `NFC(path).casefold()` without changing the returned
+original spelling. Visible non-control Unicode remains valid. Cache identity
+is platform-aware and access is locked; Git remains outside the lock, so
+duplicate cold loads are allowed but bounded.
 
 The JSON machine specification is authoritative. Its complete response schema
 is structurally compiled by `holo_index.query_result_contract_schema` and
@@ -302,6 +339,8 @@ python holo_index.py --health-check
 - `HOLO_SKIP_MODEL=1`: force lexical retrieval path.
 - `HOLO_MIN_SIMILARITY=0.35`: vector hit floor.
 - `HOLO_FAST_SEARCH=1`: retrieval-only fast path.
+  Its compact receipt reports all four result buckets explicitly:
+  `code`, `wsp`, `docs`, and `knowledge`, including zero counts.
 - `HOLO_INDEX_WEB=1`: include web assets during a targeted diagnostic
   `--index-code`; trusted baseline maintenance uses the canonical tracked web
   scope and does not accept this override.

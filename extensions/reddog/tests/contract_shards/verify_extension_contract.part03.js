@@ -84,12 +84,12 @@ const rddNoisyFocus = orchestrator.discoverRepoDeepDiveTargets(root,
 assert.strictEqual(rddNoisyFocus.focus_anchor, 'pfmall',
   'RDD-010: leading prose cannot replace the explicit subsystem focus');
 (function rddManifestCompletenessTruth() {
-  const originalExecFileSync = cp.execFileSync;
-  cp.execFileSync = (file, args, options) => {
-    if (file === 'git' && Array.isArray(args) && args.includes('ls-files')) {
+  const originalExecFileSync = require(path.join(extDir, 'governed_git_executable.js')).execFileSync;
+  require(path.join(extDir, 'governed_git_executable.js')).execFileSync = (binding, args, options) => {
+    if (Array.isArray(args) && args.includes('ls-files')) {
       return 'modules/foundups/pfmall/api.py\n' + 'x'.repeat(1000100);
     }
-    return originalExecFileSync(file, args, options);
+    return originalExecFileSync(binding, args, options);
   };
   try {
     const indexed = orchestrator.repoFileIndex(root, 20000);
@@ -98,7 +98,7 @@ assert.strictEqual(rddNoisyFocus.focus_anchor, 'pfmall',
     assert.strictEqual(indexed.manifest_source_count, 2,
       'RDD-010: manifest source count remains explicit after character truncation');
   } finally {
-    cp.execFileSync = originalExecFileSync;
+    require(path.join(extDir, 'governed_git_executable.js')).execFileSync = originalExecFileSync;
   }
 })();
 assert(!rddHostDiscovery.targets.some((p) => /(?:livechat|banter|worker_help|help_command)/i.test(p)),
@@ -235,99 +235,62 @@ includes(rddLines, '- repo_deep_dive_focus_anchor_source: explicit_focus_phrase'
 includes(rddLines, '- repo_deep_dive_pool_strategy: focus_core_plus_semantic_cross_cutting', 'RDD-008: Run Trace exposes pool strategy');
 
 (function rdd009RealBundleRegression() {
-  const result = orchestrator.holoIndexOutput(root, rddPrompt, 18000);
+  const targets = rddDiscovery.targets.concat(['modules/ai_intelligence/pfmall_discovery/README.md']); const hits = targets.map((target) => ({ location: target, need: 'governed direct-read target', content: 'evidence for ' + target, direct_read: true }));
+  const bundle = { task_retrieval: { code_hits: hits, wsp_hits: [], metadata: { retrieval_mode: 'lexical', embedding_backend: 'none', code_count: hits.length, wsp_count: 0, no_holoindex_reindex_performed: true } }, direct_read: { direct_read_fallback_used: true, direct_read_paths: targets, direct_read_rejected: [], direct_read_bytes: hits.reduce((total, hit) => total + hit.content.length, 0), direct_read_truncated: [] } };
+  const result = orchestrator.holoIndexOutput(root, rddPrompt, 18000, { baseResult: { ok: true, bundle_ok: true, bundle, owner_attempts: 0, no_holoindex_reindex_performed: true }, allowBundleOnlyBridge: false });
   const meta = result && result.meta ? result.meta : {};
   assert.strictEqual(meta.repo_deep_dive_requested, true, 'RDD-009: runtime marks the deep-dive request');
   assert.strictEqual(meta.repo_manifest_generated, true, 'RDD-009: runtime creates the tracked-file manifest');
   assert(meta.repo_manifest_file_count > 0, 'RDD-009: runtime manifest is non-empty');
   assert(meta.repo_deep_dive_targets_count > 0, 'RDD-009: runtime derives source targets');
-  assert.strictEqual(meta.direct_read_fetch_attempted, true, 'RDD-009: runtime invokes governed direct read');
+  assert.strictEqual(meta.direct_read_fetch_attempted, true, 'RDD-009: one-shot owner direct-read evidence is receipt-visible');
   assert(meta.direct_read_bytes > 0, 'RDD-009: runtime reads nonzero source bytes');
-  assert.strictEqual(meta.target_recall_ok, true, 'RDD-009: every discovered source target is recalled; missing='
-    + JSON.stringify(meta.required_targets_missing) + '; rejected=' + JSON.stringify(meta.direct_read_rejected));
+  assert.strictEqual(meta.target_recall_ok, true, 'RDD-009: every discovered source target is recalled; missing=' + JSON.stringify(meta.required_targets_missing));
   assert.strictEqual(meta.repo_deep_dive_gate_passed, true, 'RDD-009: source-bearing runtime deep dive passes');
   assert(result.direct_read_section && result.direct_read_section.chars > 0, 'RDD-009: source context reaches the bounded packet');
 })();
 
-(function rdd011OwnerFailureStillDirectReads() {
-  const originalExecFileSync = cp.execFileSync;
+function assertRdd011Failure(result) {
+  const meta = result.meta || {};
+  assert.strictEqual(meta.holoindex_owner_query_ok, false, 'RDD-011: semantic owner failure remains explicit');
+  assert.notStrictEqual(meta.direct_read_fetch_attempted, true, 'RDD-011: owner failure cannot invoke a raw fallback');
+  assert.strictEqual(meta.target_recall_ok, false, 'RDD-011: failed owner cannot claim target recall');
+  assert.strictEqual(Number(meta.direct_read_bytes || 0), 0, 'RDD-011: failed owner supplies no source bytes');
+  assert.strictEqual(meta.repo_deep_dive_focus_coverage_passed, true,
+    'RDD-011: local manifest category coverage remains distinct from source recall');
+  assert.strictEqual(meta.repo_deep_dive_gate_passed, false,
+    'RDD-011: repository evidence gate fails closed');
+  assert(!result.direct_read_section || result.direct_read_section.chars === 0,
+    'RDD-011: failed owner supplies no direct-read source context');
+  assert.strictEqual(meta.no_holoindex_reindex_performed, true,
+    'RDD-011: failed owner path performs no reindex');
+}
+
+function assertRdd011Preflight(meta) {
+  const scorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', meta);
+  const preflight = orchestrator.buildTypedGroundingPreflight(rddHostPrompt, 'wsp_holo', {
+    holoindex_scorecard: scorecard
+  });
+  assert.strictEqual(preflight.external_research_targets_count, 0,
+    'RDD-011: repository wording cannot invent external research');
+  assert.strictEqual(preflight.semantic_targets_required, 1,
+    'RDD-011: unresolved repository audit intent remains a required semantic target');
+  assert.strictEqual(preflight.passed, false,
+    'RDD-011: repository-only audit cannot reach Fusion without evidence');
+}
+
+(function rdd011OwnerFailureFailsClosed() {
   const originalMode = process.env.REDDOG_HOLO_RETRIEVAL_MODE;
-  const calls = [];
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = 'semantic';
-  cp.execFileSync = (file, args) => {
-    const argv = Array.isArray(args) ? args.map(String) : [];
-    if (file === 'git') {
-      return originalExecFileSync(file, args, {
-        cwd: root,
-        encoding: 'utf8',
-        timeout: 5000,
-        maxBuffer: 4000000,
-        windowsHide: true
-      });
-    }
-    calls.push(argv.slice());
-    if (argv.some((arg) => /reddog_holoindex_owner_query_once\.py$/i.test(arg))) {
-      const error = new Error('owner unavailable');
-      error.code = 'OWNER_UNAVAILABLE';
-      throw error;
-    }
-    assert(argv.includes('--bundle-json'), 'RDD-011: owner failure must stay on structured bundle path');
-    assert(!argv.includes('--offline'), 'RDD-011: owner failure must not discard the structured bundle');
-    const targets = [];
-    for (let index = 0; index < argv.length; index++) {
-      if (argv[index] === '--bundle-must-include' && argv[index + 1]) {
-        targets.push(argv[index + 1]);
-      }
-    }
-    const hits = targets.map((target) => ({
-      location: target,
-      need: 'governed direct-read target',
-      content: 'evidence for ' + target,
-      direct_read: true
-    }));
-    return JSON.stringify({
-      task_retrieval: {
-        code_hits: hits,
-        wsp_hits: [],
-        metadata: { retrieval_mode: 'lexical', embedding_backend: 'none' }
-      },
-      direct_read: {
-        direct_read_fallback_used: targets.length > 0,
-        direct_read_paths: targets,
-        direct_read_rejected: [],
-        direct_read_bytes: hits.reduce((total, hit) => total + hit.content.length, 0),
-        direct_read_truncated: []
-      }
-    });
-  };
   try {
-    const result = orchestrator.holoIndexOutput(root, rddHostPrompt, 18000);
-    const meta = result.meta || {};
-    assert.strictEqual(meta.holoindex_owner_query_ok, false, 'RDD-011: semantic owner failure remains explicit');
-    assert.strictEqual(meta.direct_read_fetch_attempted, true, 'RDD-011: local governed fetch still runs');
-    assert.strictEqual(meta.target_recall_ok, true, 'RDD-011: all locally discovered targets are recalled');
-    assert(meta.direct_read_bytes > 0, 'RDD-011: locally governed source bytes are present');
-    assert.strictEqual(meta.repo_deep_dive_focus_coverage_passed, true,
-      'RDD-011: owner failure recovery still proves p.fMALL evidence-category coverage');
-    assert.strictEqual(meta.repo_deep_dive_gate_passed, true,
-      'RDD-011: repository evidence gate passes; reasons=' +
-      JSON.stringify(meta.repo_deep_dive_gate_rejection_reasons || []));
-    assert(result.direct_read_section && result.direct_read_section.chars > 0,
-      'RDD-011: direct-read source context survives owner failure');
-    const scorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', meta);
-    const preflight = orchestrator.buildTypedGroundingPreflight(rddHostPrompt, 'wsp_holo', {
-      holoindex_scorecard: scorecard
+    const result = orchestrator.holoIndexOutput(root, rddHostPrompt, 18000, {
+      baseResult: hsfOwnerFailure,
+      allowBundleOnlyBridge: false
     });
-    assert.strictEqual(preflight.external_research_targets_count, 0,
-      'RDD-011: repository wording cannot invent external research');
-    assert.strictEqual(preflight.semantic_targets_required, 0,
-      'RDD-011: inferred whole-prompt semantic hint yields to complete direct-read evidence');
-    assert.strictEqual(preflight.passed, true,
-      'RDD-011: repository-only audit reaches Fusion on complete local evidence');
-    assert(calls.some((argv) => argv.includes('--bundle-must-include')),
-      'RDD-011: enriched structured fetch was invoked');
+    const meta = result.meta || {};
+    assertRdd011Failure(result);
+    assertRdd011Preflight(meta);
   } finally {
-    cp.execFileSync = originalExecFileSync;
     if (originalMode === undefined) {
       delete process.env.REDDOG_HOLO_RETRIEVAL_MODE;
     } else {

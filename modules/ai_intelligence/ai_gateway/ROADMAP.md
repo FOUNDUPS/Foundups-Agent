@@ -8,6 +8,9 @@
 
 ## Dynamic RedDog Model Evidence
 
+- [x] Exact OpenRouter Kimi K3 request-truth boundary: explicit/env/default
+  resolution, 4,096 floor, 131,072 cap, mandatory maximum reasoning, no
+  temperature, and pre-transport rejection.
 - [x] Signed single-model benchmark and promotion evidence admission
 - [x] Signed aggregate PANEL evidence with ordered topology and runtime-context binding
 - [x] PANEL runtime binding fails closed without the verified aggregate

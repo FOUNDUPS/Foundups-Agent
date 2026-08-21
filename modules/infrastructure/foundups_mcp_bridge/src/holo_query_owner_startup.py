@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable, Protocol
 
+from .holo_query_binding import parse_exact_binding
+from .holo_query_replica_binding import parse_replica_binding
+
 
 class OwnerProcess(Protocol):
     def poll(self) -> int | None: ...
@@ -14,6 +17,7 @@ class HealthProof(Protocol):
     ready: bool
     rejection: str
     binding: tuple[str, str, str, str]
+    replica_binding: tuple[str, str, str, str]
 
 
 @dataclass(frozen=True)
@@ -29,6 +33,7 @@ class OwnerStartupSettings:
     expected_repo_root_digest: str = ""
     expected_generation_id: str = ""
     expected_receipt_digest: str = ""
+    expected_replica_binding: tuple[str, str, str, str] = ("", "", "", "")
 
     @classmethod
     def from_binding(
@@ -39,6 +44,7 @@ class OwnerStartupSettings:
         token: str,
         timeouts: tuple[float, float, float, float],
         binding: tuple[str, str, str, str],
+        replica_binding: tuple[str, str, str, str] = ("", "", "", ""),
     ) -> "OwnerStartupSettings":
         return cls(
             host=host,
@@ -52,13 +58,33 @@ class OwnerStartupSettings:
             expected_repo_root_digest=binding[1],
             expected_generation_id=binding[2],
             expected_receipt_digest=binding[3],
+            expected_replica_binding=replica_binding,
         )
 
 
 @dataclass(frozen=True)
 class OwnerStartupResult:
     binding: tuple[str, str, str, str] = ("", "", "", "")
+    replica_binding: tuple[str, str, str, str] = ("", "", "", "")
     error: str = ""
+
+
+def _ready_startup_result(
+    proof: HealthProof,
+    process: OwnerProcess,
+    expected: tuple[str, str, str, str],
+    expected_replica: tuple[str, str, str, str],
+) -> OwnerStartupResult:
+    if process.poll() is not None:
+        return OwnerStartupResult(error="HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP")
+    binding = parse_exact_binding(getattr(proof, "binding", None))
+    replica = parse_replica_binding(getattr(proof, "replica_binding", None))
+    mismatch = binding is None or replica != expected_replica or any(
+        wanted and wanted != found for wanted, found in zip(expected, binding or ())
+    )
+    if mismatch:
+        return OwnerStartupResult(error="HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH")
+    return OwnerStartupResult(binding=binding, replica_binding=replica)
 
 
 def await_owner_startup(
@@ -70,6 +96,15 @@ def await_owner_startup(
     sleeper: Callable[[float], Any],
 ) -> OwnerStartupResult:
     """Wait for one authenticated ready proof within the total deadline."""
+    expected = parse_exact_binding((
+        settings.expected_repo_head_sha, settings.expected_repo_root_digest,
+        settings.expected_generation_id, settings.expected_receipt_digest,
+    ), allow_empty_fields=True)
+    if expected is None:
+        return OwnerStartupResult(error="HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH")
+    expected_replica = parse_replica_binding(settings.expected_replica_binding)
+    if expected_replica is None:
+        return OwnerStartupResult(error="HOLOINDEX_QUERY_REPLICA_REQUIRED")
     deadline = clock() + settings.startup_timeout_seconds
     while True:
         if process.poll() is not None:
@@ -88,17 +123,16 @@ def await_owner_startup(
                 ),
                 remaining,
             ),
-            expected_repo_head_sha=settings.expected_repo_head_sha,
-            expected_repo_root_digest=settings.expected_repo_root_digest,
-            expected_generation_id=settings.expected_generation_id,
-            expected_receipt_digest=settings.expected_receipt_digest,
+            expected_repo_head_sha=expected[0],
+            expected_repo_root_digest=expected[1],
+            expected_generation_id=expected[2],
+            expected_receipt_digest=expected[3],
+            expected_replica_binding=expected_replica,
         )
         if proof.ready:
-            if process.poll() is not None:
-                return OwnerStartupResult(
-                    error="HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP"
-                )
-            return OwnerStartupResult(binding=proof.binding)
+            return _ready_startup_result(
+                proof, process, expected, expected_replica
+            )
         if proof.rejection:
             return OwnerStartupResult(error=proof.rejection)
         sleeper(min(settings.probe_interval_seconds, remaining))

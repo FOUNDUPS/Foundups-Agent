@@ -3,10 +3,10 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.101', 'README version mismatch');
+includes(readme, 'Version: 0.4.102', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
-includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
-includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
+includes(startOperationsEnvironmentJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
+includes(startOperationsEnvironmentJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
 includes(bridgePy, 'def _read_stdin_json', 'bridge must read stdin as UTF-8 bytes');
 includes(bridgePy, 'sys.stdin.buffer.read()', 'bridge UTF-8 stdin invariant missing');
 includes(extensionJs, 'UNICODE_SURROGATE_PLACEHOLDER', 'unicode surrogate placeholder missing');
@@ -45,8 +45,8 @@ includes(extensionJs, 'Every finding must include a proposed fix', 'proposed-fix
 includes(extensionJs, 'HOLO_SKIP_MODEL', 'HoloIndex fastpath env missing');
 includes(extensionJs, 'REDDOG_HOLO_RETRIEVAL_MODE', 'HoloIndex explicit lexical opt-down missing');
 includes(extensionJs, "delete env.HOLO_SKIP_MODEL", 'semantic-first path must clear inherited lexical override');
-includes(extensionJs, '--bundle-json', 'bundle-json retrieval missing');
-includes(extensionJs, '--offline', 'offline fallback missing');
+includes(extensionJs, 'include_bundle: true', 'governed bundle request missing');
+includes(extensionJs, 'allowBundleOnlyBridge: false', 'async owner bundle reuse gate missing');
 includes(extensionJs, 'Skillz/Wardrobe/Rolodex discovery', 'Skillz/Rolodex discovery context missing');
 
 includes(bridgePy, 'evaluate_redaction_gate(', 'prompt/context redaction gate missing');
@@ -270,7 +270,7 @@ const hsfSemanticEnv = orchestrator.buildHoloQueryEnv({ HOLO_SKIP_MODEL: '1', HO
 assert.strictEqual(hsfSemanticEnv.HOLO_SKIP_MODEL, undefined, 'HSF-002: semantic mode must clear inherited HOLO_SKIP_MODEL');
 assert.strictEqual(hsfSemanticEnv.HOLO_OFFLINE, '1', 'HSF-002: semantic mode must preserve the operator offline/network boundary');
 assert.strictEqual(hsfSemanticEnv.HOLOINDEX_QUERY_READONLY, '1', 'HSF-002: semantic queries remain read-only');
-assert.strictEqual(hsfSemanticEnv.KEEP_ME, 'yes', 'HSF-002: unrelated environment must survive');
+assert.strictEqual(hsfSemanticEnv.KEEP_ME, undefined, 'HSF-002: unrelated environment must not cross');
 const hsfLexicalEnv = orchestrator.buildHoloQueryEnv({}, 'lexical');
 assert.strictEqual(hsfLexicalEnv.HOLO_SKIP_MODEL, '1', 'HSF-003: explicit lexical opt-down must set HOLO_SKIP_MODEL');
 assert.strictEqual(hsfLexicalEnv.HOLOINDEX_QUERY_READONLY, '1', 'HSF-003: lexical queries remain read-only');
@@ -333,22 +333,18 @@ fs.writeFileSync(
 let hsfExecCalls = 0;
 try {
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = 'semantic';
-  cp.execFileSync = function(_exe, args, options) {
+  cp.execFileSync = function(_exe, args) {
     hsfExecCalls += 1;
-    if (!args.includes('--offline')) {
-      assert.strictEqual(options.env.HOLO_SKIP_MODEL, '1',
-        'HSF-006: legacy bundle stays lexical because the owner is the sole semantic authority');
-      const err = new Error('simulated semantic bundle failure');
-      err.code = 'SIMULATED';
-      throw err;
-    }
-    assert(args.includes('--offline'), 'HSF-006: second call must be the offline lexical fallback');
-    assert.strictEqual(options.env.HOLO_SKIP_MODEL, '1', 'HSF-006: fallback must receive a valid lexical environment');
-    assert.strictEqual(options.env.HOLOINDEX_QUERY_READONLY, '1', 'HSF-006: fallback must remain read-only');
-    return '[OFFLINE] simulated lexical result';
+    throw new Error(
+      'HSF-006: raw Holo CLI fallback must not run: '
+      + JSON.stringify(args)
+    );
   };
+  // The governed owner one-shot owns both bounded semantic and lexical bundles.
+  // The extension must not regain a second raw Holo CLI fallback authority.
+  // This interceptor is a tripwire for that forbidden regression.
   const hsfFallback = orchestrator.holoIndexOutput(hsfOwnerRoot, 'semantic fallback contract', 18000);
-  assert.strictEqual(hsfExecCalls, 2, 'HSF-006: legacy bundle failure must invoke exactly one lexical fallback');
+  assert.strictEqual(hsfExecCalls, 0, 'HSF-006: owner failure must not invoke a raw lexical fallback');
   assert.strictEqual(hsfFallback.meta.holoindex_status, 'generation_bound_query_failed', 'HSF-006: failed owner proof must outrank the lexical fallback status');
   assert.strictEqual(hsfFallback.meta.holoindex_owner_attempts, 2, 'HSF-006: rejected owner retains bounded attempt telemetry');
   assert.strictEqual(hsfFallback.meta.holoindex_owner_retry_performed, true, 'HSF-006: rejected owner retains retry occurrence');
@@ -356,6 +352,10 @@ try {
     'HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP', 'HSF-006: rejected owner retains retry reason');
   assert.strictEqual(hsfFallback.meta.requested_retrieval_mode, 'semantic', 'HSF-006: receipt must retain the requested mode');
   assert.strictEqual(hsfFallback.meta.retrieval_mode, 'lexical', 'HSF-006: receipt must expose actual lexical behavior');
+  assert.strictEqual(hsfFallback.meta.holoindex_owner_query_required, true, 'HSF-006: semantic authority remains required');
+  assert.strictEqual(hsfFallback.meta.holoindex_owner_query_ok, false, 'HSF-006: failed owner is never accepted');
+  assert.strictEqual(hsfFallback.meta.no_holoindex_reindex_performed, true, 'HSF-006: failure path performs no reindex');
+  assert.strictEqual(hsfFallback.meta.index_gap_detected, true, 'HSF-006: failed authority remains an explicit index gap');
 } finally {
   cp.execFileSync = hsfOriginalExecFileSync;
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = hsfOriginalMode;
@@ -369,23 +369,23 @@ assert.strictEqual(hsfExpansionPlan.original_query, 'Audit pfmall.', 'HSF-007: o
 includes(hsfExpansionPlan.effective_query, 'architecture', 'HSF-007: broad audit query gains generic architecture vocabulary');
 includes(hsfExpansionPlan.effective_query, 'tests', 'HSF-007: broad audit query gains generic verification vocabulary');
 assert.strictEqual(hsfExpansionPlan.expansion_strategy, 'broad_audit_v1', 'HSF-007: expansion strategy is explicit');
-let hsfExpandedCall = null;
+const hsfExpandedOwner = {
+  ok: true, bundle_ok: true, owner_attempts: 0, no_holoindex_reindex_performed: true,
+  bundle: { task_retrieval: { code_hits: [], metadata: {
+    retrieval_mode: 'lexical', embedding_backend: 'none', code_count: 0, wsp_count: 0
+  } }, direct_read: { direct_read_fallback_used: false } }
+};
 try {
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = 'lexical';
-  cp.execFileSync = function(_exe, args, options) {
-    hsfExpandedCall = { args, options };
-    return JSON.stringify({ task_retrieval: { code_hits: [], metadata: { retrieval_mode: 'lexical', code_count: 0, wsp_count: 0 } } });
-  };
-  const hsfExpanded = orchestrator.holoIndexOutput(root, 'Audit pfmall.', 18000);
-  assert.strictEqual(hsfExpandedCall.options.env.HOLOINDEX_QUERY_READONLY, '1', 'HSF-007: expanded query remains read-only');
-  assert.strictEqual(hsfExpandedCall.args.filter((arg) => arg === '--search').length, 1, 'HSF-007: exactly one search is issued');
-  assert.strictEqual(hsfExpandedCall.args.includes('--bundle-must-include'), false, 'HSF-007: semantic expansion does not invent direct-read targets');
-  assert.strictEqual(hsfExpandedCall.args.some((arg) => /(?:^|-)re-?index|^--index/.test(String(arg))), false,
-    'HSF-007: expanded query never requests indexing');
+  const hsfExpanded = orchestrator.holoIndexOutput(root, 'Audit pfmall.', 18000,
+    { baseResult: hsfExpandedOwner });
+  assert.strictEqual(hsfExecCalls, 0, 'HSF-007: bounded owner bundle does not invoke raw Holo CLI');
+  assert.strictEqual(hsfExpandedOwner.no_holoindex_reindex_performed, true, 'HSF-007: bounded owner result prohibits reindex');
+  assert.strictEqual(hsfExpanded.meta.direct_read_fallback_used, false, 'HSF-007: semantic expansion invents no direct-read fallback');
+  assert.strictEqual(hsfExpanded.meta.requested_retrieval_mode, 'lexical', 'HSF-007: requested diagnostic mode is receipt-visible');
   assert.strictEqual(hsfExpanded.meta.original_query, 'Audit pfmall.', 'HSF-007: meta preserves original query');
   assert.strictEqual(hsfExpanded.meta.expansion_strategy, 'broad_audit_v1', 'HSF-007: meta preserves expansion strategy');
 } finally {
-  cp.execFileSync = hsfOriginalExecFileSync;
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = hsfOriginalMode;
 }
 

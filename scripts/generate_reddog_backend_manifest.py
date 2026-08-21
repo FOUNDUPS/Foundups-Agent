@@ -32,6 +32,7 @@ BRIDGE_FILES = (
     "scripts/reddog_github_permission_probe_once.py",
     "scripts/reddog_holoindex_incident_repair_once.py",
     "scripts/reddog_holoindex_blocked_request_recovery_once.py",
+    "scripts/reddog_holoindex_candidate_acceptance.py",
     "scripts/reddog_holoindex_owner_query_once.py",
     "scripts/reddog_judgment_verifier_once.py",
     "scripts/reddog_model_freshness_query_once.py",
@@ -111,11 +112,14 @@ def _digest(path: Path) -> str:
 
 def _resolve_local_module(module_name: str) -> Path | None:
     candidate = REPO_ROOT.joinpath(*module_name.split("."))
-    tracked = _tracked_file_set()
+    tracked_by_casefold = {
+        relative.casefold(): relative for relative in _tracked_files()
+    }
     for path in (candidate.with_suffix(".py"), candidate / "__init__.py"):
-        relative = path.relative_to(REPO_ROOT).as_posix()
-        if relative in tracked and path.is_file():
-            return path
+        if path.is_file():
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            canonical = tracked_by_casefold.get(relative.casefold())
+            return REPO_ROOT / canonical if canonical is not None else path
     return None
 
 
@@ -260,6 +264,7 @@ def _dependency_closure() -> tuple[str, ...]:
         if relative.endswith(".py")
     ]
     observed: set[str] = set()
+    tracked = _tracked_file_set()
     while queue:
         path = queue.pop()
         relative = path.relative_to(REPO_ROOT).as_posix()
@@ -267,6 +272,8 @@ def _dependency_closure() -> tuple[str, ...]:
             continue
         if not path.is_file():
             raise FileNotFoundError(relative)
+        if relative not in tracked:
+            raise ValueError(f"untracked_runtime_dependency:{relative}")
         observed.add(relative)
         tree = _parse_source(path, relative)
         queue.extend(_parent_initializers(path))

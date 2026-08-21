@@ -67,7 +67,7 @@ def run_start_operations_control(
     profile, action, control_request_id = _initial_request_fields(request)
     intent_id = ""
     try:
-        repo_state = observe_repo_state(root)
+        repo_state = observe_repo_state(root, request.get("repo_state_receipt"))
     except (OSError, RuntimeError, ValueError):
         return reject(
             action, profile, {}, ("start_operations_repository_observation_failed",),

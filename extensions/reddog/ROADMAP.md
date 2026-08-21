@@ -2,15 +2,138 @@
 
 ## Status
 
-Phase: RedDog 0.4.6 resident architect thin-client surface.
+Phase: RedDog 0.4.102 resident architect thin-client surface.
 
 Current implementation:
 
+- Governed Git public receipt boundary (v0.4.101): internal absolute Git and
+  fixed-SystemRoot verifier paths remain execution-only. Readiness/projection
+  receipts and repository-state v2 expose digest-only executable v1 evidence.
+  The Python snapshot consumer requires exact bounded schema, complete equal
+  identities, and platform-specific signature/verifier proof after checking the
+  body digest. This is structural/integrity validation, not a claim that the
+  unkeyed body digest authenticates origin; Git DLL/helper closure remains open.
+
+- Release test-tier orchestration (v0.4.101): package scripts now expose a
+  bounded fast default, shard/plan contract tier, and extension-scoped release tier
+  using installed Node only. The exact exhaustive shard body and its five tail
+  contracts remain the sole closure; a four-worker process-isolated owner
+  authenticates membership before bounded concurrent execution, preserves
+  deterministic diagnostics/failure propagation, and emits timing receipts.
+  The explicit extension promotion command is `npm run test:release`; it does
+  not replace repository-wide FMAS or backend-runtime WSP_62 validation.
+  The 400-second child guard and 420-second release ceiling are not raised.
+  First aligned promotion passed in 295.928 seconds, restoring 124.072 seconds
+  (29.5%) of ceiling headroom without omitting a member or assertion. A repeat
+  passed in 266.709 seconds; the conservative margin uses the slower run.
+  Repair loop 2 removes ambient group selection, moves internal execution to a
+  nonce-bound dedicated worker, enforces the overall 420-second parent deadline,
+  and makes timeout/kill failure permanently fail closed with bounded process-
+  tree termination. A hostile-selector run still executed all four groups and
+  passed in 279.723 seconds.
+  Repair loop 3 makes Windows termination evidence asynchronous and explicit:
+  missing/inaccessible `taskkill.exe`, nonzero exit, and bounded taskkill wait
+  all fail the receipt instead of escaping as an unhandled child-process error.
+  Fixed argv and `shell: false` remain mandatory; POSIX behavior is unchanged.
+  The first aligned loop-3 hostile-selector promotion passed in 274.537 seconds
+  wall time with an owner receipt of 273.762 seconds and no termination signal.
+- Governed Git child-environment least privilege (v0.4.101): all local config
+  probes and bound content commands share one fixed closed environment builder.
+  Provider/GitHub/AWS/generic credential-shaped values, ambient `GIT_*`,
+  Python/Node/loader injection, SSH-agent/config, home/profile, and arbitrary
+  caller fields are excluded; exact Git controls are reasserted after the
+  platform launch/temp/locale allowlist. Focused tests capture real Git child
+  options, pin non-mutation/fresh-object behavior and caller-override denial,
+  and execute a Node preload non-execution probe. The executable authority now
+  resolves lexical PATH/PATHEXT order once, binds canonical identity/size/hash
+  plus platform signature policy, invokes only that absolute file with PATH
+  removed, and revalidates before release. Direct proof intentionally excludes
+  Git DLL/helper-program closure. Operations remain local, read-only, bounded,
+  and non-network.
+- Shared Python bridge environment least privilege (v0.4.101): replaces whole-
+  editor environment inheritance on every Python child route launched from
+  `extension.js`, including the governed Holo owner adapter and resident
+  sessions, with fixed profiles. The provider credential
+  is exclusive to the advisory provider bridge; Holo owner and resident
+  authority credentials/configuration remain confined to their named routes;
+  deterministic/default bridges receive no bridge-specific credentials.
+  Focused contracts cover ambient-secret exclusion, OS/runtime preservation,
+  empty input, immutable/fresh results, closed profile selection, resident
+  authority isolation, the actual provider spawn environment, and live Holo
+  query leakage/non-aliasing. The Holo query profile preserves only the
+  canonical/legacy store roots required by the owner route. The extension no
+  longer owns raw bundle/offline CLI fallbacks; the one-shot adapter assembles
+  bounded lexical/direct-read bundles and fails semantic authority closed.
+  Local `holo_query` omits `PYTHONNOUSERSITE=1` because the current
+  configured/system interpreter needs per-user NumPy; universal isolation waits
+  on a sealed/configured Holo interpreter closure, while explicit Python
+  injection variables and credentials remain denied now.
+- R9 shared-store-independent Git authority (v0.4.101): replaces recursive
+  whole-common-store identity with canonical topology, relevant-control, exact
+  current-ref, and A/B requested-output binding. Linked reads survive unrelated
+  sibling/main/object/ref/replacement/packing activity while current HEAD/ref,
+  index, config, shallow/info controls, topology, required objects, and every
+  requested output remain fail closed. Loop2 adds required canonical ordinary
+  `info`/`objects/info` directories, per-component heads-ref grammar, and exact
+  packed-current classification. Loop3 centralizes no-follow absent/present/
+  error classification and validates the current-ref parent chain. Full
+  acceptance is green in 279.575 seconds after those runtime changes. On the
+  9,768-path linked acceptance worktree, 30 narrow
+  receipts measured 15.248 ms mean/17.161 ms p95; the twice-executed four-name
+  authority batch plus final receipt measured 1,118.705 ms mean across three
+  runs. Global special-file hygiene, continuous ABA detection, and
+  transactional FoundUp registry/schema byte reads are explicit separate gaps,
+  not guarantees of this layer. Control reads now allocate exactly the capped
+  opened size, issue only explicit remaining-length fd reads, reject incomplete
+  reads/growth/path substitution, and hash the binary index without a UTF-8
+  copy. Exact-current-ref parsing remains deliberately narrow; malformed
+  unrelated packed entries fail when a requested Git authority command parses
+  them rather than becoming a new global receipt audit.
+- R9 repair loop 4 (v0.4.101): replace the ASCII branch-name allowlist with a
+  Git-faithful bounded `refs/heads/*` parser that admits Unicode and `+`, and
+  admit the standard 40- and 64-hex detached/loose/packed current OID shapes.
+  The former 1,460-physical-line focused contract is split
+  into cohesive direct modules and a small orchestrator; current candidate JS,
+  functions, and non-historical docs are below the WSP_62 400/30/1,000 limits.
+  Backend runtime WSP_62 remains independently gated. General repository-wide
+  WSP_62 debt is out of this bounded repair and remains visible rather than
+  being converted into an exemption.
+- R9 repair loop 5 (v0.4.101): remove the partial object-format config parser.
+  The structural receipt now accepts exactly 40 or 64 hex while retaining the
+  capped config bytes in its fingerprint. Git's own `HEAD^{commit}` resolution
+  is the semantic object-format/commit proof for bound named batches and
+  projections; true unborn refs remain explicitly classified. All four Git-
+  accepted SHA-256 setting forms (canonical, quoted, hash-comment, semicolon-
+  comment) are covered in direct and linked repositories. Cross-format shapes
+  can pass only structural receipt validation and fail every governed release
+  path. Readiness remains structural/config evidence, not command success.
+- R9 repair loop 6 (v0.4.101): replace projection follow-target existence
+  decisions with no-follow final classification and stable canonical ordinary-
+  directory checks for every existing parent component. True tracked deletions
+  remain representable; dangling/interposed links or junctions, non-directory
+  parents, lookup errors, absent untracked records, and component substitution
+  fail the whole snapshot. Replace unbounded `readFileSync(fd)` capture with an
+  exact opened-size allocation and cumulative positional fd reads under the
+  unchanged 2 MiB file and 16 MiB aggregate caps.
+- R9 repair loop 7 (v0.4.101): require opened-fd regular/single-link identity
+  and a safe integer size within the unchanged 2 MiB cap before projection
+  allocation or reads. The bounded reader repeats the explicit cap. Deterministic
+  pre-open growth, replacement, invalid-size, exact-cap, and cap-plus-one
+  fixtures preserve the existing post-open growth/short/truncate coverage.
+- R8 optional worktree-config absence correction (v0.4.101): immutable Git
+  metadata receipts distinguish absent, present, and invalid
+  `config.worktree`. Authenticated absence is the valid empty optional scope;
+  presence retains risky-setting validation; state changes before the final
+  receipt fail the whole governed operation. No configuration write occurs.
+  Focused and direct offline RDD validation were green; exhaustive acceptance
+  was blocked at FWG-006 until the R9 authority receipt above superseded the
+  whole-common-store fingerprint.
 - R7 Windows projection identity and WSP_62 containment correction (v0.4.101):
   rejects normalized path aliases, ignored case/prefix/separator aliases, and
   duplicate canonical existing-file identities before content capture while
-  preserving Linux case-sensitive names. `extension.js` is exactly 8,425 lines,
-  equal to HEAD and below the unchanged 8,428-line hard ceiling. This does not
+  preserving Linux case-sensitive names. `extension.js` currently measures
+  exactly 8,400 canonical LF lines, below the unchanged 8,428-line hard
+  ceiling. This does not
   claim that inherited exempt functions satisfy the ordinary function limit.
 - HOLOINDEX_TIER0_RETRIEVAL_HARDENING_PHASE1 (v0.4.101): pins the generated
   backend closure for bounded exact README/INTERFACE retrieval, explicit
@@ -21,8 +144,9 @@ Current implementation:
   WSP_97 excerpts ahead of ordinary evidence. No execution authority is added.
   R4 adds start/end Git-storage receipts around the single projection and
   rejects before-first, between-command, and before-final control mutations.
-  Validation is O(N), capped at 20,000 entries, and intentionally performs two
-  receipts per released snapshot to close the observed TOCTOU window. Related
+  R9 supersedes the O(N), 20,000-entry whole-store identity described by R4.
+  Current validation is authority-scoped and intentionally performs two
+  output observations plus a final receipt per released named batch. Related
   FoundUp authority reads are grouped into one bounded four-command snapshot,
   retaining the same two-receipt rule while eliminating six redundant full
   metadata traversals per context. The exhaustive contract passes in 289.65
@@ -50,8 +174,18 @@ Current implementation:
 - Cursor command: `RedDog: Open`.
 - Bottom-composer webview with scrollback output.
 - OpenRouter bridge with redaction gate.
+- Exact single/Fusion completion-budget parsing with a 131,072 maximum and
+  pre-provider fail-closed rejection; Kimi K3 retains its 4,096 floor.
+- [x] Fail-closed VS Code workspace capability declarations and a deterministic
+  61-file VSIX surface derived from the complete runtime require/worker/Python
+  closure; live VSCE listing is release-only and creates no artifact.
+- [x] Governed Git executable provenance: lexical PATH/PATHEXT binding, exact
+  absolute identity/hash proof, Windows Authenticode fail-closed verification,
+  pathless child environments, v2 readiness/projection receipts, replacement
+  output withholding, and JS-to-Python Start Operations repository receipts.
+  Git DLL/helper-closure attestation remains a future hardening boundary.
 - WSP_00/WSP_97/WSP_15 operating prompt.
-- HoloIndex semantic-first bundle-json recall with truthful mode/backend receipts and an operational offline lexical fallback.
+- HoloIndex recall through one governed owner adapter: generation-bound semantic evidence, bounded lexical/direct-read bundles, and no raw extension fallback.
 - Manual lead+panel mode for review-packet traceability.
 - REDDOG_FUSION_ORCHESTRATOR_PHASE1: internal task classifier, auto effort, schema validator, one repair pass.
 - REDDOG_UX_PACKET_POLISH_PHASE1 (v0.3.19): Working Tail above controls; 0102 Role label; Copy MD Run Trace; mojibake flag; validation-failure packet semantics.
@@ -116,10 +250,20 @@ IDE extension POC
 | Review packet persistence | 3 | 4 | 3 | 4 | 14 | P1 | Enables outcome learning and model performance memory |
 | pfMALL RedDog binding | 4 | 5 | 3 | 5 | 17 | P0 | Public/operator surface after safety contracts harden |
 | WRE/OpenClaw dispatch bridge | 4 | 5 | 3 | 5 | 17 | P0 | Must remain governed; extension cannot dispatch directly |
+| Linked-worktree authority fingerprint isolation | 3 | 5 | 5 | 5 | 18 | P0 | Tests-first follow-up: tolerate unrelated shared-store additions while binding the checked-out HEAD/ref, index, config, and safety invariants |
 
-## External RedDog Lane Queue (post-#888)
+## External RedDog Lane Queue (post-#888) - historical snapshot
 
 Goal: **RedDog replaces Claude Code-style work** - not only extension polish. Advisory RedDog must bridge to governed WRE execution before random implementation.
+
+This block preserves the queue recorded after PR #891; it is not a current PR
+tracker or runtime-readiness claim. Current reconciliation (verified against
+GitHub and commit ancestry on 2026-08-21): the numbered `DONE` entries below
+are merged; the former live-enqueue contract and FoundUpJob adapter dry-run
+landed in PRs #905 and #904 respectively; and later merged work contains the
+bounded worktree-create spine. Those merges do not grant live enqueue, task
+execution, push, or merge authority. Current authority blockers are stated in
+the top-level `Status` section and the detailed slice records below.
 
 ```text
 DONE
@@ -138,13 +282,13 @@ DONE
 13. #901 OpenClaw FoundUpsJob adapter contract (2c8df23dd)
 14. #903 WRE execution valve (2761f2e65)
 
-P0 NEXT (execution track)
+P0 NEXT (historical label at snapshot time)
 15. REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1
     - refreshed contract boundary for future live OpenClaw enqueue; no runtime enqueue
 15. REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
     - propose FoundUpsJob / autonomous_task intake; no live enqueue
 
-P1
+P1 (historical label at snapshot time)
 16. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
     - first real isolated worktree; valve OPEN only
 17. REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
@@ -156,7 +300,7 @@ P1
 22. HOLOINDEX_REDDOG_WRE_EXECUTOR_DRYRUN_INDEX_GAP_PHASE1
 23. HOLOINDEX_REDDOG_OPENCLAW_ADAPTER_CONTRACT_INDEX_GAP_PHASE1
 
-P2/P3
+P2/P3 (historical label at snapshot time)
 24. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 25. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
 ```
@@ -169,7 +313,14 @@ P2/P3
 
 - **Owner:** RedDog Maintainers.
 - **Temporary exemption expiry:** 2026-09-30 (2026-Q3 technical-architect review).
-- **Current boundary:** `extension.js` is a measured 8,425-line legacy thin-client integration file, exactly equal to HEAD. The temporary exact-file threshold remains 8,428 lines with `no_growth: true`; this is a hard containment ceiling, not permission to grow from the 8,425-line baseline. Generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`. This measurement does not assert that every inherited touched function is within the ordinary WSP_62 function limit; `callFusion` retains its exact temporary exemption.
+- **Current boundary:** `extension.js` is a measured 8,400-canonical-LF-line legacy thin-client integration file, below its temporary 8,428-line threshold. `no_growth: true` is a hard containment ceiling, not permission to grow. Generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`. This measurement does not assert that every inherited touched function is within the ordinary WSP_62 function limit; `callFusion` retains its exact temporary exemption.
+- **Holo lifecycle extraction:** generation/receipt admission, bundle projection,
+  configured-interpreter provenance, and owned child lifecycle are separate
+  runtime modules below 400 physical lines. Interpreter SHA-256 proof streams
+  64 KiB descriptor chunks on a worker thread; the 256 MiB acceptance ceiling
+  is unchanged and no whole-file executable allocation remains. The closed
+  package surface is consequently 65 files (61 runtime plus 4 public files,
+  including the repository-authoritative license).
 - **Remediation:** extract model configuration plus stdin bridge invocation first, then UI rendering, retrieval/context assembly, and governed work-order receipt composition into separately tested JavaScript modules of at most 400 lines.
 - **Parity gate:** retain the focused Fusion panel ingress/payload contract and exhaustive extension contract across each extraction; preserve no-network, stdin-only model payloads and review-packet truth.
 - **Exit criterion:** remove `extensions/reddog/wsp_62_exemptions.yaml` once `extension.js` and its touched functions comply with WSP_62 limits. If the expiry arrives first, block additional extension feature work and renew only through a new architect-reviewed remediation slice.
@@ -522,7 +673,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
 
-- **Status:** **PR-READY** -- `plan_reddog_openclaw_adapter_dryrun()`; propose only, no enqueue.
+- **Status:** **LANDED** #904 (`4c5dd3578`) -- `plan_reddog_openclaw_adapter_dryrun()`; propose only, no enqueue.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py`
 - **Contract:** `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`
 
@@ -598,7 +749,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1
 
-- **Status:** **PR-READY** - in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default OFF as of v0.3.36 - opt-in; see REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1).
+- **Status:** **LANDED** #899 (`c70433d7d`) - in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default OFF as of v0.3.36 - opt-in; see REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1).
 - Sanitized follow-up memory from last run; appends to WSP task prompt without raw Copy MD paste.
 - No disk persistence, no WRE/OpenClaw runtime wiring.
 

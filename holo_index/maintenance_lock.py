@@ -9,6 +9,7 @@ reported as unsafe so callers can fail closed.
 from __future__ import annotations
 
 import errno
+import hashlib
 import os
 import stat
 from dataclasses import dataclass
@@ -42,6 +43,19 @@ class MaintenanceLockProbe:
     @property
     def held(self) -> bool:
         return self.status == "held"
+
+
+@dataclass(frozen=True)
+class MaintenanceSentinelProof:
+    """Identity and exact-byte proof for a retained existing sentinel."""
+
+    path: Path
+    device: int
+    inode: int
+    mode: int
+    attributes: int
+    size: int
+    sha256: str
 
 
 def maintenance_lock_path(ssd_path: Path | str) -> Path:
@@ -161,6 +175,136 @@ class MaintenanceLease:
         self.release()
 
 
+class ExistingMaintenanceLease(MaintenanceLease):
+    """Non-creating lease that retains and revalidates an exact sentinel."""
+
+    def __init__(
+        self, path: Path, handle: BinaryIO, proof: MaintenanceSentinelProof,
+        max_bytes: int,
+    ) -> None:
+        super().__init__(path, handle)
+        self.sentinel_proof = proof
+        self._max_bytes = max_bytes
+
+    def revalidate_sentinel(self) -> None:
+        """Prove the retained object identity and bytes are unchanged."""
+
+        if not _path_matches_sentinel_proof(self.sentinel_proof):
+            raise MaintenanceLockError("maintenance sentinel path identity changed")
+        current = _sentinel_proof(
+            self.path, os.fstat(self._handle.fileno()), self._handle,
+            self._max_bytes,
+        )
+        if current != self.sentinel_proof:
+            raise MaintenanceLockError("maintenance sentinel changed while leased")
+
+    def release(self) -> None:
+        if self._released:
+            return
+        error: BaseException | None = None
+        try:
+            self.revalidate_sentinel()
+        except BaseException as exc:
+            error = exc
+        try:
+            _unlock(self._handle)
+        except BaseException as exc:
+            if error is None:
+                error = exc
+        finally:
+            self._handle.close()
+            self._released = True
+        if error is not None:
+            raise error
+
+
+def _link_or_reparse(metadata: os.stat_result) -> bool:
+    attributes = int(getattr(metadata, "st_file_attributes", 0))
+    reparse_flag = int(getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400))
+    return stat.S_ISLNK(metadata.st_mode) or bool(attributes & reparse_flag)
+
+
+def _valid_existing_sentinel_metadata(
+    metadata: os.stat_result, max_bytes: int,
+) -> bool:
+    return bool(
+        stat.S_ISREG(metadata.st_mode)
+        and not _link_or_reparse(metadata)
+        and int(getattr(metadata, "st_nlink", 1)) == 1
+        and int(metadata.st_ino) > 0
+        and 1 <= int(metadata.st_size) <= max_bytes
+    )
+
+
+def _path_matches_sentinel_proof(proof: MaintenanceSentinelProof) -> bool:
+    try:
+        metadata = os.lstat(proof.path)
+    except OSError:
+        return False
+    return bool(
+        _valid_existing_sentinel_metadata(metadata, proof.size)
+        and int(metadata.st_dev) == proof.device
+        and int(metadata.st_ino) == proof.inode
+        and int(metadata.st_mode) == proof.mode
+        and int(getattr(metadata, "st_file_attributes", 0)) == proof.attributes
+        and int(metadata.st_size) == proof.size
+    )
+
+
+def _sentinel_proof(
+    path: Path, metadata: os.stat_result, handle: BinaryIO, max_bytes: int,
+) -> MaintenanceSentinelProof:
+    if not _valid_existing_sentinel_metadata(metadata, max_bytes):
+        raise MaintenanceLockError("existing maintenance sentinel is invalid")
+    handle.seek(0)
+    content = handle.read(max_bytes + 1)
+    if len(content) != int(metadata.st_size) or len(content) > max_bytes:
+        raise MaintenanceLockError("existing maintenance sentinel bytes are unproven")
+    return MaintenanceSentinelProof(
+        path=path,
+        device=int(metadata.st_dev),
+        inode=int(metadata.st_ino),
+        mode=int(metadata.st_mode),
+        attributes=int(getattr(metadata, "st_file_attributes", 0)),
+        size=len(content),
+        sha256="sha256:" + hashlib.sha256(content).hexdigest(),
+    )
+
+
+def acquire_existing_maintenance_lease(
+    path: Path | str, *, max_bytes: int = 4096,
+) -> ExistingMaintenanceLease:
+    """Exclusively lease an exact existing sentinel without creating or writing."""
+
+    if type(max_bytes) is not int or max_bytes <= 0:
+        raise MaintenanceLockError("existing maintenance sentinel bound is invalid")
+    lock_path = Path(path)
+    handle: BinaryIO | None = None
+    locked = False
+    try:
+        before = os.lstat(lock_path)
+        if not _valid_existing_sentinel_metadata(before, max_bytes):
+            raise MaintenanceLockError("existing maintenance sentinel is invalid")
+        handle = lock_path.open("rb", buffering=0)
+        opened = os.fstat(handle.fileno())
+        if (int(before.st_dev), int(before.st_ino)) != (
+            int(opened.st_dev), int(opened.st_ino)
+        ):
+            raise MaintenanceLockError("existing maintenance sentinel identity changed")
+        _lock_nonblocking(handle)
+        locked = True
+        proof = _sentinel_proof(lock_path, os.fstat(handle.fileno()), handle, max_bytes)
+        return ExistingMaintenanceLease(lock_path, handle, proof, max_bytes)
+    except FileNotFoundError as exc:
+        raise MaintenanceLockError("existing maintenance sentinel is absent") from exc
+    except BaseException:
+        if handle is not None:
+            if locked:
+                _unlock(handle)
+            handle.close()
+        raise
+
+
 def acquire_maintenance_lease(path: Path | str) -> MaintenanceLease:
     """Acquire the exclusive maintenance lease without waiting.
 
@@ -244,10 +388,13 @@ __all__ = [
     "AUTHORITY_BLOCK_MARKER_CONTENT",
     "AUTHORITY_BLOCK_MARKER_FILENAME",
     "MAINTENANCE_LOCK_FILENAME",
+    "ExistingMaintenanceLease",
     "MaintenanceLease",
     "MaintenanceLeaseBusy",
     "MaintenanceLockError",
     "MaintenanceLockProbe",
+    "MaintenanceSentinelProof",
+    "acquire_existing_maintenance_lease",
     "acquire_authority_update_lease",
     "authority_block_marker_path",
     "authority_block_marker_valid",

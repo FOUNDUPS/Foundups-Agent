@@ -1,4 +1,4 @@
-"""Text-only artifact generation through the authenticated upstream Hermes API."""
+"""Native leaf-delegated generation through the authenticated Hermes API."""
 
 from __future__ import annotations
 

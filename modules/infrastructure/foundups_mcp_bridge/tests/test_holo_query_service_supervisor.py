@@ -1,130 +1,31 @@
-"""Tests for the host-owned HoloIndex query-service lifecycle boundary."""
+"""Supervisor startup and runtime-selection contracts."""
 
-from __future__ import annotations
-
-import json
-import os
-import socket
-import subprocess
-import sys
-import threading
-import time
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
-from typing import Any
-
-import pytest
-
-from modules.infrastructure.foundups_mcp_bridge.src import (
-    holo_query_service_supervisor as supervisor_module,
-)
-from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (
-    DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS,
-    DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS,
-    HEALTH_SCHEMA_VERSION,
-    OWNER_HOST,
-    OWNER_MODULE,
-    SERVICE_TOKEN_ENV,
-    SERVICE_URL_ENV,
-    HoloQueryServiceSupervisor,
-    HoloQueryServiceSupervisorError,
-)
+from .holo_query_service_supervisor_support import *  # noqa: F401,F403
 
 
-TOKEN = "x" * 64
-
-
-@pytest.fixture(autouse=True)
-def _available_owner_port(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        supervisor_module,
-        "_owner_port_available",
-        lambda _host, _port: True,
-    )
-
-
-class _FakeProcess:
-    def __init__(
-        self,
-        *,
-        returncode: int | None = None,
-        wait_timeouts: int = 0,
-    ) -> None:
-        self.returncode = returncode
-        self.wait_timeouts = wait_timeouts
-        self.wait_calls = 0
-        self.terminated = False
-        self.killed = False
-
-    def poll(self) -> int | None:
-        return self.returncode
-
-    def terminate(self) -> None:
-        self.terminated = True
-
-    def kill(self) -> None:
-        self.killed = True
-
-    def wait(self, *, timeout: float) -> int:
-        del timeout
-        self.wait_calls += 1
-        if self.wait_calls <= self.wait_timeouts:
-            raise subprocess.TimeoutExpired("owner", 1)
-        self.returncode = -9 if self.killed else 0
-        return self.returncode
-
-
-def _install_successful_start(
-    monkeypatch: pytest.MonkeyPatch,
-    process: _FakeProcess,
-) -> dict[str, Any]:
-    launch: dict[str, Any] = {}
-
-    def fake_popen(command: list[str], **kwargs: Any) -> _FakeProcess:
-        launch["command"] = list(command)
-        launch["kwargs"] = {**kwargs, "env": dict(kwargs["env"])}
-        return process
-
-    monkeypatch.setattr(supervisor_module.subprocess, "Popen", fake_popen)
-    monkeypatch.setattr(
-        supervisor_module,
-        "_owner_port_available",
-        lambda _host, _port: True,
-    )
-
-    def fake_health_exchange(**kwargs: Any):
-        launch.setdefault("probe_timeouts", []).append(kwargs["timeout_seconds"])
-        launch.setdefault("probe_bindings", []).append(
-            (
-                kwargs["expected_repo_head_sha"],
-                kwargs["expected_repo_root_digest"],
-                kwargs["expected_generation_id"],
-                kwargs["expected_receipt_digest"],
-            )
-        )
-        return supervisor_module.AuthenticatedOwnerHealthProof(
-            ready=kwargs["token"] == TOKEN,
-            rejection="",
-            binding=(
-                kwargs["expected_repo_head_sha"] or ("a" * 40),
-                kwargs["expected_repo_root_digest"] or ("sha256:" + ("d" * 64)),
-                kwargs["expected_generation_id"] or ("sha256:" + ("b" * 64)),
-                kwargs["expected_receipt_digest"] or ("sha256:" + ("c" * 64)),
-            ),
-        )
-
-    monkeypatch.setattr(
-        supervisor_module,
-        "_authenticated_health_exchange",
-        fake_health_exchange,
-    )
-    monkeypatch.setattr(
-        supervisor_module.secrets,
-        "token_urlsafe",
-        lambda _bytes: TOKEN,
-    )
-    return launch
-
+def _assert_successful_start_launch(
+    owner: _RawHoloQueryServiceSupervisor,
+    launch: dict[str, Any],
+    tmp_path: Path,
+) -> None:
+    site_flags = ["-S"] if os.name == "nt" else []
+    assert launch["command"] == [
+        owner.python_executable, *site_flags, "-B", "-m", OWNER_MODULE,
+        "--host", OWNER_HOST, "--port", "9137", "--parent-pid",
+        str(supervisor_module.os.getpid()), "--canonical-ssd-path",
+        str(tmp_path / "canonical"), "--query-replica-root",
+        str(tmp_path / "replica"),
+    ]
+    options = launch["kwargs"]
+    assert options["shell"] is False
+    assert options["cwd"] == str(tmp_path.resolve())
+    assert options["stdin"] is subprocess.DEVNULL
+    assert options["stdout"] is subprocess.DEVNULL
+    assert options["stderr"] is subprocess.DEVNULL
+    assert options["env"][SERVICE_TOKEN_ENV] == TOKEN
+    assert SERVICE_URL_ENV not in options["env"]
+    assert launch["probe_timeouts"] == [DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS]
+    assert launch["probe_bindings"] == [("", "", "", "")]
 
 def test_start_uses_argv_loopback_secret_and_authenticated_health(
     tmp_path: Path,
@@ -146,39 +47,13 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
     )
     owner = HoloQueryServiceSupervisor(repo_root=tmp_path, port=9137).start()
     assert owner.is_ready is True
-    site_flags = ["-S"] if os.name == "nt" else []
-    assert launch["command"] == [
-        owner.python_executable,
-        *site_flags,
-        "-B",
-        "-m",
-        OWNER_MODULE,
-        "--host",
-        OWNER_HOST,
-        "--port",
-        "9137",
-        "--parent-pid",
-        str(supervisor_module.os.getpid()),
-    ]
-    options = launch["kwargs"]
-    assert options["shell"] is False
-    assert options["cwd"] == str(tmp_path.resolve())
-    assert options["stdin"] is subprocess.DEVNULL
-    assert options["stdout"] is subprocess.DEVNULL
-    assert options["stderr"] is subprocess.DEVNULL
-    assert options["env"][SERVICE_TOKEN_ENV] == TOKEN
-    assert SERVICE_URL_ENV not in options["env"]
-    assert launch["probe_timeouts"] == [
-        DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS
-    ]
-    assert launch["probe_bindings"] == [("", "", "", "")]
+    _assert_successful_start_launch(owner, launch, tmp_path)
     assert registered
 
     owner.stop()
     assert process.terminated is True
     assert unregistered
     assert owner.is_ready is False
-
 
 def test_windows_venv_runtime_keeps_direct_parent_and_site_packages(
     tmp_path: Path,
@@ -209,14 +84,12 @@ def test_windows_venv_runtime_keeps_direct_parent_and_site_packages(
     assert pythonpath == (str(site_packages.resolve()),)
     environment = supervisor_module._owner_environment(
         TOKEN,
-        None,
         pythonpath,
     )
     assert environment["PYTHONPATH"].split(supervisor_module.os.pathsep)[0] == str(
         site_packages.resolve()
     )
     assert environment["PYTHONPATH"] == str(site_packages.resolve())
-
 
 def test_non_current_or_non_windows_interpreter_is_not_rewritten(
     tmp_path: Path,
@@ -231,7 +104,6 @@ def test_non_current_or_non_windows_interpreter_is_not_rewritten(
         current_prefix=str(tmp_path / "venv"),
         base_prefix=str(tmp_path / "base"),
     ) == (str(requested), ())
-
 
 @pytest.mark.parametrize("missing", ["base", "site_packages"])
 def test_windows_venv_runtime_fails_closed_when_runtime_path_missing(
@@ -259,7 +131,6 @@ def test_windows_venv_runtime_fails_closed_when_runtime_path_missing(
         base_prefix=str(base.parent),
     ) == (str(launcher), ())
 
-
 def test_windows_venv_runtime_rejects_out_of_prefix_site_packages(
     tmp_path: Path,
 ) -> None:
@@ -282,7 +153,6 @@ def test_windows_venv_runtime_rejects_out_of_prefix_site_packages(
         base_prefix=str(base.parent),
         site_packages_path=str(outside),
     ) == (str(launcher), ())
-
 
 def test_windows_venv_runtime_does_not_rewrite_other_interpreter(
     tmp_path: Path,
@@ -308,7 +178,6 @@ def test_windows_venv_runtime_does_not_rewrite_other_interpreter(
         base_prefix=str(base.parent),
     ) == (str(requested), ())
 
-
 @pytest.mark.skipif(
     os.name != "nt" or sys.prefix == sys.base_prefix,
     reason="Windows virtualenv redirector regression",
@@ -319,7 +188,6 @@ def test_current_windows_venv_runtime_creates_direct_child() -> None:
     )
     environment = supervisor_module._owner_environment(
         TOKEN,
-        None,
         pythonpath,
     )
     child = subprocess.Popen(
@@ -341,7 +209,6 @@ def test_current_windows_venv_runtime_creates_direct_child() -> None:
     assert int(stdout.strip()) == os.getpid()
     assert executable != sys.executable
     assert pythonpath
-
 
 def test_start_proves_exact_binding_in_its_single_authoritative_health_loop(
     tmp_path: Path,
@@ -371,27 +238,93 @@ def test_start_proves_exact_binding_in_its_single_authoritative_health_loop(
     owner.stop()
     assert owner.verified_binding == ("", "", "", "")
 
-
-def test_start_passes_explicit_ssd_path_and_is_idempotent(
+def test_start_passes_explicit_storage_argv_without_ambient_ssd_path(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     process = _FakeProcess()
     launch = _install_successful_start(monkeypatch, process)
+    monkeypatch.setenv("HOLOINDEX_SSD_PATH", str(tmp_path / "ambient-trap"))
     monkeypatch.setattr(supervisor_module.atexit, "register", lambda _callback: None)
     monkeypatch.setattr(supervisor_module.atexit, "unregister", lambda _callback: None)
     ssd_path = tmp_path / "holo-store"
+    replica_root = tmp_path / "query-replica"
     owner = HoloQueryServiceSupervisor(
         repo_root=tmp_path,
-        ssd_path=ssd_path,
+        canonical_ssd_path=ssd_path,
+        query_replica_root=replica_root,
     ).start()
 
     assert owner.start() is owner
-    assert launch["kwargs"]["env"][supervisor_module.SSD_PATH_ENV] == str(
-        ssd_path.resolve()
+    command = launch["command"]
+    assert command[command.index("--canonical-ssd-path") + 1] == str(ssd_path.resolve())
+    assert command[command.index("--query-replica-root") + 1] == str(
+        replica_root.resolve()
     )
+    assert "HOLOINDEX_SSD_PATH" not in launch["kwargs"]["env"]
     owner.stop()
 
+def test_replica_capability_is_reverified_before_spawn_and_health(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    process = _FakeProcess()
+    _install_successful_start(monkeypatch, process)
+    events: list[str] = []
+    popen = supervisor_module.subprocess.Popen
+    exchange = supervisor_module._authenticated_health_exchange
+
+    def verified() -> object:
+        events.append("capability")
+        return object()
+
+    def spawn(*args: Any, **kwargs: Any):
+        events.append("spawn")
+        return popen(*args, **kwargs)
+
+    def health(**kwargs: Any):
+        events.append("health")
+        return exchange(**kwargs)
+
+    monkeypatch.setattr(supervisor_module.subprocess, "Popen", spawn)
+    monkeypatch.setattr(supervisor_module, "_authenticated_health_exchange", health)
+    owner = HoloQueryServiceSupervisor(
+        repo_root=tmp_path,
+        canonical_ssd_path=tmp_path / "canonical",
+        query_replica_root=tmp_path / "replica",
+        replica_capability_verifier=verified,
+    ).start(expected_replica_binding=("descriptor", "generation", "replica", "path"))
+
+    assert events == ["capability", "spawn", "capability", "health"]
+    owner.stop()
+
+def test_replica_swap_after_spawn_fails_closed_before_health(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    process = _FakeProcess()
+    launch = _install_successful_start(monkeypatch, process)
+    calls = 0
+
+    def changed() -> object:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise ValueError("QUERY_REPLICA_BINDING_CHANGED")
+        return object()
+
+    owner = HoloQueryServiceSupervisor(
+        repo_root=tmp_path,
+        canonical_ssd_path=tmp_path / "canonical",
+        query_replica_root=tmp_path / "replica",
+        replica_capability_verifier=changed,
+    )
+    with pytest.raises(ValueError, match="QUERY_REPLICA_BINDING_CHANGED"):
+        owner.start(expected_replica_binding=("descriptor", "generation", "replica", "path"))
+
+    assert process.terminated is True
+    assert "probe_bindings" not in launch
+    assert owner.is_ready is False
 
 def test_environment_handoff_is_child_only_and_invalidated_if_owner_dies(
     tmp_path: Path,
@@ -416,7 +349,6 @@ def test_environment_handoff_is_child_only_and_invalidated_if_owner_dies(
     assert error.value.code == "HOLOINDEX_QUERY_SERVICE_NOT_READY"
     assert owner._token == ""
     owner.stop()
-
 
 def test_startup_timeout_terminates_owner_and_never_exposes_token_in_error(
     tmp_path: Path,
@@ -468,7 +400,6 @@ def test_startup_timeout_terminates_owner_and_never_exposes_token_in_error(
     assert process.terminated is True
     assert owner.is_ready is False
 
-
 def test_startup_stops_immediately_on_authenticated_stale_owner(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -503,7 +434,6 @@ def test_startup_stops_immediately_on_authenticated_stale_owner(
     assert process.terminated is True
     assert owner.is_ready is False
 
-
 def test_health_rejection_accepts_only_terminal_authenticated_contract() -> None:
     base = {
         "schema_version": HEALTH_SCHEMA_VERSION,
@@ -523,590 +453,3 @@ def test_health_rejection_accepts_only_terminal_authenticated_contract() -> None
     assert supervisor_module._health_rejection_code({**base, "error": "UNAUTHORIZED"}) == ""
     assert supervisor_module._health_rejection_code({**base, "loopback_only": False}) == ""
     assert supervisor_module._health_rejection_code({**base, "schema_version": "wrong"}) == ""
-
-
-@pytest.mark.skipif(os.name != "nt", reason="Windows checkout-local venv contract")
-def test_supervisor_prefers_checkout_local_runtime_packages(
-    tmp_path: Path,
-) -> None:
-    repo_root = tmp_path / "authority"
-    runtime_root = tmp_path / "workspace"
-    site_packages = runtime_root / ".venv" / "Lib" / "site-packages"
-    repo_root.mkdir()
-    site_packages.mkdir(parents=True)
-    (runtime_root / ".venv" / "pyvenv.cfg").write_text(
-        "\n".join(
-            (
-                f"home = {Path(sys._base_executable).parent}",
-                "include-system-site-packages = false",
-                f"version = {sys.version_info.major}.{sys.version_info.minor}.0",
-                f"executable = {sys._base_executable}",
-            )
-        ),
-        encoding="utf-8",
-    )
-
-    owner = HoloQueryServiceSupervisor(
-        repo_root=repo_root,
-        runtime_root=runtime_root,
-        python_executable=sys.executable,
-    )
-
-    assert owner.runtime_root == runtime_root.resolve()
-    assert owner._pythonpath_entries == (str(site_packages.resolve()),)
-
-    alternate = tmp_path / "different-python.exe"
-    alternate_owner = HoloQueryServiceSupervisor(
-        repo_root=repo_root,
-        runtime_root=runtime_root,
-        python_executable=alternate,
-    )
-    assert alternate_owner.python_executable == str(alternate)
-    assert alternate_owner._pythonpath_entries == ()
-
-
-@pytest.mark.skipif(os.name != "nt", reason="Windows checkout-local venv contract")
-def test_supervisor_rejects_unbound_virtualenv_package_fallback(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(
-        supervisor_module,
-        "_owner_python_runtime",
-        lambda _executable: ("python.exe", ("C:/attacker/site-packages",)),
-    )
-    monkeypatch.setattr(
-        supervisor_module,
-        "trusted_holo_site_packages",
-        lambda _root, **_kwargs: (),
-    )
-
-    owner = HoloQueryServiceSupervisor(
-        repo_root=tmp_path / "authority",
-        runtime_root=tmp_path / "missing-runtime",
-        python_executable=sys.executable,
-    )
-
-    assert owner.python_executable == "python.exe"
-    assert owner._pythonpath_entries == ()
-
-
-def test_health_rejection_treats_authenticated_ready_binding_mismatch_as_terminal(
-) -> None:
-    payload = {
-        "schema_version": HEALTH_SCHEMA_VERSION,
-        "ok": True,
-        "source": "holoindex",
-        "status": "ready",
-        "loopback_only": True,
-        "freshness": "CURRENT",
-        "error": "",
-        "stale_reasons": [],
-        "index_gap_detected": False,
-        "no_holoindex_reindex_performed": True,
-        "retrieval_mode": "semantic",
-        "repo_head_sha": "a" * 40,
-        "repo_root_digest": "sha256:" + ("d" * 64),
-        "freshness_generation_id": "sha256:" + ("b" * 64),
-        "freshness_receipt_digest": "sha256:" + ("c" * 64),
-    }
-
-    assert (
-        supervisor_module._health_binding_rejection_code(
-            payload,
-            expected_repo_head_sha="d" * 40,
-            expected_repo_root_digest="sha256:" + ("d" * 64),
-            expected_generation_id="sha256:" + ("b" * 64),
-            expected_receipt_digest="sha256:" + ("c" * 64),
-        )
-        == supervisor_module.BINDING_MISMATCH_ERROR
-    )
-    assert (
-        supervisor_module._health_binding_rejection_code(
-            payload,
-            expected_repo_head_sha="a" * 40,
-            expected_repo_root_digest="sha256:" + ("d" * 64),
-            expected_generation_id="sha256:" + ("b" * 64),
-            expected_receipt_digest="sha256:" + ("c" * 64),
-        )
-        == ""
-    )
-
-
-def test_startup_fails_closed_when_spawned_owner_exits(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    process = _FakeProcess(returncode=2)
-    _install_successful_start(monkeypatch, process)
-    owner = HoloQueryServiceSupervisor(repo_root=tmp_path)
-
-    with pytest.raises(HoloQueryServiceSupervisorError) as error:
-        owner.start()
-
-    assert error.value.code == "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP"
-    assert owner.is_ready is False
-
-
-def test_startup_fails_if_owner_exits_after_health_response(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    process = _FakeProcess()
-    monkeypatch.setattr(
-        supervisor_module.subprocess,
-        "Popen",
-        lambda _command, **_kwargs: process,
-    )
-    monkeypatch.setattr(
-        supervisor_module.secrets,
-        "token_urlsafe",
-        lambda _bytes: TOKEN,
-    )
-
-    def exit_during_probe(**_kwargs: Any):
-        process.returncode = 9
-        return supervisor_module.AuthenticatedOwnerHealthProof(
-            True,
-            "",
-            (
-                "a" * 40,
-                "sha256:" + ("d" * 64),
-                "sha256:" + ("b" * 64),
-                "sha256:" + ("c" * 64),
-            ),
-        )
-
-    monkeypatch.setattr(
-        supervisor_module,
-        "_authenticated_health_exchange",
-        exit_during_probe,
-    )
-    owner = HoloQueryServiceSupervisor(repo_root=tmp_path)
-
-    with pytest.raises(HoloQueryServiceSupervisorError) as error:
-        owner.start()
-
-    assert error.value.code == "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP"
-
-
-@pytest.mark.parametrize(
-    ("token_factory", "expected_code"),
-    [
-        (lambda _bytes: "short", "HOLOINDEX_QUERY_SERVICE_TOKEN_GENERATION_FAILED"),
-        (
-            lambda _bytes: (_ for _ in ()).throw(RuntimeError("entropy unavailable")),
-            "HOLOINDEX_QUERY_SERVICE_TOKEN_GENERATION_FAILED",
-        ),
-    ],
-)
-def test_token_generation_fails_closed(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    token_factory: Any,
-    expected_code: str,
-) -> None:
-    monkeypatch.setattr(
-        supervisor_module.secrets,
-        "token_urlsafe",
-        token_factory,
-    )
-    owner = HoloQueryServiceSupervisor(repo_root=tmp_path)
-
-    with pytest.raises(HoloQueryServiceSupervisorError) as error:
-        owner.start()
-
-    assert error.value.code == expected_code
-
-
-def test_occupied_port_fails_before_process_spawn(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    spawned: list[bool] = []
-    tokens: list[bool] = []
-    monkeypatch.setattr(
-        supervisor_module.secrets,
-        "token_urlsafe",
-        lambda _bytes: tokens.append(True) or TOKEN,
-    )
-    monkeypatch.setattr(
-        supervisor_module,
-        "_owner_port_available",
-        lambda _host, _port: False,
-    )
-    monkeypatch.setattr(
-        supervisor_module.subprocess,
-        "Popen",
-        lambda *_args, **_kwargs: spawned.append(True),
-    )
-
-    with pytest.raises(HoloQueryServiceSupervisorError) as error:
-        HoloQueryServiceSupervisor(repo_root=tmp_path).start()
-
-    assert error.value.code == supervisor_module.PORT_IN_USE_ERROR
-    assert spawned == []
-    assert tokens == []
-
-
-def test_port_probe_detects_real_loopback_listener(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.undo()
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
-        listener.bind((OWNER_HOST, 0))
-        listener.listen(1)
-        port = int(listener.getsockname()[1])
-        assert supervisor_module._owner_port_available(OWNER_HOST, port) is False
-
-    assert supervisor_module._owner_port_available(OWNER_HOST, port) is True
-
-
-def test_spawn_and_repo_root_failures_use_stable_codes(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    missing_root = HoloQueryServiceSupervisor(repo_root=tmp_path / "missing")
-    with pytest.raises(HoloQueryServiceSupervisorError) as missing_error:
-        missing_root.start()
-    assert (
-        missing_error.value.code
-        == "HOLOINDEX_QUERY_SERVICE_REPO_ROOT_UNAVAILABLE"
-    )
-
-    monkeypatch.setattr(
-        supervisor_module.secrets,
-        "token_urlsafe",
-        lambda _bytes: TOKEN,
-    )
-    monkeypatch.setattr(
-        supervisor_module.subprocess,
-        "Popen",
-        lambda _command, **_kwargs: (_ for _ in ()).throw(OSError("blocked")),
-    )
-    owner = HoloQueryServiceSupervisor(repo_root=tmp_path)
-    with pytest.raises(HoloQueryServiceSupervisorError) as spawn_error:
-        owner.start()
-    assert spawn_error.value.code == "HOLOINDEX_QUERY_SERVICE_SPAWN_FAILED"
-    assert TOKEN not in str(spawn_error.value)
-
-
-def test_stop_kills_owner_that_ignores_terminate(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    process = _FakeProcess(wait_timeouts=1)
-    _install_successful_start(monkeypatch, process)
-    monkeypatch.setattr(supervisor_module.atexit, "register", lambda _callback: None)
-    monkeypatch.setattr(supervisor_module.atexit, "unregister", lambda _callback: None)
-    owner = HoloQueryServiceSupervisor(repo_root=tmp_path).start()
-
-    owner.stop()
-
-    assert process.terminated is True
-    assert process.killed is True
-    assert process.wait_calls == 2
-
-
-def test_context_manager_stops_owner(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    process = _FakeProcess()
-    _install_successful_start(monkeypatch, process)
-    monkeypatch.setattr(supervisor_module.atexit, "register", lambda _callback: None)
-    monkeypatch.setattr(supervisor_module.atexit, "unregister", lambda _callback: None)
-
-    with HoloQueryServiceSupervisor(repo_root=tmp_path) as owner:
-        assert owner.is_ready is True
-
-    assert process.terminated is True
-    assert owner.is_ready is False
-
-
-def test_health_probe_requires_exact_authenticated_ready_contract() -> None:
-    observed_authorization: list[str] = []
-
-    class Handler(BaseHTTPRequestHandler):
-        def do_GET(self) -> None:  # noqa: N802 - stdlib handler contract
-            observed_authorization.append(self.headers.get("Authorization", ""))
-            payload = json.dumps(
-                {
-                    "schema_version": HEALTH_SCHEMA_VERSION,
-                    "ok": True,
-                    "source": "holoindex",
-                    "status": "ready",
-                    "loopback_only": True,
-                    "freshness": "CURRENT",
-                    "error": "",
-                    "stale_reasons": [],
-                    "index_gap_detected": False,
-                    "no_holoindex_reindex_performed": True,
-                    "retrieval_mode": "semantic",
-                    "repo_head_sha": "a" * 40,
-                    "repo_root_digest": "sha256:" + ("d" * 64),
-                    "freshness_generation_id": "sha256:generation",
-                    "freshness_receipt_digest": "sha256:receipt",
-                }
-            ).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(payload)))
-            self.end_headers()
-            self.wfile.write(payload)
-
-        def log_message(self, *_args: object) -> None:
-            return
-
-    server = ThreadingHTTPServer((OWNER_HOST, 0), Handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        assert supervisor_module._authenticated_health_probe(
-            host=OWNER_HOST,
-            port=server.server_address[1],
-            token=TOKEN,
-            timeout_seconds=1.0,
-        )
-        assert observed_authorization == [f"Bearer {TOKEN}"]
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=2)
-
-
-def test_health_probe_accepts_semantic_response_beyond_legacy_one_second() -> None:
-    class SlowSemanticHealthHandler(BaseHTTPRequestHandler):
-        def log_message(self, _format: str, *_args: Any) -> None:
-            return
-
-        def do_GET(self) -> None:  # noqa: N802
-            time.sleep(1.1)
-            payload = {
-                "schema_version": HEALTH_SCHEMA_VERSION,
-                "ok": True,
-                "source": "holoindex",
-                "status": "ready",
-                "loopback_only": True,
-                "freshness": "CURRENT",
-                "error": "",
-                "stale_reasons": [],
-                "index_gap_detected": False,
-                "no_holoindex_reindex_performed": True,
-                "retrieval_mode": "semantic",
-                "repo_head_sha": "a" * 40,
-                "repo_root_digest": "sha256:" + ("d" * 64),
-                "freshness_generation_id": "sha256:" + "b" * 64,
-                "freshness_receipt_digest": "sha256:" + "c" * 64,
-            }
-            body = json.dumps(payload).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-
-    server = ThreadingHTTPServer((OWNER_HOST, 0), SlowSemanticHealthHandler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        assert DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS == 30.0
-        assert supervisor_module._authenticated_health_probe(
-            host=OWNER_HOST,
-            port=int(server.server_address[1]),
-            token=TOKEN,
-            timeout_seconds=DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS,
-        )
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=2)
-
-
-def _binding_health_handler() -> type[BaseHTTPRequestHandler]:
-    class Handler(BaseHTTPRequestHandler):
-        def do_GET(self) -> None:  # noqa: N802
-            payload = json.dumps(
-                {
-                    "schema_version": HEALTH_SCHEMA_VERSION,
-                    "ok": True,
-                    "source": "holoindex",
-                    "status": "ready",
-                    "loopback_only": True,
-                    "freshness": "CURRENT",
-                    "error": "",
-                    "stale_reasons": [],
-                    "index_gap_detected": False,
-                    "no_holoindex_reindex_performed": True,
-                    "retrieval_mode": "semantic",
-                    "repo_head_sha": "a" * 40,
-                    "repo_root_digest": "sha256:" + ("d" * 64),
-                    "freshness_generation_id": "sha256:generation",
-                    "freshness_receipt_digest": "sha256:receipt",
-                }
-            ).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Length", str(len(payload)))
-            self.end_headers()
-            self.wfile.write(payload)
-
-        def log_message(self, *_args: object) -> None:
-            return
-
-    return Handler
-
-
-def test_health_probe_rejects_expected_binding_mismatch() -> None:
-    server = ThreadingHTTPServer(
-        (OWNER_HOST, 0),
-        _binding_health_handler(),
-    )
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        assert not supervisor_module._authenticated_health_probe(
-            host=OWNER_HOST,
-            port=server.server_address[1],
-            token=TOKEN,
-            timeout_seconds=1.0,
-            expected_repo_head_sha="b" * 40,
-            expected_repo_root_digest="sha256:" + ("d" * 64),
-            expected_generation_id="sha256:generation",
-        )
-        assert not supervisor_module._authenticated_health_probe(
-            host=OWNER_HOST,
-            port=server.server_address[1],
-            token=TOKEN,
-            timeout_seconds=1.0,
-            expected_repo_head_sha="a" * 40,
-            expected_repo_root_digest="sha256:" + ("e" * 64),
-            expected_generation_id="sha256:generation",
-        )
-        assert not supervisor_module._authenticated_health_probe(
-            host=OWNER_HOST,
-            port=server.server_address[1],
-            token=TOKEN,
-            timeout_seconds=1.0,
-            expected_repo_head_sha="a" * 40,
-            expected_repo_root_digest="sha256:" + ("d" * 64),
-            expected_generation_id="sha256:generation",
-            expected_receipt_digest="sha256:other",
-        )
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=2)
-
-
-def test_health_probe_rejects_non_loopback_without_sending_secret() -> None:
-    assert (
-        supervisor_module._authenticated_health_probe(
-            host="localhost",
-            port=8127,
-            token=TOKEN,
-            timeout_seconds=1.0,
-        )
-        is False
-    )
-
-
-@pytest.mark.parametrize(
-    ("status", "body"),
-    [
-        (503, b"{}"),
-        (200, b"not-json"),
-        (200, b"[]"),
-    ],
-)
-def test_health_probe_rejects_error_and_malformed_responses(
-    monkeypatch: pytest.MonkeyPatch,
-    status: int,
-    body: bytes,
-) -> None:
-    class Response:
-        def __init__(self) -> None:
-            self.status = status
-
-        def read(self, _limit: int) -> bytes:
-            return body
-
-    class Connection:
-        def __init__(self, *_args: Any, **_kwargs: Any) -> None:
-            pass
-
-        def request(self, *_args: Any, **_kwargs: Any) -> None:
-            pass
-
-        def getresponse(self) -> Response:
-            return Response()
-
-        def close(self) -> None:
-            pass
-
-    monkeypatch.setattr(
-        supervisor_module.http.client,
-        "HTTPConnection",
-        Connection,
-    )
-    assert (
-        supervisor_module._authenticated_health_probe(
-            host=OWNER_HOST,
-            port=8127,
-            token=TOKEN,
-            timeout_seconds=1.0,
-        )
-        is False
-    )
-
-
-@pytest.mark.parametrize(
-    ("status", "error"),
-    (
-        (400, "QUERY_OWNER_POISONED"),
-        (503, "SEMANTIC_BACKEND_UNAVAILABLE"),
-        (504, "QUERY_TIMEOUT"),
-    ),
-)
-def test_health_exchange_reads_authenticated_terminal_error(
-    monkeypatch: pytest.MonkeyPatch,
-    status: int,
-    error: str,
-) -> None:
-    payload = {
-        "schema_version": HEALTH_SCHEMA_VERSION,
-        "ok": False,
-        "source": "holoindex",
-        "loopback_only": True,
-        "no_holoindex_reindex_performed": True,
-        "error": error,
-    }
-
-    class Response:
-        def __init__(self) -> None:
-            self.status = status
-
-        def read(self, _limit: int) -> bytes:
-            return json.dumps(payload).encode("utf-8")
-
-    class Connection:
-        def __init__(self, *_args: Any, **_kwargs: Any) -> None:
-            pass
-
-        def request(self, *_args: Any, **_kwargs: Any) -> None:
-            pass
-
-        def getresponse(self) -> Response:
-            return Response()
-
-        def close(self) -> None:
-            pass
-
-    monkeypatch.setattr(
-        supervisor_module.http.client, "HTTPConnection", Connection
-    )
-    assert supervisor_module._authenticated_health_rejection(
-        host=OWNER_HOST,
-        port=8127,
-        token=TOKEN,
-        timeout_seconds=1.0,
-    ) == error

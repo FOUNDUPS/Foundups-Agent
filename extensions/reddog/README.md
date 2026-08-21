@@ -1,6 +1,231 @@
 # RedDog
 
-Version: 0.4.101
+Version: 0.4.102
+
+## Workspace and package boundary
+
+RedDog declares both untrusted workspaces and virtual workspaces unsupported.
+The extension relies on trusted local files, Git repository identity, Python
+subprocesses, worker threads, and a materialized local backend; it must not
+imply safe or complete operation where those authorities are unavailable.
+
+The VSIX surface is an exact 65 files: every one of the 60 root runtime
+JavaScript modules, `start_operations_python_bootstrap.py`, and the public
+`LICENSE`, `README.md`, `package.json`, and `icon.png`. The packaged license
+text must canonically match the repository license authority. Tests, acceptance docs, internal
+ModLog/ROADMAP/INTERFACE/HOLOINDEX material, caches, logs, environment files,
+private-key containers, editor metadata, dependencies, and built VSIX files are
+excluded. `npm run test:package` runs two local `vsce ls --no-dependencies`
+passes and rejects instability, a missing runtime file, or any extra dev file;
+it creates no package artifact. The exact listed files must also be regular,
+non-symlink entries whose aggregate raw size is at most 1 MiB; the test emits a
+`reddog_package_surface_receipt.v1` with the measured bytes and cap. A final
+VSIX archive-size receipt remains part of the later artifact inspection because
+this source-surface test deliberately does not build an archive.
+
+## Governed Git executable provenance
+
+RedDog resolves Git once from lexical PATH/PATHEXT order, then binds the exact
+canonical regular file by portable/native identity, size, and SHA-256. Links
+and reparse substitutions are rejected while ordinary installed hardlinks are
+accepted. Windows additionally requires a Valid Authenticode result from the
+fixed SystemRoot PowerShell verifier; non-Windows records `not_applicable` but
+still requires identity and hash proof. Every Git child receives that same
+absolute path and an environment without PATH/Path/PATHEXT, and the binding is
+revalidated before results or receipts are released. The direct proof covers
+the selected Git executable, not Git DLLs or helper-program closure.
+
+Absolute Git and PowerShell verifier paths remain inside the executable
+authority and are never serialized into readiness, projection, repository-
+state, or Python snapshot receipts. Public executable v1 evidence contains
+only path digests, file hashes/sizes, complete equal start/final identities,
+and platform signature evidence. Repository-state v2 carries that digest-only
+projection to Python, whose strict structural validator rejects missing,
+unknown, malformed, inconsistent, or boolean-as-integer fields. Its body digest
+is necessary integrity evidence, not independent authentication.
+
+## Kimi K3 request budgets
+
+[VERIFIED] The Python advisory bridge accepts only integer `max_tokens` values
+from 1 through 131,072 for regular single-model and manual Fusion requests.
+Missing values retain the existing defaults (2,048 single; 1,600 Fusion), and
+malformed or out-of-range values return `invalid_max_tokens` before any
+provider function. Exact `moonshotai/kimi-k3` calls then apply the existing
+4,096 floor, preserve larger valid budgets, force maximum reasoning, and omit
+temperature. Review packets keep requested and effective budgets distinct.
+
+This offline-tested request contract does not perform or authorize a provider
+call, model promotion, OpenClaw execution, or Hermes dispatch.
+
+## Test tiers
+
+From `extensions/reddog`, `npm test` runs the bounded fast developer tier,
+`npm run test:contract` authenticates the tier plan and exhaustive shards, and
+`npm run test:release` runs the complete promotion closure. The default command
+does not silently start the multi-minute release audit and no dependency
+install is required.
+`npm run test:package` is the explicit local package-surface contract. The fast
+tier checks only static manifest, ignore-policy, and runtime-closure truth; the
+release owner executes the live VSCE listing through its existing worker plan.
+
+The release owner keeps the exact 18-shard shared-VM body and its five existing
+focused tail contracts. It runs them as four process-isolated groups with a
+fixed worker cap of four, a 400-second child timeout, the unchanged 420-second
+release ceiling, and 2 MiB output caps. Plan-order logs, per-group durations,
+the slowest group, and final exit status are emitted without environment values.
+The plan rejects omitted, duplicated, reordered, or stale tail members before
+execution; no assertion, shard digest, or negative diagnostic is removed.
+The canonical command always enters the full parent promotion path; ambient
+environment cannot select a group. A dedicated internal worker requires an
+exact parent-generated nonce binding. The parent enforces the 420-second wall
+deadline from command start, while child timeouts are recorded before bounded
+graceful/forced process-tree termination. Timeout, termination failure, or
+unconfirmed termination remains FAIL even if a child later exits zero.
+The first complete aligned promotion passed in 295.928 seconds, leaving
+124.072 seconds (29.5%) beneath the unchanged ceiling; a repeat passed in
+266.709 seconds. Acceptance uses the slower receipt.
+A hostile ambient-selector repair run still executed all four groups and passed
+in 279.723 seconds with every timeout field false.
+On Windows, a `taskkill.exe` attempt is confirmed only by a zero exit. Its
+absolute `SystemRoot` path is launched with `shell: false`; asynchronous launch
+error, nonzero exit, or the bounded 750-millisecond taskkill timeout records
+termination failure. Both graceful and forced outcomes feed the final receipt,
+and a late child-process error remains handled without reopening settlement.
+The loop-3 hostile-selector promotion passed all four groups in 274.537 seconds
+(owner 273.762 seconds) with every timeout and termination field false.
+
+[OBSERVED] Governed Git config probes and content commands receive a fresh,
+closed child environment rather than every non-`GIT_*` editor variable. Only
+the platform process-launch/root, temp, and locale values needed by local
+commands are retained; provider, GitHub,
+AWS, generic credential-shaped, Python, Node, loader, SSH-agent, and arbitrary
+caller variables are excluded. Git system/global config, attributes, external
+diff, lazy fetch, replacement objects, optional locks, pager, and terminal
+prompt behavior remain explicitly pinned. PATH/PATHEXT are used only for the
+initial lexical selection; every child then invokes the bound absolute Git with
+PATH/Path/PATHEXT removed and revalidates it before releasing output. Public
+receipts disclose only the canonical-path digest, never the path. This layer
+makes no network call and grants no new Git operation.
+Configuration/ownership probes retain a five-second per-child bound, matching
+the content-command bound so four-worker release contention cannot turn a
+healthy local repository into an intermittent authority failure.
+
+[OBSERVED] Every RedDog Python child environment launched from `extension.js`,
+including the governed Holo owner adapter and the resident session,
+is built from a closed profile rather than cloned from the editor process. The
+profile map forwards only required operating-system and interpreter runtime
+keys plus the exact provider, Holo query/owner, resident authority, work-state,
+or model-binding configuration assigned to that bridge.
+The OpenRouter credential reaches only `scripts/advisory_model_once.py`;
+unrelated ambient credentials and Python injection variables are excluded.
+Profiles are fixed internally, empty values are not synthesized, and every
+child receives a fresh environment with forced UTF-8. Non-Holo bridges also
+force user-site isolation; local `holo_query` deliberately retains the current
+configured/system interpreter's per-user NumPy visibility while Python path,
+home, startup, and credential variables remain excluded. This residual package-
+provenance risk requires a sealed/configured Holo interpreter closure before
+user-site isolation can become universal.
+Local Holo requests use only `reddog_holoindex_owner_query_once.py`. That
+adapter owns bounded semantic recall and lexical/direct-read bundle assembly;
+the extension has no raw `holo_index.py --bundle-json` or `--offline` fallback.
+Semantic failure remains an explicit index gap and performs no reindex.
+
+[OBSERVED] R9 replaces whole-shared-store identity with an authority-scoped Git
+receipt. Direct and linked topology, the authority HEAD/index/worktree config,
+common config/shallow/info controls, canonical ordinary common `info` and
+`objects/info` directories, exact current loose-or-packed branch ref, and
+forbidden alternate/graft/ref-storage surfaces remain fail closed. Named
+operations execute twice with identical sanitized argv/environment; every
+bounded output must match before an uncached narrow receipt becomes the last
+protected read. Projection snapshots retain equivalent double-enumeration,
+stable-byte capture, and final-receipt protection.
+
+Relevant control files are allocated only at their already-capped opened size
+and filled with explicit remaining-length fd reads. An incomplete read, growth,
+or path substitution before the post-read fd/path identity checks fails closed;
+the binary index is hashed without also decoding it to UTF-8. Packed-ref parsing
+binds only the exact current authority ref. It does not globally lint unrelated
+packed entries; when Git authority resolution encounters malformed packed
+storage, its command failure invalidates the whole requested batch.
+
+Supported symbolic branch names use a bounded internal `refs/heads/*` parser
+faithful to Git's exclusions without calling Git at receipt time. Unicode and
+`+` are admitted; controls, space, DEL, `~^:?*[\\`, `..`, `@{`, empty
+components, dot-prefix/dot-suffix, `.lock` suffixes, and boundary slashes are
+rejected. The receipt deliberately does not parse Git config semantics. It
+accepts only 40- or 64-hex detached, loose-current, and packed-current OID
+shapes while keeping the complete capped config bytes fingerprint-bound. Git's
+own `HEAD^{commit}` resolution proves the configured object format and required
+object before a bound named batch or projection is released. A cross-format
+shape may therefore be structurally receipt-valid but remains operationally
+unavailable. Packed storage may omit the exact current ref (true unborn state),
+but a line targeting it must be canonical. Duplicate, malformed-OID,
+noncanonical-whitespace, extra-token, and branch-peeling forms fail closed.
+
+Governed Git readiness reports root, structural metadata, ownership, and config
+risk readiness; it is not command-success evidence. It may truthfully be READY
+before a later semantic Git command fails closed.
+
+[OBSERVED] R9 repair loop 6 removes follow-target existence probes from changed-
+path admission. For an absent tracked path, every existing parent from the
+canonical root to its directory is sampled as a stable canonical ordinary
+directory without enumeration; a truly absent parent or final entry may
+represent deletion, while a present link/junction/non-directory or any lookup
+error fails closed. Existing final paths still pass the confined regular-file,
+no-link, single-link identity gate. Stable content capture now allocates exactly
+the capped opened size and fills it with explicit positional fd reads. Growth,
+incomplete/zero reads, truncation, or path substitution fails without reading
+or allocating beyond the opened size or raising the 2 MiB per-file cap.
+
+[OBSERVED] R9 repair loop 7 closes the remaining lstat-to-open allocation race.
+The opened fd must be the same ordinary single-link file as the pre-open sample,
+and its size must be a safe integer within the unchanged 2 MiB cap, before any
+content Buffer or read request is issued. The reader independently rechecks the
+explicit cap, so pre-open growth, replacement, and invalid synthetic sizes fail
+without allocating or reading candidate content.
+
+All Git-control presence decisions use one no-follow `lstat` classifier with
+exact `absent`, `present`, or `error` states. Only `ENOENT` is absence; dangling
+links/junctions/reparse entries remain present and invalid, while every other
+lookup error fails closed. This applies to optional controls, forbidden
+controls, `plainControlFile()`, common `commondir`, and root `.git`; only a
+truly absent root `.git` retains empty-repository behavior. `refs/heads` is a
+required canonical ordinary directory. Existing deeper current-ref parents are
+validated individually without enumeration, while the first truly absent
+deeper parent may still represent an unborn ref.
+
+Safe sibling commits, unrelated objects/refs/replacement refs, unrelated
+packing, and main-worktree HEAD/index/config.worktree activity no longer make a
+linked authority read unavailable when its exact outputs and relevant controls
+are unchanged. Ordinary reads intentionally do not claim global loose-object or
+all-ref hygiene; a repository-wide special-file audit is a separate,
+unimplemented maintenance concern. Receipts are point-sampled: an ABA mutation
+that occurs wholly between samples and restores both relevant controls and
+outputs is not continuously observed. FoundUp registry/schema bytes are also
+read after the Git authority quartet rather than in one filesystem transaction;
+that adjacent byte-read atomicity limitation remains a separate future layer.
+
+[OBSERVED] R9 repair loop 4 decomposes the focused governed-Git contract into
+cohesive directly runnable modules plus the unchanged invocation-path
+orchestrator. Candidate proof enforces 400 physical lines per scoped JavaScript
+file, 30 lines per detected function/arrow block, and 1,000 lines per current
+non-historical document. Backend runtime WSP_62 remains a separate gate;
+repository-wide inherited debt is not relabeled by this candidate proof.
+
+[OBSERVED] R8 accepts an authenticated absence of the optional
+`config.worktree` file in ordinary repositories and linked worktrees. When
+`extensions.worktreeConfig` is enabled, RedDog reads `--worktree` settings only
+if the start receipt proved that file present; an absent file is the valid
+empty per-worktree configuration, while an invalid or unreadable state still
+fails closed. The observed state is immutable and must match at the final
+receipt, so creation or removal during a governed batch is rejected. RedDog
+does not create the optional file or perform any Git configuration write.
+
+[SUPERSEDED] R8's focused contract and direct offline RDD probe passed, but its
+unchanged exhaustive runner later blocked at FWG-006 because the linked receipt
+still bound the entire common object/ref store. R9 above replaces that receipt
+and now passes the exhaustive contract; this paragraph preserves the historical
+R8 acceptance boundary rather than describing current status.
 
 [OBSERVED] R7 makes projection identity platform-aware without changing Linux
 case sensitivity. Repository-relative comparison keys normalize separators and
@@ -8,8 +233,9 @@ NFC, and case-fold only on Windows. Duplicate keys are rejected before capture;
 existing files must also have unique canonical confined identities after the
 regular-file, no-link, and single-link gates. Ignored intersections use the same
 prefix-safe keys, while deleted records are represented without content reads.
-`extension.js` is restored to its exact 8,425-line HEAD baseline under the
-unchanged 8,428-line hard ceiling.
+`extension.js` currently measures exactly 8,400 canonical LF lines, below the
+unchanged 8,428-line hard ceiling. `no_growth: true` remains a containment
+boundary, not permission for additional monolith growth.
 
 [OBSERVED] R6 makes every `create()` result instance-local: each frozen API
 closes over its own copied/frozen policy and projection, while the direct
@@ -26,15 +252,16 @@ module Tier-0 retrieval. Exact README/INTERFACE metadata rows carry explicit
 provenance instead of a fabricated vector similarity, and strict owner mode
 requires the complete Tier-0 pair. Governed Git uses an exact command-scoped
 `safe.directory` only when its ownership probe proves it necessary,
-fingerprints every object/ref and named control file, rejects grafts/alternates,
-and exposes override readiness; wildcard or config writes are forbidden.
+binds authority-relevant topology, controls, and current-ref semantics, rejects
+grafts/alternates, and exposes override readiness; wildcard or config writes
+are forbidden.
 Status/stat/diff reuse one enumeration but are released only after a second,
 uncached storage receipt matches the start receipt. The full snapshot fails
 closed if Git storage or controls change during enumeration or projection.
-Related FoundUp authority reads use one bounded four-command batch under the
-same start/final receipt rule; a changed final fingerprint invalidates every
-batch result. This avoids eight full metadata traversals per authority context
-without caching or weakening use-time verification.
+Related FoundUp authority reads use one bounded four-command A/B batch under
+the same final receipt rule; any output difference or relevant final
+fingerprint change invalidates every batch result without recursively scanning
+the shared object/ref store.
 Required WSP_97 evidence precedes ordinary indexed evidence within
 the bounded lower tier. This release adds no editor execution, index mutation,
 service launch, worker dispatch, repository write, or merge authority.
@@ -320,9 +547,10 @@ WSP_15 challenge is still mandatory, and no OpenClaw/Hermes execution authority
 is added. Version 0.4.53 pinned both actual upstream artifact-provider adapters and its
 generated backend manifest. OpenClaw uses its dedicated Gateway agent and
 exact-session sandbox. Hermes uses an authenticated loopback `/v1/runs` client
-only when its dedicated profile exposes zero enabled toolsets and zero skills;
-its complete event history must also prove no tool, approval, or subagent
-activity. It receives text-generation authority, never repository effects. Both run only
+only when its dedicated profile exposes exactly native `delegate_task` and zero
+skills; its complete event history must prove one stable completed leaf with
+zero file effects and no other tool or approval. It receives bounded native
+delegation authority, never repository effects. Both run only
 after signed work and model authority pass and return bounded content to the
 existing isolated Foundups writer. Version 0.4.52 introduced the upstream
 OpenClaw provider. Version 0.4.51 pins the opt-in OpenClaw/Hermes WSL
@@ -711,6 +939,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.101.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.102.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

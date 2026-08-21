@@ -17,7 +17,7 @@ import re
 import shutil
 import subprocess
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, Iterable, List, Mapping, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .holo_index import HoloIndex
@@ -25,13 +25,16 @@ if TYPE_CHECKING:
 # Re-use the module-level timeout helper already in holo_index.py
 from .holo_index import _run_with_timeout, HOLO_ENCODE_TIMEOUT
 from .collection_injections import (
+    Tier0IncompleteError,
+    Tier0LookupError,
     inject_module_tier0_candidates as _inject_module_tier0_candidates,
 )
 from .collection_search import CollectionSearchOps, search_collection
-from holo_index.tier0_retrieval import (
-    infer_explicit_module_target,
+from holo_index.module_intent_snapshot import (
+    ModuleIntentSnapshotError,
+    load_module_intent_paths,
 )
-
+from holo_index.tier0_retrieval import infer_explicit_module_target
 logger = logging.getLogger(__name__)
 
 
@@ -46,6 +49,15 @@ def _tokenize_query(query: str) -> List[str]:
 
 def _strict_semantic_owner(holo: "HoloIndex") -> bool:
     return bool(getattr(holo, "strict_semantic_owner", False))
+
+
+def _safe_search_error_code(error: Exception) -> str:
+    """Return only exact-type, low-cardinality producer error codes."""
+    return {
+        Tier0IncompleteError: "HOLOINDEX_TIER0_INCOMPLETE",
+        Tier0LookupError: "HOLOINDEX_TIER0_LOOKUP_FAILED",
+        ModuleIntentSnapshotError: "HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE",
+    }.get(type(error), "HOLOINDEX_SEARCH_FAILED")
 
 
 # Slice-priority label → numeric weight (used when metadata stores P0/P1/.../P4 strings
@@ -878,12 +890,56 @@ def _vector_search_ops() -> CollectionSearchOps:
 def _search_collection(
     holo: "HoloIndex", collection, query: str, limit: int, kind: str,
     doc_type_filter: str = "all", module_path_hint: str | None = None,
+    module_context_hits: Iterable[Mapping[str, object]] = (),
+    module_registry_hits: Iterable[Mapping[str, object]] | None = None,
 ) -> List[Dict[str, Any]]:
     """Search a collection through the bounded vector-search pipeline."""
     return search_collection(
         holo, collection, query, limit, kind, doc_type_filter,
-        module_path_hint, _vector_search_ops(),
+        module_path_hint, _vector_search_ops(), module_context_hits,
+        module_registry_hits,
     )
+
+
+def _module_intent(
+    holo: "HoloIndex", query: str,
+) -> tuple[str | None, tuple[dict[str, str], ...] | None]:
+    """Resolve full paths directly or names against the pinned Git tree."""
+    explicit_path = infer_explicit_module_target(query, ())
+    if explicit_path:
+        return explicit_path, None
+    try:
+        paths = load_module_intent_paths(holo.project_root)
+    except ModuleIntentSnapshotError:
+        if _strict_semantic_owner(holo):
+            raise
+        holo._log_agent_action(
+            "Module intent catalog unavailable; Tier-0 name promotion suppressed",
+            "WARN",
+        )
+        return None, ()
+    registry = tuple({"path": path} for path in paths)
+    return infer_explicit_module_target(query, registry), registry
+
+
+def _docs_search(
+    holo: "HoloIndex", collection: Any, query: str, limit: int,
+    context_hits: Iterable[Mapping[str, object]],
+    module_target: str | None,
+    registry_hits: Iterable[Mapping[str, object]] | None,
+) -> List[Dict[str, Any]]:
+    """Search docs with generation-stable module intent policy."""
+    try:
+        return _search_collection(
+            holo, collection, query, limit, kind="docs",
+            module_path_hint=module_target,
+            module_context_hits=context_hits,
+            module_registry_hits=registry_hits,
+        )
+    except Exception:
+        if _strict_semantic_owner(holo):
+            raise
+        return []
 
 
 # ---------------------------------------------------------------------------
@@ -1197,6 +1253,10 @@ def execute_search(
         knowledge_collection = getattr(holo, "knowledge_collection", None)
         # Work Ledger collection
         work_ledger_collection = getattr(holo, "work_ledger_collection", None)
+        tier0_module_target = None
+        module_registry_hits = None
+        if doc_type_filter in ["docs", "all"] and docs_collection is not None:
+            tier0_module_target, module_registry_hits = _module_intent(holo, query)
 
         # Search code index
         if doc_type_filter in ["code", "all"] and code_collection is not None:
@@ -1226,18 +1286,12 @@ def execute_search(
 
         # CFZ4: Search Docs index (module/root docs)
         if doc_type_filter in ["docs", "all"] and docs_collection is not None:
-            try:
-                module_path_hint = infer_explicit_module_target(
-                    query, [*code_hits, *test_hits, *symbol_results]
-                )
-                docs_hits = _search_collection(
-                    holo, docs_collection, query, limit, kind="docs",
-                    module_path_hint=module_path_hint,
-                )
-            except Exception:
-                if _strict_semantic_owner(holo):
-                    raise
-                docs_hits = []
+            docs_hits = _docs_search(
+                holo, docs_collection, query, limit,
+                (*code_hits, *test_hits, *symbol_results),
+                tier0_module_target,
+                module_registry_hits,
+            )
 
         # CFZ4: Search Knowledge index (papers/research)
         if doc_type_filter in ["knowledge", "all"] and knowledge_collection is not None:
@@ -1331,6 +1385,7 @@ def execute_search(
                 "quality_gate": _quality_gate(
                     getattr(holo, "embedding_backend", "unknown")
                 ),
+                "tier0_module_target": tier0_module_target,
                 # TQ3: per-collection routing truth (WSP 97). When
                 # routing_active=True, embedding_backend="routed" and the
                 # per-collection claim lives in collection_backend_map.
@@ -1352,7 +1407,8 @@ def execute_search(
         return payload
 
     except Exception as e:
-        holo._log_agent_action(f"Search error: {str(e)}", "ERROR")
+        error = _safe_search_error_code(e)
+        holo._log_agent_action(f"Search error: {error}", "ERROR")
         return {
             "code_hits": [],
             "wsp_hits": [],
@@ -1364,5 +1420,5 @@ def execute_search(
             "knowledge": [],
             "work_ledger_hits": [],
             "work_ledger": [],
-            "metadata": {"error": str(e)},
+            "metadata": {"error": error},
         }

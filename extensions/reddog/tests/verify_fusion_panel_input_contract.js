@@ -66,6 +66,28 @@ function workerWithPanel(panelValue, supplied) {
   return reddog.fusionWorkerFromConfig();
 }
 
+function finishFakeBridge(child, onPayload, stdinText) {
+  const payload = JSON.parse(stdinText);
+  onPayload(payload);
+  const progress = JSON.stringify({
+    event: 'progress', stage: 'lead_start', text: 'Lead request started.',
+    run_id: 'run-contract', event_id: 'event-contract', sequence: 1,
+    status: 'STARTED', role: 'lead', model: 'model-a', elapsed_ms: 3
+  });
+  child.stderr.emit('data', Buffer.from(progress.slice(0, 23)));
+  child.stderr.emit('data', Buffer.from(progress.slice(23)));
+  child.stdout.emit('data', Buffer.from(JSON.stringify({
+    ok: false, reason: 'contract_probe',
+    fusion_progress_receipt: {
+      run_id: payload.bridge_run_id, receipt_id: 'contract-receipt'
+    },
+    fusion_progress_receipt_validation: {
+      applied: true, valid: true, rejection_reasons: []
+    }
+  })));
+  child.emit('close', 0);
+}
+
 function fakeBridgeChild(onPayload) {
   const child = new EventEmitter();
   child.stdout = new EventEmitter();
@@ -79,24 +101,7 @@ function fakeBridgeChild(onPayload) {
     write: (chunk) => {
       stdinText += String(chunk);
     },
-    end: () => {
-      const payload = JSON.parse(stdinText);
-      onPayload(payload);
-      const progress = JSON.stringify({
-        event: 'progress', stage: 'lead_start', text: 'Lead request started.',
-        run_id: 'run-contract', event_id: 'event-contract', sequence: 1,
-        status: 'STARTED', role: 'lead', model: 'model-a', elapsed_ms: 3
-      });
-      child.stderr.emit('data', Buffer.from(progress.slice(0, 23)));
-      child.stderr.emit('data', Buffer.from(progress.slice(23)));
-      child.stdout.emit('data', Buffer.from(JSON.stringify({
-        ok: false,
-        reason: 'contract_probe',
-        fusion_progress_receipt: { run_id: payload.bridge_run_id, receipt_id: 'contract-receipt' },
-        fusion_progress_receipt_validation: { applied: true, valid: true, rejection_reasons: [] }
-      })));
-      child.emit('close', 0);
-    }
+    end: () => finishFakeBridge(child, onPayload, stdinText)
   };
   return child;
 }
@@ -117,7 +122,9 @@ async function captureBridgeInvocation(worker, mode) {
   try {
     const state = { bridgeChild: null, disposed: false };
     const result = await reddog.callFusion({}, worker, 'contract prompt', 'bounded context', 'system prompt', [], mode,
-      (stage, text, metadata) => progressEvents.push({ stage, text, metadata }), state, {}, {});
+      (stage, text, metadata) => progressEvents.push({ stage, text, metadata }), state, {}, {
+        backendCompatibility: { passed: true }
+      });
     return { invocation, payload, progressEvents, result, spawnCount, state };
   } finally {
     cp.spawn = originalSpawn;
@@ -207,6 +214,29 @@ function restoreApiKey(value) {
   }
 }
 
+async function assertProviderEnvironmentScope() {
+  const priorKey = process.env.OPENROUTER_API_KEY;
+  const priorSentinel = process.env.REDDOG_UNRELATED_SENTINEL;
+  process.env.OPENROUTER_API_KEY = 'provider-contract-marker';
+  process.env.REDDOG_UNRELATED_SENTINEL = 'ambient-contract-marker';
+  try {
+    const captured = await captureBridgeInvocation(
+      workerWithPanel(undefined, false), 'foundups_fusion'
+    );
+    assert.strictEqual(
+      captured.invocation.options.env.OPENROUTER_API_KEY,
+      'provider-contract-marker'
+    );
+    assert.strictEqual(
+      captured.invocation.options.env.REDDOG_UNRELATED_SENTINEL, undefined
+    );
+  } finally {
+    restoreApiKey(priorKey);
+    if (priorSentinel === undefined) delete process.env.REDDOG_UNRELATED_SENTINEL;
+    else process.env.REDDOG_UNRELATED_SENTINEL = priorSentinel;
+  }
+}
+
 async function main() {
   assertRuntimeLimits();
   assertWsp62Contracts();
@@ -215,6 +245,7 @@ async function main() {
   try {
     await assertModeCases('foundups_fusion', panelCases());
     await assertModeCases('openrouter_fusion_alias', panelCases());
+    await assertProviderEnvironmentScope();
   } finally {
     restoreApiKey(priorApiKey);
   }

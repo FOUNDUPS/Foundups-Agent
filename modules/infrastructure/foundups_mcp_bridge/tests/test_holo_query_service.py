@@ -24,6 +24,9 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     main,
     validate_bind_host,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_http import (
+    _http_status,
+)
 from modules.infrastructure.foundups_mcp_bridge.tests.holo_query_service_fixtures import (
     QUERY,
     SHA,
@@ -522,6 +525,36 @@ def test_search_error_payload_is_not_accepted_as_semantic_evidence(
     owner = _service(tmp_path, monkeypatch, backend=_Backend(raw))
     try:
         assert _query(owner)["error"] == "SEMANTIC_BACKEND_UNAVAILABLE"
+    finally:
+        owner.close()
+
+
+@pytest.mark.parametrize(
+    ("producer_error", "expected_status"),
+    [
+        ("HOLOINDEX_TIER0_INCOMPLETE", 409),
+        ("HOLOINDEX_TIER0_LOOKUP_FAILED", 503),
+        ("HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE", 503),
+    ],
+)
+def test_allowlisted_producer_failures_preserve_stable_owner_classification(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    producer_error: str,
+    expected_status: int,
+) -> None:
+    owner = _service(
+        tmp_path,
+        monkeypatch,
+        backend=_Backend(_raw_result(error=producer_error)),
+    )
+    try:
+        result = _query(owner)
+        assert result["ok"] is False
+        assert result["error"] == producer_error
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
+        assert _http_status(result) == expected_status
     finally:
         owner.close()
 

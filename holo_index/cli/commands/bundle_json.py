@@ -7,6 +7,7 @@ Self-contained lexical search + artifact snapshot + JSON bundle output.
 """
 
 import json as _json
+import math
 import os
 import re
 import sys
@@ -30,6 +31,7 @@ from holo_index.cli.direct_read_path_policy import (
 )
 from holo_index.query_admission import evaluate_readonly_query_admission
 from holo_index.tier0_retrieval import TIER0_REQUIRED_DOCS
+from holo_index.cli.repo_audit_discovery import secure_read_repo_file
 
 
 def _env_truthy(key: str, default: str = "false") -> bool:
@@ -84,6 +86,12 @@ DIRECT_READ_SYMBOL_LEAD_LINES = 6        # context lines kept BEFORE the def lin
 # Cap symbol targets per file so a caller naming MANY (plausible-but-absent) symbols of ONE file
 # cannot consume all target slots (DIRECT_READ_MAX_TARGETS) and starve other required targets.
 DIRECT_READ_MAX_SYMBOLS_PER_PATH = 8
+PUBLIC_BUNDLE_MAX_MODULE_HINT_CHARS = 512
+PUBLIC_BUNDLE_MAX_MUST_INCLUDE_CHARS = 1024
+PUBLIC_BUNDLE_MAX_SEMANTIC_KEYS = 64
+PUBLIC_BUNDLE_MAX_SEMANTIC_NODES = 20_000
+PUBLIC_BUNDLE_MAX_SEMANTIC_TEXT_CHARS = 4 * 1024 * 1024
+PUBLIC_BUNDLE_MAX_INTEGER_ABS = (1 << 63) - 1
 LEXICAL_WSP_MAX_ENTRIES = 512
 LEXICAL_WSP_MAX_FILES = 256
 LEXICAL_WSP_READ_BYTES = 16384
@@ -257,6 +265,64 @@ def _read_symbol_window(real_path, symbol, per_file_cap: int, remaining_budget: 
     return {"content": content, "bytes": used, "truncated": truncated, "omitted_reason": "none"}
 
 
+def _secure_read_snippet(repo_root, rel, symbol, remaining_budget):
+    """Read one must-include target through the descriptor-held reader."""
+    if symbol:
+        scan = secure_read_repo_file(
+            Path(repo_root), rel, byte_cap=DIRECT_READ_SYMBOL_SCAN_BYTES,
+            remaining_budget=DIRECT_READ_SYMBOL_SCAN_BYTES,
+        )
+        if scan.get("ok"):
+            window = _symbol_window_from_text(
+                scan["content"], symbol, DIRECT_READ_PER_FILE_BYTES,
+                remaining_budget, bool(scan.get("truncated")),
+            )
+            if window["content"]:
+                return window, True
+    read = secure_read_repo_file(
+        Path(repo_root), rel, byte_cap=DIRECT_READ_PER_FILE_BYTES,
+        remaining_budget=remaining_budget,
+    )
+    if read.get("ok"):
+        return {
+            "content": read["content"], "bytes": read["bytes"],
+            "truncated": bool(read.get("truncated")), "omitted_reason": "none",
+        }, False
+    reason = "hardlink_denied" if read.get("reason") == "hardlink_rejected" else read.get("reason")
+    return {"content": "", "bytes": 0, "truncated": False,
+            "omitted_reason": reason or "read_error"}, False
+
+
+def _symbol_window_from_text(text, symbol, per_file_cap, remaining_budget, scan_truncated=False):
+    """Select the existing bounded symbol window from securely opened text."""
+    if not (isinstance(symbol, str) and _SYMBOL_RE.match(symbol)):
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "symbol_invalid"}
+    cap = max(0, min(per_file_cap, remaining_budget))
+    lines = str(text).split("\n")
+    idx = _locate_symbol_line(lines, symbol)
+    if cap <= 0 or idx is None:
+        reason = "budget_exhausted" if cap <= 0 else "symbol_not_found"
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": reason}
+    last, chosen, used = len(lines) - 1, {}, 0
+    for j in range(idx, len(lines)):
+        piece = lines[j] + ("\n" if j < last else "")
+        size = len(piece.encode("utf-8"))
+        if used + size > cap:
+            break
+        chosen[j], used = piece, used + size
+    for j in range(idx - 1, max(-1, idx - 1 - DIRECT_READ_SYMBOL_LEAD_LINES), -1):
+        piece = lines[j] + ("\n" if j < last else "")
+        size = len(piece.encode("utf-8"))
+        if used + size > cap:
+            break
+        chosen[j], used = piece, used + size
+    if idx not in chosen:
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "symbol_window_empty"}
+    lo, hi = min(chosen), max(chosen)
+    return {"content": "".join(chosen[j] for j in range(lo, hi + 1)), "bytes": used,
+            "truncated": bool(scan_truncated or lo > 0 or hi < last), "omitted_reason": "none"}
+
+
 def _direct_read_fetch(repo_root, requested_paths, seen_locations=None):
     """Governed direct-read-by-path fetch (slice 2/3).
 
@@ -320,37 +386,15 @@ def _direct_read_fetch(repo_root, requested_paths, seen_locations=None):
         if deny:
             telemetry["direct_read_rejected"].append({"path": rel, "reason": deny})
             continue
-        # 2) realpath containment (covers symlink escape).
-        real, reason = _resolve_within_repo(repo_root, rel)
-        if real is None:
-            telemetry["direct_read_rejected"].append({"path": rel, "reason": reason})
-            continue
-        # 3) re-check deny rules against the resolved real basename (defense in
-        #    depth: a symlink named foo.txt could target bar.key inside repo).
-        try:
-            real_rel = str(_Path(os.path.realpath(str(repo_root))))
-            resolved_rel = os.path.relpath(str(real), real_rel).replace("\\", "/")
-        except Exception:
-            resolved_rel = rel
-        deny2 = _direct_read_deny_reason(resolved_rel)
-        if deny2:
-            telemetry["direct_read_rejected"].append({"path": rel, "reason": deny2})
-            continue
         if remaining <= 0:
             telemetry["direct_read_rejected"].append({"path": rel, "reason": "budget_exhausted"})
             continue
         # 4) bounded read. A `path#symbol` target reads a bounded LINE WINDOW around the symbol's
         #    definition; if the symbol is not locatable (or the window is unusable) it falls back to
         #    the head-clip so nothing regresses. A plain path always head-clips (unchanged).
-        symbol_windowed = False
-        if symbol:
-            snippet = _read_symbol_window(real, symbol, DIRECT_READ_PER_FILE_BYTES, remaining)
-            if snippet["content"]:
-                symbol_windowed = True
-            else:
-                snippet = _read_bounded_direct_read(real, DIRECT_READ_PER_FILE_BYTES, remaining)
-        else:
-            snippet = _read_bounded_direct_read(real, DIRECT_READ_PER_FILE_BYTES, remaining)
+        snippet, symbol_windowed = _secure_read_snippet(
+            repo_root, rel, symbol, remaining,
+        )
         if not snippet["content"]:
             if snippet["omitted_reason"] not in ("none",):
                 telemetry["direct_read_rejected"].append({"path": rel, "reason": snippet["omitted_reason"]})
@@ -854,6 +898,108 @@ def _bundle_success_payload(
     }
 
 
+def _bundle_error(task, module_hint, module_path, error):
+    return {
+        "schema_version": "wsp_memory_bundle_v1",
+        "generated_at": _utc_now_iso(), "ok": False, "task": task,
+        "module_hint": module_hint, "module_path": module_path, "error": error,
+    }
+
+
+def _bounded_semantic_payload(value):
+    """Validate a JSON-like semantic result without first copying it."""
+    if not isinstance(value, dict) or len(value) > PUBLIC_BUNDLE_MAX_SEMANTIC_KEYS:
+        return None
+    stack, active, nodes, text_chars = [(value, False)], set(), 0, 0
+    while stack:
+        item, exiting = stack.pop()
+        if isinstance(item, (dict, list)):
+            marker = id(item)
+            if exiting:
+                active.remove(marker)
+                continue
+            if marker in active:
+                return None
+            active.add(marker)
+            nodes += len(item)
+            if nodes > PUBLIC_BUNDLE_MAX_SEMANTIC_NODES:
+                return None
+            stack.append((item, True))
+            if isinstance(item, dict):
+                if any(not isinstance(key, str) for key in item):
+                    return None
+                stack.extend((key, False) for key in item.keys())
+                stack.extend((child, False) for child in item.values())
+            else:
+                stack.extend((child, False) for child in item)
+        elif isinstance(item, str):
+            text_chars += len(item)
+            if text_chars > PUBLIC_BUNDLE_MAX_SEMANTIC_TEXT_CHARS:
+                return None
+        elif isinstance(item, bool) or item is None:
+            continue
+        elif isinstance(item, int):
+            if abs(item) > PUBLIC_BUNDLE_MAX_INTEGER_ABS:
+                return None
+        elif isinstance(item, float):
+            if not math.isfinite(item):
+                return None
+        else:
+            return None
+    return dict(value)
+
+
+def build_wsp_memory_bundle(
+    repo_root, task, *, limit=5, retrieval_mode="lexical", module_hint="",
+    must_include=None, bundle_only=False, semantic_payload=None,
+):
+    """Build one bounded, store-free lexical or caller-supplied memory bundle."""
+    root = Path(repo_root)
+    if not isinstance(task, str) or not task.strip() or len(task.strip()) > 16_000:
+        return _bundle_error("", "", None, "task_invalid")
+    task = task.strip()
+    if not isinstance(module_hint, str) or len(module_hint) > PUBLIC_BUNDLE_MAX_MODULE_HINT_CHARS:
+        return _bundle_error(task, "", None, "module_hint_invalid")
+    module_hint = module_hint.strip()
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1 or limit > 20:
+        return _bundle_error(task, module_hint, None, "limit_invalid")
+    if retrieval_mode not in {"semantic", "lexical"}:
+        return _bundle_error(task, module_hint, None, "retrieval_mode_invalid")
+    if not isinstance(bundle_only, bool):
+        return _bundle_error(task, module_hint, None, "bundle_flag_invalid")
+    if must_include is None:
+        must_include = []
+    if (
+        not isinstance(must_include, list)
+        or len(must_include) > DIRECT_READ_MAX_TARGETS
+        or any(not isinstance(item, str) or not item or len(item) > PUBLIC_BUNDLE_MAX_MUST_INCLUDE_CHARS
+               for item in must_include)
+    ):
+        return _bundle_error(task, module_hint, None, "must_include_invalid")
+    module_dir, module_path = _bundle_module_context(root, module_hint)
+    if retrieval_mode == "semantic" and not bundle_only:
+        if semantic_payload is None:
+            return _bundle_error(task, module_hint, module_path, "semantic_payload_required")
+        search_payload = _bounded_semantic_payload(semantic_payload)
+        if search_payload is None:
+            return _bundle_error(task, module_hint, module_path, "semantic_payload_invalid")
+    else:
+        search_payload = _lexical_task_retrieval(
+            root, task, limit, "", module_dir=module_dir,
+        )
+    structured = _artifact_snapshot(root, module_dir) if module_dir else None
+    grounding, direct_read = _apply_repo_audit_grounding(root, task, search_payload)
+    direct_read = _apply_bundle_direct_read(
+        root, search_payload, direct_read, must_include,
+    )
+    payload = _bundle_success_payload(
+        task, module_hint, module_path, structured, search_payload,
+        direct_read, grounding,
+    )
+    payload["bundle_only"] = bool(bundle_only)
+    return payload
+
+
 def handle_bundle_json(args):
     """Handle --bundle-json command. Returns True if handled, False otherwise."""
     if not getattr(args, "bundle_json", False):
@@ -888,18 +1034,12 @@ def handle_bundle_json(args):
     if search_error is not None:
         _write_bundle_payload(search_error)
         return True
-    structured_memory = (
-        _artifact_snapshot(repo_root, module_dir) if module_dir else None
+    retrieval_mode = "lexical" if skip_model else "semantic"
+    payload = build_wsp_memory_bundle(
+        repo_root, task, limit=int(args.limit), retrieval_mode=retrieval_mode,
+        module_hint=module_hint,
+        must_include=getattr(args, "bundle_must_include", None),
+        semantic_payload=search_payload,
     )
-    repo_audit_grounding, direct_read = _apply_repo_audit_grounding(repo_root, task, search_payload)
-    direct_read = _apply_bundle_direct_read(
-        repo_root,
-        search_payload,
-        direct_read,
-        getattr(args, "bundle_must_include", None),
-    )
-    _write_bundle_payload(_bundle_success_payload(
-        task, module_hint, module_path, structured_memory,
-        search_payload, direct_read, repo_audit_grounding,
-    ))
+    _write_bundle_payload(payload)
     return True

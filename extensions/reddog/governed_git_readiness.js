@@ -1,11 +1,11 @@
 'use strict';
 
-const cp = require('child_process');
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
+const { buildGovernedGit } = require('./start_operations_environment');
+const defaultGitExecutable = require('./governed_git_executable');
 
-const GIT_READINESS_SCHEMA = 'reddog_governed_git_readiness.v1';
+const GIT_READINESS_SCHEMA = 'reddog_governed_git_readiness.v2';
 const gitReadinessByRoot = new Map();
 
 function sameCanonicalPath(left, right) {
@@ -37,44 +37,53 @@ function readinessEvidence(overrides) {
     canonical_root_validated: false, git_metadata_validated: false,
     ownership_mismatch_observed: false, safe_directory_override_applied: false,
     safe_directory_scope: 'none', safe_directory_wildcard: false,
-    config_write_performed: false, reason: 'unproven'
+    config_write_performed: false, git_executable_binding: null,
+    reason: 'unproven'
   }, overrides || {}));
 }
 
-function setGitReadiness(root, overrides) {
-  gitReadinessByRoot.set(root, readinessEvidence(overrides));
+function setGitReadiness(root, overrides, binding, authority) {
+  const evidence = readinessEvidence(Object.assign({}, overrides || {}, {
+    git_executable_binding: binding
+      ? defaultGitExecutable.toPublicExecutableReceipt(binding) : null
+  }));
+  gitReadinessByRoot.set(root, { evidence, binding: binding || null,
+    authority: authority || defaultGitExecutable });
 }
 
 function governedGitReadiness(root) {
   const canonicalRoot = validatedCanonicalRoot(root);
   if (!canonicalRoot) return readinessEvidence({ reason: 'canonical_root_invalid' });
-  return gitReadinessByRoot.get(canonicalRoot)
-    || readinessEvidence({ canonical_root_validated: true, reason: 'not_probed' });
+  const stored = gitReadinessByRoot.get(canonicalRoot);
+  if (!stored) return readinessEvidence({
+    canonical_root_validated: true, reason: 'not_probed'
+  });
+  if (!stored.binding) return stored.evidence;
+  try {
+    const current = stored.authority.revalidate(stored.binding);
+    return readinessEvidence({ ...stored.evidence,
+      git_executable_binding: defaultGitExecutable.toPublicExecutableReceipt(current) });
+  } catch (_err) {
+    return readinessEvidence({ ...stored.evidence, ready: false,
+      git_executable_binding: null, reason: 'git_executable_changed' });
+  }
 }
 
-function sanitizedGitEnv() {
-  const env = {};
-  for (const [key, value] of Object.entries(process.env)) {
-    if (!key.toUpperCase().startsWith('GIT_')) env[key] = value;
-  }
-  return Object.assign(env, {
-    GIT_CONFIG_NOSYSTEM: '1',
-    GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : os.devNull,
-    GIT_ATTR_NOSYSTEM: '1', GIT_EXTERNAL_DIFF: '', GIT_NO_LAZY_FETCH: '1',
-    GIT_NO_REPLACE_OBJECTS: '1', GIT_OPTIONAL_LOCKS: '0', GIT_PAGER: 'cat'
-  });
+function sanitizedGitEnv(source) {
+  return buildGovernedGit(source && typeof source === 'object' ? source : process.env);
 }
 
 const GIT_RISKY_SETTING_PATTERN =
-  /^(?:core\.(?:attributesfile|checkstat|excludesfile|trustctime|worktree)|extensions\.partialclone|remote\..*\.(?:partialclonefilter|promisor)|filter\..*\.(?:clean|process)|diff\..*\.(?:textconv|command)|diff\.external)$/i;
+  /^(?:core\.(?:attributesfile|checkstat|excludesfile|trustctime|worktree)|extensions\.(?:partialclone|refstorage)|remote\..*\.(?:partialclonefilter|promisor)|filter\..*\.(?:clean|process)|diff\..*\.(?:textconv|command)|diff\.external)$/i;
 const GIT_INCLUDE_PATTERN = /^(?:include\.path|includeif\..*\.path)$/i;
+const GIT_CONFIG_TIMEOUT_MS = 5000;
 
-function gitConfigNames(root, env, scope, safeDirectory = true) {
+function gitConfigNames(root, env, scope, safeDirectory, binding, authority) {
   try {
     const prefix = safeDirectory ? ['-c', 'safe.directory=' + root] : [];
-    const output = cp.execFileSync(
-      'git', [...prefix, 'config', scope, '--no-includes', '--null', '--name-only', '--list'],
-      { cwd: root, encoding: 'utf8', env, timeout: 2000, windowsHide: true,
+    const output = authority.execFileSync(
+      binding, [...prefix, 'config', scope, '--no-includes', '--null', '--name-only', '--list'],
+      { cwd: root, encoding: 'utf8', env, timeout: GIT_CONFIG_TIMEOUT_MS, windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe'] }
     );
     return String(output || '').split('\0').filter(Boolean);
@@ -83,21 +92,21 @@ function gitConfigNames(root, env, scope, safeDirectory = true) {
   }
 }
 
-function gitOwnershipReadiness(root, env) {
-  if (gitConfigNames(root, env, '--local', false) !== null) {
+function gitOwnershipReadiness(root, env, binding, authority) {
+  if (gitConfigNames(root, env, '--local', false, binding, authority) !== null) {
     return { overrideRequired: false };
   }
-  return gitConfigNames(root, env, '--local', true) !== null
+  return gitConfigNames(root, env, '--local', true, binding, authority) !== null
     ? { overrideRequired: true } : null;
 }
 
-function worktreeGitConfigEnabled(root, env, safeDirectory) {
+function worktreeGitConfigEnabled(root, env, safeDirectory, binding, authority) {
   try {
     const prefix = safeDirectory ? ['-c', 'safe.directory=' + root] : [];
-    const output = cp.execFileSync(
-      'git', [...prefix,
+    const output = authority.execFileSync(
+      binding, [...prefix,
         'config', '--local', '--no-includes', '--type=bool', '--get', 'extensions.worktreeConfig'],
-      { cwd: root, encoding: 'utf8', env, timeout: 2000, windowsHide: true }
+      { cwd: root, encoding: 'utf8', env, timeout: GIT_CONFIG_TIMEOUT_MS, windowsHide: true }
     );
     return String(output || '').trim() === 'true';
   } catch (err) {
@@ -105,16 +114,25 @@ function worktreeGitConfigEnabled(root, env, safeDirectory) {
   }
 }
 
-function configuredGitRiskySettings(root, env, safeDirectory) {
-  const localNames = gitConfigNames(root, env, '--local', safeDirectory);
+function configuredGitRiskySettings(root, env, safeDirectory, worktreeConfigState,
+  binding, authority) {
+  const localNames = gitConfigNames(
+    root, env, '--local', safeDirectory, binding, authority
+  );
   if (localNames === null) return null;
   const localRisks = localNames.filter((name) =>
     GIT_INCLUDE_PATTERN.test(name) || GIT_RISKY_SETTING_PATTERN.test(name));
   if (localRisks.length) return localRisks;
-  const worktreeEnabled = worktreeGitConfigEnabled(root, env, safeDirectory);
+  const worktreeEnabled = worktreeGitConfigEnabled(
+    root, env, safeDirectory, binding, authority
+  );
   if (worktreeEnabled === null) return null;
   if (!worktreeEnabled) return [];
-  const worktreeNames = gitConfigNames(root, env, '--worktree', safeDirectory);
+  if (worktreeConfigState === 'absent') return [];
+  if (worktreeConfigState !== 'present') return null;
+  const worktreeNames = gitConfigNames(
+    root, env, '--worktree', safeDirectory, binding, authority
+  );
   if (worktreeNames === null) return null;
   return worktreeNames.filter((name) =>
     GIT_INCLUDE_PATTERN.test(name) || GIT_RISKY_SETTING_PATTERN.test(name));
@@ -135,6 +153,7 @@ function governedGitArgs(root, safeDirectory, args) {
 }
 
 module.exports = {
+  GIT_CONFIG_TIMEOUT_MS,
   GIT_READINESS_SCHEMA,
   configuredGitRiskySettings,
   governedGitArgs,

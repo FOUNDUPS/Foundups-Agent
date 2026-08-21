@@ -29,6 +29,8 @@ from holo_index.freshness_receipt import (
 from holo_index.maintenance_lock import (
     AUTHORITY_BLOCK_MARKER_CONTENT,
     MaintenanceLeaseBusy,
+    MaintenanceLockError,
+    acquire_existing_maintenance_lease,
     acquire_authority_update_lease,
     acquire_maintenance_lease,
     authority_block_marker_path,
@@ -761,6 +763,55 @@ def test_read_only_lock_probe_does_not_create_absent_path(tmp_path: Path) -> Non
     assert probe.clear is True
     assert lock_path.exists() is False
     assert lock_path.parent.exists() is False
+
+
+def test_existing_lease_never_creates_an_absent_sentinel(tmp_path: Path) -> None:
+    lock_path = maintenance_lock_path(tmp_path / "never-created")
+
+    with pytest.raises(MaintenanceLockError, match="sentinel is absent"):
+        acquire_existing_maintenance_lease(lock_path)
+
+    assert not lock_path.exists()
+    assert not lock_path.parent.exists()
+
+
+def test_existing_lease_retains_exact_bytes_and_excludes_contenders(
+    tmp_path: Path,
+) -> None:
+    lock_path = maintenance_lock_path(tmp_path)
+    lock_path.parent.mkdir(parents=True)
+    lock_path.write_bytes(b"stable-sentinel-v1\n")
+    before = lock_path.read_bytes()
+
+    with acquire_existing_maintenance_lease(lock_path) as lease:
+        assert lease.sentinel_proof.size == len(before)
+        with pytest.raises(MaintenanceLeaseBusy):
+            acquire_maintenance_lease(lock_path)
+        lease.revalidate_sentinel()
+
+    assert lock_path.read_bytes() == before
+    with acquire_existing_maintenance_lease(lock_path):
+        pass
+
+
+def test_existing_lease_rejects_nonregular_and_hardlinked_sentinels(
+    tmp_path: Path,
+) -> None:
+    directory = maintenance_lock_path(tmp_path / "directory")
+    directory.mkdir(parents=True)
+    with pytest.raises(MaintenanceLockError, match="sentinel is invalid"):
+        acquire_existing_maintenance_lease(directory)
+
+    lock_path = maintenance_lock_path(tmp_path / "hardlink")
+    lock_path.parent.mkdir(parents=True)
+    lock_path.write_bytes(b"sentinel\n")
+    alias = lock_path.with_name("sentinel-alias.lock")
+    try:
+        alias.hardlink_to(lock_path)
+    except OSError:
+        pytest.skip("hardlink creation unavailable")
+    with pytest.raises(MaintenanceLockError, match="sentinel is invalid"):
+        acquire_existing_maintenance_lease(lock_path)
 
 
 def test_lock_probe_fails_closed_for_invalid_sentinel(tmp_path: Path) -> None:

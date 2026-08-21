@@ -1,5 +1,30 @@
 # Tests - OpenClaw Bridge
 
+## Current upstream worker providers
+
+`test_reddog_hermes_api_artifact_provider.py` proves Hermes API `0.20.4`
+accepts only one stable completed native leaf, paired delegate-only telemetry,
+explicit zero child file reads/writes, ordered final completion, zero skills,
+and unchanged pre/postflight policy.
+`test_reddog_openclaw_gateway_artifact_provider.py` proves OpenClaw
+`2026.7.1-2` service/plugin identity, WSL cold-start-safe RPC ordering, exact
+sandbox policy, signed provider-prefixed routing, and bounded non-empty artifact
+output on canonical relative paths.
+
+```powershell
+python -m pytest -q `
+  modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py `
+  modules/communication/moltbot_bridge/tests/test_reddog_openclaw_gateway_artifact_provider.py
+```
+
+## Governed repository-state v2 intake
+
+`test_reddog_operational_context_snapshot.py` covers the digest-only executable
+v1 receipt accepted from JavaScript, exact readiness/repository schemas, and
+rejection of incomplete identities, malformed or boolean numeric fields,
+signature/verifier containment drift, raw paths, and non-Windows shape drift.
+The production snapshot module remains free of `subprocess` and bare Git.
+
 ## Grant-profile atomic runtime provisioning
 
 ```powershell

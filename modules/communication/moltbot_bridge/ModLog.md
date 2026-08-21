@@ -1,4 +1,38 @@
 # ModLog - moltbot_bridge
+## 2026-08-21: Current upstream Hermes/OpenClaw worker proof
+
+- Upgraded the production Hermes contract from API `0.19.1` text-only inference
+  to API `0.20.4` native single-leaf `delegate_task` proof. Exact child identity,
+  completion, explicit zero child reads/writes, ordered delegate-only telemetry,
+  final terminal output, and postflight confinement now fail closed.
+- Reused one shared signed-principal route extractor. OpenClaw now derives its
+  provider-prefixed runtime model from the signed provider/model pair, accepts
+  the stable `2026.7.1-2` revision, rejects service/plugin version drift, and
+  orders its RPC probe last to reduce the observed WSL cold-start race while
+  preserving fail-closed behavior; scalable readiness amortization remains open.
+- Both upstream providers now reuse one bounded artifact-map validator for
+  canonical relative paths, non-empty UTF-8 text, Windows device-name defense,
+  and per-file/aggregate size limits.
+- Actual bounded GotJunk canaries returned one accepted in-memory artifact from
+  each upstream runtime. No repository artifact was materialized. The full
+  diagnostic/negative evidence is under `docs/audits/openclaw_hermes/`.
+  (WSP 00/15/22/50/84/97)
+
+## 2026-08-21: Governed repository-state v2 strict intake
+
+- Replaced permissive body-hash-plus-minimal-binding acceptance with exact,
+  bounded validation of the digest-only executable v1 public receipt.
+- Empty/partial/mismatched identities, bool numeric fields, malformed digests,
+  bad sizes/link counts, minimal Windows signatures, verifier substitution or
+  containment drift, non-Windows shape drift, unknown fields, and raw paths now
+  reject before repo-state consumption. Python remains subprocess-free.
+- Receipt hashing remains necessary but is not described as origin
+  authentication; Git DLL/helper closure remains outside direct proof.
+  (WSP 00/15/22/50/62/97)
+- Focused snapshot/start/bootstrap validation passed 105 tests with one skip;
+  the final snapshot/generator matrix passed 24/24 and the hostile extension
+  promotion passed 4/4 in 283,268 ms.
+
 ## 2026-08-15: Grant-profile atomic runtime provisioning
 
 - Extended the existing atomic signer-generation transaction with one fixed

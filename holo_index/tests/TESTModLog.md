@@ -1,5 +1,139 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-21] RedDog closed command-import regression
+
+- Added a sealed `-S -B` subprocess test for the bundle command. It proves that
+  direct-read audit grounding does not load the full Holo CLI or vector backend.
+- The regression uses repository code and standard-library imports only; it
+  performs no query, store, owner, maintenance, reindex, model, or network work.
+- The exact owner bridge entrypoint is also imported in a sealed child and must
+  leave `_cli_main`, the core vector module, ChromaDB, and NumPy unloaded.
+- Reconciled the inherited fast-summary assertion with the existing four-bucket
+  CLI receipt (`code`, `wsp`, `docs`, `knowledge`); no production output was
+  changed or narrowed.
+
+## [2026-08-20] Integrated module-intent and runtime closure
+
+- The exact module-intent, Tier-0, machine-spec, freshness, isolated-probe, and
+  process-runtime selection is **233 passed / 1 platform skip**. The earlier
+  237/1 aggregate had no reproducible file selection and is superseded.
+- Reproduction: `python -m pytest holo_index/tests/test_holoindex_freshness_receipt.py holo_index/tests/test_isolated_collection_snapshot_probe.py holo_index/tests/test_isolated_collection_snapshot_runtime.py holo_index/tests/test_machine_spec_contract.py holo_index/tests/test_tier0_retrieval_hardening.py holo_index/tests/test_module_intent_snapshot.py -q`.
+- Verification used fixtures only; no live query, store, model, maintenance,
+  reindex, or external runtime mutation occurred.
+
+## [2026-08-17] R15 bridge copy-preservation adjacency
+
+- Windows model-copy failure now proves handles close without deleting partial
+  output, destructive APIs are absent, and query staging quarantine preserves
+  injected partial bytes. Bounded seam: **211 passed / 5 skips**; no live Holo
+  store, model, owner, maintenance, or reindex path ran.
+
+## [2026-08-17] R14 bridge quarantine adjacency
+
+- Bridge-owned synthetic tests now prove no-delete failure handling for active
+  descriptors, publication temps, and staging directories, including mutation,
+  replacement, collision, rename failure, and unsupported-platform behavior.
+- The bounded ten-file Holo/bridge seam is **209 passed / 5 skips**. No live
+  Holo store, model, owner, maintenance, or reindex path ran. Governed closure
+  is **1,348 runtime files** and **1,525 tests / 265 quarantined**.
+
+## [2026-08-17] Existing-sentinel retained lease units
+
+- Four focused units prove absent sentinels are never created; existing exact
+  regular single-link sentinels retain bytes, exclude contenders, release for
+  later acquisition, and reject directory/hardlink aliases. Bridge replica
+  tests separately retain both ordered sentinels through active publication.
+
+## [2026-08-17] Query-replica materializer adjacency
+
+- Bridge-owned synthetic tests cover immutable vector/model generation copying
+  and canonical-byte preservation. Focused result is **17 passed / 2
+  host-capability skips**; accepted-copy adjacency is **47 passed / 2 skips**.
+  The accepted nine-file closure plus materializer is **165 collected = 160
+  passed / 5 skips**. Governed manifest/registry validation is **34 passed**;
+  the current closure is **1,347 runtime files** and **1,525 registered tests**.
+  No live store was used, and owner routing is unverified.
+
+## [2026-08-17] R11 retained executable capability regression
+
+- Independent RED showed R10 only validated a descriptor before the runner and
+  then closed it. New injected-runner tests prove live descriptor continuity,
+  close-on-success/error, no launch after revalidation failure, and Windows
+  replacement denial or Linux original-object execution through procfd.
+- Exact acceptance is **146 collected = 143 passed / 3 named symlink-capability
+  skips**; process-image scope is **14 = 13 passed / 1 skip** and includes an
+  actual child launch. All six manifest-generator tests pass. The broad
+  184-second timeout remains unresolved and was not rerun. No live Holo effect.
+
+## [2026-08-17] R10 Windows process-image case-alias regression
+
+- RED proved Windows admitted a lowercase spelling of a mixed-case executable;
+  coverage now rejects both parent-directory and leaf-name case aliases using
+  the live handle's final path.
+- Process-image scope collected **11 = 10 passed / 1 skip**; the seven-file
+  correction scope collected **125 = 123 passed / 2 skips**; the exact
+  nine-file acceptance scope collected **141 = 138 passed / 3 skips**. All
+  skips are named symlink-creation capability limits and are not passes.
+- The full bridge-directory attempt timed out at its 184-second shell boundary
+  without a captured outcome and is non-evidence. No live Holo effect ran.
+
+## [2026-08-17] Snapshot executable and interactive-mode adversaries
+
+- Added exact proven executable argv, mutable-`sys` denial, missing/changed proof
+  pre-spawn failure, and `PYTHONINSPECT`/startup/home/user-base/provider scrub
+  contracts. The proof is never serialized into the acceptance receipt.
+- Final hostile matrix passed **87/2 skipped** three consecutive times; exact
+  adjacent passed **271/2 skipped** and adversary/runtime/sanitizer passed
+  **136/3 skipped**. Exact generator/registry metadata passed **41**. Registry
+  is current at **1,524/265** and the 1,346-file manifest is pinned at
+  `4de0e76a29dfc8d5338ee0c88251f3deb7af2820ca07afd4832655920045a663`.
+  Fast Node contract/preflight/async passed; exhaustive shards were deferred.
+
+## [2026-08-17] Isolated snapshot runtime authority
+
+- Added subprocess contracts for exact argv/cwd/environment, hostile inherited
+  package/config removal, invalid/ambiguous/unrelated/reparse runtime rejection
+  before spawn, exact 1.5.5 origin success, and generation-bound 1.3.0 rejection
+  before `PersistentClient`.
+- The combined probe/candidate/receipt focused matrix passes **77 passed,
+  2 skipped** on Windows; skips are platform/filesystem capability guards.
+
+## [2026-08-16] K-dependent Tier-0 incident falsification
+
+- RED: the exact Group-A query at K=1/12/20 failed all three new contracts
+  because `_search_collection` lacked generation-complete module intent; an
+  owner flattener regression separately reordered an unproven 41% README ahead
+  of a 95% code hit.
+- GREEN: proved fixed HEAD-catalog intent across changing top-K contexts,
+  three real duplicate basenames, cache-by-root+HEAD invalidation, hostile and
+  bounded Git failures, final-NUL framing, all-record path validation,
+  Unicode `Cc`/`Cf`/`Cs` rejection, NFC-equivalent duplicate rejection,
+  visible-Unicode preservation, 4,096/4,097 boundaries, platform-aware locked cache behavior,
+  strict/non-strict catalog behavior, exact full paths, schema-bound target
+  attestation, and absent/unrelated/ambiguous/multi/partial/mixed/duplicate/
+  forged reservation rejection.
+- Proved exact-type error allowlisting/redaction plus deterministic no-retry
+  for Tier-0 incomplete/catalog unavailable and one retry for lookup failure.
+  R3 Unicode RED: **8 failed, 39 passed** in 1.47 s; isolated GREEN:
+  **47 passed** in 1.47 s. The exact six-file focused command, including the
+  machine-spec contract, passed **278** in 4.00 s. Final bounded 13-file
+  adjacent owner GREEN: **356 passed, 1 optional skip** in 11.21 s. The deterministic registry was
+  regenerated twice at 1,517 tests/265 quarantined with identical SHA-256
+  `0510244d701c7df08562852f02c76cdda1fccae6eb34fb387cd096aba375c675`.
+- Final registry write/write/check took 7.231/7.222/7.355 s. Manifest
+  write/write/check took 9.581/9.613/9.761 s with 1,337 runtime files,
+  canonical digest `8e2680eb6075c56f1528a0cbdf2f08b44076cf8c814cec0f45c5a997df723ac9`,
+  and file SHA-256 `b6910e4891b6b9008dd4d06699c209f5eddf5cff461a7aa2281618ffd5a95a41`.
+  The >184 s all-bridge aggregate was not rerun; it is scale evidence, not
+  acceptance evidence for this bounded slice.
+- Manifest generator tests: **5 passed** in 29.18 s. Exact supervisor no-growth
+  gate: **1 passed** in 1.25 s. Final manifest checks and the Node backend
+  compatibility contract passed. Static closure covered 35 UTF-8 files, 18
+  Python compile/AST files, 3 JSON files, and 1 JavaScript file; diff check and
+  bounded secret-pattern scan (`0` hits) passed.
+  No model, persistent store,
+  reindex, resident owner, or network was used. (WSP 22/34/62/97)
+
 ## [2026-08-16] Final publication dirty-worktree falsification
 
 - Injected clean/clean/dirty repository states across receipt construction,

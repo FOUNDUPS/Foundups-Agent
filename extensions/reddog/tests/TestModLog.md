@@ -1,5 +1,465 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-21 - Native upstream worker provenance (0.4.102)
+
+- Updated version/package and backend-manifest contracts for Hermes API
+  `0.20.4` native leaf proof and OpenClaw `2026.7.1-2` runtime identity.
+- Added the repository-authoritative license text to the VSIX contract, raising
+  the closed package surface from 64 to 65 files and removing VSCE's warning.
+- The live canaries are documented backend evidence; extension tests remain
+  deterministic and do not invoke models, expose credentials, or write repos.
+
+## 2026-08-21 - Holo runtime split, streaming provenance, and package contracts
+
+- Final release supervisor receipt: **PASS**, four groups, 309,306 ms wall;
+  core 309,218 ms, governed Git 203,295 ms, Git formats/environment 131,072 ms,
+  bridge/WSP62 13,555 ms, with no child or release timeout. Package receipt:
+  64 files / 936,267 raw bytes under the 1 MiB cap.
+- Complete-tree staging made the backend closure truthful: 1,364 runtime files
+  at canonical digest
+  `3c0cffea72e92ca1acbcd8a1f5a106164dda11ae791afe050f39490c3cd62d10`.
+- The corresponding staged-index registry contains 1,544 tests and 266
+  quarantines.
+- Removed the last raw `holo_index.py --bundle-json` launch from the exhaustive
+  contract. DRT-006 now creates the same real `ENOBUFS` shape with a bounded
+  8 KiB Node child against a 4 KiB buffer, so promotion no longer couples this
+  classifier proof to Holo authority or store state.
+- Repaired assertion inventory authentication: the former raw regex counted
+  `assert(` text inside comments and strings. The comment/string-masked receipt
+  truthfully binds 18 shards, 6,914 lines, 483 static assertion calls, and
+  aggregate SHA-256 `7bc3e58227d8db65dc97742d12ebef24984f44eda3d1f8b361961a4471be2635`.
+- Preserved EXT-ACC-001 as an executable content-survival contract. Requested
+  target snippets are now ordered ahead of broad Holo recall so the 42K final
+  bound cannot report target metadata while truncating away the target bytes.
+- Added an exact five-second governed Git configuration-probe assertion after
+  the parallel release exposed a two-second contention flake. The complete
+  supervisor remains the executable concurrency regression.
+- Expanded the candidate WSP_62 set to the generation facade, bundle
+  projection, interpreter-provenance worker, owner runtime, incident bridge,
+  and both async tests. All are at most 400 physical lines with detected
+  functions at most 30 lines.
+- Added a source and hostile 32 MiB runtime proof that configured-interpreter
+  hashing uses fixed 64 KiB `readSync` chunks off the parent event loop and
+  contains no whole-file `readFileSync` path.
+- Added direct-read projection coverage for source-bearing one-shot owner
+  bundles and raised the exact package contract from 61 to 64 files solely for
+  the three required runtime helpers. The same surface now rejects non-regular
+  entries and aggregate raw size above 1 MiB, emitting a bounded receipt.
+- Repaired the WSP_62 audit itself: its static declaration must equal the full
+  Git changed/new RedDog JavaScript set, content-line counting ignores only the
+  terminal newline, and inherited function debt cannot grow. Split the prior
+  475-line Start Operations test to below 400 lines plus a 91-line helper.
+
+## 2026-08-21 - Request-owned asynchronous Holo lifecycle contracts
+
+- Added explicit panel/request ownership from `executeAsk` through bounded
+  context, owner query, and incident repair. Disposal is proven to mark the
+  panel closed before terminating every owned Holo/provider child; cancellation
+  and late callbacks settle once with typed failure.
+- Moved configured-interpreter descriptor/stat/SHA proof to a worker thread and
+  added a hostile 32 MiB fixture proving the parent does not perform the file
+  read/hash. Ambient PATH and unresolved configured commands remain explicitly
+  unverified.
+- The fast plan now directly executes owner async, incident async, and Fusion
+  ingress contracts. Focused tests cover 300-second owner and 90-second incident
+  limits, stdin absence/throw/EPIPE, timeout, disposal, and late callbacks.
+
+## 2026-08-21 - Digest-only executable receipt and strict consumer contracts
+
+- Reproduced Python acceptance of a recomputed repository-state body containing
+  empty executable identities and a minimal `status: valid` signature.
+- Added malformed/missing/unknown/type/bounds/digest/link/identity/signature/
+  verifier-containment rejection matrices plus non-Windows exact-shape and live
+  JS-to-Python acceptance. Serialized readiness, projection, and repository-
+  state receipts are scanned for raw Git and verifier path absence.
+- Hostile promotion passed all four groups in 283,268 ms; executable/environment
+  was 103,881 ms, governed Git 168,117 ms, core 283,234 ms, and package/WSP62
+  2,599 ms. No timeout or termination occurred.
+
+## 2026-08-21 - Governed Git executable provenance contracts
+
+- Tests-first RED covered missing authority, lexical PATH/PATHEXT ordering,
+  missing executable, PATH mutation, file replacement, link/reparse rejection,
+  hardlink acceptance, absolute invocation, pathless environments, Windows
+  signature failure, v2 receipts, and batch output withholding.
+- Added a production source scan proving there is no ambient bare-Git child in
+  RedDog JS or moltbot-bridge Python. Snapshot tests pass 12/12 and Start
+  Operations control tests pass 32/32 using the governed receipt consumer.
+- The executable authority plus WSP_62-separated repository-receipt module move
+  the deterministic package contract from 59 to 61; no runtime file or public
+  metadata was hidden to preserve a stale count.
+- The first hostile release truthfully failed `RDD-010` because its legacy
+  monkeypatch matched only bare `git`. Moving the fake to the governed
+  executable boundary restored the intended oversized-manifest proof without
+  weakening production truncation behavior. The reauthenticated closure remains
+  18 shards / 6,958 lines / 1,240 assertions. Hostile promotion then passed all
+  four groups in 290,894 ms; no group timed out or required termination.
+
+## 2026-08-21 - Workspace capability and package-surface contracts
+
+- Added static fast-tier proof for exact unsupported untrusted/virtual workspace
+  capabilities, publisher/version/main/activation commands, the ignore policy,
+  and a complete require-derived runtime closure.
+- Added a release/package test that invokes the installed VSCE CLI twice without
+  a shell and requires the same exact 59-file list both times. All 55 root
+  JavaScript files, both dynamic workers, and the Python bootstrap are retained;
+  no tests, internal docs, or development artifacts remain.
+- Added the fail-closed capability assertion to the authenticated exhaustive
+  contract, now 18 shards / 6,954 lines / 1,239 assertions.
+- Validation: package list 59/59 twice; fast 8 members in 8,892 ms; contract 3
+  members in 271 ms; hostile release 4/4 in 283,993 ms with no timeout.
+  Package-surface execution added only 2,362 ms to the bridge/WSP62 group.
+
+## 2026-08-20 - Main/acceptance integration verification
+
+- Governed Git hardening, child-environment isolation, tier plan, authenticated
+  shards, and backend closure were reconciled without changing the exhaustive
+  assertion body or main-only runtime surfaces.
+- Backend generator is 6/6 and compatibility contract/preflight/async suites
+  are green. Hostile-ambient `npm run test:release` passed 4/4 process-isolated
+  groups in 323,242 ms; slowest was `core` at 323,202 ms, with no timeout or
+  signal. Fast and contract tiers passed in 10,012 ms and 528 ms.
+
+## 2026-08-20 - RedDog test tiers and promotion-runtime headroom
+
+- Tests-first RED failed at the exact missing `package.json` scripts assertion.
+  `npm test` is now a seven-member bounded developer tier and initially passed in
+  9.188 seconds; `npm run test:contract` authenticates plan and shard identity.
+  `npm run test:release` is the explicit exhaustive promotion command.
+- The release plan extracts every aggregate `require('./test_*.js')` and demands
+  exact ordered equality with five unique planned members before any worker
+  starts. Missing, duplicate, reordered, or stale membership is a hard failure.
+- The first parallel promotion run proved all three focused children green in
+  148.498/88.729/0.156 seconds but truthfully failed the core at 0.168 seconds:
+  its shared VM required `require.cache`. Restoring the local CommonJS cache
+  property preserved backward compatibility; the repaired core-only closure
+  passed in 242.789 seconds with all negative diagnostics visible.
+- Four process-isolated groups are bounded by worker cap 4, 400-second child
+  timeout, 2 MiB per-stream output, and the unchanged 420-second release
+  ceiling. Plan-order output includes per-group/slowest/total timing and any
+  exit, signal, timeout, or output overflow fails promotion.
+- The first complete aligned promotion passed in 295.928 seconds. Group times
+  were core 295.219, governed Git 174.351, Git formats/environment 101.531,
+  and bridge/WSP_62 0.167 seconds. The resulting 124.072-second (29.5%) margin
+  replaces the prior 1.1% near-ceiling posture without removing coverage.
+- A complete repeat passed in 266.709 seconds: core 265.850, governed Git
+  157.403, Git formats/environment 91.053, and bridge/WSP_62 0.166 seconds.
+  Conservative acceptance retains the slower 295.928-second receipt.
+- Independent loop-2 RED proved a caller-set `REDDOG_CONTRACT_GROUP` could run
+  one valid child group through the canonical command and exit zero. The same
+  audit showed no parent deadline and no authoritative timeout state.
+- New no-sleep fake-clock tests prove ambient selector rejection, child timeout
+  followed by exit zero remains FAIL, parent timeout followed by exit zero
+  remains FAIL, and two failed termination attempts settle as explicit failure
+  within fixed grace with streams destroyed and the child unrefed.
+- The canonical owner now always enters full promotion. A dedicated internal
+  worker requires exact argv plus an owner-generated 128-bit nonce. A hostile
+  ambient selector and forged nonce still produced all four real groups; the
+  repaired promotion passed in 279.723 seconds with all timeout fields false.
+- Loop-3 RED reproduced both a deterministic post-spawn error and a real
+  invalid-`SystemRoot` `taskkill.exe` ENOENT; the old unobserved child emitted
+  an unhandled error and exited 1. GREEN proves error/exit/close observation is
+  attached before unref, nonzero/timeout returns failure, graceful and forced
+  failures reach the bounded receipt, late errors stay handled, handles/listeners
+  settle, argv remains shell-free, and POSIX process-group behavior is unchanged.
+- The first aligned loop-3 hostile-selector promotion passed in 274.537 seconds
+  wall time: owner 273.762, core 273.724, governed Git 164.376, Git formats/
+  environment 96.467, and bridge/WSP_62 0.157 seconds. Every timeout and
+  termination field was false; the 18-shard/6,952-line/1,238-assertion closure
+  was unchanged.
+  (WSP 00/5/6/11/15/22/34/50/57/62/83/87/97)
+
+## 2026-08-20 - Governed Git child-environment least-privilege contract
+
+- The staged pre-repair source was loaded in an isolated VM without changing
+  the worktree. Its deterministic exclusion assertion failed in 0.6 seconds:
+  `UNRELATED_SENTINEL` actual `ambient-marker`, expected `undefined`. The
+  checked-in regression now evaluates ambient exclusion before the new builder
+  API assertion, so the original implementation fails on the actual leak.
+- The matrix also covers provider/GitHub/AWS/generic credential-shaped names,
+  Python/Node/dynamic-loader injection, SSH-agent and SSH/Git configuration,
+  ambient Git overrides, and arbitrary caller fields. It proves exact platform
+  allowlisting, immutable source/fresh output, fixed-control overwrite, and no
+  HOME/profile/virtual-environment inheritance.
+- Every real config/content Git child is captured and checked, and an actual
+  Node child proves an ambient preload does not execute. The test deliberately
+  retains PATH and records the unresolved executable-provenance limitation.
+  Focused GREEN passes in 1.6 seconds without network, provider, model, Holo,
+  staging, packaging, or Git-authority mutation.
+- Projection identity/race pass in 28.688/59.913 seconds; aggregate and ref/
+  config/object-format matrices pass in 135.605/83.792 seconds. Bridge Python
+  environment/start-operations, backend/preflight/async/Fusion, RDD, FoundUp,
+  candidate WSP62, syntax, diff, shard, and manifest gates are green.
+- The first exhaustive run failed truthfully at 102.707 seconds because two
+  static assertions still assigned environment controls to readiness. After
+  rebinding those exact checks to the shared environment source, the 18-shard/
+  6,952-line/1,238-assertion closure authenticates at
+  `1b26b3dc6e2910c290e6ddae61b670f50a496351d4ed099a8ad820428bd2c3a1`.
+  Full exhaustive acceptance passes in 415.462 seconds under the unchanged
+  420-second ceiling. Expected adversarial Git, Unicode, sealed-runtime, and
+  quarantined Holo dependency diagnostics remain visible.
+  (WSP 00/5/6/11/15/22/34/50/57/62/83/87/97)
+
+## 2026-08-20 - R9 loop 3 Python environment documentation truth
+
+- Static documentation RED failed on the exact Interface sentence that claimed
+  every bridge child included `PYTHONNOUSERSITE=1`.
+- Six-document truth checks now distinguish common isolated profiles from local
+  `holo_query`, pin the configured/system interpreter's per-user NumPy need,
+  preserve denial of Python injection variables and credentials, and expose the
+  sealed-interpreter/package-provenance residual.
+- Focused environment/WSP62/shard gates pass in 0.085/0.078/0.086 seconds;
+  syntax and cached/unstaged diff checks pass. Canonical exhaustive acceptance
+  passes in 405.338 seconds below the unchanged 420-second ceiling. No code,
+  test, shard, pin, package, staging, commit, Git authority, or Holo mutation
+  occurred. (WSP 00/15/22/50/57/62/83/87/97)
+
+## 2026-08-20 - R9 loop 2 live Holo environment leakage contract
+
+- Tests-first RED failed in 0.2 seconds at `UNRELATED_SENTINEL must not cross
+  the Holo query boundary`; the live extracted helper returned the ambient
+  marker from its whole-environment clone.
+- The deterministic fixture also covers `GITHUB_TOKEN`, a generic credential-
+  shaped name, `OPENROUTER_API_KEY`, `PYTHONPATH`, `PYTHONHOME`,
+  `PYTHONSTARTUP`, an arbitrary caller key, ambient retrieval-flag override,
+  fresh-object identity, and source non-mutation.
+- GREEN passes after composing the live helper through the closed `holo_query`
+  profile. An independent VM probe of the live function passes separately and
+  confirms lexical/read-only synthesis without exposing any forbidden name.
+- The repository-audit companion exposed a system-interpreter import failure
+  caused by newly forcing `PYTHONNOUSERSITE=1` on this legacy route. A focused
+  compatibility RED rejected that flag; the corrected Holo helper retains the
+  configured/system interpreter's per-user NumPy visibility without restoring
+  any forbidden environment key. Universal isolation remains dependent on a
+  sealed/configured Holo interpreter closure.
+- Candidate WSP62 then rejected one 30-line test-function overrun; cohesive
+  assertion helpers restored the candidate ceiling without weakening coverage.
+- The first exhaustive attempt stopped truthfully in 0.170 seconds because
+  HSF-002 still required `KEEP_ME` to survive. The shard now requires exclusion;
+  shard 2 is `f138a781efe77b1785853f3e1c0a7d90614c6a10720dc33b45f2b8494ffa82c0`
+  and the unchanged 18-shard/6,951-line/1,238-assertion closure is authenticated
+  at `482671e3f4fc766ae91adf7aac28fcbaea1aae229c9a8765f5a17dadd5e3f0c5`.
+- Full exhaustive acceptance passes in 398.366 seconds under the unchanged
+  420-second ceiling. Backend manifest parity remains 1,360 files at
+  `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`.
+  The focused RED/GREEN and independent probe do not query Holo. No Holo
+  mutation/reindex, model/provider/network call, stage, package, or commit occurs.
+  (WSP 00/5/6/11/15/22/34/50/62/87/97)
+
+## 2026-08-20 - Python bridge environment least-privilege contract
+
+- Pre-fix focused RED failed in 0.087 seconds on the exact whole-editor
+  `Object.assign` environment clone.
+- Added a closed-profile matrix covering required Windows/POSIX runtime keys,
+  absent/empty values, fresh result objects, source non-mutation, unknown and
+  object/array profile rejection, unrelated credential/Python injection
+  exclusion, and exact provider/Holo/resident/work-state/model-binding keys.
+- Post-fix focused, resident-session, provider-spawn Fusion, and start-operations
+  companions pass in 0.071/0.057/7.036/16.289 seconds. The actual provider
+  spawn receives its configured OpenRouter key while an unrelated sentinel is
+  absent. No provider or network call occurs.
+- The exhaustive shard closure now invokes the focused contract; authenticated
+  structure is 18 shards, 6,951 lines, 1,238 assertions, aggregate SHA-256
+  `6478ebeec37d6162abacf2ad51817674a3dc22bcf7c9c6327a4a730a3c322647`.
+- One truthful 0.310-second pre-body exhaustive attempt rejected the legacy
+  assertion owner after UTF-8 environment flags moved out of `extension.js`.
+  After rebinding that assertion to `start_operations_environment.js` and
+  authenticating shard 2, full exhaustive acceptance passed in 400.096 seconds
+  under the unchanged 420-second release ceiling.
+  (WSP 00/5/6/15/22/34/50/62/87/97)
+
+## 2026-08-20 - R9 loop 7 projection pre-open allocation gate
+
+- Pre-fix RED failed in 4.745 seconds: an 8-byte path grown to 2 MiB plus one
+  at the open boundary recorded one target allocation before the old late
+  identity rejection.
+- Added deterministic pre-open growth and replacement probes plus negative,
+  fractional, non-safe, exact-cap, and cap-plus-one size coverage. Allocation
+  and read counters must remain zero for every rejected pre-allocation case.
+- Post-fix projection race passes in 54.393 seconds and a parallel confirmation
+  passes in 69.4 seconds; projection identity passes in 36.3 seconds. Aggregate
+  governed-Git hardening passes in 145.365 seconds, ref/config semantics in
+  60.015 seconds, and candidate WSP_62 in 0.285 seconds.
+- RDD/FoundUp grounding passes in 13.3/1.4 seconds; backend contract/preflight/
+  async/Fusion pass in 1.4/44.8/1.6/9.7 seconds. Manifest parity remains 1,360
+  files at `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`.
+  The 18-shard closure remains 6,950 lines and 1,238 assertions at aggregate
+  `6f16dfa31ca2504b39509bf93c7848a44a8674d5d6d9103a2716f1418320155e`.
+- One truthful 0.068-second pre-body attempt rejected the stale orchestrator
+  digest pin. After all three exact pins matched the computed closure, full
+  exhaustive acceptance passed in 402.947 seconds under the unchanged
+  420-second ceiling. Adversarial Git and Unicode stderr remains expected.
+  (WSP 00/15/22/34/50/62/87/97)
+
+## 2026-08-18 - R9 loop 6 projection absence and stable-read bounds
+
+- RED1 failed through the public snapshot API in 9.769 seconds: a present
+  dangling `linked` junction was followed by `existsSync()`, misclassified as
+  absent, and released as tracked deletion with a receipt.
+- RED2 failed in 1.612 seconds and measured 2,101,256 bytes consumed from an
+  8-byte open before the old `readFileSync(fd)` path rejected later.
+- Identity fixtures cover valid nested deletion, dangling final/interposed
+  parent, Windows junction capability, non-directory parent, synthetic lookup
+  error, absent untracked record, and component substitution. Race fixtures
+  cover bounded allocation/request/read, incomplete-short/zero/truncate,
+  existing path replacement, and exact 0/2-MiB/2-MiB-plus-one boundaries.
+- Post-fix direct projection identity and race modules pass in 18.612 and
+  36.779 seconds. Candidate WSP_62 remains green with projection at 325 lines,
+  identity at 377, race at 361, and all detected functions at or below 30.
+- Aggregate hardening passes in 91.914 seconds; the R9 ref/config matrix passes
+  in 50.932 seconds; RDD/FoundUp grounding passes in 12.202 seconds; and the
+  backend/preflight/async/Fusion companion set passes in 44.929 seconds.
+- Manifest parity passes at 1,360 files with digest
+  `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`.
+  The authenticated closure passes at 18 shards, 6,950 lines, 1,238 assertions,
+  aggregate digest
+  `14b474d304b0d92700c53c2efafd0921ff5fb760e876c4abc7ab52449c42b35a`,
+  and 340.746 seconds under the unchanged 420-second exhaustive ceiling.
+  Intentional malformed/corrupt Git-fixture stderr is negative-path evidence.
+  Syntax, shard integrity, candidate WSP_62, and RedDog diff checks pass.
+  (WSP 00/15/22/34/50/62/87/97)
+
+## 2026-08-18 - R9 loop 5 Git-config semantic authority
+
+- Pre-fix RED passed Git's public parser and 64-hex `HEAD^{commit}` for the
+  quoted SHA-256 config spelling, then failed because RedDog's partial parser
+  returned an invalid receipt. Canonical syntax had passed first.
+- Expanded `test_governed_git_ref_formats.js` across canonical, quoted, hash-
+  comment, and semicolon-comment SHA-256 settings in direct and real linked
+  repositories, plus loose/packed/detached authority, standard SHA-1, and exact
+  invalid 39/41/63/65/nonhex rejection.
+- SHA-1 repositories carrying a 64-hex shape and SHA-256 repositories carrying
+  a 40-hex shape are allowed only through structural receipt validation. The
+  matrix requires the full named batch and status/stat/diff projection to fail
+  through Git semantics while readiness remains truthfully structural/config-
+  READY. True unborn projection behavior remains covered by the exhaustive
+  shard.
+- The first post-receipt GREEN attempt exposed detached projection fallback;
+  the next exposed packed fallback. The final implementation uses internal
+  bound/unborn classification only to preserve exact unborn behavior and uses
+  Git `HEAD^{commit}` for semantic proof. The dedicated matrix passes in
+  50.117 seconds after adding single-operation failure proofs.
+- Five direct Git groups pass in 9.835/30.513/8.512/11.856/16.702 seconds and
+  the aggregate passes in 89.564 seconds. Candidate WSP_62 and shard structure
+  pass, with the projection module explicitly included after loop 5 changed
+  that surface, at 18 shards, 6,948 lines, 1,237 assertions, aggregate SHA-256
+  `ac4e2b2e0541f3e168911a3d43d7d1d99253556dd83c1f2ebff5f1c29338e72e`.
+  RDD/FoundUp passes in 10.378 seconds; backend/runtime companions pass in
+  47.702 seconds; manifest parity remains 1,360 files at
+  `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`;
+  corrected-scope exhaustive acceptance passes in 342.348 seconds under its
+  unchanged 420-second ceiling. One pre-body exhaustive invocation truthfully
+  failed on the old orchestrator digest pin before that second pin was updated.
+  (WSP 00/15/22/34/50/62/87/97)
+
+## 2026-08-18 - R9 loop 4 refs, SHA-256, and focused-suite containment
+
+- RED ran Git's public `check-ref-format` and `HEAD^{commit}` against
+  `feature+r9` and `特性-r9`; both were Git-valid 40-hex authorities but the
+  pre-fix receipt returned `valid=false`. A supported SHA-256 repository
+  produced a 64-hex semantic HEAD and was also rejected pre-fix.
+- `test_governed_git_ref_formats.js` now covers valid Unicode/plus names, a
+  Git-rejected invalid ref corpus, and SHA-1/SHA-256 direct/linked loose,
+  packed, detached, malformed, and mixed-width cases. The matrix passes in
+  20.909 seconds on the local SHA-256-capable Git; an explicit capability skip
+  is retained for Git versions without SHA-256 initialization.
+- Split the former 1,460-physical-line hardening test into shared fixtures and
+  five cohesive contract groups, with projection identity/race separated to
+  keep both below the JavaScript ceiling. Direct exits are green: projection
+  identity 9.341 s, projection races 32.0 s, stable-I/O 8.905 s, topology/ref
+  13.0 s, and authority/readiness 17.516 s. The original invocation path runs
+  all original assertions in original order and passes in 90.404 s.
+- Added `test_reddog_candidate_wsp62.js` as a candidate-only size proof. It
+  checks scoped JS at <=400 physical lines, detected function/arrow blocks at
+  <=30 lines, and current non-historical docs at <=1,000 lines; it passes in
+  0.214 s. It explicitly does not substitute for backend runtime WSP_62 or
+  claim general repository-wide compliance. Duplicate historical narrative
+  moved to the existing ModLog so `INTERFACE.md` remains below the doc ceiling.
+- Exhaustive part13 source-shape checks now bind the Unicode-capable branch
+  parser and SHA-1/SHA-256 widths. Part18 invokes the aggregate hardening,
+  ref/object-format, and candidate-size tests. Shard structure passes at 18
+  shards, 6,948 lines, 1,237 assertions, aggregate SHA-256
+  `7f27055731558879137898c74b345184104470180c9fd8bb964581406d70bd6c`.
+- Expected adversarial Git stderr for malformed packed refs, shallow state, and
+  corrupt objects remains part of the failure-closure fixtures; it is not a
+  suite failure. Final gates are green: 14 syntax checks; RDD plus FoundUp in
+  15.257 s; four backend compatibility/runtime-WSP_62 companions in 56.802 s;
+  canonical manifest parity at 1,360 files and digest
+  `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`;
+  and final exhaustive validation in 309.251 s, including repair evidence, judgment
+  verification, split aggregate, SHA matrix, and candidate proof.
+  (WSP 00/15/22/34/50/62/87/97)
+
+## 2026-08-18 - R9 authority receipt and shared-store isolation
+
+- Required RED: safe sibling Git activity left linked `HEAD_SHA` and
+  `TRACKED_PATHS` unchanged but the recursive common-store receipt invalidated
+  both outputs. The focused suite separately proved the prior unrelated loose-
+  object hardlink assertion encoded global hygiene rather than output safety.
+- Added real linked fixtures for safe sibling/main index/HEAD/config.worktree,
+  unrelated object/ref/replacement/ref-pack churn and snapshot survival. An
+  objects/refs `opendirSync` tripwire enforces non-recursive ordinary receipts.
+- Added fail-closed current symbolic/detached/packed/loose ref, authority index,
+  relevant common/authority control, A/B output, second-pass error, topology,
+  alternate/graft/refStorage, relevant-link, and required-object regressions.
+  Existing R8 absence/mutation, no-write, safe.directory, replacement-disable,
+  unborn, projection race, and output-shape contracts remain active.
+- Repair-loop RED proved the old unbounded `readFileSync(fd)` accepted more
+  than an 8-byte opened control after deterministic >1 MiB growth, even though
+  the later receipt rejected it. Added exact requested/accepted byte bounds,
+  incomplete-read, and path-substitution regressions. The implementation now
+  allocates only the capped opened size, reads explicit remaining lengths, and
+  avoids a binary-index UTF-8 copy.
+- Added the exact malformed-packed-ref boundary: unrelated malformed lines are
+  outside narrow receipt parsing, while `HEAD_SHA` fails the whole named batch
+  when Git rejects the packed storage. No global all-ref validation is claimed.
+- Loop2 public-API REDs add nested common-directory confinement, exact supported
+  heads grammar, and malformed-current packed classification. The focused RED
+  reported all three vulnerabilities before production edits. Post-change
+  focused hardening is **PASS** in 80.2 seconds and exhaustive validation is
+  **PASS** in 275.644 seconds, including RDD and the former FWG-006 point.
+- Loop3 pre-fix RED executed every no-follow presence site and reported all as
+  vulnerable, including direct/linked final and intermediate current-ref paths.
+  Added public green requirements for exact absent/present/error classification,
+  non-ENOENT failure closure, true-absent empty/unborn behavior, required
+  `refs/heads`, and no-enumeration parent validation. Post-change focused
+  hardening is **PASS** in 84.898 seconds and exhaustive validation is **PASS**
+  in 279.575 seconds; loop2 timings above are historical evidence only.
+- The three stale
+  whole-store source assertions were replaced without changing 18 shards,
+  6,944 source lines; source-shape assertions remain 1,236. Direct RDD plus
+  FoundUp grounding are **PASS** in 12.830 seconds; backend compatibility/
+  WSP_62 is **PASS** in 40.710 seconds; manifest parity is **PASS** at 1,360 files
+  and digest `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`.
+- Acceptance-worktree performance: 30 receipts averaged 15.248 ms (17.161 ms
+  p95); three twice-executed authority quartets plus final receipt averaged
+  1,118.705 ms. These measurements are evidence, not a fixed timing contract.
+- The test contract explicitly does not claim global unrelated-store hygiene,
+  continuous ABA detection, or transactionally enclosed FoundUp registry/
+  schema byte reads. Those are separate concerns, not weakened assertions.
+
+## 2026-08-18 - R8 optional worktree-config absence and acceptance boundary
+
+- RED: both ordinary and linked repositories with worktree config enabled but
+  the optional file absent failed as `git_configuration_unreadable`.
+- Added focused fixtures requiring immutable `worktree_config_state=absent`,
+  available `HEAD_SHA`/`TRACKED_PATHS`, READY readiness, no file creation, and
+  `config_write_performed=false`. A mid-batch file creation must return only
+  `Git storage changed during batch`.
+- Focused hardening **PASS** in 65.266 seconds; syntax, direct offline RDD
+  (16.006 seconds), and 18-shard/6,944-line/1,230-assertion integrity checks are
+  **PASS**. Backend compatibility/preflight is **PASS** in 48.379 seconds, and
+  canonical manifest `--check` remains **PASS** at 1,360 runtime files with
+  digest `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`.
+- The unchanged exhaustive runner is **BLOCKED**, not PASS: it reaches FWG-006
+  after RDD and both bridge end-to-end checks. UNI-001 intentionally emits the
+  nearby surrogate `UnicodeEncodeError`; a fresh process instead isolated the
+  failure to whole-common-store fingerprint churn during the FoundUp
+  four-command linked-worktree authority batch. This is recorded for the next
+  tests-first P0 and is not masked by this optional-config test layer.
+- No exhaustive shard changed, and the JavaScript-only delta is outside the
+  authenticated Python backend manifest closure.
+
 ## 2026-08-16 - Maintenance backend closure refresh
 
 - Revalidated canonical manifest generation, digest pinning, runtime closure,

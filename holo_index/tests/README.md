@@ -1,9 +1,32 @@
 # HoloIndex Tests
 
+## Closed command-import regression
+
+`test_reddog_extension_bundle_recall.py` starts a `-S -B` child and imports the
+bundle command from the repository alone. The owner-script suite repeats that
+proof across the exact `scripts.reddog_holoindex_owner_query_once` entrypoint
+and additionally excludes ChromaDB and NumPy. RedDog's bounded direct-read path
+therefore cannot silently inherit semantic/vector dependencies.
+
+## Existing maintenance-sentinel lease
+
+Freshness-receipt tests cover the noncreating retained lease used by RedDog
+query-replica materialization. Tests operate only on temporary sentinels and
+prove exact bytes/identity plus cross-contender exclusion; they never access a
+live Holo store.
+
 ## Test Strategy (WSP 34)
 - Focus on intent routing, output composition, and HoloDAE orchestration behavior.
 - Keep unit tests deterministic; avoid external model/network dependencies.
 - Integration tests run only when model assets are available and explicitly enabled.
+
+### Query replica boundary
+
+Materializer tests live with the owning bridge at
+`modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica.py`.
+They use synthetic vector/model trees and prove canonical bytes unchanged.
+They also prove failed replica objects are quarantined without deletion. Holo
+tests must not infer owner routing or live-store acceptance from them.
 
 ## How to Run
 - Unit tests: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest holo_index/tests`
@@ -23,13 +46,32 @@ The WSP 62 check is not an exemption: it requires `search_engine.py < 1500`,
 `_search_collection <= 50`, and every function in the two new extraction
 helpers to remain `<= 50` lines.
 
+`test_module_intent_snapshot.py` proves shell-free HEAD pinning, deterministic
+ordering, final-NUL framing, all-record normalized paths, exact depth-three
+filtering, duplicate-basename ambiguity, 4,096/4,097 caps, platform-aware
+locked cache bounds, full-path independence, and fail-closed nonzero/timeout/
+malformed/control/oversize behavior. Unicode coverage rejects `Cc`/`Cf`/`Cs`
+on deeper records and NFC/NFD-equivalent duplicates while retaining visible
+accented letters and non-ASCII symbols. Its K=1/12/20 falsifier varies returned
+context for the exact Group-A audit query while holding the HEAD catalog fixed.
+Strict catalog failure is explicit; non-strict failure passes an empty registry
+and cannot fall back to vector-hit singularity.
+`test_machine_spec_contract.py` binds canonical nullable
+`tier0_module_target` metadata and rejects noncanonical target paths.
+
 ```powershell
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'
 python -m pytest `
   holo_index/tests/test_tier0_retrieval_hardening.py `
+  holo_index/tests/test_module_intent_snapshot.py `
+  holo_index/tests/test_machine_spec_contract.py `
+  modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service.py `
   modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_edges.py `
+  scripts/tests/test_reddog_holoindex_owner_query_once.py `
   -q
 ```
+
+The exact command above passed 278 tests in 4.00 s on the R3 candidate.
 
 ## Test Data
 - Synthetic fixtures are preferred to keep tests fast and reproducible.

@@ -1,5 +1,155 @@
 # HoloIndex Package ModLog
 
+## [2026-08-21] Closed command-import boundary for RedDog
+
+- Removed the eager full-CLI import from `holo_index.cli` while retaining its
+  compatible public exports through deferred loading. Bounded bundle/direct-read
+  imports no longer require ChromaDB or NumPy in RedDog's sealed child runtime.
+- Added a `-S -B` subprocess regression that proves command import does not load
+  `_cli_main` or the vector backend. No dependency, storage, owner, maintenance,
+  reindex, model, or network authority was widened. (WSP 00/15/22/50/62/97)
+
+## [2026-08-20] RedDog integration of module intent and isolated runtime proof
+
+- Integrated generation-stable `tier0_module_target`, exact Tier-0 metadata
+  injection, stable producer error codes, isolated collection verification,
+  and process-image capability proof without querying or mutating the Holo
+  store.
+- The reproducible six-file package selection is **233 passed / 1 platform
+  skip**; the earlier 237/1 aggregate had no recorded selection and is
+  superseded. The exact command is recorded in `tests/TESTModLog.md`. Current
+  main's JSON-only maintenance CLI output remains byte-identical and covered.
+  (WSP 00/6/15/22/34/50/97)
+
+## [2026-08-17] R15 bridge Windows copy preservation alignment
+
+- Independent review found the bridge's failed Windows model copy still used
+  FileDisposition deletion. Those APIs are removed; partial output survives
+  handle closure and is quarantined with the query staging root.
+- Holo core and canonical storage were not changed or accessed. Owner routing,
+  live acceptance, and orphan disposition remain missing.
+
+## [2026-08-17] R14 bridge no-delete quarantine alignment
+
+- Independent review found the R13 bridge rollback could delete same-inode,
+  same-size content mutated after proof. The bridge now preserves failed active,
+  publication-temp, and staging names through atomic no-replace quarantine.
+- Holo core and canonical storage were not changed or accessed. Owner routing,
+  live acceptance, and governed orphan retention/deletion remain missing.
+
+## [2026-08-17] R13 noncreating retained-sentinel authority
+
+- Independent RedDog replica verification disproved point probes across active
+  publication. `maintenance_lock.py` now provides a noncreating acquisition for
+  an exact existing regular non-link/reparse sentinel, retains the platform
+  byte-range/flock exclusion, and revalidates path/descriptor identity plus
+  exact bytes before release. It never creates or rewrites the sentinel.
+- The bridge acquires authority-update then maintenance order and keeps both
+  through final active validation. Canonical vector/model/receipt bytes remain
+  read only. No live Holo, E-drive, maintenance, reindex, or publication ran.
+
+## [2026-08-17] Query-replica materialization contract attached
+
+- Attached Holo storage truth to the bridge-owned
+  `holoindex_query_replica.v1` Phase-1 candidate: exact full vector tree,
+  selected complete model snapshot, canonical receipt/generation binding, and
+  both retained read-only leases. Holo core was not changed and still requires an
+  explicitly supplied storage root.
+- Holo retrieval remained degraded/quarantined; only bounded filesystem/Git
+  evidence and synthetic fixtures were used. No live query, owner, maintenance,
+  reindex, model, canonical-store, commit, push, or promotion effect occurred.
+  Owner routing and retention remain missing.
+
+## [2026-08-17] R11 retained executable capability
+
+- Independent review proved R10 closed its validation descriptor before the
+  isolated runner, leaving path replacement possible. The runtime-bound probe
+  now retains a fresh verified process-image capability through runner return or
+  exception. Windows launches the exact path while the handle denies mutation;
+  Linux launches the retained object via `/proc/self/fd/<fd>` and `pass_fds`.
+- Exact acceptance is **146 collected = 143 passed / 3 explicit symlink skips**;
+  an actual child-launch smoke and all six manifest-generator tests passed. The
+  184-second broad bridge timeout was not rerun. Holo remained quarantined; no
+  live query, owner, maintenance, reindex, MCP, model, or store effect ran.
+
+## [2026-08-17] R10 Windows executable path-case correction
+
+- Corrected the isolated snapshot child boundary so a Windows case-only parent
+  or leaf alias cannot pass merely by naming the same file identity. A
+  point-in-time descriptor's case-preserving final path must match all non-anchor
+  components; R11 later retains a fresh descriptor across the runner call.
+- Exact acceptance evidence is **141 collected = 138 passed / 3 explicit
+  symlink-capability skips**. No Holo query, owner, maintenance, reindex, MCP,
+  model, canonical-store, or live acceptance operation ran. Independent
+  promotion verification remains pending.
+
+## [2026-08-17] Snapshot process-image authority hardening
+
+- Replaced mutable Python executable selection with an in-memory OS-derived
+  process-image proof supplied by validated acceptance runtime admission and
+  re-proved immediately before the isolated child spawn.
+- The existing shared environment scrubber now removes `PYTHONINSPECT`; source,
+  dependency, generation, version, and no-retry contracts remain unchanged.
+- Bounded closure passed three 87/2 hostile runs, the 271/2 adjacent tier, the
+  136/3 adversary/runtime/sanitizer tier, and the exact 41-test metadata tier.
+  Registry is current at 1,524/265; the 1,346-file manifest digest is
+  `4de0e76a29dfc8d5338ee0c88251f3deb7af2820ca07afd4832655920045a663`.
+  Fast Node contract/preflight/async passed; exhaustive shards and live
+  acceptance were not run or claimed.
+
+## [2026-08-17] Isolated snapshot trusted-runtime binding
+
+- The snapshot subprocess now accepts exactly one validated checkout-local
+  `.venv/Lib/site-packages`, starts from the resolved base interpreter with
+  `-S -B`, and receives a scrubbed offline environment with exact `PYTHONPATH`.
+- Before opening ChromaDB it proves candidate source origin, ChromaDB 1.5.5
+  origin under that runtime, and the supported version. Known dependency/source
+  failures remain generation-bound typed errors; unexpected output still fails
+  closed as `SEMANTIC_STORE_RECEIPT_INVALID` at the acceptance boundary.
+
+## [2026-08-16] K-invariant Tier-0 intent and diagnostic repair
+
+- Reproduced the clean `03c332294...` low-K canary as CURRENT (receipt
+  `sha256:89fe9bb9d58e026b27f72dd656ff72bdfeaf7b8ec41baabdf6e09acdbb2d0440`,
+  15.4 s wrapper wall) and the exact Group-A K12 failure as
+  `SEMANTIC_BACKEND_UNAVAILABLE` after retry (receipt
+  `sha256:9deb6e1bd76e2f6c3f110b4105de286857a795916536a80348004914f4496293`,
+  26.1 s wrapper wall). This candidate makes no live-CURRENT claim.
+- Added a bounded Git HEAD catalog (`ls-tree`, no shell/filesystem walk), keyed
+  by platform-normalized root+HEAD. Its cache operations are locked without
+  holding the lock over Git; duplicate concurrent cold reads are allowed and
+  the final cache is capped at eight generations. The exact authority tree has
+  1,265 records/145,619 bytes/168 roots; the final paired probe measured
+  122.645 ms cold and 42.043 ms warm. Other caps: 5 s, 1 MiB, 4,096 roots.
+- The parser now requires a nonempty final-NUL stream and validates every
+  record's UTF-8, mode/type/object ID, modules-only normalized path, and
+  exact/NFC-normalized casefold uniqueness before depth filtering.
+  Missing/double NUL, invalid UTF-8, traversal, empty components, backslashes,
+  Unicode `Cc`/`Cf`/`Cs`, out-of-scope paths, and canonically equivalent
+  duplicate deeper records fail closed; visible Unicode letters/symbols and
+  valid ancestors/deeper paths retain their original spelling.
+- Added canonical nullable `tier0_module_target` producer attestation. Owner
+  reservation requires target/query/exact-pair agreement; absent, unrelated,
+  ambiguous, multi-module, partial, mixed, duplicate, and forged claims keep
+  global scoring. Stable producer errors retain exact redaction/retry/HTTP.
+- R3 Unicode RED was 8 failed/39 passed in 1.47 s; isolated GREEN was 47
+  passed in 1.47 s. The exact six-file focused command, including
+  `test_machine_spec_contract.py`, passed 278 in 4.00 s; the exact 13-file
+  adjacent command passed 356/1 optional skip in 11.21 s. Exact supervisor
+  no-growth passed 1 in 1.25 s.
+- Registry write/write/check took 7.231/7.222/7.355 s at 1,517 tests/265
+  quarantined with SHA-256 `0510244d701c7df08562852f02c76cdda1fccae6eb34fb387cd096aba375c675`.
+  Manifest write/write/check took 9.581/9.613/9.761 s at 1,337 runtime files;
+  canonical digest is `8e2680eb6075c56f1528a0cbdf2f08b44076cf8c814cec0f45c5a997df723ac9`
+  and file SHA-256 is `b6910e4891b6b9008dd4d06699c209f5eddf5cff461a7aa2281618ffd5a95a41`.
+- WSP 62: infrastructure 600 is advisory and default Python hard is 1,500.
+  `search_engine.py` is 1,424 lines (<1,500); inherited `execute_search` is
+  unchanged at 216 lines. Supervisor is base/candidate 688/688, `start` 50,
+  class 200. New/touched extracted helpers are <=50 lines. No exemption or
+  ceiling increase was added. (WSP 15/22/50/62/84/87/97)
+- No reindex, owner restart, exhaustive aggregate, or live owner acceptance was
+  performed; committed exact-SHA maintenance/publication remains deferred.
+
 ## [2026-08-16] Final maintenance publication clean-state proof
 
 - Added a clean exact-HEAD proof immediately before completed receipt write,

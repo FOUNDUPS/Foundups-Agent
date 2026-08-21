@@ -1,12 +1,83 @@
 # RedDog Extension Tests
 
+## 0.4.102 upstream worker provenance
+
+The packaged backend manifest and documentation contracts pin current Hermes
+native leaf delegation and OpenClaw `2026.7.1-2` provider behavior. The
+extension itself remains a thin client and does not receive upstream secrets,
+worker shell authority, repository write authority, or publish/merge authority.
+
+`test_governed_git_environment.js` is the focused least-privilege contract for
+every production governed-Git subprocess. It supplies unrelated/provider/
+GitHub/AWS/generic credentials, Python/Node/loader injection, SSH-agent/config,
+ambient Git, home/profile, virtual-environment, and arbitrary caller fields;
+none may cross. Platform launch/temp/locale preservation, exact fixed Git
+controls, fresh-object/non-alias behavior, caller-override denial, captured
+real Git child options, and an executed Node preload non-execution probe are
+pinned. Git is resolved lexically once, bound by canonical identity/size/hash
+and platform signature policy, invoked only by that absolute path, and
+revalidated before release. PATH/Path/PATHEXT are absent from each Git child.
+Public-receipt tests separately prove readiness, projection, repository-state
+v2, and Python-bound serialization contain no absolute Git or PowerShell path.
+The Python matrix rejects recomputed bodies with incomplete identity/signature
+shape and accepts the complete live JS digest-only projection.
+
 ## Test strategy
 
 Contract tests run **without OpenRouter, Cursor UI, or live bridge calls**. They validate extension source shape, exported helpers, bounded-context assembly, and Copy MD schema.
 
+The candidate WSP_62 proof includes each Holo async-lifecycle file introduced
+or changed by the current extraction: the generation facade, bundle projection,
+interpreter provenance, owner runtime, incident repair, and both focused async
+tests. Each is at most 400 physical lines and every detected JavaScript
+function is at most 30 lines. The gate also proves its declared audit set is
+exactly equal to Git's complete changed/new RedDog JavaScript surface; existing
+over-limit functions may only remain when the exact named/ordered baseline
+function did not grow. The former 475-line Start Operations test is now below
+400 content lines with cohesive fixtures in a 91-line helper. Package tests
+require the exact 65-file surface (61 runtime files and four public files),
+including license text canonically matching the repository authority.
+
 **Reuse rule (WSP 50):** Before adding tests, read `fixtures.js`, `TestModLog.md` TEST_REGISTRY, and `verify_extension_contract.js`. Extend existing fixtures and assertions; do not duplicate prompt strings or EXT-ACC probes.
 
 ## How to run
+
+Canonical package tiers from `extensions/reddog`:
+
+```powershell
+npm test                    # bounded fast developer tier
+npm run test:contract       # plan and shard authentication
+npm run test:release        # exact exhaustive promotion closure
+```
+
+The release command is the legacy `node tests/verify_extension_contract.js`
+entry. It authenticates the unchanged 18-shard aggregate and exactly five tail
+members before starting four process-isolated groups. Worker cap 4, child
+timeout 400 seconds, per-stream output cap 2 MiB, and the unchanged total
+release ceiling of 420 seconds are fixed in `reddog_test_plan.js`. Output is
+buffered and printed in plan order with group timings and a slowest-group
+receipt; any missing/duplicate member, exit, signal, timeout, or overflow fails.
+Canonical promotion never accepts group selection from ambient environment.
+Only the dedicated internal worker accepts exact parent argv plus a fresh nonce.
+The parent wall deadline is measured from command start; child/release timeout,
+termination failure, and unconfirmed termination are explicit permanent failure
+fields. Graceful then forced process-tree termination and bounded handle release
+prevent a non-closing child from extending the owner indefinitely.
+Windows taskkill launch is itself observed: exact absolute executable path,
+fixed PID argv, and `shell: false` are pinned, while async launch error, nonzero
+exit, or a 750-millisecond attempt timeout becomes explicit termination failure.
+The repository contains no standalone shard generator. The checked-in
+authenticated loader, shard manifest, exact ordered reconstruction, hashes,
+line ranges, and assertion-count contract are the generation truth.
+The suite covers both graceful and force attempts, late error idempotence,
+listener/timer cleanup, invalid `SystemRoot`, and unchanged POSIX group signals.
+The aligned loop-3 hostile-selector promotion passed in 274.537 seconds wall
+time (owner 273.762 seconds), with all four timeout/termination fields false.
+The fast tier is the CI/default inner loop and never expands to promotion.
+The first aligned complete promotion passed in 295.928 seconds; core was the
+slowest group at 295.219 seconds and total headroom was 124.072 seconds (29.5%).
+A repeat passed in 266.709 seconds; acceptance uses the slower run.
+A hostile ambient-selector repair run passed all four groups in 279.723 seconds.
 
 From repo root:
 
@@ -15,12 +86,23 @@ node --check extensions/reddog/extension.js
 node extensions/reddog/tests/verify_fusion_panel_input_contract.js
 node extensions/reddog/tests/test_foundup_work_grounding.js
 node extensions/reddog/tests/test_backend_compatibility_preflight.js
+node extensions/reddog/tests/test_package_manifest.js
+cd extensions/reddog && npm run test:package
 pytest -q scripts/tests/test_generate_reddog_backend_manifest.py
 node extensions/reddog/tests/verify_repo_audit_grounding.js
+node extensions/reddog/tests/governed_git_projection_contracts.js
+node extensions/reddog/tests/governed_git_projection_race_contracts.js
+node extensions/reddog/tests/governed_git_storage_contracts.js
+node extensions/reddog/tests/governed_git_ref_contracts.js
+node extensions/reddog/tests/governed_git_authority_contracts.js
+node extensions/reddog/tests/test_governed_git_ref_formats.js
 node extensions/reddog/tests/test_governed_git_context_hardening.js
+node extensions/reddog/tests/test_reddog_candidate_wsp62.js
 node extensions/reddog/tests/test_extension_contract_shards.js
 node extensions/reddog/tests/verify_extension_contract.js
 node extensions/reddog/tests/test_start_operations_control.js
+node extensions/reddog/tests/test_bridge_python_environment.js
+node extensions/reddog/tests/test_holoindex_async_bridge.js
 node extensions/reddog/tests/test_holoindex_incident_repair.js
 node extensions/reddog/tests/test_orchestration_prompt_trace.js
 node extensions/reddog/tests/test_conversation_history_policy.js
@@ -31,7 +113,22 @@ git diff --check -- extensions/reddog
 ```
 
 `test_governed_git_context_hardening.js` includes deterministic snapshot races
-and R6 factory/order isolation. R7 adds real Windows case-alias index coverage,
+and R6 factory/order isolation through cohesive projection, stable-I/O,
+topology/ref, and authority/readiness modules. The original path is the
+deterministic aggregate orchestrator; every split module is also directly
+runnable. `test_governed_git_ref_formats.js` differentially proves public Git
+acceptance for Unicode and `+` branch names, requested invalid-name rejection,
+and SHA-1/SHA-256 direct/linked loose, packed, detached, malformed, and mixed-
+length behavior. The SHA-256 matrix includes canonical, quoted, hash-comment,
+and semicolon-comment config forms accepted by Git. The receipt is structural
+only: exact 40/64 hex and config-byte binding. Cross-format shapes must fail
+all named outputs and projections through Git's `HEAD^{commit}` semantics;
+readiness may remain structurally READY and does not assert command success.
+`test_reddog_candidate_wsp62.js` is the separate candidate file/function/doc
+size proof; it does not replace the backend runtime WSP_62 gate or claim
+repository-wide compliance.
+
+R7 adds real Windows case-alias index coverage,
 platform-aware ignored exact/prefix/separator intersections, NFC aliases,
 canonical full-path uniqueness, and hardlink/reparse preservation. On Linux it
 proves case-distinct paths and ignored names remain distinct. The focused Fusion
@@ -41,6 +138,61 @@ under interleaving, the canonical default remains output-equivalent before and
 after custom construction, invalid construction fails closed, and no protected
 read follows the final Git proof. A Git-control mutation during the third
 capture must be caught by that later proof.
+
+R9 loop 6 extends the projection identity/race modules with no-follow deletion
+admission and exact-size fd-read contracts. It covers ordinary nested tracked
+deletion; dangling final and interposed parent links/junctions; non-directory
+parents; lookup errors; absent untracked records; parent substitution between
+component checks; read growth from 8 to 2,101,256 bytes; incomplete-short,
+zero, truncating, and replacement reads; and the 0/2-MiB/2-MiB-plus-one file
+boundaries. No fixture writes outside its registered temporary roots.
+
+R9 loop 7 adds the missing lstat-to-open boundary. Deterministic pre-open
+growth and same-size replacement must fail before any target allocation or fd
+read. Synthetic negative, fractional, non-safe, and cap-exceeding opened sizes
+must also fail before allocation; zero, exact-cap, and the loop-6 post-open
+growth/short/zero/truncate cases remain active.
+
+R8 adds ordinary-repository and real linked-worktree fixtures with
+`extensions.worktreeConfig=true` and an absent optional `config.worktree`.
+They require a frozen `absent` receipt, READY named output, no config creation,
+and `config_write_performed=false`; a deterministic absent-to-present mutation
+during a named batch must fail every output closed. At R8 those focused
+contracts did not resolve shared-store concurrency and exhaustive FWG-006
+remained blocked; R9 below supersedes that historical boundary.
+
+R9 replaces that blocker with authority-scoped receipts and exact A/B command
+replay. The focused suite proves safe sibling commits, unrelated objects/refs/
+replacement refs, unrelated packing, and main-worktree-only controls do not
+invalidate an unchanged linked authority. Separate fail-closed fixtures cover
+current symbolic/detached/packed/loose refs, authority index, relevant config/
+shallow/info controls, second-pass error/output drift, topology forgery,
+alternates/grafts/refStorage, relevant links, and missing/corrupt required HEAD
+objects. An `opendirSync` tripwire proves ordinary receipts do not recursively
+walk shared objects/refs. This is not a global repository-hygiene audit and does
+not claim continuous ABA detection. Repair-loop fixtures grow an 8-byte control
+beyond its 1 MiB cap at the fd-read boundary and require explicit cumulative
+read lengths/accepted bytes to remain within the opened size; incomplete reads
+and candidate-path substitution must also fail. A separate packed-ref fixture
+pins the narrow boundary: malformed unrelated entries are not globally linted
+by the receipt, but `HEAD_SHA` fails the entire named batch when Git authority
+resolution rejects that storage.
+
+Loop2 adds public-receipt and named-output fixtures for direct/linked external
+`info` or `objects/info` junctions, required-directory absence/non-directory
+states, and path substitution during a single receipt. It pins accepted and
+rejected per-component `refs/heads/*` grammar, then distinguishes true absent
+packed current refs from duplicate, malformed-OID, noncanonical-whitespace,
+extra-token, and branch-peeling current records. Safe sibling churn and the
+non-recursive shared-store tripwire remain active.
+
+Loop3 exercises the centralized no-follow entry-state boundary through public
+receipts and named outputs. Dangling forbidden/optional controls,
+`plainControlFile`, direct `commondir`, root `.git`, direct/linked final current
+refs, direct/linked intermediate parents, missing `refs/heads`, and synthetic
+non-ENOENT lookup errors must fail closed. True absent root `.git` remains the
+only empty-repository case, and true absent deeper ref parents retain unborn
+semantics. These fixtures do not enumerate refs or shared object entries.
 
 The suite also includes deterministic snapshot races
 before the first content command, between commands, and immediately before the
@@ -70,12 +222,17 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_backend_compatibility_preflight.js` | Pinned manifest, runtime dependency-closure integrity, intermediate junction rejection, WSP_62 ceilings, canonical containment, and content-free failure contracts |
 | `test_backend_compatibility_contract.js` | Independent executable roots, closure sentinels, pinned digest, runtime gate ordering, and allowlisted block projection |
 | `test_backend_compatibility_async.js` | Worker-thread preflight, event-loop availability, and fail-closed invalid-root behavior |
+| `test_package_manifest.js` | Static VS Code capability, publisher/version/main/activation, exact ignore policy, and complete 58-file runtime closure |
+| `test_package_surface.js` | Two stable installed-VSCE listings equal the exact 65-file distributable surface and its raw regular-file closure stays within 1 MiB; release/package tier only |
+| `reddog_package_surface_contract.js` | Pinned runtime/package sets, static relative-require traversal, dynamic-worker roots, and shell-free installed-VSCE adapter |
 | `test_authoritative_work_state_query.js` | Local authoritative-work classification, bridge failure handling, and no-Fusion routing |
 | `test_foundup_work_grounding.js` | Canonical registry identity resolution, evidence derivation, runtime binding, WSP 62, failure closure, and non-authority receipt |
 | `test_principal_memex_disclosure_source.js` | Exact disclosure shape, one-use SecretStorage deletion, malformed-source rejection, and no packet retention |
 | `scripts/tests/test_generate_reddog_backend_manifest.py` | Package-initializer resolution, executable roots, dynamic-load sentinels, and checked-in generator parity |
 | `test_start_operations_control.js` | Cross-language receipt parity, request replay, cumulative output, environment allowlist, and durable intent controls |
-| `test_holoindex_incident_repair.js` | Exhausted-owner and stale-authority admission, bounded bridge execution, WRE repair telemetry, version wiring, and no direct model binding |
+| `test_bridge_python_environment.js` | Closed Python-bridge profiles, live Holo bundle/fallback leakage and alias/mutation probes, the local-Holo per-user-package compatibility exception, OS/runtime preservation, provider/Holo/resident credential isolation, ambient-secret/Python-injection exclusion, empty/fresh input behavior, and exact extension wiring |
+| `test_holoindex_async_bridge.js` | Non-blocking owner bridge, request/webview child ownership, disposal cancellation, stdin/EPIPE teardown, late-callback idempotence, and worker-thread descriptor/stat/SHA proof for a hostile large configured interpreter |
+| `test_holoindex_incident_repair.js` | Exhausted-owner and stale-authority admission, non-blocking 90-second repair bridge, request-owned disposal cancellation, stdin/EPIPE/timeout/late-callback closure, WRE repair telemetry, version wiring, and no direct model binding |
 | `test_orchestration_prompt_trace.js` | Content-free pre-gate policy trace, exact task-prompt gate confirmation, composite/context exclusion, blocked-run non-disclosure, and Markdown-safe export |
 | `test_conversation_history_policy.js` | Raw-history denial, setting-sensitive prompt policy keys, provider-history discard, non-authority telemetry, and extension wiring |
 | `test_conversation_session_authority_source.js` | SecretStorage credential handling, narrow child environment, no ambient-secret crossover, and fail-closed credential shape |
@@ -84,7 +241,9 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_extension_contract_shards.js` | Fast reconstruction, no-loss, syntax, ordering, uniqueness, and line-ceiling regression |
 | `test_grounding_failure_dialogue.js` | Conversation-only failure receipt, queued-recovery deterministic status, tri-state recall, sanitization, no-evidence/no-authority binding, bridge-failure fallback |
 | `verify_repo_audit_grounding.js` | Focused alias, receipt, protected-context non-vacuity, local block, repair-provenance, and defensive-prompt contracts |
-| `test_governed_git_context_hardening.js` | Temp-only named atomic Git batch, captured-byte projection receipt, ignored exclusion, loose-object cache, Git control-file, and ownership hardening |
+| `test_governed_git_context_hardening.js` | Temp-only A/B named Git batch, authority-scoped receipt, length-bounded stable controls, linked shared-store isolation, captured-byte projection, relevant-control/object failure, ignored exclusion, and ownership hardening |
+| `test_governed_git_executable.js` | Lexical PATH/PATHEXT selection, exact file identity/hash, link/reparse denial, hardlink acceptance, signature policy, replacement rejection, absolute invocation, and closed child environment |
+| `test_governed_git_production_scan.js` | Static proof that RedDog production JS/Python contains no ambient bare-Git subprocess call |
 
 ## TEST_REGISTRY
 

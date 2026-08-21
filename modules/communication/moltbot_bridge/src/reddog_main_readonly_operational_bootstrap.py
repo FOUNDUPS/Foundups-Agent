@@ -159,6 +159,7 @@ def run_reddog_main_readonly_operational_bootstrap(
     prompt_text: str = "main.py read-only RedDog operational bootstrap",
     now_iso: str | None = None,
     repo_state_override: Mapping[str, Any] | None = None,
+    repo_state_receipt: Mapping[str, Any] | None = None,
     work_state_snapshot_override: Mapping[str, Any] | None = None,
     holoindex_receipt_override: HoloIndexFreshnessReceipt | Mapping[str, Any] | None = None,
     breadcrumbs: Sequence[Mapping[str, Any]] = (),
@@ -269,7 +270,9 @@ def run_reddog_main_readonly_operational_bootstrap(
         )
 
     assert work_state_snapshot is not None
-    repo_state = dict(repo_state_override) if repo_state_override is not None else observe_repo_state(root)
+    repo_state = dict(repo_state_override) if repo_state_override is not None else observe_repo_state(
+        root, repo_state_receipt
+    )
     snapshot_result = build_operational_context_snapshot(
         repo_state=repo_state,
         work_state_snapshot=work_state_snapshot,

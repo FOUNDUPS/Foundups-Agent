@@ -44,6 +44,8 @@ KIMI_PANEL_MODEL = "moonshotai/kimi-k3"
 # Historical constant name retained because the extension contract inspects the
 # bridge as text. The K3 budget applies to every direct completion role.
 KIMI_K3_PANEL_MAX_TOKENS = 4096
+MAX_COMPLETION_BUDGET = 131072
+_MISSING_COMPLETION_BUDGET = object()
 DEFAULT_LEAD_MODEL = GLM_PRINCIPAL_MODEL
 DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, KIMI_CODE_PANEL_MODEL, KIMI_PANEL_MODEL)
 MAX_PANEL_MODELS = 6
@@ -315,6 +317,21 @@ def _effective_max_tokens(model: str, requested_max_tokens: int) -> int:
     if model == KIMI_PANEL_MODEL:
         return max(requested_max_tokens, KIMI_K3_PANEL_MAX_TOKENS)
     return requested_max_tokens
+
+
+def _completion_budget(payload: dict[str, Any], default: int) -> int:
+    """Preserve one valid request budget or fail closed on malformed input."""
+
+    value = payload.get("max_tokens", _MISSING_COMPLETION_BUDGET)
+    if value is _MISSING_COMPLETION_BUDGET:
+        return default
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, int)
+        or not 1 <= value <= MAX_COMPLETION_BUDGET
+    ):
+        raise ValueError("invalid_max_tokens")
+    return value
 
 
 def _fusion_token_budgets(
@@ -807,7 +824,7 @@ def _run_foundups_fusion_core(
     payload: dict[str, Any],
 ) -> dict[str, Any]:
     timeout = _bounded_int(payload.get("timeout"), 75, 1, 180)
-    max_tokens = _bounded_int(payload.get("max_tokens"), 1600, 256, 4096)
+    max_tokens = _completion_budget(payload, 1600)
     temperature = _bounded_temperature(payload.get("temperature"), 0.2)
     lead_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
     panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
@@ -1180,6 +1197,10 @@ def main() -> int:
         return _json_result(**{**result, **audit_telemetry, **redaction_telemetry})
 
     if payload.get("mode") == "foundups_fusion":
+        try:
+            model_payload["max_tokens"] = _completion_budget(payload, 1600)
+        except ValueError:
+            return _json_result(ok=False, reason="invalid_max_tokens")
         result = _run_foundups_fusion(api_key, redacted_user_message, history, model_payload)
         result.update(_task_prompt_confirmation(gate.redacted_prompt, successful=result.get("ok") is True))
         if bridge_meta:
@@ -1197,7 +1218,10 @@ def main() -> int:
             **_task_prompt_confirmation(gate.redacted_prompt, successful=False),
         )
 
-    max_tokens = _bounded_int(payload.get("max_tokens"), 2048, 1, 4096)
+    try:
+        max_tokens = _completion_budget(payload, 2048)
+    except ValueError:
+        return _json_result(ok=False, reason="invalid_max_tokens")
     effective_max_tokens = _effective_max_tokens(model, max_tokens)
     temperature = _bounded_temperature(payload.get("temperature"), 0.2)
     timeout = _bounded_int(payload.get("timeout"), 60, 1, 120)

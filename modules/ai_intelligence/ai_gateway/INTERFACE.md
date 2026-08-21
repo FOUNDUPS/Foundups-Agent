@@ -20,6 +20,13 @@ get_usage_stats() -> Dict[str, Any]
 get_available_providers() -> List[str]
 ```
 
+**Exact OpenRouter Kimi K3 boundary:** `_call_openai(...)` recognizes only the
+pair `openrouter` / `moonshotai/kimi-k3`. Its effective completion budget is
+`max(resolved_request, 4096)` within the inclusive range `1..131072`; requests
+above that endpoint-fixture limit fail before transport. Explicit input takes
+precedence over provider environment configuration. The wire request forces
+reasoning effort `max` and omits temperature. Non-K3 routes are unchanged.
+
 #### `GatewayResult`
 Data class containing AI call results.
 

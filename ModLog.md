@@ -1,5 +1,147 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-21] RedDog 0.4.102 Native Worker Integration Candidate
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 87, 97
+
+- Reconciled 219 RedDog/Holo/MCP paths from the original candidate index with
+  16 final Hermes/OpenClaw, package-license, and audit paths. The resulting
+  235-path snapshot is one atomic integration contract; two independent
+  `ric_dae` documentation repairs remain outside this squash.
+- Replaced name-only worker scaffolding claims with bounded live proofs against
+  Hermes Agent API runtime 0.20.4 (`v2026.8.18`) and OpenClaw `2026.7.1-2`.
+  Hermes uses the upstream native `delegation` toolset and one leaf
+  `delegate_task`; OpenClaw uses its confined Gateway agent. Both GotJunk
+  canaries returned in-memory artifacts without repository materialization and
+  remain diagnostic evidence rather than signed production work orders.
+- Regenerated the fail-closed backend closure at 1,364 runtime files and
+  canonical digest
+  `1d240e2c78c9ae95120e733f1e6ba7f6eb3c6e0391e8d4473d06427c37e82cfd`.
+  The canonical test registry remains 1,544 tests / 266 quarantines.
+- Hardened Hermes lifecycle/event ordering and effect validation, OpenClaw
+  signed-model routing, shared artifact-path validation, and dedicated-provider
+  tests. Focused provider integration passed 143 tests; the exhaustive backend
+  generator passed 8/8; the authenticated four-group extension release tier
+  passed with the exact 65-file package surface.
+- Built the local, unpublished `reddog-0.4.102.vsix` (269,791 bytes, SHA-256
+  `279f71d1a48a700286d44ff8f6f2e31e39197fbf3d9524c58108dc6bbba46e48`).
+  HoloIndex semantic retrieval remained quarantined for authority/root HEAD
+  mismatch; no retry, reindex, E-drive mutation, push, PR, merge, marketplace
+  publication, or production work-order effect was performed.
+
+## [2026-08-21] RedDog Candidate Source Freeze
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 87, 97
+
+- Staged the explicitly authorized RedDog integration candidate so generated
+  closure receipts bind the complete prospective tree, including the new MCP
+  public-bundle runtime and split extension helpers.
+- The fail-closed backend generator now authenticates 1,364 runtime files at
+  canonical digest
+  `3c0cffea72e92ca1acbcd8a1f5a106164dda11ae791afe050f39490c3cd62d10`.
+- The staged-index test registry regenerates to 1,544 tests with the unchanged
+  266 explicit quarantines.
+- Holo semantic retrieval remained quarantined for authority/root HEAD
+  mismatch; no retry, reindex, repair, or E-drive mutation was performed.
+
+## [2026-08-21] RedDog Digest-Only Governed Git Receipts
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 97
+
+- Split internal executable paths from public readiness/projection/repository-
+  state v2 receipts and hardened the Python snapshot consumer against
+  recomputed malformed identity/signature bodies. The 1,363-path sealed backend
+  is pinned at `7135f436105a8031feff8916da3938c260d021301743352e13c1d6ac724300c7`.
+  No Git DLL/helper closure or keyed receipt-origin claim is made.
+
+## [2026-08-21] RedDog Governed Git Executable Provenance
+
+**WSP Protocol:** WSP 00, 15, 22, 49, 50, 62, 97
+
+- Bound every RedDog production Git call to one canonical executable with
+  identity/size/SHA-256 proof, Windows Authenticode verification, pathless child
+  environments, v2 readiness/projection receipts, and replacement fail-closure.
+- Removed the duplicate ambient Git subprocess from the Python operational
+  snapshot; Start Operations now consumes a digest/root/executable-bound JS
+  repository-state receipt. Direct proof excludes Git DLL/helper closure.
+- The executable authority and WSP_62-separated repository-receipt module
+  increase the exact VSIX surface from 59 to 61 files; preserving 59 would
+  require omitting runtime or public metadata and was rejected as an untruthful
+  package boundary.
+
+## [2026-08-21] RedDog Workspace and Package Boundary
+
+**WSP Protocol:** WSP 00, 15, 22, 49, 50, 62, 97
+
+- Declared RedDog unsupported in untrusted and virtual workspaces, matching its
+  local Git/filesystem, Python subprocess, worker-thread, and sealed-backend
+  requirements.
+- Derived and pinned an exact 59-file package surface: 56 runtime files plus
+  README/package/icon. Added static fast-tier and installed-VSCE release checks;
+  tests, internal docs, caches, credentials, dependencies, editor metadata, and
+  build artifacts are excluded. No VSIX artifact or publication was performed.
+- Backend manifest and Python registry remained byte-current. Fast/contract
+  passed in 8,892/271 ms; a hostile ambient-selector release executed all four
+  groups and passed in 283,993 ms without timeout. The release-owned live
+  package group proved the same exact 59-file list in 2,362 ms.
+
+## [2026-08-21] RedDog Kimi K3 Request-Truth Hardening
+
+**WSP Protocol:** WSP 00, 15, 22, 49, 50, 62, 97
+
+- Hardened the exact OpenRouter Kimi K3 path across AI Gateway and the RedDog
+  advisory bridge: explicit/environment/default resolution, 4,096 floor,
+  131,072 maximum, forced maximum reasoning, and temperature omission.
+- Added a dedicated single/Fusion integer parser with existing missing-value
+  defaults and stable pre-provider `invalid_max_tokens` rejection. Generic
+  timeout parsing and non-K3 request behavior remain unchanged.
+- Validation is offline and mocked; no provider call, package, publication,
+  Holo maintenance, OpenClaw execution, Hermes dispatch, or GitHub operation
+  was authorized.
+- The sealed backend manifest remains exactly 1,363 runtime paths with no path
+  additions or removals and two changed runtime digests. Its new canonical
+  digest is
+  `ca41c3d09ff2fededcd1b1d544df0b82d92640e7930986254fc5daf362cd6ca7`.
+- Offline validation passed the full 742-test AI Gateway module (2 skipped),
+  83 advisory/Fusion tests plus 20 subtests, six direct backend/bridge gates,
+  and the 1,542-test/266-quarantine registry check. RedDog fast and contract
+  tiers passed in 8,606/266 ms. A hostile ambient selector/nonce release still
+  executed all four authenticated groups and passed in 281,024 ms with no
+  timeout or termination.
+
+## [2026-08-20] RedDog Main Integration Audit
+
+**WSP Protocol**: WSP 00, 6, 15, 22, 34, 50, 62, 87, 97
+
+- Reconciled the accepted RedDog/HoloIndex branch with newer main rather than
+  overwriting main-only FastMCP, Codex-hook, signed-control-loop, JSON-only
+  maintenance, or dependency-pin work.
+- Integrated governed Git/environment hardening, module-intent Tier-0 proof,
+  isolated process/runtime proof, immutable query replicas, candidate
+  acceptance, snapshot codec, test tiers, and generated closure contracts.
+- The deterministic WSP registry is 1,540 tests / 266 quarantined after the two
+  test-module extractions. Focused Holo is 233/1 skipped; the repaired complete
+  bridge is 901/7 skipped under the unchanged cap after the earlier scaling
+  receipts. Backend closure contains 1,363 runtime files at
+  `ea942f5f0a5522d35de547f074eff4facb4422a30f2dcfd27bbb1a88ebd629c2` and is
+  validated through an isolated Git index so the working branch remains
+  unstaged. Relative to the reconstructed 1,361-file pre-repair closure, only
+  the two extracted candidate-runtime modules were added and no path was lost.
+- The RedDog extension-scoped `npm run test:release` tier passed 4/4 groups in
+  323,242 ms under hostile ambient selector/nonce input with no timeout or
+  signal. It is not a repository-wide FMAS result; the final full FMAS remains
+  a separate non-green audit at 270 errors / 245 warnings. The repaired
+  candidate-acceptance files are absent from size findings; accepted bridge
+  document/source debt and repository-wide structure/security-tool debt remain
+  visible rather than suppressed.
+- Removed a stale merge-marker line and repaired candidate-attributed WSP_62
+  debt by splitting the supervisor and candidate-acceptance contracts into
+  focused modules. The pre-split 75-test/192-assertion and
+  31-test/141-assertion inventories, including all 300 parameterized pytest
+  cases, remain exact after the move.
+- No VSIX/package publication, network/provider call, live ChatGPT tunnel,
+  Holo store/model access, maintenance, or reindex was performed.
+
 ## [2026-08-17] Codex WSP Lifecycle Hooks Phase 1
 
 **WSP Protocol**: WSP 00, 3, 5, 22, 49, 50, 84, 97
@@ -52,8 +194,6 @@
   confinement, schema, resource-bound, and regression coverage.
 - No index publication, service restart, worker dispatch, repository-write,
   merge, commit, push, or release authority was exercised.
->>>>>>> 8a77f0574 (fix(reddog): harden governed Holo and Git context)
-
 ## [2026-07-25] Deterministic Codex Tooling Projection
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 97

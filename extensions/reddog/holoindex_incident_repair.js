@@ -104,6 +104,83 @@ function coordinate(options) {
   }
 }
 
+function asyncRequest(opts) {
+  if (!shouldCoordinate(opts.ownerResult, opts.ownerObserved)) {
+    return { error: failure('owner_failure_not_repairable') };
+  }
+  const query = typeof opts.query === 'string' ? opts.query.trim() : '';
+  if (!query || query.length > MAX_QUERY_CHARS) return { error: failure('incident_query_invalid') };
+  const payload = JSON.stringify({
+    query, owner_failure: compactOwnerFailure(opts.ownerResult)
+  });
+  if (Buffer.byteLength(payload, 'utf8') > MAX_INPUT_BYTES) {
+    return { error: failure('bridge_input_too_large') };
+  }
+  return { payload };
+}
+
+function asyncSettlement(lifecycle, resolve) {
+  const state = { child: null, settled: false, removeCancel: () => {} };
+  state.finish = (value) => {
+    if (state.settled) return;
+    state.settled = true; state.removeCancel();
+    if (lifecycle) lifecycle.release(state.child);
+    resolve(value);
+  };
+  state.fail = (error) => state.finish(failure(classifyError(error)));
+  state.cancel = () => state.finish(failure('incident_repair_cancelled'));
+  return state;
+}
+
+function sendAsyncPayload(state, payload) {
+  const child = state.child;
+  if (!child || !child.stdin || typeof child.stdin.end !== 'function') {
+    if (child && typeof child.kill === 'function') child.kill();
+    state.fail(new Error('incident_repair_stdin_unavailable')); return;
+  }
+  if (typeof child.stdin.once === 'function') child.stdin.once('error', (error) => {
+    if (state.settled) return;
+    if (typeof child.kill === 'function') child.kill();
+    state.fail(error);
+  });
+  try { child.stdin.end(payload); } catch (error) {
+    if (typeof child.kill === 'function') child.kill();
+    state.fail(error);
+  }
+}
+
+function launchAsyncRepair(opts, request, lifecycle, state) {
+  const transport = typeof opts.execFile === 'function' ? opts.execFile : cp.execFile;
+  const script = path.join(opts.root, 'scripts', 'reddog_holoindex_incident_repair_once.py');
+  state.child = transport(opts.interpreterPath, ['-B', script], {
+    cwd: opts.root, env: opts.env, encoding: 'utf8', timeout: 90000,
+    maxBuffer: MAX_OUTPUT_BYTES, windowsHide: true
+  }, (err, stdout) => {
+    if (state.settled) return;
+    if (err) return state.fail(err);
+    state.finish(parseResult(stdout));
+  });
+  if (lifecycle && !lifecycle.own(state.child)) { state.cancel(); return false; }
+  if (lifecycle) state.removeCancel = lifecycle.onCancel(state.cancel);
+  sendAsyncPayload(state, request.payload);
+  return true;
+}
+
+function coordinateAsync(options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const lifecycle = opts.lifecycle;
+  const request = asyncRequest(opts);
+  if (request.error) return Promise.resolve(request.error);
+  if (lifecycle && lifecycle.isCancelled()) {
+    return Promise.resolve(failure('incident_repair_cancelled'));
+  }
+  return new Promise((resolve) => {
+    const state = asyncSettlement(lifecycle, resolve);
+    try { launchAsyncRepair(opts, request, lifecycle, state); }
+    catch (error) { state.fail(error); }
+  });
+}
+
 function immutableReceipt(value, reasons) {
   return {
     accepted: value.accepted === true,
@@ -159,5 +236,6 @@ module.exports = {
   shouldCoordinate,
   parseResult,
   coordinate,
+  coordinateAsync,
   metadata
 };

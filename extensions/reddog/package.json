@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.101",
+  "version": "0.4.102",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -11,6 +11,14 @@
   "categories": [
     "Other"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": {
+      "supported": false
+    }
+  },
   "activationEvents": [
     "onCommand:reddog.open",
     "onCommand:foundupsFusion.open",
@@ -20,6 +28,12 @@
     "onCommand:reddog.clearPrincipalMemexDisclosure"
   ],
   "main": "./extension.js",
+  "scripts": {
+    "test": "node tests/run_reddog_test_tier.js fast",
+    "test:contract": "node tests/run_reddog_test_tier.js contract",
+    "test:package": "node tests/test_package_surface.js",
+    "test:release": "node tests/verify_extension_contract.js"
+  },
   "contributes": {
     "commands": [
       {

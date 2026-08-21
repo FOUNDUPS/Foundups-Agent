@@ -15,7 +15,7 @@ try {
   cp.execFileSync('git', ['config', '--local', 'extensions.partialClone', 'origin'], { cwd: weakenedStatRoot });
   includes(orchestrator.governedGitDiff(weakenedStatRoot, 24000), '[git context unavailable:',
     'partial-clone configuration must fail governed context collection closed');
-  includes(governedGitReadinessJs, "GIT_NO_LAZY_FETCH: '1'",
+  includes(startOperationsEnvironmentJs, "GIT_NO_LAZY_FETCH: '1'",
     'governed Git environment must disable lazy object fetches');
   cp.execFileSync('git', ['config', '--local', '--unset-all', 'extensions.partialClone'],
     { cwd: weakenedStatRoot });
@@ -50,7 +50,7 @@ try {
   const replacementProof = orchestrator.governedGitDiff(replacementRefRoot, 24000);
   includes(replacementProof, 'authentic = 2',
     'replacement refs must not make an attacker-selected staged change appear clean');
-  includes(governedGitReadinessJs, "GIT_NO_REPLACE_OBJECTS: '1'",
+  includes(startOperationsEnvironmentJs, "GIT_NO_REPLACE_OBJECTS: '1'",
     'governed Git environment must disable replacement objects');
   includes(governedGitReadinessJs, "'--no-replace-objects'",
     'every governed Git command must explicitly disable replacement objects');

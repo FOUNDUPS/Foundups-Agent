@@ -21,6 +21,9 @@ const asyncSource = fs.readFileSync(
   path.join(extensionRoot, 'backend_compatibility_async.js'),
   'utf8'
 );
+const holoOwnerRuntimeSource = fs.readFileSync(
+  path.join(extensionRoot, 'holoindex_owner_runtime.js'), 'utf8'
+);
 
 function canonicalize(value) {
   if (Array.isArray(value)) {
@@ -80,7 +83,17 @@ function assertRuntimeOrdering() {
   assert(gate >= 0);
   assert(gate < askSource.indexOf('prepareFusionRequest(message, worker)'));
   assert(namedFunctionSource('prepareFusionRequest').includes('classifyTaskForRedDog'));
-  assert(gate < askSource.indexOf('buildBoundedRepoContext'));
+  assert(gate < askSource.indexOf('buildContextForRequest'));
+  const contextBuilder = namedFunctionSource('buildContextForRequest');
+  assert(contextBuilder.includes('holoGenerationBoundQuery.buildOwnedContext'));
+  assert(contextBuilder.includes('buildBoundedRepoContextAsync'));
+  assert(holoOwnerRuntimeSource.includes('async function buildOwnedContext'));
+  assert(holoOwnerRuntimeSource.includes('registry.begin()'));
+  assert(holoOwnerRuntimeSource.includes('registry.release(lifecycle)'));
+  assertFusionRuntimeOrdering(askSource);
+}
+
+function assertFusionRuntimeOrdering(askSource) {
   assert(askSource.includes('backendCompatibility.enforceRuntimeGate'));
   assert(
     askSource.indexOf('backendCompatibility.enforceRuntimeGate')

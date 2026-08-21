@@ -54,7 +54,7 @@ function classify(text) {
   return { action, normalized, operationsProfileId: PROFILE_ID };
 }
 
-function buildRequest(command, intentId, repoRoot) {
+function buildRequest(command, intentId, repoRoot, repoStateReceipt) {
   const value = command && typeof command === 'object' ? command : {};
   return {
     schema_version: CONTROL_SCHEMA,
@@ -62,8 +62,18 @@ function buildRequest(command, intentId, repoRoot) {
     control_request_id: 'sha256:' + crypto.randomBytes(32).toString('hex'),
     operations_profile_id: PROFILE_ID,
     intent_id: value.action === 'submit' ? '' : String(intentId || ''),
-    repo_root: String(repoRoot || '')
+    repo_root: String(repoRoot || ''),
+    repo_state_receipt: copiedReceipt(repoStateReceipt)
   };
+}
+
+function copiedReceipt(value) {
+  try {
+    return value && typeof value === 'object'
+      ? JSON.parse(JSON.stringify(value)) : null;
+  } catch (_err) {
+    return null;
+  }
 }
 
 function validateProgress(value, request) {

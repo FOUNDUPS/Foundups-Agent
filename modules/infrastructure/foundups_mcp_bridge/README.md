@@ -4,6 +4,102 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
+
+The bundled server is loopback-only and serves MCP Streamable HTTP at exact
+path `/mcp`. A Secure MCP Tunnel or another external OAuth 2.1/auth proxy owns
+public HTTPS and ChatGPT authorization; that external control plane is not
+implemented or claimed live here. The optional static bearer is only a local
+development defense. Legacy SSE is removed; deprecated launcher names route to
+the same HTTP runtime and lock.
+
+The remote allowlist contains exactly one tool: `holo_query_bundle`. It
+delegates to the generation-bound one-shot owner/bundle adapter. Repository,
+documentation, Overseer/SQLite, dependency, raw Holo, Git, RedDog-state, and
+signal-normalization tools remain internal/local bridge APIs and are not MCP
+remote authority. Public bundle output is secret-redacted,
+repository-relative, cycle-safe, and capped at 256 KiB. Readiness uses the
+official MCP client for initialize, initialized, tools/list, and one lexical
+bundle call. Linked worktrees resolve the capable main MCP environment through
+file-only `.git`/`commondir` evidence. Startup always uses one owned subprocess
+with the direct interpreter PID; there is no second in-process lifecycle.
+Interpreter admission also verifies the exact four versions declared in
+`requirements.txt`; an import-capable but version-drifted environment is not a
+valid MCP runtime.
+
+## Immutable query replica and owner routing (Phase 2 candidate)
+
+`reddog_holoindex_query_replica.py` can materialize one immutable
+`holoindex_query_replica.v1` generation into a new, disjoint replica-root
+capability. It accepts only an exact manifest for the complete `vectors/`
+tree (including `chroma.sqlite3`) and one complete selected
+`all-MiniLM-L6-v2` model snapshot; resolver markers must be direct children of
+that selected root. The sealed production API nonmutating-locks the already
+existing authority-update then maintenance sentinels, retains both exact
+sentinel identities/bytes plus the freshness-receipt descriptor through source
+snapshot, copy, generation publication, active publication, and final
+validation, and then releases in reverse order. Callers cannot inject copier,
+lease, receipt, or publisher authority into the public API.
+
+Phase 2 adds one canonical descriptor parser/verifier and an explicit
+`QueryReplicaOwnerRoute`. The resident owner receives the canonical SSD path
+only for freshness receipts, leases, and repository/generation proof; its
+semantic backend receives only the verified immutable replica generation.
+Neither path is inferred from ambient `HOLOINDEX_SSD_PATH`. The descriptor is
+reproved before spawn and again before authenticated health. Health and reuse
+bind all four public replica fields (descriptor digest, generation ID, replica
+ID, and path-identity digest); any missing field or drift fails closed and a
+changed exact binding cannot hot-swap a live owner. Absolute replica paths are
+not returned in public responses.
+
+R16-R19 made route, binding fields, and health containers exact. R20 makes
+health transport scalars exact before any conversion: literal `127.0.0.1`,
+port 1..65535, trimmed printable token >=32 characters, and finite positive
+timeout <=300 seconds. Bool/subclasses/aliases/containers reject before calls.
+Only an exact built-in JSON `dict` reaches health access; Mapping substitutes,
+dict subclasses, and arbitrary containers reject before any attacker method.
+Binding parsing accepts only an exact built-in four-item tuple of exact
+built-in, trimmed, printable strings. Expected canonical fields alone may be
+explicit empty wildcards;
+actual canonical and replica fields are nonempty. No value is coerced and
+hostile boolean/string/equality methods are not invoked. R21 parses expected
+canonical fields first and the mandatory exact replica tuple second, before
+transport validation or HTTP construction; wrappers retain that ordering and
+only the already parsed tuple reaches response helpers. Malformed expected
+values fail before connection, hashing, route validation, verifier, stop,
+spawn, health, or handoff; malformed actual JSON/proof returns not-ready with
+`HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH`. R22 makes JSON representation
+unambiguous: duplicate member names at any nesting level and NaN/Infinity
+constants reject, while unique exact dictionaries remain valid. Parse,
+Unicode, recursion, primitive, and bounded-size failures return unavailable;
+the 65,537-byte read and close contract is unchanged. Repeated exact values
+across distinct binding fields remain allowed. R23 contains stdlib HTTP
+protocol failures from request, response acquisition, and bounded read as
+unavailable. Expected HTTP/OSError failures during close are contained only
+after a proof has been decided, so they never mask ready or unavailable;
+unexpected/resource exceptions still surface. The governed backend closure is
+1,360 runtime files at `fdf3643a2cb8...befc3592129e`; registry remains 1,527/265.
+R24 closes acceptance drift: the slow synthetic loopback probe now carries the
+full canonical/query-replica route, binding, split argv, and scrubbed child
+environment. Shutdown/close/context behavior moved unchanged into one internal
+`Self`-typed lifecycle base; route-less context entry still fails closed.
+
+Phase 2 does **not** delete old/orphan generations, define rollback/retention,
+materialize from a live store, or wire the three route-less production callers:
+one-shot ChatGPT/MCP owner query, maintenance owner startup, and promotion-time
+owner verification. Those paths now fail closed; they are integration blockers,
+not operational availability. Phase 1 performs no content deletion. Failed publication temps, staging trees,
+and a failed active name are atomically moved without replacement into an
+owned orphan root; the active name is absent only after a successful move.
+Rename failure leaves the source name and reports only a relative unsafe path.
+Windows copy failure closes all handles and preserves its bounded partial
+destination; query materialization quarantines the enclosing staging root.
+Direct copy callers retain responsibility for their isolated partial output.
+Retention/deletion of preserved objects is a future governed policy. The R15
+candidate is not promotable until independent verification accepts it. All
+Phase-2 validation in this slice is synthetic; no live owner, store, Holo MCP,
+model, maintenance, reindex, or `E:` access occurred.
+
 The owner response flattener treats `limit <= 0` as an empty result and never
 admits a first hit through the loop termination check. Explicit module Tier-0
 reservation remains bounded by positive caller K.
@@ -16,14 +112,21 @@ This module provides the **perception layer** for the AI architect workflow:
 MCP Bridge (perception) → 0102 (reasoning) → 012 (decision) → Cursor (execution)
 ```
 
-The bridge allows 0102 (ChatGPT) to:
+Trusted in-process callers can use the wider bridge to:
 - Inspect repository structure and files
 - Access WSP protocol documents
 - Read module documentation (README, INTERFACE, ModLog)
 - Query AI Overseer state (missions, patterns, failures)
 - Generate precise Windsurf prompts based on real repo state
 
-## v1 Capabilities
+ChatGPT's `/mcp` registration does not expose those legacy tools; it exposes
+only the governed `holo_query_bundle` contract described above.
+
+## Local/internal bridge capabilities
+
+The capability catalog below describes direct `FoundUpsMCPBridge` calls only.
+It is not the Streamable HTTP tool inventory. Only `holo_query_bundle` is
+registered remotely.
 
 ### Repo Perception (Active)
 | Tool | Description |
@@ -100,33 +203,6 @@ The bridge allows 0102 (ChatGPT) to:
 
 ## Usage
 
-### FastMCP SSE Remote Server (ChatGPT Connector)
-
-The bridge can be exposed as a standard Model Context Protocol (MCP) server over SSE (Server-Sent Events) on port 8128 (configurable via `FOUNDUPS_MCP_PORT`).
-
-#### Starting the Server Standalone
-```powershell
-python -m modules.infrastructure.foundups_mcp_bridge.scripts.launch
-```
-
-#### Starting via main.py DAE Broker
-When `python main.py` is started, `mcp_bridge_sse` is automatically registered as a launchable DAE spec in the broker. It starts by default unless disabled with `FOUNDUPS_MCP_AUTOSTART=0`.
-
-#### Exposing to ChatGPT via Secure Tunnel (e.g. ngrok)
-1. Start the server (default port `8128`).
-2. Expose the port via a secure tunnel:
-   ```bash
-   ngrok http 8128
-   ```
-3. In ChatGPT Web:
-   - Navigate to **Settings → Connectors → Advanced**.
-   - Enable **Developer Mode**.
-   - Click **Create Connector**.
-   - Set Name to `FoundUps MCP Bridge`.
-   - Set Server URL to `https://<your-ngrok-subdomain>.ngrok-free.app/sse`.
-   - Click **Create**.
-4. In a new ChatGPT conversation, select the **FoundUps MCP Bridge** app to gain access to all 33 perception and read tools.
-
 ### Private HoloIndex Query Owner
 
 The RedDog operational consumers migrated in this POC use this module's owner
@@ -138,6 +214,9 @@ cleans up the process. Before expensive semantic startup it rejects an occupied
 fixed loopback port. Automatic startup binds the child to the exact supervisor
 process, so the child exits after an abruptly terminated parent without a
 blocking stdin reader.
+Replica-routed startup requires explicit `--canonical-ssd-path` and
+`--query-replica-root` arguments plus a retained verified route capability.
+The child environment deliberately omits `HOLOINDEX_SSD_PATH`.
 Ordinary authenticated semantic health probes use up to 30 seconds. During
 supervisor startup, the first cold semantic canary may use the owner's
 270-second warmup budget within the unchanged 300-second total deadline.
@@ -146,17 +225,31 @@ private handoff resolved by resolve_reddog_holoindex_owner_handoff(); it never
 exports the generated secret to the parent environment. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
 
-For queries that name one uniquely evidenced module basename or one validated
-full module path, the owner reserves at most two flattened slots for root
-`README.md` and `INTERFACE.md` hits already returned by HoloIndex. It does not
-synthesize evidence, promote nested test docs, or change global ordering for
-ambiguous or implicit module queries. Exact metadata hits retain their
-producer-owned null-similarity provenance rather than receiving a synthetic
-flattening score.
+For basename queries, HoloIndex resolves intent against a complete bounded Git
+HEAD module catalog rather than top-K hits. Full module paths bypass that
+catalog. The catalog rejects Unicode control, format, and surrogate code
+points on every record and treats NFC-equivalent case-folded paths as
+duplicates without rewriting visible Unicode. The owner reserves flattened Tier-0 slots only for one complete,
+singular README/INTERFACE pair when canonical metadata `tier0_module_target`,
+query intent, root paths, and `exact_metadata` provenance all agree. Missing,
+unrelated, ambiguous, multi-module, partial, mixed-module, duplicate, or forged
+claims keep global score order. Exact provenance alone does not attest intent;
+the owner does not synthesize evidence or promote nested test docs.
 
-The RedDog read-only operational preflight now calls the process-lifetime
+Strict catalog failure is
+`HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE`; non-strict HoloIndex logs one
+stable warning and continues with basename promotion suppressed. The owner
+also preserves `HOLOINDEX_TIER0_INCOMPLETE` and
+`HOLOINDEX_TIER0_LOOKUP_FAILED`, while rejecting all non-allowlisted producer
+detail as generic semantic unavailability. Deterministic catalog/incomplete
+failures are not retried; lookup failure retains one bounded process-owned
+retry.
+
+The RedDog read-only operational preflight calls the process-lifetime
 bootstrap automatically for E2E, report collection, audit enqueue, and
-OPENCLAW_AUTO_TASKS_ENABLED paths. Set
+OPENCLAW_AUTO_TASKS_ENABLED paths. Phase-2 replica routing remains fail-closed
+until that preflight supplies a verified `QueryReplicaOwnerRoute`; synthetic
+owner proof is not live ChatGPT/MCP availability. Set
 REDDOG_HOLOINDEX_OWNER_AUTO_START=0 to opt out. An already configured HTTP
 service URL using literal `127.0.0.1` and a strong token bypass process creation only after its
 authenticated health endpoint proves semantic readiness and the expected
@@ -383,11 +476,115 @@ Disabled tool responses:
 
 ## Security
 
-- **Private only** - Not exposed publicly
-- **Read-only** - No writes, no execution
-- **Path filtering** - Blocks .env, credentials, secrets
-- **Size limits** - 200KB max file read
-- **No secrets** - Explicit pattern blocking
+- **Remote surface** - Exactly one bounded `holo_query_bundle` tool
+- **Private transport** - Loopback only; public control plane remains external
+- **No remote repository/SQLite walkers** - Legacy perception APIs stay local
+- **Closed child environment** - Only allowlisted OS/runtime fields plus exact
+  repository/package/token fields reach server and readiness children
+- **No remote mutation or execution** - Tool annotations match the admitted path
+
+## Isolated HoloIndex Candidate Acceptance
+
+The trusted-host adapter can validate one exact clean candidate SHA without
+promoting or writing the canonical HoloIndex store. Its default CLI mode is
+import-inert as well as effect-inert: help, malformed input, and omission of
+`--real` do not import the acceptance runtime. `--real` is the only authority
+for the isolated model copy, full refresh, private owner start, two direct
+queries, and cleanup.
+
+The adapter requires a distinct clean detached authority worktree at the exact
+candidate SHA and a third clean, related dependency-only runtime checkout with
+exactly one verified checkout-local `.venv/Lib/site-packages`. The runtime HEAD
+need not equal the candidate SHA and never becomes source authority. A new store
+disjoint from all three repositories and the canonical store, a new receipt
+target, a locally resolvable canonical model snapshot, and an available literal
+`127.0.0.1:8127` private port with no existing private handoff are also required.
+One non-blocking in-process lock and one host-local cross-process lease
+serialize the canonical-store/port acceptance session. Port availability is not
+owner identity: a pre-existing handoff, foreign listener, post-check bind race,
+or missing newly created handoff fails closed without killing or reusing it.
+
+The final fresh-process snapshot separates source authority from dependency
+authority. It runs the resolved base interpreter from the candidate cwd with
+`-S -B`, an exact `PYTHONPATH` containing only the already-proven runtime
+site-packages, no user site, and the standard child-environment scrub. Before
+opening the store, it proves candidate module origin plus ChromaDB 1.5.5 origin
+under that runtime. `CANDIDATE_SOURCE_ORIGIN_INVALID`,
+`RUNTIME_DEPENDENCY_UNAVAILABLE`, and `UNSUPPORTED_CHROMADB_VERSION` are stable,
+generation-bound failures; the deterministic snapshot has no transient retry.
+The base interpreter is not selected from mutable `sys.executable` or
+`sys._base_executable`. Runtime admission obtains the actual current-process
+image from the OS, rejects alias/link/reparse/hardlink ambiguity, and binds its
+case-preserving final path plus stable file identity in an in-memory proof.
+At the runtime-bound isolated-probe runner boundary, a fresh verified descriptor
+is retained until the runner returns or raises. Windows launches the exact path
+while the non-sharing handle denies write/delete replacement. Linux launches
+`/proc/self/fd/<fd>` and passes that descriptor into the child, so pathname
+replacement cannot select a different image. Revalidation failure prevents the
+runner call; the descriptor closes on every exit. The legacy runtime-free probe
+does not consume this proof. The shared child scrubber also removes
+`PYTHONINSPECT` along with home/path/startup/user-base overrides.
+
+The model copy uses bounded descriptor I/O. On Windows, source/destination files
+and every traversed parent are pinned and re-proved through live handles using
+the repository's established verified-handle/no-replace pattern; artifact
+digests are computed from those descriptors. Live per-file or aggregate growth,
+parent/root replacement, any bound overrun, or digest drift fails closed. The
+adapter hashes the canonical freshness receipt before and after and never
+downloads or installs a model.
+
+Success requires `REFRESHED`, exact SHA, one generation/receipt binding across
+both direct queries, explicit private-owner cleanup, and then one K=1 query
+through the supported extension wrapper using candidate self-selection. The
+activation receipt must bind the candidate root/SHA and the same generation;
+canonical rehydration and a fresh-process collection snapshot must still pass
+after that wrapper has cleaned up. Receipts retain only the activation receipt
+digest/count, semantic-store verdict, and one-way owner-session digest, never
+query results, paths, URLs, or tokens. The session digest is captured when the
+exact handoff is acquired and survives cleanup without retaining another copy
+of the secret tuple. The rehydrated freshness receipt remains open through one
+confined descriptor: strict bounded parsing and exact SSD/root/SHA/generation/
+file-digest binding are revalidated immediately before and after the isolated
+snapshot probe.
+Cleanup uses an atomic expected-handoff comparison, so a replaced owner is not
+stopped. Receipts are immutable, bounded, deterministic, secret-free JSON; an
+unsafe target is never written and publication failure cannot report PASS.
+
+The isolated store is semantic-path-bound. A detached worktree at the same SHA
+is not interchangeable because the freshness receipt binds the repository root.
+Do not set `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` for acceptance activation;
+the clean candidate must select itself and resolve the primary runtime through
+the supported wrapper. ChromaDB 1.5.5 inserts one `acquire_write` lifecycle row
+when `PersistentClient` opens, including logical read-only queries. Acceptance
+therefore proves semantic non-mutation through unchanged generation/root/
+receipt and collection snapshots, not byte-for-byte SQLite identity. The
+unbounded lifecycle-row growth is unresolved scale debt, not a correctness
+failure and not a resolved capacity claim.
+One authorized live attempt at `fb72cbd99bc9499545823fa1849fc4597b8d71ec`
+failed and did not establish acceptance. Its immutable FAIL receipt has SHA-256
+`f9b5e18ce62e63af3bbbf0e0f3d36def5614216fafadca8872703f519be43a78`, reports
+`NEW_PRIVATE_OWNER_HANDOFF_MISSING`, zero queries, and an unchanged canonical
+receipt. Audit found that a primary `HOLOINDEX_MAINTENANCE_REFRESH_FAILED` result
+was masked by the missing-handoff check and that candidate/authority worktrees
+lacked runtime dependencies. Both defects are hardened. The failed store is
+retained as evidence and is never reusable: any authorized retry requires a new
+store and receipt target. No current-contract live PASS, promotion, or capacity
+claim exists.
+The later R7 attempt at `220fdd9febbac00ddde9acbf7d8673ef0888b367`
+completed two direct queries and one activation query but failed the semantic
+snapshot after 917.4 seconds because the child inherited user-site ChromaDB
+1.3.0 instead of the validated runtime's 1.5.5. Its retained 1,155-byte FAIL
+receipt has SHA-256
+`305a53b7c63b64762bb3706fb03bec76c35c3358fbc4a607c89567c7a6c1bd78`.
+R8 closes that runtime-selection defect in code only; it makes no live-PASS,
+promotion, or scale claim.
+A PASS retained for `b482fdaed4932a15b2b195c256761cfd1053f053` is historical
+pre-R5 evidence only: it did not include the post-cleanup supported-wrapper
+activation and semantic revalidation now required, so it cannot activate or
+promote the current code.
+
+See [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md#isolated-candidate-acceptance)
+for STOP conditions, commands, and RED/GREEN evidence.
 
 ## Architecture
 
@@ -435,44 +632,19 @@ Disabled tool responses:
 
 ## Future (v2)
 
-- HoloIndex semantic search integration
+- Live semantic Holo availability after authority maintenance produces a
+  generation-bound `CURRENT` freshness receipt. The governed bundle tool is
+  implemented; current live authority acceptance remains pending.
 - Gated execution capabilities
 - Agent team spawning
 - Skill dispatch with approval workflow
 
+## Streamable HTTP migration status
 
-## FastMCP Remote SSE Server & ChatGPT Tunneling
-
-The FoundUps MCP Bridge provides an SSE server (`mcp_server.py`) for remote agents (e.g. ChatGPT Developer Mode / Custom Apps) over secure tunnels.
-
-### ⚠️ Security First: Mandatory Authentication for Tunneling
-Local loopback bindings do not require authentication by default for development. **When exposing the server via a tunnel (ngrok, Cloudflare Tunnel, or OpenAI Secure MCP Tunnel), authentication MUST be configured before starting the server or tunnel.**
-
-```bash
-# 1. Set secure auth token and enforce authentication
-export FOUNDUPS_MCP_AUTH_TOKEN="your-secure-random-token"
-export FOUNDUPS_MCP_REQUIRE_AUTH="1"
-
-# 2. Launch the MCP Bridge SSE server (binds to 127.0.0.1:8128 by default)
-python -m modules.infrastructure.foundups_mcp_bridge.scripts.launch
-
-# 3. In a separate terminal, start your secure tunnel to port 8128
-# Recommended: Cloudflare Tunnel or OpenAI Secure MCP Tunnel
-cloudflared tunnel --url http://127.0.0.1:8128
-# or: ngrok http 8128
-```
-
-### ChatGPT Custom MCP App Configuration (Developer Mode)
-OpenAI supports connecting remote MCP endpoints in ChatGPT (Web):
-1. In ChatGPT Web, ensure **Developer Mode** is enabled under **Settings → Connected apps / Developer Mode**.
-2. Navigate to **Apps → Create App** (or custom MCP connector).
-3. Set **Authentication** to **Bearer Token** and paste your `FOUNDUPS_MCP_AUTH_TOKEN`.
-4. Enter the public SSE endpoint: `https://<your-tunnel-domain>/sse`.
-5. Click **Scan Tools** → confirms discovery of all 33 allowlisted perception tools.
-6. Open a chat, select the FoundUps MCP app, and interact with 0102.
-
-### Security Invariants (WSP 97)
-- **Remote Read-Only Allowlist**: Exposes exactly 33 pure perception tools (`REMOTE_READ_ONLY_ALLOWLIST`). All execution/mutation tools are strictly excluded from remote registration.
-- **Fail-Closed Bearer Auth**: Rejects unauthenticated requests with `401 Unauthorized`. URL query tokens (`?token=`) are deliberately rejected to prevent secret leakage in proxy/tunnel logs.
-- **Strict Lock Invariant**: `instance lock held <=> process owns live MCP server`. Lock is released only after confirmed server termination.
-- **Protocol Readiness Canary**: Validates live SSE handshake, tool inventory against allowlist, and safe tool invocation before reporting operational status.
+The former SSE surface is retired. The canonical local endpoint is exact
+Streamable HTTP `/mcp`, loopback-only, with one bounded read-only tool.
+`run_mcp_bridge_sse` and `stop_mcp_bridge_sse` remain deprecated name aliases
+for the same HTTP runtime and lock; they do not expose an SSE route. Public
+HTTPS plus OAuth 2.1 authorization belongs to an external tunnel/control plane
+and remains live-acceptance work. Local protocol validation does not claim a
+public tunnel or ChatGPT app connection.

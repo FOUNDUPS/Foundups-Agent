@@ -16,8 +16,11 @@ from __future__ import annotations
 import logging
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Annotated, Any, Dict, Literal, Optional
 
+from pydantic import Field, StrictBool
+
+from .holo_query_bundle_public import project_holo_query_bundle
 from .response_schema import error_response, ok_response
 
 logger = logging.getLogger(__name__)
@@ -142,3 +145,39 @@ def get_reddog_analysis_context(
     except Exception as exc:
         logger.error(f"[REDDOG] get_reddog_analysis_context error: {exc}")
         return error_response(str(exc))
+
+
+def holo_query_bundle(
+    repo_root: Path,
+    query: Annotated[str, Field(min_length=1, max_length=16_000)],
+    limit: Annotated[int, Field(strict=True, ge=1, le=20)] = 5,
+    retrieval_mode: Literal["semantic", "lexical"] = "semantic",
+    module_hint: Annotated[str, Field(max_length=512)] = "",
+    must_include: Annotated[
+        Optional[list[Annotated[str, Field(min_length=1, max_length=1024)]]],
+        Field(max_length=40),
+    ] = None,
+    bundle_only: StrictBool = False,
+) -> Dict[str, Any]:
+    """Recall one governed Holo query plus bounded WSP memory bundle."""
+    request = {
+        "query": query, "limit": limit, "retrieval_mode": retrieval_mode,
+        "include_bundle": True, "module_hint": module_hint,
+        "must_include": must_include or [], "bundle_only": bundle_only,
+    }
+    try:
+        from scripts import reddog_holoindex_owner_query_once as owner_query_bridge
+
+        result = owner_query_bridge.query_once(request, repo_root=repo_root)
+        public = project_holo_query_bundle(result, repo_root)
+    except Exception as exc:
+        logger.error("[REDDOG] holo_query_bundle failed: %s", type(exc).__name__)
+        public = project_holo_query_bundle({
+            "ok": False, "error": type(exc).__name__,
+            "index_gap_detected": True,
+            "no_holoindex_reindex_performed": True,
+        }, repo_root)
+    return ok_response(
+        public, source="reddog_holo_query_bundle", tool="holo_query_bundle",
+        surface="S3", read_only=True,
+    )

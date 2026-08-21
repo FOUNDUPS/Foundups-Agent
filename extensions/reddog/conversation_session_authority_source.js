@@ -62,12 +62,7 @@ async function clear(secretStorage) {
 }
 
 function buildBridgeEnvironment(source) {
-  const input = source && typeof source === 'object' ? source : {};
-  const env = startOperationsEnvironment.build(input);
-  for (const key of AUTHORITY_ENV_KEYS) {
-    if (Object.prototype.hasOwnProperty.call(input, key)) env[key] = input[key];
-  }
-  return env;
+  return startOperationsEnvironment.buildBridge(source, 'resident_architect');
 }
 
 module.exports = {

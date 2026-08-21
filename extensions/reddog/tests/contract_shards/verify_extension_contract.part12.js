@@ -142,7 +142,7 @@ includes(extensionJs, 'neutralizeRequiredTargetMarker(diff || \'(no diff)\')', '
 // into the SAME gate_context the Python splitter reads -> a phantom marker section. Each of these
 // four call sites MUST route its section through neutralizeRequiredTargetMarker before push. A
 // future edit dropping any one of these anchors fails the runner (forgery reopened).
-includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(targetSection.text))', 'MFH-J-007b: target-recall section (raw file bodies) must be marker-neutralized before push');
+includes(extensionJs, 'lowerSections.unshift(neutralizeRequiredTargetMarker(targetSection.text))', 'MFH-J-007b: target-recall section (raw file bodies) must be marker-neutralized before priority insertion');
 includes(extensionJs, 'lowerSections.unshift(neutralizeRequiredTargetMarker(wsp97.text))', 'MFH-J-007b: WSP_97 excerpt must be marker-neutralized before priority insertion');
 includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(skillz))', 'MFH-J-007b: Skillz/Wardrobe/Rolodex section (raw file bodies) must be marker-neutralized before push');
 includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(directReadSection.text))', 'MFH-J-007b: plain direct-read section (raw fetched bodies) must be marker-neutralized before push');
@@ -335,7 +335,7 @@ includes(extensionJs, "meta.index_gap_detected === true || meta.index_gap_detect
 // 8-target FoundUp prompt, must (a) detect the gap, (b) fire buildMustIncludeArgs,
 // (c) attempt the enriched fetch, and (d) succeed under the raised buffer so
 // direct_read_fallback_used flips true with the fetched paths present. This is the
-// exact scenario the 0.3.31 golden run FAILED. Runs the real Python bundle CLI.
+// exact scenario the 0.3.31 golden run FAILED. The adapter remains governed.
 (function drt005EndToEndTrigger() {
   const holo = orchestrator.holoIndexOutput(root, GOLDEN_FOUNDUP_PROMPT, 18000);
   const m = holo && holo.meta ? holo.meta : {};
@@ -359,33 +359,26 @@ includes(extensionJs, "meta.index_gap_detected === true || meta.index_gap_detect
   assert(stillMissing[0].startsWith('symbol:'), 'DRT-005: the lone residual gap is the symbol target (honest, not fabricated)');
 })();
 
-// DRT-006: INVISIBLE-FAILURE PROOF (faithful ENOBUFS simulation). Re-run the EXACT
-// enriched CLI command with a deliberately tiny maxBuffer to reproduce the 0.3.31
-// overflow, then assert (a) it throws and (b) the classifier tags it max_buffer --
-// i.e. the very failure that was silent is now classifiable and surfaced.
+// DRT-006: INVISIBLE-FAILURE PROOF (faithful ENOBUFS simulation). A bounded Node
+// child emits more than maxBuffer so the contract exercises the real subprocess
+// failure shape without bypassing the governed Holo owner adapter.
 (function drt006SimulatedMaxBufferThrow() {
-  const env = Object.assign({}, process.env, { HOLO_SKIP_MODEL: '1' });
-  const args = ['-B', 'holo_index.py', '--bundle-json', '--search',
-    'Audit FoundUp creation monorepo WSP_109 execution path', '--limit', '5', '--quiet-root-alerts'];
-  for (const t of GOLDEN_FETCHABLE_TARGETS) {
-    args.push('--bundle-must-include', t);
-  }
   let threw = false;
   let classified = 'unknown';
   try {
-    cp.execFileSync('python', args, {
-      cwd: root,
-      env,
+    cp.execFileSync(process.execPath, [
+      '-e', "process.stdout.write('x'.repeat(8192))"
+    ], {
       encoding: 'utf8',
-      timeout: 45000,
-      maxBuffer: 4096, // Far below the ~185KB enriched bundle => forces the overflow.
+      timeout: 5000,
+      maxBuffer: 4096,
       windowsHide: true
     });
   } catch (err) {
     threw = true;
     classified = orchestrator.classifyDirectReadFetchError(err);
   }
-  assert(threw, 'DRT-006: a 4KB buffer against the enriched bundle MUST throw (reproduces the 0.3.31 overflow)');
+  assert(threw, 'DRT-006: a child exceeding the 4KB buffer MUST throw');
   assert.strictEqual(classified, 'max_buffer', 'DRT-006: the overflow must classify as max_buffer (never silent again)');
 })();
 

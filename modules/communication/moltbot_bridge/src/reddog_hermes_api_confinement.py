@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 HERMES_ARTIFACT_PROFILE = "reddogartifact"
-HERMES_EXPECTED_API_VERSION = "0.19.1"
+HERMES_EXPECTED_API_VERSION = "0.20.4"
 
 _FEATURES = {
     "run_submission": True,
@@ -15,6 +15,7 @@ _FEATURES = {
     "run_events_sse": True,
     "run_stop": True,
     "run_approval_response": True,
+    "run_steer": True,
     "tool_progress_events": True,
     "approval_events": True,
 }
@@ -23,6 +24,8 @@ _ENDPOINTS = {
     "run_status": ("GET", "/v1/runs/{run_id}"),
     "run_events": ("GET", "/v1/runs/{run_id}/events"),
     "run_stop": ("POST", "/v1/runs/{run_id}/stop"),
+    "run_approval": ("POST", "/v1/runs/{run_id}/approval"),
+    "run_steer": ("POST", "/v1/runs/{run_id}/steer"),
     "skills": ("GET", "/v1/skills"),
     "toolsets": ("GET", "/v1/toolsets"),
 }
@@ -55,8 +58,8 @@ def verify_hermes_api_preflight(
 
 
 def hermes_tool_surface_is_closed(toolsets: object, skills: object) -> bool:
-    """Require a complete disabled-toolset inventory and no visible skills."""
-    return _toolsets_are_disabled(toolsets) and _skills_are_empty(skills)
+    """Require native leaf delegation only, with no visible skills."""
+    return _toolsets_are_native_delegation_only(toolsets) and _skills_are_empty(skills)
 
 
 def strict_json_mapping(raw: str) -> dict[str, Any] | None:
@@ -117,20 +120,34 @@ def _health_is_exact(value: object) -> bool:
     )
 
 
-def _toolsets_are_disabled(value: object) -> bool:
+def _toolsets_are_native_delegation_only(value: object) -> bool:
     if not isinstance(value, Mapping) or value.get("object") != "list":
         return False
     if value.get("platform") != "api_server" or not isinstance(value.get("data"), list):
         return False
     rows = value["data"]
-    return bool(rows) and all(
+    if not rows or not all(
         isinstance(row, Mapping)
         and isinstance(row.get("name"), str)
         and bool(row.get("name"))
-        and row.get("enabled") is False
         and type(row.get("configured")) is bool
         and isinstance(row.get("tools"), list)
         for row in rows
+    ):
+        return False
+    names = [str(row["name"]) for row in rows]
+    if len(set(names)) != len(names):
+        return False
+    enabled = [row for row in rows if row.get("enabled") is True]
+    disabled_are_closed = all(
+        row.get("enabled") is False for row in rows if row not in enabled
+    )
+    return (
+        disabled_are_closed
+        and len(enabled) == 1
+        and enabled[0].get("name") == "delegation"
+        and enabled[0].get("configured") is True
+        and enabled[0].get("tools") == ["delegate_task"]
     )
 
 

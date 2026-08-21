@@ -409,7 +409,7 @@ def read_git_head_sha(repo_root: Path | str) -> str:
     return "unknown"
 
 
-def _receipt_from_mapping(value: Mapping[str, Any]) -> HoloIndexFreshnessReceipt:
+def freshness_receipt_from_mapping(value: Mapping[str, Any]) -> HoloIndexFreshnessReceipt:
     return HoloIndexFreshnessReceipt(
         schema_version=str(value.get("schema_version", "")),
         generated_at=str(value.get("generated_at", "")),
@@ -640,7 +640,7 @@ def _coerce_build_base_receipt(
     if not isinstance(base_receipt, Mapping):
         return base_receipt
     try:
-        return _receipt_from_mapping(base_receipt)
+        return freshness_receipt_from_mapping(base_receipt)
     except (TypeError, ValueError):
         return None
 
@@ -821,7 +821,7 @@ def _coerce_base_receipt(
         receipt = value
     elif isinstance(value, Mapping):
         try:
-            receipt = _receipt_from_mapping(value)
+            receipt = freshness_receipt_from_mapping(value)
         except (TypeError, ValueError) as exc:
             raise ValueError("malformed base freshness receipt") from exc
     else:
@@ -1089,7 +1089,7 @@ def _evaluation_receipt(
     if not isinstance(value, Mapping):
         return None
     try:
-        return _receipt_from_mapping(value)
+        return freshness_receipt_from_mapping(value)
     except Exception:
         return None
 
@@ -1273,6 +1273,7 @@ __all__ = [
     "evaluate_freshness_for_paths",
     "freshness_receipt_path",
     "freshness_receipt_integrity_ok",
+    "freshness_receipt_from_mapping",
     "load_freshness_receipt",
     "publish_maintenance_invalidation",
     "read_git_head_sha",

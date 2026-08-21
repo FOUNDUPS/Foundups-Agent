@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
@@ -23,6 +24,13 @@ from holo_index.query_receipt import (  # noqa: E402
     build_query_receipt,
     canonical_semantic_evidence,
 )
+from holo_index.query_admission import (  # noqa: E402
+    ReadonlyQueryAdmission,
+    rehydrate_canonical_freshness_proof,
+)
+from holo_index.storage_contract import resolve_holoindex_ssd_path  # noqa: E402
+from holo_index.repository_state import repository_root_digest  # noqa: E402
+from holo_index.cli.commands.bundle_json import build_wsp_memory_bundle  # noqa: E402
 from holo_index.authority_worktree import (  # noqa: E402
     HoloIndexAuthoritySelection,
     resolve_holoindex_authority_root,
@@ -44,12 +52,20 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_boots
 MAX_QUERY_CHARS = 16_000
 MAX_LIMIT = 20
 MAX_OWNER_ATTEMPTS = 2
+MAX_MODULE_HINT_CHARS = 512
+MAX_MUST_INCLUDE = 40
+MAX_MUST_INCLUDE_CHARS = 1024
+_REQUEST_KEYS = frozenset({
+    "query", "limit", "retrieval_mode", "include_bundle", "module_hint",
+    "must_include", "bundle_only",
+})
 PROCESS_OWNED_STATUSES = frozenset({OWNER_STARTED, OWNER_REUSED})
 TRANSIENT_OWNER_ERRORS = frozenset(
     {
         "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
         "QUERY_OWNER_POISONED",
         "SEMANTIC_BACKEND_UNAVAILABLE",
+        "HOLOINDEX_TIER0_LOOKUP_FAILED",
     }
 )
 
@@ -90,23 +106,54 @@ def _read_payload() -> Mapping[str, Any]:
     return value
 
 
-def _bounded_request(payload: Mapping[str, Any]) -> tuple[str, int, str]:
+@dataclass(frozen=True)
+class _QueryRequest:
+    query: str
+    limit: int
+    retrieval_mode: str
+    include_bundle: bool
+    module_hint: str
+    must_include: tuple[str, ...]
+    bundle_only: bool
+
+
+def _bounded_request(payload: Mapping[str, Any]) -> tuple[_QueryRequest | None, str]:
+    if any(not isinstance(key, str) or key not in _REQUEST_KEYS for key in payload):
+        return None, "request_field_invalid"
     query = payload.get("query")
     if not isinstance(query, str) or not query.strip():
-        return "", 0, "query_required"
+        return None, "query_required"
     query = query.strip()
     if len(query) > MAX_QUERY_CHARS:
-        return "", 0, "query_too_large"
+        return None, "query_too_large"
     raw_limit = payload.get("limit", 5)
     if isinstance(raw_limit, bool):
-        return "", 0, "limit_invalid"
+        return None, "limit_invalid"
     try:
         limit = int(raw_limit)
     except (TypeError, ValueError):
-        return "", 0, "limit_invalid"
+        return None, "limit_invalid"
     if limit < 1 or limit > MAX_LIMIT:
-        return "", 0, "limit_invalid"
-    return query, limit, ""
+        return None, "limit_invalid"
+    mode = payload.get("retrieval_mode", "semantic")
+    if mode not in {"semantic", "lexical"}:
+        return None, "retrieval_mode_invalid"
+    include_bundle = payload.get("include_bundle", False)
+    bundle_only = payload.get("bundle_only", False)
+    if not isinstance(include_bundle, bool) or not isinstance(bundle_only, bool):
+        return None, "bundle_flag_invalid"
+    hint = payload.get("module_hint", "")
+    if not isinstance(hint, str) or len(hint) > MAX_MODULE_HINT_CHARS:
+        return None, "module_hint_invalid"
+    raw_paths = payload.get("must_include", [])
+    if not isinstance(raw_paths, list) or len(raw_paths) > MAX_MUST_INCLUDE:
+        return None, "must_include_invalid"
+    if any(not isinstance(item, str) or not item or len(item) > MAX_MUST_INCLUDE_CHARS for item in raw_paths):
+        return None, "must_include_invalid"
+    return _QueryRequest(
+        query, limit, mode, include_bundle or bundle_only, hint.strip(),
+        tuple(raw_paths), bundle_only,
+    ), ""
 
 
 def _authority_metadata(
@@ -157,6 +204,230 @@ def _same_authority(
     )
 
 
+def _preflight_authority(
+    selection: HoloIndexAuthoritySelection,
+    query: str,
+    *,
+    preflight: Callable[..., ReadonlyQueryAdmission],
+    resolve_ssd_path: Callable[[], Path],
+) -> Mapping[str, Any] | None:
+    try:
+        admission = preflight(
+            repo_root=selection.selected_root,
+            ssd_path=resolve_ssd_path(),
+            expected_repo_head_sha=selection.authority_head_sha,
+        )
+    except Exception as exc:
+        return {
+            **_failure(type(exc).__name__, query=query),
+            **_authority_metadata(selection),
+        }
+    if admission.allowed is True:
+        return None
+    binding = (
+        dict(admission.binding)
+        if isinstance(admission.binding, Mapping)
+        else {}
+    )
+    return {
+        **_failure(admission.error or "STALE_INDEX", query=query),
+        **admission.to_dict(),
+        **binding,
+        **_authority_metadata(selection),
+        "query": query,
+        "raw_result": {},
+    }
+
+
+@dataclass
+class _OwnerQueryState:
+    attempts: int = 0
+    retry_reason: str = ""
+    cleanup_required: bool = False
+
+
+def _owner_attempt(
+    *, query: str, limit: int, authority_root: Path, runtime_root: Path,
+    ensure_owner: Callable[..., Any], resolve_handoff: Callable[..., Any],
+    query_owner: Callable[..., Mapping[str, Any]], state: _OwnerQueryState,
+) -> tuple[Mapping[str, Any], bool, bool]:
+    bootstrap = ensure_owner(
+        repo_root=authority_root, runtime_root=runtime_root, requested=True
+    )
+    status = str(getattr(bootstrap, "status", ""))
+    if getattr(bootstrap, "ready", False) is not True:
+        error = str(getattr(bootstrap, "error", "") or "owner_bootstrap_failed")
+        return _failure(error, query=query), error in TRANSIENT_OWNER_ERRORS, False
+    process_owned = status in PROCESS_OWNED_STATUSES
+    state.cleanup_required = process_owned
+    if process_owned:
+        handoff = resolve_handoff()
+        if handoff is None:
+            return _failure("owner_handoff_missing", query=query), False, False
+        service_url, service_token = handoff
+    elif status == OWNER_CONFIGURED:
+        service_url, service_token = None, None
+    else:
+        return _failure("owner_bootstrap_status_invalid", query=query), False, False
+    result = query_owner(
+        repo_root=authority_root, query=query, limit=limit,
+        service_url=service_url, service_token=service_token,
+        timeout_seconds=60.0,
+    )
+    if not isinstance(result, Mapping):
+        return _failure("owner_response_invalid", query=query), False, False
+    retryable = process_owned and str(result.get("error") or "") in TRANSIENT_OWNER_ERRORS
+    return result, retryable, True
+
+
+def _query_with_retry(
+    *, query: str, limit: int, authority_root: Path, runtime_root: Path,
+    ensure_owner: Callable[..., Any], resolve_handoff: Callable[..., Any],
+    query_owner: Callable[..., Mapping[str, Any]], cleanup_owner: Callable[[], None],
+    state: _OwnerQueryState,
+) -> tuple[Mapping[str, Any], bool]:
+    while state.attempts < MAX_OWNER_ATTEMPTS:
+        state.attempts += 1
+        result, retryable, bindable = _owner_attempt(
+            query=query, limit=limit, authority_root=authority_root,
+            runtime_root=runtime_root, ensure_owner=ensure_owner,
+            resolve_handoff=resolve_handoff, query_owner=query_owner, state=state,
+        )
+        if state.attempts != 1 or not retryable:
+            return result, bindable or retryable
+        state.retry_reason = str(result.get("error") or "")
+        cleanup_owner()
+        state.cleanup_required = False
+    return result, bindable
+
+
+def _bind_query_receipt(
+    result: Mapping[str, Any], *, query: str, repo_root: Path,
+    selection: HoloIndexAuthoritySelection, select_authority: Callable[..., Any],
+) -> Mapping[str, Any]:
+    final_selection = select_authority(repo_root)
+    if not _same_authority(selection, final_selection):
+        return {
+            **_failure("REPOSITORY_STATE_CHANGED_DURING_QUERY", query=query),
+            **_authority_metadata(selection),
+        }
+    bound = _bind_authority(result, final_selection, query)
+    try:
+        semantic_json, _, _ = canonical_semantic_evidence(bound.get("raw_result"))
+    except ValueError as exc:
+        return {
+            **_failure(str(exc), query=query),
+            **_authority_metadata(final_selection),
+        }
+    bound = {**dict(bound), "semantic_evidence_json": semantic_json}
+    receipt = build_query_receipt(
+        source="holoindex_owner_service", source_class="holoindex",
+        query=query, result=bound, require_generation=True,
+    )
+    return {**dict(bound), "query_receipt": dict(receipt)}
+
+
+def _admit_query(
+    request: _QueryRequest, repo_root: Path,
+    *, select_authority: Callable[..., HoloIndexAuthoritySelection],
+    preflight: Callable[..., ReadonlyQueryAdmission],
+    resolve_ssd_path: Callable[[], Path],
+) -> tuple[str, int, HoloIndexAuthoritySelection | None, Mapping[str, Any] | None]:
+    query, limit = request.query, request.limit
+    selection = select_authority(repo_root)
+    if not selection.accepted:
+        failure = {
+            **_failure(selection.error or "authority_selection_failed", query=query),
+            **_authority_metadata(selection),
+        }
+    else:
+        failure = _preflight_authority(
+            selection, query, preflight=preflight,
+            resolve_ssd_path=resolve_ssd_path,
+        )
+    if failure is not None:
+        failure = _with_retry_telemetry(failure, attempts=0, retry_reason="")
+    return query, limit, selection, failure
+
+
+def _bundle_authority(repo_root: Path, selection: HoloIndexAuthoritySelection):
+    return {
+        "repo_head_sha": selection.workspace_head_sha,
+        "repo_root_digest": repository_root_digest(repo_root),
+        "workspace_overlay_present": selection.workspace_overlay_present,
+        "evidence_authority": (
+            "workspace_overlay" if selection.workspace_overlay_present
+            else "workspace_head"
+        ),
+    }
+
+
+def _build_requested_bundle(request, repo_root, selection, bundle_builder):
+    if not request.include_bundle:
+        return None
+    try:
+        bundle = bundle_builder(
+            repo_root, request.query, limit=request.limit,
+            retrieval_mode="lexical", module_hint=request.module_hint,
+            must_include=list(request.must_include), bundle_only=True,
+        )
+    except Exception as exc:
+        bundle = {"schema_version": "wsp_memory_bundle_v1", "ok": False,
+                  "error": type(exc).__name__}
+    return {
+        "bundle": bundle, "bundle_ok": bundle.get("ok") is True,
+        "bundle_error": str(bundle.get("error") or ""),
+        "bundle_authority": _bundle_authority(repo_root, selection),
+    }
+
+
+def _lexical_result(request, selection, bundle_fields):
+    bundle = (bundle_fields or {}).get("bundle") or {}
+    result = {
+        "ok": bundle.get("ok") is True, "source": "holoindex_bundle",
+        "query": request.query, "freshness": "UNKNOWN", "raw_result": {},
+        "error": str(bundle.get("error") or ""), "index_gap_detected": True,
+        "stale_reasons": ["semantic_query_not_requested"],
+        "no_holoindex_reindex_performed": True, "owner_attempts": 0,
+        "owner_retry_performed": False, "owner_retry_reason": "",
+        **_authority_metadata(selection),
+    }
+    return {**result, **(bundle_fields or {}), "no_reindex": True}
+
+
+def _execute_admitted_query(
+    *, query: str, limit: int, repo_root: Path,
+    selection: HoloIndexAuthoritySelection, ensure_owner: Callable[..., Any],
+    resolve_handoff: Callable[..., Any], query_owner: Callable[..., Any],
+    cleanup_owner: Callable[[], None], select_authority: Callable[..., Any],
+    select_runtime_root: Callable[[Path], Path],
+) -> Mapping[str, Any]:
+    state = _OwnerQueryState()
+    try:
+        result, bindable = _query_with_retry(
+            query=query, limit=limit, authority_root=selection.selected_root,
+            runtime_root=select_runtime_root(repo_root), ensure_owner=ensure_owner,
+            resolve_handoff=resolve_handoff, query_owner=query_owner,
+            cleanup_owner=cleanup_owner, state=state,
+        )
+        if bindable:
+            result = _bind_query_receipt(
+                result, query=query, repo_root=repo_root, selection=selection,
+                select_authority=select_authority,
+            )
+        return _with_retry_telemetry(
+            result, attempts=state.attempts, retry_reason=state.retry_reason,
+        )
+    except Exception as exc:
+        return _with_retry_telemetry(
+            _failure(type(exc).__name__, query=query),
+            attempts=max(1, state.attempts), retry_reason=state.retry_reason,
+        )
+    finally:
+        if state.cleanup_required:
+            cleanup_owner()
+
+
 def query_once(
     payload: Mapping[str, Any],
     *,
@@ -171,151 +442,38 @@ def query_once(
         [Path], HoloIndexAuthoritySelection
     ] = resolve_holoindex_authority_root,
     select_runtime_root: Callable[[Path], Path] = resolve_holoindex_runtime_root,
+    preflight: Callable[..., ReadonlyQueryAdmission] = (
+        rehydrate_canonical_freshness_proof
+    ),
+    resolve_ssd_path: Callable[[], Path] = resolve_holoindex_ssd_path,
+    bundle_builder: Callable[..., Mapping[str, Any]] = build_wsp_memory_bundle,
 ) -> Mapping[str, Any]:
     """Execute one owner-bound query and always clean up process-owned state."""
 
-    query, limit, request_error = _bounded_request(payload)
-    if request_error:
-        return _failure(request_error)
+    request, request_error = _bounded_request(payload)
+    if request_error or request is None:
+        return _with_retry_telemetry(_failure(request_error), attempts=0, retry_reason="")
     selection = select_authority(repo_root)
-    if not selection.accepted:
-        return _with_retry_telemetry(
-            {
-                **_failure(
-                    selection.error or "authority_selection_failed", query=query
-                ),
-                **_authority_metadata(selection),
-            },
-            attempts=0,
-            retry_reason="",
-        )
-    authority_root = selection.selected_root
-
-    started_here = False
-    attempts = 0
-    retry_reason = ""
-    try:
-        while attempts < MAX_OWNER_ATTEMPTS:
-            attempts += 1
-            bootstrap = ensure_owner(
-                repo_root=authority_root,
-                runtime_root=select_runtime_root(repo_root),
-                requested=True,
-            )
-            status = str(getattr(bootstrap, "status", ""))
-            if getattr(bootstrap, "ready", False) is not True:
-                error = str(
-                    getattr(bootstrap, "error", "") or "owner_bootstrap_failed"
-                )
-                if attempts == 1 and error in TRANSIENT_OWNER_ERRORS:
-                    retry_reason = error
-                    cleanup_owner()
-                    continue
-                if error in TRANSIENT_OWNER_ERRORS:
-                    result = _failure(error, query=query)
-                    break
-                return _with_retry_telemetry(
-                    _failure(error, query=query),
-                    attempts=attempts,
-                    retry_reason=retry_reason,
-                )
-            process_owned = status in PROCESS_OWNED_STATUSES
-            started_here = status == OWNER_STARTED
-            service_url: str | None = None
-            service_token: str | None = None
-            if process_owned:
-                handoff = resolve_handoff()
-                if handoff is None:
-                    return _with_retry_telemetry(
-                        _failure("owner_handoff_missing", query=query),
-                        attempts=attempts,
-                        retry_reason=retry_reason,
-                    )
-                service_url, service_token = handoff
-            elif status != OWNER_CONFIGURED:
-                return _with_retry_telemetry(
-                    _failure("owner_bootstrap_status_invalid", query=query),
-                    attempts=attempts,
-                    retry_reason=retry_reason,
-                )
-
-            result = query_owner(
-                repo_root=authority_root,
-                query=query,
-                limit=limit,
-                service_url=service_url,
-                service_token=service_token,
-                timeout_seconds=60.0,
-            )
-            if not isinstance(result, Mapping):
-                return _with_retry_telemetry(
-                    _failure("owner_response_invalid", query=query),
-                    attempts=attempts,
-                    retry_reason=retry_reason,
-                )
-            error = str(result.get("error") or "")
-            if (
-                attempts == 1
-                and process_owned
-                and error in TRANSIENT_OWNER_ERRORS
-            ):
-                retry_reason = error
-                cleanup_owner()
-                started_here = False
-                continue
-            break
-
-        final_selection = select_authority(repo_root)
-        if not _same_authority(selection, final_selection):
-            return _with_retry_telemetry(
-                {
-                    **_failure(
-                        "REPOSITORY_STATE_CHANGED_DURING_QUERY", query=query
-                    ),
-                    **_authority_metadata(selection),
-                },
-                attempts=attempts,
-                retry_reason=retry_reason,
-            )
-        result = _bind_authority(result, final_selection, query)
-        try:
-            semantic_evidence_json, _, _ = canonical_semantic_evidence(
-                result.get("raw_result")
-            )
-        except ValueError as exc:
-            return _with_retry_telemetry(
-                {
-                    **_failure(str(exc), query=query),
-                    **_authority_metadata(final_selection),
-                },
-                attempts=attempts,
-                retry_reason=retry_reason,
-            )
-        result = {
-            **dict(result),
-            "semantic_evidence_json": semantic_evidence_json,
-        }
-        receipt = build_query_receipt(
-            source="holoindex_owner_service",
-            source_class="holoindex",
-            query=query,
-            result=result,
-            require_generation=True,
-        )
-        return _with_retry_telemetry(
-            {**dict(result), "query_receipt": dict(receipt)},
-            attempts=attempts,
-            retry_reason=retry_reason,
-        )
-    except Exception as exc:
-        return _with_retry_telemetry(
-            _failure(type(exc).__name__, query=query),
-            attempts=max(1, attempts),
-            retry_reason=retry_reason,
-        )
-    finally:
-        if started_here:
-            cleanup_owner()
+    bundle_fields = _build_requested_bundle(
+        request, repo_root, selection, bundle_builder,
+    )
+    if request.bundle_only or request.retrieval_mode == "lexical":
+        return _lexical_result(request, selection, bundle_fields)
+    query, limit, selection, failure = _admit_query(
+        request, repo_root, select_authority=lambda _root: selection,
+        preflight=preflight, resolve_ssd_path=resolve_ssd_path,
+    )
+    if failure is not None:
+        return {**failure, **(bundle_fields or {}), "no_reindex": True}
+    assert selection is not None
+    result = _execute_admitted_query(
+        query=query, limit=limit, repo_root=repo_root, selection=selection,
+        ensure_owner=ensure_owner, resolve_handoff=resolve_handoff,
+        query_owner=query_owner, cleanup_owner=cleanup_owner,
+        select_authority=select_authority,
+        select_runtime_root=select_runtime_root,
+    )
+    return {**result, **(bundle_fields or {}), "no_reindex": True}
 
 
 def main() -> int:

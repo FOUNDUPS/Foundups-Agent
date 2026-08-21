@@ -114,6 +114,7 @@ class FoundUpsMCPBridge:
         self._tools["holo_failure_memory"] = self._wrap(holo_tools.holo_failure_memory)
         self._tools["holo_pattern_search"] = self._wrap(holo_tools.holo_pattern_search)
         self._tools["holo_task_packet"] = self._wrap(holo_tools.holo_task_packet)
+        self._tools["holo_query_bundle"] = self._wrap(reddog_tools.holo_query_bundle)
 
         # Signal normalization tools (state compression)
         self._tools["get_overseer_summary"] = self._wrap(signal_normalization.get_overseer_summary)

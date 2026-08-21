@@ -46,7 +46,7 @@
     },
     {
       "integration_id": "hermes_api_artifact_provider", "name": "Hermes API Artifact Provider", "type": "artifact_generation_provider",
-      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "UPSTREAM_API", "capability_boundary": "text_artifact_only_no_tools", "provider_runtime": "hermes_api", "upstream_invocation_surface": "authenticated loopback POST /v1/runs",
+      "owner_module": "modules/communication/moltbot_bridge", "runtime_origin": "UPSTREAM_API", "capability_boundary": "native_single_leaf_delegate_no_child_tools", "provider_runtime": "hermes_api", "upstream_invocation_surface": "authenticated loopback POST /v1/runs with delegate_task event proof",
       "implementation_paths": [
         "modules/communication/moltbot_bridge/src/reddog_artifact_generation_provider_bootstrap.py",
         "modules/communication/moltbot_bridge/src/reddog_hermes_api_artifact_provider.py",

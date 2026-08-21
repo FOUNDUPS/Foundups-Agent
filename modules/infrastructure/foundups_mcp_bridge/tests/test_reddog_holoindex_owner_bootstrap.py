@@ -1,4 +1,4 @@
-"""WSP-focused tests for RedDog's host-owned HoloIndex bootstrap."""
+"""Owner lifecycle tests for RedDog's host-owned HoloIndex bootstrap."""
 
 from __future__ import annotations
 
@@ -6,295 +6,27 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
 
-from modules.infrastructure.foundups_mcp_bridge.src import (
-    reddog_holoindex_owner_bootstrap as bootstrap,
-)
-from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (
+from .reddog_holoindex_owner_bootstrap_support import (
+    REPLICA_BINDING,
+    SAFE_TOKEN,
+    SAFE_URL,
+    REAL_ENSURE_OWNER,
+    REAL_VERIFY_OWNER,
+    _FakeReplicaRoute,
+    _FakeSupervisor,
+    _clean_owner_state,
+    _full_route,
+    bootstrap,
+    configured,
+    HoloQueryServiceSupervisorError,
     SERVICE_TOKEN_ENV,
     SERVICE_URL_ENV,
-    HoloQueryServiceSupervisorError,
 )
-
-
-SAFE_TOKEN = "s" * 64
-SAFE_URL = "http://127.0.0.1:8127"
-REAL_CONFIGURED_HEALTH = bootstrap._configured_owner_health_ready
-
-
-class _FakeSupervisor:
-    instances: list["_FakeSupervisor"] = []
-
-    def __init__(
-        self,
-        *,
-        repo_root: Path | str,
-        ssd_path: Path | str,
-        runtime_root: Path | str | None = None,
-    ) -> None:
-        self.repo_root = Path(repo_root)
-        self.runtime_root = Path(runtime_root or repo_root)
-        self.ssd_path = Path(ssd_path)
-        self.started = False
-        self.stopped = False
-        self.verified_binding = ("", "", "", "")
-        self.__class__.instances.append(self)
-
-    @property
-    def is_ready(self) -> bool:
-        return self.started and not self.stopped
-
-    def start(
-        self,
-        *,
-        expected_repo_head_sha: str = "",
-        expected_repo_root_digest: str = "",
-        expected_generation_id: str = "",
-        expected_receipt_digest: str = "",
-    ) -> "_FakeSupervisor":
-        self.started = True
-        self.stopped = False
-        self.verified_binding = (
-            expected_repo_head_sha,
-            expected_repo_root_digest,
-            expected_generation_id,
-            expected_receipt_digest,
-        )
-        return self
-
-    def environment_for_child(
-        self,
-        _base_environment: dict[str, str],
-    ) -> dict[str, str]:
-        if not self.is_ready:
-            raise HoloQueryServiceSupervisorError(
-                "HOLOINDEX_QUERY_SERVICE_NOT_READY"
-            )
-        return {
-            SERVICE_URL_ENV: SAFE_URL,
-            SERVICE_TOKEN_ENV: SAFE_TOKEN,
-        }
-
-    def stop(self) -> None:
-        self.stopped = True
-        self.verified_binding = ("", "", "", "")
-
-
-@pytest.fixture(autouse=True)
-def _clean_owner_state(monkeypatch: pytest.MonkeyPatch):
-    bootstrap.cleanup_reddog_holoindex_owner(restore_environment=True)
-    _FakeSupervisor.instances.clear()
-    monkeypatch.setattr(
-        bootstrap,
-        "_configured_owner_health_ready",
-        lambda **_kwargs: True,
-    )
-    for name in (
-        bootstrap.AUTO_START_ENV,
-        SERVICE_TOKEN_ENV,
-        SERVICE_URL_ENV,
-    ):
-        monkeypatch.delenv(name, raising=False)
-    yield
-    bootstrap.cleanup_reddog_holoindex_owner(restore_environment=True)
-    os.environ.pop(SERVICE_URL_ENV, None)
-    os.environ.pop(SERVICE_TOKEN_ENV, None)
-
-
-def test_not_requested_has_no_process_or_environment_side_effect(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(
-        bootstrap,
-        "HoloQueryServiceSupervisor",
-        Mock(side_effect=AssertionError("must not start")),
-    )
-
-    result = bootstrap.ensure_reddog_holoindex_owner(
-        repo_root=tmp_path,
-        requested=False,
-    )
-
-    assert result.status == bootstrap.OWNER_NOT_REQUESTED
-    assert result.ready is False
-    assert SERVICE_URL_ENV not in os.environ
-    assert SERVICE_TOKEN_ENV not in os.environ
-
-
-@pytest.mark.parametrize(
-    "url",
-    [
-        "http://127.0.0.1:8127",
-        "http://127.0.0.1",
-        "http://127.0.0.1:8127/holoindex/v1/query",
-        "http://127.0.0.1:8127/holoindex/v1/query/",
-    ],
-)
-def test_explicit_loopback_service_bypasses_auto_start(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    url: str,
-) -> None:
-    monkeypatch.setenv(SERVICE_URL_ENV, url)
-    monkeypatch.setenv(SERVICE_TOKEN_ENV, SAFE_TOKEN)
-    constructor = Mock(side_effect=AssertionError("configured service must win"))
-    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", constructor)
-
-    result = bootstrap.ensure_reddog_holoindex_owner(
-        repo_root=tmp_path,
-        requested=True,
-    )
-
-    assert result.ready is True
-    assert result.status == bootstrap.OWNER_CONFIGURED
-    assert bootstrap.resolve_reddog_holoindex_owner_handoff() is None
-    constructor.assert_not_called()
-
-
-def test_verify_binding_uses_configured_owner_health_without_starting(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv(SERVICE_URL_ENV, SAFE_URL)
-    monkeypatch.setenv(SERVICE_TOKEN_ENV, SAFE_TOKEN)
-    health = Mock(return_value=True)
-    monkeypatch.setattr(bootstrap, "_configured_owner_health_ready", health)
-
-    assert bootstrap.verify_reddog_holoindex_owner_binding(
-        repo_root=tmp_path,
-        expected_repo_head_sha="a" * 40,
-        expected_generation_id="sha256:" + ("b" * 64),
-        expected_receipt_digest="sha256:" + ("c" * 64),
-    )
-
-    health.assert_called_once_with(
-        service_url=SAFE_URL,
-        token=SAFE_TOKEN,
-        expected_repo_head_sha="a" * 40,
-        expected_repo_root_digest=bootstrap.repository_root_digest(tmp_path),
-        expected_generation_id="sha256:" + ("b" * 64),
-        expected_receipt_digest="sha256:" + ("c" * 64),
-    )
-
-
-def test_verify_binding_rejects_owned_owner_serving_another_generation(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
-    started = bootstrap.ensure_reddog_holoindex_owner(
-        repo_root=tmp_path,
-        requested=True,
-        expected_repo_head_sha="a" * 40,
-        expected_generation_id="sha256:" + ("b" * 64),
-        expected_receipt_digest="sha256:" + ("c" * 64),
-    )
-    assert started.ready is True
-
-    assert not bootstrap.verify_reddog_holoindex_owner_binding(
-        repo_root=tmp_path,
-        expected_repo_head_sha="a" * 40,
-        expected_generation_id="sha256:" + ("d" * 64),
-        expected_receipt_digest="sha256:" + ("c" * 64),
-    )
-
-
-def test_configured_health_wrapper_uses_authenticated_loopback_probe(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    probe = Mock(return_value=True)
-    monkeypatch.setattr(bootstrap, "_authenticated_health_probe", probe)
-
-    assert REAL_CONFIGURED_HEALTH(
-        service_url="http://127.0.0.1:9127/holoindex/v1/query",
-        token=SAFE_TOKEN,
-    )
-
-    probe.assert_called_once_with(
-        host="127.0.0.1",
-        port=9127,
-        token=SAFE_TOKEN,
-        timeout_seconds=bootstrap.CONFIGURED_HEALTH_TIMEOUT_SECONDS,
-    )
-
-
-def test_final_binding_probe_allows_bounded_semantic_canary_latency(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    observed: list[float] = []
-
-    def probe(**kwargs) -> bool:
-        observed.append(float(kwargs["timeout_seconds"]))
-        return kwargs["timeout_seconds"] >= 1.1
-
-    monkeypatch.setattr(bootstrap, "_authenticated_health_probe", probe)
-
-    assert REAL_CONFIGURED_HEALTH(
-        service_url=SAFE_URL,
-        token=SAFE_TOKEN,
-        expected_repo_head_sha="a" * 40,
-        expected_generation_id="sha256:" + ("b" * 64),
-        expected_receipt_digest="sha256:" + ("c" * 64),
-    )
-    assert observed == [bootstrap.CONFIGURED_HEALTH_TIMEOUT_SECONDS]
-    assert observed[0] == bootstrap.DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS
-
-
-def test_private_handoff_uses_binding_proven_during_supervisor_startup(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    health = Mock(side_effect=AssertionError("handoff must not rerun semantic health"))
-    monkeypatch.setattr(bootstrap, "_configured_owner_health_ready", health)
-    supervisor = _FakeSupervisor(repo_root=tmp_path, ssd_path=tmp_path)
-    supervisor.start(
-        expected_repo_head_sha="a" * 40,
-        expected_repo_root_digest="sha256:" + ("d" * 64),
-        expected_generation_id="sha256:" + ("b" * 64),
-        expected_receipt_digest="sha256:" + ("c" * 64),
-    )
-
-    handoff = bootstrap._validated_owner_handoff(
-        supervisor,
-        expected_repo_head_sha="a" * 40,
-        expected_repo_root_digest="sha256:" + ("d" * 64),
-        expected_generation_id="sha256:" + ("b" * 64),
-        expected_receipt_digest="sha256:" + ("c" * 64),
-    )
-
-    assert handoff == (SAFE_URL, SAFE_TOKEN)
-    health.assert_not_called()
-
-
-def test_private_handoff_fails_closed_when_supervisor_proved_another_binding(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    health = Mock(side_effect=AssertionError("handoff must not rerun semantic health"))
-    monkeypatch.setattr(bootstrap, "_configured_owner_health_ready", health)
-    supervisor = _FakeSupervisor(repo_root=tmp_path, ssd_path=tmp_path)
-    supervisor.start(
-        expected_repo_head_sha="d" * 40,
-        expected_repo_root_digest="sha256:" + ("a" * 64),
-        expected_generation_id="sha256:" + ("e" * 64),
-        expected_receipt_digest="sha256:" + ("f" * 64),
-    )
-
-    with pytest.raises(HoloQueryServiceSupervisorError) as exc_info:
-        bootstrap._validated_owner_handoff(
-            supervisor,
-            expected_repo_head_sha="a" * 40,
-            expected_repo_root_digest="sha256:" + ("d" * 64),
-            expected_generation_id="sha256:" + ("b" * 64),
-            expected_receipt_digest="sha256:" + ("c" * 64),
-        )
-
-    assert exc_info.value.code == bootstrap.CONFIGURED_UNREADY_ERROR
-    health.assert_not_called()
 
 
 @pytest.mark.parametrize(
@@ -359,6 +91,7 @@ def test_configured_service_requires_authenticated_semantic_health(
         expected_repo_root_digest=bootstrap.repository_root_digest(tmp_path),
         expected_generation_id="",
         expected_receipt_digest="",
+        expected_replica_binding=REPLICA_BINDING,
     )
     constructor.assert_not_called()
 
@@ -386,22 +119,21 @@ def test_auto_start_uses_canonical_store_and_keeps_handoff_process_private(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    store = tmp_path / "canonical-holo-store"
-    resolver = Mock(return_value=store)
-    monkeypatch.setattr(bootstrap, "resolve_holoindex_ssd_path", resolver)
+    route = _full_route(tmp_path)
     monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
     monkeypatch.setenv("UNRELATED_VALUE", "preserved")
 
     result = bootstrap.ensure_reddog_holoindex_owner(
         repo_root=tmp_path,
         requested=True,
+        query_replica_route=route,
     )
 
     assert result.ready is True
     assert result.status == bootstrap.OWNER_STARTED
     assert len(_FakeSupervisor.instances) == 1
-    assert _FakeSupervisor.instances[0].ssd_path == store
-    resolver.assert_called_once_with(environ=os.environ)
+    assert _FakeSupervisor.instances[0].ssd_path == route.canonical_ssd_path
+    assert not hasattr(bootstrap, "resolve_holoindex_ssd_path")
     assert SERVICE_URL_ENV not in os.environ
     assert SERVICE_TOKEN_ENV not in os.environ
     assert bootstrap.resolve_reddog_holoindex_owner_handoff() == (
@@ -454,6 +186,81 @@ def test_owner_starts_once_and_reuses_process_lifetime_instance(
         SAFE_URL,
         SAFE_TOKEN,
     )
+
+
+def test_exact_replica_binding_reuses_owned_process(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+    binding = ("descriptor", "generation", "replica", "path")
+    first_route = _FakeReplicaRoute(tmp_path, binding)
+    equivalent_route = _FakeReplicaRoute(tmp_path, binding)
+
+    first = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path, requested=True, query_replica_route=first_route
+    )
+    reused = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path, requested=True, query_replica_route=equivalent_route
+    )
+
+    assert first.status == bootstrap.OWNER_STARTED
+    assert reused.status == bootstrap.OWNER_REUSED
+    assert len(_FakeSupervisor.instances) == 1
+    assert _FakeSupervisor.instances[0].verified_replica_binding == binding
+    assert equivalent_route.revalidations > 0
+    assert _FakeSupervisor.instances[0].lifecycle_events == ["process", "health"]
+
+
+@pytest.mark.parametrize("changed_index", (0, 1, 2, 3))
+def test_replica_descriptor_or_generation_drift_forces_restart(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    changed_index: int,
+) -> None:
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+    original = ["descriptor", "generation", "replica", "path"]
+    changed = list(original)
+    changed[changed_index] += "-changed"
+    first_route = _FakeReplicaRoute(tmp_path, tuple(original))
+    changed_route = _FakeReplicaRoute(tmp_path, tuple(changed))
+
+    first = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path, requested=True, query_replica_route=first_route
+    )
+    first_owner = _FakeSupervisor.instances[0]
+    replacement = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path, requested=True, query_replica_route=changed_route
+    )
+
+    assert first.status == bootstrap.OWNER_STARTED
+    assert replacement.status == bootstrap.OWNER_STARTED
+    assert first_owner.stopped is True
+    assert len(_FakeSupervisor.instances) == 2
+    assert _FakeSupervisor.instances[1].verified_replica_binding == tuple(changed)
+
+
+def test_active_replica_swap_during_start_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+    route = _FakeReplicaRoute(
+        tmp_path,
+        ("descriptor", "generation", "replica", "path"),
+        fail_on_revalidation=3,
+    )
+
+    result = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path, requested=True, query_replica_route=route
+    )
+
+    assert result.ready is False
+    assert result.status == bootstrap.OWNER_FAILED
+    assert result.error == bootstrap.BOOTSTRAP_FAILED_ERROR
+    assert _FakeSupervisor.instances[0].lifecycle_events == []
+    assert _FakeSupervisor.instances[0].stopped is True
+    assert bootstrap.resolve_reddog_holoindex_owner_handoff() is None
 
 
 def test_changed_exact_binding_replaces_owned_process_instead_of_reusing_it(
@@ -617,9 +424,11 @@ def test_explicit_private_restart_replaces_failed_handoff(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+    route = _full_route(tmp_path)
     started = bootstrap.ensure_reddog_holoindex_owner(
         repo_root=tmp_path,
         requested=True,
+        query_replica_route=route,
     )
     first = _FakeSupervisor.instances[0]
     failed_handoff = bootstrap.resolve_reddog_holoindex_owner_handoff()
@@ -631,7 +440,31 @@ def test_explicit_private_restart_replaces_failed_handoff(
     assert started.ready is True
     assert first.stopped is True
     assert len(_FakeSupervisor.instances) == 2
+    assert _FakeSupervisor.instances[1].verified_replica_binding == REPLICA_BINDING
+    assert route.revalidations > 0
     assert restarted == (SAFE_URL, SAFE_TOKEN)
+
+
+def test_restart_with_missing_saved_replica_route_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+    route = _full_route(tmp_path)
+    started = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path, requested=True, query_replica_route=route
+    )
+    handoff = bootstrap.resolve_reddog_holoindex_owner_handoff()
+    assert started.ready is True and handoff is not None
+    first = _FakeSupervisor.instances[0]
+    bootstrap._OWNER_REPLICA_ROUTE = None
+
+    assert bootstrap.restart_reddog_holoindex_owner(
+        failed_handoff=handoff
+    ) is None
+    assert first.stopped is True
+    assert len(_FakeSupervisor.instances) == 1
+    assert bootstrap.resolve_reddog_holoindex_owner_handoff() is None
 
 
 def test_explicit_cleanup_stops_owner_and_clears_private_handoff(
@@ -653,6 +486,27 @@ def test_explicit_cleanup_stops_owner_and_clears_private_handoff(
     assert bootstrap.resolve_reddog_holoindex_owner_handoff() is None
     assert SERVICE_URL_ENV not in os.environ
     assert SERVICE_TOKEN_ENV not in os.environ
+
+
+def test_cleanup_expected_handoff_never_stops_replaced_owner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+    bootstrap.ensure_reddog_holoindex_owner(repo_root=tmp_path, requested=True)
+    owner = _FakeSupervisor.instances[0]
+    handoff = bootstrap.resolve_reddog_holoindex_owner_handoff()
+    assert handoff is not None
+
+    rejected = bootstrap.cleanup_reddog_holoindex_owner(
+        expected_handoff=(handoff[0], "different-private-token")
+    )
+
+    assert rejected is False
+    assert owner.stopped is False
+    assert bootstrap.resolve_reddog_holoindex_owner_handoff() == handoff
+    assert bootstrap.cleanup_reddog_holoindex_owner(expected_handoff=handoff) is True
+    assert owner.stopped is True
 
 
 def test_supervisor_failure_returns_only_stable_error_code(
@@ -687,8 +541,7 @@ def test_unexpected_bootstrap_failure_is_collapsed_to_stable_code(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        bootstrap,
-        "resolve_holoindex_ssd_path",
+        bootstrap, "HoloQueryServiceSupervisor",
         Mock(side_effect=RuntimeError(f"do not expose {SAFE_TOKEN}")),
     )
 

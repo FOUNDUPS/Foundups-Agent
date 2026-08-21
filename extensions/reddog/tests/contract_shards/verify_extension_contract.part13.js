@@ -89,7 +89,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.101'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.102'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -161,7 +161,7 @@ try {
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.101'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.102'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -173,7 +173,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.101'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.102'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -324,12 +324,15 @@ try {
   includes(extensionJs, 'const { status, stat, diff } = governedGitSnapshot(root);',
     'final context must use one validated governed Git snapshot');
   const governedGitStorageJs = fs.readFileSync(path.join(extDir, 'governed_git_storage.js'), 'utf8');
-  includes(governedGitStorageJs, 'storageFingerprint(gitDir, 20000)',
-    'Git storage fingerprinting must be bounded before cache lookup');
-  includes(governedGitStorageJs, 'const handle = fs.opendirSync(directory);',
-    'Git metadata traversal must stream directory entries under its global cap');
-  includes(governedGitStorageJs, 'metadata.ino, metadata.mtimeMs',
-    'Git storage fingerprints must bind control-file identity as well as timestamps');
+  assert(governedGitStorageJs.includes('function authorityReceipt(root, gitEntry) {') && governedGitStorageJs.includes("const dirs = ['objects', 'refs', 'refs/heads', 'info', 'objects/info']"), 'Git receipt must scope authority and required ordinary directories');
+  assert(governedGitStorageJs.includes('function sameDirectory(left, right) {') && governedGitStorageJs.includes('sameCanonicalPath(canonical, candidate)'), 'nested directory identity and confinement must be stable');
+  assert(governedGitStorageJs.includes("return relative.split('/').every") && governedGitStorageJs.includes("!part.endsWith('.lock')") && governedGitStorageJs.includes('function refParentChain(common, refName) {'), 'supported heads grammar and parent chain must validate every component');
+  assert(governedGitStorageJs.includes('const content = Buffer.allocUnsafe(opened.size);') && governedGitStorageJs.includes('fs.readSync(handle, content, offset, opened.size - offset, offset)'), 'control allocation and fd reads must be opened-size bounded');
+  assert(governedGitStorageJs.includes("content: name === 'index' ? '' : content.toString('utf8')"), 'binary index bytes must not be duplicated as UTF-8 text');
+  assert(governedGitStorageJs.includes('const targetsCurrent = tokens.includes(refName);') && governedGitStorageJs.includes("const canonical = /^([0-9a-f]+) ([^\\s]+)$/i.exec(line);") && governedGitStorageJs.includes('validOid(canonical[1])') && governedGitStorageJs.includes('function noFollowPathEntry(filePath) {') && fs.readFileSync(path.join(extDir, 'governed_git_context.js'), 'utf8').includes('registeredGitMetadataState(canonicalRoot)'), 'packed refs and all presence decisions must use exact classification');
+  assert(governedGitStorageJs.includes("const prefix = 'refs/heads/';") && governedGitStorageJs.includes('(value.length === 40 || value.length === 64)') && !governedGitStorageJs.includes('function objectFormat(') && fs.readFileSync(path.join(extDir, 'governed_git_projection.js'), 'utf8').includes("['rev-parse', '--verify', 'HEAD^{commit}']"), 'receipt OIDs must be width-bounded while Git retains object/config semantics');
+  const governedGitProjectionJs = fs.readFileSync(path.join(extDir, 'governed_git_projection.js'), 'utf8');
+  assert(governedGitProjectionJs.includes("const { noFollowPathEntry } = require('./governed_git_storage');") && governedGitProjectionJs.includes('function projectionPathState(root, relPath) {') && !governedGitProjectionJs.includes('fs.existsSync(full)') && governedGitProjectionJs.includes('function readOpenedBytes(handle, size, maxSize) {') && governedGitProjectionJs.includes('function openedFileMatches(before, opened, maxSize) {') && governedGitProjectionJs.includes('Number.isSafeInteger(size)') && governedGitProjectionJs.includes('fs.readSync(handle, bytes, offset, size - offset, offset)'), 'projection absence and content reads must remain no-follow, identity-bound, and capped before allocation');
 } finally {
   for (const key of injectedGitEnvKeys) {
     if (savedGitEnv[key] === undefined) delete process.env[key];

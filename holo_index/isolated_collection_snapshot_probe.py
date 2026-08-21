@@ -6,6 +6,7 @@ import argparse
 import json
 import math
 import os
+import stat
 import subprocess  # nosec B404  # Fixed interpreter/module, never a worker command.
 import sys
 import tempfile
@@ -26,6 +27,13 @@ from holo_index.freshness_receipt import (
 from holo_index.storage_contract import storage_path_identity
 from holo_index.persisted_vector_segment_probe import unqueryable_vector_segments
 from holo_index.vector_segment_durability import non_durable_vector_segments
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_sealed_holo_runtime import (
+    scrub_holo_child_environment,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_process_image import (
+    ProcessExecutableProofError,
+    hold_process_executable_for_launch,
+)
 
 
 SCHEMA_VERSION = "holoindex_isolated_snapshot_probe.v1"
@@ -33,6 +41,16 @@ MAX_RECEIPT_BYTES = 2_000_000
 MAX_PROCESS_OUTPUT_BYTES = 16_384
 DEFAULT_TIMEOUT_SECONDS = 180.0
 SUPPORTED_CHROMADB_VERSIONS = frozenset({"1.5.5"})
+STABLE_RUNTIME_ERRORS = frozenset({
+    "CANDIDATE_SOURCE_ORIGIN_INVALID",
+    "RUNTIME_DEPENDENCY_UNAVAILABLE",
+    "UNSUPPORTED_CHROMADB_VERSION",
+})
+_PROBE_ERRORS = STABLE_RUNTIME_ERRORS | {
+    "", "BASELINE_COLLECTIONS_INCOMPLETE", "COLLECTION_SNAPSHOT_MISMATCH",
+    "INVALID_RECEIPT_INTEGRITY", "INVALID_REQUEST", "PERSISTED_STORE_UNAVAILABLE",
+    "SSD_PATH_MISMATCH", "VECTOR_SEGMENT_UNAVAILABLE",
+}
 
 
 class IsolatedSnapshotProbeError(RuntimeError):
@@ -41,6 +59,10 @@ class IsolatedSnapshotProbeError(RuntimeError):
     def __init__(self, code: str) -> None:
         self.code = code
         super().__init__(code)
+
+
+class _RuntimeDependencyError(ValueError):
+    pass
 
 
 @dataclass(frozen=True)
@@ -83,7 +105,9 @@ def _receipt_from_mapping(value: Mapping[str, Any]) -> HoloIndexFreshnessReceipt
     )
 
 
-def _default_client_factory(ssd_path: Path) -> Any:
+def _default_client_factory(
+    ssd_path: Path, runtime_site_packages: Path | None = None,
+) -> Any:
     os.environ.update(
         {
             "ANONYMIZED_TELEMETRY": "false",
@@ -94,11 +118,18 @@ def _default_client_factory(ssd_path: Path) -> Any:
             "TRANSFORMERS_OFFLINE": "1",
         }
     )
-    import chromadb
-    from chromadb.config import Settings
+    try:
+        import chromadb
+        from chromadb.config import Settings
+    except (ImportError, OSError):
+        raise _RuntimeDependencyError("RUNTIME_DEPENDENCY_UNAVAILABLE") from None
 
     if str(getattr(chromadb, "__version__", "")) not in SUPPORTED_CHROMADB_VERSIONS:
-        raise ValueError("unsupported_chromadb_version")
+        raise _RuntimeDependencyError("UNSUPPORTED_CHROMADB_VERSION")
+    if runtime_site_packages is not None:
+        origin = Path(str(getattr(chromadb, "__file__", ""))).resolve(strict=False)
+        if not origin.is_file() or not origin.is_relative_to(runtime_site_packages):
+            raise _RuntimeDependencyError("RUNTIME_DEPENDENCY_UNAVAILABLE")
 
     return chromadb.PersistentClient(
         path=str(ssd_path / "vectors"),
@@ -227,8 +258,8 @@ def _snapshot_mismatches(
     )
 
 
-def _probe_environment() -> dict[str, str]:
-    environment = dict(os.environ)
+def _probe_environment(runtime_site_packages: Path | None = None) -> dict[str, str]:
+    environment = scrub_holo_child_environment(os.environ)
     environment.update(
         {
             "ANONYMIZED_TELEMETRY": "false",
@@ -239,7 +270,54 @@ def _probe_environment() -> dict[str, str]:
             "TRANSFORMERS_OFFLINE": "1",
         }
     )
+    if runtime_site_packages is not None:
+        environment["PYTHONPATH"] = str(runtime_site_packages)
     return environment
+
+
+def _is_link_or_reparse(path: Path) -> bool:
+    metadata = os.lstat(path)
+    return bool(
+        stat.S_ISLNK(metadata.st_mode)
+        or getattr(metadata, "st_file_attributes", 0)
+        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+        or getattr(path, "is_junction", lambda: False)()
+    )
+
+
+def _validated_runtime_site_packages(values: Sequence[str]) -> Path:
+    if len(values) != 1:
+        raise IsolatedSnapshotProbeError("RUNTIME_DEPENDENCY_UNAVAILABLE")
+    raw = Path(values[0])
+    try:
+        resolved = raw.resolve(strict=True)
+        if (
+            not raw.is_absolute()
+            or os.path.normcase(str(raw)) != os.path.normcase(str(resolved))
+            or not resolved.is_dir()
+            or resolved.name.lower() != "site-packages"
+            or resolved.parent.name.lower() != "lib"
+            or resolved.parent.parent.name.lower() != ".venv"
+        ):
+            raise ValueError
+        current = Path(resolved.anchor)
+        for component in resolved.parts[1:]:
+            current /= component
+            if _is_link_or_reparse(current):
+                raise ValueError
+    except (OSError, ValueError):
+        raise IsolatedSnapshotProbeError("RUNTIME_DEPENDENCY_UNAVAILABLE") from None
+    return resolved
+
+
+def _runtime_executable(runtime: Path | None, proof: object) -> Path:
+    if runtime is None:
+        return Path(sys.executable)
+    try:
+        path = Path(proof.path)
+    except (AttributeError, TypeError, ValueError):
+        raise IsolatedSnapshotProbeError("RUNTIME_DEPENDENCY_UNAVAILABLE") from None
+    return path
 
 
 def _bounded_process_stdout(
@@ -276,31 +354,49 @@ def _run_isolated_probe(
     ssd_path: Path | str,
     repo_root: Path | str,
     timeout_seconds: float,
+    runtime_site_packages: Sequence[str] | None = None,
+    base_executable_proof: object = None,
+    runner: Callable[..., Any] | None = None,
 ) -> str:
-    command = [
-        sys.executable,
-        "-B",
-        "-m",
-        "holo_index.isolated_collection_snapshot_probe",
-        "--ssd",
-        str(Path(ssd_path).resolve(strict=False)),
-    ]
+    runtime = (
+        _validated_runtime_site_packages(runtime_site_packages)
+        if runtime_site_packages is not None else None
+    )
+    executable = _runtime_executable(runtime, base_executable_proof)
+    command = _probe_command(executable, ssd_path, repo_root, runtime)
+    process_runner = runner if runner is not None else subprocess.run
     try:
         with (
             tempfile.TemporaryFile() as stdout_file,
             tempfile.TemporaryFile() as stderr_file,
         ):
-            completed = subprocess.run(  # nosec B603  # Fixed argv; shell is disabled.
-                command,
-                cwd=str(Path(repo_root).resolve(strict=False)),
-                env=_probe_environment(),
-                input=receipt.to_json().encode("utf-8"),
-                stdout=stdout_file,
-                stderr=stderr_file,
-                timeout=float(timeout_seconds),
-                check=False,
-                shell=False,
-            )
+            runner_kwargs = {
+                "cwd": str(Path(repo_root).resolve(strict=False)),
+                "env": _probe_environment(runtime),
+                "input": receipt.to_json().encode("utf-8"),
+                "stdout": stdout_file,
+                "stderr": stderr_file,
+                "timeout": float(timeout_seconds),
+                "check": False,
+                "shell": False,
+            }
+            if runtime is None:
+                completed = process_runner(command, **runner_kwargs)
+            else:
+                try:
+                    with hold_process_executable_for_launch(
+                        base_executable_proof
+                    ) as capability:
+                        command[0] = str(capability.launch_path)
+                        if capability.pass_fds:
+                            runner_kwargs["pass_fds"] = capability.pass_fds
+                        completed = process_runner(  # nosec B603
+                            command, **runner_kwargs
+                        )
+                except ProcessExecutableProofError:
+                    raise IsolatedSnapshotProbeError(
+                        "RUNTIME_DEPENDENCY_UNAVAILABLE"
+                    ) from None
             stdout = _bounded_process_stdout(completed, stdout_file, stderr_file)
     except (OSError, subprocess.SubprocessError, ValueError):
         raise IsolatedSnapshotProbeError("ISOLATED_PROBE_PROCESS_FAILED") from None
@@ -311,6 +407,19 @@ def _run_isolated_probe(
     ):
         raise IsolatedSnapshotProbeError("ISOLATED_PROBE_PROCESS_FAILED")
     return stdout
+
+
+def _probe_command(
+    executable: Path, ssd_path: Path | str, repo_root: Path | str,
+    runtime: Path | None,
+) -> list[str]:
+    command = [str(executable), *(["-S"] if runtime else []), "-B", "-m",
+               "holo_index.isolated_collection_snapshot_probe", "--ssd",
+               str(Path(ssd_path).resolve(strict=False))]
+    if runtime:
+        command.extend(["--runtime-site-packages", str(runtime), "--repo-root",
+                        str(Path(repo_root).resolve(strict=False))])
+    return command
 
 
 def _validated_probe_response(
@@ -340,6 +449,7 @@ def _validated_probe_response(
         or response.get("schema_version") != SCHEMA_VERSION
         or not isinstance(response.get("ok"), bool)
         or not isinstance(response.get("error"), str)
+        or response.get("error") not in _PROBE_ERRORS
         or response.get("generation_id") != generation_id
         or not valid_mismatches
     ):
@@ -353,12 +463,15 @@ def verify_collection_snapshots_isolated(
     ssd_path: Path | str,
     repo_root: Path | str,
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+    runtime_site_packages: Sequence[str] | None = None,
+    base_executable_proof: object = None,
 ) -> list[str]:
     """Run the persisted proof in a fresh Python process or fail closed."""
 
     deadline = _probe_deadline(timeout_seconds)
     response = _run_validated_probe(
-        receipt, ssd_path, repo_root, _remaining_timeout(deadline)
+        receipt, ssd_path, repo_root, _remaining_timeout(deadline),
+        runtime_site_packages, base_executable_proof,
     )
     mismatches = response["mismatched_collections"]
     if _probe_succeeded(response):
@@ -377,8 +490,13 @@ def _run_validated_probe(
     ssd_path: Path | str,
     repo_root: Path | str,
     timeout_seconds: float,
+    runtime_site_packages: Sequence[str] | None = None,
+    base_executable_proof: object = None,
 ) -> Mapping[str, Any]:
-    stdout = _run_isolated_probe(receipt, ssd_path, repo_root, timeout_seconds)
+    stdout = _run_isolated_probe(
+        receipt, ssd_path, repo_root, timeout_seconds, runtime_site_packages,
+        base_executable_proof,
+    )
     return _validated_probe_response(stdout, receipt.generation_id)
 
 
@@ -420,11 +538,24 @@ def _read_receipt() -> HoloIndexFreshnessReceipt:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--ssd", required=True)
+    parser.add_argument("--runtime-site-packages")
+    parser.add_argument("--repo-root")
     args = parser.parse_args(argv)
+    generation_id = ""
     try:
         receipt = _read_receipt()
+        generation_id = receipt.generation_id
         original_ssd = Path(args.ssd).resolve(strict=False)
-        client = _default_client_factory(original_ssd)
+        runtime = None
+        if args.runtime_site_packages:
+            runtime = _validated_runtime_site_packages((args.runtime_site_packages,))
+            if (
+                not args.repo_root
+                or Path(args.repo_root).resolve(strict=False)
+                != Path(__file__).resolve().parents[1]
+            ):
+                raise _RuntimeDependencyError("CANDIDATE_SOURCE_ORIGIN_INVALID")
+        client = _default_client_factory(original_ssd, runtime)
         try:
             result = probe_collection_snapshots(
                 receipt,
@@ -433,8 +564,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         finally:
             finalize_chroma_client(client)
+    except _RuntimeDependencyError as exc:
+        result = IsolatedSnapshotProbeResult(False, generation_id, (), str(exc))
+    except IsolatedSnapshotProbeError as exc:
+        result = IsolatedSnapshotProbeResult(False, generation_id, (), exc.code)
     except Exception:
-        result = IsolatedSnapshotProbeResult(False, "", (), "INVALID_REQUEST")
+        result = IsolatedSnapshotProbeResult(False, generation_id, (), "INVALID_REQUEST")
     sys.stdout.write(json.dumps(result.to_dict(), sort_keys=True) + "\n")
     return 0
 
@@ -446,6 +581,7 @@ if __name__ == "__main__":
 __all__ = [
     "IsolatedSnapshotProbeError",
     "IsolatedSnapshotProbeResult",
+    "STABLE_RUNTIME_ERRORS",
     "finalize_chroma_client",
     "open_persisted_collection_view",
     "probe_collection_snapshots",

@@ -43,7 +43,7 @@ class FakeTransport:
         self.toolsets = toolsets or _toolsets()
         self.skills = skills or {"object": "list", "data": []}
         self.capabilities = capabilities or _capabilities()
-        self.events = list(events) if events is not None else [_event_for_status(self.statuses[-1])]
+        self.events = list(events) if events is not None else _native_events(self.statuses[-1])
 
     def request(self, method, path, *, headers, payload, timeout_seconds):
         self.calls.append((method, path, dict(headers), payload, timeout_seconds))
@@ -90,6 +90,7 @@ def _capabilities():
     features = {
         "run_submission": True, "run_status": True, "run_events_sse": True,
         "run_stop": True,
+        "run_steer": True,
         "run_approval_response": True, "tool_progress_events": True,
         "approval_events": True,
     }
@@ -98,6 +99,8 @@ def _capabilities():
         "run_status": {"method": "GET", "path": "/v1/runs/{run_id}"},
         "run_events": {"method": "GET", "path": "/v1/runs/{run_id}/events"},
         "run_stop": {"method": "POST", "path": "/v1/runs/{run_id}/stop"},
+        "run_approval": {"method": "POST", "path": "/v1/runs/{run_id}/approval"},
+        "run_steer": {"method": "POST", "path": "/v1/runs/{run_id}/steer"},
         "skills": {"method": "GET", "path": "/v1/skills"},
         "toolsets": {"method": "GET", "path": "/v1/toolsets"},
     }
@@ -119,7 +122,9 @@ def _health():
 
 def _toolsets(*, enabled=False):
     return {"object": "list", "platform": "api_server", "data": [
-        {"name": "terminal", "enabled": enabled, "configured": True, "tools": ["terminal"]}
+        {"name": "terminal", "enabled": enabled, "configured": True, "tools": ["terminal"]},
+        {"name": "delegation", "enabled": True, "configured": True,
+         "tools": ["delegate_task"]},
     ]}
 
 
@@ -139,6 +144,23 @@ def _event_for_status(status):
     if state == "completed":
         event["output"] = status.get("output")
     return event
+
+
+def _native_events(status):
+    terminal = _event_for_status(status)
+    if status.get("status") != "completed":
+        return [terminal]
+    return [
+        {"event": "tool.started", "run_id": "run-1", "tool": "delegate_task"},
+        {"event": "subagent.start", "run_id": "run-1", "status": "running",
+         "subagent_id": "sa-0", "child_session_id": "child-0", "depth": 0},
+        {"event": "subagent.complete", "run_id": "run-1", "status": "completed",
+         "subagent_id": "sa-0", "child_session_id": "child-0",
+         "files_read": [], "files_written": []},
+        {"event": "tool.completed", "run_id": "run-1", "tool": "delegate_task",
+         "error": False},
+        terminal,
+    ]
 
 
 def _event_stream(events):
@@ -167,7 +189,7 @@ def _generate(transport, *, binding=None, key_provider=None, **kwargs):
         )
 
 
-def test_real_hermes_api_route_is_signed_text_only_and_truthful():
+def test_real_hermes_api_route_requires_native_leaf_delegation_and_is_truthful():
     transport = FakeTransport()
     result = _generate(transport)
     assert result.ok and result.artifact_contents == {"src/example.py": "ok"}
@@ -177,6 +199,8 @@ def test_real_hermes_api_route_is_signed_text_only_and_truthful():
     assert submit[3]["model"] == "qwen/qwen3-coder"
     assert submit[3]["provider"] == "openrouter"
     assert "Authorization" in submit[2] and "X-Hermes-Session-Key" in submit[2]
+    assert "exactly one spawning invocation of delegate_task" in submit[3]["instructions"]
+    assert "role='leaf'" in submit[3]["instructions"]
 
 
 @pytest.mark.parametrize("binding", [
@@ -251,6 +275,68 @@ def test_completed_status_cannot_hide_earlier_effect_event(event):
     assert result.run_abort_confirmed is False
 
 
+@pytest.mark.parametrize("events", [
+    [_completed_event()],
+    _native_events(_completed())[:2] + _native_events(_completed()),
+    [
+        {"event": "tool.started", "run_id": "run-1", "tool": "terminal"},
+        {"event": "subagent.start", "run_id": "run-1", "subagent_id": "sa-0",
+         "child_session_id": "child-0", "depth": 0},
+        {"event": "subagent.complete", "run_id": "run-1", "status": "completed",
+         "subagent_id": "sa-0", "child_session_id": "child-0", "files_written": []},
+        {"event": "tool.completed", "run_id": "run-1", "tool": "terminal",
+         "error": False},
+        _completed_event(),
+    ],
+    [
+        {"event": "tool.started", "run_id": "run-1", "tool": "delegate_task"},
+        {"event": "subagent.start", "run_id": "run-1", "subagent_id": "sa-0",
+         "child_session_id": "child-0", "depth": 0},
+        {"event": "subagent.complete", "run_id": "run-1", "status": "completed",
+         "subagent_id": "sa-0", "child_session_id": "child-0",
+         "files_written": ["changed.py"]},
+        {"event": "tool.completed", "run_id": "run-1", "tool": "delegate_task",
+         "error": False},
+        _completed_event(),
+    ],
+])
+def test_native_delegation_proof_rejects_missing_duplicate_other_tool_or_write(events):
+    result = _generate(FakeTransport(events=events))
+    assert result.rejection_reasons == ("FAIL_HERMES_EVENT_CONFINEMENT",)
+
+
+def test_native_delegation_accepts_layered_tool_progress_for_one_stable_child():
+    events = _native_events(_completed())
+    events[0:0] = [
+        {"event": "tool.started", "run_id": "run-1", "tool": "delegate_task"},
+        {"event": "tool.completed", "run_id": "run-1", "tool": "delegate_task",
+         "error": True},
+    ]
+    result = _generate(FakeTransport(events=events))
+    assert result.ok is True
+
+
+@pytest.mark.parametrize("events", [
+    [
+        {"event": "tool.started", "run_id": "run-1", "tool": "delegate_task"},
+        {"event": "subagent.start", "run_id": "run-1", "status": "running",
+         "subagent_id": "sa-0", "child_session_id": "child-0", "depth": 0},
+        {"event": "subagent.complete", "run_id": "run-1", "status": "completed",
+         "subagent_id": "sa-0", "child_session_id": "child-0", "files_written": []},
+        {"event": "tool.completed", "run_id": "run-1", "tool": "delegate_task", "error": False},
+        _completed_event(),
+    ],
+    _native_events(_completed())[1:3] + _native_events(_completed())[:1]
+    + _native_events(_completed())[3:],
+    _native_events(_completed()) + [
+        {"event": "message.delta", "run_id": "run-1"},
+    ],
+])
+def test_native_delegation_rejects_implicit_effects_or_out_of_order_telemetry(events):
+    result = _generate(FakeTransport(events=events))
+    assert result.rejection_reasons == ("FAIL_HERMES_EVENT_CONFINEMENT",)
+
+
 def test_event_log_must_match_terminal_status_output_and_run_id():
     wrong_output = FakeTransport(events=[_completed_event("different")])
     assert _generate(wrong_output).rejection_reasons == ("FAIL_HERMES_EVENT_CONFINEMENT",)
@@ -280,9 +366,21 @@ def test_attacker_run_id_cannot_become_a_request_path():
 @pytest.mark.parametrize("output", [
     "not-json", "{}", '{"artifact_contents":{}}',
     '{"artifact_contents":{"../escape.py":"bad"}}',
+    '{"artifact_contents":{"/tmp/escape":"bad"}}',
+    '{"artifact_contents":{"x.py":""}}',
     '{"artifact_contents":{"x.py":"one"},"artifact_contents":{"x.py":"two"}}',
 ])
 def test_malformed_duplicate_or_unsafe_artifacts_reject(output):
+    result = _generate(FakeTransport(status=[_completed(output)]))
+    assert result.rejection_reasons == ("FAIL_HERMES_ARTIFACT_OUTPUT",)
+
+
+@pytest.mark.parametrize("unsafe_path", [
+    'a"b.txt', "a*.txt", "a<b.txt", "a>b.txt", "a?.txt", "a|b.txt",
+    "CLOCK$", "CONIN$", "CONOUT$",
+])
+def test_platform_invalid_artifact_paths_reject(unsafe_path):
+    output = json.dumps({"artifact_contents": {unsafe_path: "bad"}})
     result = _generate(FakeTransport(status=[_completed(output)]))
     assert result.rejection_reasons == ("FAIL_HERMES_ARTIFACT_OUTPUT",)
 

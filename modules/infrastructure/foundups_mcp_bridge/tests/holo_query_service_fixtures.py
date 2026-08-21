@@ -54,6 +54,7 @@ def _raw_result(*, mode: str = "semantic", error: str = "") -> Mapping[str, Any]
             "retrieval_mode": mode,
             "embedding_backend": "sentence_transformers" if mode == "semantic" else "none",
             "backend_quality": "production", "quality_gate": "PASS",
+            "tier0_module_target": None,
             "routing_active": False, "collection_backend_map": backend_map,
             "collection_embedding_space_map": space_map,
         },
