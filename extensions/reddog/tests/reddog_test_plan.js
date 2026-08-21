@@ -37,8 +37,7 @@ const RELEASE_GROUPS = Object.freeze([
     './test_governed_git_production_scan', './test_governed_git_ref_formats'
   ]) }),
   Object.freeze({ id: 'bridge_wsp62', tests: Object.freeze([
-    './test_bridge_python_environment', './test_reddog_candidate_wsp62',
-    './test_package_surface'
+    './test_bridge_python_environment', './test_package_surface'
   ]) })
 ]);
 

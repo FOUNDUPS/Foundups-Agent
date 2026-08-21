@@ -1,5 +1,20 @@
 # RedDog ModLog
 
+## 2026-08-21 - Mainline release gate repair (0.4.102)
+
+- Kept the WSP 62 changed-surface proof candidate-only and removed it from the
+  exhaustive committed-main release closure. A squashed main checkout has no
+  working-tree diff, so treating that proof as a release member made the
+  documented promotion command fail after otherwise successful groups.
+- Generalized the candidate proof to derive the exact current changed/new
+  JavaScript surface instead of retaining a one-slice historical path list,
+  and added a tier regression guard plus aligned test documentation.
+- Production extension code, backend authority, package surface, and version
+  remain unchanged. WSP 15/22/62/97.
+- Validation: fast, contract, candidate, deterministic package, and exhaustive
+  release gates passed; release completed 4/4 groups in 311,358 ms without a
+  timeout.
+
 ## 2026-08-21 - Native Hermes/OpenClaw upstream worker truth (0.4.102)
 
 - Updated packaged backend provenance from Hermes text-only inference to one

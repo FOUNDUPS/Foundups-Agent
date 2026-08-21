@@ -239,7 +239,6 @@ require('./test_governed_git_executable');
 require('./test_governed_git_production_scan');
 require('./test_governed_git_ref_formats');
 require('./test_bridge_python_environment');
-require('./test_reddog_candidate_wsp62');
 require('./test_package_surface');
 
 console.log('RedDog extension contract checks passed.');

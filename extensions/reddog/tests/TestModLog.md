@@ -1,5 +1,21 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-21 - Mainline release/candidate gate separation
+
+- Removed the changed-worktree-only WSP 62 proof from the committed-main
+  release closure after `npm run test:release` correctly exposed its empty
+  `git diff HEAD` mismatch on the squashed main commit.
+- Replaced the historical hard-coded JavaScript candidate list with the exact
+  current changed/new RedDog JavaScript surface. The focused proof now remains
+  useful for future candidate worktrees and fails closed when invoked without
+  a governed candidate surface.
+- Added a tier contract preventing the candidate-only proof from re-entering
+  promotion. The seven committed-main tail members remain authenticated by the
+  shard manifest and release plan.
+- Validation: fast 12/12 in 6,005 ms; contract 3/3 in 1,036 ms; candidate WSP
+  62 PASS; deterministic package surface 65 files / 941,467 raw bytes; release
+  4/4 groups in 311,358 ms with no timeout (core slowest at 311,273 ms).
+
 ## 2026-08-21 - CI conversational-draft grounding repair
 
 - Replaced both stale inline `wireFusionWebview` source assertions for

@@ -6,73 +6,12 @@ const fs = require('fs');
 const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..', '..', '..');
-const candidateJavaScript = [
-  'extensions/reddog/backend_compatibility_constants.js',
-  'extensions/reddog/conversation_session_authority_source.js',
-  'extensions/reddog/extension.js',
-  'extensions/reddog/governed_git_context.js',
-  'extensions/reddog/governed_git_executable.js',
-  'extensions/reddog/governed_git_projection.js',
-  'extensions/reddog/governed_git_readiness.js',
-  'extensions/reddog/governed_git_repo_state.js',
-  'extensions/reddog/governed_git_storage.js',
-  'extensions/reddog/holoindex_bundle_projection.js',
-  'extensions/reddog/holoindex_generation_bound_query.js',
-  'extensions/reddog/holoindex_incident_repair.js',
-  'extensions/reddog/holoindex_interpreter_provenance.js',
-  'extensions/reddog/holoindex_owner_runtime.js',
-  'extensions/reddog/start_operations_control.js',
-  'extensions/reddog/start_operations_environment.js',
-  'extensions/reddog/start_operations_extension_adapter.js',
-  'extensions/reddog/tests/governed_git_authority_contracts.js',
-  'extensions/reddog/tests/governed_git_executable_test_helpers.js',
-  'extensions/reddog/tests/governed_git_projection_contracts.js',
-  'extensions/reddog/tests/governed_git_projection_final_order_contracts.js',
-  'extensions/reddog/tests/governed_git_projection_race_contracts.js',
-  'extensions/reddog/tests/governed_git_ref_contracts.js',
-  'extensions/reddog/tests/governed_git_storage_contracts.js',
-  'extensions/reddog/tests/governed_git_test_helpers.js',
-  'extensions/reddog/tests/test_bridge_python_environment.js',
-  'extensions/reddog/tests/test_extension_contract_shards.js',
-  'extensions/reddog/tests/test_governed_git_context_hardening.js',
-  'extensions/reddog/tests/test_governed_git_executable.js',
-  'extensions/reddog/tests/test_governed_git_production_scan.js',
-  'extensions/reddog/tests/test_governed_git_environment.js',
-  'extensions/reddog/tests/test_governed_git_ref_formats.js',
-  'extensions/reddog/tests/test_holoindex_async_bridge.js',
-  'extensions/reddog/tests/test_holoindex_incident_repair.js',
-  'extensions/reddog/tests/reddog_package_surface_contract.js',
-  'extensions/reddog/tests/reddog_test_plan.js',
-  'extensions/reddog/tests/reddog_contract_execution.js',
-  'extensions/reddog/tests/reddog_release_supervisor.js',
-  'extensions/reddog/tests/reddog_release_worker.js',
-  'extensions/reddog/tests/run_reddog_test_tier.js',
-  'extensions/reddog/tests/start_operations_control_test_helpers.js',
-  'extensions/reddog/tests/test_backend_compatibility_contract.js',
-  'extensions/reddog/tests/test_reddog_release_supervisor.js',
-  'extensions/reddog/tests/test_reddog_test_tiering.js',
-  'extensions/reddog/tests/test_package_manifest.js',
-  'extensions/reddog/tests/test_package_surface.js',
-  'extensions/reddog/tests/test_reddog_candidate_wsp62.js',
-  'extensions/reddog/tests/test_start_operations_control.js',
-  'extensions/reddog/tests/verify_extension_contract.js',
-  'extensions/reddog/tests/verify_fusion_panel_input_contract.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part01.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part02.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part03.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part09.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part12.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part13.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part14.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part17.js',
-  'extensions/reddog/tests/contract_shards/verify_extension_contract.part18.js'
-];
-const candidateDocuments = [
+const governedDocuments = new Set([
   'extensions/reddog/INTERFACE.md',
   'extensions/reddog/README.md',
   'extensions/reddog/ROADMAP.md',
   'extensions/reddog/tests/README.md'
-];
+]);
 
 function source(relative) {
   return fs.readFileSync(path.join(repoRoot, relative), 'utf8');
@@ -183,7 +122,7 @@ function assertJavaScriptLimits(relative) {
   }
 }
 
-function changedJavaScript() {
+function changedCandidatePaths() {
   const commands = [
     ['diff', '--name-only', 'HEAD', '--', 'extensions/reddog'],
     ['ls-files', '--others', '--exclude-standard', '--', 'extensions/reddog']
@@ -194,7 +133,7 @@ function changedJavaScript() {
       cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']
     });
     for (const relative of output.split(/\r?\n/)) {
-      if (/\.(?:js|ts)$/.test(relative)) found.add(relative.replace(/\\/g, '/'));
+      if (relative) found.add(relative.replace(/\\/g, '/'));
     }
   }
   return [...found].sort();
@@ -205,8 +144,11 @@ function assertDocumentLimits(relative) {
     relative + ' exceeds the candidate documentation 1000-line ceiling');
 }
 
-assert.deepStrictEqual([...candidateJavaScript].sort(), changedJavaScript(),
-  'candidate JavaScript audit list must equal the complete Git changed/new surface');
+const changedPaths = changedCandidatePaths();
+const candidateJavaScript = changedPaths.filter((relative) => /\.(?:js|ts)$/.test(relative));
+const candidateDocuments = changedPaths.filter((relative) => governedDocuments.has(relative));
+assert(candidateJavaScript.length + candidateDocuments.length > 0,
+  'candidate WSP 62 proof requires a changed/new JavaScript or governed-document surface');
 for (const relative of candidateJavaScript) assertJavaScriptLimits(relative);
 for (const relative of candidateDocuments) assertDocumentLimits(relative);
 
