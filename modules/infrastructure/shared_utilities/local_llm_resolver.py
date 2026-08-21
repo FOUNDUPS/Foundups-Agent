@@ -108,6 +108,7 @@ def probe_backend_availability(
 def require_lm_studio_backend(
     model_id: str,
     base_url: Optional[str] = None,
+    request_timeout: float = 30.0,
 ) -> LocalLLMBackend:
     """Resolve an LM-Studio-backed engine for paths that strictly require it.
 
@@ -120,9 +121,13 @@ def require_lm_studio_backend(
         raise LMStudioUnavailableError()
 
     backend = (
-        LMStudioBackend(model_id=model_id, base_url=base_url)
+        LMStudioBackend(
+            model_id=model_id,
+            base_url=base_url,
+            request_timeout=request_timeout,
+        )
         if base_url is not None
-        else LMStudioBackend(model_id=model_id)
+        else LMStudioBackend(model_id=model_id, request_timeout=request_timeout)
     )
     if not backend.initialize():
         raise LMStudioUnavailableError(

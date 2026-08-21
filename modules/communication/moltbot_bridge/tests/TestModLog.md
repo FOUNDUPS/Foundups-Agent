@@ -1,3 +1,8 @@
+## 2026-08-21: RedDog advisory bridge support parity
+
+- Revalidated panel normalization, system-prompt evidence rule, Qwen fallback,
+  hostile bridge metadata, and advisory hardening after pure-helper extraction.
+
 ## 2026-08-21: Native upstream worker regressions
 
 - Added Hermes API `0.20.4` capability/toolset checks and exact stable-child

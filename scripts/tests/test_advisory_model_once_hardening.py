@@ -61,9 +61,10 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertTrue(truncated)
         self.assertEqual(len(models), bridge.MAX_PANEL_MODELS)
 
-    def test_default_panel_keeps_kimi_code_and_adds_kimi_k3(self) -> None:
-        self.assertIn("moonshotai/kimi-k2.7-code", bridge.DEFAULT_PANEL_MODELS)
+    def test_default_panel_uses_current_qwen_challenger_and_kimi_k3(self) -> None:
+        self.assertIn("qwen/qwen3.8-max", bridge.DEFAULT_PANEL_MODELS)
         self.assertIn("moonshotai/kimi-k3", bridge.DEFAULT_PANEL_MODELS)
+        self.assertNotIn("moonshotai/kimi-k2.7-code", bridge.DEFAULT_PANEL_MODELS)
         self.assertEqual(bridge.KIMI_K3_PANEL_MAX_TOKENS, 4096)
 
     def test_kimi_k3_completion_uses_mandatory_max_reasoning_without_temperature(self) -> None:

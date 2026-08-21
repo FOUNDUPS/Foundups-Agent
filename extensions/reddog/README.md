@@ -1,6 +1,26 @@
 # RedDog
 
-Version: 0.4.102
+Version: 0.4.103
+
+## Model-routing authority
+
+RedDog classifies work into `ModelTaskRequirements`; AI Gateway owns catalog
+eligibility, measured selection, signed promotion evidence, runtime binding,
+and exact provider topology. A local Nemotron 3.5 Lightning worker may propose
+two compact evaluation panels, but it cannot select production models, serve as
+the verifier, promote a champion, or override a signed runtime binding.
+
+The evaluation fallback remains explicit when no receipt-bound production
+binding exists: GLM 5.2 principal with DeepSeek V4 Pro, Qwen 3.8 Max, and Kimi
+K3 critics. Qwen replaces the older Kimi K2.7 Code fallback slot as a current
+challenger; this static roster is not evidence that GLM or Qwen is champion.
+
+Local Nemotron uses the exact loaded LM Studio ID and native reasoning-off API,
+with no server launch or provider fallback. Its output is deterministically
+expanded into role/provider assignments and admitted only as held-out
+AutoResearch candidates. Live configured multi-call/panel AutoResearch remains
+halted at the AI Gateway safety gates, so no automatic production promotion is
+claimed.
 
 ## Workspace and package boundary
 
@@ -722,7 +742,7 @@ Command:
 Default panel:
 
 - Principal/synthesis: `z-ai/glm-5.2`
-- Critics: `deepseek/deepseek-v4-pro`, `moonshotai/kimi-k2.7-code`, and `moonshotai/kimi-k3`
+- Critics: `deepseek/deepseek-v4-pro`, `qwen/qwen3.8-max`, and `moonshotai/kimi-k3`
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
@@ -853,12 +873,12 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.3.15)
+## WSP_97 Truth Table (v0.4.103)
 
 | Claim | Status |
 | --- | --- |
 | Principal default `z-ai/glm-5.2` | OBSERVED |
-| Critics default DeepSeek V4 Pro + Kimi K2.7 Code + Kimi K3 | OBSERVED |
+| Critics default DeepSeek V4 Pro + Qwen 3.8 Max + Kimi K3 | OBSERVED |
 | 012 work focus -> 0102 WSP task prompt | OBSERVED |
 | Review packet work_focus_digest + wsp_prompt_digest | OBSERVED |
 | WORK_FOCUS_NOT_AUTHORITY | OBSERVED |
@@ -905,13 +925,13 @@ The lead is configurable. Use Cursor settings or workspace/user settings:
   "reddog.leadModel": "z-ai/glm-5.2",
   "reddog.panelModels": [
     "deepseek/deepseek-v4-pro",
-    "moonshotai/kimi-k2.7-code",
+    "qwen/qwen3.8-max",
     "moonshotai/kimi-k3"
   ]
 }
 ```
 
-The extension forwards at most seven filtered panel entries; the Python bridge is the canonical six-model runtime cap and uses the seventh only as an overflow sentinel for truthful truncation receipts. RedDog defaults to GLM-5.2 as principal, DeepSeek V4 Pro as adversarial critic, Kimi K2.7 Code as implementation critic, and Kimi K3 as a long-horizon reasoning critic. Kimi K3 uses OpenRouter's explicit `moonshotai/kimi-k3` slug; every direct completion call omits unsupported temperature, records mandatory `max` reasoning, and applies a 4096-token floor because lower budgets did not produce quorum-usable final output in the live compatibility smoke. This covers its default critic call and, only when an explicit direct selection or receipt-backed signed promotion selects K3, the single, principal, and synthesis roles. Review packets distinguish the requested budget from effective direct and per-role budgets. The bridge does not automatically promote K3 to champion, change RedDog defaults, open an OpenClaw execution valve, or dispatch Hermes.
+The extension forwards at most seven filtered panel entries; the Python bridge is the canonical six-model runtime cap and uses the seventh only as an overflow sentinel for truthful truncation receipts. RedDog defaults to GLM-5.2 as principal, DeepSeek V4 Pro as adversarial critic, Qwen 3.8 Max as implementation critic, and Kimi K3 as a long-horizon reasoning critic. Kimi K3 uses OpenRouter's explicit `moonshotai/kimi-k3` slug; every direct completion call omits unsupported temperature, records mandatory `max` reasoning, and applies a 4096-token floor because lower budgets did not produce quorum-usable final output in the live compatibility smoke. This covers its default critic call and, only when an explicit direct selection or receipt-backed signed promotion selects K3, the single, principal, and synthesis roles. Review packets distinguish the requested budget from effective direct and per-role budgets. The bridge does not automatically promote K3 to champion, change RedDog defaults, open an OpenClaw execution valve, or dispatch Hermes.
 
 ## Bounded Repo Context
 
@@ -939,6 +959,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.102.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.103.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

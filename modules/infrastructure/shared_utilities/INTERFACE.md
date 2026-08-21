@@ -1,8 +1,8 @@
 # shared_utilities Interface Specification
 
 **WSP 11 Compliance:** Complete
-**Last Updated:** 2026-03-30
-**Version:** 0.3.0
+**Last Updated:** 2026-08-21
+**Version:** 0.4.0
 
 ## [OVERVIEW] Module Overview
 
@@ -12,6 +12,27 @@
 ## [API] Public API
 
 ### Local Model Selection
+
+### Local LM Studio Backend
+
+```python
+require_lm_studio_backend(model_id, base_url=None, request_timeout=30.0)
+LMStudioBackend.create_native_chat(
+    input_text=...,
+    system_prompt=...,
+    max_output_tokens=...,
+    reasoning="off",
+    max_response_bytes=...,
+)
+```
+
+The required resolver probes but never starts LM Studio and rejects when the
+exact model ID is not loaded. The native call accepts only bounded reasoning,
+token, timeout, and response-byte controls; uses `store=false` and
+`stream=false`; and performs no provider/model fallback. The OpenAI-compatible
+chat method forwards only an allowlist of sampling/structured controls and
+constructs chat-template thinking control from a strict boolean rather than
+accepting caller-supplied arbitrary `extra_body`.
 
 Role-based model path resolution for local AI models. Models stored at `E:/HoloIndex/models/`.
 
@@ -333,6 +354,12 @@ class [SpecificError]([ModuleName]Error):
 ```
 
 ## [HISTORY] Version History
+
+### 0.4.0 (2026-08-21)
+- Added bounded LM Studio native chat with explicit reasoning control, exact
+  model identity, disabled storage/streaming, timeout/response caps, and no
+  launch or fallback.
+- Restricted OpenAI-compatible controls and added strict thinking projection.
 
 ### 0.3.0 (2026-03-30)
 - Added `asr` and `tts` roles to local_model_selection.py

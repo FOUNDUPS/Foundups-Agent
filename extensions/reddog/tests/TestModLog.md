@@ -1,5 +1,16 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-21 - Nemotron/Qwen routing contract refresh (0.4.103)
+
+- Pinned Qwen 3.8 Max as the current evaluation fallback critic, retained exact
+  GLM/DeepSeek/Kimi IDs, and regenerated authenticated shard/backend manifests.
+- AI Gateway separately covers local Nemotron proposal and verified topology
+  authority; the extension suite remains offline.
+- Independent WSP_97 repair added fail-closed modality, topology-expiry, and
+  incumbent-comparison coverage before release promotion.
+- Regenerated the 1,365-file backend closure after advisory decomposition and
+  aligned the independent generator's exact golden digest fixture.
+
 ## 2026-08-21 - Mainline release/candidate gate separation
 
 - Removed the changed-worktree-only WSP 62 proof from the committed-main

@@ -3,7 +3,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.102', 'README version mismatch');
+includes(readme, 'Version: 0.4.103', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(startOperationsEnvironmentJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(startOperationsEnvironmentJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -55,7 +55,7 @@ includes(bridgePy, 'redacted_user_message = gate.redacted_prompt', 'redacted use
 includes(bridgePy, 'messages = [{"role": "system", "content": _system_prompt(payload)}]', 'Fusion alias system prompt missing');
 includes(bridgePy, 'base_system = _system_prompt(payload)', 'manual panel system prompt missing');
 includes(bridgePy, 'GLM_PRINCIPAL_MODEL = "z-ai/glm-5.2"', 'bridge GLM principal missing');
-includes(bridgePy, 'DEEPSEEK_CRITIC_MODEL = "deepseek/deepseek-v4-pro"', 'bridge DeepSeek V4 critic missing');
+includes(bridgePy, 'DEEPSEEK_CRITIC_MODEL = "deepseek/deepseek-v4-pro"', 'bridge DeepSeek V4 critic missing'); includes(bridgePy, 'QWEN_MAX_PANEL_MODEL = "qwen/qwen3.8-max"', 'bridge Qwen 3.8 Max critic missing');
 includes(bridgePy, 'KIMI_PANEL_MODEL = "moonshotai/kimi-k3"', 'bridge Kimi K3 critic missing');
 includes(bridgePy, 'KIMI_K3_PANEL_MAX_TOKENS = 4096', 'Kimi K3 critic budget missing');
 includes(bridgePy, 'body["reasoning"] = {"effort": "max"}', 'Kimi K3 max-reasoning request contract missing');
@@ -222,7 +222,7 @@ includes(roadmap, 'REDDOG_BRIDGE_HARDENING_PHASE1', 'bridge hardening roadmap sl
 includes(extensionJs, 'Routing: Auto task-fit heuristic', 'truthful auto routing label missing');
 assert(!extensionJs.includes('Routing: Auto via WSP_15'),
   'model routing must not masquerade as a WSP_15 allocation');
-includes(extensionJs, 'deepseek/deepseek-v4-pro', 'DeepSeek V4 Pro critic default missing');
+includes(extensionJs, 'deepseek/deepseek-v4-pro', 'DeepSeek V4 Pro critic default missing'); includes(extensionJs, 'qwen/qwen3.8-max', 'Qwen 3.8 Max critic default missing');
 includes(extensionJs, 'moonshotai/kimi-k3', 'Kimi K3 critic default missing');
 includes(extensionJs, 'z-ai/glm-5.2', 'GLM 5.2 principal default missing');
 includes(extensionJs, 'openrouter_fusion_alias', 'OpenRouter Fusion alias path must remain implemented');

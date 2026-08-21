@@ -53,7 +53,7 @@ const {
   beginBasePromptTrace, outputValidationOptions, statusMessages
 } = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.102';
+const EXTENSION_VERSION = '0.4.103';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3957,7 +3957,7 @@ const FUSION_PANEL_FORWARD_LIMIT = FUSION_PANEL_RUNTIME_LIMIT + 1;
 const DEFAULT_FUSION_WORKER = {
   title: 'RedDog',
   lead: 'z-ai/glm-5.2',
-  panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code', 'moonshotai/kimi-k3']
+  panel: ['deepseek/deepseek-v4-pro', 'qwen/qwen3.8-max', 'moonshotai/kimi-k3']
 };
 function redDogSystemPromptForRole(roleLabel) {
   const allowedRoles = ['RedDog Architect', 'WSP Gate Critic', 'Repair Planner', 'Smoke Test'];

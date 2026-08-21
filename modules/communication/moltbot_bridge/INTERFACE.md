@@ -1,4 +1,12 @@
 # OpenClaw Bridge Interface
+## RedDog advisory bridge support
+
+`reddog_advisory_bridge_support.py` owns only deterministic, bounded input
+normalization, audit telemetry projection, prompt assembly, and review-packet
+formatting for `scripts/advisory_model_once.py`. Provider calls, environment
+access, redaction admission, and stdin/stdout lifecycle remain in the one-shot
+script. The extraction adds no model, worker, repository, or fallback authority.
+
 ## Governed repository-state intake
 
 `observe_repo_state(repo_root, governed_receipt)` accepts only

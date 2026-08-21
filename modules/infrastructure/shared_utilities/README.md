@@ -15,8 +15,14 @@
 - YouTube channel registry (shared rotation + scheduling metadata)
 - Cross-cutting concerns for infrastructure layer
 
+The local LLM adapter supports both the OpenAI-compatible LM Studio route and a
+bounded native `/api/v1/chat` call. Native calls expose explicit reasoning
+control, never launch LM Studio, never choose a model, never fall back to a
+different provider, disable server-side storage, and cap response bytes.
+
 **Dependencies:**
-- Standard library only (json, os, logging, datetime, random)
+- Standard library utilities plus optional `openai`/`llama_cpp` adapters for
+  explicitly selected local LLM backends.
 
 ## [STATUS] Current Status & Scoring
 

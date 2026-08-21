@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.102",
+  "version": "0.4.103",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -118,7 +118,7 @@
           "type": "array",
           "default": [
             "deepseek/deepseek-v4-pro",
-            "moonshotai/kimi-k2.7-code",
+            "qwen/qwen3.8-max",
             "moonshotai/kimi-k3"
           ],
           "maxItems": 7,
@@ -159,7 +159,7 @@
           "type": "array",
           "default": [
             "deepseek/deepseek-v4-pro",
-            "moonshotai/kimi-k2.7-code",
+            "qwen/qwen3.8-max",
             "moonshotai/kimi-k3"
           ],
           "maxItems": 7,

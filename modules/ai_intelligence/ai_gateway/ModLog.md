@@ -1,5 +1,25 @@
 # AI Gateway Module Change Log
 
+## [2026-08-21] - Verified Topology Resolution and Nemotron Shadow Proposer
+
+- Added a process-local one-shot resolver from canonically verified runtime
+  bindings to exact role/provider/model endpoints; unsupported providers and
+  replay reject without fallback or a model call. Resolutions now carry the
+  evidence expiry and a maximum 60-second TTL checked against trusted time at
+  consumption, so one-shot authority cannot be retained past freshness.
+- Added bounded evaluation-only Nemotron proposal generation through LM Studio's
+  native reasoning-off API. Nemotron returns compact ordered model IDs only;
+  deterministic code owns providers, roles, catalog/requirements binding, and
+  admission into held-out AutoResearch candidates. The deterministic Gateway
+  incumbent is injected into every accepted benchmark outside model control.
+- Merged complementary static/live catalog cards with conservative field-level
+  provenance and registered current OpenRouter GLM, DeepSeek, Qwen, Kimi, and
+  Nemotron candidates without creating champion authority. Missing or disjoint
+  provider modality evidence remains unknown; it is never synthesized as text.
+- Live validation against a bounded evaluation catalog: exact local Nemotron ID loaded; two four-role candidates
+  admitted in 36.7 seconds with content-bound call/admission receipts. Configured
+  multi-call/panel AutoResearch remains halted. WSP 15/22/50/62/97.
+
 ## [2026-08-21] - Exact Kimi K3 Request-Truth Boundary
 
 **Who/Type/Slice:** 0102 architect / Defensive /

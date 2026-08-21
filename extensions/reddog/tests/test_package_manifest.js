@@ -12,7 +12,7 @@ assert.deepStrictEqual(pkg.capabilities, {
   virtualWorkspaces: { supported: false }
 });
 assert.strictEqual(pkg.publisher, 'foundups');
-assert.strictEqual(pkg.version, '0.4.102');
+assert.strictEqual(pkg.version, '0.4.103');
 assert.strictEqual(pkg.main, './extension.js');
 assert.deepStrictEqual(pkg.activationEvents, [
   'onCommand:reddog.open',
