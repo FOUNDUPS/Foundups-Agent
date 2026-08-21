@@ -5,13 +5,22 @@ from __future__ import annotations
 import json
 import secrets
 import threading
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
     ModelRuntimeBindingVerificationReceipt,
     VerifiedRuntimeBindingCapability,
-    consume_verified_runtime_binding_capability,
-    discard_verified_runtime_binding_capability,
+)
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_evidence_verifier import (
+    VerifiedRuntimeBindingArtifact,
+)
+from modules.ai_intelligence.ai_gateway.src.model_runtime_topology_resolver import (
+    consume_resolved_runtime_topology,
+    discard_resolved_runtime_topology,
+    resolve_verified_runtime_topology,
+)
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_runtime_binding_receipt,
 )
 
 from .reddog_artifact_generation_model_binding import (
@@ -58,6 +67,8 @@ def _issue_closure(lock: Any, records: Any):
         selection: Mapping[str, Any],
         verification: ModelRuntimeBindingVerificationReceipt,
         verified_capability: VerifiedRuntimeBindingCapability,
+        available_providers: Sequence[str] | None = None,
+        trusted_now_epoch: Callable[[], int] | None = None,
     ) -> ArtifactGenerationModelCapability | None:
         if type(verified_capability) is not VerifiedRuntimeBindingCapability:
             return None
@@ -69,6 +80,22 @@ def _issue_closure(lock: Any, records: Any):
         )
         if trusted is None:
             return None
+        if not available_providers or not callable(trusted_now_epoch):
+            return None
+        try:
+            runtime = rehydrate_model_runtime_binding_receipt(runtime_binding)
+            now = int(trusted_now_epoch())
+            topology = resolve_verified_runtime_topology(
+                verified=VerifiedRuntimeBindingArtifact(
+                    runtime, verification, verified_capability
+                ),
+                selection=selection,
+                available_providers=available_providers,
+                now=now,
+                expected_runtime_surface=runtime.runtime_surface,
+            )
+        except Exception:
+            return None
         token = secrets.token_urlsafe(32)
         capability = ArtifactGenerationModelCapability(token)
         binding_json = _json(trusted)
@@ -77,10 +104,8 @@ def _issue_closure(lock: Any, records: Any):
                 capability,
                 binding_json,
                 artifact_generation_digest(trusted),
-                dict(runtime_binding),
-                dict(selection),
-                verification,
-                verified_capability,
+                topology,
+                trusted_now_epoch,
             )
         return capability
 
@@ -92,18 +117,22 @@ def _consume_closure(lock: Any, records: Any):
         record = _take_record(lock, records, capability)
         if record is None:
             return None
-        _, binding_json, binding_digest, runtime, selection, receipt, verified = record
+        _, binding_json, binding_digest, topology, trusted_now_epoch = record
         binding = json.loads(binding_json)
         if binding_digest != artifact_generation_digest(binding):
-            discard_verified_runtime_binding_capability(verified)
+            discard_resolved_runtime_topology(topology)
             return None
-        accepted = consume_verified_runtime_binding_capability(
-            verified,
-            binding=runtime,
-            selection=selection,
-            receipt=receipt,
+        endpoints = consume_resolved_runtime_topology(
+            topology, trusted_now_epoch=trusted_now_epoch
         )
-        return binding if accepted is not None else None
+        if endpoints is None or not _topology_matches(binding, endpoints):
+            return None
+        binding["resolved_runtime_topology"] = [item.to_dict() for item in endpoints]
+        binding["runtime_topology_resolution_receipt_id"] = topology.receipt_id
+        binding["runtime_topology_verification_receipt_id"] = (
+            topology.verification_receipt_id
+        )
+        return binding
 
     return consume
 
@@ -112,7 +141,7 @@ def _discard_closure(lock: Any, records: Any):
     def discard(capability: Any) -> None:
         record = _take_record(lock, records, capability)
         if record is not None:
-            discard_verified_runtime_binding_capability(record[-1])
+            discard_resolved_runtime_topology(record[-2])
 
     return discard
 
@@ -142,6 +171,24 @@ def _json(value: Mapping[str, Any]) -> str:
         ensure_ascii=True,
         default=str,
     )
+
+
+def _topology_matches(binding: Mapping[str, Any], endpoints: Sequence[Any]) -> bool:
+    selection = binding.get("model_selection")
+    assignments = selection.get("role_assignments") if isinstance(selection, Mapping) else None
+    if not isinstance(assignments, list) or len(assignments) != len(endpoints):
+        return False
+    expected = tuple(
+        (
+            str(item.get("role") or ""),
+            str(item.get("provider") or ""),
+            str(item.get("canonical_model_id") or ""),
+        )
+        for item in assignments
+        if isinstance(item, Mapping)
+    )
+    actual = tuple((item.role, item.provider, item.model_id) for item in endpoints)
+    return len(expected) == len(endpoints) and expected == actual
 
 
 (

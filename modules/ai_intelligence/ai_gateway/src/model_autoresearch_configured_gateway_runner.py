@@ -9,7 +9,11 @@ import threading
 import time
 from dataclasses import dataclass, replace
 from decimal import Decimal
-from typing import Mapping, Protocol
+from typing import Any, Callable, Mapping, Protocol, Sequence
+
+from modules.infrastructure.shared_utilities.local_llm_resolver import (
+    require_lm_studio_backend,
+)
 
 from .model_autoresearch_configured_gateway_evidence import (
     MAX_RESPONSE_BYTES,
@@ -257,6 +261,65 @@ class AIGatewayConfiguredModelCaller:
         ).normalized()
 
 
+@dataclass(frozen=True)
+class LMStudioConfiguredModelCaller:
+    """Exact already-loaded LM Studio route; never launches or falls back."""
+
+    backend_factory: Callable[[str], Any] = require_lm_studio_backend
+
+    def call_model(
+        self,
+        *,
+        provider: str,
+        model: str,
+        prompt: str,
+        task_type: str,
+        max_completion_tokens: int,
+        reasoning_effort: str,
+    ) -> GatewayModelCallResult:
+        del task_type
+        if exact_provider(provider) != "lm_studio_local":
+            raise ValueError("configured_gateway_runner_lm_studio_provider_mismatch")
+        if exact_model_id("reasoning_effort", reasoning_effort) != "off":
+            raise ValueError("configured_gateway_runner_lm_studio_reasoning_control_unsupported")
+        model_name = exact_model_id("model", model)
+        completion_cap = bounded_positive_int(
+            "max_completion_tokens", max_completion_tokens
+        )
+        started = time.monotonic()
+        backend = self.backend_factory(model_name)
+        response = backend.generate_response(prompt, max_tokens=completion_cap)
+        if not isinstance(response, str):
+            raise ValueError("configured_gateway_runner_call_response_invalid")
+        return GatewayModelCallResult(
+            success=bool(response.strip()),
+            provider="lm_studio_local",
+            model=model_name,
+            response_text=response,
+            latency_ms=int(round((time.monotonic() - started) * 1000)),
+            input_tokens=_token_count(prompt),
+            output_tokens=_token_count(response),
+            cost_estimate_usd=0.0,
+        ).normalized()
+
+
+@dataclass(frozen=True)
+class RoutedConfiguredModelCaller:
+    """Route only by the admitted provider; no fallback between callers."""
+
+    gateway_caller: GatewayModelCaller
+    lm_studio_caller: GatewayModelCaller
+
+    def call_model(self, **kwargs: Any) -> GatewayModelCallResult:
+        provider = exact_provider(kwargs.get("provider"))
+        caller = (
+            self.lm_studio_caller
+            if provider == "lm_studio_local"
+            else self.gateway_caller
+        )
+        return caller.call_model(**kwargs)
+
+
 def _provider_config(gateway: object, provider: str):
     providers = getattr(gateway, "providers", None)
     if not isinstance(providers, Mapping):
@@ -346,18 +409,27 @@ def build_configured_gateway_benchmark_runner(
         raise ValueError("configured_gateway_runner_prompt_guard_required")
     policy_digest = digest_payload(normalized_policy.to_dict())
     call_budget = _CallBudgetLedger(normalized_policy.max_total_calls)
+    campaign: dict[tuple[str, str], _PreparedRun] = {}
+    campaign_reservation: list[_RunCallReservation | None] = [None]
 
     def _runner(task, candidate):
-        prepared = _prepare_run(
-            task=task,
-            candidate=candidate,
-            prompt_source=prompt_source,
-            prompt_guard=prompt_guard,
-            policy=normalized_policy,
-        )
-        reservation = call_budget.reserve(len(prepared.calls))
+        key = (task.task_id, candidate.candidate_id)
+        prepared = campaign.pop(key, None)
+        reservation = campaign_reservation[0]
+        if prepared is None:
+            if campaign_reservation[0] is not None:
+                raise ValueError("configured_gateway_runner_campaign_member_mismatch")
+            prepared = _prepare_run(
+                task=task,
+                candidate=candidate,
+                prompt_source=prompt_source,
+                prompt_guard=prompt_guard,
+                policy=normalized_policy,
+            )
+            reservation = call_budget.reserve(len(prepared.calls))
+        assert reservation is not None
         try:
-            return _execute_run(
+            output = _execute_run(
                 prepared=prepared,
                 caller=caller,
                 policy=normalized_policy,
@@ -367,9 +439,73 @@ def build_configured_gateway_benchmark_runner(
                 call_attempt_receipt_store=call_attempt_receipt_store,
                 reservation=reservation,
             )
+            if campaign_reservation[0] is not None and not campaign:
+                reservation.release_unattempted()
+                campaign_reservation[0] = None
+            return output
+        except BaseException:
+            if campaign_reservation[0] is not None:
+                reservation.release_unattempted()
+                campaign.clear()
+                campaign_reservation[0] = None
+            raise
         finally:
-            reservation.release_unattempted()
+            if campaign_reservation[0] is None:
+                reservation.release_unattempted()
 
+    def _prepare_campaign(
+        *,
+        tasks: Sequence[ModelBenchmarkTask],
+        candidates: Sequence[ModelBenchmarkCandidate],
+    ) -> str:
+        if campaign or campaign_reservation[0] is not None:
+            raise ValueError("configured_gateway_runner_campaign_already_prepared")
+        prepared_runs = tuple(
+            _prepare_run(
+                task=task,
+                candidate=candidate,
+                prompt_source=prompt_source,
+                prompt_guard=prompt_guard,
+                policy=normalized_policy,
+            )
+            for task in tasks
+            for candidate in candidates
+        )
+        keys = tuple(
+            (item.task.task_id, item.candidate.candidate_id)
+            for item in prepared_runs
+        )
+        if not prepared_runs or len(keys) != len(set(keys)):
+            raise ValueError("configured_gateway_runner_campaign_invalid")
+        total_calls = sum(len(item.calls) for item in prepared_runs)
+        reservation = call_budget.reserve(total_calls)
+        campaign.update(zip(keys, prepared_runs))
+        campaign_reservation[0] = reservation
+        return digest_payload(
+            {
+                "policy_digest": policy_digest,
+                "members": [
+                    {
+                        "task_id": item.task.task_id,
+                        "candidate_id": item.candidate.candidate_id,
+                        "calls": [
+                            {
+                                "role": call.role,
+                                "provider": call.provider,
+                                "api_model": call.api_model,
+                                "prompt_digest": call.prompt_digest,
+                                "guard_report_digest": call.guard_report_digest,
+                                "reserved_cost_usd": format(call.reserved_cost, "f"),
+                            }
+                            for call in item.calls
+                        ],
+                    }
+                    for item in prepared_runs
+                ],
+            }
+        )
+
+    setattr(_runner, "prepare_campaign", _prepare_campaign)
     return _runner
 
 
@@ -763,7 +899,9 @@ __all__ = [
     "GatewayModelCallResult",
     "GatewayModelCaller",
     "MappingPromptSource",
+    "LMStudioConfiguredModelCaller",
     "PromptGuardApprovalReceipt",
     "PromptSource",
+    "RoutedConfiguredModelCaller",
     "build_configured_gateway_benchmark_runner",
 ]

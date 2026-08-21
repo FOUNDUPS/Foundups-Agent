@@ -1,14 +1,16 @@
 # RedDog Extension Tests
 
-## 0.4.103 model routing and upstream worker provenance
+## 0.4.104 governed runtime routing
 
 ## Nemotron and Qwen routing contracts
 
 The contract suite pins Qwen 3.8 Max in the explicit evaluation fallback and
 keeps GLM 5.2, DeepSeek V4 Pro, and Kimi K3 exact IDs. AI Gateway tests own the
 local Nemotron proposer, deterministic admission, held-out harness handoff, and
-one-shot verified topology coverage; extension tests verify only the packaged
-fallback and backend closure. No live model call is required by release tests.
+one-shot verified topology coverage. Extension tests also prove the v2 runtime
+query rejects missing/unavailable provider inventory and that each Python
+bridge profile carries only its named runtime inputs. No live model call is
+required by release tests.
 
 The packaged backend manifest and documentation contracts pin current Hermes
 native leaf delegation and OpenClaw `2026.7.1-2` provider behavior. The

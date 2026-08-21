@@ -1,3 +1,11 @@
+## 2026-08-21: Verified artifact-model topology regressions
+
+- Added exact topology consumption across bounded Fusion, OpenClaw, Hermes,
+  provider bootstrap, and resident integration fixtures.
+- Proved missing/unavailable provider inventory, stale use, replay, retargeting,
+  and provider/payload mismatch reject before egress without widening the
+  static evaluation fallback into worker authority.
+
 ## 2026-08-21: RedDog advisory bridge support parity
 
 - Revalidated panel normalization, system-prompt evidence rule, Qwen fallback,

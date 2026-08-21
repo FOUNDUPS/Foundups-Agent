@@ -8,6 +8,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 from urllib.error import HTTPError
 
@@ -34,22 +35,103 @@ def _passed_gate(*, prompt: str = "redacted-prompt", context: str | None = None)
     )
 
 
-def _invoke_bridge_main(payload: dict, *, api_key: str = "test-key") -> tuple[int, dict]:
+def _ready_runtime_receipt(payload: dict):
+    lead = str(payload.get("lead_model") or payload.get("model") or "")
+    mode = str(payload.get("mode") or "")
+    panel = tuple(
+        bridge._panel_models(payload.get("panel_models"))
+        if mode in {"foundups_fusion", "openrouter_fusion_alias"}
+        else ()
+    )
+    return SimpleNamespace(
+        status=bridge.MODEL_RUNTIME_BINDING_READY,
+        accepted=True,
+        principal_model=lead,
+        panel_models=panel,
+        role_bindings=tuple(
+            [{"role": "principal", "provider": "openrouter", "model_id": lead}]
+            + [
+                {"role": f"critic_{index}", "provider": "openrouter", "model_id": model}
+                for index, model in enumerate(panel, 1)
+            ]
+        ),
+        binding_receipt_id="binding:test",
+        topology_resolution_receipt_id="verified_model_runtime_topology:test",
+        topology_verification_receipt_id="verified_model_runtime_binding:test",
+        topology_valid_until=1_900_000_000,
+    )
+
+
+def _invoke_bridge_main(
+    payload: dict, *, api_key: str = "test-key", runtime_receipt=None
+) -> tuple[int, dict]:
     stdin_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     stdin_buffer = io.BytesIO(stdin_bytes)
     stdout = io.StringIO()
     fake_stdin = mock.Mock()
     fake_stdin.buffer = stdin_buffer
+    receipt = runtime_receipt or _ready_runtime_receipt(payload)
     with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
         os.environ, {bridge.ENV_API_KEY: api_key}, clear=False
-    ):
+    ), mock.patch.object(bridge, "query_model_runtime_binding", return_value=receipt):
         rc = bridge.main()
     return rc, json.loads(stdout.getvalue())
 
 
 class AdvisoryBridgeHardeningTests(unittest.TestCase):
-    def _invoke_main(self, payload: dict, *, api_key: str = "test-key") -> tuple[int, dict]:
-        return _invoke_bridge_main(payload, api_key=api_key)
+    def _invoke_main(
+        self, payload: dict, *, api_key: str = "test-key", runtime_receipt=None
+    ) -> tuple[int, dict]:
+        return _invoke_bridge_main(
+            payload, api_key=api_key, runtime_receipt=runtime_receipt
+        )
+
+    def test_unknown_mode_rejects_before_query_or_network(self) -> None:
+        with mock.patch.object(bridge, "query_model_runtime_binding") as query, mock.patch(
+            "urllib.request.urlopen"
+        ) as network:
+            route, reason = bridge._verified_runtime_route(
+                {"mode": "unknown", "lead_model": "z-ai/glm-5.2"}
+            )
+        self.assertIsNone(route)
+        self.assertEqual(reason, "model_runtime_topology_mode_unsupported")
+        query.assert_not_called()
+        network.assert_not_called()
+
+    def test_unconfigured_runtime_rejects_before_network(self) -> None:
+        blocked = SimpleNamespace(
+            status="UNCONFIGURED", accepted=False, role_bindings=()
+        )
+        with mock.patch("urllib.request.urlopen") as network:
+            _rc, out = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 work focus",
+                    "lead_model": "z-ai/glm-5.2",
+                },
+                runtime_receipt=blocked,
+            )
+        self.assertFalse(out.get("ok"))
+        self.assertEqual(out.get("reason"), "model_runtime_topology_not_ready")
+        self.assertFalse(out.get("made_network_call"))
+        network.assert_not_called()
+
+    def test_non_openrouter_resolved_provider_rejects_before_network(self) -> None:
+        payload = {
+            "mode": "openrouter_single",
+            "prompt": "012 work focus",
+            "lead_model": "z-ai/glm-5.2",
+        }
+        receipt = _ready_runtime_receipt(payload)
+        receipt.role_bindings = (
+            {"role": "principal", "provider": "openai", "model_id": "z-ai/glm-5.2"},
+        )
+        with mock.patch("urllib.request.urlopen") as network:
+            _rc, out = self._invoke_main(payload, runtime_receipt=receipt)
+        self.assertFalse(out.get("ok"))
+        self.assertEqual(out.get("reason"), "model_runtime_topology_provider_unsupported")
+        self.assertFalse(out.get("made_network_call"))
+        network.assert_not_called()
 
     def test_panel_models_capped_at_six(self) -> None:
         models = bridge._panel_models(["m" + str(i) for i in range(12)])
@@ -962,15 +1044,7 @@ class KimiK3RuntimeBudgetTests(unittest.TestCase):
     """Focused coverage for K3 provider budgets and truthful role receipts."""
 
     def _invoke_main(self, payload: dict) -> tuple[int, dict]:
-        stdin_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        fake_stdin = mock.Mock()
-        fake_stdin.buffer = io.BytesIO(stdin_bytes)
-        stdout = io.StringIO()
-        with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
-            os.environ, {bridge.ENV_API_KEY: "test-key"}, clear=False
-        ):
-            rc = bridge.main()
-        return rc, json.loads(stdout.getvalue())
+        return _invoke_bridge_main(payload)
 
     def test_kimi_k3_completion_applies_4096_floor(self) -> None:
         post = mock.Mock(

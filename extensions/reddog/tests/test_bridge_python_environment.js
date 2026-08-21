@@ -39,6 +39,14 @@ const CONFIG_FIXTURE = Object.freeze({
   REDDOG_AUTHORITATIVE_WORK_STATE_PATH: 'work-state-marker',
   REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT: 'binding-root-marker',
   REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH: 'binding-receipt-marker',
+  REDDOG_MODEL_SELECTION_RECEIPT_PATH: 'selection-marker',
+  REDDOG_MODEL_CATALOG_SNAPSHOT_PATH: 'catalog-marker',
+  REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH: 'benchmarks-marker',
+  REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH: 'promotions-marker',
+  REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH: 'evidence-marker',
+  REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH: 'policy-marker',
+  REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH: 'keys-marker',
+  REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS: 'openrouter',
   HOLOINDEX_QUERY_SERVICE_URL: 'owner-url-marker',
   HOLOINDEX_QUERY_SERVICE_TOKEN: 'owner-token-marker',
   HOLO_SSD_PATH: 'legacy-ssd-marker',
@@ -108,15 +116,24 @@ function assertProfile(profile, allowed) {
 }
 
 function assertProfiles() {
+  const modelRuntimeKeys = [
+    'REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT',
+    'REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH',
+    'REDDOG_MODEL_SELECTION_RECEIPT_PATH',
+    'REDDOG_MODEL_CATALOG_SNAPSHOT_PATH',
+    'REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH',
+    'REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH',
+    'REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH',
+    'REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH',
+    'REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH',
+    'REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS'
+  ];
   assertProfile('default', []);
-  assertProfile('advisory_provider', ['OPENROUTER_API_KEY']);
+  assertProfile('advisory_provider', ['OPENROUTER_API_KEY', ...modelRuntimeKeys]);
   assertProfile('authoritative_work_state', [
     'REDDOG_AUTHORITATIVE_WORK_STATE_PATH'
   ]);
-  assertProfile('model_runtime_binding', [
-    'REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT',
-    'REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH'
-  ]);
+  assertProfile('model_runtime_binding', modelRuntimeKeys);
   assertProfile('holo_query', [
     'HOLOINDEX_SSD_PATH', 'HOLO_SSD_PATH', 'HOLO_OFFLINE'
   ]);

@@ -51,9 +51,31 @@ duplicates, malformed output, and every production-scoped proposal.
 
 Accepted candidates are shadow inputs to the existing held-out combination
 benchmark harness, which always includes the deterministic AI Gateway incumbent
-outside proposer control. Nemotron does not select production models, act as verifier,
-promote a champion, or bind runtime defaults. Live configured multi-call/panel
-AutoResearch remains halted at its documented safety gates.
+outside proposer control. Nemotron does not select production models, act as
+verifier, promote a champion, or bind runtime defaults.
+
+The configured gateway runner now prepares and reserves the complete bounded
+task-by-candidate call set before first egress. It then executes only those exact
+members and records content-free, content-addressed call evidence. A live
+two-task run used the exact loaded Nemotron route with no fallback; offline
+tests remain the release authority.
+
+`model_autoresearch_campaign_configured_runtime.py` owns configured runner
+construction, canonical prompt-guard injection, typed campaign-member
+preflight, and atomic outside-repository output claims. The startup bootstrap
+only validates runtime inputs and coordinates that bounded component. This
+WSP-62 decomposition lowered the bootstrap function and file ceilings instead
+of expanding an exemption.
+
+Authenticated proposer provenance binds the exact LM Studio call and
+deterministic admission receipt to an externally signed, short-lived receipt
+stored outside the repository. Campaign authority separately binds that
+provenance, campaign execution, normalized policies, and exact candidate set
+before any promotion gate can emit champion evidence. Durable replay state is
+required; neither module owns signing keys. The production handoff accepts
+only single-model candidates and delegates final independent benchmark and
+promotion signatures to the existing signed-evidence verifier and runtime
+binder. Aggregate panel promotion remains shadow-only.
 
 ## Verified Runtime Topology Resolution
 

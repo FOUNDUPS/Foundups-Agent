@@ -1,4 +1,15 @@
 # ModLog - moltbot_bridge
+## 2026-08-21: Shared verified artifact-model topology consumers
+
+- Connected bounded FoundUps Fusion, OpenClaw gateway, and Hermes API artifact
+  providers to the shared one-shot AI Gateway resolver. Each provider defaults
+  to an empty availability inventory and can use only the exact configured
+  provider/model route carried by verified runtime evidence.
+- Propagated explicit provider inventory and trusted use-time clocks through
+  the resident queue bootstrap. Stale, replayed, unavailable, payload-mismatch,
+  and retargeted routes reject before network, secret access, or worker process
+  execution. WSP 00/15/22/50/62/97.
+
 ## 2026-08-21: RedDog advisory bridge WSP 62 containment repair
 
 - Extracted pure bounded input, telemetry, prompt, and result formatting into

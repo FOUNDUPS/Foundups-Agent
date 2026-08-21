@@ -17,6 +17,19 @@ or disjoint modalities remain unknown. `test_model_runtime_binding_security.py`
 covers one-shot verified topology resolution, replay, trusted-time expiry, and
 unavailable-provider rejection.
 
+`test_model_autoresearch_configured_gateway_runner.py` and the configured
+bootstrap safety matrix prove whole-campaign reservation occurs before first
+egress, failures release only unattempted reservations, exact local/provider
+routes are preserved, and preflight failure performs zero calls.
+The safety suite also enforces the extracted configured-runtime boundary,
+canonical prompt-guard ownership, and reduced WSP-62 bootstrap ceilings.
+`test_model_topology_proposer_authenticated_provenance.py` and
+`test_model_autoresearch_authenticated_promotion_authority.py` cover exact
+call/admission/campaign/policy binding, trust, revocation, TTL, durable replay,
+retry, and publication ordering. The production-handoff matrix proves only a
+single model can enter the existing independently signed production-evidence
+and runtime-binding suppliers; aggregate panel candidates fail closed.
+
 ## Kimi K3 request-truth coverage
 
 `test_kimi_k3_request_truth.py` verifies the exact OpenRouter model route

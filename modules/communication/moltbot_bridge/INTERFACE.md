@@ -1,4 +1,21 @@
 # OpenClaw Bridge Interface
+## Receipt-bound artifact generation models
+
+`build_generation_dependencies(...)` accepts an explicit
+`available_model_providers` sequence and injects it into exactly one configured
+artifact provider. `generate_bounded_artifact_contents(...)` uses the shared AI
+Gateway topology resolver immediately before provider execution. The resulting
+one-shot capability binds the artifact invocation, selection, runtime-binding
+verification, resolution receipt, and exact endpoint sequence.
+
+`FoundupsFusionArtifactGenerationRunner`,
+`OpenClawGatewayArtifactGenerationRunner`, and
+`HermesApiArtifactGenerationRunner` consume that capability once. Fusion
+requires OpenRouter; OpenClaw and Hermes preserve the resolved provider/model
+pair. All default provider inventories are empty. No consumer may derive an
+alternate model from static fallback, environment model names, or worker
+identity.
+
 ## RedDog advisory bridge support
 
 `reddog_advisory_bridge_support.py` owns only deterministic, bounded input

@@ -1,6 +1,6 @@
 # RedDog
 
-Version: 0.4.103
+Version: 0.4.104
 
 ## Model-routing authority
 
@@ -18,9 +18,26 @@ challenger; this static roster is not evidence that GLM or Qwen is champion.
 Local Nemotron uses the exact loaded LM Studio ID and native reasoning-off API,
 with no server launch or provider fallback. Its output is deterministically
 expanded into role/provider assignments and admitted only as held-out
-AutoResearch candidates. Live configured multi-call/panel AutoResearch remains
-halted at the AI Gateway safety gates, so no automatic production promotion is
-claimed.
+AutoResearch candidates. The configured runner reserves the entire bounded
+task-by-candidate campaign before its first provider call and retains one exact
+receipt per attempted call. A live two-task Nemotron campaign exercised that
+path without fallback. This is evaluation evidence, not automatic production
+promotion.
+
+The extension query, advisory/Fusion bridge, bounded FoundUps Fusion artifact
+provider, OpenClaw gateway provider, and Hermes API provider consume the same
+short-lived verified runtime topology. Each egress requires an explicit
+available-provider inventory and preserves the receipt's exact
+role/provider/model assignments; stale, replayed, unavailable, or retargeted
+bindings stop before network or worker execution. The static roster is used
+only when the operator explicitly allows evaluation fallback.
+
+AI Gateway provides authenticated durable proposer and campaign-promotion
+composition points plus a fail-closed single-model handoff to the existing
+signed production-evidence/runtime binder. They inject no signer and own no
+private key. Production activation still requires independently configured
+external signer, trust, revocation, durable replay, and runtime artifacts.
+Aggregate panel promotion remains shadow-only.
 
 ## Workspace and package boundary
 

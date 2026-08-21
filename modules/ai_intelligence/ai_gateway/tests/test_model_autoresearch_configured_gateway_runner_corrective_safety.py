@@ -140,7 +140,7 @@ def test_inherited_wsp62_exemptions_are_exact_no_growth_ceils() -> None:
         (module / "wsp_62_exemptions.yaml").read_text(encoding="utf-8")
     )
     expected = {
-        "run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap": 235,
+        "run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap": 233,
         "build_model_autoresearch_output_evidence_semantic_verifier": 96,
         "_verifier": 83,
     }

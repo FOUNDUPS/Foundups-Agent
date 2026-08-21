@@ -50,10 +50,12 @@ def test_bootstrap_uses_fixed_openclaw_identity_and_ignores_environment(tmp_path
         injected_runner=None, mode="openclaw_gateway", repo_root=repo,
         runtime_root=runtime,
         dependencies=ArtifactProviderDependencies(openclaw_command_runner=runner),
+        available_model_providers=("openrouter", "openrouter"),
     )
     assert reasons == () and isinstance(built, OpenClawGatewayArtifactGenerationRunner)
     assert built.agent_id == OPENCLAW_ARTIFACT_AGENT_ID
     assert built.command_runner is runner
+    assert built.available_model_providers == ("openrouter",)
 
 
 def test_production_hermes_mode_builds_real_upstream_api_adapter(tmp_path):
@@ -65,9 +67,24 @@ def test_production_hermes_mode_builds_real_upstream_api_adapter(tmp_path):
             hermes_api_transport=transport,
             hermes_api_key_provider=key_provider,
         ),
+        available_model_providers=("anthropic", "openrouter"),
     )
     assert reasons == () and isinstance(built, HermesApiArtifactGenerationRunner)
     assert built.transport is transport and built.api_key_provider is key_provider
+    assert built.available_model_providers == ("anthropic", "openrouter")
+
+
+def test_fusion_availability_is_configured_and_openrouter_only(tmp_path):
+    repo, runtime = _roots(tmp_path)
+    built, reasons = _build_artifact_generator(
+        injected_runner=None,
+        mode="foundups_fusion",
+        repo_root=repo,
+        runtime_root=runtime,
+        available_model_providers=("anthropic", "openrouter"),
+    )
+    assert reasons == ()
+    assert built.available_model_providers == ("openrouter",)
 
 
 def test_unknown_provider_mode_rejects(tmp_path):

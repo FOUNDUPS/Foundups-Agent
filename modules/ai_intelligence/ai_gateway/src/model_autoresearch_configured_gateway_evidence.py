@@ -398,6 +398,20 @@ class ConfiguredGatewayReceiptStore(Protocol):
         """Append one canonical receipt and return its ID."""
 
 
+class DurableExactPublicationStore(Protocol):
+    """Durable, idempotent state for one nonce bound to one exact digest."""
+
+    @property
+    def durable(self) -> bool: ...
+
+    @property
+    def store_id(self) -> str: ...
+
+    def advance_publication(
+        self, nonce: str, binding_digest: str, target_status: str
+    ) -> str: ...
+
+
 class JsonlConfiguredGatewayReceiptStore:
     """Append-only JSONL receipt store used only with trusted outside-repo paths."""
 
@@ -421,6 +435,191 @@ class JsonlConfiguredGatewayReceiptStore:
                 handle.flush()
                 os.fsync(handle.fileno())
         return receipt_id
+
+
+class DirectoryConfiguredGatewayReceiptStore:
+    """Content-addressed, O(1) durable receipt store for restart recovery."""
+
+    MAX_RECEIPT_BYTES = 1_048_576
+    MAX_PUBLICATION_NONCE_BYTES = 512
+    _PUBLICATION_ORDER = {"RESERVED": 0, "AUTHORIZED": 1, "APPLIED": 2}
+
+    def __init__(self, root: Path | str, *, repo_root: Path | str) -> None:
+        self.root = Path(root).resolve()
+        repository = Path(repo_root).resolve()
+        if self.root == repository or self.root.is_relative_to(repository):
+            raise ValueError("configured_gateway_receipt_store_inside_repo")
+        self._store_id = digest_payload(
+            {
+                "kind": "directory_configured_gateway_receipt_store.v1",
+                "root": str(self.root),
+            }
+        )
+        self._lock = threading.Lock()
+
+    @property
+    def durable(self) -> bool:
+        return True
+
+    @property
+    def store_id(self) -> str:
+        return self._store_id
+
+    def append(self, receipt: object) -> str:
+        to_dict = getattr(receipt, "to_dict", None)
+        if not callable(to_dict):
+            raise ValueError("configured_gateway_receipt_invalid")
+        payload = to_dict()
+        receipt_id = payload.get("attempt_receipt_id") or payload.get("receipt_id")
+        if not isinstance(receipt_id, str) or not receipt_id.strip():
+            raise ValueError("configured_gateway_receipt_id_invalid")
+        encoded = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+        if len(encoded) > self.MAX_RECEIPT_BYTES:
+            raise ValueError("configured_gateway_receipt_too_large")
+        path = self._path(receipt_id)
+        self.root.mkdir(parents=True, exist_ok=True)
+        with self._lock:
+            try:
+                fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            except FileExistsError:
+                stored = self.load(receipt_id)
+                if digest_payload(stored) != digest_payload(payload):
+                    raise ValueError("configured_gateway_receipt_store_collision")
+                return receipt_id
+            try:
+                with os.fdopen(fd, "wb") as handle:
+                    handle.write(encoded)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+            except BaseException:
+                try:
+                    path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+                raise
+        return receipt_id
+
+    def load(self, receipt_id: str) -> Mapping[str, object]:
+        path = self._path(receipt_id)
+        try:
+            if not path.is_file() or path.stat().st_size > self.MAX_RECEIPT_BYTES:
+                raise ValueError("configured_gateway_receipt_missing")
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, json.JSONDecodeError):
+            raise ValueError("configured_gateway_receipt_invalid") from None
+        if not isinstance(payload, Mapping):
+            raise ValueError("configured_gateway_receipt_invalid")
+        stored_id = payload.get("attempt_receipt_id") or payload.get("receipt_id")
+        if stored_id != receipt_id:
+            raise ValueError("configured_gateway_receipt_id_mismatch")
+        return payload
+
+    def advance_publication(
+        self, nonce: str, binding_digest: str, target_status: str
+    ) -> str:
+        """Advance one exact durable publication with idempotent recovery."""
+
+        clean_nonce = self._publication_nonce(nonce)
+        binding = require_sha256("publication_binding_digest", binding_digest)
+        if target_status not in self._PUBLICATION_ORDER:
+            raise ValueError("configured_gateway_publication_status_invalid")
+        with self._lock:
+            current = self._publication_status(clean_nonce, binding)
+            if current is None:
+                if target_status != "RESERVED":
+                    return ""
+                self._write_publication_marker(clean_nonce, binding, "RESERVED")
+                return "RESERVED"
+            if self._PUBLICATION_ORDER[target_status] > self._PUBLICATION_ORDER[current] + 1:
+                return ""
+            if self._PUBLICATION_ORDER[target_status] > self._PUBLICATION_ORDER[current]:
+                self._write_publication_marker(clean_nonce, binding, target_status)
+                return target_status
+            return current
+
+    def _path(self, receipt_id: str) -> Path:
+        if not isinstance(receipt_id, str) or not receipt_id.strip():
+            raise ValueError("configured_gateway_receipt_id_invalid")
+        name = hashlib.sha256(receipt_id.encode("utf-8")).hexdigest() + ".json"
+        return self.root / name
+
+    def _publication_nonce(self, nonce: str) -> str:
+        if not isinstance(nonce, str) or not nonce.strip():
+            raise ValueError("configured_gateway_publication_nonce_invalid")
+        if len(nonce.encode("utf-8")) > self.MAX_PUBLICATION_NONCE_BYTES:
+            raise ValueError("configured_gateway_publication_nonce_invalid")
+        return nonce
+
+    def _publication_status(self, nonce: str, binding_digest: str) -> str | None:
+        current: str | None = None
+        for status in self._PUBLICATION_ORDER:
+            path = self._publication_path(nonce, status)
+            if not path.exists():
+                break
+            payload = self._read_publication_marker(path)
+            if (
+                payload.get("nonce") != nonce
+                or payload.get("binding_digest") != binding_digest
+                or payload.get("status") != status
+                or payload.get("store_id") != self.store_id
+            ):
+                raise ValueError("configured_gateway_publication_binding_conflict")
+            current = status
+        return current
+
+    def _write_publication_marker(
+        self, nonce: str, binding_digest: str, status: str
+    ) -> None:
+        payload = {
+            "schema_version": "configured_gateway_exact_publication.v1",
+            "store_id": self.store_id,
+            "nonce": nonce,
+            "binding_digest": binding_digest,
+            "status": status,
+        }
+        encoded = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode(
+            "utf-8"
+        )
+        path = self._publication_path(nonce, status)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        except FileExistsError:
+            existing = self._read_publication_marker(path)
+            if digest_payload(existing) != digest_payload(payload):
+                raise ValueError("configured_gateway_publication_binding_conflict")
+            return
+        try:
+            with os.fdopen(fd, "wb") as handle:
+                handle.write(encoded)
+                handle.flush()
+                os.fsync(handle.fileno())
+        except BaseException:
+            try:
+                path.unlink(missing_ok=True)
+            except OSError:
+                pass
+            raise
+
+    def _read_publication_marker(self, path: Path) -> Mapping[str, object]:
+        try:
+            if not path.is_file() or path.stat().st_size > 4_096:
+                raise ValueError("configured_gateway_publication_marker_invalid")
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
+            raise ValueError("configured_gateway_publication_marker_invalid") from None
+        if not isinstance(payload, Mapping):
+            raise ValueError("configured_gateway_publication_marker_invalid")
+        return payload
+
+    def _publication_path(self, nonce: str, status: str) -> Path:
+        nonce_hash = hashlib.sha256(nonce.encode("utf-8")).hexdigest()
+        return (
+            self.root
+            / ".publications"
+            / nonce_hash[:2]
+            / f"{nonce_hash}.{status.lower()}.json"
+        )
 
 
 def build_attempt_receipt(
@@ -667,6 +866,8 @@ __all__ = [
     "ConfiguredGatewayModelBudgetEvidenceBundle",
     "ConfiguredGatewayReasoningControlEvidence",
     "ConfiguredGatewayReceiptStore",
+    "DirectoryConfiguredGatewayReceiptStore",
+    "DurableExactPublicationStore",
     "ConfiguredGatewayRunnerCallReceipt",
     "ConfiguredGatewayRunnerReceipt",
     "JsonlConfiguredGatewayReceiptStore",

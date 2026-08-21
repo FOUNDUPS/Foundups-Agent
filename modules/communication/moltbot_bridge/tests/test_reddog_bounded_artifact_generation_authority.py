@@ -137,6 +137,7 @@ def test_artifact_generation_requires_one_shot_authority_capability() -> None:
         request,
         runner=runner,
         authority_capability=forged,
+        trusted_now_epoch=lambda: 1_800_000_000,
     )
 
     assert FAIL_AUTHORITY in missing.rejection_reasons
@@ -162,6 +163,7 @@ def test_copied_authority_token_cannot_replace_original_identity() -> None:
             request["model_selection_receipt"],
             request["model_runtime_binding_receipt"],
         ),
+        trusted_now_epoch=lambda: 1_800_000_000,
     )
     accepted = generate_bounded_artifact_contents(
         request,
@@ -171,6 +173,7 @@ def test_copied_authority_token_cannot_replace_original_identity() -> None:
             request["model_selection_receipt"],
             request["model_runtime_binding_receipt"],
         ),
+        trusted_now_epoch=lambda: 1_800_000_000,
     )
     replayed = generate_bounded_artifact_contents(
         request,
@@ -180,6 +183,7 @@ def test_copied_authority_token_cannot_replace_original_identity() -> None:
             request["model_selection_receipt"],
             request["model_runtime_binding_receipt"],
         ),
+        trusted_now_epoch=lambda: 1_800_000_000,
     )
 
     assert FAIL_AUTHORITY in rejected.rejection_reasons
@@ -224,6 +228,47 @@ def test_foundups_fusion_runner_has_no_hardcoded_model_fallback(
     )
 
     assert result.ok is False
+    assert FAIL_MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert network_calls == []
+
+
+def test_unavailable_resolved_provider_rejects_before_runner() -> None:
+    class OpenAiOnlyRunner(FakeRunner):
+        available_model_providers = ("openai",)
+
+    runner = OpenAiOnlyRunner()
+    result = _generate(_request(), runner=runner)
+
+    assert FAIL_MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert runner.calls == []
+
+
+def test_expired_resolved_topology_rejects_before_network(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request = _request()
+    authority = _issue_artifact_generation_authority(request)
+    capability = model_runtime_binding_test_capability(
+        request["model_selection_receipt"], request["model_runtime_binding_receipt"]
+    )
+    ticks = iter((1_800_000_000, 1_800_000_061))
+    network_calls: list[dict[str, object]] = []
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(
+        reddog_bounded_artifact_generation_runtime,
+        "_load_foundups_fusion_runner",
+        lambda: _successful_fusion(network_calls),
+    )
+
+    result = generate_bounded_artifact_contents(
+        request,
+        runner=reddog_bounded_artifact_generation_runtime.
+        FoundupsFusionArtifactGenerationRunner(runtime_mode="foundups_fusion"),
+        authority_capability=authority,
+        model_runtime_binding_capability=capability,
+        trusted_now_epoch=lambda: next(ticks),
+    )
+
     assert FAIL_MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
     assert network_calls == []
 
@@ -293,6 +338,8 @@ def test_verified_capability_cannot_retarget_provider_topology(
 
 
 class _ReplayRunner:
+    available_model_providers = ("openai", "openrouter")
+
     def __init__(self) -> None:
         self.results: list[ArtifactGenerationModelResult] = []
 
@@ -375,6 +422,8 @@ def test_model_handle_has_no_mutable_provider_binding(
     provider_calls: list[dict[str, object]] = []
 
     class ForwardingRunner:
+        available_model_providers = ("openai", "openrouter")
+
         def generate_artifacts(self, *, prompt, context, binding, timeout_seconds):
             assert not hasattr(binding, "binding_json")
             with pytest.raises(AttributeError):

@@ -323,6 +323,19 @@ def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[
         payload.setdefault("signature_verifier_backend", "ed25519")
     if artifact_generator_mode:
         payload["artifact_generator_mode"] = artifact_generator_mode
+    available_model_providers = tuple(
+        sorted(
+            {
+                value.strip().lower()
+                for value in str(
+                    env.get("REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS") or ""
+                ).split(",")
+                if value.strip()
+            }
+        )
+    )
+    if available_model_providers:
+        payload["artifact_model_available_providers"] = available_model_providers
     if worktree_runner_mode:
         payload["worktree_runner_mode"] = worktree_runner_mode
     if evidence_command_runner_mode:

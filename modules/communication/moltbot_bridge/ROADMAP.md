@@ -1,5 +1,16 @@
 # moltbot_bridge Roadmap
 
+- COMPLETE: bounded FoundUps Fusion, OpenClaw gateway, and Hermes API artifact
+  providers consume one shared verified runtime-topology capability. Exact
+  role/provider/model identity and explicit available-provider inventory are
+  checked at use time; stale, replayed, unavailable, or retargeted bindings
+  reject before provider/worker egress. Static RedDog evaluation fallback does
+  not enter the resident worker path.
+- DEPLOYMENT REQUIRED: production model routes still depend on independently
+  supplied signed production evidence, trust/revocation inputs, current runtime
+  binding artifacts, and provider credentials. This bridge does not sign,
+  select champions, or make aggregate panel promotion authoritative.
+
 - COMPLETE: RedDog repository-state v2 intake consumes only the extension's
   digest-only executable v1 public projection and strictly validates bounded
   identity/signature/verifier shape. Raw executable paths and ambient Python Git

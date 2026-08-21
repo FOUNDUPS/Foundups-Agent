@@ -7,7 +7,7 @@ import secrets
 from typing import Any, Mapping
 
 from .reddog_artifact_generation_model_binding import artifact_generation_digest
-from .reddog_artifact_generation_model_binding import signed_principal_model_route
+from .reddog_artifact_generation_model_binding import resolved_principal_model_route
 from .reddog_artifact_generation_provider_contract import (
     ArtifactGenerationModelResult,
     validate_provider_artifact_contents,
@@ -23,7 +23,7 @@ _RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}")
 
 
 def signed_hermes_route(binding: object) -> tuple[str, str] | None:
-    return signed_principal_model_route(binding)
+    return resolved_principal_model_route(binding)
 
 
 def execute_hermes_artifact_run(

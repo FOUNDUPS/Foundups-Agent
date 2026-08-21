@@ -1,5 +1,14 @@
 # Tests - OpenClaw Bridge
 
+## Verified model-topology consumers
+
+The model runtime query, bounded runtime, authority, provider bootstrap,
+OpenClaw, Hermes, and resident integration matrices prove exact
+role/provider/model preservation with explicit availability. Negative coverage
+includes stale evidence, missing/unavailable providers, replay, retargeting,
+payload mismatch, and wrong provider; each path asserts zero network/process
+egress where applicable.
+
 ## Current upstream worker providers
 
 `test_reddog_hermes_api_artifact_provider.py` proves Hermes API `0.20.4`

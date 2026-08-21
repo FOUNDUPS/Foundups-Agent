@@ -1402,8 +1402,14 @@ class _FakeArtifactGenerator:
 
 
 class _FakeModelRuntimeBindingVerifier:
+    trusted_now_epoch = staticmethod(lambda: 1000)
+
     def verify(self, *, binding: Mapping[str, object], selection: Mapping[str, object]):
-        return model_runtime_binding_test_capability(dict(selection), dict(binding))
+        capability = model_runtime_binding_test_capability(
+            dict(selection), dict(binding)
+        )
+        assert capability is not None
+        return capability
 
 
 class _FakePatternMemoryAdmissionSink:
@@ -1573,9 +1579,15 @@ def _outside_repo_socket_path() -> Path:
 
 
 def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
-    selection, binding = model_selection_and_runtime_binding_receipts(
-        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
-    )
+    with patch(
+        "modules.ai_intelligence.ai_gateway.tests."
+        "model_signed_evidence_test_helpers.NOW",
+        1000,
+    ):
+        selection, binding = model_selection_and_runtime_binding_receipts(
+            runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+            verified_at_epoch=1000,
+        )
     verification = verified_runtime_binding_receipt(binding)
     assert verification is not None
     lineage = {
@@ -1814,9 +1826,14 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     monkeypatch.setenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", str(verifier))
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
+    monkeypatch.setenv(
+        "REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS",
+        "openrouter",
+    )
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", NOW)
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "1000")
     monkeypatch.setenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", str(authority_state))
     monkeypatch.setenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", str(snapshots))
     monkeypatch.setenv(

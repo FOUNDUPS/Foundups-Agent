@@ -168,9 +168,12 @@ def _event_stream(events):
 
 
 def _binding(model="qwen/qwen3-coder", provider="openrouter"):
-    return {"model_selection": {"lead_model": model, "role_assignments": [
-        {"role": "principal", "canonical_model_id": model, "provider": provider}
-    ]}}
+    return {
+        "model_selection": {"lead_model": model},
+        "resolved_runtime_topology": [
+            {"role": "principal", "model_id": model, "provider": provider}
+        ],
+    }
 
 
 def _generate(transport, *, binding=None, key_provider=None, **kwargs):

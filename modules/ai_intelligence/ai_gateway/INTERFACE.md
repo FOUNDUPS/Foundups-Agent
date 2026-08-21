@@ -405,11 +405,12 @@ The reasoning catalog digest is currently an operator-supplied catalog claim,
 not proof of canonical catalog admission. Exact assignment/API-model equality
 is therefore mandatory; aliases are rejected.
 
-Panel calls are reserved atomically against `max_total_calls`. A durable
-`ATTEMPTED` receipt is written before caller entry and consumes that slot.
-Failure releases only roles whose attempts were never persisted. Attempt and
-success JSONL readers canonically rehydrate records, recompute their IDs and
-cost totals, and reject tampering.
+The complete normalized task-by-selected-candidate campaign is prepared and
+reserved atomically against `max_total_calls` before the first caller entry. A
+durable `ATTEMPTED` receipt is written before each exact call and consumes that
+prepared slot. Failure releases only calls whose attempts were never persisted.
+Attempt and success JSONL readers canonically rehydrate records, recompute IDs
+and cost totals, and reject missing, duplicate, or substituted members.
 
 Configured bootstrap callers must also provide `runner_max_total_calls` and a
 canonical positive Decimal string for per-sample cost. Before runner
@@ -418,9 +419,9 @@ all selected assignment budgets, canonical path non-aliasing, and absent/empty
 write targets. The runner checks each final wrapped prompt size before prompt
 guard evaluation or caller entry.
 
-This phase-1 configured bootstrap admits exactly one executable planned call.
-Multi-call task sets and panel combinations remain NO-GO until a later phase
-can atomically prepare the complete task-by-role campaign before caller entry.
+Configured bootstrap admits a bounded multi-task SINGLE or PANEL campaign only
+after complete atomic preparation. Any prompt, assignment, path, budget, or
+capacity failure rejects the entire campaign before egress.
 
 When supplied with a `ModelAutoResearchOutputEvidenceStore`, the runner writes
 each raw role response as a digest-bound
@@ -454,12 +455,63 @@ digest, and checks explicit task metadata keys
 required terms are absent or no semantic requirements are supplied. Default
 startup behavior remains `deterministic_fixture`.
 
-Live configured-provider execution is a phase-B NO-GO until canonical catalog
-admission, authoritative provider usage receipts, and a model-budget-specific
-pre-buffer response-byte transport contract are present, and every
-input/receipt read and preflight path identity is protected by bounded
-streaming and an exclusive runtime-directory claim or equivalent
-identity-preserving boundary.
+Live local LM Studio evaluation is allowed only for an exact admitted local
+route and reasoning control; a two-task Nemotron acceptance run exercised this
+path without fallback. Production/OpenRouter campaign activation remains
+closed until canonical catalog admission, authoritative provider usage
+receipts, a model-budget-specific pre-buffer response-byte transport contract,
+and identity-preserving bounded runtime-file admission are configured.
+
+#### Authenticated topology proposer and campaign promotion authority
+
+```python
+propose_authenticated_lm_studio_shadow_topologies(...) -> AuthenticatedTopologyProposalResult
+reload_verified_topology_proposer_provenance(...) -> VerifiedTopologyProposerProvenance
+authorize_and_supply_campaign_promotion_gates(...) -> AuthenticatedCampaignPromotionSupplyResult
+```
+
+Proposer provenance binds the exact LM Studio call receipt, deterministic
+admission receipt, proposer model/provider, signer role/key epoch, TTL, and
+nonce to externally signed bytes stored in a content-addressed outside-repo
+store. Campaign promotion authority separately binds that provenance to the
+exact campaign execution receipt, normalized policy digest, and candidate set.
+Both paths rehydrate before verification, reject untrusted/revoked keys and
+invalid TTL, and require durable exact-use publication state before one-shot
+capability release. No private key or signer is present in these modules.
+
+Authenticated campaign promotion is SINGLE-model only. Aggregate panel
+candidates stay shadow-only until an independent member/topology promotion
+contract exists. Raw promotion-gate receipt IDs remain an offline/internal
+primitive and are not sufficient for production runtime binding; the later
+independent signed-evidence verifier remains mandatory.
+
+#### Authenticated single-model production binding
+
+```python
+build_authenticated_single_model_production_selection_preview(...) -> SingleModelProductionSelectionPreview
+bind_authenticated_single_model_promotion_to_runtime(...) -> SingleModelProductionBindingResult
+```
+
+The preview is deterministic and non-authoritative. The binding adapter asks
+an external boundary for independently signed benchmark and promotion evidence
+that binds the exact preview, policy, and authenticated promotion receipt. It
+then reproduces the preview selection ID through the existing verifier before
+supplying the existing selection and runtime-binding artifacts. Both outputs
+must be distinct outside-repository paths. The adapter has no signer, key,
+provider, subprocess, or network authority, and PANEL candidates fail closed.
+
+#### Configured campaign runtime assembly
+
+```python
+configured_runner_and_verifier(...) -> tuple[Callable, Callable, Path]
+prepare_configured_campaign(...) -> bool
+```
+
+`model_autoresearch_campaign_configured_runtime.py` owns canonical guard
+construction, exact provider/local caller composition, typed campaign-member
+preflight, and atomic outside-repository path claims. It does not invoke a
+provider; the campaign executor receives the runner only after preflight.
+This boundary is the WSP-62 extraction from the startup bootstrap.
 
 #### Model Combination Benchmark Harness
 

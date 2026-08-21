@@ -19,10 +19,18 @@
 - [x] Evaluation-only local Nemotron proposal call and deterministic admission
 - [x] Deterministically include the AI Gateway incumbent in every admitted
   held-out topology benchmark, outside proposer control
-- [ ] Compose resolved topology capabilities into the RedDog extension query,
-  Fusion, OpenClaw, and Hermes callers
-- [ ] Authenticate durable proposer-call origin beyond content-addressed shadow evidence
-- [ ] Outside-repository aggregate artifact supply/bootstrap and durable trust-store integration
+- [x] Compose resolved topology capabilities into the RedDog extension query,
+  Fusion, OpenClaw, and Hermes callers with explicit provider availability
+- [x] Authenticate and durably bind proposer call plus admission evidence to an
+  externally signed short-lived authority receipt
+- [x] Atomically reserve bounded configured task-by-candidate campaigns before
+  first egress and persist exact call evidence
+- [x] Bind authenticated SINGLE-model campaign promotion into the existing
+  independent signed-evidence and production runtime-binding supply
+- [ ] Configure production external signer/trust/revocation/durable replay
+  services and supply live production evidence artifacts
+- [ ] Define independently signed aggregate panel-promotion semantics; panels
+  remain evaluation/shadow-only
 
 ### Runtime binder decomposition
 

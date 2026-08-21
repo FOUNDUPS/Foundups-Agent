@@ -28,6 +28,10 @@ function receipt(overrides) {
     promotion_evidence_receipt_ids: ['d', 'e', 'f'],
     signed_promotion_receipt_ids: ['g', 'h', 'i'],
     min_verifier_pass_rate: 0.9,
+    topology_resolution_receipt_id: 'verified_model_runtime_topology:' + 'b'.repeat(64),
+    topology_verification_receipt_id: 'model_runtime_binding_verification:' + 'c'.repeat(64),
+    topology_valid_until: 1800000060,
+    available_providers: ['openai', 'deepseek', 'moonshotai'],
     rejection_reasons: [],
     no_model_call_performed: true,
     no_holoindex_query_performed: true,
@@ -77,7 +81,14 @@ async function main() {
     6
   );
   assert.strictEqual(fallback.modelBindingSource, 'evaluation_config');
-  assert.strictEqual(fallback.modelBindingBlocked, false);
+  assert.strictEqual(fallback.modelBindingBlocked, true);
+  const explicitEvaluation = query.resolveWorker(
+    { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] },
+    unconfiguredBody,
+    6,
+    { allowEvaluationFallback: true }
+  );
+  assert.strictEqual(explicitEvaluation.modelBindingBlocked, false);
 
   const rejected = query.resolveWorker(
     { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] },
@@ -99,6 +110,12 @@ async function main() {
     ]
   });
   assert.strictEqual(query.validateReceipt(verifierRole).accepted, false);
+
+  const providerMismatch = receipt({ available_providers: ['openai'] });
+  assert.strictEqual(query.validateReceipt(providerMismatch).accepted, false);
+
+  const missingTopology = receipt({ topology_resolution_receipt_id: '' });
+  assert.strictEqual(query.validateReceipt(missingTopology).accepted, false);
 
   const bridge = await query.runQuery({
     interpreter: 'python',

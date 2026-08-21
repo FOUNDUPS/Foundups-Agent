@@ -1,5 +1,14 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-21 - Governed topology-consumer closure (0.4.104)
+
+- Added v2 extension-query coverage for explicit available-provider inventory,
+  exact role/provider/model topology, expiry, and fail-closed fallback policy.
+- Added bridge-environment coverage for runtime-binding, provider-inventory,
+  and isolated Holo replica-route inputs without widening credential profiles.
+- Backend manifest, package surface, and exhaustive release receipts are
+  regenerated only from the final composed RedDog/Holo tree.
+
 ## 2026-08-21 - Nemotron/Qwen routing contract refresh (0.4.103)
 
 - Pinned Qwen 3.8 Max as the current evaluation fallback critic, retained exact

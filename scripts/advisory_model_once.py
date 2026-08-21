@@ -51,6 +51,10 @@ from modules.communication.moltbot_bridge.src.reddog_advisory_bridge_support imp
     synthesis_user_prompt as _support_synthesis_user_prompt,
     system_prompt as _support_system_prompt,
 )
+from modules.communication.moltbot_bridge.src.reddog_model_runtime_binding_query import (  # noqa: E402
+    STATUS_READY as MODEL_RUNTIME_BINDING_READY,
+    query_model_runtime_binding,
+)
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 ENV_API_KEY = "OPENROUTER_API_KEY"
@@ -1056,6 +1060,18 @@ def main() -> int:
         )
 
     _progress("redaction_pass", "Redaction gate passed.")
+    route, route_reason = _verified_runtime_route(payload)
+    if route is None:
+        _progress("model_runtime_blocked", "Verified runtime topology blocked before provider egress.")
+        return _json_result(
+            ok=False,
+            reason=route_reason,
+            made_network_call=False,
+            **audit_telemetry,
+            **redaction_telemetry,
+        )
+    bridge_meta = dict(bridge_meta)
+    bridge_meta.update(route)
     system_prompt = _system_prompt(payload)
     redacted_user_message = gate.redacted_prompt
     if gate.redacted_context:
@@ -1163,6 +1179,38 @@ def main() -> int:
         **audit_telemetry,
         **redaction_telemetry,
     )
+
+
+def _verified_runtime_route(payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
+    """Reverify and consume the exact topology in the provider-call process."""
+
+    mode = str(payload.get("mode") or "")
+    if mode not in {"openrouter_single", "foundups_fusion", "openrouter_fusion_alias"}:
+        return None, "model_runtime_topology_mode_unsupported"
+    receipt = query_model_runtime_binding(repo_root=REPO_ROOT)
+    if receipt.status != MODEL_RUNTIME_BINDING_READY or receipt.accepted is not True:
+        return None, "model_runtime_topology_not_ready"
+    bindings = tuple(receipt.role_bindings)
+    if not bindings or any(item.get("provider") != "openrouter" for item in bindings):
+        return None, "model_runtime_topology_provider_unsupported"
+    lead = str(payload.get("lead_model") or payload.get("model") or "")
+    if lead != str(receipt.principal_model or ""):
+        return None, "model_runtime_topology_payload_mismatch"
+    if mode in {"foundups_fusion", "openrouter_fusion_alias"}:
+        panel = tuple(_panel_models(payload.get("panel_models")))
+        if panel != tuple(receipt.panel_models):
+            return None, "model_runtime_topology_payload_mismatch"
+    return {
+        "model_runtime_binding_receipt_id": receipt.binding_receipt_id,
+        "model_runtime_topology_resolution_receipt_id": (
+            receipt.topology_resolution_receipt_id
+        ),
+        "model_runtime_topology_verification_receipt_id": (
+            receipt.topology_verification_receipt_id
+        ),
+        "model_runtime_topology_valid_until": receipt.topology_valid_until,
+        "model_runtime_topology_consumed_at_provider_boundary": True,
+    }, ""
 
 
 if __name__ == "__main__":

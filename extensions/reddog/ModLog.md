@@ -1,13 +1,27 @@
 # RedDog ModLog
 
+## 2026-08-21 - Verified topology consumers and governed AutoResearch (0.4.104)
+
+- Connected the extension query, advisory/Fusion bridge, bounded FoundUps
+  Fusion, OpenClaw, and Hermes artifact providers to the shared one-shot
+  runtime-topology resolver. Every route requires explicit provider
+  availability and preserves exact receipt-bound role/provider/model identity.
+- Added atomic whole-campaign reservation, exact per-call evidence, durable
+  authenticated proposer provenance, independently signed campaign promotion
+  authority, and a fail-closed single-model handoff to the existing signed
+  production binder. No signer, private key, or implicit production authority
+  was added; panel promotion remains shadow-only.
+- Exercised two exact local Nemotron calls through the governed configured
+  runner and retained content-free call/evidence receipts. The static roster
+  remains explicit evaluation fallback only. WSP 00/15/22/50/62/87/97.
+
 ## 2026-08-21 - Nemotron shadow routing and Qwen challenger fallback (0.4.103)
 
 - Added local Nemotron 3.5 Lightning as a bounded evaluation-only panel
   proposer under AI Gateway admission; it has no production selection,
   verifier, promotion, extension, repository, or worker authority.
 - Added the shared one-shot verified runtime-topology resolver with a trusted
-  use-time 60-second cap; the extension query, Fusion, OpenClaw, and Hermes are
-  explicitly pending thin consumers rather than competing model routers.
+  use-time 60-second cap. The 0.4.104 slice later connected its thin consumers.
 - Refreshed the explicit no-binding fallback to GLM 5.2 principal with DeepSeek
   V4 Pro, Qwen 3.8 Max, and Kimi K3 critics. Static defaults remain candidates,
   not measured champions.

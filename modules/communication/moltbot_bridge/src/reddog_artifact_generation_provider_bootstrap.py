@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from .reddog_artifact_generation_provider_modes import (
     RUNTIME_MODE_FOUNDUPS_FUSION,
@@ -40,6 +40,7 @@ def build_artifact_generator(
     repo_root: Path,
     runtime_root: Path,
     dependencies: ArtifactProviderDependencies | None = None,
+    available_model_providers: Sequence[str] = (),
 ) -> tuple[Any, tuple[str, ...]]:
     """Build one canonical provider or fail closed on an unknown mode."""
     if injected_runner is not None:
@@ -49,10 +50,15 @@ def build_artifact_generator(
         reasons = () if not str(mode or "").strip() else ("unsupported_artifact_generator_mode",)
         return None, reasons
     supplied = dependencies or ArtifactProviderDependencies()
+    configured_providers = _configured_providers(available_model_providers)
     if normalized == RUNTIME_MODE_OPENCLAW_GATEWAY:
-        return _build_openclaw(repo_root, runtime_root, supplied)
+        return _build_openclaw(
+            repo_root, runtime_root, supplied, configured_providers
+        )
     if normalized == RUNTIME_MODE_HERMES_API:
-        return _build_hermes(repo_root, runtime_root, supplied)
+        return _build_hermes(
+            repo_root, runtime_root, supplied, configured_providers
+        )
     if normalized != RUNTIME_MODE_FOUNDUPS_FUSION:
         return None, ("unsupported_artifact_generator_mode",)
     from .reddog_bounded_artifact_generation_runtime import (
@@ -60,7 +66,10 @@ def build_artifact_generator(
     )
 
     return FoundupsFusionArtifactGenerationRunner(
-        runtime_mode=RUNTIME_MODE_FOUNDUPS_FUSION
+        runtime_mode=RUNTIME_MODE_FOUNDUPS_FUSION,
+        available_model_providers=tuple(
+            provider for provider in configured_providers if provider == "openrouter"
+        ),
     ), ()
 
 
@@ -73,6 +82,7 @@ def build_generation_dependencies(
     verifier_config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None,
     trusted_now: Callable[[], int],
     provider_dependencies: ArtifactProviderDependencies | None = None,
+    available_model_providers: Sequence[str] = (),
     verifier_builder: Callable[..., Any] = build_model_runtime_verifier,
 ) -> tuple[Any, Any, tuple[str, ...]]:
     """Compose provider and signed model verifier for the resident loop."""
@@ -82,6 +92,7 @@ def build_generation_dependencies(
         repo_root=root,
         runtime_root=runtime_root,
         dependencies=provider_dependencies,
+        available_model_providers=available_model_providers,
     )
     if reasons:
         return None, None, reasons
@@ -144,6 +155,7 @@ def _build_openclaw(
     repo_root: Path,
     runtime_root: Path,
     dependencies: ArtifactProviderDependencies,
+    available_model_providers: tuple[str, ...],
 ) -> tuple[Any, tuple[str, ...]]:
     from .reddog_openclaw_gateway_artifact_provider import (
         OpenClawGatewayArtifactGenerationRunner,
@@ -162,6 +174,7 @@ def _build_openclaw(
         runtime_root=runtime_root / "openclaw-artifacts",
         agent_id=OPENCLAW_ARTIFACT_AGENT_ID,
         command_runner=runner,
+        available_model_providers=available_model_providers,
     ), ()
 
 
@@ -169,6 +182,7 @@ def _build_hermes(
     repo_root: Path,
     runtime_root: Path,
     dependencies: ArtifactProviderDependencies,
+    available_model_providers: tuple[str, ...],
 ) -> tuple[Any, tuple[str, ...]]:
     from .reddog_hermes_api_artifact_provider import HermesApiArtifactGenerationRunner
     from .reddog_hermes_api_transport import (
@@ -184,7 +198,13 @@ def _build_hermes(
     return HermesApiArtifactGenerationRunner(
         transport=transport,
         api_key_provider=key_provider,
+        available_model_providers=available_model_providers,
     ), ()
+
+
+def _configured_providers(values: Sequence[str]) -> tuple[str, ...]:
+    """Canonicalize an explicit runtime availability assertion."""
+    return tuple(sorted({str(value).strip().lower() for value in values if str(value).strip()}))
 
 
 __all__ = [

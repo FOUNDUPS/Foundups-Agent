@@ -7,6 +7,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
@@ -256,9 +257,15 @@ def _artifact_progressive_binding() -> dict[str, object]:
 
 
 def _artifact_model_lineage() -> tuple[dict[str, object], dict[str, object]]:
-    return model_selection_and_runtime_binding_receipts(
-        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
-    )
+    with patch(
+        "modules.ai_intelligence.ai_gateway.tests."
+        "model_signed_evidence_test_helpers.NOW",
+        1000,
+    ):
+        return model_selection_and_runtime_binding_receipts(
+            runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+            verified_at_epoch=1000,
+        )
 
 
 def _mapping_digest(value: dict[str, object]) -> str:
@@ -437,8 +444,14 @@ class _FakeEnvCommitDraftPrRunner(_FakeEnvDraftPrRunner):
 
 
 class _FakeModelRuntimeBindingVerifier:
+    trusted_now_epoch = staticmethod(lambda: 1000)
+
     def verify(self, *, binding, selection):
-        return model_runtime_binding_test_capability(dict(selection), dict(binding))
+        capability = model_runtime_binding_test_capability(
+            dict(selection), dict(binding)
+        )
+        assert capability is not None
+        return capability
 
 
 def _patch_exact_sha_commit_runtime(
@@ -468,6 +481,8 @@ def _patch_exact_sha_commit_runtime(
         "build_model_runtime_verifier",
         lambda **_kwargs: (_FakeModelRuntimeBindingVerifier(), ()),
     )
+    monkeypatch.setenv("REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS", "openrouter")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "1000")
     monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_MODE", "real")
     return evidence_runner
 

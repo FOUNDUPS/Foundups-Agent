@@ -1,5 +1,20 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## Receipt-bound artifact model routing
+
+The resident bounded-artifact path does not infer models from provider names,
+worker type, prompts, or model-vendor prefixes. It verifies one AI Gateway
+runtime binding at use time, resolves its exact role/provider/model topology,
+and mints a short-lived one-shot model capability. The configured provider must
+publish an explicit available-provider inventory; missing, stale, replayed,
+retargeted, or unavailable routes reject before egress.
+
+FoundUps Fusion admits only the configured `openrouter` route. OpenClaw passes
+the resolved principal route to its exact `--model` argument. Hermes passes the
+same resolved principal model and provider to its API request. Neither worker
+can replace the topology or use the RedDog evaluation fallback. Provider
+credentials, worker authority, and runtime-model authority remain separate.
+
 ## RedDog governed repository-state v2 intake
 
 Start Operations supplies a JavaScript-minted

@@ -81,6 +81,8 @@ TASK_FAMILY = "artifact_generation"
 
 
 class FakeRunner:
+    available_model_providers = ("openai", "openrouter", "anthropic")
+
     def __init__(
         self,
         *,
@@ -191,6 +193,7 @@ def _generate(
         runner=runner,
         authority_capability=authority,
         model_runtime_binding_capability=capability,
+        trusted_now_epoch=lambda: 1_800_000_000,
     )
 
 
@@ -415,6 +418,7 @@ def test_foundups_fusion_runner_uses_model_selection_topology(monkeypatch: pytes
         request,
         runner=reddog_bounded_artifact_generation_runtime.FoundupsFusionArtifactGenerationRunner(
             runtime_mode="foundups_fusion",
+            available_model_providers=("openrouter",),
         ),
     )
 
@@ -427,12 +431,12 @@ def test_foundups_fusion_runner_uses_model_selection_topology(monkeypatch: pytes
     assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
     assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
     assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == selection["receipt_id"]
-    assert (
-        calls[0]["bridge_meta"][
-            "model_runtime_binding_verification_receipt_id"
-        ]
-        == verification.receipt_id
-    )
+    assert calls[0]["bridge_meta"][
+        "model_runtime_topology_verification_receipt_id"
+    ] == verification.receipt_id
+    assert str(calls[0]["bridge_meta"][
+        "model_runtime_topology_resolution_receipt_id"
+    ]).startswith("verified_model_runtime_topology:")
     assert (
         gate.receipt.model_runtime_binding_verification_receipt_id
         == verification.receipt_id

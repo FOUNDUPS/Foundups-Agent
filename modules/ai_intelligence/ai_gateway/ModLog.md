@@ -1,5 +1,24 @@
 # AI Gateway Module Change Log
 
+## [2026-08-21] - Governed Multi-Call and Authenticated Promotion Composition
+
+- Added atomic preparation/reservation of the complete bounded configured
+  gateway campaign before first provider egress, exact per-call receipts, and
+  deterministic campaign rehydration. A two-task exact local Nemotron run
+  completed without fallback.
+- Added externally signed, durable proposer-call/admission provenance and a
+  separate campaign-promotion authority binding execution, policies, and exact
+  candidates. Short TTL, revocation, trust, signature, replay, substitution,
+  and output-preflight failures close before promotion use.
+- Added a single-model handoff into the existing independent signed production
+  evidence, deterministic selection, and runtime-binding artifact supply.
+  Private keys/signers remain external; panel promotion remains shadow-only.
+- Extracted configured runner construction, canonical prompt-guard ownership,
+  campaign-member preflight, and atomic output claims into
+  `model_autoresearch_campaign_configured_runtime.py`. The WSP-62 bootstrap
+  ceiling decreased from 235 to 233 lines and its file ceiling from 920 to 868.
+  WSP 00/15/22/50/62/87/97.
+
 ## [2026-08-21] - Verified Topology Resolution and Nemotron Shadow Proposer
 
 - Added a process-local one-shot resolver from canonically verified runtime

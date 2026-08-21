@@ -53,7 +53,7 @@ const {
   beginBasePromptTrace, outputValidationOptions, statusMessages
 } = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.103';
+const EXTENSION_VERSION = '0.4.104';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';

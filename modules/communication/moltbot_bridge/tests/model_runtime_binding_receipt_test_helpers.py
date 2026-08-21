@@ -83,12 +83,14 @@ def model_selection_and_runtime_binding_receipts(
     *,
     runtime_surface: str,
     model_id: str = "openai/gpt-5.6-code",
+    provider: str = "openrouter",
     task_family: str = "reddog_runtime_model_call",
     panel_model_ids: tuple[str, ...] = (),
+    verified_at_epoch: int = 1_800_000_000,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build matching model-selection and runtime-binding receipts for tests."""
 
-    seed = _fixture_seed(model_id, panel_model_ids, task_family)
+    seed = _fixture_seed(model_id, panel_model_ids, task_family, provider)
     requirements = _selection_requirements(
         task_family, seed.model_ids, bool(panel_model_ids)
     )
@@ -113,17 +115,24 @@ def model_selection_and_runtime_binding_receipts(
         if panel_model_ids
         else evidence
     )
-    return _build_receipt_pair(seed, selection, policy, runtime_evidence)
+    return _build_receipt_pair(
+        seed,
+        selection,
+        policy,
+        runtime_evidence,
+        verified_at_epoch=verified_at_epoch,
+    )
 
 
 def _fixture_seed(
     model_id: str,
     panel_model_ids: tuple[str, ...],
     task_family: str,
+    provider: str,
 ) -> _FixtureSeed:
     model_ids = (model_id, *panel_model_ids)
     snapshot = build_model_catalog_snapshot(
-        _model_cards(model_ids, task_family),
+        _model_cards(model_ids, task_family, provider),
         generated_at="2026-07-16T00:00:00+00:00",
     )
     task_set_digest = _sha256("task-set")
@@ -146,10 +155,12 @@ def _fixture_seed(
 def _model_cards(
     model_ids: tuple[str, ...],
     task_family: str,
+    provider: str,
 ) -> tuple[ModelCapabilityCard, ...]:
     return tuple(
         ModelCapabilityCard(
-            provider=candidate.split("/", 1)[0],
+            # Provider is the access route; model IDs retain vendor ownership.
+            provider=provider,
             model_id=candidate,
             canonical_model_id=candidate,
             source="test",
@@ -317,6 +328,8 @@ def _build_receipt_pair(
     selection: Any,
     policy: ModelRuntimeBindingPolicy,
     runtime_evidence: Any,
+    *,
+    verified_at_epoch: int,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     verifier_inputs = _runtime_verifier_inputs(
         seed=seed,
@@ -327,7 +340,7 @@ def _build_receipt_pair(
     verified = verify_model_runtime_binding_artifact(
         model_selection_receipt=_json_normalized(selection.to_dict()),
         **verifier_inputs,
-        now=1_800_000_000,
+        now=verified_at_epoch,
     )
     receipt = verified.binding
     verification = verified.verification
@@ -342,7 +355,7 @@ def _build_receipt_pair(
     )
     _USE_TIME_VERIFIERS[verification.receipt_id] = ModelRuntimeBindingUseTimeVerifier(
         **verifier_inputs,
-        trusted_now_epoch=lambda: 1_800_000_000,
+        trusted_now_epoch=lambda: verified_at_epoch,
     )
     return _json_normalized(selection.to_dict()), runtime_dict
 

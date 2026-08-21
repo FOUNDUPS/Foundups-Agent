@@ -1,5 +1,19 @@
 # AI Gateway TestModLog
 
+## [2026-08-21] - Governed AutoResearch and production-handoff contracts
+
+- Added successful multi-task/panel configured campaigns plus zero-egress
+  preflight, exact reservation membership, budget, route, and failure-release
+  regressions.
+- Added authenticated durable proposer and campaign-authority adversarial
+  coverage for call/admission/campaign/policy substitution, trust, revocation,
+  negative/overlong TTL, replay across restart, store failure, retry, and gate
+  output preflight.
+- Added single-model production handoff coverage through external independent
+  signed evidence and the existing runtime binder; panel promotion is rejected.
+- Moved configured runtime construction/preflight into a bounded module and
+  lowered the enforced bootstrap ceilings rather than expanding WSP-62.
+
 ## [2026-08-21] - Nemotron Proposal and Verified Topology Contracts
 
 - Added offline coverage for conservative catalog-card merge, local compact

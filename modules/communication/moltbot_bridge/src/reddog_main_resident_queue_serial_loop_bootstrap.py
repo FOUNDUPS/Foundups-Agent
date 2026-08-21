@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from fnmatch import fnmatchcase
 from pathlib import Path
-from typing import Any, Callable, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
@@ -204,6 +204,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     worktree_runner_timeout_s: int = 120,
     artifact_generator: Any = None,
     artifact_generator_mode: str | None = None,
+    artifact_model_available_providers: Sequence[str] = (),
     artifact_provider_dependencies: ArtifactProviderDependencies | None = None,
     model_runtime_binding_verifier: Any = None,
     model_runtime_verifier_config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None = None,
@@ -471,7 +472,9 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     generation = _build_generation_dependencies(
         root, runtime_root, artifact_generator, artifact_generator_mode,
         model_runtime_binding_verifier, model_runtime_verifier_config, authority_clock,
-        provider_dependencies=artifact_provider_dependencies, verifier_builder=build_model_runtime_verifier,
+        provider_dependencies=artifact_provider_dependencies,
+        available_model_providers=artifact_model_available_providers,
+        verifier_builder=build_model_runtime_verifier,
     )
     resolved_artifact_generator, resolved_model_verifier, generation_reasons = generation
     if generation_reasons:
