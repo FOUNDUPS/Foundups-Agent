@@ -1,5 +1,19 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-21] RedDog CI Grounding Contract Alignment
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 97
+
+- Repaired the CI-only conversational-draft and authoritative-work-state
+  contracts after the WSP_62 context extraction moved both calls from
+  `wireFusionWebview` into the bounded context builder and owner runtime. The
+  contracts now prove both function-reference binding and invocation without
+  weakening either no-Holo route.
+- Added both focused grounding contracts to `npm test`, closing the local/CI
+  coverage gap without moving the complete backend-closure preflight into the
+  inner loop. No production source, authority, package surface, or backend
+  closure changed.
+
 ## [2026-08-21] RedDog 0.4.102 Native Worker Integration Candidate
 
 **WSP Protocol:** WSP 00, 15, 22, 50, 62, 87, 97

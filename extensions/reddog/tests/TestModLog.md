@@ -1,5 +1,16 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-21 - CI conversational-draft grounding repair
+
+- Replaced both stale inline `wireFusionWebview` source assertions for
+  conversational-draft and authoritative-work-state empty contexts with exact
+  two-hop contracts across `buildContextForRequest` and
+  `holoindex_owner_runtime.buildOwnedContext` after the WSP_62 extraction.
+- Added both focused grounding contracts to the bounded fast tier so `npm test`
+  catches source-shape drift without rehashing the complete backend closure;
+  the aggregate remains the separate CI diagnostic security gate. Production
+  routing and authority behavior are unchanged.
+
 ## 2026-08-21 - Native upstream worker provenance (0.4.102)
 
 - Updated version/package and backend-manifest contracts for Hermes API

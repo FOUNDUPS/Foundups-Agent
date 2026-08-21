@@ -74,6 +74,10 @@ listener/timer cleanup, invalid `SystemRoot`, and unchanged POSIX group signals.
 The aligned loop-3 hostile-selector promotion passed in 274.537 seconds wall
 time (owner 273.762 seconds), with all four timeout/termination fields false.
 The fast tier is the CI/default inner loop and never expands to promotion.
+It includes the focused conversational-draft and authoritative-work-state
+grounding contracts so WSP_62 source extractions are validated locally without
+rehashing the complete backend closure. The aggregate preflight remains a
+separate CI diagnostic gate.
 The first aligned complete promotion passed in 295.928 seconds; core was the
 slowest group at 295.219 seconds and total headroom was 124.072 seconds (29.5%).
 A repeat passed in 266.709 seconds; acceptance uses the slower run.
