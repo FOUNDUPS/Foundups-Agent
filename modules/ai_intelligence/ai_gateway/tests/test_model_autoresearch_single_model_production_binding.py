@@ -12,8 +12,12 @@ import pytest
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_authenticated_promotion_authority import (
     AuthenticatedCampaignPromotionSupplyResult,
     CampaignPromotionAuthorityRequest,
+    MAX_RECEIPT_TTL_SECONDS,
+    SIGNING_PREFIX as CAMPAIGN_SIGNING_PREFIX,
     VerifiedCampaignPromotionAuthority,
+    _campaign_authority_publication_binding,
     build_signed_campaign_promotion_authority_receipt,
+    verify_and_store_campaign_promotion_authority,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution import (
     _execution_receipt,
@@ -22,9 +26,11 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_promotio
     run_reddog_model_autoresearch_campaign_promotion_gate_supply,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_evidence import (
+    DirectoryConfiguredGatewayReceiptStore,
     digest_payload,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_single_model_production_binding import (
+    CampaignPromotionAuthorityUseContext,
     bind_authenticated_single_model_promotion_to_runtime,
     build_authenticated_single_model_production_selection_preview,
 )
@@ -58,7 +64,6 @@ from modules.ai_intelligence.ai_gateway.src.model_selection_artifact_supply impo
     EVIDENCE_BUNDLE_SCHEMA_VERSION,
 )
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
-    InMemoryEvidenceNonceStore,
     ModelEvidenceSignerRole,
     StaticModelEvidenceKeyResolver,
 )
@@ -74,7 +79,7 @@ from modules.ai_intelligence.ai_gateway.tests.model_signed_evidence_test_helpers
 )
 
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).absolute().parents[4]
 MODULE_PATH = (
     REPO_ROOT
     / "modules"
@@ -85,6 +90,29 @@ MODULE_PATH = (
 )
 MODEL_ID = "openrouter/z-ai/glm-5.2"
 TASK_FAMILY = "architecture"
+CAMPAIGN_PUBLIC_KEY = "external-public-key:campaign-promotion"
+CAMPAIGN_FINGERPRINT = "fingerprint:campaign-promotion"
+CAMPAIGN_SIGNATURE = "external-signature:campaign-promotion"
+
+
+class _CampaignKeys:
+    def resolve(self, role, fingerprint, epoch):
+        if (role, fingerprint, epoch) == (
+            "promotion_authority",
+            CAMPAIGN_FINGERPRINT,
+            KEY_EPOCH,
+        ):
+            return CAMPAIGN_PUBLIC_KEY
+        return None
+
+
+class _CampaignVerifier:
+    def verify(self, public_key, signing_input, signature):
+        return (
+            public_key == CAMPAIGN_PUBLIC_KEY
+            and signing_input.startswith(CAMPAIGN_SIGNING_PREFIX + ".")
+            and signature == CAMPAIGN_SIGNATURE
+        )
 
 
 def _authenticated_gate(tmp_path: Path):
@@ -147,18 +175,27 @@ def _authenticated_gate(tmp_path: Path):
     )
     signed = build_signed_campaign_promotion_authority_receipt(
         request=request,
-        signer_public_key="external-public-key:campaign-promotion",
-        signer_key_fingerprint="fingerprint:campaign-promotion",
-        key_epoch="epoch-1",
+        signer_public_key=CAMPAIGN_PUBLIC_KEY,
+        signer_key_fingerprint=CAMPAIGN_FINGERPRINT,
+        key_epoch=KEY_EPOCH,
         issued_at=NOW - 10,
         expires_at=NOW + 300,
         nonce="nonce:campaign-promotion:single",
-        signature="external-signature:campaign-promotion",
+        signature=CAMPAIGN_SIGNATURE,
     )
-    authority = VerifiedCampaignPromotionAuthority(
+    store = DirectoryConfiguredGatewayReceiptStore(
+        tmp_path / "authority-store", repo_root=REPO_ROOT
+    )
+    keys = _CampaignKeys()
+    verifier = _CampaignVerifier()
+    authority = verify_and_store_campaign_promotion_authority(
         request=request,
-        receipt=signed,
-        durable_store_receipt_id=signed.receipt_id,
+        signed_receipt=signed,
+        key_resolver=keys,
+        signature_verifier=verifier,
+        publication_store=store,
+        receipt_store=store,
+        now=NOW,
     )
     gate_path = tmp_path / "runtime" / "promotion-gate.json"
     supply = run_reddog_model_autoresearch_campaign_promotion_gate_supply(
@@ -170,11 +207,52 @@ def _authenticated_gate(tmp_path: Path):
         signed_promotion_receipt_id=signed.receipt_id,
     )
     assert supply.accepted
+    context = CampaignPromotionAuthorityUseContext(
+        key_resolver=keys,
+        signature_verifier=verifier,
+        receipt_store=store,
+        publication_store=store,
+        trusted_now_epoch=lambda: NOW,
+    )
     return (
         AuthenticatedCampaignPromotionSupplyResult(authority=authority, supply=supply),
         benchmark_run.benchmark_evidence_receipts[0],
         policy,
+        context,
     )
+
+
+def _authority_use_with_status(tmp_path, authenticated, status):
+    store = DirectoryConfiguredGatewayReceiptStore(
+        tmp_path / ("authority-use-" + str(status or "missing").lower()),
+        repo_root=REPO_ROOT,
+    )
+    store.append(authenticated.authority.receipt)
+    binding = _campaign_authority_publication_binding(
+        authenticated.authority.request, authenticated.authority.receipt
+    )
+    nonce = "campaign-promotion-signature:" + authenticated.authority.receipt.nonce
+    if status in {"RESERVED", "AUTHORIZED", "APPLIED"}:
+        store.advance_publication(nonce, binding, "RESERVED")
+    if status in {"AUTHORIZED", "APPLIED"}:
+        store.advance_publication(nonce, binding, "AUTHORIZED")
+    if status == "APPLIED":
+        store.advance_publication(nonce, binding, "APPLIED")
+    return CampaignPromotionAuthorityUseContext(
+        key_resolver=_CampaignKeys(),
+        signature_verifier=_CampaignVerifier(),
+        receipt_store=store,
+        publication_store=store,
+        trusted_now_epoch=lambda: NOW,
+    )
+
+
+def _durable_files(store):
+    return {
+        str(path.relative_to(store.root)): path.read_bytes()
+        for path in store.root.rglob("*")
+        if path.is_file()
+    }
 
 
 def _snapshot():
@@ -253,7 +331,7 @@ def _trusted_keys():
     }
 
 
-def _runtime_policy(benchmark):
+def _runtime_policy(benchmark, authenticated):
     return {
         "task_family": TASK_FAMILY,
         "runtime_surface": "reddog_backend_architect",
@@ -261,7 +339,7 @@ def _runtime_policy(benchmark):
         "required_task_set_digest": benchmark.task_set_digest,
         "required_held_out_split_digest": benchmark.held_out_split_digest,
         "required_verifier_digest": benchmark.verifier_digest,
-        "authority_receipt_id": "runtime-authority:external",
+        "authority_receipt_id": authenticated.authority.receipt.receipt_id,
     }
 
 
@@ -330,7 +408,7 @@ def _external_bundle(
 
 
 def test_authenticated_single_model_chain_reproduces_preview_and_binds_runtime(tmp_path):
-    authenticated, benchmark, policy = _authenticated_gate(tmp_path)
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
     snapshot = _snapshot()
     selection_path = tmp_path / "runtime" / "selection.json"
     runtime_path = tmp_path / "runtime" / "binding.json"
@@ -340,17 +418,16 @@ def test_authenticated_single_model_chain_reproduces_preview_and_binds_runtime(t
         authenticated_promotion=authenticated,
         catalog_snapshot=snapshot.to_dict(),
         requirements=_requirements(),
+        authority_use=authority_use,
         signed_evidence_provider=lambda preview: _external_bundle(
             preview, authenticated, benchmark, policy
         ),
         evidence_key_resolver=_resolver(),
         evidence_signature_verifier=DeterministicSignatureVerifier(),
-        evidence_nonce_store=InMemoryEvidenceNonceStore(),
         trusted_keys_payload=_trusted_keys(),
-        runtime_policy=_runtime_policy(benchmark),
+        runtime_policy=_runtime_policy(benchmark, authenticated),
         selection_output_path=selection_path,
         runtime_binding_output_path=runtime_path,
-        now=NOW,
     )
 
     assert result.selection.accepted
@@ -362,7 +439,7 @@ def test_authenticated_single_model_chain_reproduces_preview_and_binds_runtime(t
 
 
 def test_panel_and_evidence_splices_fail_closed_before_runtime_output(tmp_path):
-    authenticated, benchmark, policy = _authenticated_gate(tmp_path)
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
     snapshot = _snapshot()
     calls = []
     panel_requirements = _requirements(
@@ -376,15 +453,14 @@ def test_panel_and_evidence_splices_fail_closed_before_runtime_output(tmp_path):
             authenticated_promotion=authenticated,
             catalog_snapshot=snapshot.to_dict(),
             requirements=panel_requirements,
+            authority_use=authority_use,
             signed_evidence_provider=lambda preview: calls.append(preview),
             evidence_key_resolver=_resolver(),
             evidence_signature_verifier=DeterministicSignatureVerifier(),
-            evidence_nonce_store=InMemoryEvidenceNonceStore(),
             trusted_keys_payload=_trusted_keys(),
-            runtime_policy=_runtime_policy(benchmark),
+            runtime_policy=_runtime_policy(benchmark, authenticated),
             selection_output_path=tmp_path / "panel-selection.json",
             runtime_binding_output_path=tmp_path / "panel-binding.json",
-            now=NOW,
         )
     assert calls == []
 
@@ -393,6 +469,7 @@ def test_panel_and_evidence_splices_fail_closed_before_runtime_output(tmp_path):
         authenticated_promotion=authenticated,
         catalog_snapshot=snapshot.to_dict(),
         requirements=_requirements(),
+        authority_use=authority_use,
     )
     spliced = _external_bundle(
         preview,
@@ -408,15 +485,14 @@ def test_panel_and_evidence_splices_fail_closed_before_runtime_output(tmp_path):
             authenticated_promotion=authenticated,
             catalog_snapshot=snapshot.to_dict(),
             requirements=_requirements(),
+            authority_use=authority_use,
             signed_evidence_provider=lambda _preview: spliced,
             evidence_key_resolver=_resolver(),
             evidence_signature_verifier=DeterministicSignatureVerifier(),
-            evidence_nonce_store=InMemoryEvidenceNonceStore(),
             trusted_keys_payload=_trusted_keys(),
-            runtime_policy=_runtime_policy(benchmark),
+            runtime_policy=_runtime_policy(benchmark, authenticated),
             selection_output_path=tmp_path / "splice-selection.json",
             runtime_binding_output_path=runtime_path,
-            now=NOW,
         )
     assert not runtime_path.exists()
 
@@ -434,21 +510,20 @@ def test_panel_and_evidence_splices_fail_closed_before_runtime_output(tmp_path):
             authenticated_promotion=authenticated,
             catalog_snapshot=snapshot.to_dict(),
             requirements=_requirements(),
+            authority_use=authority_use,
             signed_evidence_provider=lambda _preview: policy_spliced,
             evidence_key_resolver=_resolver(),
             evidence_signature_verifier=DeterministicSignatureVerifier(),
-            evidence_nonce_store=InMemoryEvidenceNonceStore(),
             trusted_keys_payload=_trusted_keys(),
-            runtime_policy=_runtime_policy(benchmark),
+            runtime_policy=_runtime_policy(benchmark, authenticated),
             selection_output_path=tmp_path / "policy-splice-selection.json",
             runtime_binding_output_path=policy_runtime_path,
-            now=NOW,
         )
     assert not policy_runtime_path.exists()
 
 
 def test_tampered_authenticated_result_and_inside_repo_outputs_reject(tmp_path):
-    authenticated, benchmark, _policy = _authenticated_gate(tmp_path)
+    authenticated, benchmark, _policy, authority_use = _authenticated_gate(tmp_path)
     forged = replace(
         authenticated,
         authority=replace(
@@ -462,6 +537,7 @@ def test_tampered_authenticated_result_and_inside_repo_outputs_reject(tmp_path):
             authenticated_promotion=forged,
             catalog_snapshot=_snapshot().to_dict(),
             requirements=_requirements(),
+            authority_use=authority_use,
         )
 
     with pytest.raises(ValueError, match="inside_repo"):
@@ -470,16 +546,248 @@ def test_tampered_authenticated_result_and_inside_repo_outputs_reject(tmp_path):
             authenticated_promotion=authenticated,
             catalog_snapshot=_snapshot().to_dict(),
             requirements=_requirements(),
+            authority_use=authority_use,
             signed_evidence_provider=lambda _preview: {},
             evidence_key_resolver=_resolver(),
             evidence_signature_verifier=DeterministicSignatureVerifier(),
-            evidence_nonce_store=InMemoryEvidenceNonceStore(),
             trusted_keys_payload=_trusted_keys(),
-            runtime_policy=_runtime_policy(benchmark),
+            runtime_policy=_runtime_policy(benchmark, authenticated),
             selection_output_path=REPO_ROOT / "selection.json",
             runtime_binding_output_path=tmp_path / "binding.json",
-            now=NOW,
         )
+
+
+@pytest.mark.parametrize("failure", ("malformed_policy", "invalid_trust"))
+def test_deterministic_preflight_rejects_before_provider_or_artifacts(
+    tmp_path, failure
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    selection = tmp_path / failure / "selection.json"
+    runtime = tmp_path / failure / "runtime.json"
+    calls = []
+    before = sorted(path.name for path in authority_use.receipt_store.root.iterdir())
+    runtime_policy = _runtime_policy(benchmark, authenticated)
+    trusted_keys = _trusted_keys()
+    if failure == "malformed_policy":
+        runtime_policy = {"task_family": TASK_FAMILY}
+    else:
+        trusted_keys = {"trusted_public_keys": [{"signer_role": "broken"}]}
+    with pytest.raises(ValueError, match="runtime_policy|trusted_keys"):
+        bind_authenticated_single_model_promotion_to_runtime(
+            repo_root=REPO_ROOT,
+            authenticated_promotion=authenticated,
+            catalog_snapshot=_snapshot().to_dict(),
+            requirements=_requirements(),
+            authority_use=authority_use,
+            signed_evidence_provider=lambda preview: calls.append(preview),
+            evidence_key_resolver=_resolver(),
+            evidence_signature_verifier=DeterministicSignatureVerifier(),
+            trusted_keys_payload=trusted_keys,
+            runtime_policy=runtime_policy,
+            selection_output_path=selection,
+            runtime_binding_output_path=runtime,
+        )
+    after = sorted(path.name for path in authority_use.receipt_store.root.iterdir())
+    assert calls == []
+    assert before == after
+    assert not selection.exists() and not runtime.exists()
+
+
+def test_preexisting_output_claim_rejects_before_provider(tmp_path):
+    authenticated, benchmark, _policy, authority_use = _authenticated_gate(tmp_path)
+    selection = tmp_path / "claimed" / "selection.json"
+    runtime = tmp_path / "claimed" / "runtime.json"
+    selection.parent.mkdir(parents=True)
+    selection.write_text("operator-owned", encoding="utf-8")
+    calls = []
+    with pytest.raises(ValueError, match="output_claim_failed"):
+        bind_authenticated_single_model_promotion_to_runtime(
+            repo_root=REPO_ROOT,
+            authenticated_promotion=authenticated,
+            catalog_snapshot=_snapshot().to_dict(),
+            requirements=_requirements(),
+            authority_use=authority_use,
+            signed_evidence_provider=lambda preview: calls.append(preview),
+            evidence_key_resolver=_resolver(),
+            evidence_signature_verifier=DeterministicSignatureVerifier(),
+            trusted_keys_payload=_trusted_keys(),
+            runtime_policy=_runtime_policy(benchmark, authenticated),
+            selection_output_path=selection,
+            runtime_binding_output_path=runtime,
+        )
+    assert calls == []
+    assert selection.read_text(encoding="utf-8") == "operator-owned"
+    assert not runtime.exists()
+
+
+@pytest.mark.parametrize("failure", ("expired", "revoked", "forged"))
+def test_authority_use_rejects_before_provider_or_artifacts(tmp_path, failure):
+    authenticated, benchmark, _policy, authority_use = _authenticated_gate(tmp_path)
+    durable_store = authority_use.receipt_store
+    before = sorted(path.name for path in durable_store.root.iterdir())
+    if failure == "expired":
+        authority_use = replace(
+            authority_use,
+            trusted_now_epoch=lambda: authenticated.authority.receipt.expires_at + 1,
+        )
+    elif failure == "revoked":
+        authority_use = replace(authority_use, revoked_key_epochs=(KEY_EPOCH,))
+    else:
+        forged_receipt = build_signed_campaign_promotion_authority_receipt(
+            request=authenticated.authority.request,
+            signer_public_key=CAMPAIGN_PUBLIC_KEY,
+            signer_key_fingerprint=CAMPAIGN_FINGERPRINT,
+            key_epoch=KEY_EPOCH,
+            issued_at=NOW - 10,
+            expires_at=NOW + 300,
+            nonce="nonce:campaign-promotion:forged",
+            signature="forged-signature",
+        )
+        forged = VerifiedCampaignPromotionAuthority(
+            request=authenticated.authority.request,
+            receipt=forged_receipt,
+            durable_store_receipt_id=forged_receipt.receipt_id,
+        )
+        authenticated = replace(authenticated, authority=forged)
+    selection = tmp_path / failure / "selection.json"
+    runtime = tmp_path / failure / "runtime.json"
+    calls = []
+    with pytest.raises(ValueError, match="authority"):
+        bind_authenticated_single_model_promotion_to_runtime(
+            repo_root=REPO_ROOT,
+            authenticated_promotion=authenticated,
+            catalog_snapshot=_snapshot().to_dict(),
+            requirements=_requirements(),
+            authority_use=authority_use,
+            signed_evidence_provider=lambda preview: calls.append(preview),
+            evidence_key_resolver=_resolver(),
+            evidence_signature_verifier=DeterministicSignatureVerifier(),
+            trusted_keys_payload=_trusted_keys(),
+            runtime_policy=_runtime_policy(benchmark, authenticated),
+            selection_output_path=selection,
+            runtime_binding_output_path=runtime,
+        )
+    assert calls == []
+    assert before == sorted(path.name for path in durable_store.root.iterdir())
+    assert not selection.exists() and not runtime.exists()
+
+
+@pytest.mark.parametrize("status", (None, "RESERVED", "AUTHORIZED"))
+def test_authority_use_requires_preexisting_applied_publication_without_mutation(
+    tmp_path, status
+):
+    authenticated, benchmark, _policy, _context = _authenticated_gate(tmp_path)
+    authority_use = _authority_use_with_status(tmp_path, authenticated, status)
+    before = _durable_files(authority_use.publication_store)
+    selection = tmp_path / "non-applied" / str(status) / "selection.json"
+    runtime = tmp_path / "non-applied" / str(status) / "runtime.json"
+    calls = []
+    with pytest.raises(ValueError, match="publication_not_applied"):
+        bind_authenticated_single_model_promotion_to_runtime(
+            repo_root=REPO_ROOT,
+            authenticated_promotion=authenticated,
+            catalog_snapshot=_snapshot().to_dict(),
+            requirements=_requirements(),
+            authority_use=authority_use,
+            signed_evidence_provider=lambda preview: calls.append(preview),
+            evidence_key_resolver=_resolver(),
+            evidence_signature_verifier=DeterministicSignatureVerifier(),
+            trusted_keys_payload=_trusted_keys(),
+            runtime_policy=_runtime_policy(benchmark, authenticated),
+            selection_output_path=selection,
+            runtime_binding_output_path=runtime,
+        )
+    assert calls == []
+    assert _durable_files(authority_use.publication_store) == before
+    assert not selection.exists() and not runtime.exists()
+
+
+@pytest.mark.parametrize(
+    ("expires_at", "reason"),
+    (
+        (NOW - 10, "ttl_invalid"),
+        (NOW - 10 + MAX_RECEIPT_TTL_SECONDS + 1, "ttl_exceeded"),
+    ),
+)
+def test_forged_signed_invalid_ttl_rejects_without_effects(
+    tmp_path, expires_at, reason
+):
+    authenticated, benchmark, _policy, _context = _authenticated_gate(tmp_path)
+    receipt = replace(authenticated.authority.receipt, expires_at=expires_at)
+    forged_authority = replace(
+        authenticated.authority,
+        receipt=receipt,
+        durable_store_receipt_id=receipt.receipt_id,
+    )
+    authenticated = replace(authenticated, authority=forged_authority)
+    authority_use = _authority_use_with_status(tmp_path, authenticated, "APPLIED")
+    before = _durable_files(authority_use.publication_store)
+    selection = tmp_path / reason / "selection.json"
+    runtime = tmp_path / reason / "runtime.json"
+    calls = []
+    with pytest.raises(ValueError, match=reason):
+        bind_authenticated_single_model_promotion_to_runtime(
+            repo_root=REPO_ROOT,
+            authenticated_promotion=authenticated,
+            catalog_snapshot=_snapshot().to_dict(),
+            requirements=_requirements(),
+            authority_use=authority_use,
+            signed_evidence_provider=lambda preview: calls.append(preview),
+            evidence_key_resolver=_resolver(),
+            evidence_signature_verifier=DeterministicSignatureVerifier(),
+            trusted_keys_payload=_trusted_keys(),
+            runtime_policy=_runtime_policy(benchmark, authenticated),
+            selection_output_path=selection,
+            runtime_binding_output_path=runtime,
+        )
+    assert calls == []
+    assert _durable_files(authority_use.publication_store) == before
+    assert not selection.exists() and not runtime.exists()
+
+
+def test_exact_retry_after_transient_runtime_supply_failure(tmp_path, monkeypatch):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_execution as execution
+
+    original = execution.run_reddog_model_runtime_binding_artifact_supply
+    attempts = []
+
+    def fail_once(**values):
+        attempts.append(values["output_path"])
+        if len(attempts) == 1:
+            raise OSError("transient-runtime-write")
+        return original(**values)
+
+    monkeypatch.setattr(
+        execution, "run_reddog_model_runtime_binding_artifact_supply", fail_once
+    )
+    selection = tmp_path / "retry" / "selection.json"
+    runtime = tmp_path / "retry" / "runtime.json"
+
+    inputs = {
+        "repo_root": REPO_ROOT,
+        "authenticated_promotion": authenticated,
+        "catalog_snapshot": _snapshot().to_dict(),
+        "requirements": _requirements(),
+        "authority_use": authority_use,
+        "signed_evidence_provider": lambda preview: _external_bundle(
+            preview, authenticated, benchmark, policy
+        ),
+        "evidence_key_resolver": _resolver(),
+        "evidence_signature_verifier": DeterministicSignatureVerifier(),
+        "trusted_keys_payload": _trusted_keys(),
+        "runtime_policy": _runtime_policy(benchmark, authenticated),
+        "selection_output_path": selection,
+        "runtime_binding_output_path": runtime,
+    }
+
+    with pytest.raises(OSError, match="transient-runtime-write"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert not selection.exists() and not runtime.exists()
+    result = bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert result.runtime_binding.accepted
+    assert len(attempts) == 2
+    assert selection.is_file() and runtime.is_file()
 
 
 def test_adapter_contains_no_signer_key_provider_or_process_boundary():

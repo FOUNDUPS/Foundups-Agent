@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import json
 import hashlib
+import ctypes
+from ctypes import wintypes
 from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
+from modules.ai_intelligence.ai_gateway.src import (
+    model_autoresearch_configured_gateway_durability as durability_module,
+)
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_evidence import (
     DirectoryConfiguredGatewayReceiptStore,
     digest_payload,
@@ -147,6 +152,83 @@ def test_directory_receipt_store_rejects_repo_root_and_persists_publication(tmp_
         restarted.advance_publication(
             "nonce:one", digest_payload({"exact": "other"}), "RESERVED"
         )
+
+
+def test_directory_store_fsyncs_receipt_and_publication_lineage(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        durability_module,
+        "_fsync_directory",
+        lambda path: calls.append(Path(path)),
+    )
+    store = _durable_store(tmp_path, "durability-lineage")
+    receipt = _signed(_proposal_result())
+    assert store.append(receipt) == receipt.receipt_id
+    assert store.root in calls and store.root.parent in calls
+
+    calls.clear()
+    binding = digest_payload({"durable": "publication"})
+    assert store.advance_publication("nonce:durable", binding, "RESERVED") == "RESERVED"
+    assert store.root in calls and store.root.parent in calls
+    assert any(path.parent.name == ".publications" for path in calls)
+
+
+def test_directory_fsync_failure_is_retryable_but_never_reported_durable(
+    tmp_path, monkeypatch
+):
+    original = durability_module._fsync_directory
+    store = _durable_store(tmp_path, "durability-failure")
+    receipt = _signed(_proposal_result())
+    monkeypatch.setattr(
+        durability_module,
+        "_fsync_directory",
+        lambda _path: (_ for _ in ()).throw(OSError("directory sync failed")),
+    )
+    with pytest.raises(OSError, match="directory sync failed"):
+        store.append(receipt)
+    assert store.load(receipt.receipt_id) == receipt.to_dict()
+
+    binding = digest_payload({"durable": "publication"})
+    with pytest.raises(OSError, match="directory sync failed"):
+        store.advance_publication("nonce:durability-failure", binding, "RESERVED")
+    monkeypatch.setattr(durability_module, "_fsync_directory", original)
+    assert store.append(receipt) == receipt.receipt_id
+    assert (
+        store.advance_publication(
+            "nonce:durability-failure", binding, "RESERVED"
+        )
+        == "RESERVED"
+    )
+
+
+def test_directory_fsync_rejects_non_directory(tmp_path):
+    target = tmp_path / "not-a-directory"
+    target.write_text("not durable directory state", encoding="utf-8")
+    with pytest.raises(OSError):
+        durability_module._fsync_directory(target)
+
+
+@pytest.mark.parametrize("function_name", ("FlushFileBuffers", "CloseHandle"))
+def test_windows_directory_durability_declares_pointer_width_handle_abi(
+    function_name,
+):
+    class _Function:
+        argtypes = None
+        restype = None
+
+    class _Kernel32:
+        pass
+
+    kernel32 = _Kernel32()
+    function = _Function()
+    setattr(kernel32, function_name, function)
+    configured = durability_module._windows_bool_handle_function(
+        kernel32, function_name
+    )
+    assert configured is function
+    assert configured.argtypes == [wintypes.HANDLE]
+    assert configured.restype is wintypes.BOOL
+    assert ctypes.sizeof(configured.argtypes[0]) == ctypes.sizeof(ctypes.c_void_p)
 
 
 def test_proposer_receipt_and_publication_store_identity_must_match(tmp_path):

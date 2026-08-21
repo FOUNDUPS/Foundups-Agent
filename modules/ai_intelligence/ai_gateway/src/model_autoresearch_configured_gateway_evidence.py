@@ -13,6 +13,8 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Mapping, Protocol, Sequence
 
+from .model_autoresearch_configured_gateway_durability import _fsync_store_lineage
+
 
 BUDGET_SCHEMA_VERSION = "configured_gateway_model_budget_evidence.v1"
 RUNNER_RECEIPT_SCHEMA_VERSION = "configured_gateway_runner_receipt.v2"
@@ -411,6 +413,10 @@ class DurableExactPublicationStore(Protocol):
         self, nonce: str, binding_digest: str, target_status: str
     ) -> str: ...
 
+    def publication_status(
+        self, nonce: str, binding_digest: str
+    ) -> str | None: ...
+
 
 class JsonlConfiguredGatewayReceiptStore:
     """Append-only JSONL receipt store used only with trusted outside-repo paths."""
@@ -485,6 +491,7 @@ class DirectoryConfiguredGatewayReceiptStore:
                 stored = self.load(receipt_id)
                 if digest_payload(stored) != digest_payload(payload):
                     raise ValueError("configured_gateway_receipt_store_collision")
+                _fsync_store_lineage(path.parent, self.root)
                 return receipt_id
             try:
                 with os.fdopen(fd, "wb") as handle:
@@ -497,6 +504,7 @@ class DirectoryConfiguredGatewayReceiptStore:
                 except OSError:
                     pass
                 raise
+            _fsync_store_lineage(path.parent, self.root)
         return receipt_id
 
     def load(self, receipt_id: str) -> Mapping[str, object]:
@@ -537,6 +545,16 @@ class DirectoryConfiguredGatewayReceiptStore:
                 return target_status
             return current
 
+    def publication_status(
+        self, nonce: str, binding_digest: str
+    ) -> str | None:
+        """Read one exact publication status without advancing it."""
+
+        clean_nonce = self._publication_nonce(nonce)
+        binding = require_sha256("publication_binding_digest", binding_digest)
+        with self._lock:
+            return self._publication_status(clean_nonce, binding)
+
     def _path(self, receipt_id: str) -> Path:
         if not isinstance(receipt_id, str) or not receipt_id.strip():
             raise ValueError("configured_gateway_receipt_id_invalid")
@@ -564,6 +582,7 @@ class DirectoryConfiguredGatewayReceiptStore:
                 or payload.get("store_id") != self.store_id
             ):
                 raise ValueError("configured_gateway_publication_binding_conflict")
+            _fsync_store_lineage(path.parent, self.root)
             current = status
         return current
 
@@ -588,6 +607,7 @@ class DirectoryConfiguredGatewayReceiptStore:
             existing = self._read_publication_marker(path)
             if digest_payload(existing) != digest_payload(payload):
                 raise ValueError("configured_gateway_publication_binding_conflict")
+            _fsync_store_lineage(path.parent, self.root)
             return
         try:
             with os.fdopen(fd, "wb") as handle:
@@ -600,6 +620,7 @@ class DirectoryConfiguredGatewayReceiptStore:
             except OSError:
                 pass
             raise
+        _fsync_store_lineage(path.parent, self.root)
 
     def _read_publication_marker(self, path: Path) -> Mapping[str, object]:
         try:

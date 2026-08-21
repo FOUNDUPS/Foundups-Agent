@@ -17,6 +17,8 @@
 - Closed the release-only advisory-stage grounding drift: the emitted
   `model_runtime_blocked` stage now has an explicit barking action and the
   authenticated exhaustive contract binds all 19 bridge stages.
+- Reconciled current README truth with the landed opt-in continuation default
+  and the 0.4.104 VSIX filename; historical ModLog entries remain historical.
 
 ## 2026-08-21 - Nemotron shadow routing and Qwen challenger fallback (0.4.103)
 

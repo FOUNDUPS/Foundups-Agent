@@ -8,6 +8,11 @@ from pathlib import Path
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 BOUNDED_MODULES = (
+    "model_autoresearch_production_authority_use.py",
+    "model_autoresearch_production_binding_execution.py",
+    "model_autoresearch_production_binding_preflight.py",
+    "model_autoresearch_production_binding_transaction.py",
+    "model_autoresearch_single_model_evidence_preflight.py",
     "model_evidence_authority_validation.py",
     "model_runtime_binding_capability.py",
     "model_runtime_binding_digest.py",
@@ -21,6 +26,15 @@ BOUNDED_MODULES = (
     "model_runtime_binding_verified_admission.py",
 )
 TOUCHED_FUNCTIONS = {
+    "model_autoresearch_single_model_production_binding.py": (
+        "build_authenticated_single_model_production_selection_preview",
+        "bind_authenticated_single_model_promotion_to_runtime",
+        "_selection_preview_for_gate",
+        "_prepare_binding_inputs",
+        "_normalized_binding_inputs",
+        "_authenticated_single_gate",
+        "_authenticated_gate_artifact",
+    ),
     "model_panel_signed_evidence.py": ("_verify_model_panel_evidence_inputs",),
 }
 

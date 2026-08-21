@@ -5,6 +5,9 @@
 - Proved missing/unavailable provider inventory, stale use, replay, retargeting,
   and provider/payload mismatch reject before egress without widening the
   static evaluation fallback into worker authority.
+- Repaired the Linux signed-worker preflight fixtures to declare the explicit
+  OpenRouter inventory and the same trusted synthetic epoch as their generated
+  runtime receipts; production fail-closed defaults remain unchanged.
 
 ## 2026-08-21: RedDog advisory bridge support parity
 

@@ -52,6 +52,9 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_queue_test_helpers import (
     model_bound_queue_inputs,
 )
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_selection_and_runtime_binding_receipts,
+)
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
     SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
     serve_reddog_isolated_signer_socket_bounded,
@@ -163,6 +166,24 @@ def test_profile_signed_worker_queue_loop_runner_materializes_without_work_order
 def isolated_agent_db(tmp_path, monkeypatch):
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
     monkeypatch.setenv("OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED", "1")
+
+    def _authority_epoch_receipts(*, runtime_surface):
+        with patch(
+            "modules.ai_intelligence.ai_gateway.tests."
+            "model_signed_evidence_test_helpers.NOW",
+            1000,
+        ):
+            return model_selection_and_runtime_binding_receipts(
+                runtime_surface=runtime_surface,
+                verified_at_epoch=1000,
+            )
+
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.tests."
+        "model_runtime_binding_queue_test_helpers."
+        "model_selection_and_runtime_binding_receipts",
+        _authority_epoch_receipts,
+    )
     DatabaseManager.reset_for_tests()
     from modules.communication.moltbot_bridge.src import (
         reddog_signed_worker_openclaw_queue_loop_runtime_binding as binding_module,
@@ -326,6 +347,8 @@ def _patch_fusion_artifact_generator(monkeypatch) -> list[dict[str, object]]:
         "build_model_runtime_verifier",
         lambda **_kwargs: (_FakeModelRuntimeBindingVerifier(), ()),
     )
+    monkeypatch.setenv("REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS", "openrouter")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "1000")
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
     return calls
 

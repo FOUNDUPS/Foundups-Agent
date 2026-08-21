@@ -26,7 +26,11 @@
 - [x] Atomically reserve bounded configured task-by-candidate campaigns before
   first egress and persist exact call evidence
 - [x] Bind authenticated SINGLE-model campaign promotion into the existing
-  independent signed-evidence and production runtime-binding supply
+  independent signed-evidence and production runtime-binding supply, including
+  use-time signature/trust/revocation/expiry verification, exact durable
+  receipt plus non-mutating already-APPLIED publication proof, deterministic
+  preflight, transactional exclusive output claims with rollback, and
+  restart-safe exact retry
 - [ ] Configure production external signer/trust/revocation/durable replay
   services and supply live production evidence artifacts
 - [ ] Define independently signed aggregate panel-promotion semantics; panels
@@ -39,8 +43,12 @@
 
 ### Configured AutoResearch bootstrap decomposition
 
-- [ ] Before 2026-09-30, extract admission evidence collection and configured
-  runner/verifier assembly from
+- [x] Extract configured runner/verifier assembly and exact AI Gateway,
+  LM Studio, and routed caller adapters from the startup bootstrap/runner;
+  preserve behavior while restoring the configured runner below its prior
+  769-line ceiling with no function above 50 lines.
+- [ ] Before 2026-09-30, extract the remaining admission evidence collection
+  from
   `run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap`
   while preserving exact rejection precedence and result truth flags.
 
@@ -101,9 +109,12 @@
 - [ ] General provider-discovery cadence and scheduler expansion remains out of
   scope; the POC does not grant discovery any startup, selection, promotion,
   registry, or runtime authority.
-- [ ] Evaluate directory-handle publication on non-Windows hosts and stronger
-  directory durability. Their current boundary requires a trusted non-shared
-  runtime directory and all parent-directory fsync remains best-effort.
+- [x] Add fail-closed file plus directory-lineage durability through the store
+  root parent, with no-follow/type/identity checks on POSIX and pointer-width
+  directory-handle flush/close checks on Windows.
+- [ ] Exercise the POSIX directory-handle path in the target non-Windows
+  deployment matrix. Unsupported filesystems remain fail-closed; the separate
+  exclusive runtime-directory claim is still required against path replacement.
 
 ## Phase 1: Enhanced Intelligence (Next)
 - **Cost optimization algorithms** - Auto-select cheapest provider

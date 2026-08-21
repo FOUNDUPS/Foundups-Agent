@@ -62,10 +62,15 @@ tests remain the release authority.
 
 `model_autoresearch_campaign_configured_runtime.py` owns configured runner
 construction, canonical prompt-guard injection, typed campaign-member
-preflight, and atomic outside-repository output claims. The startup bootstrap
+preflight, and transactional exclusive outside-repository output claims. The startup bootstrap
 only validates runtime inputs and coordinates that bounded component. This
 WSP-62 decomposition lowered the bootstrap function and file ceilings instead
 of expanding an exemption.
+
+`model_autoresearch_configured_gateway_callers.py` owns the exact AI Gateway,
+LM Studio, and routed caller adapters used by that runner. These adapters
+preserve the admitted provider/model/API route and do not start a local server
+or introduce fallback.
 
 Authenticated proposer provenance binds the exact LM Studio call and
 deterministic admission receipt to an externally signed, short-lived receipt
@@ -75,7 +80,25 @@ before any promotion gate can emit champion evidence. Durable replay state is
 required; neither module owns signing keys. The production handoff accepts
 only single-model candidates and delegates final independent benchmark and
 promotion signatures to the existing signed-evidence verifier and runtime
-binder. Aggregate panel promotion remains shadow-only.
+binder. At use time it independently re-verifies the campaign signature,
+trusted key, revocation epoch, trusted-time validity, exact durable receipt,
+issuance-equivalent TTL bounds, and an already-APPLIED publication marker read
+through a non-mutating exact-status API. Missing, RESERVED, or AUTHORIZED
+publication state rejects without marker advancement. Runtime policy, evidence
+trust, and the complete exclusive-create output claim set finish before the
+external evidence call; partial claim failure rolls back owned placeholders;
+exact retries may resume RESERVED/AUTHORIZED publication state, while APPLIED
+authority use rejects as replay. Aggregate panel promotion remains
+shadow-only.
+
+New immutable receipt and publication files are durable only after both the
+file and its containing directory lineage through the configured store root
+have been flushed. Unsupported directory durability or open, flush, identity,
+or close failure fails closed. An identical retry may complete durability for
+an already-created exact artifact; an unflushed write is never reported as
+durable. `model_autoresearch_configured_gateway_durability.py` owns this
+cross-platform boundary so evidence serialization remains independently
+bounded under WSP-62.
 
 ## Verified Runtime Topology Resolution
 
@@ -349,9 +372,11 @@ Bootstrap admission also proves the complete selected-role x normalized-task
 call count against an explicit campaign-wide cap before constructing the
 runner. All write artifacts must be absent or empty and canonically distinct
 from every read input and other write target.
-This phase-1 configured bootstrap admits exactly one executable planned call;
-multi-call task sets and panel combinations remain NO-GO until the complete
-task-by-role campaign can be prepared atomically before caller entry.
+The configured bootstrap admits the complete bounded task-by-role campaign
+only after atomic preparation and reservation before caller entry. Multi-task
+and panel evaluation is admitted within explicit per-sample and campaign-wide
+caps and exact budget, route, output, and receipt claims. Production/OpenRouter
+activation remains halted by the separately documented live-admission gates.
 
 Call-attempt and successful-run receipts are append-only outside-repository
 JSONL artifacts. Public readers rehydrate each record, recompute group/receipt

@@ -12,11 +12,30 @@
   and output-preflight failures close before promotion use.
 - Added a single-model handoff into the existing independent signed production
   evidence, deterministic selection, and runtime-binding artifact supply.
-  Private keys/signers remain external; panel promotion remains shadow-only.
+  The handoff independently authenticates the exact durable campaign authority
+  at use time, mirrors issuance TTL limits, and now proves already-APPLIED
+  upstream publication through a non-mutating status read; missing, RESERVED,
+  or AUTHORIZED markers reject without advancement. It preflights runtime
+  policy/trust and transactionally acquires both exclusive output claims before
+  external evidence, rolling back owned placeholders on partial failure, and
+  uses durable exact publication state
+  for restart-safe retry and replay rejection. Private keys/signers remain
+  external; panel promotion remains shadow-only.
 - Extracted configured runner construction, canonical prompt-guard ownership,
-  campaign-member preflight, and atomic output claims into
+  campaign-member preflight, and transactional exclusive output claims into
   `model_autoresearch_campaign_configured_runtime.py`. The WSP-62 bootstrap
   ceiling decreased from 235 to 233 lines and its file ceiling from 920 to 868.
+- Extracted exact AI Gateway, LM Studio, and routed caller adapters from the
+  configured runner. The runner is now 759 lines, below its prior 769-line
+  ceiling, and both files have no function above the WSP-62 50-line ceiling.
+- Hardened new receipt and publication writes with fail-closed file plus
+  directory-lineage durability. Exact identical retries can complete a failed
+  directory flush without treating the earlier write as durable. Windows
+  flush and close calls now declare the pointer-width `HANDLE` and `BOOL` ABI
+  explicitly, preventing default C-integer handle conversion. Extracted this
+  platform boundary into a 138-line durability module; the evidence module is
+  held to 910 lines, only 21 above its exact 889-line parent. Corrected the
+  obsolete documentation claim that configured execution was one-call-only.
   WSP 00/15/22/50/62/87/97.
 
 ## [2026-08-21] - Verified Topology Resolution and Nemotron Shadow Proposer

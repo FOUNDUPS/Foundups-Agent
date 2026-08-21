@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, cast
 
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
-    NonceStore,
     SignatureVerifier,
 )
 
@@ -31,6 +30,23 @@ from .model_autoresearch_campaign_promotion_gate_supply import (
     rehydrate_model_autoresearch_campaign_promotion_gate_supply_receipt,
 )
 from .model_autoresearch_configured_gateway_evidence import digest_payload
+from .model_autoresearch_production_authority_use import (
+    CampaignPromotionAuthorityUseContext,
+    trusted_campaign_authority_time,
+    validate_campaign_promotion_authority_use,
+)
+from .model_autoresearch_production_binding_preflight import (
+    preflight_runtime_policy,
+    preflight_trusted_keys,
+    preflight_verification_dependencies,
+)
+from .model_autoresearch_production_binding_transaction import (
+    claim_output_paths,
+    cleanup_claimed_outputs,
+)
+from .model_autoresearch_production_binding_execution import (
+    execute_production_binding,
+)
 from .model_intelligence_catalog import PromotionState
 from .model_intelligence_outcomes import (
     ModelBenchmarkEvidenceReceipt,
@@ -45,25 +61,16 @@ from .model_intelligence_selection import (
 )
 from .model_promotion_gate import ModelPromotionGateDecision
 from .model_runtime_binding import ModelRuntimeBindingPolicy
-from .model_runtime_binding_artifact_supply import (
-    ModelRuntimeBindingArtifactSupplyResult,
-    run_reddog_model_runtime_binding_artifact_supply,
-)
+from .model_runtime_binding_artifact_supply import ModelRuntimeBindingArtifactSupplyResult
 from .model_selection_artifact_supply import (
-    EVIDENCE_BUNDLE_SCHEMA_VERSION,
     ModelSelectionArtifactSupplyResult,
-    run_reddog_model_selection_artifact_supply,
 )
 from .model_signed_evidence import (
     ModelEvidenceKeyResolver,
     ModelSignedEvidenceReceipt,
     VerifiedModelEvidenceEntry,
     VerifiedModelProductionEvidence,
-    build_verified_model_production_evidence,
-    rehydrate_model_benchmark_evidence_receipt,
     rehydrate_model_catalog_snapshot,
-    rehydrate_model_promotion_evidence_receipt,
-    rehydrate_model_signed_evidence_receipt,
 )
 
 
@@ -104,6 +111,7 @@ def build_authenticated_single_model_production_selection_preview(
     authenticated_promotion: AuthenticatedCampaignPromotionSupplyResult,
     catalog_snapshot: Mapping[str, Any],
     requirements: ModelTaskRequirements,
+    authority_use: CampaignPromotionAuthorityUseContext,
 ) -> SingleModelProductionSelectionPreview:
     """Derive the exact selection ID that external evidence must sign.
 
@@ -114,7 +122,24 @@ def build_authenticated_single_model_production_selection_preview(
     """
 
     root = Path(repo_root).resolve()
-    gate = _authenticated_single_gate(authenticated_promotion, root)
+    now = trusted_campaign_authority_time(authority_use)
+    gate = _authenticated_single_gate(
+        authenticated_promotion,
+        root,
+        authority_use=authority_use,
+        now=now,
+    )
+    return _selection_preview_for_gate(
+        authenticated_promotion, catalog_snapshot, requirements, gate
+    )
+
+
+def _selection_preview_for_gate(
+    authenticated_promotion: AuthenticatedCampaignPromotionSupplyResult,
+    catalog_snapshot: Mapping[str, Any],
+    requirements: ModelTaskRequirements,
+    gate: Any,
+) -> SingleModelProductionSelectionPreview:
     normalized = _single_production_requirements(requirements, gate.task_family)
     snapshot = rehydrate_model_catalog_snapshot(catalog_snapshot)
     promotion = gate.promotion_evidence_receipt
@@ -123,12 +148,8 @@ def build_authenticated_single_model_production_selection_preview(
     if len(cards) != 1 or cards[0].promotion_state != PromotionState.CHAMPION:
         raise ValueError("single_model_production_catalog_champion_required")
 
-    # Existing production selection is deterministic but requires a typed
-    # evidence carrier.  These private markers satisfy only the pure preview
-    # calculation; real signatures are verified before any artifact is written.
-    marker = _PreviewSignatureReference(
-        receipt_id="selection-preview-only:" + gate.receipt_id
-    )
+    # Private markers are confined to deterministic preview calculation.
+    marker = _PreviewSignatureReference("selection-preview-only:" + gate.receipt_id)
     provisional = VerifiedModelProductionEvidence(
         entries=(
             VerifiedModelEvidenceEntry(
@@ -170,102 +191,123 @@ def bind_authenticated_single_model_promotion_to_runtime(
     authenticated_promotion: AuthenticatedCampaignPromotionSupplyResult,
     catalog_snapshot: Mapping[str, Any],
     requirements: ModelTaskRequirements,
+    authority_use: CampaignPromotionAuthorityUseContext,
     signed_evidence_provider: Callable[
         [SingleModelProductionSelectionPreview], Mapping[str, Any]
     ],
     evidence_key_resolver: ModelEvidenceKeyResolver,
     evidence_signature_verifier: SignatureVerifier,
-    evidence_nonce_store: NonceStore,
     trusted_keys_payload: Mapping[str, Any],
     runtime_policy: Mapping[str, Any] | ModelRuntimeBindingPolicy,
     selection_output_path: Path | str,
     runtime_binding_output_path: Path | str,
-    now: int,
 ) -> SingleModelProductionBindingResult:
     """Verify external evidence and produce one existing runtime-binding artifact."""
-
-    root = Path(repo_root).resolve()
-    selection_output = _outside_repo_output(selection_output_path, root)
-    runtime_output = _outside_repo_output(runtime_binding_output_path, root)
-    if selection_output == runtime_output:
-        raise ValueError("single_model_production_output_paths_must_differ")
-
-    preview = build_authenticated_single_model_production_selection_preview(
-        repo_root=root,
+    inputs = _prepare_binding_inputs(
+        repo_root=repo_root,
         authenticated_promotion=authenticated_promotion,
         catalog_snapshot=catalog_snapshot,
         requirements=requirements,
-    )
-    gate = _authenticated_single_gate(authenticated_promotion, root)
-    bundle = signed_evidence_provider(preview)
-    verified, benchmark, promotion = _verify_external_evidence_bundle(
-        bundle=bundle,
-        preview=preview,
-        gate=gate,
-        key_resolver=evidence_key_resolver,
-        signature_verifier=evidence_signature_verifier,
-        nonce_store=evidence_nonce_store,
-        now=int(now),
-    )
-    snapshot = rehydrate_model_catalog_snapshot(catalog_snapshot)
-    normalized = _single_production_requirements(requirements, gate.task_family)
-    reproduced = select_models_for_task(
-        snapshot,
-        normalized,
-        production_evidence=verified,
-    )
-    if (
-        reproduced.receipt_id != preview.selection_receipt_id
-        or reproduced.selected_model_ids != (preview.candidate_model_id,)
-    ):
-        raise ValueError("single_model_production_preview_not_reproduced")
-
-    selection_result = run_reddog_model_selection_artifact_supply(
-        repo_root=root,
-        catalog_snapshot=catalog_snapshot,
-        verified_evidence_bundle=verified,
-        requirements=normalized,
-        output_path=selection_output,
-    )
-    if (
-        not selection_result.accepted
-        or selection_result.selection_receipt_id != preview.selection_receipt_id
-    ):
-        raise ValueError("single_model_production_selection_supply_rejected")
-
-    runtime_result = run_reddog_model_runtime_binding_artifact_supply(
-        repo_root=root,
-        catalog_snapshot=catalog_snapshot,
-        # Consume the exact persisted JSON artifact, not an in-memory dataclass
-        # projection whose tuple fields have not crossed the JSON boundary.
-        model_selection_receipt=_read_bounded_json(selection_output),
-        benchmark_evidence_receipts=(benchmark.to_dict(),),
-        promotion_evidence_receipts=(promotion.to_dict(),),
-        verified_evidence_bundle=bundle,
+        authority_use=authority_use,
+        signed_evidence_provider=signed_evidence_provider,
+        evidence_key_resolver=evidence_key_resolver,
+        evidence_signature_verifier=evidence_signature_verifier,
         trusted_keys_payload=trusted_keys_payload,
         runtime_policy=runtime_policy,
-        output_path=runtime_output,
-        key_resolver=evidence_key_resolver,
-        signature_verifier=evidence_signature_verifier,
-        now=int(now),
+        selection_output_path=selection_output_path,
+        runtime_binding_output_path=runtime_binding_output_path,
     )
-    if not runtime_result.accepted:
-        raise ValueError(
-            "single_model_production_runtime_binding_rejected:"
-            + ",".join(runtime_result.rejection_reasons)
-        )
-    if runtime_result.selection_receipt_id != preview.selection_receipt_id:
-        raise ValueError("single_model_production_runtime_selection_mismatch")
-    return SingleModelProductionBindingResult(
-        preview=preview,
-        selection=selection_result,
-        runtime_binding=runtime_result,
+    claims = claim_output_paths(inputs["selection_output"], inputs["runtime_output"])
+    completed = False
+    try:
+        bundle = signed_evidence_provider(inputs["preview"])
+        selection, runtime = execute_production_binding(inputs=inputs, bundle=bundle)
+        completed = True
+        return SingleModelProductionBindingResult(inputs["preview"], selection, runtime)
+    finally:
+        if not completed:
+            cleanup_claimed_outputs(
+                claims,
+                expected_selection_receipt_id=inputs["preview"].selection_receipt_id,
+            )
+
+
+def _prepare_binding_inputs(**values: Any) -> dict[str, Any]:
+    root = Path(values["repo_root"]).resolve()
+    selection_output = _outside_repo_output(values["selection_output_path"], root)
+    runtime_output = _outside_repo_output(values["runtime_binding_output_path"], root)
+    if selection_output == runtime_output:
+        raise ValueError("single_model_production_output_paths_must_differ")
+    provider = values["signed_evidence_provider"]
+    if not callable(provider):
+        raise ValueError("single_model_production_evidence_provider_invalid")
+    preflight_verification_dependencies(
+        evidence_key_resolver=values["evidence_key_resolver"],
+        evidence_signature_verifier=values["evidence_signature_verifier"],
     )
+    now = trusted_campaign_authority_time(values["authority_use"])
+    preview = build_authenticated_single_model_production_selection_preview(
+        repo_root=root,
+        authenticated_promotion=values["authenticated_promotion"],
+        catalog_snapshot=values["catalog_snapshot"],
+        requirements=values["requirements"],
+        authority_use=values["authority_use"],
+    )
+    gate = _authenticated_single_gate(
+        values["authenticated_promotion"],
+        root,
+        authority_use=values["authority_use"],
+        now=now,
+    )
+    return _normalized_binding_inputs(
+        values, root, selection_output, runtime_output, now, preview, gate
+    )
+
+
+def _normalized_binding_inputs(
+    values: Mapping[str, Any],
+    root: Path,
+    selection_output: Path,
+    runtime_output: Path,
+    now: int,
+    preview: SingleModelProductionSelectionPreview,
+    gate: Any,
+) -> dict[str, Any]:
+    authenticated = values["authenticated_promotion"]
+    runtime_policy = preflight_runtime_policy(
+        values["runtime_policy"],
+        gate=gate,
+        authority_receipt_id=authenticated.authority.receipt.receipt_id,
+    )
+    trusted_keys = preflight_trusted_keys(
+        values["trusted_keys_payload"],
+        key_resolver=values["evidence_key_resolver"],
+    )
+    return {
+        **dict(values),
+        "root": root,
+        "selection_output": selection_output,
+        "runtime_output": runtime_output,
+        "now": now,
+        "preview": preview,
+        "gate": gate,
+        "snapshot": rehydrate_model_catalog_snapshot(values["catalog_snapshot"]),
+        "requirements": _single_production_requirements(
+            values["requirements"], gate.task_family
+        ),
+        "runtime_policy": runtime_policy,
+        "trusted_keys": trusted_keys,
+        "key_resolver": values["evidence_key_resolver"],
+        "signature_verifier": values["evidence_signature_verifier"],
+    }
 
 
 def _authenticated_single_gate(
     value: AuthenticatedCampaignPromotionSupplyResult,
     repo_root: Path,
+    *,
+    authority_use: CampaignPromotionAuthorityUseContext,
+    now: int,
 ):
     if type(value) is not AuthenticatedCampaignPromotionSupplyResult:
         raise ValueError("authenticated_campaign_promotion_result_required")
@@ -275,6 +317,7 @@ def _authenticated_single_gate(
         or type(authority.request) is not CampaignPromotionAuthorityRequest
     ):
         raise ValueError("authenticated_campaign_promotion_authority_invalid")
+    validate_campaign_promotion_authority_use(authority, authority_use, now=now)
     rehydrated_authority_receipt = (
         rehydrate_signed_campaign_promotion_authority_receipt(
             authority.receipt.to_dict()
@@ -291,6 +334,14 @@ def _authenticated_single_gate(
         raise ValueError("authenticated_campaign_promotion_authority_invalid")
     if len(authority.request.candidate_ids) != 1:
         raise ValueError("panel_promotion_is_shadow_only")
+    return _authenticated_gate_artifact(value, authority, repo_root)
+
+
+def _authenticated_gate_artifact(
+    value: AuthenticatedCampaignPromotionSupplyResult,
+    authority: VerifiedCampaignPromotionAuthority,
+    repo_root: Path,
+):
     supply = value.supply
     if not supply.accepted or len(supply.promotion_gate_receipt_ids) != 1:
         raise ValueError("authenticated_campaign_promotion_supply_invalid")
@@ -345,69 +396,6 @@ def _benchmark_for_gate(gate):
     )
 
 
-def _verify_external_evidence_bundle(
-    *,
-    bundle: Mapping[str, Any],
-    preview: SingleModelProductionSelectionPreview,
-    gate: Any,
-    key_resolver: ModelEvidenceKeyResolver,
-    signature_verifier: SignatureVerifier,
-    nonce_store: NonceStore,
-    now: int,
-):
-    if not isinstance(bundle, Mapping) or bundle.get("schema_version") != EVIDENCE_BUNDLE_SCHEMA_VERSION:
-        raise ValueError("single_model_production_evidence_bundle_invalid")
-    if (
-        bundle.get("catalog_snapshot_id") != preview.catalog_snapshot_id
-        or bundle.get("selection_receipt_id") != preview.selection_receipt_id
-    ):
-        raise ValueError("single_model_production_evidence_preview_mismatch")
-    entries = bundle.get("entries")
-    if not isinstance(entries, list) or len(entries) != 1 or not isinstance(entries[0], Mapping):
-        raise ValueError("single_model_production_evidence_entry_invalid")
-    entry = entries[0]
-    benchmark = rehydrate_model_benchmark_evidence_receipt(
-        _mapping(entry.get("benchmark_receipt"), "benchmark_receipt")
-    )
-    promotion = rehydrate_model_promotion_evidence_receipt(
-        _mapping(entry.get("promotion_receipt"), "promotion_receipt"),
-        benchmark_receipt=benchmark,
-    )
-    if (
-        benchmark.model_id != preview.candidate_model_id
-        or benchmark.receipt_id != gate.benchmark_evidence_receipt_id
-        or promotion.receipt_id != preview.promotion_evidence_receipt_id
-        or promotion.to_dict() != gate.promotion_evidence_receipt.to_dict()
-    ):
-        raise ValueError("single_model_production_gate_evidence_mismatch")
-    benchmark_signature = rehydrate_model_signed_evidence_receipt(
-        _mapping(entry.get("benchmark_signature_receipt"), "benchmark_signature_receipt")
-    )
-    promotion_signature = rehydrate_model_signed_evidence_receipt(
-        _mapping(entry.get("promotion_signature_receipt"), "promotion_signature_receipt")
-    )
-    if promotion_signature.promotion_policy_digest != preview.promotion_policy_digest:
-        raise ValueError("single_model_production_policy_signature_mismatch")
-    benchmark_run_receipt_id = _required(
-        bundle.get("benchmark_run_receipt_id"), "benchmark_run_receipt_id"
-    )
-    verified = build_verified_model_production_evidence(
-        catalog_snapshot_id=preview.catalog_snapshot_id,
-        selection_receipt_id=preview.selection_receipt_id,
-        benchmark_run_receipt_id=benchmark_run_receipt_id,
-        benchmark_receipt=benchmark,
-        promotion_receipt=promotion,
-        benchmark_signature_receipt=benchmark_signature,
-        promotion_signature_receipt=promotion_signature,
-        key_resolver=key_resolver,
-        signature_verifier=signature_verifier,
-        now=now,
-        nonce_store=nonce_store,
-        consume_nonces=True,
-    )
-    return verified, benchmark, promotion
-
-
 def _single_production_requirements(
     value: ModelTaskRequirements,
     task_family: str,
@@ -454,20 +442,8 @@ def _read_bounded_json(path: Path) -> Mapping[str, Any]:
     return payload
 
 
-def _mapping(value: Any, name: str) -> Mapping[str, Any]:
-    if not isinstance(value, Mapping):
-        raise ValueError(name + "_invalid")
-    return value
-
-
-def _required(value: Any, name: str) -> str:
-    text = str(value or "").strip()
-    if not text:
-        raise ValueError(name + "_missing")
-    return text
-
-
 __all__ = [
+    "CampaignPromotionAuthorityUseContext",
     "SingleModelProductionBindingResult",
     "SingleModelProductionSelectionPreview",
     "bind_authenticated_single_model_promotion_to_runtime",

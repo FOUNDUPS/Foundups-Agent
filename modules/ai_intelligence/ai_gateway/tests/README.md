@@ -29,6 +29,13 @@ call/admission/campaign/policy binding, trust, revocation, TTL, durable replay,
 retry, and publication ordering. The production-handoff matrix proves only a
 single model can enter the existing independently signed production-evidence
 and runtime-binding suppliers; aggregate panel candidates fail closed.
+That matrix also proves forged direct authority construction, expiry,
+revocation, invalid/overlong signed TTL, non-APPLIED publication state,
+malformed policy/trust, and preexisting output claims have zero
+provider calls and zero output artifacts, while an exact retry succeeds after
+a transient post-reservation runtime-supply failure. WSP-62 source guards keep
+the extracted authority, preflight, transaction, evidence, and execution
+modules at or below 200 lines with no function above 50 lines.
 
 ## Kimi K3 request-truth coverage
 

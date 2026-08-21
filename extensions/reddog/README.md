@@ -900,7 +900,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.103)
+## WSP_97 Truth Table (v0.4.104)
 
 | Claim | Status |
 | --- | --- |
@@ -968,7 +968,7 @@ The worker has no direct filesystem authority. The extension automatically attac
 
 After a successful run, focus the work focus composer and press `Ctrl+Shift+C` to copy a redacted review packet. Paste that packet into Codex for 0102 review. The packet contains digested work focus and WSP prompt excerpts (not full raw context), model slugs, bounded excerpts, task classification, resolved effort/mode, and output validator/repair status; it does not contain the OpenRouter key.
 
-**Follow-up memory (v0.3.28):** Enable **Use last RedDog packet** (default ON) to append a WSP_97-safe continuation summary to the next prompt instead of pasting raw Copy MD back into the composer. In-memory per tab only; no cross-reload persistence yet.
+**Follow-up memory (v0.3.28; opt-in default since v0.3.36):** Enable **Use last RedDog packet** (default OFF) to append a WSP_97-safe continuation summary to the next prompt instead of pasting raw Copy MD back into the composer. In-memory per tab only; no cross-reload persistence yet.
 
 ## Setup
 
@@ -986,6 +986,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.103.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.104.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

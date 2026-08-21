@@ -11,8 +11,24 @@
   output preflight.
 - Added single-model production handoff coverage through external independent
   signed evidence and the existing runtime binder; panel promotion is rejected.
+  Added zero-effect forged/expired/revoked authority, malformed policy/trust,
+  and preexisting-output preflight regressions plus restart-safe exact retry
+  after a transient post-reservation runtime-supply failure.
+  Added immutable publication-status regressions proving missing, RESERVED, and
+  AUTHORIZED markers cannot be elevated by use-time verification, plus forged
+  signed invalid/overlong TTL rejection with zero effects.
 - Moved configured runtime construction/preflight into a bounded module and
   lowered the enforced bootstrap ceilings rather than expanding WSP-62.
+- Added receipt/publication directory-lineage durability and fail-closed retry
+  coverage, including explicit pointer-width Windows `HANDLE` ABI assertions
+  for `FlushFileBuffers` and `CloseHandle`. Added source-shape gates that keep
+  the configured runner at or below its prior 769-line ceiling, the caller
+  module at or below 200 lines, the evidence module at or below 910 lines, the
+  durability module at or below 200 lines, and every function in all four files
+  at or below 50 lines.
+- Added WSP-62 guards for the five extracted production-binding authority,
+  preflight, transaction, evidence, and execution modules; each remains at or
+  below 200 lines and every function remains at or below 50 lines.
 
 ## [2026-08-21] - Nemotron Proposal and Verified Topology Contracts
 

@@ -477,7 +477,14 @@ store. Campaign promotion authority separately binds that provenance to the
 exact campaign execution receipt, normalized policy digest, and candidate set.
 Both paths rehydrate before verification, reject untrusted/revoked keys and
 invalid TTL, and require durable exact-use publication state before one-shot
-capability release. No private key or signer is present in these modules.
+capability release. New receipt and publication files are accepted as durable
+only after the file and containing directory lineage through the configured
+store root are flushed; unsupported directory durability and open, flush,
+identity, or close failures fail closed. Exact identical retry may finish the
+directory durability step for an already-created artifact.
+`model_autoresearch_configured_gateway_durability.py` owns the platform-specific
+flush boundary; the evidence module retains only its store calls. No private
+key or signer is present in these modules.
 
 Authenticated campaign promotion is SINGLE-model only. Aggregate panel
 candidates stay shadow-only until an independent member/topology promotion
@@ -492,13 +499,26 @@ build_authenticated_single_model_production_selection_preview(...) -> SingleMode
 bind_authenticated_single_model_promotion_to_runtime(...) -> SingleModelProductionBindingResult
 ```
 
+Both calls require `CampaignPromotionAuthorityUseContext`, containing injected
+campaign key resolution, signature verification, trusted time, and one matching
+durable receipt/publication store identity. The boundary re-verifies the exact
+stored signed authority, issuance TTL bounds, and its already-APPLIED upstream
+publication through a non-mutating exact-status read at use time. Missing,
+RESERVED, or AUTHORIZED state rejects without advancing a marker; a public
+`VerifiedCampaignPromotionAuthority` dataclass alone is insufficient.
+
 The preview is deterministic and non-authoritative. The binding adapter asks
 an external boundary for independently signed benchmark and promotion evidence
 that binds the exact preview, policy, and authenticated promotion receipt. It
 then reproduces the preview selection ID through the existing verifier before
 supplying the existing selection and runtime-binding artifacts. Both outputs
-must be distinct outside-repository paths. The adapter has no signer, key,
-provider, subprocess, or network authority, and PANEL candidates fail closed.
+must be distinct outside-repository paths acquired with exclusive-create claims
+and rollback if the complete claim set cannot be acquired. Malformed runtime
+policy, untrusted/revoked keys, expired authority, and unclaimable output paths
+reject before that external callback. Durable exact-use publication permits an
+identical retry from RESERVED/AUTHORIZED state and rejects APPLIED replay. The
+adapter has no signer, private key, provider, subprocess, or network authority,
+and PANEL candidates fail closed.
 
 #### Configured campaign runtime assembly
 
@@ -509,9 +529,12 @@ prepare_configured_campaign(...) -> bool
 
 `model_autoresearch_campaign_configured_runtime.py` owns canonical guard
 construction, exact provider/local caller composition, typed campaign-member
-preflight, and atomic outside-repository path claims. It does not invoke a
+preflight, and transactional exclusive outside-repository path claims. It does not invoke a
 provider; the campaign executor receives the runner only after preflight.
 This boundary is the WSP-62 extraction from the startup bootstrap.
+`model_autoresearch_configured_gateway_callers.py` separately owns the exact AI
+Gateway, LM Studio, and routed caller adapters. The routed adapter dispatches
+only the already-admitted provider and has no fallback or server-start path.
 
 #### Model Combination Benchmark Harness
 
