@@ -1,5 +1,13 @@
 # Tests - OpenClaw Bridge
 
+## WSP 62 decomposition coverage
+
+`test_reddog_runtime_module_static_boundaries.py` preserves the resident-loop
+and signed-worker executor effect/import prohibitions extracted from the large
+integration matrices. `test_reddog_wsp62_security_repair_exemptions.py` also
+caps the architect promotion and queue-loop decomposition modules at 500 file
+lines and 50 lines per function, without a new exemption.
+
 ## Verified model-topology consumers
 
 The model runtime query, bounded runtime, authority, provider bootstrap,

@@ -18,12 +18,13 @@ from .model_autoresearch_authenticated_promotion_authority import (
     _campaign_authority_publication_binding,
 )
 from .model_autoresearch_configured_gateway_evidence import (
+    ConfiguredGatewayReceiptStore,
     DurableExactPublicationStore,
     digest_payload,
 )
 
 
-class DurableCampaignAuthorityReceiptStore(Protocol):
+class DurableCampaignAuthorityReceiptStore(ConfiguredGatewayReceiptStore, Protocol):
     @property
     def durable(self) -> bool: ...
 
@@ -35,8 +36,6 @@ class DurableCampaignAuthorityReceiptStore(Protocol):
 
 @dataclass(frozen=True)
 class CampaignPromotionAuthorityUseContext:
-    """External trust, durable state, and trusted time for production use."""
-
     key_resolver: CampaignPromotionAuthorityKeyResolver
     signature_verifier: SignatureVerifier
     receipt_store: DurableCampaignAuthorityReceiptStore
@@ -182,9 +181,12 @@ def _signature_valid(
 ) -> bool:
     receipt = authority.receipt
     try:
-        return context.signature_verifier.verify(
-            receipt.signer_public_key, receipt.signing_input(), receipt.signature
-        ) is True
+        return (
+            context.signature_verifier.verify(
+                receipt.signer_public_key, receipt.signing_input(), receipt.signature
+            )
+            is True
+        )
     except Exception:
         return False
 

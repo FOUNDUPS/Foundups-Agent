@@ -29,10 +29,12 @@ script. The extraction adds no model, worker, repository, or fallback authority.
 `run_reddog_main_architect_fix_promotion_bootstrap(..., environment=...)`
 snapshots the supplied host environment and resolves the explicit
 `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` against the freshness receipt's canonical
-SSD root. `_run_locked_promotion` passes that sealed capability to
+SSD root. The bounded promotion execution adapter passes that sealed capability to
 `verify_reddog_holoindex_owner_binding`; resolution failure returns
 `holoindex_query_replica_route_not_current` before owner verification or
-publication. The bootstrap does not materialize or re-index.
+publication. Input preparation, locked execution, and the public startup adapter
+are separate modules capped at 500 lines and 50 lines per function. The
+bootstrap does not materialize or re-index.
 
 ## Governed repository-state intake
 
@@ -932,82 +934,12 @@ Structured result contract:
 - `x-openclaw-token: <token>` (preferred)
 - `x-moltbot-token: <token>` (legacy)
 
-### OpenClaw DAE (Frontal Lobe)
+### OpenClaw DAE and ExecutionBundle
 
-```python
-from modules.communication.moltbot_bridge.src.openclaw_dae import OpenClawDAE
-
-dae = OpenClawDAE(repo_root=Path("O:/Foundups-Agent"))
-
-# Full autonomy loop:
-# Ingress -> Intent -> Preflight -> Plan -> Permission -> Execute -> Validate -> Remember
-response = await dae.process(
-    message="What is the WRE orchestrator?",
-    sender="user123",
-    channel="telegram",
-    session_key="session-id",
-    metadata={},
-)
-```
-
-### 2026-03-28 Operating Contract
-
-Per `WSP 77`, OpenClaw is currently a bounded execution surface, not the primary architect.
-
-- `0102` = architecture authority, prioritization, review
-- `OpenClaw / Kohi` = bounded maintenance execution
-- `HoloIndex` = retrieval bundle for direction and available subroutines
-- `WRE` = deterministic execution plane
-
-Current OpenClaw use case:
-- fix simple codebase issues
-- run focused checks
-- emit runtime events
-- write durable reports / knowledge artifacts
-
-Current execution contract:
-
-`assigned work -> retrieve bounded HoloIndex bundle -> execute -> verify -> emit -> remember`
-
-### ExecutionBundle (WSP 87/97)
-
-```python
-from modules.communication.moltbot_bridge.src.openclaw_execution_bundle import (
-    ExecutionBundle,
-    build_execution_bundle,
-    retrieve_bundle_for_memory_query,
-)
-
-# Build pre-execution context for any query
-bundle = build_execution_bundle(
-    query="find test fixtures",
-    route="holo_index",
-    limit=5,
-    include_patterns=True,
-    include_docs=True,
-)
-
-# Bundle fields:
-# - query: The original request
-# - route: Execution route (holo_index, wre_orchestrator, etc.)
-# - docs: Relevant doc paths (README, INTERFACE, ModLog)
-# - patterns: Prior successful patterns from breadcrumbs
-# - candidate_paths: File paths likely relevant to execution
-# - constraints: WSP constraints or permission requirements
-# - verification_hints: Signals for verifying successful execution
-# - confidence: Bundle quality score (0.0-1.0)
-# - code_hits: Raw HoloIndex code search results (for route consumption)
-# - wsp_hits: Raw HoloIndex WSP search results (for route consumption)
-
-# Check if bundle has enough context
-if bundle.is_actionable():
-    # proceed with execution
-    pass
-
-# Specialized memory query bundle
-memory_bundle = retrieve_bundle_for_memory_query("decisions", topic="architecture")
-# Always high confidence (0.9) for deterministic memory queries
-```
+The bounded DAE loop, WSP 77 operating contract, example, and field contract
+are preserved in
+[`docs/OPENCLAW_DAE_EXECUTION_BUNDLE_INTERFACE_ARCHIVE.md`](docs/OPENCLAW_DAE_EXECUTION_BUNDLE_INTERFACE_ARCHIVE.md).
+0102 remains architecture authority; OpenClaw remains a bounded executor.
 
 Design principles:
 - Bundles are execution aids, not architecture authorities

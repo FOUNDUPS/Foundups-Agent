@@ -1,5 +1,32 @@
 # AI Gateway Module Change Log
 
+## [2026-08-21] - Production Binding Terminal Recovery Hardening
+
+- Derived exact authority-use identity before the external evidence callback,
+  so exact APPLIED replay and conflicting output bindings decide with zero
+  callback. Trusted time, campaign authority, and signed evidence refresh after
+  callback and immediately before APPLIED completion.
+- Added deterministic hidden stages and a bounded durable terminal receipt.
+  APPLIED ambiguity, AUTHORIZED retry, and partial two-file publication now
+  rehydrate and use-time verify exact artifacts without provider replay. No
+  valid final artifact is exposed before APPLIED. Cleanup failure is surfaced
+  and attempts explicit `.invalid.*` quarantine; if quarantine rename also
+  fails, an explicit cleanup failure preserves the artifact. This is restart
+  recovery, not a false claim of two-file filesystem atomicity.
+- Sealed each regular, single-link stage with file and parent-directory fsync
+  before terminal persistence, and flushed each final parent after rename.
+  Pre-terminal stage durability failure leaves no terminal/APPLIED/final;
+  post-APPLIED final-directory ambiguity resumes from the terminal with zero
+  provider callback.
+- Added fresh callback-free temporal checks after authority/evidence/runtime
+  verification callbacks and before terminal/APPLIED/recovery publication.
+  Authority, both signed evidence receipts, and runtime valid-until are checked
+  from the same final trusted-time sample; callback clock advancement fails
+  closed without terminal or remaining-stage publication.
+- Validation: 52 focused authority/provenance/production/WSP-62 tests passed;
+  the complete AI Gateway suite passed 815 with 2 skips. Scoped Ruff lint and
+  format checks passed. WSP 00/15/22/50/62/87/97.
+
 ## [2026-08-21] - Governed Multi-Call and Authenticated Promotion Composition
 
 - Added atomic preparation/reservation of the complete bounded configured
@@ -18,9 +45,9 @@
   or AUTHORIZED markers reject without advancement. It preflights runtime
   policy/trust and transactionally acquires both exclusive output claims before
   external evidence, rolling back owned placeholders on partial failure, and
-  uses durable exact publication state
-  for restart-safe retry and replay rejection. Private keys/signers remain
-  external; panel promotion remains shadow-only.
+  uses durable exact publication state for restart-safe retry and replay
+  rejection. Private keys/signers remain external; panel promotion remains
+  shadow-only.
 - Extracted configured runner construction, canonical prompt-guard ownership,
   campaign-member preflight, and transactional exclusive output claims into
   `model_autoresearch_campaign_configured_runtime.py`. The WSP-62 bootstrap

@@ -1,5 +1,25 @@
 # AI Gateway TestModLog
 
+## [2026-08-21] - Production transaction immutable-audit regressions
+
+- Added zero-callback exact/conflicting replay, APPLIED directory-flush
+  ambiguity, AUTHORIZED terminal retry, callback/terminal authority expiry,
+  partial final publication, and unlink-denial regressions. Production artifacts
+  stage behind a durable terminal receipt; no valid final is exposed before
+  APPLIED, recovery rehydrates and use-time verifies without provider replay,
+  and cleanup quarantine is explicit and surfaced; failed quarantine rename
+  preserves the artifact under an explicit cleanup failure.
+- Added stage file/parent durability failure and post-APPLIED final-directory
+  failure injection. The former proves zero terminal/APPLIED/final effects; the
+  latter proves exact retry completes rename durability with zero callback.
+- Added normal and recovery callbacks that advance trusted time after the prior
+  sample. The final callback-free authority, signed-evidence, and runtime-window
+  checks block terminal/APPLIED/final publication without provider replay.
+- Extended the unchanged WSP-62 limits to every new
+  output/freshness/JSON/recovery/rehydration/runner/terminal module. Validation:
+  52 focused passed; full AI Gateway 815 passed, 2 skipped; scoped Ruff
+  lint/format passed. WSP 00/15/22/50/62/87/97.
+
 ## [2026-08-21] - Governed AutoResearch and production-handoff contracts
 
 - Added successful multi-task/panel configured campaigns plus zero-egress
@@ -29,7 +49,6 @@
 - Added WSP-62 guards for the five extracted production-binding authority,
   preflight, transaction, evidence, and execution modules; each remains at or
   below 200 lines and every function remains at or below 50 lines.
-
 ## [2026-08-21] - Nemotron Proposal and Verified Topology Contracts
 
 - Added offline coverage for conservative catalog-card merge, local compact

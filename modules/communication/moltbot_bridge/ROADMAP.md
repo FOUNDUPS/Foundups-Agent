@@ -12,7 +12,12 @@
   select champions, or make aggregate panel promotion authoritative.
 - COMPLETE: architect FIX promotion resolves the explicit active HoloIndex
   query-replica capability and passes it into exact owner binding verification.
-  Live replica materialization and retention remain outside promotion.
+  Input preparation and locked publication execution are bounded modules; the
+  public startup adapter retains its API without a WSP 62 exemption. Live
+  replica materialization and retention remain outside promotion.
+- COMPLETE: the signed-worker queue-loop environment projection is separated
+  from effectful dependency construction. The runtime binding and projection
+  modules now remain below 500 lines with every function at most 50 lines.
 
 - COMPLETE: RedDog repository-state v2 intake consumes only the extension's
   digest-only executable v1 public projection and strictly validates bounded

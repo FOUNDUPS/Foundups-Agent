@@ -1,6 +1,30 @@
 """Tests for REDDOG_SIGNED_WORKER_TASK_OPENCLAW_CLAIM_RUNTIME_PHASE1."""
+
 from __future__ import annotations
-import ast
+
+from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_serial_loop_bootstrap import (  # noqa: F401
+    _FakeWorktreeRunner,
+    _draft_pr_publish_request,
+    _ed25519_signing_material,
+    _outcome_ratchet_request,
+    _pilot_allowed_paths,
+    _pilot_bounded_worker_plan,
+    _pilot_path_overrides,
+    _pilot_payloads,
+    _pilot_worktree_path,
+    _principals,
+    _repo,
+    _slice_verifier_request,
+    _snapshots,
+    _valve_environment,
+    run_reddog_main_resident_queue_serial_loop_bootstrap,
+)
+from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (  # noqa: F401
+    AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (  # noqa: F401
+    resident_queue_runtime_file_path,
+)
 import hashlib
 import json
 import subprocess
@@ -33,23 +57,6 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task
     SignedWorkerDispatchTaskExecutorReason,
     execute_reddog_signed_worker_dispatch_task,
 )
-from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
-    plan_reddog_signed_authority_worker_dispatch_dry_run,
-)
-from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
-    canonical_work_authority_digest,
-)
-from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
-    InMemoryNonceStore,
-    verify_delegated_work_authority,
-)
-from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
-    WorkerDispatchAuthorityVerificationContext,
-    recorded_authority_verification_binding,
-)
-from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
-    resident_queue_runtime_file_path,
-)
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     RUNTIME_SURFACE_READONLY_AUDIT,
     RepoAuditModelResult,
@@ -62,53 +69,33 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     PILOT_ARTIFACT,
     PILOT_OPERATION,
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-    _draft_pr_publish_request,
-    _ed25519_signing_material,
     _FakeExactShaEvidenceRunner,
-    _FakeWorktreeRunner,
     _held_out_gate_request,
-    _outcome_ratchet_request,
     _pattern_memory_admission_request,
-    _pilot_allowed_paths,
-    _pilot_bounded_worker_plan,
-    _pilot_path_overrides,
-    _pilot_payloads,
-    _pilot_worktree_path,
-    _principals,
     _profile as _bootstrap_profile,
-    _repo,
-    _slice_verifier_request,
     _snapshot as _bootstrap_snapshot,
-    _snapshots,
     _run_bootstrap_to_held_out_regression_gate,
     _run_bootstrap_to_verified_outcome_ratchet,
-    _valve_environment,
     _work_order,
     _write_runtime_json,
-    run_reddog_main_resident_queue_serial_loop_bootstrap,
 )
-from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import publish_bound_worker_dispatch
-from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import worker_dispatch_dryrun_result
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    publish_bound_worker_dispatch,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    worker_dispatch_dryrun_result,
+)
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     configure_signed_worker_claim_authority_env,
     install_signed_worker_envelope_test_authority,
     publish_agentdb_task_for_intent,
-    worker_dispatch_queue_receipt,
-    worker_dispatch_queue_receipt_digest,
-    worker_dispatch_work_order_digest,
 )
 from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
     bounded_allocation as _allocation,
     governed_snapshot as _snapshot,
     openclaw_candidate_allocation as _openclaw_candidate_allocation,
     readonly_allocation as _valid_readonly_allocation,
-    signed_audit_stage_binding,
     signed_stage_binding,
-)
-from modules.communication.moltbot_bridge.tests.test_reddog_signer_delegated_authority_runtime import (
-    _NoRevocation as _SignerNoRevocation,
-    _PrincipalKeyResolver as _SignerPrincipalKeyResolver,
-    _issue as _issue_delegated_authority,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_test_capability,
@@ -122,21 +109,10 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admis
 from modules.communication.moltbot_bridge.tests.test_reddog_readonly_audit_task_executor import (
     _audit_provider_call_evidence_from_binding,
 )
-from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
-    AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
-)
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-EXECUTOR_PATH = (
-    REPO_ROOT
-    / "modules"
-    / "communication"
-    / "moltbot_bridge"
-    / "src"
-    / "reddog_signed_worker_dispatch_task_executor.py"
-)
 
 
 def _artifact_runtime_snapshot() -> dict[str, object]:
@@ -161,13 +137,17 @@ def _artifact_runtime_snapshot() -> dict[str, object]:
     queue_item["model_runtime_binding_digest"] = canonical_model_runtime_binding_digest(
         runtime_binding
     )
-    queue_item["model_runtime_binding_verification_receipt_id"] = verification.receipt_id
+    queue_item["model_runtime_binding_verification_receipt_id"] = (
+        verification.receipt_id
+    )
     queue_item["model_runtime_binding_verification_digest"] = (
         verification_receipt_digest(verification)
     )
     worker_claim["model_selection_receipt_id"] = selection["receipt_id"]
     worker_claim["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
-    worker_claim["model_runtime_binding_verification_receipt_id"] = verification.receipt_id
+    worker_claim["model_runtime_binding_verification_receipt_id"] = (
+        verification.receipt_id
+    )
     queue_item["evidence_refs"] = [
         item
         for item in queue_item["evidence_refs"]
@@ -378,8 +358,12 @@ class _EchoEvidenceModelRunner:
     def __init__(self) -> None:
         self.calls = []
 
-    def run_repo_code_audit(self, *, prompt: str, context: str, binding, timeout_seconds: int):
-        self.calls.append({"prompt": prompt, "context": context, "binding": dict(binding)})
+    def run_repo_code_audit(
+        self, *, prompt: str, context: str, binding, timeout_seconds: int
+    ):
+        self.calls.append(
+            {"prompt": prompt, "context": context, "binding": dict(binding)}
+        )
         parsed = json.loads(context)
         evidence_ref = parsed["untrusted_repository_evidence"][0]["evidence_ref"]
         output = {
@@ -422,7 +406,9 @@ class _FakeEnvDraftPrRunner:
         self.calls.append(("push_branch", str(worktree_path), branch_name))
         return {"ok": True, "branch_name": branch_name}
 
-    def create_draft_pr(self, *, branch_name: str, base_branch: str, title: str, body: str):
+    def create_draft_pr(
+        self, *, branch_name: str, base_branch: str, title: str, body: str
+    ):
         self.calls.append(("create_draft_pr", branch_name, base_branch, title, body))
         return "https://github.com/FOUNDUPS/Foundups-Agent/pull/4242"
 
@@ -431,9 +417,7 @@ class _FakeEnvCommitDraftPrRunner(_FakeEnvDraftPrRunner):
     evidence_runner: _FakeExactShaEvidenceRunner | None = None
 
     def commit_all(self, *, worktree_path: Path, add_paths, message: str):
-        self.calls.append(
-            ("commit_all", str(worktree_path), tuple(add_paths), message)
-        )
+        self.calls.append(("commit_all", str(worktree_path), tuple(add_paths), message))
         if self.evidence_runner is None:
             return {"ok": False, "returncode": 1, "stdout": "", "stderr": ""}
         self.evidence_runner.head = "a" * 40
@@ -513,9 +497,13 @@ class _CollectingWriter:
     def activate_signed_worker_dispatch_tasks(self, tasks, receipt):  # noqa: D102,E701
         return self.enqueue_signed_worker_dispatch_tasks(tasks, receipt)
 
+
 def _digest(value: object) -> str:
-    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
+    raw = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str
+    )
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
 
 def _dryrun_result(allocation=None, intent=None):
     assert intent is None
@@ -564,9 +552,7 @@ def _task_context_with_model_runtime_binding(
     allocation = _valid_readonly_allocation(runtime_binding=runtime_binding)
     allocation.update(
         {
-            "model_runtime_binding_verification_receipt_id": (
-                verification.receipt_id
-            ),
+            "model_runtime_binding_verification_receipt_id": (verification.receipt_id),
             "model_runtime_binding_verification_digest": (
                 verification_receipt_digest(verification)
             ),
@@ -721,27 +707,27 @@ def _claim_reserved_author_and_verifier(
     monkeypatch.setattr(
         artifact_runtime,
         "_load_foundups_fusion_runner",
-        lambda: lambda _api_key, _user_payload, _messages, _payload: {
-            "ok": True,
-            "content": json.dumps(
-                {
-                    "artifact_contents": {
-                        PILOT_ARTIFACT: "# Generated By Independent Author\n"
-                    }
-                },
-                sort_keys=True,
-            ),
-            "review_packet": {"receipt_id": "fusion-artifact-receipt"},
-        },
+        lambda: (
+            lambda _api_key, _user_payload, _messages, _payload: {
+                "ok": True,
+                "content": json.dumps(
+                    {
+                        "artifact_contents": {
+                            PILOT_ARTIFACT: "# Generated By Independent Author\n"
+                        }
+                    },
+                    sort_keys=True,
+                ),
+                "review_packet": {"receipt_id": "fusion-artifact-receipt"},
+            }
+        ),
     )
 
     author_result = claim_reddog_signed_worker_dispatch_task_once(
         repo_root=repo,
         agent_db_factory=_assurance_store,
     )
-    assert author_result["accepted"] is True, json.dumps(
-        author_result, sort_keys=True
-    )
+    assert author_result["accepted"] is True, json.dumps(author_result, sort_keys=True)
     assert author_result["capability"] == "bounded_code_change"
 
     verifier_result = claim_reddog_signed_worker_dispatch_task_once(
@@ -775,13 +761,25 @@ def _queue_chain_results_through(stage_key: str) -> dict[str, object]:
     values = {
         "authority_request": {"status": "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"},
         "authority_runtime": {"decision": "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"},
-        "authority_verification": {"decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"},
-        "worker_dispatch_dryrun": {"decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT"},
-        "worker_dispatch_runtime": {"decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT"},
-        "work_order_invocation": {"decision": "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"},
+        "authority_verification": {
+            "decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
+        },
+        "worker_dispatch_dryrun": {
+            "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT"
+        },
+        "worker_dispatch_runtime": {
+            "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT"
+        },
+        "work_order_invocation": {
+            "decision": "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"
+        },
         "executor_plan": {"decision": "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"},
-        "execution_valve": {"decision": "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"},
-        "worktree_create": {"decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT"},
+        "execution_valve": {
+            "decision": "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"
+        },
+        "worktree_create": {
+            "decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT"
+        },
         "assurance_capacity_admission": {
             "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
         },
@@ -805,16 +803,21 @@ def _repo_with_readonly_target(tmp_path: Path) -> Path:
     subprocess.run(["git", "init", str(root)], check=True, capture_output=True)
     subprocess.run(
         ["git", "-C", str(root), "config", "user.email", "test@example.invalid"],
-        check=True, capture_output=True,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "-C", str(root), "config", "user.name", "RedDog Test"],
-        check=True, capture_output=True,
+        check=True,
+        capture_output=True,
     )
-    subprocess.run(["git", "-C", str(root), "add", "."], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-C", str(root), "add", "."], check=True, capture_output=True
+    )
     subprocess.run(
         ["git", "-C", str(root), "commit", "-m", "test: seed readonly target"],
-        check=True, capture_output=True,
+        check=True,
+        capture_output=True,
     )
     return root
 
@@ -822,7 +825,9 @@ def _repo_with_readonly_target(tmp_path: Path) -> Path:
 def _repo_head(repo: Path) -> str:
     result = subprocess.run(
         ["git", "-C", str(repo), "rev-parse", "HEAD"],
-        check=True, capture_output=True, text=True,
+        check=True,
+        capture_output=True,
+        text=True,
     )
     return result.stdout.strip()
 
@@ -836,10 +841,15 @@ def test_signed_worker_executor_rejects_without_runner(tmp_path: Path) -> None:
     )
 
     assert result.accepted is False
-    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_MISSING in result.rejection_reasons
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.RUNNER_MISSING
+        in result.rejection_reasons
+    )
 
 
-def test_signed_worker_executor_rejects_tampered_receipt_and_wsp15(tmp_path: Path) -> None:
+def test_signed_worker_executor_rejects_tampered_receipt_and_wsp15(
+    tmp_path: Path,
+) -> None:
     context = _task_context()
     context["signed_authority_worker_dispatch_receipt"] = dict(
         context["signed_authority_worker_dispatch_receipt"]
@@ -856,8 +866,14 @@ def test_signed_worker_executor_rejects_tampered_receipt_and_wsp15(tmp_path: Pat
     )
 
     assert result.accepted is False
-    assert SignedWorkerDispatchTaskExecutorReason.INTENT_NOT_IN_RECEIPT in result.rejection_reasons
-    assert SignedWorkerDispatchTaskExecutorReason.WSP15_MISMATCH in result.rejection_reasons
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.INTENT_NOT_IN_RECEIPT
+        in result.rejection_reasons
+    )
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.WSP15_MISMATCH
+        in result.rejection_reasons
+    )
     assert result.worker_execution_performed is False
 
 
@@ -870,7 +886,9 @@ def test_signed_worker_executor_rejects_unsafe_runner(tmp_path: Path) -> None:
     )
 
     assert result.accepted is False
-    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_UNSAFE in result.rejection_reasons
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.RUNNER_UNSAFE in result.rejection_reasons
+    )
     assert result.no_source_repo_mutation_performed is False
     assert result.no_shell_command_executed is False
     assert result.worker_execution_performed is True
@@ -881,8 +899,10 @@ def test_signed_worker_executor_counts_rejected_and_raising_runner_execution(
     tmp_path: Path,
 ) -> None:
     rejected = execute_reddog_signed_worker_dispatch_task(
-        task_context=_task_context(), task_id="task-rejected",
-        repo_root=tmp_path, runner=_FakeRunner(accepted=False),
+        task_context=_task_context(),
+        task_id="task-rejected",
+        repo_root=tmp_path,
+        runner=_FakeRunner(accepted=False),
     )
 
     class RaisingRunner:
@@ -890,8 +910,10 @@ def test_signed_worker_executor_counts_rejected_and_raising_runner_execution(
             raise RuntimeError("runner failed after invocation")
 
     raised = execute_reddog_signed_worker_dispatch_task(
-        task_context=_task_context(), task_id="task-raised",
-        repo_root=tmp_path, runner=RaisingRunner(),
+        task_context=_task_context(),
+        task_id="task-raised",
+        repo_root=tmp_path,
+        runner=RaisingRunner(),
     )
 
     assert rejected.worker_execution_performed is True
@@ -899,8 +921,14 @@ def test_signed_worker_executor_counts_rejected_and_raising_runner_execution(
     assert raised.effect_evidence_complete is False
     assert raised.no_shell_command_executed is False
     assert raised.no_source_repo_mutation_performed is False
-    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED in rejected.rejection_reasons
-    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED in raised.rejection_reasons
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED
+        in rejected.rejection_reasons
+    )
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED
+        in raised.rejection_reasons
+    )
 
 
 def test_signed_worker_executor_rejects_incomplete_or_inconsistent_effect_evidence(
@@ -933,7 +961,9 @@ def test_signed_worker_executor_rejects_incomplete_or_inconsistent_effect_eviden
         )
 
 
-def test_run_task_routes_signed_worker_before_wre_fallback(tmp_path: Path, monkeypatch) -> None:
+def test_run_task_routes_signed_worker_before_wre_fallback(
+    tmp_path: Path, monkeypatch
+) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
     row = db.db.execute_query(
@@ -942,11 +972,12 @@ def test_run_task_routes_signed_worker_before_wre_fallback(tmp_path: Path, monke
         (task_id,),
     )
 
-
     assert db.assign_signed_worker_task(task_id), row
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
 
-    result = execute_task(task_id, repo_root=tmp_path, signed_worker_runner=_FakeRunner())
+    result = execute_task(
+        task_id, repo_root=tmp_path, signed_worker_runner=_FakeRunner()
+    )
 
     assert result["ok"] is True
     assert result["executor"] == "reddog:signed_worker_dispatch"
@@ -981,7 +1012,9 @@ def test_run_task_uses_env_bound_queue_loop_runner_when_enabled(
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code_fusion")
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code_fusion"
+    )
 
     from modules.communication.moltbot_bridge.src import (
         reddog_signed_worker_openclaw_queue_loop_runtime_binding as binding_module,
@@ -1054,9 +1087,10 @@ def test_openclaw_signed_worker_healthcheck_blocks_before_agentdb_claim(
 
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
-    assert SignedWorkerOpenClawClaimReason.SIGNER_HEALTHCHECK_REJECTED in result[
-        "rejection_reasons"
-    ]
+    assert (
+        SignedWorkerOpenClawClaimReason.SIGNER_HEALTHCHECK_REJECTED
+        in result["rejection_reasons"]
+    )
     assert "signer_healthcheck_client_rejected" in result["rejection_reasons"]
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
     assert runner.calls == []
@@ -1118,12 +1152,14 @@ def test_openclaw_signed_worker_claim_persists_failure_result_receipt(
     receipt = _signed_worker_task_last_result(task_id)
     assert receipt["claim_status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
     assert receipt["accepted"] is False
-    assert SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED in receipt[
-        "rejection_reasons"
-    ]
-    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED in receipt[
-        "rejection_reasons"
-    ]
+    assert (
+        SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED
+        in receipt["rejection_reasons"]
+    )
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED
+        in receipt["rejection_reasons"]
+    )
 
 
 def test_openclaw_signed_worker_claim_fails_terminally_on_binding_exception(
@@ -1134,6 +1170,7 @@ def test_openclaw_signed_worker_claim_fails_terminally_on_binding_exception(
 
     def _raise_binding_error(**_kwargs):
         raise RuntimeError("binding failed")
+
     monkeypatch.setattr(
         supervisor_module,
         "_signed_worker_effective_runner",
@@ -1190,9 +1227,10 @@ def test_openclaw_signed_worker_claim_rejects_when_result_persistence_fails(
 
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
-    assert SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED in result[
-        "rejection_reasons"
-    ]
+    assert (
+        SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED
+        in result["rejection_reasons"]
+    )
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "executing"
 
 
@@ -1272,7 +1310,9 @@ def test_openclaw_claim_executes_0102_readonly_task_when_env_enabled(
         reddog_signed_worker_0102_readonly_review_binding as review_binding,
     )
 
-    monkeypatch.setattr(review_binding, "Signed0102ReadOnlyReviewRunner", lambda: runner)
+    monkeypatch.setattr(
+        review_binding, "Signed0102ReadOnlyReviewRunner", lambda: runner
+    )
 
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
 
@@ -1283,198 +1323,6 @@ def test_openclaw_claim_executes_0102_readonly_task_when_env_enabled(
     assert result["capability"] == "architect_review"
     assert runner.calls[0]["task_id"] == task_id
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
-
-
-def test_signer_issued_audit_reaches_real_readonly_worker_without_effects(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
-        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
-    )
-    runtime_verification = verified_runtime_binding_receipt(runtime_binding)
-    assert runtime_verification is not None
-    binding = signed_audit_stage_binding(runtime_binding=runtime_binding)
-    allocation = binding["wsp15_allocation_receipt"]
-    snapshot = _snapshot(
-        allocation,
-        slice_id="REDDOG_READONLY_AUDIT_PHASE1",
-        model_selection_receipt=selection,
-        model_selection_receipt_id=selection["receipt_id"],
-        model_selection_digest=_mapping_digest(selection),
-        model_runtime_binding_receipt=runtime_binding,
-        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-        model_runtime_binding_digest=canonical_model_runtime_binding_digest(
-            runtime_binding
-        ),
-        model_runtime_binding_verification_receipt_id=(
-            runtime_verification.receipt_id
-        ),
-        model_runtime_binding_verification_digest=verification_receipt_digest(
-            runtime_verification
-        ),
-        **{
-            key: binding[key]
-            for key in (
-                "progressive_policy_stage_receipt_id",
-                "progressive_policy_stage_digest",
-                "progressive_policy_stage_receipt",
-            )
-        },
-    )
-    queue_item = snapshot["wre_queue_items"][0]
-    issued, signer, _, snapshot_resolver = _issue_delegated_authority(
-        **binding,
-        work_order_id="wo-1",
-        work_order_digest=worker_dispatch_work_order_digest(snapshot),
-        queue_consumer_receipt_digest=worker_dispatch_queue_receipt_digest(snapshot),
-        queue_consumer_receipt=worker_dispatch_queue_receipt(snapshot),
-        requested_operation=allocation["requested_operation"],
-        allowed_paths=(),
-        denied_paths=(),
-        model_selection_receipt_id=queue_item["model_selection_receipt_id"],
-        model_selection_digest=queue_item["model_selection_digest"],
-        model_runtime_binding_receipt_id=queue_item[
-            "model_runtime_binding_receipt_id"
-        ],
-        model_runtime_binding_digest=queue_item["model_runtime_binding_digest"],
-        model_runtime_binding_verification_receipt_id=queue_item[
-            "model_runtime_binding_verification_receipt_id"
-        ],
-        model_runtime_binding_verification_digest=queue_item[
-            "model_runtime_binding_verification_digest"
-        ],
-        memex_supply_receipt_id=queue_item["memex_supply_receipt_id"],
-        memex_supply_digest=queue_item["memex_supply_digest"],
-        valve_state_required="VALVE_OPEN_DRYRUN_ONLY",
-        consensus_receipt_digest=None,
-        sovereign_authorization_digest=None,
-    )
-    assert issued.accepted and issued.identity and issued.work_authority
-    verified = verify_delegated_work_authority(
-        work_authority=issued.work_authority,
-        identity=issued.identity,
-        signature_verifier=signer,
-        principal_key_resolver=_SignerPrincipalKeyResolver(),
-        nonce_store=InMemoryNonceStore(),
-        snapshot_resolver=snapshot_resolver,
-        revocation_oracle=_SignerNoRevocation(),
-        now=1000,
-        required_valve_state="VALVE_OPEN_DRYRUN_ONLY",
-    )
-    assert verified.accepted is True, verified.reason_codes
-    authority_runtime = {
-        "decision": "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT",
-        "authority_result": issued.to_dict(),
-    }
-    authority_verification = {
-        "decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT",
-        "verified_work_authority_digest": canonical_work_authority_digest(
-            issued.work_authority
-        ),
-        "verification_result": verified.to_dict(),
-    }
-    authority_verification.update(
-        recorded_authority_verification_binding(
-            authority_runtime,
-            authority_verification,
-        )
-    )
-    dryrun = plan_reddog_signed_authority_worker_dispatch_dry_run(
-        explicit_signed_authority_worker_dispatch_dryrun_requested=True,
-        queue_authority_verification_result=authority_verification,
-        queue_authority_runtime_result=authority_runtime,
-        wsp15_allocation_receipt=allocation,
-    ).to_dict()
-    context = WorkerDispatchAuthorityVerificationContext(
-        signature_verifier=signer,
-        principal_key_resolver=_SignerPrincipalKeyResolver(),
-        nonce_store=InMemoryNonceStore(),
-        snapshot_resolver=snapshot_resolver,
-        revocation_oracle=_SignerNoRevocation(),
-        trusted_now_epoch=lambda: 1000,
-        required_valve_state="VALVE_OPEN_DRYRUN_ONLY",
-    )
-    published = runtime.publish_reddog_signed_worker_dispatch_runtime(
-        worker_dispatch_dryrun_result=dryrun,
-        queue_authority_runtime_result=authority_runtime,
-        queue_authority_verification_result=authority_verification,
-        authority_verification_context=context,
-        work_state_snapshot=snapshot,
-        queue_item_id="queue-1",
-        writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
-    )
-    assert published.accepted and len(published.tasks) == 1
-    assert published.tasks[0].context["model_runtime_binding_receipt"] == runtime_binding
-
-    repo = _repo_with_readonly_target(tmp_path)
-    target = repo / "modules" / "foundups" / "paccess_001" / "src" / "worker.py"
-    target.parent.mkdir(parents=True)
-    target.write_text("VALUE = 1\n", encoding="utf-8")
-    subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
-    subprocess.run(
-        ["git", "-C", str(repo), "commit", "-m", "test: add audit target"],
-        check=True,
-        capture_output=True,
-    )
-    head = subprocess.run(
-        ["git", "-C", str(repo), "rev-parse", "HEAD"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    from modules.communication.moltbot_bridge.src import (
-        reddog_signed_worker_0102_readonly_review_binding as review_binding,
-        reddog_signed_worker_agentdb_envelope as envelope_module,
-    )
-
-    model_runner = _EchoEvidenceModelRunner()
-    readonly_runner = review_binding.Signed0102ReadOnlyReviewRunner(
-        model_runner=model_runner,
-        holoindex_adapter=_FakeQueryAdapter(head),
-        codeindex_adapter=_FakeQueryAdapter(head),
-    )
-    monkeypatch.setattr(
-        review_binding,
-        "Signed0102ReadOnlyReviewRunner",
-        lambda: readonly_runner,
-    )
-    monkeypatch.setattr(
-        envelope_module,
-        "build_worker_dispatch_authority_context_from_env",
-        lambda **_: WorkerDispatchAuthorityVerificationContext(
-            signature_verifier=signer,
-            principal_key_resolver=_SignerPrincipalKeyResolver(),
-            nonce_store=InMemoryNonceStore(),
-            snapshot_resolver=snapshot_resolver,
-            revocation_oracle=_SignerNoRevocation(),
-            trusted_now_epoch=lambda: 1000,
-            required_valve_state="VALVE_OPEN_DRYRUN_ONLY",
-        ),
-    )
-    before = subprocess.run(
-        ["git", "-C", str(repo), "status", "--porcelain"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout
-
-    claimed = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
-
-    assert claimed["accepted"] is True, json.dumps(claimed, sort_keys=True)
-    assert claimed["capability"] == "architect_review"
-    assert model_runner.calls
-    assert subprocess.run(
-        ["git", "-C", str(repo), "status", "--porcelain"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout == before == ""
-    assert not (repo / "artifact_generation_request.json").exists()
-    assert "work_order_invocation" not in claimed
-    assert AgentDB().get_autonomous_task_by_id(published.tasks[0].task_id)[
-        "status"
-    ] == "completed"
 
 
 def test_openclaw_claim_does_not_claim_0102_bounded_code_change_even_when_readonly_enabled(
@@ -1521,7 +1369,10 @@ def test_openclaw_claim_0102_bounded_code_waits_for_bounded_stage(
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(runtime_root / "profile.json"))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+        str(runtime_root / "profile.json"),
+    )
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
@@ -1556,7 +1407,10 @@ def test_openclaw_claim_0102_bounded_code_requires_artifact_request_source(
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(runtime_root / "profile.json"))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+        str(runtime_root / "profile.json"),
+    )
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
 
@@ -1589,10 +1443,15 @@ def test_openclaw_claim_executes_0102_bounded_code_when_bounded_stage_ready(
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code")
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code"
+    )
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(runtime_root / "profile.json"))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+        str(runtime_root / "profile.json"),
+    )
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     from modules.communication.moltbot_bridge.src import (
@@ -1635,10 +1494,14 @@ def test_openclaw_claim_profile_enables_0102_bounded_code_when_stage_ready(
         _queue_chain_results_through("assurance_capacity_admission"),
     )
     runner = _FakeRunner()
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code")
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code"
+    )
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json")
+    )
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     from modules.communication.moltbot_bridge.src import (
@@ -1672,17 +1535,23 @@ def test_openclaw_claim_fusion_profile_supplies_artifact_generator_mode(
         worker_runtime="0102",
         capability="bounded_code_change",
     )
-    state = _write_runtime_json(tmp_path, "work_state.json", _artifact_runtime_snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _artifact_runtime_snapshot()
+    )
     chain = _write_runtime_json(
         tmp_path,
         "chain_results.json",
         _queue_chain_results_through("assurance_capacity_admission"),
     )
     runner = _FakeRunner()
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code_fusion")
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code_fusion"
+    )
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json")
+    )
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     from modules.communication.moltbot_bridge.src import (
         reddog_signed_worker_openclaw_queue_loop_runtime_binding as binding_module,
@@ -1721,11 +1590,15 @@ def test_openclaw_claim_explicit_zero_disables_profile_0102_bounded_code(
         "chain_results.json",
         _queue_chain_results_through("worktree_create"),
     )
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code")
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code"
+    )
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "0")
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json")
+    )
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
 
@@ -1734,636 +1607,6 @@ def test_openclaw_claim_explicit_zero_disables_profile_0102_bounded_code(
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
-
-
-def test_openclaw_queue_stage_does_not_materialize_bounded_artifact(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    repo = _repo(tmp_path)
-    principal_public, reddog_public, connector = _ed25519_signing_material()
-    pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _artifact_runtime_snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _artifact_runtime_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
-    )
-    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _artifact_runtime_work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
-    work_order["holoindex_evidence"] = {
-        **dict(work_order["holoindex_evidence"]),
-        "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
-    }
-    work_orders = _write_runtime_json(
-        tmp_path,
-        "work_orders.json",
-        {"work_orders": {str(work_order["work_order_id"]): work_order}},
-    )
-    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
-    chain = tmp_path / "runtime" / "chain_results.json"
-    authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = tmp_path / "runtime" / "signer.sock"
-    worktree_runner = _FakeWorktreeRunner()
-    worktree = _pilot_worktree_path(repo, work_order)
-
-    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        runtime_allowed_root=tmp_path / "runtime",
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-        worker_dispatch_writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
-        assurance_reservation_store=_assurance_store(),
-        worktree_runner=worktree_runner,
-        now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000, trusted_now_epoch=lambda: 1000,
-        requested_queue_item_id="queue-1",
-        max_steps=11,
-    )
-    assert seed.accepted is True, seed.rejection_reasons
-    assert seed.dispatched_stages[-1] == "assurance_capacity_admission", (
-        seed.queue_chain_requeue_required,
-        seed.retry_at,
-        seed.rejection_reasons,
-    )
-    assert (
-        json.loads(chain.read_text(encoding="utf-8"))["stage_results"][
-            "assurance_capacity_admission"
-        ]["status"]
-        == "ASSURANCE_CAPACITY_RESERVED"
-    )
-    assert worktree.exists()
-    assert not (worktree / PILOT_ARTIFACT).exists()
-
-    queue_task_id = _pending_signed_task_id("queue_stage_progress")
-    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
-    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
-    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders))
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
-
-    result = claim_reddog_signed_worker_dispatch_task_once(
-        repo_root=repo,
-        agent_db_factory=_assurance_store,
-    )
-
-    assert result["accepted"] is False
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
-    assert AgentDB().get_autonomous_task_by_id(queue_task_id)["status"] == "pending"
-    assert "bounded_worker_pilot" not in json.loads(
-        chain.read_text(encoding="utf-8")
-    )["stage_results"]
-    assert not (worktree / PILOT_ARTIFACT).exists()
-    assert not (repo / PILOT_ARTIFACT).exists()
-
-
-def test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    repo = _repo(tmp_path)
-    principal_public, reddog_public, connector = _ed25519_signing_material()
-    pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _artifact_runtime_snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _artifact_runtime_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
-    )
-    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _artifact_runtime_work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
-    work_order["holoindex_evidence"] = {
-        **dict(work_order["holoindex_evidence"]),
-        "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
-    }
-    work_orders = _write_runtime_json(
-        tmp_path,
-        "work_orders.json",
-        {"work_orders": {str(work_order["work_order_id"]): work_order}},
-    )
-    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
-    chain = tmp_path / "runtime" / "chain_results.json"
-    authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = tmp_path / "runtime" / "signer.sock"
-    worktree_runner = _FakeWorktreeRunner()
-    worktree = _pilot_worktree_path(repo, work_order)
-    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
-    generic_writer = _write_runtime_json(
-        tmp_path,
-        "generic_writer.json",
-        pilot_payloads["generic_writer_dryrun_result"],
-    )
-    governed_shell = _write_runtime_json(
-        tmp_path,
-        "governed_shell.json",
-        pilot_payloads["governed_shell_dryrun_result"],
-    )
-    holoindex = _write_runtime_json(
-        tmp_path,
-        "holoindex_evidence.json",
-        pilot_payloads["holoindex_evidence"],
-    )
-    verifier = _write_runtime_json(
-        tmp_path,
-        "verifier_request.json",
-        _slice_verifier_request(),
-    )
-
-    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        runtime_allowed_root=tmp_path / "runtime",
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        generic_writer_dryrun_result_path=generic_writer,
-        governed_shell_dryrun_result_path=governed_shell,
-        holoindex_evidence_path=holoindex,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-        worker_dispatch_writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
-        assurance_reservation_store=_assurance_store(),
-        worktree_runner=worktree_runner,
-        now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000, trusted_now_epoch=lambda: 1000,
-        requested_queue_item_id="queue-1",
-        max_steps=11,
-    )
-    assert seed.accepted is True
-    assert seed.dispatched_stages[-1] == "assurance_capacity_admission"
-    assert (
-        json.loads(chain.read_text(encoding="utf-8"))["stage_results"][
-            "assurance_capacity_admission"
-        ]["status"]
-        == "ASSURANCE_CAPACITY_RESERVED"
-    )
-    assert not (worktree / PILOT_ARTIFACT).exists()
-
-    queue_task_id = _pending_signed_task_id("queue_stage_progress")
-    coding_task_id = _pending_signed_task_id("bounded_code_change")
-    verifier_task_id = next(
-        str(task.get("task_id") or "")
-        for task in AgentDB().get_autonomous_tasks(status="assigned", limit=20)
-        if task.get("discovered_by")
-        == runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE
-        and isinstance(task.get("context"), dict)
-        and task["context"].get("capability")
-        == "independent_slice_verification"
-    )
-    _patch_exact_sha_commit_runtime(
-        monkeypatch,
-        branch_name=str(work_order["branch_name"]),
-    )
-    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
-    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
-    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders))
-    monkeypatch.setenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", str(verifier))
-    monkeypatch.setenv("REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH", str(generic_writer))
-    monkeypatch.setenv("REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH", str(governed_shell))
-    monkeypatch.setenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", str(holoindex))
-    monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
-    monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
-    monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
-    configure_signed_worker_claim_authority_env(monkeypatch, chain_path=chain, signature_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519)
-    from modules.communication.moltbot_bridge.src import (
-        reddog_bounded_artifact_generation_runtime as artifact_runtime,
-    )
-
-    monkeypatch.setattr(
-        artifact_runtime,
-        "_load_foundups_fusion_runner",
-        lambda: lambda _api_key, _user_payload, _messages, _payload: {
-            "ok": True,
-            "content": json.dumps(
-                {
-                    "artifact_contents": {
-                        PILOT_ARTIFACT: "# Generated By Independent Author\n"
-                    }
-                },
-                sort_keys=True,
-            ),
-            "review_packet": {"receipt_id": "fusion-artifact-receipt"},
-        },
-    )
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
-
-    author_result = claim_reddog_signed_worker_dispatch_task_once(
-        repo_root=repo,
-        agent_db_factory=_assurance_store,
-    )
-    assert author_result["accepted"] is True, json.dumps(
-        author_result, sort_keys=True
-    )
-    assert author_result["task_id"] == coding_task_id
-    assert author_result["capability"] == "bounded_code_change"
-    assert AgentDB().get_autonomous_task_by_id(coding_task_id)["status"] == "completed"
-    assert (worktree / PILOT_ARTIFACT).exists()
-
-    result = claim_reddog_signed_worker_dispatch_task_once(
-        repo_root=repo,
-        agent_db_factory=_assurance_store,
-    )
-    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
-    assert result["task_id"] == verifier_task_id
-    assert result["worker_runtime"] == "openclaw"
-    assert result["capability"] == "independent_slice_verification"
-    assert AgentDB().get_autonomous_task_by_id(verifier_task_id)["status"] == "completed"
-    assert AgentDB().get_autonomous_task_by_id(queue_task_id)["status"] == "pending"
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["slice_verifier"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT"
-    assert stage["verifier_result"]["decision"] == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
-    assert stage["verifier_result"]["receipt"]["changed_paths"] == [PILOT_ARTIFACT]
-    assert stage["no_command_execution_performed"] is True
-    assert stage["no_github_call_performed"] is True
-    assert stage["no_pr_publish_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_pattern_memory_write_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-    assert (worktree / PILOT_ARTIFACT).exists()
-    assert not (repo / PILOT_ARTIFACT).exists()
-
-
-def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    from modules.foundups.agent.src import worktree_pr_runner
-    _FakeEnvDraftPrRunner.instances.clear()
-    monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeEnvDraftPrRunner)
-    repo = _repo(tmp_path)
-    principal_public, reddog_public, connector = _ed25519_signing_material()
-    pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _artifact_runtime_snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _artifact_runtime_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
-    )
-    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _artifact_runtime_work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
-    work_orders = _write_runtime_json(
-        tmp_path,
-        "work_orders.json",
-        {"work_orders": {str(work_order["work_order_id"]): work_order}},
-    )
-    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
-    chain = tmp_path / "runtime" / "chain_results.json"
-    authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = tmp_path / "runtime" / "signer.sock"
-    worktree_runner = _FakeWorktreeRunner()
-    worktree = _pilot_worktree_path(repo, work_order)
-    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
-    generic_writer = _write_runtime_json(
-        tmp_path,
-        "generic_writer.json",
-        pilot_payloads["generic_writer_dryrun_result"],
-    )
-    governed_shell = _write_runtime_json(
-        tmp_path,
-        "governed_shell.json",
-        pilot_payloads["governed_shell_dryrun_result"],
-    )
-    artifacts = _write_runtime_json(
-        tmp_path,
-        "artifact_contents.json",
-        pilot_payloads["artifact_contents"],
-    )
-    holoindex = _write_runtime_json(
-        tmp_path,
-        "holoindex_evidence.json",
-        pilot_payloads["holoindex_evidence"],
-    )
-    verifier = _write_runtime_json(
-        tmp_path,
-        "verifier_request.json",
-        _slice_verifier_request(),
-    )
-    publish_request = _write_runtime_json(
-        tmp_path,
-        "publish_request.json",
-        _draft_pr_publish_request(worktree),
-    )
-
-    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        runtime_allowed_root=tmp_path / "runtime",
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        generic_writer_dryrun_result_path=generic_writer,
-        governed_shell_dryrun_result_path=governed_shell,
-        artifact_contents_path=artifacts,
-        holoindex_evidence_path=holoindex,
-        verifier_request_path=verifier,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-        worker_dispatch_writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
-        assurance_reservation_store=_assurance_store(),
-        worktree_runner=worktree_runner,
-        now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000, trusted_now_epoch=lambda: 1000,
-        requested_queue_item_id="queue-1",
-        max_steps=12,
-    )
-    assert seed.accepted is True
-    assert seed.dispatched_stages[-1] == "assurance_capacity_admission"
-    _claim_reserved_author_and_verifier(
-        monkeypatch=monkeypatch,
-        repo=repo,
-        state=state,
-        chain=chain,
-        profile=profile,
-        work_orders=work_orders,
-        generic_writer=generic_writer,
-        governed_shell=governed_shell,
-        holoindex=holoindex,
-        verifier=verifier,
-    )
-
-    task_id = _pending_signed_task_id("queue_stage_progress")
-    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
-    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
-    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders))
-    monkeypatch.setenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", str(publish_request))
-    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_MODE", "real")
-    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S", "88")
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
-
-    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
-
-    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
-    assert result["task_id"] == task_id
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
-    assert len(_FakeEnvDraftPrRunner.instances) == 3
-    draft_runner = _FakeEnvDraftPrRunner.instances[-1]
-    assert draft_runner.repo_root == repo.resolve()
-    assert draft_runner.timeout_s == 88
-    assert [call[0] for call in draft_runner.calls] == ["push_branch", "create_draft_pr"]
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["verified_draft_pr_publish"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT"
-    assert stage["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
-    assert stage["no_ready_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_pattern_memory_write_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-
-
-def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    from modules.foundups.agent.src import worktree_pr_runner
-    _FakeEnvDraftPrRunner.instances.clear()
-    monkeypatch.setattr(
-        worktree_pr_runner,
-        "RealWorktreeRunner",
-        _FakeEnvDraftPrRunner,
-    )
-    repo = _repo(tmp_path)
-    principal_public, reddog_public, connector = _ed25519_signing_material()
-    pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _artifact_runtime_snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _artifact_runtime_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
-    )
-    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _artifact_runtime_work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
-    work_orders = _write_runtime_json(
-        tmp_path,
-        "work_orders.json",
-        {"work_orders": {str(work_order["work_order_id"]): work_order}},
-    )
-    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
-    chain = tmp_path / "runtime" / "chain_results.json"
-    authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = tmp_path / "runtime" / "signer.sock"
-    worktree_runner = _FakeWorktreeRunner()
-    worktree = _pilot_worktree_path(repo, work_order)
-    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
-    generic_writer = _write_runtime_json(
-        tmp_path,
-        "generic_writer.json",
-        pilot_payloads["generic_writer_dryrun_result"],
-    )
-    governed_shell = _write_runtime_json(
-        tmp_path,
-        "governed_shell.json",
-        pilot_payloads["governed_shell_dryrun_result"],
-    )
-    artifacts = _write_runtime_json(
-        tmp_path,
-        "artifact_contents.json",
-        pilot_payloads["artifact_contents"],
-    )
-    holoindex = _write_runtime_json(
-        tmp_path,
-        "holoindex_evidence.json",
-        pilot_payloads["holoindex_evidence"],
-    )
-    verifier = _write_runtime_json(
-        tmp_path,
-        "verifier_request.json",
-        _slice_verifier_request(),
-    )
-    publish_request = _write_runtime_json(
-        tmp_path,
-        "publish_request.json",
-        _draft_pr_publish_request(worktree),
-    )
-    draft_runner = _FakeEnvDraftPrRunner(repo_root=repo, timeout_s=88)
-
-    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        runtime_allowed_root=tmp_path / "runtime",
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        generic_writer_dryrun_result_path=generic_writer,
-        governed_shell_dryrun_result_path=governed_shell,
-        artifact_contents_path=artifacts,
-        holoindex_evidence_path=holoindex,
-        verifier_request_path=verifier,
-        publish_request_path=publish_request,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-        worker_dispatch_writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
-        assurance_reservation_store=_assurance_store(),
-        worktree_runner=worktree_runner,
-        draft_pr_runner=draft_runner,
-        now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000, trusted_now_epoch=lambda: 1000,
-        requested_queue_item_id="queue-1",
-        max_steps=13,
-    )
-    assert seed.accepted is True
-    assert seed.dispatched_stages[-1] == "assurance_capacity_admission"
-    _claim_reserved_author_and_verifier(
-        monkeypatch=monkeypatch,
-        repo=repo,
-        state=state,
-        chain=chain,
-        profile=profile,
-        work_orders=work_orders,
-        generic_writer=generic_writer,
-        governed_shell=governed_shell,
-        holoindex=holoindex,
-        verifier=verifier,
-    )
-    monkeypatch.setenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", str(publish_request))
-    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_MODE", "real")
-    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S", "88")
-    publish_result = claim_reddog_signed_worker_dispatch_task_once(
-        repo_root=repo,
-        agent_db_factory=_assurance_store,
-    )
-    assert publish_result["accepted"] is True, json.dumps(
-        publish_result, sort_keys=True
-    )
-    assert publish_result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
-    seeded = json.loads(chain.read_text(encoding="utf-8"))
-    verifier_stage = seeded["stage_results"]["slice_verifier"]
-    publish_stage = seeded["stage_results"]["verified_draft_pr_publish"]
-    assert publish_stage["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
-
-    ratchet_request = _write_runtime_json(
-        tmp_path,
-        "ratchet_request.json",
-        _outcome_ratchet_request(verifier_stage["verifier_result"]),
-    )
-    outcome_store = tmp_path / "runtime" / "outcomes" / "signed-worker-ratchet.jsonl"
-    task_id = _pending_signed_task_id("queue_stage_progress")
-    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
-    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
-    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders))
-    monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_REQUEST_PATH", str(ratchet_request))
-    monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", str(outcome_store))
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
-
-    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
-
-    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
-    assert result["task_id"] == task_id
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["verified_outcome_ratchet"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT"
-    assert stage["ratchet_result"]["decision"] == "OUTCOME_RATCHET_RECORDED"
-    assert stage["ratchet_result"]["receipt"]["pattern_memory_write_performed"] is False
-    assert stage["no_command_execution_performed"] is True
-    assert stage["no_pr_publish_performed"] is True
-    assert stage["no_ready_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-    assert "held_out_regression_gate" not in stored["stage_results"]
-
-    records = [
-        json.loads(line)
-        for line in outcome_store.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
-    assert len(records) == 1
-    assert records[0]["ratchet_receipt"]["work_order_id"] == work_order["work_order_id"]
-    assert records[0]["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
-    assert not (repo / "runtime" / "outcomes" / "signed-worker-ratchet.jsonl").exists()
 
 
 def test_openclaw_claim_env_bound_queue_loop_runner_reaches_held_out_regression_gate(
@@ -2383,7 +1626,9 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_held_out_regression_
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(ctx["state"]))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(ctx["chain"]))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(ctx["profile"]))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(ctx["profile"])
+    )
     monkeypatch.setenv("REDDOG_HELD_OUT_GATE_REQUEST_PATH", str(held_out_request))
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
@@ -2403,7 +1648,9 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_held_out_regression_
 
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
     stage = stored["stage_results"]["held_out_regression_gate"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    assert (
+        stage["decision"] == "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    )
     assert (
         stage["gate_result"]["decision"]
         == "HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT"
@@ -2436,9 +1683,15 @@ def test_openclaw_claim_env_bound_queue_loop_rejects_without_outcome_authority(
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(ctx["state"]))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(ctx["chain"]))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(ctx["profile"]))
-    monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH", str(admission_request))
-    monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(ctx["profile"])
+    )
+    monkeypatch.setenv(
+        "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH", str(admission_request)
+    )
+    monkeypatch.setenv(
+        "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db)
+    )
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
 
@@ -2456,386 +1709,9 @@ def test_openclaw_claim_env_bound_queue_loop_rejects_without_outcome_authority(
     assert not (ctx["repo"] / "runtime" / "pattern_memory.db").exists()
 
 
-def test_openclaw_claim_loop_stops_before_pattern_memory_without_authority(
+def test_openclaw_claims_signed_worker_task_once_and_completes_it(
     tmp_path: Path,
-    monkeypatch,
 ) -> None:
-    from modules.foundups.agent.src import worktree_pr_runner
-
-    _FakeEnvDraftPrRunner.instances.clear()
-    monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeEnvDraftPrRunner)
-    repo = _repo(tmp_path)
-    principal_public, reddog_public, connector = _ed25519_signing_material()
-    pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _artifact_runtime_snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _artifact_runtime_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
-    )
-    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _artifact_runtime_work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
-    work_orders = _write_runtime_json(
-        tmp_path,
-        "work_orders.json",
-        {"work_orders": {str(work_order["work_order_id"]): work_order}},
-    )
-    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
-    chain = tmp_path / "runtime" / "chain_results.json"
-    authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = tmp_path / "runtime" / "signer.sock"
-    worktree_runner = _FakeWorktreeRunner()
-    worktree = _pilot_worktree_path(repo, work_order)
-    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        runtime_allowed_root=tmp_path / "runtime",
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-        worker_dispatch_writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
-        assurance_reservation_store=_assurance_store(),
-        worktree_runner=worktree_runner,
-        now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000, trusted_now_epoch=lambda: 1000,
-        requested_queue_item_id="queue-1",
-        max_steps=10,
-    )
-    assert seed.accepted is True
-    assert seed.dispatched_stages[-1] == "assurance_capacity_admission"
-    assert worktree.exists()
-    assert not (worktree / PILOT_ARTIFACT).exists()
-    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
-    generic_writer = _write_runtime_json(
-        tmp_path,
-        "generic_writer.json",
-        pilot_payloads["generic_writer_dryrun_result"],
-    )
-    governed_shell = _write_runtime_json(
-        tmp_path,
-        "governed_shell.json",
-        pilot_payloads["governed_shell_dryrun_result"],
-    )
-    artifacts = _write_runtime_json(
-        tmp_path,
-        "artifact_contents.json",
-        pilot_payloads["artifact_contents"],
-    )
-    holoindex = _write_runtime_json(
-        tmp_path,
-        "holoindex_evidence.json",
-        pilot_payloads["holoindex_evidence"],
-    )
-    verifier_request = _write_runtime_json(
-        tmp_path,
-        "verifier_request.json",
-        _slice_verifier_request(),
-    )
-    publish_request = _write_runtime_json(
-        tmp_path,
-        "publish_request.json",
-        _draft_pr_publish_request(worktree),
-    )
-    outcome_store = tmp_path / "runtime" / "outcomes" / "signed-worker-ratchet.jsonl"
-    model_feedback_store = (
-        tmp_path / "runtime" / "model_feedback" / "model_feedback.jsonl"
-    )
-    pattern_memory_db = tmp_path / "runtime" / "pattern_memory.db"
-    _claim_reserved_author_and_verifier(
-        monkeypatch=monkeypatch,
-        repo=repo,
-        state=state,
-        chain=chain,
-        profile=profile,
-        work_orders=work_orders,
-        generic_writer=generic_writer,
-        governed_shell=governed_shell,
-        holoindex=holoindex,
-        verifier=verifier_request,
-    )
-    task_id = _pending_signed_task_id("queue_stage_progress")
-    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
-    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
-    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders))
-    monkeypatch.setenv("REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH", str(generic_writer))
-    monkeypatch.setenv("REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH", str(governed_shell))
-    monkeypatch.setenv("REDDOG_ARTIFACT_CONTENTS_PATH", str(artifacts))
-    monkeypatch.setenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", str(holoindex))
-    monkeypatch.setenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", str(verifier_request))
-    monkeypatch.setenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", str(publish_request))
-    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_MODE", "real")
-    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S", "88")
-    monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_REQUEST_BINDING", "1")
-    monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", str(outcome_store))
-    monkeypatch.setenv("REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH", str(model_feedback_store))
-    monkeypatch.setenv("REDDOG_HELD_OUT_GATE_REQUEST_BINDING", "1")
-    monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING", "1")
-    monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
-    result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
-        repo_root=repo,
-        max_claims=6,
-    )
-    assert result["accepted"] is False, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT, json.dumps(
-        result, sort_keys=True
-    )
-    assert result["claimed_count"] == 5, json.dumps(result, sort_keys=True)
-    assert result["requeued_task_ids"] == (
-        task_id,
-        task_id,
-        task_id,
-        task_id,
-    )
-    assert result["completed_task_ids"] == ()
-    assert result["failed_task_ids"] == (task_id,)
-    assert result["idle"] is False
-    assert result["max_claims_reached"] is False
-    assert "stage:pattern_memory_admission" in result["rejection_reasons"]
-    assert len(result["receipt_ids"]) == 4
-    assert len(result["child_execution_evidence_digests"]) == 5
-    assert all(
-        digest.startswith("sha256:")
-        for digest in result["child_execution_evidence_digests"]
-    )
-    assert [claim["status"] for claim in result["claim_results"][:-1]] == [
-        SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
-        SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
-        SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
-        SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
-    ]
-    assert result["claim_results"][-1]["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    for stage_name in (
-        "bounded_worker_pilot",
-        "slice_verifier",
-        "verified_draft_pr_publish",
-        "verified_outcome_ratchet",
-        "model_feedback_admission",
-        "held_out_regression_gate",
-    ):
-        assert stage_name in stored["stage_results"]
-    assert "pattern_memory_admission" not in stored["stage_results"]
-    assert stored["receipts"][-1]["next_action"] == (
-        "RUN_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE"
-    )
-    assert (worktree / PILOT_ARTIFACT).exists()
-    assert not (repo / PILOT_ARTIFACT).exists()
-    draft_pr_calls = [
-        call[0]
-        for instance in _FakeEnvDraftPrRunner.instances
-        for call in instance.calls
-    ]
-    assert draft_pr_calls == ["commit_all", "push_branch", "create_draft_pr"]
-    assert outcome_store.exists()
-    assert model_feedback_store.exists()
-    assert not pattern_memory_db.exists()
-    assert not (repo / "runtime" / "pattern_memory.db").exists()
-
-def test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    repo = _repo(tmp_path)
-    profile_env = {
-        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
-        "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path / "resident-runtime"),
-        "REDDOG_RESIDENT_QUEUE_NOW_ISO": BOOTSTRAP_NOW,
-        "REDDOG_SIGNATURE_VERIFIER_BACKEND": REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-    }
-    def _write_profile_file(env_name: str, payload: object) -> Path:
-        path = Path(resident_queue_runtime_file_path(profile_env, repo, env_name))
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
-        return path
-
-    principal_public, reddog_public, connector = _ed25519_signing_material()
-    pilot_overrides = _pilot_path_overrides()
-    state = _write_profile_file("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", _artifact_runtime_snapshot())
-    profile = _write_profile_file(
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
-        _artifact_runtime_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
-    )
-    snapshots = _write_profile_file("REDDOG_PERMISSION_SNAPSHOTS_PATH", _snapshots())
-    principals = _write_profile_file(
-        "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
-        _principals(principal_public),
-    )
-    valve_env = _write_profile_file("REDDOG_EXECUTION_VALVE_ENV_PATH", _valve_environment())
-    work_order = _artifact_runtime_work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
-    work_order["holoindex_evidence"] = {
-        **dict(work_order["holoindex_evidence"]),
-        "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
-    }
-    work_orders_path = tmp_path / "resident-runtime" / "work_orders.json"
-    work_orders_path.parent.mkdir(parents=True, exist_ok=True)
-    work_orders_path.write_text(
-        json.dumps(
-            {"work_orders": {str(work_order["work_order_id"]): work_order}},
-            sort_keys=True,
-        ),
-        encoding="utf-8",
-    )
-    chain = Path(
-        resident_queue_runtime_file_path(
-            profile_env,
-            repo,
-            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
-        )
-    )
-    authority_state = Path(
-        resident_queue_runtime_file_path(
-            profile_env,
-            repo,
-            "REDDOG_AUTHORITY_RUNTIME_STATE_PATH",
-        )
-    )
-    socket_path = Path(
-        resident_queue_runtime_file_path(
-            profile_env,
-            repo,
-            "REDDOG_SIGNER_SOCKET_PATH",
-        )
-    )
-
-    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        runtime_allowed_root=tmp_path / "resident-runtime",
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders_path,
-        valve_environment_path=valve_env,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-        worker_dispatch_writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
-        assurance_reservation_store=_assurance_store(),
-        worktree_runner=_FakeWorktreeRunner(),
-        now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000, trusted_now_epoch=lambda: 1000,
-        requested_queue_item_id="queue-1",
-        max_steps=10,
-    )
-    assert seed.accepted is True
-    assert seed.dispatched_stages[-1] == "assurance_capacity_admission"
-
-    _patch_exact_sha_commit_runtime(
-        monkeypatch,
-        branch_name=str(work_order["branch_name"]),
-    )
-    pending = [
-        task
-        for task in AgentDB().get_autonomous_tasks(status="pending", limit=10)
-        if task.get("discovered_by") == runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE
-    ]
-    assert len(pending) == 2
-    coding_task_id = next(
-        task["task_id"]
-        for task in pending
-        if task["context"]["worker_runtime"] == "0102"
-        and task["context"]["capability"] == "bounded_code_change"
-    )
-
-    from modules.communication.moltbot_bridge.src import (
-        reddog_bounded_artifact_generation_runtime as artifact_runtime,
-    )
-
-    fusion_calls: list[dict[str, object]] = []
-
-    def _fake_fusion(api_key, user_payload, messages, payload):
-        fusion_calls.append(
-            {
-                "api_key": api_key,
-                "user_payload": user_payload,
-                "messages": messages,
-                "payload": payload,
-            }
-        )
-        return {
-            "ok": True,
-            "content": json.dumps(
-                {
-                    "artifact_contents": {
-                        PILOT_ARTIFACT: "# Generated By Fusion\n\nprofile path claim\n"
-                    }
-                },
-                sort_keys=True,
-            ),
-            "review_packet": {"receipt_id": "fusion-artifact-receipt-profile-path"},
-        }
-
-    monkeypatch.setattr(
-        artifact_runtime,
-        "_load_foundups_fusion_runner",
-        lambda: _fake_fusion,
-    )
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
-    for env_name in (
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
-        "REDDOG_WORK_ORDERS_PATH",
-        "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH",
-        "REDDOG_ARTIFACT_CONTENTS_PATH",
-    ):
-        monkeypatch.delenv(env_name, raising=False)
-    for key, value in profile_env.items():
-        monkeypatch.setenv(key, value)
-    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders_path))
-    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
-
-    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
-
-    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
-    assert result["task_id"] == coding_task_id
-    assert result["worker_runtime"] == "0102"
-    assert result["capability"] == "bounded_code_change"
-    assert AgentDB().get_autonomous_task_by_id(coding_task_id)["status"] == "completed"
-    assert fusion_calls
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    assert stored["stage_results"]["bounded_worker_pilot"]["decision"] == (
-        "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
-    )
-
-
-def test_openclaw_claims_signed_worker_task_once_and_completes_it(tmp_path: Path) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
 
@@ -2888,7 +1764,9 @@ def test_openclaw_claim_ignores_non_openclaw_signed_worker_task(tmp_path: Path) 
 
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
-    assert SignedWorkerOpenClawClaimReason.NO_PENDING_TASK in result["rejection_reasons"]
+    assert (
+        SignedWorkerOpenClawClaimReason.NO_PENDING_TASK in result["rejection_reasons"]
+    )
     assert db.get_autonomous_task_by_id(task_id)["status"] == "pending"
 
 
@@ -2906,7 +1784,9 @@ def test_openclaw_supervisor_instance_claims_signed_worker_task(tmp_path: Path) 
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
 
 
-def test_openclaw_claim_rejects_without_runner_and_idle_when_empty(tmp_path: Path) -> None:
+def test_openclaw_claim_rejects_without_runner_and_idle_when_empty(
+    tmp_path: Path,
+) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
 
@@ -2918,16 +1798,26 @@ def test_openclaw_claim_rejects_without_runner_and_idle_when_empty(tmp_path: Pat
 
     assert rejected["accepted"] is False
     assert rejected["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
-    assert SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED in rejected["rejection_reasons"]
-    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_MISSING in rejected["rejection_reasons"]
+    assert (
+        SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED
+        in rejected["rejection_reasons"]
+    )
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.RUNNER_MISSING
+        in rejected["rejection_reasons"]
+    )
     assert db.get_autonomous_task_by_id(task_id)["status"] == "failed"
     assert idle["accepted"] is False
     assert idle["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
 
 
 def test_openclaw_claim_loop_claims_until_idle(tmp_path: Path) -> None:
-    task_id_1 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
-    task_id_2 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_2")
+    task_id_1 = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_openclaw_candidate_1"
+    )
+    task_id_2 = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_openclaw_candidate_2"
+    )
     db = AgentDB()
 
     result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
@@ -2954,8 +1844,12 @@ def test_openclaw_claim_loop_claims_until_idle(tmp_path: Path) -> None:
 
 
 def test_openclaw_claim_loop_respects_max_claims(tmp_path: Path) -> None:
-    task_id_1 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
-    task_id_2 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_2")
+    task_id_1 = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_openclaw_candidate_1"
+    )
+    task_id_2 = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_openclaw_candidate_2"
+    )
     db = AgentDB()
 
     result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
@@ -2976,7 +1870,9 @@ def test_openclaw_claim_loop_respects_max_claims(tmp_path: Path) -> None:
 
 
 def test_openclaw_claim_loop_counts_requeued_claims(tmp_path: Path) -> None:
-    task_id = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
+    task_id = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_openclaw_candidate_1"
+    )
     db = AgentDB()
 
     result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
@@ -2997,14 +1893,15 @@ def test_openclaw_claim_loop_counts_requeued_claims(tmp_path: Path) -> None:
 
 
 def test_openclaw_claim_loop_skips_task_before_retry_window(tmp_path: Path) -> None:
-    task_id = _publish_agentdb_task(
-        intent_id="worker_dispatch_intent_retry_future"
-    )
+    task_id = _publish_agentdb_task(intent_id="worker_dispatch_intent_retry_future")
     db = AgentDB()
-    assert db.db.execute_write(
-        "UPDATE agents_autonomous_tasks SET retry_not_before = ? WHERE task_id = ?",
-        ("2999-01-01T00:00:00+00:00", task_id),
-    ) == 1
+    assert (
+        db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET retry_not_before = ? WHERE task_id = ?",
+            ("2999-01-01T00:00:00+00:00", task_id),
+        )
+        == 1
+    )
 
     result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
         repo_root=tmp_path,
@@ -3018,14 +1915,15 @@ def test_openclaw_claim_loop_skips_task_before_retry_window(tmp_path: Path) -> N
 
 
 def test_openclaw_claim_loop_claims_task_after_retry_window(tmp_path: Path) -> None:
-    task_id = _publish_agentdb_task(
-        intent_id="worker_dispatch_intent_retry_due"
-    )
+    task_id = _publish_agentdb_task(intent_id="worker_dispatch_intent_retry_due")
     db = AgentDB()
-    assert db.db.execute_write(
-        "UPDATE agents_autonomous_tasks SET retry_not_before = ? WHERE task_id = ?",
-        ("2000-01-01T00:00:00+00:00", task_id),
-    ) == 1
+    assert (
+        db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET retry_not_before = ? WHERE task_id = ?",
+            ("2000-01-01T00:00:00+00:00", task_id),
+        )
+        == 1
+    )
 
     result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
         repo_root=tmp_path,
@@ -3049,7 +1947,9 @@ def test_openclaw_claim_loop_reports_idle_without_work(tmp_path: Path) -> None:
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE
     assert result["claimed_count"] == 0
     assert result["idle"] is True
-    assert SignedWorkerOpenClawClaimReason.NO_PENDING_TASK in result["rejection_reasons"]
+    assert (
+        SignedWorkerOpenClawClaimReason.NO_PENDING_TASK in result["rejection_reasons"]
+    )
 
 
 def test_openclaw_claim_loop_ignores_non_openclaw_tasks(tmp_path: Path) -> None:
@@ -3074,8 +1974,12 @@ def test_openclaw_claim_loop_ignores_non_openclaw_tasks(tmp_path: Path) -> None:
 
 
 def test_openclaw_claim_loop_stops_after_first_rejected_claim(tmp_path: Path) -> None:
-    task_id_1 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
-    task_id_2 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_2")
+    task_id_1 = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_openclaw_candidate_1"
+    )
+    task_id_2 = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_openclaw_candidate_2"
+    )
     db = AgentDB()
 
     result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
@@ -3130,59 +2034,7 @@ def test_openclaw_claim_loop_rejects_invalid_max_claims(tmp_path: Path) -> None:
 
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT
-    assert SignedWorkerOpenClawClaimReason.MAX_CLAIMS_INVALID in result["rejection_reasons"]
-
-
-def test_openclaw_supervisor_instance_claims_signed_worker_tasks_until_idle(tmp_path: Path) -> None:
-    task_id = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
-    supervisor = OpenClawSupervisor(repo_root=tmp_path)
-
-    result = supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle(
-        signed_worker_runner=_FakeRunner(),
-        max_claims=2,
+    assert (
+        SignedWorkerOpenClawClaimReason.MAX_CLAIMS_INVALID
+        in result["rejection_reasons"]
     )
-
-    assert result["accepted"] is True
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT
-    assert result["completed_task_ids"] == (task_id,)
-    assert result["idle"] is True
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
-
-
-def test_signed_worker_executor_ast_has_no_shell_network_or_runtime_mutation() -> None:
-    source = EXECUTOR_PATH.read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    forbidden_text = (
-        "subprocess",
-        "requests",
-        "socket",
-        "holo_index.py --index",
-        "create_autonomous_task",
-        "complete_autonomous_task",
-        "git push",
-        "gh pr",
-    )
-    for token in forbidden_text:
-        assert token not in source
-
-    imported = set()
-    calls = set()
-    attrs = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            imported.update(alias.name.split(".")[0] for alias in node.names)
-        elif isinstance(node, ast.ImportFrom):
-            imported.add((node.module or "").split(".")[0])
-        elif isinstance(node, ast.Call):
-            func = node.func
-            if isinstance(func, ast.Name):
-                calls.add(func.id)
-            elif isinstance(func, ast.Attribute):
-                attrs.add(func.attr)
-
-    assert "subprocess" not in imported
-    assert "requests" not in imported
-    assert "eval" not in calls
-    assert "exec" not in calls
-    assert "system" not in attrs
-    assert "popen" not in attrs

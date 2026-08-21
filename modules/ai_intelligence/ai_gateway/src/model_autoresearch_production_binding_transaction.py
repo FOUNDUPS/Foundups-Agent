@@ -1,12 +1,10 @@
-"""Durable publication and transactional output claims for production binding."""
+"""Durable publication identity and evidence reservations for production binding."""
 
 from __future__ import annotations
 
-import json
-import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping
 
 from .model_autoresearch_authenticated_promotion_authority import (
     AuthenticatedCampaignPromotionSupplyResult,
@@ -19,34 +17,10 @@ from .model_signed_evidence import ModelSignedEvidenceReceipt
 
 
 @dataclass(frozen=True)
-class OutputClaim:
-    path: Path
-
-
-def claim_output_paths(*paths: Path) -> tuple[OutputClaim, ...]:
-    claims: list[OutputClaim] = []
-    try:
-        for path in paths:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            os.close(fd)
-            claims.append(OutputClaim(path))
-    except Exception:
-        cleanup_claimed_outputs(claims, expected_selection_receipt_id=None)
-        raise ValueError("single_model_production_output_claim_failed") from None
-    return tuple(claims)
-
-
-def cleanup_claimed_outputs(
-    claims: Sequence[OutputClaim],
-    *,
-    expected_selection_receipt_id: str | None,
-) -> None:
-    for claim in claims:
-        _cleanup_owned_output(
-            claim.path,
-            expected_selection_receipt_id=expected_selection_receipt_id,
-        )
+class ProductionPublicationIdentity:
+    nonce: str
+    binding_digest: str
+    terminal_receipt_id: str
 
 
 def production_publication_binding(
@@ -70,6 +44,34 @@ def production_publication_binding(
             "runtime_output_path": str(runtime_output),
         }
     )
+
+
+def production_publication_identity(**values: Any) -> ProductionPublicationIdentity:
+    authenticated = values["authenticated_promotion"]
+    binding = production_publication_binding(**values)
+    nonce = "single-model-production-authority-use:" + (
+        authenticated.authority.receipt.receipt_id
+    )
+    return ProductionPublicationIdentity(
+        nonce=nonce,
+        binding_digest=binding,
+        terminal_receipt_id="single-model-production-terminal:" + binding,
+    )
+
+
+def publication_status(
+    store: DurableExactPublicationStore,
+    identity: ProductionPublicationIdentity,
+) -> str | None:
+    if getattr(store, "durable", None) is not True:
+        raise ValueError("single_model_production_durable_publication_store_required")
+    operation = getattr(store, "publication_status", None)
+    if not callable(operation):
+        raise ValueError("single_model_production_durable_publication_store_required")
+    try:
+        return operation(identity.nonce, identity.binding_digest)
+    except Exception:
+        raise ValueError("single_model_production_authority_binding_conflict") from None
 
 
 def advance_publication(
@@ -124,31 +126,6 @@ def reserve_evidence_publications(
     return tuple(result)
 
 
-def _cleanup_owned_output(
-    path: Path,
-    *,
-    expected_selection_receipt_id: str | None,
-) -> None:
-    try:
-        if not path.is_file():
-            return
-        if path.stat().st_size == 0:
-            path.unlink()
-            return
-        if expected_selection_receipt_id is None:
-            return
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(payload, Mapping):
-            return
-        if (
-            payload.get("receipt_id") == expected_selection_receipt_id
-            or payload.get("selection_receipt_id") == expected_selection_receipt_id
-        ):
-            path.unlink()
-    except (OSError, ValueError, json.JSONDecodeError):
-        return
-
-
 def _preview_payload(preview: Any) -> dict[str, Any]:
     return {
         "selection_receipt_id": preview.selection_receipt_id,
@@ -177,10 +154,10 @@ def _evidence_publication(
 
 
 __all__ = [
-    "OutputClaim",
+    "ProductionPublicationIdentity",
     "advance_publication",
-    "claim_output_paths",
-    "cleanup_claimed_outputs",
     "production_publication_binding",
+    "production_publication_identity",
+    "publication_status",
     "reserve_evidence_publications",
 ]

@@ -33,9 +33,22 @@ That matrix also proves forged direct authority construction, expiry,
 revocation, invalid/overlong signed TTL, non-APPLIED publication state,
 malformed policy/trust, and preexisting output claims have zero
 provider calls and zero output artifacts, while an exact retry succeeds after
-a transient post-reservation runtime-supply failure. WSP-62 source guards keep
-the extracted authority, preflight, transaction, evidence, and execution
-modules at or below 200 lines with no function above 50 lines.
+a transient post-reservation runtime-supply failure. Adversarial transaction
+coverage also proves conflicting-path and exact APPLIED replay are
+zero-callback, APPLIED directory-flush ambiguity and AUTHORIZED terminal state
+recover exact artifacts without provider replay, and an APPLIED partial
+two-file publication completes from its verified remaining stage. Callback-time
+authority expiry has zero publication/artifact effect, pre-APPLIED expiry never
+exposes valid final artifacts, and unlink denial attempts explicit quarantine
+while surfacing cleanup failure; failed quarantine preserves the artifact with
+an explicit failure. File-fsync failure before the terminal leaves no
+terminal/APPLIED/final artifact; final-directory fsync failure after APPLIED
+resumes durably with zero provider callback.
+Callback-advancing authority and evidence verifiers prove the final pure time
+check blocks terminal/APPLIED or recovery publication without provider replay.
+WSP-62 guards keep every extracted authority, preflight, output, transaction, evidence,
+execution, recovery, runner, and terminal-receipt module at or below 200 lines
+with no function above 50 lines.
 
 ## Kimi K3 request-truth coverage
 

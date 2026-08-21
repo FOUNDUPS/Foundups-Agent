@@ -1,4 +1,22 @@
 # ModLog - moltbot_bridge
+
+## 2026-08-21: WSP 62 production-authority decomposition
+
+- Split architect FIX promotion into a stable public adapter, bounded input
+  preparation, and bounded locked execution while preserving fail-closed
+  HoloIndex owner verification and publication behavior.
+- Extracted signed-worker queue-loop environment projection from effectful
+  dependency construction; both source modules now have functions at most 50
+  lines and require no temporary exemption.
+- Moved integration-only receipt/Fusion setup and static trust-boundary checks
+  into focused test support/modules, reducing all three inherited test ceilings.
+- Archived the historical OpenClaw DAE/ExecutionBundle example and retained a
+  concise authoritative interface route with no contract loss.
+- WSP 15 classification: P0 (`C4/I5/D5/Impact5 = 19`) because stale exemptions
+  blocked the production-authority merge gate. WSP 00/97 evidence remained
+  fail-closed after the owner query reported an authority-HEAD mismatch; no
+  query retry, re-index, or replica maintenance was performed.
+
 ## 2026-08-21: Shared verified artifact-model topology consumers
 
 - Connected bounded FoundUps Fusion, OpenClaw gateway, and Hermes API artifact

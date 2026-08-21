@@ -85,11 +85,32 @@ trusted key, revocation epoch, trusted-time validity, exact durable receipt,
 issuance-equivalent TTL bounds, and an already-APPLIED publication marker read
 through a non-mutating exact-status API. Missing, RESERVED, or AUTHORIZED
 publication state rejects without marker advancement. Runtime policy, evidence
-trust, and the complete exclusive-create output claim set finish before the
-external evidence call; partial claim failure rolls back owned placeholders;
-exact retries may resume RESERVED/AUTHORIZED publication state, while APPLIED
-authority use rejects as replay. Aggregate panel promotion remains
-shadow-only.
+trust, exact authority-use nonce/binding, and exclusive final plus deterministic
+staging-path claims finish before the external evidence call. A conflicting or
+completed exact authority use is therefore decided with zero callback. After
+the callback, trusted time, campaign authority, and signed evidence are checked
+again before reservation, terminal persistence, and APPLIED completion. After
+the key, signature, store, and runtime-verification callbacks return, a fresh
+trusted-time sample drives a callback-free check of authority time, both signed
+evidence receipts, and the embedded runtime verification validity window.
+
+Successful staged artifacts and the verified evidence bundle are bound into a
+bounded durable terminal receipt before the two final paths are published.
+Each stage must be the same regular, single-link file opened by the durability
+barrier; its file contents and parent directory are flushed before terminal
+persistence. Each staged-to-final rename is followed by a final-parent flush,
+including recovery when a prior ambiguous attempt already moved one artifact.
+This does not claim two-file filesystem atomicity: interruption can expose one
+final path while the other remains staged. AUTHORIZED or ambiguously APPLIED
+retries load the exact terminal receipt, materialize any remaining stage,
+rehydrate both artifacts, and use-time verify the full evidence chain before
+returning the same result without another provider callback, only while the
+authority and evidence remain current. Cleanup failure is surfaced and first
+attempts to move the owned artifact away from consumable final paths under an
+explicit `.invalid.*` quarantine name. If that rename also fails, an explicit
+cleanup failure preserves the artifact for operator recovery. APPLIED state
+without its exact terminal receipt fails closed and preserves evidence.
+Aggregate panel promotion remains shadow-only.
 
 New immutable receipt and publication files are durable only after both the
 file and its containing directory lineage through the configured store root

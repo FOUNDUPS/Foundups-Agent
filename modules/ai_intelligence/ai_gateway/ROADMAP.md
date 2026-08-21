@@ -29,8 +29,11 @@
   independent signed-evidence and production runtime-binding supply, including
   use-time signature/trust/revocation/expiry verification, exact durable
   receipt plus non-mutating already-APPLIED publication proof, deterministic
-  preflight, transactional exclusive output claims with rollback, and
-  restart-safe exact retry
+  preflight, zero-callback exact replay/conflict decisions, staged output plus
+  file/directory-sealed stages, durable terminal-receipt recovery, durable final
+  rename directories, fresh post-callback/pre-APPLIED trust checks, explicit
+  cleanup quarantine, and restart-safe exact retry only while authority and
+  evidence remain current
 - [ ] Configure production external signer/trust/revocation/durable replay
   services and supply live production evidence artifacts
 - [ ] Define independently signed aggregate panel-promotion semantics; panels

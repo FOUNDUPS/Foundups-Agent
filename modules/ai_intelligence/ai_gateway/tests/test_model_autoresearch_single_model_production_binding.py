@@ -407,7 +407,9 @@ def _external_bundle(
     return bundle
 
 
-def test_authenticated_single_model_chain_reproduces_preview_and_binds_runtime(tmp_path):
+def test_authenticated_single_model_chain_reproduces_preview_and_binds_runtime(
+    tmp_path,
+):
     authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
     snapshot = _snapshot()
     selection_path = tmp_path / "runtime" / "selection.json"
@@ -433,7 +435,10 @@ def test_authenticated_single_model_chain_reproduces_preview_and_binds_runtime(t
     assert result.selection.accepted
     assert result.runtime_binding.accepted
     assert result.preview.selection_receipt_id == result.selection.selection_receipt_id
-    assert result.preview.selection_receipt_id == result.runtime_binding.selection_receipt_id
+    assert (
+        result.preview.selection_receipt_id
+        == result.runtime_binding.selection_receipt_id
+    )
     assert result.runtime_binding.principal_model == MODEL_ID
     assert selection_path.is_file() and runtime_path.is_file()
 
@@ -788,6 +793,494 @@ def test_exact_retry_after_transient_runtime_supply_failure(tmp_path, monkeypatc
     assert result.runtime_binding.accepted
     assert len(attempts) == 2
     assert selection.is_file() and runtime.is_file()
+
+
+def test_applied_replay_and_conflicting_paths_are_zero_callback(tmp_path):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    calls = []
+
+    def provider(preview):
+        calls.append(preview.selection_receipt_id)
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    first = bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    second = bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert second.runtime_binding.runtime_binding_receipt_id == (
+        first.runtime_binding.runtime_binding_receipt_id
+    )
+    assert calls == [first.preview.selection_receipt_id]
+
+    conflicting = dict(inputs)
+    conflicting["selection_output_path"] = tmp_path / "other" / "selection.json"
+    conflicting["runtime_binding_output_path"] = tmp_path / "other" / "runtime.json"
+    with pytest.raises(ValueError, match="authority_binding_conflict"):
+        bind_authenticated_single_model_promotion_to_runtime(**conflicting)
+    assert calls == [first.preview.selection_receipt_id]
+    assert not Path(conflicting["selection_output_path"]).exists()
+    assert not Path(conflicting["runtime_binding_output_path"]).exists()
+
+
+def test_directory_fsync_ambiguity_recovers_without_provider_replay(
+    tmp_path, monkeypatch
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    store_type = type(authority_use.publication_store)
+    original = store_type._write_publication_marker
+    injected = []
+
+    def ambiguous(self, nonce, binding, status):
+        original(self, nonce, binding, status)
+        if (
+            not injected
+            and nonce.startswith("single-model-production-authority-use:")
+            and status == "APPLIED"
+        ):
+            injected.append(True)
+            raise OSError("directory-fsync-ambiguous")
+
+    monkeypatch.setattr(store_type, "_write_publication_marker", ambiguous)
+    calls = []
+
+    def provider(preview):
+        calls.append(preview.selection_receipt_id)
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    first = bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    second = bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert injected == [True]
+    assert calls == [first.preview.selection_receipt_id]
+    assert second.runtime_binding.runtime_binding_receipt_id == (
+        first.runtime_binding.runtime_binding_receipt_id
+    )
+    assert Path(inputs["selection_output_path"]).is_file()
+    assert Path(inputs["runtime_binding_output_path"]).is_file()
+
+
+def test_partial_final_publication_recovers_after_applied(tmp_path, monkeypatch):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_outputs as outputs
+
+    original = outputs.os.replace
+    injected = []
+
+    def fail_runtime_publish(source, destination):
+        source_path = Path(source)
+        if (
+            not injected
+            and source_path.name.startswith(".binding.json.")
+            and source_path.name.endswith(".staging")
+        ):
+            injected.append(True)
+            raise OSError("runtime-final-publication-failed")
+        return original(source, destination)
+
+    monkeypatch.setattr(outputs.os, "replace", fail_runtime_publish)
+    calls = []
+
+    def provider(preview):
+        calls.append(preview.selection_receipt_id)
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    result = bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert result.runtime_binding.accepted
+    assert injected == [True]
+    assert calls == [result.preview.selection_receipt_id]
+    assert Path(inputs["selection_output_path"]).stat().st_size > 0
+    assert Path(inputs["runtime_binding_output_path"]).stat().st_size > 0
+
+
+def test_stage_fsync_failure_has_no_terminal_applied_or_final_artifact(
+    tmp_path, monkeypatch
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_artifact_durability as durability
+
+    def fail_stage_fsync(_path):
+        raise OSError("stage-fsync-failed")
+
+    monkeypatch.setattr(durability, "_fsync_regular_file", fail_stage_fsync)
+    calls = []
+
+    def provider(preview):
+        calls.append(preview.selection_receipt_id)
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    with pytest.raises(ValueError, match="stage_durability_failed"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert len(calls) == 1
+    assert not Path(inputs["selection_output_path"]).exists()
+    assert not Path(inputs["runtime_binding_output_path"]).exists()
+    payloads = _stored_payloads(authority_use)
+    assert not any(
+        item.get("schema_version") == "single_model_production_terminal.v1"
+        for item in payloads
+    )
+    assert not _production_applied(payloads)
+
+
+def test_final_directory_fsync_failure_retries_without_provider_callback(
+    tmp_path, monkeypatch
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_artifact_durability as durability
+
+    original = durability.fsync_published_parent
+
+    def fail_final_directory(_path):
+        raise ValueError("single_model_production_final_directory_durability_failed")
+
+    monkeypatch.setattr(durability, "fsync_published_parent", fail_final_directory)
+    calls = []
+
+    def provider(preview):
+        calls.append(preview.selection_receipt_id)
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    with pytest.raises(ValueError, match="final_directory_durability_failed"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert _production_applied(_stored_payloads(authority_use))
+    assert Path(inputs["selection_output_path"]).stat().st_size > 0
+    assert Path(inputs["runtime_binding_output_path"]).stat().st_size == 0
+
+    monkeypatch.setattr(durability, "fsync_published_parent", original)
+    recovered = bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert recovered.runtime_binding.accepted
+    assert calls == [recovered.preview.selection_receipt_id]
+    assert Path(inputs["runtime_binding_output_path"]).stat().st_size > 0
+
+
+def test_authorized_terminal_retry_completes_without_provider_replay(
+    tmp_path, monkeypatch
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    store_type = type(authority_use.publication_store)
+    original = store_type._write_publication_marker
+
+    def deny_applied(self, nonce, binding, status):
+        if (
+            nonce.startswith("single-model-production-authority-use:")
+            and status == "APPLIED"
+        ):
+            raise OSError("applied-write-denied")
+        return original(self, nonce, binding, status)
+
+    monkeypatch.setattr(store_type, "_write_publication_marker", deny_applied)
+    calls = []
+
+    def provider(preview):
+        calls.append(preview.selection_receipt_id)
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    with pytest.raises(ValueError, match="publication_failed"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert Path(inputs["selection_output_path"]).is_file()
+    assert Path(inputs["runtime_binding_output_path"]).is_file()
+
+    monkeypatch.setattr(store_type, "_write_publication_marker", original)
+    recovered = bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert recovered.runtime_binding.accepted
+    assert calls == [recovered.preview.selection_receipt_id]
+
+
+def test_unlink_denial_quarantines_partial_stage_and_surfaces_cleanup(
+    tmp_path, monkeypatch
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_execution as execution
+
+    def fail_runtime(**_values):
+        raise OSError("runtime-supply-failed")
+
+    original_unlink = Path.unlink
+
+    def deny_selection_stage(self, *args, **kwargs):
+        if self.name.startswith(".selection.json.") and self.name.endswith(".staging"):
+            raise PermissionError("unlink-denied")
+        return original_unlink(self, *args, **kwargs)
+
+    monkeypatch.setattr(
+        execution, "run_reddog_model_runtime_binding_artifact_supply", fail_runtime
+    )
+    monkeypatch.setattr(Path, "unlink", deny_selection_stage)
+    inputs = _production_inputs(
+        tmp_path,
+        authenticated,
+        benchmark,
+        authority_use,
+        lambda preview: _external_bundle(preview, authenticated, benchmark, policy),
+    )
+    with pytest.raises(ValueError, match="cleanup_quarantined"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert not Path(inputs["selection_output_path"]).exists()
+    assert not Path(inputs["runtime_binding_output_path"]).exists()
+    quarantined = list((tmp_path / "runtime").glob("*.invalid.*"))
+    assert len(quarantined) == 1
+    assert (
+        __import__("json")
+        .loads(quarantined[0].read_text(encoding="utf-8"))["receipt_id"]
+        .startswith("model_selection_receipt:")
+    )
+
+
+def test_callback_time_advance_rejects_before_publication_or_artifacts(tmp_path):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    clock = [NOW]
+    authority_use = replace(authority_use, trusted_now_epoch=lambda: clock[0])
+    calls = []
+
+    def provider(preview):
+        calls.append(preview.selection_receipt_id)
+        clock[0] = authenticated.authority.receipt.expires_at + 1
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    before = _durable_files(authority_use.publication_store)
+    with pytest.raises(ValueError, match="authority_expired"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert len(calls) == 1
+    assert _durable_files(authority_use.publication_store) == before
+    assert not Path(inputs["selection_output_path"]).exists()
+    assert not Path(inputs["runtime_binding_output_path"]).exists()
+
+
+def test_authority_callback_time_advance_rechecks_pure_before_terminal(tmp_path):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    clock = [NOW]
+
+    class AdvancingCampaignVerifier:
+        calls = 0
+
+        def verify(self, public_key, signing_input, signature):
+            accepted = _CampaignVerifier().verify(public_key, signing_input, signature)
+            self.calls += 1
+            if self.calls == 4:
+                clock[0] = authenticated.authority.receipt.expires_at + 1
+            return accepted
+
+    verifier = AdvancingCampaignVerifier()
+    authority_use = replace(
+        authority_use,
+        signature_verifier=verifier,
+        trusted_now_epoch=lambda: clock[0],
+    )
+    calls = []
+
+    def provider(preview):
+        calls.append(preview.selection_receipt_id)
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    with pytest.raises(ValueError, match="production_authority_expired"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert verifier.calls == 4
+    assert len(calls) == 1
+    assert not Path(inputs["selection_output_path"]).exists()
+    assert not Path(inputs["runtime_binding_output_path"]).exists()
+    payloads = _stored_payloads(authority_use)
+    assert not any(
+        item.get("schema_version") == "single_model_production_terminal.v1"
+        for item in payloads
+    )
+    assert not _production_applied(payloads)
+
+
+def test_second_refresh_expiry_keeps_final_artifacts_nonconsumable(
+    tmp_path, monkeypatch
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_finalization as finalization
+
+    clock = [NOW]
+    authority_use = replace(authority_use, trusted_now_epoch=lambda: clock[0])
+    original = finalization.refresh_production_authority
+    refreshes = []
+
+    def expire_before_applied(inputs):
+        refreshes.append(True)
+        if len(refreshes) == 2:
+            clock[0] = authenticated.authority.receipt.expires_at + 1
+        return original(inputs)
+
+    monkeypatch.setattr(
+        finalization, "refresh_production_authority", expire_before_applied
+    )
+    inputs = _production_inputs(
+        tmp_path,
+        authenticated,
+        benchmark,
+        authority_use,
+        lambda preview: _external_bundle(preview, authenticated, benchmark, policy),
+    )
+    with pytest.raises(ValueError, match="authority_expired"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    assert len(refreshes) == 2
+    selection = Path(inputs["selection_output_path"])
+    runtime = Path(inputs["runtime_binding_output_path"])
+    assert selection.stat().st_size == 0
+    assert runtime.stat().st_size == 0
+    assert len(list(selection.parent.glob("*.staging"))) == 2
+    payloads = []
+    for path in authority_use.publication_store.root.rglob("*.json"):
+        payloads.append(__import__("json").loads(path.read_text(encoding="utf-8")))
+    assert not any(
+        item.get("status") == "APPLIED"
+        and str(item.get("nonce", "")).startswith(
+            "single-model-production-authority-use:"
+        )
+        for item in payloads
+    )
+
+
+def test_applied_terminal_recovery_verifies_before_stage_publication(
+    tmp_path, monkeypatch
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    clock = [NOW]
+    authority_use = replace(authority_use, trusted_now_epoch=lambda: clock[0])
+    store_type = type(authority_use.publication_store)
+    original = store_type._write_publication_marker
+
+    def expire_after_applied(self, nonce, binding, status):
+        original(self, nonce, binding, status)
+        if (
+            nonce.startswith("single-model-production-authority-use:")
+            and status == "APPLIED"
+        ):
+            clock[0] = authenticated.authority.receipt.expires_at + 1
+            raise OSError("applied-directory-flush-ambiguous")
+
+    monkeypatch.setattr(store_type, "_write_publication_marker", expire_after_applied)
+    inputs = _production_inputs(
+        tmp_path,
+        authenticated,
+        benchmark,
+        authority_use,
+        lambda preview: _external_bundle(preview, authenticated, benchmark, policy),
+    )
+    with pytest.raises(ValueError, match="authority_expired"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    selection = Path(inputs["selection_output_path"])
+    runtime = Path(inputs["runtime_binding_output_path"])
+    assert selection.stat().st_size == 0 and runtime.stat().st_size == 0
+    assert len(list(selection.parent.glob("*.staging"))) == 2
+    markers = [
+        __import__("json").loads(path.read_text(encoding="utf-8"))
+        for path in authority_use.publication_store.root.rglob("*.json")
+    ]
+    assert any(
+        item.get("status") == "APPLIED"
+        and str(item.get("nonce", "")).startswith(
+            "single-model-production-authority-use:"
+        )
+        for item in markers
+    )
+
+
+def test_recovery_evidence_callback_time_advance_blocks_zero_callback_publish(
+    tmp_path, monkeypatch
+):
+    authenticated, benchmark, policy, authority_use = _authenticated_gate(tmp_path)
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_artifact_durability as durability
+
+    original_sync = durability.fsync_published_parent
+
+    def fail_final_directory(_path):
+        raise ValueError("single_model_production_final_directory_durability_failed")
+
+    monkeypatch.setattr(durability, "fsync_published_parent", fail_final_directory)
+    provider_calls = []
+
+    def provider(preview):
+        provider_calls.append(preview.selection_receipt_id)
+        return _external_bundle(preview, authenticated, benchmark, policy)
+
+    inputs = _production_inputs(
+        tmp_path, authenticated, benchmark, authority_use, provider
+    )
+    with pytest.raises(ValueError, match="final_directory_durability_failed"):
+        bind_authenticated_single_model_promotion_to_runtime(**inputs)
+    monkeypatch.setattr(durability, "fsync_published_parent", original_sync)
+
+    clock = [NOW]
+
+    class AdvancingEvidenceVerifier:
+        calls = 0
+
+        def verify(self, public_key, signing_input, signature):
+            accepted = DeterministicSignatureVerifier().verify(
+                public_key, signing_input, signature
+            )
+            self.calls += 1
+            if self.calls == 1:
+                clock[0] = authenticated.authority.receipt.expires_at + 1
+            return accepted
+
+    evidence_verifier = AdvancingEvidenceVerifier()
+    retry = dict(inputs)
+    retry["authority_use"] = replace(authority_use, trusted_now_epoch=lambda: clock[0])
+    retry["evidence_signature_verifier"] = evidence_verifier
+    with pytest.raises(ValueError, match="production_authority_expired"):
+        bind_authenticated_single_model_promotion_to_runtime(**retry)
+    assert evidence_verifier.calls >= 1
+    assert len(provider_calls) == 1
+    assert Path(inputs["selection_output_path"]).stat().st_size > 0
+    assert Path(inputs["runtime_binding_output_path"]).stat().st_size == 0
+
+
+def _production_inputs(tmp_path, authenticated, benchmark, authority_use, provider):
+    return {
+        "repo_root": REPO_ROOT,
+        "authenticated_promotion": authenticated,
+        "catalog_snapshot": _snapshot().to_dict(),
+        "requirements": _requirements(),
+        "authority_use": authority_use,
+        "signed_evidence_provider": provider,
+        "evidence_key_resolver": _resolver(),
+        "evidence_signature_verifier": DeterministicSignatureVerifier(),
+        "trusted_keys_payload": _trusted_keys(),
+        "runtime_policy": _runtime_policy(benchmark, authenticated),
+        "selection_output_path": tmp_path / "runtime" / "selection.json",
+        "runtime_binding_output_path": tmp_path / "runtime" / "binding.json",
+    }
+
+
+def _stored_payloads(authority_use):
+    return [
+        __import__("json").loads(path.read_text(encoding="utf-8"))
+        for path in authority_use.publication_store.root.rglob("*.json")
+    ]
+
+
+def _production_applied(payloads):
+    return any(
+        item.get("status") == "APPLIED"
+        and str(item.get("nonce", "")).startswith(
+            "single-model-production-authority-use:"
+        )
+        for item in payloads
+    )
 
 
 def test_adapter_contains_no_signer_key_provider_or_process_boundary():

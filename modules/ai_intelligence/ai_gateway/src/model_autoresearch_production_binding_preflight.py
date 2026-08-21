@@ -2,16 +2,50 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from types import SimpleNamespace
+from typing import Any, Mapping, cast
 
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     SignatureVerifier,
     constant_time_compare,
 )
 
+from .model_autoresearch_configured_gateway_evidence import digest_payload
 from .model_runtime_binding import ModelRuntimeBindingPolicy
 from .model_runtime_binding_input_rehydration import rehydrate_runtime_policy
-from .model_signed_evidence import ModelEvidenceKeyResolver, ModelEvidenceSignerRole
+from .model_signed_evidence import (
+    ModelEvidenceKeyResolver,
+    ModelEvidenceSignerRole,
+    ModelSignedEvidenceReceipt,
+    VerifiedModelEvidenceEntry,
+    VerifiedModelProductionEvidence,
+)
+
+
+def preflight_preview_evidence(gate: Any, benchmark: Any, promotion: Any) -> Any:
+    marker = SimpleNamespace(receipt_id="selection-preview-only:" + gate.receipt_id)
+    return VerifiedModelProductionEvidence(
+        entries=(
+            VerifiedModelEvidenceEntry(
+                model_id=gate.candidate_id,
+                benchmark_receipt=benchmark,
+                promotion_receipt=promotion,
+                benchmark_signature_receipt=cast(ModelSignedEvidenceReceipt, marker),
+                promotion_signature_receipt=cast(ModelSignedEvidenceReceipt, marker),
+            ),
+        ),
+        signed_evidence_verified=False,
+    )
+
+
+def preflight_promotion_policy_digest(authenticated_promotion: Any, gate: Any) -> str:
+    policy_digest = digest_payload([gate.policy.to_dict()])
+    if (
+        policy_digest
+        != authenticated_promotion.authority.request.promotion_policy_digest
+    ):
+        raise ValueError("single_model_production_policy_authority_mismatch")
+    return policy_digest
 
 
 def preflight_verification_dependencies(
@@ -155,6 +189,8 @@ def _required(value: Any) -> str:
 
 
 __all__ = [
+    "preflight_preview_evidence",
+    "preflight_promotion_policy_digest",
     "preflight_runtime_policy",
     "preflight_trusted_keys",
     "preflight_verification_dependencies",
