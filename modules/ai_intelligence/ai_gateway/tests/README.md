@@ -5,6 +5,18 @@ catalog evidence, AutoResearch admission, runtime binding, and request safety.
 Provider transports are injected or mocked; the suite must not require live
 credentials or make provider calls.
 
+## Nemotron routing coverage
+
+`test_model_topology_proposal_lm_studio.py` verifies the local reasoning-off
+caller, compact two-panel choice contract, content-free call evidence, and
+evaluation-only boundary. `test_model_topology_proposal_admission.py` covers
+catalog/requirements binding, provider and role substitution, production
+rejection, tamper detection, and handoff to the existing held-out benchmark
+harness with deterministic incumbent inclusion. Catalog coverage proves missing
+or disjoint modalities remain unknown. `test_model_runtime_binding_security.py`
+covers one-shot verified topology resolution, replay, trusted-time expiry, and
+unavailable-provider rejection.
+
 ## Kimi K3 request-truth coverage
 
 `test_kimi_k3_request_truth.py` verifies the exact OpenRouter model route

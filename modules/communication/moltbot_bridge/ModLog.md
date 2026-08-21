@@ -1,4 +1,13 @@
 # ModLog - moltbot_bridge
+## 2026-08-21: RedDog advisory bridge WSP 62 containment repair
+
+- Extracted pure bounded input, telemetry, prompt, and result formatting into
+  `reddog_advisory_bridge_support.py` without moving provider calls, authority,
+  or stdin/stdout ownership.
+- Reduced `advisory_model_once.py` from the inherited 1,288-line over-ceiling
+  state to 1,169 lines; its two exempt functions are now 189 and 176 lines,
+  below the unchanged 1,200/201 containment ceilings. WSP 15/22/62/97.
+
 ## 2026-08-21: Current upstream Hermes/OpenClaw worker proof
 
 - Upgraded the production Hermes contract from API `0.19.1` text-only inference

@@ -31,6 +31,40 @@ any model to production. Provider catalog entries and `latest`-style aliases are
 eligible candidates only; later benchmark and verifier receipts must promote
 champion/challenger status.
 
+Static task policy and live provider evidence for the same provider/model are
+merged into one conservative card. Live catalog evidence owns context, price,
+protocol capabilities, and availability; static policy may add task-family
+intent. Conflicting provider records intersect supported parameters and
+capabilities, use the smallest context and highest price, and never synthesize
+availability, modalities, or champion state. Missing/disjoint modality evidence
+remains empty and therefore fails any modality requirement.
+
+## Nemotron Shadow Topology Proposals
+
+`model_topology_proposal_lm_studio.py` calls the exact already-loaded local
+`nvidia/nemotron-3.5-lightning` ID through LM Studio's native reasoning-off
+route. It never starts LM Studio and never falls back to another provider. The
+model returns only two compact ordered model-ID arrays; deterministic code owns
+role/provider/catalog/requirements projection. `model_topology_proposal_admission.py`
+then rejects unknown models, provider substitutions, role/topology drift,
+duplicates, malformed output, and every production-scoped proposal.
+
+Accepted candidates are shadow inputs to the existing held-out combination
+benchmark harness, which always includes the deterministic AI Gateway incumbent
+outside proposer control. Nemotron does not select production models, act as verifier,
+promote a champion, or bind runtime defaults. Live configured multi-call/panel
+AutoResearch remains halted at its documented safety gates.
+
+## Verified Runtime Topology Resolution
+
+`model_runtime_topology_resolver.py` consumes the canonical verifier's opaque
+runtime-binding capability once, preserves exact role/provider/model identity,
+requires the consumer's explicit available-provider set, and mints a second
+opaque one-shot topology capability. Unknown or unavailable providers reject;
+there is no keyword routing, local/remote substitution, fallback, server probe,
+server launch, or model call in this resolver. Consumption requires trusted
+time and rejects after the earlier of evidence expiry or a 60-second resolver TTL.
+
 ### Explicit OpenRouter catalog discovery
 
 `src/model_openrouter_direct_discovery.py` can refresh the public OpenRouter

@@ -1,5 +1,12 @@
 # TestModLog
 
+## 2026-08-21 - LM Studio Native Reasoning Control
+
+- Added mocked coverage for native reasoning-off payloads, disabled storage and
+  streaming, exact model ID, bounded reads, and allowlisted OpenAI-compatible
+  structured/sampling controls.
+- Revalidated the same payload/response boundary after WSP 62 decomposition.
+
 ## 2026-07-28 - Runtime Artifact Safety WSP 62 Gate
 
 - Added exact no-growth coverage for the inherited runtime-artifact safety

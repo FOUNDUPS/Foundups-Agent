@@ -300,12 +300,43 @@ GROK_MODELS: Dict[str, ModelInfo] = {
 # OPENROUTER MODELS (explicit AutoResearch / RedDog evaluation)
 # =============================================================================
 OPENROUTER_MODELS: Dict[str, ModelInfo] = {
+    "z-ai/glm-5.2": ModelInfo(
+        model_id="z-ai/glm-5.2",
+        provider="openrouter",
+        status=ModelStatus.CURRENT,
+        notes="RedDog evaluation incumbent; production use still requires signed promotion evidence",
+    ),
+    "deepseek/deepseek-v4-pro": ModelInfo(
+        model_id="deepseek/deepseek-v4-pro",
+        provider="openrouter",
+        status=ModelStatus.CURRENT,
+        notes="RedDog evaluation critic; production use still requires signed promotion evidence",
+    ),
+    "qwen/qwen3.8-max": ModelInfo(
+        model_id="qwen/qwen3.8-max",
+        provider="openrouter",
+        status=ModelStatus.CURRENT,
+        notes="RedDog evaluation lead/critic challenger; not a production default",
+    ),
+    "qwen/qwen3.8-2.4t-a95b": ModelInfo(
+        model_id="qwen/qwen3.8-2.4t-a95b",
+        provider="openrouter",
+        status=ModelStatus.CURRENT,
+        notes="RedDog evaluation lead/critic challenger; not a production default",
+    ),
     "moonshotai/kimi-k3": ModelInfo(
         model_id="moonshotai/kimi-k3",
         provider="openrouter",
         status=ModelStatus.CURRENT,
         release_date=date(2026, 7, 16),
         notes="Kimi K3 multimodal reasoning model; explicit evaluation candidate, not automatic fallback",
+    ),
+    "nvidia/nemotron-3.5-lightning": ModelInfo(
+        model_id="nvidia/nemotron-3.5-lightning",
+        provider="openrouter",
+        status=ModelStatus.CURRENT,
+        release_date=date(2026, 8, 11),
+        notes="Bounded routing/execution challenger; proposal output has no selection authority",
     ),
 }
 
@@ -368,14 +399,41 @@ ALL_MODELS: Dict[str, ModelInfo] = {
 # =============================================================================
 RECOMMENDED_MODELS = {
     # 012's activity routing matrix (primary task types) — Feb 2026 current
-    "coding": ["claude-opus-4-6", "gpt-5.2-codex", "grok-code-fast-1", "gemini-2.5-pro", "moonshotai/kimi-k3"],
+    "coding": [
+        "claude-opus-4-6", "gpt-5.2-codex", "grok-code-fast-1",
+        "gemini-2.5-pro", "qwen/qwen3.8-max", "qwen/qwen3.8-2.4t-a95b",
+        "deepseek/deepseek-v4-pro", "moonshotai/kimi-k3",
+        "nvidia/nemotron-3.5-lightning",
+    ],
     "math": ["o3", "o4-mini", "gemini-2.5-pro", "claude-opus-4-6"],
-    "reasoning": ["o3-pro", "gpt-5.2", "claude-opus-4-6", "gemini-2.5-pro", "moonshotai/kimi-k3"],
+    "reasoning": [
+        "o3-pro", "gpt-5.2", "claude-opus-4-6", "gemini-2.5-pro",
+        "z-ai/glm-5.2", "qwen/qwen3.8-max", "qwen/qwen3.8-2.4t-a95b",
+        "deepseek/deepseek-v4-pro", "moonshotai/kimi-k3",
+        "nvidia/nemotron-3.5-lightning",
+    ],
+    "architecture": [
+        "z-ai/glm-5.2", "qwen/qwen3.8-max", "qwen/qwen3.8-2.4t-a95b",
+        "deepseek/deepseek-v4-pro", "moonshotai/kimi-k3",
+        "nvidia/nemotron-3.5-lightning",
+    ],
     "social": ["grok-4", "gpt-5", "claude-sonnet-4-5-20250929"],
-    "research": ["gemini-2.5-pro", "gpt-5.2", "claude-sonnet-4-5-20250929", "moonshotai/kimi-k3"],
+    "research": [
+        "gemini-2.5-pro", "gpt-5.2", "claude-sonnet-4-5-20250929",
+        "qwen/qwen3.8-max", "deepseek/deepseek-v4-pro", "moonshotai/kimi-k3",
+        "nvidia/nemotron-3.5-lightning",
+    ],
     # Secondary task types
-    "code_review": ["claude-opus-4-6", "gpt-5.2-codex", "gemini-2.5-pro", "moonshotai/kimi-k3"],
-    "analysis": ["gpt-5.2", "claude-sonnet-4-5-20250929", "o3", "moonshotai/kimi-k3"],
+    "code_review": [
+        "claude-opus-4-6", "gpt-5.2-codex", "gemini-2.5-pro",
+        "qwen/qwen3.8-max", "qwen/qwen3.8-2.4t-a95b", "deepseek/deepseek-v4-pro",
+        "moonshotai/kimi-k3", "nvidia/nemotron-3.5-lightning",
+    ],
+    "analysis": [
+        "gpt-5.2", "claude-sonnet-4-5-20250929", "o3", "z-ai/glm-5.2",
+        "qwen/qwen3.8-max", "deepseek/deepseek-v4-pro", "moonshotai/kimi-k3",
+        "nvidia/nemotron-3.5-lightning",
+    ],
     "creative": ["claude-sonnet-4-5-20250929", "gpt-5", "gemini-2.5-flash"],
     "quick": ["grok-4-fast", "gpt-5", "claude-haiku-4-5-20251001", "gemini-2.5-flash"],
     # Local models

@@ -14,7 +14,14 @@
 - [x] Signed single-model benchmark and promotion evidence admission
 - [x] Signed aggregate PANEL evidence with ordered topology and runtime-context binding
 - [x] PANEL runtime binding fails closed without the verified aggregate
-- [ ] Shared verified runtime-topology resolver for RedDog/Fusion consumers
+- [x] Shared verified runtime-topology resolver with a 60-second one-shot
+  capability TTL bounded by the verified evidence expiry
+- [x] Evaluation-only local Nemotron proposal call and deterministic admission
+- [x] Deterministically include the AI Gateway incumbent in every admitted
+  held-out topology benchmark, outside proposer control
+- [ ] Compose resolved topology capabilities into the RedDog extension query,
+  Fusion, OpenClaw, and Hermes callers
+- [ ] Authenticate durable proposer-call origin beyond content-addressed shadow evidence
 - [ ] Outside-repository aggregate artifact supply/bootstrap and durable trust-store integration
 
 ### Runtime binder decomposition

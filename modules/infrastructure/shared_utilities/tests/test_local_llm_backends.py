@@ -10,6 +10,8 @@ Tests:
 3. Compatibility methods (generate_response, __call__)
 """
 
+import json
+
 import pytest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
@@ -277,6 +279,72 @@ class TestCompatibilityMethods:
 
         assert isinstance(result, dict)
         assert "choices" in result
+
+    def test_lm_studio_chat_forwards_only_allowlisted_structured_controls(self):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        backend = LMStudioBackend(model_id="test-model")
+        backend._initialized = True
+        backend._client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = '{"ok":true}'
+        backend._client.chat.completions.create.return_value = mock_response
+        response_format = {"type": "json_schema", "json_schema": {"name": "test"}}
+
+        result = backend.create_chat_completion(
+            [{"role": "user", "content": "Return JSON"}],
+            max_tokens=64,
+            temperature=0,
+            response_format=response_format,
+            seed=7,
+            top_p=0.95,
+            enable_thinking=False,
+            extra_body={"not": "forwarded"},
+            unauthorized_control="blocked",
+        )
+
+        assert result["choices"][0]["message"]["content"] == '{"ok":true}'
+        call = backend._client.chat.completions.create.call_args.kwargs
+        assert call["response_format"] == response_format
+        assert call["seed"] == 7
+        assert call["top_p"] == 0.95
+        assert call["extra_body"] == {
+            "chat_template_kwargs": {"enable_thinking": False}
+        }
+        assert "unauthorized_control" not in call
+
+    @patch("urllib.request.urlopen")
+    def test_lm_studio_native_chat_uses_reasoning_off_and_bounded_read(self, urlopen):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        response = MagicMock()
+        response.read.return_value = b'{"output":[{"type":"message","content":"{\\"ok\\":true}"}]}'
+        urlopen.return_value.__enter__.return_value = response
+        backend = LMStudioBackend(model_id="test-model", request_timeout=90)
+        backend._initialized = True
+
+        result = backend.create_native_chat(
+            input_text="Return JSON",
+            system_prompt="JSON only",
+            max_output_tokens=128,
+            reasoning="off",
+            max_response_bytes=4096,
+        )
+
+        assert result["output"][0]["content"] == '{"ok":true}'
+        request = urlopen.call_args.args[0]
+        payload = json.loads(request.data)
+        assert request.full_url == "http://localhost:1234/api/v1/chat"
+        assert payload["model"] == "test-model"
+        assert payload["reasoning"] == "off"
+        assert payload["store"] is False
+        assert payload["stream"] is False
+        response.read.assert_called_once_with(4097)
 
     def test_generate_response_returns_empty_on_failure(self):
         """generate_response() returns empty string on error."""

@@ -1,6 +1,16 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-08-21 - Bounded LM Studio Native Chat
+
+- Added a bounded native LM Studio chat method with explicit reasoning control,
+  disabled storage/streaming, exact model identity, timeout and response-byte
+  caps, and no launch/fallback behavior. Request construction and bounded read
+  validation are decomposed below the ordinary WSP 62 function ceiling.
+- Added per-call OpenAI-compatible timeouts and allowlisted structured/sampling
+  controls. Arbitrary `extra_body` remains blocked; `enable_thinking` is a strict
+  boolean projected to the documented chat-template field.
+
 ## 2026-08-14 - Exact Confined Byte Reads
 
 - Extracted the confined byte reader behind its existing public function so the

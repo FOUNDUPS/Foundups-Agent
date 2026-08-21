@@ -1,5 +1,24 @@
 # RedDog Interface
 
+## Model routing and evaluation fallback
+
+The extension consumes receipt-bound AI Gateway runtime bindings when
+configured. It does not let Nemotron, Hermes, OpenClaw, LM Studio availability,
+or extension keyword heuristics mint model-selection authority. The shared
+verified topology resolver preserves exact role/provider/model bindings and
+fails closed when the consumer does not expose the required provider.
+
+Without a ready runtime binding, the explicit evaluation fallback is:
+
+- principal: `z-ai/glm-5.2`
+- critics: `deepseek/deepseek-v4-pro`, `qwen/qwen3.8-max`,
+  `moonshotai/kimi-k3`
+
+The local Nemotron proposer is shadow-only. It returns ordered model IDs;
+AI Gateway supplies providers/roles and admits only evaluation-eligible held-out
+benchmark candidates. No production routing or extension mutation follows from
+that proposal.
+
 ## Test and promotion interface
 
 `package.json` exposes `test`, `test:contract`, and `test:release` without local
@@ -551,7 +570,7 @@ Model and context routing:
 - Fusion review-packet model fields are bridge-owned. Extension-supplied `bridge_meta` may add non-core telemetry but cannot replace the selected mode, lead, critic panel, truncation state, budgets, excerpts, quorum, or retry truth.
 - Principal/synthesis default: `z-ai/glm-5.2`.
 - Adversarial critic default: `deepseek/deepseek-v4-pro`.
-- Implementation critic default: `moonshotai/kimi-k2.7-code`.
+- Implementation critic default: `qwen/qwen3.8-max`.
 - Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token floor for every direct completion call. Regular single and manual Fusion inputs accept only integer completion budgets from 1 through the endpoint-fixture maximum of 131072; missing values retain their existing 2048/1600 defaults and invalid values fail as `invalid_max_tokens` before provider dispatch. Valid larger budgets are preserved and receipts distinguish requested from effective values. An explicit direct selection or receipt-backed signed promotion may place K3 in single, principal, or synthesis roles; this bridge does not itself promote a champion, change defaults, open an OpenClaw execution valve, or dispatch Hermes.
 - REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and `wsp_holo` HoloIndex grounding (no Fusion panel, Skillz, or git).
 - Substantive audit/research/implementation prompts must produce a non-empty typed target universe. When no explicit path, external source, or semantic header exists, RedDog derives a generic semantic subject and requires content-bearing HoloIndex evidence for it; broad audits require two references across implementation/authority and verification/authority categories. Unparseable work fails before Fusion with `grounding_target_universe_empty`.

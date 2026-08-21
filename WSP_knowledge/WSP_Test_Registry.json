@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1544,
+  "total_tests": 1546,
   "quarantined_tests": 266,
   "tests": [
     {
@@ -2885,6 +2885,32 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for signed model evidence rehydration and verification."
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_topology_proposal_admission",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_model_topology_proposal_admission.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_topology_proposal_lm_studio",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_model_topology_proposal_lm_studio.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for the bounded local Nemotron shadow-proposal caller."
     },
     {
       "id": "test::modules::ai_intelligence::ai_overseer::src::test_gate_manual",

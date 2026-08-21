@@ -1,5 +1,16 @@
 # AI Gateway TestModLog
 
+## [2026-08-21] - Nemotron Proposal and Verified Topology Contracts
+
+- Added offline coverage for conservative catalog-card merge, local compact
+  Nemotron proposals, deterministic shadow admission, held-out harness handoff,
+  exact runtime topology preservation, unavailable providers, and replay.
+- Added fail-closed regressions for missing/disjoint provider modalities,
+  post-expiry topology consumption, and deterministic incumbent inclusion in
+  every proposer benchmark set.
+- Live Nemotron evidence is documented in the module ModLog and is not required
+  by the offline suite.
+
 ## [2026-08-21] - Exact Kimi K3 request truth
 
 - Added an offline request matrix for explicit 256/4,096/8,192/131,072

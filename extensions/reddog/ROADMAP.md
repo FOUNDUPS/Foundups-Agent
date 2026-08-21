@@ -2,9 +2,20 @@
 
 ## Status
 
-Phase: RedDog 0.4.102 resident architect thin-client surface.
+Phase: RedDog 0.4.103 resident architect thin-client surface.
 
 Current implementation:
+
+- Nemotron/Qwen routing slice: local Nemotron 3.5 Lightning can produce two
+  compact shadow panel proposals through LM Studio's native reasoning-off API;
+  deterministic AI Gateway admission owns role/provider/catalog binding.
+  Verified runtime topology resolution is one-shot, expires after at most 60
+  seconds, and is fail-closed. The deterministic AI Gateway incumbent is always
+  injected into held-out proposal benchmarks outside Nemotron's control. The static
+  evaluation fallback is GLM 5.2 plus DeepSeek V4 Pro, Qwen 3.8 Max, and Kimi
+  K3. Live configured panel AutoResearch and promotion-to-binding composition
+  remain blocked; the extension query, Fusion, OpenClaw, and Hermes still need
+  to consume the shared resolver.
 
 - Governed Git public receipt boundary (v0.4.101): internal absolute Git and
   fixed-SystemRoot verifier paths remain execution-only. Readiness/projection
@@ -329,7 +340,7 @@ P2/P3 (historical label at snapshot time)
 
 - **Owner:** RedDog Maintainers.
 - **Temporary exemption expiry:** 2026-09-30 (2026-Q3 technical-architect review).
-- **Current boundary:** `scripts/advisory_model_once.py` is 1,085 lines, below its 1,200-line threshold. Panel collection lives in the focused 39-line `_collect_panel_results`; `_run_foundups_fusion_core` is 181 lines and `main` is 190 lines. Their unchanged exact-function ceiling is 201 lines and is not permission for growth.
+- **Current boundary:** `scripts/advisory_model_once.py` is 1,169 lines, below its 1,200-line threshold. Pure bounded input/formatting now lives in the 266-line `reddog_advisory_bridge_support.py`; panel collection remains a focused 39-line function. `_run_foundups_fusion_core` is 189 lines and `main` is 176 lines, both below their unchanged 201-line exact-function ceiling. The exemption is containment debt, not permission for growth.
 - **Remediation:** extract manual Fusion provider fan-out, quorum/synthesis assembly, request normalization, and CLI routing into focused helpers while preserving a single stdin/stdout bridge contract.
 - **Parity gate:** retain both focused panel-mode matrices, hostile metadata proofs, provider-call fail-closed assertions, and the exhaustive RedDog extension contract across each extraction.
 - **Exit criterion:** remove the `scripts/advisory_model_once.py` entry from root `wsp_62_exemptions.yaml` once both named functions are at most 50 lines. If the expiry arrives first, block additional bridge feature work and renew only through a new architect-reviewed remediation slice.

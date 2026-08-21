@@ -1,5 +1,22 @@
 # RedDog ModLog
 
+## 2026-08-21 - Nemotron shadow routing and Qwen challenger fallback (0.4.103)
+
+- Added local Nemotron 3.5 Lightning as a bounded evaluation-only panel
+  proposer under AI Gateway admission; it has no production selection,
+  verifier, promotion, extension, repository, or worker authority.
+- Added the shared one-shot verified runtime-topology resolver with a trusted
+  use-time 60-second cap; the extension query, Fusion, OpenClaw, and Hermes are
+  explicitly pending thin consumers rather than competing model routers.
+- Refreshed the explicit no-binding fallback to GLM 5.2 principal with DeepSeek
+  V4 Pro, Qwen 3.8 Max, and Kimi K3 critics. Static defaults remain candidates,
+  not measured champions.
+- Deterministic admission now injects the Gateway incumbent into every held-out
+  comparison outside model control. Live local validation against a bounded
+  evaluation catalog admitted two four-role proposals in 36.7 seconds. Live
+  configured panel AutoResearch remains halted. Version 0.4.102 -> 0.4.103.
+  WSP 15/22/50/62/97.
+
 ## 2026-08-21 - Mainline release gate repair (0.4.102)
 
 - Kept the WSP 62 changed-surface proof candidate-only and removed it from the

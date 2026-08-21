@@ -52,6 +52,7 @@ Test gateway connectivity and configuration.
 normalize_static_registry_cards(...) -> tuple[ModelCapabilityCard, ...]
 normalize_openrouter_catalog(payload) -> tuple[tuple[ModelCapabilityCard, ...], tuple[ModelCatalogRejectedRecord, ...]]
 normalize_local_role_cards(selections) -> tuple[ModelCapabilityCard, ...]
+merge_model_capability_cards(cards) -> tuple[ModelCapabilityCard, ...]
 build_model_catalog_snapshot(cards, ...) -> ModelCatalogSnapshot
 build_canonical_model_catalog(...) -> ModelCatalogSnapshot
 ```
@@ -64,6 +65,32 @@ benchmark models, or select a RedDog/Fusion panel.
 context window, modalities, supported parameters, rough cost metadata, task
 families, and promotion state. `ModelCatalogSnapshot` binds cards and rejected
 records to a deterministic `snapshot_id`.
+
+`merge_model_capability_cards` is field-provenance-aware. For a static plus
+OpenRouter pair, provider catalog evidence owns observed capabilities while the
+static registry supplies task-family policy. Multiple provider assertions are
+combined conservatively; absent/disjoint modalities remain unknown, and
+conflicting lifecycle evidence cannot create a champion.
+
+#### Shadow Topology Proposal Admission and Local Nemotron Proposer
+
+```python
+admit_model_topology_proposal(...) -> ModelTopologyProposalAdmissionReceipt
+propose_lm_studio_shadow_topologies(...) -> LMStudioTopologyProposalResult
+```
+
+The local proposer requires evaluation-purpose requirements and one exact
+already-loaded LM Studio model. It uses the native `reasoning="off"` route,
+supplies a compact JSON schema in the prompt, performs no server launch or
+provider fallback, and retains only content-free call metadata plus an output
+digest. The model chooses ordered model IDs only. Deterministic code attaches
+roles/providers and submits the result to the admission gate.
+
+Admission binds catalog and requirements digests, allows only deterministic
+selection-eligible models/providers, reserves the verifier role, and emits
+benchmark candidates only. It injects the deterministic Gateway incumbent into
+every accepted benchmark set and deduplicates the same model-authored topology.
+Production proposals always reject.
 
 #### Direct provider catalog candidate snapshots
 
@@ -522,6 +549,21 @@ below-threshold evidence fail closed. Panel runtime binding accepts only a
 remain insufficient. This API does not
 call model providers, run benchmarks, mutate the extension, persist runtime
 defaults, or write PatternMemory.
+
+#### Verified Runtime Topology Resolver
+
+```python
+resolve_verified_runtime_topology(...) -> ResolvedRuntimeTopology
+consume_resolved_runtime_topology(resolution, *, trusted_now_epoch=...) -> tuple[RuntimeTopologyEndpoint, ...] | None
+```
+
+Resolution requires a live `VerifiedRuntimeBindingArtifact` and consumes its
+process-local capability exactly once. The consumer must name its available
+providers explicitly. The returned topology is itself process-local and
+one-shot. Consumption rejects after the earlier of verified evidence expiry or
+a 60-second resolver TTL and requires a trusted-time callable. Serialized
+receipt fields are observability, not minting authority.
+This layer performs no provider call, fallback, probe, launch, or mutation.
 
 #### Signed Production Evidence
 

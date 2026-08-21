@@ -25,6 +25,10 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admis
     consume_verified_runtime_binding_capability,
     rehydrate_runtime_binding_verification_receipt,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_topology_resolver import (
+    consume_resolved_runtime_topology,
+    resolve_verified_runtime_topology,
+)
 from modules.ai_intelligence.ai_gateway.tests.model_signed_evidence_test_helpers import (
     DeterministicSignatureVerifier,
 )
@@ -42,6 +46,89 @@ from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_boot
     ModelRuntimeVerifierConfig,
     build_model_runtime_verifier,
 )
+
+
+def _verified_runtime_artifact():
+    snapshot, selection, benchmark, promotion, _verified = _selection_chain()
+    inputs = {
+        "catalog_snapshot": _artifact(snapshot.to_dict()),
+        "model_selection_receipt": _artifact(selection.to_dict()),
+        "benchmark_evidence_receipts": (_artifact(benchmark.to_dict()),),
+        "promotion_evidence_receipts": (_artifact(promotion.to_dict()),),
+        "verified_evidence_bundle": _serialized_evidence_bundle(
+            snapshot, selection, benchmark, promotion
+        ),
+        "runtime_policy": _policy(),
+        "trusted_keys_payload": _trusted_keys_payload(),
+        "key_resolver": _key_resolver(),
+        "signature_verifier": DeterministicSignatureVerifier(),
+        "now": NOW,
+    }
+    return verify_model_runtime_binding_artifact(**inputs), selection
+
+
+def test_verified_runtime_topology_resolver_preserves_exact_route_once() -> None:
+    verified, selection = _verified_runtime_artifact()
+    provider = verified.binding.role_bindings[0].provider
+
+    resolution = resolve_verified_runtime_topology(
+        verified=verified,
+        selection=selection.to_dict(),
+        available_providers=(provider,),
+        now=NOW,
+        expected_runtime_surface="reddog_backend_architect",
+    )
+
+    assert resolution.no_model_call_performed is True
+    assert resolution.no_provider_fallback_performed is True
+    assert resolution.endpoints[0].provider == provider
+    assert resolution.endpoints[0].model_id == verified.binding.principal_model
+    assert resolution.resolved_at == NOW
+    assert resolution.valid_until == NOW + 60
+    assert consume_resolved_runtime_topology(
+        resolution, trusted_now_epoch=lambda: NOW
+    ) == resolution.endpoints
+    assert consume_resolved_runtime_topology(
+        resolution, trusted_now_epoch=lambda: NOW
+    ) is None
+
+
+def test_runtime_topology_capability_expires_before_consumption() -> None:
+    verified, selection = _verified_runtime_artifact()
+    provider = verified.binding.role_bindings[0].provider
+    resolution = resolve_verified_runtime_topology(
+        verified=verified,
+        selection=selection.to_dict(),
+        available_providers=(provider,),
+        now=NOW,
+    )
+
+    assert consume_resolved_runtime_topology(
+        resolution, trusted_now_epoch=lambda: NOW + 61
+    ) is None
+    assert consume_resolved_runtime_topology(
+        resolution, trusted_now_epoch=lambda: NOW
+    ) is None
+
+
+def test_runtime_topology_rejects_unavailable_provider_and_consumes_authority() -> None:
+    verified, selection = _verified_runtime_artifact()
+
+    with pytest.raises(ValueError, match="runtime_topology_provider_unavailable"):
+        resolve_verified_runtime_topology(
+            verified=verified,
+            selection=selection.to_dict(),
+            available_providers=("lm_studio_local",),
+            now=NOW,
+        )
+
+    with pytest.raises(ValueError, match="runtime_topology_binding_capability_rejected"):
+        resolve_verified_runtime_topology(
+            verified=verified,
+            selection=selection.to_dict(),
+            available_providers=(verified.binding.role_bindings[0].provider,),
+            now=NOW,
+        )
 
 
 def test_verification_receipt_rejects_self_rehashed_or_unknown_runtime_receipt(

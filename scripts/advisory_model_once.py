@@ -34,6 +34,23 @@ from modules.communication.moltbot_bridge.src.reddog_fusion_progress_receipt imp
     FusionProgressRecorder,
     validate_fusion_progress_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_advisory_bridge_support import (  # noqa: E402
+    bounded_int as _bounded_int,
+    bounded_temperature as _bounded_temperature,
+    clean_history as _clean_history,
+    format_panel as _format_panel,
+    fusion_critic_messages as _fusion_critic_messages,
+    fusion_lead_messages as _fusion_lead_messages,
+    fusion_success_result as _fusion_success_result,
+    fusion_synthesis_system as _fusion_synthesis_system,
+    model_slug as _model_slug,
+    panel_models_with_meta as _support_panel_models_with_meta,
+    redaction_telemetry as _support_redaction_telemetry,
+    required_target_paths as _support_required_target_paths,
+    safe_review_packet_bridge_meta as _support_safe_bridge_meta,
+    synthesis_user_prompt as _support_synthesis_user_prompt,
+    system_prompt as _support_system_prompt,
+)
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 ENV_API_KEY = "OPENROUTER_API_KEY"
@@ -41,13 +58,14 @@ GLM_PRINCIPAL_MODEL = "z-ai/glm-5.2"
 DEEPSEEK_CRITIC_MODEL = "deepseek/deepseek-v4-pro"
 KIMI_CODE_PANEL_MODEL = "moonshotai/kimi-k2.7-code"
 KIMI_PANEL_MODEL = "moonshotai/kimi-k3"
+QWEN_MAX_PANEL_MODEL = "qwen/qwen3.8-max"
 # Historical constant name retained because the extension contract inspects the
 # bridge as text. The K3 budget applies to every direct completion role.
 KIMI_K3_PANEL_MAX_TOKENS = 4096
 MAX_COMPLETION_BUDGET = 131072
 _MISSING_COMPLETION_BUDGET = object()
 DEFAULT_LEAD_MODEL = GLM_PRINCIPAL_MODEL
-DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, KIMI_CODE_PANEL_MODEL, KIMI_PANEL_MODEL)
+DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, QWEN_MAX_PANEL_MODEL, KIMI_PANEL_MODEL)
 MAX_PANEL_MODELS = 6
 RETRYABLE_HTTP_STATUS = frozenset({429, 502, 503})
 MAX_HTTP_RETRIES = 2
@@ -353,87 +371,31 @@ def _fusion_token_budgets(
     return roles, panel
 
 
-def _clean_history(value: object) -> list[dict[str, str]]:
-    if not isinstance(value, list):
-        return []
-    cleaned: list[dict[str, str]] = []
-    for item in value[-20:]:
-        if not isinstance(item, dict):
-            continue
-        role = item.get("role")
-        content = item.get("content")
-        if role in {"user", "assistant", "system"} and isinstance(content, str):
-            cleaned.append({"role": role, "content": content[:12000]})
-    return cleaned
-
-
-def _bounded_int(value: object, default: int, minimum: int, maximum: int) -> int:
-    if not isinstance(value, int) or value < minimum or value > maximum:
-        return default
-    return value
-
-
-def _bounded_temperature(value: object, default: float = 0.2) -> float:
-    if not isinstance(value, (int, float)) or value < 0 or value > 2:
-        return default
-    return float(value)
-
-
-def _model_slug(value: object, default: str) -> str:
-    if isinstance(value, str) and value.strip() and len(value.strip()) <= 120:
-        return value.strip()
-    return default
-
-
 def _panel_models(value: object) -> list[str]:
     models, _truncated = _panel_models_with_meta(value)
     return models
 
 
 def _panel_models_with_meta(value: object) -> tuple[list[str], bool]:
-    if not isinstance(value, list):
-        return list(DEFAULT_PANEL_MODELS), False
-    models: list[str] = []
-    for item in value[:MAX_PANEL_MODELS]:
-        if isinstance(item, str) and item.strip() and len(item.strip()) <= 120:
-            models.append(item.strip())
-    truncated = len(value) > MAX_PANEL_MODELS
-    return models, truncated
+    return _support_panel_models_with_meta(
+        value, defaults=DEFAULT_PANEL_MODELS, maximum=MAX_PANEL_MODELS
+    )
 
 
 def _safe_review_packet_bridge_meta(value: object) -> dict[str, Any]:
     """Keep extension telemetry from replacing bridge-owned model truth."""
 
-    if not isinstance(value, dict):
-        return {}
-    return {
-        key: item
-        for key, item in value.items()
-        if key not in REVIEW_PACKET_CORE_FIELDS
-    }
+    return _support_safe_bridge_meta(
+        value, protected_fields=REVIEW_PACKET_CORE_FIELDS
+    )
 
 
 def _system_prompt(payload: dict[str, Any]) -> str:
-    system_prompt = payload.get("system")
-    if not isinstance(system_prompt, str) or not system_prompt.strip():
-        return DEFAULT_SYSTEM_PROMPT
-    normalized = system_prompt.strip()
-    normalized = normalized.replace(UNTRUSTED_EVIDENCE_SYSTEM_RULE, "").strip()
-    limit = 6000 - len(UNTRUSTED_EVIDENCE_SYSTEM_RULE) - 1
-    prefix = normalized[:limit].rstrip()
-    return (prefix + "\n" if prefix else "") + UNTRUSTED_EVIDENCE_SYSTEM_RULE
-
-
-def _model_label(model: str) -> str:
-    return model.split("/")[-1] if "/" in model else model
-
-
-def _format_panel(lead_model: str, lead_text: str, panel_results: dict[str, str], synthesis: str) -> str:
-    parts = ["## Lead (" + lead_model + ")\n\n" + lead_text.strip()]
-    for model, text in panel_results.items():
-        parts.append("## Critic (" + model + ")\n\n" + text.strip())
-    parts.append("## Synthesis (" + lead_model + ")\n\n" + synthesis.strip())
-    return "\n\n".join(parts)
+    return _support_system_prompt(
+        payload,
+        default_prompt=DEFAULT_SYSTEM_PROMPT,
+        terminal_evidence_rule=UNTRUSTED_EVIDENCE_SYSTEM_RULE,
+    )
 
 
 def _synthesis_user_prompt(
@@ -441,19 +403,11 @@ def _synthesis_user_prompt(
     lead_text: str,
     panel_results: dict[str, str],
 ) -> str:
-    """Assemble the bounded lead and panel evidence for synthesis."""
-
-    panel_text = "\n\n".join(
-        _model_label(model) + " critique:\n" + text[:SYNTHESIS_CRITIC_CHAR_LIMIT]
-        for model, text in panel_results.items()
-    )
-    return (
-        "Original task:\n"
-        + redacted_prompt
-        + "\n\nLead answer:\n"
-        + lead_text[:12000]
-        + "\n\nPanel critiques:\n"
-        + panel_text
+    return _support_synthesis_user_prompt(
+        redacted_prompt,
+        lead_text,
+        panel_results,
+        critic_char_limit=SYNTHESIS_CRITIC_CHAR_LIMIT,
     )
 
 
@@ -831,6 +785,11 @@ def _run_foundups_fusion_core(
     role_max_tokens, panel_max_tokens = _fusion_token_budgets(
         lead_model, panel_models, max_tokens
     )
+    budget_receipt = {
+        "requested_max_tokens": max_tokens,
+        "role_max_tokens": role_max_tokens,
+        "panel_max_tokens": panel_max_tokens,
+    }
     base_system = _system_prompt(payload)
     response_contract = str(payload.get("response_contract") or "")
     strict_json_contract = response_contract.startswith("strict_json")
@@ -850,15 +809,9 @@ def _run_foundups_fusion_core(
             missing_required_evidence=missing_evidence,
         )
 
-    lead_system = (
-        base_system
-        + "\n\nLead pass: produce the initial RedDog Architect answer. Include findings, evidence, proposed fixes, uncertainties, WSP_15 priority, and next safest step."
+    lead_messages = _fusion_lead_messages(
+        base_system, strict_json_contract, history, redacted_prompt
     )
-    if strict_json_contract:
-        lead_system += "\nReturn only a JSON object matching the requested schema. Do not wrap it in markdown."
-    lead_messages = [{"role": "system", "content": lead_system}]
-    lead_messages.extend(history)
-    lead_messages.append({"role": "user", "content": redacted_prompt})
 
     _progress("lead_start", "Lead request started: " + lead_model, role="lead", model=lead_model)
     lead_retry: dict[str, Any] = {"retry_count": 0, "final_retry_reason": None}
@@ -913,15 +866,7 @@ def _run_foundups_fusion_core(
             )
 
     _progress("lead_done", "Lead response received: " + lead_model, role="lead", model=lead_model)
-    critic_system = (
-        base_system
-        + "\n\nPanel critic pass: critically review the lead answer for missing WSP_97 truth labels, missing WSP_15 scoring, unsupported evidence, weak HoloIndex retrieval, and fixes that are not actionable. For cybersecurity work, focus on identifying, preventing, or remediating issues and omit exploit details unnecessary to that defensive outcome. Start with `Challenge:` when any evidence, claim, framing, scope, or WSP_15 priority issue exists, and explicitly mention the WSP_15 priority. Start with `No material challenge:` only when the lead framing, evidence, and priority are all sound. Do not claim authority."
-    )
-    critic_user = "Original task:\n" + redacted_prompt + "\n\nLead answer:\n" + lead_text[:16000]
-    critic_messages = [
-        {"role": "system", "content": critic_system},
-        {"role": "user", "content": critic_user},
-    ]
+    critic_messages = _fusion_critic_messages(base_system, redacted_prompt, lead_text)
     _progress("panel_start", "Panel requests started: " + ", ".join(panel_models), role="panel")
     panel_results, abstaining_critics = _collect_panel_results(
         api_key, panel_models, critic_messages, panel_max_tokens, temperature, timeout
@@ -961,16 +906,7 @@ def _run_foundups_fusion_core(
             critic_challenge_retry_models=critic_challenge_retry_models,
         )
 
-    if strict_json_contract:
-        synthesis_system = (
-            base_system
-            + "\n\nSynthesis pass: resolve panel disagreement, preserve useful dissent, and return only the final strict JSON object requested by the user. Do not include markdown fences or prose outside the JSON object."
-        )
-    else:
-        synthesis_system = (
-            base_system
-            + "\n\nSynthesis pass: resolve panel disagreement, preserve useful dissent, and return the best actionable WSP-compliant recommendation. The final section must be WSP_15 Priority followed by Next safest step."
-        )
+    synthesis_system = _fusion_synthesis_system(base_system, strict_json_contract)
     synthesis_user = _synthesis_user_prompt(redacted_prompt, lead_text, panel_results)
     _progress("synthesis_start", "Synthesis request started: " + lead_model, role="synthesis", model=lead_model)
     try:
@@ -1007,42 +943,23 @@ def _run_foundups_fusion_core(
         {"role": "user", "content": redacted_prompt},
         {"role": "assistant", "content": content},
     ]
-    return {
-        "ok": True,
-        "reason": "ok",
-        "mode": "foundups_fusion",
-        "lead_model": lead_model,
-        "panel_models": panel_models,
-        "content": content,
-        "history": next_history[-20:],
-        "review_packet": {
-            "mode": "foundups_fusion",
-            "lead_model": lead_model,
-            "panel_models": panel_models,
-            "panel_models_truncated": panel_models_truncated,
-            "requested_max_tokens": max_tokens,
-            "role_max_tokens": role_max_tokens,
-            "panel_max_tokens": panel_max_tokens,
-            "redacted_prompt": redacted_prompt,
-            "lead_excerpt": lead_text[:4000],
-            "panel_excerpts": {model: text[:3000] for model, text in panel_results.items()},
-            "synthesis_excerpt": synthesis[:4000],
-            "fusion_panel_quorum": {
-                "applied": True,
-                "passed": True,
-                "reason": "fusion_quorum_passed",
-                "missing_required_evidence": [],
-                "challenging_critics": challenging_critics,
-                "abstaining_critics": abstaining_critics,
-                "lead_required": True,
-                "lead_semantic_retry_count": lead_semantic_retry_count,
-                "critic_challenge_retry_models": critic_challenge_retry_models,
-                "synthesis_requires_quorum": True,
-            },
-            "retry_count": lead_retry.get("retry_count", 0),
-            "final_retry_reason": lead_retry.get("final_retry_reason"),
-        },
-    }
+    return _fusion_success_result(
+        lead_model=lead_model,
+        panel_models=panel_models,
+        panel_models_truncated=panel_models_truncated,
+        content=content,
+        history=next_history,
+        budget_receipt=budget_receipt,
+        redacted_prompt=redacted_prompt,
+        lead_text=lead_text,
+        panel_results=panel_results,
+        synthesis=synthesis,
+        challenging_critics=challenging_critics,
+        abstaining_critics=abstaining_critics,
+        lead_semantic_retry_count=lead_semantic_retry_count,
+        critic_challenge_retry_models=critic_challenge_retry_models,
+        lead_retry=lead_retry,
+    )
 
 
 def _run_foundups_fusion(
@@ -1101,34 +1018,10 @@ def main() -> int:
     bridge_meta = _safe_review_packet_bridge_meta(payload.get("bridge_meta"))
     audit_context_requested = payload.get("audit_context") is True
     audit_context_applied = audit_context_requested
-    # REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: authoritative packed required-target
-    # paths (from the JS packer). Threaded into the gate so phantom markers minted by file content
-    # cannot be treated as required-target sections.
-    #
-    # VECTOR B closure (legacy None path): under audit_mode the empty/absent authoritative list MUST
-    # NOT collapse to None. On the non-authoritative path (audit_context=true but packProtected=false:
-    # direct-read code_hits present -> audit_context true, but direct_read_fallback_used false -> the
-    # JS packer emits authoritativePacked=[]), collapsing [] -> None would reach
-    # fusion_redaction_gate with authoritative_paths=None, which is the LEGACY "every marker section is
-    # a required-target section" path -- so a body-embedded phantom marker would be checked/counted and
-    # could mint a content-controlled blocked_path. Passing an EXPLICIT EMPTY tuple instead makes the
-    # gate build an EMPTY authoritative_set: every marker's norm_path is "not in" the empty set, so
-    # every marker folds back as ordinary content (checked==0, no forged blocked_paths) while its body
-    # STILL flows to the whole-context audit gate and fails closed on any real secret/token.
-    #
-    # Non-audit legacy behavior is preserved byte-identical: when audit_context is NOT requested an
-    # absent/empty list still collapses to None (the pre-hardening legacy path is unchanged).
-    _rt_paths_raw = payload.get("required_target_paths")
-    if isinstance(_rt_paths_raw, list) and _rt_paths_raw:
-        required_target_paths = tuple(
-            str(p) for p in _rt_paths_raw if isinstance(p, str) and p.strip()
-        )
-    elif audit_context_requested:
-        # Audit-mode with no authoritative packed paths -> explicit empty set sentinel (NOT None),
-        # so the gate treats every marker as non-authoritative (folded), never legacy all-authoritative.
-        required_target_paths = ()
-    else:
-        required_target_paths = None
+    # An explicit empty tuple closes the audit-mode legacy "all markers" path.
+    required_target_paths = _support_required_target_paths(
+        payload, audit_context_requested=audit_context_requested
+    )
     audit_telemetry = {
         "audit_context_requested": audit_context_requested,
         "audit_context_applied": audit_context_applied,
@@ -1148,19 +1041,7 @@ def main() -> int:
         audit_mode=audit_context_requested,
         required_target_paths=required_target_paths,
     )
-    # REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1: surface the per-required-target isolation
-    # counts (counts/paths/reasons only -- never raw content) so the extension Run Trace scorecard
-    # can prove ONE blocked required target did not drop the clean ones. Fields are zero/empty on
-    # the non-audit / no-marker path (backward compatible). Merged into bridge_meta (-> review_packet)
-    # AND emitted top-level (mirrors the audit_context_applied flow).
-    _rep = gate.report
-    redaction_telemetry = {
-        "required_targets_redaction_checked": _rep.required_targets_redaction_checked,
-        "required_targets_redaction_passed": _rep.required_targets_redaction_passed,
-        "required_targets_redaction_blocked": _rep.required_targets_redaction_blocked,
-        "required_targets_redaction_blocked_paths": list(_rep.required_targets_redaction_blocked_paths),
-        "required_targets_redaction_blocked_reasons": list(_rep.required_targets_redaction_blocked_reasons),
-    }
+    redaction_telemetry = _support_redaction_telemetry(gate.report)
     bridge_meta = dict(bridge_meta)
     bridge_meta.update(redaction_telemetry)
     if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
