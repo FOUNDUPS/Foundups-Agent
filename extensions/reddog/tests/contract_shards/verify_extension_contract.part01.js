@@ -86,7 +86,7 @@ function includes(haystack, needle, label) {
 // parsed to required_targets_total=8 / recalled=0. Seven are real, fetchable repo
 // files (identical to the bundle_json pytest FOUNDUP_ACCEPTANCE_TARGETS); the 8th is a
 // non-fetchable symbol, so total=8 but arg_count=7 (symbols are dropped by
-// buildMustIncludeArgs). These fetchable files exist on disk so DRT-005/006/007 run a
+// buildMustIncludeArgs). These fetchable files exist on disk so DRT-005/007 run a
 // real enriched fetch through the Python bundle CLI under the raised buffer.
 const GOLDEN_FETCHABLE_TARGETS = [
   'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md',
@@ -255,8 +255,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.101', 'package version must be 0.4.101');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.101'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.102', 'package version must be 0.4.102');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.102'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');

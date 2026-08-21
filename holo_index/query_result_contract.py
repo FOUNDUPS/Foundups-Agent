@@ -7,6 +7,7 @@ import re
 from typing import Any, Mapping, Sequence
 
 from holo_index.query_result_contract_schema import load_search_result_contract
+from holo_index.tier0_retrieval import module_tier0_paths
 
 SEARCH_RESULT_CONTRACT = load_search_result_contract()
 SEARCH_RESPONSE_KEYS = tuple(SEARCH_RESULT_CONTRACT["response_keys"])
@@ -30,6 +31,7 @@ _VALUE_RULE_IDS = frozenset({
     "nonnegative_integer", "percent_string_0_100", "boolean",
     "collection_backend", "embedding_fingerprint", "string", "string_or_null",
     "percent_string_0_100_or_null", "exact_metadata_provenance",
+    "module_path_or_null",
 })
 
 
@@ -124,6 +126,12 @@ def _validate_value(rule: str, value: Any) -> None:
             _reject()
     elif rule == "string_or_null":
         if value is not None and not isinstance(value, str):
+            _reject()
+    elif rule == "module_path_or_null":
+        if value is not None and (
+            not isinstance(value, str) or "\\" in value
+            or not module_tier0_paths(value)
+        ):
             _reject()
     else:
         _reject()

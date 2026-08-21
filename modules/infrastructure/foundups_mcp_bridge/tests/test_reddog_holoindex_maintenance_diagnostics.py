@@ -121,6 +121,12 @@ def _run_descendant_timeout(
     def recording_popen(*args, **kwargs):
         process = real_popen(*args, **kwargs)
         opened.append(process)
+        readiness_deadline = time.monotonic() + 2.0
+        while not pid_file.exists() and time.monotonic() < readiness_deadline:
+            if process.poll() is not None:
+                break
+            time.sleep(0.01)
+        assert pid_file.exists(), "refresh fixture did not publish process identities"
         return process
 
     monkeypatch.setattr(subprocess, "Popen", recording_popen)

@@ -6,6 +6,19 @@
 
 **Dependencies**: requests>=2.25.0; aiohttp>=3.9,<4
 
+## Exact Kimi K3 Request Contract
+
+The provider boundary applies a model-specific contract only to provider
+`openrouter` with model `moonshotai/kimi-k3`. After explicit request, provider
+environment, and default resolution, `max_tokens` is floored to 4,096 without
+truncating valid larger requests. The maximum is 131,072, matching the bounded
+OpenRouter endpoint fixture; 131,073 and higher fail before HTTP. K3 always
+emits `reasoning={"effort":"max"}` and omits `temperature`. Other provider/model
+pairs retain their existing request behavior.
+
+[VERIFIED] The contract is covered by offline mocked-transport tests; it does
+not grant model promotion, provider availability, or live-call authority.
+
 ## Model Intelligence Catalog
 
 `src/model_intelligence_catalog.py` provides the runtime evidence layer for

@@ -9,6 +9,8 @@ import re
 import subprocess
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR_PATH = REPO_ROOT / "scripts" / "generate_reddog_backend_manifest.py"
@@ -74,6 +76,31 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     )
 
 
+def test_generated_closure_binds_isolated_acceptance_entrypoint() -> None:
+    manifest = generator.build_manifest()
+    entrypoint = "scripts/reddog_holoindex_candidate_acceptance.py"
+    acceptance_runtime = {
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_acceptance_guards.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_acceptance_model_copy.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_acceptance_model_descriptors.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_acceptance_windows.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_candidate_acceptance.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_candidate_acceptance_types.py",
+        entrypoint,
+    }
+
+    assert entrypoint in manifest["required_executable_files"]
+    assert entrypoint in manifest["required_bridge_files"]
+    assert acceptance_runtime <= set(manifest["required_runtime_files"])
+    assert entrypoint in manifest["required_bridge_sha256"]
+
+
 def test_newly_tracked_imported_runtime_dependency_cannot_be_omitted() -> None:
     importer_relative = "holo_index/core/search_engine.py"
     dependency_relative = "holo_index/core/collection_injections.py"
@@ -99,6 +126,27 @@ def test_newly_tracked_imported_runtime_dependency_cannot_be_omitted() -> None:
     assert "holo_index/core/collection_search.py" in generated[
         "required_runtime_sha256"
     ]
+
+
+def test_untracked_local_import_fails_closed(tmp_path, monkeypatch) -> None:
+    importer = tmp_path / "pkg" / "importer.py"
+    dependency = tmp_path / "pkg" / "untracked_dependency.py"
+    importer.parent.mkdir(parents=True)
+    importer.write_text("import pkg.untracked_dependency\n", encoding="utf-8")
+    dependency.write_text("VALUE = 1\n", encoding="utf-8")
+
+    monkeypatch.setattr(generator, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(generator, "EXECUTABLE_FILES", ("pkg/importer.py",))
+    monkeypatch.setattr(generator, "STATIC_RUNTIME_FILES", ())
+    monkeypatch.setattr(generator, "_TRACKED_FILE_CACHE", ("pkg/importer.py",))
+    monkeypatch.setattr(
+        generator, "_TRACKED_FILE_SET_CACHE", frozenset({"pkg/importer.py"})
+    )
+
+    with pytest.raises(
+        ValueError, match=r"untracked_runtime_dependency:pkg/untracked_dependency\.py"
+    ):
+        generator.build_manifest()
 
 
 def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
@@ -183,12 +231,31 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "modules/communication/moltbot_bridge/src/reddog_holoindex_task_dispatch.py"
         in generated["required_runtime_sha256"]
     )
+    assert "holo_index/module_intent_snapshot.py" in generated[
+        "required_runtime_sha256"
+    ]
     _assert_signer_and_memex_runtime_files(generated)
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "f05d91f3e9714c5c4ec6e58bbee62f6b7ee6d0cc49ad8cf104c09bdd29c8ec49"
+    assert digest == "1d240e2c78c9ae95120e733f1e6ba7f6eb3c6e0391e8d4473d06427c37e82cfd"
     constants = (REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js").read_text(encoding="utf-8")
     match = re.search(r"EXPECTED_MANIFEST_SHA256 = '([a-f0-9]{64})'", constants)
     assert match is not None and match.group(1) == digest
+
+
+def test_extension_javascript_is_package_bound_not_backend_materialized() -> None:
+    generated = generator.build_manifest()
+    executable = "extensions/reddog/governed_git_executable.js"
+    assert executable not in generated["required_runtime_files"]
+    command = [
+        "node",
+        "-e",
+        "const s=require('./extensions/reddog/tests/reddog_package_surface_contract');"
+        "process.stdout.write(JSON.stringify(s.deriveRuntimeFiles()))",
+    ]
+    package_runtime = json.loads(
+        subprocess.check_output(command, cwd=REPO_ROOT, text=True, encoding="utf-8")
+    )
+    assert executable.removeprefix("extensions/reddog/") in package_runtime
 
 
 def _index_blob(relative: str) -> bytes:
@@ -231,6 +298,7 @@ def test_staged_index_manifest_is_self_consistent() -> None:
 
     assert set(required).issubset(tracked)
     assert "holo_index/core/collection_search.py" in required
+    assert "holo_index/module_intent_snapshot.py" in required
     blobs = _index_blobs(list(required))
     for relative, expected in required.items():
         normalized = blobs[relative].replace(b"\r\n", b"\n")

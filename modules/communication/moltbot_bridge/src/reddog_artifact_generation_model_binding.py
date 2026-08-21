@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from typing import Any, Mapping
 
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import (
@@ -17,6 +18,8 @@ from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     rehydrate_model_runtime_binding_receipt,
     rehydrate_model_selection_receipt,
 )
+
+_ROUTE_IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}")
 
 
 def artifact_generation_digest(value: Any) -> str:
@@ -55,6 +58,22 @@ def verified_artifact_generation_binding(
         == artifact_generation_digest(expected)
         else None
     )
+
+
+def signed_principal_model_route(binding: object) -> tuple[str, str] | None:
+    """Extract the one signed principal model/provider route, or fail closed."""
+
+    selection = binding.get("model_selection") if isinstance(binding, Mapping) else None
+    assignments = selection.get("role_assignments") if isinstance(selection, Mapping) else None
+    lead = str(selection.get("lead_model") or "") if isinstance(selection, Mapping) else ""
+    rows = [row for row in assignments or () if isinstance(row, Mapping)]
+    principals = [row for row in rows if row.get("role") == "principal"]
+    if len(principals) != 1 or principals[0].get("canonical_model_id") != lead:
+        return None
+    provider = str(principals[0].get("provider") or "")
+    if _ROUTE_IDENTIFIER.fullmatch(lead) is None or _ROUTE_IDENTIFIER.fullmatch(provider) is None:
+        return None
+    return lead, provider
 
 
 def _expected_selection(
@@ -107,5 +126,6 @@ def _normalized_mapping(value: Mapping[str, Any]) -> dict[str, Any]:
 
 __all__ = [
     "artifact_generation_digest",
+    "signed_principal_model_route",
     "verified_artifact_generation_binding",
 ]

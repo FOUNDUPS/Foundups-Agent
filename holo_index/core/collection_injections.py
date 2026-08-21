@@ -7,12 +7,20 @@ from typing import Sequence
 from holo_index.tier0_retrieval import module_tier0_paths
 
 
+class Tier0LookupError(RuntimeError):
+    """An exact Tier-0 collection lookup could not be proven."""
+
+
+class Tier0IncompleteError(RuntimeError):
+    """A singular module is missing required Tier-0 evidence."""
+
+
 def _remove_initial_tier0_rows(
     docs: list, metas: list, dists: list, expected: set[str]
 ) -> None:
     """Force strict owners to replace vector Tier-0 rows with exact reads."""
     if not (len(docs) == len(metas) == len(dists)):
-        raise RuntimeError("HOLOINDEX_STRICT_TIER0_LOOKUP_FAILED")
+        raise Tier0LookupError("HOLOINDEX_STRICT_TIER0_LOOKUP_FAILED")
     keep = [
         index for index, meta in enumerate(metas)
         if str((meta or {}).get("path") or "").replace("\\", "/").lower()
@@ -58,7 +66,9 @@ def inject_module_tier0_candidates(
         except Exception as exc:
             missing.append(path)
             if strict:
-                raise RuntimeError("HOLOINDEX_STRICT_TIER0_LOOKUP_FAILED") from exc
+                raise Tier0LookupError(
+                    "HOLOINDEX_STRICT_TIER0_LOOKUP_FAILED"
+                ) from exc
             continue
         docs.append(found_docs[0])
         meta["_retrieval_provenance"] = "exact_metadata"
@@ -66,7 +76,7 @@ def inject_module_tier0_candidates(
         dists.append(None)
         existing.add(path.lower())
     if strict and missing:
-        raise RuntimeError("HOLOINDEX_STRICT_TIER0_INCOMPLETE")
+        raise Tier0IncompleteError("HOLOINDEX_STRICT_TIER0_INCOMPLETE")
     return tuple(missing)
 
 
@@ -95,4 +105,7 @@ def inject_wsp_alias_candidates(
         return
 
 
-__all__ = ["inject_module_tier0_candidates", "inject_wsp_alias_candidates"]
+__all__ = [
+    "Tier0IncompleteError", "Tier0LookupError",
+    "inject_module_tier0_candidates", "inject_wsp_alias_candidates",
+]

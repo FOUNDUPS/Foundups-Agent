@@ -122,6 +122,20 @@ class _SlowEncodeBackend(_Backend):
         return None
 
 
+def _install_inline_budget_receipt(owner: Any) -> list[float]:
+    """Remove scheduler jitter while retaining every computed query budget."""
+
+    budgets: list[float] = []
+
+    def run(function: Any, *args: Any, timeout_seconds: float | None = None) -> Any:
+        budget = owner.query_timeout_seconds if timeout_seconds is None else timeout_seconds
+        budgets.append(float(budget))
+        return function(*args)
+
+    owner._run = run
+    return budgets
+
+
 def test_backend_is_singleton_serialized_and_safety_env_precedes_init(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -398,8 +412,11 @@ def test_cold_health_uses_one_warmup_budget_without_extending_queries(
             ready = first.result(timeout=0.5)
         assert ready["ok"] is True
         assert owner._warmed.is_set()
+        query_budgets = _install_inline_budget_receipt(owner)
         assert _query(owner)["ok"] is True
         assert owner.query_timeout_seconds == 0.02
+        assert query_budgets
+        assert all(0 < budget <= 0.02 + 1e-9 for budget in query_budgets)
     finally:
         release.set()
         owner.close()
@@ -495,7 +512,8 @@ def test_maintenance_starting_during_freshness_evaluation_blocks_backend(
 ) -> None:
     clear = SimpleNamespace(clear=True, held=False, status="idle")
     held = SimpleNamespace(clear=False, held=True, status="held")
-    probes = iter([clear, clear, clear, held])
+    # Each logical gate proves authority-update then maintenance.
+    probes = iter([clear] * 6 + [held])
     backend = _Backend()
     receipt_reads = 0
 
@@ -526,7 +544,8 @@ def test_maintenance_starting_after_backend_rejects_query_evidence(
 ) -> None:
     clear = SimpleNamespace(clear=True, held=False, status="idle")
     held = SimpleNamespace(clear=False, held=True, status="held")
-    probes = iter([clear, clear, clear, clear, held])
+    # Four clear logical gates precede backend execution; the next gate blocks.
+    probes = iter([clear] * 8 + [held])
     backend = _Backend()
     owner = _service(
         tmp_path,

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, Iterable, Mapping
 
 from holo_index.tier0_retrieval import infer_explicit_module_target, module_tier0_paths
 
@@ -120,6 +120,8 @@ def search_collection(
     holo: Any, collection: Any, query: str, limit: int, kind: str,
     doc_type_filter: str, module_path_hint: str | None,
     ops: CollectionSearchOps,
+    module_context_hits: Iterable[Mapping[str, object]] = (),
+    module_registry_hits: Iterable[Mapping[str, object]] | None = None,
 ) -> list[dict[str, Any]]:
     """Search one collection with strict-owner and truthful fallback behavior."""
     if limit <= 0:
@@ -150,7 +152,14 @@ def search_collection(
         "documents", "metadatas", "distances"
     ))
     if kind == "docs" and not module_path_hint:
-        module_path_hint = infer_explicit_module_target(query, rows[1])
+        intent_hits = (
+            module_registry_hits
+            if module_registry_hits is not None
+            else (*module_context_hits, *rows[1])
+        )
+        module_path_hint = infer_explicit_module_target(
+            query, intent_hits
+        )
     _inject_exact_rows(holo, collection, query, kind, module_path_hint, *rows, ops)
     return _rank_rows(
         rows, query, kind, limit, doc_type_filter, module_path_hint, ops

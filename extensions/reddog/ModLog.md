@@ -1,5 +1,528 @@
 # RedDog ModLog
 
+## 2026-08-21 - Native Hermes/OpenClaw upstream worker truth (0.4.102)
+
+- Updated packaged backend provenance from Hermes text-only inference to one
+  real upstream native leaf delegate with zero child tools/effects.
+- Pinned current Hermes `0.20.4` and OpenClaw `2026.7.1-2` behavior, signed
+  provider-prefixed model routing, exact runtime drift checks, and live bounded
+  GotJunk canary evidence. The extension remains a thin client and gains no
+  direct shell, repository, model-secret, publish, or merge authority.
+- Closed the VSCE license warning by packaging the repository-authoritative
+  license text and pinning the distributable to 65 files.
+
+## 2026-08-21 - Holo async runtime WSP_62 extraction (0.4.101 unchanged)
+
+- Final four-worker promotion passed all groups in 309,306 ms; core was the
+  slowest at 309,218 ms and every child/release timeout field remained false.
+  The exact package surface is 64 files / 936,267 raw bytes under the 1 MiB cap.
+- The authorized complete-tree freeze expands the sealed backend from 1,363 to
+  1,364 runtime files for the governed public Holo bundle module and binds
+  digest `3c0cffea72e92ca1acbcd8a1f5a106164dda11ae791afe050f39490c3cd62d10`.
+- The Git-bound test registry now contains 1,544 tests / 266 quarantines.
+- Removed a stale exhaustive-contract raw Holo subprocess and retained its
+  actual buffer-overflow classification proof with a bounded Node child. The
+  shard assertion counter now masks comments and strings, correcting a
+  false-inflated 1,238 receipt to 483 static calls across 6,914 authenticated
+  lines without removing runtime assertions.
+- Fixed target-evidence starvation exposed after the closed Holo import repair:
+  requested target snippets now precede broad recall output, preserving their
+  actual bytes under the 42K bounded-context cut while retaining the cap.
+- Calibrated governed Git configuration/ownership probes from two to five
+  seconds after the full four-worker release reproduced an intermittent
+  authority rejection under contention. The bound remains finite and matches
+  governed content commands; no Git operation or environment authority widened.
+- Split the 856-line generation-bound helper into a 193-line admission facade,
+  a bounded bundle projection, an owned-process runtime, and configured-
+  interpreter provenance. The incident async bridge and both focused tests now
+  satisfy the ordinary JavaScript file/function limits without exemptions.
+- Replaced whole-file interpreter hashing with fixed 64 KiB descriptor reads
+  inside the worker thread while preserving before/open/final identity checks
+  and the existing 256 MiB maximum. A hostile 32 MiB proof fails if whole-file
+  `readFileSync` returns.
+- Direct-read metadata now records a fetch attempt when a received bounded
+  owner bundle proves nonempty direct-read paths and bytes. No-content bundles
+  retain the false default.
+- Closed a candidate-audit blind spot by binding the WSP_62 list to Git's exact
+  changed/new RedDog JavaScript set. The 475-line Start Operations test was
+  decomposed below 400 content lines with a focused test helper; inherited
+  function debt is accepted only without growth against the exact HEAD body.
+- The closed distributable surface is 64 files: 61 runtime files plus README,
+  package metadata, and icon. The regular-file closure now has an enforced
+  1 MiB raw cap and a measured receipt; no VSIX was built or published in this
+  slice, so compressed archive size remains an artifact-inspection gate.
+  (WSP 00/15/22/50/62/87/97)
+
+## 2026-08-21 - Digest-only governed Git public receipts (0.4.101 unchanged)
+
+- Separated the internal absolute executable/verifier binding from the public
+  executable v1 projection used by readiness, projection, repository-state v2,
+  and the Python snapshot. Public receipts contain path digests but no raw
+  executable path.
+- Hardened Python receipt consumption beyond attacker-recomputable body hashes:
+  exact keys/types/bounds, complete equal portable/native identities, link
+  counts, signature digests, and fixed-SystemRoot verifier containment evidence
+  are mandatory. This does not overclaim keyed origin authentication or Git
+  DLL/helper closure.
+- The sealed backend remains 1,363 paths; only the snapshot runtime digest
+  changed, producing manifest digest
+  `7135f436105a8031feff8916da3938c260d021301743352e13c1d6ac724300c7`.
+  (WSP 00/15/22/50/62/97)
+- Validation: hostile promotion passed 4/4 in 283,268 ms with no timeout;
+  package remained exactly 61 files, registry remained 1,542/266, and the
+  authenticated contract remained 18 shards / 6,958 lines / 1,240 assertions.
+
+## 2026-08-21 - Governed Git executable provenance (0.4.101 unchanged)
+
+- Added a single executable authority that lexically resolves Git, binds exact
+  canonical file identity/size/SHA-256, rejects link/reparse substitution,
+  permits installed hardlinks, and requires Valid Windows Authenticode through
+  an independently SystemRoot-bounded verifier. Non-Windows signature status is
+  explicitly `not_applicable`; executable identity/hash remains mandatory.
+- All readiness, configuration, content, and projection calls now use the same
+  absolute binding with PATH/Path/PATHEXT removed. Readiness/projection receipts
+  are v2 and output is withheld on executable replacement. Start Operations now
+  passes a governed JS repository-state receipt to Python, eliminating its bare
+  Git subprocess. Direct proof does not cover Git DLL/helper closure.
+- The executable and WSP_62-separated repository-receipt modules truthfully
+  expand the closed package surface from 59 to 61 files. The sealed backend
+  remains 1,363 files and regenerated
+  to digest `92ccb6be034bdae70e0f922f3004e49b7035cba4e93d4f3e2318559004069b6f`
+  for the three changed Python closure files. (WSP 00/15/22/50/62/97)
+- The first hostile promotion exposed an obsolete exhaustive fixture that
+  intercepted only the literal command `git`; absolute executable binding made
+  that fake ineffective. The fixture now intercepts the governed authority,
+  still proves oversized manifests remain incomplete, and preserves the exact
+  18-shard/6,958-line/1,240-assertion closure. The repaired hostile promotion
+  passed 4/4 in 290,894 ms with no timeout or termination.
+
+## 2026-08-21 - Workspace and deterministic package boundary (0.4.101 unchanged)
+
+- Declared untrusted and virtual workspaces unsupported because RedDog depends
+  on trusted local Git/filesystem identity, Python subprocesses, worker threads,
+  and a materialized local backend.
+- Replaced the permissive package ignore list with a closed 59-file surface:
+  the statically derived 55-JavaScript closure, both dynamically named workers,
+  the Python bootstrap, and only README/package/icon metadata. Tests, internal
+  docs, caches, coverage, logs, environment files, private-key containers,
+  dependencies, editor metadata, built VSIX files, and the ignore policy itself
+  are excluded.
+- Added a static fast-tier manifest/closure contract and a release-group/live
+  package contract that invokes the installed VSCE listing twice and rejects
+  nondeterminism, runtime omission, or dev-file leakage. No VSIX was created or
+  published. (WSP 00/15/22/49/50/62/97)
+- Validation: installed VSCE listings were stable at exactly 59 files; sealed
+  backend manifest remained `ca41c3d0...` / 1,363 files and the Python registry
+  remained 1,542 / 266 quarantined. Fast passed 8 members in 8,892 ms and
+  contract passed 3 in 271 ms. The hostile selector/nonce release passed all
+  four groups in 283,993 ms with no timeout; `bridge_wsp62` passed its three
+  members, including package surface, in 2,362 ms.
+
+## 2026-08-21 - Kimi K3 request-truth hardening (0.4.101 unchanged)
+
+- Added a dedicated completion-budget parser for regular single and manual
+  Fusion bridge requests. Missing values retain the existing 2,048/1,600
+  defaults; only non-boolean integers from 1 through 131,072 are accepted.
+  Invalid values return stable `invalid_max_tokens` before provider dispatch.
+- Preserved valid 8,192 through 131,072 requests and the existing exact K3
+  4,096 floor, maximum reasoning, temperature omission, and truthful requested/
+  effective receipts. Non-K3 routing and generic timeout parsing are unchanged.
+- Added offline gateway/advisory matrices and module test documentation. No
+  provider, packaging, publication, OpenClaw, Hermes, Holo maintenance, or
+  GitHub operation was run. (WSP 00/15/22/49/50/62/97)
+- Regenerated the sealed backend manifest from the combined candidate through
+  a disposable index. The 1,363-path closure is unchanged; exactly
+  `ai_gateway.py` and `advisory_model_once.py` have new runtime digests. The
+  canonical manifest digest is
+  `ca41c3d09ff2fededcd1b1d544df0b82d92640e7930986254fc5daf362cd6ca7`.
+- Validation passed: full AI Gateway 742/2 skipped; all advisory/Fusion tests
+  83 plus 20 subtests; six direct backend/bridge gates; registry 1,542 tests /
+  266 quarantined; npm fast 8,606 ms; npm contract 266 ms. The hostile ambient
+  selector/nonce release executed all four authenticated groups and passed in
+  281,024 ms (core 280,990; governed Git 171,763; formats/environment 102,375;
+  bridge/WSP62 155), with no timeout or termination.
+
+## 2026-08-20 - Main/acceptance integration reconciliation (0.4.101)
+
+- Integrated R8/R9 governed-Git and least-privilege child-environment work with
+  main's signed control-loop and maintenance behavior; main-only FastMCP,
+  Codex-hook, and dependency pins remain untouched.
+- Regenerated the 1,363-file backend closure from the repaired integration tree
+  through an isolated Git index; the real branch index remained unchanged.
+  Its canonical digest is
+  `ea942f5f0a5522d35de547f074eff4facb4422a30f2dcfd27bbb1a88ebd629c2`.
+  Reconstruction of the pre-repair 1,361-file closure proves exactly two added
+  split-runtime modules and no removed path.
+- The deterministic RedDog test registry is 1,540 tests with 266 explicit
+  quarantines. The repaired fast and contract tiers pass in 9,533 ms and 944
+  ms, respectively. Live
+  packaging, publication, Holo maintenance, and provider access were not run.
+- The extension-scoped `npm run test:release` tier passed all four groups in
+  323,242 ms under hostile ambient group/nonce input and the unchanged
+  ceilings; no group timed out or received a termination signal. Fast and
+  contract tiers passed in 10,012 ms and 528 ms. Repository-wide FMAS remains
+  an independent, non-green audit with inherited debt.
+  (WSP 00/6/15/22/34/50/97)
+
+## 2026-08-20 - Release test tiers and bounded promotion owner (0.4.101)
+
+- Added dependency-free `npm test`, `npm run test:contract`, and
+  `npm run test:release` commands. The default is a bounded developer gate;
+  release remains an explicit promotion action.
+- Kept the byte-identical 18-shard/6,952-line/1,238-assertion shared-VM body and
+  its five focused tail contracts. The canonical legacy entry now authenticates
+  exact tail membership and runs four fixed process-isolated groups with a
+  four-worker cap, 400-second child timeout, 2 MiB output caps, deterministic
+  output, truthful exit propagation, and the unchanged 420-second ceiling.
+- CI now executes only the fast tier; release timing and authenticated closure
+  remain the explicit release gate. No dependency, lockfile, runtime extension
+  behavior, authority, provider, Holo, or model path changed.
+- The first complete aligned promotion passed in 295.928 seconds: core
+  295.219, governed Git 174.351, Git formats/environment 101.531, and bridge/
+  WSP_62 0.167 seconds. This leaves 124.072 seconds (29.5%) below the unchanged
+  ceiling versus the prior 415.462-second near-ceiling receipt.
+- A complete repeat passed in 266.709 seconds (core 265.850, governed Git
+  157.403, Git formats/environment 91.053, bridge/WSP_62 0.166 seconds). The
+  slower 295.928-second result remains the conservative acceptance receipt.
+- Independent verification found ambient group-selection bypass, an unenforced
+  overall deadline, and timeout termination that could be erased by exit zero.
+  The canonical entry now always owns full promotion and dispatches only to a
+  dedicated argv/nonce-bound internal worker. The supervisor enforces the
+  420-second wall deadline, records timeout before graceful/forced process-tree
+  termination, and resolves kill failure through a bounded failing receipt.
+- Deterministic fake-clock regressions prove ambient bypass denial, child and
+  parent timeout plus later exit-zero rejection, and bounded double-kill failure.
+  With hostile ambient selector and forged nonce set, all four real groups ran
+  and passed in 279.723 seconds; no closure member or assertion changed.
+- Loop-3 verification reproduced an asynchronous Windows `taskkill.exe` ENOENT
+  as an unhandled `ChildProcess` error. The supervisor now attaches error,
+  exit, and close handling before unref, bounds each taskkill attempt to 750 ms,
+  and feeds async error/nonzero/timeout evidence into both graceful and forced
+  termination receipts. Invalid-root, late-error, cleanup, and unchanged POSIX
+  process-group regressions are deterministic and provider-free.
+- The first loop-3 hostile-selector promotion passed in 274.537 seconds wall
+  time (owner 273.762; core 273.724; governed Git 164.376; Git formats/
+  environment 96.467; bridge/WSP_62 0.157). All timeout/termination fields were
+  false and the authenticated closure remained 18/6,952/1,238.
+  (WSP 00/5/6/11/15/22/34/50/57/62/83/87/97)
+
+## 2026-08-20 - Governed Git child-environment least privilege (0.4.101)
+
+- A focused staged-baseline RED proved `sanitizedGitEnv()` copied every non-
+  `GIT_*` editor variable into all governed Git configuration and content
+  children. `UNRELATED_SENTINEL` crossed first; the same deterministic fixture
+  covers provider/GitHub/AWS/generic credentials and Python, Node, loader, and
+  SSH injection controls.
+- Reused the existing closed environment module with a fixed governed-Git
+  builder. It retains only evidenced platform launch/temp/locale keys and then
+  pins the exact existing Git controls plus terminal-prompt denial. Caller
+  fields cannot select keys or override the controls; inputs remain unmodified
+  and results are fresh.
+- Preserved commands, argv, cwd, timeouts, encoding, local non-network scope,
+  SHA-1/SHA-256/worktree/ref/config behavior, and R9 receipt/projection proofs.
+  `git` is still PATH-resolved because no governed absolute executable binding
+  exists; executable provenance remains explicit rather than overclaimed.
+- The first exhaustive run truthfully rejected two stale static assertion
+  owners after the controls moved. They now inspect the shared environment
+  source while argv controls remain owned by readiness. The authenticated
+  18-shard closure is 6,952 lines/1,238 assertions at SHA-256 `1b26b3dc6e2910c290e6ddae61b670f50a496351d4ed099a8ad820428bd2c3a1`.
+  Full exhaustive acceptance passes in 415.462 seconds under the unchanged
+  420-second ceiling; manifest parity remains 1,360 runtime files at
+  `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`.
+  (WSP 00/5/6/11/15/22/34/50/57/62/83/87/97)
+
+## 2026-08-20 - R9 loop 3 Python environment documentation truth (0.4.101)
+
+- A deterministic documentation RED found that the lower Interface bridge-env
+  paragraph still universalized `PYTHONNOUSERSITE=1`, contradicting the live
+  and already-documented `holo_query` exception.
+- Aligned all six module/test memory surfaces: common isolated profiles set the
+  flag; local Holo deliberately omits it because the current configured/system
+  interpreter needs per-user NumPy. Python path/home/startup injection and
+  credentials remain denied. Universal isolation requires a sealed/configured
+  Holo interpreter closure, leaving an explicit package-provenance residual.
+- Production, tests, shard pins, package version, and Git authority are
+  unchanged. Focused environment, WSP62, shard authority, syntax, and diff
+  checks pass; canonical exhaustive acceptance passes in 405.338 seconds under
+  its unchanged 420-second ceiling. (WSP 00/15/22/50/57/62/83/87/97)
+
+## 2026-08-20 - R9 loop 2 Holo query environment closure (0.4.101)
+
+- Independent verification found that `buildHoloQueryEnv` still cloned
+  `envLike`/`process.env`, exposing unrelated ambient credentials and Python
+  startup/module-path controls to all three local Holo Python launches.
+- Extended the focused live-helper contract first. The truthful RED rejected
+  `UNRELATED_SENTINEL`; the same fixture covers Git/provider/generic credential
+  names, `PYTHONPATH`, `PYTHONHOME`, `PYTHONSTARTUP`, an arbitrary caller key,
+  ambient flag override, mutation, and aliasing.
+- A companion repository-audit RED then showed that the common
+  `PYTHONNOUSERSITE=1` flag changed the legacy Holo interpreter's installed
+  package visibility. A second focused RED pinned the behavior; only the live
+  Holo helper removes that flag for the configured/system interpreter's per-user
+  NumPy, while all injection variables and credentials remain denied. Universal
+  isolation remains blocked on a sealed/configured Holo interpreter closure.
+- Added one closed `holo_query` profile to the existing environment module and
+  composed the live helper through it. Only canonical/legacy store roots and
+  explicit offline mode are inherited; read-only and lexical model-skip flags
+  are synthesized. Arguments, cwd, stdio, timeouts, fallback/redaction logic,
+  and HoloIndex code/data remain unchanged.
+- The focused contract and an independent live-helper leak probe pass without
+  Holo queries, model/provider/network calls, staging, packaging, or commits.
+- Candidate WSP62, the 18-shard authority, and 1,360-file backend manifest
+  parity pass. HSF-002 was corrected from ambient-key preservation to exclusion
+  and authenticated at aggregate shard digest
+  `482671e3f4fc766ae91adf7aac28fcbaea1aae229c9a8765f5a17dadd5e3f0c5`.
+  Canonical exhaustive acceptance passes in 398.366 seconds under the unchanged
+  420-second ceiling; package version remains 0.4.101.
+  (WSP 00/5/6/11/15/22/34/50/62/87/97)
+
+## 2026-08-20 - Python bridge child-environment least privilege (0.4.101)
+
+- Replaced `buildBridgePythonEnv` whole-process cloning with a closed named
+  profile allowlist reused from `start_operations_environment.js`.
+- Confined OpenRouter, Holo owner, resident authority, authoritative work-state,
+  and model-runtime-binding inputs to their observed routes. Generic ambient
+  credentials, `PYTHONPATH`, `PYTHONHOME`, and arbitrary caller key lists no
+  longer cross into RedDog Python children.
+- Preserved allowlisted Windows/POSIX runtime discovery and forced UTF-8 plus
+  `PYTHONNOUSERSITE` on common isolated profiles. Updated the resident session route to the same closed
+  profile boundary without changing its stdin credential handoff.
+- Added focused environment and actual provider-spawn contracts, attached them
+  to the exhaustive shard closure, and corrected the stale Roadmap phase label
+  to package truth `0.4.101`. Full exhaustive acceptance passes in 400.096
+  seconds under its unchanged 420-second ceiling.
+  (WSP 00/11/15/22/34/50/57/62/83/87/97)
+
+## 2026-08-20 - R9 loop 7 projection pre-open allocation gate
+
+- RED proved an 8-byte file grown beyond 2 MiB between `lstat` and open/fstat
+  reached `Buffer.allocUnsafe` before the later identity check rejected it.
+- Opened fd type, link count, complete pre-open identity, and safe capped size
+  are now required before allocation/read; `readOpenedBytes` independently
+  rejects negative, non-safe, fractional, and cap-exceeding sizes.
+- Public APIs and the 2 MiB/16 MiB caps are unchanged. Existing post-open
+  growth, incomplete read, truncation, replacement, and deletion contracts
+  remain active. (WSP 00/15/22/34/50/62/87/97)
+
+## 2026-08-18 - R9 projection absence and bounded-read repair (0.4.101)
+
+- Public pre-fix RED created a tracked deletion below a present dangling
+  junction. `existsSync()` followed the target, reported false, and RedDog
+  released `D  linked/tracked.txt` with a projection receipt. A second RED grew
+  an 8-byte opened file to 2,101,256 bytes; `readFileSync(fd)` consumed the full
+  grown content before later identity checks rejected it.
+- Projection admission now reuses the no-follow entry classifier. Every
+  existing parent component is a stable canonical ordinary directory and is
+  rechecked without enumeration; only exact absence can represent deletion.
+  Dangling final/parent entries, junctions, non-directory parents, lookup
+  errors, absent untracked records, and parent substitution fail closed.
+- Stable worktree capture allocates exactly the capped opened size and fills it
+  with explicit remaining-length positional fd reads. Incomplete/zero reads,
+  growth, truncation, and path replacement reject without over-request or cap
+  increase. Zero-byte, exact-2-MiB, and 2-MiB-plus-one boundaries are covered.
+- Direct projection identity and race groups pass in 18.612 and 36.779 seconds;
+  the aggregate hardening group passes in 91.914 seconds and the R9 ref/config
+  matrix in 50.932 seconds. RDD/FoundUp grounding passes in 12.202 seconds;
+  the four backend/preflight/async/Fusion companions pass in 44.929 seconds;
+  canonical manifest parity remains 1,360 files at digest
+  `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`.
+- The authenticated exhaustive closure is 18 shards, 6,950 lines, and 1,238
+  assertions at aggregate digest
+  `14b474d304b0d92700c53c2efafd0921ff5fb760e876c4abc7ab52449c42b35a`;
+  final exhaustive acceptance passes in 340.746 seconds under the unchanged
+  420-second ceiling. Intentional malformed/corrupt Git-fixture stderr remains
+  negative-path evidence, not a failed gate. Candidate WSP_62, 17-file syntax,
+  shard integrity, and RedDog diff checks pass. (WSP 00/15/22/34/50/62/87/97)
+
+## 2026-08-18 - R9 structural OID receipt / Git semantic authority (0.4.101)
+
+- RED proved Git accepts canonical, quoted, hash-comment, and semicolon-comment
+  SHA-256 `extensions.objectFormat` settings and resolves a 64-hex
+  `HEAD^{commit}`, while RedDog's partial config parser rejected the quoted
+  spelling. The parser was removed instead of expanded.
+- The authority receipt now checks only exact 40- or 64-hex current OID shape
+  and continues to bind the complete capped config bytes. Its internal bound/
+  unborn classification is threaded to governed execution without changing the
+  frozen public receipt shape.
+- Git remains semantic authority. Bound named batches include the fixed
+  `HEAD_SHA` proof even when the caller did not request that output, and
+  projections resolve `HEAD^{commit}` before release. Only a structurally exact
+  unborn ref may take the unborn projection path. Cross-format 40/64 shapes can
+  be structurally valid but all named outputs and projections fail closed.
+- Readiness remains root/metadata/ownership/config-risk evidence. A READY
+  record does not claim a later Git content command succeeded.
+- Added direct and real linked coverage for all four SHA-256 config spellings,
+  loose/packed/detached authority, standard SHA-1, invalid 39/41/63/65/nonhex
+  OIDs, and SHA-1-64/SHA-256-40 structural-only failure paths. No package,
+  version, VSIX, backend manifest, HoloIndex, network/provider, staging, commit,
+  push, or authority expansion occurred. (WSP 00/15/22/34/50/62/87/97)
+- Final gates are **PASS**: 17 scoped JavaScript syntax checks; five direct Git
+  groups in 9.835/30.513/8.512/11.856/16.702 seconds; aggregate in 89.564
+  seconds; ref/config matrix in 50.117 seconds; candidate WSP_62 and 18-shard
+  identity at 6,948 lines, 1,237 assertions, and aggregate SHA-256
+  `ac4e2b2e0541f3e168911a3d43d7d1d99253556dd83c1f2ebff5f1c29338e72e`;
+  RDD plus FoundUp grounding in 10.378 seconds; backend/runtime companions in
+  47.702 seconds; manifest parity at 1,360 files and digest
+  `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`;
+  and corrected-scope exhaustive acceptance in 342.348 seconds under the
+  unchanged 420-second ceiling. The initial exhaustive launch stopped before
+  its body on the old aggregate pin; the corrected pin and projection-inclusive
+  candidate proof passed both structural and exhaustive gates.
+
+## 2026-08-18 - R9 ref/object-format and WSP_62 containment (0.4.101)
+
+- Public pre-fix differential RED proved Git accepted and resolved both
+  `refs/heads/feature+r9` and `refs/heads/特性-r9`, while RedDog rejected each.
+  The local Git also initialized SHA-256 repositories with 64-character
+  semantic HEAD OIDs while the receipt's fixed 40-character grammar rejected
+  them. These were implementation defects, not permission to call Git from the
+  receipt or to admit namespaces beyond `refs/heads/*`.
+- Replaced the ASCII branch allowlist with a bounded internal parser matching
+  the required Git ref exclusions while retaining Unicode and `+`. At this
+  loop's boundary, an internal config parser selected the 40/64-hex rule for
+  detached HEAD, loose current refs, and canonical packed current refs. Loop 5
+  above supersedes that parser with structural 40/64 shape validation while
+  retaining `HEAD^{commit}` as the semantic object proof.
+- Added direct and linked-worktree fixtures for loose, packed, and detached
+  SHA-1/SHA-256 refs; malformed and mixed OID widths; Git-valid Unicode/plus
+  refs; and a Git-rejected invalid corpus covering controls, DEL, forbidden
+  punctuation, sequences, components, suffixes, and boundary slashes.
+- Decomposed the former 1,460-physical-line focused test into directly runnable
+  projection identity/race, stable-I/O, topology/ref, authority/readiness, and
+  shared-fixture modules. The original invocation path remains a small
+  deterministic orchestrator and preserves the original contract order.
+  Candidate WSP_62 proof now independently enforces 400 physical JS lines,
+  30 function/arrow lines, and 1,000 current-document lines. The duplicate
+  release chronology was removed from `INTERFACE.md` in favor of `ModLog.md`
+  so the current contract document remains below its WSP_62 document ceiling.
+- Every split module passes directly; the original orchestrator passes in
+  90.404 seconds. The dedicated ref/object-format matrix passes in 20.909
+  seconds and candidate WSP_62 proof passes in 0.214 seconds. Exhaustive source
+  identity is truthfully rebound to 18 shards, 6,948 lines, 1,237 assertions,
+  and aggregate SHA-256
+  `7f27055731558879137898c74b345184104470180c9fd8bb964581406d70bd6c`.
+- Final release gates are **PASS**: 14 standalone syntax checks; direct RDD plus
+  FoundUp grounding in 15.257 seconds; backend compatibility, preflight, async,
+  and Fusion WSP_62 companion in 56.802 seconds; backend manifest parity at
+  1,360 files and digest
+  `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`;
+  and final exhaustive validation in 309.251 seconds, including repair evidence,
+  judgment verification, the split aggregate, SHA matrix, and candidate-size
+  proof. The intentional malformed-ref/shallow/object stderr remains negative-
+  fixture evidence rather than a failed gate.
+- Backend runtime WSP_62 is a separate release gate. General repository-wide
+  WSP_62 debt is outside this candidate and remains recorded; historical
+  ModLog/TestModLog archives are advisory under WSP_62 rather than silently
+  treated as current interface exemptions. No package/version/VSIX, provider,
+  network, HoloIndex, Git configuration outside ephemeral tests, stage, commit,
+  push, or authority expansion occurred. (WSP 00/15/22/50/62/87/97)
+
+## 2026-08-18 - R9 shared-store-independent Git authority (0.4.101)
+
+- RED: a real linked worktree retained byte-identical `HEAD_SHA` and
+  `TRACKED_PATHS` after a safe sibling commit, but the recursive common
+  object/ref fingerprint returned `Git storage changed during batch`. The
+  expanded focused RED also exposed the obsolete global unrelated-object
+  hardlink claim.
+- Replaced recursive object/ref identity and its 20,000-entry cap/cache with a
+  narrow frozen receipt over canonical topology, authority HEAD/index/
+  config.worktree, common config/shallow/info controls, exact detached or
+  loose/packed current-ref semantics, and forbidden alternate/graft/ref-storage
+  surfaces. Linked receipts exclude main-worktree HEAD/index/config.worktree.
+- Named fixed operations now execute twice with identical sanitized argv/env
+  and compare every bounded output before the narrow forced-final receipt.
+  `HEAD_SHA` verifies a commit object, preserving missing/corrupt required-
+  object failure without globally walking unrelated objects. Projection
+  snapshots retain equivalent two-enumeration/stable-capture/final-proof gates.
+- Repair-loop RED grew an 8-byte opened `info/exclude` beyond its 1 MiB cap at
+  the read boundary and proved the former `readFileSync(fd)` consumed the growth
+  before later rejecting it. Stable control reads now allocate exactly the
+  capped opened size, issue explicit remaining-length `readSync` calls, reject
+  incomplete reads/growth/path substitution through retained fd/path checks,
+  and hash the binary index without a redundant UTF-8 copy.
+- The packed-ref boundary is now explicit and tested: the receipt parses only
+  the exact current authority entry rather than linting unrelated lines. A
+  malformed unrelated line accepted by that narrow receipt makes Git's
+  `HEAD^{commit}` resolution fail, invalidating the whole `HEAD_SHA` batch as a
+  command failure. This does not add a global all-ref hygiene claim.
+- Repair-loop 2 public-API REDs proved external nested Git-directory junctions,
+  `refs/heads/foo.lock/bar`, and noncanonical exact-current packed lines could
+  retain a valid receipt. The repair requires stable canonical ordinary common
+  `info`/`objects/info` directories without enumerating or creating them,
+  validates every supported heads component, and prevents whitespace-token-
+  targeted malformed current entries from becoming unborn. True absent current
+  refs and malformed unrelated packed lines retain their documented behavior.
+- Repair-loop 3 public-API REDs proved every follow-target absence site accepted
+  a present dangling entry: forbidden alternates, optional config.worktree and
+  info/exclude, direct commondir, plainControlFile, root `.git`, final current
+  ref, and direct/linked intermediate current-ref parents. A synthetic non-
+  ENOENT `.git` lookup error also returned empty. One no-follow lstat classifier
+  now makes only ENOENT absent, shares the root observation with the first
+  receipt, requires canonical `refs/heads`, and checks existing deeper parents
+  without enumeration. True absent root `.git` and true unborn refs remain.
+- Added adversarial ordinary/linked coverage for safe sibling/main/object/ref/
+  replacement/packing churn; no-recursion tripwire; current symbolic/detached/
+  packed/loose ref, authority index, config/worktree-config/shallow/info drift;
+  A/B mismatch and second-pass failure; forged gitfile/common/backref; relevant
+  links; alternates/http-alternates/grafts/refStorage; and required-object loss
+  or corruption. Existing R8, safe.directory, replacement-disable, unborn, and
+  no-config-write contracts remain green.
+- Loop3 focused hardening is **PASS** in 84.898 seconds and exhaustive validation
+  is **PASS** in 279.575 seconds, including RDD, FWG-006, repair-evidence,
+  judgment-verifier, and focused Git end-to-end checks. Shard identity is now
+  18 shards, 6,944 lines, and 1,236 assertions after strengthening six
+  source-shape checks. Direct RDD plus FoundUp grounding are **PASS** in 12.830
+  seconds; backend compatibility/WSP_62 is **PASS** in 40.710 seconds; manifest
+  parity is **PASS** at 1,360 files
+  and digest `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`.
+- On the actual 9,768-path linked acceptance worktree, 30 narrow receipts
+  measured 15.248 ms mean, 15.034 ms p50, 17.161 ms p95, and 17.537 ms max.
+  Three twice-executed four-operation authority batches plus final receipt
+  measured 1,118.705 ms mean (1,051.795 ms p50, 1,349.978 ms max), replacing
+  the prior approximately 457 ms O(N) cost for each whole-store receipt.
+- Ordinary reads no longer claim global unrelated loose-object/all-ref hygiene;
+  that is a separate unimplemented maintenance audit. Receipts are
+  point-sampled and cannot detect a fully restored ABA wholly between samples.
+  FoundUp registry/schema bytes are read after the Git quartet, so their
+  transaction-level atomicity remains an adjacent future layer.
+- No version/package/VSIX, Python manifest/constant, network/provider/model,
+  HoloIndex, config write, stage, commit, push, or authority expansion occurred.
+  (WSP 00/15/22/50/62/87/97)
+
+## 2026-08-18 - R8 optional worktree-config absence correction (0.4.101)
+
+- RED: an ordinary repository or linked worktree with
+  `extensions.worktreeConfig=true` and no optional `config.worktree` returned
+  `Git configuration unreadable`, making governed RDD context unavailable.
+- Added an immutable receipt state for absent/present/invalid worktree config.
+  Authenticated absence is accepted as an empty optional scope, authenticated
+  presence retains the risky-setting scan, and invalid/unreadable states remain
+  fail closed. Start/final gates compare both fingerprint and state, so
+  mid-batch creation is rejected atomically.
+- Added real ordinary- and linked-worktree regressions proving READY output,
+  tracked-path visibility, frozen receipts, absence preservation, and
+  `config_write_performed=false`; also proved absent-to-present mutation fails
+  the whole batch.
+- Focused governed-Git hardening is **PASS** (65.266 seconds). The direct offline
+  RDD probe is **PASS** (16.006 seconds) with complete manifest, semantic decoy non-selection,
+  cross-cutting Moltbot/OpenClaw target retention, and broad fallback. Shard
+  integrity is **PASS** at 18 shards, 6,944 lines, and 1,230 assertions.
+- The unchanged exhaustive suite passed RDD, repair-evidence, and judgment
+  bridges, then blocked at FWG-006 after 142.689 seconds. The preceding
+  `UnicodeEncodeError` is the intentional UNI-001 negative fixture. A separate
+  fresh-process reproduction proved the actual blocker: the linked receipt
+  fingerprints the whole shared common object/ref store, so unrelated
+  concurrent Git activity can invalidate the four-command authority batch.
+  That scaling/receipt redesign is deferred to its own tests-first P0 layer.
+- The changed JavaScript/test files are outside the authenticated Python backend
+  closure, so no backend-manifest or compatibility-constant regeneration is
+  warranted. Canonical manifest `--check` remains **PASS** at 1,360 runtime
+  files and digest `fdf3643a2cb8dd95dce1f31a2c96611f9cf7f60496efd268819cbefc3592129e`;
+  backend compatibility/preflight remains **PASS** (48.379 seconds). No
+  package/version/VSIX build, config write, commit, push, reindex,
+  network call, provider/model call, worker dispatch, or authority expansion
+  occurred. (WSP 00/15/22/50/87/97)
+
 ## 2026-08-16 - Maintenance backend closure refresh
 
 - Rebound the compatibility constant to the regenerated 1,336-file backend

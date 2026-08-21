@@ -1,3 +1,25 @@
+## 2026-08-21: Native upstream worker regressions
+
+- Added Hermes API `0.20.4` capability/toolset checks and exact stable-child
+  event proof, including no-child, duplicate-child, other-tool, child-write,
+  omitted effect arrays, reordered/layered delegate telemetry,
+  interrupted/approval, non-final terminal, and postflight drift paths.
+- Added OpenClaw `2026.7.1-2` revision, service/plugin drift, signed provider
+  route, WSL cold-start ordering, and adversarial relative-path/non-empty
+  artifact validation shared with Hermes, including Windows-invalid characters
+  and the complete Windows device namespace.
+- Focused upstream-provider suite: 87 passed before final integration validation.
+
+## 2026-08-21: Governed repository-state v2 validation regressions
+
+- Reproduced attacker-recomputed receipt acceptance with empty identities and a
+  minimal Windows signature, then pinned exact digest-only public shape.
+- Added identity/digest/size/link/signature/verifier/containment/unknown-field
+  rejection coverage, non-Windows exact shape, live JS receipt acceptance, and
+  the existing no-subprocess/no-bare-Git source contract.
+- Final focused Python/generator validation passed 24/24; the combined snapshot,
+  Start Operations, and readonly-bootstrap suite passed 105 with one skip.
+
 ## 2026-08-15: Grant-profile atomic provisioning regressions
 
 - Added exact three-artifact v3 activation and durable launch-digest coverage

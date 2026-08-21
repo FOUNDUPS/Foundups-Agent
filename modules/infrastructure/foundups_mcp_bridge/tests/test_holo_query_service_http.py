@@ -242,11 +242,7 @@ def test_reddog_adapter_queries_live_owner_without_opening_local_chroma(
         owner.close()
 
 
-def test_main_dispatches_to_stdlib_when_fastapi_is_unavailable(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    events: list[str] = []
-
+def _stdlib_fallback_doubles(events: list[str]) -> tuple[object, object]:
     class FakeOwner:
         def close(self) -> None:
             events.append("owner_closed")
@@ -258,36 +254,46 @@ def test_main_dispatches_to_stdlib_when_fastapi_is_unavailable(
         def server_close(self) -> None:
             events.append("server_closed")
 
+    return FakeOwner(), FakeServer()
+
+
+def _stdlib_fallback_argv() -> list[str]:
+    return [
+        "--host", "127.0.0.1", "--port", "8127", "--parent-pid", "1234",
+        "--canonical-ssd-path", "O:/synthetic-canonical",
+        "--query-replica-root", "O:/synthetic-replica",
+    ]
+
+
+def test_main_dispatches_to_stdlib_when_fastapi_is_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events: list[str] = []
+    owner, server = _stdlib_fallback_doubles(events)
+
     monkeypatch.setenv("HOLOINDEX_QUERY_SERVICE_TOKEN", TOKEN)
     monkeypatch.setattr(http_module, "FastAPI", None)
     monkeypatch.setattr(
         http_module,
         "HoloIndexQueryOwnerService",
-        lambda **_kwargs: FakeOwner(),
+        lambda **_kwargs: owner,
     )
     monkeypatch.setattr(
         http_module,
         "create_stdlib_server",
-        lambda _owner, **_kwargs: FakeServer(),
+        lambda _owner, **_kwargs: server,
     )
     monkeypatch.setattr(
         http_module,
         "_start_parent_process_watchdog",
         lambda parent_pid: events.append(f"watchdog_started:{parent_pid}"),
     )
-    assert (
-        main(
-            [
-                "--host",
-                "127.0.0.1",
-                "--port",
-                "8127",
-                "--parent-pid",
-                "1234",
-            ]
-        )
-        == 0
+    monkeypatch.setattr(
+        http_module,
+        "prove_and_verify_active_query_replica",
+        lambda **_kwargs: (SimpleNamespace(), SimpleNamespace()),
     )
+    assert main(_stdlib_fallback_argv()) == 0
     assert events == [
         "watchdog_started:1234",
         "served",

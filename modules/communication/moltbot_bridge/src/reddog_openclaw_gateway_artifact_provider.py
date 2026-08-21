@@ -4,16 +4,30 @@ import json, os, re, secrets, tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping, Protocol, Sequence
-from modules.infrastructure.shared_utilities.runtime_artifact_safety import validate_runtime_root_path
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    validate_runtime_root_path,
+)
 from .fusion_redaction_gate import REDACTION_GATE_PASSED, evaluate_redaction_gate
-from .reddog_artifact_generation_admission_capability import ArtifactGenerationModelCapability, consume_artifact_generation_model
-from .reddog_artifact_generation_model_binding import artifact_generation_digest
-from .reddog_artifact_generation_provider_contract import ArtifactGenerationModelResult
-from .reddog_openclaw_gateway_command_runner import OpenClawCommandResult, SystemOpenClawCommandRunner
+from .reddog_artifact_generation_admission_capability import (
+    ArtifactGenerationModelCapability,
+    consume_artifact_generation_model,
+)
+from .reddog_artifact_generation_model_binding import (
+    artifact_generation_digest,
+    signed_principal_model_route,
+)
+from .reddog_artifact_generation_provider_contract import (
+    ArtifactGenerationModelResult,
+    validate_provider_artifact_contents,
+)
+from .reddog_openclaw_gateway_command_runner import (
+    OpenClawCommandResult,
+    SystemOpenClawCommandRunner,
+)
 from .reddog_openclaw_gateway_confinement import openclaw_artifact_session_is_confined
 
 FAIL_GATEWAY = "FAIL_OPENCLAW_GATEWAY_PREFLIGHT"
-_VERSION = re.compile(r"(?:OpenClaw\s+)?(\d{4}\.\d+\.\d+)")
+_VERSION = re.compile(r"(?:OpenClaw\s+)?(\d{4}\.\d+\.\d+(?:-\d+)?)")
 _AGENT_ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,63}")
 _MODEL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}")
 class OpenClawCommandRunner(Protocol):
@@ -54,10 +68,12 @@ class OpenClawGatewayArtifactGenerationRunner:
 def _preflight(runner, agent_id: str, session_key: str, timeout: int) -> _Preflight:
     if _AGENT_ID.fullmatch(agent_id) is None:
         return _Preflight()
+    # Put the RPC probe last: on WSL cold start the preceding read-only CLI
+    # calls give the user service time to bind without a retry or hidden launch.
     commands = (("openclaw", "--version"),
-                ("openclaw", "gateway", "status", "--require-rpc", "--json"),
                 ("openclaw", "agents", "list", "--json"),
-                ("openclaw", "sandbox", "explain", "--session", session_key, "--json"))
+                ("openclaw", "sandbox", "explain", "--session", session_key, "--json"),
+                ("openclaw", "gateway", "status", "--require-rpc", "--json"))
     results = []
     try:
         for command in commands:
@@ -68,25 +84,37 @@ def _preflight(runner, agent_id: str, session_key: str, timeout: int) -> _Prefli
     complete = all(item.termination_confirmed and not item.output_limit_exceeded for item in results)
     if any(item.returncode or item.timed_out for item in results) or not complete:
         return _Preflight(spawn_count=count, observation_complete=complete)
-    version_result, status_result, agents_result, sandbox_result = results
+    version_result, agents_result, sandbox_result, status_result = results
     match = _VERSION.search(version_result.stdout.strip())
     status, agents = _json(status_result.stdout, Mapping) or {}, _json(agents_result.stdout, list)
     cli = str(_nested(status, "cli", "version") or "")
     gateway = str(_nested(status, "rpc", "server", "version") or "")
     config, gateway_state = _nested(status, "config", "cli"), status.get("gateway")
+    service_audit = _nested(status, "service", "configAudit")
+    plugin_drift = status.get("pluginVersionDrift")
     status_ok = (_nested(status, "rpc", "ok") is True and isinstance(gateway_state, Mapping)
                  and gateway_state.get("bindMode") == "loopback" and isinstance(config, Mapping)
-                 and config.get("exists") is True and config.get("valid") is True)
+                 and config.get("exists") is True and config.get("valid") is True
+                 and isinstance(service_audit, Mapping) and service_audit.get("ok") is True
+                 and service_audit.get("issues") == [] and isinstance(plugin_drift, Mapping)
+                 and plugin_drift.get("drifts") == [])
     agent_ok = isinstance(agents, list) and any(
         isinstance(item, Mapping) and item.get("id") == agent_id for item in agents)
     sandbox_ok = openclaw_artifact_session_is_confined(
         _json(sandbox_result.stdout, Mapping) or {}, agent_id=agent_id, session_key=session_key
     )
     version = match.group(1) if match and status_ok and agent_ok and sandbox_ok else ""
-    return _Preflight(version if version and cli == gateway == version else "", count, complete)
+    exact_versions = (
+        version
+        and cli == gateway == version
+        and gateway_state.get("version") == version
+        and plugin_drift.get("gatewayVersion") == version
+    )
+    return _Preflight(version if exact_versions else "", count, complete)
 def _invoke(provider, runtime, prompt, context, preflight, model, session_key, timeout):
     message = ("Return only strict JSON with exactly one key: artifact_contents. "
-               "Values are path-to-content strings.\n\nTASK:\n" + prompt +
+               "artifact_contents must be a non-empty object whose keys are safe relative "
+               "artifact paths and whose values are non-empty text strings.\n\nTASK:\n" + prompt +
                "\n\nGOVERNED CONTEXT:\n" + context)
     path = None
     try:
@@ -132,19 +160,24 @@ def _agent_artifacts(raw: str):
     answer = _json(str(payloads[0].get("text") or ""), Mapping) if isinstance(payloads[0], Mapping) else None
     artifacts = answer.get("artifact_contents") if isinstance(answer, Mapping) else None
     run_id = str(response.get("runId") or "")
-    valid = (isinstance(answer, Mapping) and set(answer) == {"artifact_contents"}
-             and isinstance(artifacts, Mapping) and artifacts and run_id
-             and all(isinstance(k, str) and k and isinstance(v, str) for k, v in artifacts.items()))
-    return (run_id, dict(artifacts)) if valid else None
+    validated = validate_provider_artifact_contents(artifacts)
+    valid = isinstance(answer, Mapping) and set(answer) == {"artifact_contents"} and run_id
+    return (run_id, validated) if valid and validated is not None else None
 
 
 def _signed_invocation(binding):
-    selection = binding.get("model_selection") if isinstance(binding, Mapping) else None
-    model = selection.get("lead_model") if isinstance(selection, Mapping) else None
-    normalized = model.strip() if isinstance(model, str) else ""
-    if _MODEL_ID.fullmatch(normalized) is None or not isinstance(binding, Mapping):
+    route = signed_principal_model_route(binding)
+    if route is None:
         return "", ""
-    return normalized, f"agent:reddog-artifact:reddog-{secrets.token_hex(16)}"
+    canonical_model, provider = route
+    runtime_model = (
+        canonical_model
+        if canonical_model.startswith(provider + "/")
+        else f"{provider}/{canonical_model}"
+    )
+    if _MODEL_ID.fullmatch(runtime_model) is None:
+        return "", ""
+    return runtime_model, f"agent:reddog-artifact:reddog-{secrets.token_hex(16)}"
 
 
 def _runtime_root(runtime_root, repo_root):

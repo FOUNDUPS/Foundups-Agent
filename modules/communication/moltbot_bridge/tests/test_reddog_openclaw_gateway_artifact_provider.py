@@ -26,7 +26,7 @@ class FakeRunner:
         args = tuple(argv)
         self.calls.append((args, timeout_seconds))
         if args[1:] == ("--version",):
-            return _command_result("OpenClaw 2026.7.1 (abc)\n")
+            return _command_result("OpenClaw 2026.7.1-2 (abc)\n")
         if args[1:3] == ("gateway", "status"):
             return _command_result(json.dumps(self.status))
         if args[1:3] == ("agents", "list"):
@@ -52,9 +52,14 @@ def _command_result(stdout="", *, code=0, **changes):
 
 
 def _status():
-    return {"cli": {"version": "2026.7.1"}, "config": {"cli": {"exists": True, "valid": True}},
-            "gateway": {"bindMode": "loopback"},
-            "rpc": {"ok": True, "server": {"version": "2026.7.1"}}}
+    return {
+        "cli": {"version": "2026.7.1-2"},
+        "service": {"configAudit": {"ok": True, "issues": []}},
+        "config": {"cli": {"exists": True, "valid": True}},
+        "gateway": {"bindMode": "loopback", "version": "2026.7.1-2"},
+        "rpc": {"ok": True, "server": {"version": "2026.7.1-2"}},
+        "pluginVersionDrift": {"gatewayVersion": "2026.7.1-2", "drifts": []},
+    }
 
 
 def _sandbox(session_key, **changes):
@@ -84,8 +89,15 @@ def _provider(tmp_path, runner, *, agent_id="reddog-artifact"):
     return OpenClawGatewayArtifactGenerationRunner(repo, tmp_path / "runtime", agent_id, runner)
 
 
-def _generate(provider, *, prompt="secret prompt", context="private context", model="qwen/qwen3-coder"):
-    verified = {"model_selection": {"receipt_id": "selection-1", "lead_model": model}}
+def _generate(provider, *, prompt="secret prompt", context="private context",
+              model="qwen/qwen3-coder", provider_id="openrouter"):
+    verified = {"model_selection": {
+        "receipt_id": "selection-1",
+        "lead_model": model,
+        "role_assignments": [{
+            "role": "principal", "canonical_model_id": model, "provider": provider_id,
+        }],
+    }}
     with patch("modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.consume_artifact_generation_model", return_value=verified):
         return provider.generate_artifacts(prompt=prompt, context=context, binding=object(), timeout_seconds=17)
 
@@ -97,13 +109,14 @@ def test_real_gateway_cli_path_is_exact_session_sandboxed_and_truthful(tmp_path)
     assert result.worker_process_spawn_count == 5
     assert result.file_write_performed is True
     assert result.external_side_effects_possible is True
-    assert runner.calls[1][0] == (
+    assert runner.calls[3][0] == (
         "openclaw", "gateway", "status", "--require-rpc", "--json"
     )
-    preflight, invocation = runner.calls[-2][0], runner.calls[-1][0]
+    sandbox_call, invocation = runner.calls[2][0], runner.calls[-1][0]
     session = invocation[invocation.index("--session-key") + 1]
-    assert preflight[-3:] == ("--session", session, "--json")
+    assert sandbox_call[-3:] == ("--session", session, "--json")
     assert invocation[invocation.index("--agent") + 1] == "reddog-artifact"
+    assert invocation[invocation.index("--model") + 1] == "openrouter/qwen/qwen3-coder"
     assert "--local" not in invocation and runner.calls[-1][1] == 47
     assert list((tmp_path / "runtime").glob("reddog-openclaw-*.md")) == []
 
@@ -134,6 +147,16 @@ def test_sandbox_requires_closed_tool_policy(tmp_path, sandbox):
     assert len(runner.calls) == 4
 
 
+@pytest.mark.parametrize("status", [
+    {**_status(), "service": {"configAudit": {"ok": False, "issues": [{"code": "drift"}]}}},
+    {**_status(), "gateway": {"bindMode": "loopback", "version": "2026.7.1"}},
+    {**_status(), "pluginVersionDrift": {"gatewayVersion": "2026.7.1-2", "drifts": ["x"]}},
+])
+def test_service_or_version_metadata_drift_fails_preflight(tmp_path, status):
+    result = _generate(_provider(tmp_path, FakeRunner(status=status)))
+    assert result.rejection_reasons == (FAIL_GATEWAY,)
+
+
 @pytest.mark.parametrize("result", [
     _command_result(code=124, timed_out=True, termination_confirmed=True),
     _command_result(code=125, output_limit_exceeded=True),
@@ -157,10 +180,27 @@ def test_uncaught_invocation_failure_never_reports_a_clean_abort(tmp_path):
 @pytest.mark.parametrize("text", [
     "not-json", "{}", '{"artifact_contents":{}}',
     '{"artifact_contents":{"x":1}}',
+    '{"artifact_contents":{"../escape.py":"bad"}}',
+    '{"artifact_contents":{"/tmp/escape":"bad"}}',
+    '{"artifact_contents":{"C:/escape.py":"bad"}}',
+    '{"artifact_contents":{"src//escape.py":"bad"}}',
+    '{"artifact_contents":{"CON.py":"bad"}}',
+    '{"artifact_contents":{"x.py":""}}',
+    '{"artifact_contents":{"x.py":"   "}}',
     '{"artifact_contents":{"x":"one"},"artifact_contents":{"x":"two"}}',
     '{"artifact_contents":{"x":"one","x":"two"}}',
 ])
 def test_malformed_or_duplicate_output_rejects(tmp_path, text):
+    outcome = _generate(_provider(tmp_path, FakeRunner(_agent_result(text))))
+    assert outcome.rejection_reasons == ("FAIL_OPENCLAW_ARTIFACT_OUTPUT",)
+
+
+@pytest.mark.parametrize("unsafe_path", [
+    'a"b.txt', "a*.txt", "a<b.txt", "a>b.txt", "a?.txt", "a|b.txt",
+    "CLOCK$", "CONIN$", "CONOUT$",
+])
+def test_platform_invalid_artifact_paths_reject(tmp_path, unsafe_path):
+    text = json.dumps({"artifact_contents": {unsafe_path: "bad"}})
     outcome = _generate(_provider(tmp_path, FakeRunner(_agent_result(text))))
     assert outcome.rejection_reasons == ("FAIL_OPENCLAW_ARTIFACT_OUTPUT",)
 
@@ -170,6 +210,27 @@ def test_invalid_binding_precedes_all_openclaw_processes(tmp_path):
     assert _generate(_provider(tmp_path, runner), model="--local").rejection_reasons == (
         "FAIL_OPENCLAW_MODEL_BINDING",
     )
+    assert runner.calls == []
+
+
+def test_mismatched_or_missing_signed_principal_precedes_processes(tmp_path):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    verified = {"model_selection": {
+        "lead_model": "qwen/qwen3-coder",
+        "role_assignments": [{
+            "role": "principal", "canonical_model_id": "different/model",
+            "provider": "openrouter",
+        }],
+    }}
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.consume_artifact_generation_model",
+        return_value=verified,
+    ):
+        result = provider.generate_artifacts(
+            prompt="p", context="c", binding=object(), timeout_seconds=5
+        )
+    assert result.rejection_reasons == ("FAIL_OPENCLAW_MODEL_BINDING",)
     assert runner.calls == []
 
 

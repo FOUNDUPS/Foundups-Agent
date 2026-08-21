@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -130,7 +131,11 @@ def test_holo_child_environment_drops_provider_and_authority_secrets() -> None:
             "GOOGLE_AISTUDIO_API_KEY": "secret",
             "REDDOG_AUTHENTICATED_PRINCIPAL_ID": "principal",
             "REDDOG_SEALED_RUNTIME_REQUIRED": "1",
+            "PYTHONHOME": "hostile-home",
             "PYTHONPATH": "attacker",
+            "PYTHONSTARTUP": "attacker-startup",
+            "PYTHONUSERBASE": "attacker-userbase",
+            "PYTHONINSPECT": "1",
         }
     )
 
@@ -140,7 +145,11 @@ def test_holo_child_environment_drops_provider_and_authority_secrets() -> None:
     assert "GITHUB_TOKEN" not in child
     assert "GOOGLE_AISTUDIO_API_KEY" not in child
     assert "REDDOG_AUTHENTICATED_PRINCIPAL_ID" not in child
+    assert "PYTHONHOME" not in child
     assert "PYTHONPATH" not in child
+    assert "PYTHONSTARTUP" not in child
+    assert "PYTHONUSERBASE" not in child
+    assert "PYTHONINSPECT" not in child
 
 
 def test_trusted_holo_site_packages_accepts_only_checkout_local_windows_venv(
@@ -181,6 +190,18 @@ def test_trusted_holo_site_packages_accepts_only_checkout_local_windows_venv(
     assert trusted_holo_site_packages(
         tmp_path / "missing", platform_name="nt"
     ) == ()
+
+
+def test_actual_windows_primary_checkout_supplies_isolated_runtime_dependencies() -> None:
+    if os.name != "nt":
+        return
+    candidate = Path(__file__).resolve().parents[4]
+    primary = Path("O:/Foundups-Agent")
+
+    assert trusted_holo_site_packages(candidate) == ()
+    primary_packages = trusted_holo_site_packages(primary)
+    assert len(primary_packages) == 1
+    assert Path(primary_packages[0]).is_relative_to(primary / ".venv")
 
 
 def test_maintenance_runner_uses_sealed_holo_index_copy(

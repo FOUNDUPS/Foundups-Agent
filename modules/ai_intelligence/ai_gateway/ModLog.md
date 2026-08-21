@@ -1,5 +1,24 @@
 # AI Gateway Module Change Log
 
+## [2026-08-21] - Exact Kimi K3 Request-Truth Boundary
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_KIMI_K3_REQUEST_TRUTH_PHASE1`
+
+**What:** Hardened the exact `openrouter` / `moonshotai/kimi-k3` provider path.
+Explicit completion budget overrides environment, then the resolved value is
+floored to 4,096. Valid 8,192 through 131,072 requests are preserved; 131,073
+fails before HTTP. K3 always forces maximum reasoning and omits temperature.
+Non-K3 behavior is unchanged.
+
+**Validation boundary:** Offline mocked HTTP tests cover explicit, environment,
+precedence, floor, endpoint maximum, reasoning, temperature omission, and
+non-K3 compatibility. The focused gateway/advisory matrix passed 176 tests;
+the complete AI Gateway module passed 742 tests with 2 skips. No provider call
+or promotion authority was exercised.
+
+**WSP References:** WSP 00, WSP 15, WSP 22, WSP 49, WSP 50, WSP 62, WSP 97.
+
 ## [2026-07-30] - Shared Model-Evidence Authority Validation
 
 **Who/Type/Slice:** 0102 architect / Defensive /

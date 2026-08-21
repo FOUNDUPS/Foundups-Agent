@@ -64,6 +64,7 @@ def _canonical_result() -> dict:
             "timestamp": "2026-08-15T00:00:00+00:00", "cached": False,
             "retrieval_mode": "semantic", "embedding_backend": "sentence_transformers",
             "backend_quality": "production", "quality_gate": "PASS",
+            "tier0_module_target": None,
             "routing_active": False, "collection_backend_map": backend_map,
             "collection_embedding_space_map": space_map,
         },
@@ -142,6 +143,7 @@ def test_machine_spec_search_and_platform_storage_contract_is_complete() -> None
         "quality_gate",
         "routing_active",
         "collection_backend_map",
+        "tier0_module_target",
     } <= metadata_keys
     assert payload["durability"]["ssd_root_default_posix"] == (
         "$XDG_DATA_HOME/foundups/holoindex; "
@@ -181,6 +183,34 @@ def test_exact_metadata_document_provenance_is_schema_supported() -> None:
     forged["docs_hits"][0].pop("retrieval_provenance")
     with pytest.raises(ValueError, match="query_evidence_schema_invalid"):
         validate_search_result(forged, expected_query="contract")
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
+        "modules/communication/moltbot_bridge/src",
+        "modules/communication/../escape",
+        "modules/communication/.hidden",
+        "modules\\communication\\moltbot_bridge",
+        "outside/communication/moltbot_bridge",
+        "",
+    ],
+)
+def test_tier0_module_target_metadata_rejects_noncanonical_paths(
+    target: str,
+) -> None:
+    raw = _canonical_result()
+    raw["metadata"]["tier0_module_target"] = target
+
+    with pytest.raises(ValueError, match="query_evidence_schema_invalid"):
+        validate_search_result(raw, expected_query="contract")
+
+
+def test_tier0_module_target_accepts_canonical_path_or_null() -> None:
+    for target in (None, "modules/communication/moltbot_bridge"):
+        raw = _canonical_result()
+        raw["metadata"]["tier0_module_target"] = target
+        validate_search_result(raw, expected_query="contract")
 
 
 @pytest.mark.parametrize(

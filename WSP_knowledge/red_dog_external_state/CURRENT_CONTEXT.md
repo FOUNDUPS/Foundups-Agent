@@ -1,5 +1,10 @@
 # Current Context - Active State Snapshot
 
+> **NON-AUTHORITATIVE HISTORICAL SNAPSHOT (2026-06-02):** The title below is
+> preserved for lineage compatibility. None of the HEAD, lane, worker, PR, or
+> runtime claims in this file are current evidence. Verify them from Git, the
+> collaboration runtime, and the governed service owners before acting.
+
 **Purpose**: Active lanes, current HEAD, worker roles at session start.
 
 **Maintenance**: Update at session close (not live auto-refresh).

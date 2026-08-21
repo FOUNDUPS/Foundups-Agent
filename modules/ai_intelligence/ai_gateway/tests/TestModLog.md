@@ -1,5 +1,15 @@
 # AI Gateway TestModLog
 
+## [2026-08-21] - Exact Kimi K3 request truth
+
+- Added an offline request matrix for explicit 256/4,096/8,192/131,072
+  budgets, environment 256/8,192, explicit-over-environment precedence, forced
+  maximum reasoning, temperature omission, and exact provider/model scope.
+- Proved 131,073 rejects before mocked HTTP and non-K3 OpenRouter behavior is
+  unchanged.
+- Validation: exact K3 matrix 36 passed; focused gateway/advisory compatibility
+  176 passed; full AI Gateway module 742 passed with 2 skips.
+
 ## [2026-07-30] - Model-runtime security test decomposition
 
 - Split serialized-evidence, capability-identity, replay, revocation, and

@@ -1,5 +1,55 @@
 # HoloIndex Development Roadmap
 
+## [2026-08-20] RedDog Integration Status
+
+Module-intent, isolated snapshot runtime, and the immutable replica consumer
+contracts are integrated and focused-GREEN. Live exact-SHA owner acceptance,
+store maintenance, model access, and post-commit publication remain deferred;
+this work did not touch the active Holo store.
+
+## [2026-08-17] Immutable Query Replica Isolation
+
+**R15 correction complete outside the Holo package; re-verification and routing
+pending.** Independent review rejected point lease probes across active
+publication, then rejected inspect-then-delete rollback under same-object
+mutation. The bridge now retains both sentinels and receipt proof, uses sealed
+primitives and no-delete/no-replace quarantine, and removed the remaining
+Windows failed-copy FileDisposition path. It can produce one exact
+`holoindex_query_replica.v1` generation without mutating canonical source.
+Next: independent re-verification, descriptor admission in the resident-owner
+supervisor, generation-only storage binding, generation-change restart, and
+active/rollback retention plus governed orphan retention/deletion. No live Holo/store
+acceptance occurred in Phase 1.
+
+## [2026-08-16] K-Invariant Module Intent Incident Repair
+
+**Complete:** docs-only/top-K re-inference discarded cross-collection
+ambiguity, so a deterministic strict Tier-0 incomplete exception appeared as
+retryable semantic-backend unavailability. Module-name intent now uses a
+bounded HEAD tree catalog independent of K; strict owners fail closed,
+non-strict callers suppress promotion on catalog failure, and full paths
+remain direct. Producer errors are typed and redacted.
+
+**Scale evidence:** 1,265 Git directory rows yield 168 module roots under a
+1 MiB/4,096-root/5-second cap; the final paired probe measured 122.645 ms cold
+and 42.043 ms warm. Cache mutation is locked and platform-aware; concurrent
+cold callers may duplicate one bounded Git load. Future work may persist this
+catalog in generation metadata if measured owner-start latency warrants it;
+query-time filesystem scans are not allowed.
+
+The producer now attests nullable `tier0_module_target`; consumer reservation
+requires attestation, query relation, and one exact complete pair.
+
+**R3 correction:** all Git-tree records now reject Unicode control, format,
+and surrogate categories and use NFC-normalized case-folded duplicate
+identity while preserving visible Unicode spelling. The exact six-file
+focused matrix, including the machine-spec contract, passes 278 tests; the
+13-file adjacent matrix passes 356 with one optional skip.
+
+**Deferred:** live governed owner acceptance and receipt publication require a
+committed exact-SHA generation. This candidate performs no reindex, owner
+restart, or authority-store mutation.
+
 ## [2026-08-16] Explicit-Module Tier-0 Retrieval Hardening
 
 R4 removes the verifier-found WSP 62 self-exemption: vector collection search

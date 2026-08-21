@@ -27,6 +27,10 @@ from .holo_query_service import (
     HoloIndexQueryOwnerService,
     validate_bind_host,
 )
+from .reddog_holoindex_query_replica_descriptor import (
+    QueryReplicaDescriptorError,
+    prove_and_verify_active_query_replica,
+)
 
 try:
     from fastapi import FastAPI, Request
@@ -51,6 +55,9 @@ def _http_status(result: Mapping[str, Any]) -> int:
         "QUERY_QUEUE_TIMEOUT": 503,
         "OWNER_BUSY": 503,
         "SEMANTIC_BACKEND_UNAVAILABLE": 503,
+        "HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE": 503,
+        "HOLOINDEX_TIER0_INCOMPLETE": 409,
+        "HOLOINDEX_TIER0_LOOKUP_FAILED": 503,
         "SEMANTIC_CANARY_EMPTY": 503,
         "HEALTH_UNAVAILABLE": 503,
         "MISSING_GENERATION_BINDING": 409,
@@ -225,6 +232,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--host", default=DEFAULT_BIND_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--parent-pid", type=int, default=0)
+    parser.add_argument("--canonical-ssd-path", default="")
+    parser.add_argument("--query-replica-root", default="")
     return parser
 
 
@@ -284,6 +293,22 @@ def _start_parent_process_watchdog(
     return thread
 
 
+def _serve_owner(owner: HoloIndexQueryOwnerService, host: str, port: int) -> None:
+    if FastAPI is not None:
+        import uvicorn
+        uvicorn.run(
+            create_holo_query_app(owner), host=host, port=port, workers=1,
+            access_log=False, log_level="warning",
+        )
+        return
+    server = create_stdlib_server(owner, host=host, port=port)
+    try:
+        server.serve_forever()
+    finally:
+        server.server_close()
+        owner.close()
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
@@ -304,33 +329,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     if len(token) < MIN_BEARER_TOKEN_CHARS:
         print(TOKEN_TOO_SHORT_ERROR)
         return 2
+    repo_root = runtime_repository_root(Path(__file__).resolve().parents[4])
+    if not args.canonical_ssd_path or not args.query_replica_root:
+        print("HOLOINDEX_QUERY_REPLICA_REQUIRED")
+        return 2
+    try:
+        replica_proof, _binding = prove_and_verify_active_query_replica(
+            replica_root=args.query_replica_root,
+            canonical_repo_root=repo_root,
+            canonical_ssd_path=args.canonical_ssd_path,
+        )
+    except (QueryReplicaDescriptorError, OSError, ValueError):
+        print("HOLOINDEX_QUERY_REPLICA_INVALID")
+        return 2
     if args.parent_pid:
         _start_parent_process_watchdog(int(args.parent_pid))
     owner = HoloIndexQueryOwnerService(
-        repo_root=runtime_repository_root(Path(__file__).resolve().parents[4]),
+        repo_root=repo_root,
+        canonical_ssd_path=args.canonical_ssd_path,
+        query_replica_root_proof=replica_proof,
         bearer_token=token,
     )
-    if FastAPI is not None:
-        import uvicorn
-        uvicorn.run(
-            create_holo_query_app(owner),
-            host=host,
-            port=int(args.port),
-            workers=1,
-            access_log=False,
-            log_level="warning",
-        )
-    else:
-        server = create_stdlib_server(
-            owner,
-            host=host,
-            port=int(args.port),
-        )
-        try:
-            server.serve_forever()
-        finally:
-            server.server_close()
-            owner.close()
+    _serve_owner(owner, host, int(args.port))
     return 0
 
 

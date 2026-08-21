@@ -1,26 +1,72 @@
 # HoloIndex - Brain Surgeon Level Code Intelligence System
 
+## Closed command-import boundary
+
+Bounded command modules such as `holo_index.cli.commands.bundle_json` load
+without importing the semantic/vector runtime. Legacy package exports remain
+available and load the full CLI only when requested or invoked. This keeps the
+RedDog direct-read audit path operable in its sealed Python environment without
+adding ChromaDB, NumPy, model, network, or canonical-store authority.
+
+## Canonical store isolation status
+
+The FoundUps MCP bridge now contains a Phase-1 candidate materializer for one
+immutable, generation-bound query replica. It copies the complete vector tree
+and one selected complete model snapshot from exact manifests while the
+canonical receipt and noncreating, ordered authority/maintenance leases remain
+retained through active publication and final validation. Model resolver
+markers are direct snapshot-root children; the public bridge API uses sealed
+dependencies and no-delete, no-replace quarantine for failed replica objects.
+Failed Windows model copies preserve partial bytes until the bridge quarantines
+the enclosing staging root; HoloIndex never consumes that partial state.
+HoloIndex itself
+still opens the storage root supplied by its supervisor; replica descriptor
+validation and owner routing are not implemented in this slice. The canonical
+store therefore remains quarantined for normal query-owner use until that
+follow-on is independently verified.
+
 ## Module Tier-0 retrieval
 
-Vector collection orchestration is split into
-`core/collection_search.py`; `core/search_engine.py` retains the compatible
-`_search_collection` entry point without carrying the 205-line implementation.
-The engine is 1,368 lines and the wrapper is 9 lines; every new extraction
-helper is at most 50 lines.
+Vector collection orchestration is split into `core/collection_search.py`;
+`core/search_engine.py` retains the compatible `_search_collection` entry
+point. Strict and interactive semantic searches resolve basename intent from
+`module_intent_snapshot.py`, a bounded, shell-free, HEAD-pinned `git ls-tree`
+module catalog cached by resolved repository root and HEAD. The catalog is
+independent of caller K, so a module cannot become falsely singular merely
+because another named module fell outside a top-K result bucket.
+Its Git stream must be nonempty and end in exactly one record terminator;
+every record is validated for UTF-8, header, modules-only normalized path, and
+exact/NFC-normalized case-folded duplication before depth filtering. Unicode
+control, format, and surrogate code points (`Cc`/`Cf`/`Cs`) fail closed on
+every record; visible Unicode letters and symbols remain valid and retain
+their original spelling. Valid ancestors and deeper descendants are accepted
+but only exact depth-three roots are exposed.
+Cache root identity uses platform `normcase`; reads/eviction/writes/clear are
+locked, while Git calls remain outside the lock. Concurrent cold callers may
+duplicate a bounded Git read, but the final cache cannot exceed eight entries.
 
-When a semantic query names one module by an exact basename supported by
-initial hits, or supplies one validated full module path, HoloIndex performs
+When a semantic query names one module uniquely in that complete catalog, or
+supplies one validated full module path, HoloIndex performs
 zero-to-two bounded exact metadata lookups in the admitted
 `navigation_docs` collection for that module's root `README.md` and
 `INTERFACE.md` (rows already present are deduplicated). Exact metadata rows
 declare `retrieval_provenance: exact_metadata` and a null vector similarity;
 they are ordered ahead of nested docs and are exempt from the vector floor.
+Canonical nullable metadata `tier0_module_target` carries the producer's
+generation-stable intent; exact-row provenance alone is not an intent claim.
 Strict owner mode replaces any vector-returned root rows with exactly one
 exact-filtered row for each contract; duplicates cannot satisfy completeness.
 All remaining evidence keeps the existing ranking. Ambiguous or implicit
 module queries do not receive Tier-0 promotion. Strict owner mode requires the
-complete pair; non-strict mode warns when incomplete. Query paths never read
-the working tree or reindex the store.
+catalog and complete pair. If the catalog is unavailable, non-strict mode logs
+one stable warning and continues with an explicit empty registry; it never
+falls back to hit-conditioned singularity. Query paths read bounded Git tree
+metadata but never walk/read working-tree module files or reindex the store.
+
+The exact `03c332294...` tree probe has 1,265 directory records, 145,619 raw
+bytes, and 168 exact `modules/<domain>/<module>` roots. The final reproducible
+paired probe measured 122.645 ms cold and 42.043 ms warm. Hard limits are 5
+seconds, 1 MiB Git output, and 4,096 module roots.
 
 ## [ALERT] REVOLUTIONARY EVOLUTION (2025-10-17): WSP 97 System Execution Prompting Protocol
 

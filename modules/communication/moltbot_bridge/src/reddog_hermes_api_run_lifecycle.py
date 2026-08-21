@@ -1,4 +1,4 @@
-"""Bounded run lifecycle for text-only upstream Hermes artifact generation."""
+"""Bounded lifecycle for upstream Hermes native leaf-delegated generation."""
 
 from __future__ import annotations
 
@@ -7,30 +7,23 @@ import secrets
 from typing import Any, Mapping
 
 from .reddog_artifact_generation_model_binding import artifact_generation_digest
-from .reddog_artifact_generation_provider_contract import ArtifactGenerationModelResult
+from .reddog_artifact_generation_model_binding import signed_principal_model_route
+from .reddog_artifact_generation_provider_contract import (
+    ArtifactGenerationModelResult,
+    validate_provider_artifact_contents,
+)
 from .reddog_hermes_api_confinement import strict_json_mapping
 from .reddog_hermes_api_event_log import (
     verify_hermes_postflight,
     verify_hermes_run_event_log,
 )
 
-_IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}")
 _TERMINAL = {"completed", "failed", "cancelled"}
 _RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}")
 
 
 def signed_hermes_route(binding: object) -> tuple[str, str] | None:
-    selection = binding.get("model_selection") if isinstance(binding, Mapping) else None
-    assignments = selection.get("role_assignments") if isinstance(selection, Mapping) else None
-    lead = str(selection.get("lead_model") or "") if isinstance(selection, Mapping) else ""
-    rows = [row for row in assignments or () if isinstance(row, Mapping)]
-    principals = [row for row in rows if row.get("role") == "principal"]
-    if len(principals) != 1 or principals[0].get("canonical_model_id") != lead:
-        return None
-    provider = str(principals[0].get("provider") or "")
-    if _IDENTIFIER.fullmatch(lead) is None or _IDENTIFIER.fullmatch(provider) is None:
-        return None
-    return lead, provider
+    return signed_principal_model_route(binding)
 
 
 def execute_hermes_artifact_run(
@@ -75,7 +68,7 @@ def execute_hermes_artifact_run(
         if status is None:
             return _stop(runner, headers, run_id, timeout_seconds, "FAIL_HERMES_RUN_STATUS")
         state = str(status.get("status") or "")
-        if state == "waiting_for_approval" or _shows_tool_activity(status):
+        if state == "waiting_for_approval" or _shows_forbidden_activity(status):
             return _stop(runner, headers, run_id, timeout_seconds, "FAIL_HERMES_TOOL_ACTIVITY")
         if state in _TERMINAL:
             return _finish_terminal(
@@ -88,7 +81,17 @@ def execute_hermes_artifact_run(
 def _request_payload(prompt, context, session_id, model, provider_id):
     return {
         "input": f"TASK:\n{prompt}\n\nGOVERNED CONTEXT:\n{context}",
-        "instructions": "Return only strict JSON with exactly one artifact_contents object.",
+        "instructions": (
+            "You are the RedDog parent worker. Before answering, make exactly one spawning "
+            "invocation of delegate_task using the single-goal form: goal=<complete task>, "
+            "context=<all needed governed context>, role='leaf', background=false. Never use "
+            "the tasks array, action=list, action=steer, action=stop, background delegation, "
+            "or a second delegate_task call. Wait for that leaf to finish. If it does not "
+            "finish successfully, return no artifact. Do not request approval or call another "
+            "tool. After the completed child result returns, independently format its useful "
+            "result as only strict JSON with exactly one non-empty artifact_contents object "
+            "mapping safe relative paths to text."
+        ),
         "session_id": session_id,
         "model": model,
         "provider": provider_id,
@@ -135,7 +138,7 @@ def _finish_terminal(runner, headers, run_id, timeout, status, model, provider_i
         return reject_hermes("FAIL_HERMES_EVENT_CONFINEMENT", invoked=True, observed=False)
     if not verify_hermes_postflight(runner.transport, headers, timeout):
         return reject_hermes("FAIL_HERMES_POSTFLIGHT_CONFINEMENT", invoked=True)
-    return _terminal(status, run_id, model, provider_id)
+    return _terminal(status, run_id, model, provider_id, native_delegation=True)
 
 
 def _stop(runner, headers, run_id, timeout, reason):
@@ -152,14 +155,20 @@ def _stop(runner, headers, run_id, timeout, reason):
     return reject_hermes(reason, invoked=True, observed=confirmed, abort=confirmed)
 
 
-def _terminal(status, run_id, model, provider_id):
-    if status.get("status") != "completed" or _shows_tool_activity(status):
+def _terminal(status, run_id, model, provider_id, *, native_delegation):
+    if status.get("status") != "completed" or _shows_forbidden_activity(status):
         return reject_hermes("FAIL_HERMES_RUN_REJECTED", invoked=True)
     artifacts = _artifacts(str(status.get("output") or ""))
     if artifacts is None:
         return reject_hermes("FAIL_HERMES_ARTIFACT_OUTPUT", invoked=True)
     digest = artifact_generation_digest(
-        {"artifacts": artifacts, "model": model, "provider": provider_id, "run_id": run_id}
+        {
+            "artifacts": artifacts,
+            "model": model,
+            "native_delegation": native_delegation,
+            "provider": provider_id,
+            "run_id": run_id,
+        }
     )
     return ArtifactGenerationModelResult(
         True, "MODEL_OK", artifacts, run_id, digest, True,
@@ -171,28 +180,12 @@ def _terminal(status, run_id, model, provider_id):
 def _artifacts(raw: str):
     value = strict_json_mapping(raw)
     artifacts = value.get("artifact_contents") if value and set(value) == {"artifact_contents"} else None
-    if not isinstance(artifacts, Mapping) or not artifacts:
-        return None
-    valid = all(
-        isinstance(path, str) and _safe_path(path) and isinstance(content, str)
-        and "\x00" not in content and len(content.encode("utf-8")) <= 500_000
-        for path, content in artifacts.items()
-    )
-    return dict(artifacts) if valid else None
+    return validate_provider_artifact_contents(artifacts)
 
 
-def _safe_path(path: str) -> bool:
-    normalized = path.replace("\\", "/")
-    return bool(normalized) and not normalized.startswith(("/", "//")) and all(
-        part not in {"", ".", ".."} for part in normalized.split("/")
-    ) and ":" not in normalized
-
-
-def _shows_tool_activity(value: Mapping[str, Any]) -> bool:
+def _shows_forbidden_activity(value: Mapping[str, Any]) -> bool:
     event = str(value.get("last_event") or "").lower()
-    return event.startswith(("tool", "approval", "subagent")) or any(
-        bool(value.get(key)) for key in ("tool_calls", "approval", "subagents")
-    )
+    return event.startswith("approval") or bool(value.get("approval"))
 
 
 __all__ = ["execute_hermes_artifact_run", "reject_hermes", "signed_hermes_route"]

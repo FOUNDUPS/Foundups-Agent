@@ -1,6 +1,6 @@
 """
-Tests for FoundUps MCP Bridge FastMCP SSE Server.
-=================================================
+Tests for FoundUps MCP Bridge FastMCP HTTP Server.
+==================================================
 
 WSP References:
 - WSP 96: Model Context Protocol Governance and Consensus
@@ -51,18 +51,44 @@ def mcp_server(repo_root):
     return build_mcp_server(repo_root=repo_root)
 
 
+def registered_tool_names(server):
+    """Project registered names across the supported FastMCP 2/3 APIs."""
+    if hasattr(server, "list_tools"):
+        tools = asyncio.run(server.list_tools())
+        return {tool.name for tool in tools}
+    tools = asyncio.run(server.get_tools())
+    return set(tools)
+
+
 class TestMCPServerSSE:
-    """Test FastMCP SSE server, read-only boundary, and authentication lifecycle."""
+    """Test canonical HTTP server plus deprecated launcher-name compatibility."""
 
     def test_mcp_server_registers_only_allowlisted_read_tools(self, mcp_server):
-        """Verify only allowlisted read-only tools are registered (33 tools)."""
-        tools = asyncio.run(mcp_server.get_tools())
-        tool_names = set(tools.keys())
+        """Verify only the current transitive-safe allowlist is registered."""
+        tool_names = registered_tool_names(mcp_server)
 
         for allowlisted_tool in REMOTE_READ_ONLY_ALLOWLIST:
             assert allowlisted_tool in tool_names, f"Expected allowlisted tool {allowlisted_tool} to be registered"
 
-        assert len(tools) == len(REMOTE_READ_ONLY_ALLOWLIST)
+        assert len(tool_names) == len(REMOTE_READ_ONLY_ALLOWLIST)
+        assert "holo_query_bundle" in tool_names
+        assert not tool_names.intersection({
+            "holo_search", "holo_related", "holo_failure_memory",
+            "holo_pattern_search", "holo_task_packet", "search_repo",
+            "get_recent_changes", "get_file_diff", "get_diff_summary",
+            "get_change_impact_score", "get_reddog_state",
+            "get_reddog_analysis_context", "get_overseer_summary",
+            "get_hot_modules", "get_repeated_failures", "get_active_risks",
+            "get_recommended_focus", "get_prompt_context_packet",
+        })
+
+    def test_remote_tools_have_conservative_annotations(self, mcp_server):
+        for name in REMOTE_READ_ONLY_ALLOWLIST:
+            tool = asyncio.run(mcp_server.get_tool(name)).to_mcp_tool()
+            assert tool.annotations.readOnlyHint is True
+            assert tool.annotations.destructiveHint is False
+            assert tool.annotations.idempotentHint is True
+            assert tool.annotations.openWorldHint is False
 
     def test_mutation_and_dispatch_tools_are_completely_absent(self, mcp_server):
         """
@@ -70,8 +96,7 @@ class TestMCPServerSSE:
         Verify mutation/execution tools are strictly ABSENT from remote registration
         (not merely returning disabled_in_v1).
         """
-        tools = asyncio.run(mcp_server.get_tools())
-        tool_names = set(tools.keys())
+        tool_names = registered_tool_names(mcp_server)
 
         disallowed = [
             "coordinate_mission",
@@ -86,35 +111,37 @@ class TestMCPServerSSE:
 
     def test_tool_signatures_exclude_repo_root(self, mcp_server):
         """Verify repo_root is stripped from tool input schema."""
-        tree_tool = asyncio.run(mcp_server.get_tool("get_repo_tree"))
-        mcp_tree = tree_tool.to_mcp_tool()
-        properties = mcp_tree.inputSchema.get("properties", {})
-        assert "repo_root" not in properties
-        assert "path" in properties
-        assert "depth" in properties
+        holo = asyncio.run(mcp_server.get_tool("holo_query_bundle")).to_mcp_tool()
+        schema = holo.inputSchema["properties"]
+        assert "repo_root" not in schema
+        assert schema["query"]["minLength"] == 1
+        assert schema["query"]["maxLength"] == 16000
+        assert schema["limit"]["minimum"] == 1
+        assert schema["limit"]["maximum"] == 20
+        assert schema["retrieval_mode"]["enum"] == ["semantic", "lexical"]
+        paths = schema["must_include"]["anyOf"][0]
+        assert paths["maxItems"] == 40
+        assert paths["items"]["maxLength"] == 1024
 
-    def test_tool_execution_through_fastmcp(self, mcp_server):
-        """Verify executing read tool through FastMCP returns bridge result."""
-        wsp_tool = asyncio.run(mcp_server.get_tool("get_wsp_docs"))
-        result = wsp_tool.fn()
-        assert isinstance(result, dict)
-        assert result.get("status") == "ok"
-        assert "wsp_docs" in result.get("data", {})
+    def test_local_bridge_tools_are_not_remotely_registered(self, mcp_server):
+        """Legacy local perception APIs do not inherit remote authority."""
+        assert registered_tool_names(mcp_server) == {"holo_query_bundle"}
 
-    def test_reddog_state_and_analysis_context(self, mcp_server):
-        """Verify get_reddog_state and get_reddog_analysis_context through FastMCP."""
-        state_tool = asyncio.run(mcp_server.get_tool("get_reddog_state"))
-        state_res = state_tool.fn()
-        assert isinstance(state_res, dict)
-        assert state_res.get("status") == "ok"
-        assert "git" in state_res.get("data", {})
-
-        analyze_tool = asyncio.run(mcp_server.get_tool("get_reddog_analysis_context"))
-        analyze_res = analyze_tool.fn(prompt="Verify RedDog live context perception")
-        assert isinstance(analyze_res, dict)
-        assert analyze_res.get("status") == "ok"
-        assert analyze_res.get("meta", {}).get("source") == "reddog_context"
-        assert "git_state" in analyze_res.get("data", {})
+    def test_governed_holo_bundle_through_fastmcp(self, mcp_server):
+        """Verify the only remotely exposed Holo surface is store-free on canary."""
+        tool = asyncio.run(mcp_server.get_tool("holo_query_bundle"))
+        response = tool.fn(
+            query="WSP memory bundle", limit=1,
+            retrieval_mode="lexical", bundle_only=True,
+        )
+        assert response.get("status") == "ok"
+        data = response.get("data", {})
+        assert data.get("schema_version") == "reddog_holo_query_bundle_mcp.v1"
+        assert data.get("ok") is True
+        assert data.get("owner_attempts") == 0
+        assert data.get("no_holoindex_reindex_performed") is True
+        assert data.get("public_projection_bounded") is True
+        assert 0 < data.get("public_projection_bytes", 0) <= 256 * 1024
 
     def test_mcp_bridge_status_query(self):
         """Verify get_mcp_bridge_status returns dictionary."""
@@ -152,9 +179,9 @@ class TestMCPServerSSE:
         assert dup_res.get("status") == "running"
         assert dup_res.get("already_running") is True
 
-        # 1. Unauthenticated request to /sse -> 401
+        # 1. Unauthenticated request to canonical /mcp -> 401
         try:
-            req = urllib.request.Request(f"http://127.0.0.1:{port}/sse")
+            req = urllib.request.Request(f"http://127.0.0.1:{port}/mcp")
             urllib.request.urlopen(req, timeout=2.0)
             pytest.fail("Unauthenticated request should have failed with 401")
         except urllib.error.HTTPError as exc:
@@ -162,7 +189,7 @@ class TestMCPServerSSE:
 
         # 2. URL query token (?token=...) MUST BE REJECTED with 401 (P0: prevent secret logging)
         try:
-            req = urllib.request.Request(f"http://127.0.0.1:{port}/sse?token={auth_token}")
+            req = urllib.request.Request(f"http://127.0.0.1:{port}/mcp?token={auth_token}")
             urllib.request.urlopen(req, timeout=2.0)
             pytest.fail("URL query token request should have failed with 401 (Bearer header required)")
         except urllib.error.HTTPError as exc:
@@ -206,6 +233,13 @@ class TestMCPServerFailureBoundaries:
 
         with pytest.raises(ValueError, match="auth_token is required when require_auth=True"):
             build_asgi_app(repo_root=repo_root, auth_token="   ", require_auth=True)
+
+    def test_build_asgi_app_is_loopback_only(self, repo_root):
+        with pytest.raises(ValueError, match="loopback-only"):
+            build_asgi_app(
+                repo_root=repo_root, auth_token="dev-token",
+                require_auth=False, host="0.0.0.0",
+            )
 
     def test_fail_closed_without_token_when_auth_required(self, repo_root):
         """P0 Security: Server refuses to start without auth token when auth is required."""

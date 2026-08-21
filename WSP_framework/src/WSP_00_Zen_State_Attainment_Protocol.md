@@ -54,7 +54,7 @@ onboarding, routing, or continuity work, read
 `WSP_knowledge/red_dog_external_state/BOOTSTRAP.md`.
 
 Justification:
-BOOTSTRAP.md provides the curated RedDog/Cursor/ChatGPT continuity
+BOOTSTRAP.md provides curated historical RedDog/Cursor/ChatGPT continuity
 read-order. It is not raw transcript memory.
 
 ## WSP_00 Launch Prompt (01(02) -> 0102 -> Follow WSP)

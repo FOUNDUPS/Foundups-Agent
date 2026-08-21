@@ -1,5 +1,16 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+## RedDog governed repository-state v2 intake
+
+Start Operations supplies a JavaScript-minted
+`reddog_governed_git_repo_state.v2` receipt; Python never launches ambient Git.
+The embedded executable v1 receipt is a digest-only public projection: raw Git
+and fixed PowerShell verifier paths remain inside the extension authority.
+`observe_repo_state()` requires exact bounded fields, complete equal identities,
+link counts, and platform signature/verifier evidence in addition to the body
+digest. This is fail-closed structural/integrity validation, not keyed origin
+authentication, and it does not attest Git DLL/helper closure.
+
 ## Canonical elevated-authority consensus capability
 
 [OBSERVED] HIGH delegated-authority requests can now be projected onto exact
@@ -275,12 +286,17 @@ not repository-local classes that merely carry their names:
   the already-authorized paths in the isolated worktree.
 - `hermes_api` calls the installed upstream Hermes Agent `/v1/runs` API through
   authenticated loopback HTTP. It requires the fixed `reddogartifact` profile,
-  the pinned upstream version, bearer authentication, a complete disabled
-  API-server toolset inventory, zero visible skills, and the same closed surface
-  after the run. The adapter drains the complete run-event queue and rejects
-  any tool, approval, or subagent event, including events overwritten in the
-  pollable `last_event` field. Hermes performs text generation only; Foundups retains all
-  file, worktree, commit, verification, PR, and merge effects.
+  Hermes API `0.20.4`, bearer authentication, exactly the native `delegation`
+  toolset (`delegate_task` only), zero visible skills, and the same surface
+  after the run. The complete event queue must prove one stable completed leaf
+  identity with explicit empty file-read/write arrays and ordered delegate
+  completion before the final terminal event. Any second child, other tool, approval,
+  failed/interrupted child, effect, or drift rejects. Foundups retains all file,
+  worktree, commit, verification, PR, and merge effects.
+
+Both providers pass their returned map through the same bounded validator:
+canonical relative paths only, no traversal/absolute/device paths, non-empty
+UTF-8 text, and the author-stage per-file and aggregate size ceilings.
 
 Both modes consume the existing signed model-runtime binding and remain below
 the AgentDB/WRE work-order, WSP 15, exact-path, commit, and independent-verifier
@@ -293,11 +309,11 @@ class is presented as the upstream Hermes runtime.
 The Hermes bearer key is read only from
 `<resident-runtime-root>/hermes-api/api-key` through the confined runtime-file
 reader. It never appears in prompts, argv, receipts, logs, or repository files.
-The upstream Hermes API currently executes tools in its server process and does
-not expose split-runtime confinement. Therefore any enabled toolset, visible
-skill, approval request, tool event, subagent event, or pre/post-run policy
-drift rejects the artifact result. This is an artifact-generation adapter, not
-Hermes shell authority.
+The upstream Hermes API executes tools in its server process and does not expose
+split-runtime confinement. Therefore only native leaf delegation is enabled;
+the leaf inherits no file, terminal, browser, web, MCP, memory, or approval
+tool. The legacy repository `HermesJobExecutor` remains policy/dry-run
+scaffolding and is not presented as the upstream production runtime.
 
 The external signer uses a stable signer-owned system-service command:
 `reddog_signer_system_service_entrypoint`. Its v2 run packet contains the

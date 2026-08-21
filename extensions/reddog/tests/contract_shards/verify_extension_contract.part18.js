@@ -67,39 +67,40 @@ const testSessionCredential = JSON.stringify({
   principal_id: 'principal-012',
   foundup_scope: ['foundups_agent']
 });
+const residentRunnerAcceptedResult = {
+  decision: 'RESIDENT_ARCHITECT_SESSION_ACCEPT',
+  accepted: true,
+  resident_backend_invoked: true,
+  cycle_id: 'sha256:cycle',
+  python_invocation_performed: false,
+  snapshot_id: 'sha256:snapshot',
+  final_snapshot_id: 'sha256:final',
+  swarm_id: 'sha256:swarm',
+  initial_status: 'READY',
+  final_status: 'READY',
+  task_count: 5,
+  reports_persisted: 5,
+  readonly_audit_tasks_enqueued: true,
+  readonly_audit_tasks_executed: true,
+  architect_action: 'FIX',
+  architect_next_slice: 'REDDOG_NEXT_PHASE1',
+  architect_determination_id: 'sha256:architect',
+  queue_candidate_count: 1,
+  no_repo_mutation_performed: true,
+  no_holoindex_reindex_performed: true,
+  no_hermes_dispatch_performed: true,
+  no_worktree_operation_performed: true,
+  no_pr_created: true,
+  no_live_foundup_enqueue_performed: true,
+  coding_worker_spawned: false,
+  rejection_reasons: []
+};
 const residentBridgeResult = orchestrator.runResidentArchitectSessionBridge(null, 'audit work', Object.assign({}, residentGroundingOptions, {
   explicitResidentArchitectSessionRequested: true, readonlyAuditPlanningAllowed: true,
   conversationSessionCredential: testSessionCredential,
   sessionRunner: (payload) => {
     residentRunnerPayload = payload;
-    return {
-      decision: 'RESIDENT_ARCHITECT_SESSION_ACCEPT',
-      accepted: true,
-      resident_backend_invoked: true,
-      cycle_id: 'sha256:cycle',
-      python_invocation_performed: false,
-      snapshot_id: 'sha256:snapshot',
-      final_snapshot_id: 'sha256:final',
-      swarm_id: 'sha256:swarm',
-      initial_status: 'READY',
-      final_status: 'READY',
-      task_count: 5,
-      reports_persisted: 5,
-      readonly_audit_tasks_enqueued: true,
-      readonly_audit_tasks_executed: true,
-      architect_action: 'FIX',
-      architect_next_slice: 'REDDOG_NEXT_PHASE1',
-      architect_determination_id: 'sha256:architect',
-      queue_candidate_count: 1,
-      no_repo_mutation_performed: true,
-      no_holoindex_reindex_performed: true,
-      no_hermes_dispatch_performed: true,
-      no_worktree_operation_performed: true,
-      no_pr_created: true,
-      no_live_foundup_enqueue_performed: true,
-      coding_worker_spawned: false,
-      rejection_reasons: []
-    };
+    return residentRunnerAcceptedResult;
   }
 }));
 assert.strictEqual(residentRunnerPayload.conversation_session_credential, testSessionCredential,
@@ -108,6 +109,7 @@ assert.strictEqual(Object.prototype.hasOwnProperty.call(residentRunnerPayload.re
   'RAS-005: credential must not enter the durable intent');
 assert.strictEqual(residentRunnerPayload.explicit_resident_architect_session_requested, true, 'RAS-005: runner payload explicit flag');
 assert.strictEqual(residentRunnerPayload.red_dog_intent.schema_version, 'reddog_intent.v2', 'RPI-005: runner receives typed RedDogIntent');
+assert.deepStrictEqual(pkg.capabilities, { untrustedWorkspaces: { supported: false }, virtualWorkspaces: { supported: false } }, 'VS Code workspace capability boundary must fail closed');
 assert.strictEqual(residentRunnerPayload.red_dog_intent.repo_write_authority_requested, false, 'RPI-005: runner intent does not request repo write authority');
 assert.strictEqual(residentBridgeResult.accepted, true, 'RAS-005: injected resident runner acceptance preserved');
 assert.strictEqual(residentBridgeResult.red_dog_intent_submitted, true, 'RPI-005: bridge result records intent submission');
@@ -194,7 +196,9 @@ try {
   assert(!safeStatus.includes('[git context unavailable:'),
     'GGSD-001: option-shaped path text remains one validated safe.directory value');
   const safeReadiness = orchestrator.governedGitReadiness(safeDirectoryRoot);
-  assert.strictEqual(safeReadiness.schema_version, 'reddog_governed_git_readiness.v1');
+  assert.strictEqual(safeReadiness.schema_version, 'reddog_governed_git_readiness.v2');
+  assert(safeReadiness.git_executable_binding,
+    'ready Git evidence must bind the verified executable');
   assert.strictEqual(safeReadiness.canonical_root_validated, true, 'GGSD-002: canonical root is proven');
   assert.strictEqual(safeReadiness.git_metadata_validated, true, 'GGSD-003: Git metadata is proven');
   assert.strictEqual(safeReadiness.safe_directory_wildcard, false, 'GGSD-004: wildcard trust is forbidden');
@@ -230,5 +234,12 @@ try {
 }
 
 require('./test_governed_git_context_hardening');
+require('./test_governed_git_environment');
+require('./test_governed_git_executable');
+require('./test_governed_git_production_scan');
+require('./test_governed_git_ref_formats');
+require('./test_bridge_python_environment');
+require('./test_reddog_candidate_wsp62');
+require('./test_package_surface');
 
 console.log('RedDog extension contract checks passed.');

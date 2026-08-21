@@ -145,67 +145,69 @@ def read_file(repo_root: Path, path: str) -> Dict[str, Any]:
         return error_response(str(e))
 
 
+def _run_ripgrep_utf8(
+    repo_root: Path, search_path: Path, query: str, top_k: int,
+) -> subprocess.CompletedProcess:
+    """Run ripgrep with strict UTF-8 decoding so host locales cannot intrude."""
+
+    command = [
+        "rg",
+        "--json",
+        "--max-count", str(top_k * 2),
+        "--ignore-case",
+        query,
+        str(search_path),
+    ]
+    return subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="strict",
+        timeout=30,
+        cwd=str(repo_root),
+    )
+
+
+def _parse_ripgrep_matches(stdout: str) -> List[Dict[str, Any]]:
+    """Decode only canonical ripgrep match records and drop blocked paths."""
+
+    matches = []
+    for line in stdout.strip().split("\n"):
+        if not line:
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if item.get("type") != "match":
+            continue
+        data = item.get("data", {})
+        file_path = data.get("path", {}).get("text", "")
+        if any(blocked in file_path.lower() for blocked in BLOCKED_PATTERNS):
+            continue
+        matches.append({
+            "path": file_path,
+            "line_number": data.get("line_number"),
+            "text": data.get("lines", {}).get("text", "").strip()[:200],
+        })
+    return matches
+
+
 def search_repo(
     repo_root: Path,
     query: str,
     path: str = ".",
     top_k: int = 20,
 ) -> Dict[str, Any]:
-    """
-    Search repository using ripgrep.
+    """Search the allowed repository path through strict-UTF-8 ripgrep."""
 
-    Args:
-        repo_root: Repository root path
-        query: Search query (regex supported)
-        path: Relative path to search in (default ".")
-        top_k: Maximum results (default 20)
-
-    Returns:
-        MCPResponse with search results
-    """
     try:
         search_path = (repo_root / path).resolve()
         if not _is_path_allowed(search_path, repo_root):
             return error_response(f"Path not allowed: {path}")
-
-        # Use ripgrep for fast search
-        cmd = [
-            "rg",
-            "--json",
-            "--max-count", str(top_k * 2),  # Get extra for filtering
-            "--ignore-case",
-            query,
-            str(search_path),
-        ]
-
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=30,
-            cwd=str(repo_root),
-        )
-
-        matches = []
-        for line in result.stdout.strip().split("\n"):
-            if not line:
-                continue
-            try:
-                item = json.loads(line)
-                if item.get("type") == "match":
-                    data = item.get("data", {})
-                    file_path = data.get("path", {}).get("text", "")
-                    # Filter blocked paths
-                    if any(blocked in file_path.lower() for blocked in BLOCKED_PATTERNS):
-                        continue
-                    matches.append({
-                        "path": file_path,
-                        "line_number": data.get("line_number"),
-                        "text": data.get("lines", {}).get("text", "").strip()[:200],
-                    })
-            except json.JSONDecodeError:
-                continue
-
+        result = _run_ripgrep_utf8(repo_root, search_path, query, top_k)
+        matches = _parse_ripgrep_matches(result.stdout)
         return ok_response(
             {"matches": matches[:top_k], "total_found": len(matches)},
             source="repo",
@@ -217,9 +219,9 @@ def search_repo(
         return error_response("Search timeout (30s)")
     except FileNotFoundError:
         return error_response("ripgrep (rg) not found - install with: choco install ripgrep")
-    except Exception as e:
-        logger.error(f"[MCP] search_repo error: {e}")
-        return error_response(str(e))
+    except Exception as error:
+        logger.error(f"[MCP] search_repo error: {error}")
+        return error_response(str(error))
 
 
 def get_recent_changes(repo_root: Path, limit: int = 50) -> Dict[str, Any]:

@@ -4,8 +4,9 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { sameCanonicalPath } = require('./governed_git_readiness');
+const { noFollowPathEntry } = require('./governed_git_storage');
 
-const SCHEMA = 'reddog_git_projection_receipt.v1';
+const SCHEMA = 'reddog_git_projection_receipt.v2';
 const MAX_CHANGED_PATHS = 500;
 const MAX_IGNORED_PATHS = 5000;
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
@@ -40,13 +41,23 @@ function parsePaths(value, cap) {
     ? null : paths;
 }
 
+function failedOutput(value) {
+  return value.startsWith('[git context unavailable') || value.includes(TRUNCATED);
+}
+
 function concealedIndex(output) {
   const result = output(['ls-files', '-v', '-z'], 1000000);
-  if (result.startsWith('[git context unavailable') || result.includes(TRUNCATED)) return null;
+  if (failedOutput(result)) return null;
   return result.split('\0').filter(Boolean).some((record) => {
     const tag = record.charAt(0);
     return tag === 'S' || (/[a-z]/.test(tag) && tag === tag.toLowerCase());
   });
+}
+
+function semanticHeadState(output, receiptState) {
+  const commit = output(['rev-parse', '--verify', 'HEAD^{commit}'], 256);
+  if (!failedOutput(commit)) return { hasHead: true };
+  return receiptState === 'unborn' ? { hasHead: false } : null;
 }
 
 function changeSets(hasHead, output) {
@@ -79,6 +90,56 @@ function existingFileIdentity(root, relPath, policy) {
   }
 }
 
+function sameDirectoryIdentity(left, right) {
+  return right.isDirectory() && !right.isSymbolicLink()
+    && left.dev === right.dev && left.ino === right.ino;
+}
+
+function stableDirectory(candidate, before) {
+  if (!before.isDirectory() || before.isSymbolicLink()) return null;
+  const canonical = fs.realpathSync(candidate);
+  const after = noFollowPathEntry(candidate);
+  return after.state === 'present' && sameCanonicalPath(canonical, candidate)
+    && sameDirectoryIdentity(before, after.metadata)
+    ? { candidate, metadata: after.metadata } : null;
+}
+
+function directoriesStillStable(values) {
+  return values.every((value) => {
+    const current = noFollowPathEntry(value.candidate);
+    return current.state === 'present'
+      && sameDirectoryIdentity(value.metadata, current.metadata)
+      && sameCanonicalPath(fs.realpathSync(value.candidate), value.candidate);
+  });
+}
+
+function projectionPathState(root, relPath) {
+  try {
+    const canonicalRoot = fs.realpathSync(path.resolve(root));
+    const components = relPath.split('/');
+    const parents = [];
+    let candidate = canonicalRoot;
+    for (const component of components.slice(0, -1)) {
+      candidate = path.join(candidate, component);
+      const entry = noFollowPathEntry(candidate);
+      if (entry.state === 'absent') {
+        return directoriesStillStable(parents)
+          && noFollowPathEntry(candidate).state === 'absent' ? 'absent' : '';
+      }
+      if (entry.state !== 'present') return '';
+      const stable = stableDirectory(candidate, entry.metadata);
+      if (!stable) return '';
+      parents.push(stable);
+    }
+    const final = noFollowPathEntry(path.join(candidate, components.at(-1)));
+    if (final.state === 'error' || !directoriesStillStable(parents)) return '';
+    const repeated = noFollowPathEntry(path.join(candidate, components.at(-1)));
+    return repeated.state === final.state ? final.state : '';
+  } catch (err) {
+    return '';
+  }
+}
+
 function admittedRecords(root, records, policy) {
   const seen = new Set();
   const existing = new Set();
@@ -89,8 +150,9 @@ function admittedRecords(root, records, policy) {
     if (seen.has(key)) return null;
     seen.add(key);
     if (policy.isTargetReadPathDenied(record.relPath)) continue;
-    const full = path.resolve(root, record.relPath);
-    if (!fs.existsSync(full)) {
+    const state = projectionPathState(root, record.relPath);
+    if (!state) return null;
+    if (state === 'absent') {
       admitted.push({ ...record, exists: false });
       continue;
     }
@@ -111,13 +173,13 @@ function intersects(ignored, records) {
   }));
 }
 
-function enumerate(root, output, policy) {
+function enumerate(root, output, policy, receiptState) {
   const concealed = concealedIndex(output);
   if (concealed === null || concealed) return null;
-  const head = output(['rev-parse', '--verify', '--quiet', 'HEAD'], 256);
-  const sets = changeSets(!head.startsWith('[git context unavailable'), output);
-  if (Object.values(sets).some((value) =>
-    value.startsWith('[git context unavailable') || value.includes(TRUNCATED))) return null;
+  const head = semanticHeadState(output, receiptState);
+  if (!head) return null;
+  const sets = changeSets(head.hasHead, output);
+  if (Object.values(sets).some(failedOutput)) return null;
   const tracked = parsePaths(sets.tracked, MAX_CHANGED_PATHS);
   const untracked = parsePaths(sets.untracked, MAX_CHANGED_PATHS);
   const ignored = parsePaths(sets.ignored, MAX_IGNORED_PATHS);
@@ -137,6 +199,24 @@ function statIdentity(stat) {
     stat.mtimeMs, stat.ctimeMs].join(':');
 }
 
+function readOpenedBytes(handle, size, maxSize) {
+  if (!Number.isSafeInteger(size) || size < 0 || size > maxSize) return null;
+  const bytes = Buffer.allocUnsafe(size);
+  let offset = 0;
+  while (offset < size) {
+    const count = fs.readSync(handle, bytes, offset, size - offset, offset);
+    if (!Number.isInteger(count) || count <= 0 || count > size - offset) return null;
+    offset += count;
+  }
+  return bytes;
+}
+
+function openedFileMatches(before, opened, maxSize) {
+  return opened.isFile() && !opened.isSymbolicLink() && opened.nlink === 1
+    && Number.isSafeInteger(opened.size) && opened.size >= 0 && opened.size <= maxSize
+    && statIdentity(before) === statIdentity(opened);
+}
+
 function readStable(root, record, policy) {
   const resolved = existingFileIdentity(root, record.relPath, policy);
   if (!resolved || resolved.key !== comparisonKey(record.canonicalFullPath)) return null;
@@ -148,7 +228,9 @@ function readStable(root, record, policy) {
     handle = fs.openSync(resolved.full,
       fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
     const opened = fs.fstatSync(handle);
-    const bytes = fs.readFileSync(handle);
+    if (!openedFileMatches(before, opened, MAX_FILE_BYTES)) return null;
+    const bytes = readOpenedBytes(handle, opened.size, MAX_FILE_BYTES);
+    if (!bytes) return null;
     const afterHandle = fs.fstatSync(handle);
     const afterPath = fs.lstatSync(resolved.full);
     if (statIdentity(before) !== statIdentity(opened)
@@ -223,7 +305,7 @@ function changedSetDigest(changed) {
   return digest([Buffer.from(parts.join('\0'), 'utf8')]);
 }
 
-function receipt(prepared, captured, finalFingerprint) {
+function receipt(prepared, captured, finalFingerprint, finalExecutable) {
   return Object.freeze({ schema_version: SCHEMA,
     captured_at: new Date().toISOString(), point_in_time_only: true,
     root_digest: digest([Buffer.from(prepared.canonicalRoot, 'utf8')]),
@@ -233,7 +315,8 @@ function receipt(prepared, captured, finalFingerprint) {
     ignored_excluded_count: prepared.changed.ignoredExcludedCount,
     ignored_excluded_set_digest: prepared.changed.ignoredExcludedSetDigest,
     git_start_fingerprint: prepared.receipt.fingerprint,
-    git_final_fingerprint: finalFingerprint });
+    git_final_fingerprint: finalFingerprint,
+    git_executable_binding: finalExecutable });
 }
 
 function create(policy) {
@@ -242,7 +325,7 @@ function create(policy) {
     resolveSafeRepoFile: policy.resolveSafeRepoFile
   });
   return Object.freeze({
-    enumerate: (root, output) => enumerate(root, output, fixed),
+    enumerate: (root, output, receiptState) => enumerate(root, output, fixed, receiptState),
     capture: (root, changed) => capture(root, changed, fixed),
     render, changedSetDigest, receipt
   });

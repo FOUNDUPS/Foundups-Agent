@@ -1,5 +1,11 @@
 # moltbot_bridge Roadmap
 
+- COMPLETE: RedDog repository-state v2 intake consumes only the extension's
+  digest-only executable v1 public projection and strictly validates bounded
+  identity/signature/verifier shape. Raw executable paths and ambient Python Git
+  subprocesses are absent. Independent origin authentication and Git DLL/helper
+  closure remain explicitly outside this receipt proof.
+
 - COMPLETE: canonical HIGH-tier consensus capability binds the exact delegated
   request, author model/runtime evidence, sovereign authorization, reviewer
   principal/provider/role membership, distinct reviewer keys/models/runtime
@@ -163,9 +169,10 @@
   fields remain null; configuration is never evidence of service.
 - Complete: actual upstream OpenClaw Gateway and Hermes API artifact providers
   emit the canonical effect receipt. OpenClaw is exact-session sandboxed;
-  Hermes is text-only and requires a disabled tool/skill surface before and
-  after each run plus a complete effect-free SSE event history. Neither
-  provider owns Foundups repository effects.
+  Hermes requires one native, stable, completed leaf delegate with only
+  `delegate_task`, zero skills, and zero child file effects before and after
+  each run. Neither provider owns Foundups repository effects. Live bounded
+  GotJunk canaries now prove both upstream runtimes can return accepted artifacts.
 - Next: bind authoritative served provider/model and normalized usage evidence
   from both upstream response surfaces without trusting requested identity.
 - Next: extract the atomic store from the focused contract module after
@@ -255,7 +262,8 @@ second-brain database.
 ### POC
 
 1. `FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1`
-   - Status: implementation in PR #1015.
+   - Status: LANDED in PR #1015 (`3fe2feb72`); current code remains a
+     read-only deterministic assembly surface, not a live memory writer.
    - Entity: `foundups-agent`.
    - Canonical adapter: `src/foundup_memex_current_state.py`.
    - Compatibility component: `src/foundup_brain_current_state.py`.

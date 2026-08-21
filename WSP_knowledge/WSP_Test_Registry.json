@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1519,
-  "quarantined_tests": 263,
+  "total_tests": 1544,
+  "quarantined_tests": 266,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -1558,6 +1558,19 @@
       "description": "Tests for isolated persisted-state collection snapshot verification."
     },
     {
+      "id": "test::holo_index::tests::test_isolated_collection_snapshot_runtime",
+      "path": "holo_index/tests/test_isolated_collection_snapshot_runtime.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Trusted-runtime contracts for the isolated collection snapshot child."
+    },
+    {
       "id": "test::holo_index::tests::test_knowledge_full_body_chunking",
       "path": "holo_index/tests/test_knowledge_full_body_chunking.py",
       "owner": "holo_index",
@@ -1612,6 +1625,23 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::holo_index::tests::test_module_intent_snapshot",
+      "path": "holo_index/tests/test_module_intent_snapshot.py",
+      "owner": "holo_index",
+      "suite_class": "operational",
+      "shard_id": "holo-index-operational",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Bounded Git-tree authority tests for module-name intent."
     },
     {
       "id": "test::holo_index::tests::test_module_scoring_subroutine",
@@ -1846,7 +1876,7 @@
       "path": "holo_index/tests/test_selenium_run_history_mission.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -1888,13 +1918,15 @@
       "id": "test::holo_index::tests::test_tier0_retrieval_hardening",
       "path": "holo_index/tests/test_tier0_retrieval_hardening.py",
       "owner": "holo_index",
-      "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-04",
+      "suite_class": "operational",
+      "shard_id": "holo-index-operational",
       "capabilities": [],
-      "execution_type": "unit",
-      "collectable": true,
-      "timeout_s": 180,
-      "quarantine_reasons": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
       "description": "Generic module Tier-0 retrieval hardening regressions.\n\nSlice: HOLOINDEX_TIER0_RETRIEVAL_HARDENING_PHASE1\n\nAll collection behavior is deterministic and in-memory. No persistent store,\nmodel, network, reindex, or filesystem mutation is used."
     },
     {
@@ -2256,6 +2288,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Unit Tests for Confidence Tracker\n\nTests decay-based confidence algorithm with time-weighted scoring,\nfailure multiplier, and JSONL audit trail.\n\nWSP Compliance:\n- WSP 5 (Test Coverage): Comprehensive unit tests\n- WSP 6 (Test Audit): Documents test coverage"
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_kimi_k3_request_truth",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_kimi_k3_request_truth.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Request-truth contract tests for the exact OpenRouter Kimi K3 route."
     },
     {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_autoresearch_campaign_execution",
@@ -2729,7 +2774,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_provider_execution_control_evidence.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15422,7 +15467,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/src/test_mapping.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15431,11 +15476,24 @@
       "description": "MCP Bridge Test Mapping Utility.\n\nMaps modules and files to their test coverage.\n\nProvides:\n- Module-to-test file mapping\n- Test coverage detection\n- Coverage gap identification\n\nWSP References:\n- WSP 5: Test Coverage Protocol\n- WSP 49: Module Structure (tests/ directory standard)"
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_bundle_public",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_bundle_public.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Hostile contracts for the public RedDog Holo query bundle projection."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_service",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15448,7 +15506,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_edges.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15461,7 +15519,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_embedding_generation.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15474,7 +15532,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_fastapi_adapter.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15487,7 +15545,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_http.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [
         "process"
       ],
@@ -15498,11 +15556,24 @@
       "description": "Transport-level tests for the dependency-free HoloIndex HTTP runtime."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_service_replica_routing",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_replica_routing.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exact dual-path routing contracts for the resident Holo owner."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_service_runtime_safety",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_runtime_safety.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15515,23 +15586,35 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_supervisor.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [
-        "network",
         "process"
       ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Tests for the host-owned HoloIndex query-service lifecycle boundary."
+      "description": "Supervisor startup and runtime-selection contracts."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_service_supervisor_bindings",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_supervisor_bindings.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Supervisor canonical and replica binding contracts."
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_service_supervisor_cold_start",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_supervisor_cold_start.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [
         "network"
       ],
@@ -15542,11 +15625,39 @@
       "description": "Real-transport cold-start regression for the Holo owner supervisor."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_service_supervisor_health",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_supervisor_health.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Supervisor authenticated health-boundary contracts."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_service_supervisor_lifecycle",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_supervisor_lifecycle.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Supervisor lifecycle and live-probe contracts."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_service_supervisor_platform",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_supervisor_platform.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15555,11 +15666,39 @@
       "description": "Platform-launch and constructor-bound tests for the owner supervisor."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_snapshot_adapter",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_snapshot_adapter.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Chroma-shaped read-adapter compatibility for immutable snapshots."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_query_snapshot_codec",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_snapshot_codec.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "operational",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-operational",
+      "capabilities": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Synthetic contracts for the immutable Holo collection snapshot codec."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_holo_tools_foundup_validation",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_holo_tools_foundup_validation.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15572,7 +15711,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_bridge.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15581,11 +15720,26 @@
       "description": "Tests for FoundUps MCP Bridge.\n\nVerifies:\n- Response schema consistency\n- Repo perception tools\n- Doc access tools\n- Overseer read hooks\n- Execution stubs return disabled status"
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_mcp_launcher_http",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_launcher_http.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Unit contracts for worktree-safe Streamable HTTP launcher routing."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_mcp_server_sse",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_server_sse.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [
         "network"
       ],
@@ -15593,14 +15747,109 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Tests for FoundUps MCP Bridge FastMCP SSE Server.\n=================================================\n\nWSP References:\n- WSP 96: Model Context Protocol Governance and Consensus\n- WSP 97: Truthful Verification (explicit perception boundary & protocol canary)\n- WSP 34: Test Coverage Standards"
+      "description": "Tests for FoundUps MCP Bridge FastMCP HTTP Server.\n==================================================\n\nWSP References:\n- WSP 96: Model Context Protocol Governance and Consensus\n- WSP 97: Truthful Verification (explicit perception boundary & protocol canary)\n- WSP 34: Test Coverage Standards"
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_acceptance_guards",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_acceptance_guards.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial contracts for isolated RedDog HoloIndex acceptance guards."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_acceptance_model_copy",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_acceptance_model_copy.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Live-bound and Windows parent-identity attacks for acceptance model copy."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_acceptance_receipt_proof",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_acceptance_receipt_proof.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Filesystem-adversary contracts for post-activation receipt proof."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_candidate_acceptance",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Candidate-acceptance configuration and owner-handoff contracts."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_candidate_acceptance_integrity",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance_integrity.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Candidate-acceptance binding and integrity contracts."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_candidate_acceptance_lifecycle",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance_lifecycle.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Candidate-acceptance cleanup and session-lifecycle contracts."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_candidate_acceptance_script",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance_script.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "CLI contracts for the isolated HoloIndex acceptance adapter."
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_main_preflight",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_main_preflight.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15613,7 +15862,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [
         "process"
       ],
@@ -15628,7 +15877,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_handshake.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [
         "process"
       ],
@@ -15643,7 +15892,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_owner_bootstrap.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [
         "process"
       ],
@@ -15651,20 +15900,100 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "WSP-focused tests for RedDog's host-owned HoloIndex bootstrap."
+      "description": "Owner lifecycle tests for RedDog's host-owned HoloIndex bootstrap."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_owner_bootstrap_configuration",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_owner_bootstrap_configuration.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Configuration and binding-adversarial RedDog owner-bootstrap tests."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_process_image",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_process_image.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Process-image authority contracts for isolated HoloIndex acceptance."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_replica",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial contracts for immutable per-generation Holo query replicas."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_replica_descriptor",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica_descriptor.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic contracts for active query-replica descriptor admission."
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_sealed_holo_runtime",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_sealed_holo_runtime.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Security tests for manifest-authenticated Holo subprocesses."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_repo_tools_encoding",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_repo_tools_encoding.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Strict text-decoding contracts for repository search."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_repository_analysis_cache",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_repository_analysis_cache.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Standalone receipt checks for the repository-analysis test caches."
     },
     {
       "id": "test::modules::infrastructure::foundups_selenium::tests::test_edge_comment_processing",
@@ -20966,6 +21295,19 @@
       "description": "Focused defensive critic and abstention contracts."
     },
     {
+      "id": "test::scripts::tests::test_advisory_model_kimi_k3_budget_truth",
+      "path": "scripts/tests/test_advisory_model_kimi_k3_budget_truth.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Fail-closed completion-budget tests for RedDog's advisory bridge."
+    },
+    {
       "id": "test::scripts::tests::test_advisory_model_once_hardening",
       "path": "scripts/tests/test_advisory_model_once_hardening.py",
       "owner": "scripts",
@@ -21047,7 +21389,10 @@
       "owner": "scripts",
       "suite_class": "unit",
       "shard_id": "scripts-unit",
-      "capabilities": [],
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

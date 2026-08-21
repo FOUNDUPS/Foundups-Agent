@@ -1,15 +1,873 @@
 # foundups_mcp_bridge - ModLog
 
-## 2026-08-18 - FastMCP SSE Server: Fail-Closed Auth & Termination Failure Propagation
+## 2026-08-21 - ChatGPT Streamable HTTP and governed Holo bundle slice
 
-- Enforced server-level fail-closed authentication: `AuthMiddleware` and `build_asgi_app` raise `ValueError` upon construction if `require_auth=True` and `auth_token` is empty; `mcp_server.py` CLI exits with code 1.
-- Fixed termination failure propagation in `launch.py`: `_active_runtime` is NEVER cleared when `_terminate_runtime()` times out or fails, retaining lock and handle for truthfulness.
-- Implemented `REMOTE_READ_ONLY_ALLOWLIST` restricting remote registration to 33 pure read-only perception tools; mutation/dispatch tools are strictly absent from FastMCP.
-- Prohibited `?token=` query param auth to prevent secret leakage in logs; enforced Bearer header auth.
-- Renamed RedDog context tool to `get_reddog_analysis_context` with truthful docstrings and `source="reddog_context"`.
-- Hardened protocol canary to validate protocol negotiation, required tool inventory, absence of forbidden tools, and inner tool result envelope.
-- Added comprehensive unit tests in `tests/test_mcp_server_sse.py` (11/11 passed).
-  (WSP 22/34/50/80/96/97)
+- Added loopback-only FastMCP Streamable HTTP `/mcp`; removed the unmounted SSE
+  canary and retained old launcher names only as aliases to the same HTTP lock.
+  Official MCP client readiness now performs initialize/list/lexical safe-call.
+- Added `holo_query_bundle` through the existing one-shot owner/bundle adapter
+  and a 256 KiB secret-free repository-relative public projection. A transitive
+  audit then reduced the remote allowlist from 16 tools to exactly that one
+  tool. Repository/file/doc, Overseer/SQLite, dependency, raw Holo, Git,
+  RedDog-state, and signal tools remain local bridge APIs only.
+- Added exact schema constraints, conservative ToolAnnotations, loopback-only
+  binding, optional local/dev bearer semantics, worktree common-dir MCP runtime
+  discovery, exact capability/readiness receipts, and pinned runtime
+  dependencies. WSP_97 Annex A audit records this slice only; external Secure
+  MCP Tunnel/OAuth and live ChatGPT acceptance remain pending.
+- Reproduced the combined import-capable lifecycle RED: the former in-process
+  server could retain its runtime/lock after `should_exit`, and the following
+  bad-auth canary projected only an outer task-group label. Replaced the dual
+  import-dependent lifecycle with one capability-proven direct-PID subprocess;
+  bounded nested exception projection now preserves HTTP 401 while redacting
+  bearer material. Every changed/new launcher function is at most 50 lines.
+- Closed two later verifier REDs without widening authority: server/readiness
+  children now receive a closed OS/runtime environment plus exact repository,
+  dependency, and optional token fields; a dead subprocess handle releases its
+  retained lock exactly once before restart. Direct and subprocess readiness
+  require the exact one-tool inventory plus inner `ok=true`, zero lexical owner
+  attempts, no-reindex proof, bounded projection, and exact encoded bytes.
+- Decoupled package initialization from the optional bridge/tool dependency
+  stack. The documented `FoundUpsMCPBridge` export remains lazy-compatible,
+  while freshness-gate imports now pass under `python -S` without loading the
+  bridge server or MCP/Pydantic packages.
+- Closed a runtime-version assumption exposed by independent verification: an
+  import-capable FastMCP 3 environment was previously admitted despite the
+  exact 2.13.0.2/1.20.0/2.12.3/0.38.0 dependency contract. Capability probing
+  now requires all four exact versions; tests retain compatible 2.x/3.x tool
+  inventory inspection without widening production admission.
+- Focused evidence: projection/launcher **21 passed**; full FastMCP server suite
+  **13 passed**. An authenticated local live run proved the owned PID equals the
+  server PID, official `/mcp` initialize/list/lexical call, unauthenticated 401,
+  clean stop, exact lock release, and no listener/orphan. This is local code
+  evidence, not a live ChatGPT/tunnel receipt. Final combined selection:
+  Additive version-drift and requirements-binding regressions make
+  projection/launcher **23 passed** and the combined selection **36 passed**.
+  (WSP_00/15/22/50/62/87/96/97)
+
+## 2026-08-21 - Final verifier WSP_62 function-debt repair
+
+- Reproduced the exact HEAD differential before editing: candidate growth in
+  `holo_search` (244->245), candidate growth in `search_repo` (75->77), and a
+  new 61-line `_bounded_repository_analysis_scans` function. Extracted cohesive
+  input/scope/backend/fallback helpers, strict-UTF-8 ripgrep execution/parsing,
+  and cache setup/wrapper/install/receipt helpers. Public signatures, response
+  envelopes, warning strings, strict decoding, exception behavior, one-scan
+  bounds, and deep-copy isolation remain unchanged. Every changed/new function
+  is at most 42 lines; the exact post-repair differential has zero errors.
+- Corrected the cache inventory rather than repeating the earlier arithmetic:
+  the 122 original test names own 368 AST assertions after two additive,
+  selection-independent support invariants; the one intentional mutation-
+  isolation test brings the complete split closure to 123 names/369 assertions.
+- The exact accepted bridge set remains non-zero: `INTERFACE.md` 1,054 WARNING,
+  append-only `ModLog.md` 1,277 WARNING, `holo_tools.py` 1,094
+  WARNING, `test_mcp_bridge.py` 1,313 WARNING, and
+  `tests/TestModLog.md` 917 WATCH plus `test_holo_query_service_edges.py` 787
+  WATCH. No threshold or exemption was changed. (WSP 00/15/22/50/62/87/97)
+
+## 2026-08-20 - Integration-candidate WSP_62 repair and evidence correction
+
+- Split repository-analysis cache classes/fixtures from `test_mcp_bridge.py`
+  into non-test support and a standalone, self-populating receipt. The frozen
+  122-test/368-assertion inventory is preserved after two additive,
+  selection-independent support invariants and before one explicit new
+  mutation-isolation test; the combined closure is 123/369. Individual, class,
+  and original-file selections are independently valid. The monolith is 1,313
+  lines, below its applied 1,425-line candidate ceiling but still a warning.
+- Split owner-bootstrap contracts into 20 configuration/binding-adversarial and
+  21 lifecycle functions with shared non-test support. Names, decorators,
+  fixture behavior, 140 assertions, and 52 collected parameter cases are
+  preserved. Extracted candidate query/activation validation and receipt/
+  finalization proof: the public orchestrator is 498 lines, the combined
+  function inventory remains exactly 30, and every function is at most 50
+  lines with unchanged signatures, constants, and `__all__`.
+- Full FMAS remains non-green. That run's pre-entry bridge findings were
+  accepted debt, not zero warnings; the current exact accepted set is recorded
+  in the 2026-08-21 entry. No threshold, exemption, suppression, or warning
+  vocabulary changed.
+- Corrected the ungrounded Holo 237/1 statement to the exact reproducible
+  six-file **233 passed / 1 skipped** selection. Governed Holo retrieval failed
+  closed with `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`; no owner, maintenance,
+  reindex, store, model, or `E:` mutation occurred. (WSP 00/15/22/50/62/87/97)
+- The repaired complete bridge selection finishes naturally under the unchanged
+  cap: **901 passed / 7 skipped / 10 warnings in 220.32 seconds**. The warnings
+  remain the inherited LinkedIn invalid-escape `SyntaxWarning` reports.
+
+## 2026-08-20 - Deterministic legacy-suite scaling and UTF-8 fallback
+
+- Reproduced the unbounded legacy bridge contract as CPU-bound: the monolith
+  exceeded 364 seconds and its signal-normalization family alone exceeded 244
+  seconds. Added module/class-scoped, test-only snapshots for exact immutable
+  repository inputs; foreign or disposable roots always execute the real scan,
+  cached values are deep-copied, and teardown proves one scan per used key plus
+  mutation isolation. No production cache or timeout increase was introduced.
+- The monolith now completes naturally at **121 passed in 174.68 seconds**.
+  Two independent full bridge runs complete under the unchanged 360-second cap:
+  **899 passed / 7 skipped in 200.66 seconds** and **899 passed / 7 skipped in
+  314.42 seconds**. Both retain ten reports of the pre-existing LinkedIn
+  invalid-escape `SyntaxWarning`; warnings were not hidden.
+- Accounted for the full-run variance rather than averaging it away. The slow
+  repeat received about 247.55 CPU seconds over 317.8 wall seconds (~77.9%),
+  while two uncontended receipt runs finished in 182.25 and 181.33 seconds and
+  observed the identical cache cardinality: mapping 7 keys/125 requests/7
+  scans, module 57/2,434/57, reverse 12/303/12. The variance is host CPU
+  contention; repeated-scan/cache-key nondeterminism is fail-closed by the
+  exact receipt test.
+- The first final-tree run exposed one scheduler-dependent 20 ms assertion in
+  cold-health warmup coverage (**899 passed / 1 failed / 7 skipped**). The
+  runtime correctly failed closed; the test had treated host scheduling as a
+  functional guarantee. Its deterministic inline receipt now executes the same
+  proof chain and asserts every computed post-warmup budget remains at or below
+  20 ms, never the 300 ms warmup budget. No production timeout changed. The
+  exact test passes in ten independent processes, its file is **16/16**, and
+  final full bridge is **900 passed / 7 skipped in 215.31 seconds**.
+- Made ripgrep JSON decoding explicit strict UTF-8 instead of host-locale text
+  decoding. Invalid UTF-8 fails closed. Repaired stale federation tests to use
+  registered `gotjunk_001` and restored the documented canonical scope-deferral
+  warning alongside the registry-validation warning. Focused closure is
+  **16 passed**. (WSP 00/15/22/50/62/97)
+
+## 2026-08-20 - WSP_62 integration repair and exact test decomposition
+
+- Reproduced full FMAS as non-green rather than treating the RedDog npm release
+  receipt as repository-wide compliance. Inherited module/document size,
+  structure, and unavailable security-tool findings remain visible.
+- Split the 2,616-line supervisor contract into startup/runtime, binding,
+  authenticated-health, and lifecycle/live-probe modules plus one non-test
+  support module. Split the 1,068-line candidate-acceptance contract into
+  handoff, lifecycle, and integrity modules plus one non-test support module.
+- Preserved the frozen inventories exactly: 75 tests, 192 assertions, and 266
+  collected supervisor cases; 31 tests, 141 assertions, and 34 collected
+  acceptance cases. All ten verifier-identified functions are now at or below
+  50 lines without deleting or weakening an assertion. Focused closure is
+  **389 passed / 3 unchanged host-capability skips**. (WSP 00/15/22/50/62/97)
+
+## 2026-08-20 - RedDog main/acceptance integration and fixture hardening
+
+- Integrated the immutable query-replica, candidate-acceptance, process-image,
+  snapshot-codec, and owner-routing layers while retaining main's FastMCP
+  allowlist/auth lifecycle and bounded JSON-only maintenance diagnostics.
+- Preserved the tests-first Windows process fixture RED: under full-suite load,
+  the 0.25-second timeout could expire before the child published its PID pair.
+  The test Popen seam now waits at most two seconds for that explicit readiness
+  signal before starting the unchanged timeout assertion; production timeout
+  and descendant-failure behavior were not relaxed.
+- The complete affected bridge selection is **762 passed / 6 host-capability
+  skips**. Live Holo maintenance, model access, a public tunnel, and a ChatGPT
+  app session were not run or claimed. (WSP 00/6/15/22/34/50/97)
+
+## 2026-08-18 - Historical FastMCP SSE surface (superseded)
+
+- Enforced server-level fail-closed authentication: `AuthMiddleware` and
+  `build_asgi_app` raise `ValueError` when `require_auth=True` and the token is
+  empty; the CLI exits nonzero.
+- A failed runtime termination retains the lock and runtime handle.
+- `REMOTE_READ_ONLY_ALLOWLIST` restricts remote registration to 33 perception
+  tools; mutation and dispatch tools are absent. Bearer headers are required
+  when auth is enabled and URL query tokens are rejected.
+- The readiness canary proves negotiation, tool inventory, forbidden-tool
+  absence, and one safe tool result. Focused tests were 11/11. (WSP 22/34/97)
+
+## 2026-08-17 - R27 immutable collection snapshot codec and read adapter
+
+- Added a path-free deterministic codec for one non-empty Holo collection:
+  canonical ASCII JSON manifest/JSONL rows sorted by unique UTF-8 ID and
+  contiguous little-endian float32 embeddings. The manifest binds collection,
+  metric, embedding identity, dimensions, counts, byte lengths, and SHA-256.
+- Added a read-only Chroma-shaped adapter for the exact Holo retrieval subset.
+  It supports bounded squared-L2, cosine, and inner-product distance scans with
+  stable tie ordering; it exposes no mutation methods and performs no path I/O.
+- The first independent hardening RED reproduced **33 failed / 49 passed** and
+  reached **82/82**. A second verifier RED reproduced **19 failed / 83 passed**;
+  focused GREEN is now **102/102**. The codec preflights vector bytes before
+  NumPy, rejects hostile containers and recursive non-NFC/non-scalar text, and
+  preserves deterministic bytes without normalization. The adapter validates
+  path filters, lazily materializes only requested fields, enforces explicit
+  result cardinality before search, and preflights the exact compact-JSON wire
+  bytes before deepcopy/vector expansion. Query matches stay as NumPy arrays;
+  current computation plus retained matches from prior queries are accounted
+  under one session workspace ceiling. Released memoryviews fail with the
+  stable buffer error. The third verifier RED was **11 failed / 101 passed**;
+  its GREEN was **112/112**. A fourth verifier RED was **1 failed / 112 passed**:
+  cosine counted only one dimension-sized float64 array while the chunk and
+  norm-square product coexist. The corrected conservative formula counts
+  the single-row case. A fifth verifier RED was **2 failed / 114 passed**:
+  multi-row reductions retain an additional full chunk-sized scratch. Cosine
+  now reserves `24 * dimension + 96` bytes per row for chunk/square/reduction;
+  L2 reserves `32 * dimension + 32` for chunk/delta/square/reduction. The IP
+  matmul probe showed no dimension-sized hidden scratch, so its independently
+  tested chunk/dot/subtraction formula remains unchanged. Focused GREEN is
+  **116/116**. Exact adjacency is freshness/module-intent
+  **87/87** plus owner/embedding **36/36** = **123/123**; combined evidence is
+  **239/239** (the preceding aggregate was **236/236**). The 100-query warm
+  loop still proves zero rehash and zero file access. WSP15 is 20/P0.
+- Scope remains synthetic only: no maintenance exporter, replica artifact
+  session, byte-only model loader, owner route, live Holo/MCP/store/model/E:
+  access, reindex, network, package, commit, or push occurred. Integration stays
+  RED and no production claim is made. (WSP 00/15/22/50/62/87/97)
+
+## 2026-08-17 - R24 acceptance closure and supervisor WSP62 extraction
+
+- Reproduced the wider **2 failed / 94 passed / 3 skips** RED: cold start lacked
+  the mandatory route and the public supervisor class spanned 203 lines.
+- Migrated the disposable slow-loopback fixture to full canonical/replica roots,
+  no-op recorded capability verification, digest-shaped replica binding, all
+  four response fields, split argv, and scrubbed child environment. Verification
+  order is exactly verify/spawn/verify; no Holo/store/model is used.
+- Extracted stop/close/context behavior without compression into a `Self`-typed
+  internal lifecycle base. The public class is span186/max50; base span34/max12;
+  module517. Configured context works and raw route-less context fails closed.
+- Focused acceptance is **3/3**; exact ten-file verifier adjacency is **96 passed
+  / 3 unchanged skips**; supervisor **265/1**; lifecycle **317/1**; exact eight-
+  file closure **411/4**. Three production route blockers remain unchanged.
+- WSP15 is 16/P0. Generation is 1,360 files at
+  `fdf3643a2cb8...befc3592129e`; registry is 1,527/265. No live Holo/MCP/owner/
+  store/model/E:/maintenance/reindex, external network/process kill, commit,
+  push, package, or PR ran. Only the
+  existing disposable loopback fixture opened a socket. (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - R23 health HTTP exception and close precedence
+
+- Preserved local RED: `IncompleteRead` with partial bytes escaped from bounded
+  response read although close ran. Expanded focused RED was **7 failed / 7
+  passed** across the stdlib HTTP exception family and close precedence.
+- Exchange now maps `HTTPException` from request/getresponse/read to unavailable.
+  A seven-line close leaf contains only HTTP/OSError close failures after the
+  proof decision, preserving ready or unavailable without hiding unexpected,
+  programming, or resource exceptions.
+- Unchanged **14/14** covers IncompleteRead partial bytes, BadStatusLine,
+  RemoteDisconnected, ResponseNotReady, CannotSendRequest, TimeoutError/OSError
+  controls at all stages, exact event prefixes, single close, ready preservation,
+  and prior-failure precedence. Combined R16-R23 is **214/214**; lifecycle is
+  **316 passed / 1 host skip**; closure is **410 passed / 4 unchanged skips**.
+- WSP15 is 16/P0. WSP62: health283/max49, decode22, close7; transport43/max15;
+  service448/max50. Generation is 1,360 files at `6f93d87356f6...cb1db09f33a`;
+  registry is 1,527/265. No live Holo/MCP/owner/store/model/maintenance/reindex/
+  network/process/`E:` access ran. (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - R22 strict health JSON conformance correction
+
+- Preserved local fake-response RED: duplicate top-level `ok` false then true
+  used `json.loads` last-wins semantics and returned ready. The expanded matrix
+  began **24 failed / 10 passed**.
+- Added one module-local strict decoder using the existing descriptor/receipt
+  object-pairs pattern. Duplicate keys at every depth raise a private locally
+  caught parse error; `parse_constant` rejects NaN and both infinities. Unicode,
+  syntax, recursion, primitive, and oversize representations return unavailable
+  without catching `BaseException` or `MemoryError`.
+- The unchanged matrix is **34/34** with all 19 readiness/canonical/replica key
+  positions, nested duplicates, depth 64/2,000, malformed/primitive/UTF-8/
+  oversize/status cases, unique control, and exact request/read(65,537)/close.
+  Combined R16-R22 is **200/200**; lifecycle is **302 passed / 1 host skip**;
+  exact closure is **396 passed / 4 unchanged host-capability skips**.
+- WSP 15 is 16/P0. WSP 62: health 274/max49, decoder22; transport43/max15;
+  service448/max50. Generation is 1,360 files at `bc54dadeb9d1...5693a2e91e`;
+  registry is 1,527/265. No live Holo/store/owner/model/MCP/maintenance/reindex/
+  network/process/`E:` access ran. (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - R21 expected-replica exchange ordering correction
+
+- Preserved the exact tripwire RED: string, list, tuple subclass, hostile
+  object, and partial replica expectations plus probe/rejection wrappers reached
+  `HTTPConnection` **7** times while hostile methods remained untouched.
+- Authenticated exchange now parses canonical expectation first and replica
+  expectation second, before transport normalization/HTTP construction. It
+  retains the parsed exact tuple for both response helpers. Invalid expectations
+  return the stable secret-free binding mismatch; wrappers construct nothing.
+- The focused matrix moved **13 failed / 2 passed -> 15/15** and covers bytes,
+  mapping, generator, bool element, whitespace, empty, under/over length,
+  deterministic canonical precedence, zero hostile calls, and one valid
+  connection control. Combined R16-R21 held-outs are **166/166**; full lifecycle
+  is **268 passed / 1 host skip**; exact closure is **362 passed / 4 unchanged
+  host-capability skips**.
+- WSP 15 is 16/P0. WSP 62 is green: transport 43/max15, owner health 247/max49,
+  service 448/max50. Governed generation is 1,360 runtime files at
+  `61a512386a6d...aa4f3cc3`; registry remains 1,527/265. No live Holo/store/
+  owner/model/MCP/maintenance/reindex/
+  network/process/`E:` access ran. (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - R20 exact health transport scalar correction
+
+- Preserved RED: hostile host/token truth, port integer conversion, and timeout
+  float conversion executed attacker methods; wrappers inherited the flaw. The
+  corrected focused matrix began **49 failed / 19 passed**.
+- Added one dependency-leaf transport normalizer. Host is exact literal
+  `127.0.0.1`; token is exact, trimmed, printable, and at least 32 characters;
+  port is exact int 1..65535; timeout is exact int/float, finite, positive, and
+  <=300 seconds. Bool/subclasses, aliases, whitespace/control, containers,
+  generators, nonfinite, and out-of-range values fail before connection.
+- Direct health read reuses the authoritative token leaf before request/header
+  formatting. Service imports and re-exports the same token-minimum constant;
+  there is no duplicate weaker policy. Expected-binding rejection retains
+  precedence over transport validation.
+- R20 is **69/69**; combined R16-R20 held-outs are **151/151**; lifecycle is
+  **253 passed / 1 host skip**; the exact closure is **347 passed / 4 host
+  skips**. WSP 15 is 16/P0. WSP 62 is green: transport 43/max15, owner health
+  242/max44, service 448/max50.
+- Governed generation is **1,360 runtime files** at
+  `c64d0ad5786604742aa860e828b526b87efa419ca8c67ad483647263380c5f4e`;
+  registry remains **1,527 / 265**. Residual non-health transport coercions in
+  supervisor lifecycle timeout construction, service query timeout handling,
+  and configured-owner environment/handoff parsing remain separate audits.
+- Three route-construction blockers remain unchanged. No live Holo/store/
+  owner/model/MCP/maintenance/reindex/network/process/`E:` access ran.
+  (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - R19 exact health-payload container correction
+
+- Preserved the container RED: `isinstance(payload, Mapping)` admitted a hostile
+  `dict` subclass, so binding, replica, rejection, binding-rejection, and ready
+  seams each invoked attacker-controlled `get`. The focused tests began **12
+  failed / 7 passed**; R18 field exactness did not protect the container.
+- Added one lowest-boundary exact payload guard. Only an exact built-in `dict`
+  returned by JSON decoding is admissible. Dict subclasses, custom `Mapping`,
+  `UserDict`, `MappingProxyType`, list, string, arbitrary objects, and composed
+  hostile nested fields reject before `get`/items/keys/values, iteration,
+  contains, length, boolean/string/repr/equality, or error formatting.
+- JSON read, binding, replica binding, ready contract, terminal rejection,
+  binding rejection, and authenticated exchange share the guard. Invalid
+  containers produce empty bindings/readiness/rejections without raising;
+  exact plain JSON dictionaries remain valid.
+- Final synthetic evidence is **22/22** for expanded R19, **82/82** for combined
+  R16-R19 held-outs, **184 passed / 1 host skip** for full lifecycle/admission,
+  and **278 passed / 4 host-capability skips** for the exact eight-file closure.
+  WSP 15 is 16/P0. WSP 62 is green: owner health is 238 lines and its maximum
+  function is 44 lines.
+- Governed generation remains **1,359 runtime files**, digest
+  `0acd06f2da13c76b5526fe2bffc98d77f802d876c22af1a17d0e61202c602bb4`,
+  and **1,527 tests / 265 quarantined**.
+- No other owner-health response consumer admits Mapping. Separate non-health
+  trust-boundary audit candidates remain in `holo_query_freshness_gate.py`,
+  `holo_query_semantic_proof.py`, `holo_query_service_request.py`,
+  `holo_query_service_response.py`, and candidate acceptance; this slice does
+  not change them. The three route-construction blockers remain unchanged.
+  No live Holo/store/owner/model/MCP/maintenance/reindex, process control,
+  network, or `E:` access ran. (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - R18 exact canonical-binding correction
+
+- Preserved the canonical RED: malformed actual values were string-coerced and
+  admitted by empty expected wildcards, while hostile actual/expected objects
+  invoked `__bool__` and `__str__`. The new matrix began **15 failed / 13
+  passed**; this was residual R17 drift, not an acceptable compatibility seam.
+- Added one generic dependency-leaf exact parser and made the R17 replica
+  parser its strict wrapper. Canonical health, exchange, startup, supervisor,
+  configured-owner, route, bootstrap, reuse, verify, and private-handoff seams
+  now require an exact built-in four-tuple of exact, trimmed, printable built-in
+  strings. Only expected canonical fields may be explicit empty wildcards;
+  actual canonical and replica fields are always nonempty. No hostile boolean,
+  string, or equality method is invoked.
+- Malformed expected values fail before connection, repository hashing, route
+  revalidation, verifier, stop, spawn, health, or handoff. Malformed actual
+  JSON/proof values return the stable secret-free
+  `HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH` and never become ready.
+- Final synthetic evidence is **58/58** for the combined R17/R18 exact contract,
+  **162 passed / 1 host skip** for lifecycle/adversarial coverage, and **256
+  passed / 4 host-capability skips** for the exact eight-file bounded closure.
+  The extra current-host skip is unavailable process-image symlink creation;
+  the virtualenv redirector, query-replica symlink, and portable special-file
+  skips are unchanged. WSP 15 is 16/P0. WSP 62 is green across eight changed
+  production files: all functions are <=50 lines.
+- Governed generation is **1,359 runtime files**, digest
+  `3ae56612f845023c9a669e452a855aa5fa4a8762128e2f3ca5f24710808ceef4`,
+  and **1,527 tests / 265 quarantined**; manifest,
+  registry, digest, and extension-pin currentness are regenerated below.
+- The three production route-construction blockers and all R17 invariants are
+  unchanged. No live Holo/store/owner/model/MCP/maintenance/reindex, process
+  control, network, or `E:` access ran; independent verification remains
+  required. (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - R17 exact replica-binding type correction
+
+- Preserved the type-confusion RED: a four-character string and four-item list
+  passed start admission, while malformed expected health bindings could raise
+  `TypeError` and actual health fields were string-coerced. The focused matrix
+  began **15 failed / 11 passed**; this was permissive contract drift.
+- Added one dependency-leaf parser used by route, configured health,
+  supervisor, startup, authenticated health, bootstrap, reuse/restart, and
+  private handoff. It accepts only an exact built-in four-item tuple whose
+  fields are exact built-in, trimmed, nonempty strings. It rejects container
+  and string subclasses, scalar/list/mapping/generator/nested shapes, non-string
+  fields, whitespace, empties, and wrong lengths without coercion or side
+  effects. Duplicate exact strings remain valid because uniqueness is not an
+  admission invariant.
+- Malformed expected bindings now return the stable secret-free
+  `HOLOINDEX_QUERY_REPLICA_REQUIRED` before verifier/stop/spawn/health/handoff.
+  Malformed actual health/proof bindings are never ready and use
+  `HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH`; they never raise `TypeError`.
+- Final synthetic evidence is **30/30** for the expected type matrix,
+  **125 passed / 1 host skip** for lifecycle/adversarial admission, and **220
+  passed / 3 host skips** for the bounded owner/service/HTTP/descriptor/
+  materializer closure. WSP 15 is 16/P0. WSP 62 is green across seven changed
+  production modules (all <=600 lines/functions <=50 lines).
+- Governed generation is **1,358 runtime files**, digest
+  `430936e327c569aed2eab02ddb567a9bee043f91f7ede6be64ab03a993561cbb`,
+  and **1,527 tests / 265 quarantined**; the added runtime file is the canonical
+  parser and the existing test modules gained cases without changing registry
+  IDs. Manifest/registry currentness and all six digest/pin contracts pass.
+- The three production route-construction blockers and all R16 invariants are
+  unchanged. No live Holo/store/owner/model/MCP/maintenance/reindex, process
+  control, network, or `E:` access ran; independent verification remains
+  required. (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - R16 mandatory replica-route admission correction
+
+- Preserved held-out RED: replica-less canonical health was admitted and a
+  configured endpoint without `QueryReplicaOwnerRoute` reached health instead
+  of failing before side effects. This was contract drift, not acceptable
+  compatibility behavior.
+- Applied WSP 97's narrow invariant fix: every Holo-dependent admission,
+  start, reuse, restart, configured health, and binding proof requires one
+  current route and exactly four non-empty replica fields. Missing route uses
+  secret-free `HOLOINDEX_QUERY_REPLICA_REQUIRED`; partial/malformed/drifted
+  routes fail closed. Existing loopback, auth, canonical freshness, dual lease,
+  descriptor, private handoff, and cleanup contracts remain intact.
+- WSP 15: C3 + I5 + D5 + Impact5 = 18 (P0). WSP 62 is green: all six touched
+  production files are below 600 lines and all functions are at most 50 lines.
+  Focused/adversarial validation is **84 passed / 1 host skip**; bounded closure
+  is **182 passed / 3 host skips**; the held-out pair is **2/2**.
+- Governed generation is **1,357 runtime files**, digest
+  `ff8651ade766d34a17a52940b7e113d76e8443e2e610731a6b1a673b763f577b`,
+  and **1,527 tests / 265 quarantined**; all six manifest/digest contracts pass.
+  `INTERFACE.md` is compliant at exactly 1,000 lines but has zero WSP 62
+  headroom and should be decomposed before further interface expansion.
+- One-shot owner query, maintenance owner startup, and promotion owner
+  verification remain blocked because they do not construct/pass the route.
+  Holo retrieval was quarantined; exact Git/filesystem retrieval exposed stale
+  optional-route wording. Retrieval was low-noise and Tier-0/Tier-1 ordered;
+  `memory/README.md` is absent, and duplicated owner guidance carried staleness
+  risk across README/INTERFACE/runbook. No live Holo/store/owner/model/MCP/maintenance,
+  reindex, process control, network, or `E:` access ran. Independent
+  verification remains required. (WSP 00/15/22/62/97)
+
+## 2026-08-17 - Phase 2 verified query-replica owner routing
+
+- Added the canonical active-descriptor verifier and retained
+  `QueryReplicaOwnerRoute`. Canonical freshness/leases remain separate from the
+  immutable generation used by the backend; explicit argv replaces ambient
+  `HOLOINDEX_SSD_PATH`.
+- Reproof occurs before spawn and health. Authenticated health and reuse require
+  all four public replica fields; descriptor/generation/path drift replaces the
+  owner and an active swap after spawn terminates before health. Public results
+  omit absolute replica paths.
+- WSP 62 is green (all touched production files below 500 lines and functions
+  at most 50). Focused final-shape closure is **222 passed / 3 host skips** in
+  10.57 seconds. Skips are the inapplicable Windows virtualenv redirector,
+  unavailable symlink creation, and unavailable portable special-file fixture.
+  Widened synthetic adjacency is **88 passed / 1 skip** in 3.51 seconds after
+  correcting two stale single-lease transition fixtures. Governed closure is
+  **1,357 runtime files**, digest
+  `3a6577f4a1b2a7f60f004b21a6e1754f2bed376081dd403ca31df31ffcf3fb13`,
+  and **1,527 tests / 265 quarantined**; its final six staged-tree contracts
+  pass in 43.43 seconds.
+  No live Holo/store/owner/model/MCP/maintenance/reindex or `E:` access ran.
+  Operational route production, live acceptance, retention/rollback/deletion,
+  and independent promotion remain open. (WSP 00/15/22/62/97)
+
+## 2026-08-17 - R15 Windows failed-copy preservation correction
+
+- Preserved independent R14 RED: the Phase-1 production closure still imported
+  Windows handle-deletion helpers. Failed model copy called FileDisposition on
+  created files/directories, contradicting the documented no-delete contract.
+- Removed the disposition structure, constant, helper, both deletion APIs, and
+  their exports/callers. Failed Windows copies now close every file/directory
+  capability while preserving bounded partial output. Query materialization
+  quarantines the containing staging root; direct copy callers retain their
+  isolated partial destination for later governed disposition.
+- Exact destructive-source search is empty across the Phase-1 production
+  closure. Focused model/guard/query scope is **70 passed / 2 host skips**;
+  bounded ten-file seam is **211 passed / 5 skips** with two known config
+  warnings. Governed closure is **1,348 runtime files**, digest
+  `c0d1ada803675ce926d62567266a7d77d68adc9f41d924e5197c10d03f31ce3f`,
+  and **1,525 tests / 265 quarantined**. No live Holo/store, model, maintenance, reindex, publication, Git
+  publication, or package action ran. Independent promotion remains required.
+  (WSP 00/15/22/62/97)
+
+## 2026-08-17 - R14 no-delete replica rollback correction
+
+- Preserved independent verifier RED: R13 verified active identity, digest, and
+  payload, then used an identity/size-only check before unlink. Same-inode,
+  same-size mutation in that interval was deleted. Publication exception paths
+  and staging cleanup used the same destructive policy.
+- Phase 1 now performs no content deletion. Windows uses native no-replace
+  rename; Linux uses `renameat2(RENAME_NOREPLACE)`; unsupported platforms fail
+  closed. Failed publication temps, staging directories, and the active name
+  move into a fixed owned orphan root. Collision or rename failure preserves
+  the source name. Public errors expose relative orphan/unsafe paths only.
+- Focused query/guard scope is **62 passed / 2 host skips**; the bounded ten-file
+  seam is **209 passed / 5 skips** with two known disabled-plugin config
+  warnings. Governed closure is **1,348 runtime files**, digest
+  `ab4e43666520dba537c76a0431354c79ac28fb48b9c8d178ddb7120e3c775400`,
+  and **1,525 tests / 265 quarantined**. No live Holo/store, query, maintenance, reindex, model, publication,
+  commit, push, merge, PR, or package effect ran. Governed orphan retention and
+  deletion, live owner routing, and independent promotion remain open.
+  (WSP 00/15/22/62/97)
+
+## 2026-08-17 - R13 retained dual-lease publication correction
+
+- Independent Phase-1 verification reproduced a P0 race: point lease probes
+  and the freshness-receipt context ended before active-descriptor publication,
+  so an injected lease transition could still return success. This RED remains
+  the reason the prior frozen tree is not promotion evidence.
+- Added a noncreating existing-sentinel lease to the canonical maintenance-lock
+  module. Materialization now retains authority-update then maintenance
+  exclusion plus receipt proof through snapshot, copy, generation publication,
+  active publication, final validation, and reverse release. Exact sentinel
+  identity/bytes are revalidated without modifying canonical data.
+- Sealed production dependencies, added exact publication capability cleanup,
+  direct-root model markers, exact integers, and Unicode NFC/casefold/path
+  alias rejection. WSP 62 split private JSON and generation publication into
+  cohesive files; production files remain below 500 lines.
+- WSP 15 remains `4/5/5/5 = 19` (P0). Holo was quarantined, so bounded Git and
+  filesystem evidence was used. No live store/materialization, Holo/MCP query,
+  maintenance, reindex, model, commit, push, merge, PR, or package effect ran.
+  Owner routing, retention/rollback/orphan policy, live host validation, and
+  the intentionally skipped broad suite remain open. (WSP 00/15/22/50/62/97)
+
+## 2026-08-17 - Immutable Holo query replica materializer Phase 1
+
+- Added `holoindex_query_replica.v1` materialization for one exact immutable
+  generation. It reuses the accepted isolated-store, receipt-descriptor,
+  Windows directory/file lease, POSIX descriptor, bounded copy, and atomic
+  private-JSON primitives rather than creating a parallel copier.
+- Extended descriptor copy proof to hash each source before/after copying and
+  the destination, with exact sorted path/size/digest manifest admission.
+  Added deterministic failures for source/receipt/lease races, overlap,
+  links/reparse/hardlinks/special files, resource exhaustion, preexisting
+  targets, copy/hash/publication failure, and cleanup containment.
+- WSP 15 allocation is `4/5/5/5 = 19` (P0). Holo retrieval was explicitly
+  degraded/quarantined, so filesystem/Git evidence was used; no live Holo,
+  owner, MCP, maintenance, reindex, model, canonical store, commit, push, or
+  promotion effect occurred. Owner routing, generation restart, retention,
+  rollback, and orphan cleanup remain explicit follow-ons. Independent review
+  is required. (WSP 00/3/5/6/11/15/22/34/49/50/57/62/71/83/84/97)
+- Governed derived closure is current at **1,347 runtime files** with digest
+  `8a24beccd17f1438e6948ea0bf10115748f055479c40a05841eb7cf90b668929`;
+  the test registry is **1,525 total / 265 quarantined**. Exact manifest and
+  registry validation passed **34 tests** with two expected disabled-plugin
+  configuration warnings.
+
+## 2026-08-17 - R12 canonical runbook launch-continuity alignment
+
+- Independent R11 verification found one documentation-only blocker: the
+  canonical owner runbook stopped at R9 point revalidation and omitted both the
+  insufficient R10 exact-case boundary and R11 retained capability. The runbook
+  now states the exact Windows handle and Linux procfd/pass-fd contracts,
+  unsupported non-`/proc` POSIX fail-closure, and close-on-success/error truth.
+- WSP 15 scores this promotion-blocking canonical drift `1/5/5/4 = 15` (P1).
+  WSP 97 evidence remains repository-bound; Holo stayed quarantined. No source,
+  runtime, test, broad-suite, live acceptance, owner, maintenance, reindex, MCP,
+  model, store, commit, push, or promotion effect occurred. (WSP 15/22/97)
+
+## 2026-08-17 - R11 retained launch-capability correction
+
+- Independent R10 verification disproved the documented launch-continuity
+  claim: the proof helper opened, validated, and closed its descriptor before
+  the caller invoked `subprocess.run`. Path plus identity was therefore only a
+  point proof and left a replacement interval. This was documentation and
+  implementation drift, not promotion evidence.
+- WSP 97 dialectic compared (A) a context-managed live process-image capability,
+  (B) a native atomic-launch seam, and (C) copying the interpreter into a
+  harness-owned destination. A is the smallest strong move: Windows retains the
+  verified non-sharing handle across the runner; Linux executes the retained
+  descriptor through `/proc/self/fd/<fd>` with `pass_fds`. B adds unnecessary
+  native platform code. C duplicates a mutable runtime artifact and risks
+  Python layout drift. The proof receipt remains path+identity only and is not
+  serialized; a fresh capability is acquired only at the runtime-bound runner.
+- Added injected-runner adversaries proving the capability is live during the
+  call, closes on success and error, prevents runner invocation when reopening
+  fails, and either denies Windows replacement or keeps Linux execution bound
+  to the original opened object. An actual proven-interpreter subprocess smoke
+  also passed. The runtime-free legacy probe is unchanged.
+- WSP 15 remains `4/5/5/5 = 19` (P0). Exact nine-file acceptance is **146
+  collected = 143 passed / 3 explicit symlink-capability skips**. The full six
+  manifest-generator tests passed **6/6** with two disabled-plugin config
+  warnings. The manifest has **1,346 runtime files**, digest
+  `61a5b14f8f13dbb93ce91d7fab473bec72bccc7060fdf9250db3305037a6ee77`.
+- Holo retrieval remained deliberately degraded/quarantined, so repository and
+  governing-WSP evidence was used. This exposed material staleness in R9/R10
+  launch-continuity prose, now corrected. The unresolved 184-second broad
+  bridge timeout was not rerun and remains scale evidence, not acceptance
+  evidence. No Holo query, owner, maintenance, reindex, MCP, model, store,
+  commit, push, or promotion effect occurred. Independent R11 review is required.
+
+## 2026-08-17 - R10 Windows exact-case executable correction
+
+- R10 repository fallback retrieval was explicitly degraded because HoloIndex
+  query access remained quarantined. The strict RedDog bootstrap order,
+  governing WSPs, exact module Tier-0/Tier-1 docs, Git diff, and implementation
+  were read instead. Noise and duplication were low because searches were
+  constrained to the acceptance/process-image surfaces; ordering was bootstrap
+  then protocols then module docs/code/tests. No mandatory Tier-0 artifact was
+  missing. Staleness was material: R9 documentation claimed alias denial while
+  a live Windows RED proved a case-only executable alias was admitted.
+- WSP 97 dialectic compared three moves. Same-file/file-ID admission was
+  rejected because the alias and canonical spelling intentionally share one
+  identity. A separately allowlisted executable descriptor was stronger but
+  duplicated the existing OS-current-image authority and narrowed the reusable
+  proof seam. R10 used the validation descriptor's case-preserving final path to
+  require an exact match for every non-anchor component; it did not retain that
+  descriptor across the later runner call, which R11 corrects.
+  Drive/UNC anchor case remains equivalent; directory and filename aliases fail
+  closed without weakening link/reparse/hardlink/replacement checks.
+- WSP 15 scored the blocker `4/5/5/5 = 19` (P0): the native path proof is high
+  complexity and attacker-selected child execution is essential,
+  non-deferrable, and systemically material. No new module or parallel path was
+  created; the existing Windows acceptance primitive and process-image proof
+  evolved in place per WSP 50/84.
+- Dynamic RED was one failing exact Windows case-alias test. GREEN process-image
+  coverage is **11 collected = 10 passed / 1 file-symlink capability skip**.
+  The exact seven-file correction closure is **125 collected = 123 passed / 2
+  capability skips**. The nine-file acceptance closure is **141 collected =
+  138 passed / 3 capability skips**; skip reasons were unavailable file,
+  receipt-file, and directory symlink creation. Collection totals and executed
+  pass totals are deliberately separate.
+- AST parsing passed for the three corrected Python paths. The canonical test
+  registry check is current at **1,524 / 265 quarantined**. Backend-manifest
+  write/check is current at **1,346 runtime files**, digest
+  `e925b311f81e561bb975c073ced84b09528fabaddf9c613490e2d4465e0961d9`.
+  `INTERFACE.md` is 999 lines after routing duplicate bootstrap/acceptance
+  guidance back to its existing contract and runbook owners.
+  The manifest generator tier then exposed both stale pinned digest consumers
+  (**5 passed / 1 failed**, followed by one still-failing focused rerun); after
+  updating the test and extension constant, the exact failed test passed.
+  A broader full bridge-module run exceeded its 184-second shell budget without
+  a captured outcome and is not acceptance evidence. No live Holo query,
+  owner, maintenance, reindex, MCP, model, canonical-store, commit, push, or
+  promotion effect occurred. Independent R10 verification subsequently found
+  the launch-continuity gap corrected by R11.
+
+## 2026-08-17 - R9 process-image and interactive-environment closure
+
+- Independent R8 verification found two real REDs: mutable
+  `sys._base_executable` could select `cmd.exe`, and inherited
+  `PYTHONINSPECT` survived the shared child scrubber. R9 derives the interpreter
+  from the OS current-process image, descriptor-proves its canonical path and
+  stable identity during runtime admission, and reopens/re-proves it at a
+  point immediately before spawn. R11 later closes the remaining replacement
+  interval by retaining a fresh capability through the runner. The proof
+  remains in memory and is absent from receipts.
+- Windows reuses the acceptance handle/final-path pattern without requesting
+  mutation rights on the interpreter parent. POSIX uses `/proc/self/exe` and
+  `/proc/self/fd`. Raw aliases, link/junction/reparse components, nonregular or
+  multiply linked files, final-path drift, and identity replacement fail before
+  child launch. Mutable Python executable fields cannot select the command.
+- Added `PYTHONINSPECT` to the existing shared sanitizer; no second sanitizer or
+  transient retry was introduced. R9 runs no live acceptance, owner, refresh,
+  reindex, model, store, canonical, promotion, or capacity effect.
+- WSP 15 scores this executable-authority closure `4/5/5/5 = 19` (P0):
+  cross-platform identity proof is high complexity, while attacker-selected
+  child execution is essential, non-deferrable, and systemically material.
+- Final bounded validation passed the strengthened hostile suite three times
+  (**87 passed, 2 skipped** each), the exact adjacent tier (**271 passed,
+  2 skipped**), and the adversary/runtime/sanitizer tier (**136 passed,
+  3 skipped**). Registry write/write/check is current at **1,524 tests / 265
+  quarantined**. Manifest write/write/check is current at **1,346 runtime
+  files**, canonical digest
+  `4de0e76a29dfc8d5338ee0c88251f3deb7af2820ca07afd4832655920045a663`.
+  The exact generator/registry metadata tier passed **41 in 53.68s** under
+  `C:\Python312\python.exe`; fast Node contract/preflight/async suites passed.
+  The exhaustive extension shard runner was not run and is not claimed.
+
+## 2026-08-17 - R8 trusted snapshot-runtime closure
+
+- Preserved the R7 FAIL evidence unchanged: the 917.4-second run at
+  `220fdd9febbac00ddde9acbf7d8673ef0888b367` made two direct queries and one
+  activation query, kept canonical state unchanged, then failed semantic proof.
+  Its 1,155-byte receipt has SHA-256
+  `305a53b7c63b64762bb3706fb03bec76c35c3358fbc4a607c89567c7a6c1bd78`.
+- Root cause was runtime drift in the fresh snapshot child: user-site ChromaDB
+  1.3.0 was inherited instead of the validated runtime's ChromaDB 1.5.5. R8
+  threads the already-proven site-packages path in memory, launches the base
+  interpreter with `-S -B`, supplies an exact scrubbed `PYTHONPATH`, proves
+  package origin/version before `PersistentClient`, and preserves allowlisted
+  typed failures without adding retry.
+- R8 performs no live acceptance, owner, refresh, reindex, model, store,
+  canonical, promotion, or capacity effect.
+- Validation froze 1,523 registry tests (265 quarantined) and a deterministic
+  1,345-file backend manifest at
+  `8ab41b5ebd22cdfa9fb0ec8ca736ce38f17dd233fb3ff7d9ae0fd2ef7a551941`;
+  fast Node compatibility/preflight passed. The exhaustive extension shard
+  runner was deferred to independent verification and is not claimed.
+- WSP 15 scored the runtime-authority mismatch at
+  complexity/importance/deferability/impact `5/5/5/5 = 20`, priority P0; the
+  bounded closure changes runtime selection and error truth without weakening
+  the semantic, freshness, generation, cleanup, or single-attempt contracts.
+
+## 2026-08-17 - R6 receipt-continuity and session-evidence hardening
+
+- Replaced the post-activation path reopen with one bounded, confined,
+  descriptor-held freshness-receipt proof. It rejects link/reparse and hardlink
+  targets, strictly parses UTF-8/JSON/schema, binds exact SSD/repository/SHA/
+  generation/file digest, and re-proves identity plus digest immediately before
+  and after the isolated collection probe.
+- The private handoff now yields an immediate one-way session digest retained
+  separately from the cleanup tuple. PASS requires the digest after cleanup;
+  FAIL before owner creation remains empty, while cleanup/ownership failure
+  cannot fabricate PASS or disclose URL/token/path material.
+- Corrected the R5 adjacent result wording below: **273 collected = 271 passed,
+  2 skipped**, not 273 passes plus two skips. R6 ran no live acceptance, owner,
+  refresh, reindex, model, store, canonical, promotion, or capacity effect.
+  Registry write/write/check is 1,522/265 at SHA-256
+  `35d0b1b37af6b27c4929ea732a96b2846d670628cfa4015268fe8ab1bb6780b3`;
+  the 1,345-file manifest is pinned at canonical digest
+  `e50257c3cfcbfd45ff00d72afa20e82b9cb8aed72b54481e5429de87df4b7c8a`.
+  (WSP 15/22/50/62/87/97)
+
+## 2026-08-17 - R5 supported-wrapper activation hardening
+
+- Added fail-before-owner canonical freshness admission to the supported
+  one-shot wrapper. Repository-root receipt mismatch preserves
+  `freshness_repo_root_mismatch`, reports zero owner attempts/no retry, and
+  never reaches owner bootstrap or the semantic backend.
+- Candidate acceptance now performs two direct private queries, atomically
+  cleans and rechecks the handoff, performs one candidate-self-selected K=1
+  supported-wrapper activation, and then re-proves the same SHA/root/
+  generation/receipt through canonical rehydration and the existing isolated
+  collection-snapshot probe. Receipts add only the activation count/digest and
+  semantic-store verdict.
+- Bounded forensics proved ChromaDB 1.5.5 changes only its `acquire_write`
+  lifecycle table on client open; semantic tables, collection counts,
+  embedding bindings, generation, and canonical receipt remain unchanged.
+  This lifecycle-row growth is recorded as unresolved scale debt. The
+  historical `b482fdaed4932a15b2b195c256761cfd1053f053` PASS is pre-R5 only.
+- WSP 62 mechanical extraction reduced modified `query_once` to 35 lines; all
+  wrapper functions are at most 35 lines and candidate functions at most 50.
+  Focused wrapper/acceptance tests pass 58/58; hostile tests pass 13/13 three
+  times; the base-interpreter adjacent matrix collected 273: 271 passed with
+  two platform/interpreter skips. Registry remains 1,521/265 at SHA-256 `3115b7602af5e5b1e89403be218113b3f83f933ed3516539cc94701115402a55`.
+  The 1,344-file backend manifest is deterministic at canonical digest
+  `8929b8c0a9818dc4159e3aee7f8a394043950289331dfa075c371a25b6bda423`;
+  all six generator tests and Node compatibility/preflight pass. No real
+  acceptance, owner, reindex, model, canonical-store, promotion, or capacity
+  effect ran.
+  (WSP 15/22/34/50/62/87/97)
+
+## 2026-08-17 - R3 live-failure acceptance hardening
+
+- Preserved immutable evidence from the sole authorized live attempt at
+  `fb72cbd99bc9499545823fa1849fc4597b8d71ec`: receipt SHA-256
+  `f9b5e18ce62e63af3bbbf0e0f3d36def5614216fafadca8872703f519be43a78`,
+  verdict FAIL, `NEW_PRIVATE_OWNER_HANDOFF_MISSING`, zero direct queries, and
+  unchanged canonical receipt. The failed store remains evidence; it was not
+  mutated or reused, and no live PASS/promotion/capacity claim was made.
+- R3 RED proved the missing-handoff check masked an allowlisted primary
+  `HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. Startup now captures and validates a
+  handoff only when present, preserves stable operational failure first, requires
+  a handoff only after exact `REFRESHED` proof, and always finalizes cleanup for
+  an actually captured owner.
+- Added required `owner_runtime_root` / CLI `--runtime-root`. Preflight requires
+  a third distinct clean non-reparse checkout sharing the source worktrees' Git
+  common directory and exactly one existing checkout-local site-packages path.
+  Runtime HEAD is dependency-only and never source authority. Acceptance passes
+  candidate as `repo_root`, runtime as `owner_runtime_root`, and publishes only a
+  SHA-256 runtime-root digest. New-store and new-receipt rules remain mandatory.
+- RED/GREEN: masked error **1 failed -> 18 passed**; runtime seam **9 failed / 39
+  passed -> 48 passed**; expanded code matrix **57/57**; CLI **5 failed / 1
+  passed -> 6/6**. WSP 62 snapshot: candidate 578/max function 50, guards
+  562/max 46, handshake 599/max 48, types 71. (WSP 15/22/50/62/87/97)
+- Final affected matrix collected **238: 236 passed / 2 skipped**; Tier-0/query
+  ordering passed **279**; adjacent owner/query collected **245: 243 passed / 2
+  skipped**. Exact path sets and interpreter-dependent skip reasons are recorded
+  in `tests/TestModLog.md`; the hostile 17-test subset passed three times.
+  Registry stayed at
+  **1,521/265**, SHA-256
+  `3115b7602af5e5b1e89403be218113b3f83f933ed3516539cc94701115402a55`.
+  Manifest stayed at **1,344 files**, canonical digest
+  `67ff3d50decd13c7de233da9590f62d03c97067c48c42229bd419f5ce7b2e4a1`;
+  generator/Node, static/diff/secrets, and the 980-line interface cap passed.
+
+## 2026-08-17 - Isolated HoloIndex candidate acceptance adapter
+
+- Added a default-inert trusted-host acceptance adapter and thin CLI for one
+  clean exact-SHA candidate plus distinct detached authority worktree. Real mode
+  creates only a new store, copies an already-local model under sorted explicit
+  bounds, requires equal artifact digests, runs the existing maintenance
+  handshake with `requested=True` and `auto_maintenance=True`, and accepts only
+  exact `REFRESHED` proof.
+- Bound exactly two direct owner queries (K=1 and the frozen K=12 incident
+  query) to the same SHA/generation/receipt, followed by canonical freshness
+  rehydration against the isolated store. No retry wrapper can mask a query.
+- Hardened owner cleanup with optional atomic `expected_handoff` comparison
+  under the existing lock; legacy callers retain unconditional cleanup. Added
+  disjoint/reparse/TOCTOU guards, canonical receipt before/after hashing,
+  environment restoration, and immutable bounded secret-free JSON publication.
+- R1 RED provenance: 15 missing-guard, six missing-orchestrator, three
+  missing-CLI, one missing atomic-cleanup, and two finalization contracts failed
+  before production. R2 Layer C then captured four Windows/model-copy failures:
+  live per-file growth, live aggregate growth, source-parent/root replacement,
+  and destination-parent/root replacement. The integrated run exposed path-open
+  digest verification conflicting with the proven Windows handle; digesting the
+  already-held descriptors closed it without weakening sharing or identity.
+- Ported the proven-handle/no-replace pattern from the existing Windows
+  authority-runtime-store helper. All traversed parents and source/destination
+  files remain live-handle pinned and re-proved; cleanup uses owned handles.
+  WSP 62 decomposition reduced the 669-line copy file and 60/58/57-line
+  functions into cohesive modules with production functions at or below 50.
+- R2 Layer D RED was three failures before making non-real/malformed CLI paths
+  import-inert, preserving `OWNER_PORT_NOT_AVAILABLE` across a post-check bind
+  race, and rejecting an operational response without a new private handoff.
+  Process and host-local session locks serialize a canonical-store/port pair;
+  pre-existing listeners/handoffs are never killed or reused.
+- GREEN affected acceptance/owner/CLI closure passed 82/82 in 2.21 s; the four
+  import/race contracts passed 4/4 three consecutive times. No real refresh,
+  owner start, model copy/download/install, canonical store/receipt mutation,
+  promotion, or live acceptance occurred.
+- Final cross-package collection exposed the Moltbot module's nested `scripts`
+  package shadowing the repository-root namespace before the one-shot query test
+  imported. The exact ordered pair failed collection before the test seam was
+  bound directly to the proven root scripts directory, then passed 48/48. The
+  final combined 13-file authority matrix passed 212 with two optional skips in
+  19.44 s. The 17-test hostile Windows/port/handoff/session/import subset passed
+  three consecutive runs in 1.90/1.81/1.81 s.
+- Deterministic registry write/write/check recorded 1,521 tests/265 quarantined
+  at file SHA-256 `3115b7602af5e5b1e89403be218113b3f83f933ed3516539cc94701115402a55`.
+  Manifest write/write/check closed all seven acceptance runtime paths at 1,344
+  files and canonical digest
+  `a8e3a647abb0c5446670a31fb3ea8e160c9d4eda60c0a110a46918c03f9834b5`.
+  (WSP 15/22/34/50/62/87/97)
+
+## 2026-08-17 - WSP 62 interface remediation
+
+- Closed the R3 verifier's sole revision: `INTERFACE.md` had reached 1,010
+  lines. Compressed duplicated owner operations into concise public contracts
+  linked to the existing README/runbook, preserving endpoint, request,
+  response, Tier-0, error, authentication, binding, and no-index semantics.
+  Final interface size is 971 lines with 29 lines of headroom.
+- Corrected the roadmap's stale pre-threshold wording. Parser 47 passed in
+  1.56 s; registry/manifest checks remained current; manifest generator 5
+  passed in 29.29 s; two exact WSP 62 guards and Node compatibility passed.
+  No code, test, generated artifact, runtime, or live owner changed.
+  (WSP 15/22/50/62/87/97)
+
+## 2026-08-16 - K-invariant Tier-0 owner classification
+
+- Preserved three allowlisted secret-free producer failures through the owner:
+  catalog unavailable, Tier-0 incomplete, and exact lookup failed. Unknown or
+  forged metadata remains generic with empty raw/hit evidence.
+- Removed independent top-K module inference from flattening. Only a singular,
+  complete pair whose canonical `tier0_module_target`, query relation, paths,
+  and `exact_metadata` provenance agree is reserved. Missing, unrelated,
+  ambiguous, multi-module, partial, mixed, duplicate, and forged claims keep
+  score order.
+- Kept incomplete/catalog failure deterministic with no retry and exact lookup
+  failure transient with one process-owned retry. HTTP mapping is 409 for
+  incomplete and 503 for catalog/lookup availability failures.
+- R3 Unicode RED was 8 failed/39 passed in 1.47 s; isolated GREEN was 47
+  passed in 1.47 s. The exact six-file focused command including the machine
+  spec passed 278 in 4.00 s; the 13-file adjacent command passed 356/1 skip in
+  11.21 s. No service restart,
+  reindex, network, or live-generation claim. WSP 62 disposition: the
+  infrastructure threshold is a 600-line advisory; default Python hard limit
+  is 1,500. Supervisor is base/candidate 688/688, class 200, `start` 50.
+  Semantic proof/response are 499/248 lines with maximum functions 48/42.
+  No exemption or ceiling changed.
+- Regenerated the 1,337-file RedDog runtime manifest twice with canonical
+  digest `8e2680eb6075c56f1528a0cbdf2f08b44076cf8c814cec0f45c5a997df723ac9`
+  and bound `module_intent_snapshot.py` into its tested closure.
+  The deterministic registry remains 1,517 tests/265 quarantined at SHA-256
+  `0510244d701c7df08562852f02c76cdda1fccae6eb34fb387cd096aba375c675`.
+  (WSP 15/22/62/97)
 
 ## 2026-08-16 - Maintenance failure diagnostic hardening
 
@@ -32,6 +890,7 @@
   `c477253ea6fdf2748ffd9f79d72d8fd22bfa95749416b0493f8cb2ec8e91821d`.
   No freshness, lease, semantic, extension API, or package-version contract
   changed.
+  (WSP 15/22/50/62/87/97)
 
 ## 2026-08-16 - Zero-limit reconciliation
 

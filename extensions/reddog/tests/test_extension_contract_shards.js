@@ -3,10 +3,11 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const contractExecution = require('./reddog_contract_execution');
 
-const EXPECTED_SOURCE_SHA256 = 'sha256:29588bc1cd8b2b60bb6e297eb2461db492467c646dd10fe68aab7b5d36d0b30d';
-const EXPECTED_SOURCE_LINES = 6944;
-const EXPECTED_ASSERTION_CALLS = 1230;
+const EXPECTED_SOURCE_SHA256 = 'sha256:f6a5843e7a19f112714595ef3afbf328b954a0e41e003e8e0ea1ab9745ff3d2e';
+const EXPECTED_SOURCE_LINES = 6914;
+const EXPECTED_ASSERTION_CALLS = 483;
 const MAX_SHARD_LINES = 400;
 const MAX_ORCHESTRATOR_LINES = 200;
 
@@ -14,6 +15,8 @@ const testsDir = __dirname;
 const shardsDir = path.join(testsDir, 'contract_shards');
 const manifest = JSON.parse(fs.readFileSync(path.join(shardsDir, 'manifest.json'), 'utf8'));
 const orchestrator = fs.readFileSync(path.join(testsDir, 'verify_extension_contract.js'), 'utf8');
+const execution = fs.readFileSync(path.join(testsDir, 'reddog_contract_execution.js'), 'utf8');
+const authenticatedRunner = orchestrator + execution;
 
 function digest(content) {
   const canonical = String(content).replace(/\r\n/g, '\n');
@@ -59,21 +62,28 @@ assert.strictEqual(nextSourceLine - 1, EXPECTED_SOURCE_LINES);
 assert.strictEqual(lineCount(aggregate), EXPECTED_SOURCE_LINES);
 assert.strictEqual(digest(aggregate), EXPECTED_SOURCE_SHA256, 'original source body must reconstruct exactly');
 assert.strictEqual(
-  (aggregate.match(/\bassert(?:\.[A-Za-z_$][\w$]*)?\s*\(/g) || []).length,
+  contractExecution.assertionCount(aggregate),
   EXPECTED_ASSERTION_CALLS,
   'assertion calls must not be lost'
 );
+assert.strictEqual(contractExecution.assertionCount(
+  "// assert(commentOnly)\n'assert(stringOnly)';\nassert(realCall);"
+), 1, 'assertion counter must ignore comments and strings');
 assert(lineCount(orchestrator) <= MAX_ORCHESTRATOR_LINES, 'orchestrator exceeds WSP_62 ceiling');
-assert(orchestrator.includes("'contract_shards',"), 'orchestrator must load the shard manifest');
-assert(orchestrator.includes('ContractRunnerModule.wrap(contractRunnerAggregate)'), 'runner must use local CommonJS bindings');
-assert(orchestrator.includes('ContractRunnerModule.createRequire(__filename)'), 'runner must preserve local require semantics');
-assert(!orchestrator.includes('global.require'), 'runner must not leak require onto the process global');
-assert(!orchestrator.includes('global.__dirname'), 'runner must not leak __dirname onto the process global');
-assert(!orchestrator.includes('global.__filename'), 'runner must not leak __filename onto the process global');
-assert(orchestrator.includes('lstatSync(shardPath)'), 'runner must reject non-regular shard paths');
-assert(orchestrator.includes('isSymbolicLink()'), 'runner must reject shard symlinks');
-assert(orchestrator.includes('realpathSync(shardPath)'), 'runner must enforce realpath confinement');
-assert(orchestrator.includes('shard.path !== expectedRelative'), 'runner must require exact shard paths');
+assert(lineCount(execution) <= 400, 'contract execution module exceeds WSP_62 ceiling');
+assert(authenticatedRunner.includes("'contract_shards', 'manifest.json'"),
+  'authenticated runner must load the shard manifest');
+assert(authenticatedRunner.includes('Module.wrap(aggregate)'),
+  'runner must use local CommonJS bindings');
+assert(authenticatedRunner.includes('Module.createRequire(__filename)'),
+  'runner must preserve local require semantics');
+assert(!authenticatedRunner.includes('global.require'), 'runner must not leak require globally');
+assert(!authenticatedRunner.includes('global.__dirname'), 'runner must not leak dirname globally');
+assert(!authenticatedRunner.includes('global.__filename'), 'runner must not leak filename globally');
+assert(authenticatedRunner.includes('lstatSync(candidate)'), 'runner must reject invalid shard types');
+assert(authenticatedRunner.includes('isSymbolicLink()'), 'runner must reject shard symlinks');
+assert(authenticatedRunner.includes('realpathSync(candidate)'), 'runner must enforce realpath confinement');
+assert(authenticatedRunner.includes('shard.path !== relative'), 'runner must require exact shard paths');
 
 console.log(
   `RedDog extension contract shard structure passed: ${manifest.shards.length} shards, ` +

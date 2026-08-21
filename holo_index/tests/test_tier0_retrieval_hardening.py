@@ -14,11 +14,19 @@ from pathlib import Path
 
 import pytest
 
+from holo_index.core import search_engine
 from holo_index.core.collection_search import CollectionSearchOps, search_collection
+from holo_index.core.collection_injections import (
+    Tier0IncompleteError,
+    Tier0LookupError,
+)
 from holo_index.core.search_engine import (
     _inject_module_tier0_candidates,
+    _safe_search_error_code,
     _search_collection,
+    execute_search,
 )
+from holo_index.module_intent_snapshot import ModuleIntentSnapshotError
 from holo_index.tier0_retrieval import (
     TIER0_REQUIRED_DOCS,
     infer_explicit_module_target,
@@ -28,6 +36,47 @@ from holo_index.tier0_retrieval import (
 
 
 MODULE = "modules/communication/moltbot_bridge"
+
+
+@pytest.mark.parametrize(
+    ("error", "code"),
+    [
+        (Tier0IncompleteError("secret-shaped-detail"), "HOLOINDEX_TIER0_INCOMPLETE"),
+        (Tier0LookupError("secret-shaped-detail"), "HOLOINDEX_TIER0_LOOKUP_FAILED"),
+        (
+            ModuleIntentSnapshotError("secret-shaped-detail"),
+            "HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE",
+        ),
+        (RuntimeError("HOLOINDEX_STRICT_TIER0_INCOMPLETE"), "HOLOINDEX_SEARCH_FAILED"),
+        (ValueError("secret-shaped-detail"), "HOLOINDEX_SEARCH_FAILED"),
+    ],
+)
+def test_search_error_codes_are_exact_type_allowlisted_and_secret_safe(
+    error: Exception, code: str,
+) -> None:
+    assert _safe_search_error_code(error) == code
+    assert "secret" not in _safe_search_error_code(error)
+
+
+def test_execute_search_redacts_untrusted_exception_text() -> None:
+    logged: list[tuple[str, str]] = []
+
+    class _Cache:
+        @staticmethod
+        def get(*_args):
+            raise ValueError("secret-shaped-detail")
+
+    class _Holo:
+        search_cache = _Cache()
+
+        @staticmethod
+        def _log_agent_action(message, level="INFO"):
+            logged.append((message, level))
+
+    result = execute_search(_Holo(), "bounded query")
+
+    assert result["metadata"] == {"error": "HOLOINDEX_SEARCH_FAILED"}
+    assert logged == [("Search error: HOLOINDEX_SEARCH_FAILED", "ERROR")]
 
 
 @pytest.mark.parametrize("limit", [0, -1])
@@ -414,8 +463,14 @@ def test_vector_search_obeys_wsp62_hard_limits() -> None:
     assert search_sizes["_token_keyword_score"] <= 50
     assert search_sizes["_vector_result"] <= 50
     assert search_sizes["_vector_search_ops"] <= 50
+    assert search_sizes["_safe_search_error_code"] <= 50
+    assert search_sizes["_module_intent"] <= 50
+    assert search_sizes["_docs_search"] <= 50
     for helper in ("collection_search.py", "collection_injections.py"):
         assert max(_function_sizes(source_path.with_name(helper)).values()) <= 50
+    snapshot = source_path.parents[1] / "module_intent_snapshot.py"
+    assert len(snapshot.read_text(encoding="utf-8").splitlines()) < 800
+    assert max(_function_sizes(snapshot).values()) <= 50
 
 
 def test_search_collection_returns_tier0_before_nested_test_readme() -> None:
@@ -534,6 +589,144 @@ def test_docs_only_search_infers_module_from_initial_docs_metadata() -> None:
         f"{MODULE}/README.md",
         f"{MODULE}/INTERFACE.md",
     ]
+
+
+@pytest.mark.parametrize(
+    ("limit", "context_hits"),
+    [
+        (1, (_hit("modules/infrastructure/foundups_mcp_bridge/src/owner.py"),)),
+        (12, (
+            _hit("modules/infrastructure/foundups_mcp_bridge/src/owner.py"),
+            _hit("modules/development/mcp_testing/tests/test_server.py"),
+        )),
+        (20, (
+            _hit("modules/foundups/pfmall/tests/test_api.py"),
+            _hit("modules/ai_intelligence/pqn/tests/test_runtime.py"),
+        )),
+    ],
+)
+def test_generation_module_registry_makes_exact_audit_query_k_invariant(
+    limit: int, context_hits: tuple[dict[str, str], ...],
+) -> None:
+    collection = _ExactPathCollection(rows={})
+    registry_hits = tuple(_hit(f"{path}/src/known.py") for path in (
+        "modules/ai_intelligence/holo_dae",
+        "modules/ai_intelligence/pqn",
+        "modules/development/mcp_testing",
+        "modules/development/unicode_tools",
+        "modules/foundups/pfmall",
+        "modules/infrastructure/foundups_mcp_bridge",
+    ))
+
+    class _Embedding(list):
+        def tolist(self):
+            return list(self)
+
+    class _Model:
+        @staticmethod
+        def encode(_query, *, show_progress_bar):
+            assert show_progress_bar is False
+            return _Embedding([0.1, 0.2])
+
+    class _Holo:
+        model = _Model()
+        embedders = None
+        routing_active = False
+        strict_semantic_owner = True
+
+        @staticmethod
+        def _log_agent_action(*_args, **_kwargs):
+            return None
+
+    hits = _search_collection(
+        _Holo(), collection,
+        "HoloDAE PQN training system UTF8 hygiene MCP testing unicode tools "
+        "pfmall Tier0 contracts",
+        limit, "docs",
+        module_context_hits=context_hits,
+        module_registry_hits=registry_hits,
+    )
+
+    assert [hit["path"] for hit in hits] == [f"{MODULE}/tests/README.md"]
+    assert collection.calls == []
+
+
+@pytest.mark.parametrize(
+    ("query", "expected"),
+    [
+        ("moltbot_bridge Tier0 contract", MODULE),
+        (f"audit {MODULE}", MODULE),
+        ("moltbot_bridge and foundups_mcp_bridge", None),
+        ("generic module audit", None),
+    ],
+)
+def test_producer_attests_generation_stable_tier0_target_before_docs(
+    monkeypatch: pytest.MonkeyPatch, query: str, expected: str | None,
+) -> None:
+    monkeypatch.setattr(
+        search_engine,
+        "load_module_intent_paths",
+        lambda _root: (
+            MODULE,
+            "modules/infrastructure/foundups_mcp_bridge",
+        ),
+    )
+    monkeypatch.setattr(search_engine, "_search_collection", lambda *_a, **_k: [])
+
+    class _Holo:
+        project_root = Path.cwd()
+        strict_semantic_owner = True
+        search_cache = None
+        model = None
+        docs_collection = object()
+        retrieval_mode = "semantic"
+        embedding_backend = "sentence_transformers"
+        routing_active = False
+        collection_backend_map = {}
+        collection_embedding_space_map = {}
+
+        @staticmethod
+        def _log_agent_action(*_args, **_kwargs):
+            return None
+
+    result = execute_search(_Holo(), query, doc_type_filter="docs")
+
+    assert result["metadata"]["tier0_module_target"] == expected
+
+
+@pytest.mark.parametrize(
+    "query",
+    ["moltbot_bridge Tier0 contract", f"audit {MODULE}"],
+)
+def test_singular_and_full_path_intent_still_require_complete_tier0(
+    query: str,
+) -> None:
+    collection = _ExactPathCollection(rows={})
+
+    class _Embedding(list):
+        def tolist(self):
+            return list(self)
+
+    class _Model:
+        @staticmethod
+        def encode(_query, *, show_progress_bar):
+            return _Embedding([0.1, 0.2])
+
+    class _Holo:
+        model = _Model()
+        embedders = None
+        routing_active = False
+        strict_semantic_owner = True
+
+        @staticmethod
+        def _log_agent_action(*_args, **_kwargs):
+            return None
+
+    with pytest.raises(RuntimeError, match="HOLOINDEX_STRICT_TIER0_INCOMPLETE"):
+        _search_collection(
+            _Holo(), collection, query, 12, "docs",
+            module_context_hits=(_hit(f"{MODULE}/src/worker.py"),),
+        )
 
 
 def test_exact_metadata_rows_have_truthful_provenance_and_ignore_vector_floor(

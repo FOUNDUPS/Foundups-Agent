@@ -2,11 +2,13 @@
 
 const assert = require('assert');
 const cp = require('child_process');
+const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
 
 const extDir = path.resolve(__dirname, '..');
 const repair = require(path.join(extDir, 'holoindex_incident_repair.js'));
+const ownerBridge = require(path.join(extDir, 'holoindex_generation_bound_query.js'));
 const extensionSource = fs.readFileSync(path.join(extDir, 'extension.js'), 'utf8');
 const pkg = JSON.parse(fs.readFileSync(path.join(extDir, 'package.json'), 'utf8'));
 const HEAD = 'a'.repeat(40);
@@ -157,12 +159,106 @@ assert.strictEqual(repair.coordinate({
   ownerResult: failure(), ownerObserved: true, query: 'x'.repeat(16001)
 }).rejection_reasons[0], 'incident_query_invalid');
 assert(extensionSource.includes("require('./holoindex_incident_repair')"));
-assert(extensionSource.includes('holoGenerationBoundQuery.isObserved(ownerResult)'));
-assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(ownerResult, ownerObserved)'));
-assert(extensionSource.includes('coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved)'));
+assert(extensionSource.includes('holoGenerationBoundQuery.isObserved(baseResult)'));
+assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(baseResult, observed)'));
+assert(extensionSource.includes('await holoIncidentRepair.coordinateAsync'));
 assert((extensionSource.match(/holoIncidentRepair\.metadata\(incidentRepair\)/g) || []).length >= 4);
-assert.strictEqual(pkg.version, '0.4.101');
-assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.101'"));
+assert.strictEqual(pkg.version, '0.4.102');
+assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.102'"));
 assert(!fs.readFileSync(path.join(extDir, 'holoindex_incident_repair.js'), 'utf8').includes('qwen'));
 
-console.log('RedDog HoloIndex incident repair extension tests passed.');
+function asyncBase() {
+  return {
+    root: 'O:/repo', query: 'async repair', ownerResult: failure(),
+    ownerObserved: true, interpreterPath: 'python', env: {}
+  };
+}
+
+async function assertAsyncSuccess(base) {
+  let eventLoopAdvanced = false;
+  let invocation = null;
+  let payload = null;
+  const resultPromise = repair.coordinateAsync(Object.assign({}, base, {
+    execFile: (interpreter, args, options, callback) => {
+      invocation = { interpreter, args, options };
+      const child = { kill() {}, stdin: { end(value) {
+        payload = JSON.parse(value);
+        setTimeout(() => callback(null, JSON.stringify({
+          accepted: true, status: 'QUEUED', rejection_reasons: []
+        })), 20);
+      } } };
+      return child;
+    }
+  }));
+  setImmediate(() => { eventLoopAdvanced = true; });
+  const asyncResult = await resultPromise;
+  assert.strictEqual(eventLoopAdvanced, true, 'incident repair blocked the event loop');
+  assert.strictEqual(asyncResult.status, 'QUEUED');
+  assert.strictEqual(invocation.options.timeout, 90000);
+  assert.strictEqual(invocation.options.maxBuffer, 256 * 1024);
+  assert.strictEqual(payload.owner_failure.error, 'SEMANTIC_BACKEND_UNAVAILABLE');
+}
+
+async function assertAsyncCancellation(base) {
+  const registry = ownerBridge.createProcessLifecycleRegistry();
+  const lifecycle = registry.begin();
+  let lateCallback;
+  let kills = 0;
+  const cancelled = repair.coordinateAsync(Object.assign({}, base, { lifecycle,
+    execFile: (_exe, _args, _options, callback) => {
+      lateCallback = callback;
+      return { kill: () => { kills += 1; }, stdin: { end() {} } };
+    }
+  }));
+  registry.dispose();
+  const cancelledResult = await cancelled;
+  assert.strictEqual(cancelledResult.rejection_reasons[0], 'incident_repair_cancelled');
+  assert.strictEqual(kills, 1);
+  lateCallback(null, JSON.stringify({ accepted: true, status: 'QUEUED' }));
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.strictEqual(cancelledResult.status, 'REJECTED', 'late callback reopened settlement');
+}
+
+async function assertAsyncInputFailures(base) {
+  let missingInputKills = 0;
+  const missingInput = await repair.coordinateAsync(Object.assign({}, base, {
+    execFile: () => ({ kill: () => { missingInputKills += 1; } })
+  }));
+  assert.strictEqual(missingInput.accepted, false);
+  assert.strictEqual(missingInputKills, 1);
+
+  const stdin = new EventEmitter();
+  let pipeKills = 0;
+  stdin.end = () => setImmediate(() => stdin.emit('error', Object.assign(
+    new Error('broken pipe'), { code: 'EPIPE' }
+  )));
+  const pipeResult = await repair.coordinateAsync(Object.assign({}, base, {
+    execFile: () => ({ stdin, kill: () => { pipeKills += 1; } })
+  }));
+  assert.strictEqual(pipeResult.accepted, false);
+  assert.strictEqual(pipeKills, 1);
+}
+
+async function assertAsyncTimeout(base) {
+  const timeout = await repair.coordinateAsync(Object.assign({}, base, {
+    execFile: (_exe, _args, _options, callback) => {
+      setImmediate(() => callback(Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' })));
+      return { stdin: { end() {} }, kill() {} };
+    }
+  }));
+  assert.strictEqual(timeout.rejection_reasons[0], 'bridge_timeout');
+}
+
+async function asyncContracts() {
+  const base = asyncBase();
+  await assertAsyncSuccess(base);
+  await assertAsyncCancellation(base);
+  await assertAsyncInputFailures(base);
+  await assertAsyncTimeout(base);
+  console.log('RedDog HoloIndex incident repair extension tests passed.');
+}
+
+asyncContracts().catch((error) => {
+  console.error(error && error.stack || error);
+  process.exitCode = 1;
+});

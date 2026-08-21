@@ -35,6 +35,7 @@ BINDING = (
     "sha256:" + "b" * 64,
     "sha256:" + "c" * 64,
 )
+REPLICA_BINDING = tuple("sha256:" + character * 64 for character in "ef01")
 
 
 class _Process:
@@ -57,17 +58,31 @@ class _Process:
 
 
 class _SlowOwnerHarness:
-    def __init__(self, port: int) -> None:
+    def __init__(
+        self, port: int, canonical_root: Path, replica_root: Path,
+        events: list[str],
+    ) -> None:
         self.port = port
+        self.canonical_root = canonical_root
+        self.replica_root = replica_root
+        self.events = events
         self.requests: list[str] = []
         self.server: ThreadingHTTPServer | None = None
         self.thread: threading.Thread | None = None
         self.process = _Process()
         self.spawn_count = 0
 
-    def popen(self, _command: list[str], **kwargs: Any) -> _Process:
+    def popen(self, command: list[str], **kwargs: Any) -> _Process:
         self.spawn_count += 1
+        self.events.append("spawn")
         assert kwargs["env"][SERVICE_TOKEN_ENV] == TOKEN
+        assert "HOLOINDEX_SSD_PATH" not in kwargs["env"]
+        assert command[command.index("--canonical-ssd-path") + 1] == str(
+            self.canonical_root
+        )
+        assert command[command.index("--query-replica-root") + 1] == str(
+            self.replica_root
+        )
         requests = self.requests
 
         class SlowReadyHandler(BaseHTTPRequestHandler):
@@ -105,12 +120,34 @@ def _free_port() -> int:
         return int(probe.getsockname()[1])
 
 
+def _cold_start_owner(
+    tmp_path: Path,
+    canonical_root: Path,
+    replica_root: Path,
+    events: list[str],
+    port: int,
+) -> HoloQueryServiceSupervisor:
+    return HoloQueryServiceSupervisor(
+        repo_root=tmp_path,
+        canonical_ssd_path=canonical_root,
+        query_replica_root=replica_root,
+        replica_capability_verifier=lambda: events.append("verify"),
+        expected_replica_binding=REPLICA_BINDING,
+        port=port,
+        startup_timeout_seconds=TOTAL_STARTUP_SECONDS,
+        probe_timeout_seconds=ORDINARY_PROBE_SECONDS,
+    )
+
+
 def test_supervisor_cold_start_uses_longer_real_http_probe(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     port = _free_port()
-    harness = _SlowOwnerHarness(port)
+    canonical_root = tmp_path / "canonical"
+    replica_root = tmp_path / "replica"
+    events: list[str] = []
+    harness = _SlowOwnerHarness(port, canonical_root, replica_root, events)
     monkeypatch.setattr(supervisor_module.subprocess, "Popen", harness.popen)
     monkeypatch.setattr(supervisor_module.secrets, "token_urlsafe", lambda _n: TOKEN)
     monkeypatch.setattr(
@@ -118,12 +155,7 @@ def test_supervisor_cold_start_uses_longer_real_http_probe(
         "DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS",
         STARTUP_PROBE_SECONDS,
     )
-    owner = HoloQueryServiceSupervisor(
-        repo_root=tmp_path,
-        port=port,
-        startup_timeout_seconds=TOTAL_STARTUP_SECONDS,
-        probe_timeout_seconds=ORDINARY_PROBE_SECONDS,
-    )
+    owner = _cold_start_owner(tmp_path, canonical_root, replica_root, events, port)
     try:
         owner.start(
             expected_repo_head_sha=BINDING[0],
@@ -133,13 +165,20 @@ def test_supervisor_cold_start_uses_longer_real_http_probe(
         )
         assert owner.is_ready is True
         assert owner.verified_binding == BINDING
+        assert owner.verified_replica_binding == REPLICA_BINDING
         assert harness.spawn_count == 1
+        assert events == ["verify", "spawn", "verify"]
         assert harness.requests == [f"Bearer {TOKEN}"]
         assert supervisor_module._authenticated_health_probe(
             host=OWNER_HOST,
             port=port,
             token=TOKEN,
             timeout_seconds=ORDINARY_PROBE_SECONDS,
+            expected_repo_head_sha=BINDING[0],
+            expected_repo_root_digest=BINDING[1],
+            expected_generation_id=BINDING[2],
+            expected_receipt_digest=BINDING[3],
+            expected_replica_binding=REPLICA_BINDING,
         ) is False
     finally:
         owner.stop()
@@ -187,4 +226,8 @@ def _ready_payload() -> dict[str, Any]:
         "repo_root_digest": BINDING[1],
         "freshness_generation_id": BINDING[2],
         "freshness_receipt_digest": BINDING[3],
+        "query_replica_descriptor_digest": REPLICA_BINDING[0],
+        "query_replica_generation_id": REPLICA_BINDING[1],
+        "query_replica_id": REPLICA_BINDING[2],
+        "query_replica_path_identity_digest": REPLICA_BINDING[3],
     }

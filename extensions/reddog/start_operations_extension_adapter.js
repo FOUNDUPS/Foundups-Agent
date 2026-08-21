@@ -18,7 +18,9 @@ async function execute(options) {
       opts.worker
     );
   }
-  const request = protocol.buildRequest(command, intentId, opts.repoRoot);
+  const request = protocol.buildRequest(
+    command, intentId, opts.repoRoot, opts.repoStateReceipt
+  );
   const result = await bridge.run({
     interpreter: opts.interpreter,
     script: opts.script,

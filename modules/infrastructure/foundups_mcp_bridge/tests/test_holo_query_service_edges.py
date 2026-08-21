@@ -296,6 +296,7 @@ def test_flatten_hits_reserves_exact_module_root_tier0_for_explicit_module() -> 
     module = "modules/communication/moltbot_bridge"
     hits = core._flatten_hits(
         {
+            "metadata": {"tier0_module_target": module},
             "symbol_hits": [
                 {"path": f"{module}/src/worker.py", "similarity": "95.0%"},
             ],
@@ -304,8 +305,14 @@ def test_flatten_hits_reserves_exact_module_root_tier0_for_explicit_module() -> 
             ],
             "docs_hits": [
                 {"path": f"{module}/tests/README.md", "similarity": "99.0%"},
-                {"path": f"{module}/INTERFACE.md", "similarity": "42.0%"},
-                {"path": f"{module}/README.md", "similarity": "41.0%"},
+                {
+                    "path": f"{module}/INTERFACE.md", "similarity": None,
+                    "retrieval_provenance": "exact_metadata",
+                },
+                {
+                    "path": f"{module}/README.md", "similarity": None,
+                    "retrieval_provenance": "exact_metadata",
+                },
             ],
         },
         4,
@@ -333,12 +340,19 @@ def test_flatten_hits_tier0_reservation_is_bounded_at_low_k(
     module = "modules/communication/example_bridge"
     hits = core._flatten_hits(
         {
+            "metadata": {"tier0_module_target": module},
             "code_hits": [
                 {"path": f"{module}/src/worker.py", "similarity": "95.0%"},
             ],
             "docs_hits": [
-                {"path": f"{module}/INTERFACE.md", "similarity": "42.0%"},
-                {"path": f"{module}/README.md", "similarity": "41.0%"},
+                {
+                    "path": f"{module}/INTERFACE.md", "similarity": None,
+                    "retrieval_provenance": "exact_metadata",
+                },
+                {
+                    "path": f"{module}/README.md", "similarity": None,
+                    "retrieval_provenance": "exact_metadata",
+                },
             ],
         },
         limit,
@@ -347,7 +361,7 @@ def test_flatten_hits_tier0_reservation_is_bounded_at_low_k(
     assert [item["path"].rsplit("/", 1)[-1] for item in hits] == expected
 
 
-def test_flatten_hits_preserves_global_order_without_unique_explicit_module() -> None:
+def test_flatten_hits_does_not_promote_hit_conditioned_unproven_tier0() -> None:
     hits = core._flatten_hits(
         {
             "code_hits": [
@@ -364,12 +378,104 @@ def test_flatten_hits_preserves_global_order_without_unique_explicit_module() ->
             ],
         },
         2,
-        query="generic architecture research",
+        query=(
+            "HoloDAE PQN training system UTF8 hygiene MCP testing unicode "
+            "tools example Tier0 contracts"
+        ),
     )
     assert [item["path"].rsplit("/", 1)[-1] for item in hits] == [
         "high.py",
         "README.md",
     ]
+
+
+@pytest.mark.parametrize(
+    ("metadata", "query", "extra"),
+    [
+        ({}, "example_bridge worker", []),
+        (
+            {"tier0_module_target": "modules/communication/example_bridge"},
+            "unrelated worker query",
+            [],
+        ),
+        (
+            {"tier0_module_target": "modules/communication/forged_bridge"},
+            "example_bridge worker",
+            [],
+        ),
+        (
+            {"tier0_module_target": "modules/communication/example_bridge"},
+            "example_bridge and other_bridge workers",
+            [{
+                "path": "modules/communication/other_bridge/src/worker.py",
+                "similarity": "94.0%",
+            }],
+        ),
+    ],
+)
+def test_flatten_hits_requires_matching_attestation_and_query_intent(
+    metadata: dict[str, object], query: str, extra: list[dict[str, object]],
+) -> None:
+    module = "modules/communication/example_bridge"
+    result = {
+        "metadata": metadata,
+        "code_hits": [
+            {"path": "high.py", "similarity": "99.0%"},
+            *extra,
+        ],
+        "docs_hits": [
+            {
+                "path": f"{module}/README.md", "similarity": None,
+                "retrieval_provenance": "exact_metadata",
+            },
+            {
+                "path": f"{module}/INTERFACE.md", "similarity": None,
+                "retrieval_provenance": "exact_metadata",
+            },
+        ],
+    }
+
+    hits = core._flatten_hits(result, 5, query=query)
+
+    assert hits[0]["path"] == "high.py"
+
+
+@pytest.mark.parametrize(
+    "docs",
+    [
+        [
+            {"path": "modules/a/one/README.md", "similarity": "41.0%",
+             "retrieval_provenance": "exact_metadata"},
+        ],
+        [
+            {"path": "modules/a/one/README.md", "similarity": "41.0%",
+             "retrieval_provenance": "exact_metadata"},
+            {"path": "modules/b/two/INTERFACE.md", "similarity": "42.0%",
+             "retrieval_provenance": "exact_metadata"},
+        ],
+        [
+            {"path": "modules/a/one/README.md", "similarity": "41.0%",
+             "retrieval_provenance": "exact_metadata"},
+            {"path": "modules/a/one/README.md", "similarity": "40.0%",
+             "retrieval_provenance": "exact_metadata"},
+            {"path": "modules/a/one/INTERFACE.md", "similarity": "42.0%",
+             "retrieval_provenance": "exact_metadata"},
+        ],
+    ],
+)
+def test_flatten_hits_rejects_partial_mixed_or_duplicate_attested_pairs(
+    docs: list[dict[str, object]],
+) -> None:
+    hits = core._flatten_hits(
+        {
+            "code_hits": [{"path": "high.py", "similarity": "95.0%"}],
+            "docs_hits": docs,
+        },
+        5,
+        query="audit one two",
+    )
+
+    assert hits[0]["path"] == "high.py"
 
 
 def test_success_projects_physical_result_paths_before_receipt_use(

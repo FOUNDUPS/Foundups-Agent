@@ -41,14 +41,22 @@ assert(policy.systemPrompt().includes('Do not invent repository facts'));
 assert(policy.statusText().includes('no HoloIndex'));
 
 const extensionSource = fs.readFileSync(path.join(__dirname, '..', 'extension.js'), 'utf8');
+const ownerRuntimeSource = fs.readFileSync(
+  path.join(__dirname, '..', 'holoindex_owner_runtime.js'), 'utf8'
+);
 const wireStart = extensionSource.indexOf('function wireFusionWebview');
 const wireEnd = extensionSource.indexOf('function killBridgeChild', wireStart);
 const wire = extensionSource.slice(wireStart, wireEnd);
+const contextStart = extensionSource.indexOf('function buildContextForRequest');
+const contextEnd = extensionSource.indexOf('function wireFusionWebview', contextStart);
+const contextBuilder = extensionSource.slice(contextStart, contextEnd);
 const prepareStart = extensionSource.indexOf('function prepareFusionRequest');
 const prepareEnd = extensionSource.indexOf('function wireFusionWebview', prepareStart);
 const prepare = extensionSource.slice(prepareStart, prepareEnd);
 assert(extensionSource.includes('conversationalDraft'));
-assert(wire.includes('conversationalDraftPolicy.emptyContextPacket()'));
+assert(wire.includes('useDraft: classification.conversationalDraft'));
+assert(contextBuilder.includes('draft: conversationalDraftPolicy.emptyContextPacket'));
+assert(ownerRuntimeSource.includes('else if (input.useDraft) packet = input.draft();'));
 assert(wire.includes('conversationalDraftPolicy.buildUserPrompt(workFocus)'));
 assert(wire.includes('conversationalDraftPolicy.systemPrompt()'));
 assert(wire.includes('!classification.conversationalDraft'));

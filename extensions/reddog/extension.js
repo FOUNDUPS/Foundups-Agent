@@ -53,7 +53,7 @@ const {
   beginBasePromptTrace, outputValidationOptions, statusMessages
 } = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.101';
+const EXTENSION_VERSION = '0.4.102';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3224,7 +3224,7 @@ function runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, p
   try {
     const result = sealedPythonJsonOnce.run({
       repoRoot: root, interpreter: interpreter.path, script,
-      request: payload, env: buildBridgePythonEnv(process.env),
+      request: payload, env: buildBridgePythonEnv(process.env, 'default'),
       mapResult: (selected) => Object.assign({
         slice_name: REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE,
         python_invocation_performed: true, python_interpreter_source: interpreter.source,
@@ -3311,7 +3311,7 @@ function runGithubPermissionProbeBridge(context, options) {
       cwd: root,
       input: JSON.stringify(payload),
       encoding: 'utf8',
-      env: buildBridgePythonEnv(process.env),
+      env: buildBridgePythonEnv(process.env, 'default'),
       windowsHide: true,
       maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
     });
@@ -3513,7 +3513,7 @@ function invokeWreOperationalSpineExplicitValveBridge(context, preview, options)
       cwd: root,
       input: JSON.stringify(payloadResult.payload),
       encoding: 'utf8',
-      env: buildBridgePythonEnv(process.env),
+      env: buildBridgePythonEnv(process.env, 'default'),
       windowsHide: true,
       maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
     });
@@ -3696,7 +3696,7 @@ function invokeOpenClawLiveEnqueueRuntimeBindingBridge(context, packet, selectio
       cwd: root,
       input: JSON.stringify(payloadResult.payload),
       encoding: 'utf8',
-      env: buildBridgePythonEnv(process.env),
+      env: buildBridgePythonEnv(process.env, 'default'),
       windowsHide: true,
       maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
     });
@@ -4822,7 +4822,7 @@ function runRepairGuard(context, action, prompt, primary, repaired) {
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
       input: JSON.stringify(payload),
       cwd: root,
-      env: buildBridgePythonEnv(process.env),
+      env: buildBridgePythonEnv(process.env, 'default'),
       encoding: 'utf8',
       timeout: 15000,
       maxBuffer: 8 * 1024 * 1024,
@@ -4858,7 +4858,7 @@ function runJudgmentVerifier(context, prompt, output, scorecard, directReadHits)
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
       input: JSON.stringify(payload),
       cwd: root,
-      env: buildBridgePythonEnv(process.env),
+      env: buildBridgePythonEnv(process.env, 'default'),
       encoding: 'utf8',
       timeout: 15000,
       maxBuffer: 8 * 1024 * 1024,
@@ -5010,6 +5010,7 @@ async function openFusionEditor(context, installState) {
     bridgeChild: null,
     disposed: false,
     requestInFlight: false,
+    holoLifecycleRegistry: holoGenerationBoundQuery.createProcessLifecycleRegistry(),
     holoRecoveryTimer: null,
     liveEnqueueKeys: new Set(),
     operationsIntentId: String(
@@ -5019,9 +5020,10 @@ async function openFusionEditor(context, installState) {
   state.installState = installState || detectRedDogInstallState(context);
   wireFusionWebview(context, panel.webview, worker, state);
   panel.onDidDispose(() => {
+    state.disposed = true;
+    state.holoLifecycleRegistry.dispose();
     killBridgeChild(state);
     if (state.holoRecoveryTimer) clearTimeout(state.holoRecoveryTimer);
-    state.disposed = true;
   });
   panel.webview.html = renderHtml(worker, 'editor', logoUri.toString(), state.installState);
 }
@@ -5053,10 +5055,10 @@ const buildBackendCompatibilityAuditDegradedResult = (state) => backendCompatibi
 );
 const blockIncompatibleBackend = (context, state, webview, root) => backendCompatibilityAsync.blockIncompatibleBackend(context, state, webview, { detect: (value) => detectRedDogInstallStateAsync(value, root), build: buildBackendCompatibilityBlockedResult, post: postStatusAndProgress });
 const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.runConfiguredQuery({
-  workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
+  workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: (env) => buildBridgePythonEnv(env, 'authoritative_work_state'), scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
 });
-const runModelRuntimeBindingQueryBridge = () => modelRuntimeBindingQuery.runConfiguredQuery({ workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_MODEL_RUNTIME_BINDING_QUERY_SCRIPT) });
-const runLocalDiagnosticQuery = (name, worker) => { const root = workspaceRoot(); return localDiagnosticRouter.run(name, { root, worker, interpreterPath: resolvePythonInterpreter(root, reddogConfigValue('pythonPath', 'python')).path, env: buildBridgePythonEnv(process.env) }); };
+const runModelRuntimeBindingQueryBridge = () => modelRuntimeBindingQuery.runConfiguredQuery({ workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: (env) => buildBridgePythonEnv(env, 'model_runtime_binding'), scriptPath: (root) => path.join(root, REDDOG_MODEL_RUNTIME_BINDING_QUERY_SCRIPT) });
+const runLocalDiagnosticQuery = (name, worker) => { const root = workspaceRoot(); return localDiagnosticRouter.run(name, { root, worker, interpreterPath: resolvePythonInterpreter(root, reddogConfigValue('pythonPath', 'python')).path, env: buildBridgePythonEnv(process.env, 'default') }); };
 
 function fusionWorkerFromConfig() {
   return backendCompatibilityRender.resolveFusionWorker(
@@ -5064,13 +5066,15 @@ function fusionWorkerFromConfig() {
   );
 }
 function startOperationsOptions(context, message, worker, state, webview) {
+  const root = workspaceRoot();
   return {
     text: message.text, worker, state,
     interpreter: resolvePythonInterpreter(
-      workspaceRoot(), reddogConfigValue('pythonPath', 'python')
+      root, reddogConfigValue('pythonPath', 'python')
     ).path,
-    script: path.join(workspaceRoot(), REDDOG_START_OPERATIONS_CONTROL_SCRIPT),
-    repoRoot: workspaceRoot(),
+    script: path.join(root, REDDOG_START_OPERATIONS_CONTROL_SCRIPT),
+    repoRoot: root,
+    repoStateReceipt: governedGitContextFactory.governedRepoState(root),
     env: startOperationsEnvironment.build(process.env),
     persistIntentId: (value) => context.workspaceState.update(
       'reddog.operationsIntentId', value
@@ -5087,7 +5091,7 @@ function holoBlockedRecoveryOptions(context) {
     interpreterPath: resolvePythonInterpreter(
       root, reddogConfigValue('pythonPath', 'python')
     ).path,
-    env: buildBridgePythonEnv(process.env)
+    env: buildBridgePythonEnv(process.env, 'holoindex_owner')
   };
 }
 async function stageBlockedRequestRecovery(options, message, contextPacket, preflight, webview) {
@@ -5328,33 +5332,39 @@ function residentSessionStagePolicy(runtimeGate, progressiveStage, classificatio
     explicitResidentArchitectSessionRequested: explicitRequested
   };
 }
-
 function attachRuntimePolicy(result, runtimeGate, progressiveReceipt) {
   result.review_packet.progressive_execution_stage = progressiveReceipt;
   result.progressive_execution_stage = progressiveReceipt;
   result.runtime_consumption_gate = runtimeGate;
   result.review_packet.runtime_consumption_gate = runtimeGate;
 }
-
-
+function buildContextForRequest(state, input) {
+  const useHolo = ['wsp_holo', 'wsp_holo_git', 'wsp_holo_skillz', 'wsp_holo_git_skillz'].includes(input.contextMode);
+  return holoGenerationBoundQuery.buildOwnedContext(state.holoLifecycleRegistry, {
+    useEmpty: input.useEmpty, useDraft: input.useDraft, useHolo,
+    empty: authoritativeWorkStateQuery.emptyContextPacket, draft: conversationalDraftPolicy.emptyContextPacket,
+    holo: (lifecycle) => buildBoundedRepoContextAsync(input.contextMode, input.workFocus, lifecycle),
+    plain: () => buildBoundedRepoContext(input.contextMode, input.workFocus)
+  });
+}
 function wireFusionWebview(context, webview, worker, state) {
   const recoveryOptions = holoBlockedRecoveryOptions(context);
   const executeAsk = async (message, recoveryContext) => {
+    if (state.disposed) return { ok: false, reason: 'request_cancelled' };
     const actionStageEnabled = progressiveActionStageEnabled();
     if (actionStageEnabled && await blockIncompatibleBackend(context, state, webview)) return;
     const compatibility = await currentBackendCompatibility(); const auditDegraded = !actionStageEnabled && compatibility.passed !== true;
-    if (actionStageEnabled && !recoveryContext && await startOperationsAdapter.handleMessage(
-      startOperationsOptions(context, message, worker, state, webview))) return;
+    if (actionStageEnabled && !recoveryContext && await startOperationsAdapter.handleMessage(startOperationsOptions(context, message, worker, state, webview))) return;
     const {
       workFocus, workerType, classification, promptHasDetermineList,
       daemonDiagnosticProjection, governedWorkFocus, continuationEnabled, localFastPath,
       modelBindingBlock, effort, mode, contextMode
     } = prepareFusionRequest(message, worker);
-    if (modelBindingBlock && !localFastPath) {
-      postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);
-      return;
-    }
-    const contextPacket = auditDegraded || localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : (classification.conversationalDraft ? conversationalDraftPolicy.emptyContextPacket() : buildBoundedRepoContext(contextMode, governedWorkFocus));
+    if (modelBindingBlock && !localFastPath) { postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock); return; }
+    const contextBuild = await buildContextForRequest(state, { contextMode, workFocus: governedWorkFocus,
+      useEmpty: auditDegraded || localFastPath, useDraft: classification.conversationalDraft });
+    const contextPacket = contextBuild.packet;
+    if (contextBuild.cancelled) return { ok: false, reason: 'request_cancelled', cancellation: { typed: true } };
     const basePrompt = classification.conversationalDraft ? conversationalDraftPolicy.buildUserPrompt(workFocus) : constructWspTaskPrompt(governedWorkFocus, classification, contextPacket.quality, workerType);
     const continuation = continuationPrompt.prepareContinuationPrompt(
       basePrompt, continuationEnabled, state.lastContinuationSummary, {
@@ -5933,32 +5943,14 @@ function killBridgeChild(state) {
   state.bridgeChild = null;
 }
 
-function resolvePythonInterpreter(root, configuredPath) {
-  const trimmed = typeof configuredPath === 'string' ? configuredPath.trim() : '';
-  if (trimmed && trimmed !== 'python' && fs.existsSync(trimmed)) {
-    return { path: trimmed, source: 'configured' };
-  }
-  const isWin = process.platform === 'win32';
-  const dotVenv = path.join(root, '.venv', isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python');
-  if (fs.existsSync(dotVenv)) {
-    return { path: dotVenv, source: 'workspace_dotvenv' };
-  }
-  const venvPath = path.join(root, 'venv', isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python');
-  if (fs.existsSync(venvPath)) {
-    return { path: venvPath, source: 'workspace_venv' };
-  }
-  return { path: trimmed || 'python', source: 'system' };
-}
+const resolvePythonInterpreter = holoGenerationBoundQuery.resolveInterpreter;
 
 function bridgeStreamCapExceeded(currentBytes, chunkLength, cap) {
   return currentBytes + chunkLength > cap;
 }
 
-function buildBridgePythonEnv(baseEnv) {
-  return Object.assign({}, baseEnv || process.env, {
-    PYTHONIOENCODING: 'utf-8',
-    PYTHONUTF8: '1'
-  });
+function buildBridgePythonEnv(baseEnv, profile) {
+  return startOperationsEnvironment.buildBridge(baseEnv, profile);
 }
 
 function applyBridgeContextBudget(prompt, context) {
@@ -6041,7 +6033,7 @@ async function callFusion(context, worker, prompt, boundedContext, systemPrompt,
 
     const child = cp.spawn(interpreter.path, [script], {
       cwd: root,
-      env: buildBridgePythonEnv(process.env),
+      env: buildBridgePythonEnv(process.env, 'advisory_provider'),
       windowsHide: true,
       stdio: ['pipe', 'pipe', 'pipe']
     });
@@ -6399,7 +6391,8 @@ function requiredTargetSectionSurvived(text, target) {
   return { present: true, chars: Math.max(0, fenceEnd - bodyStart - 1) };
 }
 
-function buildBoundedRepoContext(mode, taskText) {
+function buildBoundedRepoContext(mode, taskText, options) {
+  const opts = options && typeof options === 'object' ? options : {};
   const root = workspaceRoot();
   const typedTargetsForContext = extractTypedTargets(taskText, root);
   const sections = [
@@ -6439,7 +6432,7 @@ function buildBoundedRepoContext(mode, taskText) {
   let repoAuditProjection = null;
   let directReadSection = null;
   if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
-    const holo = holoIndexOutput(root, taskText || '', 18000);
+    const holo = opts.holoResult || holoIndexOutput(root, taskText || '', 18000);
     if (Array.isArray(holo.repo_deep_dive_targets) && holo.repo_deep_dive_targets.length) {
       requiredTargets = uniqueStrings(requiredTargets.concat(holo.repo_deep_dive_targets));
     }
@@ -6505,7 +6498,7 @@ function buildBoundedRepoContext(mode, taskText) {
       // un-neutralized into the merged context and reach the Python isolation splitter as
       // a phantom marker section. Neutralize the whole file-body section before push so no
       // splitter marker can be minted from recalled content.
-      lowerSections.push(neutralizeRequiredTargetMarker(targetSection.text));
+      lowerSections.unshift(neutralizeRequiredTargetMarker(targetSection.text));
     }
     targetContentMeta = targetSection.meta;
     holoindex_meta = mergeTargetContentMeta(holoindex_meta, targetContentMeta);
@@ -6597,6 +6590,14 @@ function buildBoundedRepoContext(mode, taskText) {
       ? directReadSection.hits.slice()
       : []
   };
+}
+
+async function buildBoundedRepoContextAsync(mode, taskText, lifecycle) {
+  const holo = ['wsp_holo', 'wsp_holo_git', 'wsp_holo_skillz', 'wsp_holo_git_skillz'].includes(mode);
+  if (!holo) return buildBoundedRepoContext(mode, taskText);
+  return buildBoundedRepoContext(mode, taskText, {
+    holoResult: await holoIndexOutputAsync(workspaceRoot(), taskText || '', 18000, lifecycle)
+  });
 }
 
 function activeEditorContext(root) {
@@ -7367,9 +7368,10 @@ function resolveHoloRetrievalMode(envLike) {
 }
 
 function buildHoloQueryEnv(envLike, retrievalMode) {
-  const env = Object.assign({}, envLike && typeof envLike === 'object' ? envLike : process.env, {
-    HOLOINDEX_QUERY_READONLY: '1'
-  });
+  const source = envLike && typeof envLike === 'object' ? envLike : process.env;
+  const env = startOperationsEnvironment.buildBridge(source, 'holo_query');
+  delete env.PYTHONNOUSERSITE;
+  env.HOLOINDEX_QUERY_READONLY = '1';
   if (retrievalMode === 'lexical') {
     env.HOLO_SKIP_MODEL = '1';
   } else {
@@ -7443,7 +7445,7 @@ function isGenerationBoundHoloQueryAccepted(result) {
   return holoGenerationBoundQuery.isAccepted(result);
 }
 
-function runHoloIndexOwnerQuery(root, query, limit) {
+function runHoloIndexOwnerQuery(root, query, limit, request) {
   try {
     const configuredPython = reddogConfigValue('pythonPath', 'python');
     const interpreter = resolvePythonInterpreter(root, configuredPython);
@@ -7451,40 +7453,23 @@ function runHoloIndexOwnerQuery(root, query, limit) {
       root,
       query,
       limit,
+      request: request || {},
       interpreterPath: interpreter.path,
-      env: buildBridgePythonEnv(process.env)
+      interpreterSource: interpreter.source,
+      interpreterPathDigest: 'sha256:' + crypto.createHash('sha256')
+        .update(String(interpreter.path || ''), 'utf8').digest('hex'),
+      env: buildBridgePythonEnv(process.env, 'holoindex_owner')
     });
   } catch (err) {
     return holoGenerationBoundQuery.failureResult('owner_query_bridge_error', query);
   }
 }
-
-function coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved) {
-  try {
-    const configuredPython = reddogConfigValue('pythonPath', 'python');
-    const interpreter = resolvePythonInterpreter(root, configuredPython);
-    return holoIncidentRepair.coordinate({
-      root,
-      query,
-      ownerResult,
-      ownerObserved,
-      interpreterPath: interpreter.path,
-      env: buildBridgePythonEnv(process.env)
-    });
-  } catch (err) {
-    return {
-      accepted: false,
-      status: 'REJECTED',
-      rejection_reasons: ['holoindex_incident_bridge_error']
-    };
-  }
-}
-
 function mergeGenerationBoundHoloResult(bundleOutput, ownerResult) {
   return holoGenerationBoundQuery.mergeBundle(bundleOutput, ownerResult);
 }
-
-function holoIndexOutput(root, taskText, maxChars) {
+const applyHoloInterpreterMeta = holoGenerationBoundQuery.applyInterpreterMeta;
+function holoIndexOutput(root, taskText, maxChars, options) {
+  const opts = options && typeof options === 'object' ? options : {};
   const typedTargets = extractTypedTargets(taskText, root);
   const foundupGrounding = typedTargets.foundup_work_grounding;
   const queryPlan = semanticGroundingPolicy.buildEffectiveHoloQuery(taskText, typedTargets.semantic_targets);
@@ -7493,40 +7478,19 @@ function holoIndexOutput(root, taskText, maxChars) {
   const moduleHint = repoAuditGrounding.moduleHintForRepoAudit(taskText, moduleHintFromActive(root, taskText));
   const repoDeepDiveRequested = isRepoDeepDiveRequest(taskText);
   const requestedMode = resolveHoloRetrievalMode(process.env);
-  // The owner is the sole semantic authority. The legacy bundle contributes
-  // structured memory and governed direct reads, so keep it lexical and avoid
-  // loading a second semantic model whose hits are discarded during merge.
-  const bundleEnv = buildHoloQueryEnv(process.env, 'lexical');
-  let ownerResult = requestedMode === 'semantic'
-    ? runHoloIndexOwnerQuery(root, query, 5)
-    : {
-        ok: false,
-        source: 'holoindex_owner_service',
-        freshness: 'UNKNOWN',
-        raw_result: {},
-        error: 'semantic_owner_not_requested',
-        index_gap_detected: true,
-        stale_reasons: ['semantic_owner_not_requested'],
-        no_holoindex_reindex_performed: true
-      };
-  let incidentRepair = null;
-  const ownerObserved = holoGenerationBoundQuery.isObserved(ownerResult);
-  if (requestedMode === 'semantic' && holoIncidentRepair.shouldCoordinate(ownerResult, ownerObserved)) {
-    incidentRepair = coordinateHoloIndexIncident(root, query, ownerResult, ownerObserved);
-    if (incidentRepair.accepted === true && incidentRepair.status === 'OWNER_READY') {
-      ownerResult = runHoloIndexOwnerQuery(root, query, 5);
-    }
-  }
+  const ownerResult = opts.baseResult || runHoloIndexOwnerQuery(root, query, 5, {
+    retrieval_mode: requestedMode,
+    include_bundle: true,
+    module_hint: moduleHint,
+    must_include: []
+  });
+  const incidentRepair = opts.incidentRepair && typeof opts.incidentRepair === 'object'
+    ? opts.incidentRepair : null;
   try {
-    const baseArgs = ['-B', 'holo_index.py', '--bundle-json', '--search', query, '--bundle-module-hint', moduleHint, '--limit', '5', '--quiet-root-alerts'];
-    let output = cp.execFileSync('python', baseArgs, {
-      cwd: root,
-      env: bundleEnv,
-      encoding: 'utf8',
-      timeout: requestedMode === 'semantic' ? 60000 : 25000,
-      maxBuffer: repoAuditIntent.audit_intent ? 8 * 1024 * 1024 : Math.max(maxChars * 4, 65536),
-      windowsHide: true
-    });
+    if (!ownerResult.bundle || typeof ownerResult.bundle !== 'object') {
+      throw new Error('governed_holo_bundle_missing');
+    }
+    let output = JSON.stringify(ownerResult.bundle);
     if (requestedMode === 'semantic') {
       output = mergeGenerationBoundHoloResult(output, ownerResult);
     }
@@ -7550,16 +7514,9 @@ function holoIndexOutput(root, taskText, maxChars) {
     foundupWorkRuntime.applyGroundingMeta(meta, foundupGrounding);
     foundupWorkRuntime.applyTypedMeta(meta, typedTargets);
     meta.requested_retrieval_mode = requestedMode;
+    applyHoloInterpreterMeta(meta, ownerResult);
     if (incidentRepair) Object.assign(meta, holoIncidentRepair.metadata(incidentRepair));
-    // Semantic-owner failure withholds semantic hits, but it must not suppress
-    // governed direct reads for repository targets already discovered locally.
-    // Semantic obligations still fail closed later in the typed grounding gate.
-    // Direct-read fallback: if a required-target list was present and any target
-    // is missing from the semantic bundle, re-run once asking the Python layer
-    // to fetch exactly those paths, then re-evaluate recall on the enriched bundle.
     const missing = Array.isArray(meta.required_targets_missing) ? meta.required_targets_missing : [];
-    // Coerce defensively so a stringified 'true' from any upstream serialization
-    // cannot silently defeat the strict === true trigger condition below.
     const indexGap = meta.index_gap_detected === true || meta.index_gap_detected === 'true';
     let fetchTelemetry = null;
     const foundupEvidenceRequired = foundupGrounding
@@ -7567,16 +7524,8 @@ function holoIndexOutput(root, taskText, maxChars) {
     if ((indexGap || foundupEvidenceRequired) && missing.length) {
       const mustInclude = buildMustIncludeArgs(missing);
       if (mustInclude.length) {
-        // REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1: buffer + timeout
-        // are sized for a REAL enriched bundle (semantic ~100KB + Python-side total
-        // fetch budget ~96KB + section/JSON overhead), not the ~185KB observed size.
-        // 8MB floor leaves wide headroom if the Python fetch budgets grow; 45s
-        // covers the enriched call re-running HoloIndex and reading N target files
-        // under load. --bundle-must-include args are two per fetchable target.
         const enrichedMaxBuffer = Math.max(maxChars * 16, 8 * 1024 * 1024);
         const enrichedTimeoutMs = 45000;
-        // Attempt telemetry is set BEFORE the call so an error can never make the
-        // scorecard read as if the fetch was never triggered (the 0.3.31 defect).
         fetchTelemetry = {
           direct_read_fetch_attempted: true,
           direct_read_fetch_error: null,
@@ -7584,15 +7533,17 @@ function holoIndexOutput(root, taskText, maxChars) {
           direct_read_fetch_timeout_ms: enrichedTimeoutMs
         };
         try {
-          const enrichedArgs = baseArgs.concat(mustInclude);
-          let enriched = cp.execFileSync('python', enrichedArgs, {
-            cwd: root,
-            env: bundleEnv,
-            encoding: 'utf8',
-            timeout: enrichedTimeoutMs,
-            maxBuffer: enrichedMaxBuffer,
-            windowsHide: true
-          });
+          const enrichedResult = opts.allowBundleOnlyBridge === false
+            ? { bundle_ok: false, bundle_error: 'async_bundle_already_bounded' }
+            : runHoloIndexOwnerQuery(root, query, 5, {
+            retrieval_mode: 'lexical', include_bundle: true,
+            bundle_only: true, module_hint: moduleHint,
+            must_include: missing.slice(0, 40)
+            });
+          if (!enrichedResult.bundle || enrichedResult.bundle_ok !== true) {
+            throw new Error(String(enrichedResult.bundle_error || 'governed_holo_bundle_missing'));
+          }
+          let enriched = JSON.stringify(enrichedResult.bundle);
           if (requestedMode === 'semantic') {
             enriched = mergeGenerationBoundHoloResult(enriched, ownerResult);
           }
@@ -7602,16 +7553,13 @@ function holoIndexOutput(root, taskText, maxChars) {
           foundupWorkRuntime.applyGroundingMeta(meta, foundupGrounding);
           foundupWorkRuntime.applyTypedMeta(meta, typedTargets);
           meta.requested_retrieval_mode = requestedMode;
+          applyHoloInterpreterMeta(meta, ownerResult);
           if (incidentRepair) Object.assign(meta, holoIncidentRepair.metadata(incidentRepair));
         } catch (fetchErr) {
-          // Fetch failure must not abort recall; keep the pre-fetch bundle+meta,
-          // but classify + surface the cause so it is never silent again.
           fetchTelemetry.direct_read_fetch_error = classifyDirectReadFetchError(fetchErr);
         }
       }
     }
-    // Apply attempt telemetry AFTER the try/catch so it survives both the success
-    // rebuild of meta (holoIndexMetaFromBundle) and the pre-fetch-meta failure path.
     if (fetchTelemetry) {
       meta.direct_read_fetch_attempted = fetchTelemetry.direct_read_fetch_attempted;
       meta.direct_read_fetch_error = fetchTelemetry.direct_read_fetch_error;
@@ -7640,15 +7588,7 @@ function holoIndexOutput(root, taskText, maxChars) {
     };
   } catch (bundleErr) {
     try {
-      const fallbackEnv = buildHoloQueryEnv(process.env, 'lexical');
-      let output = cp.execFileSync('python', ['-B', 'holo_index.py', '--offline', '--search', query, '--limit', '5'], {
-        cwd: root,
-        env: fallbackEnv,
-        encoding: 'utf8',
-        timeout: 20000,
-        maxBuffer: Math.max(maxChars * 4, 65536),
-        windowsHide: true
-      });
+      let output = '{}';
       if (requestedMode === 'semantic') {
         output = mergeGenerationBoundHoloResult(output, ownerResult);
       }
@@ -7676,6 +7616,7 @@ function holoIndexOutput(root, taskText, maxChars) {
       meta.repo_deep_dive_gate_passed = fallbackGate.passed;
       meta.repo_deep_dive_gate_rejection_reasons = fallbackGate.rejection_reasons.slice();
       meta.requested_retrieval_mode = requestedMode;
+      applyHoloInterpreterMeta(meta, ownerResult);
       if (incidentRepair) Object.assign(meta, holoIncidentRepair.metadata(incidentRepair));
       if (requestedMode === 'semantic' && !ownerAccepted) {
         holoGenerationBoundQuery.applyRejectedOwnerMeta(meta, ownerResult);
@@ -7717,6 +7658,38 @@ function holoIndexOutput(root, taskText, maxChars) {
       };
     }
   }
+}
+async function holoIndexOutputAsync(root, taskText, maxChars, lifecycle) {
+  const typed = extractTypedTargets(taskText, root);
+  const grounding = typed.foundup_work_grounding;
+  const plan = semanticGroundingPolicy.buildEffectiveHoloQuery(taskText, typed.semantic_targets);
+  const query = grounding && grounding.applied === true && grounding.passed === true
+    ? plan.effective_query + '\nRegistered FoundUp: ' + grounding.foundup_id
+      + '\nModule: ' + (grounding.module_path || 'external')
+    : plan.effective_query;
+  const moduleHint = repoAuditGrounding.moduleHintForRepoAudit(taskText, moduleHintFromActive(root, taskText));
+  const mode = resolveHoloRetrievalMode(process.env);
+  const runtime = await holoGenerationBoundQuery.resolveInterpreterAsync(
+    root, reddogConfigValue('pythonPath', 'python'), process.platform, lifecycle
+  );
+  if (lifecycle && lifecycle.isCancelled()) return holoGenerationBoundQuery.cancelledOutput(taskText, lifecycle, holoIndexMetaFromBundle);
+  const baseResult = await holoGenerationBoundQuery.runOwnerQueryAsync({
+    root, query, limit: 5, lifecycle, interpreterPath: runtime.path,
+    interpreterProvenance: runtime.provenance,
+    env: buildBridgePythonEnv(process.env, 'holoindex_owner'),
+    request: { retrieval_mode: mode, include_bundle: true, module_hint: moduleHint,
+      must_include: typed.repo_file_targets.slice(0, 40) }
+  });
+  if (lifecycle && lifecycle.isCancelled()) return holoGenerationBoundQuery.cancelledOutput(taskText, lifecycle, holoIndexMetaFromBundle);
+  const observed = holoGenerationBoundQuery.isObserved(baseResult);
+  const incidentRepair = holoIncidentRepair.shouldCoordinate(baseResult, observed)
+    ? await holoIncidentRepair.coordinateAsync({ root, query, ownerResult: baseResult,
+      ownerObserved: observed, interpreterPath: runtime.path, lifecycle,
+      env: buildBridgePythonEnv(process.env, 'holoindex_owner') })
+    : null;
+  if (lifecycle && lifecycle.isCancelled()) return holoGenerationBoundQuery.cancelledOutput(taskText, lifecycle, holoIndexMetaFromBundle);
+  return holoIndexOutput(root, taskText, maxChars, { baseResult, incidentRepair,
+    allowBundleOnlyBridge: false });
 }
 
 // Render the Python-fetched direct-read target content (already budget-bounded
@@ -8297,6 +8270,7 @@ module.exports = {
   modeSelectionReasoning,
   skillzWardrobeRolodexContext,
   buildBoundedRepoContext,
+  buildBoundedRepoContextAsync,
   isRepoDeepDiveRequest,
   repoDeepDiveConcepts,
   repoFileIndex,
@@ -8390,6 +8364,7 @@ module.exports = {
   extractTargetTokensFromLine,
   holoIndexMetaFromBundle,
   holoIndexOutput,
+  holoIndexOutputAsync,
   isGenerationBoundHoloQueryAccepted,
   runHoloIndexOwnerQuery,
   mergeGenerationBoundHoloResult,

@@ -2,12 +2,60 @@
 
 ## Public API
 
+### `holo_query_bundle(...) -> Dict[str, Any]`
+
+Remote read-only MCP tool for one generation-bound Holo query plus lexical WSP
+memory bundle. Request schema enforces query 1..16,000 chars, limit 1..20,
+`semantic|lexical`, module hint <=512 chars, at most 40 non-empty include paths
+of <=1,024 chars, and a strict boolean bundle-only flag. The one-shot adapter
+revalidates the same bounds and never reindexes. Semantic rejection remains
+typed; lexical/bundle-only calls perform zero owner attempts and zero Holo
+store access. The `reddog_holo_query_bundle_mcp.v1` public projection removes
+private roots/tokens, projects hit paths repository-relative, redacts bounded
+text, rejects cycles/non-finite numbers/large integers/key collisions, and is
+at most 256 KiB with exact encoded-byte telemetry.
+
+### `build_asgi_app(...)`
+
+Builds a loopback-only FastMCP Streamable HTTP application at `/mcp`.
+Non-loopback hosts reject. Optional bearer authentication is a local/dev
+defense, not ChatGPT OAuth. Public exposure belongs to a Secure MCP Tunnel or
+external OAuth proxy and has no live acceptance receipt in this change.
+
+### `materialize_query_replica(...) -> QueryReplicaResult`
+
+Creates one immutable `holoindex_query_replica.v1` generation under a new `StoreProof`. Inputs are exact bindings, sorted manifests, and limits. Production has sealed primitives; the test seam is revalidated. Canonical data is read only.
+The call noncreating-locks authority-update then maintenance sentinels, proves
+their identity/bytes, and retains both handles plus the receipt descriptor
+through copy, publication, validation, and reverse release.
+
+Manifests exactly equal enumerated source trees. Integers reject bool/float;
+paths use normalized Unicode NFC/casefold ordering and uniqueness. Links,
+reparse points, hardlinks, special files, escapes, overlap, exhaustion, and
+aliases fail. SentenceTransformer markers (`modules.json`, `config.json`,
+`model.safetensors`, and `tokenizer.json` or `vocab.txt`) are direct root
+children, exactly matching the runtime resolver.
+
+Success no-replace publishes `generations/<digest>/` then immutable `holoindex_query_replica.active.json`, binding repository, receipt, generation, storage identities, UTC time, hashes, and sizes. Existing targets are never overwritten.
+Final failure atomically no-replace quarantines whatever occupies this call's active name; success makes active absent and returns a relative orphan path. Rename failure leaves active and reports a relative unsafe path.
+Publication temps and staging trees are preserved. Windows copy failure closes handles but leaves bounded partial output; the materializer quarantines its enclosing staging root. Direct `copy_model_snapshot` callers own their isolated partial destination.
+Phase 1 deletes nothing and has no retention, rollback, or live-discovery API.
+
+### `build_query_replica_owner_route(...) -> QueryReplicaOwnerRoute`
+
+Health transport requires exact built-ins: literal `127.0.0.1`, port 1..65535, printable token >=32, and finite positive timeout <=300.
+JSON is an exact dict with unique keys at every depth and no NaN/Infinity; parse, Unicode, recursion, primitive, and oversize failures return unavailable. Bindings are exact four-tuples; only expected canonical fields may be empty wildcards.
+Exchange parses canonical then mandatory replica expectation before transport/HTTP. Binding malformation returns mismatch; HTTP/OSError failures return unavailable, and targeted close failures preserve the proof. Context entry calls `start()`, so a complete route remains mandatory.
+`ensure_reddog_holoindex_owner(..., query_replica_route=route)` passes split roots,
+reproves before spawn/health, and denies ambient/public paths or reuse drift.
+
 ### `verify_reddog_holoindex_owner_binding(...) -> bool`
 
 Read-only promotion-time proof that the already-running private query owner
-serves the exact repository root, repository HEAD, HoloIndex generation, and
-on-disk freshness-receipt digest supplied by the caller. It never starts an
-owner or re-indexes; absent or mismatched owner state returns `False`.
+serves the exact repository root, repository HEAD, HoloIndex generation,
+on-disk freshness-receipt digest, and mandatory current replica route supplied
+by the caller. It never starts or re-indexes; missing route or mismatch returns
+`False`.
 Successful owner evidence is deep-copied and projected onto repository-relative
 POSIX paths before raw, flattened, semantic-evidence, or receipt use. Unknown
 rooted, drive-qualified, traversal, and outside-root paths fail closed. The
@@ -20,73 +68,22 @@ Unknown or nested evidence fields reject the complete response.
 For a positive limit and one explicit module, it reserves exact module-root
 README/INTERFACE evidence before filling remaining slots by global score.
 
-### FoundUpsMCPBridge
+### FoundUpsMCPBridge (local/internal only)
 
-Main bridge class for MCP tool access.
+Main bridge class for trusted in-process tool access. Registration here does
+not grant Streamable HTTP authority; the remote server admits only
+`holo_query_bundle`.
 
-```python
-from modules.infrastructure.foundups_mcp_bridge.src import FoundUpsMCPBridge
-
-bridge = FoundUpsMCPBridge(repo_root=Path("O:/Foundups-Agent"))
-```
-
-#### `list_tools() -> Dict`
-
-List all available tools with status.
-
-**Returns:**
-```python
-{
-    "status": "ok",
-    "data": {
-        "tools": [
-            {"name": "get_repo_tree", "description": "...", "status": "active"},
-            {"name": "coordinate_mission", "description": "...", "status": "disabled_in_v1"},
-        ],
-        "count": 21,
-        "active_count": 15,
-        "disabled_count": 6,
-    }
-}
-```
-
-#### `call_tool(tool_name: str, **kwargs) -> Dict`
-
-Call a tool by name with arguments.
-
-**Parameters:**
-- `tool_name`: Tool identifier
-- `**kwargs`: Tool-specific arguments
-
-**Returns:** MCPResponse dict
-
-#### `get_status() -> Dict`
-
-Get bridge status and capabilities.
+Construct with `FoundUpsMCPBridge(repo_root=...)`. `list_tools()` reports the
+local registry, `call_tool(name, **kwargs)` invokes a local tool, and
+`get_status()` reports bridge capabilities. All return the legacy MCPResponse
+envelope documented below; none changes the remote allowlist.
 
 ---
 
 ### HoloIndexQueryOwnerService
 
-Successful semantic responses project physical `path` and `file` metadata
-under the proven repository root to POSIX repository-relative values before
-flattening, evidence hashing, or receipt construction. Absolute evidence
-outside that root rejects the query. Failed responses always contain empty
-raw and flattened evidence, so stale or malformed backend results cannot leak
-unprojected paths. Unicode control, formatting, and alternate-whitespace path
-characters also reject before projection. This does not mutate or reindex the
-store.
-
-After projection and score ordering, `flatten_hits(result, limit, query=...)`
-reserves the canonical root README/INTERFACE order only when the query
-names an exact basename uniquely evidenced by returned paths or supplies one
-validated full module path. Reservation is limited by the caller's existing K
-and does not create fields or hits. Producer-owned `exact_metadata`
-provenance and null similarity survive flattening. Ambiguous/no-module queries
-preserve global score order; nested `tests/README.md` is never Tier-0.
-
-Supported private owner for the RedDog operational consumers migrated in this
-POC:
+The supported private RedDog owner exports:
 
     from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
         HoloIndexQueryOwnerService,
@@ -94,58 +91,47 @@ POC:
         create_stdlib_server,
     )
 
-HTTP surface:
+HTTP exposes authenticated `POST /holoindex/v1/query` and
+`GET /holoindex/v1/health` only; there is no indexing API. Both require
+`Authorization: Bearer` via `HOLOINDEX_QUERY_SERVICE_TOKEN`, accept only the
+literal `127.0.0.1` Phase-1 bind, and reject hostnames, alternate `127/8`
+literals, and IPv6. Requests, results, and execution are bounded.
 
-- POST /holoindex/v1/query
-- GET /holoindex/v1/health
+Query requires `query` and `expected_repo_head_sha`; `limit` and
+`doc_type_filter` are optional. Success requires semantic retrieval, exact
+repository SHA, stable generation/receipt digest, seven verified baseline
+manifests, and the same nonblank embedding fingerprint in each receipt entry,
+resident backend, and response. Lexical fallback, stale or missing proof,
+generation change, and backend failure fail closed. Successful paths are
+projected beneath the proven root before flattening, hashing, or receipt use;
+rooted, traversal, outside-root, Unicode-control/format/alternate-whitespace,
+or malformed evidence rejects the whole response. Every failed response has
+empty raw and flattened evidence.
 
-Both routes require Authorization: Bearer using
-HOLOINDEX_QUERY_SERVICE_TOKEN. The supported Phase-1 bind is literal
-`127.0.0.1`; hostnames, alternate `127/8` literals, and IPv6 are rejected.
-Requests are size-, query-, result-, and
-timeout-bounded. The service serializes one cached semantic backend and has no
-indexing API.
+`flatten_hits(result, limit, query=...)` reserves README then INTERFACE only
+when canonical `metadata.tier0_module_target`, query intent, one complete root
+pair, and both rows' `exact_metadata` provenance agree. Reservation is bounded
+by positive K and creates no evidence. Missing, unrelated, partial, mixed,
+duplicate, forged, ambiguous, multi-module, and no-module claims keep global
+score order; nested test docs are never Tier-0. The producer's bounded HEAD
+catalog, not flattened top-K hits, establishes intent, rejects Unicode
+`Cc`/`Cf`/`Cs`, and compares duplicate identity as `NFC(path).casefold()`
+without rewriting visible Unicode.
 
-On Windows, a nonsealed trusted-host supervisor launches the base Python
-interpreter as its direct child and prepends only the canonical checkout-local
-`.venv/Lib/site-packages` directory. The supervisor validates `pyvenv.cfg`,
-the configured base interpreter, Python major/minor compatibility, disabled
-system-site packages, and containment under the runtime root before accepting
-that dependency path. This avoids the transient venv redirector without
-weakening the exact-parent lifecycle watchdog or enabling the user site.
-Sealed runtime startup does not use the workspace virtualenv; it remains bound
-to the separately bridge-validated dependency path. The sealed manifest
-authenticates runtime source and bootstrap bytes, not every dependency file.
+Exact producer errors are `HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE`
+(HTTP 503), `HOLOINDEX_TIER0_INCOMPLETE` (HTTP 409), and
+`HOLOINDEX_TIER0_LOOKUP_FAILED` (HTTP 503). Unknown/free-text metadata becomes
+`SEMANTIC_BACKEND_UNAVAILABLE`. The owner forces authoritative
+`sentence_transformers`, disables TurboQuant and the generation-unbound
+SearchCache, and rejects incomplete/ambiguous offline model caches.
 
-The first authenticated health canary has a separate 270-second cold-model
-warmup budget. Once warm, health and query work use the ordinary owner budget
-(15 seconds by default, never more than 30); the supervising process has a
-300-second total startup budget. These are owner/work lifecycle bounds. The
-RedDog client enforces a monotonic absolute deadline for repository proof and
-response-body reads, but stdlib HTTP connect/header parsing remains
-socket-inactivity-bounded under the explicit trusted/cooperative-loopback and
-no-hostile-same-user-port-squatter POC assumption.
+Dependency validation, cache layout, cold-start/request budgets, transport
+limits, supervision, and maintenance belong to [README.md](README.md#private-holoindex-query-owner)
+and [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
 
-The query request requires query and expected_repo_head_sha; limit and
-doc_type_filter are optional. A successful response proves semantic retrieval,
-the exact repository SHA, a stable generation/receipt digest, and verified
-manifests for the seven baseline collections on both sides of the query. Every
-collection must also have a canonical embedding-space fingerprint exactly
-equal in the receipt, the resident backend map, and response metadata. Blank
-legacy fingerprints fail closed and cause trusted preflight maintenance.
-Lexical fallback, missing proof, stale proof, generation change, and backend
-failure all fail closed.
+Launch requires explicit split storage authority:
 
-The resident owner forces authoritative sentence_transformers, disables
-TurboQuant routing, and sets the generation-unbound legacy SearchCache to
-None. Offline model discovery accepts complete flat SentenceTransformer
-caches and Hugging Face models--.../snapshots/<revision> caches selected by
-refs/main (or by a sole complete snapshot when no ref exists); incomplete or
-ambiguous caches are unavailable.
-
-Launch:
-
-    python -m modules.infrastructure.foundups_mcp_bridge.src.holo_query_service --host 127.0.0.1 --port 8127
+    python -m modules.infrastructure.foundups_mcp_bridge.src.holo_query_service --host 127.0.0.1 --port 8127 --canonical-ssd-path <canonical> --query-replica-root <verified-root>
 
 ### HoloQueryServiceSupervisor
 
@@ -158,13 +144,14 @@ manually selected bearer token:
     )
 
     with HoloQueryServiceSupervisor(
-        repo_root="O:/Foundups-Agent",
-        ssd_path="E:/HoloIndex",
+        repo_root=route.canonical_repo_root, canonical_ssd_path=route.canonical_ssd_path,
+        query_replica_root=route.replica_root_proof.path, replica_capability_verifier=route.revalidate,
+        expected_replica_binding=route.expected_replica_binding,
     ) as owner:
         child_environment = owner.environment_for_child()
 
-start() returns only after an authenticated loopback health probe proves the
-owner ready and semantic. environment_for_child() returns a new mapping with
+Route-less or malformed context entry raises `HOLOINDEX_QUERY_REPLICA_REQUIRED`
+before side effects. `start()` returns only after authenticated health proves semantic readiness. `environment_for_child()` returns a new mapping with
 HOLOINDEX_QUERY_SERVICE_URL and the per-process
 HOLOINDEX_QUERY_SERVICE_TOKEN; it never mutates the host environment. stop()
 invalidates the handoff, terminates the owner, and kills it after a bounded
@@ -193,21 +180,9 @@ restarted here. See
 
 ### RedDog HoloIndex Owner Bootstrap
 
-main.py uses the process-lifetime policy API:
-
-    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_bootstrap import (
-        cleanup_reddog_holoindex_owner,
-        ensure_reddog_holoindex_owner,
-        resolve_reddog_holoindex_owner_handoff,
-    )
-
-    result = ensure_reddog_holoindex_owner(
-        repo_root=repo_root,
-        requested=holo_dependent_work_requested,
-    )
-
-The result contains only ready, status, and a stable error code. It never
-contains the URL or bearer token. For requested work, the policy respects an
+`ensure_reddog_holoindex_owner()`, `resolve_reddog_holoindex_owner_handoff()`,
+and `cleanup_reddog_holoindex_owner()` own the process-lifetime policy. Results
+contain only readiness, status, and a stable error, never URL/token. The policy respects an
 existing literal-127.0.0.1 HTTP URL/token, honors
 REDDOG_HOLOINDEX_OWNER_AUTO_START=0, otherwise resolves the canonical
 HOLOINDEX_SSD_PATH and starts one retained supervisor.
@@ -229,10 +204,24 @@ freshness-receipt digest.
 Invalid or unready explicit configuration returns a stable failure without
 overwriting either value.
 
-cleanup_reddog_holoindex_owner() is the explicit test and controlled-shutdown
-seam. It stops the auto-owned process and erases the private handoff. The
-restore_environment parameter remains compatibility-only because auto-start
-never edits the environment.
+`cleanup_reddog_holoindex_owner()` stops the auto-owned process and erases its
+private handoff; `restore_environment` is compatibility-only.
+
+`scripts/reddog_holoindex_owner_query_once.py` resolves query authority before
+owner startup. It first rehydrates the exact selected-root/store freshness
+proof; a root-bound receipt mismatch returns `freshness_repo_root_mismatch`
+with `owner_attempts=0`, no retry, and no owner/backend call. Process-owned
+`STARTED` and `REUSED` owners are cleaned after the one-shot query.
+
+`run_candidate_acceptance(...)` performs two direct private-owner queries,
+cleans the owner, executes one supported-wrapper activation, and requires final
+receipt/collection rehydration before PASS. Its secret-free receipt records
+counts and one-way digests, never owner credentials, responses, or paths. The public import surface remains in the orchestrator; pure query/activation validation and receipt/finalization proof are cohesive internal modules. The
+snapshot child uses the one validated dependency root and a retained exact
+process-image capability: Windows denies replacement through launch; Linux
+executes `/proc/self/fd/<fd>` with `pass_fds`; unsupported platforms fail
+closed. Exact subprocess, stable-error, and proof-lifetime details are
+canonical in [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
 
 ### RedDog HoloIndex Trusted Maintenance Handshake
 
@@ -242,8 +231,8 @@ requested=...)`. With `REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1` (default), the
 trusted host may refresh a stale canonical store only from a clean exact Git
 HEAD. It stops only an auto-owned owner, strips semantic bypass and source
 narrowing, runs one bounded argv-only full refresh, proves all seven baseline
-collections, rechecks HEAD, and starts the owner bound to that generation.
-Governed WRE may route the request but never acquires maintenance authority.
+collections, and rechecks HEAD. Current `_start_owner` lacks the mandatory route,
+so post-refresh start fails closed. Governed WRE never acquires maintenance authority.
 
 The one-shot owner wrapper accepts authority only from the checkout named by
 `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`: a dedicated clean checkout, immutable
@@ -259,10 +248,8 @@ stdout and the daemon reader until it exits. This is cooperative trusted-host
 best-effort containment, not a hostile-process or OS-privilege guarantee; never
 assume the whole tree is gone.
 
-Optional `owner_runtime_root` identifies the trusted workspace whose `.venv`
-supplies nonsealed refresh/owner dependencies and defaults to `repo_root`; the
-same validated path spans refresh/start. Inherited `PYTHONPATH` and user-site
-packages stay disabled; sealed refresh uses only its bridge-validated path.
+Optional `owner_runtime_root` supplies the trusted `.venv` for nonsealed
+refresh/start; inherited `PYTHONPATH` and user-site packages stay disabled.
 
 The SSD lease coordinates migrated writers, not unleased legacy writers or a
 transient edit/revert. Clean exact HEAD is therefore re-proved after final
@@ -306,7 +293,7 @@ this process. Any semantic, source-completeness, repository-race, receipt, or
 restart failure remains non-operational. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
 
-Scope note: this owner is wired for the listed RedDog operational consumers.
+Scope note: this boundary's one-shot query, maintenance start, and promotion verification still lack route plumbing.
 The legacy `src/holo_tools.py` MCP surface still opens the HoloIndex store
 directly and remains a registered migration item; Phase 1 does not claim that
 all repository consumers cross this boundary. Normal cleanup is bounded, and
@@ -315,7 +302,11 @@ Manually launched and pre-v0.4.21 owners do not inherit that parent-death proof.
 
 ---
 
-## Tool Reference
+## Local/internal tool reference (not remotely registered)
+
+The legacy perception APIs below remain direct `FoundUpsMCPBridge` surfaces.
+They are not registered at `/mcp`; their remote-admission disposition and
+transitive reasons are recorded in `ROADMAP.md#remote-admission-audit`.
 
 ### Repo Perception
 
@@ -938,58 +929,31 @@ Assemble compressed context for Windsurf prompt.
 
 ---
 
-
-### RedDog Context Tools (v1.5)
+### RedDog Context Tools (v1.5, local/internal only)
 
 #### `get_reddog_state()`
 
-Retrieve current RedDog external state snapshot including active worker lanes, open research threads, recent slice lineage, and live Git HEAD commit/branch.
-
-**Returns:**
-```python
-{
-    "status": "ok",
-    "data": {
-        "git": {"commit": str, "branch": str},
-        "state_dir_exists": bool,
-        "active_context_summary": str,
-        "active_research_threads": str,
-        "work_to_work_lineage": str,
-    },
-    "meta": {"source": "reddog"}
-}
-```
+Returns a read-only RedDog external-state snapshot with active worker lanes,
+open research threads, recent slice lineage, and the live Git commit/branch.
+The response uses the ordinary perception envelope and `meta.source="reddog"`.
 
 #### `get_reddog_analysis_context(prompt, target_module=None)`
 
-Assemble grounded RedDog contextual evidence packet for 0102 analysis (read-only context assembly).
+Assembles a read-only, repository-grounded context packet for 0102 analysis.
+It includes the prompt, optional target module, Git state, system posture,
+active context, and an optional module-documentation excerpt. The response
+uses `meta.source="reddog_context"`; it grants no execution authority.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| prompt | str | - | Task or problem statement to assemble context for |
-| target_module | str | None | Optional module name to scope documentation |
+### FastMCP Streamable HTTP Server (v1.6)
 
-**Returns:**
-```python
-{
-    "status": "ok",
-    "data": {
-        "prompt": str,
-        "target_module": str | None,
-        "git_state": {"commit": str, "branch": str},
-        "system_posture": str,
-        "active_context": str,
-        "module_doc_snippet": str | None,
-    },
-    "meta": {"source": "reddog_context", "prompt": str}
-}
-```
-
----
-
-### FastMCP Remote SSE Server (v1.5)
-
-Exposes strictly allowlisted perception tools over SSE transport with fail-closed Bearer authentication and truthful protocol readiness canary.
+The loopback-only remote surface registers exactly one name in
+`REMOTE_READ_ONLY_ALLOWLIST`: `holo_query_bundle`. Repository/documentation,
+Overseer/SQLite, dependency, mutation, ambient executable-backed repository,
+raw Holo, RedDog-state, signal, and execution tools are not remotely
+registered. The
+exact MCP route is `/mcp`; optional bearer authentication is a local
+development defense. Public HTTPS and OAuth 2.1 authorization remain the
+responsibility of an external tunnel/control plane.
 
 ```python
 from modules.infrastructure.foundups_mcp_bridge.src.mcp_server import (
@@ -998,46 +962,34 @@ from modules.infrastructure.foundups_mcp_bridge.src.mcp_server import (
     build_asgi_app,
 )
 from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
-    run_mcp_bridge_sse,
-    stop_mcp_bridge_sse,
+    run_mcp_bridge_http,
+    stop_mcp_bridge_http,
     get_mcp_bridge_status,
     verify_mcp_readiness,
 )
 ```
 
-#### Functions & API
+#### FastMCP lifecycle API
 
-##### `build_mcp_server(repo_root: Optional[Path] = None) -> FastMCP`
-Builds FastMCP server instance registering only tools from `REMOTE_READ_ONLY_ALLOWLIST` (33 pure read-only perception tools). Strips internal `repo_root` parameter from tool signatures to produce standard MCP JSON Schemas.
+- `build_mcp_server(repo_root=None)` registers only the remote read allowlist
+  and removes internal `repo_root` parameters from published tool schemas.
+- `build_asgi_app(repo_root=None, auth_token=None, require_auth=True)` raises
+  `ValueError` when authentication is required without a nonblank token.
+- `run_mcp_bridge_http(...)` owns one direct-PID subprocess and the instance
+  lock, and returns `running` only after the protocol canary succeeds. It uses
+  the same capability-proven interpreter path whether the parent can import
+  FastMCP or not; no in-process server lifecycle is selected.
+- `stop_mcp_bridge_http(timeout_sec=5.0)` is idempotent; on a termination
+  timeout it retains the lock/runtime handle and reports
+  `stop_timeout_still_running`.
+- `get_mcp_bridge_status()` reports the current owned runtime state.
+- `verify_mcp_readiness(...)` uses the official Streamable HTTP MCP client for
+  initialize, `tools/list`, exact allowlist verification, and one safe lexical
+  `holo_query_bundle` call before claiming readiness.
+- The deprecated SSE-named launch functions are aliases to this same runtime;
+  no SSE route exists.
 
-##### `build_asgi_app(repo_root: Optional[Path] = None, auth_token: Optional[str] = None, require_auth: bool = True) -> Any`
-Builds Starlette ASGI application for FastMCP SSE server wrapped with `AuthMiddleware`.
-- Fails closed: raises `ValueError` if `require_auth=True` and `auth_token` is empty.
-- Public `/health` probe returns 200 with service and auth status.
-- Protected `/sse` and `/message/` endpoints strictly require `Authorization: Bearer <token>` header (`?token=` URL query param is rejected).
-
-##### `run_mcp_bridge_sse(host: Optional[str] = None, port: Optional[int] = None, auth_token: Optional[str] = None, require_auth: Optional[bool] = None, repo_root: Optional[Path] = None, blocking: bool = True) -> Dict[str, Any]`
-Runs FoundUps MCP SSE Server with instance locking and protocol-level readiness canary.
-- Invariant: `instance lock held <=> process owns live MCP server`. Fails closed if lock cannot be acquired.
-- Multi-mode execution: in-process if FastMCP is available; fallback subprocess via `foundups-mcp-env`.
-- Secret leak prevention: passes `auth_token` via environment variable only (never argv or process logs).
-- Truthful readiness: calls `verify_mcp_readiness()` before returning `{"status": "running"}`.
-
-##### `stop_mcp_bridge_sse(timeout_sec: float = 5.0) -> Dict[str, Any]`
-Requests graceful, verified shutdown of active server.
-- Idempotent: returns `{"status": "already_stopped"}` if not running.
-- Termination failure propagation: if shutdown times out, lock and runtime handle are retained, returning `{"status": "error", "error": "stop_timeout_still_running"}`.
-
-##### `get_mcp_bridge_status() -> Dict[str, Any]`
-Returns current truthful runtime status of the active MCP SSE server.
-
-##### `verify_mcp_readiness(host: str, port: int, auth_token: Optional[str] = None, timeout_sec: float = 15.0) -> Dict[str, Any]`
-Performs protocol-level readiness verification over SSE transport:
-1. Connects to `/sse` stream.
-2. Performs JSON-RPC `initialize` handshake.
-3. Performs JSON-RPC `tools/list` request and verifies all required tools exist and mutation tools are absent.
-4. Performs JSON-RPC `tools/call` for `get_wsp_docs` and validates inner result payload `status == "ok"`.
-
+---
 
 ### Execution Stubs (v1 Disabled)
 
@@ -1094,8 +1046,9 @@ These tools return `{"status": "disabled_in_v1"}` with schema information.
 
 ## Security Constraints
 
-- Path allowlist enforced
-- .env, credentials, secrets blocked
-- 200KB file size limit
-- No write operations
-- No execution
+- Remote registration is exactly `holo_query_bundle`.
+- Its request and public response have exact schema/resource bounds.
+- Server and readiness children inherit a closed OS/runtime environment plus
+  exact repository, dependency, and optional local-token fields.
+- No repository walker, arbitrary file read, SQLite access, write, dispatch,
+  or execution API is remotely registered.

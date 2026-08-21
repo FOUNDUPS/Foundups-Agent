@@ -108,7 +108,7 @@ def test_default_client_rejects_unsupported_chromadb_version(
         SimpleNamespace(Settings=lambda **kwargs: SimpleNamespace(**kwargs)),
     )
 
-    with pytest.raises(ValueError, match="unsupported_chromadb_version"):
+    with pytest.raises(ValueError, match="UNSUPPORTED_CHROMADB_VERSION"):
         probe_module._default_client_factory(tmp_path / "ssd")
 
 

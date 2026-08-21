@@ -1,509 +1,239 @@
 # RedDog Interface
 
-R7 rejects ambiguous worktree projection identities. Path comparison converts
-separators to `/`, normalizes NFC, and folds case only on Windows; Linux remains
-case-sensitive. Changed/untracked and ignored-prefix comparisons share that
-rule. Every existing admitted file is independently canonicalized inside the
-root and must be a unique regular, non-link, single-link identity before any
-content capture. Deleted entries carry no canonical file identity and are not
-content-read. `extension.js` measures exactly 8,425 lines, equal to HEAD and
-below the unchanged 8,428-line `no_growth: true` ceiling. This containment
-statement does not claim that all inherited touched functions meet WSP_62's
-ordinary function limit; the existing exact `callFusion` exemption remains.
+## Test and promotion interface
 
-R6 removes the module-global governed projection. `create(options)` copies and
-freezes the two admitted policy callables and returns a frozen API whose
-snapshot/status/stat/diff closures cannot be changed by later factory calls.
-Direct module exports use one canonical-policy default API constructed once.
-The third content capture now precedes the forced uncached final Git receipt;
-no enumeration, capture, worktree read, or Git command occurs after that
-absolute proof. Receipt construction is pure and point-in-time only.
+`package.json` exposes `test`, `test:contract`, and `test:release` without local
+dependencies. `tests/reddog_test_plan.js` is the single authenticated membership
+source for the bounded developer tiers and the four promotion groups.
+The exact release invocation is `npm run test:release`.
+`tests/run_reddog_test_tier.js` accepts only `fast` or `contract`, resolves exact
+regular files inside the test root, runs members sequentially with bounded
+output/time, and propagates the first failure.
 
-Version 0.4.101 R5 replaces caller-supplied Git argv with four exact immutable
-operation identities (`HEAD_SHA`, `FOUNDUP_REGISTRY_STATUS`, `TRACKED_PATHS`,
-and `DIRTY_PATHS`) and makes the named batch atomic. Snapshot projections are
-rendered only from stable captured bytes and released with a point-in-time
-receipt binding root/path/content/ignored-exclusion/time/Git fingerprints.
-Ignored paths are counted and digested but never read or returned; only an
-intersection with projected paths fails closed. The receipt does not promise
-post-return filesystem atomicity.
+`tests/verify_extension_contract.js` remains the backward-compatible canonical
+promotion entry. Its parent process authenticates all 18 shards and requires
+the five deferred `test_*` members to exactly equal the unique flattened release
+plan. Four children then run the shared-VM core, governed-Git hardening, Git
+environment/ref formats, and bridge-environment/WSP_62 groups concurrently.
+Concurrency is capped at four; each child is capped at 400 seconds and 2 MiB
+per output stream under the unchanged 420-second release ceiling. Results print
+in plan order and any exit, signal, timeout, or output overflow fails promotion.
+The canonical owner never reads an environment group selector. It launches the
+unadvertised `reddog_release_worker.js` with an exact group argv and a fresh
+128-bit nonce mirrored in an owner-overridden child environment. The supervisor
+starts one overall deadline from command entry, records child/release timeout
+state before termination, then attempts graceful and forced process-tree stops.
+If close cannot be confirmed, it destroys/unrefs child handles and emits a
+bounded failing receipt after fixed grace; a later zero exit cannot erase it.
+The first aligned promotion receipt was PASS in 295.928 seconds with `core` as
+the slowest group at 295.219 seconds. A repeat passed in 266.709 seconds;
+headroom is derived from the slower receipt.
+A hostile ambient-selector repair run passed all four groups in 279.723 seconds.
+Windows tree termination resolves `SystemRoot`/`SYSTEMROOT` to an absolute
+`System32\\taskkill.exe`, uses fixed PID arguments with `shell: false`, and
+waits for explicit process evidence. Synchronous/asynchronous launch failure,
+nonzero exit, or the 750-millisecond taskkill timeout returns failure to the
+controller for both graceful and forced attempts. Error handling remains
+idempotent after settlement; POSIX process-group signaling is unchanged.
+The loop-3 hostile-selector promotion passed in 274.537 seconds wall time;
+the owner receipt was 273.762 seconds with all four timeout fields false.
 
-Version 0.4.101 pins the authenticated backend closure for bounded module
-Tier-0 retrieval. Exact README/INTERFACE metadata hits declare
-`retrieval_provenance: exact_metadata` with a null vector similarity; strict
-owner mode requires both rows. The extension remains a thin client and gains
-no index, service, worker, repository-write, or merge authority. Governed Git
-admits only its already validated canonical root through a per-command exact
-`safe.directory` when ownership requires it, exposes override readiness,
-binds object/ref and Git-control metadata, rejects graft/alternate/traversal/
-control/symlink-reparse/wildcard/config-write variants, and retains all risky-
-config gates. One governed snapshot supplies status/stat/diff from one change
-enumeration. A start storage receipt and forced uncached final receipt bind the
-result; any intervening Git storage/control change makes all three projections
-unavailable. The fixed storage cap is 20,000 entries and each receipt is one
-O(N) invariant-validating fingerprint traversal. `gitOutputs()` admits at most
-16 unique names from the fixed operation map and executes the FoundUp
-authority-context quartet between
-one start receipt and one forced-uncached final receipt. If the fingerprint
-changes, every output fails closed; no final-receipt cache or waiver is used.
-The bounded WSP_97 excerpt is placed ahead of ordinary
-indexed evidence after protected required targets so it cannot be tail-cut.
+`sanitizedGitEnv(source)` delegates to the fixed `buildGovernedGit(source)`
+profile. It returns a new object and never aliases or mutates `source`. The
+profile admits only case-normalized Windows process-launch/root/shell keys,
+required temp keys, and locale controls, then overwrites the exact governed Git
+variables. It does not copy PATH/Path/PATHEXT or wildcard-copy ambient `GIT_*`,
+credential, Python, Node, dynamic-loader, SSH-agent, home/profile,
+virtual-environment, or arbitrary caller fields.
 
-Version 0.4.100 pins repository-relative Holo owner evidence and the uncomposed
-grant-profile atomic provisioning closure. Successful owner results first pass
-the producer-owned exact result contract. RedDog then frames all indexed
-HoloIndex, repository, Skillz, documentation, Memex, Brain, and Breadcrumb text
-as untrusted evidence, neutralizes embedded boundary markers, and supplies the
-same inert-evidence system rule to every RedDog role prompt. The OpenRouter
-Fusion alias receives that rule at its outer system-message boundary; provider-
-internal role prompts remain opaque and are explicitly reported as unobservable
-rather than independently proven. Version 0.4.98 pinned owner-config v4 and the
-root-owned grant-service source policy authority. It adds no editor API or
-execution authority.
+`governed_git_executable.js` is the single executable authority. It resolves
+lexical PATH/PATHEXT order before child execution, binds the canonical regular
+file's portable/native identity, size, and SHA-256, rejects link/reparse
+substitution, and permits ordinary installed hardlinks. Windows additionally
+requires Valid Authenticode from an independently bound fixed-SystemRoot
+PowerShell verifier; non-Windows records `not_applicable`. All readiness,
+configuration, projection, content, and repository-state commands invoke the
+same receipt-bound absolute executable with the closed environment and require
+successful binding revalidation before releasing output. The direct proof does
+not extend to Git DLLs or helper-program closure.
+Local configuration and ownership probes have an exact five-second child bound;
+this remains fail-closed while allowing the documented four-worker release
+closure to contend for CPU and disk without a false authority rejection.
 
-Version 0.4.97 pins the exact-Git grant-authority effect admission chain. The
-backend requires signed E0 policy v7 and signed manifest v3 before WSP 71 may
-invoke a callback; v6/v2 remains diagnostic-only. Version 0.4.96 introduced
-shared bounded-Git runtime hardening. The inert v2 archive
-builder and verifier remain outside the executable closure pending a production
-admission consumer. It adds no UI API, signer lifecycle, production provenance
-admission, or execution authority.
+Readiness and projection receipts use `reddog_governed_git_readiness.v2` and
+`reddog_git_projection_receipt.v2`. Start Operations carries a
+`reddog_governed_git_repo_state.v2` receipt from the JavaScript authority into
+Python; the Python snapshot consumer validates its root, HEAD, dirty paths,
+worktree digest, readiness, digest-only executable receipt, and content digest
+rather than launching ambient Git. Body hashing is necessary but insufficient:
+the consumer also enforces exact object keys, types, bounds, digest formats,
+complete equal portable/native identities, link counts, and platform signature
+shape. Unknown or raw-path fields fail closed.
 
-Version 0.4.95 pins executable-archive validation; 0.4.94 pinned the reachable
-owner-E0 selection closure. The WSP 71 rehydrator remains uncomposed. No UI,
-service-lifecycle, or execution authority is added.
+`buildBridgePythonEnv(baseEnv, profile)` delegates to the closed environment
+profiles in `start_operations_environment.js`. Common isolated-profile state is limited
+to allowlisted Windows/POSIX process-discovery, temp/home, locale, certificate,
+and virtual-environment keys plus `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`, and
+`PYTHONNOUSERSITE=1`. Named profiles admit only their observed configuration:
+`advisory_provider`, `authoritative_work_state`, `model_runtime_binding`,
+`holo_query`, `holoindex_owner`, and `resident_architect`; `default` adds none.
+Unknown or caller-constructed profiles fail to `default`. OpenRouter, Holo
+owner, and resident authority credentials never cross into another profile.
+`buildHoloQueryEnv(envLike, retrievalMode)` composes `holo_query`, which admits
+only `HOLOINDEX_SSD_PATH`, legacy `HOLO_SSD_PATH`, and explicit `HOLO_OFFLINE`,
+then forces `HOLOINDEX_QUERY_READONLY=1`. Lexical mode additionally synthesizes
+`HOLO_SKIP_MODEL=1`; semantic and unknown modes remove an ambient skip request.
+The local Holo helper removes the common `PYTHONNOUSERSITE` hardening flag to
+preserve the current configured/system interpreter's per-user NumPy visibility;
+it still excludes `PYTHONPATH`, `PYTHONHOME`, `PYTHONSTARTUP`, and credentials.
+This residual package-provenance risk remains until a sealed/configured Holo
+interpreter closure can support universal user-site isolation. The function
+returns a fresh object and never aliases or mutates `envLike`.
 
-Version 0.4.93 pins the authenticated grant-service artifact dependency
-closure. It adds no UI API, service lifecycle, or execution authority.
+R9 makes `registeredGitMetadataReceipt(root)` an authority receipt rather than
+a whole-repository hygiene receipt. Its existing frozen public shape remains
+`{ fingerprint, valid, worktree_config_state }`. The fingerprint covers the
+canonical direct/linked topology, linked gitfile/common/back-reference,
+authority HEAD/index/config.worktree, common config/shallow/info attributes and
+exclude controls, top-level objects/refs directory identity, and the exact
+current detached or `refs/heads/*` loose/packed resolution. Alternate stores,
+grafts, unsafe relevant controls, and unsupported ref storage fail closed.
 
-Version 0.4.92 pins the backend dependency closure for the uncomposed
-independent grant-authority client supply. It adds no UI or execution authority.
+The common `info` and `objects/info` directories are required ordinary,
+canonical in-common directories for both direct repositories and linked
+worktrees. Missing, non-directory, symlink/junction/reparse escape, or identity
+substitution during their pre/realpath/post capture rejects the receipt; RedDog
+does not create either directory and still does not enumerate their entries.
+Supported `refs/heads/*` names use a bounded internal parser faithful to Git's
+ref-format exclusions: Unicode and `+` remain valid, while controls, space,
+DEL, `~^:?*[\\`, `..`, `@{`, empty components, dot-prefixed/dot-suffixed
+components, `.lock` suffixes, and leading/trailing slash fail closed. The
+parser never invokes Git and never broadens authority beyond branch refs. The
+receipt's OID check is intentionally structural: exactly 40 or 64 hexadecimal
+characters for detached HEAD and the current loose or packed ref. It does not
+reimplement Git's config grammar. Complete capped config bytes remain in the
+receipt fingerprint, while Git's own `HEAD^{commit}` resolution proves object-
+format and commit semantics before a bound named batch or projection is
+released. Packed current-ref classification recognizes exact-current
+whitespace tokens before accepting only the canonical one-space record;
+malformed current records cannot degrade into the valid unborn state.
 
-Version 0.4.91 pins the backend manifest after resident artifact-generation
-request derivation was consolidated in the bounded-worker stage. No thin-client
-API or execution-authority change was introduced.
+`noFollowPathEntry(path)` centralizes internal entry state as `absent`,
+`present`, or `error` from `lstat`. Only `ENOENT` maps to absent. Optional and
+forbidden controls, ordinary directories, `plainControlFile()`, direct
+`commondir`, current loose refs, and execution-root `.git` therefore reject
+dangling or unreadable present entries instead of treating them as missing.
+`registeredGitMetadataState(root)` shares the root `.git` observation with the
+first receipt so this correction does not add a fourth receipt or weaken the
+absolute-final-proof order. For supported branch refs, required canonical
+`refs/heads` plus each existing deeper parent is checked without directory
+enumeration; only a genuinely missing deeper parent preserves unborn handling.
 
-Version 0.4.90 makes the documented Windows PowerShell owner-query transport
-compatible with its leading UTF-8 BOM. The bridge still rejects malformed
-UTF-8 and does not add query-time maintenance authority.
+`gitOutputs()` still accepts at most 16 unique fixed operation names and keeps
+its existing array/error shapes. Each immutable command list runs twice with
+identical governed argv/environment; all bounded strings must match. A bound
+batch that does not request `HEAD_SHA` prepends that fixed operation as its
+semantic proof and removes the proof output before return. Only then is the
+narrow final receipt taken as the last protected read. A command error, output
+mismatch, or relevant receipt drift invalidates the whole batch. `HEAD_SHA`
+verifies `HEAD^{commit}`, so format mismatch and missing/corrupt required
+objects fail through Git even though unrelated object directories are not
+traversed. Snapshot callers use the same semantic proof while preserving true
+unborn handling, two enumerations, stable content captures, and a narrow final
+receipt. `governedGitReadiness()` covers structural/config readiness, not later
+command success, so READY may coexist with a fail-closed command result.
 
-Version 0.4.89 pins the canonical elevated-consensus capability and its complete
-strict signer dependency closure. Elevated production authority remains
-uncomposed and fail-closed.
+Projection admission never uses a follow-target existence check. For each
+changed path, `projectionPathState()` uses the shared no-follow entry classifier
+and validates every existing parent component as a stable canonical ordinary
+directory, without enumeration. Exact `ENOENT` may represent a tracked
+deletion; dangling final/parent links, junctions, non-directory parents, lookup
+errors, or component substitution reject the complete snapshot. An absent
+untracked record remains invalid. Present files continue through
+`resolveSafeRepoFile()` and the canonical confined regular-file/single-link
+identity checks.
 
-Version 0.4.88 pins owner E0 policy v5 and exact independent grant-authority
-key-epoch binding. It adds no thin-client behavior or execution authority.
+Before `readOpenedBytes(handle, size, maxSize)` is called, the opened fd must be
+an ordinary single-link file with the exact pre-open identity and a safe integer
+size from zero through 2 MiB. The reader defensively repeats the explicit size
+cap before allocating exactly that size and issuing only remaining-length
+positional `readSync` requests. A zero or incomplete read, growth, truncation,
+fd/path identity change, pre-open replacement, or invalid size returns no
+projection. Zero bytes and exactly 2 MiB are valid; 2 MiB plus one is rejected.
+These checks do not increase the per-file or aggregate caps.
 
-Version 0.4.87 pins the independent LOW-tier grant-provider foundation in the
-backend manifest. It adds no thin-client behavior or execution authority;
-HIGH/ULTRA authoritative-use composition and production signer activation
-remain unavailable.
+Each present control is capped before and after open, allocated at exactly the
+opened size, and read through explicit remaining-length fd requests. A zero or
+incomplete read, growth, truncation, or candidate-path substitution rejects the
+receipt at the retained fd/path identity checks. Index bytes are digested as a
+Buffer and are not copied into a UTF-8 string. `packedRefOid()` deliberately
+parses only an exact current-ref entry (including duplicate/current-OID
+rejection); malformed unrelated packed lines are outside the narrow receipt's
+global-hygiene claim. A `HEAD_SHA` authority resolution that makes Git parse
+such malformed storage fails the complete named batch as a command failure.
 
-Version 0.4.81 pins the reconciled signer/live-canary backend manifest without
-changing thin-client behavior or execution authority.
+This is point-sampled consistency, not continuous filesystem atomicity. A
+fully restored ABA between samples is outside the receipt claim. Per-query
+global loose-object/all-ref special-file hygiene is also not claimed; that
+would require a separate maintenance audit. The FoundUp resolver's subsequent
+registry/schema byte reads are not transactionally enclosed by the Git quartet
+and remain an explicitly separate atomicity limitation.
 
-Version 0.4.80 pinned the backend manifest after adding the external signer
-exact-effect lease primitive and strict socket-v2 client transport. The
-projection reuses the canonical WRE impact plan and never imports candidate
-tests or invokes pytest; autonomous execution remains
-blocked pending an authenticated OS-isolated runner.
-
-Version 0.4.74 pins the backend manifest for bounded iterative repository
-grounding. Semantic HoloIndex hits are candidate locators only; exact current
-HEAD content, retrieval trace, repository root, generation, and resource policy
-must validate before Fusion. No query-time index or execution authority is
-added.
-
-Version 0.4.73 adds `reddog_orchestration_prompt_trace.v1`. The extension emits
-one content-free policy projection before model invocation, using a
-process-local keyed correlation value rather than a raw prompt digest, and stores a
-confirmed copy in Copy MD after the bridge returns. The trace binds the task-prompt
-digest, actual route, worker, context, reasoning tier, policy state, and the exact
-redacted task prompt admitted by the authoritative bridge gate. If the local
-Copy-MD sanitizer would change that text, the body is withheld rather than
-displayed as exact. Provider model
-identifiers, repository context, history, and system-prompt text are excluded.
-Local queries, compatibility-degraded audit receipts, and queued HoloIndex
-recovery use `model_call_expected: false`, `role: none`, and route-specific
-context instead of inheriting a planned Fusion profile.
-Compatibility-degraded routing is resolved before grounding rejection, so a
-local receipt cannot report a provider call merely because its empty degraded
-context would also fail the grounding preflight. All pre-route status messages
-on that path explicitly identify the local receipt and no-call behavior.
-On a blocked or failed gate, no prompt body is shown. It never grants authority, includes no hidden
-chain-of-thought, and does not replace the signed OpenClaw/WRE/Hermes work
-order or the existing `reddog_provider_call_evidence.v1` transaction. The model prompt requests WSP_00 classification, HoloIndex/search plus
-governed direct-read evidence, WSP_97 CoR, reuse-first classification, WSP_15
-economy, and execution-plane resolution. Worker-prompt artifacts mechanically
-require those WSP and authority fields plus the selected author profile;
-contradictory natural-language clauses reject. Actual effects remain receipt-gated.
-Generic repository-health requests are admitted as deep dives and fail before
-Fusion unless a discovered-target manifest and governed direct-read evidence
-pass the existing recall gate. Worker-prompt `READ_PATH` validation imports
-the extension's canonical target-read deny policy. The prompt contract and
-governed reader therefore reject the same metadata, environment, dependency,
-VSIX, secret-like, and private-key paths. This preserves the stricter
-authoritative Python bundle policy instead of admitting source-looking names
-that later grounding would reject.
-`governed_git_context.js` owns bounded current-worktree status/stat/content
-projection, and `orchestration_prompt_routes.js` owns model versus no-model
-trace construction. `extension.js` consumes those modules and remains below
-its frozen WSP_62 no-growth ceiling.
-
-Version 0.4.72 adds `reddog.progressiveExecutionStage` as an effect ceiling,
-not an authority source. `audit` is the default and permits useful dialogue
-plus signed strict read-only audit tasks with no changed paths or effect
-authority. `boundedExecution` is a requested editor ceiling only. The resident
-editor backend currently clamps it to `audit`; future activation requires an
-independent root-owned runtime source. The bounded backend contract carries
-and recomputes the complete canonical WSP_15 allocation and exact effect paths
-before signer or worker effects. Production authority is not exposed.
-
-Version 0.4.71 hardens the single-input authority boundary. Plain operator
-requests are classified inside the ingress parser; diagnostic-shaped content
-never falls back to whole-message action classification. Timestamped, JSON,
-logfmt, and terse command-result logs remain inert evidence. Resident
-AgentDB/OpenClaw submission additionally requires an accepted receipt-bearing
-Wardrobe selection with no execution or enqueue effects.
-The accepted selector result must carry the canonical digest produced for the
-exact input and an immutable process-local owner proof. Serialized copies and
-injected mappings are not admission capabilities. Selector execution uses the
-approved workspace `.venv`, isolated `-I -S -B` startup, and the existing
-manifest-materialized sealed runtime. The explicit WRE valve, live enqueue,
-and resident session independently require the process-local proof. Mixed
-intent and logs use
-an explicit `DAEmon output:` or `## Run Trace` delimiter in the one textarea;
-unmarked mixed text remains evidence-only.
-
-Version 0.4.70 exposes one `012 conversation with RedDog` textarea. Enter sends
-and Shift+Enter inserts a newline. A bounded deterministic parser separates a
-leading assessment/action paragraph from following diagnostic-shaped lines;
-the evidence portion is always inert and cannot influence action
-classification. Action admission requires directive syntax, preserves a
-bounded sanitized requested scope, and honors canonical or legacy explicit
-resident-session opt-outs. Assessment-only diagnostics retain
-`daemon_diagnostic_analysis_requires_explicit_work_promotion`. Explicit
-operator action language sets `governed_action_requested=true` and may proceed
-through the existing runtime-consumption gate after grounding, validation and
-Fusion quorum pass. It then requests the existing authenticated resident
-AgentDB/OpenClaw architect session automatically. The editor does not mint
-authority: signed WSP_15 promotion, Hermes provider selection, isolated
-worktree effects, independent verification and draft-PR publication remain
-backend-owned contracts.
-
-Version 0.4.69 defines two DAEmon diagnostic routes. A raw log dump without an
-operator request remains a local, no-network summary. An explicit analysis,
-diagnosis, or repair request is converted into a bounded evidence projection:
-secret-bearing lines are omitted, the original payload is represented only by
-its SHA-256 digest and counts, and retained signals are marked as untrusted
-data whose imperative text is inert. Only the projection reaches HoloIndex and
-Fusion. Run Trace exposes the payload/projection digests and omission counts.
-The runtime-consumption gate always rejects this route with
-`daemon_diagnostic_analysis_requires_explicit_work_promotion`; diagnostic
-output cannot directly select Wardrobe, enqueue OpenClaw/Hermes, or mutate the
-repository.
-In 0.4.69, `012 work focus` and `diagnostic evidence` were separate webview message fields.
-Only the work-focus field supplies operator intent. For compatibility, a
-single-field paste may supply intent before an explicit `DAEmon output:` or
-`## Run Trace` boundary. Without either typed evidence or that boundary, the
-entire value is treated as untrusted diagnostic data and stays local.
-
-Version 0.4.68 preserves the existing Fusion challenging-critic gate and adds
-a bounded provider failover inside that same seam. A defensive evidence-review
-retry first targets the best usable critic. If that call blocks, abstains, or
-returns no qualifying challenge, one different configured critic may be tried.
-The gate accepts neither agreement nor empty output as dissent, and synthesis
-still requires a `Challenge:` that addresses framing/evidence and WSP_15
-priority. `critic_challenge_retry_models` records all attempts;
-`abstaining_critics` records initial or retry abstentions.
-
-Version 0.4.67 extends the existing incident and blocked-request interfaces for
-`HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`. A clean stale authority checkout may
-stage the exact request and enqueue the canonical post-merge task for the
-workspace HEAD. The mismatch must expose independently read workspace and
-authority HEADs plus the authority-root digest; forged, dirty, unrelated,
-same-HEAD, or substituted bindings reject. The request cannot be claimed or
-retried until authority resolution becomes current and the owner proves the
-completion generation and freshness receipt. A queued incident uses a
-deterministic no-model status packet and never asks 012 to supply repository
-paths. No query-time reindex, extension-side worktree mutation, new queue, or
-execution authority is introduced.
-
-Version 0.4.66 adds automatic advisory recovery for an ordinary editor request
-blocked by a validated, deferred HoloIndex incident. One pending request is
-held in SecretStorage. The existing AgentDB Holo maintenance task and atomic
-completion event must be complete, and a current owner receipt must match the
-incident's authority HEAD/root plus the completion generation and freshness
-receipt. SecretStorage is consumed before one retry. The retry reruns
-grounding, redaction, Fusion, and validation. An immutable AgentDB stage event
-binds the original request and incident digests before recovery; a separate
-insert-only event admits at most one caller. Neither event carries a raw
-request or grants authority. Review output receives only the staging
-digests and incident identifiers, never the stored request or query. A READY
-claim uses a bounded bridge state detached from panel lifecycle and therefore
-continues through the advisory retry if panel disposal races admission.
-Action planning and all WRE,
-OpenClaw, resident-session, repository, and merge paths are forced off.
-Staging and recovery verify backend manifest compatibility for the same
-immutable root used by their workspace bridge. Recovery performs neither scan
-nor bridge invocation when no request is pending.
-Non-Holo or external-research failures, continuation requests, stale
-authority, invalid receipts, and duplicate retries remain blocked.
-
-Version 0.4.65 adds a conversation-only grounding-failure route. A failed typed
-grounding receipt still blocks normal Fusion and all runtime consumption, but
-the extension may call the configured principal once through
-`openrouter_single` to explain the block. The call receives no packed repository
-context, no raw/direct-read content, no provider history, and no panel. The
-receipt and system policy prohibit underlying repository conclusions, code,
-worker prompts, authorization, and action planning. Successful output carries
-`grounding_failure_dialogue_only`; the runtime gate always rejects it with
-`grounding_failure_dialogue_not_actionable`. A failed redaction or backend
-compatibility gate is never bypassed by this route.
-
-Version 0.4.64 adds `RedDog: Set One-Use Principal Memex Disclosure` and
-`RedDog: Clear Principal Memex Disclosure`. The extension accepts but never
-mints one exact pre-issued disclosure packet. It deletes the packet from
-SecretStorage before the one-shot stdin bridge call. The Python resident path
-returns only a consumption boolean; the editor restores the unchanged packet
-only for explicit `consumed=false`. Final admission, missing acknowledgement,
-or bridge failure retires it.
-SecretStorage effects are process-serialized across concurrent runs. Python
-authenticates the current session, atomically separates FoundUp and Principal
-capabilities, delays Principal admission until the durable cycle's final model
-checkpoint, binds the real cycle and current generation, and rechecks expiry
-immediately before invocation. Neither the packet nor admitted context enters
-the resident intent, AgentDB audit tasks, worker context, logs, or receipts.
-Direct statement reproduction fails before persistence. Memex-informed
-determinations persist no model-authored free text or proposal body and emit
-no queue candidate. The context is non-authoritative and grants no execution
-effect.
-
-Version 0.4.63 pins the backend manifest for explicit signer request
-authority. The extension gains no signer or execution authority; it accepts
-only the exact backend closure whose generic signer rejects policy-less
-requests and whose E0 grant binds the complete canonical signing request.
-
-Version 0.4.62 pins the backend closure for authenticated Principal Memex
-resident admission. No new extension command or history source is exposed.
-The backend can admit only public accepted decisions from a current signed
-principal conversation through a separate principal-signed one-use disclosure;
-the context grants no execution authority.
-
-Version 0.4.61 pins the backend boundary for immutable `foundup`, `principal`,
-and `comparison` scope kinds. Only `foundup` scope may enter the existing work
-promotion path; no new extension command or execution authority is added.
-
-Version 0.4.60 adds `RedDog: Set Conversation Session Credential` and
-`RedDog: Clear Conversation Session Credential`. The extension accepts only a
-pre-issued principal-signed credential through SecretStorage and never mints
-one. The resident bridge passes it only through one-shot stdin; no HMAC or
-other signing material enters the resident process. Python verifies the exact
-repository, audience, transport, TTL, principal signature and FoundUp scope
-against the leased current-generation principal artifact, then removes the
-credential before downstream work.
-Authenticated persistent scope and exact proposal promotion remain separate
-runtime layers; this source grants no execution authority.
-
-Version 0.4.59 pins the exact backend dependency graph for authenticated
-conversation-to-work proposal promotion. This is compatibility metadata only;
-the extension does not invoke the P1/P2 conversation runtime.
-
-Version 0.4.58 separates authority-owned repository bytes from same-repository
-runtime dependency resolution for linked-worktree HoloIndex owner queries. The
-query remains generation-bound and cannot re-index.
-
-Version 0.4.57 separates sanitized packet continuation from raw model history.
-`Use last RedDog packet` remains an advisory-summary opt-in. The extension sends
-zero prior raw turns to Fusion, discards provider-returned history, and reports
-the exact zero-admission policy in Run Trace and Copy MD. Authenticated scoped
-turn admission is deferred to the conversational-scope slice; history never
-supplies work authority.
-
-Version 0.4.54 keeps the single Fusion adversarial retry but deterministically
-prefers a critic with a usable initial response over a route that blocked or
-abstained. Quorum still requires a material framing/evidence/WSP_15 challenge;
-the retry cannot create execution authority. Version 0.4.53 pinned the real upstream OpenClaw Gateway and Hermes API artifact providers into
-the backend integrity manifest. Signed authority is consumed before process
-creation, the dedicated OpenClaw agent is checked for confinement, and only a
-bounded artifact map reaches the existing isolated Foundups writer. Hermes
-production routing remains fail-closed pending authenticated split-runtime
-identity and confinement evidence. Version 0.4.51 pins the opt-in,
-non-authoritative OpenClaw/Hermes WSL availability adapter. Version 0.4.50 binds
-the WRE-owned runtime compatibility evidence supplier into
-the canonical backend manifest while startup remains cached-only and
-nonblocking. The supplier is integrity-only and cannot emit authenticated
-`CURRENT`; observed component matches or drift remain overall `NOT_READY`
-until signed source admission exists. Version 0.4.49 binds the read-only
-advisory. Version 0.4.48 adds a fail-closed incident-to-WRE
-repair adapter for exhausted
-semantic-owner failures. It accepts only the existing transient owner error
-classes after both owner attempts, revalidates the current clean authority
-selection, independently reproduces and verifies the owner result, and
-delegates task creation/retry/cooldown to the protected
-post-merge coordinator. `QUEUED`/`RETRY_WAIT` remain deferred; `CURRENT` must
-survive a receipt-bound query with exact HEAD/root and semantic-evidence
-digests; exhausted repair produces a non-authority coding
-candidate signal. No query surface indexes, executes a coding model, or
-changes worker authority.
-
-Version 0.4.47 seals the HoloIndex persisted vector-segment cold-start proof
-into the backend compatibility manifest. It adds no editor execution authority
-and performs no query-time indexing.
-
-Version 0.4.46 adds registry-driven FoundUp work grounding. Requests to work on
-an existing FoundUp derive canonical direct-read targets without name-specific
-branches; unknown or ambiguous identities fail before Fusion. The grounding
-receipt binds repository HEAD, registry/schema/entity/evidence digests, and the
-manifest safe-mutation surface. It is deterministic and non-authoritative;
-read evidence never becomes write scope. Registry content is validated against
-the checked-in JSON schema. Workspace-current dirty evidence is disclosed in
-the receipt, while registry, schema, and manifest identity remain clean and
-effect boundaries independently revalidate the receipt before use.
-
-Version 0.4.45 separates the generation-authoritative repository root from the
-validated workspace dependency root when the one-shot semantic bridge uses a
-clean authority checkout. Query receipts and repository proof remain bound to
-the authority checkout; only the validated Python dependency path comes from
-the calling workspace.
-
-Version 0.4.44 pins the canonical HoloIndex owner-runtime dependency binding
-and fail-fast health contract. It retains the current resident thin client and
-supersedes the quarantined 0.4.42 Codex-intercept artifact. RedDog remains the
-architect; signed OpenClaw/WRE/Hermes receipts remain the worker-action
-boundary.
-
-Version 0.4.37 keeps the full imperative work focus as the HoloIndex query but
-matches grounding evidence against its substantive subject tokens. Action
-verbs and continuation scaffolding cannot create impossible evidence
-obligations. An unnamed `it` remains insufficient; sanitized continuation is
-advisory context and cannot authorize a missing target.
-
-Version 0.4.36 gives the asynchronous HoloIndex health worker a 30-second
-deadline, calibrated from live post-merge owner-query evidence. Timeout remains
-fail-closed and never falls back to a model, synchronous host-thread query, or
-unverified freshness claim.
-
-Version 0.4.35 adds two deterministic routing boundaries:
-
-- Exact HoloIndex health questions use `runtime_health_query.js`, a bounded
-  worker thread, and the existing process-local owner proof. They make no
-  OpenRouter call and never re-index.
-- Explicit model freshness questions use `model_freshness_query.js` and
-  `scripts/reddog_model_freshness_query_once.py` to obtain one bounded official
-  provider-catalog receipt through a credential-free environment. The receipt
-  separates catalog freshness, availability, chronology completeness, and
-  provider-latest status. This metadata-only route cannot select, promote, or
-  bind a production model.
-
-Version 0.4.34 converts an accepted HoloIndex owner result into a minimal
-structured bundle when the legacy bundle is non-JSON. Only receipt-verified
-semantic evidence carrying the process-local owner proof is retained; fallback
-text is always discarded. Rejected owner results produce a typed empty bundle.
-
-Version 0.4.33 requires the manifest-authenticated `reddog_operations` Skillz
-before `start operations` can load model bindings or submit a resident intent.
-The intent binds the skill version and content/registry digests; submit and
-resume revalidate the complete receipt against the sealed use-time artifact.
-The runtime prompt receives that exact provider-neutral operating discipline.
-
-Version 0.4.32 aligns the owned-child startup health exchange with the
-existing cold semantic warmup budget. Version 0.4.31 adds one bounded
-HoloIndex recovery step to `start operations`.
-Only failed owner queries or stale generations are repairable. Recovery is a
-durable AgentDB task claimed by OpenClaw and dispatched through the canonical
-Holo maintenance handshake. Exact-HEAD owner proof is required before one
-grounding retry; a semantic miss does not trigger re-indexing. The editor has
-no direct Holo mutation authority.
-The canonical profile includes one semantic readiness target; therefore a
-failed/stale owner query is observed before the resident cycle is submitted.
-The OpenClaw repair route requires an opaque one-shot process capability,
-rejects task/assignee/context replay, and reclaims only an expired exact
-assignment. Inner Holo processes run from the sealed backend source tree with
-provider credentials and Python import overrides stripped.
-
-Version 0.4.30 adds the exact `start operations` control family. The command
-selects a checked-in, read-only operational profile and never becomes a work
-prompt or authority token. Submission/resume require distinct receipt-bound
-audit and architect model assignments plus independent host-pinned receipt
-IDs. Every call carries a fresh request ID, child output is cumulatively
-bounded, ambient IDE credentials are excluded, and status/cancellation
-reconnect to the workspace-persisted durable AgentDB intent. No-effect fields
-are implementation-boundary attestations, not independent forensic evidence.
-The bridge requires an interpreter and dependency directory contained by a
-non-redirected workspace `.venv`, starts it with `-I -S -B`, explicitly admits
-that dependency directory without processing `.pth` or `sitecustomize`, disables
-user-site loading, and does not forward `PYTHONPATH` or `PYTHONHOME`. Control
-code runs from a temporary source tree populated only by copy-time reverified
-backend-manifest files under a root disjoint from the repository; the audited
-checkout is passed separately as data. Import order is standard library, sealed
-source, then dependencies; copied source bytes are reauthenticated when loaded,
-and manifest-reserved module names cannot fall through to dependencies.
-The host pins the accepted audit and architect binding IDs through the
-`REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID` and
-`REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID`
-environment values; self-hashed artifacts do not choose those pins.
-
-Version 0.4.29 requires signed Memex supply lineage to remain exact from the
-delegated authority through AgentDB execution and independent verification.
-Verifier admission recomputes the canonical work-authority digest and rejects
-post-signing substitution before any downstream evidence is accepted.
-
-Version 0.4.28 requires a process-local verified-envelope seal before a signed
-worker can enter execution, checks the durable execution lease in the same
-transaction as finalization, and atomically quarantines invalid assignments.
-Version 0.4.27 binds queue lineage and the configured verifier through signed
-AgentDB admission. The extension-pinned backend closure includes dedicated
-signed-worker assignment, bounded lease renewal, and atomic quarantine
-recovery; these backend changes do not grant the editor execution authority.
-
-Version 0.4.26 pins the exact-SHA commit stage between bounded authoring and
-independent verification. The backend requires an executor-bound work-order
-digest, an exact base SHA, a clean scoped index, and a canonically validated
-base/head/path receipt before verification.
-
-Version 0.4.25 pins the regenerated backend manifest after WRE Skillz
-resolution became checkout-local. Backend compatibility now requires the
-portable registry and loader that reject cross-checkout execution paths.
-
-Version 0.4.24 retries the process-private HoloIndex semantic owner once after
-an explicit transient startup or semantic-backend lifecycle failure. It never
-restarts a configured owner, never re-indexes during a query, and never retries
-stale, malformed, or authority-mismatched evidence. Run Trace exposes attempts,
-whether a retry occurred, and its allowlisted reason.
-
-Version 0.4.23 pins the generated backend compatibility manifest to the exact
-post-merge HoloIndex maintenance runtime. Any missing, added-to-closure, or
-content-mismatched dependency blocks before grounding, HoloIndex query, model
-execution, or worker authority.
+Historical release narratives and superseded acceptance boundaries are maintained in
+`ModLog.md`; this interface retains only current callable and authority contracts.
 
 ## Purpose
 
 `reddog` is a local Cursor/VS Code extension whose user-facing product name is RedDog. It opens the resident 0102 FoundUps architect thin client and retains the redaction-gated OpenRouter bridge through `scripts/advisory_model_once.py`.
 
+### VS Code workspace and package capabilities
+
+`package.json` declares `untrustedWorkspaces.supported=false` and
+`virtualWorkspaces.supported=false`. RedDog requires trusted local filesystem,
+Git, Python subprocess, worker-thread, and materialized backend behavior; these
+capability flags are a fail-closed compatibility boundary, not a permission
+grant.
+
+The distributable surface is pinned to 65 files: 61 runtime files derived from
+the static relative-require closure plus the two dynamic workers and Python
+bootstrap, and four public metadata/assets (`LICENSE`, `README.md`, `package.json`,
+`icon.png`). The packaged license text must canonically match the repository
+authority. `tests/**`, `docs/**`, internal governance journals, caches,
+coverage, logs, environment files, credential-container suffixes, dependencies,
+editor files, prior VSIX files, and `.vscodeignore` do not cross the package
+boundary. The release group runs the deterministic installed-VSCE listing
+twice; the default fast tier performs static validation only.
+The listed regular-file closure is additionally capped at 1 MiB raw and emits
+`reddog_package_surface_receipt.v1` (`file_count`, `raw_bytes`,
+`raw_byte_cap`, `within_cap`). This is not a final compressed-VSIX size claim;
+archive size is verified when the release artifact is actually built.
+
+`governed_git_executable.js` is the sole production Git process authority.
+Its internal binding retains canonical absolute paths solely for invocation and
+revalidation. `toPublicExecutableReceipt()` removes both Git and verifier paths
+before any serialized boundary. Readiness v2 and projection-receipt v2 expose
+only canonical-path digests, SHA-256,
+size, start/final portable/native identities, and signature proof. Windows
+readiness requires Valid Authenticode from an identity/hash-bound fixed-
+SystemRoot PowerShell verifier; its public proof retains only verifier path/root
+digests, fixed-relative-path and containment proof, hash/size, and complete
+identities. Other platforms expose exactly `status: not_applicable`.
+Configuration and content calls use the same internal absolute binding with
+PATH/Path/PATHEXT removed and revalidate before output release. Start Operations
+consumes the JS-minted repository-state v2 receipt; Python does not resolve or
+execute Git. This proves the selected executable only, not Git DLL/helper
+closure or independent authentication of the unhashed receipt origin.
+
 It is the IDE-side thin-client surface for the resident RedDog backend and the OpenClaw/WRE/Hermes execution spine. The extension submits typed intent and displays receipts; it does not grant shell, repository write, merge, FoundUp registration, or CABR authority.
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode, not the product identity.
 
-Version 0.4.22 requires a bounded `holoindex_semantic_evidence.v1` serialization for every accepted owner result. The bridge includes the exact semantic buckets plus metadata, the query receipt binds its digest and item count, and the extension rehashes, parses, shape-checks, and consumes only that verified serialization. Outer `raw_result` remains diagnostic transport data and cannot change model evidence.
+For version-by-version provenance, generated closure pins, and migration history, see
+`ModLog.md`. Current behavior is specified by the contracts below.
 
-Version 0.4.21 selects `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` when it names a clean linked worktree at the workspace's exact HEAD and Git common directory. If unset, an existing deterministic sibling `<workspace>-holo-authority` is checked; otherwise the workspace remains the authority candidate. The one-shot query bridge re-proves selection after the owner call and accepts semantic evidence only when the service response and canonical query receipt bind the same repository-root digest, HEAD, generation, and no-mutation posture. Authority-selection metadata returns only a root digest; indexed hit payloads retain their existing path representation. The owner checks its fixed loopback port before model startup, exits when its exact supervisor process terminates, restores stdin to `DEVNULL`, and allows a bounded 30-second authenticated semantic health response within the unchanged 300-second total startup budget.
-
-Version 0.4.17 queries `REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH` within `REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT` before rendering the editor. A valid `reddog_backend_architect` binding replaces evaluation fallback models and carries role topology plus catalog/selection/binding lineage into Run Trace. Unconfigured environments remain evaluation-only; configured-invalid artifacts block before any provider call. The query is read-only and performs no HoloIndex operation, model call, command execution, or artifact mutation.
-
-Version 0.4.16 performs at most one semantic lead retry and one targeted adversarial critic retry. A retry is another fully receipted OpenRouter call through the existing redaction-gated bridge; it does not weaken required-evidence, quorum, synthesis, output-validation, or runtime-consumption gates.
-
-Version 0.4.15 recognizes anchored requests to draft or revise ordinary human communication. It overrides manual context, effort, and Fusion selections with `none`, `regular`, and a redaction-gated single model; wraps supplied text as untrusted message data; and skips repository grounding, output-to-action validation, and runtime consumption.
-
-Version 0.4.14 reconciles semantic extraction with low-confidence slash-token handling. Slash-delimited product/subsystem names remain excluded from repo-file targets but no longer suppress the surrounding semantic obligation; lines containing an actual bound repo target retain the existing no-duplicate semantic behavior.
-
-Version 0.4.13 answers direct authoritative-work questions from `REDDOG_AUTHORITATIVE_WORK_STATE_PATH`. It validates the external snapshot revision and freshness, governed queue/claim lineage, canonical WSP_15 receipt, and selected-slice consistency, then returns a digest-bound local status receipt. A missing or invalid state is `NOT_READY` and never falls through to HoloIndex or Fusion.
-
-Version 0.4.12 requires the selected workspace to satisfy an extension-pinned `scripts/reddog_backend_manifest.json` before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation. `scripts/generate_reddog_backend_manifest.py` deterministically binds every executable entry point (including `holo_index.py`), its exact-case Git-tracked Python dependency closure, package initializers, package-relative dynamic imports, and declared dynamic file-load scopes; undeclared dynamic loading fails manifest generation. The extension validates the exact backend API, executable/bridge/runtime SHA-256 digests, repository markers, every intermediate path component, canonical parent containment, regular-file type, and non-symlink/junction boundary. Full lifecycle checks run in an extension-owned worker thread; synchronous repair/judgment bridges recheck immediately before process launch. Failure produces an allowlisted, content-free local block receipt; RedDog never repairs or re-indexes the backend during this check. This is a compatibility and bounded path-integrity gate, not an atomic filesystem lock against a hostile local administrator.
-
-Version 0.4.11 requires the editor host to provide `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and `REDDOG_AUTHORIZED_FOUNDUP_IDS`. The extension binds the selected principal and FoundUp into `reddog_intent.v2`; the Python bridge independently resolves the same host scope and submits through `RedDogResidentArchitectClient`. Missing or mismatched scope fails before the backend cycle. Resident records use canonical genesis state, full-intent binding, revision CAS, terminal cancellation, monotonic retries, and recomputed internal-integrity telemetry. These controls do not replace signed execution authority.
-
-Version 0.4.10 streams orchestrator-owned Fusion stage metadata to the webview and emits digest-bound progress and OpenRouter call receipts in Copy MD. Receipts include roles, requested/served models, provider routing, generation IDs, retries, timing, token counts, and cost in OpenRouter credits. Missing or retry-ambiguous provider accounting is reported as incomplete and cost remains unknown rather than zero. Receipts are integrity-checked, bound to the extension-generated process run, secret-filtered, and observational only; they are not authentication or action authority.
+The extension-pinned backend manifest is validated before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation.
+Compatibility failure is local and fail-closed; it does not trigger repair,
+re-indexing, provider access, or work dispatch.
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
@@ -542,7 +272,7 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 |---|---|---|
 | Advisory model review | YES | OpenRouter request after Fusion redaction gate passes |
 | Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by reasoning tier and sends it through redaction gate |
-| HoloIndex recall | YES | Semantic evidence comes from the authenticated HoloIndex owner service and requires a current generation-bound query receipt. Legacy `--bundle-json` supplies bounded direct-read/context structure only; its unbound semantic hits are discarded. Explicit lexical opt-down remains diagnostic-only. |
+| HoloIndex recall | YES | One governed owner adapter supplies current generation-bound semantic evidence or a bounded lexical/direct-read bundle. The extension does not invoke raw `holo_index.py --bundle-json`/`--offline`; lexical mode remains diagnostic-only and semantic authority fails closed. |
 | Repository audit fallback | YES, READ-ONLY | Generation-bound semantic recall remains authoritative; structured Holo candidates must also survive secure direct read. Missing source or independent test/contract evidence triggers bounded deterministic discovery, never shell/model paths, writes, or execution authority. |
 | WSP_00/WSP_97/WSP_15 prompting | YES | System prompt requires role lock, truth labels, proposed fixes, and MPS priority |
 | Repo edits | NO | No write tool exposed to model |
@@ -690,12 +420,12 @@ Run Trace HoloIndex scorecard fields (v0.3.22+):
 | `work_focus_targets_derived` | At least one required target was DERIVED from free-form work-focus prose / M2M / Read-first shapes, not only the explicit header (v0.3.44+) | OBSERVED |
 | `work_focus_target_derivation_sources` | Which read-intent shapes contributed targets: subset of `{required_block, read_first, m2m_read, ctx_files, markdown_bullet, inline_path, backtick_path, symbol}` (v0.3.44+) | OBSERVED |
 | `work_focus_targets_dropped_low_confidence` | Flowing-prose tokens dropped from the required list because they had a slash but NO file extension (e.g. `breadcrumb/handoff`); EXCLUDED from `required_targets_total` / `_missing` so they cannot flip `target_recall_ok` (v0.3.45+; `[]` when none) | OBSERVED |
-| `direct_read_fallback_used` | Governed direct-read-by-path fetch ran (or offline lexical fallback used) | OBSERVED |
+| `direct_read_fallback_used` | The governed owner bundle contains accepted non-empty direct-read paths and bytes | OBSERVED |
 | `direct_read_paths` | Repo-relative target paths actually fetched by the Python bundle layer | OBSERVED |
 | `direct_read_rejected` | `{path, reason}` for denied/traversal/absolute/secret/symlink-escape hits (never read) | OBSERVED |
 | `direct_read_bytes` | Total bytes injected across all fetched targets (bounded by total budget) | OBSERVED |
 | `direct_read_truncated` | `{path, bytes}` for targets clipped by the per-file byte cap | OBSERVED |
-| `direct_read_fetch_attempted` | Enriched direct-read subprocess was invoked (v0.3.33+) | OBSERVED |
+| `direct_read_fetch_attempted` | The governed owner bundle supplied direct-read evidence, or bounded missing-target enrichment was requested (v0.3.33+) | OBSERVED |
 | `direct_read_fetch_error` | Classified fetch failure (`timeout`, `max_buffer`, `process_error`, `unknown`, or none) | OBSERVED |
 | `audit_context_requested` | Extension requested audit-mode redaction for governance direct-read context (v0.3.34+) | OBSERVED |
 | `audit_context_applied` | Bridge passed `audit_mode=True` into `evaluate_redaction_gate()` (v0.3.34+) | OBSERVED |
@@ -725,7 +455,15 @@ Run Trace Unicode normalization fields (v0.3.24+) and bridge UTF-8 invariant (v0
 | `unicode_normalization_sources` | Pipe-separated: `prompt`, `context`, `repair_prompt` | OBSERVED |
 | `unicode_normalization_form` | `NFC` when normalization ran; `none` when skipped | OBSERVED |
 
-Bridge child env (v0.3.25+): `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`. Python bridge reads stdin via `sys.stdin.buffer` UTF-8 decode so valid Unicode (e.g. U+2014 em dash) is not mis-decoded on Windows before the redaction gate.
+Bridge child env (v0.4.101+): every route uses a closed profile and forces
+`PYTHONIOENCODING=utf-8` plus `PYTHONUTF8=1`. Common isolated profiles also set
+`PYTHONNOUSERSITE=1`; local `holo_query` deliberately removes it because the
+current configured/system interpreter requires per-user NumPy. That route still
+denies `PYTHONPATH`, `PYTHONHOME`, `PYTHONSTARTUP`, and credentials. Universal
+user-site isolation requires a sealed/configured Holo interpreter closure.
+Python
+bridge reads stdin via `sys.stdin.buffer` UTF-8 decode so valid Unicode (e.g.
+U+2014 em dash) is not mis-decoded on Windows before the redaction gate.
 
 `evaluateTargetRecall(taskText, bundleOutput)` and `inferRecallTargetPaths(taskText)` implement target-specific recall from bundle `task_retrieval.code_hits`. Path-aware detector (REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1, slice 1/3): when the prompt carries an explicit "Required direct-read targets" list, `parseRequiredTargetPaths(taskText)` parses it into repo-relative paths/globs and `evaluateTargetRecall` compares each required path against content-bearing bundle locations, using `isSelfFileLocation()` so retrieving `extension.js` (RedDog itself) can never satisfy a required target. This closes the `content_included(any file) != required_targets_recalled` false negative: `index_gap_detected` is honestly `true` when required targets are absent. Prompts without a required list keep prior inferred-target behavior. This slice is detector-only: it does NOT read required files (slice 2) or change redaction (slice 3).
 
@@ -814,7 +552,7 @@ Model and context routing:
 - Principal/synthesis default: `z-ai/glm-5.2`.
 - Adversarial critic default: `deepseek/deepseek-v4-pro`.
 - Implementation critic default: `moonshotai/kimi-k2.7-code`.
-- Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token floor for every direct completion call. An explicit direct selection or receipt-backed signed promotion may place K3 in single, principal, or synthesis roles; this bridge does not itself promote a champion, change defaults, open an OpenClaw execution valve, or dispatch Hermes.
+- Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token floor for every direct completion call. Regular single and manual Fusion inputs accept only integer completion budgets from 1 through the endpoint-fixture maximum of 131072; missing values retain their existing 2048/1600 defaults and invalid values fail as `invalid_max_tokens` before provider dispatch. Valid larger budgets are preserved and receipts distinguish requested from effective values. An explicit direct selection or receipt-backed signed promotion may place K3 in single, principal, or synthesis roles; this bridge does not itself promote a champion, change defaults, open an OpenClaw execution valve, or dispatch Hermes.
 - REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and `wsp_holo` HoloIndex grounding (no Fusion panel, Skillz, or git).
 - Substantive audit/research/implementation prompts must produce a non-empty typed target universe. When no explicit path, external source, or semantic header exists, RedDog derives a generic semantic subject and requires content-bearing HoloIndex evidence for it; broad audits require two references across implementation/authority and verification/authority categories. Unparseable work fails before Fusion with `grounding_target_universe_empty`.
 - Context is not a 012-facing selector; it is resolved from the reasoning tier. That heuristic is not a WSP_15 allocation.

@@ -1,13 +1,10 @@
 'use strict';
-
 const assert = require('assert');
 const cp = require('child_process');
 const crypto = require('crypto');
-const EventEmitter = require('events');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-
 const protocol = require(path.join('..', 'start_operations_control.js'));
 const bridge = require(path.join('..', 'start_operations_bridge.js'));
 const sealedJsonOnce = require(path.join('..', 'sealed_python_json_once.js'))
@@ -19,111 +16,23 @@ const adapter = require(path.join('..', 'start_operations_extension_adapter.js')
 const operationsEnvironment = require(path.join('..', 'start_operations_environment.js'));
 const interpreterPolicy = require(path.join('..', 'start_operations_interpreter.js'));
 const grounding = require(path.join('..', 'grounded_target_continuity.js'));
-
-function signedResult(request, overrides) {
-  const value = Object.assign(protocol.failureResult(
-    request.action, 'none', request
-  ), {
-    accepted: true,
-    status: 'DETERMINED',
-    intent_id: 'sha256:' + 'a'.repeat(64),
-    cycle_id: 'sha256:' + 'b'.repeat(64),
-    repo_head_sha: 'c'.repeat(40),
-    rejection_reasons: []
-  }, overrides || {});
-  const body = { ...value };
-  delete body.response_id;
-  value.response_id = grounding.canonicalDigest(body);
-  return value;
-}
-
-function signedProgress(request) {
-  const value = {
-    schema_version: protocol.PROGRESS_SCHEMA,
-    stage: 'resident_cycle_submitting',
-    action: request.action,
-    control_request_id: request.control_request_id,
-    intent_id: 'sha256:' + 'a'.repeat(64),
-    repo_head_sha: 'c'.repeat(40),
-    operations_profile_id: protocol.PROFILE_ID
-  };
-  value.progress_id = grounding.canonicalDigest(value);
-  return value;
-}
-
-function pythonResult(request) {
-  const repoRoot = path.resolve(__dirname, '..', '..', '..');
-  const code = [
-    'from modules.communication.moltbot_bridge.src.reddog_start_operations_control_receipt import reject,result_json',
-    'from modules.communication.moltbot_bridge.src.reddog_start_operations_profile import StartOperationsProfile',
-    `print(result_json(reject("submit", StartOperationsProfile(), {}, ("test_rejection",), control_request_id="${request.control_request_id}")))`
-  ].join(';');
-  const executable = process.env.PYTHON || 'python';
-  return JSON.parse(cp.execFileSync(
-    executable, ['-B', '-c', code], { cwd: repoRoot, encoding: 'utf8' }
-  ).trim());
-}
-
-function fakeChild(lines, exitCode) {
-  const child = new EventEmitter();
-  child.stdout = new EventEmitter();
-  child.stderr = new EventEmitter();
-  child.stdin = { end() {} };
-  child.kill = () => { child.killed = true; };
-  process.nextTick(() => {
-    child.stdout.emit('data', lines.join('\n') + '\n');
-    child.emit('close', exitCode || 0);
-  });
-  return child;
-}
-
-function chunkedChild(chunks) {
-  const child = new EventEmitter();
-  child.stdout = new EventEmitter();
-  child.stderr = new EventEmitter();
-  child.stdin = { end() {} };
-  child.kill = () => { child.killed = true; };
-  process.nextTick(() => {
-    for (const chunk of chunks) child.stdout.emit('data', chunk);
-    child.emit('close', 0);
-  });
-  return child;
-}
-
-function approvedRuntime() {
-  const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-operations-'));
-  const bin = path.join(repoRoot, '.venv', 'Scripts');
-  const sitePackages = path.join(repoRoot, '.venv', 'Lib', 'site-packages');
-  fs.mkdirSync(bin, { recursive: true });
-  fs.mkdirSync(sitePackages, { recursive: true });
-  const interpreter = path.join(bin, 'python.exe');
-  fs.writeFileSync(interpreter, '');
-  return { repoRoot, interpreter, sitePackages };
-}
-
-function fakeMaterializer(runtime) {
-  return () => ({
-    runtimeRoot: runtime.repoRoot,
-    targetRepoRoot: runtime.repoRoot,
-    manifestPath: path.join(runtime.repoRoot, 'runtime-manifest.json'),
-    manifestDigest: '0'.repeat(64),
-    scriptPath: (value) => path.join(runtime.repoRoot, 'sealed', path.basename(value)),
-    cleanup() {}
-  });
-}
-
-function assertStartupHooksExcluded() {
+const helpers = require('./start_operations_control_test_helpers');
+const { approvedRuntime, chunkedChild, fakeChild, fakeMaterializer, pythonResult, signedProgress, signedResult } = helpers;
+function startupFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-python-seal-'));
   const venv = path.join(root, '.venv');
   cp.execFileSync(process.env.PYTHON || 'python', ['-m', 'venv', venv]);
-  const interpreter = path.join(venv, 'Scripts', 'python.exe');
   const dependencies = path.join(venv, 'Lib', 'site-packages');
   const sentinel = path.join(root, 'startup-hook-ran');
   const source = path.join(root, 'sealed-source');
   const target = path.join(root, 'audited-target');
-  fs.mkdirSync(source);
-  fs.mkdirSync(target);
+  fs.mkdirSync(source); fs.mkdirSync(target);
   fs.mkdirSync(path.join(target, '.git'));
+  return { root, interpreter: path.join(venv, 'Scripts', 'python.exe'),
+    dependencies, sentinel, source, target };
+}
+function writeStartupAttackers(fixture) {
+  const { dependencies, sentinel, source, target } = fixture;
   fs.writeFileSync(
     path.join(dependencies, 'attacker.pth'),
     `import pathlib;pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")\n`
@@ -139,13 +48,17 @@ function assertStartupHooksExcluded() {
   fs.mkdirSync(dependencyPackage);
   fs.writeFileSync(path.join(sourcePackage, '__init__.py'), '');
   fs.writeFileSync(path.join(sourcePackage, 'probe.py'), 'VALUE="source"\n');
-  const policy = path.join(source, 'policy.txt');
-  fs.writeFileSync(policy, 'manifest-policy\n');
+  fs.writeFileSync(path.join(source, 'policy.txt'), 'manifest-policy\n');
   fs.writeFileSync(path.join(dependencyPackage, '__init__.py'), attacker + '\n');
   fs.writeFileSync(path.join(dependencyPackage, 'probe.py'), attacker + '\n');
   fs.writeFileSync(path.join(target, 'json.py'), attacker + '\n');
   fs.writeFileSync(path.join(target, 'dep_probe.py'), attacker + '\n');
+  return sourcePackage;
+}
+function writeStartupSource(fixture, sourcePackage) {
+  const { source, target } = fixture;
   const script = path.join(source, 'probe.py');
+  const policy = path.join(source, 'policy.txt');
   fs.writeFileSync(
     script,
     'import json,dep_probe,os\nfrom modules import probe\n'
@@ -157,43 +70,41 @@ function assertStartupHooksExcluded() {
   const relativeFiles = [
     'probe.py', 'policy.txt', 'modules/__init__.py', 'modules/probe.py'
   ];
+  return { script, policy, relativeFiles, sourcePackage, target };
+}
+function startupManifest(fixture, sourceState) {
   const runtimeDigests = {};
-  for (const relative of relativeFiles) {
-    const raw = fs.readFileSync(path.join(source, relative));
+  for (const relative of sourceState.relativeFiles) {
+    const raw = fs.readFileSync(path.join(fixture.source, relative));
     runtimeDigests[relative] = crypto.createHash('sha256').update(raw).digest('hex');
   }
   const manifest = { required_runtime_sha256: runtimeDigests };
-  const manifestPath = path.join(source, '.reddog-runtime-manifest.json');
+  const manifestPath = path.join(fixture.source, '.reddog-runtime-manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(manifest));
-  const manifestDigest = grounding.canonicalDigest(manifest).slice(7);
-  const runtime = interpreterPolicy.approved(interpreter, root);
-  const args = [
-    '-I', '-S', '-B', bridge.PYTHON_BOOTSTRAP,
-    script, source, target, runtime.sitePackages, manifestPath, manifestDigest
-  ];
-  assert.strictEqual(cp.execFileSync(
-    runtime.interpreter, args, { cwd: root, encoding: 'utf8' }
-  ).trim(), `sealed:dependency:source:${target}:manifest-policy`);
-  assert.strictEqual(fs.existsSync(sentinel), false);
-  fs.writeFileSync(policy, 'attacker-policy\n');
-  assert.throws(
-    () => cp.execFileSync(runtime.interpreter, args, {
-      cwd: root, encoding: 'utf8'
-    }),
-    /runtime_source_digest_mismatch/
-  );
-  fs.writeFileSync(policy, 'manifest-policy\n');
-  fs.rmSync(path.join(sourcePackage, '__init__.py'));
-  assert.throws(
-    () => cp.execFileSync(runtime.interpreter, args, {
-      cwd: root, encoding: 'utf8'
-    }),
-    /reserved_runtime_module_missing/
-  );
-  assert.strictEqual(fs.existsSync(sentinel), false);
-  fs.rmSync(root, { recursive: true, force: true });
+  return { manifestPath, manifestDigest: grounding.canonicalDigest(manifest).slice(7) };
 }
-
+function assertStartupHooksExcluded() {
+  const fixture = startupFixture();
+  const sourceState = writeStartupSource(fixture, writeStartupAttackers(fixture));
+  const manifest = startupManifest(fixture, sourceState);
+  const runtime = interpreterPolicy.approved(fixture.interpreter, fixture.root);
+  const args = ['-I', '-S', '-B', bridge.PYTHON_BOOTSTRAP, sourceState.script,
+    fixture.source, fixture.target, runtime.sitePackages,
+    manifest.manifestPath, manifest.manifestDigest];
+  assert.strictEqual(cp.execFileSync(
+    runtime.interpreter, args, { cwd: fixture.root, encoding: 'utf8' }
+  ).trim(), `sealed:dependency:source:${fixture.target}:manifest-policy`);
+  assert.strictEqual(fs.existsSync(fixture.sentinel), false);
+  fs.writeFileSync(sourceState.policy, 'attacker-policy\n');
+  assert.throws(() => cp.execFileSync(runtime.interpreter, args,
+    { cwd: fixture.root, encoding: 'utf8' }), /runtime_source_digest_mismatch/);
+  fs.writeFileSync(sourceState.policy, 'manifest-policy\n');
+  fs.rmSync(path.join(sourceState.sourcePackage, '__init__.py'));
+  assert.throws(() => cp.execFileSync(runtime.interpreter, args,
+    { cwd: fixture.root, encoding: 'utf8' }), /reserved_runtime_module_missing/);
+  assert.strictEqual(fs.existsSync(fixture.sentinel), false);
+  fs.rmSync(fixture.root, { recursive: true, force: true });
+}
 function assertRuntimeMaterialized() {
   const repoRoot = path.resolve(__dirname, '..', '..', '..');
   assert.throws(
@@ -228,7 +139,6 @@ function assertRuntimeMaterialized() {
     runtime.cleanup();
   }
 }
-
 function assertRedirectedVenvRejected() {
   const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-repo-'));
   const external = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-venv-'));
@@ -242,8 +152,7 @@ function assertRedirectedVenvRejected() {
   fs.rmSync(repoRoot, { recursive: true, force: true });
   fs.rmSync(external, { recursive: true, force: true });
 }
-
-async function main() {
+function assertClassification() {
   assert.deepStrictEqual(protocol.classify('start operations').action, 'submit');
   assert.deepStrictEqual(protocol.classify('  START OPERATIONS  ').action, 'submit');
   assert.deepStrictEqual(protocol.classify('operations status').action, 'status');
@@ -255,28 +164,15 @@ async function main() {
   ]) {
     assert.strictEqual(protocol.classify(value), null, value + ' must not route');
   }
-  assert.strictEqual(
-    protocol.bindingRejection(
-      { action: 'submit' },
-      { modelBindingSource: 'evaluation_config' }
-    ),
-    'start_operations_requires_receipt_bound_model_runtime'
-  );
-  assert.strictEqual(
-    protocol.bindingRejection(
-      { action: 'submit' },
-      { modelBindingSource: 'receipt_bound_runtime' }
-    ),
-    ''
-  );
-  assert.strictEqual(
-    protocol.bindingRejection(
-      { action: 'cancel' },
-      { modelBindingSource: 'evaluation_config' }
-    ),
-    ''
-  );
-
+  assert.strictEqual(protocol.bindingRejection({ action: 'submit' },
+    { modelBindingSource: 'evaluation_config' }),
+  'start_operations_requires_receipt_bound_model_runtime');
+  assert.strictEqual(protocol.bindingRejection({ action: 'submit' },
+    { modelBindingSource: 'receipt_bound_runtime' }), '');
+  assert.strictEqual(protocol.bindingRejection({ action: 'cancel' },
+    { modelBindingSource: 'evaluation_config' }), '');
+}
+function validatedReceipts() {
   const request = protocol.buildRequest(
     { action: 'submit' }, '', 'O:\\Foundups-Agent'
   );
@@ -304,6 +200,10 @@ async function main() {
     grounding_retried_after_repair: true
   });
   assert(protocol.validateResult(noRefreshRepaired, request));
+  return { request, progress, terminal };
+}
+function assertRejectedReceipts(receipts) {
+  const { request, terminal } = receipts;
   assert.strictEqual(protocol.validateResult(signedResult(request, {
     no_maintenance_performed: false,
     holo_repair_attempted: true,
@@ -326,13 +226,9 @@ async function main() {
     { action: 'status' }, 'sha256:' + 'd'.repeat(64), 'O:\\Foundups-Agent'
   );
   assert.strictEqual(protocol.validateResult(terminal, staleRequest), null);
-
-  let observedProgress = null;
-  let spawnedEnvironment = null;
-  const runtime = approvedRuntime();
-  const approved = interpreterPolicy.approved(
-    runtime.interpreter, runtime.repoRoot
-  );
+}
+function assertSealedRuntime(runtime) {
+  const approved = interpreterPolicy.approved(runtime.interpreter, runtime.repoRoot);
   assert.strictEqual(approved.interpreter, fs.realpathSync(runtime.interpreter));
   assert.strictEqual(approved.sitePackages, fs.realpathSync(runtime.sitePackages));
   assert.strictEqual(interpreterPolicy.approved('python', runtime.repoRoot), '');
@@ -359,6 +255,11 @@ async function main() {
   }), /unapproved_interpreter/);
   assertStartupHooksExcluded();
   assertRedirectedVenvRejected();
+}
+async function assertBridgeSuccess(runtime, receipts) {
+  const { request, progress, terminal } = receipts;
+  let observedProgress = null;
+  let spawnedEnvironment = null;
   const result = await bridge.run({
     interpreter: runtime.interpreter,
     script: 'bridge.py',
@@ -380,6 +281,8 @@ async function main() {
   assert(spawnedEnvironment.REDDOG_SEALED_RUNTIME_BOOTSTRAP_PATH.endsWith(
     path.join('extensions', 'reddog', 'start_operations_python_bootstrap.py')
   ));
+}
+async function assertBridgeByteBound(runtime, request) {
   const line = JSON.stringify({ ignored: 'x'.repeat(9000) }) + '\n';
   const oversized = await bridge.run({
     interpreter: runtime.interpreter, script: 'bridge.py',
@@ -392,6 +295,9 @@ async function main() {
   assert(oversized.rejection_reasons.includes(
     'start_operations_bridge_output_too_large'
   ));
+}
+async function assertBridgeFrameBound(runtime, receipts) {
+  const { request, progress } = receipts;
   let overLimitCallbacks = 0;
   const overLimitFrames = Array.from(
     { length: bridge.MAX_FRAMES + 1 },
@@ -412,12 +318,23 @@ async function main() {
     'start_operations_bridge_frame_limit_exceeded'
   ));
   assert.strictEqual(overLimitCallbacks, bridge.MAX_FRAMES);
-
+}
+function adapterInput(state, capture) {
+  return {
+    text: 'start operations',
+    worker: { modelBindingSource: 'receipt_bound_runtime' },
+    state, interpreter: 'python', script: 'bridge.py',
+    repoRoot: 'O:\\Foundups-Agent', env: {},
+    persistIntentId: (value) => { capture.persisted = value; },
+    postStatus: (text) => capture.statuses.push(text),
+    postResult: (value) => { capture.posted = value; }
+  };
+}
+async function runExtensionAdapter(receipts) {
+  const { progress, terminal } = receipts;
   const originalRun = bridge.run;
   const state = {};
-  let persisted = '';
-  const statuses = [];
-  let posted = null;
+  const capture = { persisted: '', statuses: [], posted: null };
   bridge.run = async (options) => {
     options.onProgress(progress);
     return terminal;
@@ -429,46 +346,51 @@ async function main() {
       postStatus() {},
       postResult() {}
     }), false);
-    assert.strictEqual(await adapter.handleMessage({
-      text: 'start operations',
-      worker: { modelBindingSource: 'receipt_bound_runtime' },
-      state,
-      interpreter: 'python',
-      script: 'bridge.py',
-      repoRoot: 'O:\\Foundups-Agent',
-      env: {},
-      persistIntentId: (value) => { persisted = value; },
-      postStatus: (text) => statuses.push(text),
-      postResult: (value) => { posted = value; }
-    }), true);
+    assert.strictEqual(await adapter.handleMessage(adapterInput(state, capture)), true);
   } finally {
     bridge.run = originalRun;
   }
-  assert.strictEqual(state.operationsIntentId, terminal.intent_id);
-  assert.strictEqual(persisted, terminal.intent_id);
-  assert.strictEqual(posted.ok, true);
-  assert(statuses.some((text) => text.includes('submit requested')));
-  assert(statuses.some((text) => text.includes('Resident cycle submitted')));
+  return Object.assign({ state, terminal }, capture);
+}
+function assertExtensionAdapterResult(result) {
+  assert.strictEqual(result.state.operationsIntentId, result.terminal.intent_id);
+  assert.strictEqual(result.persisted, result.terminal.intent_id);
+  assert.strictEqual(result.posted.ok, true);
+  assert(result.statuses.some((text) => text.includes('submit requested')));
+  assert(result.statuses.some((text) => text.includes('Resident cycle submitted')));
+}
+function assertOperationsEnvironment() {
   const filtered = operationsEnvironment.build({
     PATH: 'runtime-path',
     PYTHONPATH: 'C:/attacker',
     PYTHONHOME: 'C:/attacker-home',
-    OPENROUTER_API_KEY: 'required-secret',
+    OPENROUTER_API_KEY: 'provider-only-marker',
     GITHUB_TOKEN: 'forbidden',
     REDDOG_SOVEREIGN_TOKEN: 'forbidden'
   });
   assert.strictEqual(filtered.PATH, 'runtime-path');
-  assert.strictEqual(filtered.OPENROUTER_API_KEY, 'required-secret');
+  assert.strictEqual(filtered.OPENROUTER_API_KEY, undefined);
   assert.strictEqual(filtered.PYTHONPATH, undefined);
   assert.strictEqual(filtered.PYTHONHOME, undefined);
   assert.strictEqual(filtered.PYTHONNOUSERSITE, '1');
   assert.strictEqual(filtered.GITHUB_TOKEN, undefined);
   assert.strictEqual(filtered.REDDOG_SOVEREIGN_TOKEN, undefined);
+}
+async function main() {
+  assertClassification();
+  const receipts = validatedReceipts();
+  assertRejectedReceipts(receipts);
+  const runtime = approvedRuntime();
+  assertSealedRuntime(runtime);
+  await assertBridgeSuccess(runtime, receipts);
+  await assertBridgeByteBound(runtime, receipts.request);
+  await assertBridgeFrameBound(runtime, receipts);
+  assertExtensionAdapterResult(await runExtensionAdapter(receipts));
+  assertOperationsEnvironment();
   assertRuntimeMaterialized();
   fs.rmSync(runtime.repoRoot, { recursive: true, force: true });
   console.log('start operations control tests passed');
 }
-
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
