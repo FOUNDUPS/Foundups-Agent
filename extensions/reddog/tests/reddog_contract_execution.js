@@ -7,8 +7,8 @@ const path = require('path');
 const vm = require('vm');
 const plan = require('./reddog_test_plan');
 
-const SOURCE_SHA256 = 'sha256:f6a5843e7a19f112714595ef3afbf328b954a0e41e003e8e0ea1ab9745ff3d2e';
-const SOURCE_LINES = 6914;
+const SOURCE_SHA256 = 'sha256:6eff2b49c864b21a22d4d2454d15127a20658b4fb096593357ba2820d5466adc';
+const SOURCE_LINES = 6913;
 const ASSERTION_CALLS = 483;
 const manifestPath = path.join(__dirname, 'contract_shards', 'manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));

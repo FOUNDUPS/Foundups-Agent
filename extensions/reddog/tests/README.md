@@ -51,8 +51,10 @@ npm run test:release        # exact exhaustive promotion closure
 ```
 
 The release command is the legacy `node tests/verify_extension_contract.js`
-entry. It authenticates the unchanged 18-shard aggregate and exactly five tail
-members before starting four process-isolated groups. Worker cap 4, child
+entry. It authenticates the 18-shard aggregate and exactly seven committed-
+main tail members before starting four process-isolated groups. The separate
+candidate WSP 62 proof derives the current changed/new JavaScript surface and
+is intentionally excluded from release. Worker cap 4, child
 timeout 400 seconds, per-stream output cap 2 MiB, and the unchanged total
 release ceiling of 420 seconds are fixed in `reddog_test_plan.js`. Output is
 buffered and printed in plan order with group timings and a slowest-group
@@ -128,9 +130,10 @@ and semicolon-comment config forms accepted by Git. The receipt is structural
 only: exact 40/64 hex and config-byte binding. Cross-format shapes must fail
 all named outputs and projections through Git's `HEAD^{commit}` semantics;
 readiness may remain structurally READY and does not assert command success.
-`test_reddog_candidate_wsp62.js` is the separate candidate file/function/doc
-size proof; it does not replace the backend runtime WSP_62 gate or claim
-repository-wide compliance.
+`test_reddog_candidate_wsp62.js` is the separate changed-worktree candidate
+file/function/doc size proof; it fails closed when no governed candidate
+surface exists, is not a release member, and does not replace the backend
+runtime WSP_62 gate or claim repository-wide compliance.
 
 R7 adds real Windows case-alias index coverage,
 platform-aware ignored exact/prefix/separator intersections, NFC aliases,
