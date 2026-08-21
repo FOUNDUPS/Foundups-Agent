@@ -55,6 +55,36 @@ project into a FoundUp, mutate HoloIndex, or grant work authority. Governed
 durable source issuance, conversation learning, and cross-Memex transfer remain
 explicit later lifecycles.
 
+## Model intelligence and worker boundary
+
+```text
+RedDog requirements
+  -> AI Gateway catalog + deterministic incumbent
+  -> Nemotron shadow topology proposals
+  -> governed held-out AutoResearch
+  -> independent promotion authority and signed production evidence
+  -> verified runtime topology
+  -> extension / Fusion / OpenClaw / Hermes consumers
+```
+
+RedDog emits task requirements; it does not choose a champion by prompt
+heuristic. Local Nemotron may propose compact evaluation topologies, but
+deterministic admission owns roles/providers and always retains an incumbent
+outside proposer control. The configured campaign runner reserves the entire
+bounded task-by-candidate matrix before first egress and records exact call
+evidence. Proposer origin, campaign execution, policies, and candidate identity
+must then be authenticated by externally signed, durable, replay-protected
+receipts before a promotion gate can emit champion evidence.
+
+Production routing is a distinct authority layer. Independent benchmark and
+promotion signatures feed deterministic selection and the existing runtime
+binder. Consumers receive only a short-lived one-shot exact
+role/provider/model topology and must declare provider availability. Static
+extension defaults are explicit evaluation fallback, never production or
+worker authority. Aggregate panel promotion remains shadow-only until a signed
+member/topology promotion contract exists. No AI model, extension, OpenClaw, or
+Hermes component owns the external signing keys through this architecture.
+
 ## WSP alignment
 
 This architecture is an application of WSP_60, not a new memory protocol. The FoundUp Memex composes WSP_60 module-owned memory, semantic/episodic/procedural/working memory, Breadcrumbs, HoloIndex retrieval, and FoundUp DAE isolation into one snapshot-bound cognition view.

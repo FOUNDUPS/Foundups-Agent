@@ -84,11 +84,16 @@ full canonical/query-replica route, binding, split argv, and scrubbed child
 environment. Shutdown/close/context behavior moved unchanged into one internal
 `Self`-typed lifecycle base; route-less context entry still fails closed.
 
-Phase 2 does **not** delete old/orphan generations, define rollback/retention,
-materialize from a live store, or wire the three route-less production callers:
+Phase 2 now wires the three production callers through the same verified route:
 one-shot ChatGPT/MCP owner query, maintenance owner startup, and promotion-time
-owner verification. Those paths now fail closed; they are integration blockers,
-not operational availability. Phase 1 performs no content deletion. Failed publication temps, staging trees,
+owner verification. The trusted host must explicitly provide
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT`; resolution proves an existing disjoint
+store and its exact active descriptor before owner use. Missing, relative,
+stale, or unprovable configuration fails closed with no owner start, query,
+promotion, replica creation, or re-index. This plumbing does **not** delete
+old/orphan generations, define rollback/retention, or materialize from a live
+store, so operational availability still requires a separately authorized
+current-generation materialization transaction. Phase 1 performs no content deletion. Failed publication temps, staging trees,
 and a failed active name are atomically moved without replacement into an
 owned orphan root; the active name is absent only after a successful move.
 Rename failure leaves the source name and reports only a relative unsafe path.

@@ -51,9 +51,91 @@ duplicates, malformed output, and every production-scoped proposal.
 
 Accepted candidates are shadow inputs to the existing held-out combination
 benchmark harness, which always includes the deterministic AI Gateway incumbent
-outside proposer control. Nemotron does not select production models, act as verifier,
-promote a champion, or bind runtime defaults. Live configured multi-call/panel
-AutoResearch remains halted at its documented safety gates.
+outside proposer control. Nemotron does not select production models, act as
+verifier, promote a champion, or bind runtime defaults.
+
+The configured gateway runner now prepares and reserves the complete bounded
+task-by-candidate call set before first egress. It then executes only those exact
+members and records content-free, content-addressed call evidence. A live
+two-task run used the exact loaded Nemotron route with no fallback; offline
+tests remain the release authority.
+
+`model_autoresearch_campaign_configured_runtime.py` owns configured runner
+construction, canonical prompt-guard injection, typed campaign-member
+preflight, and transactional exclusive outside-repository output claims. The startup bootstrap
+only validates runtime inputs and coordinates that bounded component. This
+WSP-62 decomposition lowered the bootstrap function and file ceilings instead
+of expanding an exemption.
+
+`model_autoresearch_configured_gateway_callers.py` owns the exact AI Gateway,
+LM Studio, and routed caller adapters used by that runner. These adapters
+preserve the admitted provider/model/API route and do not start a local server
+or introduce fallback.
+
+Authenticated proposer provenance binds the exact LM Studio call and
+deterministic admission receipt to an externally signed, short-lived receipt
+stored outside the repository. Campaign authority separately binds that
+provenance, campaign execution, normalized policies, and exact candidate set
+before any promotion gate can emit champion evidence. Durable replay state is
+required; neither module owns signing keys. The production handoff accepts
+only single-model candidates and delegates final independent benchmark and
+promotion signatures to the existing signed-evidence verifier and runtime
+binder. At use time it independently re-verifies the campaign signature,
+trusted key, revocation epoch, trusted-time validity, exact durable receipt,
+issuance-equivalent TTL bounds, and an already-APPLIED publication marker read
+through a non-mutating exact-status API. Missing, RESERVED, or AUTHORIZED
+publication state rejects without marker advancement. Runtime policy, evidence
+trust, exact authority-use nonce/binding, and a durable tokenized staging claim
+finish before the external evidence call; consumable final paths remain absent.
+A nonce-level runtime lock and durable RESERVED binding precede the callback,
+so competing output bindings cannot both reach the provider. A conflicting or
+completed exact authority use is therefore decided with zero callback. An
+unreadable existing provider receipt is not treated as absence. After
+the callback, the bounded raw bundle is immediately persisted under the exact
+binding. A pre-terminal retry resumes that bundle with zero callback and
+re-verifies current trusted time, authority, signatures, evidence, and runtime
+policy before any authority transition. After
+the key, signature, store, and runtime-verification callbacks return, a fresh
+trusted-time sample drives a callback-free check of authority time, both signed
+evidence receipts, and the embedded runtime verification validity window.
+
+Suppliers write to fresh per-attempt paths while durable claim markers remain
+unchanged. A death before sealing can orphan an isolated file but cannot wedge
+the deterministic claim; recovery never deletes that unproved orphan.
+Successful sealed artifacts and the verified evidence bundle are bound into a
+bounded durable terminal receipt before the two final paths are published.
+Terminal v3 binds each source path and device/inode/size/content proof. Held
+descriptors are rechecked for the terminal digest and immediately before and
+after non-replacing publication. Same-content inode replacement, hard links,
+symlinks, and foreign final occupation fail closed without deleting the
+foreign object. Each publication is followed by a final-parent flush,
+including recovery when a prior ambiguous attempt already moved one artifact.
+This does not claim two-file filesystem atomicity: interruption can expose one
+final path while the other remains staged. AUTHORIZED or ambiguously APPLIED
+retries load the exact terminal receipt, materialize any remaining stage,
+rehydrate both artifacts, and use-time verify the full evidence chain before
+returning the same result without another provider callback, only while the
+authority and evidence remain current. Cleanup removes or quarantines only an
+exact retained identity/content proof; an ambiguous or foreign replacement
+survives and raises an explicit ownership conflict. APPLIED state
+without its exact terminal receipt fails closed and preserves evidence.
+Aggregate panel promotion remains shadow-only.
+
+Windows publishes the verified stage object by retained handle. POSIX uses a
+non-replacing hard-link commit followed by exact source removal; the output
+directory must therefore be controlled by the same principal as the process.
+Recovery recognizes only the exact terminal-proved two-link inode left by
+death between those POSIX operations, removes the proven source link, flushes
+the affected directories, and resumes the final.
+The POSIX path does not claim protection against an arbitrary same-UID writer.
+
+New immutable receipt and publication files use a same-directory temporary,
+file fsync, identity check, non-replacing commit, and directory-lineage fsync.
+Process death can orphan only a hidden pending file, never expose a partial
+final record. POSIX retry repairs the exact target/pending two-link state before
+claim validation. An exact existing record is idempotent; a different record is a
+deterministic conflict. `model_autoresearch_configured_gateway_durability.py`
+owns the directory boundary so serialization remains WSP-62 bounded.
 
 ## Verified Runtime Topology Resolution
 
@@ -327,9 +409,11 @@ Bootstrap admission also proves the complete selected-role x normalized-task
 call count against an explicit campaign-wide cap before constructing the
 runner. All write artifacts must be absent or empty and canonically distinct
 from every read input and other write target.
-This phase-1 configured bootstrap admits exactly one executable planned call;
-multi-call task sets and panel combinations remain NO-GO until the complete
-task-by-role campaign can be prepared atomically before caller entry.
+The configured bootstrap admits the complete bounded task-by-role campaign
+only after atomic preparation and reservation before caller entry. Multi-task
+and panel evaluation is admitted within explicit per-sample and campaign-wide
+caps and exact budget, route, output, and receipt claims. Production/OpenRouter
+activation remains halted by the separately documented live-admission gates.
 
 Call-attempt and successful-run receipts are append-only outside-repository
 JSONL artifacts. Public readers rehydrate each record, recompute group/receipt

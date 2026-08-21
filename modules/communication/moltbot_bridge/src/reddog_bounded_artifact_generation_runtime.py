@@ -15,7 +15,7 @@ import fnmatch
 import hashlib
 import json
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_artifact_generation_admission_capability import (
     ArtifactGenerationAuthorityCapability,
@@ -106,6 +106,7 @@ def generate_bounded_artifact_contents(
     model_runtime_binding_capability: Optional[
         VerifiedRuntimeBindingCapability
     ] = None,
+    trusted_now_epoch: Optional[Callable[[], int]] = None,
 ) -> BoundedArtifactGenerationResult:
     req = request if isinstance(request, Mapping) else {}
     reasons, planned, model_selection, admission = _validate_generation_request(
@@ -121,6 +122,7 @@ def generate_bounded_artifact_contents(
         model_selection=model_selection,
         admission=admission,
         reasons=reasons,
+        trusted_now_epoch=trusted_now_epoch,
     )
     return build_generation_result(
         req,
@@ -192,6 +194,7 @@ def _run_bounded_artifact_model(
     model_selection: Mapping[str, Any],
     admission: Optional[_ModelRuntimeAdmission],
     reasons: List[str],
+    trusted_now_epoch: Optional[Callable[[], int]],
 ) -> tuple[ArtifactGenerationModelResult | None, Dict[str, str]]:
     model_result: ArtifactGenerationModelResult | None = None
     artifacts: Dict[str, str] = {}
@@ -202,13 +205,18 @@ def _run_bounded_artifact_model(
             reasons.append(FAIL_MODEL_OUTPUT)
         elif admission is None:
             reasons.append(FAIL_MODEL_RUNTIME_BINDING_RECEIPT)
+        elif not callable(trusted_now_epoch):
+            reasons.append(FAIL_MODEL_RUNTIME_BINDING_RECEIPT)
         else:
+            available_providers = getattr(runner, "available_model_providers", ())
             model_capability = _issue_artifact_generation_model(
                 invocation_binding=_binding(req, planned, model_selection),
                 runtime_binding=admission.runtime_binding,
                 selection=admission.selection,
                 verification=admission.verification,
                 verified_capability=admission.capability,
+                available_providers=available_providers,
+                trusted_now_epoch=trusted_now_epoch,
             )
             if model_capability is None:
                 reasons.append(FAIL_MODEL_RUNTIME_BINDING_RECEIPT)

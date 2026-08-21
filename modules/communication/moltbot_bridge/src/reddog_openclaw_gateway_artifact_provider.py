@@ -14,7 +14,7 @@ from .reddog_artifact_generation_admission_capability import (
 )
 from .reddog_artifact_generation_model_binding import (
     artifact_generation_digest,
-    signed_principal_model_route,
+    resolved_principal_model_route,
 )
 from .reddog_artifact_generation_provider_contract import (
     ArtifactGenerationModelResult,
@@ -43,6 +43,9 @@ class OpenClawGatewayArtifactGenerationRunner:
     runtime_root: Path
     agent_id: str
     command_runner: OpenClawCommandRunner = SystemOpenClawCommandRunner()
+    # Supplied from the governed runtime profile. Empty means unavailable and
+    # causes capability issuance to fail before any OpenClaw process is started.
+    available_model_providers: tuple[str, ...] = ()
 
     def generate_artifacts(self, *, prompt: str, context: str,
                            binding: ArtifactGenerationModelCapability,
@@ -166,7 +169,7 @@ def _agent_artifacts(raw: str):
 
 
 def _signed_invocation(binding):
-    route = signed_principal_model_route(binding)
+    route = resolved_principal_model_route(binding)
     if route is None:
         return "", ""
     canonical_model, provider = route

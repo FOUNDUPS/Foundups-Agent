@@ -1,13 +1,36 @@
 # RedDog ModLog
 
+## 2026-08-21 - Verified topology consumers and governed AutoResearch (0.4.104)
+
+- Connected the extension query, advisory/Fusion bridge, bounded FoundUps
+  Fusion, OpenClaw, and Hermes artifact providers to the shared one-shot
+  runtime-topology resolver. Every route requires explicit provider
+  availability and preserves exact receipt-bound role/provider/model identity.
+- Added atomic whole-campaign reservation, exact per-call evidence, durable
+  authenticated proposer provenance, independently signed campaign promotion
+  authority, and a fail-closed single-model handoff to the existing signed
+  production binder. No signer, private key, or implicit production authority
+  was added; panel promotion remains shadow-only.
+- Exercised two exact local Nemotron calls through the governed configured
+  runner and retained content-free call/evidence receipts. The static roster
+  remains explicit evaluation fallback only. WSP 00/15/22/50/62/87/97.
+- Closed the release-only advisory-stage grounding drift: the emitted
+  `model_runtime_blocked` stage now has an explicit barking action and the
+  authenticated exhaustive contract binds all 19 bridge stages.
+- Reconciled current README truth with the landed opt-in continuation default
+  and the 0.4.104 VSIX filename; historical ModLog entries remain historical.
+- Closed webview-aging drift: every provider egress now re-queries the runtime
+  binding, rejects `topology_valid_until` expiry at use time, and replaces the
+  webview-open worker before constructing provider stdin. WSP 62 stayed within
+  the reduced extension/function ceilings.
+
 ## 2026-08-21 - Nemotron shadow routing and Qwen challenger fallback (0.4.103)
 
 - Added local Nemotron 3.5 Lightning as a bounded evaluation-only panel
   proposer under AI Gateway admission; it has no production selection,
   verifier, promotion, extension, repository, or worker authority.
 - Added the shared one-shot verified runtime-topology resolver with a trusted
-  use-time 60-second cap; the extension query, Fusion, OpenClaw, and Hermes are
-  explicitly pending thin consumers rather than competing model routers.
+  use-time 60-second cap. The 0.4.104 slice later connected its thin consumers.
 - Refreshed the explicit no-binding fallback to GLM 5.2 principal with DeepSeek
   V4 Pro, Qwen 3.8 Max, and Kimi K3 critics. Static defaults remain candidates,
   not measured champions.
@@ -16,6 +39,15 @@
   evaluation catalog admitted two four-role proposals in 36.7 seconds. Live
   configured panel AutoResearch remains halted. Version 0.4.102 -> 0.4.103.
   WSP 15/22/50/62/97.
+## 2026-08-21 - HoloIndex query-replica closed-profile plumbing (0.4.104)
+
+- Added `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` only to the closed
+  `holoindex_owner` and `resident_architect` Python profiles so semantic query
+  and promotion verification can prove the same explicit active replica.
+- No package surface, raw Holo fallback, materialization, or re-index behavior
+  was added. The isolated repair was composed only after model authority was
+  green; the final closure is regenerated from the integrated tree.
+  WSP 00/15/22/50/97.
 
 ## 2026-08-21 - Mainline release gate repair (0.4.102)
 

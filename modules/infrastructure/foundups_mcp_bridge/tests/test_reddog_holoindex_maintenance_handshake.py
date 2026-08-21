@@ -31,6 +31,16 @@ from modules.infrastructure.foundups_mcp_bridge.src import (
 
 
 HEAD = "a" * 40
+QUERY_REPLICA_ROUTE = object()
+
+
+@pytest.fixture(autouse=True)
+def _current_query_replica_route(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        handshake,
+        "resolve_query_replica_owner_route",
+        lambda **_kwargs: QUERY_REPLICA_ROUTE,
+    )
 
 
 def _state(*, head: str = HEAD, clean: bool = True) -> RepositoryState:
@@ -182,6 +192,63 @@ def test_fresh_exact_head_receipt_starts_owner_without_refresh(
     assert result.status == handshake.OPERATIONAL_READY
     assert result.refreshed is False
     assert result.generation_id == _receipt(repo_root, ssd_path).generation_id
+
+
+def test_fresh_receipt_passes_exact_replica_route_to_owner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root, ssd_path = tmp_path / "repo", tmp_path / "ssd"
+    repo_root.mkdir()
+    _publish(repo_root, ssd_path)
+    environment = {
+        "HOLOINDEX_SSD_PATH": str(ssd_path),
+        "REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT": str(tmp_path / "replica"),
+    }
+    resolver = Mock(return_value=QUERY_REPLICA_ROUTE)
+    owner = Mock(return_value=_ready_owner())
+    monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
+    monkeypatch.setattr(handshake, "resolve_query_replica_owner_route", resolver)
+    monkeypatch.setattr(
+        handshake.owner_bootstrap, "ensure_reddog_holoindex_owner", owner
+    )
+
+    result = handshake.ensure_reddog_holoindex_operational(
+        repo_root=repo_root, requested=True, environ=environment,
+    )
+
+    assert result.ready is True
+    resolver.assert_called_once_with(
+        canonical_repo_root=repo_root.resolve(),
+        canonical_ssd_path=ssd_path.resolve(),
+        environment=environment,
+    )
+    assert owner.call_args.kwargs["query_replica_route"] is QUERY_REPLICA_ROUTE
+
+
+def test_missing_replica_route_fails_before_owner_start(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root, ssd_path = tmp_path / "repo", tmp_path / "ssd"
+    repo_root.mkdir()
+    _publish(repo_root, ssd_path)
+    owner = Mock(side_effect=AssertionError("owner must not start"))
+    monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
+    monkeypatch.setattr(
+        handshake, "resolve_query_replica_owner_route",
+        Mock(side_effect=ValueError("HOLOINDEX_QUERY_REPLICA_REQUIRED")),
+    )
+    monkeypatch.setattr(
+        handshake.owner_bootstrap, "ensure_reddog_holoindex_owner", owner
+    )
+
+    result = handshake.ensure_reddog_holoindex_operational(
+        repo_root=repo_root, requested=True,
+        environ={"HOLOINDEX_SSD_PATH": str(ssd_path)},
+    )
+
+    assert result.ready is False
+    assert result.error == "HOLOINDEX_QUERY_REPLICA_REQUIRED"
+    owner.assert_not_called()
 
 
 def test_missing_receipt_runs_bounded_secret_free_refresh_and_restarts_owner(

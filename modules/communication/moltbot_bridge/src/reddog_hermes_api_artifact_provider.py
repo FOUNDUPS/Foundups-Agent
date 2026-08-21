@@ -30,6 +30,9 @@ class HermesApiArtifactGenerationRunner:
     api_key_provider: Any
     sleeper: Callable[[float], None] = time.sleep
     monotonic: Callable[[], float] = time.monotonic
+    # Supplied from the governed runtime profile. Hermes capability discovery
+    # cannot be silently replaced by a theoretical provider roster.
+    available_model_providers: tuple[str, ...] = ()
 
     def generate_artifacts(
         self,

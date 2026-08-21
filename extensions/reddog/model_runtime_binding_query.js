@@ -3,12 +3,13 @@
 const cp = require('child_process');
 const crypto = require('crypto');
 
-const SCHEMA_VERSION = 'reddog_model_runtime_binding_query.v1';
+const SCHEMA_VERSION = 'reddog_model_runtime_binding_query.v2';
 const STATUS_READY = 'MODEL_RUNTIME_BINDING_READY';
 const STATUS_UNCONFIGURED = 'MODEL_RUNTIME_BINDING_UNCONFIGURED';
 const MAX_OUTPUT_BYTES = 2 * 1024 * 1024;
 const BRIDGE_TIMEOUT_MS = 15000;
 const MODEL_RE = /^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,119}$/;
+const PROVIDER_RE = /^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,63}$/;
 
 function runConfiguredQuery(options) {
   const root = options.workspaceRoot();
@@ -122,6 +123,9 @@ function validReadyReceipt(value) {
   const models = [value.principal_model, ...panel];
   const roleNames = roles.map((item) => String(item && item.role || ''));
   const roleModels = roles.map((item) => String(item && item.model_id || ''));
+  const roleProviders = roles.map((item) => String(item && item.provider || ''));
+  const availableProviders = Array.isArray(value.available_providers)
+    ? value.available_providers.map((item) => String(item || '')) : [];
   return value.status === STATUS_READY
     && models.every((model) => MODEL_RE.test(String(model || '')))
     && new Set(models).size === models.length
@@ -129,8 +133,18 @@ function validReadyReceipt(value) {
     && !roleNames.includes('verifier')
     && new Set(roleNames).size === roleNames.length
     && JSON.stringify(roleModels) === JSON.stringify(models)
+    && availableProviders.length > 0
+    && availableProviders.every((provider) => PROVIDER_RE.test(provider))
+    && new Set(availableProviders).size === availableProviders.length
+    && roleProviders.every((provider) => availableProviders.includes(provider))
     && typeof value.binding_receipt_id === 'string'
-    && value.binding_receipt_id.startsWith('reddog_model_runtime_binding:');
+    && value.binding_receipt_id.startsWith('reddog_model_runtime_binding:')
+    && typeof value.topology_resolution_receipt_id === 'string'
+    && value.topology_resolution_receipt_id.startsWith('verified_model_runtime_topology:')
+    && typeof value.topology_verification_receipt_id === 'string'
+    && value.topology_verification_receipt_id.length > 0
+    && Number.isSafeInteger(value.topology_valid_until)
+    && value.topology_valid_until > 0;
 }
 
 function validNoMutationClaims(value) {
@@ -141,11 +155,14 @@ function validNoMutationClaims(value) {
   ].every((key) => value[key] === true);
 }
 
-function resolveWorker(fallback, receipt, panelLimit) {
+function resolveWorker(fallback, receipt, panelLimit, options) {
   const base = fallback && typeof fallback === 'object' ? fallback : {};
-  const value = receipt && typeof receipt === 'object'
+  let value = receipt && typeof receipt === 'object'
     ? validateReceipt(receipt)
     : failureReceipt(false, 'model_runtime_binding_query_receipt_missing');
+  if (value.accepted === true && !receiptCurrentAtUse(value, options)) {
+    value = failureReceipt(true, 'model_runtime_binding_topology_expired');
+  }
   if (value.accepted === true) {
     return {
       title: base.title || 'RedDog',
@@ -156,13 +173,36 @@ function resolveWorker(fallback, receipt, panelLimit) {
       modelBindingReceipt: value
     };
   }
+  const allowEvaluationFallback = options && options.allowEvaluationFallback === true;
   return {
     title: base.title || 'RedDog',
     lead: base.lead,
     panel: Array.isArray(base.panel) ? base.panel.slice(0, panelLimit) : [],
     modelBindingSource: value.configured === true ? 'runtime_binding_rejected' : 'evaluation_config',
-    modelBindingBlocked: value.configured === true,
+    modelBindingBlocked: value.configured === true || !allowEvaluationFallback,
     modelBindingReceipt: value
+  };
+}
+
+async function resolveConfiguredWorker(queryOptions, fallback, panelLimit, options) {
+  const query = queryOptions && typeof queryOptions.query === 'function'
+    ? queryOptions.query : () => runConfiguredQuery(queryOptions);
+  return resolveWorker(fallback, await query(), panelLimit, options);
+}
+
+function receiptCurrentAtUse(receipt, options) {
+  const supplied = options && options.nowEpochSeconds;
+  const now = Number.isSafeInteger(supplied)
+    ? supplied : Math.floor(Date.now() / 1000);
+  return Number.isSafeInteger(now) && receipt.topology_valid_until >= now;
+}
+
+function blockedEgressResult(worker) {
+  return {
+    ok: false,
+    reason: 'model_runtime_binding_not_ready',
+    rejection_reasons: [blockedReason(worker)],
+    review_packet: metadata(worker)
   };
 }
 
@@ -238,11 +278,13 @@ module.exports = {
   STATUS_READY,
   STATUS_UNCONFIGURED,
   blockedReason,
+  blockedEgressResult,
   canonicalDigest,
   failureReceipt,
   metadata,
   parseOutput,
   resolveWorker,
+  resolveConfiguredWorker,
   runTraceLines,
   runConfiguredQuery,
   runQuery,

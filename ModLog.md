@@ -1,5 +1,47 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-21] RedDog 0.4.104 Governed Model Authority Integration
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 87, 97
+
+- Connected the canonically verified runtime-topology resolver to the extension
+  query, advisory/Fusion path, bounded FoundUps Fusion, OpenClaw, and Hermes.
+  Each consumer requires an explicit provider inventory and preserves exact
+  role/provider/model identity at use time without fallback.
+- Added atomic multi-call AutoResearch admission, durable authenticated
+  proposer provenance, separately signed campaign authority, and an external-
+  evidence single-model production handoff. Panel promotion remains shadow-only;
+  production signer, trust/revocation, credentials, and live evidence remain
+  deployment inputs rather than fabricated repository authority.
+- Applied WSP-62 as a decomposition trigger: configured campaign runtime
+  assembly moved to its own bounded module, lowering the bootstrap function
+  ceiling from 235 to 233 and its file ceiling from 920 to 868.
+- Pre-release composition gates passed: AI Gateway 786/786 with 2 skips,
+  runtime consumers 272/272 with 1 skip, advisory 83 plus 20 subtests, and the
+  six-shard HoloIndex route/promotion selection 152/152.
+- The exhaustive extension owner exposed and closed a mirrored-contract drift:
+  `model_runtime_blocked` was emitted by the bridge but absent from the UI stage
+  map and fixed-count assertion. The final authenticated contract now binds all
+  19 stages.
+
+## [2026-08-21] Isolated RedDog HoloIndex Query-Replica Route Plumbing
+
+**WSP Protocol:** WSP 00, 5, 6, 15, 22, 50, 64, 84, 97
+
+- Added one trusted-host resolver for the explicit existing
+  `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` and propagated its sealed capability
+  through one-shot semantic query, maintenance owner startup, and architect FIX
+  promotion verification.
+- Preserved all authority gates: invalid or stale routes fail before owner use;
+  no replica inference, materialization, re-index, promotion, or fallback was
+  added. The VSIX closed profiles now carry the field only to owner and
+  resident-architect boundaries.
+- The isolated transaction passed its focused implementation, dependent
+  integration, Node environment, backend closure, package, and release gates.
+  Those generated hashes and release receipts are superseded by the final
+  composed 0.4.104 tree. Live materialization/acceptance remains an explicit
+  authority transaction.
+
 ## [2026-08-21] RedDog CI Grounding Contract Alignment
 
 **WSP Protocol:** WSP 00, 15, 22, 50, 62, 97

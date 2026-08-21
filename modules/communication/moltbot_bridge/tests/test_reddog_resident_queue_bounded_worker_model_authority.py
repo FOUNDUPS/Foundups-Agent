@@ -60,6 +60,8 @@ from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_bound
 
 
 class _ArtifactGenerator:
+    available_model_providers = ("openai", "openrouter")
+
     def __init__(
         self,
         *,
@@ -98,6 +100,8 @@ class _ArtifactGenerator:
 
 
 class _RuntimeBindingVerifier:
+    trusted_now_epoch = staticmethod(lambda: 1_800_000_000)
+
     def __init__(self, *, reject: bool = False) -> None:
         self.reject = reject
         self.calls: list[dict[str, object]] = []

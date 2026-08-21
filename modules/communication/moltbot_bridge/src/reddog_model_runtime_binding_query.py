@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import re
+import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional
@@ -19,15 +20,29 @@ from typing import Any, Mapping, Optional
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
     ModelRuntimeBindingDecision,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_evidence_verifier import (
+    VerifiedRuntimeBindingArtifact,
+)
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    verified_runtime_binding_receipt,
+)
+from modules.ai_intelligence.ai_gateway.src.model_runtime_topology_resolver import (
+    consume_resolved_runtime_topology,
+    resolve_verified_runtime_topology,
+)
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     rehydrate_model_runtime_binding_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
+from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_bootstrap import (
+    ModelRuntimeVerifierConfig,
+    build_model_runtime_verifier,
+)
 
 
-SCHEMA_VERSION = "reddog_model_runtime_binding_query.v1"
+SCHEMA_VERSION = "reddog_model_runtime_binding_query.v2"
 STATUS_READY = "MODEL_RUNTIME_BINDING_READY"
 STATUS_UNCONFIGURED = "MODEL_RUNTIME_BINDING_UNCONFIGURED"
 STATUS_NOT_READY = "MODEL_RUNTIME_BINDING_NOT_READY"
@@ -35,6 +50,14 @@ EXPECTED_SURFACE = "reddog_backend_architect"
 MAX_PANEL_MODELS = 6
 MODEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,119}$")
 DIGEST_RE = re.compile(r"^(?:sha256:)?[a-f0-9]{64}$")
+VERIFIER_PATH_ENV = {
+    "catalog_path": "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH",
+    "benchmarks_path": "REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH",
+    "promotions_path": "REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH",
+    "evidence_path": "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH",
+    "policy_path": "REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH",
+    "trusted_keys_path": "REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH",
+}
 
 
 @dataclass(frozen=True)
@@ -56,6 +79,10 @@ class ModelRuntimeBindingQueryReceipt:
     promotion_evidence_receipt_ids: tuple[str, ...]
     signed_promotion_receipt_ids: tuple[str, ...]
     min_verifier_pass_rate: Optional[float]
+    topology_resolution_receipt_id: Optional[str]
+    topology_verification_receipt_id: Optional[str]
+    topology_valid_until: Optional[int]
+    available_providers: tuple[str, ...]
     rejection_reasons: tuple[str, ...]
     no_model_call_performed: bool = True
     no_holoindex_query_performed: bool = True
@@ -72,6 +99,8 @@ def query_model_runtime_binding(
     *,
     repo_root: Path | str,
     environ: Mapping[str, str] | None = None,
+    model_runtime_verifier: Any = None,
+    trusted_now_epoch: Any = None,
 ) -> ModelRuntimeBindingQueryReceipt:
     """Return one validated architect model binding or fail closed."""
 
@@ -80,14 +109,17 @@ def query_model_runtime_binding(
     path_value = str(env.get(
         "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH"
     ) or "").strip()
+    selection_path = str(env.get("REDDOG_MODEL_SELECTION_RECEIPT_PATH") or "").strip()
     configured = bool(root_value or path_value)
     if not configured:
         return _receipt(configured=False, status=STATUS_UNCONFIGURED)
-    reasons = _path_rejections(repo_root, root_value, path_value)
+    reasons = _path_rejections(repo_root, root_value, path_value, selection_path)
     if reasons:
         return _receipt(configured=True, status=STATUS_NOT_READY, reasons=reasons)
     try:
-        binding = _load_binding(root_value, path_value)
+        binding, selection, binding_artifact = _load_inputs(
+            root_value, path_value, selection_path
+        )
     except Exception:
         return _receipt(configured=True, status=STATUS_NOT_READY,
                         reasons=("model_runtime_binding_artifact_invalid",))
@@ -95,26 +127,74 @@ def query_model_runtime_binding(
     if reasons:
         return _receipt(configured=True, status=STATUS_NOT_READY,
                         reasons=tuple(reasons))
-    return _ready_receipt(binding)
+    clock = trusted_now_epoch if callable(trusted_now_epoch) else lambda: int(time.time())
+    verifier, verifier_reasons = _runtime_verifier(
+        repo_root=Path(repo_root), runtime_root=Path(root_value), env=env,
+        clock=clock, injected=model_runtime_verifier,
+    )
+    if verifier_reasons or verifier is None:
+        return _receipt(configured=True, status=STATUS_NOT_READY,
+                        reasons=verifier_reasons or ("model_runtime_verifier_missing",))
+    providers = _available_providers(env)
+    if not providers:
+        return _receipt(configured=True, status=STATUS_NOT_READY,
+                        reasons=("model_runtime_available_providers_missing",))
+    try:
+        capability = verifier.verify(binding=binding_artifact, selection=selection)
+    except Exception:
+        capability = None
+    if capability is None:
+        return _receipt(configured=True, status=STATUS_NOT_READY,
+                        reasons=("model_runtime_binding_use_time_verification_rejected",))
+    verification = verified_runtime_binding_receipt(binding_artifact)
+    if verification is None:
+        return _receipt(configured=True, status=STATUS_NOT_READY,
+                        reasons=("model_runtime_binding_verification_receipt_invalid",))
+    try:
+        topology = resolve_verified_runtime_topology(
+            verified=VerifiedRuntimeBindingArtifact(binding, verification, capability),
+            selection=selection,
+            available_providers=providers,
+            now=int(clock()),
+            expected_runtime_surface=EXPECTED_SURFACE,
+        )
+        endpoints = consume_resolved_runtime_topology(
+            topology, trusted_now_epoch=clock
+        )
+    except Exception:
+        endpoints = None
+    if endpoints is None:
+        return _receipt(configured=True, status=STATUS_NOT_READY,
+                        reasons=("model_runtime_topology_resolution_rejected",))
+    return _ready_receipt(binding, topology, endpoints, providers)
 
 
-def _load_binding(root_value: str, path_value: str) -> Any:
+def _load_raw(root_value: str, path_value: str) -> Mapping[str, Any]:
     runtime_root = Path(root_value).resolve()
-    raw = read_reddog_runtime_json_mapping(
+    return read_reddog_runtime_json_mapping(
         Path(path_value),
         allowed_root=runtime_root,
     )
-    return rehydrate_model_runtime_binding_receipt(raw)
 
 
-def _ready_receipt(binding: Any) -> ModelRuntimeBindingQueryReceipt:
+def _load_inputs(
+    root_value: str, path_value: str, selection_path: str
+) -> tuple[Any, Mapping[str, Any], Mapping[str, Any]]:
+    raw = _load_raw(root_value, path_value)
+    selection = read_reddog_runtime_json_mapping(
+        Path(selection_path), allowed_root=Path(root_value).resolve()
+    )
+    return rehydrate_model_runtime_binding_receipt(raw), selection, raw
+
+
+def _ready_receipt(binding: Any, topology: Any, endpoints: Any, providers: tuple[str, ...]) -> ModelRuntimeBindingQueryReceipt:
     role_bindings = tuple(
         {
             "role": item.role,
             "model_id": item.model_id,
             "provider": item.provider,
         }
-        for item in binding.role_bindings
+        for item in endpoints
     )
     return _receipt(
         configured=True,
@@ -132,34 +212,61 @@ def _ready_receipt(binding: Any) -> ModelRuntimeBindingQueryReceipt:
         promotion_ids=binding.promotion_evidence_receipt_ids,
         signed_ids=binding.signed_promotion_receipt_ids,
         min_verifier_pass_rate=binding.policy.min_verifier_pass_rate,
+        topology_resolution_receipt_id=topology.receipt_id,
+        topology_verification_receipt_id=topology.verification_receipt_id,
+        topology_valid_until=topology.valid_until,
+        available_providers=providers,
     )
+
+
+def _runtime_verifier(*, repo_root: Path, runtime_root: Path, env: Mapping[str, str], clock: Any, injected: Any) -> tuple[Any, tuple[str, ...]]:
+    config = ModelRuntimeVerifierConfig(**{
+        field: env.get(name) for field, name in VERIFIER_PATH_ENV.items()
+    })
+    return build_model_runtime_verifier(
+        repo_root=repo_root.resolve(), runtime_root=runtime_root.resolve(),
+        config=config, trusted_now=clock, injected=injected,
+        artifact_generator=True,
+    )
+
+
+def _available_providers(env: Mapping[str, str]) -> tuple[str, ...]:
+    raw = str(env.get("REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS") or "")
+    return tuple(dict.fromkeys(item.strip() for item in raw.replace(";", ",").split(",") if item.strip()))
 
 
 def _path_rejections(
     repo_root: Path | str,
     root_value: str,
     path_value: str,
+    selection_path: str,
 ) -> tuple[str, ...]:
     reasons: list[str] = []
     if not root_value:
         reasons.append("missing_model_runtime_binding_root")
     if not path_value:
         reasons.append("missing_architect_model_runtime_binding_path")
+    if not selection_path:
+        reasons.append("missing_model_selection_receipt_path")
     if reasons:
         return tuple(reasons)
     runtime_root = Path(root_value)
     artifact_path = Path(path_value)
-    if not runtime_root.is_absolute() or not artifact_path.is_absolute():
+    selection = Path(selection_path)
+    if not runtime_root.is_absolute() or not artifact_path.is_absolute() or not selection.is_absolute():
         return ("model_runtime_binding_path_not_absolute",)
     repo = Path(repo_root).resolve()
     runtime = runtime_root.resolve()
     artifact = Path(os.path.abspath(artifact_path))
+    selection_resolved = Path(os.path.abspath(selection))
     if _inside(runtime, repo):
         reasons.append("model_runtime_binding_root_inside_repo")
     if _inside(artifact, repo):
         reasons.append("model_runtime_binding_artifact_inside_repo")
     if not _inside(artifact, runtime):
         reasons.append("model_runtime_binding_artifact_outside_runtime_root")
+    if _inside(selection_resolved, repo) or not _inside(selection_resolved, runtime):
+        reasons.append("model_selection_receipt_outside_runtime_root")
     return tuple(reasons)
 
 
@@ -255,6 +362,9 @@ def _receipt(
         "task_family": None, "principal_model": None, "panel_models": (),
         "role_bindings": (), "benchmark_ids": (), "promotion_ids": (),
         "signed_ids": (), "min_verifier_pass_rate": None,
+        "topology_resolution_receipt_id": None,
+        "topology_verification_receipt_id": None,
+        "topology_valid_until": None, "available_providers": (),
     }
     defaults.update(values)
     payload = _receipt_payload(configured, accepted, status, reasons, defaults)
@@ -285,6 +395,10 @@ def _receipt_payload(
         "benchmark_evidence_receipt_ids": tuple(values["benchmark_ids"]),
         "promotion_evidence_receipt_ids": tuple(values["promotion_ids"]), "signed_promotion_receipt_ids": tuple(values["signed_ids"]),
         "min_verifier_pass_rate": values["min_verifier_pass_rate"],
+        "topology_resolution_receipt_id": values["topology_resolution_receipt_id"],
+        "topology_verification_receipt_id": values["topology_verification_receipt_id"],
+        "topology_valid_until": values["topology_valid_until"],
+        "available_providers": tuple(values["available_providers"]),
         "rejection_reasons": tuple(reasons),
         "no_model_call_performed": True, "no_holoindex_query_performed": True,
         "no_holoindex_reindex_performed": True,

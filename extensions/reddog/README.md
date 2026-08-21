@@ -1,6 +1,6 @@
 # RedDog
 
-Version: 0.4.103
+Version: 0.4.104
 
 ## Model-routing authority
 
@@ -18,9 +18,39 @@ challenger; this static roster is not evidence that GLM or Qwen is champion.
 Local Nemotron uses the exact loaded LM Studio ID and native reasoning-off API,
 with no server launch or provider fallback. Its output is deterministically
 expanded into role/provider assignments and admitted only as held-out
-AutoResearch candidates. Live configured multi-call/panel AutoResearch remains
-halted at the AI Gateway safety gates, so no automatic production promotion is
-claimed.
+AutoResearch candidates. The configured runner reserves the entire bounded
+task-by-candidate campaign before its first provider call and retains one exact
+receipt per attempted call. A live two-task Nemotron campaign exercised that
+path without fallback. This is evaluation evidence, not automatic production
+promotion.
+
+The extension query, advisory/Fusion bridge, bounded FoundUps Fusion artifact
+provider, OpenClaw gateway provider, and Hermes API provider consume the same
+short-lived verified runtime topology. Each egress requires an explicit
+available-provider inventory and preserves the receipt's exact
+role/provider/model assignments; stale, replayed, unavailable, or retargeted
+bindings stop before network or worker execution. The static roster is used
+only when the operator explicitly allows evaluation fallback.
+Every advisory/Fusion provider call re-runs the local runtime-binding query and
+checks `topology_valid_until` at use time immediately before child-process
+egress. A webview-open receipt is display context, not reusable call authority.
+
+AI Gateway provides authenticated durable proposer and campaign-promotion
+composition points plus a fail-closed single-model handoff to the existing
+signed production-evidence/runtime binder. They inject no signer and own no
+private key. Production activation still requires independently configured
+external signer, trust, revocation, durable replay, and runtime artifacts.
+Aggregate panel promotion remains shadow-only.
+
+## Governed HoloIndex query replica
+
+Semantic owner queries require the trusted host to configure an absolute
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` containing an already materialized,
+exact-generation active replica. The closed `holoindex_owner` and
+`resident_architect` child profiles carry this field only to the routes that
+prove or verify the owner. Missing, relative, stale, or unprovable replicas
+fail closed; the extension does not create a replica, re-index, or fall back to
+the writable canonical store.
 
 ## Workspace and package boundary
 
@@ -873,7 +903,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.103)
+## WSP_97 Truth Table (v0.4.104)
 
 | Claim | Status |
 | --- | --- |
@@ -941,7 +971,7 @@ The worker has no direct filesystem authority. The extension automatically attac
 
 After a successful run, focus the work focus composer and press `Ctrl+Shift+C` to copy a redacted review packet. Paste that packet into Codex for 0102 review. The packet contains digested work focus and WSP prompt excerpts (not full raw context), model slugs, bounded excerpts, task classification, resolved effort/mode, and output validator/repair status; it does not contain the OpenRouter key.
 
-**Follow-up memory (v0.3.28):** Enable **Use last RedDog packet** (default ON) to append a WSP_97-safe continuation summary to the next prompt instead of pasting raw Copy MD back into the composer. In-memory per tab only; no cross-reload persistence yet.
+**Follow-up memory (v0.3.28; opt-in default since v0.3.36):** Enable **Use last RedDog packet** (default OFF) to append a WSP_97-safe continuation summary to the next prompt instead of pasting raw Copy MD back into the composer. In-memory per tab only; no cross-reload persistence yet.
 
 ## Setup
 
@@ -959,6 +989,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.103.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.104.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

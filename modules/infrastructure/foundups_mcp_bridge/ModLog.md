@@ -1,5 +1,18 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-21 - Query-replica production route plumbing
+
+- Added an explicit trusted-host resolver that proves an existing disjoint
+  `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` and exact active descriptor before
+  constructing `QueryReplicaOwnerRoute`.
+- One-shot semantic queries and maintenance owner starts now pass the sealed
+  route into the existing owner API. Configuration/proof drift reduces to
+  `HOLOINDEX_QUERY_REPLICA_REQUIRED` before owner start or query, with no path
+  disclosure, materialization, re-index, or fallback.
+- Focused route/query/maintenance/promotion selection passed 110 tests; owner,
+  dispatch, and postmerge dependencies passed in the broader integration
+  selection. (WSP 00/5/6/15/22/50/64/84/97)
+
 ## 2026-08-21 - ChatGPT Streamable HTTP and governed Holo bundle slice
 
 - Added loopback-only FastMCP Streamable HTTP `/mcp`; removed the unmounted SSE

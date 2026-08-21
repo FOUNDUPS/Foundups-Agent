@@ -36,9 +36,31 @@ def _invoke_main(payload: dict) -> tuple[int, dict]:
     fake_stdin = mock.Mock()
     fake_stdin.buffer = io.BytesIO(json.dumps(payload).encode("utf-8"))
     stdout = io.StringIO()
+    lead = str(payload.get("lead_model") or payload.get("model") or "")
+    mode = str(payload.get("mode") or "")
+    panel = tuple(
+        bridge._panel_models(payload.get("panel_models"))
+        if mode in {"foundups_fusion", "openrouter_fusion_alias"}
+        else ()
+    )
+    receipt = mock.Mock(
+        status=bridge.MODEL_RUNTIME_BINDING_READY,
+        accepted=True,
+        principal_model=lead,
+        panel_models=panel,
+        role_bindings=tuple(
+            [{"role": "principal", "provider": "openrouter", "model_id": lead}]
+            + [{"role": f"critic_{index}", "provider": "openrouter", "model_id": model}
+               for index, model in enumerate(panel, 1)]
+        ),
+        binding_receipt_id="binding:test",
+        topology_resolution_receipt_id="verified_model_runtime_topology:test",
+        topology_verification_receipt_id="verified_model_runtime_binding:test",
+        topology_valid_until=1_900_000_000,
+    )
     with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
         os.environ, {bridge.ENV_API_KEY: "test-key"}, clear=False
-    ):
+    ), mock.patch.object(bridge, "query_model_runtime_binding", return_value=receipt):
         rc = bridge.main()
     return rc, json.loads(stdout.getvalue())
 

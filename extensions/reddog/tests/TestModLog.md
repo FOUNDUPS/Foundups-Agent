@@ -1,5 +1,26 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-21 - Governed topology-consumer closure (0.4.104)
+
+- Added v2 extension-query coverage for explicit available-provider inventory,
+  exact role/provider/model topology, expiry, and fail-closed fallback policy.
+- Added bridge-environment coverage for runtime-binding, provider-inventory,
+  and isolated Holo replica-route inputs without widening credential profiles.
+- Backend manifest, package surface, and exhaustive release receipts are
+  regenerated only from the final composed RedDog/Holo tree.
+- Added the missing `model_runtime_blocked` stage action and updated the exact
+  19-stage exhaustive assertion plus authenticated shard/aggregate hashes.
+- Added stale-at-use and webview-aging runtime-binding regressions. The focused
+  source contract proves `callFusion` re-queries before provider spawn, and the
+  Fusion stdin matrix proves only fresh receipt-bound topology reaches the
+  bridge. Commands: `node tests/test_model_runtime_binding_query.js`,
+  `node tests/verify_fusion_panel_input_contract.js`, and
+  `node tests/test_reddog_candidate_wsp62.js` -> PASS; `npm test` -> 12-member
+  PASS in 2.931 seconds; `npm run test:contract` -> 3-member PASS in 0.595 seconds;
+  `npm run test:package` -> 65 files / 948,219 bytes PASS;
+  `npm run test:release` -> 4 groups PASS in 323.643 seconds with no timeout.
+- Evidence location: this entry plus the final-SHA check rollup on PR #1529.
+
 ## 2026-08-21 - Nemotron/Qwen routing contract refresh (0.4.103)
 
 - Pinned Qwen 3.8 Max as the current evaluation fallback critic, retained exact
@@ -10,6 +31,13 @@
   incumbent-comparison coverage before release promotion.
 - Regenerated the 1,365-file backend closure after advisory decomposition and
   aligned the independent generator's exact golden digest fixture.
+## 2026-08-21 - Query-replica profile confinement
+
+- Added the query-replica root fixture and proved it crosses only the
+  `holoindex_owner` and `resident_architect` closed profiles.
+- The existing ambient secret and arbitrary-key exclusions remain unchanged.
+  Integrated Node environment, backend-manifest, package, contract, and release
+  gates are regenerated and rerun from the final 0.4.104 tree.
 
 ## 2026-08-21 - Mainline release/candidate gate separation
 

@@ -1,5 +1,22 @@
 # Tests - OpenClaw Bridge
 
+## WSP 62 decomposition coverage
+
+`test_reddog_runtime_module_static_boundaries.py` preserves the resident-loop
+and signed-worker executor effect/import prohibitions extracted from the large
+integration matrices. `test_reddog_wsp62_security_repair_exemptions.py` also
+caps the architect promotion and queue-loop decomposition modules at 500 file
+lines and 50 lines per function, without a new exemption.
+
+## Verified model-topology consumers
+
+The model runtime query, bounded runtime, authority, provider bootstrap,
+OpenClaw, Hermes, and resident integration matrices prove exact
+role/provider/model preservation with explicit availability. Negative coverage
+includes stale evidence, missing/unavailable providers, replay, retargeting,
+payload mismatch, and wrong provider; each path asserts zero network/process
+egress where applicable.
+
 ## Current upstream worker providers
 
 `test_reddog_hermes_api_artifact_provider.py` proves Hermes API `0.20.4`
@@ -305,6 +322,11 @@ Focused architect-FIX two-phase publication:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_publication.py modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py modules/communication/moltbot_bridge/tests/test_reddog_architect_proposal_verified_authority.py modules/communication/moltbot_bridge/tests/test_reddog_authoritative_work_state_refresh_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_authority_profile_source_artifact_supply.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_runtime_artifact_locking.py modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply.py modules/communication/moltbot_bridge/tests/test_reddog_resident_control_loop_signing_context.py modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py -q
 ```
+
+The main-bootstrap selection proves the exact query-replica capability reaches
+owner binding verification and that route-resolution failure occurs before
+verification or publication. Fixtures that exercise later promotion authority
+inject an inert route capability rather than weakening production resolution.
 
 Cross-process resident FIX promotion claim:
 

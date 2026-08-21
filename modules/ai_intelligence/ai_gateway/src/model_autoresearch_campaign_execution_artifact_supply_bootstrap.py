@@ -21,38 +21,32 @@ import json
 import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Callable, Mapping, Optional, Sequence
 
-from modules.ai_intelligence.ai_gateway.src.ai_gateway import AIGateway
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_runner import (
-    AIGatewayConfiguredModelCaller,
     ConfiguredGatewayRunnerPolicy,
-    MappingPromptSource,
-    build_configured_gateway_benchmark_runner,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_canonical_prompt_guard import (
     CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST,
     CANONICAL_PROMPT_GUARD_PROFILE,
     CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
-    build_canonical_local_autoresearch_prompt_guard,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_evidence import (
     ConfiguredGatewayModelBudgetEvidenceBundle,
-    JsonlConfiguredGatewayReceiptStore,
     canonical_decimal,
-    read_runner_receipts_jsonl,
     rehydrate_model_budget_evidence_bundle,
+)
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_configured_runtime import (
+    configured_runner_and_verifier,
+    digest_receipt,
+    preflight_candidate,
+    preflight_tasks,
+    prepare_configured_campaign,
+    runtime_path,
 )
 from modules.ai_intelligence.ai_gateway.src.model_champion_challenger_autoresearch import (
     ModelAutoResearchAction,
     rehydrate_model_autoresearch_plan_receipt,
-)
-from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
-    JsonlModelAutoResearchOutputEvidenceStore,
-    read_model_autoresearch_output_evidence_jsonl,
-)
-from modules.ai_intelligence.ai_gateway.src.model_autoresearch_semantic_verifier import (
-    build_model_autoresearch_output_evidence_semantic_verifier,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution import (
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ACCEPT,
@@ -60,11 +54,9 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_executio
 )
 from modules.ai_intelligence.ai_gateway.src.model_combination_benchmark_harness import (
     ModelBenchmarkCandidate,
-    ModelBenchmarkRoleAssignment,
     ModelBenchmarkTask,
     ModelBenchmarkTaskOutput,
     ModelBenchmarkVerifierResult,
-    build_model_benchmark_candidate,
 )
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
     ModelOutcomeMetrics,
@@ -83,6 +75,7 @@ MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_VERIFIER = "deterministic_fixture"
 MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER = "configured_gateway"
 MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER = "exact_output_digest"
 MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER = "output_evidence_semantic"
+MAX_RUNTIME_JSON_BYTES = 4 * 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -135,6 +128,7 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
     runner_success_receipt_path: Path | str | None = None,
     runner_prompt_guard_profile: str = CANONICAL_PROMPT_GUARD_PROFILE,
     gateway: object | None = None,
+    lm_studio_backend_factory: Callable[[str], Any] | None = None,
 ) -> ModelAutoResearchCampaignExecutionBootstrapResult:
     """Materialize an AutoResearch campaign execution artifact from runtime files."""
 
@@ -284,39 +278,36 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
     if runner_mode_text == MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
         assert prompts is not None
         assert policy is not None
-        evidence_path = _runtime_path(root, output_evidence_path)
-        resolved_output_evidence_path = str(evidence_path)
-        trusted_prompt_guard = build_canonical_local_autoresearch_prompt_guard()
-        runner = build_configured_gateway_benchmark_runner(
-            caller=AIGatewayConfiguredModelCaller(
-                gateway if gateway is not None else AIGateway()
-            ),
-            prompt_source=MappingPromptSource(prompts),
+        runner, verifier, evidence_path = configured_runner_and_verifier(
+            root=root,
+            prompts=prompts,
             policy=policy,
-            prompt_guard=trusted_prompt_guard,
-            output_evidence_store=JsonlModelAutoResearchOutputEvidenceStore(
-                evidence_path,
-                repo_root=root,
+            semantic_verifier=(
+                verifier_mode_text
+                == MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER
             ),
-            call_attempt_receipt_store=JsonlConfiguredGatewayReceiptStore(
-                _runtime_path(root, call_attempt_evidence_path),
-            ),
-            runner_receipt_store=JsonlConfiguredGatewayReceiptStore(
-                _runtime_path(root, runner_success_receipt_path),
-            ),
+            exact_verifier=_exact_output_digest_verifier,
+            output_evidence_path=output_evidence_path,
+            call_attempt_evidence_path=call_attempt_evidence_path,
+            runner_success_receipt_path=runner_success_receipt_path,
+            gateway=gateway,
+            lm_studio_backend_factory=lm_studio_backend_factory,
         )
-        if verifier_mode_text == MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER:
-            verifier = build_model_autoresearch_output_evidence_semantic_verifier(
-                evidence_records=lambda: read_model_autoresearch_output_evidence_jsonl(
-                    evidence_path,
-                    repo_root=root,
-                ),
-                runner_receipts=lambda: read_runner_receipts_jsonl(
-                    _runtime_path(root, runner_success_receipt_path)
-                ),
-            )
-        else:
-            verifier = _exact_output_digest_verifier
+        resolved_output_evidence_path = str(evidence_path)
+        if not prepare_configured_campaign(
+            runner=runner,
+            root=root,
+            plan_payload=plan_payload,
+            candidate_pool=candidate_pool,
+            tasks=tasks,
+            output_paths=(
+                output_evidence_path,
+                call_attempt_evidence_path,
+                runner_success_receipt_path,
+                output_path,
+            ),
+        ):
+            return _not_ready(("model_autoresearch_campaign_atomic_admission_failed",))
         no_provider_call = False
     execution = run_reddog_model_autoresearch_campaign_execution(
         repo_root=root,
@@ -353,7 +344,7 @@ def _fixture_runner(
     task: ModelBenchmarkTask,
     candidate: ModelBenchmarkCandidate,
 ) -> ModelBenchmarkTaskOutput:
-    output_digest = _digest(
+    output_digest = digest_receipt(
         "model_autoresearch_fixture_output",
         {
             "candidate_id": candidate.candidate_id,
@@ -364,7 +355,7 @@ def _fixture_runner(
     )
     return ModelBenchmarkTaskOutput(
         output_digest=output_digest,
-        runner_receipt_id=_digest(
+        runner_receipt_id=digest_receipt(
             "model_autoresearch_fixture_runner",
             {"candidate_id": candidate.candidate_id, "task_id": task.task_id},
         ),
@@ -382,7 +373,7 @@ def _fixture_verifier(
     candidate: ModelBenchmarkCandidate,
     output: ModelBenchmarkTaskOutput,
 ) -> ModelBenchmarkVerifierResult:
-    expected = _digest(
+    expected = digest_receipt(
         "model_autoresearch_fixture_output",
         {
             "candidate_id": candidate.candidate_id,
@@ -394,7 +385,7 @@ def _fixture_verifier(
     accepted = output.output_digest == expected
     return ModelBenchmarkVerifierResult(
         decision=VerifierDecision.ACCEPT if accepted else VerifierDecision.REJECT,
-        verifier_receipt_id=_digest(
+        verifier_receipt_id=digest_receipt(
             "model_autoresearch_fixture_verifier",
             {
                 "candidate_id": candidate.candidate_id,
@@ -415,7 +406,7 @@ def _exact_output_digest_verifier(
     accepted = hmac.compare_digest(str(output.output_digest), str(task.expected_output_digest))
     return ModelBenchmarkVerifierResult(
         decision=VerifierDecision.ACCEPT if accepted else VerifierDecision.REJECT,
-        verifier_receipt_id=_digest(
+        verifier_receipt_id=digest_receipt(
             "model_autoresearch_exact_output_digest_verifier",
             {
                 "candidate_id": candidate.candidate_id,
@@ -449,7 +440,13 @@ def _read_json_outside_repo(
     if not resolved.exists() or not resolved.is_file():
         return None, (missing_reason,)
     try:
-        payload = json.loads(resolved.read_text(encoding="utf-8"))
+        size = resolved.stat().st_size
+        if not 1 <= size <= MAX_RUNTIME_JSON_BYTES:
+            return None, (malformed_reason,)
+        raw = resolved.read_bytes()
+        if len(raw) != size:
+            return None, (malformed_reason,)
+        payload = json.loads(raw.decode("utf-8"))
     except Exception:
         return None, (malformed_reason,)
     if not isinstance(payload, (Mapping, list)):
@@ -521,7 +518,7 @@ def _configured_output_evidence_path_reasons(
         return ()
     if not value:
         return ("missing_model_autoresearch_campaign_output_evidence_path",)
-    resolved = _runtime_path(repo_root, value)
+    resolved = runtime_path(repo_root, value)
     if _is_inside(resolved, repo_root):
         return ("model_autoresearch_campaign_output_evidence_path_inside_repo",)
     return ()
@@ -538,7 +535,7 @@ def _configured_receipt_path_reasons(
         return ()
     if not value:
         return (f"missing_model_autoresearch_campaign_{label}_path",)
-    if _is_inside(_runtime_path(repo_root, value), repo_root):
+    if _is_inside(runtime_path(repo_root, value), repo_root):
         return (f"model_autoresearch_campaign_{label}_path_inside_repo",)
     return ()
 
@@ -575,13 +572,13 @@ def _configured_artifact_state_reasons(
     if len(paths) != len(set(paths)):
         reasons.append("model_autoresearch_campaign_artifact_path_alias")
     for label, value in values[:4]:
-        if value and not _is_absent_or_empty_file(_runtime_path(repo_root, value)):
+        if value and not _is_absent_or_empty_file(runtime_path(repo_root, value)):
             reasons.append(f"model_autoresearch_campaign_{label}_path_not_empty")
     return tuple(reasons)
 
 
 def _canonical_path(repo_root: Path, value: Path | str | None) -> str:
-    path = _runtime_path(repo_root, value)
+    path = runtime_path(repo_root, value)
     return os.path.normcase(os.path.normpath(str(path)))
 
 
@@ -590,13 +587,6 @@ def _is_absent_or_empty_file(path: Path) -> bool:
         return not path.exists() or (path.is_file() and path.stat().st_size == 0)
     except OSError:
         return False
-
-
-def _runtime_path(repo_root: Path, value: Path | str | None) -> Path:
-    path = Path(value or "")
-    if not path.is_absolute():
-        path = repo_root.parent / path
-    return path.resolve()
 
 
 def _configured_budget_bundle(
@@ -653,8 +643,6 @@ def _configured_campaign_call_reasons(
         reasons.append("model_autoresearch_campaign_assignment_not_in_model_budget")
     if planned_calls > policy.max_total_calls:
         reasons.append("model_autoresearch_campaign_total_call_budget_exceeded")
-    if planned_calls != 1:
-        reasons.append("model_autoresearch_campaign_multi_call_not_supported")
     return tuple(reasons)
 
 
@@ -667,11 +655,11 @@ def _configured_campaign_call_facts(
         return None
     try:
         plan = rehydrate_model_autoresearch_plan_receipt(plan_payload)
-        candidates = tuple(_preflight_candidate(item) for item in candidate_pool)
+        candidates = tuple(preflight_candidate(item) for item in candidate_pool)
         task_count = _normalized_task_count(tasks)
     except (TypeError, ValueError):
         return None
-    candidate_digest = _digest(
+    candidate_digest = digest_receipt(
         "model_autoresearch_candidate_pool",
         {
             "candidates": [
@@ -700,43 +688,8 @@ def _configured_campaign_call_facts(
     return assignments, len(assignments) * task_count
 
 
-def _preflight_candidate(payload: Mapping[str, Any]) -> ModelBenchmarkCandidate:
-    raw_roles = payload.get("role_assignments")
-    if not isinstance(raw_roles, list) or not raw_roles:
-        raise ValueError("invalid_candidate_roles")
-    if any(not isinstance(item, Mapping) for item in raw_roles):
-        raise ValueError("invalid_candidate_role")
-    roles = tuple(
-        ModelBenchmarkRoleAssignment(
-            role=item.get("role"),  # type: ignore[arg-type]
-            model_id=item.get("model_id"),  # type: ignore[arg-type]
-            provider=item.get("provider"),  # type: ignore[arg-type]
-        )
-        for item in raw_roles
-    )
-    candidate = build_model_benchmark_candidate(roles)
-    if (
-        candidate.candidate_id != payload.get("candidate_id")
-        or candidate.topology_digest != payload.get("topology_digest")
-    ):
-        raise ValueError("candidate_binding_mismatch")
-    return candidate
-
-
 def _normalized_task_count(tasks: Sequence[Mapping[str, Any]]) -> int:
-    normalized = tuple(
-        ModelBenchmarkTask(
-            task_id=item.get("task_id"),  # type: ignore[arg-type]
-            task_family=item.get("task_family"),  # type: ignore[arg-type]
-            prompt_digest=item.get("prompt_digest"),  # type: ignore[arg-type]
-            expected_output_digest=item.get("expected_output_digest"),  # type: ignore[arg-type]
-            verifier_contract_digest=item.get("verifier_contract_digest"),  # type: ignore[arg-type]
-            metadata=item.get("metadata") or {},  # type: ignore[arg-type]
-        ).normalized()
-        for item in tasks
-    )
-    if not normalized:
-        raise ValueError("missing_tasks")
+    normalized = preflight_tasks(tasks)
     return len(normalized)
 
 
@@ -876,11 +829,6 @@ def _is_inside(child: Path, parent: Path) -> bool:
     child_r = child.resolve()
     parent_r = parent.resolve()
     return child_r == parent_r or parent_r in child_r.parents
-
-
-def _digest(prefix: str, value: Mapping[str, Any]) -> str:
-    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
-    return f"{prefix}:{hashlib.sha256(encoded).hexdigest()}"
 
 
 def _content_digest(value: str) -> str:

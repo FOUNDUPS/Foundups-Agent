@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import (
     canonical_model_runtime_binding_digest,
@@ -76,6 +76,46 @@ def signed_principal_model_route(binding: object) -> tuple[str, str] | None:
     return lead, provider
 
 
+def resolved_model_topology(
+    binding: object,
+) -> tuple[tuple[str, str, str], ...] | None:
+    """Return only the resolver-consumed role/provider/model endpoints."""
+
+    endpoints = (
+        binding.get("resolved_runtime_topology")
+        if isinstance(binding, Mapping)
+        else None
+    )
+    if not isinstance(endpoints, Sequence) or isinstance(endpoints, (str, bytes)):
+        return None
+    rows: list[tuple[str, str, str]] = []
+    for endpoint in endpoints:
+        if not isinstance(endpoint, Mapping):
+            return None
+        row = (
+            str(endpoint.get("role") or ""),
+            str(endpoint.get("provider") or ""),
+            str(endpoint.get("model_id") or ""),
+        )
+        if any(_ROUTE_IDENTIFIER.fullmatch(value) is None for value in row):
+            return None
+        rows.append(row)
+    if not rows or len({row[0] for row in rows}) != len(rows):
+        return None
+    return tuple(rows)
+
+
+def resolved_principal_model_route(binding: object) -> tuple[str, str] | None:
+    """Return the exact principal route from consumed resolver authority."""
+
+    topology = resolved_model_topology(binding)
+    principals = [row for row in topology or () if row[0] == "principal"]
+    if len(principals) != 1:
+        return None
+    _, provider, model = principals[0]
+    return model, provider
+
+
 def _expected_selection(
     runtime: Any,
     selected: Any,
@@ -126,6 +166,8 @@ def _normalized_mapping(value: Mapping[str, Any]) -> dict[str, Any]:
 
 __all__ = [
     "artifact_generation_digest",
+    "resolved_model_topology",
+    "resolved_principal_model_route",
     "signed_principal_model_route",
     "verified_artifact_generation_binding",
 ]

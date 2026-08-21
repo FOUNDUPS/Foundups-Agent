@@ -30,7 +30,6 @@ EXPECTED_MODULE_FILES = {
     "src/reddog_resident_queue_slice_verifier_request_binding.py",
     "src/reddog_signed_authority_worker_dispatch_dryrun.py",
     "src/reddog_signed_worker_0102_readonly_review_binding.py",
-    "src/reddog_signed_worker_openclaw_queue_loop_runtime_binding.py",
     "src/reddog_signed_worker_queue_serial_loop_runner.py",
     "src/reddog_signer_delegated_authority_runtime.py",
     "src/reddog_signer_key_provider_dryrun.py",
@@ -78,6 +77,13 @@ PUBLICATION_MODULE_FILES = {
 }
 BOUNDED_AUTHORITY_BINDING_FILES = {
     "src/reddog_worker_dispatch_authority_binding.py",
+}
+BOUNDED_RUNTIME_DECOMPOSITION_FILES = {
+    "src/reddog_main_architect_fix_promotion_bootstrap.py",
+    "src/reddog_main_architect_fix_promotion_execution.py",
+    "src/reddog_main_architect_fix_promotion_preparation.py",
+    "src/reddog_signed_worker_openclaw_queue_loop_runtime_binding.py",
+    "src/reddog_signed_worker_queue_loop_environment.py",
 }
 ROOT_OUTCOME_AUTHORITY_FILES = {
     "src/foundup_verified_outcome_root_authority.py",
@@ -198,8 +204,9 @@ def test_module_security_repair_exemptions_are_exact_and_do_not_grow() -> None:
         _assert_exact_temporary_exemption(item, MODULE_ROOT)
         if item["file"] in ROOT_AUTHORITY_EXACT_HOSTS:
             target = MODULE_ROOT / item["file"]
-            assert len(target.read_text(encoding="utf-8").splitlines()) == (
-                item["no_growth_ceiling"]["file_lines"]
+            assert (
+                len(target.read_text(encoding="utf-8").splitlines())
+                == (item["no_growth_ceiling"]["file_lines"])
             )
 
 
@@ -266,7 +273,9 @@ def test_exemption_registry_preserves_inherited_ceiling_and_allows_reduction() -
         if entry.get("file") == "wsp_62_exemptions.yaml"
     )
     assert item["threshold_override"] == EXEMPTION_REGISTRY_CEILING
-    assert len(path.read_text(encoding="utf-8").splitlines()) <= EXEMPTION_REGISTRY_CEILING
+    assert (
+        len(path.read_text(encoding="utf-8").splitlines()) <= EXEMPTION_REGISTRY_CEILING
+    )
 
 
 def test_architect_publication_modules_need_no_wsp62_exemption() -> None:
@@ -274,7 +283,9 @@ def test_architect_publication_modules_need_no_wsp62_exemption() -> None:
         target = MODULE_ROOT / relative_path
         assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
         for name, size in _named_sizes(target).items():
-            assert size <= (200 if name == "AtomicArchitectFixPromotionPublisher" else 50)
+            assert size <= (
+                200 if name == "AtomicArchitectFixPromotionPublisher" else 50
+            )
 
 
 def test_new_authority_binding_modules_are_bounded_without_exemption() -> None:
@@ -282,6 +293,13 @@ def test_new_authority_binding_modules_are_bounded_without_exemption() -> None:
         target = MODULE_ROOT / relative_path
         assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
         assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_runtime_decomposition_modules_are_bounded_without_exemption() -> None:
+    for relative_path in BOUNDED_RUNTIME_DECOMPOSITION_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 500
+        assert _oversized_function_sizes(target, threshold=50) == {}
 
 
 def test_root_outcome_authority_modules_stay_within_domain_limits() -> None:
@@ -341,9 +359,7 @@ def test_runtime_artifact_safety_has_exact_no_growth_remediation() -> None:
     assert item["temporary"] is True
     assert item["architect_reviewer"] == "0102 Technical Architect"
     assert date.fromisoformat(item["expires_on"]) == date(2026, 9, 30)
-    assert item["remediation"].endswith(
-        "#runtime-artifact-safety-decomposition"
-    )
+    assert item["remediation"].endswith("#runtime-artifact-safety-decomposition")
     _assert_exact_temporary_exemption(item, SHARED_UTILITIES_ROOT)
     target = SHARED_UTILITIES_ROOT / item["file"]
     assert item["threshold_override"] == len(

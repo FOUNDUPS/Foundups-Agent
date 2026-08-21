@@ -14,20 +14,14 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker
     SIGNED_WORKER_DISPATCH_TASK_SOURCE,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
-    resident_queue_artifact_generator_mode,
-    resident_queue_binding_enabled,
     resident_queue_draft_pr_runner_mode,
-    resident_queue_evidence_command_runner_mode,
-    resident_queue_materializer_mode,
     resident_queue_integer_epoch,
-    resident_queue_model_feedback_ledger_store_path,
     resident_queue_now_epoch,
-    resident_queue_outcome_ratchet_store_path,
     resident_queue_pattern_memory_admission_db_path,
-    resident_queue_runtime_file_path,
-    resident_queue_runtime_flag_enabled,
-    resident_queue_runtime_root_path,
-    resident_queue_worktree_runner_mode,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_loop_environment import (
+    SignedWorkerQueueLoopEnvironment,
+    project_signed_worker_queue_loop_environment,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_loop_runner import (
     RedDogSignedWorkerQueueSerialLoopRunner,
@@ -35,15 +29,15 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_
 )
 
 SIGNED_WORKER_QUEUE_LOOP_BINDING_READY = "SIGNED_WORKER_QUEUE_LOOP_BINDING_READY"
-SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED = "SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED"
+SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED = (
+    "SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED"
+)
 SIGNED_WORKER_QUEUE_LOOP_BINDING_REJECT = "SIGNED_WORKER_QUEUE_LOOP_BINDING_REJECT"
 
 OPENCLAW_SIGNED_WORKER_RUNTIME = "openclaw"
 OPENCLAW_CANDIDATE_QUEUE_REVIEW_CAPABILITY = "candidate_queue_review"
 OPENCLAW_QUEUE_STAGE_PROGRESS_CAPABILITY = "queue_stage_progress"
-OPENCLAW_INDEPENDENT_SLICE_VERIFICATION_CAPABILITY = (
-    "independent_slice_verification"
-)
+OPENCLAW_INDEPENDENT_SLICE_VERIFICATION_CAPABILITY = "independent_slice_verification"
 SIGNED_0102_WORKER_RUNTIME = "0102"
 SIGNED_0102_BOUNDED_CODE_CHANGE_CAPABILITY = "bounded_code_change"
 
@@ -51,8 +45,12 @@ SIGNED_0102_BOUNDED_CODE_CHANGE_CAPABILITY = "bounded_code_change"
 class SignedWorkerOpenClawQueueLoopBindingReason:
     NOT_REQUESTED = "SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED"
     WORK_STATE_PATH_MISSING = "REJECT_SIGNED_WORKER_QUEUE_LOOP_WORK_STATE_PATH_MISSING"
-    CHAIN_RESULTS_PATH_MISSING = "REJECT_SIGNED_WORKER_QUEUE_LOOP_CHAIN_RESULTS_PATH_MISSING"
-    AUTHORITY_PROFILE_PATH_MISSING = "REJECT_SIGNED_WORKER_QUEUE_LOOP_AUTHORITY_PROFILE_PATH_MISSING"
+    CHAIN_RESULTS_PATH_MISSING = (
+        "REJECT_SIGNED_WORKER_QUEUE_LOOP_CHAIN_RESULTS_PATH_MISSING"
+    )
+    AUTHORITY_PROFILE_PATH_MISSING = (
+        "REJECT_SIGNED_WORKER_QUEUE_LOOP_AUTHORITY_PROFILE_PATH_MISSING"
+    )
     MAX_STEPS_INVALID = "REJECT_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS_INVALID"
     NOW_EPOCH_INVALID = "REJECT_SIGNED_WORKER_QUEUE_LOOP_NOW_EPOCH_INVALID"
     DRAFT_PR_RUNNER_MODE_UNSUPPORTED = (
@@ -90,30 +88,39 @@ class SignedWorkerOpenClawQueueLoopBindingResult:
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)
-        payload["runner"] = None if self.runner is None else self.runner.__class__.__name__
+        payload["runner"] = (
+            None if self.runner is None else self.runner.__class__.__name__
+        )
         return payload
 
 
-def is_openclaw_candidate_signed_worker_context(context: Mapping[str, Any] | None) -> bool:
+def is_openclaw_candidate_signed_worker_context(
+    context: Mapping[str, Any] | None,
+) -> bool:
     """Return True only for the signed worker task OpenClaw is allowed to claim."""
 
     if not isinstance(context, Mapping):
         return False
     return (
         str(context.get("source") or "") == SIGNED_WORKER_DISPATCH_TASK_SOURCE
-        and str(context.get("worker_runtime") or "").strip().lower() == OPENCLAW_SIGNED_WORKER_RUNTIME
-        and str(context.get("capability") or "").strip().lower() == OPENCLAW_CANDIDATE_QUEUE_REVIEW_CAPABILITY
+        and str(context.get("worker_runtime") or "").strip().lower()
+        == OPENCLAW_SIGNED_WORKER_RUNTIME
+        and str(context.get("capability") or "").strip().lower()
+        == OPENCLAW_CANDIDATE_QUEUE_REVIEW_CAPABILITY
     )
 
 
-def is_openclaw_queue_stage_progress_signed_worker_context(context: Mapping[str, Any] | None) -> bool:
+def is_openclaw_queue_stage_progress_signed_worker_context(
+    context: Mapping[str, Any] | None,
+) -> bool:
     """Return True only for signed OpenClaw queue-stage progress tasks."""
 
     if not isinstance(context, Mapping):
         return False
     return (
         str(context.get("source") or "") == SIGNED_WORKER_DISPATCH_TASK_SOURCE
-        and str(context.get("worker_runtime") or "").strip().lower() == OPENCLAW_SIGNED_WORKER_RUNTIME
+        and str(context.get("worker_runtime") or "").strip().lower()
+        == OPENCLAW_SIGNED_WORKER_RUNTIME
         and str(context.get("capability") or "").strip().lower()
         == OPENCLAW_QUEUE_STAGE_PROGRESS_CAPABILITY
     )
@@ -135,14 +142,17 @@ def is_openclaw_independent_verifier_signed_worker_context(
     )
 
 
-def is_0102_bounded_code_change_signed_worker_context(context: Mapping[str, Any] | None) -> bool:
+def is_0102_bounded_code_change_signed_worker_context(
+    context: Mapping[str, Any] | None,
+) -> bool:
     """Return True only for signed 0102 coding tasks handled at the bounded stage."""
 
     if not isinstance(context, Mapping):
         return False
     return (
         str(context.get("source") or "") == SIGNED_WORKER_DISPATCH_TASK_SOURCE
-        and str(context.get("worker_runtime") or "").strip() == SIGNED_0102_WORKER_RUNTIME
+        and str(context.get("worker_runtime") or "").strip()
+        == SIGNED_0102_WORKER_RUNTIME
         and str(context.get("capability") or "").strip().lower()
         == SIGNED_0102_BOUNDED_CODE_CHANGE_CAPABILITY
     )
@@ -156,78 +166,94 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
 ) -> SignedWorkerOpenClawQueueLoopBindingResult:
     """Build the OpenClaw queue-loop runner from explicit runtime config."""
 
-    requested = resident_queue_runtime_flag_enabled(
+    projected = project_signed_worker_queue_loop_environment(
         env,
-        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER",
+        repo_root,
+        now_epoch_resolver=resident_queue_now_epoch,
     )
-    if not requested:
+    if not projected.requested:
         return SignedWorkerOpenClawQueueLoopBindingResult(
             accepted=False,
             status=SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED,
             requested=False,
             runner=None,
-            rejection_reasons=(SignedWorkerOpenClawQueueLoopBindingReason.NOT_REQUESTED,),
+            rejection_reasons=(
+                SignedWorkerOpenClawQueueLoopBindingReason.NOT_REQUESTED,
+            ),
         )
 
-    work_state_path = _stripped(
-        resident_queue_runtime_file_path(env, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")
+    return _build_requested_queue_loop_runner(
+        projected=projected, repo_root=repo_root, env=env, bootstrap=bootstrap
     )
-    chain_results_path = _stripped(
-        resident_queue_runtime_file_path(env, repo_root, "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH")
-    )
-    authority_profile_path = _stripped(
-        resident_queue_runtime_file_path(env, repo_root, "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH")
-    )
+
+
+def _build_requested_queue_loop_runner(
+    *, projected: SignedWorkerQueueLoopEnvironment, repo_root, env, bootstrap
+) -> SignedWorkerOpenClawQueueLoopBindingResult:
     reasons: list[str] = []
-    if not work_state_path:
-        reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.WORK_STATE_PATH_MISSING)
-    if not chain_results_path:
-        reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.CHAIN_RESULTS_PATH_MISSING)
-    if not authority_profile_path:
-        reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.AUTHORITY_PROFILE_PATH_MISSING)
-
-    max_steps_raw = _stripped(env.get("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS")) or _stripped(
-        env.get("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS")
-    )
-    try:
-        max_steps = int(max_steps_raw) if max_steps_raw else 2
-    except ValueError:
-        max_steps = 0
-    if max_steps < 1:
+    if not projected.work_state_path:
+        reasons.append(
+            SignedWorkerOpenClawQueueLoopBindingReason.WORK_STATE_PATH_MISSING
+        )
+    if not projected.chain_results_path:
+        reasons.append(
+            SignedWorkerOpenClawQueueLoopBindingReason.CHAIN_RESULTS_PATH_MISSING
+        )
+    if not projected.authority_profile_path:
+        reasons.append(
+            SignedWorkerOpenClawQueueLoopBindingReason.AUTHORITY_PROFILE_PATH_MISSING
+        )
+    if projected.max_steps < 1:
         reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.MAX_STEPS_INVALID)
-    now_epoch, now_epoch_valid = resident_queue_now_epoch(env)
-    if not now_epoch_valid:
+    if not projected.now_epoch_valid:
         reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.NOW_EPOCH_INVALID)
-
     draft_pr_runner, draft_pr_reasons = _build_draft_pr_runner(
         repo_root=repo_root,
         env=env,
     )
     reasons.extend(draft_pr_reasons)
-    pattern_memory_admission_sink, pattern_memory_reasons = _build_pattern_memory_admission_sink(
-        repo_root=repo_root,
-        env=env,
+    pattern_memory_admission_sink, pattern_memory_reasons = (
+        _build_pattern_memory_admission_sink(
+            repo_root=repo_root,
+            env=env,
+        )
     )
     reasons.extend(pattern_memory_reasons)
 
     if reasons:
-        return SignedWorkerOpenClawQueueLoopBindingResult(
-            accepted=False,
-            status=SIGNED_WORKER_QUEUE_LOOP_BINDING_REJECT,
-            requested=True,
-            runner=None,
-            rejection_reasons=tuple(dict.fromkeys(reasons)),
-            work_state_path=work_state_path,
-            chain_results_path=chain_results_path,
-            authority_profile_path=authority_profile_path,
-            max_steps=max_steps,
-        )
+        return _rejected_queue_loop_binding(projected, reasons)
+    return _ready_queue_loop_binding(
+        projected,
+        repo_root,
+        env,
+        bootstrap,
+        draft_pr_runner,
+        pattern_memory_admission_sink,
+    )
 
-    bootstrap_kwargs = _bootstrap_kwargs(env, repo_root=repo_root)
-    if draft_pr_runner is not None:
-        bootstrap_kwargs["draft_pr_runner"] = draft_pr_runner
-    if pattern_memory_admission_sink is not None:
-        bootstrap_kwargs["pattern_memory_admission_sink"] = pattern_memory_admission_sink
+
+def _rejected_queue_loop_binding(projected, reasons):
+    return SignedWorkerOpenClawQueueLoopBindingResult(
+        accepted=False,
+        status=SIGNED_WORKER_QUEUE_LOOP_BINDING_REJECT,
+        requested=True,
+        runner=None,
+        rejection_reasons=tuple(dict.fromkeys(reasons)),
+        work_state_path=projected.work_state_path,
+        chain_results_path=projected.chain_results_path,
+        authority_profile_path=projected.authority_profile_path,
+        max_steps=projected.max_steps,
+    )
+
+
+def _ready_queue_loop_binding(
+    projected, repo_root, env, bootstrap, draft_runner, memory_sink
+):
+    bootstrap_kwargs = dict(projected.bootstrap_kwargs)
+    if draft_runner is not None:
+        bootstrap_kwargs["draft_pr_runner"] = draft_runner
+    if memory_sink is not None:
+        bootstrap_kwargs["pattern_memory_admission_sink"] = memory_sink
     worker_dispatch_writer = _build_worker_dispatch_writer(env)
     if worker_dispatch_writer is not None:
         bootstrap_kwargs["worker_dispatch_writer"] = worker_dispatch_writer
@@ -235,15 +261,17 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
     if assurance_reservation_store is not None:
         bootstrap_kwargs["assurance_reservation_store"] = assurance_reservation_store
     config = SignedWorkerQueueSerialLoopRunnerConfig(
-        work_state_path=str(work_state_path),
-        chain_results_path=str(chain_results_path),
-        authority_profile_path=str(authority_profile_path),
-        runtime_allowed_root=resident_queue_runtime_root_path(env, repo_root),
+        work_state_path=projected.work_state_path,
+        chain_results_path=projected.chain_results_path,
+        authority_profile_path=projected.authority_profile_path,
+        runtime_allowed_root=projected.runtime_allowed_root,
         repo_root=Path(repo_root).resolve(),
-        now_iso=_stripped(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO")) or None,
-        now_epoch=now_epoch,
-        trusted_now_epoch=(lambda value=now_epoch: value) if now_epoch is not None else resident_queue_integer_epoch,
-        max_steps=max_steps,
+        now_iso=projected.now_iso,
+        now_epoch=projected.now_epoch,
+        trusted_now_epoch=(lambda value=projected.now_epoch: value)
+        if projected.now_epoch is not None
+        else resident_queue_integer_epoch,
+        max_steps=projected.max_steps,
         bootstrap_kwargs=bootstrap_kwargs,
     )
     runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=bootstrap)
@@ -253,97 +281,11 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         requested=True,
         runner=runner,
         rejection_reasons=(),
-        work_state_path=work_state_path,
-        chain_results_path=chain_results_path,
-        authority_profile_path=authority_profile_path,
-        max_steps=max_steps,
+        work_state_path=projected.work_state_path,
+        chain_results_path=projected.chain_results_path,
+        authority_profile_path=projected.authority_profile_path,
+        max_steps=projected.max_steps,
     )
-
-
-_BOOTSTRAP_PATH_PAIRS = {
-    "work_orders_path": "REDDOG_WORK_ORDERS_PATH",
-    "valve_environment_path": "REDDOG_EXECUTION_VALVE_ENV_PATH",
-    "generic_writer_dryrun_result_path": "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH",
-    "governed_shell_dryrun_result_path": "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH",
-    "artifact_contents_path": "REDDOG_ARTIFACT_CONTENTS_PATH",
-    "artifact_generation_request_path": "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH",
-    "model_verifier.catalog_path": "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH",
-    "model_verifier.benchmarks_path": "REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH",
-    "model_verifier.promotions_path": "REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH",
-    "model_verifier.evidence_path": "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH",
-    "model_verifier.policy_path": "REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH",
-    "model_verifier.trusted_keys_path": "REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH",
-    "holoindex_evidence_path": "REDDOG_HOLOINDEX_EVIDENCE_PATH",
-    "verifier_request_path": "REDDOG_SLICE_VERIFIER_REQUEST_PATH",
-    "evidence_producer_request_path": "REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH",
-    "publish_request_path": "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH",
-    "ratchet_request_path": "REDDOG_OUTCOME_RATCHET_REQUEST_PATH",
-    "outcome_ratchet_store_path": "REDDOG_OUTCOME_RATCHET_STORE_PATH",
-    "held_out_gate_request_path": "REDDOG_HELD_OUT_GATE_REQUEST_PATH",
-    "admission_request_path": "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH",
-    "authority_state_path": "REDDOG_AUTHORITY_RUNTIME_STATE_PATH",
-    "permission_snapshots_path": "REDDOG_PERMISSION_SNAPSHOTS_PATH",
-    "principal_authority_records_path": "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
-    "signer_socket_path": "REDDOG_SIGNER_SOCKET_PATH",
-    "signature_verifier_backend": "REDDOG_SIGNATURE_VERIFIER_BACKEND",
-}
-
-_BOOTSTRAP_FLAG_PAIRS = (
-    ("pilot_dryrun_binding_enabled", "REDDOG_PILOT_DRYRUN_BINDING"),
-    ("artifact_generation_request_binding_enabled", "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING"),
-    ("slice_verifier_request_binding_enabled", "REDDOG_SLICE_VERIFIER_REQUEST_BINDING"),
-    ("draft_pr_publish_request_binding_enabled", "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING"),
-    ("outcome_ratchet_request_binding_enabled", "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING"),
-    ("held_out_gate_request_binding_enabled", "REDDOG_HELD_OUT_GATE_REQUEST_BINDING"),
-    ("pattern_memory_admission_request_binding_enabled", "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING"),
-)
-
-
-def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[str, Any]:
-    materializer_mode = resident_queue_materializer_mode(env)
-    artifact_generator_mode = resident_queue_artifact_generator_mode(env)
-    worktree_runner_mode = resident_queue_worktree_runner_mode(env)
-    evidence_command_runner_mode = resident_queue_evidence_command_runner_mode(env)
-    outcome_ratchet_store_path = resident_queue_outcome_ratchet_store_path(
-        env,
-        repo_root,
-    )
-    model_feedback_ledger_store_path = resident_queue_model_feedback_ledger_store_path(
-        env,
-        repo_root,
-    )
-    payload: dict[str, Any] = {}
-    if materializer_mode:
-        payload["work_order_materializer_mode"] = materializer_mode
-    for key, env_name in _BOOTSTRAP_PATH_PAIRS.items():
-        value = _optional_runtime_file_path(env, repo_root=repo_root, env_name=env_name)
-        if value:
-            payload[key] = value
-    if payload.get("signer_socket_path"):
-        payload.setdefault("signature_verifier_backend", "ed25519")
-    if artifact_generator_mode:
-        payload["artifact_generator_mode"] = artifact_generator_mode
-    if worktree_runner_mode:
-        payload["worktree_runner_mode"] = worktree_runner_mode
-    if evidence_command_runner_mode:
-        payload["evidence_command_runner_mode"] = evidence_command_runner_mode
-    if outcome_ratchet_store_path:
-        payload["outcome_ratchet_store_path"] = outcome_ratchet_store_path
-    if model_feedback_ledger_store_path:
-        payload["model_feedback_ledger_store_path"] = model_feedback_ledger_store_path
-    model_config = {
-        key.split(".", 1)[1]: payload.pop(key)
-        for key in tuple(payload)
-        if key.startswith("model_verifier.")
-    }
-    model_config["verifier_backend"] = _stripped(
-        env.get("REDDOG_MODEL_EVIDENCE_SIGNATURE_VERIFIER_BACKEND")
-    ) or "ed25519"
-    payload["model_runtime_verifier_config"] = model_config
-    for key, env_name in _BOOTSTRAP_FLAG_PAIRS:
-        if resident_queue_binding_enabled(env, env_name):
-            payload[key] = True
-    return payload
 
 
 def _build_draft_pr_runner(
@@ -406,7 +348,9 @@ def _build_worker_dispatch_writer(env: Mapping[str, str]) -> Any:
         resident_queue_runtime_flag_enabled,
     )
 
-    if not resident_queue_runtime_flag_enabled(env, "REDDOG_WORKER_DISPATCH_AGENTDB_WRITER"):
+    if not resident_queue_runtime_flag_enabled(
+        env, "REDDOG_WORKER_DISPATCH_AGENTDB_WRITER"
+    ):
         return None
 
     from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
@@ -424,21 +368,6 @@ def _build_assurance_reservation_store(env: Mapping[str, str]) -> Any:
 
 def _stripped(value: Any) -> str:
     return str(value or "").strip()
-
-
-def _optional_runtime_file_path(
-    env: Mapping[str, str],
-    *,
-    repo_root: Path | str,
-    env_name: str,
-) -> str:
-    explicit = _stripped(env.get(env_name))
-    if explicit:
-        return explicit
-    value = _stripped(resident_queue_runtime_file_path(env, repo_root, env_name))
-    if value and Path(value).exists():
-        return value
-    return ""
 
 
 __all__ = [

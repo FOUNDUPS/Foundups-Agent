@@ -49,6 +49,20 @@ Exchange parses canonical then mandatory replica expectation before transport/HT
 `ensure_reddog_holoindex_owner(..., query_replica_route=route)` passes split roots,
 reproves before spawn/health, and denies ambient/public paths or reuse drift.
 
+### `resolve_query_replica_owner_route(...) -> QueryReplicaOwnerRoute`
+
+Trusted-host resolver for `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT`. The value must
+be an explicit absolute path to an existing store disjoint from the canonical
+repository and SSD roots. The resolver opens a `StoreProof`, verifies the exact
+active descriptor against the supplied canonical roots, and returns the sealed
+route. It never infers a replica from `HOLOINDEX_SSD_PATH`, materializes,
+re-indexes, or mutates. Configuration, store-proof, or descriptor failure is
+reduced to `HOLOINDEX_QUERY_REPLICA_REQUIRED` without publishing the path.
+
+The one-shot semantic adapter and maintenance handshake resolve this route
+before owner startup; promotion resolves it before read-only owner binding
+verification. All three pass the same capability into the existing owner API.
+
 ### `verify_reddog_holoindex_owner_binding(...) -> bool`
 
 Read-only promotion-time proof that the already-running private query owner

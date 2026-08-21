@@ -91,13 +91,12 @@ def _provider(tmp_path, runner, *, agent_id="reddog-artifact"):
 
 def _generate(provider, *, prompt="secret prompt", context="private context",
               model="qwen/qwen3-coder", provider_id="openrouter"):
-    verified = {"model_selection": {
-        "receipt_id": "selection-1",
-        "lead_model": model,
-        "role_assignments": [{
-            "role": "principal", "canonical_model_id": model, "provider": provider_id,
+    verified = {
+        "model_selection": {"receipt_id": "selection-1", "lead_model": model},
+        "resolved_runtime_topology": [{
+            "role": "principal", "model_id": model, "provider": provider_id,
         }],
-    }}
+    }
     with patch("modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.consume_artifact_generation_model", return_value=verified):
         return provider.generate_artifacts(prompt=prompt, context=context, binding=object(), timeout_seconds=17)
 

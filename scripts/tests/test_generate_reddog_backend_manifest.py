@@ -14,14 +14,23 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR_PATH = REPO_ROOT / "scripts" / "generate_reddog_backend_manifest.py"
-SPEC = importlib.util.spec_from_file_location("reddog_backend_manifest_generator", GENERATOR_PATH)
+SPEC = importlib.util.spec_from_file_location(
+    "reddog_backend_manifest_generator", GENERATOR_PATH
+)
 assert SPEC and SPEC.loader
 generator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(generator)
 
 
 def test_package_initializers_resolve_relative_imports_from_their_package() -> None:
-    initializer = REPO_ROOT / "modules" / "communication" / "moltbot_bridge" / "src" / "__init__.py"
+    initializer = (
+        REPO_ROOT
+        / "modules"
+        / "communication"
+        / "moltbot_bridge"
+        / "src"
+        / "__init__.py"
+    )
     module = initializer.with_name("openclaw_dae.py")
 
     expected = ["modules", "communication", "moltbot_bridge", "src"]
@@ -43,21 +52,24 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     assert "scripts/reddog_holoindex_incident_repair_once.py" in runtime
     assert "scripts/reddog_start_operations_control_once.py" in runtime
     assert (
-        "modules/communication/moltbot_bridge/src/"
-        "reddog_start_operations_control.py"
+        "modules/communication/moltbot_bridge/src/reddog_start_operations_control.py"
     ) in runtime
     assert (
         "modules/communication/moltbot_bridge/src/"
         "reddog_start_operations_resident_client.py"
     ) in runtime
     assert (
-        "modules/communication/moltbot_bridge/skillz/"
-        "reddog_operations/SKILLz.md"
+        "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md"
     ) in runtime
-    assert "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py" in runtime
+    assert (
+        "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py"
+        in runtime
+    )
     assert "modules/communication/moltbot_bridge/src/openclaw_dae.py" in runtime
     assert "modules/foundups/src/foundup_registry_loader.py" in runtime
-    assert "modules/platform_integration/linkedin_agent/src/linkedin_agent.py" in runtime
+    assert (
+        "modules/platform_integration/linkedin_agent/src/linkedin_agent.py" in runtime
+    )
     assert "holo_index/maintenance_lock.py" in runtime
     assert "holo_index/query_admission.py" in runtime
     assert "holo_index/vector_segment_durability.py" in runtime
@@ -65,14 +77,12 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     assert "modules/communication/moltbot_bridge/src/openclaw_supervisor.py" in runtime
     assert "modules/infrastructure/database/src/agent_db.py" in runtime
     assert (
-        "modules/infrastructure/idle_automation/src/"
-        "holoindex_postmerge_coordinator.py"
+        "modules/infrastructure/idle_automation/src/holoindex_postmerge_coordinator.py"
     ) in runtime
     assert "modules/infrastructure/database/src/Database.py" not in runtime
     assert "modules/infrastructure/database/src/database.py" in runtime
     assert (
-        "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py"
-        in runtime
+        "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py" in runtime
     )
 
 
@@ -109,23 +119,20 @@ def test_newly_tracked_imported_runtime_dependency_cannot_be_omitted() -> None:
 
     tree = generator._parse_source(importer, importer_relative)
     import_names, _ = generator._imports(tree, importer)
-    resolved = generator._resolve_local_module(
-        "holo_index.core.collection_injections"
-    )
+    resolved = generator._resolve_local_module("holo_index.core.collection_injections")
     generated = generator.build_manifest()
 
     assert "holo_index.core.collection_injections" in import_names
     assert dependency_relative in generator._tracked_file_set()
     assert resolved == dependency
     assert dependency_relative in generated["required_runtime_files"]
-    assert (
-        generated["required_runtime_sha256"][dependency_relative]
-        == generator._digest(dependency)
-    )
+    assert generated["required_runtime_sha256"][
+        dependency_relative
+    ] == generator._digest(dependency)
     assert "holo_index.core.collection_search" in import_names
-    assert "holo_index/core/collection_search.py" in generated[
-        "required_runtime_sha256"
-    ]
+    assert (
+        "holo_index/core/collection_search.py" in generated["required_runtime_sha256"]
+    )
 
 
 def test_untracked_local_import_fails_closed(tmp_path, monkeypatch) -> None:
@@ -165,14 +172,10 @@ def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
         "reddog_signer_current_generation_runtime_binding.py",
         "modules/communication/moltbot_bridge/src/"
         "reddog_signer_current_generation_use_time_gate.py",
-        "modules/communication/moltbot_bridge/src/"
-        "reddog_authoritative_use_lease.py",
-        "modules/ai_intelligence/digital_twin/src/"
-        "principal_memex_contract.py",
-        "modules/ai_intelligence/digital_twin/src/"
-        "principal_memex_projection.py",
-        "modules/communication/moltbot_bridge/src/"
-        "reddog_principal_memex_disclosure.py",
+        "modules/communication/moltbot_bridge/src/reddog_authoritative_use_lease.py",
+        "modules/ai_intelligence/digital_twin/src/principal_memex_contract.py",
+        "modules/ai_intelligence/digital_twin/src/principal_memex_projection.py",
+        "modules/communication/moltbot_bridge/src/reddog_principal_memex_disclosure.py",
         "modules/communication/moltbot_bridge/src/"
         "reddog_principal_memex_resident_admission.py",
         "modules/communication/moltbot_bridge/src/"
@@ -231,13 +234,19 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "modules/communication/moltbot_bridge/src/reddog_holoindex_task_dispatch.py"
         in generated["required_runtime_sha256"]
     )
-    assert "holo_index/module_intent_snapshot.py" in generated[
-        "required_runtime_sha256"
-    ]
+    assert (
+        "holo_index/module_intent_snapshot.py" in generated["required_runtime_sha256"]
+    )
     _assert_signer_and_memex_runtime_files(generated)
+    _assert_manifest_digest_pin(generated)
+
+
+def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "c33e73d8687c21294a9028b0b1051fe1231a187ffd2116b8e654b9d966fea7e6"
-    constants = (REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js").read_text(encoding="utf-8")
+    assert digest == "d8806dfe0898acd91680ce7dc9547793774602fd5ef21527031b01436ea635b1"
+    constants = (
+        REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
+    ).read_text(encoding="utf-8")
     match = re.search(r"EXPECTED_MANIFEST_SHA256 = '([a-f0-9]{64})'", constants)
     assert match is not None and match.group(1) == digest
 
@@ -259,15 +268,15 @@ def test_extension_javascript_is_package_bound_not_backend_materialized() -> Non
 
 
 def _index_blob(relative: str) -> bytes:
-    return subprocess.check_output(
-        ["git", "show", f":{relative}"], cwd=REPO_ROOT
-    )
+    return subprocess.check_output(["git", "show", f":{relative}"], cwd=REPO_ROOT)
 
 
 def _index_blobs(relatives: list[str]) -> dict[str, bytes]:
     process = subprocess.Popen(
-        ["git", "cat-file", "--batch"], cwd=REPO_ROOT,
-        stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        ["git", "cat-file", "--batch"],
+        cwd=REPO_ROOT,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
     )
     request = b"".join(f":{relative}\n".encode("utf-8") for relative in relatives)
     output, _ = process.communicate(request)
@@ -280,7 +289,7 @@ def _index_blobs(relatives: list[str]) -> dict[str, bytes]:
         assert len(header) == 3 and header[1] == "blob"
         size = int(header[2])
         start = header_end + 1
-        blobs[relative] = output[start:start + size]
+        blobs[relative] = output[start : start + size]
         offset = start + size + 1
     assert offset == len(output)
     return blobs
@@ -290,9 +299,11 @@ def test_staged_index_manifest_is_self_consistent() -> None:
     """Prove promotion closure from index blobs, independent of the worktree."""
     manifest_relative = "scripts/reddog_backend_manifest.json"
     manifest = json.loads(_index_blob(manifest_relative).decode("utf-8"))
-    staged = subprocess.check_output(
-        ["git", "ls-files", "-z"], cwd=REPO_ROOT
-    ).decode("utf-8").split("\0")
+    staged = (
+        subprocess.check_output(["git", "ls-files", "-z"], cwd=REPO_ROOT)
+        .decode("utf-8")
+        .split("\0")
+    )
     tracked = {path for path in staged if path}
     required = manifest["required_runtime_sha256"]
 

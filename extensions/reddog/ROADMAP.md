@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.103 resident architect thin-client surface.
+Phase: RedDog 0.4.104 resident architect thin-client surface.
 
 Current implementation:
 
@@ -13,9 +13,16 @@ Current implementation:
   seconds, and is fail-closed. The deterministic AI Gateway incumbent is always
   injected into held-out proposal benchmarks outside Nemotron's control. The static
   evaluation fallback is GLM 5.2 plus DeepSeek V4 Pro, Qwen 3.8 Max, and Kimi
-  K3. Live configured panel AutoResearch and promotion-to-binding composition
-  remain blocked; the extension query, Fusion, OpenClaw, and Hermes still need
-  to consume the shared resolver.
+  K3. The extension query, advisory/Fusion bridge, bounded FoundUps Fusion,
+  OpenClaw, and Hermes providers consume the shared resolver with explicit
+  available-provider inventory and no retargeting. Configured
+  task-by-candidate AutoResearch is atomically reserved before first egress and
+  has been exercised live for two exact local Nemotron calls. Authenticated
+  proposer/campaign authority and the single-model signed-evidence/runtime-
+  binding handoff are implemented without embedded signing authority. Live
+  production activation remains deployment-blocked on independent external
+  signers, trust/revocation, durable replay configuration, and production
+  evidence artifacts. Aggregate panel promotion remains shadow-only.
 
 - Governed Git public receipt boundary (v0.4.101): internal absolute Git and
   fixed-SystemRoot verifier paths remain execution-only. Readiness/projection
@@ -79,6 +86,12 @@ Current implementation:
   configured/system interpreter needs per-user NumPy; universal isolation waits
   on a sealed/configured Holo interpreter closure, while explicit Python
   injection variables and credentials remain denied now.
+- Query-replica production plumbing (0.4.102 source candidate): the closed
+  `holoindex_owner` and `resident_architect` profiles carry only the explicit
+  `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` needed by the one-shot query and
+  promotion boundaries. Host-side code proves an existing exact-generation
+  active replica and fails closed before owner use. Live materialization,
+  retention, and ChatGPT-app acceptance remain separate pending work.
 - R9 shared-store-independent Git authority (v0.4.101): replaces recursive
   whole-common-store identity with canonical topology, relevant-control, exact
   current-ref, and A/B requested-output binding. Linked reads survive unrelated

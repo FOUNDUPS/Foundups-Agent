@@ -1,7 +1,38 @@
+## 2026-08-21: WSP 62 production-authority decomposition regressions
+
+- Added exact bounded-file/function guards for the architect FIX promotion
+  adapter, preparation, execution, signed-worker binding, and environment
+  projection modules.
+- Extracted static effect-boundary tests and OpenClaw claim-loop model setup
+  from three inherited integration matrices; collection and assertions remain
+  active while all original no-growth ceilings decrease.
+- Revalidated the exact WSP 62 exemption registry with no new exemption.
+
+## 2026-08-21: Verified artifact-model topology regressions
+
+- Added exact topology consumption across bounded Fusion, OpenClaw, Hermes,
+  provider bootstrap, and resident integration fixtures.
+- Proved missing/unavailable provider inventory, stale use, replay, retargeting,
+  and provider/payload mismatch reject before egress without widening the
+  static evaluation fallback into worker authority.
+- Repaired the Linux signed-worker preflight fixtures to declare the explicit
+  OpenRouter inventory and the same trusted synthetic epoch as their generated
+  runtime receipts; production fail-closed defaults remain unchanged.
+
 ## 2026-08-21: RedDog advisory bridge support parity
 
 - Revalidated panel normalization, system-prompt evidence rule, Qwen fallback,
   hostile bridge metadata, and advisory hardening after pure-helper extraction.
+
+## 2026-08-21: Promotion query-replica route regressions
+
+- Proved the exact sealed route reaches owner verification and missing route
+  proof rejects before verification/publication.
+- Updated shared proposal and model-runtime fixtures to supply only an inert
+  route capability when the test's subject is downstream authority behavior.
+- Focused combined implementation selection passed **110 tests**; dependent
+  promotion/authority/dispatch/postmerge selection passed **75 tests** in the
+  isolated transaction and is rerun after final composition.
 
 ## 2026-08-21: Native upstream worker regressions
 

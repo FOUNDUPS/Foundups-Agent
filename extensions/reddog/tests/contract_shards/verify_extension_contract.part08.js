@@ -341,7 +341,7 @@ function extractBridgeStages(source) {
 const bridgeStages = extractBridgeStages(bridgePy);
 const mappedStages = Object.keys(orchestrator.REDDOG_STAGE_ACTIONS).sort();
 assert.deepStrictEqual(mappedStages, bridgeStages, 'REDDOG_STAGE_ACTIONS must cover every advisory bridge stage');
-assert.strictEqual(bridgeStages.length, 18, 'expected 18 unique bridge stages');
+assert.strictEqual(bridgeStages.length, 19, 'expected 19 unique bridge stages');
 assert.strictEqual(orchestrator.REDDOG_TERMINAL_HOLD_MS, 3000, 'terminal hold must be 3000ms');
 
 const redactionMatch = orchestrator.matchReddogProgress({ stage: 'redaction_blocked', text: 'Redaction gate blocked before network.' });

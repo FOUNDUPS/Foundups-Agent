@@ -271,6 +271,9 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
                 runner=self.artifact_generator,
                 authority_capability=authority,
                 model_runtime_binding_capability=capability,
+                trusted_now_epoch=getattr(
+                    self.model_runtime_binding_verifier, "trusted_now_epoch", None
+                ),
             )
         finally:
             discard_verified_runtime_binding_capability(capability)

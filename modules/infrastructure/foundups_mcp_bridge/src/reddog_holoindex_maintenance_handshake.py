@@ -43,6 +43,10 @@ from .reddog_sealed_holo_runtime import (
     sealed_runtime_required,
     trusted_holo_site_packages,
 )
+from .reddog_holoindex_owner_replica_route import (
+    QUERY_REPLICA_REQUIRED_ERROR,
+    resolve_query_replica_owner_route,
+)
 
 
 AUTO_MAINTENANCE_ENV = "REDDOG_HOLOINDEX_AUTO_MAINTENANCE"
@@ -441,11 +445,20 @@ def _start_owner(
     refreshed: bool,
     state: RepositoryState,
     receipt: HoloIndexFreshnessReceipt,
+    environ: Mapping[str, str],
 ) -> RedDogHoloIndexOperationalResult:
     binding = generation_binding_from_receipt(
         receipt,
         receipt_path=freshness_receipt_path(ssd_path),
     )
+    try:
+        route = resolve_query_replica_owner_route(
+            canonical_repo_root=repo_root,
+            canonical_ssd_path=ssd_path,
+            environment=environ,
+        )
+    except Exception:
+        return _failure(QUERY_REPLICA_REQUIRED_ERROR, state=state)
     owner = owner_bootstrap.ensure_reddog_holoindex_owner(
         repo_root=repo_root,
         runtime_root=owner_runtime_root,
@@ -453,6 +466,7 @@ def _start_owner(
         expected_repo_head_sha=state.head_sha,
         expected_generation_id=receipt.generation_id,
         expected_receipt_digest=str(binding["freshness_receipt_digest"]),
+        query_replica_route=route,
     )
     if not owner.ready:
         return _failure(owner.error or owner_bootstrap.BOOTSTRAP_FAILED_ERROR, state=state)
@@ -502,6 +516,7 @@ def _refresh_and_start_owner(
         refreshed=True,
         state=final_state,
         receipt=receipt,
+        environ=environ,
     )
 
 
@@ -531,6 +546,7 @@ def _ensure_locked(
             refreshed=False,
             state=state,
             receipt=receipt,
+            environ=environ,
         )
     if not auto_maintenance:
         return _failure(MAINTENANCE_REQUIRED_ERROR, state=state, reasons=reasons)

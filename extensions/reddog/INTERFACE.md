@@ -6,7 +6,10 @@ The extension consumes receipt-bound AI Gateway runtime bindings when
 configured. It does not let Nemotron, Hermes, OpenClaw, LM Studio availability,
 or extension keyword heuristics mint model-selection authority. The shared
 verified topology resolver preserves exact role/provider/model bindings and
-fails closed when the consumer does not expose the required provider.
+fails closed when the consumer does not expose the required provider. Each
+`callFusion` provider egress obtains a fresh query receipt and performs an
+epoch-second `topology_valid_until` check before spawning the provider bridge;
+the worker captured when the webview opened is never sufficient call authority.
 
 Without a ready runtime binding, the explicit evaluation fallback is:
 
@@ -98,6 +101,9 @@ and virtual-environment keys plus `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`, and
 `holo_query`, `holoindex_owner`, and `resident_architect`; `default` adds none.
 Unknown or caller-constructed profiles fail to `default`. OpenRouter, Holo
 owner, and resident authority credentials never cross into another profile.
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` is admitted only by `holoindex_owner`
+and `resident_architect`, allowing their Python boundaries to prove the same
+explicit active replica without exposing it to unrelated bridge children.
 `buildHoloQueryEnv(envLike, retrievalMode)` composes `holo_query`, which admits
 only `HOLOINDEX_SSD_PATH`, legacy `HOLO_SSD_PATH`, and explicit `HOLO_OFFLINE`,
 then forces `HOLOINDEX_QUERY_READONLY=1`. Lexical mode additionally synthesizes

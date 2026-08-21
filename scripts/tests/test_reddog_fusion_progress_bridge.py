@@ -48,9 +48,23 @@ def _run_main(payload: dict[str, object], *, api_key: str = "") -> dict[str, obj
     stdout = io.StringIO()
     stderr = io.StringIO()
     env = {bridge.ENV_API_KEY: api_key} if api_key else {}
+    lead = str(payload.get("lead_model") or payload.get("model") or "")
+    receipt = mock.Mock(
+        status=bridge.MODEL_RUNTIME_BINDING_READY,
+        accepted=True,
+        principal_model=lead,
+        panel_models=(),
+        role_bindings=({"role": "principal", "provider": "openrouter", "model_id": lead},),
+        binding_receipt_id="binding:test",
+        topology_resolution_receipt_id="verified_model_runtime_topology:test",
+        topology_verification_receipt_id="verified_model_runtime_binding:test",
+        topology_valid_until=1_900_000_000,
+    )
     with mock.patch.object(sys, "stdin", stdin), mock.patch.object(sys, "stdout", stdout), mock.patch.object(
         sys, "stderr", stderr
-    ), mock.patch.dict(os.environ, env, clear=True):
+    ), mock.patch.dict(os.environ, env, clear=True), mock.patch.object(
+        bridge, "query_model_runtime_binding", return_value=receipt
+    ):
         bridge.main()
     return json.loads(stdout.getvalue())
 

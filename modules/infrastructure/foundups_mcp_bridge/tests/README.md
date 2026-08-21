@@ -315,7 +315,11 @@ the disposable process fixture.
 - `test_holo_query_service_runtime_safety.py`: runtime confinement and
   mutation-safety boundaries.
 - `test_reddog_holoindex_maintenance_handshake.py`: trusted refresh command,
-  repository/receipt validation, and owner restart orchestration.
+  repository/receipt validation, exact query-replica route propagation, and
+  owner restart orchestration.
+- `test_reddog_holoindex_owner_replica_route_resolution.py`: explicit absolute
+  replica-root configuration, existing isolated-store proof, exact route build,
+  and stable fail-closed error reduction.
 - `test_reddog_holoindex_maintenance_diagnostics.py`: bounded child-output
   capture, strict stable-error propagation, cooperative descendant containment,
   failed-`taskkill`/escaped-session limits, exact-PID test cleanup, and secret-free

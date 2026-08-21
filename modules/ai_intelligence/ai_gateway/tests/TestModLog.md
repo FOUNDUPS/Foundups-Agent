@@ -1,5 +1,89 @@
 # AI Gateway TestModLog
 
+## [2026-08-21] - Restart, Provider-Presence, and POSIX Link Regressions
+
+- Added real subprocess death at selection-only and selection-plus-runtime
+  pre-seal points. Retry completes from the durable provider bundle with zero
+  callback and leaves unproved isolated attempt artifacts untouched.
+- Added unreadable durable provider-receipt and concurrent conflicting-binding
+  regressions. Corruption/transient read failure is not absence, and only the
+  nonce-reservation winner reaches provider code.
+- Added POSIX-only subprocess coverage for death after final hard-link creation
+  and after immutable target-link creation. Recovery accepts only the exact
+  proof-bound nlink=2 state and durably removes the corresponding owned source
+  or pending link. Invalid interrupted-publication payload, later runtime-proof
+  failure, and post-open trusted-time failure prove every retained descriptor
+  closes before fallback or rejection. Extended WSP-62 guards to both extracted
+  helper modules.
+- Commands: `python -m pytest modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_production_binding_crash_security.py modules/ai_intelligence/ai_gateway/tests/test_model_runtime_binding_wsp62_boundaries.py -q` -> `17 passed, 3 skipped` in 5.36 seconds; `python -m pytest modules/ai_intelligence/ai_gateway/tests -q` -> `830 passed, 5 skipped` in 31.49 seconds; exact manifest identity test -> `1 passed` in 62.81 seconds.
+- Evidence location: this entry plus the final-SHA check rollup on PR #1529.
+  WSP-62, Ruff, compileall, and diff-check passed locally.
+
+## [2026-08-21] - Production ownership and process-crash regressions
+
+- Added claim-race winner-token convergence and real subprocess death after an
+  exact claim. Retry reuses the owned claim; a provider bundle persisted
+  immediately after callback resumes with zero provider callback and fresh
+  trust/time/evidence/runtime verification.
+- Added foreign cleanup replacement and occupied-final probes, plus post-seal
+  same-content inode replacement, hard-link, and symlink substitution. Foreign
+  objects survive with explicit ownership conflict and never become finals.
+- Added a real subprocess midwrite death against the immutable configured store.
+  The final receipt remains absent, retry commits a complete record, and only a
+  hidden pending temporary may remain from the killed process.
+- Extended WSP-62 guards to atomic-create, claim, and retained artifact-identity
+  modules. Current validation is recorded in the 2026-08-21 corrective entry
+  above. WSP 00/15/22/50/62/97.
+
+## [2026-08-21] - Production transaction immutable-audit regressions
+
+- Added zero-callback exact/conflicting replay, APPLIED directory-flush
+  ambiguity, AUTHORIZED terminal retry, callback/terminal authority expiry,
+  partial final publication, and unlink-denial regressions. Production artifacts
+  stage behind a durable terminal receipt; no valid final is exposed before
+  APPLIED, recovery rehydrates and use-time verifies without provider replay,
+  and cleanup quarantine is explicit and surfaced; failed quarantine rename
+  preserves the artifact under an explicit cleanup failure.
+- Added stage file/parent durability failure and post-APPLIED final-directory
+  failure injection. The former proves zero terminal/APPLIED/final effects; the
+  latter proves exact retry completes rename durability with zero callback.
+- Added normal and recovery callbacks that advance trusted time after the prior
+  sample. The final callback-free authority, signed-evidence, and runtime-window
+  checks block terminal/APPLIED/final publication without provider replay.
+- Extended the unchanged WSP-62 limits to every new
+  output/freshness/JSON/recovery/rehydration/runner/terminal module. Validation:
+  52 focused passed; full AI Gateway 815 passed, 2 skipped; scoped Ruff
+  lint/format passed. WSP 00/15/22/50/62/87/97.
+
+## [2026-08-21] - Governed AutoResearch and production-handoff contracts
+
+- Added successful multi-task/panel configured campaigns plus zero-egress
+  preflight, exact reservation membership, budget, route, and failure-release
+  regressions.
+- Added authenticated durable proposer and campaign-authority adversarial
+  coverage for call/admission/campaign/policy substitution, trust, revocation,
+  negative/overlong TTL, replay across restart, store failure, retry, and gate
+  output preflight.
+- Added single-model production handoff coverage through external independent
+  signed evidence and the existing runtime binder; panel promotion is rejected.
+  Added zero-effect forged/expired/revoked authority, malformed policy/trust,
+  and preexisting-output preflight regressions plus restart-safe exact retry
+  after a transient post-reservation runtime-supply failure.
+  Added immutable publication-status regressions proving missing, RESERVED, and
+  AUTHORIZED markers cannot be elevated by use-time verification, plus forged
+  signed invalid/overlong TTL rejection with zero effects.
+- Moved configured runtime construction/preflight into a bounded module and
+  lowered the enforced bootstrap ceilings rather than expanding WSP-62.
+- Added receipt/publication directory-lineage durability and fail-closed retry
+  coverage, including explicit pointer-width Windows `HANDLE` ABI assertions
+  for `FlushFileBuffers` and `CloseHandle`. Added source-shape gates that keep
+  the configured runner at or below its prior 769-line ceiling, the caller
+  module at or below 200 lines, the evidence module at or below 910 lines, the
+  durability module at or below 200 lines, and every function in all four files
+  at or below 50 lines.
+- Added WSP-62 guards for the five extracted production-binding authority,
+  preflight, transaction, evidence, and execution modules; each remains at or
+  below 200 lines and every function remains at or below 50 lines.
 ## [2026-08-21] - Nemotron Proposal and Verified Topology Contracts
 
 - Added offline coverage for conservative catalog-card merge, local compact

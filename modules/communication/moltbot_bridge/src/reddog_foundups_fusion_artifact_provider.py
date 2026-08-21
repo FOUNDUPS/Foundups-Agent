@@ -17,7 +17,10 @@ from .reddog_artifact_generation_admission_capability import (
     ArtifactGenerationModelCapability,
     consume_artifact_generation_model,
 )
-from .reddog_artifact_generation_model_binding import artifact_generation_digest
+from .reddog_artifact_generation_model_binding import (
+    artifact_generation_digest,
+    resolved_model_topology,
+)
 from .reddog_artifact_generation_provider_contract import ArtifactGenerationModelResult
 
 ENV_ARTIFACT_GENERATOR_RUNTIME_MODE = "REDDOG_ARTIFACT_GENERATOR_RUNTIME_MODE"
@@ -35,6 +38,9 @@ class FoundupsFusionArtifactGenerationRunner:
     runtime_mode: str = ""
     max_tokens: int = 1800
     temperature: float = 0.0
+    # Fusion's transport is OpenRouter. Vendor ownership encoded in a model ID
+    # is not the provider route used for egress.
+    available_model_providers: tuple[str, ...] = ()
 
     def generate_artifacts(
         self,
@@ -124,11 +130,15 @@ def _parse(result: Any, started: float) -> ArtifactGenerationModelResult:
         external_side_effects_possible=True,
     )
 def _topology(binding: Mapping[str, Any]) -> dict[str, Any]:
-    selected = binding.get("model_selection")
-    if not isinstance(selected, Mapping):
+    endpoints = resolved_model_topology(binding)
+    if endpoints is None:
         return {}
-    lead = str(selected.get("lead_model") or "")
-    panel = tuple(str(item) for item in selected.get("panel_models") or ())
+    principals = [row for row in endpoints if row[0] == "principal"]
+    if len(principals) != 1:
+        return {}
+    lead = principals[0][2]
+    panel = tuple(row[2] for row in endpoints if row[0] != "principal")
+    selected = binding.get("model_selection")
     required = (
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
@@ -136,9 +146,14 @@ def _topology(binding: Mapping[str, Any]) -> dict[str, Any]:
         "model_runtime_binding_verification_digest",
     )
     lineage = {
-        "model_selection_receipt_id": selected.get("receipt_id"),
-        "model_selection_digest": selected.get("digest"),
-        **{key: selected.get(key) for key in required},
+        "model_selection_receipt_id": selected.get("receipt_id") if isinstance(selected, Mapping) else None,
+        "model_selection_digest": selected.get("digest") if isinstance(selected, Mapping) else None,
+        **{
+            key: selected.get(key) if isinstance(selected, Mapping) else None
+            for key in required
+        },
+        "model_runtime_topology_resolution_receipt_id": binding.get("runtime_topology_resolution_receipt_id"),
+        "model_runtime_topology_verification_receipt_id": binding.get("runtime_topology_verification_receipt_id"),
     }
     return {"lead_model": lead, "panel_models": panel, **lineage} if lead else {}
 def _lineage(topology: Mapping[str, Any]) -> dict[str, Any]:

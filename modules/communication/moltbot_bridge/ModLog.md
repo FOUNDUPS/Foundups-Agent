@@ -1,4 +1,33 @@
 # ModLog - moltbot_bridge
+
+## 2026-08-21: WSP 62 production-authority decomposition
+
+- Split architect FIX promotion into a stable public adapter, bounded input
+  preparation, and bounded locked execution while preserving fail-closed
+  HoloIndex owner verification and publication behavior.
+- Extracted signed-worker queue-loop environment projection from effectful
+  dependency construction; both source modules now have functions at most 50
+  lines and require no temporary exemption.
+- Moved integration-only receipt/Fusion setup and static trust-boundary checks
+  into focused test support/modules, reducing all three inherited test ceilings.
+- Archived the historical OpenClaw DAE/ExecutionBundle example and retained a
+  concise authoritative interface route with no contract loss.
+- WSP 15 classification: P0 (`C4/I5/D5/Impact5 = 19`) because stale exemptions
+  blocked the production-authority merge gate. WSP 00/97 evidence remained
+  fail-closed after the owner query reported an authority-HEAD mismatch; no
+  query retry, re-index, or replica maintenance was performed.
+
+## 2026-08-21: Shared verified artifact-model topology consumers
+
+- Connected bounded FoundUps Fusion, OpenClaw gateway, and Hermes API artifact
+  providers to the shared one-shot AI Gateway resolver. Each provider defaults
+  to an empty availability inventory and can use only the exact configured
+  provider/model route carried by verified runtime evidence.
+- Propagated explicit provider inventory and trusted use-time clocks through
+  the resident queue bootstrap. Stale, replayed, unavailable, payload-mismatch,
+  and retargeted routes reject before network, secret access, or worker process
+  execution. WSP 00/15/22/50/62/97.
+
 ## 2026-08-21: RedDog advisory bridge WSP 62 containment repair
 
 - Extracted pure bounded input, telemetry, prompt, and result formatting into
@@ -7,6 +36,16 @@
 - Reduced `advisory_model_once.py` from the inherited 1,288-line over-ceiling
   state to 1,169 lines; its two exempt functions are now 189 and 176 lines,
   below the unchanged 1,200/201 containment ceilings. WSP 15/22/62/97.
+
+## 2026-08-21: Promotion-time query-replica owner proof
+
+- Architect FIX promotion now snapshots its supplied environment, resolves the
+  active query replica against the freshness receipt's canonical SSD, and
+  passes the sealed route into exact owner binding verification.
+- Missing/stale route proof rejects before owner verification and profile/queue
+  publication. The resident claim runtime forwards its already closed
+  environment; no materialization, re-index, or fallback was added.
+  (WSP 00/5/6/15/22/50/64/84/97)
 
 ## 2026-08-21: Current upstream Hermes/OpenClaw worker proof
 

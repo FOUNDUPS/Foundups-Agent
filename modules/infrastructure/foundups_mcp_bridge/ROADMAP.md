@@ -95,9 +95,11 @@ before authenticated health; health/reuse require all four public replica
 fields and binding drift forces replacement rather than hot swap. Explicit
 argv carries both roots and the child receives no ambient `HOLOINDEX_SSD_PATH`.
 
-**Still missing:** route production/plumbing in one-shot owner query
-`_owner_attempt`, maintenance `_start_owner`, and promotion
-`_run_locked_promotion`; live authorized materialization and owner acceptance; ChatGPT-app MCP proof;
+**Completed plumbing:** one-shot owner query `_owner_attempt`, maintenance
+`_start_owner`, and promotion `_run_locked_promotion` now resolve and propagate
+the explicit current replica capability without fallback or mutation.
+
+**Still missing:** live authorized current-generation materialization and owner acceptance; ChatGPT-app MCP proof;
 active/rollback retention; governed orphan deletion; and scale evidence for
 Chroma lifecycle growth and registry/closure hashing. This author slice used
 synthetic stores only and is not promotion evidence. R24 author validation is

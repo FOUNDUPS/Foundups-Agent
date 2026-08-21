@@ -198,9 +198,10 @@ def test_assigned_worker_reverifies_signed_model_evidence_before_provider(
         governed_shell_dryrun_result=bundle["governed_shell_dryrun_result"],
         artifact_contents={},
         artifact_generation_request_binding_enabled=True,
-        artifact_generator=FoundupsFusionArtifactGenerationRunner(
-            runtime_mode="foundups_fusion"
-        ),
+            artifact_generator=FoundupsFusionArtifactGenerationRunner(
+                runtime_mode="foundups_fusion",
+                available_model_providers=("openrouter",),
+            ),
         model_runtime_binding_verifier=verifier,
         repo_root=bundle["repo_root"],
     )
@@ -217,7 +218,7 @@ def test_assigned_worker_reverifies_signed_model_evidence_before_provider(
     assert len(provider_calls) == 1
     bridge_meta = provider_calls[0]["bridge_meta"]
     assert (
-        bridge_meta["model_runtime_binding_verification_receipt_id"]
+        bridge_meta["model_runtime_topology_verification_receipt_id"]
         == verification.receipt_id
     )
     stage = chain_store.load()["stage_results"][BOUNDED_WORKER_PILOT_STAGE_KEY]
@@ -303,7 +304,8 @@ def _invoke_promoted_provider(context, monkeypatch):
         artifact_contents={},
         artifact_generation_request_binding_enabled=True,
         artifact_generator=FoundupsFusionArtifactGenerationRunner(
-            runtime_mode="foundups_fusion"
+            runtime_mode="foundups_fusion",
+            available_model_providers=("openrouter",),
         ),
         model_runtime_binding_verifier=model_runtime_binding_test_verifier(
             context["binding"]

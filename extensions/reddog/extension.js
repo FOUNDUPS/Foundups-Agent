@@ -53,7 +53,7 @@ const {
   beginBasePromptTrace, outputValidationOptions, statusMessages
 } = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.103';
+const EXTENSION_VERSION = '0.4.104';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -192,6 +192,7 @@ const REDDOG_STAGE_ACTIONS = {
   redaction_pass: { action: 'nosing', pixel: '<rd>' },
   fusion_alias_start: { action: 'fetching', pixel: '<rd>' },
   fusion_alias_done: { action: 'crystallizing', pixel: '<rd>' },
+  model_runtime_blocked: { action: 'barking', pixel: '!rd!' },
   lead_start: { action: 'fetching', pixel: '<rd>' }, lead_done: { action: 'herding', pixel: '<rd>' },
   lead_retry: { action: 'fetching', pixel: '<rd>' },
   panel_start: { action: 'herding', pixel: '<rd>' }, panel_done: { action: 'herding', pixel: '<rd>' },
@@ -4990,8 +4991,7 @@ function activate(context) {
 }
 
 async function openFusionEditor(context, installState) {
-  const binding = await runModelRuntimeBindingQueryBridge();
-  const worker = modelRuntimeBindingQuery.resolveWorker(fusionWorkerFromConfig(), binding, FUSION_PANEL_RUNTIME_LIMIT);
+  const worker = await resolveCurrentFusionWorker();
   const panel = vscode.window.createWebviewPanel(
     'reddog',
     worker.title,
@@ -5029,9 +5029,7 @@ async function openFusionEditor(context, installState) {
 }
 
 const workspaceRoot = () => backendCompatibility.workspaceRoot(vscode, process.cwd());
-const reddogConfigValue = (key, fallback) => backendCompatibility.configurationValue(
-  vscode, REDDOG_CONFIG_NAMESPACE, REDDOG_LEGACY_CONFIG_NAMESPACE, key, fallback
-);
+const reddogConfigValue = (key, fallback) => backendCompatibility.configurationValue(vscode, REDDOG_CONFIG_NAMESPACE, REDDOG_LEGACY_CONFIG_NAMESPACE, key, fallback);
 const detectRedDogInstallState = (context) => backendCompatibility.detectInstallState(vscode, context, REDDOG_BACKEND_CLIENT);
 const detectRedDogInstallStateAsync = (context, root) => backendCompatibilityAsync.detectInstallStateAsync(
   vscode, context, REDDOG_BACKEND_CLIENT, backendCompatibility, root
@@ -5039,9 +5037,7 @@ const detectRedDogInstallStateAsync = (context, root) => backendCompatibilityAsy
 const currentBackendCompatibility = () => backendCompatibilityAsync.runBackendCompatibilityPreflightAsync(
   backendCompatibility.workspaceRoot(vscode, '')
 );
-const currentBackendCompatibilityAtRoot = (root) => (
-  backendCompatibilityAsync.runBackendCompatibilityPreflightAsync(root)
-);
+const currentBackendCompatibilityAtRoot = (root) => backendCompatibilityAsync.runBackendCompatibilityPreflightAsync(root);
 const currentBackendCompatibilitySync = () => backendCompatibility.runBackendCompatibilityPreflight(
   backendCompatibility.workspaceRoot(vscode, '')
 );
@@ -5058,6 +5054,7 @@ const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.r
   workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: (env) => buildBridgePythonEnv(env, 'authoritative_work_state'), scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
 });
 const runModelRuntimeBindingQueryBridge = () => modelRuntimeBindingQuery.runConfiguredQuery({ workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: (env) => buildBridgePythonEnv(env, 'model_runtime_binding'), scriptPath: (root) => path.join(root, REDDOG_MODEL_RUNTIME_BINDING_QUERY_SCRIPT) });
+const resolveCurrentFusionWorker = (query) => modelRuntimeBindingQuery.resolveConfiguredWorker({ query: query || runModelRuntimeBindingQueryBridge }, fusionWorkerFromConfig(), FUSION_PANEL_RUNTIME_LIMIT);
 const runLocalDiagnosticQuery = (name, worker) => { const root = workspaceRoot(); return localDiagnosticRouter.run(name, { root, worker, interpreterPath: resolvePythonInterpreter(root, reddogConfigValue('pythonPath', 'python')).path, env: buildBridgePythonEnv(process.env, 'default') }); };
 
 function fusionWorkerFromConfig() {
@@ -5995,6 +5992,9 @@ async function callFusion(context, worker, prompt, boundedContext, systemPrompt,
         : buildBackendCompatibilityBlockedResult(state)
     );
   }
+  worker = await resolveCurrentFusionWorker(callOptions.runtimeBindingQuery);
+  const runtimeBindingBlock = modelRuntimeBindingQuery.blockedReason(worker);
+  if (runtimeBindingBlock) return modelRuntimeBindingQuery.blockedEgressResult(worker);
   return new Promise((resolve) => {
     const root = workspaceRoot();
     const script = path.join(root, 'scripts', 'advisory_model_once.py');

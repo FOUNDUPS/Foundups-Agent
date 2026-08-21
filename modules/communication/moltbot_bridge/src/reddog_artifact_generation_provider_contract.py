@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, Mapping, Protocol
+from typing import Any, Dict, Mapping, Protocol, Sequence
 
 from .reddog_artifact_generation_admission_capability import (
     ArtifactGenerationModelCapability,
@@ -79,6 +79,11 @@ class ArtifactGenerationModelResult:
 
 
 class BoundedArtifactGenerationRunner(Protocol):
+    # Exact provider routes proven available for this configured runner instance.
+    # This is deliberately not a broad list of providers the upstream product
+    # could theoretically support.
+    available_model_providers: Sequence[str]
+
     def generate_artifacts(
         self,
         *,
