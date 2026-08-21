@@ -157,9 +157,12 @@ function validNoMutationClaims(value) {
 
 function resolveWorker(fallback, receipt, panelLimit, options) {
   const base = fallback && typeof fallback === 'object' ? fallback : {};
-  const value = receipt && typeof receipt === 'object'
+  let value = receipt && typeof receipt === 'object'
     ? validateReceipt(receipt)
     : failureReceipt(false, 'model_runtime_binding_query_receipt_missing');
+  if (value.accepted === true && !receiptCurrentAtUse(value, options)) {
+    value = failureReceipt(true, 'model_runtime_binding_topology_expired');
+  }
   if (value.accepted === true) {
     return {
       title: base.title || 'RedDog',
@@ -178,6 +181,28 @@ function resolveWorker(fallback, receipt, panelLimit, options) {
     modelBindingSource: value.configured === true ? 'runtime_binding_rejected' : 'evaluation_config',
     modelBindingBlocked: value.configured === true || !allowEvaluationFallback,
     modelBindingReceipt: value
+  };
+}
+
+async function resolveConfiguredWorker(queryOptions, fallback, panelLimit, options) {
+  const query = queryOptions && typeof queryOptions.query === 'function'
+    ? queryOptions.query : () => runConfiguredQuery(queryOptions);
+  return resolveWorker(fallback, await query(), panelLimit, options);
+}
+
+function receiptCurrentAtUse(receipt, options) {
+  const supplied = options && options.nowEpochSeconds;
+  const now = Number.isSafeInteger(supplied)
+    ? supplied : Math.floor(Date.now() / 1000);
+  return Number.isSafeInteger(now) && receipt.topology_valid_until >= now;
+}
+
+function blockedEgressResult(worker) {
+  return {
+    ok: false,
+    reason: 'model_runtime_binding_not_ready',
+    rejection_reasons: [blockedReason(worker)],
+    review_packet: metadata(worker)
   };
 }
 
@@ -253,11 +278,13 @@ module.exports = {
   STATUS_READY,
   STATUS_UNCONFIGURED,
   blockedReason,
+  blockedEgressResult,
   canonicalDigest,
   failureReceipt,
   metadata,
   parseOutput,
   resolveWorker,
+  resolveConfiguredWorker,
   runTraceLines,
   runConfiguredQuery,
   runQuery,

@@ -384,6 +384,81 @@ def test_recovery_closes_interrupted_artifact_when_payload_is_invalid(
     assert held.closed is True
 
 
+def test_recovery_closes_selection_when_runtime_proof_is_invalid(tmp_path, monkeypatch):
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_recovery as recovery
+
+    selection = _closing_artifact()
+    monkeypatch.setattr(recovery, "_load_artifact", lambda *_args: ({}, selection))
+    proof_calls = []
+
+    def parse_proof(_value):
+        if proof_calls:
+            raise ValueError("runtime-proof-invalid")
+        proof_calls.append(True)
+        return SimpleNamespace()
+
+    monkeypatch.setattr(recovery.artifact_durability, "proof_from_dict", parse_proof)
+    with pytest.raises(ValueError, match="runtime-proof-invalid"):
+        recovery._recover_verified_terminal(
+            {}, _recovery_transaction(tmp_path), _recovery_receipt()
+        )
+    assert selection.closed is True
+
+
+def test_recovery_closes_both_artifacts_when_trusted_time_fails(tmp_path, monkeypatch):
+    import modules.ai_intelligence.ai_gateway.src.model_autoresearch_production_binding_recovery as recovery
+
+    selection, runtime = _closing_artifact(), _closing_artifact()
+    artifacts = iter((selection, runtime))
+    monkeypatch.setattr(
+        recovery, "_load_artifact", lambda *_args: ({}, next(artifacts))
+    )
+    monkeypatch.setattr(
+        recovery.artifact_durability,
+        "proof_from_dict",
+        lambda _value: SimpleNamespace(),
+    )
+    monkeypatch.setattr(
+        recovery,
+        "trusted_campaign_authority_time",
+        lambda _context: (_ for _ in ()).throw(ValueError("trusted-time-failed")),
+    )
+    inputs = {"authority_use": SimpleNamespace()}
+    with pytest.raises(ValueError, match="trusted-time-failed"):
+        recovery._recover_verified_terminal(
+            inputs, _recovery_transaction(tmp_path), _recovery_receipt()
+        )
+    assert selection.closed is True
+    assert runtime.closed is True
+
+
+def _closing_artifact():
+    artifact = SimpleNamespace(closed=False)
+    artifact.close = lambda: setattr(artifact, "closed", True)
+    return artifact
+
+
+def _recovery_transaction(tmp_path):
+    return SimpleNamespace(
+        selection_output=tmp_path / "selection-final.json",
+        selection_stage=tmp_path / "selection-stage.json",
+        runtime_output=tmp_path / "runtime-final.json",
+        runtime_stage=tmp_path / "runtime-stage.json",
+    )
+
+
+def _recovery_receipt():
+    return SimpleNamespace(
+        selection_source=None,
+        selection_digest="sha256:" + "1" * 64,
+        selection_proof={},
+        runtime_source=None,
+        runtime_digest="sha256:" + "2" * 64,
+        runtime_proof={},
+        verified_evidence_bundle={},
+    )
+
+
 def _claim_crash_script(inputs: dict) -> str:
     store = inputs["authority_use"].receipt_store.root
     return f"""

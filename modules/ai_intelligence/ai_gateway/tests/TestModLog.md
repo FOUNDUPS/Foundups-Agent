@@ -11,11 +11,13 @@
 - Added POSIX-only subprocess coverage for death after final hard-link creation
   and after immutable target-link creation. Recovery accepts only the exact
   proof-bound nlink=2 state and durably removes the corresponding owned source
-  or pending link. Invalid interrupted-publication payload recovery also proves
-  the retained descriptor closes before fallback continues. Extended WSP-62
-  guards to both extracted helper modules.
-  Validation: crash/WSP-62 matrix 15 passed, 3 platform skips; complete AI
-  Gateway suite 828 passed, 5 platform skips; WSP-62 and diff-check passed.
+  or pending link. Invalid interrupted-publication payload, later runtime-proof
+  failure, and post-open trusted-time failure prove every retained descriptor
+  closes before fallback or rejection. Extended WSP-62 guards to both extracted
+  helper modules.
+- Commands: `python -m pytest modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_production_binding_crash_security.py modules/ai_intelligence/ai_gateway/tests/test_model_runtime_binding_wsp62_boundaries.py -q` -> `17 passed, 3 skipped` in 5.36 seconds; `python -m pytest modules/ai_intelligence/ai_gateway/tests -q` -> `830 passed, 5 skipped` in 31.49 seconds; exact manifest identity test -> `1 passed` in 62.81 seconds.
+- Evidence location: this entry plus the final-SHA check rollup on PR #1529.
+  WSP-62, Ruff, compileall, and diff-check passed locally.
 
 ## [2026-08-21] - Production ownership and process-crash regressions
 

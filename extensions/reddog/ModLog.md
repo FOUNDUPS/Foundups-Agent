@@ -19,6 +19,10 @@
   authenticated exhaustive contract binds all 19 bridge stages.
 - Reconciled current README truth with the landed opt-in continuation default
   and the 0.4.104 VSIX filename; historical ModLog entries remain historical.
+- Closed webview-aging drift: every provider egress now re-queries the runtime
+  binding, rejects `topology_valid_until` expiry at use time, and replaces the
+  webview-open worker before constructing provider stdin. WSP 62 stayed within
+  the reduced extension/function ceilings.
 
 ## 2026-08-21 - Nemotron shadow routing and Qwen challenger fallback (0.4.103)
 

@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const EventEmitter = require('events');
+const fs = require('fs');
 const path = require('path');
 
 const query = require(path.join('..', 'model_runtime_binding_query.js'));
@@ -58,6 +59,48 @@ function fakeChild(output) {
   return child;
 }
 
+async function assertBindingAgesFailClosed() {
+  const agingReceipt = receipt({ topology_valid_until: 10 });
+  let queries = 0;
+  const queryOptions = { query: async () => { queries += 1; return agingReceipt; } };
+  const current = await query.resolveConfiguredWorker(
+    queryOptions, { title: 'RedDog' }, 6, { nowEpochSeconds: 10 }
+  );
+  const aged = await query.resolveConfiguredWorker(
+    queryOptions, { title: 'RedDog' }, 6, { nowEpochSeconds: 11 }
+  );
+  assert.strictEqual(current.modelBindingBlocked, false);
+  assert.strictEqual(aged.modelBindingBlocked, true);
+  assert.strictEqual(query.blockedReason(aged), 'model_runtime_binding_topology_expired');
+  assert.strictEqual(queries, 2);
+}
+
+function assertProviderEgressRequeries() {
+  const extension = fs.readFileSync(path.join(__dirname, '..', 'extension.js'), 'utf8');
+  const callStart = extension.indexOf('async function callFusion(');
+  const requery = extension.indexOf('await resolveCurrentFusionWorker(', callStart);
+  const providerSpawn = extension.indexOf('const child = cp.spawn', callStart);
+  assert(callStart >= 0 && requery > callStart && providerSpawn > requery);
+}
+
+function assertFallbackPolicy() {
+  const body = {
+    ...query.failureReceipt(false, 'model_runtime_binding_unconfigured'),
+    rejection_reasons: []
+  };
+  body.query_receipt_id = query.canonicalDigest(body);
+  const fallback = query.resolveWorker(
+    { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] }, body, 6
+  );
+  const evaluation = query.resolveWorker(
+    { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] },
+    body, 6, { allowEvaluationFallback: true }
+  );
+  assert.strictEqual(fallback.modelBindingSource, 'evaluation_config');
+  assert.strictEqual(fallback.modelBindingBlocked, true);
+  assert.strictEqual(evaluation.modelBindingBlocked, false);
+}
+
 async function main() {
   const valid = query.validateReceipt(receipt());
   assert.strictEqual(valid.accepted, true);
@@ -70,25 +113,9 @@ async function main() {
   assert.deepStrictEqual(worker.panel, ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k3']);
   assert.strictEqual(worker.modelBindingSource, 'receipt_bound_runtime');
 
-  const unconfiguredBody = {
-    ...query.failureReceipt(false, 'model_runtime_binding_unconfigured'),
-    rejection_reasons: []
-  };
-  unconfiguredBody.query_receipt_id = query.canonicalDigest(unconfiguredBody);
-  const fallback = query.resolveWorker(
-    { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] },
-    unconfiguredBody,
-    6
-  );
-  assert.strictEqual(fallback.modelBindingSource, 'evaluation_config');
-  assert.strictEqual(fallback.modelBindingBlocked, true);
-  const explicitEvaluation = query.resolveWorker(
-    { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] },
-    unconfiguredBody,
-    6,
-    { allowEvaluationFallback: true }
-  );
-  assert.strictEqual(explicitEvaluation.modelBindingBlocked, false);
+  await assertBindingAgesFailClosed();
+
+  assertFallbackPolicy();
 
   const rejected = query.resolveWorker(
     { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] },
@@ -126,6 +153,8 @@ async function main() {
     timeoutMs: 1000
   });
   assert.strictEqual(bridge.accepted, true);
+
+  assertProviderEgressRequeries();
   console.log('model runtime binding query tests passed');
 }
 

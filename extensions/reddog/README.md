@@ -31,6 +31,9 @@ available-provider inventory and preserves the receipt's exact
 role/provider/model assignments; stale, replayed, unavailable, or retargeted
 bindings stop before network or worker execution. The static roster is used
 only when the operator explicitly allows evaluation fallback.
+Every advisory/Fusion provider call re-runs the local runtime-binding query and
+checks `topology_valid_until` at use time immediately before child-process
+egress. A webview-open receipt is display context, not reusable call authority.
 
 AI Gateway provides authenticated durable proposer and campaign-promotion
 composition points plus a fail-closed single-model handoff to the existing

@@ -238,6 +238,10 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "holo_index/module_intent_snapshot.py" in generated["required_runtime_sha256"]
     )
     _assert_signer_and_memex_runtime_files(generated)
+    _assert_manifest_digest_pin(generated)
+
+
+def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
     assert digest == "d8806dfe0898acd91680ce7dc9547793774602fd5ef21527031b01436ea635b1"
     constants = (

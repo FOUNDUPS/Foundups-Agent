@@ -10,6 +10,16 @@
   regenerated only from the final composed RedDog/Holo tree.
 - Added the missing `model_runtime_blocked` stage action and updated the exact
   19-stage exhaustive assertion plus authenticated shard/aggregate hashes.
+- Added stale-at-use and webview-aging runtime-binding regressions. The focused
+  source contract proves `callFusion` re-queries before provider spawn, and the
+  Fusion stdin matrix proves only fresh receipt-bound topology reaches the
+  bridge. Commands: `node tests/test_model_runtime_binding_query.js`,
+  `node tests/verify_fusion_panel_input_contract.js`, and
+  `node tests/test_reddog_candidate_wsp62.js` -> PASS; `npm test` -> 12-member
+  PASS in 2.931 seconds; `npm run test:contract` -> 3-member PASS in 0.595 seconds;
+  `npm run test:package` -> 65 files / 948,219 bytes PASS;
+  `npm run test:release` -> 4 groups PASS in 323.643 seconds with no timeout.
+- Evidence location: this entry plus the final-SHA check rollup on PR #1529.
 
 ## 2026-08-21 - Nemotron/Qwen routing contract refresh (0.4.103)
 

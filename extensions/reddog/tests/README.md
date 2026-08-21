@@ -17,6 +17,11 @@ native leaf delegation and OpenClaw `2026.7.1-2` provider behavior. The
 extension itself remains a thin client and does not receive upstream secrets,
 worker shell authority, repository write authority, or publish/merge authority.
 
+`test_model_runtime_binding_query.js` ages a once-valid receipt across two query
+calls and proves the second call blocks. Its source contract requires the
+egress re-query to occur inside `callFusion` before provider spawn; the Fusion
+stdin contract injects a fresh receipt for every offline probe.
+
 `test_governed_git_environment.js` is the focused least-privilege contract for
 every production governed-Git subprocess. It supplies unrelated/provider/
 GitHub/AWS/generic credentials, Python/Node/loader injection, SSH-agent/config,

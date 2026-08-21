@@ -6,7 +6,10 @@ The extension consumes receipt-bound AI Gateway runtime bindings when
 configured. It does not let Nemotron, Hermes, OpenClaw, LM Studio availability,
 or extension keyword heuristics mint model-selection authority. The shared
 verified topology resolver preserves exact role/provider/model bindings and
-fails closed when the consumer does not expose the required provider.
+fails closed when the consumer does not expose the required provider. Each
+`callFusion` provider egress obtains a fresh query receipt and performs an
+epoch-second `topology_valid_until` check before spawning the provider bridge;
+the worker captured when the webview opened is never sufficient call authority.
 
 Without a ready runtime binding, the explicit evaluation fallback is:
 

@@ -14,8 +14,10 @@
   source unlink, plus the corresponding two-link pending/target state in
   immutable record creation. Repair removes only the exact proven sibling link
   and flushes affected directories under the documented controlled-principal
-  boundary. Validation: complete AI Gateway suite 828 passed, 5 platform
-  skips; crash/WSP-62 matrix 15 passed, 3 platform skips; WSP-62 and
+  boundary. Recovery transfers retained-descriptor ownership only after both
+  artifacts and all trust/evidence/time checks succeed; any later failure
+  closes every descriptor already acquired. Validation: complete AI Gateway
+  suite 830 passed, 5 platform skips; crash/WSP-62 matrix 17 passed, 3 platform skips; WSP-62 and
   diff-check passed. WSP 00/15/22/50/62/97.
 
 ## [2026-08-21] - Production Binding Ownership and Crash-Safety Correction

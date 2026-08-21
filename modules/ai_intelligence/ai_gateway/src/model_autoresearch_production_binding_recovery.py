@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import ExitStack
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -17,14 +18,9 @@ from .model_autoresearch_production_binding_outputs import (
 from . import (
     model_autoresearch_production_binding_artifact_durability as artifact_durability,
 )
-from .model_autoresearch_production_binding_rehydration import (
-    rehydrate_production_supply_results,
-    verify_recovered_runtime,
-)
+from . import model_autoresearch_production_binding_rehydration as rehydration
 from .model_autoresearch_production_binding_temporal import pure_recheck_production_time
-from .model_autoresearch_single_model_evidence_preflight import (
-    verify_external_single_model_evidence_bundle,
-)
+from . import model_autoresearch_single_model_evidence_preflight as evidence_preflight
 from .model_autoresearch_production_terminal_receipt import (
     ProductionBindingTerminalReceipt,
     rehydrate_production_terminal_receipt,
@@ -96,41 +92,45 @@ def _load_terminal_payload(inputs, receipt_id, required):
 
 
 def _recover_verified_terminal(inputs, transaction, receipt):
-    selection_payload, selection_source = _load_artifact(
-        transaction.selection_output,
-        _receipt_source(receipt.selection_source, transaction.selection_stage),
-        receipt.selection_digest,
-        artifact_durability.proof_from_dict(receipt.selection_proof),
-    )
-    runtime_payload, runtime_source = _load_artifact(
-        transaction.runtime_output,
-        _receipt_source(receipt.runtime_source, transaction.runtime_stage),
-        receipt.runtime_digest,
-        artifact_durability.proof_from_dict(receipt.runtime_proof),
-    )
-    now = trusted_campaign_authority_time(inputs["authority_use"])
-    validate_campaign_promotion_authority_use(
-        inputs["authenticated_promotion"].authority,
-        inputs["authority_use"],
-        now=now,
-    )
-    values = verify_external_single_model_evidence_bundle(
-        bundle=receipt.verified_evidence_bundle,
-        preview=inputs["preview"],
-        gate=inputs["gate"],
-        key_resolver=inputs["key_resolver"],
-        signature_verifier=inputs["signature_verifier"],
-        revoked_key_epochs=inputs["trusted_keys"]["revoked_key_epochs"],
-        now=now,
-    )
-    verify_recovered_runtime(
-        inputs, receipt, selection_payload, runtime_payload, values, now
-    )
-    pure_recheck_production_time(inputs, values, runtime_payload)
-    selection, runtime = rehydrate_production_supply_results(
-        inputs, selection_payload, runtime_payload
-    )
-    return selection, runtime, selection_source, runtime_source, receipt
+    with ExitStack() as opened:
+        selection_payload, selection_source = _load_artifact(
+            transaction.selection_output,
+            _receipt_source(receipt.selection_source, transaction.selection_stage),
+            receipt.selection_digest,
+            artifact_durability.proof_from_dict(receipt.selection_proof),
+        )
+        opened.callback(selection_source.close)
+        runtime_payload, runtime_source = _load_artifact(
+            transaction.runtime_output,
+            _receipt_source(receipt.runtime_source, transaction.runtime_stage),
+            receipt.runtime_digest,
+            artifact_durability.proof_from_dict(receipt.runtime_proof),
+        )
+        opened.callback(runtime_source.close)
+        now = trusted_campaign_authority_time(inputs["authority_use"])
+        validate_campaign_promotion_authority_use(
+            inputs["authenticated_promotion"].authority,
+            inputs["authority_use"],
+            now=now,
+        )
+        values = evidence_preflight.verify_external_single_model_evidence_bundle(
+            bundle=receipt.verified_evidence_bundle,
+            preview=inputs["preview"],
+            gate=inputs["gate"],
+            key_resolver=inputs["key_resolver"],
+            signature_verifier=inputs["signature_verifier"],
+            revoked_key_epochs=inputs["trusted_keys"]["revoked_key_epochs"],
+            now=now,
+        )
+        rehydration.verify_recovered_runtime(
+            inputs, receipt, selection_payload, runtime_payload, values, now
+        )
+        pure_recheck_production_time(inputs, values, runtime_payload)
+        selection, runtime = rehydration.rehydrate_production_supply_results(
+            inputs, selection_payload, runtime_payload
+        )
+        opened.pop_all()
+        return selection, runtime, selection_source, runtime_source, receipt
 
 
 def publish_recovered_binding(recovered, transaction) -> tuple[Any, Any]:
