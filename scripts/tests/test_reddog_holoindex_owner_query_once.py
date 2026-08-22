@@ -24,6 +24,18 @@ import reddog_holoindex_owner_query_once as _OWNER_QUERY_SCRIPT  # noqa: E402
 MAX_QUERY_CHARS = _OWNER_QUERY_SCRIPT.MAX_QUERY_CHARS
 _read_payload = _OWNER_QUERY_SCRIPT._read_payload
 _query_once = _OWNER_QUERY_SCRIPT.query_once
+REPLICA_BINDING = (
+    "sha256:" + "c" * 64,
+    "sha256:" + "d" * 64,
+    "sha256:" + "e" * 64,
+    "sha256:" + "f" * 64,
+)
+REPLICA_FIELDS = (
+    "query_replica_descriptor_digest",
+    "query_replica_generation_id",
+    "query_replica_id",
+    "query_replica_path_identity_digest",
+)
 
 
 def test_owner_script_import_is_closed_environment_safe() -> None:
@@ -71,7 +83,12 @@ def query_once(payload, *, repo_root, **kwargs):
         lambda **values: _admission(Path(values["repo_root"])),
     )
     kwargs.setdefault("resolve_ssd_path", lambda: Path("E:/HoloIndex-test"))
-    kwargs.setdefault("resolve_replica_route", lambda **_values: object())
+    kwargs.setdefault(
+        "resolve_replica_route",
+        lambda **_values: SimpleNamespace(
+            expected_replica_binding=REPLICA_BINDING
+        ),
+    )
     return _query_once(payload, repo_root=repo_root, **kwargs)
 
 
@@ -92,7 +109,7 @@ def test_owner_query_script_import_is_bound_to_root_scripts_directory() -> None:
 
 
 def _success(root: Path) -> dict:
-    return {
+    result = {
         "ok": True,
         "source": "holoindex_owner_service",
         "query": "audit pfmall",
@@ -109,6 +126,8 @@ def _success(root: Path) -> dict:
         "retrieval_mode": "semantic",
         "no_holoindex_reindex_performed": True,
     }
+    result.update(dict(zip(REPLICA_FIELDS, REPLICA_BINDING)))
+    return result
 
 
 def test_read_payload_accepts_powershell_utf8_bom(monkeypatch) -> None:
@@ -214,7 +233,7 @@ def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
     calls: dict = {}
     bootstrap_calls: dict = {}
     route_calls: dict = {}
-    route = object()
+    route = SimpleNamespace(expected_replica_binding=REPLICA_BINDING)
 
     def query_owner(**kwargs):
         calls.update(kwargs)
@@ -252,6 +271,24 @@ def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
     assert calls["repo_root"] == authority
     assert result["workspace_overlay_present"] is True
     assert result["semantic_evidence_authority"] == "committed_head_only"
+
+
+def test_owner_query_rejects_response_for_different_replica(tmp_path: Path) -> None:
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        select_authority=_selection,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=True, status="CONFIGURED", error=""
+        ),
+        query_owner=lambda **_kwargs: {
+            **_success(tmp_path),
+            "query_replica_id": "sha256:" + "0" * 64,
+        },
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH"
 
 
 def test_missing_query_replica_route_fails_before_owner_query(tmp_path: Path) -> None:

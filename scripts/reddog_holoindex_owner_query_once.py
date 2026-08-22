@@ -51,6 +51,9 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_repli
     QUERY_REPLICA_REQUIRED_ERROR,
     resolve_query_replica_owner_route,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_replica_binding import (  # noqa: E402
+    parse_replica_binding,
+)
 
 
 MAX_QUERY_CHARS = 16_000
@@ -71,6 +74,12 @@ TRANSIENT_OWNER_ERRORS = frozenset(
         "SEMANTIC_BACKEND_UNAVAILABLE",
         "HOLOINDEX_TIER0_LOOKUP_FAILED",
     }
+)
+_REPLICA_PUBLIC_FIELDS = (
+    "query_replica_descriptor_digest",
+    "query_replica_generation_id",
+    "query_replica_id",
+    "query_replica_path_identity_digest",
 )
 OwnerHandoffResolver = Callable[[], tuple[str, str] | None]
 AuthoritySelector = Callable[[Path], HoloIndexAuthoritySelection]
@@ -253,6 +262,18 @@ class _OwnerQueryState:
     cleanup_required: bool = False
 
 
+def _response_matches_replica_route(
+    result: Mapping[str, Any], route: Any,
+) -> bool:
+    expected = parse_replica_binding(
+        getattr(route, "expected_replica_binding", None)
+    )
+    actual = parse_replica_binding(
+        tuple(result.get(key) for key in _REPLICA_PUBLIC_FIELDS)
+    )
+    return expected is not None and actual == expected
+
+
 def _owner_attempt(
     *, query: str, limit: int, authority_root: Path, runtime_root: Path,
     ssd_path: Path,
@@ -293,6 +314,10 @@ def _owner_attempt(
     )
     if not isinstance(result, Mapping):
         return _failure("owner_response_invalid", query=query), False, False
+    if result.get("ok") is True and not _response_matches_replica_route(result, route):
+        return _failure(
+            "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH", query=query
+        ), False, False
     retryable = process_owned and str(result.get("error") or "") in TRANSIENT_OWNER_ERRORS
     return result, retryable, True
 

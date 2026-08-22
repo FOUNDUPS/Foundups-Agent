@@ -1,5 +1,13 @@
 # RedDog ModLog
 
+## 2026-08-22 - Holo owner response replica identity
+
+- Rebound the packaged backend closure to preserve descriptor, generation,
+  replica, and path-identity fields through the owner client.
+- The one-shot bridge now compares those returned fields with the route it
+  admitted before startup. Missing or different replica identity fails closed;
+  no maintenance or routing authority was added.
+
 ## 2026-08-22 - Resident conversation envelope documentation alignment
 
 - Corrected the roadmap to distinguish the already-implemented AgentDB

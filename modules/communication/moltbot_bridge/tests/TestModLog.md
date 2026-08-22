@@ -1,3 +1,11 @@
+## 2026-08-22: Holo owner response-replica regressions
+
+- Added four missing-field client cases and one one-shot different-replica
+  rejection case, while retaining valid response projection.
+- Focused owner-client plus one-shot matrix: **68 passed**. Changed functions
+  remain at or below 50 lines; the unrelated inherited 56-line client helper
+  is unchanged and receives no exemption increase.
+
 ## 2026-08-21: WSP 62 production-authority decomposition regressions
 
 - Added exact bounded-file/function guards for the architect FIX promotion

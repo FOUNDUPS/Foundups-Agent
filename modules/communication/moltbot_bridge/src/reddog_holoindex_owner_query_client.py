@@ -26,11 +26,21 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     MIN_BEARER_TOKEN_CHARS,
     TOKEN_TOO_SHORT_ERROR,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_replica_binding import (
+    parse_replica_binding,
+)
 
 
 HOLOINDEX_QUERY_SERVICE_URL_ENV = "HOLOINDEX_QUERY_SERVICE_URL"
 HOLOINDEX_QUERY_SERVICE_TOKEN_ENV = "HOLOINDEX_QUERY_SERVICE_TOKEN"
 MAX_HOLOINDEX_SERVICE_RESPONSE_BYTES = 2_000_000
+_REPLICA_PUBLIC_FIELDS = (
+    "query_replica_descriptor_digest",
+    "query_replica_generation_id",
+    "query_replica_id",
+    "query_replica_path_identity_digest",
+)
+_EMPTY_REPLICA_BINDING = ("", "", "", "")
 
 
 @dataclass
@@ -45,6 +55,7 @@ class _OwnerResponseState:
     generation_id: str
     receipt_digest: str
     retrieval_mode: str
+    replica_binding: tuple[str, str, str, str]
 
 
 @dataclass(frozen=True)
@@ -324,6 +335,9 @@ def _response_state(payload: Mapping[str, Any]) -> _OwnerResponseState:
         if isinstance(raw_reasons, list)
         else []
     )
+    replica = parse_replica_binding(
+        tuple(payload.get(key) for key in _REPLICA_PUBLIC_FIELDS)
+    )
     return _OwnerResponseState(
         ok=ok,
         error=_error_code(
@@ -340,14 +354,33 @@ def _response_state(payload: Mapping[str, Any]) -> _OwnerResponseState:
         generation_id=str(payload.get("freshness_generation_id") or ""),
         receipt_digest=str(payload.get("freshness_receipt_digest") or ""),
         retrieval_mode=str(payload.get("retrieval_mode") or "").lower(),
+        replica_binding=replica or _EMPTY_REPLICA_BINDING,
+    )
+
+
+def _response_contract_checks(
+    state: _OwnerResponseState, *, success_contract_valid: bool,
+    expected_head: str, repo_root: Path,
+) -> tuple[tuple[bool, str, str], ...]:
+    return (
+        (not success_contract_valid, "HOLOINDEX_QUERY_SERVICE_CONTRACT_INVALID",
+         "owner_response_contract_invalid"),
+        (state.repo_head_sha != expected_head, "REPO_HEAD_MISMATCH",
+         "stale_repo_head_sha"),
+        (state.repo_root_digest != repository_root_digest(repo_root),
+         "REPO_ROOT_MISMATCH", "repository_root_mismatch"),
+        (not state.generation_id or not state.receipt_digest,
+         "MISSING_GENERATION_BINDING", ""),
+        (state.retrieval_mode != "semantic", "SEMANTIC_BACKEND_UNAVAILABLE", ""),
+        (state.replica_binding == _EMPTY_REPLICA_BINDING,
+         "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH",
+         "query_replica_binding_mismatch"),
     )
 
 
 def _apply_response_contract(
-    state: _OwnerResponseState,
-    payload: Mapping[str, Any],
-    expected_head: str,
-    repo_root: Path,
+    state: _OwnerResponseState, payload: Mapping[str, Any],
+    expected_head: str, repo_root: Path,
 ) -> None:
     contract_valid = bool(
         payload.get("schema_version") == "holoindex_query_service.v1"
@@ -366,32 +399,9 @@ def _apply_response_contract(
         state.ok = False
         state.error = "HOLOINDEX_QUERY_SERVICE_CONTRACT_INVALID"
         state.stale_reasons.append("owner_response_contract_invalid")
-    checks = (
-        (
-            not success_contract_valid,
-            "HOLOINDEX_QUERY_SERVICE_CONTRACT_INVALID",
-            "owner_response_contract_invalid",
-        ),
-        (
-            state.repo_head_sha != expected_head,
-            "REPO_HEAD_MISMATCH",
-            "stale_repo_head_sha",
-        ),
-        (
-            state.repo_root_digest != repository_root_digest(repo_root),
-            "REPO_ROOT_MISMATCH",
-            "repository_root_mismatch",
-        ),
-        (
-            not state.generation_id or not state.receipt_digest,
-            "MISSING_GENERATION_BINDING",
-            "",
-        ),
-        (
-            state.retrieval_mode != "semantic",
-            "SEMANTIC_BACKEND_UNAVAILABLE",
-            "",
-        ),
+    checks = _response_contract_checks(
+        state, success_contract_valid=success_contract_valid,
+        expected_head=expected_head, repo_root=repo_root,
     )
     for failed, failure_code, reason in checks:
         if state.ok and failed:
@@ -430,6 +440,7 @@ def _normalized_response(
         state.freshness = "STALE"
     if not state.ok and not state.stale_reasons:
         state.stale_reasons.append("holoindex_owner_query_failed")
+    replica_binding = dict(zip(_REPLICA_PUBLIC_FIELDS, state.replica_binding))
     return {
         "ok": state.ok,
         "source": "holoindex_owner_service",
@@ -448,6 +459,7 @@ def _normalized_response(
         "repo_root_digest": state.repo_root_digest,
         "retrieval_mode": state.retrieval_mode,
         "no_holoindex_reindex_performed": True,
+        **replica_binding,
     }
 
 

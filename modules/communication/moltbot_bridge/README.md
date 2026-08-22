@@ -1,5 +1,14 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
+## HoloIndex query replica truth
+
+The loopback owner client preserves the four public immutable-replica binding
+fields in every successful normalized result. The one-shot RedDog query bridge
+compares them with the exact route admitted before owner startup, so a response
+from an absent, malformed, or different replica fails closed before its query
+receipt is bound. This is response identity propagation only; it grants no
+maintenance, route-selection, repository, or model authority.
+
 ## Receipt-bound artifact model routing
 
 The resident bounded-artifact path does not infer models from provider names,
