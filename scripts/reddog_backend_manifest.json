@@ -1471,7 +1471,7 @@
     "holo_index/core/collection_injections.py": "967b17fcd41ec23e29cfd0ad4fca0808f0a6b01b3d46e5750f39ffcba8c35654",
     "holo_index/core/collection_search.py": "c987e68d5a64341b0073e8cfdf82c1bbd13f005d75d5cfa67ae8ce512ac29808",
     "holo_index/core/holo_index.py": "0d3fdb3d1318dd1fc5647caaf8a9a04242f540e771af613490dddc9bb65e87df",
-    "holo_index/core/indexing_engine.py": "643d5983f0b9e449b4085d75252d2bdc0fab0360243d2cbeb08dc33a22159bfd",
+    "holo_index/core/indexing_engine.py": "994abc381cf5e658bc399ef387131fdf3cfd3029e7b233865bf4d7c38c449d67",
     "holo_index/core/intelligent_subroutine_engine.py": "c4fd5edd7e7a19fda2d3e4eba3fb7c01f15fbf13ade904e1eff5c40116ca5521",
     "holo_index/core/introspection_engine.py": "b08df89435d8aacd14d472ffde6d6c108f1382a03875cbe60e84ee4da4c96c9c",
     "holo_index/core/module_scoring_subroutine.py": "aff9a0f3479107c3950e202684037d9d6c81dad20f5c85dd91b0c56ad6074007",

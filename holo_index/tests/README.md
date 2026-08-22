@@ -42,9 +42,21 @@ collections and a supplied fake embedding; it must not contact a model,
 network, persistent index, or resident owner.
 It also pins strict replacement of duplicate vector Tier-0 rows, exact WSP_62
 ceilings, non-strict exception warnings, and full-path case normalization.
+`test_indexer_zero_docs_observability.py` additionally runs the real docs
+index transform into the strict Tier-0 injection seam. It requires producer
+metadata to be repository-relative POSIX and proves the resulting root pair is
+queryable without normalization. The test uses only a temporary tree and fake
+collection; it does not open or mutate a live index.
 The WSP 62 check is not an exemption: it requires `search_engine.py < 1500`,
 `_search_collection <= 50`, and every function in the two new extraction
 helpers to remain `<= 50` lines.
+
+`test_graphrag_exporter.py` proves repository-relative hits resolve from the
+Holo authority root even under a foreign CWD and that `..` escapes are not
+read. Relative hits without an explicit root also fail closed; absolute legacy
+fixtures inside the authority root retain their existing behavior, while
+absolute escapes are rejected. GraphRAG currently consumes code/WSP hits, so
+this is adjacent path-contract coverage rather than a docs-index test.
 
 `test_module_intent_snapshot.py` proves shell-free HEAD pinning, deterministic
 ordering, final-NUL framing, all-record normalized paths, exact depth-three

@@ -18,12 +18,15 @@ Worker: W6
 
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+from holo_index.core.collection_injections import inject_module_tier0_candidates
 from holo_index.core.indexing_engine import IndexResult, index_docs_entries
+from holo_index.incremental_index_records import prepare_records
 
 
 # ---------------------------------------------------------------------------
@@ -113,6 +116,27 @@ class FakeHoloIndex:
         mock_collection = MagicMock()
         mock_collection.add = lambda **kwargs: self._add_calls.append(kwargs)
         return mock_collection
+
+
+class IndexedDocsCollection:
+    """Exact metadata view over one captured full-index add payload."""
+
+    def __init__(self, added: Dict[str, Any]) -> None:
+        self.added = added
+
+    def get(self, *, where, include):
+        assert include == ["documents", "metadatas"]
+        matches = [
+            (document, metadata)
+            for document, metadata in zip(
+                self.added["documents"], self.added["metadatas"]
+            )
+            if metadata["path"] == where["path"]
+        ]
+        return {
+            "documents": [item[0] for item in matches],
+            "metadatas": [item[1] for item in matches],
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -211,6 +235,57 @@ class TestIndexDocsEntriesZeroDocsScenario:
         assert result.indexed_count == 2  # Only 2 had content
         assert result.is_empty is False
         assert result.success is True
+
+    def test_full_index_metadata_is_queryable_by_strict_tier0_consumer(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The producer and exact Tier-0 consumer share one path identity."""
+        module = "modules/infrastructure/example_bridge"
+        module_root = tmp_path / module
+        module_root.mkdir(parents=True)
+        for name in ("README.md", "INTERFACE.md"):
+            (module_root / name).write_text(
+                f"# {name}\ncontract", encoding="utf-8"
+            )
+        fake_holo = FakeHoloIndex(project_root=tmp_path)
+        foreign_cwd = tmp_path / "foreign-cwd"
+        foreign_cwd.mkdir()
+        monkeypatch.chdir(foreign_cwd)
+        index_docs_entries(fake_holo)
+
+        added = fake_holo._add_calls[0]
+        paths = [metadata["path"] for metadata in added["metadatas"]]
+        assert paths == [f"{module}/INTERFACE.md", f"{module}/README.md"]
+
+        incremental = prepare_records(
+            operation=SimpleNamespace(
+                collection="navigation_docs",
+                repo_relative_path=f"{module}/README.md",
+                stable_id="hidx_docs_example",
+            ),
+            document="# README.md\ncontract",
+            plan=SimpleNamespace(
+                foundup_id="example_bridge", foundup_root=module
+            ),
+            gateway=SimpleNamespace(embed=lambda _text: [0.0] * 384),
+            receipt_source="test",
+        )
+        assert incremental[0].metadata["path"] in paths
+
+        docs: list = []
+        metas: list = []
+        dists: list = []
+        assert inject_module_tier0_candidates(
+            IndexedDocsCollection(added), docs, metas, dists, module, strict=True
+        ) == ()
+        assert [metadata["path"] for metadata in metas] == [
+            f"{module}/README.md",
+            f"{module}/INTERFACE.md",
+        ]
+        assert all(
+            metadata["_retrieval_provenance"] == "exact_metadata"
+            for metadata in metas
+        )
 
 
 class TestCLIRewardLogic:

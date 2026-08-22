@@ -106,6 +106,11 @@ retrieval performs zero-to-two exact metadata gets for module-root `README.md`
 and `INTERFACE.md`. Their Tier-0 order is README then INTERFACE. Exact rows use
 `retrieval_provenance: exact_metadata` and `similarity: null`; they are not
 fabricated vector results and do not pass through the vector similarity floor.
+`navigation_docs` producers MUST persist `path` as the repository-relative
+POSIX identity emitted by the canonical source set. Absolute checkout paths,
+backslashes, and query-time path rewriting are outside this contract.
+Consumers that dereference these paths MUST resolve them from
+`HoloIndex.project_root`, not the process CWD, and reject relative escapes.
 Canonical result metadata includes nullable `tier0_module_target`, set from
 the same generation-stable intent before docs retrieval. Consumers must not
 treat `exact_metadata` alone as proof that the query targeted that module.
