@@ -25,6 +25,11 @@
   `bandit`/`pip-audit`, and the scan reports inherited structure, parse, and
   exemption-expiry debt across the repository. The focused binding and module
   exemption regressions remain green; no clean FMAS claim is made.
+- The first independent CI test job correctly rejected a stale canonical test
+  registry after this file was added. The deterministic WSP-6 generator added
+  the binding suite to `modules-communication-moltbot-bridge-unit-part-07`,
+  shifted later shard boundaries, and `--check` then reported `CURRENT`
+  (`1,568` entries; `267` explicit quarantines).
 - Covered current TURN/STATUS/CANCEL admission, no AgentDB mutation, one-use
   capability retirement, stale revision/turn/TTL, new-scope rejection,
   current principal-signed E0 scope, missing/raising/malformed stores,

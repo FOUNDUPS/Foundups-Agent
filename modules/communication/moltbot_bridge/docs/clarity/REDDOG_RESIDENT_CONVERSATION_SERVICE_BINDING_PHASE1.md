@@ -15,13 +15,13 @@ dispatch a worker, or mutate AgentDB.
 
 ## 2. WSP 15 Allocation
 
-- Receipt: `sha256:65476fbc497c4aba12f5d4eb2b058d55801eecc757f4376b7fa3afe1ae2aea05`
+- Receipt: `sha256:5653bdce783c8b404e92cb2b010acf10b8e32e5219cc469c0f34c88e63241558`
 - Scores: complexity `5`, importance `5`, deferability `4`, impact `5`
 - Total/priority: `19 / P0`
 - Reasoning tier: `ULTRA`
 - Execution plane: local code and tests; WRE runtime attachment is not part of
   this layer.
-- Final allocation is bound to all 15 changed paths and five directly read
+- Final allocation is bound to all 16 changed paths and five directly read
   authority/transport sources; its canonical validator accepts with no
   rejection reasons.
 
@@ -95,6 +95,8 @@ dispatch a worker, or mutate AgentDB.
 - Cross-module transport/authentication/signing/tamper/WSP-62 matrix:
   `130 passed` with importlib collection.
 - Focused binding plus module exemption gates: `31 passed`.
+- Canonical test registry: deterministic generation and `--check` both report
+  `CURRENT` with `1,568` entries and `267` explicit quarantines.
 - Full local bridge closure: `6,220 passed`, `47 skipped`, `45 failed` in
   `17m24s`. At exact parent `f06ca1fcc4acc9e2645a3ed898bad844ac6df298`,
   44 failure node IDs reproduce. The remaining node passes at the parent and
