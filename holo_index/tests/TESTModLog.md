@@ -1,5 +1,29 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-23] Tier-0 producer/consumer identity regression
+
+- Added a production-shaped docs-indexer-to-strict-consumer regression after
+  a live named-module query exposed absolute metadata rows.
+- The regression rejects authority-root leakage by requiring exact
+  repository-relative POSIX paths and proves README/INTERFACE exact lookup in
+  canonical order.
+- Focused indexer plus Tier-0 suite on the combined parent: 58 passed. It used
+  a temporary tree and fake collection only; no live store, model, owner,
+  maintenance, reindex, or replica mutation occurred.
+- Added two GraphRAG regressions for authority-root resolution and traversal
+  rejection, then an independent P1 falsifier for missing-root CWD authority;
+  a second falsifier rejects absolute paths outside the root. The corrected
+  complete focused compatibility matrix is 64 passed on the combined parent.
+- Before merge reconciliation, adjacent Holo producer/incremental/intent/machine
+  suites passed 201. On the exact combined parent, the focused 64 tests and 42
+  owner-wrapper tests passed together as 106; RedDog backend
+  compatibility/preflight also passed.
+- A combined Python command timed out at 304 seconds without a result. Split
+  execution isolated the closure tier: seven generator contracts passed and
+  the eighth exposed only the old digest sentinel; that exact node passed in
+  60.67 seconds after rebinding. The timeout is non-evidence and recorded as
+  P1 test-scale debt rather than hidden or treated as success.
+
 ## [2026-08-22] Immutable snapshot query integration
 
 - Added snapshot-store round-trip, artifact-tamper, real Chroma-export, Holo

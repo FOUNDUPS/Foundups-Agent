@@ -1,5 +1,28 @@
 # HoloIndex Package ModLog
 
+## [2026-08-23] Repository-relative Tier-0 producer identity repair
+
+- Reproduced a live exact-HEAD `moltbot_bridge` owner query returning
+  `HOLOINDEX_TIER0_INCOMPLETE` with no reindex or authority mutation.
+- Traced the failure to `index_docs_entries`: `navigation_docs` stored absolute
+  authority-worktree paths while strict Tier-0 lookup used canonical
+  repository-relative POSIX paths.
+- Recovered the one-line producer invariant and production-shaped regression
+  from unmerged commit `b99eff3bb` instead of recreating the design or merging
+  its stale 880-line closure.
+- Added an indexer-to-strict-consumer test. No query fallback, lookup
+  normalization, hashing relaxation, maintenance, replica mutation, or live
+  activation is included. (WSP 00/15/22/50/62/84/97)
+- Adjacent hardening bound GraphRAG relative code/WSP hit reads to an explicit
+  `project_root`, rejected relative and absolute escapes plus missing-root CWD
+  fallback, and added foreign-CWD plus full/incremental path-parity coverage.
+  Legacy absolute paths remain compatible only inside that root. GraphRAG does
+  not currently consume the `navigation_docs` result bucket.
+- WSP_62 differential review: `indexing_engine.py` remains 1,600 lines and
+  `index_docs_entries` remains 102 lines, exactly matching the base. This
+  candidate replaces one producer expression without growth; the existing
+  roadmap-owned indexing-engine decomposition remains separate.
+
 ## [2026-08-22] Immutable snapshot-backed query replicas
 
 - Live owner admission proved that `HOLOINDEX_QUERY_READONLY=1` prevented

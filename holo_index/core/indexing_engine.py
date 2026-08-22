@@ -1009,7 +1009,7 @@ def index_docs_entries(holo: "HoloIndex") -> IndexResult:
         documents.append(doc_payload)
         metadata_entry: Dict[str, Any] = {
             "title": title,
-            "path": str(file_path),
+            "path": file_path.relative_to(holo.project_root).as_posix(),
             "summary": summary,
             "type": doc_type,
             "priority": _calculate_document_priority(doc_type, file_path),

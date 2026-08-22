@@ -1,5 +1,16 @@
 # RedDog ModLog
 
+## 2026-08-23 - Holo Tier-0 producer compatibility binding
+
+- Rebound the packaged backend manifest to the Holo docs producer fix that
+  emits repository-relative POSIX metadata paths for strict named-module
+  README/INTERFACE retrieval.
+- No extension behavior, authority, command surface, or version changed; live
+  use remains gated on merge plus governed exact-final-HEAD Holo activation.
+- Backend compatibility/preflight passed against the regenerated 1,376-file
+  closure; its manifest and independent test sentinel bind digest
+  `5271998070d6...`.
+
 ## 2026-08-22 - Holo owner response replica identity
 
 - Rebound the packaged backend closure to preserve descriptor, generation,

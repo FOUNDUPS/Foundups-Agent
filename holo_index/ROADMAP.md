@@ -1,5 +1,33 @@
 # HoloIndex Development Roadmap
 
+## [2026-08-23] Exact-module Tier-0 producer compatibility
+
+**Candidate complete, activation deferred:** a live exact-HEAD owner query
+proved that strict `moltbot_bridge` retrieval failed closed because the docs
+producer persisted authority-worktree absolute paths while the exact consumer
+requires repository-relative POSIX identities. The producer now shares the
+consumer's canonical identity, and a production-shaped regression runs the
+real index transform into the strict exact lookup. This repair does not weaken
+Tier-0 completeness, freshness, hashing, replica admission, or query-only
+isolation. As adjacent path-contract hardening, the legacy GraphRAG exporter
+now binds relative and absolute hits to an explicit authority root and rejects
+escapes or a missing root. It currently consumes code/WSP hits, not
+`navigation_docs`.
+
+Independent WSP_97 verification is complete, and RedDog PR #1538 plus PFMall
+PR #1539 are merged. This final source candidate is reconciled directly on
+their exact combined main. Next: merge this verified candidate, then run one
+governed exact-final-HEAD maintenance, replica activation, and live
+named-module owner query. The active `f06ca1f` generation remains immutable
+and truthful about its bytes but is not accepted as evidence for
+explicit-module Tier-0 retrieval.
+
+**P1 test-scale debt:** the eight backend-manifest generator contracts rebuild
+the same 1,376-file closure repeatedly and took more than five minutes locally.
+Evaluate one content-bound per-tree closure fixture for the adversarial matrix,
+while retaining an independent cold-regeneration sentinel. Performance work
+must not weaken omission, untracked-import, or digest checks.
+
 ## [2026-08-20] RedDog Integration Status
 
 Module-intent, isolated snapshot runtime, and the immutable replica consumer

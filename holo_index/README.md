@@ -54,6 +54,11 @@ zero-to-two bounded exact metadata lookups in the admitted
 `INTERFACE.md` (rows already present are deduplicated). Exact metadata rows
 declare `retrieval_provenance: exact_metadata` and a null vector similarity;
 they are ordered ahead of nested docs and are exempt from the vector floor.
+The docs producer stores `path` as a canonical repository-relative POSIX
+value. This is the same identity consumed by strict exact lookups; absolute
+authority-worktree paths are neither published nor normalized at query time.
+File-reading consumers bind relative hits to the Holo authority root and
+reject traversal outside it, so behavior is independent of process CWD.
 Canonical nullable metadata `tier0_module_target` carries the producer's
 generation-stable intent; exact-row provenance alone is not an intent claim.
 Strict owner mode replaces any vector-returned root rows with exactly one

@@ -1,5 +1,27 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-23] HoloIndex Tier-0 Producer/Consumer Identity Repair
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 84, 97
+
+- A governed exact-HEAD RedDog owner query failed closed for explicit
+  `moltbot_bridge` intent even though both Tier-0 contracts were tracked.
+- Corrected the docs producer to persist the repository-relative POSIX path
+  identity already required by strict exact lookup, with a production-shaped
+  producer-to-consumer regression and incremental parity. Adjacent GraphRAG
+  path handling now requires an explicit authority root for relative code/WSP
+  hits, keeps legacy absolute hits only within that root, and rejects escapes
+  or missing-root CWD fallback.
+- Reused the useful invariant from unmerged `b99eff3bb` without importing its
+  stale broad closure. Active replicas were not changed; promotion requires a
+  later governed exact-final-HEAD maintenance and activation transaction.
+- Validation before merge reconciliation: 201 adjacent Holo tests and 42
+  owner-wrapper tests passed. On the exact combined parent, the focused
+  producer/Tier-0/GraphRAG plus owner-wrapper matrix passed 106 tests; RedDog
+  compatibility/preflight also passed. The repeated full-closure generator
+  tier is separately recorded as scaling debt; its stale digest sentinel was
+  fixed and the exact previously failing contract then passed.
+
 ## [2026-08-22] RedDog Resident Conversation Transport Contract
 
 **WSP Protocol:** WSP 00, 15, 22, 50, 62, 73, 97

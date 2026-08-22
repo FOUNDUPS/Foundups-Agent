@@ -28,6 +28,24 @@ class GraphRAGExporter:
 
     def __init__(self, holo_index: Any):
         self._holo_index = holo_index
+        project_root = getattr(holo_index, "project_root", None)
+        self._project_root = Path(project_root).resolve() if project_root else None
+
+    def _resolve_source_path(self, raw_path: Any) -> Optional[Path]:
+        """Bind source hits to the explicit Holo authority root."""
+        if self._project_root is None:
+            return None
+        candidate = Path(str(raw_path or ""))
+        resolved = (
+            candidate.resolve()
+            if candidate.is_absolute()
+            else (self._project_root / candidate).resolve()
+        )
+        try:
+            resolved.relative_to(self._project_root)
+        except ValueError:
+            return None
+        return resolved
 
     # ------------------------------------------------------------------ #
     # Collection helpers
@@ -59,7 +77,9 @@ class GraphRAGExporter:
                 path = hit.get("path")
                 if not path:
                     continue
-                file_path = Path(path)
+                file_path = self._resolve_source_path(path)
+                if file_path is None:
+                    continue
                 if not file_path.exists():
                     continue
                 if file_path.suffix.lower() not in self.SUPPORTED_SUFFIXES:
