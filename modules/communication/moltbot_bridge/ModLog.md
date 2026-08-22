@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-22: Resident conversation request-to-scope binding
+
+- Added an admission-only bridge from the strict Digital Twin `TURN`,
+  `STATUS`, and `CANCEL` envelope to one authenticated current AgentDB scope
+  revision.
+- The bridge consumes the existing opaque one-use capability, verifies record
+  shape/digest/authentication plus principal/session/scope equality, expiry,
+  exact revision, and turn lineage, then emits content-free non-authoritative
+  evidence without reserving CAS or mutating state.
+- Empty conversation IDs remain fail closed pending trusted scope resolution;
+  durable idempotency and operation handlers remain required before a live
+  VSIX/PFMall adapter.
+- A WSP 62 test exposed that adding the bridge to the existing lifecycle file
+  would push it to 490 lines. Extracted the distinct admission boundary into a
+  243-line module with a 37-line maximum function and no exemption.
+- Compressed the legacy interface registry from 1,529 to 1,502 lines while
+  adding the contract, and ratcheted its exact temporary ceiling down from
+  1,519 to 1,502; no exemption was added or widened.
+- Added the WSP 97 high-risk assumption audit and synchronized working,
+  contract, intent, navigation, and verification memory. WSP 00/15/22/50/62/
+  84/97.
+
 ## 2026-08-22: Holo owner replica response binding
 
 - Preserved the service's exact four-field query-replica capability through

@@ -32,8 +32,11 @@ conversation state, AgentDB, or any FoundUp Memex.
 - Complete: strict transport-neutral `TURN` / `STATUS` / `CANCEL` request
   envelope with CAS revision, digest bindings, nonce/idempotency, five-minute
   freshness, identity/effect injection rejection, and content-free projection.
-- Next: bind that envelope to verified resident session authority and current
-  AgentDB CAS state; this authenticated service does not yet exist.
+- Complete: admission-only binding for existing conversations consumes one
+  verified session capability and binds the envelope to the exact authenticated
+  AgentDB record/revision without mutation or authority transfer.
+- Next: trusted new-scope resolution, durable request idempotency, and
+  operation-specific TURN/STATUS/CANCEL handlers with immediate CAS recheck.
 - Next: thin PFMall/phone transport adapter; the browser remains a client, not
   the model/OpenClaw host.
 - Deferred: asynchronous critics, durable cross-device history, bounded Memex/

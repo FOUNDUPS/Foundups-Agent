@@ -1,5 +1,20 @@
 # Tests - OpenClaw Bridge
 
+## Resident conversation request-to-scope binding
+
+`test_reddog_resident_conversation_scope_binding.py` uses the existing
+temporary SQLite AgentDB fixture and opaque conversation capabilities. It
+proves existing TURN/STATUS/CANCEL admission, content-free output, zero
+mutation, one-use consumption, exact revision/turn checks, expiry, missing
+state, current principal-signed E0 scope, forged/cross-session/cross-principal
+authority, attacker-rehashed record tampering, dependency failure, and WSP 62
+file/function limits.
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py -q
+```
+
 ## HoloIndex owner replica response contracts
 
 `test_reddog_holoindex_owner_client_transport.py` proves a successful owner

@@ -52,15 +52,16 @@ control operations require a conversation ID and non-negative CAS revision.
 
 The envelope is deliberately untrusted and zero-authority. It has no fields for
 principal, FoundUp, credential, provider/model, effect ceiling, or work
-authority. Those bindings belong to the future resident service and must be
-derived from verified session authority and current AgentDB state. The
-content-free binding contains no operator text and explicitly grants neither
-identity nor effect authority. Its unkeyed digest is structural integrity and
-equality evidence, not authentication or replay enforcement.
+authority. The resident communication layer now binds an existing-conversation
+envelope to one consumed session capability and the exact authenticated
+AgentDB revision. The resulting content-free evidence still grants neither
+identity nor effect authority, reserves no CAS, and provides no durable replay
+enforcement.
 
 This interface does not expose an HTTP endpoint, authenticate a session, mutate
 AgentDB, invoke a model, or dispatch work. VSIX/PFMall adapters remain gated on
-the authenticated service binding and shared cross-surface vectors.
+trusted new-scope resolution, a durable idempotency journal, operation handlers,
+and shared cross-surface vectors.
 
 ---
 

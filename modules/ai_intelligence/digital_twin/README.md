@@ -19,8 +19,12 @@ boundary for `TURN`, `STATUS`, and `CANCEL`. It accepts only content, opaque
 digest bindings, CAS revision, nonce/idempotency, and a maximum five-minute
 validity window. Principal, FoundUp, credential, provider/model, effect, and
 work-authority fields are deliberately outside the client envelope and must be
-derived and revalidated by the future authenticated resident service. The
-contract adds no listener, persistence, authentication, model call, or effect.
+derived and revalidated by the resident host. The communication layer now has
+an admission-only existing-scope binding that consumes one opaque session
+capability and verifies the exact current AgentDB revision without mutation.
+The client contract itself still adds no listener, persistence,
+authentication, model call, or effect. Live adapters remain gated on trusted
+new-scope resolution, durable idempotency, and operation handlers.
 
 `principal_memex_projection.py` implements the first structural, read-only
 Principal Memex projection. It validates provenance identifiers, canonical

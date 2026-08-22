@@ -2,6 +2,16 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-08-22 - Resident conversation authenticated-scope binding
+
+- Synchronized the Digital Twin transport documentation with the new resident
+  communication-layer admission boundary for existing conversations.
+- Clarified that the client envelope remains zero-authority while the host
+  consumes a separate opaque session capability and verifies exact AgentDB
+  state without mutation.
+- Kept live VSIX/PFMall transport blocked on trusted new-scope resolution,
+  durable idempotency, operation handlers, and shared acceptance vectors.
+
 ## 2026-08-22 - Resident conversation transport contract phase 1
 
 - Added a strict transport-neutral request envelope for RedDog `TURN`,

@@ -1,3 +1,52 @@
+## 2026-08-22: Resident conversation request-to-scope regressions
+
+- Test-first collection initially failed because the binding did not exist.
+- The first implementation produced 10 behavioral passes but failed its WSP
+  62 guard after growing the existing lifecycle source to 490 lines. The
+  bridge was extracted into its own bounded admission module without weakening
+  the guard.
+- Focused adversarial matrix: **15 passed** with expected repo-level pytest
+  configuration warnings and no runtime/network dependency.
+- Focused branch coverage: **100%** (`106` statements, `24` branches).
+- Cross-module transport/authentication/signing/tamper/WSP-62 matrix:
+  **130 passed** using `--import-mode=importlib`. The default prepend import
+  mode cannot collect both modules' same-basename `tests` packages in one
+  process; separate module runs also passed (`36` Digital Twin + `94` bridge).
+- Full local bridge closure (`406` test files; approximately `5,179` test
+  functions): **6,220 passed, 47 skipped, 45 failed** in `17m24s` with plugin
+  autoload disabled. Exact-parent differential at
+  `f06ca1fcc4acc9e2645a3ed898bad844ac6df298` reproduced 44/45 candidate
+  failures. The remaining hardening test passed at the parent and passed when
+  isolated on the candidate, identifying full-suite order pollution rather
+  than a persistent candidate regression. The 44 reproduced failures are
+  inherited environment, stale-boundary, and WSP-62 debt; this is not a clean
+  promotion-suite claim. Independent CI remains required.
+- Repository-wide FMAS was also run and is not a pass: the environment lacks
+  `bandit`/`pip-audit`, and the scan reports inherited structure, parse, and
+  exemption-expiry debt across the repository. The focused binding and module
+  exemption regressions remain green; no clean FMAS claim is made.
+- The first independent CI test job correctly rejected a stale canonical test
+  registry after this file was added. The deterministic WSP-6 generator added
+  the binding suite to `modules-communication-moltbot-bridge-unit-part-07`,
+  shifted later shard boundaries, and `--check` then reported `CURRENT`
+  (`1,568` entries; `267` explicit quarantines).
+- Covered current TURN/STATUS/CANCEL admission, no AgentDB mutation, one-use
+  capability retirement, stale revision/turn/TTL, new-scope rejection,
+  current principal-signed E0 scope, missing/raising/malformed stores,
+  forged/cross-session/cross-principal authority,
+  attacker-rehashed record authentication, dependency exceptions, content
+  exclusion, and WSP 62 ceilings.
+
+**Commands**:
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py -q
+python -m coverage run --branch --source=modules.communication.moltbot_bridge.src.reddog_resident_conversation_scope_binding -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py -q
+python -m coverage report -m
+python -m pytest --import-mode=importlib modules/ai_intelligence/digital_twin/tests/test_resident_conversation_transport_contract.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py modules/communication/moltbot_bridge/tests/test_reddog_authenticated_conversation_scope_state.py modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_authentication.py modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_signing.py modules/communication/moltbot_bridge/tests/test_reddog_conversation_session_authority_source.py modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_tamper_and_rotation.py modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py -q
+```
+
 ## 2026-08-22: Holo owner response-replica regressions
 
 - Added four missing-field client cases and one one-shot different-replica

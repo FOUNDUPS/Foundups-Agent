@@ -109,42 +109,15 @@ cannot reuse the backend. Specialized proposal, control-loop, manifest,
 verified-outcome, conversation, and peer-handshake policies retain their own
 domain-specific validation.
 ## Authenticated RedDog conversation scope
-`authenticate_conversation_scope()` derives the principal only from a verified
-`sess.v1` subject and returns an opaque one-use capability. Create, resume, and
-advance persist bounded authenticated state in AgentDB with insert/CAS, expiry,
-and turn lineage. Scope schema v3 adds `foundup`, `principal`, and `comparison`.
-FoundUp scope retains evidence, snapshot, HEAD, and HoloIndex bindings; only
-evidence already admitted by grounding may persist. Principal and comparison
-scope forbid repository/operational bindings, and comparison requires at least
-two FoundUps already present in the principal credential. Neither can promote work.
-`prepare_conversation_work_context()` binds one current revision to a verified
-resident intent. Backend determination rejects stale scope before a model call.
-`commit_pending_conversation_work_proposal()` CAS-stores one exact FIX preview;
-`verify_pending_conversation_work_proposal()` issues its one-use capability.
-Signed WSP 15 promotion consumes it only after current-record, FoundUp, Memex,
-model, and existing principal-signature checks. Admission schema v2 signs the
-complete conversation/snapshot lineage. Neither state nor capability grants
-work authority. `authenticate_signed_conversation_scope()` is the production
-editor source: it verifies a strict principal-signed credential using only the
-current-generation public key, enforces repository/audience/transport/TTL and
-FoundUp scope, and yields the same opaque operation-local capability. The
-credential never enters AgentDB, model context, receipts, logs, or child env.
-Principal-signed sessions persist scope v3 only through the existing isolated
-E0 signer. Scope v2 records fail closed and are not inferred or upgraded because
-they lack the immutable kind binding. The signer re-verifies the credential
-against current principal authority on every use, signs the complete record and
-credential, and advances a signer-owned monotonic conversation head. AgentDB
-first stages the exact
-unsigned payload as non-authoritative pending state; only a matching E0 response
-may atomically publish it. Exact replay supports crash recovery; altered pending
-content, rollback, fork, nonce replay, stale authority, wrong key epoch, forged
-peer metadata, or missing policy/resolver/anchor fails closed. Restarted consumers
-must present the same valid credential and verify the signature and attestation.
-Legacy intake HMAC remains supported; neither scheme grants work or repository
-authority. Config v3 is the only bootable schema and stale v2 fails before service
-invocation. The public supplier retains its 16 KiB request budget; the conversation
-bootstrap explicitly supplies the reviewed 160 KiB bound. Lower bounds omit
-conversation signing rather than weakening the socket limit.
+`authenticate_conversation_scope()` derives the principal only from a verified `sess.v1` subject and returns an opaque one-use capability. Create, resume, and advance persist bounded authenticated state in AgentDB with insert/CAS, expiry, and turn lineage. Scope schema v3 supports `foundup`, `principal`, and `comparison`; only FoundUp scope retains grounded evidence/snapshot/HEAD/Holo bindings or may later request work promotion.
+
+`bind_resident_conversation_request_to_authenticated_scope(store, capability, request, now_epoch)` consumes that capability and admits one existing `TURN`, `STATUS`, or `CANCEL` envelope only after rechecking envelope freshness, current AgentDB record shape/digest, record authentication, principal/session/scope equality, expiry, exact revision, and turn lineage. Its `reddog_resident_conversation_scope_binding.v1` result contains only opaque request/state digests and explicit no-authority flags. It does not reserve CAS, persist idempotency, return operator text, mutate state, call a model, or dispatch work. Empty conversation IDs reject until trusted new-scope resolution exists; every later mutation must re-authenticate current state and repeat AgentDB CAS.
+
+`prepare_conversation_work_context()` binds one current revision to a verified resident intent. Backend determination rejects stale scope before a model call. `commit_pending_conversation_work_proposal()` CAS-stores one exact FIX preview, and `verify_pending_conversation_work_proposal()` issues its one-use capability. Signed WSP 15 promotion additionally rechecks current record, FoundUp, Memex, model, and principal signature. Neither state nor capability grants work authority.
+
+`authenticate_signed_conversation_scope()` is the production editor source: it uses the current-generation public key and enforces repository, audience, transport, TTL, principal, and FoundUp scope. The credential never enters AgentDB, model context, receipts, logs, or child env. Principal-signed scope v3 persists only through the isolated E0 signer; v2 fails closed. AgentDB stages unsigned payload as non-authoritative pending state and publishes only a matching E0 response. Exact replay supports crash recovery; altered content, rollback/fork, nonce replay, stale authority, wrong key epoch, forged peer metadata, or missing policy/resolver/anchor rejects. Restart requires the same valid credential plus signature and attestation verification.
+
+Legacy intake HMAC remains test/backward-compatible and grants no work or repository authority. Config v3 is the only bootable schema. The public signer supplier remains capped at 16 KiB; the reviewed conversation bootstrap uses 160 KiB rather than weakening signer validation.
 
 ## Public API
 ### Architect proposal validity and execution readiness

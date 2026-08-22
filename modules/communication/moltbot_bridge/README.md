@@ -302,9 +302,15 @@ generation/freshness receipt, FoundUp, grounding receipt, and intent.
 Conversation state and the pending capability do not grant work authority.
 Only a `foundup` scope may request the existing proposal-promotion chain.
 WRE/OpenClaw/Hermes dispatch, repository mutation, and merge remain downstream
-gates. The extension now has a public-key-only authenticated-session source.
-Durable conversation-state consumption remains blocked until that source
-receipt is bound into the P1 state lifecycle.
+gates. `reddog_resident_conversation_scope_binding.py` now consumes one opaque
+authenticated-session capability and binds an existing `TURN`, `STATUS`, or
+`CANCEL` envelope to the exact current AgentDB record, revision receipt,
+record digest, session binding, and turn lineage. It returns content-free
+evidence, does not reserve the CAS revision, and performs no state mutation.
+The extension still needs a host-side session-capability adapter, trusted
+new-scope resolution, durable idempotency, and operation handlers before live
+conversation traffic is enabled. The WSP 97 assumption audit is attached at
+`docs/clarity/REDDOG_RESIDENT_CONVERSATION_SERVICE_BINDING_PHASE1.md`.
 
 ## Upstream Agent Execution Boundary
 
