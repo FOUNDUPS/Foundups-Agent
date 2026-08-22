@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-import os
 import importlib
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -18,6 +20,35 @@ def _model_copy_module():
     return importlib.import_module(
         "modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_acceptance_model_copy"
     )
+
+
+@pytest.mark.parametrize(
+    "first",
+    (
+        "reddog_holoindex_acceptance_guards",
+        "reddog_holoindex_artifact_manifest",
+        "reddog_holoindex_acceptance_model_copy",
+    ),
+)
+def test_acceptance_modules_import_in_any_order(first: str) -> None:
+    package = "modules.infrastructure.foundups_mcp_bridge.src"
+    script = (
+        "import importlib;"
+        f"importlib.import_module({package!r} + '.' + {first!r});"
+        f"g=importlib.import_module({package!r} + '.reddog_holoindex_acceptance_guards');"
+        f"a=importlib.import_module({package!r} + '.reddog_holoindex_artifact_manifest');"
+        f"c=importlib.import_module({package!r} + '.reddog_holoindex_acceptance_model_copy');"
+        "assert g.ModelCopyLimits is a.ModelCopyLimits;"
+        "assert g.ExpectedArtifactFile is a.ExpectedArtifactFile;"
+        "assert g.copy_model_snapshot is c.copy_model_snapshot"
+    )
+    environment = os.environ.copy()
+    environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    result = subprocess.run(
+        [sys.executable, "-c", script], cwd=Path(__file__).resolve().parents[4],
+        env=environment, capture_output=True, text=True, timeout=30, check=False,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def _model(root: Path) -> Path:

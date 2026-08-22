@@ -390,13 +390,26 @@ from .reddog_private_json_publication import (  # noqa: E402
 )
 
 
-from .reddog_holoindex_acceptance_model_copy import (  # noqa: E402
-    ArtifactFileProof,
-    ExpectedArtifactFile,
-    ModelCopyLimits,
-    ModelCopyProof,
-    copy_model_snapshot,
+_MODEL_COPY_EXPORTS = frozenset(
+    {
+        "ArtifactFileProof",
+        "ExpectedArtifactFile",
+        "ModelCopyLimits",
+        "ModelCopyProof",
+        "copy_model_snapshot",
+    }
 )
+
+
+def __getattr__(name: str) -> object:
+    """Resolve model-copy facade exports without an eager import cycle."""
+    if name not in _MODEL_COPY_EXPORTS:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    from . import reddog_holoindex_acceptance_model_copy as model_copy
+
+    value = getattr(model_copy, name)
+    globals()[name] = value
+    return value
 
 
 __all__ = [

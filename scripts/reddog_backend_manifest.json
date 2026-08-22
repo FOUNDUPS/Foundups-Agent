@@ -2423,7 +2423,7 @@
     "modules/infrastructure/foundups_mcp_bridge/src/holo_tools.py": "bf70c4a75cc58d069ae5e087f0eec3300301dc44b91c5d3bba9097c374d264ef",
     "modules/infrastructure/foundups_mcp_bridge/src/impact_scoring.py": "764cfd66d55aa9002669cff7bb07bbbcfd800d2eb8f7d52159a74715f6f92114",
     "modules/infrastructure/foundups_mcp_bridge/src/overseer_tools.py": "7d8f2056cded3061e8611ab9472258f832e5e3f871f25eedb3b8702f8de97d03",
-    "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_guards.py": "acfe33e7f233171f18c74efa4b9ff1a8f66ceeb57983ff0ea116f7e1c8896889",
+    "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_guards.py": "a1a893eb25cea61d75a27b64cb03a2ea5a35d0540f904e0f4cc00ea2283aee89",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_model_copy.py": "3d9b4ea7b8d4dfab3113e6a811b40f3c72d474c021609dab2d89acdba43846f8",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_model_descriptors.py": "79b0436837c602f2b4e814a1144bac1bac6254161173d6fa3ef210cd8334f870",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_receipt_proof.py": "53dfcccb3ee660eb2f9c0c06b36c0e3d87b4deec84101ef2707e62a2c9a724dc",

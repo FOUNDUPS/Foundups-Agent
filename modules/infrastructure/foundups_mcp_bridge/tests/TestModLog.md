@@ -1,5 +1,16 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-22] Acceptance import-order regression
+
+- Added isolated subprocess coverage for every first-import order across the
+  acceptance guard facade, artifact manifest, and model copier. The regression
+  also proves the facade returns the canonical manifest types and copier rather
+  than substitute schema objects.
+- Exact importlib-mode replica reproduction changed from **2 failed / 32 passed
+  / 2 skipped** to **34 passed / 2 skipped**. The combined guard, model-copy,
+  materializer, candidate-acceptance, and descriptor closure is **95 passed /
+  2 platform skips**; differential WSP 62 inspection reports no new debt.
+
 ## [2026-08-22] Live replica Windows scalability regressions
 
 - Added canonical mixed-case manifest ordering coverage and a 602-file Windows

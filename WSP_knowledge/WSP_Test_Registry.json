@@ -16021,7 +16021,9 @@
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
