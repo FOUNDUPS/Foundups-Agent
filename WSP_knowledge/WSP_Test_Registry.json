@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1566,
+  "total_tests": 1567,
   "quarantined_tests": 267,
   "tests": [
     {
@@ -3635,6 +3635,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Read-only 012 Principal Memex projection contract tests."
+    },
+    {
+      "id": "test::modules::ai_intelligence::digital_twin::tests::test_resident_conversation_transport_contract",
+      "path": "modules/ai_intelligence/digital_twin/tests/test_resident_conversation_transport_contract.py",
+      "owner": "modules/ai_intelligence/digital_twin",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-digital-twin-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial tests for the resident RedDog conversation envelope."
     },
     {
       "id": "test::modules::ai_intelligence::digital_twin::tests::test_trajectory_logger",

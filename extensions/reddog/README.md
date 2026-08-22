@@ -6,7 +6,7 @@ Version: 0.4.105
 
 `conversation_plane_policy.js` keeps intent, reasoning depth, and effect ceiling independent; unknown text is `CHAT / FAST / NONE`, and risk never raises effects.
 Chat gets no repository/HoloIndex context or work authority; shared Python/JavaScript vectors run through `npm run test:conversation`.
-OpenClaw is the resident 0102 execution/supervision layer, Hermes is bounded, and the authenticated PFMall/phone adapter remains specified, not implemented.
+OpenClaw is the resident 0102 execution/supervision layer and Hermes is bounded. The backend now has a strict zero-authority turn/status/cancel envelope; authenticated service binding and VSIX/PFMall/phone transport adapters remain specified, not implemented.
 
 ## Model-routing authority
 

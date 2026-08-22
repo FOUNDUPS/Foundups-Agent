@@ -14,6 +14,14 @@ text can emit at most a proposal and cannot authorize bounded execution.
 The contract performs no model, memory, HoloIndex, database, repository, or
 network operation.
 
+`resident_conversation_transport_contract.py` defines the next transport-neutral
+boundary for `TURN`, `STATUS`, and `CANCEL`. It accepts only content, opaque
+digest bindings, CAS revision, nonce/idempotency, and a maximum five-minute
+validity window. Principal, FoundUp, credential, provider/model, effect, and
+work-authority fields are deliberately outside the client envelope and must be
+derived and revalidated by the future authenticated resident service. The
+contract adds no listener, persistence, authentication, model call, or effect.
+
 `principal_memex_projection.py` implements the first structural, read-only
 Principal Memex projection. It validates provenance identifiers, canonical
 content/item/projection digests, principal isolation, sensitivity, and
@@ -95,6 +103,8 @@ Phase 3: Tool-Use Training
 | `comment_drafter.py` | RAG → LLM → Guardrails pipeline |
 | `decision_policy.py` | Comment/like/ignore heuristics |
 | `trajectory_logger.py` | JSONL training data collector |
+| `conversation_plane.py` | Deterministic intent/depth/effect classification |
+| `resident_conversation_transport_contract.py` | Strict zero-authority turn/status/cancel envelope |
 
 ## Pipeline
 

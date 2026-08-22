@@ -32,6 +32,38 @@ closed.
 
 ---
 
+## Resident conversation transport envelope
+
+```python
+from modules.ai_intelligence.digital_twin.src.resident_conversation_transport_contract import (
+    request_from_mapping,
+)
+
+request = request_from_mapping(untrusted_payload, now_epoch=trusted_now)
+receipt_binding = request.content_free_binding()
+```
+
+The exact `reddog_resident_conversation_request.v1` shape supports `TURN`,
+`STATUS`, and `CANCEL`. It binds request, conversation, revision, turn, client
+nonce, idempotency key, issue time, expiry, and bounded NFKC-normalized operator
+text. All opaque identifiers use canonical `sha256:` shape. A new conversation
+turn uses an empty `conversation_id` with revision `-1`; existing turns and
+control operations require a conversation ID and non-negative CAS revision.
+
+The envelope is deliberately untrusted and zero-authority. It has no fields for
+principal, FoundUp, credential, provider/model, effect ceiling, or work
+authority. Those bindings belong to the future resident service and must be
+derived from verified session authority and current AgentDB state. The
+content-free binding contains no operator text and explicitly grants neither
+identity nor effect authority. Its unkeyed digest is structural integrity and
+equality evidence, not authentication or replay enforcement.
+
+This interface does not expose an HTTP endpoint, authenticate a session, mutate
+AgentDB, invoke a model, or dispatch work. VSIX/PFMall adapters remain gated on
+the authenticated service binding and shared cross-surface vectors.
+
+---
+
 ## Principal Memex read-only projection
 
 ```python

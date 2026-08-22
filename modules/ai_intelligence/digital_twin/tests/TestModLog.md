@@ -15,6 +15,20 @@
 
 ## Entries
 - 2026-08-22
+  - Command: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q -p pytest_cov modules/ai_intelligence/digital_twin/tests/test_resident_conversation_transport_contract.py --cov=modules.ai_intelligence.digital_twin.src.resident_conversation_transport_contract --cov-report=term-missing --cov-fail-under=100`
+  - Result: PASS (36/36); 100% statement and branch coverage for the new contract.
+  - Coverage: exact shape, authority-field injection, native JSON types,
+    operation/revision semantics, digest bindings, expiry/future clock bounds,
+    use-time freshness, Unicode/control characters, content-free projection,
+    forged object rejection, and WSP-62 limits.
+  - Environment note: two pre-existing pytest configuration warnings reported
+    missing async plugin options; no test was skipped, deselected, or failed.
+  - Module closure: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q modules/ai_intelligence/digital_twin/tests` PASS (117/117).
+  - Dependency closure: `cd extensions/reddog && npm run test:conversation`
+    PASS (15 JavaScript vectors; 32 Python contracts).
+  - Registry: `python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check`
+    PASS (`current`, 1,567 tracked tests; new test is collectable and not quarantined).
+- 2026-08-22
   - Command: `cd extensions/reddog && npm run test:conversation`
   - Result: PASS (15 shared JS vectors; 32 Python contract tests).
   - Coverage: default chat, read-only research/status, proposal-only work and
