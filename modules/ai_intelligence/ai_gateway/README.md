@@ -41,9 +41,16 @@ remains empty and therefore fails any modality requirement.
 
 ## Nemotron Shadow Topology Proposals
 
-`model_topology_proposal_lm_studio.py` calls the exact already-loaded local
-`nvidia/nemotron-3.5-lightning` ID through LM Studio's native reasoning-off
-route. It never starts LM Studio and never falls back to another provider. The
+`model_topology_proposal_lm_studio.py` acquires one exact local
+`nvidia/nemotron-3.5-lightning` model transaction and calls the verified
+instance through LM Studio's native reasoning-off route. It borrows a
+pre-existing instance or explicitly loads and then unloads its own instance;
+managed loading is serialized per physical node/port and admitted only when no
+other instance is resident. It never starts LM Studio, downloads a model,
+evicts a pre-existing model, or falls back. The content-addressed lifecycle
+receipt is jointly bound into the proposer call evidence; neither hash is an
+authentication boundary. Existing short-lived signed proposer provenance
+authenticates the pair before downstream authority. The
 model returns only two compact ordered model-ID arrays; deterministic code owns
 role/provider/catalog/requirements projection. `model_topology_proposal_admission.py`
 then rejects unknown models, provider substitutions, role/topology drift,
@@ -56,9 +63,10 @@ verifier, promote a champion, or bind runtime defaults.
 
 The configured gateway runner now prepares and reserves the complete bounded
 task-by-candidate call set before first egress. It then executes only those exact
-members and records content-free, content-addressed call evidence. A live
-two-task run used the exact loaded Nemotron route with no fallback; offline
-tests remain the release authority.
+members and records content-free, content-addressed call evidence. The earlier
+live two-task run proved the exact model route but predated native
+residency/ownership receipts; it is historical evidence, not release authority.
+Offline lifecycle and proposer contracts are the current release authority.
 
 `model_autoresearch_campaign_configured_runtime.py` owns configured runner
 construction, canonical prompt-guard injection, typed campaign-member

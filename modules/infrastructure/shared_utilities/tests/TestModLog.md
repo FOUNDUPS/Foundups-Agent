@@ -1,5 +1,23 @@
 # TestModLog
 
+## 2026-08-22 - LM Studio Lifecycle Hardening
+
+- Added deterministic native inventory, exact lease ownership, node-wide
+  capacity, maximum-context, managed load/unload, restart recovery/quarantine,
+  load-stage cancellation, authentication, loopback-alias, use-time
+  instance/JIT, structural receipt binding, and real cross-process lock coverage.
+- Focused cross-module command passed: 121 tests with one platform-specific skip
+  across shared utilities, topology proposal/admission, authenticated proposer
+  provenance, and runtime-artifact safety under the documented importlib-mode
+  command and a unique outside-repository pytest base directory.
+- Moved the real Windows spawned-process lock target into an import-stable test
+  support module; this preserves the concurrency proof under the documented
+  pytest `--import-mode=importlib` suite command.
+- No live LM Studio server, model, network, model subprocess, or secret was
+  used; the only real child process was the bounded cross-process lock proof.
+- The inherited navigation sub-suite remains a separately named collection/
+  registry-drift blocker and is not represented as part of this passing gate.
+
 ## 2026-08-21 - LM Studio Native Reasoning Control
 
 - Added mocked coverage for native reasoning-off payloads, disabled storage and

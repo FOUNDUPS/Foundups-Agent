@@ -15,10 +15,17 @@
 - YouTube channel registry (shared rotation + scheduling metadata)
 - Cross-cutting concerns for infrastructure layer
 
-The local LLM adapter supports both the OpenAI-compatible LM Studio route and a
-bounded native `/api/v1/chat` call. Native calls expose explicit reasoning
-control, never launch LM Studio, never choose a model, never fall back to a
-different provider, disable server-side storage, and cap response bytes.
+The local LLM adapter distinguishes installed models from exact resident
+instances through native `/api/v1/models`. Generic resolution remains
+probe/borrow-only. Explicit callers may use one node/port-wide, bounded-lock
+model transaction that borrows an existing instance or, only when node
+residency is empty and native context limits admit it, loads one exact model.
+The transaction journals interrupted-load intent outside the repository,
+invokes one caller-bounded operation, unloads only proven ownership, verifies
+cleanup, and returns content-free, content-addressed lifecycle evidence.
+Structural receipts require the existing signed provenance layer for
+adversarial trust. No path starts/stops the server, downloads a model, guesses
+an ID, invokes `lms`, evicts an existing model, or falls back implicitly.
 
 **Dependencies:**
 - Standard library utilities plus optional `openai`/`llama_cpp` adapters for
@@ -80,7 +87,8 @@ different provider, disable server-side storage, and cap response bytes.
 validation, descriptor-confined I/O, cross-process locking, and telemetry
 redaction. New consumers must reuse its public API rather than add parallel
 safety policies. A dedicated parity migration must separate redaction,
-confined reads/writes, and platform lock backends while preserving Windows
+confined reads/writes, and remaining policy seams; the platform lock backend is
+now extracted to `runtime_operation_locking.py` while preserving Windows
 extended-length paths, Linux descriptor verification, and the existing public
 imports. Its temporary exact WSP 62 no-growth ceiling is recorded in
 `wsp_62_exemptions.yaml`.

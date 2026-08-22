@@ -13,6 +13,8 @@ const plan = require('./reddog_test_plan');
 
 assert(packageJson.scripts, 'package.json must operationalize RedDog test tiers');
 assert.strictEqual(packageJson.scripts.test, 'node tests/run_reddog_test_tier.js fast');
+assert.strictEqual(packageJson.scripts['test:conversation'],
+  'node tests/run_conversation_test_tier.js');
 assert.strictEqual(packageJson.scripts['test:contract'],
   'node tests/run_reddog_test_tier.js contract');
 assert.strictEqual(packageJson.scripts['test:package'],

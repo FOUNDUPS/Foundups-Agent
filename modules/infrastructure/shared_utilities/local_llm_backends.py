@@ -12,13 +12,26 @@ WSP 91: DAEMON Observability
 import json
 import logging
 import os
+import urllib.error
 import urllib.parse
 import urllib.request
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional
+
+from modules.infrastructure.shared_utilities.lm_studio_model_lifecycle import (
+    LMStudioAuthenticationError,
+    LMStudioResidencyState,
+    inspect_lm_studio_model,
+    normalize_lm_studio_base_url,
+)
 
 logger = logging.getLogger(__name__)
+
+
+class _RejectLMStudioRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *_args: Any, **_kwargs: Any) -> None:
+        return None
 
 
 class LocalLLMBackend(ABC):
@@ -156,11 +169,21 @@ class LMStudioBackend(LocalLLMBackend):
 
     DEFAULT_BASE_URL = "http://localhost:1234/v1"
     ALLOWED_CHAT_CONTROLS = frozenset({"response_format", "seed", "stop", "top_p"})
+    MAX_NATIVE_REQUEST_BYTES = 262_144
 
-    def __init__(self, model_id: str, base_url: str = None, request_timeout: float = 30.0):
+    def __init__(
+        self,
+        model_id: str,
+        base_url: str = None,
+        request_timeout: float = 30.0,
+        expected_instance_id: str | None = None,
+        api_token: str | None = None,
+    ):
         self.model_id = model_id
         self.base_url = base_url or self.DEFAULT_BASE_URL
         self.request_timeout = max(1.0, min(float(request_timeout), 600.0))
+        self.expected_instance_id = expected_instance_id
+        self.api_token = api_token
         self._client = None
         self._initialized = False
 
@@ -168,35 +191,54 @@ class LMStudioBackend(LocalLLMBackend):
     def backend_name(self) -> str:
         return "lm_studio"
 
+    @property
+    def inference_model_id(self) -> str:
+        """Prefer the exact verified instance identity when one was leased."""
+        return self.expected_instance_id or self.model_id
+
     def initialize(self) -> bool:
         """Verify LM Studio API is available and model is loaded."""
         if self._initialized:
             return True
 
         try:
+            state = inspect_lm_studio_model(
+                self.model_id,
+                base_url=self.base_url,
+                api_token=self.api_token,
+                timeout=min(self.request_timeout, 10.0),
+            )
+            if state.state is not LMStudioResidencyState.RESIDENT:
+                logger.warning(
+                    "[LM-STUDIO] Exact model '%s' is not resident (%s)",
+                    self.model_id,
+                    state.state.value,
+                )
+                return False
+            instance_ids = tuple(item.instance_id for item in state.loaded_instances)
+            expected = self.expected_instance_id
+            if len(instance_ids) != 1 or (expected is not None and instance_ids[0] != expected):
+                logger.warning("[LM-STUDIO] Exact model residency is ambiguous or changed")
+                return False
+            self.expected_instance_id = instance_ids[0]
+
             from openai import OpenAI
 
+            root = normalize_lm_studio_base_url(self.base_url)
             self._client = OpenAI(
-                base_url=self.base_url,
-                api_key="not-needed",
+                base_url=f"{root}/v1",
+                api_key=self.api_token or "not-needed",
                 timeout=self.request_timeout,
             )
-
-            # Verify model is available
-            models = self._client.models.list()
-            available = [m.id for m in models.data]
-
-            if self.model_id not in available:
-                logger.warning(f"[LM-STUDIO] Model '{self.model_id}' not loaded. Available: {available}")
-                return False
-
-            logger.info(f"[LM-STUDIO] Connected, model '{self.model_id}' ready")
+            logger.info("[LM-STUDIO] Exact model '%s' resident and verified", self.model_id)
             self._initialized = True
             return True
 
         except ImportError:
             logger.warning("[LM-STUDIO] openai package not installed")
             return False
+        except LMStudioAuthenticationError:
+            raise
         except Exception as e:
             logger.debug(f"[LM-STUDIO] Not available: {e}")
             return False
@@ -205,13 +247,17 @@ class LMStudioBackend(LocalLLMBackend):
         if not self._initialized or self._client is None:
             return {"choices": [{"text": ""}]}
         try:
+            self._require_exact_instance_unchanged()
             response = self._client.completions.create(
-                model=self.model_id,
+                model=self.inference_model_id,
                 prompt=prompt,
                 max_tokens=max_tokens,
                 temperature=temperature,
             )
+            self._require_exact_instance_unchanged()
             return {"choices": [{"text": response.choices[0].text if response.choices else ""}]}
+        except LMStudioAuthenticationError:
+            raise
         except Exception as e:
             logger.error(f"[LM-STUDIO] Completion failed: {e}")
             return {"choices": [{"text": ""}]}
@@ -226,6 +272,7 @@ class LMStudioBackend(LocalLLMBackend):
         if not self._initialized or self._client is None:
             return {"choices": [{"message": {"content": ""}}]}
         try:
+            self._require_exact_instance_unchanged()
             controls = {
                 name: kwargs[name]
                 for name in self.ALLOWED_CHAT_CONTROLS
@@ -240,14 +287,17 @@ class LMStudioBackend(LocalLLMBackend):
                     }
                 }
             response = self._client.chat.completions.create(
-                model=self.model_id,
+                model=self.inference_model_id,
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature,
                 **controls,
             )
+            self._require_exact_instance_unchanged()
             content = response.choices[0].message.content if response.choices else ""
             return {"choices": [{"message": {"content": content}}]}
+        except LMStudioAuthenticationError:
+            raise
         except Exception as e:
             logger.error(f"[LM-STUDIO] Chat completion failed: {e}")
             return {"choices": [{"message": {"content": ""}}]}
@@ -272,29 +322,77 @@ class LMStudioBackend(LocalLLMBackend):
             raise ValueError("invalid_lm_studio_max_output_tokens")
         if not 1 <= int(max_response_bytes) <= 1_048_576:
             raise ValueError("invalid_lm_studio_max_response_bytes")
-        request = urllib.request.Request(
-            _lm_studio_native_chat_endpoint(self.base_url),
-            data=_lm_studio_native_chat_payload(
-                model_id=self.model_id,
-                input_text=input_text,
-                system_prompt=system_prompt,
-                reasoning=reasoning,
-                temperature=temperature,
-                top_p=top_p,
-                max_output_tokens=max_output_tokens,
-            ),
-            headers={"Content-Type": "application/json"},
-            method="POST",
+        request = _build_lm_studio_native_chat_request(
+            base_url=self.base_url,
+            model_id=self.inference_model_id,
+            api_token=self.api_token,
+            input_text=input_text,
+            system_prompt=system_prompt,
+            reasoning=reasoning,
+            temperature=temperature,
+            top_p=top_p,
+            max_output_tokens=max_output_tokens,
+            max_request_bytes=self.MAX_NATIVE_REQUEST_BYTES,
         )
         try:
-            return _read_lm_studio_native_chat(
+            self._require_exact_instance_unchanged()
+            response = _read_lm_studio_native_chat(
                 request,
                 timeout=self.request_timeout,
                 max_response_bytes=int(max_response_bytes),
             )
+            _verify_native_instance_response(response, self.expected_instance_id)
+            self._require_exact_instance_unchanged()
+            return response
+        except LMStudioAuthenticationError:
+            raise
         except Exception as exc:
             logger.error(f"[LM-STUDIO] Native chat failed: {exc}")
             return {"output": []}
+
+    def _require_exact_instance_unchanged(self) -> None:
+        """Fail before/after use unless the initialized instance still owns the key."""
+
+        _require_exact_lm_studio_instance_unchanged(self)
+
+
+def _build_lm_studio_native_chat_request(
+    *,
+    base_url: str,
+    model_id: str,
+    api_token: str | None,
+    max_request_bytes: int,
+    **controls: Any,
+) -> urllib.request.Request:
+    headers = {"Content-Type": "application/json"}
+    if api_token is not None:
+        headers["Authorization"] = f"Bearer {api_token}"
+    payload = _lm_studio_native_chat_payload(model_id=model_id, **controls)
+    if len(payload) > max_request_bytes:
+        raise ValueError("lm_studio_native_request_too_large")
+    return urllib.request.Request(
+        _lm_studio_native_chat_endpoint(base_url),
+        data=payload,
+        headers=headers,
+        method="POST",
+    )
+
+
+def _require_exact_lm_studio_instance_unchanged(backend: LMStudioBackend) -> None:
+    state = inspect_lm_studio_model(
+        backend.model_id,
+        base_url=backend.base_url,
+        api_token=backend.api_token,
+        timeout=min(backend.request_timeout, 10.0),
+    )
+    instance_ids = tuple(item.instance_id for item in state.loaded_instances)
+    if (
+        state.state is not LMStudioResidencyState.RESIDENT
+        or len(instance_ids) != 1
+        or instance_ids[0] != backend.expected_instance_id
+    ):
+        backend._initialized = False
+        raise RuntimeError("lm_studio_exact_instance_changed")
 
 
 def _lm_studio_native_chat_endpoint(base_url: str) -> str:
@@ -338,8 +436,17 @@ def _read_lm_studio_native_chat(
     timeout: float,
     max_response_bytes: int,
 ) -> Dict:
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        raw = response.read(max_response_bytes + 1)
+    try:
+        with _open_lm_studio_request(request, timeout=timeout) as response:
+            if hasattr(response, "geturl") and response.geturl() != request.full_url:
+                raise ValueError("lm_studio_native_redirect_rejected")
+            raw = response.read(max_response_bytes + 1)
+    except urllib.error.HTTPError as exc:
+        if exc.code in {401, 403}:
+            raise LMStudioAuthenticationError(
+                "lm_studio_authentication_failed"
+            ) from None
+        raise
     if len(raw) > max_response_bytes:
         raise ValueError("lm_studio_native_response_too_large")
     decoded = json.loads(raw)
@@ -348,16 +455,43 @@ def _read_lm_studio_native_chat(
     return decoded
 
 
-def is_lm_studio_available(base_url: str = LMStudioBackend.DEFAULT_BASE_URL) -> bool:
-    """Check if LM Studio API is responding."""
-    try:
-        import urllib.request
-        import json
+def _verify_native_instance_response(
+    response: Mapping[str, Any], expected_instance_id: str | None
+) -> None:
+    if expected_instance_id is None:
+        return
+    if response.get("model_instance_id") != expected_instance_id:
+        raise ValueError("lm_studio_native_instance_mismatch")
+    stats = response.get("stats")
+    if not isinstance(stats, Mapping):
+        raise ValueError("lm_studio_native_stats_invalid")
+    if "model_load_time_seconds" in stats:
+        raise ValueError("lm_studio_native_implicit_load_rejected")
 
-        req = urllib.request.Request(f"{base_url}/models", method="GET")
-        req.add_header("Content-Type", "application/json")
-        with urllib.request.urlopen(req, timeout=2) as resp:
-            data = json.loads(resp.read().decode())
-            return "data" in data and len(data["data"]) > 0
+
+def _open_lm_studio_request(
+    request: urllib.request.Request, *, timeout: float
+) -> Any:
+    opener = urllib.request.build_opener(
+        urllib.request.ProxyHandler({}), _RejectLMStudioRedirect()
+    )
+    return opener.open(request, timeout=timeout)
+
+
+def is_lm_studio_available(
+    base_url: str = LMStudioBackend.DEFAULT_BASE_URL,
+    api_token: str | None = None,
+) -> bool:
+    """Check native LM Studio server reachability without asserting residency."""
+    try:
+        state = inspect_lm_studio_model(
+            "__reddog_reachability_probe__",
+            base_url=base_url,
+            api_token=api_token,
+            timeout=2.0,
+        )
+        return state.state is not LMStudioResidencyState.SERVER_UNREACHABLE
+    except LMStudioAuthenticationError:
+        raise
     except Exception:
         return False

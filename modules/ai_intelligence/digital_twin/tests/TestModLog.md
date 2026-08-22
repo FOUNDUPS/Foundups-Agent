@@ -14,6 +14,12 @@
 - evidence location (log file, screenshot)
 
 ## Entries
+- 2026-08-22
+  - Command: `cd extensions/reddog && npm run test:conversation`
+  - Result: PASS (15 shared JS vectors; 32 Python contract tests).
+  - Coverage: default chat, read-only research/status, proposal-only work and
+    authorization, cancel authority requirement, ambiguous `do it`, risk-only
+    reasoning escalation, strict rehydration, and effect-ceiling rejection.
 - 2026-08-06
   - Command: `pytest -q modules/ai_intelligence/digital_twin/tests/test_principal_memex_projection.py`
   - Result: PASS (32/32)

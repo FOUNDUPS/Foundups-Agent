@@ -211,6 +211,22 @@ Historical release narratives and superseded acceptance boundaries are maintaine
 
 `reddog` is a local Cursor/VS Code extension whose user-facing product name is RedDog. It opens the resident 0102 FoundUps architect thin client and retains the redaction-gated OpenRouter bridge through `scripts/advisory_model_once.py`.
 
+### Continuous conversation adapter
+
+`conversation_plane_policy.js` exposes deterministic `classify()` plus bounded
+prompt, context, effort, and model selectors. Its decision carries independent
+`interaction_intent`, `reasoning_depth`, and `effect_ceiling` fields. The
+adapter can emit at most `PROPOSAL`; it cannot emit bounded execution authority.
+`CHAT` always receives an empty repository context packet. Default fast/critic
+chat uses the configured single-model path; an explicit/risk-derived panel may
+use Fusion without changing the `NONE` effect ceiling.
+Raw provider history and the opt-in last-work-packet summary are both withheld
+from foreground chat, even if the UI continuation checkbox is selected.
+
+This is a package-internal policy interface, not a network API. PFMall and phone
+clients require a future authenticated resident adapter with durable event
+ordering; the browser `reddog:command` event is not that transport.
+
 ### VS Code workspace and package capabilities
 
 `package.json` declares `untrustedWorkspaces.supported=false` and
@@ -219,7 +235,7 @@ Git, Python subprocess, worker-thread, and materialized backend behavior; these
 capability flags are a fail-closed compatibility boundary, not a permission
 grant.
 
-The distributable surface is pinned to 65 files: 61 runtime files derived from
+The distributable surface is pinned to 66 files: 62 runtime files derived from
 the static relative-require closure plus the two dynamic workers and Python
 bootstrap, and four public metadata/assets (`LICENSE`, `README.md`, `package.json`,
 `icon.png`). The packaged license text must canonically match the repository

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import multiprocessing
 from pathlib import Path
 
 import pytest
@@ -12,17 +13,44 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     confined_runtime_operation_lock,
     redact_runtime_text,
     redact_runtime_value,
+    runtime_operation_lock,
     secure_append_runtime_text,
     secure_read_confined_bytes,
     secure_read_confined_text,
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
+from modules.infrastructure.shared_utilities.tests.runtime_lock_test_support import (
+    hold_runtime_lock,
+)
 
 
 def test_windows_runtime_mutex_uses_machine_global_namespace() -> None:
     name = runtime_artifact_safety._windows_runtime_mutex_name("a" * 64)
     assert name == "Global\\FoundupsRuntime-" + "a" * 64
+
+
+def test_runtime_operation_lock_timeout_is_cross_process() -> None:
+    context = multiprocessing.get_context("spawn")
+    ready = context.Event()
+    release = context.Event()
+    identity = "runtime-lock-cross-process-contract"
+    process = context.Process(
+        target=hold_runtime_lock, args=(identity, ready, release)
+    )
+    process.start()
+    try:
+        assert ready.wait(10)
+        with pytest.raises(TimeoutError, match="runtime_operation_lock_timeout"):
+            with runtime_operation_lock(identity, timeout_seconds=0.1):
+                raise AssertionError("unreachable")
+    finally:
+        release.set()
+        process.join(10)
+        if process.is_alive():
+            process.terminate()
+            process.join(5)
+    assert process.exitcode == 0
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Windows extended paths")

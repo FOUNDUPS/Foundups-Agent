@@ -16,7 +16,10 @@
 - [x] PANEL runtime binding fails closed without the verified aggregate
 - [x] Shared verified runtime-topology resolver with a 60-second one-shot
   capability TTL bounded by the verified evidence expiry
-- [x] Evaluation-only local Nemotron proposal call and deterministic admission
+- [x] Evaluation-only local Nemotron proposal call with exact native model
+  lifecycle evidence, node-wide managed capacity, restart-safe zero-residency
+  recovery/otherwise-quarantine, joint structural call binding, and deterministic
+  admission; signed proposer provenance remains the authentication boundary
 - [x] Deterministically include the AI Gateway incumbent in every admitted
   held-out topology benchmark, outside proposer control
 - [x] Compose resolved topology capabilities into the RedDog extension query,

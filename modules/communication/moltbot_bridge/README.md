@@ -1,4 +1,4 @@
-# OpenClaw Bridge = 012's Digital Twin
+# OpenClaw Bridge - Digital Twin Execution Layer
 
 ## Receipt-bound artifact model routing
 
@@ -499,10 +499,13 @@ reservation. Detached completion and generic task finalization reject.
 
 ## Vision
 
-OpenClaw becomes **0102** — the Digital Twin of 012:
-- **Voice**: Multi-channel (WhatsApp, Telegram, Discord, Voice)
-- **Brain**: WSP framework + HoloIndex semantic search
-- **Body**: Foundups-Agent codebase
+RedDog hosts the continuous **0102 Digital Twin** product/persona. OpenClaw may
+host the principal-scoped 0102 execution runtime behind RedDog and remains its
+resident multi-channel gateway and work supervisor:
+- **Channels**: WhatsApp, Telegram, Discord, voice, and authenticated thin clients
+- **Policy and conversation**: RedDog/0102 with WSP governance
+- **Supervision**: OpenClaw admits bounded work to WRE/Hermes
+- **Work surface**: Foundups-Agent and FoundUp DAEs
 
 ## Architecture
 
@@ -517,11 +520,14 @@ These fields round-trip through `to_dict()` / `from_dict()` and are not an
 alias for the existing-module build or extraction actions.
 
 ```
-012 (Human) ──voice/chat──► OpenClaw Gateway ──WSP-trained──► Foundups Codebase
-                                   │
-                                   ├── AGENTS.md (WSP training)
-                                   ├── SOUL.md (0102 identity)
-                                   └── skills/ (foundups-wsp, holo-search)
+012 ──voice/chat/PFMall/VSIX──► RedDog 0102 conversation plane
+                                         │ proposal-only boundary
+                                         ▼
+                              OpenClaw work supervisor
+                                         │
+                                         ├── WRE/Hermes bounded workers
+                                         ├── AGENTS.md (WSP governance)
+                                         └── Foundups-Agent / FoundUp DAEs
 ```
 
 ## 2026-03-28 Operating Rule

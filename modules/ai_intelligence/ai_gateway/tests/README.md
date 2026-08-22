@@ -8,8 +8,11 @@ credentials or make provider calls.
 ## Nemotron routing coverage
 
 `test_model_topology_proposal_lm_studio.py` verifies the local reasoning-off
-caller, compact two-panel choice contract, content-free call evidence, and
-evaluation-only boundary. `test_model_topology_proposal_admission.py` covers
+caller, compact two-panel choice contract, exact lifecycle receipt binding and
+structural mismatch rejection (including independently rehashed lifecycle
+substitution), content-free call evidence, and evaluation-only boundary.
+Authenticated trust remains covered by the separate signed-provenance suite.
+`test_model_topology_proposal_admission.py` covers
 catalog/requirements binding, provider and role substitution, production
 rejection, tamper detection, and handoff to the existing held-out benchmark
 harness with deterministic incumbent inclusion. Catalog coverage proves missing

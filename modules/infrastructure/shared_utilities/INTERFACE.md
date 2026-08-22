@@ -1,8 +1,8 @@
 # shared_utilities Interface Specification
 
 **WSP 11 Compliance:** Complete
-**Last Updated:** 2026-08-21
-**Version:** 0.4.0
+**Last Updated:** 2026-08-22
+**Version:** 0.5.0
 
 ## [OVERVIEW] Module Overview
 
@@ -16,7 +16,16 @@
 ### Local LM Studio Backend
 
 ```python
-require_lm_studio_backend(model_id, base_url=None, request_timeout=30.0)
+inspect_lm_studio_model(model_key, base_url=..., api_token=None)
+execute_lm_studio_model_transaction(
+    model_key=...,
+    operation=...,
+    mode=LMStudioLeaseMode.MANAGED_LOAD,
+    load_config={"context_length": 32768},
+)
+require_lm_studio_backend(
+    model_id, base_url=None, request_timeout=30.0, api_token=None
+)
 LMStudioBackend.create_native_chat(
     input_text=...,
     system_prompt=...,
@@ -26,13 +35,31 @@ LMStudioBackend.create_native_chat(
 )
 ```
 
-The required resolver probes but never starts LM Studio and rejects when the
-exact model ID is not loaded. The native call accepts only bounded reasoning,
-token, timeout, and response-byte controls; uses `store=false` and
-`stream=false`; and performs no provider/model fallback. The OpenAI-compatible
-chat method forwards only an allowlist of sampling/structured controls and
-constructs chat-template thinking control from a strict boolean rather than
-accepting caller-supplied arbitrary `extra_body`.
+Native inventory exposes `SERVER_UNREACHABLE`, `NOT_INSTALLED`,
+`INSTALLED_NOT_RESIDENT`, and `RESIDENT`; OpenAI-compatible `/v1/models` is not
+accepted as residency proof. `require_lm_studio_backend` is borrow-only. The
+managed transaction loads only an exact installed key, verifies the returned
+instance, targets that instance for inference, revalidates it immediately
+before and after use, rejects implicit/JIT load evidence, and unloads only a
+transaction-owned instance. Managed loads share one physical node/port lock,
+fail when any resident model already occupies capacity, and reject context
+length above the native model maximum. Post-load inventory must contain exactly
+the one owned instance; concurrent foreign residency triggers owned cleanup and
+failure. A pre-existing instance is never
+unloaded. Load timeout/cancellation is durably quarantined. Because native
+inventory has no documented server-generation identity, restart proceeds only
+when inventory proves zero residency; even a matching reused instance ID is
+never auto-unloaded.
+Native requests are loopback HTTP only, reject redirects, accept an optional
+API token without exposing it in lease representation/equality or evidence,
+ignore environment proxy variables, disable storage/streaming, and cap
+request/response controls. The legacy OpenAI-compatible convenience methods
+perform pre/post native identity checks but are outside governed lifecycle
+authority because that SDK transport is not the native instance receipt path.
+Lifecycle and
+call receipts are content-addressed structural evidence, not authentication;
+the signed proposer-provenance layer supplies trust. The ordinary resolver and
+`main.py` do not launch or load LM Studio.
 
 Role-based model path resolution for local AI models. Models stored at `E:/HoloIndex/models/`.
 
@@ -354,6 +381,12 @@ class [SpecificError]([ModuleName]Error):
 ```
 
 ## [HISTORY] Version History
+
+### 0.5.0 (2026-08-22)
+- Added exact native installed/resident observation and managed model leases.
+- Bound owned load/unload confirmation to deterministic lifecycle receipts.
+- Rejected OpenAI-model-list residency assumptions, wrong/JIT instances,
+  redirects, ambiguity, blind load retry, and owned-cleanup mismatch.
 
 ### 0.4.0 (2026-08-21)
 - Added bounded LM Studio native chat with explicit reasoning control, exact

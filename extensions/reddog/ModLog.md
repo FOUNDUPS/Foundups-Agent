@@ -1,5 +1,34 @@
 # RedDog ModLog
 
+## 2026-08-22 - Exact model lifecycle and continuous conversation (0.4.105)
+
+- Added deterministic `CHAT`, `RESEARCH`, `PROPOSE`, `AUTHORIZE`, `STATUS`, and
+  `CANCEL` intent with independent `FAST`/`CRITIC`/`PANEL` depth and a strict
+  effect ceiling. Bare continuation and ambiguous authorization remain chat;
+  explicit named work can emit only a proposal.
+- Extracted the VSIX adapter into `conversation_plane_policy.js`; default chat
+  has no repository/HoloIndex context, work-order construction, or routing
+  summary. Risk may increase reasoning without increasing authority.
+- Independent WSP-97 audit blocked promotion until foreground chat also
+  suppressed the opt-in prior work-packet summary, malformed routing
+  dependencies failed at construction, and Unicode-scalar limits matched the
+  Python contract. Adversarial regressions pin each repair.
+- Added exact native LM Studio inventory/residency, managed capacity borrowing,
+  interrupted-load recovery, cross-process locking, and use-time identity
+  proofs. No model server launch, download, provider fallback, or eviction of
+  pre-existing models was added.
+- Bumped the closed package to 0.4.105 and 66 files/62 runtime files. Rebound
+  the 1,376-file backend manifest and the 18-shard extension contract without
+  weakening Start Operations interception.
+- Aligned PFMall, Digital Twin, and OpenClaw documents around the two-layer
+  identity: RedDog hosts the 0102 persona/conversation, while a principal-scoped
+  OpenClaw runtime may provide channel/admission/execution/supervision behind
+  it. The authenticated PFMall/phone adapter is not implemented.
+  WSP 00/15/22/50/62/73/97.
+- Promotion evidence: independent repaired-tree GO; staged generator 8/8;
+  fast 13/13; conversation 15 shared vectors/32 Python contracts; exact
+  66-file package; and four-group release PASS without timeout.
+
 ## 2026-08-22 - Immutable Holo snapshot backend closure (0.4.104)
 
 - Production knowledge rows exposed valid decomposed Unicode after the first
