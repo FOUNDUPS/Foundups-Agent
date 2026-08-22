@@ -26,7 +26,10 @@ from holo_index.core.search_engine import (
     _search_collection,
     execute_search,
 )
-from holo_index.module_intent_snapshot import ModuleIntentSnapshotError
+from holo_index.module_intent_snapshot import (
+    ModuleIntentSnapshotError,
+    load_module_intent_paths,
+)
 from holo_index.tier0_retrieval import (
     TIER0_REQUIRED_DOCS,
     infer_explicit_module_target,
@@ -36,6 +39,7 @@ from holo_index.tier0_retrieval import (
 
 
 MODULE = "modules/communication/moltbot_bridge"
+PFMALL_MODULE = "modules/foundups/pfmall"
 
 
 @pytest.mark.parametrize(
@@ -147,6 +151,27 @@ def test_tier0_contract_matches_bundle_required_order() -> None:
         f"{MODULE}/README.md",
         f"{MODULE}/INTERFACE.md",
     )
+
+
+def test_registered_pfmall_module_has_repository_tier0_contracts() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    registered_modules = load_module_intent_paths(repo_root)
+
+    assert PFMALL_MODULE in registered_modules
+    registry_hits = tuple(
+        _hit(f"{path}/__init__.py") for path in registered_modules
+    )
+    assert (
+        infer_explicit_module_target("audit pfmall RedDog surface", registry_hits)
+        == PFMALL_MODULE
+    )
+
+    required = module_tier0_paths(PFMALL_MODULE)
+    assert required == (
+        f"{PFMALL_MODULE}/README.md",
+        f"{PFMALL_MODULE}/INTERFACE.md",
+    )
+    assert all((repo_root / path).is_file() for path in required)
 
 
 @pytest.mark.parametrize(
