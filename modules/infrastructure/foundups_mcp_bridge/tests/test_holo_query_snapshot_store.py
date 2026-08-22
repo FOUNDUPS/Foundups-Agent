@@ -130,6 +130,33 @@ def test_snapshot_artifact_change_fails_closed(tmp_path: Path) -> None:
         open_query_snapshot_client(ssd / "vectors")
 
 
+def test_snapshot_export_normalizes_persisted_unicode_to_nfc(tmp_path: Path) -> None:
+    ssd, holo, receipt = _fixture(tmp_path)
+    knowledge = getattr(holo, COLLECTION_ATTRS["navigation_knowledge"])
+    knowledge._values["documents"][0] = "Cafe\u0301"
+    knowledge._values["metadatas"][0]["section"] = "Re\u0301sume\u0301"
+
+    publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+    collection = open_query_snapshot_client(ssd / "vectors").get_collection(
+        "navigation_knowledge"
+    )
+    row = collection.get(ids=["row_1"])
+
+    assert row["documents"] == ["Caf\u00e9"]
+    assert row["metadatas"] == [
+        {"path": "first.py", "section": "R\u00e9sum\u00e9"}
+    ]
+
+
+def test_snapshot_export_rejects_nfc_key_collision(tmp_path: Path) -> None:
+    ssd, holo, receipt = _fixture(tmp_path)
+    knowledge = getattr(holo, COLLECTION_ATTRS["navigation_knowledge"])
+    knowledge._values["metadatas"][0] = {"\u00e9": 1, "e\u0301": 2}
+
+    with pytest.raises(QuerySnapshotStoreError, match="NORMALIZATION_COLLISION"):
+        publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+
+
 def test_real_chroma_export_is_queryable_without_chroma_reopen(tmp_path: Path) -> None:
     import chromadb
 

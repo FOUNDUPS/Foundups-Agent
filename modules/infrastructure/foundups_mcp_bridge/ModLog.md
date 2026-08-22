@@ -2,6 +2,9 @@
 
 ## 2026-08-22 - Immutable snapshot query backend integration
 
+- Follow-up production evidence showed decomposed Unicode in knowledge rows.
+  Snapshot export now normalizes document and metadata strings/keys to NFC and
+  rejects normalization key collisions before publication.
 - Live replica forensics showed Chroma 1.5.5 writes SQLite on every Rust
   startup and rewrites HNSW bytes during query/close, even with validate-only
   migrations. A catalog overlay was therefore rejected after its integrated

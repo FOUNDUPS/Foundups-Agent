@@ -2426,7 +2426,7 @@
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_adapter.py": "59512eba1e62ea72a31af0d08a25e653749a5afda6dce34a14f37f8a3e9fe266",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_codec.py": "f1772e3aa0edce58a89a5df8eb753284031a864bf2b16fff1fe056bafb9c0070",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_contract.py": "375490cf7b3fafae1bef873b9156cb22dbce9d9f39a7ef082791e2e55aa1454f",
-    "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_store.py": "071f9206e2408c8037c6cb9567889cd80f3a9f72a66e411f99e266ad3ad8224f",
+    "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_store.py": "a119a09008c9cac198831c322376e98fdb620010897ac3fe16b70133f1919528",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_transport.py": "24fe943e8c768728030602c334dde8a863f3e4d568b9734c8266185b0dc8745e",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_tools.py": "bf70c4a75cc58d069ae5e087f0eec3300301dc44b91c5d3bba9097c374d264ef",
     "modules/infrastructure/foundups_mcp_bridge/src/impact_scoring.py": "764cfd66d55aa9002669cff7bb07bbbcfd800d2eb8f7d52159a74715f6f92114",

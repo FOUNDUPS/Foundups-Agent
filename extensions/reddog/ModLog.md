@@ -2,6 +2,9 @@
 
 ## 2026-08-22 - Immutable Holo snapshot backend closure (0.4.104)
 
+- Production knowledge rows exposed valid decomposed Unicode after the first
+  merge. Export now canonicalizes document/metadata strings and keys to NFC,
+  while normalization collisions remain fail-closed.
 - Refreshed the pinned governed backend manifest after adding the immutable
   Holo snapshot publisher/loader and its existing codec/adapter dependencies.
 - The extension surface and version are unchanged; this binds RedDog's sealed

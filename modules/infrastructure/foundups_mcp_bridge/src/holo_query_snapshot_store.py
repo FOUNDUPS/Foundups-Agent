@@ -9,6 +9,7 @@ import re
 import shutil
 import stat
 import tempfile
+import unicodedata
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -140,6 +141,29 @@ def _embedding_identity(
     }
 
 
+def _nfc_snapshot_value(value: Any, *, depth: int = 0) -> Any:
+    """Normalize persisted text while rejecting key collisions fail closed."""
+    if depth > 64:
+        return value
+    if type(value) is str:
+        return unicodedata.normalize("NFC", value)
+    if type(value) is list:
+        return [_nfc_snapshot_value(item, depth=depth + 1) for item in value]
+    if type(value) is dict:
+        normalized: dict[Any, Any] = {}
+        for key, item in value.items():
+            normalized_key = (
+                unicodedata.normalize("NFC", key) if type(key) is str else key
+            )
+            if normalized_key in normalized:
+                _fail("NORMALIZATION_COLLISION")
+            normalized[normalized_key] = _nfc_snapshot_value(
+                item, depth=depth + 1
+            )
+        return normalized
+    return value
+
+
 def _encode_collection(
     holo: Any, entry: Any, *, limits: SnapshotLimits,
 ) -> EncodedCollectionSnapshot:
@@ -154,7 +178,11 @@ def _encode_collection(
     if not all(len(values) == entry.count for values in snapshot.values()):
         _fail("COLLECTION_COUNT_MISMATCH")
     rows = [
-        {"id": str(item_id), "document": document, "metadata": metadata}
+        {
+            "id": str(item_id),
+            "document": _nfc_snapshot_value(document),
+            "metadata": _nfc_snapshot_value(metadata),
+        }
         for item_id, document, metadata in zip(ids, documents, metadatas)
     ]
     metadata = getattr(collection, "metadata", None)
