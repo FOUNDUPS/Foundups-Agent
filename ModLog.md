@@ -1,5 +1,26 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-22] RedDog Resident Conversation Transport Contract
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 73, 97
+
+- Added a strict, transport-neutral `TURN` / `STATUS` / `CANCEL` envelope with
+  canonical digest bindings, CAS revision, nonce/idempotency, and a maximum
+  five-minute validity window.
+- Kept principal, FoundUp, credential, provider/model, effect, and work
+  authority outside the untrusted client payload. The future service must
+  derive them from verified session authority and current AgentDB state.
+- Added adversarial injection/replay/type/Unicode/forgery tests and a
+  content-free structural binding that explicitly grants no authority.
+- Corrected RedDog, Digital Twin, and architecture documents: AgentDB/session
+  substrate and the envelope exist; authenticated service binding and
+  VSIX/PFMall/phone adapters do not.
+- Verification: 36/36 focused tests with 100% statement/branch coverage,
+  117/117 Digital Twin module tests, and the existing RedDog conversation tier
+  with 15 JavaScript vectors plus 32 Python contracts.
+- Regenerated and rechecked the canonical WSP test registry at 1,567 tracked
+  Python test files; the new contract test is collectable and not quarantined.
+
 ## [2026-08-22] RedDog Continuous Digital Twin Conversation Plane
 
 **WSP Protocol:** WSP 00, 15, 22, 50, 62, 73, 97

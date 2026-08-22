@@ -2,6 +2,21 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-08-22 - Resident conversation transport contract phase 1
+
+- Added a strict transport-neutral request envelope for RedDog `TURN`,
+  `STATUS`, and `CANCEL` traffic without adding a network endpoint or runtime.
+- Bound canonical request/conversation/turn IDs, CAS revision, client nonce,
+  idempotency, and a maximum five-minute freshness window.
+- Rejected client-supplied identity, FoundUp, credential, model/provider,
+  effect, and work-authority fields; those remain host-derived obligations for
+  the future authenticated resident service.
+- Added content-free receipt projection, exact native-type enforcement,
+  Unicode normalization, adversarial tests, 100% focused branch coverage, and
+  WSP-62 file/function assertions.
+- Corrected RedDog and Digital Twin roadmaps to distinguish the implemented
+  AgentDB/session substrate and envelope from the still-missing service/adapters.
+
 ## 2026-08-22 - RedDog continuous conversation plane phase 1
 
 - Added independent interaction-intent, reasoning-depth, and effect-ceiling

@@ -1,5 +1,15 @@
 # RedDog ModLog
 
+## 2026-08-22 - Resident conversation envelope documentation alignment
+
+- Corrected the roadmap to distinguish the already-implemented AgentDB
+  conversation/session authority substrate from the missing live service.
+- Documented the new backend zero-authority turn/status/cancel envelope and
+  kept authenticated service binding plus VSIX/PFMall/phone adapters explicitly
+  unimplemented.
+- RedDog package/runtime files and version remain unchanged; the existing
+  `test:conversation` dependency tier passed unchanged.
+
 ## 2026-08-22 - Exact model lifecycle and continuous conversation (0.4.105)
 
 - Added deterministic `CHAT`, `RESEARCH`, `PROPOSE`, `AUTHORIZE`, `STATUS`, and

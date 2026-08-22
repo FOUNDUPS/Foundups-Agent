@@ -9,8 +9,11 @@ Current implementation:
 - [x] Continuous foreground conversation classifier and VSIX adapter with
   independent intent/depth/effect axes, zero-effect chat, shared cross-language
   vectors, and a dedicated bounded test tier.
-- [ ] Authenticated AgentDB-backed resident conversation service and thin
-  PFMall/phone transport. The existing browser event remains presentation-only.
+- [x] AgentDB conversation-scope/session authority substrate and a strict
+  transport-neutral turn/status/cancel envelope exist in backend modules.
+- [ ] Bind the envelope to verified resident session authority and current
+  AgentDB CAS state, then add thin VSIX/PFMall/phone adapters. The existing
+  browser event remains presentation-only.
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
 

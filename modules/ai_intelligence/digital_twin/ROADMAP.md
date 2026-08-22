@@ -29,7 +29,11 @@ conversation state, AgentDB, or any FoundUp Memex.
 - Complete: default `CHAT / FAST / NONE`, ambiguous-authority rejection, risk
   reasoning escalation without effect escalation, and VSIX thin adapter.
 - Complete: dedicated cross-language `test:conversation` vectors.
-- Next: authenticated AgentDB-backed resident turn/status/cancel service.
+- Complete: strict transport-neutral `TURN` / `STATUS` / `CANCEL` request
+  envelope with CAS revision, digest bindings, nonce/idempotency, five-minute
+  freshness, identity/effect injection rejection, and content-free projection.
+- Next: bind that envelope to verified resident session authority and current
+  AgentDB CAS state; this authenticated service does not yet exist.
 - Next: thin PFMall/phone transport adapter; the browser remains a client, not
   the model/OpenClaw host.
 - Deferred: asynchronous critics, durable cross-device history, bounded Memex/

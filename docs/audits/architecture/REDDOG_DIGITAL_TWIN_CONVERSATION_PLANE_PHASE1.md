@@ -1,7 +1,7 @@
 # RedDog Digital Twin Conversation Plane - Phase 1
 
 **Date:** 2026-08-22 (JST)
-**State:** Implemented candidate; production PFMall/phone channel remains gated
+**State:** Conversation policy and transport envelope implemented; authenticated service and production PFMall/phone channel remain gated
 **Protocols:** WSP 00, 15, 22, 50, 62, 73, 97
 
 ## Decision
@@ -66,6 +66,11 @@ against the deterministic ceiling and cannot elevate it.
   ceiling.
 - Existing AgentDB scope, signer, promotion, OpenClaw, WRE, and Hermes modules
   are reused. No second router, database, signer, queue, or worker stack exists.
+- `resident_conversation_transport_contract.py` owns an exact zero-authority
+  `TURN` / `STATUS` / `CANCEL` envelope. It validates canonical digest IDs,
+  CAS revision, nonce/idempotency, a maximum five-minute lifetime, and emits a
+  content-free binding. It contains no endpoint, authentication, persistence,
+  model, queue, or effect implementation.
 - `npm run test:conversation` is the dedicated cross-language fast lane.
 
 The `asynchronous_readonly_allowed` decision field is admission metadata only.
@@ -86,9 +91,10 @@ The scalable channel is hybrid:
    (and later voice), renders replies/receipts, and may cancel its own turn.
 2. A resident RedDog hub owns model access, secrets, current conversation
    authority, and the OpenClaw supervisor connection.
-3. Each turn will carry principal, conversation, FoundUp, revision, nonce,
-   idempotency, and expiry bindings. The server revalidates them; browser
-   claims never widen scope.
+3. The client envelope carries conversation, revision, turn, nonce,
+   idempotency, and expiry bindings. The admitted server-side turn must add
+   principal and FoundUp scope derived from verified session authority and
+   current AgentDB state; browser claims never supply or widen them.
 4. AgentDB CAS/event order provides current single-host continuity. Multi-host
    scale requires the already-planned PostgreSQL/shared event-store migration,
    not browser localStorage as authority.
@@ -101,8 +107,9 @@ person. WSP 98's mesh/zero-server direction is a target state. This phase does
 not claim mesh-native RedDog: shared ordering, replay, and authority must be
 resolved before a resident hub can be replaced or federated.
 
-Therefore the PFMall/phone adapter is `SPECIFIED_NOT_IMPLEMENTED` in this
-slice. Shipping an unauthenticated fetch hook would be false progress and a
+Therefore the transport envelope is `OBSERVED`, while authenticated service
+binding and the PFMall/phone adapter remain `SPECIFIED_NOT_IMPLEMENTED`.
+Shipping an unauthenticated fetch hook would be false progress and a
 cross-principal risk.
 
 ## Memory and continuity truth
@@ -140,6 +147,8 @@ Total: `4 + 5 + 5 + 5 = 19`, canonical `P0`.
 | Chat/model text can execute work | FALSE / FORBIDDEN |
 | Prior work-packet continuation enters foreground chat | FALSE / FORBIDDEN |
 | Existing authenticated work promotion reused | OBSERVED, not invoked by ordinary chat |
+| Strict content-free turn/status/cancel envelope | OBSERVED |
+| Envelope authenticates principal or FoundUp scope | FALSE / FORBIDDEN |
 | Durable cross-device conversation | SPECIFIED_NOT_IMPLEMENTED |
 | PFMall authenticated conversation adapter | SPECIFIED_NOT_IMPLEMENTED |
 | Phone voice ingress/barge-in | SPECIFIED_NOT_IMPLEMENTED |
@@ -152,9 +161,26 @@ Total: `4 + 5 + 5 + 5 = 19`, canonical `P0`.
 
 ## Next gated layers
 
-1. Authenticated resident conversation service using the existing conversation
-   session authority and AgentDB CAS ports.
-2. Thin VSIX and PFMall transport adapters with idempotent turn/status/cancel
-   envelopes and content-free progress receipts.
+1. Authenticated resident conversation service binding the implemented
+   envelope to existing conversation-session authority and AgentDB CAS ports.
+2. Thin VSIX and PFMall transport adapters plus content-free progress receipts.
 3. Governed bounded memory recall with source/freshness labels.
 4. Local STT/TTS and interruption after consent and cancellation proofs.
+
+## WSP 97 high-risk assumption audit
+
+- Assumption: the host derives principal and FoundUp scope from a verified,
+  current resident session. The envelope cannot assert either value.
+- Failure modes held closed by this slice: identity/effect/provider injection,
+  unknown operations, stale or future envelopes, revision-shape ambiguity,
+  malformed digest bindings, raw operator text in public bindings, and direct
+  dataclass construction with invalid static state.
+- Still-open service failures: atomic idempotency storage, credential replay,
+  authenticated cancellation ownership, current AgentDB CAS binding, durable
+  progress ordering, and cross-surface contract parity.
+- Rejected alternatives: browser localStorage as authority, extending the
+  unauthenticated read-only PFMall API, adding a second database/router, or
+  treating request digests as authentication.
+- Decision: `PROCEED` for the pure contract and tests; `HALT` for any live
+  endpoint or adapter until the existing signer/session/AgentDB authority chain
+  is bound and adversarially verified.
