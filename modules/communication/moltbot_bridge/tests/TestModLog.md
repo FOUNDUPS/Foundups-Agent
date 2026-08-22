@@ -1,3 +1,16 @@
+## 2026-08-23: FoundUp Memex learning-candidate regressions
+
+- Added focused deterministic and adversarial coverage for the structural-only
+  learning-candidate gate, including supporting/contradicting evidence,
+  supersession, receipt/scope/HEAD binding, research allowlisting,
+  reconstruction tamper detection, secret/score/time rejection, hostile types,
+  zero-authority flags, and WSP 62/import boundaries.
+- Focused result: **9 passed**. No model, network, database, HoloIndex, Brain,
+  Breadcrumb, roadmap, work-state, or repository mutation occurs.
+- Adjacent FoundUp Memex/Brain/verified-outcome matrix: **92 passed** in 11.54
+  seconds. This is local development evidence, not runtime admission or a
+  governed production-promotion receipt.
+
 ## 2026-08-22: Resident conversation request-to-scope regressions
 
 - Test-first collection initially failed because the binding did not exist.

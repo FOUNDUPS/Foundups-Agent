@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-23: FoundUp Memex structural learning-candidate gate
+
+- Implemented the roadmap's bounded candidate layer as a pure transformation
+  over one exact FoundUp Memex view and receipt-bound Breadcrumb,
+  verified-outcome, or explicitly allowed governed-research evidence.
+- Candidates preserve supporting and contradicting evidence independently,
+  carry proposal-only salience/confidence and supersession pointers, and bind a
+  deterministic evidence manifest that can be reconstructed without storing
+  raw evidence in the gate.
+- The output is `STRUCTURAL_ONLY`, non-runtime-admissible, and explicitly grants
+  no persistence, Brain/Breadcrumb/HoloIndex/roadmap mutation, or work
+  authority. The legacy cross-platform JSON memory and disabled Holo adaptive
+  consolidation prototypes were not imported or modified.
+- WSP 15 score: 17/20 (P0 architecture: C4/I5/D3/Impact5). WSP 00/10/15/22/50/
+  60/62/79/84/87/97.
+
 ## 2026-08-22: Resident conversation request-to-scope binding
 
 - Added an admission-only bridge from the strict Digital Twin `TURN`,

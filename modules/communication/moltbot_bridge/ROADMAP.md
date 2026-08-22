@@ -297,11 +297,21 @@ second-brain database.
 ### MVP sequence
 
 2. `FOUNDUP_MEMEX_LEARNING_CANDIDATE_GATE_PHASE1`
+   - Status: IMPLEMENTED_NOT_RUNTIME_ADMITTED on the current candidate branch.
    - Convert scoped Breadcrumbs, verified outcomes, and governed research
      receipts into evidence-backed learning candidates.
    - No durable Brain write.
+   - The structural gate preserves contradictions, supersession pointers,
+     proposed salience/confidence, and reconstructable source-receipt closure.
+     Live source adapters and durable admission remain deferred.
+   - AutoResearch follow-up must retain a deterministic incumbent and use a
+     frozen held-out corpus. Primary metrics are reconstruction fidelity,
+     contradiction retention, false-merge/false-forget rate, semantic token
+     compression, retrieval quality, and latency. WRE may coordinate bounded
+     experiments but is not promotion or memory-write authority.
 
 3. `FOUNDUP_MEMEX_GOVERNED_BRAIN_CONSOLIDATION_PHASE1`
+   - Status: SPECIFIED_NOT_IMPLEMENTED.
    - Admit accepted learning candidates into the existing Brain through a
      provenance, contradiction, supersession, and authority gate.
 

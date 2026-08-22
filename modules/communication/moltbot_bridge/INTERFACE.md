@@ -206,8 +206,8 @@ checks revocation, freshness, FoundUp/snapshot/head/content/work/slice/job/worke
 verifier/runtime lineage, and issues an opaque one-use capability. The FoundUp Brain
 assembler consumes that capability against the same durable replay state. Raw
 booleans, raw receipt IDs, caller-supplied records, and serializable capability
-markers are never authority. Learning candidates, Brain writes, roadmap writes,
-default Memex supply, and HoloIndex mutation remain outside this interface. `ExternalSignerAuthoritativeUseLeaseIssuer` extends socket-v2/E0 with an opaque exact-effect capability bound to the root-selected signer profile, current generation, and durable replay root; substitution, replay, expiry overrun, rollback revival, and socket-v1 downgrade reject, while production remains inactive until the external signer lifecycle and live canary are provisioned.
+markers are never authority. `gate_foundup_memex_learning_candidates()` emits digest-bound `STRUCTURAL_ONLY` candidates with supporting/contradicting evidence, supersession pointers, proposed salience/confidence, and reconstruction verification; it is non-runtime-admissible and performs no persistence or mutation.
+Brain writes, runtime source adapters, roadmap writes, default Memex supply, and HoloIndex mutation remain outside this interface. `ExternalSignerAuthoritativeUseLeaseIssuer` extends socket-v2/E0 with an opaque exact-effect capability bound to the root-selected signer profile, current generation, and durable replay root; substitution, replay, expiry overrun, rollback revival, and socket-v1 downgrade reject, while production remains inactive until the external signer lifecycle and live canary are provisioned.
 
 `build_grant_service_archive_from_git()` reads only exact commit-tree blobs and
 emits canonical archive schema v2. `validate_grant_service_archive_git_provenance()`
