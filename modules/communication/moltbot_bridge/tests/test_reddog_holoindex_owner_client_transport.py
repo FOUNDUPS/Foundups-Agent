@@ -23,6 +23,18 @@ import modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter a
 
 SERVICE_TOKEN = "test-token-" + "x" * 32
 REDIRECT_TOKEN = "redirect-secret-" + "y" * 32
+REPLICA_BINDING = (
+    "sha256:" + "c" * 64,
+    "sha256:" + "d" * 64,
+    "sha256:" + "e" * 64,
+    "sha256:" + "f" * 64,
+)
+REPLICA_FIELDS = (
+    "query_replica_descriptor_digest",
+    "query_replica_generation_id",
+    "query_replica_id",
+    "query_replica_path_identity_digest",
+)
 
 
 @pytest.fixture(autouse=True)
@@ -63,7 +75,7 @@ class _HTTPResponse:
 
 
 def _successful_query_payload(head_sha: str, repo_root: Path) -> dict:
-    return {
+    payload = {
         "schema_version": "holoindex_query_service.v1",
         "ok": True,
         "source": "holoindex",
@@ -93,6 +105,8 @@ def _successful_query_payload(head_sha: str, repo_root: Path) -> dict:
             ],
         },
     }
+    payload.update(dict(zip(REPLICA_FIELDS, REPLICA_BINDING)))
+    return payload
 
 
 def test_holoindex_owner_service_avoids_local_store_and_preserves_evidence(
@@ -178,6 +192,30 @@ def test_owner_client_rejects_foreign_root_digest(
     assert result["ok"] is False
     assert result["error"] == "REPO_ROOT_MISMATCH"
     assert "repository_root_mismatch" in result["stale_reasons"]
+
+
+@pytest.mark.parametrize("missing_field", REPLICA_FIELDS)
+def test_owner_client_requires_complete_replica_binding(
+    tmp_path: Path, monkeypatch, missing_field: str,
+) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    head_sha = "9" * 40
+    _set_repo_head(repo_root, head_sha)
+    payload = _successful_query_payload(head_sha, repo_root)
+    payload.pop(missing_field)
+    monkeypatch.setattr(
+        owner_query_client, "urlopen", lambda *_args, **_kwargs: _HTTPResponse(payload)
+    )
+
+    result = owner_query_client.query_holoindex_owner(
+        repo_root=repo_root, query="WSP 97 research", limit=8,
+        service_url="http://127.0.0.1:8765", service_token=SERVICE_TOKEN,
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH"
+    assert "query_replica_binding_mismatch" in result["stale_reasons"]
 
 
 def test_explicit_empty_service_url_never_falls_back_to_environment(

@@ -37,6 +37,12 @@ HOLO_BASELINE_COLLECTIONS = (
     "navigation_knowledge",
 )
 SERVICE_TOKEN = "test-token-" + "x" * 32
+REPLICA_BINDING = {
+    "query_replica_descriptor_digest": "sha256:" + "c" * 64,
+    "query_replica_generation_id": "sha256:" + "d" * 64,
+    "query_replica_id": "sha256:" + "e" * 64,
+    "query_replica_path_identity_digest": "sha256:" + "f" * 64,
+}
 
 
 @pytest.fixture(autouse=True)
@@ -237,6 +243,7 @@ def _replacement_owner_payload(head_sha: str, root_digest: str) -> dict:
         "raw_result": {
             "wsp_hits": [{"path": "WSP_framework/src/WSP_97.md"}],
         },
+        **REPLICA_BINDING,
     }
 
 
@@ -397,6 +404,7 @@ def test_holoindex_owner_service_client_rejects_missing_generation_binding(
                 "repo_root_digest": repository_root_digest(repo_root),
                 "retrieval_mode": "semantic",
                 "raw_result": {"wsp_hits": []},
+                **REPLICA_BINDING,
             }
         ),
     )
@@ -490,6 +498,7 @@ def test_holoindex_owner_service_rejects_repository_change_during_query(
                 "freshness_receipt_digest": "sha256:" + "b" * 64,
                 "retrieval_mode": "semantic",
                 "raw_result": {"wsp_hits": []},
+                **REPLICA_BINDING,
             }
         ),
     )

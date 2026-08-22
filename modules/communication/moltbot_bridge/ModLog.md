@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-22: Holo owner replica response binding
+
+- Preserved the service's exact four-field query-replica capability through
+  the loopback client instead of dropping it during response normalization.
+- A successful client response now requires a complete built-in replica tuple;
+  the one-shot owner wrapper independently compares it with the already
+  verified route and fails closed on absence or mismatch.
+- Added focused missing-field and different-replica regressions. No query,
+  maintenance, model, index, signer, or action authority was added.
+  WSP 00/15/22/50/62/97.
+
 ## 2026-08-21: WSP 62 production-authority decomposition
 
 - Split architect FIX promotion into a stable public adapter, bounded input

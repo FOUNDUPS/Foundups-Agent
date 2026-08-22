@@ -1,4 +1,14 @@
 # OpenClaw Bridge Interface
+
+## HoloIndex owner response binding
+
+`query_holoindex_owner(...)` accepts a successful semantic response only when
+the owner supplies all four exact query-replica fields: descriptor digest,
+generation ID, replica ID, and path-identity digest. The normalized response
+preserves those fields. `scripts/reddog_holoindex_owner_query_once.py` then
+compares the returned tuple with its verified `QueryReplicaOwnerRoute`; a
+missing, malformed, or different tuple returns
+`HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH` and cannot produce a success receipt.
 ## Receipt-bound artifact generation models
 
 `build_generation_dependencies(...)` accepts an explicit

@@ -1,5 +1,12 @@
 # Tests - OpenClaw Bridge
 
+## HoloIndex owner replica response contracts
+
+`test_reddog_holoindex_owner_client_transport.py` proves a successful owner
+response retains all four exact replica fields and fails closed when any field
+is missing. `scripts/tests/test_reddog_holoindex_owner_query_once.py` proves a
+valid-but-different returned replica cannot be bound to the verified route.
+
 ## WSP 62 decomposition coverage
 
 `test_reddog_runtime_module_static_boundaries.py` preserves the resident-loop
