@@ -173,7 +173,10 @@ def _encode_payload(
 ) -> bytes:
     if payload.get("schema_version") != expected_schema:
         _fail("RECEIPT_SCHEMA_INVALID")
-    if redact_runtime_value(payload) != dict(payload) or (
+    if type(max_bytes) is not int or max_bytes <= 0:
+        _fail("RECEIPT_SIZE_BOUND")
+    redaction_items = min(max(max_bytes, 128), 1_000_000)
+    if redact_runtime_value(payload, max_items=redaction_items) != dict(payload) or (
         reject_absolute_paths and _contains_absolute_path(payload)
     ):
         _fail("RECEIPT_NOT_SECRET_FREE")
@@ -181,7 +184,7 @@ def _encode_payload(
         json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
         + "\n"
     ).encode("utf-8")
-    if type(max_bytes) is not int or max_bytes <= 0 or len(encoded) > max_bytes:
+    if len(encoded) > max_bytes:
         _fail("RECEIPT_SIZE_BOUND")
     return encoded
 

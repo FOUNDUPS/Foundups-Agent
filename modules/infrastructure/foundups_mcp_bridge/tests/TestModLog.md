@@ -1,5 +1,16 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-22] Live replica Windows scalability regressions
+
+- Added canonical mixed-case manifest ordering coverage and a 602-file Windows
+  copy regression that exceeds the former CRT descriptor ceiling.
+- Added a 600-item descriptor scan proving no truncation false positive and
+  proving a secret in the final item still rejects. Added an explicit
+  descriptor-size bound case after raising the shared limit to 4 MiB.
+- Focused materializer, Windows copier, and descriptor selection: **46 passed,
+  2 platform skips**. A live 10,444-file / 8,136,157,518-byte materialization
+  then completed with descriptor digest `8f56dc6d...5002`.
+
 ## [2026-08-21] Query-replica route propagation regressions
 
 - Added direct resolver coverage for missing/relative roots, exact proof/build

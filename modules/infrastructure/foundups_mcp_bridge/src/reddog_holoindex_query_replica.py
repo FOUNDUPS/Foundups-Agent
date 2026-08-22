@@ -96,7 +96,7 @@ class QueryReplicaLimits:
     max_total_bytes: int = 8_589_934_592
     max_path_bytes: int = 1024
     max_receipt_bytes: int = 262_144
-    max_descriptor_bytes: int = 2_097_152
+    max_descriptor_bytes: int = 4_194_304
 
     def validate(self) -> None:
         values = (

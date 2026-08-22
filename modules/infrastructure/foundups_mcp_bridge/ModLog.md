@@ -1,5 +1,22 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-22 - Live Holo query-replica materialization closure
+
+- Reproduced four synthetic-only gaps against the current 8.1 GB Windows Holo
+  store: mixed-case manifest ordering, the CRT descriptor ceiling, descriptor
+  redaction truncation after 128 files, and a 2 MiB descriptor ceiling.
+- Canonical snapshot enumeration now uses the validator's NFC/casefold order.
+  Windows copy retains raw OS file/directory handles through final proof while
+  opening only transient CRT descriptors, preserving no-replacement and
+  source/destination continuity without the 512-descriptor limit.
+- Private JSON secret scanning now covers every item admitted by its byte bound
+  and still rejects a secret in the final item. The shared replica descriptor
+  ceiling is 4 MiB; oversize descriptors continue to fail closed.
+- Live evidence: exact-generation replica materialization completed for
+  `cff2694e...`, publishing 10,444 files / 8,136,157,518 bytes under a short
+  disjoint `E:` root. Owner cutover remains bound to merging this code and
+  refreshing the resulting new `main` SHA. (WSP 00/5/6/15/22/50/64/84/97)
+
 ## 2026-08-21 - Query-replica production route plumbing
 
 - Added an explicit trusted-host resolver that proves an existing disjoint

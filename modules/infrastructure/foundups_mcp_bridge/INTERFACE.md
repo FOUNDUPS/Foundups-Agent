@@ -36,6 +36,11 @@ aliases fail. SentenceTransformer markers (`modules.json`, `config.json`,
 `model.safetensors`, and `tokenizer.json` or `vocab.txt`) are direct root
 children, exactly matching the runtime resolver.
 
+Windows retains raw OS handles for every source, destination, and directory
+through final aggregate proof while using transient CRT descriptors one at a
+time. The descriptor is bounded to 4 MiB, sufficient for the verified
+10,444-file live generation; larger payloads still fail closed.
+
 Success no-replace publishes `generations/<digest>/` then immutable `holoindex_query_replica.active.json`, binding repository, receipt, generation, storage identities, UTC time, hashes, and sizes. Existing targets are never overwritten.
 Final failure atomically no-replace quarantines whatever occupies this call's active name; success makes active absent and returns a relative orphan path. Rename failure leaves active and reports a relative unsafe path.
 Publication temps and staging trees are preserved. Windows copy failure closes handles but leaves bounded partial output; the materializer quarantines its enclosing staging root. Direct `copy_model_snapshot` callers own their isolated partial destination.

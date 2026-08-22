@@ -77,7 +77,7 @@ def snapshot_artifact_files(source: Path, limits: ModelCopyLimits) -> ArtifactSn
     pending = [source]
     while pending:
         _scan_directory(source, pending.pop(), pending, directories, files)
-    files.sort(key=lambda item: item[0])
+    files.sort(key=lambda item: _normalized_path_key(item[0]))
     _validate_snapshot_bounds(files, limits)
     return ArtifactSnapshot(files, directories)
 

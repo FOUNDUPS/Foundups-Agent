@@ -23,6 +23,7 @@ _FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000
 _FILE_RENAME_INFO_CLASS = 3
 _FILE_ATTRIBUTE_TAG_INFO_CLASS = 9
 _INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
+_DUPLICATE_SAME_ACCESS = 0x00000002
 
 class _FileAttributeTagInfo(ctypes.Structure):
     _fields_ = [
@@ -43,13 +44,28 @@ class WindowsDirectoryLease:
     """Pinned non-reparse directory with stable final path and file identity."""
 
     path: Path
-    descriptor: int
+    handle: int
     identity: tuple[int, int]
 
     def close(self) -> None:
-        if self.descriptor >= 0:
-            os.close(self.descriptor)
-            self.descriptor = -1
+        if self.handle:
+            _close_handle(self.handle)
+            self.handle = 0
+
+
+@dataclass
+class WindowsFileLease:
+    """Pinned regular file retained as a raw handle, outside CRT limits."""
+
+    path: Path
+    handle: int
+    expected_identity: tuple[int, int, int, int, int] | None
+    writable: bool = False
+
+    def close(self) -> None:
+        if self.handle:
+            _close_handle(self.handle)
+            self.handle = 0
 
 def _kernel32() -> ctypes.WinDLL:
     if os.name != "nt":
@@ -179,6 +195,65 @@ def _descriptor_identity(descriptor: int) -> tuple[int, int, int, int, int]:
     )
 
 
+def _duplicate_handle(handle: int) -> int:
+    kernel32 = _kernel32()
+    current_process = kernel32.GetCurrentProcess
+    current_process.restype = wintypes.HANDLE
+    duplicate = kernel32.DuplicateHandle
+    duplicate.argtypes = [
+        wintypes.HANDLE,
+        wintypes.HANDLE,
+        wintypes.HANDLE,
+        ctypes.POINTER(wintypes.HANDLE),
+        wintypes.DWORD,
+        wintypes.BOOL,
+        wintypes.DWORD,
+    ]
+    duplicate.restype = wintypes.BOOL
+    process = current_process()
+    duplicated = wintypes.HANDLE()
+    if not duplicate(
+        process,
+        wintypes.HANDLE(handle),
+        process,
+        ctypes.byref(duplicated),
+        0,
+        False,
+        _DUPLICATE_SAME_ACCESS,
+    ):
+        raise ctypes.WinError(ctypes.get_last_error())
+    return int(duplicated.value)
+
+
+def _duplicate_descriptor(handle: int, *, writable: bool = False) -> int:
+    import msvcrt
+
+    duplicated = _duplicate_handle(handle)
+    descriptor = -1
+    try:
+        flags = (
+            (os.O_RDWR if writable else os.O_RDONLY)
+            | getattr(os, "O_BINARY", 0)
+        )
+        descriptor = msvcrt.open_osfhandle(duplicated, flags)
+        duplicated = 0
+        return descriptor
+    except BaseException:
+        if descriptor >= 0:
+            os.close(descriptor)
+        elif duplicated:
+            _close_handle(duplicated)
+        raise
+
+
+def _identity_from_handle(handle: int) -> tuple[int, int, int, int, int]:
+    descriptor = _duplicate_descriptor(handle)
+    try:
+        return _descriptor_identity(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def open_windows_directory_lease(
     path: Path,
     *,
@@ -186,32 +261,23 @@ def open_windows_directory_lease(
 ) -> WindowsDirectoryLease:
     """Pin a directory while denying write/delete sharing and prove identity."""
 
-    import msvcrt
-
     handle = _open_handle(
         path,
         desired_access=_FILE_READ_ATTRIBUTES | _DELETE,
         share_mode=_FILE_SHARE_READ,
         flags=_FILE_FLAG_BACKUP_SEMANTICS | _FILE_FLAG_OPEN_REPARSE_POINT,
     )
-    descriptor = -1
     try:
-        descriptor = msvcrt.open_osfhandle(
-            handle, os.O_RDONLY | getattr(os, "O_BINARY", 0)
-        )
-        handle = 0
-        _require_handle_path(_descriptor_handle(descriptor), path, directory=True)
-        metadata = os.fstat(descriptor)
-        if not stat.S_ISDIR(metadata.st_mode):
-            raise ValueError("acceptance_windows_directory_type_invalid")
-        identity = (int(metadata.st_dev), int(metadata.st_ino))
+        _require_handle_path(handle, path, directory=True)
+        identity_value = _identity_from_handle(handle)
+        identity = (identity_value[0], identity_value[1])
         if expected_identity is not None and identity != expected_identity:
             raise ValueError("acceptance_windows_directory_identity_changed")
-        return WindowsDirectoryLease(Path(path), descriptor, identity)
+        lease = WindowsDirectoryLease(Path(path), handle, identity)
+        handle = 0
+        return lease
     except BaseException:
-        if descriptor >= 0:
-            os.close(descriptor)
-        elif handle:
+        if handle:
             _close_handle(handle)
         raise
 
@@ -219,13 +285,11 @@ def open_windows_directory_lease(
 def validate_windows_directory_lease(lease: WindowsDirectoryLease) -> None:
     """Re-prove one pinned directory from its live handle."""
 
-    if lease.descriptor < 0:
+    if not lease.handle:
         raise ValueError("acceptance_windows_directory_lease_closed")
-    _require_handle_path(
-        _descriptor_handle(lease.descriptor), lease.path, directory=True
-    )
-    metadata = os.fstat(lease.descriptor)
-    if (int(metadata.st_dev), int(metadata.st_ino)) != lease.identity:
+    _require_handle_path(lease.handle, lease.path, directory=True)
+    identity = _identity_from_handle(lease.handle)
+    if (identity[0], identity[1]) != lease.identity:
         raise ValueError("acceptance_windows_directory_identity_changed")
 
 
@@ -235,7 +299,7 @@ def validate_windows_directory_lease_exact_path(
     """Reject a case- or Unicode-spelling alias for a pinned directory."""
     validate_windows_directory_lease(lease)
     _validate_exact_path_parts(
-        _final_path(_descriptor_handle(lease.descriptor)), lease.path,
+        _final_path(lease.handle), lease.path,
         "acceptance_windows_directory_path_case_alias",
     )
 
@@ -345,6 +409,97 @@ def create_windows_destination_file(
         elif handle:
             _close_handle(handle)
         raise
+
+
+def open_windows_source_file_lease(
+    path: Path,
+    parent: WindowsDirectoryLease,
+    *,
+    expected_identity: tuple[int, int, int, int, int],
+) -> WindowsFileLease:
+    """Pin one private source file without consuming a CRT descriptor."""
+
+    _require_parent(path, parent)
+    handle = _open_handle(
+        path,
+        desired_access=_GENERIC_READ | _FILE_READ_ATTRIBUTES,
+        share_mode=_FILE_SHARE_READ,
+        flags=_FILE_ATTRIBUTE_NORMAL | _FILE_FLAG_OPEN_REPARSE_POINT,
+    )
+    try:
+        lease = WindowsFileLease(Path(path), handle, expected_identity)
+        validate_windows_file_lease(lease)
+        validate_windows_directory_lease(parent)
+        handle = 0
+        return lease
+    finally:
+        if handle:
+            _close_handle(handle)
+
+
+def create_windows_destination_file_lease(
+    path: Path,
+    parent: WindowsDirectoryLease,
+) -> WindowsFileLease:
+    """Create and pin one private destination outside CRT descriptor limits."""
+
+    _require_parent(path, parent)
+    handle = _open_handle(
+        path,
+        desired_access=(
+            _GENERIC_READ | _GENERIC_WRITE | _DELETE | _FILE_READ_ATTRIBUTES
+        ),
+        share_mode=_FILE_SHARE_READ,
+        flags=_FILE_ATTRIBUTE_NORMAL | _FILE_FLAG_OPEN_REPARSE_POINT,
+        creation_disposition=_CREATE_NEW,
+    )
+    try:
+        lease = WindowsFileLease(Path(path), handle, None, writable=True)
+        identity = validate_windows_file_lease(lease)
+        if identity[2] != 0:
+            raise ValueError("acceptance_windows_destination_not_empty")
+        validate_windows_directory_lease(parent)
+        handle = 0
+        return lease
+    finally:
+        if handle:
+            _close_handle(handle)
+
+
+def open_windows_file_lease_descriptor(lease: WindowsFileLease) -> int:
+    """Open one transient CRT descriptor from a retained raw file handle."""
+
+    validate_windows_file_lease(lease)
+    descriptor = _duplicate_descriptor(lease.handle, writable=lease.writable)
+    try:
+        validate_windows_file_descriptor(
+            descriptor,
+            lease.path,
+            expected_identity=lease.expected_identity,
+        )
+        return descriptor
+    except BaseException:
+        os.close(descriptor)
+        raise
+
+
+def validate_windows_file_lease(
+    lease: WindowsFileLease,
+) -> tuple[int, int, int, int, int]:
+    """Re-prove one retained raw file handle without retaining a CRT slot."""
+
+    if not lease.handle:
+        raise ValueError("acceptance_windows_file_lease_closed")
+    _require_handle_path(lease.handle, lease.path, directory=False)
+    descriptor = _duplicate_descriptor(lease.handle, writable=lease.writable)
+    try:
+        return validate_windows_file_descriptor(
+            descriptor,
+            lease.path,
+            expected_identity=lease.expected_identity,
+        )
+    finally:
+        os.close(descriptor)
 
 
 def validate_windows_file_descriptor(
@@ -487,13 +642,18 @@ def publish_windows_temp_no_replace(
 
 __all__ = [
     "WindowsDirectoryLease",
+    "WindowsFileLease",
     "create_windows_destination_file",
+    "create_windows_destination_file_lease",
+    "open_windows_file_lease_descriptor",
     "open_windows_directory_lease",
     "open_windows_source_file",
+    "open_windows_source_file_lease",
     "open_windows_verified_regular_file",
     "publish_windows_temp_no_replace",
     "validate_windows_directory_lease",
     "validate_windows_directory_lease_exact_path",
     "validate_windows_file_descriptor",
     "validate_windows_file_descriptor_exact_path",
+    "validate_windows_file_lease",
 ]

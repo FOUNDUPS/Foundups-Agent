@@ -53,19 +53,95 @@ def _tree_manifest(logical_name: str, source: Path, relative_root: str):
     from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_acceptance_guards import (
         ExpectedArtifactFile,
     )
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_artifact_manifest import (
+        ModelCopyLimits,
+        snapshot_artifact_files,
+    )
     from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_query_replica import (
         ArtifactTreeManifest,
     )
 
+    snapshot = snapshot_artifact_files(
+        source,
+        ModelCopyLimits(
+            max_files=200_000,
+            max_file_bytes=2_147_483_648,
+            max_total_bytes=8_589_934_592,
+        ),
+    )
     files = tuple(
         ExpectedArtifactFile(
-            relative_path=file.relative_to(source).as_posix(),
-            size=file.stat().st_size,
+            relative_path=relative,
+            size=metadata.st_size,
             sha256=_digest(file),
         )
-        for file in sorted(path for path in source.rglob("*") if path.is_file())
+        for relative, file, metadata in snapshot.files
     )
     return ArtifactTreeManifest(logical_name, source, relative_root, files)
+
+
+def test_artifact_snapshot_order_matches_casefolded_manifest_order(
+    tmp_path: Path,
+) -> None:
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_artifact_manifest import (
+        ExpectedArtifactFile,
+        ModelCopyLimits,
+        snapshot_artifact_files,
+        validate_expected_manifest,
+    )
+
+    source = tmp_path / "model"
+    source.mkdir()
+    (source / "README.md").write_bytes(b"readme")
+    (source / "config.json").write_bytes(b"{}")
+    snapshot = snapshot_artifact_files(
+        source,
+        ModelCopyLimits(max_files=10, max_file_bytes=100, max_total_bytes=100),
+    )
+    manifest = tuple(
+        ExpectedArtifactFile(relative, metadata.st_size, _digest(path))
+        for relative, path, metadata in snapshot.files
+    )
+
+    assert tuple(item.relative_path for item in manifest) == (
+        "config.json",
+        "README.md",
+    )
+    assert validate_expected_manifest(snapshot.files, manifest)
+
+
+def test_large_descriptor_secret_scan_is_complete_without_truncation() -> None:
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_acceptance_guards import (
+        AcceptanceGuardError,
+    )
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_private_json_publication import (
+        _encode_payload,
+    )
+
+    payload = {
+        "schema_version": "holoindex_query_replica.v1",
+        "files": [
+            {"path": f"vectors/chunk-{index:04d}.bin"}
+            for index in range(600)
+        ],
+    }
+
+    encoded = _encode_payload(
+        payload,
+        2_097_152,
+        expected_schema="holoindex_query_replica.v1",
+        reject_absolute_paths=False,
+    )
+    assert json.loads(encoded) == payload
+
+    payload["files"][-1]["token"] = "not-persistable"
+    with pytest.raises(AcceptanceGuardError, match="RECEIPT_NOT_SECRET_FREE"):
+        _encode_payload(
+            payload,
+            2_097_152,
+            expected_schema="holoindex_query_replica.v1",
+            reject_absolute_paths=False,
+        )
 
 
 def _canonical_fixture_paths(tmp_path: Path):
@@ -190,6 +266,40 @@ def test_valid_materialization_is_deterministic_and_preserves_canonical_bytes(tm
         for entry in descriptor["files"]
     )
     assert list((fixture[2] / ".query-replica-orphans").iterdir()) == []
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows raw-handle scalability")
+def test_windows_materializer_does_not_exhaust_crt_descriptors(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    canonical, repo, replica, root_proof = fixture[:4]
+    vectors = fixture[5][1].source_root
+    for index in range(600):
+        (vectors / f"chunk-{index:04d}.bin").write_bytes(b"segment")
+    manifest = _tree_manifest("vectors", vectors, "vectors")
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_acceptance_model_copy import (
+        copy_model_snapshot,
+    )
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_artifact_manifest import (
+        ModelCopyLimits,
+    )
+
+    result = copy_model_snapshot(
+        vectors,
+        replica / "vectors-copy",
+        store_proof=root_proof,
+        canonical_store=canonical,
+        repo_roots=(repo,),
+        limits=ModelCopyLimits(
+            max_files=1_000,
+            max_file_bytes=1_000_000,
+            max_total_bytes=10_000_000,
+        ),
+        expected_manifest=manifest.files,
+    )
+
+    assert result.file_count == 602
 
 
 def test_source_mutation_during_copy_is_rejected(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -438,7 +548,7 @@ def test_injected_windows_reparse_and_special_sources_fail_closed(
         _materialize(fixture)
 
 
-@pytest.mark.parametrize("bound", ["count", "bytes", "path"])
+@pytest.mark.parametrize("bound", ["count", "bytes", "path", "descriptor"])
 def test_resource_bounds_fail_closed(tmp_path: Path, bound: str) -> None:
     from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_query_replica import (
         QueryReplicaError,
@@ -451,6 +561,7 @@ def test_resource_bounds_fail_closed(tmp_path: Path, bound: str) -> None:
         max_file_bytes=1024,
         max_total_bytes=1 if bound == "bytes" else 4096,
         max_path_bytes=2 if bound == "path" else 512,
+        max_descriptor_bytes=1 if bound == "descriptor" else 4_194_304,
     )
     with pytest.raises(QueryReplicaError):
         _materialize(fixture, limits=limits)

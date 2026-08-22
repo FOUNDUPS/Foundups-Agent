@@ -294,7 +294,9 @@ the disposable process fixture.
   descriptor ordering, source-hash change, receipt/generation swap, lease
   transition, overlap, link/reparse/hardlink/special rejection, resource
   bounds, preexisting targets, copy/hash/publication failure, and confined
-  no-delete staging quarantine.
+  no-delete staging quarantine. Windows also proves a 602-file copy retains raw
+  handles without exhausting CRT descriptors; large descriptor scans cover all
+  600 items and still reject a secret in the final item.
 - It never reads a live Holo store, starts an owner, loads a model, uses a
   network, or performs maintenance. Real symlink/FIFO cases may skip when the
   host cannot create them; injected reparse/special coverage remains mandatory.
