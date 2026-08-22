@@ -18,15 +18,14 @@ For exhaustive machine-level semantics, use:
 
 ### Query storage isolation boundary
 
-HoloIndex continues to accept one explicit storage root and does not discover
-or trust `holoindex_query_replica.v1` descriptors itself. The bridge-owned
-Phase-1 materializer can prove/copy one immutable vector + model generation,
-retaining the existing authority then maintenance sentinels plus receipt proof
-through final active publication. It requires direct-root model markers and
-sealed production primitives; failure paths preserve rather than delete temps,
-staging, and active-name objects. The owner is not replica-backed until a follow-on validates the descriptor,
-supplies only the generation directory, and restarts on generation change.
-Canonical freshness evidence remains authoritative.
+HoloIndex accepts the one explicit generation root supplied by the bridge-owned
+verified `holoindex_query_replica.v1` route. Governed maintenance publishes a
+canonical snapshot set for all seven baseline collections before its PASS
+receipt. The materializer copies those artifacts with the vector/model tree;
+the owner reproves the descriptor, loads only the path-free immutable snapshot
+adapter, and requires its generation ID to match the replica binding. Query
+startup and retrieval do not start Chroma or open SQLite/HNSW. Canonical
+freshness evidence remains authoritative and generation drift requires restart.
 
 ### Tool boundary (truth-recorded by PR #704)
 HoloIndex is a **semantic retrieval system**. It **complements** `grep`/`glob`; it does not replace them. Choose the right tool for the query:
@@ -74,13 +73,16 @@ Storage resolution is deterministic:
 4. platform-safe absolute default
 
 HOLOINDEX_QUERY_READONLY=1 requires an existing
-vectors/chroma.sqlite3, never creates directories or collections, and never
-writes the repository activity log. Storage failures raise
+vectors/chroma.sqlite3 plus the governed `vectors/query_snapshots` set, never
+creates directories or collections, and never writes the repository activity
+log. The immutable query client exposes only the bounded `get`, `count`, and
+exact vector `query` subset required by Holo search. Storage failures raise
 HoloIndexStorageError with one of the stable codes
 HOLOINDEX_STORAGE_UNAVAILABLE, HOLOINDEX_STORAGE_NOT_WRITABLE,
 HOLOINDEX_STORAGE_PATH_MISMATCH, or HOLOINDEX_COLLECTION_UNAVAILABLE.
-ChromaDB itself is not a read-only database client. The supported RedDog
-operational adapter uses the host-owned service at literal `127.0.0.1`, as
+ChromaDB itself is not a read-only database client and is therefore absent from
+the query path. The supported RedDog operational adapter uses the host-owned
+service at literal `127.0.0.1`, as
 documented by modules/infrastructure/foundups_mcp_bridge/INTERFACE.md. This
 adapter boundary is not an OS privilege boundary; host deployment must enforce
 filesystem/process permissions separately when required. Legacy consumers,

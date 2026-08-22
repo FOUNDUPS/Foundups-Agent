@@ -9,6 +9,11 @@ import pytest
 
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_query_replica_descriptor import (
     ActiveQueryReplicaBinding,
+    QueryReplicaDescriptorError,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_replica import (
+    QueryReplicaRuntime,
+    prepare_query_backend,
 )
 from modules.infrastructure.foundups_mcp_bridge.tests.holo_query_service_fixtures import (
     _Backend,
@@ -127,3 +132,20 @@ def test_backend_reporting_canonical_storage_is_rejected(
         owner.close()
     assert result["ok"] is False
     assert result["error"] == "SEMANTIC_BACKEND_UNAVAILABLE"
+
+
+def test_production_backend_requires_exact_snapshot_generation(tmp_path: Path) -> None:
+    binding = _binding(tmp_path)
+    runtime = QueryReplicaRuntime(
+        tmp_path / "canonical", lambda: binding, binding,
+        require_snapshot_generation=True,
+    )
+    backend = _Backend()
+    backend.ssd_path = binding.generation_directory
+    backend.query_snapshot_generation_id = "sha256:" + "9" * 64
+
+    with pytest.raises(
+        QueryReplicaDescriptorError,
+        match="QUERY_REPLICA_SNAPSHOT_GENERATION_MISMATCH",
+    ):
+        prepare_query_backend(runtime, lambda _path: backend)

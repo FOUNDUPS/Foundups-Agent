@@ -1,5 +1,18 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-22 - Immutable snapshot query backend integration
+
+- Live replica forensics showed Chroma 1.5.5 writes SQLite on every Rust
+  startup and rewrites HNSW bytes during query/close, even with validate-only
+  migrations. A catalog overlay was therefore rejected after its integrated
+  immutability test failed.
+- Connected the existing R27 path-free snapshot codec and exact-vector adapter
+  to governed maintenance, Holo read-only startup, owner generation admission,
+  and backend lifecycle cleanup. All seven baseline snapshots must publish
+  before PASS; replica reads no longer open Chroma, SQLite, or HNSW.
+- Added deterministic store, tamper, real-Chroma export, generation mismatch,
+  and maintenance lifecycle coverage. (WSP 00/15/22/34/50/62/84/87/97)
+
 ## 2026-08-22 - Live Holo query-replica materialization closure
 
 - Reproduced four synthetic-only gaps against the current 8.1 GB Windows Holo

@@ -173,6 +173,8 @@ def open_persisted_collection_view(
     embedding = metadata if isinstance(metadata, Mapping) else {}
     return SimpleNamespace(
         client=client,
+        ssd_path=ssd,
+        models_path=ssd / "models",
         **attributes,
         index_embedding_backend=str(embedding.get("embedding_backend") or ""),
         index_embedding_model_id=str(embedding.get("embedding_model") or ""),

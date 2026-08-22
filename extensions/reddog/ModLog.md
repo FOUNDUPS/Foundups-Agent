@@ -1,5 +1,12 @@
 # RedDog ModLog
 
+## 2026-08-22 - Immutable Holo snapshot backend closure (0.4.104)
+
+- Refreshed the pinned governed backend manifest after adding the immutable
+  Holo snapshot publisher/loader and its existing codec/adapter dependencies.
+- The extension surface and version are unchanged; this binds RedDog's sealed
+  Python runtime to the exact query backend used by the owner. WSP 22/50/97.
+
 ## 2026-08-21 - Verified topology consumers and governed AutoResearch (0.4.104)
 
 - Connected the extension query, advisory/Fusion bridge, bounded FoundUps

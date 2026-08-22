@@ -302,24 +302,36 @@ class HoloIndex:
                 ) from exc
 
         self._log_agent_action("Setting up persistent ChromaDB collections...", "INFO")
+        if readonly_query_enabled():
+            from modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store import (
+                open_query_snapshot_client,
+            )
         try:
-            self.client = chromadb.PersistentClient(path=str(self.vector_path))
+            if readonly_query_enabled():
+                self.client = open_query_snapshot_client(self.vector_path)
+                self.query_snapshot_generation_id = self.client.generation_id
+            else:
+                self.client = chromadb.PersistentClient(path=str(self.vector_path))
         except Exception as exc:
             raise classify_storage_exception(
                 exc,
                 path=self.ssd_path,
                 operation="open_chromadb",
             ) from exc
-        self.code_collection = self._ensure_collection("navigation_code")
-        self.wsp_collection = self._ensure_collection("navigation_wsp")
-        self.test_collection = self._ensure_collection("navigation_tests")
-        self.skill_collection = self._ensure_collection("navigation_skills")
-        self.symbol_collection = self._ensure_collection("navigation_symbols")
-        # CFZ4: New collections for semantic separation
-        self.docs_collection = self._ensure_collection("navigation_docs")
-        self.knowledge_collection = self._ensure_collection("navigation_knowledge")
-        # Work Ledger: Slice tracking for WSP 15/60/70 work state queries
-        self.work_ledger_collection = self._ensure_collection("navigation_work_ledger")
+        try:
+            self.code_collection = self._ensure_collection("navigation_code")
+            self.wsp_collection = self._ensure_collection("navigation_wsp")
+            self.test_collection = self._ensure_collection("navigation_tests")
+            self.skill_collection = self._ensure_collection("navigation_skills")
+            self.symbol_collection = self._ensure_collection("navigation_symbols")
+            # CFZ4: New collections for semantic separation
+            self.docs_collection = self._ensure_collection("navigation_docs")
+            self.knowledge_collection = self._ensure_collection("navigation_knowledge")
+            # Work Ledger: Slice tracking for WSP 15/60/70 work state queries
+            self.work_ledger_collection = self._ensure_collection("navigation_work_ledger")
+        except Exception:
+            self.close()
+            raise
 
         self._log_agent_action("Loading sentence transformer (cached on SSD)...", "MODEL")
         os.environ['SENTENCE_TRANSFORMERS_HOME'] = str(self.models_path)
@@ -731,6 +743,11 @@ class HoloIndex:
         """
         from .search_engine import execute_search
         return execute_search(self, query, limit, doc_type_filter)
+
+    def close(self) -> None:
+        """Release the vector client."""
+        if callable(close := getattr(self.client, "close", None)):
+            close()
 
     # --------- CLI Helpers --------- #
 

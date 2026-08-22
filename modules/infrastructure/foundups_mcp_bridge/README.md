@@ -52,6 +52,15 @@ ID, and path-identity digest); any missing field or drift fails closed and a
 changed exact binding cannot hot-swap a live owner. Absolute replica paths are
 not returned in public responses.
 
+Governed Holo maintenance publishes a deterministic immutable snapshot set for
+the seven baseline collections before its PASS receipt. The replica copies that
+set as part of `vectors/`. The resident owner never starts Chroma against the
+replica: it validates every snapshot artifact, loads the existing bounded exact-
+vector adapter, and requires the embedded generation ID to equal the active
+descriptor. SQLite and HNSW remain unopened and byte-stable throughout query
+and shutdown. Snapshot artifact payload is preflight-bounded to 384 MiB before
+publication and again before any query artifact is loaded.
+
 R16-R19 made route, binding fields, and health containers exact. R20 makes
 health transport scalars exact before any conversion: literal `127.0.0.1`,
 port 1..65535, trimmed printable token >=32 characters, and finite positive

@@ -260,6 +260,11 @@ def _paged_collection_snapshot(collection: Any, *, count: int) -> dict[str, list
     return combined
 
 
+def paged_collection_snapshot(collection: Any, *, count: int) -> dict[str, list[Any]]:
+    """Return the bounded complete collection payload used by receipt/export proof."""
+    return _paged_collection_snapshot(collection, count=count)
+
+
 def _collection_snapshot_manifest(
     collection: Any,
     *,
@@ -1275,6 +1280,7 @@ __all__ = [
     "freshness_receipt_integrity_ok",
     "freshness_receipt_from_mapping",
     "load_freshness_receipt",
+    "paged_collection_snapshot",
     "publish_maintenance_invalidation",
     "read_git_head_sha",
     "write_freshness_receipt",

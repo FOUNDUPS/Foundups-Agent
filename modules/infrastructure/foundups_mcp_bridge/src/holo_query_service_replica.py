@@ -24,6 +24,7 @@ class QueryReplicaRuntime:
     canonical_ssd_path: Path
     verifier: Callable[[], ActiveQueryReplicaBinding] | None
     binding: ActiveQueryReplicaBinding | None = None
+    require_snapshot_generation: bool = False
 
     def verify(self) -> ActiveQueryReplicaBinding | None:
         if self.verifier is None:
@@ -60,7 +61,10 @@ def build_query_replica_runtime(
             canonical_repo_root=repo_root,
             canonical_ssd_path=canonical_ssd_path,
         )
-    runtime = QueryReplicaRuntime(canonical_ssd_path, verifier)
+    runtime = QueryReplicaRuntime(
+        canonical_ssd_path, verifier,
+        require_snapshot_generation=require_replica,
+    )
     runtime.binding = runtime.verify()
     if runtime.binding is None and require_replica:
         raise ValueError("HOLOINDEX_QUERY_REPLICA_REQUIRED")
@@ -88,6 +92,13 @@ def prepare_query_backend(
         or storage_path_identity(reported) != storage_path_identity(runtime.query_ssd_path)
     ):
         raise QueryReplicaDescriptorError("QUERY_REPLICA_BACKEND_STORAGE_MISMATCH")
+    snapshot_generation = getattr(backend, "query_snapshot_generation_id", "")
+    if (
+        before is not None
+        and runtime.require_snapshot_generation
+        and snapshot_generation != before.generation_id
+    ):
+        raise QueryReplicaDescriptorError("QUERY_REPLICA_SNAPSHOT_GENERATION_MISMATCH")
     if before != runtime.verify():
         raise QueryReplicaDescriptorError("QUERY_REPLICA_BINDING_CHANGED")
     backend.search_cache = None

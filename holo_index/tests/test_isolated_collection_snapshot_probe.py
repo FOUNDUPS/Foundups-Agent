@@ -373,6 +373,7 @@ def test_persisted_view_reopens_all_collections_without_encoder(tmp_path: Path) 
     )
 
     assert view.client is client
+    assert view.models_path == (tmp_path / "ssd" / "models").resolve(strict=False)
     assert view.code_collection is collections["navigation_code"]
     assert view.wsp_collection is collections["navigation_wsp"]
     assert view.skill_collection is collections["navigation_skills"]

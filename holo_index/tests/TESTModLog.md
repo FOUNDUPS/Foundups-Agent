@@ -1,5 +1,12 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-22] Immutable snapshot query integration
+
+- Added snapshot-store round-trip, artifact-tamper, real Chroma-export, Holo
+  client selection/lifecycle, maintenance publication, and exact replica-
+  generation binding coverage. The read adapter's existing adversarial codec
+  and distance suite remains the query implementation contract.
+
 ## [2026-08-21] RedDog closed command-import regression
 
 - Added a sealed `-S -B` subprocess test for the bundle command. It proves that

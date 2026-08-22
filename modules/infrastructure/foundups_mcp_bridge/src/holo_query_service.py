@@ -194,6 +194,15 @@ class HoloIndexQueryOwnerService:
 
     def close(self) -> None:
         self._executor.shutdown(wait=False, cancel_futures=True)
+        if not self._request_lock.acquire(blocking=False):
+            return
+        try:
+            backend, self._backend = self._backend, None
+            close = getattr(backend, "close", None)
+            if callable(close):
+                close()
+        finally:
+            self._request_lock.release()
 
     def authorization_error(self, authorization: str | None) -> str:
         expected = self._bearer_token

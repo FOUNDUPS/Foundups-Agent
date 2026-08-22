@@ -19,11 +19,13 @@ markers are direct snapshot-root children; the public bridge API uses sealed
 dependencies and no-delete, no-replace quarantine for failed replica objects.
 Failed Windows model copies preserve partial bytes until the bridge quarantines
 the enclosing staging root; HoloIndex never consumes that partial state.
-HoloIndex itself
-still opens the storage root supplied by its supervisor; replica descriptor
-validation and owner routing are not implemented in this slice. The canonical
-store therefore remains quarantined for normal query-owner use until that
-follow-on is independently verified.
+Governed maintenance exports all seven baseline collections into a bounded,
+generation-bound snapshot set. HoloIndex opens only the generation root
+supplied by its verified query-replica supervisor and loads those immutable
+rows and float32 vectors through the existing exact-search adapter. The query
+path never starts Chroma or opens SQLite/HNSW; its snapshot generation must
+equal the verified replica generation. Maintenance retains the write-capable
+canonical Chroma path.
 
 ## Module Tier-0 retrieval
 

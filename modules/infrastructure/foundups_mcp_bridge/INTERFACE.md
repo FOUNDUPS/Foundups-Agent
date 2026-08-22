@@ -110,6 +110,12 @@ The supported private RedDog owner exports:
         create_stdlib_server,
     )
 
+The production backend is the immutable seven-collection snapshot set emitted
+by governed maintenance and copied inside the verified replica generation. It
+supports only the Chroma-shaped read subset used by HoloIndex. Backend creation
+fails closed when the snapshot generation differs from the active replica;
+query startup/search never starts Chroma or opens replica SQLite/HNSW files.
+
 HTTP exposes authenticated `POST /holoindex/v1/query` and
 `GET /holoindex/v1/health` only; there is no indexing API. Both require
 `Authorization: Bearer` via `HOLOINDEX_QUERY_SERVICE_TOKEN`, accept only the
