@@ -4,8 +4,9 @@
 
 - Added generation-bound snapshot-set publication/loading, artifact tamper,
   real Chroma export, exact owner-generation mismatch, and lifecycle coverage.
-- The existing 116-test codec/adapter adversarial contract plus four store
-  tests pass as one 120-test focused snapshot seam.
+- The existing 116-test codec/adapter adversarial contract plus six store
+  tests pass as one 122-test focused snapshot seam. Production-shaped
+  decomposed Unicode is normalized to NFC at export and reopens canonically.
 
 ## [2026-08-22] Acceptance import-order regression
 
