@@ -95,6 +95,14 @@ before authenticated health; health/reuse require all four public replica
 fields and binding drift forces replacement rather than hot swap. Explicit
 argv carries both roots and the child receives no ambient `HOLOINDEX_SSD_PATH`.
 
+The live 10,556-file replica exposed that repeating its complete 8.29 GB proof
+inside the 15-second request deadline was impossible. The resident path now
+keeps complete admission at route resolution and again inside the isolated
+owner, then revalidates the unchanged descriptor/authority plus only the model
+and sealed snapshot artifacts reachable by the in-memory backend. Measured
+runtime proofs were 1.297 and 1.359 seconds versus 42.422 seconds for complete
+admission; no timeout was enlarged and SQLite/HNSW remain unreachable.
+
 **Completed plumbing:** one-shot owner query `_owner_attempt`, maintenance
 `_start_owner`, and promotion `_run_locked_promotion` now resolve and propagate
 the explicit current replica capability without fallback or mutation.

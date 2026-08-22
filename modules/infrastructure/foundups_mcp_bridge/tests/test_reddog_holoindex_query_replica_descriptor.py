@@ -13,6 +13,7 @@ from modules.infrastructure.foundups_mcp_bridge.tests.test_reddog_holoindex_quer
     _ReceiptProof,
     _fixture,
     _materialize,
+    _tree_manifest,
 )
 
 
@@ -39,6 +40,33 @@ def _verify(fixture, **overrides):
 
     canonical, repo, _replica, proof, _binding, _manifests = fixture
     return _verify_active_query_replica_for_test(
+        replica_root_proof=proof,
+        canonical_repo_root=repo,
+        canonical_ssd_path=canonical,
+        dependencies=overrides.pop("dependencies", _dependencies()),
+        **overrides,
+    )
+
+
+def _fixture_with_query_snapshots(tmp_path: Path):
+    fixture = _fixture(tmp_path)
+    canonical, repo, replica, proof, binding, manifests = fixture
+    snapshots = canonical / "vectors" / "query_snapshots"
+    snapshots.mkdir()
+    (snapshots / "snapshot_set.json").write_bytes(b"sealed-snapshot-set")
+    (snapshots / "code_entries.snapshot").write_bytes(b"sealed-code-snapshot")
+    vectors = _tree_manifest("vectors", canonical / "vectors", "vectors")
+    return canonical, repo, replica, proof, binding, (manifests[0], vectors)
+
+
+def _revalidate(fixture, admitted, **overrides):
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_query_replica_descriptor import (
+        _revalidate_admitted_query_replica_for_test,
+    )
+
+    canonical, repo, _replica, proof, _binding, _manifests = fixture
+    return _revalidate_admitted_query_replica_for_test(
+        admitted_binding=admitted,
         replica_root_proof=proof,
         canonical_repo_root=repo,
         canonical_ssd_path=canonical,
@@ -74,6 +102,49 @@ def test_replica_artifact_mutation_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError, match="ARTIFACT_DIGEST_MISMATCH"):
         _verify(fixture)
+
+
+def test_admitted_binding_revalidation_rejects_runtime_artifact_surface_drift(
+    tmp_path: Path,
+) -> None:
+    relatives = (
+        Path("vectors/query_snapshots/code_entries.snapshot"),
+        Path("models/sentence_transformers/all-MiniLM-L6-v2/model.safetensors"),
+    )
+    for index, relative in enumerate(relatives):
+        case = tmp_path / f"mutation-{index}"
+        case.mkdir()
+        fixture = _fixture_with_query_snapshots(case)
+        result = _materialize(fixture)
+        admitted = _verify(fixture)
+        assert _revalidate(fixture, admitted) == admitted
+        (result.generation_directory / relative).write_bytes(b"changed-runtime")
+        with pytest.raises(RuntimeError, match="RUNTIME_ARTIFACT_CHANGED"):
+            _revalidate(fixture, admitted)
+
+    extra_case = tmp_path / "extra"
+    extra_case.mkdir()
+    fixture = _fixture_with_query_snapshots(extra_case)
+    result = _materialize(fixture)
+    admitted = _verify(fixture)
+    extra = result.generation_directory / "models" / "unlisted-runtime.bin"
+    extra.write_bytes(b"unlisted")
+    with pytest.raises(RuntimeError, match="RUNTIME_ARTIFACT_SET_CHANGED"):
+        _revalidate(fixture, admitted)
+
+
+def test_admitted_binding_revalidation_rejects_descriptor_swap(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture_with_query_snapshots(tmp_path)
+    result = _materialize(fixture)
+    admitted = _verify(fixture)
+    payload = json.loads(result.active_descriptor.read_text(encoding="utf-8"))
+    payload["created_at"] = "2026-08-18T00:00:00+00:00"
+    result.active_descriptor.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="BINDING_CHANGED"):
+        _revalidate(fixture, admitted)
 
 
 def test_active_descriptor_schema_and_generation_path_fail_closed(

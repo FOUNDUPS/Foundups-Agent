@@ -29,6 +29,13 @@
   fast 13/13; conversation 15 shared vectors/32 Python contracts; exact
   66-file package; and four-group release PASS without timeout.
 
+## 2026-08-22 - Bounded resident Holo proof binding (post-0.4.105 backend repair)
+
+- Rebound the packaged backend manifest to the resident Holo owner bounded
+  replica-revalidation repair. Complete replica admission remains mandatory;
+  steady-state queries retain the original 15-second deadline and fail closed
+  on descriptor, authority, model, or sealed-snapshot drift.
+
 ## 2026-08-22 - Immutable Holo snapshot backend closure (0.4.104)
 
 - Production knowledge rows exposed valid decomposed Unicode after the first

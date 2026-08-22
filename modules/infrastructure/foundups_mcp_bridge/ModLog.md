@@ -1,5 +1,21 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-22 - Resident owner bounded replica revalidation
+
+- Live one-shot evidence reached exact authority `0dce910a...` but failed
+  closed with `QUERY_TIMEOUT`: the 15-second request repeated a complete 8.29
+  GB, 10,556-artifact replica proof before and after semantic retrieval.
+- Kept complete digest admission once in the trusted route and independently
+  once in the isolated owner. Retained route/owner proofs now revalidate the
+  exact descriptor/manifest, canonical repository/receipt/leases, and rehash
+  only the model plus immutable query snapshots reachable by the backend.
+  Chroma, SQLite, and HNSW remain unopened; no timeout or cache TTL changed.
+- Live read-only benchmark: complete admission 42.422 seconds; retained proofs
+  1.297 and 1.359 seconds with the same generation/binding. Focused contracts
+  are 101/101; generated/one-shot/snapshot adjacency is 171/171. The complete
+  bridge package is 961 passed / 6 expected host-capability skips under the
+  base interpreter, with zero failures.
+
 ## 2026-08-22 - Immutable snapshot query backend integration
 
 - Follow-up production evidence showed decomposed Unicode in knowledge rows.

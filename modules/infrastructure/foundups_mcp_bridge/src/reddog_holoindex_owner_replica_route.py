@@ -21,6 +21,7 @@ from .reddog_holoindex_acceptance_guards import (
 from .reddog_holoindex_query_replica_descriptor import (
     ActiveQueryReplicaBinding,
     QueryReplicaDescriptorError,
+    revalidate_admitted_query_replica,
     verify_active_query_replica,
 )
 
@@ -42,7 +43,8 @@ class QueryReplicaOwnerRoute:
         return self.binding.reuse_binding
 
     def revalidate(self) -> ActiveQueryReplicaBinding:
-        observed = verify_active_query_replica(
+        observed = revalidate_admitted_query_replica(
+            admitted_binding=self.binding,
             replica_root_proof=self.replica_root_proof,
             canonical_repo_root=self.canonical_repo_root,
             canonical_ssd_path=self.canonical_ssd_path,

@@ -149,3 +149,39 @@ def test_production_backend_requires_exact_snapshot_generation(tmp_path: Path) -
         match="QUERY_REPLICA_SNAPSHOT_GENERATION_MISMATCH",
     ):
         prepare_query_backend(runtime, lambda _path: backend)
+
+
+def test_runtime_switches_from_full_admission_to_bounded_revalidation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from modules.infrastructure.foundups_mcp_bridge.src import (
+        holo_query_service_replica as replica_module,
+    )
+
+    binding = _binding(tmp_path)
+    calls = {"full": 0, "bounded": 0}
+
+    def full(**_kwargs):
+        calls["full"] += 1
+        return binding
+
+    def bounded(**kwargs):
+        calls["bounded"] += 1
+        assert kwargs["admitted_binding"] == binding
+        return binding
+
+    monkeypatch.setattr(replica_module, "verify_active_query_replica", full)
+    monkeypatch.setattr(
+        replica_module, "revalidate_admitted_query_replica", bounded
+    )
+    runtime = replica_module.build_query_replica_runtime(
+        repo_root=tmp_path,
+        canonical_ssd_path=tmp_path / "canonical",
+        proof=object(),  # type: ignore[arg-type]
+        injected=None,
+        require_replica=True,
+    )
+
+    assert calls == {"full": 1, "bounded": 1}
+    assert runtime.verify() == binding
+    assert calls == {"full": 1, "bounded": 2}

@@ -1,5 +1,18 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-22] Resident owner bounded replica proof
+
+- Added adversarial retained-proof coverage for exact descriptor identity,
+  model/sealed-snapshot hashing, and production runtime transition from one
+  full admission to bounded revalidation.
+- Focused replica/route/supervisor/HTTP matrix is **101 passed**;
+  generated/one-shot/snapshot adjacency is **171 passed**. The complete bridge
+  package is **961 passed / 6 expected host-capability skips** under the base
+  interpreter with the trusted site-packages and zero failures.
+- Live read-only timing against 10,556 artifacts: full admission **42.422 s**;
+  retained proof **1.297 s** and **1.359 s**. Production query timeout remains
+  15 seconds; no test or runtime cache was added.
+
 ## [2026-08-22] Immutable snapshot query integration
 
 - Added generation-bound snapshot-set publication/loading, artifact tamper,

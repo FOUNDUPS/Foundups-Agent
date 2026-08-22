@@ -61,6 +61,15 @@ descriptor. SQLite and HNSW remain unopened and byte-stable throughout query
 and shutdown. Snapshot artifact payload is preflight-bounded to 384 MiB before
 publication and again before any query artifact is loaded.
 
+Replica proof is intentionally two-tiered. Initial route resolution and the
+isolated owner each perform one complete 8.29 GB manifest/digest admission.
+After that admission, route reuse, startup health, and queries revalidate the
+unchanged descriptor, canonical repository/receipt/leases, and rehash only the
+runtime-reachable model plus `vectors/query_snapshots/` artifacts. The sealed
+backend cannot reach copied Chroma/SQLite/HNSW state. The 15-second query
+deadline is unchanged. On the live 10,556-file generation, complete admission
+took 42.422 seconds; two bounded proofs took 1.297 and 1.359 seconds.
+
 R16-R19 made route, binding fields, and health containers exact. R20 makes
 health transport scalars exact before any conversion: literal `127.0.0.1`,
 port 1..65535, trimmed printable token >=32 characters, and finite positive

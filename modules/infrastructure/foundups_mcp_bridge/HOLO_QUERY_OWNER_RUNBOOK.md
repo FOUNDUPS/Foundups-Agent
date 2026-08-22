@@ -51,6 +51,17 @@ bytes; the materializer then quarantines the enclosing staging root. A direct
 copy caller owns its isolated partial destination. Retention or deletion of
 these objects requires a later governed policy.
 
+Complete replica verification is an admission operation, not a per-query
+operation. The trusted route resolver hashes every descriptor artifact once,
+and the isolated owner independently repeats that complete proof once. The
+retained route/owner then checks the unchanged descriptor, manifest projection,
+canonical repository/receipt/leases, and hashes only the selected model and
+`vectors/query_snapshots/`, because the immutable in-memory backend has no
+Chroma/SQLite/HNSW read surface. Any reachable-artifact or authority drift
+fails closed. Do not replace this with a time-based cache and do not increase
+the 15-second query timeout; the measured bounded proof is 1.297--1.359 seconds
+on the live generation, versus 42.422 seconds for full admission.
+
 R16 made route possession mandatory, R17 made replica capability exact, R18
 made canonical fields exact, and R19 requires decoded health to be an exact
 built-in `dict`. Reject Mapping substitutes, dict subclasses, and arbitrary

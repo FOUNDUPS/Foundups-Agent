@@ -69,6 +69,7 @@ _REPLICA_KEYS = frozenset({"storage_identity"})
 _FILE_KEYS = frozenset({
     "path", "size", "sha256", "source_before_sha256", "source_after_sha256",
 })
+_RUNTIME_ARTIFACT_PREFIXES = ("models/", "vectors/query_snapshots/")
 
 
 class QueryReplicaDescriptorError(RuntimeError):
@@ -373,6 +374,73 @@ def _verify_artifacts(
     return tuple(bindings)
 
 
+def _verify_runtime_artifacts(
+    binding: ActiveQueryReplicaBinding,
+    generation: Path,
+    limits: QueryReplicaLimits,
+) -> None:
+    """Rehash only artifacts reachable by the sealed in-memory query backend."""
+
+    selected = tuple(
+        artifact for artifact in binding.artifacts
+        if artifact.relative_path.startswith(_RUNTIME_ARTIFACT_PREFIXES)
+    )
+    roots = {
+        "models" if artifact.relative_path.startswith("models/")
+        else "query_snapshots"
+        for artifact in selected
+    }
+    if roots != {"models", "query_snapshots"}:
+        _fail("QUERY_REPLICA_RUNTIME_ARTIFACT_SET_INCOMPLETE")
+    _reject_unlisted_runtime_entries(
+        generation, {artifact.relative_path for artifact in selected}
+    )
+    total = 0
+    for artifact in selected:
+        relative = artifact.relative_path
+        if len(relative.encode("utf-8")) > limits.max_path_bytes:
+            _fail("QUERY_REPLICA_FILE_SIZE_BOUND")
+        path = generation / Path(relative)
+        if not _relative_to(path, generation):
+            _fail("QUERY_REPLICA_FILE_PATH_ESCAPE")
+        payload, identity = _read_regular_file(path, limits.max_file_bytes)
+        if (
+            identity != artifact.identity
+            or len(payload) != artifact.size
+            or _digest(payload) != artifact.digest
+        ):
+            _fail("QUERY_REPLICA_RUNTIME_ARTIFACT_CHANGED")
+        total += artifact.size
+        if total > limits.max_total_bytes:
+            _fail("QUERY_REPLICA_TOTAL_SIZE_BOUND")
+
+
+def _reject_unlisted_runtime_entries(
+    generation: Path,
+    expected: set[str],
+) -> None:
+    observed: set[str] = set()
+    pending = [
+        generation / "models",
+        generation / "vectors" / "query_snapshots",
+    ]
+    while pending:
+        directory = pending.pop()
+        for entry in os.scandir(directory):
+            path = Path(entry.path)
+            metadata = os.lstat(path)
+            if _is_link_or_reparse(path, metadata):
+                _fail("QUERY_REPLICA_PATH_LINK_OR_REPARSE")
+            if stat.S_ISDIR(metadata.st_mode):
+                pending.append(path)
+            elif stat.S_ISREG(metadata.st_mode):
+                observed.add(path.relative_to(generation).as_posix())
+            else:
+                _fail("QUERY_REPLICA_SPECIAL_FILE")
+    if observed != expected:
+        _fail("QUERY_REPLICA_RUNTIME_ARTIFACT_SET_CHANGED")
+
+
 def _reject_unlisted_entries(generation: Path, expected: set[str]) -> None:
     observed: set[str] = set()
     pending = [generation]
@@ -466,6 +534,92 @@ def verify_active_query_replica(
         raise QueryReplicaDescriptorError(str(exc)) from exc
 
 
+def _require_admitted_repository_state(
+    binding: ActiveQueryReplicaBinding,
+    repo_root: Path,
+    dependencies: _DescriptorDependencies,
+) -> None:
+    state = dependencies.state_reader(repo_root)
+    if (
+        getattr(state, "proven_clean", False) is not True
+        or getattr(state, "head_sha", "") != binding.canonical_repo_head_sha
+    ):
+        _fail("QUERY_REPLICA_REPOSITORY_STATE_CHANGED")
+
+
+def _revalidate_admitted_query_replica_for_test(
+    *, admitted_binding: ActiveQueryReplicaBinding,
+    replica_root_proof: StoreProof, canonical_repo_root: Path | str,
+    canonical_ssd_path: Path | str, limits: QueryReplicaLimits = QueryReplicaLimits(),
+    dependencies: _DescriptorDependencies = _DescriptorDependencies(),
+) -> ActiveQueryReplicaBinding:
+    """Reprove a fully admitted binding over the backend's reachable files."""
+
+    limits.validate()
+    repo_root = _normalized(canonical_repo_root)
+    canonical = _normalized(canonical_ssd_path)
+    root = _validate_root_proof(replica_root_proof, canonical, repo_root)
+    _require_clear_leases(canonical, dependencies)
+    descriptor = root / ACTIVE_DESCRIPTOR_NAME
+    if _normalized(admitted_binding.descriptor_path) != descriptor:
+        _fail("QUERY_REPLICA_BINDING_CHANGED")
+    payload_bytes, descriptor_identity = _read_regular_file(
+        descriptor, limits.max_descriptor_bytes
+    )
+    if (
+        descriptor_identity != admitted_binding.descriptor_identity
+        or _digest(payload_bytes) != admitted_binding.descriptor_digest
+    ):
+        _fail("QUERY_REPLICA_BINDING_CHANGED")
+    payload = _decode_descriptor(payload_bytes)
+    canonical_value, _, files, generation = _validate_topology(
+        payload, root, canonical, repo_root
+    )
+    _validate_canonical_binding(
+        canonical_value, canonical, repo_root, dependencies, limits
+    )
+    if generation != _normalized(admitted_binding.generation_directory):
+        _fail("QUERY_REPLICA_BINDING_CHANGED")
+    manifest = _manifest_items(files, generation)
+    admitted_manifest = tuple(
+        (artifact.relative_path, artifact.size, artifact.digest)
+        for artifact in admitted_binding.artifacts
+    )
+    if manifest != admitted_manifest:
+        _fail("QUERY_REPLICA_BINDING_CHANGED")
+    rebuilt = _build_binding(
+        descriptor, payload_bytes, descriptor_identity, canonical_value,
+        root, generation, admitted_binding.artifacts,
+    )
+    if rebuilt != admitted_binding:
+        _fail("QUERY_REPLICA_BINDING_CHANGED")
+    _verify_runtime_artifacts(admitted_binding, generation, limits)
+    _require_clear_leases(canonical, dependencies)
+    _require_admitted_repository_state(admitted_binding, repo_root, dependencies)
+    return admitted_binding
+
+
+def revalidate_admitted_query_replica(
+    *, admitted_binding: ActiveQueryReplicaBinding,
+    replica_root_proof: StoreProof, canonical_repo_root: Path | str,
+    canonical_ssd_path: Path | str, limits: QueryReplicaLimits = QueryReplicaLimits(),
+) -> ActiveQueryReplicaBinding:
+    """Revalidate an admitted replica without reopening unused vector storage."""
+
+    try:
+        return _revalidate_admitted_query_replica_for_test(
+            admitted_binding=admitted_binding,
+            replica_root_proof=replica_root_proof,
+            canonical_repo_root=canonical_repo_root,
+            canonical_ssd_path=canonical_ssd_path,
+            limits=limits,
+        )
+    except QueryReplicaDescriptorError:
+        raise
+    except (AcceptanceGuardError, OSError, TypeError, ValueError) as exc:
+        raise QueryReplicaDescriptorError(str(exc)) from exc
+
+
 def prove_and_verify_active_query_replica(
     *, replica_root: Path | str, canonical_repo_root: Path | str,
     canonical_ssd_path: Path | str, limits: QueryReplicaLimits = QueryReplicaLimits(),
@@ -485,5 +639,5 @@ def prove_and_verify_active_query_replica(
 __all__ = [
     "ActiveQueryReplicaBinding", "QueryReplicaArtifactBinding",
     "QueryReplicaDescriptorError", "prove_and_verify_active_query_replica",
-    "verify_active_query_replica",
+    "revalidate_admitted_query_replica", "verify_active_query_replica",
 ]
