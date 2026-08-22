@@ -116,6 +116,9 @@ NEED_TO = {
     "openclaw security tests": "modules/ai_intelligence/ai_overseer/tests/test_openclaw_security_sentinel.py",
     "openclaw dae tests": "modules/communication/moltbot_bridge/tests/test_openclaw_dae.py",
     "moltbot bridge digital twin": "modules/communication/moltbot_bridge/README.md",
+    "reddog authenticated conversation scope": "modules/communication/moltbot_bridge/src/reddog_authenticated_conversation_scope_state.py",
+    "reddog resident conversation request scope binding": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_scope_binding.py:bind_resident_conversation_request_to_authenticated_scope()",
+    "reddog current conversation session authority": "modules/communication/moltbot_bridge/src/reddog_conversation_session_authority_source.py:lease_current_generation_conversation_session()",
     "moltbot bridge workspace skills": "modules/communication/moltbot_bridge/workspace/AGENTS.md",
 
     # M2M Compression (Machine-to-Machine 0102-0102 Documentation)
@@ -166,6 +169,7 @@ NEED_TO = {
     "wsp_00 awakening script": "WSP_agentic/scripts/functional_0102_awakening_v2.py",
 
     # Digital Twin (Core Components)
+    "digital twin resident conversation transport": "modules/ai_intelligence/digital_twin/src/resident_conversation_transport_contract.py:request_from_mapping()",
     "digital twin voice memory": "modules/ai_intelligence/digital_twin/src/voice_memory.py:VoiceMemory",
     "build voice memory index": "modules/ai_intelligence/digital_twin/src/voice_memory.py:VoiceMemory.build_index()",
     "query voice memory": "modules/ai_intelligence/digital_twin/src/voice_memory.py:VoiceMemory.query()",
