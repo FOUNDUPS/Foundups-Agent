@@ -1,5 +1,16 @@
 # AI Gateway TestModLog
 
+## [2026-08-22] - Nemotron Lifecycle Receipt Binding
+
+- Added valid, missing, and tampered lifecycle-receipt coverage for the local
+  topology proposer; call evidence now binds the exact model instance and
+  owned cleanup state.
+- Added joint call/lifecycle validation that rejects a different lifecycle even
+  when its unkeyed content ID is correctly recomputed; signed provenance, not
+  either deterministic hash, remains the authentication contract.
+- Revalidated authenticated proposer provenance and promotion authority against
+  the v2 call receipt without live provider/model/network effects.
+
 ## [2026-08-21] - Restart, Provider-Presence, and POSIX Link Regressions
 
 - Added real subprocess death at selection-only and selection-plus-runtime

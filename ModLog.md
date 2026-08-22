@@ -1,5 +1,24 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-22] RedDog LM Studio Exact Lifecycle Hardening
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 73, 97
+
+- Replaced OpenAI-compatible model-list presence with native installed/resident
+  instance truth for local RedDog/Nemotron calls and required exact use-time
+  identity before and after inference.
+- Added bounded node/port-wide managed capacity, native maximum-context
+  preflight, zero-eviction ownership, and an atomically published
+  outside-repository interrupted-load intent. Process restart auto-recovers
+  only after zero native residency; all resident/reused IDs quarantine.
+- Decomposed native transport, lifecycle ownership, intent durability, atomic
+  publication, and platform locking into WSP-62-bounded sibling modules.
+  Content-addressed call/lifecycle evidence is jointly checked; existing signed
+  proposer provenance remains the authentication boundary.
+- Kept `main.py` and ordinary resolution probe-only: no server/llmster launch,
+  model download, `lms` subprocess, provider fallback, or pre-existing model
+  eviction was introduced.
+
 ## [2026-08-21] RedDog 0.4.104 Governed Model Authority Integration
 
 **WSP Protocol:** WSP 00, 15, 22, 50, 62, 87, 97

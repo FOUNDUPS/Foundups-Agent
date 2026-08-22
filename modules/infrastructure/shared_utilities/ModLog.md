@@ -1,6 +1,34 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-08-22 - Exact LM Studio Residency and Managed Model Transactions
+
+- Replaced `/v1/models` presence as residency proof with exact native
+  `/api/v1/models` `loaded_instances` verification.
+- Added a bounded loopback-only managed transaction with one node/port-wide
+  cross-process capacity lock, bounded acquisition, native maximum-context
+  preflight, zero-additive-residency admission, and a durable outside-repository
+  interrupted-load intent. Because native inventory exposes no server
+  generation, restart never auto-unloads any resident instance—even a matching
+  ID may be reused. Zero residency recovers; all residency is quarantined.
+- Re-observation after load requires exactly the one owned node instance;
+  concurrent foreign residency causes owned-only cleanup and fails closed.
+- Split native transport/inventory, lease ownership, recovery intent, and
+  platform locking into WSP-62-bounded sibling modules. Exact instance identity
+  is revalidated immediately before and after inference.
+- Lifecycle and proposer-call receipts are deterministic, content-free
+  structural evidence. They are jointly validated, but authenticated trust is
+  explicitly delegated to the existing signed proposer-provenance envelope.
+- Added optional API-token forwarding to native and OpenAI-compatible calls;
+  tokens never enter lease representation/equality, receipts, journal records,
+  logs, or errors. Redirects, implicit/JIT loads,
+  ambiguity, oversized/malformed responses, and blind load retry fail closed.
+- Governed native transport now disables environment-proxy inheritance so a
+  loopback Bearer request cannot be forwarded by `HTTP_PROXY`; legacy
+  OpenAI-compatible convenience calls remain outside lifecycle authority.
+- Corrected probe state terminology from model-ready to server-reachable. The
+  resolver and ordinary `main.py` preflight remain non-launching/non-loading.
+
 ## 2026-08-21 - Bounded LM Studio Native Chat
 
 - Added a bounded native LM Studio chat method with explicit reasoning control,
@@ -83,7 +111,7 @@
   state to branch on.
 - **Solution** (probe-only, additive — no existing signature/return type changed):
   - `local_llm_resolver.py`:
-    - `LocalLLMAvailability` (Enum): `LM_STUDIO_READY` / `FALLBACK_LLAMA_CPP` / `UNAVAILABLE`
+    - `LocalLLMAvailability` (Enum): `LM_STUDIO_SERVER_REACHABLE` / `FALLBACK_LLAMA_CPP` / `UNAVAILABLE`; reachability does not prove model residency
     - `probe_backend_availability(model_path=None)`: probe-only classifier (HTTP probe + GGUF filesystem check); never launches LM Studio
     - `operator_action_for(status)`: operator-actionable guidance per state
     - `LMStudioUnavailableError` + `require_lm_studio_backend(model_id, base_url=None)`: named error for paths that strictly require LM Studio

@@ -1,5 +1,19 @@
 # AI Gateway Module Change Log
 
+## [2026-08-22] - Nemotron Exact Model Lifecycle Evidence
+
+- Replaced the assumed already-loaded proposer boundary with an explicit exact
+  LM Studio model transaction using native installed/resident instance truth.
+- Bound lifecycle receipt ID/digest, exact instance, observed configuration,
+  origin, and load/unload confirmation into the v2 shadow-call receipt.
+- Added a public joint validator for lifecycle/call structural agreement and
+  documented that deterministic hashes are content addressing, while existing
+  signed proposer provenance supplies authentication.
+- Managed proposer loads now inherit node/port-wide capacity serialization,
+  maximum-context preflight, and durable interrupted-load recovery/quarantine.
+- Kept Nemotron evaluation-only and reasoning-off with no server launch,
+  download, fallback, verifier, promotion, or production-binding authority.
+
 ## [2026-08-21] - Production Binding Restart and Reservation Closure
 
 - Moved supplier writes off deterministic claim markers onto fresh per-attempt

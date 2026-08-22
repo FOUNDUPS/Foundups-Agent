@@ -14,6 +14,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
 
+from .runtime_operation_locking import (
+    exclusive_runtime_lock as _exclusive_lock,
+    validated_lock_timeout as _validated_lock_timeout,
+    windows_runtime_mutex_name as _windows_runtime_mutex_name,
+)
+
 
 _WINDOWS_RESERVED_NAMES = {
     "CON",
@@ -244,13 +250,16 @@ def secure_replace_runtime_text(
 
 
 @contextmanager
-def runtime_operation_lock(identity: Path | str) -> Iterator[None]:
+def runtime_operation_lock(
+    identity: Path | str, *, timeout_seconds: float | None = None
+) -> Iterator[None]:
     """Serialize a bounded runtime operation without creating repo lock files."""
 
     raw = str(identity or "").strip()
     if not raw or len(raw) > 8192 or "\x00" in raw:
         raise ValueError("runtime_operation_lock_identity_invalid")
-    with _exclusive_lock(Path(raw)):
+    timeout = _validated_lock_timeout(timeout_seconds)
+    with _exclusive_lock(Path(raw), timeout_seconds=timeout):
         yield
 
 
@@ -678,67 +687,6 @@ def _remove_created_file(path: Path, expected: os.stat_result) -> None:
             os.unlink(open_path)
     except OSError:
         pass
-
-
-@contextmanager
-def _exclusive_lock(path: Path) -> Iterator[None]:
-    lock_key = hashlib.sha256(os.path.normcase(str(path)).encode("utf-8")).hexdigest()
-    if os.name == "nt":
-        import ctypes
-        from ctypes import wintypes
-
-        kernel32 = ctypes.windll.kernel32
-        create_mutex = kernel32.CreateMutexW
-        create_mutex.argtypes = [wintypes.LPVOID, wintypes.BOOL, wintypes.LPCWSTR]
-        create_mutex.restype = wintypes.HANDLE
-        wait_for_single = kernel32.WaitForSingleObject
-        wait_for_single.argtypes = [wintypes.HANDLE, wintypes.DWORD]
-        wait_for_single.restype = wintypes.DWORD
-        release_mutex = kernel32.ReleaseMutex
-        release_mutex.argtypes = [wintypes.HANDLE]
-        release_mutex.restype = wintypes.BOOL
-        close_handle = kernel32.CloseHandle
-        close_handle.argtypes = [wintypes.HANDLE]
-        close_handle.restype = wintypes.BOOL
-        handle = create_mutex(None, False, _windows_runtime_mutex_name(lock_key))
-        if not handle:
-            raise OSError("runtime_artifact_mutex_create_failed")
-        wait_result = wait_for_single(handle, 0xFFFFFFFF)
-        if wait_result not in (0x00000000, 0x00000080):
-            close_handle(handle)
-            raise OSError("runtime_artifact_mutex_wait_failed")
-        try:
-            yield
-        finally:
-            release_mutex(handle)
-            close_handle(handle)
-        return
-
-    import fcntl
-
-    lock_root = Path(tempfile.gettempdir()) / "foundups-runtime-locks"
-    lock_root.mkdir(mode=0o700, parents=True, exist_ok=True)
-    lock_path = lock_root / f"{lock_key}.lock"
-    descriptor = os.open(
-        lock_path,
-        os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0),
-        0o600,
-    )
-    try:
-        _require_private_regular_file(os.fstat(descriptor))
-        fcntl.flock(descriptor, fcntl.LOCK_EX)
-        try:
-            yield
-        finally:
-            fcntl.flock(descriptor, fcntl.LOCK_UN)
-    finally:
-        os.close(descriptor)
-
-
-def _windows_runtime_mutex_name(lock_key: str) -> str:
-    """Return one machine-global mutex name for cross-session serialization."""
-
-    return f"Global\\FoundupsRuntime-{lock_key}"
 
 
 __all__ = [

@@ -47,13 +47,14 @@ class LocalLLMAvailability(str, Enum):
 
     Makes LM Studio absence explicit instead of an ambiguous ``None`` return:
 
-    - ``LM_STUDIO_READY``: LM Studio API is reachable on localhost:1234.
+    - ``LM_STUDIO_SERVER_REACHABLE``: the native LM Studio API responds; this
+      does not assert that a requested model is resident.
     - ``FALLBACK_LLAMA_CPP``: LM Studio absent, but a local GGUF file exists so
       the llama.cpp fallback can serve the request.
     - ``UNAVAILABLE``: LM Studio absent and no local GGUF fallback is available.
     """
 
-    LM_STUDIO_READY = "lm_studio_ready"
+    LM_STUDIO_SERVER_REACHABLE = "lm_studio_server_reachable"
     FALLBACK_LLAMA_CPP = "fallback_llama_cpp"
     UNAVAILABLE = "unavailable"
 
@@ -72,8 +73,11 @@ class LMStudioUnavailableError(RuntimeError):
 
 def operator_action_for(status: LocalLLMAvailability) -> str:
     """Return operator-actionable guidance for a given availability status."""
-    if status is LocalLLMAvailability.LM_STUDIO_READY:
-        return "LM Studio reachable on localhost:1234 - no action needed."
+    if status is LocalLLMAvailability.LM_STUDIO_SERVER_REACHABLE:
+        return (
+            "LM Studio server reachable on localhost:1234. Exact model "
+            "residency must still be verified before inference."
+        )
     if status is LocalLLMAvailability.FALLBACK_LLAMA_CPP:
         return (
             "LM Studio not reachable on localhost:1234 - using local GGUF "
@@ -99,7 +103,7 @@ def probe_backend_availability(
     the optional GGUF fallback. Returns a named :class:`LocalLLMAvailability`.
     """
     if is_lm_studio_available():
-        return LocalLLMAvailability.LM_STUDIO_READY
+        return LocalLLMAvailability.LM_STUDIO_SERVER_REACHABLE
     if model_path is not None and Path(model_path).exists():
         return LocalLLMAvailability.FALLBACK_LLAMA_CPP
     return LocalLLMAvailability.UNAVAILABLE
@@ -109,6 +113,7 @@ def require_lm_studio_backend(
     model_id: str,
     base_url: Optional[str] = None,
     request_timeout: float = 30.0,
+    api_token: str | None = None,
 ) -> LocalLLMBackend:
     """Resolve an LM-Studio-backed engine for paths that strictly require it.
 
@@ -117,7 +122,8 @@ def require_lm_studio_backend(
     of returning a silent ``None``. Use this only for operations that genuinely
     cannot fall back to llama.cpp (e.g. UI-TARS vision via LM Studio).
     """
-    if not is_lm_studio_available():
+    probe_url = base_url or LMStudioBackend.DEFAULT_BASE_URL
+    if not is_lm_studio_available(probe_url, api_token=api_token):
         raise LMStudioUnavailableError()
 
     backend = (
@@ -125,15 +131,19 @@ def require_lm_studio_backend(
             model_id=model_id,
             base_url=base_url,
             request_timeout=request_timeout,
+            api_token=api_token,
         )
         if base_url is not None
-        else LMStudioBackend(model_id=model_id, request_timeout=request_timeout)
+        else LMStudioBackend(
+            model_id=model_id,
+            request_timeout=request_timeout,
+            api_token=api_token,
+        )
     )
     if not backend.initialize():
         raise LMStudioUnavailableError(
             f"LM Studio reachable but model '{model_id}' is not loaded. "
-            "Load it in LM Studio (or via the dependency launcher's "
-            "load_all_models) before retrying."
+            "Load that exact model explicitly before retrying."
         )
     return backend
 

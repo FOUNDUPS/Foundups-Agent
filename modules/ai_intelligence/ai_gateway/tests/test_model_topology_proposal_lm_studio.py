@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 
 import pytest
 
@@ -12,18 +13,46 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
 from modules.ai_intelligence.ai_gateway.src.model_topology_proposal_lm_studio import (
     propose_lm_studio_shadow_topologies,
     rehydrate_lm_studio_topology_proposal_call_receipt,
+    validate_lm_studio_topology_lifecycle_binding,
 )
 from modules.ai_intelligence.ai_gateway.tests.test_model_topology_proposal_admission import (
     _proposal,
     _requirements,
     _snapshot,
 )
+from modules.infrastructure.shared_utilities.lm_studio_model_lifecycle import (
+    LIFECYCLE_SCHEMA_VERSION,
+    LMStudioModelLifecycleReceipt,
+)
+
+
+def _fake_lifecycle_receipt():
+    body = {
+        "schema_version": LIFECYCLE_SCHEMA_VERSION,
+        "model_key": "nvidia/nemotron-3.5-lightning",
+        "instance_id": "nemotron-test-instance",
+        "lease_mode": "managed_load",
+        "residency_origin": "preexisting",
+        "base_url_digest": "a" * 64,
+        "lock_scope_digest": "b" * 64,
+        "requested_config_digest": "c" * 64,
+        "observed_config_digest": "d" * 64,
+        "load_confirmed": False,
+        "unload_confirmed": False,
+        "no_server_launch_performed": True,
+        "no_model_download_performed": True,
+        "no_provider_fallback_performed": True,
+    }
+    encoded = json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
+    receipt_id = "lm_studio_model_lifecycle:" + hashlib.sha256(encoded).hexdigest()
+    return LMStudioModelLifecycleReceipt(receipt_id=receipt_id, **body)
 
 
 class _FakeLMStudioBackend:
-    def __init__(self, content: str) -> None:
+    def __init__(self, content: str, lifecycle_receipt=None) -> None:
         self.content = content
         self.calls = []
+        self.lifecycle_receipt = lifecycle_receipt or _fake_lifecycle_receipt()
 
     def create_native_chat(self, **controls):
         self.calls.append(controls)
@@ -62,6 +91,11 @@ def test_local_proposer_requests_strict_schema_and_binds_call_evidence():
     assert result.call_receipt.native_reasoning_control == "off"
     assert result.call_receipt.no_provider_fallback_performed is True
     assert result.call_receipt.no_server_launch_performed is True
+    assert result.call_receipt.lifecycle_receipt_id == backend.lifecycle_receipt.receipt_id
+    assert result.call_receipt.lifecycle_residency_origin == "preexisting"
+    assert result.call_receipt.lifecycle_load_confirmed is False
+    assert result.call_receipt.lifecycle_unload_confirmed is False
+    assert result.lifecycle_receipt == backend.lifecycle_receipt
     assert result.admission_receipt.accepted is True
     assert (
         result.admission_receipt.proposer_call_receipt_id
@@ -134,3 +168,61 @@ def test_local_proposer_rejects_production_requirements_without_call():
         )
 
     assert backend.calls == []
+
+
+def test_local_proposer_rejects_missing_lifecycle_receipt():
+    backend = _FakeLMStudioBackend("{}")
+    del backend.lifecycle_receipt
+
+    with pytest.raises(ValueError, match="lifecycle_receipt_missing"):
+        propose_lm_studio_shadow_topologies(
+            catalog_snapshot=_snapshot(),
+            requirements=_requirements(),
+            proposer_model_id="nvidia/nemotron-3.5-lightning",
+            backend_factory=lambda _model_id: backend,
+        )
+
+
+def test_local_proposer_rejects_lifecycle_receipt_tamper():
+    lifecycle = _fake_lifecycle_receipt().to_dict()
+    lifecycle["instance_id"] = "tampered"
+    backend = _FakeLMStudioBackend("{}", lifecycle_receipt=lifecycle)
+
+    with pytest.raises(ValueError, match="receipt_id_invalid"):
+        propose_lm_studio_shadow_topologies(
+            catalog_snapshot=_snapshot(),
+            requirements=_requirements(),
+            proposer_model_id="nvidia/nemotron-3.5-lightning",
+            backend_factory=lambda _model_id: backend,
+        )
+
+
+def test_joint_binding_rejects_structurally_rehashed_different_lifecycle():
+    snapshot = _snapshot()
+    requirements = _requirements()
+    proposal = _proposal(snapshot, requirements)
+    choices = {
+        "topologies": [
+            [item["model_id"] for item in candidate["role_assignments"]]
+            for candidate in proposal["candidates"][:2]
+        ]
+    }
+    result = propose_lm_studio_shadow_topologies(
+        catalog_snapshot=snapshot,
+        requirements=requirements,
+        proposer_model_id="nvidia/nemotron-3.5-lightning",
+        backend_factory=lambda _model_id: _FakeLMStudioBackend(json.dumps(choices)),
+    )
+    forged = result.lifecycle_receipt.to_dict()
+    forged["instance_id"] = "structurally-valid-but-different"
+    body = dict(forged)
+    body.pop("receipt_id")
+    encoded = json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
+    forged["receipt_id"] = (
+        "lm_studio_model_lifecycle:" + hashlib.sha256(encoded).hexdigest()
+    )
+
+    with pytest.raises(ValueError, match="lifecycle_binding_invalid"):
+        validate_lm_studio_topology_lifecycle_binding(
+            result.call_receipt, forged
+        )

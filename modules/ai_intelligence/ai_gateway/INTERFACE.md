@@ -77,13 +77,22 @@ conflicting lifecycle evidence cannot create a champion.
 ```python
 admit_model_topology_proposal(...) -> ModelTopologyProposalAdmissionReceipt
 propose_lm_studio_shadow_topologies(...) -> LMStudioTopologyProposalResult
+validate_lm_studio_topology_lifecycle_binding(...) -> tuple[call, lifecycle]
 ```
 
 The local proposer requires evaluation-purpose requirements and one exact
-already-loaded LM Studio model. It uses the native `reasoning="off"` route,
-supplies a compact JSON schema in the prompt, performs no server launch or
-provider fallback, and retains only content-free call metadata plus an output
-digest. The model chooses ordered model IDs only. Deterministic code attaches
+installed LM Studio model. An explicit model transaction borrows one exact
+resident instance or, under a bounded node/port capacity lock with zero other
+residency and native maximum-context preflight, loads and later unloads its own
+exact instance. Interrupted loads are journaled; restart continues only after
+zero native residency and quarantines any resident or reused ID. It uses
+the native `reasoning="off"` route, targets the verified instance ID, rejects
+implicit/JIT load evidence, performs no server launch/download/provider
+fallback, and jointly validates content-free lifecycle evidence against the
+call receipt. These deterministic hashes prove structural agreement, not
+adversarial authenticity; the separate signed proposer-provenance contract is
+required before authority. The
+model chooses ordered model IDs only. Deterministic code attaches
 roles/providers and submits the result to the admission gate.
 
 Admission binds catalog and requirements digests, allows only deterministic
@@ -456,8 +465,10 @@ required terms are absent or no semantic requirements are supplied. Default
 startup behavior remains `deterministic_fixture`.
 
 Live local LM Studio evaluation is allowed only for an exact admitted local
-route and reasoning control; a two-task Nemotron acceptance run exercised this
-path without fallback. Production/OpenRouter campaign activation remains
+route, verified lifecycle, and reasoning control. The earlier two-task
+Nemotron run exercised the route without fallback but predated lifecycle
+receipts, so it is historical rather than current release evidence.
+Production/OpenRouter campaign activation remains
 closed until canonical catalog admission, authoritative provider usage
 receipts, a model-budget-specific pre-buffer response-byte transport contract,
 and identity-preserving bounded runtime-file admission are configured.
