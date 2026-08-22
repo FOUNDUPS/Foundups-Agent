@@ -589,6 +589,11 @@ def test_real_client_routes_final_snapshot_check_to_isolated_probe(
             [],
         )[-1],
     )
+    monkeypatch.setattr(
+        maintenance_module,
+        "_publish_query_snapshots",
+        lambda *_args: lifecycle.append("query_snapshots_published"),
+    )
 
     receipt = session.complete(
         holo,
@@ -604,6 +609,7 @@ def test_real_client_routes_final_snapshot_check_to_isolated_probe(
         "writer_stopped",
         "cache_cleared",
         "persisted_view_opened",
+        "query_snapshots_published",
         "writer_stopped",
         "cache_cleared",
         "isolated_probe",
@@ -640,6 +646,9 @@ def test_maintenance_preserves_vector_segment_failure_category(
                 "VECTOR_SEGMENT_UNAVAILABLE"
             )
         ),
+    )
+    monkeypatch.setattr(
+        maintenance_module, "_publish_query_snapshots", lambda *_args: None
     )
 
     with pytest.raises(
@@ -723,6 +732,9 @@ def test_persisted_proof_view_finalizes_when_repository_head_changes(
         maintenance_module,
         "open_persisted_collection_view",
         lambda _ssd: lifecycle.append("persisted_view_opened") or proof,
+    )
+    monkeypatch.setattr(
+        maintenance_module, "_publish_query_snapshots", lambda *_args: None
     )
 
     with pytest.raises(

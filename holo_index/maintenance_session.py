@@ -380,6 +380,51 @@ def _finalize_writer_store(holo: Any) -> None:
         ) from exc
 
 
+def _publish_query_snapshots(
+    session: Any, holo: Any, receipt: HoloIndexFreshnessReceipt,
+) -> None:
+    """Publish immutable query artifacts while the proved view is still open."""
+    try:
+        from modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store import (
+            publish_query_snapshot_set,
+        )
+
+        publish_query_snapshot_set(holo, receipt, ssd_path=session.ssd_path)
+    except Exception as exc:
+        raise MaintenanceSessionError(
+            "HOLOINDEX_QUERY_SNAPSHOT_PUBLICATION_FAILED", type(exc).__name__
+        ) from exc
+
+
+def _build_persisted_completed_receipt(
+    session: Any, holo: Any, *, refreshed: frozenset[str], source: str,
+    refresh_proofs: Mapping[str, Any] | None,
+    source_manifests: Mapping[str, str], source_scopes: Mapping[str, str],
+    source_policy_digests: Mapping[str, str],
+    carry_forward_evidence: Mapping[str, Any], head_sha: str,
+) -> tuple[Any, HoloIndexFreshnessReceipt]:
+    _finalize_writer_store(holo)
+    with _persisted_collection_proof_view(session.ssd_path) as proof_holo:
+        receipt = _build_completed_receipt(
+            session, proof_holo, refreshed=refreshed, source=source,
+            refresh_proofs=refresh_proofs, source_manifests=source_manifests,
+            source_scopes=source_scopes,
+            source_policy_digests=source_policy_digests,
+            carry_forward_evidence=carry_forward_evidence, head_sha=head_sha,
+        )
+        _publish_query_snapshots(session, proof_holo, receipt)
+        final_head = _clean_repository_head(
+            session.repo_root, session._repository_state_reader,
+            require_head=False,
+        )
+        if final_head != session.starting_head_sha:
+            raise MaintenanceSessionError(
+                "HOLOINDEX_REPOSITORY_HEAD_CHANGED",
+                f"expected={session.starting_head_sha}; actual={final_head}",
+            )
+    return proof_holo, receipt
+
+
 @contextmanager
 def _persisted_collection_proof_view(ssd_path: Path | str):
     """Yield a fresh persisted view and always release its Chroma system."""
@@ -518,30 +563,13 @@ class MaintenanceSession:
             head_sha=head_sha,
         )
         if _requires_isolated_snapshot_probe(holo):
-            _finalize_writer_store(holo)
-            with _persisted_collection_proof_view(self.ssd_path) as proof_holo:
-                receipt = _build_completed_receipt(
-                    self,
-                    proof_holo,
-                    refreshed=refreshed,
-                    source=source,
-                    refresh_proofs=refresh_proofs,
-                    source_manifests=source_manifests,
-                    source_scopes=source_scopes,
-                    source_policy_digests=source_policy_digests,
-                    carry_forward_evidence=carry_forward_evidence,
-                    head_sha=head_sha,
-                )
-                final_head = _clean_repository_head(
-                    self.repo_root,
-                    self._repository_state_reader,
-                    require_head=False,
-                )
-                if final_head != self.starting_head_sha:
-                    raise MaintenanceSessionError(
-                        "HOLOINDEX_REPOSITORY_HEAD_CHANGED",
-                        f"expected={self.starting_head_sha}; actual={final_head}",
-                    )
+            proof_holo, receipt = _build_persisted_completed_receipt(
+                self, holo, refreshed=refreshed, source=source,
+                refresh_proofs=refresh_proofs,
+                source_manifests=source_manifests, source_scopes=source_scopes,
+                source_policy_digests=source_policy_digests,
+                carry_forward_evidence=carry_forward_evidence, head_sha=head_sha,
+            )
         else:
             proof_holo = holo
             receipt = _build_completed_receipt(

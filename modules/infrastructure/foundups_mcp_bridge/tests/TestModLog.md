@@ -1,5 +1,12 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-22] Immutable snapshot query integration
+
+- Added generation-bound snapshot-set publication/loading, artifact tamper,
+  real Chroma export, exact owner-generation mismatch, and lifecycle coverage.
+- The existing 116-test codec/adapter adversarial contract plus four store
+  tests pass as one 120-test focused snapshot seam.
+
 ## [2026-08-22] Acceptance import-order regression
 
 - Added isolated subprocess coverage for every first-import order across the

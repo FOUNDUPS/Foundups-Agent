@@ -44,6 +44,7 @@ class _MaintenanceClient:
 class _MissingReadonlyCollectionClient:
     def __init__(self) -> None:
         self.create_called = False
+        self.generation_id = "sha256:" + "a" * 64
 
     def get_collection(self, name: str):
         raise RuntimeError(f"collection missing: {name}")
@@ -129,9 +130,10 @@ def test_readonly_collection_open_never_creates(tmp_path: Path, monkeypatch) -> 
     monkeypatch.setenv("HOLOINDEX_QUERY_READONLY", "1")
     _silence_holo_logging(monkeypatch)
     client = _MissingReadonlyCollectionClient()
+    session = type("Session", (), {"client": client, "close": lambda self: None})()
     monkeypatch.setattr(
-        "holo_index.core.holo_index.chromadb.PersistentClient",
-        lambda **kwargs: client,
+        "modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store.open_query_snapshot_client",
+        lambda _path: session.client,
     )
 
     with pytest.raises(HoloIndexStorageError) as raised:
@@ -144,6 +146,39 @@ def test_readonly_collection_open_never_creates(tmp_path: Path, monkeypatch) -> 
     assert not (root / "indexes").exists()
 
 
+def test_readonly_chroma_uses_immutable_snapshot_client(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = tmp_path / "store"
+    _readonly_layout(root)
+    monkeypatch.setenv("HOLOINDEX_QUERY_READONLY", "1")
+    _silence_holo_logging(monkeypatch)
+    captured = {}
+
+    class ReadonlyClient:
+        def get_collection(self, _name: str):
+            return _Collection()
+
+    client = ReadonlyClient()
+    client.generation_id = "sha256:" + "a" * 64
+    client.close = lambda: captured.update(closed=True)
+
+    def open_client(vector_path):
+        captured["vector_path"] = vector_path
+        return client
+
+    monkeypatch.setattr(
+        "modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store.open_query_snapshot_client",
+        open_client,
+    )
+
+    index = HoloIndex(ssd_path=root, quiet=True)
+    index.close()
+
+    assert captured == {"vector_path": root / "vectors", "closed": True}
+    assert index.query_snapshot_generation_id == "sha256:" + "a" * 64
+
+
 def test_readonly_chroma_write_denial_has_stable_code(tmp_path: Path, monkeypatch) -> None:
     root = tmp_path / "store"
     _readonly_layout(root)
@@ -153,7 +188,10 @@ def test_readonly_chroma_write_denial_has_stable_code(tmp_path: Path, monkeypatc
     def denied_client(*args, **kwargs):
         raise RuntimeError("error returned from database: (code: 8) attempt to write a readonly database")
 
-    monkeypatch.setattr("holo_index.core.holo_index.chromadb.PersistentClient", denied_client)
+    monkeypatch.setattr(
+        "modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store.open_query_snapshot_client",
+        denied_client,
+    )
 
     with pytest.raises(HoloIndexStorageError) as raised:
         HoloIndex(ssd_path=root, quiet=True)

@@ -1,5 +1,20 @@
 # HoloIndex Package ModLog
 
+## [2026-08-22] Immutable snapshot-backed query replicas
+
+- Live owner admission proved that `HOLOINDEX_QUERY_READONLY=1` prevented
+  collection creation but Chroma startup changed `chroma.sqlite3`; a second
+  proof showed `migrations="validate"` still writes `acquire_write`, and a real
+  query/close also changed HNSW segment bytes.
+- Connected the existing hardened immutable snapshot codec/read adapter to the
+  governed maintenance completion path. PASS publication now requires exact
+  snapshots for all seven baseline collections.
+- Read-only HoloIndex loads only those bounded snapshot bytes and performs
+  exact vector scans without starting Chroma or opening SQLite/HNSW. The owner
+  requires the snapshot generation to equal its verified replica binding and
+  closes the backend during normal lifecycle shutdown. Maintenance remains the
+  only Chroma writer. (WSP 00/15/22/50/62/84/97)
+
 ## [2026-08-21] Closed command-import boundary for RedDog
 
 - Removed the eager full-CLI import from `holo_index.cli` while retaining its
