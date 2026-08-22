@@ -283,16 +283,19 @@ Self-contained IIFE for FAQ topics. Will be removed when OpenClaw lands.
 
 ---
 
-### Shell-Local vs OpenClaw Capabilities
+### Shell-Local vs Resident RedDog/OpenClaw Capabilities
 
-| Hook | Shell-Local (Current) | OpenClaw (Future) |
+| Hook | Shell-Local (Current) | Resident RedDog/OpenClaw (Future) |
 |------|----------------------|-------------------|
 | `searchByCreator()` | String match on catalog | AI semantic search |
 | `projectPersonalMall()` | Filter by creator | Personalized ranking |
 | `setProjection()` | Client-side sort | AI-ranked projections |
 | `getRecommendations()` | Static recommendations | AI-generated suggestions |
 
-> **Dev/Testing Shim**: The Search Mall text input is a temporary shell-local shim for testing field scope APIs. It will be replaced by OpenClaw-powered search UI.
+> **Dev/Testing Shim**: The Search Mall text input is a temporary shell-local
+> shim for testing field-scope APIs. Future AI search requires an authenticated
+> RedDog adapter; the shell does not directly host the model or OpenClaw
+> authority.
 
 ### Data Expectations
 
@@ -364,6 +367,10 @@ interface InviteDoc {
 **Scope**: Browser-side postMessage bridge for structured agent control of the pfMALL video wall. Phase 1 (PMCTRL1).
 
 This contract defines the **only** sanctioned way for an external agent (0102, Hermes, future native phone agent, future RedDog AI) to drive the `/member/` runtime. The dispatcher is an **API contract**, not a UI driver: every command routes to an existing runtime API on `window.mallTileField` / `window.mallVideoPlayer`. When the underlying API is missing, the dispatcher returns `api_unavailable`; it never fabricates success, and it never uses direct DOM selectors as a fallback.
+
+This browser control contract is not the future RedDog conversation transport.
+It carries no resident identity, durable conversation, model credential, work
+order, OpenClaw policy, or Hermes execution authority.
 
 ### Message Envelopes
 

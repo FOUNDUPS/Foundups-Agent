@@ -255,8 +255,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.104', 'package version must be 0.4.104');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.104'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.105', 'package version must be 0.4.105');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.105'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -298,9 +298,9 @@ assert(
 );
 includes(extensionJs, "workspaceState.get('reddog.operationsIntentId'", 'durable operations intent missing');
 includes(extensionJs, 'startOperationsEnvironment.build(process.env)', 'ambient extension env exposed');
+const operationsIntercept = extensionJs.indexOf('startOperationsAdapter.handleMessage('); const conversationPromptAssembly = extensionJs.indexOf('const basePrompt = conversationPlanePolicy.selectUserPrompt(');
 assert(
-  extensionJs.indexOf('startOperationsAdapter.handleMessage(')
-    < extensionJs.indexOf('const basePrompt = classification.conversationalDraft'),
+  operationsIntercept >= 0 && conversationPromptAssembly >= 0 && operationsIntercept < conversationPromptAssembly,
   'operations control must intercept before WSP prompt/Fusion assembly'
 );
 includes(readme, 'RedDog is the resident FoundUps architect', 'README product identity statement missing');

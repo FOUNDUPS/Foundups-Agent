@@ -2,6 +2,20 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-08-22 - RedDog continuous conversation plane phase 1
+
+- Added independent interaction-intent, reasoning-depth, and effect-ceiling
+  contracts with default `CHAT / FAST / NONE` behavior.
+- Added strict adapter rehydration and downstream effect-ceiling enforcement;
+  conversation decisions can never grant bounded execution.
+- Hardened the effect gate against forged/mutated decisions, aligned the
+  Python/JavaScript input cap to Unicode scalar values, and pinned ordinary
+  WSP-62 file/function limits in the focused suite.
+- Added shared Python/VSIX acceptance vectors and documented the hybrid
+  PFMall/phone thin-client-to-resident-hub scale boundary.
+- Kept AgentDB, signer, work promotion, OpenClaw, WRE, and Hermes as existing
+  downstream authorities rather than creating parallel infrastructure.
+
 ## 2026-08-06 - Authenticated resident Principal Memex admission
 
 - Added a resident-only admission path that derives the structural Principal

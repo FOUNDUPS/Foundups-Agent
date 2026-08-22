@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.104",
+  "version": "0.4.105",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -30,6 +30,7 @@
   "main": "./extension.js",
   "scripts": {
     "test": "node tests/run_reddog_test_tier.js fast",
+    "test:conversation": "node tests/run_conversation_test_tier.js",
     "test:contract": "node tests/run_reddog_test_tier.js contract",
     "test:package": "node tests/test_package_surface.js",
     "test:release": "node tests/verify_extension_contract.js"

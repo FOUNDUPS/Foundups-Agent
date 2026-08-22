@@ -75,16 +75,19 @@ public/member/
 - invite codes remain available from Red Dog plane
 - collapsible guide topics explain the Mall, gestures, readiness states
 
-### Shell-Local vs OpenClaw
+### Shell-Local vs Resident RedDog/OpenClaw
 
-| Feature | Current (Shell-Local) | Future (OpenClaw) |
+| Feature | Current (Shell-Local) | Future (Resident RedDog/OpenClaw) |
 |---------|----------------------|-------------------|
 | Search Mall | Text input filters by creator name | AI-powered semantic search |
 | Personal Mall | Filters by `creator === '012'` | Personalized recommendations |
 | Projections | Client-side sort | AI-ranked projections |
 | Density | Manual preset selection | AI-controlled adaptive density |
 
-> **Note**: Search Mall text input is a dev/testing shim. It will be replaced by OpenClaw-powered search when the gateway is ready.
+> **Note**: Search Mall text input is a dev/testing shim. A future authenticated
+> RedDog thin-client adapter may use the principal-scoped OpenClaw execution
+> layer. The current browser events and postMessage dispatcher are not a
+> conversation transport and hold no model or work authority.
 
 ## Out of Scope
 

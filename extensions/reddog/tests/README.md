@@ -1,6 +1,6 @@
 # RedDog Extension Tests
 
-## 0.4.104 governed runtime routing
+## 0.4.105 continuous conversation and governed runtime routing
 
 ## Nemotron and Qwen routing contracts
 
@@ -50,7 +50,7 @@ exactly equal to Git's complete changed/new RedDog JavaScript surface; existing
 over-limit functions may only remain when the exact named/ordered baseline
 function did not grow. The former 475-line Start Operations test is now below
 400 content lines with cohesive fixtures in a 91-line helper. Package tests
-require the exact 65-file surface (61 runtime files and four public files),
+require the exact 66-file surface (62 runtime files and four public files),
 including license text canonically matching the repository authority.
 
 **Reuse rule (WSP 50):** Before adding tests, read `fixtures.js`, `TestModLog.md` TEST_REGISTRY, and `verify_extension_contract.js`. Extend existing fixtures and assertions; do not duplicate prompt strings or EXT-ACC probes.
@@ -65,6 +65,7 @@ Canonical package tiers from `extensions/reddog`:
 
 ```powershell
 npm test                    # bounded fast developer tier
+npm run test:conversation   # shared Python/JavaScript conversation vectors
 npm run test:contract       # plan and shard authentication
 npm run test:release        # exact exhaustive promotion closure
 ```
@@ -248,8 +249,8 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_backend_compatibility_preflight.js` | Pinned manifest, runtime dependency-closure integrity, intermediate junction rejection, WSP_62 ceilings, canonical containment, and content-free failure contracts |
 | `test_backend_compatibility_contract.js` | Independent executable roots, closure sentinels, pinned digest, runtime gate ordering, and allowlisted block projection |
 | `test_backend_compatibility_async.js` | Worker-thread preflight, event-loop availability, and fail-closed invalid-root behavior |
-| `test_package_manifest.js` | Static VS Code capability, publisher/version/main/activation, exact ignore policy, and complete 58-file runtime closure |
-| `test_package_surface.js` | Two stable installed-VSCE listings equal the exact 65-file distributable surface and its raw regular-file closure stays within 1 MiB; release/package tier only |
+| `test_package_manifest.js` | Static VS Code capability, publisher/version/main/activation, exact ignore policy, and complete 62-file runtime closure |
+| `test_package_surface.js` | Two stable installed-VSCE listings equal the exact 66-file distributable surface and its raw regular-file closure stays within 1 MiB; release/package tier only |
 | `reddog_package_surface_contract.js` | Pinned runtime/package sets, static relative-require traversal, dynamic-worker roots, and shell-free installed-VSCE adapter |
 | `test_authoritative_work_state_query.js` | Local authoritative-work classification, bridge failure handling, and no-Fusion routing |
 | `test_foundup_work_grounding.js` | Canonical registry identity resolution, evidence derivation, runtime binding, WSP 62, failure closure, and non-authority receipt |

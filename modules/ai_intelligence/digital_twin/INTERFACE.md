@@ -4,6 +4,34 @@
 
 ---
 
+## Continuous conversation decision
+
+```python
+from modules.ai_intelligence.digital_twin.src.conversation_plane import (
+    classify_conversation_turn,
+)
+from modules.ai_intelligence.digital_twin.src.conversation_plane_contract import (
+    enforce_effect_ceiling,
+)
+
+decision = classify_conversation_turn("Explain the current routing.")
+assert decision.interaction_intent.value == "RESEARCH"
+assert decision.effect_ceiling.value == "READ_ONLY"
+```
+
+The classifier is deterministic and effect-free. It does not accept an effect
+request as input. `enforce_effect_ceiling()` rejects downstream or model
+attempts to exceed the decision. `BOUNDED_EXECUTION` is a vocabulary value for
+the separate governed work plane and is forbidden as a conversation-plane
+decision.
+
+Operator text is NFKC-normalized and bounded to 12,000 Unicode scalar values
+on both Python and JavaScript surfaces. The effect gate revalidates the exact
+typed decision before comparing ranks; forged or mutated decision objects fail
+closed.
+
+---
+
 ## Principal Memex read-only projection
 
 ```python

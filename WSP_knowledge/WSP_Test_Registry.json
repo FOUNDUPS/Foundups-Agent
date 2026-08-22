@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1564,
+  "total_tests": 1566,
   "quarantined_tests": 267,
   "tests": [
     {
@@ -3596,6 +3596,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for CommentDrafter."
+    },
+    {
+      "id": "test::modules::ai_intelligence::digital_twin::tests::test_conversation_plane",
+      "path": "modules/ai_intelligence/digital_twin/tests/test_conversation_plane.py",
+      "owner": "modules/ai_intelligence/digital_twin",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-digital-twin-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Contracts for the zero-authority RedDog conversational plane."
     },
     {
       "id": "test::modules::ai_intelligence::digital_twin::tests::test_decision_policy",
@@ -16908,12 +16921,29 @@
       "description": "Tests for the LM Studio dependency boundary gate.\n\nSlice: LM_STUDIO_DEPENDENCY_BOUNDARY_DOC_AND_GATE_PHASE1\n\nVerifies that LM Studio is a clearly bounded OPTIONAL local dependency:\n1. LM Studio absent + GGUF fallback available -> fallback state/message is clear.\n2. LM Studio absent + required path -> named unavailable error w/ operator action.\n3. LM Studio available -> happy path (LMStudioBackend) preserved.\n4. local_llm_resolver never launches LM Studio (no subprocess, no launcher).\n5. No live "
     },
     {
+      "id": "test::modules::infrastructure::shared_utilities::tests::test_lm_studio_model_lifecycle",
+      "path": "modules/infrastructure/shared_utilities/tests/test_lm_studio_model_lifecycle.py",
+      "owner": "modules/infrastructure/shared_utilities",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-shared-utilities-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Contract tests for exact LM Studio model residency and managed leases."
+    },
+    {
       "id": "test::modules::infrastructure::shared_utilities::tests::test_local_llm_backends",
       "path": "modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py",
       "owner": "modules/infrastructure/shared_utilities",
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-shared-utilities-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

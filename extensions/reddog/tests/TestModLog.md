@@ -1,5 +1,32 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-22 - Continuous conversation and lifecycle candidate (0.4.105)
+
+- Added the operational `test:conversation` tier with 15 shared JS vectors and
+  32 Python contracts covering chat, research, proposal, authorization, status,
+  cancellation, explicit/bare continuation, risk-only depth escalation, strict
+  rehydration, async-admission derivation, and effect-ceiling rejection.
+- Fast tier: 13/13 members PASS. Contract tier: 3/3 PASS. Package: exact 66
+  files/62 runtime files under the 1 MiB raw cap. Candidate WSP 62: PASS with
+  `extension.js` at 8,370 lines and the new policy below its module ceilings.
+- Authenticated aggregate: 18 shards, 6,913 lines, 483 assertions PASS. The
+  Start Operations source contract was advanced from the removed draft-only
+  prompt expression to the new policy selector while preserving presence and
+  authority-first order.
+- The first independent frozen-tree audit returned NO-GO and exposed prior
+  work-summary ingress into chat, a forged-decision effect bypass, malformed
+  nested routing dependencies, cross-language astral-length drift, and a
+  56-line Python WSP-62 violation. All received focused adversarial tests; the
+  validator is now 44 lines.
+- Backend manifest equality and VSIX digest pin PASS at 1,372 files. An initial
+  five-minute wrapper produced no assertion result; the final staged-index
+  eight-case generator suite then passed 8/8 in 351.51 seconds.
+- The repaired-tree independent audit returned GO with all five blockers
+  closed. Final `npm run test:release`: four groups PASS in 341,658 ms; core
+  341,520 ms, governed Git 227,289 ms, Git formats/environment 140,627 ms, and
+  bridge/WSP62 2,956 ms. No group or release timeout occurred; package receipt
+  was 66 files / 960,354 raw bytes.
+
 ## 2026-08-21 - Governed topology-consumer closure (0.4.104)
 
 - Added v2 extension-query coverage for explicit available-provider inventory,

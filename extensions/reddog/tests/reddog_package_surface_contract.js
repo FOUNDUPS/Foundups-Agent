@@ -18,6 +18,7 @@ const EXPECTED_RUNTIME_FILES = Object.freeze([
   'backend_compatibility_worker.js',
   'continuation_prompt.js',
   'conversation_history_policy.js',
+  'conversation_plane_policy.js',
   'conversation_session_authority_source.js',
   'conversational_draft_policy.js',
   'daemon_diagnostic_analysis.js',

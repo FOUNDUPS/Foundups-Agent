@@ -2,9 +2,17 @@
 
 ## Status
 
-Phase: RedDog 0.4.104 resident architect thin-client surface.
+Phase: RedDog 0.4.105 resident architect thin-client surface.
 
 Current implementation:
+
+- [x] Continuous foreground conversation classifier and VSIX adapter with
+  independent intent/depth/effect axes, zero-effect chat, shared cross-language
+  vectors, and a dedicated bounded test tier.
+- [ ] Authenticated AgentDB-backed resident conversation service and thin
+  PFMall/phone transport. The existing browser event remains presentation-only.
+- [ ] Durable personalized memory, voice, automatic async critic dispatch, and
+  promotion-to-execution binding; each remains separately gated.
 
 - Nemotron/Qwen routing slice: local Nemotron 3.5 Lightning can produce two
   compact shadow panel proposals through LM Studio's native reasoning-off API;
@@ -156,7 +164,7 @@ Current implementation:
   rejects normalized path aliases, ignored case/prefix/separator aliases, and
   duplicate canonical existing-file identities before content capture while
   preserving Linux case-sensitive names. `extension.js` currently measures
-  exactly 8,400 canonical LF lines, below the unchanged 8,428-line hard
+  exactly 8,370 canonical LF lines, below the unchanged 8,428-line hard
   ceiling. This does not
   claim that inherited exempt functions satisfy the ordinary function limit.
 - HOLOINDEX_TIER0_RETRIEVAL_HARDENING_PHASE1 (v0.4.101): pins the generated
@@ -201,7 +209,7 @@ Current implementation:
 - Exact single/Fusion completion-budget parsing with a 131,072 maximum and
   pre-provider fail-closed rejection; Kimi K3 retains its 4,096 floor.
 - [x] Fail-closed VS Code workspace capability declarations and a deterministic
-  61-file VSIX surface derived from the complete runtime require/worker/Python
+  66-file VSIX surface derived from the complete runtime require/worker/Python
   closure; live VSCE listing is release-only and creates no artifact.
 - [x] Governed Git executable provenance: lexical PATH/PATHEXT binding, exact
   absolute identity/hash proof, Windows Authenticode fail-closed verification,
@@ -337,13 +345,13 @@ P2/P3 (historical label at snapshot time)
 
 - **Owner:** RedDog Maintainers.
 - **Temporary exemption expiry:** 2026-09-30 (2026-Q3 technical-architect review).
-- **Current boundary:** `extension.js` is a measured 8,400-canonical-LF-line legacy thin-client integration file, below its temporary 8,428-line threshold. `no_growth: true` is a hard containment ceiling, not permission to grow. Generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`. This measurement does not assert that every inherited touched function is within the ordinary WSP_62 function limit; `callFusion` retains its exact temporary exemption.
+- **Current boundary:** `extension.js` is a measured 8,370-canonical-LF-line legacy thin-client integration file, below its temporary 8,428-line threshold. `no_growth: true` is a hard containment ceiling, not permission to grow. Conversation intent/depth/effect policy now lives in `conversation_plane_policy.js`; generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`. This measurement does not assert that every inherited touched function is within the ordinary WSP_62 function limit; `callFusion` retains its exact temporary exemption.
 - **Holo lifecycle extraction:** generation/receipt admission, bundle projection,
   configured-interpreter provenance, and owned child lifecycle are separate
   runtime modules below 400 physical lines. Interpreter SHA-256 proof streams
   64 KiB descriptor chunks on a worker thread; the 256 MiB acceptance ceiling
   is unchanged and no whole-file executable allocation remains. The closed
-  package surface is consequently 65 files (61 runtime plus 4 public files,
+  package surface is consequently 66 files (62 runtime plus 4 public files,
   including the repository-authoritative license).
 - **Remediation:** extract model configuration plus stdin bridge invocation first, then UI rendering, retrieval/context assembly, and governed work-order receipt composition into separately tested JavaScript modules of at most 400 lines.
 - **Parity gate:** retain the focused Fusion panel ingress/payload contract and exhaustive extension contract across each extraction; preserve no-network, stdin-only model payloads and review-packet truth.

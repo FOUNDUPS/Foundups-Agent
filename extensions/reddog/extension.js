@@ -33,6 +33,7 @@ const continuationPrompt = require('./continuation_prompt');
 const conversationHistoryPolicy = require('./conversation_history_policy');
 const authoritativeWorkStateQuery = require('./authoritative_work_state_query');
 const conversationalDraftPolicy = require('./conversational_draft_policy');
+const conversationPlanePolicy = require('./conversation_plane_policy');
 const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const startOperationsAdapter = require('./start_operations_extension_adapter');
@@ -53,7 +54,11 @@ const {
   beginBasePromptTrace, outputValidationOptions, statusMessages
 } = orchestrationPromptRoutes;
 const progressiveExecutionStage = require('./progressive_execution_stage');
-const EXTENSION_VERSION = '0.4.104';
+const conversationPlaneRouting = conversationPlanePolicy.createRouting({
+  cleanContextMode, cleanEffort, cleanMode, cleanWorkerType,
+  authoritativeWorkStateQuery
+});
+const EXTENSION_VERSION = '0.4.105';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -4196,6 +4201,7 @@ function buildSimpleIdentityFastPathResult(workFocus, workerType, worker) {
 
 function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
   const text = String(prompt || '');
+  const conversationPlane = conversationPlanePolicy.classify(text);
   const opts = options && typeof options === 'object' ? options : {};
   const daemonIngress = opts.daemonDiagnosticIngress || splitDaemonDiagnosticInput(text, '');
   const operatorControlText = daemonIngress.operator_intent_source;
@@ -4206,6 +4212,7 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
   let reasons = [];
   let localFastPath = null;
   let conversationalDraft = false;
+  let conversationalChat = false;
   let daemonDiagnosticAnalysis = false;
   const governedActionRequested = hasDaemonDiagnosticActionIntent(operatorControlText);
   const repoAuditIntent = repoAuditGrounding.detectRepoAuditIntent(operatorControlText);
@@ -4250,6 +4257,10 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
     localFastPath = 'authoritative_work_state';
   } else if (conversationalDraftPolicy.isConversationalDraftRequest(text)) {
     tier = 'REGULAR'; reasons.push('conversational_draft_single_model'); conversationalDraft = true;
+  } else if (conversationPlane.interaction_intent === 'CHAT' && worker !== 'smoke_tester') {
+    tier = conversationPlane.reasoning_depth === 'PANEL' ? 'ULTRA'
+      : (conversationPlane.reasoning_depth === 'CRITIC' ? 'HIGH' : 'REGULAR');
+    reasons.push('conversation_plane_foreground_chat'); conversationalChat = true;
   } else if (ULTRA_TASK_PATTERNS.some((pattern) => pattern.test(haystack))) {
     tier = 'ULTRA';
     reasons.push('ultra_keyword_match');
@@ -4263,11 +4274,14 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
     tier = 'REGULAR';
     reasons.push('smoke_tester_default');
   } else {
-    tier = 'HIGH';
-    reasons.push('uncertain_default_high');
+    tier = conversationPlane.reasoning_depth === 'PANEL' ? 'ULTRA'
+      : (conversationPlane.reasoning_depth === 'CRITIC' ? 'HIGH' : 'REGULAR');
+    reasons.push('conversation_plane_default');
   }
 
-  const preferManualPanel = !(localFastPath || conversationalDraft) && (tier !== 'REGULAR' || worker !== 'smoke_tester');
+  reasons.push.apply(reasons, conversationPlane.reason_codes);
+  const preferManualPanel = !(localFastPath || conversationalDraft || conversationalChat)
+    && (tier !== 'REGULAR' || worker !== 'smoke_tester');
   return {
     tier,
     reasons,
@@ -4275,6 +4289,8 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
     contextMode: mode,
     localFastPath,
     conversationalDraft,
+    conversationalChat,
+    conversationPlane,
     daemonDiagnosticAnalysis,
     daemonDiagnosticActionRequested,
     governedActionRequested,
@@ -4287,62 +4303,15 @@ function classifyTaskForRedDog(prompt, contextMode, workerType, options) {
 }
 
 function resolveAutoContextMode(classification, selectedContextMode) {
-  const mode = cleanContextMode(selectedContextMode);
-  if (classification && classification.conversationalDraft) return 'none';
-  if (mode !== 'auto') {
-    return mode;
-  }
-  if (classification && authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath)) {
-    return 'none';
-  }
-  const tier = classification && classification.tier ? classification.tier : 'HIGH';
-  if (tier === 'REGULAR') {
-    return 'wsp_holo';
-  }
-  if (tier === 'ULTRA') {
-    return 'wsp_holo_git_skillz';
-  }
-  return 'wsp_holo_skillz';
+  return conversationPlaneRouting.resolveAutoContextMode(classification, selectedContextMode);
 }
 
 function resolveAutoEffort(classification, selectedEffort) {
-  const effort = cleanEffort(selectedEffort);
-  if (classification && classification.conversationalDraft) return 'regular';
-  if (effort !== 'auto') {
-    return effort;
-  }
-  if (classification && authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath)) {
-    return 'regular';
-  }
-  const tier = classification && classification.tier ? classification.tier : 'HIGH';
-  if (tier === 'ULTRA') {
-    return 'ultra';
-  }
-  if (tier === 'REGULAR') {
-    return 'regular';
-  }
-  return 'high';
+  return conversationPlaneRouting.resolveAutoEffort(classification, selectedEffort);
 }
 
 function resolveModelMode(classification, selectedMode, workerType) {
-  const mode = cleanMode(selectedMode);
-  const worker = cleanWorkerType(workerType);
-  const localMode = authoritativeWorkStateQuery.localModelMode(classification && classification.localFastPath);
-  if (localMode) return localMode;
-  if (classification && classification.conversationalDraft) return 'openrouter_single';
-  if (mode === 'auto') {
-    return classification && classification.tier === 'REGULAR' ? 'openrouter_single' : 'foundups_fusion';
-  }
-  if (worker === 'smoke_tester') {
-    return mode;
-  }
-  if (mode === 'openrouter_fusion_alias') {
-    return mode;
-  }
-  if (classification && classification.prefersAuditablePanel) {
-    return 'foundups_fusion';
-  }
-  return mode;
+  return conversationPlaneRouting.resolveModelMode(classification, selectedMode, workerType);
 }
 
 function validateRedDogOutput(markdown, options) {
@@ -4884,6 +4853,7 @@ function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort
   const unicode = unicodeMeta && typeof unicodeMeta === 'object' ? unicodeMeta : emptyUnicodeNormalizationMeta();
   return Object.assign({}, base, {
     task_classification: classification,
+    conversation_plane_decision: classification && classification.conversationPlane,
     resolved_effort: resolvedEffort,
     reddog_effort: String(resolvedEffort || 'unknown').toLowerCase(),
     resolved_mode: resolvedMode,
@@ -5283,7 +5253,7 @@ function prepareFusionRequest(message, worker) {
     promptHasDetermineList: classification.determineListRequested === true,
     daemonDiagnosticProjection: projection,
     governedWorkFocus: projection ? projection.focus : workFocus,
-    continuationEnabled: message.useLastPacket === true && !classification.conversationalDraft,
+    continuationEnabled: message.useLastPacket === true && conversationPlanePolicy.continuationAllowed(classification),
     localFastPath: authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath),
     modelBindingBlock: modelRuntimeBindingQuery.blockedReason(worker),
     effort: resolveAutoEffort(classification, cleanEffort(message.effort)),
@@ -5338,8 +5308,9 @@ function attachRuntimePolicy(result, runtimeGate, progressiveReceipt) {
 function buildContextForRequest(state, input) {
   const useHolo = ['wsp_holo', 'wsp_holo_git', 'wsp_holo_skillz', 'wsp_holo_git_skillz'].includes(input.contextMode);
   return holoGenerationBoundQuery.buildOwnedContext(state.holoLifecycleRegistry, {
-    useEmpty: input.useEmpty, useDraft: input.useDraft, useHolo,
-    empty: authoritativeWorkStateQuery.emptyContextPacket, draft: conversationalDraftPolicy.emptyContextPacket,
+    useEmpty: input.useEmpty, useDraft: input.useDraft || input.useConversation, useHolo,
+    empty: authoritativeWorkStateQuery.emptyContextPacket,
+    draft: input.useConversation ? conversationPlanePolicy.emptyContextPacket : conversationalDraftPolicy.emptyContextPacket,
     holo: (lifecycle) => buildBoundedRepoContextAsync(input.contextMode, input.workFocus, lifecycle),
     plain: () => buildBoundedRepoContext(input.contextMode, input.workFocus)
   });
@@ -5359,10 +5330,10 @@ function wireFusionWebview(context, webview, worker, state) {
     } = prepareFusionRequest(message, worker);
     if (modelBindingBlock && !localFastPath) { postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock); return; }
     const contextBuild = await buildContextForRequest(state, { contextMode, workFocus: governedWorkFocus,
-      useEmpty: auditDegraded || localFastPath, useDraft: classification.conversationalDraft });
+      useEmpty: auditDegraded || localFastPath, useDraft: classification.conversationalDraft, useConversation: classification.conversationalChat });
     const contextPacket = contextBuild.packet;
     if (contextBuild.cancelled) return { ok: false, reason: 'request_cancelled', cancellation: { typed: true } };
-    const basePrompt = classification.conversationalDraft ? conversationalDraftPolicy.buildUserPrompt(workFocus) : constructWspTaskPrompt(governedWorkFocus, classification, contextPacket.quality, workerType);
+    const basePrompt = conversationPlanePolicy.selectUserPrompt(classification, workFocus, () => constructWspTaskPrompt(governedWorkFocus, classification, contextPacket.quality, workerType), conversationalDraftPolicy);
     const continuation = continuationPrompt.prepareContinuationPrompt(
       basePrompt, continuationEnabled, state.lastContinuationSummary, {
         append: appendContinuationSummaryToWspPrompt,
@@ -5375,13 +5346,12 @@ function wireFusionWebview(context, webview, worker, state) {
     const promptConstruction = orchestrationPromptTrace.buildPromptConstructionMetadata(
       governedWorkFocus, wspTaskPrompt, daemonDiagnosticProjection, contextPacket
     );
-    const systemPrompt = classification.conversationalDraft ? conversationalDraftPolicy.systemPrompt() : buildSystemPrompt(workerType, effort, contextPacket.quality);
+    const systemPrompt = conversationPlanePolicy.selectSystemPrompt(classification, () => buildSystemPrompt(workerType, effort, contextPacket.quality), conversationalDraftPolicy);
     const basePromptTraceInput = buildBasePromptTraceInput(systemPrompt, wspTaskPrompt, mode,
       workerType, classification.tier, contextMode, classification.governedActionRequested === true);
-    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' reasoning_tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + (classification.conversationalDraft ? '' : ' panel=' + worker.panel.join(' + ')) + ' model_source=' + worker.modelBindingSource + ' (' + classification.reasons.join(', ') + ')');
+    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' reasoning_tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + (classification.conversationalDraft ? '' : (classification.conversationalChat && mode !== 'foundups_fusion' ? '' : ' panel=' + worker.panel.join(' + '))) + ' model_source=' + worker.modelBindingSource + ' (' + classification.reasons.join(', ') + ')');
     const localStatus = authoritativeWorkStateQuery.statusText(classification.localFastPath);
-    const routeMessages = statusMessages(auditDegraded, localStatus,
-      conversationalDraftPolicy.statusText(), classification.conversationalDraft);
+    const routeMessages = statusMessages(auditDegraded, localStatus, conversationPlanePolicy.routeStatus(classification, conversationalDraftPolicy), classification.conversationalDraft || classification.conversationalChat);
     postStatusAndProgress(webview, null, routeMessages.route || 'Bridge started. Redaction gate runs before any OpenRouter API call.');
     if (daemonDiagnosticProjection) {
       postStatusAndProgress(webview, null, 'DAEmon output was reduced to a bounded redacted evidence projection. Raw diagnostic text will not be sent to the model or treated as authority.');
@@ -5535,7 +5505,7 @@ function wireFusionWebview(context, webview, worker, state) {
     absorbUnicodeMeta(result);
     const groundingDialogueOnly = groundingFailureDialogue.isDialogueResult(result);
     const substantiveTask = isSubstantiveRedDogWorker(workerType) && !localFastPath
-      && !classification.conversationalDraft && !groundingDialogueOnly;
+      && !classification.conversationalDraft && !groundingDialogueOnly && !classification.conversationalChat;
     if (result.ok && substantiveTask) {
       workTrail.push('validator_started');
       const validation = validateRedDogOutput(result.content || '', outputValidationOptions(
@@ -5854,7 +5824,7 @@ function wireFusionWebview(context, webview, worker, state) {
     }
     result.work_trail = workTrail.toEvents();
     if (result.ok && result.content) {
-      result.content = ((classification.conversationalDraft || groundingDialogueOnly)
+      result.content = ((classification.conversationalDraft || classification.conversationalChat || groundingDialogueOnly)
         ? ''
         : routingSummary(workerType, classification, effort, mode, contextMode, worker) + '\n\n') + result.content;
       const mojibake = detectMojibake(result.content);

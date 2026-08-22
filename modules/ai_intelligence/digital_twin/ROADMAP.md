@@ -23,6 +23,18 @@ conversation state, AgentDB, or any FoundUp Memex.
 - Deferred: explicit learning admission and
   explicit Principal-to-FoundUp projection.
 
+## Continuous conversation lane
+
+- Complete: deterministic interaction/reasoning/effect contract.
+- Complete: default `CHAT / FAST / NONE`, ambiguous-authority rejection, risk
+  reasoning escalation without effect escalation, and VSIX thin adapter.
+- Complete: dedicated cross-language `test:conversation` vectors.
+- Next: authenticated AgentDB-backed resident turn/status/cancel service.
+- Next: thin PFMall/phone transport adapter; the browser remains a client, not
+  the model/OpenClaw host.
+- Deferred: asynchronous critics, durable cross-device history, bounded Memex/
+  HoloIndex recall, voice ingress/TTS, and multi-host event-store scale.
+
 ---
 
 ## Current State (V0.6.0) - Audited 2026-08-06

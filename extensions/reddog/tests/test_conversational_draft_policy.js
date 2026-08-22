@@ -4,6 +4,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const policy = require('../conversational_draft_policy');
+const conversationPlaneSource = fs.readFileSync(path.join(__dirname, '..', 'conversation_plane_policy.js'), 'utf8');
 
 const exactPrompt = [
   '0102 how should I respond to "Olivia said the line one cube equals one idea, agents join and build is a clean way to describe FoundUps."',
@@ -55,13 +56,13 @@ const prepareEnd = extensionSource.indexOf('function wireFusionWebview', prepare
 const prepare = extensionSource.slice(prepareStart, prepareEnd);
 assert(extensionSource.includes('conversationalDraft'));
 assert(wire.includes('useDraft: classification.conversationalDraft'));
-assert(contextBuilder.includes('draft: conversationalDraftPolicy.emptyContextPacket'));
+assert(contextBuilder.includes('input.useConversation ? conversationPlanePolicy.emptyContextPacket : conversationalDraftPolicy.emptyContextPacket'));
 assert(ownerRuntimeSource.includes('else if (input.useDraft) packet = input.draft();'));
-assert(wire.includes('conversationalDraftPolicy.buildUserPrompt(workFocus)'));
-assert(wire.includes('conversationalDraftPolicy.systemPrompt()'));
+assert(conversationPlaneSource.includes('draftPolicy.buildUserPrompt(value)'));
+assert(conversationPlaneSource.includes('draftPolicy.systemPrompt()'));
 assert(wire.includes('!classification.conversationalDraft'));
 assert(wire.includes("classification.conversationalDraft ? ''"));
-assert(prepare.includes('message.useLastPacket === true && !classification.conversationalDraft'));
-assert(wire.includes("classification.conversationalDraft ? '' : ' panel='"));
+assert(prepare.includes('message.useLastPacket === true && conversationPlanePolicy.continuationAllowed(classification)'));
+assert(wire.includes("classification.conversationalDraft ? '' : (classification.conversationalChat"));
 
 console.log('conversational draft policy tests passed');

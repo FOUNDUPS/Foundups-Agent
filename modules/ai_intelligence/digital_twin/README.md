@@ -6,6 +6,14 @@ RedDog is the application/runtime shell. 0102 is the Digital Twin hosted by
 RedDog. The Principal Memex is the bounded cognition substrate that may help
 0102 understand 012; it is neither the Digital Twin nor operational authority.
 
+`conversation_plane_contract.py` and `conversation_plane.py` implement the
+deterministic foreground conversation contract. Interaction intent, reasoning
+depth, and effect ceiling are independent. Unknown text defaults to
+`CHAT / FAST / NONE`; risk may raise reasoning but never effects; conversation
+text can emit at most a proposal and cannot authorize bounded execution.
+The contract performs no model, memory, HoloIndex, database, repository, or
+network operation.
+
 `principal_memex_projection.py` implements the first structural, read-only
 Principal Memex projection. It validates provenance identifiers, canonical
 content/item/projection digests, principal isolation, sensitivity, and
@@ -68,9 +76,10 @@ Phase 3: Tool-Use Training
 - **Decisioning**: `decision_policy.py` determines comment / like / ignore
 - **Scheduling**: Orchestrated through LinkedIn modules (scheduler + social media DAE)
 
-## YouTube Concatenation (Live Chat + Studio + Scheduling)
+## YouTube application direction (legacy lane)
 
-- **Live Chat**: Digital Twin becomes primary response engine (BanterEngine fallback only)
+- **Live Chat**: planned Digital Twin response integration; not established by
+  the conversation-plane phase
 - **Studio Comments**: Digital Twin drafts + decisions for comment replies
 - **Scheduling**: Index weave signals utility routing
   - 012 voice → Digital Twin memory
@@ -133,8 +142,10 @@ set VOICE_MEMORY_VIDEO_INDEX=0
 
 ## Vision System (V0.5.0)
 
-### Autonomous Vision Agent
-0102 runs as a standalone vision-based agent at `E:\0102_Digital_Twin\`.
+### Historical external vision prototype
+An external prototype was documented at `E:\0102_Digital_Twin\`. Its current
+runtime/deployment state was not verified by the conversation-plane phase and
+it is not the canonical RedDog host or work authority.
 
 ### Quick Start
 ```bash

@@ -12,7 +12,7 @@ assert.deepStrictEqual(pkg.capabilities, {
   virtualWorkspaces: { supported: false }
 });
 assert.strictEqual(pkg.publisher, 'foundups');
-assert.strictEqual(pkg.version, '0.4.104');
+assert.strictEqual(pkg.version, '0.4.105');
 assert.strictEqual(pkg.main, './extension.js');
 assert.deepStrictEqual(pkg.activationEvents, [
   'onCommand:reddog.open',
@@ -27,10 +27,10 @@ assert.deepStrictEqual(
   pkg.activationEvents
 );
 assert.deepStrictEqual(surface.deriveRuntimeFiles(), surface.EXPECTED_RUNTIME_FILES);
-assert.strictEqual(surface.EXPECTED_RUNTIME_FILES.length, 61);
-assert.strictEqual(surface.EXPECTED_PACKAGE_FILES.length, 65);
+assert.strictEqual(surface.EXPECTED_RUNTIME_FILES.length, 62);
+assert.strictEqual(surface.EXPECTED_PACKAGE_FILES.length, 66);
 const packageReceipt = surface.packageSurfaceReceipt(surface.EXPECTED_PACKAGE_FILES);
-assert.strictEqual(packageReceipt.file_count, 65);
+assert.strictEqual(packageReceipt.file_count, 66);
 assert(packageReceipt.raw_bytes > 0);
 assert.strictEqual(packageReceipt.raw_byte_cap, 1024 * 1024);
 assert.strictEqual(packageReceipt.within_cap, true);

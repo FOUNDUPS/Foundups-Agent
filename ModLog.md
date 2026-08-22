@@ -1,5 +1,32 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-22] RedDog Continuous Digital Twin Conversation Plane
+
+**WSP Protocol:** WSP 00, 15, 22, 50, 62, 73, 97
+
+- Added one deterministic Digital Twin conversation contract with independent
+  intent, reasoning-depth, and effect-ceiling axes. Unknown/bare continuation
+  text fails to `CHAT / FAST / NONE`; explicit named work stops at proposal;
+  conversation text and model output cannot authorize execution.
+- Wired the VSIX to zero-context foreground chat with single-model default and
+  optional critic/panel reasoning without HoloIndex or work-order dependency.
+  Added the operational `test:conversation` tier and shared Python/JavaScript
+  acceptance vectors.
+- An independent frozen-tree WSP-97 audit rejected the first candidate. The
+  repaired boundary withholds prior work-packet continuation from chat,
+  revalidates effect decisions, validates nested adapters, uses a shared
+  Unicode-scalar cap, and keeps every new Python function within WSP 62.
+- Reconciled RedDog/OpenClaw identity drift: RedDog is the product/shell, 0102
+  is the Digital Twin main agent, and a principal-scoped OpenClaw runtime may
+  provide channel, admission, execution, and supervision behind it. PFMall,
+  phone, per-principal runtime deployment, durable memory, and mesh scale remain
+  explicitly gated.
+- Regenerated the exact 1,372-file backend closure and the authenticated
+  18-shard/483-assertion extension aggregate. No HoloIndex repair, phone
+  checkout mutation, model launch, or worker dispatch occurred.
+- Final staged generator passed 8/8; the second independent audit returned GO;
+  and the four-group RedDog release passed in 341,658 ms with no timeout.
+
 ## [2026-08-22] RedDog LM Studio Exact Lifecycle Hardening
 
 **WSP Protocol:** WSP 00, 15, 22, 50, 62, 73, 97
