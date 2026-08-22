@@ -290,8 +290,8 @@ def test_main_dispatches_to_stdlib_when_fastapi_is_unavailable(
     )
     monkeypatch.setattr(
         http_module,
-        "prove_and_verify_active_query_replica",
-        lambda **_kwargs: (SimpleNamespace(), SimpleNamespace()),
+        "prove_existing_isolated_store",
+        lambda *_args, **_kwargs: SimpleNamespace(),
     )
     assert main(_stdlib_fallback_argv()) == 0
     assert events == [

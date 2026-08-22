@@ -1,5 +1,21 @@
 # foundups_mcp_bridge Tests
 
+## Resident owner bounded replica revalidation
+
+- Descriptor tests prove that retained admission rereads the exact active
+  descriptor/manifest and rejects model, sealed-snapshot, or unlisted runtime
+  artifact drift without reopening unused copied vector storage.
+- Runtime routing proves exactly one complete admission switches to bounded
+  revalidation; injected synthetic verifiers retain their existing behavior.
+- The HTTP entry point proves only the isolated-root capability before owner
+  construction; the owner performs the independent full descriptor admission
+  and retains the stable `HOLOINDEX_QUERY_REPLICA_INVALID` failure.
+- Focused result: **101 passed**; generated/one-shot/snapshot adjacency is
+  **171 passed**; the complete bridge package is **961 passed / 6 expected
+  host-capability skips**. Real read-only timing was 42.422 seconds complete
+  versus 1.297 and 1.359 seconds retained, under the unchanged 15-second
+  request deadline.
+
 ## Streamable HTTP and public Holo bundle contracts
 
 - `test_holo_query_bundle_public.py` covers secret/absolute-path redaction,

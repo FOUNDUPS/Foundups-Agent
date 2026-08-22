@@ -13,6 +13,7 @@ from .reddog_holoindex_acceptance_guards import StoreProof
 from .reddog_holoindex_query_replica_descriptor import (
     ActiveQueryReplicaBinding,
     QueryReplicaDescriptorError,
+    revalidate_admitted_query_replica,
     verify_active_query_replica,
 )
 
@@ -68,6 +69,15 @@ def build_query_replica_runtime(
     runtime.binding = runtime.verify()
     if runtime.binding is None and require_replica:
         raise ValueError("HOLOINDEX_QUERY_REPLICA_REQUIRED")
+    if injected is None and proof is not None and runtime.binding is not None:
+        admitted = runtime.binding
+        runtime.verifier = lambda: revalidate_admitted_query_replica(
+            admitted_binding=admitted,
+            replica_root_proof=proof,
+            canonical_repo_root=repo_root,
+            canonical_ssd_path=canonical_ssd_path,
+        )
+        runtime.verify()
     return runtime
 
 

@@ -29,7 +29,10 @@ from .holo_query_service import (
 )
 from .reddog_holoindex_query_replica_descriptor import (
     QueryReplicaDescriptorError,
-    prove_and_verify_active_query_replica,
+)
+from .reddog_holoindex_acceptance_guards import (
+    AcceptanceGuardError,
+    prove_existing_isolated_store,
 )
 
 try:
@@ -334,22 +337,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("HOLOINDEX_QUERY_REPLICA_REQUIRED")
         return 2
     try:
-        replica_proof, _binding = prove_and_verify_active_query_replica(
-            replica_root=args.query_replica_root,
-            canonical_repo_root=repo_root,
-            canonical_ssd_path=args.canonical_ssd_path,
+        replica_proof = prove_existing_isolated_store(
+            args.query_replica_root,
+            canonical_store=args.canonical_ssd_path,
+            repo_roots=(repo_root,),
         )
-    except (QueryReplicaDescriptorError, OSError, ValueError):
+    except (AcceptanceGuardError, QueryReplicaDescriptorError, OSError, ValueError):
         print("HOLOINDEX_QUERY_REPLICA_INVALID")
         return 2
     if args.parent_pid:
         _start_parent_process_watchdog(int(args.parent_pid))
-    owner = HoloIndexQueryOwnerService(
-        repo_root=repo_root,
-        canonical_ssd_path=args.canonical_ssd_path,
-        query_replica_root_proof=replica_proof,
-        bearer_token=token,
-    )
+    try:
+        owner = HoloIndexQueryOwnerService(
+            repo_root=repo_root,
+            canonical_ssd_path=args.canonical_ssd_path,
+            query_replica_root_proof=replica_proof,
+            bearer_token=token,
+        )
+    except (QueryReplicaDescriptorError, OSError, ValueError):
+        print("HOLOINDEX_QUERY_REPLICA_INVALID")
+        return 2
     _serve_owner(owner, host, int(args.port))
     return 0
 

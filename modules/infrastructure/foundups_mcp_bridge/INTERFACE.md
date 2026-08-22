@@ -68,6 +68,14 @@ The one-shot semantic adapter and maintenance handshake resolve this route
 before owner startup; promotion resolves it before read-only owner binding
 verification. All three pass the same capability into the existing owner API.
 
+Initial resolution hashes the complete descriptor manifest. A retained route
+then revalidates descriptor identity/bytes, exact manifest projection,
+canonical repository/receipt/leases, and the only runtime-reachable artifacts:
+the selected model and `vectors/query_snapshots/`. The isolated owner performs
+its own complete admission before switching to the same bounded proof. This is
+not a TTL/cache decision and does not raise the 15-second query deadline;
+descriptor, authority, model, or snapshot drift still fails closed.
+
 ### `verify_reddog_holoindex_owner_binding(...) -> bool`
 
 Read-only promotion-time proof that the already-running private query owner
@@ -115,6 +123,9 @@ by governed maintenance and copied inside the verified replica generation. It
 supports only the Chroma-shaped read subset used by HoloIndex. Backend creation
 fails closed when the snapshot generation differs from the active replica;
 query startup/search never starts Chroma or opens replica SQLite/HNSW files.
+The owner performs one complete replica admission, then uses the retained
+bounded proof above before and after semantic retrieval. Runtime proof never
+substitutes for initial full-manifest admission.
 
 HTTP exposes authenticated `POST /holoindex/v1/query` and
 `GET /holoindex/v1/health` only; there is no indexing API. Both require
