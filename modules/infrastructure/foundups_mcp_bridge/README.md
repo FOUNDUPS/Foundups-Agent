@@ -91,19 +91,22 @@ owner verification. The trusted host must explicitly provide
 store and its exact active descriptor before owner use. Missing, relative,
 stale, or unprovable configuration fails closed with no owner start, query,
 promotion, replica creation, or re-index. This plumbing does **not** delete
-old/orphan generations, define rollback/retention, or materialize from a live
-store, so operational availability still requires a separately authorized
-current-generation materialization transaction. Phase 1 performs no content deletion. Failed publication temps, staging trees,
+old/orphan generations, define rollback/retention, or automatically materialize
+from a live store, so operational availability still requires a separately
+authorized current-generation materialization transaction. A local live
+transaction on 2026-08-22 accepted a 10,444-file, 8.1 GB Windows generation
+after closing mixed-case ordering, CRT-handle scaling, full-list secret
+scanning, and descriptor-size gaps; production owner cutover remains
+exact-`main` bound. Phase 1 performs no content deletion. Failed publication temps, staging trees,
 and a failed active name are atomically moved without replacement into an
 owned orphan root; the active name is absent only after a successful move.
 Rename failure leaves the source name and reports only a relative unsafe path.
 Windows copy failure closes all handles and preserves its bounded partial
 destination; query materialization quarantines the enclosing staging root.
 Direct copy callers retain responsibility for their isolated partial output.
-Retention/deletion of preserved objects is a future governed policy. The R15
-candidate is not promotable until independent verification accepts it. All
-Phase-2 validation in this slice is synthetic; no live owner, store, Holo MCP,
-model, maintenance, reindex, or `E:` access occurred.
+Retention/deletion of preserved objects is a future governed policy. Live local
+materialization and descriptor verification now have acceptance evidence; live
+owner/Holo MCP promotion still requires the patched exact-`main` generation.
 
 The owner response flattener treats `limit <= 0` as an empty result and never
 admits a first hit through the loop termination check. Explicit module Tier-0

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import stat
 from dataclasses import dataclass
@@ -24,7 +26,6 @@ from .reddog_holoindex_acceptance_model_descriptors import (
     DescriptorCopyProof,
     copy_descriptors,
     copy_one_posix,
-    descriptor_artifact_digest,
     file_identity,
 )
 from .reddog_holoindex_artifact_manifest import (
@@ -39,11 +40,14 @@ from .reddog_holoindex_artifact_manifest import (
 )
 from .reddog_holoindex_acceptance_windows import (
     WindowsDirectoryLease,
-    create_windows_destination_file,
+    WindowsFileLease,
+    create_windows_destination_file_lease,
+    open_windows_file_lease_descriptor,
     open_windows_directory_lease,
-    open_windows_source_file,
+    open_windows_source_file_lease,
     validate_windows_directory_lease,
     validate_windows_file_descriptor,
+    validate_windows_file_lease,
 )
 
 
@@ -51,8 +55,8 @@ from .reddog_holoindex_acceptance_windows import (
 class _WindowsCopySession:
     source_directories: dict[str, WindowsDirectoryLease]
     destination_directories: dict[str, WindowsDirectoryLease]
-    source_files: list[tuple[Path, int, tuple[int, int, int, int, int]]]
-    destination_files: list[tuple[Path, int]]
+    source_files: list[tuple[Path, WindowsFileLease]]
+    destination_files: list[tuple[Path, WindowsFileLease]]
     total_bytes: int = 0
     file_proofs: list[ArtifactFileProof] | None = None
 
@@ -150,22 +154,16 @@ def _destination_directory_lease(
 
 
 def _close_windows_copy(
-    source_files: list[tuple[Path, int, tuple[int, int, int, int, int]]],
-    destination_files: list[tuple[Path, int]],
+    source_files: list[tuple[Path, WindowsFileLease]],
+    destination_files: list[tuple[Path, WindowsFileLease]],
     source_directories: dict[str, WindowsDirectoryLease],
     destination_directories: dict[str, WindowsDirectoryLease],
 ) -> None:
-    for _path, descriptor, _identity_proof in source_files:
-        try:
-            os.close(descriptor)
-        except OSError:
-            pass
+    for _path, lease in source_files:
+        lease.close()
     source_files.clear()
-    for _path, descriptor in destination_files:
-        try:
-            os.close(descriptor)
-        except OSError:
-            pass
+    for _path, lease in destination_files:
+        lease.close()
     destination_files.clear()
     for lease in reversed(list(source_directories.values())):
         lease.close()
@@ -188,35 +186,35 @@ def _open_windows_store_lease(
     session.destination_directories[_lease_key(store_proof.path)] = lease
 
 
-def _open_windows_copy_descriptors(
+def _open_windows_copy_leases(
     source_file: Path,
     target: Path,
     expected: os.stat_result,
     source_parent: WindowsDirectoryLease,
     destination_parent: WindowsDirectoryLease,
     session: _WindowsCopySession,
-) -> tuple[int, int]:
-    source_fd = -1
-    target_fd = -1
+) -> tuple[WindowsFileLease, WindowsFileLease]:
+    source_lease: WindowsFileLease | None = None
+    target_lease: WindowsFileLease | None = None
     try:
-        source_fd = open_windows_source_file(
+        source_lease = open_windows_source_file_lease(
             source_file, source_parent, expected_identity=file_identity(expected)
         )
-        session.source_files.append((source_file, source_fd, file_identity(expected)))
-        target_fd = create_windows_destination_file(target, destination_parent)
-        session.destination_files.append((target, target_fd))
-        return source_fd, target_fd
+        session.source_files.append((source_file, source_lease))
+        target_lease = create_windows_destination_file_lease(
+            target, destination_parent
+        )
+        session.destination_files.append((target, target_lease))
+        return source_lease, target_lease
     except (OSError, ValueError) as exc:
-        if source_fd >= 0 and not any(
-            descriptor == source_fd
-            for _path, descriptor, _proof in session.source_files
+        if source_lease is not None and not any(
+            lease is source_lease for _path, lease in session.source_files
         ):
-            os.close(source_fd)
-        if target_fd >= 0 and not any(
-            descriptor == target_fd
-            for _path, descriptor in session.destination_files
+            source_lease.close()
+        if target_lease is not None and not any(
+            lease is target_lease for _path, lease in session.destination_files
         ):
-            os.close(target_fd)
+            target_lease.close()
         raise AcceptanceGuardError("MODEL_WINDOWS_HANDLE_OPEN_FAILED") from exc
 
 
@@ -241,7 +239,7 @@ def _copy_one_windows_snapshot_file(
         target.parent,
         session.destination_directories,
     )
-    source_fd, target_fd = _open_windows_copy_descriptors(
+    source_lease, target_lease = _open_windows_copy_leases(
         source_file,
         target,
         expected,
@@ -249,31 +247,43 @@ def _copy_one_windows_snapshot_file(
         destination_parent,
         session,
     )
-    descriptor_proof = copy_descriptors(
-        source_fd,
-        target_fd,
-        expected,
-        limits=limits,
-        total_before=session.total_bytes,
-    )
-    session.total_bytes += descriptor_proof.copied_bytes
-    assert session.file_proofs is not None
-    session.file_proofs.append(build_file_proof(relative, descriptor_proof, expected_file))
-    validate_windows_file_descriptor(
-        source_fd, source_file, expected_identity=file_identity(expected)
-    )
-    validate_windows_file_descriptor(target_fd, target)
-    validate_windows_directory_lease(source_parent)
-    validate_windows_directory_lease(destination_parent)
+    source_fd = -1
+    target_fd = -1
+    try:
+        source_fd = open_windows_file_lease_descriptor(source_lease)
+        target_fd = open_windows_file_lease_descriptor(target_lease)
+        descriptor_proof = copy_descriptors(
+            source_fd,
+            target_fd,
+            expected,
+            limits=limits,
+            total_before=session.total_bytes,
+        )
+        session.total_bytes += descriptor_proof.copied_bytes
+        assert session.file_proofs is not None
+        session.file_proofs.append(
+            build_file_proof(relative, descriptor_proof, expected_file)
+        )
+        validate_windows_file_descriptor(
+            source_fd, source_file, expected_identity=file_identity(expected)
+        )
+        validate_windows_file_descriptor(target_fd, target)
+        validate_windows_file_lease(source_lease)
+        validate_windows_file_lease(target_lease)
+        validate_windows_directory_lease(source_parent)
+        validate_windows_directory_lease(destination_parent)
+    finally:
+        if target_fd >= 0:
+            os.close(target_fd)
+        if source_fd >= 0:
+            os.close(source_fd)
 
 
 def _validate_windows_copy_session(session: _WindowsCopySession) -> None:
-    for path, descriptor, identity_proof in session.source_files:
-        validate_windows_file_descriptor(
-            descriptor, path, expected_identity=identity_proof
-        )
-    for path, descriptor in session.destination_files:
-        validate_windows_file_descriptor(descriptor, path)
+    for _path, lease in session.source_files:
+        validate_windows_file_lease(lease)
+    for _path, lease in session.destination_files:
+        validate_windows_file_lease(lease)
     for lease in session.source_directories.values():
         validate_windows_directory_lease(lease)
     for lease in session.destination_directories.values():
@@ -303,11 +313,11 @@ def _prove_windows_model_copy(
     snapshot: ArtifactSnapshot, session: _WindowsCopySession
 ) -> ModelCopyProof:
     relative_files = tuple(relative for relative, _, _ in snapshot.files)
-    source_digest = descriptor_artifact_digest(
-        relative_files, [descriptor for _, descriptor, _ in session.source_files]
+    source_digest = _windows_lease_artifact_digest(
+        relative_files, [lease for _, lease in session.source_files]
     )
-    destination_digest = descriptor_artifact_digest(
-        relative_files, [descriptor for _, descriptor in session.destination_files]
+    destination_digest = _windows_lease_artifact_digest(
+        relative_files, [lease for _, lease in session.destination_files]
     )
     if source_digest != destination_digest:
         _fail("MODEL_DIGEST_MISMATCH")
@@ -319,6 +329,36 @@ def _prove_windows_model_copy(
         relative_files=relative_files,
         files=tuple(session.file_proofs or ()),
     )
+
+
+def _windows_lease_artifact_digest(
+    relative_files: tuple[str, ...],
+    leases: list[WindowsFileLease],
+) -> str:
+    """Hash retained Windows handles one at a time outside CRT limits."""
+
+    if len(relative_files) != len(leases) or not leases:
+        _fail("MODEL_DIGEST_MISMATCH")
+    manifest = []
+    for relative, lease in zip(relative_files, leases):
+        descriptor = open_windows_file_lease_descriptor(lease)
+        try:
+            metadata = os.fstat(descriptor)
+            digest = hashlib.sha256()
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            for block in iter(lambda: os.read(descriptor, 1024 * 1024), b""):
+                digest.update(block)
+            manifest.append(
+                {
+                    "path": relative,
+                    "size": int(metadata.st_size),
+                    "sha256": digest.hexdigest(),
+                }
+            )
+        finally:
+            os.close(descriptor)
+    payload = json.dumps(manifest, sort_keys=True, separators=(",", ":"))
+    return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def _copy_model_snapshot_windows(
