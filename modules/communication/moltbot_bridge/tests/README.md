@@ -6,7 +6,10 @@
 candidate projection from exact FoundUp/snapshot/source receipts. Its positive
 and adversarial cases cover contradiction preservation, supersession pointers,
 proposed salience/confidence, reconstruction fidelity, forged and cross-FoundUp
-receipts, governed-research allowlisting, verified-outcome HEAD binding,
+receipts, governed-research fail-closed behavior, verified-outcome HEAD binding,
+ambiguous outcome-receipt rejection, proposal-bound local-resigning rejection,
+canonical Unicode/time/score output, immutable result receipts, pre-dedup
+collection bounds, exact view receipt/invariant enforcement,
 tampering, secret text, invalid scores, future evidence/proposals, hostile
 runtime types, and storage/network/model import prohibitions.
 

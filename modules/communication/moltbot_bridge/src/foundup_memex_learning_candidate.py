@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from types import MappingProxyType
 from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.foundup_memex_current_state import (
@@ -21,6 +22,9 @@ from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_c
     GATE_ACCEPTED,
     GATE_RECEIPT_SCHEMA_VERSION,
     GATE_REJECTED,
+    MAX_GOVERNED_RESEARCH_RECEIPTS,
+    MAX_REFERENCES_PER_PROPOSAL,
+    MAX_SUPERSEDED_MEMORIES,
     PROPOSAL_SCHEMA_VERSION,
     STRUCTURAL_VERIFICATION,
     FoundUpMemexLearningCandidate,
@@ -29,6 +33,10 @@ from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_c
     FoundUpMemexLearningProposal,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_validation import (
+    candidate_reasons as _candidate_reasons,
+    canonical_identifier as _canonical_identifier,
+    canonical_text as _canonical_text,
+    canonical_time as _canonical_time,
     evidence_reasons as _evidence_reasons,
     evidence_scope_reasons as _evidence_scope_reasons,
     gate_input_reasons as _gate_input_reasons,
@@ -53,6 +61,12 @@ def build_foundup_memex_learning_evidence(
     )
     if any(type(value) is not str for value in values):
         raise ValueError("learning_evidence_type_invalid")
+    for value in (
+        foundup_id, snapshot_id, source_class, source_receipt_id,
+        source_revision, polarity,
+    ):
+        _canonical_identifier(value)
+    canonical_statement = _canonical_text(statement)
     payload = {
         "schema_version": EVIDENCE_SCHEMA_VERSION,
         "foundup_id": foundup_id,
@@ -60,10 +74,10 @@ def build_foundup_memex_learning_evidence(
         "source_class": source_class,
         "source_receipt_id": source_receipt_id,
         "source_revision": source_revision,
-        "observed_at": observed_at,
-        "statement": statement,
+        "observed_at": _canonical_time(observed_at),
+        "statement": canonical_statement,
         "polarity": polarity,
-        "content_digest": _digest({"statement": statement}),
+        "content_digest": _digest({"statement": canonical_statement}),
     }
     evidence = FoundUpMemexLearningEvidence(
         evidence_id=_digest(payload), **payload
@@ -85,18 +99,30 @@ def build_foundup_memex_learning_proposal(
 
     if any(type(value) is not str for value in (foundup_id, snapshot_id, category, statement, created_at)):
         raise ValueError("learning_proposal_type_invalid")
+    for value in (foundup_id, snapshot_id, category):
+        _canonical_identifier(value)
+    support = _bounded_sorted_unique_strings(
+        supporting_evidence_ids, MAX_REFERENCES_PER_PROPOSAL
+    )
+    contradiction = _bounded_sorted_unique_strings(
+        contradicting_evidence_ids, MAX_REFERENCES_PER_PROPOSAL
+    )
+    if len(support) + len(contradiction) > MAX_REFERENCES_PER_PROPOSAL:
+        raise ValueError("learning_sequence_count_invalid")
     payload = {
         "schema_version": PROPOSAL_SCHEMA_VERSION,
         "foundup_id": foundup_id,
         "snapshot_id": snapshot_id,
         "category": category,
-        "statement": statement,
-        "supporting_evidence_ids": _sorted_unique_strings(supporting_evidence_ids),
-        "contradicting_evidence_ids": _sorted_unique_strings(contradicting_evidence_ids),
-        "supersedes_memory_ids": _sorted_unique_strings(supersedes_memory_ids),
-        "proposed_salience": proposed_salience,
-        "proposed_confidence": proposed_confidence,
-        "created_at": created_at,
+        "statement": _canonical_text(statement),
+        "supporting_evidence_ids": support,
+        "contradicting_evidence_ids": contradiction,
+        "supersedes_memory_ids": _bounded_sorted_unique_strings(
+            supersedes_memory_ids, MAX_SUPERSEDED_MEMORIES
+        ),
+        "proposed_salience": _canonical_score(proposed_salience),
+        "proposed_confidence": _canonical_score(proposed_confidence),
+        "created_at": _canonical_time(created_at),
     }
     proposal = FoundUpMemexLearningProposal(
         proposal_id=_digest(payload), **payload
@@ -114,9 +140,13 @@ def gate_foundup_memex_learning_candidates(
     created_at: str,
     governed_research_receipt_ids: Sequence[str] = (),
 ) -> FoundUpMemexLearningCandidateGateResult:
-    """Validate a deterministic batch and emit projection-only candidates."""
+    """Emit projections; caller research digests never establish authority."""
 
-    reasons = _gate_input_reasons(view, evidence, proposals, created_at)
+    try:
+        gate_created_at = _canonical_time(created_at)
+    except ValueError:
+        gate_created_at = created_at
+    reasons = _gate_input_reasons(view, evidence, proposals, gate_created_at)
     evidence_items = tuple(evidence) if type(evidence) in (list, tuple) else ()
     proposal_items = tuple(proposals) if type(proposals) in (list, tuple) else ()
     evidence_by_id = {
@@ -126,94 +156,100 @@ def gate_foundup_memex_learning_candidates(
         and type(item.evidence_id) is str
     }
     try:
-        research_receipts = _sorted_unique_strings(governed_research_receipt_ids)
+        research_receipts = _bounded_sorted_unique_strings(
+            governed_research_receipt_ids, MAX_GOVERNED_RESEARCH_RECEIPTS
+        )
     except ValueError:
         research_receipts = ()
         reasons.append("learning_gate_research_receipt_invalid")
     if any(not sha256_valid(item) for item in research_receipts):
         reasons.append("learning_gate_research_receipt_invalid")
-    if type(view) is FoundUpMemexView and _view_identity_valid(view):
-        for item in evidence_by_id.values():
-            item_reasons = _evidence_reasons(item)
-            reasons.extend(item_reasons)
-            if not item_reasons:
-                reasons.extend(_evidence_scope_reasons(item, view, research_receipts))
-            if not item_reasons and _time_after(item.observed_at, created_at):
-                reasons.append("learning_evidence_observed_in_future")
-        for proposal in proposal_items:
-            if type(proposal) is not FoundUpMemexLearningProposal:
-                continue
-            proposal_reasons = _proposal_reasons(proposal)
-            reasons.extend(proposal_reasons)
-            if not proposal_reasons:
-                reasons.extend(_proposal_scope_reasons(proposal, view, evidence_by_id, created_at))
-    if reasons:
-        return _gate_result(False, view, (), evidence_by_id.values(), created_at, reasons)
-
-    candidates = tuple(
-        sorted(
-            (_candidate_from(proposal, evidence_by_id) for proposal in proposal_items),
-            key=lambda item: item.candidate_id,
-        )
+    reasons.extend(_batch_reasons(
+        view, evidence_by_id, proposal_items, gate_created_at, research_receipts
+    ))
+    valid_evidence = tuple(
+        item for item in evidence_by_id.values() if not _evidence_reasons(item)
     )
-    if any(not verify_foundup_memex_learning_candidate_reconstruction(item, tuple(evidence_by_id.values())) for item in candidates):
+    if reasons:
+        return _gate_result(False, view, (), valid_evidence, gate_created_at, reasons)
+
+    candidate_pairs = tuple(
+        (proposal, _candidate_from(proposal, evidence_by_id))
+        for proposal in proposal_items
+    )
+    if any(
+        not verify_foundup_memex_learning_candidate_reconstruction(
+            candidate, proposal, valid_evidence
+        )
+        for proposal, candidate in candidate_pairs
+    ):
         return _gate_result(
-            False, view, (), evidence_by_id.values(), created_at,
+            False, view, (), valid_evidence, gate_created_at,
             ["learning_candidate_reconstruction_failed"],
         )
-    return _gate_result(True, view, candidates, evidence_by_id.values(), created_at, [])
+    candidates = tuple(sorted(
+        (candidate for _, candidate in candidate_pairs), key=lambda item: item.candidate_id
+    ))
+    return _gate_result(True, view, candidates, valid_evidence, gate_created_at, [])
+
+
+def _batch_reasons(
+    view: Any,
+    evidence_by_id: Mapping[str, FoundUpMemexLearningEvidence],
+    proposals: Sequence[Any], gate_created_at: Any,
+    research_receipts: tuple[str, ...],
+) -> list[str]:
+    reasons: list[str] = []
+    if type(view) is not FoundUpMemexView or not _view_identity_valid(view):
+        return reasons
+    for item in evidence_by_id.values():
+        item_reasons = _evidence_reasons(item)
+        reasons.extend(item_reasons)
+        if not item_reasons:
+            reasons.extend(_evidence_scope_reasons(item, view, research_receipts))
+        if not item_reasons and _time_after(item.observed_at, gate_created_at):
+            reasons.append("learning_evidence_observed_in_future")
+    for proposal in proposals:
+        if type(proposal) is not FoundUpMemexLearningProposal:
+            continue
+        proposal_reasons = _proposal_reasons(proposal)
+        reasons.extend(proposal_reasons)
+        if not proposal_reasons:
+            reasons.extend(_proposal_scope_reasons(
+                proposal, view, evidence_by_id, gate_created_at
+            ))
+    return reasons
 
 
 def verify_foundup_memex_learning_candidate_reconstruction(
     candidate: FoundUpMemexLearningCandidate,
+    proposal: FoundUpMemexLearningProposal,
     evidence: Sequence[FoundUpMemexLearningEvidence],
 ) -> bool:
-    """Recompute the candidate and its complete supporting/contradicting closure."""
+    """Recompute a candidate from its proposal and complete evidence closure."""
 
-    if type(candidate) is not FoundUpMemexLearningCandidate:
-        return False
-    if any(
-        type(value) is not tuple
-        for value in (
-            candidate.supporting_evidence_ids,
-            candidate.contradicting_evidence_ids,
-            candidate.supersedes_memory_ids,
-            candidate.source_receipt_ids,
-        )
+    if (
+        _candidate_reasons(candidate)
+        or _proposal_reasons(proposal)
+        or type(evidence) not in (list, tuple)
+        or not 0 < len(evidence) <= MAX_REFERENCES_PER_PROPOSAL
+        or any(type(item) is not FoundUpMemexLearningEvidence for item in evidence)
     ):
         return False
-    by_id = {item.evidence_id: item for item in evidence if not _evidence_reasons(item)}
-    referenced = candidate.supporting_evidence_ids + candidate.contradicting_evidence_ids
-    if len(referenced) != len(set(referenced)) or any(item not in by_id for item in referenced):
+    valid = tuple(item for item in evidence if not _evidence_reasons(item))
+    if len(valid) != len(evidence):
         return False
-    selected = tuple(by_id[item] for item in referenced)
-    if any(by_id[item].polarity != "supporting" for item in candidate.supporting_evidence_ids):
+    by_id = {item.evidence_id: item for item in valid}
+    if len(by_id) != len(valid):
         return False
-    if any(by_id[item].polarity != "contradicting" for item in candidate.contradicting_evidence_ids):
+    referenced = proposal.supporting_evidence_ids + proposal.contradicting_evidence_ids
+    if any(item not in by_id for item in referenced):
         return False
-    expected_manifest = _evidence_manifest(selected)
-    expected_sources = tuple(sorted({item.source_receipt_id for item in selected}))
-    payload = candidate.to_dict()
-    payload.pop("candidate_id")
-    return (
-        candidate.verification == STRUCTURAL_VERIFICATION
-        and candidate.runtime_admissible is False
-        and candidate.brain_write_authorized is False
-        and all(
-            value is True
-            for value in (
-                candidate.no_persistence_performed,
-                candidate.no_brain_write_performed,
-                candidate.no_breadcrumb_write_performed,
-                candidate.no_holoindex_mutation_performed,
-                candidate.no_roadmap_mutation_performed,
-                candidate.no_work_authority_granted,
-            )
-        )
-        and candidate.evidence_manifest_digest == expected_manifest
-        and candidate.source_receipt_ids == expected_sources
-        and candidate.candidate_id == _digest(payload)
-    )
+    if any(by_id[item].polarity != "supporting" for item in proposal.supporting_evidence_ids):
+        return False
+    if any(by_id[item].polarity != "contradicting" for item in proposal.contradicting_evidence_ids):
+        return False
+    return candidate == _candidate_from(proposal, by_id)
 
 
 def _candidate_from(
@@ -264,10 +300,10 @@ def _gate_result(
     payload = {
         "schema_version": GATE_RECEIPT_SCHEMA_VERSION,
         "status": GATE_ACCEPTED if accepted else GATE_REJECTED,
-        "foundup_id": getattr(view, "foundup_id", ""),
-        "snapshot_id": getattr(view, "snapshot_id", ""),
-        "snapshot_content_digest": getattr(view, "snapshot_content_digest", ""),
-        "memex_view_id": getattr(view, "foundup_brain_view_id", ""),
+        "foundup_id": _strict_string_attr(view, "foundup_id"),
+        "snapshot_id": _strict_string_attr(view, "snapshot_id"),
+        "snapshot_content_digest": _strict_string_attr(view, "snapshot_content_digest"),
+        "memex_view_id": _strict_string_attr(view, "foundup_brain_view_id"),
         "created_at": created_at if type(created_at) is str else "",
         "verification": STRUCTURAL_VERIFICATION,
         "evidence_manifest_digest": _evidence_manifest(evidence_values),
@@ -288,7 +324,7 @@ def _gate_result(
         accepted=accepted,
         status=payload["status"],
         candidates=candidate_values,
-        receipt=receipt,
+        receipt=MappingProxyType(receipt),
         rejection_reasons=clean_reasons,
     )
 
@@ -307,14 +343,29 @@ def _evidence_manifest(evidence: Sequence[FoundUpMemexLearningEvidence]) -> str:
     )
 
 
-def _sorted_unique_strings(values: Sequence[str]) -> tuple[str, ...]:
+def _bounded_sorted_unique_strings(
+    values: Sequence[str], limit: int,
+) -> tuple[str, ...]:
     if type(values) not in (list, tuple) or any(type(value) is not str for value in values):
         raise ValueError("learning_sequence_type_invalid")
+    if len(values) > limit:
+        raise ValueError("learning_sequence_count_invalid")
     return tuple(sorted(set(values)))
 
 
+def _canonical_score(value: Any) -> float:
+    if type(value) not in (int, float):
+        raise ValueError("learning_score_type_invalid")
+    return float(value)
+
+
+def _strict_string_attr(value: Any, name: str) -> str:
+    selected = getattr(value, name, "")
+    return selected if type(selected) is str else ""
+
+
 def _digest(value: Any) -> str:
-    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
+    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 

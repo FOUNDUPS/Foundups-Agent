@@ -298,11 +298,13 @@ second-brain database.
 
 2. `FOUNDUP_MEMEX_LEARNING_CANDIDATE_GATE_PHASE1`
    - Status: IMPLEMENTED_NOT_RUNTIME_ADMITTED on the current candidate branch.
-   - Convert scoped Breadcrumbs, verified outcomes, and governed research
-     receipts into evidence-backed learning candidates.
+   - Convert scoped Breadcrumbs and verified outcomes into evidence-backed
+     learning candidates. Governed research is declared but fail-closed until
+     an authenticated research-receipt authority is integrated.
    - No durable Brain write.
    - The structural gate preserves contradictions, supersession pointers,
-     proposed salience/confidence, and reconstructable source-receipt closure.
+     proposed salience/confidence, canonical bounded inputs, exact upstream
+     view receipts, and proposal-bound reconstructable source-receipt closure.
      Live source adapters and durable admission remain deferred.
    - AutoResearch follow-up must retain a deterministic incumbent and use a
      frozen held-out corpus. Primary metrics are reconstruction fidelity,

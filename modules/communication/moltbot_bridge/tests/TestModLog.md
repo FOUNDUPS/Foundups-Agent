@@ -1,8 +1,19 @@
+## 2026-08-23: FoundUp Memex learning-candidate hardening regressions
+
+- Added adversarial coverage proving a caller cannot self-authorize governed
+  research, locally re-sign a changed candidate, inject view invariants, or
+  substitute an assembly receipt.
+- Added canonical Unicode/time/score and fail-before-dedup collection-bound
+  coverage. Reconstruction now replays the exact proposal and evidence closure.
+- Focused result: **14 passed in 0.82 seconds**. Adjacent FoundUp
+  Memex/Brain/verified-outcome matrix: **97 passed in 8.21 seconds**. Both are
+  local structural validation only.
+
 ## 2026-08-23: FoundUp Memex learning-candidate regressions
 
 - Added focused deterministic and adversarial coverage for the structural-only
   learning-candidate gate, including supporting/contradicting evidence,
-  supersession, receipt/scope/HEAD binding, research allowlisting,
+  supersession, receipt/scope/HEAD binding, initial research allowlisting,
   reconstruction tamper detection, secret/score/time rejection, hostile types,
   zero-authority flags, and WSP 62/import boundaries.
 - Focused result: **9 passed**. No model, network, database, HoloIndex, Brain,

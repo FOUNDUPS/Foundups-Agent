@@ -28,6 +28,10 @@ CATEGORIES = frozenset(
 )
 MAX_EVIDENCE = 256
 MAX_PROPOSALS = 64
+MAX_REFERENCES_PER_PROPOSAL = 256
+MAX_SUPERSEDED_MEMORIES = 64
+MAX_GOVERNED_RESEARCH_RECEIPTS = 64
+MAX_IDENTIFIER_CHARS = 512
 MAX_STATEMENT_CHARS = 4096
 
 
@@ -115,10 +119,17 @@ class FoundUpMemexLearningCandidateGateResult:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            **asdict(self),
+            "accepted": self.accepted,
+            "status": self.status,
             "candidates": [candidate.to_dict() for candidate in self.candidates],
             "receipt": dict(self.receipt),
             "rejection_reasons": list(self.rejection_reasons),
+            "no_persistence_performed": self.no_persistence_performed,
+            "no_brain_write_performed": self.no_brain_write_performed,
+            "no_breadcrumb_write_performed": self.no_breadcrumb_write_performed,
+            "no_holoindex_mutation_performed": self.no_holoindex_mutation_performed,
+            "no_roadmap_mutation_performed": self.no_roadmap_mutation_performed,
+            "no_work_authority_granted": self.no_work_authority_granted,
         }
 
 
@@ -127,6 +138,10 @@ __all__ = [
     "EVIDENCE_SCHEMA_VERSION",
     "GATE_ACCEPTED",
     "GATE_REJECTED",
+    "MAX_GOVERNED_RESEARCH_RECEIPTS",
+    "MAX_IDENTIFIER_CHARS",
+    "MAX_REFERENCES_PER_PROPOSAL",
+    "MAX_SUPERSEDED_MEMORIES",
     "PROPOSAL_SCHEMA_VERSION",
     "FoundUpMemexLearningCandidate",
     "FoundUpMemexLearningCandidateGateResult",

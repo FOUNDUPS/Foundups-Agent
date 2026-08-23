@@ -1,10 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-23: FoundUp Memex learning-candidate fail-closed hardening
+
+- Removed caller-asserted governed-research receipt IDs from the admission
+  decision. The declared source class now fails closed until an authenticated
+  authority-bound receipt verifier exists.
+- Canonicalized human-authored text with NFKC, aware timestamps to UTC seconds,
+  and numeric scores to floats; bounded evidence/supersession inputs before
+  deduplication and removed fallback object-to-string digest coercion.
+- Reconstruction now requires and exactly replays the original proposal plus
+  evidence closure. Memex views require the exact invariant set and a
+  self-consistent assembly receipt before structural projection. This proves
+  structure, not authenticated provenance; later admission must supply that
+  independent authority.
+- This remains `STRUCTURAL_ONLY`: no runtime admission, persistence, Brain or
+  Breadcrumb write, HoloIndex/roadmap mutation, or work authority.
+- WSP 00/10/15/22/50/60/62/79/84/87/97.
+
 ## 2026-08-23: FoundUp Memex structural learning-candidate gate
 
 - Implemented the roadmap's bounded candidate layer as a pure transformation
-  over one exact FoundUp Memex view and receipt-bound Breadcrumb,
-  verified-outcome, or explicitly allowed governed-research evidence.
+  over one exact FoundUp Memex view and receipt-bound Breadcrumb or
+  verified-outcome evidence. Governed research was declared for later
+  authenticated authority integration.
 - Candidates preserve supporting and contradicting evidence independently,
   carry proposal-only salience/confidence and supersession pointers, and bind a
   deterministic evidence manifest that can be reconstructed without storing

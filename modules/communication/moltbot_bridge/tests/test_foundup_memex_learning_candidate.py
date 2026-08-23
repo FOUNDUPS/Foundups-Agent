@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import json
 from dataclasses import replace
 from pathlib import Path
 
@@ -19,6 +20,10 @@ from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate i
     build_foundup_memex_learning_proposal,
     gate_foundup_memex_learning_candidates,
     verify_foundup_memex_learning_candidate_reconstruction,
+)
+from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_contract import (
+    MAX_REFERENCES_PER_PROPOSAL,
+    MAX_SUPERSEDED_MEMORIES,
 )
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     build_operational_context_snapshot,
@@ -39,6 +44,11 @@ GATE_TIME = "2026-08-23T00:01:00+00:00"
 
 def _sha(value: str) -> str:
     return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _digest(value) -> str:
+    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def _view(*, outcomes=()):
@@ -167,13 +177,15 @@ def test_gate_emits_deterministic_read_only_candidate_with_contradiction() -> No
     assert first.accepted is True and first.status == GATE_ACCEPTED
     assert first.to_dict() == second.to_dict()
     assert first.receipt["receipt_id"] == second.receipt["receipt_id"]
+    with pytest.raises(TypeError):
+        first.receipt["status"] = GATE_REJECTED
     candidate = first.candidates[0]
     assert candidate.contradicting_evidence_ids == (contradiction.evidence_id,)
     assert candidate.supersedes_memory_ids == (_sha("older-memory"),)
     assert candidate.runtime_admissible is False
     assert candidate.brain_write_authorized is False
     assert verify_foundup_memex_learning_candidate_reconstruction(
-        candidate, (support, contradiction)
+        candidate, proposal, (support, contradiction)
     )
     assert all(
         (
@@ -221,7 +233,7 @@ def test_unbound_receipt_and_cross_foundup_scope_fail_closed() -> None:
     assert result.receipt["brain_write_authorized"] is False
 
 
-def test_governed_research_requires_explicit_receipt_allowlist() -> None:
+def test_governed_research_fails_closed_without_authenticated_authority() -> None:
     view = _view()
     research_receipt = _sha("governed-research")
     evidence = build_foundup_memex_learning_evidence(
@@ -239,7 +251,7 @@ def test_governed_research_requires_explicit_receipt_allowlist() -> None:
     blocked = gate_foundup_memex_learning_candidates(
         view=view, evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME
     )
-    accepted = gate_foundup_memex_learning_candidates(
+    caller_asserted = gate_foundup_memex_learning_candidates(
         view=view,
         evidence=(evidence,),
         proposals=(proposal,),
@@ -248,8 +260,11 @@ def test_governed_research_requires_explicit_receipt_allowlist() -> None:
     )
 
     assert blocked.accepted is False
-    assert blocked.rejection_reasons == ("learning_evidence_receipt_not_bound",)
-    assert accepted.accepted is True
+    assert blocked.rejection_reasons == (
+        "learning_evidence_governed_research_authority_unavailable",
+    )
+    assert caller_asserted.accepted is False
+    assert caller_asserted.rejection_reasons == blocked.rejection_reasons
 
 
 def test_verified_outcome_evidence_binds_to_exact_outcome_and_head() -> None:
@@ -295,6 +310,43 @@ def test_verified_outcome_evidence_binds_to_exact_outcome_and_head() -> None:
     assert wrong_head.accepted is False
 
 
+def test_verified_outcome_receipt_collision_is_ambiguous_and_rejected() -> None:
+    shared_digest = _sha("shared-verified-outcome")
+    outcomes = tuple(
+        {
+            "foundup_id": FOUNDUP_ID,
+            "outcome_id": _sha(f"outcome-{index}"),
+            "verification_receipt_id": _sha(f"verification-{index}"),
+            "held_out_receipt_id": _sha(f"held-out-{index}"),
+            "head_sha": HEAD,
+            "accepted": True,
+            "held_out_passed": True,
+            "content_digest": shared_digest,
+        }
+        for index in range(2)
+    )
+    view = _view(outcomes=outcomes)
+    evidence = build_foundup_memex_learning_evidence(
+        foundup_id=FOUNDUP_ID,
+        snapshot_id=view.snapshot_id,
+        source_class="verified_outcome",
+        source_receipt_id=shared_digest,
+        source_revision=HEAD,
+        observed_at=OBSERVED_AT,
+        statement="A colliding receipt cannot identify one outcome.",
+        polarity="supporting",
+    )
+    result = gate_foundup_memex_learning_candidates(
+        view=view,
+        evidence=(evidence,),
+        proposals=(_proposal(view, (evidence,)),),
+        created_at=GATE_TIME,
+    )
+
+    assert result.accepted is False
+    assert "learning_evidence_receipt_ambiguous" in result.rejection_reasons
+
+
 def test_reconstruction_rejects_tampered_candidate_or_evidence() -> None:
     view = _view()
     evidence = _breadcrumb_evidence(
@@ -309,11 +361,129 @@ def test_reconstruction_rejects_tampered_candidate_or_evidence() -> None:
     candidate = result.candidates[0]
 
     assert not verify_foundup_memex_learning_candidate_reconstruction(
-        replace(candidate, evidence_manifest_digest=_sha("forged")), (evidence,)
+        replace(candidate, evidence_manifest_digest=_sha("forged")),
+        _proposal(view, (evidence,)),
+        (evidence,),
     )
     assert not verify_foundup_memex_learning_candidate_reconstruction(
-        candidate, (replace(evidence, statement="tampered"),)
+        candidate,
+        _proposal(view, (evidence,)),
+        (replace(evidence, statement="tampered"),),
     )
+
+
+def test_reconstruction_is_bound_to_original_proposal_not_local_resigning() -> None:
+    view = _view()
+    evidence = _breadcrumb_evidence(
+        view, polarity="supporting", statement="Original evidence remains authoritative."
+    )
+    proposal = _proposal(view, (evidence,))
+    result = gate_foundup_memex_learning_candidates(
+        view=view, evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME
+    )
+    candidate = result.candidates[0]
+    altered = replace(candidate, statement="Locally rewritten candidate statement.")
+    altered_payload = altered.to_dict()
+    altered_payload.pop("candidate_id")
+    altered = replace(altered, candidate_id=_digest(altered_payload))
+
+    assert verify_foundup_memex_learning_candidate_reconstruction(
+        candidate, proposal, (evidence,)
+    )
+    assert not verify_foundup_memex_learning_candidate_reconstruction(
+        altered, proposal, (evidence,)
+    )
+
+
+def test_builders_emit_one_canonical_text_time_and_score_representation() -> None:
+    view = _view()
+    receipt = view.source_receipts["breadcrumbs"]
+    evidence = build_foundup_memex_learning_evidence(
+        foundup_id=FOUNDUP_ID,
+        snapshot_id=view.snapshot_id,
+        source_class="breadcrumbs",
+        source_receipt_id=receipt["content_digest"],
+        source_revision=receipt["source_version"],
+        observed_at="2026-08-23T09:00:00+09:00",
+        statement="  Repeated\u00a0outcome  ",
+        polarity="supporting",
+    )
+    proposal = build_foundup_memex_learning_proposal(
+        foundup_id=FOUNDUP_ID,
+        snapshot_id=view.snapshot_id,
+        category="observed_pattern",
+        statement="  Fullwidth \uff21 normalizes.  ",
+        supporting_evidence_ids=(evidence.evidence_id,),
+        proposed_salience=0,
+        proposed_confidence=1,
+        created_at="2026-08-23T00:01:00+00:00",
+    )
+
+    assert evidence.observed_at == "2026-08-23T00:00:00Z"
+    assert evidence.statement == "Repeated outcome"
+    assert proposal.statement == "Fullwidth A normalizes."
+    assert type(proposal.proposed_salience) is float
+    assert type(proposal.proposed_confidence) is float
+    assert proposal.created_at == "2026-08-23T00:01:00Z"
+
+    with pytest.raises(ValueError, match="learning_identifier_not_canonical"):
+        build_foundup_memex_learning_evidence(
+            foundup_id=f" {FOUNDUP_ID}",
+            snapshot_id=view.snapshot_id,
+            source_class="breadcrumbs",
+            source_receipt_id=receipt["content_digest"],
+            source_revision=receipt["source_version"],
+            observed_at=OBSERVED_AT,
+            statement="Authority identifiers are never silently normalized.",
+            polarity="supporting",
+        )
+
+
+def test_proposal_reference_and_supersession_inputs_are_bounded_before_dedup() -> None:
+    view = _view()
+    evidence = _breadcrumb_evidence(view, polarity="supporting", statement="Bounded input.")
+    common = {
+        "foundup_id": FOUNDUP_ID,
+        "snapshot_id": view.snapshot_id,
+        "category": "observed_pattern",
+        "statement": "Oversized reference lists fail before normalization.",
+        "proposed_salience": 0.5,
+        "proposed_confidence": 0.5,
+        "created_at": GATE_TIME,
+    }
+    with pytest.raises(ValueError, match="learning_sequence_count_invalid"):
+        build_foundup_memex_learning_proposal(
+            **common,
+            supporting_evidence_ids=(evidence.evidence_id,) * (MAX_REFERENCES_PER_PROPOSAL + 1),
+        )
+    with pytest.raises(ValueError, match="learning_sequence_count_invalid"):
+        build_foundup_memex_learning_proposal(
+            **common,
+            supporting_evidence_ids=(evidence.evidence_id,),
+            supersedes_memory_ids=(_sha("old"),) * (MAX_SUPERSEDED_MEMORIES + 1),
+        )
+
+
+def test_view_requires_exact_invariants_and_assembly_receipt_identity() -> None:
+    view = _view()
+    evidence = _breadcrumb_evidence(view, polarity="supporting", statement="Scoped evidence.")
+    proposal = _proposal(view, (evidence,))
+    extra_invariant = replace(view, invariants={**view.invariants, "caller_asserted": True})
+    tampered_receipt = dict(view.assembly_receipt)
+    tampered_receipt["receipt_id"] = _sha("caller-resigned")
+    bad_receipt = replace(view, assembly_receipt=tampered_receipt)
+
+    extra_result = gate_foundup_memex_learning_candidates(
+        view=extra_invariant, evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME
+    )
+    receipt_result = gate_foundup_memex_learning_candidates(
+        view=bad_receipt, evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME
+    )
+
+    assert extra_result.accepted is False
+    assert "learning_gate_view_invalid" in extra_result.rejection_reasons
+    assert receipt_result.accepted is False
+    assert "learning_gate_view_invalid" in receipt_result.rejection_reasons
 
 
 def test_builders_reject_secrets_invalid_scores_and_future_evidence() -> None:
