@@ -1,5 +1,46 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-23] Narrow replica manifest and WSP_62 verification
+
+- Added exact 22-file topology and generation preflight coverage, legacy full
+  vector-tree rejection, missing snapshot rejection, and a real-Chroma export
+  cleanup using the existing pinned client finalizer.
+- Split three manifest-policy tests into their owning test module before the
+  primary materializer test crossed the 800-line WSP_62 review threshold.
+- Command: `python -m pytest` over snapshot store, materializer, manifest
+  policy, and descriptor tests. Result: **80 passed / 2 expected
+  host-capability skips** in 31.49 seconds.
+- WSP_97 falsification added fail-before-mutation coverage for canonical roots,
+  receipt aliases, exact outer scalar/container/order rules, NFD paths, full
+  descriptor-path bounds, and case-variant nested model markers. It also binds
+  every inner snapshot path/size/digest to the outer copy manifest.
+- Descriptor topology now rejects SQLite-only and modern-plus-SQLite closures,
+  while a coherent model plus complete legacy SQLite/HNSW closure remains
+  full-audit readable and fails retained modern runtime revalidation.
+- Added a no-site-packages subprocess regression after the exhaustive release
+  tier exposed NumPy on the one-shot import path. The owner-client chain now
+  imports successfully under `python -S`; snapshot payload validation remains
+  deferred to materialization.
+- Final exhaustive extension release rerun: **PASS**, all four isolated groups,
+  **385.561 seconds**, no release or group timeout.
+- Independent WSP_97 falsification found published pre-snapshot descriptors
+  with the former SQLite marker and no snapshot files. Added a synthetic full-
+  descriptor regression proving complete historical audit verification while
+  the existing materializer regression continues to reject legacy creation.
+- Independent WSP_97 falsification also found that a nested second
+  `modules.json` marker survived preflight. Added a regression proving the
+  ambiguous model fails before generation or active-descriptor publication.
+- Reproduced one HTTP adapter failure unchanged on exact base, identified its
+  synthetic owner as missing the mandatory replica binding, and reused the
+  established injected-verifier fixture. The isolated case and all 10 HTTP
+  runtime tests pass; the complete bridge package is **981 passed / 7 expected
+  skips / 14 inherited warnings in 328.28 seconds**.
+- The first backend-generator run exceeded 240 seconds because five read-only
+  tests rebuilt the identical closure. A module-scoped immutable fixture keeps
+  one worktree build while the hostile monkeypatch case and staged-index
+  batch-hash proof remain separate. Final rerun: **8 passed in 68.38 seconds**
+  at backend digest `8e72d82c2f8e...`.
+
 ## [2026-08-22] Resident owner bounded replica proof
 
 - Added adversarial retained-proof coverage for exact descriptor identity,

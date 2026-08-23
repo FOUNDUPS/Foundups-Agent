@@ -1,5 +1,44 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-23: Narrow generation-bound query-replica closure
+
+**Implemented locally; synthetic acceptance complete; live exact-main
+activation pending.** The materializer now admits only one complete selected
+model plus the exact generation-bound 22-file sealed snapshot set at
+`vectors/query_snapshots/`. Complete legacy vector trees, SQLite/HNSW payloads,
+extra or missing snapshot artifacts, and wrong-generation snapshot manifests
+fail closed before copy. Static roots, receipt paths, artifact paths, scalar
+types, aliases, ordering, and full descriptor-path bounds fail before the first
+replica-root mutation; inner snapshot bindings must equal the outer manifest.
+Descriptor verification requires one coherent model and either the exact
+modern snapshot vector surface or a complete historical SQLite/HNSW closure.
+Historical full descriptors remain audit-readable but cannot pass retained
+modern runtime revalidation or new materialization.
+
+WSP_62 review extracted generation/manifest policy from the materializer,
+reduced that production module from 498 to 380 lines, kept the descriptor at
+649 lines, and kept the expanded primary
+test module below 800 lines by giving manifest-policy regressions their own
+test file. Focused acceptance is 80 passed / 2 host-capability skips. The HTTP
+owner fixture now carries the same complete
+replica binding required by the production client, closing inherited baseline
+drift; the complete bridge package is 981 passed / 7 expected skips / 14
+inherited warnings in 328.28 seconds.
+
+The replica manifest policy keeps RedDog one-shot startup import-light: the
+snapshot-set wire name is owned by the existing lightweight contract, while
+NumPy-backed store validation is deferred until materialization. A no-site-
+packages subprocess regression guards that boundary.
+
+The currently active exact-main replica is intentionally unchanged and still
+contains the prior 8.33 GB legacy closure; observed cold owner queries were
+122--153 seconds, including a fresh 120-second bounded-shell overrun during
+this slice. After merge, the required operational sequence is governed
+exact-main Holo maintenance, immutable narrow materialization, full descriptor
+verification, serialized route CAS, one real owner query, and unchanged
+post-query digests. Historical replicas remain immutable; retention and
+deletion stay out of scope.
+
 ## 2026-08-21: Streamable HTTP `/mcp` and governed Holo bundle
 
 **Implemented locally; live ChatGPT/tunnel acceptance pending.** The canonical
@@ -314,15 +353,15 @@ the post-merge activation run completes.
 The exact post-repair HEAD differential has zero errors and this non-zero
 accepted bridge set only:
 
-- WARNING: `INTERFACE.md` 1,054 lines.
-- WARNING: append-only `ModLog.md` 1,277 lines.
+- WARNING: `INTERFACE.md` 1,097 lines.
+- WARNING: append-only `ModLog.md` 1,424 lines.
 - WARNING: `src/holo_tools.py` 1,094 lines. Its candidate-grown `holo_search`
   is now a 41-line orchestrator with cohesive helpers, so the function error is
   closed while the file-level warning remains visible.
 - WARNING: `tests/test_mcp_bridge.py` 1,313 lines. Cache scaffolding is already
   extracted, but the file remains a warning below its applied 1,425-line
   candidate ceiling.
-- WATCH: append-only `tests/TestModLog.md` 917 lines.
+- WATCH: append-only `tests/TestModLog.md` 1,058 lines.
 - WATCH: `tests/test_holo_query_service_edges.py` 787 lines.
 
 No other bridge path is part of the accepted warning/watch set. Owner bootstrap

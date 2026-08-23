@@ -1,5 +1,25 @@
 # RedDog ModLog
 
+## 2026-08-23 - Narrow Holo query-replica backend binding
+
+- Rebound the packaged backend closure to the materializer policy that admits
+  only the selected model plus the exact generation-bound 22-file sealed query
+  snapshot set. New generations contain no copied SQLite/HNSW payload.
+- The extension command surface, authority, package version, and VSIX runtime
+  files are unchanged. Backend compatibility now binds 1,377 runtime files at
+  digest `8e72d82c2f8e...`.
+- The unchanged 1,400-file ceiling leaves 23 files (1.64%) headroom; this is
+  explicit scaling debt, not grounds to widen the release gate.
+- The exhaustive release tier found and closed a candidate-only import leak:
+  replica policy no longer loads the NumPy-backed snapshot codec during the
+  minimal-Python one-shot query import. Materialization retains the same full
+  manifest preflight through a deferred maintenance-time import.
+- The final four-group exhaustive release rerun passed in 385.561 seconds with
+  no release or group timeout.
+- This is not a live activation claim; merge must be followed by exact-main
+  Holo maintenance, narrow immutable materialization, route CAS, owner query,
+  and unchanged post-query digest proof.
+
 ## 2026-08-23 - Holo Tier-0 producer compatibility binding
 
 - Rebound the packaged backend manifest to the Holo docs producer fix that

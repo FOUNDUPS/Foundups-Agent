@@ -1,5 +1,51 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-23] RedDog Narrow Holo Query-Replica Closure
+
+**WSP Protocol:** WSP 00, 5, 6, 15, 22, 34, 50, 62, 84, 87, 97
+
+- Replaced future query-replica materialization of the complete legacy Holo
+  vector tree with the exact selected embedding model and generation-bound
+  22-file sealed query snapshot set. New materialization rejects SQLite/HNSW
+  and topology/generation drift before copy. Existing full-vector descriptors
+  remain readable only when they prove a coherent model plus SQLite and
+  complete legacy HNSW segment cores; they are historical-audit inputs, not
+  modern snapshot runtime bindings.
+- Closed preflight identity gaps by requiring exact NFC/POSIX artifact roots,
+  files, order, aliases, scalar types, full descriptor-path bounds, and the
+  canonical receipt `Path` before the first replica-root mutation.
+- Require exactly one case-insensitive resolver marker whose canonical direct
+  spelling is `modules.json`; nested/case-variant second-model markers fail
+  before publication. The inner snapshot manifest's 22 path/size/digest
+  bindings must also equal the outer copied manifest before copy.
+- Extracted manifest policy under WSP_62, reduced the materializer from 498 to
+  380 lines, kept the descriptor at 649 lines, and split manifest-policy tests
+  before the primary test module crossed 800 lines.
+- Focused synthetic verification is 80 passed / 2 expected host-capability
+  skips. The deterministic backend closure is 1,377 runtime files at digest
+  `8e72d82c2f8e...`; live narrow proof requires merge and a new exact-main
+  maintenance/materialization/route/query/post-digest transaction.
+- Exhaustive release falsification exposed a NumPy import on RedDog's minimal
+  one-shot path. The snapshot-set filename now lives in the existing
+  lightweight contract, and payload-codec/store validation is imported only
+  when materialization runs; a `python -S` owner-client import proves the
+  query startup surface remains site-package-free.
+- The 1,377-file generated closure retains only 23 files (1.64%) of headroom
+  under its unchanged 1,400-file cap; widening that cap is not this repair.
+- The final exhaustive extension release tier passed all four isolated groups
+  in 385.561 seconds with no release or group timeout.
+- Repaired inherited HTTP-test drift by giving its synthetic owner the
+  established exact replica-binding verifier required by the production
+  client contract. The complete bridge package is **981 passed / 7 expected
+  skips / 14 inherited warnings in 328.28 seconds**.
+- Removed redundant exhaustive-test work: five read-only manifest assertions
+  now share one immutable worktree closure, while hostile mutation and the
+  staged-index proof remain independent. The suite changed from exceeding a
+  240-second cap to a final 8/8 in 68.38 seconds without a runtime cache or
+  wider cap.
+- The active and historical HQR replicas were not modified or deleted by this
+  code slice. The dirty `O:` checkout was not used for source changes.
+
 ## [2026-08-23] HoloIndex Tier-0 Producer/Consumer Identity Repair
 
 **WSP Protocol:** WSP 00, 15, 22, 50, 62, 84, 97

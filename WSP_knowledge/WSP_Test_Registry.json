@@ -16290,6 +16290,21 @@
       "description": "Synthetic contracts for active query-replica descriptor admission."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_replica_manifest",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica_manifest.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Focused policy tests for the narrow RedDog query-replica closure."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_sealed_holo_runtime",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_sealed_holo_runtime.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",

@@ -15,25 +15,21 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from holo_index.freshness_receipt import freshness_receipt_path
 from holo_index.maintenance_lock import (
     MaintenanceLockError,
     acquire_existing_maintenance_lease,
     authority_update_lock_path,
     maintenance_lock_path,
 )
-from holo_index.repository_state import repository_root_digest
 from holo_index.storage_contract import storage_path_identity
 
 from .reddog_holoindex_acceptance_guards import (
     AcceptanceGuardError,
-    ExpectedArtifactFile,
     ModelCopyLimits,
     StoreProof,
     PublishedPrivateJsonProof,
     QuarantinedPathProof,
     _normalized,
-    _relative_to,
     atomic_publish_private_json_proven,
     copy_model_snapshot,
     create_isolated_store,
@@ -51,70 +47,20 @@ from .reddog_holoindex_query_replica_orphans import (
     owned_directory,
     quarantine_owned_staging,
 )
+from .reddog_holoindex_query_replica_manifest import (
+    ArtifactTreeManifest,
+    CanonicalGenerationBinding,
+    QueryReplicaError,
+    QueryReplicaLimits,
+    QueryReplicaResult,
+    fail_query_replica as _fail,
+    query_snapshot_runtime_artifact_paths_complete,
+    runtime_artifact_paths_complete,
+    validate_generation_binding,
+    validate_query_replica_manifests,
+)
 QUERY_REPLICA_SCHEMA_VERSION = "holoindex_query_replica.v1"
 ACTIVE_DESCRIPTOR_NAME = "holoindex_query_replica.active.json"
-_HEX = frozenset("0123456789abcdef")
-class QueryReplicaError(RuntimeError):
-    """Stable fail-closed materializer error."""
-
-    def __init__(
-        self, code: str, *, orphan_relative_path: str = "",
-        unsafe_relative_path: str = "",
-    ) -> None:
-        super().__init__(code)
-        self.orphan_relative_path = orphan_relative_path
-        self.unsafe_relative_path = unsafe_relative_path
-
-
-def _fail(code: str) -> None:
-    raise QueryReplicaError(code)
-
-
-@dataclass(frozen=True)
-class CanonicalGenerationBinding:
-    repo_root: Path
-    repo_root_digest: str
-    repo_head_sha: str
-    receipt_path: Path
-    receipt_digest: str
-    generation_id: str
-    canonical_storage_identity: str
-
-
-@dataclass(frozen=True)
-class ArtifactTreeManifest:
-    logical_name: str
-    source_root: Path
-    replica_relative_root: str
-    files: tuple[ExpectedArtifactFile, ...]
-
-
-@dataclass(frozen=True)
-class QueryReplicaLimits:
-    max_files: int = 200_000
-    max_file_bytes: int = 2_147_483_648
-    max_total_bytes: int = 8_589_934_592
-    max_path_bytes: int = 1024
-    max_receipt_bytes: int = 262_144
-    max_descriptor_bytes: int = 4_194_304
-
-    def validate(self) -> None:
-        values = (
-            self.max_files, self.max_file_bytes, self.max_total_bytes,
-            self.max_path_bytes, self.max_receipt_bytes,
-            self.max_descriptor_bytes,
-        )
-        if any(type(value) is not int or value <= 0 for value in values):
-            _fail("QUERY_REPLICA_LIMIT_INVALID")
-
-
-@dataclass(frozen=True)
-class QueryReplicaResult:
-    generation_directory: Path
-    active_descriptor: Path
-    descriptor_digest: str
-    file_count: int
-    total_bytes: int
 
 
 @dataclass(frozen=True)
@@ -137,74 +83,6 @@ class _MaterializationPaths:
     generation: Path
     generation_name: str
     manifests: tuple[ArtifactTreeManifest, ...]
-
-
-def _valid_digest(value: str) -> bool:
-    return len(value) == 71 and value.startswith("sha256:") and set(value[7:]) <= _HEX
-
-
-def _validate_binding(binding: CanonicalGenerationBinding, canonical_store: Path) -> None:
-    repo_root = _normalized(binding.repo_root)
-    receipt = _normalized(binding.receipt_path)
-    if binding.repo_root_digest != repository_root_digest(repo_root):
-        _fail("QUERY_REPLICA_REPO_ROOT_DIGEST_MISMATCH")
-    if len(binding.repo_head_sha) != 40 or set(binding.repo_head_sha) > _HEX:
-        _fail("QUERY_REPLICA_REPO_HEAD_INVALID")
-    if not _valid_digest(binding.receipt_digest) or not _valid_digest(binding.generation_id):
-        _fail("QUERY_REPLICA_GENERATION_BINDING_INVALID")
-    if receipt != freshness_receipt_path(canonical_store).resolve(strict=False):
-        _fail("QUERY_REPLICA_RECEIPT_PATH_NONCANONICAL")
-    if binding.canonical_storage_identity != storage_path_identity(canonical_store):
-        _fail("QUERY_REPLICA_STORAGE_IDENTITY_MISMATCH")
-
-
-def _validate_manifests(
-    manifests: tuple[ArtifactTreeManifest, ...],
-    canonical_store: Path,
-    limits: QueryReplicaLimits,
-) -> tuple[ArtifactTreeManifest, ...]:
-    if tuple(sorted(manifests, key=lambda item: item.logical_name)) != manifests:
-        _fail("QUERY_REPLICA_MANIFEST_ORDER_INVALID")
-    if tuple(item.logical_name for item in manifests) != ("model", "vectors"):
-        _fail("QUERY_REPLICA_ARTIFACT_SET_INVALID")
-    total_files = 0
-    total_bytes = 0
-    for manifest in manifests:
-        relative_root = Path(manifest.replica_relative_root)
-        if (
-            relative_root.is_absolute()
-            or ".." in relative_root.parts
-            or not relative_root.parts
-            or relative_root.parts[0] not in {"models", "vectors"}
-        ):
-            _fail("QUERY_REPLICA_ARTIFACT_ROOT_INVALID")
-        source = _normalized(manifest.source_root)
-        expected_source = canonical_store.joinpath(relative_root).resolve(strict=False)
-        if source != expected_source or not _relative_to(source, canonical_store):
-            _fail("QUERY_REPLICA_SOURCE_PATH_INVALID")
-        if manifest.logical_name == "vectors":
-            if relative_root.as_posix() != "vectors":
-                _fail("QUERY_REPLICA_VECTOR_ROOT_INVALID")
-            if "chroma.sqlite3" not in {item.relative_path for item in manifest.files}:
-                _fail("QUERY_REPLICA_VECTOR_DATABASE_MISSING")
-        elif relative_root.parts[0] != "models":
-            _fail("QUERY_REPLICA_MODEL_ROOT_INVALID")
-        else:
-            model_paths = {item.relative_path for item in manifest.files}
-            if not {"modules.json", "config.json", "model.safetensors"} <= model_paths or not (
-                {"tokenizer.json", "vocab.txt"} & model_paths
-            ):
-                _fail("QUERY_REPLICA_MODEL_SNAPSHOT_INCOMPLETE")
-        for item in manifest.files:
-            if len(item.relative_path.encode("utf-8")) > limits.max_path_bytes:
-                _fail("QUERY_REPLICA_PATH_BOUND")
-            total_files += 1
-            total_bytes += item.size
-    if total_files > limits.max_files:
-        _fail("QUERY_REPLICA_FILE_COUNT_BOUND")
-    if total_bytes > limits.max_total_bytes:
-        _fail("QUERY_REPLICA_TOTAL_SIZE_BOUND")
-    return manifests
 
 
 def _descriptor_payload(
@@ -256,8 +134,10 @@ def _prepare_materialization(
     verify_store_proof(
         replica_root_proof, canonical_store=canonical, repo_roots=(binding.repo_root,)
     )
-    _validate_binding(binding, canonical)
-    ordered = _validate_manifests(manifests, canonical, limits)
+    validate_generation_binding(binding, canonical)
+    ordered = validate_query_replica_manifests(
+        manifests, canonical, limits, generation_id=binding.generation_id
+    )
     active = replica_root / ACTIVE_DESCRIPTOR_NAME
     generation_name = binding.generation_id.removeprefix("sha256:")
     generation = replica_root / "generations" / generation_name
@@ -495,4 +375,6 @@ __all__ = [
     "ACTIVE_DESCRIPTOR_NAME", "ArtifactTreeManifest", "CanonicalGenerationBinding",
     "QUERY_REPLICA_SCHEMA_VERSION", "QueryReplicaError", "QueryReplicaLimits",
     "QueryReplicaResult", "materialize_query_replica",
+    "query_snapshot_runtime_artifact_paths_complete",
+    "runtime_artifact_paths_complete",
 ]

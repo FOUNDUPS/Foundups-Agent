@@ -26,7 +26,9 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store im
     QuerySnapshotStoreError,
     open_query_snapshot_client,
     publish_query_snapshot_set,
+    validate_query_snapshot_set_manifest,
 )
+from holo_index.isolated_collection_snapshot_probe import finalize_chroma_client
 
 
 class _Collection:
@@ -104,6 +106,16 @@ def _tree_hashes(root: Path) -> dict[str, str]:
     }
 
 
+def _artifact_bindings(root: Path) -> dict[str, tuple[int, str]]:
+    return {
+        path.name: (
+            path.stat().st_size,
+            "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest(),
+        )
+        for path in root.iterdir() if path.is_file()
+    }
+
+
 def test_snapshot_round_trip_queries_without_mutating_generation(tmp_path: Path) -> None:
     ssd, holo, receipt = _fixture(tmp_path)
     root = publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
@@ -118,6 +130,86 @@ def test_snapshot_round_trip_queries_without_mutating_generation(tmp_path: Path)
     assert client.get_collection("navigation_work_ledger").count() == 0
     assert _tree_hashes(root) == before
     client.close()
+
+
+def test_snapshot_manifest_preflight_binds_exact_generation_and_artifact_set(
+    tmp_path: Path,
+) -> None:
+    ssd, holo, receipt = _fixture(tmp_path)
+    root = publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+
+    names = validate_query_snapshot_set_manifest(
+        root,
+        expected_generation_id=receipt.generation_id,
+        expected_artifact_bindings=_artifact_bindings(root),
+    )
+
+    assert len(names) == 22
+    assert names[0].endswith(".manifest.json")
+    assert names[-1] == "snapshot_set.json"
+
+
+def test_snapshot_manifest_preflight_cross_binds_outer_artifact_manifest(
+    tmp_path: Path,
+) -> None:
+    ssd, holo, receipt = _fixture(tmp_path)
+    root = publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+    bindings = _artifact_bindings(root)
+    target = next(name for name in bindings if name.endswith(".rows.jsonl"))
+    bindings[target] = (bindings[target][0], "sha256:" + "f" * 64)
+
+    with pytest.raises(QuerySnapshotStoreError, match="ARTIFACT_BINDING_MISMATCH"):
+        validate_query_snapshot_set_manifest(
+            root,
+            expected_generation_id=receipt.generation_id,
+            expected_artifact_bindings=bindings,
+        )
+
+
+def test_snapshot_manifest_preflight_rejects_wrong_generation_without_loading(
+    tmp_path: Path,
+) -> None:
+    ssd, holo, receipt = _fixture(tmp_path)
+    root = publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+
+    with pytest.raises(QuerySnapshotStoreError, match="GENERATION_MISMATCH"):
+        validate_query_snapshot_set_manifest(
+            root, expected_generation_id="sha256:" + "c" * 64
+        )
+
+
+def test_snapshot_preflight_and_open_reject_injected_link_components(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store as store
+
+    ssd, holo, receipt = _fixture(tmp_path)
+    root = publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+    injected_links = {root.absolute(), (ssd / "vectors").absolute()}
+    monkeypatch.setattr(
+        store, "_is_link",
+        lambda path, _metadata: Path(path).absolute() in injected_links,
+    )
+
+    with pytest.raises(QuerySnapshotStoreError, match="ROOT_INVALID"):
+        validate_query_snapshot_set_manifest(
+            root, expected_generation_id=receipt.generation_id
+        )
+    with pytest.raises(QuerySnapshotStoreError, match="ROOT_INVALID"):
+        open_query_snapshot_client(ssd / "vectors")
+
+
+@pytest.mark.parametrize("generation", ["", "b" * 64, b"sha256:invalid"])
+def test_snapshot_manifest_preflight_requires_exact_generation_scalar(
+    tmp_path: Path, generation: object,
+) -> None:
+    ssd, holo, receipt = _fixture(tmp_path)
+    root = publish_query_snapshot_set(holo, receipt, ssd_path=ssd)
+
+    with pytest.raises(QuerySnapshotStoreError, match="GENERATION_INVALID"):
+        validate_query_snapshot_set_manifest(
+            root, expected_generation_id=generation  # type: ignore[arg-type]
+        )
 
 
 def test_snapshot_artifact_change_fails_closed(tmp_path: Path) -> None:
@@ -180,7 +272,7 @@ def test_real_chroma_export_is_queryable_without_chroma_reopen(tmp_path: Path) -
             setattr(proof_holo, COLLECTION_ATTRS[name], collection)
         publish_query_snapshot_set(proof_holo, receipt, ssd_path=ssd)
     finally:
-        writer.close()
+        finalize_chroma_client(writer)
 
     client = open_query_snapshot_client(ssd / "vectors")
     assert client.get_collection("navigation_symbols").count() == 2

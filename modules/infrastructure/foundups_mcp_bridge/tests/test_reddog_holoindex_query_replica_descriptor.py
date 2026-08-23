@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
+import shutil
 from types import SimpleNamespace
 
 import pytest
@@ -13,7 +15,6 @@ from modules.infrastructure.foundups_mcp_bridge.tests.test_reddog_holoindex_quer
     _ReceiptProof,
     _fixture,
     _materialize,
-    _tree_manifest,
 )
 
 
@@ -49,14 +50,7 @@ def _verify(fixture, **overrides):
 
 
 def _fixture_with_query_snapshots(tmp_path: Path):
-    fixture = _fixture(tmp_path)
-    canonical, repo, replica, proof, binding, manifests = fixture
-    snapshots = canonical / "vectors" / "query_snapshots"
-    snapshots.mkdir()
-    (snapshots / "snapshot_set.json").write_bytes(b"sealed-snapshot-set")
-    (snapshots / "code_entries.snapshot").write_bytes(b"sealed-code-snapshot")
-    vectors = _tree_manifest("vectors", canonical / "vectors", "vectors")
-    return canonical, repo, replica, proof, binding, (manifests[0], vectors)
+    return _fixture(tmp_path)
 
 
 def _revalidate(fixture, admitted, **overrides):
@@ -73,6 +67,48 @@ def _revalidate(fixture, admitted, **overrides):
         dependencies=overrides.pop("dependencies", _dependencies()),
         **overrides,
     )
+
+
+def _descriptor_entry(path: Path, generation: Path) -> dict[str, object]:
+    digest = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+    return {
+        "path": path.relative_to(generation).as_posix(),
+        "size": path.stat().st_size,
+        "sha256": digest,
+        "source_before_sha256": digest,
+        "source_after_sha256": digest,
+    }
+
+
+def _rewrite_as_legacy_full_descriptor(fixture, *, retain_snapshots: bool = False):
+    result = _materialize(fixture)
+    snapshots = result.generation_directory / "vectors" / "query_snapshots"
+    if not retain_snapshots:
+        shutil.rmtree(snapshots)
+    sqlite = result.generation_directory / "vectors" / "chroma.sqlite3"
+    sqlite.write_bytes(b"historical-legacy-vector-database")
+    segment = result.generation_directory / "vectors" / "legacy-segment"
+    segment.mkdir()
+    for name in (
+        "data_level0.bin", "header.bin", "length.bin", "link_lists.bin",
+    ):
+        (segment / name).write_bytes(name.encode("ascii"))
+    payload = json.loads(result.active_descriptor.read_text(encoding="utf-8"))
+    retained = [
+        entry for entry in payload["files"]
+        if entry["path"].startswith("models/")
+        or (retain_snapshots and entry["path"].startswith("vectors/query_snapshots/"))
+    ]
+    payload["files"] = retained + [
+        _descriptor_entry(path, result.generation_directory)
+        for path in (sqlite, *sorted(segment.iterdir()))
+    ]
+    payload["files"].sort(key=lambda entry: entry["path"])
+    result.active_descriptor.write_text(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    return result
 
 
 def test_materialized_descriptor_routes_to_exact_generation_without_path_leak(
@@ -97,10 +133,102 @@ def test_materialized_descriptor_routes_to_exact_generation_without_path_leak(
 def test_replica_artifact_mutation_is_rejected(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     result = _materialize(fixture)
-    target = result.generation_directory / "vectors" / "chroma.sqlite3"
+    target = result.generation_directory / "vectors" / "query_snapshots" / "snapshot_set.json"
     target.write_bytes(b"changed-generation")
 
     with pytest.raises(RuntimeError, match="ARTIFACT_DIGEST_MISMATCH"):
+        _verify(fixture)
+
+
+def test_historical_full_descriptor_remains_verifiable_for_audit(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    result = _rewrite_as_legacy_full_descriptor(fixture)
+    admitted = _verify(fixture)
+
+    assert "vectors/chroma.sqlite3" in {
+        artifact.relative_path for artifact in admitted.artifacts
+    }
+    assert not (result.generation_directory / "vectors" / "query_snapshots").exists()
+
+
+def test_sqlite_only_historical_descriptor_is_rejected(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    result = _rewrite_as_legacy_full_descriptor(fixture)
+    shutil.rmtree(result.generation_directory / "models")
+    vectors = result.generation_directory / "vectors"
+    for path in tuple(vectors.iterdir()):
+        if path.name != "chroma.sqlite3":
+            shutil.rmtree(path) if path.is_dir() else path.unlink()
+    payload = json.loads(result.active_descriptor.read_text(encoding="utf-8"))
+    payload["files"] = [
+        entry for entry in payload["files"]
+        if entry["path"] == "vectors/chroma.sqlite3"
+    ]
+    result.active_descriptor.write_text(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RuntimeError, match="RUNTIME_ARTIFACT_SET_INCOMPLETE"):
+        _verify(fixture)
+
+
+def test_modern_snapshot_descriptor_mixed_with_sqlite_is_rejected(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    result = _materialize(fixture)
+    sqlite = result.generation_directory / "vectors" / "chroma.sqlite3"
+    sqlite.write_bytes(b"mixed-legacy-payload")
+    payload = json.loads(result.active_descriptor.read_text(encoding="utf-8"))
+    payload["files"].append(
+        _descriptor_entry(sqlite, result.generation_directory)
+    )
+    payload["files"].sort(key=lambda entry: entry["path"])
+    result.active_descriptor.write_text(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RuntimeError, match="RUNTIME_ARTIFACT_SET_INCOMPLETE"):
+        _verify(fixture)
+
+
+def test_historical_full_descriptor_with_snapshots_is_audit_only(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    _rewrite_as_legacy_full_descriptor(fixture, retain_snapshots=True)
+    admitted = _verify(fixture)
+
+    with pytest.raises(RuntimeError, match="RUNTIME_ARTIFACT_SET_INCOMPLETE"):
+        _revalidate(fixture, admitted)
+
+
+def test_descriptor_rejects_case_variant_nested_model_marker(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    result = _materialize(fixture)
+    marker = (
+        result.generation_directory / "models" / "sentence_transformers"
+        / "all-MiniLM-L6-v2" / "nested" / "MODULES.JSON"
+    )
+    marker.parent.mkdir()
+    marker.write_bytes(b"[]")
+    payload = json.loads(result.active_descriptor.read_text(encoding="utf-8"))
+    payload["files"].append(
+        _descriptor_entry(marker, result.generation_directory)
+    )
+    payload["files"].sort(key=lambda entry: entry["path"])
+    result.active_descriptor.write_text(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RuntimeError, match="RUNTIME_ARTIFACT_SET_INCOMPLETE"):
         _verify(fixture)
 
 
@@ -108,7 +236,7 @@ def test_admitted_binding_revalidation_rejects_runtime_artifact_surface_drift(
     tmp_path: Path,
 ) -> None:
     relatives = (
-        Path("vectors/query_snapshots/code_entries.snapshot"),
+        Path("vectors/query_snapshots/navigation_code.rows.jsonl"),
         Path("models/sentence_transformers/all-MiniLM-L6-v2/model.safetensors"),
     )
     for index, relative in enumerate(relatives):
@@ -180,7 +308,7 @@ def test_authority_or_maintenance_lease_transition_is_rejected(
 def test_unlisted_generation_file_and_hardlink_are_rejected(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     result = _materialize(fixture)
-    source = result.generation_directory / "vectors" / "chroma.sqlite3"
+    source = result.generation_directory / "vectors" / "query_snapshots" / "snapshot_set.json"
     extra = result.generation_directory / "vectors" / "unlisted.bin"
     extra.write_bytes(b"unlisted")
     with pytest.raises(RuntimeError, match="MANIFEST_MISMATCH"):

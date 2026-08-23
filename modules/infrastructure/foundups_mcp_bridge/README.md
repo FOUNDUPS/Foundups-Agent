@@ -27,19 +27,26 @@ Interpreter admission also verifies the exact four versions declared in
 `requirements.txt`; an import-capable but version-drifted environment is not a
 valid MCP runtime.
 
-## Immutable query replica and owner routing (Phase 2 candidate)
+## Immutable query replica and owner routing
 
 `reddog_holoindex_query_replica.py` can materialize one immutable
 `holoindex_query_replica.v1` generation into a new, disjoint replica-root
-capability. It accepts only an exact manifest for the complete `vectors/`
-tree (including `chroma.sqlite3`) and one complete selected
-`all-MiniLM-L6-v2` model snapshot; resolver markers must be direct children of
-that selected root. The sealed production API nonmutating-locks the already
-existing authority-update then maintenance sentinels, retains both exact
-sentinel identities/bytes plus the freshness-receipt descriptor through source
-snapshot, copy, generation publication, active publication, and final
-validation, and then releases in reverse order. Callers cannot inject copier,
-lease, receipt, or publisher authority into the public API.
+capability. Its two sorted logical manifests are exactly `model` and
+`snapshots`: one complete selected `all-MiniLM-L6-v2` model snapshot plus the
+generation-bound 22-file sealed set rooted at `vectors/query_snapshots/`.
+Model resolver markers must be direct children of the selected model root.
+The snapshot-set manifest must bind the canonical generation and contain the
+exact seven-collection topology, and every inner path/size/digest must equal
+the outer copy manifest before copy begins. Roots, receipt paths, artifact
+paths, scalar types, ordering, aliases, and full descriptor-path bounds fail
+closed before the first replica-root mutation. New generations contain no
+Chroma database, SQLite, HNSW, or other legacy vector-tree payload. The sealed
+production API nonmutating-locks the already existing authority-update then
+maintenance sentinels, retains both exact sentinel identities/bytes plus the
+freshness-receipt descriptor through source snapshot, copy, generation
+publication, active publication, and final validation, and then releases in
+reverse order. Callers cannot inject copier, lease, receipt, or publisher
+authority into the public API.
 
 Phase 2 adds one canonical descriptor parser/verifier and an explicit
 `QueryReplicaOwnerRoute`. The resident owner receives the canonical SSD path
@@ -53,22 +60,24 @@ changed exact binding cannot hot-swap a live owner. Absolute replica paths are
 not returned in public responses.
 
 Governed Holo maintenance publishes a deterministic immutable snapshot set for
-the seven baseline collections before its PASS receipt. The replica copies that
-set as part of `vectors/`. The resident owner never starts Chroma against the
-replica: it validates every snapshot artifact, loads the existing bounded exact-
-vector adapter, and requires the embedded generation ID to equal the active
-descriptor. SQLite and HNSW remain unopened and byte-stable throughout query
-and shutdown. Snapshot artifact payload is preflight-bounded to 384 MiB before
+the seven baseline collections before its PASS receipt. The materializer copies
+only that exact set from `vectors/query_snapshots/`. The resident owner never
+starts Chroma against the replica: it validates every snapshot artifact, loads
+the existing bounded exact-vector adapter, and requires the embedded generation
+ID to equal the active descriptor. SQLite and HNSW are absent from new replica
+generations. Snapshot artifact payload is preflight-bounded to 384 MiB before
 publication and again before any query artifact is loaded.
 
 Replica proof is intentionally two-tiered. Initial route resolution and the
-isolated owner each perform one complete 8.29 GB manifest/digest admission.
-After that admission, route reuse, startup health, and queries revalidate the
-unchanged descriptor, canonical repository/receipt/leases, and rehash only the
-runtime-reachable model plus `vectors/query_snapshots/` artifacts. The sealed
-backend cannot reach copied Chroma/SQLite/HNSW state. The 15-second query
-deadline is unchanged. On the live 10,556-file generation, complete admission
-took 42.422 seconds; two bounded proofs took 1.297 and 1.359 seconds.
+isolated owner each perform one complete manifest/digest admission over the
+selected model and sealed snapshots. After that admission, route reuse,
+startup health, and queries revalidate the unchanged descriptor, canonical
+repository/receipt/leases, and the same runtime closure. The sealed backend has
+no Chroma/SQLite/HNSW path. The 15-second query deadline is unchanged. The
+previous full-tree live replica demonstrated why this narrowing is necessary:
+its 8.33 GB closure produced 122--153 second cold owner queries. The narrow
+materializer is synthetically verified; live timing requires merge, exact-main
+maintenance, materialization, activation, and immutable post-query proof.
 
 R16-R19 made route, binding fields, and health containers exact. R20 makes
 health transport scalars exact before any conversion: literal `127.0.0.1`,
@@ -95,8 +104,9 @@ across distinct binding fields remain allowed. R23 contains stdlib HTTP
 protocol failures from request, response acquisition, and bounded read as
 unavailable. Expected HTTP/OSError failures during close are contained only
 after a proof has been decided, so they never mask ready or unavailable;
-unexpected/resource exceptions still surface. The governed backend closure is
-1,360 runtime files at `fdf3643a2cb8...befc3592129e`; registry remains 1,527/265.
+  unexpected/resource exceptions still surface. At R23, the historical
+  governed backend closure was 1,360 runtime files at
+  `fdf3643a2cb8...befc3592129e`; registry remained 1,527/265.
 R24 closes acceptance drift: the slow synthetic loopback probe now carries the
 full canonical/query-replica route, binding, split argv, and scrubbed child
 environment. Shutdown/close/context behavior moved unchanged into one internal
@@ -111,20 +121,21 @@ stale, or unprovable configuration fails closed with no owner start, query,
 promotion, replica creation, or re-index. This plumbing does **not** delete
 old/orphan generations, define rollback/retention, or automatically materialize
 from a live store, so operational availability still requires a separately
-authorized current-generation materialization transaction. A local live
-transaction on 2026-08-22 accepted a 10,444-file, 8.1 GB Windows generation
-after closing mixed-case ordering, CRT-handle scaling, full-list secret
-scanning, and descriptor-size gaps; production owner cutover remains
-exact-`main` bound. Phase 1 performs no content deletion. Failed publication temps, staging trees,
+authorized current-generation materialization transaction. Historical
+full-tree live transactions remain valid immutable evidence only when their
+descriptor proves one coherent model plus SQLite and complete legacy HNSW
+segment cores. They remain audit-readable but are rejected by retained modern
+runtime revalidation. The narrow
+closure in this working tree is not active production proof until it is merged
+and rebuilt at the resulting exact `main`. Phase 1 performs no content
+deletion. Failed publication temps, staging trees,
 and a failed active name are atomically moved without replacement into an
 owned orphan root; the active name is absent only after a successful move.
 Rename failure leaves the source name and reports only a relative unsafe path.
 Windows copy failure closes all handles and preserves its bounded partial
 destination; query materialization quarantines the enclosing staging root.
 Direct copy callers retain responsibility for their isolated partial output.
-Retention/deletion of preserved objects is a future governed policy. Live local
-materialization and descriptor verification now have acceptance evidence; live
-owner/Holo MCP promotion still requires the patched exact-`main` generation.
+Retention/deletion of preserved objects is a future governed policy.
 
 The owner response flattener treats `limit <= 0` as an empty result and never
 admits a first hit through the loop termination check. Explicit module Tier-0

@@ -1,5 +1,45 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-23 - Narrow generation-bound replica materialization
+
+- Replaced full legacy `vectors/` materialization with the exact selected model
+  plus generation-bound 22-file sealed snapshot closure. SQLite/HNSW, extra or
+  missing snapshot files, and snapshot-generation drift fail before copy.
+- Extracted manifest/generation policy into a cohesive module and added a
+  snapshot-store manifest preflight that validates topology and byte budgets
+  without loading vector payloads. Existing full-vector descriptors remain
+  readable only when one coherent model, SQLite, and complete legacy HNSW
+  segment cores are present. Historical audit never grants retained snapshot
+  execution; new materialization requires the narrow closure.
+- Static identity preflight requires canonical receipt/root/file paths, exact
+  NFC/POSIX spelling, scalar types, full path bounds, order and aliases before
+  the first replica-root mutation. Selected-model topology rejects nested
+  case-variant resolver markers, and every inner snapshot binding must equal
+  the outer manifest before copy.
+- Exhaustive RedDog release validation exposed an eager snapshot-store import
+  that pulled NumPy into the stdlib-only one-shot query path. Centralized the
+  set-manifest filename in the existing lightweight snapshot contract and
+  deferred store validation until materialization; a `python -S` regression
+  proves the owner-client import surface remains site-package-free.
+- The final exhaustive RedDog release rerun passed all four isolated groups in
+  385.561 seconds with no release or group timeout.
+- WSP_62 differential review reduced the materializer from 498 to 380 lines,
+  kept the descriptor at 649 lines, and split focused policy
+  tests before the primary test module crossed 800 lines.
+- Focused synthetic acceptance is 80 passed / 2 expected host-capability skips.
+  One inherited HTTP adapter test used a synthetic owner without the mandatory
+  replica binding; the fixture now reuses the established exact binding
+  verifier. The complete bridge package is **981 passed / 7 expected skips /
+  14 inherited warnings in 328.28 seconds**.
+  The backend generator contract initially exceeded 240 seconds because five
+  read-only assertions rebuilt the same closure; one module-scoped immutable
+  fixture reduced it to a final 8/8 in 68.38 seconds while the staged-index
+  blob proof remains independent and uncached at backend digest
+  `8e72d82c2f8e...`.
+  Live narrow activation remains gated on merge, exact-main maintenance,
+  materialization, route CAS, owner query, and post-query immutable proof.
+  (WSP 00/5/6/15/22/34/50/62/84/87/97)
+
 ## 2026-08-22 - Resident owner bounded replica revalidation
 
 - Live one-shot evidence reached exact authority `0dce910a...` but failed

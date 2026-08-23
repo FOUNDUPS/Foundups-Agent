@@ -1,10 +1,42 @@
 # foundups_mcp_bridge Tests
 
+## Narrow generation-bound query-replica closure
+
+- Snapshot-store preflight verifies the exact seven-collection/22-file
+  manifest, canonical generation binding, inner/outer path-size-digest
+  equality, and size bounds without loading vectors. Injected link-component
+  and non-string generation cases prove the
+  path/scalar gate independently of host symlink privileges.
+- Materializer tests reject the legacy full `vectors/` closure, wrong snapshot
+  generation, missing artifacts, a nested second-model marker, and all prior
+  path/link/resource failures. Canonical root/receipt/file aliases, malformed
+  scalars, NFD paths, full path bounds, and case-variant model markers prove the
+  replica root remains pristine on static rejection.
+  The synthetic success fixture now copies 26 artifacts: four model markers and
+  22 sealed snapshot files.
+- WSP_62 moved manifest-policy cases into
+  `test_reddog_holoindex_query_replica_manifest.py`; the primary materializer
+  test remains below 800 lines. A `python -S` subprocess proves replica policy
+  and the owner-client import path do not require NumPy/site packages until
+  materialization. Focused result: **80 passed / 2 expected
+  host-capability skips** after adding a historical full-descriptor audit
+  regression; the modern materializer still rejects that legacy closure.
+- The final exhaustive extension release rerun passed all four isolated groups
+  in **385.561 seconds** with no release or group timeout.
+- The HTTP runtime fixture injects the established exact replica verifier, so
+  its synthetic owner exercises the complete binding required by the live
+  client. Complete package result: **981 passed / 7 expected skips / 14
+  inherited warnings in 328.28 seconds**.
+- The backend-generator contract builds one immutable worktree closure for its
+  five read-only assertions; hostile monkeypatch generation and the staged-index
+  blob/digest proof remain independent. Final result: **8 passed in 68.38 seconds**
+  after the repeated-build form exceeded a 240-second cap.
+
 ## Resident owner bounded replica revalidation
 
 - Descriptor tests prove that retained admission rereads the exact active
   descriptor/manifest and rejects model, sealed-snapshot, or unlisted runtime
-  artifact drift without reopening unused copied vector storage.
+  artifact drift without opening legacy vector storage.
 - Runtime routing proves exactly one complete admission switches to bounded
   revalidation; injected synthetic verifiers retain their existing behavior.
 - The HTTP entry point proves only the isolated-root capability before owner
@@ -310,7 +342,7 @@ the disposable process fixture.
   descriptor ordering, source-hash change, receipt/generation swap, lease
   transition, overlap, link/reparse/hardlink/special rejection, resource
   bounds, preexisting targets, copy/hash/publication failure, and confined
-  no-delete staging quarantine. Windows also proves a 602-file copy retains raw
+  no-delete staging quarantine. Windows also proves a 622-file copy retains raw
   handles without exhausting CRT descriptors; large descriptor scans cover all
   600 items and still reject a secret in the final item.
 - It never reads a live Holo store, starts an owner, loads a model, uses a

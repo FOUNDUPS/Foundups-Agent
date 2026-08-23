@@ -24,22 +24,27 @@ external OAuth proxy and has no live acceptance receipt in this change.
 
 ### `materialize_query_replica(...) -> QueryReplicaResult`
 
-Creates one immutable `holoindex_query_replica.v1` generation under a new `StoreProof`. Inputs are exact bindings, sorted manifests, and limits. Production has sealed primitives; the test seam is revalidated. Canonical data is read only.
-The call noncreating-locks authority-update then maintenance sentinels, proves
-their identity/bytes, and retains both handles plus the receipt descriptor
-through copy, publication, validation, and reverse release.
+Creates one immutable `holoindex_query_replica.v1` generation under a new
+`StoreProof` from exact bindings, limits, and sorted `model` and `snapshots`
+manifests. The model root is complete; `vectors/query_snapshots` is the exact
+22-file set whose manifest binds the requested generation before copy. Legacy
+`vectors/` manifests and `chroma.sqlite3` reject. Production is sealed, the
+test seam is revalidated, and canonical data is read only. The call retains
+both sentinel identities/bytes and the receipt descriptor through copy,
+publication, validation, and reverse release.
 
-Manifests exactly equal enumerated source trees. Integers reject bool/float;
-paths use normalized Unicode NFC/casefold ordering and uniqueness. Links,
-reparse points, hardlinks, special files, escapes, overlap, exhaustion, and
-aliases fail. SentenceTransformer markers (`modules.json`, `config.json`,
-`model.safetensors`, and `tokenizer.json` or `vocab.txt`) are direct root
-children, exactly matching the runtime resolver.
+Manifests exactly equal enumerated sources. Before any replica-root mutation,
+integers reject bool/float; roots, receipt paths, and file paths require one
+exact NFC/POSIX representation; full descriptor paths are bounded; and file
+order/uniqueness use NFC+casefold identity. The inner snapshot manifest's 22
+path/size/digest bindings exactly equal the outer manifest. Links, reparse
+points, hardlinks, special files, escapes, overlap, exhaustion, and aliases
+fail. Model markers are case-insensitively unique and the one accepted direct
+marker has the canonical `modules.json` spelling.
 
 Windows retains raw OS handles for every source, destination, and directory
 through final aggregate proof while using transient CRT descriptors one at a
-time. The descriptor is bounded to 4 MiB, sufficient for the verified
-10,444-file live generation; larger payloads still fail closed.
+time. The descriptor remains bounded to 4 MiB; larger payloads fail closed.
 
 Success no-replace publishes `generations/<digest>/` then immutable `holoindex_query_replica.active.json`, binding repository, receipt, generation, storage identities, UTC time, hashes, and sizes. Existing targets are never overwritten.
 Final failure atomically no-replace quarantines whatever occupies this call's active name; success makes active absent and returns a relative orphan path. Rename failure leaves active and reports a relative unsafe path.
@@ -68,13 +73,14 @@ The one-shot semantic adapter and maintenance handshake resolve this route
 before owner startup; promotion resolves it before read-only owner binding
 verification. All three pass the same capability into the existing owner API.
 
-Initial resolution hashes the complete descriptor manifest. A retained route
-then revalidates descriptor identity/bytes, exact manifest projection,
-canonical repository/receipt/leases, and the only runtime-reachable artifacts:
-the selected model and `vectors/query_snapshots/`. The isolated owner performs
-its own complete admission before switching to the same bounded proof. This is
-not a TTL/cache decision and does not raise the 15-second query deadline;
-descriptor, authority, model, or snapshot drift still fails closed.
+Initial resolution hashes the complete narrow descriptor; modern admission
+requires the vector surface to equal exactly the 22 snapshots. A retained route
+revalidates its identity/bytes, manifest projection, authority, and only the
+selected model plus `vectors/query_snapshots/`. The isolated owner independently
+admits the full closure before using the same bounded proof. No TTL/cache or
+deadline changes; descriptor, authority, model, or snapshot drift fails closed.
+The full verifier can audit a historical coherent model plus SQLite/HNSW
+closure, but retained runtime revalidation rejects that legacy surface.
 
 ### `verify_reddog_holoindex_owner_binding(...) -> bool`
 
@@ -119,13 +125,14 @@ The supported private RedDog owner exports:
     )
 
 The production backend is the immutable seven-collection snapshot set emitted
-by governed maintenance and copied inside the verified replica generation. It
+by governed maintenance and copied as the exact 22-file snapshot closure inside
+the verified replica generation. It
 supports only the Chroma-shaped read subset used by HoloIndex. Backend creation
 fails closed when the snapshot generation differs from the active replica;
 query startup/search never starts Chroma or opens replica SQLite/HNSW files.
 The owner performs one complete replica admission, then uses the retained
 bounded proof above before and after semantic retrieval. Runtime proof never
-substitutes for initial full-manifest admission.
+substitutes for initial complete narrow-manifest admission.
 
 HTTP exposes authenticated `POST /holoindex/v1/query` and
 `GET /holoindex/v1/health` only; there is no indexing API. Both require
