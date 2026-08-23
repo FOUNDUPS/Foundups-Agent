@@ -1,5 +1,58 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-23: FoundUp Memex learning-candidate fail-closed hardening
+
+- Removed caller-asserted governed-research receipt IDs from the admission
+  decision. The declared source class now fails closed until an authenticated
+  authority-bound receipt verifier exists.
+- Canonicalized human-authored text with NFKC, aware timestamps to UTC seconds,
+  and numeric scores to floats; bounded evidence/supersession inputs before
+  deduplication and removed fallback object-to-string digest coercion.
+- Reconstruction now requires and exactly replays the original proposal plus
+  evidence closure. Memex views require the exact invariant set and a
+  self-consistent assembly receipt before structural projection. This proves
+  structure, not authenticated provenance; later admission must supply that
+  independent authority.
+- This remains `STRUCTURAL_ONLY`: no runtime admission, persistence, Brain or
+  Breadcrumb write, HoloIndex/roadmap mutation, or work authority.
+- An independent exact-commit review returned NO-GO on exception leaks and
+  late rehydrated-collection bounds. The repair converts extreme timestamp and
+  nested hostile-value failures into deterministic rejection, removes
+  validation-time dataclass deep copying, and applies limits before traversal,
+  sorting, or deduplication. The repaired commit requires a fresh review.
+- The fresh review found one remaining callback-bearing nested source-receipt
+  path. Plain-data view-source validation was extracted into a bounded module,
+  and public gate/reconstruction boundaries now convert any unanticipated
+  nested validation exception into stable rejection. Another exact-commit
+  review remains required before delivery.
+- The next release review found unsafe fallback attribute access, incomplete
+  whole-view plain-data coverage, post-rejection batch traversal, and a
+  reconstruction verifier that tolerated unrelated evidence. The final repair
+  makes fallback reads exception-safe, validates and cumulatively bounds every
+  nested view container before hashing, returns immediately on gate-input
+  failure, and requires exact proposal-evidence closure.
+- The final bound review found that mapping-key characters were not included in
+  the cumulative pre-hash budget. Keys and values now share one total character
+  budget, individual strings remain bounded, and integer magnitude is capped.
+- WSP 00/10/15/22/50/60/62/79/84/87/97.
+
+## 2026-08-23: FoundUp Memex structural learning-candidate gate
+
+- Implemented the roadmap's bounded candidate layer as a pure transformation
+  over one exact FoundUp Memex view and receipt-bound Breadcrumb or
+  verified-outcome evidence. Governed research was declared for later
+  authenticated authority integration.
+- Candidates preserve supporting and contradicting evidence independently,
+  carry proposal-only salience/confidence and supersession pointers, and bind a
+  deterministic evidence manifest that can be reconstructed without storing
+  raw evidence in the gate.
+- The output is `STRUCTURAL_ONLY`, non-runtime-admissible, and explicitly grants
+  no persistence, Brain/Breadcrumb/HoloIndex/roadmap mutation, or work
+  authority. The legacy cross-platform JSON memory and disabled Holo adaptive
+  consolidation prototypes were not imported or modified.
+- WSP 15 score: 17/20 (P0 architecture: C4/I5/D3/Impact5). WSP 00/10/15/22/50/
+  60/62/79/84/87/97.
+
 ## 2026-08-22: Resident conversation request-to-scope binding
 
 - Added an admission-only bridge from the strict Digital Twin `TURN`,

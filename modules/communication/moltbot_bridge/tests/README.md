@@ -1,5 +1,25 @@
 # Tests - OpenClaw Bridge
 
+## FoundUp Memex learning-candidate gate
+
+`test_foundup_memex_learning_candidate.py` proves deterministic read-only
+candidate projection from exact FoundUp/snapshot/source receipts. Its positive
+and adversarial cases cover contradiction preservation, supersession pointers,
+proposed salience/confidence, reconstruction fidelity, forged and cross-FoundUp
+receipts, governed-research fail-closed behavior, verified-outcome HEAD binding,
+ambiguous outcome-receipt rejection, proposal-bound local-resigning rejection,
+canonical Unicode/time/score output, immutable result receipts, pre-dedup
+collection bounds, exact view receipt/invariant enforcement,
+tampering, secret text, invalid/overflowing scores, extreme timestamps, nested
+callback-bearing values, future evidence/proposals, hostile runtime types, and
+nested source/view callbacks, safe fallback attribute access, exact evidence
+closure, oversized/cumulative nested keys and values, storage/network/model
+import prohibitions.
+
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_learning_candidate.py -q
+```
+
 ## Resident conversation request-to-scope binding
 
 `test_reddog_resident_conversation_scope_binding.py` uses the existing

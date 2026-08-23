@@ -275,6 +275,30 @@ This path grants no work, repository, signer, merge, FoundUp-projection, or
 HoloIndex authority. Principal Memex disclosure issuance, automatic learning,
 and conversation-to-work authorization remain separate work.
 
+## FoundUp Memex learning candidates
+
+`foundup_memex_learning_candidate.py` implements the read-only
+`FOUNDUP_MEMEX_LEARNING_CANDIDATE_GATE_PHASE1` contract. It binds proposed
+FoundUp learning to one immutable current-state Memex view and exact
+Breadcrumb or verified-outcome receipts. Governed research remains a declared
+source class but fails closed until an authenticated receipt authority is
+connected; a caller-supplied digest list cannot authorize it. Supporting and
+contradicting evidence remain separate, supersession is proposal metadata, and
+reconstruction recomputes the candidate from the exact original proposal plus
+its referenced evidence. Text, timestamps, scores, and reference collections
+have one bounded canonical representation. The upstream Memex view requires
+an exact assembly receipt and invariant set. Output is `STRUCTURAL_ONLY`, non-runtime-admissible, and
+cannot persist memory, write Brain/Breadcrumb/HoloIndex/roadmap state, or grant
+work authority. Source authorities retain the raw evidence; this is not a new
+memory store. Durable Brain admission remains a later independently governed
+gate. Assembly-receipt and view-ID checks establish structural self-consistency,
+not authenticated provenance; because every output remains non-admissible and
+zero-authority, authentication belongs to that later admission boundary.
+Rehydrated nested values, extreme timestamps, and oversized collections reject
+without invoking caller callbacks or escaping the public validation boundary.
+The complete nested view graph is cumulatively bounded plain data, and public
+reconstruction accepts exactly—not a superset of—the proposal evidence closure.
+
 The isolated Ed25519 backend also rejects delegated identity or work-authority
 requests unless the backend has a signer-owned domain policy or the existing
 E0 secret-access grant has bound one ephemeral backend to the exact canonical

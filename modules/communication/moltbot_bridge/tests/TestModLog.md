@@ -1,3 +1,43 @@
+## 2026-08-23: FoundUp Memex learning-candidate hardening regressions
+
+- Added adversarial coverage proving a caller cannot self-authorize governed
+  research, locally re-sign a changed candidate, inject view invariants, or
+  substitute an assembly receipt.
+- Added canonical Unicode/time/score and fail-before-dedup collection-bound
+  coverage. Reconstruction now replays the exact proposal and evidence closure.
+- The first independent review reproduced exception leaks for extreme dates,
+  custom nested mappings/objects, and unorderable candidate references, plus
+  late rehydrated-collection bounds. Regression-first repair makes those paths
+  reject without callbacks or exceptions.
+- Repaired focused result: **17 passed in 0.74 seconds**. Adjacent FoundUp
+  Memex/Brain/verified-outcome matrix: **100 passed in 8.84 seconds**.
+- The fresh review found one remaining nested source-receipt callback path.
+  The second repair adds exact bounded plain-data validation plus public
+  exception boundaries. Post-repair focused result: **17 passed in 0.76
+  seconds**; adjacent matrix: **100 passed in 7.45 seconds**. These remain local
+  structural results; another exact-commit verdict is required.
+- The next release review found unsafe fallback attribute access, incomplete
+  plain-data coverage outside source receipts/outcomes, late oversized-batch
+  traversal, and acceptance of unrelated evidence during reconstruction.
+- The next bound review found mapping-key characters were outside the cumulative
+  pre-hash budget. Regressions now cover oversized individual keys and
+  cumulative values, with integer magnitude also bounded.
+- Final focused result: **18 passed in 0.73 seconds**; adjacent matrix: **101
+  passed in 7.73 seconds**. A final fresh exact-commit verdict remains required.
+
+## 2026-08-23: FoundUp Memex learning-candidate regressions
+
+- Added focused deterministic and adversarial coverage for the structural-only
+  learning-candidate gate, including supporting/contradicting evidence,
+  supersession, receipt/scope/HEAD binding, initial research allowlisting,
+  reconstruction tamper detection, secret/score/time rejection, hostile types,
+  zero-authority flags, and WSP 62/import boundaries.
+- Focused result: **9 passed**. No model, network, database, HoloIndex, Brain,
+  Breadcrumb, roadmap, work-state, or repository mutation occurs.
+- Adjacent FoundUp Memex/Brain/verified-outcome matrix: **92 passed** in 11.54
+  seconds. This is local development evidence, not runtime admission or a
+  governed production-promotion receipt.
+
 ## 2026-08-22: Resident conversation request-to-scope regressions
 
 - Test-first collection initially failed because the binding did not exist.
