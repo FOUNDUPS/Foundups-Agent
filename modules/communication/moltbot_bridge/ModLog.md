@@ -15,6 +15,11 @@
   independent authority.
 - This remains `STRUCTURAL_ONLY`: no runtime admission, persistence, Brain or
   Breadcrumb write, HoloIndex/roadmap mutation, or work authority.
+- An independent exact-commit review returned NO-GO on exception leaks and
+  late rehydrated-collection bounds. The repair converts extreme timestamp and
+  nested hostile-value failures into deterministic rejection, removes
+  validation-time dataclass deep copying, and applies limits before traversal,
+  sorting, or deduplication. The repaired commit requires a fresh review.
 - WSP 00/10/15/22/50/60/62/79/84/87/97.
 
 ## 2026-08-23: FoundUp Memex structural learning-candidate gate

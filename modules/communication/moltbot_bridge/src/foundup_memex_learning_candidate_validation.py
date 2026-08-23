@@ -76,7 +76,11 @@ def canonical_text(value: Any) -> str:
 
     if type(value) is not str:
         raise ValueError("learning_text_type_invalid")
+    if len(value) > MAX_STATEMENT_CHARS:
+        raise ValueError("learning_text_too_long")
     normalized = unicodedata.normalize("NFKC", value).strip()
+    if len(normalized) > MAX_STATEMENT_CHARS:
+        raise ValueError("learning_text_too_long")
     if "\x00" in normalized or any(
         ord(char) < 32 and char not in "\n\r\t" for char in normalized
     ):
@@ -87,6 +91,8 @@ def canonical_text(value: Any) -> str:
 def canonical_identifier(value: Any) -> str:
     """Require an authority identifier to already use its canonical form."""
 
+    if type(value) is not str or len(value) > MAX_IDENTIFIER_CHARS:
+        raise ValueError("learning_identifier_not_canonical")
     normalized = canonical_text(value)
     if not normalized or normalized != value or len(normalized) > MAX_IDENTIFIER_CHARS:
         raise ValueError("learning_identifier_not_canonical")
@@ -98,15 +104,24 @@ def canonical_time(value: Any) -> str:
 
     if type(value) is not str:
         raise ValueError("learning_time_type_invalid")
+    if len(value) > 64:
+        raise ValueError("learning_time_invalid")
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError as exc:
+        if parsed.tzinfo is None or parsed.utcoffset() is None or parsed.microsecond:
+            raise ValueError("learning_time_invalid")
+        return parsed.astimezone(timezone.utc).isoformat(timespec="seconds").replace(
+            "+00:00", "Z"
+        )
+    except (ValueError, OverflowError) as exc:
         raise ValueError("learning_time_invalid") from exc
-    if parsed.tzinfo is None or parsed.utcoffset() is None or parsed.microsecond:
-        raise ValueError("learning_time_invalid")
-    return parsed.astimezone(timezone.utc).isoformat(timespec="seconds").replace(
-        "+00:00", "Z"
-    )
+
+
+def _text_canonical(value: str) -> bool:
+    try:
+        return value == canonical_text(value)
+    except ValueError:
+        return False
 
 
 def gate_input_reasons(
@@ -141,11 +156,11 @@ def view_identity_valid(view: Any) -> bool:
         if (
             type(view) is not FoundUpMemexView
             or view.schema_version != FOUNDUP_MEMEX_VIEW_SCHEMA_VERSION
-            or not isinstance(view.invariants, Mapping)
+            or type(view.invariants) is not dict
             or set(view.invariants) != _EXPECTED_VIEW_INVARIANTS
             or any(value is not True for value in view.invariants.values())
-            or not isinstance(view.assembly_receipt, Mapping)
-            or not isinstance(view.source_receipts, Mapping)
+            or type(view.assembly_receipt) is not dict
+            or type(view.source_receipts) is not dict
             or canonical_identifier(view.foundup_id) != view.foundup_id
             or not all(sha256_valid(value) for value in (
                 view.foundup_brain_view_id, view.snapshot_id,
@@ -190,7 +205,7 @@ def view_identity_valid(view: Any) -> bool:
         return (
             view.foundup_brain_view_id == _digest(content)
         )
-    except (AttributeError, TypeError, ValueError):
+    except Exception:
         return False
 
 
@@ -260,6 +275,16 @@ def proposal_scope_reasons(
     return reasons
 
 
+def _reference_ids_valid(value: Any, limit: int) -> bool:
+    return (
+        type(value) is tuple
+        and len(value) <= limit
+        and all(type(entry) is str for entry in value)
+        and value == tuple(sorted(set(value)))
+        and all(sha256_valid(entry) for entry in value)
+    )
+
+
 def evidence_reasons(item: Any) -> tuple[str, ...]:
     if type(item) is not FoundUpMemexLearningEvidence:
         return ("learning_evidence_type_invalid",)
@@ -281,7 +306,7 @@ def evidence_reasons(item: Any) -> tuple[str, ...]:
         reasons.append("learning_evidence_identifier_not_canonical")
     if not all((item.foundup_id, item.snapshot_id, item.source_revision, item.statement)):
         reasons.append("learning_evidence_required_value_missing")
-    if item.statement != canonical_text(item.statement):
+    if not _text_canonical(item.statement):
         reasons.append("learning_evidence_statement_not_canonical")
     if not sha256_valid(item.source_receipt_id) or not valid_time(item.observed_at):
         reasons.append("learning_evidence_binding_invalid")
@@ -312,20 +337,15 @@ def proposal_reasons(item: Any) -> tuple[str, ...]:
         reasons.append("learning_proposal_identifier_not_canonical")
     if not all((item.foundup_id, item.snapshot_id, item.statement)) or not valid_time(item.created_at):
         reasons.append("learning_proposal_required_value_invalid")
-    if item.statement != canonical_text(item.statement):
+    if not _text_canonical(item.statement):
         reasons.append("learning_proposal_statement_not_canonical")
     reasons.extend(_safe_text_reasons(item.statement, "proposal_statement"))
-    for value, label in (
-        (item.supporting_evidence_ids, "support"),
-        (item.contradicting_evidence_ids, "contradiction"),
-        (item.supersedes_memory_ids, "supersession"),
+    for value, label, limit in (
+        (item.supporting_evidence_ids, "support", MAX_REFERENCES_PER_PROPOSAL),
+        (item.contradicting_evidence_ids, "contradiction", MAX_REFERENCES_PER_PROPOSAL),
+        (item.supersedes_memory_ids, "supersession", MAX_SUPERSEDED_MEMORIES),
     ):
-        if (
-            type(value) is not tuple
-            or any(type(entry) is not str for entry in value)
-            or value != tuple(sorted(set(value)))
-            or any(not sha256_valid(entry) for entry in value)
-        ):
+        if not _reference_ids_valid(value, limit):
             reasons.append(f"learning_proposal_{label}_ids_invalid")
     if (
         type(item.supporting_evidence_ids) is tuple
@@ -344,7 +364,11 @@ def proposal_reasons(item: Any) -> tuple[str, ...]:
             reasons.append(f"learning_proposal_{label}_invalid")
     payload = item.to_dict()
     payload.pop("proposal_id")
-    if item.proposal_id != _digest(payload):
+    try:
+        digest_matches = item.proposal_id == _digest(payload)
+    except (TypeError, ValueError, OverflowError, RecursionError):
+        digest_matches = False
+    if not digest_matches:
         reasons.append("learning_proposal_digest_mismatch")
     return tuple(reasons)
 
@@ -371,19 +395,24 @@ def candidate_reasons(item: Any) -> tuple[str, ...]:
         reasons.append("learning_candidate_identifier_not_canonical")
     if item.verification != STRUCTURAL_VERIFICATION or not valid_time(item.created_at):
         reasons.append("learning_candidate_verification_invalid")
-    if item.statement != canonical_text(item.statement):
+    if not _text_canonical(item.statement):
         reasons.append("learning_candidate_statement_not_canonical")
-    for value in (
-        item.supporting_evidence_ids, item.contradicting_evidence_ids,
-        item.supersedes_memory_ids, item.source_receipt_ids,
+    for value, limit in (
+        (item.supporting_evidence_ids, MAX_REFERENCES_PER_PROPOSAL),
+        (item.contradicting_evidence_ids, MAX_REFERENCES_PER_PROPOSAL),
+        (item.supersedes_memory_ids, MAX_SUPERSEDED_MEMORIES),
+        (item.source_receipt_ids, MAX_REFERENCES_PER_PROPOSAL),
     ):
-        if (
-            type(value) is not tuple
-            or value != tuple(sorted(set(value)))
-            or any(not sha256_valid(entry) for entry in value)
-        ):
+        if not _reference_ids_valid(value, limit):
             reasons.append("learning_candidate_reference_ids_invalid")
             break
+    if (
+        type(item.supporting_evidence_ids) is tuple
+        and type(item.contradicting_evidence_ids) is tuple
+        and len(item.supporting_evidence_ids) + len(item.contradicting_evidence_ids)
+        > MAX_REFERENCES_PER_PROPOSAL
+    ):
+        reasons.append("learning_candidate_evidence_count_invalid")
     if not all(sha256_valid(value) for value in (
         item.candidate_id, item.proposal_id, item.evidence_manifest_digest,
     )):
@@ -419,6 +448,8 @@ def time_after(left: Any, right: Any) -> bool:
 
 
 def _safe_text_reasons(value: str, field: str) -> list[str]:
+    if len(value) > MAX_STATEMENT_CHARS:
+        return [f"learning_{field}_too_long"]
     redaction = redact_runtime_text(value, max_chars=MAX_STATEMENT_CHARS)
     reasons: list[str] = []
     if redaction.replacements:

@@ -294,6 +294,8 @@ memory store. Durable Brain admission remains a later independently governed
 gate. Assembly-receipt and view-ID checks establish structural self-consistency,
 not authenticated provenance; because every output remains non-admissible and
 zero-authority, authentication belongs to that later admission boundary.
+Rehydrated nested values, extreme timestamps, and oversized collections reject
+without invoking caller callbacks or escaping the public validation boundary.
 
 The isolated Ed25519 backend also rejects delegated identity or work-authority
 requests unless the backend has a signer-owned domain policy or the existing

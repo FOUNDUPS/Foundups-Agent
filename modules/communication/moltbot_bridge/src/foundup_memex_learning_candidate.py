@@ -346,17 +346,22 @@ def _evidence_manifest(evidence: Sequence[FoundUpMemexLearningEvidence]) -> str:
 def _bounded_sorted_unique_strings(
     values: Sequence[str], limit: int,
 ) -> tuple[str, ...]:
-    if type(values) not in (list, tuple) or any(type(value) is not str for value in values):
+    if type(values) not in (list, tuple):
         raise ValueError("learning_sequence_type_invalid")
     if len(values) > limit:
         raise ValueError("learning_sequence_count_invalid")
+    if any(type(value) is not str for value in values):
+        raise ValueError("learning_sequence_type_invalid")
     return tuple(sorted(set(values)))
 
 
 def _canonical_score(value: Any) -> float:
     if type(value) not in (int, float):
         raise ValueError("learning_score_type_invalid")
-    return float(value)
+    try:
+        return float(value)
+    except (ValueError, OverflowError) as exc:
+        raise ValueError("learning_score_invalid") from exc
 
 
 def _strict_string_attr(value: Any, name: str) -> str:

@@ -50,7 +50,19 @@ class FoundUpMemexLearningEvidence:
     content_digest: str
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        return {
+            "schema_version": self.schema_version,
+            "evidence_id": self.evidence_id,
+            "foundup_id": self.foundup_id,
+            "snapshot_id": self.snapshot_id,
+            "source_class": self.source_class,
+            "source_receipt_id": self.source_receipt_id,
+            "source_revision": self.source_revision,
+            "observed_at": self.observed_at,
+            "statement": self.statement,
+            "polarity": self.polarity,
+            "content_digest": self.content_digest,
+        }
 
 
 @dataclass(frozen=True)
@@ -69,7 +81,20 @@ class FoundUpMemexLearningProposal:
     created_at: str
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        return {
+            "schema_version": self.schema_version,
+            "proposal_id": self.proposal_id,
+            "foundup_id": self.foundup_id,
+            "snapshot_id": self.snapshot_id,
+            "category": self.category,
+            "statement": self.statement,
+            "supporting_evidence_ids": self.supporting_evidence_ids,
+            "contradicting_evidence_ids": self.contradicting_evidence_ids,
+            "supersedes_memory_ids": self.supersedes_memory_ids,
+            "proposed_salience": self.proposed_salience,
+            "proposed_confidence": self.proposed_confidence,
+            "created_at": self.created_at,
+        }
 
 
 @dataclass(frozen=True)

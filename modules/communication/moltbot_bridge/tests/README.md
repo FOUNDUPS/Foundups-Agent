@@ -10,8 +10,9 @@ receipts, governed-research fail-closed behavior, verified-outcome HEAD binding,
 ambiguous outcome-receipt rejection, proposal-bound local-resigning rejection,
 canonical Unicode/time/score output, immutable result receipts, pre-dedup
 collection bounds, exact view receipt/invariant enforcement,
-tampering, secret text, invalid scores, future evidence/proposals, hostile
-runtime types, and storage/network/model import prohibitions.
+tampering, secret text, invalid/overflowing scores, extreme timestamps, nested
+callback-bearing values, future evidence/proposals, hostile runtime types, and
+storage/network/model import prohibitions.
 
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_learning_candidate.py -q

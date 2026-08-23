@@ -5,9 +5,13 @@
   substitute an assembly receipt.
 - Added canonical Unicode/time/score and fail-before-dedup collection-bound
   coverage. Reconstruction now replays the exact proposal and evidence closure.
-- Focused result: **14 passed in 0.82 seconds**. Adjacent FoundUp
-  Memex/Brain/verified-outcome matrix: **97 passed in 8.21 seconds**. Both are
-  local structural validation only.
+- The first independent review reproduced exception leaks for extreme dates,
+  custom nested mappings/objects, and unorderable candidate references, plus
+  late rehydrated-collection bounds. Regression-first repair makes those paths
+  reject without callbacks or exceptions.
+- Repaired focused result: **17 passed in 0.74 seconds**. Adjacent FoundUp
+  Memex/Brain/verified-outcome matrix: **100 passed in 8.84 seconds**. Both are
+  local structural validation only; a fresh independent verdict is required.
 
 ## 2026-08-23: FoundUp Memex learning-candidate regressions
 

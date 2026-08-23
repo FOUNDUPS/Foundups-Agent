@@ -23,6 +23,7 @@ from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate i
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_contract import (
     MAX_REFERENCES_PER_PROPOSAL,
+    MAX_STATEMENT_CHARS,
     MAX_SUPERSEDED_MEMORIES,
 )
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
@@ -49,6 +50,16 @@ def _sha(value: str) -> str:
 def _digest(value) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+class _ExplodingDeepcopy:
+    def __deepcopy__(self, _memo):
+        raise RuntimeError("deepcopy must not execute")
+
+
+class _ExplodingIterMapping(dict):
+    def __iter__(self):
+        raise RuntimeError("mapping iteration must fail closed")
 
 
 def _view(*, outcomes=()):
@@ -514,6 +525,17 @@ def test_builders_reject_secrets_invalid_scores_and_future_evidence() -> None:
             proposed_confidence=0.5,
             created_at=GATE_TIME,
         )
+    with pytest.raises(ValueError, match="learning_score_invalid"):
+        build_foundup_memex_learning_proposal(
+            foundup_id=FOUNDUP_ID,
+            snapshot_id=view.snapshot_id,
+            category="observed_pattern",
+            statement="Overflowing scores must fail.",
+            supporting_evidence_ids=(evidence.evidence_id,),
+            proposed_salience=10 ** 10000,
+            proposed_confidence=0.5,
+            created_at=GATE_TIME,
+        )
     future = build_foundup_memex_learning_evidence(
         foundup_id=FOUNDUP_ID,
         snapshot_id=view.snapshot_id,
@@ -595,6 +617,105 @@ def test_hostile_runtime_types_fail_closed_without_throwing() -> None:
     assert "learning_gate_evidence_count_invalid" in bad_evidence_container.rejection_reasons
     assert bad_proposal_container.accepted is False
     assert "learning_gate_proposal_count_invalid" in bad_proposal_container.rejection_reasons
+
+
+def test_nested_hostile_values_and_mappings_fail_closed_without_callbacks() -> None:
+    view = _view()
+    evidence = _breadcrumb_evidence(view, polarity="supporting", statement="Typed evidence.")
+    proposal = _proposal(view, (evidence,))
+    accepted = gate_foundup_memex_learning_candidates(
+        view=view, evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME
+    )
+    candidate = accepted.candidates[0]
+
+    bad_view = gate_foundup_memex_learning_candidates(
+        view=replace(view, invariants=_ExplodingIterMapping(view.invariants)),
+        evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME,
+    )
+    bad_evidence = gate_foundup_memex_learning_candidates(
+        view=view, evidence=(replace(evidence, statement=_ExplodingDeepcopy()),),
+        proposals=(proposal,), created_at=GATE_TIME,
+    )
+    bad_proposal = gate_foundup_memex_learning_candidates(
+        view=view, evidence=(evidence,),
+        proposals=(replace(proposal, proposed_salience=_ExplodingDeepcopy()),),
+        created_at=GATE_TIME,
+    )
+    oversized_text = gate_foundup_memex_learning_candidates(
+        view=view,
+        evidence=(replace(evidence, statement="x" * (MAX_STATEMENT_CHARS + 1)),),
+        proposals=(proposal,),
+        created_at=GATE_TIME,
+    )
+
+    assert bad_view.accepted is False
+    assert "learning_gate_view_invalid" in bad_view.rejection_reasons
+    assert bad_evidence.accepted is False
+    assert "learning_evidence_type_invalid" in bad_evidence.rejection_reasons
+    assert bad_proposal.accepted is False
+    assert "learning_proposal_salience_invalid" in bad_proposal.rejection_reasons
+    assert oversized_text.accepted is False
+    assert "learning_evidence_statement_too_long" in oversized_text.rejection_reasons
+    assert not verify_foundup_memex_learning_candidate_reconstruction(
+        replace(
+            candidate,
+            supporting_evidence_ids=(_ExplodingDeepcopy(), _ExplodingDeepcopy()),
+        ),
+        proposal,
+        (evidence,),
+    )
+
+
+def test_extreme_offset_dates_reject_without_overflow() -> None:
+    view = _view()
+    evidence = _breadcrumb_evidence(view, polarity="supporting", statement="Typed time.")
+    proposal = _proposal(view, (evidence,))
+    extreme_time = "0001-01-01T00:00:00+14:00"
+
+    result = gate_foundup_memex_learning_candidates(
+        view=view, evidence=(evidence,), proposals=(proposal,), created_at=extreme_time
+    )
+
+    assert result.accepted is False
+    assert "learning_gate_created_at_invalid" in result.rejection_reasons
+    with pytest.raises(ValueError, match="learning_time_invalid"):
+        build_foundup_memex_learning_evidence(
+            foundup_id=FOUNDUP_ID,
+            snapshot_id=view.snapshot_id,
+            source_class="breadcrumbs",
+            source_receipt_id=view.source_receipts["breadcrumbs"]["content_digest"],
+            source_revision=view.source_receipts["breadcrumbs"]["source_version"],
+            observed_at=extreme_time,
+            statement="An overflowing timestamp must reject.",
+            polarity="supporting",
+        )
+
+
+def test_rehydrated_proposal_and_candidate_reference_counts_are_bounded() -> None:
+    view = _view()
+    evidence = _breadcrumb_evidence(view, polarity="supporting", statement="Bounded closure.")
+    proposal = _proposal(view, (evidence,))
+    result = gate_foundup_memex_learning_candidates(
+        view=view, evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME
+    )
+    oversized_ids = tuple(
+        _sha(f"oversized-reference-{index}")
+        for index in range(MAX_REFERENCES_PER_PROPOSAL + 1)
+    )
+    bad_proposal = gate_foundup_memex_learning_candidates(
+        view=view,
+        evidence=(evidence,),
+        proposals=(replace(proposal, supporting_evidence_ids=oversized_ids),),
+        created_at=GATE_TIME,
+    )
+
+    assert bad_proposal.accepted is False
+    assert "learning_proposal_evidence_count_invalid" in bad_proposal.rejection_reasons
+    assert not verify_foundup_memex_learning_candidate_reconstruction(
+        replace(result.candidates[0], supporting_evidence_ids=oversized_ids),
+        proposal,
+        (evidence,),
+    )
 
 
 def test_future_proposal_fails_closed() -> None:
