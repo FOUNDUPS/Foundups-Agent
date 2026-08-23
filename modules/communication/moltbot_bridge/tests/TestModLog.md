@@ -10,8 +10,12 @@
   late rehydrated-collection bounds. Regression-first repair makes those paths
   reject without callbacks or exceptions.
 - Repaired focused result: **17 passed in 0.74 seconds**. Adjacent FoundUp
-  Memex/Brain/verified-outcome matrix: **100 passed in 8.84 seconds**. Both are
-  local structural validation only; a fresh independent verdict is required.
+  Memex/Brain/verified-outcome matrix: **100 passed in 8.84 seconds**.
+- The fresh review found one remaining nested source-receipt callback path.
+  The second repair adds exact bounded plain-data validation plus public
+  exception boundaries. Post-repair focused result: **17 passed in 0.76
+  seconds**; adjacent matrix: **100 passed in 7.45 seconds**. These remain local
+  structural results; another exact-commit verdict is required.
 
 ## 2026-08-23: FoundUp Memex learning-candidate regressions
 

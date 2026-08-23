@@ -52,6 +52,24 @@ def _digest(value) -> str:
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _resign_view(view):
+    content = {
+        "schema_version": view.schema_version,
+        "foundup_id": view.foundup_id,
+        "snapshot_id": view.snapshot_id,
+        "snapshot_content_digest": view.snapshot_content_digest,
+        "identity": view.identity,
+        "current_state": view.current_state,
+        "source_receipts": view.source_receipts,
+        "roadmap_state": view.roadmap_state,
+        "verified_outcomes": view.verified_outcomes,
+        "learning_candidates": view.learning_candidates,
+        "roadmap_signals": view.roadmap_signals,
+        "assembly_receipt": view.assembly_receipt,
+    }
+    return replace(view, foundup_brain_view_id=_digest(content))
+
+
 class _ExplodingDeepcopy:
     def __deepcopy__(self, _memo):
         raise RuntimeError("deepcopy must not execute")
@@ -60,6 +78,11 @@ class _ExplodingDeepcopy:
 class _ExplodingIterMapping(dict):
     def __iter__(self):
         raise RuntimeError("mapping iteration must fail closed")
+
+
+class _ExplodingGetMapping(dict):
+    def get(self, *_args, **_kwargs):
+        raise RuntimeError("nested get callback must not execute")
 
 
 def _view(*, outcomes=()):
@@ -632,6 +655,15 @@ def test_nested_hostile_values_and_mappings_fail_closed_without_callbacks() -> N
         view=replace(view, invariants=_ExplodingIterMapping(view.invariants)),
         evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME,
     )
+    nested_receipts = dict(view.source_receipts)
+    nested_receipts["breadcrumbs"] = _ExplodingGetMapping(
+        nested_receipts["breadcrumbs"]
+    )
+    nested_view = _resign_view(replace(view, source_receipts=nested_receipts))
+    bad_nested_view = gate_foundup_memex_learning_candidates(
+        view=nested_view,
+        evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME,
+    )
     bad_evidence = gate_foundup_memex_learning_candidates(
         view=view, evidence=(replace(evidence, statement=_ExplodingDeepcopy()),),
         proposals=(proposal,), created_at=GATE_TIME,
@@ -650,6 +682,8 @@ def test_nested_hostile_values_and_mappings_fail_closed_without_callbacks() -> N
 
     assert bad_view.accepted is False
     assert "learning_gate_view_invalid" in bad_view.rejection_reasons
+    assert bad_nested_view.accepted is False
+    assert "learning_gate_view_invalid" in bad_nested_view.rejection_reasons
     assert bad_evidence.accepted is False
     assert "learning_evidence_type_invalid" in bad_evidence.rejection_reasons
     assert bad_proposal.accepted is False

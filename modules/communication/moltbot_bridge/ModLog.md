@@ -20,6 +20,11 @@
   nested hostile-value failures into deterministic rejection, removes
   validation-time dataclass deep copying, and applies limits before traversal,
   sorting, or deduplication. The repaired commit requires a fresh review.
+- The fresh review found one remaining callback-bearing nested source-receipt
+  path. Plain-data view-source validation was extracted into a bounded module,
+  and public gate/reconstruction boundaries now convert any unanticipated
+  nested validation exception into stable rejection. Another exact-commit
+  review remains required before delivery.
 - WSP 00/10/15/22/50/60/62/79/84/87/97.
 
 ## 2026-08-23: FoundUp Memex structural learning-candidate gate

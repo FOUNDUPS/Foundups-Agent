@@ -143,6 +143,25 @@ def gate_foundup_memex_learning_candidates(
     """Emit projections; caller research digests never establish authority."""
 
     try:
+        return _gate_candidates(
+            view=view, evidence=evidence, proposals=proposals,
+            created_at=created_at,
+            governed_research_receipt_ids=governed_research_receipt_ids,
+        )
+    except Exception:
+        return _gate_result(
+            False, view, (), (), created_at, ["learning_gate_input_exception"]
+        )
+
+
+def _gate_candidates(
+    *, view: FoundUpMemexView,
+    evidence: Sequence[FoundUpMemexLearningEvidence],
+    proposals: Sequence[FoundUpMemexLearningProposal],
+    created_at: str,
+    governed_research_receipt_ids: Sequence[str] = (),
+) -> FoundUpMemexLearningCandidateGateResult:
+    try:
         gate_created_at = _canonical_time(created_at)
     except ValueError:
         gate_created_at = created_at
@@ -228,6 +247,17 @@ def verify_foundup_memex_learning_candidate_reconstruction(
 ) -> bool:
     """Recompute a candidate from its proposal and complete evidence closure."""
 
+    try:
+        return _verify_candidate_reconstruction(candidate, proposal, evidence)
+    except Exception:
+        return False
+
+
+def _verify_candidate_reconstruction(
+    candidate: FoundUpMemexLearningCandidate,
+    proposal: FoundUpMemexLearningProposal,
+    evidence: Sequence[FoundUpMemexLearningEvidence],
+) -> bool:
     if (
         _candidate_reasons(candidate)
         or _proposal_reasons(proposal)

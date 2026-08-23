@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_c
     FoundUpMemexLearningEvidence,
     FoundUpMemexLearningProposal,
 )
+from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_view_validation import (
+    view_sources_are_plain_data,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     redact_runtime_text,
 )
@@ -160,7 +163,7 @@ def view_identity_valid(view: Any) -> bool:
             or set(view.invariants) != _EXPECTED_VIEW_INVARIANTS
             or any(value is not True for value in view.invariants.values())
             or type(view.assembly_receipt) is not dict
-            or type(view.source_receipts) is not dict
+            or not view_sources_are_plain_data(view)
             or canonical_identifier(view.foundup_id) != view.foundup_id
             or not all(sha256_valid(value) for value in (
                 view.foundup_brain_view_id, view.snapshot_id,
@@ -217,7 +220,7 @@ def evidence_scope_reasons(
         return ["learning_evidence_scope_mismatch"]
     if item.source_class == "breadcrumbs":
         receipt = view.source_receipts.get("breadcrumbs")
-        if not isinstance(receipt, Mapping):
+        if type(receipt) is not dict:
             return ["learning_evidence_receipt_not_bound"]
         reasons = []
         if item.source_receipt_id != receipt.get("content_digest"):
@@ -230,7 +233,7 @@ def evidence_scope_reasons(
     if item.source_class == "verified_outcome":
         matches = [
             outcome for outcome in view.verified_outcomes
-            if isinstance(outcome, Mapping) and item.source_receipt_id in {
+            if type(outcome) is dict and item.source_receipt_id in {
                 str(outcome.get(name) or "")
                 for name in (
                     "content_digest", "evidence_bundle_digest",
@@ -311,6 +314,8 @@ def evidence_reasons(item: Any) -> tuple[str, ...]:
     if not sha256_valid(item.source_receipt_id) or not valid_time(item.observed_at):
         reasons.append("learning_evidence_binding_invalid")
     reasons.extend(_safe_text_reasons(item.statement, "evidence_statement"))
+    if reasons:
+        return tuple(reasons)
     payload = values
     payload.pop("evidence_id")
     expected_content = _digest({"statement": item.statement})
@@ -362,6 +367,8 @@ def proposal_reasons(item: Any) -> tuple[str, ...]:
     for value, label in ((item.proposed_salience, "salience"), (item.proposed_confidence, "confidence")):
         if type(value) is not float or not math.isfinite(value) or not 0.0 <= value <= 1.0:
             reasons.append(f"learning_proposal_{label}_invalid")
+    if reasons:
+        return tuple(reasons)
     payload = item.to_dict()
     payload.pop("proposal_id")
     try:
