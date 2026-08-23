@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-23: Cross-platform OpenClaw dry-run worktree binding repair
+
+- A RedDog routing matrix proved the dry-run adapter rejected the executor's
+  canonical external `<repo>/<work-order>/<nonce>` worktree shape on Windows.
+  The adapter had drifted to an obsolete shape that omitted the repository slug.
+- Added exact equality with the executor-owned canonical worktree constructor,
+  binding repository root and slug, work-order ID, and sanitized nonce after
+  absolute component validation. Relative, alternate-root, traversal,
+  duplicated-marker, missing-segment, and mismatched-order paths remain closed;
+  no enqueue, worktree creation, OpenClaw, Hermes, Git, or model call was added.
+  (WSP 00/15/22/50/62/84/97)
+
 ## 2026-08-23: Resident generation-bound Holo owner binding implementation
 
 - Replaced the resident audit worker's ambient handoff-only default with a

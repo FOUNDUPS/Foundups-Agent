@@ -1,5 +1,24 @@
 # RedDog ModLog
 
+## 2026-08-23 - Compact Holo snapshot runtime closure (0.4.106)
+
+- Rebound the authenticated 1,381-file backend manifest after a live exact-main
+  RedDog canary exposed and repaired Holo read-only startup's stale dependency
+  on excluded `chroma.sqlite3` state. The final closure digest is
+  `04d3e3de5683...e8a67aae`.
+- The verified runtime now opens only the compact sealed query-snapshot replica;
+  warmup plus a semantic query returned CURRENT evidence without opening
+  Chroma, SQLite, or HNSW storage state and without model-provider, OpenClaw,
+  Fusion, or Hermes dispatch effects.
+- Bumped the closed VSIX contract to 0.4.106. (WSP
+  00/15/22/50/62/84/97)
+- Applied the WSP_62 documentation boundary by extracting release-tier scaling
+  receipts from the primary README into `docs/TEST_TIER_SCALING.md`; the README
+  remains the operational entrypoint rather than a growing historical ledger.
+- The governed Nemotron/Fusion/OpenClaw/Hermes routing matrix is 440/440 green;
+  OpenClaw now exact-binds the executor-issued external worktree path and the
+  pinned Hermes submodule dry-run proves no live delegate effect.
+
 ## 2026-08-23 - Resident Holo owner-path implementation
 
 - Connected the canonical resident/OpenClaw read-only audit worker to the

@@ -1,4 +1,12 @@
 # TestModLog - wre_core/tests
+## 2026-08-23: HXA4 authenticated commander fixture alignment
+- Updated the real-Hermes dry-run fixture to carry the authenticated commander
+  fact required by the hardened OpenClaw FoundUp mutation gate.
+- Preserved the fail-closed production gate; only the positive-path fixture now
+  declares the authority its scenario already assumes.
+- Revalidated the pinned Hermes delegate import and controlled dry-run path
+  without permitting a live delegate call.
+
 ## 2026-08-11: WSP 62 differential enforcement reconciliation
 - Proved inherited no-growth ceilings are upper bounds, allowing reductions
   while rejecting growth beyond the registered ceiling.

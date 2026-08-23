@@ -168,6 +168,34 @@ def test_cli_help_advertises_auto_refresh_opt_in() -> None:
     assert "--allow-auto-refresh" in (result.stdout + result.stderr)
 
 
+def test_readonly_core_import_does_not_require_chromadb() -> None:
+    env = os.environ.copy()
+    env["HOLOINDEX_QUERY_READONLY"] = "1"
+    env["HOLO_DISABLE_PIP_INSTALL"] = "1"
+    probe = """
+import builtins
+real_import = builtins.__import__
+def blocked(name, *args, **kwargs):
+    if name == 'chromadb' or name.startswith('chromadb.'):
+        raise ImportError('blocked_chromadb_probe')
+    return real_import(name, *args, **kwargs)
+builtins.__import__ = blocked
+from holo_index.core.holo_index import HoloIndex
+assert HoloIndex is not None
+"""
+    result = subprocess.run(
+        [sys.executable, "-B", "-c", probe],
+        cwd=str(REPO_ROOT),
+        env=env,
+        capture_output=True,
+        timeout=30,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
 def test_auto_refresh_branch_is_gated_in_cli_source() -> None:
     source = (REPO_ROOT / "holo_index" / "_cli_main.py").read_text(encoding="utf-8")
     assert "if not selected_collections and _auto_refresh_allowed(args)" in source
@@ -214,6 +242,7 @@ def test_cli_foreign_root_denial_precedes_backend_construction(
         "argv",
         ["holo_index.py", "--search", "WSP 97", "--ssd", str(tmp_path)],
     )
+    monkeypatch.setattr(_cli_main, "_MAINTENANCE_RESULT_STREAM", sys.stdout)
 
     with pytest.raises(SystemExit) as raised:
         _cli_main.main()
@@ -451,6 +480,6 @@ def test_collection_reset_refuses_readonly_context() -> None:
 
 def test_reddog_extension_sets_readonly_env_for_holoindex_calls() -> None:
     source = (REPO_ROOT / "extensions" / "reddog" / "extension.js").read_text(encoding="utf-8")
-    assert "HOLOINDEX_QUERY_READONLY: '1'" in source
+    assert "env.HOLOINDEX_QUERY_READONLY = '1';" in source
     assert "env.HOLO_SKIP_MODEL = '1';" in source
     assert "delete env.HOLO_SKIP_MODEL;" in source

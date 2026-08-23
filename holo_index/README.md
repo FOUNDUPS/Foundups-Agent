@@ -189,7 +189,9 @@ signed WRE authority transaction must authorize any later promotion.
 HoloIndex storage is resolved once by the canonical contract: explicit
 ssd_path or --ssd, then HOLOINDEX_SSD_PATH, then the legacy HOLO_SSD_PATH,
 then a platform-safe absolute default. Query-only mode requires an existing
-vectors/chroma.sqlite3 and does not create directories, collections, or the
+sealed `vectors/query_snapshots` set and does not require or open
+`vectors/chroma.sqlite3`. It also does not import the maintenance-only
+`chromadb` dependency, and it creates no directories, collections, or
 repository activity log.
 
 Chroma PersistentClient can perform internal SQLite writes even during a

@@ -1,5 +1,19 @@
 # HoloIndex Package ModLog
 
+## [2026-08-23] Compact RedDog snapshot runtime closure
+
+- A production-shaped exact-main RedDog canary proved the new 33-artifact query
+  replica but failed before semantic search because read-only Holo startup still
+  required the excluded legacy `vectors/chroma.sqlite3` file.
+- Replaced that stale admission check with the sealed
+  `vectors/query_snapshots` directory contract and gave snapshot-open failures
+  their accurate `open_query_snapshot` operation label. Read-only startup now
+  matches the immutable snapshot client, does not import the maintenance-only
+  Chroma dependency, and does not create or open Chroma, SQLite, or HNSW state.
+  The non-baseline work-ledger collection remains absent
+  in read-only mode instead of triggering an expected exception and traceback
+  on every semantic query. (WSP 00/15/22/50/62/84/97)
+
 ## [2026-08-23] Planner-preserved model source identity
 
 - Added an opt-in `preserve_source_path` resolver mode so trusted replica-plan

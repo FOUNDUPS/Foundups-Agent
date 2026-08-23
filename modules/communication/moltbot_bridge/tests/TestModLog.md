@@ -1,3 +1,10 @@
+## 2026-08-23: OpenClaw dry-run external worktree regression
+
+- Restored the three positive dry-run adapter paths against the executor's real
+  cross-platform external worktree shape and added a negative missing-repo-slug
+  case plus a canonical-looking path under an attacker-controlled alternate
+  root. All proofs remain proposal-only with no enqueue or execution effect.
+
 ## 2026-08-23: Resident generation-bound Holo regressions
 
 - Added positive and adversarial coverage for the resident adapter's exact

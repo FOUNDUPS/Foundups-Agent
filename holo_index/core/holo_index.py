@@ -65,28 +65,34 @@ def _is_pip_install_allowed() -> bool:
     allow_val = os.getenv("HOLO_ALLOW_PIP_INSTALL", "").strip().lower()
     return allow_val in ("1", "true", "yes")
 
-try:
-    import chromadb
-except ImportError as exc:
-    if _is_pip_install_allowed():
-        # Explicit opt-in: auto-install chromadb
-        print("[HOLO] HOLO_ALLOW_PIP_INSTALL=1: Installing chromadb via pip...")
-        import subprocess
-        subprocess.check_call([__import__('sys').executable, "-m", "pip", "install", "chromadb"])
-        import chromadb
-    else:
-        # Fail-closed: no network call, actionable error message
-        raise ImportError(
-            "chromadb is required but not installed.\n"
-            "\n"
-            "To install manually (recommended):\n"
-            "    pip install chromadb\n"
-            "\n"
-            "To enable auto-install (network-capable, not recommended):\n"
-            "    Set HOLO_ALLOW_PIP_INSTALL=1\n"
-            "\n"
-            "HoloIndex requires chromadb for vector storage. Install it and retry."
-        ) from exc
+chromadb = None
+
+
+def _require_chromadb():
+    """Load the maintenance-only Chroma dependency on first use."""
+
+    global chromadb
+    if chromadb is not None:
+        return chromadb
+    try:
+        import chromadb as loaded_chromadb
+    except ImportError as exc:
+        if _is_pip_install_allowed():
+            print("[HOLO] HOLO_ALLOW_PIP_INSTALL=1: Installing chromadb via pip...")
+            import subprocess
+
+            subprocess.check_call(
+                [__import__('sys').executable, "-m", "pip", "install", "chromadb"]
+            )
+            import chromadb as loaded_chromadb
+        else:
+            raise ImportError(
+                "chromadb is required but not installed for HoloIndex maintenance.\n"
+                "Install it manually with: pip install chromadb\n"
+                "Or explicitly opt in to installation with HOLO_ALLOW_PIP_INSTALL=1."
+            ) from exc
+    chromadb = loaded_chromadb
+    return chromadb
 
 # Lazy load sentence_transformers to prevent crash on import
 SentenceTransformer = None
@@ -272,8 +278,8 @@ class HoloIndex:
         self.models_path = self.ssd_path / "models"
         self.indexes_path = self.ssd_path / "indexes"
         if readonly_query_enabled():
-            database_path = self.vector_path / "chroma.sqlite3"
-            required_paths = (self.ssd_path, self.vector_path, database_path)
+            snapshot_path = self.vector_path / "query_snapshots"
+            required_paths = (self.ssd_path, self.vector_path, snapshot_path)
             missing_paths = [path for path in required_paths if not path.exists()]
             if missing_paths:
                 missing = ",".join(str(path) for path in missing_paths)
@@ -283,7 +289,11 @@ class HoloIndex:
                     operation="open_readonly_store",
                     detail=f"missing_required_path={missing}",
                 )
-            if not self.ssd_path.is_dir() or not self.vector_path.is_dir() or not database_path.is_file():
+            if (
+                not self.ssd_path.is_dir()
+                or not self.vector_path.is_dir()
+                or not snapshot_path.is_dir()
+            ):
                 raise HoloIndexStorageError(
                     STORAGE_UNAVAILABLE_CODE,
                     path=self.ssd_path,
@@ -301,7 +311,12 @@ class HoloIndex:
                     operation="create_storage_layout",
                 ) from exc
 
-        self._log_agent_action("Setting up persistent ChromaDB collections...", "INFO")
+        storage_message = (
+            "Opening immutable query snapshots..."
+            if readonly_query_enabled()
+            else "Setting up persistent ChromaDB collections..."
+        )
+        self._log_agent_action(storage_message, "INFO")
         if readonly_query_enabled():
             from modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store import (
                 open_query_snapshot_client,
@@ -311,12 +326,16 @@ class HoloIndex:
                 self.client = open_query_snapshot_client(self.vector_path)
                 self.query_snapshot_generation_id = self.client.generation_id
             else:
-                self.client = chromadb.PersistentClient(path=str(self.vector_path))
+                self.client = _require_chromadb().PersistentClient(path=str(self.vector_path))
         except Exception as exc:
             raise classify_storage_exception(
                 exc,
                 path=self.ssd_path,
-                operation="open_chromadb",
+                operation=(
+                    "open_query_snapshot"
+                    if readonly_query_enabled()
+                    else "open_chromadb"
+                ),
             ) from exc
         try:
             self.code_collection = self._ensure_collection("navigation_code")
@@ -328,7 +347,11 @@ class HoloIndex:
             self.docs_collection = self._ensure_collection("navigation_docs")
             self.knowledge_collection = self._ensure_collection("navigation_knowledge")
             # Work Ledger: Slice tracking for WSP 15/60/70 work state queries
-            self.work_ledger_collection = self._ensure_collection("navigation_work_ledger")
+            self.work_ledger_collection = (
+                None
+                if readonly_query_enabled()
+                else self._ensure_collection("navigation_work_ledger")
+            )
         except Exception:
             self.close()
             raise
