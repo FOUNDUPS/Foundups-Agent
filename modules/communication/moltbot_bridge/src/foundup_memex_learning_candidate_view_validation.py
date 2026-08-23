@@ -8,6 +8,7 @@ from typing import Any
 
 MAX_NESTED_ITEMS = 4096
 MAX_NESTED_DEPTH = 16
+MAX_NESTED_INTEGER_BITS = 4096
 MAX_NESTED_NODES = 65_536
 MAX_NESTED_STRING_CHARS = 1_048_576
 
@@ -16,7 +17,7 @@ def view_is_plain_data(view: Any) -> bool:
     """Reject callback-bearing view containers before traversal or hashing."""
 
     try:
-        budget = [MAX_NESTED_NODES]
+        budget = [MAX_NESTED_NODES, MAX_NESTED_STRING_CHARS]
         return all(
             _plain_value(value, 0, budget)
             for value in (
@@ -33,7 +34,7 @@ def view_is_plain_data(view: Any) -> bool:
 def _plain_mapping(value: dict[Any, Any], depth: int, budget: list[int]) -> bool:
     return (
         len(value) <= MAX_NESTED_ITEMS
-        and all(type(key) is str for key in value)
+        and all(type(key) is str and _plain_string(key, budget) for key in value)
         and all(_plain_value(item, depth + 1, budget) for item in value.values())
     )
 
@@ -42,12 +43,14 @@ def _plain_value(value: Any, depth: int, budget: list[int]) -> bool:
     budget[0] -= 1
     if budget[0] < 0 or depth > MAX_NESTED_DEPTH:
         return False
-    if value is None or type(value) in (bool, int):
+    if value is None or type(value) is bool:
         return True
+    if type(value) is int:
+        return value.bit_length() <= MAX_NESTED_INTEGER_BITS
     if type(value) is float:
         return math.isfinite(value)
     if type(value) is str:
-        return len(value) <= MAX_NESTED_STRING_CHARS
+        return _plain_string(value, budget)
     if type(value) in (list, tuple):
         return len(value) <= MAX_NESTED_ITEMS and all(
             _plain_value(item, depth + 1, budget) for item in value
@@ -55,6 +58,11 @@ def _plain_value(value: Any, depth: int, budget: list[int]) -> bool:
     if type(value) is dict:
         return _plain_mapping(value, depth, budget)
     return False
+
+
+def _plain_string(value: str, budget: list[int]) -> bool:
+    budget[1] -= len(value)
+    return len(value) <= MAX_NESTED_STRING_CHARS and budget[1] >= 0
 
 
 __all__ = ["view_is_plain_data"]

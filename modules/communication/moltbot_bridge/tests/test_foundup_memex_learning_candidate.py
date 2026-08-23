@@ -27,6 +27,9 @@ from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_c
     MAX_STATEMENT_CHARS,
     MAX_SUPERSEDED_MEMORIES,
 )
+from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_view_validation import (
+    MAX_NESTED_STRING_CHARS,
+)
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     build_operational_context_snapshot,
 )
@@ -692,6 +695,24 @@ def test_nested_hostile_values_and_mappings_fail_closed_without_callbacks() -> N
         view=callback_view,
         evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME,
     )
+    oversized_key_view = _resign_view(replace(
+        view, identity={"k" * (MAX_NESTED_STRING_CHARS + 1): "value"}
+    ))
+    bad_oversized_key_view = gate_foundup_memex_learning_candidates(
+        view=oversized_key_view,
+        evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME,
+    )
+    cumulative_view = _resign_view(replace(
+        view,
+        identity={
+            "first": "x" * (MAX_NESTED_STRING_CHARS // 2 + 1),
+            "second": "y" * (MAX_NESTED_STRING_CHARS // 2 + 1),
+        },
+    ))
+    bad_cumulative_view = gate_foundup_memex_learning_candidates(
+        view=cumulative_view,
+        evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME,
+    )
     raising_view = gate_foundup_memex_learning_candidates(
         view=_RaisingView(), evidence=(), proposals=(), created_at=GATE_TIME
     )
@@ -717,6 +738,10 @@ def test_nested_hostile_values_and_mappings_fail_closed_without_callbacks() -> N
     assert "learning_gate_view_invalid" in bad_nested_view.rejection_reasons
     assert bad_callback_view.accepted is False
     assert counting_identity.calls == 0
+    assert bad_oversized_key_view.accepted is False
+    assert "learning_gate_view_invalid" in bad_oversized_key_view.rejection_reasons
+    assert bad_cumulative_view.accepted is False
+    assert "learning_gate_view_invalid" in bad_cumulative_view.rejection_reasons
     assert raising_view.accepted is False
     assert raising_view.receipt["foundup_id"] == ""
     assert bad_evidence.accepted is False

@@ -31,6 +31,9 @@
   makes fallback reads exception-safe, validates and cumulatively bounds every
   nested view container before hashing, returns immediately on gate-input
   failure, and requires exact proposal-evidence closure.
+- The final bound review found that mapping-key characters were not included in
+  the cumulative pre-hash budget. Keys and values now share one total character
+  budget, individual strings remain bounded, and integer magnitude is capped.
 - WSP 00/10/15/22/50/60/62/79/84/87/97.
 
 ## 2026-08-23: FoundUp Memex structural learning-candidate gate

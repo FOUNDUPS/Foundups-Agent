@@ -19,9 +19,11 @@
 - The next release review found unsafe fallback attribute access, incomplete
   plain-data coverage outside source receipts/outcomes, late oversized-batch
   traversal, and acceptance of unrelated evidence during reconstruction.
-- Final regressions cover each path. Focused result: **18 passed in 0.70
-  seconds**; adjacent matrix: **101 passed in 7.80 seconds**. A final fresh
-  exact-commit verdict remains required.
+- The next bound review found mapping-key characters were outside the cumulative
+  pre-hash budget. Regressions now cover oversized individual keys and
+  cumulative values, with integer magnitude also bounded.
+- Final focused result: **18 passed in 0.73 seconds**; adjacent matrix: **101
+  passed in 7.73 seconds**. A final fresh exact-commit verdict remains required.
 
 ## 2026-08-23: FoundUp Memex learning-candidate regressions
 
