@@ -10,7 +10,10 @@ It never indexes, mutates repository state, or exposes the owner bearer token.
 from __future__ import annotations
 
 import json
+import math
 import sys
+from threading import Lock
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
@@ -75,6 +78,7 @@ TRANSIENT_OWNER_ERRORS = frozenset(
         "HOLOINDEX_TIER0_LOOKUP_FAILED",
     }
 )
+_OWNER_LIFECYCLE_LOCK = Lock()
 _REPLICA_PUBLIC_FIELDS = (
     "query_replica_descriptor_digest",
     "query_replica_generation_id",
@@ -274,13 +278,36 @@ def _response_matches_replica_route(
     return expected is not None and actual == expected
 
 
+def _owner_service_credentials(
+    bootstrap: Any, resolve_handoff: Callable[..., Any],
+    state: _OwnerQueryState, query: str,
+) -> tuple[str | None, str | None, bool, Mapping[str, Any] | None]:
+    status = str(getattr(bootstrap, "status", ""))
+    if getattr(bootstrap, "ready", False) is not True:
+        error = str(getattr(bootstrap, "error", "") or "owner_bootstrap_failed")
+        return None, None, error in TRANSIENT_OWNER_ERRORS, _failure(error, query=query)
+    process_owned = status in PROCESS_OWNED_STATUSES
+    state.cleanup_required = process_owned
+    if process_owned:
+        handoff = resolve_handoff()
+        if handoff is None:
+            return None, None, False, _failure("owner_handoff_missing", query=query)
+        return handoff[0], handoff[1], True, None
+    if status == OWNER_CONFIGURED:
+        return None, None, False, None
+    return None, None, False, _failure("owner_bootstrap_status_invalid", query=query)
+
+
 def _owner_attempt(
     *, query: str, limit: int, authority_root: Path, runtime_root: Path,
     ssd_path: Path,
     ensure_owner: Callable[..., Any], resolve_handoff: Callable[..., Any],
     query_owner: Callable[..., Mapping[str, Any]], state: _OwnerQueryState,
-    resolve_replica_route: Callable[..., Any],
+    resolve_replica_route: Callable[..., Any], operation_deadline: float | None,
 ) -> tuple[Mapping[str, Any], bool, bool]:
+    remaining = _remaining_timeout(operation_deadline)
+    if remaining == 0:
+        return _failure("QUERY_TIMEOUT", query=query), False, False
     try:
         route = resolve_replica_route(
             canonical_repo_root=authority_root,
@@ -288,29 +315,24 @@ def _owner_attempt(
         )
     except Exception:
         return _failure(QUERY_REPLICA_REQUIRED_ERROR, query=query), False, False
+    ensure_kwargs = {"startup_timeout_seconds": remaining} if remaining is not None else {}
     bootstrap = ensure_owner(
         repo_root=authority_root, runtime_root=runtime_root, requested=True,
         query_replica_route=route,
+        **ensure_kwargs,
     )
-    status = str(getattr(bootstrap, "status", ""))
-    if getattr(bootstrap, "ready", False) is not True:
-        error = str(getattr(bootstrap, "error", "") or "owner_bootstrap_failed")
-        return _failure(error, query=query), error in TRANSIENT_OWNER_ERRORS, False
-    process_owned = status in PROCESS_OWNED_STATUSES
-    state.cleanup_required = process_owned
-    if process_owned:
-        handoff = resolve_handoff()
-        if handoff is None:
-            return _failure("owner_handoff_missing", query=query), False, False
-        service_url, service_token = handoff
-    elif status == OWNER_CONFIGURED:
-        service_url, service_token = None, None
-    else:
-        return _failure("owner_bootstrap_status_invalid", query=query), False, False
+    service_url, service_token, process_owned, failure = _owner_service_credentials(
+        bootstrap, resolve_handoff, state, query,
+    )
+    if failure is not None:
+        return failure, process_owned, False
+    remaining = _remaining_timeout(operation_deadline)
+    if remaining == 0:
+        return _failure("QUERY_TIMEOUT", query=query), False, False
     result = query_owner(
         repo_root=authority_root, query=query, limit=limit,
         service_url=service_url, service_token=service_token,
-        timeout_seconds=60.0,
+        timeout_seconds=remaining if remaining is not None else 60.0,
     )
     if not isinstance(result, Mapping):
         return _failure("owner_response_invalid", query=query), False, False
@@ -328,8 +350,11 @@ def _query_with_retry(
     ensure_owner: Callable[..., Any], resolve_handoff: Callable[..., Any],
     query_owner: Callable[..., Mapping[str, Any]], cleanup_owner: Callable[[], None],
     state: _OwnerQueryState, resolve_replica_route: Callable[..., Any],
+    operation_deadline: float | None,
 ) -> tuple[Mapping[str, Any], bool]:
     while state.attempts < MAX_OWNER_ATTEMPTS:
+        if _remaining_timeout(operation_deadline) == 0:
+            return _failure("QUERY_TIMEOUT", query=query), False
         state.attempts += 1
         result, retryable, bindable = _owner_attempt(
             query=query, limit=limit, authority_root=authority_root,
@@ -337,6 +362,7 @@ def _query_with_retry(
             ensure_owner=ensure_owner,
             resolve_handoff=resolve_handoff, query_owner=query_owner, state=state,
             resolve_replica_route=resolve_replica_route,
+            operation_deadline=operation_deadline,
         )
         if state.attempts != 1 or not retryable:
             return result, bindable or retryable
@@ -446,7 +472,7 @@ def _execute_admitted_query(
     resolve_handoff: Callable[..., Any], query_owner: Callable[..., Any],
     cleanup_owner: Callable[[], None], select_authority: Callable[..., Any],
     select_runtime_root: Callable[[Path], Path], ssd_path: Path,
-    resolve_replica_route: Callable[..., Any],
+    resolve_replica_route: Callable[..., Any], operation_deadline: float | None,
 ) -> Mapping[str, Any]:
     state = _OwnerQueryState()
     try:
@@ -457,6 +483,7 @@ def _execute_admitted_query(
             resolve_handoff=resolve_handoff, query_owner=query_owner,
             cleanup_owner=cleanup_owner, state=state,
             resolve_replica_route=resolve_replica_route,
+            operation_deadline=operation_deadline,
         )
         if bindable:
             result = _bind_query_receipt(
@@ -488,6 +515,66 @@ def _resolve_query_ssd_path(
         )
 
 
+def _operation_deadline(value: float | None) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise ValueError("operation_timeout_invalid")
+    timeout = float(value)
+    if not math.isfinite(timeout) or timeout <= 0 or timeout > 60:
+        raise ValueError("operation_timeout_invalid")
+    return time.monotonic() + timeout
+
+
+def _remaining_timeout(deadline: float | None) -> float | None:
+    if deadline is None:
+        return None
+    return max(0.0, deadline - time.monotonic())
+
+
+def _request_and_deadline(
+    payload: Mapping[str, Any], operation_timeout_seconds: float | None,
+) -> tuple[_QueryRequest | None, float | None, Mapping[str, Any] | None]:
+    try:
+        deadline = _operation_deadline(operation_timeout_seconds)
+    except (TypeError, ValueError):
+        failure = _with_retry_telemetry(
+            _failure("operation_timeout_invalid"), attempts=0, retry_reason="",
+        )
+        return None, None, failure
+    request, request_error = _bounded_request(payload)
+    if request_error or request is None:
+        failure = _with_retry_telemetry(
+            _failure(request_error), attempts=0, retry_reason="",
+        )
+        return None, deadline, failure
+    return request, deadline, None
+
+
+def _execute_serialized_owner_query(
+    *, operation_deadline: float | None, query: str,
+    execute: Callable[[], Mapping[str, Any]],
+) -> Mapping[str, Any]:
+    remaining = _remaining_timeout(operation_deadline)
+    if remaining == 0:
+        return _with_retry_telemetry(
+            _failure("QUERY_TIMEOUT", query=query), attempts=0, retry_reason="",
+        )
+    acquired = (
+        _OWNER_LIFECYCLE_LOCK.acquire(timeout=remaining)
+        if remaining is not None
+        else _OWNER_LIFECYCLE_LOCK.acquire()
+    )
+    if not acquired:
+        return _with_retry_telemetry(
+            _failure("QUERY_TIMEOUT", query=query), attempts=0, retry_reason="",
+        )
+    try:
+        return execute()
+    finally:
+        _OWNER_LIFECYCLE_LOCK.release()
+
+
 def query_once(
     payload: Mapping[str, Any],
     *,
@@ -502,16 +589,15 @@ def query_once(
     resolve_ssd_path: Callable[[], Path] = resolve_holoindex_ssd_path,
     resolve_replica_route: Callable[..., Any] = resolve_query_replica_owner_route,
     bundle_builder: Callable[..., Mapping[str, Any]] = build_wsp_memory_bundle,
+    operation_timeout_seconds: float | None = 60.0,
 ) -> Mapping[str, Any]:
     """Execute one owner-bound query and always clean up process-owned state."""
 
-    request, request_error = _bounded_request(payload)
-    if request_error or request is None:
-        return _with_retry_telemetry(_failure(request_error), attempts=0, retry_reason="")
+    request, deadline, request_failure = _request_and_deadline(payload, operation_timeout_seconds)
+    if request_failure is not None or request is None:
+        return request_failure or _failure("request_invalid")
     selection = select_authority(repo_root)
-    bundle_fields = _build_requested_bundle(
-        request, repo_root, selection, bundle_builder,
-    )
+    bundle_fields = _build_requested_bundle(request, repo_root, selection, bundle_builder)
     if request.bundle_only or request.retrieval_mode == "lexical":
         return _lexical_result(request, selection, bundle_fields)
     ssd_path, failure = _resolve_query_ssd_path(resolve_ssd_path, request.query)
@@ -525,24 +611,46 @@ def query_once(
     if failure is not None:
         return {**failure, **(bundle_fields or {}), "no_reindex": True}
     assert selection is not None
-    result = _execute_admitted_query(
-        query=query, limit=limit, repo_root=repo_root, selection=selection,
-        ensure_owner=ensure_owner, resolve_handoff=resolve_handoff,
-        query_owner=query_owner, cleanup_owner=cleanup_owner,
-        select_authority=select_authority,
-        select_runtime_root=select_runtime_root, ssd_path=ssd_path,
-        resolve_replica_route=resolve_replica_route,
+    result = _execute_serialized_owner_query(
+        operation_deadline=deadline, query=query,
+        execute=lambda: _execute_admitted_query(
+            query=query, limit=limit, repo_root=repo_root, selection=selection,
+            ensure_owner=ensure_owner, resolve_handoff=resolve_handoff,
+            query_owner=query_owner, cleanup_owner=cleanup_owner,
+            select_authority=select_authority,
+            select_runtime_root=select_runtime_root, ssd_path=ssd_path,
+            resolve_replica_route=resolve_replica_route,
+            operation_deadline=deadline,
+        ),
     )
     return {**result, **(bundle_fields or {}), "no_reindex": True}
 
 
-def main() -> int:
+def _cli_operation_timeout(argv: list[str]) -> float | None:
+    if not argv:
+        return 60.0
+    if len(argv) != 2 or argv[0] != "--operation-timeout-seconds":
+        raise ValueError("invalid_arguments")
+    timeout = float(argv[1])
+    _operation_deadline(timeout)
+    return timeout
+
+
+def _main_result(arguments: list[str]) -> Mapping[str, Any]:
+    try:
+        operation_timeout = _cli_operation_timeout(arguments)
+    except (TypeError, ValueError):
+        return _failure("invalid_arguments")
     try:
         payload = _read_payload()
     except (UnicodeError, ValueError, json.JSONDecodeError):
-        result: Mapping[str, Any] = _failure("invalid_json")
-    else:
-        result = query_once(payload)
+        return _failure("invalid_json")
+    return query_once(payload, operation_timeout_seconds=operation_timeout)
+
+
+def main(argv: list[str] | None = None) -> int:
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    result = _main_result(arguments)
     sys.stdout.write(json.dumps(result, ensure_ascii=True, sort_keys=True))
     sys.stdout.write("\n")
     return 0

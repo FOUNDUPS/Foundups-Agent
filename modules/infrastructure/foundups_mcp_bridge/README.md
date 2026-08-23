@@ -29,6 +29,47 @@ valid MCP runtime.
 
 ## Immutable query replica and owner routing
 
+`reddog_holoindex_query_replica_plan.py` is the read-only trusted-host planner
+for a future activation transaction. It requires a clean exact repository
+HEAD and a CURRENT canonical freshness proof, resolves only the selected
+`all-MiniLM-L6-v2` snapshot, and descriptor-hashes that complete model plus the
+exact 22-file query-snapshot set twice. Three enumerations bracket those
+digest passes; full file and directory identities, generation binding, and
+canonical freshness must remain unchanged through the final observation. Links,
+reparse points, hardlinks, special files, aliases, hostile scalar/container
+shapes, or observed source mutation fail closed. The materializer revalidates
+the returned expected manifests against any later source change. The planner
+performs no copy, route change, maintenance, owner launch, or activation.
+
+This planner is one completed layer, not an activation claim. The private
+route record/CAS store, crash journal, activation controller, secret-free
+receipt, exact-main materialization, and live pre/post-route query proof remain
+separate gated work.
+
+`reddog_holoindex_query_route_contract.py`,
+`reddog_holoindex_query_route_store.py`, and the extracted confined
+`reddog_holoindex_query_route_io.py` implement the private stable-route state
+layer. One no-replace `EMPTY` record anchors the file; every `CURRENT`
+transition requires the exact prior revision and record digest, increments by
+one, and binds its predecessor. A machine-wide lock serializes activators. The
+store writes a private `PREPARED` journal before selecting the candidate. A
+normal context exit finalizes `COMMITTED` only after an explicit commit request;
+exceptions and uncommitted exits restore and re-prove the exact previous record.
+Recovery treats `PREPARED` as rollback-only, compares the structurally valid
+route digest before selected-root liveness, and therefore restores the exact
+predecessor even if a selected candidate root vanished after replacement. It
+fails terminally when the route matches neither recorded state. Records and
+journals use strict canonical ASCII JSON, copied immutable nested bindings,
+duplicate-key rejection, bounded descriptor-confined reads, and private
+regular-file/link/path checks. WSP_62 keeps route policy and persistence in
+separate sub-200-line classes.
+
+This layer does not alter the user environment, resolve semantic authority,
+materialize a replica, query an owner, publish an activation receipt, or activate
+the current machine. Those duties remain activation-controller work.
+The high-risk assumptions and fail-closed decision are attached at
+[`docs/clarity/REDDOG_HOLO_QUERY_ROUTE_CONSUMER_ASSUMPTION_AUDIT_20260823.md`](docs/clarity/REDDOG_HOLO_QUERY_ROUTE_CONSUMER_ASSUMPTION_AUDIT_20260823.md).
+
 `reddog_holoindex_query_replica.py` can materialize one immutable
 `holoindex_query_replica.v1` generation into a new, disjoint replica-root
 capability. Its two sorted logical manifests are exactly `model` and
@@ -114,11 +155,21 @@ environment. Shutdown/close/context behavior moved unchanged into one internal
 
 Phase 2 now wires the three production callers through the same verified route:
 one-shot ChatGPT/MCP owner query, maintenance owner startup, and promotion-time
-owner verification. The trusted host must explicitly provide
-`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT`; resolution proves an existing disjoint
-store and its exact active descriptor before owner use. Missing, relative,
-stale, or unprovable configuration fails closed with no owner start, query,
-promotion, replica creation, or re-index. This plumbing does **not** delete
+owner verification. The preferred trusted-host configuration is the stable
+private `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; the legacy explicit
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` remains a migration path, and configuring
+both is rejected as ambiguous. Route-file resolution is serialized with the
+activation lock but uses the store's nonmutating terminal read. A no-journal
+record is admissible only for the initial `EMPTY` state; every `CURRENT` record
+requires a `COMMITTED` or `ROLLED_BACK` journal whose selected digest matches.
+`PREPARED` fails pending and is never recovered or rewritten by a query
+consumer; explicit activation/controller recovery uses the separate mutating
+store load. After terminal admission, the resolver requires `CURRENT` and
+exact-matches the record's authority, canonical binding, replica root, and all
+four public replica fields against a fresh active-descriptor proof. Missing,
+relative, stale, ambiguous, uncommitted, or unprovable configuration fails
+closed with no owner start, query, promotion, replica creation, or re-index.
+This plumbing does **not** delete
 old/orphan generations, define rollback/retention, or automatically materialize
 from a live store, so operational availability still requires a separately
 authorized current-generation materialization transaction. Historical

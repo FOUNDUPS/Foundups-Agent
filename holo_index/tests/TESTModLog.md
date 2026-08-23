@@ -1,5 +1,11 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-23] Model resolver source-provenance option
+
+- Added a capability-gated alias regression proving `preserve_source_path=True`
+  retains model-directory provenance for the RedDog plan admission gate. The
+  default resolver contract remains unchanged.
+
 ## [2026-08-23] Tier-0 producer/consumer identity regression
 
 - Added a production-shaped docs-indexer-to-strict-consumer regression after

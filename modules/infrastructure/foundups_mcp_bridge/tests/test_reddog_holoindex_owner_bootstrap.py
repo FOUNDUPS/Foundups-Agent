@@ -63,6 +63,28 @@ def test_invalid_explicit_configuration_fails_without_overwrite_or_start(
     constructor.assert_not_called()
 
 
+def test_owner_start_uses_caller_lifecycle_budget(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv(SERVICE_URL_ENV, raising=False)
+    monkeypatch.delenv(SERVICE_TOKEN_ENV, raising=False)
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+
+    result = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path,
+        requested=True,
+        query_replica_route=_full_route(tmp_path),
+        startup_timeout_seconds=7.0,
+    )
+
+    assert result.ready is True
+    owner = _FakeSupervisor.instances[-1]
+    assert owner.startup_timeout_seconds == 7.0
+    assert owner.probe_timeout_seconds == 7.0
+    assert owner.shutdown_timeout_seconds == 3.0
+
+
 def test_configured_service_requires_authenticated_semantic_health(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

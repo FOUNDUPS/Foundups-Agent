@@ -1,3 +1,21 @@
+## 2026-08-23: Resident generation-bound Holo regressions
+
+- Added positive and adversarial coverage for the resident adapter's exact
+  one-shot payload, scoped-hit projection, raw/receipt exclusion, receipt
+  replay verification, repository/authority/replica equality, timeout safety,
+  bounded process output, and complete lifecycle serialization.
+- Added shared one-shot concurrency and CLI deadline propagation/rejection
+  tests plus owner bootstrap lifecycle-budget coverage. Updated the canonical
+  audit worker fixture to patch the new production default while injected
+  adapters remain unchanged.
+- Independent adjacent collection exposed a missing legacy diagnostic-adapter
+  export. The repaired canonical worker guard now pins that compatibility
+  surface, and the four direct/query/receipt/transport suites pass **49/49**.
+- Focused owner/adapter/bootstrap matrix: **128 passed**. Canonical worker:
+  **75 passed**. Exact WSP_62 exemption suite: **16 passed**. The generated
+  candidate's isolated RedDog release passed **4/4 in 288,505 ms**; the prior
+  concurrent-audit timeout is retained as P1 contention evidence.
+
 ## 2026-08-23: FoundUp Memex learning-candidate hardening regressions
 
 - Added adversarial coverage proving a caller cannot self-authorize governed

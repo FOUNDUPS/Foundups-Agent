@@ -1,5 +1,68 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-23: Stable route-file owner resolution
+
+**Implemented locally and independently WSP_97-falsified; no live route
+activated.** The existing owner resolver now consumes the stable private
+`REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`, performs a nonmutating terminal read
+through the route store, and requires exact authority, canonical, replica-root, and
+four-field descriptor agreement. The legacy direct root remains a migration
+path; both values together fail closed. RedDog forwards the pointer through
+the closed owner and resident-architect profiles plus the bounded Start
+Operations promotion/control boundary.
+
+Normal consumers take the activation lock without write authority. An
+unjournaled record is valid only while `EMPTY`; every `CURRENT` record requires
+an exact terminal-journal digest. `PREPARED` fails pending and only an explicit
+activation/controller load may perform rollback recovery. This closes
+journal-loss promotion without giving query paths publication authority.
+
+The activation controller remains the next layer. Its post-selection child
+must avoid recursively taking the held activation lock: it will receive the
+exact selected candidate root explicitly while the controller proves the route
+record before and after that query. Normal committed consumers use the stable
+route file. Existing processes still require restart after the one-time user-
+environment pointer is installed.
+
+## 2026-08-23: Private route CAS and crash-recovery layer
+
+**Implemented and independently verified at `7da03c62`; no live route
+activated.** The stable private route file now starts from an immutable-shape
+`EMPTY` revision and admits only exact predecessor-digest plus incrementing-
+revision `CURRENT` candidates. A machine-wide lock, PREPARED journal, atomic
+same-directory replacement, exact reread, rollback-only crash recovery, and
+normal-exit commit finalization prevent concurrent winner, ABA, and late-error
+promotion. Unknown route/journal combinations fail terminally without deletion.
+PREPARED recovery evaluates structurally valid route digests before selected-
+root liveness, allowing exact predecessor restoration after candidate-root
+loss. Direct proofs copy exact-key binding maps and normalize hostile values.
+WSP_62 separates the 196-line policy class from a 133-line confined I/O class;
+both route suites are registry-collectable.
+
+The next separately reviewed layer must bind this transaction to the verified
+planner/materializer, pre-route and selected-route owner queries, secret-free
+activation receipt, and deterministic recovery entry point. Stable route-file
+resolution and closed-profile propagation are now the adjacent implemented
+layer; the one-time user-environment installation remains an operational gate.
+
+## 2026-08-23: Exact activation-plan admission layer
+
+**Implemented and independently verified; live activation remains gated.** A
+read-only planner proves a clean exact HEAD, CURRENT canonical
+freshness, the selected `all-MiniLM-L6-v2` snapshot, and the exact 22-file
+generation-bound query-snapshot set. It descriptor-hashes every file twice,
+uses a final third enumeration to catch second-pass identity swaps, and passes
+the result through the production generation and manifest validators. It
+holds no post-return lease; the materializer owns later source revalidation.
+It neither materializes nor changes routing.
+
+The next separately reviewed layers are the private stable route-file store,
+serialized digest/revision CAS with crash recovery, activation controller,
+secret-free receipt, and thin trusted-host CLI. Only after merge at exact main
+may the controller materialize an absent immutable root, prove candidate and
+selected-route queries, and reverify all digests. Existing and historical
+replicas remain untouched by the planner.
+
 ## 2026-08-23: Narrow generation-bound query-replica closure
 
 **Implemented locally; synthetic acceptance complete; live exact-main

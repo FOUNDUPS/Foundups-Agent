@@ -1,5 +1,55 @@
 # foundups_mcp_bridge Tests
 
+## Stable route-file owner resolution
+
+- `test_reddog_holoindex_owner_replica_route_resolution.py` retains the legacy
+  direct-root proofs and adds route-file rejection for relative/noncanonical
+  values, direct-root ambiguity, exact committed selection, unjournaled
+  `CURRENT`, `PREPARED`, and canonical or replica descriptor mismatch. Consumer
+  failures preserve route/journal bytes and normalize private store errors.
+- Focused route contract/store: **46 passed / 1 host-capability skip**. Expanded
+  resolver, route, owner bootstrap, maintenance, and real one-shot suite:
+  **173 passed / 1 skip**. Independent focused replay: **121 passed / 1 skip**.
+  All route roots were disposable; no live environment, owner, Holo store, or
+  replica was touched.
+
+## Private route contract and store
+
+- `test_reddog_holoindex_query_route_contract.py` proves canonical round trips,
+  copied immutable nested bindings, direct-proof backing-map isolation,
+  duplicate/noncanonical/non-finite/oversize JSON
+  rejection, exact shapes and scalars, timestamp/path/digest/generation rules,
+  hostile direct-construction errors, and journal predecessor/candidate chain
+  integrity.
+- `test_reddog_holoindex_query_route_store.py` proves no-replace idempotent
+  initialization, exact revision+digest CAS, normal-exit commit, uncommitted and
+  exceptional rollback, commit-request late failure, two concurrent activators,
+  prepared recovery before/after route swap and after candidate-root loss,
+  read-only PREPARED rejection, terminal digest admission, mandatory journal
+  proof for `CURRENT`, in-lock candidate revalidation, unknown-state terminal failure,
+  atomic-replace failure recovery, rollback failure recovery, lexical path/link
+  rejection, and private-file mode where supported.
+- Result: **46 passed / 1 symlink-capability skip** with the route contract
+  using disposable roots only.
+  Both files are collectable in the 1,574-test / 267-quarantined registry.
+  No live route, Holo store, replica, owner, environment, or receipt was touched.
+
+## Exact activation-plan admission
+
+- `test_reddog_holoindex_query_replica_plan.py` covers strict repository/store/
+  HEAD/model boundaries, CURRENT binding stability, exact two-manifest output,
+  and production generation/22-file snapshot-manifest integration.
+- Adversarial cases include same-size content replacement with restored mtime,
+  directory identity replacement during either digest pass, model/snapshot
+  link or junction aliases, exact-limit type rejection, missing/extra/wrong-
+  generation snapshots, hostile binding shapes, and stable public failure
+  normalization.
+- Adjacent confined-reader and model-resolver tests prove descriptor/path
+  identity stability and planner-only preservation of unresolved source-path
+  evidence. Result: **109 passed / 4 host-capability skips**. All fixtures are
+  disposable; no canonical store, live owner, route, replica, or maintenance
+  state is changed.
+
 ## Narrow generation-bound query-replica closure
 
 - Snapshot-store preflight verifies the exact seven-collection/22-file

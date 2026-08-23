@@ -17,6 +17,17 @@ Current implementation:
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
 
+- Governed Holo resident binding (implemented / live canary required): the VSIX one-shot and canonical
+  resident/OpenClaw read-only worker now use the same verified replica resolver
+  and owner-query contract. The resident path is child-process bounded,
+  response/receipt bound, scoped before Fusion, and performs no reindex or
+  Hermes dispatch. The 30-second parent wall reserves three seconds for cleanup
+  around an at-most-27-second child operation. A dirty-authority probe proves
+  fail-closed reachability, not live success; clean/current post-merge success
+  remains an activation gate. P1 throughput work may replace per-query cold
+  starts and process-local-only serialization with a supervised lease only if
+  identical route, cleanup, and receipt proofs remain.
+
 - Nemotron/Qwen routing slice: local Nemotron 3.5 Lightning can produce two
   compact shadow panel proposals through LM Studio's native reasoning-off API;
   deterministic AI Gateway admission owns role/provider/catalog binding.
@@ -97,12 +108,27 @@ Current implementation:
   configured/system interpreter needs per-user NumPy; universal isolation waits
   on a sealed/configured Holo interpreter closure, while explicit Python
   injection variables and credentials remain denied now.
-- Query-replica production plumbing (0.4.102 source candidate): the closed
-  `holoindex_owner` and `resident_architect` profiles carry only the explicit
+- Query-replica production plumbing (current source candidate): the closed
+  `holoindex_owner` and `resident_architect` profiles plus the bounded Start
+  Operations promotion/control environment carry the explicit non-empty string
+  stable `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE` or exclusive legacy
   `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` needed by the one-shot query and
-  promotion boundaries. Host-side code proves an existing exact-generation
-  active replica and fails closed before owner use. Live materialization,
-  retention, and ChatGPT-app acceptance remain separate pending work.
+  promotion boundaries. Normal host consumers take the activation lock only
+  for a nonmutating terminal read: `CURRENT` requires a digest-bound journal,
+  `PREPARED` fails pending, and recovery remains explicit controller work.
+  Route-record/active-descriptor agreement is then proved before owner use.
+  Live materialization, retention, and ChatGPT-app acceptance remain separate
+  pending work.
+  Capacity is already P1 debt rather than permission to widen gates: the
+  candidate backend occupies 1,381/1,400 files (19-file headroom), its generated
+  manifest occupies 309,370/327,680 bytes (18,310-byte headroom), and the
+  package surface occupies 66 files / 962,637 bytes under its unchanged 1 MiB
+  ceiling (85,939-byte headroom). The isolated frozen-source release passed all
+  four groups in 288.505 seconds without a timeout; governed Git finished
+  111.605 seconds below the unchanged 400-second child ceiling. A separate run
+  under competing audit load correctly failed when core and governed Git both
+  reached that ceiling. Profiling, scheduling, and reducing those long poles is
+  P1 scale debt; no unverified cache or timeout increase is authorized.
 - R9 shared-store-independent Git authority (v0.4.101): replaces recursive
   whole-common-store identity with canonical topology, relevant-control, exact
   current-ref, and A/B requested-output binding. Linked reads survive unrelated

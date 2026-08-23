@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1570,
+  "total_tests": 1574,
   "quarantined_tests": 267,
   "tests": [
     {
@@ -8497,6 +8497,19 @@
       "description": ""
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_generation_bound_holoindex_query_adapter",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_generation_bound_holoindex_query_adapter.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for the resident generation-bound HoloIndex query adapter."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_generic_agent_worktree_write_spine_contract_doc",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_generic_agent_worktree_write_spine_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -8939,7 +8952,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_authoritative_work_state_refresh_bootstrap.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9412,7 +9425,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_operator_loop_and_generic_spine_audit_phase1.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10006,7 +10019,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_model_feedback_ledger_admission_handler.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10511,7 +10524,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_queue_loop_case_6.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [
         "network"
       ],
@@ -10980,7 +10993,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_conversation_wiring.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11528,7 +11541,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_held_out_regression_gate_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -16303,6 +16316,47 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Focused policy tests for the narrow RedDog query-replica closure."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_replica_plan",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica_plan.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_route_contract",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_route_contract.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_route_store",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_route_store.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_sealed_holo_runtime",

@@ -93,6 +93,11 @@ extended-length paths, Linux descriptor verification, and the existing public
 imports. Its temporary exact WSP 62 no-growth ceiling is recorded in
 `wsp_62_exemptions.yaml`.
 
+`runtime_artifact_confined_byte_reader.py` also exposes a bounded streaming
+digest proof for callers that already hold an expected file identity. It uses
+one no-follow confined descriptor, rejects identity/path drift before and after
+hashing, and returns only the digest, size, and admitted identity.
+
 ## [API] Public API & Usage
 
 ### Exported Functions/Classes

@@ -22,6 +22,20 @@ AI Gateway supplies providers/roles and admits only evaluation-eligible held-out
 benchmark candidates. No production routing or extension mutation follows from
 that proposal.
 
+## Governed resident Holo grounding
+
+The VSIX one-shot and canonical resident/OpenClaw read-only worker share the
+same generation-bound owner-query contract. The resident adapter has a
+30-second total wall, passes no more than 27 seconds into the child operation,
+and reserves three seconds for parent cleanup. It exposes only allowed scoped
+hit metadata after exact CURRENT repository, authority, generation, replica,
+and receipt verification; Fusion receives no route or owner credential.
+
+The implementation is not activation evidence. A clean/current post-merge
+live-success canary is still required. Per-query child startup and
+process-local-only serialization are explicit P1 scalability debt, and no
+outbound Hermes dispatch is enabled by this interface.
+
 ## Test and promotion interface
 
 `package.json` exposes `test`, `test:contract`, and `test:release` without local
@@ -101,9 +115,27 @@ and virtual-environment keys plus `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`, and
 `holo_query`, `holoindex_owner`, and `resident_architect`; `default` adds none.
 Unknown or caller-constructed profiles fail to `default`. OpenRouter, Holo
 owner, and resident authority credentials never cross into another profile.
-`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` is admitted only by `holoindex_owner`
-and `resident_architect`, allowing their Python boundaries to prove the same
-explicit active replica without exposing it to unrelated bridge children.
+`REDDOG_HOLOINDEX_QUERY_ROUTE_FILE` and the exclusive legacy
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` are admitted by the closed
+`holoindex_owner` and `resident_architect` profiles, allowing their Python
+boundaries to prove the same explicit active replica without exposing it to
+unrelated bridge children. The separate Start Operations control environment
+also admits these exact non-empty strings for its promotion-time owner check;
+non-string, empty, secret, and arbitrary values are dropped. Python rejects
+both route candidates together, requires a digest-bound terminal journal for
+`CURRENT`, and exact-matches route-file authority and replica bindings to the
+active descriptor without consumer-side recovery or publication.
+Those two profiles and the bounded Start Operations control boundary admit
+`REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` so an
+explicit clean committed-head authority checkout survives the JavaScript to
+Python boundary. The value remains only a candidate: Python independently
+proves its topology, clean state, and exact workspace HEAD before use.
+The resident worker does not treat profile propagation as proof. Its default
+generation-bound adapter invokes the same one-shot owner bridge in a bounded
+child process, validates exact CURRENT authority/replica/receipt coherence, and
+projects only allowed-path hits into a new scoped worker receipt. Raw owner
+evidence, private route state, and credentials do not enter Fusion. The path
+grounds canonical resident/OpenClaw audits but performs no live Hermes dispatch.
 `buildHoloQueryEnv(envLike, retrievalMode)` composes `holo_query`, which admits
 only `HOLOINDEX_SSD_PATH`, legacy `HOLO_SSD_PATH`, and explicit `HOLO_OFFLINE`,
 then forces `HOLOINDEX_QUERY_READONLY=1`. Lexical mode additionally synthesizes

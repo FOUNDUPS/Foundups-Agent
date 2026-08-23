@@ -70,10 +70,10 @@ from modules.communication.moltbot_bridge.src.reddog_memex_snapshot_projection_s
     supply_assignment_bound_memex_projection,
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter import (
-    HoloIndexReadOnlyQueryAdapter,
-    path_is_allowed,
+    HoloIndexReadOnlyQueryAdapter, path_is_allowed,
     paths_from_query_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_generation_bound_holoindex_query_adapter import GenerationBoundHoloIndexQueryAdapter
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     SelectionDecision,
     SelectionPurpose,
@@ -544,7 +544,7 @@ def execute_model_backed_repo_code_audit(
         *tuple(str(value) for value in assignment.get("allowed_read_targets", ())),
     )))
     holo_receipt = _query_index(
-        adapter=holoindex_adapter or HoloIndexReadOnlyQueryAdapter(repo_root),
+        adapter=holoindex_adapter or GenerationBoundHoloIndexQueryAdapter(repo_root),
         source="holoindex",
         query=query,
         allowed_paths=discovery_targets,
@@ -594,7 +594,7 @@ def execute_model_backed_repo_code_audit(
     external_research_artifacts = _optional_external_research_artifacts(
         task_context=task_context,
         assignment=assignment,
-        holoindex_adapter=holoindex_adapter or HoloIndexReadOnlyQueryAdapter(repo_root),
+        holoindex_adapter=holoindex_adapter or GenerationBoundHoloIndexQueryAdapter(repo_root),
         external_research_retriever=external_research_retriever,
     )
     external_research_receipt = external_research_artifacts[0] if external_research_artifacts else None

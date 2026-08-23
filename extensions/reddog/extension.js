@@ -6594,8 +6594,9 @@ function activeEditorContext(root) {
   return '### active editor ' + (selected ? 'selection' : 'file') + ': ' + rel + '\n```' + (doc.languageId || 'text') + '\n' + clipped + '\n```';
 }
 
-function repoFileIndex(root, maxFiles) {
-  const trackedPaths = gitOutput(root, 'TRACKED_PATHS');
+function repoFileIndexFromTrackedOutput(trackedPaths, maxFiles) {
+  if (typeof trackedPaths !== 'string' || !Number.isInteger(maxFiles)
+    || maxFiles < 1 || maxFiles > REPO_DEEP_DIVE_MAX_MANIFEST_FILES) return null;
   const marker = '\n' + GIT_OUTPUT_TRUNCATED_MARKER;
   const gitFiles = trackedPaths.length > 1000000
     ? trackedPaths.slice(0, 1000000 - marker.length) + marker : trackedPaths;
@@ -6610,14 +6611,14 @@ function repoFileIndex(root, maxFiles) {
       return selected;
     }
   }
-  const roots = ['modules', 'holo_index', '.claude', 'extensions', 'scripts', 'data'];
+  return null;
+}
+
+function repoFileIndex(root, maxFiles) {
+  const indexed = repoFileIndexFromTrackedOutput(gitOutput(root, 'TRACKED_PATHS'), maxFiles);
+  if (indexed) return indexed;
   const files = [];
-  for (const relRoot of roots) {
-    walkRepoFiles(root, relRoot, files, maxFiles);
-    if (files.length >= maxFiles) {
-      break;
-    }
-  }
+  walkRepoFiles(root, '.', files, maxFiles);
   files.manifest_truncated = files.length >= maxFiles;
   files.manifest_source_count = files.length;
   return files;
@@ -8243,6 +8244,7 @@ module.exports = {
   buildBoundedRepoContextAsync,
   isRepoDeepDiveRequest,
   repoDeepDiveConcepts,
+  repoFileIndexFromTrackedOutput,
   repoFileIndex,
   discoverRepoDeepDiveTargets,
   taskTextWithDiscoveredRepoTargets,

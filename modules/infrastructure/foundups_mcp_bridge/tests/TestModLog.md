@@ -1,5 +1,65 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-23] Stable route-file consumer binding
+
+- Added exact stable-route-file resolution, dual-configuration rejection,
+  authority/canonical/replica binding comparison, nonmutating terminal reads,
+  mandatory journal proof for `CURRENT`, and bounded RedDog propagation. The
+  existing direct-root behavior remains an isolated legacy migration path.
+- Focused route contract/store: **46 passed / 1 host-capability skip** in 6.54
+  seconds. Expanded resolver/route/owner/maintenance/one-shot integration:
+  **173 passed / 1 skip** in 11.12 seconds. Independent focused replay:
+  **121 passed / 1 skip** in 9.91 seconds. The Node environment matrix also
+  passed.
+- Backend generator/provenance passed **8/8** in 86.48 seconds; the exact
+  1,381-file closure and extension pin equal
+  `d818aefa512d...9e88e`. Registry is current at **1,574 / 267**. Backend
+  compatibility, Start Operations, fast tier, and the 66-file/962,637-byte
+  package surface pass. The isolated exhaustive release passed **4/4 in
+  288,505 ms** with no timeout; the 111,605 ms governed-Git child margin and a
+  retained concurrent-audit timeout remain P1 profiling/contention debt.
+  No live route, owner, Holo, environment, or replica state changed.
+  (WSP 00/15/22/50/62/97)
+
+## [2026-08-23] Private route CAS and crash-recovery falsification
+
+- Added strict route/journal parser and immutable binding tests plus adversarial
+  store coverage for CAS, concurrency, prepared crash windows, unknown state,
+  replace/rollback failure, late exception after commit request, and path/link/
+  permission boundaries.
+- Independent WSP_97 review reproduced a candidate-root-loss recovery defect,
+  mutable proxy-backing proof drift, loose direct binding shapes/types, and one
+  registry quarantine caused by module-scope parametrization. The repair adds
+  direct-crash, pre-yield loss, in-lock revalidation, immutable-copy, extra-key,
+  and hostile direct-type regressions. WSP_62 extracted route I/O so policy and
+  persistence classes are both below 200 lines.
+- Focused result: **33 passed / 1 host symlink-capability skip** in 3.53 seconds.
+  Registry is **1,573 / 267 quarantined** and both route suites are collectable.
+  All roots were disposable; no live
+  operational state changed.
+- Sequential route plus replica-plan/manifest/materializer adjacency passed
+  **111 / 3 skips** in 23.59 seconds. One earlier parallel generator+pytest run returned a transient
+  selected-root-not-directory failure; it is non-evidence, was not hidden, and
+  no path check was weakened; the deterministic root-loss case was separately
+  reproduced and repaired. The backend check then passed alone at 1,377 files
+  and `5c038a465ec8...776d35d`.
+  (WSP 00/15/22/50/62/97)
+
+## [2026-08-23] Exact activation-plan falsification
+
+- Added production-contract integration for one complete selected-model plus
+  exact 22-file snapshot plan and failures for missing, extra, or wrong-
+  generation artifacts.
+- Added WSP_97 identity/race cases for restored-mtime content replacement,
+  directory swaps during either digest pass, link/junction aliases, exact
+  limits types, hostile freshness shapes, and public error normalization.
+  Tests use real generation and manifest validators rather than stubbed policy.
+- Focused planner, model resolver, confined reader, manifest, and materializer
+  matrix: **109 passed / 4 host-capability skips**. No live
+  artifact or route was touched. Registry is **1,571 / 267 quarantined**;
+  runtime manifest is **1,377 files** at `5c038a465ec8...776d35d`.
+  (WSP 00/15/22/50/62/97)
+
 ## [2026-08-23] Narrow replica manifest and WSP_62 verification
 
 - Added exact 22-file topology and generation preflight coverage, legacy full

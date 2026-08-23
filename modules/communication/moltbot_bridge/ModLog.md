@@ -1,5 +1,40 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-23: Resident generation-bound Holo owner binding implementation
+
+- Replaced the resident audit worker's ambient handoff-only default with a
+  focused adapter over the existing governed one-shot owner bridge. A fresh
+  resident/OpenClaw process now inspects the verified replica route instead of
+  returning `HOLOINDEX_QUERY_SERVICE_NOT_CONFIGURED` without reading it.
+- WSP_97 falsification found and closed an owner cleanup race, unscoped raw and
+  nested receipt leakage, split HEAD/root/generation/replica admission,
+  pre-filter result starvation, hostile timeout exceptions, unbounded captured
+  output, and adapter-only serialization. The shared one-shot now owns the
+  lifecycle lock; the resident adapter restores the process boundary and
+  enforces a 30-second parent wall with at most 27 seconds for the child
+  operation and a three-second cleanup reserve. The budget is above the
+  documented 14.5-18.5 second cold-owner range that made 15 seconds unsafe.
+- The one-shot retains a 60-second default for extension/direct callers and
+  propagates remaining time into configured health, owner startup, query, and
+  retry. Its CLI accepts only the exact internal timeout flag. No reindex,
+  route recovery/publication, Fusion route disclosure, or Hermes dispatch was
+  added.
+- Current focused owner/adapter/bootstrap result: **128 passed**. Canonical
+  read-only audit worker: **75 passed**. Exact inherited WSP_62 guard: **16
+  passed**. The legacy diagnostic adapter export is retained and its four
+  adjacent direct/query/receipt/transport suites pass **49/49**. A
+  production-shaped probe reached the one-shot boundary and failed
+  closed on the independently dirty authority root with zero owner attempts and
+  no reindex; it did not regress to service-not-configured.
+- This is local code evidence, not a live-success claim. A clean/current
+  post-merge owner canary remains required before activation. Per-query child
+  startup and process-local-only serialization remain P1 cross-process and
+  horizontal-throughput debt; no timeout or trust proof was weakened.
+- The exact generated candidate passed the isolated four-group RedDog release
+  in **288,505 ms**. A concurrent-audit run first timed out core/governed Git at
+  the unchanged ceiling and remains explicit P1 contention evidence.
+- WSP 00/15/22/50/62/84/87/97.
+
 ## 2026-08-23: FoundUp Memex learning-candidate fail-closed hardening
 
 - Removed caller-asserted governed-research receipt IDs from the admission

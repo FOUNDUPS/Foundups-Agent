@@ -4,6 +4,11 @@ Offline pytest coverage for shared model, runtime-artifact, registry, policy,
 validation, and environment utilities. Network/model/process effects must be
 mocked in unit tests.
 
+`test_runtime_artifact_safety.py` covers confined streaming-digest success,
+strict expected-identity/bound types, same-size restored-mtime mutation,
+replacement/link rejection, and descriptor/path stability with disposable
+files only.
+
 ## LM Studio lifecycle coverage
 
 `test_lm_studio_model_lifecycle.py` proves native installed-versus-resident

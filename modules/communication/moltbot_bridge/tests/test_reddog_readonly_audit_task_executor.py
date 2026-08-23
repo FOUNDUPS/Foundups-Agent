@@ -23,8 +23,8 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
     REPO_CODE_AUDIT_LANE,
     RUNTIME_SURFACE_READONLY_AUDIT,
     FoundupsFusionRepoAuditModelRunner,
-    CodeIndexReadOnlyQueryAdapter,
-    HoloIndexReadOnlyQueryAdapter,
+    CodeIndexReadOnlyQueryAdapter, HoloIndexReadOnlyQueryAdapter,
+    GenerationBoundHoloIndexQueryAdapter,
     RepoAuditModelResult,
 )
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
@@ -176,7 +176,7 @@ def _patch_default_query_adapters(monkeypatch) -> None:
     def fake_code_query(self, *, query: str, allowed_paths, limit: int):
         return _FakeQueryAdapter().query(query=query, allowed_paths=allowed_paths, limit=limit)
 
-    monkeypatch.setattr(HoloIndexReadOnlyQueryAdapter, "query", fake_holo_query)
+    monkeypatch.setattr(GenerationBoundHoloIndexQueryAdapter, "query", fake_holo_query)
     monkeypatch.setattr(CodeIndexReadOnlyQueryAdapter, "query", fake_code_query)
 
 
@@ -2435,4 +2435,4 @@ def test_executor_module_ast_has_no_mutation_network_or_runtime_wiring() -> None
 
     assert not (imported & {"subprocess", "requests", "socket", "urllib", "shutil"})
     assert not (calls & {"eval", "exec", "compile", "system", "popen", "run", "Popen"})
-    assert not (attrs & {"write_text", "mkdir", "unlink", "rmdir"})
+    assert HoloIndexReadOnlyQueryAdapter is readonly_worker_runtime.HoloIndexReadOnlyQueryAdapter and not (attrs & {"write_text", "mkdir", "unlink", "rmdir"})

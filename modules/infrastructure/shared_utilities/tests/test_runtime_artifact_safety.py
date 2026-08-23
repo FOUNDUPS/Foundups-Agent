@@ -9,6 +9,10 @@ from pathlib import Path
 import pytest
 
 from modules.infrastructure.shared_utilities import runtime_artifact_safety
+from modules.infrastructure.shared_utilities.runtime_artifact_confined_byte_reader import (
+    confined_file_identity,
+    secure_digest_confined_file_impl,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     confined_runtime_operation_lock,
     redact_runtime_text,
@@ -68,6 +72,50 @@ def test_descriptor_final_path_rejects_unsupported_posix_platform(
 
     with pytest.raises(OSError, match="unsupported_platform"):
         runtime_artifact_safety._linux_descriptor_final_path(0)
+
+
+def test_confined_digest_binds_preopened_identity_and_content(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    source = root / "artifact.bin"
+    source.write_bytes(b"artifact")
+    expected = confined_file_identity(os.lstat(source))
+
+    proof = secure_digest_confined_file_impl(
+        source,
+        allowed_root=root,
+        expected_identity=expected,
+        max_bytes=64,
+    )
+
+    assert proof.identity == expected
+    assert proof.size == 8
+    assert proof.digest == "sha256:c7c5c1d70c5dec4416ab6158afd0b223ef40c29b1dc1f97ed9428b94d4cadb1c"
+
+
+def test_confined_digest_rejects_stale_identity_and_bounds(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    source = root / "artifact.bin"
+    source.write_bytes(b"first")
+    stale = confined_file_identity(os.lstat(source))
+    source.write_bytes(b"second")
+
+    with pytest.raises(ValueError, match="identity_mismatch"):
+        secure_digest_confined_file_impl(
+            source,
+            allowed_root=root,
+            expected_identity=stale,
+            max_bytes=64,
+        )
+    current = confined_file_identity(os.lstat(source))
+    with pytest.raises(ValueError, match="bound_exceeded"):
+        secure_digest_confined_file_impl(
+            source,
+            allowed_root=root,
+            expected_identity=current,
+            max_bytes=3,
+        )
 
 
 def test_confined_runtime_operation_lock_uses_canonical_runtime_file(

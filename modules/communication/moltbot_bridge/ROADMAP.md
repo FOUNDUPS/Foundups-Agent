@@ -1,5 +1,17 @@
 # moltbot_bridge Roadmap
 
+- IMPLEMENTED / LIVE CANARY REQUIRED: the default resident/OpenClaw read-only audit worker now reaches
+  the verified Holo query-replica resolver through the existing one-shot owner
+  bridge. Complete owner lifecycles are serialized, the child/parent deadline
+  is bounded, response/receipt bindings are reverified, and only scoped hit
+  metadata enters the worker. The 30-second parent wall gives the child at most
+  27 seconds and retains three seconds for cleanup. Fusion receives no private
+  route state and no Hermes dispatch is performed. The dirty-authority probe
+  proves fail-closed reachability only; clean/current post-merge success is an
+  activation gate. P1 scale debt remains: the safe phase-1 path serializes only
+  within one process and starts a bounded one-shot process per Holo query; a
+  future supervised owner lease may reduce cross-process contention and
+  cold-start cost without weakening proof.
 - COMPLETE: bounded FoundUps Fusion, OpenClaw gateway, and Hermes API artifact
   providers consume one shared verified runtime-topology capability. Exact
   role/provider/model identity and explicit available-provider inventory are

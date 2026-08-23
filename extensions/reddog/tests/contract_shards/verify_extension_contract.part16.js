@@ -81,10 +81,11 @@ assert.strictEqual(quotedIsolationTargets.quoted_reference_blocks.length, 2, 'TT
 assert.deepStrictEqual(quotedIsolationTargets.repo_file_targets, [], 'TTX-013: quoted repo paths remain context only');
 assert.deepStrictEqual(quotedIsolationTargets.external_research_targets, [], 'TTX-014: quoted URLs remain context only');
 
-// REDDOG_FOUNDUP_WORK_SKILL_GROUNDING_PHASE1 (FWG-001..008): registered FoundUp
-// work derives evidence from the canonical registry, never a name-specific branch.
 const foundupWorkPrompt = 'work on TRADE foundup';
-const foundupWorkTargets = orchestrator.extractTypedTargets(foundupWorkPrompt, root);
+const foundupFixture = require('./foundup_integration_test_fixture').create(root, vscodeMock);
+const foundupWorkTargets = orchestrator.extractTypedTargets(foundupWorkPrompt, foundupFixture.root);
+assert.throws(() => foundupFixture.baseResultFor({ repo_file_targets: ['../outside.txt'] }),
+  /foundup_fixture_path_invalid/, 'FWG-000: fixture evidence reads remain confined');
 assert.strictEqual(foundupWorkTargets.foundup_work_grounding.applied, true, 'FWG-001: FoundUp work resolver must apply');
 assert.strictEqual(foundupWorkTargets.foundup_work_grounding.passed, true, 'FWG-002: registered FoundUp must resolve');
 assert.strictEqual(foundupWorkTargets.foundup_work_grounding.foundup_id, 'trade', 'FWG-003: registry identity must bind');
@@ -102,7 +103,7 @@ const foundupMissing = orchestrator.buildTypedGroundingPreflight(foundupWorkProm
   holoindex_scorecard: { target_recall_ok: false, required_targets_missing: ['modules/foundups/trade/foundup_manifest.json'] }
 });
 assert.strictEqual(foundupMissing.passed, false, 'FWG-007: missing FoundUp evidence must block Fusion');
-const unknownFoundupTargets = orchestrator.extractTypedTargets('fix Nimbus FoundUp', root);
+const unknownFoundupTargets = orchestrator.extractTypedTargets('fix Nimbus FoundUp', foundupFixture.root);
 const unknownFoundup = orchestrator.buildTypedGroundingPreflight('fix Nimbus FoundUp', 'wsp_holo_skillz', {
   typed_targets: unknownFoundupTargets,
   holoindex_scorecard: { target_recall_ok: true, required_targets_missing: [] }
@@ -110,30 +111,30 @@ const unknownFoundup = orchestrator.buildTypedGroundingPreflight('fix Nimbus Fou
 assert.strictEqual(unknownFoundup.passed, true, 'FWG-008: unresolved language may reach advisory Fusion with registry evidence');
 assert.strictEqual(unknownFoundup.foundup_requires_wsp109_resolution, true,
   'FWG-008: unresolved language must route to WSP 109 without mutation scope');
-assert.strictEqual(orchestrator.extractTypedTargets('work on FoundUp Nimbus', root).foundup_work_grounding.requires_wsp109_resolution,
+assert.strictEqual(orchestrator.extractTypedTargets('work on FoundUp Nimbus', foundupFixture.root).foundup_work_grounding.requires_wsp109_resolution,
   true, 'FWG-008: unresolved language must route consistently in either word order');
 for (const prompt of ['work on Nimbus, a FoundUp', 'work on Nimbus as a FoundUp', 'work on Nimbus, our new FoundUp',
   'work on Nimbus, an existing FoundUp', 'work on Nimbus, which is a FoundUp', 'work on Nimbus, another FoundUp'])
-  assert.strictEqual(orchestrator.extractTypedTargets(prompt, root).foundup_work_grounding.requires_wsp109_resolution,
+  assert.strictEqual(orchestrator.extractTypedTargets(prompt, foundupFixture.root).foundup_work_grounding.requires_wsp109_resolution,
     true, 'FWG-008: unmatched determiner grammar must route without authority');
 for (const prompt of ['Review how TRADE differs from another FoundUp.', 'Audit another FoundUp workflow.',
   'Review some FoundUp workflows.', 'Review more FoundUp workflows.', 'Review all FoundUp workflows.'])
-  assert.strictEqual(orchestrator.extractTypedTargets(prompt, root).foundup_work_grounding.requires_wsp109_resolution,
+  assert.strictEqual(orchestrator.extractTypedTargets(prompt, foundupFixture.root).foundup_work_grounding.requires_wsp109_resolution,
     true, 'FWG-008: generic language uses the same no-authority resolution route');
 for (const prompt of ['edit Nimbus FoundUp', 'modify Nimbus FoundUp', 'patch Nimbus FoundUp',
   'create Nimbus FoundUp', 'migrate Nimbus FoundUp', 'work on Nimbus FoundUps', 'Review FoundUps agent workflows'])
-  assert.strictEqual(orchestrator.extractTypedTargets(prompt, root).foundup_work_grounding.requires_wsp109_resolution,
+  assert.strictEqual(orchestrator.extractTypedTargets(prompt, foundupFixture.root).foundup_work_grounding.requires_wsp109_resolution,
     true, 'FWG-008: verb or plural variation cannot bypass WSP 109 resolution');
-assert.strictEqual(orchestrator.extractTypedTargets('Edit FoundUps Agent Market', root).foundup_work_grounding.foundup_id,
+assert.strictEqual(orchestrator.extractTypedTargets('Edit FoundUps Agent Market', foundupFixture.root).foundup_work_grounding.foundup_id,
   'agent_market', 'FWG-008: registered alias must outrank product-token similarity');
-const foundupHolo = orchestrator.holoIndexOutput(root, foundupWorkPrompt, 18000);
+const foundupHolo = orchestrator.holoIndexOutput(foundupFixture.root, foundupWorkPrompt, 18000, { baseResult: foundupFixture.baseResultFor(foundupWorkTargets), allowBundleOnlyBridge: false });
 assert.strictEqual(foundupHolo.meta.foundup_work_grounding_passed, true, 'FWG-009: Holo metadata must carry the registry receipt verdict');
 assert.strictEqual(foundupHolo.meta.direct_read_fetch_attempted, true, 'FWG-010: registered FoundUp evidence must trigger governed direct read');
 assert.strictEqual(foundupHolo.meta.target_recall_ok, true, 'FWG-011: canonical FoundUp evidence must be recalled');
 assert(foundupHolo.direct_read_section.paths.includes('modules/foundups/trade/foundup_manifest.json'), 'FWG-012: manifest content must enter the direct-read packet');
 const antifafmWorkPrompt = 'work on antifafm_001 foundup';
-const antifafmWorkTargets = orchestrator.extractTypedTargets(antifafmWorkPrompt, root);
-const antifafmHolo = orchestrator.holoIndexOutput(root, antifafmWorkPrompt, 18000);
+const antifafmWorkTargets = orchestrator.extractTypedTargets(antifafmWorkPrompt, foundupFixture.root);
+const antifafmHolo = orchestrator.holoIndexOutput(foundupFixture.root, antifafmWorkPrompt, 18000, { baseResult: foundupFixture.baseResultFor(antifafmWorkTargets), allowBundleOnlyBridge: false });
 assert.strictEqual(antifafmWorkTargets.foundup_work_grounding.passed, true,
   'FWG-012: registry-heavy FoundUp must resolve');
 assert.strictEqual(antifafmHolo.meta.target_recall_ok, true,
@@ -263,7 +264,7 @@ const foundupResidentConflict = orchestrator.buildResidentArchitectSessionPayloa
 assert.strictEqual(foundupResidentConflict.ok, false, 'FWG-019: caller-selected identity cannot override grounding');
 assert(foundupResidentConflict.rejection_reasons.includes('resident_architect_grounded_foundup_mismatch'),
   'FWG-019: identity conflict exposes a stable rejection reason');
-
+foundupFixture.restore();
 const typedRecall = orchestrator.evaluateTargetRecall(typedPrompt, {
   task_retrieval: {
     code_hits: [

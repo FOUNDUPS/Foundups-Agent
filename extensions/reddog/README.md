@@ -50,10 +50,26 @@ Aggregate panel promotion remains shadow-only.
 
 ## Governed HoloIndex query replica
 
-Semantic owner queries require an absolute, already materialized,
-exact-generation `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT`. Only the closed
-`holoindex_owner` and `resident_architect` routes receive it. Invalid or stale
-replicas fail closed; the extension never creates, re-indexes, or falls back.
+The VSIX one-shot query and the canonical resident/OpenClaw read-only audit
+worker now converge on the same verified one-shot owner bridge. The resident
+adapter uses a bounded child process, rechecks CURRENT HEAD/root/generation and
+all four replica fields, discards the unscoped raw/receipt body, and supplies
+only signed-scope hits to the worker's new receipt. Fusion never receives the
+private route or owner credential. This does not enable outbound Hermes
+dispatch; Hermes-compatible receipts remain evidence only. The resident parent
+wall is 30 seconds, with at most 27 seconds entering the child and three seconds
+reserved for cleanup. This is implemented and locally falsified, but it is not
+activated until a clean/current post-merge owner query succeeds. The current
+dirty-authority probe proves fail-closed reachability only. Process-local
+serialization and one cold child per query remain P1 throughput debt.
+
+Semantic owner queries prefer the stable private `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; the legacy absolute, already materialized `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` remains an exclusive migration
+path, and using both fails closed. The closed `holoindex_owner` and `resident_architect` Python
+profiles receive these candidates with optional `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`; the existing Start Operations control boundary also admits exact non-empty strings for promotion-time owner
+verification. Unrelated bridge profiles receive none. Python requires a digest-bound terminal
+journal for every `CURRENT` route and independently proves the exact active descriptor, canonical
+HEAD/root/generation/receipt, and four replica bindings. Consumer reads never recover or rewrite a
+`PREPARED` transition. Invalid, ambiguous, uncommitted, or stale routes and authority roots fail closed; the extension never creates, re-indexes, or falls back.
 
 ## Workspace and package boundary
 
