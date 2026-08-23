@@ -52,7 +52,8 @@ from .reddog_holoindex_acceptance_windows import (
 from .reddog_holoindex_query_replica import (
     ACTIVE_DESCRIPTOR_NAME,
     QUERY_REPLICA_SCHEMA_VERSION,
-    QueryReplicaLimits,
+    QueryReplicaLimits, query_snapshot_runtime_artifact_paths_complete,
+    runtime_artifact_paths_complete,
 )
 
 
@@ -332,8 +333,8 @@ def _manifest_items(files: list[Any], generation: Path) -> tuple[tuple[str, int,
         items.append((relative, size, str(digests[0])))
     if tuple(items) != tuple(sorted(items)):
         _fail("QUERY_REPLICA_MANIFEST_ORDER_INVALID")
-    if "vectors/chroma.sqlite3" not in {item[0] for item in items}:
-        _fail("QUERY_REPLICA_VECTOR_DATABASE_MISSING")
+    if not runtime_artifact_paths_complete({item[0] for item in items}):
+        _fail("QUERY_REPLICA_RUNTIME_ARTIFACT_SET_INCOMPLETE")
     return tuple(items)
 
 
@@ -380,6 +381,11 @@ def _verify_runtime_artifacts(
     limits: QueryReplicaLimits,
 ) -> None:
     """Rehash only artifacts reachable by the sealed in-memory query backend."""
+
+    if not query_snapshot_runtime_artifact_paths_complete({
+        artifact.relative_path for artifact in binding.artifacts
+    }):
+        _fail("QUERY_REPLICA_RUNTIME_ARTIFACT_SET_INCOMPLETE")
 
     selected = tuple(
         artifact for artifact in binding.artifacts

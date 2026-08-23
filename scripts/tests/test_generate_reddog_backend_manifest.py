@@ -22,6 +22,13 @@ generator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(generator)
 
 
+@pytest.fixture(scope="module")
+def generated_manifest() -> dict[str, object]:
+    """Build the immutable worktree closure once for read-only assertions."""
+
+    return generator.build_manifest()
+
+
 def test_package_initializers_resolve_relative_imports_from_their_package() -> None:
     initializer = (
         REPO_ROOT
@@ -38,8 +45,10 @@ def test_package_initializers_resolve_relative_imports_from_their_package() -> N
     assert generator._package_parts(module) == expected
 
 
-def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None:
-    manifest = generator.build_manifest()
+def test_generated_closure_binds_executable_and_dynamic_load_sentinels(
+    generated_manifest: dict[str, object],
+) -> None:
+    manifest = generated_manifest
     runtime = set(manifest["required_runtime_files"])
     tracked = set(generator._tracked_files())
 
@@ -86,8 +95,10 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     )
 
 
-def test_generated_closure_binds_isolated_acceptance_entrypoint() -> None:
-    manifest = generator.build_manifest()
+def test_generated_closure_binds_isolated_acceptance_entrypoint(
+    generated_manifest: dict[str, object],
+) -> None:
+    manifest = generated_manifest
     entrypoint = "scripts/reddog_holoindex_candidate_acceptance.py"
     acceptance_runtime = {
         "modules/infrastructure/foundups_mcp_bridge/src/"
@@ -111,7 +122,9 @@ def test_generated_closure_binds_isolated_acceptance_entrypoint() -> None:
     assert entrypoint in manifest["required_bridge_sha256"]
 
 
-def test_newly_tracked_imported_runtime_dependency_cannot_be_omitted() -> None:
+def test_newly_tracked_imported_runtime_dependency_cannot_be_omitted(
+    generated_manifest: dict[str, object],
+) -> None:
     importer_relative = "holo_index/core/search_engine.py"
     dependency_relative = "holo_index/core/collection_injections.py"
     importer = REPO_ROOT / importer_relative
@@ -120,7 +133,7 @@ def test_newly_tracked_imported_runtime_dependency_cannot_be_omitted() -> None:
     tree = generator._parse_source(importer, importer_relative)
     import_names, _ = generator._imports(tree, importer)
     resolved = generator._resolve_local_module("holo_index.core.collection_injections")
-    generated = generator.build_manifest()
+    generated = generated_manifest
 
     assert "holo_index.core.collection_injections" in import_names
     assert dependency_relative in generator._tracked_file_set()
@@ -193,9 +206,11 @@ def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
         assert "modules/communication/moltbot_bridge/src/" + filename in required
 
 
-def test_checked_in_manifest_matches_independent_generation() -> None:
+def test_checked_in_manifest_matches_independent_generation(
+    generated_manifest: dict[str, object],
+) -> None:
     checked_in = json.loads(generator.MANIFEST_PATH.read_text(encoding="utf-8"))
-    generated = generator.build_manifest()
+    generated = generated_manifest
 
     assert checked_in == generated
     assert generator.MANIFEST_PATH.stat().st_size <= 320 * 1024
@@ -237,13 +252,18 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     assert (
         "holo_index/module_intent_snapshot.py" in generated["required_runtime_sha256"]
     )
+    assert (
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_replica_manifest.py"
+        in generated["required_runtime_sha256"]
+    )
     _assert_signer_and_memex_runtime_files(generated)
     _assert_manifest_digest_pin(generated)
 
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "5271998070d6aa32befa24bd7cb1684847c3b64ae16685b7bb4207fe42e8ce97"
+    assert digest == "8e72d82c2f8ed542f14cef2addf9e5ecd3de527b888cdaa029b52573696f4df4"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")
@@ -251,8 +271,10 @@ def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     assert match is not None and match.group(1) == digest
 
 
-def test_extension_javascript_is_package_bound_not_backend_materialized() -> None:
-    generated = generator.build_manifest()
+def test_extension_javascript_is_package_bound_not_backend_materialized(
+    generated_manifest: dict[str, object],
+) -> None:
+    generated = generated_manifest
     executable = "extensions/reddog/governed_git_executable.js"
     assert executable not in generated["required_runtime_files"]
     command = [

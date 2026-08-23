@@ -38,6 +38,9 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_response 
 from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_service import (
     _receipt as _service_receipt,
 )
+from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_service_replica_routing import (
+    _binding as _replica_binding,
+)
 from modules.infrastructure.foundups_mcp_bridge.tests.holo_query_service_fixtures import (
     _raw_result,
 )
@@ -96,10 +99,12 @@ def _owner(
 ) -> HoloIndexQueryOwnerService:
     monkeypatch.setenv("HOLOINDEX_QUERY_SERVICE_TOKEN", TOKEN)
     ssd_path = tmp_path / "holo-store"
+    replica_binding = _replica_binding(tmp_path)
     return HoloIndexQueryOwnerService(
         repo_root=tmp_path,
         ssd_path=ssd_path,
         backend_factory=lambda _path: backend or _Backend(),
+        _replica_verifier_for_test=lambda: replica_binding,
         receipt_loader=lambda _path: _receipt(tmp_path, ssd_path),
         repository_state_reader=lambda _root: SimpleNamespace(
             proven_clean=True,

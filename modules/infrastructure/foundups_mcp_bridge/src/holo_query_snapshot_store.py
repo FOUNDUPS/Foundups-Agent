@@ -34,11 +34,11 @@ from .holo_query_snapshot_codec import (
     encode_collection_snapshot,
     load_collection_snapshot,
 )
+from .holo_query_snapshot_contract import SET_MANIFEST
 
 
 SCHEMA_VERSION = "holoindex_query_snapshot_set.v1"
 SNAPSHOT_DIRECTORY = "query_snapshots"
-SET_MANIFEST = "snapshot_set.json"
 MAX_SNAPSHOT_SET_BYTES = 384 * 1024 * 1024
 _ARTIFACT_KEYS = ("manifest", "rows", "vectors")
 _ARTIFACT_SUFFIXES = {
@@ -80,6 +80,27 @@ def _is_link(path: Path, metadata: os.stat_result) -> bool:
     return stat.S_ISLNK(metadata.st_mode) or bool(
         attributes & _WINDOWS_REPARSE_POINT
     )
+
+
+def _validated_directory(path: Path | str) -> Path:
+    """Return one absolute directory only when every component is non-link."""
+
+    target = Path(path).absolute()
+    current = Path(target.anchor)
+    metadata: os.stat_result | None = None
+    try:
+        for component in target.parts:
+            if component == target.anchor:
+                continue
+            current /= component
+            metadata = os.lstat(current)
+            if _is_link(current, metadata):
+                _fail("ROOT_INVALID")
+    except OSError:
+        _fail("ROOT_INVALID")
+    if metadata is None or not stat.S_ISDIR(metadata.st_mode):
+        _fail("ROOT_INVALID")
+    return target
 
 
 def _identity(metadata: os.stat_result) -> tuple[int, int, int, int]:
@@ -339,6 +360,23 @@ def _validated_artifact(
     root: Path, collection: str, kind: str, value: Any,
     *, limits: SnapshotLimits,
 ) -> bytes:
+    expected, expected_bytes, expected_digest = _artifact_descriptor(
+        collection, kind, value, limits=limits
+    )
+    ceiling = {
+        "manifest": limits.max_manifest_bytes,
+        "rows": limits.max_rows_bytes,
+        "vectors": limits.max_vector_bytes,
+    }[kind]
+    payload = _read_regular(root / expected, ceiling=ceiling)
+    if len(payload) != expected_bytes or _digest(payload) != expected_digest:
+        _fail("ARTIFACT_BINDING_MISMATCH")
+    return payload
+
+
+def _artifact_descriptor(
+    collection: str, kind: str, value: Any, *, limits: SnapshotLimits,
+) -> tuple[str, int, str]:
     expected = _artifact_name(collection, kind)
     ceiling = {
         "manifest": limits.max_manifest_bytes,
@@ -348,17 +386,14 @@ def _validated_artifact(
     if (
         type(value) is not dict
         or set(value) != {"path", "bytes", "sha256"}
-        or value["path"] != expected
-        or type(value["bytes"]) is not int
+        or value.get("path") != expected
+        or type(value.get("bytes")) is not int
         or not 0 < value["bytes"] <= ceiling
-        or type(value["sha256"]) is not str
+        or type(value.get("sha256")) is not str
         or _DIGEST.fullmatch(value["sha256"]) is None
     ):
         _fail("ARTIFACT_BINDING_INVALID")
-    payload = _read_regular(root / expected, ceiling=ceiling)
-    if len(payload) != value["bytes"] or _digest(payload) != value["sha256"]:
-        _fail("ARTIFACT_BINDING_MISMATCH")
-    return payload
+    return expected, value["bytes"], value["sha256"]
 
 
 def _preflight_set_size(manifest: Mapping[str, Any], limits: SnapshotLimits) -> None:
@@ -417,6 +452,58 @@ class ImmutableSnapshotClient:
         """Release owned resources; immutable snapshots retain no open handles."""
 
 
+def validate_query_snapshot_set_manifest(
+    snapshot_root: Path | str,
+    *,
+    expected_generation_id: str,
+    expected_artifact_bindings: Mapping[str, tuple[int, str]] | None = None,
+    limits: SnapshotLimits = SnapshotLimits(),
+) -> tuple[str, ...]:
+    """Validate the sealed set topology and generation without loading vectors."""
+
+    limits.validate()
+    if (
+        type(expected_generation_id) is not str
+        or _DIGEST.fullmatch(expected_generation_id) is None
+    ):
+        _fail("GENERATION_INVALID")
+    root = _validated_directory(snapshot_root)
+    payload = _read_regular(root / SET_MANIFEST, ceiling=limits.max_manifest_bytes)
+    manifest = _decode_set_manifest(payload, limits=limits)
+    _preflight_set_size(manifest, limits)
+    if manifest["generation_id"] != expected_generation_id:
+        _fail("GENERATION_MISMATCH")
+    expected = {SET_MANIFEST}
+    observed_bindings = {SET_MANIFEST: (len(payload), _digest(payload))}
+    for name in sorted(BASELINE_QUERY_COLLECTIONS):
+        artifacts = manifest["collections"].get(name)
+        if type(artifacts) is not dict or set(artifacts) != set(_ARTIFACT_KEYS):
+            _fail("ARTIFACT_SET_INVALID")
+        for kind in _ARTIFACT_KEYS:
+            artifact, size, digest = _artifact_descriptor(
+                name, kind, artifacts[kind], limits=limits
+            )
+            expected.add(artifact)
+            observed_bindings[artifact] = (size, digest)
+    if {entry.name for entry in os.scandir(root)} != expected:
+        _fail("UNEXPECTED_ARTIFACT")
+    if expected_artifact_bindings is not None:
+        if (
+            not isinstance(expected_artifact_bindings, Mapping)
+            or any(
+                type(path) is not str
+                or type(binding) is not tuple
+                or len(binding) != 2
+                or type(binding[0]) is not int
+                or type(binding[1]) is not str
+                for path, binding in expected_artifact_bindings.items()
+            )
+            or dict(expected_artifact_bindings) != observed_bindings
+        ):
+            _fail("ARTIFACT_BINDING_MISMATCH")
+    return tuple(sorted(expected, key=lambda value: unicodedata.normalize("NFC", value).casefold()))
+
+
 def open_query_snapshot_client(
     vector_path: Path | str,
     *,
@@ -425,10 +512,7 @@ def open_query_snapshot_client(
     """Load the exact immutable query set without opening Chroma or SQLite."""
 
     limits.validate()
-    root = Path(vector_path).resolve(strict=True) / SNAPSHOT_DIRECTORY
-    metadata = os.lstat(root)
-    if not stat.S_ISDIR(metadata.st_mode) or _is_link(root, metadata):
-        _fail("ROOT_INVALID")
+    root = _validated_directory(Path(vector_path).absolute() / SNAPSHOT_DIRECTORY)
     manifest_bytes = _read_regular(root / SET_MANIFEST, ceiling=limits.max_manifest_bytes)
     manifest = _decode_set_manifest(manifest_bytes, limits=limits)
     _preflight_set_size(manifest, limits)
@@ -460,4 +544,5 @@ def open_query_snapshot_client(
 __all__ = [
     "ImmutableSnapshotClient", "QuerySnapshotStoreError",
     "open_query_snapshot_client", "publish_query_snapshot_set",
+    "validate_query_snapshot_set_manifest",
 ]

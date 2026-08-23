@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 
 SCHEMA_VERSION = "holoindex_exact_collection_snapshot.v1"
+SET_MANIFEST = "snapshot_set.json"
 METRICS = frozenset({"l2", "cosine", "ip"})
 GET_INCLUDES = frozenset({"documents", "metadatas", "embeddings"})
 QUERY_INCLUDES = GET_INCLUDES | {"distances"}
@@ -53,5 +54,6 @@ class EncodedCollectionSnapshot:
 
 __all__ = [
     "EncodedCollectionSnapshot", "GET_INCLUDES", "METRICS", "QUERY_INCLUDES",
-    "SCHEMA_VERSION", "SnapshotCodecError", "SnapshotLimits", "fail",
+    "SCHEMA_VERSION", "SET_MANIFEST", "SnapshotCodecError", "SnapshotLimits",
+    "fail",
 ]

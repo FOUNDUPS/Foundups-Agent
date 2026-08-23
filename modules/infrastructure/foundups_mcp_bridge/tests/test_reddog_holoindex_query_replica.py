@@ -12,7 +12,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from holo_index.freshness_receipt import freshness_receipt_path
+from holo_index.freshness_receipt import BASELINE_QUERY_COLLECTIONS, freshness_receipt_path
 from holo_index.maintenance_lock import (
     acquire_authority_update_lease,
     acquire_maintenance_lease,
@@ -47,6 +47,36 @@ class _ReceiptProof:
 
 def _digest(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _snapshot_tree(vectors: Path) -> Path:
+    snapshots = vectors / "query_snapshots"
+    snapshots.mkdir()
+    collections = {}
+    for collection in sorted(BASELINE_QUERY_COLLECTIONS):
+        artifacts = {}
+        for kind, suffix in (
+            ("manifest", "manifest.json"),
+            ("rows", "rows.jsonl"),
+            ("vectors", "vectors.f32"),
+        ):
+            path = snapshots / f"{collection}.{suffix}"
+            path.write_bytes(f"{collection}:{kind}".encode("ascii"))
+            artifacts[kind] = {
+                "path": path.name,
+                "bytes": path.stat().st_size,
+                "sha256": _digest(path),
+            }
+        collections[collection] = artifacts
+    payload = {
+        "schema_version": "holoindex_query_snapshot_set.v1",
+        "generation_id": GENERATION,
+        "collections": collections,
+    }
+    (snapshots / "snapshot_set.json").write_bytes(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("ascii") + b"\n"
+    )
+    return snapshots
 
 
 def _tree_manifest(logical_name: str, source: Path, relative_root: str):
@@ -151,10 +181,7 @@ def _canonical_fixture_paths(tmp_path: Path):
     repo.mkdir()
     vectors = canonical / "vectors"
     vectors.mkdir()
-    (vectors / "chroma.sqlite3").write_bytes(b"sqlite-generation")
-    segment = vectors / "segment"
-    segment.mkdir()
-    (segment / "index.bin").write_bytes(b"hnsw-generation")
+    snapshots = _snapshot_tree(vectors)
     model_relative = Path("models") / "sentence_transformers" / "all-MiniLM-L6-v2"
     model = canonical / model_relative
     model.mkdir(parents=True)
@@ -172,7 +199,7 @@ def _canonical_fixture_paths(tmp_path: Path):
         pass
     with acquire_maintenance_lease(maintenance_lock_path(canonical)):
         pass
-    return canonical, repo, vectors, model, model_relative, receipt
+    return canonical, repo, snapshots, model, model_relative, receipt
 
 
 def _fixture(tmp_path: Path):
@@ -193,7 +220,7 @@ def _fixture(tmp_path: Path):
 
     manifests = (
         _tree_manifest("model", model, model_relative.as_posix()),
-        _tree_manifest("vectors", vectors, "vectors"),
+        _tree_manifest("snapshots", vectors, "vectors/query_snapshots"),
     )
     binding = CanonicalGenerationBinding(
         repo_root=repo,
@@ -256,7 +283,7 @@ def test_valid_materialization_is_deterministic_and_preserves_canonical_bytes(tm
     after = {path.relative_to(canonical).as_posix(): _digest(path) for path in canonical.rglob("*") if path.is_file()}
     descriptor = json.loads(result.active_descriptor.read_text(encoding="utf-8"))
     assert before == after
-    assert result.file_count == 6
+    assert result.file_count == 26
     assert descriptor["schema_version"] == "holoindex_query_replica.v1"
     assert descriptor["status"] == "CURRENT"
     paths = [entry["path"] for entry in descriptor["files"]]
@@ -299,7 +326,7 @@ def test_windows_materializer_does_not_exhaust_crt_descriptors(
         expected_manifest=manifest.files,
     )
 
-    assert result.file_count == 602
+    assert result.file_count == 622
 
 
 def test_source_mutation_during_copy_is_rejected(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -491,14 +518,15 @@ def test_link_hardlink_and_special_sources_are_rejected(tmp_path: Path, kind: st
     from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_query_replica import QueryReplicaError
 
     fixture = _fixture(tmp_path)
-    vectors = fixture[0] / "vectors"
+    vectors = fixture[5][1].source_root
+    source = vectors / "snapshot_set.json"
     if kind == "symlink":
         try:
-            (vectors / "bad-link").symlink_to(vectors / "chroma.sqlite3")
+            (vectors / "bad-link").symlink_to(source)
         except OSError:
             pytest.skip("symlink creation unavailable")
     elif kind == "hardlink":
-        os.link(vectors / "chroma.sqlite3", vectors / "bad-hardlink")
+        os.link(source, vectors / "bad-hardlink")
     else:
         if os.name == "nt":
             pytest.skip("portable special-file fixture unavailable on Windows")
@@ -557,9 +585,9 @@ def test_resource_bounds_fail_closed(tmp_path: Path, bound: str) -> None:
 
     fixture = _fixture(tmp_path)
     limits = QueryReplicaLimits(
-        max_files=1 if bound == "count" else 20,
-        max_file_bytes=1024,
-        max_total_bytes=1 if bound == "bytes" else 4096,
+        max_files=1 if bound == "count" else 100,
+        max_file_bytes=100_000,
+        max_total_bytes=1 if bound == "bytes" else 1_000_000,
         max_path_bytes=2 if bound == "path" else 512,
         max_descriptor_bytes=1 if bound == "descriptor" else 4_194_304,
     )

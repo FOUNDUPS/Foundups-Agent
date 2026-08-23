@@ -20,9 +20,15 @@ process-control permissions.
 
 A separate Phase-1 materializer can create one immutable
 `holoindex_query_replica.v1` generation. The trusted caller supplies the exact
-canonical receipt/generation binding and exact manifests for the full vector
-tree and one complete selected model snapshot whose resolver marker files are
-direct children of that root. Point probes are insufficient. The materializer
+canonical receipt/generation binding and exactly two sorted manifests: one
+complete selected model snapshot whose resolver marker files are direct
+children of that root, and the exact generation-bound 22-file snapshot set at
+`vectors/query_snapshots/`. A complete legacy `vectors/` tree,
+`chroma.sqlite3`, HNSW segments, extra or missing snapshot files, an inner/
+outer path-size-digest mismatch, or a snapshot-set generation mismatch fail
+before copy. Roots, receipt paths, and manifest paths must have one exact
+NFC/POSIX representation before the replica root is changed. Point probes are
+insufficient. The materializer
 opens no new sentinel: it nonmutating-locks the existing authority-update
 sentinel first and maintenance sentinel second, proves each exact regular
 non-link/non-reparse identity and bytes, and retains both handles plus the
@@ -55,12 +61,17 @@ Complete replica verification is an admission operation, not a per-query
 operation. The trusted route resolver hashes every descriptor artifact once,
 and the isolated owner independently repeats that complete proof once. The
 retained route/owner then checks the unchanged descriptor, manifest projection,
-canonical repository/receipt/leases, and hashes only the selected model and
-`vectors/query_snapshots/`, because the immutable in-memory backend has no
-Chroma/SQLite/HNSW read surface. Any reachable-artifact or authority drift
-fails closed. Do not replace this with a time-based cache and do not increase
-the 15-second query timeout; the measured bounded proof is 1.297--1.359 seconds
-on the live generation, versus 42.422 seconds for full admission.
+canonical repository/receipt/leases, and hashes the selected model plus the
+exact `vectors/query_snapshots/` closure. New generations contain only those runtime
+artifacts because the immutable in-memory backend has no Chroma/SQLite/HNSW
+read surface. Any artifact or authority drift fails closed. Do not replace this
+with a time-based cache and do not increase the 15-second query timeout. The
+last full-tree exact-main replica measured 122--153 seconds for cold owner
+queries; the narrow closure must receive a new exact-main live acceptance and
+post-query immutable proof before its latency is claimed. Historical full-tree
+descriptors require a coherent model, SQLite, and complete HNSW segment cores;
+the full verifier can audit them, but retained runtime revalidation rejects
+their non-narrow vector surface.
 
 R16 made route possession mandatory, R17 made replica capability exact, R18
 made canonical fields exact, and R19 requires decoded health to be an exact
