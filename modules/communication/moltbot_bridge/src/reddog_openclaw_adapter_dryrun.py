@@ -50,6 +50,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_runtime_invocati
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
     EXECUTOR_PLAN_ACCEPT,
+    canonical_external_worktree_path,
 )
 
 ADAPTER_DRYRUN_ACCEPT = "ADAPTER_DRYRUN_ACCEPT"
@@ -169,6 +170,37 @@ def _path_covered_by_allowed(path: str, allowed_patterns: Sequence[str]) -> bool
     return False
 
 
+def _worktree_scope_valid(
+    path: str,
+    work_order_id: str,
+    nonce: str,
+    repo_root: str,
+) -> bool:
+    """Bind the exact executor-issued external worktree path."""
+
+    normalized = path.replace("\\", "/")
+    if not (
+        normalized.startswith("/")
+        or re.match(r"^[A-Za-z]:/", normalized) is not None
+    ):
+        return False
+    parts = [part for part in normalized.split("/") if part]
+    if any(part in {".", ".."} for part in parts):
+        return False
+    markers = [
+        index
+        for index in range(len(parts) - 1)
+        if parts[index : index + 2] == [".reddog", "worktrees"]
+    ]
+    if len(markers) != 1:
+        return False
+    tail = parts[markers[0] + 2 :]
+    if len(tail) != 3 or tail[1] != work_order_id or not all(tail):
+        return False
+    expected = canonical_external_worktree_path(repo_root, work_order_id, nonce)
+    return normalized.rstrip("/") == expected.replace("\\", "/").rstrip("/")
+
+
 def _build_evidence_refs(
     policy_digest: str,
     work_order_digest: str,
@@ -272,7 +304,9 @@ def _validate_target(target_type: str) -> List[str]:
     return []
 
 
-def _validate_path_scope(work_order: Mapping[str, Any], plan: Mapping[str, Any]) -> List[str]:
+def _validate_path_scope(
+    work_order: Mapping[str, Any], plan: Mapping[str, Any], repo_root: str
+) -> List[str]:
     reasons: List[str] = []
     wo_allowed = list(work_order.get("allowed_paths") or [])
     plan_allowed = list(plan.get("allowed_paths") or [])
@@ -298,7 +332,8 @@ def _validate_path_scope(work_order: Mapping[str, Any], plan: Mapping[str, Any])
 
     worktree = str(plan.get("proposed_worktree_path") or "")
     work_order_id = _work_order_id(work_order)
-    if worktree and f"/.reddog/worktrees/{work_order_id}/" not in worktree.replace("\\", "/"):
+    nonce = str(work_order.get("nonce") or "")
+    if worktree and not _worktree_scope_valid(worktree, work_order_id, nonce, repo_root):
         reasons.append("worktree_path_outside_scope")
 
     return reasons
@@ -436,7 +471,7 @@ def plan_reddog_openclaw_adapter_dryrun(
     executor_plan_result: Mapping[str, Any],
     valve_decision: Mapping[str, Any],
     *,
-    target_type: str = INTAKE_FOUNDUP_JOB,
+    target_type: str = INTAKE_FOUNDUP_JOB, repo_root: str = ".",
     now: Optional[datetime] = None,
 ) -> RedDogOpenClawAdapterDryRunResult:
     """Plan OpenClaw intake translation without enqueue or execution."""
@@ -460,7 +495,7 @@ def plan_reddog_openclaw_adapter_dryrun(
 
     plan = executor_plan_result.get("plan")
     if isinstance(plan, Mapping):
-        reasons.extend(_validate_path_scope(work_order, plan))
+        reasons.extend(_validate_path_scope(work_order, plan, repo_root))
 
     op_norm = _normalize_operation(str(work_order.get("requested_operation") or ""))
     if normalized_target == INTAKE_FOUNDUP_JOB and op_norm not in OPERATION_TO_REQUESTED_ACTION:

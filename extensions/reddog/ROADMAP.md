@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.105 resident architect thin-client surface.
+Phase: RedDog 0.4.106 resident architect thin-client surface.
 
 Current implementation:
 
@@ -122,8 +122,8 @@ Current implementation:
   Capacity is already P1 debt rather than permission to widen gates: the
   candidate backend occupies 1,381/1,400 files (19-file headroom), its generated
   manifest occupies 309,370/327,680 bytes (18,310-byte headroom), and the
-  package surface occupies 66 files / 962,637 bytes under its unchanged 1 MiB
-  ceiling (85,939-byte headroom). The isolated frozen-source release passed all
+  package surface occupies 66 files / 961,130 bytes under its unchanged 1 MiB
+  ceiling (87,446-byte headroom). The isolated frozen-source release passed all
   four groups in 288.505 seconds without a timeout; governed Git finished
   111.605 seconds below the unchanged 400-second child ceiling. A separate run
   under competing audit load correctly failed when core and governed Git both

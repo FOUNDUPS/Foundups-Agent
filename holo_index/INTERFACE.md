@@ -72,11 +72,12 @@ Storage resolution is deterministic:
 3. legacy HOLO_SSD_PATH
 4. platform-safe absolute default
 
-HOLOINDEX_QUERY_READONLY=1 requires an existing
-vectors/chroma.sqlite3 plus the governed `vectors/query_snapshots` set, never
-creates directories or collections, and never writes the repository activity
-log. The immutable query client exposes only the bounded `get`, `count`, and
-exact vector `query` subset required by Holo search. Storage failures raise
+HOLOINDEX_QUERY_READONLY=1 requires the governed `vectors/query_snapshots` set;
+it neither imports the maintenance-only `chromadb` dependency nor requires or
+opens `vectors/chroma.sqlite3`, never creates
+directories or collections, and never writes the repository activity log. The
+immutable query client exposes only the bounded `get`, `count`, and exact vector
+`query` subset required by Holo search. Storage failures raise
 HoloIndexStorageError with one of the stable codes
 HOLOINDEX_STORAGE_UNAVAILABLE, HOLOINDEX_STORAGE_NOT_WRITABLE,
 HOLOINDEX_STORAGE_PATH_MISMATCH, or HOLOINDEX_COLLECTION_UNAVAILABLE.

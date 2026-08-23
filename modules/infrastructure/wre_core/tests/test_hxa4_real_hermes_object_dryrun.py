@@ -84,6 +84,7 @@ class MockIntent:
         self.sender = sender
         self.session_key = "hxa4_real_hermes_test"
         self.channel = "test_channel"
+        self.is_authorized_commander = True
 
 
 def set_d3_capability_token_gates(job):

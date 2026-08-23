@@ -1,6 +1,6 @@
 # RedDog Extension Tests
 
-## 0.4.105 continuous conversation and governed runtime routing
+## 0.4.106 compact snapshot runtime and governed routing
 
 ## Nemotron and Qwen routing contracts
 
@@ -45,8 +45,8 @@ separate Start Operations promotion/control allowlist. The Start Operations
 builder admits exact non-empty strings and rejects empty, non-string, secret,
 and arbitrary inputs without aliasing its source. Backend closure pinning,
 Start Operations, the 13-member fast tier, and the exact package contract pass
-at 1,381 runtime files and manifest digest `d818aefa512d...9e88e`. The package
-surface is 66 files / 962,637 bytes under the unchanged 1 MiB cap. The canonical
+at 1,381 runtime files and manifest digest `04d3e3de5683...e8a67aae`. The package
+surface is 66 files / 961,130 bytes under the unchanged 1 MiB cap. The canonical
 registry is current at 1,574 tests / 267 quarantined.
 
 The authenticated release aggregate is 18 shards / 6,928 lines / 489 counted

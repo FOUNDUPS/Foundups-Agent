@@ -1,5 +1,24 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-23] Compact snapshot-only startup regression
+
+- Changed the storage-contract fixture to contain only the sealed
+  `vectors/query_snapshots` directory and explicitly proved read-only Holo
+  startup succeeds without creating or opening `chroma.sqlite3`.
+- Added a fresh-process import probe that blocks every `chromadb` import and
+  proves the read-only core remains loadable with package installation disabled.
+- Rebound snapshot-open error evidence to `open_query_snapshot`; the focused
+  regression was added after a live exact-main RedDog owner canary exposed the
+  stale legacy-file precondition. The CLI machine-result assertion now captures
+  the preserved result-stream seam explicitly, preventing import-time stream
+  capture from bypassing the per-test capture object. The same runtime test
+  proves the intentionally unsealed work ledger is not queried. (WSP
+  6/22/34/50/97)
+- Repaired two adjacent stale test seams found by the expanded read-only suite:
+  CLI denial now captures the preserved machine-result stream explicitly, and
+  the RedDog source contract checks the current explicit environment assignment
+  instead of a removed object-literal spelling. No runtime guard was relaxed.
+
 ## [2026-08-23] Model resolver source-provenance option
 
 - Added a capability-gated alias regression proving `preserve_source_path=True`

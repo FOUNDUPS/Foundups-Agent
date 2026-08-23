@@ -1,6 +1,6 @@
 # RedDog
 
-Version: 0.4.105
+Version: 0.4.106
 
 ## Continuous conversation plane
 
@@ -135,31 +135,11 @@ install is required.
 tier checks only static manifest, ignore-policy, and runtime-closure truth; the
 release owner executes the live VSCE listing through its existing worker plan.
 
-The release owner keeps the exact 18-shard shared-VM body and its five existing
-focused tail contracts. It runs them as four process-isolated groups with a
-fixed worker cap of four, a 400-second child timeout, the unchanged 420-second
-release ceiling, and 2 MiB output caps. Plan-order logs, per-group durations,
-the slowest group, and final exit status are emitted without environment values.
-The plan rejects omitted, duplicated, reordered, or stale tail members before
-execution; no assertion, shard digest, or negative diagnostic is removed.
-The canonical command always enters the full parent promotion path; ambient
-environment cannot select a group. A dedicated internal worker requires an
-exact parent-generated nonce binding. The parent enforces the 420-second wall
-deadline from command start, while child timeouts are recorded before bounded
-graceful/forced process-tree termination. Timeout, termination failure, or
-unconfirmed termination remains FAIL even if a child later exits zero.
-The first complete aligned promotion passed in 295.928 seconds, leaving
-124.072 seconds (29.5%) beneath the unchanged ceiling; a repeat passed in
-266.709 seconds. Acceptance uses the slower receipt.
-A hostile ambient-selector repair run still executed all four groups and passed
-in 279.723 seconds with every timeout field false.
-On Windows, a `taskkill.exe` attempt is confirmed only by a zero exit. Its
-absolute `SystemRoot` path is launched with `shell: false`; asynchronous launch
-error, nonzero exit, or the bounded 750-millisecond taskkill timeout records
-termination failure. Both graceful and forced outcomes feed the final receipt,
-and a late child-process error remains handled without reopening settlement.
-The loop-3 hostile-selector promotion passed all four groups in 274.537 seconds
-(owner 273.762 seconds) with every timeout and termination field false.
+The exact release parallelism, timeout, termination, hostile-selector, and
+historical acceptance receipts are maintained in
+[Test Tier Scaling](https://github.com/FOUNDUPS/Foundups-Agent/blob/main/extensions/reddog/docs/TEST_TIER_SCALING.md).
+Those receipts are verification
+evidence, not execution or promotion authority.
 
 [OBSERVED] Governed Git config probes and content commands receive a fresh,
 closed child environment rather than every non-`GIT_*` editor variable. Only
@@ -920,7 +900,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.105)
+## WSP_97 Truth Table (v0.4.106)
 
 | Claim | Status |
 | --- | --- |
@@ -1006,6 +986,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.105.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.106.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

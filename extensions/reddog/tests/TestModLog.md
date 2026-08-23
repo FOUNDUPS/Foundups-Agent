@@ -1,5 +1,16 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-23 - Compact Holo snapshot runtime canary (0.4.106)
+
+- Regenerated and pinned the authenticated 1,381-file backend closure after the
+  snapshot-only Holo runtime correction. Focused Holo/owner tests and the
+  production-shaped warmup/query canary prove CURRENT semantic retrieval from
+  the 33-artifact replica with post-query hashes unchanged. Version and package
+  contracts advance together to 0.4.106. The final closure digest is
+  `04d3e3de5683...e8a67aae`, and the exact package is 66 files / 961,130 bytes.
+- Candidate WSP_62 forced the changed README below its 1,000-line ceiling by
+  extracting detailed release scaling receipts to a companion document.
+
 ## 2026-08-23 - Stable route-file bounded propagation
 
 - Extended the exhaustive bridge-environment matrix so
