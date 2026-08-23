@@ -296,6 +296,8 @@ not authenticated provenance; because every output remains non-admissible and
 zero-authority, authentication belongs to that later admission boundary.
 Rehydrated nested values, extreme timestamps, and oversized collections reject
 without invoking caller callbacks or escaping the public validation boundary.
+The complete nested view graph is cumulatively bounded plain data, and public
+reconstruction accepts exactly—not a superset of—the proposal evidence closure.
 
 The isolated Ed25519 backend also rejects delegated identity or work-authority
 requests unless the backend has a signer-owned domain policy or the existing

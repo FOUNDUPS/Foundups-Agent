@@ -33,7 +33,7 @@ from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_c
     FoundUpMemexLearningProposal,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_view_validation import (
-    view_sources_are_plain_data,
+    view_is_plain_data,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     redact_runtime_text,
@@ -163,7 +163,7 @@ def view_identity_valid(view: Any) -> bool:
             or set(view.invariants) != _EXPECTED_VIEW_INVARIANTS
             or any(value is not True for value in view.invariants.values())
             or type(view.assembly_receipt) is not dict
-            or not view_sources_are_plain_data(view)
+            or not view_is_plain_data(view)
             or canonical_identifier(view.foundup_id) != view.foundup_id
             or not all(sha256_valid(value) for value in (
                 view.foundup_brain_view_id, view.snapshot_id,

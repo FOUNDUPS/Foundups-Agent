@@ -16,6 +16,12 @@
   exception boundaries. Post-repair focused result: **17 passed in 0.76
   seconds**; adjacent matrix: **100 passed in 7.45 seconds**. These remain local
   structural results; another exact-commit verdict is required.
+- The next release review found unsafe fallback attribute access, incomplete
+  plain-data coverage outside source receipts/outcomes, late oversized-batch
+  traversal, and acceptance of unrelated evidence during reconstruction.
+- Final regressions cover each path. Focused result: **18 passed in 0.70
+  seconds**; adjacent matrix: **101 passed in 7.80 seconds**. A final fresh
+  exact-commit verdict remains required.
 
 ## 2026-08-23: FoundUp Memex learning-candidate regressions
 

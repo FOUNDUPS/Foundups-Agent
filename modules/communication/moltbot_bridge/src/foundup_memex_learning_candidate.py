@@ -166,6 +166,8 @@ def _gate_candidates(
     except ValueError:
         gate_created_at = created_at
     reasons = _gate_input_reasons(view, evidence, proposals, gate_created_at)
+    if reasons:
+        return _gate_result(False, view, (), (), gate_created_at, reasons)
     evidence_items = tuple(evidence) if type(evidence) in (list, tuple) else ()
     proposal_items = tuple(proposals) if type(proposals) in (list, tuple) else ()
     evidence_by_id = {
@@ -198,7 +200,7 @@ def _gate_candidates(
     )
     if any(
         not verify_foundup_memex_learning_candidate_reconstruction(
-            candidate, proposal, valid_evidence
+            candidate, proposal, _proposal_evidence_closure(proposal, evidence_by_id)
         )
         for proposal, candidate in candidate_pairs
     ):
@@ -273,13 +275,23 @@ def _verify_candidate_reconstruction(
     if len(by_id) != len(valid):
         return False
     referenced = proposal.supporting_evidence_ids + proposal.contradicting_evidence_ids
-    if any(item not in by_id for item in referenced):
+    if len(referenced) != len(valid) or set(referenced) != set(by_id):
         return False
     if any(by_id[item].polarity != "supporting" for item in proposal.supporting_evidence_ids):
         return False
     if any(by_id[item].polarity != "contradicting" for item in proposal.contradicting_evidence_ids):
         return False
     return candidate == _candidate_from(proposal, by_id)
+
+
+def _proposal_evidence_closure(
+    proposal: FoundUpMemexLearningProposal,
+    evidence_by_id: Mapping[str, FoundUpMemexLearningEvidence],
+) -> tuple[FoundUpMemexLearningEvidence, ...]:
+    return tuple(
+        evidence_by_id[item]
+        for item in proposal.supporting_evidence_ids + proposal.contradicting_evidence_ids
+    )
 
 
 def _candidate_from(
@@ -395,8 +407,11 @@ def _canonical_score(value: Any) -> float:
 
 
 def _strict_string_attr(value: Any, name: str) -> str:
-    selected = getattr(value, name, "")
-    return selected if type(selected) is str else ""
+    try:
+        selected = getattr(value, name, "")
+        return selected if type(selected) is str else ""
+    except Exception:
+        return ""
 
 
 def _digest(value: Any) -> str:

@@ -22,6 +22,7 @@ from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate i
     verify_foundup_memex_learning_candidate_reconstruction,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_learning_candidate_contract import (
+    MAX_EVIDENCE,
     MAX_REFERENCES_PER_PROPOSAL,
     MAX_STATEMENT_CHARS,
     MAX_SUPERSEDED_MEMORIES,
@@ -83,6 +84,20 @@ class _ExplodingIterMapping(dict):
 class _ExplodingGetMapping(dict):
     def get(self, *_args, **_kwargs):
         raise RuntimeError("nested get callback must not execute")
+
+
+class _CountingItemsMapping(dict):
+    calls = 0
+
+    def items(self):
+        self.calls += 1
+        return super().items()
+
+
+class _RaisingView:
+    @property
+    def foundup_id(self):
+        raise RuntimeError("fallback attribute callback must not execute")
 
 
 def _view(*, outcomes=()):
@@ -427,6 +442,12 @@ def test_reconstruction_is_bound_to_original_proposal_not_local_resigning() -> N
     assert not verify_foundup_memex_learning_candidate_reconstruction(
         altered, proposal, (evidence,)
     )
+    unrelated = _breadcrumb_evidence(
+        view, polarity="supporting", statement="Unrelated evidence is not closure."
+    )
+    assert not verify_foundup_memex_learning_candidate_reconstruction(
+        candidate, proposal, (evidence, unrelated)
+    )
 
 
 def test_builders_emit_one_canonical_text_time_and_score_representation() -> None:
@@ -664,6 +685,16 @@ def test_nested_hostile_values_and_mappings_fail_closed_without_callbacks() -> N
         view=nested_view,
         evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME,
     )
+    counting_identity = _CountingItemsMapping(view.identity)
+    callback_view = _resign_view(replace(view, identity=counting_identity))
+    counting_identity.calls = 0
+    bad_callback_view = gate_foundup_memex_learning_candidates(
+        view=callback_view,
+        evidence=(evidence,), proposals=(proposal,), created_at=GATE_TIME,
+    )
+    raising_view = gate_foundup_memex_learning_candidates(
+        view=_RaisingView(), evidence=(), proposals=(), created_at=GATE_TIME
+    )
     bad_evidence = gate_foundup_memex_learning_candidates(
         view=view, evidence=(replace(evidence, statement=_ExplodingDeepcopy()),),
         proposals=(proposal,), created_at=GATE_TIME,
@@ -684,6 +715,10 @@ def test_nested_hostile_values_and_mappings_fail_closed_without_callbacks() -> N
     assert "learning_gate_view_invalid" in bad_view.rejection_reasons
     assert bad_nested_view.accepted is False
     assert "learning_gate_view_invalid" in bad_nested_view.rejection_reasons
+    assert bad_callback_view.accepted is False
+    assert counting_identity.calls == 0
+    assert raising_view.accepted is False
+    assert raising_view.receipt["foundup_id"] == ""
     assert bad_evidence.accepted is False
     assert "learning_evidence_type_invalid" in bad_evidence.rejection_reasons
     assert bad_proposal.accepted is False
@@ -750,6 +785,23 @@ def test_rehydrated_proposal_and_candidate_reference_counts_are_bounded() -> Non
         proposal,
         (evidence,),
     )
+
+
+def test_oversized_gate_batch_rejects_before_evidence_manifest_traversal() -> None:
+    view = _view()
+    evidence = _breadcrumb_evidence(view, polarity="supporting", statement="Batch bound.")
+    proposal = _proposal(view, (evidence,))
+
+    result = gate_foundup_memex_learning_candidates(
+        view=view,
+        evidence=(evidence,) * (MAX_EVIDENCE + 1),
+        proposals=(proposal,),
+        created_at=GATE_TIME,
+    )
+
+    assert result.accepted is False
+    assert "learning_gate_evidence_count_invalid" in result.rejection_reasons
+    assert result.receipt["evidence_manifest_digest"] == _digest([])
 
 
 def test_future_proposal_fails_closed() -> None:

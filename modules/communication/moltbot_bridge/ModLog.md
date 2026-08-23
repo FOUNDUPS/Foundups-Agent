@@ -25,6 +25,12 @@
   and public gate/reconstruction boundaries now convert any unanticipated
   nested validation exception into stable rejection. Another exact-commit
   review remains required before delivery.
+- The next release review found unsafe fallback attribute access, incomplete
+  whole-view plain-data coverage, post-rejection batch traversal, and a
+  reconstruction verifier that tolerated unrelated evidence. The final repair
+  makes fallback reads exception-safe, validates and cumulatively bounds every
+  nested view container before hashing, returns immediately on gate-input
+  failure, and requires exact proposal-evidence closure.
 - WSP 00/10/15/22/50/60/62/79/84/87/97.
 
 ## 2026-08-23: FoundUp Memex structural learning-candidate gate

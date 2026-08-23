@@ -12,7 +12,8 @@ canonical Unicode/time/score output, immutable result receipts, pre-dedup
 collection bounds, exact view receipt/invariant enforcement,
 tampering, secret text, invalid/overflowing scores, extreme timestamps, nested
 callback-bearing values, future evidence/proposals, hostile runtime types, and
-nested source-receipt callbacks, storage/network/model import prohibitions.
+nested source/view callbacks, safe fallback attribute access, exact evidence
+closure, storage/network/model import prohibitions.
 
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_learning_candidate.py -q
