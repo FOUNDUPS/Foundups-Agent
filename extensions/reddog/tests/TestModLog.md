@@ -1,5 +1,54 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-23 - Stable route-file bounded propagation
+
+- Extended the exhaustive bridge-environment matrix so
+  `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE` survives the `holoindex_owner` and
+  `resident_architect` profiles and the separate Start Operations
+  promotion/control allowlist, while remaining absent from unrelated bridge
+  profiles. Start Operations drops empty and non-string values.
+- Python resolver integration separately proves direct-root ambiguity and exact
+  terminal-journal/route-record/descriptor binding before owner use.
+- Backend generator/provenance is **8/8 in 86.48 seconds** at the exact
+  1,381-file closure digest `d818aefa512d...9e88e`; backend compatibility,
+  environment, Start Operations, and the 13-member fast tier pass. The exact
+  package contract passes at **66 files / 962,637 bytes** under 1 MiB. The
+  independent manifest check passed in **85.9 seconds** with the same digest and
+  file/manifest/package measurements; registry is **1,574 / 267**.
+- Candidate WSP_62 file/function/document proof passes after extracting the
+  profile expectation data from the formerly growing assertion function;
+  RedDog README is 998 physical lines and no threshold was raised.
+- An exhaustive release attempt returned **NO-GO** at core assertion RDD-004
+  after 197.649 seconds; governed Git, Git-format/environment, bridge/WSP_62,
+  package, and timeout evidence passed with no timeout. The failure is retained
+  as non-promotion evidence. Base/candidate comparison proved it inherited and
+  deterministic: denied partial-clone Git reached a bespoke fallback that
+  omitted root, `public`, `docs`, and `WSP_framework` evidence.
+- Replaced that allowlist with one bounded non-link-following root walk and
+  added an exact-string/out-of-range parser boundary plus forced-unavailable
+  RDD regressions. A second inherited FWG-002 failure was a host-dependent test,
+  not grounds for a production filesystem fallback; its success path now uses
+  `foundup_integration_test_fixture.js`, a confined ordinary-Git repository with
+  canonical registry/manifests, hook/signing suppression, real digest/use-time
+  checks, process-exit cleanup, and traversal rejection.
+- Final authenticated identity is **18 shards / 6,928 lines / 489 counted
+  assertions** at aggregate `sha256:940aa9cc...93452`. Independent frozen-source
+  `npm run test:release` passed **4/4 in 288,505 ms**: core 273,730 ms,
+  governed Git 288,395 ms, Git formats/environment 180,643 ms, and
+  bridge/WSP_62 3,683 ms. There were no group/release timeouts. An earlier run
+  under concurrent reviewer load timed out core/governed Git at
+  402,674/402,672 ms and is retained as NO-GO contention evidence. No guard was
+  widened; the isolated governed-Git margin is 111,605 ms.
+
+## 2026-08-23 - Holo authority-root profile confinement
+
+- Extended the exhaustive bridge-environment fixture to prove
+  `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` survives the `holoindex_owner` and
+  `resident_architect` profiles plus the bounded Start Operations control
+  environment and remains absent from unrelated bridge profiles.
+- This is the regression for the dedicated clean-authority checkout binding;
+  Python remains responsible for topology and exact-HEAD admission.
+
 ## 2026-08-22 - Continuous conversation and lifecycle candidate (0.4.105)
 
 - Added the operational `test:conversation` tier with 15 shared JS vectors and

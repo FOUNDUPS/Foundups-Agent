@@ -52,7 +52,9 @@ const CONFIG_FIXTURE = Object.freeze({
   HOLO_SSD_PATH: 'legacy-ssd-marker',
   HOLO_OFFLINE: '1',
   REDDOG_HOLOINDEX_OWNER_AUTO_START: '0',
+  REDDOG_HOLOINDEX_QUERY_ROUTE_FILE: 'query-route-marker',
   REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT: 'query-replica-marker',
+  REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT: 'authority-repo-marker',
   HOLOINDEX_SSD_PATH: 'holo-store-marker',
   REDDOG_SEALED_RUNTIME_REQUIRED: '1',
   REDDOG_SEALED_RUNTIME_ROOT: 'sealed-root-marker',
@@ -87,6 +89,44 @@ const HOLO_QUERY_FORBIDDEN_KEYS = Object.freeze([
   'CALLER_ARBITRARY_KEY'
 ]);
 
+const MODEL_RUNTIME_KEYS = Object.freeze([
+  'REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT',
+  'REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH',
+  'REDDOG_MODEL_SELECTION_RECEIPT_PATH',
+  'REDDOG_MODEL_CATALOG_SNAPSHOT_PATH',
+  'REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH',
+  'REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH',
+  'REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH',
+  'REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH',
+  'REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH',
+  'REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS'
+]);
+
+const PROFILE_EXPECTATIONS = Object.freeze({
+  default: Object.freeze([]),
+  advisory_provider: Object.freeze(['OPENROUTER_API_KEY', ...MODEL_RUNTIME_KEYS]),
+  authoritative_work_state: Object.freeze(['REDDOG_AUTHORITATIVE_WORK_STATE_PATH']),
+  model_runtime_binding: MODEL_RUNTIME_KEYS,
+  holo_query: Object.freeze(['HOLOINDEX_SSD_PATH', 'HOLO_SSD_PATH', 'HOLO_OFFLINE']),
+  holoindex_owner: Object.freeze([
+    'HOLOINDEX_QUERY_SERVICE_URL', 'HOLOINDEX_QUERY_SERVICE_TOKEN',
+    'REDDOG_HOLOINDEX_OWNER_AUTO_START', 'HOLOINDEX_SSD_PATH',
+    'REDDOG_HOLOINDEX_QUERY_ROUTE_FILE', 'REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT',
+    'REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT', 'REDDOG_SEALED_RUNTIME_REQUIRED',
+    'REDDOG_SEALED_RUNTIME_ROOT', 'REDDOG_SEALED_RUNTIME_MANIFEST_PATH',
+    'REDDOG_SEALED_RUNTIME_MANIFEST_DIGEST', 'REDDOG_SEALED_RUNTIME_BOOTSTRAP_PATH',
+    'REDDOG_SEALED_RUNTIME_SITE_PACKAGES'
+  ]),
+  resident_architect: Object.freeze([
+    'REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH',
+    'REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH', 'REDDOG_AUTHORITATIVE_WORK_STATE_PATH',
+    'HOLOINDEX_FRESHNESS_RECEIPT', 'HOLOINDEX_SSD_PATH', 'REDDOG_RUNTIME_ARTIFACT_ROOT',
+    'REDDOG_HOLOINDEX_QUERY_ROUTE_FILE', 'REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT',
+    'REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT', 'REDDOG_AUTHORITY_RUNTIME_STATE_PATH',
+    'REDDOG_AUTHORITY_PROFILE_PATH'
+  ])
+});
+
 function mergedFixture() {
   return Object.assign({}, SYSTEM_FIXTURE, CONFIG_FIXTURE, FORBIDDEN_FIXTURE);
 }
@@ -117,45 +157,34 @@ function assertProfile(profile, allowed) {
 }
 
 function assertProfiles() {
-  const modelRuntimeKeys = [
-    'REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT',
-    'REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH',
-    'REDDOG_MODEL_SELECTION_RECEIPT_PATH',
-    'REDDOG_MODEL_CATALOG_SNAPSHOT_PATH',
-    'REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH',
-    'REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH',
-    'REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH',
-    'REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH',
-    'REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH',
-    'REDDOG_MODEL_RUNTIME_AVAILABLE_PROVIDERS'
-  ];
-  assertProfile('default', []);
-  assertProfile('advisory_provider', ['OPENROUTER_API_KEY', ...modelRuntimeKeys]);
-  assertProfile('authoritative_work_state', [
-    'REDDOG_AUTHORITATIVE_WORK_STATE_PATH'
-  ]);
-  assertProfile('model_runtime_binding', modelRuntimeKeys);
-  assertProfile('holo_query', [
-    'HOLOINDEX_SSD_PATH', 'HOLO_SSD_PATH', 'HOLO_OFFLINE'
-  ]);
-  assertProfile('holoindex_owner', [
-    'HOLOINDEX_QUERY_SERVICE_URL', 'HOLOINDEX_QUERY_SERVICE_TOKEN',
-    'REDDOG_HOLOINDEX_OWNER_AUTO_START', 'HOLOINDEX_SSD_PATH',
-    'REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT',
-    'REDDOG_SEALED_RUNTIME_REQUIRED', 'REDDOG_SEALED_RUNTIME_ROOT',
-    'REDDOG_SEALED_RUNTIME_MANIFEST_PATH',
-    'REDDOG_SEALED_RUNTIME_MANIFEST_DIGEST',
-    'REDDOG_SEALED_RUNTIME_BOOTSTRAP_PATH',
-    'REDDOG_SEALED_RUNTIME_SITE_PACKAGES'
-  ]);
-  assertProfile('resident_architect', [
-    'REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH',
-    'REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH',
-    'REDDOG_AUTHORITATIVE_WORK_STATE_PATH', 'HOLOINDEX_FRESHNESS_RECEIPT',
-    'HOLOINDEX_SSD_PATH', 'REDDOG_RUNTIME_ARTIFACT_ROOT',
-    'REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT',
-    'REDDOG_AUTHORITY_RUNTIME_STATE_PATH', 'REDDOG_AUTHORITY_PROFILE_PATH'
-  ]);
+  for (const [profile, expected] of Object.entries(PROFILE_EXPECTATIONS)) {
+    assertProfile(profile, expected);
+  }
+}
+
+function assertStartOperationsEnvironment() {
+  const source = mergedFixture();
+  const before = JSON.stringify(source);
+  const first = environment.build(source);
+  const second = environment.build(source);
+  assert.notStrictEqual(first, source);
+  assert.notStrictEqual(first, second);
+  assert.strictEqual(JSON.stringify(source), before);
+  for (const key of [
+    'REDDOG_HOLOINDEX_QUERY_ROUTE_FILE', 'REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT',
+    'REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT'
+  ]) assert.strictEqual(first[key], CONFIG_FIXTURE[key]);
+  assertForbiddenKeys(first);
+  const rejected = environment.build({
+    REDDOG_HOLOINDEX_QUERY_ROUTE_FILE: 7,
+    REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT: '',
+    REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT: new String('hostile'),
+    GITHUB_TOKEN: 'ambient-marker'
+  });
+  assert.strictEqual(rejected.REDDOG_HOLOINDEX_QUERY_ROUTE_FILE, undefined);
+  assert.strictEqual(rejected.REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT, undefined);
+  assert.strictEqual(rejected.REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT, undefined);
+  assert.strictEqual(rejected.GITHUB_TOKEN, undefined);
 }
 
 function assertInputSafety() {
@@ -258,6 +287,7 @@ function assertLiveHoloQueryEnvironmentIsClosed() {
 
 assertExtensionProfiles();
 assertProfiles();
+assertStartOperationsEnvironment();
 assertInputSafety();
 assertSessionProfile();
 assertLiveHoloQueryEnvironmentIsClosed();

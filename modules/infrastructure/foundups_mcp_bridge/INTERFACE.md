@@ -17,39 +17,42 @@ at most 256 KiB with exact encoded-byte telemetry.
 
 ### `build_asgi_app(...)`
 
-Builds a loopback-only FastMCP Streamable HTTP application at `/mcp`.
-Non-loopback hosts reject. Optional bearer authentication is a local/dev
-defense, not ChatGPT OAuth. Public exposure belongs to a Secure MCP Tunnel or
-external OAuth proxy and has no live acceptance receipt in this change.
+Builds a loopback-only FastMCP Streamable HTTP application at `/mcp`; non-loopback hosts reject.
+Optional bearer auth is local/dev defense, not ChatGPT OAuth; external exposure has no live receipt here.
 
 ### `materialize_query_replica(...) -> QueryReplicaResult`
 
-Creates one immutable `holoindex_query_replica.v1` generation under a new
-`StoreProof` from exact bindings, limits, and sorted `model` and `snapshots`
-manifests. The model root is complete; `vectors/query_snapshots` is the exact
-22-file set whose manifest binds the requested generation before copy. Legacy
-`vectors/` manifests and `chroma.sqlite3` reject. Production is sealed, the
-test seam is revalidated, and canonical data is read only. The call retains
-both sentinel identities/bytes and the receipt descriptor through copy,
-publication, validation, and reverse release.
+Creates one immutable `holoindex_query_replica.v1` generation under a new `StoreProof` from exact bindings, limits, and sorted `model`/`snapshots` manifests.
+Only the complete model and exact generation-bound 22-file `vectors/query_snapshots` closure is accepted; legacy `vectors/` and `chroma.sqlite3` reject.
+Production is sealed/read-only at the source and retains sentinel identities/bytes plus the receipt descriptor through copy, publication, validation, and reverse release.
 
-Manifests exactly equal enumerated sources. Before any replica-root mutation,
-integers reject bool/float; roots, receipt paths, and file paths require one
-exact NFC/POSIX representation; full descriptor paths are bounded; and file
-order/uniqueness use NFC+casefold identity. The inner snapshot manifest's 22
-path/size/digest bindings exactly equal the outer manifest. Links, reparse
-points, hardlinks, special files, escapes, overlap, exhaustion, and aliases
-fail. Model markers are case-insensitively unique and the one accepted direct
-marker has the canonical `modules.json` spelling.
+Manifests exactly equal enumerated sources. Before mutation, integers reject bool/float; paths use one bounded exact NFC/POSIX representation; ordering uses NFC+casefold identity; all 22 inner bindings equal the outer manifest.
+Links, reparse points, hardlinks, special files, escapes, overlap, exhaustion, aliases, and ambiguous model markers fail.
 
-Windows retains raw OS handles for every source, destination, and directory
-through final aggregate proof while using transient CRT descriptors one at a
-time. The descriptor remains bounded to 4 MiB; larger payloads fail closed.
+Windows retains raw OS handles through final aggregate proof while using one transient CRT descriptor at a time; the 4 MiB descriptor bound fails closed.
 
 Success no-replace publishes `generations/<digest>/` then immutable `holoindex_query_replica.active.json`, binding repository, receipt, generation, storage identities, UTC time, hashes, and sizes. Existing targets are never overwritten.
 Final failure atomically no-replace quarantines whatever occupies this call's active name; success makes active absent and returns a relative orphan path. Rename failure leaves active and reports a relative unsafe path.
-Publication temps and staging trees are preserved. Windows copy failure closes handles but leaves bounded partial output; the materializer quarantines its enclosing staging root. Direct `copy_model_snapshot` callers own their isolated partial destination.
-Phase 1 deletes nothing and has no retention, rollback, or live-discovery API.
+Publication temps and staging trees are preserved. Windows copy failure closes handles but leaves bounded partial output; the materializer quarantines its enclosing staging root. Direct `copy_model_snapshot` callers own their isolated partial destination. Phase 1 deletes nothing and has no retention, rollback, or live-discovery API.
+
+### `build_query_replica_activation_plan(...) -> QueryReplicaActivationPlan`
+
+Read-only trusted-host admission for explicit canonical roots, clean exact HEAD, CURRENT freshness, and the exact `all-MiniLM-L6-v2` model.
+It returns canonical binding plus validated `model` and `snapshots` manifests after two descriptor-hash passes and a final identity enumeration.
+Links, reparse points, hardlinks, special files, hostile values, or observed mutation fail with stable `QueryReplicaPlanError` codes.
+It holds no post-return lease; materialization revalidates later source changes. It does not copy, maintain, launch, route, or activate.
+
+### `QueryRouteStore`
+
+Private trusted-host stable route state. `initialize_empty()` no-replace anchors revision 0; `load()` recovers any PREPARED transaction by exact rollback.
+`load_readonly()` performs a terminal read under the same lock without
+publication or recovery: no journal is valid only for `EMPTY`, `CURRENT`
+requires the journal-selected digest, and `PREPARED` returns
+`QUERY_ROUTE_TRANSITION_PENDING`. `load()` likewise rejects an unjournaled
+`CURRENT` record with `QUERY_ROUTE_JOURNAL_REQUIRED`; explicit controller use
+is the only recovery boundary.
+`transition(candidate, expected_revision=..., expected_route_digest=...)` holds one machine-wide lock, journals before route replacement, and exposes a commit request finalized only on normal context exit.
+Canonical bounded JSON, copied immutable binding maps, duplicate/type/path/link/private-file checks, revision+digest CAS, and exact reread proofs fail closed. PREPARED recovery compares raw structural state before selected-root liveness so a vanished candidate can be rolled back; an unknown third state remains terminal. Confined persistence is delegated to `QueryRouteRuntimeIO`. The store does not validate semantic authority, query, materialize, publish receipts, alter environment variables, or activate by itself.
 
 ### `build_query_replica_owner_route(...) -> QueryReplicaOwnerRoute`
 
@@ -58,16 +61,24 @@ JSON is an exact dict with unique keys at every depth and no NaN/Infinity; parse
 Exchange parses canonical then mandatory replica expectation before transport/HTTP. Binding malformation returns mismatch; HTTP/OSError failures return unavailable, and targeted close failures preserve the proof. Context entry calls `start()`, so a complete route remains mandatory.
 `ensure_reddog_holoindex_owner(..., query_replica_route=route)` passes split roots,
 reproves before spawn/health, and denies ambient/public paths or reuse drift.
+Its optional `startup_timeout_seconds` is exact-positive and bounds configured
+health plus process startup/probe/shutdown for a caller-supplied operation
+deadline. Invalid timeout types fail closed; absence retains the host default.
 
 ### `resolve_query_replica_owner_route(...) -> QueryReplicaOwnerRoute`
 
-Trusted-host resolver for `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT`. The value must
-be an explicit absolute path to an existing store disjoint from the canonical
-repository and SSD roots. The resolver opens a `StoreProof`, verifies the exact
-active descriptor against the supplied canonical roots, and returns the sealed
-route. It never infers a replica from `HOLOINDEX_SSD_PATH`, materializes,
-re-indexes, or mutates. Configuration, store-proof, or descriptor failure is
-reduced to `HOLOINDEX_QUERY_REPLICA_REQUIRED` without publishing the path.
+Trusted-host resolver preferring `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; the
+legacy `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` remains supported only when the
+route-file value is absent. Both present is an ambiguity failure. The route
+file must be absolute, private, canonical, and selected under its serialized
+store. Its `CURRENT` authority root, canonical HEAD/root/generation/receipt,
+replica root, and four public replica fields must exactly match a fresh active-
+descriptor proof. The legacy value must be an explicit absolute path to an
+existing store disjoint from canonical repository and SSD roots. The resolver
+never infers a replica from `HOLOINDEX_SSD_PATH`, materializes, recovers a
+transition, rewrites route state, or re-indexes. Configuration, terminal route
+admission, descriptor, or binding failure is reduced to
+`HOLOINDEX_QUERY_REPLICA_REQUIRED` without publishing a private path.
 
 The one-shot semantic adapter and maintenance handshake resolve this route
 before owner startup; promotion resolves it before read-only owner binding

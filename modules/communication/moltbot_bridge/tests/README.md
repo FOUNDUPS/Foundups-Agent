@@ -41,6 +41,20 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident
 response retains all four exact replica fields and fails closed when any field
 is missing. `scripts/tests/test_reddog_holoindex_owner_query_once.py` proves a
 valid-but-different returned replica cannot be bound to the verified route.
+`test_reddog_generation_bound_holoindex_query_adapter.py` additionally proves
+the resident default uses the one-shot contract, filters before limiting,
+removes raw/semantic/nested receipt bodies and arbitrary fields, rejects every
+split binding, serializes concurrent lifecycles, bounds lock wait, rejects
+hostile timeouts, and enforces the production child-process wall. The one-shot
+suite independently proves its shared lifecycle lock and strict CLI deadline.
+The canonical worker matrix also preserves the legacy direct/query/transport
+adapter export so existing diagnostic callers remain import-compatible while
+fresh resident workers use the generation-bound default.
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_holoindex_owner_client_transport.py modules/communication/moltbot_bridge/tests/test_reddog_holoindex_direct_query_boundary.py modules/communication/moltbot_bridge/tests/test_reddog_holoindex_receipt_binding.py modules/communication/moltbot_bridge/tests/test_reddog_holoindex_query_boundary.py -q
+```
 
 ## WSP 62 decomposition coverage
 

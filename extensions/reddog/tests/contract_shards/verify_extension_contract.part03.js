@@ -24,7 +24,17 @@ const rddBundle = JSON.stringify({
     metadata: { retrieval_mode: 'semantic', code_count: 3, wsp_count: 1 }
   }
 });
-const rddDiscovery = orchestrator.discoverRepoDeepDiveTargets(root, rddPrompt, rddBundle, 12);
+const rddGovernedGitExecutable = require(path.join(extDir, 'governed_git_executable.js'));
+const rddOriginalBind = rddGovernedGitExecutable.bind;
+let rddDiscovery;
+let rddFallbackIndex;
+rddGovernedGitExecutable.bind = () => { throw new Error('forced governed Git unavailable'); };
+try {
+  rddDiscovery = orchestrator.discoverRepoDeepDiveTargets(root, rddPrompt, rddBundle, 12);
+  rddFallbackIndex = orchestrator.repoFileIndex(root, 20000);
+} finally {
+  rddGovernedGitExecutable.bind = rddOriginalBind;
+}
 assert.strictEqual(rddDiscovery.manifest_generated, true, 'RDD-003: manifest generated');
 assert(rddDiscovery.manifest_file_count > 0, 'RDD-003: manifest is non-empty');
 assert.strictEqual(rddDiscovery.manifest_truncated, false, 'RDD-003: complete repository manifest is explicit');
@@ -41,6 +51,12 @@ assert(rddDiscovery.focus_candidate_count >= 3,
   'RDD-004: focus-bound selection records its eligible corpus size');
 assert(rddDiscovery.semantic_paths.includes('public/member/js/shell-bridge-interceptor.js'),
   'RDD-004: the generic semantic decoy is observed before focus filtering');
+assert(rddFallbackIndex.includes('main.py'),
+  'RDD-004: bounded fallback observes policy-admitted root files');
+assert(rddFallbackIndex.includes('docs/README.md'),
+  'RDD-004: bounded fallback observes repository documentation trees');
+assert(rddFallbackIndex.includes('WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md'),
+  'RDD-004: bounded fallback observes the WSP authority tree');
 assert(!rddDiscovery.targets.includes('public/member/js/shell-bridge-interceptor.js'),
   'RDD-004: generic semantic decoy cannot consume focused evidence budget');
 assert(rddDiscovery.targets.includes('modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py'),
@@ -84,21 +100,19 @@ const rddNoisyFocus = orchestrator.discoverRepoDeepDiveTargets(root,
 assert.strictEqual(rddNoisyFocus.focus_anchor, 'pfmall',
   'RDD-010: leading prose cannot replace the explicit subsystem focus');
 (function rddManifestCompletenessTruth() {
-  const originalExecFileSync = require(path.join(extDir, 'governed_git_executable.js')).execFileSync;
-  require(path.join(extDir, 'governed_git_executable.js')).execFileSync = (binding, args, options) => {
-    if (Array.isArray(args) && args.includes('ls-files')) {
-      return 'modules/foundups/pfmall/api.py\n' + 'x'.repeat(1000100);
-    }
-    return originalExecFileSync(binding, args, options);
-  };
-  try {
-    const indexed = orchestrator.repoFileIndex(root, 20000);
-    assert.strictEqual(indexed.manifest_truncated, true,
-      'RDD-010: character-truncated git manifests cannot claim completeness');
-    assert.strictEqual(indexed.manifest_source_count, 2,
-      'RDD-010: manifest source count remains explicit after character truncation');
-  } finally {
-    require(path.join(extDir, 'governed_git_executable.js')).execFileSync = originalExecFileSync;
+  const indexed = orchestrator.repoFileIndexFromTrackedOutput(
+    'modules/foundups/pfmall/api.py\n' + 'x'.repeat(1000100), 20000);
+  assert.strictEqual(indexed.manifest_truncated, true,
+    'RDD-010: character-truncated git manifests cannot claim completeness');
+  assert.strictEqual(indexed.manifest_source_count, 2,
+    'RDD-010: manifest source count remains explicit after character truncation');
+  assert.strictEqual(orchestrator.repoFileIndexFromTrackedOutput(null, 20000), null,
+    'RDD-010: non-string tracked output fails closed');
+  assert.strictEqual(orchestrator.repoFileIndexFromTrackedOutput(Object.create(null), 20000), null,
+    'RDD-010: hostile tracked-output objects fail closed before property access');
+  for (const invalidMax of ['20000', true, 0, 20001]) {
+    assert.strictEqual(orchestrator.repoFileIndexFromTrackedOutput('main.py', invalidMax), null,
+      'RDD-010: non-exact or out-of-range manifest bounds fail closed');
   }
 })();
 assert(!rddHostDiscovery.targets.some((p) => /(?:livechat|banter|worker_help|help_command)/i.test(p)),

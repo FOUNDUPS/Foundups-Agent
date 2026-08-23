@@ -1,5 +1,119 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-23 - Owner lifecycle deadline propagation
+
+- Added an optional exact-positive startup budget to the existing owner
+  bootstrap. The remaining one-shot deadline now bounds configured semantic
+  health, owner startup/probe/shutdown, query, and retry without changing the
+  extension's authenticated owner/replica proof.
+- Refactored launch and locked admission into bounded helpers; the bootstrap is
+  585 lines with a 48-line maximum function. Invalid timeout values fail closed
+  and the default host lifecycle remains compatible.
+- This is deadline propagation, not route authority or a new owner. The shared
+  one-shot and resident process wall own higher-level serialization/termination.
+  Focused combined owner/adapter/bootstrap result: **128 passed**.
+- WSP 00/15/22/50/62/84/87/97.
+
+## 2026-08-23 - Stable route-file owner resolution
+
+- Extended the existing verified owner-route resolver instead of creating a
+  parallel path. `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE` now loads the journaled
+  private route under a bounded lock and requires exact `CURRENT` authority,
+  canonical HEAD/root/generation/receipt, replica root, and all four descriptor
+  bindings before owner construction. The legacy direct root remains available
+  only by itself; dual configuration fails closed.
+- Independent WSP_97 review established that query consumers must not recover
+  a `PREPARED` transition and that a `CURRENT` record without its terminal
+  journal is not commit proof. The resolver now uses a nonmutating terminal
+  read; unjournaled `CURRENT` fails, while explicit controller `load()` retains
+  rollback recovery.
+- Preserved the route pointer through RedDog's `holoindex_owner` and
+  `resident_architect` environment profiles and the existing bounded Start
+  Operations promotion/control allowlist. The latter now copies only exact
+  non-empty strings. No credentials or unrelated bridge children receive it.
+- WSP_15 allocation is **C4/I5/D5/Impact5 = 19/P0** because this closes the
+  production-consumer edge required by activation. Governed Holo retrieval
+  failed closed first on candidate/main mismatch and later on a dirty external
+  authority checkout, always with zero owner attempts and no reindex; direct
+  Tier-0/Tier-1 retrieval then extended the existing resolver/store/profile
+  seams in explicitly degraded mode.
+- Final focused route contract/store result is **46 passed / 1 host-capability
+  skip**; the expanded resolver/route/owner/maintenance/one-shot matrix is
+  **173 passed / 1 skip**. Independent WSP_97 replay of its exact focused
+  selection is **121 passed / 1 skip**, with no remaining code P0/P1.
+- Backend closure is **1,381 files** at manifest digest
+  `d818aefa512d...9e88e`; all 8 generator/provenance contracts, the extension
+  backend pin, environment matrix, Start Operations contract, 13-member fast
+  tier, and exact package surface pass. Registry is **1,574 / 267
+  quarantined**. No live route, environment, owner, Holo store, replica,
+  query, or activation was changed. (WSP 00/15/22/50/62/84/87/97)
+- Capacity remains explicit P1 scale debt: the candidate closure is
+  **1,381/1,400 files** (19-file headroom), its generated manifest is
+  **309,370/327,680 bytes** (18,310-byte headroom), and the package surface is
+  **66 files / 962,637 bytes** under the unchanged 1 MiB ceiling (85,939-byte
+  headroom). No cap was raised.
+- The exact composed candidate then passed the isolated four-group RedDog
+  release in **288,505 ms** with no timeout. Governed Git finished 111,605 ms
+  below the unchanged child ceiling. A prior concurrent-audit run timed out
+  core/governed Git and remains P1 contention/profiling debt.
+- WSP_62 proof keeps owner resolution at 255 lines / 43-line maximum function,
+  route store at 300 lines / 183-line class / 33-line maximum function, and
+  confined I/O at 191 lines / 139-line class / 40-line maximum function. The
+  two expanded route test modules remain below the 800-line test ceiling.
+
+## 2026-08-23 - Private query-route CAS and crash recovery
+
+- Added exact immutable route/journal contracts with canonical ASCII JSON,
+  duplicate/non-finite rejection, exact scalar/container shapes, bounded
+  revisions, generation coherence, absolute private roots, and immutable nested
+  bindings.
+- Added a stable route store that no-replace initializes `EMPTY`, serializes on
+  one machine-wide lock, requires exact revision+digest CAS, journals PREPARED
+  before atomic selection, and commits only on normal context exit after an
+  explicit request. Failure or crash restores and re-proves the prior record;
+  an unknown route/journal combination returns `QUERY_ROUTE_ROLLBACK_UNPROVEN`.
+- Independent WSP_97 falsification found and closed two P1 boundaries before
+  commit: recovery now compares structural route digests before selected-root
+  liveness so a vanished candidate can still restore the predecessor, and
+  direct route/journal construction now exact-validates and copies nested proxy
+  maps so proof bytes cannot drift behind mutable backing state. Stable error
+  codes cover hostile direct scalar types.
+- WSP_62 extracted confined private-file I/O into
+  `reddog_holoindex_query_route_io.py`; route state/recovery policy remains in
+  the 196-line `QueryRouteStore`, while the 133-line I/O class owns bounded
+  reads, private-file proof, atomic replacement, and lock-path confinement.
+- Added concurrent-winner, stale/ABA expectation, both prepared-crash windows,
+  unknown state, replace failure, rollback failure, late failure after commit
+  request, path alias/link, canonical JSON, hostile type, and binding-chain
+  falsification. Focused result: **33 passed / 1 capability skip**; the tracked
+  registry is **1,573 tests / 267 quarantined**, with both route suites
+  collectable. The sequential route/plan/manifest/materializer matrix is **111 passed
+  / 3 capability skips**. The unchanged backend closure remains current at
+  **1,377 files**, digest `5c038a465ec8...776d35d`.
+- No live route, environment variable, canonical store, replica, owner, model,
+  query, receipt, or activation was changed. Controller integration remains a
+  separate gate. (WSP 00/15/22/50/62/84/87/97)
+
+## 2026-08-23 - Exact query-replica activation planning
+
+- Added a read-only planner that requires clean exact-HEAD/CURRENT canonical
+  admission and emits exactly the selected model plus 22 sealed snapshot
+  manifests for the existing materializer.
+- Rejected source links/reparse points, hardlinks, special files, aliases,
+  hostile boundary types, directory swaps, and same-size/restored-mtime file
+  mutation. Every file is descriptor-hashed twice, a final enumeration closes
+  second-pass swaps, and the complete binding is revalidated through production
+  generation/manifest contracts. Later change remains materializer-owned.
+- Preserved model-resolver source-path evidence on the planner-only call path;
+  default resolver behavior is unchanged. Added confined streaming digest
+  proofs that bind expected and final descriptor/path identity.
+- Focused and adjacent validation passed **109 tests / 4 host-capability
+  skips**. This slice performs no materialization, route mutation,
+  maintenance, owner startup, or activation. Route CAS/controller work remains
+  separately gated. The tracked registry is **1,571 / 267 quarantined** and the
+  regenerated RedDog closure is **1,377 runtime files** at canonical manifest
+  digest `5c038a465ec8...776d35d`. (WSP 00/15/22/50/62/84/87/97)
+
 ## 2026-08-23 - Narrow generation-bound replica materialization
 
 - Replaced full legacy `vectors/` materialization with the exact selected model

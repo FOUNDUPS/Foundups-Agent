@@ -11,6 +11,14 @@
 
 ## [API] Public API
 
+### Confined Runtime Artifact Reads
+
+`secure_digest_confined_file_impl(path, allowed_root=..., expected_identity=...,
+max_bytes=...)` streams one regular private file through a confined no-follow
+descriptor. It requires an exact `ConfinedFileIdentity`, enforces the byte
+bound, verifies descriptor/path identity before and after hashing, and returns
+`ConfinedFileDigestProof`. `secure_read_confined_bytes_impl` remains unchanged.
+
 ### Local Model Selection
 
 ### Local LM Studio Backend

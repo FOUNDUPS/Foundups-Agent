@@ -37,6 +37,30 @@ v2, and Python-bound serialization contain no absolute Git or PowerShell path.
 The Python matrix rejects recomputed bodies with incomplete identity/signature
 shape and accepts the complete live JS digest-only projection.
 
+## Stable Holo route propagation
+
+`test_bridge_python_environment.js` proves the stable route pointer crosses
+only the `holoindex_owner` and `resident_architect` bridge profiles plus the
+separate Start Operations promotion/control allowlist. The Start Operations
+builder admits exact non-empty strings and rejects empty, non-string, secret,
+and arbitrary inputs without aliasing its source. Backend closure pinning,
+Start Operations, the 13-member fast tier, and the exact package contract pass
+at 1,381 runtime files and manifest digest `d818aefa512d...9e88e`. The package
+surface is 66 files / 962,637 bytes under the unchanged 1 MiB cap. The canonical
+registry is current at 1,574 tests / 267 quarantined.
+
+The authenticated release aggregate is 18 shards / 6,928 lines / 489 counted
+assertions. When governed Git correctly rejects a host checkout, repository
+deep-dive discovery uses one complete bounded root walk; its regressions require
+root files, `public`, `docs`, and `WSP_framework` while preserving focus
+filtering. Registered-FoundUp success runs in a confined ordinary-Git fixture
+with canonical registry evidence, disabled ambient hooks/signing, and hostile
+path rejection; production Git authority remains fail-closed. The final
+isolated four-group release passed in 288,505 ms. Governed Git's 111,605 ms
+child-timeout margin remains P1 profiling debt. A concurrent-audit run that
+timed out core and governed Git is retained as contention evidence, not
+permission to raise the guard or cache stale authority.
+
 ## Test strategy
 
 Contract tests run **without OpenRouter, Cursor UI, or live bridge calls**. They validate extension source shape, exported helpers, bounded-context assembly, and Copy MD schema.
@@ -56,8 +80,11 @@ including license text canonically matching the repository authority.
 **Reuse rule (WSP 50):** Before adding tests, read `fixtures.js`, `TestModLog.md` TEST_REGISTRY, and `verify_extension_contract.js`. Extend existing fixtures and assertions; do not duplicate prompt strings or EXT-ACC probes.
 
 `test_bridge_python_environment.js` also proves
-`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` is confined to the `holoindex_owner` and
-`resident_architect` profiles and remains absent from every unrelated child.
+`REDDOG_HOLOINDEX_QUERY_ROUTE_FILE` and the exclusive legacy
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` are confined to the `holoindex_owner` and
+`resident_architect` profiles. It proves the paired
+`REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` follows the same closed-profile boundary
+and remains absent from every unrelated child.
 
 ## How to run
 

@@ -1,5 +1,78 @@
 # RedDog ModLog
 
+## 2026-08-23 - Resident Holo owner-path implementation
+
+- Connected the canonical resident/OpenClaw read-only audit worker to the
+  existing generation-bound one-shot Holo owner bridge. Fresh child processes
+  no longer ignore the propagated route and fall through to
+  `HOLOINDEX_QUERY_SERVICE_NOT_CONFIGURED`.
+- Independent WSP_97 review rejected early in-process versions for cleanup
+  races, raw/nested receipt leakage, split bindings, and false timeout claims.
+  The accepted design serializes the shared lifecycle, restores the one-shot
+  process boundary, enforces bounded capture and a 30-second parent wall with
+  at most 27 seconds entering the child and three seconds retained for cleanup,
+  and rebuilds a scoped worker receipt from allowed hits only.
+- This Holo resolver is separate from the completed AI Gateway model-topology
+  resolver. Fusion receives no route secret; Hermes dispatch remains disabled.
+  Focused evidence is 128 owner/adapter/bootstrap passes, 75 canonical worker
+  passes, 49 adjacent compatibility passes, and 16 exact WSP_62 passes. The
+  generated closure, registry, package, fast tier, and exhaustive release are
+  refreshed at the exact candidate below.
+- The dirty-authority production-shaped probe proves fail-closed reachability,
+  not a live-success canary. Clean/current post-merge success remains required
+  before activation. Per-query cold children and process-local-only
+  serialization remain P1 throughput debt.
+- WSP 00/15/22/50/62/84/87/97.
+
+## 2026-08-23 - Stable Holo route-file propagation
+
+- Added `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE` to the `holoindex_owner` and
+  `resident_architect` profiles and the bounded Start Operations
+  promotion/control environment. All unrelated bridge children continue to
+  drop it; the control boundary now copies only exact non-empty strings.
+- The Python owner resolver now requires either this stable route pointer or
+  the exclusive legacy direct root and exact-matches selected route authority,
+  canonical generation, and four replica bindings to the active descriptor.
+  Consumer reads are nonmutating: `PREPARED` fails pending and an unjournaled
+  `CURRENT` record is not commit proof.
+- Rebound the current **1,381-file** candidate to manifest digest
+  `d818aefa512d...9e88e`; all 8 generator/provenance contracts, the backend
+  pin, Start Operations, bridge environment, 13-member fast tier, and package
+  surface pass. Registry is 1,574/267.
+- Capacity debt is explicit: 19 files remain below the 1,400-file cap, 18,310
+  bytes below the 327,680-byte manifest cap, and the exact 66-file package is
+  962,637/1,048,576 bytes (85,939-byte headroom). No cap was raised.
+- Exhaustive release falsification exposed two inherited partial-clone host
+  assumptions after the route slice was green. The complete bounded repository
+  fallback now walks the root once when governed Git is unavailable, and the
+  FoundUp integration contract uses a confined ordinary-Git fixture instead of
+  weakening production Git authority. The authenticated aggregate is 18
+  shards / 6,928 lines / 489 counted assertions.
+- An intentionally retained concurrent-audit run returned **NO-GO** when core
+  and governed Git reached the unchanged child ceiling at 402,674/402,672 ms.
+  With competing audit work paused, the exact candidate passed all four groups
+  in **288,505 ms**: core 273,730 ms, governed Git 288,395 ms, Git
+  formats/environment 180,643 ms, and bridge/WSP_62 3,683 ms. No timeout was
+  raised. The failed contention run remains P1 profiling/scalability evidence;
+  no ceiling was widened and the isolated governed-Git margin is 111,605 ms.
+- Independent WSP_97 falsification found no remaining code P0/P1 after the
+  journal-proof, environment, and release-gate repairs. No live activation occurred.
+- WSP 00/15/22/50/62/97.
+
+## 2026-08-23 - Holo authority-root closed-profile propagation
+
+- Preserved `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` through the
+  `holoindex_owner` and `resident_architect` bridge profiles and the bounded
+  Start Operations promotion/control environment, alongside the
+  exact-generation query-replica route.
+- This closes the JavaScript-to-Python binding gap for an explicit clean
+  committed-head authority checkout without weakening Python topology, clean
+  state, same-HEAD, descriptor, or receipt verification.
+- Added the value to the exhaustive environment-profile matrix; unrelated
+  profiles continue to drop it. Package version remains pending the complete
+  governed activation slice.
+- WSP 00/15/22/50/62/97.
+
 ## 2026-08-23 - Narrow Holo query-replica backend binding
 
 - Rebound the packaged backend closure to the materializer policy that admits

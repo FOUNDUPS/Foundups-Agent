@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hmac
+import math
 import os
 import threading
 from dataclasses import dataclass
@@ -88,10 +89,15 @@ def _configured_owner_health_ready(
     expected_generation_id: str = "",
     expected_receipt_digest: str = "",
     expected_replica_binding: tuple[str, str, str, str] = ("", "", "", ""),
+    timeout_seconds: float | None = None,
 ) -> bool:
     return configured_owner_health_ready(
         service_url=service_url, token=token,
-        timeout_seconds=CONFIGURED_HEALTH_TIMEOUT_SECONDS,
+        timeout_seconds=(
+            timeout_seconds
+            if timeout_seconds is not None
+            else CONFIGURED_HEALTH_TIMEOUT_SECONDS
+        ),
         health_probe=_authenticated_health_probe,
         expected_repo_head_sha=expected_repo_head_sha,
         expected_repo_root_digest=expected_repo_root_digest,
@@ -115,6 +121,7 @@ def _configured_service_result(
     expected_generation_id: str = "",
     expected_receipt_digest: str = "",
     expected_replica_binding: tuple[str, str, str, str] = ("", "", "", ""),
+    timeout_seconds: float | None = None,
 ) -> RedDogHoloIndexOwnerBootstrapResult | None:
     canonical_binding = parse_exact_binding((
         expected_repo_head_sha, expected_repo_root_digest,
@@ -141,6 +148,8 @@ def _configured_service_result(
         "expected_receipt_digest": canonical_binding[3],
     }
     health_kwargs["expected_replica_binding"] = replica_binding
+    if timeout_seconds is not None:
+        health_kwargs["timeout_seconds"] = timeout_seconds
     if not _configured_owner_health_ready(**health_kwargs):
         return _owner_failed(CONFIGURED_UNREADY_ERROR)
     return RedDogHoloIndexOwnerBootstrapResult(
@@ -365,43 +374,64 @@ def _required_current_route(
     return route
 
 
-def _start_owned_owner(
-    *, repo_root: Path | str,
-    runtime_root: Path | str | None,
+def _launch_owned_owner(
+    *, repo_root: Path | str, runtime_root: Path | str | None,
     expected_binding: tuple[str, str, str, str],
     query_replica_route: QueryReplicaOwnerRoute | None,
-) -> RedDogHoloIndexOwnerBootstrapResult:
-    """Start, authenticate, and retain one process-private owner."""
-    global _OWNER_EXPECTED_BINDING, _OWNER_HANDOFF, _OWNER_REPLICA_ROUTE, _OWNER_SUPERVISOR
-    supervisor: HoloQueryServiceSupervisor | None = None
-    try:
-        route = _required_current_route(query_replica_route)
-        ssd_path = route.canonical_ssd_path
-        supervisor_args, replica_binding = owner_supervisor_configuration(
-            repo_root=repo_root, runtime_root=runtime_root,
-            canonical_ssd_path=ssd_path, route=route,
+    startup_timeout_seconds: float | None,
+) -> tuple[QueryReplicaOwnerRoute, HoloQueryServiceSupervisor, tuple[str, str]]:
+    route = _required_current_route(query_replica_route)
+    supervisor_args, replica_binding = owner_supervisor_configuration(
+        repo_root=repo_root, runtime_root=runtime_root,
+        canonical_ssd_path=route.canonical_ssd_path, route=route,
+    )
+    if startup_timeout_seconds is not None:
+        supervisor_args.update(
+            startup_timeout_seconds=startup_timeout_seconds,
+            probe_timeout_seconds=min(
+                DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS, startup_timeout_seconds,
+            ),
+            shutdown_timeout_seconds=min(3.0, startup_timeout_seconds),
         )
-        supervisor = HoloQueryServiceSupervisor(**supervisor_args)
+    supervisor = HoloQueryServiceSupervisor(**supervisor_args)
+    try:
         supervisor.start(**owner_start_binding_kwargs(expected_binding, replica_binding))
         handoff = _validated_owner_handoff(
-            supervisor,
-            expected_repo_head_sha=expected_binding[0],
+            supervisor, expected_repo_head_sha=expected_binding[0],
             expected_repo_root_digest=expected_binding[1],
             expected_generation_id=expected_binding[2],
             expected_receipt_digest=expected_binding[3],
             expected_replica_binding=replica_binding,
         )
+    except BaseException:
+        supervisor.stop()
+        raise
+    return route, supervisor, handoff
+
+
+def _start_owned_owner(
+    *, repo_root: Path | str,
+    runtime_root: Path | str | None,
+    expected_binding: tuple[str, str, str, str],
+    query_replica_route: QueryReplicaOwnerRoute | None,
+    startup_timeout_seconds: float | None = None,
+) -> RedDogHoloIndexOwnerBootstrapResult:
+    """Start, authenticate, and retain one process-private owner."""
+    global _OWNER_EXPECTED_BINDING, _OWNER_HANDOFF, _OWNER_REPLICA_ROUTE, _OWNER_SUPERVISOR
+    try:
+        route, supervisor, handoff = _launch_owned_owner(
+            repo_root=repo_root, runtime_root=runtime_root,
+            expected_binding=expected_binding,
+            query_replica_route=query_replica_route,
+            startup_timeout_seconds=startup_timeout_seconds,
+        )
     except HoloQueryServiceSupervisorError as exc:
-        if supervisor is not None:
-            supervisor.stop()
         return RedDogHoloIndexOwnerBootstrapResult(
             ready=False,
             status=OWNER_FAILED,
             error=exc.code,
         )
     except Exception:
-        if supervisor is not None:
-            supervisor.stop()
         return RedDogHoloIndexOwnerBootstrapResult(
             ready=False,
             status=OWNER_FAILED,
@@ -438,16 +468,63 @@ def _required_owner_request(
     return route, binding
 
 
+def _startup_timeout(value: float | None) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise ValueError("startup_timeout_invalid")
+    timeout = float(value)
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError("startup_timeout_invalid")
+    return timeout
+
+
+def _ensure_owner_locked(
+    *, repo_root: Path | str, runtime_root: Path | str | None,
+    route: QueryReplicaOwnerRoute, expected_binding: tuple[str, str, str, str],
+    startup_timeout_seconds: float | None,
+) -> RedDogHoloIndexOwnerBootstrapResult:
+    expected_runtime_root = Path(runtime_root or repo_root).resolve(strict=False)
+    reused = _reuse_owned_owner(
+        expected_binding=expected_binding,
+        expected_runtime_root=expected_runtime_root,
+        query_replica_route=route,
+    )
+    if reused is not None:
+        return reused
+    configured = _configured_service_result(
+        expected_repo_head_sha=expected_binding[0],
+        expected_repo_root_digest=expected_binding[1],
+        expected_generation_id=expected_binding[2],
+        expected_receipt_digest=expected_binding[3],
+        expected_replica_binding=route.expected_replica_binding,
+        timeout_seconds=startup_timeout_seconds,
+    )
+    if configured is not None:
+        return configured
+    if os.environ.get(AUTO_START_ENV, "1") == "0":
+        return RedDogHoloIndexOwnerBootstrapResult(
+            False, OWNER_AUTO_START_DISABLED, AUTO_START_DISABLED_ERROR,
+        )
+    return _start_owned_owner(
+        repo_root=repo_root, runtime_root=runtime_root,
+        expected_binding=expected_binding, query_replica_route=route,
+        startup_timeout_seconds=startup_timeout_seconds,
+    )
+
+
 def ensure_reddog_holoindex_owner(
     *, repo_root: Path | str,
     runtime_root: Path | str | None = None, requested: bool,
     expected_repo_head_sha: str = "", expected_generation_id: str = "",
     expected_receipt_digest: str = "", query_replica_route: QueryReplicaOwnerRoute | None = None,
+    startup_timeout_seconds: float | None = None,
 ) -> RedDogHoloIndexOwnerBootstrapResult:
     """Ensure one host owner exists only for Holo-dependent RedDog work."""
     if not requested:
         return RedDogHoloIndexOwnerBootstrapResult(False, OWNER_NOT_REQUESTED)
     try:
+        startup_timeout_seconds = _startup_timeout(startup_timeout_seconds)
         route, expected_binding = _required_owner_request(
             repo_root=repo_root,
             expected_repo_head_sha=expected_repo_head_sha,
@@ -455,35 +532,15 @@ def ensure_reddog_holoindex_owner(
             expected_receipt_digest=expected_receipt_digest,
             query_replica_route=query_replica_route,
         )
+    except (TypeError, ValueError):
+        return _owner_failed(BOOTSTRAP_FAILED_ERROR)
     except HoloQueryServiceSupervisorError as exc:
         return _owner_failed(exc.code)
-    expected_runtime_root = Path(runtime_root or repo_root).resolve(strict=False)
     with _OWNER_LOCK:
-        reused = _reuse_owned_owner(
+        return _ensure_owner_locked(
+            repo_root=repo_root, runtime_root=runtime_root, route=route,
             expected_binding=expected_binding,
-            expected_runtime_root=expected_runtime_root,
-            query_replica_route=route,
-        )
-        if reused is not None:
-            return reused
-        configured_result = _configured_service_result(
-            expected_repo_head_sha=expected_binding[0],
-            expected_repo_root_digest=expected_binding[1],
-            expected_generation_id=expected_binding[2],
-            expected_receipt_digest=expected_binding[3],
-            expected_replica_binding=route.expected_replica_binding,
-        )
-        if configured_result is not None:
-            return configured_result
-        if os.environ.get(AUTO_START_ENV, "1") == "0":
-            return RedDogHoloIndexOwnerBootstrapResult(
-                False, OWNER_AUTO_START_DISABLED, AUTO_START_DISABLED_ERROR,
-            )
-        return _start_owned_owner(
-            repo_root=repo_root,
-            runtime_root=runtime_root,
-            expected_binding=expected_binding,
-            query_replica_route=route,
+            startup_timeout_seconds=startup_timeout_seconds,
         )
 
 

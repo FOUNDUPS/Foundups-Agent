@@ -9,6 +9,24 @@ preserves those fields. `scripts/reddog_holoindex_owner_query_once.py` then
 compares the returned tuple with its verified `QueryReplicaOwnerRoute`; a
 missing, malformed, or different tuple returns
 `HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH` and cannot produce a success receipt.
+
+`GenerationBoundHoloIndexQueryAdapter.query(...)` is the canonical resident
+read-only worker adapter. It starts the one-shot script with `python -S -B`,
+permits at most 27 seconds for the child operation inside a 30-second parent
+wall, and retains three seconds for process cleanup. Lock wait consumes the
+same total budget. Success requires CURRENT semantic freshness, exact
+repository/authority HEAD and root equality, exact generation equality, and
+all four verified replica fields. The adapter re-verifies the one-shot receipt,
+filters allowed hits before limiting, and returns only a scoped receipt plus
+safe hit metadata; raw semantic buckets, route data, and nested one-shot
+receipts are not exposed to Fusion.
+
+The lifecycle lock is process-local and the adapter starts one bounded child
+per query. This is a fail-closed phase-1 correctness boundary, not a claim of
+cross-process serialization or horizontally scalable throughput. A
+clean/current post-merge live-success canary remains an activation requirement;
+the dirty-authority probe establishes only fail-closed path reachability.
+
 ## Receipt-bound artifact generation models
 
 `build_generation_dependencies(...)` accepts an explicit
@@ -571,6 +589,23 @@ The adapter never exports that handoff, opens Chroma, or indexes. Each request
 sends the exact clean local repository HEAD. The adapter
 preserves canonical WSP, docs, knowledge, tests, skills, work-ledger, code, and
 symbol buckets before normalizing hits.
+
+`GenerationBoundHoloIndexQueryAdapter.query(...)` is the production default
+for resident/OpenClaw read-only audit workers when no adapter is injected. It
+reuses `scripts/reddog_holoindex_owner_query_once.py` through its intended
+one-shot child-process boundary. The child receives a strict internal deadline;
+the parent enforces a final wall timeout with bounded file-backed stdout/stderr
+capture. The shared one-shot serializes its complete process-owned owner
+lifecycle, so concurrent direct callers cannot clean up an owner still in use.
+
+A successful resident result must be CURRENT semantic evidence, have no gap or
+stale reasons, match repository/authority HEAD and root identities, match the
+canonical generation to all four immutable replica fields, and reproduce the
+one-shot query receipt exactly before that receipt body is discarded. Only
+allowed-path normalized hits and safe public scalar bindings survive. The audit
+worker creates its own scoped generation-bound receipt. The adapter never
+forwards route variables or owner credentials to Fusion, never reindexes, and
+does not turn Hermes-compatible evidence into live Hermes dispatch.
 
 The returned freshness field is CURRENT only for semantic retrieval with an
 exact SHA, non-empty generation and receipt digest, and complete seven-

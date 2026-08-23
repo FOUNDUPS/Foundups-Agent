@@ -1,5 +1,11 @@
 # HoloIndex Tests
 
+## Model source-path provenance
+
+`test_holoindex_embedding_space.py` proves the opt-in planner mode preserves an
+available model-directory alias for link/junction inspection while the default
+resolver behavior remains unchanged.
+
 ## Closed command-import regression
 
 `test_reddog_extension_bundle_recall.py` starts a `-S -B` child and imports the

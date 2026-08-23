@@ -1,6 +1,15 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-08-23 - Confined streaming digest identity proof
+
+- Added a bounded streaming SHA-256 proof that opens one confined no-follow
+  descriptor, requires an expected full file identity, and rechecks descriptor
+  plus path identity after hashing. Windows descriptor/path creation-time
+  representation is handled without dropping the final path comparison.
+- Added replacement, mutation, restored-mtime, link, bound, and stable-success
+  coverage. The existing confined byte-read API is unchanged.
+
 ## 2026-08-22 - Exact LM Studio Residency and Managed Model Transactions
 
 - Replaced `/v1/models` presence as residency proof with exact native

@@ -16,6 +16,7 @@ from .holo_query_replica_binding import (
 from .reddog_holoindex_acceptance_guards import (
     AcceptanceGuardError,
     StoreProof,
+    _normalized,
     prove_existing_isolated_store,
 )
 from .reddog_holoindex_query_replica_descriptor import (
@@ -24,10 +25,15 @@ from .reddog_holoindex_query_replica_descriptor import (
     revalidate_admitted_query_replica,
     verify_active_query_replica,
 )
+from .reddog_holoindex_query_route_contract import QueryRouteRecord
+from .reddog_holoindex_query_route_io import QueryRouteStoreError
+from .reddog_holoindex_query_route_store import QueryRouteStore
 
 
 QUERY_REPLICA_REQUIRED_ERROR = "HOLOINDEX_QUERY_REPLICA_REQUIRED"
 QUERY_REPLICA_ROOT_ENV = "REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT"
+QUERY_REPLICA_ROUTE_FILE_ENV = "REDDOG_HOLOINDEX_QUERY_ROUTE_FILE"
+_QUERY_ROUTE_RESOLUTION_LOCK_TIMEOUT_SECONDS = 15.0
 
 @dataclass(frozen=True)
 class QueryReplicaOwnerRoute:
@@ -70,31 +76,116 @@ def build_query_replica_owner_route(
     return QueryReplicaOwnerRoute(repo_root, canonical, replica_root_proof, binding)
 
 
+def _route_record_matches_owner(
+    record: QueryRouteRecord, route: QueryReplicaOwnerRoute,
+) -> bool:
+    binding = route.binding
+    canonical = {
+        "repo_head_sha": binding.canonical_repo_head_sha,
+        "repo_root_digest": binding.canonical_repo_root_digest,
+        "generation_id": binding.generation_id,
+        "receipt_digest": binding.canonical_receipt_digest,
+    }
+    return (
+        record.status == "CURRENT"
+        and record.canonical == canonical
+        and record.replica == binding.public_binding
+        and record.replica_root == str(route.replica_root_proof.path)
+    )
+
+
+def _resolve_route_file(
+    raw_route_file: str, *, canonical_repo_root: Path | str,
+    canonical_ssd_path: Path | str,
+) -> QueryReplicaOwnerRoute:
+    if raw_route_file != raw_route_file.strip():
+        raise ValueError(QUERY_REPLICA_REQUIRED_ERROR)
+    route_path = Path(raw_route_file)
+    if not route_path.is_absolute() or route_path.parent == route_path:
+        raise ValueError(QUERY_REPLICA_REQUIRED_ERROR)
+    repo_root = _normalized(canonical_repo_root)
+    store = QueryRouteStore(
+        route_path, runtime_root=route_path.parent,
+        canonical_store=canonical_ssd_path, repo_roots=(repo_root,),
+        lock_timeout_seconds=_QUERY_ROUTE_RESOLUTION_LOCK_TIMEOUT_SECONDS,
+        create_runtime_root=False,
+    )
+    selected = store.load_readonly().record
+    if selected.authority_repo_root != str(repo_root):
+        raise ValueError(QUERY_REPLICA_REQUIRED_ERROR)
+    proof = prove_existing_isolated_store(
+        Path(selected.replica_root),
+        canonical_store=canonical_ssd_path, repo_roots=(repo_root,),
+    )
+    route = build_query_replica_owner_route(
+        canonical_repo_root=repo_root, canonical_ssd_path=canonical_ssd_path,
+        replica_root_proof=proof,
+    )
+    if not _route_record_matches_owner(selected, route):
+        raise ValueError(QUERY_REPLICA_REQUIRED_ERROR)
+    return route
+
+
+def _resolve_legacy_root(
+    raw_root: str, *, canonical_repo_root: Path | str,
+    canonical_ssd_path: Path | str,
+) -> QueryReplicaOwnerRoute:
+    replica_root = Path(raw_root.strip())
+    if not replica_root.is_absolute():
+        raise ValueError(QUERY_REPLICA_REQUIRED_ERROR)
+    proof = prove_existing_isolated_store(
+        replica_root,
+        canonical_store=canonical_ssd_path, repo_roots=(canonical_repo_root,),
+    )
+    return build_query_replica_owner_route(
+        canonical_repo_root=canonical_repo_root,
+        canonical_ssd_path=canonical_ssd_path,
+        replica_root_proof=proof,
+    )
+
+
 def resolve_query_replica_owner_route(
     *, canonical_repo_root: Path | str, canonical_ssd_path: Path | str,
     environment: Mapping[str, str] | None = None,
 ) -> QueryReplicaOwnerRoute:
     """Resolve one explicitly configured, existing, exact-generation route."""
 
-    env = os.environ if environment is None else environment
+    if environment is None or environment is os.environ:
+        env = os.environ
+    else:
+        if type(environment) is not dict or any(
+            type(key) is not str or type(value) is not str
+            for key, value in environment.items()
+        ):
+            raise ValueError(QUERY_REPLICA_REQUIRED_ERROR)
+        env = dict(environment)
     raw_root = env.get(QUERY_REPLICA_ROOT_ENV)
-    if type(raw_root) is not str or not raw_root.strip():
+    raw_route_file = env.get(QUERY_REPLICA_ROUTE_FILE_ENV)
+    root_configured = type(raw_root) is str and bool(raw_root.strip())
+    route_file_configured = (
+        type(raw_route_file) is str and bool(raw_route_file.strip())
+    )
+    if root_configured == route_file_configured:
         raise ValueError(QUERY_REPLICA_REQUIRED_ERROR)
-    replica_root = Path(raw_root.strip())
-    if not replica_root.is_absolute():
+    if (
+        raw_root is not None and type(raw_root) is not str
+        or raw_route_file is not None and type(raw_route_file) is not str
+    ):
         raise ValueError(QUERY_REPLICA_REQUIRED_ERROR)
     try:
-        proof = prove_existing_isolated_store(
-            replica_root,
-            canonical_store=canonical_ssd_path,
-            repo_roots=(canonical_repo_root,),
-        )
-        return build_query_replica_owner_route(
-            canonical_repo_root=canonical_repo_root,
+        if route_file_configured:
+            return _resolve_route_file(
+                raw_route_file, canonical_repo_root=canonical_repo_root,
+                canonical_ssd_path=canonical_ssd_path,
+            )
+        return _resolve_legacy_root(
+            raw_root, canonical_repo_root=canonical_repo_root,
             canonical_ssd_path=canonical_ssd_path,
-            replica_root_proof=proof,
         )
-    except (AcceptanceGuardError, QueryReplicaDescriptorError, OSError, TypeError):
+    except (
+        AcceptanceGuardError, QueryReplicaDescriptorError,
+        QueryRouteStoreError, OSError, TypeError, ValueError,
+    ):
         raise ValueError(QUERY_REPLICA_REQUIRED_ERROR) from None
 
 
@@ -158,6 +249,7 @@ __all__ = [
     "QueryReplicaOwnerRoute", "build_query_replica_owner_route",
     "owner_start_binding_kwargs", "owner_supervisor_configuration",
     "QUERY_REPLICA_REQUIRED_ERROR", "QUERY_REPLICA_ROOT_ENV",
+    "QUERY_REPLICA_ROUTE_FILE_ENV",
     "replica_binding_is_complete", "replica_route_is_current",
     "resolve_query_replica_owner_route",
 ]

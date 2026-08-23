@@ -1,5 +1,13 @@
 # HoloIndex Package ModLog
 
+## [2026-08-23] Planner-preserved model source identity
+
+- Added an opt-in `preserve_source_path` resolver mode so trusted replica-plan
+  admission can inspect and reject link/junction provenance before resolution.
+  The default resolved-path behavior and all existing callers remain
+  unchanged; dedicated coverage proves the planner-only mode preserves an
+  available alias for fail-closed inspection. (WSP 00/15/22/50/62/84/97)
+
 ## [2026-08-23] Repository-relative Tier-0 producer identity repair
 
 - Reproduced a live exact-HEAD `moltbot_bridge` owner query returning

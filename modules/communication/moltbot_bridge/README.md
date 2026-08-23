@@ -9,6 +9,24 @@ from an absent, malformed, or different replica fails closed before its query
 receipt is bound. This is response identity propagation only; it grants no
 maintenance, route-selection, repository, or model authority.
 
+Resident read-only audit workers use
+`GenerationBoundHoloIndexQueryAdapter`, not an ambient in-process handoff. It
+invokes that exact one-shot bridge in a bounded child process, admits only a
+CURRENT semantic response with equal repository/authority/replica bindings,
+and projects only signed-scope hit metadata. Raw semantic buckets and the
+one-shot receipt body never enter Fusion/model context; the worker builds a new
+scoped query receipt. Shared in-process callers are serialized at the one-shot
+owner lifecycle. The resident boundary is 30 seconds including lock wait: at
+most 27 seconds enter the child operation and three seconds remain for parent
+cleanup. That budget is calibrated above the previously observed 14.5-18.5
+second cold owner startup range; the earlier 15-second diagnostic budget was
+known to produce false `NOT_READY` results. This is the implemented Holo
+grounding path used by the canonical resident worker, but a clean/current
+post-merge success canary is still required before activation. The current
+dirty-authority probe proves only fail-closed reachability. The process-local
+lock and per-query cold child are safe phase-1 constraints, not horizontal
+throughput claims. The path does not perform outbound Hermes dispatch.
+
 ## Receipt-bound artifact model routing
 
 The resident bounded-artifact path does not infer models from provider names,

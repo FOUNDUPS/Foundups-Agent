@@ -5,6 +5,7 @@ from __future__ import annotations
 from io import BytesIO
 import sys
 from pathlib import Path
+from threading import Event, Thread
 from types import SimpleNamespace
 
 import pytest
@@ -108,6 +109,43 @@ def test_owner_query_script_import_is_bound_to_root_scripts_directory() -> None:
     assert Path(_OWNER_QUERY_SCRIPT.__file__).resolve() == SCRIPT_PATH.resolve()
 
 
+def test_cli_timeout_is_forwarded_to_query_once(monkeypatch) -> None:
+    calls = {}
+    monkeypatch.setattr(_OWNER_QUERY_SCRIPT, "_read_payload", lambda: {"query": "audit"})
+
+    def fake_query(payload, *, operation_timeout_seconds):
+        calls.update(payload=payload, timeout=operation_timeout_seconds)
+        return {"ok": False, "error": "test_terminal"}
+
+    monkeypatch.setattr(_OWNER_QUERY_SCRIPT, "query_once", fake_query)
+    result = _OWNER_QUERY_SCRIPT._main_result([
+        "--operation-timeout-seconds", "12.0",
+    ])
+
+    assert result["error"] == "test_terminal"
+    assert calls == {"payload": {"query": "audit"}, "timeout": 12.0}
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [["--unknown", "12"], ["--operation-timeout-seconds"],
+     ["--operation-timeout-seconds", "invalid"],
+     ["--operation-timeout-seconds", "0"]],
+)
+def test_cli_timeout_rejects_unknown_or_invalid_arguments(
+    monkeypatch, arguments,
+) -> None:
+    monkeypatch.setattr(
+        _OWNER_QUERY_SCRIPT, "_read_payload",
+        lambda: (_ for _ in ()).throw(AssertionError("must not read stdin")),
+    )
+
+    result = _OWNER_QUERY_SCRIPT._main_result(arguments)
+
+    assert result["ok"] is False
+    assert result["error"] == "invalid_arguments"
+
+
 def _success(root: Path) -> dict:
     result = {
         "ok": True,
@@ -128,6 +166,95 @@ def _success(root: Path) -> dict:
     }
     result.update(dict(zip(REPLICA_FIELDS, REPLICA_BINDING)))
     return result
+
+
+def test_operation_timeout_bounds_owner_start_and_query(tmp_path: Path) -> None:
+    bootstrap_calls = {}
+    query_calls = {}
+
+    def ensure_owner(**kwargs):
+        bootstrap_calls.update(kwargs)
+        return SimpleNamespace(ready=True, status="CONFIGURED", error="")
+
+    def query_owner(**kwargs):
+        query_calls.update(kwargs)
+        return _success(tmp_path)
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        select_authority=_selection,
+        ensure_owner=ensure_owner,
+        query_owner=query_owner,
+        operation_timeout_seconds=5.0,
+    )
+
+    assert result["ok"] is True
+    assert 0 < bootstrap_calls["startup_timeout_seconds"] <= 5.0
+    assert 0 < query_calls["timeout_seconds"] <= 5.0
+
+
+@pytest.mark.parametrize("timeout", [True, 0, -1, float("inf"), 61])
+def test_operation_timeout_rejects_invalid_internal_budget(
+    tmp_path: Path, timeout,
+) -> None:
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        operation_timeout_seconds=timeout,
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "operation_timeout_invalid"
+    assert result["owner_attempts"] == 0
+
+
+def test_shared_owner_lifecycle_serializes_direct_callers(tmp_path: Path) -> None:
+    first_entered = Event()
+    release_first = Event()
+    active = 0
+    maximum_active = 0
+    query_calls = 0
+    results = []
+
+    def ensure_owner(**_kwargs):
+        return SimpleNamespace(ready=True, status="STARTED", error="")
+
+    def query_owner(**_kwargs):
+        nonlocal active, maximum_active, query_calls
+        query_calls += 1
+        active += 1
+        maximum_active = max(maximum_active, active)
+        if query_calls == 1:
+            first_entered.set()
+            assert release_first.wait(2)
+        active -= 1
+        return _success(tmp_path)
+
+    def run_query():
+        results.append(query_once(
+            {"query": "audit pfmall"}, repo_root=tmp_path,
+            select_authority=_selection, ensure_owner=ensure_owner,
+            resolve_handoff=lambda: ("http://127.0.0.1:8127", "s" * 64),
+            query_owner=query_owner, cleanup_owner=lambda: None,
+        ))
+
+    first = Thread(target=run_query)
+    second = Thread(target=run_query)
+    first.start()
+    assert first_entered.wait(2)
+    second.start()
+    assert query_calls == 1
+    release_first.set()
+    first.join(2)
+    second.join(2)
+
+    assert not first.is_alive()
+    assert not second.is_alive()
+    assert maximum_active == 1
+    assert query_calls == 2
+    assert len(results) == 2
+    assert all(result["ok"] is True for result in results)
 
 
 def test_read_payload_accepts_powershell_utf8_bom(monkeypatch) -> None:
@@ -186,7 +313,7 @@ def test_started_owner_uses_private_handoff_and_cleans_up(tmp_path: Path) -> Non
     assert calls["repo_root"] == tmp_path
     assert calls["service_url"].startswith("http://127.0.0.1:")
     assert calls["service_token"] == "x" * 48
-    assert calls["timeout_seconds"] == 60.0
+    assert 0 < calls["timeout_seconds"] <= 60.0
     assert calls["cleaned"] is True
 
 

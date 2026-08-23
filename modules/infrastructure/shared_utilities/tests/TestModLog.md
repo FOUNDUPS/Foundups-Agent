@@ -1,5 +1,11 @@
 # TestModLog
 
+## 2026-08-23 - Confined Streaming Digest Proof
+
+- Added stable success, strict identity/bound, replacement/link, content
+  mutation, and same-size restored-mtime coverage for the descriptor-confined
+  streaming SHA-256 proof. All artifacts are disposable test files.
+
 ## 2026-08-22 - LM Studio Lifecycle Hardening
 
 - Added deterministic native inventory, exact lease ownership, node-wide

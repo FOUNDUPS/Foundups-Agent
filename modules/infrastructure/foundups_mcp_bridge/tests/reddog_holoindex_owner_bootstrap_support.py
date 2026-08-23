@@ -75,6 +75,9 @@ class _FakeSupervisor:
         canonical_ssd_path: Path | str | None = None,
         query_replica_root: Path | str | None = None,
         replica_capability_verifier=None,
+        startup_timeout_seconds: float = 300.0,
+        probe_timeout_seconds: float = 30.0,
+        shutdown_timeout_seconds: float = 3.0,
     ) -> None:
         self.repo_root = Path(repo_root)
         self.runtime_root = Path(runtime_root or repo_root)
@@ -84,6 +87,9 @@ class _FakeSupervisor:
             Path(query_replica_root) if query_replica_root is not None else None
         )
         self.replica_capability_verifier = replica_capability_verifier
+        self.startup_timeout_seconds = startup_timeout_seconds
+        self.probe_timeout_seconds = probe_timeout_seconds
+        self.shutdown_timeout_seconds = shutdown_timeout_seconds
         self.lifecycle_events: list[str] = []
         self.started = False
         self.stopped = False
