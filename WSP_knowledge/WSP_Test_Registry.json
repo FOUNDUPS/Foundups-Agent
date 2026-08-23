@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1569,
+  "total_tests": 1570,
   "quarantined_tests": 267,
   "tests": [
     {
