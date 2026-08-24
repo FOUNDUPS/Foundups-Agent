@@ -1,5 +1,35 @@
 # RedDog ModLog
 
+## 2026-08-23 - Governed Holo maintenance runtime repair (0.4.107)
+
+- Bound RedDog's exact maintenance dependency directory and actual held
+  process image across the governed refresh and final isolated snapshot probe.
+  Invalid governed authority can no longer be omitted and mistaken for a
+  legitimate runtime-free caller. Ambient Python/provider secrets remain
+  absent, proof stays in memory, and stable failure is returned before
+  invalidation or spawn.
+- The first exhaustive release was retained as **NO-GO** at RDD-003. A complete
+  host fallback walk had encountered ignored local closures; no repository cap
+  or production guard was widened. The fallback regression now uses one
+  confined O:-local repository containing root, docs, WSP, focused
+  implementation/test/contract, cross-cutting, semantic-decoy, and
+  tracked-like .claude evidence while excluding administrative/runtime trees.
+  Targeted reruns then exposed and repaired RDD-004/RDD-009 fixture
+  fidelity/root mismatches without weakening target recall.
+- Candidate WSP_62 then rejected the 34-line fixture constructor. Cleanup was
+  extracted into its own bounded helper; the unchanged 30-line function limit
+  now passes without an exemption.
+- Version 0.4.107 closes at **18 authenticated shards / 6,929 lines / 490
+  assertions**, aggregate
+  sha256:563b7efc4d012d7166d0e7dbdba8a9ebe5d0a66093419dc66070123dae6ebbcc.
+  The final post-extraction four-worker release passed in **162,441 ms** with
+  no timeout: core 162,364 ms, governed Git 71,632 ms, Git
+  formats/environment 42,339 ms, and bridge/WSP_62 2,605 ms. Package surface
+  is **66 files / 961,383 bytes**
+  under the unchanged 1 MiB cap. Backend closure is **1,382 files** at
+  77b25ba7da6085431f5685b7f1fca2efba1092cf0c9555bbd5bdd7002df213a0.
+  (WSP 00/15/22/50/62/84/87/97; WSP_15 19/P0)
+
 ## 2026-08-23 - Compact Holo snapshot runtime closure (0.4.106)
 
 - Rebound the authenticated 1,381-file backend manifest after a live exact-main

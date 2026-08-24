@@ -226,6 +226,16 @@ consumers fail closed
 with HOLOINDEX_MAINTENANCE_ACTIVE or
 HOLOINDEX_MAINTENANCE_LOCK_UNPROVEN.
 
+When a trusted RedDog launcher supplies an explicit maintenance-probe runtime,
+`MaintenanceSession.begin()` revalidates its single site-packages path and
+creates an in-memory current-process executable proof before lease acquisition
+or invalidation. The exact pair is forwarded only to the existing isolated
+snapshot verifier; it is neither persisted nor included in freshness receipts.
+Missing explicit authority keeps direct maintenance runtime-free. Invalid,
+changed, linked, ambiguous, or partial authority fails before mutation as
+`HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED` with stable detail
+`RUNTIME_DEPENDENCY_UNAVAILABLE`; the isolated proof remains single-shot.
+
 Generation publication additionally requires the pinned HNSW collection
 configuration and a complete persisted artifact set for each baseline vector
 segment. This proof reads Chroma's SQLite catalog and segment files without

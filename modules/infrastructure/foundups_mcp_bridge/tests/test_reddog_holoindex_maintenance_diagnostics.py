@@ -17,6 +17,9 @@ from holo_index.repository_state import RepositoryState
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_maintenance_handshake as handshake,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_process_image import (
+    prove_current_process_executable,
+)
 
 
 def _state() -> RepositoryState:
@@ -28,6 +31,31 @@ def _state() -> RepositoryState:
     )
 
 
+def _runtime_executable() -> str:
+    return str(prove_current_process_executable().path)
+
+
+def _trusted_runtime_root(tmp_path: Path) -> Path:
+    """Create the minimal exact virtualenv proof required by the handshake."""
+
+    root = tmp_path / "runtime"
+    site_packages = root / ".venv" / "Lib" / "site-packages"
+    site_packages.mkdir(parents=True)
+    base = Path(getattr(sys, "_base_executable", sys.executable)).resolve()
+    (root / ".venv" / "pyvenv.cfg").write_text(
+        "\n".join(
+            (
+                f"home = {base.parent}",
+                "include-system-site-packages = false",
+                f"version = {sys.version.split()[0]}",
+                f"executable = {base}",
+            )
+        ),
+        encoding="utf-8",
+    )
+    return root
+
+
 def _failed_refresh(tmp_path: Path, monkeypatch, runner):
     monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
     monkeypatch.setattr(
@@ -35,6 +63,7 @@ def _failed_refresh(tmp_path: Path, monkeypatch, runner):
     )
     return handshake.ensure_reddog_holoindex_operational(
         repo_root=tmp_path,
+        owner_runtime_root=_trusted_runtime_root(tmp_path),
         requested=True,
         environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
         runner=runner,
@@ -133,7 +162,7 @@ def _run_descendant_timeout(
     started = time.monotonic()
     with pytest.raises(subprocess.TimeoutExpired):
         handshake._bounded_refresh_runner(
-            [sys.executable, "-c", child],
+            [_runtime_executable(), "-c", child],
             cwd=str(tmp_path),
             env=os.environ.copy(),
             stdin=subprocess.DEVNULL,
@@ -233,7 +262,7 @@ def test_refresh_timeout_remains_stable_and_secret_free(tmp_path: Path, monkeypa
 def test_default_refresh_runner_bounds_retained_stdout(tmp_path: Path) -> None:
     completed = handshake._bounded_refresh_runner(
         [
-            sys.executable,
+            _runtime_executable(),
             "-c",
             f"import sys; sys.stdout.buffer.write(b'x' * "
             f"{handshake._REFRESH_STDOUT_MAX_BYTES + 1})",
@@ -275,7 +304,7 @@ def test_timeout_kills_descendant_and_releases_reader_pipe(
     started = time.monotonic()
     with pytest.raises(subprocess.TimeoutExpired):
         handshake._bounded_refresh_runner(
-            [sys.executable, "-c", child],
+            [_runtime_executable(), "-c", child],
             cwd=str(tmp_path),
             env=os.environ.copy(),
             stdin=subprocess.DEVNULL,
@@ -286,14 +315,14 @@ def test_timeout_kills_descendant_and_releases_reader_pipe(
             check=False,
         )
     elapsed = time.monotonic() - started
-    direct_pid, descendant_pid = map(int, pid_file.read_text().split(","))
+    script_pid, descendant_pid = map(int, pid_file.read_text().split(","))
     refresh_process = opened[0]
 
     assert elapsed < 2.0
-    assert refresh_process.pid == direct_pid
     assert refresh_process.poll() is not None
     assert refresh_process.stdout is not None and refresh_process.stdout.closed
-    assert _wait_process_absent(direct_pid)
+    assert _wait_process_absent(refresh_process.pid)
+    assert _wait_process_absent(script_pid)
     assert _wait_process_absent(descendant_pid)
     assert not _refresh_reader_alive()
 
@@ -321,16 +350,18 @@ def test_taskkill_failure_bounds_direct_child_and_exposes_retained_reader(
 
     assert not _refresh_reader_alive()
     monkeypatch.setattr(subprocess, "run", intercepted_run)
-    elapsed, refresh_process, direct_pid, descendant_pid = _run_descendant_timeout(
+    elapsed, refresh_process, script_pid, descendant_pid = _run_descendant_timeout(
         tmp_path, monkeypatch
     )
     try:
         assert elapsed < 3.5
         assert taskkill_commands == [
-            ["taskkill", "/PID", str(direct_pid), "/T", "/F"]
+            ["taskkill", "/PID", str(refresh_process.pid), "/T", "/F"]
         ]
         assert refresh_process.poll() is not None
-        assert _wait_process_absent(direct_pid)
+        assert _wait_process_absent(refresh_process.pid)
+        if script_pid != refresh_process.pid:
+            assert _process_exists(script_pid)
         assert _process_exists(descendant_pid)
         assert refresh_process.stdout is not None
         assert not refresh_process.stdout.closed
@@ -338,8 +369,10 @@ def test_taskkill_failure_bounds_direct_child_and_exposes_retained_reader(
     finally:
         monkeypatch.setattr(subprocess, "run", real_run)
         _kill_exact_pid(descendant_pid, windows_runner=real_run)
-        _kill_exact_pid(direct_pid, windows_runner=real_run)
+        _kill_exact_pid(script_pid, windows_runner=real_run)
+        _kill_exact_pid(refresh_process.pid, windows_runner=real_run)
 
+    assert _wait_process_absent(script_pid)
     assert _wait_process_absent(descendant_pid)
     assert _wait_reader_absent()
     assert refresh_process.stdout.closed

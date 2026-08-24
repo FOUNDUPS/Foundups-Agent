@@ -1,5 +1,15 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-23] Maintenance pre-invalidation runtime proof
+
+- Added regression coverage proving runtime proof exists before invalidation,
+  survives a post-begin marker replacement, enters the isolated child as a
+  sealed marker without PYTHONPATH, and rejects partial or changed proof
+  single-shot. The direct no-marker path remains explicitly runtime-free.
+- Complete relevant maintenance coverage passed **106 / 2 skips**; the adjacent
+  process/owner/acceptance/isolated-runtime/CLI matrix passed **119 / 2
+  skips**. No live Holo store, route, or replica was changed.
+
 ## [2026-08-23] Compact snapshot-only startup regression
 
 - Changed the storage-contract fixture to contain only the sealed

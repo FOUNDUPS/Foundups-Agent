@@ -285,8 +285,11 @@ requested=...)`. With `REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1` (default), the
 trusted host may refresh a stale canonical store only from a clean exact Git
 HEAD. It stops only an auto-owned owner, strips semantic bypass and source
 narrowing, runs one bounded argv-only full refresh, proves all seven baseline
-collections, and rechecks HEAD. Current `_start_owner` lacks the mandatory route,
-so post-refresh start fails closed. Governed WRE never acquires maintenance authority.
+collections, and rechecks HEAD. Both fresh-receipt and post-refresh startup
+resolve the mandatory `QueryReplicaOwnerRoute`; missing, ambiguous, drifted, or
+uncommitted route state fails as `HOLOINDEX_QUERY_REPLICA_REQUIRED` before
+owner construction. Governed WRE reaches maintenance authority only through
+the explicit exact-SHA authority transaction below.
 
 The one-shot owner wrapper accepts authority only from the checkout named by
 `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`: a dedicated clean checkout, immutable
@@ -304,6 +307,18 @@ assume the whole tree is gone.
 
 Optional `owner_runtime_root` supplies the trusted `.venv` for nonsealed
 refresh/start; inherited `PYTHONPATH` and user-site packages stay disabled.
+The launcher passes one independently validated site-packages path through
+`HOLOINDEX_MAINTENANCE_PROBE_SITE_PACKAGES`, distinct from ambient
+`PYTHONPATH`. Before lease acquisition or invalidation, `MaintenanceSession`
+revalidates that exact non-link path against its virtualenv and proves the
+actual current-process image. The typed path/proof pair stays process-local and
+is passed unchanged to `verify_collection_snapshots_isolated`; it is never
+serialized, logged, or returned. Missing marker retains the runtime-free
+contract only when no governed runtime input was supplied. A governed
+invalid/ambiguous/link runtime returns
+`HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED` before spawn rather than
+omitting the marker. Child-side changed or partial authority fails single-shot
+with the same code and detail `RUNTIME_DEPENDENCY_UNAVAILABLE`.
 
 The SSD lease coordinates migrated writers, not unleased legacy writers or a
 transient edit/revert. Clean exact HEAD is therefore re-proved after final
@@ -347,7 +362,10 @@ this process. Any semantic, source-completeness, repository-race, receipt, or
 restart failure remains non-operational. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
 
-Scope note: this boundary's one-shot query, maintenance start, and promotion verification still lack route plumbing.
+Scope note: one-shot query, maintenance start, and promotion verification now
+consume the same mandatory verified route. The separate activation controller
+that creates/materializes/commits a new route and emits its secret-free receipt
+is not implemented by these consumers.
 The legacy `src/holo_tools.py` MCP surface still opens the HoloIndex store
 directly and remains a registered migration item; Phase 1 does not claim that
 all repository consumers cross this boundary. Normal cleanup is bounded, and

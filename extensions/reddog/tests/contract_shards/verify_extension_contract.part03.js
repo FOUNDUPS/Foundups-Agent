@@ -27,17 +27,18 @@ const rddBundle = JSON.stringify({
 const rddGovernedGitExecutable = require(path.join(extDir, 'governed_git_executable.js'));
 const rddOriginalBind = rddGovernedGitExecutable.bind;
 let rddDiscovery;
-let rddFallbackIndex;
+let rddFallbackIndex; const rddFallbackFixture = fixtures.createRepoDeepDiveFallbackFixture(root); process.once('exit', rddFallbackFixture.cleanup);
 rddGovernedGitExecutable.bind = () => { throw new Error('forced governed Git unavailable'); };
 try {
-  rddDiscovery = orchestrator.discoverRepoDeepDiveTargets(root, rddPrompt, rddBundle, 12);
-  rddFallbackIndex = orchestrator.repoFileIndex(root, 20000);
+  rddDiscovery = orchestrator.discoverRepoDeepDiveTargets(rddFallbackFixture.root, rddPrompt, rddBundle, 12);
+  rddFallbackIndex = orchestrator.repoFileIndex(rddFallbackFixture.root, 20000);
 } finally {
   rddGovernedGitExecutable.bind = rddOriginalBind;
 }
 assert.strictEqual(rddDiscovery.manifest_generated, true, 'RDD-003: manifest generated');
 assert(rddDiscovery.manifest_file_count > 0, 'RDD-003: manifest is non-empty');
-assert.strictEqual(rddDiscovery.manifest_truncated, false, 'RDD-003: complete repository manifest is explicit');
+assert.strictEqual(rddDiscovery.manifest_truncated || rddFallbackIndex.some((file) => /^(?:\.claude\/worktrees|\.worktrees|\.cache|\.next|foundups-mcp-env|\.reddog_test_tmp|\.pytest_tmp|\.pytest_cache|\.mypy_cache|\.ruff_cache)\//.test(file)), false, 'RDD-003: complete repository fixture excludes local administrative/runtime trees');
+assert(rddFallbackIndex.includes('.claude/CLAUDE.md'), 'RDD-003: tracked-like .claude guidance remains discoverable');
 assert(rddDiscovery.targets.length > 0 && rddDiscovery.targets.length <= 12, 'RDD-003: bounded non-empty targets');
 assert(rddDiscovery.targets.some((p) => /modules\/foundups\/pfmall\/[^/]+\.py$/i.test(p)), 'RDD-004: implementation target selected');
 assert(rddDiscovery.targets.some((p) => /(?:^|\/)tests?(?:\/|_)/i.test(p)), 'RDD-004: test target selected');
@@ -251,7 +252,7 @@ includes(rddLines, '- repo_deep_dive_pool_strategy: focus_core_plus_semantic_cro
 (function rdd009RealBundleRegression() {
   const targets = rddDiscovery.targets.concat(['modules/ai_intelligence/pfmall_discovery/README.md']); const hits = targets.map((target) => ({ location: target, need: 'governed direct-read target', content: 'evidence for ' + target, direct_read: true }));
   const bundle = { task_retrieval: { code_hits: hits, wsp_hits: [], metadata: { retrieval_mode: 'lexical', embedding_backend: 'none', code_count: hits.length, wsp_count: 0, no_holoindex_reindex_performed: true } }, direct_read: { direct_read_fallback_used: true, direct_read_paths: targets, direct_read_rejected: [], direct_read_bytes: hits.reduce((total, hit) => total + hit.content.length, 0), direct_read_truncated: [] } };
-  const result = orchestrator.holoIndexOutput(root, rddPrompt, 18000, { baseResult: { ok: true, bundle_ok: true, bundle, owner_attempts: 0, no_holoindex_reindex_performed: true }, allowBundleOnlyBridge: false });
+  const result = orchestrator.holoIndexOutput(rddFallbackFixture.root, rddPrompt, 18000, { baseResult: { ok: true, bundle_ok: true, bundle, owner_attempts: 0, no_holoindex_reindex_performed: true }, allowBundleOnlyBridge: false });
   const meta = result && result.meta ? result.meta : {};
   assert.strictEqual(meta.repo_deep_dive_requested, true, 'RDD-009: runtime marks the deep-dive request');
   assert.strictEqual(meta.repo_manifest_generated, true, 'RDD-009: runtime creates the tracked-file manifest');

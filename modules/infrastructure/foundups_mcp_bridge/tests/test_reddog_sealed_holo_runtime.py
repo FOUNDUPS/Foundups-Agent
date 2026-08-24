@@ -5,14 +5,27 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
 
 from modules.infrastructure.foundups_mcp_bridge.src import (
     holo_query_service_supervisor as supervisor,
 )
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_maintenance_handshake as handshake,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_runtime import (
+    PROBE_SITE_PACKAGES_ENV,
+)
+from modules.infrastructure.foundups_mcp_bridge.src import (
+    reddog_holoindex_maintenance_runtime as maintenance_runtime,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_process_image import (
+    ProcessExecutableProofError,
+    prove_current_process_executable,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_sealed_holo_runtime import (
     SEALED_BOOTSTRAP_ENV,
@@ -46,7 +59,7 @@ def _sealed_fixture(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
     entry = source / "holo_index.py"
     owner_entry = source / "scripts" / "reddog_holoindex_owner_service_once.py"
     manifest = source / ".reddog-runtime-manifest.json"
-    site = tmp_path / "site-packages"
+    site = tmp_path / ".venv" / "Lib" / "site-packages"
     for path in (trusted, bootstrap, entry, owner_entry):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("pass\n", encoding="utf-8")
@@ -61,7 +74,19 @@ def _sealed_fixture(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
     canonical = json.dumps(
         value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
     ).encode("utf-8")
-    site.mkdir()
+    site.mkdir(parents=True)
+    base = Path(getattr(sys, "_base_executable", sys.executable)).resolve()
+    (tmp_path / ".venv" / "pyvenv.cfg").write_text(
+        "\n".join(
+            (
+                f"home = {base.parent}",
+                "include-system-site-packages = false",
+                f"version = {sys.version.split()[0]}",
+                f"executable = {base}",
+            )
+        ),
+        encoding="utf-8",
+    )
     env = {
         SEALED_REQUIRED_ENV: "1",
         SEALED_ROOT_ENV: str(source),
@@ -198,7 +223,8 @@ def test_actual_windows_primary_checkout_supplies_isolated_runtime_dependencies(
     candidate = Path(__file__).resolve().parents[4]
     primary = Path("O:/Foundups-Agent")
 
-    assert trusted_holo_site_packages(candidate) == ()
+    if candidate.resolve() != primary.resolve():
+        assert trusted_holo_site_packages(candidate) == ()
     primary_packages = trusted_holo_site_packages(primary)
     assert len(primary_packages) == 1
     assert Path(primary_packages[0]).is_relative_to(primary / ".venv")
@@ -234,6 +260,130 @@ def test_maintenance_runner_uses_sealed_holo_index_copy(
     assert str(repo / "holo_index.py") not in calls[0][0]
     assert calls[0][1]["env"][SEALED_REQUIRED_ENV] == "1"
     assert "PYTHONPATH" not in calls[0][1]["env"]
+    assert calls[0][1]["env"][PROBE_SITE_PACKAGES_ENV] == env[
+        SEALED_SITE_PACKAGES_ENV
+    ]
+
+
+def test_environment_replaces_hostile_probe_runtime_overrides(
+    tmp_path: Path,
+) -> None:
+    _trusted, _source, sealed = _sealed_fixture(tmp_path)
+    site_packages = Path(sealed[SEALED_SITE_PACKAGES_ENV])
+    child = maintenance_runtime.build_maintenance_environment(
+        environ={
+            "PYTHONPATH": "attacker-controlled",
+            PROBE_SITE_PACKAGES_ENV: "attacker-controlled",
+            "OPENAI_API_KEY": "fixture-secret",
+            "HOLOINDEX_QUERY_READONLY": "1",
+        },
+        ssd_path=tmp_path / "ssd",
+        runtime_root=tmp_path,
+    )
+
+    assert child["PYTHONPATH"] == str(site_packages)
+    assert child[PROBE_SITE_PACKAGES_ENV] == str(site_packages)
+    assert child[maintenance_runtime.MAINTENANCE_JSON_ONLY_ENV] == "1"
+    assert "OPENAI_API_KEY" not in child
+    assert "HOLOINDEX_QUERY_READONLY" not in child
+
+
+@pytest.mark.parametrize("entries", ((), ("duplicate", "duplicate")))
+def test_governed_invalid_runtime_authority_is_never_omitted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    entries: tuple[str, ...],
+) -> None:
+    monkeypatch.setattr(
+        maintenance_runtime,
+        "trusted_holo_site_packages",
+        lambda _root, **_kwargs: entries,
+    )
+
+    with pytest.raises(
+        maintenance_runtime.MaintenanceProbeRuntimeError,
+        match="RUNTIME_DEPENDENCY_UNAVAILABLE",
+    ):
+        maintenance_runtime.build_maintenance_environment(
+            environ={}, ssd_path=tmp_path / "ssd", runtime_root=tmp_path,
+        )
+
+
+def test_missing_probe_marker_preserves_runtime_free_maintenance() -> None:
+    assert maintenance_runtime.resolve_maintenance_probe_runtime(
+        {}
+    ).verifier_kwargs() == {}
+
+
+def test_explicit_probe_runtime_is_bound_to_process_image(tmp_path: Path) -> None:
+    _trusted, _source, sealed = _sealed_fixture(tmp_path)
+    site_packages = sealed[SEALED_SITE_PACKAGES_ENV]
+    proof = maintenance_runtime.resolve_maintenance_probe_runtime(
+        {PROBE_SITE_PACKAGES_ENV: site_packages}
+    )
+
+    assert proof.runtime_site_packages == (site_packages,)
+    assert proof.base_executable_proof == prove_current_process_executable()
+
+
+@pytest.mark.parametrize("kind", ("missing", "ambiguous"))
+def test_invalid_explicit_probe_runtime_fails_closed(
+    tmp_path: Path, kind: str,
+) -> None:
+    _trusted, _source, sealed = _sealed_fixture(tmp_path)
+    site_packages = sealed[SEALED_SITE_PACKAGES_ENV]
+    value = str(tmp_path / "missing")
+    if kind == "ambiguous":
+        value = os.pathsep.join((site_packages, site_packages))
+
+    with pytest.raises(maintenance_runtime.MaintenanceProbeRuntimeError):
+        maintenance_runtime.resolve_maintenance_probe_runtime(
+            {PROBE_SITE_PACKAGES_ENV: value}
+        )
+
+
+def test_linked_probe_runtime_fails_closed(tmp_path: Path) -> None:
+    _trusted, _source, sealed = _sealed_fixture(tmp_path)
+    linked = tmp_path / "linked" / ".venv" / "Lib" / "site-packages"
+    linked.parent.mkdir(parents=True)
+    try:
+        linked.symlink_to(
+            sealed[SEALED_SITE_PACKAGES_ENV], target_is_directory=True,
+        )
+    except OSError:
+        pytest.skip("directory symlink unavailable")
+
+    with pytest.raises(maintenance_runtime.MaintenanceProbeRuntimeError):
+        maintenance_runtime.resolve_maintenance_probe_runtime(
+            {PROBE_SITE_PACKAGES_ENV: str(linked)}
+        )
+
+
+def test_unproven_process_image_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _trusted, _source, sealed = _sealed_fixture(tmp_path)
+    monkeypatch.setattr(
+        maintenance_runtime,
+        "prove_current_process_executable",
+        lambda: (_ for _ in ()).throw(ProcessExecutableProofError()),
+    )
+
+    with pytest.raises(maintenance_runtime.MaintenanceProbeRuntimeError):
+        maintenance_runtime.resolve_maintenance_probe_runtime(
+            {PROBE_SITE_PACKAGES_ENV: sealed[SEALED_SITE_PACKAGES_ENV]}
+        )
+
+
+def test_partial_probe_runtime_capability_is_never_forwarded(
+    tmp_path: Path,
+) -> None:
+    _trusted, _source, sealed = _sealed_fixture(tmp_path)
+    partial = maintenance_runtime.MaintenanceProbeRuntimeProof(
+        (sealed[SEALED_SITE_PACKAGES_ENV],), None,
+    )
+
+    with pytest.raises(maintenance_runtime.MaintenanceProbeRuntimeError):
+        partial.verifier_kwargs()
 
 
 def test_owner_runner_uses_sealed_wrapper_copy(

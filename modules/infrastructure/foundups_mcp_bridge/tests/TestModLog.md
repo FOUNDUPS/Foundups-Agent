@@ -1,5 +1,21 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-23] Maintenance runtime/process-image binding
+
+- Added hostile marker, Python-override, missing/ambiguous/link/unproven/partial
+  runtime, exact process-image, pre-invalidation, post-begin replacement,
+  sealed-child environment, and real Windows process regressions. The
+  diagnostics fixture now constructs a minimal exact runtime instead of
+  depending on ambient packages.
+- Focused production-shaped diagnostics: **13 passed / 1 skip**. Complete
+  maintenance boundary: **106 passed / 2 skips**. Adjacent
+  process/owner/acceptance/isolated-runtime/CLI matrix: **119 passed / 2
+  skips**. A sandbox-only taskkill denial was retained as non-evidence; the
+  elevated Windows replay passed. No mutation or live route activation was
+  performed. Backend generator/provenance is **8/8** at 1,382 files and digest
+  77b25ba7da6085431f5685b7f1fca2efba1092cf0c9555bbd5bdd7002df213a0.
+  (WSP 00/15/22/50/62/97)
+
 ## [2026-08-23] Stable route-file consumer binding
 
 - Added exact stable-route-file resolution, dual-configuration rejection,

@@ -45,6 +45,11 @@ from holo_index.verified_collection_carry_forward import (
     build_carry_forward_evidence,
     collection_source_policy_digest,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_runtime import (
+    MaintenanceProbeRuntimeError,
+    MaintenanceProbeRuntimeProof,
+    resolve_maintenance_probe_runtime,
+)
 
 
 MAINTENANCE_FAILURE_EXIT_CODE = 4
@@ -456,6 +461,7 @@ def _final_collection_snapshot_failures(
             receipt,
             ssd_path=session.ssd_path,
             repo_root=session.repo_root,
+            **session._probe_runtime.verifier_kwargs(),
         )
     except IsolatedSnapshotProbeError as exc:
         raise MaintenanceSessionError(
@@ -476,6 +482,7 @@ class MaintenanceSession:
     base_receipt: HoloIndexFreshnessReceipt | None
     _lease: MaintenanceLease
     _repository_state_reader: Callable[[Path], Any]
+    _probe_runtime: MaintenanceProbeRuntimeProof
     _closed: bool = False
 
     @classmethod
@@ -495,6 +502,13 @@ class MaintenanceSession:
         planned = frozenset(planned_collections)
         if not planned:
             raise MaintenanceSessionError("HOLOINDEX_MAINTENANCE_PLAN_EMPTY")
+        try:
+            probe_runtime = resolve_maintenance_probe_runtime()
+        except MaintenanceProbeRuntimeError as exc:
+            raise MaintenanceSessionError(
+                "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED",
+                "RUNTIME_DEPENDENCY_UNAVAILABLE",
+            ) from exc
         state_reader = repository_state_reader or read_repository_state
         head_sha = _clean_repository_head(root, state_reader)
         lease, invalidation, base_receipt = _begin_invalidation(
@@ -514,6 +528,7 @@ class MaintenanceSession:
             base_receipt=base_receipt,
             _lease=lease,
             _repository_state_reader=state_reader,
+            _probe_runtime=probe_runtime,
         )
         atexit.register(session.close)
         return session

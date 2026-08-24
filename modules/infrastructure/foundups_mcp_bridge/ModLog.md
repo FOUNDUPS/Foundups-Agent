@@ -1,5 +1,32 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-23 - Maintenance isolated-probe runtime provenance
+
+- A governed exact-current-HEAD Holo retrieval failed closed as
+  HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED with detail
+  RUNTIME_DEPENDENCY_UNAVAILABLE; it performed no reindex, retry,
+  downgrade, route change, or authority mutation. The failure exposed that the
+  launcher could silently omit invalid governed runtime authority and that
+  sys.executable could name a Windows virtualenv redirector rather than the
+  process image actually held across the refresh.
+- Added one strict runtime boundary for the exact virtualenv site-packages
+  directory and actual process image. The proof is created before lease
+  acquisition/invalidation, held across the refresh runner, forwarded as a
+  typed pair to the existing isolated snapshot verifier, and revalidated in
+  the child. Ambient Python overrides are scrubbed; linked, changed,
+  ambiguous, partial, or unproven authority fails single-shot with the same
+  stable code/detail. Only a caller that supplied no governed runtime input
+  retains the direct runtime-free contract. No path, proof, or credential is
+  serialized into a receipt.
+- Focused diagnostics are **13 passed / 1 host-capability skip**; the complete
+  maintenance boundary is **106 passed / 2 skips**, and adjacent
+  process/owner/acceptance/isolated-runtime/CLI coverage is **119 passed / 2
+  skips**. Candidate WSP_62 passed with the changed runtime/handshake at
+  237/593 lines and no threshold increase. The authenticated backend closure
+  is **1,382 files** at
+  77b25ba7da6085431f5685b7f1fca2efba1092cf0c9555bbd5bdd7002df213a0.
+  (WSP 00/15/22/50/62/84/87/97; WSP_15 19/P0)
+
 ## 2026-08-23 - Owner lifecycle deadline propagation
 
 - Added an optional exact-positive startup budget to the existing owner

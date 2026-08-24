@@ -1,5 +1,26 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-23 - Governed Holo maintenance release closure (0.4.107)
+
+- Added strict launcher/session/child runtime-provenance tests and refreshed the
+  1,382-file authenticated backend pin. Python evidence is 13/1 focused
+  diagnostics, 106/2 complete maintenance boundary, 119/2 adjacent integration,
+  and 8/8 backend generation/provenance.
+- Retained the first full RDD-003 NO-GO and the targeted RDD-004/RDD-009
+  follow-on failures. Their repair confines forced-Git-unavailable discovery to
+  an ordinary O:-local repository fixture and reuses that root for the real
+  bundle regression. Production focus, completeness, recall, link, and size
+  gates remain unchanged.
+- The first candidate WSP_62 replay rejected a 34-line fixture constructor.
+  Extracting cleanup into a separate bounded helper produced the final PASS;
+  no ceiling or exemption changed.
+- Final shard identity is **18 / 6,929 lines / 490 assertions** at
+  sha256:563b7efc4d012d7166d0e7dbdba8a9ebe5d0a66093419dc66070123dae6ebbcc.
+  Final post-extraction release passed **4/4 in 162,441 ms**, no timeout. Exact package surface:
+  **66 files / 961,383 bytes**. Registry remains current at **1,574 tests / 267
+  quarantined**. Candidate WSP_62 passed without increasing a limit.
+  (WSP 00/15/22/50/62/97)
+
 ## 2026-08-23 - Compact Holo snapshot runtime canary (0.4.106)
 
 - Regenerated and pinned the authenticated 1,381-file backend closure after the
