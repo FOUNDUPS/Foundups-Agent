@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pytest
 
+import holo_index.maintenance_session as maintenance_module
 from holo_index.freshness_receipt import (
     ALL_COLLECTIONS,
     SCHEMA_VERSION,
@@ -21,12 +23,19 @@ from holo_index.freshness_receipt import (
     write_freshness_receipt,
 )
 from holo_index.repository_state import RepositoryState
+from holo_index.maintenance_session import MaintenanceSession, MaintenanceSessionError
 from holo_index.source_scope import canonical_source_scope_id
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_maintenance_handshake as handshake,
 )
 from modules.infrastructure.foundups_mcp_bridge.src import (
+    reddog_holoindex_maintenance_runtime as maintenance_runtime,
+)
+from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_main_preflight as main_preflight,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_process_image import (
+    prove_current_process_executable,
 )
 
 
@@ -256,6 +265,7 @@ def test_missing_receipt_runs_bounded_secret_free_refresh_and_restarts_owner(
 ) -> None:
     repo_root, ssd_path = tmp_path / "repo", tmp_path / "ssd"
     repo_root.mkdir()
+    _trusted_probe_runtime_at(repo_root)
     cleanup_calls: list[bool] = []
     monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
     monkeypatch.setattr(
@@ -289,12 +299,15 @@ def test_omitted_runtime_root_binds_repo_to_refresh_and_owner(
     repo_root, ssd_path = tmp_path / "repo", tmp_path / "ssd"
     repo_root.mkdir()
     trusted = str(repo_root / ".venv" / "Lib" / "site-packages")
+    Path(trusted).mkdir(parents=True)
     owner_calls: list[dict] = []
     monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
     monkeypatch.setattr(
-        handshake,
+        maintenance_runtime,
         "trusted_holo_site_packages",
-        lambda root: (trusted,) if root == repo_root.resolve() else (),
+        lambda root, **_kwargs: (
+            (trusted,) if root == repo_root.resolve() else ()
+        ),
     )
     monkeypatch.setattr(
         handshake.owner_bootstrap,
@@ -308,6 +321,7 @@ def test_omitted_runtime_root_binds_repo_to_refresh_and_owner(
 
     def runner(_command, **kwargs):
         assert kwargs["env"]["PYTHONPATH"] == trusted
+        assert kwargs["env"][maintenance_runtime.PROBE_SITE_PACKAGES_ENV] == trusted
         _publish(repo_root, ssd_path)
         return SimpleNamespace(returncode=0)
 
@@ -364,8 +378,11 @@ def test_refresh_environment_restores_only_validated_runtime_packages(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     trusted = str(tmp_path / "workspace" / ".venv" / "Lib" / "site-packages")
+    Path(trusted).mkdir(parents=True)
     resolver = Mock(return_value=(trusted,))
-    monkeypatch.setattr(handshake, "trusted_holo_site_packages", resolver)
+    monkeypatch.setattr(
+        maintenance_runtime, "trusted_holo_site_packages", resolver,
+    )
 
     child = handshake._refresh_environment(
         environ={"PYTHONPATH": "attacker-controlled"},
@@ -374,7 +391,10 @@ def test_refresh_environment_restores_only_validated_runtime_packages(
     )
 
     assert child["PYTHONPATH"] == trusted
-    resolver.assert_called_once_with(tmp_path / "workspace")
+    resolver.assert_called_once_with(
+        tmp_path / "workspace",
+        base_executable=prove_current_process_executable().path,
+    )
 
 
 def test_legacy_receipt_without_embedding_space_triggers_refresh(
@@ -382,6 +402,7 @@ def test_legacy_receipt_without_embedding_space_triggers_refresh(
 ) -> None:
     repo_root, ssd_path = tmp_path / "repo", tmp_path / "ssd"
     repo_root.mkdir()
+    _trusted_probe_runtime_at(repo_root)
     write_freshness_receipt(
         _receipt(repo_root, ssd_path, embedding_fingerprint=""),
         freshness_receipt_path(ssd_path),
@@ -455,6 +476,7 @@ def test_disabled_maintenance_reports_required(tmp_path: Path, monkeypatch) -> N
 
 
 def test_nonzero_refresh_fails_without_starting_owner(tmp_path: Path, monkeypatch) -> None:
+    _trusted_probe_runtime_at(tmp_path)
     monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
     monkeypatch.setattr(
         handshake.owner_bootstrap, "cleanup_reddog_holoindex_owner", lambda: None
@@ -472,6 +494,7 @@ def test_nonzero_refresh_fails_without_starting_owner(tmp_path: Path, monkeypatc
 def test_repository_head_change_after_refresh_fails_closed(
     tmp_path: Path, monkeypatch
 ) -> None:
+    _trusted_probe_runtime_at(tmp_path)
     states = iter((_state(), _state(head="e" * 40)))
     monkeypatch.setattr(handshake, "read_repository_state", lambda _root: next(states))
     monkeypatch.setattr(
@@ -574,4 +597,121 @@ def test_interactive_auto_tasks_default_to_required_maintenance(
             "maintenance_requested": True,
             "enforced": False,
         }
+    ]
+
+
+def _trusted_probe_runtime_at(root: Path) -> tuple[Path, Path]:
+    site_packages = root / ".venv" / "Lib" / "site-packages"
+    site_packages.mkdir(parents=True)
+    executable = prove_current_process_executable().path
+    (root / ".venv" / "pyvenv.cfg").write_text(
+        "\n".join(
+            (
+                f"home = {executable.parent}",
+                "include-system-site-packages = false",
+                f"version = {sys.version.split()[0]}",
+                f"executable = {executable}",
+            )
+        ),
+        encoding="utf-8",
+    )
+    return root, site_packages.resolve()
+
+
+def _trusted_probe_runtime(tmp_path: Path) -> tuple[Path, Path]:
+    return _trusted_probe_runtime_at(tmp_path / "workspace")
+
+
+def test_governed_invalid_runtime_fails_before_refresh_spawn(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
+    monkeypatch.setattr(
+        handshake.owner_bootstrap, "cleanup_reddog_holoindex_owner", lambda: None,
+    )
+
+    result = handshake.ensure_reddog_holoindex_operational(
+        repo_root=tmp_path,
+        requested=True,
+        environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
+        runner=lambda *_args, **_kwargs: pytest.fail("refresh must not spawn"),
+    )
+
+    assert result.ready is False
+    assert result.error == handshake.FINAL_SNAPSHOT_PROBE_FAILED_ERROR
+
+
+def test_unproven_probe_runtime_fails_before_invalidation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        maintenance_module,
+        "resolve_maintenance_probe_runtime",
+        lambda: (_ for _ in ()).throw(
+            maintenance_module.MaintenanceProbeRuntimeError(
+                "RUNTIME_DEPENDENCY_UNAVAILABLE"
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        maintenance_module,
+        "_begin_invalidation",
+        lambda **_kwargs: pytest.fail("invalidation must not begin"),
+    )
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match=(
+            "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED: "
+            "RUNTIME_DEPENDENCY_UNAVAILABLE"
+        ),
+    ):
+        MaintenanceSession.begin(
+            ssd_path=tmp_path / "ssd",
+            repo_root=tmp_path / "repo",
+            planned_collections={"navigation_code"},
+            repository_state_reader=lambda _root: _state(),
+        )
+
+
+def test_session_retains_probe_capability_after_marker_replacement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _root, site_packages = _trusted_probe_runtime(tmp_path)
+    monkeypatch.setenv(
+        maintenance_runtime.PROBE_SITE_PACKAGES_ENV, str(site_packages),
+    )
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _state(),
+    )
+    retained = session._probe_runtime.verifier_kwargs()
+    monkeypatch.setenv(
+        maintenance_runtime.PROBE_SITE_PACKAGES_ENV, str(tmp_path / "attacker"),
+    )
+    calls: list[dict[str, object]] = []
+
+    class ChromaClient:
+        __module__ = "chromadb.api.client"
+
+    monkeypatch.setattr(
+        maintenance_module,
+        "verify_collection_snapshots_isolated",
+        lambda _receipt, **kwargs: calls.append(kwargs) or [],
+    )
+
+    assert maintenance_module._final_collection_snapshot_failures(
+        session,
+        SimpleNamespace(client=ChromaClient()),
+        _receipt(session.repo_root, session.ssd_path),
+    ) == []
+    session.close()
+    assert len(calls) == 1
+    assert calls[0]["ssd_path"] == session.ssd_path
+    assert calls[0]["repo_root"] == session.repo_root
+    assert calls[0]["runtime_site_packages"] == (str(site_packages),)
+    assert calls[0]["base_executable_proof"] is retained[
+        "base_executable_proof"
     ]

@@ -1,5 +1,20 @@
 # HoloIndex Package ModLog
 
+## [2026-08-23] Isolated final-probe runtime provenance
+
+- MaintenanceSession.begin() now resolves the optional governed
+  site-packages/process-image proof before lease acquisition or invalidation
+  and forwards the exact typed pair only to
+  verify_collection_snapshots_isolated. Direct callers with no governed
+  input remain runtime-free.
+- Invalid, linked, changed, ambiguous, partial, or unproven authority fails
+  before mutation as
+  HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED /
+  RUNTIME_DEPENDENCY_UNAVAILABLE. The proof remains in memory and is not
+  added to generation or freshness receipts. No retry, vector fallback,
+  reindex, or weaker verifier was introduced. (WSP
+  00/15/22/50/62/84/87/97)
+
 ## [2026-08-23] Compact RedDog snapshot runtime closure
 
 - A production-shaped exact-main RedDog canary proved the new 33-artifact query

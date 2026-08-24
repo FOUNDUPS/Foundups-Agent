@@ -1,5 +1,21 @@
 # RedDog Extension Tests
 
+## 0.4.107 governed Holo maintenance runtime provenance
+
+The maintenance launch contract proves one exact virtualenv site-packages
+directory and the actual held process image before invalidation, carries that
+typed proof through the governed refresh, and revalidates it inside the
+single-shot isolated snapshot probe. Governed invalid or partial authority
+fails closed; only a truly direct no-runtime caller remains runtime-free.
+
+The repository-deep-dive forced-Git-unavailable regression is host-independent:
+it uses a confined O:-local repository fixture with policy-admitted root/docs/
+WSP/focus/cross-cutting evidence and excluded administrative/runtime trees.
+RDD-003 completeness, RDD-004 focus selection, and RDD-009 target recall remain
+fail-closed. The authenticated aggregate is 18 shards / 6,929 lines / 490
+assertions. The final post-extraction four-worker release passes in 162,441 ms with no timeout;
+the package surface is 66 files / 961,383 bytes under 1 MiB.
+
 ## 0.4.106 compact snapshot runtime and governed routing
 
 ## Nemotron and Qwen routing contracts

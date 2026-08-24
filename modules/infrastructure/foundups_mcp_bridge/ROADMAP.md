@@ -1,5 +1,24 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-23: Maintenance isolated-probe runtime provenance
+
+**Implemented locally; exact-main maintenance replay remains required after
+merge.** A governed exact-SHA refresh exposed that the outer handshake restored
+the trusted dependency path only through `PYTHONPATH`, while the nested child
+scrubber correctly removed that ambient override before the final isolated
+snapshot probe. The result was deterministic
+`HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED` /
+`RUNTIME_DEPENDENCY_UNAVAILABLE` despite a durable store and a valid runtime.
+
+The bounded repair conveys one separately validated site-packages path,
+revalidates it before `MaintenanceSession` invalidation, creates a fresh
+process-image proof, and forwards the typed pair unchanged to the existing
+single-shot verifier. Governed invalid/ambiguous/link authority fails before
+spawn and is never downgraded to a missing marker. It adds no retry, secret
+field, receipt authority, route mutation, vector fallback, or relaxed
+validation. Exact-main authority refresh, compact replica materialization, and
+route activation remain post-merge gates.
+
 ## 2026-08-23: Stable route-file owner resolution
 
 **Implemented locally and independently WSP_97-falsified; no live route

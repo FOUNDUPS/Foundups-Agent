@@ -416,7 +416,12 @@ the disposable process fixture.
   mutation-safety boundaries.
 - `test_reddog_holoindex_maintenance_handshake.py`: trusted refresh command,
   repository/receipt validation, exact query-replica route propagation, and
-  owner restart orchestration.
+  owner restart orchestration; it also proves governed invalid runtime fails
+  before spawn, child rejection precedes invalidation, and post-begin marker
+  replacement cannot alter the process-local capability.
+- `test_reddog_sealed_holo_runtime.py`: sealed/nonsealed runtime selection,
+  hostile environment replacement, missing/ambiguous/link/partial authority,
+  direct runtime-free compatibility, and exact process-image binding.
 - `test_reddog_holoindex_owner_replica_route_resolution.py`: explicit absolute
   replica-root configuration, existing isolated-store proof, exact route build,
   and stable fail-closed error reduction.

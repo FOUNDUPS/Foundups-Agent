@@ -30,18 +30,25 @@ from holo_index.repository_state import RepositoryState, read_repository_state
 from holo_index.query_receipt import generation_binding_from_receipt
 from holo_index.storage_contract import (
     HOLOINDEX_SSD_PATH_ENV,
-    READONLY_QUERY_ENV,
     resolve_holoindex_ssd_path,
     storage_path_identity,
 )
 
 from . import reddog_holoindex_owner_bootstrap as owner_bootstrap
 from .holo_query_service_supervisor import SERVICE_TOKEN_ENV, SERVICE_URL_ENV
+from .reddog_holoindex_maintenance_runtime import (
+    MAINTENANCE_JSON_ONLY_ENV,
+    MaintenanceProbeRuntimeError,
+    build_maintenance_environment as _refresh_environment,
+    prepare_maintenance_launch as _refresh_launch,
+)
+from .reddog_holoindex_process_image import (
+    ProcessExecutableProofError,
+    hold_process_executable_for_launch,
+)
 from .reddog_sealed_holo_runtime import (
-    scrub_holo_child_environment,
     sealed_holo_command,
     sealed_runtime_required,
-    trusted_holo_site_packages,
 )
 from .reddog_holoindex_owner_replica_route import (
     QUERY_REPLICA_REQUIRED_ERROR,
@@ -51,7 +58,6 @@ from .reddog_holoindex_owner_replica_route import (
 
 AUTO_MAINTENANCE_ENV = "REDDOG_HOLOINDEX_AUTO_MAINTENANCE"
 MAINTENANCE_TIMEOUT_ENV = "REDDOG_HOLOINDEX_MAINTENANCE_TIMEOUT_SECONDS"
-MAINTENANCE_JSON_ONLY_ENV = "HOLOINDEX_MAINTENANCE_JSON_ONLY"
 OPERATIONAL_NOT_REQUESTED = "NOT_REQUESTED"
 OPERATIONAL_READY = "READY"
 OPERATIONAL_REFRESHED = "REFRESHED"
@@ -62,6 +68,7 @@ MAINTENANCE_REQUIRED_ERROR = "HOLOINDEX_MAINTENANCE_REQUIRED"
 REFRESH_FAILED_ERROR = "HOLOINDEX_MAINTENANCE_REFRESH_FAILED"
 REFRESH_TIMEOUT_ERROR = "HOLOINDEX_MAINTENANCE_REFRESH_TIMEOUT"
 RECEIPT_INVALID_ERROR = "HOLOINDEX_MAINTENANCE_RECEIPT_INVALID"
+FINAL_SNAPSHOT_PROBE_FAILED_ERROR = "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED"
 REPOSITORY_CHANGED_ERROR = "HOLOINDEX_MAINTENANCE_REPOSITORY_CHANGED"
 TIMEOUT_INVALID_ERROR = "HOLOINDEX_MAINTENANCE_TIMEOUT_INVALID"
 _HANDSHAKE_LOCK = threading.Lock()
@@ -79,27 +86,6 @@ _STABLE_MAINTENANCE_ERRORS = frozenset(
     PERSISTED_COLLECTION_VIEW_FAILED REFRESH_SOURCE_MANIFEST_MISMATCH REFRESH_SOURCE_PROBE_FAILED REPOSITORY_DIRTY
     REPOSITORY_HEAD_CHANGED REPOSITORY_STATE_UNAVAILABLE WRITER_STORE_FINALIZATION_FAILED""".split()
 )
-_REFRESH_ENV_EXACT_DENY = frozenset(
-    {
-        "HOLO_FAST_SEARCH",
-        "HOLO_INDEX_SYMBOLS",
-        "HOLO_INDEX_WEB",
-        "HOLO_SKIP_MODEL",
-        MAINTENANCE_JSON_ONLY_ENV,
-        READONLY_QUERY_ENV,
-        SERVICE_TOKEN_ENV,
-        SERVICE_URL_ENV,
-        "WSP_PATH",
-        "WSP_PATHS",
-    }
-)
-_REFRESH_ENV_PREFIX_DENY = (
-    "HOLO_SYMBOL_",
-    "HOLO_WEB_",
-    "HOLO_WSP_",
-    "HOLOINDEX_WSP_",
-)
-
 @dataclass(frozen=True)
 class RedDogHoloIndexOperationalResult:
     """Secret-free operational proof returned to the trusted host."""
@@ -330,31 +316,6 @@ def _timeout_seconds(
     return value, ""
 
 
-def _refresh_environment(
-    *,
-    environ: Mapping[str, str],
-    ssd_path: Path,
-    runtime_root: Path | str | None,
-) -> dict[str, str]:
-    """Return a canonical maintenance environment without scope overrides."""
-    child_environment = scrub_holo_child_environment(environ)
-    for name in tuple(child_environment):
-        normalized = name.upper()
-        if normalized in _REFRESH_ENV_EXACT_DENY or normalized.startswith(
-            _REFRESH_ENV_PREFIX_DENY
-        ):
-            child_environment.pop(name, None)
-    child_environment[HOLOINDEX_SSD_PATH_ENV] = str(ssd_path)
-    child_environment["HOLO_USE_TURBOQUANT"] = "0"
-    child_environment[MAINTENANCE_JSON_ONLY_ENV] = "1"
-    child_environment["PYTHONDONTWRITEBYTECODE"] = "1"
-    if runtime_root is not None and not sealed_runtime_required(environ):
-        entries = trusted_holo_site_packages(runtime_root)
-        if entries:
-            child_environment["PYTHONPATH"] = os.pathsep.join(entries)
-    return child_environment
-
-
 def _run_full_refresh(
     *,
     repo_root: Path,
@@ -364,11 +325,14 @@ def _run_full_refresh(
     timeout: float,
     runner,
 ) -> str:
-    child_environment = _refresh_environment(
-        environ=environ,
-        ssd_path=ssd_path,
-        runtime_root=runtime_root,
-    )
+    try:
+        launch = _refresh_launch(
+            environ=environ,
+            ssd_path=ssd_path,
+            runtime_root=runtime_root,
+        )
+    except MaintenanceProbeRuntimeError:
+        return FINAL_SNAPSHOT_PROBE_FAILED_ERROR
     sealed = sealed_holo_command(
         environ=environ,
         trusted_module_path=Path(__file__),
@@ -384,18 +348,29 @@ def _run_full_refresh(
         "-B", str(repo_root / "holo_index.py"),
         "--index-all", "--ssd", str(ssd_path),
     ]
+    runner_kwargs = {
+        "cwd": str(repo_root),
+        "env": launch.environment,
+        "stdin": subprocess.DEVNULL,
+        "stdout": subprocess.PIPE,
+        "stderr": subprocess.DEVNULL,
+        "shell": False,
+        "timeout": timeout,
+        "check": False,
+    }
     try:
-        completed = runner(
-            command,
-            cwd=str(repo_root),
-            env=child_environment,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            shell=False,
-            timeout=timeout,
-            check=False,
-        )
+        if launch.executable_proof is None:
+            completed = runner(command, **runner_kwargs)
+        else:
+            with hold_process_executable_for_launch(
+                launch.executable_proof
+            ) as capability:
+                command[0] = str(capability.launch_path)
+                if capability.pass_fds:
+                    runner_kwargs["pass_fds"] = capability.pass_fds
+                completed = runner(command, **runner_kwargs)
+    except ProcessExecutableProofError:
+        return FINAL_SNAPSHOT_PROBE_FAILED_ERROR
     except subprocess.TimeoutExpired:
         return REFRESH_TIMEOUT_ERROR
     except (OSError, subprocess.SubprocessError, ValueError):

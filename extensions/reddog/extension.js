@@ -58,7 +58,7 @@ const conversationPlaneRouting = conversationPlanePolicy.createRouting({
   cleanContextMode, cleanEffort, cleanMode, cleanWorkerType,
   authoritativeWorkStateQuery
 });
-const EXTENSION_VERSION = '0.4.106';
+const EXTENSION_VERSION = '0.4.107';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -6923,6 +6923,12 @@ function evaluateRepoDeepDiveGate(meta, directReadSection) {
   return { applied: true, passed: reasons.length === 0, rejection_reasons: reasons };
 }
 
+const REPO_WALK_IGNORED_DIRECTORIES = new Set([
+  '.git', '.worktrees', '.reddog_test_tmp', '.pytest_tmp', '.pytest_cache',
+  '.mypy_cache', '.ruff_cache', '.cache', '.next', 'node_modules',
+  '__pycache__', '.venv', 'venv', 'env', 'dist', 'build'
+]);
+
 function walkRepoFiles(root, relDir, files, maxFiles) {
   if (files.length >= maxFiles) {
     return;
@@ -6942,7 +6948,9 @@ function walkRepoFiles(root, relDir, files, maxFiles) {
     if (files.length >= maxFiles) {
       return;
     }
-    if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === '__pycache__' || entry.name === '.venv' || entry.name === 'dist' || entry.name === 'build') {
+    if (REPO_WALK_IGNORED_DIRECTORIES.has(entry.name)
+      || (relDir === '.claude' && entry.name === 'worktrees')
+      || /(?:^|[-_.])(?:venv|env)$/i.test(entry.name)) {
       continue;
     }
     const rel = path.posix.join(relDir.replace(/\\/g, '/'), entry.name);

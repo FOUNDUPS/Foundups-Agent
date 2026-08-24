@@ -41,10 +41,10 @@ shapes, or observed source mutation fail closed. The materializer revalidates
 the returned expected manifests against any later source change. The planner
 performs no copy, route change, maintenance, owner launch, or activation.
 
-This planner is one completed layer, not an activation claim. The private
-route record/CAS store, crash journal, activation controller, secret-free
-receipt, exact-main materialization, and live pre/post-route query proof remain
-separate gated work.
+The planner, compact materializer, private route record/CAS store, and crash
+journal are completed layers, not an activation claim. The activation
+controller, secret-free receipt, exact-main materialization, and live
+pre/post-route query proof remain separate gated work.
 
 `reddog_holoindex_query_route_contract.py`,
 `reddog_holoindex_query_route_store.py`, and the extracted confined
@@ -335,9 +335,11 @@ retry.
 
 The RedDog read-only operational preflight calls the process-lifetime
 bootstrap automatically for E2E, report collection, audit enqueue, and
-OPENCLAW_AUTO_TASKS_ENABLED paths. Phase-2 replica routing remains fail-closed
-until that preflight supplies a verified `QueryReplicaOwnerRoute`; synthetic
-owner proof is not live ChatGPT/MCP availability. Set
+OPENCLAW_AUTO_TASKS_ENABLED paths. Replica routing is mandatory and fail-
+closed: preflight resolves a verified `QueryReplicaOwnerRoute` from the stable
+private route file, or from the isolated legacy-root migration input when the
+route file is absent. Synthetic owner proof is not live ChatGPT/MCP
+availability. Set
 REDDOG_HOLOINDEX_OWNER_AUTO_START=0 to opt out. An already configured HTTP
 service URL using literal `127.0.0.1` and a strong token bypass process creation only after its
 authenticated health endpoint proves semantic readiness and the expected
@@ -354,6 +356,20 @@ request through governed WRE dispatch, while maintenance authority remains
 with the trusted host. It never stops a stale externally configured owner.
 A legacy blank embedding-space fingerprint is not accepted as historical
 compatibility: it makes the receipt stale and triggers this maintenance path.
+
+The trusted launcher removes ambient Python overrides and resolves at most one
+checkout-local dependency directory. It conveys that directory separately as
+`HOLOINDEX_MAINTENANCE_PROBE_SITE_PACKAGES`; the maintenance process
+revalidates it before invalidation and creates a fresh in-memory proof of the
+actual process image. `MaintenanceSession` forwards the path/proof pair
+unchanged only to the existing fresh-process snapshot verifier. The proof is
+never serialized or logged, and no provider credential crosses the child
+boundary. Only a direct caller with no governed runtime input retains the
+runtime-free contract. A governed invalid/ambiguous/link runtime is never
+silently omitted: the launcher returns
+`HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED` before spawn. Child-side
+path, process-image, or partial-pair rejection uses stable detail
+`RUNTIME_DEPENDENCY_UNAVAILABLE`. There is no retry or vector-proof downgrade.
 
 For one-shot owner routing, `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` must name a
 dedicated clean authority checkout, not the active caller worktree. Keep that
