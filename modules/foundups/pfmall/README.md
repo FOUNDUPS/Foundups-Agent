@@ -5,11 +5,11 @@
 
 ## Purpose
 
-p.fMALL is the discovery and interaction shell for FoundUps and media. This
-module owns manifest discovery, catalog projection, route resolution, optional
-state-overlay presentation, static shell assets, and policy objects used by the
-member Mall. It does not own a model, a durable RedDog conversation, worker
-execution, or FoundUp business logic.
+p.fMALL is the marketplace, discovery, and interaction shell for FoundUps and media. The intended user experience is that **p.fMALL is where the user talks to RedDog** while browsing FoundUps, concrete opportunity instances, media, and contribution paths. The browser shell owns presentation, discovery, routing, and safe projections; durable RedDog cognition and governed execution remain behind authenticated backend boundaries.
+
+This module owns manifest discovery, catalog projection, route resolution, optional state-overlay presentation, static shell assets, and policy objects used by the member Mall. It does not own a model, a durable RedDog conversation, worker execution, or FoundUp business logic.
+
+The opportunity-instance extension is documented in `modules/foundups/docs/PFMALL_FOUNDUP_OPPORTUNITY_INSTANCE_MODEL.md`: pfMALL may surface both reusable FoundUps and concrete opportunities such as a specific site, house, vehicle, or other candidate instance. RedDog is the conversational bridge that helps the user understand those opportunities and routes authorized work into the FoundUp/WRE execution stack.
 
 ## Implemented surfaces
 
@@ -33,17 +33,16 @@ execution, or FoundUp business logic.
 
 ## RedDog, OpenClaw, and Hermes boundary
 
-The current browser concierge is a shell-local FAQ IIFE: it makes no network
-call and is not an AI runtime. The `pfmall-control-dispatcher.js` message bridge
-can control existing Mall presentation APIs, but it is not a conversation
-transport and grants no resident identity, model credential, durable-session,
-work-order, OpenClaw-policy, or Hermes-execution authority.
+The target product boundary is explicit: the user converses with RedDog through p.fMALL. The current browser concierge is only a shell-local FAQ IIFE: it makes no network call and is not yet that production RedDog runtime. The `pfmall-control-dispatcher.js` message bridge can control existing Mall presentation APIs, but it is not a conversation transport and grants no resident identity, model credential, durable-session, work-order, OpenClaw-policy, or Hermes-execution authority.
 
-A production RedDog connection must arrive through a separately authenticated
-adapter. RedDog owns the continuous conversation and governed request state;
-OpenClaw owns policy/control-plane decisions; Hermes executes admitted jobs.
-The browser remains an untrusted thin client. No text or `postMessage` field can
-create those authorities.
+A production RedDog connection must arrive through a separately authenticated adapter. RedDog owns the continuous conversation and governed request state; OpenClaw owns policy/control-plane decisions; Hermes executes admitted jobs. The browser remains an untrusted thin client. No text or `postMessage` field can create those authorities.
+
+The intended loop is:
+
+```text
+user -> p.fMALL -> RedDog conversation -> authorized FoundUp/project context
+     -> OpenClaw/WRE/SKILLz -> evidence/result -> RedDog -> p.fMALL
+```
 
 ## Current truth boundaries
 
@@ -54,6 +53,7 @@ create those authorities.
 | Optional state overlay | Implemented contract | Advisory provider data |
 | Member Mall UI and browser control dispatcher | Implemented | Presentation only |
 | Shell-local RedDog FAQ concierge | Implemented legacy shim | Static guidance only |
+| p.fMALL as the user-facing RedDog conversation surface | Architecture intent | p.fMALL + authenticated RedDog adapter |
 | Authenticated resident RedDog conversation adapter | Specified, not implemented in p.fMALL | RedDog backend |
 | OpenClaw policy or worker authority in browser | Prohibited | Backend control plane |
 | Hermes execution in browser | Prohibited | Governed worker plane |
@@ -73,6 +73,7 @@ Canonical architecture documents remain under `modules/foundups/docs/`:
 - `PFMALL_DATA_ISOLATION_MODEL.md`
 - `PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
 - `PFMALL_DEVICE_MODEL_ROUTING_CONTRACT.md`
+- `PFMALL_FOUNDUP_OPPORTUNITY_INSTANCE_MODEL.md`
 
 ## Verification
 
