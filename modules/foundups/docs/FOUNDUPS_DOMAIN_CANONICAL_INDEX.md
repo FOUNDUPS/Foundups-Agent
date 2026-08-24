@@ -141,6 +141,8 @@ Use four statuses:
 - `modules/foundups/docs/PFMALL_FOUNDUP_MANIFEST_SCHEMA.md`
   - future full FoundUp runtime manifest (CABR, signing, capabilities)
   - distinct from current Video Mall catalog
+- `modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md`
+  - planning model for discovering concrete opportunity instances beneath reusable FoundUps without redefining RedDog or adding a new lifecycle layer
 - `modules/foundups/docs/FOUNDUP_FEDERATION_MIGRATION_PLAN.md`
   - useful, but still draft and not proof that all migrations have happened
 - submodule roadmaps:
