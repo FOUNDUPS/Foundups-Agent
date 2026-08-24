@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "foundup_id": "progressive_execution_agent",
+  "display_name": "Progressive Execution Agent",
+  "entity_type": "foundup",
+  "stage": "incubating",
+  "tier": "F0_DAE",
+  "implementation_status": "SPECIFIED",
+  "poc_status": "idea",
+  "token_status": "TOKEN_DEFERRED",
+  "module_path": "modules/foundups/progressive_execution_agent",
+  "public_surface_status": "discoverable",
+  "mall_entry_status": "discoverable_only",
+  "summary": "Evidence-driven FoundUp execution system that models the whole project while exposing one verified next-best action at a time to the human founder.",
+  "poc": {
+    "environment": "Fukui E-Singularity community feasibility",
+    "loop": "evidence_gap -> capability_resolution -> guided_field_action -> evidence_receipt -> graph_update -> next_best_action"
+  },
+  "architecture": {
+    "owns": [
+      "project dependency/evidence state",
+      "capability demand",
+      "progressive disclosure UX",
+      "evidence receipt integration"
+    ],
+    "does_not_own": [
+      "WRE orchestration",
+      "SKILLz runtime",
+      "model/provider selection"
+    ]
+  },
+  "next_slice": "PROGRESSIVE_EXECUTION_AGENT_POC_PHASE1",
+  "name_status": "provisional"
+}
