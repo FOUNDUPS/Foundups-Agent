@@ -40,10 +40,11 @@ transport and grants no resident identity, model credential, durable-session,
 work-order, OpenClaw-policy, or Hermes-execution authority.
 
 A production RedDog connection must arrive through a separately authenticated
-adapter. RedDog owns the continuous conversation and governed request state;
-OpenClaw owns policy/control-plane decisions; Hermes executes admitted jobs.
-The browser remains an untrusted thin client. No text or `postMessage` field can
-create those authorities.
+adapter. RedDog/0102 owns the continuous product identity and governed
+conversation state; OpenClaw supervises policy/control-plane admission; WRE
+owns repository/process execution and verification; Hermes receives bounded
+admitted leaf jobs. The browser remains an untrusted thin client. No text or
+`postMessage` field can create those authorities.
 
 ## Current truth boundaries
 

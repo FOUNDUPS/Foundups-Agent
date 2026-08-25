@@ -26,8 +26,9 @@
   any mutation-bearing request is admitted.
 - [ ] Translate only bounded, authenticated RedDog projections into existing
   Mall presentation commands.
-- [ ] Preserve OpenClaw as policy/control plane and Hermes as admitted worker
-  execution; neither authority belongs in the browser.
+- [ ] Preserve OpenClaw as policy/control supervisor, WRE as execution and
+  verification authority, and Hermes as a bounded admitted leaf worker; none
+  of those authorities belongs in the browser.
 
 ## P1 — Runtime convergence and deployment hardening
 

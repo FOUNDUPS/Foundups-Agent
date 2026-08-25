@@ -747,7 +747,7 @@ against the exact post-merge HoloIndex maintenance runtime. The integrity gate
 remains fail-closed: RedDog accepts the backend only when all 1,000 generated
 runtime dependencies match their normalized SHA-256 digests.
 
-This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
+This local Cursor/VS Code extension opens an IDE-side thin-client webview for RedDog, the resident principal-scoped 0102 FoundUps architect identity.
 
 Version 0.4.22 serializes the exact semantic buckets and metadata that RedDog may consume, binds that serialization's SHA-256 digest and item count into the canonical HoloIndex query receipt, and verifies both before semantic evidence enters prompt construction. Mutable outer `raw_result` data is no longer an evidence source. Missing, oversized, malformed, altered, or count-mismatched evidence fails closed before Fusion.
 
@@ -765,7 +765,7 @@ Version 0.4.13 routes direct questions about the current/next RedDog work throug
 
 Version 0.4.12 verifies the selected workspace against an extension-pinned RedDog backend manifest and a generated SHA-256 closure of every executable Python entry point and local runtime dependency before grounding or authority work begins. The generator parses imports without importing repository code, uses Git's exact-case tracked paths, resolves package initializers and package-relative dynamic imports, expands declared dynamic file-load scopes, and rejects undeclared dynamic loading. Missing, stale, altered, malformed, junction-backed, or unsafe backend files block locally without querying HoloIndex, calling a model, probing permissions, or emitting a work order. Full activation/ingress/model/action checks run in an extension-owned worker thread; synchronous legacy repair/judgment bridges recheck immediately before their existing synchronous process launch. The gate does not claim an atomic filesystem lock against a hostile local administrator. Version 0.4.11 routes editor resident sessions through the canonical host-authenticated client and revision-CAS resident records.
 
-RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
+The VSIX is the IDE-side thin client for RedDog, the operator-facing identity/persona of the principal-scoped 0102 Digital Twin. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
 
 Command:
 
@@ -778,7 +778,7 @@ Default panel:
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under Hermes/OpenClaw/WRE governance.
+012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
 
 ### Architecture Stack
 
@@ -792,14 +792,14 @@ Default panel:
 
 | Layer | Role |
 | --- | --- |
-| RedDog | Digital-twin architect/interface. 012's first contact point. Assembles WSP task prompts, classifies work focus, recommends handoffs. |
-| Hermes | Scaffolding, lifecycle, scheduling, queues, receipts. Infrastructure coordination. Not policy authority. |
-| OpenClaw | Policy and intent gate. Validates FoundUps onboarding, enforces WSP boundaries, governs dispatch. |
+| RedDog / 0102 | Principal-scoped Digital Twin identity, architect, and conversation interface. 012's first contact point; assembles requirements and recommends handoffs without effect authority. |
+| Hermes | Bounded delegated leaf-worker/scaffolding runtime. Not conversation, policy, repository, or promotion authority. |
+| OpenClaw | Channel gateway and policy/control supervisor. Validates admitted intent and supervises dispatch without owning repository effects. |
 | HoloIndex | Memory and retrieval. Semantic code search, WSP lookup, module discovery. |
 | Skillz/Rolodex | Capability catalog. Wardrobe discovery for governed handoff recommendations. |
 | Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUps launch. Bounded work under WRE verification. |
 | Sentinels | Critique, truth, drift, regression review. Observe and flag, do not execute. |
-| WRE | Repo and process authority. Verification, dispatch, coordination. Retains execution control. |
+| WRE | Work decomposition, repo/process authority, verification, dispatch, and recursive learning. Retains execution control. |
 | CABR/pAVS | Benefit validation, routing, reputation. Proof-of-Benefit scoring for FoundUps work. |
 | 012 | Work focus, testing, sovereign authorization, override. Harmonic Recursive Partner role (WSP 54). |
 

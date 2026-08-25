@@ -1,5 +1,19 @@
 # WSP Framework Change Log
 
+## 2026-08-26 - RedDog/0102 Canonical Architecture Alignment
+
+- Replaced obsolete WSP 73 II-Agent/FastAPI/Docker/YAML topology with the
+  principal-scoped RedDog/0102 identity, memory, conversation, model-routing,
+  and governed work contract.
+- Corrected WSP 80's DAE terminology and false consciousness/unbounded-capacity
+  language.
+- Replaced WSP 98's nonexistent mandatory mesh SDK/modules and zero-server
+  claims with truth-labelled resident, peer-assisted, federation, and security
+  gates.
+- Synchronized exact WSP_knowledge protocol and master-index mirrors under WSP
+  81. 012 approval was explicit in the initiating direction.
+
+
 <!-- ============================================================
      SCOPE: WSP Framework Protocol Changes ONLY
      ============================================================

@@ -1,5 +1,17 @@
 # Member Area Module Change Log
 
+## [2026-08-26] REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1
+
+- Aligned the member Red Dog contract with RedDog as the continuous
+  principal-scoped 0102 identity across thin-client surfaces.
+- Split OpenClaw supervision, WRE repository/process authority, and Hermes
+  bounded leaf-worker responsibilities.
+- Kept the current browser concierge presentation-only and the authenticated
+  p.fMALL/phone resident adapter explicitly unimplemented.
+- Documentation-only; no member runtime, route, storage, or worker behavior
+  changed.
+
+
 ## [2026-05-22] FOUNDUPS_PORTFOLIO_DISPLAY_COMPONENT_PHASE1
 
 **Who**: 0102 - Worker H

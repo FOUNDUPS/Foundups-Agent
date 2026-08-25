@@ -2,9 +2,12 @@
 
 ## Product boundary
 
-RedDog is the application/runtime shell. 0102 is the Digital Twin hosted by
-RedDog. The Principal Memex is the bounded cognition substrate that may help
-0102 understand 012; it is neither the Digital Twin nor operational authority.
+RedDog is the operator-facing product identity, persona, and conversation
+surface of the principal-scoped 0102 Digital Twin. RedDog services may host its
+runtime, but RedDog is not a separate shell containing 0102 and no single
+process owns the complete identity. The Principal Memex is the bounded
+cognition substrate that may help 0102 understand 012; it is neither the
+Digital Twin nor operational authority.
 
 `conversation_plane_contract.py` and `conversation_plane.py` implement the
 deterministic foreground conversation contract. Interaction intent, reasoning

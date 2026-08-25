@@ -2,6 +2,18 @@
 
 ## Chronological Change Log
 
+### 2026-08-26 - Canonical FoundUps/RedDog Lifecycle Alignment
+
+- Repaired the master architecture's false "no PWA" and fixed-scale claims.
+- Distinguished the implemented p.fMALL PWA shell from the target Progressive
+  Web Agent, stake gate, stakeholder interior, and authenticated RedDog
+  transport.
+- Defined RedDog/0102, OpenClaw, WRE, Hermes, phone, and p.fMALL boundaries
+  without making the browser or one OpenClaw instance authoritative.
+- Documentation-only; no catalog, route, wallet, model, worker, or runtime
+  state changed. WSP 15/22/50/62/73/97/98.
+
+
 ### 2026-05-21 - Public Portfolio Status Schema (W9: FOUNDUPS_PUBLIC_PORTFOLIO_STATUS_SCHEMA_PHASE1)
 
 **By:** 0102 (W9) — **Slice:** `FOUNDUPS_PUBLIC_PORTFOLIO_STATUS_SCHEMA_PHASE1`

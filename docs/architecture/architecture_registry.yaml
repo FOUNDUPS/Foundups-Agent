@@ -121,4 +121,4 @@ architectures:
       - HoloIndex canonical repo truth
       - 012 Principal Memex
       - 0102 Digital Twin cognition
-      - RedDog hosts 0102
+      - RedDog is the operator-facing identity of the principal-scoped 0102 Digital Twin
