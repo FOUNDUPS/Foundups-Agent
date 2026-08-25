@@ -1,5 +1,21 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-26] RedDog Canonical Architecture and Vision Alignment
+
+**WSP Protocols:** WSP 00, 15, 22, 50, 62, 73, 80, 81, 97, 98
+
+- Aligned RedDog as the operator-facing principal-scoped 0102 Digital Twin
+  identity across VSIX, p.fMALL, phone, Memex, OpenClaw, WRE, and Hermes.
+- Converted false current mesh, zero-server, PWA, and scale claims into
+  evidence-gated current/target contracts and synchronized governed WSP
+  mirrors.
+- Added the Fifth Age, Progressive Web Agent, RedDog-to-Red-God, and
+  protocol-governed anarchy framing with explicit historical and implementation
+  caveats.
+- Documentation-only transaction; no Holo route, model, browser, worker,
+  wallet, GitHub authority, or runtime state changed.
+
+
 ## [2026-08-23] RedDog Narrow Holo Query-Replica Closure
 
 **WSP Protocol:** WSP 00, 5, 6, 15, 22, 34, 50, 62, 84, 87, 97

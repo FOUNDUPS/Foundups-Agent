@@ -6,19 +6,22 @@
 
 ## 1. Canonical identity
 
-RedDog is 012's continuous 0102 Digital Twin product, persona, and conversation
-surface. A principal-scoped OpenClaw 0102 runtime may be the resident execution
-layer behind that RedDog. This preserves the original "personal OpenClaw
-agent" vision without claiming that the browser shell is the runtime or that
-one OpenClaw process owns the complete RedDog identity and policy.
+RedDog is the operator-facing name, product identity, persona, and conversation
+surface of 012's principal-scoped 0102 Digital Twin. RedDog does not contain a
+separate 0102 identity. RedDog services may host the runtime, and a
+principal-scoped OpenClaw runtime may supervise admitted execution behind it.
+This preserves the original "personal OpenClaw agent" direction without
+claiming that the browser shell is the runtime or that one OpenClaw process
+owns the complete RedDog identity and policy.
 
 | Component | Canonical responsibility |
 |---|---|
-| RedDog | Operator-facing Digital Twin product, persona, conversation surface, and resident application shell. It hosts 0102. |
-| 0102 | 012's Digital Twin/main agent: the real-time reasoning and orchestration relationship, without sovereign or implicit effect authority. |
+| RedDog / 0102 | Operator-facing Digital Twin product identity and the real-time reasoning/orchestration relationship, without sovereign or implicit effect authority. |
+| RedDog services | Authenticated conversation, session, model, memory-adapter, transport, and receipt hosts. A service is not the complete RedDog identity. |
 | PFMall shell | Thin presentation client for RedDog. It may emit authenticated requests and display replies or receipts after the resident adapter exists. |
 | OpenClaw | Principal-scoped 0102 execution/runtime layer, channel gateway, and work supervisor behind RedDog. It does not independently widen RedDog policy or effect authority. |
-| WRE / Hermes | Bounded execution spine and delegated leaf workers operating only from admitted work orders. |
+| WRE | Work decomposition, repository/process authority, verification, and recursive learning for admitted work orders. |
+| Hermes | Bounded delegated leaf-worker/scaffolding runtime. It is not policy, repository, or conversation authority. |
 | AgentDB | Durable conversation/event ordering, proposal provenance, replay protection, and receipt references. Browser storage is never authoritative for these records. |
 
 RedDog remains a companion-facing product, but personality cannot expand its
@@ -51,14 +54,17 @@ PFMall / phone / VSIX thin clients
               |
               | authenticated request + session/event id
               v
-Resident RedDog 0102 conversation plane
+Resident RedDog / 0102 conversation services
               |
               | proposal-only boundary
               v
 OpenClaw resident work supervisor
               |
               v
-WRE / Hermes / FoundUp DAEs
+WRE execution/effect authority
+              |
+              v
+Hermes / FoundUp DAE workers
 ```
 
 The phone emits to the resident hub; it does not need to host OpenClaw or the
@@ -136,8 +142,9 @@ and acceptance gates.
 ## 8. Phase gates
 
 1. **Implemented in the RedDog VSIX**: deterministic conversation-plane policy,
-   zero-effect foreground chat, shared Python/JavaScript vectors, and governed
-   model routing.
+   zero-effect foreground chat, shared Python/JavaScript vectors, governed
+   model routing, and session-local presentation. Raw provider history is
+   discarded; durable cross-session continuity is not implemented.
 2. **Specified, not implemented in PFMall**: authenticated thin-client adapter,
    durable session/event continuity, and resident reply streaming.
 3. **Blocked pending separate proof**: durable personalized memory, voice,

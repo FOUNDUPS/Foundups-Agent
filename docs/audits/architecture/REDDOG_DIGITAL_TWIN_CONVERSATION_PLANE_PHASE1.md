@@ -14,7 +14,7 @@ governed work plane remains a separate effect boundary.
 VSIX / future PFMall phone client
               |
               v
-RedDog-hosted 0102 Digital Twin conversation plane
+RedDog / principal-scoped 0102 Digital Twin conversation plane
               |
               +-- CHAT / RESEARCH / PROPOSAL (no execution authority)
               |
@@ -22,11 +22,13 @@ RedDog-hosted 0102 Digital Twin conversation plane
 existing authenticated conversation-to-work promotion
               |
               v
-OpenClaw resident work supervisor -> WRE / Hermes / FoundUp DAEs
+OpenClaw supervision -> WRE execution/effect authority
+  -> Hermes / FoundUp DAE workers
 ```
 
 The identity and runtime statements are intentionally distinct. RedDog is the
-continuous Digital Twin product/persona and hosts its conversation policy. A
+operator-facing name/persona of the principal-scoped 0102 Digital Twin and its
+services host the conversation policy. A
 principal-scoped OpenClaw 0102 agent may be the resident execution/runtime
 layer that embodies work for that twin. That does not make the browser an
 OpenClaw host, collapse RedDog into one OpenClaw process, or give OpenClaw

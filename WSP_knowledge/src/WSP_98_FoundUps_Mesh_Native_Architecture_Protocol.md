@@ -1,361 +1,223 @@
 # WSP 98: FoundUps Mesh-Native Architecture Protocol
-- **Status:** Active
-- **Purpose:** Establishes mesh-native architecture pattern for ALL FoundUps where users automatically create peer-to-peer infrastructure, enabling DAE-to-DAE communication, distributed compute, and zero-server operation
-- **Trigger:** When creating ANY new FoundUp, when integrating mesh capabilities, when building DAE coordination systems
-- **Input:** FoundUp requirements, user base size, DAE coordination needs
-- **Output:** Mesh-enabled FoundUp architecture, SDK integration guidance, DAE mesh patterns
-- **Responsible Agent(s):** 0102, FoundUp architects, DAE orchestrators
-- **Dependencies:** WSP 27 (Universal DAE Architecture), WSP 80 (Cube-Level DAE Orchestration), WSP 3 (Enterprise Domain Organization), WSP 97 (System Execution Prompting), WSP 104 (Route Namespace and Tenant Isolation)
 
-## Prerequisite: WSP 104 Namespace Guardrails
+- **Status:** Active target protocol; mesh foundation is not implemented
+- **Updated:** 2026-08-26
+- **Purpose:** Define the constraints and evidence gates for evolving FoundUps
+  from resident-hub deployments toward federated and peer-assisted operation.
+- **Trigger:** Designing a FoundUp transport, federating RedDog services,
+  distributing work or storage, or claiming mesh readiness.
+- **Dependencies:** WSP 27, WSP 80, WSP 3, WSP 97, WSP 103, WSP 104
 
-**Before a FoundUp is treated as mesh-ready**, it must satisfy the WSP 104 namespace guardrails:
+## 1. Truth boundary
 
-- unique `foundup_id`
-- unique `routing_prefix` = `/f/{foundup_id}`
-- unique `data_namespace` = `idb_{foundup_id}`
-- no root-level tenant route claims
+WSP 98 describes a target architecture. It does not prove that a mesh SDK,
+peer discovery, distributed storage, distributed compute, or zero-server
+deployment exists.
 
-A FoundUp that fails namespace validation must not be onboarded to the mesh network.
+At this repository revision:
 
----
+| Claim | State |
+|---|---|
+| WSP 104 FoundUp namespace guardrails | Implemented protocol and supporting contracts |
+| p.fMALL/member Progressive Web App shell | Implemented presentation surface |
+| Authenticated p.fMALL/phone RedDog transport | Specified, not implemented |
+| Universal JavaScript or Python mesh SDK | Not implemented |
+| `modules/communication/liberty_alert/src/mesh_core.py` and sibling mesh modules | Not present |
+| Peer-discovery, multi-hop, distributed storage, and distributed compute proofs | Not present |
+| Zero-server FoundUps | Target, not an implementation claim |
 
-## 🌐 Vision: User-as-Infrastructure
+The earlier protocol named absent modules, package versions, user-count
+thresholds, and performance properties as though they existed. Those names
+were illustrative and are not admissible evidence. A future implementation
+must be discovered from the repository and admitted through the gates below.
 
-**Core Principle**: Every FoundUp user's device becomes a mesh node, collectively forming distributed infrastructure that enables:
-- **Zero-server operation**: P2P networking eliminates central servers
-- **DAE coordination**: DAEs communicate across user devices via mesh
-- **Distributed compute**: AI/processing tasks distributed across mesh
-- **Privacy-first**: Data stays peer-to-peer, ephemeral, encrypted
-- **Unstoppable**: Mesh networks resilient to shutdown/censorship
+## 2. Canonical terms
 
-### The Paradigm Shift
+- **Mesh-native:** contracts do not assume one permanent host and can admit
+  independently authenticated peers without moving authority into clients.
+- **Peer-assisted:** a resident service remains available while peers provide
+  bounded transport, cache, storage, or compute capabilities.
+- **Federated:** multiple independently operated authorities exchange signed,
+  scoped records under WSP 103.
+- **Progressive Web App (PWA):** the installable browser presentation/runtime
+  technology.
+- **Progressive Web Agent:** the target FoundUp/DAE experience in which an
+  installable surface can reach governed agent services. It is not proven by a
+  web manifest or service worker alone.
+- **DAE:** Decentralized or Distributed Autonomous Entity/Ecosystem as defined
+  by WSP 27. "Digital Autonomous Entity" may describe its software embodiment,
+  but does not replace the governance meaning.
 
-**Before (Centralized FoundUps):**
-```
-FoundUp = PWA + Cloud Server + Database
-Cost: $X per user (hosting, storage, compute)
-Control: Centralized (vulnerable to shutdown)
-Scalability: Server costs grow with users
-```
+## 3. Mandatory invariants
 
-**After (Mesh-Native FoundUps):**
-```
-FoundUp = PWA + Mesh DAE + P2P Network
-Cost: $0 per user (P2P hosting, local storage)
-Control: Distributed (unstoppable mesh)
-Scalability: Network grows stronger with users
-```
+### 3.1 Identity and namespace
 
-## 🏗️ Architecture Components
+Before any peer or FoundUp is admitted:
 
-### Layer 1: Universal Mesh Foundation
+- `foundup_id`, `routing_prefix=/f/{foundup_id}`, and
+  `data_namespace=idb_{foundup_id}` satisfy WSP 104;
+- principal, session, FoundUp, workspace, and capability scopes are explicit;
+- browser/device claims are untrusted until authenticated by the owning
+  authority; and
+- no peer can widen another tenant's namespace or effect ceiling.
 
-**Location**: `modules/communication/liberty_alert/`
+### 3.2 Authority remains separate from transport
 
-**Core Components:**
-```python
-# Universal mesh infrastructure (WSP 3 communication/ domain)
-modules/communication/liberty_alert/
-  src/
-    mesh_core.py              # WebRTC + Meshtastic protocol
-    dae_coordinator.py        # DAE-to-DAE messaging
-    mesh_discovery.py         # Auto-peer discovery
-    mesh_routing.py           # Multi-hop routing
-    mesh_encryption.py        # E2E encryption
-```
+Transport availability is not work authority. A peer message, model output,
+RedDog turn, OpenClaw proposal, or Hermes result cannot authorize an effect.
+Repository and process effects remain behind WRE admission and separately
+authenticated work orders. Durable proposal provenance, authorization, and
+receipts must survive peer retries and reordering.
 
-**Purpose**: Foundation mesh protocol reusable by ALL FoundUps
+### 3.3 Progressive enhancement
 
-### Layer 2: FoundUp Mesh SDK
+A FoundUp must remain safe when the mesh is absent, partitioned, stale, or
+hostile. Public discovery and local presentation may degrade gracefully.
+Protected reads, proposals, wallet operations, governance, and work execution
+must fail closed when their current authority cannot be proved.
 
-**Location**: `modules/foundups/src/mesh_sdk/`
+### 3.4 Data and privacy
 
-**Components:**
-```javascript
-// JavaScript SDK for PWA FoundUps
-modules/foundups/src/mesh_sdk/javascript/
-  @foundups/mesh-core/
-    index.js                  # Main MeshDAE class
-    discovery.js              # Peer discovery
-    coordinator.js            # DAE coordination
-    storage.js                # Mesh-distributed storage
-    compute.js                # Distributed compute
+- Data ownership, retention, replication, deletion, and jurisdiction are
+  explicit per record class.
+- Personally identifiable or principal-private data is not broadcast merely
+  because encryption exists.
+- Local-first storage is a preference, not permission to make browser storage
+  authoritative for identity, replay protection, policy, or work receipts.
+- Replication requires bounded payloads, authenticated provenance, conflict
+  semantics, and revocation/tombstone behavior.
 
-// Python SDK for backend DAEs
-modules/foundups/src/mesh_sdk/python/
-  foundups_mesh/
-    dae_node.py               # DAE mesh node
-    peer_discovery.py         # Find nearby DAE peers
-    mesh_coordinator.py       # Multi-DAE orchestration
-```
+### 3.5 Cryptography
 
-**Purpose**: NPM/PyPI packages ALL FoundUps embed
+Do not prescribe a cipher, password derivation function, or key topology from
+an example. Use reviewed platform protocols and libraries. A production slice
+requires a separate threat model covering enrollment, peer authentication,
+forward secrecy, rotation, revocation, recovery, metadata leakage, and key
+custody.
 
-### Layer 3: Mesh-Enabled FoundUps
+### 3.6 Observability and verification
 
-**Example: GotJunk + Mesh**
-```javascript
-// modules/foundups/gotjunk/frontend/App.tsx
-import { MeshDAE } from '@foundups/mesh-core';
+Every admitted peer operation exposes content-bounded evidence for:
 
-const gotjunkMesh = new MeshDAE({
-  foundupId: 'gotjunk',
-  capabilities: ['storage', 'discovery', 'ai'],
-  autoConnect: true
-});
+- peer and capability identity;
+- principal/FoundUp/session scope;
+- request, result, and policy digests;
+- ordering/idempotency state;
+- expiry and revocation state; and
+- whether an effect was proposed, authorized, attempted, or completed.
 
-// Broadcast item to mesh (P2P, no server)
-await gotjunkMesh.broadcast({
-  type: 'item_available',
-  location: getCurrentLocation(),
-  distance: 50, // 50km radius
-  preview: generateThumbnail(photo)
-});
+Availability, latency, scale, privacy, and resilience remain
+`NEEDS_VERIFICATION` until measured under a named topology and failure model.
 
-// Receive items from mesh peers
-gotjunkMesh.on('item_available', (item) => {
-  if (withinRadius(item.location, 50)) {
-    showNotification('New item nearby!');
-  }
-});
-```
+## 4. Target layered topology
 
-## 🎯 Mandatory Patterns
-
-### Pattern 1: Universal SDK Dependency
-
-**ALL FoundUps MUST include mesh SDK:**
-
-```json
-// modules/foundups/[app]/frontend/package.json
-{
-  "dependencies": {
-    "@foundups/mesh-core": "^1.0.0"  // MANDATORY
-  }
-}
+```text
+p.fMALL / phone / VSIX thin clients
+              |
+              | authenticated, replay-safe turns
+              v
+RedDog / principal-scoped 0102 conversation services
+              |
+              +-- Principal Memex and scoped FoundUp Memex reads
+              +-- HoloIndex repository retrieval
+              |
+              | proposal-to-work promotion
+              v
+OpenClaw policy/control supervisor
+              |
+              v
+WRE authority -> Hermes bounded leaf workers -> FoundUp DAEs
+              |
+              v
+optional federation / peer-assisted transport, storage, and compute
 ```
 
-### Pattern 2: MeshDAE Initialization
+RedDog is the operator-facing 0102 Digital Twin persona and continuous product
+identity across these surfaces. It is not one browser, one server, or one
+OpenClaw process. OpenClaw can host or supervise an execution runtime; Hermes
+is a delegated worker boundary; WRE owns admitted execution. A phone normally
+emits to the resident/federated hub rather than hosting that complete stack.
 
-**ALL FoundUps MUST initialize MeshDAE:**
+## 5. Deployment progression
 
-```typescript
-// Standard initialization pattern
-import { MeshDAE } from '@foundups/mesh-core';
+### Gate 0: Resident-hub baseline
 
-class FoundUpApp {
-  private mesh: MeshDAE;
+- Authenticated RedDog conversation service.
+- Durable event order, compare-and-swap, replay protection, and cancellation.
+- Thin clients contain no standing model, memory, repository, or worker
+  credentials.
+- OpenClaw/WRE/Hermes effects remain separately admitted.
 
-  async initialize() {
-    // Initialize mesh DAE (auto-connects to nearby peers)
-    this.mesh = new MeshDAE({
-      foundupId: 'your-foundup-name',
-      capabilities: ['storage', 'compute', 'ai'],
-      autoConnect: true,
-      encryption: true
-    });
+### Gate 1: Peer-assisted proof of concept
 
-    await this.mesh.start();
-  }
-}
-```
+- One bounded, non-authoritative capability such as public-content cache or
+  disposable compute.
+- Two independently identified devices.
+- Partition, replay, duplicate, revocation, and malicious-peer tests.
+- Resident fallback and invariant-equivalent receipts.
 
-### Pattern 3: DAE-to-DAE Coordination
+### Gate 2: Federated prototype
 
-**DAEs communicate via mesh, not central server:**
+- Multiple independently operated authorities.
+- WSP 103 trust and route contracts.
+- Shared ordering/conflict protocol and cross-tenant isolation evidence.
+- Measured capacity and failure behavior; no extrapolated user thresholds.
 
-```python
-# Backend DAE using mesh coordination
-from foundups_mesh import DAEMeshNode
+### Gate 3: Mesh-capable MVP
 
-class GotJunkDAE:
-    def __init__(self):
-        self.mesh = DAEMeshNode(
-            foundup_id='gotjunk',
-            capabilities=['ai', 'storage']
-        )
+- SDK and scaffold exist as versioned, tested packages.
+- At least one FoundUp uses them without losing the resident-hub safety
+  contract.
+- Security review, upgrade/rollback, compatibility, and incident procedures
+  are operational.
+- Only then may FoundUp scaffolding require the verified mesh dependency.
 
-    async def analyze_item(self, photo: bytes):
-        # Try local AI first
-        if self.has_local_ai():
-            return await self.ai_agent.analyze(photo)
+### Gate 4: Reduced-server or server-independent operation
 
-        # Delegate to mesh peer with AI capability
-        peer = await self.mesh.find_peer_with('ai')
-        return await peer.request('analyze_item', photo)
-```
+This is a separately proved deployment outcome, not the definition of mesh
+readiness. Bootstrap discovery, identity recovery, durable ordering, policy,
+wallet, and audit requirements must all have demonstrated replacements before
+any "zero-server" claim is allowed.
 
-### Pattern 4: Mesh-Distributed Storage
+## 6. Validation checklist
 
-**Data stored peer-to-peer, not centralized database:**
+- [ ] WSP 104 namespace admission passes.
+- [ ] Current repository modules and package identities are verified before
+      documentation names them.
+- [ ] Client, transport, policy, execution, and storage authorities are
+      separate.
+- [ ] Retry, replay, reordering, partition, revocation, and malicious-peer
+      tests pass.
+- [ ] Private data classes and retention rules are explicit.
+- [ ] Cryptography and key custody have an independent threat review.
+- [ ] Scale and resilience claims cite reproducible measurements.
+- [ ] Non-mesh operation remains safe and truthful.
+- [ ] WSP 97 labels distinguish observed, specified, target, and false claims.
 
-```typescript
-// Store data across mesh (redundant, encrypted)
-await mesh.storage.set('item_123', {
-  photo: itemBlob,
-  location: { lat: 34.05, lon: -118.24 },
-  redundancy: 3  // Store on 3 mesh peers
-});
+## 7. Prohibited shortcuts
 
-// Retrieve from nearest peer
-const item = await mesh.storage.get('item_123');
-```
+- Do not invent a universal SDK or dependency in documentation before code and
+  package evidence exists.
+- Do not equate PWA installability with a Progressive Web Agent or mesh node.
+- Do not treat WebRTC, Bluetooth, Meshtastic, MCP, or any transport as identity
+  or effect authority.
+- Do not store authoritative RedDog session, wallet, policy, or receipt state
+  in browser-local storage.
+- Do not claim exponential scaling, zero cost, censorship resistance, privacy,
+  or zero-server operation without a stated threat model and measurements.
+- Do not implement a custom cryptographic protocol for convenience.
 
-## 📊 Network Effect Architecture
+## 8. Related protocols and evidence
 
-### Critical Mass Thresholds
+- WSP 27: DAE and FoundUp architecture
+- WSP 73: 012 Digital Twin / RedDog architecture
+- WSP 80: cube-level DAE orchestration
+- WSP 97: truth-labelled system execution
+- WSP 103: FoundUp federation
+- WSP 104: route namespace and tenant isolation
+- `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md`
+- `docs/audits/architecture/REDDOG_DIGITAL_TWIN_CONVERSATION_PLANE_PHASE1.md`
 
-| Users | Mesh Nodes | Network State | Capabilities |
-|-------|------------|---------------|--------------|
-| 2-10 | Small mesh | **Functional** | Direct P2P, basic routing |
-| 10-100 | Local mesh | **Resilient** | Multi-hop, local redundancy |
-| 100-1000 | Regional mesh | **Autonomous** | Distributed AI, zero-server |
-| 1000+ | Global mesh | **Unstoppable** | Full decentralization |
-
-### Multi-FoundUp Mesh Network
-
-**FoundUps automatically interconnect:**
-
-```yaml
-GotJunk: 500 users = 500 mesh nodes
-Liberty Alert: 200 users = 200 mesh nodes
-PQN Portal: 300 users = 300 mesh nodes
-
-Combined Mesh Network: 1000 nodes (interconnected!)
-  - GotJunk DAE can coordinate with Liberty Alert DAE
-  - Distributed compute shared across all FoundUps
-  - Mesh grows exponentially with each new FoundUp
-```
-
-## 🚀 Implementation Phases
-
-### Phase 1: Foundation (PoC)
-**Deliverable**: Liberty Alert mesh infrastructure + SDK
-```yaml
-Build:
-  - modules/communication/liberty_alert/src/mesh_core.py
-  - modules/foundups/src/mesh_sdk/javascript/@foundups/mesh-core
-  - NPM package: @foundups/mesh-core v0.1.0
-
-Test:
-  - 2-phone mesh connection
-  - P2P message broadcast
-  - Auto-peer discovery
-```
-
-### Phase 2: Integration (Prototype)
-**Deliverable**: GotJunk v2.0 (mesh-enabled)
-```yaml
-Integration:
-  - Add @foundups/mesh-core to GotJunk
-  - Initialize MeshDAE in App.tsx
-  - Broadcast items peer-to-peer
-  - Test 10-node mesh network
-
-Result:
-  - GotJunk users create mesh infrastructure
-  - Items discoverable without server
-  - DAEs coordinate on user devices
-```
-
-### Phase 3: Universal (MVP)
-**Deliverable**: ALL new FoundUps mesh-native by default
-```yaml
-Enforcement:
-  - FoundUp scaffolding includes mesh SDK
-  - MeshDAE initialization in template
-  - WSP compliance checks mesh integration
-
-Result:
-  - Every FoundUp adds mesh nodes
-  - Exponential network growth
-  - Universal DAE-to-DAE communication
-```
-
-## 🔐 Security & Privacy Patterns
-
-### Mandatory Security Requirements
-
-**ALL mesh communications MUST:**
-1. **E2E Encryption**: All messages encrypted before broadcast
-2. **No PII Storage**: Zero personally identifiable information retained
-3. **Ephemeral Data**: Messages/data auto-expire
-4. **Open Source**: Full code transparency for audit
-5. **Local-First**: Data stays on user's device by default
-
-### Encryption Pattern
-
-```typescript
-// Standard mesh encryption (mandatory)
-const mesh = new MeshDAE({
-  foundupId: 'gotjunk',
-  encryption: {
-    enabled: true,  // MANDATORY
-    algorithm: 'AES-256-GCM',
-    keyDerivation: 'PBKDF2'
-  }
-});
-```
-
-## 🎯 WSP Compliance Validation
-
-### Pre-Integration Checklist
-
-**Before deploying any mesh-enabled FoundUp:**
-
-- [ ] `@foundups/mesh-core` included in `package.json`
-- [ ] MeshDAE initialized in app entry point
-- [ ] Encryption enabled (mandatory)
-- [ ] Peer discovery configured
-- [ ] DAE-to-DAE coordination tested
-- [ ] Multi-hop routing validated
-- [ ] Privacy patterns verified (no PII storage)
-- [ ] Open source compliance (all mesh code auditable)
-
-### Automated Validation
-
-```python
-# WSP 98 compliance checker
-from modules.infrastructure.wsp_orchestrator import WSPValidator
-
-validator = WSPValidator()
-result = validator.check_wsp_98_compliance('modules/foundups/gotjunk')
-
-assert result.has_mesh_sdk, "Missing @foundups/mesh-core dependency"
-assert result.mesh_initialized, "MeshDAE not initialized"
-assert result.encryption_enabled, "Encryption disabled (WSP 98 violation)"
-```
-
-## 📚 Related WSPs
-
-- **WSP 27**: Universal DAE Architecture - Foundation for DAE patterns
-- **WSP 80**: Cube-Level DAE Orchestration - DAE spawning and coordination
-- **WSP 3**: Enterprise Domain Organization - Liberty Alert in communication/ domain
-- **WSP 53**: Symbiotic Environment Integration - Environment integration patterns
-- **WSP 59**: Distributed Development Architecture - Distributed systems principles
-- **WSP 97**: System Execution Prompting - Rubik cubes (MVP DAEs) using mesh
-
-## 🎯 Key Takeaways
-
-1. **ALL FoundUps are mesh-native** - Users automatically create infrastructure
-2. **Mesh SDK is universal** - One package, all FoundUps
-3. **DAEs communicate via mesh** - Not central servers
-4. **Network effect exponential** - Each FoundUp multiplies mesh nodes
-5. **Privacy-first by design** - E2E encryption, ephemeral data, local-first
-
-## 🚨 Anti-Patterns (Violations)
-
-**NEVER:**
-- ❌ Create FoundUp without mesh SDK integration
-- ❌ Store user data on central servers when mesh is available
-- ❌ Implement custom mesh protocol (use universal SDK)
-- ❌ Disable encryption for "performance" reasons
-- ❌ Forget DAE-to-DAE coordination capabilities
-
-**Pattern Memory**: Liberty Alert mesh infrastructure is the foundation - ALWAYS use `@foundups/mesh-core`, NEVER rebuild mesh protocol from scratch.
-
----
-
-**Status**: Active - Mandatory for ALL new FoundUps starting 2025-11-03
-**Next Review**: After Phase 2 (GotJunk v2.0 mesh integration)
+The next implementation is Gate 0's authenticated resident conversation
+binding, not a speculative mesh SDK. Build and verify one layer before moving
+to the next.

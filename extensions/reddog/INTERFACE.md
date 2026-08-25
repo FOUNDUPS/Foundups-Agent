@@ -249,7 +249,7 @@ Historical release narratives and superseded acceptance boundaries are maintaine
 
 ## Purpose
 
-`reddog` is a local Cursor/VS Code extension whose user-facing product name is RedDog. It opens the resident 0102 FoundUps architect thin client and retains the redaction-gated OpenRouter bridge through `scripts/advisory_model_once.py`.
+`reddog` is a local Cursor/VS Code thin-client extension for RedDog, the operator-facing identity/persona of the principal-scoped 0102 FoundUps Digital Twin. It retains the redaction-gated OpenRouter bridge through `scripts/advisory_model_once.py`.
 
 ### Continuous conversation adapter
 
@@ -316,7 +316,7 @@ closure or independent authentication of the unhashed receipt origin.
 
 It is the IDE-side thin-client surface for the resident RedDog backend and the OpenClaw/WRE/Hermes execution spine. The extension submits typed intent and displays receipts; it does not grant shell, repository write, merge, FoundUp registration, or CABR authority.
 
-RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode, not the product identity.
+The VSIX is the IDE-side thin client; RedDog/0102 is the resident FoundUps architect identity and conversation interface. Fusion is one internal reasoning mode, not the product identity.
 
 For version-by-version provenance, generated closure pins, and migration history, see
 `ModLog.md`. Current behavior is specified by the contracts below.
@@ -327,7 +327,7 @@ re-indexing, provider access, or work dispatch.
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under Hermes/OpenClaw/WRE governance.
+012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
 
 ### Architecture Stack
 
@@ -341,14 +341,14 @@ re-indexing, provider access, or work dispatch.
 
 | Layer | Role |
 | --- | --- |
-| RedDog | Digital-twin architect/interface. 012's first contact point. |
-| Hermes | Scaffolding, lifecycle, scheduling, queues, receipts. Not policy authority. |
-| OpenClaw | Policy and intent gate. |
+| RedDog / 0102 | Principal-scoped Digital Twin identity, architect, and conversation interface. 012's first contact point. |
+| Hermes | Bounded delegated leaf-worker/scaffolding runtime. Not conversation, policy, repository, or promotion authority. |
+| OpenClaw | Channel gateway and policy/control supervisor for admitted work. |
 | HoloIndex | Memory and retrieval. |
 | Skillz/Rolodex | Capability catalog. |
 | Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUps launch. |
 | Sentinels | Critique, truth, drift, regression review. Review only, no execution. |
-| WRE | Repo and process authority. Verification and dispatch. |
+| WRE | Work decomposition, repo/process authority, verification, dispatch, and recursive learning. |
 | CABR/pAVS | Benefit validation, routing, reputation. |
 | 012 | Work focus, testing, sovereign authorization, override. |
 

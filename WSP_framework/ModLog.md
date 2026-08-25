@@ -38,6 +38,17 @@
 - **2025-10-06 13:27:26**: WSP Documentation Guardian performed ASCII remediation on 162 files
 # WSP Framework ModLog
 
+- **2026-08-26**: **RedDog/0102 Canonical Architecture Alignment** - Reworked
+  WSP 73 into the current RedDog identity, conversation, Memex, model-routing,
+  OpenClaw/WRE/Hermes, p.fMALL/phone, and phased authority contract; corrected
+  WSP 80's DAE/consciousness/resource wording; and replaced WSP 98's absent
+  mesh-module and zero-server claims with evidence-gated resident,
+  peer-assisted, and federated progression. Updated the master index and exact
+  WSP_knowledge mirrors. WSP 81 approval was provided by 012's explicit
+  direction to perform all necessary WSP_00/WSP_97 RedDog work. Slice:
+  `REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1`. Labels: DOCS_PROTOCOL,
+  CURRENT_VS_TARGET_REPAIR, NO_RUNTIME_CHANGE. (WSP 15/22/50/62/73/80/81/97/98)
+
 ## Module-Specific Change Log (WSP 22 Compliance)
 
 ## 2026-03-30 - WSP Identity Model Simplified to Self / Role / Origin

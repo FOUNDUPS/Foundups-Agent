@@ -15,14 +15,25 @@ FoundUps is a compute-allocation system for building autonomous ventures:
 Think **Perplexity for doing**, not just answering.
 The platform combines WSP/WRE orchestration, Holo memory retrieval, FAM lifecycle tooling, and simulator economics into one operator surface.
 
-## Digital Twin Direction (0102/OpenClaw)
+## RedDog Digital Twin Direction
 
-FoundUps treats OpenClaw 0102 agents as the execution layer for your digital twin:
-- Start with bounded responsibilities (assistive tasks)
-- Gradually expand authority as reliability and alignment improve
-- Move from helper -> operator -> autonomous venture builder under WSP gates
+RedDog is the operator-facing name, persona, and continuous product identity of
+a principal-scoped 0102 Digital Twin. VSIX, p.fMALL, phone, and future voice
+surfaces are thin clients to that relationship; no browser, model, server, or
+OpenClaw process is the complete RedDog identity.
 
-This is the path to a practical digital twin that can run real work safely.
+OpenClaw can supervise admitted execution, WRE owns repository/process
+authority and verification, and Hermes receives bounded leaf jobs. Capability
+expands only through current authenticated policy and work receipts:
+
+- begin with effect-free conversation and bounded research;
+- promote explicit proposals through separate authorization;
+- expand responsibilities only after measured reliability and independent
+  review; and
+- preserve 012's sovereign correction and override at every stage.
+
+That layered path produces a practical Digital Twin without confusing
+conversation, memory, worker availability, or personality with authority.
 
 ---
 

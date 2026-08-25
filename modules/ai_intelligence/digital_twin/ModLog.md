@@ -2,6 +2,17 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-08-26 - RedDog/0102 identity clarification
+
+- Defined RedDog as the operator-facing identity/persona/surface of the
+  principal-scoped 0102 Digital Twin rather than a separate shell that hosts
+  0102.
+- Preserved RedDog services as runtime hosts and Principal Memex as bounded
+  cognition rather than identity or work authority.
+- Documentation-only; no conversation, model, memory, or execution behavior
+  changed.
+
+
 ## 2026-08-22 - Resident conversation authenticated-scope binding
 
 - Synchronized the Digital Twin transport documentation with the new resident
@@ -68,8 +79,9 @@
   projection, HoloIndex writes, or work authority.
 - Kept the structural API outside the package export and sealed RedDog runtime
   closure; authenticated resident admission owns that later integration.
-- Clarified that RedDog hosts 0102; the Principal Memex informs the Digital
-  Twin but is not itself the agent.
+- Clarified the RedDog/0102 boundary: RedDog is the product identity, runtime
+  services host it, and Principal Memex informs the Digital Twin without
+  becoming the agent.
 
 ## V0.5.0 - WSP_00 Boot Integration (2026-03-23)
 

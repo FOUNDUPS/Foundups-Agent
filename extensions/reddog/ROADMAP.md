@@ -265,20 +265,20 @@ Current implementation:
 
 ## Architecture Direction
 
-This extension is the RedDog thin client. The resident backend and OpenClaw/WRE/Hermes workers remain the authority-bearing runtime.
+This extension is the IDE-side RedDog thin client. RedDog/0102 is the continuous principal-scoped identity; resident services host conversation/model state while OpenClaw supervises admitted work, WRE retains execution authority, and Hermes receives bounded leaf jobs.
 
-RedDog is the resident FoundUps architect thin client and product surface. Fusion is one internal reasoning mode; authority-bearing work remains in the resident backend and signed OpenClaw/WRE/Hermes worker path.
+RedDog is the resident FoundUps architect identity and conversation product across thin-client surfaces. Fusion is one internal reasoning mode; authority-bearing work remains in the signed OpenClaw/WRE/Hermes worker path.
 
 ### RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under Hermes/OpenClaw/WRE governance.
+012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
 
 ```text
 012 work focus
   -> RedDog digital twin / architect interface
   -> recursive 0102 DAE ecosystem
-  -> Hermes scaffolding / lifecycle / scheduling
-  -> OpenClaw policy + intent gate
+  -> OpenClaw policy / control supervision
+  -> WRE execution authority -> Hermes bounded leaf jobs
   -> HoloIndex memory / retrieval
   -> Skillz / Rolodex capability catalog
   -> autonomous WRE/DAE agents

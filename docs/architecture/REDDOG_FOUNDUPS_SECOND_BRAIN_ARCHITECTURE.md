@@ -20,13 +20,18 @@ Breadcrumbs
 = episodic continuity and recent operational history
 
 RedDog
-= the orchestrator that launches, builds, runs, audits, and improves FoundUps
+= the operator-facing product identity, persona, and conversation surface of a
+  principal-scoped 0102 Digital Twin
 
 012 Principal Memex
 = persistent principal cognition that informs 0102 across FoundUps
 
 0102 Digital Twin
-= active reasoning/orchestration agent hosted by RedDog
+= the active reasoning/orchestration relationship presented to 012 as RedDog
+
+RedDog services
+= the runtime hosts for authenticated conversation, models, memory adapters,
+  transports, and receipts; no single service is the complete RedDog identity
 ```
 
 The FoundUp Memex remains the implementation center of FoundUp cognition. The
@@ -36,11 +41,20 @@ store, conversation transcript, AgentDB queue, or authority source.
 ## Principal Memex and RedDog
 
 ```text
-012 -> Principal Memex -> 0102 Digital Twin -> RedDog interface/runtime
+012 <-> RedDog / principal-scoped 0102 Digital Twin
+          |
+          +-> Principal Memex (principal cognition)
+          +-> scoped FoundUp Memex (one FoundUp cognition)
+          +-> HoloIndex (repository/WSP retrieval)
+          |
+          +-> authenticated proposal-to-work promotion
+                    -> OpenClaw -> WRE -> Hermes / FoundUp DAEs
 ```
 
-RedDog hosts 0102. The Principal Memex helps 0102 interpret stable 012 goals,
-preferences, terminology, decision history, and cross-FoundUp strategy.
+RedDog is how 012 encounters the principal-scoped 0102 Digital Twin; it is not
+a container holding a separate 0102 identity. RedDog services may host that
+relationship's runtime. The Principal Memex helps 0102 interpret stable 012
+goals, preferences, terminology, decision history, and cross-FoundUp strategy.
 Current repository evidence remains authoritative for code truth, and signed
 authorization remains authoritative for work.
 
@@ -116,6 +130,13 @@ Each FoundUp is a decentralized autonomous entity, not merely a repository or ap
 - decision history, contradictions, and supersession.
 
 RedDog operates through the Memex of the FoundUp currently in scope. RedDog does not silently collapse all FoundUps into one memory store.
+
+One continuous RedDog identity does not yet mean one durable conversation is
+implemented across every surface. The VSIX currently discards raw provider
+history, and the p.fMALL/phone authenticated resident adapter remains
+specified, not implemented. Continuity becomes `OBSERVED` only when the
+existing session authority, AgentDB event/CAS state, durable idempotency, and
+source-labelled Memex admission are connected and adversarially verified.
 
 ## POC
 

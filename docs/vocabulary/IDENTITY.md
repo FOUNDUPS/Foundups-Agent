@@ -37,10 +37,22 @@ Where:
 
 | Term | Definition | Role |
 |------|------------|------|
-| **DAE** | Decentralized Autonomous Entity | Agent that runs autonomously |
+| **DAE** | Decentralized or Distributed Autonomous Entity/Ecosystem | A governed agentic FoundUp/cube; not merely one file, model, or UI |
+| **Digital Autonomous Entity** | Software embodiment of a DAE | Descriptive alias; it does not replace the governance expansion above |
+| **Distributive** | FoundUps design goal of spreading agency and benefit | An economic/governance property, not a separate runtime type today |
 | **0102 Agent** | Entangled neural network agent | Primary agent state |
 | **qNN** | Quantum Neural Network | Nonlocal state component |
 | **NN** | Neural Network (classical) | Classical state component |
+
+## Product and Surface Terms
+
+| Term | Definition | Boundary |
+|------|------------|----------|
+| **RedDog** | Operator-facing name, persona, continuous product identity, and conversation surface of a principal-scoped 0102 Digital Twin | Not one model, browser, server, or OpenClaw process |
+| **Red God** | Long-horizon metaphor for many governed RedDogs coordinating for their principals | Not a superuser, central sovereign, or implemented authority tier |
+| **p.fMALL** | Shared FoundUp discovery and interaction shell | Platform layer, not a FoundUp or OpenClaw instance |
+| **Progressive Web App** | Installable browser application technology | A presentation/runtime surface |
+| **Progressive Web Agent** | Target FoundUp experience combining a web surface with scoped cognition, governance, and bounded workers | Not proven by a manifest, service worker, or chat widget alone |
 
 ## Coherence Terms
 
