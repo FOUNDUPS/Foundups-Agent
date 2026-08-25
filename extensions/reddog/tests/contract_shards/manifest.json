@@ -1,7 +1,7 @@
 {
   "schema_version": "reddog_extension_contract_shards.v1",
   "source_path": "extensions/reddog/tests/verify_extension_contract.js",
-  "source_sha256": "sha256:f9677125899dc75751d3dee59bf1aed50444e5f08adf0b4456b1e7c3a960ab63",
+  "source_sha256": "sha256:969770f05975a4f357e65ca8f9268a54d9107c97728c7539f35f88bd1291602f",
   "source_line_count": 6929,
   "assertion_call_count": 490,
   "canonical_line_endings": "LF",
@@ -14,7 +14,7 @@
       "source_line_start": 1,
       "source_line_end": 400,
       "line_count": 400,
-      "sha256": "sha256:e4a99d9dfd70080361382fb4364d1d3d6bb5153f6e5800d1730c1f2efb520d29"
+      "sha256": "sha256:c2b8c84b900f08998d4d5fdc34e3de7fb181f8adf7bb265777e4d7219def1482"
     },
     {
       "order": 2,

@@ -303,9 +303,9 @@ assert(
   operationsIntercept >= 0 && conversationPromptAssembly >= 0 && operationsIntercept < conversationPromptAssembly,
   'operations control must intercept before WSP prompt/Fusion assembly'
 );
-includes(readme, 'RedDog is the resident FoundUps architect', 'README product identity statement missing');
+includes(readme, 'The VSIX is the IDE-side thin client for RedDog, the operator-facing identity/persona of the principal-scoped 0102 Digital Twin.', 'README product identity statement missing');
 includes(iface, 'Fusion is one internal reasoning mode, not the product identity', 'INTERFACE mode identity statement missing');
-includes(roadmap, 'RedDog is the resident FoundUps architect', 'ROADMAP product identity statement missing');
+includes(roadmap, 'RedDog is the resident FoundUps architect identity and conversation product across thin-client surfaces.', 'ROADMAP product identity statement missing');
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
 includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
 includes(fusionProgressJs, "command: 'progress'", 'progress command shape missing');
