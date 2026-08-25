@@ -4,6 +4,22 @@
 **Domain**: `communication/`
 **WSP Compliance**: WSP 3, 22, 49, 80, 54
 
+## 2026-08-25 - AutoPost/Foundups Mall publisher boundary hardening
+
+**Author**: 0102
+**WSP**: WSP_00, WSP_97, WSP_62
+
+- Removed direct OAuth token/client-secret file loading from `youtube_uploader.py`; all authentication now enters through pinned `youtube_auth.get_authenticated_service(token_index=...)`.
+- Added explicit channel policy, authorized-channel observation and optional channel-ID pinning. `foundups-mall` requires `YT_UPLOAD_CHANNEL_ID_FOUNDUPS_MALL` and fails closed without it.
+- Added `YouTubePublishResult`, video MIME/title/privacy validation, 8 MB resumable upload, optional playlist insertion, subscriber-notification suppression and authoritative result IDs.
+- Added a governed `publish_foundups_media` path that forces unlisted visibility and carries author/manifest references. The authenticated gateway and signature verifier remain separate required modules.
+- Kept `upload_short` return type and public default for existing callers to avoid a hidden behavioral break.
+- Added no-network boundary tests; live credentials were not read and no upload was attempted.
+
+**Verification**: `test_youtube_publisher_boundary.py` plus `youtube_auth/tests/test_oauth_no_silent_fallback.py` passed (9 tests).
+
+---
+
 ## 2026-04-19 - VEO1: Migrate from deprecated google.generativeai to google.genai
 
 **Author**: 0102  
