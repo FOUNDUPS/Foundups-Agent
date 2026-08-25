@@ -1,5 +1,22 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-23] Exact query-replica activation falsification
+
+- Added controller/CLI coverage for inert default, exact clean repository
+  proofs, maintenance-only orchestration, immutable materialization, candidate
+  rollback, stable-route commit/query, no-replace receipts, receipt-path
+  collisions, zero semantic evidence, post-commit failures, interruption, and
+  committed-route finalization.
+- WSP_97 removed a duplicated activation validator and synthetic authority
+  selection, then added fresh workspace-only authority tests. WSP_62 split the
+  sole 66-line new helper; production is 504 lines / 39-line maximum function,
+  tests 460 / 41.
+- Expanded adjacent result: **470 passed / 7 expected host-capability skips**
+  in 50.10 seconds across O:-confined test shards. Repository-drift regressions
+  reject changes after materialization and after the candidate query. No live
+  canonical store, route, replica, owner, or environment changed.
+  (WSP 00/15/22/50/62/84/87/97)
+
 ## [2026-08-23] Maintenance runtime/process-image binding
 
 - Added hostile marker, Python-override, missing/ambiguous/link/unproven/partial

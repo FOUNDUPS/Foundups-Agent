@@ -1,5 +1,27 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-23 - Exact query-replica activation controller
+
+- Added an inert-by-default trusted-host controller and thin CLI composing the
+  existing exact-main maintenance proof, planner, compact materializer, route
+  CAS, supported owner query, replica revalidation, and private no-replace
+  receipt publisher. Maintenance-only proof was separated from owner startup.
+- WSP_97 falsification rejected synthetic authority evidence, duplicated query
+  validation, late committed-state recording, receipt/runtime collisions,
+  configurable or empty canaries, and missing interrupted-commit finalization.
+  The accepted path rereads exact clean workspace state, reuses the shared
+  validator and `route.revalidate()`, requires semantic hits, records commit
+  truth immediately, re-proves exact clean state after materialization and
+  again after the candidate query immediately before commit, and can finalize
+  a receipt-less exact committed route after a fresh stable query.
+- WSP_62 extracted the bounded maintenance process runner, kept the activation
+  module at 506 lines with a 39-line largest function, and kept the expanded
+  483-line test at a 41-line largest helper. Adjacent
+  activation/route/planner/materializer/descriptor/maintenance/acceptance/CLI
+  evidence is **470 passed / 7 expected host-capability skips**. No live Holo
+  route, environment, replica, owner, or canonical store was changed.
+  (WSP 00/15/22/50/62/84/87/97)
+
 ## 2026-08-23 - Maintenance isolated-probe runtime provenance
 
 - A governed exact-current-HEAD Holo retrieval failed closed as

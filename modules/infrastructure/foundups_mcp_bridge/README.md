@@ -30,7 +30,7 @@ valid MCP runtime.
 ## Immutable query replica and owner routing
 
 `reddog_holoindex_query_replica_plan.py` is the read-only trusted-host planner
-for a future activation transaction. It requires a clean exact repository
+for an explicit activation transaction. It requires a clean exact repository
 HEAD and a CURRENT canonical freshness proof, resolves only the selected
 `all-MiniLM-L6-v2` snapshot, and descriptor-hashes that complete model plus the
 exact 22-file query-snapshot set twice. Three enumerations bracket those
@@ -41,10 +41,11 @@ shapes, or observed source mutation fail closed. The materializer revalidates
 the returned expected manifests against any later source change. The planner
 performs no copy, route change, maintenance, owner launch, or activation.
 
-The planner, compact materializer, private route record/CAS store, and crash
-journal are completed layers, not an activation claim. The activation
-controller, secret-free receipt, exact-main materialization, and live
-pre/post-route query proof remain separate gated work.
+The planner, compact materializer, private route record/CAS store, crash
+journal, and inert-by-default activation controller are completed layers. This
+is not a live activation claim: exact-main materialization, route selection,
+and the real pre/post-route semantic proofs occur only under the explicit
+trusted-host `--real` transaction.
 
 `reddog_holoindex_query_route_contract.py`,
 `reddog_holoindex_query_route_store.py`, and the extracted confined
@@ -64,11 +65,29 @@ duplicate-key rejection, bounded descriptor-confined reads, and private
 regular-file/link/path checks. WSP_62 keeps route policy and persistence in
 separate sub-200-line classes.
 
-This layer does not alter the user environment, resolve semantic authority,
-materialize a replica, query an owner, publish an activation receipt, or activate
-the current machine. Those duties remain activation-controller work.
+The route store alone does not alter the user environment, resolve semantic
+authority, materialize a replica, query an owner, publish an activation
+receipt, or activate the current machine. Those duties are composed only by
+the explicit activation controller.
 The high-risk assumptions and fail-closed decision are attached at
 [`docs/clarity/REDDOG_HOLO_QUERY_ROUTE_CONSUMER_ASSUMPTION_AUDIT_20260823.md`](docs/clarity/REDDOG_HOLO_QUERY_ROUTE_CONSUMER_ASSUMPTION_AUDIT_20260823.md).
+
+`reddog_holoindex_query_replica_activation.py` composes the existing
+maintenance-only proof, planner, materializer, route CAS, one-shot query, and
+private JSON publisher. Default invocation is inert. Real mode first proves
+the exact clean repository and a new receipt target, refreshes without starting
+an owner, materializes an absent immutable root, validates a fixed semantic
+canary before commit, and re-proves the exact clean repository both immediately
+after materialization/before route transition and after that canary/immediately
+before commit. It then commits the revision/digest-bound route, repeats the
+canary through normal route-file resolution, and revalidates the replica after
+each query. Authority selection rereads the exact workspace state instead of
+fabricating a receipt. A post-commit failure is reported as
+`COMMITTED_UNVERIFIED`; a committed route whose receipt publication was
+interrupted is finalized on the next identical invocation after a fresh stable
+query and immutable revalidation. No file is overwritten or deleted.
+The separate assumption audit is
+[`docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md`](docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md).
 
 `reddog_holoindex_query_replica.py` can materialize one immutable
 `holoindex_query_replica.v1` generation into a new, disjoint replica-root

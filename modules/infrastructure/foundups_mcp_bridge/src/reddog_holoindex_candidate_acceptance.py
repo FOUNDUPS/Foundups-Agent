@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from holo_index.embedding_space import resolve_sentence_transformer_snapshot
-from holo_index.authority_worktree import resolve_holoindex_authority_root
+from holo_index.authority_worktree import select_holoindex_workspace_authority
 from holo_index.freshness_receipt import freshness_receipt_path
 from holo_index.isolated_collection_snapshot_probe import (
     IsolatedSnapshotProbeError,
@@ -90,7 +90,7 @@ _ACCEPTANCE_SESSION_LOCK = threading.Lock()
 def _candidate_self_selection(repo_root: Path) -> Any:
     """Ignore ambient explicit authority during candidate activation."""
 
-    return resolve_holoindex_authority_root(repo_root, environment={})
+    return select_holoindex_workspace_authority(repo_root)
 
 
 def _activate_supported_wrapper(

@@ -1,16 +1,17 @@
 # RedDog
 
-Version: 0.4.107
+Version: 0.4.108
 
-## Continuous conversation plane
+## Continuous conversation surface
 
-`conversation_plane_policy.js` keeps intent, reasoning depth, and effect ceiling independent; unknown text is `CHAT / FAST / NONE`, and risk never raises effects.
-Chat gets no repository/HoloIndex context or work authority; shared Python/JavaScript vectors run through `npm run test:conversation`.
+`conversation_plane_policy.js` keeps intent, reasoning depth, and effect ceiling independent; unknown text is `CHAT / FAST / NONE`, and risk never raises effects. Chat gets no repository/HoloIndex context or work authority; shared Python/JavaScript vectors run through `npm run test:conversation`.
+Foreground provider turns discard raw history; durable VSIX/PFMall/phone conversation adapters and ChatGPT-like cross-session memory remain missing.
 OpenClaw is the resident 0102 execution/supervision layer and Hermes is bounded. The backend now has a strict zero-authority turn/status/cancel envelope; authenticated service binding and VSIX/PFMall/phone transport adapters remain specified, not implemented.
 
 ## Model-routing authority
 
-RedDog classifies work into `ModelTaskRequirements`; AI Gateway owns catalog
+The resident routing plane represents classified work as
+`ModelTaskRequirements`; AI Gateway owns catalog
 eligibility, measured selection, signed promotion evidence, runtime binding,
 and exact provider topology. A local Nemotron 3.5 Lightning worker may propose
 two compact evaluation panels, but it cannot select production models, serve as
@@ -36,7 +37,9 @@ short-lived verified runtime topology. Each egress requires an explicit
 available-provider inventory and preserves the receipt's exact
 role/provider/model assignments; stale, replayed, unavailable, or retargeted
 bindings stop before network or worker execution. The static roster is used
-only when the operator explicitly allows evaluation fallback.
+only when `reddog.allowEvaluationFallback=true`; the default is false and a
+rejected configured binding can never fall back.
+Evaluation fallback is dialogue-only and cannot plan actions, enqueue OpenClaw work, dispatch, or promote output.
 Every advisory/Fusion provider call re-runs the local runtime-binding query and
 checks `topology_valid_until` at use time immediately before child-process
 egress. A webview-open receipt is display context, not reusable call authority.
@@ -75,8 +78,10 @@ HEAD/root/generation/receipt, and four replica bindings. Consumer reads never re
 
 RedDog rejects untrusted and virtual workspaces. Trusted local files, Git,
 Python, worker threads, and a materialized backend are required.
+The deny-by-default webview CSP permits only the packaged icon, VS Code-theme
+styles, and one fresh nonce-bound script; it admits no network script source.
 
-The VSIX surface is an exact 66 files: every one of the 61 root runtime
+The VSIX surface is an exact 67 files: every one of the 62 root runtime
 JavaScript modules, `start_operations_python_bootstrap.py`, and the public
 `LICENSE`, `README.md`, `package.json`, and `icon.png`. The packaged license
 text must canonically match the repository license authority. Tests, acceptance docs, internal
@@ -280,7 +285,7 @@ NFC, and case-fold only on Windows. Duplicate keys are rejected before capture;
 existing files must also have unique canonical confined identities after the
 regular-file, no-link, and single-link gates. Ignored intersections use the same
 prefix-safe keys, while deleted records are represented without content reads.
-`extension.js` currently measures exactly 8,370 canonical LF lines, below the
+`extension.js` currently measures exactly 8,400 canonical LF lines, at the
 unchanged 8,428-line hard ceiling. `no_growth: true` remains a containment
 boundary, not permission for additional monolith growth.
 
@@ -900,7 +905,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.107)
+## WSP_97 Truth Table (v0.4.108)
 
 | Claim | Status |
 | --- | --- |
@@ -950,6 +955,7 @@ The lead is configurable. Use Cursor settings or workspace/user settings:
 ```json
 {
   "reddog.leadModel": "z-ai/glm-5.2",
+  "reddog.allowEvaluationFallback": false,
   "reddog.panelModels": [
     "deepseek/deepseek-v4-pro",
     "qwen/qwen3.8-max",
@@ -957,6 +963,9 @@ The lead is configurable. Use Cursor settings or workspace/user settings:
   ]
 }
 ```
+
+Enable evaluation fallback only when no runtime binding is configured; any
+invalid, expired, replayed, or provider-incompatible binding stays blocked.
 
 The extension forwards at most seven filtered panel entries; the Python bridge is the canonical six-model runtime cap and uses the seventh only as an overflow sentinel for truthful truncation receipts. RedDog defaults to GLM-5.2 as principal, DeepSeek V4 Pro as adversarial critic, Qwen 3.8 Max as implementation critic, and Kimi K3 as a long-horizon reasoning critic. Kimi K3 uses OpenRouter's explicit `moonshotai/kimi-k3` slug; every direct completion call omits unsupported temperature, records mandatory `max` reasoning, and applies a 4096-token floor because lower budgets did not produce quorum-usable final output in the live compatibility smoke. This covers its default critic call and, only when an explicit direct selection or receipt-backed signed promotion selects K3, the single, principal, and synthesis roles. Review packets distinguish the requested budget from effective direct and per-role budgets. The bridge does not automatically promote K3 to champion, change RedDog defaults, open an OpenClaw execution valve, or dispatch Hermes.
 
@@ -986,6 +995,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.107.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.108.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

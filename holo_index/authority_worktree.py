@@ -154,6 +154,24 @@ def _workspace_selection(
     )
 
 
+def select_holoindex_workspace_authority(
+    workspace_root: Path | str,
+    *,
+    state_reader: Callable[[Path], RepositoryState] = read_repository_state,
+) -> HoloIndexAuthoritySelection:
+    """Select this workspace only after a fresh clean-state proof."""
+
+    workspace = Path(workspace_root).resolve(strict=False)
+    state = state_reader(workspace)
+    if state.head_sha == "unknown":
+        return _failure(
+            workspace, state, WORKSPACE_STATE_UNAVAILABLE, "workspace"
+        )
+    if not state.proven_clean:
+        return _failure(workspace, state, AUTHORITY_ROOT_DIRTY, "workspace")
+    return _workspace_selection(workspace, state)
+
+
 def resolve_holoindex_runtime_root(
     workspace_root: Path | str,
     *,
@@ -286,4 +304,5 @@ __all__ = [
     "authority_selection_matches_target",
     "resolve_holoindex_authority_root",
     "resolve_holoindex_runtime_root",
+    "select_holoindex_workspace_authority",
 ]

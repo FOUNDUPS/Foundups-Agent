@@ -1,5 +1,29 @@
 # RedDog ModLog
 
+## 2026-08-26 - Activation boundary and thin-client security closure (0.4.108)
+
+- Added the inert exact query-replica activation controller and maintenance
+  process dependency to the authenticated backend closure. The closure is
+  **1,383 files** at
+  `6cbff6cc16705a4f0bb3a0ac4334b8c90619ad0b824ee8b5d1078c83a2806ac1`;
+  no live route, replica, environment, or canonical Holo store was changed.
+- Made the static evaluation roster an explicit default-off operator setting.
+  Configured-but-invalid runtime bindings remain fail-closed and cannot fall
+  back. Fresh provider-egress binding now enters the downstream stage policy,
+  where evaluation topology cannot open action planning or enqueue/dispatch.
+  Added a fresh per-panel nonce and deny-by-default webview CSP; inline style
+  remains a documented WSP_62 extraction debt. The candidate gate passes
+  at **8,400** extension lines at the candidate gate's reduced ceiling
+  and unchanged 8,428 temporary exemption.
+- Rebound the authenticated 18-shard contract to aggregate
+  `f9677125899dc75751d3dee59bf1aed50444e5f08adf0b4456b1e7c3a960ab63`.
+  The exact distributable surface is **67 files / 964,953 bytes** under the
+  unchanged 1 MiB cap. The exact-current-main four-worker release passed in
+  **172,357 ms** with no timeout: core 172,282 ms, governed Git 69,958 ms, Git
+  formats/environment 38,885 ms, and bridge/WSP_62 2,678 ms. The staged-index
+  registry is current at **1,577 tests / 267 quarantined**. (WSP
+  00/15/22/50/62/84/87/97)
+
 ## 2026-08-23 - Governed Holo maintenance runtime repair (0.4.107)
 
 - Bound RedDog's exact maintenance dependency directory and actual held

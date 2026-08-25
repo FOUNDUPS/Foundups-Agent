@@ -99,6 +99,14 @@ function assertFallbackPolicy() {
   assert.strictEqual(fallback.modelBindingSource, 'evaluation_config');
   assert.strictEqual(fallback.modelBindingBlocked, true);
   assert.strictEqual(evaluation.modelBindingBlocked, false);
+  const rejected = query.resolveWorker(
+    { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] },
+    query.failureReceipt(true, 'artifact_invalid'),
+    6,
+    { allowEvaluationFallback: true }
+  );
+  assert.strictEqual(rejected.modelBindingSource, 'runtime_binding_rejected');
+  assert.strictEqual(rejected.modelBindingBlocked, true);
 }
 
 async function main() {
@@ -116,14 +124,6 @@ async function main() {
   await assertBindingAgesFailClosed();
 
   assertFallbackPolicy();
-
-  const rejected = query.resolveWorker(
-    { title: 'RedDog', lead: 'fallback/lead', panel: ['fallback/critic'] },
-    query.failureReceipt(true, 'artifact_invalid'),
-    6
-  );
-  assert.strictEqual(rejected.modelBindingSource, 'runtime_binding_rejected');
-  assert.strictEqual(rejected.modelBindingBlocked, true);
 
   const tampered = receipt();
   tampered.principal_model = 'attacker/forged';
