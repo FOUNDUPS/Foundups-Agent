@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-08-26 - Canonical identity contract reconciliation (0.4.108)
+
+- Rebound the executable README/ROADMAP identity assertions to the canonical
+  principal-scoped 0102 Digital Twin and thin-client wording landed by PR
+  #1553. The prior assertion encoded the superseded product sentence and
+  correctly blocked exact-main release validation after the documentation
+  merge. No runtime, HoloIndex, model, worker, or authority behavior changed.
+  The rebound 18-shard aggregate is
+  `969770f05975a4f357e65ca8f9268a54d9107c97728c7539f35f88bd1291602f`;
+  the four-worker release passed 4/4 in **158,071 ms** with no timeout and the
+  exact package remains **67 files / 965,192 bytes** under 1 MiB.
+  (WSP 00/15/22/50/84/97; WSP_15 16/P0 release blocker)
+
 ## 2026-08-26 - Activation boundary and thin-client security closure (0.4.108)
 
 - Added the inert exact query-replica activation controller and maintenance

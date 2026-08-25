@@ -1,5 +1,15 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-26 - Canonical identity grounding repair (0.4.108)
+
+- Updated the exhaustive contract to assert the post-PR-1553 canonical RedDog
+  identity in README and ROADMAP independently. The exact-main release gate
+  exposed the stale pre-alignment sentence; no threshold or production policy
+  was weakened. The rebound 18-shard aggregate is
+  `969770f05975a4f357e65ca8f9268a54d9107c97728c7539f35f88bd1291602f`;
+  contract/fast/package tiers pass, and the final release passed 4/4 in
+  **158,071 ms** with no timeout. (WSP 00/15/22/50/84/97)
+
 ## 2026-08-26 - Activation and webview security falsification (0.4.108)
 
 - Expanded the exact activation/route/planner/materializer/descriptor/

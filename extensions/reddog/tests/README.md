@@ -1,5 +1,13 @@
 # RedDog Extension Tests
 
+## 0.4.108 canonical identity grounding
+
+The exhaustive product-identity assertions bind README and ROADMAP to their
+post-PR-1553 canonical RedDog wording. This closes documentation/contract drift
+without changing runtime behavior or weakening the release gate. The rebound
+aggregate is sha256:969770f...1602f and the final four-worker release passed
+4/4 in 158,071 ms with no timeout.
+
 ## 0.4.108 activation and webview security closure
 
 The expanded activation-controller adjacency is 470 passed / 7 expected
