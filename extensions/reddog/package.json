@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.107",
+  "version": "0.4.108",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -128,6 +128,11 @@
           },
           "description": "Evaluation fallback critic models used only when no receipt-bound production runtime binding is configured. The extension forwards at most seven so Python can prove over-cap truncation."
         },
+        "reddog.allowEvaluationFallback": {
+          "type": "boolean",
+          "default": false,
+          "description": "Explicitly allow the configured evaluation-only lead and critic roster when no production runtime binding is configured. A rejected configured binding always remains blocked."
+        },
         "reddog.enableResidentArchitectSession": {
           "type": "boolean",
           "default": true,
@@ -168,6 +173,11 @@
             "type": "string"
           },
           "description": "Legacy alias for reddog.panelModels. Retained for the 0.4.0 migration with the same seven-item forwarding bound."
+        },
+        "foundupsFusion.allowEvaluationFallback": {
+          "type": "boolean",
+          "default": false,
+          "description": "Legacy alias for reddog.allowEvaluationFallback. Retained for the 0.4.0 migration."
         },
         "foundupsFusion.enableResidentArchitectSession": {
           "type": "boolean",

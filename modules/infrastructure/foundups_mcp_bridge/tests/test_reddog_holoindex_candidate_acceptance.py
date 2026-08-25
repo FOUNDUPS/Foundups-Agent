@@ -64,8 +64,8 @@ def test_activation_ignores_ambient_explicit_authority(monkeypatch, tmp_path: Pa
     monkeypatch.setenv("REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT", str(tmp_path / "foreign"))
     monkeypatch.setattr(
         acceptance,
-        "resolve_holoindex_authority_root",
-        lambda root, **kwargs: observed.update(root=root, **kwargs) or "selection",
+        "select_holoindex_workspace_authority",
+        lambda root: observed.update(root=root) or "selection",
     )
     monkeypatch.setattr(
         acceptance,
@@ -79,7 +79,7 @@ def test_activation_ignores_ambient_explicit_authority(monkeypatch, tmp_path: Pa
     )
     selector = observed["wrapper"]["select_authority"]
     assert selector(tmp_path) == "selection"
-    assert observed["environment"] == {}
+    assert observed["root"] == tmp_path
     assert result == {"ok": True}
 
 def test_default_mode_never_creates_store_or_runs_maintenance(tmp_path: Path) -> None:
@@ -169,7 +169,7 @@ def test_actual_handshake_failure_chain_uses_dependency_runtime_without_optimism
             error=handshake.REFRESH_FAILED_ERROR,
         )
 
-    monkeypatch.setattr(handshake, "_ensure_locked", fail_locked)
+    monkeypatch.setattr(handshake, "_ensure_current_locked", fail_locked)
     dependencies.ensure_operational = handshake.ensure_reddog_holoindex_operational
     result = run_candidate_acceptance(_config(tmp_path), dependencies=dependencies)
 

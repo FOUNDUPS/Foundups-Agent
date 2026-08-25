@@ -203,6 +203,34 @@ def test_fresh_exact_head_receipt_starts_owner_without_refresh(
     assert result.generation_id == _receipt(repo_root, ssd_path).generation_id
 
 
+def test_maintenance_only_current_never_resolves_or_starts_owner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root, ssd_path = tmp_path / "repo", tmp_path / "ssd"
+    repo_root.mkdir()
+    _publish(repo_root, ssd_path)
+    monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
+    monkeypatch.setattr(
+        handshake,
+        "resolve_query_replica_owner_route",
+        Mock(side_effect=AssertionError("route must not resolve")),
+    )
+    owner = Mock(side_effect=AssertionError("owner must not start"))
+    monkeypatch.setattr(
+        handshake.owner_bootstrap, "ensure_reddog_holoindex_owner", owner
+    )
+
+    result = handshake.ensure_reddog_holoindex_current(
+        repo_root=repo_root,
+        requested=True,
+        environ={"HOLOINDEX_SSD_PATH": str(ssd_path)},
+    )
+
+    assert result.ready is True
+    assert result.status == handshake.OPERATIONAL_READY
+    owner.assert_not_called()
+
+
 def test_fresh_receipt_passes_exact_replica_route_to_owner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:

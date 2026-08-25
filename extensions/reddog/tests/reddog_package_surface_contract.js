@@ -68,6 +68,7 @@ const EXPECTED_RUNTIME_FILES = Object.freeze([
   'start_operations_interpreter.js',
   'start_operations_python_bootstrap.py',
   'target_read_path_policy.js',
+  'webview_security.js',
   'worker_prompt_contract.js'
 ]);
 const EXPECTED_PACKAGE_FILES = Object.freeze([

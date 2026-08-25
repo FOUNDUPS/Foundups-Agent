@@ -4,16 +4,33 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const surface = require('./reddog_package_surface_contract');
+require('./test_webview_security');
 
 const pkg = JSON.parse(fs.readFileSync(path.join(surface.extDir, 'package.json'), 'utf8'));
+const extensionSource = fs.readFileSync(path.join(surface.extDir, 'extension.js'), 'utf8');
 
 assert.deepStrictEqual(pkg.capabilities, {
   untrustedWorkspaces: { supported: false },
   virtualWorkspaces: { supported: false }
 });
 assert.strictEqual(pkg.publisher, 'foundups');
-assert.strictEqual(pkg.version, '0.4.107');
+assert.strictEqual(pkg.version, '0.4.108');
 assert.strictEqual(pkg.main, './extension.js');
+for (const key of ['reddog.allowEvaluationFallback',
+  'foundupsFusion.allowEvaluationFallback']) {
+  const setting = pkg.contributes.configuration.properties[key];
+  assert.deepStrictEqual({ type: setting.type, default: setting.default },
+    { type: 'boolean', default: false });
+}
+assert(extensionSource.includes(
+  "allowEvaluationFallback: reddogConfigValue('allowEvaluationFallback', false) === true"
+));
+assert(extensionSource.includes("require('./webview_security')"));
+assert(extensionSource.includes('webviewSecurity.createWebviewSecurity(panel.webview.cspSource)'));
+assert(extensionSource.includes('http-equiv="Content-Security-Policy"'));
+assert(extensionSource.includes('content="${escapedCspPolicy}"'));
+assert(extensionSource.includes('<script nonce="${escapedCspNonce}">'));
+assert(!extensionSource.includes('\n  <script>'));
 assert.deepStrictEqual(pkg.activationEvents, [
   'onCommand:reddog.open',
   'onCommand:foundupsFusion.open',
@@ -27,10 +44,10 @@ assert.deepStrictEqual(
   pkg.activationEvents
 );
 assert.deepStrictEqual(surface.deriveRuntimeFiles(), surface.EXPECTED_RUNTIME_FILES);
-assert.strictEqual(surface.EXPECTED_RUNTIME_FILES.length, 62);
-assert.strictEqual(surface.EXPECTED_PACKAGE_FILES.length, 66);
+assert.strictEqual(surface.EXPECTED_RUNTIME_FILES.length, 63);
+assert.strictEqual(surface.EXPECTED_PACKAGE_FILES.length, 67);
 const packageReceipt = surface.packageSurfaceReceipt(surface.EXPECTED_PACKAGE_FILES);
-assert.strictEqual(packageReceipt.file_count, 66);
+assert.strictEqual(packageReceipt.file_count, 67);
 assert(packageReceipt.raw_bytes > 0);
 assert.strictEqual(packageReceipt.raw_byte_cap, 1024 * 1024);
 assert.strictEqual(packageReceipt.within_cap, true);

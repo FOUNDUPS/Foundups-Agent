@@ -42,6 +42,29 @@ It returns canonical binding plus validated `model` and `snapshots` manifests af
 Links, reparse points, hardlinks, special files, hostile values, or observed mutation fail with stable `QueryReplicaPlanError` codes.
 It holds no post-return lease; materialization revalidates later source changes. It does not copy, maintain, launch, route, or activate.
 
+### `activate_query_replica(...) -> QueryReplicaActivationResult`
+
+Trusted-host controller for one exact-HEAD immutable replica activation. Its
+configuration requires absolute disjoint canonical/replica/runtime paths, one
+exact 40-hex repository HEAD, bounded timeout, and a strict `real` boolean.
+Default `real=False` returns `NOT_REQUESTED` without inspecting or creating
+state.
+
+Real mode proves the clean repository before any route-store creation and
+requires a new receipt target. It then uses `ensure_reddog_holoindex_current`
+without owner startup, the existing planner/materializer, revision+digest route
+CAS, a fixed semantic canary before commit, the same canary through normal
+stable-route resolution after commit, and `QueryReplicaOwnerRoute.revalidate`
+after both queries. Exact clean repository state is reread after materialization
+before route transition and after the candidate query immediately before commit.
+Authority is reread from the exact workspace at each owner
+stability check. The bounded secret-free receipt distinguishes `FAILED`,
+`COMMITTED_UNVERIFIED`, and `PASS`, includes no absolute paths, and never
+overwrites an existing target. A missing receipt for an exact already-committed
+target is safely finalized by a fresh stable query and replica proof;
+conflicting targets fail closed. The controller does not install a user
+environment route, delete generations, or infer authorization.
+
 ### `QueryRouteStore`
 
 Private trusted-host stable route state. `initialize_empty()` no-replace anchors revision 0; `load()` recovers any PREPARED transaction by exact rollback.
@@ -290,6 +313,11 @@ resolve the mandatory `QueryReplicaOwnerRoute`; missing, ambiguous, drifted, or
 uncommitted route state fails as `HOLOINDEX_QUERY_REPLICA_REQUIRED` before
 owner construction. Governed WRE reaches maintenance authority only through
 the explicit exact-SHA authority transaction below.
+
+`ensure_reddog_holoindex_current(...)` is the maintenance-only companion used
+by activation. It proves or refreshes the exact canonical generation but never
+resolves a replica route or starts an owner. Operational preflight calls it
+before the existing owner-start boundary.
 
 The one-shot owner wrapper accepts authority only from the checkout named by
 `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`: a dedicated clean checkout, immutable

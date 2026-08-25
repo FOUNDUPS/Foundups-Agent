@@ -17,6 +17,14 @@ Without a ready runtime binding, the explicit evaluation fallback is:
 - critics: `deepseek/deepseek-v4-pro`, `qwen/qwen3.8-max`,
   `moonshotai/kimi-k3`
 
+This roster is usable only when the operator explicitly sets
+`reddog.allowEvaluationFallback=true`; its default is false. The opt-in applies
+only to an unconfigured runtime. A configured binding that is rejected,
+expired, replayed, or provider-incompatible always blocks.
+An admitted evaluation roster remains no-effect: only a fresh
+`receipt_bound_runtime` egress can open bounded action planning. Evaluation
+output cannot enqueue OpenClaw work, dispatch, or enter production promotion.
+
 The local Nemotron proposer is shadow-only. It returns ordered model IDs;
 AI Gateway supplies providers/roles and admits only evaluation-eligible held-out
 benchmark candidates. No production routing or extension mutation follows from
@@ -270,7 +278,7 @@ Git, Python subprocess, worker-thread, and materialized backend behavior; these
 capability flags are a fail-closed compatibility boundary, not a permission
 grant.
 
-The distributable surface is pinned to 66 files: 62 runtime files derived from
+The distributable surface is pinned to 67 files: 63 runtime files derived from
 the static relative-require closure plus the two dynamic workers and Python
 bootstrap, and four public metadata/assets (`LICENSE`, `README.md`, `package.json`,
 `icon.png`). The packaged license text must canonically match the repository
@@ -283,6 +291,12 @@ The listed regular-file closure is additionally capped at 1 MiB raw and emits
 `reddog_package_surface_receipt.v1` (`file_count`, `raw_bytes`,
 `raw_byte_cap`, `within_cap`). This is not a final compressed-VSIX size claim;
 archive size is verified when the release artifact is actually built.
+
+`renderHtml()` receives `webview.cspSource` plus a fresh 128-bit nonce created
+for each panel. Its deny-by-default CSP admits the packaged icon, inline
+VS Code-theme CSS, and only the nonce-bearing inline script. The webview has no
+network or arbitrary script source. Inline CSS remains an explicit bounded
+compatibility exception pending the WSP_62 UI extraction.
 
 `governed_git_executable.js` is the sole production Git process authority.
 Its internal binding retains canonical absolute paths solely for invocation and

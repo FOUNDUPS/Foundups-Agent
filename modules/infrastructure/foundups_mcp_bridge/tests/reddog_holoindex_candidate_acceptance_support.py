@@ -68,6 +68,7 @@ def _activation_result(tmp_path: Path) -> dict[str, object]:
         "workspace_overlay_present": False,
         "semantic_evidence_authority": "clean_workspace_head",
         "no_authority_worktree_mutation_performed": True,
+        "no_reindex": True,
         "owner_attempts": 1,
         "owner_retry_performed": False,
         "owner_retry_reason": "",

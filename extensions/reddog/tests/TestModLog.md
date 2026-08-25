@@ -1,5 +1,19 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-26 - Activation and webview security falsification (0.4.108)
+
+- Expanded the exact activation/route/planner/materializer/descriptor/
+  maintenance/acceptance/authority/CLI suite to **470 passed / 7 expected
+  host-capability skips** with TEMP/TMP/base temp confined to O:.
+- Added default-off evaluation-fallback and webview CSP/nonce contracts, then
+  rebound the exact **1,383-file** backend closure and 18-shard source identity.
+  The 14-member fast tier now executes the behavioral no-effect evaluation
+  topology gate. The exact package is **67 files / 964,953 bytes** under 1 MiB. No live Holo
+  authority or consumer state was changed. The final release passed 4/4 in
+  **172,357 ms** with no worker or release timeout; the canonical staged-index
+  registry is current at **1,577 tests / 267 quarantined**. (WSP
+  00/15/22/50/62/97)
+
 ## 2026-08-23 - Governed Holo maintenance release closure (0.4.107)
 
 - Added strict launcher/session/child runtime-provenance tests and refreshed the

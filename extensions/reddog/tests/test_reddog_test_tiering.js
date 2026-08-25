@@ -29,6 +29,8 @@ assert.strictEqual(plan.RELEASE_CEILING_MS, 420000);
 assert(plan.RELEASE_GROUPS.length <= plan.RELEASE_WORKER_CAP);
 assert(!plan.FAST_TESTS.includes('verify_extension_contract.js'),
   'default tier must not silently run promotion');
+assert(plan.FAST_TESTS.includes('test_progressive_execution_stage.js'),
+  'default tier must prove evaluation topology cannot open action planning');
 assert(!plan.releaseTests().includes('./test_reddog_candidate_wsp62'),
   'candidate-only WSP 62 proof must not enter committed-main release closure');
 

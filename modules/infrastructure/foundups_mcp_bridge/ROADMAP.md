@@ -1,5 +1,30 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-23: Exact query-replica activation controller
+
+**Implemented locally and WSP_62-bounded; live activation remains an explicit
+post-merge operation.** The inert-by-default controller composes the existing
+maintenance-only proof, planner, compact materializer, route CAS, supported
+one-shot owner query, replica revalidation, and no-replace private receipt
+publisher. Its canary is fixed and must return real semantic evidence. Clean
+exact repository state is reread, not synthesized, before and during owner
+admission, after materialization before route transition, and again after the
+candidate query immediately before commit.
+
+Candidate query or replica drift rolls back to the exact predecessor.
+Post-commit failures remain `COMMITTED_UNVERIFIED`; an interrupted receipt can
+be finalized on the next identical invocation by resolving the committed
+route, running one fresh stable-route canary, and revalidating every retained
+artifact. Receipt, journal, lock, route, and quarantine collisions reject
+before mutation. The controller installs no environment variable and deletes
+nothing. Expanded adjacent evidence is 470 passed / 7 host-capability skips.
+
+Remaining operational gates: merge, rebuild canonical Holo state at that exact
+main SHA, choose a new immutable replica root, run the explicit CLI once,
+independently verify the receipt/route/replica, install the stable route pointer
+through the governed activation path, restart consumers, and prove a real owner
+query leaves every replica digest unchanged.
+
 ## 2026-08-23: Maintenance isolated-probe runtime provenance
 
 **Implemented locally; exact-main maintenance replay remains required after
@@ -36,12 +61,11 @@ an exact terminal-journal digest. `PREPARED` fails pending and only an explicit
 activation/controller load may perform rollback recovery. This closes
 journal-loss promotion without giving query paths publication authority.
 
-The activation controller remains the next layer. Its post-selection child
-must avoid recursively taking the held activation lock: it will receive the
-exact selected candidate root explicitly while the controller proves the route
-record before and after that query. Normal committed consumers use the stable
-route file. Existing processes still require restart after the one-time user-
-environment pointer is installed.
+The activation controller is now the adjacent implemented layer. Its candidate
+query receives the already verified route directly and therefore does not
+re-enter the route lock; the post-commit query uses the stable route file.
+Existing processes still require restart after the separately governed
+one-time user-environment pointer is installed.
 
 ## 2026-08-23: Private route CAS and crash-recovery layer
 

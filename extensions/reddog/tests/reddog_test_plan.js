@@ -22,6 +22,7 @@ const FAST_TESTS = Object.freeze([
   'test_bridge_python_environment.js',
   'test_conversation_plane_policy.js',
   'test_conversational_draft_policy.js',
+  'test_progressive_execution_stage.js',
   'test_authoritative_work_state_query.js',
   'test_backend_compatibility_contract.js',
   'test_backend_compatibility_async.js',

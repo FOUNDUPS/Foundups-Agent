@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.107 resident architect thin-client surface.
+Phase: RedDog 0.4.108 resident architect thin-client surface.
 
 Current implementation:
 
@@ -122,7 +122,7 @@ Current implementation:
   Capacity is already P1 debt rather than permission to widen gates: the
   candidate backend occupies 1,381/1,400 files (19-file headroom), its generated
   manifest occupies 309,370/327,680 bytes (18,310-byte headroom), and the
-  package surface occupies 66 files / 961,130 bytes under its unchanged 1 MiB
+  package surface occupies 67 files / 964,953 bytes under its unchanged 1 MiB
   ceiling (87,446-byte headroom). The isolated frozen-source release passed all
   four groups in 288.505 seconds without a timeout; governed Git finished
   111.605 seconds below the unchanged 400-second child ceiling. A separate run
@@ -374,13 +374,13 @@ P2/P3 (historical label at snapshot time)
 
 - **Owner:** RedDog Maintainers.
 - **Temporary exemption expiry:** 2026-09-30 (2026-Q3 technical-architect review).
-- **Current boundary:** `extension.js` is a measured 8,370-canonical-LF-line legacy thin-client integration file, below its temporary 8,428-line threshold. `no_growth: true` is a hard containment ceiling, not permission to grow. Conversation intent/depth/effect policy now lives in `conversation_plane_policy.js`; generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`. This measurement does not assert that every inherited touched function is within the ordinary WSP_62 function limit; `callFusion` retains its exact temporary exemption.
+- **Current boundary:** `extension.js` is a measured 8,400-canonical-LF-line legacy thin-client integration file, at the candidate gate's reduced ceiling and below the temporary 8,428-line exemption. `no_growth: true` is a hard containment ceiling, not permission to grow. Conversation intent/depth/effect policy now lives in `conversation_plane_policy.js`; generation-bound HoloIndex logic remains in its focused module, repository-audit receipt projection lives in `repo_audit_grounding.js`, and webview CSP/nonce construction lives in `webview_security.js`. This measurement does not assert that every inherited touched function is within the ordinary WSP_62 function limit; `callFusion` retains its exact temporary exemption.
 - **Holo lifecycle extraction:** generation/receipt admission, bundle projection,
   configured-interpreter provenance, and owned child lifecycle are separate
   runtime modules below 400 physical lines. Interpreter SHA-256 proof streams
   64 KiB descriptor chunks on a worker thread; the 256 MiB acceptance ceiling
   is unchanged and no whole-file executable allocation remains. The closed
-  package surface is consequently 66 files (62 runtime plus 4 public files,
+  package surface is consequently 67 files (63 runtime plus 4 public files,
   including the repository-authoritative license).
 - **Remediation:** extract model configuration plus stdin bridge invocation first, then UI rendering, retrieval/context assembly, and governed work-order receipt composition into separately tested JavaScript modules of at most 400 lines.
 - **Parity gate:** retain the focused Fusion panel ingress/payload contract and exhaustive extension contract across each extraction; preserve no-network, stdin-only model payloads and review-packet truth.

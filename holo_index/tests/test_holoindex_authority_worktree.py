@@ -13,6 +13,7 @@ from holo_index.authority_worktree import (
     authority_selection_matches_target,
     resolve_holoindex_authority_root,
     resolve_holoindex_runtime_root,
+    select_holoindex_workspace_authority,
 )
 from holo_index.repository_state import RepositoryState, repository_root_digest
 
@@ -94,6 +95,34 @@ def test_existing_deterministic_sibling_is_selected(tmp_path: Path) -> None:
     assert result.accepted is True
     assert result.selected_root == authority
     assert result.source == "deterministic_sibling"
+
+
+def test_workspace_only_selector_ignores_existing_sibling(tmp_path: Path) -> None:
+    workspace, _authority = _roots(tmp_path)
+
+    result = select_holoindex_workspace_authority(
+        workspace, state_reader=lambda _path: _state()
+    )
+
+    assert result.accepted is True
+    assert result.selected_root == workspace
+    assert result.source == "workspace"
+
+
+def test_workspace_only_selector_refreshes_dirty_state(tmp_path: Path) -> None:
+    workspace, _authority = _roots(tmp_path)
+    states = iter((_state(), _state(clean=False)))
+
+    first = select_holoindex_workspace_authority(
+        workspace, state_reader=lambda _path: next(states)
+    )
+    second = select_holoindex_workspace_authority(
+        workspace, state_reader=lambda _path: next(states)
+    )
+
+    assert first.accepted is True
+    assert second.accepted is False
+    assert second.error == AUTHORITY_ROOT_DIRTY
 
 
 def test_configured_invalid_path_fails_without_workspace_fallback(

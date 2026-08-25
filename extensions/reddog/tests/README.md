@@ -1,5 +1,19 @@
 # RedDog Extension Tests
 
+## 0.4.108 activation and webview security closure
+
+The expanded activation-controller adjacency is 470 passed / 7 expected
+host-capability skips with all pytest runtime confined to O:. The extension
+contract proves default-off evaluation fallback, configured-binding failure
+closure, a fresh nonce-bound deny-by-default webview CSP, the authenticated
+1,383-file backend closure, and the exact 67-file / 964,953-byte package
+surface. The exact-current-main four-worker release passes in 172,357 ms without timeout. No test
+mutates a live Holo route, replica, environment, or store. The canonical
+staged-index registry is current at 1,577 tests / 267 quarantined.
+The 14-member fast tier includes the behavioral progressive-stage regression:
+evaluation topology cannot open action planning even when bounded execution is
+configured, while only `receipt_bound_runtime` can satisfy that gate.
+
 ## 0.4.107 governed Holo maintenance runtime provenance
 
 The maintenance launch contract proves one exact virtualenv site-packages
@@ -90,7 +104,7 @@ exactly equal to Git's complete changed/new RedDog JavaScript surface; existing
 over-limit functions may only remain when the exact named/ordered baseline
 function did not grow. The former 475-line Start Operations test is now below
 400 content lines with cohesive fixtures in a 91-line helper. Package tests
-require the exact 66-file surface (62 runtime files and four public files),
+require the exact 67-file surface (63 runtime files and four public files),
 including license text canonically matching the repository authority.
 
 **Reuse rule (WSP 50):** Before adding tests, read `fixtures.js`, `TestModLog.md` TEST_REGISTRY, and `verify_extension_contract.js`. Extend existing fixtures and assertions; do not duplicate prompt strings or EXT-ACC probes.
@@ -292,8 +306,9 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_backend_compatibility_preflight.js` | Pinned manifest, runtime dependency-closure integrity, intermediate junction rejection, WSP_62 ceilings, canonical containment, and content-free failure contracts |
 | `test_backend_compatibility_contract.js` | Independent executable roots, closure sentinels, pinned digest, runtime gate ordering, and allowlisted block projection |
 | `test_backend_compatibility_async.js` | Worker-thread preflight, event-loop availability, and fail-closed invalid-root behavior |
-| `test_package_manifest.js` | Static VS Code capability, publisher/version/main/activation, exact ignore policy, and complete 62-file runtime closure |
-| `test_package_surface.js` | Two stable installed-VSCE listings equal the exact 66-file distributable surface and its raw regular-file closure stays within 1 MiB; release/package tier only |
+| `test_package_manifest.js` | Static VS Code capability, publisher/version/main/activation, explicit default-off evaluation fallback, CSP wiring, exact ignore policy, and complete 63-file runtime closure |
+| `test_package_surface.js` | Two stable installed-VSCE listings equal the exact 67-file distributable surface and its raw regular-file closure stays within 1 MiB; release/package tier only |
+| `test_webview_security.js` | Fresh nonce creation, deny-by-default CSP policy, immutable return value, and hostile source/nonce rejection |
 | `reddog_package_surface_contract.js` | Pinned runtime/package sets, static relative-require traversal, dynamic-worker roots, and shell-free installed-VSCE adapter |
 | `test_authoritative_work_state_query.js` | Local authoritative-work classification, bridge failure handling, and no-Fusion routing |
 | `test_foundup_work_grounding.js` | Canonical registry identity resolution, evidence derivation, runtime binding, WSP 62, failure closure, and non-authority receipt |

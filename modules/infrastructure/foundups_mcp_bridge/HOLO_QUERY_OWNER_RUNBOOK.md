@@ -118,10 +118,13 @@ split storage argv, and removal of ambient `HOLOINDEX_SSD_PATH`. Context entry
 uses the same `start()` gate: configured synthetic routes work and absent routes
 fail with `HOLOINDEX_QUERY_REPLICA_REQUIRED` before spawn.
 
-This slice does not yet wire one-shot owner query `_owner_attempt`, maintenance
-`_start_owner`, or promotion `_run_locked_promotion` to construct and pass the
-route, and performed no live materialization or owner launch. Those three paths
-fail closed and ChatGPT-app MCP readiness is not established.
+One-shot owner query `_owner_attempt`, maintenance `_start_owner`, and
+promotion `_run_locked_promotion` now consume the same verified route
+capability. The separate trusted-host activation controller can construct that
+route only under explicit real mode, with a fixed semantic canary before and
+after commit and a no-replace receipt. This source transaction has not itself
+performed a live materialization or installed a user environment pointer;
+ChatGPT-app MCP readiness remains a separate transport concern.
 
 For a linked-worktree caller, repository bytes still come from the selected
 clean same-HEAD authority checkout. Runtime dependencies come from the primary

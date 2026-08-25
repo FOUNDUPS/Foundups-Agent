@@ -34,6 +34,7 @@ const conversationHistoryPolicy = require('./conversation_history_policy');
 const authoritativeWorkStateQuery = require('./authoritative_work_state_query');
 const conversationalDraftPolicy = require('./conversational_draft_policy');
 const conversationPlanePolicy = require('./conversation_plane_policy');
+const webviewSecurity = require('./webview_security');
 const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const startOperationsAdapter = require('./start_operations_extension_adapter');
@@ -58,11 +59,12 @@ const conversationPlaneRouting = conversationPlanePolicy.createRouting({
   cleanContextMode, cleanEffort, cleanMode, cleanWorkerType,
   authoritativeWorkStateQuery
 });
-const EXTENSION_VERSION = '0.4.107';
+const EXTENSION_VERSION = '0.4.108';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
 const REDDOG_LEGACY_CONFIG_NAMESPACE = 'foundupsFusion';
+const MODEL_RUNTIME_BINDING_EGRESS = Symbol('reddog.model_runtime_binding_egress');
 const REDDOG_BACKEND_CLIENT = Object.freeze({ extensionId: REDDOG_EXTENSION_ID, legacyExtensionId: REDDOG_LEGACY_EXTENSION_ID, extensionVersion: EXTENSION_VERSION, backendApiVersion: backendCompatibility.BACKEND_API_VERSION, buildInstallStateSection: (state) => backendCompatibilityRender.buildInstallStateSection(state, REDDOG_BACKEND_CLIENT) });
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_SNIPPET_MAX_FILE_BYTES = 500000;
@@ -4846,11 +4848,12 @@ function isSubstantiveRedDogWorker(workerType) {
   return worker === 'reddog_architect' || worker === 'wsp_gate_critic' || worker === 'repair_planner';
 }
 
-function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker, promptConstruction, holoScorecard, workTrail, unicodeMeta) {
+function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker, promptConstruction, holoScorecard, workTrail, unicodeMeta, bindingMetadata) {
   const base = reviewPacket && typeof reviewPacket === 'object' ? reviewPacket : {};
   const construction = promptConstruction && typeof promptConstruction === 'object' ? promptConstruction : {};
   const providerReport = resolveProviderReasoningReport(resolvedEffort);
   const unicode = unicodeMeta && typeof unicodeMeta === 'object' ? unicodeMeta : emptyUnicodeNormalizationMeta();
+  const binding = bindingMetadata && typeof bindingMetadata === 'object' ? bindingMetadata : modelRuntimeBindingQuery.metadata(worker);
   return Object.assign({}, base, {
     task_classification: classification,
     conversation_plane_decision: classification && classification.conversationPlane,
@@ -4860,7 +4863,7 @@ function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort
     resolved_context: resolvedContextMode,
     principal_model: worker && worker.lead ? worker.lead : undefined,
     panel_models: worker && Array.isArray(worker.panel) ? worker.panel : undefined,
-    ...modelRuntimeBindingQuery.metadata(worker),
+    ...binding,
     mode_selection_reasoning: modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode),
     work_focus_digest: construction.work_focus_digest,
     wsp_prompt_digest: construction.wsp_prompt_digest,
@@ -4995,7 +4998,11 @@ async function openFusionEditor(context, installState) {
     killBridgeChild(state);
     if (state.holoRecoveryTimer) clearTimeout(state.holoRecoveryTimer);
   });
-  panel.webview.html = renderHtml(worker, 'editor', logoUri.toString(), state.installState);
+  const security = webviewSecurity.createWebviewSecurity(panel.webview.cspSource);
+  panel.webview.html = renderHtml(
+    worker, 'editor', logoUri.toString(), state.installState,
+    security
+  );
 }
 
 const workspaceRoot = () => backendCompatibility.workspaceRoot(vscode, process.cwd());
@@ -5024,7 +5031,12 @@ const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.r
   workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: (env) => buildBridgePythonEnv(env, 'authoritative_work_state'), scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
 });
 const runModelRuntimeBindingQueryBridge = () => modelRuntimeBindingQuery.runConfiguredQuery({ workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: (env) => buildBridgePythonEnv(env, 'model_runtime_binding'), scriptPath: (root) => path.join(root, REDDOG_MODEL_RUNTIME_BINDING_QUERY_SCRIPT) });
-const resolveCurrentFusionWorker = (query) => modelRuntimeBindingQuery.resolveConfiguredWorker({ query: query || runModelRuntimeBindingQueryBridge }, fusionWorkerFromConfig(), FUSION_PANEL_RUNTIME_LIMIT);
+const resolveCurrentFusionWorker = (query) => modelRuntimeBindingQuery.resolveConfiguredWorker(
+  { query: query || runModelRuntimeBindingQueryBridge },
+  fusionWorkerFromConfig(),
+  FUSION_PANEL_RUNTIME_LIMIT,
+  { allowEvaluationFallback: reddogConfigValue('allowEvaluationFallback', false) === true }
+);
 const runLocalDiagnosticQuery = (name, worker) => { const root = workspaceRoot(); return localDiagnosticRouter.run(name, { root, worker, interpreterPath: resolvePythonInterpreter(root, reddogConfigValue('pythonPath', 'python')).path, env: buildBridgePythonEnv(process.env, 'default') }); };
 
 function fusionWorkerFromConfig() {
@@ -5274,12 +5286,13 @@ function progressiveActionStageEnabled() {
   );
 }
 
-function progressiveStageForRuntime(runtimeConsumptionGate) {
+function progressiveStageForRuntime(runtimeConsumptionGate, bindingMetadata) {
   const configured = configuredProgressiveExecutionStage();
+  const actionRuntimeReady = progressiveExecutionStage.runtimeBindingAllowsActionPlanning(bindingMetadata);
   return {
     configured,
     receipt: progressiveExecutionStage.project(
-      configured, runtimeConsumptionGate.passed === true
+      configured, runtimeConsumptionGate.passed === true && actionRuntimeReady
     )
   };
 }
@@ -5290,7 +5303,7 @@ function residentSessionStagePolicy(runtimeGate, progressiveStage, classificatio
     || classification.readonlyAuditRequested === true;
   return {
     actionPlanningAllowed: available
-      && progressiveExecutionStage.allowsActionPlanning(progressiveStage.configured),
+      && progressiveStage.receipt.action_planning_ceiling_open === true,
     readonlyAuditPlanningAllowed: available
       && progressiveStage.configured === progressiveExecutionStage.AUDIT
       && classification.readonlyAuditRequested === true,
@@ -5717,7 +5730,7 @@ function wireFusionWebview(context, webview, worker, state) {
       runtimeConsumptionGate,
       await currentBackendCompatibility()
     );
-    const progressiveStage = progressiveStageForRuntime(runtimeConsumptionGate);
+    const egressBinding = result[MODEL_RUNTIME_BINDING_EGRESS] || {}; const progressiveStage = progressiveStageForRuntime(runtimeConsumptionGate, egressBinding);
     const sessionPolicy = residentSessionStagePolicy(
       runtimeConsumptionGate, progressiveStage, classification, recoveryContext
     );
@@ -5783,7 +5796,8 @@ function wireFusionWebview(context, webview, worker, state) {
       promptConstruction,
       holoScorecard,
       workTrail,
-      unicodeMeta
+      unicodeMeta,
+      egressBinding
     );
     attachRuntimePolicy(result, runtimeConsumptionGate, progressiveStage.receipt);
     result.review_packet.fusion_progress_receipts = fusionProgressReceipts;
@@ -5998,7 +6012,10 @@ async function callFusion(context, worker, prompt, boundedContext, systemPrompt,
       if (state) {
         state.bridgeChild = null;
       }
-      resolve(result);
+      const value = result && typeof result === 'object' ? result : {};
+      value[MODEL_RUNTIME_BINDING_EGRESS] = modelRuntimeBindingQuery.metadata(worker);
+      value.review_packet = Object.assign({}, value.review_packet || {}, value[MODEL_RUNTIME_BINDING_EGRESS]);
+      resolve(value);
     }
 
     const child = cp.spawn(interpreter.path, [script], {
@@ -7782,18 +7799,21 @@ function reddogTrailWebviewBootstrapJson() {
   });
 }
 
-function renderHtml(worker, surface, logoUri, installState) {
+function renderHtml(worker, surface, logoUri, installState, security) {
   const escapedTitle = escapeHtml(worker.title);
   const escapedLead = escapeHtml(worker.lead);
   const escapedPanel = escapeHtml(worker.panel.join(' + '));
   const escapedSurface = escapeHtml(surface);
   const escapedLogoUri = escapeHtml(logoUri || '');
+  const escapedCspPolicy = escapeHtml(security && security.policy || '');
+  const escapedCspNonce = escapeHtml(security && security.nonce || '');
   const state = installState && typeof installState === 'object' ? installState : {};
   const escapedInstall = escapeHtml(backendCompatibility.installStatusMessage(state));
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="${escapedCspPolicy}">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapedTitle}</title>
   <style>
@@ -7868,7 +7888,7 @@ function renderHtml(worker, surface, logoUri, installState) {
       <div class="hint">Enter sends. Shift+Enter adds a new line. Ctrl+Shift+C copies the redacted review packet.</div>
     </form>
   </div>
-  <script>
+  <script nonce="${escapedCspNonce}">
     const vscode = acquireVsCodeApi();
     const TRAIL = ${reddogTrailWebviewBootstrapJson()};
     const form = document.getElementById('form');

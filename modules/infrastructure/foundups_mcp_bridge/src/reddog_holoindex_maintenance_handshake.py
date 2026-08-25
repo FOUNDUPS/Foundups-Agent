@@ -10,11 +10,10 @@ from __future__ import annotations
 import json
 import os
 import re
-import signal
 import subprocess
 import sys
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
 
@@ -46,6 +45,11 @@ from .reddog_holoindex_process_image import (
     ProcessExecutableProofError,
     hold_process_executable_for_launch,
 )
+from .reddog_holoindex_maintenance_process import (
+    REFRESH_CAPTURE_CLEANUP_SECONDS,
+    REFRESH_STDOUT_MAX_BYTES,
+    bounded_refresh_runner,
+)
 from .reddog_sealed_holo_runtime import (
     sealed_holo_command,
     sealed_runtime_required,
@@ -72,10 +76,9 @@ FINAL_SNAPSHOT_PROBE_FAILED_ERROR = "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_F
 REPOSITORY_CHANGED_ERROR = "HOLOINDEX_MAINTENANCE_REPOSITORY_CHANGED"
 TIMEOUT_INVALID_ERROR = "HOLOINDEX_MAINTENANCE_TIMEOUT_INVALID"
 _HANDSHAKE_LOCK = threading.Lock()
-_REFRESH_STDOUT_MAX_BYTES = 16 * 1024
+_REFRESH_STDOUT_MAX_BYTES = REFRESH_STDOUT_MAX_BYTES
 _REFRESH_STDOUT_LINE_MAX_BYTES = 4 * 1024
-_REFRESH_STDOUT_CHUNK_BYTES = 4096
-_REFRESH_CAPTURE_CLEANUP_SECONDS = 1.0
+_REFRESH_CAPTURE_CLEANUP_SECONDS = REFRESH_CAPTURE_CLEANUP_SECONDS
 _STABLE_MAINTENANCE_ERROR_PATTERN = re.compile(r"HOLOINDEX_[A-Z0-9_]{1,96}\Z")
 _STABLE_MAINTENANCE_ERRORS = frozenset(
     "HOLOINDEX_" + suffix for suffix in """BASE_FRESHNESS_RECEIPT_BINDING_MISMATCH BASE_FRESHNESS_RECEIPT_INVALID
@@ -100,115 +103,7 @@ class RedDogHoloIndexOperationalResult:
     freshness_reasons: tuple[str, ...] = ()
 
 
-@dataclass
-class _BoundedRefreshCapture:
-    """Bounded secret-bearing output retained only for local parsing."""
-    stdout: bytearray = field(default_factory=bytearray)
-    oversized: bool = False
-    read_failed: bool = False
-
-
-@dataclass(frozen=True)
-class _BoundedRefreshResult:
-    returncode: int
-    stdout: bytes
-    output_oversized: bool = False
-    output_read_failed: bool = False
-
-
-def _drain_refresh_stdout(stream, capture: _BoundedRefreshCapture) -> None:
-    try:
-        while True:
-            chunk = stream.read(_REFRESH_STDOUT_CHUNK_BYTES)
-            if not chunk:
-                return
-            remaining = _REFRESH_STDOUT_MAX_BYTES - len(capture.stdout)
-            if remaining > 0:
-                capture.stdout.extend(chunk[:remaining])
-            if len(chunk) > remaining:
-                capture.oversized = True
-    except (OSError, ValueError):
-        capture.read_failed = True
-    finally:
-        try:
-            stream.close()
-        except (OSError, ValueError):
-            pass
-
-
-def _terminate_refresh_tree(process) -> None:
-    """Boundedly terminate only the exact refresh PID and its descendants."""
-    if process.poll() is not None:
-        return
-    if os.name == "nt":
-        try:
-            subprocess.run(
-                ["taskkill", "/PID", str(int(process.pid)), "/T", "/F"],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                shell=False,
-                timeout=_REFRESH_CAPTURE_CLEANUP_SECONDS,
-                check=False,
-            )
-        except (OSError, subprocess.SubprocessError, ValueError):
-            pass
-    else:
-        try:
-            os.killpg(int(process.pid), signal.SIGKILL)
-        except (OSError, ProcessLookupError, ValueError):
-            pass
-    if process.poll() is None:
-        try:
-            process.kill()
-        except OSError:
-            pass
-    try:
-        process.wait(timeout=_REFRESH_CAPTURE_CLEANUP_SECONDS)
-    except subprocess.TimeoutExpired:
-        pass
-
-
-def _bounded_refresh_runner(command, **kwargs) -> _BoundedRefreshResult:
-    """Run one child with bounded memory/time and no stderr or disk capture."""
-    timeout = float(kwargs.pop("timeout"))
-    kwargs.pop("check", None)
-    if kwargs.get("stdout") is not subprocess.PIPE:
-        raise ValueError("bounded refresh requires stdout=PIPE")
-    kwargs["bufsize"] = 0
-    if os.name == "nt":
-        kwargs["creationflags"] = int(kwargs.get("creationflags", 0)) | int(
-            subprocess.CREATE_NEW_PROCESS_GROUP
-        )
-    else:
-        kwargs["start_new_session"] = True
-    process = subprocess.Popen(command, **kwargs)
-    if process.stdout is None:
-        _terminate_refresh_tree(process)
-        raise OSError("bounded refresh stdout unavailable")
-    capture = _BoundedRefreshCapture()
-    reader = threading.Thread(
-        target=_drain_refresh_stdout,
-        args=(process.stdout, capture),
-        name="reddog-holo-refresh-output",
-        daemon=True,
-    )
-    reader.start()
-    try:
-        returncode = process.wait(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        _terminate_refresh_tree(process)
-        reader.join(timeout=_REFRESH_CAPTURE_CLEANUP_SECONDS)
-        raise
-    reader.join(timeout=_REFRESH_CAPTURE_CLEANUP_SECONDS)
-    if reader.is_alive():
-        capture.read_failed = True
-    return _BoundedRefreshResult(
-        returncode=returncode,
-        stdout=bytes(capture.stdout),
-        output_oversized=capture.oversized,
-        output_read_failed=capture.read_failed or reader.is_alive(),
-    )
+_bounded_refresh_runner = bounded_refresh_runner
 
 def _unique_json_object(pairs) -> dict:
     payload: dict = {}
@@ -417,15 +312,10 @@ def _start_owner(
     repo_root: Path,
     owner_runtime_root: Path | str | None,
     ssd_path: Path,
-    refreshed: bool,
     state: RepositoryState,
-    receipt: HoloIndexFreshnessReceipt,
+    current: RedDogHoloIndexOperationalResult,
     environ: Mapping[str, str],
 ) -> RedDogHoloIndexOperationalResult:
-    binding = generation_binding_from_receipt(
-        receipt,
-        receipt_path=freshness_receipt_path(ssd_path),
-    )
     try:
         route = resolve_query_replica_owner_route(
             canonical_repo_root=repo_root,
@@ -438,17 +328,17 @@ def _start_owner(
         repo_root=repo_root,
         runtime_root=owner_runtime_root,
         requested=True,
-        expected_repo_head_sha=state.head_sha,
-        expected_generation_id=receipt.generation_id,
-        expected_receipt_digest=str(binding["freshness_receipt_digest"]),
+        expected_repo_head_sha=current.repo_head_sha,
+        expected_generation_id=current.generation_id,
+        expected_receipt_digest=current.freshness_receipt_digest,
         query_replica_route=route,
     )
     if not owner.ready:
         return _failure(owner.error or owner_bootstrap.BOOTSTRAP_FAILED_ERROR, state=state)
-    return _ready_result(refreshed=refreshed, state=state, receipt=receipt)
+    return current
 
 
-def _refresh_and_start_owner(
+def _refresh_current_generation(
     *,
     repo_root: Path,
     owner_runtime_root: Path | str | None,
@@ -484,18 +374,12 @@ def _refresh_and_start_owner(
             state=final_state,
             reasons=final_reasons,
         )
-    return _start_owner(
-        repo_root=repo_root,
-        owner_runtime_root=owner_runtime_root,
-        ssd_path=ssd_path,
-        refreshed=True,
-        state=final_state,
-        receipt=receipt,
-        environ=environ,
+    return _ready_result(
+        refreshed=True, state=final_state, receipt=receipt,
     )
 
 
-def _ensure_locked(
+def _ensure_current_locked(
     *,
     repo_root: Path,
     owner_runtime_root: Path | str | None,
@@ -514,15 +398,7 @@ def _ensure_locked(
         state=state,
     )
     if receipt is not None and not reasons:
-        return _start_owner(
-            repo_root=repo_root,
-            owner_runtime_root=owner_runtime_root,
-            ssd_path=ssd_path,
-            refreshed=False,
-            state=state,
-            receipt=receipt,
-            environ=environ,
-        )
+        return _ready_result(refreshed=False, state=state, receipt=receipt)
     if not auto_maintenance:
         return _failure(MAINTENANCE_REQUIRED_ERROR, state=state, reasons=reasons)
     if environ.get(SERVICE_URL_ENV) or environ.get(SERVICE_TOKEN_ENV):
@@ -530,7 +406,7 @@ def _ensure_locked(
     timeout, timeout_error = _timeout_seconds(environ, timeout_seconds)
     if timeout_error:
         return _failure(timeout_error, state=state, reasons=reasons)
-    return _refresh_and_start_owner(
+    return _refresh_current_generation(
         repo_root=repo_root,
         owner_runtime_root=owner_runtime_root,
         ssd_path=ssd_path,
@@ -540,6 +416,55 @@ def _ensure_locked(
         initial_state=state,
         initial_reasons=reasons,
     )
+
+
+def _settings(
+    *,
+    repo_root: Path | str,
+    owner_runtime_root: Path | str | None,
+    auto_maintenance: bool | None,
+    environ: Mapping[str, str] | None,
+    runner,
+) -> tuple[Mapping[str, str], bool, Path, Path, object]:
+    env = os.environ if environ is None else environ
+    enabled = (
+        str(env.get(AUTO_MAINTENANCE_ENV, "1")).strip() != "0"
+        if auto_maintenance is None
+        else bool(auto_maintenance)
+    )
+    root = Path(repo_root).resolve(strict=False)
+    runtime_root = Path(owner_runtime_root or root).resolve(strict=False)
+    refresh_runner = _bounded_refresh_runner if runner is None else runner
+    return env, enabled, root, runtime_root, refresh_runner
+
+
+def ensure_reddog_holoindex_current(
+    *,
+    repo_root: Path | str,
+    owner_runtime_root: Path | str | None = None,
+    requested: bool,
+    auto_maintenance: bool | None = None,
+    timeout_seconds: float | None = None,
+    environ: Mapping[str, str] | None = None,
+    runner=None,
+) -> RedDogHoloIndexOperationalResult:
+    """Ensure a clean exact-HEAD generation without resolving or starting an owner."""
+
+    if not requested:
+        return RedDogHoloIndexOperationalResult(False, OPERATIONAL_NOT_REQUESTED)
+    env, enabled, root, runtime_root, refresh_runner = _settings(
+        repo_root=repo_root, owner_runtime_root=owner_runtime_root,
+        auto_maintenance=auto_maintenance, environ=environ, runner=runner,
+    )
+    with _HANDSHAKE_LOCK:
+        return _ensure_current_locked(
+            repo_root=root,
+            owner_runtime_root=runtime_root,
+            environ=env,
+            auto_maintenance=enabled,
+            timeout_seconds=timeout_seconds,
+            runner=refresh_runner,
+        )
 
 
 def ensure_reddog_holoindex_operational(
@@ -553,25 +478,28 @@ def ensure_reddog_holoindex_operational(
     runner=None,
 ) -> RedDogHoloIndexOperationalResult:
     """Ensure a clean exact-HEAD index and authenticated semantic owner."""
+
     if not requested:
         return RedDogHoloIndexOperationalResult(False, OPERATIONAL_NOT_REQUESTED)
-    env = os.environ if environ is None else environ
-    maintenance_enabled = (
-        str(env.get(AUTO_MAINTENANCE_ENV, "1")).strip() != "0"
-        if auto_maintenance is None
-        else bool(auto_maintenance)
+    env, enabled, root, runtime_root, refresh_runner = _settings(
+        repo_root=repo_root, owner_runtime_root=owner_runtime_root,
+        auto_maintenance=auto_maintenance, environ=environ, runner=runner,
     )
-    root = Path(repo_root).resolve(strict=False)
-    runtime_root = Path(owner_runtime_root or root).resolve(strict=False)
-    refresh_runner = _bounded_refresh_runner if runner is None else runner
     with _HANDSHAKE_LOCK:
-        return _ensure_locked(
-            repo_root=root,
-            owner_runtime_root=runtime_root,
-            environ=env,
-            auto_maintenance=maintenance_enabled,
-            timeout_seconds=timeout_seconds,
+        current = _ensure_current_locked(
+            repo_root=root, owner_runtime_root=runtime_root, environ=env,
+            auto_maintenance=enabled, timeout_seconds=timeout_seconds,
             runner=refresh_runner,
+        )
+        if not current.ready:
+            return current
+        state = read_repository_state(root)
+        if not state.proven_clean or state.head_sha != current.repo_head_sha:
+            return _failure(REPOSITORY_CHANGED_ERROR, state=state)
+        return _start_owner(
+            repo_root=root, owner_runtime_root=runtime_root,
+            ssd_path=resolve_holoindex_ssd_path(environ=env),
+            state=state, current=current, environ=env,
         )
 
 
@@ -589,5 +517,6 @@ __all__ = [
     "REFRESH_TIMEOUT_ERROR",
     "REPOSITORY_CHANGED_ERROR",
     "RedDogHoloIndexOperationalResult",
+    "ensure_reddog_holoindex_current",
     "ensure_reddog_holoindex_operational",
 ]

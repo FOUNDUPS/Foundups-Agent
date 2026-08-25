@@ -91,20 +91,40 @@ def _validate_rehydration(
         _raise("FINAL_REHYDRATION_PROOF_INVALID")
 
 
+def _replica_binding_valid(
+    result: Mapping[str, Any],
+    expected_replica_binding: Mapping[str, str] | None,
+) -> bool:
+    if expected_replica_binding is None:
+        return True
+    return all(
+        result.get(key) == expected_replica_binding.get(key)
+        for key in (
+            "query_replica_descriptor_digest",
+            "query_replica_generation_id",
+            "query_replica_id",
+            "query_replica_path_identity_digest",
+        )
+    )
+
+
 def _activation_binding_valid(
     result: Mapping[str, Any],
     *,
+    expected_query: str,
     expected_sha: str,
     expected_root_digest: str,
     generation_id: str,
     receipt_digest: str,
+    expected_replica_binding: Mapping[str, str] | None = None,
 ) -> bool:
     return bool(
         result.get("ok") is True
-        and result.get("query") == K1_ACCEPTANCE_QUERY
+        and result.get("query") == expected_query
         and result.get("freshness") == "CURRENT"
         and result.get("index_gap_detected") is False
         and result.get("no_holoindex_reindex_performed") is True
+        and result.get("no_reindex") is True
         and str(result.get("repo_head_sha", "")).lower()
         == expected_sha.lower()
         and result.get("freshness_generation_id") == generation_id
@@ -118,6 +138,83 @@ def _activation_binding_valid(
         and result.get("workspace_overlay_present") is False
         and result.get("semantic_evidence_authority")
         == "clean_workspace_head"
+        and _replica_binding_valid(result, expected_replica_binding)
+    )
+
+
+def _activation_receipt_valid(
+    query_receipt: Mapping[str, Any],
+    *,
+    expected_query: str,
+    expected_sha: str,
+    expected_root_digest: str,
+    generation_id: str,
+    receipt_digest: str,
+    require_semantic_evidence: bool,
+) -> str:
+    receipt_payload = dict(query_receipt)
+    claimed_id = receipt_payload.pop("receipt_id", "")
+    if not (
+        isinstance(claimed_id, str)
+        and claimed_id.startswith("sha256:")
+        and digest_json(receipt_payload) == claimed_id
+        and query_receipt.get("ok") is True
+        and query_receipt.get("query") == expected_query
+        and query_receipt.get("freshness") == "CURRENT"
+        and query_receipt.get("index_gap_detected") is False
+        and query_receipt.get("no_holoindex_reindex_performed") is True
+        and str(query_receipt.get("repo_head_sha", "")).lower()
+        == expected_sha.lower()
+        and query_receipt.get("freshness_generation_id") == generation_id
+        and query_receipt.get("freshness_receipt_digest") == receipt_digest
+        and query_receipt.get("repo_root_digest") == expected_root_digest
+        and query_receipt.get("authority_repo_root_digest")
+        == expected_root_digest
+        and (
+            not require_semantic_evidence
+            or (
+                type(query_receipt.get("semantic_evidence_count")) is int
+                and query_receipt.get("semantic_evidence_count") >= 1
+            )
+        )
+    ):
+        _raise("ACTIVATION_QUERY_RECEIPT_INVALID")
+    return claimed_id
+
+
+def validate_activation_query(
+    result: Mapping[str, Any],
+    *,
+    expected_query: str,
+    expected_sha: str,
+    expected_root_digest: str,
+    generation_id: str,
+    receipt_digest: str,
+    expected_replica_binding: Mapping[str, str] | None = None,
+) -> str:
+    if not _activation_binding_valid(
+        result,
+        expected_query=expected_query,
+        expected_sha=expected_sha,
+        expected_root_digest=expected_root_digest,
+        generation_id=generation_id,
+        receipt_digest=receipt_digest,
+        expected_replica_binding=expected_replica_binding,
+    ) or result.get("no_authority_worktree_mutation_performed") is not True:
+        _raise("ACTIVATION_QUERY_PROOF_INVALID")
+    if expected_replica_binding is not None and not result.get("hits"):
+        _raise("ACTIVATION_QUERY_PROOF_INVALID")
+    query_receipt = result.get("query_receipt")
+    if not isinstance(query_receipt, Mapping):
+        _raise("ACTIVATION_QUERY_RECEIPT_INVALID")
+    return _activation_receipt_valid(
+        query_receipt,
+        expected_query=expected_query,
+        expected_sha=expected_sha,
+        expected_root_digest=expected_root_digest,
+        generation_id=generation_id,
+        receipt_digest=receipt_digest,
+        require_semantic_evidence=expected_replica_binding is not None,
     )
 
 
@@ -129,35 +226,11 @@ def _validate_activation_query(
     generation_id: str,
     receipt_digest: str,
 ) -> str:
-    if not _activation_binding_valid(
+    return validate_activation_query(
         result,
+        expected_query=K1_ACCEPTANCE_QUERY,
         expected_sha=expected_sha,
         expected_root_digest=expected_root_digest,
         generation_id=generation_id,
         receipt_digest=receipt_digest,
-    ) or result.get("no_authority_worktree_mutation_performed") is not True:
-        _raise("ACTIVATION_QUERY_PROOF_INVALID")
-    query_receipt = result.get("query_receipt")
-    if not isinstance(query_receipt, Mapping):
-        _raise("ACTIVATION_QUERY_RECEIPT_INVALID")
-    receipt_payload = dict(query_receipt)
-    claimed_id = receipt_payload.pop("receipt_id", "")
-    if not (
-        isinstance(claimed_id, str)
-        and claimed_id.startswith("sha256:")
-        and digest_json(receipt_payload) == claimed_id
-        and query_receipt.get("ok") is True
-        and query_receipt.get("query") == K1_ACCEPTANCE_QUERY
-        and query_receipt.get("freshness") == "CURRENT"
-        and query_receipt.get("index_gap_detected") is False
-        and query_receipt.get("no_holoindex_reindex_performed") is True
-        and str(query_receipt.get("repo_head_sha", "")).lower()
-        == expected_sha.lower()
-        and query_receipt.get("freshness_generation_id") == generation_id
-        and query_receipt.get("freshness_receipt_digest") == receipt_digest
-        and query_receipt.get("repo_root_digest") == expected_root_digest
-        and query_receipt.get("authority_repo_root_digest")
-        == expected_root_digest
-    ):
-        _raise("ACTIVATION_QUERY_RECEIPT_INVALID")
-    return claimed_id
+    )

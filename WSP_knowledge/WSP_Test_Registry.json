@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1575,
+  "total_tests": 1577,
   "quarantined_tests": 267,
   "tests": [
     {
@@ -16303,6 +16303,19 @@
       "description": "Adversarial contracts for immutable per-generation Holo query replicas."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_replica_activation",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica_activation.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Focused tests for governed query-replica activation."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_replica_descriptor",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica_descriptor.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
@@ -21801,6 +21814,19 @@
         "module_scope_raise"
       ],
       "description": ""
+    },
+    {
+      "id": "test::scripts::tests::test_reddog_holoindex_activate_query_replica",
+      "path": "scripts/tests/test_reddog_holoindex_activate_query_replica.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "CLI contracts for default-inert HoloIndex replica activation."
     },
     {
       "id": "test::scripts::tests::test_reddog_holoindex_blocked_request_recovery_once",

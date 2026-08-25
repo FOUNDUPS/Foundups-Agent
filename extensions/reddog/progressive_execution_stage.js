@@ -15,6 +15,10 @@ function allowsActionPlanning(stage) {
   return resolveStage(stage) === BOUNDED_EXECUTION;
 }
 
+function runtimeBindingAllowsActionPlanning(metadata) {
+  return metadata && metadata.model_binding_source === 'receipt_bound_runtime';
+}
+
 function isReadonlyAuditRequest(text, auditIntentDetected) {
   return auditIntentDetected === true && !MUTATION_REQUEST.test(String(text || ''));
 }
@@ -48,6 +52,7 @@ module.exports = {
   BOUNDED_EXECUTION,
   PRODUCTION,
   allowsActionPlanning,
+  runtimeBindingAllowsActionPlanning,
   isReadonlyAuditRequest,
   project,
   resolveStage,

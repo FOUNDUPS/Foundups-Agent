@@ -1,5 +1,20 @@
 # foundups_mcp_bridge Tests
 
+## Exact query-replica activation
+
+- `test_reddog_holoindex_query_replica_activation.py` proves inert default,
+  exact-repository-before-mutation ordering, fixed semantic candidate and
+  stable-route canaries, rollback, revision/digest commit, immediate committed
+  truth, replica revalidation, secret-free receipt publication, reserved and
+  pre-existing receipt denial, fresh workspace-only authority selection,
+  interrupted committed publication, and receipt-less committed-route
+  finalization.
+- The CLI contract proves default inertness and explicit argument projection.
+  The adjacent activation/route/planner/materializer/descriptor/maintenance/
+  candidate-acceptance/authority/CLI suite is **470 passed / 7 host-capability
+  skips** using only disposable O:-local test roots. No live route or Holo state
+  was touched.
+
 ## Stable route-file owner resolution
 
 - `test_reddog_holoindex_owner_replica_route_resolution.py` retains the legacy
