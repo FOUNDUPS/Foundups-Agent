@@ -85,18 +85,30 @@ video_path = generator.generate_video(
 
 ### YouTubeShortsUploader
 
-YouTube upload handler (read-only integration with youtube_auth).
+YouTube upload handler using the hardened `youtube_auth` service boundary. It never reads OAuth token files directly and never returns credential material.
 
 ```python
 from modules.communication.youtube_shorts.src.youtube_uploader import YouTubeShortsUploader
 
-uploader = YouTubeShortsUploader()
+uploader = YouTubeShortsUploader(channel="foundups-mall")
 ```
+
+Construction pins a channel role to one credential set and verifies the authorized YouTube channel before any upload. `foundups-mall` requires `YT_UPLOAD_CHANNEL_ID_FOUNDUPS_MALL`; a missing or mismatched pin fails closed.
+
+#### `publish_video(...) -> YouTubePublishResult`
+
+Uploads MP4, WebM, or QuickTime through an 8 MB resumable transport. The default privacy is `unlisted`; optional playlist insertion returns the authoritative playlist-item ID. Callers receive video/channel/playlist identities and URLs, never an OAuth token or local credential path.
+
+#### `publish_foundups_media(...) -> YouTubePublishResult`
+
+Forces `unlisted` and appends a compact `foundups.media.v1` author/manifest reference. This is an uploader boundary, not a public gateway: the future caller must authenticate the AutoPost operator and verify the signed manifest before invoking it.
 
 #### Methods
 
 ##### `upload_short(video_path: str, title: str, description: str, tags: list = None) -> str`
 Upload video as YouTube Short.
+
+Backward-compatibility note: this helper retains its existing `public` default. New Foundups/pfMALL flows must use `publish_video` or `publish_foundups_media`, whose governed default is `unlisted`.
 
 **Parameters:**
 - `video_path` (str): Local .mp4 file path

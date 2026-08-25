@@ -72,6 +72,14 @@ from modules.platform_integration.youtube_auth.src.youtube_auth import get_authe
 - [OK] `modules/platform_integration/youtube_dae/` - Untouched
 - [OK] `modules/platform_integration/youtube_auth/` - Read-only import
 
+## Hardened Publisher Boundary
+
+`YouTubeShortsUploader` now obtains an authenticated service only from `youtube_auth.get_authenticated_service(token_index=...)`. Channel roles are explicit; initialization observes the authorized channel and rejects a configured channel-ID mismatch before any write. The `foundups-mall` role requires `YT_UPLOAD_CHANNEL_ID_FOUNDUPS_MALL` and uses credential set 10.
+
+The governed API defaults to `unlisted`, supports resumable MP4/WebM/QuickTime upload, optional playlist insertion, audience/synthetic-media declarations, disabled subscriber notification, and authoritative video/channel/playlist result IDs. The legacy `upload_short` public default is retained only for existing callers.
+
+This is the server-side publishing Lego block, not the AutoPost upload gateway. A managed Foundups Mall flow still requires a separate authenticated API that validates user/session authorization and the signed Foundups manifest before this uploader is called. Refresh tokens, client-secret files, and shared bearer credentials must never be returned to AutoPost or any browser.
+
 ## Usage
 
 ### From Main Menu (Option 11)
@@ -119,6 +127,5 @@ print(f"Posted: {short_url}")
 ## Development Status
 
 **Phase**: POC
-**Next**: Create Veo 3 generator + YouTube uploader
-**Timeline**: 1-2 days for POC
-**Goal**: Autonomous 012->0102->YouTube flow
+**Next**: Build the authenticated AutoPost-to-Foundups-Mall gateway and signed-command verifier without weakening the YouTubeAuth boundary.
+**Goal**: Autonomous 012->0102->YouTube generation plus governed Foundups media publishing.
