@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1574,
+  "total_tests": 1575,
   "quarantined_tests": 267,
   "tests": [
     {
@@ -12619,6 +12619,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Test VEO3 generator migration from google.generativeai to google.genai\n\nVEO1 \u2014 YOUTUBE_SHORTS_VEO3_GENAI_MIGRATION_PHASE1\n\nTests:\n- SDK unavailable handling\n- Client creation (mocked)\n- Generation request (mocked)\n- No live network calls\n\nWSP 97: These tests verify mocked paths only, not live API calls."
+    },
+    {
+      "id": "test::modules::communication::youtube_shorts::tests::test_youtube_publisher_boundary",
+      "path": "modules/communication/youtube_shorts/tests/test_youtube_publisher_boundary.py",
+      "owner": "modules/communication/youtube_shorts",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-shorts-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
     },
     {
       "id": "test::modules::development::cursor_multi_agent_bridge::tests::test_agent_coordinator",
