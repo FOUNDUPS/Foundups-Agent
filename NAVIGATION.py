@@ -120,8 +120,9 @@ NEED_TO = {
     "reddog resident conversation request scope binding": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_scope_binding.py:bind_resident_conversation_request_to_authenticated_scope()",
     "reddog resident conversation request idempotency": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_request_journal.py:reserve_bound_resident_conversation_request()",
     "reddog resident conversation request journal store": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_request_journal_store.py:AgentDbResidentConversationRequestJournal",
-    "reddog resident conversation admission proof": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_capability.py:derive_resident_conversation_request_journal_authority()",
+    "reddog resident conversation admission proof": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_capability.py:consume_verified_scope_authority_for_request_journal()",
     "reddog current conversation session authority": "modules/communication/moltbot_bridge/src/reddog_conversation_session_authority_source.py:lease_current_generation_conversation_session()",
+    "reddog current session conversation admission": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_admission.py:reserve_current_generation_resident_conversation_request()",
     "moltbot bridge workspace skills": "modules/communication/moltbot_bridge/workspace/AGENTS.md",
 
     # M2M Compression (Machine-to-Machine 0102-0102 Documentation)

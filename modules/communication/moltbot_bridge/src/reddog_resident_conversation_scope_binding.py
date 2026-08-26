@@ -13,9 +13,10 @@ from modules.ai_intelligence.digital_twin.src.resident_conversation_transport_co
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capability import (
     AuthenticatedConversationScopeCapability,
+    VerifiedConversationScopeAuthority,
     consume_conversation_scope_capability,
+    consume_verified_scope_authority_for_request_journal,
     conversation_scope_authority_view,
-    derive_resident_conversation_request_journal_authority,
     discard_conversation_scope_capability,
     verify_record_with_scope_authority,
 )
@@ -119,18 +120,57 @@ def bind_resident_conversation_request_to_authenticated_scope(
         discard_conversation_scope_capability(authority)
 
 
+def bind_resident_conversation_request_to_verified_scope_authority(
+    *,
+    store: AgentDbConversationScopeStore,
+    authority: VerifiedConversationScopeAuthority,
+    request: ResidentConversationRequest,
+    now_epoch: int,
+) -> ResidentConversationScopeBindingResult:
+    """Consume a live verified session authority and bind one request."""
+
+    reason = _resident_request_rejection_reason(request, now_epoch)
+    if reason:
+        return _retire_and_reject_binding(authority, reason)
+    if not request.conversation_id:
+        return _retire_and_reject_binding(
+            authority, "resident_conversation_new_scope_resolution_required"
+        )
+    record = _load_binding_record(store, request.conversation_id)
+    if record is None:
+        return _retire_and_reject_binding(
+            authority, "resident_conversation_access_denied"
+        )
+    try:
+        view = conversation_scope_authority_view(authority)
+        if not _verified_record_authority(authority, view, record):
+            return _binding_rejected("resident_conversation_access_denied")
+        reason = _current_record_request_rejection_reason(record, request, now_epoch)
+        return (
+            _binding_rejected(reason)
+            if reason
+            else _accepted_scope_binding(record, view, request, authority, now_epoch)
+        )
+    except Exception:
+        return _binding_rejected("resident_conversation_access_denied")
+    finally:
+        discard_conversation_scope_capability(authority)
+
+
 def _resident_request_rejection_reason(
     request: ResidentConversationRequest, now_epoch: int
 ) -> str:
-    if type(now_epoch) is not int or now_epoch < 0:
-        return "resident_conversation_now_invalid"
-    reasons = resident_conversation_request_reasons(request)
-    if reasons:
-        return reasons[0]
     try:
+        if type(now_epoch) is not int or now_epoch < 0:
+            return "resident_conversation_now_invalid"
+        reasons = resident_conversation_request_reasons(request)
+        if reasons:
+            return reasons[0]
         enforce_request_freshness(request, now_epoch=now_epoch)
     except ValueError as exc:
         return str(exc) or "resident_conversation_request_invalid"
+    except Exception:
+        return "resident_conversation_request_invalid"
     return ""
 
 
@@ -168,18 +208,26 @@ def _consume_current_record_authority(
             scope_kind=str(record["scope_kind"]),
         )
         view = conversation_scope_authority_view(authority)
-        verified = bool(
-            authority is not None
-            and view is not None
-            and authority_matches(record, view)
-            and verify_record_with_scope_authority(authority, record)
-        )
+        verified = _verified_record_authority(authority, view, record)
     except Exception:
         view, verified = None, False
     if not verified:
         discard_conversation_scope_capability(authority)
         return None, None
     return authority, view
+
+
+def _verified_record_authority(
+    authority: Any,
+    view: Mapping[str, Any] | None,
+    record: Mapping[str, Any],
+) -> bool:
+    return bool(
+        authority is not None
+        and view is not None
+        and authority_matches(record, view)
+        and verify_record_with_scope_authority(authority, record)
+    )
 
 
 def _current_record_request_rejection_reason(
@@ -235,8 +283,9 @@ def _accepted_scope_binding(
         **{key: value for key, value in payload.items() if key != "schema_version"},
     )
     candidate = reservation_record(request, result, now_epoch)
-    proof = derive_resident_conversation_request_journal_authority(
+    proof = consume_verified_scope_authority_for_request_journal(
         verified_authority,
+        record=record,
         reservation_id=candidate["reservation_id"], not_before_epoch=now_epoch,
         scope_expires_at=min(
             int(record["expires_at"]), int(authority["expires_at"])
@@ -267,4 +316,5 @@ __all__ = [
     "ResidentConversationScopeBindingResult",
     "SCHEMA_VERSION",
     "bind_resident_conversation_request_to_authenticated_scope",
+    "bind_resident_conversation_request_to_verified_scope_authority",
 ]

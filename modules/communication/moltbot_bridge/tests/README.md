@@ -31,7 +31,7 @@ authority, attacker-rehashed record tampering, dependency failure, and WSP 62
 file/function limits.
 
 `test_reddog_resident_conversation_request_journal.py` proves the admission
-service: live-authority-derived opaque proof consumption, constructed-binding
+service: atomic live-parent consumption and opaque proof issuance, constructed-binding
 and unregistered-parent forgery rejection,
 content-free reservation, restart-safe exact replay, divergent/concurrent
 collision rejection, scope-expiry/change fencing, TURN/STATUS/CANCEL behavior,
@@ -44,9 +44,20 @@ The production-shaped fixture also exposed and now guards prior positional-row
 drift in signed pending conversation scope. No test executes a handler or
 reserves conversation CAS.
 
+`test_reddog_resident_conversation_admission.py` proves the current-session
+aggregate holds the signed-session lease across binding and reservation,
+passes the exact authority-source inputs without exposing them in results or
+storage, and consumes the verified parent. It covers restart replay, pre-lease
+malformed/new-scope rejection, stable and unexpected source failures,
+directly allocated opaque authority, cross-session mismatch, journal failure,
+direct E0 session transplant, hostile record mapping, and WSP 62/effect-wiring
+boundaries. The authority source is replaced only by
+a controlled context-manager fixture; its independent production suite owns
+generation/config/socket/signature verification.
+
 ```powershell
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
-python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal_store.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal_store.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_admission.py -q
 ```
 
 ## HoloIndex owner replica response contracts

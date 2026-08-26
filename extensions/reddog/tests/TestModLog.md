@@ -1,5 +1,18 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-26 - Resident admission compatibility regression (0.4.109)
+
+- Rebound the exact 1,383-file backend closure and extension version contract
+  to the final current-session admission hashes without expanding runtime
+  dependencies. Canonical digest: `5d8ef0cf64ffc12c4a8dda5fef6259653791e91e5824b7baba815bdfccb5feea`.
+- Generator/staged-index plus canonical registry matrix: **36 passed**; registry
+  current at **1,580 tests / 268 quarantined**. No live aggregate caller or
+  effect surface is introduced.
+- Rebound contract aggregate: 18 shards / 6,929 lines / 490 assertions at
+  `sha256:77c56bd30c800a50785d48bb77e5fb788f5ff5c85116d747ef16f5d34ddca0f9`.
+  Fast `14/14`, contract `3/3`, conversation `32 passed`, and deterministic
+  67-file package tiers pass.
+
 ## 2026-08-26 - Resident replay manifest parity regression (0.4.108)
 
 - Linux fast-tier CI exposed two stale authenticated-scope runtime hashes that

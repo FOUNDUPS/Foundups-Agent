@@ -39,7 +39,10 @@ conversation state, AgentDB, or any FoundUp Memex.
   secret-backed-authority-derived opaque proof at the store boundary and uses
   exact replay, an owned expiry clock, global conflict/capacity controls, and
   SQLite/PostgreSQL current-scope fencing before insert.
-- Next: trusted new-scope resolution, admission aggregation, and operation-
+- Complete: inert host aggregation for existing conversations prevalidates the
+  request, holds the current signed-generation session lease through verified
+  scope binding and durable reservation, and returns the content-free result.
+- Next: trusted new-scope resolution, host invocation wiring, and operation-
   specific TURN/STATUS/CANCEL handlers with immediate authenticated CAS.
 - Next: thin PFMall/phone transport adapter; the browser remains a client, not
   the model/OpenClaw host.

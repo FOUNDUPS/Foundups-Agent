@@ -1,3 +1,29 @@
+## 2026-08-26: Current-session resident admission aggregation regressions
+
+- Added adversarial coverage for one inert existing-conversation host
+  aggregate: strict rejection before credential lease, exact current-generation
+  lease arguments/lifetime, live authority-to-current-record binding, durable
+  content-free reservation, and restart-safe exact replay.
+- Proved a directly allocated but unregistered opaque authority and a live
+  cross-session authority cannot admit, the verified parent is consumed, and
+  authority-source/journal failures remain fail closed without credential,
+  operator-text, principal, or FoundUp disclosure.
+- Independent WSP 97 falsification reproduced a concurrent parent double-use,
+  arbitrary typed-error detail propagation, and malformed exact-type request
+  escape. New deterministic regressions prove atomic sequential/concurrent
+  parent consumption, source-reason sanitization, total prevalidation,
+  expired/future rejection before lease, and lease lifetime through journal
+  reservation.
+- The fresh review reproduced an E0 record/session transplant at the new
+  atomic primitive. An exact signed cross-session regression plus a hostile
+  Mapping regression now prove complete record-to-parent identity equality,
+  parent retirement, no child, and no escaping callback error.
+- Repaired focused binder/journal/aggregate matrix: **51 passed**; broader
+  binder/journal-store/session-authority coverage is **72 passed**. Ruff and
+  Python compilation pass. The aggregate invokes no traffic handler, model,
+  worker, repository mutation, conversation CAS, or Holo maintenance.
+- Fresh-context independent WSP 00/WSP 97 exact-hash audit: **GO**, `36 passed`.
+
 ## 2026-08-26: Resident conversation request idempotency regressions
 
 - Added adversarial proof for content-free durable reservation, restart-safe

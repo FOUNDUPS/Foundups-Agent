@@ -349,10 +349,12 @@ authenticated-session capability and binds an existing `TURN`, `STATUS`, or
 `CANCEL` envelope to the exact current AgentDB record, revision receipt,
 record digest, session binding, and turn lineage. It returns content-free
 evidence plus an opaque one-use process-local reservation proof excluded from
-its serialized projection. The proof is derived only while the existing
-secret-backed verified scope authority remains live, and it binds the exact
-canonical reservation identity; public binding digests cannot mint it. It does
-not reserve CAS or mutate state.
+its serialized projection. The proof is issued atomically while the existing
+secret-backed verified scope authority is retired, re-verifies the exact scope
+record plus its full principal/session/credential/repository identity, and binds
+the canonical reservation identity; concurrent use or public
+binding digests cannot mint a second proof. It does not reserve CAS or mutate
+state.
 `reddog_resident_conversation_request_journal.py` validates that proof before
 the split reservation contract/store consumes it at the deepest AgentDB write
 boundary. The store's own clock rechecks request and scope expiry, so a caller
@@ -364,9 +366,17 @@ receipt. SQLite uses an immediate write transaction; PostgreSQL locks the scope
 and global capacity rows. Unified mapping rows and indexed columns are checked
 against the canonical record. The reservation grants no CAS, model, dispatch,
 identity, or effect
-authority. Live traffic still requires a host-side session-capability adapter,
-trusted new-scope resolution, and operation handlers that repeat authenticated
-current-record CAS. The phase audits are under `docs/clarity/`.
+authority. `reddog_resident_conversation_admission.py` now composes strict
+request prevalidation, the existing current-generation signed-session lease,
+authority-native current-scope binding, and durable reservation into one
+fail-closed host operation for an existing conversation. The credential is
+passed only to the authority source, the generation lease remains held through
+reservation, and the consumed verified authority never becomes serialized
+state. This composition is inert until a host invokes it: it creates no
+endpoint and performs no conversation handler, CAS, model, or worker action.
+Live traffic still requires a host invocation adapter, trusted new-scope
+resolution, and operation handlers that repeat authenticated current-record
+CAS. The phase audits are under `docs/clarity/`.
 
 ## Upstream Agent Execution Boundary
 

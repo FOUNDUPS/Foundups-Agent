@@ -21,7 +21,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capability import (
     VerifiedConversationScopeAuthority,
-    derive_resident_conversation_request_journal_authority,
+    consume_verified_scope_authority_for_request_journal,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_conversation_request_journal import (
     AgentDbResidentConversationRequestJournal,
@@ -225,8 +225,9 @@ def test_constructed_binding_without_opaque_admission_proof_rejects(tmp_path: Pa
 def test_unregistered_verified_authority_cannot_mint_journal_proof() -> None:
     forged_parent = object.__new__(VerifiedConversationScopeAuthority)
 
-    forged_child = derive_resident_conversation_request_journal_authority(
+    forged_child = consume_verified_scope_authority_for_request_journal(
         forged_parent,
+        record={},
         reservation_id=digest({"reservation": "forged"}),
         not_before_epoch=NOW,
         scope_expires_at=NOW + 60,

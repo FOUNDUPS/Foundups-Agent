@@ -232,28 +232,24 @@ def conversation_scope_authority_view(authority: Any) -> Mapping[str, Any] | Non
     }
 
 
-def derive_resident_conversation_request_journal_authority(
+def consume_verified_scope_authority_for_request_journal(
     authority: Any,
     *,
+    record: Mapping[str, Any],
     reservation_id: str,
     not_before_epoch: int,
     scope_expires_at: int,
 ) -> ResidentConversationRequestJournalAuthority | None:
-    """Derive one exact journal write from registered verified authority."""
+    """Atomically retire one verified parent and issue one journal child."""
 
     if type(authority) is not VerifiedConversationScopeAuthority:
         return None
     child = object.__new__(ResidentConversationRequestJournalAuthority)
     with _LOCK:
-        parent = _AUTHORITIES.get(authority)
-        valid = bool(
-            parent is not None
-            and type(reservation_id) is str
-            and type(not_before_epoch) is int
-            and type(scope_expires_at) is int
-            and 0 <= not_before_epoch < scope_expires_at <= parent.expires_at
-        )
-        if not valid:
+        parent = _AUTHORITIES.pop(authority, None)
+        if not _journal_child_admission_valid(
+            parent, record, reservation_id, not_before_epoch, scope_expires_at
+        ):
             return None
         _JOURNAL_AUTHORITIES[child] = _ResidentConversationRequestJournalSeal(
             reservation_id=reservation_id,
@@ -261,6 +257,27 @@ def derive_resident_conversation_request_journal_authority(
             scope_expires_at=scope_expires_at,
         )
     return child
+
+
+def _journal_child_admission_valid(
+    parent: _ConversationScopeAuthoritySeal | None,
+    record: Mapping[str, Any],
+    reservation_id: str,
+    not_before_epoch: int,
+    scope_expires_at: int,
+) -> bool:
+    try:
+        return bool(
+            parent is not None
+            and isinstance(record, Mapping)
+            and type(reservation_id) is str
+            and type(not_before_epoch) is int
+            and type(scope_expires_at) is int
+            and 0 <= not_before_epoch < scope_expires_at <= parent.expires_at
+            and _verify_record_with_seal(parent, record)
+        )
+    except Exception:
+        return False
 
 
 def resident_conversation_request_journal_authority_matches(
@@ -331,8 +348,16 @@ def verify_record_with_scope_authority(
     authority: Any, record: Mapping[str, Any]
 ) -> bool:
     seal = _authority_seal(authority)
+    return _verify_record_with_seal(seal, record)
+
+
+def _verify_record_with_seal(
+    seal: _ConversationScopeAuthoritySeal | None,
+    record: Mapping[str, Any],
+) -> bool:
     if (
         seal is None
+        or not _record_matches_authority_identity(seal, record)
         or not _record_matches_authorized_scope(seal, record)
         or record.get("record_auth_scheme") != seal.record_auth_scheme
     ):
@@ -342,6 +367,21 @@ def verify_record_with_scope_authority(
             seal.record_signing_context, record
         )
     return verify_hmac_conversation_scope_record(record, seal.record_verify_keys)
+
+
+def _record_matches_authority_identity(
+    seal: _ConversationScopeAuthoritySeal,
+    record: Mapping[str, Any],
+) -> bool:
+    return all(
+        record.get(field) == getattr(seal, field)
+        for field in (
+            "principal_id", "principal_provider", "verified_subject_digest",
+            "principal_record_digest", "principal_key_fingerprint", "transport",
+            "session_binding_digest", "credential_id", "session_id",
+            "repo_full_name", "record_auth_scheme",
+        )
+    )
 
 
 def discard_conversation_scope_capability(capability: Any) -> None:
@@ -386,8 +426,8 @@ __all__ = [
     "VerifiedConversationScopeAuthority",
     "consume_conversation_scope_capability",
     "consume_resident_conversation_request_journal_authority",
+    "consume_verified_scope_authority_for_request_journal",
     "conversation_scope_authority_view", "discard_conversation_scope_capability",
-    "derive_resident_conversation_request_journal_authority",
     "resident_conversation_request_journal_authority_matches",
     "split_conversation_scope_capability",
     "sign_record_with_scope_authority", "verify_record_with_scope_authority",

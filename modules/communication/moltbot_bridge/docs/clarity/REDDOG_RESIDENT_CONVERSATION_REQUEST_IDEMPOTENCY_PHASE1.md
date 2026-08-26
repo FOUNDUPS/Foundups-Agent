@@ -46,7 +46,7 @@ a worker, expose a network endpoint, or mutate HoloIndex.
 
 | ID | Assumption | Evidence | Confidence |
 |---|---|---|---|
-| A1 | A journal may consume only a successful exact binding, never a reconstructed result or client identity assertion. | The binder derives a non-constructible one-use child from the still-registered secret-backed verified authority, binds the canonical reservation identity, and excludes it from serialization. | HIGH |
+| A1 | A journal may consume only a successful exact binding, never a reconstructed result or client identity assertion. | The binder atomically retires the still-registered secret-backed verified parent while issuing one non-constructible child, binds the canonical reservation identity, and excludes it from serialization. | HIGH |
 | A2 | Idempotency must survive process restart. | Existing AgentDB scope already provides the durable database boundary. | HIGH |
 | A3 | Exact replay is the only accepted collision. | Request digest covers operator text and all envelope identity fields. | HIGH |
 | A4 | A new insert must fence state changes after binding. | Admission does not reserve CAS; AgentDB state can advance before persistence. | HIGH |
