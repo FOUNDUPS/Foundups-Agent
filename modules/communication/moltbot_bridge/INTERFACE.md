@@ -1065,7 +1065,7 @@ Current operational rule:
 - `execute_task` requires the one-use claim ID and context digest; calls
   without that capability stop before the authority transaction
 
-Post-merge HoloIndex configuration:
+Post-merge HoloIndex configuration (live path accepted at exact main `cfd1e0051`; later HEADs require new evidence):
 - `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED` defaults to `1`; set `0` to disable.
 - `HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC` sets polling (minimum 30 seconds).
 - `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` selects the clean authority worktree.

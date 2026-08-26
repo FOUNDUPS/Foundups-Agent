@@ -28,7 +28,10 @@ The stable route is supplied through
 `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; configuring the legacy direct replica root
 at the same time fails closed. Route/activation failure leaves the durable task
 non-completed and the request event unresolved. Automatic route advancement
-remains candidate truth until a merged exact-main OpenClaw replay passes.
+passed its production-shaped acceptance at exact main `cfd1e0051`: the real
+OpenClaw supervisor claimed and completed the AgentDB task, and a subsequent
+governed owner query returned CURRENT without reindex or repository mutation.
+That evidence is commit-bound and does not authorize a later HEAD.
 
 ## WSP Compliance
 

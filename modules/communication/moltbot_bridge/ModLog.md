@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-27: Exact-main automatic OpenClaw acceptance
+
+- The governed authority mismatch at exact main `cfd1e0051` was bound to the
+  canonical post-merge task. The real broker-managed OpenClaw supervisor then
+  claimed it through AgentDB CAS and the sealed production executor completed
+  generation `sha256:60d06274...` with exact freshness-receipt binding.
+- A normal governed query subsequently returned CURRENT/no-gap/no-reindex; the
+  production verifier preserved the exact 33-artifact / 220,800,343-byte
+  immutable binding. AgentDB task/request completion is independently valid;
+  the completion event remains pending only for downstream ledger consumption.
+- A wrong ambient interpreter lacked FastAPI and failed before task claim. The
+  repository `.venv` satisfied the declared runtime and completed the bounded
+  transaction. The resident stopped cleanly after verification. No Holo,
+  repository, model, or secret authority was added to OpenClaw.
+  Secret-free local evidence is attached at
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json`.
+  (WSP 00/15/22/34/50/62/83/97/108)
+
 ## 2026-08-27: Stable-route post-merge handoff truth
 
 - Aligned OpenClaw/RedDog documentation with the exact boundary: OpenClaw owns
@@ -7,9 +25,10 @@
   activation controllers own refresh, replica publication, and stable-route
   commit. OpenClaw is scaffolding, not the Holo store or RedDog identity.
 - The exact `a7302344` route is live from manual recovery; its historical
-  post-merge task remains failed. The split-lease automatic composer is a
-  candidate until a new merged exact-main task completes. Direct-root routing
-  remains a mutually exclusive migration path. (WSP 00/15/22/50/62/87/97)
+  post-merge task remains failed. At that candidate point, the split-lease
+  automatic composer still required a new merged exact-main task; the newer
+  entry above records its completion. Direct-root routing remains a mutually
+  exclusive migration path. (WSP 00/15/22/50/62/87/97)
 
 ## 2026-08-27: Resident governed Holo usability repair
 

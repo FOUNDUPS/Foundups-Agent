@@ -29,16 +29,21 @@ Current implementation:
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
 
-- Governed Holo resident binding (implemented / live canary required): the VSIX one-shot and canonical
+- Governed Holo resident binding (implemented / exact-main live acceptance passed): the VSIX one-shot and canonical
   resident/OpenClaw read-only worker now use the same verified replica resolver
   and owner-query contract. The resident path is child-process bounded,
   response/receipt bound, scoped before Fusion, and performs no reindex or
   Hermes dispatch. The 60-second parent wall reserves three seconds for cleanup
-  around an at-most-57-second child operation. Exact-main activation and a real
-  owner query passed at `61c2c3003bc4c2086f105f4c39effd499a026627` on 2026-08-27; later HEADs require their
-  own evidence. P1 throughput work may replace per-query cold
+  around an at-most-57-second child operation. The real OpenClaw/AgentDB
+  post-merge path completed at exact main `cfd1e0051`; a fresh owner query was
+  CURRENT/no-gap/no-reindex and immutable revalidation remained unchanged.
+  Later HEADs require their own evidence. P1 throughput work may replace per-query cold
   starts and process-local-only serialization with a supervised lease only if
   identical route, cleanup, and receipt proofs remain.
+- [ ] Close cross-process owner startup contention. Concurrent audit queries
+  can still fail closed with `HOLOINDEX_QUERY_SERVICE_PORT_IN_USE`; a supervised
+  owner lease/reuse boundary must remove that P1 scale limit without weakening
+  exact route, cleanup, or receipt proofs.
 - [ ] Add truthful post-commit feature-branch recall. The current same-HEAD
   authority intentionally rejects a branch commit beyond the sealed main
   generation; a bounded branch lexical/structural overlay or equivalent

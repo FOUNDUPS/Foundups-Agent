@@ -33,21 +33,25 @@ wsp_cycle(input="idle_automation", log=True)
   observation, one durable task per `origin/main` SHA, CAS worker claim,
   cross-process authority/SSD leases, non-rewind checkout update, atomic
   completion, and canonical receipt rehydration. The split-lease automatic
-  replica activation ordering is locally implemented and focused-GREEN; one
-  merged exact-main OpenClaw replay remains its production acceptance gate.
+  replica activation ordering passed a real broker-managed OpenClaw replay at
+  exact main `cfd1e0051`, including atomic AgentDB completion and immutable
+  post-query revalidation.
 
-### Exact-main Holo route replay gate (P0)
+### Exact-main Holo route replay gate (P0, completed at `cfd1e0051`)
 
-- Manual governed evidence at `a7302344` proves canonical generation
-  `sha256:d654414a...`, stable-route selection, and unchanged-replica query.
+- Historical manual evidence at `a7302344` proved generation
+  `sha256:d654414a...`; the automatic successor transaction completed at
+  `cfd1e0051` on generation `sha256:60d06274...`.
 - The predecessor OpenClaw task failed twice because owner admission ran before
   a current route existed and then self-contended under the outer authority
   lease.
-- Candidate order is first lease/refresh -> release -> activate/query -> second
+- Accepted order is first lease/refresh -> release -> activate/query -> second
   lease/final proof -> atomic AgentDB completion.
-- Next acceptance is one automatic route advance and completion at the exact
-  merged successor SHA; the historical a730 task remains truthful failure
-  evidence and is not rewritten.
+- AgentDB records the `cfd1e0051` task completed by `openclaw_supervisor`; a
+  fresh owner query returned CURRENT/no-gap/no-reindex and full immutable
+  revalidation preserved all 33 artifacts. The historical a730 task remains
+  truthful failure evidence and is not rewritten. Later HEADs require their
+  own exact-SHA transaction.
 
 ### WSP 62 Near-Term Remediation
 

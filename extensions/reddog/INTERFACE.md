@@ -39,10 +39,13 @@ and reserves three seconds for parent cleanup. It exposes only allowed scoped
 hit metadata after exact CURRENT repository, authority, generation, replica,
 and receipt verification; Fusion receives no route or owner credential.
 
-Exact-main activation and a real owner query passed at `61c2c3003bc4c2086f105f4c39effd499a026627` on
-2026-08-27; this evidence does not carry across commits. Per-query child startup and
-process-local-only serialization are explicit P1 scalability debt, and no
-outbound Hermes dispatch is enabled by this interface.
+Automatic exact-main maintenance, route activation, and AgentDB completion
+passed through the real OpenClaw supervisor at
+`cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9` on 2026-08-27. A subsequent
+normal owner query returned CURRENT/no-gap/no-reindex and full immutable
+revalidation was unchanged. This evidence does not carry across commits.
+Per-query child startup and process-local-only serialization are explicit P1
+scalability debt, and no outbound Hermes dispatch is enabled by this interface.
 
 ## Test and promotion interface
 
