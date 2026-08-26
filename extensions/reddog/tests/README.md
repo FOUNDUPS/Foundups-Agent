@@ -1,5 +1,15 @@
 # RedDog Extension Tests
 
+## 0.4.114 governed resident Holo usability
+
+The resident adapter regression, including its 60/57/3-second budget and
+authority semantics, is owned by the bridge module. Extension contracts pin
+version 0.4.114 and the authenticated backend closure: 1,343 files at digest
+`ba41d84612db22b5d24621c4b3ca8ea1c7a6e2f69ee131e963369fa12b30819e`.
+Historical commit-bound canary evidence at
+`61c2c3003bc4c2086f105f4c39effd499a026627` does not authorize this candidate
+or a later commit. The extension adds no Holo mutation or Hermes dispatch.
+
 ## 0.4.113 backend WSP 62 compatibility
 
 The 1,385-file generated backend closure at

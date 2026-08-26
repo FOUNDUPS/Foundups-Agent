@@ -11,21 +11,21 @@ missing, malformed, or different tuple returns
 `HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH` and cannot produce a success receipt.
 
 `GenerationBoundHoloIndexQueryAdapter.query(...)` is the canonical resident
-read-only worker adapter. It starts the one-shot script with `python -S -B`,
-permits at most 27 seconds for the child operation inside a 30-second parent
-wall, and retains three seconds for process cleanup. Lock wait consumes the
-same total budget. Success requires CURRENT semantic freshness, exact
-repository/authority HEAD and root equality, exact generation equality, and
-all four verified replica fields. The adapter re-verifies the one-shot receipt,
-filters allowed hits before limiting, and returns only a scoped receipt plus
-safe hit metadata; raw semantic buckets, route data, and nested one-shot
-receipts are not exposed to Fusion.
+read-only worker adapter. It starts the one-shot script with a runtime selected
+by the owner supervisor and `python -S -B`. Its scrubbed child environment retains required OS/runtime variables, exact Holo configuration, and vetted venv site-packages while excluding recognized credentials and Python overrides. At most
+57 seconds enter the child within a 60-second parent wall; lock wait shares that
+budget and three seconds remain for cleanup. A prior 27-second cold query timed
+out; the repaired path completed CURRENT in 32.5 seconds without claiming
+horizontal scale. Success requires exact CURRENT semantic HEAD/root/generation
+and all four replica fields. The adapter re-verifies the one-shot receipt,
+filters allowed hits before limiting, and returns only scoped safe hit metadata;
+raw semantic buckets, route data, and nested receipts do not enter Fusion.
 
-The lifecycle lock is process-local and the adapter starts one bounded child
-per query. This is a fail-closed phase-1 correctness boundary, not a claim of
-cross-process serialization or horizontally scalable throughput. A
-clean/current post-merge live-success canary remains an activation requirement;
-the dirty-authority probe establishes only fail-closed path reachability.
+`clean_workspace_head` requires `workspace_overlay_present=false`;
+`committed_head_only` permits a clean or overlaid caller through a separate
+configured same-HEAD authority. Exact binding/no-mutation checks remain.
+The lifecycle lock is process-local and starts one child per query; this is a
+phase-1 correctness boundary, not cross-process or horizontal scale. Historical evidence at `61c2c3003bc4c2086f105f4c39effd499a026627` does not authorize later HEADs.
 
 ## Receipt-bound artifact generation models
 

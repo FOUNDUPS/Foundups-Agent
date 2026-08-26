@@ -1,6 +1,22 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-08-27] - REDDOG CANDIDATE TEST-REGISTRY FRESHNESS
+
+- Regenerated the existing deterministic Git-tracked registry after CI found
+  the checked-in projection stale. The result is 1,585 registered tests with
+  268 quarantined: the Cisco skill-safety scanner-guard test now carries its
+  observed `process` capability and three already-tracked WRE truth suites are
+  registered.
+- `generate_test_registry.py --check` and the 45 focused registry/differential
+  tests pass. No quarantine, collection, shard, timeout, or authority policy
+  was relaxed.
+- CI then exposed that this README, already included in the simulator's core
+  CABR terminology guard, lacked either canonical expansion. Restored
+  **Consensus-Driven Autonomous Benefit Rate** and preserved the explicit
+  fail-closed `cabr_ready=false` boundary. The four-test terminology guard and
+  full 302-test simulator suite pass. (WSP 5/6/15/22/29/50/97)
+
 ### [2026-08-26] - EXECUTION-TRUTH AND PRODUCTION SKILLZ ADMISSION
 
 - Replaced truthy/coerced success with exact Boolean success plus typed effect

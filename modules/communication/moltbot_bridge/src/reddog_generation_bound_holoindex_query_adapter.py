@@ -26,6 +26,12 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter imp
     holoindex_hits,
     path_is_allowed,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (
+    _owner_python_runtime,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_sealed_holo_runtime import (
+    scrub_holo_child_environment,
+)
 
 
 QueryOnceRunner = Callable[..., Mapping[str, Any]]
@@ -59,16 +65,34 @@ _BOOLEAN_FIELDS = (
 )
 _MAX_PROCESS_STDOUT_BYTES = 8 * 1024 * 1024
 _MAX_PROCESS_STDERR_BYTES = 1024 * 1024
+_OWNER_QUERY_CONFIGURATION_KEYS = (
+    "HOLOINDEX_QUERY_SERVICE_URL", "HOLOINDEX_QUERY_SERVICE_TOKEN",
+    "REDDOG_HOLOINDEX_OWNER_AUTO_START", "HOLOINDEX_SSD_PATH",
+    "REDDOG_HOLOINDEX_QUERY_ROUTE_FILE", "REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT",
+    "REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT",
+)
+
+
+def _owner_query_environment(pythonpath_entries: Sequence[str]) -> dict[str, str]:
+    environment = scrub_holo_child_environment(os.environ)
+    for name in _OWNER_QUERY_CONFIGURATION_KEYS:
+        value = os.environ.get(name)
+        if value:
+            environment[name] = value
+    if pythonpath_entries:
+        environment["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
+    return environment
 
 
 def _capture_owner_process(
     command: Sequence[str], *, root: Path, payload: Mapping[str, Any],
     timeout_seconds: float, options: Mapping[str, Any],
+    environment: Mapping[str, str],
 ) -> tuple[bytes | None, str]:
     try:
         with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
             process = subprocess.run(
-                list(command), cwd=str(root), env=os.environ.copy(),
+                list(command), cwd=str(root), env=dict(environment),
                 input=json.dumps(payload, ensure_ascii=True).encode("utf-8"),
                 stdout=stdout, stderr=stderr, timeout=timeout_seconds,
                 check=False, shell=False, close_fds=True, **dict(options),
@@ -99,8 +123,15 @@ def _run_owner_query_once(
     )
     if script.parent != (root / "scripts").resolve(strict=False) or not script.is_file():
         return _failure(str(payload.get("query") or ""), "HOLOINDEX_OWNER_QUERY_SCRIPT_INVALID")
+    try:
+        python_executable, pythonpath_entries = _owner_python_runtime(sys.executable)
+    except (OSError, TypeError, ValueError):
+        return _failure(
+            str(payload.get("query") or ""),
+            "HOLOINDEX_OWNER_QUERY_PROCESS_FAILED",
+        )
     command = [
-        sys.executable, "-S", "-B", str(script),
+        python_executable, "-S", "-B", str(script),
         "--operation-timeout-seconds", str(operation_timeout_seconds),
     ]
     options: dict[str, Any] = {}
@@ -112,6 +143,7 @@ def _run_owner_query_once(
     stdout, process_error = _capture_owner_process(
         command, root=root, payload=payload,
         timeout_seconds=process_timeout_seconds, options=options,
+        environment=_owner_query_environment(pythonpath_entries),
     )
     if process_error or stdout is None:
         return _failure(str(payload.get("query") or ""), process_error)
@@ -209,6 +241,18 @@ def _owner_receipt_matches(result: Mapping[str, Any], query: str) -> bool:
     return dict(supplied) == dict(recomputed)
 
 
+def _semantic_authority_is_bound(result: Mapping[str, Any]) -> bool:
+    authority = result.get("semantic_evidence_authority")
+    overlay = result.get("workspace_overlay_present")
+    return bool(
+        isinstance(overlay, bool)
+        and (
+            authority == "committed_head_only"
+            or (authority == "clean_workspace_head" and overlay is False)
+        )
+    )
+
+
 def _successful_result_is_bound(result: Mapping[str, Any], query: Any) -> bool:
     if result.get("ok") is not True:
         return True
@@ -229,12 +273,7 @@ def _successful_result_is_bound(result: Mapping[str, Any], query: Any) -> bool:
         and result.get("no_holoindex_reindex_performed") is True
         and result.get("no_reindex") is True
         and result.get("no_authority_worktree_mutation_performed") is True
-        and isinstance(result.get("workspace_overlay_present"), bool)
-        and result.get("semantic_evidence_authority") == (
-            "committed_head_only"
-            if result.get("workspace_overlay_present") is True
-            else "clean_workspace_head"
-        )
+        and _semantic_authority_is_bound(result)
         and isinstance(result.get("raw_result"), Mapping)
         and _owner_receipt_matches(result, query)
     )
@@ -263,7 +302,7 @@ class GenerationBoundHoloIndexQueryAdapter:
 
     repo_root: Path
     query_once_runner: QueryOnceRunner | None = None
-    operation_timeout_seconds: float = 30.0
+    operation_timeout_seconds: float = 60.0
 
     def query(
         self, *, query: str, allowed_paths: Sequence[str], limit: int,

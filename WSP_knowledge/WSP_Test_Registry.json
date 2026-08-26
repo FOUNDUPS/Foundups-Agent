@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1582,
+  "total_tests": 1585,
   "quarantined_tests": 268,
   "tests": [
     {
@@ -11799,7 +11799,9 @@
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
       "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -18334,6 +18336,19 @@
       "description": "Tests for WRE_AUTONOMOUS_SLICE_VERIFIER_RUNTIME_PHASE1."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_execution_truth",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_execution_truth.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Fail-closed execution-truth contracts for the legacy WRE skill path."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_wre_git_commit_archive",
       "path": "modules/infrastructure/wre_core/tests/test_wre_git_commit_archive.py",
       "owner": "modules/infrastructure/wre_core",
@@ -18405,6 +18420,19 @@
       "description": "Strict provider-neutral WRE role Skillz tests."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_runtime_admission_truth",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Fail-closed runtime-admission contracts for production WRE Skillz."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_wre_skills_discovery",
       "path": "modules/infrastructure/wre_core/tests/test_wre_skills_discovery.py",
       "owner": "modules/infrastructure/wre_core",
@@ -18429,6 +18457,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for WRE Skills Loader - Skills 2.0 Hygiene\n\nWSP Compliance: WSP 5 (Test Coverage), WSP 96 (WRE Skills)"
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_telemetry_truth",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_telemetry_truth.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Regression guards for WRE token-telemetry truth boundaries."
     },
     {
       "id": "test::modules::infrastructure::wre_core::tests::test_wre_test_differential_runtime",
