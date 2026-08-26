@@ -17,3 +17,12 @@ public/kosei/**                    text eol=lf
 
 # Canonical generated registry is byte-compared on every platform.
 WSP_knowledge/WSP_Test_Registry.json text eol=lf
+
+# RedDog VSIX reproducibility: vsce packages working-tree bytes, so every
+# packaged text input must materialize as LF on every host.
+extensions/reddog/*.js text eol=lf
+extensions/reddog/start_operations_python_bootstrap.py text eol=lf
+extensions/reddog/package.json text eol=lf
+extensions/reddog/README.md text eol=lf
+extensions/reddog/LICENSE text eol=lf
+extensions/reddog/icon.png -text

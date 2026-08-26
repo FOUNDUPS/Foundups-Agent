@@ -1,5 +1,21 @@
 # RedDog ModLog
 
+## 2026-08-26 - Cross-platform VSIX byte reproducibility (0.4.112)
+
+- A post-merge package audit reproduced three different raw-byte totals from
+  the same Git tree: Windows CRLF materialization, a hybrid pre-commit tree,
+  and canonical LF blobs. The 67-file membership and 1 MiB cap were correct,
+  but the documented exact byte total was not portable.
+- Added repository-distributed `text eol=lf` rules for every packaged RedDog
+  text member and an explicit PNG binary exclusion. Package-surface receipt v2
+  now verifies effective attributes and exact bytes, rejects CRLF/bare CR, and
+  binds policy/content digests, 66 text files, one binary file, and the
+  host-observed raw-byte total without presenting it as a universal constant.
+- Updated stale 0.4.111 test documentation to the actual `d58c0098...786cb`
+  backend closure and removed the obsolete 134-test/965,288-byte claims.
+  The package gate must pass before direct `vsce package --no-dependencies`;
+  no parallel packager or dependency was introduced. (WSP 00/15/22/50/62/84/97)
+
 ## 2026-08-26 - Durable first-TURN link compatibility (0.4.111)
 
 - Rebound the 1,384-file authenticated backend closure after hardening the
@@ -9,8 +25,8 @@
 - Canonical staged-index registry governance is current at **1,582 tests /
   268 quarantined**.
 - Focused Python/backend-generator/registry evidence passes; the fast
-  14-member tier, 32-vector conversation tier, and deterministic package
-  surface pass at **67 files / 965,288 bytes**.
+  14-member tier, 32-vector conversation tier, and deterministic 67-file
+  package surface stay within the 1 MiB raw-byte cap.
 - The new explicit v2 first-TURN contract, binder, aggregate, scope-identity
   extraction, journal-store extension, and tests remain outside the VSIX import
   closure because the extension still has no resident service caller. Version

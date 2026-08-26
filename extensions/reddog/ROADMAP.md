@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.111 resident architect thin-client surface.
+Phase: RedDog 0.4.112 resident architect thin-client surface.
 
 Current implementation:
 
@@ -20,6 +20,9 @@ Current implementation:
 - [x] The durable first-turn resolution link atomically binds original empty-ID
   request identity to the authenticated resolved ID/revision 0 in the existing
   AgentDB journal and supports signed later-revision replay validation.
+- [x] RedDog package text materializes as LF across hosts through tracked Git
+  attributes; package receipt v2 binds 66 text files, one binary, and the raw
+  cap without treating one host's observed byte total as universal.
 - [ ] Wire the inert host aggregates, add immediate-CAS operation handlers, and
   thin VSIX/PFMall/phone adapters. The existing browser event remains
   presentation-only.

@@ -1,5 +1,19 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-26 - RedDog package EOL reproducibility (0.4.112)
+
+- Added exact and effective `.gitattributes` verification for 66 packaged text
+  files at `text eol=lf` and the packaged PNG at `-text`.
+- Upgraded `reddog_package_surface_receipt` to v2 with effective-policy and
+  sorted member-content digests, CR-byte rejection, LF mode, and text/binary
+  counts while retaining the measured working-tree byte total and 1 MiB cap.
+- Added hostile CRLF, bare-CR, missing/overridden-attribute cases and fresh
+  `core.autocrlf=true/false` index-materialization equivalence.
+- Made materialization fixtures exclusively owned through `mkdtemp` and added
+  a sparse over-cap member proving rejection before package-byte reads.
+- Removed host-specific raw-byte claims from current documentation; artifact
+  inspection remains authoritative for each built VSIX archive.
+
 ## 2026-08-26 - Durable first-TURN link compatibility (0.4.111)
 
 - Rebound the exact 1,384-file authenticated backend closure after atomic
@@ -7,8 +21,8 @@
   `d58c0098b3c873683becbce6e2228ba41841f111913ce72e72bf49eb1df786cb`.
 - Canonical staged-index registry: **1,582 tests / 268 quarantined**.
 - Candidate Python/backend-generator/registry evidence passes, alongside fast
-  `14/14`, conversation `32 passed`, and deterministic package
-  **67 files / 965,288 bytes**.
+  `14/14`, conversation `32 passed`, and a deterministic 67-file package
+  surface within the 1 MiB cap.
 - Version, package, generated-manifest, focused conversation, and release gates
   bind the VSIX to the backend slice without claiming a host caller, handler,
   immediate CAS, model/worker execution, or live adapter.

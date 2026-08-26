@@ -1,16 +1,27 @@
 # RedDog Extension Tests
 
+## 0.4.112 package EOL reproducibility
+
+The package contract now proves repository-distributed LF materialization for
+all 66 text entries and explicit binary treatment for `icon.png`. Receipt v2
+reports the observed working-tree bytes and the 1 MiB cap together with
+effective-policy and sorted member-content digests. Hostile CRLF, bare CR,
+missing/overridden attributes, and `core.autocrlf`-variant materializations are
+covered; an oversized member rejects during stat preflight before file reads,
+and exclusive temporary roots prevent fixture pre-seeding. Docs no longer
+treat a host-specific byte observation as universal.
+
 ## 0.4.111 durable first-TURN link compatibility
 
 The 1,384-file generated backend closure at
-`sha256:cb777a1a...d65e7dce` is rebound to the atomic two-FoundUp
+`sha256:d58c0098...786cb` is rebound to the atomic two-FoundUp
 capability/session authority seam. The explicit v2 link aggregate and its
 other new modules remain outside the extension import closure because no VSIX
 service caller exists. Package and release tests therefore prove compatibility,
 not live first-turn execution, handler/CAS wiring, or PFMall/phone transport.
 The canonical staged-index registry contains 1,582 tests / 268 quarantined.
-Focused Python/backend-generator/registry evidence is 134 passed; the package
-surface is 67 files / 965,288 bytes.
+Focused Python/backend-generator/registry evidence passed; the package surface
+is 67 files within the 1 MiB raw-byte cap.
 
 ## 0.4.110 trusted new-scope backend compatibility
 
@@ -344,10 +355,10 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | `test_backend_compatibility_preflight.js` | Pinned manifest, runtime dependency-closure integrity, intermediate junction rejection, WSP_62 ceilings, canonical containment, and content-free failure contracts |
 | `test_backend_compatibility_contract.js` | Independent executable roots, closure sentinels, pinned digest, runtime gate ordering, and allowlisted block projection |
 | `test_backend_compatibility_async.js` | Worker-thread preflight, event-loop availability, and fail-closed invalid-root behavior |
-| `test_package_manifest.js` | Static VS Code capability, publisher/version/main/activation, explicit default-off evaluation fallback, CSP wiring, exact ignore policy, and complete 63-file runtime closure |
-| `test_package_surface.js` | Two stable installed-VSCE listings equal the exact 67-file distributable surface and its raw regular-file closure stays within 1 MiB; release/package tier only |
+| `test_package_manifest.js` | Static VS Code capability, publisher/version/main/activation, explicit default-off evaluation fallback, CSP wiring, exact ignore/EOL policy, and complete 63-file runtime closure |
+| `test_package_surface.js` | Two stable installed-VSCE listings equal the exact 67-file distributable surface; effective attributes, hostile CR bytes, cross-`autocrlf` materialization, content digests, binary treatment, and the 1 MiB cap are verified; release/package tier only |
 | `test_webview_security.js` | Fresh nonce creation, deny-by-default CSP policy, immutable return value, and hostile source/nonce rejection |
-| `reddog_package_surface_contract.js` | Pinned runtime/package sets, static relative-require traversal, dynamic-worker roots, and shell-free installed-VSCE adapter |
+| `reddog_package_surface_contract.js` | Pinned runtime/package sets, static relative-require traversal, dynamic-worker roots, shell-free installed-VSCE adapter, effective Git-attribute proof, and exact member-byte hashing |
 | `test_authoritative_work_state_query.js` | Local authoritative-work classification, bridge failure handling, and no-Fusion routing |
 | `test_foundup_work_grounding.js` | Canonical registry identity resolution, evidence derivation, runtime binding, WSP 62, failure closure, and non-authority receipt |
 | `test_principal_memex_disclosure_source.js` | Exact disclosure shape, one-use SecretStorage deletion, malformed-source rejection, and no packet retention |
