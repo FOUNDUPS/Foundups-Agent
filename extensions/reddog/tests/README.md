@@ -1,5 +1,14 @@
 # RedDog Extension Tests
 
+## 0.4.110 trusted new-scope backend compatibility
+
+The 1,384-file generated backend closure at `sha256:3211a4e5...c8498` was
+rebound after the slice and adds only its required signer-context dependency.
+The resolver, authority-native create/recovery, and nonce fence remain outside
+the extension import closure because no runtime caller exists. First-turn
+journal linkage, handlers, models, workers, conversation CAS, and live
+VSIX/PFMall/phone traffic remain outside the release.
+
 ## 0.4.109 resident admission compatibility
 
 The authenticated backend closure remains 1,383 files and is rebound to

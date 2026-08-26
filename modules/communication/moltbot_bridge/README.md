@@ -344,39 +344,25 @@ generation/freshness receipt, FoundUp, grounding receipt, and intent.
 Conversation state and the pending capability do not grant work authority.
 Only a `foundup` scope may request the existing proposal-promotion chain.
 WRE/OpenClaw/Hermes dispatch, repository mutation, and merge remain downstream
-gates. `reddog_resident_conversation_scope_binding.py` now consumes one opaque
-authenticated-session capability and binds an existing `TURN`, `STATUS`, or
-`CANCEL` envelope to the exact current AgentDB record, revision receipt,
-record digest, session binding, and turn lineage. It returns content-free
-evidence plus an opaque one-use process-local reservation proof excluded from
-its serialized projection. The proof is issued atomically while the existing
-secret-backed verified scope authority is retired, re-verifies the exact scope
-record plus its full principal/session/credential/repository identity, and binds
-the canonical reservation identity; concurrent use or public
-binding digests cannot mint a second proof. It does not reserve CAS or mutate
-state.
-`reddog_resident_conversation_request_journal.py` validates that proof before
-the split reservation contract/store consumes it at the deepest AgentDB write
-boundary. The store's own clock rechecks request and scope expiry, so a caller
-cannot backdate the public reservation timestamp. It stores no operator text,
-principal, or FoundUp IDs;
-exact replay is idempotent, altered key/request/nonce reuse rejects, and a new
-insert atomically rechecks the current scope revision, digest, and revision
-receipt. SQLite uses an immediate write transaction; PostgreSQL locks the scope
-and global capacity rows. Unified mapping rows and indexed columns are checked
-against the canonical record. The reservation grants no CAS, model, dispatch,
-identity, or effect
-authority. `reddog_resident_conversation_admission.py` now composes strict
-request prevalidation, the existing current-generation signed-session lease,
-authority-native current-scope binding, and durable reservation into one
-fail-closed host operation for an existing conversation. The credential is
-passed only to the authority source, the generation lease remains held through
-reservation, and the consumed verified authority never becomes serialized
-state. This composition is inert until a host invokes it: it creates no
-endpoint and performs no conversation handler, CAS, model, or worker action.
-Live traffic still requires a host invocation adapter, trusted new-scope
-resolution, and operation handlers that repeat authenticated current-record
-CAS. The phase audits are under `docs/clarity/`.
+gates.
+
+For existing conversations, `reddog_resident_conversation_admission.py`
+composes strict request prevalidation, the current-generation signed-session
+lease, exact authenticated AgentDB scope binding, and a content-free durable
+replay reservation. The opaque parent and reservation child are one-use; the
+store rechecks current scope revision, receipt, expiry, and capacity under its
+backend lock. No operator text or identity value is journaled.
+
+`reddog_resident_conversation_new_scope_admission.py` now provides the separate
+trusted empty-ID `TURN` path. Exact v2 intent/request/grounding/FoundUp binding
+precedes the same generation lease and required E0 signer. Stable signed-session
+identity fences divergent nonce reuse; only a fully authenticated exact record
+may replay. The returned scope stores no raw operator text.
+
+Both aggregates are inert: they expose no endpoint and perform no handler,
+conversation CAS, model, or worker action. Live traffic still requires a durable
+first-turn resolution link, host adapter, and immediate authenticated CAS.
+Detailed locking, failure, and recovery audits are under `docs/clarity/`.
 
 ## Upstream Agent Execution Boundary
 

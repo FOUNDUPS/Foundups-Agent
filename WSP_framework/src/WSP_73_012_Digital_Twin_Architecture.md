@@ -1,7 +1,7 @@
 # WSP 73: 012 Digital Twin / RedDog Architecture Protocol
 
 - **Status:** Active
-- **Version:** 2.0
+- **Version:** 2.1
 - **Updated:** 2026-08-26
 - **Purpose:** Define the identity, memory, conversation, orchestration, and
   authority boundaries for a principal-scoped 0102 Digital Twin presented as
@@ -201,7 +201,7 @@ chat widget alone does not prove a Progressive Web Agent.
 | Deterministic RedDog conversation classification and effect ceiling | Implemented |
 | VSIX RedDog thin client and governed model calls | Implemented |
 | HoloIndex generation-bound read-only query integration | Implemented with freshness/route preconditions |
-| AgentDB conversation-scope contracts and authenticated existing-scope admission | Implemented building blocks |
+| AgentDB existing-scope admission and trusted new-scope persistence | Implemented building blocks; first TURN not executed |
 | Principal Memex structural projection and bounded resident admission | Implemented building blocks |
 | Static evaluation fallback isolated from action planning | Implemented |
 | Authenticated durable resident conversation service | Not implemented |
@@ -213,8 +213,8 @@ chat widget alone does not prove a Progressive Web Agent.
 
 ## 11. Phase gates
 
-1. Bind the existing conversation envelope to authenticated new/existing
-   session authority, durable idempotency, AgentDB CAS, and operation handlers.
+1. Bind each empty-ID first request durably to its resolved conversation ID and
+   revision, then add immediate authenticated AgentDB CAS and operation handlers.
 2. Connect VSIX and p.fMALL/phone thin-client adapters to that one service.
 3. Add source-labelled, governed Principal/FoundUp Memex recall.
 4. Bind proposal-to-work promotion to current OpenClaw/WRE authority receipts.

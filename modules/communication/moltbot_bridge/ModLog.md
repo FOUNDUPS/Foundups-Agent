@@ -1,5 +1,35 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-26: Trusted new-conversation scope admission Phase 1
+
+- Added the inert empty-ID `TURN` resolution and current-generation admission
+  aggregate. Exact `reddog_intent.v2`, request/work-focus, grounding receipt,
+  and registered FoundUp equality are established before credential use; the
+  E0 signer and signed-generation lease then cover one authority-native AgentDB
+  scope create or authenticated exact recovery.
+- Extracted signer-context loading from the session authority source to retain
+  WSP 62 bounds. The new aggregate requires a real record-signing context but
+  does not request Principal Memex, journal or execute the first turn, reserve
+  conversation CAS, invoke a model/worker, expose traffic, or grant effects.
+- Independent WSP 97 falsification returned **NO-GO** because the initial tests
+  fixed the session binding while production derived it from intent. Divergent
+  first turns could therefore create different conversation IDs with one nonce.
+  The repair uses the signed credential's stable session ID only on the new
+  authority-native path, preserves legacy/root-create identity behavior, and
+  adds real signed-session divergence tests. The audit also prompted an explicit
+  scope-lifetime check against request expiry; no limit was weakened.
+- The repaired-byte independent audit returned **GO** with 46 focused passes.
+  The local repaired authenticated state/session/signing/tamper/admission/
+  binding/journal matrix is **127 passed** and Ruff is clean. The staged
+  registry is current at **1,581 / 268 quarantined**. The extension backend
+  closure is **1,384 files** at `3211a4e5...c8498`; only the extracted signing
+  context is imported there, while this unwired aggregate remains outside it.
+- WSP 15: C4/I5/D4/Impact5 = **18/P0**. The governed Holo query failed closed
+  once on authority/workspace HEAD mismatch (`e656fd76...` versus
+  `10d85a92...`); no retry, reindex, route repair, or mutation occurred. Direct
+  exact retrieval supplied the bounded evidence set. WSP
+  00/15/22/50/62/84/97.
+
 ## 2026-08-26: Current-session resident admission aggregate Phase 1
 
 - Added one inert host operation for existing conversations that composes the

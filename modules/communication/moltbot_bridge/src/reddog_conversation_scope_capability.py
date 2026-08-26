@@ -232,6 +232,45 @@ def conversation_scope_authority_view(authority: Any) -> Mapping[str, Any] | Non
     }
 
 
+def consume_verified_scope_authority_for_scope_creation(
+    authority: Any,
+    *,
+    active_foundup_id: str,
+    discussion_foundup_ids: tuple[str, ...],
+    scope_kind: str,
+    now_epoch: int,
+) -> VerifiedConversationScopeAuthority | None:
+    """Atomically retire one parent into an exact new-scope operation child."""
+
+    if type(authority) is not VerifiedConversationScopeAuthority:
+        return None
+    child = object.__new__(VerifiedConversationScopeAuthority)
+    with _LOCK:
+        seal = _AUTHORITIES.pop(authority, None)
+        try:
+            admitted = bool(
+                seal is not None
+                and type(now_epoch) is int
+                and 0 <= now_epoch < seal.expires_at
+                and scope_kind == seal.authorized_scope_kind
+                and active_foundup_id == seal.authorized_active_foundup_id
+                and discussion_foundup_ids
+                == seal.authorized_discussion_foundup_ids
+                and scope_request_authorized(
+                    scope_kind=scope_kind,
+                    active_foundup_id=active_foundup_id,
+                    discussion_foundup_ids=discussion_foundup_ids,
+                    allowed_foundup_ids=seal.foundup_scope,
+                )
+            )
+        except Exception:
+            admitted = False
+        if not admitted:
+            return None
+        _AUTHORITIES[child] = seal
+    return child
+
+
 def consume_verified_scope_authority_for_request_journal(
     authority: Any,
     *,
@@ -426,6 +465,7 @@ __all__ = [
     "VerifiedConversationScopeAuthority",
     "consume_conversation_scope_capability",
     "consume_resident_conversation_request_journal_authority",
+    "consume_verified_scope_authority_for_scope_creation",
     "consume_verified_scope_authority_for_request_journal",
     "conversation_scope_authority_view", "discard_conversation_scope_capability",
     "resident_conversation_request_journal_authority_matches",

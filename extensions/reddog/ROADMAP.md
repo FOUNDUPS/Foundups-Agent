@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.109 resident architect thin-client surface.
+Phase: RedDog 0.4.110 resident architect thin-client surface.
 
 Current implementation:
 
@@ -14,9 +14,12 @@ Current implementation:
 - [x] Existing-conversation admission now binds the envelope to verified
   current-generation session authority and current AgentDB state, then stores
   a content-free replay reservation without reserving conversation CAS.
-- [ ] Wire the inert host aggregate, trusted new-scope resolution, immediate-CAS
-  operation handlers, and thin VSIX/PFMall/phone adapters. The existing browser
-  event remains presentation-only.
+- [x] Trusted empty-ID TURN resolution and current-generation E0 scope
+  persistence bind exact intent/request/grounding/FoundUp identity and reject
+  divergent nonce replay without retaining raw operator text.
+- [ ] Add the durable first-turn resolution link, wire both inert host
+  aggregates, add immediate-CAS operation handlers, and thin VSIX/PFMall/phone
+  adapters. The existing browser event remains presentation-only.
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
 

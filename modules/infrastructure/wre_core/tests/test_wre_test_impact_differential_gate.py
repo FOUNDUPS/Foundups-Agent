@@ -209,7 +209,7 @@ def test_receipt_is_deterministic_side_effect_free_and_full_digest() -> None:
     assert first.no_repository_mutation_performed is True
 
 
-def test_protocols_bind_wsp15_economics_and_truth_boundary() -> None:
+def test_protocols_bind_wsp15_economics_test_reuse_and_truth_boundary() -> None:
     root = Path(__file__).resolve().parents[4]
     wsp6 = (root / "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md").read_text(encoding="utf-8")
     wsp97 = (root / "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md").read_text(encoding="utf-8")
@@ -218,7 +218,31 @@ def test_protocols_bind_wsp15_economics_and_truth_boundary() -> None:
         assert phrase in wsp6
     for phrase in ("Do I need it?", "Can I afford it?", "Can I live without it now?", "SPECIFIED_NOT_IMPLEMENTED"):
         assert phrase in wsp97
-    assert contract["version"] == "1.8"
+    assert "Test Inventory / Reuse Gate" in wsp97
+    assert contract["version"] == "1.9"
+    reuse_gate = contract["test_inventory_reuse_gate"]
+    assert reuse_gate["required_before_test_authoring"] is True
+    assert reuse_gate["applies_when"] == ["create", "modify", "replace", "expand"]
+    assert reuse_gate["authorities"] == ["WSP_22", "WSP_50", "WSP_84", "WSP_6"]
+    assert reuse_gate["required_retrieval"] == [
+        "HoloIndex query for target module, behavior or contract, and likely test vocabulary",
+        "target module tests/TestModLog.md when present",
+        "target module tests/README.md when present",
+        "closest existing tests, fixtures, and helpers",
+    ]
+    assert reuse_gate["reuse_order"] == [
+        "reuse or extend an existing test for the same behavior or contract",
+        "add an edge case to the existing file for the same pipeline or fixture",
+        "create a new test file only for a materially distinct subsystem or contract",
+    ]
+    assert "active tests exist without" in reuse_gate["missing_testmodlog_rule"]
+    assert "concrete HoloIndex search parameters" in reuse_gate["worker_prompt_requirement"]
+    assert reuse_gate["failure_conditions"] == [
+        "new test file without required retrieval",
+        "duplicate coverage where an existing test could be cleanly extended",
+        "active test inventory materially diverges from tests/TestModLog.md",
+        "historical aggregate pass count reported as fresh without fresh execution evidence",
+    ]
 
 
 def test_framework_and_knowledge_protocol_mirrors_match() -> None:

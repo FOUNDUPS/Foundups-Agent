@@ -13,6 +13,7 @@ from modules.ai_intelligence.digital_twin.src.resident_conversation_transport_co
 from modules.communication.moltbot_bridge.src.reddog_conversation_session_authority_source import (
     ConversationSessionAuthoritySourceError,
     lease_current_generation_conversation_session,
+    public_conversation_session_authority_reason,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
@@ -31,21 +32,6 @@ from modules.communication.moltbot_bridge.src.reddog_resident_conversation_scope
 
 
 UNAVAILABLE_REASON = "resident_conversation_admission_unavailable"
-SESSION_SOURCE_REJECTION_REASONS = frozenset(
-    {
-        "conversation_session_authority_source_missing",
-        "conversation_session_scope_delegation_failed",
-        "conversation_session_authority_verification_failed",
-        "conversation_session_authority_scope_rejected",
-        "conversation_session_expected_binding_mismatch",
-        "conversation_session_signer_config_unavailable",
-        "conversation_session_signer_policy_unavailable",
-        "conversation_session_signer_profile_unavailable",
-        "conversation_session_signer_socket_unavailable",
-        "conversation_session_intent_binding_invalid",
-        "conversation_session_repository_identity_unavailable",
-    }
-)
 
 
 def reserve_current_generation_resident_conversation_request(
@@ -119,11 +105,8 @@ def _request_rejection_reason(
 def _session_source_rejection_reason(
     error: ConversationSessionAuthoritySourceError,
 ) -> str:
-    return (
-        error.reason
-        if type(error.reason) is str
-        and error.reason in SESSION_SOURCE_REJECTION_REASONS
-        else UNAVAILABLE_REASON
+    return public_conversation_session_authority_reason(
+        error, unavailable_reason=UNAVAILABLE_REASON
     )
 
 
