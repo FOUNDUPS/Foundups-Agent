@@ -40,15 +40,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_principal_authority import (
     load_current_generation_principal_authority_resolver,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_config_loader import (
-    load_current_generation_signer_config,
-)
-from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
-    build_reddog_isolated_signer_socket_client,
-)
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
-    ConversationScopeSignerPolicy,
     ConversationScopeSigningContext,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_session_signing_context import (
+    ConversationSessionSigningContextError,
+    load_conversation_session_signing_context as _conversation_signing_context,
 )
 from modules.communication.moltbot_bridge.src.reddog_principal_memex_live_resident_source_supply import (
     PrincipalMemexSessionAuthorization,
@@ -59,6 +56,21 @@ from modules.communication.moltbot_bridge.src.reddog_principal_memex_live_reside
 
 OWNER_CONFIG_ENV = "REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH"
 AUTHORITY_RECEIPT_SCHEMA = "reddog_conversation_session_authority_receipt.v1"
+SESSION_SOURCE_REJECTION_REASONS = frozenset(
+    {
+        "conversation_session_authority_source_missing",
+        "conversation_session_scope_delegation_failed",
+        "conversation_session_authority_verification_failed",
+        "conversation_session_authority_scope_rejected",
+        "conversation_session_expected_binding_mismatch",
+        "conversation_session_signer_config_unavailable",
+        "conversation_session_signer_policy_unavailable",
+        "conversation_session_signer_profile_unavailable",
+        "conversation_session_signer_socket_unavailable",
+        "conversation_session_intent_binding_invalid",
+        "conversation_session_repository_identity_unavailable",
+    }
+)
 
 
 class ConversationSessionAuthoritySourceError(ValueError):
@@ -67,6 +79,19 @@ class ConversationSessionAuthoritySourceError(ValueError):
     def __init__(self, reason: str) -> None:
         super().__init__(reason)
         self.reason = reason
+
+
+def public_conversation_session_authority_reason(
+    error: ConversationSessionAuthoritySourceError, *, unavailable_reason: str,
+) -> str:
+    """Project only an allowlisted session-source reason."""
+
+    return (
+        error.reason
+        if type(error.reason) is str
+        and error.reason in SESSION_SOURCE_REJECTION_REASONS
+        else unavailable_reason
+    )
 
 
 @dataclass(frozen=True)
@@ -95,6 +120,7 @@ def lease_current_generation_conversation_session(
     owner_config_path: str,
     now_epoch: int,
     include_principal_scope_capability: bool = False,
+    require_record_signing_context: bool = False,
 ) -> Iterator[VerifiedResidentConversationSession]:
     """Hold current-generation authority through one resident admission."""
 
@@ -125,6 +151,7 @@ def lease_current_generation_conversation_session(
             session_binding=binding,
             now_epoch=now_epoch,
             include_principal_scope_capability=include_principal_scope_capability,
+            require_record_signing_context=require_record_signing_context,
         )
         try:
             yield session
@@ -148,7 +175,7 @@ def _authenticate_and_consume(
     *, repo_root: Path, selection: Mapping[str, Any], serialized_credential: str,
     repo_full_name: str, intent: Mapping[str, Any], requested_foundup: str,
     grounding_receipt_id: str, session_binding: str, now_epoch: int,
-    include_principal_scope_capability: bool,
+    include_principal_scope_capability: bool, require_record_signing_context: bool,
 ) -> tuple[
     VerifiedResidentConversationSession,
     VerifiedConversationScopeAuthority,
@@ -159,7 +186,9 @@ def _authenticate_and_consume(
         serialized_credential=serialized_credential,
         repo_full_name=repo_full_name, session_binding=session_binding,
         now_epoch=now_epoch,
-        require_signing_context=include_principal_scope_capability,
+        require_signing_context=(
+            include_principal_scope_capability or require_record_signing_context
+        ),
     )
     foundup_capability, principal_capability = _scope_capabilities(
         capability, include_principal_scope_capability
@@ -222,6 +251,8 @@ def _authenticate_scope(
             now_epoch=int(now_epoch),
             record_signing_context=signing_context,
         )
+    except ConversationSessionSigningContextError as exc:
+        raise ConversationSessionAuthoritySourceError(exc.reason) from exc
     except Exception as exc:
         raise ConversationSessionAuthoritySourceError(
             "conversation_session_authority_verification_failed"
@@ -238,8 +269,7 @@ def _verified_session(
     *, authority: Any, credential: Any, intent: Mapping[str, Any],
     selection: Mapping[str, Any], grounding_receipt_id: str,
     principal_capability: PrincipalContextReadConversationScopeCapability | None,
-    principal_resolver: PrincipalAuthorityResolver,
-    runtime_root: Path | None,
+    principal_resolver: PrincipalAuthorityResolver, runtime_root: Path | None,
 ) -> VerifiedResidentConversationSession:
     if authority is None:
         raise ConversationSessionAuthoritySourceError(
@@ -273,7 +303,7 @@ def _verified_session(
         view=view,
         runtime_root=runtime_root,
     )
-    session = VerifiedResidentConversationSession(
+    return VerifiedResidentConversationSession(
         principal_id=credential.principal_id,
         principal_provider=credential.principal_provider,
         foundup_scope=credential.foundup_scope,
@@ -285,7 +315,6 @@ def _verified_session(
         authority=authority,
         principal_memex_authorization=principal_authorization,
     )
-    return session
 
 
 def _principal_authorization(
@@ -312,82 +341,6 @@ def _principal_authorization(
         ),
         runtime_root=runtime_root,
     )
-
-
-def _conversation_signing_context(
-    *,
-    repo_root: Path,
-    selection: Mapping[str, Any],
-    serialized_credential: str,
-    required: bool,
-) -> tuple[ConversationScopeSigningContext | None, Path | None]:
-    try:
-        config = load_current_generation_signer_config(
-            repo_root=repo_root, selection=selection
-        )
-    except Exception:
-        if not required:
-            return None, None
-        raise ConversationSessionAuthoritySourceError(
-            "conversation_session_signer_config_unavailable"
-        )
-    policy = config.conversation_scope_signer_policy
-    if isinstance(policy, Mapping):
-        policy = ConversationScopeSignerPolicy(**dict(policy))
-    if not isinstance(policy, ConversationScopeSignerPolicy):
-        if not required:
-            return None, None
-        raise ConversationSessionAuthoritySourceError(
-            "conversation_session_signer_policy_unavailable"
-        )
-    if not _has_exact_signer_profile(config=config, policy=policy):
-        if not required:
-            return None, None
-        raise ConversationSessionAuthoritySourceError(
-            "conversation_session_signer_profile_unavailable"
-        )
-    built = build_reddog_isolated_signer_socket_client(
-        repo_root=repo_root,
-        socket_path=config.socket_path,
-        timeout_s=min(float(config.timeout_s), 30.0),
-        max_response_bytes=int(config.max_response_bytes),
-    )
-    if built.accepted is not True or built.client is None:
-        if not required:
-            return None, None
-        raise ConversationSessionAuthoritySourceError(
-            "conversation_session_signer_socket_unavailable"
-        )
-    return (
-        ConversationScopeSigningContext(
-            signer=built.client,
-            signer_public_key=policy.signer_public_key,
-            key_epoch=policy.key_epoch,
-            serialized_session_credential=serialized_credential,
-        ),
-        Path(config.runtime_root).resolve(),
-    )
-
-
-def _has_exact_signer_profile(
-    *, config: Any, policy: ConversationScopeSignerPolicy
-) -> bool:
-    profiles = tuple(config.key_provider_profiles) or (
-        (config.key_provider_profile,) if config.key_provider_profile else ()
-    )
-    matches = tuple(
-        item
-        for item in profiles
-        if _profile_field(item, "expected_public_key") == policy.signer_public_key
-        and _profile_field(item, "expected_key_epoch") == policy.key_epoch
-    )
-    return len(matches) == 1
-
-
-def _profile_field(profile: Any, name: str) -> str:
-    if isinstance(profile, Mapping):
-        return str(profile.get(name) or "")
-    return str(getattr(profile, name, "") or "")
 
 
 def _authority_receipt(
@@ -480,7 +433,8 @@ def _git_config_path(repo_root: Path) -> Path:
 
 __all__ = [
     "AUTHORITY_RECEIPT_SCHEMA", "ConversationSessionAuthoritySourceError",
+    "SESSION_SOURCE_REJECTION_REASONS",
     "VerifiedResidentConversationSession",
     "lease_current_generation_conversation_session",
-    "owner_config_from_environment",
+    "owner_config_from_environment", "public_conversation_session_authority_reason",
 ]

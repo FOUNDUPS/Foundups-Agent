@@ -127,35 +127,15 @@ cannot reuse the backend. Specialized proposal, control-loop, manifest,
 verified-outcome, conversation, and peer-handshake policies retain their own
 domain-specific validation.
 ## Authenticated RedDog conversation scope
-`authenticate_conversation_scope()` derives the principal only from a verified `sess.v1` subject and returns an opaque one-use capability. Create, resume, and advance persist bounded authenticated state in AgentDB with insert/CAS, expiry, and turn lineage. Scope schema v3 supports `foundup`, `principal`, and `comparison`; only FoundUp scope retains grounded evidence/snapshot/HEAD/Holo bindings or may later request work promotion.
 
-`bind_resident_conversation_request_to_authenticated_scope(store, capability, request, now_epoch)` consumes that capability and admits one existing `TURN`, `STATUS`, or `CANCEL` envelope only after rechecking envelope freshness, current AgentDB record shape/digest, record authentication, principal/session/scope equality, expiry, exact revision, and turn lineage. Its serialized `reddog_resident_conversation_scope_binding.v1` result contains only opaque request/state digests and explicit no-authority flags. The deepest capability operation atomically retires the live secret-backed verified parent, re-verifies the exact current record, and issues at most one non-constructible child bound to the canonical reservation identity; the child is excluded from `to_dict()`. `reserve_bound_resident_conversation_request(journal, request, binding, now_epoch)` validates that child, and the AgentDB store consumes it before any database access while using its owned clock to fence request and scope expiry. It then stores one content-free `reddog_resident_conversation_request_reservation.v1` replay fence. Exact retries return the original reservation; divergent global key/request/nonce reuse, corrupt JSON/digest/index columns, scope expiry/change or backdating, malformed store output, unsupported backends, or capacity-counter drift rejects. SQLite serializes with `BEGIN IMMEDIATE`; PostgreSQL locks the current scope and global counter rows with `FOR UPDATE`; both use portable `ON CONFLICT DO NOTHING`. Neither function returns operator text, reserves conversation CAS, mutates conversation state, calls a model, dispatches work, or grants identity/effect authority. Empty conversation IDs reject until trusted new-scope resolution exists; every handler must re-authenticate current state and repeat AgentDB CAS immediately before mutation.
+`authenticate_conversation_scope()`, create/resume/advance, the existing-scope binder, durable request journal, and `reserve_current_generation_resident_conversation_request(...)` form the authenticated AgentDB existing-conversation path.
+It consumes opaque authority, verifies current record/revision/turn lineage, and returns content-free evidence without reserving conversation CAS or granting effects.
 
-`bind_resident_conversation_request_to_verified_scope_authority(...)` is the
-authority-native sibling used after the production session source has already
-consumed the root credential capability. It accepts only a still-registered
-`VerifiedConversationScopeAuthority`, verifies that authority against the exact
-current record and its full principal/session/credential/repository identity,
-atomically retires it while issuing the reservation child, and retires it on
-every rejection path. A directly allocated opaque object or an authority for another session
-cannot bind.
+`resolve_resident_conversation_new_scope_request(...)` plus `create_current_generation_resident_conversation_scope(...)` form the separate empty-ID TURN path. Exact v2 intent/request/grounding/FoundUp bindings precede the current-generation E0 lease; signed session identity fences nonce divergence and exact authenticated recovery is the only replay accepted.
 
-`reserve_current_generation_resident_conversation_request(...)` is the inert
-host aggregate. It rejects malformed, stale, and new-scope requests before
-credential leasing; then holds
-`lease_current_generation_conversation_session(...)` across authority-native
-binding and durable journal reservation. Stable authority-source failures are
-preserved and all unexpected failures map to
-`resident_conversation_admission_unavailable`. The result is the existing
-content-free reservation contract. This API does not parse network traffic,
-create scopes, execute TURN/STATUS/CANCEL handlers, reserve conversation CAS,
-invoke models, or dispatch workers; no live host currently calls it.
+`authenticate_signed_conversation_scope()` remains the production credential source; legacy HMAC is test/backward-compatible only. `prepare_conversation_work_context()` and proposal promotion remain later, independently authorized stages.
 
-`prepare_conversation_work_context()` binds one current revision to a verified resident intent. Backend determination rejects stale scope before a model call. `commit_pending_conversation_work_proposal()` CAS-stores one exact FIX preview, and `verify_pending_conversation_work_proposal()` issues its one-use capability. Signed WSP 15 promotion additionally rechecks current record, FoundUp, Memex, model, and principal signature. Neither state nor capability grants work authority.
-
-`authenticate_signed_conversation_scope()` is the production editor source: it uses the current-generation public key and enforces repository, audience, transport, TTL, principal, and FoundUp scope. The credential never enters AgentDB, model context, receipts, logs, or child env. Principal-signed scope v3 persists only through the isolated E0 signer; v2 fails closed. AgentDB stages unsigned payload as non-authoritative pending state and publishes only a matching E0 response. Exact replay supports crash recovery; altered content, rollback/fork, nonce replay, stale authority, wrong key epoch, forged peer metadata, or missing policy/resolver/anchor rejects. Restart requires the same valid credential plus signature and attestation verification.
-
-Legacy intake HMAC remains test/backward-compatible and grants no work or repository authority. Config v3 is the only bootable schema. The public signer supplier remains capped at 16 KiB; the reviewed conversation bootstrap uses 160 KiB rather than weakening signer validation.
+Neither aggregate exposes traffic, executes a first turn or handler, invokes a model/worker, or grants work authority. Every future mutation must re-authenticate current state and perform immediate AgentDB CAS. Detailed assumptions, failure modes, locking, expiry, and recovery contracts are in `docs/clarity/REDDOG_RESIDENT_CONVERSATION_SERVICE_BINDING_PHASE1.md`, `REDDOG_RESIDENT_CONVERSATION_REQUEST_IDEMPOTENCY_PHASE1.md`, `REDDOG_RESIDENT_CONVERSATION_ADMISSION_AGGREGATE_PHASE1.md`, and `REDDOG_RESIDENT_CONVERSATION_NEW_SCOPE_ADMISSION_PHASE1.md`.
 
 ## Public API
 ### Architect proposal validity and execution readiness

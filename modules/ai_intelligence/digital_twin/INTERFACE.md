@@ -54,14 +54,18 @@ The envelope is deliberately untrusted and zero-authority. It has no fields for
 principal, FoundUp, credential, provider/model, effect ceiling, or work
 authority. The resident communication layer now binds an existing-conversation
 envelope to one consumed session capability and the exact authenticated
-AgentDB revision. The resulting content-free evidence still grants neither
-identity nor effect authority, reserves no CAS, and provides no durable replay
-enforcement.
+AgentDB revision, then durably stores a content-free replay fence. A separate
+trusted empty-ID TURN aggregate verifies exact v2 intent/request/grounding/
+FoundUp equality, holds current signed generation plus E0 signer authority, and
+creates or exactly recovers one content-minimized AgentDB scope. Signed session
+identity prevents per-intent binding changes from splitting one client nonce.
+Neither result grants effect authority or reserves conversation CAS.
 
 This interface does not expose an HTTP endpoint, authenticate a session, mutate
 AgentDB, invoke a model, or dispatch work. VSIX/PFMall adapters remain gated on
-trusted new-scope resolution, a durable idempotency journal, operation handlers,
-and shared cross-surface vectors.
+a durable first-turn request-to-resolved-conversation journal link, host wiring,
+operation handlers with immediate authenticated CAS, and shared cross-surface
+vectors.
 
 ---
 

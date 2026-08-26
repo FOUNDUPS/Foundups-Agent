@@ -23,6 +23,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_session_author
     ConversationSessionAuthoritySourceError,
     lease_current_generation_conversation_session,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_session_signing_context import (
+    ConversationSessionSigningContextError,
+)
 from modules.communication.moltbot_bridge.src.reddog_conversation_session_credential import (
     AUDIENCE,
     MODE,
@@ -135,6 +138,7 @@ def _install_current_generation(
 def _lease(
     monkeypatch, *, credential: str | None = None, intent: dict | None = None,
     include_principal_scope_capability: bool = False,
+    require_record_signing_context: bool = False,
 ):
     return lease_current_generation_conversation_session(
         repo_root=REPO_ROOT,
@@ -144,6 +148,7 @@ def _lease(
         owner_config_path="O:/runtime/owner.json",
         now_epoch=NOW,
         include_principal_scope_capability=include_principal_scope_capability,
+        require_record_signing_context=require_record_signing_context,
     )
 
 
@@ -178,6 +183,30 @@ def test_principal_memex_requests_a_distinct_one_use_scope_capability(monkeypatc
         assert not hasattr(session, "principal_scope_capability")
         assert not hasattr(session, "principal_resolver")
     assert principal_memex_session_runtime_root(authorization) is None
+
+
+def test_record_signing_context_is_independently_required(monkeypatch) -> None:
+    _install_current_generation(monkeypatch, _record())
+    calls: list[dict[str, object]] = []
+
+    def unavailable(**kwargs):
+        calls.append(kwargs)
+        raise ConversationSessionSigningContextError(
+            "conversation_session_signer_policy_unavailable"
+        )
+
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_conversation_session_authority_source._conversation_signing_context",
+        unavailable,
+    )
+    with pytest.raises(
+        ConversationSessionAuthoritySourceError,
+        match="conversation_session_signer_policy_unavailable",
+    ):
+        with _lease(monkeypatch, require_record_signing_context=True):
+            pass
+    assert calls and calls[0]["required"] is True
 
 
 @pytest.mark.parametrize(

@@ -1,4 +1,12 @@
 # TestModLog - wre_core/tests
+## 2026-08-26: WSP 97 v1.9 test-reuse machine-contract mirror
+- Extended the existing WSP 6/15/97 protocol-alignment regression rather than
+  creating a parallel test file. It now binds JSON version 1.9 and the exact
+  test-inventory/reuse authorities, four retrieval duties, three reuse choices,
+  and four fail-closed conditions already approved in canonical Markdown.
+- Preserved the existing framework/knowledge byte-identity assertion. This is
+  a docs-contract test only; no WRE execution or runtime policy changed.
+
 ## 2026-08-23: HXA4 authenticated commander fixture alignment
 - Updated the real-Hermes dry-run fixture to carry the authenticated commander
   fact required by the hardened OpenClaw FoundUp mutation gate.

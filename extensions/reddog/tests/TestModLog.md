@@ -1,5 +1,18 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-26 - Trusted new-scope backend compatibility (0.4.110)
+
+- Rebound the authenticated backend closure after the repaired new-scope slice;
+  only the extracted signer-context dependency entered the extension import
+  graph. The unwired resolver/admission aggregate remains outside the closure.
+  Closure: **1,384 files** at
+  `3211a4e5c83d7a8fca27ec7155933659164587fa5ca9813899d3dc79b51c8498`;
+  registry: **1,581 / 268 quarantined**.
+- Backend Python evidence includes 17 focused and 127 adjacent passes; the
+  repaired-byte independent WSP 97 audit is GO with 46 focused passes. The
+  initial independent NO-GO and production-shaped nonce-split regression remain
+  recorded rather than erased.
+
 ## 2026-08-26 - Resident admission compatibility regression (0.4.109)
 
 - Rebound the exact 1,383-file backend closure and extension version contract

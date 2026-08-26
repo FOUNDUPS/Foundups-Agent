@@ -680,7 +680,12 @@ def test_canonical_contract_declares_repository_evidence_validator() -> None:
     contract = load_contract(DEFAULT_CONTRACT_PATH)
     validator = contract["wsp_97"]["validator"]
 
-    assert contract["wsp_97"]["version"] == "1.8"
+    assert contract["wsp_97"]["version"] == "1.9"
+    reuse_gate = contract["wsp_97"]["test_inventory_reuse_gate"]
+    assert reuse_gate["required_before_test_authoring"] is True
+    assert reuse_gate["applies_when"] == ["create", "modify", "replace", "expand"]
+    assert "active tests exist without" in reuse_gate["missing_testmodlog_rule"]
+    assert "concrete HoloIndex search parameters" in reuse_gate["worker_prompt_requirement"]
     assert validator["status"] == "active_repository_evidence_validation"
     assert validator["entrypoint"] == "tools/wsp97_execution_validator.py"
     assert validator["receipt_schema_version"] == SCHEMA_VERSION

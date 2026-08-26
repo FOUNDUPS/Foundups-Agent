@@ -1,5 +1,20 @@
 # RedDog ModLog
 
+## 2026-08-26 - Trusted new-scope backend compatibility (0.4.110)
+
+- Pinned the authenticated backend closure after the trusted empty-ID TURN
+  slice; only its extracted signer-context dependency entered the extension
+  import graph. The unwired resolver/admission aggregate remains outside the
+  closure. Real signed-session regressions prove binding changes cannot split
+  one nonce into multiple scopes; the initial independent NO-GO caused
+  that repair before the final GO. The exact closure is **1,384
+  files** at `3211a4e5c83d7a8fca27ec7155933659164587fa5ca9813899d3dc79b51c8498`.
+- The VSIX remains a thin client with no caller for either resident aggregate.
+  It does not journal or execute the first TURN, run a handler/model/worker,
+  reserve conversation CAS, or gain OpenClaw/Hermes/repository authority.
+  Registry governance is current at **1,581 tests / 268 quarantined**.
+  (WSP 00/15/22/50/62/84/97)
+
 ## 2026-08-26 - Resident admission compatibility rebind (0.4.109)
 
 - Rebound the existing authenticated backend closure after atomic

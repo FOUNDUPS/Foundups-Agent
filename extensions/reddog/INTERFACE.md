@@ -265,10 +265,13 @@ from foreground chat, even if the UI continuation checkbox is selected.
 
 This is a package-internal policy interface, not a network API. The Digital
 Twin backend now defines a strict zero-authority turn/status/cancel envelope,
-but RedDog does not yet bind it to verified resident session authority or
-current AgentDB CAS state. PFMall and phone clients therefore still require an
-authenticated resident adapter with durable event ordering; the browser
-`reddog:command` event is not that transport.
+binds existing requests to verified current-generation session/AgentDB state,
+stores their content-free replay fence, and can persist one trusted empty-ID
+TURN scope after exact intent/grounding/FoundUp/E0 checks. The extension does
+not call either aggregate, and the first TURN is not yet journal-linked to its
+resolved conversation or executed. PFMall and phone clients therefore still
+require an authenticated resident adapter with durable event ordering; the
+browser `reddog:command` event is not that transport.
 
 ### VS Code workspace and package capabilities
 

@@ -2,6 +2,16 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-08-26 - Trusted resident new-conversation scope alignment
+
+- Aligned the Digital Twin transport boundary with the communication layer's
+  trusted empty-ID TURN resolution and authenticated AgentDB scope persistence.
+- Recorded exact intent/request/grounding/FoundUp checks, signed-session nonce
+  fencing, E0 exact recovery, and the absence of raw-text persistence.
+- Kept the next boundary explicit: the first request is not yet journal-linked
+  to its resolved conversation or executed, and no VSIX/PFMall/phone host or
+  immediate-CAS operation handler is active.
+
 ## 2026-08-26 - RedDog/0102 identity clarification
 
 - Defined RedDog as the operator-facing identity/persona/surface of the

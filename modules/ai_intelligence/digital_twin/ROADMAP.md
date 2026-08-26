@@ -42,8 +42,13 @@ conversation state, AgentDB, or any FoundUp Memex.
 - Complete: inert host aggregation for existing conversations prevalidates the
   request, holds the current signed-generation session lease through verified
   scope binding and durable reservation, and returns the content-free result.
-- Next: trusted new-scope resolution, host invocation wiring, and operation-
-  specific TURN/STATUS/CANCEL handlers with immediate authenticated CAS.
+- Complete: trusted empty-ID TURN resolution and current-generation FoundUp
+  scope persistence bind exact intent, request, grounding, registered FoundUp,
+  signed-session identity and E0 authenticated exact recovery. Raw operator
+  text is not persisted.
+- Next: durable first-turn request-to-resolved-conversation journal binding,
+  host invocation wiring, and operation-specific TURN/STATUS/CANCEL handlers
+  with immediate authenticated CAS.
 - Next: thin PFMall/phone transport adapter; the browser remains a client, not
   the model/OpenClaw host.
 - Deferred: asynchronous critics, durable cross-device history, bounded Memex/

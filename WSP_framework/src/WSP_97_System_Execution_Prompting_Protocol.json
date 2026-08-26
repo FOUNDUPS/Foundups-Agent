@@ -1,7 +1,7 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.8",
+    "version": "1.9",
     "status": "active",
     "mantra_stage_count": 7,
     "operator_action_count": 9,
@@ -25,6 +25,31 @@
       ],
       "verification_authority": "WSP_6",
       "differential_rule": "exact test identifiers; aggregate counts are telemetry only"
+    },
+    "test_inventory_reuse_gate": {
+      "required_before_test_authoring": true,
+      "applies_when": ["create", "modify", "replace", "expand"],
+      "authorities": ["WSP_22", "WSP_50", "WSP_84", "WSP_6"],
+      "required_retrieval": [
+        "HoloIndex query for target module, behavior or contract, and likely test vocabulary",
+        "target module tests/TestModLog.md when present",
+        "target module tests/README.md when present",
+        "closest existing tests, fixtures, and helpers"
+      ],
+      "reuse_order": [
+        "reuse or extend an existing test for the same behavior or contract",
+        "add an edge case to the existing file for the same pipeline or fixture",
+        "create a new test file only for a materially distinct subsystem or contract"
+      ],
+      "inventory_update": "update tests/TestModLog.md after test additions, removals, renames, or material expansion; update tests/README.md when execution conventions or suite organization change",
+      "missing_testmodlog_rule": "when active tests exist without tests/TestModLog.md, inventory the actual current test files and create or refresh TestModLog before adding a new test file",
+      "worker_prompt_requirement": "test work prompts SHOULD include concrete HoloIndex search parameters for the target behavior and test surface",
+      "failure_conditions": [
+        "new test file without required retrieval",
+        "duplicate coverage where an existing test could be cleanly extended",
+        "active test inventory materially diverges from tests/TestModLog.md",
+        "historical aggregate pass count reported as fresh without fresh execution evidence"
+      ]
     },
     "mantra_stages": [
       "HoloIndex",

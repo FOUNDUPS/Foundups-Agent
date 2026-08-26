@@ -1,3 +1,17 @@
+## 2026-08-26: Trusted new-conversation scope admission
+
+- Added positive, replay, concurrent, E0, malformed, expiry, one-use, disclosure,
+  and WSP-62 coverage for the inert empty-ID TURN-to-scope aggregate.
+- Independent review reproduced an intent-derived session-binding split that
+  the initial fixed-authority tests missed. New real signed-credential cases
+  change the production-shaped session binding through divergent turn and
+  grounded text while reusing one nonce; both reject and leave one row.
+- Added a direct regression proving scope TTL must span the resident request.
+  Focused suite: **17 passed**. Repaired authenticated state/session/signing/
+  tamper/admission/binding/journal matrix: **127 passed**. Independent repaired
+  bytes: **GO**, 46 focused passes. Ruff passes; six production sources remain
+  at most 500 lines/functions at most 50 lines.
+
 ## 2026-08-26: Current-session resident admission aggregation regressions
 
 - Added adversarial coverage for one inert existing-conversation host

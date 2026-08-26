@@ -22,6 +22,16 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_l
 
 ## Resident conversation admission and request idempotency
 
+`test_reddog_resident_conversation_new_scope_admission.py` proves the separate
+trusted empty-ID TURN aggregate: exact v2 intent/request/grounding/FoundUp
+binding before credential use, required E0 signer context, generation-lease
+lifetime, one-use authority consumption, content-minimized scope persistence,
+authenticated exact replay, divergent nonce conflict, expiry, concurrency, and
+stable failure projection. Production-shaped signed-session cases deliberately
+change the intent-derived session binding and prove one stable signed session
+cannot split one nonce into multiple scopes. The aggregate neither journals nor
+executes the first turn and contains no handler/model/worker/CAS effect wiring.
+
 `test_reddog_resident_conversation_scope_binding.py` uses the existing
 temporary SQLite AgentDB fixture and opaque conversation capabilities. It
 proves existing TURN/STATUS/CANCEL admission, content-free output, zero
@@ -58,6 +68,11 @@ generation/config/socket/signature verification.
 ```powershell
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal_store.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_admission.py -q
+```
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_new_scope_admission.py -q --basetemp O:\reddog-test-runtime\pytest-new-scope
 ```
 
 ## HoloIndex owner replica response contracts

@@ -122,6 +122,8 @@ NEED_TO = {
     "reddog resident conversation request journal store": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_request_journal_store.py:AgentDbResidentConversationRequestJournal",
     "reddog resident conversation admission proof": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_capability.py:consume_verified_scope_authority_for_request_journal()",
     "reddog current conversation session authority": "modules/communication/moltbot_bridge/src/reddog_conversation_session_authority_source.py:lease_current_generation_conversation_session()",
+    "reddog trusted new conversation scope resolution": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_new_scope_resolution.py:resolve_resident_conversation_new_scope_request()",
+    "reddog current session new conversation scope admission": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_new_scope_admission.py:create_current_generation_resident_conversation_scope()",
     "reddog current session conversation admission": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_admission.py:reserve_current_generation_resident_conversation_request()",
     "moltbot bridge workspace skills": "modules/communication/moltbot_bridge/workspace/AGENTS.md",
 

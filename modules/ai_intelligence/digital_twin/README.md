@@ -23,11 +23,14 @@ digest bindings, CAS revision, nonce/idempotency, and a maximum five-minute
 validity window. Principal, FoundUp, credential, provider/model, effect, and
 work-authority fields are deliberately outside the client envelope and must be
 derived and revalidated by the resident host. The communication layer now has
-an admission-only existing-scope binding that consumes one opaque session
-capability and verifies the exact current AgentDB revision without mutation.
-The client contract itself still adds no listener, persistence,
-authentication, model call, or effect. Live adapters remain gated on trusted
-new-scope resolution, durable idempotency, and operation handlers.
+current-generation aggregates for both existing conversations and trusted
+empty-ID TURN scope creation. Existing requests receive a durable content-free
+replay reservation; new scope creation verifies exact intent, grounding,
+registered FoundUp, signed session identity, E0 persistence, and exact recovery.
+The client contract itself still adds no listener, persistence, authentication,
+model call, or effect. The first new-conversation TURN is not yet rebound into
+the existing journal or executed; live adapters remain gated on that durable
+resolution link, host wiring, and immediate-CAS operation handlers.
 
 `principal_memex_projection.py` implements the first structural, read-only
 Principal Memex projection. It validates provenance identifiers, canonical

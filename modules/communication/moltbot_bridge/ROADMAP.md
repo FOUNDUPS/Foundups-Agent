@@ -116,10 +116,15 @@
   holds the signed-generation lease through authority-native scope binding and
   durable reservation, consumes the verified parent, and returns only the
   existing content-free result. It is not wired to traffic or handlers.
-- BLOCKED: principal-side credential issuance UX, trusted new-scope selection,
-  host invocation wiring, and operation-specific TURN/STATUS/CANCEL handlers
-  with immediate authenticated CAS. Environment principal/FoundUp values are
-  not authentication.
+- COMPLETE: trusted empty-ID TURN resolution and current-generation new-scope
+  persistence. Exact extension intent, request, grounding, and registered
+  FoundUp bindings are checked before credential use; the generation lease and
+  E0 signer cover authority-native AgentDB create/exact recovery. Signed session
+  identity fences nonce divergence, and scope lifetime spans the request.
+- BLOCKED: principal-side credential issuance UX, durable first-turn
+  request-to-resolved-conversation journal binding, host invocation wiring, and
+  operation-specific TURN/STATUS/CANCEL handlers with immediate authenticated
+  CAS. Environment principal/FoundUp values are not authentication.
 - COMPLETE: one authenticated scope revision and resident intent can be bound
   to an immutable architect proposal preview. AgentDB CAS stores the exact
   pending proposal; backend determination rejects stale snapshot/HEAD/Holo
