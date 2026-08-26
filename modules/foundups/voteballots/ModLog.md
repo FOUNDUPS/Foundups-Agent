@@ -2,6 +2,50 @@
 
 ---
 
+## 2026-08-26 — WSP 109 Canonicalization + Public PoC Reopen
+
+**Author**: 0102  
+**Slice**: `VOTE_WSP109_REOPEN_AND_PUBLIC_POC_ARCHITECT_PACKET_PHASE1`  
+**Branch**: `docs/vote-wsp109-canonicalization-20260826`  
+**WSP Compliance**: WSP 00, WSP 22, WSP 50, WSP 84, WSP 97, WSP 104, WSP 109
+
+### Created
+
+- `docs/intake/INTAKE_SOURCE.md`
+- `docs/intake/OUTCOME.md`
+- `docs/intake/SOLUTION.md`
+- `docs/intake/PAIN.md`
+- `docs/intake/POC_SCOPE.md`
+- `docs/intake/PROTOTYPE_GATE.md`
+- `docs/intake/SKILLS_MAP.md`
+- `docs/intake/FOUNDUP_MANIFEST_DRAFT.md`
+- `docs/audits/architecture/VOTE_WSP109_REOPEN_AND_PUBLIC_POC_ARCHITECT_PACKET_PHASE1.md`
+- `tests/TestModLog.md` — canonical anti-vibecoding test inventory and reuse guide
+
+### Updated
+
+- `README.md` — reconciled stale design-only wording with the implemented six-slice PoC chain while preserving the not-public-launched truth boundary.
+- `ROADMAP.md` — reoriented work around the public PoC funnel, gated prototype, cryptographic parallel-ballot research, registration assurance, resilience reuse, and later SmartDAO governance extraction.
+- `tests/README.md` — replaced stale design-spec test guidance with the active suite inventory/reuse gate.
+
+### Architectural Decisions Recorded
+
+- Public `/f/{foundup_id}` remains the zero-barrier PoC/trust surface.
+- Deeper participation remains gated through the existing pfMALL/member path.
+- Public VOTE starts from locality/candidate/funding evidence and WSP 97 truth labels.
+- AutoPost capture patterns, GotJunk map/geolocation, and Liberty Alert coordination must be retrieved/reused before new equivalents are built.
+- Any in-app cryptographic ballot is explicitly non-binding unless and until a separate legal/certification authority exists.
+- Registration assurance begins as opt-in official-source checking; no silent or autonomous official voter-record mutation is claimed.
+
+### Test Documentation / Truth Boundary
+
+- No new production test was created in this docs-only slice.
+- `tests/TestModLog.md` now inventories every active VOTE test file so workers can extend/reuse tests rather than duplicate them.
+- The canonical 2026-05-25 closure snapshot records `303 passed`; this entry does not claim that historical suite was rerun for the docs-only work.
+- No runtime code, manifest, registry, catalog, route activation, CABR, payout, blockchain execution, or SmartDAO activation was changed.
+
+---
+
 ## 2026-05-25 — Shell Integration (PoC Phase 1, Slice 6)
 
 **Author**: W6 (0102)
@@ -370,7 +414,7 @@ from modules.foundups.voteballots.src import (
 
 - `FundingSummaryRequest` — Request with resolution result and options
 - `FundingSummaryResult` — Summary outcome with trail termination
-- `FundingSourceSummary` — Individual source with confidence
+- `FundingSourceSummary` — Individual source with confidence label
 - `FundingSummaryStatus` — Status enum
 - `TrailTerminationMarker` — Trail termination enum
 
