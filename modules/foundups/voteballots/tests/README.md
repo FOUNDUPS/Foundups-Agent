@@ -1,95 +1,101 @@
 # Vote/Ballots Tests
 
-**Status**: Design Specification  
-**WSP Compliance**: WSP 5 (Test Coverage)  
+**Status**: Active PoC test suite  
+**Primary inventory**: `tests/TestModLog.md`  
+**WSP Compliance**: WSP 22, WSP 50, WSP 84, WSP 97
 
 ---
 
-## Test Categories
+## Mandatory Pre-Test Gate
 
-### Unit Tests (`test_unit_*.py`)
+Before creating or modifying any VOTE test:
 
-Test individual hooks in isolation with mocked external APIs.
+1. Read `tests/TestModLog.md`.
+2. Read this README.
+3. Inspect the closest existing test file.
+4. Prefer extending/reusing an existing test file or fixture when the target behavior is already represented.
+5. Create a new test file only for a materially distinct contract or subsystem.
+6. Update `tests/TestModLog.md` after any test addition, removal, rename, or major coverage change.
 
-```bash
-pytest tests/test_unit_*.py -v
-```
-
-### Golden Tests (`test_golden_*.py`)
-
-Test against known candidates with verified ground truth.
-
-```bash
-pytest tests/test_golden_*.py -v
-```
-
-### Adversarial Tests (`test_adversarial_*.py`)
-
-Edge cases designed to trigger failure modes.
-
-```bash
-pytest tests/test_adversarial_*.py -v
-```
-
-### Integration Tests (`test_integration_*.py`)
-
-Full pipeline tests with sandboxed real API calls.
-
-```bash
-SANDBOX_MODE=true pytest tests/test_integration_*.py -v
-```
+This is an anti-vibecoding requirement: the test inventory exists so workers do not recreate tests that already cover the behavior.
 
 ---
 
-## Test Data
+## Current Active Test Surface
 
-### Golden Dataset
+See `TestModLog.md` for the canonical file-by-file inventory and reuse guidance.
 
-Location: `tests/fixtures/golden/`
+Current test files include:
 
-Contains verified data for:
-- 10 federal candidates (diverse offices, parties, funding patterns)
-- 5 state candidates
-- Known attack ad campaigns
-- Known dark money patterns
+- `test_fec_adapter.py`
+- `test_entity_resolution.py`
+- `test_funding_summary.py`
+- `test_confidence_scoring_integration.py`
+- `test_quick_answer.py`
+- `test_shell_integration.py`
+- `test_adversarial_influence_categories.py`
+- `test_unit_confidence_scoring.py`
 
-### Adversarial Cases
+The canonical VOTE PoC closure snapshot records **303 passing tests** on 2026-05-25 for the implementation-complete six-slice chain. That historical result is evidence, not a claim that the suite was rerun for later docs-only work.
 
-Location: `tests/fixtures/adversarial/`
+---
 
-Contains edge cases:
-- Same-name candidates (disambiguation tests)
-- Foreign funding false positive prevention
-- AIPAC vs foreign funding distinction
-- Dark money estimation bounds
+## Suite Boundaries
+
+The current PoC suite is designed to remain deterministic and safe:
+
+- no live FEC API required for the core tests
+- no API key required for the core tests
+- no unmocked network calls in the PoC chain
+- ambiguity must be preserved rather than guessed
+- evidence provenance and trail termination must be preserved
+- dark-money or foreign-funding claims cannot be promoted to verified fact without evidence
+- no candidate recommendation
+- no targeted persuasion
+- no microtargeting
+- shell tests do not activate public routes or mutate registry/catalog/manifest state
 
 ---
 
 ## Running Tests
 
+From repository root:
+
 ```bash
-# All tests
-pytest tests/ -v
+# Full VOTE suite
+python -m pytest modules/foundups/voteballots/tests/ -q
 
-# Unit only (fast, no network)
-pytest tests/test_unit_*.py -v
+# A focused existing file — preferred before inventing a new test file
+python -m pytest modules/foundups/voteballots/tests/test_funding_summary.py -q
 
-# With coverage
-pytest tests/ --cov=src --cov-report=html
-
-# Specific hook
-pytest tests/ -k "entity_resolution" -v
+# Focus by test name / behavior
+python -m pytest modules/foundups/voteballots/tests/ -k "entity_resolution" -q
 ```
 
----
-
-## CI Requirements
-
-1. Unit tests: Must pass on every PR
-2. Golden tests: Must pass on every PR (cached data)
-3. Adversarial tests: Must pass on every PR
-4. Integration tests: Run on main branch only (API keys required)
+For coverage, use the repository's current coverage workflow rather than assuming the older design-spec command is still canonical.
 
 ---
 
-*0102 pArtifact: Test structure per WSP 5. No tests in root directory.*
+## Test Families
+
+### Data-source and identity
+- FEC adapter
+- entity resolution / ambiguity
+
+### Evidence and truth boundary
+- funding summary
+- confidence scoring
+- adversarial influence categories
+
+### User-facing output
+- quick answer
+- pfMALL shell payload
+
+### Legacy/unit precedent
+- unit confidence-scoring scaffold
+
+When adding behavior, start from the closest family above and consult `TestModLog.md` before deciding that a new test file is necessary.
+
+---
+
+*0102 operational rule: retrieve the test inventory before test creation; reuse before duplication.*
