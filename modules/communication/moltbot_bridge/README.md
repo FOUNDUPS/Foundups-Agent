@@ -348,11 +348,25 @@ gates. `reddog_resident_conversation_scope_binding.py` now consumes one opaque
 authenticated-session capability and binds an existing `TURN`, `STATUS`, or
 `CANCEL` envelope to the exact current AgentDB record, revision receipt,
 record digest, session binding, and turn lineage. It returns content-free
-evidence, does not reserve the CAS revision, and performs no state mutation.
-The extension still needs a host-side session-capability adapter, trusted
-new-scope resolution, durable idempotency, and operation handlers before live
-conversation traffic is enabled. The WSP 97 assumption audit is attached at
-`docs/clarity/REDDOG_RESIDENT_CONVERSATION_SERVICE_BINDING_PHASE1.md`.
+evidence plus an opaque one-use process-local reservation proof excluded from
+its serialized projection. The proof is derived only while the existing
+secret-backed verified scope authority remains live, and it binds the exact
+canonical reservation identity; public binding digests cannot mint it. It does
+not reserve CAS or mutate state.
+`reddog_resident_conversation_request_journal.py` validates that proof before
+the split reservation contract/store consumes it at the deepest AgentDB write
+boundary. The store's own clock rechecks request and scope expiry, so a caller
+cannot backdate the public reservation timestamp. It stores no operator text,
+principal, or FoundUp IDs;
+exact replay is idempotent, altered key/request/nonce reuse rejects, and a new
+insert atomically rechecks the current scope revision, digest, and revision
+receipt. SQLite uses an immediate write transaction; PostgreSQL locks the scope
+and global capacity rows. Unified mapping rows and indexed columns are checked
+against the canonical record. The reservation grants no CAS, model, dispatch,
+identity, or effect
+authority. Live traffic still requires a host-side session-capability adapter,
+trusted new-scope resolution, and operation handlers that repeat authenticated
+current-record CAS. The phase audits are under `docs/clarity/`.
 
 ## Upstream Agent Execution Boundary
 

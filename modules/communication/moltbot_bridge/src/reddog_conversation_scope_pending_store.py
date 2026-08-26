@@ -45,27 +45,7 @@ class AgentDbConversationScopePendingStore:
                     (value["conversation_id"],),
                 ).fetchone()
                 if existing is not None:
-                    raw, stored_digest, existing_recovery = existing
-                    stored = json.loads(raw)
-                    if (
-                        not isinstance(stored, Mapping)
-                        or validate_unsigned_record(stored)
-                        or canonical_digest(stored) != stored_digest
-                        or _recovery_digest(stored) != existing_recovery
-                    ):
-                        return _result(False, "conversation_scope_pending_conflict")
-                    if stored_digest == digest and existing_recovery == recovery:
-                        return _result(
-                            True, "conversation_scope_pending_recovered", stored
-                        )
-                    if existing_recovery == recovery:
-                        return _result(
-                            True,
-                            "conversation_scope_pending_recovery_required",
-                            stored,
-                            recovery_only=True,
-                        )
-                    return _result(False, "conversation_scope_pending_conflict")
+                    return _existing_pending_result(existing, digest, recovery)
                 active = conn.execute(
                     "SELECT revision FROM reddog_conversation_scopes WHERE conversation_id = ?",
                     (value["conversation_id"],),
@@ -73,8 +53,9 @@ class AgentDbConversationScopePendingStore:
                 if not _active_matches(active, expected_revision):
                     return _result(False, "conversation_scope_revision_conflict")
                 count = conn.execute(
-                    "SELECT COUNT(*) FROM reddog_conversation_scope_pending"
-                ).fetchone()[0]
+                    "SELECT COUNT(*) AS count FROM reddog_conversation_scope_pending"
+                ).fetchone()
+                count = _row_value(count, "count", 0)
                 if int(count) >= MAX_PENDING_SCOPES:
                     return _result(False, "conversation_scope_pending_capacity")
                 conn.execute(
@@ -120,7 +101,12 @@ class AgentDbConversationScopePendingStore:
                 "SELECT expected_revision, unsigned_digest FROM reddog_conversation_scope_pending WHERE conversation_id = ?",
                 (value["conversation_id"],),
             ).fetchone()
-            if pending is None or int(pending[0]) != expected or pending[1] != canonical_digest(unsigned):
+            if (
+                pending is None
+                or int(_row_value(pending, "expected_revision", 0)) != expected
+                or _row_value(pending, "unsigned_digest", 1)
+                != canonical_digest(unsigned)
+            ):
                 return _result(False, "conversation_scope_pending_mismatch")
             if expected < 0:
                 cursor = _insert_active(conn, value)
@@ -157,8 +143,33 @@ class AgentDbConversationScopePendingStore:
 
 def _active_matches(row: Any, expected: int) -> bool:
     return (row is None and expected < 0) or (
-        row is not None and int(row[0]) == expected
+        row is not None and int(_row_value(row, "revision", 0)) == expected
     )
+
+
+def _existing_pending_result(
+    row: Any, digest: str, recovery: str
+) -> Mapping[str, Any]:
+    raw = _row_value(row, "unsigned_json", 0)
+    stored_digest = _row_value(row, "unsigned_digest", 1)
+    existing_recovery = _row_value(row, "recovery_digest", 2)
+    stored = json.loads(raw)
+    valid = (
+        isinstance(stored, Mapping)
+        and not validate_unsigned_record(stored)
+        and canonical_digest(stored) == stored_digest
+        and _recovery_digest(stored) == existing_recovery
+    )
+    if not valid:
+        return _result(False, "conversation_scope_pending_conflict")
+    if stored_digest == digest and existing_recovery == recovery:
+        return _result(True, "conversation_scope_pending_recovered", stored)
+    if existing_recovery == recovery:
+        return _result(
+            True, "conversation_scope_pending_recovery_required", stored,
+            recovery_only=True,
+        )
+    return _result(False, "conversation_scope_pending_conflict")
 
 
 def _insert_active(conn: Any, value: Mapping[str, Any]) -> Any:
@@ -177,7 +188,7 @@ def _update_active(conn: Any, value: Mapping[str, Any], expected: int) -> Any:
     ).fetchone()
     if current is None:
         return _NoChange()
-    prior = json.loads(current[0])
+    prior = json.loads(_row_value(current, "scope_json", 0))
     if any(value.get(name) != prior.get(name) for name in IMMUTABLE_FIELDS):
         return _NoChange()
     return conn.execute(
@@ -185,6 +196,12 @@ def _update_active(conn: Any, value: Mapping[str, Any], expected: int) -> Any:
         (value["conversation_revision"], _json(value), datetime.now(UTC).isoformat(),
          value["conversation_id"], expected),
     )
+
+
+def _row_value(row: Any, name: str, index: int) -> Any:
+    if isinstance(row, Mapping):
+        return row[name]
+    return row[index]
 
 
 class _NoChange:

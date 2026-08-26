@@ -22,6 +22,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_authenti
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
     canonical_digest,
 )
+from modules.infrastructure.database.src.db_manager import _UnifiedConnection
 
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -49,8 +50,9 @@ class SqliteLayer:
     def get_connection(self):
         connection = sqlite3.connect(self.path, timeout=5, check_same_thread=False)
         connection.row_factory = sqlite3.Row
+        unified = _UnifiedConnection(connection, "sqlite")
         try:
-            yield connection
+            yield unified
             connection.commit()
         except Exception:
             connection.rollback()
@@ -61,6 +63,9 @@ class SqliteLayer:
     def execute_query(self, query: str, params: tuple[Any, ...] = ()) -> list[Any]:
         with self.get_connection() as connection:
             return list(connection.execute(query, params).fetchall())
+
+    def backend_info(self) -> dict[str, str]:
+        return {"engine": "sqlite"}
 
 
 class TestAgentDb:

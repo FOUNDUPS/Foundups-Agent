@@ -205,7 +205,7 @@ def test_agentdb_pending_create_recovers_after_signer_commit_crash(
         "SELECT conversation_id FROM reddog_conversation_scope_pending"
     )
     assert len(rows) == 1
-    conversation_id = str(rows[0][0])
+    conversation_id = str(rows[0]["conversation_id"])
     assert base.load(conversation_id)["record"] is None
     assert anchor.load()["heads"][conversation_id]["conversation_revision"] == 0
 
@@ -214,8 +214,8 @@ def test_agentdb_pending_create_recovers_after_signer_commit_crash(
     assert recovered.accepted is True
     assert recovered.conversation_id == conversation_id
     assert TestAgentDb(path).db.execute_query(
-        "SELECT COUNT(*) FROM reddog_conversation_scope_pending"
-    )[0][0] == 0
+        "SELECT COUNT(*) AS count FROM reddog_conversation_scope_pending"
+    )[0]["count"] == 0
 
 
 def test_agentdb_pending_advance_recovers_after_signer_commit_crash(
@@ -287,7 +287,7 @@ def test_attacker_rehashed_pending_record_cannot_change_signed_state(
     row = layer.execute_query(
         "SELECT conversation_id, unsigned_json FROM reddog_conversation_scope_pending"
     )[0]
-    tampered = json.loads(row[1])
+    tampered = json.loads(row["unsigned_json"])
     tampered["updated_at"] += 1
     tampered["record_auth_nonce"] = canonical_digest(
         {
@@ -318,7 +318,7 @@ def test_attacker_rehashed_pending_record_cannot_change_signed_state(
                     json.dumps(tampered, sort_keys=True, separators=(",", ":")),
                     tampered_digest,
                     tampered_recovery,
-                    row[0],
+                    row["conversation_id"],
                 ),
         )
 
@@ -327,7 +327,7 @@ def test_attacker_rehashed_pending_record_cannot_change_signed_state(
     assert rejected.rejection_reasons == (
         "conversation_scope_record_authentication_unavailable",
     )
-    assert _store(path).load(str(row[0]))["record"] is None
+    assert _store(path).load(str(row["conversation_id"]))["record"] is None
 
 
 def test_recovery_only_request_without_signer_anchor_fails_closed(

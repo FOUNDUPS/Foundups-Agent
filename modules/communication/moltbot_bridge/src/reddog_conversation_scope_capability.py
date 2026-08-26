@@ -62,6 +62,10 @@ class VerifiedConversationScopeAuthority(_OpaqueCapability):
     """Consumed operation-local authority that never exposes MAC keys."""
 
 
+class ResidentConversationRequestJournalAuthority(_OpaqueCapability):
+    """One-use child derived from live verified scope authority."""
+
+
 @dataclass(frozen=True)
 class _ConversationScopeAuthoritySeal:
     principal_id: str
@@ -91,12 +95,23 @@ class _DelegatedConversationScopeSeal:
     permitted_scope_kind: str
 
 
+@dataclass(frozen=True)
+class _ResidentConversationRequestJournalSeal:
+    reservation_id: str
+    not_before_epoch: int
+    scope_expires_at: int
+
+
 _LOCK = threading.Lock()
 _CAPABILITIES: WeakKeyDictionary[AuthenticatedConversationScopeCapability, _ConversationScopeAuthoritySeal] = WeakKeyDictionary()
 _DELEGATED_CAPABILITIES: WeakKeyDictionary[
     _OpaqueCapability, _DelegatedConversationScopeSeal
 ] = WeakKeyDictionary()
 _AUTHORITIES: WeakKeyDictionary[VerifiedConversationScopeAuthority, _ConversationScopeAuthoritySeal] = WeakKeyDictionary()
+_JOURNAL_AUTHORITIES: WeakKeyDictionary[
+    ResidentConversationRequestJournalAuthority,
+    _ResidentConversationRequestJournalSeal,
+] = WeakKeyDictionary()
 
 
 def _issue_conversation_scope_capability(
@@ -217,6 +232,70 @@ def conversation_scope_authority_view(authority: Any) -> Mapping[str, Any] | Non
     }
 
 
+def derive_resident_conversation_request_journal_authority(
+    authority: Any,
+    *,
+    reservation_id: str,
+    not_before_epoch: int,
+    scope_expires_at: int,
+) -> ResidentConversationRequestJournalAuthority | None:
+    """Derive one exact journal write from registered verified authority."""
+
+    if type(authority) is not VerifiedConversationScopeAuthority:
+        return None
+    child = object.__new__(ResidentConversationRequestJournalAuthority)
+    with _LOCK:
+        parent = _AUTHORITIES.get(authority)
+        valid = bool(
+            parent is not None
+            and type(reservation_id) is str
+            and type(not_before_epoch) is int
+            and type(scope_expires_at) is int
+            and 0 <= not_before_epoch < scope_expires_at <= parent.expires_at
+        )
+        if not valid:
+            return None
+        _JOURNAL_AUTHORITIES[child] = _ResidentConversationRequestJournalSeal(
+            reservation_id=reservation_id,
+            not_before_epoch=not_before_epoch,
+            scope_expires_at=scope_expires_at,
+        )
+    return child
+
+
+def resident_conversation_request_journal_authority_matches(
+    authority: Any, *, reservation_id: str, reserved_at: int
+) -> bool:
+    """Check a registered child without consuming its mutation authority."""
+
+    if type(authority) is not ResidentConversationRequestJournalAuthority:
+        return False
+    with _LOCK:
+        seal = _JOURNAL_AUTHORITIES.get(authority)
+        return bool(
+            seal is not None
+            and reservation_id == seal.reservation_id
+            and seal.not_before_epoch <= reserved_at < seal.scope_expires_at
+        )
+
+
+def consume_resident_conversation_request_journal_authority(
+    authority: Any, *, reservation_id: str, reserved_at: int, observed_at: int
+) -> bool:
+    """Consume an exact verified-authority child at the mutation boundary."""
+
+    if type(authority) is not ResidentConversationRequestJournalAuthority:
+        return False
+    with _LOCK:
+        seal = _JOURNAL_AUTHORITIES.pop(authority, None)
+    return bool(
+        seal is not None
+        and reservation_id == seal.reservation_id
+        and seal.not_before_epoch <= reserved_at <= observed_at
+        and observed_at < seal.scope_expires_at
+    )
+
+
 def sign_record_with_scope_authority(
     authority: Any,
     record: Mapping[str, Any],
@@ -276,6 +355,8 @@ def discard_conversation_scope_capability(capability: Any) -> None:
             _DELEGATED_CAPABILITIES.pop(capability, None)
         elif type(capability) is VerifiedConversationScopeAuthority:
             _AUTHORITIES.pop(capability, None)
+        elif type(capability) is ResidentConversationRequestJournalAuthority:
+            _JOURNAL_AUTHORITIES.pop(capability, None)
 
 
 def _authority_seal(authority: Any) -> _ConversationScopeAuthoritySeal | None:
@@ -301,9 +382,13 @@ def _record_matches_authorized_scope(
 __all__ = [
     "AuthenticatedConversationScopeCapability", "FoundUpConversationScopeCapability",
     "PrincipalContextReadConversationScopeCapability",
+    "ResidentConversationRequestJournalAuthority",
     "VerifiedConversationScopeAuthority",
     "consume_conversation_scope_capability",
+    "consume_resident_conversation_request_journal_authority",
     "conversation_scope_authority_view", "discard_conversation_scope_capability",
+    "derive_resident_conversation_request_journal_authority",
+    "resident_conversation_request_journal_authority_matches",
     "split_conversation_scope_capability",
     "sign_record_with_scope_authority", "verify_record_with_scope_authority",
 ]

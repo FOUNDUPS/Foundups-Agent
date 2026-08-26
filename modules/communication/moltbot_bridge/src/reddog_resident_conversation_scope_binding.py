@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, field, fields
 from typing import Any, Mapping
 
 from modules.ai_intelligence.digital_twin.src.resident_conversation_transport_contract import (
@@ -15,6 +15,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     AuthenticatedConversationScopeCapability,
     consume_conversation_scope_capability,
     conversation_scope_authority_view,
+    derive_resident_conversation_request_journal_authority,
     discard_conversation_scope_capability,
     verify_record_with_scope_authority,
 )
@@ -27,6 +28,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_record i
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_store import (
     AgentDbConversationScopeStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_conversation_request_reservation_contract import (
+    reservation_record,
 )
 
 
@@ -62,9 +66,16 @@ class ResidentConversationScopeBindingResult:
     no_model_invocation_performed: bool = True
     no_worker_dispatch_performed: bool = True
     no_holoindex_reindex_performed: bool = True
+    _reservation_capability: Any = field(
+        default=None, init=False, repr=False, compare=False
+    )
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        return {
+            item.name: getattr(self, item.name)
+            for item in fields(self)
+            if not item.name.startswith("_")
+        }
 
 
 def bind_resident_conversation_request_to_authenticated_scope(
@@ -100,7 +111,9 @@ def bind_resident_conversation_request_to_authenticated_scope(
         return (
             _binding_rejected(reason)
             if reason
-            else _accepted_scope_binding(record, view, request)
+            else _accepted_scope_binding(
+                record, view, request, authority, now_epoch
+            )
         )
     finally:
         discard_conversation_scope_capability(authority)
@@ -196,6 +209,8 @@ def _accepted_scope_binding(
     record: Mapping[str, Any],
     authority: Mapping[str, Any],
     request: ResidentConversationRequest,
+    verified_authority: Any,
+    now_epoch: int,
 ) -> ResidentConversationScopeBindingResult:
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -213,12 +228,24 @@ def _accepted_scope_binding(
         "principal_record_digest": str(authority["principal_record_digest"]),
         "session_binding_digest": str(authority["session_binding_digest"]),
     }
-    return ResidentConversationScopeBindingResult(
+    result = ResidentConversationScopeBindingResult(
         accepted=True,
         status="RESIDENT_CONVERSATION_SCOPE_BOUND",
         binding_id=canonical_digest(payload),
         **{key: value for key, value in payload.items() if key != "schema_version"},
     )
+    candidate = reservation_record(request, result, now_epoch)
+    proof = derive_resident_conversation_request_journal_authority(
+        verified_authority,
+        reservation_id=candidate["reservation_id"], not_before_epoch=now_epoch,
+        scope_expires_at=min(
+            int(record["expires_at"]), int(authority["expires_at"])
+        ),
+    )
+    if proof is None:
+        return _binding_rejected("resident_conversation_access_denied")
+    object.__setattr__(result, "_reservation_capability", proof)
+    return result
 
 
 def _retire_and_reject_binding(
