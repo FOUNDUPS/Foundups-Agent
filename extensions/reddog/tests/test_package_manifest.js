@@ -14,7 +14,7 @@ assert.deepStrictEqual(pkg.capabilities, {
   virtualWorkspaces: { supported: false }
 });
 assert.strictEqual(pkg.publisher, 'foundups');
-assert.strictEqual(pkg.version, '0.4.111');
+assert.strictEqual(pkg.version, '0.4.112');
 assert.strictEqual(pkg.main, './extension.js');
 for (const key of ['reddog.allowEvaluationFallback',
   'foundupsFusion.allowEvaluationFallback']) {
@@ -51,6 +51,13 @@ assert.strictEqual(packageReceipt.file_count, 67);
 assert(packageReceipt.raw_bytes > 0);
 assert.strictEqual(packageReceipt.raw_byte_cap, 1024 * 1024);
 assert.strictEqual(packageReceipt.within_cap, true);
+assert.strictEqual(packageReceipt.schema_version, 'reddog_package_surface_receipt.v2');
+assert.strictEqual(packageReceipt.text_eol_policy, 'reddog_package_eol_policy.v1');
+assert.strictEqual(packageReceipt.text_eol, 'lf');
+assert.strictEqual(packageReceipt.text_file_count, 66);
+assert.strictEqual(packageReceipt.binary_file_count, 1);
+assert.match(packageReceipt.eol_policy_digest, /^sha256:[0-9a-f]{64}$/);
+assert.match(packageReceipt.content_digest, /^sha256:[0-9a-f]{64}$/);
 const canonicalLicense = (value) => value.replace(/\r\n/g, '\n')
   .replace(/[ \t]+$/gm, '').trimEnd();
 assert.strictEqual(

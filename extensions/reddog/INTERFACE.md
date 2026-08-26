@@ -294,10 +294,14 @@ coverage, logs, environment files, credential-container suffixes, dependencies,
 editor files, prior VSIX files, and `.vscodeignore` do not cross the package
 boundary. The release group runs the deterministic installed-VSCE listing
 twice; the default fast tier performs static validation only.
-The listed regular-file closure is additionally capped at 1 MiB raw and emits
-`reddog_package_surface_receipt.v1` (`file_count`, `raw_bytes`,
-`raw_byte_cap`, `within_cap`). This is not a final compressed-VSIX size claim;
-archive size is verified when the release artifact is actually built.
+The listed regular-file closure is additionally capped at 1 MiB raw. Git
+attributes materialize all 66 text entries as LF on every host and keep the PNG
+binary. `reddog_package_surface_receipt.v2` emits file/byte/cap fields plus the
+governing effective EOL-policy digest, sorted member-content digest, LF mode,
+and text/binary counts. CR bytes or an effective attribute override fail before
+receipt emission. The observed raw
+total is not a final compressed-VSIX size claim; archive size is verified when
+the release artifact is actually built.
 
 `renderHtml()` receives `webview.cspSource` plus a fresh 128-bit nonce created
 for each panel. Its deny-by-default CSP admits the packaged icon, inline

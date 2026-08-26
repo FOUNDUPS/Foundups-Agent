@@ -1,5 +1,17 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-26] RedDog VSIX LF Materialization Contract
+
+**WSP Protocols:** WSP 00, 15, 22, 50, 62, 84, 97
+
+- Pinned all packaged RedDog text to Git `text eol=lf` while explicitly
+  excluding the packaged PNG binary, so `vsce package` consumes the same text bytes on
+  Windows, Linux, and macOS regardless of `core.autocrlf`.
+- Upgraded the package-surface receipt to v2 with effective-policy and sorted
+  member-content digests, plus CR-byte/attribute-override rejection, and removed
+  false host-specific raw-byte totals from current docs.
+- No runtime, model, worker, repository-effect, or Holo authority changed.
+
 ## [2026-08-26] RedDog Canonical Architecture and Vision Alignment
 
 **WSP Protocols:** WSP 00, 15, 22, 50, 62, 73, 80, 81, 97, 98

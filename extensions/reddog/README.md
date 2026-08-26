@@ -1,6 +1,6 @@
 # RedDog
 
-Version: 0.4.111
+Version: 0.4.112
 
 ## Continuous conversation surface
 
@@ -81,19 +81,15 @@ Python, worker threads, and a materialized backend are required.
 The deny-by-default webview CSP permits only the packaged icon, VS Code-theme
 styles, and one fresh nonce-bound script; it admits no network script source.
 
-The VSIX surface is an exact 67 files: every one of the 62 root runtime
-JavaScript modules, `start_operations_python_bootstrap.py`, and the public
-`LICENSE`, `README.md`, `package.json`, and `icon.png`. The packaged license
-text must canonically match the repository license authority. Tests, acceptance docs, internal
-ModLog/ROADMAP/INTERFACE/HOLOINDEX material, caches, logs, environment files,
-private-key containers, editor metadata, dependencies, and built VSIX files are
-excluded. `npm run test:package` runs two local `vsce ls --no-dependencies`
-passes and rejects instability, a missing runtime file, or any extra dev file;
-it creates no package artifact. The exact listed files must also be regular,
-non-symlink entries whose aggregate raw size is at most 1 MiB; the test emits a
-`reddog_package_surface_receipt.v1` with the measured bytes and cap. A final
-VSIX archive-size receipt remains part of the later artifact inspection because
-this source-surface test deliberately does not build an archive.
+The VSIX surface is exactly 67 files: 62 root runtime JavaScript modules, the
+Python bootstrap, and four public files. The packaged license must match root
+authority; tests, internal docs, caches, credentials, dependencies, and build
+artifacts remain excluded. `npm run test:package` proves two stable VSCE lists,
+regular non-symlink membership, and the 1 MiB raw cap without building a VSIX.
+Tracked attributes pin 66 packaged text members to LF and keep `icon.png`
+binary. Receipt v2 binds effective-policy and sorted member-content digests;
+CR bytes or attribute overrides fail closed. Archive size remains verified on
+the built artifact. See `docs/REDDOG_PACKAGE_EOL_REPRODUCIBILITY_PHASE1.md`.
 
 ## Governed Git executable provenance
 
@@ -905,7 +901,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.111)
+## WSP_97 Truth Table (v0.4.112)
 
 | Claim | Status |
 | --- | --- |
@@ -985,16 +981,18 @@ Set `OPENROUTER_API_KEY` in the environment used to launch Cursor. Do not store 
 
 ## Install
 
-Build the VSIX locally from tracked source with `vsce package --no-dependencies`. Do not commit `*.vsix`.
+Build the VSIX locally only after the package contract accepts the exact
+LF-governed working-tree bytes. Do not commit `*.vsix`.
 
 ```powershell
 cd extensions/reddog
+npm run test:package
 vsce package --no-dependencies
 ```
 
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.111.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.112.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.
