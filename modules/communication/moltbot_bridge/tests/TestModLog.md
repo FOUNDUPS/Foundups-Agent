@@ -1,3 +1,14 @@
+## 2026-08-26: Main bootstrap WSP 62 extraction regressions
+
+- Extended the existing authority exact-schema, bootstrap, and durable-scope
+  WSP 62 suites; no duplicate test file was created.
+- Added mapping-list list/tuple/empty/invalid and exact nested-order cases,
+  original/result import identity, cold import-order checks, a 615-line host
+  ceiling, and an explicit 432-line orchestration-function ceiling.
+- Pre-change/current differential projection evidence covers all 53 result
+  fields for empty and populated ready/not-ready paths, including accepted and
+  rejected enqueue behavior.
+
 ## 2026-08-26: Durable first-TURN resolution regressions
 
 - Added the distinct first-turn resolution-link suite for the explicit v2

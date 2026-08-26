@@ -12,17 +12,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
 from holo_index.freshness_receipt import HoloIndexFreshnessReceipt, freshness_receipt_path
 from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
-    FusionAssignmentGateDecision,
     evaluate_context_snapshot_fusion_assignment_gate,
 )
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_runtime import (
     DEFAULT_AUDIT_LANES,
-    ReadOnlyAuditSwarmPlan,
     plan_reddog_openclaw_readonly_audit_swarm,
 )
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
@@ -69,8 +66,14 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
 from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import STAGE_AUDIT
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import allocate_reddog_wsp15_receipt
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import resolve_grounding_read_targets
-REDDOG_MAIN_BOOTSTRAP_READY = "REDDOG_MAIN_BOOTSTRAP_READY"
-REDDOG_MAIN_BOOTSTRAP_NOT_READY = "REDDOG_MAIN_BOOTSTRAP_NOT_READY"
+from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap_result import (
+    REDDOG_MAIN_BOOTSTRAP_NOT_READY,
+    REDDOG_MAIN_BOOTSTRAP_READY,
+    RedDogMainReadonlyBootstrapResult,
+    build_not_ready_bootstrap_result as _not_ready,
+    build_ready_bootstrap_result as _ready,
+)
+
 REDDOG_MAIN_BOOTSTRAP_DISABLED = "REDDOG_MAIN_BOOTSTRAP_DISABLED"
 
 DEFAULT_BOOTSTRAP_CHANGED_PATHS = (
@@ -83,68 +86,6 @@ DEFAULT_BOOTSTRAP_CHANGED_PATHS = (
 )
 
 DEFAULT_BOOTSTRAP_READ_TARGETS = DEFAULT_BOOTSTRAP_CHANGED_PATHS
-
-
-@dataclass(frozen=True)
-class RedDogMainReadonlyBootstrapResult:
-    """Result emitted by the startup bootstrap check."""
-
-    ready: bool
-    status: str
-    snapshot_receipt_id: Optional[str]
-    context_view_id: Optional[str]
-    evidence_bundle_id: Optional[str]
-    determination_id: Optional[str]
-    swarm_id: Optional[str]
-    assignment_count: int
-    rejection_reasons: tuple[str, ...]
-    changed_paths: tuple[str, ...]
-    allowed_read_targets: tuple[str, ...]
-    wsp15_allocation_receipt: Optional[Mapping[str, Any]] = None
-    assignment_ids: tuple[str, ...] = ()
-    report_collection_attempted: bool = False
-    report_collection_status: Optional[str] = None
-    report_collection_report_count: int = 0
-    report_bundle_id: Optional[str] = None
-    report_collection_rejection_reasons: tuple[str, ...] = ()
-    readonly_audit_decision_attempted: bool = False
-    readonly_audit_decision_status: Optional[str] = None
-    readonly_audit_decision_action: Optional[str] = None
-    readonly_audit_decision_id: Optional[str] = None
-    readonly_audit_decision_next_slice: Optional[str] = None
-    readonly_audit_decision_rejection_reasons: tuple[str, ...] = ()
-    readonly_audit_decision_persist_attempted: bool = False
-    readonly_audit_decision_persist_status: Optional[str] = None
-    readonly_audit_decision_persist_stored: bool = False
-    readonly_audit_decision_persist_rejection_reasons: tuple[str, ...] = ()
-    backend_architect_determination_attempted: bool = False
-    backend_architect_determination_status: Optional[str] = None
-    backend_architect_determination_action: Optional[str] = None
-    backend_architect_determination_id: Optional[str] = None
-    backend_architect_determination_next_slice: Optional[str] = None
-    backend_architect_determination_queue_candidate_count: int = 0
-    backend_architect_determination_persist_stored: bool = False
-    backend_architect_determination_rejection_reasons: tuple[str, ...] = ()
-    enqueue_attempted: bool = False
-    enqueue_decision: Optional[str] = None
-    enqueue_receipt_id: Optional[str] = None
-    enqueue_task_count: int = 0
-    enqueue_rejection_reasons: tuple[str, ...] = ()
-    memex_snapshot_supply_attempted: bool = False
-    memex_snapshot_supply_status: Optional[str] = None
-    memex_snapshot_supply_view_id: Optional[str] = None
-    memex_snapshot_supply_receipt: Optional[Mapping[str, Any]] = None
-    memex_snapshot_supply_rejection_reasons: tuple[str, ...] = ()
-    no_model_call_performed: bool = True
-    no_worker_spawn_performed: bool = True
-    no_openclaw_enqueue_performed: bool = True
-    no_hermes_dispatch_performed: bool = True
-    no_repo_mutation_performed: bool = True
-    no_holoindex_reindex_performed: bool = True
-    no_queue_mutation_performed: bool = True
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
 
 
 def run_reddog_main_readonly_operational_bootstrap(
@@ -581,97 +522,6 @@ def run_reddog_main_readonly_operational_bootstrap(
     )
 
 
-def _ready(
-    *,
-    snapshot: OperationalContextSnapshot,
-    context_view: Any,
-    evidence_bundle: EvidenceBundle,
-    gate: FusionAssignmentGateDecision,
-    plan: ReadOnlyAuditSwarmPlan,
-    changed_paths: Sequence[str],
-    allowed_read_targets: Sequence[str],
-    wsp15_allocation_receipt: Mapping[str, Any],
-    collection_result: ReadOnlyAuditReportCollectionResult | None,
-    decision_result: ReadOnlyAuditDecisionReceipt | None,
-    decision_persist_result: ReadOnlyAuditDecisionPersistResult | None,
-    architect_result: BackendArchitectDeterminationResult | None,
-    enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None,
-    enqueue_attempted: bool,
-    memex_supply_result: OperationalMemexTaskEnrichmentResult | None = None,
-) -> RedDogMainReadonlyBootstrapResult:
-    assert gate.determination_binding is not None
-    bundle = collection_result.validation.bundle if collection_result and collection_result.validation else None
-    return RedDogMainReadonlyBootstrapResult(
-        ready=True,
-        status=REDDOG_MAIN_BOOTSTRAP_READY,
-        snapshot_receipt_id=snapshot.snapshot_receipt_id,
-        context_view_id=context_view.context_view_id,
-        evidence_bundle_id=evidence_bundle.evidence_bundle_id,
-        wsp15_allocation_receipt=wsp15_allocation_receipt,
-        determination_id=gate.determination_binding.determination_id,
-        swarm_id=plan.receipt.swarm_id,
-        assignment_count=len(plan.assignments),
-        assignment_ids=tuple(assignment.assignment_id for assignment in plan.assignments),
-        rejection_reasons=(),
-        changed_paths=tuple(changed_paths),
-        allowed_read_targets=tuple(allowed_read_targets),
-        report_collection_attempted=collection_result is not None,
-        report_collection_status=collection_result.status if collection_result else None,
-        report_collection_report_count=collection_result.report_count if collection_result else 0,
-        report_bundle_id=bundle.bundle_id if bundle else None,
-        report_collection_rejection_reasons=collection_result.rejection_reasons if collection_result else (),
-        readonly_audit_decision_attempted=decision_result is not None,
-        readonly_audit_decision_status=decision_result.status if decision_result else None,
-        readonly_audit_decision_action=decision_result.action if decision_result else None,
-        readonly_audit_decision_id=decision_result.decision_id if decision_result else None,
-        readonly_audit_decision_next_slice=decision_result.next_slice_name if decision_result else None,
-        readonly_audit_decision_rejection_reasons=decision_result.rejection_reasons if decision_result else (),
-        readonly_audit_decision_persist_attempted=decision_persist_result is not None,
-        readonly_audit_decision_persist_status=decision_persist_result.status if decision_persist_result else None,
-        readonly_audit_decision_persist_stored=decision_persist_result.stored if decision_persist_result else False,
-        readonly_audit_decision_persist_rejection_reasons=(
-            decision_persist_result.rejection_reasons if decision_persist_result else ()
-        ),
-        backend_architect_determination_attempted=architect_result is not None,
-        backend_architect_determination_status=architect_result.status if architect_result else None,
-        backend_architect_determination_action=architect_result.receipt.action if architect_result else None,
-        backend_architect_determination_id=(
-            architect_result.receipt.determination_receipt_id if architect_result else None
-        ),
-        backend_architect_determination_next_slice=(
-            architect_result.receipt.next_slice_name if architect_result else None
-        ),
-        backend_architect_determination_queue_candidate_count=(
-            architect_result.queue_candidate_count if architect_result else 0
-        ),
-        backend_architect_determination_persist_stored=(
-            architect_result.persist_result.stored if architect_result else False
-        ),
-        backend_architect_determination_rejection_reasons=(
-            architect_result.rejection_reasons if architect_result else ()
-        ),
-        enqueue_attempted=enqueue_attempted,
-        enqueue_decision=enqueue_result.decision if enqueue_result else None,
-        enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
-        enqueue_task_count=len(enqueue_result.tasks) if enqueue_result else 0,
-        enqueue_rejection_reasons=enqueue_result.rejection_reasons if enqueue_result else (),
-        memex_snapshot_supply_attempted=memex_supply_result is not None,
-        memex_snapshot_supply_status=memex_supply_result.status if memex_supply_result else None,
-        memex_snapshot_supply_view_id=memex_supply_result.memex_view_id if memex_supply_result else None,
-        memex_snapshot_supply_receipt=(
-            dict(memex_supply_result.supply_receipt or {}) if memex_supply_result else None
-        ),
-        memex_snapshot_supply_rejection_reasons=(
-            memex_supply_result.rejection_reasons if memex_supply_result else ()
-        ),
-        no_openclaw_enqueue_performed=not bool(enqueue_result and enqueue_result.accepted),
-        no_queue_mutation_performed=not bool(enqueue_result and enqueue_result.accepted),
-        no_model_call_performed=not bool(
-            architect_result and architect_result.receipt.model_result_digest
-        ),
-    )
-
-
 def _build_bootstrap_evidence_bundle(
     *,
     snapshot: OperationalContextSnapshot,
@@ -733,99 +583,6 @@ def _read_json_outside_repo(
     if not isinstance(payload, Mapping):
         return None, (unreadable_reason,)
     return payload, ()
-
-
-def _not_ready(
-    *,
-    reasons: Sequence[str],
-    changed_paths: Sequence[str],
-    allowed_read_targets: Sequence[str],
-    wsp15_allocation_receipt: Mapping[str, Any] | None = None,
-    snapshot: OperationalContextSnapshot | None = None,
-    evidence_bundle: EvidenceBundle | None = None,
-    gate: FusionAssignmentGateDecision | None = None,
-    swarm_plan: ReadOnlyAuditSwarmPlan | None = None,
-    collection_result: ReadOnlyAuditReportCollectionResult | None = None,
-    decision_result: ReadOnlyAuditDecisionReceipt | None = None,
-    decision_persist_result: ReadOnlyAuditDecisionPersistResult | None = None,
-    architect_result: BackendArchitectDeterminationResult | None = None,
-    enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None,
-    memex_supply_result: OperationalMemexTaskEnrichmentResult | None = None,
-) -> RedDogMainReadonlyBootstrapResult:
-    determination_id = None
-    if gate and gate.determination_binding:
-        determination_id = gate.determination_binding.determination_id
-    return RedDogMainReadonlyBootstrapResult(
-        ready=False,
-        status=REDDOG_MAIN_BOOTSTRAP_NOT_READY,
-        snapshot_receipt_id=snapshot.snapshot_receipt_id if snapshot else None,
-        context_view_id=gate.determination_binding.context_view_id if gate and gate.determination_binding else None,
-        evidence_bundle_id=evidence_bundle.evidence_bundle_id if evidence_bundle else None,
-        wsp15_allocation_receipt=wsp15_allocation_receipt,
-        determination_id=determination_id,
-        swarm_id=swarm_plan.receipt.swarm_id if swarm_plan else None,
-        assignment_count=len(swarm_plan.assignments) if swarm_plan else 0,
-        assignment_ids=tuple(assignment.assignment_id for assignment in swarm_plan.assignments) if swarm_plan else (),
-        rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons if str(reason).strip())),
-        changed_paths=tuple(changed_paths),
-        allowed_read_targets=tuple(allowed_read_targets),
-        report_collection_attempted=collection_result is not None,
-        report_collection_status=collection_result.status if collection_result else None,
-        report_collection_report_count=collection_result.report_count if collection_result else 0,
-        report_bundle_id=(
-            collection_result.validation.bundle.bundle_id
-            if collection_result and collection_result.validation.bundle
-            else None
-        ),
-        report_collection_rejection_reasons=collection_result.rejection_reasons if collection_result else (),
-        readonly_audit_decision_attempted=decision_result is not None,
-        readonly_audit_decision_status=decision_result.status if decision_result else None,
-        readonly_audit_decision_action=decision_result.action if decision_result else None,
-        readonly_audit_decision_id=decision_result.decision_id if decision_result else None,
-        readonly_audit_decision_next_slice=decision_result.next_slice_name if decision_result else None,
-        readonly_audit_decision_rejection_reasons=decision_result.rejection_reasons if decision_result else (),
-        readonly_audit_decision_persist_attempted=decision_persist_result is not None,
-        readonly_audit_decision_persist_status=decision_persist_result.status if decision_persist_result else None,
-        readonly_audit_decision_persist_stored=decision_persist_result.stored if decision_persist_result else False,
-        readonly_audit_decision_persist_rejection_reasons=(
-            decision_persist_result.rejection_reasons if decision_persist_result else ()
-        ),
-        backend_architect_determination_attempted=architect_result is not None,
-        backend_architect_determination_status=architect_result.status if architect_result else None,
-        backend_architect_determination_action=architect_result.receipt.action if architect_result else None,
-        backend_architect_determination_id=(
-            architect_result.receipt.determination_receipt_id if architect_result else None
-        ),
-        backend_architect_determination_next_slice=(
-            architect_result.receipt.next_slice_name if architect_result else None
-        ),
-        backend_architect_determination_queue_candidate_count=(
-            architect_result.queue_candidate_count if architect_result else 0
-        ),
-        backend_architect_determination_persist_stored=(
-            architect_result.persist_result.stored if architect_result else False
-        ),
-        backend_architect_determination_rejection_reasons=(
-            architect_result.rejection_reasons if architect_result else ()
-        ),
-        enqueue_attempted=enqueue_result is not None,
-        enqueue_decision=enqueue_result.decision if enqueue_result else None,
-        enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
-        enqueue_task_count=len(enqueue_result.tasks) if enqueue_result and enqueue_result.accepted else 0,
-        enqueue_rejection_reasons=enqueue_result.rejection_reasons if enqueue_result else (),
-        memex_snapshot_supply_attempted=memex_supply_result is not None,
-        memex_snapshot_supply_status=memex_supply_result.status if memex_supply_result else None,
-        memex_snapshot_supply_view_id=memex_supply_result.memex_view_id if memex_supply_result else None,
-        memex_snapshot_supply_receipt=(
-            dict(memex_supply_result.supply_receipt or {}) if memex_supply_result else None
-        ),
-        memex_snapshot_supply_rejection_reasons=(
-            memex_supply_result.rejection_reasons if memex_supply_result else ()
-        ),
-        no_model_call_performed=not bool(
-            architect_result and architect_result.receipt.model_result_digest
-        ),
-    )
 
 
 def _normalize_paths(paths: Sequence[str]) -> tuple[str, ...]:

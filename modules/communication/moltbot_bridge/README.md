@@ -580,7 +580,7 @@ reservation. Detached completion and generic task finalization reject.
 
 RedDog hosts the continuous **0102 Digital Twin** product/persona. OpenClaw may
 host the principal-scoped 0102 execution runtime behind RedDog and remains its
-resident multi-channel gateway and work supervisor:
+resident multi-channel gateway/work supervisor; the main read-only bootstrap re-exports its stable result identity from `reddog_main_readonly_operational_bootstrap_result.py`:
 - **Channels**: WhatsApp, Telegram, Discord, voice, and authenticated thin clients
 - **Policy and conversation**: RedDog/0102 with WSP governance
 - **Supervision**: OpenClaw admits bounded work to WRE/Hermes

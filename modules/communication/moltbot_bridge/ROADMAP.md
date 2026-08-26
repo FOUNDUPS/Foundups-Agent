@@ -128,10 +128,16 @@
   generation boundary. Exact authenticated replay remains valid through later
   signed revisions by checking the immutable E0 receipt chain and its signed
   source/resolved request commitment; replay authority consumption is atomic.
-- WSP 15 FOLLOW-UP: repair two unchanged legacy WSP 62 ratchets separately:
-  `_visit_type_paths` is 61 lines against its 60-line ceiling and
-  `reddog_main_readonly_operational_bootstrap.py` is 858 lines against its
-  857-line no-growth ceiling. Neither file is part of this first-turn slice.
+- COMPLETE: the two legacy WSP 62 ratchet failures are repaired without a
+  ceiling increase. Mapping-list recursion is an owned helper and
+  `_visit_type_paths` is 59 lines. The bootstrap result schema and bounded
+  projections are a 286-line sibling; the public bootstrap surface is
+  identity-preserving and the host fell from 858 to 615 lines.
+- WSP 15 FOLLOW-UP: decompose the unchanged 432-line
+  `run_reddog_main_readonly_operational_bootstrap` entrypoint by lifecycle
+  ownership. Its exact function and host-file no-growth ratchets remain active;
+  this result-only extraction does not claim the orchestration monolith is
+  fully WSP 62 compliant.
 - BLOCKED: principal-side credential issuance UX, host invocation wiring, and
   operation-specific TURN/STATUS/CANCEL handlers with immediate authenticated
   CAS. Environment principal/FoundUp values are not authentication.

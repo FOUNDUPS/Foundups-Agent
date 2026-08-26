@@ -2,6 +2,8 @@
 
 import ast
 from pathlib import Path
+import subprocess
+import sys
 
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +33,7 @@ SOURCE_FILES = {
     "src/reddog_ed25519_signer_backend.py",
     "src/reddog_ed25519_signer_validation.py",
     "src/reddog_isolated_signer_socket_protocol.py",
+    "src/reddog_main_readonly_operational_bootstrap_result.py",
     "src/reddog_signer_audit_attestation.py",
     "src/reddog_signer_conversation_scope_anchor.py",
     "src/reddog_signer_current_generation_config_loader.py",
@@ -70,8 +73,14 @@ TEST_FILES = {
     "tests/test_reddog_signer_system_service_manifest_selection_loader.py",
 }
 LEGACY_NO_GROWTH_FILES = {
-    MODULE_ROOT / "src/reddog_main_readonly_operational_bootstrap.py": 857,
+    MODULE_ROOT / "src/reddog_main_readonly_operational_bootstrap.py": 615,
     REPO_ROOT / "extensions/reddog/tests/verify_extension_contract.js": 5893,
+}
+LEGACY_NO_GROWTH_FUNCTIONS = {
+    (
+        MODULE_ROOT / "src/reddog_main_readonly_operational_bootstrap.py",
+        "run_reddog_main_readonly_operational_bootstrap",
+    ): 432,
 }
 
 
@@ -106,3 +115,44 @@ def test_manifest_contract_test_stays_bounded() -> None:
 def test_touched_legacy_hosts_do_not_grow() -> None:
     for path, ceiling in LEGACY_NO_GROWTH_FILES.items():
         assert len(path.read_text(encoding="utf-8").splitlines()) <= ceiling, path
+
+
+def test_touched_legacy_functions_do_not_grow() -> None:
+    for (path, function_name), ceiling in LEGACY_NO_GROWTH_FUNCTIONS.items():
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        matches = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name == function_name
+        ]
+        assert len(matches) == 1, (path, function_name)
+        assert matches[0].end_lineno - matches[0].lineno + 1 <= ceiling
+
+
+def test_bootstrap_result_surface_reexports_exact_identity() -> None:
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_readonly_operational_bootstrap as bootstrap,
+    )
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_readonly_operational_bootstrap_result as result,
+    )
+
+    assert bootstrap.RedDogMainReadonlyBootstrapResult is result.RedDogMainReadonlyBootstrapResult
+    assert bootstrap.REDDOG_MAIN_BOOTSTRAP_READY is result.REDDOG_MAIN_BOOTSTRAP_READY
+    assert bootstrap.REDDOG_MAIN_BOOTSTRAP_NOT_READY is result.REDDOG_MAIN_BOOTSTRAP_NOT_READY
+
+
+def test_bootstrap_and_result_modules_are_cold_import_order_independent() -> None:
+    bootstrap = "modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap"
+    result = f"{bootstrap}_result"
+    for first, second in ((bootstrap, result), (result, bootstrap)):
+        completed = subprocess.run(
+            [sys.executable, "-c", f"import {first}; import {second}"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        assert completed.returncode == 0, completed.stderr

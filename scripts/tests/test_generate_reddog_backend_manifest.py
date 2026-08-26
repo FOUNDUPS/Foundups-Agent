@@ -258,12 +258,18 @@ def test_checked_in_manifest_matches_independent_generation(
         in generated["required_runtime_sha256"]
     )
     _assert_signer_and_memex_runtime_files(generated)
+    result_module = (
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_main_readonly_operational_bootstrap_result.py"
+    )
+    assert generated["required_runtime_files"].count(result_module) == 1
+    assert result_module in generated["required_runtime_sha256"]
     _assert_manifest_digest_pin(generated)
 
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "d58c0098b3c873683becbce6e2228ba41841f111913ce72e72bf49eb1df786cb"
+    assert digest == "6e022fb56e5e8775eac9814654fcaf4b338a699a8c91829edb96c9e5b868fa32"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

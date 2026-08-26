@@ -311,9 +311,7 @@ def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> Non
         if not _is_mapping_list(item):
             found.append(path)
             return
-        for index, child in enumerate(item):
-            for key, nested in child.items():
-                _visit_type_paths(nested, f"{path}[{index}].{key}", str(key), found)
+        _visit_mapping_list_paths(item, path, found)
         return
     elif field in _STRING_LIST_FIELDS:
         if type(item) not in (list, tuple) or any(
@@ -355,6 +353,16 @@ def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> Non
     ):
         for index, child in enumerate(item):
             _visit_type_paths(child, f"{path}[{index}]", "", found)
+
+
+def _visit_mapping_list_paths(
+    items: Sequence[Mapping[str, Any]],
+    path: str,
+    found: list[str],
+) -> None:
+    for index, child in enumerate(items):
+        for key, nested in child.items():
+            _visit_type_paths(nested, f"{path}[{index}].{key}", str(key), found)
 
 
 def _is_mapping_list(value: Any) -> bool:

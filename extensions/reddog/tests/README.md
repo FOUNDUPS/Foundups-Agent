@@ -1,5 +1,13 @@
 # RedDog Extension Tests
 
+## 0.4.113 backend WSP 62 compatibility
+
+The 1,385-file generated backend closure at
+`sha256:6e022fb5...8fa32` includes the extracted main bootstrap result module
+exactly once. Generator, compatibility, version, contract-shard, package, and
+release gates bind the VSIX to those bytes without claiming new runtime
+authority. The package surface remains 67 files under the 1 MiB raw-byte cap.
+
 ## 0.4.112 package EOL reproducibility
 
 The package contract now proves repository-distributed LF materialization for

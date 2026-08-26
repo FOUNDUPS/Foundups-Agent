@@ -1,5 +1,14 @@
 # Tests - OpenClaw Bridge
 
+## Main bootstrap WSP 62 extraction
+
+The existing authority exact-schema suite now covers list, tuple, empty, and
+invalid mapping-list rehydration with exact nested rejection order. The
+existing bootstrap and durable-authentication WSP 62 suites prove the extracted
+result module stays bounded, the original public symbols retain exact identity,
+cold imports work in either order, and the remaining 432-line orchestration
+entrypoint cannot grow. No parallel test file or runtime authority was added.
+
 ## FoundUp Memex learning-candidate gate
 
 `test_foundup_memex_learning_candidate.py` proves deterministic read-only

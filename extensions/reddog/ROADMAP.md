@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.112 resident architect thin-client surface.
+Phase: RedDog 0.4.113 resident architect thin-client surface.
 
 Current implementation:
 
