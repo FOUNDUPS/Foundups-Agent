@@ -56,8 +56,10 @@ Runtime configuration:
 
 The process-local transaction lock spans both authority leases and activation.
 The automatic composer selects only absent replica/receipt targets and never
-overwrites a generation. This ordering is locally verified; production
-acceptance requires one merged exact-main OpenClaw replay.
+overwrites a generation. This ordering passed production-shaped acceptance at
+exact main `cfd1e0051` through the real OpenClaw supervisor and AgentDB. A
+subsequent governed owner query was CURRENT/no-gap/no-reindex and immutable
+revalidation remained unchanged. Later HEADs require their own transaction.
 
 ### Class: IdleAutomationDAE
 

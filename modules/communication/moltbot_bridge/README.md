@@ -2,30 +2,29 @@
 
 ## HoloIndex query replica truth
 
-The loopback owner client preserves the four public immutable-replica binding
-fields in every successful normalized result. The one-shot RedDog query bridge
-compares them with the exact route admitted before owner startup, so a response
-from an absent, malformed, or different replica fails closed before its query
-receipt is bound. This is response identity propagation only; it grants no
-maintenance, route-selection, repository, or model authority.
+The loopback owner client preserves all four immutable-replica binding fields.
+The one-shot bridge compares them with the route admitted before owner startup;
+an absent, malformed, or different replica fails closed. This propagates
+response identity only and grants no maintenance, route, repository, or model authority.
 
-Resident read-only audit workers use
-`GenerationBoundHoloIndexQueryAdapter`, not an ambient in-process handoff. It
-invokes that exact one-shot bridge in a bounded child process, admits only a
-CURRENT semantic response with equal repository/authority/replica bindings,
-and projects only signed-scope hit metadata. Raw semantic buckets and the
-one-shot receipt body never enter Fusion/model context; the worker builds a new
-scoped query receipt. Shared in-process callers are serialized at the one-shot
-owner lifecycle. The resident boundary is 60 seconds including lock wait: at
-most 57 seconds enter the child operation and three seconds remain for parent
-cleanup. A cold query exceeded the former 27-second child budget; the repaired
-child completed CURRENT in 32.5 seconds. Windows venv callers reuse the owner
-supervisor's vetted base runtime/site-packages and scrubbed child environment before isolated `-S -B`; required OS/runtime variables and exact Holo configuration cross, while recognized credentials and Python overrides do not.
-A committed authority permits clean or overlaid callers, while
-`clean_workspace_head` requires no overlay; all exact HEAD/root/generation/
-replica/receipt checks remain mandatory. Historical canary evidence at commit
-`61c2c3003bc4c2086f105f4c39effd499a026627` does not authorize later HEADs. The process-local lock and per-query cold child are phase-1 correctness limits,
-not horizontal throughput claims. No outbound Hermes dispatch is performed.
+Resident audit workers use `GenerationBoundHoloIndexQueryAdapter` in a bounded
+child, admit only equal CURRENT repository/authority/replica bindings, and
+project signed-scope hit metadata into a new receipt; raw buckets never enter
+Fusion. The 60-second boundary gives the child at most 57 seconds and keeps
+three seconds for cleanup. Windows venv callers reuse the supervisor-vetted
+runtime/site-packages through a scrubbed isolated `-S -B` environment; required
+runtime/Holo values cross while credentials and Python overrides do not.
+Committed authority permits overlays, while `clean_workspace_head` does not.
+The real OpenClaw post-merge path passed at exact main `cfd1e0051`; a later
+owner query was CURRENT/no-gap/no-reindex and immutable revalidation was
+unchanged. Evidence never authorizes a later HEAD. Process-local serialization
+and cold children remain phase-1 correctness limits, not throughput claims.
+No outbound Hermes dispatch is performed.
+
+The resident launcher requires the root FastAPI/Uvicorn runtime. Acceptance used
+the repository `.venv`; an ambient interpreter missing FastAPI failed before
+task claim and performed no maintenance. Dependency failure never authorizes a
+Holo repair or query-time reindex.
 
 ## Receipt-bound artifact model routing
 

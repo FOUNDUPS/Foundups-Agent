@@ -12,6 +12,25 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-08-27 - Exact-main OpenClaw acceptance completed
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 34, WSP 50, WSP 62, WSP 83, WSP 97, WSP 108
+
+- At exact main `cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9`, the governed
+  incident bridge queued the canonical post-merge task and the real
+  broker-managed OpenClaw supervisor claimed it with AgentDB CAS and completed
+  it through the sealed Holo executor. Retry count remained zero.
+- Completion binds generation `sha256:60d062749983...06f3c66` and freshness
+  receipt `sha256:74be7db6ba21...ed0fa`. The request event is resolved
+  completed; the completion event's pending ledger status remains intentional
+  downstream-consumption state, not incomplete execution.
+- A subsequent normal owner query returned CURRENT/no-gap/no-reindex. Full
+  production revalidation preserved the exact 33-artifact / 220,800,343-byte
+  immutable replica binding. This closes the candidate gate only for the exact
+  accepted commit.
+- Secret-free read-only AgentDB row evidence is attached at
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json`.
+
 ### 2026-08-27 - Post-merge activation order and durable completion truth
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 84, WSP 87, WSP 97

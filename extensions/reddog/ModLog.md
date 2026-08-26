@@ -1,5 +1,25 @@
 # RedDog ModLog
 
+## 2026-08-27 - Exact-main live acceptance and VSIX build (0.4.115)
+
+- Closed the 0.4.115 candidate gate at exact main
+  `cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9`. The real broker-managed
+  OpenClaw supervisor claimed and completed the canonical AgentDB Holo task;
+  a later normal owner query returned CURRENT/no-gap/no-reindex and the full
+  immutable replica revalidation was unchanged.
+- Built `O:\RedDog-Releases\reddog-0.4.115-cfd1e0051.vsix`: 275,502 bytes,
+  SHA-256
+  `6ee3902703774683aba78135f076630163a1ce4499094d909807ff7270f1adbb`.
+  Independent archive audit found the exact 67-file, 944,930-byte extension
+  surface and matched every packaged byte to the accepted commit after VSCE's
+  canonical README/LICENSE renames.
+- The secret-free Holo, AgentDB, OpenClaw, and archive evidence is recorded in
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json`.
+- Exact-main gates passed: fast 14/14, conversation 32/32, contract 3/3,
+  package 67 files under 1 MiB, and release 4/4 groups in 172.611s. No model,
+  Git, Holo maintenance, or worker authority moved into the VSIX.
+  (WSP 00/15/22/34/50/62/83/97/108)
+
 ## 2026-08-27 - Post-merge Holo activation compatibility (0.4.115)
 
 - Rebound the thin VSIX after the backend gained split authority-lease and
@@ -8,10 +28,11 @@
 - The authenticated backend closure is **1,349 files** at
   `4095e31c989bfd6a9d66d82dcc389de23afaaf697257ef0f2d81a4771a714e46`;
   the canonical registry is **1,587 / 268 quarantined**.
-- Exact `a7302344` is live from manual recovery, not this candidate. Release
-  acceptance requires the merged exact-main OpenClaw task plus a commit-bound
-  VSIX build. No model, Git, Holo maintenance, or worker authority moved into
-  the extension. (WSP 00/15/22/50/62/84/87/97)
+- At that candidate point, exact `a7302344` was live from manual recovery and
+  release acceptance still required the merged exact-main OpenClaw task plus a
+  commit-bound VSIX build. The newer entry above records completion without
+  rewriting this historical boundary. No model, Git, Holo maintenance, or
+  worker authority moved into the extension. (WSP 00/15/22/50/62/84/87/97)
 
 ## 2026-08-27 - Governed resident Holo usability contract (0.4.114)
 

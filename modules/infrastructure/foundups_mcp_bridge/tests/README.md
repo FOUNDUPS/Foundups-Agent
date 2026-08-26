@@ -9,8 +9,10 @@
 - The adjacent idle-automation authority-order suite proves the first authority
   lease is released before activation and reacquired for final Git/receipt
   binding. Public production entrypoints expose no effect-injection parameters.
-- Focused cross-module result: **62 passed**. These are isolated proofs; live
-  automatic acceptance requires the next merged exact-main post-merge task.
+- Focused cross-module result: **62 passed**. These are isolated proofs.
+  Separately, automatic acceptance passed the real OpenClaw/AgentDB path at
+  exact main `cfd1e0051`, followed by a CURRENT/no-gap/no-reindex owner query
+  and unchanged full-replica proof. Later HEADs require their own evidence.
 
 ## Exact query-replica activation
 

@@ -6,8 +6,10 @@ Version and contract fixtures bind the VSIX to the 1,349-file authenticated
 backend closure at `4095e31c989b...1a714e46`. The backend's 62 focused tests
 prove split authority-lease order, absent-only replica activation, exact
 generation/receipt binding, and failure-preserving AgentDB completion truth.
-This does not claim the candidate has run live; the merged exact-main OpenClaw
-task and commit-bound VSIX inspection remain release gates.
+Separately, the candidate passed the real OpenClaw/AgentDB path at exact main
+`cfd1e0051`, followed by a CURRENT/no-gap/no-reindex owner query and unchanged
+immutable revalidation. The commit-bound VSIX was then built and byte-audited;
+later HEADs still require their own acceptance.
 
 ## 0.4.114 governed resident Holo usability
 

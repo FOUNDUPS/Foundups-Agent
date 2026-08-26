@@ -32,8 +32,10 @@ and no completion event. A ready owner cannot substitute another generation
 or freshness receipt.
 
 These are isolated tests. They do not mutate the live Holo store, route,
-replica, AgentDB, authority checkout, or network. Production acceptance still
-requires the merged exact-main OpenClaw replay described in `ROADMAP.md`.
+replica, AgentDB, authority checkout, or network. Separately, production-shaped
+acceptance passed through the real OpenClaw/AgentDB path at exact main
+`cfd1e0051`; see `ROADMAP.md`. That commit-bound result does not convert this
+isolated suite into live evidence or authorize later HEADs.
 
 ## Running
 

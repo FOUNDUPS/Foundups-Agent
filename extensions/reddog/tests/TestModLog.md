@@ -1,5 +1,23 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Exact-main live acceptance and VSIX audit (0.4.115)
+
+- The real broker-managed OpenClaw supervisor completed the canonical
+  post-merge AgentDB task at exact main `cfd1e0051`; independent read-only
+  verification recomputed the claim and request/completion payload bindings.
+- A fresh owner query returned CURRENT/no-gap/no-reindex at generation
+  `sha256:60d06274...`; full revalidation preserved all 33 artifacts /
+  220,800,343 bytes.
+- Re-ran conversation **32/32** and the four-group release supervisor **4/4 in
+  172.611s** under the repository `.venv`; fast **14/14**, contract **3/3**,
+  and the deterministic package gate remain green.
+- Direct VSIX inspection passed CRC, path, duplicate, symlink, encryption,
+  compression, version, and byte-equivalence checks. Artifact:
+  `O:\RedDog-Releases\reddog-0.4.115-cfd1e0051.vsix`, 275,502 bytes,
+  `sha256:6ee390270377...0f1adbb`.
+- Reproducible secret-free runtime rows and artifact identity are attached at
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json`.
+
 ## 2026-08-27 - Post-merge Holo activation compatibility (0.4.115)
 
 - Pinned version and contract shards to 0.4.115 and rebound the generated

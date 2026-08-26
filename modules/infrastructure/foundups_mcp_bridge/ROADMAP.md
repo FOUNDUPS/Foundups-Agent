@@ -2,7 +2,8 @@
 
 ## 2026-08-27: Exact-main post-merge route activation ordering
 
-**Candidate implemented and focused-GREEN; merged OpenClaw replay required.**
+**Implemented, focused-GREEN, and accepted through real OpenClaw at exact main
+`cfd1e0051`.**
 The authority transaction now holds its process lock across two authority
 leases: exact-SHA checkout and canonical refresh under the first; replica
 activation and stable-route owner proof outside it; final authority, clean
@@ -19,13 +20,15 @@ and receipt equality is mandatory after owner admission. Activation failure,
 route malformation, second-lease contention, or supersession cannot complete
 AgentDB.
 
-Observed predecessor evidence is intentionally separate: exact main
+Observed predecessor evidence remains intentionally separate: exact main
 `a7302344424615dc9d061ef408c2de2508660b81` was manually refreshed and activated
 to generation `sha256:d654414a...` with stable-route and unchanged-replica
 proof. Two real OpenClaw attempts before this repair failed
-`HOLOINDEX_QUERY_REPLICA_REQUIRED`. The acceptance gate for this candidate is
-merge, exact-new-main maintenance, automatic new route activation, final
-OpenClaw completion, and one unchanged-digest owner query.
+`HOLOINDEX_QUERY_REPLICA_REQUIRED`. At successor exact main `cfd1e0051`, the
+automatic transaction completed through the broker-managed OpenClaw supervisor
+and AgentDB, activated generation `sha256:60d06274...`, returned a fresh
+CURRENT/no-gap/no-reindex owner query, and preserved all immutable replica
+digests. The gate is closed for that commit; later HEADs require new evidence.
 
 ## 2026-08-23: Exact query-replica activation controller
 
@@ -47,14 +50,14 @@ before mutation. The controller installs no environment variable and deletes
 nothing. Expanded adjacent evidence is 470 passed / 7 host-capability skips.
 
 Historical operational gates were completed manually at exact main `a7302344`.
-The remaining gate for automatic operation is a later merged exact-main
-OpenClaw replay through the post-merge composer, followed by independent
-receipt/route/replica and unchanged-digest verification.
+Automatic operation was then accepted at exact main `cfd1e0051` through the
+post-merge composer, followed by independent receipt/route/replica and
+unchanged-digest verification. The controller remains exact-commit-bound.
 
 ## 2026-08-23: Maintenance isolated-probe runtime provenance
 
-**Implemented locally; exact-main maintenance replay remains required after
-merge.** A governed exact-SHA refresh exposed that the outer handshake restored
+**Historical pre-acceptance status; resolved by the exact-main `cfd1e0051`
+transaction recorded above.** A governed exact-SHA refresh exposed that the outer handshake restored
 the trusted dependency path only through `PYTHONPATH`, while the nested child
 scrubber correctly removed that ambient override before the final isolated
 snapshot probe. The result was deterministic
@@ -67,13 +70,14 @@ process-image proof, and forwards the typed pair unchanged to the existing
 single-shot verifier. Governed invalid/ambiguous/link authority fails before
 spawn and is never downgraded to a missing marker. It adds no retry, secret
 field, receipt authority, route mutation, vector fallback, or relaxed
-validation. Exact-main authority refresh, compact replica materialization, and
-route activation remain post-merge gates.
+validation. At the time of this entry, exact-main authority refresh, compact
+replica materialization, and route activation remained post-merge gates; the
+current status is the accepted transaction recorded above.
 
 ## 2026-08-23: Stable route-file owner resolution
 
-**Implemented locally and independently WSP_97-falsified; no live route
-activated.** The existing owner resolver now consumes the stable private
+**Historical pre-activation status; live route acceptance is recorded at the
+top of this roadmap.** The existing owner resolver now consumes the stable private
 `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`, performs a nonmutating terminal read
 through the route store, and requires exact authority, canonical, replica-root, and
 four-field descriptor agreement. The legacy direct root remains a migration

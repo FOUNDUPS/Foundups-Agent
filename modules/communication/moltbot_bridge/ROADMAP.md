@@ -1,13 +1,12 @@
 # moltbot_bridge Roadmap
 
-- CURRENT EXACT-MAIN EVIDENCE: after the earlier `61c2c300` canary, governed
-  maintenance and a manual route activation completed at exact main
-  `a7302344424615dc9d061ef408c2de2508660b81`, generation
-  `sha256:d654414a...`. A fresh resident-shaped owner query returned CURRENT,
-  no gap/no reindex, and left the replica unchanged. This proves the stable
-  route and resident consumer at that commit; it does not yet prove the local
-  automatic post-merge activation-order candidate. That candidate still
-  requires merge and one real OpenClaw replay at the resulting exact main.
+- CURRENT EXACT-MAIN EVIDENCE: after the earlier `61c2c300` canary and manual
+  `a7302344` recovery, the automatic post-merge transaction completed through
+  the real broker-managed OpenClaw supervisor at exact main `cfd1e0051`,
+  generation `sha256:60d06274...`. AgentDB claim/completion bindings validated;
+  a fresh owner query returned CURRENT/no-gap/no-reindex and full immutable
+  revalidation preserved all 33 artifacts. This closes the automatic
+  activation-order candidate gate for that commit only.
 
 - IMPLEMENTED / HISTORICAL EXACT-HEAD CANARY EVIDENCE: the default resident/OpenClaw read-only audit worker now reaches
   the verified Holo query-replica resolver through the existing one-shot owner
@@ -23,6 +22,9 @@
   within one process and starts a bounded one-shot process per Holo query; a
   future supervised owner lease may reduce cross-process contention and
   cold-start cost without weakening proof.
+- P1 SCALE DEBT: concurrent one-shot owner startups can still fail closed with
+  `HOLOINDEX_QUERY_SERVICE_PORT_IN_USE`. A supervised cross-process owner
+  lease/reuse boundary must preserve the same route, cleanup, and receipt proof.
 - P0 DESIGN REQUIRED: a committed feature branch whose HEAD advances beyond
   the sealed authority is correctly rejected today. Normal post-commit IDE
   recall needs a bounded, independently verified branch-overlay design (or an

@@ -99,9 +99,11 @@ freshness-receipt digest must exactly equal the canonical refresh proof; a
 ready owner with any substituted binding fails closed. The authority
 transaction releases its first authority-update lease before this composer,
 then reacquires the lease and revalidates authority, repository, and
-`origin/main` before durable completion. This automatic ordering repair is a
-candidate until a merged exact-main OpenClaw replay advances the route and
-publishes completion.
+`origin/main` before durable completion. This ordering passed the real
+broker-managed OpenClaw/AgentDB path at exact main `cfd1e0051`: generation
+`sha256:60d06274...` was activated, the task completed, and a later governed
+owner query plus full immutable revalidation remained unchanged. Later HEADs
+still require their own exact-SHA transaction.
 
 `reddog_holoindex_query_replica.py` can materialize one immutable
 `holoindex_query_replica.v1` generation into a new, disjoint replica-root
@@ -150,8 +152,11 @@ repository/receipt/leases, and the same runtime closure. The sealed backend has
 no Chroma/SQLite/HNSW path. The 15-second query deadline is unchanged. The
 previous full-tree live replica demonstrated why this narrowing is necessary:
 its 8.33 GB closure produced 122--153 second cold owner queries. The narrow
-materializer is synthetically verified; live timing requires merge, exact-main
-maintenance, materialization, activation, and immutable post-query proof.
+materializer is synthetically verified and completed one exact-main live
+materialization/activation at `cfd1e0051`. The resulting 33-artifact,
+220,800,343-byte replica returned a fresh CURRENT query and passed full
+unchanged post-query proof. This is correctness evidence, not a horizontal
+throughput claim.
 
 R16-R19 made route, binding fields, and health containers exact. R20 makes
 health transport scalars exact before any conversion: literal `127.0.0.1`,
@@ -769,9 +774,10 @@ for STOP conditions, commands, and RED/GREEN evidence.
 
 ## Future (v2)
 
-- Live semantic Holo availability after authority maintenance produces a
-  generation-bound `CURRENT` freshness receipt. The governed bundle tool is
-  implemented; current live authority acceptance remains pending.
+- Live semantic Holo availability is accepted at exact main `cfd1e0051` with a
+  generation-bound CURRENT freshness receipt and unchanged immutable replica.
+  The governed bundle tool is implemented. Public ChatGPT/tunnel acceptance
+  remains a separate deployment boundary.
 - Gated execution capabilities
 - Agent team spawning
 - Skill dispatch with approval workflow

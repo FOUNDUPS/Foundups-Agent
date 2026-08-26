@@ -1,6 +1,6 @@
 # Assumption Audit: RedDog Holo Post-Merge Activation Order
 
-- Status: PROCEED_WITH_FAIL_CLOSED_GATES
+- Status: ACCEPTED_AT_EXACT_MAIN_CFD1E0051
 - Base commit: `a7302344424615dc9d061ef408c2de2508660b81`
 - Execution plane: OpenClaw/AgentDB task -> Holo authority -> replica activation
 - WSP_15: C4 / I5 / D5 / Impact5 = 19 (P0)
@@ -40,7 +40,7 @@
 | F5 | The second authority lease is busy after an owner starts. | MED | HIGH | Stop only the process-owned owner and return BUSY; never complete or resolve the request. |
 | F6 | Existing replica/receipt evidence is overwritten. | LOW | CRITICAL | Bounded absent-only allocation; no delete, overwrite, or reuse authority. |
 | F7 | A pre-migration long-lived process retains the legacy root while the user route pointer is newer. | MED during migration | HIGH | Dual configuration remains rejected. Restart once after route-pointer migration or construct the child with only the persisted stable route. Do not weaken the exclusive-capability rule. |
-| F8 | Manual `a7302344` recovery is misreported as automatic acceptance. | MED | HIGH | Keep the historical task failed and label the current live route as manual evidence; require a new merged exact-main task for acceptance. |
+| F8 | Manual `a7302344` recovery is misreported as automatic acceptance. | MED | HIGH | Keep the historical task failed and label it manual evidence; automatic acceptance is separately bound to the completed `cfd1e0051` task. |
 
 ## 4. Alternatives Considered
 
@@ -63,7 +63,19 @@
 - Gates: focused and adjacent Python suites, real AgentDB regression, WSP_62,
   registry and authenticated-backend reprojection, extension release gates,
   squash merge, then one new exact-main OpenClaw replay and immutable query
-  proof before declaring automatic production acceptance.
+  proof. Those final gates completed at `cfd1e0051`; later HEADs require their
+  own exact-SHA evidence.
 - Explicitly excluded: query-time reindex, lease bypass, route ambiguity,
   overwrite/delete/retention authority, provider/model changes, and relabeling
   historical failed work.
+
+## 6. Resolution Evidence
+
+- The real broker-managed OpenClaw supervisor claimed and completed
+  `holoindex_postmerge_refresh:cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9`
+  through AgentDB with retry count zero.
+- Completion binds generation `sha256:60d062749983...06f3c66` and freshness
+  receipt `sha256:74be7db6ba21...ed0fa`.
+- A subsequent normal governed query returned CURRENT/no-gap/no-reindex and
+  full production revalidation preserved all 33 immutable artifacts. The
+  historical `a7302344` task remains failed evidence.

@@ -1,5 +1,38 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-27] RedDog Exact-Main Holo/OpenClaw Live Acceptance
+
+**WSP Protocols:** WSP 00, 15, 22, 34, 50, 62, 83, 97, 108
+
+- Closed the post-merge acceptance gate at exact main
+  `cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9`. The governed incident bridge
+  recorded the initial authority-HEAD mismatch, queued the canonical exact-SHA
+  maintenance task, and the real broker-managed OpenClaw supervisor claimed
+  and completed it through AgentDB without query-time reindex or repository
+  mutation.
+- The completed transaction published generation
+  `sha256:60d062749983e9041460182aa7d509dbd3c1269bb85ff68eea957a3c906f3c66`
+  and freshness receipt
+  `sha256:74be7db6ba2179f8bbfdddbc255882e335c31db2cbf2044ebdbdbdd6d12ed0fa`.
+  A fresh normal owner query returned CURRENT/no-gap/no-reindex, and the
+  production verifier rehashed all 33 immutable artifacts / 220,800,343 bytes
+  without changing descriptor, replica, or path identity.
+- Built and byte-audited
+  `O:\RedDog-Releases\reddog-0.4.115-cfd1e0051.vsix`: 275,502 compressed bytes,
+  SHA-256
+  `6ee3902703774683aba78135f076630163a1ce4499094d909807ff7270f1adbb`.
+  The 67-file extension surface remains 944,930 bytes at
+  `sha256:f48a934ca411e1bb8273b6e8c0eb0387bfc1c0fb76a7c74ac9a7c086c9cb452c`;
+  fast, conversation, contract, package, and four-group release gates pass.
+- A PATH-selected interpreter without FastAPI failed before task claim. The
+  repository `.venv` contains the declared FastAPI/Uvicorn runtime and ran the
+  accepted transaction. The resident was stopped after verification; no
+  listener remained and independent secret scans were clean.
+- Execution receipt:
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+- Secret-free runtime evidence:
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json`.
+
 ## [2026-08-27] RedDog Post-Merge Holo Activation Order Repair
 
 **WSP Protocols:** WSP 00, 15, 22, 50, 62, 78, 84, 87, 97

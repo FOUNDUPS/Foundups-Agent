@@ -1,5 +1,24 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Exact-main automatic replica activation accepted
+
+- Closed the split-lease composer's live gate at exact main
+  `cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9`. The canonical incident bridge
+  queued the existing post-merge task; the real OpenClaw supervisor claimed it
+  through AgentDB and the sealed executor completed the authority refresh,
+  absent-only materialization, route CAS, governed query, final authority proof,
+  and atomic task completion.
+- The active route is CURRENT at revision 3 and generation
+  `sha256:60d062749983...06f3c66`. The production verifier rehashed all 33
+  artifacts / 220,800,343 bytes before and after a fresh normal owner query;
+  descriptor, replica ID, and path identity remained exact.
+- This is commit-bound production-shaped evidence, not permission for query-time
+  maintenance or a claim about later HEADs. The earlier `a7302344` failure
+  remains historical truth. Secret-free route, AgentDB, and artifact evidence
+  is attached at
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json`.
+  (WSP 00/15/22/34/50/62/83/97/108)
+
 ## 2026-08-27 - Exact-main post-merge replica composition
 
 - Reproduced `HOLOINDEX_QUERY_REPLICA_REQUIRED` after a successful exact-main
