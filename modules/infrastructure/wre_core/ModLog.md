@@ -1,5 +1,85 @@
 # WRE Core - ModLog
 ## Chronological Change Log
+
+### [2026-08-26] - EXECUTION-TRUTH AND PRODUCTION SKILLZ ADMISSION
+
+- Replaced truthy/coerced success with exact Boolean success plus typed effect
+  receipts from a manifest-bound adjacent executor. Local Qwen output is now
+  proposal-only; model, loader, executor, and ReAct failures stay failures with
+  stable redacted reasons.
+- Bound production admission to exact registry/frontmatter state, source
+  hygiene, bundle content, manifest verification, and Cisco's exact single-
+  bundle scan contract. Scanner caches can no longer outlive changed Skillz
+  bytes or bypass hygiene. Concurrent bundles use fingerprint-isolated report
+  directories, and disabled scanner enforcement is a blocked misconfiguration.
+- Removed JSON handler configurations from the executable registry, blocked
+  unauthenticated A/B runtime selection and promotion, and stopped structural
+  fidelity from masquerading as independent outcome quality.
+- Extracted A/B statistics from the near-limit PatternMemory host. Each arm
+  must meet its target; variant labels and success are exact typed evidence;
+  closure durably records its statistical label without promoting artifacts.
+- Extracted compatibility/runtime support and removed ungated direct-RAG and
+  CodeAct execution so the master orchestrator fell from 1,814 to 1,139 lines
+  without a candidate-authored exemption. Scanner admission now survives a
+  pre/post fingerprint check and dispatch compiles captured bytes only when
+  their bundle fingerprint matches the admission receipt. Malformed YAML and
+  local-engine exception sentinels fail closed without raw material storage.
+  Reconciled WSP
+  95, README, INTERFACE, ROADMAP, test documentation, and owner records to the
+  implemented fail-closed boundary. Focused matrix: 224 passed / 4 platform-
+  limited link/reparse skips. A separate isolated AntifaFM suite passed 14
+  tests, and the superseded-ops documentation gate also passed. Both production Skillz
+  passed real manifest-bound
+  scans; default PatternMemory and AgentDB files remained byte-identical.
+  (WSP 00/15/22/50/62/84/95/97)
+- Independent audit then found stale subordinate interfaces, executable
+  fallback prose, and synthetic token telemetry in the gateway, MLE-STAR,
+  HoloIndex plugin, and PQN compatibility path. Those surfaces now report
+  configured budgets separately and keep token reduction explicitly
+  unmeasured. The root interface again lists the live loader, PatternMemory,
+  and filesystem-discovery APIs. Gateway/telemetry regressions are included in
+  the focused execution-truth tier.
+- A second independent gate returned NO-GO on exact candidate bytes because
+  `WREMonitor` still wrote livechat configuration and counted unsupported
+  suggestions as applied effects. The monitor and dashboard now remain
+  proposal-only, write nothing, return `False`, and handle unmeasured token
+  telemetry without comparison errors. Generic gateway recall and FoundUp
+  inspection likewise return proposal-only/no-worker/no-effect truth instead
+  of compliance or autonomous-operation claims. Historical phase, policy,
+  closure, remote-DAE, and implementation reports now carry explicit
+  non-authoritative/superseded boundaries. WSP 62 review split the 837-line
+  execution contract, reduced candidate threshold crossings, and left no
+  changed oversized function growth. (WSP 00/15/22/50/62/95/97)
+- A fresh exact-byte replay found a concatenation ambiguity in bundle hashes
+  and an MLE-STAR special-route bypass. Bundle fingerprints now include a
+  version tag plus file-name, presence, and content-length framing. MLE-STAR
+  proof receipts fail closed on malformed structure and remain invalid until a
+  real signature verifier exists; its gateway output initially discarded only
+  top-level effect, worker, compliance, and validity claims. The replay also eliminated two
+  documentation ceiling ratchets, bannered the remaining WSP 96 recursive
+  architecture, and completed monitor/recursive public API contracts. Exact
+  focused matrix: 227 passed / 4 platform-limited skips. (WSP 15/22/50/62/95/97)
+- The next frozen external audit exposed genuine deep MLE claim leakage, plugin
+  dispatch occurring before WSP callbacks, a still-live direct Holo plugin,
+  broken recursive shutdown, immortal default auto-save, and stale current
+  OpenClaw line counts. Component proposals are now recursively bounded and
+  sanitized; every plugin crosses both callbacks and then remains blocked until
+  admitted executor/effect evidence exists; direct Holo plugin
+  construction/execution is dormant and blocked; recursive persistence
+  is opt-in with a stoppable, truth-valued shutdown. WSP 62 extraction kept all
+  grown functions at or below their base spans. Exact focused matrix: 235
+  passed / 4 platform-limited skips in 29.38s; AntifaFM: 14 passed in 0.76s.
+  (WSP 00/15/22/50/62/95/97)
+- The final documentation sweep found the 2025 PatternMemory architecture still
+  declaring universal production integration. The document now explicitly
+  remains a historical, superseded proposal and points to current local-SQLite
+  authority; cross-FoundUp replication and production RSI remain unimplemented.
+  (WSP 00/15/22/50/62/97)
+- Removed a stale exact-current orchestrator line count from the roadmap. WSP 62
+  now owns the moving physical-size fact mechanically; the roadmap retains only
+  the durable below-hard-limit/no-candidate-exemption boundary.
+  (WSP 22/50/62/97)
+
 ### [2026-08-11] - WSP 62 DIFFERENTIAL ENFORCEMENT RECONCILIATION
 
 - Reconciled the WRE inherited-debt authority with current `main` after the

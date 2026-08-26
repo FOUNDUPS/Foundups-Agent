@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-26: OpenClaw refactor-status truth correction
+
+- Corrected the touched README/INTERFACE current line-count claim: the active
+  `openclaw_dae.py` is 1,580 lines, not the historical 1,342-line extraction
+  result. It remains inherited WSP 62 hard-limit debt and the facade split is
+  incomplete; no source growth or exemption was added in this transaction.
+  (WSP 00/22/50/62/97)
+
+## 2026-08-26: Exact Skillz scanner contract selection
+
+- Corrected the shared Cisco Skill Scanner adapter to use `scan` for one exact
+  Skillz bundle and `scan-all --recursive` only for wardrobe roots. Direct
+  `SKILLz.md` bundles pass the explicit `--skill-file` contract; manifest
+  verification, stale/malformed report rejection, typed severity parsing,
+  timeout normalization, and unknown-threshold handling fail closed. Scanner
+  processes receive a minimal credential-free environment and raw process
+  streams are not returned.
+- Both registered production RedDog/WRE Skillz passed the installed scanner's
+  real exact-bundle path. This grants no execution, model, worker, Git, Holo,
+  network, or promotion authority. (WSP 00/15/22/50/62/95/97)
+
 ## 2026-08-26: Main bootstrap WSP 62 result extraction
 
 - Extracted the stable 53-field main read-only bootstrap result schema and its

@@ -1,5 +1,10 @@
 # WRE Phase 3 - FINAL WSP Compliance Audit
 
+> **Historical point-in-time audit — superseded and non-authoritative.**
+> The 2025 autonomous-execution and completion claims below are not current
+> effect or RSI evidence. Current authority is the module `README.md`,
+> `INTERFACE.md`, `ROADMAP.md`, production receipts, and WSP 95 v2.1.
+
 **Date**: 2025-10-25
 **Auditor**: 0102
 **Status**: Phase 3 is **100% COMPLETE** ✅

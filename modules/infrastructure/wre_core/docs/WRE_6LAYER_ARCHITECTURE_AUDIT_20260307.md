@@ -1,5 +1,10 @@
 # WRE + Skill System Architecture — Deep Dive Audit
 
+> **Historical point-in-time audit — non-authoritative.**
+> “Fully implemented” verdicts below reflect the 2026-03-07 snapshot and are not
+> current production-effect or RSI proof. Use current module contracts, WSP 95
+> v2.1, and generation-bound receipts for present capability claims.
+
 **Date**: 2026-03-07  
 **Scope**: External system prompt (6-layer architecture) vs actual codebase  
 **Verdict**: **Enhancement, not drift** — the codebase has evolved significantly beyond the original spec in most layers, with one notable gap.

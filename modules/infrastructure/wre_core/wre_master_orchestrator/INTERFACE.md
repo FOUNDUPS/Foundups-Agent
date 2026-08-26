@@ -1,159 +1,74 @@
-# WRE Master Orchestrator - Interface Specification
+# WRE Master Orchestrator Interface
 
-Per WSP 11 (WRE Standard Command Protocol)
+This submodule interface is a focused projection of the authoritative
+[WRE Core interface](../INTERFACE.md). It documents implemented callable
+surfaces, not historical autonomy claims.
 
-## Core Interface
+## `WREMasterOrchestrator`
 
-### WREMasterOrchestrator
+### Registered Skillz
 
-```python
-class WREMasterOrchestrator:
-    """THE Master Orchestrator per WSP 46"""
-    
-    def __init__(self):
-        """Initialize with pattern memory and WSP validation"""
-        
-    def recall_pattern(self, operation_type: str) -> Pattern:
-        """
-        Recall pattern from memory per WSP 60
-        Args:
-            operation_type: Type of operation (e.g., "module_creation")
-        Returns:
-            Pattern object with WSP chain and token cost
-        """
-        
-    def execute(self, task: Dict) -> Any:
-        """
-        Execute task through pattern recall per WSP 46
-        Args:
-            task: Dict with 'type' and optional 'plugin' keys
-        Returns:
-            Result of pattern application
-        """
-        
-    def register_plugin(self, plugin: OrchestratorPlugin):
-        """
-        Register orchestrator plugin per WSP 65
-        Args:
-            plugin: OrchestratorPlugin instance
-        """
+- `execute_skill(skill_name, agent, input_context, force=False) -> dict`
+- `execute_skill_with_reasoning(skill_name, agent, input_context,
+  max_iterations=None, fidelity_threshold=None, force=False) -> dict`
+- `evolve_skill(...) -> bool`
+- `get_skill_statistics(skill_name, days=30) -> dict`
 
-    def register_plugin(self, plugin_name: str, plugin_obj: Any):
-        """
-        Backward-compatible registration overload.
-        Args:
-            plugin_name: Explicit plugin key
-            plugin_obj: Plugin instance
-        """
+`execute_skill()` requires WSP 95 admission and exact scanner-to-dispatch
+fingerprint continuity. Success requires typed effect evidence. Loader,
+scanner, executor, or result-shape failure returns a stable fail-closed record;
+there is no executable fallback instruction.
 
-    def get_plugin(self, plugin_name: str) -> Optional[Any]:
-        """Return registered plugin by name, or None."""
+`execute_skill_with_reasoning()` reports `execution_success` independently of
+fidelity acceptance. `evolve_skill()` returns `True` only when a non-production
+proposal variation was stored; it does not activate or promote that variation.
 
-    def validate_module_path(self, module_path: Path) -> bool:
-        """Return True if module path exists under repository root."""
-        
-    def get_metrics(self) -> Dict:
-        """
-        Get operational metrics per WSP 70
-        Returns:
-            Dict with state, coherence, patterns, tokens
-        """
-```
+### Compatibility plugins and patterns
 
-### OrchestratorPlugin
+- `register_plugin(plugin)` or `register_plugin(name, plugin)`
+- `get_plugin(name) -> object | None`
+- `validate_module_path(path) -> bool`
+- `recall_pattern(operation_type) -> Pattern`
+- `execute(task) -> Any`
+- `select_skill_tot(candidates, context, max_branches=3)`
+- `find_skill_candidates(intent)`
+- `execute_codeact_skill(skill_spec, input_context) -> dict`
+- `get_metrics() -> dict`
 
-```python
-class OrchestratorPlugin:
-    """Base class for plugins per WSP 11"""
-    
-    def __init__(self, name: str):
-        """Initialize plugin with name"""
-        
-    def register(self, master: WREMasterOrchestrator):
-        """Register with master orchestrator"""
-        
-    def execute(self, task: Dict) -> Any:
-        """Execute task using master's pattern memory"""
-```
+`recall_pattern()` and `execute()` require independently injected WSP verifier
+callbacks. After both callbacks, `execute()` still blocks every legacy plugin:
+the callbacks authenticate neither plugin code nor effects. Direct HoloIndex
+compatibility execution names the governed owner-query route; other plugins
+must migrate to the WSP 95 admitted Skillz executor before dispatch is allowed.
+`execute_codeact_skill()` always returns a `codeact_prototype_boundary` block.
+Candidate selection is not admission, execution, evaluation, or promotion.
 
-### Pattern
+### Metrics
 
-```python
-@dataclass
-class Pattern:
-    """Pattern memory unit per WSP 60"""
-    id: str  # Pattern identifier
-    wsp_chain: list  # WSP citation chain [1, 3, 49, 22, 5]
-    tokens: int  # Token cost (50-200 target)
-    pattern: str  # Pattern description
-    
-    def apply(self, context: Dict) -> Any:
-        """Apply pattern to context"""
-```
+`get_metrics()` exposes observed component/counter state and
+`token_reduction_measured: false`. The implementation does not report a token
+reduction percentage or average token usage without authenticated receipts.
 
-## Usage Examples
+## `OrchestratorPlugin`
 
-### Basic Orchestration
-```python
-from wre_master_orchestrator import WREMasterOrchestrator
+- `register(master)` binds an in-process plugin to the master.
+- Direct `execute(task)` calls are plugin-specific and have only caller-granted
+  authority; the master orchestrator does not dispatch this compatibility API.
 
-# Create master (only one!)
-master = WREMasterOrchestrator()
+Plugin registration does not confer WSP 95 Skillz admission or external-effect
+authority.
 
-# Execute with pattern recall
-result = master.execute({
-    "type": "module_creation",
-    "name": "my_module"
-})
-# Uses 150 tokens instead of 5000+
-```
+## `Pattern`
 
-### Plugin Registration
-```python
-from wre_master_orchestrator import OrchestratorPlugin
+`Pattern` stores an identifier, WSP citation chain, configured token-budget
+hint, and pattern content. `Pattern.apply(context)` applies the stored template.
+Its token field is not measured usage, and application is not effect proof.
 
-class MyPlugin(OrchestratorPlugin):
-    def __init__(self):
-        super().__init__("my_plugin")
+## Failure and authority rules
 
-# Register plugin
-plugin = MyPlugin()
-master.register_plugin(plugin)
-
-# Execute through plugin
-result = master.execute({
-    "plugin": "my_plugin",
-    "type": "custom_operation"
-})
-```
-
-### Pattern Memory Access
-```python
-# Recall specific pattern
-pattern = master.recall_pattern("error_handling")
-print(f"WSP Chain: {pattern.wsp_chain}")  # [64, 50, 48, 60]
-print(f"Token Cost: {pattern.tokens}")  # 100
-
-# Apply pattern directly
-result = pattern.apply({"error": "FileNotFound"})
-```
-
-## WSP Compliance
-All operations follow:
-- WSP 50: Pre-action verification
-- WSP 64: Violation prevention
-- WSP 48: Recursive learning
-- WSP 22: ModLog updates
-- WSP 75: Token measurements
-
-## Error Handling
-- Raises `ValueError` if operation fails WSP validation
-- Raises `KeyError` if plugin not registered
-- Returns default pattern if pattern not found (learns new)
-
-## Runtime Resilience Rules (2026-02-19)
-- Skill loading failures must degrade to deterministic fallback instructions (non-fatal).
-- Pattern memory default singleton is production-only; tests/explicit DB paths remain isolated.
-- Runtime DB override uses `WRE_PATTERN_MEMORY_DB`.
-
----
+- Missing patterns, plugins, Skillz, manifests, or scanner evidence fail closed.
+- Raw model/engine exception material is not a public result.
+- Returned structural fidelity is not outcome quality.
+- No API in this submodule independently grants Git, network, repository-write,
+  worker-dispatch, Holo maintenance, production activation, or rollback
+  authority.

@@ -1,5 +1,46 @@
 # WRE Core Roadmap
 
+## WRE master orchestrator decomposition
+
+Execution-truth hardening extracted registry-bound executor dispatch, local
+proposal inference, production admission/scanner policy, and legacy support
+plugins into focused modules. The inherited coordinator fell from 1,814 to
+a substantially smaller compatibility host and remains below the canonical
+Python hard limit without a candidate-authored exemption. Exact current size is
+verified mechanically by WSP 62 rather than frozen into roadmap prose.
+
+Continue parity-proven decomposition in later focused slices:
+
+- extract outcome recording and continuity breadcrumbs from
+  `_execute_skill_once` (250 lines; inherited debt reduced from 329);
+- extract the ReAct retry controller (113 lines; inherited debt reduced from
+  122);
+- extract candidate proposal construction/storage from `evolve_skill` (108
+  lines; inherited debt reduced from 123);
+- extract constructor configuration blocks (`__init__`, 88 lines; inherited
+  debt reduced from 93);
+- separate selection, evolution proposals, and telemetry;
+- keep every new module/function below WSP 62 thresholds.
+
+## Execution-truth P0 follow-ons
+
+- implement an authenticated independent outcome evaluator;
+- implement durable proposer/verifier/promoter separation and signed receipts;
+- bind a generation-current read-only Holo owner adapter before re-enabling
+  any generic pre-execution retrieval;
+- bring CodeAct under exact WSP 95 registry, scanner receipt, captured bytes,
+  typed effect receipts, and independent verification before enabling it;
+- bind A/B candidates to immutable runtime artifacts before re-enabling traffic;
+- build governed artifact activation and rollback without query-time Holo writes;
+- prove a production end-to-end RSI canary before describing WRE as production RSI;
+- add typed admission-failure audit storage without conflating it with successful
+  PatternMemory outcomes.
+- replace process-global PatternMemory/cache mutation with per-work-item
+  connections or serialized transaction ownership before concurrent multi-agent
+  execution; `check_same_thread=False` is not a concurrency proof;
+- bind shared in-process admission caches to an explicit synchronization and
+  bounded-eviction contract before one RedDog process serves many FoundUps.
+
 ## Autonomous slice verifier decomposition
 
 Decompose `wre_autonomous_slice_verifier_runtime.py` without weakening its
@@ -49,13 +90,9 @@ confined artifact-supply workflow. Detecting a malicious resolver that returns
 a different self-consistent receipt requires a separately authorized
 provenance/signature contract and is outside Phase 1.
 
-## WRE documentation WSP62 decomposition
+## WRE documentation archival
 
-`INTERFACE.md`, `ModLog.md`, and `tests/TestModLog.md` contain inherited
-chronological/API history above the canonical Markdown threshold.
-`INTERFACE.md` remains governed by a temporary no-growth ceiling.
-The two required append-only audit logs use non-blocking archival advisories;
-their history cannot block unrelated functional or security work. Before
-2026-09-30, archive superseded history through an approved retention workflow,
-preserve current interfaces and audit lineage, and remove each temporary
-exception once the canonical threshold is met.
+`README.md` and `INTERFACE.md` now describe current truth below the Markdown
+threshold. `ModLog.md` and `tests/TestModLog.md` remain required append-only
+audit histories under non-blocking archival advisories. Archive them through an
+approved retention workflow without losing lineage.

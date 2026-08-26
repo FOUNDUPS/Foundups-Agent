@@ -38,6 +38,10 @@ from typing import Optional, Dict, Any
 logger = logging.getLogger(__name__)
 
 
+def _log_error_type(message: str, exc: Exception) -> None:
+    logger.error("%s; error_type=%s", message, type(exc).__name__)
+
+
 class QwenInferenceEngine:
     """
     Local LLM inference engine using llama-cpp-python.
@@ -117,11 +121,11 @@ class QwenInferenceEngine:
             logger.info("Qwen model loaded successfully")
             return True
 
-        except ImportError as e:
-            logger.error(f"llama-cpp-python not installed: {e}")
+        except ImportError:
+            logger.error("llama-cpp-python is not installed")
             return False
-        except Exception as e:
-            logger.error(f"Failed to load Qwen model: {e}")
+        except Exception as exc:
+            _log_error_type("Failed to load Qwen model", exc)
             return False
 
     def generate_response(
@@ -172,9 +176,9 @@ class QwenInferenceEngine:
                 # Raw text response
                 return str(response).strip()
 
-        except Exception as e:
-            logger.error(f"Error generating response: {e}")
-            return f"Error: Failed to generate response - {e}"
+        except Exception as exc:
+            _log_error_type("Qwen response generation failed", exc)
+            return "Error: Qwen response generation failed"
 
     def analyze_code_context(
         self,

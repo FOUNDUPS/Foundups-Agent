@@ -1,5 +1,10 @@
 # WRE Phase 2 - FINAL COMPLETION AUDIT
 
+> **Historical point-in-time audit — superseded and non-authoritative.**
+> “Final” applies only to the 2025 phase transaction. It is not current
+> capability evidence; use the module `README.md`, `INTERFACE.md`, `ROADMAP.md`,
+> production receipts, and WSP 95 v2.1 for current truth.
+
 **Date**: 2025-10-24
 **Auditor**: 0102
 **Status**: Phase 2 is **100% COMPLETE** ✅

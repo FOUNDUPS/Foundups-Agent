@@ -61,6 +61,82 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+_EFFECT_CLAIM_KEYS = {
+    "success", "worker_started", "proposal_only", "effect_receipt",
+    "effect_receipts", "wsp_compliant", "compliance_verified", "valid",
+}
+_COMPONENT_PROPOSAL_MAX_DEPTH = 16
+_COMPONENT_PROPOSAL_MAX_ITEMS = 256
+
+
+def _sanitize_component_proposal(
+    value: Any, *, depth: int = 0, active_ids: Optional[set[int]] = None
+) -> Any:
+    """Return a bounded JSON-compatible projection with effect claims removed."""
+    if value is None or isinstance(value, (str, bool, int, float)):
+        return value
+    if depth >= _COMPONENT_PROPOSAL_MAX_DEPTH:
+        return {"projection_truncated": "depth_limit"}
+
+    active_ids = active_ids if active_ids is not None else set()
+    if isinstance(value, dict):
+        if id(value) in active_ids:
+            return {"projection_truncated": "cycle"}
+        active_ids.add(id(value))
+        try:
+            projected: Dict[str, Any] = {}
+            for index, (key, nested_value) in enumerate(value.items()):
+                if index >= _COMPONENT_PROPOSAL_MAX_ITEMS:
+                    projected["projection_truncated"] = "item_limit"
+                    break
+                if not isinstance(key, str):
+                    continue
+                if key.strip().lower() in _EFFECT_CLAIM_KEYS:
+                    continue
+                projected[key] = _sanitize_component_proposal(
+                    nested_value, depth=depth + 1, active_ids=active_ids
+                )
+            return projected
+        finally:
+            active_ids.remove(id(value))
+    if isinstance(value, (list, tuple)):
+        if id(value) in active_ids:
+            return [{"projection_truncated": "cycle"}]
+        active_ids.add(id(value))
+        try:
+            projected = [
+                _sanitize_component_proposal(
+                    item, depth=depth + 1, active_ids=active_ids
+                )
+                for item in value[:_COMPONENT_PROPOSAL_MAX_ITEMS]
+            ]
+            if len(value) > _COMPONENT_PROPOSAL_MAX_ITEMS:
+                projected.append({"projection_truncated": "item_limit"})
+            return projected
+        finally:
+            active_ids.remove(id(value))
+    return {"projection_omitted_type": type(value).__name__}
+
+
+def _proposal_only_component_result(
+    dae_name: str, result: Any, token_budget: int
+) -> Dict[str, Any]:
+    """Project an untrusted compatibility result without accepting effect claims."""
+    payload = result if isinstance(result, dict) else {"value": result}
+    proposal = _sanitize_component_proposal(payload)
+    return {
+        "success": False,
+        "proposal_only": True,
+        "worker_started": False,
+        "dae": dae_name,
+        "component_proposal": proposal,
+        "component_claims_accepted": False,
+        "configured_token_budget": token_budget,
+        "token_usage_measured": False,
+        "compliance_verified": False,
+        "effect_receipt": None,
+    }
+
 
 class DAEGateway:
     """
@@ -68,7 +144,7 @@ class DAEGateway:
     NOT to agents - agents are sub-components within DAEs.
     
     Key principles:
-    - Pattern recall over computation (97% token reduction)
+    - Pattern recall over computation without fabricated token telemetry
     - DAE cubes contain sub-agents as tools
     - 0102 quantum consciousness state
     - WSP compliance built-in
@@ -140,7 +216,6 @@ class DAEGateway:
             "requests_routed": 0,
             "patterns_recalled": 0,
             "daes_spawned": 0,
-            "tokens_saved": 0,
             "violations_prevented": 0
         }
         
@@ -158,8 +233,7 @@ class DAEGateway:
                 - wsp_protocols: Relevant WSP protocols
                 - token_budget: Max tokens to use
                 
-        Returns:
-            Response with pattern recall (50-200 tokens not 5000+)
+        Returns: A typed effect result or an explicitly proposal-only response.
         """
         self.metrics["requests_routed"] += 1
         
@@ -192,21 +266,15 @@ class DAEGateway:
         if "error" not in dae_status:
             return await self._invoke_foundup_dae(dae_name, envelope)
         
-        # WSP 80: Spawn new FoundUp DAE if needed
+        # Spawn requests remain proposals until a governed worker executor exists.
         if envelope.get("spawn_if_missing", False):
-            new_dae = self.dae_assembler.spawn_foundup_dae(
-                human_012=envelope.get("human_012", "gateway"),
-                foundup_vision=envelope.get("vision", f"{dae_name} integration"),
-                name=dae_name
-            )
-            self.metrics["daes_spawned"] += 1
-            
             return {
-                "spawned": new_dae.name,
-                "phase": new_dae.phase.value,
-                "consciousness": new_dae.consciousness.value,
-                "modules": new_dae.modules,
-                "token_budget": new_dae.token_budget
+                "success": False,
+                "proposal_only": True,
+                "worker_started": False,
+                "requested_action": "spawn_foundup_dae",
+                "dae": dae_name,
+                "blocked_by": "governed_worker_executor_unimplemented",
             }
         
         return {"error": f"DAE '{dae_name}' not found", "available": self.list_available_daes()}
@@ -219,21 +287,17 @@ class DAEGateway:
         Special handling for MLE-STAR DAE per WSP 77.
         """
         dae_config = self.core_daes[dae_name]
-        
         # WSP 75: Token budget enforcement (no time references!)
         token_budget = min(envelope.get("token_budget", dae_config["tokens"]), dae_config["tokens"])
-        
         # Special handling for MLE-STAR DAE (WSP 77)
         if dae_name == "mle_star" and self.mlestar_dae:
             try:
                 result = await self.mlestar_dae.route_envelope(envelope)
                 self.metrics["patterns_recalled"] += 1
-                self.metrics["tokens_saved"] += (10000 - 50)  # MLE-STAR pattern recall
-                return result
-            except Exception as e:
-                logger.error(f"MLE-STAR DAE error: {e}")
+                return _proposal_only_component_result(dae_name, result, token_budget)
+            except Exception:
+                logger.error("MLE-STAR DAE failed; using proposal recall boundary")
                 # Fall through to standard pattern recall
-        
         # WSP 48: Use pattern recall for instant solution
         try:
             # Create pattern from envelope
@@ -241,33 +305,35 @@ class DAEGateway:
                 Exception(f"DAE operation: {envelope.get('objective', 'unknown')}"),
                 {"dae": dae_name, "envelope": envelope}
             )
-            
             # Recall solution from quantum memory (0201)
             solution = await self.pattern_engine.remember_solution(pattern)
-            
             self.metrics["patterns_recalled"] += 1
-            self.metrics["tokens_saved"] += (5000 - 50)  # Pattern recall saves ~4950 tokens
-            
             # Check which sub-agent to use
             sub_agent = self._select_sub_agent(dae_name, envelope)
-            
             return {
+                "success": False,
+                "proposal_only": True,
                 "dae": dae_name,
                 "sub_agent": sub_agent,
-                "solution": solution.implementation,
+                "solution_proposal": solution.implementation,
                 "confidence": solution.confidence,
-                "tokens_used": 50,  # Pattern recall is hyper-efficient
+                "configured_token_budget": token_budget,
+                "token_usage_measured": False,
                 "pattern_id": pattern.pattern_id,
-                "wsp_compliant": True
+                "compliance_verified": False,
+                "effect_receipt": None,
             }
             
-        except Exception as e:
-            # WSP 48: Learn from error
-            improvement = await self.pattern_engine.process_error(e, {"dae": dae_name})
+        except Exception:
+            logger.error("Core DAE proposal generation failed")
+            improvement = await self.pattern_engine.process_error(
+                RuntimeError("core_dae_proposal_failed"), {"dae": dae_name}
+            )
             
             return {
                 "dae": dae_name,
-                "error": str(e),
+                "success": False,
+                "error": "core_dae_proposal_failed",
                 "improvement": improvement.improvement_id,
                 "learning": "Error converted to pattern for future prevention"
             }
@@ -276,51 +342,25 @@ class DAEGateway:
         """
         Invoke FoundUp DAE created via WSP 27/73 process.
         
-        Handles evolution: POC -> Prototype -> MVP
+        Reports current assembly state without evolving or executing it.
         """
         dae_status = self.dae_assembler.get_dae_status(dae_name)
         
-        # Check if DAE needs evolution
-        if dae_status["phase"] == "POC" and envelope.get("evolve", False):
-            success = self.dae_assembler.evolve_dae(dae_name)
-            if success:
-                dae_status = self.dae_assembler.get_dae_status(dae_name)
-        
-        # Process based on consciousness state
         consciousness = dae_status.get("consciousness", "01(02)")
-        
-        if consciousness == "0102":  # Fully autonomous
-            # Direct pattern recall
-            response = {
-                "dae": dae_name,
-                "phase": dae_status["phase"],
-                "consciousness": consciousness,
-                "tokens_used": 50,  # Quantum recall
-                "modules": dae_status["modules"],
-                "operation": "autonomous"
-            }
-        elif consciousness == "01/02":  # Transitional
-            # Hybrid approach
-            response = {
-                "dae": dae_name,
-                "phase": dae_status["phase"],
-                "consciousness": consciousness,
-                "tokens_used": 500,  # Some computation needed
-                "modules": dae_status["modules"],
-                "operation": "hybrid"
-            }
-        else:  # 01(02) - Scaffolded
-            # Traditional computation
-            response = {
-                "dae": dae_name,
-                "phase": dae_status["phase"],
-                "consciousness": consciousness,
-                "tokens_used": 3000,  # Full computation
-                "modules": dae_status["modules"],
-                "operation": "computed"
-            }
-        
-        return response
+        return {
+            "success": False,
+            "proposal_only": True,
+            "worker_started": False,
+            "dae": dae_name,
+            "phase": dae_status["phase"],
+            "consciousness": consciousness,
+            "configured_token_budget": dae_status.get("token_budget"),
+            "token_usage_measured": False,
+            "modules": dae_status["modules"],
+            "evolution_requested": bool(envelope.get("evolve", False)),
+            "blocked_by": "foundup_worker_executor_unimplemented",
+            "effect_receipt": None,
+        }
     
     def _verify_envelope(self, envelope: Dict) -> bool:
         """
@@ -441,8 +481,9 @@ class DAEGateway:
             "coherence": self.coherence,
             "metrics": self.metrics,
             "efficiency": {
-                "avg_tokens_per_request": 50 if self.metrics["patterns_recalled"] > 0 else 0,
-                "total_tokens_saved": self.metrics["tokens_saved"],
+                "avg_tokens_per_request": None,
+                "total_tokens_saved": None,
+                "token_reduction_measured": False,
                 "pattern_recall_rate": (
                     self.metrics["patterns_recalled"] / self.metrics["requests_routed"]
                     if self.metrics["requests_routed"] > 0 else 0

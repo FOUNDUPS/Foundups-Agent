@@ -16,6 +16,16 @@ from modules.infrastructure.wre_core.skillz.wre_skills_loader import (
     SkillMetadata,
     SkillHygieneStatus,
 )
+from modules.infrastructure.wre_core.src.skill_manifest_guard import verify_skill_manifest
+
+
+def test_non_mapping_yaml_frontmatter_returns_empty_metadata(tmp_path):
+    skill = tmp_path / "SKILLz.md"
+    skill.write_text(
+        "---\n- valid-yaml\n- wrong-root\n---\n# Skill\n", encoding="utf-8"
+    )
+    loader = object.__new__(WRESkillsLoader)
+    assert loader._extract_metadata(skill) == {}
 
 
 class TestSkillHygieneStatus:
@@ -211,6 +221,35 @@ retirement_date: null
 
         assert "retired" in str(exc_info.value).lower()
 
+    def test_hygiene_cannot_be_bypassed_by_unenforced_cache_load(
+        self, loader_with_registry
+    ):
+        loader_with_registry.load_skill(
+            "retired_skill", "qwen", enforce_hygiene=False
+        )
+
+        with pytest.raises(ValueError, match="retired"):
+            loader_with_registry.load_skill(
+                "retired_skill", "qwen", enforce_hygiene=True
+            )
+
+    @pytest.mark.parametrize(
+        "skill_name",
+        ["invalid_category_skill", "no_category_skill"],
+    )
+    def test_load_skill_blocks_all_unhealthy_skills(
+        self,
+        loader_with_registry,
+        skill_name,
+    ):
+        """Execution hygiene must reject unhealthy skills, not merely warn."""
+        with pytest.raises(ValueError, match="hygiene"):
+            loader_with_registry.load_skill(
+                skill_name,
+                "qwen",
+                enforce_hygiene=True,
+            )
+
     def test_load_skill_bypass_hygiene(self, loader_with_registry):
         """load_skill with enforce_hygiene=False allows retired skills."""
         # Should not raise
@@ -401,6 +440,24 @@ class TestCheckoutLocalSkillResolution:
 
         resolved.relative_to(loader.repo_root)
         assert resolved.name == "SKILLz.md"
+
+    def test_every_registered_production_skill_is_executable_content(self):
+        """Legacy JSON action configs must not masquerade as production Skillz."""
+        loader = WRESkillsLoader()
+        production = {
+            name: info
+            for name, info in loader.registry["skills"].items()
+            if info.get("promotion_state") == "production"
+        }
+
+        assert production
+        assert set(production) == {"auto_test_registry_audit", "reddog_operations"}
+        for skill_name in production:
+            resolved = loader.resolve_skill_file(skill_name)
+            assert resolved.name in {"SKILLz.md", "SKILL.md"}
+            assert loader.check_skill_hygiene(skill_name).is_healthy is True
+            manifest = verify_skill_manifest(resolved.parent, required=True)
+            assert manifest.passed is True
 
 
 class TestIsRetired:

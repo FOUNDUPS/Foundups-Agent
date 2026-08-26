@@ -1,4 +1,48 @@
 # TestModLog - wre_core/tests
+## 2026-08-26: Final external-audit blocker replay
+
+- Replaced the mislabeled top-level MLE projection case with genuinely nested,
+  list-contained, and cyclic forged effect/compliance/worker claims. Recursive
+  bounded projection now removes them at every depth.
+- Added proofs that registered legacy plugins remain blocked even after both
+  injected WSP callbacks, direct Holo execution stays blocked, and the dormant
+  plugin class itself cannot query or maintain Holo. Compatibility logging no
+  longer emits caller task/result material.
+- Added stoppable recursive-learning shutdown and redacted persistence-failure
+  regressions. Background auto-save is opt-in rather than an immortal
+  constructor side effect.
+- Exact isolated focused result: `235 passed, 4 platform-limited link/reparse
+  skips in 29.38s`. AntifaFM remained `14 passed in 0.76s`.
+
+## 2026-08-26: Independent execution-truth repair audit
+
+- A later exact-byte replay rejected ambiguous `name || content` bundle hashing
+  and the raw MLE-STAR return path. Added a collision construction proving
+  distinct optional-file layouts cannot share a fingerprint, an adversarial
+  component-effect result projection test, and malformed/unsigned Proof-of-Benefit
+  receipt tests. Exact repaired result: `227 passed, 4 platform-limited skips
+  in 29.10s`.
+- Rejected the first candidate after three independent audits reproduced false
+  monitor application success and unsafe dashboard handling of `None` token
+  telemetry. Added regressions proving monitor application writes nothing,
+  gateway recall is proposal-only, FoundUp inspection does not evolve/start a
+  worker, and unmeasured dashboard status is safe.
+- Split the new 837-line execution-truth suite into bounded executor and runtime
+  admission suites per WSP 62. Refactored Moltbot scanner cases and loader
+  hygiene below their domain thresholds without dropping assertions.
+- Added runtime guards proving the DAE gateway, MLE-STAR compatibility DAE,
+  HoloIndex plugin, WRE monitor, and recursive-improvement engine do not report
+  synthetic token usage, savings, averages, or reduction.
+- Proved the PQN computation compatibility branch and recursive-improvement
+  application path fail closed instead of claiming unexecuted work.
+- Added the existing gateway and recursive-learning tests to the operational
+  focused tier. `--import-mode=importlib` prevents duplicate `tests` package
+  names from colliding without changing assertions.
+- Exact isolated focused result after the first repair gate: `224 passed, 4
+  platform-limited skips in 29.13s`. No model/provider, worker dispatch, Holo
+  query/maintenance, Git
+  mutation, or production database path was used.
+
 ## 2026-08-26: WSP 97 v1.9 test-reuse machine-contract mirror
 - Extended the existing WSP 6/15/97 protocol-alignment regression rather than
   creating a parallel test file. It now binds JSON version 1.9 and the exact
@@ -1457,3 +1501,22 @@ verified unrelated to this slice on the clean tree.
   - Warnings are unchanged repo-level pytest config warnings (`asyncio_*`) under plugin-autoload-disabled mode.
 
 ---
+# 2026-08-26 - WRE execution-truth hardening verification
+
+- Added adversarial contracts for unhealthy Skillz, loader failure, decoy
+  same-name executors, absent registered executors, false-shaped success,
+  missing effect evidence, redaction, failed high-fidelity output, content-
+  bound scan caching, malformed YAML roots, mutation during/after scanning,
+  exact admission-fingerprint dispatch, engine-error redaction, blocked
+  CodeAct, measured metrics, non-production A/B candidate staging, and ReAct
+  truth.
+- Replaced real-model/shared-memory orchestrator tests with isolated PatternMemory
+  and an explicit injected successful executor.
+- Combined focused result: 202 passed / 4 platform-limited link/reparse skips
+  in 28.27 seconds, including
+  loader, execution truth, PatternMemory, Qwen wiring, WSP 62, WSP 95 mirror,
+  Cisco exact-bundle selection, skill evolution, and master-orchestrator
+  contracts. Both registered production Skillz also passed real scanner and
+  manifest admission. All temp/cache/database paths were pinned to
+  `O:\pytest_tmp\reddog_wre_truth`; default PatternMemory and AgentDB digests
+  remained unchanged.

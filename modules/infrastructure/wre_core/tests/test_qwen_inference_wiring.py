@@ -9,68 +9,35 @@ WSP Compliance: WSP 5 (Test Coverage), WSP 96 (WRE Skills)
 
 import sys
 import json
+from datetime import datetime
 from pathlib import Path
+import uuid
 
 # Add repo root to path
 repo_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(repo_root))
 
 from modules.infrastructure.wre_core.src.libido_monitor import GemmaLibidoMonitor
-from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory, SkillOutcome
 from modules.infrastructure.wre_core.src.skill_selector import SkillSelector
 from modules.infrastructure.wre_core.skillz.wre_skills_loader import WRESkillsLoader
 
 
-def test_execute_skill_with_qwen_mock():
-    """Test _execute_skill_with_qwen method (mock without actual LLM)"""
-    print("\n" + "="*70)
-    print("[TEST] Qwen Inference Wiring - Phase 2")
-    print("="*70)
-
-    # Initialize core components
-    print("\n[1/4] Initializing WRE components...")
-    libido_monitor = GemmaLibidoMonitor()
-    pattern_memory = PatternMemory()
-    skills_loader = WRESkillsLoader()
-    print("[OK] Core components initialized")
-
-    # Test 1: Qwen skill execution structure
-    print("\n[2/4] Testing Qwen execution structure...")
-
-    # Mock skill content
-    skill_content = """
-# Qwen Git Push Decision Skill
-
-## Steps:
-1. Analyze git diff
-2. Calculate MPS score
-3. Generate commit message
-4. Decide push action
-"""
-
-    # Mock input context
-    input_context = {
-        "git_diff": "Added new feature X",
-        "files_changed": 3,
-        "lines_changed": 150
-    }
-
-    # Simulate what _execute_skill_with_qwen would return
-    # (without actually calling Qwen which requires model files)
-    execution_result = {
-        "output": "Qwen execution (graceful fallback - model not available)",
+def _typed_effect_result():
+    return {
+        "success": True,
+        "output": "Explicit test executor result",
         "steps_completed": 4,
-        "failed_at_step": None
+        "failed_at_step": None,
+        "effect_receipts": [{"receipt_id": "test-1", "effect_type": "test"}],
+        "_effect_evidence": True,
     }
 
-    print(f"[OK] Execution result structure: {execution_result.keys()}")
-    print(f"    - Steps completed: {execution_result['steps_completed']}")
-    print(f"    - Failed at step: {execution_result['failed_at_step']}")
 
-    # Test 2: Libido validation
-    print("\n[3/4] Testing Gemma libido validation...")
-
-    # Convert to dict format expected by validate_step_fidelity
+def test_execute_skill_result_shape_without_model_call():
+    """Explicit typed effect evidence has the expected structural fidelity."""
+    execution_result = _typed_effect_result()
+    libido_monitor = GemmaLibidoMonitor()
     step_output_dict = {
         "output": execution_result["output"],
         "steps_completed": execution_result["steps_completed"],
@@ -83,14 +50,16 @@ def test_execute_skill_with_qwen_mock():
         expected_patterns=expected_patterns
     )
 
-    print(f"[OK] Pattern fidelity calculated: {fidelity:.2f}")
+    assert execution_result["success"] is True
+    assert execution_result["_effect_evidence"] is True
+    assert fidelity == 1.0
 
-    # Test 3: Pattern memory storage
-    print("\n[4/4] Testing pattern memory storage...")
 
-    from modules.infrastructure.wre_core.src.pattern_memory import SkillOutcome
-    from datetime import datetime
-    import uuid
+def test_typed_effect_outcome_uses_isolated_pattern_memory(tmp_path):
+    """Typed effect evidence persists without inventing outcome quality."""
+    input_context = {"files_changed": 3, "lines_changed": 150}
+    execution_result = _typed_effect_result()
+    pattern_memory = PatternMemory(db_path=tmp_path / "pattern_memory.db")
 
     outcome = SkillOutcome(
         execution_id=str(uuid.uuid4()),
@@ -100,33 +69,18 @@ def test_execute_skill_with_qwen_mock():
         input_context=json.dumps(input_context),
         output_result=json.dumps(execution_result),
         success=True,
-        pattern_fidelity=fidelity,
-        outcome_quality=0.95,
+        pattern_fidelity=1.0,
+        outcome_quality=0.0,
         execution_time_ms=250,
         step_count=4,
-        notes="Phase 2 test execution"
+        notes="Typed test evidence; independent outcome quality unavailable"
     )
-
     pattern_memory.store_outcome(outcome)
-    print("[OK] Outcome stored in pattern_memory.db")
-
-    # Verify storage
     metrics = pattern_memory.get_skill_metrics("qwen_gitpush", days=1)
-    print(f"    - Executions: {metrics['execution_count']}")
-    print(f"    - Avg fidelity: {metrics['avg_fidelity']:.2f}")
 
-    print("\n" + "="*70)
-    print("[SUCCESS] Phase 2 Qwen Inference Wiring Tests PASSED")
-    print("="*70)
-    print("\nKEY FINDINGS:")
-    print("1. Core WRE components integrate correctly")
-    print("2. Execution result structure matches expected format")
-    print("3. Libido validation works with execution results")
-    print("4. Pattern memory stores outcomes successfully")
-    print("\nNOTE: Full Qwen LLM inference requires:")
-    print("  - llama-cpp-python installed")
-    print("  - LOCAL_MODEL_CODE_DIR or LOCAL_MODEL_CODE_PATH set (qwen-coder-7b default)")
-    print("  - Graceful fallback implemented if unavailable")
+    assert metrics["execution_count"] == 1
+    assert metrics["avg_fidelity"] == 1.0
+    assert metrics["avg_quality"] == 0.0
 
 
 def test_resolve_skill_file_uses_authoritative_registry_location():
@@ -156,4 +110,4 @@ def test_skill_selector_matches_natural_language_git_intent():
 
 
 if __name__ == "__main__":
-    test_execute_skill_with_qwen_mock()
+    raise SystemExit("Run with pytest so storage is isolated")

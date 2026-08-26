@@ -1,5 +1,5 @@
 # WRE Skills System: Complete First Principles Design
-
+> **Historical/non-authoritative design:** WSP 95 and the root WRE interface govern admission; efficiency values below are unverified estimates.
 **Status**: ARCHITECTURAL DESIGN - READY FOR IMPLEMENTATION
 **Date**: 2025-10-20
 **Architect**: 0102 (with WSP 77 Agent Coordination)

@@ -1,5 +1,10 @@
 # Remote DAE Architecture - Remote Code Execution Cube
 
+> **Design specification only — capabilities below are not implemented proof.**
+> This document grants no remote execution, deployment, self-modification,
+> production-effect, or independent operating authority. Any future executor
+> must enter through WSP 95 v2.1 admission and emit authenticated effect receipts.
+
 ## Core Concept: Autonomous Remote Development
 
 The **Remote DAE** is a revolutionary autonomous system that can:

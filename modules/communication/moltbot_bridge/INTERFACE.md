@@ -1154,11 +1154,11 @@ Token symbol resolution:
 - **Associates**: Domain DAEs execute (communication, platform, dev, content)
 
 ### Security
-
 - Non-commanders: ADVISORY only (no mutations)
 - COMMAND/SYSTEM intents blocked for non-commanders (WSP 50)
-- Cisco skill scanner preflight runs before mutating/skill-driven routes:
-  `command`, `system`, `schedule`, `social`, `automation`, `foundup`
+- `run_skill_scan(skills_dir, report_dir=...)` invokes Cisco `scan --skill-file
+  SKILLz.md` for a bundle or recursive `scan-all` for a wardrobe; failures close.
+  Its stable result is supply-chain evidence, never effect or promotion authority.
 - Secret patterns (AIza*, sk-*, oauth_token*) redacted from output
 - Key-isolation mode:
   - `OPENCLAW_NO_API_KEYS=1` blocks cloud provider fallback in conversation/FAM paths.
@@ -1271,7 +1271,7 @@ This is the canonical internal layout for future work:
 - `openclaw_bootstrap_config.py`: constructor-time control-plane state
 
 Refactor status:
-- `openclaw_dae.py` now stays below the large-file threshold at `1342` lines
+- `openclaw_dae.py` is currently `1580` lines: inherited WSP 62 hard-limit debt; the facade split remains incomplete
 - execution-plane resolution now matches `WSP_97`: resolve intent -> gate -> plan -> route -> validate -> remember
 
 ## Runtime Supervision Commands

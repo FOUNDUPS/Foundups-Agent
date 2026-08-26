@@ -4,6 +4,16 @@
 This ModLog tracks all changes to the `holo_index/qwen_advisor/` module.
 Each entry must include WSP protocol references and impact analysis.
 
+## [2026-08-26] - LOCAL_PROPOSAL_ERROR_REDACTION
+**Agent**: 0102 (Codex)
+**Type**: Execution-truth security repair
+**WSP Compliance**: WSP 22, WSP 50, WSP 95, WSP 97
+
+- Replaced raw model-load and generation exception text in logs and return
+  values with stable type-only diagnostics. This prevents a local WRE proposal
+  failure from persisting exception material in PatternMemory.
+- No Holo query, index, maintenance, freshness, or routing behavior changed.
+
 ## [2026-07-16] - HOLOINDEX_RESIDENT_DAE_RUNTIME_CONSOLIDATION_PHASE1
 **Agent**: 0102 (Codex)
 **Type**: Runtime consolidation repair

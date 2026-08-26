@@ -1,10 +1,19 @@
-# Pattern Memory Architecture - Universal Collective Learning
+# Historical Pattern Memory Universal-Learning Proposal
+
+> **HISTORICAL / SUPERSEDED / NON-AUTHORITATIVE:** This 2025 design proposal
+> records an intended universal-learning architecture; it is not the current
+> production topology or completion status. The implemented PatternMemory is a
+> local SQLite observation/candidate store. It does not prove cross-FoundUp
+> replication, universal learning, evaluator/promoter authority, activation,
+> rollback, or production RSI. Code snippets, automatic-sharing language, and
+> token-savings values below are unverified proposal material. Current authority:
+> [README.md](README.md), [INTERFACE.md](INTERFACE.md), and source/tests.
 
 **WSP Compliance**: WSP 48 (Recursive Self-Improvement), WSP 60 (Pattern Memory)
 
 ## Overview
 
-PatternMemory provides **universal collective learning** across ALL FoundUps through SQLite-based false positive storage. When one FoundUp (or one 0102 session) learns a false positive, ALL future operations benefit.
+This historical proposal envisioned **universal collective learning** across FoundUps through shared false-positive storage. That cross-FoundUp replication and universal-benefit contract is not implemented by the current local SQLite store.
 
 ## Architecture
 
@@ -221,7 +230,7 @@ if checker.pattern_memory.is_false_positive("module", name):
 
 **Real-World Impact**: After 10 learned false positives, thousands of tokens saved per session.
 
-### Universal Sharing
+### Proposed Universal Sharing (Not Implemented)
 
 ```
 Session 1 (0102-alpha):
@@ -334,7 +343,7 @@ assert not any(v.affected_files[0].contains("holo_dae") for v in violations)
 - **WSP 48**: Recursive self-improvement through pattern storage
 - **WSP 60**: SQLite persistence for pattern memory
 - **WSP 77**: Agent coordination efficiency (skip false positive missions)
-- **WSP 48**: Collective intelligence (all agents benefit)
+- **WSP 48**: Historical collective-intelligence aspiration; universal sharing is not implemented
 
 ## Related Documentation
 
@@ -346,5 +355,5 @@ assert not any(v.affected_files[0].contains("holo_dae") for v in violations)
 ---
 
 **Last Updated**: 2025-12-01
-**Sprints Completed**: 1 (Recon), 2 (Architecture), 3 (AI Overseer), 4 (HoloDAE), 5 (Docs)
-**Status**: ✅ Production-ready, universal integration complete
+**Historical planning record**: Sprints 1 (Recon), 2 (Architecture), 3 (AI Overseer), 4 (HoloDAE), 5 (Docs)
+**Current status**: Superseded proposal; universal production integration is not implemented

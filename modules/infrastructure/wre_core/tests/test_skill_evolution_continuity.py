@@ -224,14 +224,20 @@ class TestEvolutionContinuityIntegration:
         assert exec_105_events[0]["event_type"] == "variation_promoted"
 
 
-class TestRealPromotionPathContinuity:
-    """Regression: promotion events through real orchestrator path include continuity."""
+class TestCandidateReadyContinuity:
+    """A/B nomination remains non-production while retaining lineage."""
 
     @pytest.fixture
     def memory_with_ab_test(self, tmp_path):
-        """Create PatternMemory with an active A/B test ready for promotion."""
+        """Create PatternMemory with an active A/B test ready for nomination."""
         db_path = tmp_path / "test_promotion.db"
         memory = PatternMemory(db_path=db_path)
+        memory.store_variation(
+            variation_id="test_skill_v1",
+            skill_name="test_promotion_skill",
+            variation_content="# Candidate",
+            parent_version="current",
+        )
 
         # Schedule an A/B test
         test_id = memory.schedule_ab_test(
@@ -242,56 +248,54 @@ class TestRealPromotionPathContinuity:
         )
 
         # Record enough successes for treatment to win
+        memory.record_ab_outcome(test_id, "control", success=False)
+        memory.record_ab_outcome(test_id, "control", success=False)
         memory.record_ab_outcome(test_id, "treatment", success=True)
         memory.record_ab_outcome(test_id, "treatment", success=True)
 
         return memory, test_id
 
-    def test_promotion_via_check_ab_promotion_includes_continuity(self, memory_with_ab_test, tmp_path, monkeypatch):
+    def test_candidate_nomination_includes_continuity(self, memory_with_ab_test):
         """
-        Regression: variation_promoted event includes continuity metadata.
-
-        This exercises the real promotion path code, not manual event insertion.
+        Statistical treatment win creates candidate lineage, not promotion.
         """
         memory, test_id = memory_with_ab_test
 
-        # Check if promotion should happen
+        # The statistical result is nomination evidence only.
         winner = memory.check_ab_promotion(test_id)
         assert winner == "treatment"
 
-        # Simulate the orchestrator promotion path with continuity
-        # This mirrors what execute_skill does at line 1151
         execution_id = "exec_promo_001"
         continuity_id = "continuity_promo_abc"
         parent_continuity_id = "parent_promo_xyz"
 
-        memory.promote_variation("test_skill_v1")
-        memory.close_ab_test(test_id, "treatment")
+        memory.stage_variation_candidate("test_skill_v1")
+        memory.close_ab_test(test_id, "treatment_candidate")
         memory.record_learning_event(
             event_id="ev_promo_001",
             skill_name="test_promotion_skill",
-            event_type="variation_promoted",
-            description="Auto-promoted test_skill_v1 via A/B win",
+            event_type="variation_candidate_ready",
+            description="Nominated test_skill_v1 for independent verification",
             variation_id="test_skill_v1",
             continuity_id=continuity_id,
             parent_continuity_id=parent_continuity_id,
             execution_id=execution_id,
         )
 
-        # Verify promotion event has continuity metadata
+        # Verify candidate event has continuity metadata.
         history = memory.get_evolution_history("test_promotion_skill")
         assert len(history) == 1
 
-        promo_event = history[0]
-        assert promo_event["event_type"] == "variation_promoted"
-        assert promo_event["continuity_id"] == continuity_id
-        assert promo_event["parent_continuity_id"] == parent_continuity_id
-        assert promo_event["execution_id"] == execution_id
+        candidate_event = history[0]
+        assert candidate_event["event_type"] == "variation_candidate_ready"
+        assert candidate_event["continuity_id"] == continuity_id
+        assert candidate_event["parent_continuity_id"] == parent_continuity_id
+        assert candidate_event["execution_id"] == execution_id
 
         # Queryable via lineage APIs
         by_continuity = memory.get_evolution_by_continuity(continuity_id)
         assert len(by_continuity) == 1
-        assert by_continuity[0]["event_type"] == "variation_promoted"
+        assert by_continuity[0]["event_type"] == "variation_candidate_ready"
 
         by_execution = memory.get_evolution_by_execution(execution_id)
         assert len(by_execution) == 1

@@ -1,3 +1,16 @@
+## 2026-08-26: Exact single-Skillz scan regression
+
+- Added command-shape coverage proving direct `SKILLz.md` bundles use Cisco
+  `scan --skill-file SKILLz.md`, while wardrobe roots retain
+  `scan-all --recursive`.
+- Focused adapter suite: **22 passed / 1 platform-limited link skip**. Real
+  production admission also passed for `auto_test_registry_audit` and
+  `reddog_operations`; no mocked scanner was
+  used for those two admission checks.
+- Repaired calendar-stale evolution fixtures and proved the read-only mutation
+  surface recommends candidate nomination, never direct treatment promotion.
+  Focused evolution suite: **42 passed**.
+
 ## 2026-08-26: Main bootstrap WSP 62 extraction regressions
 
 - Extended the existing authority exact-schema, bootstrap, and durable-scope

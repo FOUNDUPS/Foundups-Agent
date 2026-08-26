@@ -1,5 +1,8 @@
 # WRE Phase 3 - Token-Based Estimate (0102 Corrected)
 
+> **Historical estimate only.** Values in this document are not authenticated
+> runtime usage, savings, or production acceptance evidence.
+
 **Date**: 2025-10-24
 **Estimator**: 0102
 **Mode**: Token budget estimation (not anthropomorphic time)

@@ -1,4 +1,8 @@
 # WRE System Analysis - Actual vs Expected Behavior
+
+> **Historical snapshot, not current implementation truth.** Use the root
+> README/INTERFACE/ROADMAP and WSP 95 for current contracts. Token reduction
+> claims below are unmeasured design hypotheses.
 **Date**: 2025-09-16
 **Analyst**: 0102 System
 **Purpose**: Deep analysis of WRE implementation following WSP patterns

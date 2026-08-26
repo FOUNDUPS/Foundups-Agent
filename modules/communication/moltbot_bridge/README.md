@@ -922,13 +922,13 @@ records (`action_cli_<route>_<action>`), enabling recall of:
 
 ## Skill Safety Gate (Cisco Skill Scanner)
 
-OpenClaw DAE now runs a cached safety preflight on local skills before mutating routes
-(`command`, `system`, `schedule`, `social`, `automation`, `foundup`).
-
-- Scanner package: `cisco-ai-skill-scanner`
-- CLI: `skill-scanner`
-- Skills path scanned: `modules/communication/moltbot_bridge/workspace/skills`
-- Report path: `modules/communication/moltbot_bridge/reports/openclaw_skill_scan_report.json`
+`src.skill_safety_guard.run_skill_scan()` is OpenClaw's cached preflight for
+mutating routes. A `SKILLz.md` bundle uses Cisco `scan --skill-file SKILLz.md`;
+a wardrobe uses recursive `scan-all`. Reports use a caller-selected directory.
+Missing/malformed evidence, manifest failure, timeout, or a required unavailable
+scanner fails closed. Scanner output is redacted and its environment excludes
+credentials. `SkillScanResult` is supply-chain evidence only; it grants no
+execution, effect, outcome-evaluation, or promotion authority.
 
 Environment toggles:
 - `OPENCLAW_SKILL_SCAN_REQUIRED=1` (default): fail closed if scanner missing
@@ -996,5 +996,5 @@ OpenClaw now follows a facade + delegated-module design.
 | `src/openclaw_bootstrap_config.py` | Constructor-time state/bootstrap wiring |
 
 Current refactor result:
-- `openclaw_dae.py` reduced from `2638` lines to `1342`
+- `openclaw_dae.py` is currently `1580` lines and remains inherited WSP 62 hard-limit debt
 - remaining file content is predominantly facade wrappers, dataclasses, and the honeypot surface
