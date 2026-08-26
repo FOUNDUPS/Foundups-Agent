@@ -1,8 +1,8 @@
 # WSP 97: System Execution Prompting Protocol
 
 **Status**: ACTIVE
-**Version**: 1.8
-**Date**: 2026-08-01
+**Version**: 1.9
+**Date**: 2026-08-26
 **Author**: 0102 (System Execution Architect)
 
 ---
@@ -197,6 +197,41 @@ Use this sequence unless a narrower protocol overrides it:
 7. Run the dialectic sweep
 8. Reduce to first principles / simplest valid move
 9. Execute inside the correct plane
+
+### 1.2A Test Inventory / Reuse Gate
+
+When a task may create, modify, replace, or expand tests, WSP 97 MUST apply the WSP 22 TestModLog pattern before test authoring.
+
+**Required pre-test retrieval**:
+1. Query HoloIndex using the target module, behavior/contract under test, and likely test vocabulary.
+2. Read the target module's `tests/TestModLog.md` when present.
+3. Read the target module's `tests/README.md` when present.
+4. Inspect the closest existing test file(s), fixtures, and helpers surfaced by retrieval.
+
+**Reuse decision**:
+```text
+need test coverage
+  -> retrieve TestModLog + tests README + nearest tests
+  -> same behavior/contract? REUSE or EXTEND existing test
+  -> same pipeline/fixture, new edge case? ADD CASE to existing test file
+  -> materially distinct subsystem/contract? CREATE new test file
+```
+
+A worker MUST NOT create a new test file merely because doing so is easier than understanding the current suite. Existing tests, fixtures, parametrizations, and assertions are reusable architecture.
+
+If a module has active tests but no `tests/TestModLog.md`, the worker MUST first inventory the actual current test files and create or refresh the TestModLog before adding a new test file. The inventory must describe what each existing test file covers well enough for a future worker to decide whether to reuse it without opening every test file.
+
+After tests are added, removed, renamed, or materially expanded, update `tests/TestModLog.md` in the same work slice. Update `tests/README.md` when execution conventions or suite organization change.
+
+**Work-order requirement**: worker prompts that request test creation or modification SHOULD include concrete HoloIndex search parameters for the target behavior and test surface so retrieval is reproducible and not replaced by vibe-based file creation.
+
+**Failure conditions**:
+- new test file created without TestModLog/README/nearest-test retrieval when those artifacts exist;
+- duplicate coverage created where an existing test could be cleanly extended;
+- active test inventory materially diverges from `tests/TestModLog.md` after the slice;
+- a historical aggregate pass count is reported as a fresh test run without fresh execution evidence.
+
+**Relationships**: WSP 22 owns the TestModLog artifact; WSP 50 owns pre-action verification; WSP 84 supplies code/test memory discipline; WSP 6 governs verification depth. WSP 97 makes retrieval/reuse part of the execution gate.
 
 ### 1.2.1 WSP 15 Economy and Verification Binding
 
@@ -562,13 +597,17 @@ Always reference WSP 97 in your validation tasks and optimize for minimal, preci
 | WSP | Integration Point | Status |
 |-----|------------------|--------|
 | **WSP 21** | Prompt Engineering Foundation | [OK] Enhanced |
+| **WSP 22** | ModLog/TestModLog operational memory | [OK] Enhanced |
 | **WSP 35** | HoloIndex Coordination | [OK] Enhanced |
+| **WSP 50** | Pre-action verification | [OK] Enhanced |
 | **WSP 77** | Agent Coordination | [OK] Enhanced |
 | **WSP 80** | Cube-Level Orchestration | [OK] Enhanced |
+| **WSP 84** | Existing code/test memory discipline | [OK] Enhanced |
 | **WSP 96** | MCP Governance | [OK] Enhanced |
 
 ### Testing & Validation
 
+- **Test Inventory Reuse**: Before authoring tests, retrieve `tests/TestModLog.md`, `tests/README.md`, and nearest existing tests; reuse/extend before creating new test files.
 - **Mantra Compliance**: Execution receipts must index evidence for all 7 mantra stages
 - **Profile Adherence**: Runtime receipts must identify the actual model binding
   and budget used; role labels alone are not evidence
