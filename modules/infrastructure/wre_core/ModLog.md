@@ -1,6 +1,17 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-08-27] - REDDOG CANDIDATE TEST-REGISTRY FRESHNESS
+
+- Regenerated the existing deterministic Git-tracked registry after CI found
+  the checked-in projection stale. The result is 1,585 registered tests with
+  268 quarantined: the Cisco skill-safety scanner-guard test now carries its
+  observed `process` capability and three already-tracked WRE truth suites are
+  registered.
+- `generate_test_registry.py --check` and the 45 focused registry/differential
+  tests pass. No quarantine, collection, shard, timeout, or authority policy
+  was relaxed. (WSP 5/6/15/22/50/97)
+
 ### [2026-08-26] - EXECUTION-TRUTH AND PRODUCTION SKILLZ ADMISSION
 
 - Replaced truthy/coerced success with exact Boolean success plus typed effect

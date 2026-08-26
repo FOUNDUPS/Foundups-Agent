@@ -1,4 +1,14 @@
 # TestModLog - wre_core/tests
+## 2026-08-27: RedDog candidate registry freshness
+
+- Reprojected the canonical registry from tracked Python tests after the CI
+  byte-identity gate reported stale checked-in bytes: **1,585 total / 268
+  quarantined**.
+- `generate_test_registry.py --check` passed, followed by **45 passed** across
+  `test_wre_test_registry.py` and
+  `test_wre_test_registry_differential_plan_runtime.py` in an isolated O:
+  temporary root. No test was executed through the registry projection itself.
+
 ## 2026-08-26: Final external-audit blocker replay
 
 - Replaced the mislabeled top-level MLE projection case with genuinely nested,

@@ -16,6 +16,11 @@
 - A post-hardening candidate-overlay adapter run also returned CURRENT with
   three scoped hits, no gap/reindex, and one attempt in 31.6 seconds, while
   retaining the exact committed semantic authority above.
+- CI then exposed a stale canonical test-registry projection. Regeneration
+  preserved 268 quarantined tests, raised the tracked total from 1,582 to
+  1,585, classified the Cisco skill-safety scanner-guard suite's real process
+  capability, and registered three already-tracked WRE truth suites. The
+  byte-identity check and 45 registry/differential tests pass.
 
 ## [2026-08-26] RedDog Bootstrap WSP 62 Extraction
 

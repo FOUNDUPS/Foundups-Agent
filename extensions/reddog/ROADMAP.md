@@ -39,6 +39,11 @@ Current implementation:
   own evidence. P1 throughput work may replace per-query cold
   starts and process-local-only serialization with a supervised lease only if
   identical route, cleanup, and receipt proofs remain.
+- [ ] Add truthful post-commit feature-branch recall. The current same-HEAD
+  authority intentionally rejects a branch commit beyond the sealed main
+  generation; a bounded branch lexical/structural overlay or equivalent
+  immutable per-commit replica must close that gap before RedDog can label the
+  result CURRENT. Do not relax the exact-HEAD gate.
 
 - Nemotron/Qwen routing slice: local Nemotron 3.5 Lightning can produce two
   compact shadow panel proposals through LM Studio's native reasoning-off API;

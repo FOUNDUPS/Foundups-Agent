@@ -16,6 +16,9 @@
 - Rebound the 18-shard aggregate to
   `sha256:a042b670b7f1ef12f80edeb18c26f3bfe78ddc360d1fd1f9ca2d2021053aa1ee`;
   the full four-group release supervisor passes.
+- Refreshed the canonical Git-tracked Python test registry after CI correctly
+  rejected stale bytes: **1,585 tests / 268 quarantined**. The registry check
+  and its 45 focused registry/differential tests pass.
 - This entry records extension compatibility only; no extension Holo mutation,
   worker dispatch, or Hermes authority was added.
 

@@ -14,6 +14,11 @@
   within one process and starts a bounded one-shot process per Holo query; a
   future supervised owner lease may reduce cross-process contention and
   cold-start cost without weakening proof.
+- P0 DESIGN REQUIRED: a committed feature branch whose HEAD advances beyond
+  the sealed authority is correctly rejected today. Normal post-commit IDE
+  recall needs a bounded, independently verified branch-overlay design (or an
+  equally strong per-commit replica path) before it may report CURRENT/no-gap;
+  the same-HEAD gate must not be weakened to simulate freshness.
 - COMPLETE: bounded FoundUps Fusion, OpenClaw gateway, and Hermes API artifact
   providers consume one shared verified runtime-topology capability. Exact
   role/provider/model identity and explicit available-provider inventory are
