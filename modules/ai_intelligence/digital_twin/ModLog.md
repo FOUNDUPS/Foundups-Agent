@@ -2,6 +2,18 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-08-26 - Durable resident first-TURN resolution alignment
+
+- Aligned current Digital Twin truth with the implemented explicit v2 journal
+  link from the original empty-ID request digest to its authenticated resolved
+  conversation ID/revision 0.
+- Recorded the single-generation, two-one-use-FoundUp-authority boundary and
+  later-revision replay check against the immutable E0 receipt chain. Scope
+  schema v4 signs the exact source/resolved request commitment in immutable E0
+  state, and replay atomically consumes its verified authority.
+- Host invocation, operation handlers, immediate conversation CAS, response
+  delivery, and live VSIX/PFMall/phone adapters remain unimplemented.
+
 ## 2026-08-26 - Trusted resident new-conversation scope alignment
 
 - Aligned the Digital Twin transport boundary with the communication layer's

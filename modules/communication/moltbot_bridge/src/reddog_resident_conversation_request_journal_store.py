@@ -19,6 +19,11 @@ from modules.communication.moltbot_bridge.src.reddog_resident_conversation_reque
     reservation_identity,
     reservation_record_reasons,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_conversation_first_turn_contract import (
+    SCHEMA_VERSION as FIRST_TURN_SCHEMA_VERSION,
+    first_turn_reservation_identity,
+    first_turn_reservation_record_reasons,
+)
 
 
 MAX_REQUESTS_PER_CONVERSATION = 4096
@@ -41,7 +46,7 @@ class AgentDbResidentConversationRequestJournal:
         self, record: Mapping[str, Any], *, admission_authority: Any = None
     ) -> Mapping[str, Any]:
         value = dict(record) if isinstance(record, Mapping) else {}
-        if reservation_record_reasons(value):
+        if _record_reasons(value):
             return _store_result(False, "resident_conversation_request_reservation_invalid")
         try:
             observed_at = self._observed_epoch()
@@ -84,6 +89,36 @@ class AgentDbResidentConversationRequestJournal:
             return _loaded_result(rows, conversation_id, idempotency_key)
         except Exception:
             return _store_result(False, "resident_conversation_request_journal_unavailable")
+
+    def load_related(
+        self, *, conversation_id: str, idempotency_key: str,
+        request_id: str, client_nonce: str,
+    ) -> Mapping[str, Any]:
+        """Return a row only when all authenticated resolution keys match."""
+
+        values = (conversation_id, idempotency_key, request_id, client_nonce)
+        if not all(digest_shaped(value) for value in values):
+            return _store_result(
+                False, "resident_conversation_request_reservation_invalid"
+            )
+        try:
+            db = self._agent_db()
+            _backend_engine(db)
+            self._ensure_tables(db)
+            with db.db.get_connection() as connection:
+                rows = _related_rows(
+                    connection,
+                    {
+                        "idempotency_key": idempotency_key,
+                        "request_id": request_id,
+                        "client_nonce": client_nonce,
+                    },
+                )
+            return _loaded_related_result(rows, values)
+        except Exception:
+            return _store_result(
+                False, "resident_conversation_request_journal_unavailable"
+            )
 
     def _reserve(
         self, value: Mapping[str, Any], observed_at: int
@@ -274,7 +309,7 @@ def _existing_result(rows: list[Any], candidate: Mapping[str, Any]) -> Mapping[s
     if len(rows) != 1:
         return _store_result(False, "resident_conversation_request_idempotency_conflict")
     existing = _stored_record(rows[0])
-    if existing is None or reservation_identity(existing) != reservation_identity(candidate):
+    if existing is None or _record_identity(existing) != _record_identity(candidate):
         return _store_result(False, "resident_conversation_request_idempotency_conflict")
     return _store_result(True, "", existing, stored=False, idempotent_replay=True)
 
@@ -289,6 +324,23 @@ def _loaded_result(
         record is None or record.get("conversation_id") != conversation_id
         or record.get("idempotency_key") != idempotency_key
     ):
+        return _store_result(False, "resident_conversation_request_idempotency_conflict")
+    return _store_result(True, "", record, stored=False)
+
+
+def _loaded_related_result(
+    rows: list[Any], values: tuple[str, str, str, str],
+) -> Mapping[str, Any]:
+    if not rows:
+        return _store_result(False, "resident_conversation_request_reservation_missing")
+    if len(rows) != 1:
+        return _store_result(False, "resident_conversation_request_idempotency_conflict")
+    record = _stored_record(rows[0])
+    actual = tuple(
+        record.get(name) if record else None
+        for name in ("conversation_id", "idempotency_key", "request_id", "client_nonce")
+    )
+    if actual != values:
         return _store_result(False, "resident_conversation_request_idempotency_conflict")
     return _store_result(True, "", record, stored=False)
 
@@ -308,10 +360,26 @@ def _stored_record(row: Any) -> dict[str, Any] | None:
         return None
     return (
         record if isinstance(record, dict)
-        and not reservation_record_reasons(record)
+        and not _record_reasons(record)
         and canonical_digest(record) == digest
         and all(record.get(key) == value for key, value in columns.items())
         else None
+    )
+
+
+def _record_reasons(record: Mapping[str, Any]) -> tuple[str, ...]:
+    return (
+        first_turn_reservation_record_reasons(record)
+        if record.get("schema_version") == FIRST_TURN_SCHEMA_VERSION
+        else reservation_record_reasons(record)
+    )
+
+
+def _record_identity(record: Mapping[str, Any]) -> Mapping[str, Any]:
+    return (
+        first_turn_reservation_identity(record)
+        if record.get("schema_version") == FIRST_TURN_SCHEMA_VERSION
+        else reservation_identity(record)
     )
 
 

@@ -27,6 +27,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     conversation_scope_authority_view,
     discard_conversation_scope_capability,
     split_conversation_scope_capability,
+    split_foundup_conversation_scope_capability_pair,
 )
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_contract import (
     canonical_digest,
@@ -105,6 +106,9 @@ class VerifiedResidentConversationSession:
     current_generation_manifest_id: str
     authority_receipt: Mapping[str, Any]
     authority: VerifiedConversationScopeAuthority
+    secondary_authority: VerifiedConversationScopeAuthority | None = field(
+        default=None, repr=False, compare=False
+    )
     principal_memex_authorization: PrincipalMemexSessionAuthorization | None = field(
         default=None, repr=False, compare=False
     )
@@ -120,6 +124,7 @@ def lease_current_generation_conversation_session(
     owner_config_path: str,
     now_epoch: int,
     include_principal_scope_capability: bool = False,
+    include_secondary_foundup_authority: bool = False,
     require_record_signing_context: bool = False,
 ) -> Iterator[VerifiedResidentConversationSession]:
     """Hold current-generation authority through one resident admission."""
@@ -128,36 +133,33 @@ def lease_current_generation_conversation_session(
         intent, grounding_receipt_id
     )
     repo_full_name = _canonical_repo_full_name(repo_root)
-    binding = canonical_digest(
-        {
-            "intent_id": intent_id,
-            "grounding_receipt_id": grounding_receipt_id,
-            "source_surface": str(intent.get("source_surface") or ""),
-        }
-    )
+    binding = _session_binding(intent, intent_id, grounding_receipt_id)
     authority: VerifiedConversationScopeAuthority | None = None
+    secondary_authority: VerifiedConversationScopeAuthority | None = None
     principal_authorization: PrincipalMemexSessionAuthorization | None = None
     with lease_owner_e0_current_selection(
         owner_config_path=owner_config_path, repo_root=repo_root
     ) as selection:
-        session, authority, principal_authorization = _authenticate_and_consume(
-            repo_root=repo_root,
-            selection=selection,
-            serialized_credential=serialized_credential,
-            repo_full_name=repo_full_name,
-            intent=intent,
-            requested_foundup=requested_foundup,
-            grounding_receipt_id=grounding_receipt_id,
-            session_binding=binding,
-            now_epoch=now_epoch,
-            include_principal_scope_capability=include_principal_scope_capability,
-            require_record_signing_context=require_record_signing_context,
+        session, authority, secondary_authority, principal_authorization = (
+            _authenticate_and_consume(
+                repo_root=repo_root, selection=selection,
+                serialized_credential=serialized_credential,
+                repo_full_name=repo_full_name, intent=intent,
+                requested_foundup=requested_foundup,
+                grounding_receipt_id=grounding_receipt_id,
+                session_binding=binding, now_epoch=now_epoch,
+                include_principal_scope_capability=include_principal_scope_capability,
+                include_secondary_foundup_authority=include_secondary_foundup_authority,
+                require_record_signing_context=require_record_signing_context,
+            )
         )
         try:
             yield session
         finally:
             if authority is not None:
                 discard_conversation_scope_capability(authority)
+            if secondary_authority is not None:
+                discard_conversation_scope_capability(secondary_authority)
             if principal_authorization is not None:
                 discard_principal_memex_live_resident_source(principal_authorization)
 
@@ -171,14 +173,27 @@ def owner_config_from_environment(environment: Mapping[str, str]) -> str:
     return value
 
 
+def _session_binding(
+    intent: Mapping[str, Any], intent_id: str, grounding_receipt_id: str,
+) -> str:
+    return canonical_digest(
+        {
+            "intent_id": intent_id, "grounding_receipt_id": grounding_receipt_id,
+            "source_surface": str(intent.get("source_surface") or ""),
+        }
+    )
+
+
 def _authenticate_and_consume(
     *, repo_root: Path, selection: Mapping[str, Any], serialized_credential: str,
     repo_full_name: str, intent: Mapping[str, Any], requested_foundup: str,
     grounding_receipt_id: str, session_binding: str, now_epoch: int,
-    include_principal_scope_capability: bool, require_record_signing_context: bool,
+    include_principal_scope_capability: bool, include_secondary_foundup_authority: bool,
+    require_record_signing_context: bool,
 ) -> tuple[
     VerifiedResidentConversationSession,
     VerifiedConversationScopeAuthority,
+    VerifiedConversationScopeAuthority | None,
     PrincipalMemexSessionAuthorization | None,
 ]:
     capability, credential, resolver, signing_context, runtime_root = _authenticate_scope(
@@ -190,38 +205,61 @@ def _authenticate_and_consume(
             include_principal_scope_capability or require_record_signing_context
         ),
     )
-    foundup_capability, principal_capability = _scope_capabilities(
-        capability, include_principal_scope_capability
+    foundup_capability, secondary_capability, principal_capability = _scope_capabilities(
+        capability, include_principal_scope_capability,
+        include_secondary_foundup_authority,
     )
     authority = consume_conversation_scope_capability(
         foundup_capability, active_foundup_id=requested_foundup,
         discussion_foundup_ids=(requested_foundup,), now_epoch=int(now_epoch),
     )
+    secondary_authority = consume_conversation_scope_capability(
+        secondary_capability, active_foundup_id=requested_foundup,
+        discussion_foundup_ids=(requested_foundup,), now_epoch=int(now_epoch),
+    ) if secondary_capability is not None else None
     try:
         session = _verified_session(
-            authority=authority, credential=credential, intent=intent,
+            authority=authority, secondary_authority=secondary_authority,
+            credential=credential, intent=intent,
             selection=selection, grounding_receipt_id=grounding_receipt_id,
             principal_capability=principal_capability, principal_resolver=resolver,
             runtime_root=runtime_root,
         )
     except Exception:
         discard_conversation_scope_capability(authority)
+        discard_conversation_scope_capability(secondary_authority)
         discard_conversation_scope_capability(principal_capability)
         raise
-    return session, authority, session.principal_memex_authorization
+    return (
+        session, authority, secondary_authority,
+        session.principal_memex_authorization,
+    )
 
 
 def _scope_capabilities(
     capability: AuthenticatedConversationScopeCapability, include_principal: bool,
-) -> tuple[Any, PrincipalContextReadConversationScopeCapability | None]:
+    include_secondary: bool,
+) -> tuple[Any, Any | None, PrincipalContextReadConversationScopeCapability | None]:
+    if include_principal and include_secondary:
+        discard_conversation_scope_capability(capability)
+        raise ConversationSessionAuthoritySourceError(
+            "conversation_session_scope_delegation_failed"
+        )
+    if include_secondary:
+        children = split_foundup_conversation_scope_capability_pair(capability)
+        if children is None:
+            raise ConversationSessionAuthoritySourceError(
+                "conversation_session_scope_delegation_failed"
+            )
+        return children[0], children[1], None
     if not include_principal:
-        return capability, None
+        return capability, None, None
     children = split_conversation_scope_capability(capability)
     if children is None:
         raise ConversationSessionAuthoritySourceError(
             "conversation_session_scope_delegation_failed"
         )
-    return children
+    return children[0], None, children[1]
 
 
 def _authenticate_scope(
@@ -266,21 +304,13 @@ def _authenticate_scope(
 
 
 def _verified_session(
-    *, authority: Any, credential: Any, intent: Mapping[str, Any],
+    *, authority: Any, secondary_authority: Any, credential: Any,
+    intent: Mapping[str, Any],
     selection: Mapping[str, Any], grounding_receipt_id: str,
     principal_capability: PrincipalContextReadConversationScopeCapability | None,
     principal_resolver: PrincipalAuthorityResolver, runtime_root: Path | None,
 ) -> VerifiedResidentConversationSession:
-    if authority is None:
-        raise ConversationSessionAuthoritySourceError(
-            "conversation_session_authority_scope_rejected"
-        )
-    view = conversation_scope_authority_view(authority)
-    if not isinstance(view, Mapping):
-        discard_conversation_scope_capability(authority)
-        raise ConversationSessionAuthoritySourceError(
-            "conversation_session_authority_scope_rejected"
-        )
+    view = _authority_view_or_raise(authority, secondary_authority)
     if str(intent.get("principal_ref") or "").strip() != credential.principal_id:
         discard_conversation_scope_capability(authority)
         raise ConversationSessionAuthoritySourceError(
@@ -313,8 +343,25 @@ def _verified_session(
         current_generation_manifest_id=str(selection.get("manifest_id") or ""),
         authority_receipt=MappingProxyType(receipt),
         authority=authority,
+        secondary_authority=secondary_authority,
         principal_memex_authorization=principal_authorization,
     )
+
+
+def _authority_view_or_raise(
+    authority: Any, secondary_authority: Any,
+) -> Mapping[str, Any]:
+    secondary_valid = (
+        secondary_authority is None
+        or conversation_scope_authority_view(secondary_authority) is not None
+    )
+    view = conversation_scope_authority_view(authority)
+    if authority is None or not secondary_valid or not isinstance(view, Mapping):
+        discard_conversation_scope_capability(authority)
+        raise ConversationSessionAuthoritySourceError(
+            "conversation_session_authority_scope_rejected"
+        )
+    return view
 
 
 def _principal_authorization(

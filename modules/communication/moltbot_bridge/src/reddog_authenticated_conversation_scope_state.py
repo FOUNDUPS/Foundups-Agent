@@ -49,6 +49,9 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind imp
     SCOPE_KIND_FOUNDUP,
     SCOPE_KINDS,
 )
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_identity import (
+    conversation_scope_id,
+)
 
 
 MAX_SCOPE_TTL_SECONDS = 86400
@@ -234,8 +237,7 @@ def _recover_exact_new_scope(
     )
 
 
-def _new_scope_record(
-    request: ConversationScopeCreateRequest, grounded: Mapping[str, Any], authority_view: Mapping[str, Any],
+def _new_scope_record(request: ConversationScopeCreateRequest, grounded: Mapping[str, Any], authority_view: Mapping[str, Any],
     discussions: tuple[str, ...], now_epoch: int, *, scope_kind: str, conversation_session_identity: str = "",
 ) -> dict[str, Any]:
     state = _initial_scope_state(request, grounded, discussions, scope_kind)
@@ -244,9 +246,9 @@ def _new_scope_record(
     if ttl <= 0 or ttl > MAX_SCOPE_TTL_SECONDS or not nonce:
         raise ValueError("conversation_scope_ttl_or_nonce_invalid")
     foundup_id = str(grounded.get("foundup_id") or "")
-    conversation_id = _conversation_id(
+    conversation_id = _scope_identity(
         authority_view, scope_kind, foundup_id, discussions, nonce,
-        conversation_session_identity=conversation_session_identity,
+        conversation_session_identity,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -260,6 +262,7 @@ def _new_scope_record(
         "credential_id": str(authority_view.get("credential_id") or ""),
         "session_id": str(authority_view.get("session_id") or ""),
         "repo_full_name": str(authority_view.get("repo_full_name") or ""),
+        "initial_turn_request_binding_digest": str(request.initial_turn_request_binding_digest or ""),
         "authorized_foundup_id": foundup_id,
         "conversation_revision": 0,
         **state,
@@ -286,6 +289,18 @@ def _new_scope_record(
     }
 
 
+def _scope_identity(
+    authority: Mapping[str, Any], scope_kind: str, foundup_id: str,
+    discussions: tuple[str, ...], nonce: str, session_identity: str,
+) -> str:
+    return conversation_scope_id(
+        principal_id=str(authority["principal_id"]), scope_kind=scope_kind,
+        foundup_id=foundup_id, discussion_foundup_ids=discussions,
+        session_identity=(session_identity or str(authority["session_binding_digest"])),
+        conversation_nonce=nonce,
+    )
+
+
 def _initial_scope_state(
     request: ConversationScopeCreateRequest, grounded: Mapping[str, Any],
     discussions: tuple[str, ...], scope_kind: str,
@@ -301,24 +316,6 @@ def _initial_scope_state(
             if scope_kind == SCOPE_KIND_FOUNDUP
             else ()
         ),
-    )
-
-
-def _conversation_id(
-    authority: Mapping[str, Any], scope_kind: str, foundup_id: str,
-    discussions: tuple[str, ...], nonce: str, *, conversation_session_identity: str,
-) -> str:
-    return canonical_digest(
-        {
-            "principal_id": authority["principal_id"],
-            "scope_kind": scope_kind,
-            "foundup_id": foundup_id,
-            "discussion_foundup_ids": list(discussions),
-            "session_binding_digest": (
-                conversation_session_identity or authority["session_binding_digest"]
-            ),
-            "conversation_nonce": nonce,
-        }
     )
 
 

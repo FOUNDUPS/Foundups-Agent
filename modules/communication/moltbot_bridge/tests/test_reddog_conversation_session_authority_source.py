@@ -138,6 +138,7 @@ def _install_current_generation(
 def _lease(
     monkeypatch, *, credential: str | None = None, intent: dict | None = None,
     include_principal_scope_capability: bool = False,
+    include_secondary_foundup_authority: bool = False,
     require_record_signing_context: bool = False,
 ):
     return lease_current_generation_conversation_session(
@@ -148,6 +149,7 @@ def _lease(
         owner_config_path="O:/runtime/owner.json",
         now_epoch=NOW,
         include_principal_scope_capability=include_principal_scope_capability,
+        include_secondary_foundup_authority=include_secondary_foundup_authority,
         require_record_signing_context=require_record_signing_context,
     )
 
@@ -183,6 +185,38 @@ def test_principal_memex_requests_a_distinct_one_use_scope_capability(monkeypatc
         assert not hasattr(session, "principal_scope_capability")
         assert not hasattr(session, "principal_resolver")
     assert principal_memex_session_runtime_root(authorization) is None
+
+
+def test_first_turn_requests_two_distinct_foundup_authorities(monkeypatch) -> None:
+    _install_current_generation(monkeypatch, _record())
+    with _lease(monkeypatch, include_secondary_foundup_authority=True) as session:
+        secondary = session.secondary_authority
+        assert secondary is not None
+        assert secondary is not session.authority
+        primary_view = conversation_scope_authority_view(session.authority)
+        secondary_view = conversation_scope_authority_view(secondary)
+        assert primary_view == secondary_view
+        assert primary_view is not None
+    assert conversation_scope_authority_view(session.authority) is None
+    assert conversation_scope_authority_view(secondary) is None
+
+
+def test_principal_and_second_foundup_delegation_cannot_share_one_root(monkeypatch) -> None:
+    _install_current_generation(monkeypatch, _record())
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_conversation_session_authority_source._conversation_signing_context",
+        lambda **_kwargs: (None, REPO_ROOT),
+    )
+    with pytest.raises(
+        ConversationSessionAuthoritySourceError,
+        match="conversation_session_scope_delegation_failed",
+    ):
+        with _lease(
+            monkeypatch, include_principal_scope_capability=True,
+            include_secondary_foundup_authority=True,
+        ):
+            pass
 
 
 def test_record_signing_context_is_independently_required(monkeypatch) -> None:

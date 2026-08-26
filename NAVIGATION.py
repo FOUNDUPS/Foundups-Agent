@@ -124,6 +124,8 @@ NEED_TO = {
     "reddog current conversation session authority": "modules/communication/moltbot_bridge/src/reddog_conversation_session_authority_source.py:lease_current_generation_conversation_session()",
     "reddog trusted new conversation scope resolution": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_new_scope_resolution.py:resolve_resident_conversation_new_scope_request()",
     "reddog current session new conversation scope admission": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_new_scope_admission.py:create_current_generation_resident_conversation_scope()",
+    "reddog durable first turn resolution link": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_first_turn_resolution.py:resolve_current_generation_resident_conversation_first_turn()",
+    "reddog first turn resolution contract": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_first_turn_contract.py",
     "reddog current session conversation admission": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_admission.py:reserve_current_generation_resident_conversation_request()",
     "moltbot bridge workspace skills": "modules/communication/moltbot_bridge/workspace/AGENTS.md",
 
@@ -480,8 +482,6 @@ DAE_ARCHITECTURE = {
     "dMRV integration": "WSP_framework/src/WSP_29_CABR_Engine.md - Section 2.5: Digital MRV Framework 3.0 attestation",
     "participation score definition": "WSP_framework/src/WSP_29_CABR_Engine.md - Section 2.4: FAM-derived part_score components",
     "anti-sybil agent identity": "WSP_framework/src/WSP_29_CABR_Engine.md - Section 6: Layered Sybil defense (L1-L5)",
-    "foundup death sunset protocol": "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md - Section 13: 3-phase sunset (WARNING→WIND-DOWN→DISSOLUTION)",
-
     # WSP 26: 21M Token Model + Subscription + Blockchain (v3.0)
     "21M token model every foundup bitcoin": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.7.1: 21M fixed supply per FoundUp, divisible to 8 decimals",
     "ubiquitous gateway any token BTC": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.8: Any token → converted to BTC inside ecosystem",

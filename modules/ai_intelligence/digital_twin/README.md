@@ -24,13 +24,15 @@ validity window. Principal, FoundUp, credential, provider/model, effect, and
 work-authority fields are deliberately outside the client envelope and must be
 derived and revalidated by the resident host. The communication layer now has
 current-generation aggregates for both existing conversations and trusted
-empty-ID TURN scope creation. Existing requests receive a durable content-free
+empty-ID TURN resolution. Existing requests receive a durable content-free
 replay reservation; new scope creation verifies exact intent, grounding,
-registered FoundUp, signed session identity, E0 persistence, and exact recovery.
+registered FoundUp, signed session identity, E0 persistence, and exact recovery,
+then an explicit v2 journal row binds the original empty-ID request digest to
+the derived conversation ID/revision 0 under the same generation lease.
 The client contract itself still adds no listener, persistence, authentication,
-model call, or effect. The first new-conversation TURN is not yet rebound into
-the existing journal or executed; live adapters remain gated on that durable
-resolution link, host wiring, and immediate-CAS operation handlers.
+model call, or effect. The first new-conversation TURN is durably linked but not
+executed; live adapters remain gated on host wiring and immediate-CAS operation
+handlers.
 
 `principal_memex_projection.py` implements the first structural, read-only
 Principal Memex projection. It validates provenance identifiers, canonical

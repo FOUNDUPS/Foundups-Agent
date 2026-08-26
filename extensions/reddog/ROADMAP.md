@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.110 resident architect thin-client surface.
+Phase: RedDog 0.4.111 resident architect thin-client surface.
 
 Current implementation:
 
@@ -17,9 +17,12 @@ Current implementation:
 - [x] Trusted empty-ID TURN resolution and current-generation E0 scope
   persistence bind exact intent/request/grounding/FoundUp identity and reject
   divergent nonce replay without retaining raw operator text.
-- [ ] Add the durable first-turn resolution link, wire both inert host
-  aggregates, add immediate-CAS operation handlers, and thin VSIX/PFMall/phone
-  adapters. The existing browser event remains presentation-only.
+- [x] The durable first-turn resolution link atomically binds original empty-ID
+  request identity to the authenticated resolved ID/revision 0 in the existing
+  AgentDB journal and supports signed later-revision replay validation.
+- [ ] Wire the inert host aggregates, add immediate-CAS operation handlers, and
+  thin VSIX/PFMall/phone adapters. The existing browser event remains
+  presentation-only.
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
 

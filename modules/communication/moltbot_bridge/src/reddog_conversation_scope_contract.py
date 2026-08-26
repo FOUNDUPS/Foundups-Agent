@@ -20,7 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_kind imp
 )
 
 
-SCHEMA_VERSION = "reddog_authenticated_conversation_scope.v3"
+SCHEMA_VERSION = "reddog_authenticated_conversation_scope.v4"
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 HEAD_RE = re.compile(r"^[0-9a-f]{7,64}$")
 MAX_TEXT = 720
@@ -35,6 +35,7 @@ IMMUTABLE_FIELDS = frozenset(
         "verified_subject_digest", "principal_record_digest", "principal_key_fingerprint",
         "transport", "session_binding_digest", "authorized_foundup_id", "created_at",
         "credential_id", "session_id", "repo_full_name",
+        "initial_turn_request_binding_digest",
     }
 )
 MUTABLE_FIELDS = frozenset(
@@ -161,6 +162,9 @@ def _binding_reasons(record: Mapping[str, Any]) -> list[str]:
         reasons.append("conversation_scope_pending_proposal_invalid")
     if not _valid_optional_digest_pair(record, "source_snapshot_id", "source_snapshot_digest"):
         reasons.append("conversation_scope_snapshot_binding_invalid")
+    binding = str(record.get("initial_turn_request_binding_digest") or "")
+    if binding and not SHA256_RE.fullmatch(binding):
+        reasons.append("conversation_scope_initial_turn_binding_invalid")
     if not _valid_optional_digest_pair(
         record, "holoindex_generation_id", "holoindex_freshness_receipt_id"
     ):

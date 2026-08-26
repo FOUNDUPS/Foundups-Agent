@@ -359,9 +359,21 @@ precedes the same generation lease and required E0 signer. Stable signed-session
 identity fences divergent nonce reuse; only a fully authenticated exact record
 may replay. The returned scope stores no raw operator text.
 
-Both aggregates are inert: they expose no endpoint and perform no handler,
-conversation CAS, model, or worker action. Live traffic still requires a durable
-first-turn resolution link, host adapter, and immediate authenticated CAS.
+`reddog_resident_conversation_first_turn_resolution.py` composes that resolver
+with the existing request journal. One credential lease atomically delegates
+two separately registered, one-use FoundUp authorities: one creates or exactly
+recovers E0, and the other authenticates the same E0 record before minting the
+journal proof. The explicit v2 `RESOLVED_INITIAL_TURN` row preserves the
+original empty-ID request digest separately from the derived resolved-ID/
+revision-0 request digest. Scope schema v4 also commits that exact pair into
+signed immutable E0 state. Authenticated replay atomically consumes one
+verified authority, derives the conversation ID before lookup, and may validate
+the immutable revision-0 receipt through a later signed revision chain; no
+idempotency-only lookup discloses an ID.
+
+All three aggregates remain host-unwired: they expose no endpoint and perform
+no handler, conversation CAS, model, or worker action. Live traffic still
+requires a host adapter and immediate authenticated CAS.
 Detailed locking, failure, and recovery audits are under `docs/clarity/`.
 
 ## Upstream Agent Execution Boundary

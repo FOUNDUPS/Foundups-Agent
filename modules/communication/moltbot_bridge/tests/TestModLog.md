@@ -1,3 +1,18 @@
+## 2026-08-26: Durable first-TURN resolution regressions
+
+- Added the distinct first-turn resolution-link suite for the explicit v2
+  source/derived digest contract, atomic two-FoundUp delegation, content-free
+  AgentDB persistence, restart/crash recovery, related-key and nonce conflicts,
+  concurrency convergence, later-revision authenticated replay, tamper closure,
+  and WSP 62/effect boundaries.
+- Updated the existing capability test to retain the fail-closed rule exposed
+  by independent WSP 97 review: a partial delegation registration failure
+  retires the root and both children rather than leaving credential authority
+  reusable.
+- Added full-row idempotency rewrite/rehash proof against the signed immutable
+  E0 request commitment and a barrier-synchronized replay race proving one
+  shared verified authority succeeds exactly once.
+
 ## 2026-08-26: Trusted new-conversation scope admission
 
 - Added positive, replay, concurrent, E0, malformed, expiry, one-use, disclosure,
