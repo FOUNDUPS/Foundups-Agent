@@ -1,5 +1,9 @@
 # WRE Enhancement Plan - Leveraging Claude Code Features
 
+> **Historical proposal, not production authority.** Autonomy and efficiency
+> claims below are unimplemented/unmeasured unless restated in the current root
+> README, INTERFACE, ROADMAP, and tests.
+
 ## Vision
 Transform WRE into an improved fully autonomous Claude Code SDK that runs in any terminal with enhanced capabilities.
 

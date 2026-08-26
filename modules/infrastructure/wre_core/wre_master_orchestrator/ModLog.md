@@ -2,6 +2,41 @@
 
 <!-- Per WSP 22: Journal format - NEWEST entries at TOP, oldest at bottom -->
 
+## External-Audit Repair: Compatibility Plugin Gate
+**Date**: 2026-08-26
+**WSP Protocol**: WSP 00, WSP 22, WSP 50, WSP 62, WSP 95, WSP 97
+**Type**: Security/truth correction
+
+- Moved both injected WSP checks ahead of every legacy plugin request, then
+  blocked dispatch because the callbacks authenticate neither code nor effects.
+  Missing plugins fail closed and forged results never reach the caller.
+- Blocked direct HoloIndex execution both at the master route and dormant plugin
+  class. Construction no longer opens Holo state; governed owner retrieval and
+  maintenance remain separate receipt-bound transactions.
+- Added adversarial verifier-bypass, forged-effect, direct-Holo, and log-redaction
+  regressions. Legacy plugins must migrate to WSP 95 admission before dispatch.
+
+---
+
+## Execution-Truth Correction: Admission, Fallback, and Telemetry
+**Date**: 2026-08-26
+**WSP Protocol**: WSP 00, WSP 22, WSP 50, WSP 62, WSP 95, WSP 97
+**Type**: Audit correction
+
+### Summary
+
+- Replaced the stale submodule README and INTERFACE with the current WSP 95
+  admission and fail-closed result contracts.
+- Loader/scanner failure now remains documented as blocked execution; the older
+  deterministic-fallback execution claim below is historical and superseded.
+- Removed synthetic token averages/reduction from the active HoloIndex plugin,
+  DAE gateway, MLE-STAR compatibility path, and PQN compatibility result.
+  Configured token values are budget hints; token reduction remains unmeasured.
+- The older 50-200/97% entries below are historical design hypotheses, not
+  current measurements or acceptance evidence.
+
+---
+
 ## Sprint 3: Multi-Path & CodeAct - ToT Selection + Hybrid Execution
 **Date**: 2026-02-24
 **WSP Protocol**: WSP 46, WSP 48, WSP 77, WSP 64

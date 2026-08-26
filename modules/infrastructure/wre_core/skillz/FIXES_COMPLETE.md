@@ -1,5 +1,10 @@
 # WRE Skills System - Critical Fixes Complete
 
+> **Historical session record — superseded and non-authoritative.**
+> “Complete” describes the 2025 transaction, not current production readiness.
+> Use current module contracts, WSP 95 v2.1, and exact receipts for capability
+> claims; no execution or promotion authority is conferred here.
+
 **Date**: 2025-10-20
 **Status**: ✅ ALL CRITICAL FIXES IMPLEMENTED
 **Reviewer**: Following 0102_gpt recommendations

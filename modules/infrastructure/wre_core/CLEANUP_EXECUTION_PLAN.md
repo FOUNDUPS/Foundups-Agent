@@ -1,5 +1,9 @@
 # WRE Legacy Code Cleanup Execution Plan
 
+> **Historical plan, not runtime authority.** Embedded token counts are legacy
+> budget hypotheses, not measured usage. Current execution and admission truth
+> is defined by `README.md`, `INTERFACE.md`, and WSP 95.
+
 ## [ALERT] CRITICAL: Two wre_core Folders Must Be Resolved
 
 ### Current State

@@ -13,9 +13,9 @@ WSP Compliance:
 - WSP 27: Universal DAE Architecture (4-phase lifecycle)
 - WSP 46: WRE Protocol (skill trigger integration)
 - WSP 64: Secure credential management (ENV vars only - stream key)
-- WSP 77: Agent Coordination (AI Overseer + WRE skills)
+- WSP 77: Coordination seams (AI Overseer notification adapter unbound)
 - WSP 91: DAEMON Observability (heartbeat + telemetry)
-- WSP 96: WRE Skills (domain-based skill discovery)
+- WSP 95: WRE Skillz (production registry admission)
 
 NAVIGATION: antifaFM radio → YouTube Live bridge
 -> Called by: CLI youtube_menu.py (option 10)
@@ -37,7 +37,7 @@ from typing import Any, Dict, Optional
 from .ffmpeg_streamer import FFmpegStreamer, StreamConfig, StreamState, FFmpegStreamerError
 from .stream_health_monitor import StreamHealthMonitor, RecoveryConfig, HealthState
 
-# WRE Integration (WSP 46, WSP 96)
+# WRE Integration (WSP 46, WSP 95)
 try:
     from modules.infrastructure.wre_core.src.skill_trigger import SkillTriggerMixin
     WRE_AVAILABLE = True
@@ -95,17 +95,18 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
     - Auto-recovery with exponential backoff
     - Telemetry logging for observability
     - AI Overseer integration for error detection
-    - WRE skill execution for autonomous operations
+    - Optional registered production Skillz cadence
 
     DAE Phases (WSP 27):
     - Phase -1 (Signal): Icecast audio stream input
     - Phase 0 (Knowledge): Stream metadata, health history
     - Phase 1 (Protocol): FFmpeg command construction
-    - Phase 2 (Agentic): Auto-recovery, health monitoring, WRE skills
+    - Phase 2 (Agentic): Auto-recovery, health monitoring, admitted Skillz
 
-    WRE Integration (WSP 46, WSP 96):
+    WRE Integration (WSP 46, WSP 95):
     - Domain: "streaming"
-    - Skills: suno_stt_lyrics_extract, antifafm_add_video
+    - Only registry-admitted production Skillz may run
+    - Suno/video JSON action configs remain direct launch-handler inputs
     - Cadence: 15 minutes (fires domain skills periodically)
     """
 
@@ -157,7 +158,7 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
         if enable_ai_monitoring:
             self._init_ai_overseer()
 
-        # WRE Skill Trigger integration (WSP 46, WSP 96)
+        # Optional production Skillz trigger integration (WSP 46, WSP 95)
         if WRE_AVAILABLE:
             self.init_skill_triggers(
                 domain="streaming",
@@ -185,12 +186,12 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
         try:
             from modules.ai_intelligence.ai_overseer.src.ai_overseer import AIOverseer
             self.ai_overseer = AIOverseer()
-            logger.info("[RADIO] AI Overseer connected for error monitoring")
+            logger.info("[RADIO] AI Overseer initialized; notification hook is not bound")
         except ImportError:
             logger.debug("[RADIO] AI Overseer not available - monitoring disabled")
             self.ai_overseer = None
-        except Exception as e:
-            logger.warning(f"[RADIO] AI Overseer init failed: {e}")
+        except Exception as exc:
+            logger.warning("[RADIO] AI Overseer init failed; error_type=%s", type(exc).__name__)
             self.ai_overseer = None
 
     def _init_discord_output(self) -> None:
@@ -476,8 +477,7 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
                 if self.ai_overseer and self.status == BroadcasterStatus.ERROR:
                     await self._notify_ai_overseer()
 
-                # WRE Skill execution (WSP 46, WSP 96)
-                # Fire domain skills on cadence (every 15 min by default)
+                # Fire only admitted production domain Skillz on cadence.
                 if WRE_AVAILABLE and self.status == BroadcasterStatus.BROADCASTING:
                     try:
                         skill_results = await self.fire_pending_skills(
@@ -489,15 +489,15 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
                         )
                         if skill_results:
                             logger.info(f"[RADIO] WRE skills executed: {len(skill_results)} results")
-                    except Exception as e:
-                        logger.debug(f"[RADIO] WRE skill execution failed: {e}")
+                    except Exception as exc:
+                        logger.debug("[RADIO] WRE Skillz failed; error_type=%s", type(exc).__name__)
 
                 await asyncio.sleep(self.heartbeat_interval)
 
             except asyncio.CancelledError:
                 break
-            except Exception as e:
-                logger.error(f"[RADIO] Heartbeat error: {e}")
+            except Exception as exc:
+                logger.error("[RADIO] Heartbeat failed; error_type=%s", type(exc).__name__)
                 await asyncio.sleep(self.heartbeat_interval)
 
     def _write_telemetry(self) -> None:
@@ -540,24 +540,14 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
             with open(self.telemetry_path, "a", encoding="utf-8") as f:
                 f.write(json.dumps(payload) + "\n")
 
-        except Exception as e:
-            logger.debug(f"[RADIO] Telemetry write failed: {e}")
+        except Exception as exc:
+            logger.debug("[RADIO] Telemetry write failed; error_type=%s", type(exc).__name__)
 
     async def _notify_ai_overseer(self) -> None:
-        """Notify AI Overseer of error state (WSP 77)."""
+        """Expose the missing notification adapter without claiming delivery."""
         if not self.ai_overseer:
             return
-
-        try:
-            error_context = {
-                "module": "antifafm_broadcaster",
-                "status": self.status.value,
-                "error": self.streamer.get_status().get("error") if self.streamer else None,
-            }
-            # AI Overseer would analyze and potentially trigger autonomous fix
-            logger.info(f"[RADIO] Notified AI Overseer of error state: {error_context}")
-        except Exception as e:
-            logger.debug(f"[RADIO] AI Overseer notification failed: {e}")
+        logger.warning("[RADIO] AI Overseer notification skipped: adapter is not implemented")
 
     def get_status(self) -> Dict[str, Any]:
         """Get current broadcaster status."""

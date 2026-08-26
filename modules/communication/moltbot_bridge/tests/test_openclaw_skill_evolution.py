@@ -19,12 +19,15 @@ from __future__ import annotations
 import json
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from modules.infrastructure.database.src.db_manager import DatabaseManager
+
+CURRENT_TIMESTAMP = datetime.now(timezone.utc).isoformat()
 
 
 @pytest.fixture(autouse=True)
@@ -61,7 +64,7 @@ class TestDiscoverOpenclawSkills:
                     execution_id=f"exec_{skill}_{i}",
                     skill_name=skill,
                     agent="openclaw_dae",
-                    timestamp="2026-03-29T10:00:00",
+                    timestamp=CURRENT_TIMESTAMP,
                     input_context="{}",
                     output_result="{}",
                     success=True,
@@ -79,7 +82,7 @@ class TestDiscoverOpenclawSkills:
                     execution_id=f"exec_{skill}",
                     skill_name=skill,
                     agent="wre",
-                    timestamp="2026-03-29T10:00:00",
+                    timestamp=CURRENT_TIMESTAMP,
                     input_context="{}",
                     output_result="{}",
                     success=True,
@@ -188,7 +191,7 @@ class TestBuildSkillEvolutionReport:
                     execution_id=f"exec_healthy_{i}",
                     skill_name="openclaw_healthy",
                     agent="openclaw_dae",
-                    timestamp="2026-03-29T10:00:00",
+                    timestamp=CURRENT_TIMESTAMP,
                     input_context="{}",
                     output_result="{}",
                     success=True,
@@ -206,7 +209,7 @@ class TestBuildSkillEvolutionReport:
                     execution_id=f"exec_candidate_{i}",
                     skill_name="openclaw_candidate",
                     agent="openclaw_dae",
-                    timestamp="2026-03-29T10:00:00",
+                    timestamp=CURRENT_TIMESTAMP,
                     input_context="{}",
                     output_result="{}",
                     success=True,
@@ -223,7 +226,7 @@ class TestBuildSkillEvolutionReport:
                 execution_id="exec_insufficient_0",
                 skill_name="openclaw_insufficient",
                 agent="openclaw_dae",
-                timestamp="2026-03-29T10:00:00",
+                timestamp=CURRENT_TIMESTAMP,
                 input_context="{}",
                 output_result="{}",
                 success=True,
@@ -314,7 +317,7 @@ class TestBuildSkillEvolutionReport:
                     execution_id=f"exec_evolved_{i}",
                     skill_name="openclaw_evolved",
                     agent="openclaw_dae",
-                    timestamp="2026-03-29T10:00:00",
+                    timestamp=CURRENT_TIMESTAMP,
                     input_context="{}",
                     output_result="{}",
                     success=True,
@@ -757,7 +760,7 @@ class TestBuildMutationSurfaceReport:
                     execution_id=f"exec_stable_{i}",
                     skill_name="openclaw_stable",
                     agent="openclaw_dae",
-                    timestamp="2026-03-29T10:00:00",
+                    timestamp=CURRENT_TIMESTAMP,
                     input_context="{}",
                     output_result="{}",
                     success=True,
@@ -775,7 +778,7 @@ class TestBuildMutationSurfaceReport:
                     execution_id=f"exec_eligible_{i}",
                     skill_name="openclaw_eligible",
                     agent="openclaw_dae",
-                    timestamp="2026-03-29T10:00:00",
+                    timestamp=CURRENT_TIMESTAMP,
                     input_context="{}",
                     output_result="{}",
                     success=True,
@@ -792,7 +795,7 @@ class TestBuildMutationSurfaceReport:
                 execution_id="exec_blocked_0",
                 skill_name="openclaw_blocked",
                 agent="openclaw_dae",
-                timestamp="2026-03-29T10:00:00",
+                timestamp=CURRENT_TIMESTAMP,
                 input_context="{}",
                 output_result="{}",
                 success=True,
@@ -945,6 +948,30 @@ class TestBuildMutationSurfaceEntry:
         assert "ab_promotion_status" in entry
         assert "promotion_readiness" in entry
         assert "gates" in entry
+
+    def test_ab_winner_recommends_nomination_not_promotion(
+        self, pattern_memory, monkeypatch
+    ):
+        """Statistical treatment evidence cannot recommend production mutation."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_entry,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+        test_id = pattern_memory.schedule_ab_test(
+            "openclaw_test", "control", "candidate", sample_size_target=1
+        )
+        pattern_memory.record_ab_outcome(test_id, "control", success=False)
+        pattern_memory.record_ab_outcome(test_id, "treatment", success=True)
+
+        entry = build_mutation_surface_entry(
+            pattern_memory,
+            "openclaw_test",
+            {"execution_count": 10, "avg_fidelity": 0.75},
+        )
+
+        assert entry["recommended_action"] == "nominate_treatment_candidate"
+        assert entry["requires_approval"] is True
 
 
 # ---------------------------------------------------------------------------

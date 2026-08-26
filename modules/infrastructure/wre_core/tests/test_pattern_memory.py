@@ -181,6 +181,71 @@ class TestPatternMemory:
         assert row["created_by"] == "qwen"
         assert row["test_status"] == "testing"
 
+    def test_stage_variation_candidate_does_not_promote(self, memory):
+        """An A/B winner remains non-production pending independent admission."""
+        variation_id = "qwen_gitpush_candidate"
+        memory.store_variation(
+            variation_id=variation_id,
+            skill_name="qwen_gitpush",
+            variation_content="# Candidate version",
+        )
+
+        memory.stage_variation_candidate(variation_id)
+
+        row = memory.conn.execute(
+            "SELECT promoted, test_status FROM skill_variations "
+            "WHERE variation_id = ?",
+            (variation_id,),
+        ).fetchone()
+        assert row["promoted"] == 0
+        assert row["test_status"] == "candidate_ready"
+
+    def test_legacy_promote_variation_fails_closed(self, memory):
+        """PatternMemory cannot self-authorize production state."""
+        with pytest.raises(PermissionError, match="signed promoter"):
+            memory.promote_variation("candidate_v1")
+
+    @pytest.mark.parametrize("variant", ["", "candidate", "CONTROL"])
+    def test_record_ab_outcome_rejects_unknown_variant(self, memory, variant):
+        """Unknown variant labels cannot be counted as treatment."""
+        test_id = memory.schedule_ab_test("skill", "v1", "v2", sample_size_target=1)
+
+        with pytest.raises(ValueError, match="variant"):
+            memory.record_ab_outcome(test_id, variant, success=True)
+
+    def test_record_ab_outcome_requires_exact_boolean(self, memory):
+        """Truthy strings cannot create A/B success evidence."""
+        test_id = memory.schedule_ab_test("skill", "v1", "v2", sample_size_target=1)
+
+        with pytest.raises(TypeError, match="boolean"):
+            memory.record_ab_outcome(test_id, "treatment", success="false")
+
+    def test_ab_nomination_requires_target_for_both_variants(self, memory):
+        """One populated arm cannot nominate its own treatment."""
+        test_id = memory.schedule_ab_test("skill", "v1", "v2", sample_size_target=2)
+        memory.record_ab_outcome(test_id, "treatment", success=True)
+        memory.record_ab_outcome(test_id, "treatment", success=True)
+        assert memory.check_ab_promotion(test_id) is None
+
+        memory.record_ab_outcome(test_id, "control", success=False)
+        memory.record_ab_outcome(test_id, "control", success=False)
+        assert memory.check_ab_promotion(test_id) == "treatment"
+
+    def test_record_ab_outcome_rejects_inactive_test(self, memory):
+        """Closed or missing tests cannot accept late samples."""
+        test_id = memory.schedule_ab_test("skill", "v1", "v2", sample_size_target=1)
+        memory.close_ab_test(test_id, "inconclusive")
+
+        row = memory.conn.execute(
+            "SELECT status, winner FROM ab_test_assignments WHERE test_id = ?",
+            (test_id,),
+        ).fetchone()
+        assert row["status"] == "completed"
+        assert row["winner"] == "inconclusive"
+
+        with pytest.raises(ValueError, match="inactive"):
+            memory.record_ab_outcome(test_id, "control", success=True)
+
     def test_record_learning_event(self, memory):
         """Test recording learning event for skill evolution"""
         memory.record_learning_event(

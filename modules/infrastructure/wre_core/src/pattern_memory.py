@@ -28,6 +28,11 @@ from datetime import datetime, timedelta
 import json
 import logging
 
+from modules.infrastructure.wre_core.src.pattern_ab_evidence import (
+    PatternABEvidenceMixin,
+    initialize_ab_schema,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +58,7 @@ class SkillOutcome:
     notes: Optional[str] = None
 
 
-class PatternMemory:
+class PatternMemory(PatternABEvidenceMixin):
     """
     Pattern Memory - SQLite storage for skill outcomes and recursive learning
 
@@ -195,23 +200,7 @@ class PatternMemory:
         except sqlite3.OperationalError as exc:
             logger.warning("[PATTERN-MEMORY] Learning events schema upgrade failed: %s", exc)
 
-        # A/B test assignments table (Sprint 1 - TT-SI closure)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS ab_test_assignments (
-                test_id TEXT PRIMARY KEY,
-                skill_name TEXT NOT NULL,
-                control_version TEXT NOT NULL,
-                treatment_version TEXT NOT NULL,
-                start_time TEXT NOT NULL,
-                end_time TEXT,
-                status TEXT DEFAULT 'running',
-                sample_size_target INTEGER DEFAULT 20,
-                control_successes INTEGER DEFAULT 0,
-                control_trials INTEGER DEFAULT 0,
-                treatment_successes INTEGER DEFAULT 0,
-                treatment_trials INTEGER DEFAULT 0
-            )
-        """)
+        initialize_ab_schema(self.conn)
 
         # Telemetry counters table (Sprint 1 - observability)
         cursor.execute("""
@@ -803,156 +792,6 @@ class PatternMemory:
         return [dict(row) for row in rows]
 
     # ------------------------------------------------------------------ #
-    #  A/B Testing & Variation Promotion (Sprint 1 - TT-SI Closure)      #
-    # ------------------------------------------------------------------ #
-
-    def schedule_ab_test(
-        self,
-        skill_name: str,
-        control_version: str,
-        treatment_version: str,
-        sample_size_target: int = 20
-    ) -> str:
-        """
-        Schedule A/B test between control and treatment variation.
-
-        Per WRE_COT_DEEP_ANALYSIS.md Gap D: Close TT-SI loop
-
-        Args:
-            skill_name: Skill being tested
-            control_version: Current production version ID
-            treatment_version: New variation ID to test
-            sample_size_target: Min samples before promotion decision
-
-        Returns:
-            test_id for tracking
-        """
-        import uuid
-        test_id = f"ab_{skill_name}_{uuid.uuid4().hex[:8]}"
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            INSERT INTO ab_test_assignments (
-                test_id, skill_name, control_version, treatment_version,
-                start_time, sample_size_target
-            ) VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            test_id, skill_name, control_version, treatment_version,
-            datetime.now().isoformat(), sample_size_target
-        ))
-        self.conn.commit()
-        logger.info(f"[PATTERN-MEMORY] Scheduled A/B test {test_id}")
-        return test_id
-
-    def get_active_ab_test(self, skill_name: str) -> Optional[Dict]:
-        """Get active A/B test for skill if exists."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            SELECT * FROM ab_test_assignments
-            WHERE skill_name = ? AND status = 'running'
-            ORDER BY start_time DESC LIMIT 1
-        """, (skill_name,))
-        row = cursor.fetchone()
-        return dict(row) if row else None
-
-    def record_ab_outcome(
-        self,
-        test_id: str,
-        variant: str,
-        success: bool
-    ) -> None:
-        """
-        Record outcome for A/B test variant.
-
-        Args:
-            test_id: A/B test identifier
-            variant: 'control' or 'treatment'
-            success: Whether execution met fidelity threshold
-        """
-        cursor = self.conn.cursor()
-        if variant == 'control':
-            cursor.execute("""
-                UPDATE ab_test_assignments
-                SET control_trials = control_trials + 1,
-                    control_successes = control_successes + ?
-                WHERE test_id = ?
-            """, (1 if success else 0, test_id))
-        else:
-            cursor.execute("""
-                UPDATE ab_test_assignments
-                SET treatment_trials = treatment_trials + 1,
-                    treatment_successes = treatment_successes + ?
-                WHERE test_id = ?
-            """, (1 if success else 0, test_id))
-        self.conn.commit()
-
-    def check_ab_promotion(self, test_id: str, min_margin: float = 0.10) -> Optional[str]:
-        """
-        Check if treatment should be promoted.
-
-        Args:
-            test_id: A/B test identifier
-            min_margin: Minimum win margin (default 10%)
-
-        Returns:
-            'treatment' if should promote, 'control' if treatment lost, None if inconclusive
-        """
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM ab_test_assignments WHERE test_id = ?", (test_id,))
-        row = cursor.fetchone()
-        if not row:
-            return None
-
-        test = dict(row)
-        total_trials = test['control_trials'] + test['treatment_trials']
-
-        if total_trials < test['sample_size_target']:
-            return None
-
-        control_rate = test['control_successes'] / max(test['control_trials'], 1)
-        treatment_rate = test['treatment_successes'] / max(test['treatment_trials'], 1)
-
-        margin = treatment_rate - control_rate
-
-        if margin >= min_margin:
-            return 'treatment'
-        elif margin <= -min_margin:
-            return 'control'
-        return None
-
-    def promote_variation(self, variation_id: str) -> None:
-        """Promote variation to production."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            UPDATE skill_variations
-            SET promoted = 1, test_status = 'promoted'
-            WHERE variation_id = ?
-        """, (variation_id,))
-        self.conn.commit()
-        logger.info(f"[PATTERN-MEMORY] Promoted variation {variation_id}")
-
-    def archive_variation(self, variation_id: str) -> None:
-        """Archive losing variation."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            UPDATE skill_variations
-            SET test_status = 'archived'
-            WHERE variation_id = ?
-        """, (variation_id,))
-        self.conn.commit()
-        logger.info(f"[PATTERN-MEMORY] Archived variation {variation_id}")
-
-    def close_ab_test(self, test_id: str, winner: str) -> None:
-        """Close A/B test with winner."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            UPDATE ab_test_assignments
-            SET status = 'completed', end_time = ?
-            WHERE test_id = ?
-        """, (datetime.now().isoformat(), test_id))
-        self.conn.commit()
-        logger.info(f"[PATTERN-MEMORY] Closed A/B test {test_id}, winner={winner}")
-
-    # ------------------------------------------------------------------ #
     #  Telemetry Counters (Sprint 1 - Observability)                     #
     # ------------------------------------------------------------------ #
 
@@ -1392,8 +1231,8 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
 
-    # Initialize pattern memory
-    memory = PatternMemory()
+    # Demonstration is always in-memory; never touch the production database.
+    memory = PatternMemory(db_path=Path(":memory:"))
 
     print("[EXAMPLE 1] Store skill execution outcome:")
     outcome = SkillOutcome(
@@ -1402,13 +1241,16 @@ if __name__ == "__main__":
         agent="qwen",
         timestamp=datetime.now().isoformat(),
         input_context=json.dumps({"files_changed": 14, "lines_added": 250}),
-        output_result=json.dumps({"action": "push_now", "mps_score": 14}),
+        output_result=json.dumps({
+            "success": True,
+            "effect_receipts": [{"receipt_id": "demo-1", "effect_type": "demo"}],
+        }),
         success=True,
         pattern_fidelity=0.92,
-        outcome_quality=0.95,
+        outcome_quality=0.0,
         execution_time_ms=1200,
         step_count=4,
-        notes="Successful git push with P1 priority"
+        notes="Demonstration effect record; independent quality unavailable"
     )
     memory.store_outcome(outcome)
     print(f"  Stored: exec_id={outcome.execution_id[:8]}...")
@@ -1439,8 +1281,8 @@ if __name__ == "__main__":
     memory.record_learning_event(
         event_id=str(uuid.uuid4()),
         skill_name="qwen_gitpush",
-        event_type="variation_promoted",
-        description="Promoted v1.1 after 65% → 78% fidelity improvement",
+        event_type="variation_candidate_ready",
+        description="Nominated v1.1 for independent verification",
         before_fidelity=0.65,
         after_fidelity=0.78,
         variation_id="qwen_gitpush_v1.1_improved"

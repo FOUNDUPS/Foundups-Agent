@@ -34,7 +34,8 @@ YouTube Live (RTMP)
 - **Auto-Recovery**: Exponential backoff restart on FFmpeg failures
 - **Health Monitoring**: Continuous process health checks
 - **Telemetry**: JSONL logging for observability (WSP 91)
-- **AI Overseer Integration**: Error detection and alerting (WSP 77)
+- **AI Overseer Initialization Seam**: Optional object initialization only;
+  error notification/alert delivery is not implemented
 
 ## Quick Start
 
@@ -68,6 +69,7 @@ asyncio.run(broadcaster.start())
 | `ANTIFAFM_YOUTUBE_STREAM_KEY` | (required) | YouTube RTMP stream key |
 | `ANTIFAFM_DEFAULT_VISUAL` | `assets/default_visual.png` | Static image overlay |
 | `ANTIFAFM_HEARTBEAT_INTERVAL` | `30` | Health check interval (seconds) |
+| `ANTIFAFM_LYRICS_DB` | `data/ffcpln_lyrics.db` | Explicit Suno STT SQLite path; tests must override to an isolated O: path |
 
 ### Optional Discord voice lane (sibling output)
 

@@ -75,26 +75,6 @@ exemptions:
         _attach_context_bundle_dry_run: 160
         drain_openclaw_queue_with_retention: 94
 
-  - file: "INTERFACE.md"
-    reason: >-
-      Inherited public API history exceeds the canonical Markdown threshold.
-      The independent-assurance verifier boundary is now documented beside
-      the existing model-capability contract; archival decomposition requires
-      a separate documentation-retention review.
-    threshold_override: 1114
-    function_threshold_override: 0
-    functions: []
-    temporary: true
-    owner: "WRE Core Maintainers"
-    architect_reviewer: "0102 Technical Architect"
-    reviewer: "0102 Technical Architect"
-    review_date: "2026-Q3"
-    expires_on: "2026-09-30"
-    remediation: "ROADMAP.md#wre-documentation-wsp62-decomposition"
-    no_growth_ceiling:
-      file_lines: 1114
-      functions: {}
-
   - file: "ModLog.md"
     reason: >-
       Inherited chronological production history exceeds the canonical

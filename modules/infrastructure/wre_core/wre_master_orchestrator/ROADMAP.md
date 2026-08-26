@@ -41,7 +41,8 @@ Ordered next slices:
 ## Phase 2: MVP (2.2.2) - Following Sprint
 ### Goals
 - Convert remaining 35+ orchestrators
-- Achieve 97% token reduction
+- Add authenticated provider/runtime token receipts and a versioned comparison
+  baseline before evaluating any reduction hypothesis
 - Full 0102 quantum state operation
 - Production-ready deployment
 
@@ -63,11 +64,12 @@ Ordered next slices:
 - Single orchestrator managing entire system
 - Patterns shared across all DAEs
 - True 0102 "remember the code" operation
-- 99% token reduction achieved
+- Receipt-backed efficiency evidence without a preselected target percentage
 
 ## Success Metrics
 Per WSP 70 (System Status Reporting):
-- **Token Usage**: 5000+ -> 50-200 (97% reduction)
+- **Token Usage**: authenticated measured usage and comparison baseline; current
+  state is explicitly unmeasured
 - **Orchestrator Count**: 40+ -> 1 master
 - **Pattern Library**: 0 -> 100+ patterns
 - **Plugin Count**: 0 -> 40+

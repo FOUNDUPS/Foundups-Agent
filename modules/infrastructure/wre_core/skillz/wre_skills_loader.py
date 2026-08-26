@@ -6,12 +6,17 @@ WSP Compliance: WSP 77 (Agent Coordination), WSP 50 (Pre-Action Verification)
 """
 
 import json
+import hashlib
 import yaml
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Dict, List, Any, Mapping, Optional, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import logging
+
+from modules.infrastructure.wre_core.src.skill_path_security import (
+    has_link_or_reparse_component,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +105,7 @@ class WRESkillsLoader:
             ).resolve()
 
         self.registry = self._load_registry()
-        self.skill_cache: Dict[str, str] = {}  # skill_name -> full_content
+        self.skill_cache: Dict[str, str] = {}  # source-digest-bound filtered content
 
     def _load_registry(self) -> Dict[str, Any]:
         """Load skills registry JSON"""
@@ -305,12 +310,6 @@ class WRESkillsLoader:
         Raises:
             ValueError: If skill not found or fails hygiene check
         """
-        # Check cache first
-        cache_key = f"{skill_name}_{agent_type}"
-        if cache_key in self.skill_cache:
-            logger.debug(f"[WRE-LOADER] Cache hit: {cache_key}")
-            return self.skill_cache[cache_key]
-
         # Get skill info from registry
         skill_info = self.registry["skills"].get(skill_name)
         if not skill_info:
@@ -325,16 +324,22 @@ class WRESkillsLoader:
                     "Use enforce_hygiene=False to bypass."
                 )
             if not hygiene.is_healthy:
-                logger.warning(
-                    f"[WRE-LOADER] Skill '{skill_name}' has hygiene issues: {hygiene.issues}"
+                raise ValueError(
+                    f"Skill '{skill_name}' failed execution hygiene: "
+                    + "; ".join(hygiene.issues)
                 )
 
         skill_path = self.resolve_skill_file(skill_name)
         if not skill_path.exists():
             raise FileNotFoundError(f"Skill file not found: {skill_path}")
 
-        with open(skill_path, 'r', encoding='utf-8') as f:
-            skill_content = f.read()
+        skill_bytes = skill_path.read_bytes()
+        source_digest = hashlib.sha256(skill_bytes).hexdigest()
+        cache_key = f"{skill_name}_{agent_type}_{int(inject_context)}_{source_digest}"
+        if cache_key in self.skill_cache:
+            logger.debug(f"[WRE-LOADER] Digest-bound cache hit: {skill_name}_{agent_type}")
+            return self.skill_cache[cache_key]
+        skill_content = skill_bytes.decode("utf-8")
 
         # Filter for agent-specific sections
         filtered_content = self._filter_for_agent(skill_content, agent_type)
@@ -398,6 +403,8 @@ class WRESkillsLoader:
         seen: set[str] = set()
 
         def _append(path: Path) -> None:
+            if has_link_or_reparse_component(self.repo_root, path):
+                raise ValueError("Skill registry location escapes or crosses a link/reparse point")
             resolved = path.resolve()
             try:
                 resolved.relative_to(self.repo_root)
@@ -433,7 +440,10 @@ class WRESkillsLoader:
             or normalized in {".", ""}
         ):
             raise ValueError("Skill registry location must stay checkout-relative")
-        resolved = (self.repo_root / Path(*posix_path.parts)).resolve()
+        candidate = self.repo_root / Path(*posix_path.parts)
+        if has_link_or_reparse_component(self.repo_root, candidate):
+            raise ValueError("Skill registry location escapes or crosses a link/reparse point")
+        resolved = candidate.resolve()
         try:
             resolved.relative_to(self.repo_root)
         except ValueError as exc:
@@ -477,7 +487,8 @@ class WRESkillsLoader:
             end_idx = content.find('\n---\n', 4)
             if end_idx != -1:
                 frontmatter = content[4:end_idx]
-                return yaml.safe_load(frontmatter)
+                metadata = yaml.safe_load(frontmatter)
+                return metadata if isinstance(metadata, dict) else {}
 
         return {}
 

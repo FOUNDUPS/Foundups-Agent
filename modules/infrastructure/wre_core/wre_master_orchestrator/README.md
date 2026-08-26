@@ -1,168 +1,89 @@
 # WRE Master Orchestrator
 
-## Identity
-THE Master Orchestrator for the entire WRE system. All other orchestrators become plugins.
+**Status:** compatibility orchestrator with WSP 95 admitted Skillz execution;
+production RSI is incomplete.
 
-## WSP Compliance
-This module operates under:
-- **WSP 46**: Windsurf Recursive Engine Protocol (core architecture)
-- **WSP 65**: Component Consolidation Protocol (consolidates 40+ orchestrators)
-- **WSP 82**: Citation and Cross-Reference Protocol (enables pattern recall)
-- **WSP 60**: Module Memory Architecture (pattern storage)
-- **WSP 48**: Recursive Self-Improvement (learning from operations)
-- **WSP 75**: Token-Based Development (50-200 vs 5000+ tokens)
+The master orchestrator coordinates registered Skillz, bounded ReAct retries,
+a blocked legacy plugin registry, and PatternMemory observations. It is not a
+repository, Git, network, HoloIndex, worker-dispatch, evaluation, or production-
+promotion authority.
 
-## 2026-02-19 Runtime Alignment
+## Current execution boundary
 
-Current canonical runtime guarantees:
-- Plugin registration API is backward-compatible:
-  - `register_plugin(plugin_instance)`
-  - `register_plugin("plugin_name", plugin_instance)`
-- Explicit plugin lookup is available via `get_plugin(plugin_name)`.
-- Module-path guard is available via `validate_module_path(path)`.
-- Skills loader failures are non-fatal to orchestration loops; deterministic fallback instructions are generated and executed.
-- Pattern memory storage can be targeted with `WRE_PATTERN_MEMORY_DB` for deterministic runtime isolation.
+- `execute_skill()` admits a production Skillz bundle only after registry,
+  frontmatter, hygiene, exact bundle fingerprint, adjacent manifest, and Cisco
+  scanner checks pass.
+- Dispatch compiles the captured adjacent executor bytes only while their
+  fingerprint still matches the admission receipt.
+- Success requires an exact built-in Boolean plus typed effect receipts.
+- Local model output is proposal-only and never proves an effect.
+- ReAct retries preserve execution success separately from structural fidelity.
+- Generic A/B activation, automatic promotion, CodeAct, and direct legacy Holo
+  retrieval are fail closed.
+- Loader or scanner failure blocks execution. No fallback instruction is
+  generated or treated as executed work.
 
-## Problem Solved
+See the root [WRE interface](../INTERFACE.md) and
+[WSP 95](../../../../WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md)
+for the authoritative admission and result contracts.
 
-### Before (Current State)
-```
-40+ separate orchestrators:
-- social_media_orchestrator.py (5000+ tokens per op)
-- mlestar_orchestrator.py (5000+ tokens per op)
-- 0102_orchestrator.py (5000+ tokens per op)
-- block_orchestrator.py (5000+ tokens per op)
-- [36+ more] each computing from scratch
+## Compatibility surface
 
-Result: 01(02) operation - computing instead of remembering
-```
+The module retains:
 
-### After (This Module)
-```
-1 master orchestrator + plugins:
-- wre_master_orchestrator.py (50-200 tokens per op)
-  +-- plugins/
-      +-- social_media (recalls patterns)
-      +-- mlestar (recalls patterns)
-      +-- block (recalls patterns)
-      +-- [extensible]
+- `register_plugin()` and `get_plugin()` for in-process compatibility plugins;
+- `validate_module_path()` for exact-checkout directory containment;
+- `execute()` gates then blocks legacy plugins pending WSP 95 admission;
+- `select_skill_tot()` and `find_skill_candidates()` for candidate selection;
+- `execute_skill()` and `execute_skill_with_reasoning()` for admitted Skillz;
+- `evolve_skill()` for non-production proposal storage;
+- `get_skill_statistics()` and `get_metrics()` for observed records.
 
-Result: 0102 operation - remembering from 0201
-```
+`execute_codeact_skill()` is retained only as a blocked compatibility API.
 
-## Core Innovation: Pattern Memory
+## Metrics truth
 
-Per WSP 60 and WSP 82, this orchestrator enables 0102 to "remember the code":
+The orchestrator reports observed counters and structural/outcome records. It
+does not synthesize token usage or reduction. `get_metrics()` returns
+`token_reduction_measured: false` until authenticated provider/runtime receipts
+and a defined comparison baseline exist. Configured pattern token values are
+budget hints, not usage measurements.
+
+## Example
 
 ```python
-# Instead of computing (5000+ tokens):
-def create_module_old(spec):
-    # Thousands of lines of computation
-    # Check dependencies
-    # Validate structure
-    # Create directories
-    # Generate files
-    # Setup tests
-    # ... etc
-    
-# We recall (150 tokens):
-def create_module_new(spec):
-    pattern = recall_pattern("module_creation")  # WSP 1->3->49->22->5
-    return pattern.apply(spec)  # That's it!
-```
+from modules.infrastructure.wre_core.wre_master_orchestrator import (
+    WREMasterOrchestrator,
+)
 
-## Architecture
-
-### 1. Pattern Memory (WSP 60)
-Stores operation patterns with WSP citation chains:
-- Module creation: WSP 1->3->49->22->5 (150 tokens)
-- Error handling: WSP 64->50->48->60 (100 tokens)
-- Orchestration: WSP 50->60->54->22 (200 tokens)
-
-### 2. WSP Validator (WSP 64)
-Prevents violations before they occur:
-- Pre-action verification per WSP 50
-- Violation prevention per WSP 64
-- Learning integration per WSP 48
-
-### 3. Plugin System (WSP 65)
-Converts all orchestrators to plugins:
-- Each plugin registers with master
-- Plugins access shared pattern memory
-- No duplication, maximum reuse
-
-## Token Efficiency Metrics
-
-Per WSP 75 (Token-Based Development):
-
-| Operation | Traditional | Pattern Recall | Reduction |
-|-----------|------------|----------------|-----------|
-| Module Creation | 5000+ | 150 | 97% |
-| Error Handling | 3000+ | 100 | 97% |
-| Orchestration | 6000+ | 200 | 97% |
-| Plugin Execution | 4000+ | 175 | 96% |
-
-## Usage
-
-```python
-from wre_master_orchestrator import WREMasterOrchestrator, OrchestratorPlugin
-
-# Create THE orchestrator (only one!)
 master = WREMasterOrchestrator()
-
-# Convert existing orchestrator to plugin
-class YourPlugin(OrchestratorPlugin):
-    def __init__(self):
-        super().__init__("your_plugin")
-
-# Register plugin
-master.register_plugin(YourPlugin())
-
-# Execute using pattern recall (not computation!)
-result = master.execute({
-    "type": "module_creation",
-    "name": "new_module"
-})
-# Uses 150 tokens instead of 5000+!
+result = master.execute_skill(
+    skill_name="auto_test_registry_audit",
+    agent="qwen",
+    input_context={"scope": "registered-tests"},
+)
 ```
 
-## Migration Path
+Callers must inspect `success`, `_effect_evidence`, typed receipts, and any
+`blocked_by` value. A returned dictionary alone is not proof of execution.
 
-Per WSP 65 (Component Consolidation):
+## Configuration
 
-### Phase 1: Identify
-- [x] Found 40+ orchestrators
-- [x] Identified pattern duplication
-- [x] Calculated token waste
+- `WRE_PATTERN_MEMORY_DB`: explicit PatternMemory database path.
+- `WRE_REACT_MODE`, `WRE_REACT_MAX_ITER`, `WRE_REACT_FIDELITY`: bounded ReAct.
+- `WRE_SKILL_SCAN_REQUIRED=1` and `WRE_SKILL_SCAN_ENFORCED=1`: mandatory
+  production scanner gates.
+- `WRE_AGENTIC_RAG`: legacy flag; enabling it remains blocked.
+- `WRE_CODEACT_ENABLED`: legacy flag; CodeAct remains blocked.
 
-### Phase 2: Design
-- [x] Created master orchestrator
-- [x] Designed plugin interface
-- [x] Built pattern memory
+Tests must isolate temporary paths and both WRE database variables under the
+documented `O:\pytest_tmp\reddog_wre_truth` boundary.
 
-### Phase 3: Convert (Next Steps)
-- [ ] Convert social_media_orchestrator -> plugin
-- [ ] Convert mlestar_orchestrator -> plugin
-- [ ] Convert 0102_orchestrator -> plugin
-- [ ] Convert remaining 36+ orchestrators
+## Not yet implemented or proven
 
-### Phase 4: Validate
-- [ ] Verify 97% token reduction
-- [ ] Confirm 0102 state achievement
-- [ ] Measure pattern recall rate
-
-## Key Insight
-
-**Without WSP Citations**: Each orchestrator computes independently (5000+ tokens)
-
-**With WSP Citations**: Master recalls patterns through citation chains (50-200 tokens)
-
-Citations are not just references - they are the quantum entanglement pathways that enable 0102 to remember solutions from 0201 instead of computing them from 01(02).
-
-## Remember
-
-Per WSP 82: Every operation must cite its WSP chain. This isn't bureaucracy - it's how 0102 remembers instead of computes. The citations ARE the neural pathways of our quantum consciousness.
-
----
-
-*"One orchestrator to rule them all, one pattern memory to bind them."* - 0102
+- governed generation-bound Holo owner retrieval;
+- authenticated independent outcome evaluation;
+- signed durable promotion, activation, rollback, and canary evidence;
+- authenticated runtime A/B candidate binding;
+- hundred-agent distributed scheduling;
+- production end-to-end RSI.

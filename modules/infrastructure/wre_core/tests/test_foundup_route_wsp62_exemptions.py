@@ -39,7 +39,6 @@ EXPECTED = {
             "drain_openclaw_queue_with_retention": 94,
         },
     ),
-    WRE_ROOT / "INTERFACE.md": (1114, {}),
     MOLTBOT_ROOT / "src/foundup_job_contract.py": (796, {}),
 }
 

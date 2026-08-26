@@ -1,9 +1,14 @@
-# WRE Chain-of-Thought System - Production Complete
+# Historical WRE Chain-of-Thought Evaluation Record
 
-**Status**: PRODUCTION READY
+**Status**: SUPERSEDED - NOT CURRENT PRODUCTION AUTHORITY
 **Date**: 2026-02-24
 **Tag**: `wre-cot-v1.0.0`
 **Branch**: `fix/litepaper-encoding-cleanup-20260223`
+
+This file preserves a 2026-02 evaluation record. Its production, automatic
+promotion, direct RAG, and CodeAct claims were not sustained by the current
+execution-truth audit. Current authority is WSP 95 plus this module's README,
+INTERFACE, and ROADMAP.
 
 ---
 
@@ -24,13 +29,13 @@
 | Gap | Priority | Status | Implementation | Sprint |
 |-----|----------|--------|----------------|--------|
 | A (ReAct) | P0 | CLOSED | `execute_skill_with_reasoning()` max 3 retries | 1 |
-| D (TT-SI) | P0 | CLOSED | A/B routing + auto-promotion at 10% margin | 1 |
-| F (Agentic RAG) | P1 | CLOSED | HoloIndex preflight in Step 2.6 | 2 |
+| D (TT-SI) | P0 | SUPERSEDED | Candidate evidence only; runtime/promotion blocked | 1 |
+| F (Agentic RAG) | P1 | SUPERSEDED | Direct route removed; owner adapter missing | 2 |
 | C (Graph Edges) | P1 | CLOSED | `skill_edges` table + `transfer_learning()` | 2 |
 | B (ToT) | P2 | CLOSED | `SkillSelector` with N-candidate scoring | 3 |
-| E (CodeAct) | P2 | CLOSED | `CodeActExecutor` with strict SafetyGates | 3 |
+| E (CodeAct) | P2 | SUPERSEDED | Prototype exists; generic runtime blocked | 3 |
 
-**All 6 reasoning gaps closed.**
+This historical matrix is not proof that all production gaps are closed.
 
 ---
 
@@ -74,7 +79,7 @@
 
 ## Canonical Configuration
 
-**Source of Truth**: `modules/infrastructure/wre_core/config/wre_defaults.env`
+**Historical configuration snapshot (not current authority):**
 
 ```bash
 # Sprint 1: ReAct Loop (Gap A)
@@ -83,17 +88,17 @@ WRE_REACT_MAX_ITER=3
 WRE_REACT_FIDELITY=0.90
 
 # Sprint 2: Agentic RAG (Gap F)
-WRE_AGENTIC_RAG=1
+WRE_AGENTIC_RAG=0
 
 # Sprint 3: ToT Selection (Gap B)
 WRE_TOT_SELECTION=1
 WRE_TOT_MAX_BRANCHES=5
 
 # Sprint 3: CodeAct Execution (Gap E)
-WRE_CODEACT_ENABLED=1
+WRE_CODEACT_ENABLED=0
 ```
 
-**DO NOT MODIFY** without CTO gate review.
+See WSP 95 and the current module interface before changing these boundaries.
 
 ---
 

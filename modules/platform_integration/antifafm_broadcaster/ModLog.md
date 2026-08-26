@@ -1798,4 +1798,27 @@ the configured password in plaintext through third-party `obsws_python` logging.
 
 ---
 
+## Unversioned Audit Correction - WRE Skillz Truth Reclassification (2026-08-26)
+
+- Reclassified `suno_stt_extract.json` and the AntifaFM video action JSON as
+  direct launch-handler configurations, not executable WRE Skillz.
+- Removed their obsolete production-registry claims without deleting the
+  owning handler configurations or direct launch paths.
+- Domain cadence now selects only exact registered production Skillz; the
+  current `streaming` domain safely returns no WRE work unless an independently
+  admitted production Skillz is added.
+- Redacted caught exception text from the cadence boundary. Corrected the
+  unimplemented AI Overseer notification seam so it reports a skipped,
+  unbound adapter instead of claiming a notification occurred.
+- Reconciled README/INTERFACE/ROADMAP with that missing adapter and limited the
+  Suno CLI's Windows stream wrapping to direct CLI execution so importers retain
+  ownership of capture streams.
+- Independent exact-tree audit found three Windows SQLite cleanup failures and
+  two CLI tests resolving cwd to `O:\` instead of the repository. The extractor
+  now explicitly closes every connection, accepts `ANTIFAFM_LYRICS_DB`/an
+  explicit constructor path for isolation, and the tests derive the exact repo
+  root. Full Suno contract: 14 passed with no production database effect.
+
+---
+
 *ModLog format per WSP 22*
