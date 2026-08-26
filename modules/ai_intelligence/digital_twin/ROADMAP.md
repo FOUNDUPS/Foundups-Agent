@@ -35,8 +35,12 @@ conversation state, AgentDB, or any FoundUp Memex.
 - Complete: admission-only binding for existing conversations consumes one
   verified session capability and binds the envelope to the exact authenticated
   AgentDB record/revision without mutation or authority transfer.
-- Next: trusted new-scope resolution, durable request idempotency, and
-  operation-specific TURN/STATUS/CANCEL handlers with immediate CAS recheck.
+- Complete: durable content-free AgentDB request reservation consumes one
+  secret-backed-authority-derived opaque proof at the store boundary and uses
+  exact replay, an owned expiry clock, global conflict/capacity controls, and
+  SQLite/PostgreSQL current-scope fencing before insert.
+- Next: trusted new-scope resolution, admission aggregation, and operation-
+  specific TURN/STATUS/CANCEL handlers with immediate authenticated CAS.
 - Next: thin PFMall/phone transport adapter; the browser remains a client, not
   the model/OpenClaw host.
 - Deferred: asynchronous critics, durable cross-device history, bounded Memex/

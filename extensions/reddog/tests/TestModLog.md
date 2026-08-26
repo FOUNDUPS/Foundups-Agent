@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-26 - Resident replay manifest parity regression (0.4.108)
+
+- Linux fast-tier CI exposed two stale authenticated-scope runtime hashes that
+  Windows release validation did not exercise through the fast preflight.
+  Regenerated the existing 1,383-file closure, updated its canonical pin, and
+  retained the staged-index parity test; no assertion or threshold was
+  weakened. (WSP 00/15/22/50/62/84/97)
+
 ## 2026-08-26 - Canonical identity grounding repair (0.4.108)
 
 - Updated the exhaustive contract to assert the post-PR-1553 canonical RedDog

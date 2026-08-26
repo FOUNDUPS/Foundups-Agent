@@ -1,5 +1,52 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-26: Resident conversation request idempotency Phase 1
+
+- Added a bounded AgentDB request journal after the existing authenticated
+  request-to-scope binding. The binder now derives a non-constructible one-use
+  child only from the live registered secret-backed scope authority, binds it
+  to the canonical reservation identity, and excludes it from serialization.
+  The store consumes that proof before database access and uses its owned clock
+  to recheck request/scope expiry plus the exact current scope revision, record
+  digest, and latest revision receipt under backend-specific locks. Exact
+  retries with a fresh proof replay the original record; altered key/request/
+  nonce reuse, stale state, capacity, corruption, expiry, and database failure
+  reject closed.
+- Independent WSP 97 review returned NO-GO on positional unified-cursor access,
+  SQLite-only SQL, scope-expiry drift, constructible binding evidence, index-
+  column tampering, malformed injected store output, and missing capacity/race
+  tests. Storage was split into contract/service/backend LEGO modules, SQLite
+  and PostgreSQL locking were made explicit, all indexed columns bind to the
+  stored record, and a serialized global counter closes horizontal cap races.
+- A second independent NO-GO proved that an underscore-only digest registrar
+  was forgeable inside Python. That registrar/module was removed. Journal
+  authority now derives from the pre-existing live verified authority registry;
+  unregistered-parent minting, direct-store bypass, one-use behavior, and
+  backdated expiry are falsified explicitly.
+- Production-shaped mapping rows exposed the same older positional-access drift
+  in signed pending scope staging/finalization; that adjacent authenticated path
+  now uses named rows and its oversized stage function was extracted below the
+  WSP 62 function limit without changing signing authority.
+- Reservation records exclude operator text, principal, and FoundUp IDs and
+  grant no conversation CAS, identity, effect, model, dispatch, or HoloIndex
+  authority. This is not a live TURN/STATUS/CANCEL handler or transport adapter.
+- WSP 15 rescore: complexity 5, importance 5, deferability 5, impact 5 =
+  **20/P0**. The governed Holo query failed closed on an authority-HEAD mismatch;
+  no retry, reindex, route change, or Holo maintenance was performed.
+- The authenticated conversation/journal/signing matrix is **94 passed**; the
+  extended RedDog/WSP-62 matrix is **110 passed**, Digital Twin transport is
+  **36 passed**, and registry governance is **45 passed** in isolated package
+  processes. Six touched/new sources are at most **394 lines** with functions
+  at most **41 lines**; Ruff and compile checks are clean.
+  The release gate is **4/4 PASS**; package closure is **67 files / 965,192
+  bytes** under the 1 MiB cap. Exact-final timing belongs in the external
+  WSP-97 receipt so documentation does not create a self-referential rerun.
+- Linux fast-tier CI then correctly rejected stale backend-manifest hashes for
+  the two modified files already inside its authenticated runtime closure. The
+  governed generator rebound only those hashes; the closure remains 1,383
+  files with no widened dependency or authority surface.
+  WSP 00/15/22/50/62/84/97.
+
 ## 2026-08-23: Cross-platform OpenClaw dry-run worktree binding repair
 
 - A RedDog routing matrix proved the dry-run adapter rejected the executor's

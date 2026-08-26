@@ -20,7 +20,7 @@ import prohibitions.
 python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_memex_learning_candidate.py -q
 ```
 
-## Resident conversation request-to-scope binding
+## Resident conversation admission and request idempotency
 
 `test_reddog_resident_conversation_scope_binding.py` uses the existing
 temporary SQLite AgentDB fixture and opaque conversation capabilities. It
@@ -30,9 +30,23 @@ state, current principal-signed E0 scope, forged/cross-session/cross-principal
 authority, attacker-rehashed record tampering, dependency failure, and WSP 62
 file/function limits.
 
+`test_reddog_resident_conversation_request_journal.py` proves the admission
+service: live-authority-derived opaque proof consumption, constructed-binding
+and unregistered-parent forgery rejection,
+content-free reservation, restart-safe exact replay, divergent/concurrent
+collision rejection, scope-expiry/change fencing, TURN/STATUS/CANCEL behavior,
+malformed store closure, and WSP 62 limits. The companion
+`test_reddog_resident_conversation_request_journal_store.py` proves unified
+mapping rows, portable PostgreSQL row locks/UPSERT SQL, SQLite serialization,
+global/per-conversation capacity, store-owned-clock expiry/backdating, direct
+store admission rejection, and JSON/digest/all-index-column corruption.
+The production-shaped fixture also exposed and now guards prior positional-row
+drift in signed pending conversation scope. No test executes a handler or
+reserves conversation CAS.
+
 ```powershell
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
-python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_scope_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal.py modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal_store.py -q
 ```
 
 ## HoloIndex owner replica response contracts

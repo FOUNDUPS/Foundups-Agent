@@ -1,3 +1,32 @@
+## 2026-08-26: Resident conversation request idempotency regressions
+
+- Added adversarial proof for content-free durable reservation, restart-safe
+  exact replay, divergent key/request/nonce conflicts, atomic stale-scope
+  fencing, STATUS/CANCEL current-turn binding, rejected/tampered admissions,
+  expiry/store failure closure, bounded capacity, eight-way single-writer
+  concurrency, stored-record/digest tampering, and WSP 62 limits.
+- Independent falsification added constructed-binding, scope-expiry-between-
+  phases, divergent concurrent collision, malformed store, global-capacity,
+  unified mapping-row, PostgreSQL lock/UPSERT, and all-index-column regressions.
+  The mapping fixture exposed two positional assumptions in existing signed
+  pending-scope tests and four in the store; both production and tests now use
+  named fields.
+- A second falsification rejected the digest-only private issuer as forgeable.
+  Coverage now proves derivation requires a registered verified parent, the
+  store consumes the child before access, and its own clock rejects backdated
+  scope expiry.
+- Authenticated conversation/journal/signing matrix: **94 passed**. Extended
+  RedDog/WSP-62: **110 passed**. Transport-neutral Digital Twin: **36 passed**.
+  Registry governance: **45 passed**. Package roots ran in isolated processes
+  because the repository's multiple top-level `tests` packages collide when
+  collected together.
+- Linux fast-tier CI additionally proved the backend manifest was stale for
+  the two changed files already in its 1,383-file runtime closure. The existing
+  generator and staged-index parity test now pin the regenerated hashes; no
+  dependency or test threshold was added.
+  This layer invokes no handler, model, worker, network, Holo maintenance, or
+  conversation-state mutation.
+
 ## 2026-08-23: OpenClaw dry-run external worktree regression
 
 - Restored the three positive dry-run adapter paths against the executor's real

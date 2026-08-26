@@ -1,5 +1,17 @@
 # RedDog ModLog
 
+## 2026-08-26 - Resident replay dependency closure rebind (0.4.108)
+
+- Linux fast-tier CI correctly rejected the backend runtime preflight after the
+  resident request replay transaction changed two already-bound authenticated
+  scope dependencies without regenerating their manifest hashes. The governed
+  generator rebound only `reddog_conversation_scope_capability.py` and
+  `reddog_conversation_scope_pending_store.py`; the dependency set remains
+  **1,383 files** and the canonical manifest is now
+  `101a690fc967995aa802154e562fc0920d9c36acdf6276c653499601a1cd2e06`.
+  No dependency, threshold, fallback, live route, model, worker, or authority
+  surface was added. (WSP 00/15/22/50/62/84/97)
+
 ## 2026-08-26 - Canonical identity contract reconciliation (0.4.108)
 
 - Rebound the executable README/ROADMAP identity assertions to the canonical
