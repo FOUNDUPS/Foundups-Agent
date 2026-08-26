@@ -2,7 +2,7 @@
 
 ## [2026-08-27] RedDog Governed Holo Usability Repair
 
-**WSP Protocols:** WSP 00, 15, 22, 50, 62, 84, 87, 97
+**WSP Protocols:** WSP 00, 15, 22, 29, 50, 62, 84, 87, 97
 
 - Repaired the resident generation-bound Holo adapter's committed-authority,
   sealed-runtime/site-packages, scrubbed child environment, and cold-query
@@ -21,6 +21,11 @@
   1,585, classified the Cisco skill-safety scanner-guard suite's real process
   capability, and registered three already-tracked WRE truth suites. The
   byte-identity check and 45 registry/differential tests pass.
+- The next CI stage exposed a separate inherited CABR terminology drift in the
+  WRE README. Restored the canonical **Consensus-Driven Autonomous Benefit
+  Rate** definition while explicitly retaining `cabr_ready=false` and no
+  consensus, payout, or production authority. The exact four-test guard and
+  full 302-test simulator suite pass.
 
 ## [2026-08-26] RedDog Bootstrap WSP 62 Extraction
 

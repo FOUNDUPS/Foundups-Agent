@@ -8,6 +8,11 @@
   `test_wre_test_registry.py` and
   `test_wre_test_registry_differential_plan_runtime.py` in an isolated O:
   temporary root. No test was executed through the registry projection itself.
+- The next CI stage reproduced one CABR terminology-guard failure against the
+  WRE README. After restoring the canonical expansion with its fail-closed
+  runtime boundary, the exact guard passed **4/4** and the CI-equivalent
+  simulator command passed **302/302** with two non-blocking local pytest
+  configuration warnings.
 
 ## 2026-08-26: Final external-audit blocker replay
 

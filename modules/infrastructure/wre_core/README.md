@@ -52,6 +52,9 @@ Fail-closed rules:
 - Synthetic fallback instructions cannot create success.
 - Loader caches are source-digest-bound and never bypass hygiene.
 - Local model text is a proposal, not effect evidence.
+- CABR means **Consensus-Driven Autonomous Benefit Rate**. Generic WRE job,
+  admission, and worker paths keep `cabr_ready=false`; legacy calculation
+  helpers do not prove CABR consensus, payout, or production authority.
 - A single registered Skillz bundle uses Cisco `scan --skill-file SKILLz.md`;
   wardrobe roots use `scan-all --recursive`.
 - Production admission rejects disabled scanner-required or enforcement policy.

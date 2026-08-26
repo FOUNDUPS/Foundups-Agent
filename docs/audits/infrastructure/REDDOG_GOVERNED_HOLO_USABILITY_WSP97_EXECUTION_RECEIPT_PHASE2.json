@@ -11,6 +11,7 @@
       "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
       "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
       "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_29_CABR_Engine.md",
       "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
       "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
       "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
@@ -31,19 +32,22 @@
     "research": [
       "Governed Holo receipt sha256:70bb452efaa2f4f2ecbb0251c18d7f0ea858c800d80fba656f7ad5360dd4a902 returned CURRENT committed-head evidence with no gap or reindex.",
       "A real resident-adapter candidate-overlay canary returned CURRENT with three scoped hits, no gap/reindex, one owner attempt, and committed_head_only authority in 31.6 seconds.",
-      "The long-lived host carried a retired legacy replica variable while the activated stable route existed at user scope; dual configuration remained fail-closed and no query-time repair or reindex ran."
+      "The long-lived host carried a retired legacy replica variable while the activated stable route existed at user scope; dual configuration remained fail-closed and no query-time repair or reindex ran.",
+      "A CURRENT/no-gap/no-reindex governed Holo query retrieved the WRE README, the exact CABR terminology guard, and canonical WSP 29 before the CI terminology repair."
     ],
     "micro_pass": [
       "25 focused generation-bound adapter tests passed, including trusted site-packages propagation and ambient provider/Git/principal secret rejection.",
       "8 backend-manifest generator tests passed against the staged index.",
       "The WSP 62 candidate gate and 18-shard/6,929-line/490-assertion reconstruction passed.",
-      "The canonical registry is byte-current at 1,585 tests / 268 quarantined; 45 focused registry and differential-plan tests passed."
+      "The canonical registry is byte-current at 1,585 tests / 268 quarantined; 45 focused registry and differential-plan tests passed.",
+      "The CABR terminology guard reproduced RED at 1 failed / 3 passed, then passed 4/4 after the WRE README repair."
     ],
     "macro_pass": [
       "The expanded adapter/worker/one-shot/supervisor matrix passed 428 tests with one platform-limited skip.",
       "RedDog fast, contract, and deterministic 67-file package tiers passed; package content digest sha256:94fcb00b46f8adad598d59e26525c43d797530f68c6078484afc260d439f35c3 remained below the 1 MiB cap.",
       "The final four-group RedDog release supervisor passed in 164936 ms without timeout.",
-      "CI correctly rejected stale canonical registry bytes; deterministic regeneration and focused registry verification repaired the projection without changing quarantine policy."
+      "CI correctly rejected stale canonical registry bytes; deterministic regeneration and focused registry verification repaired the projection without changing quarantine policy.",
+      "The CI-equivalent simulator suite passed 302/302 after restoring canonical CABR terminology without enabling CABR authority."
     ],
     "hard_think": [
       "Separated semantic authority from caller overlay state: only clean_workspace_head requires a clean caller, while committed_head_only remains bound to a separate exact same-HEAD authority.",
@@ -61,6 +65,7 @@
     "execute": [
       "modules/communication/moltbot_bridge/src/reddog_generation_bound_holoindex_query_adapter.py",
       "modules/communication/moltbot_bridge/tests/test_reddog_generation_bound_holoindex_query_adapter.py",
+      "modules/infrastructure/wre_core/README.md",
       "WSP_knowledge/WSP_Test_Registry.json",
       "scripts/reddog_backend_manifest.json",
       "extensions/reddog/backend_compatibility_constants.js",
@@ -71,6 +76,7 @@
     "WSP_00",
     "WSP_15",
     "WSP_22",
+    "WSP_29",
     "WSP_34",
     "WSP_50",
     "WSP_62",

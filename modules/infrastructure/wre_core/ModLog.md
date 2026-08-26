@@ -10,7 +10,12 @@
   registered.
 - `generate_test_registry.py --check` and the 45 focused registry/differential
   tests pass. No quarantine, collection, shard, timeout, or authority policy
-  was relaxed. (WSP 5/6/15/22/50/97)
+  was relaxed.
+- CI then exposed that this README, already included in the simulator's core
+  CABR terminology guard, lacked either canonical expansion. Restored
+  **Consensus-Driven Autonomous Benefit Rate** and preserved the explicit
+  fail-closed `cabr_ready=false` boundary. The four-test terminology guard and
+  full 302-test simulator suite pass. (WSP 5/6/15/22/29/50/97)
 
 ### [2026-08-26] - EXECUTION-TRUTH AND PRODUCTION SKILLZ ADMISSION
 
