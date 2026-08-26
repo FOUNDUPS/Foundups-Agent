@@ -140,14 +140,14 @@ These aggregates expose no traffic, handler, CAS, model/worker, or work authorit
 ## Public API
 ### Architect proposal validity and execution readiness
 
-`evaluate_architect_proposal_executability()` requires audit-supported reuse,
-exact scope/tests/gates/evidence, and emits admission v2. Validity remains
-separate from readiness; model claims and future capabilities are not current
-authority. `promote_reddog_architect_fix_to_signed_wsp15_work_order()` rehydrates
-the receipt and rechecks platform, HEAD, HoloIndex, work state, snapshot,
-candidate, WSP 15, and conversation authority before queue mutation. Missing
-capabilities remain blocked at use time. The immutable admission SHA is the
-authorized base; INDEX_GAP requires the existing maintenance exception.
+`evaluate_architect_proposal_executability()` requires audit-supported reuse, exact
+scope/tests/gates/evidence, and emits admission v2. Validity remains separate from readiness;
+model claims and future capabilities are not current authority. Promotion rechecks platform,
+HEAD, HoloIndex, work state, snapshot, candidate, WSP 15, and conversation authority before
+queue mutation. The immutable admission SHA is the authorized base; INDEX_GAP requires the
+existing maintenance exception. The main bootstrap re-exports its stable result class and
+READY/NOT_READY constants from `reddog_main_readonly_operational_bootstrap_result`; all 53
+projection fields retain their prior ready/not-ready enqueue and no-effect semantics.
 
 The receipt's SHA is integrity evidence, not authentication.
 Operational Memex supply receipts are exact-schema rehydrated before resident

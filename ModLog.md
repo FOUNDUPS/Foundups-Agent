@@ -1,5 +1,16 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-26] RedDog Bootstrap WSP 62 Extraction
+
+**WSP Protocols:** WSP 00, 15, 22, 50, 62, 84, 97
+
+- Repaired the two documented RedDog WSP 62 ratchet failures through a local
+  mapping-list helper and an identity-preserving bootstrap-result module.
+- Reduced the bootstrap host from 858 to 615 lines and retained an explicit
+  432-line no-growth ratchet for the remaining orchestration entrypoint.
+- Rebound RedDog 0.4.113 to the exact 1,385-file backend closure without adding
+  runtime or effect authority.
+
 ## [2026-08-26] RedDog VSIX LF Materialization Contract
 
 **WSP Protocols:** WSP 00, 15, 22, 50, 62, 84, 97

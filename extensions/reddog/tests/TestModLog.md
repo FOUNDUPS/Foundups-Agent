@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-26 - Backend WSP 62 compatibility (0.4.113)
+
+- Pinned the 1,385-file authenticated closure at
+  `6e022fb56e5e8775eac9814654fcaf4b338a699a8c91829edb96c9e5b868fa32`.
+- The manifest generator asserts the new bootstrap-result dependency appears
+  exactly once with a bound content hash. Version, backend compatibility,
+  shard, package, and release suites remain the acceptance surface.
+
 ## 2026-08-26 - RedDog package EOL reproducibility (0.4.112)
 
 - Added exact and effective `.gitattributes` verification for 66 packaged text

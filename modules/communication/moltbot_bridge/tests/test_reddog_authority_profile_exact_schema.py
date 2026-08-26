@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import re
+
 import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
@@ -156,6 +158,44 @@ def test_authority_profile_typed_rehydration_preserves_canonical_source() -> Non
 
     assert rehydrate_authority_profile_source(profile) == profile
     assert rehydrate_authority_profile_runtime(profile) == profile
+
+
+@pytest.mark.parametrize(
+    ("required_checks", "expected"),
+    (
+        ([], []),
+        ((), []),
+        ([{"name": "pytest", "argv": ["pytest", "-q"], "timeout_s": 30}],
+         [{"name": "pytest", "argv": ["pytest", "-q"], "timeout_s": 30}]),
+        (({"name": "pytest"},), [{"name": "pytest"}]),
+    ),
+)
+def test_effect_scope_rehydration_preserves_mapping_list_contract(
+    required_checks: object,
+    expected: list[dict[str, object]],
+) -> None:
+    assert rehydrate_authority_profile_effect_scope(
+        {"required_checks": required_checks}
+    ) == {"required_checks": expected}
+
+
+@pytest.mark.parametrize(
+    ("required_checks", "expected_path"),
+    (
+        (["not-a-mapping"], "required_checks"),
+        ([{"timeout_s": "30"}, {"name": 7}], "required_checks[0].timeout_s"),
+        ([{"name": "pytest"}, {"name": 7}], "required_checks[1].name"),
+    ),
+)
+def test_effect_scope_rehydration_rejects_mapping_list_type_confusion_in_order(
+    required_checks: object,
+    expected_path: str,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match="authority_profile_invalid:" + re.escape(expected_path),
+    ):
+        rehydrate_authority_profile_effect_scope({"required_checks": required_checks})
 
 
 @pytest.mark.parametrize(

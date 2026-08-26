@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-26: Main bootstrap WSP 62 result extraction
+
+- Extracted the stable 53-field main read-only bootstrap result schema and its
+  ready/not-ready projections into one 286-line sibling. The original module
+  re-exports the exact class/constants and aliases the bounded builders, so
+  public imports and output semantics are unchanged.
+- Extracted only the authority-profile mapping-list recursion needed to reduce
+  `_visit_type_paths` from 61 to 59 lines. List/tuple/empty/invalid and nested
+  ordering regressions preserve strict fail-closed behavior.
+- Reduced the bootstrap host from 858 to 615 lines without raising an
+  exemption. Its unchanged 432-line orchestration entrypoint now has an exact
+  explicit legacy no-growth ratchet and remains a separate decomposition debt.
+- Rebound the authenticated RedDog backend closure to 1,385 files at
+  `6e022fb56e5e8775eac9814654fcaf4b338a699a8c91829edb96c9e5b868fa32`.
+  No model, worker, OpenClaw, Hermes, queue, repository, or HoloIndex authority
+  changed. (WSP 00/15/22/50/62/84/97)
+
 ## 2026-08-26: Durable first-TURN resolution link
 
 - Added an explicit v2 `RESOLVED_INITIAL_TURN` journal contract that preserves

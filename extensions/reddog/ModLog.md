@@ -1,5 +1,15 @@
 # RedDog ModLog
 
+## 2026-08-26 - Backend WSP 62 compatibility (0.4.113)
+
+- Rebound the authenticated backend closure after extracting the main
+  read-only bootstrap result boundary and authority-profile mapping-list
+  traversal. The closure is **1,385 files** at
+  `6e022fb56e5e8775eac9814654fcaf4b338a699a8c91829edb96c9e5b868fa32`.
+- The extension runtime is unchanged. Version 0.4.113 identifies exact backend
+  compatibility; it adds no model, worker, OpenClaw, Hermes, queue, repository,
+  HoloIndex, host, or conversation authority. (WSP 00/15/22/50/62/84/97)
+
 ## 2026-08-26 - Cross-platform VSIX byte reproducibility (0.4.112)
 
 - A post-merge package audit reproduced three different raw-byte totals from

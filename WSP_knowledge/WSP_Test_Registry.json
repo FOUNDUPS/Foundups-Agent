@@ -8056,7 +8056,9 @@
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
       "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
