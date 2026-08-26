@@ -41,6 +41,10 @@
   The release gate is **4/4 PASS**; package closure is **67 files / 965,192
   bytes** under the 1 MiB cap. Exact-final timing belongs in the external
   WSP-97 receipt so documentation does not create a self-referential rerun.
+- Linux fast-tier CI then correctly rejected stale backend-manifest hashes for
+  the two modified files already inside its authenticated runtime closure. The
+  governed generator rebound only those hashes; the closure remains 1,383
+  files with no widened dependency or authority surface.
   WSP 00/15/22/50/62/84/97.
 
 ## 2026-08-23: Cross-platform OpenClaw dry-run worktree binding repair

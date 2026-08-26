@@ -20,6 +20,10 @@
   Registry governance: **45 passed**. Package roots ran in isolated processes
   because the repository's multiple top-level `tests` packages collide when
   collected together.
+- Linux fast-tier CI additionally proved the backend manifest was stale for
+  the two changed files already in its 1,383-file runtime closure. The existing
+  generator and staged-index parity test now pin the regenerated hashes; no
+  dependency or test threshold was added.
   This layer invokes no handler, model, worker, network, Holo maintenance, or
   conversation-state mutation.
 
