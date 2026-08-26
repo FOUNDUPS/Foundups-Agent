@@ -7,6 +7,22 @@
 
 ---
 
+## 2026-08-27: Exact-SHA activation order and AgentDB truth
+
+- Added split-lease ordering, initial/final lease contention, post-activation
+  supersession, exact generation/receipt mismatch, sealed public signatures,
+  and owner-cleanup regressions.
+- Added both composed FakeDB and real SQLite AgentDB failure paths. A failed
+  route activation cannot create a completion event or resolve the durable
+  request, and the task is explicitly failed.
+- Focused authority/executor/coordinator/database result: **62 passed** with no
+  live Holo, Git, route, replica, or network mutation.
+- The module macro audit found two startup-dispatch tests executing live
+  self-research and pattern training, causing repeatable 90--240 second test
+  timeouts. Replaced them with exact mocked executor-boundary proofs. The tests
+  still verify constructor arguments, self-research keyword arguments,
+  dispatch selection, and result projection without launching real work.
+
 ## 2026-07-24: Daily OpenRouter Catalog Schedule POC
 
 **Files:** `test_schedule_evaluator.py`,

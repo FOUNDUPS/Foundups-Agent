@@ -12,6 +12,25 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-08-27 - Post-merge activation order and durable completion truth
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 84, WSP 87, WSP 97
+
+- Split the exact-SHA authority lease so canonical refresh completes and
+  releases before query-replica activation; one process lock still serializes
+  the entire transaction. A second authority lease then proves final clean
+  HEAD/origin/main and exact generation/receipt binding.
+- The executor now composes the existing real activation controller and cannot
+  complete a task on missing, substituted, or failed operational proof.
+  Production dependency injection is sealed behind private test adapters.
+- FakeDB and real SQLite AgentDB regressions prove failure leaves the task
+  failed, the request pending, and the completion event absent. The prior
+  `a7302344` task remains historically failed; a new merged exact-main task is
+  the live acceptance gate. Focused cross-module result: **62 passed**.
+- Removed unbounded live self-research/training execution from the startup unit
+  tests while retaining exact dispatcher and call-contract assertions. The
+  complete idle/AgentDB selection now passes **204/204 in 12.71s**.
+
 ### 2026-08-09 - Incident-bound post-merge maintenance admission
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97

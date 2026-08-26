@@ -1,4 +1,12 @@
 # TestModLog - wre_core/tests
+
+## 2026-08-27: Post-merge registry reprojection
+
+- Registered the two new tracked RedDog Holo post-merge test modules. The
+  deterministic projection is current at **1,587 total / 268 quarantined**.
+- Registry generation/check changed no quarantine, capability, collection,
+  shard, or execution authority.
+
 ## 2026-08-27: RedDog candidate registry freshness
 
 - Reprojected the canonical registry from tracked Python tests after the CI

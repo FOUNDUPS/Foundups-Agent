@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-08-27 - Post-merge Holo activation compatibility (0.4.115)
+
+- Rebound the thin VSIX after the backend gained split authority-lease and
+  exact query-replica activation composition. RedDog conversations continue to
+  use the stable route-file pointer; the legacy direct root remains exclusive.
+- The authenticated backend closure is **1,349 files** at
+  `4095e31c989bfd6a9d66d82dcc389de23afaaf697257ef0f2d81a4771a714e46`;
+  the canonical registry is **1,587 / 268 quarantined**.
+- Exact `a7302344` is live from manual recovery, not this candidate. Release
+  acceptance requires the merged exact-main OpenClaw task plus a commit-bound
+  VSIX build. No model, Git, Holo maintenance, or worker authority moved into
+  the extension. (WSP 00/15/22/50/62/84/87/97)
+
 ## 2026-08-27 - Governed resident Holo usability contract (0.4.114)
 
 - Aligned the VSIX documentation with the repaired resident adapter: valid

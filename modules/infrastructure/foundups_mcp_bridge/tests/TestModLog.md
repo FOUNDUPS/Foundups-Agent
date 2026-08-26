@@ -1,5 +1,19 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-27] Post-merge activation composition falsification
+
+- Added absent-only target allocation, legacy/route ambiguity, activation
+  failure, committed-route, post-query immutability, exact binding, and
+  production-signature sealing regressions for the composite post-merge path.
+- Cross-module authority/executor/coordinator/AgentDB selection: **62 passed**.
+  Real AgentDB proof preserves a failed task, pending request, and absent
+  completion event when route activation fails. Tests use disposable roots and
+  do not mutate the live Holo store, route, replica, authority checkout, or
+  network. (WSP 00/15/22/34/50/62/78/97)
+- Complete bridge macro: **1,096 passed / 10 expected capability skips in
+  493.58s**. Seventeen warnings originate from an inherited LinkedIn visual
+  test invalid escape and are not failures in this transaction.
+
 ## [2026-08-23] Exact query-replica activation falsification
 
 - Added controller/CLI coverage for inert default, exact clean repository

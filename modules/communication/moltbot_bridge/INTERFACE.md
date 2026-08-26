@@ -54,12 +54,12 @@ script. The extraction adds no model, worker, repository, or fallback authority.
 
 ## RedDog architect FIX promotion HoloIndex proof
 
-`run_reddog_main_architect_fix_promotion_bootstrap(..., environment=...)`
-snapshots the supplied host environment and resolves the explicit
-`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` against the freshness receipt's canonical
-SSD root. The bounded promotion execution adapter passes that sealed capability to
-`verify_reddog_holoindex_owner_binding`; resolution failure returns
-`holoindex_query_replica_route_not_current` before owner verification or
+`run_reddog_main_architect_fix_promotion_bootstrap(..., environment=...)` snapshots
+the supplied host environment and resolves the explicit
+`REDDOG_HOLOINDEX_QUERY_ROUTE_FILE` against the freshness receipt's canonical SSD root and exact route binding. The legacy direct replica-root variable is valid
+only when the route-file value is absent; both together fail closed. The
+bounded promotion execution adapter passes that sealed capability to
+`verify_reddog_holoindex_owner_binding`; resolution failure returns `holoindex_query_replica_route_not_current` before owner verification or
 publication. Input preparation, locked execution, and the public startup adapter
 are separate modules capped at 500 lines and 50 lines per function. The
 bootstrap does not materialize or re-index.

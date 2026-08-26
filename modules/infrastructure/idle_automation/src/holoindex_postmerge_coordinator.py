@@ -71,7 +71,7 @@ def _ensure_incident_binding_event(
     )
 
 
-def coordinate_holoindex_postmerge(
+def _coordinate_holoindex_postmerge_for_test(
     *,
     repo_root: Path | str,
     db: AgentDbPort | None = None,
@@ -452,7 +452,24 @@ def coordinate_holoindex_postmerge(
     )
 
 
-def execute_holoindex_postmerge_task(
+def coordinate_holoindex_postmerge(
+    *,
+    repo_root: Path | str,
+    db: AgentDbPort | None = None,
+    environment: Mapping[str, str] | None = None,
+    incident_binding: Mapping[str, Any] | None = None,
+) -> HoloIndexPostMergeCoordinationResult:
+    """Coordinate one post-merge task using sealed production dependencies."""
+
+    return _coordinate_holoindex_postmerge_for_test(
+        repo_root=repo_root,
+        db=db,
+        environment=environment,
+        incident_binding=incident_binding,
+    )
+
+
+def _execute_holoindex_postmerge_task_for_test(
     *,
     repo_root: Path | str,
     task_id: str,
@@ -462,9 +479,9 @@ def execute_holoindex_postmerge_task(
     environment: Mapping[str, str] | None = None,
     authority_transaction: Callable[..., Any] | None = None,
 ) -> dict[str, Any]:
-    """Compatibility import for the separately owned effect adapter."""
+    """Internal dependency seam for the separately owned effect adapter."""
     from .holoindex_postmerge_executor import (
-        execute_holoindex_postmerge_task as execute,
+        _execute_holoindex_postmerge_task_for_test as execute,
     )
 
     return execute(
@@ -475,6 +492,30 @@ def execute_holoindex_postmerge_task(
         db=db,
         environment=environment,
         authority_transaction=authority_transaction,
+    )
+
+
+def execute_holoindex_postmerge_task(
+    *,
+    repo_root: Path | str,
+    task_id: str,
+    context: Mapping[str, Any],
+    execution_claim: Mapping[str, str] | None = None,
+    db: AgentDbPort | None = None,
+    environment: Mapping[str, str] | None = None,
+) -> dict[str, Any]:
+    """Compatibility import using only sealed production dependencies."""
+
+    from .holoindex_postmerge_executor import (
+        execute_holoindex_postmerge_task as execute,
+    )
+    return execute(
+        repo_root=repo_root,
+        task_id=task_id,
+        context=context,
+        execution_claim=execution_claim,
+        db=db,
+        environment=environment,
     )
 
 

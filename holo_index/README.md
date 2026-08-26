@@ -10,9 +10,9 @@ adding ChromaDB, NumPy, model, network, or canonical-store authority.
 
 ## Canonical store isolation status
 
-The FoundUps MCP bridge now contains a Phase-1 candidate materializer for one
-immutable, generation-bound query replica. It copies the complete vector tree
-and one selected complete model snapshot from exact manifests while the
+The FoundUps MCP bridge contains a governed materializer for one immutable,
+generation-bound query replica. It copies one selected complete model snapshot
+and the exact sealed 22-file `vectors/query_snapshots` set from manifests while the
 canonical receipt and noncreating, ordered authority/maintenance leases remain
 retained through active publication and final validation. Model resolver
 markers are direct snapshot-root children; the public bridge API uses sealed
@@ -26,6 +26,12 @@ rows and float32 vectors through the existing exact-search adapter. The query
 path never starts Chroma or opens SQLite/HNSW; its snapshot generation must
 equal the verified replica generation. Maintenance retains the write-capable
 canonical Chroma path.
+
+Exact main `a7302344424615dc9d061ef408c2de2508660b81` has a manually activated
+immutable snapshot replica for generation `sha256:d654414a...`; a governed
+owner query proved CURRENT/no-gap/no-reindex and unchanged replica bytes. The
+automatic post-merge ordering repair remains candidate truth until replayed at
+a later merged exact main.
 
 ## Module Tier-0 retrieval
 

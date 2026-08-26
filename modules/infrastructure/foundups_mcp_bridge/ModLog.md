@@ -1,5 +1,31 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Exact-main post-merge replica composition
+
+- Reproduced `HOLOINDEX_QUERY_REPLICA_REQUIRED` after a successful exact-main
+  refresh: the authority transaction held the authority lease while the
+  existing activation controller attempted its own ordered authority and
+  maintenance lease admission.
+- Retained one process lock but split the authority lease around activation.
+  The new bounded composer first probes the normal owner, allocates only absent
+  replica/receipt names, invokes the existing real activation controller, and
+  reprobes the owner. Final completion requires exact canonical HEAD,
+  generation, receipt, committed route, and unchanged replica evidence.
+- Extracted the authority-block marker, transaction types, and activation step
+  per WSP_62. Public production entrypoints use sealed dependencies;
+  dependency seams remain private and test-only. The authority transaction is
+  599 lines, its type module is 59 lines, and every function in both is at most
+  50 lines. `no_growth: true`; further phase growth moves to a focused engine.
+- Exact `a7302344` is already live through the prior manual activation at
+  generation `sha256:d654414a...`. This candidate has not rewritten that
+  history and requires a new exact-main post-merge replay after merge.
+  Focused cross-module result: **62 passed**. Backend closure: **1,349 files**
+  at `4095e31c989bfd6a9d66d82dcc389de23afaaf697257ef0f2d81a4771a714e46`.
+  (WSP 00/15/22/50/62/78/84/87/97; WSP_15 19/P0)
+- Full bridge acceptance is **1,096 passed / 10 expected host-capability skips
+  in 493.58s**. The duration is macro/release evidence, not an interactive
+  developer-loop target; focused contracts remain the operational fast tier.
+
 ## 2026-08-23 - Exact query-replica activation controller
 
 - Added an inert-by-default trusted-host controller and thin CLI composing the

@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1585,
+  "total_tests": 1587,
   "quarantined_tests": 268,
   "tests": [
     {
@@ -16348,6 +16348,19 @@
       "description": "Fail-closed host resolution for RedDog query-replica owner routes."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_postmerge_replica",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_postmerge_replica.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Post-merge canonical-to-replica ordering regressions."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_process_image",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_process_image.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
@@ -16721,6 +16734,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for auto_moderator -> idle_automation caller wiring.\n\nValidates that the production caller path propagates continuity\ncontext (triggering_session) so background idle work can be\ncorrelated to the originating livechat/stream session."
+    },
+    {
+      "id": "test::modules::infrastructure::idle_automation::tests::test_holoindex_postmerge_authority_order",
+      "path": "modules/infrastructure/idle_automation/tests/test_holoindex_postmerge_authority_order.py",
+      "owner": "modules/infrastructure/idle_automation",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-idle-automation-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Authority-lease, activation ordering, and supersession regressions."
     },
     {
       "id": "test::modules::infrastructure::idle_automation::tests::test_holoindex_postmerge_coordinator",

@@ -34,8 +34,13 @@ task context to a one-use claim ID; the effect adapter must consume it through
 `assigned -> executing` and validate the request event before invoking the
 trusted authority transaction. Successful completion is committed
 atomically with the request resolution and exact generation receipt.
-`CURRENT` is returned only after the canonical read-only admission gate
-rehydrates the same HEAD, generation, and freshness-receipt digest.
+The authority transaction runs canonical refresh under its first authority
+lease, releases that lease while the governed activation controller
+materializes/queries/commits the immutable replica, and reacquires the lease
+for final binding, clean-HEAD, and `origin/main` proof. `CURRENT` is returned
+only when the owner exactly matches the canonical HEAD, generation, and
+freshness-receipt digest. Failure leaves the task failed or retryable, the
+request pending, and the completion event absent.
 Claims have a 7500-second lease, covering the bounded 7200-second maintenance
 timeout plus margin. A crashed or interrupted worker is reclaimed
 by exact assignment timestamp and enters the existing bounded retry policy.
@@ -43,8 +48,16 @@ by exact assignment timestamp and enters the existing bounded retry policy.
 Runtime configuration:
 
 - `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`: absolute dedicated worktree.
+- `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`: absolute private stable route record.
+- `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT`: legacy-only direct root; rejected when
+  the stable route-file value is also present.
 - `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED=1`: enable periodic observation.
 - `HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC`: minimum 30 seconds.
+
+The process-local transaction lock spans both authority leases and activation.
+The automatic composer selects only absent replica/receipt targets and never
+overwrites a generation. This ordering is locally verified; production
+acceptance requires one merged exact-main OpenClaw replay.
 
 ### Class: IdleAutomationDAE
 

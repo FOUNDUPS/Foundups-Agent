@@ -19,7 +19,16 @@ The Idle Automation module provides autonomous background tasks that execute whe
 System maintenance includes an opt-in exact-SHA HoloIndex coordinator. It
 observes `origin/main` off the supervisor's synchronous path, queues one
 durable OpenClaw task per SHA, and delegates all indexing to the trusted
-authority-worktree transaction. Query workers remain read-only.
+authority-worktree transaction. That transaction refreshes canonical state,
+releases its authority lease for governed immutable replica activation,
+reacquires the lease for final exact-SHA proof, and only then permits atomic
+AgentDB completion. Query workers remain read-only.
+
+The stable route is supplied through
+`REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; configuring the legacy direct replica root
+at the same time fails closed. Route/activation failure leaves the durable task
+non-completed and the request event unresolved. Automatic route advancement
+remains candidate truth until a merged exact-main OpenClaw replay passes.
 
 ## WSP Compliance
 
@@ -110,6 +119,9 @@ wre_integration.record_idle_execution(
 - `AUTO_OPENROUTER_CATALOG_REFRESH=false`: Opt in to the daily catalog POC
 - `OPENROUTER_CATALOG_RUNTIME_ROOT=...`: Trusted catalog evidence root; defaults
   to `~/.foundups-agent/ai_gateway/openrouter_catalog`
+- `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT=...`: Dedicated clean authority worktree
+- `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE=...`: Private stable query-route record
+- `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED=1`: Enable exact-main observation
 
 ### Safety Controls
 - `--no-auto-push` CLI flag to disable during testing

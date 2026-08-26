@@ -1,5 +1,21 @@
 # HoloIndex Development Roadmap
 
+## [2026-08-27] Exact-main replica activation and post-merge ordering
+
+Manual governed activation is complete at exact main
+`a7302344424615dc9d061ef408c2de2508660b81`, generation
+`sha256:d654414a...`. The stable route selected the immutable 33-artifact
+model-plus-22-snapshot closure; a production-shaped owner query returned
+CURRENT/no-gap/no-reindex and post-query verification found no changed replica
+digest.
+
+The remaining P0 is automatic operation for a successor commit. The local
+repair separates canonical refresh, activation, and final proof across two
+authority leases while retaining one process lock. Merge it, run the real
+OpenClaw post-merge task at exact new main, verify route advancement and atomic
+completion, then reprove unchanged replica bytes. The two failed a730 OpenClaw
+attempts remain historical evidence and must not be relabeled completed.
+
 ## [2026-08-23] Exact-module Tier-0 producer compatibility
 
 **Candidate complete, activation deferred:** a live exact-HEAD owner query
@@ -14,13 +30,10 @@ now binds relative and absolute hits to an explicit authority root and rejects
 escapes or a missing root. It currently consumes code/WSP hits, not
 `navigation_docs`.
 
-Independent WSP_97 verification is complete, and RedDog PR #1538 plus PFMall
-PR #1539 are merged. This final source candidate is reconciled directly on
-their exact combined main. Next: merge this verified candidate, then run one
-governed exact-final-HEAD maintenance, replica activation, and live
-named-module owner query. The active `f06ca1f` generation remains immutable
-and truthful about its bytes but is not accepted as evidence for
-explicit-module Tier-0 retrieval.
+Independent WSP_97 verification and the historical PR merges completed. The
+later a730 exact-main maintenance, manual replica activation, and live owner
+query supersede the former `f06ca1f` operational status. Each generation
+remains immutable evidence only for its bound commit.
 
 **P1 test-scale debt:** the eight backend-manifest generator contracts rebuild
 the same 1,376-file closure repeatedly and took more than five minutes locally.
@@ -30,10 +43,10 @@ must not weaken omission, untracked-import, or digest checks.
 
 ## [2026-08-20] RedDog Integration Status
 
-Module-intent, isolated snapshot runtime, and the immutable replica consumer
-contracts are integrated and focused-GREEN. Live exact-SHA owner acceptance,
-store maintenance, model access, and post-commit publication remain deferred;
-this work did not touch the active Holo store.
+Module-intent, isolated snapshot runtime, and immutable replica consumer
+contracts are integrated. Live exact-SHA owner acceptance, store maintenance,
+model access, and route publication were later proven manually at a730; future
+commits still require their own exact-bound replay.
 
 ## [2026-08-17] Immutable Query Replica Isolation
 
@@ -81,7 +94,7 @@ restart, or authority-store mutation.
 ## [2026-08-16] Explicit-Module Tier-0 Retrieval Hardening
 
 R4 removes the verifier-found WSP 62 self-exemption: vector collection search
-is extracted to bounded helpers, `search_engine.py` is 1,368 lines (<1,500),
+is extracted to bounded helpers, `search_engine.py` is 1,424 lines (<1,500),
 and `_search_collection` is 9 lines (<=50). No exemption was added.
 
 **Complete in this slice:** explicit, uniquely evidenced module queries reuse

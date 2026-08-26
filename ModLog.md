@@ -1,5 +1,34 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-27] RedDog Post-Merge Holo Activation Order Repair
+
+**WSP Protocols:** WSP 00, 15, 22, 50, 62, 78, 84, 87, 97
+
+- Reproduced the exact `a7302344` OpenClaw/AgentDB post-merge task failure:
+  the authority transaction retained the canonical maintenance lease while the
+  immutable query-replica activation path needed to acquire that same lease.
+  The historical task remains failed evidence; it was not relabeled complete.
+- Split the transaction into refresh and final authority-lease windows under
+  one process lock. Between them, the existing activation controller now
+  materializes an absent-only generation, commits the stable route by CAS,
+  performs a governed owner query, and re-proves unchanged replica bytes.
+  Public production entrypoints no longer expose injectable effect seams.
+- Real AgentDB regression coverage proves activation failure leaves the task
+  failed, its request pending, and no completion event. Exact canonical HEAD,
+  generation, and freshness receipt equality is mandatory before completion.
+- The already activated exact-`a7302344` route remains CURRENT at generation
+  `sha256:d654414a...`; it was created by the prior manual recovery and is not
+  evidence that this candidate has run automatically. Automatic acceptance
+  requires a new exact-main post-merge replay after merge.
+- RedDog is advanced to 0.4.115 and bound to the authenticated 1,349-file
+  backend closure at `4095e31c989bfd6a9d66d82dcc389de23afaaf697257ef0f2d81a4771a714e46`.
+  The canonical registry is 1,587 tests / 268 quarantined.
+- Focused post-merge evidence is 62 passed; the complete idle/AgentDB boundary
+  is 204 passed; the bridge macro is 1,096 passed / 10 capability skips; and
+  RedDog fast, contract, package, and four-group release tiers pass. Two legacy
+  unit tests that launched live self-research/training were converted to exact
+  bounded dispatch proofs, reducing the idle macro from timeout to 12.71s.
+
 ## [2026-08-27] RedDog Governed Holo Usability Repair
 
 **WSP Protocols:** WSP 00, 15, 22, 29, 50, 62, 84, 87, 97

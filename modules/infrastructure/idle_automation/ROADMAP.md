@@ -32,20 +32,34 @@ wsp_cycle(input="idle_automation", log=True)
 - **Exact-SHA HoloIndex Post-Merge Maintenance**: Non-blocking OpenClaw
   observation, one durable task per `origin/main` SHA, CAS worker claim,
   cross-process authority/SSD leases, non-rewind checkout update, atomic
-  completion, and canonical receipt rehydration
+  completion, and canonical receipt rehydration. The split-lease automatic
+  replica activation ordering is locally implemented and focused-GREEN; one
+  merged exact-main OpenClaw replay remains its production acceptance gate.
+
+### Exact-main Holo route replay gate (P0)
+
+- Manual governed evidence at `a7302344` proves canonical generation
+  `sha256:d654414a...`, stable-route selection, and unchanged-replica query.
+- The predecessor OpenClaw task failed twice because owner admission ran before
+  a current route existed and then self-contended under the outer authority
+  lease.
+- Candidate order is first lease/refresh -> release -> activate/query -> second
+  lease/final proof -> atomic AgentDB completion.
+- Next acceptance is one automatic route advance and completion at the exact
+  merged successor SHA; the historical a730 task remains truthful failure
+  evidence and is not rewritten.
 
 ### WSP 62 Near-Term Remediation
 
 - `tests/test_scheduled_routines_integration.py` is 1,057 physical lines:
-  above the 1,000-line remediation trigger but below the 1,200-line
-  OK/guideline boundary. Add no further provider-schedule cases there. The next
+  inherited critical-window WSP_62 debt. `no_growth: true`; the next
   provider-schedule test change must extract those cases into
   `tests/test_openrouter_catalog_schedule_integration.py`, targeting roughly
   500 lines in each resulting test module.
-- `src/idle_automation_dae.py` is 1,444 physical lines, within the 1,200-1,500
-  DAE guideline window. Extract remaining scheduled-claim orchestration and
-  configuration before any further feature growth and before the file reaches
-  1,500 lines.
+- `src/idle_automation_dae.py` is 1,444 physical lines: inherited mandatory-
+  review WSP_62 debt above the 1,425-line DAE review trigger. `no_growth: true`;
+  extract remaining scheduled-claim orchestration and configuration before any
+  further feature change.
 
 ## Development Phases
 

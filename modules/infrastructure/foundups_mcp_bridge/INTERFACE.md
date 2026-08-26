@@ -356,15 +356,11 @@ while the operational result remains false.
 
 ### Exact-SHA Authority Worktree Transaction
 
-`advance_reddog_holoindex_authority()` is the trusted WRE effect boundary for
-post-merge refresh. It acquires a separate cross-process authority-update
-lease, fetches and proves the requested `origin/main` SHA, rejects non-forward
-updates, stops the process-owned query service, switches the dedicated clean
-worktree in detached mode, and invokes the existing maintenance handshake.
-Before any Git effect it re-derives the authority-root digest and common Git
-directory under that lease, rejecting any path substitution since queuing.
-The inner `MaintenanceSession` remains responsible for SSD invalidation,
-refresh, final receipt publication, and its own writer lease.
+`advance_reddog_holoindex_authority()` is the trusted WRE effect boundary for post-merge refresh and route activation. Under a first cross-process authority-update lease it re-derives the authority-root digest and common Git directory, fetches/proves `origin/main`, rejects non-forward updates, stops the owned query service, switches the dedicated clean worktree, and runs canonical maintenance. The inner `MaintenanceSession` owns SSD invalidation, refresh, receipt publication, and its writer lease.
+
+The process lock remains held while the authority lease is released for `ensure_postmerge_query_replica_operational()`. That composer uses `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`, accepts an already-current exact binding or selects new/no-overwrite targets, and reuses `activate_query_replica()`. Candidate query, route CAS, stable-route query, and unchanged-replica proof remain controller-owned. HEAD, generation, and freshness-receipt digest must exactly equal the canonical refresh proof.
+
+After every activation outcome the transaction reacquires authority and reproves binding, clean target HEAD, and current `origin/main`. Post-activation lease failure stops the activated owner; initial contention does not stop an unowned process. Only the final exact proof may complete AgentDB; route/activation failure leaves the task failed, request unresolved, and completion event absent.
 
 If main advances during refresh, the owner is stopped and the authority
 checkout advances to the newer unindexed HEAD (or the current generation is
@@ -390,10 +386,7 @@ this process. Any semantic, source-completeness, repository-race, receipt, or
 restart failure remains non-operational. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
 
-Scope note: one-shot query, maintenance start, and promotion verification now
-consume the same mandatory verified route. The separate activation controller
-that creates/materializes/commits a new route and emits its secret-free receipt
-is not implemented by these consumers.
+Scope note: one-shot query, maintenance, promotion, and the post-merge composer consume the same verified route. Query/promotion consumers remain read-only; only the trusted controller creates/materializes/commits a route and emits its receipt. Automatic post-merge composition is locally implemented but requires a merged exact-main OpenClaw replay before production completion may be claimed.
 The legacy `src/holo_tools.py` MCP surface still opens the HoloIndex store
 directly and remains a registered migration item; Phase 1 does not claim that
 all repository consumers cross this boundary. Normal cleanup is bounded, and

@@ -1,5 +1,19 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Post-merge Holo activation compatibility (0.4.115)
+
+- Pinned version and contract shards to 0.4.115 and rebound the generated
+  backend closure to 1,349 files at `4095e31c989b...1a714e46`.
+- Reauthenticated the unchanged 18-shard/6,929-line/490-assertion exhaustive
+  contract at `sha256:01160dcae591...c405576` after the version-only edits.
+- Registry generation/check is current at 1,587 tests / 268 quarantined.
+  Python activation-order evidence is 62 passed; extension package, shard, and
+  release gates remain required before the exact-main VSIX is published.
+- Final candidate results: fast **14/14 in 2.673s**, contract **3/3**, package
+  **67 files / 944,930 bytes** with content digest
+  `sha256:f48a934ca411...c9cb452c`, and release **4/4 groups in
+  164.090s** without timeout.
+
 ## 2026-08-27 - Governed resident Holo usability (0.4.114)
 
 - Bumped the thin-client identity and contract fixtures after the shared
