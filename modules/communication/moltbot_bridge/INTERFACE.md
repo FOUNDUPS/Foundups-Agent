@@ -133,9 +133,9 @@ It consumes opaque authority, verifies current record/revision/turn lineage, and
 
 `resolve_resident_conversation_new_scope_request(...)` plus `create_current_generation_resident_conversation_scope(...)` form the separate empty-ID TURN path. Exact v2 intent/request/grounding/FoundUp bindings precede the current-generation E0 lease; signed session identity fences nonce divergence and exact authenticated recovery is the only replay accepted.
 
+`resolve_current_generation_resident_conversation_first_turn(...)` atomically obtains two one-use FoundUp authority siblings, creates/exactly recovers scope-schema-v4 E0 with an immutable signed source/resolved request commitment, and stores explicit v2 `RESOLVED_INITIAL_TURN` digests in the existing journal; replay derives the ID before exact four-key lookup, atomically consumes its verified authority, and validates the retained E0 receipt through the current signed revision chain.
 `authenticate_signed_conversation_scope()` remains the production credential source; legacy HMAC is test/backward-compatible only. `prepare_conversation_work_context()` and proposal promotion remain later, independently authorized stages.
-
-Neither aggregate exposes traffic, executes a first turn or handler, invokes a model/worker, or grants work authority. Every future mutation must re-authenticate current state and perform immediate AgentDB CAS. Detailed assumptions, failure modes, locking, expiry, and recovery contracts are in `docs/clarity/REDDOG_RESIDENT_CONVERSATION_SERVICE_BINDING_PHASE1.md`, `REDDOG_RESIDENT_CONVERSATION_REQUEST_IDEMPOTENCY_PHASE1.md`, `REDDOG_RESIDENT_CONVERSATION_ADMISSION_AGGREGATE_PHASE1.md`, and `REDDOG_RESIDENT_CONVERSATION_NEW_SCOPE_ADMISSION_PHASE1.md`.
+These aggregates expose no traffic, handler, CAS, model/worker, or work authority; see `docs/clarity/REDDOG_RESIDENT_CONVERSATION_*_PHASE1.md`, including `REDDOG_RESIDENT_CONVERSATION_FIRST_TURN_RESOLUTION_PHASE1.md`, for exact locking, expiry, failure, and recovery contracts.
 
 ## Public API
 ### Architect proposal validity and execution readiness

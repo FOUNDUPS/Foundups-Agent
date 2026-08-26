@@ -1,12 +1,12 @@
 # RedDog
 
-Version: 0.4.110
+Version: 0.4.111
 
 ## Continuous conversation surface
 
 `conversation_plane_policy.js` keeps intent, reasoning depth, and effect ceiling independent; unknown text is `CHAT / FAST / NONE`, and risk never raises effects. Chat gets no repository/HoloIndex context or work authority; shared Python/JavaScript vectors run through `npm run test:conversation`.
 Foreground provider turns discard raw history; durable VSIX/PFMall/phone conversation adapters and ChatGPT-like cross-session memory remain missing.
-OpenClaw is the resident 0102 execution/supervision layer and Hermes is bounded. Backend modules now authenticate and reserve existing requests and can persist a trusted new FoundUp scope, but the VSIX has no service caller and the first TURN is neither journal-linked nor executed.
+OpenClaw is the resident 0102 execution/supervision layer and Hermes is bounded. Backend modules now authenticate and reserve existing requests, persist a trusted new FoundUp scope, and durably bind the original empty-ID first TURN to its resolved ID/revision 0. The VSIX still has no service caller, so no first-turn handler or conversation CAS executes.
 
 ## Model-routing authority
 
@@ -905,7 +905,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.110)
+## WSP_97 Truth Table (v0.4.111)
 
 | Claim | Status |
 | --- | --- |
@@ -995,6 +995,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.110.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.111.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

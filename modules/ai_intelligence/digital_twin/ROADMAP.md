@@ -46,9 +46,11 @@ conversation state, AgentDB, or any FoundUp Memex.
   scope persistence bind exact intent, request, grounding, registered FoundUp,
   signed-session identity and E0 authenticated exact recovery. Raw operator
   text is not persisted.
-- Next: durable first-turn request-to-resolved-conversation journal binding,
-  host invocation wiring, and operation-specific TURN/STATUS/CANCEL handlers
-  with immediate authenticated CAS.
+- Complete: durable first-turn request-to-resolved-conversation journal binding
+  uses an explicit v2 source/derived digest record and validates immutable E0
+  receipt identity through later signed revisions.
+- Next: host invocation wiring and operation-specific TURN/STATUS/CANCEL
+  handlers with immediate authenticated CAS.
 - Next: thin PFMall/phone transport adapter; the browser remains a client, not
   the model/OpenClaw host.
 - Deferred: asynchronous critics, durable cross-device history, bounded Memex/

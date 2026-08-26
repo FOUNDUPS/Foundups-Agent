@@ -1,5 +1,32 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-26: Durable first-TURN resolution link
+
+- Added an explicit v2 `RESOLVED_INITIAL_TURN` journal contract that preserves
+  the original empty-ID request digest independently from the derived resolved
+  conversation/revision-0 digest. Reused the existing AgentDB journal rather
+  than creating a parallel link table.
+- One current-generation credential lease now atomically delegates two
+  separately registered one-use FoundUp authorities. E0 create/exact recovery
+  and journal binding cannot reuse or copy one verified authority. Exact replay
+  derives the ID only after authentication and validates the stored E0 receipt
+  against the current signed revision chain.
+- Added crash, concurrency, divergent-key/nonce, later-revision replay, tamper,
+  content-disclosure, one-use, and WSP 62 regressions. The aggregate remains
+  host-unwired and grants no handler, CAS, model, worker, repository, or Holo
+  effect. (WSP 00/15/22/50/62/84/97)
+- Independent WSP 97 falsification then proved that self-hashed journal fields
+  did not authenticate a rewritten idempotency identity and that replay viewed
+  an authority before retiring it. The repaired scope schema v4 commits the
+  exact source/resolved request pair into signed immutable E0 state; replay
+  verifies that commitment and atomically pops-and-verifies its authority.
+  Full-row rehash tamper and synchronized two-caller regressions now fail
+  closed without weakening the one-use or no-effect boundaries.
+- The expanded conversation matrix is **149 passed** with two unchanged
+  legacy WSP 62 ratchet failures outside this candidate. Their exact 61/60
+  function and 858/857 file deltas are recorded in ROADMAP for a separate
+  WSP 15 refactor transaction; no ceiling was relaxed.
+
 ## 2026-08-26: Trusted new-conversation scope admission Phase 1
 
 - Added the inert empty-ID `TURN` resolution and current-generation admission

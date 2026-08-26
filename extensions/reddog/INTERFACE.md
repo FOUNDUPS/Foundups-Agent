@@ -267,9 +267,13 @@ This is a package-internal policy interface, not a network API. The Digital
 Twin backend now defines a strict zero-authority turn/status/cancel envelope,
 binds existing requests to verified current-generation session/AgentDB state,
 stores their content-free replay fence, and can persist one trusted empty-ID
-TURN scope after exact intent/grounding/FoundUp/E0 checks. The extension does
-not call either aggregate, and the first TURN is not yet journal-linked to its
-resolved conversation or executed. PFMall and phone clients therefore still
+TURN scope after exact intent/grounding/FoundUp/E0 checks. The backend also
+durably binds that original empty-ID request to the resolved ID/revision 0
+through an explicit v2 journal record under the same signed-generation lease.
+The backend's scope-schema-v4 E0 state signs the exact source/resolved request
+commitment, and replay consumes its verified authority atomically.
+The extension does not call these aggregates, and the first TURN is not yet
+executed by a handler or immediate CAS. PFMall and phone clients therefore still
 require an authenticated resident adapter with durable event ordering; the
 browser `reddog:command` event is not that transport.
 

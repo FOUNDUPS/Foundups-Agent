@@ -18,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_conversation_scope_capabili
     consume_conversation_scope_capability,
     conversation_scope_authority_view,
     split_conversation_scope_capability,
+    split_foundup_conversation_scope_capability_pair,
 )
 from modules.communication.moltbot_bridge.tests.reddog_conversation_scope_test_support import (
     NOW,
@@ -181,6 +182,23 @@ def test_capability_split_children_are_independently_one_use() -> None:
     ) is not None
 
 
+def test_foundup_pair_split_issues_distinct_one_use_siblings() -> None:
+    root = capability()
+    children = split_foundup_conversation_scope_capability_pair(root)
+    assert children is not None
+    assert children[0] is not children[1]
+    assert split_foundup_conversation_scope_capability_pair(root) is None
+    for child in children:
+        authority = consume_conversation_scope_capability(
+            child, active_foundup_id="trade",
+            discussion_foundup_ids=("trade",), now_epoch=NOW,
+        )
+        assert authority is not None
+        assert conversation_scope_authority_view(authority) is not None
+        assert consume_conversation_scope_capability(
+            child, active_foundup_id="trade",
+            discussion_foundup_ids=("trade",), now_epoch=NOW,
+        ) is None
 def test_failed_split_is_atomic(monkeypatch) -> None:
     class _FailSecond(dict):
         issued: list[object] = []
@@ -204,7 +222,9 @@ def test_failed_split_is_atomic(monkeypatch) -> None:
         discussion_foundup_ids=("trade",),
         now_epoch=NOW,
     ) is None
-    assert split_conversation_scope_capability(root) is not None
+    # A partial delegation failure retires the root as well as both children;
+    # no credential-derived authority remains reusable after the failed split.
+    assert split_conversation_scope_capability(root) is None
 
 
 def test_split_children_reject_construction_copy_pickle_and_secret_repr() -> None:

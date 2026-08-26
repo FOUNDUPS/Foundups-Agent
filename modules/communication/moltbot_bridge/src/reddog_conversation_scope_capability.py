@@ -104,14 +104,9 @@ class _ResidentConversationRequestJournalSeal:
 
 _LOCK = threading.Lock()
 _CAPABILITIES: WeakKeyDictionary[AuthenticatedConversationScopeCapability, _ConversationScopeAuthoritySeal] = WeakKeyDictionary()
-_DELEGATED_CAPABILITIES: WeakKeyDictionary[
-    _OpaqueCapability, _DelegatedConversationScopeSeal
-] = WeakKeyDictionary()
+_DELEGATED_CAPABILITIES: WeakKeyDictionary[_OpaqueCapability, _DelegatedConversationScopeSeal] = WeakKeyDictionary()
 _AUTHORITIES: WeakKeyDictionary[VerifiedConversationScopeAuthority, _ConversationScopeAuthoritySeal] = WeakKeyDictionary()
-_JOURNAL_AUTHORITIES: WeakKeyDictionary[
-    ResidentConversationRequestJournalAuthority,
-    _ResidentConversationRequestJournalSeal,
-] = WeakKeyDictionary()
+_JOURNAL_AUTHORITIES: WeakKeyDictionary[ResidentConversationRequestJournalAuthority, _ResidentConversationRequestJournalSeal] = WeakKeyDictionary()
 
 
 def _issue_conversation_scope_capability(
@@ -130,36 +125,47 @@ def split_conversation_scope_capability(
     PrincipalContextReadConversationScopeCapability,
 ] | None:
     """Atomically retire one root and issue two scope-restricted children."""
+    children = _split_delegated_capabilities(
+        capability,
+        (
+            (FoundUpConversationScopeCapability, SCOPE_KIND_FOUNDUP),
+            (PrincipalContextReadConversationScopeCapability, SCOPE_KIND_PRINCIPAL),
+        ),
+    )
+    return children if children is None else (children[0], children[1])
 
+
+def split_foundup_conversation_scope_capability_pair(
+    capability: Any,
+) -> tuple[FoundUpConversationScopeCapability, FoundUpConversationScopeCapability] | None:
+    """Retire one root into two separately registered FoundUp children."""
+    children = _split_delegated_capabilities(
+        capability,
+        ((FoundUpConversationScopeCapability, SCOPE_KIND_FOUNDUP),) * 2,
+    )
+    return children if children is None else (children[0], children[1])
+
+
+def _split_delegated_capabilities(
+    capability: Any, specifications: tuple[tuple[type[_OpaqueCapability], str], ...],
+) -> tuple[Any, ...] | None:
     if type(capability) is not AuthenticatedConversationScopeCapability:
         return None
-    foundup = object.__new__(FoundUpConversationScopeCapability)
-    principal = object.__new__(PrincipalContextReadConversationScopeCapability)
+    children = tuple(object.__new__(child_type) for child_type, _kind in specifications)
     with _LOCK:
-        seal = _CAPABILITIES.get(capability)
-        if seal is None or not _register_split_children(foundup, principal, seal):
+        seal = _CAPABILITIES.pop(capability, None)
+        if seal is None:
             return None
-        _CAPABILITIES.pop(capability, None)
-    return foundup, principal
-
-
-def _register_split_children(
-    foundup: FoundUpConversationScopeCapability,
-    principal: PrincipalContextReadConversationScopeCapability,
-    seal: _ConversationScopeAuthoritySeal,
-) -> bool:
-    try:
-        _DELEGATED_CAPABILITIES[foundup] = _DelegatedConversationScopeSeal(
-            seal, SCOPE_KIND_FOUNDUP
-        )
-        _DELEGATED_CAPABILITIES[principal] = _DelegatedConversationScopeSeal(
-            seal, SCOPE_KIND_PRINCIPAL
-        )
-    except Exception:
-        _DELEGATED_CAPABILITIES.pop(foundup, None)
-        _DELEGATED_CAPABILITIES.pop(principal, None)
-        return False
-    return True
+        try:
+            for child, (_child_type, kind) in zip(children, specifications):
+                _DELEGATED_CAPABILITIES[child] = _DelegatedConversationScopeSeal(
+                    seal, kind
+                )
+        except Exception:
+            for child in children:
+                _DELEGATED_CAPABILITIES.pop(child, None)
+            return None
+    return children
 
 
 def consume_conversation_scope_capability(
@@ -213,8 +219,12 @@ def _consume_capability_seal(
 
 def conversation_scope_authority_view(authority: Any) -> Mapping[str, Any] | None:
     seal = _authority_seal(authority)
-    if seal is None:
-        return None
+    return None if seal is None else _conversation_scope_authority_view(seal)
+
+
+def _conversation_scope_authority_view(
+    seal: _ConversationScopeAuthoritySeal,
+) -> Mapping[str, Any]:
     return {
         "principal_id": seal.principal_id,
         "principal_provider": seal.principal_provider,
@@ -230,6 +240,20 @@ def conversation_scope_authority_view(authority: Any) -> Mapping[str, Any] | Non
         "repo_full_name": seal.repo_full_name,
         "expires_at": seal.expires_at,
     }
+
+
+def consume_and_verify_record_with_scope_authority(
+    authority: Any, record: Mapping[str, Any],
+) -> Mapping[str, Any] | None:
+    """Atomically retire authority, then verify its exact signed scope record."""
+    if type(authority) is not VerifiedConversationScopeAuthority:
+        return None
+    with _LOCK:
+        seal = _AUTHORITIES.pop(authority, None)
+    return (
+        _conversation_scope_authority_view(seal)
+        if seal is not None and _verify_record_with_seal(seal, record) else None
+    )
 
 
 def consume_verified_scope_authority_for_scope_creation(
@@ -463,12 +487,14 @@ __all__ = [
     "PrincipalContextReadConversationScopeCapability",
     "ResidentConversationRequestJournalAuthority",
     "VerifiedConversationScopeAuthority",
+    "consume_and_verify_record_with_scope_authority",
     "consume_conversation_scope_capability",
     "consume_resident_conversation_request_journal_authority",
     "consume_verified_scope_authority_for_scope_creation",
     "consume_verified_scope_authority_for_request_journal",
     "conversation_scope_authority_view", "discard_conversation_scope_capability",
     "resident_conversation_request_journal_authority_matches",
+    "split_foundup_conversation_scope_capability_pair",
     "split_conversation_scope_capability",
     "sign_record_with_scope_authority", "verify_record_with_scope_authority",
 ]

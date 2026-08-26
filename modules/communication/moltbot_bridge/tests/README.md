@@ -32,6 +32,16 @@ change the intent-derived session binding and prove one stable signed session
 cannot split one nonce into multiple scopes. The aggregate neither journals nor
 executes the first turn and contains no handler/model/worker/CAS effect wiring.
 
+`test_reddog_resident_conversation_first_turn_resolution.py` owns the distinct
+durable-link aggregate. It proves explicit v2/source-vs-derived request digest
+semantics, two separately registered FoundUp authority siblings, content-free
+storage, exact restart and scope-only crash recovery, related-key and nonce
+divergence rejection, concurrent convergence, authenticated replay through a
+later signed scope revision, signed immutable E0 request-identity commitment,
+full-row journal rewrite rejection, atomic same-authority replay consumption,
+and WSP 62/effect ceilings. It does not test handler execution or conversation
+CAS.
+
 `test_reddog_resident_conversation_scope_binding.py` uses the existing
 temporary SQLite AgentDB fixture and opaque conversation capabilities. It
 proves existing TURN/STATUS/CANCEL admission, content-free output, zero
@@ -73,6 +83,11 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident
 ```powershell
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_new_scope_admission.py -q --basetemp O:\reddog-test-runtime\pytest-new-scope
+```
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_first_turn_resolution.py -q --basetemp O:\reddog-test-runtime\pytest-first-turn
 ```
 
 ## HoloIndex owner replica response contracts

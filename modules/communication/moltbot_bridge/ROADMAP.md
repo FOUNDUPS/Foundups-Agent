@@ -121,8 +121,18 @@
   FoundUp bindings are checked before credential use; the generation lease and
   E0 signer cover authority-native AgentDB create/exact recovery. Signed session
   identity fences nonce divergence, and scope lifetime spans the request.
-- BLOCKED: principal-side credential issuance UX, durable first-turn
-  request-to-resolved-conversation journal binding, host invocation wiring, and
+- COMPLETE: durable first-turn request-to-resolved-conversation journal
+  binding. One signed-session lease produces two separately registered one-use
+  FoundUp authorities; E0 create/exact recovery and the explicit v2
+  `RESOLVED_INITIAL_TURN` journal fence therefore share one credential/
+  generation boundary. Exact authenticated replay remains valid through later
+  signed revisions by checking the immutable E0 receipt chain and its signed
+  source/resolved request commitment; replay authority consumption is atomic.
+- WSP 15 FOLLOW-UP: repair two unchanged legacy WSP 62 ratchets separately:
+  `_visit_type_paths` is 61 lines against its 60-line ceiling and
+  `reddog_main_readonly_operational_bootstrap.py` is 858 lines against its
+  857-line no-growth ceiling. Neither file is part of this first-turn slice.
+- BLOCKED: principal-side credential issuance UX, host invocation wiring, and
   operation-specific TURN/STATUS/CANCEL handlers with immediate authenticated
   CAS. Environment principal/FoundUp values are not authentication.
 - COMPLETE: one authenticated scope revision and resident intent can be bound

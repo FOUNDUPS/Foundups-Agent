@@ -1,5 +1,29 @@
 # RedDog ModLog
 
+## 2026-08-26 - Durable first-TURN link compatibility (0.4.111)
+
+- Rebound the 1,384-file authenticated backend closure after hardening the
+  existing capability/session authority seams for atomic two-FoundUp
+  delegation. Exact manifest digest:
+  `d58c0098b3c873683becbce6e2228ba41841f111913ce72e72bf49eb1df786cb`.
+- Canonical staged-index registry governance is current at **1,582 tests /
+  268 quarantined**.
+- Focused Python/backend-generator/registry evidence passes; the fast
+  14-member tier, 32-vector conversation tier, and deterministic package
+  surface pass at **67 files / 965,288 bytes**.
+- The new explicit v2 first-TURN contract, binder, aggregate, scope-identity
+  extraction, journal-store extension, and tests remain outside the VSIX import
+  closure because the extension still has no resident service caller. Version
+  0.4.111 identifies compatibility with those backend bytes; it adds no host
+  endpoint, handler, conversation CAS, model, worker, repository, or Holo
+  effect. (WSP 00/15/22/50/62/84/97)
+- Independent WSP 97 contract-integrity review rejected the first candidate:
+  journal self-digests could be rewritten with idempotency identity, and replay
+  viewed authority before retiring it. Backend scope schema v4 now signs the
+  exact source/resolved request commitment in immutable E0 state and replay
+  atomically consumes/verifies its authority. Full-row rewrite and barrier-race
+  regressions preserve fail-closed behavior.
+
 ## 2026-08-26 - Trusted new-scope backend compatibility (0.4.110)
 
 - Pinned the authenticated backend closure after the trusted empty-ID TURN

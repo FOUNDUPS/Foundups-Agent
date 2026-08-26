@@ -1,5 +1,17 @@
 # RedDog Extension Tests
 
+## 0.4.111 durable first-TURN link compatibility
+
+The 1,384-file generated backend closure at
+`sha256:cb777a1a...d65e7dce` is rebound to the atomic two-FoundUp
+capability/session authority seam. The explicit v2 link aggregate and its
+other new modules remain outside the extension import closure because no VSIX
+service caller exists. Package and release tests therefore prove compatibility,
+not live first-turn execution, handler/CAS wiring, or PFMall/phone transport.
+The canonical staged-index registry contains 1,582 tests / 268 quarantined.
+Focused Python/backend-generator/registry evidence is 134 passed; the package
+surface is 67 files / 965,288 bytes.
+
 ## 0.4.110 trusted new-scope backend compatibility
 
 The 1,384-file generated backend closure at `sha256:3211a4e5...c8498` was

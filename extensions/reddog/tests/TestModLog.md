@@ -1,5 +1,20 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-26 - Durable first-TURN link compatibility (0.4.111)
+
+- Rebound the exact 1,384-file authenticated backend closure after atomic
+  two-FoundUp capability/session delegation. Canonical digest:
+  `d58c0098b3c873683becbce6e2228ba41841f111913ce72e72bf49eb1df786cb`.
+- Canonical staged-index registry: **1,582 tests / 268 quarantined**.
+- Candidate Python/backend-generator/registry evidence passes, alongside fast
+  `14/14`, conversation `32 passed`, and deterministic package
+  **67 files / 965,288 bytes**.
+- Version, package, generated-manifest, focused conversation, and release gates
+  bind the VSIX to the backend slice without claiming a host caller, handler,
+  immediate CAS, model/worker execution, or live adapter.
+- Added adversarial backend evidence for signed immutable E0 request identity
+  and exactly-once atomic consumption of one replay authority.
+
 ## 2026-08-26 - Trusted new-scope backend compatibility (0.4.110)
 
 - Rebound the authenticated backend closure after the repaired new-scope slice;
