@@ -1,10 +1,46 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-26: Current-session resident admission aggregate Phase 1
+
+- Added one inert host operation for existing conversations that composes the
+  strict resident request preflight, current-generation principal-signed
+  session lease, exact authenticated AgentDB scope binding, and durable
+  content-free replay reservation. The signed-generation lease remains held
+  through journal completion; no host traffic or handler calls this API yet.
+- Added an authority-native binder for the session source's already-consumed
+  `VerifiedConversationScopeAuthority`. It accepts only a live registered
+  authority matching the current authenticated record, atomically retires it
+  while issuing at most one reservation child, and retires it on rejection.
+- Independent WSP 97 falsification reproduced concurrent double-use of the
+  initially non-atomic parent, arbitrary typed-error text propagation, and an
+  exact-type malformed request exception. The repair moves child issuance and
+  parent retirement under one capability-registry lock with record
+  re-verification, allowlists public session-source reasons, and makes request
+  prevalidation total and fail closed.
+- The fresh audit then reproduced a direct E0 cross-session record/parent
+  transplant against the new atomic primitive. The deepest operation now
+  enforces the complete record-to-seal identity tuple before issuing a child;
+  mismatched E0 session and hostile Mapping inputs burn the parent and return
+  no child without leaking an exception.
+- A fresh-context independent WSP 00/WSP 97 audit returned **GO** on the final
+  five implementation/test hashes with `36 passed`; no requested correctness
+  invariant remained unproven.
+- Malformed, stale, and new-scope requests reject before credential leasing;
+  stable authority-source failures remain typed and unexpected failures close
+  to one public admission-unavailable reason. The aggregate stores or returns
+  no credential, operator text, principal, or FoundUp identity and grants no
+  conversation CAS, model, worker, repository, or effect authority.
+- WSP 15: C4/I5/D4/Impact5 = **18/P0**. The governed Holo query failed closed
+  once on authority/workspace HEAD mismatch; no retry, reindex, route repair,
+  or Holo mutation occurred. Direct must-include source and document retrieval
+  grounded the bounded slice. WSP 00/15/22/50/62/84/97.
+
 ## 2026-08-26: Resident conversation request idempotency Phase 1
 
 - Added a bounded AgentDB request journal after the existing authenticated
-  request-to-scope binding. The binder now derives a non-constructible one-use
-  child only from the live registered secret-backed scope authority, binds it
+  request-to-scope binding. The binder now atomically consumes the live
+  registered secret-backed scope authority to issue a non-constructible one-use
+  child and binds it
   to the canonical reservation identity, and excludes it from serialization.
   The store consumes that proof before database access and uses its owned clock
   to recheck request/scope expiry plus the exact current scope revision, record
@@ -20,7 +56,7 @@
   stored record, and a serialized global counter closes horizontal cap races.
 - A second independent NO-GO proved that an underscore-only digest registrar
   was forgeable inside Python. That registrar/module was removed. Journal
-  authority now derives from the pre-existing live verified authority registry;
+  authority now comes from atomically consuming the pre-existing live verified authority registry;
   unregistered-parent minting, direct-store bypass, one-use behavior, and
   backdated expiry are falsified explicitly.
 - Production-shaped mapping rows exposed the same older positional-access drift

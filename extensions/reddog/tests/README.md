@@ -1,5 +1,14 @@
 # RedDog Extension Tests
 
+## 0.4.109 resident admission compatibility
+
+The authenticated backend closure remains 1,383 files and is rebound to
+`sha256:5d8ef0cf...feea` after the inert current-session admission layer made
+verified-parent consumption atomic and identity-exact. Version tests bind the
+VSIX to 0.4.109. No extension caller activates the aggregate; traffic,
+handlers, models, workers, conversation CAS, and new-scope resolution remain
+outside this release.
+
 ## 0.4.108 canonical identity grounding
 
 The exhaustive product-identity assertions bind README and ROADMAP to their

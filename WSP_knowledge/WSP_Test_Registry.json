@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1579,
-  "quarantined_tests": 267,
+  "total_tests": 1580,
+  "quarantined_tests": 268,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -9761,6 +9761,21 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for runtime control-loop signer context resolution."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_resident_conversation_admission",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_admission.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-moltbot-bridge-operational",
+      "capabilities": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_file_write"
+      ],
+      "description": "Adversarial tests for current-session resident request admission."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_resident_conversation_request_journal",

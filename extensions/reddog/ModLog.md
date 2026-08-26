@@ -1,5 +1,22 @@
 # RedDog ModLog
 
+## 2026-08-26 - Resident admission compatibility rebind (0.4.109)
+
+- Rebound the existing authenticated backend closure after atomic
+  record/parent identity consumption and total current-session admission were
+  added behind the still-unwired host boundary. The dependency set remains
+  **1,383 files**; canonical manifest digest:
+  `5d8ef0cf64ffc12c4a8dda5fef6259653791e91e5824b7baba815bdfccb5feea`.
+- Version `0.4.109` identifies this exact compatibility pin. The VSIX still has
+  no caller for the new aggregate and gains no endpoint, handler, model,
+  worker, conversation CAS, new-scope, Holo maintenance, or repository effect.
+  (WSP 00/15/22/50/62/84/97)
+- The rebound 18-shard contract reconstructs 6,929 lines / 490 assertions at
+  `sha256:77c56bd30c800a50785d48bb77e5fb788f5ff5c85116d747ef16f5d34ddca0f9`.
+  Fast `14/14`, contract `3/3`, conversation `32 passed`, and deterministic
+  67-file package tiers pass. Exact-final package bytes and release timing are
+  retained outside tracked self-referential documentation.
+
 ## 2026-08-26 - Resident replay dependency closure rebind (0.4.108)
 
 - Linux fast-tier CI correctly rejected the backend runtime preflight after the

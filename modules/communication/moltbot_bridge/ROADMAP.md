@@ -102,17 +102,22 @@
   transport, TTL, principal, FoundUp, current generation, intent and grounding.
 - COMPLETE: admission-only binding of an existing transport envelope to one
   consumed session capability and exact authenticated AgentDB CAS revision.
-  While the verified secret-backed authority remains live, it derives one
-  opaque child bound to the canonical reservation identity and excludes that
-  process-local proof from output.
+  One atomic capability operation retires the verified secret-backed parent,
+  re-verifies the exact record, and issues at most one opaque child bound to the
+  canonical reservation identity; the process-local proof stays out of output.
 - COMPLETE: durable, content-free AgentDB request reservation with exact replay,
   divergent global key/request/nonce rejection, bounded serialized capacity,
   SQLite/PostgreSQL locking, and an atomic current unexpired scope revision/
   digest/revision-receipt fence. The store consumes the binder proof before
   database access and uses its owned clock to prevent expiry backdating. It
   does not reserve conversation CAS or authorize handler execution.
+- COMPLETE: inert current-generation admission aggregation for existing
+  conversations. One host call prevalidates the request before credential use,
+  holds the signed-generation lease through authority-native scope binding and
+  durable reservation, consumes the verified parent, and returns only the
+  existing content-free result. It is not wired to traffic or handlers.
 - BLOCKED: principal-side credential issuance UX, trusted new-scope selection,
-  admission aggregation, and operation-specific TURN/STATUS/CANCEL handlers
+  host invocation wiring, and operation-specific TURN/STATUS/CANCEL handlers
   with immediate authenticated CAS. Environment principal/FoundUp values are
   not authentication.
 - COMPLETE: one authenticated scope revision and resident intent can be bound

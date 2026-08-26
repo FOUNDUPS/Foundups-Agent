@@ -1899,7 +1899,7 @@
     "modules/communication/moltbot_bridge/src/reddog_bounded_worktree_worker_execution_pilot.py": "a8c74b5a9ad51bbca6f3eee467e9d0e226ef2434c9498f2e26c60219d49e65b9",
     "modules/communication/moltbot_bridge/src/reddog_context_snapshot_fusion_assignment_gate.py": "1806aae90fa2a605f9e14cefc2ea55ade1a9e671688424053e302d96366011d2",
     "modules/communication/moltbot_bridge/src/reddog_conversation_scope_authentication.py": "9cbe76637aa9dce2398051d75bf0b477a3bba482585d4cb1449cacf24b5e1eaf",
-    "modules/communication/moltbot_bridge/src/reddog_conversation_scope_capability.py": "435e914e83cffe52ff33fc0ce1a6ff35cf45dfd300e3c61690376e0f6d979732",
+    "modules/communication/moltbot_bridge/src/reddog_conversation_scope_capability.py": "0ac828abbc2d3f04d309740fa6ab76139fa371f41279691430e0533bd7050cde",
     "modules/communication/moltbot_bridge/src/reddog_conversation_scope_contract.py": "c9cb637d210c7de95984cd4a954d4e5201576239428289202c118d6145a571a9",
     "modules/communication/moltbot_bridge/src/reddog_conversation_scope_digest.py": "65b565f3f9bc1ef48e2faf728e4cf41427cf1aa4a1e9885f2c5d5f1e8d3ac4fa",
     "modules/communication/moltbot_bridge/src/reddog_conversation_scope_kind.py": "aa457ca994d8776cbd0417b04449efc7d60f2de3030d3870e0f5896127b9a50c",
