@@ -1,0 +1,86 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "61c2c3003bc4c2086f105f4c39effd499a026627"
+  },
+  "execution_id": "REDDOG_GOVERNED_HOLO_USABILITY_PHASE2",
+  "execution_plane": "local_tools",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "modules/communication/moltbot_bridge/README.md",
+      "modules/communication/moltbot_bridge/INTERFACE.md",
+      "modules/communication/moltbot_bridge/ROADMAP.md",
+      "modules/communication/moltbot_bridge/ModLog.md",
+      "modules/communication/moltbot_bridge/tests/README.md",
+      "modules/communication/moltbot_bridge/tests/TestModLog.md",
+      "modules/communication/moltbot_bridge/src/reddog_generation_bound_holoindex_query_adapter.py",
+      "modules/communication/moltbot_bridge/tests/test_reddog_generation_bound_holoindex_query_adapter.py"
+    ],
+    "research": [
+      "Governed Holo receipt sha256:70bb452efaa2f4f2ecbb0251c18d7f0ea858c800d80fba656f7ad5360dd4a902 returned CURRENT committed-head evidence with no gap or reindex.",
+      "A real resident-adapter candidate-overlay canary returned CURRENT with three scoped hits, no gap/reindex, one owner attempt, and committed_head_only authority in 31.6 seconds.",
+      "The long-lived host carried a retired legacy replica variable while the activated stable route existed at user scope; dual configuration remained fail-closed and no query-time repair or reindex ran."
+    ],
+    "micro_pass": [
+      "25 focused generation-bound adapter tests passed, including trusted site-packages propagation and ambient provider/Git/principal secret rejection.",
+      "8 backend-manifest generator tests passed against the staged index.",
+      "The WSP 62 candidate gate and 18-shard/6,929-line/490-assertion reconstruction passed."
+    ],
+    "macro_pass": [
+      "The expanded adapter/worker/one-shot/supervisor matrix passed 428 tests with one platform-limited skip.",
+      "RedDog fast, contract, and deterministic 67-file package tiers passed; package content digest sha256:94fcb00b46f8adad598d59e26525c43d797530f68c6078484afc260d439f35c3 remained below the 1 MiB cap.",
+      "The final four-group RedDog release supervisor passed in 164936 ms without timeout."
+    ],
+    "hard_think": [
+      "Separated semantic authority from caller overlay state: only clean_workspace_head requires a clean caller, while committed_head_only remains bound to a separate exact same-HEAD authority.",
+      "Rejected the incomplete venv repair after audit showed the selected trusted site-packages tuple was discarded and the ambient environment crossed the child boundary.",
+      "Retained the exclusive route-versus-legacy configuration rule instead of silently selecting between ambiguous capabilities."
+    ],
+    "dialectic_sweep": [
+      "Independent WSP 97 auditors issued NO-GO findings for WSP 62 growth, stale WSP_95 assertions, incomplete runtime propagation, ambient secret forwarding, missing root ModLog trace, and historical-canary overclaim.",
+      "The first audit round's WSP 62, WSP_95, runtime propagation, secret forwarding, root trace, and canary-identity findings were repaired without weakening ceilings or redaction policy."
+    ],
+    "first_principles": [
+      "A usable Holo path must return CURRENT exact-generation evidence without granting query-time maintenance, reindex, repository, model, or Hermes authority.",
+      "A trusted child retains required OS/runtime variables, exact Holo configuration, and the vetted runtime path; recognized credentials, private unrelated RedDog state, and caller-controlled Python import overrides are excluded."
+    ],
+    "execute": [
+      "modules/communication/moltbot_bridge/src/reddog_generation_bound_holoindex_query_adapter.py",
+      "modules/communication/moltbot_bridge/tests/test_reddog_generation_bound_holoindex_query_adapter.py",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/tests/contract_shards/manifest.json"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_GOVERNED_HOLO_USABILITY_WSP97_EXECUTION_RECEIPT_PHASE2.json",
+    "ModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "modules/communication/moltbot_bridge/tests/TestModLog.md"
+  ]
+}

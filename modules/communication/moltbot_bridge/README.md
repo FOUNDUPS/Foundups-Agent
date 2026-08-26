@@ -16,16 +16,16 @@ CURRENT semantic response with equal repository/authority/replica bindings,
 and projects only signed-scope hit metadata. Raw semantic buckets and the
 one-shot receipt body never enter Fusion/model context; the worker builds a new
 scoped query receipt. Shared in-process callers are serialized at the one-shot
-owner lifecycle. The resident boundary is 30 seconds including lock wait: at
-most 27 seconds enter the child operation and three seconds remain for parent
-cleanup. That budget is calibrated above the previously observed 14.5-18.5
-second cold owner startup range; the earlier 15-second diagnostic budget was
-known to produce false `NOT_READY` results. This is the implemented Holo
-grounding path used by the canonical resident worker, but a clean/current
-post-merge success canary is still required before activation. The current
-dirty-authority probe proves only fail-closed reachability. The process-local
-lock and per-query cold child are safe phase-1 constraints, not horizontal
-throughput claims. The path does not perform outbound Hermes dispatch.
+owner lifecycle. The resident boundary is 60 seconds including lock wait: at
+most 57 seconds enter the child operation and three seconds remain for parent
+cleanup. A cold query exceeded the former 27-second child budget; the repaired
+child completed CURRENT in 32.5 seconds. Windows venv callers reuse the owner
+supervisor's vetted base runtime/site-packages and scrubbed child environment before isolated `-S -B`; required OS/runtime variables and exact Holo configuration cross, while recognized credentials and Python overrides do not.
+A committed authority permits clean or overlaid callers, while
+`clean_workspace_head` requires no overlay; all exact HEAD/root/generation/
+replica/receipt checks remain mandatory. Historical canary evidence at commit
+`61c2c3003bc4c2086f105f4c39effd499a026627` does not authorize later HEADs. The process-local lock and per-query cold child are phase-1 correctness limits,
+not horizontal throughput claims. No outbound Hermes dispatch is performed.
 
 ## Receipt-bound artifact model routing
 

@@ -1,5 +1,19 @@
 # Tests - OpenClaw Bridge
 
+## Resident governed Holo usability
+
+`test_reddog_generation_bound_holoindex_query_adapter.py` proves the resident
+adapter admits a separate committed same-HEAD authority for both clean and
+overlaid callers, while a workspace authority with an overlay and unknown
+authority labels still fail closed. It also proves the child reuses the owner
+supervisor's runtime/site-packages, scrubs ambient secrets before `-S -B`, and retains the 60-second parent,
+57-second operation, and three-second cleanup bounds. The focused suite is 25
+passed; the expanded adapter/worker/one-shot/supervisor matrix is 428 passed / 1 skipped. The
+historical commit-bound canary at
+`61c2c3003bc4c2086f105f4c39effd499a026627` returned CURRENT with two scoped
+hits and no reindex in 32.5 seconds; it did not mutate Holo or the repository
+and does not authorize the candidate or any later commit.
+
 ## Main bootstrap WSP 62 extraction
 
 The existing authority exact-schema suite now covers list, tuple, empty, and

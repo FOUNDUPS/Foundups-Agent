@@ -140,7 +140,7 @@ const GOLDEN_7FILE_FOUNDUP_PROMPT = [
   'End with WSP_15 priority and the next safest slice.'
 ].join('\n');
 
-// WSP_95 contains fail-closed "chain-of-thought" literals (private_reasoning BLOCK even in audit_mode).
+// Keep the historical 6-target golden shape stable; WSP_95 policy safety is proven separately.
 // Golden wire proof uses the 6 governance/code targets that pass audit-mode egress.
 const GOLDEN_6FILE_AUDIT_PROMPT = [
   'Audit the FoundUp creation monorepo WSP_109 execution path.',
@@ -153,8 +153,8 @@ const GOLDEN_6FILE_AUDIT_PROMPT = [
 
 // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (RTP-001..005 + ADDENDUM B): the golden
 // 6-file FoundUp-creation audit prompt used to prove protected required-target packing.
-// Uses the 6 governance/code targets (WSP_95 excluded: its chain-of-thought literals
-// fail-closed in audit_mode) and DELIBERATELY omits "WSP_97" prose so the packing tests
+// Uses the historical 6 governance/code targets (WSP_95 safety is tested separately)
+// and DELIBERATELY omits "WSP_97" prose so the packing tests
 // do not trip the WSP_97 excerpt path -- this is a pure PACKING proof.
 const GOLDEN_6FILE_TARGETS = GOLDEN_7FILE_TARGETS.filter((t) => !t.includes('WSP_95'));
 const GOLDEN_6FILE_FOUNDUP_PROMPT = [
@@ -255,8 +255,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.113', 'package version must be 0.4.113');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.113'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.114', 'package version must be 0.4.114');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.114'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');

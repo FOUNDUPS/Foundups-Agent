@@ -1,5 +1,25 @@
 # RedDog ModLog
 
+## 2026-08-27 - Governed resident Holo usability contract (0.4.114)
+
+- Aligned the VSIX documentation with the repaired resident adapter: valid
+  configured committed authority is no longer coupled to caller cleanliness,
+  the bounded cold-query wall is 60 seconds with a 57-second child and
+  three-second cleanup reserve, and the historical commit-bound canary is recorded.
+- The 32.5-second canary at `61c2c3003bc4c2086f105f4c39effd499a026627`
+  returned CURRENT with two scoped hits and no reindex; it does not authorize
+  the candidate or any later commit.
+  Per-query child startup and process-local serialization remain explicit scale
+  debt; no Hermes dispatch, model authority, or repository effect was added.
+- Rebuilt the authenticated backend closure after the prior WRE execution-truth
+  merge and this adapter repair: **1,343 files**, digest
+  `ba41d84612db22b5d24621c4b3ca8ea1c7a6e2f69ee131e963369fa12b30819e`.
+- Repaired stale ACB-006 grounding after WSP_95 v2.1 removed its historical
+  unsafe literal: canonical WSP_95 must pass audit-mode egress, while an
+  explicit synthetic private-reasoning payload must still fail closed. The
+  exhaustive 18-shard release gate passes without relaxing redaction policy.
+  (WSP 00/15/22/50/62/87/97)
+
 ## 2026-08-26 - Backend WSP 62 compatibility (0.4.113)
 
 - Rebound the authenticated backend closure after extracting the main

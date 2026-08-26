@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.113 resident architect thin-client surface.
+Phase: RedDog 0.4.114 resident architect thin-client surface.
 
 Current implementation:
 
@@ -33,10 +33,10 @@ Current implementation:
   resident/OpenClaw read-only worker now use the same verified replica resolver
   and owner-query contract. The resident path is child-process bounded,
   response/receipt bound, scoped before Fusion, and performs no reindex or
-  Hermes dispatch. The 30-second parent wall reserves three seconds for cleanup
-  around an at-most-27-second child operation. A dirty-authority probe proves
-  fail-closed reachability, not live success; clean/current post-merge success
-  remains an activation gate. P1 throughput work may replace per-query cold
+  Hermes dispatch. The 60-second parent wall reserves three seconds for cleanup
+  around an at-most-57-second child operation. Exact-main activation and a real
+  owner query passed at `61c2c3003bc4c2086f105f4c39effd499a026627` on 2026-08-27; later HEADs require their
+  own evidence. P1 throughput work may replace per-query cold
   starts and process-local-only serialization with a supervised lease only if
   identical route, cleanup, and receipt proofs remain.
 

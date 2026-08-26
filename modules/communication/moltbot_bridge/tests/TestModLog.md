@@ -1,3 +1,24 @@
+## 2026-08-27: Resident governed Holo usability regressions
+
+- RED proved a valid `committed_head_only` result was rejected solely because
+  the caller checkout was clean, an unsealed Windows venv child exited during
+  startup, and the former 27-second child budget timed out a real cold query.
+- Added clean/overlaid committed-authority positives, impossible overlaid
+  workspace-authority and unknown-authority negatives, and exact owner-runtime
+  resolver command coverage. The runtime regression now proves vetted
+  site-packages propagate while provider/Git/principal secrets and hostile
+  Python overrides do not. Focused result: **25 passed**; expanded adapter/
+  worker/one-shot/supervisor matrix: **428 passed / 1 skipped**.
+- The real default adapter then returned CURRENT, two scoped hits, no gap, no
+  reindex, one owner attempt, and a 32.5-second wall at historical exact commit
+  `61c2c3003bc4c2086f105f4c39effd499a026627`. This evidence does not authorize
+  the candidate or any later commit. This is commit-bound live
+  evidence, not a horizontal-throughput or future-commit claim.
+- A post-hardening candidate-overlay run through the real adapter returned
+  CURRENT with three scoped hits, no gap/reindex, and one attempt in 31.6
+  seconds. Its semantic authority remained the exact committed base above;
+  this verifies the candidate execution path, not a future commit activation.
+
 ## 2026-08-26: Exact single-Skillz scan regression
 
 - Added command-shape coverage proving direct `SKILLz.md` bundles use Cisco

@@ -1,5 +1,30 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-27: Resident governed Holo usability repair
+
+- Reproduced three distinct boundaries instead of treating fail-closed output
+  as usability: the stable route bound to historical exact commit
+  `61c2c3003bc4c2086f105f4c39effd499a026627` returned CURRENT; the resident
+  normalizer rejected its valid configured `committed_head_only` authority;
+  and the default cold child exceeded the former 27-second operation budget.
+- Preserved every exact HEAD/root/generation/replica/receipt/no-mutation check.
+  `clean_workspace_head` still requires no caller overlay; committed-head
+  evidence now permits either caller state because authority may be a separate
+  clean same-HEAD checkout. Windows venv callers reuse the supervisor's vetted
+  base runtime/site-packages, while its scrubber removes ambient credentials
+  and Python overrides before restoring only exact Holo configuration. The bounded budgets
+  are now 60/57 seconds with the existing three-second cleanup reserve.
+- RED reproduced authority rejection, missing trusted-path propagation, ambient
+  credential forwarding, and runtime selection; GREEN is 25 focused
+  tests. A real default adapter query returned CURRENT, two scoped hits, no gap,
+  no reindex, and one owner attempt in 32.5 seconds. This commit-bound evidence
+  does not authorize the candidate or any later commit. Per-query cold startup and
+  process-local serialization remain scale debt. (WSP 00/15/22/34/50/62/87/97)
+- After environment hardening, the candidate-overlay adapter returned CURRENT
+  with three scoped hits, no gap/reindex, and one attempt in 31.6 seconds. The
+  query remained bound to exact committed authority
+  `61c2c3003bc4c2086f105f4c39effd499a026627`; it is not future-commit evidence.
+
 ## 2026-08-26: OpenClaw refactor-status truth correction
 
 - Corrected the touched README/INTERFACE current line-count claim: the active

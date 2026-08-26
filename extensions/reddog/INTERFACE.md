@@ -34,13 +34,13 @@ that proposal.
 
 The VSIX one-shot and canonical resident/OpenClaw read-only worker share the
 same generation-bound owner-query contract. The resident adapter has a
-30-second total wall, passes no more than 27 seconds into the child operation,
+60-second total wall, passes no more than 57 seconds into the child operation,
 and reserves three seconds for parent cleanup. It exposes only allowed scoped
 hit metadata after exact CURRENT repository, authority, generation, replica,
 and receipt verification; Fusion receives no route or owner credential.
 
-The implementation is not activation evidence. A clean/current post-merge
-live-success canary is still required. Per-query child startup and
+Exact-main activation and a real owner query passed at `61c2c3003bc4c2086f105f4c39effd499a026627` on
+2026-08-27; this evidence does not carry across commits. Per-query child startup and
 process-local-only serialization are explicit P1 scalability debt, and no
 outbound Hermes dispatch is enabled by this interface.
 

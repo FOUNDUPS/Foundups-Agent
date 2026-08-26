@@ -1,5 +1,22 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-27] RedDog Governed Holo Usability Repair
+
+**WSP Protocols:** WSP 00, 15, 22, 50, 62, 84, 87, 97
+
+- Repaired the resident generation-bound Holo adapter's committed-authority,
+  sealed-runtime/site-packages, scrubbed child environment, and cold-query
+  budget handling without adding query-time mutation or reindex authority.
+- Rebound RedDog 0.4.114 to the authenticated 1,343-file backend closure at
+  `ba41d84612db22b5d24621c4b3ca8ea1c7a6e2f69ee131e963369fa12b30819e`.
+- Historical commit-bound canary evidence at
+  `61c2c3003bc4c2086f105f4c39effd499a026627` is CURRENT/no-gap/no-reindex but
+  does not authorize this candidate or a later commit. Cold per-query startup
+  and process-local serialization remain explicit scale debt.
+- A post-hardening candidate-overlay adapter run also returned CURRENT with
+  three scoped hits, no gap/reindex, and one attempt in 31.6 seconds, while
+  retaining the exact committed semantic authority above.
+
 ## [2026-08-26] RedDog Bootstrap WSP 62 Extraction
 
 **WSP Protocols:** WSP 00, 15, 22, 50, 62, 84, 97

@@ -1,5 +1,24 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Governed resident Holo usability (0.4.114)
+
+- Bumped the thin-client identity and contract fixtures after the shared
+  generation-bound resident adapter repair.
+- The bridge-owned focused result is 25 passed; its expanded owner/worker/
+  supervisor matrix is 428 passed / 1 skipped. The historical canary at
+  `61c2c3003bc4c2086f105f4c39effd499a026627` returned CURRENT but does not
+  authorize the candidate or any later commit.
+- The regenerated backend closure is 1,343 files at
+  `ba41d84612db22b5d24621c4b3ca8ea1c7a6e2f69ee131e963369fa12b30819e`.
+- Replaced the obsolete expectation that canonical WSP_95 contains a blocked
+  phrase with separate positive and negative proofs: the current protocol
+  passes audit mode, and an explicit `private_reasoning` probe still blocks.
+- Rebound the 18-shard aggregate to
+  `sha256:a042b670b7f1ef12f80edeb18c26f3bfe78ddc360d1fd1f9ca2d2021053aa1ee`;
+  the full four-group release supervisor passes.
+- This entry records extension compatibility only; no extension Holo mutation,
+  worker dispatch, or Hermes authority was added.
+
 ## 2026-08-26 - Backend WSP 62 compatibility (0.4.113)
 
 - Pinned the 1,385-file authenticated closure at

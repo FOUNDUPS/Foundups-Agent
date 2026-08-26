@@ -380,21 +380,21 @@ try {
 }
 assert(acbDefaultBlocked, 'ACB-003: audit_context=false/default gate must still block governance structure content');
 
-// ACB-004: golden direct-read section (6 governance/code targets; excludes WSP_95 chain-of-thought literal) passes audit-mode gate.
+// ACB-004: the historical 6-target golden direct-read section passes the audit-mode gate.
 const acbHolo = orchestrator.holoIndexOutput(root, GOLDEN_6FILE_AUDIT_PROMPT, 18000);
 assert.strictEqual(acbHolo.direct_read_section && acbHolo.direct_read_section.audit_context, true, 'ACB-004: governance direct-read must set audit_context on direct-read section');
 fusionRedactionGateAuditMode(acbHolo.direct_read_section.text, 'ACB-004 golden direct-read section audit-mode gate');
 
-// ACB-006: WSP_95 direct-read content STILL blocks in audit_mode (private_reasoning fail-closed; not relaxed by this slice).
-const wsp95Path = 'WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md';
-const wsp95Snippet = fs.readFileSync(path.join(root, wsp95Path), 'utf8').slice(0, 12000);
-let acbWsp95Blocked = false;
+// ACB-006: canonical WSP_95 is safe to audit, while explicit private reasoning remains fail-closed.
+const wsp95Protocol = fs.readFileSync(path.join(root, 'WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md'), 'utf8');
+fusionRedactionGateAuditMode(wsp95Protocol, 'ACB-006 complete canonical WSP_95 audit-mode probe');
+let acbPrivateReasoningBlocked = false;
 try {
-  fusionRedactionGateAuditMode(wsp95Snippet, 'ACB-006 WSP_95 audit-mode probe');
-} catch (wsp95Err) {
-  acbWsp95Blocked = true;
-  includes(String((wsp95Err && wsp95Err.stdout) || ''), 'private_reasoning', 'ACB-006: WSP_95 must block on private_reasoning even in audit mode');
+  fusionRedactionGateAuditMode('private_reasoning hidden plan', 'ACB-006 synthetic private-reasoning probe');
+} catch (privateReasoningErr) {
+  acbPrivateReasoningBlocked = true;
+  includes(String((privateReasoningErr && privateReasoningErr.stdout) || ''), 'private_reasoning', 'ACB-006: explicit private reasoning must block in audit mode');
 }
-assert(acbWsp95Blocked, 'ACB-006: WSP_95 chain-of-thought literal must remain fail-closed in audit mode');
+assert(acbPrivateReasoningBlocked, 'ACB-006: explicit private reasoning must remain fail-closed in audit mode');
 
 // ACB-005: audit-mode still redacts synthetic secrets embedded in golden direct-read probe.

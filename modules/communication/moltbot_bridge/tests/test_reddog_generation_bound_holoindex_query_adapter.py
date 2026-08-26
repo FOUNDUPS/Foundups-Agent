@@ -91,8 +91,9 @@ def test_adapter_reuses_governed_one_shot_and_scopes_hits(tmp_path: Path) -> Non
         "retrieval_mode": "semantic",
         "include_bundle": False,
     }, tmp_path)
-    assert 0 < calls[0][2] <= 27
-    assert calls[0][2] < calls[0][3] <= 30
+    assert 0 < calls[0][2] <= 57
+    assert 30 < calls[0][3] <= 60
+    assert calls[0][2] < calls[0][3]
     assert result["ok"] is True
     assert result["freshness"] == "CURRENT"
     assert result["freshness_generation_id"] == digest
@@ -103,6 +104,25 @@ def test_adapter_reuses_governed_one_shot_and_scopes_hits(tmp_path: Path) -> Non
     assert "raw_result" not in result
     assert "semantic_evidence_json" not in result
     assert "query_receipt" not in result
+
+
+@pytest.mark.parametrize("workspace_overlay_present", [False, True])
+def test_adapter_accepts_committed_authority_from_caller_workspace(
+    tmp_path: Path, workspace_overlay_present: bool,
+) -> None:
+    digest = "sha256:" + "a" * 64
+    result = _bound_owner_result("evidence", digest, "b" * 40)
+    result["semantic_evidence_authority"] = "committed_head_only"
+    result["workspace_overlay_present"] = workspace_overlay_present
+    result = _seal_owner_result(result)
+
+    observed = GenerationBoundHoloIndexQueryAdapter(
+        tmp_path, lambda *_args, **_kwargs: result,
+    ).query(query="evidence", allowed_paths=("modules/**",), limit=8)
+
+    assert observed["ok"] is True
+    assert observed["semantic_evidence_authority"] == "committed_head_only"
+    assert observed["workspace_overlay_present"] is workspace_overlay_present
 
 
 def test_adapter_preserves_route_failure_without_service_fallback(tmp_path: Path) -> None:
@@ -286,6 +306,54 @@ def test_production_process_boundary_enforces_hard_timeout(tmp_path: Path) -> No
     assert elapsed < 0.5
 
 
+def test_process_boundary_reuses_owner_runtime_resolution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "reddog_holoindex_owner_query_once.py").write_text(
+        "raise SystemExit(0)\n", encoding="utf-8",
+    )
+    resolved = str(tmp_path / "trusted-base-python.exe")
+    captured = {}
+    monkeypatch.setattr(
+        adapter_module,
+        "_owner_python_runtime",
+        lambda _requested: (resolved, ("trusted-site-packages",)),
+    )
+    monkeypatch.setenv("PYTHONPATH", "hostile-import-path")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "provider-secret")
+    monkeypatch.setenv("GITHUB_TOKEN", "repository-secret")
+    monkeypatch.setenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "principal-secret")
+    monkeypatch.setenv("REDDOG_HOLOINDEX_QUERY_ROUTE_FILE", "trusted-route")
+    monkeypatch.setenv("REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT", "trusted-authority")
+
+    def capture(command, **_kwargs):
+        captured["command"] = list(command)
+        captured["environment"] = dict(_kwargs["environment"])
+        return json.dumps({"ok": False, "error": "EXPECTED"}).encode(), ""
+
+    monkeypatch.setattr(adapter_module, "_capture_owner_process", capture)
+
+    adapter_module._run_owner_query_once(
+        {"query": "evidence"}, repo_root=tmp_path,
+        operation_timeout_seconds=1, process_timeout_seconds=2,
+    )
+
+    assert captured["command"][:4] == [resolved, "-S", "-B", str(
+        scripts / "reddog_holoindex_owner_query_once.py"
+    )]
+    environment = captured["environment"]
+    assert environment["PYTHONPATH"] == "trusted-site-packages"
+    assert environment["REDDOG_HOLOINDEX_QUERY_ROUTE_FILE"] == "trusted-route"
+    assert environment["REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT"] == "trusted-authority"
+    for forbidden in (
+        "OPENROUTER_API_KEY", "GITHUB_TOKEN",
+        "REDDOG_AUTHENTICATED_PRINCIPAL_ID",
+    ):
+        assert forbidden not in environment
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     [
@@ -297,7 +365,8 @@ def test_production_process_boundary_enforces_hard_timeout(tmp_path: Path) -> No
         ("stale_reasons", ["STALE_INDEX"]),
         ("no_authority_worktree_mutation_performed", False),
         ("retrieval_mode", "lexical"),
-        ("semantic_evidence_authority", "committed_head_only"),
+        ("workspace_overlay_present", True),
+        ("semantic_evidence_authority", "unverified"),
     ],
 )
 def test_adapter_rejects_split_or_incomplete_owner_binding(
