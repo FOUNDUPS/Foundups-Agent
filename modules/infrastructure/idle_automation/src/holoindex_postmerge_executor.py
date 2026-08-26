@@ -156,7 +156,7 @@ def _persist_completion(
     )
 
 
-def execute_holoindex_postmerge_task(
+def _execute_holoindex_postmerge_task_for_test(
     *,
     repo_root: Path | str,
     task_id: str,
@@ -166,7 +166,7 @@ def execute_holoindex_postmerge_task(
     environment: Mapping[str, str] | None = None,
     authority_transaction: Callable[..., Any] | None = None,
 ) -> dict[str, Any]:
-    """Execute one already-claimed task through the trusted authority transaction."""
+    """Internal dependency seam; production callers use sealed defaults."""
     database = _load_db(db)
     workspace = Path(repo_root).resolve(strict=False)
     env = os.environ if environment is None else environment
@@ -341,6 +341,27 @@ def execute_holoindex_postmerge_task(
         ok=True,
         detail=json.dumps(structured, sort_keys=True),
         structured_result=structured,
+    )
+
+
+def execute_holoindex_postmerge_task(
+    *,
+    repo_root: Path | str,
+    task_id: str,
+    context: Mapping[str, Any],
+    execution_claim: Mapping[str, str] | None = None,
+    db: AgentDbPort | None = None,
+    environment: Mapping[str, str] | None = None,
+) -> dict[str, Any]:
+    """Execute one claimed task through sealed production dependencies."""
+
+    return _execute_holoindex_postmerge_task_for_test(
+        repo_root=repo_root,
+        task_id=task_id,
+        context=context,
+        execution_claim=execution_claim,
+        db=db,
+        environment=environment,
     )
 
 

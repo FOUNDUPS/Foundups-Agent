@@ -1,6 +1,17 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-08-27] - REDDOG POST-MERGE REGISTRY REPROJECTION
+
+- Reprojected the canonical staged Git test registry after adding the focused
+  post-merge replica and authority-order suites: **1,587 registered / 268
+  quarantined**.
+- `generate_test_registry.py --check` passes without changing quarantine,
+  shard, timeout, capability, or execution policy. The authenticated RedDog
+  backend closure is **1,349 files** at
+  `4095e31c989bfd6a9d66d82dcc389de23afaaf697257ef0f2d81a4771a714e46`.
+  (WSP 5/6/15/22/50/62/97)
+
 ### [2026-08-27] - REDDOG CANDIDATE TEST-REGISTRY FRESHNESS
 
 - Regenerated the existing deterministic Git-tracked registry after CI found

@@ -1,5 +1,19 @@
 # HoloIndex Package ModLog
 
+## [2026-08-27] Exact-main immutable route evidence reconciliation
+
+- Recorded the live exact-`a7302344` manual activation truth: generation
+  `sha256:d654414a...`, stable route CURRENT, governed semantic query current,
+  no index gap, no reindex, and unchanged immutable replica proof.
+- Corrected current documentation from the historical complete-vector-tree
+  model to the implemented selected-model plus sealed 22-snapshot query
+  closure. The canonical store remains maintenance authority; query replicas
+  remain immutable read-only projections.
+- The automatic post-merge split-lease composer is candidate evidence only
+  until a later exact-main OpenClaw task completes. No Holo source, canonical
+  store, route, or replica was changed by this documentation transaction.
+  (WSP 00/15/22/50/62/87/97)
+
 ## [2026-08-23] Isolated final-probe runtime provenance
 
 - MaintenanceSession.begin() now resolves the optional governed

@@ -21,11 +21,18 @@ For exhaustive machine-level semantics, use:
 HoloIndex accepts the one explicit generation root supplied by the bridge-owned
 verified `holoindex_query_replica.v1` route. Governed maintenance publishes a
 canonical snapshot set for all seven baseline collections before its PASS
-receipt. The materializer copies those artifacts with the vector/model tree;
+receipt. The materializer copies the exact sealed 22-file snapshot set plus
+one selected complete model; it does not copy the legacy vectors tree;
 the owner reproves the descriptor, loads only the path-free immutable snapshot
 adapter, and requires its generation ID to match the replica binding. Query
 startup and retrieval do not start Chroma or open SQLite/HNSW. Canonical
 freshness evidence remains authoritative and generation drift requires restart.
+
+The preferred host route is `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`. Query
+consumers never activate it. The trusted post-merge transaction may reuse the
+bridge controller after canonical refresh, outside its first authority lease,
+then reacquire authority and prove exact HEAD/generation/receipt before durable
+completion.
 
 ### Tool boundary (truth-recorded by PR #704)
 HoloIndex is a **semantic retrieval system**. It **complements** `grep`/`glob`; it does not replace them. Choose the right tool for the query:

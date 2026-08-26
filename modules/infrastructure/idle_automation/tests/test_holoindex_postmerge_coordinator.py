@@ -394,6 +394,10 @@ def _transaction_result(
     )
 
 
+def _activate_current(**kwargs):
+    return kwargs["current"]
+
+
 def test_exact_sha_task_is_queued_once(
     roots,
     monkeypatch: pytest.MonkeyPatch,
@@ -403,13 +407,13 @@ def test_exact_sha_task_is_queued_once(
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
 
-    first = coordinator.coordinate_holoindex_postmerge(
+    first = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
         git_runner=git,
     )
-    second = coordinator.coordinate_holoindex_postmerge(
+    second = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -434,14 +438,14 @@ def test_incident_binding_is_durable_and_idempotent(
     _patch_state(monkeypatch, authority, git)
     incident = _incident_binding()
 
-    first = coordinator.coordinate_holoindex_postmerge(
+    first = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
         git_runner=git,
         incident_binding=incident,
     )
-    second = coordinator.coordinate_holoindex_postmerge(
+    second = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -473,7 +477,7 @@ def test_distinct_incidents_share_canonical_maintenance_without_overwrite(
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
     original = _incident_binding()
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -487,7 +491,7 @@ def test_distinct_incidents_share_canonical_maintenance_without_overwrite(
         observed_head="e" * 40,
         incident_id="sha256:" + ("e" * 64),
     )
-    associated = coordinator.coordinate_holoindex_postmerge(
+    associated = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -518,7 +522,7 @@ def test_existing_unbound_maintenance_accepts_authenticated_incident_association
     db = FakeDB()
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -529,7 +533,7 @@ def test_existing_unbound_maintenance_accepts_authenticated_incident_association
     request_before = dict(db.events[request_id])
     incident = _incident_binding()
 
-    associated = coordinator.coordinate_holoindex_postmerge(
+    associated = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -557,7 +561,7 @@ def test_tampered_incident_association_rejects_without_rewrite(
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
     incident = _incident_binding()
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -570,7 +574,7 @@ def test_tampered_incident_association_rejects_without_rewrite(
     )
     tampered = dict(db.events[event_id])
 
-    rejected = coordinator.coordinate_holoindex_postmerge(
+    rejected = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -593,7 +597,7 @@ def test_incident_target_must_match_fetched_origin_before_queue_effect(
     git = FakeGit((NEWER_HEAD,))
     _patch_state(monkeypatch, authority, git)
 
-    rejected = coordinator.coordinate_holoindex_postmerge(
+    rejected = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -616,7 +620,7 @@ def test_tampered_completion_event_fails_closed(
     db = FakeDB()
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -634,7 +638,7 @@ def test_tampered_completion_event_fails_closed(
         }
     }
 
-    result = coordinator.coordinate_holoindex_postmerge(
+    result = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -654,7 +658,7 @@ def test_failed_task_enters_bounded_retry_then_requeues(
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
     start = datetime(2026, 7, 26, tzinfo=UTC)
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -663,7 +667,7 @@ def test_failed_task_enters_bounded_retry_then_requeues(
     )
     db.tasks[queued.task_id]["status"] = "failed"
 
-    waiting = coordinator.coordinate_holoindex_postmerge(
+    waiting = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -673,7 +677,7 @@ def test_failed_task_enters_bounded_retry_then_requeues(
     assert waiting.status == "RETRY_WAIT"
     assert db.tasks[queued.task_id]["context"]["retry_count"] == 1
 
-    requeued = coordinator.coordinate_holoindex_postmerge(
+    requeued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -693,7 +697,7 @@ def test_expired_assignment_is_reclaimed_into_bounded_retry(
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
     start = datetime(2026, 7, 26, tzinfo=UTC)
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -706,7 +710,7 @@ def test_expired_assignment_is_reclaimed_into_bounded_retry(
         - timedelta(seconds=coordinator.ASSIGNMENT_LEASE_SECONDS + 1)
     ).isoformat()
 
-    result = coordinator.coordinate_holoindex_postmerge(
+    result = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -732,7 +736,7 @@ def test_execution_rejects_context_before_any_effect(
     }
     effects: list[str] = []
 
-    result = coordinator.execute_holoindex_postmerge_task(
+    result = coordinator._execute_holoindex_postmerge_task_for_test(
         repo_root=workspace,
         task_id=coordinator.TASK_PREFIX + HEAD,
         context={
@@ -759,7 +763,7 @@ def test_valid_execution_updates_authority_and_persists_proof(
     db = FakeDB()
     git = FakeGit((HEAD, HEAD))
     _patch_state(monkeypatch, authority, git)
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -772,7 +776,7 @@ def test_valid_execution_updates_authority_and_persists_proof(
         transaction_calls.append(kwargs)
         return _transaction_result()
 
-    missing_claim = coordinator.execute_holoindex_postmerge_task(
+    missing_claim = coordinator._execute_holoindex_postmerge_task_for_test(
         repo_root=workspace,
         task_id=queued.task_id,
         context=db.tasks[queued.task_id]["context"],
@@ -787,7 +791,7 @@ def test_valid_execution_updates_authority_and_persists_proof(
     )
     assert transaction_calls == []
 
-    result = coordinator.execute_holoindex_postmerge_task(
+    result = coordinator._execute_holoindex_postmerge_task_for_test(
         repo_root=workspace,
         task_id=queued.task_id,
         context=db.tasks[queued.task_id]["context"],
@@ -820,7 +824,7 @@ def test_valid_execution_updates_authority_and_persists_proof(
             "environ": _environment(authority),
         }
     ]
-    duplicate = coordinator.execute_holoindex_postmerge_task(
+    duplicate = coordinator._execute_holoindex_postmerge_task_for_test(
         repo_root=workspace,
         task_id=queued.task_id,
         context=db.tasks[queued.task_id]["context"],
@@ -842,7 +846,7 @@ def test_invalid_request_event_blocks_authority_effect(
     db = FakeDB()
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -854,7 +858,7 @@ def test_invalid_request_event_blocks_authority_effect(
     ] = "sha256:" + ("0" * 64)
     effects: list[str] = []
 
-    result = coordinator.execute_holoindex_postmerge_task(
+    result = coordinator._execute_holoindex_postmerge_task_for_test(
         repo_root=workspace,
         task_id=queued.task_id,
         context=db.tasks[queued.task_id]["context"],
@@ -877,7 +881,7 @@ def test_origin_main_advance_after_refresh_blocks_completion(
     db = FakeDB()
     setup_git = FakeGit()
     _patch_state(monkeypatch, authority, setup_git)
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -894,7 +898,7 @@ def test_origin_main_advance_after_refresh_blocks_completion(
         ),
     )
 
-    result = coordinator.execute_holoindex_postmerge_task(
+    result = coordinator._execute_holoindex_postmerge_task_for_test(
         repo_root=workspace,
         task_id=queued.task_id,
         context=db.tasks[queued.task_id]["context"],
@@ -925,7 +929,7 @@ def test_dirty_or_unrelated_authority_never_queues(
     git = FakeGit()
     _patch_state(monkeypatch, authority, git, authority_clean=False)
 
-    result = coordinator.coordinate_holoindex_postmerge(
+    result = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -945,14 +949,14 @@ def test_completion_requires_canonical_operational_proof(
     db = FakeDB()
     git = FakeGit()
     _patch_state(monkeypatch, authority, git)
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
         git_runner=git,
     )
     _claim(db, queued.task_id)
-    completed = coordinator.execute_holoindex_postmerge_task(
+    completed = coordinator._execute_holoindex_postmerge_task_for_test(
         repo_root=workspace,
         task_id=queued.task_id,
         context=db.tasks[queued.task_id]["context"],
@@ -963,7 +967,7 @@ def test_completion_requires_canonical_operational_proof(
     )
     assert completed["ok"] is True
 
-    current = coordinator.coordinate_holoindex_postmerge(
+    current = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -980,7 +984,7 @@ def test_completion_requires_canonical_operational_proof(
     assert current.accepted is True
     assert current.status == "CURRENT"
 
-    rejected = coordinator.coordinate_holoindex_postmerge(
+    rejected = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -1012,211 +1016,6 @@ class _Lease:
         self.effects.append("lease_exit")
 
 
-def test_authority_transaction_holds_lease_through_switch_and_refresh(
-    roots,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    workspace, authority = roots
-    git = FakeGit((HEAD, HEAD))
-    _patch_state(monkeypatch, authority, git)
-    effects: list[str] = []
-    operational_args: dict[str, object] = {}
-
-    def ensure_operational(**kwargs):
-        operational_args.update(kwargs)
-        effects.append("refresh")
-        return SimpleNamespace(
-            ready=True,
-            status="REFRESHED",
-            refreshed=True,
-            error="",
-            repo_head_sha=HEAD,
-            generation_id="sha256:" + ("1" * 64),
-            freshness_receipt_digest="sha256:" + ("2" * 64),
-        )
-
-    result = authority_transaction.advance_reddog_holoindex_authority(
-        workspace_root=workspace,
-        repo_root=authority,
-        target_repo_head_sha=HEAD,
-        expected_authority_root_digest=(
-            authority_transaction.repository_root_digest(authority)
-        ),
-        environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
-        git_runner=git,
-        cleanup_owner=lambda: effects.append("cleanup"),
-        ensure_operational=ensure_operational,
-        lease_factory=lambda _path: _Lease(effects),
-    )
-
-    assert result.ready is True
-    assert effects == ["lease_enter", "cleanup", "refresh", "lease_exit"]
-    assert operational_args["owner_runtime_root"] == workspace
-    assert git.switch_target == HEAD
-
-
-def test_authority_transaction_rejects_non_forward_update(
-    roots,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    workspace, authority = roots
-
-    def read_state(_path: Path):
-        return _state(NEWER_HEAD)
-
-    monkeypatch.setattr(authority_transaction, "read_repository_state", read_state)
-
-    class NonAncestorGit(FakeGit):
-        def __call__(self, argv: Sequence[str], cwd: Path):
-            if tuple(argv)[:3] == ("git", "merge-base", "--is-ancestor"):
-                return SimpleNamespace(returncode=1, stdout="", stderr="")
-            return super().__call__(argv, cwd)
-
-    git = NonAncestorGit()
-    result = authority_transaction.advance_reddog_holoindex_authority(
-        workspace_root=workspace,
-        repo_root=authority,
-        target_repo_head_sha=HEAD,
-        expected_authority_root_digest=(
-            authority_transaction.repository_root_digest(authority)
-        ),
-        environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
-        git_runner=git,
-        ensure_operational=lambda **_kwargs: pytest.fail("must not refresh"),
-        cleanup_owner=lambda: pytest.fail("must not stop owner"),
-        lease_factory=lambda _path: _Lease([]),
-    )
-
-    assert result.ready is False
-    assert result.error == "authority_non_forward_update_rejected"
-
-
-def test_authority_transaction_supersession_stops_owner_and_advances_checkout(
-    roots,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    workspace, authority = roots
-    git = FakeGit((HEAD, NEWER_HEAD))
-    _patch_state(monkeypatch, authority, git)
-    effects: list[str] = []
-
-    result = authority_transaction.advance_reddog_holoindex_authority(
-        workspace_root=workspace,
-        repo_root=authority,
-        target_repo_head_sha=HEAD,
-        expected_authority_root_digest=(
-            authority_transaction.repository_root_digest(authority)
-        ),
-        environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
-        git_runner=git,
-        cleanup_owner=lambda: effects.append("cleanup"),
-        ensure_operational=lambda **_kwargs: _transaction_result(),
-        lease_factory=lambda _path: _Lease(effects),
-    )
-
-    assert result.ready is False
-    assert result.status == "SUPERSEDED"
-    assert result.observed_origin_main_sha == NEWER_HEAD
-    assert effects == [
-        "lease_enter",
-        "cleanup",
-        "cleanup",
-        "lease_exit",
-    ]
-    assert git.switch_target == NEWER_HEAD
-
-
-def test_supersession_invalidation_failure_leaves_durable_block_marker(
-    roots,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    workspace, authority = roots
-
-    class LatestSwitchFails(FakeGit):
-        def __call__(self, argv: Sequence[str], cwd: Path):
-            if (
-                tuple(argv)[:4] == ("git", "switch", "--detach", "--quiet")
-                and tuple(argv)[4] == NEWER_HEAD
-            ):
-                return SimpleNamespace(returncode=1, stdout="", stderr="")
-            return super().__call__(argv, cwd)
-
-    git = LatestSwitchFails((HEAD, NEWER_HEAD))
-    _patch_state(monkeypatch, authority, git)
-    monkeypatch.setattr(
-        authority_transaction,
-        "_invalidate_generation",
-        lambda **_kwargs: False,
-    )
-
-    result = authority_transaction.advance_reddog_holoindex_authority(
-        workspace_root=workspace,
-        repo_root=authority,
-        target_repo_head_sha=HEAD,
-        expected_authority_root_digest=(
-            authority_transaction.repository_root_digest(authority)
-        ),
-        environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
-        git_runner=git,
-        cleanup_owner=lambda: None,
-        ensure_operational=lambda **_kwargs: _transaction_result(),
-        lease_factory=lambda _path: _Lease([]),
-    )
-
-    marker = authority / ".holoindex_authority_blocked"
-    assert result.ready is False
-    assert result.status == "REJECTED"
-    assert result.error == "target_superseded_invalidation_failed"
-    assert marker.read_text(encoding="ascii") == "holoindex_authority_blocked_v1\n"
-
-
-def test_authority_transaction_recovers_its_own_block_marker(
-    roots,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    workspace, authority = roots
-    marker = authority / ".holoindex_authority_blocked"
-    marker.write_bytes(b"holoindex_authority_blocked_v1\n")
-    git = FakeGit((HEAD, HEAD))
-
-    def read_state(_path: Path):
-        return _state(
-            git.switch_target or HEAD,
-            clean=not marker.exists(),
-        )
-
-    monkeypatch.setattr(authority_transaction, "read_repository_state", read_state)
-    result = authority_transaction.advance_reddog_holoindex_authority(
-        workspace_root=workspace,
-        repo_root=authority,
-        target_repo_head_sha=HEAD,
-        expected_authority_root_digest=(
-            authority_transaction.repository_root_digest(authority)
-        ),
-        environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
-        git_runner=git,
-        cleanup_owner=lambda: None,
-        ensure_operational=lambda **_kwargs: SimpleNamespace(
-            ready=True,
-            status="READY",
-            refreshed=False,
-            error="",
-            repo_head_sha=HEAD,
-            generation_id="sha256:" + ("1" * 64),
-            freshness_receipt_digest="sha256:" + ("2" * 64),
-        ),
-        lease_factory=lambda _path: _Lease([]),
-    )
-
-    assert result.ready is True
-    assert not marker.exists()
-
-
 def test_coordinator_queues_and_executes_block_marker_recovery(
     roots,
     monkeypatch: pytest.MonkeyPatch,
@@ -1238,7 +1037,7 @@ def test_coordinator_queues_and_executes_block_marker_recovery(
     monkeypatch.setattr(contract, "read_repository_state", read_state)
     monkeypatch.setattr(authority_transaction, "read_repository_state", read_state)
     db = FakeDB()
-    queued = coordinator.coordinate_holoindex_postmerge(
+    queued = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
         db=db,
         environment=_environment(authority),
@@ -1249,11 +1048,11 @@ def test_coordinator_queues_and_executes_block_marker_recovery(
     _claim(db, queued.task_id)
 
     def run_transaction(**kwargs):
-        return authority_transaction.advance_reddog_holoindex_authority(
+        return authority_transaction._advance_reddog_holoindex_authority_for_test(
             **kwargs,
             git_runner=git,
             cleanup_owner=lambda: None,
-            ensure_operational=lambda **_inner: SimpleNamespace(
+            ensure_current=lambda **_inner: SimpleNamespace(
                 ready=True,
                 status="REFRESHED",
                 refreshed=True,
@@ -1262,10 +1061,11 @@ def test_coordinator_queues_and_executes_block_marker_recovery(
                 generation_id="sha256:" + ("1" * 64),
                 freshness_receipt_digest="sha256:" + ("2" * 64),
             ),
+            activate_replica=_activate_current,
             lease_factory=lambda _path: _Lease([]),
         )
 
-    executed = coordinator.execute_holoindex_postmerge_task(
+    executed = coordinator._execute_holoindex_postmerge_task_for_test(
         repo_root=workspace,
         task_id=queued.task_id,
         context=db.tasks[queued.task_id]["context"],
@@ -1281,32 +1081,6 @@ def test_coordinator_queues_and_executes_block_marker_recovery(
     assert executed["ok"] is True
     assert db.tasks[queued.task_id]["status"] == "completed"
     assert not marker.exists()
-
-
-def test_authority_transaction_rejects_substituted_authority_binding(
-    roots,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    workspace, authority = roots
-    git = FakeGit()
-    _patch_state(monkeypatch, authority, git)
-
-    result = authority_transaction.advance_reddog_holoindex_authority(
-        workspace_root=workspace,
-        repo_root=authority,
-        target_repo_head_sha=HEAD,
-        expected_authority_root_digest="sha256:" + ("0" * 64),
-        environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
-        git_runner=git,
-        ensure_operational=lambda **_kwargs: pytest.fail("must not refresh"),
-        cleanup_owner=lambda: pytest.fail("must not stop owner"),
-        lease_factory=lambda _path: _Lease([]),
-    )
-
-    assert result.ready is False
-    assert result.error == "authority_root_binding_invalid"
-    assert not any(call[:3] == ("git", "fetch", "--quiet") for call, _ in git.calls)
 
 
 def test_postmerge_runtime_has_no_shell_or_destructive_git_path() -> None:

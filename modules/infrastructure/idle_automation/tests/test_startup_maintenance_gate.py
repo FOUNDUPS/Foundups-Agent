@@ -367,48 +367,59 @@ class TestStartupTaskExecution:
         assert result["structured_result"] == expected_receipt
         assert json.loads(result["detail"]) == expected_receipt
 
-    def test_self_research_task_executes_live(self):
-        """startup_refresh_self_research executes through live dispatch (no mocking)."""
-        from modules.communication.moltbot_bridge.scripts.run_task import (
-            _try_startup_maintenance_dispatch,
-        )
+    def test_self_research_task_dispatches_bounded_executor(self):
+        """Self-research dispatch preserves the exact bounded run contract."""
+        from modules.communication.moltbot_bridge.scripts import run_task
 
-        # Live dispatch - verifies correct SelfResearchRefresher.run() kwargs
-        result = _try_startup_maintenance_dispatch(
-            repo_root=REPO_ROOT,
-            task_id="startup_refresh_self_research",
-            context={"source": "startup_maintenance_gate"},
-        )
+        refresher = MagicMock()
+        refresher.run.return_value = {"generated_on": "2026-08-27T00:00:00Z"}
+        with patch(
+            "modules.infrastructure.idle_automation.src.self_research_refresh.SelfResearchRefresher",
+            return_value=refresher,
+        ) as refresher_type:
+            result = run_task._try_startup_maintenance_dispatch(
+                repo_root=REPO_ROOT,
+                task_id="startup_refresh_self_research",
+                context={"source": "startup_maintenance_gate"},
+            )
 
         assert result is not None, "Self research task should have an executor"
         assert result["executor"] == "startup:self_research"
-        # Critical: no "unexpected keyword argument" in detail
-        assert "unexpected keyword" not in result.get("detail", "").lower()
-        # Regression: success detection uses generated_on, not status field
-        assert result["ok"] is True, "Self research should return ok=True when report has generated_on"
-
-    def test_training_batch_task_executes_live(self):
-        """startup_training_batch executes through live dispatch (IdleAutomationDAE)."""
-        from modules.communication.moltbot_bridge.scripts.run_task import (
-            _try_startup_maintenance_dispatch,
+        assert result["ok"] is True
+        refresher_type.assert_called_once_with(repo_root=REPO_ROOT)
+        refresher.run.assert_called_once_with(
+            run_holo_refresh=False,
+            run_compliance=True,
+            run_self_audit=True,
+            run_watchlists=True,
+            write_tasks=True,
+            emit_nudges=True,
         )
 
-        # Live dispatch - verifies correct IdleAutomationDAE._execute_pattern_training() call
-        result = _try_startup_maintenance_dispatch(
-            repo_root=REPO_ROOT,
-            task_id="startup_training_batch",
-            context={"source": "startup_maintenance_gate"},
-        )
+    def test_training_batch_task_dispatches_bounded_executor(self):
+        """Training dispatch selects its executor without running training."""
+        from modules.communication.moltbot_bridge.scripts import run_task
 
-        assert result is not None, "Training batch task should have an executor"
-        assert result["executor"] == "startup:training_batch"
-        # ok may be True or False depending on training state, but should not error
-        assert "detail" in result
-        # Critical: no "unexpected keyword argument" in detail
-        assert "unexpected keyword" not in result.get("detail", "").lower()
-        # Should have structured training result
-        structured = result.get("structured_result", {})
-        assert "task" in structured or "error" in result.get("detail", "")
+        expected = {
+            "ok": True,
+            "detail": "bounded training result",
+            "executor": "startup:training_batch",
+            "structured_result": {"task": "pattern_training", "success": True},
+        }
+        with patch(
+            "modules.infrastructure.idle_automation.src.self_research_refresh.SelfResearchRefresher"
+        ) as refresher_type, patch.object(
+            run_task, "_run_training_batch", return_value=expected
+        ) as training:
+            result = run_task._try_startup_maintenance_dispatch(
+                repo_root=REPO_ROOT,
+                task_id="startup_training_batch",
+                context={"source": "startup_maintenance_gate"},
+            )
+
+        assert result == expected
+        refresher_type.assert_called_once_with(repo_root=REPO_ROOT)
+        training.assert_called_once_with()
 
     def test_unknown_task_returns_none(self):
         """Unknown startup task returns None (falls through to no_executor_matched)."""

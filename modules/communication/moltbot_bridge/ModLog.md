@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-27: Stable-route post-merge handoff truth
+
+- Aligned OpenClaw/RedDog documentation with the exact boundary: OpenClaw owns
+  durable task execution, while the separately governed Holo authority and
+  activation controllers own refresh, replica publication, and stable-route
+  commit. OpenClaw is scaffolding, not the Holo store or RedDog identity.
+- The exact `a7302344` route is live from manual recovery; its historical
+  post-merge task remains failed. The split-lease automatic composer is a
+  candidate until a new merged exact-main task completes. Direct-root routing
+  remains a mutually exclusive migration path. (WSP 00/15/22/50/62/87/97)
+
 ## 2026-08-27: Resident governed Holo usability repair
 
 - Reproduced three distinct boundaries instead of treating fail-closed output

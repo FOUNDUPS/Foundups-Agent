@@ -1,5 +1,17 @@
 # foundups_mcp_bridge Tests
 
+## Post-merge query-replica composition
+
+- `test_reddog_holoindex_postmerge_replica.py` proves exact-current admission,
+  normal-owner reuse, route-only configuration, absent-only replica/receipt
+  allocation, activation failure truth, exact binding equality, and immutable
+  post-query proof.
+- The adjacent idle-automation authority-order suite proves the first authority
+  lease is released before activation and reacquired for final Git/receipt
+  binding. Public production entrypoints expose no effect-injection parameters.
+- Focused cross-module result: **62 passed**. These are isolated proofs; live
+  automatic acceptance requires the next merged exact-main post-merge task.
+
 ## Exact query-replica activation
 
 - `test_reddog_holoindex_query_replica_activation.py` proves inert default,

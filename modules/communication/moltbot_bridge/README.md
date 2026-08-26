@@ -44,12 +44,12 @@ credentials, worker authority, and runtime-model authority remain separate.
 
 ## RedDog HoloIndex promotion binding
 
-Architect FIX promotion now requires the already-running HoloIndex owner to
-prove the explicit, exact-generation query replica selected by
-`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT`. The resident runtime passes a closed
-environment snapshot into the promotion bootstrap. Missing or stale replica
-proof rejects before queue/profile publication; no fallback, materialization,
-or re-index is performed.
+Architect FIX promotion requires the already-running HoloIndex owner to prove
+the explicit, exact-generation query replica selected by
+the preferred private `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`. The legacy direct `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` is accepted only when the route-file
+value is absent; configuring both is rejected. The resident runtime passes a closed
+environment snapshot into the promotion bootstrap. Missing or stale
+route/replica proof rejects before queue/profile publication; no fallback, materialization, or re-index is performed by promotion.
 
 ## RedDog governed repository-state v2 intake
 

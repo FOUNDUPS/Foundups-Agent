@@ -42,10 +42,11 @@ the returned expected manifests against any later source change. The planner
 performs no copy, route change, maintenance, owner launch, or activation.
 
 The planner, compact materializer, private route record/CAS store, crash
-journal, and inert-by-default activation controller are completed layers. This
-is not a live activation claim: exact-main materialization, route selection,
-and the real pre/post-route semantic proofs occur only under the explicit
-trusted-host `--real` transaction.
+journal, and inert-by-default activation controller are completed layers. A
+manual governed activation at exact main `a7302344424615dc9d061ef408c2de2508660b81`
+selected generation `sha256:d654414a...`, passed the stable-route query, and
+left the immutable replica unchanged. That receipt proves the controller, not
+automatic post-merge composition for a later commit.
 
 `reddog_holoindex_query_route_contract.py`,
 `reddog_holoindex_query_route_store.py`, and the extracted confined
@@ -88,6 +89,19 @@ interrupted is finalized on the next identical invocation after a fresh stable
 query and immutable revalidation. No file is overwritten or deleted.
 The separate assumption audit is
 [`docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md`](docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md).
+
+`reddog_holoindex_postmerge_replica.py` is the bounded post-merge composer. It
+first asks the normal owner path to prove the canonical refresh identity. When
+the stable route still names an older generation, it derives new/no-overwrite
+replica and receipt targets from the configured stable route, reuses
+`activate_query_replica()`, and reproves the owner. HEAD, generation, and
+freshness-receipt digest must exactly equal the canonical refresh proof; a
+ready owner with any substituted binding fails closed. The authority
+transaction releases its first authority-update lease before this composer,
+then reacquires the lease and revalidates authority, repository, and
+`origin/main` before durable completion. This automatic ordering repair is a
+candidate until a merged exact-main OpenClaw replay advances the route and
+publishes completion.
 
 `reddog_holoindex_query_replica.py` can materialize one immutable
 `holoindex_query_replica.v1` generation into a new, disjoint replica-root

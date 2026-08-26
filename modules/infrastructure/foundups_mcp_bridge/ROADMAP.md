@@ -1,5 +1,32 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-27: Exact-main post-merge route activation ordering
+
+**Candidate implemented and focused-GREEN; merged OpenClaw replay required.**
+The authority transaction now holds its process lock across two authority
+leases: exact-SHA checkout and canonical refresh under the first; replica
+activation and stable-route owner proof outside it; final authority, clean
+HEAD, and `origin/main` proof under the second. This avoids the observed
+self-contention between the outer authority lease and the materializer's own
+authority/maintenance lease order without creating an unlocked completion
+window.
+
+The bounded composer accepts an already-current route or allocates only an
+absent `<generation-prefix>-rN` replica and
+`activation_<head-prefix>_rN.json` receipt. Full digests remain authoritative;
+the mnemonic prefixes select names only. Exact canonical HEAD, generation,
+and receipt equality is mandatory after owner admission. Activation failure,
+route malformation, second-lease contention, or supersession cannot complete
+AgentDB.
+
+Observed predecessor evidence is intentionally separate: exact main
+`a7302344424615dc9d061ef408c2de2508660b81` was manually refreshed and activated
+to generation `sha256:d654414a...` with stable-route and unchanged-replica
+proof. Two real OpenClaw attempts before this repair failed
+`HOLOINDEX_QUERY_REPLICA_REQUIRED`. The acceptance gate for this candidate is
+merge, exact-new-main maintenance, automatic new route activation, final
+OpenClaw completion, and one unchanged-digest owner query.
+
 ## 2026-08-23: Exact query-replica activation controller
 
 **Implemented locally and WSP_62-bounded; live activation remains an explicit
@@ -19,11 +46,10 @@ artifact. Receipt, journal, lock, route, and quarantine collisions reject
 before mutation. The controller installs no environment variable and deletes
 nothing. Expanded adjacent evidence is 470 passed / 7 host-capability skips.
 
-Remaining operational gates: merge, rebuild canonical Holo state at that exact
-main SHA, choose a new immutable replica root, run the explicit CLI once,
-independently verify the receipt/route/replica, install the stable route pointer
-through the governed activation path, restart consumers, and prove a real owner
-query leaves every replica digest unchanged.
+Historical operational gates were completed manually at exact main `a7302344`.
+The remaining gate for automatic operation is a later merged exact-main
+OpenClaw replay through the post-merge composer, followed by independent
+receipt/route/replica and unchanged-digest verification.
 
 ## 2026-08-23: Maintenance isolated-probe runtime provenance
 
@@ -459,19 +485,24 @@ the post-merge activation run completes.
 The exact post-repair HEAD differential has zero errors and this non-zero
 accepted bridge set only:
 
-- WARNING: `INTERFACE.md` 1,097 lines.
-- WARNING: append-only `ModLog.md` 1,424 lines.
+- WARNING: `INTERFACE.md` 1,147 lines.
+- WARNING: append-only `ModLog.md` 1,613 lines.
 - WARNING: `src/holo_tools.py` 1,094 lines. Its candidate-grown `holo_search`
   is now a 41-line orchestrator with cohesive helpers, so the function error is
   closed while the file-level warning remains visible.
 - WARNING: `tests/test_mcp_bridge.py` 1,313 lines. Cache scaffolding is already
   extracted, but the file remains a warning below its applied 1,425-line
   candidate ceiling.
-- WATCH: append-only `tests/TestModLog.md` 1,058 lines.
+- WATCH: append-only `tests/TestModLog.md` 1,165 lines.
 - WATCH: `tests/test_holo_query_service_edges.py` 787 lines.
 
-No other bridge path is part of the accepted warning/watch set. Owner bootstrap
-and candidate acceptance remain decomposed below their applicable thresholds.
+No other bridge path is part of the accepted warning/watch set. The current
+post-merge candidate is bounded at authority transaction 599/max-function 46,
+authority marker 87/24, transaction types 59/no functions, and replica composer
+277/50. The 599-line authority facade is `no_growth: true`; the RedDog/Holo
+maintainers must extract Git/lease phase mechanics into a focused engine before
+adding another authority phase. Owner bootstrap and candidate acceptance remain
+decomposed below their applicable thresholds.
 
 No global WSP_62 compliance claim is made until those historical items are
 completed and the repository-wide FMAS size gate is green. The RedDog npm

@@ -1,5 +1,14 @@
 # moltbot_bridge Roadmap
 
+- CURRENT EXACT-MAIN EVIDENCE: after the earlier `61c2c300` canary, governed
+  maintenance and a manual route activation completed at exact main
+  `a7302344424615dc9d061ef408c2de2508660b81`, generation
+  `sha256:d654414a...`. A fresh resident-shaped owner query returned CURRENT,
+  no gap/no reindex, and left the replica unchanged. This proves the stable
+  route and resident consumer at that commit; it does not yet prove the local
+  automatic post-merge activation-order candidate. That candidate still
+  requires merge and one real OpenClaw replay at the resulting exact main.
+
 - IMPLEMENTED / HISTORICAL EXACT-HEAD CANARY EVIDENCE: the default resident/OpenClaw read-only audit worker now reaches
   the verified Holo query-replica resolver through the existing one-shot owner
   bridge. Complete owner lifecycles are serialized, the child/parent deadline
