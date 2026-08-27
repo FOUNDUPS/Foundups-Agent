@@ -27,6 +27,9 @@ const hgbqOwnerWire = {
   owner_retry_reason: 'HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP',
   retrieval_mode: 'semantic',
   no_holoindex_reindex_performed: true,
+  retrieval_runtime_ranker_digest: hgbqRankerDigest,
+  runtime_environment_digest: hgbqRuntimeDigest,
+  runtime_environment_exact_closure_verified: false,
   query_receipt: hgbqReceipt
 };
 const hgbqBridgeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-owner-bridge-'));
@@ -68,6 +71,12 @@ function hgbqOwnerWithEvidence(evidence, count) {
 }
 assert.strictEqual(orchestrator.isGenerationBoundHoloQueryAccepted(hgbqOwner), true,
   'HGBQ-001: exact generation-bound owner contract is accepted');
+assert.strictEqual(orchestrator.isGenerationBoundHoloQueryAccepted(Object.assign(
+  {}, hgbqOwner, { runtime_environment_digest: 'sha256:' + '0'.repeat(64) }
+)), false, 'HGBQ-001: result/receipt runtime-environment mismatch rejects');
+assert.strictEqual(orchestrator.isGenerationBoundHoloQueryAccepted(Object.assign(
+  {}, hgbqOwner, { runtime_environment_exact_closure_verified: true }
+)), false, 'HGBQ-001: result/receipt closure-assurance mismatch rejects');
 assert.strictEqual(orchestrator.isGenerationBoundHoloQueryAccepted(hgbqOwnerWithEvidence(
   Object.assign({}, hgbqSemanticEvidence, { schema_version: 'holoindex_semantic_evidence.v2' }),
   2
@@ -389,4 +398,3 @@ assert(reddogAuditClass.tier === 'HIGH' || reddogAuditClass.tier === 'ULTRA', 'S
 // should be scored locally. Sending raw trace telemetry through Fusion can re-trigger
 // the redaction gate just to explain that the redaction gate blocked.
 includes(daemonDiagnosticJs, 'function isRunTraceRequest', 'RTLA-001: run trace assessment detector missing');
-includes(daemonDiagnosticJs, 'function buildRunTraceResult', 'RTLA-001: run trace assessment builder missing');

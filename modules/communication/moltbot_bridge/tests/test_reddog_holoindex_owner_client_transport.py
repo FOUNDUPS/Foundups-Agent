@@ -91,6 +91,7 @@ def _successful_query_payload(head_sha: str, repo_root: Path) -> dict:
         "repo_root_digest": repository_root_digest(repo_root),
         "retrieval_mode": "semantic",
         "retrieval_runtime_ranker_digest": "sha256:" + "c" * 64,
+        "runtime_environment_digest": "sha256:" + "d" * 64,
         "raw_result": {
             "wsp_hits": [
                 {

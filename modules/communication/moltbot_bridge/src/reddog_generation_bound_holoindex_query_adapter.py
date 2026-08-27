@@ -50,6 +50,7 @@ _DIGEST_FIELDS = (
     "query_replica_id",
     "query_replica_path_identity_digest",
     "retrieval_runtime_ranker_digest",
+    "runtime_environment_digest",
 )
 _HEAD_FIELDS = (
     "repo_head_sha",
@@ -63,6 +64,7 @@ _BOOLEAN_FIELDS = (
     "no_holoindex_reindex_performed",
     "no_reindex",
     "owner_retry_performed",
+    "runtime_environment_exact_closure_verified",
 )
 _MAX_PROCESS_STDOUT_BYTES = 8 * 1024 * 1024
 _MAX_PROCESS_STDERR_BYTES = 1024 * 1024

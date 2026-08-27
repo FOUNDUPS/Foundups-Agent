@@ -2,9 +2,12 @@
 
 ## [2026-08-27] A-grade retrieval truth gate
 
-Exact-main freshness repair is operational at audited main
-`66526ae5cdd0467ce264c1db4122ab82eadb7733`, generation
-`sha256:f2013aeb...`: owner queries are CURRENT, no-gap, and query-only. The
+Exact-main freshness/replica maintenance RSI is operational at audited main
+`bfcf9041b80be6773951e1c2e07500ebf7c9df62`, generation
+`sha256:7b94cf8a...`: activation and immutable post-query verification passed.
+The earlier
+`66526ae5cdd0467ce264c1db4122ab82eadb7733` cold-owner evidence remains
+historical exact-commit evidence. The
 broker-managed OpenClaw/AgentDB task completed with no retry; three independent
 fresh-process queries completed in approximately 34 seconds each, and one
 pre-warmed governed query completed in 10.3 seconds after a 25.5-second owner
@@ -27,10 +30,12 @@ Those floors cannot be weakened. It performs no ranker change, reindex,
 repository write, or promotion. Its facade is backend-content-bound but has no
 non-test/VSIX caller while independent evaluator trust remains unadministered.
 
-The activation, exact-main generation, and cold-owner proof are complete for
-`66526ae5`. The next focused transaction must bind a once-published exact owner
-executable/dependency/environment manifest and deterministic execution knobs.
-After that, a separately administered evaluator trust boundary and authenticated
+Activation and exact-main generation are complete; current post-restart cold
+owner readiness is not. Runtime identity now binds executable content,
+ABI/platform, exact verified source bytes, dependency build records,
+replica/model closure, and actual controls. Installed dependency payload bytes
+and a persistent authenticated owner remain P0. After that, a separately
+administered evaluator trust boundary and authenticated
 proposer provenance must be deployed. A non-test admission consumer plus a
 separate promotion authority, canary, rollback, and outcome-learning transaction
 remain required before retrieval-quality RSI can be declared operational.

@@ -17,6 +17,7 @@ DIGEST_B = "sha256:" + "b" * 64
 SHA = "1" * 40
 ROOT_DIGEST = "sha256:" + "c" * 64
 RANKER_DIGEST = "sha256:" + "d" * 64
+RUNTIME_DIGEST = "sha256:" + "e" * 64
 
 
 def _owner_query(*, repo_root, query, limit):
@@ -34,6 +35,8 @@ def _owner_query(*, repo_root, query, limit):
         "repo_head_sha": SHA,
         "repo_root_digest": ROOT_DIGEST,
         "retrieval_runtime_ranker_digest": RANKER_DIGEST,
+        "runtime_environment_digest": RUNTIME_DIGEST,
+        "runtime_environment_exact_closure_verified": True,
         "latency_ms": 5.0,
         "index_gap_detected": False,
         "stale_reasons": [],
@@ -47,6 +50,17 @@ def _replica_binding(*, repo_head_sha: str = SHA):
         canonical_receipt_digest=DIGEST_A,
         canonical_repo_head_sha=repo_head_sha,
         canonical_repo_root_digest=ROOT_DIGEST,
+        public_binding={
+            "query_replica_descriptor_digest": DIGEST_A,
+            "query_replica_generation_id": DIGEST_B,
+            "query_replica_id": ROOT_DIGEST,
+            "query_replica_path_identity_digest": RANKER_DIGEST,
+        },
+        artifacts=(SimpleNamespace(
+            relative_path="models/model/model.safetensors",
+            size=1,
+            digest=RUNTIME_DIGEST,
+        ),),
     )
 
 
@@ -55,9 +69,10 @@ def _replica_route(*, repo_head_sha: str = SHA):
     return SimpleNamespace(revalidate=lambda: binding)
 
 
-def _owner_query_once(payload, *, repo_root, query_environment):
+def _owner_query_once(payload, *, repo_root, query_environment, cleanup_owner):
     assert query_environment == {"route": "configured"}
     assert payload["retrieval_mode"] == "semantic"
+    assert cleanup_owner is runtime._retain_owner
     return _owner_query(
         repo_root=repo_root,
         query=payload["query"],
@@ -99,6 +114,7 @@ def _configure(monkeypatch):
         lambda **_kwargs: Path("E:/HoloIndex"),
     )
     monkeypatch.setattr(runtime, "query_holoindex_owner_once", _owner_query_once)
+    monkeypatch.setattr(runtime, "cleanup_reddog_holoindex_owner", lambda: None)
     corpus = runtime.build_retrieval_corpus(heldout_cases=(
         runtime.RetrievalCase(
             "alpha", "alpha query", (runtime.RetrievalRelevance("alpha.py", 3),)
@@ -230,7 +246,7 @@ def test_runtime_fails_closed_on_stale_owner(monkeypatch, tmp_path: Path):
     monkeypatch.setattr(
         runtime,
         "query_holoindex_owner_once",
-        lambda payload, *, repo_root, query_environment: stale(
+        lambda payload, *, repo_root, query_environment, cleanup_owner: stale(
             repo_root=repo_root,
             query=payload["query"],
             limit=payload["limit"],
@@ -255,7 +271,7 @@ def test_runtime_rejects_owner_response_for_other_repository(monkeypatch, tmp_pa
     monkeypatch.setattr(
         runtime,
         "query_holoindex_owner_once",
-        lambda payload, *, repo_root, query_environment: wrong_root(
+        lambda payload, *, repo_root, query_environment, cleanup_owner: wrong_root(
             repo_root=repo_root,
             query=payload["query"],
             limit=payload["limit"],
@@ -320,6 +336,7 @@ def test_candidate_id_is_deterministic(monkeypatch, tmp_path: Path):
             "retrieval_mode": "semantic",
         }),
         "ranker_digest": RANKER_DIGEST,
+        "runtime_environment_digest": RUNTIME_DIGEST,
     })
 
 
@@ -334,7 +351,7 @@ def test_runtime_rejects_owner_executing_other_ranker(monkeypatch, tmp_path: Pat
     monkeypatch.setattr(
         runtime,
         "query_holoindex_owner_once",
-        lambda payload, *, repo_root, query_environment: other_ranker(
+        lambda payload, *, repo_root, query_environment, cleanup_owner: other_ranker(
             repo_root=repo_root,
             query=payload["query"],
             limit=payload["limit"],
@@ -358,7 +375,7 @@ def test_runtime_quality_gate_rejects_zero_hit_run(monkeypatch, tmp_path: Path):
     monkeypatch.setattr(
         runtime,
         "query_holoindex_owner_once",
-        lambda payload, *, repo_root, query_environment: empty(
+        lambda payload, *, repo_root, query_environment, cleanup_owner: empty(
             repo_root=repo_root,
             query=payload["query"],
             limit=payload["limit"],
@@ -433,6 +450,32 @@ def test_a_grade_gate_accepts_independent_evidence_without_promotion(
     payload = receipt.to_dict()
     claimed = payload.pop("receipt_id")
     assert claimed == digest_json(payload)
+
+
+def test_a_grade_gate_rejects_unverified_runtime_byte_closure(
+    monkeypatch, tmp_path: Path,
+):
+    _configure(monkeypatch)
+
+    def unverified(payload, **kwargs):
+        result = dict(_owner_query_once(payload, **kwargs))
+        result["runtime_environment_exact_closure_verified"] = False
+        return result
+
+    monkeypatch.setattr(runtime, "query_holoindex_owner_once", unverified)
+    public = runtime.execute_m2m_holo_retrieval_benchmark(
+        repo_root=tmp_path, payload=_payload()
+    )
+    independent = _independent_evaluation(public)
+    receipt = grade_gate._evaluate_holo_retrieval_a_grade(
+        public_result=public,
+        independent_evaluation=independent,
+        signature_envelope=_signature_envelope(independent),
+        signature_verifier=_SignatureVerifier(),
+    )
+
+    assert receipt.accepted is False
+    assert "public_runtime_exact_closure_unverified" in receipt.rejection_reasons
 
 
 @pytest.mark.parametrize(

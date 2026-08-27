@@ -1,6 +1,15 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-08-27] - HOLO LARGE-FILE PROOF REGISTRY HARDENING
+
+- Reprojected the canonical registry after the Holo large-file health proof was
+  made import-safe and cleanup-safe. It moves from quarantined operational
+  collection to a collectable unit surface without relaxing registry policy:
+  **1,591 registered / 267 quarantined**.
+- The generator write/check and both dedicated registry suites pass **45/45**.
+  (WSP 5/6/22/50/62/87/97)
+
 ### [2026-08-27] - GOVERNED FMAS HEALTH ADMISSION / TRACKED INVENTORY
 
 - Added a clean-exact-HEAD WSP 62 health gate that binds candidate/baseline Git

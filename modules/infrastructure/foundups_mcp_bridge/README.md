@@ -4,6 +4,24 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+## Holo retrieval runtime identity
+
+The private query owner emits a secret-free
+`runtime_environment_digest` computed inside the authenticated child. It binds
+the exact executable content, ABI/platform, verified backend source closure,
+installed distribution build records, immutable replica/model artifacts, and
+observed allowlisted behavior controls. Required CPU/offline/read-only settings
+must already be effective; the manifest never invents forced values. Parent
+prediction is not accepted for production, including sealed or alternate
+interpreters.
+
+This is not yet exact dependency-byte assurance. Installed package payload
+files are not all rehashed, so queries explicitly report
+`runtime_environment_exact_closure_verified=false` and A-grade admission
+rejects. Current cold one-shot semantic startup also exceeds 180 seconds after
+restart; resident authenticated owner activation and dependency-byte sealing
+remain P0. Query-time reindex and environment repair remain forbidden.
+
 ## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
 
 The bundled server is loopback-only and serves MCP Streamable HTTP at exact

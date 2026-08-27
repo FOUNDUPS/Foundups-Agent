@@ -1,3 +1,4 @@
+includes(daemonDiagnosticJs, 'function buildRunTraceResult', 'RTLA-001: run trace assessment builder missing');
 const blockedTracePrompt = [
   'Please assess this Run Trace.',
   '',
@@ -395,6 +396,5 @@ for (const explicitDirective of [
 const inferredSingleInput = orchestrator.splitDaemonDiagnosticInput([
   'Fix this runtime failure.', '', 'DAEmon output:',
   'ERROR: HoloIndex owner exited',
-  'status: stopped',
-  'result: failed'
+  'status: stopped', 'result: failed'
 ].join('\n'), '');

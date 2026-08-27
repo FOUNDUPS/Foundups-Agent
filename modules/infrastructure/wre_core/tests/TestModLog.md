@@ -1,5 +1,12 @@
 # TestModLog - wre_core/tests
 
+## 2026-08-27: Holo large-file proof registry hardening
+
+- The canonical registry is current at **1,591 total / 267 quarantined** after
+  the Holo large-file proof removed module-scope writes and stream mutation.
+- Generator write/check and the two dedicated registry suites pass **45/45**;
+  no registry admission rule or quarantine threshold was weakened.
+
 ## 2026-08-27: Governed FMAS health admission and tracked inventory
 
 - Added adversarial coverage for exact candidate/tool/baseline binding, full

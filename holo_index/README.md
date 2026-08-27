@@ -27,14 +27,26 @@ path never starts Chroma or opens SQLite/HNSW; its snapshot generation must
 equal the verified replica generation. Maintenance retains the write-capable
 canonical Chroma path.
 
-Exact main `66526ae5cdd0467ce264c1db4122ab82eadb7733` was refreshed and activated
+Current exact-main maintenance/replica RSI is healthy at
+`bfcf9041b80be6773951e1c2e07500ebf7c9df62`, generation
+`sha256:7b94cf8a...`: the broker-managed maintenance replay completed and full
+immutable verification passed after a CURRENT/no-gap/no-reindex query. That
+proves exact-generation repair and activation, not retrieval-quality RSI.
+
+Historical exact main `66526ae5cdd0467ce264c1db4122ab82eadb7733` was refreshed and activated
 through the broker-managed OpenClaw/AgentDB post-merge path at generation
 `sha256:f2013aeb...`. Three fresh-process governed owner queries returned
 CURRENT/no-gap/no-reindex on their first attempt in about 34 seconds wall time,
 and a separately pre-warmed owner served the same governed path in 10.3 seconds
 wall time. Full post-query verification retained all 33 artifacts and
 221,204,272 bytes unchanged. This closes exact-main activation and cold-owner
-usability for that commit; it does not make retrieval quality A-grade or RSI.
+usability for that commit only. Current post-restart semantic-owner startup
+failed closed at 60 and 180 seconds, so that historical timing is not current
+availability evidence. Runtime identity now binds executable, ABI/platform,
+verified source bytes, distribution build records, replica/model closure, and
+actual controls, but installed dependency payload bytes remain unverified.
+Resident owner activation, quality improvement, independent evaluation, and
+promotion/rollback learning remain required for retrieval RSI.
 
 ## Module Tier-0 retrieval
 

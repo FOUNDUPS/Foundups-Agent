@@ -2,6 +2,22 @@
 
 ## Public API
 
+### Holo owner runtime identity
+
+Every owner health/query success includes a canonical
+`runtime_environment_digest`. The child derives it from its actual executable,
+ABI/platform, backend source bytes, distribution build records, replica/model
+closure, and allowlisted runtime controls. Required production settings are
+verified against `os.environ`; mismatch raises
+`HOLOINDEX_RUNTIME_ENVIRONMENT_UNAVAILABLE`. Only the digest crosses the trust
+boundary; absolute paths, metadata bodies, and secrets do not.
+
+`runtime_environment_exact_closure_verified` is a separate boolean. It remains
+false until installed distribution payload bytes are exactly verified. The
+query/client/benchmark path may preserve false for measurement, while the
+A-grade evidence gate must reject it. The supervisor accepts the authenticated
+child's self-attestation rather than deriving another interpreter's state.
+
 ### `holo_query_bundle(...) -> Dict[str, Any]`
 
 Remote read-only MCP tool for one generation-bound Holo query plus lexical WSP

@@ -33,9 +33,10 @@ that proposal.
 ## Governed resident Holo grounding
 
 The VSIX one-shot and canonical resident/OpenClaw read-only worker share the
-same generation-bound owner-query contract. The resident adapter has a
-60-second total wall, passes no more than 57 seconds into the child operation,
-and reserves three seconds for parent cleanup. It exposes only allowed scoped
+same generation-bound owner-query contract. The Python worker adapter retains
+its 60-second total wall and reserves three seconds for cleanup; the canonical
+CLI and asynchronous VSIX cold path are separately bounded at 300 seconds to
+cover the existing 270-second readiness canary. It exposes only allowed scoped
 hit metadata after exact CURRENT repository, authority, generation, replica,
 and receipt verification; Fusion receives no route or owner credential.
 
@@ -43,9 +44,12 @@ Each success and health response now carries the owner-computed
 `retrieval_runtime_ranker_digest` for the exact ten-module source closure that
 controls backend routing, ranking, Tier0 injection/dedup, path projection, and
 response ordering. Query clients and evaluation receipts require that value to
-equal the candidate's clean-authority digest. This is source integrity, not a
-complete runtime identity: the Python executable and sealed exact dependency
-environment remain P1 prerequisites for reproducible A-grade evidence.
+equal the candidate's clean-authority digest. The same receipt now carries the
+child-computed `runtime_environment_digest`, binding executable content,
+ABI/platform, verified RedDog source bytes, distribution build records,
+replica/model artifacts, and actual allowlisted settings. Installed dependency
+payload bytes are not exact-closure verified, so the assurance flag is false
+and A-grade admission rejects.
 
 The A-grade facade always reruns the public corpus and enforces non-downgradable
 floors, but it has no non-test/VSIX caller and no deployed independent signing
@@ -56,9 +60,10 @@ passed again through the real OpenClaw supervisor at exact main
 `66526ae5cdd0467ce264c1db4122ab82eadb7733` on 2026-08-27. Three fresh-process
 queries completed in about 34 seconds each and a pre-warmed query in 10.3
 seconds; all were CURRENT/no-gap/no-reindex, and full immutable revalidation of
-33 artifacts remained unchanged. This evidence does not carry across commits.
-Per-query child startup and process-local-only serialization are explicit P1
-scalability debt, and no outbound Hermes dispatch is enabled by this interface.
+33 artifacts remained unchanged. Current post-restart calls failed closed at
+60/180 seconds, so the historical timing does not prove current readiness.
+Persistent authenticated owner activation is P0 scalability debt, and no
+outbound Hermes dispatch is enabled by this interface.
 
 ## Test and promotion interface
 

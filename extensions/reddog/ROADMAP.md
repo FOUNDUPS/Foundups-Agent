@@ -2,7 +2,13 @@
 
 ## Status
 
-Phase: RedDog 0.4.123 resident architect thin-client surface.
+Phase: RedDog 0.4.124 resident architect thin-client surface.
+
+0.4.124 binds the authenticated Holo owner's actual runtime-environment digest
+through RedDog receipts and packages the updated backend closure. It does not
+claim A-grade: installed dependency payload bytes are not exact-closure
+verified, post-restart cold startup exceeded 180 seconds, and normal operation
+still needs one persistent authenticated owner.
 
 Current implementation:
 

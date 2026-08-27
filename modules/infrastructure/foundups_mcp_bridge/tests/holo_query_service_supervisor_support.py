@@ -54,10 +54,27 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_superviso
 )
 
 TOKEN = "x" * 64
+RUNTIME_ENVIRONMENT_DIGEST = "sha256:" + "f" * 64
+TEST_RUNTIME_ROOT = Path(__file__).resolve().parents[4]
 
 REPLICA_BINDING = ("descriptor", "generation", "replica", "path")
+_REPLICA_PUBLIC_FIELDS = (
+    "query_replica_descriptor_digest", "query_replica_generation_id",
+    "query_replica_id", "query_replica_path_identity_digest",
+)
 
 _RawHoloQueryServiceSupervisor = HoloQueryServiceSupervisor
+
+class _SyntheticReplicaCapability:
+    artifacts: tuple[object, ...] = ()
+
+    def __init__(self, binding: tuple[str, str, str, str]) -> None:
+        self.public_binding = MappingProxyType(dict(zip(_REPLICA_PUBLIC_FIELDS, binding)))
+
+def _synthetic_replica_capability(
+    binding: tuple[str, str, str, str] = REPLICA_BINDING,
+) -> _SyntheticReplicaCapability:
+    return _SyntheticReplicaCapability(binding)
 
 class _TupleBinding(tuple):
     pass
@@ -236,6 +253,7 @@ def _ready_health_payload(
         "no_holoindex_reindex_performed": True,
         "retrieval_mode": "semantic",
         "retrieval_runtime_ranker_digest": "sha256:" + ("e" * 64),
+        "runtime_environment_digest": RUNTIME_ENVIRONMENT_DIGEST,
         "repo_head_sha": "a" * 40,
         "repo_root_digest": "sha256:" + ("d" * 64),
         "freshness_generation_id": "sha256:" + ("b" * 64),
@@ -347,10 +365,15 @@ def HoloQueryServiceSupervisor(  # type: ignore[misc]
     """Build the explicit full synthetic route used by lifecycle tests."""
 
     root = Path(repo_root)
+    kwargs.setdefault("runtime_root", TEST_RUNTIME_ROOT)
     kwargs.setdefault("canonical_ssd_path", root / "canonical")
     kwargs.setdefault("query_replica_root", root / "replica")
-    kwargs.setdefault("replica_capability_verifier", lambda: object())
+    kwargs.setdefault("replica_capability_verifier", _synthetic_replica_capability)
     kwargs.setdefault("expected_replica_binding", REPLICA_BINDING)
+    kwargs.setdefault(
+        "_runtime_environment_resolver_for_test",
+        lambda **_kwargs: RUNTIME_ENVIRONMENT_DIGEST,
+    )
     return _RawHoloQueryServiceSupervisor(repo_root=root, **kwargs)
 
 @pytest.fixture(autouse=True)
@@ -413,6 +436,9 @@ def _successful_health_proof(
             kwargs["expected_receipt_digest"] or ("sha256:" + ("c" * 64)),
         ),
         replica_binding=kwargs.get("expected_replica_binding", ("", "", "", "")),
+        runtime_environment_digest=kwargs.get(
+            "expected_runtime_environment_digest", RUNTIME_ENVIRONMENT_DIGEST
+        ),
     )
 
 
@@ -486,6 +512,7 @@ def _binding_health_handler(
                     "no_holoindex_reindex_performed": True,
                     "retrieval_mode": "semantic",
                     "retrieval_runtime_ranker_digest": "sha256:" + ("e" * 64),
+                    "runtime_environment_digest": RUNTIME_ENVIRONMENT_DIGEST,
                     "repo_head_sha": "a" * 40,
                     "repo_root_digest": "sha256:" + ("d" * 64),
                     "freshness_generation_id": "sha256:generation",

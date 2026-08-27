@@ -16,6 +16,9 @@ from .reddog_holoindex_query_replica_descriptor import (
     revalidate_admitted_query_replica,
     verify_active_query_replica,
 )
+from .reddog_holoindex_runtime_environment_binding import (
+    QUERY_RUNTIME_FORCED_ENVIRONMENT,
+)
 
 
 @dataclass
@@ -88,13 +91,7 @@ def prepare_query_backend(
     """Build one backend only on the twice-verified replica generation."""
 
     before = runtime.verify()
-    os.environ.update({
-        "HOLOINDEX_QUERY_READONLY": "1", "HOLO_OFFLINE": "1",
-        "HOLO_DISABLE_PIP_INSTALL": "1", "HOLO_ALLOW_PIP_INSTALL": "0",
-        "ANONYMIZED_TELEMETRY": "false", "HOLO_SILENT": "1",
-        "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1",
-        "HF_DATASETS_OFFLINE": "1", "HOLO_USE_TURBOQUANT": "0",
-    })
+    os.environ.update(QUERY_RUNTIME_FORCED_ENVIRONMENT)
     backend = factory(runtime.query_ssd_path)
     reported = getattr(backend, "ssd_path", None)
     if reported is not None and (

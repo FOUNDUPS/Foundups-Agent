@@ -1,6 +1,25 @@
 # foundups_mcp_bridge Roadmap
 
-## 2026-08-27: Exact-main cold-owner readiness closure
+## 2026-08-27: Runtime-environment binding implemented; resident owner remains P0
+
+The owner now publishes a separate runtime-environment digest binding its
+descriptor-pinned executable bytes, ABI/platform, exact verified RedDog source
+closure, installed distribution build records, replica/model closure, and the
+actual allowlisted runtime settings. The authenticated child computes the
+digest; the parent no longer predicts another interpreter's state. Required
+CPU/offline/read-only settings are checked against the actual child process.
+Installed distribution payload bytes are not yet verified, so the exact-
+closure flag is false and the A-grade gate rejects. The public benchmark
+captures the authenticated digest and keeps one owner resident for its corpus.
+
+Current post-restart one-shot validation failed closed at both 60 and 180
+seconds with `HOLOINDEX_QUERY_SERVICE_STARTUP_TIMEOUT`; source verification
+itself takes about 0.1 seconds, so semantic model/backend warm-up is the long
+pole. The bounded CLI allowance is aligned with the existing 270-second canary,
+but persistent authenticated RedDog owner activation is P0. Timeout expansion
+alone is not a scale solution.
+
+## 2026-08-27: Historical exact-main cold-owner evidence
 
 The existing broker-managed OpenClaw/AgentDB post-merge path completed at exact
 main `66526ae5cdd0467ce264c1db4122ab82eadb7733`, generation
@@ -9,15 +28,13 @@ Three fresh-process governed owner queries completed on attempt one in about 34
 seconds each. A separately pre-warmed owner started in 25.5 seconds and served
 the same governed path in 10.3 seconds. Full production verification retained
 all 33 artifacts / 221,204,272 bytes and the same descriptor, replica, and path
-identities. The former cold-owner P0 is closed for this exact commit without
-increasing a timeout. This is single-owner usability evidence, not a horizontal
-scale, A-grade quality, or retrieval-quality RSI claim.
+identities. This was valid single-owner evidence for that exact commit. It is
+superseded for current-runtime availability by the post-restart timeout above
+and never established horizontal scale, A-grade quality, or retrieval RSI.
 
-WSP_15 scores the next runtime-environment sealing transaction 17/P0: source
-binding is insufficient until the owner executable, ABI/platform, exact
-dependency/build identities, model/runtime closure, and deterministic knobs are
-published once and carried as a separate digest. Evaluator/proposer trust and
-production promotion remain subsequent authority transactions.
+WSP_15 keeps exact installed dependency-byte closure plus resident-owner
+activation at P0. Evaluator/proposer trust and production promotion remain
+subsequent authority transactions.
 
 ## 2026-08-27: Owner-loaded retrieval ranker attestation
 

@@ -4,7 +4,6 @@ This module isolates transport from the RedDog read-only audit worker. It has
 no indexing or repository mutation authority and accepts only a loopback HTTP
 endpoint with bearer authentication.
 """
-
 from __future__ import annotations
 
 import ipaddress
@@ -24,8 +23,9 @@ from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_ope
 from holo_index.repository_state import read_repository_state, repository_root_digest
 from holo_index.retrieval_runtime_binding import (
     is_retrieval_ranker_digest,
-    retrieval_ranker_binding,
+    is_retrieval_runtime_digest,
     retrieval_ranker_digest_from,
+    retrieval_runtime_binding_from, runtime_environment_digest_from,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     MIN_BEARER_TOKEN_CHARS,
@@ -34,7 +34,6 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_replica_binding import (
     parse_replica_binding,
 )
-
 
 HOLOINDEX_QUERY_SERVICE_URL_ENV = "HOLOINDEX_QUERY_SERVICE_URL"
 HOLOINDEX_QUERY_SERVICE_TOKEN_ENV = "HOLOINDEX_QUERY_SERVICE_TOKEN"
@@ -62,6 +61,7 @@ class _OwnerResponseState:
     retrieval_mode: str
     replica_binding: tuple[str, str, str, str]
     retrieval_runtime_ranker_digest: str
+    runtime_environment_digest: str
 
 
 @dataclass(frozen=True)
@@ -362,6 +362,7 @@ def _response_state(payload: Mapping[str, Any]) -> _OwnerResponseState:
         retrieval_mode=str(payload.get("retrieval_mode") or "").lower(),
         replica_binding=replica or _EMPTY_REPLICA_BINDING,
         retrieval_runtime_ranker_digest=retrieval_ranker_digest_from(payload),
+        runtime_environment_digest=runtime_environment_digest_from(payload),
     )
 
 
@@ -385,6 +386,9 @@ def _response_contract_checks(
         (not is_retrieval_ranker_digest(state.retrieval_runtime_ranker_digest),
          "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH",
          "retrieval_runtime_ranker_binding_invalid"),
+        (not is_retrieval_runtime_digest(state.runtime_environment_digest),
+         "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH",
+         "runtime_environment_binding_invalid"),
     )
 
 
@@ -421,6 +425,12 @@ def _apply_response_contract(
                 state.stale_reasons.append(reason)
 
 
+def _payload_hits(payload: Mapping[str, Any]) -> list[dict[str, Any]]:
+    raw_hits = payload.get("hits")
+    return [dict(item) for item in raw_hits if isinstance(item, Mapping)] if isinstance(
+        raw_hits, list) else []
+
+
 def _normalized_response(
     *,
     payload: Mapping[str, Any],
@@ -432,12 +442,7 @@ def _normalized_response(
 ) -> Mapping[str, Any]:
     state = _response_state(payload)
     _apply_response_contract(state, payload, expected_head, repo_root)
-    raw_hits = payload.get("hits")
-    hits = (
-        [dict(item) for item in raw_hits if isinstance(item, Mapping)]
-        if isinstance(raw_hits, list)
-        else []
-    )
+    hits = _payload_hits(payload)
     if state.ok:
         repository_error = _post_query_repository_error(
             repo_root, expected_head, deadline
@@ -469,7 +474,7 @@ def _normalized_response(
         "repo_root_digest": state.repo_root_digest,
         "retrieval_mode": state.retrieval_mode,
         "no_holoindex_reindex_performed": True,
-        **retrieval_ranker_binding(state.retrieval_runtime_ranker_digest),
+        **retrieval_runtime_binding_from(payload),
         **replica_binding,
     }
 

@@ -1,5 +1,29 @@
 # HoloIndex Package ModLog
 
+## [2026-08-27] Large-file health proof repair
+
+- Repaired the manual WSP_62/WSP_87 health proof after validation exposed a
+  missing `io` import, a stale package-root projection, and failure-path temp
+  leakage. The proof now imports through the canonical `holo_index` package,
+  uses an external same-drive temp root, guarantees cleanup, and fails unless
+  the rules engine emits exactly one HIGH finding. (WSP 22/50/62/87/97)
+
+## [2026-08-27] Runtime-bound retrieval truth and availability correction
+
+- Added a child-computed runtime-environment digest to query receipts and
+  AutoResearch candidate identity. Exact RedDog source bytes are verified
+  against the generated manifest through stable descriptors.
+- Added an explicit exact-closure assurance flag and made A-grade composition
+  reject until installed dependency payload bytes are verified. The public
+  benchmark retains one authenticated owner across all cases.
+- Reconciled current truth: exact-main maintenance/replica RSI passes at
+  `bfcf9041`, generation `sha256:7b94cf8a...`; post-restart semantic owner
+  startup failed closed at 60/180 seconds. Resident-owner activation and
+  quality/promotion feedback remain open; retrieval RSI is not claimed.
+- Centralized complete public runtime-evidence projection and decomposed query
+  receipt assembly so the new identity path introduces no WSP_62 function debt.
+  (WSP 00/15/22/50/62/83/87/97)
+
 ## [2026-08-27] Exact-main cold-owner readiness evidence
 
 - Completed the existing broker-managed OpenClaw/AgentDB post-merge transaction

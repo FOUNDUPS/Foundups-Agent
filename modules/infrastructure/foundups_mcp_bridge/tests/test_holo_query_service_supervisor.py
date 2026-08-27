@@ -276,7 +276,7 @@ def test_replica_capability_is_reverified_before_spawn_and_health(
 
     def verified() -> object:
         events.append("capability")
-        return object()
+        return _synthetic_replica_capability()
 
     def spawn(*args: Any, **kwargs: Any):
         events.append("spawn")
@@ -311,7 +311,7 @@ def test_replica_swap_after_spawn_fails_closed_before_health(
         calls += 1
         if calls == 2:
             raise ValueError("QUERY_REPLICA_BINDING_CHANGED")
-        return object()
+        return _synthetic_replica_capability()
 
     owner = HoloQueryServiceSupervisor(
         repo_root=tmp_path,

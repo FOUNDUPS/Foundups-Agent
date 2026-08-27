@@ -69,6 +69,7 @@ class RetrievalCandidateBinding:
     repo_root_digest: str
     config_digest: str
     ranker_digest: str
+    runtime_environment_digest: str
 
 
 def retrieval_candidate_id(
@@ -79,6 +80,7 @@ def retrieval_candidate_id(
     repo_root_digest: str,
     config_digest: str,
     ranker_digest: str,
+    runtime_environment_digest: str,
 ) -> str:
     """Derive candidate identity from the currently sealed source bindings."""
 
@@ -89,6 +91,7 @@ def retrieval_candidate_id(
         "repo_root_digest": repo_root_digest,
         "config_digest": config_digest,
         "ranker_digest": ranker_digest,
+        "runtime_environment_digest": runtime_environment_digest,
     })
 
 
@@ -176,7 +179,10 @@ def _validate_binding(binding: RetrievalCandidateBinding) -> None:
     values = asdict(binding)
     if not all(str(value or "").strip() for value in values.values()):
         raise ValueError("incomplete_candidate_binding")
-    for name in ("freshness_receipt_digest", "config_digest", "ranker_digest"):
+    for name in (
+        "freshness_receipt_digest", "config_digest", "ranker_digest",
+        "runtime_environment_digest",
+    ):
         if not DIGEST_PATTERN.fullmatch(str(values[name])):
             raise ValueError(f"invalid_{name}")
     if not DIGEST_PATTERN.fullmatch(binding.candidate_id):
@@ -216,6 +222,8 @@ def _validate_query_receipt(
         receipt.get("repo_head_sha") == binding.repo_head_sha,
         receipt.get("repo_root_digest") == binding.repo_root_digest,
         receipt.get("retrieval_runtime_ranker_digest") == binding.ranker_digest,
+        receipt.get("runtime_environment_digest")
+        == binding.runtime_environment_digest,
         receipt.get("no_holoindex_reindex_performed") is True,
         receipt.get("index_gap_detected") is False,
     )

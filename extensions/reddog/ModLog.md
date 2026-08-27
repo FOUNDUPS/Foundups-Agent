@@ -1,5 +1,16 @@
 # RedDog ModLog
 
+## 2026-08-27 - Runtime-environment binding release (0.4.124)
+
+- Rebound the packaged backend closure after exact child runtime-environment
+  identity, source-byte verification, receipt propagation, benchmark owner
+  reuse, and exact-closure A-grade rejection landed.
+- Corrected availability truth: historical 0.4.123 cold timing does not prove
+  current post-restart readiness. One-shot startup failed closed at 60/180
+  seconds; resident authenticated owner activation remains P0.
+- No model, Holo maintenance, dispatch, repository, or promotion authority was
+  added. (WSP 00/15/22/50/62/83/87/97)
+
 ## 2026-08-27 - Exact-main cold-owner readiness evidence (0.4.123)
 
 - The real OpenClaw/AgentDB post-merge task completed at exact main `66526ae5`,

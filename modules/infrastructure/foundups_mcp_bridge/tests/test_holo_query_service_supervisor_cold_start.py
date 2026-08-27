@@ -22,6 +22,10 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_superviso
     OWNER_HOST,
     SERVICE_TOKEN_ENV,
 )
+from .holo_query_service_supervisor_support import (
+    TEST_RUNTIME_ROOT,
+    _synthetic_replica_capability,
+)
 
 
 TOKEN = "s" * 64
@@ -36,6 +40,7 @@ BINDING = (
     "sha256:" + "c" * 64,
 )
 REPLICA_BINDING = tuple("sha256:" + character * 64 for character in "ef01")
+RUNTIME_ENVIRONMENT_DIGEST = "sha256:" + "9" * 64
 
 
 class _Process:
@@ -129,10 +134,16 @@ def _cold_start_owner(
 ) -> HoloQueryServiceSupervisor:
     return HoloQueryServiceSupervisor(
         repo_root=tmp_path,
+        runtime_root=TEST_RUNTIME_ROOT,
         canonical_ssd_path=canonical_root,
         query_replica_root=replica_root,
-        replica_capability_verifier=lambda: events.append("verify"),
+        replica_capability_verifier=lambda: (
+            events.append("verify") or _synthetic_replica_capability(REPLICA_BINDING)
+        ),
         expected_replica_binding=REPLICA_BINDING,
+        _runtime_environment_resolver_for_test=(
+            lambda **_kwargs: RUNTIME_ENVIRONMENT_DIGEST
+        ),
         port=port,
         startup_timeout_seconds=TOTAL_STARTUP_SECONDS,
         probe_timeout_seconds=ORDINARY_PROBE_SECONDS,
@@ -223,6 +234,7 @@ def _ready_payload() -> dict[str, Any]:
         "no_holoindex_reindex_performed": True,
         "retrieval_mode": "semantic",
         "retrieval_runtime_ranker_digest": "sha256:" + ("e" * 64),
+        "runtime_environment_digest": RUNTIME_ENVIRONMENT_DIGEST,
         "repo_head_sha": BINDING[0],
         "repo_root_digest": BINDING[1],
         "freshness_generation_id": BINDING[2],

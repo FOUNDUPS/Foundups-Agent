@@ -13,17 +13,24 @@ The client also requires `retrieval_runtime_ranker_digest` to be a canonical
 SHA-256 digest. `GenerationBoundHoloIndexQueryAdapter` preserves it in the safe
 projection and rebuilt receipt; A-grade evaluation separately requires exact
 equality with the clean authority candidate.
-This is source identity only. The owner executable and exact dependency/build
-environment remain an explicit P1 before reproducible A-grade/RSI evidence.
+The client also preserves the owner-computed `runtime_environment_digest` and
+`runtime_environment_exact_closure_verified`. Executable content,
+ABI/platform, verified RedDog source bytes, distribution build records,
+replica/model closure, and observed runtime settings are now bound. Installed
+dependency payload bytes remain unverified; the exact-closure flag is therefore
+false and A-grade/RSI admission rejects.
 
 `GenerationBoundHoloIndexQueryAdapter.query(...)` is the canonical resident
 read-only worker adapter. It starts the one-shot script with a runtime selected
 by the owner supervisor and `python -S -B`. Its scrubbed child environment retains required OS/runtime variables, exact Holo configuration, and vetted venv site-packages while excluding recognized credentials and Python overrides. At most
-57 seconds enter the child within a 60-second parent wall; lock wait shares that
-budget and three seconds remain for cleanup. At exact main `66526ae5c`, three
+57 seconds enter this adapter's child within a 60-second parent wall; lock wait
+shares that budget and three seconds remain for cleanup. The canonical CLI and
+asynchronous VSIX cold path use a separate bounded 300-second wall aligned with
+the 270-second readiness canary. At exact main `66526ae5c`, three
 fresh one-shot queries completed CURRENT in about 34 seconds; after a 25.5-second
-bootstrap, a warm governed query completed in 10.3 seconds. This proves bounded
-phase-1 availability, not horizontal scale. Success requires exact CURRENT semantic HEAD/root/generation
+bootstrap, a warm governed query completed in 10.3 seconds. Current post-restart
+cold validation did not reproduce that evidence within 180 seconds, so a
+resident owner remains P0. Success requires exact CURRENT semantic HEAD/root/generation
 and all four replica fields. The adapter re-verifies the one-shot receipt,
 filters allowed hits before limiting, and returns only scoped safe hit metadata;
 raw semantic buckets, route data, and nested receipts do not enter Fusion.

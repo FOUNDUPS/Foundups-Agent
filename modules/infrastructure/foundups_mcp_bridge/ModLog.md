@@ -1,5 +1,26 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Exact runtime identity and cold-start truth correction
+
+- Added the owner-computed runtime-environment digest across authenticated
+  health, query responses, clients, receipts, and retrieval candidates. It
+  binds executable content, ABI/platform, verified RedDog source bytes,
+  distribution build records, replica/model artifacts, and observed knobs.
+- Removed false parent-environment projection, verified the actual required
+  child environment, rejected raw site-package links/reparse points, and used
+  descriptor-stable source reads. The A-grade gate rejects while installed
+  distribution payload bytes remain unverified.
+- The benchmark retains one authenticated owner across its corpus. Current
+  post-restart one-shot queries still fail closed during semantic warm-up at
+  60/180 seconds, superseding the historical exact-commit availability claim
+  for this runtime. Resident owner activation remains P0. No query-time index,
+  route, repository, or promotion effect was added.
+- Applied WSP_62 decomposition to owner startup, authenticated health,
+  response composition, and owner construction. Every candidate-created or
+  candidate-grown function is at or below 50 lines and the owner class is
+  below 200 without an exemption.
+  (WSP 00/15/22/50/62/83/87/97)
+
 ## 2026-08-27 - Exact-main cold-owner readiness closure
 
 - The real broker-managed OpenClaw supervisor claimed and completed

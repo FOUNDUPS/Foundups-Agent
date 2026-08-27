@@ -11,10 +11,12 @@
 Public API for AI Intelligence Overseer - MCP coordinator for Holo Qwen/Gemma agent teams.
 
 Current Holo A-grade composition is evidence-only. It reruns the public corpus,
-requires fixed quality floors and owner-loaded source-ranker identity, and has
-no non-test caller or independent deployed signing trust. Source identity does
-not yet bind the Python executable or exact dependency/build environment;
-retrieval-quality RSI is therefore unavailable.
+requires fixed quality floors, owner-loaded source-ranker identity, and one
+authenticated runtime-environment digest. The public benchmark keeps a single
+owner resident across its probe and corpus. The A-grade gate rejects unless
+every query receipt also asserts exact runtime closure. Installed dependency
+payload bytes are not yet verified, and there is no non-test caller or
+independent deployed signing trust; retrieval-quality RSI is unavailable.
 
 **Key Features**:
 - WSP 77 agent coordination (Qwen + Gemma + 0102)
@@ -124,6 +126,10 @@ retrieval/ranking implementation surface, including the extracted
 `core/search_engine.py`; repository HEAD and replica generation bind the
 surrounding code and indexed data. Each owner query receipt must report that
 same digest from the runtime modules actually loaded by the owner process.
+It must also preserve the child-computed runtime-environment digest. A-grade
+composition separately requires
+`runtime_environment_exact_closure_verified=true`; current production owners
+emit false until installed distribution payload bytes are sealed and verified.
 
 ---
 

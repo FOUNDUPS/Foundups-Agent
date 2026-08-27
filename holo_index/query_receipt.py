@@ -84,6 +84,8 @@ class HoloIndexQueryReceipt:
     stale_reasons: list[str] = field(default_factory=list)
     no_holoindex_reindex_performed: bool = True
     retrieval_runtime_ranker_digest: str = ""
+    runtime_environment_digest: str = ""
+    runtime_environment_exact_closure_verified: bool = False
     receipt_id: str = ""
 
     def to_dict(self) -> dict[str, Any]:
@@ -348,22 +350,26 @@ def _per_target_verdicts(value: Any) -> list[dict[str, Any]] | None:
     ]
 
 
-def build_query_receipt(
-    *,
-    source: str,
-    source_class: str,
-    query: str,
-    result: Mapping[str, Any],
-    require_generation: bool,
+def _runtime_receipt_evidence(result: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "retrieval_runtime_ranker_digest": str(
+            result.get("retrieval_runtime_ranker_digest") or ""
+        ),
+        "runtime_environment_digest": str(
+            result.get("runtime_environment_digest") or ""
+        ),
+        "runtime_environment_exact_closure_verified": (
+            result.get("runtime_environment_exact_closure_verified") is True
+        ),
+    }
+
+
+def _base_query_receipt_payload(
+    *, source: str, source_class: str, query: str,
+    result: Mapping[str, Any], require_generation: bool,
     generation_binding: Mapping[str, Any] | None = None,
     hit_limit: int = 8,
-) -> Mapping[str, Any]:
-    """Normalize a query result into a deterministic receipt.
-
-    If ``require_generation`` is true, any fresh/current success without a
-    generation id is downgraded to UNKNOWN and marked as an INDEX_GAP.
-    """
-
+) -> dict[str, Any]:
     binding = _result_binding(result, generation_binding)
     freshness = str(result.get("freshness") or "UNKNOWN").upper()
     ok = result.get("ok") is True
@@ -377,14 +383,13 @@ def build_query_receipt(
         error=error,
         stale_reasons=stale_reasons,
     )
-    generation_id = str(binding.get("freshness_generation_id") or "")
     hits = normalize_query_hits(
         result.get("hits"), source_class=source_class, limit=hit_limit
     )
     _, semantic_evidence_digest, semantic_evidence_count = (
         canonical_semantic_evidence(result.get("raw_result"))
     )
-    payload = {
+    return {
         "schema_version": SCHEMA_VERSION,
         "source": str(source or ""),
         "source_class": str(source_class or ""),
@@ -393,7 +398,7 @@ def build_query_receipt(
         "freshness": freshness,
         "hits": [hit.to_dict() for hit in hits],
         "error": error,
-        "freshness_generation_id": generation_id,
+        "freshness_generation_id": str(binding.get("freshness_generation_id") or ""),
         "freshness_receipt_digest": str(binding.get("freshness_receipt_digest") or ""),
         "freshness_receipt_path": str(binding.get("freshness_receipt_path") or ""),
         "repo_head_sha": str(binding.get("repo_head_sha") or ""),
@@ -404,13 +409,31 @@ def build_query_receipt(
         ),
         "stale_reasons": stale_reasons,
         "no_holoindex_reindex_performed": True,
-        "retrieval_runtime_ranker_digest": str(
-            result.get("retrieval_runtime_ranker_digest") or ""
-        ),
+        **_runtime_receipt_evidence(result),
         "semantic_evidence_digest": semantic_evidence_digest,
         "semantic_evidence_count": semantic_evidence_count,
         "observed_latency_ms": _observed_latency_ms(result.get("latency_ms")),
     }
+
+
+def build_query_receipt(
+    *,
+    source: str,
+    source_class: str,
+    query: str,
+    result: Mapping[str, Any],
+    require_generation: bool,
+    generation_binding: Mapping[str, Any] | None = None,
+    hit_limit: int = 8,
+) -> Mapping[str, Any]:
+    """Normalize a query result into one deterministic generation receipt."""
+
+    payload = _base_query_receipt_payload(
+        source=source, source_class=source_class, query=query, result=result,
+        require_generation=require_generation,
+        generation_binding=generation_binding, hit_limit=hit_limit,
+    )
+    binding = _result_binding(result, generation_binding)
     root_digest = str(binding.get("repo_root_digest") or "")
     if root_digest:
         payload["repo_root_digest"] = root_digest

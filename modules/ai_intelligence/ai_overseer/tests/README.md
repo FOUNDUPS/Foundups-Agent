@@ -16,7 +16,8 @@ Structure:
 - `test_openclaw_security_alerts.py` OpenClaw security event emission, dispatch, and dedupe behavior.
 - `test_m2m_holo_retrieval_benchmark.py` generation-bound, non-mutating Holo
   benchmark Skillz runtime plus independent signed A-grade evidence-gate
-  coverage.
+  coverage, resident-within-run owner reuse, actual runtime digest capture, and
+  exact dependency-closure rejection.
 
 ## Running Tests
 

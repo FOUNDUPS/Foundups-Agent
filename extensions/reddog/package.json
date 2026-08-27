@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.123",
+  "version": "0.4.124",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -29,6 +29,8 @@
   ],
   "main": "./extension.js",
   "scripts": {
+    "generate:contract-shards": "node tests/generate_extension_contract_shard_manifest.js --write",
+    "check:contract-shards": "node tests/generate_extension_contract_shard_manifest.js --check",
     "test": "node tests/run_reddog_test_tier.js fast",
     "test:conversation": "node tests/run_conversation_test_tier.js",
     "test:contract": "node tests/run_reddog_test_tier.js contract",

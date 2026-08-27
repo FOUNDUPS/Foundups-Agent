@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1590,
-  "quarantined_tests": 268,
+  "total_tests": 1591,
+  "quarantined_tests": 267,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -382,19 +382,16 @@
       "id": "test::holo_index::scripts::test_large_file",
       "path": "holo_index/scripts/test_large_file.py",
       "owner": "holo_index",
-      "suite_class": "operational",
-      "shard_id": "holo-index-operational",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "module_scope_file_write",
-        "module_scope_process_stream_mutation"
-      ],
-      "description": "Create a temporary large file to test health warnings."
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exercise HoloIndex large-file health warnings without repository pollution."
     },
     {
       "id": "test::holo_index::skillz::orphan_capability_scanner::tests::test_file_specific_binding",
@@ -882,7 +879,7 @@
       "path": "holo_index/tests/test_comprehensive_training_corpus_brain_artifacts.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-01",
+      "shard_id": "holo-index-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1363,7 +1360,7 @@
       "path": "holo_index/tests/test_holoindex_memex_query_routing.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-02",
+      "shard_id": "holo-index-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1863,7 +1860,7 @@
       "path": "holo_index/tests/test_rolodex_wre_alignment.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -16495,6 +16492,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_runtime_environment_binding",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_runtime_environment_binding.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial tests for the secret-free Holo retrieval runtime identity."
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_sealed_holo_runtime",
