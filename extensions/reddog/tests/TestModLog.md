@@ -1,5 +1,21 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Post-merge Holo route continuity release binding (0.4.117)
+
+- Advanced version and contract fixtures so the extension cannot accept the
+  changed post-merge backend under the 0.4.116 package identity.
+- The generated authenticated closure remains **1,350 files** at
+  `8c411cb8ea86...2870660a`; the canonical registry remains **1,588 / 268
+  quarantined**. Backend evidence is **34 focused passed** and **85 adjacent
+  passed**; the complete bridge macro is **1,135 passed / 8 expected skips in
+  548.82 seconds**.
+- Reauthenticated the unchanged 18-shard / 6,929-line / 490-assertion contract
+  at `27aca704f4aa...9ede4a9e`. Fast **14/14**, conversation **32/32**,
+  contract **3/3**, deterministic package, and release **4/4 groups in 179.863
+  seconds** pass. Package identity is **67 files / 945,212 bytes** at content
+  digest `78102b01b82a...57033417`. Exact-main live replay and artifact audit
+  remain post-merge gates.
+
 ## 2026-08-27 - Holo owner acquisition release binding (0.4.116)
 
 - Advanced version and contract fixtures so the extension cannot silently use

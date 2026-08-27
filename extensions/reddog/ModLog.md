@@ -1,5 +1,27 @@
 # RedDog ModLog
 
+## 2026-08-27 - Post-merge Holo route continuity compatibility (0.4.117)
+
+- Advanced the thin-client identity because a VSIX-bundled backend dependency
+  now makes the post-merge composer reuse the same allowlisted current-user
+  route snapshot as the supported one-shot query. This closes inherited
+  legacy-root drift without changing the strict low-level ambiguity gate.
+- The regenerated authenticated closure remains **1,350 files** at
+  `8c411cb8ea86...2870660a`; the canonical registry remains **1,588 / 268
+  quarantined**. Focused backend evidence is **34 passed** and the adjacent
+  post-merge closure is **85 passed**; the complete bridge macro is **1,135
+  passed / 8 expected capability skips**. The four-group release supervisor
+  passed in **179.863 seconds**. Its deterministic package surface is **67
+  files / 945,212 bytes** at content digest
+  `78102b01b82a...57033417`. Exact-main live OpenClaw replay and the
+  commit-bound VSIX build/archive audit remain separate post-merge promotion
+  gates.
+- The VSIX gains no Holo refresh, route-publication, credential, listener,
+  repository-write, worker, signer, or merge authority.
+  (WSP 00/15/22/50/62/83/84/87/97)
+- Repository-bound WSP_97 evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_ROUTE_CONTINUITY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27 - Governed Holo owner acquisition compatibility (0.4.116)
 
 - Advanced the thin-client identity because the authenticated Python backend

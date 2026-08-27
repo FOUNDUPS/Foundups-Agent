@@ -1,5 +1,31 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-27] RedDog Post-Merge Holo Route Continuity (0.4.117)
+
+**WSP Protocols:** WSP 00, 5, 15, 22, 34, 50, 62, 83, 84, 87, 97
+
+- The first real exact-`938d1d01` OpenClaw replay refreshed canonical Holo
+  state but failed replica activation because its long-lived process retained
+  the retired direct replica root while current user state held the stable
+  route file. The task remains failed evidence; it was not relabeled or
+  completed manually.
+- Reused the existing allowlisted owner-acquisition boundary once per
+  post-merge transaction. The same immutable private route snapshot now feeds
+  both owner proofs and activation, without mutating ambient state, copying
+  credentials, weakening route ambiguity, or widening Holo/Git/worker
+  authority.
+- Validation is 34 focused passes, 85 adjacent passes, 92% composer coverage,
+  and 1,135 bridge passes / 8 expected skips. RedDog 0.4.117 passes fast 14/14,
+  conversation 32/32, contract 3/3, package, and all four release groups. The
+  authenticated backend is 1,350 files at `8c411cb8...2870660a`; package
+  identity is 67 files / 945,212 bytes at `78102b01...57033417`.
+- Independent WSP_00/WSP_97 reviews found no code/authority defect and forced
+  this current-base receipt plus documentation corrections. Squash merge, one
+  exact-merged-main OpenClaw replay with immutable verification, and the
+  commit-bound 0.4.117 VSIX build/archive audit remain separate gates.
+- Receipt:
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_ROUTE_CONTINUITY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## [2026-08-27] RedDog Holo Owner Acquisition Reliability
 
 **WSP Protocols:** WSP 00, 15, 22, 34, 50, 62, 83, 84, 87, 97
@@ -33,10 +59,10 @@
   `docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
   Secret-free command/result evidence is attached at
   `docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_EXECUTION_EVIDENCE_PHASE1.json`.
-- This candidate is staged and unmerged. Remaining promotion gates are final
-  independent review and PR checks, squash merge, exact-merged-main Holo
-  activation plus immutable verification, and the merge-commit-bound 0.4.116
-  VSIX build/archive audit.
+- PR #1567 was squash-merged at exact main `938d1d01`. Its first automatic
+  replay refreshed canonical state but exposed the separate long-lived
+  post-merge route-continuity defect recorded above. No 0.4.116 artifact was
+  promoted; 0.4.117 supersedes it with a new exact-main acceptance boundary.
 
 ## [2026-08-27] RedDog Exact-Main Holo/OpenClaw Live Acceptance
 
