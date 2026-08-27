@@ -9,7 +9,8 @@ mutates, dispatches, and merges NOTHING.
 
 Pipeline (WAE-L1):
   OBSERVE  : FMAS / violation / low-fruit findings (parsed by fmas_improvement_bridge)
-  PROPOSE  : ImprovementJob(status=PENDING, dry_run=True) ONLY
+  PROPOSE  : dry-run ImprovementJobs; admitted findings are PENDING while
+             malformed or untrusted WSP 62 inputs are BLOCKED
   DIRECT   : RedDog autonomously orders proposals by WSP-15 (low-lying fruit
              first) and assigns ONE direction per proposal - a RECOMMENDATION /
              priority / routing decision + status note. NOT execution.
@@ -17,7 +18,7 @@ Pipeline (WAE-L1):
 This is NOT a new orchestrator and NOT a new DAE. It is the Architect hat
 folding into the existing wre_core recursive_improvement +
 improvement_job_contract surface. It composes the existing
-fmas_improvement_bridge (which already emits PENDING/dry_run ImprovementJobs)
+fmas_improvement_bridge (which emits dry-run PENDING or BLOCKED proposals)
 and adds the autonomous triage/direction + a fail-closed execution seam.
 
 WSP Compliance:
@@ -29,14 +30,16 @@ WSP Compliance:
   WSP 97  : System Execution Prompting (dry_run=True, observe/propose/direct only)
 
 WSP 97 TRUTH BOUNDARIES (WAE-L1 - all enforced + tested):
-  - Emits ImprovementJob(PENDING, dry_run=True) ONLY.
+  - Emits dry_run=True jobs only: admissible normalized findings are PENDING;
+    malformed or untrusted WSP 62 inputs are BLOCKED.
   - RedDog "direction" is a recommendation/priority/routing decision + status
     note - NOT execution, NOT mutation, NOT merge.
   - NO dispatch (no dispatch_foundup / Hermes execute / worker spawn).
   - NO queue mutation (no add/remove/drain of any job queue).
   - NO auto-fix execution; NO real source/repo/file mutation.
-  - LOW-FRUIT FIRST: only low_lying_fruit / LOW-risk may be MARKED
-    ready-to-advance; MEDIUM/HIGH or requires_architect_review -> escalate.
+  - LOW-FRUIT FIRST: low_lying_fruit / LOW-risk may be prioritized, but direct
+    FMAS parsing has no authenticated authority receipt and is never marked
+    ready-to-advance; MEDIUM/HIGH or review-required proposals escalate.
   - EXECUTION SEAM FAILS CLOSED: advance_to_execution() is the interface L2
     will implement; in L1 it returns NOT_READY (no hard verifier exists yet).
 
@@ -62,6 +65,7 @@ from typing import Any, Dict, List
 from .improvement_job_contract import (
     ImprovementJob,
     ImprovementRiskLevel,
+    ImprovementStatus,
 )
 from .fmas_improvement_bridge import parse_fmas_findings
 
@@ -93,8 +97,8 @@ class RedDogDirection(str, Enum):
     """Valid but not low-fruit; recommend deferring behind higher-priority work."""
 
     MARK_READY_TO_ADVANCE = "mark_ready_to_advance"
-    """LOW-risk + low-lying fruit + auto-approvable: MARK ready (advancing still
-    returns NOT_READY in L1 - no hard verifier exists)."""
+    """Reserved compatibility value; WAE-L1 never emits readiness because no
+    authenticated provenance and hard verifier are composed here."""
 
     ESCALATE_TO_012 = "escalate_to_012"
     """MEDIUM/HIGH risk or requires_architect_review: escalate to 012/architect.
@@ -110,7 +114,7 @@ class AdvanceOutcome(str, Enum):
     """Outcome of an advance_to_execution() attempt."""
 
     NOT_READY = "NOT_READY"
-    """Fail-closed default in L1: no hard verifier (L2) exists yet."""
+    """Reserved fail-closed result if a future trusted caller supplies readiness."""
 
     BLOCKED = "BLOCKED"
     """Job not eligible to advance (not marked ready / not low-risk)."""
@@ -151,14 +155,13 @@ class DirectedProposal:
     """An ImprovementJob proposal paired with RedDog's direction decision."""
 
     job: ImprovementJob
-    """The PENDING / dry_run ImprovementJob (proposal)."""
+    """A dry-run ImprovementJob; inadmissible input may already be BLOCKED."""
 
     direction: RedDogDirection
     """The single direction RedDog assigned (recommendation only)."""
 
     ready_to_advance: bool = False
-    """True only for low-fruit LOW-risk jobs RedDog marked ready. Advancing
-    still returns NOT_READY in L1 (no hard verifier)."""
+    """Compatibility field only; the WAE-L1 director always leaves it false."""
 
     priority_rank: int = 0
     """0-based ordering rank assigned by triage (lower = higher priority)."""
@@ -257,20 +260,21 @@ class RedDogDirector:
         findings: List[Dict[str, Any]],
     ) -> List[ImprovementJob]:
         """
-        OBSERVE findings -> PROPOSE ImprovementJob(PENDING, dry_run=True).
+        OBSERVE findings -> PROPOSE dry-run PENDING or BLOCKED jobs.
 
-        Delegates to the existing fmas_improvement_bridge, which already emits
-        PENDING / dry_run jobs. This method does NOT execute or mutate anything.
+        Delegates to the existing bridge. Admissible normalized findings are
+        PENDING; malformed or untrusted WSP 62 inputs are BLOCKED. This method
+        does NOT execute or mutate anything.
 
         Args:
             findings: List of FMAS/violation/low-fruit finding dicts.
 
         Returns:
-            List of ImprovementJob proposals (PENDING, dry_run=True).
+            Dry-run ImprovementJob proposals in PENDING or BLOCKED state.
         """
         jobs = parse_fmas_findings(findings)
         logger.info(
-            "[REDDOG] OBSERVE->PROPOSE: %d findings -> %d proposals (PENDING/dry_run)",
+            "[REDDOG] OBSERVE->PROPOSE: %d findings -> %d dry-run proposals",
             len(findings),
             len(jobs),
         )
@@ -286,7 +290,7 @@ class RedDogDirector:
         direction per proposal. Recommendation only - executes nothing.
 
         Args:
-            jobs: PENDING / dry_run ImprovementJob proposals.
+            jobs: dry-run proposals; inadmissible jobs may already be BLOCKED.
 
         Returns:
             DirectedProposals ordered low-fruit first, each with one direction.
@@ -311,9 +315,39 @@ class RedDogDirector:
 
     def _direct_one(self, job: ImprovementJob, rank: int) -> DirectedProposal:
         """Assign exactly one direction to a single proposal (no execution)."""
-        prio = job.wsp15_priority
+        inadmissible = self._inadmissible_direction(job, rank)
+        if inadmissible is not None:
+            return inadmissible
+        review = self._review_direction(job, rank)
+        if review is not None:
+            return review
+        return self._low_risk_direction(job, rank)
 
-        # MEDIUM/HIGH risk or architect-review-required -> escalate, NEVER advance.
+    def _inadmissible_direction(
+        self, job: ImprovementJob, rank: int
+    ) -> DirectedProposal | None:
+        if job.status != ImprovementStatus.PENDING or not job.dry_run:
+            return DirectedProposal(
+                job=job,
+                direction=RedDogDirection.DEFER,
+                ready_to_advance=False,
+                priority_rank=rank,
+                note="Blocked/non-dry-run input is not an admissible L1 proposal.",
+            )
+        if not job.scope.is_well_formed():
+            return DirectedProposal(
+                job=job,
+                direction=RedDogDirection.REQUEST_CONTEXT,
+                ready_to_advance=False,
+                priority_rank=rank,
+                note="Scope is absent, non-canonical, or not confined.",
+            )
+        return None
+
+    def _review_direction(
+        self, job: ImprovementJob, rank: int
+    ) -> DirectedProposal | None:
+        prio = job.wsp15_priority
         if (
             job.risk_level in (ImprovementRiskLevel.MEDIUM, ImprovementRiskLevel.HIGH)
             or prio.requires_architect_review
@@ -329,32 +363,23 @@ class RedDogDirector:
                     f"{prio.requires_architect_review}. Never auto-advanced."
                 ),
             )
+        return None
 
-        # LOW risk + low-lying fruit + auto-approvable -> mark ready (still NOT_READY to advance).
+    def _low_risk_direction(
+        self, job: ImprovementJob, rank: int
+    ) -> DirectedProposal:
+        prio = job.wsp15_priority
         if job.can_auto_approve():
             return DirectedProposal(
                 job=job,
-                direction=RedDogDirection.MARK_READY_TO_ADVANCE,
-                ready_to_advance=True,
-                priority_rank=rank,
-                note=(
-                    "Low-lying fruit, LOW risk, auto-approvable: marked "
-                    "ready-to-advance. Advancing returns NOT_READY in L1 "
-                    "(no hard verifier yet)."
-                ),
-            )
-
-        # LOW risk but missing scope/context -> request context.
-        if not (job.scope.module_path or job.scope.file_paths):
-            return DirectedProposal(
-                job=job,
-                direction=RedDogDirection.REQUEST_CONTEXT,
+                direction=RedDogDirection.PRIORITIZE,
                 ready_to_advance=False,
                 priority_rank=rank,
-                note="LOW risk but no scope/context; recommend gathering more.",
+                note=(
+                    "Low-lying fruit and LOW risk, but direct FMAS provenance "
+                    "is advisory; authenticated verification is still required."
+                ),
             )
-
-        # LOW risk, scoped, low-lying fruit -> prioritize for attention.
         if prio.low_lying_fruit:
             return DirectedProposal(
                 job=job,
@@ -363,8 +388,6 @@ class RedDogDirector:
                 priority_rank=rank,
                 note="Low-lying fruit, LOW risk: surface first for attention.",
             )
-
-        # LOW risk, scoped, not low-fruit -> route recommendation (no spawn).
         return DirectedProposal(
             job=job,
             direction=RedDogDirection.ROUTE,
@@ -382,7 +405,7 @@ class RedDogDirector:
         findings: List[Dict[str, Any]],
     ) -> List[DirectedProposal]:
         """
-        Full WAE-L1 path: OBSERVE findings -> PROPOSE PENDING/dry_run jobs ->
+        Full WAE-L1 path: OBSERVE findings -> PROPOSE dry-run jobs ->
         DIRECT (order low-fruit first, assign one direction each).
 
         Executes nothing. Returns directed proposals only.
@@ -402,12 +425,9 @@ class RedDogDirector:
         Fail-closed execution seam. This is the interface L2 will implement
         (attach a hard verifier). In L1 it ALWAYS refuses to advance:
 
-          - If the proposal is not marked ready_to_advance -> BLOCKED.
-          - If it IS marked ready_to_advance -> NOT_READY, because no hard
-            verifier (L2) exists yet (mirrors the L0 fail-closed posture).
-
-        RedDog may MARK a proposal ready-to-advance, but advancing returns
-        NOT_READY: it executes, mutates, dispatches, and merges NOTHING.
+          - WAE-L1 emits no readiness authority, so normal proposals are BLOCKED.
+          - A compatibility object carrying ready_to_advance=True still returns
+            NOT_READY because no hard verifier (L2) is composed.
 
         Args:
             proposal: A DirectedProposal from direct().
@@ -432,7 +452,7 @@ class RedDogDirector:
             outcome=AdvanceOutcome.NOT_READY,
             reason=(
                 "EXECUTION_SEAM_FAILS_CLOSED: no L2 hard verifier is wired. "
-                "RedDog can mark ready-to-advance, but advancing requires an "
+                "Compatibility readiness cannot advance without an "
                 "independent hard verifier (L2). Merge remains 012/DAO."
             ),
             job_id=proposal.job.job_id,

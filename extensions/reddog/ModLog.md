@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-08-27 - Governed WRE health admission binding (0.4.121)
+
+- Advanced the thin-client identity because its authenticated 1,353-file
+  backend closure now includes hardened shared FMAS proposal, parsing, and path
+  contracts. The separate exact-HEAD health gate remains unreachable from the
+  VSIX; no scanner, dispatch, or promotion authority was added.
+- Bound manifest `914cb7db8cb5...f5e2`; direct WSP 62 source-label bypasses,
+  Windows alias/ADS paths, 48-bit dedup identity, shallow receipt mutation,
+  Unicode Git decoding, filesystem-order drift, and the CodeQL-reported
+  exponential-backtracking regex are covered by regressions.
+- WRE focused closure is **310 passed / 1 capability skip** and an independent
+  WSP 4/62 verifier returned GO. (WSP 00/15/22/50/62/79/87/97)
+
 ## 2026-08-27 - Holo retrieval truth binding (0.4.120)
 
 - Advanced the thin-client identity because the exact backend closure now

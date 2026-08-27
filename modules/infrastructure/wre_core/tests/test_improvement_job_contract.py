@@ -101,6 +101,29 @@ class TestImprovementJobCreation:
             )
 
 
+@pytest.mark.parametrize(
+    "unsafe_path",
+    [
+        "modules/example/.env.",
+        "modules/example/.env ",
+        "modules/example/NUL",
+        "modules/example/con.txt",
+        "modules/example/COM1.py",
+        "modules/example/file.py:stream",
+        "modules/example/file.py::$DATA",
+    ],
+)
+def test_scope_rejects_windows_alias_and_ads_paths(unsafe_path):
+    """Windows aliases and alternate data streams are never valid scope."""
+    scope = ImprovementScope(
+        module_path="modules/example",
+        file_paths=[unsafe_path],
+        allowed_paths=[unsafe_path],
+    )
+
+    assert scope.is_well_formed() is False
+
+
 # ---------------------------------------------------------------------------
 # Test 2: ImprovementType values exist
 # ---------------------------------------------------------------------------
@@ -256,6 +279,10 @@ class TestArchitectReviewRequirements:
             finding_id="typo_001",
             improvement_type=ImprovementType.DOC_LEDGER_HYGIENE,
             risk_level=ImprovementRiskLevel.LOW,
+            scope=ImprovementScope(
+                module_path="modules/infrastructure/wre_core",
+                file_paths=["modules/infrastructure/wre_core/README.md"],
+            ),
         )
         # LOW risk factory sets requires_architect_review=False
         job.wsp15_priority.requires_architect_review = False
@@ -263,6 +290,23 @@ class TestArchitectReviewRequirements:
 
         assert job.can_auto_approve() is True
         assert job.requires_architect_review() is False
+
+    def test_invalid_scope_cannot_auto_approve(self):
+        """Traversal-bearing scope never qualifies for auto-approval."""
+        job = create_improvement_job(
+            finding_id="forged_001",
+            improvement_type=ImprovementType.DOC_LEDGER_HYGIENE,
+            risk_level=ImprovementRiskLevel.LOW,
+            scope=ImprovementScope(
+                module_path="modules/infrastructure/wre_core",
+                file_paths=["modules/infrastructure/wre_core/../.env"],
+            ),
+        )
+        job.wsp15_priority.requires_architect_review = False
+        job.wsp15_priority.low_lying_fruit = True
+
+        assert job.scope.is_well_formed() is False
+        assert job.can_auto_approve() is False
 
     def test_medium_risk_requires_review(self):
         """MEDIUM risk always requires architect review."""
@@ -458,6 +502,29 @@ class TestScopeRejection:
         # Out of scope
         assert job.validate_scope("modules/other/src/file.py") is False
         assert job.validate_scope("holo_index/src/file.py") is False
+
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "modules/test/../.env.py",
+            "modules/test/src/../../.env.py",
+            "C:/modules/test/src/file.py",
+            "/modules/test/src/file.py",
+            "modules/test/src/file.py\x00.extra",
+        ],
+    )
+    def test_validate_scope_rejects_noncanonical_paths(self, path):
+        scope = ImprovementScope(
+            module_path="modules/test",
+            file_paths=["modules/test/src/file.py"],
+        )
+        job = ImprovementJob(
+            job_id="imp_scope_attack",
+            finding_id="scope_attack",
+            improvement_type=ImprovementType.MODULE_REPAIR,
+            scope=scope,
+        )
+        assert job.validate_scope(path) is False
 
 
 # ---------------------------------------------------------------------------

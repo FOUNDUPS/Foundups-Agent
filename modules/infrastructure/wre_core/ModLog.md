@@ -1,10 +1,52 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-08-27] - GOVERNED FMAS HEALTH ADMISSION / TRACKED INVENTORY
+
+- Added a clean-exact-HEAD WSP 62 health gate that binds candidate/baseline Git
+  identity, canonical scanner bytes, the complete producer digest, exclusion
+  reasons, exact tracked scope, deterministic dispositions, and capped dry-run
+  `ImprovementJob` proposals. No-baseline debt emits no jobs.
+- Quarantined direct string and structured WSP 62 bridge input, rejected
+  traversal, Windows-aliased, reserved-device, and ADS scope from local
+  auto-approval eligibility, replaced an exponential-backtracking path regex
+  with bounded segment-delimited parsing, and kept
+  every direct RedDog FMAS direction advisory with zero readiness authority.
+- Changed canonical FMAS size inventory to Git-tracked files, with an explicit
+  exact-inventory input for governed callers. The live scan fell from 4,955
+  observations / roughly 64 seconds to 471 / 16.3 seconds; critical noise fell
+  from 2,665 to 67 by excluding ignored/runtime/vendor closure before parsing.
+- Applied WSP 62 to the implementation: extracted finding, WSP 62 parsing,
+  path/identity, and triage contracts; the FMAS bridge fell from 876 to 722
+  lines and no new or grown candidate function exceeds 50 lines.
+- Reconciled WSP 4, WSP 62, and the master index in both canonical mirrors:
+  inclusive 50-line ceilings, exact candidate-commit inventory, differential
+  candidate debt, inherited-debt nonblocking, and proposal-only model/worker
+  authority now match the implemented scanner and health gate.
+- Clarified that the legacy `WSP15Priority` object is qualitative execution-
+  risk metadata, not canonical numeric WSP 15 MPS or a signed allocation
+  receipt. Updated README, interface, roadmap, navigation, and test ledgers.
+- WSP 15 allocation: C=4, I=5, D=5, Impact=5, total **19/P0** because noisy
+  health debt could otherwise be promoted as candidate work or block unrelated
+  RedDog progress.
+- Verification: the focused O:-resident command covering modular audit, health
+  admission/bridge/job/direction, route exemptions, and WSP 97 validation is
+  **310 passed / 1 capability skip**. It invoked no model, worker, queue,
+  authority/shared-checkout mutation, Holo, promotion, or production database
+  effect; isolated tests create and mutate disposable temporary Git fixtures.
+- Separate exact-main integration validation used the real OpenClaw resident and
+  supervisor to complete AgentDB task `holoindex_postmerge_refresh:3f2c11de...`
+  in 481.6 seconds. Two governed queries then returned CURRENT/no-gap/no-reindex
+  with unchanged generation, descriptor, replica, and path-identity digests.
+  Retrieval found the canonical FMAS bridge but also ranked stale historical
+  orphan reports, so direct current-code verification remained mandatory.
+  (WSP 00/15/22/50/62/79/87/97)
+
 ### [2026-08-27] - REDDOG POST-MERGE REGISTRY REPROJECTION
 
 - Reprojected the canonical staged Git test registry after adding the focused
-  post-merge replica and authority-order suites: **1,587 registered / 268
+  post-merge replica, authority-order, and health-admission suites: **1,589
+  registered / 268
   quarantined**.
 - `generate_test_registry.py --check` passes without changing quarantine,
   shard, timeout, capability, or execution policy. The authenticated RedDog

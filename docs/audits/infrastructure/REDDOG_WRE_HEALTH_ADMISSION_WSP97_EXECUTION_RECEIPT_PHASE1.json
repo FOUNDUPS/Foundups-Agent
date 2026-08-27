@@ -1,0 +1,87 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "3f2c11de6a28202b8182932c77228f9bb88de0d3"
+  },
+  "execution_id": "REDDOG_WRE_HEALTH_ADMISSION_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_79_Module_SWOT_Analysis_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "Governed Holo owner retrieval returned CURRENT at exact authority 3f2c11de6a28202b8182932c77228f9bb88de0d3 with no index gap or reindex.",
+      "Retrieval found the canonical FMAS bridge and modular audit implementation but also ranked stale historical orphan reports; current-code and Git evidence remained mandatory.",
+      "The actual OpenClaw resident and OpenClawSupervisor previously completed exact-main Holo maintenance through AgentDB using the repository O:-resident virtual environment; ambient Python failed for missing FastAPI and was not accepted."
+    ],
+    "research": [
+      "WRE, FMAS, WSP 4, WSP 62, RedDog backend closure, test registry, OpenClaw, and proposal-direction contracts were inspected before edits.",
+      "Gemma dead/orphan classification remains outside this slice because deterministic current-code provenance is not yet a trustworthy deletion authority.",
+      "The qwen_wsp_enhancement skill influenced mirror and protocol gap review only; its speculative model guidance was not granted authority."
+    ],
+    "micro_pass": [
+      "The exact O:-resident focused closure passed 310 tests with one intentional capability skip.",
+      "RedDog's 14-member fast tier passed and reconstructed all 18 authenticated contract shards at 6929 source lines and 490 assertion calls.",
+      "The backend generator check returned digest 914cb7db8cb57e22816b725e704f58fe96b9138e50374b6e6cc75c9a68cbf5e2 across 1353 runtime files."
+    ],
+    "macro_pass": [
+      "The canonical staged test registry is current at 1589 programs and 268 quarantined entries.",
+      "NAV schema passed 5 tests; WSP framework/knowledge mirrors are byte-identical.",
+      "Exact-base AST comparison reports zero new or grown Python functions above the inclusive 50-line default ceiling."
+    ],
+    "hard_think": [
+      "WSP 15 allocation is Complexity 4, Importance 5, Deferability 5, Impact 5, total 19/P0 because unauthenticated health noise must not become worker authority.",
+      "The smallest safe layer is exact-HEAD proposal admission with bounded jobs and revalidatable receipts; HealthReviewPacket, signed work-order, worker, verifier, and promotion composition remain separate.",
+      "The pre/post observable-drift checks do not lock the filesystem or exclude a transient mutate-scan-restore race, so health results remain proposal-only."
+    ],
+    "dialectic_sweep": [
+      "Independent WSP 4/62 reconciliation initially returned NO-GO for a diagnostic CLI authority overclaim and missing exact 50/51 regression; both were repaired and the verifier returned GO.",
+      "Independent receipt audit found source-label quarantine bypass, Windows alias and ADS scope, shallow receipt mutation, short identity collision, Unicode decoding, filesystem ordering, and documentation drift; each accepted blocker was repaired and regression-covered.",
+      "GitHub CodeQL rejected an exponential-backtracking WSP 62 path expression; it was replaced by a bounded segment-delimited expression before merge.",
+      "The exact health gate is intentionally not represented as a reachable RedDog runtime entry point because no non-test caller exists."
+    ],
+    "first_principles": [
+      "Health observations are evidence, not authenticated work instructions.",
+      "A model may rank deterministic evidence but cannot establish code reachability, worker authority, verification, or promotion by assertion.",
+      "A thin client must authenticate every reachable backend dependency and advance package identity when that closure changes."
+    ],
+    "execute": [
+      "Implemented exact candidate/base/scanner/inventory WSP 62 health admission with capped dry-run proposals.",
+      "Hardened shared FMAS parsing, collision-resistant identity, Windows and Unicode paths, immutable receipt snapshots, job-evidence revalidation, and deterministic traversal.",
+      "Reconciled WSP 4, WSP 62, master-index mirrors, module documentation, test registry, backend manifest, RedDog 0.4.121 identity, and authenticated contract shards."
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_79",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_WRE_HEALTH_ADMISSION_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "modules/infrastructure/wre_core/ModLog.md",
+    "modules/infrastructure/wre_core/tests/TestModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "independent WSP 4/62 verifier GO",
+    "independent RedDog receipt audit adversarial findings and final frozen-byte verdict"
+  ]
+}

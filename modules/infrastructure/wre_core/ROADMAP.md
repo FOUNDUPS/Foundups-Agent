@@ -41,6 +41,32 @@ Continue parity-proven decomposition in later focused slices:
 - bind shared in-process admission caches to an explicit synchronization and
   bounded-eviction contract before one RedDog process serves many FoundUps.
 
+## Code-health composition
+
+The deterministic WSP 62 admission layer is proposal-only and intentionally
+has no runtime caller. Compose it without widening authority:
+
+- persist one immutable, module-grouped health-review packet for bounded
+  no-baseline debt samples;
+- obtain RedDog architect `FIX`/`DEFER`/`REJECT` determinations with canonical
+  numeric WSP 15 C/I/D/Impact scores and exact allowed paths;
+- convert only authenticated `FIX` determinations to the existing signed work
+  order, preserving producer-to-verifier lineage;
+- route through exact typed AgentDB/OpenClaw/Hermes workers and require
+  independent diff/test/effect evidence before a draft PR;
+- keep Nemotron, Qwen, Gemma, AutoResearch, and PatternMemory advisory until
+  deterministic admission and independent verification accept their outputs;
+- add incremental exact-changed-file FMAS scanning and bounded caching. The
+  tracked-only producer reduced the live scan to 471 findings / 16.3 seconds,
+  but that is still too expensive per prompt or per worker;
+- replace the qualitative `WSP15Priority` compatibility object with a real
+  signed numeric WSP 15 allocation receipt at the architect boundary.
+
+Dead/orphan/duplicate evidence is a separate lane. Current legacy detectors
+are not deletion authorities; first build one receipt-bound import/entrypoint/
+runtime/registry/Git evidence graph and held-out false-positive corpus, then
+perform WSP 79 preservation before archive or consolidation.
+
 ## Autonomous slice verifier decomposition
 
 Decompose `wre_autonomous_slice_verifier_runtime.py` without weakening its

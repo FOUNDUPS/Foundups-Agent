@@ -24,6 +24,7 @@ import os
 import tempfile
 import shutil
 import logging
+import subprocess
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from unittest.mock import patch, MagicMock
 
@@ -446,6 +447,18 @@ class TestBaselineComparison(unittest.TestCase):
             file_path = src_dir / file_name
             with open(file_path, 'w') as f:
                 f.write(f"# {module_name} - {file_name}\n")
+
+    def test_module_discovery_is_canonical_not_filesystem_order(self):
+        root = Path(self.temp_dir) / "ordered_modules"
+        for name in ("zeta", "Alpha", "beta"):
+            (root / name / "src").mkdir(parents=True)
+
+        discovered = modular_audit.discover_modules_recursive(root)
+
+        self.assertEqual(
+            [item[1] for item in discovered],
+            ["Alpha", "beta", "zeta"],
+        )
     
     def test_audit_with_baseline_comparison_invalid_baseline(self):
         """Test comparison with an invalid baseline path."""
@@ -477,6 +490,34 @@ class TestBaselineComparison(unittest.TestCase):
 
 class TestWSP62Thresholds(unittest.TestCase):
     """Validate WSP 62 tiered thresholds for Python files."""
+
+    def test_python_function_default_ceiling_is_inclusive_at_50_lines(self):
+        """Exactly 50 lines pass while a new 51-line function is debt."""
+        with tempfile.TemporaryDirectory() as target_dir, tempfile.TemporaryDirectory() as base_dir:
+            target = Path(target_dir)
+            baseline = Path(base_dir)
+            src = target / "modules/infrastructure/example/src"
+            src.mkdir(parents=True)
+            (baseline / "modules").mkdir()
+            (src / "at_ceiling.py").write_text(
+                "def work():\n" + "    value = 1\n" * 49,
+                encoding="utf-8",
+            )
+            (src / "over_ceiling.py").write_text(
+                "def work():\n" + "    value = 1\n" * 50,
+                encoding="utf-8",
+            )
+
+            findings = modular_audit.audit_file_sizes(
+                target, enable_wsp_62=True, baseline_root=baseline
+            )
+
+            self.assertFalse(
+                any("at_ceiling.py" in item and "function debt" in item for item in findings)
+            )
+            self.assertTrue(
+                any("over_ceiling.py" in item and "new candidate function debt" in item for item in findings)
+            )
 
     def test_python_tiered_thresholds(self):
         """Python files should trigger tiered WSP 62 notices."""
@@ -1294,6 +1335,48 @@ class TestWSP62Thresholds(unittest.TestCase):
 
             self.assertTrue(any("ADVISORY_ARCHIVE" in item for item in findings))
             self.assertFalse(any("ERROR" in item for item in findings))
+
+    def test_git_inventory_excludes_ignored_runtime_closure(self):
+        """WSP 62 scans tracked files before walking ignored runtime data."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            src = root / "modules/infrastructure/example/src"
+            ignored = src / "runtime"
+            ignored.mkdir(parents=True)
+            tracked_file = src / "tracked.py"
+            ignored_file = ignored / "generated.py"
+            tracked_file.write_text("line\n" * 1500, encoding="utf-8")
+            ignored_file.write_text("line\n" * 1500, encoding="utf-8")
+            (root / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(
+                ["git", "add", ".gitignore", tracked_file.relative_to(root).as_posix()],
+                cwd=root,
+                check=True,
+            )
+
+            findings = modular_audit.audit_file_sizes(root, enable_wsp_62=True)
+
+            self.assertTrue(any("tracked.py" in item for item in findings))
+            self.assertFalse(any("generated.py" in item for item in findings))
+
+    def test_explicit_tracked_inventory_bounds_authoritative_scan(self):
+        """An authority caller can supply an exact repository file inventory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            src = root / "modules/infrastructure/example/src"
+            src.mkdir(parents=True)
+            (src / "tracked.py").write_text("line\n" * 1500, encoding="utf-8")
+            (src / "untracked.py").write_text("line\n" * 1500, encoding="utf-8")
+
+            findings = modular_audit.audit_file_sizes(
+                root,
+                enable_wsp_62=True,
+                tracked_paths={"modules/infrastructure/example/src/tracked.py"},
+            )
+
+            self.assertTrue(any("tracked.py" in item for item in findings))
+            self.assertFalse(any("untracked.py" in item for item in findings))
 
 
 if __name__ == "__main__":

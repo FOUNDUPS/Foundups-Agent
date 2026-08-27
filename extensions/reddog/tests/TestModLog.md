@@ -1,5 +1,18 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Governed WRE health admission binding (0.4.121)
+
+- Advanced all current-version fixtures and rebound the authenticated shared
+  FMAS/path closure to `914cb7db8cb5...f5e2` rather than bypassing compatibility
+  preflight. The separate health gate remains outside reachable runtime closure.
+- Adversarial WRE coverage proves source-independent WSP 62 quarantine,
+  Windows alias/ADS rejection, full evidence identity, deep receipt snapshots,
+  job mutation detection, explicit UTF-8 Git inventory, canonical traversal,
+  and bounded segment-delimited regex parsing after CodeQL rejected backtracking.
+- Focused WRE closure is **310 passed / 1 capability skip**; the registry is
+  **1,589 / 268 quarantined** and RedDog's 14-member fast tier passes after the
+  current 18-shard rebinding.
+
 ## 2026-08-27 - Holo retrieval truth binding (0.4.120)
 
 - Advanced every current-version fixture so the repaired authenticated backend
