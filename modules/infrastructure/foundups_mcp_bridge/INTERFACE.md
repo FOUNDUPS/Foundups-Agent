@@ -58,7 +58,10 @@ stable-route resolution after commit, and `QueryReplicaOwnerRoute.revalidate`
 after both queries. A typed post-commit query validation failure permits one
 additional read-only stable-route proof. Candidate admission is never retried;
 two failed post-commit proofs remain `COMMITTED_UNVERIFIED`; a recovered proof
-must still pass replica revalidation. Exact clean repository state is reread after materialization
+must still pass replica revalidation. Stable resolution discards caller route
+inputs and passes exactly one committed route-file environment to the strict
+resolver, preventing duplicate-keyword failure and legacy-root precedence.
+Exact clean repository state is reread after materialization
 before route transition and after the candidate query immediately before commit.
 Authority is reread from the exact workspace at each owner
 stability check. The bounded secret-free receipt distinguishes `FAILED`,

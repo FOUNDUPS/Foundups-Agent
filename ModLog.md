@@ -1,5 +1,37 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-27] RedDog Stable-Route Resolver Correction (0.4.119 candidate)
+
+**WSP Protocols:** WSP 00, 5, 15, 22, 50, 62, 84, 87, 97
+
+- The real exact-main OpenClaw replay for PR #1569 refreshed canonical Holo,
+  materialized generation `sha256:cf1433b1...`, passed candidate admission,
+  and committed route revision 6, but both post-commit proofs failed
+  `ACTIVATION_QUERY_PROOF_INVALID`. The task remains failed and its activation
+  receipt remains `COMMITTED_UNVERIFIED`; no result was relabeled.
+- A production-shaped query exposed the deterministic cause: `query_once`
+  supplied an `environment` keyword to the stable resolver, whose callback
+  expanded those kwargs and supplied a second `environment`. Python rejected
+  the duplicate before route resolution, normalized as
+  `HOLOINDEX_QUERY_REPLICA_REQUIRED`. The 0.4.118 retry therefore repeated the
+  same invalid call and could not recover.
+- The stable callback now supersedes caller route inputs with only the exact
+  committed route-file capability. The legacy direct root cannot win;
+  candidate admission, retry bounds, exact authority, immutable revalidation,
+  and failure semantics are unchanged. RED reproduced the exact committed-
+  unverified failure; GREEN is 13 passed / 1 expected skip at 90% coverage and
+  191 passed / 1 expected skip across the current adjacent closure. WSP_15 is
+  16/P0. The complete bridge macro is 1,136 passed / 8 expected skips in
+  549.69 seconds. The canonical registry is 1,588 / 268 quarantined; the
+  authenticated 1,350-file backend closure is
+  `0de0c08c0181...afa28`. RedDog fast 14/14, conversation 32/32, contract
+  3/3, package, and all 4/4 release groups pass in 191.972 seconds. The
+  contract aggregate is `a6d2e50c1c97...43ecfaa`; package identity is 67
+  files / 945,469 bytes at `59a710359237...25101de`. Exact-main replay and a
+  commit-bound VSIX remain promotion gates.
+- Repository-bound WSP_97 evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_STABLE_ROUTE_RESOLVER_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## [2026-08-27] RedDog Post-Commit Holo Proof Recovery (0.4.118 candidate)
 
 **WSP Protocols:** WSP 00, 5, 15, 22, 50, 62, 84, 87, 97

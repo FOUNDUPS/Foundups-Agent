@@ -1,5 +1,22 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Stable-route resolver binding (0.4.119)
+
+- Advanced version fixtures so the extension cannot accept the corrected
+  activation backend under 0.4.118 identity.
+- RED added the production `query_once` resolver shape: canonical roots plus an
+  existing `environment` keyword. It reproduced committed-unverified before
+  the fix. GREEN proves the callback passes exactly the committed route-file
+  mapping and drops the hostile legacy root.
+- Focused: **13 passed / 1 expected skip**, **90%** coverage. Current adjacent:
+  **191 passed / 1 expected skip**. Complete bridge macro: **1,136 passed / 8
+  expected skips in 549.69 seconds**. Backend: **1,350 files** at
+  `0de0c08c0181...afa28`; registry: **1,588 / 268 quarantined**. Fast **14/14**,
+  conversation **32/32**, contract **3/3**, package, and release **4/4 groups
+  in 191.972 seconds** pass. Contract identity is
+  `a6d2e50c1c97...43ecfaa`; package identity is **67 files / 945,469 bytes** at
+  `59a710359237...25101de`. Exact-main and VSIX identities remain pending.
+
 ## 2026-08-27 - Post-commit Holo proof recovery binding (0.4.118)
 
 - Advanced the version and current contract fixtures so the extension cannot

@@ -86,6 +86,9 @@ each query. A typed validation failure on that post-commit canary gets exactly
 one fresh read-only proof attempt; candidate/pre-commit admission is never
 retried. Two failed proofs remain `COMMITTED_UNVERIFIED`, while a recovered
 proof still requires the same full immutable revalidation before PASS.
+Normal route resolution replaces any caller-supplied route mapping with the
+single committed route-file capability; it does not expand an existing
+`environment` keyword or allow a legacy direct replica root to compete.
 Authority selection rereads the exact workspace state instead of
 fabricating a receipt. A post-commit failure is reported as
 `COMMITTED_UNVERIFIED`; a committed route whose receipt publication was
@@ -119,8 +122,13 @@ post-commit stable proof returned `ACTIVATION_QUERY_PROOF_INVALID`, so the
 historical AgentDB task and activation receipt correctly remain failed/
 `COMMITTED_UNVERIFIED`. Subsequent supported and activation-shaped queries were
 CURRENT/no-gap/no-reindex against the same replica. The bounded second proof
-above addresses that observed transient without relabeling history or adding
-query-time maintenance, unbounded retry, or mutation authority.
+was retained as bounded transient resilience. Exact-main `f058f87b` proved the
+underlying failure was deterministic instead: the stable callback duplicated
+the caller's `environment` keyword before route resolution, so both attempts
+returned the generic activation failure even though revision 6 was usable.
+The callback now supersedes caller route inputs with the exact committed route
+file, without relabeling either failed task or adding query-time maintenance,
+unbounded retry, or mutation authority.
 
 `reddog_holoindex_query_replica.py` can materialize one immutable
 `holoindex_query_replica.v1` generation into a new, disjoint replica-root

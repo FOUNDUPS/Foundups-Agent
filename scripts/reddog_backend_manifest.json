@@ -2418,7 +2418,7 @@
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_postmerge_replica.py": "9106359e0fab23dcf3394de9f7ffd2e8bd8499bb2aed6112ed3d9aebf14c84b8",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_process_image.py": "655271d9f435011b99b8b3d0be31228e071de0c7ce28ba219a3b51c9c5114242",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_replica.py": "c9cd6ce5e6e1d09a4cd49aabedfd232498746c32d9512a7ee8901250275fa2f8",
-    "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_replica_activation.py": "e8eb37e67c0f293e1f26ffeac13b5fd21321cfc8c170907a8c7bd7c70d9b1249",
+    "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_replica_activation.py": "c27dff800e46c229b001eec824014244b432c5efbc8edd9ecce75d40decdc00e",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_replica_activation_contract.py": "f1b06b207a5ff2faf6d6dede9e746bf34baad7bb405144093b58dba77899f6da",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_replica_descriptor.py": "1957f157e6707c5b28b213ed4f74aaf637ef965d31f5527479990f45210ae3a3",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_replica_generation.py": "fef6732313c730c237beb32b5e46b16d366eb723bb05136fbd4a0ecfe75d6cf0",

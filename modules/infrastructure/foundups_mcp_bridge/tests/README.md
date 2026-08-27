@@ -53,12 +53,15 @@
   interrupted committed publication, and receipt-less committed-route
   finalization. It also proves exactly one typed post-commit recovery attempt,
   no candidate retry, terminal `COMMITTED_UNVERIFIED` after two failures, and
-  the same recovery rule for receipt-less committed-route finalization.
+  the same recovery rule for receipt-less committed-route finalization. The
+  production-shaped resolver regression supplies an existing caller
+  `environment` and proves stable resolution replaces it with exactly the
+  committed route-file capability; a legacy direct root cannot win.
 - Current focused result is **13 passed / 1 expected host-capability skip** at
   **90%** activation-controller coverage. The adjacent post-merge, owner,
-  candidate-acceptance, authority, and coordinator closure is **205 passed / 1
+  candidate-acceptance, authority, and coordinator closure is **191 passed / 1
   expected skip**. The complete bridge macro is **1,136 passed / 8 expected
-  skips in 550.92 seconds**. All test roots are disposable and O:-local.
+  skips in 549.69 seconds**. All test roots are disposable and O:-local.
 - The CLI contract proves default inertness and explicit argument projection.
   The adjacent activation/route/planner/materializer/descriptor/maintenance/
   candidate-acceptance/authority/CLI suite is **470 passed / 7 host-capability

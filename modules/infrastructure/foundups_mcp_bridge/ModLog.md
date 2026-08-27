@@ -1,5 +1,27 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Stable-route callback environment correction
+
+- Preserved the failed exact-`f058f87b` OpenClaw task and activation receipt.
+  The route and Holo generation are CURRENT, but AgentDB remains failed because
+  both post-commit proofs raised `ACTIVATION_QUERY_PROOF_INVALID`.
+- Reproduced the hidden inner cause through the production callback contract:
+  `query_once` already passed `environment` in resolver kwargs and the stable
+  callback supplied it again. The deterministic `TypeError` was normalized to
+  `HOLOINDEX_QUERY_REPLICA_REQUIRED`; the 0.4.118 retry repeated the same call.
+- Stable resolution now explicitly projects the canonical roots and replaces
+  route inputs with only the committed route-file capability. No legacy root,
+  retry, maintenance, mutation, or authority expansion was added. RED failed
+  committed-unverified; GREEN is **13 passed / 1 expected skip**, **90%**
+  coverage, and **191 passed / 1 expected skip** adjacent. The complete bridge
+  macro is **1,136 passed / 8 expected skips in 549.69 seconds**. Registry and
+  backend projections are current at **1,588 / 268 quarantined** and **1,350
+  files** (`0de0c08c0181...afa28`). RedDog release is **4/4 groups in 191.972
+  seconds**. WSP_15 is 16/P0. Exact-main completion remains unproven.
+  (WSP 00/15/22/50/62/84/87/97)
+- Repository-bound WSP_97 evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_STABLE_ROUTE_RESOLVER_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27 - Bounded post-commit query-proof recovery
 
 - Preserved the exact `a48e9b61` failure instead of treating a committed route

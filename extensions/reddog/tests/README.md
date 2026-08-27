@@ -1,5 +1,20 @@
 # RedDog Extension Tests
 
+## 0.4.119 stable-route resolver compatibility
+
+Version and contract fixtures advance because the authenticated activation
+callback now replaces caller route inputs with the exact committed route-file
+capability. The regression passes a production-shaped pre-existing
+`environment` keyword and proves the legacy direct-root value cannot win.
+Focused evidence is 13 passed / 1 expected skip at 90% coverage; current
+adjacent evidence is 191 passed / 1 expected skip. The complete bridge macro is
+1,136 passed / 8 expected skips in 549.69 seconds. The authenticated backend
+is 1,350 files at `0de0c08c0181...afa28`; registry is 1,588 / 268 quarantined.
+Fast 14/14, conversation 32/32, contract 3/3, package, and all 4/4 release
+groups pass in 191.972 seconds. Contract identity is
+`a6d2e50c1c97...43ecfaa`; package identity is 67 files / 945,469 bytes at
+`59a710359237...25101de`. Exact-main and VSIX evidence remain separate gates.
+
 ## 0.4.118 post-commit Holo proof recovery compatibility
 
 Version and contract fixtures advance because the authenticated backend now
