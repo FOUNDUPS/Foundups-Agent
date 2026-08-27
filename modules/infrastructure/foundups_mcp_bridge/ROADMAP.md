@@ -1,5 +1,25 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-27: Post-commit stable-proof resilience
+
+**Implemented and adjacent-GREEN; exact-main replay remains required.** The
+0.4.117 OpenClaw run at exact `a48e9b61` refreshed canonical Holo, materialized
+generation `sha256:7102c478...`, passed the candidate canary, and committed
+route revision 5, but its first normal stable-route proof failed validation.
+Later governed IDE and activation-shaped queries were CURRENT/no-gap/no-reindex
+against the same immutable binding. The task and receipt remain failed/
+`COMMITTED_UNVERIFIED`; they were not rewritten.
+
+The activation controller now makes at most two post-commit stable proofs. It
+catches only its typed query-validation failure, starts no retry before route
+commit, and still requires full replica revalidation after a recovered proof.
+Two failures remain fail-closed. WSP_15 is 17/P0. Current evidence is 13 passed
+/ 1 expected skip, 90% controller coverage, 205 passed / 1 expected skip
+across the adjacent closure, and 1,136 passed / 8 expected skips across the
+complete bridge. The authenticated extension release passes 4/4 groups. The
+next gate is merge, exact-main automatic OpenClaw completion, immutable
+verification, and commit-bound VSIX packaging.
+
 ## 2026-08-27: Supported Holo owner acquisition reliability
 
 **Implemented and focused-GREEN on base

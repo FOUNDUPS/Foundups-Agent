@@ -55,7 +55,10 @@ requires a new receipt target. It then uses `ensure_reddog_holoindex_current`
 without owner startup, the existing planner/materializer, revision+digest route
 CAS, a fixed semantic canary before commit, the same canary through normal
 stable-route resolution after commit, and `QueryReplicaOwnerRoute.revalidate`
-after both queries. Exact clean repository state is reread after materialization
+after both queries. A typed post-commit query validation failure permits one
+additional read-only stable-route proof. Candidate admission is never retried;
+two failed post-commit proofs remain `COMMITTED_UNVERIFIED`; a recovered proof
+must still pass replica revalidation. Exact clean repository state is reread after materialization
 before route transition and after the candidate query immediately before commit.
 Authority is reread from the exact workspace at each owner
 stability check. The bounded secret-free receipt distinguishes `FAILED`,

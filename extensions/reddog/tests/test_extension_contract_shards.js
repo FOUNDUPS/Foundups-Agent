@@ -5,7 +5,7 @@ const path = require('path');
 const vm = require('vm');
 const contractExecution = require('./reddog_contract_execution');
 
-const EXPECTED_SOURCE_SHA256 = 'sha256:27aca704f4aa9f72ad7c56747f19bc7ab3b8d965d04aa3f1544650019ede4a9e';
+const EXPECTED_SOURCE_SHA256 = 'sha256:e08abe4e0fb984d035f70e335e68d1206dfda31b98c91814e75172e8513509ef';
 const EXPECTED_SOURCE_LINES = 6929;
 const EXPECTED_ASSERTION_CALLS = 490;
 const MAX_SHARD_LINES = 400;

@@ -1,5 +1,32 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-27] RedDog Post-Commit Holo Proof Recovery (0.4.118 candidate)
+
+**WSP Protocols:** WSP 00, 5, 15, 22, 50, 62, 84, 87, 97
+
+- The merged 0.4.117 route-continuity repair did restore Holo usability at
+  exact main `a48e9b61`: revision 5 committed generation
+  `sha256:7102c478...`, and later governed IDE/activation canaries were CURRENT,
+  exact-HEAD, no-gap, no-reindex, with the same immutable replica binding.
+  AgentDB nevertheless retained the run as failed because the first normal
+  stable-route proof after commit returned `ACTIVATION_QUERY_PROOF_INVALID`.
+- Added one bounded read-only recovery proof after a post-commit validation
+  failure. Candidate admission remains one-shot; only typed validation failures
+  are retried; two failed proofs remain `COMMITTED_UNVERIFIED`; a successful
+  recovery still revalidates every admitted replica artifact before PASS.
+- WSP_15 scores the release blocker 17/P0. RED reproduced the missing recovery;
+  GREEN is 13 passed / 1 expected skip at 90% activation-controller coverage,
+  with 205 passed / 1 expected skip across the adjacent owner, acceptance,
+  post-merge, authority, and coordinator closure. The authenticated closure is
+  1,350 files at `9f1867c334c9...566685d`; the complete bridge macro is 1,136
+  passed / 8 expected skips. RedDog fast 14/14, conversation 32/32, contract
+  3/3, deterministic package, and all four release groups pass. Package
+  identity is 67 files / 945,324 bytes at `51fde503...65ef02`; the authenticated
+  contract aggregate is `e08abe4e...3509ef`. A new exact-main OpenClaw replay
+  and commit-bound VSIX audit remain promotion gates.
+- Receipt:
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTCOMMIT_PROOF_RECOVERY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## [2026-08-27] RedDog Post-Merge Holo Route Continuity (0.4.117)
 
 **WSP Protocols:** WSP 00, 5, 15, 22, 34, 50, 62, 83, 84, 87, 97
@@ -20,9 +47,11 @@
   authenticated backend is 1,350 files at `8c411cb8...2870660a`; package
   identity is 67 files / 945,212 bytes at `78102b01...57033417`.
 - Independent WSP_00/WSP_97 reviews found no code/authority defect and forced
-  this current-base receipt plus documentation corrections. Squash merge, one
-  exact-merged-main OpenClaw replay with immutable verification, and the
-  commit-bound 0.4.117 VSIX build/archive audit remain separate gates.
+  this current-base receipt plus documentation corrections. PR #1568 was
+  squash-merged at `a48e9b61`; its exact-main OpenClaw replay then committed a
+  usable immutable route but failed its first stable proof, so no 0.4.117 VSIX
+  was promoted. That historical failure is the evidence for the 0.4.118 repair
+  above.
 - Receipt:
   `docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_ROUTE_CONTINUITY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
 

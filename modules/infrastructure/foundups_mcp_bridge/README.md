@@ -82,7 +82,11 @@ canary before commit, and re-proves the exact clean repository both immediately
 after materialization/before route transition and after that canary/immediately
 before commit. It then commits the revision/digest-bound route, repeats the
 canary through normal route-file resolution, and revalidates the replica after
-each query. Authority selection rereads the exact workspace state instead of
+each query. A typed validation failure on that post-commit canary gets exactly
+one fresh read-only proof attempt; candidate/pre-commit admission is never
+retried. Two failed proofs remain `COMMITTED_UNVERIFIED`, while a recovered
+proof still requires the same full immutable revalidation before PASS.
+Authority selection rereads the exact workspace state instead of
 fabricating a receipt. A post-commit failure is reported as
 `COMMITTED_UNVERIFIED`; a committed route whose receipt publication was
 interrupted is finalized on the next identical invocation after a fresh stable
@@ -108,6 +112,15 @@ broker-managed OpenClaw/AgentDB path at exact main `cfd1e0051`: generation
 `sha256:60d06274...` was activated, the task completed, and a later governed
 owner query plus full immutable revalidation remained unchanged. Later HEADs
 still require their own exact-SHA transaction.
+
+At later exact main `a48e9b61`, the route-continuity repair reached canonical
+generation `sha256:7102c478...` and committed route revision 5. The first
+post-commit stable proof returned `ACTIVATION_QUERY_PROOF_INVALID`, so the
+historical AgentDB task and activation receipt correctly remain failed/
+`COMMITTED_UNVERIFIED`. Subsequent supported and activation-shaped queries were
+CURRENT/no-gap/no-reindex against the same replica. The bounded second proof
+above addresses that observed transient without relabeling history or adding
+query-time maintenance, unbounded retry, or mutation authority.
 
 `reddog_holoindex_query_replica.py` can materialize one immutable
 `holoindex_query_replica.v1` generation into a new, disjoint replica-root

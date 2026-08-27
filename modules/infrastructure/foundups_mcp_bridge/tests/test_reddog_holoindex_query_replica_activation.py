@@ -295,7 +295,11 @@ def test_postcommit_query_failure_is_not_reported_as_rollback(
     config = _config(tmp_path)
     dependencies, calls = _dependencies(config)
     good = _query_result(_binding(config, object()))
+    query_count = 0
+
     def query_once_then_fail(payload, **kwargs):
+        nonlocal query_count
+        query_count += 1
         seen = bool(calls.get("query_seen"))
         calls["query_seen"] = True
         return {"ok": False} if seen else good
@@ -312,7 +316,31 @@ def test_postcommit_query_failure_is_not_reported_as_rollback(
     assert result.ok is False
     assert result.verdict == "COMMITTED_UNVERIFIED"
     assert result.route_committed is True
+    assert query_count == 3
     assert _route_store(config).load_readonly().record.status == "CURRENT"
+
+
+def test_postcommit_query_proof_gets_one_bounded_recovery_attempt(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    config = _config(tmp_path)
+    dependencies, calls = _dependencies(config)
+    good = _query_result(_binding(config, object()))
+    transient = {"ok": False, "error": "owner_startup_failed"}
+    query_results = iter((good, transient, good))
+    dependencies.query = lambda _payload, **_kwargs: next(query_results)
+    monkeypatch.setattr(
+        activation,
+        "resolve_query_replica_owner_route",
+        lambda **_kwargs: calls["route"],
+    )
+
+    result = activate_query_replica(config, dependencies=dependencies)
+
+    assert result.ok is True
+    assert result.verdict == "PASS"
+    assert result.route_committed is True
+    assert result.post_query_replica_unchanged is True
 
 
 def test_default_is_inert_and_does_not_touch_filesystem(tmp_path: Path) -> None:
@@ -473,6 +501,13 @@ def test_missing_receipt_for_committed_target_is_recovered(
     assert not config.receipt_path.exists()
     dependencies.publish = real_publish
     calls["queries"] = []
+    recovery_results = iter(
+        (
+            {"ok": False, "error": "owner_startup_failed"},
+            _query_result(calls["route"].binding),
+        )
+    )
+    dependencies.query = lambda _payload, **_kwargs: next(recovery_results)
     result = activate_query_replica(config, dependencies=dependencies)
 
     assert result.ok is True

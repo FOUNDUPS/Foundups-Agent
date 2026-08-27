@@ -1,5 +1,21 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-27] Post-commit stable-query recovery falsification
+
+- RED proved a candidate canary and route commit could succeed while one
+  transient normal-route validation left the activation permanently
+  `COMMITTED_UNVERIFIED`; the existing controller performed no second proof.
+- GREEN proves exactly one additional typed post-commit query, PASS plus
+  immutable revalidation when it recovers, and bounded
+  `COMMITTED_UNVERIFIED` after both proofs fail. Receipt-less committed-route
+  recovery uses the same bounded path. Candidate admission is still one-shot.
+- Focused: **13 passed / 1 expected host-capability skip**, **90%** controller
+  coverage. Adjacent owner/bootstrap/acceptance/post-merge/authority/
+  coordinator closure: **205 passed / 1 expected skip**. No live Holo, route,
+  replica, owner, Git, or network state was mutated by tests. Complete bridge:
+  **1,136 passed / 8 expected skips in 550.92 seconds**.
+  (WSP 00/15/22/50/62/84/87/97)
+
 ## [2026-08-27] Post-merge route continuity falsification
 
 - Added a regression reproducing an inherited direct replica root plus a newer

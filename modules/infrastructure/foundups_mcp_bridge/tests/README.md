@@ -51,7 +51,14 @@
   truth, replica revalidation, secret-free receipt publication, reserved and
   pre-existing receipt denial, fresh workspace-only authority selection,
   interrupted committed publication, and receipt-less committed-route
-  finalization.
+  finalization. It also proves exactly one typed post-commit recovery attempt,
+  no candidate retry, terminal `COMMITTED_UNVERIFIED` after two failures, and
+  the same recovery rule for receipt-less committed-route finalization.
+- Current focused result is **13 passed / 1 expected host-capability skip** at
+  **90%** activation-controller coverage. The adjacent post-merge, owner,
+  candidate-acceptance, authority, and coordinator closure is **205 passed / 1
+  expected skip**. The complete bridge macro is **1,136 passed / 8 expected
+  skips in 550.92 seconds**. All test roots are disposable and O:-local.
 - The CLI contract proves default inertness and explicit argument projection.
   The adjacent activation/route/planner/materializer/descriptor/maintenance/
   candidate-acceptance/authority/CLI suite is **470 passed / 7 host-capability
