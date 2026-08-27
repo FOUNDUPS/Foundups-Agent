@@ -2,13 +2,13 @@
 
 ## Status
 
-Phase: RedDog 0.4.124 resident architect thin-client surface.
+Phase: RedDog 0.4.125 resident architect thin-client surface.
 
-0.4.124 binds the authenticated Holo owner's actual runtime-environment digest
-through RedDog receipts and packages the updated backend closure. It does not
-claim A-grade: installed dependency payload bytes are not exact-closure
-verified, post-restart cold startup exceeded 180 seconds, and normal operation
-still needs one persistent authenticated owner.
+0.4.125 authenticates the reachable shared filesystem-safety prerequisites
+used by the staged dependency materializer. The materializer itself remains a
+maintenance-only library outside the thin-client runtime closure. A trusted
+stage-zero verifier must still bind the full runtime, signature, and empirical
+write denial, while normal operation still needs one persistent owner.
 
 Current implementation:
 
@@ -20,10 +20,16 @@ Current implementation:
   At exact main `66526ae5`, three fresh-process queries passed on attempt one in
   about 34 seconds each; a pre-warmed query passed in 10.3 seconds after a
   25.5-second bootstrap. This is single-owner readiness, not A-grade or scale.
-- [ ] P1: seal and bind the owner Python executable, ABI/platform, exact
-  dependency manifest, backend builds, and deterministic execution knobs.
-  Then deploy an independent evaluator/signing trust boundary and wire a
-  non-test admission consumer; source binding alone is not reproducibility.
+- [x] Implement and production-shape-test a maintenance-only exact dependency
+  materializer; it is intentionally not reachable from the VSIX runtime.
+- [ ] P0-A: use a separately trusted stage-zero verifier to bind the owner
+  Python executable, ABI/platform, standard library, native loader closure,
+  sealed dependency generation, backend build, deterministic execution knobs,
+  signature, and empirical write denial. Then publish a route-v2 binding with
+  atomic CAS; source binding alone is not reproducibility.
+- [ ] P0-B: activate one authenticated resident owner against only that route-v2
+  binding, with bounded startup/restart, serialized requests, and identical
+  per-response freshness and immutable-closure proof.
 
 - [x] Authenticated backend closure contains hardened shared FMAS proposal,
   parsing, and path contracts. The separate exact-HEAD WSP 62 health gate has

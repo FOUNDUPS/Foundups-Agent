@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import os
+import stat
 from dataclasses import dataclass
 from pathlib import Path
+
+from .runtime_artifact_windows_streams import windows_extended_path
 
 
 @dataclass(frozen=True)
@@ -51,11 +54,23 @@ def _descriptor_identity_matches(
     return bool(
         observed.device == expected.device
         and observed.inode == expected.inode
-        and observed.mode == expected.mode
+        and _mode_identity_matches(observed.mode, expected.mode)
         and observed.links == expected.links
         and observed.size == expected.size
         and observed.modified_ns == expected.modified_ns
         and observed.attributes == expected.attributes
+    )
+
+
+def _mode_identity_matches(observed: int, expected: int) -> bool:
+    """Normalize only Windows' extension-derived execute-bit projection."""
+
+    if os.name != "nt":
+        return observed == expected
+    execute_bits = stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+    return bool(
+        stat.S_IFMT(observed) == stat.S_IFMT(expected)
+        and (observed & ~execute_bits) == (expected & ~execute_bits)
     )
 
 
@@ -126,7 +141,7 @@ def secure_digest_confined_file_impl(
         after = os.fstat(descriptor)
         if not _descriptor_identity_matches(after, expected_identity) or total != expected_identity.size:
             raise ValueError("confined_digest_identity_changed")
-        current = os.lstat(expected)
+        current = os.lstat(_filesystem_path(expected))
         if confined_file_identity(current) != expected_identity:
             raise ValueError("confined_digest_path_identity_changed")
         _verify_descriptor(descriptor, expected, root, safety)
@@ -154,15 +169,40 @@ def _validated_paths(path: Path | str, allowed_root: Path | str, safety):
     expected = Path(os.path.abspath(expected))
     if not safety._is_relative_to(expected, root_candidate):
         raise ValueError("confined_read_path_outside_root")
-    if safety._contains_link_component(
-        root_candidate
-    ) or safety._contains_link_component(expected):
+    if _contains_link_component(root_candidate, safety) or _contains_link_component(
+        expected, safety
+    ):
         raise ValueError("confined_read_path_link_rejected")
     root = safety._resolve_runtime_path(root_candidate, strict=True)
     resolved = safety._resolve_runtime_path(expected, strict=True)
     if not safety._is_relative_to(resolved, root):
         raise ValueError("confined_read_path_outside_root")
     return root, resolved
+
+
+def _filesystem_path(path: Path) -> Path | str:
+    return windows_extended_path(path) if os.name == "nt" else path
+
+
+def _contains_link_component(path: Path, safety) -> bool:
+    if os.name != "nt":
+        return safety._contains_link_component(path)
+    current = Path(path.anchor) if path.is_absolute() else Path()
+    for component in path.parts:
+        if component == path.anchor:
+            continue
+        current /= component
+        try:
+            metadata = os.lstat(windows_extended_path(current))
+        except FileNotFoundError:
+            continue
+        reparse = bool(
+            getattr(metadata, "st_file_attributes", 0)
+            & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+        )
+        if stat.S_ISLNK(metadata.st_mode) or reparse:
+            return True
+    return False
 
 
 def _verify_descriptor(descriptor: int, expected: Path, root: Path, safety) -> None:

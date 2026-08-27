@@ -1,5 +1,39 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-28] Inert dependency-runtime falsification
+
+- Added exact file/directory planning, bounded Windows traversal, existing
+  generation reuse, staging/publication verification, parser/canonicalization,
+  alias/link/hardlink, mutation, unlisted topology, and contract substitution
+  falsifiers.
+- Proved two concurrent public builders for one runtime store never enter the
+  underlying materialization transaction together, including ordinary versus
+  extended-length Windows aliases of the same proved device/inode identity.
+- Extracted the 700-file retained-handle proof to a WSP_62-bounded sibling and
+  decomposed the opt-in production-shape test below the 50-line function limit.
+- Added shared Windows file/directory alternate-stream probes and ensured
+  source, payload, generation root, descriptor, inventory, and orphan namespace
+  all reject named streams. Junction fallbacks execute where file symlink
+  privileges are unavailable.
+- Added an opt-in 72,261-file/11,639-child-directory scale test with handle,
+  memory, time, reuse, and orphan assertions. Production-shape and real-byte
+  evidence completed: synthetic first/reuse **1,708.812s / 836.969s** with
+  handles **+6** and RSS **+543,744,000 bytes**; exact 1,853,891,335-byte tree
+  first/reuse **2,250.675s / 798.191s** with handles **+31** and RSS
+  **+537,284,608 bytes**. Both proved 72,261 files, 11,639 child directories,
+  exact reuse, one generation, and zero successful-root orphans.
+- The first real 1.85 GB dependency run failed closed at deep ONNX directory
+  creation with `WinError 206`. A direct RED reproducer crossed legacy Windows
+  `MAX_PATH`; GREEN now proves the complete materialize, publish, verify, and
+  reuse path. The focused slice passes **72 tests / 6 expected capability
+  skips** after the repair. The failed real-r2 staging tree was preserved under
+  its orphan namespace; the fresh successful real-r3 root contains no orphan.
+- Final exact candidate validation is **72 passed / 6 expected skips** focused
+  and **139 passed / 5 expected skips** across adjacent artifact-manifest,
+  model-copy, replica, runtime-environment, and sealed-runtime contracts.
+- No live route, owner, replica, model, maintenance, reindex, activation, or
+  dependency runtime was changed.
+
 ## [2026-08-27] Runtime-environment binding falsification
 
 - Added exact source-byte/manifest parity, descriptor-stable read, actual

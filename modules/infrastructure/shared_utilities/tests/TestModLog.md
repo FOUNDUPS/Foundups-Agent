@@ -1,5 +1,17 @@
 # TestModLog
 
+## 2026-08-28 - Windows Runtime Artifact Safety
+
+- Added focused coverage for executable-suffix mode projection, clean file and
+  directory stream admission, named file/directory stream rejection, and
+  repeated clean-directory calls without handle growth.
+- Kept the inherited runtime-artifact test at its exact no-growth baseline by
+  extracting all new Windows cases into a WSP_62-bounded sibling.
+- Added POSIX lock-root symlink, broad-permission, and private-root falsifiers
+  for the pinned machine-wide runtime-lock namespace.
+- Cross-module RedDog coverage now drives a valid deep payload past legacy
+  Windows `MAX_PATH` through publish, full re-verification, and exact reuse.
+
 ## 2026-08-23 - Confined Streaming Digest Proof
 
 - Added stable success, strict identity/bound, replacement/link, content

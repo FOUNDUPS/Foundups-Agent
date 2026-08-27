@@ -22,6 +22,26 @@ rejects. Current cold one-shot semantic startup also exceeds 180 seconds after
 restart; resident authenticated owner activation and dependency-byte sealing
 remain P0. Query-time reindex and environment repair remain forbidden.
 
+The first dependency-byte layer now exists as an inert, content-addressed
+materializer. It hashes every admitted `site-packages` file and every directory
+name, preserves empty directories, bounds file/directory/depth/path/inventory
+resources, copies with `O(depth)` retained Windows directory handles, and fully
+reproves staging plus the no-replace published generation. Literal links,
+reparse points, hardlinks, aliases, alternate data streams, mutation, and
+unlisted topology fail closed. Public materialization is serialized per proved
+store device/inode across processes so equivalent path spellings converge and
+concurrent builders wait before reusing the exact
+generation instead of duplicating payload copies. Windows creation,
+enumeration, metadata, stream, and confined-digest operations retain one
+extended-length spelling for valid payload paths beyond legacy `MAX_PATH`.
+Its descriptor deliberately reports
+`write_denial_verified=false` and `activation_eligible=false`; it is not yet
+selected by the owner and does not inspect dependency payload content for
+secrets. Interpreter/standard-library/native-library closure, signing,
+write-denial, resident-owner binding, and retrieval-quality promotion remain
+separate P0 layers. Therefore the exact-closure and A-grade statements above
+remain unchanged.
+
 ## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
 
 The bundled server is loopback-only and serves MCP Streamable HTTP at exact

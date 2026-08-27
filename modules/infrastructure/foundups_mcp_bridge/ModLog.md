@@ -1,5 +1,46 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-28 - Inert dependency-runtime materialization layer
+
+- Added a canonical, content-addressed `site-packages` planner/materializer and
+  full staging/generation verifier. The contract binds file bytes, relative
+  paths, sizes, and complete directory topology while enforcing file,
+  directory, depth, path, byte, inventory, and descriptor limits.
+- Reused confined store/path/file primitives and introduced an `O(depth)`
+  Windows copy traversal instead of the existing all-file-handle model copy.
+  Exact existing generations are verified and reused before any second payload
+  copy; staging is proved before no-replace publication and canonical bytes are
+  reproved afterward.
+- Serialized the complete public plan/materialize/reuse transaction with the
+  shared machine-wide runtime-operation lock so concurrent builders cannot
+  duplicate a 1.85 GB staging copy. Abandoned OS locks remain recoverable.
+- Added fail-closed coverage for literal links/junctions, reparse points,
+  aliases, hardlinks, mutation, unlisted files/directories, Windows file and
+  directory alternate data streams, contract-envelope streams, parser
+  canonicality, substitutions, and direct limit validation. Removed ambiguous
+  descriptor claims about payload secret content.
+- The first real installed-payload run failed at a legitimate deep ONNX path
+  with `WinError 206`. Replaced ordinary Windows directory, enumeration,
+  metadata, stream, and confined-digest operations at that boundary with the
+  shared extended-length spelling; full materialize/verify/reuse coverage now
+  reproduces a path beyond legacy `MAX_PATH`.
+- Production-shape evidence passed 72,261 files / 11,639 child directories in
+  1,708.812 seconds first-copy and 836.969 seconds reuse. The repaired exact
+  real tree passed 72,261 files / 11,639 child directories /
+  1,853,891,335 bytes as `sha256:1f02b47c...` in 2,250.675 seconds first-copy
+  and 798.191 seconds full reuse, with one generation, zero successful-root
+  orphans, peak handle delta 31, and peak RSS delta 537,284,608 bytes.
+- Bound the WSP_00/15/22/50/62/83/87/97 execution and independent audit
+  evidence in
+  `docs/audits/infrastructure/HOLOINDEX_INERT_DEPENDENCY_RUNTIME_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+  The receipt explicitly keeps
+  HoloIndex A-grade, exact activation, resident ownership, and retrieval RSI
+  blocked rather than projecting inert materialization as completion.
+- This layer is intentionally inert: it neither changes the live Holo route nor
+  claims signing, write denial, activation, interpreter/native closure, or
+  retrieval RSI. Those remain separate P0 authority transactions.
+  (WSP 00/15/22/50/62/83/84/87/97)
+
 ## 2026-08-27 - Exact runtime identity and cold-start truth correction
 
 - Added the owner-computed runtime-environment digest across authenticated

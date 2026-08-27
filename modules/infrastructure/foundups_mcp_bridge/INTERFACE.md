@@ -4,19 +4,19 @@
 
 ### Holo owner runtime identity
 
-Every owner health/query success includes a canonical
-`runtime_environment_digest`. The child derives it from its actual executable,
-ABI/platform, backend source bytes, distribution build records, replica/model
-closure, and allowlisted runtime controls. Required production settings are
-verified against `os.environ`; mismatch raises
-`HOLOINDEX_RUNTIME_ENVIRONMENT_UNAVAILABLE`. Only the digest crosses the trust
-boundary; absolute paths, metadata bodies, and secrets do not.
+Owner health/query success includes a canonical `runtime_environment_digest`
+computed in the authenticated child from its executable, ABI/platform,
+backend/distribution records, replica/model closure, and allowlisted controls.
+Only the digest crosses the trust boundary. Exact closure remains a separate
+false-by-default predicate rejected until every payload byte/control is proven.
 
-`runtime_environment_exact_closure_verified` is a separate boolean. It remains
-false until installed distribution payload bytes are exactly verified. The
-query/client/benchmark path may preserve false for measurement, while the
-A-grade evidence gate must reject it. The supervisor accepts the authenticated
-child's self-attestation rather than deriving another interpreter's state.
+### `materialize_dependency_runtime(...) -> DependencyRuntimeMaterializationResult`
+
+Creates/reproves one bounded, content-addressed, inert `site-packages` generation.
+Identity covers NFC paths, every file byte/size, and complete directory topology.
+Publication is fully reverified, atomic no-replace, and serialized by store identity.
+Windows copying is O(depth), ADS-aware, and extended-path safe for payloads.
+Unsafe topology rejects; activation, signing, routes, and write denial stay false.
 
 ### `holo_query_bundle(...) -> Dict[str, Any]`
 

@@ -1015,7 +1015,34 @@
         "WSP 87",
         "WSP 97"
       ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "b1316c64db88ce53c643227b61926bf3fd550b6ea089f42c0ca3ab318546bb15",
+      "links": {
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ],
+        "entry_points": [
+          "modules/infrastructure/foundups_mcp_bridge/ModLog.md"
+        ]
+      },
+      "module_hint": "holo_index",
+      "path": "docs/audits/infrastructure/HOLOINDEX_INERT_DEPENDENCY_RUNTIME_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+      "size_bytes": 10363,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 62",
+        "WSP 83",
+        "WSP 87",
+        "WSP 97"
+      ]
     }
   ],
-  "generated_at": "2026-08-28T00:19:55+09:00"
+  "generated_at": "2026-08-28T08:24:57+09:00"
 }

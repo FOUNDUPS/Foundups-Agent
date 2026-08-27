@@ -1,5 +1,22 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Inert dependency-runtime closure release (0.4.125)
+
+- Advanced the immutable extension identity because the authenticated backend
+  manifest now includes changed reachable filesystem-safety dependencies. The
+  five inert materializer modules remain maintenance-only and outside that
+  thin-client runtime closure.
+- No activation or A-grade assertion is inferred from package authentication;
+  fast 14/14, conversation 32/32, contract 3/3, deterministic package, and
+  exhaustive 4/4 release groups pass in 178.717 seconds. The 18-shard contract
+  is `bd15011d599f...98c4ed`; the 67-file package is 945,746 bytes at
+  `dc90aba585c6...36436ae`.
+- Built and independently inspected
+  `O:\RedDog-Releases\reddog-0.4.125.vsix`: 275,634 bytes,
+  `sha256:e3dc0884f8e411245385734aae0abb3a783c3129a24971d3642beaf7d07f8b31`,
+  69 entries, zero duplicate/unsafe names or package-member byte mismatches,
+  and exact 0.4.125 package identity. (WSP 00/15/22/50/62/83/87/97)
+
 ## 2026-08-27 - Runtime-environment binding release (0.4.124)
 
 - Rebound version, authenticated contract shards, backend manifest, and VSIX

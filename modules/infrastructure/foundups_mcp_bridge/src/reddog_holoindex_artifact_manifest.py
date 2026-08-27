@@ -17,6 +17,9 @@ from .reddog_holoindex_acceptance_guards import (
     _reject_link_components,
 )
 from .reddog_holoindex_acceptance_model_descriptors import DescriptorCopyProof
+from modules.infrastructure.shared_utilities.runtime_artifact_windows_streams import (
+    windows_extended_path,
+)
 
 
 @dataclass(frozen=True)
@@ -67,7 +70,7 @@ def snapshot_artifact_files(source: Path, limits: ModelCopyLimits) -> ArtifactSn
     limits.validate()
     _reject_link_components(source)
     try:
-        root_metadata = os.lstat(source)
+        root_metadata = os.lstat(_filesystem_path(source))
     except OSError as exc:
         raise AcceptanceGuardError("MODEL_SOURCE_UNAVAILABLE") from exc
     if not stat.S_ISDIR(root_metadata.st_mode) or _is_link_or_reparse(source, root_metadata):
@@ -88,17 +91,17 @@ def _scan_directory(
     files: list[tuple[str, Path, os.stat_result]],
 ) -> None:
     try:
-        entries = sorted(os.scandir(directory), key=lambda item: item.name)
+        entries = sorted(os.scandir(_filesystem_path(directory)), key=lambda item: item.name)
     except OSError as exc:
         raise AcceptanceGuardError("MODEL_ENUMERATION_FAILED") from exc
     next_directories: list[Path] = []
     for entry in entries:
-        candidate = Path(entry.path)
+        candidate = directory / entry.name
         try:
-            metadata = os.lstat(candidate)
+            metadata = os.lstat(_filesystem_path(candidate))
         except OSError as exc:
             raise AcceptanceGuardError("MODEL_ENUMERATION_CHANGED") from exc
-        if _is_link_or_reparse(candidate, metadata):
+        if _is_link_or_reparse(Path(_filesystem_path(candidate)), metadata):
             _fail("MODEL_LINK_OR_REPARSE_REJECTED")
         if stat.S_ISDIR(metadata.st_mode):
             directories[candidate] = metadata
@@ -108,6 +111,10 @@ def _scan_directory(
         else:
             _fail("MODEL_SPECIAL_FILE_REJECTED")
     pending.extend(reversed(next_directories))
+
+
+def _filesystem_path(path: Path) -> Path | str:
+    return windows_extended_path(path) if os.name == "nt" else path
 
 
 def _validate_snapshot_bounds(

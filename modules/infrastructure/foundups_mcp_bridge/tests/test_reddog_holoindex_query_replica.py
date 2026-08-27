@@ -551,14 +551,14 @@ def test_injected_windows_reparse_and_special_sources_fail_closed(
         monkeypatch.setattr(
             artifact_manifest,
             "_is_link_or_reparse",
-            lambda path, metadata=None: Path(path) == target or original(path, metadata),
+            lambda path, metadata=None: Path(str(path).removeprefix("\\\\?\\")) == target or original(path, metadata),
         )
     else:
         original_lstat = artifact_manifest.os.lstat
 
         def special_lstat(path):
             value = original_lstat(path)
-            if Path(path) != target:
+            if Path(str(path).removeprefix("\\\\?\\")) != target:
                 return value
             return SimpleNamespace(
                 st_mode=stat.S_IFIFO,

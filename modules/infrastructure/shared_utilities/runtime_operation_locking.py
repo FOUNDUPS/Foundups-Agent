@@ -90,23 +90,54 @@ def _posix_lock(
 ) -> Iterator[None]:
     import fcntl
 
-    lock_root = Path(tempfile.gettempdir()) / "foundups-runtime-locks"
-    lock_root.mkdir(mode=0o700, parents=True, exist_ok=True)
-    lock_path = lock_root / f"{lock_key}.lock"
-    descriptor = os.open(
-        lock_path,
-        os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0),
-        0o600,
-    )
+    root_descriptor = _open_private_lock_root()
     try:
-        _require_private_regular_file(os.fstat(descriptor))
-        _acquire_posix_lock(descriptor, timeout_seconds)
+        descriptor = os.open(
+            f"{lock_key}.lock",
+            os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0),
+            0o600,
+            dir_fd=root_descriptor,
+        )
         try:
-            yield
+            _require_private_regular_file(os.fstat(descriptor))
+            _acquire_posix_lock(descriptor, timeout_seconds)
+            try:
+                yield
+            finally:
+                fcntl.flock(descriptor, fcntl.LOCK_UN)
         finally:
-            fcntl.flock(descriptor, fcntl.LOCK_UN)
+            os.close(descriptor)
     finally:
+        os.close(root_descriptor)
+
+
+def _open_private_lock_root() -> int:
+    lock_root = Path(tempfile.gettempdir()) / "foundups-runtime-locks"
+    try:
+        lock_root.mkdir(mode=0o700)
+    except FileExistsError:
+        pass
+    metadata = os.lstat(lock_root)
+    _require_private_directory(metadata)
+    descriptor = os.open(
+        lock_root,
+        os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0),
+    )
+    opened = os.fstat(descriptor)
+    if (opened.st_dev, opened.st_ino) != (metadata.st_dev, metadata.st_ino):
         os.close(descriptor)
+        raise OSError("runtime_artifact_lock_root_changed")
+    return descriptor
+
+
+def _require_private_directory(value: os.stat_result) -> None:
+    if (
+        not stat.S_ISDIR(value.st_mode)
+        or stat.S_IMODE(value.st_mode) != 0o700
+        or value.st_uid != os.geteuid()
+    ):
+        raise PermissionError("runtime_artifact_lock_root_not_private")
 
 
 def _acquire_posix_lock(descriptor: int, timeout_seconds: float | None) -> None:
@@ -129,7 +160,11 @@ def _acquire_posix_lock(descriptor: int, timeout_seconds: float | None) -> None:
 def _require_private_regular_file(value: os.stat_result) -> None:
     if not stat.S_ISREG(value.st_mode):
         raise ValueError("runtime_artifact_not_regular_file")
-    if os.name != "nt" and stat.S_IMODE(value.st_mode) & 0o077:
+    if os.name != "nt" and (
+        stat.S_IMODE(value.st_mode) & 0o077
+        or value.st_uid != os.geteuid()
+        or value.st_nlink != 1
+    ):
         raise PermissionError("runtime_artifact_permissions_too_broad")
 
 

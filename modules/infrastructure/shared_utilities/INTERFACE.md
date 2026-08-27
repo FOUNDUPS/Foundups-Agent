@@ -19,6 +19,23 @@ descriptor. It requires an exact `ConfinedFileIdentity`, enforces the byte
 bound, verifies descriptor/path identity before and after hashing, and returns
 `ConfinedFileDigestProof`. `secure_read_confined_bytes_impl` remains unchanged.
 
+On Windows, suffix-derived execute bits are excluded from mode equality because
+they are a Python filename projection rather than an NTFS permission change;
+all other identity fields remain exact. Callers that also need NTFS stream
+admission may invoke `require_unnamed_data_stream_only(path)`
+only after their normal no-follow/link/reparse and final-path checks. It accepts
+exactly `::$DATA` for a regular file and no returned streams for a directory;
+named streams fail closed. The helper uses one bounded handle and is not a
+standalone topology validator. `windows_extended_path(path)` returns the
+absolute Windows API spelling used by runtime-artifact callers whose valid
+internal paths can exceed legacy `MAX_PATH`; it grants no admission by itself.
+
+`runtime_operation_lock(identity, timeout_seconds=None)` hashes the opaque
+identity into an OS-owned Windows mutex or a POSIX advisory lock. POSIX lock
+storage requires one owner-private `0700` no-follow directory and a private,
+single-link, owner-matched regular lock file opened relative to its pinned
+directory descriptor. Unsafe pre-created lock namespaces reject.
+
 ### Local Model Selection
 
 ### Local LM Studio Backend

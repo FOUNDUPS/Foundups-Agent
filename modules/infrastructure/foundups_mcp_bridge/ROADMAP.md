@@ -1,5 +1,45 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-28: Inert exact dependency-payload generation
+
+**Implemented with production-shape and exact real-byte evidence; this is not
+an activation claim.** A dedicated materializer now binds every admitted
+`site-packages` file plus the complete directory topology into a canonical
+content-addressed generation. It provides bounded planning, early exact reuse,
+`O(depth)` Windows handle retention, staging verification, atomic no-replace
+publication, canonical post-publication proof, fail-closed preservation, and
+machine-wide per-store builder serialization.
+Windows file/directory alternate streams and execute-bit projection are covered
+through shared primitives. A production-byte run also exposed a legacy
+`MAX_PATH` directory-creation boundary; extended-length creation, enumeration,
+metadata, hashing, verification, and reuse now have a direct regression. The
+layer remains inert and reports no signing,
+write-denial, or activation authority.
+
+The opt-in synthetic production shape passed with 72,261 files and 11,639
+child directories: first materialization 1,708.812 seconds, exact reuse
+836.969 seconds, peak handle delta 6, and peak RSS delta 543,744,000 bytes.
+The actual 1,853,891,335-byte installed dependency tree then passed as
+generation `sha256:1f02b47c...`: first materialization 2,250.675 seconds,
+full reuse verification 798.191 seconds, peak handle delta 31, peak RSS delta
+537,284,608 bytes, one generation, and zero successful-root orphans. These are
+bounded single-builder/reuse measurements, not interactive latency or
+horizontal-throughput claims.
+
+Arbitrarily long caller-supplied repository/canonical/runtime control roots are
+not part of this layer's claim; a separate P2 transaction may either bind an
+explicit absolute control-root limit or extend every creation, publication,
+contract, quarantine, and recovery syscall boundary.
+
+Next P0 layers are deliberately separate: durable hard-crash recovery and
+retention, signer/write-denial admission, exact interpreter/
+standard-library/native dependency and deterministic-execution binding,
+pre-import bootstrap verification, and resident authenticated owner selection.
+Only after those exist may the runtime exact-closure predicate become true.
+Retrieval RSI then needs a distinct authenticated proposer/evaluator,
+canary/promotion/rollback, and production-outcome learning transaction; current
+maintenance self-repair and offline recommendation do not establish it.
+
 ## 2026-08-27: Runtime-environment binding implemented; resident owner remains P0
 
 The owner now publishes a separate runtime-environment digest binding its
