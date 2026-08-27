@@ -3,6 +3,8 @@
 ## Resident governed Holo usability
 
 `test_reddog_generation_bound_holoindex_query_adapter.py` proves the resident
+adapter preserves the owner-loaded runtime ranker digest in its safe result and
+receipt. Owner client tests reject missing or malformed ranker attestations.
 adapter admits a separate committed same-HEAD authority for both clean and
 overlaid callers, while a workspace authority with an overlay and unknown
 authority labels still fail closed. It also proves the child reuses the owner
@@ -13,6 +15,8 @@ historical commit-bound canary at
 `61c2c3003bc4c2086f105f4c39effd499a026627` returned CURRENT with two scoped
 hits and no reindex in 32.5 seconds; it did not mutate Holo or the repository
 and does not authorize the candidate or any later commit.
+The current candidate's live 60-second cold one-shot timed out twice; historical
+success remains regression context, not current availability proof.
 
 ## Main bootstrap WSP 62 extraction
 

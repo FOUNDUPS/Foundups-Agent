@@ -3,6 +3,9 @@
 ## HoloIndex query replica truth
 
 The loopback owner client preserves all four immutable-replica binding fields.
+It also requires and preserves the digest computed from the ranker modules
+actually loaded by the owner. The resident safe projection carries that digest
+into its rebuilt receipt instead of dropping it at the worker boundary.
 The one-shot bridge compares them with the route admitted before owner startup;
 an absent, malformed, or different replica fails closed. This propagates
 response identity only and grants no maintenance, route, repository, or model authority.
@@ -20,6 +23,12 @@ owner query was CURRENT/no-gap/no-reindex and immutable revalidation was
 unchanged. Evidence never authorizes a later HEAD. Process-local serialization
 and cold children remain phase-1 correctness limits, not throughput claims.
 No outbound Hermes dispatch is performed.
+
+Current candidate cold-start truth is degraded: two governed 60-second
+one-shot attempts timed out, and a diagnostic did not establish readiness
+inside 300 seconds. Historical 32.5-second success is not current availability
+evidence. Resident-owner reuse/cold-start repair remains P0 and must not be
+solved by weakening freshness, runtime binding, or timeout truth.
 
 The resident launcher requires the root FastAPI/Uvicorn runtime. Acceptance used
 the repository `.venv`; an ambient interpreter missing FastAPI failed before

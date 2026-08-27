@@ -1,5 +1,19 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Owner-loaded retrieval ranker attestation
+
+- Added a shared Holo retrieval runtime binding and emitted it from query and
+  health responses. The digest is computed from the ten modules actually
+  imported by the owner, not from a separate clean authority checkout.
+- Made authenticated health and the loopback client reject absent or malformed
+  runtime ranker digests. Retrieval AutoResearch additionally requires exact
+  equality with its candidate ranker binding.
+- Added mixed-root, linked-file, source-change, missing/malformed response, and
+  candidate-mismatch falsifiers. No ranker, index, route, or replica mutation
+  authority was introduced. Executable/dependency/build environment identity
+  remains an explicit P1 rather than an A-grade claim.
+  (WSP 00/15/22/50/62/87/97)
+
 ## 2026-08-27 - Stable-route callback environment correction
 
 - Preserved the failed exact-`f058f87b` OpenClaw task and activation receipt.

@@ -189,6 +189,18 @@ HTTP exposes authenticated `POST /holoindex/v1/query` and
 literal `127.0.0.1` Phase-1 bind, and reject hostnames, alternate `127/8`
 literals, and IPv6. Requests, results, and execution are bounded.
 
+Successful query and ready health responses include
+`retrieval_runtime_ranker_digest`, computed inside the owner from the exact
+retrieval modules it loaded. The client rejects absent or malformed values.
+Consumers evaluating a candidate must additionally compare this value with
+the digest of the clean authority candidate; repository identity alone does
+not prove which ranker bytes executed the query.
+
+This value binds source only. A future separately sealed
+`runtime_environment_digest` must bind the owner executable, ABI/platform,
+exact dependency/build identities, and deterministic execution knobs before
+independent A-grade evaluation is reproducible.
+
 Query requires `query` and `expected_repo_head_sha`; `limit` and
 `doc_type_filter` are optional. Success requires semantic retrieval, exact
 repository SHA, stable generation/receipt digest, seven verified baseline

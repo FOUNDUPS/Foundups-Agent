@@ -1,5 +1,30 @@
 # HoloIndex Package ModLog
 
+## [2026-08-27] A-grade retrieval evidence boundary
+
+- Added exact indexed symbol metadata scoring so a callable named directly in
+  a query can outrank semantically adjacent registry prose. The rule is generic
+  search-time ranking, not an M2M path special case.
+- Corrected the public M2M sentinel judgment: the query explicitly names the
+  sentinel runtime, while the generic compiler remains lower-grade supporting
+  relevance. No measured result was rewritten or relabeled.
+- Added a caller-supplied signature-verifier seam for a sealed-corpus A-grade
+  evidence gate in AI Overseer. It requires public regression success,
+  evaluator/proposer
+  separation, at least 30 disjoint cases, Recall/MRR/nDCG >= 0.95, and p95
+  latency <= 5s. It cannot change or promote HoloIndex.
+- The backend-content-bound callable facade re-runs the public corpus, pins
+  semantic mode, and rejects any query whose owner-emitted loaded-runtime
+  ranker digest differs from the clean authority candidate, including
+  `core/search_engine.py`.
+- No independently administered signature authority or non-test/VSIX caller is
+  implemented; the gate remains non-operational scaffolding. The source digest
+  does not yet bind the Python executable, ABI/platform, exact dependency
+  environment, backend builds, or deterministic execution knobs.
+- Replaced stale exact-main and unmeasured 95%/<200ms roadmap claims with the
+  live b5b4de05 failure baseline and explicit post-merge proof sequence.
+  (WSP 00/15/22/50/62/87/97)
+
 ## [2026-08-27] Exact-main immutable route evidence reconciliation
 
 - Recorded the live exact-`a7302344` manual activation truth: generation

@@ -1,5 +1,20 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-27] Exact-symbol and independent A-grade gate regressions
+
+- Extended the existing Tier-0 ranking suite with a generic exact-symbol
+  precedence falsifier; no new ranking test island was created.
+- Extended retrieval AutoResearch's mutation-boundary scan to the independent
+  A-grade gate and added AI Overseer acceptance, weak-corpus, separation,
+  metric, signature, public-failure, and intent-aligned judgment coverage.
+- Focused result: 67 passed / 2 collection-policy skips; the two exact Tier-0
+  nodes separately passed. Tests use synthetic receipts and in-memory ranking
+  inputs only; no model, owner, index, route, reindex, or promotion ran.
+- Added exact loaded-runtime ranker binding coverage: source mutation changes
+  the digest, mixed runtime roots and linked files reject, owner clients require
+  a valid digest, and the benchmark rejects a digest different from its clean
+  authority candidate.
+
 ## [2026-08-23] Maintenance pre-invalidation runtime proof
 
 - Added regression coverage proving runtime proof exists before invalidation,

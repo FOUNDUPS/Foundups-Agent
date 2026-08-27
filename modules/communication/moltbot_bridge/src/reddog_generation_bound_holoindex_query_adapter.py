@@ -49,6 +49,7 @@ _DIGEST_FIELDS = (
     "query_replica_generation_id",
     "query_replica_id",
     "query_replica_path_identity_digest",
+    "retrieval_runtime_ranker_digest",
 )
 _HEAD_FIELDS = (
     "repo_head_sha",

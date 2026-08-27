@@ -15,7 +15,8 @@ Structure:
 - `test_ai_overseer_openclaw_security.py` AI Overseer sentinel wiring and monitor lifecycle.
 - `test_openclaw_security_alerts.py` OpenClaw security event emission, dispatch, and dedupe behavior.
 - `test_m2m_holo_retrieval_benchmark.py` generation-bound, non-mutating Holo
-  benchmark Skillz runtime coverage.
+  benchmark Skillz runtime plus independent signed A-grade evidence-gate
+  coverage.
 
 ## Running Tests
 
@@ -43,5 +44,13 @@ The benchmark regression proves canonical authority-root selection, governed
 owner-query invocation, exact owner-error preservation, and non-mutation. The
 2026-08-27 focused benchmark/navigation matrix passed 56 tests; the live corpus
 correctly returned `quality_below_policy`, not success.
+
+The A-grade gate regressions use synthetic signed-evidence verifiers and prove
+the backend-content-bound callable facade re-runs public regressions instead
+of trusting a supplied
+public result, plus minimum corpus size, public-corpus separation, evaluator
+independence, metric and latency policy, candidate binding, signature failure,
+receipt integrity, policy-downgrade rejection, and explicit no-promotion truth.
+They do not claim a live sealed evaluation or non-test caller.
 
 Keep these flags off for fast deterministic runs; enable intentionally for full-stack validation.

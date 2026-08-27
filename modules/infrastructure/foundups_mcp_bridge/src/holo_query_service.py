@@ -23,6 +23,7 @@ from holo_index.freshness_receipt import (
     load_freshness_receipt,
 )
 from holo_index.repository_state import read_repository_state, repository_root_digest
+from holo_index.retrieval_runtime_binding import loaded_retrieval_ranker_digest
 from holo_index.storage_contract import resolve_holoindex_ssd_path
 from .reddog_holoindex_acceptance_guards import StoreProof
 from .reddog_holoindex_query_replica_descriptor import ActiveQueryReplicaBinding
@@ -133,6 +134,8 @@ def _freshness_gate(
 
 class HoloIndexQueryOwnerService:
     """Singleton, serialized owner for generation-pinned semantic queries."""
+
+    retrieval_runtime_ranker_digest = loaded_retrieval_ranker_digest()
 
     def __init__(
         self, *, repo_root: Path | str,
@@ -288,6 +291,9 @@ class HoloIndexQueryOwnerService:
             error=error,
             reasons=failure_reasons,
             binding=response_binding,
+            retrieval_runtime_ranker_digest=(
+                self.retrieval_runtime_ranker_digest
+            ),
             raw=raw, mode=mode,
             latency_ms=int((time.monotonic() - started) * 1000) if started else 0,
         )

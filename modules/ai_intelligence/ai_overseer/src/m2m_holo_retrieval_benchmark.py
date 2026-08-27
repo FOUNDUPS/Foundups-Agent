@@ -9,6 +9,7 @@ from typing import Any, Mapping
 
 from holo_index.authority_worktree import resolve_holoindex_authority_root
 from holo_index.query_receipt import digest_json, file_digest
+from holo_index.retrieval_runtime_binding import retrieval_ranker_digest_for_root
 from holo_index.storage_contract import resolve_holoindex_ssd_path
 from holo_index.retrieval_autoresearch import (
     RetrievalCandidateBinding,
@@ -26,6 +27,12 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_repli
     resolve_query_replica_owner_route,
 )
 from scripts.reddog_holoindex_owner_query_once import query_once as query_holoindex_owner_once
+from .m2m_holo_retrieval_grade_gate import (
+    HoloRetrievalGradeGateReceipt,
+    HoloRetrievalGradePolicy,
+    IndependentRetrievalSignatureVerifier,
+    _evaluate_holo_retrieval_a_grade,
+)
 
 
 CORPUS_SCHEMA = "holoindex_retrieval_corpus_source.v1"
@@ -134,10 +141,12 @@ def _candidate(
         or binding.canonical_repo_root_digest != authority.authority_root_digest
     ):
         raise ValueError("query_replica_authority_mismatch")
-    config_digest = digest_json({"limit": limit, "doc_type": "all"})
-    ranker_digest = file_digest(
-        authority.selected_root / "holo_index" / "core" / "holo_index.py"
-    )
+    config_digest = digest_json({
+        "limit": limit,
+        "doc_type": "all",
+        "retrieval_mode": "semantic",
+    })
+    ranker_digest = retrieval_ranker_digest_for_root(authority.selected_root)
     fields = {
         "generation_id": binding.generation_id,
         "freshness_receipt_digest": binding.canonical_receipt_digest,
@@ -163,7 +172,7 @@ def _query(
     query_environment: Mapping[str, str],
 ):
     result = query_holoindex_owner_once(
-        {"query": query, "limit": limit},
+        {"query": query, "limit": limit, "retrieval_mode": "semantic"},
         repo_root=repo_root,
         query_environment=query_environment,
     )
@@ -171,6 +180,8 @@ def _query(
         raise ValueError(str(result.get("error") or "owner_query_failed"))
     if result.get("repo_root_digest") != binding.repo_root_digest:
         raise ValueError("query_owner_repo_root_mismatch")
+    if result.get("retrieval_runtime_ranker_digest") != binding.ranker_digest:
+        raise ValueError("query_owner_ranker_runtime_mismatch")
     return result
 
 
@@ -255,4 +266,30 @@ def execute_m2m_holo_retrieval_benchmark(
     return _result(run, verification)
 
 
-__all__ = ["execute_m2m_holo_retrieval_benchmark"]
+def evaluate_m2m_holo_retrieval_a_grade(
+    *,
+    repo_root: Path,
+    payload: Mapping[str, Any],
+    independent_evaluation: Mapping[str, Any],
+    signature_envelope: Mapping[str, Any],
+    signature_verifier: IndependentRetrievalSignatureVerifier,
+    policy: HoloRetrievalGradePolicy = HoloRetrievalGradePolicy(),
+) -> HoloRetrievalGradeGateReceipt:
+    """Re-run public regressions, then evaluate independent candidate evidence."""
+
+    return _evaluate_holo_retrieval_a_grade(
+        public_result=execute_m2m_holo_retrieval_benchmark(
+            repo_root=repo_root,
+            payload=payload,
+        ),
+        independent_evaluation=independent_evaluation,
+        signature_envelope=signature_envelope,
+        signature_verifier=signature_verifier,
+        policy=policy,
+    )
+
+
+__all__ = [
+    "evaluate_m2m_holo_retrieval_a_grade",
+    "execute_m2m_holo_retrieval_benchmark",
+]

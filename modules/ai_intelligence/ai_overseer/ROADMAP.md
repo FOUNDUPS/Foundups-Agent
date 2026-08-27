@@ -3,6 +3,19 @@
 Scope: the `src/foundup_genesis/` intake trajectory (envelope -> validator -> gate -> builder ->
 scaffold). The broader AI Overseer roadmap lives in README.md / ModLog.md.
 
+## Cross-cutting active P0
+
+- Holo retrieval A-grade evidence now has a pure sealed-corpus gate with an
+  injected signature-verifier seam; independent signing trust is not deployed.
+  Its thresholds are non-downgradable and its callable facade is content-bound
+  in the backend closure, but no non-test/VSIX operation invokes it yet.
+  Once the candidate lands, publish an exact-main
+  generation, rerun the public corpus, and obtain an independently administered
+  sealed evaluation. First close the current cold-owner P0 and bind a sealed
+  Python executable/dependency/build environment plus deterministic execution
+  knobs. Promotion, canary, rollback, and outcome learning remain separate
+  authority transactions.
+
 ## Landed
 
 - `FoundUpGenesisEnvelope` schema + strict validator (WSP 97 truth markers, WSP 104 id format).

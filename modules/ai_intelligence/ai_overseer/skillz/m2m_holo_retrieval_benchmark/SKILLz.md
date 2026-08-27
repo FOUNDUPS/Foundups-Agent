@@ -85,11 +85,25 @@ write.
 The deterministic receipt IDs prove integrity after serialization. They are
 not signatures and do not authorize promotion. A future promotion transaction
 must use a separate sealed evaluation corpus, rehydrate the receipts, and
-require independently signed authority. The legacy `heldout_cases` field means
+require independently administered signed authority. The legacy `heldout_cases` field means
 only that those cases are excluded from `train_cases`.
+
+The benchmark runtime's `evaluate_m2m_holo_retrieval_a_grade(...)` facade
+is content-bound to the separate `m2m_holo_retrieval_grade_gate` module and can admit
+A-grade evidence only after it re-runs this fixed public corpus and a distinct
+evaluator supplies a valid
+signature-verifier-approved envelope over a sealed, public-corpus-disjoint
+evaluation. The current verifier is an injected seam, not deployed signing
+trust. That admission is
+still not promotion authority.
+The thresholds cannot be weakened. This facade is not currently registered as
+an AI Overseer/VSIX Skillz operation; independent evaluator trust and a
+non-test caller remain future governed composition work.
 
 The Skillz calls the existing authenticated loopback owner client directly.
 Its public API does not accept an arbitrary query callback.
+Each result must bind the clean authority candidate to the ranker digest the
+owner computed from its actually loaded retrieval modules.
 
 ## WSP Chain
 

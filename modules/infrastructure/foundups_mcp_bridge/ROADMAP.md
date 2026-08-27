@@ -1,5 +1,22 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-27: Owner-loaded retrieval ranker attestation
+
+The owner now emits a SHA-256 manifest digest for the ten retrieval/ranking
+modules actually loaded in its process. Health and client contracts reject a
+missing or malformed digest, and the Holo retrieval benchmark rejects any
+digest different from its clean authority candidate. This closes the former
+clean-authority/dirty-runtime attestation gap without forbidding ordinary
+query use from a dirty workspace. Independent evaluator signing trust and
+production ranker promotion remain separate blocked authority layers.
+The closure includes backend routing plus final owner response ordering/path
+projection plus the replica module that forces strict fp32 semantic-owner
+configuration, and uses raw source bytes so checkout byte drift fails closed.
+P1 remains: publish and verify one sealed owner executable/dependency/build
+manifest and emit its digest instead of hashing a whole environment per query.
+This must include ABI/platform and deterministic execution knobs before
+retrieval-quality A-grade/RSI evidence can be called reproducible.
+
 ## 2026-08-27: Stable-route resolver environment correction
 
 **Implemented and adjacent-GREEN; exact-main replay remains required.** The

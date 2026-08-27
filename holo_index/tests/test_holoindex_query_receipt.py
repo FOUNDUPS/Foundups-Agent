@@ -72,6 +72,7 @@ def test_query_receipt_binds_generation_and_hits() -> None:
             "ok": True,
             "query": "RedDog operational loop",
             "freshness": "CURRENT",
+            "retrieval_runtime_ranker_digest": "sha256:" + "a" * 64,
             "hits": [{"path": "holo_index/query_receipt.py", "title": "query receipts", "score": 0.9}],
         },
         require_generation=True,
@@ -90,6 +91,7 @@ def test_query_receipt_binds_generation_and_hits() -> None:
     assert receipt["semantic_evidence_digest"].startswith("sha256:")
     assert receipt["semantic_evidence_count"] == 0
     assert receipt["no_holoindex_reindex_performed"] is True
+    assert receipt["retrieval_runtime_ranker_digest"] == "sha256:" + "a" * 64
 
 
 def test_canonical_semantic_evidence_binds_buckets_metadata_and_count() -> None:

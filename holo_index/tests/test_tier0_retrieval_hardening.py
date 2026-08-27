@@ -498,6 +498,41 @@ def test_vector_search_obeys_wsp62_hard_limits() -> None:
     assert max(_function_sizes(snapshot).values()) <= 50
 
 
+def test_exact_symbol_metadata_outweighs_a_semantic_near_miss() -> None:
+    """Exact callable identity must beat a nearby registry description."""
+    query = "compile_to_staged promote_staged rollback"
+    target = search_engine._vector_result(
+        "code",
+        query,
+        "all",
+        "compile_to_staged(self, file_path)",
+        {
+            "path": "modules/ai_intelligence/ai_overseer/src/"
+            "m2m_compression_sentinel.py",
+            "symbol": "compile_to_staged(self, file_path)",
+            "type": "symbol",
+            "priority": 1.0,
+        },
+        1.0,
+    )
+    near_miss = search_engine._vector_result(
+        "code",
+        query,
+        "all",
+        "Skills registry with promotion gating and rollback checks",
+        {
+            "path": "modules/infrastructure/wre_core/skillz/skills_registry.py",
+            "symbol": "class WRESkillsRegistry",
+            "type": "symbol",
+            "priority": 1.0,
+        },
+        0.95,
+    )
+
+    assert target is not None and near_miss is not None
+    assert target["_sort_key"] > near_miss["_sort_key"]
+
+
 def test_search_collection_returns_tier0_before_nested_test_readme() -> None:
     collection = _ExactPathCollection(
         rows={

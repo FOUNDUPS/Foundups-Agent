@@ -826,6 +826,7 @@ def _token_keyword_score(query: str, meta: Dict[str, Any]) -> float:
     """Score exact and normalized query tokens against bounded metadata."""
     fields = {
         "title": ((meta.get("title") or "").lower(), 2.0),
+        "symbol": ((meta.get("symbol") or "").lower(), 3.0),
         "summary": ((meta.get("summary") or "").lower(), 0.5),
         "keywords": ((meta.get("keywords") or "").lower(), 1.25),
         "test_id": ((meta.get("test_id") or "").lower(), 3.0),

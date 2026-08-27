@@ -48,6 +48,7 @@ def _bound_owner_result(query: str, digest: str, head: str, raw_result=None):
         "query_replica_generation_id": digest,
         "query_replica_id": digest,
         "query_replica_path_identity_digest": digest,
+        "retrieval_runtime_ranker_digest": digest,
         "raw_result": raw_result or {},
         "index_gap_detected": False,
         "stale_reasons": [],
@@ -97,6 +98,7 @@ def test_adapter_reuses_governed_one_shot_and_scopes_hits(tmp_path: Path) -> Non
     assert result["ok"] is True
     assert result["freshness"] == "CURRENT"
     assert result["freshness_generation_id"] == digest
+    assert result["retrieval_runtime_ranker_digest"] == digest
     assert [hit["path"] for hit in result["hits"]] == ["modules/allowed.py"]
     assert result["no_holoindex_reindex_performed"] is True
     serialized = json.dumps(result, sort_keys=True)

@@ -22,6 +22,11 @@ from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 from holo_index.repository_state import read_repository_state, repository_root_digest
+from holo_index.retrieval_runtime_binding import (
+    is_retrieval_ranker_digest,
+    retrieval_ranker_binding,
+    retrieval_ranker_digest_from,
+)
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     MIN_BEARER_TOKEN_CHARS,
     TOKEN_TOO_SHORT_ERROR,
@@ -56,6 +61,7 @@ class _OwnerResponseState:
     receipt_digest: str
     retrieval_mode: str
     replica_binding: tuple[str, str, str, str]
+    retrieval_runtime_ranker_digest: str
 
 
 @dataclass(frozen=True)
@@ -355,6 +361,7 @@ def _response_state(payload: Mapping[str, Any]) -> _OwnerResponseState:
         receipt_digest=str(payload.get("freshness_receipt_digest") or ""),
         retrieval_mode=str(payload.get("retrieval_mode") or "").lower(),
         replica_binding=replica or _EMPTY_REPLICA_BINDING,
+        retrieval_runtime_ranker_digest=retrieval_ranker_digest_from(payload),
     )
 
 
@@ -375,6 +382,9 @@ def _response_contract_checks(
         (state.replica_binding == _EMPTY_REPLICA_BINDING,
          "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH",
          "query_replica_binding_mismatch"),
+        (not is_retrieval_ranker_digest(state.retrieval_runtime_ranker_digest),
+         "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH",
+         "retrieval_runtime_ranker_binding_invalid"),
     )
 
 
@@ -459,6 +469,7 @@ def _normalized_response(
         "repo_root_digest": state.repo_root_digest,
         "retrieval_mode": state.retrieval_mode,
         "no_holoindex_reindex_performed": True,
+        **retrieval_ranker_binding(state.retrieval_runtime_ranker_digest),
         **replica_binding,
     }
 

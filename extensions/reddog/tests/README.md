@@ -1,5 +1,20 @@
 # RedDog Extension Tests
 
+## 0.4.122 Holo source-ranker evidence gate
+
+Current fixtures bind the 1,355-file backend closure at
+`4ee3e87327df...bc78`, the owner-emitted ranker digest, and the fixed-floor
+public-corpus A-grade evidence facade. They deliberately do not claim a live
+A-grade/RSI path: independent signer trust, a non-test admission caller, and
+executable/dependency environment binding are absent, while cold owner startup
+currently fails its bounded P0 availability gate.
+
+```powershell
+python scripts/generate_reddog_backend_manifest.py --check
+python -m pytest -q scripts/tests/test_generate_reddog_backend_manifest.py
+cd extensions/reddog; npm test; npm run test:conversation; npm run test:contract
+```
+
 ## 0.4.121 governed WRE health admission binding
 
 Current-version fixtures bind the regenerated 1,353-file backend closure and

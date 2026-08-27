@@ -9,6 +9,12 @@ preserves those fields. `scripts/reddog_holoindex_owner_query_once.py` then
 compares the returned tuple with its verified `QueryReplicaOwnerRoute`; a
 missing, malformed, or different tuple returns
 `HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH` and cannot produce a success receipt.
+The client also requires `retrieval_runtime_ranker_digest` to be a canonical
+SHA-256 digest. `GenerationBoundHoloIndexQueryAdapter` preserves it in the safe
+projection and rebuilt receipt; A-grade evaluation separately requires exact
+equality with the clean authority candidate.
+This is source identity only. The owner executable and exact dependency/build
+environment remain an explicit P1 before reproducible A-grade/RSI evidence.
 
 `GenerationBoundHoloIndexQueryAdapter.query(...)` is the canonical resident
 read-only worker adapter. It starts the one-shot script with a runtime selected

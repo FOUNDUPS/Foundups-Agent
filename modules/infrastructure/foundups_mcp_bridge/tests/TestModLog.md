@@ -1,5 +1,15 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-27] Owner-loaded retrieval ranker binding falsification
+
+- Proved the digest changes with any bound source file, all modules must share
+  one exact root, and linked ranker files reject.
+- Proved successful query/health clients fail closed on missing or malformed
+  runtime ranker identity and retrieval benchmarking rejects a different
+  owner-executed ranker.
+- Focused owner/client/health validation passed; no live Holo maintenance,
+  reindex, route mutation, or promotion ran.
+
 ## [2026-08-27] Stable-route resolver environment falsification
 
 - RED changed the activation query double to call the resolver exactly like

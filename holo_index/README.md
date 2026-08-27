@@ -160,9 +160,17 @@ HoloIndex has evolved from a search tool into the **autonomous intelligence foun
 - [OK] **Active today:** classical pipeline (tokenisation [U+279C] SentenceTransformer embeddings [U+279C] ChromaDB) plus HoloDAE monitoring.
 - [U+26A0]️ **Future work:** quantum modules (quantum_agent_db, quantum_encoding) are NumPy research scaffolds; they are not invoked in production runs.
 - [U+1F9ED] **Roadmap:** quantum/Grover references remain aspirational until hardware integration is feasible.
-HoloIndex + **HoloDAE** = Complete autonomous code intelligence system:
+HoloIndex + **HoloDAE** is the governed retrieval and observation foundation
+for future autonomous code intelligence:
 - **HoloIndex**: Semantic code discovery (WSP 87)
-- **HoloDAE**: Autonomous 0102 intelligence agent that monitors and enhances all searches
+- **HoloDAE**: Observation and proposal surfaces around retrieval
+
+Current production truth is narrower than the historical vision. Exact-main
+freshness repair is operational, but retrieval-quality RSI is not. The audited
+`b5b4de05` generation passed integrity verification and Recall@8, yet failed
+the public quality policy at MRR `0.9167` and nDCG@8 `0.8718`. No live loop
+currently edits the production ranker, passes an independent sealed corpus,
+and promotes or rolls back that candidate.
 
 ## Operational Documentation
 - **[CLI_REFERENCE.md](CLI_REFERENCE.md)** — Verbatim menu snapshot and CLI command mappings (for 0102_gpt parsing)
@@ -189,6 +197,24 @@ This is a shadow evaluation boundary, not an indexer. It never re-indexes,
 changes ranking heuristics, writes outcomes, or promotes a generation. A
 comparison result is integrity evidence only; a separate sealed evaluation and
 signed WRE authority transaction must authorize any later promotion.
+
+`m2m_holo_retrieval_grade_gate` is the next authority boundary. It requires the
+public regression to pass plus a signature-verifier-approved evaluation over at least 30
+sealed cases disjoint from the checked-in corpus. Recall@K, MRR, and nDCG@K
+must each be at least `0.95`, and p95 semantic-query latency must be at most
+`5000ms`. Acceptance is A-grade evidence only: the gate cannot reindex, change
+the ranker, write repository artifacts, or authorize promotion.
+Its backend-content-bound callable AI Overseer facade re-runs the governed
+public corpus, pins semantic mode, and requires every query receipt to carry
+the ranker digest computed by the owner from the retrieval modules it actually
+loaded. It does not trust caller-supplied public status flags or a digest of a
+different clean authority checkout.
+The thresholds are non-downgradable. The facade is backend-content-bound but
+has no non-test/VSIX caller or independently administered evaluator/signing trust yet,
+so it is not an operational RSI loop. The source-ranker digest also does not
+yet bind the owner Python executable, ABI/platform, exact dependency manifest,
+backend builds, or deterministic execution knobs; that reproducibility layer
+must be sealed once and carried as a separate runtime-environment digest.
 
 ### Operational Storage and Restricted-Worker Queries (2026-07-18)
 
@@ -289,12 +315,19 @@ the owner.
 - **Throttled Sections**: AgenticOutputThrottler now enforces `max_sections` automatically; additional sections are suppressed with an inline hint to re-run with `--verbose`.
 - **ASCII-Only Signals**: Success/error banners are pure ASCII (`[GREEN]`, `[YELLOW]`, `[ERROR]`) so Unicode scrubbers stay dormant by default.
 - **Single Rendering Path**: CLI search results are routed through `throttler.display_results()` + `render_prioritized_output()`—no duplicate collate logic.
-- **Adaptive History**: Each run asynchronously logs code/WSP hit counts plus advisor/todo metadata, feeding Gemma/Qwen learning without blocking the CLI loop.
+- **Adaptive History**: Optional runs log retrieval observations; those records
+  do not directly change or authorize the production ranker.
 - **Memory Value Score (MVS)**: `[MEMORY]` cards include a 1-10 score derived from doc type priority plus entrypoint/WSP foundation boosts.
 - **History Gating**: Output history logging can be limited with `HOLO_OUTPUT_HISTORY_MODE=verbose|errors|signals` and rotated via `HOLO_OUTPUT_HISTORY_MAX_MB` (default 10MB).
 - **Intent Verbosity Caps**: OutputComposer now enforces per-intent limits (minimal/balanced/detailed) to keep results only to what 0102 needs.
 - **Bundle Fastpath**: `--bundle-json` with `HOLO_SKIP_MODEL=1` now includes path-based code hits when `--bundle-module-hint` is provided.
 ## Revolutionary Architecture
+
+> **Historical vision, not current production truth.** The implementation
+> below contains useful observation and proposal components, but stored logs,
+> self-scored effectiveness, and model output do not prove recursive
+> improvement. The generation-bound and A-grade contracts above are the
+> current authority for retrieval quality.
 
 ### [AI] HoloDAE - Chain-of-Thought Logging for Recursive Self-Improvement
 **The act of using HoloIndex IS the monitoring trigger!**
@@ -307,7 +340,8 @@ When 0102 runs a search, HoloDAE executes current features (health checks, vibec
 - [OK] **Decision Logging**: Every analysis choice with reasoning
 - [OK] **Effectiveness Scoring**: AI evaluates its own performance
 - [OK] **Pattern Recognition**: Learns from successful vs unsuccessful analyses
-- [OK] **Recursive Improvement**: Stored data improves future decisions
+- [PARTIAL] **Recursive Improvement**: observations are stored; verified
+  ranker improvement, promotion, canary, and rollback remain unproven
 - [OK] **012 Monitoring**: Logs visible for system tweaking and oversight
 
 #### Current HoloDAE Features (Executed Automatically):

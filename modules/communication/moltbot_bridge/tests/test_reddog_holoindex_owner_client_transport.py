@@ -90,6 +90,7 @@ def _successful_query_payload(head_sha: str, repo_root: Path) -> dict:
         "repo_head_sha": head_sha,
         "repo_root_digest": repository_root_digest(repo_root),
         "retrieval_mode": "semantic",
+        "retrieval_runtime_ranker_digest": "sha256:" + "c" * 64,
         "raw_result": {
             "wsp_hits": [
                 {
@@ -216,6 +217,32 @@ def test_owner_client_requires_complete_replica_binding(
     assert result["ok"] is False
     assert result["error"] == "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH"
     assert "query_replica_binding_mismatch" in result["stale_reasons"]
+
+
+@pytest.mark.parametrize(
+    "runtime_digest", ["", "sha256:not-a-digest", "sha256:" + "A" * 64]
+)
+def test_owner_client_requires_exact_runtime_ranker_binding(
+    tmp_path: Path, monkeypatch, runtime_digest: str,
+) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    head_sha = "9" * 40
+    _set_repo_head(repo_root, head_sha)
+    payload = _successful_query_payload(head_sha, repo_root)
+    payload["retrieval_runtime_ranker_digest"] = runtime_digest
+    monkeypatch.setattr(
+        owner_query_client, "urlopen", lambda *_args, **_kwargs: _HTTPResponse(payload)
+    )
+
+    result = owner_query_client.query_holoindex_owner(
+        repo_root=repo_root, query="WSP 97 research", limit=8,
+        service_url="http://127.0.0.1:8765", service_token=SERVICE_TOKEN,
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH"
+    assert "retrieval_runtime_ranker_binding_invalid" in result["stale_reasons"]
 
 
 def test_explicit_empty_service_url_never_falls_back_to_environment(

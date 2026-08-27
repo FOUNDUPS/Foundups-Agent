@@ -2,9 +2,22 @@
 
 ## Status
 
-Phase: RedDog 0.4.121 resident architect thin-client surface.
+Phase: RedDog 0.4.122 resident architect thin-client surface.
 
 Current implementation:
+
+- [x] Bind candidate evaluation to the owner-loaded ten-module source-ranker
+  closure and reject missing, malformed, foreign-root, or mismatched digests.
+  The pure A-grade gate reruns the public corpus and prevents caller-downgraded
+  floors without granting index, maintenance, dispatch, or promotion effects.
+- [ ] P0: make a governed cold owner query complete inside its bounded wall.
+  Current exact-candidate evidence is two 60-second startup timeouts plus no
+  readiness proof within a 300-second diagnostic. Retrieval-quality RSI and an
+  A-grade declaration remain unavailable until this is closed and remeasured.
+- [ ] P1: seal and bind the owner Python executable, ABI/platform, exact
+  dependency manifest, backend builds, and deterministic execution knobs.
+  Then deploy an independent evaluator/signing trust boundary and wire a
+  non-test admission consumer; source binding alone is not reproducibility.
 
 - [x] Authenticated backend closure contains hardened shared FMAS proposal,
   parsing, and path contracts. The separate exact-HEAD WSP 62 health gate has
@@ -91,8 +104,9 @@ Current implementation:
 
 - Release test-tier orchestration (v0.4.101): package scripts now expose a
   bounded fast default, shard/plan contract tier, and extension-scoped release tier
-  using installed Node only. The exact exhaustive shard body and its five tail
-  contracts remain the sole closure; a four-worker process-isolated owner
+  using installed Node only. The exact exhaustive shard body and its seven tail
+  contracts (five governed-Git plus two bridge/package) remain the sole closure;
+  a four-worker process-isolated owner
   authenticates membership before bounded concurrent execution, preserves
   deterministic diagnostics/failure propagation, and emits timing receipts.
   The explicit extension promotion command is `npm run test:release`; it does

@@ -1,13 +1,10 @@
 # RedDog
 
-Version: 0.4.121
+Version: 0.4.122
 
-This candidate binds RedDog's authenticated backend to the hardened shared WRE
-FMAS proposal, parsing, and path contracts. The repository's separate exact-
-HEAD WSP 62 health gate can produce capped dry-run proposals, but it has no
-non-test runtime caller and is therefore not included as a reachable backend
-entry point. Direct WSP 62 input remains quarantined; no worker dispatch, source
-mutation, promotion, or execution authority is added to the thin VSIX.
+This candidate authenticates RedDog to the 1,355-file Holo retrieval closure at
+`4ee3e87327df...bc78`, including owner-loaded source-ranker attestation. Its A-grade
+gate is non-operational; the thin VSIX gains no maintenance, promotion, or execution authority.
 
 ## Continuous conversation surface
 
@@ -17,24 +14,19 @@ OpenClaw is the resident 0102 execution/supervision layer and Hermes is bounded.
 
 ## Model-routing authority
 
-The resident routing plane represents classified work as
-`ModelTaskRequirements`; AI Gateway owns catalog
+The routing plane represents work as `ModelTaskRequirements`; AI Gateway owns
 eligibility, measured selection, signed promotion evidence, runtime binding,
-and exact provider topology. A local Nemotron 3.5 Lightning worker may propose
-two compact evaluation panels, but it cannot select production models, serve as
-the verifier, promote a champion, or override a signed runtime binding.
+and topology. Nemotron may propose panels but cannot select or promote models,
+verify itself, or override a signed runtime binding.
 
-The evaluation fallback remains explicit when no receipt-bound production
-binding exists: GLM 5.2 principal with DeepSeek V4 Pro, Qwen 3.8 Max, and Kimi
-K3 critics. Qwen replaces the older Kimi K2.7 Code fallback slot as a current
-challenger; this static roster is not evidence that GLM or Qwen is champion.
+Without a receipt-bound production binding, the explicit evaluation fallback
+is GLM 5.2 with DeepSeek V4 Pro, Qwen 3.8 Max, and Kimi K3 critics. This static
+roster is not evidence that GLM or Qwen is champion.
 
-Local Nemotron uses the exact loaded LM Studio ID and native reasoning-off API,
-with no server launch or provider fallback. Its output is deterministically
-expanded into role/provider assignments and admitted only as held-out
-AutoResearch candidates. The configured runner reserves the entire bounded
-task-by-candidate campaign before its first provider call and retains one exact
-receipt per attempted call. A live two-task Nemotron campaign exercised that
+Local Nemotron uses the loaded LM Studio ID and native reasoning-off API, with
+no server launch/fallback. Its output becomes held-out AutoResearch candidates;
+the runner reserves the bounded campaign before its first call and retains one
+exact receipt per call. A live two-task Nemotron campaign exercised that
 path without fallback. This is evaluation evidence, not automatic production
 promotion.
 
@@ -68,12 +60,11 @@ only signed-scope hits to the worker's new receipt. Fusion never receives the
 private route or owner credential. This does not enable outbound Hermes
 dispatch; Hermes-compatible receipts remain evidence only. The resident parent
 wall is 60 seconds, with at most 57 seconds entering the child and three seconds
-reserved for cleanup. The former 27-second child budget timed out a real cold
-query; the repaired default completed CURRENT in 32.5 seconds. A separate
-committed same-HEAD authority is valid for clean and overlaid callers, while a
-workspace authority still requires no overlay. Historical exact-commit evidence at `61c2c3003bc4c2086f105f4c39effd499a026627` does not authorize later HEADs.
-Process-local serialization and one cold child per query remain P1
-throughput debt.
+reserved for cleanup. At this candidate, two cold owner starts timed out at that
+wall and a 300-second diagnostic produced no readiness proof: cold availability
+is P0-failed, not A-grade. Historical exact-commit evidence does not authorize
+later HEADs. Process-local serialization and one cold child per query remain P1
+throughput debt after the P0 is closed.
 
 Semantic owner queries prefer the stable private `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; the legacy absolute, already materialized `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` remains an exclusive migration
 path, and using both fails closed. The closed `holoindex_owner` and `resident_architect` Python
@@ -910,7 +901,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.121)
+## WSP_97 Truth Table (v0.4.122)
 
 | Claim | Status |
 | --- | --- |
@@ -1002,6 +993,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.121.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.122.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

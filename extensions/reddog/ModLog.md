@@ -1,5 +1,22 @@
 # RedDog ModLog
 
+## 2026-08-27 - Holo source-ranker evidence gate (0.4.122)
+
+- Advanced the thin-client identity because the authenticated 1,355-file
+  backend closure now carries owner-computed `retrieval_runtime_ranker_digest`
+  evidence through health, response, client, receipt, and resident adapter
+  boundaries. The closure is rebound to `4ee3e87327df...bc78`.
+- Added a pure, non-effect A-grade evidence gate with fixed minimum corpus and
+  metric floors, exact candidate/public-corpus identities, and an injected
+  signature-verifier seam. The raw composer is private and the public facade
+  always reruns the benchmark.
+- This is not an operational A-grade/RSI claim: no non-test caller or deployed
+  independent signing authority exists, executable/dependency environment
+  binding remains P1, and current cold owner startup is P0-failed at the
+  60-second wall with no readiness proof in a 300-second diagnostic.
+- No Holo maintenance, reindex, worker dispatch, or promotion authority was
+  added to the VSIX. (WSP 00/15/22/50/62/84/87/97)
+
 ## 2026-08-27 - Governed WRE health admission binding (0.4.121)
 
 - Advanced the thin-client identity because its authenticated 1,353-file

@@ -160,6 +160,20 @@ ID, and path-identity digest); any missing field or drift fails closed and a
 changed exact binding cannot hot-swap a live owner. Absolute replica paths are
 not returned in public responses.
 
+Every owner process also imports and hashes one fixed ten-module retrieval
+policy closure. Query and health responses expose only its SHA-256 manifest
+digest as `retrieval_runtime_ranker_digest`. Health and the loopback client
+reject a missing or malformed digest; retrieval evaluation additionally
+requires it to equal the clean authority candidate. This prevents a benchmark
+from attesting clean authority files while a configured, reused, or newly
+started owner executes different runtime bytes.
+The digest uses raw source bytes intentionally: line-ending or other byte drift
+between authority and executing runtime is rejected rather than normalized
+away. This is distinct from the VSIX packaging manifest's text normalization.
+It intentionally does not yet attest the Python executable, ABI/platform,
+exact dependency/build manifest, or deterministic execution knobs; consumers
+must not treat the source digest alone as reproducible A-grade runtime proof.
+
 Governed Holo maintenance publishes a deterministic immutable snapshot set for
 the seven baseline collections before its PASS receipt. The materializer copies
 only that exact set from `vectors/query_snapshots/`. The resident owner never
