@@ -11,6 +11,9 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance
     OPERATIONAL_FAILED,
     RedDogHoloIndexOperationalResult,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (
+    build_owner_query_environment,
+)
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (
     QUERY_REPLICA_REQUIRED_ERROR,
     QUERY_REPLICA_ROOT_ENV,
@@ -68,6 +71,7 @@ def _run(
     environment=None,
     ensure_operational=None,
     activate=None,
+    build_environment=None,
 ):
     runtime = tmp_path / "runtime"
     runtime.mkdir(exist_ok=True)
@@ -82,6 +86,10 @@ def _run(
         dependencies=_PostmergeReplicaDependencies(
             ensure_operational=ensure_operational or (lambda **_kwargs: _required()),
             activate=activate or (lambda _config: pytest.fail("unexpected activation")),
+            build_environment=(
+                build_environment
+                or (lambda *, process_environment: dict(process_environment))
+            ),
         ),
     )
 
@@ -177,6 +185,104 @@ def test_missing_or_ambiguous_route_configuration_fails_before_activation(
     assert missing.error == POSTMERGE_ROUTE_CONFIG_ERROR
     assert ambiguous.error == POSTMERGE_ROUTE_CONFIG_ERROR
     assert activations == []
+
+
+def test_current_user_route_replaces_inherited_legacy_root_for_entire_transaction(
+    tmp_path: Path,
+) -> None:
+    route = tmp_path / "runtime" / "route.json"
+    route.parent.mkdir()
+    source = {QUERY_REPLICA_ROOT_ENV: str(tmp_path / "legacy")}
+    owner_environments = []
+    activations = []
+    owner_results = iter((_required(), _ready()))
+
+    def resolve_environment(*, process_environment):
+        return build_owner_query_environment(
+            process_environment=process_environment,
+            user_environment={QUERY_REPLICA_ROUTE_FILE_ENV: str(route)},
+        )
+
+    result = _run(
+        tmp_path,
+        environment=source,
+        ensure_operational=lambda **kwargs: (
+            owner_environments.append(dict(kwargs["environ"]))
+            or next(owner_results)
+        ),
+        activate=lambda config: (
+            activations.append(config)
+            or SimpleNamespace(
+                ok=True,
+                route_committed=True,
+                post_query_replica_unchanged=True,
+                error="",
+            )
+        ),
+        build_environment=resolve_environment,
+    )
+
+    assert result.ready is True
+    assert source == {QUERY_REPLICA_ROOT_ENV: str(tmp_path / "legacy")}
+    assert owner_environments == [
+        {QUERY_REPLICA_ROUTE_FILE_ENV: str(route)},
+        {QUERY_REPLICA_ROUTE_FILE_ENV: str(route)},
+    ]
+    assert activations[0].route_path == route
+
+
+def test_route_environment_selection_failure_is_stable_and_effect_free(
+    tmp_path: Path,
+) -> None:
+    effects = []
+    result = _run(
+        tmp_path,
+        ensure_operational=lambda **_kwargs: effects.append("owner"),
+        activate=lambda _config: effects.append("activation"),
+        build_environment=lambda **_kwargs: (_ for _ in ()).throw(
+            ValueError("registry_unavailable")
+        ),
+    )
+
+    assert result.ready is False
+    assert result.error == POSTMERGE_ROUTE_CONFIG_ERROR
+    assert effects == []
+
+
+def test_non_replica_owner_failure_is_terminal_before_activation(
+    tmp_path: Path,
+) -> None:
+    activations = []
+    owner_failure = RedDogHoloIndexOperationalResult(
+        False, OPERATIONAL_FAILED, False, "OWNER_UNAVAILABLE",
+    )
+
+    result = _run(
+        tmp_path,
+        ensure_operational=lambda **_kwargs: owner_failure,
+        activate=lambda config: activations.append(config),
+    )
+
+    assert result.ready is False
+    assert result.error == "OWNER_UNAVAILABLE"
+    assert activations == []
+
+
+def test_post_activation_owner_failure_is_terminal(tmp_path: Path) -> None:
+    owner_results = iter((_required(), _required()))
+    result = _run(
+        tmp_path,
+        ensure_operational=lambda **_kwargs: next(owner_results),
+        activate=lambda _config: SimpleNamespace(
+            ok=True,
+            route_committed=True,
+            post_query_replica_unchanged=True,
+            error="",
+        ),
+    )
+
+    assert result.ready is False
+    assert result.error == QUERY_REPLICA_REQUIRED_ERROR
 
 
 def test_activation_failure_never_claims_operational(tmp_path: Path) -> None:

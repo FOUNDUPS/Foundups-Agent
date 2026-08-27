@@ -1,5 +1,25 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Post-merge route continuity repair
+
+- Reproduced the exact-main OpenClaw failure after canonical refresh without
+  touching Holo data. The long-lived process carried the retired direct-root
+  value while the current user environment carried the stable route file; the
+  ordinary query wrapper reconciled that state, but the post-merge composer
+  passed ambient configuration directly.
+- Reused the existing allowlisted owner-acquisition boundary once per
+  post-merge transaction. Both owner probes and activation now receive the same
+  private route snapshot, current user route precedence removes only the
+  inherited legacy root, and ambient state, credentials, low-level ambiguity
+  rejection, route CAS, and activation authority are unchanged.
+- Focused result: **34 passed**; the changed composer reaches **92%** statement
+  coverage. Adjacent post-merge, route-resolution, coordinator, and authority-
+  order result: **85 passed**. The complete bridge macro is **1,135 passed / 8
+  expected host-capability skips in 548.82 seconds**. Exact-main live replay
+  remains required after merge. (WSP 00/15/22/50/62/84/97; WSP_15 19/P0)
+- Repository-bound WSP_97 evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_ROUTE_CONTINUITY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27 - Supported Holo owner acquisition reliability
 
 - Reproduced the plain supported query failure in a long-lived process while

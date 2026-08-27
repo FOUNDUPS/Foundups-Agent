@@ -1,5 +1,20 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-27] Post-merge route continuity falsification
+
+- Added a regression reproducing an inherited direct replica root plus a newer
+  current-user stable route. The post-merge transaction must select the route
+  once, pass the same route-only private mapping to both owner probes and
+  activation, and leave the source mapping unchanged.
+- Added route-environment selection failure containment before owner or
+  activation effects. Focused owner-acquisition pair: **34 passed**. Adjacent
+  post-merge, route-resolution, coordinator, and authority-order closure: **85
+  passed**. The composer reaches **92%** statement coverage. The complete
+  bridge macro is **1,135 passed / 8 expected capability skips in 548.82
+  seconds** using an O:-local base temp. No live Holo, route, replica, owner,
+  process environment, Git, or network mutation occurred.
+  (WSP 00/15/22/50/62/84/97)
+
 ## [2026-08-27] Holo owner acquisition reliability falsification
 
 - Added allowlisted route-refresh, non-string route rejection, exact port

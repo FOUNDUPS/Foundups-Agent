@@ -59,7 +59,7 @@ const conversationPlaneRouting = conversationPlanePolicy.createRouting({
   cleanContextMode, cleanEffort, cleanMode, cleanWorkerType,
   authoritativeWorkStateQuery
 });
-const EXTENSION_VERSION = '0.4.116';
+const EXTENSION_VERSION = '0.4.117';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';

@@ -14,7 +14,7 @@ assert.deepStrictEqual(pkg.capabilities, {
   virtualWorkspaces: { supported: false }
 });
 assert.strictEqual(pkg.publisher, 'foundups');
-assert.strictEqual(pkg.version, '0.4.116');
+assert.strictEqual(pkg.version, '0.4.117');
 assert.strictEqual(pkg.main, './extension.js');
 for (const key of ['reddog.allowEvaluationFallback',
   'foundupsFusion.allowEvaluationFallback']) {

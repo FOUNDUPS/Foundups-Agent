@@ -1,5 +1,16 @@
 # RedDog Extension Tests
 
+## 0.4.117 post-merge Holo route continuity compatibility
+
+Version and contract fixtures advance because the authenticated backend
+closure now includes current-user route precedence in the post-merge composer.
+The 1,350-file manifest is `8c411cb8ea86...2870660a`; the canonical registry
+remains 1,588 tests / 268 quarantined. The focused backend result is 34 passed
+and its adjacent authority/route closure is 85 passed; the complete bridge
+macro is 1,135 passed / 8 expected skips. Fast 14/14, conversation 32/32,
+contract 3/3, package, and all four release groups pass. One exact-main
+OpenClaw replay remains mandatory before artifact publication.
+
 ## 0.4.116 governed Holo owner acquisition compatibility
 
 Version and contract fixtures advance with the authenticated backend closure.

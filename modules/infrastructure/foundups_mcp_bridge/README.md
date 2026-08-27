@@ -91,7 +91,11 @@ The separate assumption audit is
 [`docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md`](docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md).
 
 `reddog_holoindex_postmerge_replica.py` is the bounded post-merge composer. It
-first asks the normal owner path to prove the canonical refresh identity. When
+first builds the same allowlisted private route environment used by the
+supported one-shot query: on Windows, a current non-empty user route pointer
+replaces an inherited legacy replica root without mutating `os.environ` or
+copying unrelated values. It then asks the normal owner path to prove the
+canonical refresh identity. When
 the stable route still names an older generation, it derives new/no-overwrite
 replica and receipt targets from the configured stable route, reuses
 `activate_query_replica()`, and reproves the owner. HEAD, generation, and

@@ -13,6 +13,7 @@ from .reddog_holoindex_maintenance_handshake import (
     RedDogHoloIndexOperationalResult,
     ensure_reddog_holoindex_operational,
 )
+from .reddog_holoindex_owner_acquisition import build_owner_query_environment
 from .reddog_holoindex_owner_replica_route import (
     QUERY_REPLICA_REQUIRED_ERROR,
     QUERY_REPLICA_ROOT_ENV,
@@ -40,6 +41,7 @@ class _PostmergeReplicaDependencies:
 
     ensure_operational: Callable[..., Any] = ensure_reddog_holoindex_operational
     activate: Callable[..., Any] = activate_query_replica
+    build_environment: Callable[..., dict[str, str]] = build_owner_query_environment
 
 
 def _failure(current: Any, error: str) -> RedDogHoloIndexOperationalResult:
@@ -148,6 +150,39 @@ def _operational(
     )
 
 
+def _current_proof_valid(current: Any, expected_repo_head_sha: str) -> bool:
+    return bool(
+        getattr(current, "ready", False) is True
+        and getattr(current, "repo_head_sha", "") == expected_repo_head_sha
+        and getattr(current, "generation_id", "")
+        and getattr(current, "freshness_receipt_digest", "")
+    )
+
+
+def _route_environment(
+    dependencies: _PostmergeReplicaDependencies,
+    environ: Mapping[str, str],
+) -> Mapping[str, str] | None:
+    try:
+        return dependencies.build_environment(process_environment=environ)
+    except (OSError, TypeError, ValueError):
+        return None
+
+
+def _existing_route_result(
+    current: Any,
+    operational: Any,
+) -> RedDogHoloIndexOperationalResult | None:
+    if getattr(operational, "ready", False) is True:
+        if not _binding_matches(current, operational):
+            return _failure(current, POSTMERGE_OPERATIONAL_BINDING_MISMATCH)
+        return _ready_with_refresh(current, operational)
+    if getattr(operational, "error", "") != QUERY_REPLICA_REQUIRED_ERROR:
+        error = str(getattr(operational, "error", "") or OPERATIONAL_FAILED)
+        return _failure(current, error)
+    return None
+
+
 def _activate_missing_replica(
     dependencies: _PostmergeReplicaDependencies,
     *,
@@ -206,27 +241,24 @@ def _ensure_postmerge_query_replica_operational_for_test(
     dependencies: _PostmergeReplicaDependencies | None = None,
 ) -> RedDogHoloIndexOperationalResult:
     """Activate one new replica when exact-current owner admission needs it."""
-
     deps = dependencies or _PostmergeReplicaDependencies()
     root = Path(repo_root).resolve(strict=False)
     runtime_root = Path(owner_runtime_root).resolve(strict=False)
     store = Path(canonical_store).resolve(strict=False)
-    if (
-        getattr(current, "ready", False) is not True
-        or getattr(current, "repo_head_sha", "") != expected_repo_head_sha
-        or not getattr(current, "generation_id", "")
-        or not getattr(current, "freshness_receipt_digest", "")
-    ):
+    if not _current_proof_valid(current, expected_repo_head_sha):
         return _failure(current, "HOLOINDEX_POSTMERGE_CURRENT_PROOF_INVALID")
+    route_environment = _route_environment(deps, environ)
+    if route_environment is None:
+        return _failure(current, POSTMERGE_ROUTE_CONFIG_ERROR)
     initial = _operational(
-        deps, repo_root=root, owner_runtime_root=runtime_root, environ=environ
+        deps,
+        repo_root=root,
+        owner_runtime_root=runtime_root,
+        environ=route_environment,
     )
-    if getattr(initial, "ready", False) is True:
-        if not _binding_matches(current, initial):
-            return _failure(current, POSTMERGE_OPERATIONAL_BINDING_MISMATCH)
-        return _ready_with_refresh(current, initial)
-    if getattr(initial, "error", "") != QUERY_REPLICA_REQUIRED_ERROR:
-        return _failure(current, str(getattr(initial, "error", "") or OPERATIONAL_FAILED))
+    existing = _existing_route_result(current, initial)
+    if existing is not None:
+        return existing
     activation_error = _activate_missing_replica(
         deps,
         repo_root=root,
@@ -234,13 +266,16 @@ def _ensure_postmerge_query_replica_operational_for_test(
         canonical_store=store,
         expected_repo_head_sha=expected_repo_head_sha,
         current=current,
-        environ=environ,
+        environ=route_environment,
         timeout_seconds=timeout_seconds,
     )
     if activation_error:
         return _failure(current, activation_error)
     final = _operational(
-        deps, repo_root=root, owner_runtime_root=runtime_root, environ=environ
+        deps,
+        repo_root=root,
+        owner_runtime_root=runtime_root,
+        environ=route_environment,
     )
     if getattr(final, "ready", False) is not True:
         return _failure(current, str(getattr(final, "error", "") or OPERATIONAL_FAILED))

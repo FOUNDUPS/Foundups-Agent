@@ -128,8 +128,11 @@ journal-loss promotion without giving query paths publication authority.
 The activation controller is now the adjacent implemented layer. Its candidate
 query receives the already verified route directly and therefore does not
 re-enter the route lock; the post-commit query uses the stable route file.
-Existing processes still require restart after the separately governed
-one-time user-environment pointer is installed.
+Supported one-shot and post-merge callers now snapshot the current allowlisted
+user route and replace an inherited legacy root in a private mapping. A
+restart remains useful for unrelated long-lived consumers that do not yet use
+that shared acquisition boundary, but it is no longer required for these two
+governed paths.
 
 ## 2026-08-23: Private route CAS and crash-recovery layer
 

@@ -26,9 +26,10 @@
 ## Post-merge query-replica composition
 
 - `test_reddog_holoindex_postmerge_replica.py` proves exact-current admission,
-  normal-owner reuse, route-only configuration, absent-only replica/receipt
-  allocation, activation failure truth, exact binding equality, and immutable
-  post-query proof.
+  normal-owner reuse, current-user route precedence over an inherited legacy
+  root, source-environment immutability, route-selection failure containment,
+  route-only configuration, absent-only replica/receipt allocation, activation
+  failure truth, exact binding equality, and immutable post-query proof.
 - The adjacent idle-automation authority-order suite proves the first authority
   lease is released before activation and reacquired for final Git/receipt
   binding. Public production entrypoints expose no effect-injection parameters.
@@ -36,6 +37,11 @@
   Separately, automatic acceptance passed the real OpenClaw/AgentDB path at
   exact main `cfd1e0051`, followed by a CURRENT/no-gap/no-reindex owner query
   and unchanged full-replica proof. Later HEADs require their own evidence.
+- The route-precedence repair is **34 passed** in its focused owner-acquisition
+  pair and **85 passed** across post-merge, route-resolution, coordinator, and
+  authority-order regressions. The composer reaches **92%** statement coverage;
+  the complete bridge macro is **1,135 passed / 8 expected capability skips in
+  548.82 seconds**. Live exact-main replay remains a separate gate.
 
 ## Exact query-replica activation
 

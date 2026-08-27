@@ -1,0 +1,103 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "938d1d01fc0d3ac4285d6d1ac5f9c9747d633b61"
+  },
+  "execution_id": "REDDOG_HOLO_POSTMERGE_ROUTE_CONTINUITY_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The governed Holo query was attempted before editing and failed closed with HOLOINDEX_QUERY_REPLICA_REQUIRED, freshness UNKNOWN, index_gap_detected true, and no reindex.",
+      "Read-only fallback inspection covered the post-merge composer, owner-acquisition environment builder, low-level route resolver, authority transaction, focused tests, and module documentation.",
+      "Actual non-secret process and current-user route probes reproduced the inherited legacy-root/current route-file split without reading credentials or broad environment state."
+    ],
+    "research": [
+      "Exact main 938d1d01 refreshed canonical Holo state but the real OpenClaw task failed HOLOINDEX_POSTMERGE_ROUTE_CONFIG_INVALID before replica activation.",
+      "The supported one-shot query already reused build_owner_query_environment so a current user route replaced an inherited legacy root in a private allowlisted mapping.",
+      "The post-merge composer passed ambient configuration directly and was the only missing consumer of that existing route-continuity capability."
+    ],
+    "micro_pass": [
+      "The focused post-merge/owner-acquisition pair passed 34 tests and the changed composer reached 92 percent overall coverage.",
+      "The adjacent post-merge, route-resolution, coordinator, and authority-order closure passed 85 tests.",
+      "RedDog fast passed 14 members; conversation passed 32 tests; contract authentication passed 3 members; the package contract passed."
+    ],
+    "macro_pass": [
+      "The complete foundups_mcp_bridge suite passed 1135 tests with 8 expected host-capability skips in 548.82 seconds.",
+      "The authenticated RedDog four-group release supervisor passed in 179.863 seconds without timeout.",
+      "The canonical test registry is current at 1588 tests and 268 quarantined programs.",
+      "The authenticated backend closure is current at 1350 files and digest 8c411cb8ea86ccbf50596068ad35d06d3eb2a116f4212b65f0f8b14f2870660a.",
+      "The deterministic package surface is 67 files and 945212 bytes at content digest 78102b01b82a7004959ec01eb690674b583c4c24a33e5427419ef6df57033417."
+    ],
+    "hard_think": [
+      "Reused the existing route-only acquisition boundary once per transaction instead of weakening the low-level ambiguity resolver or adding a second environment policy.",
+      "Kept canonical repository, store, expected HEAD, route CAS, activation, and final authority proof unchanged; current-user precedence grants no route-publication authority.",
+      "Advanced the extension identity to 0.4.117 because the changed Python file is inside the authenticated VSIX backend closure."
+    ],
+    "dialectic_sweep": [
+      "Independent WSP_00/WSP_97 correctness review returned GO after reproducing the host condition and verifying strict authority preservation.",
+      "Independent documentation review rejected stale root ModLog and final-gate wording; both were corrected without rewriting historical exact-commit evidence.",
+      "Independent release review rejected the historical-base activation receipt as provenance for 0.4.117; this current-base receipt closes that evidence gap.",
+      "Validation first rejected stale shard pins and the old backend digest pin; exact generated identities were updated rather than bypassing either gate."
+    ],
+    "first_principles": [
+      "Fail-closed protects Holo integrity but does not satisfy RedDog availability; the supported query must become usable again through governed activation.",
+      "A stable route pointer prevents per-generation restarts only when every supported long-lived caller selects it exclusively from current trusted configuration.",
+      "Historical task failure, current pre-merge validation, post-merge OpenClaw replay, and final VSIX artifact proof are separate facts and must remain separately bound."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_postmerge_replica.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_postmerge_replica.py",
+      "modules/infrastructure/foundups_mcp_bridge/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/extension.js",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/README.md",
+      "extensions/reddog/ROADMAP.md",
+      "extensions/reddog/ModLog.md",
+      "extensions/reddog/tests/README.md",
+      "extensions/reddog/tests/TestModLog.md"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_ROUTE_CONTINUITY_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md",
+    "ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

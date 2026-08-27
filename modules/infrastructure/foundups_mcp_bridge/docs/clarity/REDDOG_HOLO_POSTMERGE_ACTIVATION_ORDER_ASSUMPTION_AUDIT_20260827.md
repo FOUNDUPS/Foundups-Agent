@@ -27,7 +27,7 @@
 | A4 | New target names must never overwrite evidence. | Replica and receipt allocation accepts only absent paths and increments a bounded suffix. | HIGH |
 | A5 | The final authority lease must be reacquired after activation. | Repository HEAD/origin/main, clean state, generation, and receipt are re-proved after the normal owner query. | HIGH |
 | A6 | Task failure must not resolve the durable request. | FakeDB and real SQLite AgentDB regressions preserve failed task, pending request, and absent completion event. | HIGH |
-| A7 | Stable route-file possession eliminates per-generation process restarts after one migration restart. | The route path is stable while its journaled record advances by CAS; a long-lived pre-migration process carrying only the retired direct-root variable failed closed until its child environment selected the route exclusively. | MEDIUM |
+| A7 | Stable route-file possession eliminates per-generation process restarts only when every supported long-lived caller selects the current route exclusively. | The route path is stable while its journaled record advances by CAS. The one-shot query already selected the allowlisted current-user route over an inherited legacy root; the post-merge composer initially omitted that shared boundary and reproduced the failure. | HIGH after repair |
 
 ## 3. Failure Modes
 
@@ -39,7 +39,7 @@
 | F4 | A caller injects a fake refresh, activation, Git, or completion result into production. | MED | CRITICAL | Public authority, coordinator, and executor signatures expose only production dependencies; effect seams are private test adapters. |
 | F5 | The second authority lease is busy after an owner starts. | MED | HIGH | Stop only the process-owned owner and return BUSY; never complete or resolve the request. |
 | F6 | Existing replica/receipt evidence is overwritten. | LOW | CRITICAL | Bounded absent-only allocation; no delete, overwrite, or reuse authority. |
-| F7 | A pre-migration long-lived process retains the legacy root while the user route pointer is newer. | MED during migration | HIGH | Dual configuration remains rejected. Restart once after route-pointer migration or construct the child with only the persisted stable route. Do not weaken the exclusive-capability rule. |
+| F7 | A pre-migration long-lived process retains the legacy root while the user route pointer is newer. | MED during migration | HIGH | Dual configuration remains rejected by the low-level resolver. Supported long-lived callers must build the shared allowlisted private route snapshot, where a current user route replaces the inherited legacy root without mutating ambient state. |
 | F8 | Manual `a7302344` recovery is misreported as automatic acceptance. | MED | HIGH | Keep the historical task failed and label it manual evidence; automatic acceptance is separately bound to the completed `cfd1e0051` task. |
 
 ## 4. Alternatives Considered
@@ -79,3 +79,17 @@
 - A subsequent normal governed query returned CURRENT/no-gap/no-reindex and
   full production revalidation preserved all 33 immutable artifacts. The
   historical `a7302344` task remains failed evidence.
+
+## 7. Later-HEAD Falsification Addendum
+
+- Exact main `938d1d01` refreshed canonical state but failed replica activation
+  with `HOLOINDEX_POSTMERGE_ROUTE_CONFIG_INVALID` in a long-lived OpenClaw
+  process. Read-only diagnosis proved that process held only the retired direct
+  root while the current user environment held the stable route file.
+- The post-merge composer now reuses the existing owner-acquisition environment
+  builder once per transaction and passes that immutable private mapping to
+  both owner probes and activation. It does not weaken ambiguous low-level
+  input, mutate `os.environ`, copy credentials, or authorize route publication.
+- This addendum corrects A7/F7; the historical `cfd1e0051` acceptance remains
+  valid for that exact commit. The repair still requires merge and a new
+  exact-main live replay before it is accepted operationally.
