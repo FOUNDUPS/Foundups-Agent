@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1591,
+  "total_tests": 1598,
   "quarantined_tests": 267,
   "tests": [
     {
@@ -16274,11 +16274,76 @@
       "description": "CLI contracts for the isolated HoloIndex acceptance adapter."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_dependency_runtime",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial tests for inert Holo dependency-runtime generations."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_dependency_runtime_contract",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime_contract.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Fail-closed parser and limit tests for inert dependency runtimes."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_dependency_runtime_edges",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime_edges.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Additional path and binding falsifiers for inert dependency runtimes."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_dependency_runtime_scale",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime_scale.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Opt-in production-shape soak for the dependency-runtime materializer."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_dependency_runtime_windows_copy_scale",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_dependency_runtime_windows_copy_scale.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Windows retained-handle scaling proof for dependency-runtime copying."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_main_preflight",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_main_preflight.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -16291,7 +16356,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [
         "process"
       ],
@@ -16306,7 +16371,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_handshake.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [
         "process"
       ],
@@ -16321,7 +16386,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_owner_acquisition_reliability.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -17259,6 +17324,32 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Adversarial tests for shared runtime artifact safety helpers."
+    },
+    {
+      "id": "test::modules::infrastructure::shared_utilities::tests::test_runtime_artifact_windows_safety",
+      "path": "modules/infrastructure/shared_utilities/tests/test_runtime_artifact_windows_safety.py",
+      "owner": "modules/infrastructure/shared_utilities",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-shared-utilities-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Windows-specific identity and stream falsifiers for runtime artifacts."
+    },
+    {
+      "id": "test::modules::infrastructure::shared_utilities::tests::test_runtime_operation_locking_posix",
+      "path": "modules/infrastructure/shared_utilities/tests/test_runtime_operation_locking_posix.py",
+      "owner": "modules/infrastructure/shared_utilities",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-shared-utilities-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "POSIX lock-root confinement falsifiers for shared runtime locks."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::tests::test_session_utils",

@@ -98,6 +98,24 @@ digest proof for callers that already hold an expected file identity. It uses
 one no-follow confined descriptor, rejects identity/path drift before and after
 hashing, and returns only the digest, size, and admitted identity.
 
+On Windows, confined identity comparison ignores only the execute bits that
+Python projects from executable filename suffixes; file type, read/write mode,
+device/inode, link count, size, timestamps, attributes, and final path remain
+bound. `runtime_artifact_windows_streams.py` provides a bounded
+`FileStreamInfo` check for callers that have already proved no-follow topology:
+clean files admit only the unnamed `::$DATA` stream, clean directories admit no
+reported stream, and every named alternate stream rejects. It must not be used
+alone as link/reparse/final-path proof. The same module exposes
+`windows_extended_path()` so approved runtime-artifact traversal, metadata,
+directory creation, and handle operations use one absolute `\\?\` spelling
+when valid payload paths exceed the legacy Windows `MAX_PATH` boundary.
+
+On POSIX, machine-wide runtime locks create or reopen one owner-private `0700`
+lock directory, reject links or wrong ownership/permissions, pin that directory
+with a no-follow descriptor, and open the private single-link lock file relative
+to the pinned descriptor. A replaceable or redirected temporary lock namespace
+therefore fails closed rather than splitting serialization.
+
 ## [API] Public API & Usage
 
 ### Exported Functions/Classes

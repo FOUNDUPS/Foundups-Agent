@@ -1,5 +1,21 @@
 # RedDog Extension Tests
 
+## 0.4.125 inert dependency-runtime closure release
+
+- Rebinds the version and authenticated contract to the 1,357-file backend
+  closure at `3ccb0d6bd227...f5b827`, including reachable shared safety code.
+- Proves only package identity and the existing RedDog extension contracts.
+  The maintenance-only materializer modules are not in that runtime closure;
+  no gate establishes A-grade, activation, route mutation, or resident ownership.
+- Fast 14/14, conversation 32/32, contract 3/3, deterministic package, and
+  exhaustive 4/4 release groups pass. The authenticated contract is 18 shards,
+  6,942 lines, and 492 assertions at `bd15011d599f...98c4ed`; package identity
+  is 67 files / 945,746 bytes at `dc90aba585c6...36436ae`.
+- `O:\RedDog-Releases\reddog-0.4.125.vsix` is 275,634 bytes at
+  `sha256:e3dc0884f8e411245385734aae0abb3a783c3129a24971d3642beaf7d07f8b31`.
+  Independent archive inspection found 69 entries, no duplicate or unsafe
+  names, zero package-member byte mismatches, and package version 0.4.125.
+
 ## 0.4.124 runtime-environment binding release
 
 - Rebinds package/version/contract evidence to the authenticated backend

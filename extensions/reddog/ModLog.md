@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-08-27 - Inert dependency-runtime closure release (0.4.125)
+
+- Rebound the authenticated backend closure to the reachable Windows/POSIX
+  safety primitives used by the staged dependency materializer. The five
+  maintenance-only materializer modules remain outside the thin-client runtime
+  closure; the package gains no activation, route, owner, or execution authority.
+- Kept A-grade and retrieval-RSI truth fail-closed: stage-zero runtime
+  activation, a resident authenticated owner, and independently governed
+  proposer/evaluator/promotion/outcome-learning layers remain separate P0
+  transactions. The exact `0.4.125` VSIX passed the authenticated four-group
+  release closure and independent archive inspection. (WSP
+  00/15/22/50/62/83/87/97)
+
 ## 2026-08-27 - Runtime-environment binding release (0.4.124)
 
 - Rebound the packaged backend closure after exact child runtime-environment

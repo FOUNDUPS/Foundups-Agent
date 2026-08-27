@@ -1,5 +1,40 @@
 # foundups_mcp_bridge Tests
 
+## Inert dependency-runtime closure
+
+- `test_reddog_holoindex_dependency_runtime.py` proves content addressing,
+  exact reuse without recopy, source/destination mutation rejection, complete
+  file/directory topology, bounded retained handles, aliases, hardlinks,
+  preservation, and inert truth flags.
+- `test_reddog_holoindex_dependency_runtime_edges.py` covers literal store and
+  generation junctions, aggregate path bounds, Windows file/directory alternate
+  streams, and the full generation contract envelope.
+- `test_reddog_holoindex_dependency_runtime_contract.py` covers duplicate keys,
+  noncanonical/truncated JSON, unknown keys, reordered rows, inventory
+  substitution, direct public limit validation, and concurrent public-builder
+  serialization across ordinary and extended-length Windows spellings of the
+  same proved store.
+- `test_reddog_holoindex_dependency_runtime_windows_copy_scale.py` keeps the
+  700-file retained-handle proof separate from the primary adversarial suite;
+  retained leases scale with path depth, not file count. It also drives a valid
+  payload path beyond legacy Windows `MAX_PATH` through full materialization,
+  post-publication verification, and exact reuse.
+- `test_reddog_holoindex_dependency_runtime_scale.py` is an explicit opt-in
+  production-shape soak for 72,261 files and 11,639 child directories. It must
+  remain opt-in; ordinary unit collection does not represent that expensive
+  proof. All tests use disposable O:-local roots and never touch the live Holo
+  route, store, model, owner, or maintenance path.
+
+Exact opt-in evidence on this slice:
+
+- Synthetic production shape: 72,261 files / 11,639 child directories; first
+  1,708.812s, reuse 836.969s, peak handles +6, peak RSS +543,744,000 bytes.
+- Real installed payload: 72,261 files / 11,639 child directories /
+  1,853,891,335 bytes; first 2,250.675s, reuse 798.191s, peak handles +31,
+  peak RSS +537,284,608 bytes; one generation and zero successful-root orphans.
+- Both are single-builder resource/reuse proofs, not query-latency or
+  horizontal-throughput benchmarks.
+
 ## Exact retrieval runtime-environment binding
 
 - Adversarial tests cover executable/source mutation, manifest parity, raw

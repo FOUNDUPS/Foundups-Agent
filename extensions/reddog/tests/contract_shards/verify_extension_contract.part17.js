@@ -333,7 +333,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.124' } }
+      ? { id, packageJSON: { version: '0.4.125' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({

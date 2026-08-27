@@ -1,6 +1,24 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-08-28 - Windows confined identity and alternate-stream proof
+
+- Corrected confined identity comparison for Windows' suffix-projected execute
+  bits without weakening file type, read/write mode, object identity, size,
+  timestamps, attributes, link count, or final-path checks.
+- Added a bounded `GetFileInformationByHandleEx(FileStreamInfo)` helper that
+  admits only the unnamed file data stream and rejects named file or directory
+  streams. Existing topology guards remain mandatory at every call site.
+- Reused its canonical extended-length Windows spelling for deep runtime tree
+  creation, enumeration, metadata, stream, and confined-digest checks after a
+  real dependency payload exposed an ordinary-path `WinError 206` boundary.
+- Extracted Windows-specific falsifiers to a dedicated WSP_62-bounded test file;
+  the inherited runtime-artifact safety host retains its exact baseline content.
+- Hardened the POSIX machine-wide lock namespace against symlink, replacement,
+  ownership, permission, and hardlink attacks by pinning a private directory
+  descriptor and opening the lock relative to it.
+  (WSP 22/50/62/83/97)
+
 ## 2026-08-23 - Confined streaming digest identity proof
 
 - Added a bounded streaming SHA-256 proof that opens one confined no-follow

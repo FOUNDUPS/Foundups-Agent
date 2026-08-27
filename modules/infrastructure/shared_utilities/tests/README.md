@@ -9,6 +9,18 @@ strict expected-identity/bound types, same-size restored-mtime mutation,
 replacement/link rejection, and descriptor/path stability with disposable
 files only.
 
+`test_runtime_artifact_windows_safety.py` covers the Windows executable-suffix
+mode projection and bounded file/directory alternate-stream behavior. It uses
+disposable O:-local files, asserts named streams reject, and does not treat the
+stream helper as a substitute for outer no-follow topology validation.
+The RedDog dependency-runtime integration suite additionally proves the shared
+extended-length spelling through materialization, verification, and reuse of a
+valid payload path beyond legacy Windows `MAX_PATH`.
+
+`test_runtime_operation_locking_posix.py` proves a symlinked or broadly
+permissioned POSIX lock namespace rejects and an owner-private namespace works.
+These tests are platform-gated on Windows and run in POSIX CI.
+
 ## LM Studio lifecycle coverage
 
 `test_lm_studio_model_lifecycle.py` proves native installed-versus-resident
