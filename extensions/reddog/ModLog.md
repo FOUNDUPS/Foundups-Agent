@@ -1,5 +1,26 @@
 # RedDog ModLog
 
+## 2026-08-27 - Stable-route resolver compatibility (0.4.119)
+
+- Advanced the thin-client identity because its authenticated backend replaces
+  caller route inputs with the exact committed route-file capability during
+  the post-commit canary. This removes a deterministic duplicate-`environment`
+  keyword failure without changing query, Holo, worker, or merge authority.
+- The exact `f058f87b` OpenClaw task remains failed and its revision-6
+  activation receipt remains `COMMITTED_UNVERIFIED`, even though subsequent
+  governed queries prove the route CURRENT. Version 0.4.119 requires its own
+  exact-main replay and commit-bound VSIX audit.
+- RED/GREEN: **13 passed / 1 expected skip**, **90%** controller coverage;
+  current adjacent closure **191 passed / 1 expected skip**. The complete
+  bridge macro is **1,136 passed / 8 expected skips in 549.69 seconds**. The
+  current registry is **1,588 / 268 quarantined**; the authenticated backend is
+  **1,350 files** at `0de0c08c0181...afa28`. Fast **14/14**, conversation
+  **32/32**, contract **3/3**, package, and all **4/4** release groups pass in
+  **191.972 seconds**. Contract identity is `a6d2e50c1c97...43ecfaa`; package
+  identity is **67 files / 945,469 bytes** at
+  `59a710359237...25101de`. Exact-main and VSIX gates remain pending.
+  (WSP 00/15/22/50/62/84/87/97)
+
 ## 2026-08-27 - Post-commit Holo proof recovery compatibility (0.4.118)
 
 - Advanced the thin-client identity because its authenticated backend now

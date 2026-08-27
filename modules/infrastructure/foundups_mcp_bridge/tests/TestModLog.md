@@ -1,5 +1,19 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-27] Stable-route resolver environment falsification
+
+- RED changed the activation query double to call the resolver exactly like
+  `query_once`: canonical roots plus an existing `environment` keyword. The
+  pre-fix callback supplied `environment` again and left the committed route
+  unverified, reproducing exact-main OpenClaw evidence.
+- GREEN proves the stable callback passes only canonical roots and the exact
+  committed route-file mapping to the strict resolver. The hostile legacy
+  direct root is discarded; candidate admission and retry behavior are
+  unchanged. Focused: **13 passed / 1 expected skip**, **90%** coverage;
+  current adjacent: **191 passed / 1 expected skip**. The captured complete
+  bridge macro is **1,136 passed / 8 expected skips in 549.69 seconds**.
+  (WSP 00/15/22/50/62/84/87/97)
+
 ## [2026-08-27] Post-commit stable-query recovery falsification
 
 - RED proved a candidate canary and route commit could succeed while one

@@ -75,3 +75,20 @@
   catching only `CandidateAcceptanceError`. A recovered query still must pass
   `QueryReplicaOwnerRoute.revalidate()`. Two failures preserve the original
   fail-closed outcome.
+
+## 7. 2026-08-27 Stable-Resolver Contract Falsification Addendum
+
+- Exact main `f058f87b` repeated the failure after both bounded proofs while
+  committing a usable revision-6 route for generation `sha256:cf1433b1...`.
+  This falsified the transient-only reading of F4; the retry was bounded and
+  safe but insufficient.
+- The production callback contract supplied `environment` in resolver kwargs.
+  The stable callback also supplied `environment`, causing a deterministic
+  duplicate-keyword `TypeError` before the strict resolver ran. The query
+  boundary correctly hid the exception as `HOLOINDEX_QUERY_REPLICA_REQUIRED`,
+  but the activation receipt necessarily retained only the outer stable error.
+- RED now exercises the exact callback shape and fails committed-unverified on
+  the old code. The correction replaces caller route inputs with the committed
+  route-file capability while preserving canonical roots. Candidate admission,
+  two-attempt bounds, exact authority, semantic evidence, immutable reproof,
+  and terminal failure truth remain unchanged.

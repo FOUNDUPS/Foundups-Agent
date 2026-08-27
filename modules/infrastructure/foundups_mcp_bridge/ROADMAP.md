@@ -1,5 +1,29 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-27: Stable-route resolver environment correction
+
+**Implemented and adjacent-GREEN; exact-main replay remains required.** The
+0.4.118 exact-main run at `f058f87b` reached canonical generation
+`sha256:cf1433b1...`, passed candidate admission, and committed revision 6.
+Both stable proofs then failed because the callback expanded a caller mapping
+that already contained `environment` and also supplied `environment` itself.
+This deterministic Python duplicate-keyword failure was normalized to
+`HOLOINDEX_QUERY_REPLICA_REQUIRED` and then
+`ACTIVATION_QUERY_PROOF_INVALID`; the failed task and
+`COMMITTED_UNVERIFIED` receipt remain immutable evidence.
+
+The callback now projects canonical repository/store inputs explicitly and
+replaces all caller route inputs with the committed route-file capability.
+Candidate admission, two-attempt post-commit bound, terminal failure truth,
+exact authority, semantic evidence, and immutable revalidation are unchanged.
+RED reproduced the production-shaped failure. GREEN is 13 passed / 1 expected
+skip at 90% controller coverage and 191 passed / 1 expected skip across the
+current adjacent closure. WSP_15 is 16/P0. The pre-merge macro and release
+gates are now complete: **1,136 passed / 8
+expected skips in 549.69 seconds** and **4/4 release groups in 191.972
+seconds**. Next gates are merge, exact-main automatic completion, immutable
+verification, and the commit-bound VSIX audit.
+
 ## 2026-08-27: Post-commit stable-proof resilience
 
 **Implemented and adjacent-GREEN; exact-main replay remains required.** The

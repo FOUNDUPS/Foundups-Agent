@@ -28,6 +28,9 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_query_repli
     QueryReplicaActivationConfig,
     validate_activation_config,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (
+    QUERY_REPLICA_ROUTE_FILE_ENV,
+)
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_query_route_store import (
     QueryRouteStore,
 )
@@ -157,6 +160,7 @@ def _query_runner(
         resolved = kwargs["resolve_replica_route"](
             canonical_repo_root=config.repo_root,
             canonical_ssd_path=config.canonical_store,
+            environment={"HOLOINDEX_QUERY_REPLICA_ROOT": "must-not-win"},
         )
         assert resolved is route
         results = query_results or [_query_result(route.binding)]
@@ -223,10 +227,16 @@ def test_real_activation_commits_after_candidate_then_normal_query(
 ) -> None:
     config = _config(tmp_path)
     dependencies, calls = _dependencies(config)
+    stable_resolutions = []
+
+    def resolve_stable(**kwargs):
+        stable_resolutions.append(kwargs)
+        return calls["route"]
+
     monkeypatch.setattr(
         activation,
         "resolve_query_replica_owner_route",
-        lambda **_kwargs: calls["route"],
+        resolve_stable,
     )
 
     result = activate_query_replica(config, dependencies=dependencies)
@@ -235,6 +245,15 @@ def test_real_activation_commits_after_candidate_then_normal_query(
     assert result.verdict == "PASS"
     assert result.route_committed is True
     assert result.post_query_replica_unchanged is True
+    assert stable_resolutions == [
+        {
+            "canonical_repo_root": config.repo_root,
+            "canonical_ssd_path": config.canonical_store,
+            "environment": {
+                QUERY_REPLICA_ROUTE_FILE_ENV: str(config.route_path),
+            },
+        }
+    ]
     assert len(calls["queries"]) == 2
     candidate_route = calls["queries"][0]["resolve_replica_route"]()
     assert candidate_route is calls["route"]

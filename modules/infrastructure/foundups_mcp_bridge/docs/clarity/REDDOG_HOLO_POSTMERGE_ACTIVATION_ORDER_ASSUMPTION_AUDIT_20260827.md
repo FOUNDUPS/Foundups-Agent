@@ -109,3 +109,21 @@
 - A separate focused P0 transaction adds exactly one typed, read-only
   post-commit recovery proof. It does not retry candidate admission, change
   route CAS, relabel the historical task, or widen Holo/Git/worker authority.
+
+## 9. Exact-Main Stable-Resolver Contract Falsification
+
+- PR #1569 merged at `f058f87b`. The real OpenClaw/AgentDB path refreshed
+  generation `sha256:cf1433b1...`, passed candidate admission, and committed
+  route revision 6. Both post-commit proofs still failed
+  `ACTIVATION_QUERY_PROOF_INVALID`; the task and activation receipt remain
+  failed/`COMMITTED_UNVERIFIED` even though a later governed query is CURRENT.
+- A production-shaped direct query proved this was not transient owner timing.
+  `query_once` passed canonical roots plus `environment` to the callback; the
+  stable callback expanded those kwargs and supplied `environment` again.
+  Python rejected the duplicate keyword before strict route resolution and the
+  query boundary normalized it to `HOLOINDEX_QUERY_REPLICA_REQUIRED`.
+- Decision: preserve the two-attempt resilience bound, but correct the resolver
+  seam by explicitly projecting canonical roots and replacing caller route
+  inputs with the single committed route-file capability. This closes A7/F7
+  at the actual callback boundary and adds no route-publication, maintenance,
+  retry, or mutation authority.

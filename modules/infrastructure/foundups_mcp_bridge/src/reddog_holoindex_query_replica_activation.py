@@ -200,9 +200,9 @@ def _run_query(
     stable_route: bool,
 ) -> str:
     if stable_route:
-        resolver = lambda **kwargs: resolve_query_replica_owner_route(
+        resolver = lambda **kwargs: _resolve_stable_route(
+            config,
             **kwargs,
-            environment={QUERY_REPLICA_ROUTE_FILE_ENV: str(config.route_path)},
         )
     else:
         resolver = lambda **_kwargs: route
@@ -224,6 +224,23 @@ def _run_query(
         generation_id=binding.generation_id,
         receipt_digest=binding.canonical_receipt_digest,
         expected_replica_binding=binding.public_binding,
+    )
+
+
+def _resolve_stable_route(
+    config: QueryReplicaActivationConfig,
+    *,
+    canonical_repo_root: Any,
+    canonical_ssd_path: Any,
+    environment: Mapping[str, str] | None = None,
+) -> Any:
+    """Resolve only the committed route, superseding caller route inputs."""
+
+    del environment
+    return resolve_query_replica_owner_route(
+        canonical_repo_root=canonical_repo_root,
+        canonical_ssd_path=canonical_ssd_path,
+        environment={QUERY_REPLICA_ROUTE_FILE_ENV: str(config.route_path)},
     )
 
 
