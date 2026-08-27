@@ -20,9 +20,10 @@ environment remain an explicit P1 before reproducible A-grade/RSI evidence.
 read-only worker adapter. It starts the one-shot script with a runtime selected
 by the owner supervisor and `python -S -B`. Its scrubbed child environment retains required OS/runtime variables, exact Holo configuration, and vetted venv site-packages while excluding recognized credentials and Python overrides. At most
 57 seconds enter the child within a 60-second parent wall; lock wait shares that
-budget and three seconds remain for cleanup. A prior 27-second cold query timed
-out; the repaired path completed CURRENT in 32.5 seconds without claiming
-horizontal scale. Success requires exact CURRENT semantic HEAD/root/generation
+budget and three seconds remain for cleanup. At exact main `66526ae5c`, three
+fresh one-shot queries completed CURRENT in about 34 seconds; after a 25.5-second
+bootstrap, a warm governed query completed in 10.3 seconds. This proves bounded
+phase-1 availability, not horizontal scale. Success requires exact CURRENT semantic HEAD/root/generation
 and all four replica fields. The adapter re-verifies the one-shot receipt,
 filters allowed hits before limiting, and returns only scoped safe hit metadata;
 raw semantic buckets, route data, and nested receipts do not enter Fusion.

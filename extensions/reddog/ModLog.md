@@ -1,5 +1,20 @@
 # RedDog ModLog
 
+## 2026-08-27 - Exact-main cold-owner readiness evidence (0.4.123)
+
+- The real OpenClaw/AgentDB post-merge task completed at exact main `66526ae5`,
+  generation `sha256:f2013aeb...`, with retry count zero and route revision 10.
+- Three fresh-process RedDog owner calls passed on attempt one in about 34
+  seconds each. A separately pre-warmed owner started in 25.5 seconds and served
+  the same governed path in 10.3 seconds; full verification retained all 33
+  replica artifacts unchanged.
+- This supersedes the prior current P0 cold-start status without rewriting its
+  historical failure entry or increasing a timeout. Runtime-environment sealing,
+  independent trust, admission/promotion, and cross-process throughput remain
+  open; no A-grade/RSI/scale claim follows. The packaged README changed, so the
+  immutable extension identity advances to 0.4.123 rather than rebuilding
+  0.4.122 with different bytes. (WSP 00/15/22/50/62/83/87/97)
+
 ## 2026-08-27 - Holo source-ranker evidence gate (0.4.122)
 
 - Advanced the thin-client identity because the authenticated 1,355-file

@@ -1,7 +1,7 @@
 {
   "schema_version": "reddog_extension_contract_shards.v1",
   "source_path": "extensions/reddog/tests/verify_extension_contract.js",
-  "source_sha256": "sha256:2ec42ef9cff7f18c770fe32954c8eb06869d34553ee2cca675bf4a5263fbb2b3",
+  "source_sha256": "sha256:caf243d985f7b22de29dfafa6cc21c714ed31a1ce5cf3e34c6f82152dcfa951d",
   "source_line_count": 6929,
   "assertion_call_count": 490,
   "canonical_line_endings": "LF",
@@ -14,7 +14,7 @@
       "source_line_start": 1,
       "source_line_end": 400,
       "line_count": 400,
-      "sha256": "sha256:85eb952d4cb7b3c22f374016a04209f709de131cf78c57f9d2394866e1e245b3"
+      "sha256": "sha256:27d507831a7a620e76f52033b635f04463713545f087549454597e19165fa4f1"
     },
     {
       "order": 2,
@@ -22,7 +22,7 @@
       "source_line_start": 401,
       "source_line_end": 799,
       "line_count": 399,
-      "sha256": "sha256:91e16284a3ea03834243826ec50f5415f68fdef84a8494b89d9a198bea2d152f"
+      "sha256": "sha256:9b4f6db5fa6688e39964ca2224a07899bf898a7e0706ec2f11d18bfa5e44090d"
     },
     {
       "order": 3,
@@ -78,7 +78,7 @@
       "source_line_start": 3142,
       "source_line_end": 3540,
       "line_count": 399,
-      "sha256": "sha256:44c7093efa411c83646915a09e5ba08d32eea79c4d4b31b968bbe0a6e70e114e"
+      "sha256": "sha256:21327e5fe89d045b39f794bd5cea31e95e24759f5ee3b764f86a0c7ae20fdbb8"
     },
     {
       "order": 10,
@@ -110,7 +110,7 @@
       "source_line_start": 4715,
       "source_line_end": 5113,
       "line_count": 399,
-      "sha256": "sha256:c241ee7e367a26417f706e09c0d3618d07e605fd44079c662bda80a6937917f5"
+      "sha256": "sha256:8e28f8dfeb04b87ef0f8d51f02045644b148544b45e1b174edae51e614b9e5a6"
     },
     {
       "order": 14,
@@ -142,7 +142,7 @@
       "source_line_start": 6314,
       "source_line_end": 6685,
       "line_count": 372,
-      "sha256": "sha256:0934d02309f99cd50ef2158e408f256c75c921536a6f68144a4736daf132cf10"
+      "sha256": "sha256:325ad6ab81b3c2958e9217cd0dca6def5bb73aefee60231eb15c838323ef5b6a"
     },
     {
       "order": 18,

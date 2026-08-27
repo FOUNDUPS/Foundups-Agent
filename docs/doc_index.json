@@ -964,7 +964,58 @@
         "WSP 22",
         "WSP 83"
       ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "c79e31c806b87e34037101af159c171ba6e9fc29a7d865bbe8982572b9647cf2",
+      "links": {
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ],
+        "entry_points": [
+          "ModLog.md"
+        ]
+      },
+      "module_hint": "holo_index",
+      "path": "docs/audits/infrastructure/HOLOINDEX_COLD_OWNER_READINESS_EVIDENCE_PHASE1.json",
+      "size_bytes": 9760,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 83",
+        "WSP 87",
+        "WSP 97"
+      ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "25c9ef56639ed509fd9da07220eac51a5b84892aeaa448ed06555e1a98c1437f",
+      "links": {
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ],
+        "entry_points": [
+          "ModLog.md"
+        ]
+      },
+      "module_hint": "holo_index",
+      "path": "docs/audits/infrastructure/HOLOINDEX_COLD_OWNER_READINESS_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+      "size_bytes": 9932,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 83",
+        "WSP 87",
+        "WSP 97"
+      ]
     }
   ],
-  "generated_at": "2026-02-08T17:06:01+09:00"
+  "generated_at": "2026-08-28T00:19:55+09:00"
 }

@@ -1,5 +1,22 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Exact-main cold-owner readiness closure
+
+- The real broker-managed OpenClaw supervisor claimed and completed
+  `holoindex_postmerge_refresh:66526ae5...` through AgentDB with retry count
+  zero, publishing generation `sha256:f2013aeb...` on route revision 10.
+- Three fresh-process governed owner queries returned CURRENT/no-gap/no-reindex
+  on their first attempt in about 34 seconds each. A separately pre-warmed owner
+  started in 25.5 seconds and served the same governed path in 10.3 seconds.
+- Full descriptor verification after the live queries retained 33 artifacts /
+  221,204,272 bytes and identical descriptor, replica, and path-identity
+  digests. No timeout, authority, mutation, or retry contract changed.
+- This closes cold-owner usability for exact `66526ae5`, not A-grade retrieval
+  quality or RSI. Executable/dependency/environment sealing, independently
+  administered evaluator/proposer trust, non-test admission, promotion, canary,
+  rollback, and outcome learning remain separate transactions.
+  (WSP 00/15/22/50/62/83/84/87/97)
+
 ## 2026-08-27 - Owner-loaded retrieval ranker attestation
 
 - Added a shared Holo retrieval runtime binding and emitted it from query and

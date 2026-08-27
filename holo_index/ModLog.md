@@ -1,5 +1,23 @@
 # HoloIndex Package ModLog
 
+## [2026-08-27] Exact-main cold-owner readiness evidence
+
+- Completed the existing broker-managed OpenClaw/AgentDB post-merge transaction
+  at exact main `66526ae5`, generation `sha256:f2013aeb...`, with retry count
+  zero and a CURRENT route at revision 10.
+- Three fresh-process governed queries completed on attempt one in approximately
+  34 seconds each; an explicitly pre-warmed owner started in 25.5 seconds and
+  served the same governed query path in 10.3 seconds. All results were
+  CURRENT/no-gap/no-reindex with the same owner-loaded ranker digest.
+- Full production descriptor verification retained 33 artifacts / 221,204,272
+  bytes with the same descriptor, replica, and path-identity digests after the
+  live queries. The previous cold-owner P0 is closed for this exact commit
+  without a timeout increase.
+- Retrieval quality remains below the public MRR/nDCG floors. Runtime-environment
+  sealing, independent evaluator/proposer trust, non-test admission, promotion,
+  canary, rollback, and outcome learning remain separate work; no A-grade or
+  retrieval-quality RSI claim was made. (WSP 00/15/22/50/62/83/87/97)
+
 ## [2026-08-27] A-grade retrieval evidence boundary
 
 - Added exact indexed symbol metadata scoring so a callable named directly in

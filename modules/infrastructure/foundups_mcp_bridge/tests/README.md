@@ -52,6 +52,11 @@
   authority-order regressions. The composer reaches **92%** statement coverage;
   the complete bridge macro is **1,135 passed / 8 expected capability skips in
   548.82 seconds**. Live exact-main replay remains a separate gate.
+- That separate live gate later completed at exact main `66526ae5`: the real
+  OpenClaw/AgentDB task completed with retry count zero, three fresh-process
+  queries and one pre-warmed query returned CURRENT/no-gap/no-reindex, and full
+  verification retained all 33 replica artifacts unchanged. This is operational
+  evidence, not a test result or horizontal throughput claim.
 
 ## Exact query-replica activation
 

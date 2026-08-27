@@ -27,11 +27,14 @@ path never starts Chroma or opens SQLite/HNSW; its snapshot generation must
 equal the verified replica generation. Maintenance retains the write-capable
 canonical Chroma path.
 
-Exact main `a7302344424615dc9d061ef408c2de2508660b81` has a manually activated
-immutable snapshot replica for generation `sha256:d654414a...`; a governed
-owner query proved CURRENT/no-gap/no-reindex and unchanged replica bytes. The
-automatic post-merge ordering repair remains candidate truth until replayed at
-a later merged exact main.
+Exact main `66526ae5cdd0467ce264c1db4122ab82eadb7733` was refreshed and activated
+through the broker-managed OpenClaw/AgentDB post-merge path at generation
+`sha256:f2013aeb...`. Three fresh-process governed owner queries returned
+CURRENT/no-gap/no-reindex on their first attempt in about 34 seconds wall time,
+and a separately pre-warmed owner served the same governed path in 10.3 seconds
+wall time. Full post-query verification retained all 33 artifacts and
+221,204,272 bytes unchanged. This closes exact-main activation and cold-owner
+usability for that commit; it does not make retrieval quality A-grade or RSI.
 
 ## Module Tier-0 retrieval
 

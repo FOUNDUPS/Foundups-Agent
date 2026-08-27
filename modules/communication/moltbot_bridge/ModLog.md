@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-27: Exact-main cold owner readiness closure
+
+- Ran the real broker-managed OpenClaw maintenance path at exact main
+  `66526ae5c`, producing generation `sha256:f2013aeb...` through an AgentDB task
+  claimed by `openclaw_supervisor` with no retry.
+- Three fresh governed owner queries returned CURRENT/no-gap/no-reindex in
+  about 34 seconds. A warm governed query took 10.3 seconds after a 25.5-second
+  bootstrap; full verification preserved 33 artifacts / 221,204,272 bytes.
+- Closed the phase-1 cold availability P0 while retaining the 60-second wall.
+  This does not establish A-grade retrieval quality, runtime-environment
+  identity, independent evaluator trust, or horizontal scale.
+  (WSP 00/15/22/50/83/87/97)
+
 ## 2026-08-27: Owner-loaded ranker receipt propagation
 
 - Required a canonical owner-emitted runtime ranker digest and carried it
