@@ -75,6 +75,7 @@ class _FakeSupervisor:
         canonical_ssd_path: Path | str | None = None,
         query_replica_root: Path | str | None = None,
         replica_capability_verifier=None,
+        port: int = 8127,
         startup_timeout_seconds: float = 300.0,
         probe_timeout_seconds: float = 30.0,
         shutdown_timeout_seconds: float = 3.0,
@@ -87,6 +88,7 @@ class _FakeSupervisor:
             Path(query_replica_root) if query_replica_root is not None else None
         )
         self.replica_capability_verifier = replica_capability_verifier
+        self.port = port
         self.startup_timeout_seconds = startup_timeout_seconds
         self.probe_timeout_seconds = probe_timeout_seconds
         self.shutdown_timeout_seconds = shutdown_timeout_seconds

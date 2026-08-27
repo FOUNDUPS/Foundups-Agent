@@ -62,6 +62,7 @@ def test_activation_ignores_ambient_explicit_authority(monkeypatch, tmp_path: Pa
 
     observed: dict[str, object] = {}
     monkeypatch.setenv("REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT", str(tmp_path / "foreign"))
+    monkeypatch.setenv("REDDOG_HOLOINDEX_QUERY_ROUTE_FILE", str(tmp_path / "production.json"))
     monkeypatch.setattr(
         acceptance,
         "select_holoindex_workspace_authority",
@@ -75,11 +76,17 @@ def test_activation_ignores_ambient_explicit_authority(monkeypatch, tmp_path: Pa
     )
 
     result = acceptance._activate_supported_wrapper(
-        repo_root=tmp_path, query="activation", limit=1
+        repo_root=tmp_path,
+        query_replica_root=tmp_path / "isolated",
+        query="activation",
+        limit=1,
     )
     selector = observed["wrapper"]["select_authority"]
     assert selector(tmp_path) == "selection"
     assert observed["root"] == tmp_path
+    assert observed["wrapper"]["query_environment"] == {
+        "REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT": str((tmp_path / "isolated").resolve()),
+    }
     assert result == {"ok": True}
 
 def test_default_mode_never_creates_store_or_runs_maintenance(tmp_path: Path) -> None:

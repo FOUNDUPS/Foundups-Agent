@@ -8,6 +8,17 @@ exactly one process at literal `127.0.0.1`,
 creates an ephemeral bearer token, and proves authenticated semantic health.
 The owner exposes query and health routes only; it never indexes.
 
+Direct/resident bootstrap uses loopback port 8127 unless an exact built-in
+port in 1..65535 is supplied. Independent supported one-shot callers select a
+PID-sharded candidate in 8127..8190 and may advance once after a bounded
+transient error including `HOLOINDEX_QUERY_SERVICE_PORT_IN_USE`. A port is never
+ownership evidence: every owner still uses a process-private bearer and exact
+authenticated binding. A known pre-existing listener is not adopted or killed;
+a post-probe bind race must fail authenticated health and is not a hostile
+same-user isolation claim. This is bounded multi-caller
+availability, not horizontal scale. A per-user resident broker with
+authenticated current-user local IPC is a separate scaling and security slice.
+
 The trusted maintenance handshake is a separate host authority. When the
 canonical seven-collection proof is absent or stale, it can stop only an owner
 that this process owns, run one bounded full refresh, validate the exact new
@@ -126,6 +137,18 @@ after commit and a no-replace receipt. This source transaction has not itself
 performed a live materialization or installed a user environment pointer;
 ChatGPT-app MCP readiness remains a separate transport concern.
 
+Three process-local route keys are allowlisted: authority root, stable route
+file, and the legacy migration root. On Windows, the supported one-shot wrapper
+rereads exactly two non-secret HKCU values: authority root and stable route
+file. A non-empty current-user stable route supersedes and removes an inherited
+process-local legacy root only in the route-only copied mapping. It does not
+copy credentials or unrelated process configuration and does not mutate
+`os.environ`. Precedence grants no authority; the unchanged strict route
+resolver must still prove the complete route. Every process-owned second
+attempt receives a diversified shard; the bounded retry set includes the full
+`HOLOINDEX_QUERY_SERVICE_PORT_IN_USE` code, startup exit, poisoned-owner,
+semantic-backend, and Tier-0 lookup failures.
+
 For a linked-worktree caller, repository bytes still come from the selected
 clean same-HEAD authority checkout. Runtime dependencies come from the primary
 worktree proved by the same Git common directory, then pass the existing
@@ -143,6 +166,7 @@ Defaults:
 
 - REDDOG_HOLOINDEX_OWNER_AUTO_START=1
 - REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1
+- direct/resident owner port 8127; supported one-shots use 8127--8190
 - canonical freshness storage resolves through the canonical storage contract;
   semantic storage comes only from the verified route generation
 
@@ -191,6 +215,13 @@ dead owned process is replaced once; failure returns no handoff. Cleanup stops
 the owned process and erases the private tuple. The compatibility
 restore_environment argument does not imply that automatic startup edited the
 environment.
+
+For the supported one-shot wrapper,
+`HOLOINDEX_QUERY_SERVICE_PORT_IN_USE` and startup exit join the existing
+bounded transient retry reasons. Each process's second attempt differs from its
+own first PID-derived shard. The mapping has 4,032 ordered pairs, so processes
+separated by that period can still collide on both candidates. The
+two-attempt/64-port cap is deliberate and permits terminal contention.
 
 ## Isolated Candidate Acceptance
 
@@ -439,8 +470,9 @@ The maintenance handshake performs this exact sequence:
 11. Construct and retain the verified replica route, then start the private
     owner with the exact SHA, repository-root digest, generation, receipt
     digest, and four replica fields supplied to one authenticated semantic
-    startup exchange. This route-construction integration remains pending.
-    Retain the returned binding with the live process; do not launch a duplicate
+    startup exchange. This route construction is implemented by the activation
+    controller and accepted at exact main as recorded in the roadmap. Retain
+    the returned binding with the live process; do not launch a duplicate
     semantic canary merely to export the process-private handoff.
 
 Refresh/index/proof failures preserve a non-current state. Child stdout is
@@ -470,6 +502,7 @@ receipt cannot satisfy this sequence.
 | Semantic backend unavailable | Abort before collection reset | Restore the cached/approved backend |
 | Repository dirty or HEAD changes | Leave/emit invalidation and fail | Restore a clean exact checkout, then retry |
 | Backend query times out | Poison owner permanently | Private adapter replaces the owned owner and retries once; external supervisor owns external recovery |
+| Independent one-shot finds its PID shard occupied | Treat listener as foreign; try one per-process distinct shard | Accept success only after private-token exact-binding health; pair collisions and terminal contention remain fail-closed |
 | Owner startup/health fails after successful refresh | Keep the valid CURRENT receipt but return non-operational | Repair owner lifecycle, then re-run authenticated health; do not needlessly restamp the store |
 | Controlled host exit or cleanup runs | Stop owned process and erase handoff | Treat old token as invalid |
 | Auto-owning host dies abruptly | The v0.4.21+ owner waits on its exact supervisor process and exits; manually launched and pre-v0.4.21 owners have no such proof | Confirm the owned process exited, then re-run authenticated preflight; remediate only a verified legacy/manual owner |

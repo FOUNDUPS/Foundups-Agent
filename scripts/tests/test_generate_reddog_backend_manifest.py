@@ -257,6 +257,11 @@ def test_checked_in_manifest_matches_independent_generation(
         "reddog_holoindex_query_replica_manifest.py"
         in generated["required_runtime_sha256"]
     )
+    assert (
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_owner_acquisition.py"
+        in generated["required_runtime_sha256"]
+    )
     _assert_signer_and_memex_runtime_files(generated)
     result_module = (
         "modules/communication/moltbot_bridge/src/"
@@ -269,7 +274,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "4095e31c989bfd6a9d66d82dcc389de23afaaf697257ef0f2d81a4771a714e46"
+    assert digest == "52cacf9a4cf29f44edf922f32d219b82a30b2aa1f56d617c96e8e6491f818d9b"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

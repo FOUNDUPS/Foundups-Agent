@@ -2,10 +2,13 @@
 
 ## Status
 
-Phase: RedDog 0.4.115 resident architect thin-client surface.
+Phase: RedDog 0.4.116 resident architect thin-client surface.
 
 Current implementation:
 
+- [x] The authenticated backend closure includes the route-only Holo owner
+  acquisition policy; the thin VSIX remains a caller and receives no owner
+  token, listener-adoption, Holo maintenance, or reindex authority.
 - [x] Continuous foreground conversation classifier and VSIX adapter with
   independent intent/depth/effect axes, zero-effect chat, shared cross-language
   vectors, and a dedicated bounded test tier.

@@ -1,5 +1,43 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-27] RedDog Holo Owner Acquisition Reliability
+
+**WSP Protocols:** WSP 00, 15, 22, 34, 50, 62, 83, 84, 87, 97
+
+- Repaired the supported one-shot Holo caller for long-lived Windows processes:
+  it now refreshes only the non-secret current-user route values into an
+  allowlisted private mapping while the unchanged strict resolver retains full
+  authority. Credentials/unrelated environment are not copied and
+  `os.environ` is not mutated.
+- Independent callers select from 64 process-sharded private-owner ports and
+  may make one diversified retry after bounded transient failure. They never
+  trust or adopt a known pre-existing listener, and authenticated health guards
+  the post-probe race without claiming hostile same-user isolation. This is bounded
+  availability; a per-user authenticated local-IPC resident broker remains the
+  next scaling slice.
+- Final production-shaped simultaneous queries both passed on attempt 1 with
+  distinct receipts in 38.04 seconds. Both were exact-base `CURRENT`, no gap,
+  and no reindex. Injected contention plus process-shard falsification tests
+  exercise the bounded attempt-2 branch; no live-contention claim is made.
+  Final delta closure is 119 passed; the acquisition module has 100%
+  statement coverage; the complete bridge macro is 1,117 passed / 10 expected skips in
+  515.45 seconds. The canonical registry is current at 1,588 / 268 quarantined,
+  the 1,350-file authenticated backend closure is current at
+  `52cacf9a4cf2...1f818d9b`, and the four-group extension release gate passed in
+  166.480 seconds.
+- The macro first exposed a pre-existing synthetic Windows launcher fixture
+  that named the venv redirector as its base executable. The fixture now uses
+  the existing canonical base-interpreter pattern; production lifecycle code
+  did not change.
+- WSP_97 execution evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+  Secret-free command/result evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_EXECUTION_EVIDENCE_PHASE1.json`.
+- This candidate is staged and unmerged. Remaining promotion gates are final
+  independent review and PR checks, squash merge, exact-merged-main Holo
+  activation plus immutable verification, and the merge-commit-bound 0.4.116
+  VSIX build/archive audit.
+
 ## [2026-08-27] RedDog Exact-Main Holo/OpenClaw Live Acceptance
 
 **WSP Protocols:** WSP 00, 15, 22, 34, 50, 62, 83, 97, 108

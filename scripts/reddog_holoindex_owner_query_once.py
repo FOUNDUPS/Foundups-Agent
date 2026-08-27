@@ -50,9 +50,18 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_boots
     ensure_reddog_holoindex_owner,
     resolve_reddog_holoindex_owner_handoff,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (  # noqa: E402
+    PORT_IN_USE_ERROR,
+)
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (  # noqa: E402
     QUERY_REPLICA_REQUIRED_ERROR,
     resolve_query_replica_owner_route,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (  # noqa: E402
+    MAX_OWNER_ATTEMPTS,
+    OWNER_PORT_SHARD_COUNT,
+    build_owner_query_environment,
+    owner_port_for_attempt as _owner_port_for_attempt,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_replica_binding import (  # noqa: E402
     parse_replica_binding,
@@ -61,7 +70,6 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_replica_binding i
 
 MAX_QUERY_CHARS = 16_000
 MAX_LIMIT = 20
-MAX_OWNER_ATTEMPTS = 2
 MAX_MODULE_HINT_CHARS = 512
 MAX_MUST_INCLUDE = 40
 MAX_MUST_INCLUDE_CHARS = 1024
@@ -73,6 +81,7 @@ PROCESS_OWNED_STATUSES = frozenset({OWNER_STARTED, OWNER_REUSED})
 TRANSIENT_OWNER_ERRORS = frozenset(
     {
         "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
+        PORT_IN_USE_ERROR,
         "QUERY_OWNER_POISONED",
         "SEMANTIC_BACKEND_UNAVAILABLE",
         "HOLOINDEX_TIER0_LOOKUP_FAILED",
@@ -135,6 +144,17 @@ class _QueryRequest:
     module_hint: str
     must_include: tuple[str, ...]
     bundle_only: bool
+
+
+@dataclass(frozen=True)
+class _PreparedQuery:
+    query: str
+    limit: int
+    selection: HoloIndexAuthoritySelection
+    route_environment: Mapping[str, str]
+    select_authority: AuthoritySelector
+    ssd_path: Path
+    bundle_fields: Mapping[str, Any] | None
 
 
 def _bounded_request(payload: Mapping[str, Any]) -> tuple[_QueryRequest | None, str]:
@@ -304,6 +324,7 @@ def _owner_attempt(
     ensure_owner: Callable[..., Any], resolve_handoff: Callable[..., Any],
     query_owner: Callable[..., Mapping[str, Any]], state: _OwnerQueryState,
     resolve_replica_route: Callable[..., Any], operation_deadline: float | None,
+    route_environment: Mapping[str, str],
 ) -> tuple[Mapping[str, Any], bool, bool]:
     remaining = _remaining_timeout(operation_deadline)
     if remaining == 0:
@@ -312,6 +333,7 @@ def _owner_attempt(
         route = resolve_replica_route(
             canonical_repo_root=authority_root,
             canonical_ssd_path=ssd_path,
+            environment=route_environment,
         )
     except Exception:
         return _failure(QUERY_REPLICA_REQUIRED_ERROR, query=query), False, False
@@ -319,6 +341,7 @@ def _owner_attempt(
     bootstrap = ensure_owner(
         repo_root=authority_root, runtime_root=runtime_root, requested=True,
         query_replica_route=route,
+        owner_port=_owner_port_for_attempt(state.attempts),
         **ensure_kwargs,
     )
     service_url, service_token, process_owned, failure = _owner_service_credentials(
@@ -351,6 +374,7 @@ def _query_with_retry(
     query_owner: Callable[..., Mapping[str, Any]], cleanup_owner: Callable[[], None],
     state: _OwnerQueryState, resolve_replica_route: Callable[..., Any],
     operation_deadline: float | None,
+    route_environment: Mapping[str, str],
 ) -> tuple[Mapping[str, Any], bool]:
     while state.attempts < MAX_OWNER_ATTEMPTS:
         if _remaining_timeout(operation_deadline) == 0:
@@ -363,6 +387,7 @@ def _query_with_retry(
             resolve_handoff=resolve_handoff, query_owner=query_owner, state=state,
             resolve_replica_route=resolve_replica_route,
             operation_deadline=operation_deadline,
+            route_environment=route_environment,
         )
         if state.attempts != 1 or not retryable:
             return result, bindable or retryable
@@ -473,9 +498,17 @@ def _execute_admitted_query(
     cleanup_owner: Callable[[], None], select_authority: Callable[..., Any],
     select_runtime_root: Callable[[Path], Path], ssd_path: Path,
     resolve_replica_route: Callable[..., Any], operation_deadline: float | None,
+    route_environment: Mapping[str, str], preflight: Preflight,
 ) -> Mapping[str, Any]:
     state = _OwnerQueryState()
     try:
+        selection, changed = _revalidate_serialized_authority(
+            repo_root=repo_root, selection=selection, query=query,
+            select_authority=select_authority, preflight=preflight,
+            ssd_path=ssd_path,
+        )
+        if changed is not None:
+            return _with_retry_telemetry(changed, attempts=0, retry_reason="")
         result, bindable = _query_with_retry(
             query=query, limit=limit, authority_root=selection.selected_root,
             runtime_root=select_runtime_root(repo_root), ssd_path=ssd_path,
@@ -484,6 +517,7 @@ def _execute_admitted_query(
             cleanup_owner=cleanup_owner, state=state,
             resolve_replica_route=resolve_replica_route,
             operation_deadline=operation_deadline,
+            route_environment=route_environment,
         )
         if bindable:
             result = _bind_query_receipt(
@@ -501,6 +535,21 @@ def _execute_admitted_query(
     finally:
         if state.cleanup_required:
             cleanup_owner()
+
+
+def _revalidate_serialized_authority(
+    *, repo_root: Path, selection: HoloIndexAuthoritySelection, query: str,
+    select_authority: AuthoritySelector, preflight: Preflight, ssd_path: Path,
+) -> tuple[HoloIndexAuthoritySelection, Mapping[str, Any] | None]:
+    current = select_authority(repo_root)
+    if not _same_authority(selection, current):
+        return current, {
+            **_failure("REPOSITORY_STATE_CHANGED_DURING_QUERY", query=query),
+            **_authority_metadata(selection),
+        }
+    return current, _preflight_authority(
+        current, query, preflight=preflight, ssd_path=ssd_path,
+    )
 
 
 def _resolve_query_ssd_path(
@@ -551,6 +600,23 @@ def _request_and_deadline(
     return request, deadline, None
 
 
+def _query_runtime_environment(
+    explicit: Mapping[str, str] | None,
+) -> dict[str, str]:
+    return build_owner_query_environment(
+        process_environment=explicit,
+        user_environment={} if explicit is not None else None,
+    )
+
+
+def _environment_bound_authority_selector(
+    selector: AuthoritySelector, environment: Mapping[str, str],
+) -> AuthoritySelector:
+    if selector is resolve_holoindex_authority_root:
+        return lambda root: selector(root, environment=environment)
+    return selector
+
+
 def _execute_serialized_owner_query(
     *, operation_deadline: float | None, query: str,
     execute: Callable[[], Mapping[str, Any]],
@@ -575,11 +641,59 @@ def _execute_serialized_owner_query(
         _OWNER_LIFECYCLE_LOCK.release()
 
 
+def _route_query_context(
+    *, request: _QueryRequest, repo_root: Path,
+    select_authority: AuthoritySelector,
+    query_environment: Mapping[str, str] | None,
+) -> tuple[
+    dict[str, str], AuthoritySelector, HoloIndexAuthoritySelection | None,
+    Mapping[str, Any] | None,
+]:
+    try:
+        environment = _query_runtime_environment(query_environment)
+    except (TypeError, ValueError):
+        return {}, select_authority, None, _with_retry_telemetry(
+            _failure(QUERY_REPLICA_REQUIRED_ERROR, query=request.query),
+            attempts=0, retry_reason="",
+        )
+    selector = _environment_bound_authority_selector(select_authority, environment)
+    return environment, selector, selector(repo_root), None
+
+
+def _prepare_owner_query(
+    *, request: _QueryRequest, repo_root: Path,
+    select_authority: AuthoritySelector,
+    query_environment: Mapping[str, str] | None,
+    bundle_builder: Callable[..., Mapping[str, Any]],
+    resolve_ssd_path: Callable[[], Path], preflight: Preflight,
+) -> tuple[_PreparedQuery | None, Mapping[str, Any] | None]:
+    environment, selector, selection, failure = _route_query_context(
+        request=request, repo_root=repo_root, select_authority=select_authority,
+        query_environment=query_environment,
+    )
+    if failure is not None or selection is None:
+        return None, failure or _failure(QUERY_REPLICA_REQUIRED_ERROR, query=request.query)
+    bundle = _build_requested_bundle(request, repo_root, selection, bundle_builder)
+    if request.bundle_only or request.retrieval_mode == "lexical":
+        return None, _lexical_result(request, selection, bundle)
+    ssd_path, failure = _resolve_query_ssd_path(resolve_ssd_path, request.query)
+    if failure is not None or ssd_path is None:
+        return None, {**(failure or {}), **(bundle or {}), "no_reindex": True}
+    query, limit, selection, failure = _admit_query(
+        request, repo_root, select_authority=lambda _root: selection,
+        preflight=preflight, ssd_path=ssd_path,
+    )
+    if failure is not None or selection is None:
+        return None, {**(failure or {}), **(bundle or {}), "no_reindex": True}
+    return _PreparedQuery(
+        query, limit, selection, environment, selector, ssd_path, bundle,
+    ), None
+
+
 def query_once(
     payload: Mapping[str, Any],
     *,
-    repo_root: Path = REPO_ROOT,
-    ensure_owner: Callable[..., Any] = ensure_reddog_holoindex_owner,
+    repo_root: Path = REPO_ROOT, ensure_owner: Callable[..., Any] = ensure_reddog_holoindex_owner,
     resolve_handoff: OwnerHandoffResolver = resolve_reddog_holoindex_owner_handoff,
     query_owner: Callable[..., Mapping[str, Any]] = query_holoindex_owner,
     cleanup_owner: Callable[..., None] = cleanup_reddog_holoindex_owner,
@@ -590,40 +704,35 @@ def query_once(
     resolve_replica_route: Callable[..., Any] = resolve_query_replica_owner_route,
     bundle_builder: Callable[..., Mapping[str, Any]] = build_wsp_memory_bundle,
     operation_timeout_seconds: float | None = 60.0,
+    query_environment: Mapping[str, str] | None = None,
 ) -> Mapping[str, Any]:
     """Execute one owner-bound query and always clean up process-owned state."""
 
     request, deadline, request_failure = _request_and_deadline(payload, operation_timeout_seconds)
     if request_failure is not None or request is None:
         return request_failure or _failure("request_invalid")
-    selection = select_authority(repo_root)
-    bundle_fields = _build_requested_bundle(request, repo_root, selection, bundle_builder)
-    if request.bundle_only or request.retrieval_mode == "lexical":
-        return _lexical_result(request, selection, bundle_fields)
-    ssd_path, failure = _resolve_query_ssd_path(resolve_ssd_path, request.query)
-    if failure is not None:
-        return {**failure, **(bundle_fields or {}), "no_reindex": True}
-    assert ssd_path is not None
-    query, limit, selection, failure = _admit_query(
-        request, repo_root, select_authority=lambda _root: selection,
-        preflight=preflight, ssd_path=ssd_path,
+    prepared, terminal = _prepare_owner_query(
+        request=request, repo_root=repo_root, select_authority=select_authority,
+        query_environment=query_environment, bundle_builder=bundle_builder,
+        resolve_ssd_path=resolve_ssd_path, preflight=preflight,
     )
-    if failure is not None:
-        return {**failure, **(bundle_fields or {}), "no_reindex": True}
-    assert selection is not None
+    if terminal is not None or prepared is None:
+        return terminal or _failure(QUERY_REPLICA_REQUIRED_ERROR, query=request.query)
     result = _execute_serialized_owner_query(
-        operation_deadline=deadline, query=query,
+        operation_deadline=deadline, query=prepared.query,
         execute=lambda: _execute_admitted_query(
-            query=query, limit=limit, repo_root=repo_root, selection=selection,
+            query=prepared.query, limit=prepared.limit, repo_root=repo_root,
+            selection=prepared.selection,
             ensure_owner=ensure_owner, resolve_handoff=resolve_handoff,
             query_owner=query_owner, cleanup_owner=cleanup_owner,
-            select_authority=select_authority,
-            select_runtime_root=select_runtime_root, ssd_path=ssd_path,
+            select_authority=prepared.select_authority,
+            select_runtime_root=select_runtime_root, ssd_path=prepared.ssd_path,
             resolve_replica_route=resolve_replica_route,
             operation_deadline=deadline,
+            route_environment=prepared.route_environment, preflight=preflight,
         ),
     )
-    return {**result, **(bundle_fields or {}), "no_reindex": True}
+    return {**result, **(prepared.bundle_fields or {}), "no_reindex": True}
 
 
 def _cli_operation_timeout(argv: list[str]) -> float | None:

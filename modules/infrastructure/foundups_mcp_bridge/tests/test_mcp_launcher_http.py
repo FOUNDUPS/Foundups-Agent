@@ -78,18 +78,22 @@ def test_windows_venv_runtime_uses_base_interpreter_and_preserves_pid(tmp_path):
     environment = tmp_path / "mcp-env"
     scripts = environment / "Scripts"
     packages = environment / "Lib" / "site-packages"
+    base_executable = Path(
+        getattr(sys, "_base_executable", sys.executable)
+    ).resolve()
+    assert base_executable.is_file()
     scripts.mkdir(parents=True)
     packages.mkdir(parents=True)
     launcher = scripts / "python.exe"
     launcher.write_bytes(b"venv launcher")
     (environment / "pyvenv.cfg").write_text(
-        f"home = {Path(sys.executable).parent}\n"
-        f"executable = {Path(sys.executable)}\n",
+        f"home = {base_executable.parent}\n"
+        f"executable = {base_executable}\n",
         encoding="utf-8",
     )
 
     executable, selected_packages = launch._mcp_runtime_python(launcher)
-    assert executable == Path(sys.executable).resolve()
+    assert executable == base_executable
     assert selected_packages == packages.resolve()
     child_env = os.environ.copy()
     child_env.pop("PYTHONPATH", None)
