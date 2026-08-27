@@ -2,10 +2,15 @@
 
 ## Status
 
-Phase: RedDog 0.4.120 resident architect thin-client surface.
+Phase: RedDog 0.4.121 resident architect thin-client surface.
 
 Current implementation:
 
+- [x] Authenticated backend closure contains hardened shared FMAS proposal,
+  parsing, and path contracts. The separate exact-HEAD WSP 62 health gate has
+  collision-resistant identity, immutable/revalidatable receipts, and Unicode
+  hardening, but no extension command/runtime caller; signed HealthReviewPacket
+  composition and worker authority remain future work.
 - [x] The authenticated backend closure includes the route-only Holo owner
   acquisition policy shared by one-shot and post-merge callers; the thin VSIX
   remains a caller and receives no owner token, route-publication,

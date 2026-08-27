@@ -160,6 +160,11 @@ NEED_TO = {
     "wardrobe skills": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:WRESkillsLoader - Like clothing outfits the agent wears for specific tasks",
     "load skillz": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:WRESkillsLoader.load_skill_on_demand()",
     "wre skillz protocol": "WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md - Micro Chain-of-Thought paradigm (canonical WSP 95)",
+    "wre fmas finding contract": "modules/infrastructure/wre_core/src/fmas_finding_contract.py:FMASFinding",
+    "wre wsp62 finding parser": "modules/infrastructure/wre_core/src/fmas_wsp62_contract.py:parse_wsp62_finding_text()",
+    "wre wsp62 health audit": "modules/infrastructure/wre_core/src/fmas_health_triage.py:run_wsp62_health_audit()",
+    "wre improvement job contract": "modules/infrastructure/wre_core/src/improvement_job_contract.py:ImprovementJob",
+    "reddog improvement direction": "modules/infrastructure/wre_core/src/reddog_direction.py:RedDogDirector",
 
     # Centralized DAEmon (Cardiovascular System)
     "centralized daemon monitoring": "modules/infrastructure/dae_daemon/src/dae_daemon.py:CentralDAEmon",

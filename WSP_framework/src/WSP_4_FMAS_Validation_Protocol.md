@@ -76,21 +76,23 @@ python -c "import json; [json.load(open(f)) for f in ['modules/*/module.json']]"
 -   **Expected Result**: Memory structure follows WSP 60 modular architecture principles.
 
 ### 2.5. File Size Compliance Validation (Related to WSP 62)
--   **Check**: Validates that all files comply with WSP 62 size thresholds and refactoring requirements.
+-   **Check**: Applies WSP 62 differential debt control to an exact candidate and authenticated exact base. Mode 1 is health reporting only.
 -   **Validation Points**:
-    - Python files under 500 lines (or domain-specific threshold)
-    - Configuration files under 200 lines
-    - Functions under 50 lines, classes under 200 lines
-    - Documented exemptions for oversized files
-    - Refactoring plans for files approaching thresholds
--   **Command**: `python tools/modular_audit/modular_audit.py modules/ --wsp-62-size-check`
--   **Expected Result**: All files comply with size thresholds or have documented exemptions.
+    - Python review begins at 800 lines; warning/critical/hard thresholds are defined only by WSP 62
+    - Configuration files use the current WSP 62 threshold table
+    - New or grown Python functions over 50 lines require extraction or exact-base ceiling evidence
+    - Exemptions must pre-exist at the authoritative base and cannot be candidate-ratcheted
+    - Exact base/candidate evidence separates candidate debt from inherited/advisory debt
+    - Authoritative enforcement uses a validated exact candidate-commit `modules/` inventory; untracked ignored/runtime/vendor closure is excluded, while intentionally tracked paths remain governed by canonical audit skip policy
+-   **Diagnostic command**: `python tools/modular_audit/modular_audit.py --mode 2 --baseline <clean-merge-base-checkout> --wsp-62-size-check`. This developer report uses the current index/worktree inventory and is not authoritative candidate admission by itself.
+-   **Authoritative admission**: call `run_wsp62_health_audit(<clean-candidate-checkout>, baseline_repo_root=<clean-merge-base-checkout>)`; it binds a clean candidate HEAD, its exact `git ls-tree` inventory, the authenticated base, scanner bytes, and pre/post observable-drift checks. These checks do not lock the filesystem or exclude a transient mutate/scan/restore race, so the result remains proposal-only.
+-   **Expected Result**: Candidate-attributed `ERROR` findings block; inherited debt and archival advisories remain visible without being misattributed.
 
 ## 3. Failure Condition
 
 -   If any validation check fails, the FMAS will flag the module as non-compliant.
 -   **Naming Coherence Failures**: If incomplete naming propagation is detected, FMAS will immediately trigger rollback procedures and prevent system integration.
--   **Size Compliance Failures**: If WSP 62 size violations are detected without documented exemptions, FMAS will block integration and require refactoring.
+-   **Size Compliance Failures**: FMAS blocks only candidate-attributed WSP 62 errors, invalid exemption contracts, or applicable hard-limit breaches. Broad no-baseline debt is advisory evidence.
 -   In an automated CI/CD environment or pre-commit hook, a failure of this audit will block the module from being integrated, tested further, or deployed.
 -   The audit script's output will specify the exact files or directories in violation.
 
@@ -102,41 +104,41 @@ When naming coherence violations are detected:
 4. **System Validation**: Re-run full test suite and import validation after any corrections
 
 ### 3.2. Size Compliance Emergency Protocol (WSP 62 Integration)
-When size violations are detected:
-1. **Immediate Assessment**: Categorize violations by severity (>150% threshold = critical)
-2. **Exemption Review**: Check for valid documented exemptions
-3. **Refactoring Planning**: Generate automated refactoring recommendations
-4. **Integration Blocking**: Prevent further development until compliance achieved
+When candidate-attributed size violations are detected:
+1. **Immediate Assessment**: Bind the exact candidate, authoritative base, tracked inventory, and scanner output
+2. **Exemption Review**: Verify the contract existed at the base and was not widened by the candidate
+3. **Refactoring Planning**: Extract a cohesive owned boundary without deleting functionality
+4. **Integration Blocking**: Block only the attributed candidate error; schedule unrelated inherited debt separately
 
-### 2.4. Test Framework Fixture Dependency Management (Related to WSP 6)
+### 2.6. Test Framework Fixture Dependency Management (Related to WSP 6)
 -   **Purpose**: Validates pytest fixture dependencies and parametrized test configurations to prevent test framework structural failures.
 -   **Trigger**: When test files use pytest fixtures, parametrization, or advanced pytest features.
 
-#### 2.4.1. Pytest Fixture Validation
+#### 2.6.1. Pytest Fixture Validation
 -   **Check**: Verifies that all fixture dependencies are properly declared and available.
 -   **Command**: `pytest --collect-only modules/ 2>&1 | grep "fixture.*not found"`
 -   **Expected Result**: No output. Any fixture errors indicate missing dependencies.
 
-#### 2.4.2. Parametrized Test Validation
+#### 2.6.2. Parametrized Test Validation
 -   **Check**: Ensures parametrized tests have proper fixture setup or data sources.
 -   **Command**: `grep -r "@pytest.mark.parametrize\|def test_.*(" modules/*/tests/ | grep -v "def test_.*()"`
 -   **Expected Result**: All parametrized tests must have corresponding data sources or fixtures.
 
-#### 2.4.3. Test Framework Structural Integrity
+#### 2.6.3. Test Framework Structural Integrity
 -   **Check**: Validates that test files follow proper pytest conventions and can be collected successfully.
 -   **Command**: `pytest --collect-only modules/ --quiet`
 -   **Expected Result**: Successful collection of all tests with no collection errors.
 
-#### 2.4.4. Test Framework Emergency Repair Protocol
+#### 2.6.4. Test Framework Emergency Repair Protocol
 When pytest fixture dependency failures are detected:
 1. **Immediate Analysis**: Identify missing fixture definitions or incorrect test signatures
 2. **Fixture Resolution**: Either add missing fixtures or remove parametrization if not needed
 3. **Test Framework Validation**: Re-run collection to ensure test discovery succeeds
 4. **Integration Testing**: Verify repaired tests can execute successfully
 
-### 3.2. Critical Naming Violations
+### 3.3. Critical Naming Violations
 The following naming changes require **Architecture Review** before FMAS validation:
 - Core agent class names (ChroniclerAgent, ComplianceAgent, etc.)
 - WRE engine components and interfaces
 - Cross-WSP canonical symbols and terminology
-- Module import paths and public API names 
+- Module import paths and public API names

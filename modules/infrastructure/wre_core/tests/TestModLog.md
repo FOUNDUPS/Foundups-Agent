@@ -1,9 +1,31 @@
 # TestModLog - wre_core/tests
 
+## 2026-08-27: Governed FMAS health admission and tracked inventory
+
+- Added adversarial coverage for exact candidate/tool/baseline binding, full
+  producer digest and exclusion-reason identity, ignored/untracked scope,
+  traversal, Windows alias/ADS and extension-prefix attacks, Unicode Git paths,
+  bounded linear WSP 62 path parsing, pre/post observable-drift checks,
+  full-evidence deduplication/job IDs, deep receipt immutability,
+  mutable-job validation, caps, and no-baseline health-debt classification.
+- Added direct string and structured WSP 62 quarantine regressions, invalid-
+  scope auto-approval rejection, and a 180-case RedDog matrix with zero ready
+  or `MARK_READY` directions.
+- Proved Git-backed FMAS excludes ignored runtime closure before size parsing
+  and that an authority caller can supply an exact tracked inventory.
+- Exact O:-resident health-admission tier: **235 passed in 5.87s**. A clean committed
+  real-candidate positive public run remains a pre-merge process obligation;
+  the dirty shared root correctly fails closed.
+- Revalidation after canonical WSP drift repair plus WSP 62 mirror/exemption
+  and WSP 97 receipt gates yields **310 passed / 1 capability skip**. Compileall
+  passes, and exact-base AST
+  comparison reports zero new or grown functions above 50 lines.
+
 ## 2026-08-27: Post-merge registry reprojection
 
-- Registered the two new tracked RedDog Holo post-merge test modules. The
-  deterministic projection is current at **1,587 total / 268 quarantined**.
+- Registered the tracked RedDog Holo post-merge and WRE health-admission test
+  modules. The deterministic projection is current at **1,589 total / 268
+  quarantined**.
 - Registry generation/check changed no quarantine, capability, collection,
   shard, or execution authority.
 

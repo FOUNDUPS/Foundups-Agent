@@ -2,7 +2,7 @@
 
 **Coverage claim:** focused contract coverage only
 **Framework:** pytest
-**Last verified:** 2026-08-26
+**Last verified:** 2026-08-27
 
 ## Isolation gate
 
@@ -89,6 +89,25 @@ The suite contains a large sharded/exhaustive contract surface. A focused pass
 does not substitute for full-suite evidence, and an interrupted full run must
 be reported as incomplete rather than passing.
 
+## FMAS health-admission tier
+
+```powershell
+python -m pytest -q `
+  tools/modular_audit/tests/test_modular_audit.py `
+  tools/modular_audit/tests/test_fmas_mode2.py `
+  modules/infrastructure/wre_core/tests/test_fmas_health_triage.py `
+  modules/infrastructure/wre_core/tests/test_fmas_improvement_bridge.py `
+  modules/infrastructure/wre_core/tests/test_improvement_job_contract.py `
+  modules/infrastructure/wre_core/tests/test_security_analysis_assistant.py `
+  modules/infrastructure/wre_core/tests/test_reddog_direction.py
+```
+
+Exact O:-resident result on 2026-08-27: `235 passed in 5.87s`. This proves tracked
+inventory, authority and receipt binding, scope rejection, WSP 62 quarantine,
+deterministic proposal admission, and advisory-only RedDog direction. It does
+not prove a clean real-candidate positive run, model selection, worker dispatch,
+promotion, or production RSI.
+
 ## Test inventory
 
 - `test_wre_execution_truth.py`: false-success, result evidence, ReAct, and
@@ -103,6 +122,10 @@ be reported as incomplete rather than passing.
 - `test_pattern_memory.py`: outcome and non-production candidate storage.
 - `test_qwen_inference_wiring.py`: isolated proposal/result-shape wiring.
 - `test_foundup_route_wsp62_exemptions.py`: bounded inherited debt.
+- `test_fmas_health_triage.py`: exact-head producer lineage and dispositions.
+- `test_fmas_improvement_bridge.py`: normalized parsing and direct WSP 62 block.
+- `test_improvement_job_contract.py`: path confinement and dry-run job contract.
+- `test_reddog_direction.py`: advisory ordering with zero readiness authority.
 - `wre_master_orchestrator/tests/test_wre_master_orchestrator.py`: public
   coordination behavior with injected effect evidence.
 - `wre_gateway/tests/test_dae_gateway_policyflags_guards.py`: envelope boundary

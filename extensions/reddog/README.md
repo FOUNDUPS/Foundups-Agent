@@ -1,14 +1,13 @@
 # RedDog
 
-Version: 0.4.120
+Version: 0.4.121
 
-This candidate fixes the committed-route resolver used by the authenticated
-backend's post-commit Holo proof. The caller-supplied route environment is
-replaced by the exact committed route-file capability rather than being passed
-twice. Candidate admission remains one-shot; two failed stable-route proofs
-remain `COMMITTED_UNVERIFIED`; recovered proof still requires immutable replica
-revalidation. It does not move Holo maintenance, route publication, listener
-trust, credentials, retry authority, or execution authority into the VSIX.
+This candidate binds RedDog's authenticated backend to the hardened shared WRE
+FMAS proposal, parsing, and path contracts. The repository's separate exact-
+HEAD WSP 62 health gate can produce capped dry-run proposals, but it has no
+non-test runtime caller and is therefore not included as a reachable backend
+entry point. Direct WSP 62 input remains quarantined; no worker dispatch, source
+mutation, promotion, or execution authority is added to the thin VSIX.
 
 ## Continuous conversation surface
 
@@ -911,7 +910,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.120)
+## WSP_97 Truth Table (v0.4.121)
 
 | Claim | Status |
 | --- | --- |
@@ -1003,6 +1002,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.120.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.121.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

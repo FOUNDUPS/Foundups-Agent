@@ -269,6 +269,52 @@ it returns `False`, keeps `applied=False`, and records
 `tokens_saved=None` and `token_reduction_measured=False`. This prototype does
 not edit, evaluate, promote, activate, or roll back artifacts.
 
+## FMAS / WSP 62 health admission
+
+```python
+from modules.infrastructure.wre_core.src.fmas_health_triage import (
+    run_wsp62_health_audit,
+)
+
+result = run_wsp62_health_audit(
+    candidate_repo_root=repo_root,
+    baseline_repo_root=exact_merge_base_checkout,  # optional
+    candidate_job_limit=50,
+)
+```
+
+The candidate must be a clean Git checkout. The optional baseline must pass
+FMAS exact merge-base authority. The imported canonical scanner must be a
+regular, non-reparse file inside the candidate. Pre/post HEAD, tool, and
+tracked-inventory checks reject drift observable at either gate. This is a
+proposal-only detection boundary, not a filesystem lock: a transient
+mutate/scan/restore race is not excluded and no result is execution authority.
+
+`result.receipt` binds the producer observation count/digest, all exclusion
+reason counts, authoritative finding-set digest, dispositions, selected IDs,
+stable proposal digest, candidate/baseline HEADs, and scanner digest. Receipt
+maps/IDs are immutable snapshots; `validate_health_audit_result()` recomputes
+receipt, finding, audit, and mutable-job evidence identities before consumption.
+Only exact-HEAD tracked WSP 62
+observations enter the authoritative finding set. Excluded ignored, malformed,
+or non-WSP62 observations remain visible through receipt counts and cannot be
+silently dropped without changing the receipt identity.
+
+Without a baseline, `CRITICAL`/`ERROR` size observations are `health_debt` and
+emit no jobs. With an authoritative baseline, only candidate-attributed
+`ERROR` findings may emit capped PENDING/dry-run jobs. This API does not call a
+model, persist or mutate a queue, dispatch OpenClaw/Hermes, edit source, or
+promote an artifact.
+
+`parse_fmas_finding()` and `parse_fmas_strings()` are compatibility parsers,
+not WSP 62 authority. Both quarantine direct WSP 62 input. The internal
+normalized factory is used only after the health gate has admitted evidence.
+`RedDogDirector` never marks direct FMAS input ready-to-advance.
+
+`WSP15Priority` is a legacy compatibility name for qualitative execution-risk
+hints. It is not the canonical numeric C/I/D/Impact MPS contract and must not
+be used as a signed WSP 15 allocation receipt.
+
 ## Monitor compatibility
 
 `WREMonitor` exposes `track_api_call()`, `track_stream_transition()`,

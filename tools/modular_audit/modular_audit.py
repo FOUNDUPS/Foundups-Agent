@@ -58,7 +58,7 @@ import hashlib
 import subprocess
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, FrozenSet, Iterable, List, Optional, Tuple
 
 VERSION = "0.8.1"
 BASELINE_MISSING = object()
@@ -166,7 +166,7 @@ def discover_modules_recursive(modules_root):
     
     def scan_directory(current_path, relative_path=""):
         """Recursively scan for modules."""
-        for item in current_path.iterdir():
+        for item in sorted(current_path.iterdir(), key=lambda path: path.name.casefold()):
             if not item.is_dir() or item.name.startswith('.') or item.name == '__pycache__':
                 continue
                 
@@ -216,10 +216,12 @@ def _git_value(root, *args):
             ["git", "-C", str(root), *args],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="strict",
             timeout=10,
             check=False,
         )
-    except (OSError, subprocess.TimeoutExpired):
+    except (OSError, subprocess.TimeoutExpired, UnicodeError):
         return None
     return result.stdout.strip() if result.returncode == 0 else None
 
@@ -1303,8 +1305,56 @@ def _audit_sized_file(
     )
 
 
+def _canonical_tracked_module_paths(paths: Iterable[str]) -> FrozenSet[str]:
+    """Validate repository-relative tracked paths under ``modules/``."""
+    canonical = set()
+    for raw in paths:
+        if not isinstance(raw, str) or not raw or "\x00" in raw:
+            raise ValueError("tracked inventory path invalid")
+        normalized = raw.replace("\\", "/")
+        parts = normalized.split("/")
+        if (
+            not normalized.startswith("modules/")
+            or any(part in {"", ".", ".."} for part in parts)
+            or re.match(r"^[A-Za-z]:", normalized)
+        ):
+            raise ValueError("tracked inventory path invalid")
+        canonical.add(normalized)
+    return frozenset(canonical)
+
+
+def _git_tracked_module_paths(modules_dir: Path) -> Optional[FrozenSet[str]]:
+    """Return Git-tracked module paths, or ``None`` outside a Git checkout."""
+    repo_root = modules_dir.parent
+    top_level = _git_value(repo_root, "rev-parse", "--show-toplevel")
+    if top_level is None:
+        return None
+    if Path(top_level).resolve() != repo_root.resolve():
+        raise ValueError("modules root is not repository root/modules")
+    raw = _git_value(repo_root, "ls-files", "-z", "--", "modules")
+    if raw is None:
+        raise ValueError("tracked inventory unavailable")
+    return _canonical_tracked_module_paths(item for item in raw.split("\x00") if item)
+
+
+def _module_sized_file_candidates(
+    module_path: Path,
+    modules_dir: Path,
+    tracked_paths: Optional[FrozenSet[str]],
+) -> Iterable[Path]:
+    """Yield bounded file candidates for one discovered module."""
+    if tracked_paths is None:
+        yield from module_path.glob("**/*")
+        return
+    module_prefix = f"modules/{module_path.relative_to(modules_dir).as_posix()}/"
+    for relative_path in sorted(tracked_paths):
+        if relative_path.startswith(module_prefix):
+            yield modules_dir.parent / relative_path
+
+
 def audit_file_sizes(
-    modules_root, enable_wsp_62=False, baseline_root=None, rename_map=None
+    modules_root, enable_wsp_62=False, baseline_root=None, rename_map=None,
+    tracked_paths=None,
 ):
     """Audit module files with optional exact-baseline growth attribution."""
     if not enable_wsp_62:
@@ -1314,6 +1364,14 @@ def audit_file_sizes(
         return ["WSP 62: Modules directory does not exist"]
     findings = []
     thresholds = get_file_size_thresholds()
+    try:
+        inventory = (
+            _git_tracked_module_paths(modules_dir)
+            if tracked_paths is None
+            else _canonical_tracked_module_paths(tracked_paths)
+        )
+    except ValueError as exc:
+        return [f"WSP 62 ERROR: {exc}"]
     if rename_map is None:
         rename_map = _git_rename_map(modules_dir.parent) if baseline_root else {}
     for module_path, _module_name, domain_path in discover_modules_recursive(modules_dir):
@@ -1321,7 +1379,9 @@ def audit_file_sizes(
         baseline_rules = _baseline_module_rules(
             module_path, modules_dir, baseline_root
         )
-        for file_path in module_path.glob('**/*'):
+        for file_path in _module_sized_file_candidates(
+            module_path, modules_dir, inventory
+        ):
             findings.extend(
                 _audit_sized_file(
                     file_path, module_path, domain_path, modules_dir,

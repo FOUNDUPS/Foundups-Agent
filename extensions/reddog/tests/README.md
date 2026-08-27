@@ -1,5 +1,19 @@
 # RedDog Extension Tests
 
+## 0.4.121 governed WRE health admission binding
+
+Current-version fixtures bind the regenerated 1,353-file backend closure and
+its shared WRE FMAS/path contracts. The separate health gate remains proposal-
+only and has no runtime caller: exact authority and receipt evidence may emit
+dry-run jobs in its focused Python suite, while direct WSP 62 text,
+noncanonical Windows paths, and mutable receipt/job drift fail closed.
+
+```powershell
+O:\Foundups-Agent\.venv\Scripts\python.exe scripts/generate_reddog_backend_manifest.py --check
+O:\Foundups-Agent\.venv\Scripts\python.exe -m pytest -q tools/modular_audit/tests/test_modular_audit.py modules/infrastructure/wre_core/tests/test_fmas_health_triage.py modules/infrastructure/wre_core/tests/test_fmas_improvement_bridge.py modules/infrastructure/wre_core/tests/test_improvement_job_contract.py modules/infrastructure/wre_core/tests/test_security_analysis_assistant.py modules/infrastructure/wre_core/tests/test_reddog_direction.py modules/infrastructure/wre_core/tests/test_foundup_route_wsp62_exemptions.py tests/test_wsp97_execution_validator.py
+cd extensions/reddog; npm test
+```
+
 ## 0.4.120 Holo retrieval truth binding
 
 The current version fixtures bind the canonical owner-lifecycle benchmark and

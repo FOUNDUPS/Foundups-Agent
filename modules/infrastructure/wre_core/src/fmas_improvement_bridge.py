@@ -37,13 +37,12 @@ from __future__ import annotations
 import hashlib
 import logging
 import re
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
+from .fmas_finding_contract import FMASFinding, FMASFindingType, FMASSeverity
 from .improvement_job_contract import (
     ImprovementJob,
+    ImprovementReasonCode,
     ImprovementRiskLevel,
     ImprovementScope,
     ImprovementStatus,
@@ -51,160 +50,9 @@ from .improvement_job_contract import (
     WSP15Priority,
     create_improvement_job,
 )
+from .fmas_wsp62_contract import ParsedWSP62Finding, parse_wsp62_finding_text
 
 logger = logging.getLogger("fmas_improvement_bridge")
-
-
-def utc_now() -> datetime:
-    """Return current UTC timestamp."""
-    return datetime.now(timezone.utc)
-
-
-# ---------------------------------------------------------------------------
-# FMAS Finding Categories
-# ---------------------------------------------------------------------------
-
-
-class FMASFindingType(str, Enum):
-    """
-    Normalized FMAS finding types.
-
-    Maps to FMAS output prefixes and categories.
-    """
-
-    MISSING_SRC = "missing_src"
-    """Module missing src/ directory."""
-
-    MISSING_TESTS = "missing_tests"
-    """Module missing tests/ directory."""
-
-    MISSING_TEST_README = "missing_test_readme"
-    """Module missing tests/README.md."""
-
-    MISSING_DEPENDENCY_MANIFEST = "missing_dependency_manifest"
-    """Module missing module.json or requirements.txt."""
-
-    NO_PYTHON_FILES = "no_python_files"
-    """Module has no Python files in src/."""
-
-    SECURITY_VULNERABILITY = "security_vulnerability"
-    """Security vulnerability detected (pip-audit, bandit, npm)."""
-
-    SECRET_DETECTED = "secret_detected"
-    """Potential secret in code (WSP 71 violation)."""
-
-    WSP_VIOLATION = "wsp_violation"
-    """WSP protocol violation."""
-
-    DOMAIN_VIOLATION = "domain_violation"
-    """Enterprise domain structure violation."""
-
-    ORPHAN_CAPABILITY = "orphan_capability"
-    """Orphaned CLI capability not connected to WRE."""
-
-    DOC_STALE = "doc_stale"
-    """Documentation is stale or outdated."""
-
-    UNKNOWN = "unknown"
-    """Unknown finding type."""
-
-
-class FMASSeverity(str, Enum):
-    """FMAS finding severity levels."""
-
-    CRITICAL = "critical"
-    """Security/integrity issues that must be fixed immediately."""
-
-    HIGH = "high"
-    """Significant issues blocking integration."""
-
-    MEDIUM = "medium"
-    """Important issues requiring attention."""
-
-    LOW = "low"
-    """Minor issues, suggestions, warnings."""
-
-    INFO = "info"
-    """Informational only."""
-
-
-# ---------------------------------------------------------------------------
-# FMAS Finding (Normalized)
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class FMASFinding:
-    """
-    Normalized representation of an FMAS finding.
-
-    Can be created from:
-      - Structured dict (future FMAS JSON output)
-      - Raw FMAS string (current FMAS text output)
-    """
-
-    finding_id: str
-    """Unique finding identifier (hash-based)."""
-
-    finding_type: FMASFindingType
-    """Normalized finding type."""
-
-    severity: FMASSeverity
-    """Finding severity."""
-
-    module_path: str
-    """Affected module path (e.g., 'communication/livechat')."""
-
-    file_path: Optional[str] = None
-    """Specific file path if applicable."""
-
-    message: str = ""
-    """Human-readable finding message."""
-
-    raw_finding: str = ""
-    """Original FMAS output string."""
-
-    wsp_refs: List[str] = field(default_factory=list)
-    """Related WSP protocol references."""
-
-    source: str = "fmas"
-    """Finding source (fmas, orphan_scanner, manual, etc.)."""
-
-    detected_at: datetime = field(default_factory=utc_now)
-    """Detection timestamp."""
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Serialize to dict."""
-        return {
-            "finding_id": self.finding_id,
-            "finding_type": self.finding_type.value,
-            "severity": self.severity.value,
-            "module_path": self.module_path,
-            "file_path": self.file_path,
-            "message": self.message,
-            "raw_finding": self.raw_finding,
-            "wsp_refs": self.wsp_refs,
-            "source": self.source,
-            "detected_at": self.detected_at.isoformat(),
-        }
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> FMASFinding:
-        """Deserialize from dict."""
-        finding = cls(
-            finding_id=data["finding_id"],
-            finding_type=FMASFindingType(data.get("finding_type", "unknown")),
-            severity=FMASSeverity(data.get("severity", "medium")),
-            module_path=data.get("module_path", ""),
-            file_path=data.get("file_path"),
-            message=data.get("message", ""),
-            raw_finding=data.get("raw_finding", ""),
-            wsp_refs=data.get("wsp_refs", []),
-            source=data.get("source", "fmas"),
-        )
-        if data.get("detected_at"):
-            finding.detected_at = datetime.fromisoformat(data["detected_at"])
-        return finding
 
 
 # ---------------------------------------------------------------------------
@@ -248,7 +96,6 @@ _FMAS_PATTERNS = {
     ),
 }
 
-
 def generate_finding_id(raw_finding: str, module_path: str) -> str:
     """
     Generate deterministic finding ID.
@@ -274,6 +121,10 @@ def parse_fmas_string(raw_finding: str) -> Optional[FMASFinding]:
     if not raw_finding:
         return None
 
+    wsp62_finding = parse_wsp62_finding_text(raw_finding)
+    if wsp62_finding:
+        return _build_wsp62_finding(wsp62_finding, raw_finding)
+
     # Try each pattern
     for finding_type_key, pattern in _FMAS_PATTERNS.items():
         match = pattern.search(raw_finding)
@@ -282,6 +133,35 @@ def parse_fmas_string(raw_finding: str) -> Optional[FMASFinding]:
 
     # Unknown finding type
     return _build_unknown_finding(raw_finding)
+
+
+def _build_wsp62_finding(
+    parsed: ParsedWSP62Finding,
+    raw_finding: str,
+) -> FMASFinding:
+    """Build a scoped WSP 62 finding without collapsing its trusted level."""
+    severity = {
+        "CRITICAL": FMASSeverity.CRITICAL,
+        "ERROR": FMASSeverity.HIGH,
+        "EXEMPTION_EXPIRED": FMASSeverity.INFO,
+        "ADVISORY_ARCHIVE": FMASSeverity.INFO,
+        "WARNING": FMASSeverity.MEDIUM,
+        "APPROACHING": FMASSeverity.LOW,
+        "WATCH": FMASSeverity.LOW,
+        "INHERITED": FMASSeverity.INFO,
+        "INHERITED_METADATA": FMASSeverity.INFO,
+    }.get(parsed.level, FMASSeverity.INFO)
+    return FMASFinding(
+        finding_id=generate_finding_id(raw_finding, parsed.module_path),
+        finding_type=FMASFindingType.WSP_VIOLATION,
+        severity=severity,
+        module_path=parsed.module_path,
+        file_path=parsed.file_path,
+        message=parsed.body,
+        raw_finding=raw_finding,
+        wsp_refs=["WSP 62"],
+        source="fmas_wsp62",
+    )
 
 
 def _build_finding_from_match(
@@ -706,53 +586,77 @@ def derive_wsp15_priority(finding: FMASFinding) -> WSP15Priority:
 # ---------------------------------------------------------------------------
 
 
-def parse_fmas_finding(finding: Dict[str, Any]) -> ImprovementJob:
-    """
-    Parse a single FMAS finding dict and create ImprovementJob.
-
-    This is the main entry point for structured FMAS findings.
-
-    Args:
-        finding: FMAS finding dict
-
-    Returns:
-        ImprovementJob with dry_run=True
-
-    Raises:
-        ValueError: If finding is malformed
-    """
+def parse_fmas_finding(
+    finding: Dict[str, Any],
+    *,
+    idempotency_key: Optional[str] = None,
+    requested_by: str = "fmas_bridge",
+) -> ImprovementJob:
+    """Parse one FMAS dict into a dry-run ImprovementJob proposal."""
     if not finding:
         raise ValueError("Finding dict is empty")
-
-    # Parse to FMASFinding first
     fmas_finding = parse_fmas_dict(finding)
+    job = _create_job_from_fmas_finding(
+        fmas_finding,
+        idempotency_key=idempotency_key,
+        requested_by=requested_by,
+    )
+    if _is_untrusted_wsp62_finding(fmas_finding):
+        _block_untrusted_wsp62_job(job)
+    return job
 
-    # Map to ImprovementJob
+
+def _is_untrusted_wsp62_finding(finding: FMASFinding) -> bool:
+    """Recognize WSP 62 content without trusting caller-controlled labels."""
+    if finding.source.strip().casefold() == "fmas_wsp62":
+        return True
+    if any(
+        parse_wsp62_finding_text(text.strip()) is not None
+        for text in (finding.raw_finding, finding.message)
+        if isinstance(text, str) and text.strip()
+    ):
+        return True
+    normalized_refs = {
+        re.sub(r"[^a-z0-9]", "", str(reference).casefold())
+        for reference in finding.wsp_refs
+    }
+    return "wsp62" in normalized_refs
+
+
+def _create_job_from_fmas_finding(
+    fmas_finding: FMASFinding,
+    *,
+    idempotency_key: Optional[str] = None,
+    requested_by: str = "fmas_bridge",
+) -> ImprovementJob:
+    """Map one already-admitted normalized finding to a dry-run job."""
+
     improvement_type = map_fmas_type_to_improvement_type(fmas_finding)
     risk_level = map_fmas_severity_to_risk(fmas_finding)
     scope = build_scope_from_fmas_finding(fmas_finding)
     wsp15_priority = derive_wsp15_priority(fmas_finding)
-
-    # Create ImprovementJob (always dry_run=True)
     job = create_improvement_job(
         finding_id=fmas_finding.finding_id,
         improvement_type=improvement_type,
         scope=scope,
         risk_level=risk_level,
-        requested_by="fmas_bridge",
+        requested_by=requested_by,
         payload={
             "fmas_finding": fmas_finding.to_dict(),
             "source": fmas_finding.source,
         },
+        idempotency_key=idempotency_key,
     )
-
-    # Override wsp15_priority with derived values
     job.wsp15_priority = wsp15_priority
-
-    # Add evidence
     job.evidence_refs.append(f"FMAS:{fmas_finding.finding_id}")
-
     return job
+
+
+def _block_untrusted_wsp62_job(job: ImprovementJob) -> None:
+    """Quarantine WSP 62 input that bypassed the governed health gate."""
+    job.status = ImprovementStatus.BLOCKED
+    job.status_reason_code = ImprovementReasonCode.FAIL_VALIDATION_ERROR
+    job.status_reason_human = "WSP 62 input requires run_wsp62_health_audit authority"
 
 
 def parse_fmas_findings(findings: List[Dict[str, Any]]) -> List[ImprovementJob]:
@@ -815,8 +719,6 @@ def _create_blocked_job_for_malformed(
     error_msg: str,
 ) -> ImprovementJob:
     """Create a BLOCKED ImprovementJob for malformed findings."""
-    from .improvement_job_contract import ImprovementReasonCode
-
     finding_id = generate_finding_id(str(finding), "malformed")
 
     job = create_improvement_job(

@@ -93,6 +93,32 @@ The normative contract is
 | `src/foundup_job_router.py` | Governed FoundUp job admission and route selection |
 | `src/foundup_job_consumer.py` | Queue retention and dry-run dispatch consumers |
 | `src/wre_autonomous_slice_verifier_runtime.py` | Independent verifier boundary |
+| `src/fmas_finding_contract.py` | Normalized FMAS observation schema |
+| `src/fmas_wsp62_contract.py` | Syntactic WSP 62 parser; grants no provenance |
+| `src/fmas_health_triage.py` | Exact-HEAD WSP 62 admission and proposal receipt |
+| `src/fmas_improvement_bridge.py` | Finding-to-ImprovementJob mapping |
+
+## Code-health admission
+
+`run_wsp62_health_audit()` is the bounded code-health entry point. It requires
+a clean candidate checkout and binds exact Git HEAD, canonical scanner bytes,
+optional exact-base authority, the full producer observation digest, exclusion
+reasons, and exact tracked-file scope. Only baseline-attributed `WSP 62 ERROR`
+findings can become capped, deterministic, dry-run `ImprovementJob` proposals.
+No-baseline critical findings remain health debt; they are not candidate jobs.
+
+Direct string or structured WSP 62 input through the legacy FMAS bridge is
+blocked. The triage layer invokes no model, queue, worker, source mutation, Git
+mutation, or promoter; its Git operations are read-only authority checks. It
+currently has no non-test runtime caller. Its
+legacy `WSP15Priority` value contains execution-risk hints, not canonical
+numeric WSP 15 MPS or an allocation receipt.
+
+FMAS now inventories Git-tracked module files before size inspection. On the
+2026-08-27 repository candidate this reduced the raw scan from 4,955 findings
+in roughly 64 seconds to 471 findings in 16.3 seconds; critical observations
+fell from 2,665 to 67 because 2,598 ignored/runtime/vendor paths no longer
+entered the producer. Incremental changed-file scanning remains roadmap work.
 
 ## RedDog relationship
 
@@ -109,6 +135,9 @@ governed work/learning control plane; they are not the same process.
 Durable conversation binding, Principal Memex ingestion, production OpenClaw
 and Hermes effect chains, and automatic conversation-to-work lineage remain
 separate RedDog P0 work.
+
+Legacy direct FMAS direction remains advisory: RedDog may prioritize or
+escalate a proposal, but it never marks those proposals ready to execute.
 
 ## Production Skillz
 
