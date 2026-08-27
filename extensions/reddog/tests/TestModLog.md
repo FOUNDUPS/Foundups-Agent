@@ -1,5 +1,15 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Holo retrieval truth binding (0.4.120)
+
+- Advanced every current-version fixture so the repaired authenticated backend
+  cannot be distributed under the prior 0.4.119 package identity.
+- The Linux-reproduced backend-preflight failure is GREEN after regenerating
+  the 1,350-file manifest and pinning `ee679968a31a...ab80`.
+- Fresh evidence: generator parity plus focused Holo/NAV tests are **13 passed /
+  13 optional skips**; the 18-shard contract is `d1e4f7f54bab...97f22` and the
+  complete fast tier is **14/14 PASS**.
+
 ## 2026-08-27 - Stable-route resolver binding (0.4.119)
 
 - Advanced version fixtures so the extension cannot accept the corrected

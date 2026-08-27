@@ -1,15 +1,18 @@
 # AI Intelligence Overseer - WSP 77 Agent Coordination
 
-**Status**: POC
-**Version**: 0.1.0
-**Date**: 2025-10-17
+**Status**: Active mixed-maturity module; production RSI is not proven
+**Version**: 0.10.5
+**Date**: 2026-08-27
 **WSP Compliance**: WSP 77 (Agent Coordination), WSP 54 (Role Assignment), WSP 96 (MCP Governance)
 
 ---
 
 ## Executive Summary
 
-AI Intelligence Overseer is the **NEW** multi-agent coordination system that replaces the deprecated 6-agent architecture (WINSERV, RIDER, BOARD, FRONT_CELL, BACK_CELL, GEMINI). It coordinates Qwen + Gemma AI agents using WSP 77 patterns with proper WSP 54 role assignments.
+AI Intelligence Overseer contains operational monitoring, security, M2M, and
+coordination surfaces alongside legacy heuristic paths. Qwen/Gemma labels do
+not by themselves prove a live model call, independent review, or production
+effect. Current callable truth is defined in INTERFACE.md.
 
 **Key Innovation**: MCP-based orchestration where Holo Qwen/Gemma can spawn specialized agent teams for different tasks using WRE (Windsurf Recursive Engine).
 
@@ -618,6 +621,16 @@ This skill standardizes:
 
 Use it for architecture, product positioning, security, and governance decisions where bad choices are expensive to reverse.
 
+## Generation-bound Holo retrieval benchmark
+
+`m2m_holo_retrieval_benchmark` uses the canonical governed owner-query
+lifecycle and exact authority root. It is read-only, rejects query-time reindex,
+and preserves owner failures instead of replacing them with a generic error.
+The live fixed corpus on 2026-08-27 achieved recall@8 `1.0`, MRR `0.9167`,
+nDCG `0.8718`, mean latency `3829ms`, and p95 `4578ms`. The truthful outcome is
+`quality_below_policy` because nDCG remains below `0.95`; this is a retrieval
+quality baseline, not successful AutoResearch or promotion evidence.
+
 ---
 
 ## Related Documentation
@@ -631,6 +644,7 @@ Use it for architecture, product positioning, security, and governance decisions
 
 ---
 
-**Status**: 🟡 POC - Ready for initial implementation
-**Next Step**: Create core `ai_overseer.py` with WSP 77 coordination
-**Mission Control**: AI Intelligence Overseer replacing deprecated 6-agent system [ROCKET]
+**Status**: Active mixed-maturity module; production RSI is not proven.
+**Current boundary**: Mixed operational and legacy surfaces; see INTERFACE.md
+for callable truth. The core exists, but model-labeled heuristic paths are not
+independent reviewer or production RSI evidence.

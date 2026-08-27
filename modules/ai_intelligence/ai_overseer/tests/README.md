@@ -39,4 +39,9 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/ai_intelligence/ai_ove
 The Holo retrieval benchmark tests are explicitly allowlisted in the default
 lane; broader legacy AI Overseer suites remain opt-in.
 
+The benchmark regression proves canonical authority-root selection, governed
+owner-query invocation, exact owner-error preservation, and non-mutation. The
+2026-08-27 focused benchmark/navigation matrix passed 56 tests; the live corpus
+correctly returned `quality_below_policy`, not success.
+
 Keep these flags off for fast deterministic runs; enable intentionally for full-stack validation.

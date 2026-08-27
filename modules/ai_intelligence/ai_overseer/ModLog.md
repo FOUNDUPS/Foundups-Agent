@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-08-27 - HOLO OWNER-LIFECYCLE / RETRIEVAL TRUTH REPAIR
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 97
+
+- Replaced the stale root-bound benchmark call with the canonical governed
+  one-shot owner lifecycle and derived authority root. Query-time maintenance,
+  callback injection, and repository writes remain rejected.
+- Preserved exact owner errors instead of masking them. Added regressions for
+  authority selection and failure propagation; the focused benchmark/navigation
+  matrix passed 56 tests.
+- The live fixed corpus returned recall@8 1.0, MRR .9167, nDCG .8718, mean
+  3829ms, and p95 4578ms. The result remains `quality_below_policy` because
+  nDCG is below 0.95; no promotion or AutoResearch success is claimed.
+
 ## 2026-08-01 - HOLOINDEX_GENERATION_BOUND_RETRIEVAL_AUTORESEARCH_PHASE1
 
 **Author**: 0102 | WSP: 00, 15, 22, 50, 62, 97

@@ -17110,7 +17110,7 @@
       "collectable": false,
       "timeout_s": 900,
       "quarantine_reasons": [
-        "syntax_error"
+        "module_scope_process_stream_mutation"
       ],
       "description": ""
     },

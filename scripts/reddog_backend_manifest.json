@@ -1606,7 +1606,7 @@
     "modules/ai_intelligence/ai_overseer/src/holo_telemetry_monitor.py": "e7713a33b9759d8403f0dae4cf60ad0d94bdba738b4bd69345c740cbb156a484",
     "modules/ai_intelligence/ai_overseer/src/ii_agent_adapter.py": "a2776ff61188b723606e381f2d4edd0a7ba900850a5d055e4b109f24dc8fd306",
     "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py": "57a9a6f11e3bdaf5b98e6e22cb2b8098fb388feb9c08cb198e357086e10b9115",
-    "modules/ai_intelligence/ai_overseer/src/m2m_holo_retrieval_benchmark.py": "1a6e6e35eb4663ce5eb4ecee90807bd2dbf697c325ef9a13b961159ff5f17649",
+    "modules/ai_intelligence/ai_overseer/src/m2m_holo_retrieval_benchmark.py": "1683aba6281b0a12989796ab41b78b9589b5f4da89e0299bbd148715164f11b7",
     "modules/ai_intelligence/ai_overseer/src/mcp_integration.py": "359974121e7be99410424718318e29df889d39a0aa6d4785640fd4c4bb74fd6d",
     "modules/ai_intelligence/ai_overseer/src/openclaw_security_sentinel.py": "1caa5a5677f4285db74714e47f868052adc9e1d2cd2aff6b478e63a0a6013401",
     "modules/ai_intelligence/ai_overseer/src/overseer_db.py": "1a4f0283d0ca8fe9b12f1670c46f85a8331793e140d9da469b9cfee229a55879",
