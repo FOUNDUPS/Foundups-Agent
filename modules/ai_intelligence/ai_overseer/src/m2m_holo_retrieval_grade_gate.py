@@ -134,6 +134,22 @@ def _public_reasons(public_result: Mapping[str, Any]) -> list[str]:
     if run.get("no_generation_promotion_performed") is not True:
         reasons.append("public_promotion_boundary_unproven")
     reasons.extend(_public_binding_reasons(run, verification))
+    evaluations = run.get("evaluations")
+    closure_verified = bool(
+        isinstance(evaluations, Sequence)
+        and not isinstance(evaluations, (str, bytes))
+        and evaluations
+        and all(
+            isinstance(item, Mapping)
+            and isinstance(item.get("query_receipt"), Mapping)
+            and item["query_receipt"].get(
+                "runtime_environment_exact_closure_verified"
+            ) is True
+            for item in evaluations
+        )
+    )
+    if not closure_verified:
+        reasons.append("public_runtime_exact_closure_unverified")
     reasons.extend(_public_quality_reasons(public_result, run))
     return reasons
 
@@ -145,6 +161,7 @@ def _public_binding_reasons(
     fields = (
         "generation_id", "freshness_receipt_digest", "repo_root_digest",
         "config_digest", "ranker_digest",
+        "runtime_environment_digest",
     )
     reasons: list[str] = []
     if run.get("schema_version") != RUN_SCHEMA or run.get("split") != "heldout":
@@ -157,6 +174,7 @@ def _public_binding_reasons(
             for name in (
                 "generation_id", "freshness_receipt_digest", "repo_head_sha",
                 "repo_root_digest", "config_digest", "ranker_digest",
+                "runtime_environment_digest",
             )
         })
     except TypeError:
@@ -253,6 +271,7 @@ def _binding_reasons(
     fields = (
         "candidate_id", "generation_id", "freshness_receipt_digest",
         "repo_head_sha", "repo_root_digest", "config_digest", "ranker_digest",
+        "runtime_environment_digest",
     )
     if any(independent.get(name) != binding.get(name) for name in fields):
         reasons.append("independent_candidate_binding_mismatch")

@@ -14,6 +14,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Mapping, Self
+from holo_index.retrieval_runtime_binding import retrieval_ranker_digest_for_root
 from .holo_query_service import DEFAULT_STARTUP_WARMUP_TIMEOUT_SECONDS
 from .holo_query_owner_startup import (
     OwnerStartupResult, OwnerStartupSettings, await_owner_startup,
@@ -35,6 +36,10 @@ from .reddog_sealed_holo_runtime import (
     sealed_holo_command,
     sealed_runtime_required,
     trusted_holo_site_packages,
+)
+from .reddog_holoindex_runtime_environment_binding import (
+    OWNER_STARTUP_FORCED_ENVIRONMENT, QUERY_RUNTIME_FORCED_ENVIRONMENT,
+    RuntimeEnvironmentBindingError,
 )
 OWNER_MODULE = "modules.infrastructure.foundups_mcp_bridge.src.holo_query_service"
 OWNER_HOST = "127.0.0.1"
@@ -59,6 +64,15 @@ class HoloQueryServiceSupervisorError(RuntimeError):
     def __init__(self, code: str) -> None:
         self.code = code
         super().__init__(code)
+
+
+def _lifecycle_limits(*values: float) -> tuple[float, ...]:
+    limits = tuple(float(value) for value in values)
+    if any(not math.isfinite(value) or value <= 0 for value in limits):
+        raise ValueError("lifecycle timeouts must be positive")
+    return limits
+
+
 def _hidden_process_options() -> dict[str, object]:
     """Build Windows no-window options without weakening other platforms."""
     if os.name != "nt":
@@ -179,6 +193,8 @@ def _owner_environment(
             "HF_DATASETS_OFFLINE": "1",
         }
     )
+    environment.update(OWNER_STARTUP_FORCED_ENVIRONMENT)
+    environment.update(QUERY_RUNTIME_FORCED_ENVIRONMENT)
     if pythonpath_entries:
         environment["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
     return environment
@@ -225,6 +241,55 @@ def _required_replica_start_binding(
     ):
         raise HoloQueryServiceSupervisorError("HOLOINDEX_QUERY_REPLICA_REQUIRED")
     return parsed
+
+
+def _runtime_expectation(
+    supervisor: "HoloQueryServiceSupervisor",
+    replica_binding: tuple[str, str, str, str],
+) -> str:
+    resolver = supervisor._runtime_environment_resolver
+    if resolver is None:
+        return ""
+    try:
+        return _expected_owner_runtime_environment(
+            runtime_root=supervisor.runtime_root,
+            replica_binding=replica_binding,
+            replica_verifier=supervisor._replica_capability_verifier,
+            resolver=resolver,
+        )
+    except (OSError, TypeError, ValueError, RuntimeEnvironmentBindingError):
+        raise HoloQueryServiceSupervisorError(
+            "HOLOINDEX_RUNTIME_ENVIRONMENT_UNAVAILABLE"
+        ) from None
+
+
+def _expected_owner_runtime_environment(
+    *,
+    runtime_root: Path,
+    replica_binding: tuple[str, str, str, str],
+    replica_verifier: Callable[[], object],
+    resolver: Callable[..., str],
+) -> str:
+    """Reprove the replica and derive the runtime expected from this host."""
+
+    observed = replica_verifier()
+    public = getattr(observed, "public_binding", {})
+    fields = (
+        "query_replica_descriptor_digest", "query_replica_generation_id",
+        "query_replica_id", "query_replica_path_identity_digest",
+    )
+    actual = parse_replica_binding(tuple(public.get(key) for key in fields)) if (
+        isinstance(public, Mapping)
+    ) else None
+    if actual != replica_binding:
+        raise RuntimeEnvironmentBindingError("RUNTIME_REPLICA_BINDING_MISMATCH")
+    ranker_digest = retrieval_ranker_digest_for_root(runtime_root)
+    return resolver(
+        source_root=runtime_root,
+        ranker_digest=ranker_digest,
+        replica_binding=dict(zip(fields, replica_binding)),
+        replica_artifacts=getattr(observed, "artifacts", ()),
+    )
 
 
 def _owner_command(
@@ -276,6 +341,31 @@ def _owner_command(
     ]
 
 
+def _await_supervised_owner_startup(
+    supervisor: "HoloQueryServiceSupervisor",
+    requested_binding: tuple[str, str, str, str],
+    replica_binding: tuple[str, str, str, str],
+    runtime_digest: str,
+) -> OwnerStartupResult:
+    return await_owner_startup(
+        process=supervisor._process,
+        settings=OwnerStartupSettings.from_binding(
+            host=OWNER_HOST, port=supervisor.port, token=supervisor._token,
+            timeouts=(
+                supervisor.startup_timeout_seconds,
+                supervisor.probe_timeout_seconds,
+                DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS,
+                supervisor.probe_interval_seconds,
+            ),
+            binding=requested_binding, replica_binding=replica_binding,
+            runtime_environment_digest=runtime_digest,
+        ),
+        health_exchange=_authenticated_health_exchange,
+        clock=time.monotonic,
+        sleeper=time.sleep,
+    )
+
+
 class _SupervisorLifecycle:
     """Own shutdown and context-manager behavior for one supervisor instance."""
 
@@ -284,6 +374,7 @@ class _SupervisorLifecycle:
     _token: str
     _verified_binding: tuple[str, str, str, str]
     _verified_replica_binding: tuple[str, str, str, str]
+    _verified_runtime_environment_digest: str
     _atexit_registered: bool
     shutdown_timeout_seconds: float
 
@@ -297,6 +388,7 @@ class _SupervisorLifecycle:
         self._token = ""
         self._verified_binding = ("", "", "", "")
         self._verified_replica_binding = ("", "", "", "")
+        self._verified_runtime_environment_digest = ""
         if self._atexit_registered:
             atexit.unregister(self.stop)
             self._atexit_registered = False
@@ -328,17 +420,14 @@ class HoloQueryServiceSupervisor(_SupervisorLifecycle):
         runtime_root: Path | str | None = None,
         replica_capability_verifier: Callable[[], object] | None = None,
         expected_replica_binding: tuple[str, str, str, str] = ("", "", "", ""),
+        _runtime_environment_resolver_for_test: Callable[..., str] | None = None,
     ) -> None:
         if not 1 <= int(port) <= 65_535:
             raise ValueError("port must be between 1 and 65535")
-        limits = (
-            float(startup_timeout_seconds),
-            float(probe_timeout_seconds),
-            float(probe_interval_seconds),
-            float(shutdown_timeout_seconds),
+        limits = _lifecycle_limits(
+            startup_timeout_seconds, probe_timeout_seconds,
+            probe_interval_seconds, shutdown_timeout_seconds,
         )
-        if any(not math.isfinite(value) or value <= 0 for value in limits):
-            raise ValueError("lifecycle timeouts must be positive")
         self.repo_root = Path(repo_root).resolve(strict=False)
         self.runtime_root = Path(runtime_root or repo_root).resolve(strict=False)
         canonical_input = canonical_ssd_path if canonical_ssd_path is not None else ssd_path
@@ -351,6 +440,8 @@ class HoloQueryServiceSupervisor(_SupervisorLifecycle):
         )
         self._replica_capability_verifier = replica_capability_verifier
         self._expected_replica_binding = expected_replica_binding
+        # Production trusts only the authenticated child's self-attested digest.
+        self._runtime_environment_resolver = _runtime_environment_resolver_for_test
         self.port = int(port)
         (
             self.startup_timeout_seconds, self.probe_timeout_seconds,
@@ -363,6 +454,7 @@ class HoloQueryServiceSupervisor(_SupervisorLifecycle):
         self._token, self._ready = "", False
         self._verified_binding: tuple[str, str, str, str] = ("", "", "", "")
         self._verified_replica_binding: tuple[str, str, str, str] = ("", "", "", "")
+        self._verified_runtime_environment_digest = ""
         self._atexit_registered = False
     @property
     def service_url(self) -> str:
@@ -379,6 +471,9 @@ class HoloQueryServiceSupervisor(_SupervisorLifecycle):
     @property
     def verified_replica_binding(self) -> tuple[str, str, str, str]:
         return self._verified_replica_binding
+    @property
+    def verified_runtime_environment_digest(self) -> str:
+        return self._verified_runtime_environment_digest
     def _spawn(self) -> subprocess.Popen[bytes]:
         if not self.repo_root.is_dir():
             raise HoloQueryServiceSupervisorError("HOLOINDEX_QUERY_SERVICE_REPO_ROOT_UNAVAILABLE")
@@ -415,29 +510,6 @@ class HoloQueryServiceSupervisor(_SupervisorLifecycle):
             owner_environment.pop(SERVICE_TOKEN_ENV, None)
         self._token = token
         return process
-    def _await_startup(
-        self, requested_binding: tuple[str, str, str, str],
-        replica_binding: tuple[str, str, str, str],
-    ) -> OwnerStartupResult:
-        return await_owner_startup(
-            process=self._process,
-            settings=OwnerStartupSettings.from_binding(
-                host=OWNER_HOST,
-                port=self.port,
-                token=self._token,
-                timeouts=(
-                    self.startup_timeout_seconds,
-                    self.probe_timeout_seconds,
-                    DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS,
-                    self.probe_interval_seconds,
-                ),
-                binding=requested_binding,
-                replica_binding=replica_binding,
-            ),
-            health_exchange=_authenticated_health_exchange,
-            clock=time.monotonic,
-            sleeper=time.sleep,
-        )
     def start(
         self, *, expected_repo_head_sha: str = "",
         expected_repo_root_digest: str = "", expected_generation_id: str = "",
@@ -455,24 +527,33 @@ class HoloQueryServiceSupervisor(_SupervisorLifecycle):
             query_replica_root=self.query_replica_root,
             verifier=self._replica_capability_verifier,
         )
+        runtime_digest = _runtime_expectation(self, replica_binding)
         reusable = _binding_matches(
             requested_binding, self._verified_binding
-        ) and _binding_matches(replica_binding, self._verified_replica_binding)
+        ) and _binding_matches(
+            replica_binding, self._verified_replica_binding
+        ) and (
+            not runtime_digest
+            or runtime_digest == self._verified_runtime_environment_digest
+        )
         if self.is_ready and reusable:
             return self
-        if self._replica_capability_verifier is not None:
-            self._replica_capability_verifier()
         self.stop()
         self._process = self._spawn()
         try:
             if self._replica_capability_verifier is not None:
                 self._replica_capability_verifier()
-            result = self._await_startup(requested_binding, replica_binding)
+            result = _await_supervised_owner_startup(
+                self, requested_binding, replica_binding, runtime_digest
+            )
             if result.error:
                 raise HoloQueryServiceSupervisorError(result.error)
             self._ready = True
             self._verified_binding = result.binding
             self._verified_replica_binding = result.replica_binding
+            self._verified_runtime_environment_digest = (
+                result.runtime_environment_digest
+            )
             self._register_cleanup()
             return self
         except BaseException:

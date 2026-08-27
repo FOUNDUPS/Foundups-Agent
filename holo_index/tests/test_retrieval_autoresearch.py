@@ -51,6 +51,7 @@ def _binding(candidate: str = "baseline", generation: str = "gen-a"):
         "repo_root_digest": ROOT_DIGEST,
         "config_digest": DIGEST_B,
         "ranker_digest": ranker_digest,
+        "runtime_environment_digest": digest_json({"runtime": candidate}),
     }
     return RetrievalCandidateBinding(
         candidate_id=retrieval_candidate_id(**fields),
@@ -75,6 +76,7 @@ def _runner(paths: dict[str, list[str]], latency: float = 10.0):
             "repo_head_sha": binding.repo_head_sha,
             "repo_root_digest": binding.repo_root_digest,
             "retrieval_runtime_ranker_digest": binding.ranker_digest,
+            "runtime_environment_digest": binding.runtime_environment_digest,
             "latency_ms": latency,
             "index_gap_detected": False,
             "stale_reasons": [],
@@ -524,6 +526,7 @@ def test_binding_rejects_arbitrary_digest_shaped_candidate_id():
         repo_root_digest=binding.repo_root_digest,
         config_digest=binding.config_digest,
         ranker_digest=binding.ranker_digest,
+        runtime_environment_digest=binding.runtime_environment_digest,
     )
     with pytest.raises(ValueError, match="candidate_id_binding_mismatch"):
         run_generation_bound_benchmark(

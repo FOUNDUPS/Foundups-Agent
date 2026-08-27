@@ -1,5 +1,19 @@
 # RedDog Extension Tests
 
+## 0.4.124 runtime-environment binding release
+
+- Rebinds package/version/contract evidence to the authenticated backend
+  closure that carries runtime-environment identity and exact-closure truth.
+- Keeps cold-start failure and resident-owner debt explicit; no test converts
+  historical timing into current availability.
+- Final evidence: 1,356 backend files at `76911818b5f2...47461`; 18 contract
+  shards / 6,942 lines / 492 assertions at `f1bcedc0bc5c...606e4`; a 67-file,
+  deterministic 67-file package below the 1 MiB cap; and all four exhaustive
+  release groups PASS in 190.138 seconds. Focused Python surfaces pass 611
+  tests with one expected platform-capability skip.
+- Release artifact: `O:\RedDog-Releases\reddog-0.4.124.vsix`. Exact size and
+  SHA-256 live in the external WSP_97 receipt as built-artifact evidence.
+
 ## 0.4.123 cold-owner readiness documentation release
 
 The packaged README now reports the exact-main cold-owner acceptance instead of
@@ -324,9 +338,12 @@ prevent a non-closing child from extending the owner indefinitely.
 Windows taskkill launch is itself observed: exact absolute executable path,
 fixed PID argv, and `shell: false` are pinned, while async launch error, nonzero
 exit, or a 750-millisecond attempt timeout becomes explicit termination failure.
-The repository contains no standalone shard generator. The checked-in
-authenticated loader, shard manifest, exact ordered reconstruction, hashes,
-line ranges, and assertion-count contract are the generation truth.
+`generate_extension_contract_shard_manifest.js` is the deterministic producer
+for the authenticated shard manifest and its duplicated runner/test identity
+constants. Run it with `--write` after an intentional shard edit and `--check`
+in validation. The checked-in authenticated loader, shard manifest, exact
+ordered reconstruction, hashes, line ranges, and assertion-count contract are
+the release truth.
 The suite covers both graceful and force attempts, late error idempotence,
 listener/timer cleanup, invalid `SystemRoot`, and unchanged POSIX group signals.
 The aligned loop-3 hostile-selector promotion passed in 274.537 seconds wall

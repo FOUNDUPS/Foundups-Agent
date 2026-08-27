@@ -9,7 +9,10 @@ import time
 from typing import Any, Mapping, Sequence
 
 from holo_index.query_result_contract import validate_search_result
-from holo_index.retrieval_runtime_binding import retrieval_ranker_binding
+from holo_index.retrieval_runtime_binding import (
+    retrieval_ranker_binding,
+    runtime_environment_binding,
+)
 from holo_index.tier0_retrieval import (
     infer_explicit_module_target,
     module_path_from_hit,
@@ -198,6 +201,21 @@ def _deduplicated_hits(
     return hits
 
 
+def _response_content(
+    ok: bool, freshness: str, error: str, reasons: Sequence[str],
+    hits: Sequence[Mapping[str, Any]], raw: Mapping[str, Any] | None,
+) -> tuple[list[str], str, list[Mapping[str, Any]], dict[str, Any]]:
+    stale = list(_dedupe([str(value) for value in reasons]))
+    normalized = str(freshness or "UNKNOWN").upper()
+    if not ok and normalized != "UNKNOWN":
+        normalized = "STALE"
+    if not ok and not stale:
+        stale = [failure_reason(error)]
+    response_hits = [] if not ok else list(hits)
+    response_raw = {} if not ok else dict(raw or {})
+    return stale, normalized, response_hits, response_raw
+
+
 def build_response(
     *,
     ok: bool,
@@ -211,18 +229,15 @@ def build_response(
     mode: str = "unknown",
     latency_ms: int = 0,
     retrieval_runtime_ranker_digest: str = "",
+    runtime_environment_digest: str = "",
+    runtime_environment_exact_closure_verified: bool = False,
 ) -> dict[str, Any]:
     """Build a response that can never claim CURRENT on a failed operation."""
     from .holo_query_freshness_gate import normalize_binding
 
-    stale = list(_dedupe([str(value) for value in reasons]))
-    normalized_freshness = str(freshness or "UNKNOWN").upper()
-    if not ok and normalized_freshness != "UNKNOWN":
-        normalized_freshness = "STALE"
-    if not ok and not stale:
-        stale = [failure_reason(error)]
-    response_hits = [] if not ok else list(hits)
-    response_raw = {} if not ok else dict(raw or {})
+    stale, normalized_freshness, response_hits, response_raw = _response_content(
+        ok, freshness, error, reasons, hits, raw
+    )
     canonical_binding = normalize_binding(binding)
     # The absolute canonical receipt and private replica paths remain internal.
     canonical_binding["freshness_receipt_path"] = ""
@@ -244,6 +259,10 @@ def build_response(
         "latency_ms": max(0, int(latency_ms)),
         "no_holoindex_reindex_performed": True,
         **retrieval_ranker_binding(retrieval_runtime_ranker_digest),
+        **runtime_environment_binding(runtime_environment_digest),
+        "runtime_environment_exact_closure_verified": (
+            runtime_environment_exact_closure_verified is True
+        ),
         **canonical_binding,
         **replica_binding,
     }
@@ -258,6 +277,12 @@ def semantic_canary_empty_response(result: Mapping[str, Any]) -> dict[str, Any]:
         latency_ms=int(result.get("latency_ms") or 0),
         retrieval_runtime_ranker_digest=str(
             result.get("retrieval_runtime_ranker_digest") or ""
+        ),
+        runtime_environment_digest=str(
+            result.get("runtime_environment_digest") or ""
+        ),
+        runtime_environment_exact_closure_verified=(
+            result.get("runtime_environment_exact_closure_verified") is True
         ),
     )
 
@@ -284,6 +309,10 @@ def semantic_success_response(
         raw=normalized, hits=flatten_hits(normalized, limit, query=query),
         mode="semantic", latency_ms=int((time.monotonic() - started) * 1000),
         retrieval_runtime_ranker_digest=owner.retrieval_runtime_ranker_digest,
+        runtime_environment_digest=owner.runtime_environment_digest,
+        runtime_environment_exact_closure_verified=(
+            owner.runtime_environment_exact_closure_verified
+        ),
     )
 
 

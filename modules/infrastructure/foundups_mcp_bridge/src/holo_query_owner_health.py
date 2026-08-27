@@ -6,7 +6,10 @@ import http.client
 import json
 from dataclasses import dataclass
 
-from holo_index.retrieval_runtime_binding import is_retrieval_ranker_digest
+from holo_index.retrieval_runtime_binding import (
+    is_retrieval_ranker_digest,
+    is_retrieval_runtime_digest,
+)
 
 from .holo_query_binding import parse_exact_binding
 from .holo_query_replica_binding import parse_replica_binding
@@ -29,6 +32,7 @@ class AuthenticatedOwnerHealthProof:
     rejection: str
     binding: tuple[str, str, str, str]
     replica_binding: tuple[str, str, str, str] = EMPTY_BINDING
+    runtime_environment_digest: str = ""
 
 
 class _InvalidHealthJson(ValueError):
@@ -110,6 +114,7 @@ def _ready_metadata_contract(value: dict[str, object]) -> bool:
         value.get("no_holoindex_reindex_performed") is True,
         _exact_text(value.get("retrieval_mode"), "semantic"),
         is_retrieval_ranker_digest(value.get("retrieval_runtime_ranker_digest")),
+        is_retrieval_runtime_digest(value.get("runtime_environment_digest")),
     ))
 
 
@@ -126,11 +131,18 @@ def _health_replica_binding(
     return parse_replica_binding(candidate) or EMPTY_BINDING
 
 
+def _health_runtime_environment_digest(payload: object) -> str:
+    value = _exact_health_payload(payload)
+    digest = value.get("runtime_environment_digest") if value is not None else ""
+    return str(digest) if is_retrieval_runtime_digest(digest) else ""
+
+
 def _health_contract_ready(
     payload: object, *, expected_repo_head_sha: str,
     expected_repo_root_digest: str, expected_generation_id: str,
     expected_receipt_digest: str,
     expected_replica_binding: tuple[str, str, str, str] = EMPTY_BINDING,
+    expected_runtime_environment_digest: str = "",
 ) -> bool:
     value = _exact_health_payload(payload)
     if value is None:
@@ -144,16 +156,22 @@ def _health_contract_ready(
         return False
     actual = _health_binding(value)
     actual_replica = _health_replica_binding(value)
+    actual_runtime = _health_runtime_environment_digest(value)
     contract = (
         _ready_metadata_contract(value),
         actual != EMPTY_BINDING,
         actual_replica != EMPTY_BINDING,
+        bool(actual_runtime),
     )
     matches = tuple(not wanted or wanted == found for wanted, found in zip(
         expected + expected_replica,
         actual + actual_replica,
     ))
-    return all(contract + matches)
+    runtime_matches = (
+        not expected_runtime_environment_digest
+        or expected_runtime_environment_digest == actual_runtime
+    )
+    return all(contract + matches + (runtime_matches,))
 
 
 def _health_rejection_code(payload: object) -> str:
@@ -184,6 +202,7 @@ def _health_binding_rejection_code(
     expected_repo_root_digest: str, expected_generation_id: str,
     expected_receipt_digest: str,
     expected_replica_binding: tuple[str, str, str, str] = EMPTY_BINDING,
+    expected_runtime_environment_digest: str = "",
 ) -> str:
     expected = parse_exact_binding((
         expected_repo_head_sha, expected_repo_root_digest,
@@ -199,14 +218,20 @@ def _health_binding_rejection_code(
     if not _ready_metadata_contract(value):
         return ""
     actual_replica = _health_replica_binding(value)
+    actual_runtime = _health_runtime_environment_digest(value)
     actual = actual_canonical + actual_replica
     wanted_binding = expected + expected_replica
     binding_invalid = (
         actual_canonical == EMPTY_BINDING or actual_replica == EMPTY_BINDING
+        or not actual_runtime
     )
-    return BINDING_MISMATCH_ERROR if binding_invalid or any(
+    mismatch = any(
         wanted and wanted != found for wanted, found in zip(wanted_binding, actual)
-    ) else ""
+    ) or bool(
+        expected_runtime_environment_digest
+        and expected_runtime_environment_digest != actual_runtime
+    )
+    return BINDING_MISMATCH_ERROR if binding_invalid or mismatch else ""
 
 
 def _close_health_connection(connection: http.client.HTTPConnection) -> None:
@@ -218,11 +243,39 @@ def _close_health_connection(connection: http.client.HTTPConnection) -> None:
         pass
 
 
+def _health_exchange_proof(
+    payload: object,
+    expected: tuple[str, str, str, str],
+    expected_replica: tuple[str, str, str, str],
+    expected_runtime_environment_digest: str,
+) -> AuthenticatedOwnerHealthProof:
+    binding = _health_binding(payload)
+    replica = _health_replica_binding(payload)
+    runtime_digest = _health_runtime_environment_digest(payload)
+    kwargs = dict(
+        expected_repo_head_sha=expected[0],
+        expected_repo_root_digest=expected[1],
+        expected_generation_id=expected[2],
+        expected_receipt_digest=expected[3],
+        expected_replica_binding=expected_replica,
+        expected_runtime_environment_digest=expected_runtime_environment_digest,
+    )
+    if payload is not None and _health_contract_ready(payload, **kwargs):
+        return AuthenticatedOwnerHealthProof(True, "", binding, replica, runtime_digest)
+    rejection = _health_rejection_code(payload) or _health_binding_rejection_code(
+        payload, **kwargs
+    )
+    return AuthenticatedOwnerHealthProof(
+        False, rejection, binding, replica, runtime_digest
+    )
+
+
 def _authenticated_health_exchange(
     *, host: str, port: int, token: str, timeout_seconds: float,
     expected_repo_head_sha: str = "", expected_repo_root_digest: str = "",
     expected_generation_id: str = "", expected_receipt_digest: str = "",
     expected_replica_binding: tuple[str, str, str, str] = EMPTY_BINDING,
+    expected_runtime_environment_digest: str = "",
 ) -> AuthenticatedOwnerHealthProof:
     unavailable = AuthenticatedOwnerHealthProof(False, "", EMPTY_BINDING)
     expected = parse_exact_binding((
@@ -248,21 +301,10 @@ def _authenticated_health_exchange(
     )
     try:
         payload = _read_health_payload(connection, transport.token)
-        binding = _health_binding(payload)
-        replica = _health_replica_binding(payload)
-        kwargs = dict(
-            expected_repo_head_sha=expected[0],
-            expected_repo_root_digest=expected[1],
-            expected_generation_id=expected[2],
-            expected_receipt_digest=expected[3],
-            expected_replica_binding=expected_replica,
+        return _health_exchange_proof(
+            payload, expected, expected_replica,
+            expected_runtime_environment_digest,
         )
-        if payload is not None and _health_contract_ready(payload, **kwargs):
-            return AuthenticatedOwnerHealthProof(True, "", binding, replica)
-        rejection = _health_rejection_code(payload) or _health_binding_rejection_code(
-            payload, **kwargs
-        )
-        return AuthenticatedOwnerHealthProof(False, rejection, binding, replica)
     except (OSError, http.client.HTTPException, UnicodeError, ValueError, json.JSONDecodeError):
         return unavailable
     finally:

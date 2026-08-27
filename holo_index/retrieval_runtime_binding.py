@@ -117,6 +117,14 @@ def loaded_retrieval_ranker_digest(
     return retrieval_ranker_digest_for_root(_loaded_runtime_root(module_loader))
 
 
+def loaded_retrieval_runtime_root(
+    module_loader: Callable[[str], ModuleType] = importlib.import_module,
+) -> Path:
+    """Return the common verified source root of the loaded ranker closure."""
+
+    return _loaded_runtime_root(module_loader)
+
+
 def is_retrieval_ranker_digest(value: Any) -> bool:
     text = value if type(value) is str else ""
     return (
@@ -134,12 +142,51 @@ def retrieval_ranker_digest_from(value: Mapping[str, Any]) -> str:
     return str(value.get("retrieval_runtime_ranker_digest") or "")
 
 
+def is_retrieval_runtime_digest(value: Any) -> bool:
+    """Validate any canonical SHA-256 retrieval-runtime identity."""
+
+    return is_retrieval_ranker_digest(value)
+
+
+def runtime_environment_binding(value: Any) -> dict[str, str]:
+    return {"runtime_environment_digest": str(value or "")}
+
+
+def runtime_environment_digest_from(value: Mapping[str, Any]) -> str:
+    return str(value.get("runtime_environment_digest") or "")
+
+
+def retrieval_runtime_binding(
+    ranker_digest: Any, environment_digest: Any, exact_closure_verified: bool,
+) -> dict[str, Any]:
+    """Project the complete public retrieval-runtime identity."""
+
+    return {
+        **retrieval_ranker_binding(ranker_digest),
+        **runtime_environment_binding(environment_digest),
+        "runtime_environment_exact_closure_verified": exact_closure_verified is True,
+    }
+
+
+def retrieval_runtime_binding_from(value: Mapping[str, Any]) -> dict[str, Any]:
+    return retrieval_runtime_binding(
+        retrieval_ranker_digest_from(value), runtime_environment_digest_from(value),
+        value.get("runtime_environment_exact_closure_verified") is True,
+    )
+
+
 __all__ = [
     "MAX_RANKER_MODULE_BYTES",
     "RANKER_RUNTIME_MODULES",
     "is_retrieval_ranker_digest",
+    "is_retrieval_runtime_digest",
     "loaded_retrieval_ranker_digest",
+    "loaded_retrieval_runtime_root",
     "retrieval_ranker_binding",
+    "retrieval_runtime_binding",
+    "retrieval_runtime_binding_from",
     "retrieval_ranker_digest_from",
     "retrieval_ranker_digest_for_root",
+    "runtime_environment_binding",
+    "runtime_environment_digest_from",
 ]

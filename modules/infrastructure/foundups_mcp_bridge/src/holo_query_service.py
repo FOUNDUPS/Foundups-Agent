@@ -23,13 +23,24 @@ from holo_index.freshness_receipt import (
     load_freshness_receipt,
 )
 from holo_index.repository_state import read_repository_state, repository_root_digest
-from holo_index.retrieval_runtime_binding import loaded_retrieval_ranker_digest
+from holo_index.retrieval_runtime_binding import (
+    loaded_retrieval_ranker_digest,
+    loaded_retrieval_runtime_root,
+)
+from holo_index.query_receipt import digest_json
 from holo_index.storage_contract import resolve_holoindex_ssd_path
 from .reddog_holoindex_acceptance_guards import StoreProof
 from .reddog_holoindex_query_replica_descriptor import ActiveQueryReplicaBinding
 from .holo_query_service_replica import (
     build_query_replica_runtime,
     prepare_query_backend,
+)
+from .reddog_holoindex_runtime_environment_binding import (
+    OWNER_STARTUP_FORCED_ENVIRONMENT,
+    QUERY_RUNTIME_FORCED_ENVIRONMENT,
+    RuntimeEnvironmentBindingError,
+    exact_runtime_closure_verified,
+    runtime_environment_manifest,
 )
 from .holo_query_service_request import (
     ALLOWED_DOC_TYPE_FILTERS,
@@ -132,10 +143,55 @@ def _freshness_gate(
     )
 
 
+def _service_storage_paths(
+    repo_root: Path | str, canonical_input: Path | str | None,
+) -> tuple[Path, Path, Path]:
+    root = Path(repo_root).resolve(strict=False)
+    canonical = resolve_holoindex_ssd_path(canonical_input)
+    return root, canonical, freshness_receipt_path(canonical)
+
+
+def _owner_runtime_environment(
+    replica: Any, backend_factory: Callable[[Path], Any] | None,
+) -> tuple[str, str, bool]:
+    ranker_digest = loaded_retrieval_ranker_digest()
+    manifest = runtime_environment_manifest(
+        source_root=loaded_retrieval_runtime_root(),
+        ranker_digest=ranker_digest,
+        replica_binding=replica.public_binding,
+        replica_artifacts=(replica.binding.artifacts if replica.binding else ()),
+        require_complete_replica_binding=backend_factory is None,
+        required_environment=(
+            {**OWNER_STARTUP_FORCED_ENVIRONMENT, **QUERY_RUNTIME_FORCED_ENVIRONMENT}
+            if backend_factory is None else None
+        ),
+    )
+    return ranker_digest, digest_json(manifest), exact_runtime_closure_verified(manifest)
+
+
+def _service_replica_runtime(
+    *, repo_root: Path, canonical_ssd_path: Path,
+    proof: StoreProof | None,
+    injected: Callable[[], ActiveQueryReplicaBinding] | None,
+    backend_factory: Callable[[Path], Any] | None,
+) -> Any:
+    return build_query_replica_runtime(
+        repo_root=repo_root, canonical_ssd_path=canonical_ssd_path,
+        proof=proof, injected=injected, require_replica=backend_factory is None,
+    )
+
+
+def _required_owner_runtime_environment(
+    replica: Any, backend_factory: Callable[[Path], Any] | None,
+) -> tuple[str, str, bool]:
+    try:
+        return _owner_runtime_environment(replica, backend_factory)
+    except RuntimeEnvironmentBindingError:
+        raise ValueError("HOLOINDEX_RUNTIME_ENVIRONMENT_UNAVAILABLE") from None
+
+
 class HoloIndexQueryOwnerService:
     """Singleton, serialized owner for generation-pinned semantic queries."""
-
-    retrieval_runtime_ranker_digest = loaded_retrieval_ranker_digest()
 
     def __init__(
         self, *, repo_root: Path | str,
@@ -159,25 +215,25 @@ class HoloIndexQueryOwnerService:
                 max_query_chars, max_request_bytes, max_limit,
             )
         )
-        self.repo_root = Path(repo_root).resolve(strict=False)
         canonical_input = canonical_ssd_path if canonical_ssd_path is not None else ssd_path
-        self.canonical_ssd_path = resolve_holoindex_ssd_path(canonical_input)
+        self.repo_root, self.canonical_ssd_path, self.receipt_path = _service_storage_paths(
+            repo_root, canonical_input
+        )
         self.ssd_path = self.canonical_ssd_path  # compatibility: freshness authority
-        self.receipt_path = freshness_receipt_path(self.canonical_ssd_path)
         self.query_timeout_seconds, self.startup_warmup_timeout_seconds = timeout, warmup_timeout
         self.max_query_chars, self.max_request_bytes = query_chars, request_bytes
         self.max_limit = result_limit
         self._bearer_token = _captured_bearer_token(bearer_token)
         self._factory = backend_factory or _default_backend_factory
-        self._replica = build_query_replica_runtime(
-            repo_root=self.repo_root,
-            canonical_ssd_path=self.canonical_ssd_path,
-            proof=query_replica_root_proof,
-            injected=_replica_verifier_for_test,
-            require_replica=backend_factory is None,
+        self._replica = _service_replica_runtime(
+            repo_root=self.repo_root, canonical_ssd_path=self.canonical_ssd_path,
+            proof=query_replica_root_proof, injected=_replica_verifier_for_test,
+            backend_factory=backend_factory,
         )
-        self._replica_verifier, self._replica_binding = self._replica.verifier, self._replica.binding
         self.query_ssd_path = self._replica.query_ssd_path
+        (self.retrieval_runtime_ranker_digest, self.runtime_environment_digest,
+         self.runtime_environment_exact_closure_verified) = _required_owner_runtime_environment(
+            self._replica, backend_factory)
         self._repository_state_reader = repository_state_reader or read_repository_state
         self._freshness = _freshness_gate(
             self.repo_root, self.canonical_ssd_path, self.receipt_path,
@@ -293,6 +349,10 @@ class HoloIndexQueryOwnerService:
             binding=response_binding,
             retrieval_runtime_ranker_digest=(
                 self.retrieval_runtime_ranker_digest
+            ),
+            runtime_environment_digest=self.runtime_environment_digest,
+            runtime_environment_exact_closure_verified=(
+                self.runtime_environment_exact_closure_verified
             ),
             raw=raw, mode=mode,
             latency_ms=int((time.monotonic() - started) * 1000) if started else 0,

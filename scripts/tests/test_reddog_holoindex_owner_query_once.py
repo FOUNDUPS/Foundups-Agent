@@ -211,7 +211,7 @@ def test_operation_timeout_bounds_owner_start_and_query(tmp_path: Path) -> None:
     assert 0 < query_calls["timeout_seconds"] <= 5.0
 
 
-@pytest.mark.parametrize("timeout", [True, 0, -1, float("inf"), 61])
+@pytest.mark.parametrize("timeout", [True, 0, -1, float("inf"), 301])
 def test_operation_timeout_rejects_invalid_internal_budget(
     tmp_path: Path, timeout,
 ) -> None:
@@ -330,7 +330,7 @@ def test_started_owner_uses_private_handoff_and_cleans_up(tmp_path: Path) -> Non
     assert calls["repo_root"] == tmp_path
     assert calls["service_url"].startswith("http://127.0.0.1:")
     assert calls["service_token"] == "x" * 48
-    assert 0 < calls["timeout_seconds"] <= 60.0
+    assert 0 < calls["timeout_seconds"] <= 300.0
     assert calls["cleaned"] is True
 
 

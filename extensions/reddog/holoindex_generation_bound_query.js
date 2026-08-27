@@ -34,6 +34,9 @@ function hasCurrentOwnerResult(value) {
     && value.freshness_receipt_digest.length > 0
     && typeof value.repo_head_sha === 'string' && value.repo_head_sha.length > 0
     && /^sha256:[0-9a-f]{64}$/.test(String(value.repo_root_digest || ''))
+    && /^sha256:[0-9a-f]{64}$/.test(String(value.retrieval_runtime_ranker_digest || ''))
+    && /^sha256:[0-9a-f]{64}$/.test(String(value.runtime_environment_digest || ''))
+    && typeof value.runtime_environment_exact_closure_verified === 'boolean'
     && value.authority_repo_root_digest === value.repo_root_digest
     && value.workspace_repo_head_sha === value.repo_head_sha
     && value.authority_repo_head_sha === value.repo_head_sha
@@ -112,7 +115,11 @@ function receiptIdentityMatches(receipt, value) {
     && receipt.authority_repo_head_sha === value.authority_repo_head_sha
     && receipt.authority_repo_root_digest === value.authority_repo_root_digest
     && receipt.workspace_overlay_present === value.workspace_overlay_present
-    && receipt.semantic_evidence_authority === value.semantic_evidence_authority;
+    && receipt.semantic_evidence_authority === value.semantic_evidence_authority
+    && receipt.retrieval_runtime_ranker_digest === value.retrieval_runtime_ranker_digest
+    && receipt.runtime_environment_digest === value.runtime_environment_digest
+    && receipt.runtime_environment_exact_closure_verified
+      === value.runtime_environment_exact_closure_verified;
 }
 
 function receiptMatchesResult(receipt, value) {

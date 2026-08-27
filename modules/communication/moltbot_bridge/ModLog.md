@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-27: Runtime-environment receipt and resident-owner truth
+
+- Preserved the child-computed runtime-environment digest and exact-closure
+  assurance through the loopback client, generation-bound adapter, and rebuilt
+  query receipt. Missing/malformed digests reject; false exact closure remains
+  measurable but cannot satisfy A-grade admission.
+- Distinguished the 60-second Python worker adapter from the bounded
+  300-second CLI/asynchronous VSIX cold path. Current post-restart semantic
+  startup failed closed at 60 and 180 seconds; historical exact-commit timing
+  is not current availability evidence. Resident owner reuse remains P0.
+- No Holo maintenance, repository, dispatch, promotion, or package-install
+  authority was added. (WSP 00/15/22/50/62/83/87/97)
+- Extracted the shared retrieval-runtime evidence projection into HoloIndex;
+  the communication client is 672 lines, below its 675-line domain ceiling,
+  and no candidate-grown function exceeds the WSP_62 limit.
+
 ## 2026-08-27: Exact-main cold owner readiness closure
 
 - Ran the real broker-managed OpenClaw maintenance path at exact main

@@ -321,6 +321,8 @@ const hgbqGeneration = 'sha256:' + 'a'.repeat(64);
 const hgbqFreshnessDigest = 'sha256:' + 'b'.repeat(64);
 const hgbqHead = 'c'.repeat(40);
 const hgbqRootDigest = 'sha256:' + 'd'.repeat(64);
+const hgbqRankerDigest = 'sha256:' + 'e'.repeat(64);
+const hgbqRuntimeDigest = 'sha256:' + 'f'.repeat(64);
 const hgbqSemanticEvidence = {
   schema_version: 'holoindex_semantic_evidence.v1',
   code_hits: [{ path: 'modules/foundups/pfmall/api.py', preview: 'PFMall implementation API.' }],
@@ -357,6 +359,9 @@ const hgbqReceipt = {
   index_gap_detected: false,
   stale_reasons: [],
   no_holoindex_reindex_performed: true,
+  retrieval_runtime_ranker_digest: hgbqRankerDigest,
+  runtime_environment_digest: hgbqRuntimeDigest,
+  runtime_environment_exact_closure_verified: false,
   semantic_evidence_digest: holoGenerationBoundQuery.semanticEvidenceDigest(hgbqSemanticEvidenceJson),
   semantic_evidence_count: 2
 };

@@ -73,6 +73,8 @@ MAX_LIMIT = 20
 MAX_MODULE_HINT_CHARS = 512
 MAX_MUST_INCLUDE = 40
 MAX_MUST_INCLUDE_CHARS = 1024
+DEFAULT_OPERATION_TIMEOUT_SECONDS = 300.0
+MAX_OPERATION_TIMEOUT_SECONDS = 300.0
 _REQUEST_KEYS = frozenset({
     "query", "limit", "retrieval_mode", "include_bundle", "module_hint",
     "must_include", "bundle_only",
@@ -570,7 +572,10 @@ def _operation_deadline(value: float | None) -> float | None:
     if isinstance(value, bool):
         raise ValueError("operation_timeout_invalid")
     timeout = float(value)
-    if not math.isfinite(timeout) or timeout <= 0 or timeout > 60:
+    if (
+        not math.isfinite(timeout) or timeout <= 0
+        or timeout > MAX_OPERATION_TIMEOUT_SECONDS
+    ):
         raise ValueError("operation_timeout_invalid")
     return time.monotonic() + timeout
 
@@ -703,7 +708,7 @@ def query_once(
     resolve_ssd_path: Callable[[], Path] = resolve_holoindex_ssd_path,
     resolve_replica_route: Callable[..., Any] = resolve_query_replica_owner_route,
     bundle_builder: Callable[..., Mapping[str, Any]] = build_wsp_memory_bundle,
-    operation_timeout_seconds: float | None = 60.0,
+    operation_timeout_seconds: float | None = DEFAULT_OPERATION_TIMEOUT_SECONDS,
     query_environment: Mapping[str, str] | None = None,
 ) -> Mapping[str, Any]:
     """Execute one owner-bound query and always clean up process-owned state."""
@@ -737,7 +742,7 @@ def query_once(
 
 def _cli_operation_timeout(argv: list[str]) -> float | None:
     if not argv:
-        return 60.0
+        return DEFAULT_OPERATION_TIMEOUT_SECONDS
     if len(argv) != 2 or argv[0] != "--operation-timeout-seconds":
         raise ValueError("invalid_arguments")
     timeout = float(argv[1])

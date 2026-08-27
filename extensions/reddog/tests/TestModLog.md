@@ -1,5 +1,22 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Runtime-environment binding release (0.4.124)
+
+- Rebound version, authenticated contract shards, backend manifest, and VSIX
+  expectations to the runtime-environment identity transaction.
+- Added a deterministic checked-in shard-manifest producer so shard hashes,
+  aggregate identity, line ranges, and duplicated guard constants are generated
+  and independently checkable rather than hand-edited.
+- Added no passing cold-start claim; current one-shot timeout evidence remains
+  explicit and resident owner activation stays P0.
+- Fast 14/14, contract 3/3, package, and exhaustive 4/4 release gates pass.
+  The final source closure is 1,356 files at `76911818b5f2...47461`; package
+  identity is 67 files below the 1 MiB cap; the exhaustive
+  wall is 190.138 seconds. Focused Python evidence is 611 passed / one expected
+  capability skip.
+- Built `O:\RedDog-Releases\reddog-0.4.124.vsix`; its exact size and SHA-256
+  are recorded externally because they identify the built artifact, not source.
+
 ## 2026-08-27 - Cold-owner readiness documentation release (0.4.123)
 
 - Rebound the authenticated 18-shard contract from 0.4.122 to 0.4.123 because

@@ -1,5 +1,15 @@
 # foundups_mcp_bridge Tests
 
+## Exact retrieval runtime-environment binding
+
+- Adversarial tests cover executable/source mutation, manifest parity, raw
+  site-package link/reparse rejection, distribution metadata limits and
+  collisions, required-environment mismatch, replica/model completeness, and
+  secret/path-free public projection.
+- Supervisor/health/client tests prove the authenticated child digest is
+  captured and mismatches fail closed. Production A-grade assurance remains
+  false until installed distribution payload bytes have an exact closure.
+
 ## Owner-loaded retrieval ranker binding
 
 - Runtime-binding tests prove source changes alter the digest and reject mixed

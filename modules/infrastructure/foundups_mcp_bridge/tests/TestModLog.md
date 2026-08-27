@@ -1,5 +1,18 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-27] Runtime-environment binding falsification
+
+- Added exact source-byte/manifest parity, descriptor-stable read, actual
+  environment, replica/model, executable, distribution metadata, raw-link,
+  health, supervisor, client, and receipt falsifiers.
+- Added WSP_62 bounds for the changed supervisor and preserved isolated/sharded
+  execution for import-sensitive suites. Live cold-start timeout remains
+  operational debt rather than a passing test claim.
+- Repaired synthetic supervisor capabilities to carry the same exact four-field
+  replica identity expected by the runtime-digest resolver; the six-file
+  supervisor surface passes 276 tests and the service/runtime surface passes
+  145 tests with one expected platform-capability skip after manifest sealing.
+
 ## [2026-08-27] Owner-loaded retrieval ranker binding falsification
 
 - Proved the digest changes with any bound source file, all modules must share

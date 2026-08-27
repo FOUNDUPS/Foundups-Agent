@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-08-27 - HOLO RUNTIME CANDIDATE BINDING HARDENING
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 83, 87, 97
+
+- Changed the public benchmark to capture the authenticated owner's actual
+  runtime-environment digest instead of predicting child state from the parent.
+- Retained one owner across the probe and complete held-out corpus, with final
+  cleanup, eliminating repeated cold owner startup inside one benchmark.
+- Made A-grade composition reject every run whose query receipts do not prove
+  exact runtime closure. Installed dependency payload bytes remain unverified,
+  so current production evidence cannot pass this gate.
+- Added no ranker, index, route, repository, signer, or promotion authority.
+
 ## 2026-08-27 - INDEPENDENT HOLO A-GRADE EVIDENCE GATE
 
 **Author**: 0102 | WSP: 00, 15, 22, 50, 62, 87, 97

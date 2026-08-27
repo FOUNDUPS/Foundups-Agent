@@ -6,6 +6,12 @@ The loopback owner client preserves all four immutable-replica binding fields.
 It also requires and preserves the digest computed from the ranker modules
 actually loaded by the owner. The resident safe projection carries that digest
 into its rebuilt receipt instead of dropping it at the worker boundary.
+The same path now preserves the child-computed runtime-environment digest and
+the explicit exact-closure assurance flag. The digest covers executable,
+ABI/platform, verified RedDog source bytes, distribution build records,
+replica/model artifacts, and actual allowlisted settings. Exact installed
+package payload bytes remain unverified, so A-grade admission rejects even when
+ordinary query evidence is otherwise valid.
 The one-shot bridge compares them with the route admitted before owner startup;
 an absent, malformed, or different replica fails closed. This propagates
 response identity only and grants no maintenance, route, repository, or model authority.
@@ -13,8 +19,9 @@ response identity only and grants no maintenance, route, repository, or model au
 Resident audit workers use `GenerationBoundHoloIndexQueryAdapter` in a bounded
 child, admit only equal CURRENT repository/authority/replica bindings, and
 project signed-scope hit metadata into a new receipt; raw buckets never enter
-Fusion. The 60-second boundary gives the child at most 57 seconds and keeps
-three seconds for cleanup. Windows venv callers reuse the supervisor-vetted
+Fusion. The Python worker adapter retains its explicit 60-second boundary;
+the canonical CLI and asynchronous VSIX cold path are bounded at 300 seconds
+to cover the existing 270-second readiness canary. Windows venv callers reuse the supervisor-vetted
 runtime/site-packages through a scrubbed isolated `-S -B` environment; required
 runtime/Holo values cross while credentials and Python overrides do not.
 Committed authority permits overlays, while `clean_workspace_head` does not.
@@ -26,10 +33,11 @@ HEAD. Process-local serialization and cold children remain phase-1 correctness
 limits, not throughput claims.
 No outbound Hermes dispatch is performed.
 
-Exact-main cold availability is proven for the current phase-1 boundary. It is
-not an A-grade or horizontal-scale claim: runtime-environment identity,
-independent evaluator/proposer trust, non-test admission, promotion/canary/
-rollback, and outcome learning remain open.
+Historical exact-main cold availability does not prove the current runtime.
+Post-restart live calls failed closed at 60 and 180 seconds, so normal RedDog
+operation needs one resident authenticated owner rather than a cold child per
+query. Exact dependency bytes, independent evaluator/proposer trust, non-test
+admission, promotion/canary/rollback, and outcome learning remain open.
 
 The resident launcher requires the root FastAPI/Uvicorn runtime. Acceptance used
 the repository `.venv`; an ambient interpreter missing FastAPI failed before

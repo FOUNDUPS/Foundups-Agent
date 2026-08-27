@@ -9,12 +9,14 @@ scaffold). The broader AI Overseer roadmap lives in README.md / ModLog.md.
   injected signature-verifier seam; independent signing trust is not deployed.
   Its thresholds are non-downgradable and its callable facade is content-bound
   in the backend closure, but no non-test/VSIX operation invokes it yet.
-  Once the candidate lands, publish an exact-main
-  generation, rerun the public corpus, and obtain an independently administered
-  sealed evaluation. First close the current cold-owner P0 and bind a sealed
-  Python executable/dependency/build environment plus deterministic execution
-  knobs. Promotion, canary, rollback, and outcome learning remain separate
-  authority transactions.
+  Runtime identity now binds the child executable, ABI/platform, verified
+  RedDog source bytes, distribution build records, replica/model closure, and
+  actual controls; the gate rejects because installed dependency payload bytes
+  are not exact-closure verified. The benchmark reuses one owner across its
+  corpus, but RedDog still needs a resident authenticated owner for normal
+  operation. Then publish an exact-main generation, rerun the public corpus,
+  and obtain an independently administered sealed evaluation. Promotion,
+  canary, rollback, and outcome learning remain separate authority transactions.
 
 ## Landed
 

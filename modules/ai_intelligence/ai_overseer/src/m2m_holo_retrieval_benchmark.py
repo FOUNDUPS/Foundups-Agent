@@ -9,7 +9,10 @@ from typing import Any, Mapping
 
 from holo_index.authority_worktree import resolve_holoindex_authority_root
 from holo_index.query_receipt import digest_json, file_digest
-from holo_index.retrieval_runtime_binding import retrieval_ranker_digest_for_root
+from holo_index.retrieval_runtime_binding import (
+    is_retrieval_runtime_digest,
+    retrieval_ranker_digest_for_root,
+)
 from holo_index.storage_contract import resolve_holoindex_ssd_path
 from holo_index.retrieval_autoresearch import (
     RetrievalCandidateBinding,
@@ -22,6 +25,9 @@ from holo_index.retrieval_autoresearch import (
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (
     build_owner_query_environment,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_bootstrap import (
+    cleanup_reddog_holoindex_owner,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (
     resolve_query_replica_owner_route,
@@ -41,6 +47,10 @@ CORPUS_PATH = Path(
     "m2m_holo_retrieval_benchmark/retrieval_corpus_v1.json"
 )
 QUALITY_THRESHOLD = 0.95
+
+
+def _retain_owner() -> None:
+    """Keep the benchmark's authenticated owner resident until final cleanup."""
 
 
 def _case(value: Any) -> RetrievalCase:
@@ -120,6 +130,30 @@ def _limit(payload: Mapping[str, Any]) -> int:
     return limit
 
 
+def _runtime_probe(
+    repo_root: Path, environment: Mapping[str, str],
+    binding: Any, ranker_digest: str,
+) -> str:
+    probe = query_holoindex_owner_once(
+        {
+            "query": "HoloIndex retrieval runtime binding", "limit": 1,
+            "retrieval_mode": "semantic",
+        },
+        repo_root=repo_root, query_environment=environment,
+        cleanup_owner=_retain_owner,
+    )
+    if probe.get("ok") is not True:
+        raise ValueError(str(probe.get("error") or "owner_query_failed"))
+    if probe.get("repo_root_digest") != binding.canonical_repo_root_digest:
+        raise ValueError("query_owner_repo_root_mismatch")
+    if probe.get("retrieval_runtime_ranker_digest") != ranker_digest:
+        raise ValueError("query_owner_ranker_runtime_mismatch")
+    digest = str(probe.get("runtime_environment_digest") or "")
+    if not is_retrieval_runtime_digest(digest):
+        raise ValueError("query_owner_environment_runtime_invalid")
+    return digest
+
+
 def _candidate(
     repo_root: Path, limit: int
 ) -> tuple[RetrievalCandidateBinding, dict[str, str]]:
@@ -147,6 +181,9 @@ def _candidate(
         "retrieval_mode": "semantic",
     })
     ranker_digest = retrieval_ranker_digest_for_root(authority.selected_root)
+    environment_digest = _runtime_probe(
+        repo_root, environment, binding, ranker_digest,
+    )
     fields = {
         "generation_id": binding.generation_id,
         "freshness_receipt_digest": binding.canonical_receipt_digest,
@@ -154,6 +191,7 @@ def _candidate(
         "repo_root_digest": binding.canonical_repo_root_digest,
         "config_digest": config_digest,
         "ranker_digest": ranker_digest,
+        "runtime_environment_digest": environment_digest,
     }
     return (
         RetrievalCandidateBinding(
@@ -175,6 +213,7 @@ def _query(
         {"query": query, "limit": limit, "retrieval_mode": "semantic"},
         repo_root=repo_root,
         query_environment=query_environment,
+        cleanup_owner=_retain_owner,
     )
     if result.get("ok") is not True:
         raise ValueError(str(result.get("error") or "owner_query_failed"))
@@ -182,32 +221,33 @@ def _query(
         raise ValueError("query_owner_repo_root_mismatch")
     if result.get("retrieval_runtime_ranker_digest") != binding.ranker_digest:
         raise ValueError("query_owner_ranker_runtime_mismatch")
+    if result.get("runtime_environment_digest") != binding.runtime_environment_digest:
+        raise ValueError("query_owner_environment_runtime_mismatch")
     return result
 
 
 def _run_verified_benchmark(repo_root: Path, limit: int):
     corpus, source_digest = _load_corpus(repo_root)
-    candidate, query_environment = _candidate(repo_root, limit)
-    run = run_generation_bound_benchmark(
-        corpus=corpus,
-        split="heldout",
-        binding=candidate,
-        query_runner=lambda query, k, binding: _query(
-            repo_root, query, k, binding, query_environment
-        ),
-        k=limit,
-        corpus_source_digest=source_digest,
-    )
-    verification = verify_generation_bound_benchmark(
-        corpus=corpus,
-        run=run,
-        verifier_digest=file_digest(
-            repo_root / "holo_index" / "retrieval_autoresearch.py"
-        ),
-        expected_corpus_source_digest=source_digest,
-        expected_candidate_binding=candidate,
-    )
-    return run, verification
+    try:
+        candidate, query_environment = _candidate(repo_root, limit)
+        run = run_generation_bound_benchmark(
+            corpus=corpus, split="heldout", binding=candidate,
+            query_runner=lambda query, k, binding: _query(
+                repo_root, query, k, binding, query_environment
+            ),
+            k=limit, corpus_source_digest=source_digest,
+        )
+        verification = verify_generation_bound_benchmark(
+            corpus=corpus, run=run,
+            verifier_digest=file_digest(
+                repo_root / "holo_index" / "retrieval_autoresearch.py"
+            ),
+            expected_corpus_source_digest=source_digest,
+            expected_candidate_binding=candidate,
+        )
+        return run, verification
+    finally:
+        cleanup_reddog_holoindex_owner()
 
 
 def _result(run: Mapping[str, Any], verification: Mapping[str, Any]) -> dict[str, Any]:
