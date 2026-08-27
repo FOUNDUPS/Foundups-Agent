@@ -1,10 +1,11 @@
 # moltbot_bridge Roadmap
 
-- P0 CURRENT COLD-START AVAILABILITY: two governed 60-second one-shot queries
-  timed out on the current candidate, and a no-operation-deadline diagnostic
-  produced no readiness proof inside 300 seconds. Preserve fail-closed truth.
-  Diagnose resident-owner/model/snapshot cold initialization in a separate
-  focused transaction; do not raise budgets before measuring the blocked pole.
+- COMPLETE PHASE-1 COLD-START AVAILABILITY: the exact-main OpenClaw maintenance
+  transaction completed and three fresh governed one-shot queries returned
+  CURRENT/no-gap/no-reindex in about 34 seconds. A warm governed query completed
+  in 10.3 seconds after a 25.5-second bootstrap. This closes the prior cold
+  availability P0 without raising the 60-second wall; it is not a throughput or
+  horizontal-scale claim.
 - IMPLEMENTED CANDIDATE RANKER TRUTH: the owner client and resident adapter
   preserve the owner-loaded ranker digest end to end. Retrieval grading rejects
   a digest that differs from its clean authority candidate.
@@ -12,13 +13,12 @@
   ABI/platform, dependency/build, and deterministic-knob manifest digest.
   Source-ranker equality alone is not A-grade/RSI environment identity.
 
-- CURRENT EXACT-MAIN EVIDENCE: after the earlier `61c2c300` canary and manual
-  `a7302344` recovery, the automatic post-merge transaction completed through
-  the real broker-managed OpenClaw supervisor at exact main `cfd1e0051`,
-  generation `sha256:60d06274...`. AgentDB claim/completion bindings validated;
-  a fresh owner query returned CURRENT/no-gap/no-reindex and full immutable
-  revalidation preserved all 33 artifacts. This closes the automatic
-  activation-order candidate gate for that commit only.
+- LATEST RECORDED EXACT-MAIN EVIDENCE: the automatic post-merge transaction completed
+  through the real broker-managed OpenClaw supervisor at exact main
+  `66526ae5c`, generation `sha256:f2013aeb...`. AgentDB claim/completion bindings
+  validated; three fresh owner queries and one warm query returned
+  CURRENT/no-gap/no-reindex, and full immutable revalidation preserved all 33
+  artifacts / 221,204,272 bytes. This evidence authorizes that commit only.
 
 - IMPLEMENTED / HISTORICAL EXACT-HEAD CANARY EVIDENCE: the default resident/OpenClaw read-only audit worker now reaches
   the verified Holo query-replica resolver through the existing one-shot owner

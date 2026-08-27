@@ -1,5 +1,24 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-27: Exact-main cold-owner readiness closure
+
+The existing broker-managed OpenClaw/AgentDB post-merge path completed at exact
+main `66526ae5cdd0467ce264c1db4122ab82eadb7733`, generation
+`sha256:f2013aeb...`, with retry count zero and a CURRENT revision-10 route.
+Three fresh-process governed owner queries completed on attempt one in about 34
+seconds each. A separately pre-warmed owner started in 25.5 seconds and served
+the same governed path in 10.3 seconds. Full production verification retained
+all 33 artifacts / 221,204,272 bytes and the same descriptor, replica, and path
+identities. The former cold-owner P0 is closed for this exact commit without
+increasing a timeout. This is single-owner usability evidence, not a horizontal
+scale, A-grade quality, or retrieval-quality RSI claim.
+
+WSP_15 scores the next runtime-environment sealing transaction 17/P0: source
+binding is insufficient until the owner executable, ABI/platform, exact
+dependency/build identities, model/runtime closure, and deterministic knobs are
+published once and carried as a separate digest. Evaluator/proposer trust and
+production promotion remain subsequent authority transactions.
+
 ## 2026-08-27: Owner-loaded retrieval ranker attestation
 
 The owner now emits a SHA-256 manifest digest for the ten retrieval/ranking
@@ -264,14 +283,13 @@ snapshot-set wire name is owned by the existing lightweight contract, while
 NumPy-backed store validation is deferred until materialization. A no-site-
 packages subprocess regression guards that boundary.
 
-The currently active exact-main replica is intentionally unchanged and still
-contains the prior 8.33 GB legacy closure; observed cold owner queries were
-122--153 seconds, including a fresh 120-second bounded-shell overrun during
-this slice. After merge, the required operational sequence is governed
-exact-main Holo maintenance, immutable narrow materialization, full descriptor
-verification, serialized route CAS, one real owner query, and unchanged
-post-query digests. Historical replicas remain immutable; retention and
-deletion stay out of scope.
+Historical exact-main replicas containing the prior 8.33 GB legacy closure
+produced 122--153 second cold owner queries. The exact-`66526ae5` acceptance
+route selected a narrow 33-artifact / 221,204,272-byte
+replica. Broker-managed refresh, immutable materialization, serialized route
+CAS, three fresh-process queries, one pre-warmed query, and unchanged full
+descriptor verification all passed. Historical replicas remain immutable;
+retention and deletion stay out of scope.
 
 ## 2026-08-21: Streamable HTTP `/mcp` and governed Holo bundle
 
@@ -537,10 +555,10 @@ ambiguous-query, and adversarial lookup behavior is pinned by focused tests.
 **Deferred:** post-commit exact-SHA maintenance/publication and live governed
 owner acceptance. The resident owner is not restarted by this change.
 
-## Current P0: HoloIndex / RedDog Operational Truth Boundary POC
+## Historical Phase-1: HoloIndex / RedDog Operational Truth Boundary POC
 
 **Priority:** 20 / P0 under WSP_15
-**Phase:** Implementation present; focused validation/PR evidence pending
+**Phase:** Exact-main implementation and live acceptance complete at `66526ae5`
 **Owner:** 0102 architect for 012
 
 The Phase-1 target is one query/health-only HoloIndex owner, one trusted-host
@@ -548,10 +566,10 @@ maintenance handshake, process-private bearer handoff, exact clean-HEAD and gene
 binding, semantic-only health, and complete canonical proof for all seven
 baseline collections.
 
-Acceptance will require the focused HoloIndex, owner lifecycle, HTTP, RedDog
+Acceptance included the focused HoloIndex, owner lifecycle, HTTP, RedDog
 boundary, startup-dispatch, and operational-consumer matrices plus static
-contract checks. The persistent store is not current for the merge SHA until
-the post-merge activation run completes.
+contract checks. The exact-main post-merge task, fresh/warm governed owner
+queries, and immutable replica revalidation are complete.
 
 ## Post-Merge Activation
 
@@ -567,18 +585,19 @@ the post-merge activation run completes.
 
 ## Next Operational Slices
 
-- Bind the resident RedDog/WRE control loop to the owner handoff without
-  granting query workers index-write authority.
-- Add durable maintenance-request receipts and retry/backoff policy owned by
-  WRE, not by the query process.
-- Add post-merge scheduled refresh and generation-health monitoring.
+- Publish and verify a sealed runtime-environment digest without hashing a
+  complete environment on every query.
+- Deploy independently administered evaluator trust and authenticated proposer
+  provenance for the sealed corpus.
+- Wire one non-test admission consumer to a separate promotion/canary/rollback/
+  outcome-learning authority; query workers retain no write authority.
 - Migrate or explicitly retire the legacy `src/holo_tools.py` direct-store
   HoloIndex consumer.
 - Replace the cooperative-writer/exclusive-window POC assumption with an
   immutable exact-commit source snapshot, and add orphan-process reclamation
   for abrupt host death.
-- Add semantic recall/capacity gates for representative FoundUp creation,
-  repair, and enhancement tasks.
+- Pass semantic recall/capacity gates for representative FoundUp creation,
+  repair, and enhancement tasks before any A-grade claim.
 - Prove governed build-to-test-to-draft-PR recursion in isolated worktrees
   before considering unattended merge authority.
 

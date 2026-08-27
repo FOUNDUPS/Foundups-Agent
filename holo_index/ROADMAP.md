@@ -2,15 +2,23 @@
 
 ## [2026-08-27] A-grade retrieval truth gate
 
-Exact-main freshness repair is operational at audited base `b5b4de05`,
-generation `sha256:67271e6b...`: owner queries are CURRENT, no-gap, and
-query-only. Retrieval quality is not A-grade. The current governed public run
-passed Recall@8 at `1.0` but failed its `0.95` policy at MRR `0.9167` and
-nDCG@8 `0.8718`; p95 semantic-query latency was approximately `4.25s` and the
-full six-case cold benchmark took approximately `206s` because replica
+Exact-main freshness repair is operational at audited main
+`66526ae5cdd0467ce264c1db4122ab82eadb7733`, generation
+`sha256:f2013aeb...`: owner queries are CURRENT, no-gap, and query-only. The
+broker-managed OpenClaw/AgentDB task completed with no retry; three independent
+fresh-process queries completed in approximately 34 seconds each, and one
+pre-warmed governed query completed in 10.3 seconds after a 25.5-second owner
+bootstrap. Full verification retained the exact 33-artifact, 221,204,272-byte
+replica closure unchanged. The previous cold-owner P0 is therefore closed for
+this exact commit without increasing any timeout.
+
+Retrieval quality is not A-grade. The latest governed public run, recorded at
+base `b5b4de05`, passed Recall@8 at `1.0` but failed its `0.95` policy at MRR
+`0.9167` and nDCG@8 `0.8718`; p95 semantic-query latency was approximately
+`4.25s` and the full six-case cold benchmark took approximately `206s` because replica
 admission rehashed the reachable sealed closure.
 
-The active P0 candidate gives exact indexed `symbol` metadata deterministic
+The merged gate gives exact indexed `symbol` metadata deterministic
 search-time weight, corrects one intent-inverted graded judgment, and adds an
 independent A-grade evidence gate. The gate requires a signature-verifier-approved,
 public-corpus-disjoint sealed evaluation with at least 30 cases, all three
@@ -19,14 +27,13 @@ Those floors cannot be weakened. It performs no ranker change, reindex,
 repository write, or promotion. Its facade is backend-content-bound but has no
 non-test/VSIX caller while independent evaluator trust remains unadministered.
 
-Required activation sequence once the candidate lands: first close the current
-P0 cold-owner failure (two 60-second timeouts and no readiness proof inside a
-300-second diagnostic), publish an exact-main generation, then rerun the public
-corpus. Before independent sealed evaluation, bind a once-published exact owner
+The activation, exact-main generation, and cold-owner proof are complete for
+`66526ae5`. The next focused transaction must bind a once-published exact owner
 executable/dependency/environment manifest and deterministic execution knobs.
-A separate evaluator trust boundary, promotion authority, canary, rollback,
-and outcome-learning transaction remain required before retrieval-quality RSI
-can be declared operational.
+After that, a separately administered evaluator trust boundary and authenticated
+proposer provenance must be deployed. A non-test admission consumer plus a
+separate promotion authority, canary, rollback, and outcome-learning transaction
+remain required before retrieval-quality RSI can be declared operational.
 
 ## [2026-08-23] Exact-module Tier-0 producer compatibility
 

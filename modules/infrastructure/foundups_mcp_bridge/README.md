@@ -42,11 +42,12 @@ the returned expected manifests against any later source change. The planner
 performs no copy, route change, maintenance, owner launch, or activation.
 
 The planner, compact materializer, private route record/CAS store, crash
-journal, and inert-by-default activation controller are completed layers. A
-manual governed activation at exact main `a7302344424615dc9d061ef408c2de2508660b81`
-selected generation `sha256:d654414a...`, passed the stable-route query, and
-left the immutable replica unchanged. That receipt proves the controller, not
-automatic post-merge composition for a later commit.
+journal, and inert-by-default activation controller are completed layers. The
+broker-managed OpenClaw/AgentDB path completed at exact main
+`66526ae5cdd0467ce264c1db4122ab82eadb7733`, selected generation
+`sha256:f2013aeb...`, passed fresh and pre-warmed stable-route queries, and left
+the immutable replica unchanged. That receipt is exact-commit evidence; it does
+not attest a later commit or retrieval-quality A-grade/RSI.
 
 `reddog_holoindex_query_route_contract.py`,
 `reddog_holoindex_query_route_store.py`, and the extracted confined
@@ -113,8 +114,12 @@ then reacquires the lease and revalidates authority, repository, and
 `origin/main` before durable completion. This ordering passed the real
 broker-managed OpenClaw/AgentDB path at exact main `cfd1e0051`: generation
 `sha256:60d06274...` was activated, the task completed, and a later governed
-owner query plus full immutable revalidation remained unchanged. Later HEADs
-still require their own exact-SHA transaction.
+owner query plus full immutable revalidation remained unchanged. The same path
+later completed at exact main `66526ae5`, generation `sha256:f2013aeb...`, with
+retry count zero. Three fresh-process queries completed in about 34 seconds
+each and a pre-warmed governed query in 10.3 seconds; all 33 artifacts /
+221,204,272 bytes then reverified unchanged. Each gate is closed only for its
+named commit.
 
 At later exact main `a48e9b61`, the route-continuity repair reached canonical
 generation `sha256:7102c478...` and committed route revision 5. The first
@@ -191,11 +196,11 @@ repository/receipt/leases, and the same runtime closure. The sealed backend has
 no Chroma/SQLite/HNSW path. The 15-second query deadline is unchanged. The
 previous full-tree live replica demonstrated why this narrowing is necessary:
 its 8.33 GB closure produced 122--153 second cold owner queries. The narrow
-materializer is synthetically verified and completed one exact-main live
-materialization/activation at `cfd1e0051`. The resulting 33-artifact,
-220,800,343-byte replica returned a fresh CURRENT query and passed full
-unchanged post-query proof. This is correctness evidence, not a horizontal
-throughput claim.
+materializer is synthetically verified and has completed live exact-main
+materialization/activation at `cfd1e0051` and `66526ae5`. The latter
+33-artifact, 221,204,272-byte acceptance replica returned fresh and pre-warmed CURRENT
+queries and passed full unchanged post-query proof. This is correctness and
+single-owner readiness evidence, not a horizontal throughput claim.
 
 R16-R19 made route, binding fields, and health containers exact. R20 makes
 health transport scalars exact before any conversion: literal `127.0.0.1`,

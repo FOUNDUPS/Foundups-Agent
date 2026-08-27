@@ -420,7 +420,7 @@ this process. Any semantic, source-completeness, repository-race, receipt, or
 restart failure remains non-operational. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
 
-Scope note: one-shot query, maintenance, promotion, and the post-merge composer consume the same verified route. Query/promotion consumers remain read-only; only the trusted controller creates/materializes/commits a route and emits its receipt. Automatic post-merge composition passed production-shaped acceptance through the real OpenClaw/AgentDB path at exact main `cfd1e0051`; a fresh owner query and full immutable revalidation remained unchanged. Later HEADs require their own exact-SHA transaction.
+Scope note: one-shot query, maintenance, promotion, and the post-merge composer consume the same verified route. Query/promotion consumers remain read-only; only the trusted controller creates/materializes/commits a route and emits its receipt. Automatic post-merge composition passed production-shaped acceptance through the real OpenClaw/AgentDB path at exact main `cfd1e0051` and again at `66526ae5`; the latter retained generation `sha256:f2013aeb...`, passed three fresh-process queries plus one pre-warmed governed query, and reverified all 33 immutable artifacts unchanged. Later HEADs require their own exact-SHA transaction.
 The legacy `src/holo_tools.py` MCP surface still opens the HoloIndex store
 directly and remains a registered migration item; Phase 1 does not claim that
 all repository consumers cross this boundary. Normal cleanup is bounded, and

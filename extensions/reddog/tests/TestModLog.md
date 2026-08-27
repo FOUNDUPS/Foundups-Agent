@@ -1,5 +1,16 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Cold-owner readiness documentation release (0.4.123)
+
+- Rebound the authenticated 18-shard contract from 0.4.122 to 0.4.123 because
+  the package README changed; backend behavior and its 1,355-file manifest did
+  not change.
+- Fast, conversation, contract, package, and four-group exhaustive release
+  tiers passed. WSP_97 validation passed 74 tests with one expected capability
+  skip; the deterministic package surface is 67 files / 944,804 bytes.
+- Built `O:\RedDog-Releases\reddog-0.4.123.vsix`: 275,471 bytes,
+  `sha256:10a7fa644c7492268259413fed536bf7a882c9dde9dce1cad5dafe11960ffb13`.
+
 ## 2026-08-27 - Holo source-ranker evidence gate (0.4.122)
 
 - Advanced current-version fixtures and the authenticated exhaustive shards so

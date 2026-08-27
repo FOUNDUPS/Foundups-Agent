@@ -1,5 +1,33 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-27] HoloIndex Exact-Main Readiness and A-Grade Truth
+
+**WSP Protocols:** WSP 00, 15, 22, 50, 62, 83, 84, 87, 97
+
+- PR #1573 merged the RedDog 0.4.122 source-ranker binding and evidence-only
+  A-grade gate at exact main `66526ae5`; it did not authorize ranker promotion
+  or claim retrieval-quality RSI.
+- The existing broker-managed OpenClaw/AgentDB post-merge path then completed
+  for that exact commit with retry count zero and activated generation
+  `sha256:f2013aeb...` on CURRENT route revision 10.
+- Three fresh-process governed queries completed on attempt one in about 34
+  seconds each. A separately pre-warmed owner started in 25.5 seconds and served
+  the same governed path in 10.3 seconds. Full verification retained the exact
+  33-artifact / 221,204,272-byte replica unchanged. No timeout or runtime code
+  changed in this evidence transaction.
+- HoloIndex is usable by 0102 and RedDog, and exact-generation maintenance RSI
+  is operational. Retrieval-quality A-grade/RSI remains false: the latest public
+  MRR/nDCG baseline fails policy, runtime-environment identity is unsealed,
+  independent evaluator/proposer trust is undeployed, and no non-test admission
+  consumer reaches promotion/canary/rollback/outcome learning.
+- The packaged readiness wording advances RedDog to 0.4.123. All release tiers
+  passed and `O:\RedDog-Releases\reddog-0.4.123.vsix` is 275,471 bytes with
+  SHA-256 `10a7fa644c7492268259413fed536bf7a882c9dde9dce1cad5dafe11960ffb13`.
+- Evidence:
+  `docs/audits/infrastructure/HOLOINDEX_COLD_OWNER_READINESS_EVIDENCE_PHASE1.json`
+  and
+  `docs/audits/infrastructure/HOLOINDEX_COLD_OWNER_READINESS_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## [2026-08-27] RedDog Stable-Route Resolver Correction (0.4.119 candidate)
 
 **WSP Protocols:** WSP 00, 5, 15, 22, 50, 62, 84, 87, 97

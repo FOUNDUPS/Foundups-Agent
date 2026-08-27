@@ -18,17 +18,18 @@ three seconds for cleanup. Windows venv callers reuse the supervisor-vetted
 runtime/site-packages through a scrubbed isolated `-S -B` environment; required
 runtime/Holo values cross while credentials and Python overrides do not.
 Committed authority permits overlays, while `clean_workspace_head` does not.
-The real OpenClaw post-merge path passed at exact main `cfd1e0051`; a later
-owner query was CURRENT/no-gap/no-reindex and immutable revalidation was
-unchanged. Evidence never authorizes a later HEAD. Process-local serialization
-and cold children remain phase-1 correctness limits, not throughput claims.
+The real OpenClaw post-merge path passed at exact main `66526ae5c`; three fresh
+owner queries were CURRENT/no-gap/no-reindex in about 34 seconds, a warm
+governed query took 10.3 seconds after a 25.5-second bootstrap, and immutable
+revalidation preserved all 33 artifacts. Evidence never authorizes a later
+HEAD. Process-local serialization and cold children remain phase-1 correctness
+limits, not throughput claims.
 No outbound Hermes dispatch is performed.
 
-Current candidate cold-start truth is degraded: two governed 60-second
-one-shot attempts timed out, and a diagnostic did not establish readiness
-inside 300 seconds. Historical 32.5-second success is not current availability
-evidence. Resident-owner reuse/cold-start repair remains P0 and must not be
-solved by weakening freshness, runtime binding, or timeout truth.
+Exact-main cold availability is proven for the current phase-1 boundary. It is
+not an A-grade or horizontal-scale claim: runtime-environment identity,
+independent evaluator/proposer trust, non-test admission, promotion/canary/
+rollback, and outcome learning remain open.
 
 The resident launcher requires the root FastAPI/Uvicorn runtime. Acceptance used
 the repository `.venv`; an ambient interpreter missing FastAPI failed before

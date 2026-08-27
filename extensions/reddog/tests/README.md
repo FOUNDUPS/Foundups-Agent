@@ -1,5 +1,14 @@
 # RedDog Extension Tests
 
+## 0.4.123 cold-owner readiness documentation release
+
+The packaged README now reports the exact-main cold-owner acceptance instead of
+the superseded candidate failure. Because README is one of 67 immutable package
+members, the version advances rather than rebuilding 0.4.122 with different
+bytes. Fast, conversation, contract, package, and four-group exhaustive release
+tiers pass. The 944,804-byte package surface remains below its 1 MiB cap and the
+1,355-file authenticated backend manifest remains unchanged.
+
 ## 0.4.122 Holo source-ranker evidence gate
 
 Current fixtures bind the 1,355-file backend closure at

@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.122 resident architect thin-client surface.
+Phase: RedDog 0.4.123 resident architect thin-client surface.
 
 Current implementation:
 
@@ -10,10 +10,10 @@ Current implementation:
   closure and reject missing, malformed, foreign-root, or mismatched digests.
   The pure A-grade gate reruns the public corpus and prevents caller-downgraded
   floors without granting index, maintenance, dispatch, or promotion effects.
-- [ ] P0: make a governed cold owner query complete inside its bounded wall.
-  Current exact-candidate evidence is two 60-second startup timeouts plus no
-  readiness proof within a 300-second diagnostic. Retrieval-quality RSI and an
-  A-grade declaration remain unavailable until this is closed and remeasured.
+- [x] Close governed cold-owner availability without enlarging its bounded wall.
+  At exact main `66526ae5`, three fresh-process queries passed on attempt one in
+  about 34 seconds each; a pre-warmed query passed in 10.3 seconds after a
+  25.5-second bootstrap. This is single-owner readiness, not A-grade or scale.
 - [ ] P1: seal and bind the owner Python executable, ABI/platform, exact
   dependency manifest, backend builds, and deterministic execution knobs.
   Then deploy an independent evaluator/signing trust boundary and wire a
@@ -61,8 +61,9 @@ Current implementation:
   response/receipt bound, scoped before Fusion, and performs no reindex or
   Hermes dispatch. The 60-second parent wall reserves three seconds for cleanup
   around an at-most-57-second child operation. The real OpenClaw/AgentDB
-  post-merge path completed at exact main `cfd1e0051`; a fresh owner query was
-  CURRENT/no-gap/no-reindex and immutable revalidation remained unchanged.
+  post-merge path completed again at exact main `66526ae5`, generation
+  `sha256:f2013aeb...`; three fresh-process queries and one pre-warmed query were
+  CURRENT/no-gap/no-reindex and all 33 artifacts reverified unchanged.
   Later HEADs require their own evidence. P1 throughput work may replace per-query cold
   starts and process-local-only serialization with a supervised lease only if
   identical route, cleanup, and receipt proofs remain.

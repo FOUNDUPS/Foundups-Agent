@@ -1,6 +1,6 @@
 # RedDog
 
-Version: 0.4.122
+Version: 0.4.123
 
 This candidate authenticates RedDog to the 1,355-file Holo retrieval closure at
 `4ee3e87327df...bc78`, including owner-loaded source-ranker attestation. Its A-grade
@@ -60,11 +60,12 @@ only signed-scope hits to the worker's new receipt. Fusion never receives the
 private route or owner credential. This does not enable outbound Hermes
 dispatch; Hermes-compatible receipts remain evidence only. The resident parent
 wall is 60 seconds, with at most 57 seconds entering the child and three seconds
-reserved for cleanup. At this candidate, two cold owner starts timed out at that
-wall and a 300-second diagnostic produced no readiness proof: cold availability
-is P0-failed, not A-grade. Historical exact-commit evidence does not authorize
-later HEADs. Process-local serialization and one cold child per query remain P1
-throughput debt after the P0 is closed.
+reserved for cleanup. At exact main `66526ae5`, three fresh-process calls passed
+on attempt one in about 34 seconds each; an explicitly pre-warmed call passed in
+10.3 seconds after a 25.5-second bootstrap. Cold availability is closed for that
+commit without changing a timeout, but retrieval quality is not A-grade/RSI.
+Process-local serialization and one cold child per query remain P1 throughput
+debt; exact-commit evidence never authorizes a later HEAD.
 
 Semantic owner queries prefer the stable private `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; the legacy absolute, already materialized `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` remains an exclusive migration
 path, and using both fails closed. The closed `holoindex_owner` and `resident_architect` Python
@@ -901,7 +902,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.122)
+## WSP_97 Truth Table (v0.4.123)
 
 | Claim | Status |
 | --- | --- |
@@ -993,6 +994,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.122.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.123.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

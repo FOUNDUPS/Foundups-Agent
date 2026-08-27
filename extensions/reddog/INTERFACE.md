@@ -49,15 +49,14 @@ environment remain P1 prerequisites for reproducible A-grade evidence.
 
 The A-grade facade always reruns the public corpus and enforces non-downgradable
 floors, but it has no non-test/VSIX caller and no deployed independent signing
-authority. Current cold-start evidence is also P0-failed: two bounded owner
-starts timed out and a 300-second diagnostic emitted no readiness proof.
-Accordingly retrieval-quality RSI is unavailable and no promotion follows.
+authority. Retrieval-quality RSI is unavailable and no promotion follows.
 
 Automatic exact-main maintenance, route activation, and AgentDB completion
-passed through the real OpenClaw supervisor at
-`cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9` on 2026-08-27. A subsequent
-normal owner query returned CURRENT/no-gap/no-reindex and full immutable
-revalidation was unchanged. This evidence does not carry across commits.
+passed again through the real OpenClaw supervisor at exact main
+`66526ae5cdd0467ce264c1db4122ab82eadb7733` on 2026-08-27. Three fresh-process
+queries completed in about 34 seconds each and a pre-warmed query in 10.3
+seconds; all were CURRENT/no-gap/no-reindex, and full immutable revalidation of
+33 artifacts remained unchanged. This evidence does not carry across commits.
 Per-query child startup and process-local-only serialization are explicit P1
 scalability debt, and no outbound Hermes dispatch is enabled by this interface.
 
