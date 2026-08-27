@@ -7,9 +7,8 @@ import os
 from pathlib import Path
 from typing import Any, Mapping
 
-from holo_index.freshness_receipt import read_git_head_sha
-from holo_index.query_receipt import digest_json, file_digest, load_generation_binding
-from holo_index.repository_state import repository_root_digest
+from holo_index.authority_worktree import resolve_holoindex_authority_root
+from holo_index.query_receipt import digest_json, file_digest
 from holo_index.storage_contract import resolve_holoindex_ssd_path
 from holo_index.retrieval_autoresearch import (
     RetrievalCandidateBinding,
@@ -20,9 +19,13 @@ from holo_index.retrieval_autoresearch import (
     run_generation_bound_benchmark,
     verify_generation_bound_benchmark,
 )
-from modules.communication.moltbot_bridge.src.reddog_holoindex_owner_query_client import (
-    query_holoindex_owner,
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (
+    build_owner_query_environment,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (
+    resolve_query_replica_owner_route,
+)
+from scripts.reddog_holoindex_owner_query_once import query_once as query_holoindex_owner_once
 
 
 CORPUS_SCHEMA = "holoindex_retrieval_corpus_source.v1"
@@ -110,33 +113,62 @@ def _limit(payload: Mapping[str, Any]) -> int:
     return limit
 
 
-def _candidate(repo_root: Path, limit: int) -> RetrievalCandidateBinding:
-    binding = load_generation_binding(ssd_path=resolve_holoindex_ssd_path())
-    current_head = read_git_head_sha(repo_root)
-    receipt_head = str(binding.get("repo_head_sha") or "")
-    if not current_head or current_head != receipt_head:
-        raise ValueError("freshness_receipt_repo_head_mismatch")
-    root_digest = repository_root_digest(repo_root)
+def _candidate(
+    repo_root: Path, limit: int
+) -> tuple[RetrievalCandidateBinding, dict[str, str]]:
+    environment = build_owner_query_environment()
+    authority = resolve_holoindex_authority_root(
+        repo_root, environment=environment
+    )
+    if not authority.accepted:
+        raise ValueError(authority.error or "holoindex_authority_unavailable")
+    canonical_ssd_path = resolve_holoindex_ssd_path(environ=environment)
+    route = resolve_query_replica_owner_route(
+        canonical_repo_root=authority.selected_root,
+        canonical_ssd_path=canonical_ssd_path,
+        environment=environment,
+    )
+    binding = route.revalidate()
+    if (
+        binding.canonical_repo_head_sha != authority.authority_head_sha
+        or binding.canonical_repo_root_digest != authority.authority_root_digest
+    ):
+        raise ValueError("query_replica_authority_mismatch")
     config_digest = digest_json({"limit": limit, "doc_type": "all"})
-    ranker_digest = file_digest(repo_root / "holo_index" / "core" / "holo_index.py")
+    ranker_digest = file_digest(
+        authority.selected_root / "holo_index" / "core" / "holo_index.py"
+    )
     fields = {
-        "generation_id": str(binding.get("freshness_generation_id") or ""),
-        "freshness_receipt_digest": str(
-            binding.get("freshness_receipt_digest") or ""
-        ),
-        "repo_head_sha": current_head,
-        "repo_root_digest": root_digest,
+        "generation_id": binding.generation_id,
+        "freshness_receipt_digest": binding.canonical_receipt_digest,
+        "repo_head_sha": binding.canonical_repo_head_sha,
+        "repo_root_digest": binding.canonical_repo_root_digest,
         "config_digest": config_digest,
         "ranker_digest": ranker_digest,
     }
-    return RetrievalCandidateBinding(
-        candidate_id=retrieval_candidate_id(**fields),
-        **fields,
+    return (
+        RetrievalCandidateBinding(
+            candidate_id=retrieval_candidate_id(**fields),
+            **fields,
+        ),
+        environment,
     )
 
 
-def _query(repo_root: Path, query: str, limit: int, binding):
-    result = query_holoindex_owner(repo_root=repo_root, query=query, limit=limit)
+def _query(
+    repo_root: Path,
+    query: str,
+    limit: int,
+    binding: RetrievalCandidateBinding,
+    query_environment: Mapping[str, str],
+):
+    result = query_holoindex_owner_once(
+        {"query": query, "limit": limit},
+        repo_root=repo_root,
+        query_environment=query_environment,
+    )
+    if result.get("ok") is not True:
+        raise ValueError(str(result.get("error") or "owner_query_failed"))
     if result.get("repo_root_digest") != binding.repo_root_digest:
         raise ValueError("query_owner_repo_root_mismatch")
     return result
@@ -144,13 +176,13 @@ def _query(repo_root: Path, query: str, limit: int, binding):
 
 def _run_verified_benchmark(repo_root: Path, limit: int):
     corpus, source_digest = _load_corpus(repo_root)
-    candidate = _candidate(repo_root, limit)
+    candidate, query_environment = _candidate(repo_root, limit)
     run = run_generation_bound_benchmark(
         corpus=corpus,
         split="heldout",
         binding=candidate,
         query_runner=lambda query, k, binding: _query(
-            repo_root, query, k, binding
+            repo_root, query, k, binding, query_environment
         ),
         k=limit,
         corpus_source_digest=source_digest,

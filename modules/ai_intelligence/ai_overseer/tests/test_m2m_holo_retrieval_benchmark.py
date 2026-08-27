@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 from holo_index.query_receipt import digest_json
 from modules.ai_intelligence.ai_overseer.src import m2m_holo_retrieval_benchmark as runtime
@@ -35,21 +36,58 @@ def _owner_query(*, repo_root, query, limit):
     }
 
 
+def _replica_binding(*, repo_head_sha: str = SHA):
+    return SimpleNamespace(
+        generation_id=DIGEST_B,
+        canonical_receipt_digest=DIGEST_A,
+        canonical_repo_head_sha=repo_head_sha,
+        canonical_repo_root_digest=ROOT_DIGEST,
+    )
+
+
+def _replica_route(*, repo_head_sha: str = SHA):
+    binding = _replica_binding(repo_head_sha=repo_head_sha)
+    return SimpleNamespace(revalidate=lambda: binding)
+
+
+def _owner_query_once(payload, *, repo_root, query_environment):
+    assert query_environment == {"route": "configured"}
+    return _owner_query(
+        repo_root=repo_root,
+        query=payload["query"],
+        limit=payload["limit"],
+    )
+
+
 def _configure(monkeypatch):
-    monkeypatch.setattr(runtime, "load_generation_binding", lambda **_kwargs: {
-        "freshness_generation_id": DIGEST_B,
-        "freshness_receipt_digest": DIGEST_A,
-        "repo_head_sha": SHA,
-    })
+    monkeypatch.setattr(
+        runtime,
+        "build_owner_query_environment",
+        lambda: {"route": "configured"},
+    )
+    monkeypatch.setattr(
+        runtime,
+        "resolve_holoindex_authority_root",
+        lambda repo_root, environment: SimpleNamespace(
+            accepted=True,
+            error="",
+            selected_root=repo_root,
+            authority_head_sha=SHA,
+            authority_root_digest=ROOT_DIGEST,
+        ),
+    )
+    monkeypatch.setattr(
+        runtime,
+        "resolve_query_replica_owner_route",
+        lambda **_kwargs: _replica_route(),
+    )
     monkeypatch.setattr(runtime, "file_digest", lambda path: DIGEST_B)
     monkeypatch.setattr(
-        runtime, "resolve_holoindex_ssd_path", lambda: Path("E:/HoloIndex")
+        runtime,
+        "resolve_holoindex_ssd_path",
+        lambda **_kwargs: Path("E:/HoloIndex"),
     )
-    monkeypatch.setattr(runtime, "read_git_head_sha", lambda path: SHA)
-    monkeypatch.setattr(
-        runtime, "repository_root_digest", lambda path: ROOT_DIGEST
-    )
-    monkeypatch.setattr(runtime, "query_holoindex_owner", _owner_query)
+    monkeypatch.setattr(runtime, "query_holoindex_owner_once", _owner_query_once)
     corpus = runtime.build_retrieval_corpus(heldout_cases=(
         runtime.RetrievalCase(
             "alpha", "alpha query", (runtime.RetrievalRelevance("alpha.py", 3),)
@@ -117,7 +155,15 @@ def test_runtime_fails_closed_on_stale_owner(monkeypatch, tmp_path: Path):
         result.update({"freshness": "STALE", "index_gap_detected": True})
         return result
 
-    monkeypatch.setattr(runtime, "query_holoindex_owner", stale)
+    monkeypatch.setattr(
+        runtime,
+        "query_holoindex_owner_once",
+        lambda payload, *, repo_root, query_environment: stale(
+            repo_root=repo_root,
+            query=payload["query"],
+            limit=payload["limit"],
+        ),
+    )
 
     result = runtime.execute_m2m_holo_retrieval_benchmark(
         repo_root=tmp_path, payload=_payload()
@@ -134,7 +180,15 @@ def test_runtime_rejects_owner_response_for_other_repository(monkeypatch, tmp_pa
         result["repo_root_digest"] = "sha256:" + "f" * 64
         return result
 
-    monkeypatch.setattr(runtime, "query_holoindex_owner", wrong_root)
+    monkeypatch.setattr(
+        runtime,
+        "query_holoindex_owner_once",
+        lambda payload, *, repo_root, query_environment: wrong_root(
+            repo_root=repo_root,
+            query=payload["query"],
+            limit=payload["limit"],
+        ),
+    )
     result = runtime.execute_m2m_holo_retrieval_benchmark(
         repo_root=tmp_path, payload=_payload()
     )
@@ -144,12 +198,16 @@ def test_runtime_rejects_owner_response_for_other_repository(monkeypatch, tmp_pa
 
 def test_runtime_rejects_freshness_receipt_for_other_head(monkeypatch, tmp_path: Path):
     _configure(monkeypatch)
-    monkeypatch.setattr(runtime, "read_git_head_sha", lambda path: "2" * 40)
+    monkeypatch.setattr(
+        runtime,
+        "resolve_query_replica_owner_route",
+        lambda **_kwargs: _replica_route(repo_head_sha="2" * 40),
+    )
     result = runtime.execute_m2m_holo_retrieval_benchmark(
         repo_root=tmp_path, payload=_payload()
     )
     assert result["success"] is False
-    assert result["error"] == "freshness_receipt_repo_head_mismatch"
+    assert result["error"] == "query_replica_authority_mismatch"
 
 
 def test_exact_repository_file_rejects_wrong_case(tmp_path: Path):
@@ -175,9 +233,10 @@ def test_exact_repository_file_rejects_reparse_component(
 
 def test_candidate_id_is_deterministic(monkeypatch, tmp_path: Path):
     _configure(monkeypatch)
-    first = runtime._candidate(tmp_path, 5)
-    second = runtime._candidate(tmp_path, 5)
+    first, first_environment = runtime._candidate(tmp_path, 5)
+    second, second_environment = runtime._candidate(tmp_path, 5)
     assert first == second
+    assert first_environment == second_environment == {"route": "configured"}
     assert first.candidate_id == digest_json({
         "generation_id": DIGEST_B,
         "freshness_receipt_digest": DIGEST_A,
@@ -196,7 +255,15 @@ def test_runtime_quality_gate_rejects_zero_hit_run(monkeypatch, tmp_path: Path):
         result.update({"hits": [], "raw_result": {"code_hits": []}})
         return result
 
-    monkeypatch.setattr(runtime, "query_holoindex_owner", empty)
+    monkeypatch.setattr(
+        runtime,
+        "query_holoindex_owner_once",
+        lambda payload, *, repo_root, query_environment: empty(
+            repo_root=repo_root,
+            query=payload["query"],
+            limit=payload["limit"],
+        ),
+    )
 
     result = runtime.execute_m2m_holo_retrieval_benchmark(
         repo_root=tmp_path, payload=_payload()

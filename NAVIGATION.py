@@ -35,7 +35,7 @@ NEED_TO = {
 
     # Generic duplicate prevention (existing implementations)
     "duplicate item prevention": "modules/platform_integration/social_media_orchestrator/src/core/duplicate_prevention_manager.py",
-    "social media duplicate posting": "modules/platform_integration/social_media_orchestrator/src/core/duplicate_prevention_manager.DuplicatePreventionManager.mark_as_posted()",
+    "social media duplicate posting": "modules/platform_integration/social_media_orchestrator/src/core/duplicate_prevention_manager.py:DuplicatePreventionManager.mark_as_posted()",
 
     # Other common patterns
     "user location detection": "modules/foundups/gotjunk/frontend/App.tsx:getCurrentPositionPromise()",
@@ -295,7 +295,7 @@ NEED_TO = {
 
     # WRE Skills - Autonomous Engagement (NEW - 2025-12-05)
     "autonomous youtube engagement": "modules/communication/video_comments/skillz/qwen_studio_engage/ - Agentic Studio comment engagement",
-    "youtube studio skillz": "modules/communication/video_comments/skillz/qwen_studio_engage/SKILL.md - Qwen+Gemma autonomous engagement",
+    "youtube studio skillz": "modules/communication/video_comments/skillz/qwen_studio_engage/SKILLz.md - Qwen+Gemma autonomous engagement",
     "studio comment like reply": "modules/communication/video_comments/skillz/qwen_studio_engage/executor.py - Vision-based engagement execution",
     "youtube studio ui reference": "modules/communication/video_comments/skillz/qwen_studio_engage/VISION_UI_REFERENCE.md - Precise Vision targeting",
 
@@ -355,12 +355,12 @@ NEED_TO = {
     "score viral potential": "modules/ai_intelligence/video_indexer/src/clip_generator.py:ClipGenerator._score_virality()",
     "video index storage": "modules/ai_intelligence/video_indexer/src/video_index_store.py:VideoIndexStore",
 
-    # Foundups(R)Agent / RedDog external extension lane (012-facing)
-    "foundups agent extension Copy MD Work Trail Run Trace": "extensions/foundups_advisory_workers/extension.js",
-    "foundups advisory workers extension Copy MD": "extensions/foundups_advisory_workers/extension.js",
-    "buildCopyMarkdown Redaction Gate Report Governed Handoff": "extensions/foundups_advisory_workers/extension.js:buildCopyMarkdown symbol",
-    "extension.js WSP_97 truth label compliance review": "extensions/foundups_advisory_workers/extension.js",
-    "RedDog external worker acceptance baseline": "extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md",
+    # RedDog extension lane (012-facing)
+    "foundups agent extension Copy MD Work Trail Run Trace": "extensions/reddog/extension.js",
+    "foundups advisory workers extension Copy MD": "extensions/reddog/extension.js",
+    "buildCopyMarkdown Redaction Gate Report Governed Handoff": "extensions/reddog/extension.js:buildCopyMarkdown symbol",
+    "extension.js WSP_97 truth label compliance review": "extensions/reddog/extension.js",
+    "RedDog external worker acceptance baseline": "extensions/reddog/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md",
     "advisory_model_once redaction gate bridge OpenRouter": "scripts/advisory_model_once.py",
     "Foundups Agent OpenRouter bridge redaction": "scripts/advisory_model_once.py",
 }

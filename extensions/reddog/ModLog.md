@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-08-27 - Holo retrieval truth binding (0.4.120)
+
+- Advanced the thin-client identity because the exact backend closure now
+  includes the repaired AI Overseer retrieval benchmark and its canonical Holo
+  owner-lifecycle contract. The VSIX still receives only generation-bound,
+  read-only Holo evidence and gains no indexing or maintenance authority.
+- Rebuilt the authenticated 1,350-file backend manifest at
+  `ee679968a31a...ab80`; this closes the compatibility-preflight rejection
+  exposed by the Linux fast tier instead of bypassing that fail-closed gate.
+- Generator parity plus the focused Holo/NAV suite is **13 passed / 13 optional
+  skips**; the rebound 18-shard contract is `d1e4f7f54bab...97f22` and the
+  RedDog fast tier is **14/14 PASS**. (WSP 00/22/50/84/87/97)
+
 ## 2026-08-27 - Stable-route resolver compatibility (0.4.119)
 
 - Advanced the thin-client identity because its authenticated backend replaces

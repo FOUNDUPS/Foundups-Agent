@@ -1,5 +1,19 @@
 # RedDog Extension Tests
 
+## 0.4.120 Holo retrieval truth binding
+
+The current version fixtures bind the canonical owner-lifecycle benchmark and
+its regenerated 1,350-file backend manifest. The preflight must reject stale
+digests; it is never bypassed for documentation or Holo repairs.
+
+```bash
+python scripts/generate_reddog_backend_manifest.py --check
+pytest -q scripts/tests/test_generate_reddog_backend_manifest.py \
+  modules/ai_intelligence/ai_overseer/tests/test_m2m_holo_retrieval_benchmark.py \
+  modules/infrastructure/shared_utilities/tests/navigation/test_navigation_schema.py
+cd extensions/reddog && npm test
+```
+
 ## 0.4.119 stable-route resolver compatibility
 
 Version and contract fixtures advance because the authenticated activation

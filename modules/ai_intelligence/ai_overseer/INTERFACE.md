@@ -95,8 +95,10 @@ Execute one of the module-local M2M workflow skillz by name.
   requires non-empty relevance judgments, binds every query to the current
   HoloIndex generation/freshness receipt, and returns benchmark plus verifier
   receipts. It does not write reports or promote a generation.
-  The runtime uses the existing authenticated loopback owner client; callers
-  cannot inject an arbitrary query callback.
+  The runtime derives the canonical authority root and executes the governed
+  owner lifecycle through `scripts/reddog_holoindex_owner_query_once.py`.
+  Callers cannot inject an arbitrary callback, query a mismatched root, or
+  trigger query-time maintenance. Exact owner failure details are preserved.
 
 ---
 
