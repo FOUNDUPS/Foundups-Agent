@@ -1,5 +1,16 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Holo source-ranker evidence gate (0.4.122)
+
+- Advanced current-version fixtures and the authenticated exhaustive shards so
+  the new owner-loaded source-ranker contract cannot ship as 0.4.121.
+- Added negative coverage for missing/malformed/mismatched runtime ranker
+  digests, linked or mixed runtime roots, caller-weakened quality floors,
+  private raw-composer access, and resident-adapter field loss.
+- The release evidence remains intentionally non-promotional: cold owner
+  startup is P0-failed, and independent signer/caller plus exact executable and
+  dependency-environment identity remain required before A-grade/RSI.
+
 ## 2026-08-27 - Governed WRE health admission binding (0.4.121)
 
 - Advanced all current-version fixtures and rebound the authenticated shared

@@ -74,6 +74,7 @@ def _runner(paths: dict[str, list[str]], latency: float = 10.0):
             "freshness_receipt_digest": binding.freshness_receipt_digest,
             "repo_head_sha": binding.repo_head_sha,
             "repo_root_digest": binding.repo_root_digest,
+            "retrieval_runtime_ranker_digest": binding.ranker_digest,
             "latency_ms": latency,
             "index_gap_detected": False,
             "stale_reasons": [],
@@ -539,6 +540,8 @@ def test_runtime_modules_have_no_index_or_process_mutation_surface():
         root / "retrieval_autoresearch.py",
         root.parent / "modules" / "ai_intelligence" / "ai_overseer" / "src"
         / "m2m_holo_retrieval_benchmark.py",
+        root.parent / "modules" / "ai_intelligence" / "ai_overseer" / "src"
+        / "m2m_holo_retrieval_grade_gate.py",
     ]
     banned_imports = {"subprocess"}
     banned_calls = {"system", "popen", "index_code_entries", "index_wsp_entries"}

@@ -6,6 +6,32 @@
 
 ---
 
+## 2026-08-27 - INDEPENDENT HOLO A-GRADE EVIDENCE GATE
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 87, 97
+
+- Added a pure A-grade composition gate for the public generation-bound run
+  plus a caller-supplied signature-verifier seam for sealed-corpus evaluation.
+  The default policy binds
+  30 disjoint cases, Recall/MRR/nDCG >= .95, and p95 latency <= 5 seconds.
+- Exposed it through a backend-content-bound callable benchmark facade that
+  re-runs the governed public corpus rather than trusting caller-supplied
+  public status flags.
+- Kept authority explicit: even accepted evidence sets promotion authority and
+  performed promotion to false, with no gate-local ranker, index, route, or
+  repository effect. Effects of an injected external verifier are not attested.
+- Made the 30-case, .95 quality, and 5-second latency requirements
+  non-downgradable. The content-bound facade remains without a non-test/VSIX
+  caller pending independent evaluator trust administration.
+- Corrected the M2M sentinel graded judgment and added adversarial coverage for
+  corpus size/leakage, evaluator separation, metric regression, signature
+  failure, public-gate failure, and deterministic receipt integrity.
+- Corrected candidate truth binding so `ranker_digest` covers the extracted
+  retrieval/ranking implementation (including `core/search_engine.py`) and
+  every run rejects an owner-emitted loaded-runtime digest mismatch. The
+  benchmark explicitly pins semantic retrieval mode.
+- Focused validation evidence is recorded in the transaction receipt.
+
 ## 2026-08-27 - HOLO OWNER-LIFECYCLE / RETRIEVAL TRUTH REPAIR
 
 **Author**: 0102 | WSP: 00, 15, 22, 50, 62, 97

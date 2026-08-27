@@ -80,7 +80,7 @@ def retrieval_candidate_id(
     config_digest: str,
     ranker_digest: str,
 ) -> str:
-    """Derive candidate identity from every security-relevant binding."""
+    """Derive candidate identity from the currently sealed source bindings."""
 
     return digest_json({
         "generation_id": generation_id,
@@ -215,6 +215,7 @@ def _validate_query_receipt(
         receipt.get("freshness_receipt_digest") == binding.freshness_receipt_digest,
         receipt.get("repo_head_sha") == binding.repo_head_sha,
         receipt.get("repo_root_digest") == binding.repo_root_digest,
+        receipt.get("retrieval_runtime_ranker_digest") == binding.ranker_digest,
         receipt.get("no_holoindex_reindex_performed") is True,
         receipt.get("index_gap_detected") is False,
     )

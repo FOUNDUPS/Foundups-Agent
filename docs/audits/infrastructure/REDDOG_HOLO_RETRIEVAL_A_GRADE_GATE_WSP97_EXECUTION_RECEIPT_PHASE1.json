@@ -1,0 +1,102 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "b5b4de05034383a3aade697c45875a8470cd31d0"
+  },
+  "execution_id": "REDDOG_HOLO_RETRIEVAL_A_GRADE_GATE_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The governed owner query for HoloIndex retrieval RSI/A-grade runtime binding failed closed after 66.8 seconds with HOLOINDEX_QUERY_SERVICE_STARTUP_TIMEOUT, freshness UNKNOWN, index_gap_detected true, and no reindex performed.",
+      "Because the Holo owner returned no retrieval result, noise, ordering, duplication, and must-include coverage could not be graded; CURRENT freshness was not assumed. Repository-relative README, INTERFACE, ROADMAP, ModLog, test inventory, implementation, and contract evidence were read directly after preserving that failure.",
+      "The earlier frozen-candidate verifier found a clean-authority versus executing-ranker mismatch, caller-downgradable floors, stale RedDog authentication pins, and operational-reach overclaims; each was converted into a falsifiable contract or explicit blocked-state statement.",
+      "A separate WSP_00/WSP_97 runtime-chain audit found that source identity still omits the owner executable and exact dependency/build environment; that missing reproducibility layer is retained as P1 rather than represented as A-grade."
+    ],
+    "research": [
+      "The live index schema was verified to carry exact symbol metadata before adding one generic search-time symbol weight; no M2M path or query special case was introduced.",
+      "The public corpus judgment was checked against query intent before correcting the inverted M2M sentinel grade; measured output was never rewritten into a passing result.",
+      "The executing owner path was traced through backend routing, collection search, Tier0 injection/dedup, path projection, response ordering, replica configuration, health, loopback client, query receipt, and resident RedDog adapter.",
+      "RedDog release membership, backend generator, 18 authenticated shards, package surface, and current version fixtures were inspected before the 0.4.122 rebind."
+    ],
+    "micro_pass": [
+      "Backend manifest generator and staged-index authentication passed 8 tests at 1355 runtime files and canonical digest 4ee3e87327df96cae0f9b1fd127c8eaf40f062240b51852a55d2605a7d38bc78.",
+      "Holo runtime-binding, receipt, AutoResearch, and Tier0 tests passed 105 tests with one Windows link-capability skip; AI Overseer A-grade gate tests passed 29.",
+      "RedDog owner-client/resident-adapter tests passed 63; foundups_mcp_bridge owner/service suites passed 412; all touched Python sources compiled.",
+      "RedDog fast passed 14 members, conversation passed 32 tests, contract passed 3 members, candidate WSP_62 passed, and deterministic package validation passed."
+    ],
+    "macro_pass": [
+      "The four-group authenticated RedDog release supervisor passed in 170.057 seconds; core was the slowest group at 169.968 seconds and no group timed out.",
+      "The VSIX package contract remains 67 files and 944707 raw bytes under the 1048576-byte cap; extension.js remains exactly 8400 lines and README.md is 998 lines.",
+      "The canonical test registry is current at 1590 tests and 268 quarantined entries, including the new Holo runtime-binding test.",
+      "The contract reconstructs 18 shards, 6929 lines, and 490 assertion calls at aggregate sha256:2ec42ef9cff7f18c770fe32954c8eb06869d34553ee2cca675bf4a5263fbb2b3; staged and working diffs pass whitespace checks."
+    ],
+    "hard_think": [
+      "WSP_15 allocation for the executing-ranker truth gap was Complexity 4, Importance 5, Deferability 5, Impact 5, total 19/P0: a quality evaluator cannot attest different bytes from those that executed its queries.",
+      "The smallest valid layer is a fixed raw-source closure computed inside the owner and required end to end; promotion, runtime-environment sealing, independent signing trust, and cold-owner repair remain separate transactions.",
+      "The current cold-owner timeout is also P0 usability debt. Raising the deadline without locating the resident/model/snapshot startup pole would hide rather than repair the failure."
+    ],
+    "dialectic_sweep": [
+      "Hashing only a clean authority checkout is simpler but permits a configured or reused owner to execute different ranker bytes; owner-emitted identity closes that contradiction.",
+      "Allowing caller-selected quality thresholds makes an A-grade label meaningless; policy inputs may strengthen but never weaken the fixed corpus, metric, and latency floors.",
+      "Source closure identity is necessary but cannot prove equal Torch, Transformers, SentenceTransformers, NumPy, Python, or backend builds; documentation and receipts therefore reject a reproducibility overclaim.",
+      "A callable pure gate is testable but not an operational RSI loop without an independent evaluator, deployed trust/revocation, a non-test consumer, promotion/canary/rollback authority, and verified outcome learning."
+    ],
+    "first_principles": [
+      "Retrieval evidence is valid only when the measured corpus, generation, repository, configuration, ranker source, and executing owner identity are bound and independently checkable.",
+      "A-grade is an admission result, not a feature name; unavailable runtime, missing environment identity, missing trust, or missing caller keeps the system below A-grade.",
+      "RSI requires an authenticated propose-evaluate-promote-observe-rollback loop. Exact-generation repair RSI works, while retrieval-quality RSI does not yet exist operationally.",
+      "The thin VSIX remains a consumer of bounded read-only evidence and receives no Holo maintenance, reindex, repository, worker-dispatch, or promotion authority."
+    ],
+    "execute": [
+      "Branch fix/holoindex-a-grade-evaluation-gate",
+      "holo_index/retrieval_runtime_binding.py",
+      "holo_index/retrieval_autoresearch.py",
+      "modules/ai_intelligence/ai_overseer/src/m2m_holo_retrieval_grade_gate.py",
+      "modules/ai_intelligence/ai_overseer/src/m2m_holo_retrieval_benchmark.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service.py",
+      "modules/communication/moltbot_bridge/src/reddog_generation_bound_holoindex_query_adapter.py",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "WSP_knowledge/WSP_Test_Registry.json"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_RETRIEVAL_A_GRADE_GATE_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "holo_index/ModLog.md",
+    "holo_index/tests/TESTModLog.md",
+    "modules/ai_intelligence/ai_overseer/ModLog.md",
+    "modules/ai_intelligence/ai_overseer/tests/TestModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

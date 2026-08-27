@@ -9,6 +9,7 @@ import time
 from typing import Any, Mapping, Sequence
 
 from holo_index.query_result_contract import validate_search_result
+from holo_index.retrieval_runtime_binding import retrieval_ranker_binding
 from holo_index.tier0_retrieval import (
     infer_explicit_module_target,
     module_path_from_hit,
@@ -209,6 +210,7 @@ def build_response(
     hits: Sequence[Mapping[str, Any]] = (),
     mode: str = "unknown",
     latency_ms: int = 0,
+    retrieval_runtime_ranker_digest: str = "",
 ) -> dict[str, Any]:
     """Build a response that can never claim CURRENT on a failed operation."""
     from .holo_query_freshness_gate import normalize_binding
@@ -241,6 +243,7 @@ def build_response(
         "raw_result": response_raw,
         "latency_ms": max(0, int(latency_ms)),
         "no_holoindex_reindex_performed": True,
+        **retrieval_ranker_binding(retrieval_runtime_ranker_digest),
         **canonical_binding,
         **replica_binding,
     }
@@ -253,6 +256,9 @@ def semantic_canary_empty_response(result: Mapping[str, Any]) -> dict[str, Any]:
         reasons=("semantic_canary_empty",), binding=result,
         mode=str(result.get("retrieval_mode") or "unknown"),
         latency_ms=int(result.get("latency_ms") or 0),
+        retrieval_runtime_ranker_digest=str(
+            result.get("retrieval_runtime_ranker_digest") or ""
+        ),
     )
 
 
@@ -277,6 +283,7 @@ def semantic_success_response(
         ok=True, query=query, freshness="CURRENT", error="", binding=binding,
         raw=normalized, hits=flatten_hits(normalized, limit, query=query),
         mode="semantic", latency_ms=int((time.monotonic() - started) * 1000),
+        retrieval_runtime_ranker_digest=owner.retrieval_runtime_ranker_digest,
     )
 
 

@@ -1,5 +1,15 @@
 # foundups_mcp_bridge Tests
 
+## Owner-loaded retrieval ranker binding
+
+- Runtime-binding tests prove source changes alter the digest and reject mixed
+  roots or linked ranker files.
+- Owner, authenticated health, loopback-client, query-receipt, and retrieval
+  benchmark tests require the owner-emitted digest and reject malformed or
+  candidate-mismatched values.
+- The tests use synthetic repositories/responses and do not reindex, mutate a
+  route, start maintenance, or promote a ranker.
+
 ## Supported Holo owner acquisition reliability
 
 - `test_reddog_holoindex_owner_acquisition_reliability.py` proves route-only

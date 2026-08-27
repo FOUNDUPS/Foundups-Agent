@@ -222,6 +222,7 @@ def _ready_payload() -> dict[str, Any]:
         "index_gap_detected": False,
         "no_holoindex_reindex_performed": True,
         "retrieval_mode": "semantic",
+        "retrieval_runtime_ranker_digest": "sha256:" + ("e" * 64),
         "repo_head_sha": BINDING[0],
         "repo_root_digest": BINDING[1],
         "freshness_generation_id": BINDING[2],

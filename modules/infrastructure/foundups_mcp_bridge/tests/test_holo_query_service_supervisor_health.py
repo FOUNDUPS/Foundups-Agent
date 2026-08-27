@@ -106,6 +106,7 @@ def test_json_decoder_admits_exact_plain_dict() -> None:
         "freshness_receipt_digest", "query_replica_descriptor_digest",
         "query_replica_generation_id", "query_replica_id",
         "query_replica_path_identity_digest",
+        "retrieval_runtime_ranker_digest",
     ),
 )
 def test_duplicate_health_keys_never_admit_ready_or_terminal(

@@ -57,6 +57,15 @@ The WSP 62 check is not an exemption: it requires `search_engine.py < 1500`,
 `_search_collection <= 50`, and every function in the two new extraction
 helpers to remain `<= 50` lines.
 
+The same suite now proves exact indexed `symbol` metadata outweighs a nearby
+semantic registry result without a path-specific exception. Retrieval
+AutoResearch coverage also statically includes the independent AI Overseer
+A-grade gate so it cannot acquire process/index mutation surfaces unnoticed.
+`test_retrieval_runtime_binding.py` proves the owner ranker digest changes with
+source bytes, accepts one exact runtime root, and rejects mixed roots or linked
+ranker files. Owner-client and benchmark regressions reject missing, malformed,
+or candidate-mismatched runtime ranker attestations.
+
 `test_graphrag_exporter.py` proves repository-relative hits resolve from the
 Holo authority root even under a foreign CWD and that `..` escapes are not
 read. Relative hits without an explicit root also fail closed; absolute legacy

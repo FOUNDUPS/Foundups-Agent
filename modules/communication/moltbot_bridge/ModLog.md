@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-27: Owner-loaded ranker receipt propagation
+
+- Required a canonical owner-emitted runtime ranker digest and carried it
+  through the resident safe projection and rebuilt receipt.
+- Added malformed/missing and end-to-end preservation regressions. A-grade
+  evaluation compares the emitted digest with its clean authority candidate.
+- Recorded that source equality does not yet bind the owner executable or exact
+  dependency/build environment; that remains P1 before reproducible A-grade.
+- Current live cold-start validation failed closed twice at 60 seconds; a
+  bounded diagnostic established no readiness proof inside 300 seconds. This
+  is recorded as P0 availability debt, not current Holo usability.
+  (WSP 00/15/22/50/62/87/97)
+
 ## 2026-08-27: Exact-main automatic OpenClaw acceptance
 
 - The governed authority mismatch at exact main `cfd1e0051` was bound to the

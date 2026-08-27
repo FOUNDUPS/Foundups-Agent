@@ -240,6 +240,7 @@ def _replacement_owner_payload(head_sha: str, root_digest: str) -> dict:
         "repo_head_sha": head_sha,
         "repo_root_digest": root_digest,
         "retrieval_mode": "semantic",
+        "retrieval_runtime_ranker_digest": "sha256:" + "c" * 64,
         "raw_result": {
             "wsp_hits": [{"path": "WSP_framework/src/WSP_97.md"}],
         },
@@ -403,6 +404,7 @@ def test_holoindex_owner_service_client_rejects_missing_generation_binding(
                 "repo_head_sha": head_sha,
                 "repo_root_digest": repository_root_digest(repo_root),
                 "retrieval_mode": "semantic",
+                "retrieval_runtime_ranker_digest": "sha256:" + "c" * 64,
                 "raw_result": {"wsp_hits": []},
                 **REPLICA_BINDING,
             }
@@ -497,6 +499,7 @@ def test_holoindex_owner_service_rejects_repository_change_during_query(
                 "freshness_generation_id": "sha256:" + "a" * 64,
                 "freshness_receipt_digest": "sha256:" + "b" * 64,
                 "retrieval_mode": "semantic",
+                "retrieval_runtime_ranker_digest": "sha256:" + "c" * 64,
                 "raw_result": {"wsp_hits": []},
                 **REPLICA_BINDING,
             }

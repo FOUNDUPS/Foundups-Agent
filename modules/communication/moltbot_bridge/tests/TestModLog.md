@@ -1,3 +1,10 @@
+## 2026-08-27: Owner-loaded ranker binding propagation
+
+- Proved query clients reject missing/malformed runtime ranker digests and the
+  resident safe projection preserves the valid digest end to end.
+- Synthetic focused suites pass. Live current-candidate cold starts failed
+  closed at the bounded deadlines and are not restated as usable.
+
 ## 2026-08-27: Resident governed Holo usability regressions
 
 - RED proved a valid `committed_head_only` result was rejected solely because

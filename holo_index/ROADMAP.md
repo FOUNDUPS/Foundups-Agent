@@ -1,20 +1,32 @@
 # HoloIndex Development Roadmap
 
-## [2026-08-27] Exact-main replica activation and post-merge ordering
+## [2026-08-27] A-grade retrieval truth gate
 
-Manual governed activation is complete at exact main
-`a7302344424615dc9d061ef408c2de2508660b81`, generation
-`sha256:d654414a...`. The stable route selected the immutable 33-artifact
-model-plus-22-snapshot closure; a production-shaped owner query returned
-CURRENT/no-gap/no-reindex and post-query verification found no changed replica
-digest.
+Exact-main freshness repair is operational at audited base `b5b4de05`,
+generation `sha256:67271e6b...`: owner queries are CURRENT, no-gap, and
+query-only. Retrieval quality is not A-grade. The current governed public run
+passed Recall@8 at `1.0` but failed its `0.95` policy at MRR `0.9167` and
+nDCG@8 `0.8718`; p95 semantic-query latency was approximately `4.25s` and the
+full six-case cold benchmark took approximately `206s` because replica
+admission rehashed the reachable sealed closure.
 
-The remaining P0 is automatic operation for a successor commit. The local
-repair separates canonical refresh, activation, and final proof across two
-authority leases while retaining one process lock. Merge it, run the real
-OpenClaw post-merge task at exact new main, verify route advancement and atomic
-completion, then reprove unchanged replica bytes. The two failed a730 OpenClaw
-attempts remain historical evidence and must not be relabeled completed.
+The active P0 candidate gives exact indexed `symbol` metadata deterministic
+search-time weight, corrects one intent-inverted graded judgment, and adds an
+independent A-grade evidence gate. The gate requires a signature-verifier-approved,
+public-corpus-disjoint sealed evaluation with at least 30 cases, all three
+quality metrics at or above `0.95`, and p95 query latency at or below `5s`.
+Those floors cannot be weakened. It performs no ranker change, reindex,
+repository write, or promotion. Its facade is backend-content-bound but has no
+non-test/VSIX caller while independent evaluator trust remains unadministered.
+
+Required activation sequence once the candidate lands: first close the current
+P0 cold-owner failure (two 60-second timeouts and no readiness proof inside a
+300-second diagnostic), publish an exact-main generation, then rerun the public
+corpus. Before independent sealed evaluation, bind a once-published exact owner
+executable/dependency/environment manifest and deterministic execution knobs.
+A separate evaluator trust boundary, promotion authority, canary, rollback,
+and outcome-learning transaction remain required before retrieval-quality RSI
+can be declared operational.
 
 ## [2026-08-23] Exact-module Tier-0 producer compatibility
 
@@ -172,6 +184,10 @@ legacy monoliths remain above their domain thresholds.
 
 ## [ALERT] ARCHITECTURAL REVOLUTION (2025-09-25)
 
+> **Historical vision only.** Status labels below predate generation-bound
+> evaluation and are not current production evidence. The 2026-08-27 A-grade
+> section above supersedes their quality and RSI claims.
+
 HoloIndex has undergone a **fundamental transformation** from a search tool into the **autonomous intelligence foundation** for the entire FoundUps ecosystem.
 
 ## Vision: The Green Foundation Board Agent
@@ -193,13 +209,14 @@ HoloIndex has undergone a **fundamental transformation** from a search tool into
 - [OK] **012 Monitoring**: Logs visible for system tweaking and oversight
 - [OK] **Real-time Health Checks**: Automatic dependency audits and module analysis
 - [OK] **Pattern Detection**: Context-aware suggestions based on search patterns
-- [OK] **Recursive Improvement**: Stored decision data improves future AI behavior
+- [PARTIAL] **Recursive Improvement**: observations are stored, but no verified
+  production ranker-improvement and promotion loop is operational
 - [OK] **Multi-Modal Integration**: CLI, main.py, and continuous monitoring modes
 
 ## Core Capabilities Status
 
 ### [OK] HOLODAE AUTONOMOUS INTELLIGENCE (BREAKTHROUGH) - VIBECODING PREVENTION CORE
-- **Status**: Fully Operational - Major architectural breakthrough!
+- **Status**: Historical mixed-maturity implementation; production RSI unproven
 - **Features**: Chain-of-Thought Algorithm (20/20 MPS), effectiveness scoring, recursive self-improvement
 - **Chain-of-Thought Algorithm**: ENTIRE SYSTEM COORDINATING INTELLIGENCE - logs every decision with reasoning
 - **Effectiveness Scoring**: AI evaluates its own performance (0.44 effectiveness shown in logs)
@@ -208,9 +225,10 @@ HoloIndex has undergone a **fundamental transformation** from a search tool into
 - **Vibecoding Prevention**: Core coordinating intelligence that prevents vibecoding through intelligent oversight
 
 ### [OK] SEMANTIC SEARCH ENGINE - VIBECODING PREVENTION CORE (18/20 MPS)
-- **Status**: Fully Operational + Enhanced with HoloDAE + Noise Reduction (2026-02-07)
+- **Status**: Exact-generation query path operational; quality gate currently fails
 - **Features**: Vector-based code search, multi-modal results, SSD optimization
-- **Performance**: <200ms query response, 95%+ accuracy
+- **Measured performance**: audited public run MRR `0.9167`, nDCG@8 `0.8718`,
+  semantic p95 about `4.25s`; A-grade policy not met
 - **Vibecoding Prevention**: FINDS EXISTING CODE BEFORE VIBECODING occurs - critical prevention mechanism
 - **Enhancement**: Every search triggers automatic intelligence analysis
 - **2026-02-07 Improvements**:

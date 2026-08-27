@@ -21,8 +21,8 @@
       "case_id": "heldout-m2m-compiler",
       "query": "m2m compression sentinel",
       "relevance": [
-        {"path": "prompt/swarm/m2m_compiler.py", "grade": 3},
-        {"path": "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py", "grade": 2}
+        {"path": "modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py", "grade": 3},
+        {"path": "prompt/swarm/m2m_compiler.py", "grade": 1}
       ]
     },
     {

@@ -6,6 +6,8 @@ import http.client
 import json
 from dataclasses import dataclass
 
+from holo_index.retrieval_runtime_binding import is_retrieval_ranker_digest
+
 from .holo_query_binding import parse_exact_binding
 from .holo_query_replica_binding import parse_replica_binding
 from .holo_query_semantic_proof import PRODUCER_FAILURE_CODES
@@ -107,6 +109,7 @@ def _ready_metadata_contract(value: dict[str, object]) -> bool:
         value.get("index_gap_detected") is False,
         value.get("no_holoindex_reindex_performed") is True,
         _exact_text(value.get("retrieval_mode"), "semantic"),
+        is_retrieval_ranker_digest(value.get("retrieval_runtime_ranker_digest")),
     ))
 
 

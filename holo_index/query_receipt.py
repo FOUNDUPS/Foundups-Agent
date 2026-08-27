@@ -83,6 +83,7 @@ class HoloIndexQueryReceipt:
     index_gap_detected: bool = False
     stale_reasons: list[str] = field(default_factory=list)
     no_holoindex_reindex_performed: bool = True
+    retrieval_runtime_ranker_digest: str = ""
     receipt_id: str = ""
 
     def to_dict(self) -> dict[str, Any]:
@@ -403,6 +404,9 @@ def build_query_receipt(
         ),
         "stale_reasons": stale_reasons,
         "no_holoindex_reindex_performed": True,
+        "retrieval_runtime_ranker_digest": str(
+            result.get("retrieval_runtime_ranker_digest") or ""
+        ),
         "semantic_evidence_digest": semantic_evidence_digest,
         "semantic_evidence_count": semantic_evidence_count,
         "observed_latency_ms": _observed_latency_ms(result.get("latency_ms")),

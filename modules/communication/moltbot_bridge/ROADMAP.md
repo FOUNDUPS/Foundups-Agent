@@ -1,5 +1,17 @@
 # moltbot_bridge Roadmap
 
+- P0 CURRENT COLD-START AVAILABILITY: two governed 60-second one-shot queries
+  timed out on the current candidate, and a no-operation-deadline diagnostic
+  produced no readiness proof inside 300 seconds. Preserve fail-closed truth.
+  Diagnose resident-owner/model/snapshot cold initialization in a separate
+  focused transaction; do not raise budgets before measuring the blocked pole.
+- IMPLEMENTED CANDIDATE RANKER TRUTH: the owner client and resident adapter
+  preserve the owner-loaded ranker digest end to end. Retrieval grading rejects
+  a digest that differs from its clean authority candidate.
+- P1 RUNTIME REPRODUCIBILITY: add a separately sealed owner executable,
+  ABI/platform, dependency/build, and deterministic-knob manifest digest.
+  Source-ranker equality alone is not A-grade/RSI environment identity.
+
 - CURRENT EXACT-MAIN EVIDENCE: after the earlier `61c2c300` canary and manual
   `a7302344` recovery, the automatic post-merge transaction completed through
   the real broker-managed OpenClaw supervisor at exact main `cfd1e0051`,

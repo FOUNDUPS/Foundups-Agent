@@ -10,6 +10,12 @@
 
 Public API for AI Intelligence Overseer - MCP coordinator for Holo Qwen/Gemma agent teams.
 
+Current Holo A-grade composition is evidence-only. It reruns the public corpus,
+requires fixed quality floors and owner-loaded source-ranker identity, and has
+no non-test caller or independent deployed signing trust. Source identity does
+not yet bind the Python executable or exact dependency/build environment;
+retrieval-quality RSI is therefore unavailable.
+
 **Key Features**:
 - WSP 77 agent coordination (Qwen + Gemma + 0102)
 - WSP 54 role assignment (Agent Teams variant)
@@ -99,6 +105,25 @@ Execute one of the module-local M2M workflow skillz by name.
   owner lifecycle through `scripts/reddog_holoindex_owner_query_once.py`.
   Callers cannot inject an arbitrary callback, query a mismatched root, or
   trigger query-time maintenance. Exact owner failure details are preserved.
+
+`evaluate_m2m_holo_retrieval_a_grade(...)` in the backend-content-bound callable
+`src/m2m_holo_retrieval_benchmark.py` facade delegates to the pure
+`src/m2m_holo_retrieval_grade_gate.py` composition gate. It accepts
+the repository root and fixed benchmark payload, re-runs the governed public
+corpus itself, then composes a separately produced sealed-corpus evaluation,
+its signature envelope, and an injected independent signature verifier. The
+default policy requires 30 disjoint cases, Recall/MRR/nDCG >= `0.95`, and p95
+latency <= `5000ms`. An accepted result is eligibility evidence only;
+`promotion_authorized` and `promotion_to_holoindex_performed` remain `false`.
+Those values are non-downgradable floors; injected policy may only strengthen
+them. The facade is content-bound and callable by backend composition, but is
+not registered as an AI Overseer/VSIX Skillz operation and has no non-test
+caller while independent evaluator trust administration remains absent.
+The candidate pins semantic retrieval mode and hashes the explicit Holo
+retrieval/ranking implementation surface, including the extracted
+`core/search_engine.py`; repository HEAD and replica generation bind the
+surrounding code and indexed data. Each owner query receipt must report that
+same digest from the runtime modules actually loaded by the owner process.
 
 ---
 

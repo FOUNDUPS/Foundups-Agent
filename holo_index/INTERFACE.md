@@ -62,6 +62,27 @@ remains the public-compatible internal seam. Both the wrapper and every new
 or touched extraction helper are constrained to at most 50 lines, while
 `search_engine.py` is strictly below the 1,500-line WSP 62 hard limit.
 
+Indexed symbol rows expose canonical `symbol` metadata. Exact query tokens
+matching that field receive deterministic keyword weight before hybrid sort,
+so a named callable can outrank semantically adjacent prose. This improves
+literal-symbol ordering inside HoloIndex; direct `rg` remains the authority
+when the caller already knows the exact token.
+
+Generation-bound public regression and deterministic comparison are exposed
+by `holo_index.retrieval_autoresearch`. They perform no ranker change or
+promotion. The independent A-grade composition gate is owned by AI Overseer;
+its accepted receipt is evidence only and still requires a separate external
+promotion authority.
+`holo_index.retrieval_runtime_binding` defines the fixed ten-module ranker
+closure. `retrieval_ranker_digest_for_root(root)` computes the clean candidate
+digest; `loaded_retrieval_ranker_digest()` computes the digest from module
+origins actually imported by the owner. Retrieval benchmark query receipts
+must carry the latter and equal the former.
+This contract binds source bytes only. It does not yet identify the owner
+executable or exact SentenceTransformers/Transformers/Torch/NumPy/backend
+environment, so accepted source identity is not complete reproducibility or
+production A-grade evidence.
+
 ## Programmatic API
 
 ### Core Retrieval

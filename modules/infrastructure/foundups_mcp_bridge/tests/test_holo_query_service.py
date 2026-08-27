@@ -483,6 +483,8 @@ def test_stable_semantic_generation_preserves_complete_raw_wsp_and_knowledge(
         assert result["ok"] is True
         assert result["freshness"] == "CURRENT"
         assert result["retrieval_mode"] == "semantic"
+        assert result["retrieval_runtime_ranker_digest"].startswith("sha256:")
+        assert len(result["retrieval_runtime_ranker_digest"]) == 71
         assert result["freshness_generation_id"] == _receipt(
             repo_root=tmp_path,
             ssd_path=tmp_path / "holo-store",

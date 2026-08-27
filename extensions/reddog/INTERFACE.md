@@ -39,6 +39,20 @@ and reserves three seconds for parent cleanup. It exposes only allowed scoped
 hit metadata after exact CURRENT repository, authority, generation, replica,
 and receipt verification; Fusion receives no route or owner credential.
 
+Each success and health response now carries the owner-computed
+`retrieval_runtime_ranker_digest` for the exact ten-module source closure that
+controls backend routing, ranking, Tier0 injection/dedup, path projection, and
+response ordering. Query clients and evaluation receipts require that value to
+equal the candidate's clean-authority digest. This is source integrity, not a
+complete runtime identity: the Python executable and sealed exact dependency
+environment remain P1 prerequisites for reproducible A-grade evidence.
+
+The A-grade facade always reruns the public corpus and enforces non-downgradable
+floors, but it has no non-test/VSIX caller and no deployed independent signing
+authority. Current cold-start evidence is also P0-failed: two bounded owner
+starts timed out and a 300-second diagnostic emitted no readiness proof.
+Accordingly retrieval-quality RSI is unavailable and no promotion follows.
+
 Automatic exact-main maintenance, route activation, and AgentDB completion
 passed through the real OpenClaw supervisor at
 `cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9` on 2026-08-27. A subsequent
@@ -59,8 +73,9 @@ output/time, and propagates the first failure.
 
 `tests/verify_extension_contract.js` remains the backward-compatible canonical
 promotion entry. Its parent process authenticates all 18 shards and requires
-the five deferred `test_*` members to exactly equal the unique flattened release
-plan. Four children then run the shared-VM core, governed-Git hardening, Git
+the seven deferred `test_*` members (five governed-Git plus two bridge/package
+tails) to exactly equal the unique flattened release plan. Four children then
+run the shared-VM core, governed-Git hardening, Git
 environment/ref formats, and bridge-environment/WSP_62 groups concurrently.
 Concurrency is capped at four; each child is capped at 400 seconds and 2 MiB
 per output stream under the unchanged 420-second release ceiling. Results print

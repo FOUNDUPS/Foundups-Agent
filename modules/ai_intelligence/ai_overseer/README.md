@@ -627,9 +627,30 @@ Use it for architecture, product positioning, security, and governance decisions
 lifecycle and exact authority root. It is read-only, rejects query-time reindex,
 and preserves owner failures instead of replacing them with a generic error.
 The live fixed corpus on 2026-08-27 achieved recall@8 `1.0`, MRR `0.9167`,
-nDCG `0.8718`, mean latency `3829ms`, and p95 `4578ms`. The truthful outcome is
+nDCG `0.8718`, mean latency `3770ms`, and p95 `4250ms`. The truthful outcome is
 `quality_below_policy` because nDCG remains below `0.95`; this is a retrieval
 quality baseline, not successful AutoResearch or promotion evidence.
+
+The backend-content-bound callable `evaluate_m2m_holo_retrieval_a_grade(...)`
+benchmark facade delegates to `m2m_holo_retrieval_grade_gate`, which composes a passing public
+run with a caller-supplied signature-verifier-approved sealed-corpus
+evaluation. The facade re-runs the fixed public corpus through the governed
+owner instead of trusting a
+caller-supplied public result. It requires evaluator/proposer separation,
+at least 30 cases disjoint from the public corpus, Recall/MRR/nDCG >= `0.95`,
+and p95 latency <= `5000ms`. Its receipt can accept A-grade evidence but always
+keeps promotion unauthorized. The gate performs no ranker, index, route, or
+file effect; effects of the injected verifier are explicitly not attested.
+These are fixed non-downgradable floors. The facade is authenticated as a
+backend dependency, but no AI Overseer/VSIX operation or non-test caller uses
+it yet; independent evaluator key/signing-trust administration is still
+missing. Every public query must carry the ranker digest emitted by the owner
+from the retrieval modules it actually loaded; a digest from another clean
+checkout cannot satisfy the candidate binding.
+Source equality is necessary but incomplete: the candidate does not yet bind
+the owner executable, ABI/platform, exact package/build manifest, or
+deterministic execution knobs. Independent evidence must include a sealed
+runtime-environment digest before A-grade/RSI is reproducible.
 
 ---
 
