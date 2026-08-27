@@ -1,5 +1,27 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Bounded post-commit query-proof recovery
+
+- Preserved the exact `a48e9b61` failure instead of treating a committed route
+  as completed: candidate receipt publication and route revision 5 succeeded,
+  the first stable-route proof failed `ACTIVATION_QUERY_PROOF_INVALID`, and the
+  activation/task remained `COMMITTED_UNVERIFIED`/failed. Later governed
+  canaries proved the same route CURRENT and immutable.
+- Added one typed, read-only recovery attempt only after commit, reused by fresh
+  activation and receipt-less committed-route recovery. Candidate admission is
+  still one-shot, unexpected exceptions are not swallowed, the retry count is
+  fixed at two total stable proofs, and PASS still follows immutable route
+  revalidation.
+- RED reproduced the absent recovery. GREEN: **13 passed / 1 expected skip**,
+  **90%** activation-controller coverage, and **205 passed / 1 expected skip**
+  across the adjacent owner/bootstrap/acceptance/post-merge/authority/
+  coordinator closure. Production is 528 lines with a 39-line maximum
+  function, within WSP_62. The complete bridge macro is **1,136 passed / 8
+  expected skips in 550.92 seconds**. (WSP 00/15/22/50/62/84/87/97; WSP_15
+  17/P0)
+- Repository-bound WSP_97 evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTCOMMIT_PROOF_RECOVERY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27 - Post-merge route continuity repair
 
 - Reproduced the exact-main OpenClaw failure after canonical refresh without

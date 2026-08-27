@@ -15,6 +15,7 @@ from scripts.reddog_holoindex_owner_query_once import query_once
 
 from .reddog_holoindex_acceptance_guards import create_isolated_store
 from .reddog_holoindex_candidate_query_validation import (
+    CandidateAcceptanceError,
     validate_activation_query,
 )
 from .reddog_holoindex_maintenance_handshake import (
@@ -46,6 +47,9 @@ from .reddog_private_json_publication import (
     atomic_publish_private_json_proven,
     verify_proven_private_json,
 )
+
+
+_POSTCOMMIT_QUERY_ATTEMPTS = 2
 
 
 @dataclass
@@ -223,6 +227,24 @@ def _run_query(
     )
 
 
+def _run_postcommit_query(
+    config: QueryReplicaActivationConfig,
+    dependencies: QueryReplicaActivationDependencies,
+    route: Any,
+) -> str:
+    """Retry one failed proof after commit; every attempt remains read-only."""
+
+    last_error: CandidateAcceptanceError | None = None
+    for _attempt in range(_POSTCOMMIT_QUERY_ATTEMPTS):
+        try:
+            return _run_query(config, dependencies, route, stable_route=True)
+        except CandidateAcceptanceError as exc:
+            last_error = exc
+    if last_error is None:  # Defensive: the attempt constant is module-owned.
+        fail_activation("ACTIVATION_QUERY_PROOF_INVALID")
+    raise last_error
+
+
 def _revalidate(route: Any) -> None:
     observed = route.revalidate()
     if observed != route.binding:
@@ -342,8 +364,8 @@ def _recover_committed_route(
     evidence.committed_route_digest = selected.digest
     evidence.route_committed = True
     evidence.recovered_committed_route = True
-    evidence.normal_query_receipt_id = _run_query(
-        config, dependencies, route, stable_route=True
+    evidence.normal_query_receipt_id = _run_postcommit_query(
+        config, dependencies, route
     )
     _revalidate(route)
     evidence.post_query_replica_unchanged = True
@@ -407,8 +429,8 @@ def _execute_activation(
         artifact_bytes=result.total_bytes,
     )
     _activate_route(config, dependencies, store, previous, route, evidence)
-    evidence.normal_query_receipt_id = _run_query(
-        config, dependencies, route, stable_route=True
+    evidence.normal_query_receipt_id = _run_postcommit_query(
+        config, dependencies, route
     )
     _revalidate(route)
     evidence.post_query_replica_unchanged = True

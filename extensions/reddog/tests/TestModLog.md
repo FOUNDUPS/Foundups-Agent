@@ -1,5 +1,24 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Post-commit Holo proof recovery binding (0.4.118)
+
+- Advanced the version and current contract fixtures so the extension cannot
+  accept the changed activation backend under the 0.4.117 package identity.
+- Backend RED/GREEN proves one typed post-commit recovery, no candidate retry,
+  terminal `COMMITTED_UNVERIFIED` after two failures, and immutable
+  revalidation after recovery. Focused result: **13 passed / 1 expected skip**
+  at **90%** coverage; adjacent result: **205 passed / 1 expected skip**.
+- The authenticated manifest is **1,350 files** at
+  `9f1867c334c9...566685d`; registry is **1,588 / 268 quarantined**. The complete
+  bridge macro is **1,136 passed / 8 expected skips in 550.92 seconds**. The
+  rebound 18-shard / 6,929-line / 490-assertion aggregate is
+  `e08abe4e0fb9...513509ef`. Fast **14/14**, conversation **32/32**, contract
+  **3/3**, package, and release **4/4 groups in 167.248 seconds** pass. Package
+  identity is **67 files / 945,324 bytes** at
+  `51fde503c1d8...6e65ef02`. Exact-main OpenClaw and commit-bound VSIX remain
+  separate post-merge gates.
+
+
 ## 2026-08-27 - Post-merge Holo route continuity release binding (0.4.117)
 
 - Advanced version and contract fixtures so the extension cannot accept the

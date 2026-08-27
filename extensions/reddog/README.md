@@ -1,11 +1,13 @@
 # RedDog
 
-Version: 0.4.117
+Version: 0.4.118
 
-This candidate binds both the supported HoloIndex one-shot caller and the
-post-merge replica composer to the same private, verified current-user route
-refresh. It does not move Holo maintenance, route publication, listener trust,
-credentials, or execution authority into the VSIX.
+This candidate binds the authenticated backend's exact-one post-commit Holo
+proof recovery. Candidate admission remains one-shot; two failed stable-route
+proofs remain `COMMITTED_UNVERIFIED`; recovered proof still requires immutable
+replica revalidation. It does not move Holo maintenance, route publication,
+listener trust, credentials, retry authority, or execution authority into the
+VSIX.
 
 ## Continuous conversation surface
 
@@ -908,7 +910,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.117)
+## WSP_97 Truth Table (v0.4.118)
 
 | Claim | Status |
 | --- | --- |
@@ -1000,6 +1002,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.117.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.118.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

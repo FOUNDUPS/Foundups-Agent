@@ -1,5 +1,30 @@
 # RedDog ModLog
 
+## 2026-08-27 - Post-commit Holo proof recovery compatibility (0.4.118)
+
+- Advanced the thin-client identity because its authenticated backend now
+  permits exactly one typed, read-only stable-route proof recovery after route
+  commit. Candidate admission remains one-shot, two failed proofs remain
+  `COMMITTED_UNVERIFIED`, and successful recovery still requires immutable
+  replica revalidation.
+- The exact `a48e9b61` historical run remains failed truth even though its
+  committed revision-5 route is CURRENT and later governed queries passed.
+  Version 0.4.118 does not relabel it or add Holo maintenance, route, listener,
+  credential, repository, worker, signer, or merge authority to the VSIX.
+- Focused backend evidence is **13 passed / 1 expected skip** at **90%**
+  controller coverage; adjacent evidence is **205 passed / 1 expected skip**.
+  The regenerated authenticated closure remains **1,350 files** at
+  `9f1867c334c9...566685d`; the canonical registry is **1,588 / 268
+  quarantined**. The complete bridge macro is **1,136 passed / 8 expected
+  skips**. Fast **14/14**, conversation **32/32**, contract **3/3**, package,
+  and all **4/4** release groups pass in **167.248 seconds**. The authenticated
+  contract aggregate is `e08abe4e0fb9...513509ef`; package identity is **67
+  files / 945,324 bytes** at `51fde503c1d8...6e65ef02`. Exact-main OpenClaw and
+  commit-bound VSIX evidence remain separate post-merge gates.
+  (WSP 00/15/22/50/62/84/87/97)
+- Repository-bound WSP_97 evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTCOMMIT_PROOF_RECOVERY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27 - Post-merge Holo route continuity compatibility (0.4.117)
 
 - Advanced the thin-client identity because a VSIX-bundled backend dependency

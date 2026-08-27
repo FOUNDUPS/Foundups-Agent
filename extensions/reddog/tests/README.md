@@ -1,5 +1,20 @@
 # RedDog Extension Tests
 
+## 0.4.118 post-commit Holo proof recovery compatibility
+
+Version and contract fixtures advance because the authenticated backend now
+makes at most two stable-route proofs after commit. It does not retry candidate
+admission, and two failed proofs remain `COMMITTED_UNVERIFIED`; recovered proof
+still requires immutable replica revalidation. Focused backend evidence is 13
+passed / 1 expected skip at 90% coverage; the adjacent closure is 205 passed /
+1 expected skip. The regenerated authenticated closure is 1,350 files at
+`9f1867c334c9...566685d`; registry is 1,588 / 268 quarantined. The complete
+bridge macro is 1,136 passed / 8 expected skips. Fast 14/14, conversation
+32/32, contract 3/3, package, and all 4/4 release groups pass in 167.248
+seconds. The rebound contract aggregate is `e08abe4e0fb9...513509ef`; package
+identity is 67 files / 945,324 bytes at `51fde503c1d8...6e65ef02`. Exact-main
+OpenClaw and commit-bound VSIX evidence remain separate post-merge gates.
+
 ## 0.4.117 post-merge Holo route continuity compatibility
 
 Version and contract fixtures advance because the authenticated backend

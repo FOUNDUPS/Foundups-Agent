@@ -33,7 +33,7 @@
 | F1 | Repository or canonical receipt changes during planning/copy. | MED | CRITICAL | Exact state/receipt/manifests are reproved by planner, materializer, descriptor verifier, and final revalidation. |
 | F2 | Candidate query recursively waits on the route lock. | MED | HIGH | Candidate receives an explicit route capability; only the post-commit query uses the route-file resolver. |
 | F3 | Candidate succeeds but mutates a reachable artifact. | LOW | CRITICAL | Full admitted-replica revalidation runs inside the transaction before commit. |
-| F4 | Post-commit normal query or digest proof fails. | LOW | CRITICAL | Emit `COMMITTED_UNVERIFIED`, never PASS or a false rollback claim. |
+| F4 | The first post-commit normal query proof fails transiently after route commit. | MED | CRITICAL | Make exactly one additional typed, read-only stable-route proof; require immutable revalidation after recovery; otherwise emit `COMMITTED_UNVERIFIED`, never PASS or a false rollback claim. |
 | F5 | A CAS loser deletes or overwrites its materialization. | MED | HIGH | Preserve the immutable unselected root as evidence; this slice performs no retention or deletion. |
 | F6 | Receipt exposes private roots, environment, URL, token, or executable. | MED | CRITICAL | Receipt is an exact digest/count/status projection and private publication rejects absolute path values. |
 | F7 | Receipt publication fails after commit. | LOW | HIGH | Return `ACTIVATION_RECEIPT_PUBLICATION_FAILED` and `COMMITTED_UNVERIFIED`; never claim PASS. |
@@ -58,4 +58,20 @@
   regeneration, exact staged-diff audit, merge, then one authorized exact-main
   activation with post-query immutable proof.
 - Explicitly excluded: replica deletion/retention, network-shared routes,
-  model download, provider calls, retry downgrade, and ambient route selection.
+  model download, provider calls, candidate retry, unbounded/broad retry, and
+  ambient route selection.
+
+## 6. 2026-08-27 Post-Commit Falsification Addendum
+
+- Exact main `a48e9b61` passed candidate query admission and committed route
+  revision 5 for generation `sha256:7102c478...`, then returned
+  `ACTIVATION_QUERY_PROOF_INVALID` on the first stable-route proof. The receipt
+  remains `COMMITTED_UNVERIFIED` and the AgentDB task remains failed.
+- Later supported and activation-shaped queries returned CURRENT/no-gap/
+  no-reindex with the same route and replica binding. This falsifies the
+  assumption that one post-commit attempt is a sufficient availability gate;
+  it does not weaken candidate, route, receipt, or immutability proof.
+- Decision: permit exactly two total stable-route proof attempts after commit,
+  catching only `CandidateAcceptanceError`. A recovered query still must pass
+  `QueryReplicaOwnerRoute.revalidate()`. Two failures preserve the original
+  fail-closed outcome.

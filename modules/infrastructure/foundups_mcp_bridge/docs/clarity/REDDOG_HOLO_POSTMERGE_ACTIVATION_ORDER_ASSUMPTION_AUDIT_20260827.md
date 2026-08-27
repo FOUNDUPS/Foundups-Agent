@@ -93,3 +93,19 @@
 - This addendum corrects A7/F7; the historical `cfd1e0051` acceptance remains
   valid for that exact commit. The repair still requires merge and a new
   exact-main live replay before it is accepted operationally.
+
+## 8. Exact-Main Route-Continuity Replay Addendum
+
+- PR #1568 merged at `a48e9b61`. The real broker-managed OpenClaw transaction
+  then refreshed canonical Holo, materialized generation
+  `sha256:7102c478...`, passed the candidate query, and committed stable route
+  revision 5. This proves the route-environment repair reached activation.
+- The first normal post-commit proof returned
+  `ACTIVATION_QUERY_PROOF_INVALID`; the activation receipt remains
+  `COMMITTED_UNVERIFIED` and AgentDB remains failed. Later supported and
+  activation-shaped queries were CURRENT/no-gap/no-reindex against that same
+  immutable binding, so Holo is operational but the durable completion gate
+  was a false negative.
+- A separate focused P0 transaction adds exactly one typed, read-only
+  post-commit recovery proof. It does not retry candidate admission, change
+  route CAS, relabel the historical task, or widen Holo/Git/worker authority.
