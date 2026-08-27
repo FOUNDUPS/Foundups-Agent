@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.115
+Version: 0.4.116
+
+This candidate binds the supported HoloIndex one-shot caller to a private,
+verified current-user route refresh and bounded process-sharded owner
+acquisition. It does not move Holo maintenance, listener trust, credentials,
+or execution authority into the VSIX.
 
 ## Continuous conversation surface
 
@@ -903,7 +908,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.115)
+## WSP_97 Truth Table (v0.4.116)
 
 | Claim | Status |
 | --- | --- |
@@ -995,6 +1000,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.115.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.116.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

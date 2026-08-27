@@ -1,5 +1,37 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-27 - Supported Holo owner acquisition reliability
+
+- Reproduced the plain supported query failure in a long-lived process while
+  the same exact-base query passed after manual route normalization. The fault
+  was caller continuity, not Holo data: inherited legacy route configuration
+  masked the current stable user route.
+- Added a route-only Windows current-user refresh and exact validated owner-port
+  propagation. The supported one-shot wrapper uses 64 PID-sharded ports and
+  gives every process-owned second attempt a diversified shard for the complete
+  transient set: port contention, startup exit, poisoned owner, semantic
+  backend unavailability, and Tier-0 lookup failure. It never copies
+  credentials, mutates the process environment, weakens route verification,
+  adopts a known pre-existing listener, or kills a foreign process. The
+  authenticated post-probe race boundary is not a hostile same-user claim.
+- Final delta evidence is **119 passed**, with **100% statement coverage** on the new
+  owner-acquisition boundary. Two independent OS processes simultaneously
+  returned `CURRENT`, exact base, no gap, and no reindex with distinct receipts
+  in 38.04 seconds; both used attempt 1. Injected contention and process-shard
+  falsification tests exercise attempt 2 without claiming live contention.
+  The complete bridge macro is **1,117 passed / 10
+  expected capability skips in 515.45 seconds**. Registry and authenticated
+  backend projections are current at **1,588 / 268 quarantined** and **1,350
+  files** (`52cacf9a4cf2...1f818d9b`). Port sharding is explicitly
+  bounded availability; the per-user resident IPC broker remains the next
+  scaling slice. Assumptions and rejected alternatives are attached at
+  `docs/audits/security/REDDOG_HOLO_OWNER_ACQUISITION_ASSUMPTION_AUDIT_20260827.md`.
+  WSP_97 evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+  Exact secret-free command/result evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_OWNER_ACQUISITION_EXECUTION_EVIDENCE_PHASE1.json`.
+  (WSP 00/15/22/50/62/83/84/87/97; WSP_15 19/P0)
+
 ## 2026-08-27 - Exact-main automatic replica activation accepted
 
 - Closed the split-lease composer's live gate at exact main

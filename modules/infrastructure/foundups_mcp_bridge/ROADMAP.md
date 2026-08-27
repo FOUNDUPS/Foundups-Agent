@@ -1,5 +1,39 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-27: Supported Holo owner acquisition reliability
+
+**Implemented and focused-GREEN on base
+`90e9eca19f810a03ffaacde0edfffbce2de9513b`; post-merge exact-main activation
+and release packaging remain required.** Long-lived Windows callers now build
+an allowlisted route-only environment from current-user authority/route values,
+without copying credentials or mutating the process. The unchanged strict
+resolver remains the authority gate. Independent one-shots use one of 64
+PID-sharded loopback ports and one diversified retry after bounded transient
+failure. Known pre-existing listeners are not adopted or killed; authenticated
+health still guards the post-probe bind race, without claiming hostile
+same-user isolation or globally unique PID pairs.
+
+Final delta coverage is **119 passed**; the new owner acquisition boundary
+reaches **100% statement coverage**. Two independent PowerShell processes completed
+simultaneous plain governed queries at exact base, `CURRENT`, no gap, and no
+reindex with distinct receipts in 38.04 seconds; both used attempt 1. Injected
+contention and process-shard falsification tests cover attempt 2; live
+contention is not claimed. The complete
+bridge macro is **1,117 passed / 10 expected capability skips in 515.45
+seconds**. Registry/backend projections and the extension release suite are
+green. This proves
+bounded multi-caller availability, not horizontal throughput: each caller can
+still initialize its own model-backed owner. WSP_15 allocation is 19/P0. The
+next scaling layer is one per-user resident broker with authenticated
+current-user local IPC, broker-memory-only bearer state, bounded queueing, and
+separate lifecycle/security acceptance.
+
+WSP_62 follow-up debt: split the 1,151-line one-shot test by admission,
+authority-race, owner-lifecycle, and CLI contracts, and extract the inherited
+over-limit backend-manifest closure assertion function. Production files and
+touched production functions remain within their enforced bounds; this debt is
+test decomposition, not permission to expand either file further.
+
 ## 2026-08-27: Exact-main post-merge route activation ordering
 
 **Implemented, focused-GREEN, and accepted through real OpenClaw at exact main

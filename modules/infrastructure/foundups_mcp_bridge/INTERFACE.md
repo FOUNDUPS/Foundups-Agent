@@ -103,6 +103,15 @@ transition, rewrites route state, or re-indexes. Configuration, terminal route
 admission, descriptor, or binding failure is reduced to
 `HOLOINDEX_QUERY_REPLICA_REQUIRED` without publishing a private path.
 
+The low-level ambiguity rule is unchanged. The supported one-shot wrapper may
+pass a private copied environment in which a non-empty current Windows user
+route pointer replaces an inherited legacy root. That pointer remains
+untrusted until this resolver proves the complete route. Three process-local
+route keys are allowlisted; Windows HKCU reads exactly two non-secret values:
+authority root and stable route file. The legacy root is process-local only and
+is removed from the private copy when the HKCU route file wins. Credentials and
+unrelated process values are ignored, and `os.environ` is unchanged.
+
 The one-shot semantic adapter and maintenance handshake resolve this route
 before owner startup; promotion resolves it before read-only owner binding
 verification. All three pass the same capability into the existing owner API.
@@ -257,12 +266,11 @@ restarted here. See
 
 ### RedDog HoloIndex Owner Bootstrap
 
-`ensure_reddog_holoindex_owner()`, `resolve_reddog_holoindex_owner_handoff()`,
-and `cleanup_reddog_holoindex_owner()` own the process-lifetime policy. Results
-contain only readiness, status, and a stable error, never URL/token. The policy respects an
-existing literal-127.0.0.1 HTTP URL/token, honors
-REDDOG_HOLOINDEX_OWNER_AUTO_START=0, otherwise resolves the canonical
-HOLOINDEX_SSD_PATH and starts one retained supervisor.
+`ensure_reddog_holoindex_owner(..., owner_port=8127)`,
+`resolve_reddog_holoindex_owner_handoff()`, and
+`cleanup_reddog_holoindex_owner()` own process-lifetime policy. `owner_port`
+must be an exact built-in integer in 1..65535. Results never contain URL/token.
+Existing literal-loopback configuration and auto-start opt-out are unchanged.
 
 Successful automatic startup stores the URL/token only in a process-private
 handoff; it does not modify os.environ. In-process RedDog adapters call
@@ -289,6 +297,14 @@ owner startup. It first rehydrates the exact selected-root/store freshness
 proof; a root-bound receipt mismatch returns `freshness_repo_root_mismatch`
 with `owner_attempts=0`, no retry, and no owner/backend call. Process-owned
 `STARTED` and `REUSED` owners are cleaned after the one-shot query.
+Independent one-shots select one PID-sharded port in 8127..8190 and give every
+process-owned second attempt a diversified shard. The bounded retry set includes
+`HOLOINDEX_QUERY_SERVICE_PORT_IN_USE`, startup exit, poisoned-owner,
+semantic-backend, and Tier-0 lookup failures. Port choice is not trust;
+every owner retains private-token and exact-binding proof. Known pre-existing
+listeners are not adopted or killed, and a post-probe bind race must fail
+authenticated health; this is not a hostile same-user isolation claim. This is
+bounded availability, not a resident broker or horizontal-throughput claim.
 
 `run_candidate_acceptance(...)` performs two direct private-owner queries,
 cleans the owner, executes one supported-wrapper activation, and requires final

@@ -1,5 +1,34 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-27] Holo owner acquisition reliability falsification
+
+- Added allowlisted route-refresh, non-string route rejection, exact port
+  bounds, port propagation, first-port contention, distinct retry, and
+  representative same-first-shard PID-diversification regressions. Candidate
+  acceptance now passes only its explicit isolated replica root into the
+  supported wrapper and ignores ambient process/HKCU production routing.
+- Final owner/bootstrap/candidate/one-shot delta: **119 passed** in 2.42 seconds
+  using only O:-local disposable roots. The new owner-acquisition boundary
+  separately reaches **100% statement coverage**.
+- Two independent final live processes concurrently passed the plain supported
+  query at exact base `90e9eca1...`: both `CURRENT`, no gap, no reindex, and
+  attempt 1, with distinct query receipts in 38.04 seconds. Injected contention
+  and process-shard falsification tests exercise bounded attempt 2; no live-
+  contention result is claimed. No route, replica,
+  canonical store, or process environment was mutated.
+- The first complete bridge macro exposed one inherited environment-dependent
+  Windows launcher fixture: it wrote the active venv redirector into the
+  synthetic `pyvenv.cfg` while asserting base-interpreter PID identity. The
+  fixture now uses the repository's existing `sys._base_executable` pattern;
+  no production runtime-selection or timeout behavior changed.
+- The final complete bridge macro is **1,117 passed / 10 expected capability
+  skips in 515.45 seconds** under short O:-only temp root `O:\RT\r2`. A prior
+  final run reached 1,116 passes before one deep fixture exceeded a longer
+  Windows temp-path budget; the exact test then passed under `O:\RT\r1` before
+  the full green rerun. Both non-green discovery runs remain evidence rather
+  than being relabeled green.
+  (WSP 00/15/22/34/50/62/83/84/87/97)
+
 ## [2026-08-27] Post-merge activation composition falsification
 
 - Added absent-only target allocation, legacy/route ambiguity, activation

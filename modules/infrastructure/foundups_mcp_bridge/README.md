@@ -337,7 +337,17 @@ bootstraps own its lifecycle
 through HoloQueryServiceSupervisor, which generates an ephemeral token, proves
 authenticated semantic readiness, can supply a trusted child environment, and
 cleans up the process. Before expensive semantic startup it rejects an occupied
-fixed loopback port. Automatic startup binds the child to the exact supervisor
+loopback port. Direct/resident bootstrap retains port 8127 by default. The
+supported one-shot wrapper instead selects one of 64 process-sharded ports
+(8127--8190) and gives every process-owned second attempt a diversified shard.
+That bounded retry set includes the stable
+`HOLOINDEX_QUERY_SERVICE_PORT_IN_USE` acquisition failure, startup exit, and
+the existing poisoned-owner/semantic-backend/Tier-0 transient failures. Every
+shard still receives its own process-private token and exact authenticated
+binding; the caller never intentionally adopts or kills a known pre-existing
+listener and never treats a port probe as identity. A post-probe bind race is
+outside the same-user hostile-squatter claim and must fail authenticated health.
+Automatic startup binds the child to the exact supervisor
 process, so the child exits after an abruptly terminated parent without a
 blocking stdin reader.
 Replica-routed startup requires explicit `--canonical-ssd-path` and
@@ -350,6 +360,22 @@ Automatic in-process startup keeps the URL/token in a
 private handoff resolved by resolve_reddog_holoindex_owner_handoff(); it never
 exports the generated secret to the parent environment. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
+
+On Windows, the one-shot wrapper privately rereads only the current-user
+authority-root and stable-route-file values. A non-empty user route pointer
+supersedes an inherited legacy replica-root value in that copied mapping; the
+process environment is unchanged and the low-level resolver still rejects
+dual configuration. Pointer precedence grants no authority: the existing
+private-path, terminal-journal, repository, receipt, generation, descriptor,
+and immutable-replica proofs must all pass before owner startup. This removes
+the former restart/manual-sanitation dependency for long-lived IDE and MCP
+processes without reading user-scope credentials.
+
+Port sharding is bounded multi-caller availability, not horizontal scale. Each
+independent process still initializes a model-backed owner. The next scaling
+layer is one per-user resident broker with authenticated, current-user local
+IPC and an in-memory bearer; it requires a separate security and lifecycle
+acceptance slice.
 
 For basename queries, HoloIndex resolves intent against a complete bounded Git
 HEAD module catalog rather than top-K hits. Full module paths bypass that
@@ -643,8 +669,9 @@ target, a locally resolvable canonical model snapshot, and an available literal
 `127.0.0.1:8127` private port with no existing private handoff are also required.
 One non-blocking in-process lock and one host-local cross-process lease
 serialize the canonical-store/port acceptance session. Port availability is not
-owner identity: a pre-existing handoff, foreign listener, post-check bind race,
-or missing newly created handoff fails closed without killing or reusing it.
+owner identity: a pre-existing handoff, known foreign listener, post-check bind
+race, or missing newly created handoff fails closed without killing or reusing
+it. The boundary is not hardened against a hostile same-user process.
 
 The final fresh-process snapshot separates source authority from dependency
 authority. It runs the resolved base interpreter from the candidate cwd with

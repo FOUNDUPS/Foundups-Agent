@@ -1,5 +1,20 @@
 # RedDog ModLog
 
+## 2026-08-27 - Governed Holo owner acquisition compatibility (0.4.116)
+
+- Advanced the thin-client identity because the authenticated Python backend
+  closure now includes route-only current-user refresh and bounded
+  process-sharded owner acquisition. The VSIX gains no credential, listener,
+  maintenance, reindex, or repository-write authority.
+- The regenerated authenticated closure is **1,350 files** at
+  `52cacf9a4cf29f44edf922f32d219b82a30b2aa1f56d617c96e8e6491f818d9b`;
+  the canonical registry is current at **1,588 / 268 quarantined**. Release-
+  suite passed all **4/4 groups in 166.480 seconds** with a deterministic
+  **67-file / 945,191-byte** package surface at content digest
+  `829981b2246a...562138469d`. Final commit-bound VSIX evidence remains a
+  post-merge promotion gate.
+  (WSP 00/15/22/50/62/83/84/87/97)
+
 ## 2026-08-27 - Exact-main live acceptance and VSIX build (0.4.115)
 
 - Closed the 0.4.115 candidate gate at exact main

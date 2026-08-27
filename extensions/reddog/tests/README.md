@@ -1,5 +1,13 @@
 # RedDog Extension Tests
 
+## 0.4.116 governed Holo owner acquisition compatibility
+
+Version and contract fixtures advance with the authenticated backend closure.
+The 1,350-file manifest includes the owner-acquisition module at
+`52cacf9a4cf2...1f818d9b`; the canonical registry is current at 1,588 tests /
+268 quarantined. All release groups must pass before a commit-bound VSIX is
+published. Historical 0.4.115 evidence does not authorize this candidate.
+
 ## 0.4.115 post-merge Holo activation compatibility
 
 Version and contract fixtures bind the VSIX to the 1,349-file authenticated

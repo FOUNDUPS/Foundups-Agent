@@ -1,5 +1,28 @@
 # foundups_mcp_bridge Tests
 
+## Supported Holo owner acquisition reliability
+
+- `test_reddog_holoindex_owner_acquisition_reliability.py` proves route-only
+  current-user precedence, no secret/unrelated environment copying, no process
+  mutation, exact owner-port validation/propagation, bounded contention retry,
+  distinct per-process retry ports, and one representative same-first-shard
+  PID pair that diverges on retry. The 4,032 ordered pairs are explicitly not
+  globally unique.
+- Existing one-shot, bootstrap, and candidate-acceptance suites prove the new
+  environment and port seams preserve strict route, freshness, cleanup, and
+  isolated-candidate behavior. Final delta result: **119 passed**; the new owner
+  acquisition boundary independently passes the 90% WSP_5 gate at **100%
+  statement coverage**.
+- Production-shaped acceptance used two independent PowerShell processes with
+  no manual environment repair. Both plain governed queries returned
+  `CURRENT`, exact base `90e9eca1...`, no gap, and no reindex with distinct
+  receipts in 38.04 seconds; both used attempt 1. Injected contention and
+  process-shard falsification tests exercise the bounded second shard; no live-
+  contention result is claimed.
+- The complete bridge macro is **1,117 passed / 10 expected capability skips in
+  515.45 seconds**. This is bounded two-caller evidence, not a throughput/scale
+  claim.
+
 ## Post-merge query-replica composition
 
 - `test_reddog_holoindex_postmerge_replica.py` proves exact-current admission,

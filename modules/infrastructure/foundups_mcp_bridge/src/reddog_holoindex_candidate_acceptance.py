@@ -79,6 +79,10 @@ from .reddog_holoindex_owner_bootstrap import (
     cleanup_reddog_holoindex_owner,
     resolve_reddog_holoindex_owner_handoff,
 )
+from .reddog_holoindex_owner_acquisition import (
+    build_owner_query_environment,
+)
+from .reddog_holoindex_owner_replica_route import QUERY_REPLICA_ROOT_ENV
 from scripts.reddog_holoindex_owner_query_once import (
     query_once as supported_owner_query_once,
 )
@@ -94,7 +98,7 @@ def _candidate_self_selection(repo_root: Path) -> Any:
 
 
 def _activate_supported_wrapper(
-    *, repo_root: Path, query: str, limit: int
+    *, repo_root: Path, query_replica_root: Path, query: str, limit: int
 ) -> Mapping[str, Any]:
     """Exercise the supported extension adapter through candidate selection."""
 
@@ -102,6 +106,12 @@ def _activate_supported_wrapper(
         {"query": query, "limit": limit},
         repo_root=repo_root,
         select_authority=_candidate_self_selection,
+        query_environment=build_owner_query_environment(
+            process_environment={
+                QUERY_REPLICA_ROOT_ENV: str(query_replica_root.resolve()),
+            },
+            user_environment={},
+        ),
     )
 
 
@@ -398,6 +408,7 @@ def _run_activation_and_semantic_proof(
     try:
         activation = dependencies.activate_supported_wrapper(
             repo_root=config.candidate_root,
+            query_replica_root=config.isolated_store,
             query=K1_ACCEPTANCE_QUERY,
             limit=1,
         )

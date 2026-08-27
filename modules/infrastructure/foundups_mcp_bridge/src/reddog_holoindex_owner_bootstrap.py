@@ -13,6 +13,7 @@ from holo_index.repository_state import repository_root_digest
 from .holo_query_binding import parse_exact_binding
 from .holo_query_service_supervisor import (
     BINDING_MISMATCH_ERROR,
+    DEFAULT_OWNER_PORT,
     DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS,
     SERVICE_TOKEN_ENV,
     SERVICE_URL_ENV,
@@ -281,6 +282,7 @@ def restart_reddog_holoindex_owner(
             return _OWNER_HANDOFF if supervisor.is_ready else None
         repo_root = supervisor.repo_root
         runtime_root = getattr(supervisor, "runtime_root", None)
+        owner_port = int(getattr(supervisor, "port", DEFAULT_OWNER_PORT))
         expected = _OWNER_EXPECTED_BINDING
         replica_route = _OWNER_REPLICA_ROUTE
         supervisor.stop()
@@ -295,6 +297,7 @@ def restart_reddog_holoindex_owner(
             expected_generation_id=expected[2],
             expected_receipt_digest=expected[3],
             query_replica_route=replica_route,
+            owner_port=owner_port,
         )
         return _OWNER_HANDOFF if restarted.ready else None
 
@@ -379,12 +382,14 @@ def _launch_owned_owner(
     expected_binding: tuple[str, str, str, str],
     query_replica_route: QueryReplicaOwnerRoute | None,
     startup_timeout_seconds: float | None,
+    owner_port: int,
 ) -> tuple[QueryReplicaOwnerRoute, HoloQueryServiceSupervisor, tuple[str, str]]:
     route = _required_current_route(query_replica_route)
     supervisor_args, replica_binding = owner_supervisor_configuration(
         repo_root=repo_root, runtime_root=runtime_root,
         canonical_ssd_path=route.canonical_ssd_path, route=route,
     )
+    supervisor_args["port"] = owner_port
     if startup_timeout_seconds is not None:
         supervisor_args.update(
             startup_timeout_seconds=startup_timeout_seconds,
@@ -415,6 +420,7 @@ def _start_owned_owner(
     expected_binding: tuple[str, str, str, str],
     query_replica_route: QueryReplicaOwnerRoute | None,
     startup_timeout_seconds: float | None = None,
+    owner_port: int = DEFAULT_OWNER_PORT,
 ) -> RedDogHoloIndexOwnerBootstrapResult:
     """Start, authenticate, and retain one process-private owner."""
     global _OWNER_EXPECTED_BINDING, _OWNER_HANDOFF, _OWNER_REPLICA_ROUTE, _OWNER_SUPERVISOR
@@ -424,6 +430,7 @@ def _start_owned_owner(
             expected_binding=expected_binding,
             query_replica_route=query_replica_route,
             startup_timeout_seconds=startup_timeout_seconds,
+            owner_port=owner_port,
         )
     except HoloQueryServiceSupervisorError as exc:
         return RedDogHoloIndexOwnerBootstrapResult(
@@ -483,6 +490,7 @@ def _ensure_owner_locked(
     *, repo_root: Path | str, runtime_root: Path | str | None,
     route: QueryReplicaOwnerRoute, expected_binding: tuple[str, str, str, str],
     startup_timeout_seconds: float | None,
+    owner_port: int,
 ) -> RedDogHoloIndexOwnerBootstrapResult:
     expected_runtime_root = Path(runtime_root or repo_root).resolve(strict=False)
     reused = _reuse_owned_owner(
@@ -510,6 +518,7 @@ def _ensure_owner_locked(
         repo_root=repo_root, runtime_root=runtime_root,
         expected_binding=expected_binding, query_replica_route=route,
         startup_timeout_seconds=startup_timeout_seconds,
+        owner_port=owner_port,
     )
 
 
@@ -519,12 +528,15 @@ def ensure_reddog_holoindex_owner(
     expected_repo_head_sha: str = "", expected_generation_id: str = "",
     expected_receipt_digest: str = "", query_replica_route: QueryReplicaOwnerRoute | None = None,
     startup_timeout_seconds: float | None = None,
+    owner_port: int = DEFAULT_OWNER_PORT,
 ) -> RedDogHoloIndexOwnerBootstrapResult:
     """Ensure one host owner exists only for Holo-dependent RedDog work."""
     if not requested:
         return RedDogHoloIndexOwnerBootstrapResult(False, OWNER_NOT_REQUESTED)
     try:
         startup_timeout_seconds = _startup_timeout(startup_timeout_seconds)
+        if type(owner_port) is not int or not 1 <= owner_port <= 65_535:
+            raise ValueError("owner_port_invalid")
         route, expected_binding = _required_owner_request(
             repo_root=repo_root,
             expected_repo_head_sha=expected_repo_head_sha,
@@ -541,6 +553,7 @@ def ensure_reddog_holoindex_owner(
             repo_root=repo_root, runtime_root=runtime_root, route=route,
             expected_binding=expected_binding,
             startup_timeout_seconds=startup_timeout_seconds,
+            owner_port=owner_port,
         )
 
 

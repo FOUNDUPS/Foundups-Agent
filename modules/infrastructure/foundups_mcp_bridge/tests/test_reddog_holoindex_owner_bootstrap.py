@@ -451,6 +451,7 @@ def test_explicit_private_restart_replaces_failed_handoff(
         repo_root=tmp_path,
         requested=True,
         query_replica_route=route,
+        owner_port=8188,
     )
     first = _FakeSupervisor.instances[0]
     failed_handoff = bootstrap.resolve_reddog_holoindex_owner_handoff()
@@ -462,6 +463,8 @@ def test_explicit_private_restart_replaces_failed_handoff(
     assert started.ready is True
     assert first.stopped is True
     assert len(_FakeSupervisor.instances) == 2
+    assert first.port == 8188
+    assert _FakeSupervisor.instances[1].port == 8188
     assert _FakeSupervisor.instances[1].verified_replica_binding == REPLICA_BINDING
     assert route.revalidations > 0
     assert restarted == (SAFE_URL, SAFE_TOKEN)

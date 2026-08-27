@@ -13,6 +13,9 @@ import pytest
 from holo_index.authority_worktree import HoloIndexAuthoritySelection
 from holo_index.query_admission import ReadonlyQueryAdmission
 from holo_index.repository_state import repository_root_digest
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (
+    QUERY_REPLICA_ROUTE_FILE_ENV,
+)
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "reddog_holoindex_owner_query_once.py"
@@ -93,15 +96,29 @@ def query_once(payload, *, repo_root, **kwargs):
     return _query_once(payload, repo_root=repo_root, **kwargs)
 
 
-def _selection(root: Path) -> HoloIndexAuthoritySelection:
+def _selection(
+    root: Path, *, selected_root: Path | None = None,
+    workspace_overlay_present: bool = False, source: str = "workspace",
+) -> HoloIndexAuthoritySelection:
+    authority = root if selected_root is None else selected_root
     return HoloIndexAuthoritySelection(
         accepted=True,
-        selected_root=root,
+        selected_root=authority,
         workspace_head_sha="c" * 40,
         authority_head_sha="c" * 40,
-        authority_root_digest=repository_root_digest(root),
-        workspace_overlay_present=False,
-        source="workspace",
+        authority_root_digest=repository_root_digest(authority),
+        workspace_overlay_present=workspace_overlay_present,
+        source=source,
+    )
+
+
+def _changed_selection(selection: HoloIndexAuthoritySelection) -> HoloIndexAuthoritySelection:
+    return HoloIndexAuthoritySelection(
+        **{
+            **selection.__dict__,
+            "workspace_head_sha": "d" * 40,
+            "authority_head_sha": "d" * 40,
+        }
     )
 
 
@@ -348,14 +365,9 @@ def test_configured_owner_uses_environment_contract_without_cleanup(tmp_path: Pa
 def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
     authority = tmp_path / "authority"
     authority.mkdir()
-    selection = HoloIndexAuthoritySelection(
-        accepted=True,
-        selected_root=authority,
-        workspace_head_sha="c" * 40,
-        authority_head_sha="c" * 40,
-        authority_root_digest=repository_root_digest(authority),
-        workspace_overlay_present=True,
-        source="configured",
+    selection = _selection(
+        tmp_path, selected_root=authority,
+        workspace_overlay_present=True, source="configured",
     )
     calls: dict = {}
     bootstrap_calls: dict = {}
@@ -385,6 +397,7 @@ def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
         query_owner=query_owner,
         select_authority=lambda _root: selection,
         resolve_replica_route=resolve_replica_route,
+        query_environment={QUERY_REPLICA_ROUTE_FILE_ENV: "O:/safe-route.json"},
     )
 
     assert result["ok"] is True
@@ -394,6 +407,7 @@ def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
     assert route_calls == {
         "canonical_repo_root": authority,
         "canonical_ssd_path": Path("E:/HoloIndex-test"),
+        "environment": {QUERY_REPLICA_ROUTE_FILE_ENV: "O:/safe-route.json"},
     }
     assert calls["repo_root"] == authority
     assert result["workspace_overlay_present"] is True
@@ -966,26 +980,37 @@ def test_head_mismatch_failure_preserves_verified_authority_binding(
     assert result["no_authority_worktree_mutation_performed"] is True
 
 
-def test_authority_change_after_query_discards_result(tmp_path: Path) -> None:
+def test_authority_change_before_owner_rejects_without_query(tmp_path: Path) -> None:
     accepted = _selection(tmp_path)
-    changed = HoloIndexAuthoritySelection(
-        **{
-            **accepted.__dict__,
-            "workspace_head_sha": "d" * 40,
-            "authority_head_sha": "d" * 40,
-        }
-    )
-    selections = iter((accepted, changed))
+    selections = iter((accepted, _changed_selection(accepted)))
     result = query_once(
         {"query": "audit pfmall"},
         repo_root=tmp_path,
-        ensure_owner=lambda **_kwargs: SimpleNamespace(
-            ready=True, status="CONFIGURED", error=""
+        ensure_owner=lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("owner must not start after serialized authority drift")
         ),
-        query_owner=lambda **_kwargs: _success(tmp_path),
         select_authority=lambda _root: next(selections),
     )
 
+    assert result["ok"] is False
+    assert result["error"] == "REPOSITORY_STATE_CHANGED_DURING_QUERY"
+    assert result["owner_attempts"] == 0
+
+
+def test_authority_change_after_query_discards_result(tmp_path: Path) -> None:
+    accepted = _selection(tmp_path)
+    selections = iter((accepted, accepted, _changed_selection(accepted)))
+    query_calls: list[str] = []
+    result = query_once(
+        {"query": "audit pfmall"}, repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=True, status="CONFIGURED", error=""
+        ),
+        query_owner=lambda **_kwargs: query_calls.append("query") or _success(tmp_path),
+        select_authority=lambda _root: next(selections),
+    )
+
+    assert query_calls == ["query"]
     assert result["ok"] is False
     assert result["error"] == "REPOSITORY_STATE_CHANGED_DURING_QUERY"
     assert "query_receipt" not in result
