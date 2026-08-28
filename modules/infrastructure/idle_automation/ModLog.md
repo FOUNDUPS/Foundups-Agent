@@ -2,6 +2,18 @@
 
 This log tracks changes specific to the **idle_automation** module in the **infrastructure** enterprise domain.
 
+### 2026-08-29 - Pre-owner exact-HEAD incident kind
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- Added `REPO_HEAD_MISMATCH` to the immutable incident contract so the
+  communication bridge can route an independently reproduced pre-owner
+  exact-main freshness transition into the existing task.
+- Durable normalization treats it like other non-authority-root incidents:
+  observed authority HEAD must equal target HEAD. No new task family or
+  maintenance authority was introduced.
+- Shared focused incident/root/coordinator result: 75 passed.
+
 ## WSP 22 ModLog Protocol
 - **Purpose**: Track module-specific changes and evolution per WSP 22
 - **Format**: Reverse chronological order (newest first)

@@ -1,5 +1,12 @@
 # moltbot_bridge Roadmap
 
+- IMPLEMENTED_CANDIDATE - PRE-OWNER EXACT-HEAD REPAIR ADMISSION: a
+  zero-attempt `REPO_HEAD_MISMATCH` now reaches the existing post-merge task
+  only after exact authority/no-effect validation and independent reproduction
+  of the same stale HEAD/generation/freshness/reason binding. Shared owner
+  classification remains receipt-bound and retry-exhausted.
+  Exact-main OpenClaw replay, immutable replica verification, and a separate
+  merged acceptance receipt remain required before this is COMPLETE.
 - COMPLETE - OWNER-QUERY ROOT SEPARATION LIVE ACCEPTANCE: exact-main `724954fa`
   exposed the post-completion false-negative after successful real OpenClaw
   maintenance. Merged exact-main `da558d51` then passed the repaired controller

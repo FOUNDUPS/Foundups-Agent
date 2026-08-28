@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-29: Pre-owner exact-HEAD repair admission candidate
+
+- Added the canonical `REPO_HEAD_MISMATCH` incident kind for the exact-main
+  freshness transition that rejects before owner acquisition.
+- Admission now requires exact zero-attempt query/authority/root/generation/
+  freshness/no-effect evidence and one independent reproduction of the same
+  stale HEAD/generation/freshness/reason binding before the existing OpenClaw
+  post-merge task can be reconciled. The shared owner classifier and all
+  receipt-bound owner transient rules are unchanged.
+- Coordinator receipts now require exact `holoindex_postmerge_refresh:<HEAD>`
+  task identity. Focused incident/root/coordinator result: 75 passed. Exact-main live replay
+  and immutable post-query verification remain pending merge.
+- WSP: 00, 06, 15, 22, 50, 62, 84, 87, 97.
+
 ## 2026-08-28: Merged owner-query root-separation live acceptance
 
 - Ran the merged controller from the clean control checkout at exact main

@@ -35,7 +35,9 @@ wsp_cycle(input="idle_automation", log=True)
   completion, and canonical receipt rehydration. The split-lease automatic
   replica activation ordering passed a real broker-managed OpenClaw replay at
   exact main `cfd1e0051`, including atomic AgentDB completion and immutable
-  post-query revalidation.
+  post-query revalidation. The incident contract now also admits the
+  independently verified pre-owner `REPO_HEAD_MISMATCH`; candidate exact-main
+  live replay remains pending before that ingress closure is complete.
 - **Linked-control dependency-runtime resolution**: The post-merge executor now
   resolves the existing same-repository primary runtime root before entering
   the authority transaction. This preserves a clean control checkout and clean

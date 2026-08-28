@@ -12,6 +12,15 @@ the repaired controller on its first real OpenClaw transaction; a fresh owner
 query and full 33-artifact post-query verification retained the exact binding.
 That live result is commit-bound and does not prove runtime closure or A-grade.
 
+`test_reddog_holoindex_incident_repair_runtime.py` also proves the exact-main
+freshness transition can be repaired before owner acquisition: only a bound
+zero-attempt `REPO_HEAD_MISMATCH` reproduced by an independent fixed query may
+reach the canonical post-merge task. Wrong attempt count, receipt HEAD, or
+stale-reason evidence rejects before coordination. The independent query
+cannot substitute a different repairable error, a receipt-bound result of the
+same error, or different stale HEAD/generation/freshness/reason evidence. The
+ordinary shared owner classifier rejects this unreceipted pre-owner result.
+
 `test_holoindex_postmerge_runtime_owner_proof.py` owns the distinct
 post-completion readiness contract. It proves one fully receipt-bound exhausted
 transient can receive exactly one immediate reproof on acquisition cycles zero

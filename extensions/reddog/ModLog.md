@@ -1,5 +1,27 @@
 # RedDog ModLog
 
+## 2026-08-29 - Governed pre-owner exact-main repair ingress (0.4.136)
+
+- The thin client now recognizes only the complete zero-attempt
+  `REPO_HEAD_MISMATCH` shape, binds its embedded query to the normalized outer
+  query before spawn, and forwards the stale HEAD/generation/freshness/reason
+  closure without a query receipt. Other owner failures keep the prior compact
+  nine-field projection and receipt-bound exhausted-retry rules.
+- Python independently reproduces the exact stale binding inside the dedicated
+  incident bridge; the shared owner classifier remains receipt-bound. Focused
+  incident/root/coordinator result is 75 passed and the direct JavaScript
+  bridge/package-surface tests pass.
+- Final affected Python is 283 passed; registry is 1,612 tests / 268
+  quarantined. Backend identity is `9c34a61bfeb4...db7039`; contract identity
+  is `6a3cf131fc90...adb273`; the 67-file package is 948,953 bytes at
+  `33a4a7bb09a6...be4754`. All four exhaustive groups pass in 180.005 seconds.
+- `O:\RedDog-Releases\reddog-0.4.136.vsix` is 276,366 bytes at
+  `sha256:ccf65001c726...ced3f8`: 69 safe unique ZIP files, 67 exact source
+  members, no encryption/symlinks/unsafe paths, and zero credential-value
+  patterns. Merge, exact-main OpenClaw replay, and immutable replica
+  verification remain gates; A-grade and retrieval RSI are not claimed.
+  (WSP 00/15/22/50/62/84/87/97)
+
 ## 2026-08-28 - Evidence-qualified Holo module intent (0.4.135)
 
 - RedDog now authenticates the Holo runtime containing the bounded exact-HEAD

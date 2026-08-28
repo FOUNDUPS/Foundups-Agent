@@ -146,6 +146,7 @@ def test_incident_recheck_passes_workspace_root(
         query=QUERY, workspace_repo_root=workspace,
         selection=_selection(workspace, authority),
         query_runner=lambda *_args, **_kwargs: {}, incident_id=ROOT_DIGEST,
+        expected_binding={"owner_error": "SEMANTIC_BACKEND_UNAVAILABLE"},
     )
 
     assert receipt is not None and receipt.status == "OWNER_READY"
@@ -162,7 +163,8 @@ def test_current_coordination_proof_passes_workspace_root(
         _current_classifier(observed),
     )
     coordinated = {
-        "accepted": True, "status": "CURRENT", "task_id": "",
+        "accepted": True, "status": "CURRENT",
+        "task_id": "holoindex_postmerge_refresh:" + HEAD,
         "target_repo_head_sha": HEAD, "authority_root_digest": ROOT_DIGEST,
         "rejection_reasons": (),
     }

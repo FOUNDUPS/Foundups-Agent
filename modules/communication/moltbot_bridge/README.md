@@ -9,7 +9,7 @@ mode, avoids process-global flags, and directly registers only the two required 
 The exact AgentDB task ID is supplied at supervisor construction and acknowledged by a same-root,
 Holo-only resident; its sealed authority digest is rechecked during polling. A bound poller cannot
 replace it. Pre-existing bindings release exactly; owned supervisors stay bound through shutdown, closing the release-to-stop race. Runtime/task drift rejects promptly; pending/assigned progress is bounded to 60 seconds and executing observation to its canonical 7,500-second v2 integrity-bound AgentDB claim lease. Claim ID, issued time, expiry, assignee, and task context share one digest; first completion after expiry rejects atomically.
-The owner path binds replica, ranker, runtime, HEAD/root/generation, and no-reindex evidence.
+The owner path binds replica, ranker, runtime, HEAD/root/generation, and no-reindex evidence. A pre-owner `REPO_HEAD_MISMATCH` may reuse only the existing one-task-per-HEAD OpenClaw transaction after exact zero-attempt authority/no-effect binding and an independent match of stale HEAD, generation, freshness digest, and bounded reasons; shared owner classification remains receipt-bound and query handling cannot index. Exact-main live acceptance remains pending merge.
 
 After completion, one receipt-bound exhausted transient may receive one immediate reproof inside
 the 300-second deadline. Its new two-port acquisition cycle is result/receipt-bound and validated.

@@ -54,6 +54,11 @@ Claims have a 7500-second lease, covering the bounded 7200-second maintenance
 timeout plus margin. A crashed or interrupted worker is reclaimed
 by exact assignment timestamp and enters the existing bounded retry policy.
 
+Incident-bound coordination accepts `REPO_HEAD_MISMATCH` as a non-authority-
+root mismatch: the observed authority HEAD must equal the exact target HEAD.
+The communication bridge owns the preceding zero-attempt evidence and
+independent-query checks; this interface grants no query-side indexing.
+
 Runtime configuration:
 
 - `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`: absolute dedicated worktree.

@@ -1,5 +1,22 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-29 - Pre-owner exact-main repair ingress (0.4.136)
+
+- Added thin-client falsifiers for wrong outer query, owner attempts, bounded
+  stale reasons, and any query-receipt property; compact forwarding retains
+  only the authenticated pre-owner closure.
+- Added Python falsifiers for shared-classifier leakage, different repairable
+  error, receipt-bound same error, changed stale HEAD/generation/freshness/
+  reasons, explicit null receipt, and forged coordinator task. Focused result
+  is **75 passed**.
+- Final affected Python is **283 passed**; registry is 1,612/268. Fast,
+  conversation (32 Python passes), package, contract, and all four exhaustive
+  release groups pass in 180.005 seconds. Backend is `9c34a61bfeb4...db7039`,
+  contract `6a3cf131fc90...adb273`, and package `33a4a7bb09a6...be4754`.
+- VSIX inspection proves 0.4.136, 69 safe ZIP files / 67 exact source members,
+  276,366 bytes, `sha256:ccf65001c726...ced3f8`, and zero credential-value
+  patterns. Exact-main replay remains pending merge.
+
 ## 2026-08-28 - Evidence-qualified Holo module intent (0.4.135)
 
 - Added no new extension behavior island: the release binds RedDog to the

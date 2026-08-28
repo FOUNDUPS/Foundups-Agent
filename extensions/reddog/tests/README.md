@@ -1,5 +1,22 @@
 # RedDog Extension Tests
 
+## 0.4.136 pre-owner exact-main repair ingress
+
+- JavaScript positives/negatives bind the normalized outer query, exact
+  zero-attempt failure shape, stale evidence, no-receipt projection, and the
+  unchanged nine-field projection for ordinary repairable owner failures.
+- The shared Python owner classifier rejects the unreceipted result; the
+  dedicated incident bridge requires an exact independent stale binding.
+  Focused incident/root/coordinator result is 75 passed.
+- Affected Python is 283 passed and the registry is current at 1,612/268.
+  Backend `9c34a61bfeb4...db7039`, contract `6a3cf131fc90...adb273`, and
+  package `33a4a7bb09a6...be4754` are current; all four exhaustive groups pass
+  in 180.005 seconds.
+- The inspected 0.4.136 VSIX is 276,366 bytes at
+  `sha256:ccf65001c726...ced3f8`, with 69 safe entries, 67 exact source-byte
+  matches, and zero credential-value-pattern hits. Merged exact-main live
+  acceptance remains pending.
+
 ## 0.4.135 evidence-qualified Holo module intent
 
 - The authenticated 1,365-file backend closure is
