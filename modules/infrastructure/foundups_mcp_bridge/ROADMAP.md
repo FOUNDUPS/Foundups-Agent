@@ -1,12 +1,36 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-29: Inert exact Windows Python base-runtime generation
+
+**Implemented and production-shape verified; this is not an activation
+claim.** A strict contract, materializer, and independent full-byte verifier
+now preserve a runnable base-prefix topology for root Python/VCRuntime files,
+`DLLs`, `Lib`, and `tcl`, while excluding development/documentation trees and
+`Lib/site-packages`. File roles, file bytes/sizes, complete directory topology,
+admission/exclusion policy, inventories, and descriptors are content-addressed.
+The layer reuses the bounded dependency tree copy and adds a read-only source
+lease mode that does not require DELETE authority from protected installed-Python
+roots while retaining write/delete share denial.
+
+The first real run falsified two synthetic assumptions before publication:
+four `DLLs` catalog/icon files needed an explicit runtime-data role, and
+`C:/Python312` correctly denied a source lease that unnecessarily requested
+DELETE authority. Both were repaired without relaxing topology. The final
+production shape passed materialization, staging proof, no-replace publication,
+canonical reproof, and exact reuse in 239.94 seconds: 4,068 files, 372 child
+directories, 81,515,843 bytes, generation `sha256:3efe4fba...`.
+
+The descriptor keeps native-loader closure, deterministic effects, signature,
+write denial, activation eligibility, and exact runtime closure false. No live
+owner, route, replica, maintenance state, extension behavior, or RSI changed.
+
 ## 2026-08-29: Pre-owner exact-main acceptance
 
 The merged `REPO_HEAD_MISMATCH` ingress passed the real broker-managed path at
-exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e`. The canonical task
-completed through OpenClaw/WRE at generation `sha256:7869f238...`; a fresh
+exact main `0f992c9b55067055049674f49568e58315242c35`. The canonical task
+completed through OpenClaw/WRE at generation `sha256:eeb23404...`; a fresh
 owner query was CURRENT/no-gap/no-reindex on attempt one, and full production
-verification retained 33 artifacts / 222,719,702 bytes unchanged. This closes
+verification retained 33 artifacts / 222,706,129 bytes unchanged. This closes
 that exact-commit maintenance gate only. Exact runtime closure, A-grade,
 retrieval RSI, resident scale, and future-commit authority remain open.
 
@@ -52,8 +76,8 @@ explicit absolute control-root limit or extend every creation, publication,
 contract, quarantine, and recovery syscall boundary.
 
 Next P0 layers are deliberately separate: durable hard-crash recovery and
-retention, signer/write-denial admission, exact interpreter/
-standard-library/native dependency and deterministic-execution binding,
+retention, signer/write-denial admission, composition of the exact base and
+dependency generations, external native-loader and deterministic-execution binding,
 pre-import bootstrap verification, and resident authenticated owner selection.
 Only after those exist may the runtime exact-closure predicate become true.
 Retrieval RSI then needs a distinct authenticated proposer/evaluator,

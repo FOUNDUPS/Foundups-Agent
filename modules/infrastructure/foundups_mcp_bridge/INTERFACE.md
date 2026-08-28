@@ -10,6 +10,20 @@ backend/distribution records, replica/model closure, and allowlisted controls.
 Only the digest crosses the trust boundary. Exact closure remains a separate
 false-by-default predicate rejected until every payload byte/control is proven. `reddog_holoindex_owner_acquisition` exports the shared two-attempt, 300-second, fixed-transient policy plus 32 deterministic acquisition cycles over the 64-port shard set. The root one-shot validates the controller-selected cycle and integrity-binds it in the query receipt. These values grant no query, retry, route, maintenance, or repository authority.
 
+### `materialize_base_runtime(...) -> BaseRuntimeMaterializationResult`
+
+Creates or reproves one Windows-specific, content-addressed, inert Python
+base-prefix generation. The preserved runnable topology admits exact root
+interpreter/runtime DLLs plus `DLLs`, `Lib`, and `tcl`; it excludes development,
+documentation, scripts, and `Lib/site-packages`. Inventory identity covers file
+bytes, sizes, roles, policy roots, and complete directory topology. Publication
+uses the existing proved store, bounded handle copy, staging proof, atomic
+no-replace transition, canonical reproof, quarantine, and per-store operation
+lock. Protected installed-Python sources use a read-only lease mode that
+does not require DELETE authority. Native-loader closure, deterministic
+effects, signature, write denial, activation eligibility, and exact runtime
+closure remain false. The API never launches Python or changes a route/owner.
+
 ### `materialize_dependency_runtime(...) -> DependencyRuntimeMaterializationResult`
 
 Creates/reproves one bounded, content-addressed, inert `site-packages` generation.

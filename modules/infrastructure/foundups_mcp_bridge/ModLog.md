@@ -1,5 +1,25 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Inert exact Windows Python base-runtime generation
+
+- Added strict inventory/descriptor, materializer, and full-byte verifier
+  modules for a runnable Windows Python base-prefix topology. The generation
+  binds root interpreter/VCRuntime files, `DLLs`, `Lib`, `tcl`, file roles,
+  empty directories, and explicit admission/exclusion policy while keeping
+  `Lib/site-packages` in the separate dependency generation.
+- Reused the bounded dependency tree-copy path with explicit projection roots.
+  Added a read-only Windows source-lease mode because the real protected
+  installed-Python root correctly denied the former unnecessary DELETE access;
+  competing write/delete sharing remains denied.
+- The production shape exposed four unclassified `DLLs` catalog/icon artifacts;
+  they are now explicitly bound as runtime data. Final materialize/publish/
+  reprove/reuse passed 4,068 files / 372 directories / 81,515,843 bytes in
+  239.94 seconds as generation `sha256:3efe4fba...`.
+- The descriptor deliberately leaves external native-loader closure,
+  deterministic effects, signature, write denial, activation, exact runtime
+  closure, A-grade, and RSI false. No owner, route, replica, maintenance, or
+  VSIX state changed. (WSP 00/15/22/50/62/83/84/87/97)
+
 ## 2026-08-28 - Producer-ranked typed-stream merge
 
 - Reproduced a live quality defect where collection-local hybrid ranking put an

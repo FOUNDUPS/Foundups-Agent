@@ -1,5 +1,22 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-29 - Inert base-runtime backend binding (0.4.137)
+
+- Added strict and adversarial base-runtime coverage: **55 passed / 1 opt-in
+  skip**. Adjacent dependency/runtime-environment/sealed-runtime/process-image
+  coverage is **82 passed / 5 expected skips**.
+- Production materialization/reuse passed 4,068 files / 372 directories /
+  81,515,843 bytes as `sha256:3efe4fba...` in 239.94 seconds after two real
+  fail-closed discoveries corrected file roles and protected-source lease access.
+- Registry is 1,616/268. Backend is `fccaca219ac3...0713be`; contract shards are
+  `bc04f3fedd2a...a519a4`; deterministic package is 67 files / 948,887 bytes at
+  `3db698e1ff22...b652d1`.
+- VSIX inspection proves version 0.4.137, 69 safe ZIP entries / 67 exact source
+  members, 276,358 bytes, `sha256:c4961ce5b543...6ef1c`, and zero byte mismatch
+  or credential-value-pattern hit.
+- Tests and packaging change no live Holo owner, route, replica, maintenance,
+  activation, A-grade, or RSI state.
+
 ## 2026-08-29 - Pre-owner exact-main repair ingress (0.4.136)
 
 - Added thin-client falsifiers for wrong outer query, owner attempts, bounded

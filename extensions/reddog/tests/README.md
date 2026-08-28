@@ -1,5 +1,24 @@
 # RedDog Extension Tests
 
+## 0.4.137 inert base-runtime backend binding
+
+- The release changes no extension authority. It advances the authenticated
+  backend identity for the shared protected-source lease correction and
+  independently records the inert Windows Python base-runtime publication
+  layer, which remains outside the executable VSIX closure.
+- Focused base-runtime result is 55 passed / 1 opt-in skip; adjacent runtime
+  result is 82 passed / 5 expected skips. The real shape passed 4,068 files /
+  372 directories / 81,515,843 bytes with exact reuse in 239.94 seconds.
+- Backend is `fccaca219ac3...0713be` / 1,365 files; the 18-shard contract is
+  `bc04f3fedd2a...a519a4` / 492 assertions; registry is 1,616/268. The
+  deterministic package is 67 files / 948,887 bytes at
+  `3db698e1ff22...b652d1`.
+- The inspected `O:\RedDog-Releases\reddog-0.4.137.vsix` is 276,358 bytes at
+  `sha256:c4961ce5b543...6ef1c`, with 69 safe entries, 67 exact source members,
+  and zero byte mismatches or credential-value-pattern hits.
+- Activation, signing, write denial, owner/route changes, A-grade, and
+  retrieval-quality RSI are not claimed.
+
 ## 0.4.136 pre-owner exact-main repair ingress
 
 - JavaScript positives/negatives bind the normalized outer query, exact

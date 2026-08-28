@@ -258,12 +258,13 @@ def open_windows_directory_lease(
     path: Path,
     *,
     expected_identity: tuple[int, int] | None = None,
+    require_delete_authority: bool = True,
 ) -> WindowsDirectoryLease:
     """Pin a directory while denying write/delete sharing and prove identity."""
 
     handle = _open_handle(
         path,
-        desired_access=_FILE_READ_ATTRIBUTES | _DELETE,
+        desired_access=_FILE_READ_ATTRIBUTES | (_DELETE if require_delete_authority else 0),
         share_mode=_FILE_SHARE_READ,
         flags=_FILE_FLAG_BACKUP_SEMANTICS | _FILE_FLAG_OPEN_REPARSE_POINT,
     )
@@ -280,8 +281,6 @@ def open_windows_directory_lease(
         if handle:
             _close_handle(handle)
         raise
-
-
 def validate_windows_directory_lease(lease: WindowsDirectoryLease) -> None:
     """Re-prove one pinned directory from its live handle."""
 

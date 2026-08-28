@@ -1,5 +1,26 @@
 # RedDog ModLog
 
+## 2026-08-29 - Inert base-runtime backend binding (0.4.137)
+
+- Rebound the authenticated backend closure after adding the inert exact
+  Windows Python base-runtime contract/materializer/verifier and protected-source
+  lease mode. The VSIX gains no execution, activation, route, owner, signing,
+  write-denial, or Holo maintenance authority.
+- Base-runtime focused coverage is **55 passed / 1 opt-in skip**; adjacent
+  dependency/environment/sealed-runtime/process-image coverage is **82 passed /
+  5 expected skips**. The production shape passed exact materialization/reuse
+  for 4,068 files / 372 directories / 81,515,843 bytes in 239.94 seconds.
+- Backend identity is `fccaca219ac3...0713be` / 1,365 files; contract identity
+  is `bc04f3fedd2a...a519a4` / 18 shards / 492 assertions; registry is
+  1,616 tests / 268 quarantined. The deterministic package is 67 files /
+  948,887 bytes at `3db698e1ff22...b652d1`.
+- `O:\RedDog-Releases\reddog-0.4.137.vsix` is 276,358 bytes at
+  `sha256:c4961ce5b543...6ef1c`: 69 safe ZIP entries, 67 exact source members,
+  and zero source-byte mismatches or credential-value-pattern hits.
+- Native-loader closure, deterministic effects, signature, empirical write
+  denial, route-v2 activation, A-grade, and retrieval RSI remain explicitly
+  false/blocked. (WSP 00/15/22/50/62/83/84/87/97)
+
 ## 2026-08-29 - Governed pre-owner exact-main repair ingress (0.4.136)
 
 - The thin client now recognizes only the complete zero-attempt
