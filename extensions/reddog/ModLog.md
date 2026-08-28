@@ -18,8 +18,11 @@
 - `O:\RedDog-Releases\reddog-0.4.136.vsix` is 276,366 bytes at
   `sha256:ccf65001c726...ced3f8`: 69 safe unique ZIP files, 67 exact source
   members, no encryption/symlinks/unsafe paths, and zero credential-value
-  patterns. Merge, exact-main OpenClaw replay, and immutable replica
-  verification remain gates; A-grade and retrieval RSI are not claimed.
+  patterns. PR #1591 merged as exact main `09e98fff`; the real OpenClaw/WRE
+  task completed at generation `sha256:7869f238...`, a governed query was
+  CURRENT/no-gap/no-reindex on attempt one, and verification retained 33
+  artifacts / 222,719,702 bytes unchanged. A-grade and retrieval RSI are not
+  claimed because runtime exact closure remains false.
   (WSP 00/15/22/50/62/84/87/97)
 
 ## 2026-08-28 - Evidence-qualified Holo module intent (0.4.135)

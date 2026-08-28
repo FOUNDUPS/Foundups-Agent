@@ -106,6 +106,16 @@ Committed authority permits caller overlays; `clean_workspace_head` does not.
 
 ## Current truth and scale
 
+Merged exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e`
+live-accepted the pre-owner `REPO_HEAD_MISMATCH` ingress. The exact canonical
+task completed through OpenClaw/WRE at generation `sha256:7869f238...`, its
+owned resident and supervisor stopped cleanly, and the controller performed no
+reindex. A fresh owner query returned CURRENT/no-gap/no-reindex on attempt one
+with equal workspace/authority HEADs and no overlay. Full verification retained
+33 artifacts / 222,719,702 bytes at descriptor `sha256:af0e9a2a...`, replica
+`sha256:fb03a1db...`, and path identity `sha256:4d5c10b7...`.
+This exact-commit result closes the pre-owner repair gate only.
+
 Exact-main `724954fa3799b19174a7ac0b653da8c95e9ccf13` exposed the controller
 false-negative after real OpenClaw maintenance and atomic completion succeeded:
 the post-completion classifier passed the selected clean authority back into
@@ -130,8 +140,8 @@ external loader policy, signature, or write denial, so
 dependency closure cannot be hashed per query; A-grade scale requires
 asynchronous signed/protected promotion plus a resident authenticated owner.
 
-Base-bound maintenance/freshness self-repair is observed operational;
-merged controller acceptance for this root-separation repair remains pending. Retrieval-quality RSI still requires
+Base-bound maintenance/freshness self-repair and the merged pre-owner ingress
+are observed operational at their named commits. Retrieval-quality RSI still requires
 an authenticated proposer, independently sealed evaluator, separate promoter,
 CAS/canary/semantic rollback, signed outcome ledger, and bounded WRE feedback
 loop. No outbound Hermes dispatch is part of this contract.

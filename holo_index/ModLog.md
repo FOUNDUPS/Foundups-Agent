@@ -1,5 +1,20 @@
 # HoloIndex Package ModLog
 
+## [2026-08-29] Pre-owner exact-main live acceptance
+
+- PR #1591 merged as exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e`.
+  The governed controller admitted only the canonical pre-owner stale-HEAD
+  incident and completed the existing OpenClaw/WRE task at generation
+  `sha256:7869f238...`; its owned runtimes stopped cleanly.
+- A fresh broad RSI owner query returned CURRENT/no-gap/no-reindex on attempt
+  one with equal authority/workspace HEADs and no overlay. The required module
+  bundle passed with no required artifact missing and no false telemetry
+  `feedback` module target.
+- Production verification retained 33 artifacts / 222,719,702 bytes at
+  descriptor `sha256:af0e9a2a...`, replica `sha256:fb03a1db...`, and path
+  identity `sha256:4d5c10b7...`. Exact runtime closure remains false; A-grade,
+  retrieval RSI, and scale remain NO-GO. (WSP 00/15/22/50/62/84/87/97)
+
 ## [2026-08-28] Evidence-qualified module-intent candidate
 
 - Reproduced the exact governed failure at current main: generic `feedback`

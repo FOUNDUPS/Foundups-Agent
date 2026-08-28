@@ -11,6 +11,10 @@
   when its HEAD/root are correct; the dedicated pre-owner suite is split below
   WSP_62. Fresh incident/root/coordinator result: **75 passed**. No Holo maintenance,
   owner restart, replica write, or repository effect occurred in this suite.
+- After PR #1591 merged, exact main `09e98fff` exercised the accepted positive
+  path through real OpenClaw/WRE. The owner query was CURRENT/no-gap/no-reindex
+  on attempt one and production verification retained 33 artifacts /
+  222,719,702 bytes unchanged. Runtime exact closure remains false.
 
 ## 2026-08-28: Merged root-separation acceptance replay
 

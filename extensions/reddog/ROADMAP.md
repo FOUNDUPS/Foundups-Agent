@@ -14,11 +14,17 @@ trusted stage-zero verifier must still bind the full runtime, signature, and
 empirical write denial, while normal operation still needs one persistent
 owner and independently governed retrieval RSI.
 The receipt-bound owner reproof and separately contained pre-owner exact-binding
-repair are synthetically and adversarially closed; one clean exact-main
-post-merge replay remains the acceptance gate. No package test or
-VSIX artifact substitutes for that live commit-bound proof.
+repair are live-accepted at exact main `09e98fff`: the governed OpenClaw/WRE
+transaction completed, the ordinary owner query was CURRENT/no-gap/no-reindex
+on attempt one, and full verification retained all 33 replica artifacts.
+This exact-commit proof does not close runtime exactness, A-grade, RSI, or scale.
 
 Current implementation:
+
+- [x] Close the 0.4.136 pre-owner exact-main acceptance gate at `09e98fff`.
+  The canonical task produced generation `sha256:7869f238...`; immutable
+  revalidation retained 33 artifacts / 222,719,702 bytes. The controller did
+  not reindex, and its owned OpenClaw runtimes stopped cleanly.
 
 - [x] Bind candidate evaluation to the owner-loaded twelve-module source-ranker
   closure and reject missing, malformed, foreign-root, or mismatched digests.

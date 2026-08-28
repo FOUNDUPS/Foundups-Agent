@@ -2,6 +2,20 @@
 
 This log tracks changes specific to the **idle_automation** module in the **infrastructure** enterprise domain.
 
+### 2026-08-29 - Pre-owner exact-main live acceptance
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- PR #1591 merged as exact main `09e98fff`; the existing one-task-per-SHA
+  coordinator accepted the independently reproduced pre-owner stale-HEAD
+  incident and completed the real OpenClaw/WRE transaction at generation
+  `sha256:7869f238...`.
+- A fresh governed owner query returned CURRENT/no-gap/no-reindex on attempt
+  one. Production verification retained 33 artifacts / 222,719,702 bytes and
+  unchanged descriptor, replica, and path identities.
+- This closes only the exact-commit maintenance ingress. Runtime exact closure,
+  A-grade, retrieval RSI, and horizontal scale remain unproven.
+
 ### 2026-08-29 - Pre-owner exact-HEAD incident kind
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97

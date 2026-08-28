@@ -20,6 +20,11 @@ stale-reason evidence rejects before coordination. The independent query
 cannot substitute a different repairable error, a receipt-bound result of the
 same error, or different stale HEAD/generation/freshness/reason evidence. The
 ordinary shared owner classifier rejects this unreceipted pre-owner result.
+Merged exact main `09e98fff` then exercised that exact path through the real
+OpenClaw/WRE task. The resulting governed query was CURRENT/no-gap/no-reindex
+on attempt one and all 33 replica artifacts reverified unchanged. This is live
+acceptance for the named commit, not a replacement for these falsifiers or an
+A-grade/RSI claim.
 
 `test_holoindex_postmerge_runtime_owner_proof.py` owns the distinct
 post-completion readiness contract. It proves one fully receipt-bound exhausted

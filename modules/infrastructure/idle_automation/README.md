@@ -28,6 +28,10 @@ The incident allowlist includes the exact-main pre-owner
 `REPO_HEAD_MISMATCH`. Its RedDog bridge must independently reproduce complete
 authority/no-effect evidence before this coordinator sees the incident. The
 coordinator still creates only the existing one-task-per-SHA transaction.
+Exact main `09e98fff` live-accepted this path: the real OpenClaw/WRE task
+completed at generation `sha256:7869f238...`, the subsequent owner query was
+CURRENT/no-gap/no-reindex on attempt one, and all 33 replica artifacts
+reverified unchanged. This exact-commit evidence grants no later-HEAD authority.
 
 The stable route is supplied through
 `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; configuring the legacy direct replica root
