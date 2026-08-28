@@ -239,7 +239,7 @@ def _prove_completion_owner(
         if remaining <= 0:
             return None, "owner_proof_timeout_after_completion"
         status, owner = query_and_classify_owner_result(
-            query=query, selection=selection,
+            query=query, selection=selection, workspace_repo_root=root,
             query_runner=partial(query_runner, acquisition_cycle=acquisition_cycle),
             operation_timeout_seconds=remaining,
         )

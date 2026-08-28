@@ -1,5 +1,24 @@
 # RedDog Extension Tests
 
+## 0.4.134 Holo owner-query root separation release
+
+- Five focused caller tests prove verified owner queries use the original
+  workspace/control checkout and never recycle the selected authority as query
+  entry. A selector negative retains `HOLOINDEX_AUTHORITY_ROOT_INVALID` when
+  configured authority equals workspace.
+- The focused root selection is 21 passed and the expanded affected lifecycle
+  selection is 190 passed. The canonical registry is 1,610 tests / 268
+  quarantined; its 52-test registry/indexing selection passes.
+- Exact pre-package identities: backend `bacffc8e18b4...a8076645`; contract
+  `3c951718cb13...e14a7f1f`. Merged exact-main replay remains a separate
+  production gate.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic package,
+  candidate WSP_62, and exhaustive four-group release gates pass in 184.6
+  seconds. Package identity is 946,244 bytes at
+  `e8e2329154f5...1852246e`. The inspected 0.4.134 VSIX is 275,758 bytes at
+  `sha256:0bd21de0974b...a2a37e23`, with 69 safe entries, 67 exact source-byte
+  matches, and no credential-value-pattern hit.
+
 ## 0.4.133 linked-control dependency runtime release
 
 - A bounded Python regression module proves the clean control root resolves to

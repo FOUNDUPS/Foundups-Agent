@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-28: Owner-query workspace/authority root separation
+
+- Preserved exact-main `724954fa` evidence: the real OpenClaw transaction
+  completed maintenance and atomic completion at generation `sha256:4ede3b9d...`,
+  but the controller rejected `owner_result_invalid_after_completion`. Exact
+  reproduction proved its post-completion query passed the selected authority
+  back as the workspace entry root; the authority resolver correctly rejected
+  configured authority equal to workspace. An independent governed query was
+  CURRENT/no-gap/no-reindex in 35.3 seconds, and full immutable verification
+  retained 33 artifacts / 222,617,459 bytes.
+- Made the original `workspace_repo_root` mandatory at the shared classifier and
+  carried it through post-merge proof, incident recheck, CURRENT coordination,
+  and blocked-request recovery. The independently captured clean authority
+  remains the result-verification target. Query payloads gain no root-selection,
+  maintenance, reindex, route, Git, model, Hermes, or promotion authority.
+- Added direct/caller root-forwarding falsifiers and preserved the resolver's
+  same-root rejection. The focused affected surface is **190 passed** and a
+  production-shaped CURRENT proof passes. Merged exact-main replay remains the
+  acceptance gate; runtime exact closure, retrieval RSI, and A-grade remain
+  false. (WSP 00/06/15/22/50/62/84/87/97)
+
 ## 2026-08-28: Exact-task liveness and owner-reacquisition closure
 
 - Preserved exact-main `db44f8be` evidence: OpenClaw completed maintenance and

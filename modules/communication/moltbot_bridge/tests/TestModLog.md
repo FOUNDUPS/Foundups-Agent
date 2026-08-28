@@ -1,3 +1,15 @@
+## 2026-08-28: Owner-query root-separation regressions
+
+- Added five direct/caller falsifiers proving the original workspace/control
+  root reaches every verified owner requery and the selected authority never
+  replaces it as query entry.
+- Added an authority-selector negative proving configured authority equal to
+  workspace remains `HOLOINDEX_AUTHORITY_ROOT_INVALID`; no resolver gate was
+  relaxed.
+- Focused new/selector result: **21 passed**. Expanded postcompletion,
+  controller, incident, blocked-recovery, owner-query, and selector result:
+  **190 passed**. Merged exact-main replay remains required.
+
 ## 2026-08-28: Exact-task liveness and owner-cycle falsification
 
 - Extended post-completion owner proof with distinct acquisition cycles,

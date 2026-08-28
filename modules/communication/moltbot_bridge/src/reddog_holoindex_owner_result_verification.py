@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from holo_index.authority_worktree import HoloIndexAuthoritySelection
@@ -203,11 +204,14 @@ def query_and_classify_owner_result(
     *,
     query: str,
     selection: HoloIndexAuthoritySelection,
+    workspace_repo_root: Path | str,
     query_runner: Callable[..., Mapping[str, Any]],
     operation_timeout_seconds: float | None = None,
 ) -> tuple[str, Mapping[str, Any]]:
     try:
-        kwargs: dict[str, Any] = {"repo_root": selection.selected_root}
+        kwargs: dict[str, Any] = {
+            "repo_root": Path(workspace_repo_root).resolve(strict=False)
+        }
         if operation_timeout_seconds is not None:
             kwargs["operation_timeout_seconds"] = operation_timeout_seconds
         result = query_runner({"query": query, "limit": 5}, **kwargs)

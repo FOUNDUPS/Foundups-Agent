@@ -1,5 +1,24 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-28 - Holo owner-query root separation release (0.4.134)
+
+- RED reproduced `HOLOINDEX_AUTHORITY_ROOT_INVALID` when the completed
+  controller passed its selected authority back as the workspace query root.
+  GREEN carries the original root through four production caller paths while
+  preserving independent authority classification and same-root rejection.
+- New/selector result is **21 passed**; expanded controller, postcompletion,
+  incident, recovery, one-shot, and authority result is **190 passed**.
+- Registry generation is current at 1,610 tests / 268 quarantined and the
+  registry/indexing surface is **52 passed**. Backend identity is
+  `bacffc8e18b4...a8076645`; contract identity is
+  `3c951718cb13...e14a7f1f`. Merged exact-main replay remains required.
+- Backend generator is **8 passed**; fast 14-member, conversation 32-test,
+  contract 3-member, deterministic package, candidate WSP_62, and exhaustive
+  four-group gates pass in 184.6 seconds. Package identity is 946,244 bytes at
+  `e8e2329154f5...1852246e`. Read-only VSIX inspection found 69 safe entries,
+  67 exact source members, zero credential-value patterns, and version 0.4.134;
+  the artifact is 275,758 bytes at `sha256:0bd21de0974b...a2a37e23`.
+
 ## 2026-08-28 - Linked-control dependency runtime release (0.4.133)
 
 - RED independent audit reproduced an escaping resolver exception that left a
