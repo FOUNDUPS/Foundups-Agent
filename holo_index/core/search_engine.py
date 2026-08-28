@@ -34,8 +34,12 @@ from holo_index.module_intent_snapshot import (
     ModuleIntentSnapshotError,
     load_module_intent_paths,
 )
+from holo_index.document_truth import current_truth_rank, query_requests_current_truth
 from holo_index.tier0_retrieval import infer_explicit_module_target
 logger = logging.getLogger(__name__)
+
+_CURRENT_TRUTH_DOC_CANDIDATE_MULTIPLIER = 4
+_MAX_CURRENT_TRUTH_DOC_CANDIDATES = 80
 
 
 # ---------------------------------------------------------------------------
@@ -893,12 +897,13 @@ def _search_collection(
     doc_type_filter: str = "all", module_path_hint: str | None = None,
     module_context_hits: Iterable[Mapping[str, object]] = (),
     module_registry_hits: Iterable[Mapping[str, object]] | None = None,
+    metadata_where: Mapping[str, object] | None = None,
 ) -> List[Dict[str, Any]]:
     """Search a collection through the bounded vector-search pipeline."""
     return search_collection(
         holo, collection, query, limit, kind, doc_type_filter,
         module_path_hint, _vector_search_ops(), module_context_hits,
-        module_registry_hits,
+        module_registry_hits, metadata_where,
     )
 
 
@@ -931,12 +936,33 @@ def _docs_search(
 ) -> List[Dict[str, Any]]:
     """Search docs with generation-stable module intent policy."""
     try:
-        return _search_collection(
-            holo, collection, query, limit, kind="docs",
+        candidate_limit = limit
+        if query_requests_current_truth(query):
+            candidate_limit = min(
+                _MAX_CURRENT_TRUTH_DOC_CANDIDATES,
+                limit * _CURRENT_TRUTH_DOC_CANDIDATE_MULTIPLIER,
+            )
+        candidates = _search_collection(
+            holo, collection, query, candidate_limit, kind="docs",
             module_path_hint=module_target,
             module_context_hits=context_hits,
             module_registry_hits=registry_hits,
         )
+        if query_requests_current_truth(query):
+            summaries = _search_collection(
+                holo, collection, query, candidate_limit, kind="docs",
+                module_path_hint=module_target,
+                module_context_hits=context_hits,
+                module_registry_hits=registry_hits,
+                metadata_where={"record_kind": "document_summary"},
+            )
+            candidates.extend(summaries)
+            candidates = sorted(
+                candidates,
+                key=lambda item: current_truth_rank(query, item),
+                reverse=True,
+            )
+        return _merge_hits(candidates, [], limit)
     except Exception:
         if _strict_semantic_owner(holo):
             raise

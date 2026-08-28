@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1607,
+  "total_tests": 1608,
   "quarantined_tests": 268,
   "tests": [
     {
@@ -931,6 +931,19 @@
       "description": "Test doc-type filtering in HoloIndex search."
     },
     {
+      "id": "test::holo_index::tests::test_document_truth",
+      "path": "holo_index/tests/test_document_truth.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Current-truth authority classification regressions."
+    },
+    {
       "id": "test::holo_index::tests::test_enhanced_search",
       "path": "holo_index/tests/test_enhanced_search.py",
       "owner": "holo_index",
@@ -1347,7 +1360,7 @@
       "path": "holo_index/tests/test_holoindex_memex_projection_integrity.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-02",
+      "shard_id": "holo-index-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1845,7 +1858,7 @@
       "path": "holo_index/tests/test_ricdae_wsp_analysis.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [
         "import_path_mutation"
       ],

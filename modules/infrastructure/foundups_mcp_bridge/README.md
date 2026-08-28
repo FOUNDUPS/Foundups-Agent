@@ -4,17 +4,33 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+## Current governed Holo status (2026-08-28)
+
+Exact main `5ca0c0aaa5299e6f2d3b409368e54e99fd06240c` is active at immutable
+generation `sha256:a913b641...` and freshness receipt `sha256:f9382c4d...`.
+A fresh one-shot query returned `CURRENT`, no gap, no reindex, and first-attempt
+success. A later post-merge controller fast-path returned `OWNER_READY` without
+starting runtimes. One immediate in-process post-completion proof failed even
+though subsequent independent proofs passed; its root cause is not proven.
+
+This establishes usable governed retrieval, not A-grade or RSI. The latest
+clean-authority public benchmark failed the fixed `0.95` MRR/nDCG floors at
+`0.91666667` and `0.93198851`, and exact dependency payload closure remains
+false. Retrieval proposal, independent administered admission, promotion,
+canary, ranker rollback, and candidate-bound outcome learning are absent.
+
 ## Holo retrieval runtime identity
 
 The shared owner-acquisition policy owns the two-attempt ceiling, 300-second
-operation ceiling, PID-sharded ports, and exact transient allowlist consumed by
-both the supported one-shot and RedDog's post-completion verifier. Policy is no
-longer duplicated in the root script. Thirty-two bounded acquisition cycles
+operation ceiling, PID-sharded ports, and exact transient allowlist. Policy is
+no longer duplicated in the root script. Thirty-two bounded acquisition cycles
 form one deterministic 64-port permutation per process; cycle zero preserves
-the original pair, and a controller reproof uses cycle one instead of retrying
-the same ports. The one-shot binds the selected cycle into its result and query
-receipt. This does not make every owner failure retryable: only independently
-verified exhausted allowlisted transients may enter the immediate reproof.
+the original pair. The one-shot binds a caller-selected cycle into its result
+and query receipt. The activation controller still calls the default cycle for
+candidate and immediate post-commit proofs, so disjoint post-completion cycle
+allocation remains a focused reliability repair. No arbitrary invalid result
+is retryable: only independently verified exhausted allowlisted transients may
+enter the bounded second proof.
 
 The private query owner emits a secret-free
 `runtime_environment_digest` computed inside the authenticated child. It binds
@@ -214,7 +230,7 @@ ID, and path-identity digest); any missing field or drift fails closed and a
 changed exact binding cannot hot-swap a live owner. Absolute replica paths are
 not returned in public responses.
 
-Every owner process also imports and hashes one fixed ten-module retrieval
+Every owner process also imports and hashes one fixed twelve-module retrieval
 policy closure. Query and health responses expose only its SHA-256 manifest
 digest as `retrieval_runtime_ranker_digest`. Health and the loopback client
 reject a missing or malformed digest; retrieval evaluation additionally
@@ -243,6 +259,9 @@ selected model and sealed snapshots. After that admission, route reuse,
 startup health, and queries revalidate the unchanged descriptor, canonical
 repository/receipt/leases, and the same runtime closure. The sealed backend has
 no Chroma/SQLite/HNSW path. The 15-second query deadline is unchanged. The
+adapter's only query metadata filter is exact string equality on `record_kind`;
+unsupported keys, values, and compound expressions fail closed. The adapter is
+included in the owner-emitted twelve-module retrieval-ranker digest. The
 previous full-tree live replica demonstrated why this narrowing is necessary:
 its 8.33 GB closure produced 122--153 second cold owner queries. The narrow
 materializer is synthetically verified and has completed live exact-main

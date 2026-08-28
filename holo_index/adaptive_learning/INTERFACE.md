@@ -1,5 +1,13 @@
 # Adaptive Learning Interface
 
+## Current truth boundary
+
+This is an experimental package interface, not a production query or RSI
+contract. HoloIndex CLI initialization is disabled because this path caused
+hangs. No production caller can admit or promote its output. The only
+orchestrator entry point below that exists is `process_adaptive_request()`;
+there is no `record_feedback()` or `get_adaptation_metrics()` method.
+
 ## Public API
 
 ### Core Orchestrator
@@ -15,7 +23,8 @@ class AdaptiveLearningOrchestrator:
                                       query: str,
                                       raw_results: List[Dict],
                                       raw_response: str,
-                                      context: Dict[str, Any]) -> AdaptiveResult:
+                                      context: Optional[Dict[str, Any]] = None
+                                      ) -> AdaptiveLearningResult:
         """
         Process request through adaptive learning pipeline
 
@@ -26,74 +35,71 @@ class AdaptiveLearningOrchestrator:
             context: Additional context
 
         Returns:
-            AdaptiveResult with optimized outputs
+            AdaptiveLearningResult with experimental optimization outputs
         """
 
-    def record_feedback(self, query: str,
-                        results: List[Dict],
-                        rating: str):
-        """Record user feedback for learning"""
-
-    def get_adaptation_metrics(self) -> Dict[str, float]:
-        """Get current adaptation performance metrics"""
 ```
 
 ### Data Structures
 
 ```python
 @dataclass
-class AdaptiveResult:
+class AdaptiveLearningResult:
     """Result from adaptive learning processing"""
-    query_processing: QueryProcessingResult
-    search_optimization: SearchOptimizationResult
-    response_optimization: ResponseOptimizationResult
+    query_processing: AdaptiveQueryResult
+    search_optimization: OptimizedSearchResults
+    response_optimization: OptimizedResponse
     memory_optimization: MemoryOptimizationResult
-    processing_metadata: Dict[str, Any]
-    overall_performance: Dict[str, float]
+    overall_performance: Dict[str, float] = field(default_factory=dict)
+    learning_insights: Dict[str, Any] = field(default_factory=dict)
+    processing_metadata: Dict[str, Any] = field(default_factory=dict)
 ```
 
 ```python
 @dataclass
-class QueryProcessingResult:
-    """Query enhancement results"""
+class AdaptiveQueryResult:
     original_query: str
     enhanced_query: str
-    expansion_terms: List[str]
-    intent_detected: str
+    intent: QueryIntent
     optimization_score: float
+    processing_metadata: Dict[str, Any] = field(default_factory=dict)
 ```
 
 ```python
 @dataclass
-class SearchOptimizationResult:
-    """Search optimization results"""
-    original_results: List[Dict]
-    optimized_results: List[Dict]
-    ranking_changes: List[Tuple[int, int]]
-    performance_metrics: Dict[str, float]
+class OptimizedSearchResults:
+    original_results: List[SearchResult]
+    optimized_results: List[SearchResult]
+    optimization_metadata: Dict[str, Any] = field(default_factory=dict)
+    performance_metrics: Dict[str, float] = field(default_factory=dict)
 ```
 
 ```python
 @dataclass
-class ResponseOptimizationResult:
-    """Response enhancement results"""
+class OptimizedResponse:
     original_response: str
     optimized_response: str
-    template_used: Optional[str]
-    quality_metrics: Dict[str, float]
+    response_candidates: List[ResponseCandidate]
+    optimization_metadata: Dict[str, Any] = field(default_factory=dict)
+    quality_metrics: Dict[str, float] = field(default_factory=dict)
 ```
 
 ```python
 @dataclass
 class MemoryOptimizationResult:
-    """Memory management results"""
-    patterns_stored: int
+    patterns_processed: int
     patterns_consolidated: int
-    memory_saved_bytes: int
-    memory_efficiency: float
+    patterns_pruned: int
+    optimization_metrics: Dict[str, float] = field(default_factory=dict)
+    memory_efficiency: float = 0.0
+    learning_adaptation: Dict[str, Any] = field(default_factory=dict)
 ```
 
-### Component APIs
+### Historical component API sketch (not an implemented contract)
+
+The signatures in this subsection predate the current async component
+implementations. They are retained only as design history and must not be used
+for imports, tests, or production integration.
 
 #### Query Processor
 
@@ -181,7 +187,11 @@ class MemoryArchitectureEvolution:
 
 ## Usage Examples
 
-### Basic Adaptive Processing
+### Isolated experimental processing
+
+This source-shaped example is not the production HoloIndex query path. It may
+initialize AgentDB-backed components and is appropriate only in a bounded test
+or research harness.
 
 ```python
 from holo_index.adaptive_learning import AdaptiveLearningOrchestrator
@@ -212,36 +222,16 @@ async def process_search(query):
 result = asyncio.run(process_search("find authentication module"))
 ```
 
-### Recording Feedback
+### Feedback and monitoring
 
-```python
-# Record positive feedback
-orchestrator.record_feedback(
-    query="find authentication module",
-    results=result.search_optimization.optimized_results,
-    rating="useful"
-)
+No orchestrator-level feedback or metrics methods are implemented. Component
+insight methods are experimental and do not authorize live ranker changes.
 
-# Record negative feedback
-orchestrator.record_feedback(
-    query="broken query",
-    results=[],
-    rating="needs_more"
-)
-```
+### Historical direct-component sketch (not executable)
 
-### Monitoring Adaptation
-
-```python
-# Get metrics
-metrics = orchestrator.get_adaptation_metrics()
-print(f"Query Optimization: {metrics['query_optimization']:.2%}")
-print(f"Search Stability: {metrics['search_ranking_stability']:.2%}")
-print(f"Response Quality: {metrics['response_improvement']:.2%}")
-print(f"Memory Efficiency: {metrics['memory_efficiency']:.2%}")
-```
-
-### Direct Component Usage
+The following example names methods that are not present in the current
+components. Use source inspection and focused tests before any future public
+component API is admitted.
 
 ```python
 from holo_index.adaptive_learning import AdaptiveQueryProcessor
@@ -258,42 +248,32 @@ processor.learn_from_query(enhanced_query, results_quality=0.8)
 ## Integration Points
 
 ### With HoloIndex CLI
-Automatically integrated when Phase 3 is available:
-```python
-# Enabled by default if available
-[INFO] Phase 3: Adaptive Learning initialized
-[INFO] Phase 3: Processing with adaptive learning...
-```
 
-### Storage Locations
-```
-E:/HoloIndex/adaptive_learning/
-+-- query_patterns.json      # Learned query patterns
-+-- search_metrics.json      # Search optimization data
-+-- response_templates.json  # Response templates
-+-- memory_evolution.json    # Memory patterns
-+-- adaptation_metrics.json  # Performance metrics
-```
+Not integrated. `_cli_main.py` imports the class when available, but the
+initialization block is commented out because it caused hangs. Import
+availability is not runtime enablement.
 
-## Performance Considerations
+### Storage contract
 
-- **Async Processing**: Uses asyncio for non-blocking operations
-- **Memory Limit**: Keeps last 1000 patterns by default
-- **Pruning**: Automatically prunes patterns below 0.3 utility
-- **Learning Rate**: 0.01 default, adjustable
-- **Adaptation Interval**: Every 100 queries
+There is no admitted package-wide storage contract. Components use AgentDB or
+component-specific experimental paths. No path in this package is authorized
+to store or promote production ranker state.
+
+## Performance boundary
+
+The public coroutine is asynchronous, but no accepted latency, memory, pruning,
+learning-rate, or adaptation-interval contract has been benchmarked. Component
+constants must not be reported as production defaults.
 
 ## Error Handling
 
-Methods may raise:
-- `ImportError`: Missing adaptive learning dependencies
-- `RuntimeError`: Async context required
-- `ValueError`: Invalid parameters
-- `MemoryError`: Pattern memory exceeded
+`process_adaptive_request()` catches broad component failures and returns a
+fallback `AdaptiveLearningResult` with `processing_metadata["error"]`. There is
+no stable public exception taxonomy.
 
 ## WSP Compliance
 
-- **WSP 48**: Recursive Self-Improvement implementation
-- **WSP 60**: Module Memory Architecture
+- **WSP 48**: Experimental RSI candidate work only; production RSI is absent
+- **WSP 60**: Experimental memory work, without admitted production writeback
 - **WSP 11**: Complete interface documentation
-- **WSP 84**: Pattern memory verification
+- **WSP 84**: Existing-source verification requirement

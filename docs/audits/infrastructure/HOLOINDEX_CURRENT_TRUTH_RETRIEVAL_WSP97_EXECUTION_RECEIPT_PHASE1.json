@@ -1,0 +1,110 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "5ca0c0aaa5299e6f2d3b409368e54e99fd06240c"
+  },
+  "execution_id": "HOLOINDEX_CURRENT_TRUTH_RETRIEVAL_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_60_Module_Memory_Architecture.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_81_Framework_Backup_Governance_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The governed owner query passed CURRENT at exact base 5ca0c0aa with no index gap, no reindex, and first-attempt success; retrieval was usable but did not answer current truth reliably.",
+      "The latest independent public benchmark measured Recall@8 1.0, MRR 0.91666667, nDCG@8 0.93198851, and semantic p95 about 4.78 seconds; MRR and nDCG failed the immutable 0.95 floor and exact runtime closure was false.",
+      "Governed Holo retrieval returned stale audits above current contracts. Independent WSP_00/WSP_97 auditors reproduced premature K truncation, temporal/exact-intent errors, nested-audit classification misses, section starvation, and documentation/runtime drift.",
+      "Retrieval evaluation and pinned-candidate AutoResearch exist, but live generic proposal, independent administered admission, canary, promotion, ranker rollback, and candidate-bound production outcome learning do not. Retrieval RSI was retained as NO-GO.",
+      "One independent base-route attempt failed closed as QUERY_REPLICA_CHANGED with no retry or reindex. A later single governed query returned CURRENT at the exact base with no gap, no reindex, and first-attempt success, but the active base snapshot still returned stale audits because this candidate is not merged or activated; neither observation was relabeled as candidate live acceptance."
+    ],
+    "research": [
+      "The canonical docs source manifest, document indexer, collection search pipeline, bridge global flattening, runtime-ranker closure, adaptive package, WSP 60 mirrors, RedDog package contracts, and release process were read before edits.",
+      "Actual corpus probes classified 2037 tracked sources and showed one current file could contribute more sections than the bounded candidate window; increasing the cap was rejected as non-scaling.",
+      "Existing HXA/FX/CFZ extraction rules were reused for exact-artifact intent, and explicit historical/temporal intent was made authoritative instead of adding query-specific ranking cases.",
+      "The qwen_wsp_enhancement skill was read completely before WSP 60 was aligned to observed runtime evidence and synchronized to its WSP_knowledge mirror."
+    ],
+    "micro_pass": [
+      "Added exact current/implementation/history/vision classification with nested audit, temporal, case-insensitive PR, short slice, and mixed-intent falsifiers.",
+      "Extracted document indexing reduced indexing_engine.py from 1600 to 1467 lines; collection_search.py, document_indexing.py, document_truth.py, and all new or grown functions satisfy WSP 62 limits.",
+      "Current docs retrieval now authority-sorts before K and merges a metadata-filtered document_summary stream so duplicate section hits cannot starve unique paths. Independent review first falsified the unsupported where call; the immutable adapter now admits only exact-string record_kind equality and is bound into the ranker identity.",
+      "Actual docs build probe found 2037 sources, 2046 records, and only 11 path-bound reviewed current sections; stale generic status/current-architecture sections were not admitted."
+    ],
+    "macro_pass": [
+      "Candidate retrieval, AutoResearch, bridge, runtime, WSP, and generator validation passed 299 tests with one capability skip and no deselection after the backend manifest was regenerated.",
+      "WSP framework coherence passed 6 tests after four obsolete protocol manifest identities were aligned with the canonical master index and existing files; WSP 60 framework and knowledge mirrors are byte-identical.",
+      "The canonical registry is current at 1608 tests and 268 quarantines. Backend generator passed 8 tests and --check at 1365 files, digest 43705c230f38e8c614ce0dda9cc825b556852793a129921fcb44e675f87e59ec.",
+      "RedDog 0.4.131 fast, 32-test conversation, contract, package, and exhaustive four-group release tiers passed in 207.169 seconds. Contract identity is 21f7ff0902c6e6f786aa49b24b1e4c0a3cbdb6825e1d690412eaf191456e4b7d. The 67-file package is 946087 bytes at cc0f6a6c5830ce9cb3225d7e48223283d4761069afa3e04667117a7fc7823e57."
+    ],
+    "hard_think": [
+      "WSP 15 scored current-truth retrieval drift at 18/P0 because a usable semantic system that answers status from stale audits can direct subsequent autonomous work incorrectly.",
+      "The smallest scalable layer is file-role authority plus path-bound current sections and a separate one-summary-per-document semantic stream; unbounded oversampling, query-specific paths, or declaring all README sections current were rejected.",
+      "A-grade and retrieval RSI are separate P0 layers. Current-truth ranking cannot substitute for exact runtime payload closure, a disjoint sealed evaluator, passing generic quality metrics, signed promotion, canary, rollback, or outcome learning."
+    ],
+    "dialectic_sweep": [
+      "File-level current authority alone is simple but leaks historical sections inside current contracts; exact per-path heading admission closes that contradiction.",
+      "Authority sorting before limit fixes stale-first ordering but not same-file section crowding; the filtered summary stream preserves bounded path diversity without increasing the candidate ceiling indefinitely.",
+      "The first 0.4.130 pre-release package passed mocked tests but failed the real immutable-adapter boundary. It was retained as rejected evidence; the repair was reversioned 0.4.131 and all identities were regenerated.",
+      "Adaptive code can compute experimental outputs but its CLI initialization is disabled and it has no admitted production consumer; documentation therefore labels it experimental rather than operational RSI.",
+      "A passing release suite proves package contracts, not Holo A-grade quality or RSI. Those claims remain fail-closed despite producing a new VSIX."
+    ],
+    "first_principles": [
+      "Current-state answers must prefer reviewed current contracts, then implementation evidence, while explicit historical and exact-artifact queries retain semantic intent.",
+      "A retrieval system scales only when bounded K still permits source diversity; candidate caps cannot be the sole defense against repeated chunks from one document.",
+      "RSI requires a closed authenticated propose-evaluate-admit-promote-observe-rollback loop whose outcomes bind to the exact candidate. Observation and pinned evaluation alone are not RSI.",
+      "The RedDog VSIX remains a thin consumer of governed read-only evidence and receives no Holo write, reindex, maintenance, dispatch, evaluation-admission, or promotion authority."
+    ],
+    "execute": [
+      "Branch fix/holoindex-current-truth-retrieval-phase1",
+      "holo_index/document_truth.py",
+      "holo_index/core/document_indexing.py",
+      "holo_index/core/collection_search.py",
+      "holo_index/core/search_engine.py",
+      "holo_index/canonical_source_manifest.py",
+      "holo_index/retrieval_runtime_binding.py",
+      "WSP_framework/src/WSP_60_Module_Memory_Architecture.md",
+      "WSP_knowledge/src/WSP_60_Module_Memory_Architecture.md",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "O:/RedDog-Releases/reddog-0.4.131.vsix (275738 bytes; sha256:736c307fcb9152043ab0bbe420ab488f90785f95badb1513759eeb619958f9d1; 69 unique safe entries; 67 package members exactly equal source)"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_60",
+    "WSP_62",
+    "WSP_81",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_CURRENT_TRUTH_RETRIEVAL_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "WSP_framework/ModLog.md",
+    "holo_index/ModLog.md",
+    "holo_index/tests/TestModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "ModLog.md"
+  ]
+}

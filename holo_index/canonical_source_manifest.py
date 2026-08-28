@@ -142,7 +142,23 @@ def _docs_source_files(holo: Any) -> list[Path]:
             and "_backup" not in str(file_path).lower()
             and "/archive/" not in file_path.as_posix().lower()
         )
-    return filter_git_tracked_files(holo.project_root, files)
+    files.extend(
+        holo.project_root / relative_path
+        for relative_path in (
+            "holo_index/README.md",
+            "holo_index/INTERFACE.md",
+            "holo_index/ROADMAP.md",
+            "holo_index/ModLog.md",
+            "holo_index/CLI_REFERENCE.md",
+            "holo_index/tests/README.md",
+            "holo_index/tests/TestModLog.md",
+            "holo_index/memory/README.md",
+            "holo_index/adaptive_learning/README.md",
+            "holo_index/adaptive_learning/INTERFACE.md",
+        )
+        if (holo.project_root / relative_path).is_file()
+    )
+    return filter_git_tracked_files(holo.project_root, sorted(set(files)))
 
 
 def _knowledge_source_files(holo: Any) -> list[Path]:

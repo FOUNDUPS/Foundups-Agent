@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase: RedDog 0.4.129 resident architect thin-client surface.
+Phase: RedDog 0.4.131 resident architect thin-client surface.
 
-0.4.129 truth-binds exact-task post-merge execution, receipt-bound owner
+0.4.131 retains exact-task post-merge execution, receipt-bound owner
 reacquisition, phase-aware liveness, and repeatable supervisor release. The
 bounded operator controller is not an extension command. A
 trusted stage-zero verifier must still bind the full runtime, signature, and
@@ -16,7 +16,7 @@ VSIX artifact substitutes for that live commit-bound proof.
 
 Current implementation:
 
-- [x] Bind candidate evaluation to the owner-loaded ten-module source-ranker
+- [x] Bind candidate evaluation to the owner-loaded twelve-module source-ranker
   closure and reject missing, malformed, foreign-root, or mismatched digests.
   The pure A-grade gate reruns the public corpus and prevents caller-downgraded
   floors without granting index, maintenance, dispatch, or promotion effects.

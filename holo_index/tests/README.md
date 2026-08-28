@@ -1,5 +1,21 @@
 # HoloIndex Tests
 
+## Current-truth document retrieval
+
+`test_document_truth.py` proves low-cardinality current, implementation,
+history, vision, and unknown classification plus the broad-current versus
+exact/historical/temporal query boundary. It also proves authority ordering
+before K truncation and a filtered summary stream that preserves path diversity
+when one document has many section hits.
+
+`test_indexer_zero_docs_observability.py` proves canonical Holo contracts gain
+only for an exact per-path heading allowlist while historical or generic status
+sections cannot inherit current authority. Historical audit docs remain one
+summary record. All indexing tests use temporary repositories,
+deterministic fake embeddings, and fake collections; they never open, mutate,
+or refresh a live Holo generation. The same suite requires the parent indexing
+engine to remain below 1,500 lines and every extracted function at or below 50.
+
 ## Model source-path provenance
 
 `test_holoindex_embedding_space.py` proves the opt-in planner mode preserves an

@@ -260,6 +260,7 @@ def test_internal_normalizers_reject_bad_payloads_and_dedupe_hits() -> None:
                 "bad",
                 {"path": "same.py"},
                 {"path": "same.py"},
+                {"path": "SAME.py"},
                 {"name": "pathless"},
             ]
         },
@@ -290,6 +291,63 @@ def test_flatten_hits_uses_global_score_across_typed_buckets() -> None:
         "low.py",
     ]
     assert hits[1]["type"] == "wsp"
+
+
+def test_flatten_hits_current_status_prefers_current_contract_over_history() -> None:
+    hits = core._flatten_hits(
+        {
+            "docs_hits": [
+                {
+                    "path": "docs/audits/holoindex_search_quality/OLD_REPORT.md",
+                    "similarity": "99.0%",
+                    "type": "documentation",
+                },
+                {
+                    "path": "holo_index/README.md",
+                    "similarity": "41.0%",
+                    "type": "module_readme",
+                },
+            ],
+            "symbol_hits": [
+                {
+                    "path": "holo_index/retrieval_autoresearch.py",
+                    "similarity": "90.0%",
+                    "type": "symbol",
+                },
+            ],
+        },
+        3,
+        query="Is HoloIndex RSI working and what is currently missing?",
+    )
+
+    assert [item["path"] for item in hits] == [
+        "holo_index/README.md",
+        "holo_index/retrieval_autoresearch.py",
+        "docs/audits/holoindex_search_quality/OLD_REPORT.md",
+    ]
+
+
+def test_flatten_hits_historical_baseline_preserves_similarity_order() -> None:
+    hits = core._flatten_hits(
+        {
+            "docs_hits": [
+                {
+                    "path": "docs/audits/holoindex_search_quality/BASELINE.md",
+                    "similarity": "99.0%",
+                    "type": "documentation",
+                },
+                {
+                    "path": "holo_index/README.md",
+                    "similarity": "41.0%",
+                    "type": "module_readme",
+                },
+            ],
+        },
+        2,
+        query="historical HoloIndex retrieval baseline",
+    )
+
+    assert hits[0]["path"].endswith("BASELINE.md")
 
 
 def test_flatten_hits_reserves_exact_module_root_tier0_for_explicit_module() -> None:

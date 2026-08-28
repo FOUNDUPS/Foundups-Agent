@@ -1,5 +1,25 @@
 # HoloIndex Public Interface
 
+## Current-truth retrieval contract
+
+The canonical docs source set explicitly admits HoloIndex's root `README.md`,
+`INTERFACE.md`, `ROADMAP.md`, `CLI_REFERENCE.md`, test contracts, and memory
+boundary. Current root/test contracts receive bounded heading-scoped vector
+records; generic module docs and historical audits/ModLogs retain one summary
+record per source. Stored records carry low-cardinality truth and record-kind
+metadata. This changes retrieval evidence shape, not factual authority.
+
+Broad status queries such as "current", "working", or "missing" oversample a
+bounded docs candidate set, deduplicate repository paths case-insensitively,
+and globally order current contracts before implementation evidence, unknown
+records, vision, and historical records. Exact PR/slice queries and explicitly
+historical/baseline queries preserve ordinary semantic score ordering. Exact
+module Tier-0 reservation remains stronger and unchanged.
+
+This policy prevents stale audit prose from becoming the default answer to a
+current-state question. It does not prove that a document is true, change the
+ranker automatically, authorize reindexing, or constitute retrieval RSI.
+
 ## Package import boundary
 
 Importing `holo_index.cli.commands.bundle_json` is a bounded, closed-environment
@@ -73,7 +93,7 @@ by `holo_index.retrieval_autoresearch`. They perform no ranker change or
 promotion. The independent A-grade composition gate is owned by AI Overseer;
 its accepted receipt is evidence only and still requires a separate external
 promotion authority.
-`holo_index.retrieval_runtime_binding` defines the fixed ten-module ranker
+`holo_index.retrieval_runtime_binding` defines the fixed twelve-module ranker
 closure. `retrieval_ranker_digest_for_root(root)` computes the clean candidate
 digest; `loaded_retrieval_ranker_digest()` computes the digest from module
 origins actually imported by the owner. Retrieval benchmark query receipts
@@ -81,10 +101,13 @@ must carry the latter and equal the former.
 Owner-service receipts additionally bind exact acquisition attempt/retry
 telemetry when valid; consumers reject malformed, missing, or top-level-only
 telemetry before it can authorize a second post-completion proof.
-This contract binds source bytes only. It does not yet identify the owner
-executable or exact SentenceTransformers/Transformers/Torch/NumPy/backend
-environment, so accepted source identity is not complete reproducibility or
-production A-grade evidence.
+The owner now emits a secret-free `runtime_environment_digest` over its source
+closure, executable identity, platform ABI, installed-distribution build-record
+metadata, replica/model bindings, declared runtime knobs, and required
+environment checks. Exact runtime byte closure remains false because installed
+distribution payload bytes and all deterministic runtime effects are not yet
+verified. The digest is therefore useful identity evidence, but not complete
+reproducibility or production A-grade evidence.
 
 ## Programmatic API
 

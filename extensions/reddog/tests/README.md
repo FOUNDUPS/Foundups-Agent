@@ -1,5 +1,29 @@
 # RedDog Extension Tests
 
+## 0.4.131 current-truth Holo retrieval
+
+- Current/history intent falsifiers cover temporal queries, case-insensitive
+  PRs, short HXA/FX/CFZ IDs, nested audit paths, and stale Holo docs.
+- Authority-before-limit and faithful bounded-candidate tests prove exact
+  current contracts survive higher-scoring history and duplicate section
+  crowding through the filtered summary stream.
+- Path-bound section tests admit only reviewed current headings. Historical or
+  generic `Status`/`Current Architecture` headings inside a current file cannot
+  inherit current-truth authority.
+- These tests do not prove A-grade quality, exact runtime byte closure,
+  independent evaluator trust, promotion, canary, rollback, or retrieval RSI.
+- Candidate Python retrieval/WSP/generator surface: 299 passed / 1 capability
+  skip, with no deselection. Backend generator: 8 passed and current at 1,365
+  files. Fast 14-member, conversation 32-test, contract
+  3-member, deterministic package, and exhaustive four-group release tiers
+  pass in 207.169 seconds.
+- The 0.4.130 pre-release artifact is rejected because its immutable snapshot
+  adapter did not support the summary filter. Version 0.4.131 package identity
+  is 67 files / 946,087 bytes at `cc0f6a6c5830...23e57`.
+  `O:\RedDog-Releases\reddog-0.4.131.vsix` is 275,738 bytes at
+  `sha256:736c307fcb91...58f9d1`; inspection found 69 safe unique entries and
+  no member-byte mismatch.
+
 ## 0.4.129 claim-clock fencing and RSI truth release
 
 - SQLite writer acquisition and PostgreSQL row locking precede claim, start,

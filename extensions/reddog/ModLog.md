@@ -1,5 +1,29 @@
 # RedDog ModLog
 
+## 2026-08-28 - Current-truth Holo retrieval release candidate (0.4.131)
+
+- Added `document_truth.py` and the governed snapshot adapter to the exact
+  twelve-module retrieval-ranker closure.
+  Broad current-status queries rank canonical current contracts ahead of code,
+  vision, and history; explicit historical, temporal, PR, and slice-ID queries
+  retain their semantic order.
+- Canonical Holo and adaptive boundary contracts now use an exact per-path
+  heading allowlist. A separately filtered summary query prevents one
+  document's section chunks from starving path diversity at bounded K.
+- This release does not claim A-grade or retrieval RSI: the latest accepted
+  public metrics remain below the MRR/nDCG floor and exact runtime closure,
+  independent admission, canary, promotion, rollback, and outcome learning are
+  missing.
+- The 0.4.130 pre-release artifact was rejected after the governed adapter
+  exposed an unsupported summary filter. Version 0.4.131 binds the repaired
+  adapter. Final identities: backend 1,365 files at `43705c230f38...e59ec`;
+  contract 18 shards / 6,942 lines / 492 assertions at `21f7ff0902c6...e4b7d`;
+  package 67 files / 946,087 bytes at `cc0f6a6c5830...23e57`. All release tiers
+  pass; exhaustive wall 207.169 seconds. The verified
+  `O:\RedDog-Releases\reddog-0.4.131.vsix` is 275,738 bytes at
+  `sha256:736c307fcb91...58f9d1`, with 69 safe unique entries and zero package
+  source mismatch. (WSP 00/05/06/15/22/34/50/60/62/83/84/87/97)
+
 ## 2026-08-28 - Claim-clock fencing and RSI truth release (0.4.129)
 
 - Independent WSP_97 review rejected the candidate because SQLite could wait

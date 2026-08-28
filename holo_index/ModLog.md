@@ -1,5 +1,25 @@
 # HoloIndex Package ModLog
 
+## [2026-08-28] Current-truth retrieval candidate
+
+- Admitted the canonical Holo README/INTERFACE/ROADMAP/CLI/test/memory and
+  adaptive-boundary contracts into the exact tracked docs source set. Only
+  reviewed path-bound current headings receive section records; historical
+  audits, ModLogs, and other sections retain summary/history treatment.
+- Added deterministic current/implementation/history/vision classification,
+  bounded status-query docs oversampling, a filtered summary stream for path
+  diversity, case-normalized path deduplication, and owner-level authority
+  ordering. Exact PR/slice and historical/temporal queries preserve semantic
+  ordering; exact module Tier-0 remains unchanged.
+- Extracted document indexing from `core/indexing_engine.py`, reducing it from
+  1,600 to 1,467 lines. The new 271-line module and all its functions satisfy
+  the WSP_62 file/function limits without an exemption.
+- Corrected WSP 60 plus adaptive-learning and memory documentation: the CLI path remains
+  disabled, advertised feedback/metrics methods do not exist, and evaluation
+  scaffolding is not production RSI. This candidate performs no reindex,
+  activation, ranker promotion, route change, or maintenance. (WSP
+  00/15/22/50/60/62/83/84/87/97)
+
 ## [2026-08-28] Owner acquisition cycle receipt binding
 
 - Query receipts now integrity-bind valid owner attempt count, retry flag,
