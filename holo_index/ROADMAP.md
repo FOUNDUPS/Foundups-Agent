@@ -1,12 +1,12 @@
 # HoloIndex Development Roadmap
 
-## [2026-08-28] Current-truth retrieval and RSI gate
+## [2026-08-29] Current-truth retrieval and RSI gate
 
 **Current status:** governed retrieval is operational at exact main
-`18cd53cc63d771b8636b7f73d7674d4f325ba4b0`, active generation
-`sha256:e00c0b3a...`, and freshness receipt `sha256:7ace827a...` as of this
-candidate transaction. A fresh owner query passed CURRENT/no-gap/no-reindex on
-attempt one and full verification preserved 33 artifacts / 222,647,517 bytes.
+`09e98fff04b4d94544d97a1dd7b795785d13db2e`, active generation
+`sha256:7869f238...`, and freshness receipt `sha256:fd0a0005...`. A fresh owner
+query passed CURRENT/no-gap/no-reindex on attempt one and full verification
+preserved 33 artifacts / 222,719,702 bytes.
 Future live status must come from a fresh governed receipt.
 
 **A-grade verdict: NO-GO.** The latest clean-authority public benchmark measured
@@ -31,16 +31,13 @@ WSP_15 orders the remaining P0 layers as follows:
 4. add independent admission, shadow canary, signed promotion, rollback proof,
    and candidate-bound outcome learning.
 
-The next measured blocker is module-intent quality, not replica freshness.
-The token `feedback` deterministically selected telemetry data as a module and
-strict Tier-0 correctly rejected its missing contracts. The candidate replaces
-depth-only discovery with bounded exact-HEAD evidence: direct `src/tests`
-trees or regular root README/INTERFACE blobs, obtained through one directory
-projection and one candidate-only Git batch. It excludes the false container,
-preserves 160 proved modules, and uses 215,467 bytes rather than the rejected
-828,543-byte all-file projection. Operational acceptance requires merge,
-exact-main regeneration/activation, replay of the original failing query, and
-immutable post-query verification.
+The module-intent defect is closed at exact main `09e98fff`. The token
+`feedback` had selected telemetry data as a module and strict Tier-0 correctly
+rejected its missing contracts. The merged repair uses bounded exact-HEAD
+evidence—direct `src/tests` trees or regular root README/INTERFACE blobs—and
+the exact-main broad RSI replay returned useful semantic results without that
+false target. The next P0 is exact runtime payload/control closure, not another
+module-intent or replica-freshness repair.
 
 ## [2026-08-27] Historical A-grade retrieval truth gate
 

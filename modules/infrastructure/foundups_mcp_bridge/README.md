@@ -4,14 +4,14 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
-## Current governed Holo status (2026-08-28)
+## Current governed Holo status (2026-08-29)
 
-Exact main `5ca0c0aaa5299e6f2d3b409368e54e99fd06240c` is active at immutable
-generation `sha256:a913b641...` and freshness receipt `sha256:f9382c4d...`.
-A fresh one-shot query returned `CURRENT`, no gap, no reindex, and first-attempt
-success. A later post-merge controller fast-path returned `OWNER_READY` without
-starting runtimes. One immediate in-process post-completion proof failed even
-though subsequent independent proofs passed; its root cause is not proven.
+Exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e` is active at immutable
+generation `sha256:7869f238...` and freshness receipt `sha256:fd0a0005...`.
+The real pre-owner stale-HEAD transaction completed through OpenClaw/WRE, and
+a fresh one-shot query returned `CURRENT`, no gap, no reindex, and first-attempt
+success. Full production verification retained 33 artifacts / 222,719,702
+bytes with unchanged descriptor, replica, and path identities.
 
 This establishes usable governed retrieval, not A-grade or RSI. The latest
 clean-authority public benchmark failed the fixed `0.95` MRR/nDCG floors at

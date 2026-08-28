@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-29: Pre-owner exact-main live acceptance
+
+- PR #1591 merged as exact main `09e98fff`; the governed controller admitted
+  the independently reproduced pre-owner stale-HEAD binding into exactly
+  `holoindex_postmerge_refresh:09e98fff...` and completed it through the real
+  OpenClaw/WRE path.
+- Owned resident and supervisor runtimes started and stopped cleanly. A fresh
+  governed owner query returned CURRENT/no-gap/no-reindex on attempt one with
+  equal workspace/authority HEADs and no overlay.
+- Production verification retained 33 artifacts / 222,719,702 bytes at
+  generation `sha256:7869f238...`, descriptor `sha256:af0e9a2a...`, replica
+  `sha256:fb03a1db...`, and path identity `sha256:4d5c10b7...`.
+- Runtime exact closure remains false. This is not A-grade, retrieval RSI,
+  horizontal scale, or future-commit authority. (WSP 00/15/22/50/62/84/87/97)
+
 ## 2026-08-29: Pre-owner exact-HEAD repair admission candidate
 
 - Added the canonical `REPO_HEAD_MISMATCH` incident kind for the exact-main

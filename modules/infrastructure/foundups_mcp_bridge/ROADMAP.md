@@ -1,5 +1,15 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-29: Pre-owner exact-main acceptance
+
+The merged `REPO_HEAD_MISMATCH` ingress passed the real broker-managed path at
+exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e`. The canonical task
+completed through OpenClaw/WRE at generation `sha256:7869f238...`; a fresh
+owner query was CURRENT/no-gap/no-reindex on attempt one, and full production
+verification retained 33 artifacts / 222,719,702 bytes unchanged. This closes
+that exact-commit maintenance gate only. Exact runtime closure, A-grade,
+retrieval RSI, resident scale, and future-commit authority remain open.
+
 ## 2026-08-28: Shared owner readiness policy
 
 The owner-acquisition boundary now centrally exports the exact transient set,

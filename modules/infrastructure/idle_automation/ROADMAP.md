@@ -36,8 +36,11 @@ wsp_cycle(input="idle_automation", log=True)
   replica activation ordering passed a real broker-managed OpenClaw replay at
   exact main `cfd1e0051`, including atomic AgentDB completion and immutable
   post-query revalidation. The incident contract now also admits the
-  independently verified pre-owner `REPO_HEAD_MISMATCH`; candidate exact-main
-  live replay remains pending before that ingress closure is complete.
+  independently verified pre-owner `REPO_HEAD_MISMATCH`. Exact main
+  `09e98fff` live-accepted that ingress through the real OpenClaw/WRE task at
+  generation `sha256:7869f238...`; a fresh owner query was CURRENT/no-gap/
+  no-reindex on attempt one and all 33 replica artifacts reverified unchanged.
+  Runtime exact closure, A-grade, retrieval RSI, and scale remain open.
 - **Linked-control dependency-runtime resolution**: The post-merge executor now
   resolves the existing same-repository primary runtime root before entering
   the authority transaction. This preserves a clean control checkout and clean

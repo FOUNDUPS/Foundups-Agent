@@ -14,8 +14,11 @@
   in 180.005 seconds.
 - The inspected 0.4.136 VSIX is 276,366 bytes at
   `sha256:ccf65001c726...ced3f8`, with 69 safe entries, 67 exact source-byte
-  matches, and zero credential-value-pattern hits. Merged exact-main live
-  acceptance remains pending.
+  matches, and zero credential-value-pattern hits. Merged exact main
+  `09e98fff` completed the real OpenClaw/WRE repair; a fresh owner query was
+  CURRENT/no-gap/no-reindex on attempt one and all 33 replica artifacts
+  reverified unchanged. Runtime exact closure, A-grade, and retrieval RSI
+  remain separate blocked gates.
 
 ## 0.4.135 evidence-qualified Holo module intent
 

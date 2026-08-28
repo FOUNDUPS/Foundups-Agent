@@ -15,7 +15,11 @@
   contract `6a3cf131fc90...adb273`, and package `33a4a7bb09a6...be4754`.
 - VSIX inspection proves 0.4.136, 69 safe ZIP files / 67 exact source members,
   276,366 bytes, `sha256:ccf65001c726...ced3f8`, and zero credential-value
-  patterns. Exact-main replay remains pending merge.
+  patterns. PR #1591 merged as exact main `09e98fff`; its real OpenClaw/WRE
+  replay completed at generation `sha256:7869f238...`, the governed query was
+  CURRENT/no-gap/no-reindex on attempt one, and all 33 replica artifacts
+  reverified unchanged. Runtime exact closure remains false, so A-grade and
+  retrieval RSI are still NO-GO.
 
 ## 2026-08-28 - Evidence-qualified Holo module intent (0.4.135)
 

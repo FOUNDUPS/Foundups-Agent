@@ -14,6 +14,10 @@
   non-authority-root incident kinds.
 - Fresh incident/root/coordinator result: **75 passed** with no live Holo or
   OpenClaw effect.
+- The later exact-main acceptance at `09e98fff` used the real OpenClaw/WRE
+  path, completed the canonical task, returned CURRENT/no-gap/no-reindex on
+  the fresh query, and retained all 33 immutable replica artifacts. That live
+  receipt is separate from this no-effect test result.
 
 ## 2026-08-28: Linked-control dependency runtime RED/GREEN
 

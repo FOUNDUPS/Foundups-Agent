@@ -1,12 +1,12 @@
 # HoloIndex - Brain Surgeon Level Code Intelligence System
 
-## Current operational truth (2026-08-28)
+## Current operational truth (2026-08-29)
 
 Live authority is a fresh governed owner receipt, not prose. Exact main
-`18cd53cc63d771b8636b7f73d7674d4f325ba4b0` was activated at generation
-`sha256:e00c0b3a...` and freshness receipt `sha256:7ace827a...`. A fresh owner
+`09e98fff04b4d94544d97a1dd7b795785d13db2e` was activated at generation
+`sha256:7869f238...` and freshness receipt `sha256:fd0a0005...`. A fresh owner
 query returned `CURRENT`, no gap, no reindex, first attempt; full verification
-retained 33 artifacts / 222,647,517 bytes. These values are as-of evidence,
+retained 33 artifacts / 222,719,702 bytes. These values are as-of evidence,
 not authority for a later commit.
 
 HoloIndex is not yet A-grade and retrieval RSI is not operational. The latest
@@ -18,12 +18,13 @@ retrieval proposer, administered independent evaluator, signed admission,
 shadow canary, promotion, ranker rollback, or candidate-bound production
 outcome learner.
 
-The current sprint exposed a separate deterministic false-module defect: the
+The preceding sprint exposed a separate deterministic false-module defect: the
 generic token `feedback` selected `modules/telemetry/feedback`, which is a data
 container without module contracts, and strict Tier-0 correctly failed closed.
-The candidate catalog admits only roots proved by direct `src/tests` trees or
-root README/INTERFACE blobs. Merge, exact-main refresh, and replay of the
-original query remain required; this prose is never promotion evidence.
+The merged catalog admits only roots proved by direct `src/tests` trees or
+root README/INTERFACE blobs. The exact-main refresh and broad RSI query above
+live-accepted that repair without a false Tier-0 target; this prose is never
+promotion evidence.
 
 ## Closed command-import boundary
 
