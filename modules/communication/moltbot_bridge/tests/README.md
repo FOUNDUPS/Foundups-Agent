@@ -1,5 +1,32 @@
 # Tests - OpenClaw Bridge
 
+## Exact-main post-merge lifecycle
+
+`test_holoindex_postmerge_runtime_controller.py` proves dirty/non-main
+admission closes before query effects, an already-CURRENT owner starts no
+runtime, transaction-owned OpenClaw runtimes start and stop in dependency order,
+pre-existing broker runtimes remain resident, direct register-only bootstrap
+touches no ambient autostart flags, exact completion generation equals the final owner receipt, and a
+still-live owned thread turns apparent success into rejection.
+
+The same file proves the canonical-store controller lease rejects contention,
+both lost-start races reject without claiming foreign ownership, every accepted
+OWNER_READY path repeats the exact-main Git proof, and final-Git interrupts
+become fixed rejections after cleanup. Owned supervisors receive the explicit
+`holoindex_postmerge_only` mode; supervisor coverage proves hostile ambient
+flags cannot activate self-audit or any non-Holo task family.
+Direct execute-gate cases additionally prove forged and structurally malformed
+plans cannot bypass the Holo-only triage boundary or escape its fixed rejection.
+Those focused cases live in
+`test_openclaw_supervisor_holoindex_postmerge.py`; the inherited supervisor
+test host remains below its base line count instead of ratcheting WSP 62 debt.
+
+The launch/supervisor regressions independently prove register-only bootstrap
+directly registers exactly two OpenClaw specs, starts nothing, and leaves
+hostile ambient autostart flags unchanged. A generic completed task row remains
+insufficient, malformed exact-head bindings reject, and a canonical atomic
+completion receipt succeeds.
+
 ## Resident governed Holo usability
 
 `test_reddog_generation_bound_holoindex_query_adapter.py` proves the resident

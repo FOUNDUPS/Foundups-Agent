@@ -1,48 +1,23 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
-## HoloIndex query replica truth
+## HoloIndex runtime truth
 
-The loopback owner client preserves all four immutable-replica binding fields.
-It also requires and preserves the digest computed from the ranker modules
-actually loaded by the owner. The resident safe projection carries that digest
-into its rebuilt receipt instead of dropping it at the worker boundary.
-The same path now preserves the child-computed runtime-environment digest and
-the explicit exact-closure assurance flag. The digest covers executable,
-ABI/platform, verified RedDog source bytes, distribution build records,
-replica/model artifacts, and actual allowlisted settings. Exact installed
-package payload bytes remain unverified, so A-grade admission rejects even when
-ordinary query evidence is otherwise valid.
-The one-shot bridge compares them with the route admitted before owner startup;
-an absent, malformed, or different replica fails closed. This propagates
-response identity only and grants no maintenance, route, repository, or model authority.
+The exact-main operator controller requires a clean local
+`refs/remotes/origin/main`, exact sealed repair/completion receipts, stable
+broker readiness, final Git/owner revalidation, and proven thread-dead cleanup.
+It holds one canonical-store cross-process lease, preserves pre-existing
+runtimes, launches owned supervisors in explicit Holo-only mode, never changes
+process-global task flags, and directly registers only the two required
+OpenClaw specs without entering main/MCP bootstrap.
+The owner path binds replica, ranker, runtime-environment, HEAD/root/generation,
+and no-reindex evidence; raw buckets never enter Fusion.
 
-Resident audit workers use `GenerationBoundHoloIndexQueryAdapter` in a bounded
-child, admit only equal CURRENT repository/authority/replica bindings, and
-project signed-scope hit metadata into a new receipt; raw buckets never enter
-Fusion. The Python worker adapter retains its explicit 60-second boundary;
-the canonical CLI and asynchronous VSIX cold path are bounded at 300 seconds
-to cover the existing 270-second readiness canary. Windows venv callers reuse the supervisor-vetted
-runtime/site-packages through a scrubbed isolated `-S -B` environment; required
-runtime/Holo values cross while credentials and Python overrides do not.
-Committed authority permits overlays, while `clean_workspace_head` does not.
-The real OpenClaw post-merge path passed at exact main `66526ae5c`; three fresh
-owner queries were CURRENT/no-gap/no-reindex in about 34 seconds, a warm
-governed query took 10.3 seconds after a 25.5-second bootstrap, and immutable
-revalidation preserved all 33 artifacts. Evidence never authorizes a later
-HEAD. Process-local serialization and cold children remain phase-1 correctness
-limits, not throughput claims.
-No outbound Hermes dispatch is performed.
-
-Historical exact-main cold availability does not prove the current runtime.
-Post-restart live calls failed closed at 60 and 180 seconds, so normal RedDog
-operation needs one resident authenticated owner rather than a cold child per
-query. Exact dependency bytes, independent evaluator/proposer trust, non-test
-admission, promotion/canary/rollback, and outcome learning remain open.
-
-The resident launcher requires the root FastAPI/Uvicorn runtime. Acceptance used
-the repository `.venv`; an ambient interpreter missing FastAPI failed before
-task claim and performed no maintenance. Dependency failure never authorizes a
-Holo repair or query-time reindex.
+At exact main `5e0835c690e0f4f1712c7021a75abdc35aadeca0`, the real
+OpenClaw transaction produced generation `sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915`; a governed query
+returned CURRENT/no-gap/no-reindex in 3.75 seconds and revalidation preserved
+33 artifacts / 221,734,133 bytes. Runtime exact closure remains false, so this
+is maintenance lifecycle evidence—not retrieval RSI, A-grade, or future-commit
+authority. See [docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
 
 ## Receipt-bound artifact model routing
 

@@ -1,5 +1,25 @@
 # moltbot_bridge Roadmap
 
+- COMPLETE EXACT-MAIN OPERATOR LIFECYCLE HARDENING: register-only bootstrap
+  registers only the two required OpenClaw specs without main/MCP/autostart or
+  process-environment effects; post-merge supervisor
+  verification requires the exact atomic completion receipt; and the bounded
+  controller distinguishes pre-existing runtimes from transaction-owned ones,
+  serializes callers with a cross-process lease, uses an explicit Holo-only
+  supervisor mode with no global environment mutation, revalidates Git on every
+  accepted terminal path, verifies CURRENT completion equality, and proves
+  owned broker threads dead.
+- P0 A-GRADE RUNTIME EVIDENCE: prove the inert current-Python executable,
+  stdlib/archive/bytecode, native-extension, and native-loader closure. Tighten
+  exact-runtime admission so dependency bytes alone can never make the current
+  partial runtime descriptor exact. Then add signed protected activation,
+  route-v2 binding, and a resident authenticated owner; never hash the 1.85 GB
+  dependency closure per query.
+- P0 RETRIEVAL RSI: add authenticated proposer, independently sealed evaluator,
+  separate promoter/CAS/canary/semantic rollback, signed outcome ledger, and a
+  bounded WRE feedback loop. Current maintenance self-repair is operational;
+  retrieval-quality self-improvement is not.
+
 - COMPLETE PHASE-1 COLD-START AVAILABILITY: the exact-main OpenClaw maintenance
   transaction completed and three fresh governed one-shot queries returned
   CURRENT/no-gap/no-reindex in about 34 seconds. A warm governed query completed
@@ -9,16 +29,19 @@
 - IMPLEMENTED CANDIDATE RANKER TRUTH: the owner client and resident adapter
   preserve the owner-loaded ranker digest end to end. Retrieval grading rejects
   a digest that differs from its clean authority candidate.
-- P1 RUNTIME REPRODUCIBILITY: add a separately sealed owner executable,
-  ABI/platform, dependency/build, and deterministic-knob manifest digest.
-  Source-ranker equality alone is not A-grade/RSI environment identity.
+- P0 RUNTIME REPRODUCIBILITY: the current descriptor binds useful executable,
+  ABI/platform, source, build-record, replica/model, and knob evidence but does
+  not prove Python-owned stdlib/native bytes, external loader policy, signature,
+  or write denial. Source/ranker/dependency equality alone is not A-grade/RSI
+  environment identity.
 
-- LATEST RECORDED EXACT-MAIN EVIDENCE: the automatic post-merge transaction completed
-  through the real broker-managed OpenClaw supervisor at exact main
-  `66526ae5c`, generation `sha256:f2013aeb...`. AgentDB claim/completion bindings
-  validated; three fresh owner queries and one warm query returned
-  CURRENT/no-gap/no-reindex, and full immutable revalidation preserved all 33
-  artifacts / 221,204,272 bytes. This evidence authorizes that commit only.
+- LATEST RECORDED EXACT-MAIN EVIDENCE: the automatic post-merge transaction
+  completed through the real broker-managed OpenClaw supervisor at exact main
+  `5e0835c690e0f4f1712c7021a75abdc35aadeca0`, generation
+  `sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915`. Exact AgentDB claim/completion validation passed; a
+  governed query returned CURRENT/no-gap/no-reindex in 3.75 seconds, and full
+  immutable revalidation preserved 33 artifacts / 221,734,133 bytes. This
+  evidence authorizes that commit only.
 
 - IMPLEMENTED / HISTORICAL EXACT-HEAD CANARY EVIDENCE: the default resident/OpenClaw read-only audit worker now reaches
   the verified Holo query-replica resolver through the existing one-shot owner

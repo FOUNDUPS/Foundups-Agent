@@ -5,8 +5,8 @@ NAVIGATION.py - WSP 87 Code Navigation Protocol Implementation
 This file maps problems to existing solutions to prevent vibecoding.
 0102 agents MUST consult this file BEFORE creating any new code.
 
-Status: ACTIVE - Fully functional with HoloIndex integration
-Last Updated: 2026-02-18 - Added Member Area (auth, dashboard shell, navigation)
+Status: ACTIVE curated map - Holo semantic retrieval remains fail-closed when stale
+Last Updated: 2026-08-27 - Added exact-main RedDog/Holo maintenance controller
 WSP Compliance: WSP 87 (Code Navigation), WSP 50 (Pre-Action Verification)
 
 COVERAGE:
@@ -116,6 +116,9 @@ NEED_TO = {
     "openclaw security tests": "modules/ai_intelligence/ai_overseer/tests/test_openclaw_security_sentinel.py",
     "openclaw dae tests": "modules/communication/moltbot_bridge/tests/test_openclaw_dae.py",
     "moltbot bridge digital twin": "modules/communication/moltbot_bridge/README.md",
+    "reddog holo exact main postmerge controller": "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py:run_holoindex_postmerge_runtime_once()",
+    "reddog holo postmerge cli": "scripts/reddog_holoindex_postmerge_runtime_once.py",
+    "reddog holo postmerge completion policy": "modules/communication/moltbot_bridge/src/holoindex_postmerge_supervisor_policy.py:validate_supervisor_holoindex_postmerge_completion()",
     "reddog main readonly operational bootstrap": "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap.py:run_reddog_main_readonly_operational_bootstrap()",
     "reddog main bootstrap result projection": "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap_result.py:RedDogMainReadonlyBootstrapResult",
     "reddog authority profile typed rehydration": "modules/communication/moltbot_bridge/src/reddog_authority_profile_rehydration.py:rehydrate_authority_profile_runtime()",

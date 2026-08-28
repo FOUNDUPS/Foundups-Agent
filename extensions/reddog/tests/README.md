@@ -1,5 +1,22 @@
 # RedDog Extension Tests
 
+## 0.4.126 exact-main post-merge lifecycle release
+
+- The authenticated 1,357-file backend closure binds direct two-spec OpenClaw
+  registration with no main/MCP bootstrap, cross-process controller
+  serialization, explicit Holo-only supervisor isolation, and exact task-bound
+  Holo completion validation.
+- Extension version, package surface, incident-repair assertions, and all 18
+  contract shards bind 0.4.126. The operator controller is deliberately not a
+  VSIX command and adds no maintenance authority to the thin client.
+- Fast 14/14, conversation 32/32, contract 3/3, deterministic package, and
+  exhaustive 4/4 release groups pass. The package surface is 67 files / 945,801
+  bytes at `sha256:7a1a8fb2e803...9a27f7c9`.
+- `O:\RedDog-Releases\reddog-0.4.126.vsix` is 275,668 bytes at
+  `sha256:639d6c82b195...b52b94b`. Read-only archive inspection found 69 entries,
+  67 package members, no duplicate/unsafe names or source-byte mismatches, and
+  exact package version 0.4.126.
+
 ## 0.4.125 inert dependency-runtime closure release
 
 - Rebinds the version and authenticated contract to the 1,357-file backend

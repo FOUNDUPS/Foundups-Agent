@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-27: Exact-main post-merge operator hardening
+
+- Closed incidental bootstrap effects by replacing main bootstrap plus ambient
+  autostart overrides with direct registration of only the resident and
+  supervisor specs. No MCP registration/start or process-environment mutation
+  occurs.
+- Replaced generic latest-100 completed-row truth for the Holo post-merge family
+  with the canonical exact task/request/completion transaction validator.
+- Added one bounded clean-main controller and JSON CLI. It starts only owned
+  broker runtimes, preserves pre-existing ones, binds the final CURRENT owner
+  generation to the completion receipt, and rejects unless owned threads are
+  proven dead after cleanup.
+- Replaced process-global transaction flags with an explicit
+  `holoindex_postmerge_only` supervisor mode, serialized controllers with the
+  existing cross-process lease primitive, rejected every ownership race, and
+  added final Git revalidation to both OWNER_READY paths. The mode cannot
+  restart, self-audit, claim non-Holo work, evolve skills, emit nudges, or write
+  continuity breadcrumbs.
+- Recorded exact-main `5e0835c6` live evidence without calling it A-grade:
+  maintenance self-repair works, while exact runtime closure and retrieval RSI
+  remain false/blocked. (WSP 00/15/22/50/62/77/87/97)
+- Repository-bound execution evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_RUNTIME_CONTROLLER_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27: Runtime-environment receipt and resident-owner truth
 
 - Preserved the child-computed runtime-environment digest and exact-closure

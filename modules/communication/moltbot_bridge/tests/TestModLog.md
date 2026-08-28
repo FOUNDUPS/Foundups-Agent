@@ -1,3 +1,21 @@
+## 2026-08-27: Exact-main post-merge controller regressions
+
+- Added dirty-workspace, CURRENT short-circuit, exact owned lifecycle,
+  pre-existing-runtime preservation, environment isolation, completion
+  binding, and thread-dead cleanup falsifiers.
+- Added direct two-spec register-only bootstrap, Holo-only triage/execute, and
+  supervisor exact atomic-completion tests. The exact controller file is 22
+  passed; the complete controller,
+  launch, and supervisor selection is 90 passed. The post-merge
+  coordinator/authority-order/reserved-namespace dependency selection is 53
+  passed.
+- Regenerated and verified the canonical staged-index registry at 1,600 tests
+  with 267 quarantined entries after adding the focused Holo supervisor module;
+  the registry/differential/Holo indexing selection passed 52 tests.
+- Extracted the candidate Holo-specific supervisor cases into the 285-line
+  `test_openclaw_supervisor_holoindex_postmerge.py`; the inherited host is 14
+  lines below its base size and no WSP 62 exemption was added.
+
 ## 2026-08-27: Owner-loaded ranker binding propagation
 
 - Proved query clients reject missing/malformed runtime ranker digests and the

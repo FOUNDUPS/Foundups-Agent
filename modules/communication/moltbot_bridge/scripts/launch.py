@@ -30,53 +30,22 @@ def _ensure_broker_bootstrap() -> None:
     Safe to call multiple times - uses module-level flag to avoid re-registration.
     """
     global _broker_bootstrapped
-    if _broker_bootstrapped:
-        return
-
     try:
         from modules.infrastructure.dae_daemon.src.dae_launch_broker import (
             get_dae_launch_broker,
         )
 
         broker = get_dae_launch_broker()
-        if broker and len(broker.list_launchable_daes()) > 0:
-            # Already bootstrapped by main.py
+        launchable = broker.list_launchable_daes() if broker else {}
+        if {"openclaw", "openclaw_supervisor"}.issubset(launchable):
             _broker_bootstrapped = True
             return
-
-        # Import and call main.py's bootstrap function
-        # GUARD: Suppress supervisor autostart to avoid recursive start
-        # (we're already inside run_openclaw_supervisor_service)
-        logger.info("[SUPERVISOR-BOOTSTRAP] Broker has no specs - self-bootstrapping (register only)")
-        try:
-            from main import bootstrap_runtime_dae_launches
-
-            # Save and suppress autostart env gates
-            saved_supervisor_autostart = os.getenv("OPENCLAW_SUPERVISOR_AUTOSTART")
-            saved_resident_autostart = os.getenv("OPENCLAW_RESIDENT_AUTOSTART")
-            os.environ["OPENCLAW_SUPERVISOR_AUTOSTART"] = "0"
-            os.environ["OPENCLAW_RESIDENT_AUTOSTART"] = "0"
-
-            try:
-                bootstrap_runtime_dae_launches()
-            finally:
-                # Restore original env values
-                if saved_supervisor_autostart is not None:
-                    os.environ["OPENCLAW_SUPERVISOR_AUTOSTART"] = saved_supervisor_autostart
-                else:
-                    os.environ.pop("OPENCLAW_SUPERVISOR_AUTOSTART", None)
-                if saved_resident_autostart is not None:
-                    os.environ["OPENCLAW_RESIDENT_AUTOSTART"] = saved_resident_autostart
-                else:
-                    os.environ.pop("OPENCLAW_RESIDENT_AUTOSTART", None)
-
-            _broker_bootstrapped = True
-            logger.info("[SUPERVISOR-BOOTSTRAP] Self-bootstrap complete (specs registered, no autostart)")
-        except ImportError:
-            # Fallback: Register minimal specs for supervisor to function
-            logger.warning("[SUPERVISOR-BOOTSTRAP] main.py import failed, registering minimal specs")
-            _register_minimal_openclaw_specs(broker)
-            _broker_bootstrapped = True
+        logger.info("[SUPERVISOR-BOOTSTRAP] Registering OpenClaw specs only")
+        _register_minimal_openclaw_specs(broker)
+        registered = broker.list_launchable_daes()
+        _broker_bootstrapped = {
+            "openclaw", "openclaw_supervisor"
+        }.issubset(registered)
     except Exception as exc:
         logger.error("[SUPERVISOR-BOOTSTRAP] Bootstrap failed: %s", exc)
 
@@ -85,8 +54,7 @@ def _register_minimal_openclaw_specs(broker: Any) -> None:
     """Register minimal DAE specs for supervisor to function without full main.py bootstrap."""
     from modules.infrastructure.dae_daemon.src.dae_launch_broker import DAELaunchSpec
 
-    # Register openclaw resident spec
-    broker.register_launch_spec(
+    specs = (
         DAELaunchSpec(
             dae_id="openclaw",
             dae_name="OpenClaw Resident Service",
@@ -96,9 +64,21 @@ def _register_minimal_openclaw_specs(broker: Any) -> None:
             stop_callable=stop_openclaw_resident_service,
             heartbeat_interval_sec=15.0,
             description="Resident OpenClaw webhook/control-plane service.",
-        )
+        ),
+        DAELaunchSpec(
+            dae_id="openclaw_supervisor",
+            dae_name="OpenClaw Supervisor",
+            domain="communication",
+            module_path="modules.communication.moltbot_bridge.scripts.launch",
+            start_callable=run_openclaw_supervisor_service,
+            stop_callable=stop_openclaw_supervisor_service,
+            heartbeat_interval_sec=15.0,
+            description="Canonical 0102 supervisor state machine.",
+        ),
     )
-    logger.info("[SUPERVISOR-BOOTSTRAP] Registered minimal openclaw spec")
+    for spec in specs:
+        broker.register_launch_spec(spec)
+    logger.info("[SUPERVISOR-BOOTSTRAP] Registered OpenClaw runtime specs")
 
 
 def _resolve_host(host: Optional[str]) -> str:
@@ -219,7 +199,10 @@ def get_openclaw_resident_status() -> Dict[str, Any]:
         return status
 
 
-def run_openclaw_supervisor_service(repo_root: Optional[str] = None) -> Dict[str, Any]:
+def run_openclaw_supervisor_service(
+    repo_root: Optional[str] = None,
+    runtime_mode: Optional[str] = None,
+) -> Dict[str, Any]:
     """Run the explicit OpenClaw supervisor state machine as a broker-managed runtime."""
     from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
         OpenClawSupervisor,
@@ -232,7 +215,10 @@ def run_openclaw_supervisor_service(repo_root: Optional[str] = None) -> Dict[str
     # is started standalone (not via main.py bootstrap).
     _ensure_broker_bootstrap()
 
-    supervisor = OpenClawSupervisor(repo_root=resolved_root)
+    supervisor = OpenClawSupervisor(
+        repo_root=resolved_root,
+        runtime_mode=runtime_mode,
+    )
 
     with _supervisor_lock:
         global _supervisor_runtime

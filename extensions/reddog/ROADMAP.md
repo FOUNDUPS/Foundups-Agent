@@ -2,13 +2,14 @@
 
 ## Status
 
-Phase: RedDog 0.4.125 resident architect thin-client surface.
+Phase: RedDog 0.4.126 resident architect thin-client surface.
 
-0.4.125 authenticates the reachable shared filesystem-safety prerequisites
-used by the staged dependency materializer. The materializer itself remains a
-maintenance-only library outside the thin-client runtime closure. A trusted
-stage-zero verifier must still bind the full runtime, signature, and empirical
-write denial, while normal operation still needs one persistent owner.
+0.4.126 authenticates exact atomic post-merge completion and direct
+OpenClaw-only registration without main/MCP bootstrap. The bounded operator
+controller is not an extension command. A
+trusted stage-zero verifier must still bind the full runtime, signature, and
+empirical write denial, while normal operation still needs one persistent
+owner and independently governed retrieval RSI.
 
 Current implementation:
 

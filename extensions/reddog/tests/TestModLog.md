@@ -1,5 +1,22 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-27 - Exact-main post-merge lifecycle release (0.4.126)
+
+- Rebound version/contract fixtures and the authenticated 1,357-file backend
+  manifest to the exact-completion and register-only bootstrap hardening.
+- Added Python lifecycle falsifiers for owned/pre-existing runtimes and
+  thread-dead cleanup; the exact controller file is 22 passed and the complete
+  controller/launch/supervisor selection is 90 passed. Packaging evidence is
+  18-shard contract, and exhaustive 4/4 release groups pass in 184.570 seconds.
+- Kept the Holo-specific supervisor cases in a separate 269-line test module;
+  the inherited supervisor test host is smaller than base and receives no new
+  WSP 62 exemption.
+- The exact 67-file package is 945,801 bytes at
+  `sha256:7a1a8fb2e803...9a27f7c9`; the VSIX is 275,668 bytes at
+  `sha256:639d6c82b195...b52b94b`.
+- The canonical staged-index registry is current at 1,600 tests / 267
+  quarantined entries; its focused registry selection passed 52 tests.
+
 ## 2026-08-27 - Inert dependency-runtime closure release (0.4.125)
 
 - Advanced the immutable extension identity because the authenticated backend

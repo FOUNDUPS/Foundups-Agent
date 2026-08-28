@@ -39,10 +39,14 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     redact_runtime_value,
 )
 from .holoindex_postmerge_supervisor_policy import (
+    HOLOINDEX_POSTMERGE_ONLY_MODE,
     HoloIndexPostmergePoller,
     exclude_holoindex_postmerge_tasks,
     holoindex_postmerge_enabled,
+    holoindex_postmerge_only_execution_rejection,
+    is_holoindex_postmerge_only_mode,
     maintenance_candidates,
+    verified_maintenance_task_status,
 )
 
 logger = logging.getLogger(__name__)
@@ -1889,13 +1893,15 @@ class OpenClawSupervisor:
         observer: Any | None = None,
         action_reporter: Optional[Callable[[str, str, Dict[str, Any]], None]] = None,
         self_audit_factory: Optional[Callable[[Path], Any]] = None,
+        runtime_mode: str | None = None,
     ) -> None:
+        self._holoindex_postmerge_only = is_holoindex_postmerge_only_mode(runtime_mode)
         self.repo_root = Path(repo_root).resolve()
         self.poll_sec = float(os.getenv("OPENCLAW_SUPERVISOR_POLL_SEC", "10"))
-        self.restart_enabled = os.getenv("OPENCLAW_SUPERVISOR_ALLOW_RESTART", "1") != "0"
+        self.restart_enabled = not self._holoindex_postmerge_only and os.getenv("OPENCLAW_SUPERVISOR_ALLOW_RESTART", "1") != "0"
         self.max_restart_attempts = max(int(os.getenv("OPENCLAW_SUPERVISOR_MAX_RESTARTS", "3")), 1)
         self.restart_window_sec = max(float(os.getenv("OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC", "900")), 60.0)
-        self.self_audit_enabled = os.getenv("OPENCLAW_SELF_AUDIT_ENABLED", "1") != "0"
+        self.self_audit_enabled = not self._holoindex_postmerge_only and os.getenv("OPENCLAW_SELF_AUDIT_ENABLED", "1") != "0"
         self.current_state = SupervisorState.BOOT
         self.last_reason = "init"
         self.last_cycle: Dict[str, Any] = {}
@@ -1910,7 +1916,8 @@ class OpenClawSupervisor:
         self._self_audit_loop: Any | None = None
         self._event_cursor = 0
         self._restart_attempts: Deque[float] = deque()
-        self._holoindex_postmerge_poller = HoloIndexPostmergePoller(self.repo_root)
+        poller_enabled = True if self._holoindex_postmerge_only else None
+        self._holoindex_postmerge_poller = HoloIndexPostmergePoller(self.repo_root, enabled=poller_enabled)
 
         # Unified from Supervisor24x7 (P1 2026-03-22)
         self.metrics = SupervisorMetrics()
@@ -2005,6 +2012,63 @@ class OpenClawSupervisor:
             self._stop_event.wait(max(self.poll_sec, 1.0))
         return {"status": "stopped", "state": self.current_state.value}
 
+    def _new_cycle_continuity(self, parent_context: Any) -> Any:
+        if self._holoindex_postmerge_only:
+            return None
+        cycle_id = f"cycle_{self.metrics.cycles_completed}"
+        return self._create_continuity_context(cycle_id, parent_context)
+
+    def _report_escalation_nudge(
+        self, reason: str, triage: Mapping[str, Any], observation: Mapping[str, Any]
+    ) -> None:
+        high_value = {
+            "resident_openclaw_restart_budget_exhausted",
+            "broker_or_observer_unavailable",
+            "openclaw_runtime_not_registered",
+        }
+        if self._holoindex_postmerge_only or reason not in high_value:
+            return
+        self._emit_supervisor_nudge(
+            trigger_type="supervisor_escalation",
+            title=f"Supervisor escalation: {reason}",
+            summary=(
+                f"Supervisor reached ESCALATE state due to: {reason}. "
+                f"Restart budget: {triage.get('restart_budget', {})}. "
+                "Manual intervention may be required."
+            ),
+            priority="P0" if "budget_exhausted" in reason else "P1",
+            details={
+                "escalation_reason": reason,
+                "restart_budget": triage.get("restart_budget"),
+                "observation_keys": list(observation.keys()),
+            },
+        )
+
+    def _report_verify_failure_nudge(
+        self, plan: Mapping[str, Any], verify: Mapping[str, Any]
+    ) -> None:
+        if self._holoindex_postmerge_only:
+            return
+        task = plan.get("task")
+        task_id = task.get("task_id") if isinstance(task, Mapping) else None
+        error = verify.get("error", "unknown")
+        suffix = f" [{task_id}]" if task_id else ""
+        suffix += f" ({error})" if error != "unknown" else ""
+        self._emit_supervisor_nudge(
+            trigger_type="supervisor_verify_failure",
+            title=f"Task verify failed: {plan.get('action', 'unknown')}{suffix}",
+            summary=(
+                f"Execution of {plan.get('action')} completed but verification failed. "
+                f"Error: {error}. Reason: {plan.get('reason', '')}"
+            ),
+            priority="P1",
+            details={
+                "plan_action": plan.get("action"), "plan_reason": plan.get("reason"),
+                "verify_error": error, "task_id": task_id,
+                "fidelity": verify.get("fidelity"),
+            },
+        )
+
     def run_cycle(self, parent_context=None) -> Dict[str, Any]:
         """Run one supervisor cycle.
 
@@ -2018,9 +2082,7 @@ class OpenClawSupervisor:
             self._transition(SupervisorState.PREFLIGHT, "dependencies_checked")
             self._bootstrapped = True
 
-        # Gateway Continuity Layer: Create continuity context for this cycle
-        cycle_id = f"cycle_{self.metrics.cycles_completed}"
-        self._continuity_context = self._create_continuity_context(cycle_id, parent_context)
+        self._continuity_context = self._new_cycle_continuity(parent_context)
 
         observation: Dict[str, Any] = {}
         plan: Dict[str, Any] | None = None
@@ -2046,29 +2108,8 @@ class OpenClawSupervisor:
             self._transition(SupervisorState.ESCALATE, triage["reason"])
             verify = {"ok": False, "error": triage["reason"]}
             self._remember(observation, triage, {}, verify)
-            # Emit nudge for high-value escalation reasons
             escalation_reason = triage["reason"]
-            high_value_reasons = {
-                "resident_openclaw_restart_budget_exhausted",
-                "broker_or_observer_unavailable",
-                "openclaw_runtime_not_registered",
-            }
-            if escalation_reason in high_value_reasons:
-                self._emit_supervisor_nudge(
-                    trigger_type="supervisor_escalation",
-                    title=f"Supervisor escalation: {escalation_reason}",
-                    summary=(
-                        f"Supervisor reached ESCALATE state due to: {escalation_reason}. "
-                        f"Restart budget: {triage.get('restart_budget', {})}. "
-                        f"Manual intervention may be required."
-                    ),
-                    priority="P0" if "budget_exhausted" in escalation_reason else "P1",
-                    details={
-                        "escalation_reason": escalation_reason,
-                        "restart_budget": triage.get("restart_budget"),
-                        "observation_keys": list(observation.keys()),
-                    },
-                )
+            self._report_escalation_nudge(escalation_reason, triage, observation)
             self.last_cycle = {
                 "state": self.current_state.value,
                 "triage": triage,
@@ -2094,28 +2135,7 @@ class OpenClawSupervisor:
         if not verify["ok"]:
             self._transition(SupervisorState.ESCALATE, verify.get("error", "verify_failed"))
             self._remember(observation, plan, action_result, verify)
-            # Emit nudge for verify failure (high-value event)
-            # Include task_id and error in title to distinguish different failures
-            task_id = plan.get("task", {}).get("task_id") if plan.get("task") else None
-            verify_error = verify.get("error", "unknown")
-            title_suffix = f" [{task_id}]" if task_id else ""
-            title_suffix += f" ({verify_error})" if verify_error != "unknown" else ""
-            self._emit_supervisor_nudge(
-                trigger_type="supervisor_verify_failure",
-                title=f"Task verify failed: {plan.get('action', 'unknown')}{title_suffix}",
-                summary=(
-                    f"Execution of {plan.get('action')} completed but verification failed. "
-                    f"Error: {verify_error}. Reason: {plan.get('reason', '')}"
-                ),
-                priority="P1",
-                details={
-                    "plan_action": plan.get("action"),
-                    "plan_reason": plan.get("reason"),
-                    "verify_error": verify_error,
-                    "task_id": task_id,
-                    "fidelity": verify.get("fidelity"),
-                },
-            )
+            self._report_verify_failure_nudge(plan, verify)
         else:
             self._transition(SupervisorState.REMEMBER, plan["action"])
             self._remember(observation, plan, action_result, verify)
@@ -2360,6 +2380,23 @@ class OpenClawSupervisor:
     #  TRIAGE — decide what action to take                                #
     # ------------------------------------------------------------------ #
 
+    def _triage_signed_worker_tasks(self) -> Dict[str, Any] | None:
+        if self._holoindex_postmerge_only or not _signed_worker_tasks_enabled_from_env():
+            return None
+        max_claims, error = _signed_worker_task_max_claims_from_env()
+        if error:
+            return {"kind": "escalate", "reason": error}
+        try:
+            if _has_pending_reddog_signed_worker_dispatch_task(repo_root=self.repo_root):
+                return {
+                    "kind": "action", "reason": "signed_worker_task_pending",
+                    "action": "claim_signed_worker_tasks_until_idle",
+                    "max_claims": max_claims,
+                }
+        except Exception as exc:
+            logger.warning("Failed to check signed worker tasks: %s", exc)
+        return None
+
     def _triage(self, observation: Dict[str, Any]) -> Dict[str, Any]:
         broker = self._get_broker()
         observer = self._get_observer()
@@ -2386,26 +2423,17 @@ class OpenClawSupervisor:
                 "restart_budget": observation.get("restart_budget", {}),
             }
 
-        signed_worker_tasks_enabled = _signed_worker_tasks_enabled_from_env()
-        if signed_worker_tasks_enabled:
-            max_claims, max_claims_error = _signed_worker_task_max_claims_from_env()
-            if max_claims_error:
-                return {"kind": "escalate", "reason": max_claims_error}
-            try:
-                if _has_pending_reddog_signed_worker_dispatch_task(repo_root=self.repo_root):
-                    return {
-                        "kind": "action",
-                        "reason": "signed_worker_task_pending",
-                        "action": "claim_signed_worker_tasks_until_idle",
-                        "max_claims": max_claims,
-                    }
-            except Exception as exc:
-                logger.warning("Failed to check signed worker tasks: %s", exc)
+        signed_worker = self._triage_signed_worker_tasks()
+        if signed_worker is not None:
+            return signed_worker
 
         # Check AgentDB for pending autonomous tasks
         # CIRCUIT BREAKER: Only auto-execute if explicitly enabled by 012
         # Set OPENCLAW_AUTO_TASKS_ENABLED=1 after menu choice to activate
-        auto_tasks_enabled = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") == "1"
+        auto_tasks_enabled = bool(
+            not self._holoindex_postmerge_only
+            and os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") == "1"
+        )
         if auto_tasks_enabled:
             try:
                 from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
@@ -2430,8 +2458,13 @@ class OpenClawSupervisor:
 
         # Bounded maintenance task selection (WSP 77/87/97)
         # Uses maintenance selector to find safe, low-risk tasks with HoloIndex direction
-        maintenance_enabled = os.getenv("OPENCLAW_MAINTENANCE_ENABLED", "0") == "1"
-        postmerge_enabled = holoindex_postmerge_enabled()
+        maintenance_enabled = bool(
+            not self._holoindex_postmerge_only
+            and os.getenv("OPENCLAW_MAINTENANCE_ENABLED", "0") == "1"
+        )
+        postmerge_enabled = bool(
+            self._holoindex_postmerge_only or holoindex_postmerge_enabled()
+        )
         if maintenance_enabled or postmerge_enabled:
             try:
                 from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
@@ -2502,9 +2535,12 @@ class OpenClawSupervisor:
             except Exception as exc:
                 logger.warning("Failed to select maintenance task: %s", exc)
 
+        if self._holoindex_postmerge_only:
+            return {"kind": "idle", "reason": "holoindex_postmerge_only_idle"}
+
         # Check self-audit events from JSONL (lower priority than restart and AgentDB tasks)
         # DaemonSelfAuditLoop persists events to JSONL with recommended_fix field
-        self_audit_enabled = os.getenv("OPENCLAW_SELF_AUDIT_ENABLED", "1") != "0"
+        self_audit_enabled = self.self_audit_enabled
         if self_audit_enabled and self._self_audit_loop:
             pending_event = self._get_pending_self_audit_event()
             if pending_event:
@@ -2626,23 +2662,33 @@ class OpenClawSupervisor:
     #  EXECUTE — dispatch action                                          #
     # ------------------------------------------------------------------ #
 
+    @staticmethod
+    def _start_execution_emitter(
+        plan: Mapping[str, Any]
+    ) -> tuple[Any, Any, Any]:
+        try:
+            from modules.infrastructure.dae_daemon.src.runtime_emitter import (
+                emit_failure, emit_start, emit_success,
+            )
+            started = emit_start(
+                "openclaw_supervisor", "supervisor_execute",
+                details={"action": plan.get("action", "unknown")},
+            )
+            return started, emit_success, emit_failure
+        except Exception:
+            return None, None, None
+
     def _execute(self, plan: Dict[str, Any]) -> Dict[str, Any]:
+        mode_rejection = holoindex_postmerge_only_execution_rejection(
+            enabled=self._holoindex_postmerge_only, plan=plan,
+        )
+        if mode_rejection is not None:
+            return mode_rejection
         broker = self._get_broker()
         if broker is None:
             return {"ok": False, "error": "broker_unavailable"}
 
-        # Runtime emitter: structured event for supervisor execution observability
-        _rt_start = None
-        try:
-            from modules.infrastructure.dae_daemon.src.runtime_emitter import (
-                emit_start as _re_start, emit_success as _re_ok, emit_failure as _re_fail,
-            )
-            _rt_start = _re_start(
-                "openclaw_supervisor", "supervisor_execute",
-                details={"action": plan.get("action", "unknown")},
-            )
-        except Exception:
-            _re_ok = _re_fail = None
+        _rt_start, _re_ok, _re_fail = self._start_execution_emitter(plan)
 
         if plan["action"] == "start_openclaw":
             self._record_restart_attempt()
@@ -3028,9 +3074,7 @@ class OpenClawSupervisor:
                 from modules.infrastructure.database.src.agent_db import AgentDB
 
                 db = AgentDB()
-                completed_tasks = db.get_autonomous_tasks(status="completed", limit=100)
-                if task_id and any(item.get("task_id") == task_id for item in completed_tasks):
-                    task_status = "completed"
+                task_status = verified_maintenance_task_status(db, task_id, family)
             except Exception as exc:
                 logger.debug("[SUPERVISOR] VERIFY: maintenance task status check skipped: %s", exc)
 

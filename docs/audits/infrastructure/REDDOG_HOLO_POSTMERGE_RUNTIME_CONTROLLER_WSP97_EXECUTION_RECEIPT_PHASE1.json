@@ -1,0 +1,126 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "5e0835c690e0f4f1712c7021a75abdc35aadeca0"
+  },
+  "execution_id": "REDDOG_HOLO_POSTMERGE_RUNTIME_CONTROLLER_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "exact_main_holoindex_postmerge_runtime_controller",
+    "scoped_maintenance_runtime": "verified",
+    "maintenance_replica_rsi": "working",
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "runtime_environment_exact_closure_verified": false,
+    "resident_authenticated_owner": false,
+    "live_route_changed": false
+  },
+  "wsp15_allocation": {
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "decision": "complete the fail-closed exact-main maintenance lifecycle before retrieval RSI or A-grade promotion"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_77_Agent_Coordination_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 awakening passed at coherence 0.718 before this micro-sprint.",
+      "Governed Holo owner queries were CURRENT, no-gap, and no-reindex at base commit 5e0835c690e0f4f1712c7021a75abdc35aadeca0 with generation sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915.",
+      "Retrieval evaluation found useful ordered module evidence with moderate duplication and staleness risk correctly bounded by the exact generation; direct source governed the uncommitted overlay.",
+      "Module README, INTERFACE, ROADMAP, ModLog, test README, TestModLog, NAVIGATION, controller, supervisor policy, broker, coordinator, lease, and closest tests were inspected before edits."
+    ],
+    "research": [
+      "The existing exact-SHA coordinator and resident OpenClaw supervisor were retained; the missing layer was a serialized clean-main operator controller with exact completion rehydration and ownership cleanup.",
+      "The existing canonical Holo maintenance lease was reused for cross-process serialization instead of adding a second lock authority.",
+      "Independent WSP_97 audits found terminal Git-revalidation bypasses, BaseException leakage, global-environment races, overly broad bootstrap effects, direct execute bypasses, malformed-plan escapes, and candidate WSP_62 growth.",
+      "A separate RSI authority audit established that WRE telemetry has zero-denominator truth defects, PatternMemory authority is fragmented, and no verified production retrieval-learning canary exists."
+    ],
+    "micro_pass": [
+      "The exact controller, launch, inherited supervisor, and extracted Holo supervisor selection passed 90 tests in 44.38 seconds.",
+      "The postmerge coordinator, authority-order, and reserved-namespace dependency selection passed 53 tests.",
+      "The WSP_62 overlay gate passed 16 tests; the inherited supervisor test host is 14 lines below base and the focused Holo supervisor test module is 269 lines with maximum function length 58.",
+      "The backend manifest generator contract passed 8 tests and check mode reproduced 1,357 files at sha256:3377498c29a23eb02678a130aa7bad62f6b8ed4caa10daf4898a59bdf498b2c5.",
+      "The canonical staged-index test registry check passed at 1,600 tests with 267 quarantined entries; its registry, differential-plan, and Holo indexing selection passed 52 tests.",
+      "RedDog fast 14-member, conversation 32-test, contract 3-member, deterministic package, and contract-shard checks passed."
+    ],
+    "macro_pass": [
+      "The exhaustive RedDog release verifier passed all four groups in 184.570 seconds with no group or release timeout.",
+      "An independent verifier reproduced cross-process lease rejection and release, 705684 unchanged environment observations during minimal bootstrap, exact two-spec registration with zero starts, terminal Git checks, ownership races, and fixed malformed-input rejection.",
+      "The 67-file package surface is 945801 bytes at sha256:7a1a8fb2e80353013f51f1782a4d6cd164ab796670dea488fd25fd099a27f7c9.",
+      "The release artifact O:/RedDog-Releases/reddog-0.4.126.vsix is 275668 bytes at sha256:639d6c82b1957fd5b1c3f54790172045c5a77f53628b09632e1409192b52b94b; read-only inspection found 69 entries, 67 package members, no duplicate or unsafe names, zero source-byte mismatches, and package version 0.4.126.",
+      "No live Holo maintenance, route activation, reindex, Hermes dispatch, repository mutation outside this overlay, or extension install was performed."
+    ],
+    "hard_think": [
+      "A maintenance controller is not retrieval RSI: it may restore exact-main query state but cannot propose, evaluate, promote, canary, roll back, or learn ranking changes.",
+      "Process-global environment overrides are not an ownership boundary; explicit supervisor runtime mode plus persisted task binding and a canonical cross-process lease are required.",
+      "Every success path must repeat Git identity after query and before acceptance because the checkout can become dirty while a CURRENT owner result is being obtained.",
+      "A-grade remains blocked until exact interpreter, stdlib, native-loader, signature, write-denial, activation, and resident-owner evidence is verified."
+    ],
+    "dialectic_sweep": [
+      "Starting the complete OpenClaw bootstrap would reuse more code but also registers or starts unrelated authority; direct registration of the exact resident and supervisor specs is the smaller safe boundary.",
+      "A global controller flag would be simpler but races observers and concurrent launches; explicit constructor mode carries authority without mutating ambient process state.",
+      "Adding a WSP_62 exemption would preserve one large test file but ratchet inherited debt; moving only candidate Holo tests preserved provenance and reduced the host below base.",
+      "Calling CURRENT retrieval A-grade would conflate availability with quality and learning; measured nDCG, MRR, sealed-case count, runtime closure, and RSI-loop gates remain independent."
+    ],
+    "first_principles": [
+      "The controller accepts only an exact clean main checkout and one serialized maintenance transaction.",
+      "It owns and cleans up only runtimes it started, preserves pre-existing complete topology, and rejects ambiguous partial or lost-start topology.",
+      "Holo-only mode permits only the exact canonical postmerge family after persisted task and atomic completion validation; every other action fails closed before effects.",
+      "This slice proves maintenance lifecycle safety only and cannot authorize A-grade, retrieval RSI, live promotion, or Hermes work."
+    ],
+    "execute": [
+      "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py",
+      "modules/communication/moltbot_bridge/src/holoindex_postmerge_supervisor_policy.py",
+      "modules/communication/moltbot_bridge/src/openclaw_supervisor.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_incident_repair_contract.py",
+      "modules/communication/moltbot_bridge/scripts/launch.py",
+      "scripts/reddog_holoindex_postmerge_runtime_once.py",
+      "modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_controller.py",
+      "modules/communication/moltbot_bridge/tests/test_openclaw_supervisor_holoindex_postmerge.py",
+      "extensions/reddog/package.json",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "scripts/reddog_backend_manifest.json"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_77",
+    "WSP_83",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_RUNTIME_CONTROLLER_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/doc_index.json",
+    "NAVIGATION.py",
+    "modules/communication/moltbot_bridge/README.md",
+    "modules/communication/moltbot_bridge/INTERFACE.md",
+    "modules/communication/moltbot_bridge/ROADMAP.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "modules/communication/moltbot_bridge/tests/README.md",
+    "modules/communication/moltbot_bridge/tests/TestModLog.md",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}
