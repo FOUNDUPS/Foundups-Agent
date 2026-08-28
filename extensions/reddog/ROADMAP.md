@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase: RedDog 0.4.135 resident architect thin-client surface.
+Phase: RedDog 0.4.136 resident architect thin-client surface.
 
-0.4.135 retains exact-task post-merge execution, receipt-bound owner
+0.4.136 retains exact-task post-merge execution, receipt-bound owner
 reacquisition, phase-aware liveness, repeatable supervisor release, and
 same-repository dependency-runtime resolution. Every verified requery now
 enters through the original workspace/control root while its captured clean
@@ -13,8 +13,9 @@ extension command. A
 trusted stage-zero verifier must still bind the full runtime, signature, and
 empirical write denial, while normal operation still needs one persistent
 owner and independently governed retrieval RSI.
-The receipt/reproof repair is synthetically and adversarially closed; one clean
-exact-main post-merge replay remains the acceptance gate. No package test or
+The receipt-bound owner reproof and separately contained pre-owner exact-binding
+repair are synthetically and adversarially closed; one clean exact-main
+post-merge replay remains the acceptance gate. No package test or
 VSIX artifact substitutes for that live commit-bound proof.
 
 Current implementation:

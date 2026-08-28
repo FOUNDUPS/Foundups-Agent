@@ -21,11 +21,15 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acqui
     TRANSIENT_OWNER_ERRORS,
     owner_acquisition_cycle_valid,
 )
+from modules.infrastructure.idle_automation.src.holoindex_postmerge_contract import (
+    REPO_HEAD_MISMATCH,
+)
 
 
 CURRENT = "CURRENT"
 INVALID = "INVALID"
 REPAIRABLE = "REPAIRABLE"
+SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
 DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
 
 
@@ -112,6 +116,48 @@ def _owner_telemetry_is_bound(
 
 def _digest(value: Any) -> bool:
     return type(value) is str and DIGEST_RE.fullmatch(value) is not None
+
+
+def is_bound_preowner_repo_head_mismatch(
+    result: Mapping[str, Any], *, query: str,
+    selection: HoloIndexAuthoritySelection,
+) -> bool:
+    """Verify a fail-closed exact-HEAD rejection before owner acquisition."""
+    stale_reasons = result.get("stale_reasons")
+    return bool(
+        result.get("ok") is False
+        and result.get("source") == "holoindex_owner_service"
+        and result.get("query") == query
+        and result.get("freshness") == "STALE"
+        and result.get("error") == REPO_HEAD_MISMATCH
+        and result.get("index_gap_detected") is True
+        and type(result.get("owner_attempts")) is int
+        and result.get("owner_attempts") == 0
+        and result.get("owner_retry_performed") is False
+        and result.get("owner_retry_reason") == ""
+        and type(result.get("owner_acquisition_cycle")) is int
+        and result.get("owner_acquisition_cycle") == 0
+        and type(result.get("repo_head_sha")) is str
+        and SHA_RE.fullmatch(result["repo_head_sha"]) is not None
+        and result.get("repo_head_sha") != selection.authority_head_sha
+        and result.get("repo_root_digest") == selection.authority_root_digest
+        and result.get("workspace_repo_head_sha") == selection.workspace_head_sha
+        and result.get("authority_repo_head_sha") == selection.authority_head_sha
+        and result.get("authority_repo_root_digest") == selection.authority_root_digest
+        and result.get("no_authority_worktree_mutation_performed") is True
+        and result.get("no_holoindex_reindex_performed") is True
+        and result.get("no_reindex") is True
+        and result.get("workspace_overlay_present") is False
+        and result.get("semantic_evidence_authority") == "committed_head_only"
+        and result.get("raw_result") == {}
+        and "query_receipt" not in result
+        and isinstance(stale_reasons, list)
+        and 0 < len(stale_reasons) <= 16
+        and all(type(reason) is str and len(reason) <= 128 for reason in stale_reasons)
+        and "stale_repo_head_sha" in stale_reasons
+        and _digest(result.get("freshness_generation_id"))
+        and _digest(result.get("freshness_receipt_digest"))
+    )
 
 
 def _verified_receipt(
@@ -230,6 +276,7 @@ __all__ = [
     "INVALID",
     "REPAIRABLE",
     "classify_verified_owner_result",
+    "is_bound_preowner_repo_head_mismatch",
     "is_verified_transient_owner_result",
     "query_and_classify_owner_result",
 ]

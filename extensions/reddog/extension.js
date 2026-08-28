@@ -59,7 +59,7 @@ const conversationPlaneRouting = conversationPlanePolicy.createRouting({
   cleanContextMode, cleanEffort, cleanMode, cleanWorkerType,
   authoritativeWorkStateQuery
 });
-const EXTENSION_VERSION = '0.4.135';
+const EXTENSION_VERSION = '0.4.136';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -7678,7 +7678,7 @@ async function holoIndexOutputAsync(root, taskText, maxChars, lifecycle) {
   });
   if (lifecycle && lifecycle.isCancelled()) return holoGenerationBoundQuery.cancelledOutput(taskText, lifecycle, holoIndexMetaFromBundle);
   const observed = holoGenerationBoundQuery.isObserved(baseResult);
-  const incidentRepair = holoIncidentRepair.shouldCoordinate(baseResult, observed)
+  const incidentRepair = holoIncidentRepair.shouldCoordinate(baseResult, observed, query)
     ? await holoIncidentRepair.coordinateAsync({ root, query, ownerResult: baseResult,
       ownerObserved: observed, interpreterPath: runtime.path, lifecycle,
       env: buildBridgePythonEnv(process.env, 'holoindex_owner') })

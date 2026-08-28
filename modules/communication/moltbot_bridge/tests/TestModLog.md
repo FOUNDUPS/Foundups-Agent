@@ -1,3 +1,17 @@
+## 2026-08-29: Pre-owner exact-HEAD repair admission
+
+- Added the positive exact-task path for independently reproduced,
+  zero-attempt `REPO_HEAD_MISMATCH` and negative attempt/receipt-HEAD/stale-
+  reason cases. Existing receipt-bound owner failures still require exhausted
+  attempts.
+- A different repairable error, a receipt-bound result of the same error, and
+  changed stale HEAD/generation/freshness/reason bindings all reject. The
+  shared owner classifier remains receipt-bound and returns `INVALID` here.
+- A forged coordinator result naming the wrong exact task now rejects even
+  when its HEAD/root are correct; the dedicated pre-owner suite is split below
+  WSP_62. Fresh incident/root/coordinator result: **75 passed**. No Holo maintenance,
+  owner restart, replica write, or repository effect occurred in this suite.
+
 ## 2026-08-28: Merged root-separation acceptance replay
 
 - Replayed the merged controller from the clean control checkout at exact main

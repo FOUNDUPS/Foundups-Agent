@@ -1,7 +1,7 @@
 # RedDog
 
-Version: 0.4.135
-0.4.135 binds RedDog to HoloIndex's evidence-qualified module-intent catalog: only direct `src/tests` scaffolds or regular root README/INTERFACE contracts can drive basename Tier-0 promotion. Depth-only telemetry/data containers no longer poison generic prompts. Exact-main activation and replay remain required. HoloIndex is still below A-grade and retrieval RSI remains blocked pending exact runtime closure, independent evaluation, promotion/canary/rollback, and candidate-bound outcome learning.
+Version: 0.4.136
+0.4.136 binds RedDog to the governed pre-owner exact-main repair ingress. A zero-attempt `REPO_HEAD_MISMATCH` may reconcile only the existing exact-HEAD OpenClaw task after complete authority/no-effect validation and an independent fixed-query reproduction of the same stale HEAD, generation, freshness digest, and bounded reasons. The ordinary owner classifier and retry rules remain receipt-bound. Exact-main activation and replay remain required; HoloIndex is still below A-grade and retrieval RSI remains blocked pending exact runtime closure, independent evaluation, promotion/canary/rollback, and candidate-bound outcome learning.
 
 This candidate integrity-binds RedDog to the 1,365-file backend closure, including the operator controller, exact task-bound OpenClaw execution, receipt-bound owner cycles, integrity-bound AgentDB claim lease, and fail-closed runtime/task liveness.
 The operator controller remains outside the thin-client command surface, and the VSIX gains no maintenance, reindex, promotion, or execution authority.
@@ -902,7 +902,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.135)
+## WSP_97 Truth Table (v0.4.136)
 
 | Claim | Status |
 | --- | --- |
@@ -994,6 +994,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.135.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.136.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

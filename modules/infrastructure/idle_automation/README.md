@@ -24,6 +24,11 @@ releases its authority lease for governed immutable replica activation,
 reacquires the lease for final exact-SHA proof, and only then permits atomic
 AgentDB completion. Query workers remain read-only.
 
+The incident allowlist includes the exact-main pre-owner
+`REPO_HEAD_MISMATCH`. Its RedDog bridge must independently reproduce complete
+authority/no-effect evidence before this coordinator sees the incident. The
+coordinator still creates only the existing one-task-per-SHA transaction.
+
 The stable route is supplied through
 `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; configuring the legacy direct replica root
 at the same time fails closed. Route/activation failure leaves the durable task

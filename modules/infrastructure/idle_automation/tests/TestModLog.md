@@ -7,6 +7,14 @@
 
 ---
 
+## 2026-08-29: Pre-owner exact-HEAD incident contract
+
+- The shared incident allowlist now includes `REPO_HEAD_MISMATCH`; durable
+  normalization continues requiring a current observed authority HEAD for all
+  non-authority-root incident kinds.
+- Fresh incident/root/coordinator result: **75 passed** with no live Holo or
+  OpenClaw effect.
+
 ## 2026-08-28: Linked-control dependency runtime RED/GREEN
 
 - RED proved the post-merge executor forwarded its clean linked control

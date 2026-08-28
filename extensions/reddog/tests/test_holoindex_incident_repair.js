@@ -31,6 +31,18 @@ function failure(changes) {
   }, changes || {});
 }
 
+function repoHeadFailure(changes) {
+  return failure(Object.assign({
+    source: 'holoindex_owner_service', query: 'repair exact main',
+    freshness: 'STALE', error: 'REPO_HEAD_MISMATCH', owner_attempts: 0,
+    owner_retry_performed: false, owner_retry_reason: '', owner_acquisition_cycle: 0,
+    repo_head_sha: STALE_HEAD, repo_root_digest: ROOT_DIGEST, no_reindex: true,
+    workspace_overlay_present: false, semantic_evidence_authority: 'committed_head_only',
+    raw_result: {}, stale_reasons: ['stale_repo_head_sha'],
+    freshness_generation_id: INCIDENT_DIGEST, freshness_receipt_digest: RECEIPT_DIGEST
+  }, changes || {}));
+}
+
 assert.strictEqual(repair.shouldCoordinate(failure(), true), true);
 assert.strictEqual(repair.shouldCoordinate(failure({
   error: 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH',
@@ -54,6 +66,11 @@ assert.strictEqual(repair.shouldCoordinate(failure({
 assert.strictEqual(repair.shouldCoordinate(failure({
   workspace_repo_head_sha: new String(HEAD)
 }), true), false);
+assert.strictEqual(repair.shouldCoordinate(repoHeadFailure(), true, 'repair exact main'), true);
+assert.strictEqual(repair.shouldCoordinate(repoHeadFailure(), true, 'different query'), false);
+assert.strictEqual(repair.shouldCoordinate(repoHeadFailure({ owner_attempts: false }), true, 'repair exact main'), false);
+assert.strictEqual(repair.shouldCoordinate(repoHeadFailure({ stale_reasons: [] }), true, 'repair exact main'), false);
+assert.strictEqual(repair.shouldCoordinate(repoHeadFailure({ query_receipt: {} }), true, 'repair exact main'), false);
 
 const original = cp.execFileSync;
 try {
@@ -127,6 +144,17 @@ try {
     STALE_HEAD
   );
 
+  repair.coordinate({
+    root: 'O:/repo', query: 'repair exact main', ownerResult: repoHeadFailure(),
+    ownerObserved: true, interpreterPath: 'python', env: { SAFE: '1' }
+  });
+  assert.strictEqual(calls, 3);
+  const repoHeadPayload = JSON.parse(invocation.options.input).owner_failure;
+  assert.strictEqual(repoHeadPayload.error, 'REPO_HEAD_MISMATCH');
+  assert.strictEqual(repoHeadPayload.repo_head_sha, STALE_HEAD);
+  assert.strictEqual(repoHeadPayload.stale_reasons[0], 'stale_repo_head_sha');
+  assert.strictEqual(Object.prototype.hasOwnProperty.call(repoHeadPayload, 'query_receipt'), false);
+
   const meta = repair.metadata(result);
   assert.strictEqual(meta.incident_repair_attempted, true);
   assert.strictEqual(meta.incident_repair_enqueued, true);
@@ -140,7 +168,7 @@ try {
     root: 'O:/repo', query: 'bounded', ownerResult: huge,
     ownerObserved: true, interpreterPath: 'python'
   }).accepted, false);
-  assert.strictEqual(calls, 2);
+  assert.strictEqual(calls, 3);
 
   const cyclic = failure();
   cyclic.untrusted = cyclic;
@@ -148,7 +176,7 @@ try {
     root: 'O:/repo', query: 'bounded', ownerResult: cyclic,
     ownerObserved: true, interpreterPath: 'python'
   }).accepted, false);
-  assert.strictEqual(calls, 2);
+  assert.strictEqual(calls, 3);
 } finally {
   cp.execFileSync = original;
 }
@@ -160,11 +188,11 @@ assert.strictEqual(repair.coordinate({
 }).rejection_reasons[0], 'incident_query_invalid');
 assert(extensionSource.includes("require('./holoindex_incident_repair')"));
 assert(extensionSource.includes('holoGenerationBoundQuery.isObserved(baseResult)'));
-assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(baseResult, observed)'));
+assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(baseResult, observed, query)'));
 assert(extensionSource.includes('await holoIncidentRepair.coordinateAsync'));
 assert((extensionSource.match(/holoIncidentRepair\.metadata\(incidentRepair\)/g) || []).length >= 4);
-assert.strictEqual(pkg.version, '0.4.135');
-assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.135'"));
+assert.strictEqual(pkg.version, '0.4.136');
+assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.136'"));
 assert(!fs.readFileSync(path.join(extDir, 'holoindex_incident_repair.js'), 'utf8').includes('qwen'));
 
 function asyncBase() {

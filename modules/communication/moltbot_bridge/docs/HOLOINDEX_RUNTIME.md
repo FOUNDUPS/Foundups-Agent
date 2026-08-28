@@ -10,6 +10,21 @@ admit the existing broker-managed chain:
 
 `OpenClaw poller -> AgentDB claim -> post-merge executor -> authority transaction -> atomic completion`
 
+The ordinary post-merge transition first appears as a fail-closed
+`REPO_HEAD_MISMATCH`: the exact-main authority is current while the canonical
+freshness receipt still names the preceding commit. This happens before owner
+acquisition, so `owner_attempts` is exactly zero and no owner query receipt
+exists. Repair admission requires the fixed query, `STALE`, the stale receipt
+HEAD distinct from the accepted authority HEAD, exact workspace/authority/root
+bindings, generation and freshness digests, empty semantic result, committed-
+HEAD authority, and explicit no-reindex/no-mutation claims. The coordinator
+then independently repeats the query and requires the same stale receipt HEAD,
+generation, freshness digest, and canonical bounded reason set before it can
+create/reconcile the existing exact-HEAD task. The ordinary shared owner
+classifier remains receipt-bound. All other
+repairable owner failures still require an integrity-bound query receipt and
+both lower-level attempts.
+
 Register-only bootstrap directly registers only the resident and supervisor
 specs; it invokes no main bootstrap, autostart, MCP registration, or ambient
 environment mutation.
