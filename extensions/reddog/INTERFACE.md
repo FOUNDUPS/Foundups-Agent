@@ -41,7 +41,7 @@ hit metadata after exact CURRENT repository, authority, generation, replica,
 and receipt verification; Fusion receives no route or owner credential.
 
 Each success and health response now carries the owner-computed
-`retrieval_runtime_ranker_digest` for the exact ten-module source closure that
+`retrieval_runtime_ranker_digest` for the exact twelve-module source closure that
 controls backend routing, ranking, Tier0 injection/dedup, path projection, and
 response ordering. Query clients and evaluation receipts require that value to
 equal the candidate's clean-authority digest. The same receipt now carries the

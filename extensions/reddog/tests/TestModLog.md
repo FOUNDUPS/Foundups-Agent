@@ -1,5 +1,22 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-28 - Current-truth Holo retrieval (0.4.131)
+
+- Added executable counterexamples for premature docs truncation, duplicate
+  section starvation, mixed historical/current intent, temporal queries,
+  nested audit classification, and exact PR/slice bypass.
+- Added exact canonical-source admission and per-path current-section
+  allowlisting. All indexing tests remain fake-collection/read-only and cannot
+  open or mutate the live Holo store.
+- The 0.4.130 pre-release artifact was rejected at the governed-adapter
+  boundary. Final 0.4.131 identities are backend `43705c230f38...e59ec`,
+  contract `21f7ff0902c6...e4b7d`, package `cc0f6a6c5830...23e57`, and VSIX
+  `sha256:736c307fcb91...58f9d1` / 275,738 bytes.
+- Candidate retrieval/WSP/generator validation is **299 passed / 1 capability
+  skip** with no deselection. Generator is **8 passed**; framework coherence is
+  **6 passed**; fast, conversation, contract, package, and exhaustive
+  four-group release tiers pass in 207.169 seconds.
+
 ## 2026-08-28 - Claim-clock fencing and RSI truth release (0.4.129)
 
 - Independent audit reproduced deferred-SQLite lease-clock races. Three new

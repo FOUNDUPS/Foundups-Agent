@@ -1,5 +1,32 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-28] HoloIndex Current-Truth Retrieval Candidate
+
+**WSP Protocols:** WSP 00, 05, 06, 15, 22, 34, 50, 60, 62, 83, 84, 87, 97
+
+- Governed retrieval is usable at exact main `5ca0c0aa...`, active generation
+  `sha256:a913b641...`; HoloIndex remains below A-grade at Recall@8 `1.0`, MRR
+  `0.91666667`, and nDCG@8 `0.93198851`, with exact runtime closure false.
+- The candidate admits Holo and adaptive-boundary contracts, section-indexes
+  only exact path-bound current headings, separates current/implementation/
+  vision/history authority, and carries that policy through bounded docs
+  retrieval and owner response normalization. A filtered summary stream keeps
+  bounded retrieval diverse when one file has many matching sections.
+- Document indexing was extracted from the 1,600-line monolith; the parent is
+  now 1,467 lines and the 271-line extraction has no function above 50 lines.
+- WSP 60, adaptive-learning, and bridge documentation now state executable truth:
+  evaluation exists, but proposer admission, canary, promotion, ranker rollback,
+  and candidate-bound outcome learning do not. No live reindex or activation
+  belongs to this pre-merge candidate.
+- Focused Holo/bridge/runtime/AutoResearch/WSP/generator validation passed
+  **299 tests / 1 optional skip**. WSP coherence separately passed 6 tests;
+  generated backend closure contains 1,365 files at `43705c230f38...e59ec`;
+  the registry contains 1,608 tests / 268 quarantines.
+- RedDog 0.4.131 release tiers pass; the rejected 0.4.130 artifact was retained.
+  The new VSIX is `O:\RedDog-Releases\reddog-0.4.131.vsix`, 275,738 bytes at
+  `sha256:736c307fcb91...58f9d1`, with 69 safe unique entries and zero package
+  member mismatch.
+
 ## [2026-08-28] RedDog/Holo Claim-Clock and RSI Truth Release (0.4.129)
 
 **WSP Protocols:** WSP 00, 05, 06, 15, 22, 34, 48, 50, 62, 64, 83, 84, 97

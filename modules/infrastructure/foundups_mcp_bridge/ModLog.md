@@ -1,5 +1,24 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-28 - Current-truth owner response ordering
+
+- Extended the immutable snapshot adapter with one bounded exact-string
+  `record_kind` query filter required by the diverse summary stream. Unsupported
+  keys and malformed values reject; no general Chroma filter grammar or storage
+  authority was added. The adapter is now in the twelve-module ranker digest.
+- Preserved low-cardinality document authority through global typed-bucket
+  flattening for broad current-status queries and normalized path identities
+  before deduplication. Exact PR/slice, historical, and baseline queries retain
+  ordinary score order; exact module Tier-0 reservation remains authoritative.
+- Reconciled operational documentation with exact main `5ca0c0aa...`, active
+  generation `sha256:a913b641...`, the below-floor public benchmark, and the
+  absence of retrieval promotion RSI. Corrected the acquisition-cycle claim:
+  the one-shot accepts disjoint cycles, but activation still uses the default
+  cycle for candidate and immediate post-commit proofs.
+- This candidate changes response policy and documentation only. It performs no
+  owner start, index mutation, maintenance, route change, activation, or
+  promotion. (WSP 00/15/22/50/62/83/87/97)
+
 ## 2026-08-28 - Receipt-bound owner acquisition cycles
 
 - Kept the shared two-attempt, 300-second, fixed-transient policy and extended

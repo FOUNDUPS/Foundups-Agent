@@ -1,5 +1,20 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-28] Current-truth response-order falsification
+
+- Reproduced the governed-adapter `where` incompatibility, then added a real
+  immutable-snapshot/collection-search regression for exact `record_kind`
+  filtering plus malformed-filter rejection.
+- Added synthetic cross-bucket evidence proving broad current-status queries
+  order canonical current contracts, implementation, then historical audits.
+- Added the inverse historical-baseline case and case-variant path deduplication
+  so the policy cannot leak into exact historical retrieval or duplicate one
+  repository artifact.
+- Tests are pure response normalization with no live owner, Holo store, model,
+  route, maintenance, reindex, or ranker promotion. (WSP 05/06/34/50/97)
+- Combined Holo/bridge/registry evidence: **210 passed / 1 optional skip**;
+  generated registry check: 1,608 tests / 268 quarantines.
+
 ## [2026-08-28] Owner acquisition cycle falsification
 
 - Proved cycle zero preserves the existing pair, cycle one supplies two new

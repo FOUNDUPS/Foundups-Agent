@@ -116,12 +116,30 @@ def _rank_rows(
     ]
 
 
+def _query_rows(
+    collection: Any, embedding: Any, limit: int,
+    metadata_where: Mapping[str, object] | None,
+) -> tuple[list, list, list]:
+    """Query one bounded vector window with an optional exact metadata filter."""
+
+    query_args: dict[str, Any] = {
+        "query_embeddings": [embedding], "n_results": limit,
+    }
+    if metadata_where is not None:
+        query_args["where"] = dict(metadata_where)
+    results = collection.query(**query_args)
+    return tuple(results.get(name, [[]])[0] for name in (
+        "documents", "metadatas", "distances"
+    ))
+
+
 def search_collection(
     holo: Any, collection: Any, query: str, limit: int, kind: str,
     doc_type_filter: str, module_path_hint: str | None,
     ops: CollectionSearchOps,
     module_context_hits: Iterable[Mapping[str, object]] = (),
     module_registry_hits: Iterable[Mapping[str, object]] | None = None,
+    metadata_where: Mapping[str, object] | None = None,
 ) -> list[dict[str, Any]]:
     """Search one collection with strict-owner and truthful fallback behavior."""
     if limit <= 0:
@@ -147,10 +165,7 @@ def search_collection(
             "Encoding timed out - falling back to lexical search", "WARN"
         )
         return ops.lexical_search(holo, collection, query, limit, kind, doc_type_filter)
-    results = collection.query(query_embeddings=[embedding], n_results=limit)
-    rows = tuple(results.get(name, [[]])[0] for name in (
-        "documents", "metadatas", "distances"
-    ))
+    rows = _query_rows(collection, embedding, limit, metadata_where)
     if kind == "docs" and not module_path_hint:
         intent_hits = (
             module_registry_hits

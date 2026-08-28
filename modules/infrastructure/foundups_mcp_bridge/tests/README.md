@@ -1,5 +1,13 @@
 # foundups_mcp_bridge Tests
 
+## Current-truth global response ordering
+
+`test_holo_query_service_edges.py` proves broad current-status queries preserve
+current contracts and implementation over higher-similarity historical audits,
+while historical/baseline queries preserve semantic ordering. It also proves
+case-variant repository paths deduplicate globally. These are pure response
+tests with synthetic hits; they do not query or mutate HoloIndex.
+
 ## Inert dependency-runtime closure
 
 - `test_reddog_holoindex_dependency_runtime.py` proves content addressing,
@@ -68,6 +76,9 @@ Exact opt-in evidence on this slice:
   a parallel policy. The focused isolated shard is **28 passed**.
 - `scripts/tests/test_reddog_holoindex_owner_query_once.py` proves cycle one
   reaches both one-shot attempts and its top-level/receipt evidence.
+- Activation currently invokes the one-shot default cycle for candidate and
+  post-commit proofs. A disjoint post-completion cycle is recorded reliability
+  debt, not implied by the selector's standalone cycle-one coverage.
 - Existing one-shot, bootstrap, and candidate-acceptance suites prove the new
   environment and port seams preserve strict route, freshness, cleanup, and
   isolated-candidate behavior. Final delta result: **125 passed**; the owner
@@ -331,7 +342,9 @@ Exact opt-in evidence on this slice:
   public-container normalization to the stable error type, and recursive NFC
   enforcement without silent normalization.
 - The path-free adapter covers the Holo read subset: `name`, `metadata`,
-  `count()`, paged/ID/path `get()`, and nested `query()`. Squared-L2,
+  `count()`, paged/ID/path `get()`, and nested `query()`. Query filtering is
+  limited to exact-string `record_kind` equality and is exercised through the
+  real Holo collection-search boundary; unsupported shapes reject. Squared-L2,
   `1-cosine`, and `1-inner-product` distances, stable ID tie ordering, exact
   include shapes, stable float64 computation for admitted float32 extremes,
   explicit zero-vector cosine behavior, and workspace-bounded dynamic vector

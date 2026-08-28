@@ -74,6 +74,47 @@ def test_query_is_deterministic_for_ties_and_multiple_queries() -> None:
     assert result["distances"][1] == pytest.approx([0.0, 2.0])
 
 
+def test_holo_summary_query_uses_governed_exact_metadata_filter() -> None:
+    from holo_index.core.collection_search import _query_rows
+    from modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_codec import (
+        encode_collection_snapshot,
+        load_collection_snapshot,
+    )
+    from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_snapshot_codec import (
+        _identity,
+    )
+
+    encoded = encode_collection_snapshot(
+        collection_name="navigation_docs",
+        rows=[
+            {
+                "id": "section",
+                "document": "current section",
+                "metadata": {"path": "holo_index/README.md", "record_kind": "document_section"},
+            },
+            {
+                "id": "summary",
+                "document": "current summary",
+                "metadata": {"path": "holo_index/INTERFACE.md", "record_kind": "document_summary"},
+            },
+        ],
+        embeddings=[[1.0, 0.0], [0.0, 1.0]], metric="l2",
+        embedding_identity=_identity(),
+    )
+    collection = load_collection_snapshot(
+        encoded.manifest, encoded.rows, encoded.vectors,
+    )
+
+    documents, metadatas, distances = _query_rows(
+        collection, [1.0, 0.0], 2,
+        {"record_kind": "document_summary"},
+    )
+
+    assert documents == ["current summary"]
+    assert metadatas[0]["record_kind"] == "document_summary"
+    assert distances == pytest.approx([2.0])
+
+
 def test_get_omits_unknown_ids_without_mutating_internal_rows() -> None:
     collection = _collection()
     assert collection.get(ids=["missing"], include=[]) == {"ids": []}
@@ -98,6 +139,14 @@ def test_get_omits_unknown_ids_without_mutating_internal_rows() -> None:
         lambda c: c.query(query_embeddings=[[float("nan"), 0.0]], n_results=1),
         lambda c: c.query(query_embeddings=[[1.0, 0.0]], n_results=0),
         lambda c: c.query(query_embeddings=[[1.0, 0.0]], n_results=1, include=["uris"]),
+        lambda c: c.query(
+            query_embeddings=[[1.0, 0.0]], n_results=1,
+            where={"path": "a.py"},
+        ),
+        lambda c: c.query(
+            query_embeddings=[[1.0, 0.0]], n_results=1,
+            where={"record_kind": 7},
+        ),
     ],
 )
 def test_adapter_rejects_unsupported_or_malformed_reads(call) -> None:

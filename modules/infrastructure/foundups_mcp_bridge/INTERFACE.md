@@ -163,8 +163,8 @@ mappings, and digest-shaped embedding fingerprints.
 Unknown or nested evidence fields reject the complete response.
 
 `flatten_hits(result, limit, query=...)` returns no hits when `limit <= 0`.
-For a positive limit and one explicit module, it reserves exact module-root
-README/INTERFACE evidence before filling remaining slots by global score.
+For one explicit module it reserves exact root README/INTERFACE evidence. Broad current-status queries preserve current-contract and implementation authority over historical/vision records across typed buckets.
+Exact PR/slice and historical queries retain score order; paths deduplicate by normalized case. This policy neither proves prose nor promotes a ranker.
 
 ### FoundUpsMCPBridge (local/internal only)
 
@@ -195,6 +195,10 @@ the verified replica generation. It
 supports only the Chroma-shaped read subset used by HoloIndex. Backend creation
 fails closed when the snapshot generation differs from the active replica;
 query startup/search never starts Chroma or opens replica SQLite/HNSW files.
+`query(where=...)` supports only exact string equality for `record_kind`; all
+other query-filter shapes fail closed. This bounded filter is part of the
+twelve-module retrieval-ranker identity and supplies the current-truth summary
+stream without admitting a general metadata query language.
 The owner performs one complete replica admission, then uses the retained
 bounded proof above before and after semantic retrieval. Runtime proof never
 substitutes for initial complete narrow-manifest admission.
@@ -212,10 +216,14 @@ Consumers evaluating a candidate must additionally compare this value with
 the digest of the clean authority candidate; repository identity alone does
 not prove which ranker bytes executed the query.
 
-This value binds source only. A future separately sealed
-`runtime_environment_digest` must bind the owner executable, ABI/platform,
-exact dependency/build identities, and deterministic execution knobs before
-independent A-grade evaluation is reproducible.
+The separately emitted `runtime_environment_digest` now binds the source
+closure, owner executable, ABI/platform, distribution build-record metadata,
+replica/model identities, declared runtime knobs, and required environment
+checks without exposing paths or secrets. Its
+`runtime_environment_exact_closure_verified` flag remains false because exact
+installed-distribution payload bytes and all deterministic runtime effects are
+not yet proven. Independent A-grade evaluation is therefore not reproducible
+at exact runtime-byte closure yet.
 
 Query requires `query` and `expected_repo_head_sha`; `limit` and
 `doc_type_filter` are optional. Success requires semantic retrieval, exact

@@ -9,6 +9,7 @@ import time
 from typing import Any, Mapping, Sequence
 
 from holo_index.query_result_contract import validate_search_result
+from holo_index.document_truth import current_truth_rank
 from holo_index.retrieval_runtime_binding import (
     retrieval_ranker_binding,
     runtime_environment_binding,
@@ -115,7 +116,10 @@ def flatten_hits(
             normalized = dict(item)
             normalized.setdefault("type", kind)
             candidates.append(
-                (_hit_score(item), bucket_index, item_index, identity, normalized)
+                (
+                    _hit_score(item) + 10.0 * current_truth_rank(query, normalized),
+                    bucket_index, item_index, identity, normalized,
+                )
             )
     candidates.sort(key=lambda value: (-value[0], value[1], value[2], value[3]))
     metadata = result.get("metadata")
@@ -192,9 +196,10 @@ def _deduplicated_hits(
     hits: list[Mapping[str, Any]] = []
     seen: set[str] = set()
     for _score, _bucket, _position, identity, normalized in candidates:
-        if identity in seen:
+        normalized_identity = identity.replace("\\", "/").casefold()
+        if normalized_identity in seen:
             continue
-        seen.add(identity)
+        seen.add(normalized_identity)
         hits.append(normalized)
         if len(hits) >= limit:
             break

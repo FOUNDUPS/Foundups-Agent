@@ -1,5 +1,25 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-28] Current-truth indexing and ranking falsifiers
+
+- Added classification and query-intent counterexamples, bounded current-docs
+  oversampling, historical no-oversampling, temporal/exact-artifact bypass,
+  authority-before-limit, and a filtered diversity-preserving summary stream.
+- Extended the fake-collection indexer suite to prove canonical current Holo
+  contracts receive only exact path-bound current section records while stale
+  status/history headings reject. Historical audits remain one summary record.
+  Added an exact WSP_62 guard for the reduced parent and every
+  extracted function.
+- Bridge response tests prove current contracts and implementation outrank a
+  higher-similarity old audit only for broad current-status queries; historical
+  queries keep semantic score order. No live index, model, route, owner,
+  reindex, maintenance, or promotion is used. (WSP 05/06/34/50/62/97)
+- Combined current-truth, Tier-0, runtime-binding, AutoResearch,
+  bridge-response, and adjacent search matrix: **231 passed / 1 optional skip /
+  6 environment-bound owner tests deselected** using O:-local temporary state.
+  The registry is current at 1,608 tests / 268 quarantines; the independent
+  backend generator is 8 passed at 1,365 files.
+
 ## [2026-08-28] Owner acquisition cycle receipt integrity
 
 - Added direct receipt coverage for exact owner attempts, retry flag, retry

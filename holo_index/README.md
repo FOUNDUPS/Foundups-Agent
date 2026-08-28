@@ -1,5 +1,30 @@
 # HoloIndex - Brain Surgeon Level Code Intelligence System
 
+## Current operational truth (2026-08-28)
+
+Governed local retrieval is usable at exact main
+`5ca0c0aaa5299e6f2d3b409368e54e99fd06240c`. The active immutable replica is
+generation `sha256:a913b641...` with freshness receipt
+`sha256:f9382c4d...`. A fresh governed owner query returned `CURRENT`, no index
+gap, no reindex, and first-attempt success; a later controller fast-path also
+returned `OWNER_READY` without starting maintenance or query runtimes.
+
+HoloIndex is not yet A-grade and retrieval RSI is not operational. The latest
+clean-authority public benchmark passed Recall@8 at `1.0` but failed the fixed
+`0.95` floors at MRR `0.91666667` and nDCG@8 `0.93198851`. All six benchmark
+queries reported `runtime_environment_exact_closure_verified=false`.
+`retrieval_autoresearch.py` evaluates pinned candidates only: there is no live
+retrieval proposer, administered independent evaluator, signed admission,
+shadow canary, promotion, ranker rollback, or candidate-bound production
+outcome learner.
+
+The current-truth retrieval candidate on this branch admits canonical Holo
+contracts, indexes their heading-scoped status sections, classifies current
+contracts separately from implementation, vision, and history, and preserves
+that authority through owner-level global ranking. It is not active evidence
+until merged, regenerated at exact main, activated, and remeasured. Historical
+evidence below remains useful only for its named commit and generation.
+
 ## Closed command-import boundary
 
 Bounded command modules such as `holo_index.cli.commands.bundle_json` load
@@ -27,7 +52,7 @@ path never starts Chroma or opens SQLite/HNSW; its snapshot generation must
 equal the verified replica generation. Maintenance retains the write-capable
 canonical Chroma path.
 
-Historical exact-commit maintenance/replica evidence passed at
+Earlier exact-commit maintenance/replica evidence passed at
 `db44f8be3374785341d1c237ec61da774444eb14`, generation
 `sha256:b5a138e0...`: the real OpenClaw/AgentDB maintenance task completed, a
 fresh governed owner query returned CURRENT/no-gap/no-reindex in 3.812 seconds,
@@ -103,14 +128,14 @@ bytes, and 168 exact `modules/<domain>/<module>` roots. The final reproducible
 paired probe measured 122.645 ms cold and 42.043 ms warm. Hard limits are 5
 seconds, 1 MiB Git output, and 4,096 module roots.
 
-## [ALERT] REVOLUTIONARY EVOLUTION (2025-10-17): WSP 97 System Execution Prompting Protocol
+## Historical 2025 WSP 97 design claim
 
-HoloIndex has evolved from module finder to **brain surgeon level code intelligence** with **baked-in WSP 97 execution prompting**:
+The following was the 2025 design framing, not a current runtime acceptance claim:
 - **Before**: Find modules -> "Here's the file"
 - **After**: Function-level indexing -> "Lines 256-276: check_video_is_live" + Mermaid flow analysis + inefficiency detection
 - **WSP 97**: **EXECUTION/ACTIVATION PROTOCOL** - Baked-in agentic execution methodology for building Rubik Cubes (MVP DAEs)
 
-### Core Mantra (Baked into All Agents)
+### Historical core mantra
 ```
 HoloIndex -> Research -> Hard Think -> First Principles -> Build -> Follow WSP
 ```
@@ -120,14 +145,14 @@ HoloIndex -> Research -> Hard Think -> First Principles -> Build -> Follow WSP
 **Rubik Context**: Rubik = MVP DAE. Currently "Cubes" (modules) need Qwen/Gemma enhancement to become fully agentic PWAs connecting to blockchains via FoundUp MCPs
 **Holo as Toolkit**: HoloIndex provides the intelligence toolkit for Rubik Cube development and orchestration
 
-## [ALERT] PREVIOUS REVOLUTIONARY EVOLUTION (2025-10-13)
+## Historical 2025 CodeIndex design claim
 
-HoloIndex has evolved from module finder to **brain surgeon level code intelligence**:
+This earlier goal describes intended CodeIndex behavior:
 - **Before**: Find modules -> "Here's the file"
 - **After**: Function-level indexing -> "Lines 256-276: check_video_is_live" + Mermaid flow analysis + inefficiency detection
 
-## [AI] CODE INDEX CAPABILITIES (WSP 92)
-- **Function-Level Indexing**: Every function mapped with line numbers and complexity analysis
+## [AI] CodeIndex capability targets (WSP 92)
+- **Function-Level Indexing**: Indexed functions may carry line and complexity metadata
 - **Mermaid Flow Diagrams**: Visual code flow for each module showing logic paths
 - **Inefficiency Detection**: Identifies duplicate code, overly complex functions, logic flow issues
 - **DAE Cube Mapping**: Maps modules to DAE cubes with boundary awareness
@@ -191,11 +216,11 @@ for future autonomous code intelligence:
 - **HoloIndex**: Semantic code discovery (WSP 87)
 - **HoloDAE**: Observation and proposal surfaces around retrieval
 
-Current production truth is narrower than the historical vision. Base-bound
-exact-commit freshness repair is validated; exact-current-remote-main replay
-remains a post-merge gate, and retrieval-quality RSI is not operational. The audited
-`b5b4de05` generation passed integrity verification and Recall@8, yet failed
-the public quality policy at MRR `0.9167` and nDCG@8 `0.8718`. No live loop
+Current production truth is narrower than the historical vision. Exact main
+`5ca0c0aa...` is active at generation `sha256:a913b641...`, and
+retrieval-quality RSI is not operational. The latest clean-authority public
+run passed Recall@8 but failed the policy at MRR `0.9167` and nDCG@8 `0.9320`.
+No live loop
 currently edits the production ranker, passes an independent sealed corpus,
 and promotes or rolls back that candidate.
 
@@ -352,7 +377,7 @@ the owner.
 - **History Gating**: Output history logging can be limited with `HOLO_OUTPUT_HISTORY_MODE=verbose|errors|signals` and rotated via `HOLO_OUTPUT_HISTORY_MAX_MB` (default 10MB).
 - **Intent Verbosity Caps**: OutputComposer now enforces per-intent limits (minimal/balanced/detailed) to keep results only to what 0102 needs.
 - **Bundle Fastpath**: `--bundle-json` with `HOLO_SKIP_MODEL=1` now includes path-based code hits when `--bundle-module-hint` is provided.
-## Revolutionary Architecture
+## Historical recursive-improvement architecture
 
 > **Historical vision, not current production truth.** The implementation
 > below contains useful observation and proposal components, but stored logs,
@@ -366,7 +391,10 @@ the owner.
 **[TARGET] Decision Trace**: selected Holo interactions may be logged as inputs
 to separately governed evaluation; logs do not change production behavior.
 
-When 0102 runs a search, HoloDAE executes current features (health checks, vibecoding, etc.) and logs its complete decision-making process internally:
+Historical advisor paths attempted health/coaching analysis and internal
+decision logging. The governed owner query does not execute that complete
+stack, and no claim of complete logging is accepted without a path-specific
+test.
 
 #### Decision-Trace Features (Logged for Evaluation):
 - [OK] **Decision Logging**: Every analysis choice with reasoning
@@ -377,20 +405,22 @@ When 0102 runs a search, HoloDAE executes current features (health checks, vibec
   ranker improvement, promotion, canary, and rollback remain unproven
 - [OK] **012 Monitoring**: Logs visible for system tweaking and oversight
 
-#### Current HoloDAE Features (Executed Automatically):
+#### Historical HoloDAE feature claims (verify before relying on them):
 - [OK] **Health Checks**: Automatic dependency audits and module analysis
 - [OK] **Vibecoding Detection**: Pattern analysis for behavioral coaching
 - [OK] **File Size Analysis**: Architectural health monitoring
 - [OK] **Module Analysis**: System-wide dependency checking
-- [OK] **Real-time Execution**: All features run based on query context
+- [PARTIAL] **Contextual Execution**: feature activation depends on the query
+  path; governed owner retrieval does not run the complete advisor stack
 
 ### [SEARCH] Enhanced Search Intelligence
 - **Vector Database**: ChromaDB for semantic similarity
 - **Video Index Safety**: Subprocess health probe + safe batch indexing to avoid native segfaults
 - **Dual Search**: Code + WSP documentation
 - **NAVIGATION.py Integration**: Problem->Solution mapping
-- **Adaptive Learning**: Query enhancement and pattern learning
-- **Automatic Health Checks**: Every search triggers module dependency analysis
+- **Adaptive Learning prototype**: isolated query/response optimization code;
+  CLI integration and production ranker authority are disabled
+- **Optional Health Checks**: advisor-enabled paths can request dependency analysis
 - **Ghost Hit Filtering**: Similarity threshold (`HOLO_MIN_SIMILARITY=0.35`) eliminates low-relevance results near vector centroid
 - **Robust Deduplication**: Path normalization (Windows/Unix, absolute/relative) prevents duplicate hits
 - **Batched Symbol Indexing**: ChromaDB writes chunked at 5000 entries to prevent overflow on large codebases
@@ -426,7 +456,8 @@ Principles:
 - **NAVIGATION is minimal**: entry points only, not every new function.
 - **Complements grep/glob**: semantic/intent queries land here; `grep`/`rg` remain authoritative for exact-text and exact-symbol lookups; `glob` remains authoritative for known-path queries.
 - **rg is a safety net**: an internal exact-match fallback inside HoloIndex (via `_rg_symbol_search`), not the primary path of HoloIndex itself.
-- **Index once, search forever**: use symbol indexing to keep memory fresh.
+- **Generation-bound refresh**: source changes require governed maintenance,
+  immutable snapshot publication, exact-main activation, and freshness proof.
 
 Symbol indexing (module-scoped):
 ```
@@ -455,13 +486,14 @@ python holo_index.py --index-all
 - **LLM Integration**: Qwen-Coder 1.5B for code understanding
 - **WSP Master**: Comprehensive protocol guidance (95+ protocols)
 - **Pattern Coach**: Behavioral pattern detection and coaching
-- **HoloDAE Intelligence**: Real-time code health monitoring
+- **HoloDAE monitoring target**: prototype health/coach paths exist; governed
+  owner retrieval does not provide continuous real-time code-health authority
 
 ### 3. 0102 Consciousness Guidance
 - **0102-to-0102 Prompts**: Violation-aware compliance prompts written by 0102 for 0102
 - **Module-Specific WSP Guidance**: Contextual protocols based on detected module
 - **Violation Prevention**: Reminders based on WSP_MODULE_VIOLATIONS.md history
-- **Deep Think Enforcement**: Prevents vibecoding through consciousness prompts
+- **Deep Think prompts**: advisory reminders; they do not enforce behavior
 - **Core WSP Questions**: "Does this need to exist?", "Can I afford it?", "Can I live without it?"
 - **DAE Cube Organizer**: `--init-dae` command for alignment and structure mapping
 
@@ -529,17 +561,17 @@ python holo_index.py --code-index-report modules/communication/livechat
 # Reports saved to: holo_index/reports/CodeIndex_Report_*.md
 ```
 
-### [AI] HOLODAE INTELLIGENCE & ANALYSIS (8 functions):
+### [AI] Historical HoloDAE intelligence/analysis surfaces (verify each path):
 
-**[SEARCH] Health Analysis (Automatic)**
-- Triggered automatically on all HoloIndex searches
-- Performs dependency audits and module health checks
+**[SEARCH] Health Analysis (legacy advisor path)**
+- Not triggered by the governed owner query
+- Prototype paths may perform dependency and module checks when explicitly run
 
-**[RULER] File Size Analysis (Automatic)**
+**[RULER] File Size Analysis (prototype)**
 - Monitors architectural health and identifies large files
 - Provides refactoring recommendations for files >1000 lines
 
-**[U+1F3D7]️ Module Analysis (Automatic)**
+**[U+1F3D7]️ Module Analysis (prototype)**
 - System-wide dependency checking and structure validation
 - Identifies orphaned files and connection opportunities
 
@@ -556,9 +588,9 @@ tail -f holo_index/logs/holodae_activity.log
 python main.py  # Select option 2 -> 25
 ```
 
-**[U+1F3E5] Background Health Scans**
-- Continuous system monitoring when HoloDAE is active
-- Automatic health checks every few minutes
+**[U+1F3E5] Background Health Scans (historical claim)**
+- Continuous production monitoring has not been re-verified
+- No cadence is part of the governed retrieval contract
 
 **[UP] Effectiveness Scoring**
 - AI evaluates its own performance (0.0-1.0 scores)
@@ -578,8 +610,8 @@ python holo_index.py --wsp88
 ```
 
 **[NOTE] Compliance Checking**
-- Automatic WSP protocol validation during searches
-- Violation-aware guidance and recommendations
+- Optional advisor/diagnostic paths can produce WSP guidance
+- Governed semantic owner searches do not automatically certify compliance
 
 **[BOOKS] Documentation Audit**
 ```bash
@@ -734,8 +766,8 @@ HoloIndex uses a gamification system to encourage quality behaviors:
 - **Variants**: Different reward multipliers (currently variant A)
 
 ## Performance
-- **Governed semantic query**: latest public p95 approximately 4.25 seconds;
-  the six-case cold benchmark took approximately 206 seconds
+- **Governed semantic query**: latest public p95 approximately 4.78 seconds;
+  the six-case clean-authority benchmark took approximately 101 seconds
 - **Historical targets**: <200ms dual search and <500ms cached LLM inference
   are not current acceptance evidence
 - **Index Size**: ~500MB for full codebase
