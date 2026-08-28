@@ -1,5 +1,35 @@
 # RedDog ModLog
 
+## 2026-08-29 - Inert runtime-composition boundary (0.4.138)
+
+- Added a descriptor-only backend composition that independently reproves and
+  binds the exact base/dependency generations, their complete identities and
+  counts, the exact `python.exe` member, and fixed isolated dependency topology.
+  Neither large payload is copied and no private path crosses the public binding.
+- Focused composition coverage is **24 passed / 1 capability skip**; the
+  bounded non-scale adjacent base/dependency/environment/process/sealed
+  selection is **159 passed / 6 skips**. The VSIX gains no composition,
+  execution, owner, route, signer, ACL,
+  maintenance, or activation authority.
+- ABI/native-loader, deterministic/pre-import, signature, empirical write
+  denial, route-v2, exact closure, A-grade, and retrieval RSI remain false or
+  blocked. (WSP 00/15/22/50/62/84/87/97)
+- Backend identity remains `fccaca219ac3...0713be` / 1,365 files; the
+  18-shard contract is `0362913b7a2b...b4d05` / 6,942 lines / 492 assertions;
+  registry is 1,618/268. The deterministic package is 67 files / 949,053 bytes
+  at `a655ffe69f1f...f4ea`.
+- The independently inspected `O:\RedDog-Releases\reddog-0.4.138.vsix` is
+  276,441 bytes at `sha256:f68a9cae2b1c...c1c47`, with 69 safe unique ZIP
+  entries, 67 exact source members, and zero encryption, alias, unsafe-path,
+  sensitive-name, source-byte-mismatch, or credential-value-pattern findings.
+- The separate O:-local production gate materialized the 72,261-file /
+  1,853,891,335-byte dependency generation, published composition
+  `sha256:44e21db7...`, and passed the fresh repaired reverse reproof in 579.54
+  seconds with its descriptor unchanged. It remains outside the VSIX/query path.
+- Fast 14-member, O:-venv conversation (32 Python passes / 15 shared JS
+  vectors), contract 3-member, package, and four-group exhaustive release gates
+  pass. The exhaustive wall is 170.331 seconds with no timeout.
+
 ## 2026-08-29 - Inert base-runtime backend binding (0.4.137)
 
 - Rebound the authenticated backend closure after adding the inert exact

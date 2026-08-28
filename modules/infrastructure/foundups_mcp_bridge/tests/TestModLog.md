@@ -1,5 +1,28 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Inert runtime-composition falsification
+
+- Added pure schema and end-to-end adversarial coverage for a descriptor-only
+  base/dependency composition generation: exact reuse, independent component
+  reproof, interpreter member binding, substitution, stale/tampered component
+  bytes/contracts, topology aliases, overlapping stores, publication-window
+  mutation, quarantine, and path-free public evidence.
+- Hostile audit falsified the initial sequential `B -> D -> interpreter` proof
+  by mutating a non-interpreter base member during dependency verification.
+  The repaired `B1 -> D1 -> D2 -> B2` verifier requires exact binding equality;
+  one-shot base and dependency mutation probes now fail closed. This remains a
+  bounded cross-pass proof, not write denial or ABA resistance.
+- Focused result is 24 passed / 1 capability skip. The explicit adjacent base,
+  dependency, runtime-environment, process-image, sealed-runtime, and
+  composition non-scale selection is 159 passed / 6 expected capability skips. All temp
+  roots were explicitly O:-local; no live owner, route, replica, Holo, ACL,
+  queue, or maintenance state was touched.
+- Production evidence is 72,261 dependency files / 11,639 directories /
+  1,853,891,335 bytes materialized in 2,856.73 seconds, followed by a 588.32
+  second descriptor-only composition. The fresh repaired verifier passed in
+  579.54 seconds, retained descriptor `sha256:cbbfe268...` unchanged, and kept
+  every activation-grade claim false.
+
 ## [2026-08-29] Inert base-runtime closure falsification
 
 - Added 39 strict contract tests and adversarial materialization/edge coverage

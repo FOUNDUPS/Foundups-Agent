@@ -1,5 +1,31 @@
 # RedDog Extension Tests
 
+## 0.4.138 inert exact runtime composition
+
+- The release changes no extension authority. It binds versioned documentation
+  and contract fixtures to the backend's descriptor-only exact base/dependency
+  composition, which remains outside the executable VSIX closure.
+- Hostile review falsified the first sequential component proof. The repaired
+  `B1 -> D1 -> D2 -> B2` full reproof requires exact binding equality; focused
+  composition coverage is 24 passed / 1 capability skip and the bounded
+  non-scale adjacent selection is 159 passed / 6 expected skips.
+- Backend is `fccaca219ac3...0713be` / 1,365 files; contract is
+  `0362913b7a2b...b4d05` / 18 shards / 6,942 lines / 492 assertions; registry
+  is 1,618/268. The deterministic package is 67 files / 949,053 bytes at
+  `a655ffe69f1f...f4ea`.
+- The inspected `O:\RedDog-Releases\reddog-0.4.138.vsix` is 276,441 bytes at
+  `sha256:f68a9cae2b1c...c1c47`: 69 safe unique entries, 67 exact source
+  members, and zero encryption, symlink, unsafe-path, sensitive-name,
+  source-byte-mismatch, or credential-value-pattern findings.
+- Reverse reproof is not ABA resistance or write denial. Activation, native
+  loader closure, signing, route-v2, A-grade, and retrieval RSI remain open.
+- Separate O:-local production evidence materialized 72,261 dependency files /
+  1,853,891,335 bytes, published composition `sha256:44e21db7...`, and passed a
+  fresh repaired-verifier reproof in 579.54 seconds with no descriptor change.
+- Fast 14-member, O:-venv conversation (32 Python / 15 shared JavaScript
+  vectors), contract 3-member, package, and all four exhaustive release groups
+  pass; exhaustive duration is 170.331 seconds with no timeout.
+
 ## 0.4.137 inert base-runtime backend binding
 
 - The release changes no extension authority. It advances the authenticated

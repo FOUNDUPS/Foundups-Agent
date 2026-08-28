@@ -3,11 +3,17 @@
 ## Current operational truth (2026-08-29)
 
 Live authority is a fresh governed owner receipt, not prose. Exact main
-`09e98fff04b4d94544d97a1dd7b795785d13db2e` was activated at generation
-`sha256:7869f238...` and freshness receipt `sha256:fd0a0005...`. A fresh owner
+`9c27cd03953bb4573c0a1091f01af649434c872a` was activated at generation
+`sha256:4fdfbbb1...` and freshness receipt `sha256:50cff0ab...`. A fresh owner
 query returned `CURRENT`, no gap, no reindex, first attempt; full verification
-retained 33 artifacts / 222,719,702 bytes. These values are as-of evidence,
+retained 33 artifacts / 222,979,317 bytes. These values are as-of evidence,
 not authority for a later commit.
+
+The exact base and dependency payloads now also have an inert, path-free
+composition contract in the MCP bridge. It prevents component mix-and-match
+and binds the exact interpreter member without recopying payloads. It is not
+active: ABI/native-loader closure, deterministic effects, pre-import safety,
+signing, write denial, route-v2, A-grade, and retrieval RSI remain open.
 
 HoloIndex is not yet A-grade and retrieval RSI is not operational. The latest
 clean-authority public benchmark passed Recall@8 at `1.0` but failed the fixed

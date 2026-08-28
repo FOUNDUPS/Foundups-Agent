@@ -1,5 +1,32 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Inert exact runtime-composition generation
+
+- Added WSP_62-bounded contract, verifier, and materializer siblings that bind
+  one exact base generation to one exact dependency generation without copying
+  either payload. Canonical identity includes all component descriptor,
+  inventory, and tree digests/counts plus the exact interpreter member and
+  isolated launch topology.
+- Reused the existing full-byte verifiers, isolated-store proof, confined JSON,
+  machine-wide operation lock, no-replace publication, and owned quarantine.
+  Component substitution, stale/tampered payloads or contracts, aliases,
+  overlapping stores, mutation across publication, and public path leakage fail
+  closed.
+- Hostile WSP_97 review found that the first sequential verifier result could
+  become stale while the second component was checked. Canonical verification
+  now uses exact-equality `B1 -> D1 -> D2 -> B2` full reproof. Injected
+  post-base and post-dependency mutations fail closed; this does not claim ABA
+  resistance or durable write denial.
+- Focused contract passed 24 tests / 1 capability skip; the bounded non-scale
+  adjacent base, dependency, environment, process-image, and sealed-runtime
+  matrix passed 159 / 6 skips. ABI/native-loader/determinism/pre-import/signature/write-denial/
+  activation/exact-closure truth remains false. (WSP 00/15/22/50/62/84/87/97)
+- Production dependency materialization passed 72,261 files / 11,639
+  directories / 1,853,891,335 bytes in 2,856.73 seconds. Composition generation
+  `sha256:44e21db7...` published in 588.32 seconds; a fresh repaired-verifier
+  process accepted it in 579.54 seconds with descriptor `sha256:cbbfe268...`
+  unchanged and all activation-grade flags false.
+
 ## 2026-08-29 - Inert exact Windows Python base-runtime generation
 
 - Added strict inventory/descriptor, materializer, and full-byte verifier

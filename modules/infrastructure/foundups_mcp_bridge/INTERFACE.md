@@ -24,6 +24,23 @@ does not require DELETE authority. Native-loader closure, deterministic
 effects, signature, write denial, activation eligibility, and exact runtime
 closure remain false. The API never launches Python or changes a route/owner.
 
+### `materialize_runtime_composition(...) -> RuntimeCompositionMaterializationResult`
+
+Creates or fully reproves one descriptor-only, content-addressed, inert pairing
+of an exact Windows base-runtime generation and exact dependency generation.
+It reruns both existing full-byte verifiers in bounded reverse order
+(`B1 -> D1 -> D2 -> B2`), requires exact full-binding equality, and binds all
+component identities and counts plus the exact `python.exe` inventory
+row/content and the separate `site-packages` launch role, and publishes through
+confined canonical JSON,
+per-store serialization, no-replace directory transition, and owned quarantine.
+The public binding is path-free. No payload is recopied. ABI/native-loader,
+determinism, pre-import bootstrap, signing, write denial, activation, and exact
+closure are schema-forced false; the API never spawns an owner or changes a
+route, ACL, queue, replica, or maintenance state.
+The reverse reproof detects one-shot cross-pass mutation but is not an ABA,
+immutability, or durable write-denial proof.
+
 ### `materialize_dependency_runtime(...) -> DependencyRuntimeMaterializationResult`
 
 Creates/reproves one bounded, content-addressed, inert `site-packages` generation.
