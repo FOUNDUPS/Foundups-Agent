@@ -1,5 +1,27 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-28] Module-intent false-container falsifiers
+
+- Added synthetic and real-repository proof that module depth is insufficient:
+  telemetry feedback and documentation containers are excluded, while direct
+  `src/tests` scaffolds and regular root README/INTERFACE contracts qualify.
+- Added adversarial candidate-tree batch coverage for nonzero/oversize output,
+  wrong object IDs, malformed headers/sizes/modes, invalid UTF-8 and names,
+  case-fold duplicates, truncated raw IDs, extra bytes, and symlink contracts.
+- Added hostile inherited `GIT_DIR`, work-tree, object-directory, alternates,
+  and replace-ref variables; the runner must strip them, select trusted Git,
+  and force no-replacement/no-optional-lock execution. Split binary fixtures
+  and evidence projection tests so all files/functions remain below WSP_62.
+- Module-intent plus Tier-0 focused result: **109 passed**. The production
+  resident still contains exact-main bytes until merge/restart; no test starts
+  or stops it, touches the replica, or performs maintenance. (WSP
+  05/06/15/34/50/62/87/97)
+- Owner-script, immutable query-service, machine-spec, Tier-0, and both
+  module-intent suites pass **334/334** in 4.94 seconds.
+- The canonical registry is current at **1,611 tests / 267 quarantines**; the
+  extracted evidence suite is collectable and the snapshot suite is no longer
+  quarantined as operational local-function work.
+
 ## [2026-08-28] Producer-ranked owner merge falsifier
 
 - Added a generic counterexample in which a collection-local exact-symbol

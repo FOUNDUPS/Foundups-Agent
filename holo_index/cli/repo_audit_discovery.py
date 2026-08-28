@@ -483,6 +483,11 @@ def _git_command(root: Path, args: Sequence[str]) -> list[str]:
     ] if git_executable else [])
 
 
+# Shared read-only Git authority for generation-pinned Holo consumers.
+git_read_environment = _git_environment
+git_read_command = _git_command
+
+
 def _remaining(deadline: float) -> float:
     return max(0.0, deadline - time.monotonic())
 

@@ -2,13 +2,12 @@
 
 ## Current operational truth (2026-08-28)
 
-Live authority is the receipt from a fresh governed owner query, not a commit
-or generation copied into this document. At the start of the current ranking
-transaction, exact main `1dc016fc3223244cfc37efd2a4fea4022118c342`
-was independently accepted at generation `sha256:ba5119f...` and freshness
-receipt `sha256:5e1164d6...`: `CURRENT`, no index gap, no reindex, first
-attempt. The completed post-merge transaction was reconciled as `OWNER_READY`
-without starting a runtime or repeating maintenance.
+Live authority is a fresh governed owner receipt, not prose. Exact main
+`18cd53cc63d771b8636b7f73d7674d4f325ba4b0` was activated at generation
+`sha256:e00c0b3a...` and freshness receipt `sha256:7ace827a...`. A fresh owner
+query returned `CURRENT`, no gap, no reindex, first attempt; full verification
+retained 33 artifacts / 222,647,517 bytes. These values are as-of evidence,
+not authority for a later commit.
 
 HoloIndex is not yet A-grade and retrieval RSI is not operational. The latest
 clean-authority public benchmark passed Recall@8 at `1.0` but failed the fixed
@@ -19,13 +18,12 @@ retrieval proposer, administered independent evaluator, signed admission,
 shadow canary, promotion, ranker rollback, or candidate-bound production
 outcome learner.
 
-Canonical Holo contracts and bounded heading-scoped status sections are active
-in that generation. The ranked-stream slice preserves each producer-ranked
-typed result stream while merging globally, instead of silently reordering a
-collection's exact-symbol winner by raw similarity. It also restores the
-missing HoloDAE README/INTERFACE Tier-0 pair. Operational acceptance of either
-change is owned only by exact-main regeneration, activation, and remeasurement;
-this prose is never promotion evidence.
+The current sprint exposed a separate deterministic false-module defect: the
+generic token `feedback` selected `modules/telemetry/feedback`, which is a data
+container without module contracts, and strict Tier-0 correctly failed closed.
+The candidate catalog admits only roots proved by direct `src/tests` trees or
+root README/INTERFACE blobs. Merge, exact-main refresh, and replay of the
+original query remain required; this prose is never promotion evidence.
 
 ## Closed command-import boundary
 
@@ -87,20 +85,22 @@ promotion/rollback learning remain required for retrieval RSI.
 Vector collection orchestration is split into `core/collection_search.py`;
 `core/search_engine.py` retains the compatible `_search_collection` entry
 point. Strict and interactive semantic searches resolve basename intent from
-`module_intent_snapshot.py`, a bounded, shell-free, HEAD-pinned `git ls-tree`
-module catalog cached by resolved repository root and HEAD. The catalog is
+`module_intent_snapshot.py`, a bounded, shell-free, HEAD-pinned Git-tree
+catalog cached by resolved repository root and HEAD. One directory projection
+proves direct `src/tests` scaffolds; one `cat-file --batch` reads only the
+immediate immutable tree objects of depth-three candidates to recognize root
+README/INTERFACE contracts. Data, archive, report, and container directories
+are not modules merely because they occupy `modules/<domain>/<name>`.
+The catalog is
 independent of caller K, so a module cannot become falsely singular merely
 because another named module fell outside a top-K result bucket.
-Its Git stream must be nonempty and end in exactly one record terminator;
-every record is validated for UTF-8, header, modules-only normalized path, and
-exact/NFC-normalized case-folded duplication before depth filtering. Unicode
-control, format, and surrogate code points (`Cc`/`Cf`/`Cs`) fail closed on
-every record; visible Unicode letters and symbols remain valid and retain
-their original spelling. Valid ancestors and deeper descendants are accepted
-but only exact depth-three roots are exposed.
+The directory stream requires exact NUL framing. Every directory and immediate
+tree entry validates mode/type/object identity, UTF-8, normalized path/name,
+and exact/NFC-casefold uniqueness. Unicode control, format, and surrogate code
+points (`Cc`/`Cf`/`Cs`) fail closed; visible Unicode remains unchanged.
 Cache root identity uses platform `normcase`; reads/eviction/writes/clear are
 locked, while Git calls remain outside the lock. Concurrent cold callers may
-duplicate a bounded Git read, but the final cache cannot exceed eight entries.
+duplicate bounded Git reads, but the final cache cannot exceed eight entries.
 
 When a semantic query names one module uniquely in that complete catalog, or
 supplies one validated full module path, HoloIndex performs
@@ -123,12 +123,14 @@ module queries do not receive Tier-0 promotion. Strict owner mode requires the
 catalog and complete pair. If the catalog is unavailable, non-strict mode logs
 one stable warning and continues with an explicit empty registry; it never
 falls back to hit-conditioned singularity. Query paths read bounded Git tree
-metadata but never walk/read working-tree module files or reindex the store.
+objects but never walk/read working-tree module files or reindex the store.
 
-The exact `03c332294...` tree probe has 1,265 directory records, 145,619 raw
-bytes, and 168 exact `modules/<domain>/<module>` roots. The final reproducible
-paired probe measured 122.645 ms cold and 42.043 ms warm. Hard limits are 5
-seconds, 1 MiB Git output, and 4,096 module roots.
+The exact `18cd53cc...` probe has 1,278 directory records / 146,876 bytes,
+170 candidate roots, and 68,591 bytes of immediate-tree evidence: 215,467
+bytes total versus 828,543 bytes for the rejected all-file scan. It exposes
+160 proved modules and measured 186.539 ms cold / 46.953 ms warm. Each Git
+output is capped at 8 MiB (enough for 4,096 modules at the measured shape),
+batch input at 4,096 object IDs, and each Git subprocess at five seconds.
 
 ## Historical 2025 WSP 97 design claim
 

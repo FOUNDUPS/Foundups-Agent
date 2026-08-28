@@ -155,7 +155,7 @@ exists. The resolver never checks out, updates, or indexes either worktree.
 Search response contract:
 
 For an exact module basename that resolves uniquely against the complete,
-HEAD-pinned Git module-directory catalog, or one validated full
+HEAD-pinned Git module-evidence catalog, or one validated full
 `modules/<domain>/<module>` query path, docs
 retrieval performs zero-to-two exact metadata gets for module-root `README.md`
 and `INTERFACE.md`. Their Tier-0 order is README then INTERFACE. Exact rows use
@@ -177,12 +177,16 @@ singularity. Full paths do not require the catalog. Stable producer errors are
 `HOLOINDEX_TIER0_INCOMPLETE`, and `HOLOINDEX_TIER0_LOOKUP_FAILED`; all other
 exception text is reduced to `HOLOINDEX_SEARCH_FAILED` before leaving HoloIndex.
 Ambiguous or implicit module intent preserves ordinary score ordering.
-The catalog requires a final NUL and validates every record before depth
-filtering. Every path rejects Unicode `Cc`, `Cf`, and `Cs` categories, and
-duplicate identity is `NFC(path).casefold()` without changing the returned
-original spelling. Visible non-control Unicode remains valid. Cache identity
-is platform-aware and access is locked; Git remains outside the lock, so
-duplicate cold loads are allowed but bounded.
+The catalog uses a NUL-framed recursive directory projection plus one
+`cat-file --batch` over the immediate immutable trees of exact depth-three
+candidates. A root qualifies only through a direct `src/tests` tree or a
+regular root README/INTERFACE blob; directory depth alone is not evidence.
+Every directory and immediate entry rejects invalid mode/type/framing, Unicode
+`Cc`/`Cf`/`Cs`, and `NFC(value).casefold()` duplicates without changing valid
+spelling. Both Git outputs, batch input, runtime, module count, and cache size
+are bounded. Cache identity is platform-aware and locked; Git calls remain
+outside the lock, so duplicate cold loads are allowed but bounded. Full-path
+intent remains catalog-independent.
 
 The JSON machine specification is authoritative. Its complete response schema
 is structurally compiled by `holo_index.query_result_contract_schema` and

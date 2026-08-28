@@ -1,0 +1,127 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "18cd53cc63d771b8636b7f73d7674d4f325ba4b0"
+  },
+  "execution_id": "HOLOINDEX_MODULE_INTENT_EVIDENCE_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "candidate_code_and_release": "verified",
+    "independent_wsp97_verdict": "GO",
+    "merged_exact_main_live_acceptance": "pending",
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "runtime_environment_exact_closure_verified": false,
+    "live_route_changed": false
+  },
+  "wsp15_allocation": {
+    "complexity": 3,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 18,
+    "priority": "P0",
+    "decision": "exclude unscaffolded depth-three containers from basename module intent before further Holo RSI feature work"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The governed exact original query failed closed at exact main with HOLOINDEX_TIER0_INCOMPLETE and module_tier0_incomplete while the bundle, active generation, route, owner, and replica remained healthy.",
+      "Removing only the generic feedback token returned CURRENT on the same active descriptor and generation.",
+      "Direct intent evaluation proved modules/telemetry/feedback was selected even though its tracked tree contains only telemetry session data and no root README or INTERFACE.",
+      "The WSP memory bundle and Holo README, INTERFACE, ROADMAP, ModLog, tests README, TestModLog, memory README, requirements, NAVIGATION, manifest, and closest Tier-0 tests were read before edits."
+    ],
+    "research": [
+      "Existing modular audits define scaffolds through src/tests or root contracts; directory depth alone is not module evidence.",
+      "The first tracked-file implementation was rejected after independent review measured 828543 of 1048576 output bytes, leaving insufficient growth headroom.",
+      "The accepted design reuses the existing trusted Git resolver and closed Git environment from repository audit discovery rather than creating a second Git authority implementation.",
+      "The exact-HEAD projection reads recursive directory metadata plus the immediate immutable tree object of each depth-three candidate in one bounded batch."
+    ],
+    "micro_pass": [
+      "The exact base contains 1278 directory records / 146876 bytes, 170 candidate roots, and 68591 bytes of immediate-tree evidence; 160 roots qualify.",
+      "All ten exclusions lack direct src/tests trees and root README/INTERFACE blobs; telemetry feedback is excluded while HoloDAE and the doc-only consciousness engine remain available.",
+      "Focused module-intent plus Tier-0 validation passed 109 tests; trusted repository-Git validation passed 44 tests with one policy skip.",
+      "The documented owner/service/machine/Tier-0 adjacency command passed 334 tests in 4.94 seconds; independent WSP 97 replay passed the same 334 tests in 4.55 seconds.",
+      "Implementation is 297 lines with a 47-line largest function; test files are 564, 170, and 50 lines with no function above 42 lines.",
+      "The canonical registry was regenerated and verified current at 1611 tests / 267 quarantines; the evidence projection is a collectable Holo unit and the split removed the former snapshot quarantine."
+    ],
+    "macro_pass": [
+      "Backend manifest generation and its eight exhaustive contracts passed at 1365 runtime files and sha256:22fca9ba3e28f74199dc0c00259650d5bfa34a45e1202d6769c287c0bf598351.",
+      "RedDog 0.4.135 fast, 32-test conversation, package, contract, and exhaustive four-group release tiers passed; exhaustive duration was 189.323 seconds.",
+      "The 18-shard 6942-line 492-assertion contract is sha256:7ed04109cbc6dbe551fef83410472c17bb9ed9f930ec782f197f2205f286343b.",
+      "The deterministic 67-file package is 946232 bytes at sha256:7c3516fa73ecd3d2aa9e6ffd7a9180b3e3e3799ca03dad38c3d0859db6460d79.",
+      "O:/RedDog-Releases/reddog-0.4.135.vsix is 275792 bytes at sha256:b1b9e203dcab3fa63bb7cc18112c3379699e895951c09c3b747366189b22a55a; inspection found 69 safe unique ZIP files, 67 exact source members, zero byte mismatches, and zero credential-value patterns."
+    ],
+    "hard_think": [
+      "Strict Tier-0 correctly rejected an incomplete target; the defect was false module inference, not fail-closed enforcement.",
+      "Evidence-qualified roots preserve legitimate doc-only modules without allowing data containers, report roots, archives, or organizational directories to poison basename intent.",
+      "Eight MiB per Git output supports the declared 4096-module ceiling at measured repository shape while scope, process count, batch input, time, cache, and returned roots remain separately bounded.",
+      "Candidate tests cannot replace merged exact-main refresh, resident replay of the original query, and immutable post-query replica verification."
+    ],
+    "dialectic_sweep": [
+      "A feedback stopword would hide one symptom and remain vulnerable to the next container name.",
+      "Adding fake contracts to telemetry data would corrupt module semantics and weaken strict Tier-0.",
+      "Scanning every tracked file was functionally correct but did not scale with repository source volume.",
+      "Using inherited Git state or ambient PATH would make exact-HEAD evidence caller-steerable; trusted executable resolution, closed Git variables/config, no replacement refs, and no optional locks are mandatory."
+    ],
+    "first_principles": [
+      "A module name is admitted by committed scaffold evidence, never directory depth or semantic-hit happenstance.",
+      "Full explicit module paths remain independently validated and do not consult the basename catalog.",
+      "Query-time discovery reads immutable Git metadata only; it never walks module files, opens the index store, reindexes, changes routes, or starts maintenance.",
+      "This slice fixes retrieval intent quality only; exact runtime closure, A-grade metrics, proposer/evaluator separation, promotion, canary, rollback, and outcome learning remain separate gates."
+    ],
+    "execute": [
+      "holo_index/cli/repo_audit_discovery.py",
+      "holo_index/module_intent_snapshot.py",
+      "holo_index/tests/module_intent_test_support.py",
+      "holo_index/tests/test_module_intent_snapshot.py",
+      "holo_index/tests/test_module_intent_evidence_projection.py",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "O:/RedDog-Releases/reddog-0.4.135.vsix"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_MODULE_INTENT_EVIDENCE_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "holo_index/README.md",
+    "holo_index/INTERFACE.md",
+    "holo_index/ROADMAP.md",
+    "holo_index/ModLog.md",
+    "holo_index/tests/README.md",
+    "holo_index/tests/TestModLog.md",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

@@ -1,5 +1,24 @@
 # RedDog ModLog
 
+## 2026-08-28 - Evidence-qualified Holo module intent (0.4.135)
+
+- RedDog now authenticates the Holo runtime containing the bounded exact-HEAD
+  module-evidence catalog. Direct `src/tests` trees or regular root README/
+  INTERFACE blobs qualify a basename; depth-only data containers do not.
+- Reused Holo's trusted Git resolver and closed environment, forced no-replace/
+  no-lock reads, split the evidence tests under WSP_62, and set an 8 MiB bound
+  compatible with the declared 4,096-module ceiling at measured scale.
+- Regenerated the unchanged 1,365-file backend topology at digest
+  `22fca9ba3e28...bf598351`; the 18-shard / 6,942-line / 492-assertion contract
+  is `sha256:7ed04109cbc6...f286343b`.
+- Fast, conversation (32 Python passes), package, contract, exhaustive release,
+  334-case owner adjacency, and eight manifest-generator contracts pass.
+  Independent WSP_97 returned GO. Exact-main activation/live replay remains a
+  post-merge gate; A-grade and retrieval RSI are not claimed.
+- `O:\RedDog-Releases\reddog-0.4.135.vsix` is 275,792 bytes at
+  `sha256:b1b9e203dcab...b22a55a`: 67 exact source members, zero byte mismatches,
+  and zero credential-value patterns. (WSP 00/15/22/50/62/84/87/97)
+
 ## 2026-08-28 - Holo owner-query root separation release (0.4.134)
 
 - Preserved the exact-main `724954fa` counterexample: real OpenClaw maintenance

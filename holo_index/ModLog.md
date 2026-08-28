@@ -1,5 +1,30 @@
 # HoloIndex Package ModLog
 
+## [2026-08-28] Evidence-qualified module-intent candidate
+
+- Reproduced the exact governed failure at current main: generic `feedback`
+  promoted `modules/telemetry/feedback`, a telemetry JSON container without
+  root contracts, and strict Tier-0 failed closed as designed.
+- Rejected the first all-file repair after WSP_97 review found it already used
+  828,543/1,048,576 bytes. The replacement reads one 146,876-byte directory
+  projection and one 68,591-byte candidate-root batch, both from exact HEAD.
+- A root now qualifies only through a direct `src/tests` tree or regular root
+  README/INTERFACE blob. All directory and raw-tree framing, modes, types,
+  object IDs, paths, names, Unicode, duplicates, counts, bytes, time, cache,
+  and subprocess behavior remain fail closed and bounded.
+- Reused the repository-audit trusted Git resolver and closed read environment;
+  inherited Git authority variables, replacement refs, optional locks, system/
+  global config, hooks, attributes, excludes, and external diffs cannot steer
+  these reads. The 8 MiB per-output bound supports the stated 4,096-module cap
+  at the measured repository shape without reopening an all-file projection.
+- The local projection exposes 160 proved modules, excludes telemetry feedback,
+  and preserves HoloDAE plus doc-only consciousness-engine intent. It performs
+  no file walk, index/store access, reindex, route, owner, or activation change.
+  Exact-main refresh and original-query replay remain acceptance gates. The
+  complete execution evidence is sealed in
+  `docs/audits/infrastructure/HOLOINDEX_MODULE_INTENT_EVIDENCE_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+  (WSP 00/15/22/50/62/83/84/87/97)
+
 ## [2026-08-28] Producer-ranked owner merge candidate
 
 - Live exact-main benchmarking proved the collection-local exact-symbol winner

@@ -3,12 +3,11 @@
 ## [2026-08-28] Current-truth retrieval and RSI gate
 
 **Current status:** governed retrieval is operational at exact main
-`1dc016fc3223244cfc37efd2a4fea4022118c342`, active generation
-`sha256:ba5119f...`, and freshness receipt `sha256:5e1164d6...` as of the
-start of this candidate transaction. A fresh owner query passed without
-reindexing, and the completed post-merge transaction later reconciled as
-`OWNER_READY` without starting runtimes or repeating maintenance. Future live
-status must come from a fresh governed receipt rather than these as-of values.
+`18cd53cc63d771b8636b7f73d7674d4f325ba4b0`, active generation
+`sha256:e00c0b3a...`, and freshness receipt `sha256:7ace827a...` as of this
+candidate transaction. A fresh owner query passed CURRENT/no-gap/no-reindex on
+attempt one and full verification preserved 33 artifacts / 222,647,517 bytes.
+Future live status must come from a fresh governed receipt.
 
 **A-grade verdict: NO-GO.** The latest clean-authority public benchmark measured
 Recall@8 `1.0`, MRR `0.91666667`, nDCG@8 `0.93198851`, and p95 semantic latency
@@ -32,13 +31,16 @@ WSP_15 orders the remaining P0 layers as follows:
 4. add independent admission, shadow canary, signed promotion, rollback proof,
    and candidate-bound outcome learning.
 
-The active generation already contains the authoritative current-truth docs
-slice. The ranked-stream slice repairs its next measured integration defect:
-owner global flattening now merges producer-ranked streams without reversing
-an exact-symbol winner on a slightly higher raw similarity. It also restores
-the missing HoloDAE Tier-0 contract pair that caused a broad RSI query to fail
-closed. Operational acceptance is owned only by exact-main regeneration,
-activation, and remeasurement; this roadmap is never promotion evidence.
+The next measured blocker is module-intent quality, not replica freshness.
+The token `feedback` deterministically selected telemetry data as a module and
+strict Tier-0 correctly rejected its missing contracts. The candidate replaces
+depth-only discovery with bounded exact-HEAD evidence: direct `src/tests`
+trees or regular root README/INTERFACE blobs, obtained through one directory
+projection and one candidate-only Git batch. It excludes the false container,
+preserves 160 proved modules, and uses 215,467 bytes rather than the rejected
+828,543-byte all-file projection. Operational acceptance requires merge,
+exact-main regeneration/activation, replay of the original failing query, and
+immutable post-query verification.
 
 ## [2026-08-27] Historical A-grade retrieval truth gate
 

@@ -95,16 +95,17 @@ fixtures inside the authority root retain their existing behavior, while
 absolute escapes are rejected. GraphRAG currently consumes code/WSP hits, so
 this is adjacent path-contract coverage rather than a docs-index test.
 
-`test_module_intent_snapshot.py` proves shell-free HEAD pinning, deterministic
-ordering, final-NUL framing, all-record normalized paths, exact depth-three
-filtering, duplicate-basename ambiguity, 4,096/4,097 caps, platform-aware
-locked cache bounds, full-path independence, and fail-closed nonzero/timeout/
-malformed/control/oversize behavior. Unicode coverage rejects `Cc`/`Cf`/`Cs`
-on deeper records and NFC/NFD-equivalent duplicates while retaining visible
-accented letters and non-ASCII symbols. Its K=1/12/20 falsifier varies returned
-context for the exact Group-A audit query while holding the HEAD catalog fixed.
-Strict catalog failure is explicit; non-strict failure passes an empty registry
-and cannot fall back to vector-hit singularity.
+`test_module_intent_snapshot.py` proves closed Git authority, HEAD pinning,
+deterministic ordering, NUL-framed directory projection, invalid paths,
+normalized duplicates, 4,096/4,097 caps, cache bounds, and full-path/catalog
+failure behavior. `test_module_intent_evidence_projection.py` proves exact
+candidate-tree framing, direct `src/tests` or regular root-contract admission,
+and false data-container exclusion. It falsifies object ID/type/size/mode,
+truncated/extra/raw-object bytes, symlinked contracts, invalid UTF-8/names, and
+nonzero/oversize behavior. Its real-repository case preserves HoloDAE and the
+doc-only consciousness engine while excluding telemetry feedback. Hostile Git
+authority is removed and commands force no-replacement/no-lock options. The
+8 MiB bound has an exact cap-plus-one rejection.
 `test_machine_spec_contract.py` binds canonical nullable
 `tier0_module_target` metadata and rejects noncanonical target paths.
 
@@ -113,6 +114,7 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'
 python -m pytest `
   holo_index/tests/test_tier0_retrieval_hardening.py `
   holo_index/tests/test_module_intent_snapshot.py `
+  holo_index/tests/test_module_intent_evidence_projection.py `
   holo_index/tests/test_machine_spec_contract.py `
   modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service.py `
   modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_edges.py `
@@ -120,7 +122,7 @@ python -m pytest `
   -q
 ```
 
-The exact command above passed 278 tests in 4.00 s on the R3 candidate.
+The exact command above passed 334 tests in 4.94 s on this candidate.
 
 ## Test Data
 - Synthetic fixtures are preferred to keep tests fast and reproducible.
