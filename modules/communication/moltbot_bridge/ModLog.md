@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-28: Merged owner-query root-separation live acceptance
+
+- Ran the merged controller from the clean control checkout at exact main
+  `da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6` against the distinct clean authority.
+  Its first real OpenClaw transaction completed maintenance, activation,
+  verification, atomic AgentDB completion, and reverse-order owned-runtime
+  shutdown at generation `sha256:9c7e3ab6...`; the controller accepted it.
+- A fresh governed query was CURRENT/no-gap/no-reindex on attempt one. Full
+  post-query verification rehashed 33 artifacts / 222,647,465 bytes and retained
+  descriptor `sha256:87990aba...`; both canonical worktrees remained clean at
+  exact main. This closes only the root-separation replay gate. Runtime exact
+  closure, retrieval RSI, A-grade, scale, and future-commit authority remain
+  false or unproven. (WSP 00/06/15/22/50/62/84/87/97)
+
 ## 2026-08-28: Owner-query workspace/authority root separation
 
 - Preserved exact-main `724954fa` evidence: the real OpenClaw transaction
