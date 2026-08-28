@@ -60,8 +60,10 @@ passed again through the real OpenClaw supervisor at exact main
 `66526ae5cdd0467ce264c1db4122ab82eadb7733` on 2026-08-27. Three fresh-process
 queries completed in about 34 seconds each and a pre-warmed query in 10.3
 seconds; all were CURRENT/no-gap/no-reindex, and full immutable revalidation of
-33 artifacts remained unchanged. Current post-restart calls failed closed at
-60/180 seconds, so the historical timing does not prove current readiness.
+33 artifacts remained unchanged. Earlier post-restart diagnostics failed closed
+at 60/180 seconds; the latest base-bound governed query passed on attempt one
+inside the 300-second CLI wall. That proves base usability, not exact-current-
+main readiness or scale.
 Persistent authenticated owner activation is P0 scalability debt, and no
 outbound Hermes dispatch is enabled by this interface.
 

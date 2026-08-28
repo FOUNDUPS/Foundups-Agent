@@ -19,6 +19,9 @@ from holo_index.maintenance_lock import (
     AUTHORITY_BLOCK_MARKER_FILENAME,
     authority_block_marker_valid,
 )
+from modules.infrastructure.database.src.holoindex_postmerge_claim_contract import (
+    MAX_POSTMERGE_CLAIM_LEASE_SECONDS,
+)
 
 
 SCHEMA_VERSION = "holoindex_postmerge_coordination_v1"
@@ -32,7 +35,7 @@ CLAIM_AGENT_ID = "openclaw_supervisor"
 AUTHORITY_REPO_ROOT_ENV = "REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT"
 MAX_RETRIES = 3
 RETRY_DELAY_SECONDS = 300
-ASSIGNMENT_LEASE_SECONDS = 7500
+ASSIGNMENT_LEASE_SECONDS = MAX_POSTMERGE_CLAIM_LEASE_SECONDS
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -98,7 +101,7 @@ class AgentDbPort(Protocol):
         expected_schema_version: str,
         expected_target_repo_head_sha: str,
         expected_authority_root_digest: str,
-        lease_seconds: int = 900,
+        lease_seconds: int = ASSIGNMENT_LEASE_SECONDS,
     ) -> str: ...
 
     def start_holoindex_postmerge_execution(
@@ -431,7 +434,7 @@ def incident_binding_event_valid(
     )
 
 
-def _task_binding_valid(
+def holoindex_postmerge_task_binding_valid(
     task: Mapping[str, Any] | None,
     *,
     target_repo_head_sha: str,
@@ -482,7 +485,7 @@ def validate_holoindex_postmerge_request(
         or
         task_id != TASK_PREFIX + target_repo_head_sha
         or request_event_id != expected_event
-        or not _task_binding_valid(
+        or not holoindex_postmerge_task_binding_valid(
             database.get_autonomous_task_by_id(task_id),
             target_repo_head_sha=target_repo_head_sha,
             authority_root_digest=authority_root_digest,
@@ -526,7 +529,7 @@ def validate_holoindex_postmerge_completion(
     task = database.get_autonomous_task_by_id(task_id)
     if (
         task_id != TASK_PREFIX + target_repo_head_sha
-        or not _task_binding_valid(
+        or not holoindex_postmerge_task_binding_valid(
             task,
             target_repo_head_sha=target_repo_head_sha,
             authority_root_digest=authority_root_digest,
@@ -552,6 +555,7 @@ def validate_holoindex_postmerge_completion(
 
 
 __all__ = [
+    "ASSIGNMENT_LEASE_SECONDS",
     "AUTHORITY_REPO_ROOT_ENV",
     "CLAIM_AGENT_ID",
     "COMPLETION_EVENT_PREFIX",
@@ -564,6 +568,7 @@ __all__ = [
     "SCHEMA_VERSION",
     "SOURCE",
     "TASK_PREFIX",
+    "holoindex_postmerge_task_binding_valid",
     "incident_binding_event_id",
     "incident_binding_event_payload",
     "incident_binding_event_valid",

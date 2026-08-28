@@ -2,23 +2,24 @@
 
 ## HoloIndex runtime truth
 
-The exact-main operator controller requires a clean local
-`refs/remotes/origin/main`, exact sealed repair/completion receipts, stable
-broker readiness, final Git/owner revalidation, and proven thread-dead cleanup.
-It holds one canonical-store cross-process lease, preserves pre-existing
-runtimes, launches owned supervisors in explicit Holo-only mode, never changes
-process-global task flags, and directly registers only the two required
-OpenClaw specs without entering main/MCP bootstrap.
-The owner path binds replica, ranker, runtime-environment, HEAD/root/generation,
-and no-reindex evidence; raw buckets never enter Fusion.
+The exact-main controller requires clean `refs/remotes/origin/main`, sealed repair/completion
+receipts, stable broker readiness, final Git/owner revalidation, and proven thread-dead cleanup.
+One canonical-store lease preserves pre-existing runtimes, launches owned supervisors in Holo-only
+mode, avoids process-global flags, and directly registers only the two required OpenClaw specs.
+The exact AgentDB task ID is supplied at supervisor construction and acknowledged by a same-root,
+Holo-only resident; its sealed authority digest is rechecked during polling. A bound poller cannot
+replace it. Pre-existing bindings release exactly; owned supervisors stay bound through shutdown, closing the release-to-stop race. Runtime/task drift rejects promptly; pending/assigned progress is bounded to 60 seconds and executing observation to its canonical 7,500-second v2 integrity-bound AgentDB claim lease. Claim ID, issued time, expiry, assignee, and task context share one digest; first completion after expiry rejects atomically.
+The owner path binds replica, ranker, runtime, HEAD/root/generation, and no-reindex evidence.
 
-After exact completion, one fully receipt-bound exhausted transient may receive
-one immediate reproof inside the original 300-second/transaction deadline; all
-other failures reject. At exact main `7e6d33e677aac14b5f3b97c2caf87d3aeb8941ea`,
-maintenance/activation/verification completed at generation `sha256:84976647...`,
-but the former single proof rejected before a governed query returned the same
-CURRENT binding in 3.89 seconds. The candidate is synthetically closed; live
-exact-main replay is required, and exact runtime closure/RSI/A-grade remain false.
+After completion, one receipt-bound exhausted transient may receive one immediate reproof inside
+the 300-second deadline. Its new two-port acquisition cycle is result/receipt-bound and validated.
+At exact main `db44f8be3374785341d1c237ec61da774444eb14`, maintenance, activation,
+verification, and atomic completion succeeded at generation `sha256:b5a138e0...`. The pre-repair
+controller rejected its proof, while an independent governed query returned the same CURRENT
+binding in 3.812 seconds and verification retained 33 artifacts / 222,033,165 bytes unchanged.
+Focused tests close that diagnosed path; merged current-main replay is still required. An already
+started external authority transaction is not yet cancellable or guarded at every route-effect
+boundary, so runtime exact closure, retrieval RSI, and A-grade remain false.
 
 Historical exact main `5e0835c690e0f4f1712c7021a75abdc35aadeca0` also ran the real
 OpenClaw transaction produced generation `sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915`; a governed query

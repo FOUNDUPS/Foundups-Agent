@@ -15,13 +15,36 @@ specs; it invokes no main bootstrap, autostart, MCP registration, or ambient
 environment mutation.
 One canonical-store cross-process lease serializes the complete controller
 lifecycle. When no OpenClaw runtime exists, the controller starts resident then
-supervisor and records ownership. The supervisor receives the explicit
-`holoindex_postmerge_only` mode through broker launch arguments; that mode
+supervisor and records ownership. The supervisor receives explicit
+`holoindex_postmerge_only` mode and the exact admitted task ID through broker
+launch arguments; a live registration call must acknowledge the same task
+before completion waiting. A bound poller cannot schedule or replace it. That mode
 disables restart, self-audit, signed/autonomous/general-maintenance work,
 skill/mutation reporting, nudges, and continuity breadcrumbs without changing
 process-global environment. When both broker runtimes already exist, it
 preserves their configuration and lifecycle. Partial or raced ownership
 rejects.
+
+Resident, supervisor, dispatch, sealed-executor, and server imports are
+preflighted before repair coordination may create an AgentDB task. During
+completion waiting, both broker threads and the exact task binding, status,
+source, schema, target HEAD, sealed authority digest, skills, assignee, and
+active claim are rechecked. Pending/assigned unchanged state is bounded to 60
+seconds; executing observation retains its 7,500-second v2 integrity-bound
+AgentDB claim lease because healthy materialization has exceeded 1,800 seconds.
+The claim digest includes its schema, ID, issued time, expiry, assignee, and
+complete task context; the stored assignment timestamp must equal issuance.
+The atomic completion transaction rejects a first terminal commit at or after
+expiry while permitting only an exact already-completed replay whose recorded
+completion preceded expiry. This is deterministic AgentDB/CAS integrity, not a
+secret MAC or signature against an arbitrary database writer. Runtime death/error,
+missing or drifted tasks, failure/supersession, retry wait, expired claims, or
+completed state without its atomic receipt rejects before the outer timeout.
+
+After completion or failure, a pre-existing supervisor must acknowledge exact
+release so another current task can bind. A controller-owned supervisor is not
+released first: it remains task-bound until reverse-order shutdown proves its
+thread dead, closing the release-to-periodic-poll interleaving.
 
 Completion requires `validate_holoindex_postmerge_completion()`, equal final
 owner generation/freshness receipt, CURRENT/no-gap/no-reindex evidence, and a
@@ -31,12 +54,21 @@ interrupted paths; owned supervisor stops before owned resident, and success is
 revoked unless every owned broker thread is dead. Rejected CLI operations exit
 nonzero and expose fixed secret-free reasons.
 
+The lease currently fences task admission, observation, and AgentDB completion.
+It does not cancel an already-started authority call or recheck lease authority
+inside every external activation/route CAS. Therefore timeout cannot be claimed
+as full effect fencing, and A-grade remains blocked on a renewable execution
+heartbeat or an equivalent use-time guard at the final external-effect boundary.
+
 After exact atomic completion, owner readiness uses at most two controller
 proofs inside one budget capped by both the remaining transaction deadline and
 300 seconds from first proof. Only a fully receipt-integrity, authority,
 semantic-evidence, and error-bound failure that exhausted both lower-level
 owner attempts with an allowlisted transient reason admits the immediate second
-proof. There is no sleep. Wrong completion generation/freshness, stale or
+proof. The controller supplies acquisition cycle zero then one; each cycle uses
+two deterministic nonrepeating process shards, and the selected cycle is bound
+into the result and receipt. There is no sleep. Wrong cycle, completion
+generation/freshness, stale or
 rejected authority, deterministic failure, malformed/forged evidence, and an
 expired budget reject after the first observation. The lower-level two-attempt
 owner acquisition remains independently bounded inside each proof.
@@ -59,16 +91,18 @@ Committed authority permits caller overlays; `clean_workspace_head` does not.
 
 ## Current truth and scale
 
-Exact-main `7e6d33e677aac14b5f3b97c2caf87d3aeb8941ea` completed maintenance,
+Exact-main `db44f8be3374785341d1c237ec61da774444eb14` completed maintenance,
 activation, verification, and atomic completion through the real OpenClaw
-supervisor at generation
-`sha256:84976647513dfa4748c0d4a74111d7dbafe5475ed2c201a4a2b1c614447f6e53`.
-The pre-repair controller then rejected its single independent owner proof. A
-later governed query returned CURRENT/no-gap/no-reindex with that exact
-generation and freshness receipt in 3.89 seconds, proving a controller
-false-negative rather than a failed maintenance transaction. The bounded
-reproof candidate has synthetic closure only; a post-merge live transaction is
-still required. Evidence is commit-bound.
+supervisor at generation `sha256:b5a138e0...`. The pre-repair controller then
+rejected `owner_not_current_after_completion`. A fresh governed owner query
+returned CURRENT/no-gap/no-reindex with the same binding in 3.812 seconds, and
+full verification retained 33 artifacts / 222,033,165 bytes unchanged. The
+short completion-to-rejection interval plus immediate counterexample proved a
+false negative and exposed same-cycle reacquisition as an untested assumption;
+it did not prove port reuse caused the transient. This repair hardens that
+assumption and task/runtime liveness, with focused-test closure only until
+merged current-main replay. Evidence is commit-bound. The high-risk interleaving
+record is `REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md`.
 
 The runtime-environment digest covers executable, ABI/platform, verified RedDog
 source, distribution build records, replica/model artifacts, and allowlisted
@@ -78,7 +112,8 @@ external loader policy, signature, or write denial, so
 dependency closure cannot be hashed per query; A-grade scale requires
 asynchronous signed/protected promotion plus a resident authenticated owner.
 
-Maintenance self-repair is operational. Retrieval-quality RSI still requires
+Base-bound maintenance/freshness self-repair is observed operational;
+current-main controller acceptance remains pending. Retrieval-quality RSI still requires
 an authenticated proposer, independently sealed evaluator, separate promoter,
 CAS/canary/semantic rollback, signed outcome ledger, and bounded WRE feedback
 loop. No outbound Hermes dispatch is part of this contract.

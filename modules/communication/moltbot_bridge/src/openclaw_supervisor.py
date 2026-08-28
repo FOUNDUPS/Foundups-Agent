@@ -1894,6 +1894,7 @@ class OpenClawSupervisor:
         action_reporter: Optional[Callable[[str, str, Dict[str, Any]], None]] = None,
         self_audit_factory: Optional[Callable[[Path], Any]] = None,
         runtime_mode: str | None = None,
+        postmerge_task_id: str = "",
     ) -> None:
         self._holoindex_postmerge_only = is_holoindex_postmerge_only_mode(runtime_mode)
         self.repo_root = Path(repo_root).resolve()
@@ -1917,7 +1918,9 @@ class OpenClawSupervisor:
         self._event_cursor = 0
         self._restart_attempts: Deque[float] = deque()
         poller_enabled = True if self._holoindex_postmerge_only else None
-        self._holoindex_postmerge_poller = HoloIndexPostmergePoller(self.repo_root, enabled=poller_enabled)
+        self._holoindex_postmerge_poller = HoloIndexPostmergePoller(
+            self.repo_root, enabled=poller_enabled, task_id=postmerge_task_id,
+        )
 
         # Unified from Supervisor24x7 (P1 2026-03-22)
         self.metrics = SupervisorMetrics()
@@ -1926,6 +1929,12 @@ class OpenClawSupervisor:
         self._libido_monitor: Any | None = None
         self._triage_queue: List[Dict[str, Any]] = []
         self._execution_results: List[Dict[str, Any]] = []
+
+    def register_holoindex_postmerge_task(self, task_id: str) -> bool:
+        return self._holoindex_postmerge_poller.bind_task(task_id)
+
+    def release_holoindex_postmerge_task(self, task_id: str) -> bool:
+        return self._holoindex_postmerge_poller.release_task(task_id)
 
     def claim_reddog_readonly_audit_task_once(
         self,

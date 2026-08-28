@@ -4,20 +4,31 @@
 
 `test_holoindex_postmerge_runtime_owner_proof.py` owns the distinct
 post-completion readiness contract. It proves one fully receipt-bound exhausted
-transient can receive exactly one immediate reproof, both queries share the
-remaining transaction/300-second budget, and two transients remain terminal.
+transient can receive exactly one immediate reproof on acquisition cycles zero
+then one, both queries share the remaining transaction/300-second budget, and
+two transients remain terminal. Cycle telemetry must match its sealed receipt.
 Rejected authority, stale/deterministic/malformed/forged results, wrong
 completion generation or freshness digest, zero/consumed budgets, and
 `KeyboardInterrupt`/`SystemExit` all reject without weakening owned-runtime
 cleanup. It also pins the controller below the communication WSP_62 ceiling.
-The focused owner-proof file passes 24 tests; the expanded owner-result consumer
-matrix is 148 passed. Query-receipt plus root one-shot coverage is 68 passed.
+
+`test_holoindex_postmerge_runtime_admission.py` proves missing dispatch-chain
+imports reject before coordination, exact-task registration waits only for live
+readiness, short admission bounds reject stalls, and a healthy 2,400-second
+execution remains inside the canonical 7,500-second v2 integrity-bound lease.
+`test_holoindex_postmerge_runtime_liveness.py` separately falsifies broker
+death, terminal/retry task state, request/authority/claim drift, wrong assignee,
+expired claims, and invalid completed state. Database claim regressions bind ID,
+issued time, expiry, assignment time, and digest; reject late first completion;
+and preserve exact post-expiry replay. Three claim-clock contention falsifiers
+raise the affected Python surface to 309 passed.
 
 `test_holoindex_postmerge_runtime_controller.py` proves dirty/non-main
 admission closes before query effects, an already-CURRENT owner starts no
 runtime, transaction-owned OpenClaw runtimes start and stop in dependency order,
 pre-existing broker runtimes remain resident, direct register-only bootstrap
-touches no ambient autostart flags, exact completion generation equals the final owner receipt, and a
+touches no ambient autostart flags, the exact task ID reaches Holo-only launch,
+exact completion generation equals the final owner receipt, and a
 still-live owned thread turns apparent success into rejection.
 
 The same file proves the canonical-store controller lease rejects contention,
@@ -26,6 +37,10 @@ OWNER_READY path repeats the exact-main Git proof, and final-Git interrupts
 become fixed rejections after cleanup. Owned supervisors receive the explicit
 `holoindex_postmerge_only` mode; supervisor coverage proves hostile ambient
 flags cannot activate self-audit or any non-Holo task family.
+Bound-poller tests prove exact bind/release/rebind identity and no independent
+coordinator scheduling. Controller cases prove pre-existing release and owned
+binding retention through stop. Launch tests prove same-root/Holo-only
+attestation and fail-closed full dependency preflight.
 Direct execute-gate cases additionally prove forged and structurally malformed
 plans cannot bypass the Holo-only triage boundary or escape its fixed rejection.
 Those focused cases live in
@@ -37,6 +52,8 @@ directly registers exactly two OpenClaw specs, starts nothing, and leaves
 hostile ambient autostart flags unchanged. A generic completed task row remains
 insufficient, malformed exact-head bindings reject, and a canonical atomic
 completion receipt succeeds.
+`test_openclaw_maintenance_selector.py` also proves this self-hosting task family
+does not recursively build a Holo execution bundle before it can be claimed.
 
 ## Resident governed Holo usability
 
@@ -53,8 +70,9 @@ historical commit-bound canary at
 `61c2c3003bc4c2086f105f4c39effd499a026627` returned CURRENT with two scoped
 hits and no reindex in 32.5 seconds; it did not mutate Holo or the repository
 and does not authorize the candidate or any later commit.
-The current candidate's live 60-second cold one-shot timed out twice; historical
-success remains regression context, not current availability proof.
+The candidate's earlier 60-second cold one-shot timed out twice. A later
+base-bound governed query passed on attempt one inside the 300-second CLI wall;
+this proves base usability, not exact-current-main readiness or scale.
 
 ## Main bootstrap WSP 62 extraction
 

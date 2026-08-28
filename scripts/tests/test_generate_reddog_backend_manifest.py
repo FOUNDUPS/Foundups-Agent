@@ -59,6 +59,7 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels(
     assert "holo_index/query_result_contract_schema.py" in runtime
     assert "scripts/reddog_authoritative_work_state_query_once.py" in runtime
     assert "scripts/reddog_holoindex_incident_repair_once.py" in runtime
+    assert "scripts/reddog_holoindex_postmerge_runtime_once.py" in runtime
     assert "scripts/reddog_start_operations_control_once.py" in runtime
     assert (
         "modules/communication/moltbot_bridge/src/reddog_start_operations_control.py"
@@ -84,7 +85,21 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels(
     assert "holo_index/vector_segment_durability.py" in runtime
     assert "modules/communication/moltbot_bridge/scripts/run_task.py" in runtime
     assert "modules/communication/moltbot_bridge/src/openclaw_supervisor.py" in runtime
+    assert "modules/communication/moltbot_bridge/scripts/launch.py" in runtime
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "holoindex_postmerge_runtime_controller.py"
+    ) in runtime
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "holoindex_postmerge_runtime_liveness.py"
+    ) in runtime
+    assert "holo_index/owner_acquisition_contract.py" in runtime
     assert "modules/infrastructure/database/src/agent_db.py" in runtime
+    assert (
+        "modules/infrastructure/database/src/"
+        "holoindex_postmerge_claim_contract.py"
+    ) in runtime
     assert (
         "modules/infrastructure/idle_automation/src/holoindex_postmerge_coordinator.py"
     ) in runtime
@@ -274,7 +289,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "b9fa4e50c87d70483aebeea7b3fcb3c221db28f2c64ea5348fe2e63ed56b3ad5"
+    assert digest == "6160d5be6d36e2e3b3cccea8630b2d316dff093cfe6d5dccdc88a1e45fdaffd8"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

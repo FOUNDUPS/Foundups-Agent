@@ -202,6 +202,7 @@ def get_openclaw_resident_status() -> Dict[str, Any]:
 def run_openclaw_supervisor_service(
     repo_root: Optional[str] = None,
     runtime_mode: Optional[str] = None,
+    postmerge_task_id: str = "",
 ) -> Dict[str, Any]:
     """Run the explicit OpenClaw supervisor state machine as a broker-managed runtime."""
     from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
@@ -218,6 +219,7 @@ def run_openclaw_supervisor_service(
     supervisor = OpenClawSupervisor(
         repo_root=resolved_root,
         runtime_mode=runtime_mode,
+        postmerge_task_id=postmerge_task_id,
     )
 
     with _supervisor_lock:
@@ -242,6 +244,74 @@ def run_openclaw_supervisor_service(
         with _supervisor_lock:
             if _supervisor_runtime is supervisor:
                 _supervisor_runtime = None
+
+
+def _postmerge_supervisor_attested(supervisor: Any, expected_repo_root: Path | str) -> bool:
+    try:
+        expected = Path(expected_repo_root).resolve(strict=False)
+    except (TypeError, ValueError, OSError):
+        return False
+    return bool(
+        supervisor.repo_root == expected
+        and supervisor._holoindex_postmerge_only is True
+    )
+
+
+def register_openclaw_supervisor_postmerge_task(
+    task_id: str, expected_repo_root: Path | str,
+) -> str:
+    """Bind an exact task to the live supervisor without exposing internals."""
+
+    with _supervisor_lock:
+        supervisor = _supervisor_runtime
+        if supervisor is None:
+            return "not_ready"
+        if not _postmerge_supervisor_attested(supervisor, expected_repo_root):
+            return "rejected"
+        return (
+            "bound" if supervisor.register_holoindex_postmerge_task(task_id)
+            else "rejected"
+        )
+
+
+def release_openclaw_supervisor_postmerge_task(
+    task_id: str, expected_repo_root: Path | str,
+) -> str:
+    """Release an exact binding only on the attested Holo-only supervisor."""
+
+    with _supervisor_lock:
+        supervisor = _supervisor_runtime
+        if supervisor is None or not _postmerge_supervisor_attested(
+            supervisor, expected_repo_root
+        ):
+            return "rejected"
+        return (
+            "released" if supervisor.release_holoindex_postmerge_task(task_id)
+            else "rejected"
+        )
+
+
+def openclaw_postmerge_runtime_dependencies_ready() -> bool:
+    """Fail closed before task creation when resident imports are unavailable."""
+
+    try:
+        from modules.communication.moltbot_bridge.src.webhook_receiver import app
+        from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
+            OpenClawSupervisor,
+        )
+        from modules.communication.moltbot_bridge.scripts.run_task import execute_task
+        from modules.infrastructure.idle_automation.src.holoindex_postmerge_executor import (
+            execute_holoindex_postmerge_task,
+        )
+        import uvicorn  # noqa: F401
+    except Exception:
+        return False
+    return bool(
+        app is not None
+        and OpenClawSupervisor is not None
+        and callable(execute_task)
+        and callable(execute_holoindex_postmerge_task)
+    )
 
 
 def stop_openclaw_supervisor_service() -> Dict[str, Any]:

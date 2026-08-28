@@ -1,18 +1,23 @@
-## 2026-08-28: Post-completion owner readiness falsification
+## 2026-08-28: Exact-task liveness and owner-cycle falsification
 
-- Added a separate 24-case contract for bounded transient recovery, exact
-  completion equality, authenticated error binding, nonretryable stale/
-  deterministic/malformed/forged failures, remaining-deadline propagation,
-  and interruption cleanup.
-- Expanded communication owner-result selection: **148 passed**. Related
-  infrastructure selection: **84 passed / 1 skipped**; query-receipt plus root
-  one-shot: **68 passed**; exact WSP_62 exemptions: **16 passed**. The first
-  mixed collection reproduced the existing
-  top-level `scripts` namespace collision and is retained as runner-boundary
-  evidence rather than a product failure.
-- Production is 605 lines / max function 43 for the controller, 229 / 33 for
-  result verification, 129 / 25 for shared acquisition, and 765 / 47 for the
-  root one-shot. No WSP_62 exemption or threshold ratchet was added.
+- Extended post-completion owner proof with distinct acquisition cycles,
+  receipt/result cycle integrity, invalid/missing cycle rejection, exact
+  completion equality, deadline propagation, and interruption cleanup.
+- Added bounded admission/liveness for full dispatch preflight, attested binding,
+  phase deadlines, runtime death/error, task/request/authority/claim drift,
+  failure/retry state, and invalid completion. Pre-existing supervisors release
+  exactly; owned supervisors retain binding through stop. Selector coverage
+  proves no recursive Holo bundle.
+- Replaced the weak claim digest with a v2 integrity-bound lease covering claim
+  ID, issued time, expiry, assignee, and full task context. Added atomic late
+  completion, exact replay, tamper, overlong/bool lease, and assigned-time
+  counterexamples. External route-effect cancellation remains outside this layer.
+- Added one-shot cycle-to-port/receipt tests and a complete 64-shard permutation
+  proof. With three database writer-contention falsifiers, the affected Python
+  surface is **309 passed** before the independent
+  manifest shard. Production controller is
+  673 lines, below its 675 ceiling; `openclaw_supervisor.py` is 3,416, below its
+  3,419 no-growth ceiling. No exemption or threshold ratchet was added.
 
 ## 2026-08-27: Exact-main post-merge controller regressions
 

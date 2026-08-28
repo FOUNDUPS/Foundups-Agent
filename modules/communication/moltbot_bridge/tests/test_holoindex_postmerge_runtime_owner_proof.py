@@ -65,6 +65,7 @@ def _owner_result(
     attempts: int = MAX_OWNER_ATTEMPTS, retried: bool = True,
     retry_reason: str = "SEMANTIC_BACKEND_UNAVAILABLE",
     generation: str = GENERATION, freshness_digest: str = FRESHNESS,
+    acquisition_cycle: int = 0,
 ) -> dict[str, Any]:
     result: dict[str, Any] = {
         "ok": current,
@@ -92,6 +93,7 @@ def _owner_result(
         owner_attempts=attempts,
         owner_retry_performed=retried,
         owner_retry_reason=retry_reason,
+        owner_acquisition_cycle=acquisition_cycle,
     )
     result["query_receipt"] = build_query_receipt(
         source="holoindex_owner_service",
@@ -148,7 +150,7 @@ def test_verified_exhausted_transient_gets_one_immediate_full_reproof(
     )
 
     owner, reason, timeouts = _prove(
-        tmp_path, [transient, _owner_result(current=True)]
+        tmp_path, [transient, _owner_result(current=True, acquisition_cycle=1)]
     )
 
     assert reason == ""
@@ -161,11 +163,11 @@ def test_two_verified_transients_reject_after_exactly_two_proofs(
     tmp_path: Path,
 ) -> None:
     owner, reason, timeouts = _prove(
-        tmp_path, [_owner_result(), _owner_result()]
+        tmp_path, [_owner_result(), _owner_result(acquisition_cycle=1)]
     )
 
     assert owner is None
-    assert reason == "owner_not_current_after_completion"
+    assert reason == "owner_transient_exhausted_after_completion"
     assert len(timeouts) == controller._POSTCOMPLETION_OWNER_PROOF_ATTEMPTS
 
 
@@ -174,10 +176,12 @@ def test_controller_proof_count_is_independent_of_low_level_attempt_policy(
 ) -> None:
     monkeypatch.setattr(verification, "MAX_OWNER_ATTEMPTS", 3)
     transient = _owner_result(attempts=3)
-    owner, reason, timeouts = _prove(tmp_path, [transient, transient])
+    owner, reason, timeouts = _prove(
+        tmp_path, [transient, _owner_result(attempts=3, acquisition_cycle=1)]
+    )
 
     assert owner is None
-    assert reason == "owner_not_current_after_completion"
+    assert reason == "owner_transient_exhausted_after_completion"
     assert len(timeouts) == 2
 
 
@@ -202,7 +206,7 @@ def test_untrusted_stale_or_deterministic_failure_never_retries(
     owner, reason, timeouts = _prove(tmp_path, [result])
 
     assert owner is None
-    assert reason == "owner_not_current_after_completion"
+    assert reason == "owner_result_invalid_after_completion"
     assert len(timeouts) == 1
 
 
@@ -289,6 +293,8 @@ def test_malformed_receipt_bound_error_is_invalid_not_exception(
         ("owner_attempts", True),
         ("owner_retry_performed", []),
         ("owner_retry_reason", {}),
+        ("owner_acquisition_cycle", True),
+        ("owner_acquisition_cycle", 32),
     ],
 )
 def test_malformed_retry_telemetry_is_invalid_not_exception(
@@ -339,6 +345,43 @@ def test_current_wrong_completion_binding_rejects_without_retry(
     assert owner is None
     assert reason == "owner_completion_binding_mismatch"
     assert len(timeouts) == 1
+
+
+def test_completion_reproof_uses_a_distinct_acquisition_cycle(
+    tmp_path: Path,
+) -> None:
+    cycles: list[int] = []
+    results = [_owner_result(), _owner_result(current=True)]
+
+    def query(_payload: Mapping[str, Any], **kwargs: Any) -> Mapping[str, Any]:
+        cycle = kwargs["acquisition_cycle"]
+        cycles.append(cycle)
+        result = dict(results.pop(0))
+        result["owner_acquisition_cycle"] = cycle
+        return _reseal(result)
+
+    owner, reason = controller._prove_completion_owner(
+        query=QUERY, root=tmp_path, completion=COMPLETION, deadline=500.0,
+        clock=FakeClock(), query_runner=query,
+        select_authority=lambda root: _selection(root),
+    )
+
+    assert reason == ""
+    assert owner is not None
+    assert cycles == [0, 1]
+
+
+def test_current_owner_with_wrong_acquisition_cycle_rejects(tmp_path: Path) -> None:
+    owner, reason = controller._prove_completion_owner(
+        query=QUERY, root=tmp_path, completion=COMPLETION, deadline=500.0,
+        clock=FakeClock(),
+        query_runner=lambda *_args, **_kwargs: _owner_result(
+            current=True, acquisition_cycle=1,
+        ),
+        select_authority=lambda root: _selection(root),
+    )
+    assert owner is None
+    assert reason == "owner_acquisition_cycle_mismatch_after_completion"
 
 
 def test_zero_remaining_budget_starts_no_query(tmp_path: Path) -> None:
@@ -418,6 +461,7 @@ def test_owner_proof_baseexception_still_cleans_owned_runtimes(
 ) -> None:
     broker = _Broker()
     clock = FakeClock()
+    released: list[str] = []
     monkeypatch.setattr(
         controller,
         "validate_supervisor_holoindex_postmerge_completion",
@@ -428,6 +472,7 @@ def test_owner_proof_baseexception_still_cleans_owned_runtimes(
         root=tmp_path,
         head=HEAD,
         task_id="holoindex_postmerge_refresh:" + HEAD,
+        authority_root_digest=ROOT_DIGEST,
         query=QUERY,
         timeout_seconds=10.0,
         poll_interval_seconds=0.1,
@@ -439,11 +484,13 @@ def test_owner_proof_baseexception_still_cleans_owned_runtimes(
         clock=clock,
         sleeper=clock.advance,
         git_runner=lambda *_args: (_ for _ in ()).throw(AssertionError("unused")),
+        task_releaser=lambda task_id, _root: released.append(task_id) or "released",
     )
 
     assert result.accepted is False
     assert result.rejection_reasons == ("runtime_exception",)
     assert result.stopped_runtime_ids == ("openclaw_supervisor", "openclaw")
+    assert released == []  # Owned supervisor remains bound until proven stopped.
 
 
 def test_touched_runtime_boundaries_remain_wsp62_bounded() -> None:

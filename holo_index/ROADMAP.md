@@ -2,9 +2,17 @@
 
 ## [2026-08-27] A-grade retrieval truth gate
 
-Exact-main freshness/replica maintenance mechanisms passed at historical main
-`bfcf9041b80be6773951e1c2e07500ebf7c9df62`, generation
-`sha256:7b94cf8a...`; that is not a current operational RSI claim.
+Historical exact-commit freshness/replica maintenance passed at
+`db44f8be3374785341d1c237ec61da774444eb14`, generation
+`sha256:b5a138e0...`. OpenClaw completed the exact task and atomic receipt; a
+fresh governed query returned CURRENT in 3.812 seconds and immutable
+verification retained 33 artifacts / 222,033,165 bytes. The pre-repair
+controller nevertheless returned a false owner rejection. The candidate binds
+the admitted task through supervisor launch/acknowledgment, checks runtime/task
+liveness, exact authority binding, pre-task dependency closure, and distinct
+receipt-bound owner cycles. Focused validation passes; merged current-main replay
+is still required. This is transaction evidence, not accepted RSI.
+
 The earlier
 `66526ae5cdd0467ce264c1db4122ab82eadb7733` cold-owner evidence remains
 historical exact-commit evidence. The
@@ -13,12 +21,7 @@ fresh-process queries completed in approximately 34 seconds each, and one
 pre-warmed governed query completed in 10.3 seconds after a 25.5-second owner
 bootstrap. Full verification retained the exact 33-artifact, 221,204,272-byte
 replica closure unchanged. The previous cold-owner P0 is therefore closed for
-that historical commit without increasing any timeout. At current audited main
-`7e6d33e6`, maintenance/activation/verification and atomic completion passed at
-generation `sha256:84976647...`, but the former single post-completion proof
-returned a false terminal transient rejection. The candidate binds owner retry
-telemetry and permits one deadline-bounded reproof; synthetic validation passes,
-while an exact-main post-merge replay remains required.
+that historical commit without increasing any timeout.
 
 Retrieval quality is not A-grade. The latest governed public run, recorded at
 base `b5b4de05`, passed Recall@8 at `1.0` but failed its `0.95` policy at MRR
@@ -35,8 +38,8 @@ Those floors cannot be weakened. It performs no ranker change, reindex,
 repository write, or promotion. Its facade is backend-content-bound but has no
 non-test/VSIX caller while independent evaluator trust remains unadministered.
 
-Activation and exact-main generation are complete; current post-restart cold
-owner readiness is not. Runtime identity now binds executable content,
+Activation and generation completed for the bound historical commits above;
+candidate exact-current-main replay is not accepted. Runtime identity now binds executable content,
 ABI/platform, exact verified source bytes, dependency build records,
 replica/model closure, and actual controls. Installed dependency payload bytes
 and a persistent authenticated owner remain P0. After that, a separately
@@ -205,14 +208,18 @@ legacy monoliths remain above their domain thresholds.
 > evaluation and are not current production evidence. The 2026-08-27 A-grade
 > section above supersedes their quality and RSI claims.
 
-HoloIndex has undergone a **fundamental transformation** from a search tool into the **autonomous intelligence foundation** for the entire FoundUps ecosystem.
+HoloIndex is the intended **knowledge foundation** for the FoundUps ecosystem;
+the current implementation supplies governed retrieval and candidate evidence,
+not autonomous production learning.
 
 ## Vision: The Green Foundation Board Agent
 > **Status clarification (2025-09-28):** Roadmap phases record planned work. Production today still runs on classical embeddings; quantum items remain future research.
 
 **Phase 1 (Complete)**: Basic semantic search with WSP compliance checking
-**Phase 2 (Complete)**: LLM-powered intelligent guidance and pattern learning
-**Phase 3 (Complete)**: [AI] **HoloDAE Autonomous Intelligence** - Revolutionary breakthrough!
+**Phase 2 (Partial)**: LLM-powered guidance and pattern-observation storage;
+verified learning/promotion is incomplete
+**Phase 3 (Partial)**: [AI] **HoloDAE decision instrumentation**; autonomous
+production intelligence is not established
 **Phase 4 (Current)**: Enhanced intelligence capabilities and cross-module coordination
 **Phase 5 (Next)**: Full ecosystem orchestration and predictive intelligence
 
@@ -221,7 +228,7 @@ HoloIndex has undergone a **fundamental transformation** from a search tool into
 ### Revolutionary Architecture Achieved:
 - [OK] **Request-Driven Intelligence**: Every HoloIndex search triggers automatic analysis
 - [OK] **Autonomous Agent**: HoloDAE runs like YouTube DAE with continuous monitoring
-- [OK] **Chain-of-Thought Logging**: AI logs decisions for recursive self-improvement
+- [OK] **Decision Logging**: observations are stored for separately governed evaluation
 - [OK] **Effectiveness Scoring**: AI evaluates its own performance (0.0-1.0 scores)
 - [OK] **012 Monitoring**: Logs visible for system tweaking and oversight
 - [OK] **Real-time Health Checks**: Automatic dependency audits and module analysis
@@ -234,11 +241,13 @@ HoloIndex has undergone a **fundamental transformation** from a search tool into
 
 ### [OK] HOLODAE AUTONOMOUS INTELLIGENCE (BREAKTHROUGH) - VIBECODING PREVENTION CORE
 - **Status**: Historical mixed-maturity implementation; production RSI unproven
-- **Features**: Chain-of-Thought Algorithm (20/20 MPS), effectiveness scoring, recursive self-improvement
+- **Features**: historical Chain-of-Thought scoring and stored observations;
+  recursive production improvement is unproven
 - **Chain-of-Thought Algorithm**: ENTIRE SYSTEM COORDINATING INTELLIGENCE - logs every decision with reasoning
 - **Effectiveness Scoring**: AI evaluates its own performance (0.44 effectiveness shown in logs)
 - **Integration**: CLI, main.py, continuous monitoring mode
-- **Innovation**: AI learns from logged decisions to improve future behavior
+- **Candidate path**: evaluators may use logged decisions to propose future
+  behavior; no automatic production change occurs
 - **Vibecoding Prevention**: Core coordinating intelligence that prevents vibecoding through intelligent oversight
 
 ### [OK] SEMANTIC SEARCH ENGINE - VIBECODING PREVENTION CORE (18/20 MPS)
@@ -277,10 +286,10 @@ HoloIndex has undergone a **fundamental transformation** from a search tool into
 - **Vibecoding Prevention**: Real-time vibecoding detection through continuous codebase monitoring
 - **Status**: Fully Operational
 
-### [OK] PATTERN COACH - CRITICAL BEHAVIORAL VIBECODING PREVENTION (18/20 MPS)
-- **Status**: Fully Operational + Behavioral Learning
-- **Features**: Behavioral pattern learning, contextual health warnings, reward system integration
-- **Intelligence**: Learns from user behavior, adapts coaching strategies
+### [PARTIAL] PATTERN COACH - BEHAVIORAL VIBECODING OBSERVATION (18/20 MPS)
+- **Status**: Detection/coaching implemented; verified behavioral learning is not
+- **Features**: Pattern observations, contextual health warnings, reward-system integration
+- **Intelligence**: proposes coaching from recorded behavior; production policy does not adapt automatically
 - **Vibecoding Prevention**: PREVENTS BEHAVIORAL VIBECODING PATTERNS - detects when 012 is about to duplicate code
 - **Critical Role**: Behavioral prevention is as important as finding existing code
 
@@ -294,7 +303,8 @@ HoloIndex has undergone a **fundamental transformation** from a search tool into
 
 ### [U+1F534] RED CUBE (19-20 MPS) - MISSION CRITICAL VIBECODING PREVENTION:
 - **Chain-of-Thought Algorithm** (20/20): ENTIRE SYSTEM COORDINATING INTELLIGENCE
-- **Self-Improvement Engine** (20/20): Learns vibecoding patterns
+- **Candidate Evidence Recorder** (20/20 historical MPS): stores vibecoding
+  observations for independent evaluation
 - **HoloDAE Autonomous Agent** (20/20): ENTIRE SYSTEM WORKING TOGETHER
 - **Instance Lock Management** (19/20): Prevents concurrent conflicts
 - **File System Monitoring** (19/20): Real-time vibecoding detection
@@ -480,11 +490,12 @@ HoloIndex Intelligence Platform
 
 ### Phase 3 Completion (Current Sprint)
 - [x] DAE Cube Organizer operational with all 5 DAE types
-- [x] Chain-of-thought logging system for recursive self-improvement
+- [x] Decision logging as candidate evidence; recursive production improvement remains open
 - [x] Effectiveness scoring and decision analysis (0.44 effectiveness demonstrated)
-- [x] Pattern-based coaching learning from user behavior
+- [x] Pattern-based coaching proposals from recorded behavior
 - [x] WSP Master providing comprehensive protocol guidance
-- [x] Sub-second response times for all operations
+- [ ] Sub-second response times for all operations; latest governed semantic
+  p95 is approximately 4.25 seconds and cold six-case execution about 206 seconds
 
 ### Phase 4 Readiness (Next Sprint)
 - [ ] Cross-DAE intelligence and coordination (using chain-of-thought effectiveness data)
@@ -589,7 +600,9 @@ Based on comprehensive analysis of 2026 RAG research papers (arXiv:2506.00054, a
 
 ## Conclusion
 
-HoloIndex has evolved into the **ultimate vibecoding prevention system** through coordinated AI intelligence. The **Chain-of-Thought Algorithm** serves as the coordinating intelligence that makes the entire system work together, logging every decision, evaluating effectiveness, and enabling recursive self-improvement.
+HoloIndex provides a governed retrieval and vibecoding-prevention substrate.
+Decision logging, effectiveness scores, and pattern observations are candidate
+evidence; they do not establish recursive production self-improvement.
 
 **Core Mission**: **HoloIndex stops vibecoding** by enforcing "Research FIRST, Code LAST" through:
 - **Chain-of-Thought Algorithm** (20/20 MPS): Entire system coordinating intelligence
@@ -597,6 +610,9 @@ HoloIndex has evolved into the **ultimate vibecoding prevention system** through
 - **Pattern Coach** (18/20 MPS): Prevents behavioral vibecoding patterns
 - **HoloDAE Autonomous Agent** (20/20 MPS): Entire system working together
 
-HoloDAE serves as the **green LEGO baseboard** that enables construction while continuously preventing vibecoding through logged experience and intelligent oversight.
+HoloDAE is intended as the **green LEGO baseboard** for construction. Current
+logs and oversight propose evidence; independently governed promotion remains required.
 
-**Next Phase**: Enhanced vibecoding prevention through deeper pattern recognition and predictive intervention using accumulated AI learning patterns to stop vibecoding before it occurs.
+**Next Phase**: independently evaluate accumulated observations, admit bounded
+proposals, and prove canary/promotion/rollback/outcome learning before calling
+predictive intervention operational.

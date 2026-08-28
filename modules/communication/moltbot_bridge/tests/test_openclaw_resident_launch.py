@@ -2,6 +2,8 @@ import os
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import pytest
+
 from modules.communication.moltbot_bridge.scripts import launch as openclaw_launch
 
 
@@ -96,9 +98,10 @@ def test_run_openclaw_supervisor_service_uses_supervisor_runtime(monkeypatch, tm
     monkeypatch.setattr(openclaw_launch, "_ensure_broker_bootstrap", lambda: None)
 
     class FakeSupervisor:
-        def __init__(self, repo_root, runtime_mode=None):
+        def __init__(self, repo_root, runtime_mode=None, postmerge_task_id=""):
             created["repo_root"] = repo_root
             created["runtime_mode"] = runtime_mode
+            created["postmerge_task_id"] = postmerge_task_id
 
         def run_forever(self):
             return {"status": "stopped"}
@@ -110,12 +113,75 @@ def test_run_openclaw_supervisor_service_uses_supervisor_runtime(monkeypatch, tm
     )
 
     result = openclaw_launch.run_openclaw_supervisor_service(
-        repo_root=str(tmp_path), runtime_mode="holoindex_postmerge_only"
+        repo_root=str(tmp_path), runtime_mode="holoindex_postmerge_only",
+        postmerge_task_id="holoindex_postmerge_refresh:" + ("a" * 40),
     )
 
     assert created["repo_root"] == tmp_path
     assert created["runtime_mode"] == "holoindex_postmerge_only"
+    assert created["postmerge_task_id"].endswith("a" * 40)
     assert result["status"] == "stopped"
+
+
+def test_register_and_release_postmerge_task_require_attested_runtime(tmp_path):
+    openclaw_launch._supervisor_runtime = None
+    assert openclaw_launch.register_openclaw_supervisor_postmerge_task(
+        "task", tmp_path,
+    ) == "not_ready"
+
+    runtime = MagicMock()
+    runtime.repo_root = tmp_path.resolve()
+    runtime._holoindex_postmerge_only = True
+    runtime.register_holoindex_postmerge_task.side_effect = [True, False]
+    runtime.release_holoindex_postmerge_task.return_value = True
+    openclaw_launch._supervisor_runtime = runtime
+    try:
+        assert openclaw_launch.register_openclaw_supervisor_postmerge_task(
+            "task", tmp_path,
+        ) == "bound"
+        assert openclaw_launch.register_openclaw_supervisor_postmerge_task(
+            "other", tmp_path,
+        ) == "rejected"
+        assert openclaw_launch.release_openclaw_supervisor_postmerge_task(
+            "task", tmp_path,
+        ) == "released"
+    finally:
+        openclaw_launch._supervisor_runtime = None
+
+
+def test_postmerge_binding_rejects_wrong_root_or_general_runtime(tmp_path):
+    runtime = MagicMock()
+    runtime.repo_root = tmp_path.resolve()
+    runtime._holoindex_postmerge_only = False
+    openclaw_launch._supervisor_runtime = runtime
+    try:
+        assert openclaw_launch.register_openclaw_supervisor_postmerge_task(
+            "task", tmp_path,
+        ) == "rejected"
+        runtime._holoindex_postmerge_only = True
+        assert openclaw_launch.register_openclaw_supervisor_postmerge_task(
+            "task", tmp_path / "other",
+        ) == "rejected"
+        runtime.register_holoindex_postmerge_task.assert_not_called()
+    finally:
+        openclaw_launch._supervisor_runtime = None
+
+
+@pytest.mark.parametrize(
+    "module_name",
+    [
+        "modules.communication.moltbot_bridge.src.webhook_receiver",
+        "modules.communication.moltbot_bridge.src.openclaw_supervisor",
+        "modules.communication.moltbot_bridge.scripts.run_task",
+        "modules.infrastructure.idle_automation.src.holoindex_postmerge_executor",
+        "uvicorn",
+    ],
+)
+def test_postmerge_runtime_dependency_preflight_is_fail_closed(
+    monkeypatch, module_name,
+):
+    monkeypatch.setitem(__import__("sys").modules, module_name, None)
+    assert openclaw_launch.openclaw_postmerge_runtime_dependencies_ready() is False
 
 
 def test_stop_openclaw_supervisor_service_calls_stop():

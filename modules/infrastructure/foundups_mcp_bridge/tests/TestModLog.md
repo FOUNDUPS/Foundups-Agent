@@ -1,15 +1,15 @@
 # foundups_mcp_bridge TestModLog
 
-## [2026-08-28] Shared owner acquisition policy reuse
+## [2026-08-28] Owner acquisition cycle falsification
 
-- Extended the existing acquisition reliability suite with exact identity/
-  equality checks proving the root one-shot consumes the shared transient set,
-  two-attempt ceiling, and 300-second operation ceiling.
-- Isolated acquisition result: **22 passed**; expanded bridge result: **84
-  passed / 1 skipped**. Communication tests run in a
-  separate process because the repository's top-level `scripts` packages
-  collide under mixed collection. No live owner, route, Holo, maintenance,
-  repository, or network state was touched.
+- Proved cycle zero preserves the existing pair, cycle one supplies two new
+  ports, and all 32 cycles form a complete 64-port permutation for one process.
+- Proved bool, negative, overflow, and string cycles reject. Existing one-shot
+  coverage in `scripts/tests/test_reddog_holoindex_owner_query_once.py` binds cycle
+  one through both startup attempts into result/receipt and rejects malformed
+  input before owner startup.
+- Isolated acquisition result: **28 passed**. No live owner, route, Holo,
+  maintenance, repository, or network state was touched.
 
 ## [2026-08-28] Inert dependency-runtime falsification
 

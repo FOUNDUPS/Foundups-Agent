@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1601,
+  "total_tests": 1607,
   "quarantined_tests": 268,
   "tests": [
     {
@@ -7196,6 +7196,19 @@
       "description": "Tests for hardening tranche: SOURCE tier, rate limiting, COMMAND fallback.\n\nWSP Compliance:\n  WSP 71  : Secrets Management - Permission fail-closed\n  WSP 95  : WRE Skills Wardrobe Protocol - Security gates\n\nTest Coverage:\n  1. SOURCE tier enforcement via AgentPermissionManager\n  2. Webhook rate limiting (token bucket)\n  3. COMMAND graceful degradation when WRE unavailable"
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_holoindex_postmerge_runtime_admission",
+      "path": "modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_admission.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Controller admission, exact-task acknowledgment, and fail-fast regressions."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_holoindex_postmerge_runtime_controller",
       "path": "modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_controller.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -7207,6 +7220,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_holoindex_postmerge_runtime_liveness",
+      "path": "modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_liveness.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Exact-task and resident-runtime liveness regressions."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_holoindex_postmerge_runtime_owner_proof",
@@ -7576,7 +7602,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_openclaw_wsp109_onboarding_dryrun.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -7589,7 +7615,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_pavs_verification_seam.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -8000,7 +8026,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_authority_runtime_resolver_artifact_supply_bootstrap.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8028,7 +8054,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_bounded_artifact_generation_authority.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8461,7 +8487,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_extension_wre_operational_spine_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8474,7 +8500,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_external_signer_authoritative_use_lease.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8951,7 +8977,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_judgment_verifier_bridge.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [
         "process"
       ],
@@ -8966,7 +8992,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_lane_state_reconciler.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9426,7 +9452,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_operational_context_snapshot.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9439,7 +9465,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_operational_memex_snapshot_supplier.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9915,7 +9941,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_fix_promotion_artifact_handoff.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9928,7 +9954,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [
         "process"
       ],
@@ -10528,7 +10554,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_dispatch_task_executor.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [
         "process"
       ],
@@ -10543,7 +10569,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_execution_security.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10994,7 +11020,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_reader.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11007,7 +11033,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_witness_isolation.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11529,7 +11555,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_executor_dryrun.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11542,7 +11568,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_governed_shell_runner_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11828,6 +11854,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for ROC Candidate Metrics -- Observability-Only Counter\n\nValidates:\n  - Empty input count = 0\n  - Accepted-for-review candidate increments count\n  - Rejected record does not increment\n  - Pending quorum does not increment\n  - Malformed record counted as anomaly\n  - Missing evidence does not infer candidacy\n  - All required WSP 97 labels present\n  - Forbidden consumers present\n  - Export JSON deterministic\n  - Pure function / no filesystem writes\n  - No state mutation\n  - No payout readines"
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_scripts_namespace",
+      "path": "modules/communication/moltbot_bridge/tests/test_scripts_namespace.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Fail-closed package-path regressions for the root script test alias."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_skill_boundary_policy",
@@ -13404,6 +13443,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for the FoundUp LIVE scaffold writer.\n\nSlice: FOUNDUP_SCAFFOLD_WRITER_LIVE_PHASE1\nWSP:   49, 50, 97, 109\n\nA FakeRunner is injected everywhere -- NO real git/gh/worktree/PR executes in CI.\npAccess (paccess_001) is used ONLY as the acceptance fixture."
+    },
+    {
+      "id": "test::modules::foundups::agent::tests::test_grokbot_reddog_tool_provider",
+      "path": "modules/foundups/agent/tests/test_grokbot_reddog_tool_provider.py",
+      "owner": "modules/foundups/agent",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-agent-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for the governed Grok Bot RedDog tool-provider boundary."
     },
     {
       "id": "test::modules::foundups::agent::tests::test_hermes_foundup_builder",
@@ -15694,6 +15746,32 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Regression tests for SQLite runtime pragma behavior in DatabaseManager."
+    },
+    {
+      "id": "test::modules::infrastructure::database::tests::test_holoindex_postmerge_claim_atomicity",
+      "path": "modules/infrastructure/database/tests/test_holoindex_postmerge_claim_atomicity.py",
+      "owner": "modules/infrastructure/database",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-database-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Writer-contention expiry falsifiers for HoloIndex post-merge claims."
+    },
+    {
+      "id": "test::modules::infrastructure::database::tests::test_holoindex_postmerge_claim_security",
+      "path": "modules/infrastructure/database/tests/test_holoindex_postmerge_claim_security.py",
+      "owner": "modules/infrastructure/database",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-database-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Integrity and use-time fencing for HoloIndex post-merge claims."
     },
     {
       "id": "test::modules::infrastructure::database::tests::test_holoindex_postmerge_reserved_namespace",

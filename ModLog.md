@@ -1,5 +1,49 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-28] RedDog/Holo Claim-Clock and RSI Truth Release (0.4.129)
+
+**WSP Protocols:** WSP 00, 05, 06, 15, 22, 34, 48, 50, 62, 64, 83, 84, 97
+
+- WSP_97 subagent audit rejected the first candidate at the actual SQLite
+  boundary: deferred transactions could cross lease expiry after validation.
+  Backend write/row fences now precede claim-clock reads, with three real
+  contention regressions covering issuance, start, and completion.
+- Holo documentation now separates stored observations/proposals from the
+  WSP_48 enhancement/validation/integration/assessment loop. Base-bound
+  maintenance/freshness repair works; retrieval-quality RSI and A-grade do not.
+- All RedDog tiers pass against the final 0.4.129 bytes. The immutable VSIX is
+  `O:\RedDog-Releases\reddog-0.4.129.vsix`, 275,700 bytes at
+  `sha256:7e9bad6a3e02...6c39f4d1e`, with 69 safe unique entries and zero
+  source mismatch.
+- Post-rebase validation pinned the generated shard manifest to LF, removing a
+  Windows-only false stale check without changing the packaged 0.4.129 bytes.
+- Exact-current-main replay, exact runtime closure, renewable external-effect
+  fencing, independent evaluator/proposer trust, promotion, canary, rollback,
+  and outcome learning remain fail-closed follow-on gates.
+
+## [2026-08-28] RedDog/Holo Exact-Task Liveness Candidate (0.4.128)
+
+**WSP Protocols:** WSP 00, 05, 06, 15, 22, 34, 50, 62, 64, 83, 84, 97
+
+- Independent WSP_97 audits found mutable claim identity/expiry, a late
+  completion race, and an over-broad Python namespace repair. The candidate now
+  uses one bounded v2 claim contract, fences first completion atomically in
+  AgentDB, and confines the pytest compatibility alias to the exact repository
+  scripts directory.
+- Exact task and sealed authority bindings now survive launch, liveness,
+  completion, and release. All 64 owner ports are covered by deterministic
+  cycles while the controller retains its fixed two-proof maximum.
+- Affected Python surfaces pass 303 tests, manifest 8, WSP_62 16, canonical
+  registry selection 52, and all RedDog release tiers. The final four-group
+  release completed in 201.201 seconds.
+- `O:\RedDog-Releases\reddog-0.4.128.vsix` is independently verified at
+  275,700 bytes / `sha256:f9fa068d79ff...7ab3ce30f` with 69 safe unique
+  entries and zero source mismatch.
+- This is candidate safety evidence, not A-grade: exact-current-main live
+  replay, runtime exact-closure proof, renewable in-flight effect fencing, and
+  governed retrieval proposer/evaluator/promotion/canary/rollback learning are
+  still separate fail-closed gates.
+
 ## [2026-08-27] HoloIndex Exact-Main Readiness and A-Grade Truth
 
 **WSP Protocols:** WSP 00, 15, 22, 50, 62, 83, 84, 87, 97

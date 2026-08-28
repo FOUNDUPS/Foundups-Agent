@@ -1,17 +1,21 @@
 # foundups_mcp_bridge - ModLog
 
-## 2026-08-28 - Shared owner acquisition policy reuse
+## 2026-08-28 - Receipt-bound owner acquisition cycles
 
-- Moved the existing fixed transient allowlist and 300-second owner-operation
-  ceiling beside the established two-attempt/port-sharding policy. The root
-  one-shot imports the shared values without changing its internal retry,
-  cleanup, route, or receipt behavior.
-- Exposed the same constants to the RedDog post-completion verifier so its one
-  additional full proof cannot drift from owner acquisition policy.
-- Added an exact reuse assertion to the existing acquisition reliability suite;
-  the isolated shard is **22 passed** and the related bridge matrix is **84
-  passed / 1 skipped**. No route, owner, replica, Holo store,
-  maintenance, Git, or network state was changed by tests.
+- Kept the shared two-attempt, 300-second, fixed-transient policy and extended
+  its PID-sharded selector with 32 bounded acquisition cycles. All 64 ports form
+  one deterministic permutation; cycle zero preserves compatibility and cycle
+  one cannot reuse either first-proof shard.
+- The root one-shot rejects bool/out-of-range cycles before owner startup,
+  forwards the exact cycle to both low-level attempts, and seals it into result
+  and query receipt. Communication verification independently enforces range,
+  type, equality, and receipt integrity.
+- The isolated acquisition suite is **28 passed**. No route, owner, replica,
+  Holo store, maintenance, Git, or network state was changed by tests.
+- The activation-order counterexamples, authority boundaries, phase deadlines,
+  supervisor-release race, and remaining recovery limits are recorded in the
+  discoverable
+  [assumption audit](docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md).
   (WSP 00/05/06/11/15/22/34/50/62/64/84/97)
 
 ## 2026-08-28 - Inert dependency-runtime materialization layer
@@ -65,10 +69,10 @@
   child environment, rejected raw site-package links/reparse points, and used
   descriptor-stable source reads. The A-grade gate rejects while installed
   distribution payload bytes remain unverified.
-- The benchmark retains one authenticated owner across its corpus. Current
-  post-restart one-shot queries still fail closed during semantic warm-up at
-  60/180 seconds, superseding the historical exact-commit availability claim
-  for this runtime. Resident owner activation remains P0. No query-time index,
+- The benchmark retains one authenticated owner across its corpus. At this
+  transaction point, post-restart one-shot queries failed closed during
+  semantic warm-up at 60/180 seconds. A later base-bound query superseded that
+  diagnostic for base usability only. Resident owner activation remains P0. No query-time index,
   route, repository, or promotion effect was added.
 - Applied WSP_62 decomposition to owner startup, authenticated health,
   response composition, and owner construction. Every candidate-created or

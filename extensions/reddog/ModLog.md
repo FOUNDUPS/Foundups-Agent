@@ -1,5 +1,53 @@
 # RedDog ModLog
 
+## 2026-08-28 - Claim-clock fencing and RSI truth release (0.4.129)
+
+- Independent WSP_97 review rejected the candidate because SQLite could wait
+  for a writer after lease validation. Claim, start, and completion now acquire
+  `BEGIN IMMEDIATE` before reading the claim clock; PostgreSQL appends `FOR
+  UPDATE`. Three real writer-contention regressions prove issuance starts after
+  the wait and start/completion reject when the wait crosses expiry.
+- Reworded the packaged contract from ambiguous backend “authentication” to
+  integrity binding and reconciled base-bound maintenance/freshness evidence
+  with exact-current-main, exact-runtime, A-grade, and retrieval-RSI blockers.
+- Rebound the 1,363-file backend closure at
+  `6160d5be6d36...5fdaffd8`; the 18-shard contract remains 6,942 lines / 492
+  assertions at `772c72ece00c...e50aa6f0`. The 67-file package is 945,990
+  bytes at `5d7a7f254548...99461e93`.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive four-group release tiers pass; the final release
+  completed in 202.154 seconds.
+- Built and independently inspected
+  `O:\RedDog-Releases\reddog-0.4.129.vsix`: 275,700 bytes at
+  `sha256:7e9bad6a3e02...6c39f4d1e`, 69 entries, no duplicate/unsafe names,
+  and zero package-member byte mismatches. The external-effect lease and full
+  WSP_48 retrieval-learning loop remain unimplemented. (WSP
+  00/05/06/15/22/34/48/50/62/64/83/84/97)
+
+## 2026-08-28 - Exact-task liveness and v2 claim-fence release (0.4.128)
+
+- Bound the admitted AgentDB task and sealed authority digest through launch,
+  liveness, completion, and release. Deterministic owner acquisition cycles use
+  all 64 shards without widening the two-proof controller boundary.
+- Replaced the mutable v1 claim with a v2 integrity binding over claim ID,
+  issued time, expiry, assignee, and complete context. First late completion is
+  rejected atomically; expired cleanup remains possible. This is trusted-store
+  integrity, not a MAC, and it does not cancel an already-started external
+  authority effect.
+- Rebound the 1,363-file backend closure at
+  `61bcfeb6ce69...e16c0d58`, and kept the 18-shard contract at 6,942 lines /
+  492 assertions with identity `16bcddfc83a8...f6557361`.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive four-group release tiers pass; the exact-byte release
+  completed in 201.201 seconds. The 67-file package is 945,990 bytes at
+  `e5eb5e0b0035...bf00d146`.
+- Built and independently inspected
+  `O:\RedDog-Releases\reddog-0.4.128.vsix`: 275,700 bytes at
+  `sha256:f9fa068d79ff...7ab3ce30f`, 69 entries, no duplicate/unsafe names,
+  and zero package-member byte mismatches. Exact-current-main live replay,
+  exact runtime closure, external-effect fencing, retrieval RSI, and A-grade
+  remain blocked. (WSP 00/05/06/15/22/34/50/62/64/83/84/97)
+
 ## 2026-08-28 - Receipt-bound owner reproof release (0.4.127)
 
 - Bound valid owner attempt/retry telemetry into the authenticated Holo query

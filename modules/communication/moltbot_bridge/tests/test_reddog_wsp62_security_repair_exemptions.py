@@ -107,6 +107,7 @@ CURRENT_SECURITY_RUNTIME_FILES = {
     "src/reddog_work_order_signature_verifier.py",
 }
 BOUNDED_DATABASE_SECURITY_FILES = {
+    "modules/infrastructure/database/src/holoindex_postmerge_claim_contract.py",
     "modules/infrastructure/database/src/signed_worker_assurance_completion.py",
     "modules/infrastructure/database/src/signed_worker_assurance_request.py",
     "modules/infrastructure/database/src/signed_worker_assurance_staging.py",

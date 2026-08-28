@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import nullcontext
+import importlib.util
 from pathlib import Path
 import sys
 from types import SimpleNamespace
@@ -10,6 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from holo_index.authority_worktree import AUTHORITY_REPO_ROOT_ENV
+from holo_index.owner_acquisition_contract import OWNER_ACQUISITION_CYCLE_COUNT
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_owner_bootstrap as bootstrap,
 )
@@ -28,7 +30,18 @@ from modules.infrastructure.foundups_mcp_bridge.tests.reddog_holoindex_owner_boo
     _clean_owner_state,
     _full_route,
 )
-from scripts import reddog_holoindex_owner_query_once as owner_query
+OWNER_QUERY_PATH = (
+    Path(__file__).resolve().parents[4]
+    / "scripts"
+    / "reddog_holoindex_owner_query_once.py"
+)
+_OWNER_QUERY_SPEC = importlib.util.spec_from_file_location(
+    "reddog_holoindex_owner_query_reliability", OWNER_QUERY_PATH,
+)
+assert _OWNER_QUERY_SPEC and _OWNER_QUERY_SPEC.loader
+owner_query = importlib.util.module_from_spec(_OWNER_QUERY_SPEC)
+sys.modules[_OWNER_QUERY_SPEC.name] = owner_query
+_OWNER_QUERY_SPEC.loader.exec_module(owner_query)
 
 
 def _fake_windows_registry(monkeypatch: pytest.MonkeyPatch) -> SimpleNamespace:
@@ -232,6 +245,33 @@ def test_same_initial_shard_uses_pid_diversified_retry_shard() -> None:
     ) != owner_query._owner_port_for_attempt(2, process_id=second_pid)
 
 
+def test_reacquisition_cycle_never_reuses_the_first_two_process_shards() -> None:
+    ports = [
+        owner_acquisition.owner_port_for_attempt(
+            attempt, process_id=100, acquisition_cycle=cycle,
+        )
+        for cycle in (0, 1)
+        for attempt in (1, 2)
+    ]
+    assert len(set(ports)) == 4
+
+
+def test_all_reacquisition_cycles_form_one_complete_port_permutation() -> None:
+    assert (
+        owner_acquisition.MAX_OWNER_ACQUISITION_CYCLES
+        == OWNER_ACQUISITION_CYCLE_COUNT
+    )
+    ports = [
+        owner_acquisition.owner_port_for_attempt(
+            attempt, process_id=100, acquisition_cycle=cycle,
+        )
+        for cycle in range(owner_acquisition.MAX_OWNER_ACQUISITION_CYCLES)
+        for attempt in range(1, owner_acquisition.MAX_OWNER_ATTEMPTS + 1)
+    ]
+    assert len(ports) == owner_acquisition.OWNER_PORT_SHARD_COUNT
+    assert len(set(ports)) == owner_acquisition.OWNER_PORT_SHARD_COUNT
+
+
 @pytest.mark.parametrize("attempt", [True, 0, 3])
 def test_owner_port_policy_rejects_invalid_attempt(attempt: object) -> None:
     with pytest.raises(ValueError, match="owner_attempt_invalid"):
@@ -243,4 +283,12 @@ def test_owner_port_policy_rejects_invalid_process_id(process_id: object) -> Non
     with pytest.raises(ValueError, match="owner_process_invalid"):
         owner_acquisition.owner_port_for_attempt(
             1, process_id=process_id,  # type: ignore[arg-type]
+        )
+
+
+@pytest.mark.parametrize("cycle", [True, -1, 32, "1"])
+def test_owner_port_policy_rejects_invalid_acquisition_cycle(cycle: object) -> None:
+    with pytest.raises(ValueError, match="owner_acquisition_cycle_invalid"):
+        owner_acquisition.owner_port_for_attempt(
+            1, process_id=100, acquisition_cycle=cycle,  # type: ignore[arg-type]
         )

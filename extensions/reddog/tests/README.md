@@ -1,5 +1,45 @@
 # RedDog Extension Tests
 
+## 0.4.129 claim-clock fencing and RSI truth release
+
+- SQLite writer acquisition and PostgreSQL row locking precede claim, start,
+  and completion time checks. Three contention regressions cover delayed claim
+  issuance and start/completion waits crossing expiry.
+- Affected Python surfaces pass 309 tests, the manifest shard passes 8,
+  WSP_62 passes 16, and the canonical registry is 1,607 tests / 268
+  quarantined entries with its focused 52-test selection passing.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive 4-group release tiers pass in 202.154 seconds. The
+  backend digest is `6160d5be6d36...5fdaffd8`; contract identity is
+  `772c72ece00c...e50aa6f0`.
+- The generated contract-shard manifest is pinned to LF in `.gitattributes`,
+  so a Windows rebase cannot create a false stale-manifest failure.
+- Package identity is 67 files / 945,990 bytes at
+  `5d7a7f254548...99461e93`. `O:\RedDog-Releases\reddog-0.4.129.vsix` is
+  275,700 bytes at `sha256:7e9bad6a3e02...6c39f4d1e`; independent inspection
+  found 69 safe unique entries and no member-byte mismatch.
+- These tests do not prove exact-current-main replay, exact runtime closure,
+  renewable external-effect fencing, retrieval RSI, or A-grade quality.
+
+## 0.4.128 exact-task liveness and v2 claim-fence release
+
+- The authenticated 1,363-file backend closure binds exact task/authority
+  liveness, bounded owner acquisition cycles, v2 claim integrity, atomic late
+  first-completion rejection, and exact supervisor release.
+- Affected Python surfaces pass 303 tests, the independent manifest shard passes
+  8, WSP_62 passes 16, and the canonical registry is 1,605 tests / 268
+  quarantined entries with its focused 52-test selection passing.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive 4-group release tiers pass. The final release wall is
+  201.201 seconds; the 18-shard contract is `16bcddfc83a8...f6557361`.
+- Package identity is 67 files / 945,990 bytes at
+  `e5eb5e0b0035...bf00d146`. `O:\RedDog-Releases\reddog-0.4.128.vsix` is
+  275,700 bytes at `sha256:f9fa068d79ff...7ab3ce30f`; independent inspection
+  found 69 entries, no duplicates/unsafe paths, and no member-byte mismatch.
+- These tests do not establish exact-current-main replay, authenticated runtime
+  exact closure, cancellation of in-flight external effects, retrieval RSI, or
+  A-grade quality.
+
 ## 0.4.127 receipt-bound owner reproof release
 
 - The authenticated 1,357-file backend closure binds owner attempt count,

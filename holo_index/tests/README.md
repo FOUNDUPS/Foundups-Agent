@@ -26,10 +26,11 @@ live Holo store.
 - Keep unit tests deterministic; avoid external model/network dependencies.
 - Integration tests run only when model assets are available and explicitly enabled.
 
-`test_holoindex_query_receipt.py` proves valid owner attempt/retry telemetry is
-inside the receipt digest. Root one-shot and communication tests separately
-prove malformed or top-level-only telemetry cannot authorize a controller
-reproof. Query-receipt plus root one-shot coverage is 68 passed.
+`test_holoindex_query_receipt.py` proves valid owner attempt/retry/cycle
+telemetry is inside the receipt digest. Root one-shot and communication tests
+separately prove malformed, out-of-range, unequal, or top-level-only telemetry
+cannot authorize a controller reproof. Query-receipt plus one-shot cycle
+coverage is 77 passed.
 
 ### Query replica boundary
 

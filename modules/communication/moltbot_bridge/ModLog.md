@@ -1,30 +1,35 @@
 # ModLog - moltbot_bridge
 
-## 2026-08-28: Bounded post-completion owner readiness recovery
+## 2026-08-28: Exact-task liveness and owner-reacquisition closure
 
-- Preserved the exact `7e6d33e6` evidence: maintenance, replica activation,
-  verification, and atomic completion succeeded at generation
-  `sha256:84976647...`; the pre-repair controller rejected one transient owner
-  proof, while a later governed query returned CURRENT with the same binding in
-  3.89 seconds.
-- Reused the shared two-attempt/300-second owner acquisition policy. The
-  controller now permits one immediate second full proof only for a receipt-
-  verified exhausted allowlisted transient. Both proofs share the original
-  budget; no sleep, route, database, maintenance, or Git authority was added.
-- Hardened owner-result verification so error and exact owner attempt/retry
-  telemetry must equal their receipt-bound values. Stale/rejected authority,
-  deterministic/malformed/forged
-  results, completion mismatch, deadline exhaustion, and `BaseException`
-  remain fail closed with existing cleanup and final Git checks.
-- Added a distinct bounded owner-proof regression file. The file is **24
-  passed**; expanded communication validation is **148 passed**, bridge
-  validation is **84 passed / 1 skipped**, query-receipt plus one-shot is **68
-  passed**, and the exact WSP_62 suite is **16 passed**. A mixed process
-  reproduced the known top-level `scripts`
-  namespace collision, so package shards remain isolated. Live replay is
-  required after merge. (WSP 00/05/06/11/15/22/34/50/62/64/84/97)
-- Repository-bound execution evidence is attached at
-  `docs/audits/infrastructure/REDDOG_HOLO_OWNER_REPROOF_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+- Preserved exact-main `db44f8be` evidence: OpenClaw completed maintenance and
+  atomic completion at generation `sha256:b5a138e0...`; the controller rejected
+  its immediate proof, while a fresh governed query returned the same CURRENT
+  binding in 3.812 seconds and immutable verification retained 33 artifacts /
+  222,033,165 bytes. This was a controller false-negative, not failed repair.
+- Passed the admitted task and sealed authority digest through broker launch,
+  same-root/Holo-only acknowledgment, and every liveness read. Pre-existing
+  bindings release exactly; owned supervisors remain bound until thread-dead
+  stop. The full supervisor/dispatch/executor import chain now fails before task
+  creation. Runtime/task/claim drift rejects on 60-second admission bounds or
+  the canonical 7,500-second v2 integrity-bound AgentDB claim lease instead of
+  the four-hour ceiling. Claim identity/issued time/expiry now share the digest,
+  stored assignment time must match issuance, and first late completion rejects
+  atomically; this is deterministic integrity, not a MAC against a DB writer.
+- Reused the two-attempt owner policy while adding deterministic acquisition
+  cycles. Controller proof zero and proof one use four distinct process shards;
+  cycle telemetry is integrity-bound into result and receipt and independently
+  revalidated. Holo-family selection no longer recursively loads HoloIndex.
+- Added bounded exact-cycle, admission, liveness, launch, supervisor, selector,
+  receipt, owner-proof, claim-fence, and package-path regressions; the affected
+  Python surface is **303 passed** before the independent manifest shard.
+  The pytest-only top-level `scripts` alias appends exactly the repository-root
+  scripts directory; normal imports do not extend the namespace and foreign
+  `sys.path` script trees are rejected.
+  Merged exact-main replay remains required. No route, maintenance, Git, model,
+  Hermes, or promotion authority was added. Runtime exact closure and retrieval
+  RSI remain open. An in-flight external authority effect is not yet renewable,
+  cancellable, or rechecked at every route CAS. (WSP 00/05/06/15/22/34/50/62/64/84/97)
 
 ## 2026-08-27: Exact-main post-merge operator hardening
 
