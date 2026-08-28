@@ -6,6 +6,13 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 ## Holo retrieval runtime identity
 
+The shared owner-acquisition policy owns the two-attempt ceiling, 300-second
+operation ceiling, PID-sharded ports, and exact transient allowlist consumed by
+both the supported one-shot and RedDog's post-completion verifier. Policy is no
+longer duplicated in the root script. This does not make every owner failure
+retryable: only independently verified exhausted allowlisted transients may
+enter the controller's one immediate reproof.
+
 The private query owner emits a secret-free
 `runtime_environment_digest` computed inside the authenticated child. It binds
 the exact executable content, ABI/platform, verified backend source closure,

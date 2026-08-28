@@ -1,5 +1,18 @@
 # RedDog Extension Tests
 
+## 0.4.127 receipt-bound owner reproof release
+
+- The authenticated 1,357-file backend closure binds owner attempt count,
+  retry flag/reason, error, semantic evidence, and authority into the query
+  receipt before the controller can admit one deadline-bounded reproof.
+- Fast 14/14, conversation 32/32, contract 3/3, deterministic package, and
+  exhaustive 4/4 release groups pass. The 18-shard contract has 6,942 lines /
+  492 assertions at `e8fccaa6791e...d3a03e2`; package identity is 67 files /
+  945,836 bytes at `f080f99bb960...8831d`.
+- `O:\RedDog-Releases\reddog-0.4.127.vsix` is 275,672 bytes at
+  `sha256:287853f6e933...6b830`. Archive inspection found 69 entries, no
+  duplicate/unsafe names, zero source-byte mismatches, and version 0.4.127.
+
 ## 0.4.126 exact-main post-merge lifecycle release
 
 - The authenticated 1,357-file backend closure binds direct two-spec OpenClaw

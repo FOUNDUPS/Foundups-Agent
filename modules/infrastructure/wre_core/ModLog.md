@@ -1,6 +1,14 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-08-28] - REDDOG OWNER-PROOF REGISTRY REPROJECTION
+
+- Registered the distinct post-completion owner-proof falsifier after staging
+  exact Git identity: **1,601 registered / 268 quarantined**.
+- Generator write/check and the registry/differential/indexing selection pass
+  **94/94** without relaxing capability, quarantine, shard, collection, timeout,
+  or execution policy. (WSP 5/6/22/50/62/87/97)
+
 ### [2026-08-27] - HOLO LARGE-FILE PROOF REGISTRY HARDENING
 
 - Reprojected the canonical registry after the Holo large-file health proof was

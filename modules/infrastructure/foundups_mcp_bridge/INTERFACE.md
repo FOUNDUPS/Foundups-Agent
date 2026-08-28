@@ -8,7 +8,7 @@ Owner health/query success includes a canonical `runtime_environment_digest`
 computed in the authenticated child from its executable, ABI/platform,
 backend/distribution records, replica/model closure, and allowlisted controls.
 Only the digest crosses the trust boundary. Exact closure remains a separate
-false-by-default predicate rejected until every payload byte/control is proven.
+false-by-default predicate rejected until every payload byte/control is proven. `reddog_holoindex_owner_acquisition` exports the shared two-attempt, 300-second, fixed-transient policy consumed by the root one-shot and communication proof; the values grant no query, retry, route, maintenance, or repository authority.
 
 ### `materialize_dependency_runtime(...) -> DependencyRuntimeMaterializationResult`
 

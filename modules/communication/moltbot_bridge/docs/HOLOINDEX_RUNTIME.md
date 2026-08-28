@@ -31,6 +31,16 @@ interrupted paths; owned supervisor stops before owned resident, and success is
 revoked unless every owned broker thread is dead. Rejected CLI operations exit
 nonzero and expose fixed secret-free reasons.
 
+After exact atomic completion, owner readiness uses at most two controller
+proofs inside one budget capped by both the remaining transaction deadline and
+300 seconds from first proof. Only a fully receipt-integrity, authority,
+semantic-evidence, and error-bound failure that exhausted both lower-level
+owner attempts with an allowlisted transient reason admits the immediate second
+proof. There is no sleep. Wrong completion generation/freshness, stale or
+rejected authority, deterministic failure, malformed/forged evidence, and an
+expired budget reject after the first observation. The lower-level two-attempt
+owner acquisition remains independently bounded inside each proof.
+
 ## Owner response binding
 
 `query_holoindex_owner(...)` requires descriptor digest, generation ID, replica
@@ -49,10 +59,16 @@ Committed authority permits caller overlays; `clean_workspace_head` does not.
 
 ## Current truth and scale
 
-Exact-main `5e0835c690e0f4f1712c7021a75abdc35aadeca0` completed through
-the real OpenClaw supervisor at generation `sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915`. A governed
-query returned CURRENT/no-gap/no-reindex in 3.75 seconds; full revalidation
-preserved 33 artifacts / 221,734,133 bytes. Evidence is commit-bound.
+Exact-main `7e6d33e677aac14b5f3b97c2caf87d3aeb8941ea` completed maintenance,
+activation, verification, and atomic completion through the real OpenClaw
+supervisor at generation
+`sha256:84976647513dfa4748c0d4a74111d7dbafe5475ed2c201a4a2b1c614447f6e53`.
+The pre-repair controller then rejected its single independent owner proof. A
+later governed query returned CURRENT/no-gap/no-reindex with that exact
+generation and freshness receipt in 3.89 seconds, proving a controller
+false-negative rather than a failed maintenance transaction. The bounded
+reproof candidate has synthetic closure only; a post-merge live transaction is
+still required. Evidence is commit-bound.
 
 The runtime-environment digest covers executable, ABI/platform, verified RedDog
 source, distribution build records, replica/model artifacts, and allowlisted

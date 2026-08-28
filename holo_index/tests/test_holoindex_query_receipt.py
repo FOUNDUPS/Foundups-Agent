@@ -266,6 +266,27 @@ def test_query_receipt_does_not_claim_reindex_or_command_authority() -> None:
     assert "subprocess" not in receipt
 
 
+def test_query_receipt_binds_valid_owner_acquisition_telemetry() -> None:
+    receipt = build_query_receipt(
+        source="holoindex_owner_service",
+        source_class=SOURCE_CLASS_HOLOINDEX,
+        query="owner readiness",
+        result={
+            "ok": False,
+            "freshness": "UNKNOWN",
+            "error": "SEMANTIC_BACKEND_UNAVAILABLE",
+            "owner_attempts": 2,
+            "owner_retry_performed": True,
+            "owner_retry_reason": "SEMANTIC_BACKEND_UNAVAILABLE",
+        },
+        require_generation=True,
+    )
+
+    assert receipt["owner_attempts"] == 2
+    assert receipt["owner_retry_performed"] is True
+    assert receipt["owner_retry_reason"] == "SEMANTIC_BACKEND_UNAVAILABLE"
+
+
 def test_query_receipt_preserves_adapter_stale_reasons() -> None:
     receipt = build_query_receipt(
         source="holoindex",

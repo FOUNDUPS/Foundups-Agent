@@ -1,0 +1,142 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "7e6d33e677aac14b5f3b97c2caf87d3aeb8941ea"
+  },
+  "execution_id": "REDDOG_HOLO_OWNER_REPROOF_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "receipt_bound_postcompletion_owner_reproof",
+    "candidate_contract": "verified",
+    "exact_main_live_replay": "required_after_merge",
+    "maintenance_replica_rsi": "commit_bound_mechanism_only",
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "runtime_environment_exact_closure_verified": false,
+    "resident_authenticated_owner": false,
+    "live_route_changed": false,
+    "release_version": "0.4.127"
+  },
+  "wsp15_allocation": {
+    "complexity": 2,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 17,
+    "priority": "P0",
+    "decision": "close the exact false-negative owner-readiness boundary before any A-grade or RSI claim"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_11_WRE_Standard_Command_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_64_Violation_Prevention_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 strict awakening passed at coherence 0.734 before the slice.",
+      "Governed Holo was CURRENT, no-gap, and no-reindex at exact base 7e6d33e677aac14b5f3b97c2caf87d3aeb8941ea, generation sha256:84976647513dfa4748c0d4a74111d7dbafe5475ed2c201a4a2b1c614447f6e53.",
+      "The first broad retrieval was noisy and omitted Tier-0 docs; the targeted query ranked the exact controller and tests first. Direct current docs and NAVIGATION supplied the missing artifacts without reindexing.",
+      "The real base transaction completed maintenance, activation, verification, and atomic completion, but one transient owner proof produced a false terminal rejection; a later governed query returned the same CURRENT binding in 3.89 seconds."
+    ],
+    "research": [
+      "The existing two-attempt acquisition policy, owner one-shot, query receipt, result verifier, and postmerge controller were reused rather than creating a parallel readiness system.",
+      "Independent WSP_97 review rejected the first candidate for malformed-type exceptions, pre-selection deadline accounting, coupling controller proofs to low-level attempts, and unbound retry telemetry.",
+      "The repaired receipt binds exact valid owner attempt count, retry flag, and retry reason; top-level-only forgery and malformed values cannot authorize reproof.",
+      "Documentation drift that called historical maintenance evidence current operational RSI was corrected to commit-bound mechanism evidence with exact-main replay still pending."
+    ],
+    "micro_pass": [
+      "Owner-result consumers passed 148 tests; related bridge lifecycle passed 84 with 1 capability skip; query-receipt plus root one-shot passed 68; the distinct owner-proof file passed 24.",
+      "The exact WSP_62 exemption suite passed 16 tests. Differential review kept _base_query_receipt_payload at its 50-line base ceiling, controller at 605 lines/max function 43, verifier at 229/33, acquisition at 129/25, and root one-shot at 765/47.",
+      "The backend manifest generator passed 8 tests and reproduced 1,357 files at sha256:b9fa4e50c87d70483aebeea7b3fcb3c221db28f2c64ea5348fe2e63ed56b3ad5.",
+      "The canonical staged-index registry is current at 1,601 tests with 268 quarantined; registry, differential, impact, runtime, and Holo indexing tests passed 94.",
+      "Independent WSP_00/WSP_97 audit returned GO after replaying all four adversarial counterexamples and 349 focused/expanded passes."
+    ],
+    "macro_pass": [
+      "RedDog fast 14-member, conversation 32-test, contract 3-member, deterministic package, and contract-shard tiers passed.",
+      "The exhaustive four-group RedDog release verifier passed in 195.725 seconds without group or release timeout.",
+      "The 18-shard contract has 6,942 lines and 492 assertions at sha256:e8fccaa6791e8c04ef67af51ed2f6a2ba16b3c7ffc87aaebee8e332ebd3a03e2.",
+      "The exact 67-file package surface is 945,836 bytes at sha256:f080f99bb960835873b69e8a20705b83b315171a17938e7a57d53ccef7c8831d.",
+      "O:/RedDog-Releases/reddog-0.4.127.vsix is 275,672 bytes at sha256:287853f6e933fe1e508bed62b95248c1d21817364fcd46ece0c3a52b6bc6b830; read-only inspection found 69 entries, 67 package members, no duplicate or unsafe names, zero source-byte mismatches, and package version 0.4.127.",
+      "No live Holo maintenance, route activation, reindex, extension install, model/provider call, OpenClaw work dispatch, Hermes dispatch, or promotion occurred."
+    ],
+    "hard_think": [
+      "Availability recovery is not RSI: a bounded second proof can remove a false negative but cannot propose, evaluate, promote, canary, roll back, or learn retrieval changes.",
+      "A self-hashed query receipt supplies integrity and exact binding within the trusted owner process; it is not independent signer authority or runtime exact-closure proof.",
+      "The controller proof limit must remain exactly two even if low-level acquisition attempts evolve; lower-level exhaustion is only a retry-admission predicate.",
+      "The remaining stage-zero runtime closure and WRE evidence admission must be separate focused transactions."
+    ],
+    "dialectic_sweep": [
+      "Retrying every failure would improve apparent availability but would turn deterministic, stale, malformed, or forged evidence into effects; only a verified allowlisted exhausted transient qualifies.",
+      "Trusting top-level retry counters was smaller code but permitted forged exhaustion; telemetry had to enter the existing query-receipt digest before return.",
+      "Reusing MAX_OWNER_ATTEMPTS for controller proofs appeared consistent but silently broadened controller authority when acquisition policy changes; a fixed local two-proof ceiling is safer.",
+      "Increasing the WSP_62 interface or function exemptions would hide candidate debt; documentation was compressed to exact ceilings and the 51-line function was restored to 50."
+    ],
+    "first_principles": [
+      "One exact completion may receive no more than two controller proofs inside min(transaction deadline, first proof start plus 300 seconds).",
+      "Authority selection time consumes the same proof budget and a consumed budget starts no query.",
+      "The immediate second proof requires receipt-bound exact error and acquisition telemetry plus shared-policy exhaustion and an allowlisted transient reason.",
+      "CURRENT must match the exact completion generation and freshness receipt; every other mismatch rejects without retry.",
+      "This slice is complete only as candidate code and release evidence; clean exact-main live replay remains an explicit post-merge gate."
+    ],
+    "execute": [
+      "holo_index/query_receipt.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_owner_acquisition.py",
+      "scripts/reddog_holoindex_owner_query_once.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_owner_result_verification.py",
+      "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py",
+      "modules/communication/moltbot_bridge/tests/test_holoindex_postmerge_runtime_owner_proof.py",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/backend_compatibility_constants.js"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_6",
+    "WSP_11",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_64",
+    "WSP_83",
+    "WSP_84",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_OWNER_REPROOF_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/doc_index.json",
+    "NAVIGATION.py",
+    "holo_index/README.md",
+    "holo_index/INTERFACE.md",
+    "holo_index/ROADMAP.md",
+    "holo_index/ModLog.md",
+    "modules/communication/moltbot_bridge/README.md",
+    "modules/communication/moltbot_bridge/INTERFACE.md",
+    "modules/communication/moltbot_bridge/ROADMAP.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

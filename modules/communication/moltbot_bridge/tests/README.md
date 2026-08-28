@@ -2,6 +2,17 @@
 
 ## Exact-main post-merge lifecycle
 
+`test_holoindex_postmerge_runtime_owner_proof.py` owns the distinct
+post-completion readiness contract. It proves one fully receipt-bound exhausted
+transient can receive exactly one immediate reproof, both queries share the
+remaining transaction/300-second budget, and two transients remain terminal.
+Rejected authority, stale/deterministic/malformed/forged results, wrong
+completion generation or freshness digest, zero/consumed budgets, and
+`KeyboardInterrupt`/`SystemExit` all reject without weakening owned-runtime
+cleanup. It also pins the controller below the communication WSP_62 ceiling.
+The focused owner-proof file passes 24 tests; the expanded owner-result consumer
+matrix is 148 passed. Query-receipt plus root one-shot coverage is 68 passed.
+
 `test_holoindex_postmerge_runtime_controller.py` proves dirty/non-main
 admission closes before query effects, an already-CURRENT owner starts no
 runtime, transaction-owned OpenClaw runtimes start and stop in dependency order,

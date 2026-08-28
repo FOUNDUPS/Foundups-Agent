@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-08-28: Bounded post-completion owner readiness recovery
+
+- Preserved the exact `7e6d33e6` evidence: maintenance, replica activation,
+  verification, and atomic completion succeeded at generation
+  `sha256:84976647...`; the pre-repair controller rejected one transient owner
+  proof, while a later governed query returned CURRENT with the same binding in
+  3.89 seconds.
+- Reused the shared two-attempt/300-second owner acquisition policy. The
+  controller now permits one immediate second full proof only for a receipt-
+  verified exhausted allowlisted transient. Both proofs share the original
+  budget; no sleep, route, database, maintenance, or Git authority was added.
+- Hardened owner-result verification so error and exact owner attempt/retry
+  telemetry must equal their receipt-bound values. Stale/rejected authority,
+  deterministic/malformed/forged
+  results, completion mismatch, deadline exhaustion, and `BaseException`
+  remain fail closed with existing cleanup and final Git checks.
+- Added a distinct bounded owner-proof regression file. The file is **24
+  passed**; expanded communication validation is **148 passed**, bridge
+  validation is **84 passed / 1 skipped**, query-receipt plus one-shot is **68
+  passed**, and the exact WSP_62 suite is **16 passed**. A mixed process
+  reproduced the known top-level `scripts`
+  namespace collision, so package shards remain isolated. Live replay is
+  required after merge. (WSP 00/05/06/11/15/22/34/50/62/64/84/97)
+- Repository-bound execution evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_OWNER_REPROOF_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27: Exact-main post-merge operator hardening
 
 - Closed incidental bootstrap effects by replacing main bootstrap plus ambient

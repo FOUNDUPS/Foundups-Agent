@@ -230,6 +230,10 @@ so it is not an operational RSI loop. The source-ranker digest also does not
 yet bind the owner Python executable, ABI/platform, exact dependency manifest,
 backend builds, or deterministic execution knobs; that reproducibility layer
 must be sealed once and carried as a separate runtime-environment digest.
+Owner-service query receipts bind valid acquisition attempt count, retry flag,
+and retry reason; malformed telemetry is omitted and cannot authorize a
+post-completion reproof. This closes retry-evidence integrity, not the missing
+exact runtime closure, evaluator independence, promotion, or learning loop.
 
 ### Operational Storage and Restricted-Worker Queries (2026-07-18)
 

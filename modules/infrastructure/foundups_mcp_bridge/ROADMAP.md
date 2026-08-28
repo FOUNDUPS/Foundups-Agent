@@ -1,5 +1,15 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-28: Shared owner readiness policy
+
+The owner-acquisition boundary now centrally exports the exact transient set,
+two-attempt ceiling, and 300-second operation ceiling used by both the root
+one-shot and RedDog's bounded post-completion verifier. The root script no
+longer defines a parallel policy. Synthetic communication and infrastructure
+shards pass; exact-main live replay remains a separate gate. This is bounded
+availability hardening, not resident ownership, horizontal scale, exact runtime
+closure, A-grade admission, or retrieval RSI.
+
 ## 2026-08-28: Inert exact dependency-payload generation
 
 **Implemented with production-shape and exact real-byte evidence; this is not

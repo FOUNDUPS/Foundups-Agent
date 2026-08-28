@@ -7,7 +7,7 @@ from typing import Mapping
 
 from holo_index.authority_worktree import AUTHORITY_REPO_ROOT_ENV
 
-from .holo_query_service_supervisor import DEFAULT_OWNER_PORT
+from .holo_query_service_supervisor import DEFAULT_OWNER_PORT, PORT_IN_USE_ERROR
 from .reddog_holoindex_owner_replica_route import (
     QUERY_REPLICA_ROOT_ENV,
     QUERY_REPLICA_ROUTE_FILE_ENV,
@@ -16,6 +16,16 @@ from .reddog_holoindex_owner_replica_route import (
 
 OWNER_PORT_SHARD_COUNT = 64
 MAX_OWNER_ATTEMPTS = 2
+OWNER_OPERATION_TIMEOUT_SECONDS = 300.0
+TRANSIENT_OWNER_ERRORS = frozenset(
+    {
+        "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
+        PORT_IN_USE_ERROR,
+        "QUERY_OWNER_POISONED",
+        "SEMANTIC_BACKEND_UNAVAILABLE",
+        "HOLOINDEX_TIER0_LOOKUP_FAILED",
+    }
+)
 _QUERY_ROUTE_NAMES = (
     AUTHORITY_REPO_ROOT_ENV,
     QUERY_REPLICA_ROOT_ENV,
@@ -111,7 +121,9 @@ def owner_port_for_attempt(
 
 __all__ = [
     "MAX_OWNER_ATTEMPTS",
+    "OWNER_OPERATION_TIMEOUT_SECONDS",
     "OWNER_PORT_SHARD_COUNT",
+    "TRANSIENT_OWNER_ERRORS",
     "build_owner_query_environment",
     "owner_port_for_attempt",
 ]

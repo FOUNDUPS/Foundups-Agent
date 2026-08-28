@@ -12,7 +12,15 @@ OpenClaw specs without entering main/MCP bootstrap.
 The owner path binds replica, ranker, runtime-environment, HEAD/root/generation,
 and no-reindex evidence; raw buckets never enter Fusion.
 
-At exact main `5e0835c690e0f4f1712c7021a75abdc35aadeca0`, the real
+After exact completion, one fully receipt-bound exhausted transient may receive
+one immediate reproof inside the original 300-second/transaction deadline; all
+other failures reject. At exact main `7e6d33e677aac14b5f3b97c2caf87d3aeb8941ea`,
+maintenance/activation/verification completed at generation `sha256:84976647...`,
+but the former single proof rejected before a governed query returned the same
+CURRENT binding in 3.89 seconds. The candidate is synthetically closed; live
+exact-main replay is required, and exact runtime closure/RSI/A-grade remain false.
+
+Historical exact main `5e0835c690e0f4f1712c7021a75abdc35aadeca0` also ran the real
 OpenClaw transaction produced generation `sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915`; a governed query
 returned CURRENT/no-gap/no-reindex in 3.75 seconds and revalidation preserved
 33 artifacts / 221,734,133 bytes. Runtime exact closure remains false, so this

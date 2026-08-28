@@ -62,7 +62,9 @@ Exact opt-in evidence on this slice:
   mutation, exact owner-port validation/propagation, bounded contention retry,
   distinct per-process retry ports, and one representative same-first-shard
   PID pair that diverges on retry. The 4,032 ordered pairs are explicitly not
-  globally unique.
+  globally unique. It also proves the root one-shot imports the exact shared
+  attempt ceiling, operation ceiling, and transient set instead of maintaining
+  a parallel policy. The focused isolated shard is **22 passed**.
 - Existing one-shot, bootstrap, and candidate-acceptance suites prove the new
   environment and port seams preserve strict route, freshness, cleanup, and
   isolated-candidate behavior. Final delta result: **119 passed**; the new owner

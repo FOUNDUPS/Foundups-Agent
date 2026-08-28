@@ -621,6 +621,12 @@ def test_transient_bootstrap_exhaustion_returns_bound_receipt(
     assert result["authority_repo_head_sha"] == "c" * 40
     assert result["query_receipt"]["receipt_id"].startswith("sha256:")
     assert result["query_receipt"]["query"] == "audit pfmall"
+    assert result["query_receipt"]["owner_attempts"] == 2
+    assert result["query_receipt"]["owner_retry_performed"] is True
+    assert (
+        result["query_receipt"]["owner_retry_reason"]
+        == "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP"
+    )
     assert result["no_authority_worktree_mutation_performed"] is True
 
 

@@ -2,14 +2,17 @@
 
 ## Status
 
-Phase: RedDog 0.4.126 resident architect thin-client surface.
+Phase: RedDog 0.4.127 resident architect thin-client surface.
 
-0.4.126 authenticates exact atomic post-merge completion and direct
-OpenClaw-only registration without main/MCP bootstrap. The bounded operator
-controller is not an extension command. A
+0.4.127 authenticates receipt-bound post-completion transient recovery while
+preserving exact atomic completion and direct OpenClaw-only registration. The
+bounded operator controller is not an extension command. A
 trusted stage-zero verifier must still bind the full runtime, signature, and
 empirical write denial, while normal operation still needs one persistent
 owner and independently governed retrieval RSI.
+The receipt/reproof repair is synthetically and adversarially closed; one clean
+exact-main post-merge replay remains the acceptance gate. No package test or
+VSIX artifact substitutes for that live commit-bound proof.
 
 Current implementation:
 

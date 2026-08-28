@@ -1,5 +1,15 @@
 # HoloIndex Package ModLog
 
+## [2026-08-28] Owner acquisition receipt binding
+
+- Query receipts now integrity-bind valid owner attempt count, retry flag, and
+  retry reason. The owner one-shot attaches telemetry before receipt creation,
+  so top-level-only forgery and malformed list/dict/bool values fail closed.
+- Focused query-receipt plus root one-shot coverage is **68 passed**; expanded
+  owner consumers are **148 passed**. This closes a retry-proof integrity gap,
+  but does not claim exact runtime closure, A-grade retrieval, or RSI.
+  (WSP 00/15/22/50/62/64/84/97)
+
 ## [2026-08-27] Large-file health proof repair
 
 - Repaired the manual WSP_62/WSP_87 health proof after validation exposed a
