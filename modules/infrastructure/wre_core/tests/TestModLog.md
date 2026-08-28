@@ -1,5 +1,12 @@
 # TestModLog - wre_core/tests
 
+## 2026-08-28: RedDog owner-proof registry reprojection
+
+- Added the tracked, distinct post-completion proof suite to the canonical
+  projection: **1,601 total / 268 quarantined**.
+- Generator write/check plus registry, differential planning/impact/runtime,
+  and Holo registry indexing pass **94/94**. No registry execution occurred.
+
 ## 2026-08-27: Holo large-file proof registry hardening
 
 - The canonical registry is current at **1,591 total / 267 quarantined** after

@@ -78,6 +78,9 @@ closure. `retrieval_ranker_digest_for_root(root)` computes the clean candidate
 digest; `loaded_retrieval_ranker_digest()` computes the digest from module
 origins actually imported by the owner. Retrieval benchmark query receipts
 must carry the latter and equal the former.
+Owner-service receipts additionally bind exact acquisition attempt/retry
+telemetry when valid; consumers reject malformed, missing, or top-level-only
+telemetry before it can authorize a second post-completion proof.
 This contract binds source bytes only. It does not yet identify the owner
 executable or exact SentenceTransformers/Transformers/Torch/NumPy/backend
 environment, so accepted source identity is not complete reproducibility or

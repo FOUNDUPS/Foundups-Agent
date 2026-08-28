@@ -1,5 +1,19 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-28 - Shared owner acquisition policy reuse
+
+- Moved the existing fixed transient allowlist and 300-second owner-operation
+  ceiling beside the established two-attempt/port-sharding policy. The root
+  one-shot imports the shared values without changing its internal retry,
+  cleanup, route, or receipt behavior.
+- Exposed the same constants to the RedDog post-completion verifier so its one
+  additional full proof cannot drift from owner acquisition policy.
+- Added an exact reuse assertion to the existing acquisition reliability suite;
+  the isolated shard is **22 passed** and the related bridge matrix is **84
+  passed / 1 skipped**. No route, owner, replica, Holo store,
+  maintenance, Git, or network state was changed by tests.
+  (WSP 00/05/06/11/15/22/34/50/62/64/84/97)
+
 ## 2026-08-28 - Inert dependency-runtime materialization layer
 
 - Added a canonical, content-addressed `site-packages` planner/materializer and

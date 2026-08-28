@@ -50,16 +50,15 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_boots
     ensure_reddog_holoindex_owner,
     resolve_reddog_holoindex_owner_handoff,
 )
-from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (  # noqa: E402
-    PORT_IN_USE_ERROR,
-)
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (  # noqa: E402
     QUERY_REPLICA_REQUIRED_ERROR,
     resolve_query_replica_owner_route,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (  # noqa: E402
     MAX_OWNER_ATTEMPTS,
+    OWNER_OPERATION_TIMEOUT_SECONDS,
     OWNER_PORT_SHARD_COUNT,
+    TRANSIENT_OWNER_ERRORS,
     build_owner_query_environment,
     owner_port_for_attempt as _owner_port_for_attempt,
 )
@@ -73,22 +72,13 @@ MAX_LIMIT = 20
 MAX_MODULE_HINT_CHARS = 512
 MAX_MUST_INCLUDE = 40
 MAX_MUST_INCLUDE_CHARS = 1024
-DEFAULT_OPERATION_TIMEOUT_SECONDS = 300.0
-MAX_OPERATION_TIMEOUT_SECONDS = 300.0
+DEFAULT_OPERATION_TIMEOUT_SECONDS = OWNER_OPERATION_TIMEOUT_SECONDS
+MAX_OPERATION_TIMEOUT_SECONDS = OWNER_OPERATION_TIMEOUT_SECONDS
 _REQUEST_KEYS = frozenset({
     "query", "limit", "retrieval_mode", "include_bundle", "module_hint",
     "must_include", "bundle_only",
 })
 PROCESS_OWNED_STATUSES = frozenset({OWNER_STARTED, OWNER_REUSED})
-TRANSIENT_OWNER_ERRORS = frozenset(
-    {
-        "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
-        PORT_IN_USE_ERROR,
-        "QUERY_OWNER_POISONED",
-        "SEMANTIC_BACKEND_UNAVAILABLE",
-        "HOLOINDEX_TIER0_LOOKUP_FAILED",
-    }
-)
 _OWNER_LIFECYCLE_LOCK = Lock()
 _REPLICA_PUBLIC_FIELDS = (
     "query_replica_descriptor_digest",
@@ -521,14 +511,15 @@ def _execute_admitted_query(
             operation_deadline=operation_deadline,
             route_environment=route_environment,
         )
+        result = _with_retry_telemetry(
+            result, attempts=state.attempts, retry_reason=state.retry_reason,
+        )
         if bindable:
             result = _bind_query_receipt(
                 result, query=query, repo_root=repo_root, selection=selection,
                 select_authority=select_authority,
             )
-        return _with_retry_telemetry(
-            result, attempts=state.attempts, retry_reason=state.retry_reason,
-        )
+        return result
     except Exception as exc:
         return _with_retry_telemetry(
             _failure(type(exc).__name__, query=query),

@@ -10,7 +10,7 @@ ranker, runtime, CURRENT, and no-reindex evidence. The controller starts/stops
 only runtimes it proves it owns, serializes callers with a canonical-store
 cross-process lease, injects an explicit Holo-only supervisor mode instead of
 ambient environment changes, and returns nonzero through its CLI on rejection.
-It grants no reindex, route, repository, model, Hermes, or promotion authority.
+It grants no reindex, route, repository, model, Hermes, or promotion authority. Post-completion readiness has at most two controller proofs inside `min(transaction_deadline, first_proof_start + 300s)`; only a fully receipt-bound exhausted allowlisted transient admits the immediate second proof, while rejected authority, malformed evidence, deterministic/stale failure, timeout, or CURRENT completion mismatch never retries.
 
 The current environment exact-closure flag is false, so A-grade and retrieval
 RSI remain rejected. Detailed schemas, lifecycle, budgets, failure reasons, and

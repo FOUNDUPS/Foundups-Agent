@@ -1,5 +1,22 @@
 # RedDog ModLog
 
+## 2026-08-28 - Receipt-bound owner reproof release (0.4.127)
+
+- Bound valid owner attempt/retry telemetry into the authenticated Holo query
+  receipt and limited post-completion recovery to one immediate second proof
+  inside the original deadline. Malformed, forged, stale, deterministic,
+  authority-rejected, mismatched, and expired evidence remains terminal.
+- Rebound the 1,357-file backend closure at `b9fa4e50c87d...ed56b3ad5`,
+  advanced the 18-shard contract to `e8fccaa6791e...d3a03e2`, and kept the
+  67-file package within its fixed cap at 945,836 bytes / `f080f99bb960...8831d`.
+- The exhaustive four-group release gate passed in 195.725 seconds. Built and
+  independently inspected `O:\RedDog-Releases\reddog-0.4.127.vsix`: 275,672
+  bytes / `sha256:287853f6e933...6b830`, 69 entries, no duplicate/unsafe names,
+  and zero package-member byte mismatches. Exact-main live replay remains
+  required; retrieval RSI and A-grade are not claimed. (WSP 00/15/22/50/62/83/87/97)
+- Repository-bound execution evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_OWNER_REPROOF_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27 - Exact-main post-merge lifecycle release (0.4.126)
 
 - Rebound the authenticated 1,357-file backend closure to exact atomic Holo

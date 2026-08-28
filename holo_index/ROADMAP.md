@@ -2,9 +2,9 @@
 
 ## [2026-08-27] A-grade retrieval truth gate
 
-Exact-main freshness/replica maintenance RSI is operational at audited main
+Exact-main freshness/replica maintenance mechanisms passed at historical main
 `bfcf9041b80be6773951e1c2e07500ebf7c9df62`, generation
-`sha256:7b94cf8a...`: activation and immutable post-query verification passed.
+`sha256:7b94cf8a...`; that is not a current operational RSI claim.
 The earlier
 `66526ae5cdd0467ce264c1db4122ab82eadb7733` cold-owner evidence remains
 historical exact-commit evidence. The
@@ -13,7 +13,12 @@ fresh-process queries completed in approximately 34 seconds each, and one
 pre-warmed governed query completed in 10.3 seconds after a 25.5-second owner
 bootstrap. Full verification retained the exact 33-artifact, 221,204,272-byte
 replica closure unchanged. The previous cold-owner P0 is therefore closed for
-this exact commit without increasing any timeout.
+that historical commit without increasing any timeout. At current audited main
+`7e6d33e6`, maintenance/activation/verification and atomic completion passed at
+generation `sha256:84976647...`, but the former single post-completion proof
+returned a false terminal transient rejection. The candidate binds owner retry
+telemetry and permits one deadline-bounded reproof; synthetic validation passes,
+while an exact-main post-merge replay remains required.
 
 Retrieval quality is not A-grade. The latest governed public run, recorded at
 base `b5b4de05`, passed Recall@8 at `1.0` but failed its `0.95` policy at MRR

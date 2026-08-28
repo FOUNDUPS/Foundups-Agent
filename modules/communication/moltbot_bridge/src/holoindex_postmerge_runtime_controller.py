@@ -16,11 +16,15 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_r
 from modules.communication.moltbot_bridge.src.reddog_holoindex_owner_result_verification import (
     CURRENT,
     classify_verified_owner_result,
+    is_verified_transient_owner_result,
     query_and_classify_owner_result,
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_contract import (
     rehydrate_deferred_receipt,
     rehydrate_owner_ready_receipt,
+)
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (
+    OWNER_OPERATION_TIMEOUT_SECONDS,
 )
 
 from .holoindex_postmerge_supervisor_policy import (
@@ -33,6 +37,7 @@ from .holoindex_postmerge_supervisor_policy import (
 SCHEMA_VERSION = "reddog_holoindex_postmerge_runtime.v1"
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _RUNTIME_LEASE_FILENAME = "reddog_holoindex_postmerge_runtime.lock"
+_POSTCOMPLETION_OWNER_PROOF_ATTEMPTS = 2
 
 
 @dataclass(frozen=True)
@@ -195,17 +200,50 @@ def _stop_owned(
     return tuple(stopped), tuple(errors)
 
 
-def _current_result(
-    *, query: str, repo_root: Path, query_runner: Callable[..., Mapping[str, Any]],
-    select_authority: Callable[[Path], Any],
-) -> tuple[bool, Mapping[str, Any]]:
-    selection = select_authority(repo_root)
-    if not getattr(selection, "accepted", False):
-        return False, {}
-    status, result = query_and_classify_owner_result(
-        query=query, selection=selection, query_runner=query_runner,
+def _owner_matches_completion(
+    owner: Mapping[str, Any], completion: Mapping[str, Any],
+) -> bool:
+    return all(
+        owner.get(owner_key) == completion.get(completion_key)
+        for owner_key, completion_key in (
+            ("freshness_generation_id", "generation_id"),
+            ("freshness_receipt_digest", "freshness_receipt_digest"),
+        )
     )
-    return status == CURRENT, result
+
+
+def _prove_completion_owner(
+    *, query: str, root: Path, completion: Mapping[str, Any], deadline: float,
+    clock: Callable[[], float], query_runner: Callable[..., Mapping[str, Any]],
+    select_authority: Callable[[Path], Any],
+) -> tuple[Mapping[str, Any] | None, str]:
+    proof_deadline = min(deadline, clock() + OWNER_OPERATION_TIMEOUT_SECONDS)
+    for attempt in range(1, _POSTCOMPLETION_OWNER_PROOF_ATTEMPTS + 1):
+        remaining = proof_deadline - clock()
+        if remaining <= 0:
+            return None, "owner_proof_timeout_after_completion"
+        selection = select_authority(root)
+        if not getattr(selection, "accepted", False):
+            return None, "owner_not_current_after_completion"
+        remaining = proof_deadline - clock()
+        if remaining <= 0:
+            return None, "owner_proof_timeout_after_completion"
+        status, owner = query_and_classify_owner_result(
+            query=query, selection=selection, query_runner=query_runner,
+            operation_timeout_seconds=remaining,
+        )
+        if clock() >= proof_deadline:
+            return None, "owner_proof_timeout_after_completion"
+        if status == CURRENT:
+            if not _owner_matches_completion(owner, completion):
+                return None, "owner_completion_binding_mismatch"
+            return owner, ""
+        if attempt == 1 and is_verified_transient_owner_result(
+            owner, query=query, selection=selection,
+        ):
+            continue
+        return None, "owner_not_current_after_completion"
+    return None, "owner_not_current_after_completion"
 
 
 def _query_initial_owner(
@@ -362,20 +400,13 @@ def _wait_for_completion(
         completed, deadline=deadline, clock=clock, sleeper=sleeper, interval=interval,
     ):
         return None, "postmerge_completion_timeout"
-    current, owner = _current_result(
-        query=query, repo_root=root, query_runner=query_runner,
+    owner, reason = _prove_completion_owner(
+        query=query, root=root, completion=completion, deadline=deadline,
+        clock=clock, query_runner=query_runner,
         select_authority=select_authority,
     )
-    if not current:
-        return None, "owner_not_current_after_completion"
-    if any(
-        owner.get(owner_key) != completion.get(completion_key)
-        for owner_key, completion_key in (
-            ("freshness_generation_id", "generation_id"),
-            ("freshness_receipt_digest", "freshness_receipt_digest"),
-        )
-    ):
-        return None, "owner_completion_binding_mismatch"
+    if reason or owner is None:
+        return None, reason or "owner_not_current_after_completion"
     current_head, error = _exact_local_main(root, git_runner)
     if error or current_head != expected_head:
         return None, "workspace_changed_during_transaction"

@@ -68,6 +68,15 @@ def test_current_user_route_replaces_stale_route_without_copying_secrets() -> No
     assert process[QUERY_REPLICA_ROOT_ENV] == "O:/legacy-replica"
 
 
+def test_one_shot_reuses_the_shared_owner_acquisition_policy() -> None:
+    assert owner_query.MAX_OWNER_ATTEMPTS == owner_acquisition.MAX_OWNER_ATTEMPTS
+    assert (
+        owner_query.MAX_OPERATION_TIMEOUT_SECONDS
+        == owner_acquisition.OWNER_OPERATION_TIMEOUT_SECONDS
+    )
+    assert owner_query.TRANSIENT_OWNER_ERRORS is owner_acquisition.TRANSIENT_OWNER_ERRORS
+
+
 def test_blank_user_route_preserves_explicit_process_migration_root() -> None:
     process = {QUERY_REPLICA_ROOT_ENV: "O:/legacy-replica"}
     resolved = owner_acquisition.build_owner_query_environment(

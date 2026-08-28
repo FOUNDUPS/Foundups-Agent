@@ -1071,7 +1071,41 @@
         "WSP 87",
         "WSP 97"
       ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "8d2c81dfbe74e39f109fb1411e986ab335552eb61804c81bb8ec7b1398c52332",
+      "links": {
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ],
+        "entry_points": [
+          "extensions/reddog/ModLog.md",
+          "modules/communication/moltbot_bridge/ModLog.md",
+          "holo_index/ModLog.md"
+        ]
+      },
+      "module_hint": "holo_index",
+      "path": "docs/audits/infrastructure/REDDOG_HOLO_OWNER_REPROOF_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+      "size_bytes": 9495,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 5",
+        "WSP 6",
+        "WSP 11",
+        "WSP 15",
+        "WSP 22",
+        "WSP 34",
+        "WSP 50",
+        "WSP 62",
+        "WSP 64",
+        "WSP 83",
+        "WSP 84",
+        "WSP 97"
+      ]
     }
   ],
-  "generated_at": "2026-08-28T08:24:57+09:00"
+  "generated_at": "2026-08-28T12:11:00+09:00"
 }

@@ -1,9 +1,9 @@
 # RedDog
 
-Version: 0.4.126
-0.4.126 authenticates exact-main post-merge lifecycle hardening; maintenance RSI works, while retrieval RSI and A-grade runtime closure remain blocked.
+Version: 0.4.127
+0.4.127 binds fail-closed post-completion owner reproof evidence; exact-main live replay, retrieval RSI, and A-grade runtime closure remain blocked.
 
-This candidate authenticates RedDog to the 1,357-file backend closure at `3377498c29a2...f498b2c5`, including exact atomic post-merge completion validation and direct OpenClaw-only registration with no main/MCP bootstrap.
+This candidate authenticates RedDog to the 1,357-file backend closure at `b9fa4e50c87d...ed56b3ad5`, including receipt-bound owner retry evidence, exact atomic post-merge completion validation, and direct OpenClaw-only registration with no main/MCP bootstrap.
 The operator controller remains outside the thin-client command surface, and the VSIX gains no maintenance, reindex, promotion, or execution authority.
 
 ## Continuous conversation surface
@@ -902,7 +902,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.126)
+## WSP_97 Truth Table (v0.4.127)
 
 | Claim | Status |
 | --- | --- |
@@ -994,6 +994,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.126.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.127.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

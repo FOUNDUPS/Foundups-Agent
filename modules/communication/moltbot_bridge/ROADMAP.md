@@ -1,5 +1,14 @@
 # moltbot_bridge Roadmap
 
+- IMPLEMENTED / LIVE REPLAY REQUIRED - POST-COMPLETION OWNER READINESS:
+  exact-main `7e6d33e6` completed maintenance, activation, verification, and its
+  atomic completion at generation `sha256:84976647...`, but the former
+  single-shot independent owner proof produced a false terminal rejection. A
+  later governed query was CURRENT with the same generation/receipt in 3.89
+  seconds. The candidate now permits exactly one immediate second proof only
+  for a fully receipt-bound, exhausted, allowlisted transient and shares one
+  300-second/transaction deadline. Synthetic regressions pass; a new exact-main
+  transaction after merge remains the live acceptance gate.
 - COMPLETE EXACT-MAIN OPERATOR LIFECYCLE HARDENING: register-only bootstrap
   registers only the two required OpenClaw specs without main/MCP/autostart or
   process-environment effects; post-merge supervisor
@@ -35,7 +44,7 @@
   or write denial. Source/ranker/dependency equality alone is not A-grade/RSI
   environment identity.
 
-- LATEST RECORDED EXACT-MAIN EVIDENCE: the automatic post-merge transaction
+- HISTORICAL EXACT-MAIN EVIDENCE: the automatic post-merge transaction
   completed through the real broker-managed OpenClaw supervisor at exact main
   `5e0835c690e0f4f1712c7021a75abdc35aadeca0`, generation
   `sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915`. Exact AgentDB claim/completion validation passed; a

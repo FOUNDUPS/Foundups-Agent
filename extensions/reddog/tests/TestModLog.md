@@ -1,5 +1,20 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-28 - Receipt-bound owner reproof release (0.4.127)
+
+- Independent WSP_97 review first rejected malformed error types, stale
+  deadline accounting, coupled retry ceilings, and top-level-only retry
+  telemetry. Exact counterexamples now pass and the final verifier returned GO.
+- Owner-result consumers: **148 passed**; bridge lifecycle: **84 passed / 1
+  skipped**; query receipt plus one-shot: **68 passed**; WSP_62: **16 passed**;
+  backend manifest: **8 passed**; registry/differential/indexing: **94 passed**.
+- The canonical registry is **1,601 tests / 268 quarantined**. Fast 14-member,
+  conversation 32-test, contract 3-member, deterministic package, and exhaustive
+  4-group release tiers pass; the latter completed in 195.725 seconds.
+- The 67-file package is 945,836 bytes at `f080f99bb960...8831d`; the VSIX is
+  275,672 bytes at `sha256:287853f6e933...6b830` and independently matches all
+  67 source members. Live exact-main replay remains separate.
+
 ## 2026-08-27 - Exact-main post-merge lifecycle release (0.4.126)
 
 - Rebound version/contract fixtures and the authenticated 1,357-file backend

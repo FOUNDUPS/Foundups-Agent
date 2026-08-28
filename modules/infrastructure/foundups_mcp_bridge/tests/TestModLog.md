@@ -1,5 +1,16 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-28] Shared owner acquisition policy reuse
+
+- Extended the existing acquisition reliability suite with exact identity/
+  equality checks proving the root one-shot consumes the shared transient set,
+  two-attempt ceiling, and 300-second operation ceiling.
+- Isolated acquisition result: **22 passed**; expanded bridge result: **84
+  passed / 1 skipped**. Communication tests run in a
+  separate process because the repository's top-level `scripts` packages
+  collide under mixed collection. No live owner, route, Holo, maintenance,
+  repository, or network state was touched.
+
 ## [2026-08-28] Inert dependency-runtime falsification
 
 - Added exact file/directory planning, bounded Windows traversal, existing

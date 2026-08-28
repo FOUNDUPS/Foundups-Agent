@@ -15,6 +15,10 @@ from holo_index.query_receipt import (
 from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_contract import (
     REPAIRABLE_ERRORS,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (
+    MAX_OWNER_ATTEMPTS,
+    TRANSIENT_OWNER_ERRORS,
+)
 
 
 CURRENT = "CURRENT"
@@ -83,8 +87,53 @@ def _owner_attempts(result: Mapping[str, Any]) -> int:
     return value if type(value) is int else 0
 
 
+def _owner_telemetry_is_bound(
+    result: Mapping[str, Any], receipt: Mapping[str, Any]
+) -> bool:
+    validators = {
+        "owner_attempts": lambda value: type(value) is int and value >= 0,
+        "owner_retry_performed": lambda value: type(value) is bool,
+        "owner_retry_reason": lambda value: type(value) is str,
+    }
+    for field, valid in validators.items():
+        if field not in result and field not in receipt:
+            continue
+        result_value = result.get(field)
+        receipt_value = receipt.get(field)
+        if not valid(result_value) or not valid(receipt_value):
+            return False
+        if type(result_value) is not type(receipt_value) or result_value != receipt_value:
+            return False
+    return True
+
+
 def _digest(value: Any) -> bool:
     return type(value) is str and DIGEST_RE.fullmatch(value) is not None
+
+
+def _verified_receipt(
+    result: Mapping[str, Any],
+    *,
+    query: str,
+    selection: HoloIndexAuthoritySelection,
+) -> Mapping[str, Any] | None:
+    receipt = result.get("query_receipt")
+    if not isinstance(receipt, Mapping):
+        return None
+    if type(result.get("error")) is not str or type(receipt.get("error")) is not str:
+        return None
+    if not all((
+        _receipt_integrity(receipt),
+        *_binding_checks(result, receipt, query, selection),
+        _semantic_evidence_valid(result, receipt),
+        receipt.get("ok") is (result.get("ok") is True),
+        receipt.get("freshness") == result.get("freshness"),
+        receipt.get("error") == result.get("error"),
+        receipt.get("index_gap_detected") is (result.get("index_gap_detected") is True),
+        _owner_telemetry_is_bound(result, receipt),
+    )):
+        return None
+    return receipt
 
 
 def classify_verified_owner_result(
@@ -95,17 +144,10 @@ def classify_verified_owner_result(
 ) -> str:
     """Classify one independently produced, receipt-bound owner result."""
 
-    receipt = result.get("query_receipt")
-    if not isinstance(receipt, Mapping):
-        return INVALID
-    if not all((
-        _receipt_integrity(receipt),
-        *_binding_checks(result, receipt, query, selection),
-        _semantic_evidence_valid(result, receipt),
-        receipt.get("ok") is (result.get("ok") is True),
-        receipt.get("freshness") == result.get("freshness"),
-        receipt.get("index_gap_detected") is (result.get("index_gap_detected") is True),
-    )):
+    receipt = _verified_receipt(
+        result, query=query, selection=selection
+    )
+    if receipt is None:
         return INVALID
     if (
         result.get("ok") is True
@@ -129,16 +171,44 @@ def classify_verified_owner_result(
     return INVALID
 
 
+def is_verified_transient_owner_result(
+    result: Mapping[str, Any],
+    *,
+    query: str,
+    selection: HoloIndexAuthoritySelection,
+) -> bool:
+    """Admit one controller retry only for an exhausted authenticated transient."""
+
+    receipt = _verified_receipt(
+        result, query=query, selection=selection
+    )
+    error = result.get("error")
+    retry_reason = result.get("owner_retry_reason")
+    return bool(
+        receipt is not None
+        and result.get("ok") is False
+        and type(error) is str
+        and error in TRANSIENT_OWNER_ERRORS
+        and result.get("index_gap_detected") is True
+        and _owner_attempts(result) == MAX_OWNER_ATTEMPTS
+        and result.get("owner_retry_performed") is True
+        and type(retry_reason) is str
+        and retry_reason in TRANSIENT_OWNER_ERRORS
+    )
+
+
 def query_and_classify_owner_result(
     *,
     query: str,
     selection: HoloIndexAuthoritySelection,
     query_runner: Callable[..., Mapping[str, Any]],
+    operation_timeout_seconds: float | None = None,
 ) -> tuple[str, Mapping[str, Any]]:
     try:
-        result = query_runner(
-            {"query": query, "limit": 5}, repo_root=selection.selected_root
-        )
+        kwargs: dict[str, Any] = {"repo_root": selection.selected_root}
+        if operation_timeout_seconds is not None:
+            kwargs["operation_timeout_seconds"] = operation_timeout_seconds
+        result = query_runner({"query": query, "limit": 5}, **kwargs)
     except Exception:
         return INVALID, {}
     if not isinstance(result, Mapping):
@@ -154,5 +224,6 @@ __all__ = [
     "INVALID",
     "REPAIRABLE",
     "classify_verified_owner_result",
+    "is_verified_transient_owner_result",
     "query_and_classify_owner_result",
 ]

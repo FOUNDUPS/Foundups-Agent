@@ -1,5 +1,13 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-28] Owner acquisition receipt integrity
+
+- Added direct receipt coverage for exact owner attempts, retry flag, and retry
+  reason. Communication counterexamples reseal malformed error/telemetry values
+  and forge top-level retry fields without updating the receipt; all reject.
+- Query-receipt plus root one-shot: **68 passed**; expanded communication
+  consumers: **148 passed**. Tests use only synthetic/O:-temporary state.
+
 ## [2026-08-27] Exact-symbol and independent A-grade gate regressions
 
 - Extended the existing Tier-0 ranking suite with a generic exact-symbol
