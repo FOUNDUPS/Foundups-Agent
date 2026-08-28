@@ -1,5 +1,23 @@
 # RedDog ModLog
 
+## 2026-08-27 - Exact-main post-merge lifecycle release (0.4.126)
+
+- Rebound the authenticated 1,357-file backend closure to exact atomic Holo
+  post-merge completion validation and direct OpenClaw-only registration with
+  no main/MCP bootstrap or process-environment mutation.
+- Added a separate clean-main operator controller without exposing maintenance,
+  reindex, runtime-start, or promotion authority through the VSIX command
+  surface. Maintenance RSI is operational; retrieval RSI and A-grade runtime
+  closure remain explicitly blocked.
+- Advanced the thin-client identity to 0.4.126 and regenerated all 18 contract
+  shard identities. (WSP 00/15/22/50/62/77/83/87/97)
+- The exact 67-file package surface is 945,801 bytes at
+  `sha256:7a1a8fb2e803...9a27f7c9`; the four-group exhaustive release gate passed
+  in 184.570 seconds. `O:\RedDog-Releases\reddog-0.4.126.vsix` is 275,668
+  bytes at `sha256:639d6c82b195...b52b94b`.
+- Repository-bound execution evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_RUNTIME_CONTROLLER_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
 ## 2026-08-27 - Inert dependency-runtime closure release (0.4.125)
 
 - Rebound the authenticated backend closure to the reachable Windows/POSIX

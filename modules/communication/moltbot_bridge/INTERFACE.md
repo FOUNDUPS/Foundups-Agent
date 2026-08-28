@@ -1,45 +1,21 @@
 # OpenClaw Bridge Interface
 
-## HoloIndex owner response binding
+## HoloIndex runtime interface
 
-`query_holoindex_owner(...)` accepts a successful semantic response only when
-the owner supplies all four exact query-replica fields: descriptor digest,
-generation ID, replica ID, and path-identity digest. The normalized response
-preserves those fields. `scripts/reddog_holoindex_owner_query_once.py` then
-compares the returned tuple with its verified `QueryReplicaOwnerRoute`; a
-missing, malformed, or different tuple returns
-`HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH` and cannot produce a success receipt.
-The client also requires `retrieval_runtime_ranker_digest` to be a canonical
-SHA-256 digest. `GenerationBoundHoloIndexQueryAdapter` preserves it in the safe
-projection and rebuilt receipt; A-grade evaluation separately requires exact
-equality with the clean authority candidate.
-The client also preserves the owner-computed `runtime_environment_digest` and
-`runtime_environment_exact_closure_verified`. Executable content,
-ABI/platform, verified RedDog source bytes, distribution build records,
-replica/model closure, and observed runtime settings are now bound. Installed
-dependency payload bytes remain unverified; the exact-closure flag is therefore
-false and A-grade/RSI admission rejects.
+`run_holoindex_postmerge_runtime_once(...)` owns one clean exact-main
+maintenance lifecycle; `query_holoindex_owner(...)` and
+`GenerationBoundHoloIndexQueryAdapter.query(...)` own read-only response
+binding. Success requires exact task/completion, HEAD/root/generation, replica,
+ranker, runtime, CURRENT, and no-reindex evidence. The controller starts/stops
+only runtimes it proves it owns, serializes callers with a canonical-store
+cross-process lease, injects an explicit Holo-only supervisor mode instead of
+ambient environment changes, and returns nonzero through its CLI on rejection.
+It grants no reindex, route, repository, model, Hermes, or promotion authority.
 
-`GenerationBoundHoloIndexQueryAdapter.query(...)` is the canonical resident
-read-only worker adapter. It starts the one-shot script with a runtime selected
-by the owner supervisor and `python -S -B`. Its scrubbed child environment retains required OS/runtime variables, exact Holo configuration, and vetted venv site-packages while excluding recognized credentials and Python overrides. At most
-57 seconds enter this adapter's child within a 60-second parent wall; lock wait
-shares that budget and three seconds remain for cleanup. The canonical CLI and
-asynchronous VSIX cold path use a separate bounded 300-second wall aligned with
-the 270-second readiness canary. At exact main `66526ae5c`, three
-fresh one-shot queries completed CURRENT in about 34 seconds; after a 25.5-second
-bootstrap, a warm governed query completed in 10.3 seconds. Current post-restart
-cold validation did not reproduce that evidence within 180 seconds, so a
-resident owner remains P0. Success requires exact CURRENT semantic HEAD/root/generation
-and all four replica fields. The adapter re-verifies the one-shot receipt,
-filters allowed hits before limiting, and returns only scoped safe hit metadata;
-raw semantic buckets, route data, and nested receipts do not enter Fusion.
-
-`clean_workspace_head` requires `workspace_overlay_present=false`;
-`committed_head_only` permits a clean or overlaid caller through a separate
-configured same-HEAD authority. Exact binding/no-mutation checks remain.
-The lifecycle lock is process-local and starts one child per query; this is a
-phase-1 correctness boundary, not cross-process or horizontal scale. Historical evidence at `61c2c3003bc4c2086f105f4c39effd499a026627` does not authorize later HEADs.
+The current environment exact-closure flag is false, so A-grade and retrieval
+RSI remain rejected. Detailed schemas, lifecycle, budgets, failure reasons, and
+scale boundaries are in
+[docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
 
 ## Receipt-bound artifact generation models
 

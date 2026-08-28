@@ -1,7 +1,33 @@
+import os
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from modules.communication.moltbot_bridge.scripts import launch as openclaw_launch
+
+
+def test_broker_bootstrap_registers_only_openclaw_specs(monkeypatch):
+    broker = MagicMock()
+    broker.list_launchable_daes.side_effect = [
+        {}, {"openclaw": {}, "openclaw_supervisor": {}}
+    ]
+
+    monkeypatch.setattr(openclaw_launch, "_broker_bootstrapped", False)
+    monkeypatch.setattr(
+        "modules.infrastructure.dae_daemon.src.dae_launch_broker.get_dae_launch_broker",
+        lambda: broker,
+    )
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_AUTOSTART", "supervisor-original")
+    monkeypatch.delenv("OPENCLAW_RESIDENT_AUTOSTART", raising=False)
+    monkeypatch.setenv("FOUNDUPS_MCP_AUTOSTART", "mcp-original")
+
+    openclaw_launch._ensure_broker_bootstrap()
+
+    registered = [call.args[0].dae_id for call in broker.register_launch_spec.call_args_list]
+    assert registered == ["openclaw", "openclaw_supervisor"]
+    broker.start_dae.assert_not_called()
+    assert os.environ["OPENCLAW_SUPERVISOR_AUTOSTART"] == "supervisor-original"
+    assert "OPENCLAW_RESIDENT_AUTOSTART" not in os.environ
+    assert os.environ["FOUNDUPS_MCP_AUTOSTART"] == "mcp-original"
 
 
 def test_run_openclaw_resident_service_uses_uvicorn(monkeypatch):
@@ -67,10 +93,12 @@ def test_stop_openclaw_resident_service_sets_should_exit():
 
 def test_run_openclaw_supervisor_service_uses_supervisor_runtime(monkeypatch, tmp_path):
     created = {}
+    monkeypatch.setattr(openclaw_launch, "_ensure_broker_bootstrap", lambda: None)
 
     class FakeSupervisor:
-        def __init__(self, repo_root):
+        def __init__(self, repo_root, runtime_mode=None):
             created["repo_root"] = repo_root
+            created["runtime_mode"] = runtime_mode
 
         def run_forever(self):
             return {"status": "stopped"}
@@ -81,9 +109,12 @@ def test_run_openclaw_supervisor_service_uses_supervisor_runtime(monkeypatch, tm
         SimpleNamespace(OpenClawSupervisor=FakeSupervisor),
     )
 
-    result = openclaw_launch.run_openclaw_supervisor_service(repo_root=str(tmp_path))
+    result = openclaw_launch.run_openclaw_supervisor_service(
+        repo_root=str(tmp_path), runtime_mode="holoindex_postmerge_only"
+    )
 
     assert created["repo_root"] == tmp_path
+    assert created["runtime_mode"] == "holoindex_postmerge_only"
     assert result["status"] == "stopped"
 
 

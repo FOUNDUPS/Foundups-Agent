@@ -36,7 +36,7 @@ exemptions:
       revocation, bounded renewal, and proposal signer-policy runtime
       boundaries; splitting the historical registry remains separate
       documentation-maintenance work.
-    threshold_override: 1537
+    threshold_override: 1527
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

@@ -1,0 +1,574 @@
+"""Bounded owner for one exact-main HoloIndex post-merge transaction."""
+
+from __future__ import annotations
+
+import re
+import subprocess
+import time
+from contextlib import nullcontext
+from dataclasses import asdict, dataclass, replace
+from pathlib import Path
+from typing import Any, Callable, ContextManager, Mapping, Sequence
+
+from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_runtime import (
+    coordinate_holoindex_incident_repair,
+)
+from modules.communication.moltbot_bridge.src.reddog_holoindex_owner_result_verification import (
+    CURRENT,
+    classify_verified_owner_result,
+    query_and_classify_owner_result,
+)
+from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_contract import (
+    rehydrate_deferred_receipt,
+    rehydrate_owner_ready_receipt,
+)
+
+from .holoindex_postmerge_supervisor_policy import (
+    HOLOINDEX_POSTMERGE_ONLY_MODE,
+    HOLOINDEX_POSTMERGE_TASK_PREFIX,
+    validate_supervisor_holoindex_postmerge_completion,
+)
+
+
+SCHEMA_VERSION = "reddog_holoindex_postmerge_runtime.v1"
+_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_RUNTIME_LEASE_FILENAME = "reddog_holoindex_postmerge_runtime.lock"
+
+
+@dataclass(frozen=True)
+class HoloIndexPostmergeRuntimeResult:
+    accepted: bool
+    status: str
+    target_repo_head_sha: str = ""
+    task_id: str = ""
+    generation_id: str = ""
+    freshness_receipt_digest: str = ""
+    started_runtime_ids: tuple[str, ...] = ()
+    stopped_runtime_ids: tuple[str, ...] = ()
+    rejection_reasons: tuple[str, ...] = ()
+    no_holoindex_reindex_performed_by_controller: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        value = asdict(self)
+        value["schema_version"] = SCHEMA_VERSION
+        for field in (
+            "started_runtime_ids",
+            "stopped_runtime_ids",
+            "rejection_reasons",
+        ):
+            value[field] = list(value[field])
+        return value
+
+
+GitRunner = Callable[[Sequence[str], Path], subprocess.CompletedProcess[str]]
+
+
+def _git_runner(argv: Sequence[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        list(argv), cwd=str(cwd), capture_output=True, text=True,
+        encoding="utf-8", errors="replace", timeout=60, check=False, shell=False,
+    )
+
+
+def _git_value(
+    runner: GitRunner, root: Path, *args: str, allow_empty: bool = False,
+) -> tuple[str, str]:
+    try:
+        completed = runner(("git", *args), root)
+    except BaseException:
+        return "", "git_command_failed"
+    value = str(completed.stdout or "").strip()
+    if completed.returncode != 0 or (not value and not allow_empty):
+        return "", "git_command_failed"
+    return value, ""
+
+
+def _exact_local_main(root: Path, runner: GitRunner) -> tuple[str, str]:
+    dirty, error = _git_value(
+        runner, root, "status", "--porcelain=v1", "--untracked-files=all",
+        allow_empty=True,
+    )
+    if error or dirty:
+        return "", "workspace_not_clean"
+    head, error = _git_value(runner, root, "rev-parse", "HEAD")
+    if error or _SHA_RE.fullmatch(head.lower()) is None:
+        return "", "workspace_head_unproven"
+    origin_main, error = _git_value(
+        runner, root, "rev-parse", "refs/remotes/origin/main"
+    )
+    if error or _SHA_RE.fullmatch(origin_main.lower()) is None:
+        return "", "origin_main_unproven"
+    if head.lower() != origin_main.lower():
+        return "", "workspace_not_exact_origin_main"
+    return head.lower(), ""
+
+
+def _wait_for(
+    predicate: Callable[[], bool], *, deadline: float,
+    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
+) -> bool:
+    while clock() < deadline:
+        if predicate():
+            return True
+        sleeper(interval)
+    return predicate()
+
+
+def _runtime_ready(status: Mapping[str, Any]) -> bool:
+    return bool(
+        status.get("registered") is True
+        and status.get("running") is True
+        and status.get("thread_alive") is True
+        and status.get("state") in {"starting", "running", "degraded"}
+        and not status.get("last_error")
+    )
+
+
+def _wait_runtime_ready(
+    broker: Any, runtime_id: str, *, deadline: float,
+    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
+) -> bool:
+    consecutive = 0
+
+    def stable() -> bool:
+        nonlocal consecutive
+        status = broker.get_runtime_status(runtime_id)
+        consecutive = consecutive + 1 if _runtime_ready(status) else 0
+        return consecutive >= 2
+
+    return _wait_for(
+        stable, deadline=deadline, clock=clock, sleeper=sleeper, interval=interval,
+    )
+
+
+def _start_runtime(
+    broker: Any, runtime_id: str, *, deadline: float,
+    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
+    launch_kwargs: Mapping[str, Any] | None = None,
+) -> tuple[bool, bool, str]:
+    status = broker.get_runtime_status(runtime_id)
+    if status.get("thread_alive") is True or status.get("running") is True:
+        ready = _wait_runtime_ready(
+            broker, runtime_id, deadline=deadline, clock=clock,
+            sleeper=sleeper, interval=interval,
+        )
+        reason = "" if ready else f"{runtime_id}_preexisting_not_stable"
+        return ready, False, reason
+    if launch_kwargs is None:
+        started = broker.start_dae(runtime_id, actor_id="0102")
+    else:
+        started = broker.start_dae(
+            runtime_id, actor_id="0102", launch_kwargs=dict(launch_kwargs)
+        )
+    if started.get("success") is not True:
+        return False, False, f"{runtime_id}_start_failed"
+    owned = started.get("status") != "already_running"
+    ready = _wait_runtime_ready(
+        broker, runtime_id, deadline=deadline, clock=clock,
+        sleeper=sleeper, interval=interval,
+    )
+    return ready, owned, "" if ready else f"{runtime_id}_start_timeout"
+
+
+def _stop_owned(
+    broker: Any, owned: Sequence[str], *, deadline: float,
+    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    stopped: list[str] = []
+    errors: list[str] = []
+    for runtime_id in reversed(tuple(owned)):
+        try:
+            requested = broker.stop_dae(runtime_id, actor_id="0102")
+            if requested.get("success") is not True:
+                errors.append(f"{runtime_id}_stop_failed")
+                continue
+            dead = _wait_for(
+                lambda: broker.get_runtime_status(runtime_id).get("thread_alive") is False,
+                deadline=deadline, clock=clock, sleeper=sleeper, interval=interval,
+            )
+            if dead:
+                stopped.append(runtime_id)
+            else:
+                errors.append(f"{runtime_id}_stop_timeout")
+        except BaseException:
+            errors.append(f"{runtime_id}_stop_exception")
+    return tuple(stopped), tuple(errors)
+
+
+def _current_result(
+    *, query: str, repo_root: Path, query_runner: Callable[..., Mapping[str, Any]],
+    select_authority: Callable[[Path], Any],
+) -> tuple[bool, Mapping[str, Any]]:
+    selection = select_authority(repo_root)
+    if not getattr(selection, "accepted", False):
+        return False, {}
+    status, result = query_and_classify_owner_result(
+        query=query, selection=selection, query_runner=query_runner,
+    )
+    return status == CURRENT, result
+
+
+def _query_initial_owner(
+    *, root: Path, head: str, query: str,
+    query_runner: Callable[..., Mapping[str, Any]],
+    select_authority: Callable[[Path], Any],
+) -> tuple[Mapping[str, Any] | None, HoloIndexPostmergeRuntimeResult | None]:
+    try:
+        initial = query_runner({"query": query, "limit": 5}, repo_root=root)
+    except BaseException:
+        return None, HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", head, rejection_reasons=("owner_query_failed",),
+        )
+    if not isinstance(initial, Mapping):
+        return None, HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", head, rejection_reasons=("owner_query_invalid",),
+        )
+    try:
+        selection = select_authority(root)
+        current = bool(
+            getattr(selection, "accepted", False)
+            and classify_verified_owner_result(
+                initial, query=query, selection=selection
+            ) == CURRENT
+        )
+    except BaseException:
+        current = False
+    if current:
+        return None, HoloIndexPostmergeRuntimeResult(
+            True, "OWNER_READY", head,
+            generation_id=str(initial.get("freshness_generation_id") or ""),
+            freshness_receipt_digest=str(initial.get("freshness_receipt_digest") or ""),
+        )
+    return initial, None
+
+
+def _coordinate_repair(
+    *, root: Path, head: str, query: str, initial: Mapping[str, Any],
+    coordinator: Callable[..., Any],
+) -> tuple[str, HoloIndexPostmergeRuntimeResult | None]:
+    try:
+        repair_value = coordinator(
+            repo_root=root, query=query, owner_failure=initial
+        ).to_dict()
+    except BaseException:
+        return "", HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", head,
+            rejection_reasons=("repair_coordination_failed",),
+        )
+    if not isinstance(repair_value, Mapping) or repair_value.get("accepted") is not True:
+        return "", HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", head, rejection_reasons=("repair_rejected",),
+        )
+    if repair_value.get("status") == "OWNER_READY":
+        ready = rehydrate_owner_ready_receipt(repair_value)
+        if ready is None or ready.target_repo_head_sha != head:
+            return "", HoloIndexPostmergeRuntimeResult(
+                False, "REJECTED", head,
+                rejection_reasons=("owner_ready_receipt_not_exact_head",),
+            )
+        return "", HoloIndexPostmergeRuntimeResult(
+            True, "OWNER_READY", head,
+            generation_id=ready.generation_id,
+            freshness_receipt_digest=ready.freshness_receipt_digest,
+        )
+    deferred = rehydrate_deferred_receipt(repair_value)
+    task_id = deferred.task_id if deferred else ""
+    if deferred is None or task_id != HOLOINDEX_POSTMERGE_TASK_PREFIX + head:
+        return task_id, HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", head, task_id,
+            rejection_reasons=("repair_task_not_exact_head",),
+        )
+    return task_id, None
+
+
+def _admit_or_coordinate(
+    *, root: Path, query: str, git_runner: GitRunner,
+    query_runner: Callable[..., Mapping[str, Any]],
+    select_authority: Callable[[Path], Any], coordinator: Callable[..., Any],
+) -> tuple[str, str, HoloIndexPostmergeRuntimeResult | None]:
+    head, error = _exact_local_main(root, git_runner)
+    if error:
+        return "", "", HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", rejection_reasons=(error,)
+        )
+    initial, terminal = _query_initial_owner(
+        root=root, head=head, query=query, query_runner=query_runner,
+        select_authority=select_authority,
+    )
+    if terminal is not None or initial is None:
+        return head, "", terminal
+    task_id, terminal = _coordinate_repair(
+        root=root, head=head, query=query, initial=initial, coordinator=coordinator,
+    )
+    return head, task_id, terminal
+
+
+def _start_required_runtimes(
+    broker: Any, *, deadline: float, clock: Callable[[], float],
+    sleeper: Callable[[float], None], interval: float,
+    owned: list[str] | None = None,
+) -> tuple[list[str], int, str]:
+    owned = [] if owned is None else owned
+    preexisting = 0
+    for runtime_id in ("openclaw", "openclaw_supervisor"):
+        launch_kwargs = (
+            {"runtime_mode": HOLOINDEX_POSTMERGE_ONLY_MODE}
+            if runtime_id == "openclaw_supervisor"
+            else None
+        )
+        ready, started, reason = _start_runtime(
+            broker, runtime_id, deadline=deadline, clock=clock,
+            sleeper=sleeper, interval=interval, launch_kwargs=launch_kwargs,
+        )
+        if started:
+            owned.append(runtime_id)
+        else:
+            preexisting += 1
+        if not ready:
+            return owned, preexisting, reason
+    return owned, preexisting, ""
+
+
+def _preexisting_runtime_topology(broker: Any) -> str:
+    active = [
+        bool(status.get("thread_alive") or status.get("running"))
+        for status in (
+            broker.get_runtime_status("openclaw"),
+            broker.get_runtime_status("openclaw_supervisor"),
+        )
+    ]
+    if all(active):
+        return "all"
+    if any(active):
+        return "partial"
+    return "none"
+
+
+def _wait_for_completion(
+    *, database: Any, task_id: str, query: str, root: Path, deadline: float,
+    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
+    query_runner: Callable[..., Mapping[str, Any]],
+    select_authority: Callable[[Path], Any], git_runner: GitRunner,
+    expected_head: str,
+) -> tuple[Mapping[str, Any] | None, str]:
+    completion: Mapping[str, Any] | None = None
+
+    def completed() -> bool:
+        nonlocal completion
+        completion = validate_supervisor_holoindex_postmerge_completion(database, task_id)
+        return completion is not None
+
+    if not _wait_for(
+        completed, deadline=deadline, clock=clock, sleeper=sleeper, interval=interval,
+    ):
+        return None, "postmerge_completion_timeout"
+    current, owner = _current_result(
+        query=query, repo_root=root, query_runner=query_runner,
+        select_authority=select_authority,
+    )
+    if not current:
+        return None, "owner_not_current_after_completion"
+    if any(
+        owner.get(owner_key) != completion.get(completion_key)
+        for owner_key, completion_key in (
+            ("freshness_generation_id", "generation_id"),
+            ("freshness_receipt_digest", "freshness_receipt_digest"),
+        )
+    ):
+        return None, "owner_completion_binding_mismatch"
+    current_head, error = _exact_local_main(root, git_runner)
+    if error or current_head != expected_head:
+        return None, "workspace_changed_during_transaction"
+    return owner, ""
+
+
+def _perform_runtime_transaction(
+    *, root: Path, head: str, task_id: str, query: str, timeout_seconds: float,
+    poll_interval_seconds: float, query_runner: Callable[..., Mapping[str, Any]],
+    select_authority: Callable[[Path], Any], broker: Any,
+    database_provider: Callable[[], Any], clock: Callable[[], float],
+    sleeper: Callable[[float], None], git_runner: GitRunner,
+    owned: list[str], preexisting_allowed: bool,
+) -> tuple[HoloIndexPostmergeRuntimeResult, list[str]]:
+    deadline = clock() + timeout_seconds
+    outcome = HoloIndexPostmergeRuntimeResult(False, "REJECTED", head, task_id)
+    owned, preexisting, reason = _start_required_runtimes(
+        broker, deadline=deadline, clock=clock, sleeper=sleeper,
+        interval=poll_interval_seconds, owned=owned,
+    )
+    if reason:
+        return replace(outcome, rejection_reasons=(reason,)), owned
+    if preexisting and not preexisting_allowed:
+        return replace(
+            outcome, rejection_reasons=("runtime_ownership_race",)
+        ), owned
+    owner, reason = _wait_for_completion(
+        database=database_provider(), task_id=task_id, query=query, root=root,
+        deadline=deadline, clock=clock, sleeper=sleeper,
+        interval=poll_interval_seconds, query_runner=query_runner,
+        select_authority=select_authority, git_runner=git_runner,
+        expected_head=head,
+    )
+    if reason:
+        return replace(outcome, rejection_reasons=(reason,)), owned
+    return HoloIndexPostmergeRuntimeResult(
+        True, "COMPLETED", head, task_id,
+        generation_id=str(owner.get("freshness_generation_id") or ""),
+        freshness_receipt_digest=str(owner.get("freshness_receipt_digest") or ""),
+    ), owned
+
+
+def _finalize_runtime_outcome(
+    *, outcome: HoloIndexPostmergeRuntimeResult, owned: Sequence[str],
+    stopped: Sequence[str], stop_errors: Sequence[str], root: Path,
+    head: str, git_runner: GitRunner,
+) -> HoloIndexPostmergeRuntimeResult:
+    outcome = replace(
+        outcome, started_runtime_ids=tuple(owned),
+        stopped_runtime_ids=tuple(stopped),
+    )
+    if stop_errors:
+        return replace(
+            outcome, accepted=False, status="REJECTED",
+            rejection_reasons=outcome.rejection_reasons + tuple(stop_errors),
+        )
+    if not outcome.accepted:
+        return outcome
+    final_head, final_error = _exact_local_main(root, git_runner)
+    if final_error or final_head != head:
+        return replace(
+            outcome, accepted=False, status="REJECTED",
+            rejection_reasons=("workspace_changed_before_return",),
+        )
+    return outcome
+
+
+def _execute_runtime_transaction(
+    *, root: Path, head: str, task_id: str, query: str, timeout_seconds: float,
+    poll_interval_seconds: float, query_runner: Callable[..., Mapping[str, Any]],
+    select_authority: Callable[[Path], Any], bootstrap: Callable[[], None],
+    broker_provider: Callable[[], Any], database_provider: Callable[[], Any],
+    clock: Callable[[], float], sleeper: Callable[[float], None],
+    git_runner: GitRunner,
+) -> HoloIndexPostmergeRuntimeResult:
+    outcome = HoloIndexPostmergeRuntimeResult(False, "REJECTED", head, task_id)
+    broker: Any | None = None
+    owned: list[str] = []
+    stopped: tuple[str, ...] = ()
+    stop_errors: tuple[str, ...] = ()
+    try:
+        bootstrap()
+        broker = broker_provider()
+        topology = _preexisting_runtime_topology(broker)
+        if topology == "partial":
+            outcome = replace(
+                outcome, rejection_reasons=("preexisting_runtime_topology_partial",)
+            )
+        else:
+            outcome, owned = _perform_runtime_transaction(
+                root=root, head=head, task_id=task_id, query=query,
+                timeout_seconds=timeout_seconds,
+                poll_interval_seconds=poll_interval_seconds,
+                query_runner=query_runner, select_authority=select_authority,
+                broker=broker, database_provider=database_provider, clock=clock,
+                sleeper=sleeper, git_runner=git_runner, owned=owned,
+                preexisting_allowed=topology == "all",
+            )
+    except BaseException:
+        outcome = replace(outcome, rejection_reasons=("runtime_exception",))
+    finally:
+        if broker is not None and owned:
+            stopped, stop_errors = _stop_owned(
+                broker, owned, deadline=clock() + min(timeout_seconds, 60.0),
+                clock=clock, sleeper=sleeper, interval=poll_interval_seconds,
+            )
+    return _finalize_runtime_outcome(
+        outcome=outcome, owned=owned, stopped=stopped, stop_errors=stop_errors,
+        root=root, head=head, git_runner=git_runner,
+    )
+
+
+def _run_holoindex_postmerge_runtime_for_test(
+    *, repo_root: Path, query: str, timeout_seconds: float, poll_interval_seconds: float,
+    git_runner: GitRunner, query_runner: Callable[..., Mapping[str, Any]],
+    select_authority: Callable[[Path], Any], coordinator: Callable[..., Any],
+    bootstrap: Callable[[], None], broker_provider: Callable[[], Any],
+    database_provider: Callable[[], Any], clock: Callable[[], float],
+    sleeper: Callable[[float], None],
+    lease_factory: Callable[[], ContextManager[Any]] = nullcontext,
+) -> HoloIndexPostmergeRuntimeResult:
+    root = repo_root.resolve(strict=False)
+    try:
+        with lease_factory():
+            head, task_id, terminal = _admit_or_coordinate(
+                root=root, query=query, git_runner=git_runner,
+                query_runner=query_runner, select_authority=select_authority,
+                coordinator=coordinator,
+            )
+            if terminal is not None:
+                return _finalize_runtime_outcome(
+                    outcome=terminal, owned=(), stopped=(), stop_errors=(),
+                    root=root, head=head, git_runner=git_runner,
+                )
+            return _execute_runtime_transaction(
+                root=root, head=head, task_id=task_id, query=query,
+                timeout_seconds=timeout_seconds,
+                poll_interval_seconds=poll_interval_seconds,
+                query_runner=query_runner, select_authority=select_authority,
+                bootstrap=bootstrap, broker_provider=broker_provider,
+                database_provider=database_provider, clock=clock, sleeper=sleeper,
+                git_runner=git_runner,
+            )
+    except BaseException:
+        return HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", rejection_reasons=("runtime_controller_unavailable",)
+        )
+
+
+def _production_runtime_lease() -> ContextManager[Any]:
+    from holo_index.maintenance_lock import acquire_maintenance_lease
+    from holo_index.storage_contract import resolve_holoindex_ssd_path
+
+    path = (
+        resolve_holoindex_ssd_path() / "indexes" / _RUNTIME_LEASE_FILENAME
+    )
+    return acquire_maintenance_lease(path)
+
+
+def run_holoindex_postmerge_runtime_once(
+    *, repo_root: Path | str, query: str, timeout_seconds: float = 14_400.0,
+    poll_interval_seconds: float = 1.0,
+) -> HoloIndexPostmergeRuntimeResult:
+    """Run or reconcile one exact-main transaction and release owned runtimes."""
+
+    if not isinstance(query, str) or not query.strip() or len(query) > 16_000:
+        return HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", rejection_reasons=("query_invalid",)
+        )
+    if not (30.0 <= timeout_seconds <= 21_600.0) or not (
+        0.05 <= poll_interval_seconds <= 10.0
+    ):
+        return HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", rejection_reasons=("runtime_limits_invalid",)
+        )
+    from holo_index.authority_worktree import resolve_holoindex_authority_root
+    from modules.communication.moltbot_bridge.scripts.launch import _ensure_broker_bootstrap
+    from modules.infrastructure.dae_daemon.src.dae_launch_broker import get_dae_launch_broker
+    from modules.infrastructure.database.src.agent_db import AgentDB
+    from scripts.reddog_holoindex_owner_query_once import query_once
+
+    return _run_holoindex_postmerge_runtime_for_test(
+        repo_root=Path(repo_root), query=query.strip(), timeout_seconds=timeout_seconds,
+        poll_interval_seconds=poll_interval_seconds, git_runner=_git_runner,
+        query_runner=query_once, select_authority=resolve_holoindex_authority_root,
+        coordinator=coordinate_holoindex_incident_repair,
+        bootstrap=_ensure_broker_bootstrap, broker_provider=get_dae_launch_broker,
+        database_provider=AgentDB, clock=time.monotonic, sleeper=time.sleep,
+        lease_factory=_production_runtime_lease,
+    )
+
+
+__all__ = [
+    "HoloIndexPostmergeRuntimeResult",
+    "run_holoindex_postmerge_runtime_once",
+]
