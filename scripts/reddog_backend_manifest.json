@@ -2412,7 +2412,7 @@
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_http.py": "c33a6fb0025720fed0ef9ccf336326b75a6564d712d7bf9b158600ed1bc69f73",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_replica.py": "51161889c4ea5c5438c6019f78dde20a16846234669c15d0be02489d58cefb41",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_request.py": "e4a5bceaab4e108c3c7e23322944588ac5c1c02de09c81969ba4082d5416969a",
-    "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_response.py": "7c7fb227cc3e589f1e3e928359fb64fc7ebd4711b5f0d8e0ae71d6f99fef05cb",
+    "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_response.py": "a8ef0596ebe0591b7fa2681014ae3a1a7ff16ba499ec060b134d30ab63b34219",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_supervisor.py": "d3bb489c979315de480dda8ed3e6bb048cc6e0ec5a723ca36a3111176690991c",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_adapter.py": "92bcd9c1443bb163ac248c870ec16fe8b8d462fc29319cc4f0dbe7dacc455173",
     "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_codec.py": "f1772e3aa0edce58a89a5df8eb753284031a864bf2b16fff1fe056bafb9c0070",

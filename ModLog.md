@@ -1,5 +1,30 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-28] HoloIndex Ranked-Stream and HoloDAE Tier-0 Candidate (0.4.132)
+
+**WSP Protocols:** WSP 00, 05, 06, 15, 22, 34, 48, 50, 62, 83, 84, 87, 97
+
+- Reconciled the completed exact-main maintenance transaction at
+  `1dc016fc...` as `OWNER_READY` with generation `sha256:ba5119f...`; the
+  controller started no runtime and performed no reindex during recovery.
+- Reproduced the remaining public quality failure at the real owner boundary:
+  global flattening reversed a collection-local exact-symbol winner on a
+  `0.4%` raw-similarity difference. The candidate now k-way merges typed
+  producer-ranked streams while preserving current-truth authority classes.
+- Restored source-accurate HoloDAE README/INTERFACE Tier-0 contracts after a
+  broad governed RSI query correctly failed closed on their absence. The docs
+  disclose that the broker launcher still targets legacy direct-HoloIndex
+  auto-reindex code; no launcher authority was widened or relabeled safe.
+- Updated historical RSI architecture and live-status prose to distinguish
+  target design, as-of receipts, measured evaluation, A-grade admission, and
+  operational RSI. HoloIndex remains NO-GO for A-grade and RSI until exact-main
+  activation, fresh benchmarking, exact runtime closure, independent
+  evaluation, and promotion/canary/rollback/outcome gates pass.
+- Pre-merge validation is 1,188 bridge passes / 14 expected skips and all
+  RedDog release groups PASS in 203.191 seconds. The inspected 0.4.132 VSIX is
+  275,728 bytes at `sha256:f40ed659c685...25e40b`; release integrity does not
+  promote the still-unverified Holo runtime or RSI loop.
+
 ## [2026-08-28] HoloIndex Current-Truth Retrieval Candidate
 
 **WSP Protocols:** WSP 00, 05, 06, 15, 22, 34, 50, 60, 62, 83, 84, 87, 97

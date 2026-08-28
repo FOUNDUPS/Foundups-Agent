@@ -1,7 +1,7 @@
 # RedDog
 
-Version: 0.4.131
-0.4.131 adds bounded current-truth Holo retrieval with exact path-bound section authority and a diversity-preserving summary stream over the governed immutable adapter. HoloIndex remains below A-grade and retrieval RSI remains blocked pending exact runtime closure, independent evaluation, promotion/canary/rollback, and candidate-bound outcome learning.
+Version: 0.4.132
+0.4.132 preserves producer-ranked Holo result streams at the RedDog owner boundary, rotates the authenticated backend closure, and restores the HoloDAE Tier-0 contracts. HoloIndex remains below A-grade and retrieval RSI remains blocked pending exact runtime closure, independent evaluation, promotion/canary/rollback, and candidate-bound outcome learning.
 
 This candidate integrity-binds RedDog to the 1,365-file backend closure, including the operator controller, exact task-bound OpenClaw execution, receipt-bound owner cycles, integrity-bound AgentDB claim lease, and fail-closed runtime/task liveness.
 The operator controller remains outside the thin-client command surface, and the VSIX gains no maintenance, reindex, promotion, or execution authority.
@@ -902,7 +902,7 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.4.131)
+## WSP_97 Truth Table (v0.4.132)
 
 | Claim | Status |
 | --- | --- |
@@ -994,6 +994,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.131.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.132.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

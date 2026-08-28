@@ -24,6 +24,7 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter imp
     HoloIndexReadOnlyQueryAdapter,
 )
 from modules.infrastructure.foundups_mcp_bridge.src import (
+    holo_query_service,
     holo_query_service_http as http_module,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
@@ -98,6 +99,15 @@ def _owner(
     backend: Any | None = None,
 ) -> HoloIndexQueryOwnerService:
     monkeypatch.setenv("HOLOINDEX_QUERY_SERVICE_TOKEN", TOKEN)
+    monkeypatch.setattr(
+        holo_query_service,
+        "_owner_runtime_environment",
+        lambda _replica, _backend_factory: (
+            "sha256:" + "8" * 64,
+            "sha256:" + "9" * 64,
+            False,
+        ),
+    )
     ssd_path = tmp_path / "holo-store"
     replica_binding = _replica_binding(tmp_path)
     return HoloIndexQueryOwnerService(

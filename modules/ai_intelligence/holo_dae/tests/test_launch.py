@@ -2,8 +2,22 @@ import threading
 import time
 import types
 import builtins
+from pathlib import Path
 
 from modules.ai_intelligence.holo_dae.scripts import launch as holo_launch
+from modules.infrastructure.wre_core.src import dae_preflight
+
+
+def test_tier0_contract_docs_disclose_legacy_reindex_boundary():
+    module_root = Path(__file__).resolve().parents[1]
+    readme = (module_root / "README.md").read_text(encoding="utf-8")
+    interface = (module_root / "INTERFACE.md").read_text(encoding="utf-8")
+
+    assert "runtime_reindex_allowed=false" in readme
+    assert "AutonomousHoloDAE" in readme
+    assert "Retrieval RSI is therefore not operational" in readme
+    assert "compatibility-only" in interface
+    assert "performs no reindex" in interface
 
 
 class _FakeLock:
@@ -57,6 +71,7 @@ def test_run_holodae_supports_stop_hook(monkeypatch):
 
     holo_launch._holodae_instance = None
     holo_launch._holodae_status.clear()
+    monkeypatch.setattr(dae_preflight, "run_dae_preflight", lambda *_args, **_kwargs: True)
     original_sleep = time.sleep
     monkeypatch.setattr(holo_launch.time, "sleep", lambda _: original_sleep(0.01))
     original_import = builtins.__import__

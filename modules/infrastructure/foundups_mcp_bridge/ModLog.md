@@ -1,5 +1,19 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-28 - Producer-ranked typed-stream merge
+
+- Reproduced a live quality defect where collection-local hybrid ranking put an
+  exact symbol first but global owner flattening sorted every item again by raw
+  similarity and moved it to rank two.
+- Replaced the second independent full sort with a deterministic k-way merge of
+  producer-ranked typed streams. Existing current-truth classes are applied as
+  a stable within-stream authority partition before head comparison. Global
+  score, casefold deduplication, and producer-attested module Tier-0 reservation
+  remain unchanged.
+- The policy is generic and contains no benchmark query or target path. This
+  candidate performs no query, reindex, maintenance, route change, activation,
+  promotion, or outcome write. (WSP 00/15/22/50/62/83/84/87/97)
+
 ## 2026-08-28 - Current-truth owner response ordering
 
 - Extended the immutable snapshot adapter with one bounded exact-string
