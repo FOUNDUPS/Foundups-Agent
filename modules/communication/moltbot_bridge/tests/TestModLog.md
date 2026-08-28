@@ -1,3 +1,15 @@
+## 2026-08-28: Merged root-separation acceptance replay
+
+- Replayed the merged controller from the clean control checkout at exact main
+  `da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6`; the first real OpenClaw transaction
+  was accepted at generation `sha256:9c7e3ab6...` after atomic completion and
+  reverse-order owned-runtime shutdown.
+- A fresh governed query returned CURRENT/no-gap/no-reindex on attempt one.
+  Production full verification then rehashed 33 artifacts / 222,647,465 bytes,
+  retained descriptor `sha256:87990aba...`, and left both canonical worktrees
+  clean. This is live acceptance evidence, not a synthetic pass count or an
+  A-grade/retrieval-RSI claim. (WSP 06/15/22/50/62/84/87/97)
+
 ## 2026-08-28: Owner-query root-separation regressions
 
 - Added five direct/caller falsifiers proving the original workspace/control

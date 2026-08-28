@@ -7,8 +7,10 @@ incident-recheck, CURRENT-coordination, and blocked-recovery queries enter throu
 the original workspace/control root while results remain classified against the
 independently captured authority. The authority selector separately proves a
 configured authority equal to the workspace is rejected. The focused root and
-affected lifecycle selection is 190 passed; merged exact-main replay remains the
-production acceptance gate.
+affected lifecycle selection is 190 passed. Merged exact-main `da558d51` passed
+the repaired controller on its first real OpenClaw transaction; a fresh owner
+query and full 33-artifact post-query verification retained the exact binding.
+That live result is commit-bound and does not prove runtime closure or A-grade.
 
 `test_holoindex_postmerge_runtime_owner_proof.py` owns the distinct
 post-completion readiness contract. It proves one fully receipt-bound exhausted

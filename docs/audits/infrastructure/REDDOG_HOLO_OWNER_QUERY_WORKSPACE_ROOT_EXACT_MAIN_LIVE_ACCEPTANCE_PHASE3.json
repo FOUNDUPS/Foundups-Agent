@@ -1,0 +1,78 @@
+{
+  "schema_version": "reddog_holo_owner_query_live_acceptance_evidence.v1",
+  "recorded_at": "2026-08-28",
+  "truth_boundary": "This evidence closes the merged workspace/authority root-separation controller replay at one exact commit. It does not prove exact runtime closure, A-grade retrieval quality, retrieval RSI, horizontal scale, future-commit authority, or extension package identity.",
+  "accepted_commit": "da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6",
+  "controller_transaction": {
+    "accepted": true,
+    "status": "COMPLETED",
+    "first_transaction": true,
+    "wall_seconds": 450.2,
+    "agentdb_task_id": "holoindex_postmerge_refresh:da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6",
+    "task_executor_elapsed_ms": 429813,
+    "generation_id": "sha256:9c7e3ab6e5f8ebb45c622a6ab20ea8320fc2b530d858a7b214506cc69180b331",
+    "freshness_receipt_digest": "sha256:cb5439fea990805452bbfdd33810f9bf65b1566c9c731f1a0f7858a931f23e6f",
+    "started_runtimes": [
+      "openclaw",
+      "openclaw_supervisor"
+    ],
+    "stopped_runtimes": [
+      "openclaw_supervisor",
+      "openclaw"
+    ],
+    "no_query_time_reindex": true
+  },
+  "fresh_owner_query": {
+    "ok": true,
+    "freshness": "CURRENT",
+    "index_gap_detected": false,
+    "no_reindex": true,
+    "owner_attempts": 1,
+    "owner_retry_performed": false,
+    "owner_acquisition_cycle": 0,
+    "process_wall_seconds": 34.1,
+    "result_latency_ms": 3704,
+    "authority_repo_head_sha": "da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6",
+    "workspace_repo_head_sha": "da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6",
+    "query_replica_generation_id": "sha256:9c7e3ab6e5f8ebb45c622a6ab20ea8320fc2b530d858a7b214506cc69180b331",
+    "query_replica_descriptor_digest": "sha256:87990aba7757a556bd908f7fe64bc7ae7fe81f6f560c25aa4919285ccd953b1d",
+    "query_replica_id": "sha256:04c3b00bb0ab0a69c45b929cea87d6ded67661dc857f0dd6269ae2f2c227c1e5",
+    "query_replica_path_identity_digest": "sha256:78447c5665754cc059f8e2df358593d4fbce9f0ab712f065fdaacf779a9f6662",
+    "runtime_environment_exact_closure_verified": false
+  },
+  "post_query_immutable_verification": {
+    "ok": true,
+    "replica_root": "E:\\HQR\\9c7e3ab6-r1",
+    "canonical_ssd_path": "E:\\HoloIndex",
+    "artifact_count": 33,
+    "artifact_bytes": 222647465,
+    "generation_id": "sha256:9c7e3ab6e5f8ebb45c622a6ab20ea8320fc2b530d858a7b214506cc69180b331",
+    "freshness_receipt_digest": "sha256:cb5439fea990805452bbfdd33810f9bf65b1566c9c731f1a0f7858a931f23e6f",
+    "descriptor_digest": "sha256:87990aba7757a556bd908f7fe64bc7ae7fe81f6f560c25aa4919285ccd953b1d",
+    "replica_id": "sha256:04c3b00bb0ab0a69c45b929cea87d6ded67661dc857f0dd6269ae2f2c227c1e5",
+    "path_identity_digest": "sha256:78447c5665754cc059f8e2df358593d4fbce9f0ab712f065fdaacf779a9f6662"
+  },
+  "repository_state_after_verification": {
+    "control_checkout_clean": true,
+    "authority_checkout_clean": true,
+    "control_head_sha": "da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6",
+    "authority_head_sha": "da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6",
+    "primary_checkout_unrelated_untracked_sites_preserved": true
+  },
+  "retrieval_evaluation": {
+    "freshness": "CURRENT",
+    "index_gap_detected": false,
+    "no_reindex": true,
+    "ordering": "The owner-query root audit and regression test ranked first in their relevant streams.",
+    "noise": "Documentation results included unrelated ModLogs and protocol material.",
+    "duplication": "The knowledge stream repeated one Papers ModLog.",
+    "missing_artifact_control": "The six requested module memory artifacts were supplied through the deterministic must-include bundle.",
+    "quality_verdict": "Usable and current for grounded work, but not A-grade retrieval quality."
+  },
+  "evidence_limits": [
+    "The released RedDog 0.4.134 VSIX remains the immutable candidate artifact built before this replay.",
+    "The controller replay does not establish current-Python stdlib, native-loader, signature, or empirical write-denial closure.",
+    "Maintenance and freshness recovery are not retrieval-quality RSI; no proposer, independent evaluator, promoter/CAS, canary, semantic rollback, or candidate-bound outcome learning is proven.",
+    "A later repository commit requires a new exact-main activation before it can be current Holo authority."
+  ]
+}

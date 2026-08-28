@@ -13,11 +13,10 @@ The owner path binds replica, ranker, runtime, HEAD/root/generation, and no-rein
 
 After completion, one receipt-bound exhausted transient may receive one immediate reproof inside
 the 300-second deadline. Its new two-port acquisition cycle is result/receipt-bound and validated.
-At exact main `724954fa3799b19174a7ac0b653da8c95e9ccf13`, real OpenClaw maintenance, activation, verification, and atomic completion succeeded at generation `sha256:4ede3b9d714e2484256d587fbf798b00deb3c64c47f1c0aa2ad881274e066922`.
-The controller rejected `owner_result_invalid_after_completion` because its requery passed the selected authority back as the workspace entry root; the resolver correctly rejected that same-root topology.
-An independent governed query returned CURRENT/no-gap/no-reindex in 35.3 seconds; full revalidation retained 33 artifacts / 222,617,459 bytes unchanged.
-The repair keeps the original control root as query entry and the independent clean authority as proof target. Candidate tests and a production-shaped CURRENT proof pass; merged exact-main controller replay remains required.
-An already started external authority transaction is not cancellable or guarded at every route-effect boundary, so runtime exact closure, retrieval RSI, and A-grade remain false.
+Historical exact main `724954fa3799b19174a7ac0b653da8c95e9ccf13` exposed a controller false-negative after real OpenClaw maintenance completed: its requery recycled the selected authority as the workspace entry root and the resolver correctly rejected that same-root topology.
+Merged exact main `da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6` passed the repaired controller on its first transaction. Real OpenClaw maintenance, activation, verification, atomic completion, and reverse-order owned-runtime shutdown produced generation `sha256:9c7e3ab6e5f8ebb45c622a6ab20ea8320fc2b530d858a7b214506cc69180b331`.
+A fresh governed query returned CURRENT/no-gap/no-reindex on attempt one; post-query full verification retained 33 artifacts / 222,647,465 bytes at descriptor `sha256:87990aba7757a556bd908f7fe64bc7ae7fe81f6f560c25aa4919285ccd953b1d`.
+This closes the merged root-separation replay gate only. Runtime exact closure, retrieval RSI, A-grade, horizontal scale, and future-commit authority remain false or unproven.
 
 Historical exact main `5e0835c690e0f4f1712c7021a75abdc35aadeca0` also ran the real
 OpenClaw transaction produced generation `sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915`; a governed query

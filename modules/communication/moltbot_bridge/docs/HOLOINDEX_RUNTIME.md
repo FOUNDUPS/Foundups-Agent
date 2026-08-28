@@ -91,21 +91,19 @@ Committed authority permits caller overlays; `clean_workspace_head` does not.
 
 ## Current truth and scale
 
-Exact-main `724954fa3799b19174a7ac0b653da8c95e9ccf13` completed maintenance,
-activation, verification, and atomic completion through the real OpenClaw
-supervisor at generation
-`sha256:4ede3b9d714e2484256d587fbf798b00deb3c64c47f1c0aa2ad881274e066922`.
-The controller then rejected `owner_result_invalid_after_completion`. Exact
-reproduction showed the post-completion classifier passed the selected clean
-authority back into `query_once` as its workspace root, so the configured
-authority equalled the workspace and the resolver correctly returned
-`HOLOINDEX_AUTHORITY_ROOT_INVALID`. A fresh governed owner query entered through
-the original control root and returned CURRENT/no-gap/no-reindex in 35.3 seconds;
-full verification retained 33 artifacts / 222,617,459 bytes unchanged. The
-focused repair makes the workspace entry root explicit through every classifier
-caller while retaining the captured authority as the independent verification
-target. Candidate caller regressions and a production-shaped CURRENT proof pass;
-merged current-main replay remains required. Evidence is commit-bound. The
+Exact-main `724954fa3799b19174a7ac0b653da8c95e9ccf13` exposed the controller
+false-negative after real OpenClaw maintenance and atomic completion succeeded:
+the post-completion classifier passed the selected clean authority back into
+`query_once` as its workspace root, so the resolver correctly returned
+`HOLOINDEX_AUTHORITY_ROOT_INVALID`. Merged exact-main
+`da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6` then passed the repaired controller
+on its first transaction. Maintenance, activation, verification, atomic task
+completion, and reverse-order owned-runtime shutdown produced generation
+`sha256:9c7e3ab6e5f8ebb45c622a6ab20ea8320fc2b530d858a7b214506cc69180b331`.
+A fresh owner query was CURRENT/no-gap/no-reindex on attempt one; post-query
+full verification retained 33 artifacts / 222,647,465 bytes at descriptor
+`sha256:87990aba7757a556bd908f7fe64bc7ae7fe81f6f560c25aa4919285ccd953b1d`.
+This proves the merged root-separation path at that commit only. The
 high-risk decision record is
 `docs/audits/security/REDDOG_HOLO_OWNER_QUERY_WORKSPACE_ROOT_ASSUMPTION_AUDIT_20260828.md`.
 
