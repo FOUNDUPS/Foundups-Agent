@@ -27,11 +27,16 @@ path never starts Chroma or opens SQLite/HNSW; its snapshot generation must
 equal the verified replica generation. Maintenance retains the write-capable
 canonical Chroma path.
 
-Current exact-main maintenance/replica RSI is healthy at
-`bfcf9041b80be6773951e1c2e07500ebf7c9df62`, generation
-`sha256:7b94cf8a...`: the broker-managed maintenance replay completed and full
-immutable verification passed after a CURRENT/no-gap/no-reindex query. That
-proves exact-generation repair and activation, not retrieval-quality RSI.
+Historical exact-commit maintenance/replica evidence passed at
+`db44f8be3374785341d1c237ec61da774444eb14`, generation
+`sha256:b5a138e0...`: the real OpenClaw/AgentDB maintenance task completed, a
+fresh governed owner query returned CURRENT/no-gap/no-reindex in 3.812 seconds,
+and full verification retained 33 artifacts / 222,033,165 bytes unchanged.
+The pre-repair controller still reported a false owner rejection; its exact-task,
+liveness, and distinct-cycle repair requires merged current-main replay.
+Maintenance/freshness self-repair is observed working for this bound base
+transaction, but current-main controller acceptance is not. Retrieval-quality
+RSI and A-grade remain unaccepted.
 
 Historical exact main `66526ae5cdd0467ce264c1db4122ab82eadb7733` was refreshed and activated
 through the broker-managed OpenClaw/AgentDB post-merge path at generation
@@ -42,7 +47,9 @@ wall time. Full post-query verification retained all 33 artifacts and
 221,204,272 bytes unchanged. This closes exact-main activation and cold-owner
 usability for that commit only. Current post-restart semantic-owner startup
 failed closed at 60 and 180 seconds, so that historical timing is not current
-availability evidence. Runtime identity now binds executable, ABI/platform,
+availability evidence. A later base-bound governed query succeeded on its first
+attempt inside the 300-second CLI wall; that supersedes the diagnostic timeout
+for base usability, not exact-current-main readiness or scale. Runtime identity now binds executable, ABI/platform,
 verified source bytes, distribution build records, replica/model closure, and
 actual controls, but installed dependency payload bytes remain unverified.
 Resident owner activation, quality improvement, independent evaluation, and
@@ -101,7 +108,7 @@ seconds, 1 MiB Git output, and 4,096 module roots.
 HoloIndex has evolved from module finder to **brain surgeon level code intelligence** with **baked-in WSP 97 execution prompting**:
 - **Before**: Find modules -> "Here's the file"
 - **After**: Function-level indexing -> "Lines 256-276: check_video_is_live" + Mermaid flow analysis + inefficiency detection
-- **WSP 97**: **META-FRAMEWORK** - Baked-in execution methodology for building Rubik Cubes (MVP DAEs)
+- **WSP 97**: **EXECUTION/ACTIVATION PROTOCOL** - Baked-in agentic execution methodology for building Rubik Cubes (MVP DAEs)
 
 ### Core Mantra (Baked into All Agents)
 ```
@@ -144,7 +151,9 @@ HoloIndex has evolved from module finder to **brain surgeon level code intellige
 
 ## [ALERT] MAJOR ARCHITECTURAL PIVOT (2025-09-25)
 
-HoloIndex has evolved from a search tool into the **autonomous intelligence foundation** for the entire FoundUps ecosystem. This is now the **green foundation board agent** that comes with every LEGO set.
+HoloIndex is intended to become the **knowledge foundation** for the FoundUps
+ecosystem. Today its governed generation-bound query path is usable; autonomous
+retrieval improvement, promotion, and production orchestration remain gated.
 
 ## [U+1F525] UPCOMING ENHANCEMENT: Intent-Driven Orchestration (2025-10-07)
 
@@ -158,13 +167,15 @@ HoloIndex has evolved from a search tool into the **autonomous intelligence foun
 - **Smart Routing**: Only relevant components execute (not all 7 every time)
 - **Structured Output**: 4 priority sections (INTENT, FINDINGS, MCP, ALERTS)
 - **Alert Deduplication**: 87 "ModLog outdated" warnings -> 1 line
-- **Feedback Learning**: Rate output (good/noisy/missing) -> System learns and improves
+- **Feedback Evidence**: Rate output (good/noisy/missing) -> store observations
+  for independent evaluation; no production ranker changes automatically
 - **Breadcrumb Events**: Track all orchestration decisions for multi-agent learning
 
 **Token Efficiency:**
 - Before: ~10,000 tokens per query
 - After: ~2,900 tokens per query (71% reduction)
-- With learning: ~1,500 tokens after 1000 cycles (48% total reduction)
+- Historical target after 1000 evaluated cycles: ~1,500 tokens; not current
+  measured production evidence
 
 **Architecture Preserved:** Qwen->0102->012 orchestration UNCHANGED (enhancement, not replacement)
 
@@ -180,8 +191,9 @@ for future autonomous code intelligence:
 - **HoloIndex**: Semantic code discovery (WSP 87)
 - **HoloDAE**: Observation and proposal surfaces around retrieval
 
-Current production truth is narrower than the historical vision. Exact-main
-freshness repair is operational, but retrieval-quality RSI is not. The audited
+Current production truth is narrower than the historical vision. Base-bound
+exact-commit freshness repair is validated; exact-current-remote-main replay
+remains a post-merge gate, and retrieval-quality RSI is not operational. The audited
 `b5b4de05` generation passed integrity verification and Recall@8, yet failed
 the public quality policy at MRR `0.9167` and nDCG@8 `0.8718`. No live loop
 currently edits the production ranker, passes an independent sealed corpus,
@@ -348,17 +360,19 @@ the owner.
 > improvement. The generation-bound and A-grade contracts above are the
 > current authority for retrieval quality.
 
-### [AI] HoloDAE - Chain-of-Thought Logging for Recursive Self-Improvement
+### [AI] HoloDAE - Decision Logging and RSI Candidate Evidence
 **The act of using HoloIndex IS the monitoring trigger!**
 
-**[TARGET] Chain-of-Thought Algorithm**: Every Holo interaction is logged for AI self-improvement!
+**[TARGET] Decision Trace**: selected Holo interactions may be logged as inputs
+to separately governed evaluation; logs do not change production behavior.
 
 When 0102 runs a search, HoloDAE executes current features (health checks, vibecoding, etc.) and logs its complete decision-making process internally:
 
-#### Chain-of-Thought Features (Logged for Self-Improvement):
+#### Decision-Trace Features (Logged for Evaluation):
 - [OK] **Decision Logging**: Every analysis choice with reasoning
 - [OK] **Effectiveness Scoring**: AI evaluates its own performance
-- [OK] **Pattern Recognition**: Learns from successful vs unsuccessful analyses
+- [PARTIAL] **Pattern Comparison**: records successful versus unsuccessful
+  analyses; verified learning and promotion are absent
 - [PARTIAL] **Recursive Improvement**: observations are stored; verified
   ranker improvement, promotion, canary, and rollback remain unproven
 - [OK] **012 Monitoring**: Logs visible for system tweaking and oversight
@@ -552,7 +566,8 @@ python main.py  # Select option 2 -> 25
 
 **[REFRESH] Recursive Improvement Data**
 - Stored learning data from all AI interactions
-- Used for continuous system optimization
+- Available as candidate evidence for offline evaluation; no verified
+  production consumer currently adapts or promotes the retrieval ranker
 
 ### [CLIPBOARD] WSP COMPLIANCE & GOVERNANCE (5 functions):
 
@@ -593,7 +608,8 @@ python holo_index.py --search "create module" --llm-advisor
 
 **[U+1F4AC] Pattern Coach**
 - Behavioral pattern detection and coaching
-- Learns from user interaction patterns
+- Records interaction-pattern observations and proposes coaching; it does not
+  autonomously adapt the production ranker or policy
 
 **[U+1F4D6] WSP Master**
 - 95+ WSP protocol guidance system
@@ -649,12 +665,12 @@ python holo_index.py --search "livechat message"
 # [AI] 0102: Deep think: Can this be simplified? Follow WSP simplicity.
 ```
 
-### Chain-of-Thought Logging (For Recursive Self-Improvement)
+### Decision Logging (For Evaluation and Candidate Improvement)
 ```bash
 # 012 can see the AI's decision-making in logs for monitoring/tweaking:
 tail -f holo_index/logs/holodae_activity.log
 
-# Shows chain-of-thought decisions logged for self-improvement:
+# Shows decision observations logged for independent evaluation:
 # [HOLODAE-CALL] 012 initiated HoloIndex search: 'check health status'
 # [HOLODAE-FOUND] 8 files across 3 modules relevant to query
 # [COT-START] Session cot_1739123456: 'check health status' with 8 files, 3 modules
@@ -662,10 +678,10 @@ tail -f holo_index/logs/holodae_activity.log
 # [COT-DECISION] file_size_analysis: Files available: 8
 # [COT-DECISION] module_health_analysis: Modules available: 3
 # [COT-COMPLETE] Session cot_1739123456: 3 decisions, effectiveness 0.85
-# [COT-STORED] Session cot_1739123456 stored for recursive improvement analysis
+# [COT-STORED] Session cot_1739123456 stored as candidate evidence
 
-# The AI uses this logged data to improve future decision-making
-# 012 can analyze these logs to understand and tweak system behavior
+# 012/AutoResearch may evaluate these logs and propose bounded changes;
+# no verified production learning or promotion follows automatically
 ```
 
 ### With AI Advisor
@@ -718,11 +734,14 @@ HoloIndex uses a gamification system to encourage quality behaviors:
 - **Variants**: Different reward multipliers (currently variant A)
 
 ## Performance
-- **Search Speed**: <200ms dual search
-- **LLM Inference**: <500ms with caching
+- **Governed semantic query**: latest public p95 approximately 4.25 seconds;
+  the six-case cold benchmark took approximately 206 seconds
+- **Historical targets**: <200ms dual search and <500ms cached LLM inference
+  are not current acceptance evidence
 - **Index Size**: ~500MB for full codebase
 - **Memory Usage**: <1GB with models loaded
-- **Token Efficiency**: 93% reduction vs traditional
+- **Token Efficiency**: 93% was a historical design estimate, not a current
+  governed measurement
 
 ## Dependencies
 - Python 3.8+
@@ -732,4 +751,6 @@ HoloIndex uses a gamification system to encourage quality behaviors:
 - SQLite (violation tracking)
 
 ## Status
-[OK] **PRODUCTION READY** - All systems operational with comprehensive AI intelligence
+[PARTIAL] **GOVERNED QUERY USABLE** - Base-bound maintenance/freshness repair
+is observed working. Exact-current-main controller acceptance, exact runtime
+closure, resident scale, A-grade quality, and retrieval RSI remain blocked.

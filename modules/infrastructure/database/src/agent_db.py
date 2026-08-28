@@ -26,6 +26,12 @@ from typing import Any, Callable, Dict, List, Mapping, Optional
 
 from .db_manager import DatabaseManager
 from . import holoindex_postmerge_task_namespace as _postmerge_tasks
+from .holoindex_postmerge_claim_contract import (
+    MAX_POSTMERGE_CLAIM_LEASE_SECONDS, begin_holoindex_postmerge_write_fence,
+    build_holoindex_postmerge_claim_context,
+    holoindex_postmerge_claim_binding_valid,
+    holoindex_postmerge_completed_replay_valid,
+)
 from .signed_worker_assignment import assign_signed_worker_task as _assign_signed_worker_task
 from .signed_worker_execution_lease import ensure_execution_lease_schema
 from .signed_worker_result_ledger import ensure_result_history_schema
@@ -48,38 +54,6 @@ _ASSURANCE_REQUIRED_FIELDS = (
     "expires_at",
 )
 
-_POSTMERGE_CLAIM_KEYS = frozenset(
-    {
-        "claim_id",
-        "claim_binding_digest",
-        "claim_expires_at",
-    }
-)
-
-
-def _postmerge_claim_binding_digest(
-    *,
-    task_id: str,
-    agent_id: str,
-    context: Mapping[str, Any],
-) -> str:
-    base_context = {
-        str(key): value
-        for key, value in context.items()
-        if key not in _POSTMERGE_CLAIM_KEYS
-    }
-    payload = {
-        "task_id": task_id,
-        "agent_id": agent_id,
-        "context": base_context,
-    }
-    encoded = json.dumps(
-        payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    ).encode("ascii")
-    return "sha256:" + hashlib.sha256(encoded).hexdigest()
 _ASSURANCE_REQUEST_SCHEMA_VERSION = "reddog_assurance_capacity_request.v1"
 _ASSURANCE_MAX_LEASE = timedelta(hours=6)
 _ASSURANCE_MAX_RENEWALS = 3
@@ -1314,7 +1288,7 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
         expected_schema_version: str,
         expected_target_repo_head_sha: str,
         expected_authority_root_digest: str,
-        lease_seconds: int = 7500,
+        lease_seconds: int = MAX_POSTMERGE_CLAIM_LEASE_SECONDS,
     ) -> str:
         """Claim one exact-SHA task and return its immutable claim ID."""
         try:
@@ -1324,7 +1298,7 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
                     SELECT status, assigned_to, context
                     FROM agents_autonomous_tasks
                     WHERE task_id = ?
-                    """,
+                    """ + begin_holoindex_postmerge_write_fence(self.db, conn),
                     (task_id,),
                 ).fetchone()
                 if row is None:
@@ -1332,9 +1306,7 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
                 raw_context = str(row.get("context") or "")
                 context = self._parse_task_context(dict(row))
                 target_sha = str(context.get("target_repo_head_sha") or "")
-                authority_digest = str(
-                    context.get("authority_root_digest") or ""
-                )
+                authority_digest = str(context.get("authority_root_digest") or "")
                 if (
                     str(row.get("status") or "") != "pending"
                     or str(row.get("assigned_to") or "").strip()
@@ -1351,26 +1323,22 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
                         char not in "0123456789abcdef"
                         for char in authority_digest[7:]
                     )
-                    or lease_seconds < 1
+                    or type(lease_seconds) is not int
+                    or not 1 <= lease_seconds <= MAX_POSTMERGE_CLAIM_LEASE_SECONDS
                 ):
                     return ""
                 claim_id = "hpmc_" + uuid.uuid4().hex
-                claim_digest = _postmerge_claim_binding_digest(
+                now = datetime.now(timezone.utc)
+                claimed_context = build_holoindex_postmerge_claim_context(
                     task_id=task_id,
                     agent_id=agent_id,
-                    context=context,
+                    base_context=context,
+                    claim_id=claim_id,
+                    issued_at=now,
+                    lease_seconds=lease_seconds,
                 )
-                now = datetime.now(timezone.utc)
-                claimed_context = dict(context)
-                claimed_context.update(
-                    {
-                        "claim_id": claim_id,
-                        "claim_binding_digest": claim_digest,
-                        "claim_expires_at": (
-                            now + timedelta(seconds=lease_seconds)
-                        ).isoformat(),
-                    }
-                )
+                if claimed_context is None:
+                    return ""
                 claimed = conn.execute(
                     """
                     UPDATE agents_autonomous_tasks
@@ -1406,38 +1374,28 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
             with self.db.get_connection() as conn:
                 row = conn.execute(
                     """
-                    SELECT status, assigned_to, context
+                    SELECT status, assigned_to, assigned_at, context
                     FROM agents_autonomous_tasks
                     WHERE task_id = ?
-                    """,
+                    """ + begin_holoindex_postmerge_write_fence(self.db, conn),
                     (task_id,),
                 ).fetchone()
                 if row is None:
                     return False
                 raw_context = str(row.get("context") or "")
                 context = self._parse_task_context(dict(row))
-                recomputed = _postmerge_claim_binding_digest(
-                    task_id=task_id,
-                    agent_id=agent_id,
-                    context=context,
-                )
-                expires_raw = str(context.get("claim_expires_at") or "")
-                try:
-                    expires_at = datetime.fromisoformat(
-                        expires_raw.replace("Z", "+00:00")
-                    )
-                    if expires_at.tzinfo is None:
-                        expires_at = expires_at.replace(tzinfo=timezone.utc)
-                except ValueError:
-                    return False
                 if (
                     str(row.get("status") or "") != "assigned"
                     or str(row.get("assigned_to") or "") != agent_id
-                    or context.get("claim_id") != claim_id
-                    or context.get("claim_binding_digest")
-                    != claim_binding_digest
-                    or recomputed != claim_binding_digest
-                    or datetime.now(timezone.utc) >= expires_at
+                    or not holoindex_postmerge_claim_binding_valid(
+                        task_id=task_id,
+                        agent_id=agent_id,
+                        assigned_at=row.get("assigned_at"),
+                        context=context,
+                        expected_claim_id=claim_id,
+                        expected_digest=claim_binding_digest,
+                        require_active=True,
+                    )
                 ):
                     return False
                 started = conn.execute(
@@ -1471,7 +1429,7 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
             with self.db.get_connection() as conn:
                 row = conn.execute(
                     """
-                    SELECT status, assigned_to, context
+                    SELECT status, assigned_to, assigned_at, context
                     FROM agents_autonomous_tasks
                     WHERE task_id = ?
                     """,
@@ -1485,15 +1443,14 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
                     str(row.get("status") or "")
                     not in {"assigned", "executing"}
                     or str(row.get("assigned_to") or "") != agent_id
-                    or context.get("claim_id") != claim_id
-                    or context.get("claim_binding_digest")
-                    != claim_binding_digest
-                    or _postmerge_claim_binding_digest(
+                    or not holoindex_postmerge_claim_binding_valid(
                         task_id=task_id,
                         agent_id=agent_id,
+                        assigned_at=row.get("assigned_at"),
                         context=context,
+                        expected_claim_id=claim_id,
+                        expected_digest=claim_binding_digest,
                     )
-                    != claim_binding_digest
                 ):
                     return False
                 finalized = conn.execute(
@@ -1534,10 +1491,10 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
             with self.db.get_connection() as conn:
                 task = conn.execute(
                     """
-                    SELECT status, assigned_to, context
+                    SELECT status, assigned_to, assigned_at, completed_at, context
                     FROM agents_autonomous_tasks
                     WHERE task_id = ?
-                    """,
+                    """ + begin_holoindex_postmerge_write_fence(self.db, conn),
                     (task_id,),
                 ).fetchone()
                 request = conn.execute(
@@ -1572,39 +1529,33 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
                     if task is not None
                     else {}
                 )
-                claim_valid = bool(
-                    task is not None
-                    and task_context.get("claim_id") == claim_id
-                    and task_context.get("claim_binding_digest")
-                    == claim_binding_digest
-                    and _postmerge_claim_binding_digest(
-                        task_id=task_id,
-                        agent_id=agent_id,
-                        context=task_context,
-                    )
-                    == claim_binding_digest
-                )
-
                 if existing is not None:
-                    try:
-                        existing_payload = json.loads(str(existing.get("payload") or ""))
-                    except (TypeError, ValueError):
-                        return False
-                    return bool(
-                        task is not None
-                        and str(task.get("status") or "") == "completed"
-                        and str(task.get("assigned_to") or "") == agent_id
-                        and claim_valid
-                        and request is not None
-                        and str(request.get("resolution_status") or "") == "completed"
-                        and existing_payload == completion_payload
+                    return bool(task is not None) and (
+                        holoindex_postmerge_completed_replay_valid(
+                            task_id=task_id, agent_id=agent_id, task=task,
+                            context=task_context, request=request,
+                            existing_payload_raw=existing.get("payload"),
+                            completion_payload=completion_payload,
+                            claim_id=claim_id,
+                            claim_binding_digest=claim_binding_digest,
+                        )
                     )
 
+                completion_now = datetime.now(timezone.utc)
                 if (
                     task is None
                     or str(task.get("status") or "") != "executing"
                     or str(task.get("assigned_to") or "") != agent_id
-                    or not claim_valid
+                    or not holoindex_postmerge_claim_binding_valid(
+                        task_id=task_id,
+                        agent_id=agent_id,
+                        assigned_at=task.get("assigned_at"),
+                        context=task_context,
+                        expected_claim_id=claim_id,
+                        expected_digest=claim_binding_digest,
+                        now=completion_now,
+                        require_active=True,
+                    )
                     or request is None
                     or str(request.get("resolution_status") or "") != "pending"
                 ):
@@ -1653,7 +1604,7 @@ class AgentDB(_postmerge_tasks.HoloIndexPostmergeTaskNamespaceMixin):
                       AND context = ?
                     """,
                     (
-                        datetime.now().isoformat(),
+                        completion_now.isoformat(),
                         task_id,
                         agent_id,
                         task_context_raw,

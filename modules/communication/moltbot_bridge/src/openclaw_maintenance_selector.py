@@ -126,6 +126,30 @@ class MaintenanceSelectionResult:
         }
 
 
+def _execution_bundle_direction(
+    *, description: str, family: str, task_id: str,
+) -> tuple[float, list[str], bool]:
+    """Retrieve direction except for the self-hosting Holo maintenance family."""
+
+    if family == "holoindex_postmerge":
+        return 0.0, [], False
+    try:
+        from .openclaw_execution_bundle import build_execution_bundle
+
+        bundle = build_execution_bundle(
+            query=description, route=family, limit=3,
+            include_patterns=True, include_docs=True,
+        )
+        logger.debug(
+            "[MAINTENANCE] Bundle for %s: conf=%.2f candidates=%d",
+            task_id, bundle.confidence, len(bundle.candidate_paths),
+        )
+        return bundle.confidence, bundle.verification_hints[:3], True
+    except Exception as exc:
+        logger.debug("[MAINTENANCE] Bundle build failed: %s", exc)
+        return 0.0, [], False
+
+
 def select_maintenance_task(
     pending_tasks: List[Dict[str, Any]],
     observation: Dict[str, Any],
@@ -171,31 +195,10 @@ def select_maintenance_task(
 
         family_config = ALLOWED_TASK_FAMILIES[family]
 
-        # Build HoloIndex execution bundle for direction
-        bundle_confidence = 0.0
-        execution_hints = []
-        try:
-            from .openclaw_execution_bundle import build_execution_bundle
-
-            bundle = build_execution_bundle(
-                query=description,
-                route=family,
-                limit=3,
-                include_patterns=True,
-                include_docs=True,
-            )
-            bundle_confidence = bundle.confidence
-            execution_hints = bundle.verification_hints[:3]
-            bundle_used = True
-
-            logger.debug(
-                "[MAINTENANCE] Bundle for %s: conf=%.2f candidates=%d",
-                task_id,
-                bundle_confidence,
-                len(bundle.candidate_paths),
-            )
-        except Exception as exc:
-            logger.debug("[MAINTENANCE] Bundle build failed: %s", exc)
+        bundle_confidence, execution_hints, used = _execution_bundle_direction(
+            description=description, family=family, task_id=task_id,
+        )
+        bundle_used = bundle_used or used
 
         # Check for blocked patterns in description
         escalation_reason = _check_blocked_patterns(description, required_skills)

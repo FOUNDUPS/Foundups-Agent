@@ -13,9 +13,60 @@ from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
 from modules.communication.moltbot_bridge.src.holoindex_postmerge_supervisor_policy import (
     HOLOINDEX_POSTMERGE_ONLY_MODE,
     HOLOINDEX_POSTMERGE_SOURCE,
+    HoloIndexPostmergePoller,
     holoindex_postmerge_only_execution_rejection,
     validate_supervisor_holoindex_postmerge_completion,
 )
+
+
+def test_bound_poller_never_schedules_an_independent_coordinator(
+    tmp_path, monkeypatch,
+):
+    task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+    poller = HoloIndexPostmergePoller(tmp_path, enabled=True, task_id=task_id)
+    schedule = MagicMock()
+    monkeypatch.setattr(poller, "_schedule", schedule)
+
+    assert poller.poll() == {
+        "accepted": True, "status": "TASK_BOUND", "rejection_reasons": [],
+    }
+    assert poller.task_id == task_id
+    assert poller.future is None
+    schedule.assert_not_called()
+
+
+def test_poller_binding_is_idempotent_and_rejects_replacement(tmp_path):
+    first = "holoindex_postmerge_refresh:" + ("a" * 40)
+    second = "holoindex_postmerge_refresh:" + ("b" * 40)
+    poller = HoloIndexPostmergePoller(tmp_path, enabled=True)
+
+    assert poller.bind_task(first) is True
+    assert poller.bind_task(first) is True
+    assert poller.bind_task(second) is False
+    assert poller.bind_task("not-a-task") is False
+    assert poller.task_id == first
+
+
+def test_poller_exact_release_allows_the_next_controller_task(tmp_path):
+    first = "holoindex_postmerge_refresh:" + ("a" * 40)
+    second = "holoindex_postmerge_refresh:" + ("b" * 40)
+    poller = HoloIndexPostmergePoller(tmp_path, enabled=True, task_id=first)
+
+    assert poller.release_task(second) is False
+    assert poller.release_task(first) is True
+    assert poller.task_id == ""
+    assert poller.bind_task(second) is True
+
+
+def test_supervisor_constructor_and_registration_preserve_exact_task(tmp_path):
+    task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path, runtime_mode=HOLOINDEX_POSTMERGE_ONLY_MODE,
+        postmerge_task_id=task_id,
+    )
+    assert supervisor.register_holoindex_postmerge_task(task_id) is True
+    assert supervisor._holoindex_postmerge_poller.task_id == task_id
+    assert supervisor.release_holoindex_postmerge_task(task_id) is True
 
 
 def test_postmerge_completion_policy_requires_exact_atomic_receipt(monkeypatch):

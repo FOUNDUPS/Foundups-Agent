@@ -6,6 +6,10 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Mapping
 
+from .holoindex_postmerge_claim_contract import (
+    holoindex_postmerge_claim_binding_valid,
+)
+
 from .protected_autonomous_task_namespace import (
     HOLOINDEX_POSTMERGE_TASK_PREFIX,
     ProtectedAutonomousTaskNamespaceMixin,
@@ -127,12 +131,34 @@ def requeue_holoindex_postmerge_task(
 def reclaim_expired_holoindex_postmerge_task(
     owner: Any, task_id: str, agent_id: str, *, expected_assigned_at: str
 ) -> bool:
-    stored = _stored_binding(owner, task_id, "assigned")
-    if stored is None:
-        stored = _stored_binding(owner, task_id, "executing")
-    if stored is None:
+    rows = owner.db.execute_query(
+        "SELECT status, assigned_to, assigned_at, context "
+        "FROM agents_autonomous_tasks WHERE task_id = ?",
+        (task_id,),
+    )
+    if not rows:
         return False
-    raw_context, _ = stored
+    row = dict(rows[0])
+    raw_context = str(row.get("context") or "")
+    try:
+        context = json.loads(raw_context)
+    except (TypeError, ValueError):
+        return False
+    if (
+        row.get("status") not in {"assigned", "executing"}
+        or row.get("assigned_to") != agent_id
+        or row.get("assigned_at") != expected_assigned_at
+        or not isinstance(context, Mapping)
+        or not _valid_task_binding(task_id, context)
+        or not holoindex_postmerge_claim_binding_valid(
+            task_id=task_id,
+            agent_id=agent_id,
+            assigned_at=row.get("assigned_at"),
+            context=context,
+            require_expired=True,
+        )
+    ):
+        return False
     return owner.db.execute_write(
         "UPDATE agents_autonomous_tasks SET status = 'failed', completed_at = ? "
         "WHERE task_id = ? AND status IN ('assigned', 'executing') "

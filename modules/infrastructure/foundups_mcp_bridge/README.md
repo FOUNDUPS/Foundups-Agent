@@ -9,9 +9,12 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 The shared owner-acquisition policy owns the two-attempt ceiling, 300-second
 operation ceiling, PID-sharded ports, and exact transient allowlist consumed by
 both the supported one-shot and RedDog's post-completion verifier. Policy is no
-longer duplicated in the root script. This does not make every owner failure
-retryable: only independently verified exhausted allowlisted transients may
-enter the controller's one immediate reproof.
+longer duplicated in the root script. Thirty-two bounded acquisition cycles
+form one deterministic 64-port permutation per process; cycle zero preserves
+the original pair, and a controller reproof uses cycle one instead of retrying
+the same ports. The one-shot binds the selected cycle into its result and query
+receipt. This does not make every owner failure retryable: only independently
+verified exhausted allowlisted transients may enter the immediate reproof.
 
 The private query owner emits a secret-free
 `runtime_environment_digest` computed inside the authenticated child. It binds
@@ -25,9 +28,10 @@ interpreters.
 This is not yet exact dependency-byte assurance. Installed package payload
 files are not all rehashed, so queries explicitly report
 `runtime_environment_exact_closure_verified=false` and A-grade admission
-rejects. Current cold one-shot semantic startup also exceeds 180 seconds after
-restart; resident authenticated owner activation and dependency-byte sealing
-remain P0. Query-time reindex and environment repair remain forbidden.
+rejects. Earlier post-restart diagnostics exceeded 60/180 seconds; the latest
+base-bound governed query passed on attempt one inside the 300-second CLI wall.
+Resident exact-current-main owner activation and dependency-byte sealing remain
+P0. Query-time reindex and environment repair remain forbidden.
 
 The first dependency-byte layer now exists as an inert, content-addressed
 materializer. It hashes every admitted `site-packages` file and every directory

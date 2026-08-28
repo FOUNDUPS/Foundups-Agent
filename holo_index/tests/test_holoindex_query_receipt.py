@@ -278,6 +278,7 @@ def test_query_receipt_binds_valid_owner_acquisition_telemetry() -> None:
             "owner_attempts": 2,
             "owner_retry_performed": True,
             "owner_retry_reason": "SEMANTIC_BACKEND_UNAVAILABLE",
+            "owner_acquisition_cycle": 1,
         },
         require_generation=True,
     )
@@ -285,6 +286,20 @@ def test_query_receipt_binds_valid_owner_acquisition_telemetry() -> None:
     assert receipt["owner_attempts"] == 2
     assert receipt["owner_retry_performed"] is True
     assert receipt["owner_retry_reason"] == "SEMANTIC_BACKEND_UNAVAILABLE"
+    assert receipt["owner_acquisition_cycle"] == 1
+
+
+@pytest.mark.parametrize("cycle", [True, -1, 32, "1"])
+def test_query_receipt_omits_invalid_owner_acquisition_cycle(cycle: object) -> None:
+    receipt = build_query_receipt(
+        source="holoindex_owner_service",
+        source_class=SOURCE_CLASS_HOLOINDEX,
+        query="owner readiness",
+        result={"ok": False, "freshness": "UNKNOWN", "error": "offline",
+                "owner_acquisition_cycle": cycle},
+        require_generation=True,
+    )
+    assert "owner_acquisition_cycle" not in receipt
 
 
 def test_query_receipt_preserves_adapter_stale_reasons() -> None:

@@ -108,20 +108,21 @@ def _selection(_root):
 def _run(
     monkeypatch, tmp_path, *, broker=None, clock=None, bootstrap=None,
     completion_validator=None, owner_result=None, git_runner=None,
+    task_binder=None, task_releaser=None,
 ):
     broker = broker or FakeBroker()
     clock = clock or FakeClock()
     monkeypatch.setattr(controller, "classify_verified_owner_result", lambda *_a, **_k: "INVALID")
+
+    def classified_owner(**kwargs):
+        result = dict(owner_result or {"freshness_generation_id": GENERATION, "freshness_receipt_digest": FRESHNESS})
+        result.setdefault("owner_acquisition_cycle",
+                          kwargs["query_runner"].keywords["acquisition_cycle"])
+        return controller.CURRENT, result
     monkeypatch.setattr(
         controller,
         "query_and_classify_owner_result",
-        lambda **_kwargs: (
-            controller.CURRENT,
-            owner_result or {
-                "freshness_generation_id": GENERATION,
-                "freshness_receipt_digest": FRESHNESS,
-            },
-        ),
+        classified_owner,
     )
     monkeypatch.setattr(
         controller,
@@ -148,6 +149,8 @@ def _run(
         database_provider=lambda: object(),
         clock=clock,
         sleeper=clock.sleep,
+        task_binder=task_binder or (lambda _task_id, _root: "bound"),
+        task_releaser=task_releaser or (lambda _task_id, _root: "released"),
     )
 
 
@@ -231,7 +234,12 @@ def test_runtime_controller_owns_exact_lifecycle_with_holo_only_supervisor(
     monkeypatch, tmp_path,
 ):
     broker = FakeBroker()
-    result = _run(monkeypatch, tmp_path, broker=broker)
+    result = _run(
+        monkeypatch, tmp_path, broker=broker,
+        task_releaser=lambda *_args: (_ for _ in ()).throw(
+            AssertionError("owned supervisor must stop while still bound")
+        ),
+    )
 
     assert result.accepted is True
     assert result.status == "COMPLETED"
@@ -241,7 +249,7 @@ def test_runtime_controller_owns_exact_lifecycle_with_holo_only_supervisor(
     assert broker.stopped == ["openclaw_supervisor", "openclaw"]
     assert broker.start_launch_kwargs == [
         None,
-        {"runtime_mode": controller.HOLOINDEX_POSTMERGE_ONLY_MODE},
+        {"runtime_mode": controller.HOLOINDEX_POSTMERGE_ONLY_MODE, "postmerge_task_id": TASK_ID},
     ]
 
 
@@ -255,6 +263,59 @@ def test_runtime_controller_preserves_preexisting_broker_runtimes(monkeypatch, t
     assert result.stopped_runtime_ids == ()
     assert broker.started == []
     assert broker.stopped == []
+
+
+def test_runtime_controller_releases_preexisting_supervisor_for_next_task(
+    monkeypatch, tmp_path,
+):
+    broker = FakeBroker(already_running=True)
+    bound: list[str] = []
+
+    def bind(task_id, root):
+        assert root == tmp_path
+        if bound and bound[-1] != task_id:
+            return "rejected"
+        if not bound:
+            bound.append(task_id)
+        return "bound"
+
+    def release(task_id, root):
+        assert root == tmp_path and bound == [task_id]
+        bound.clear()
+        return "released"
+
+    result = _run(
+        monkeypatch, tmp_path, broker=broker,
+        task_binder=bind, task_releaser=release,
+    )
+    assert result.accepted is True
+    assert bound == []
+
+
+def test_runtime_controller_release_failure_revokes_success(monkeypatch, tmp_path):
+    result = _run(
+        monkeypatch, tmp_path, broker=FakeBroker(already_running=True),
+        task_releaser=lambda _task_id, _root: "rejected",
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == ("postmerge_task_release_rejected",)
+
+
+def test_preexisting_supervisor_release_survives_completion_interrupt(
+    monkeypatch, tmp_path,
+):
+    released: list[str] = []
+
+    def interrupted(_database, _task_id):
+        raise KeyboardInterrupt("bounded")
+
+    result = _run(
+        monkeypatch, tmp_path, broker=FakeBroker(already_running=True),
+        completion_validator=interrupted,
+        task_releaser=lambda task_id, _root: released.append(task_id) or "released",
+    )
+    assert result.rejection_reasons == ("runtime_exception",)
+    assert released == [TASK_ID]
 
 
 def test_runtime_controller_fails_when_owned_thread_does_not_stop(monkeypatch, tmp_path):

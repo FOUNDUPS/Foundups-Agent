@@ -1,14 +1,18 @@
 # moltbot_bridge Roadmap
 
-- IMPLEMENTED / LIVE REPLAY REQUIRED - POST-COMPLETION OWNER READINESS:
-  exact-main `7e6d33e6` completed maintenance, activation, verification, and its
-  atomic completion at generation `sha256:84976647...`, but the former
-  single-shot independent owner proof produced a false terminal rejection. A
-  later governed query was CURRENT with the same generation/receipt in 3.89
-  seconds. The candidate now permits exactly one immediate second proof only
-  for a fully receipt-bound, exhausted, allowlisted transient and shares one
-  300-second/transaction deadline. Synthetic regressions pass; a new exact-main
-  transaction after merge remains the live acceptance gate.
+- IMPLEMENTED / LIVE REPLAY REQUIRED - EXACT-TASK RUNTIME READINESS:
+  exact-main `db44f8be` completed maintenance and atomic completion at
+  `sha256:b5a138e0...`; the controller falsely rejected before a governed query
+  returned the same CURRENT binding in 3.812 seconds and immutable verification
+  retained 33 artifacts / 222,033,165 bytes. The repair binds the admitted task
+  through same-root/Holo-only acknowledgment, retains owned bindings until stop,
+  releases pre-existing bindings exactly, rechecks sealed authority/task state,
+  applies phase-aware liveness, preflights the complete dispatch chain before
+  task creation, and uses distinct receipt-bound owner cycles.
+  Focused regressions pass; merged exact-main replay remains the acceptance gate.
+- P1 WSP_62 DEBT: the controller is 673/675 lines. Keep the no-growth gate and
+  next extract the cohesive Git admission/finalization policy with its existing
+  counterexamples; do not mix that refactor into this security/runtime slice.
 - COMPLETE EXACT-MAIN OPERATOR LIFECYCLE HARDENING: register-only bootstrap
   registers only the two required OpenClaw specs without main/MCP/autostart or
   process-environment effects; post-merge supervisor
@@ -26,8 +30,9 @@
   dependency closure per query.
 - P0 RETRIEVAL RSI: add authenticated proposer, independently sealed evaluator,
   separate promoter/CAS/canary/semantic rollback, signed outcome ledger, and a
-  bounded WRE feedback loop. Current maintenance self-repair is operational;
-  retrieval-quality self-improvement is not.
+  bounded WRE feedback loop. Maintenance/freshness self-repair is observed at
+  bound historical/base commits; candidate controller acceptance still needs
+  exact-current-main replay and retrieval-quality self-improvement is not operational.
 
 - COMPLETE PHASE-1 COLD-START AVAILABILITY: the exact-main OpenClaw maintenance
   transaction completed and three fresh governed one-shot queries returned

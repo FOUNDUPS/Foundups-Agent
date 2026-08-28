@@ -2,10 +2,10 @@
 
 ## Status
 
-Phase: RedDog 0.4.127 resident architect thin-client surface.
+Phase: RedDog 0.4.129 resident architect thin-client surface.
 
-0.4.127 authenticates receipt-bound post-completion transient recovery while
-preserving exact atomic completion and direct OpenClaw-only registration. The
+0.4.129 truth-binds exact-task post-merge execution, receipt-bound owner
+reacquisition, phase-aware liveness, and repeatable supervisor release. The
 bounded operator controller is not an extension command. A
 trusted stage-zero verifier must still bind the full runtime, signature, and
 empirical write denial, while normal operation still needs one persistent
@@ -186,11 +186,11 @@ Current implementation:
   Live materialization, retention, and ChatGPT-app acceptance remain separate
   pending work.
   Capacity is already P1 debt rather than permission to widen gates: the
-  candidate backend occupies 1,381/1,400 files (19-file headroom), its generated
-  manifest occupies 309,370/327,680 bytes (18,310-byte headroom), and the
-  package surface occupies 67 files / 964,953 bytes under its unchanged 1 MiB
-  ceiling (87,446-byte headroom). The isolated frozen-source release passed all
-  four groups in 288.505 seconds without a timeout; governed Git finished
+  candidate backend occupies 1,363/1,400 files (37-file headroom), its generated
+  manifest occupies 305,126/327,680 bytes (22,554-byte headroom), and the
+  package surface occupies 67 files / 945,990 bytes under its unchanged 1 MiB
+  ceiling (102,586-byte headroom). The final exact-byte release passed all
+  four groups in 202.154 seconds without a timeout; governed Git finished
   111.605 seconds below the unchanged 400-second child ceiling. A separate run
   under competing audit load correctly failed when core and governed Git both
   reached that ceiling. Profiling, scheduling, and reducing those long poles is
@@ -304,7 +304,7 @@ Current implementation:
 - Exact single/Fusion completion-budget parsing with a 131,072 maximum and
   pre-provider fail-closed rejection; Kimi K3 retains its 4,096 floor.
 - [x] Fail-closed VS Code workspace capability declarations and a deterministic
-  66-file VSIX surface derived from the complete runtime require/worker/Python
+  67-file VSIX surface (66 text files plus the icon) derived from the complete runtime require/worker/Python
   closure; live VSCE listing is release-only and creates no artifact.
 - [x] Governed Git executable provenance: lexical PATH/PATHEXT binding, exact
   absolute identity/hash proof, Windows Authenticode fail-closed verification,

@@ -60,14 +60,17 @@ Exact opt-in evidence on this slice:
 - `test_reddog_holoindex_owner_acquisition_reliability.py` proves route-only
   current-user precedence, no secret/unrelated environment copying, no process
   mutation, exact owner-port validation/propagation, bounded contention retry,
-  distinct per-process retry ports, and one representative same-first-shard
-  PID pair that diverges on retry. The 4,032 ordered pairs are explicitly not
-  globally unique. It also proves the root one-shot imports the exact shared
+  distinct per-process retry ports, one representative same-first-shard PID
+  pair, four distinct ports across controller cycles zero/one, and one complete
+  64-port permutation across all cycles. Invalid bool, negative, overflow, and
+  string cycles fail closed. It also proves the root one-shot imports the shared
   attempt ceiling, operation ceiling, and transient set instead of maintaining
-  a parallel policy. The focused isolated shard is **22 passed**.
+  a parallel policy. The focused isolated shard is **28 passed**.
+- `scripts/tests/test_reddog_holoindex_owner_query_once.py` proves cycle one
+  reaches both one-shot attempts and its top-level/receipt evidence.
 - Existing one-shot, bootstrap, and candidate-acceptance suites prove the new
   environment and port seams preserve strict route, freshness, cleanup, and
-  isolated-candidate behavior. Final delta result: **119 passed**; the new owner
+  isolated-candidate behavior. Final delta result: **125 passed**; the owner
   acquisition boundary independently passes the 90% WSP_5 gate at **100%
   statement coverage**.
 - Production-shaped acceptance used two independent PowerShell processes with

@@ -34,6 +34,7 @@ BRIDGE_FILES = (
     "scripts/reddog_holoindex_blocked_request_recovery_once.py",
     "scripts/reddog_holoindex_candidate_acceptance.py",
     "scripts/reddog_holoindex_owner_query_once.py",
+    "scripts/reddog_holoindex_postmerge_runtime_once.py",
     "scripts/reddog_judgment_verifier_once.py",
     "scripts/reddog_model_freshness_query_once.py",
     "scripts/reddog_model_runtime_binding_query_once.py",

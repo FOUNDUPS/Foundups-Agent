@@ -1,13 +1,17 @@
 # HoloIndex Package ModLog
 
-## [2026-08-28] Owner acquisition receipt binding
+## [2026-08-28] Owner acquisition cycle receipt binding
 
-- Query receipts now integrity-bind valid owner attempt count, retry flag, and
-  retry reason. The owner one-shot attaches telemetry before receipt creation,
-  so top-level-only forgery and malformed list/dict/bool values fail closed.
-- Focused query-receipt plus root one-shot coverage is **68 passed**; expanded
-  owner consumers are **148 passed**. This closes a retry-proof integrity gap,
-  but does not claim exact runtime closure, A-grade retrieval, or RSI.
+- Query receipts now integrity-bind valid owner attempt count, retry flag,
+  retry reason, and controller-selected acquisition cycle. The one-shot attaches
+  telemetry before receipt creation; communication verification independently
+  rejects malformed, out-of-range, missing, unequal, or rehashed cycle evidence.
+- Exact-main `db44f8be` maintenance completed at `sha256:b5a138e0...`; a fresh
+  query returned CURRENT in 3.812 seconds and full verification retained 33
+  artifacts / 222,033,165 bytes. The controller false-negative repair has
+  focused synthetic closure only until merge/replay. Base-bound
+  maintenance/freshness self-repair is observed working; current-main runtime
+  acceptance, retrieval-quality RSI, and A-grade remain false.
   (WSP 00/15/22/50/62/64/84/97)
 
 ## [2026-08-27] Large-file health proof repair
@@ -26,7 +30,7 @@
 - Added an explicit exact-closure assurance flag and made A-grade composition
   reject until installed dependency payload bytes are verified. The public
   benchmark retains one authenticated owner across all cases.
-- Reconciled current truth: exact-main maintenance/replica RSI passes at
+- Reconciled transaction truth: base-bound maintenance/freshness self-repair passed at
   `bfcf9041`, generation `sha256:7b94cf8a...`; post-restart semantic owner
   startup failed closed at 60/180 seconds. Resident-owner activation and
   quality/promotion feedback remain open; retrieval RSI is not claimed.
@@ -183,7 +187,7 @@
   store.
 - The reproducible six-file package selection is **233 passed / 1 platform
   skip**; the earlier 237/1 aggregate had no recorded selection and is
-  superseded. The exact command is recorded in `tests/TESTModLog.md`. Current
+  superseded. The exact command is recorded in `tests/TestModLog.md`. Current
   main's JSON-only maintenance CLI output remains byte-identical and covered.
   (WSP 00/6/15/22/34/50/97)
 

@@ -26,3 +26,6 @@ extensions/reddog/package.json text eol=lf
 extensions/reddog/README.md text eol=lf
 extensions/reddog/LICENSE text eol=lf
 extensions/reddog/icon.png -text
+
+# Generated shard identity is raw-compared against canonical LF JSON.
+extensions/reddog/tests/contract_shards/manifest.json text eol=lf

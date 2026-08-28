@@ -6,6 +6,10 @@ import os
 from typing import Mapping
 
 from holo_index.authority_worktree import AUTHORITY_REPO_ROOT_ENV
+from holo_index.owner_acquisition_contract import (
+    OWNER_ACQUISITION_CYCLE_COUNT,
+    owner_acquisition_cycle_valid,
+)
 
 from .holo_query_service_supervisor import DEFAULT_OWNER_PORT, PORT_IN_USE_ERROR
 from .reddog_holoindex_owner_replica_route import (
@@ -16,6 +20,7 @@ from .reddog_holoindex_owner_replica_route import (
 
 OWNER_PORT_SHARD_COUNT = 64
 MAX_OWNER_ATTEMPTS = 2
+MAX_OWNER_ACQUISITION_CYCLES = OWNER_ACQUISITION_CYCLE_COUNT
 OWNER_OPERATION_TIMEOUT_SECONDS = 300.0
 TRANSIENT_OWNER_ERRORS = frozenset(
     {
@@ -103,6 +108,7 @@ def build_owner_query_environment(
 
 def owner_port_for_attempt(
     attempt: int, *, process_id: int | None = None,
+    acquisition_cycle: int = 0,
 ) -> int:
     """Select one bounded process shard; the port grants no authority."""
 
@@ -111,19 +117,28 @@ def owner_port_for_attempt(
         raise ValueError("owner_attempt_invalid")
     if type(pid) is not int or pid <= 0:
         raise ValueError("owner_process_invalid")
-    offset = pid % OWNER_PORT_SHARD_COUNT
-    if attempt == 2:
-        offset = (
-            offset + 1 + (pid // OWNER_PORT_SHARD_COUNT) % (OWNER_PORT_SHARD_COUNT - 1)
-        ) % OWNER_PORT_SHARD_COUNT
-    return DEFAULT_OWNER_PORT + offset
+    if not owner_acquisition_cycle_valid(acquisition_cycle):
+        raise ValueError("owner_acquisition_cycle_invalid")
+    first = pid % OWNER_PORT_SHARD_COUNT
+    second = (
+        first + 1 + (pid // OWNER_PORT_SHARD_COUNT) % (OWNER_PORT_SHARD_COUNT - 1)
+    ) % OWNER_PORT_SHARD_COUNT
+    offsets = [first, second]
+    for delta in range(1, OWNER_PORT_SHARD_COUNT):
+        candidate = (first + delta) % OWNER_PORT_SHARD_COUNT
+        if candidate not in offsets:
+            offsets.append(candidate)
+    index = acquisition_cycle * MAX_OWNER_ATTEMPTS + attempt - 1
+    return DEFAULT_OWNER_PORT + offsets[index]
 
 
 __all__ = [
     "MAX_OWNER_ATTEMPTS",
+    "MAX_OWNER_ACQUISITION_CYCLES",
     "OWNER_OPERATION_TIMEOUT_SECONDS",
     "OWNER_PORT_SHARD_COUNT",
     "TRANSIENT_OWNER_ERRORS",
     "build_owner_query_environment",
+    "owner_acquisition_cycle_valid",
     "owner_port_for_attempt",
 ]

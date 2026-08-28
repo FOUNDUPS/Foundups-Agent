@@ -2,19 +2,19 @@
 
 ## HoloIndex runtime interface
 
-`run_holoindex_postmerge_runtime_once(...)` owns one clean exact-main
-maintenance lifecycle; `query_holoindex_owner(...)` and
-`GenerationBoundHoloIndexQueryAdapter.query(...)` own read-only response
-binding. Success requires exact task/completion, HEAD/root/generation, replica,
-ranker, runtime, CURRENT, and no-reindex evidence. The controller starts/stops
-only runtimes it proves it owns, serializes callers with a canonical-store
-cross-process lease, injects an explicit Holo-only supervisor mode instead of
-ambient environment changes, and returns nonzero through its CLI on rejection.
-It grants no reindex, route, repository, model, Hermes, or promotion authority. Post-completion readiness has at most two controller proofs inside `min(transaction_deadline, first_proof_start + 300s)`; only a fully receipt-bound exhausted allowlisted transient admits the immediate second proof, while rejected authority, malformed evidence, deterministic/stale failure, timeout, or CURRENT completion mismatch never retries.
+`run_holoindex_postmerge_runtime_once(...)` owns one clean exact-main maintenance lifecycle;
+`query_holoindex_owner(...)` and `GenerationBoundHoloIndexQueryAdapter.query(...)` own reads.
+Success requires exact task/completion, HEAD/root/generation, replica, ranker, runtime, CURRENT,
+and no-reindex evidence. A canonical-store lease contains owned runtime start/stop and cleanup.
+Holo-only launch receives the exact task ID and requires same-root/mode resident acknowledgment; its sealed receipt authority digest is rechecked against AgentDB. Pre-existing bindings release exactly, while owned supervisors stay bound until stop; runtime/task drift rejects during polling;
+pending/assigned phases have 60-second progress bounds; execution observation uses the canonical
+7,500-second v2 integrity-bound AgentDB lease over claim ID, issued time, expiry, assignee, and
+complete task context; first completion after expiry rejects in the same transaction.
+Post-completion permits at most two proofs inside the 300-second/transaction bound. Only a receipt-bound exhausted transient admits proof two on a distinct result/receipt-bound port cycle; no reindex, route, Git, model, Hermes, or promotion authority is granted.
 
-The current environment exact-closure flag is false, so A-grade and retrieval
-RSI remain rejected. Detailed schemas, lifecycle, budgets, failure reasons, and
-scale boundaries are in
+The current environment exact-closure flag is false; an already-started external authority
+transaction has no cancellation/route-effect lease guard, so A-grade and retrieval RSI remain
+rejected. Detailed schemas, lifecycle, budgets, failure reasons, and scale boundaries are in
 [docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
 
 ## Receipt-bound artifact generation models

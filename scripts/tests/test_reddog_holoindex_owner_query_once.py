@@ -24,6 +24,9 @@ if SCRIPT_DIRECTORY not in sys.path:
     sys.path.insert(0, SCRIPT_DIRECTORY)
 
 import reddog_holoindex_owner_query_once as _OWNER_QUERY_SCRIPT  # noqa: E402
+from modules.infrastructure.foundups_mcp_bridge.src import (  # noqa: E402
+    reddog_holoindex_owner_acquisition as acquisition,
+)
 
 MAX_QUERY_CHARS = _OWNER_QUERY_SCRIPT.MAX_QUERY_CHARS
 _read_payload = _OWNER_QUERY_SCRIPT._read_payload
@@ -1155,3 +1158,41 @@ def test_extended_request_validation_fails_closed(tmp_path: Path, payload, error
     result = _query_once(payload, repo_root=tmp_path, select_authority=_selection)
     assert result["ok"] is False and result["error"] == error
     assert result["owner_attempts"] == 0
+
+
+def test_controller_cycle_binds_ports_result_and_receipt(tmp_path: Path) -> None:
+    ports: list[int] = []
+
+    def ensure_owner(**kwargs):
+        ports.append(kwargs["owner_port"])
+        return SimpleNamespace(
+            ready=False, status="FAILED",
+            error="HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
+        )
+
+    result = query_once(
+        {"query": "runtime closure"}, repo_root=tmp_path,
+        select_authority=_selection, ensure_owner=ensure_owner,
+        cleanup_owner=lambda: None, acquisition_cycle=1,
+    )
+    assert ports == [
+        acquisition.owner_port_for_attempt(attempt, acquisition_cycle=1)
+        for attempt in (1, 2)
+    ]
+    assert result["owner_acquisition_cycle"] == 1
+    assert result["query_receipt"]["owner_acquisition_cycle"] == 1
+
+
+@pytest.mark.parametrize("cycle", [True, -1, 32, "1"])
+def test_invalid_controller_cycle_rejects_before_owner_start(
+    tmp_path: Path, cycle: object,
+) -> None:
+    calls: list[object] = []
+    result = query_once(
+        {"query": "runtime closure"}, repo_root=tmp_path,
+        ensure_owner=lambda **kwargs: calls.append(kwargs),
+        acquisition_cycle=cycle,  # type: ignore[arg-type]
+    )
+    assert result["error"] == "owner_acquisition_cycle_invalid"
+    assert result["owner_attempts"] == 0
+    assert calls == []

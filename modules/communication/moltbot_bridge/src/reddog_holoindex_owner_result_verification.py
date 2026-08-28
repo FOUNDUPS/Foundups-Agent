@@ -18,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_c
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (
     MAX_OWNER_ATTEMPTS,
     TRANSIENT_OWNER_ERRORS,
+    owner_acquisition_cycle_valid,
 )
 
 
@@ -94,6 +95,7 @@ def _owner_telemetry_is_bound(
         "owner_attempts": lambda value: type(value) is int and value >= 0,
         "owner_retry_performed": lambda value: type(value) is bool,
         "owner_retry_reason": lambda value: type(value) is str,
+        "owner_acquisition_cycle": owner_acquisition_cycle_valid,
     }
     for field, valid in validators.items():
         if field not in result and field not in receipt:

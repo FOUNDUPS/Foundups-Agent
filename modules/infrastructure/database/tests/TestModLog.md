@@ -1,5 +1,30 @@
 # Database Module - Test Evolution Log
 
+## Entry: HoloIndex Post-Merge Claim-Clock Writer Fencing
+**Date**: 2026-08-28
+**Test File**: `test_holoindex_postmerge_claim_atomicity.py`
+**Coverage**:
+- SQLite claim issuance waits for the writer fence before setting issued/expiry.
+- Start and completion waits that cross expiry reject without state mutation.
+- PostgreSQL seam emits row-level `FOR UPDATE` without an eager statement;
+  live PostgreSQL contention remains unproven in this environment.
+**Result**: 4 passed; final combined claim/schema/WSP_62 selection 60 passed.
+**WSP References**: WSP 5, WSP 6, WSP 15, WSP 22, WSP 48, WSP 50, WSP 62, WSP 78, WSP 97
+
+## Entry: HoloIndex Post-Merge v2 Claim and Expiry Fence
+**Date**: 2026-08-28
+**Test Files**: `test_holoindex_postmerge_claim_security.py`,
+`test_agent_db_schema_compatibility.py`,
+`test_holoindex_postmerge_reserved_namespace.py`
+**Coverage**:
+- Claim ID, issued time, expiry, assignee, context digest, and assignment-time
+  equality; boolean/non-integer/overlong lease rejection.
+- Rehashed stored ID/expiry substitution cannot replace the issued caller
+  capability; first completion after expiry is atomically inert.
+- Exact completed replay after expiry requires a recorded pre-expiry terminal
+  time; reclaim requires actual expiry plus exact-row CAS.
+**WSP References**: WSP 5, WSP 6, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
 ## Entry: Author-Side Assurance Quarantine Regression
 **Date**: 2026-07-28
 **Test File**: `test_signed_worker_quarantine_security.py`

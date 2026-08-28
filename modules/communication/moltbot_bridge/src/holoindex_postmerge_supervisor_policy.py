@@ -55,7 +55,12 @@ def holoindex_postmerge_only_execution_rejection(
 class HoloIndexPostmergePoller:
     """Own one bounded coordinator worker and its shutdown boundary."""
 
-    def __init__(self, repo_root: Path, *, enabled: bool | None = None) -> None:
+    def __init__(
+        self, repo_root: Path, *, enabled: bool | None = None,
+        task_id: str = "",
+    ) -> None:
+        if task_id and not is_canonical_holoindex_postmerge_task_id(task_id):
+            raise ValueError("holoindex_postmerge_task_id_invalid")
         self._repo_root = repo_root.resolve()
         self._enabled = enabled
         self._lock = threading.Lock()
@@ -63,7 +68,7 @@ class HoloIndexPostmergePoller:
         self._future: Future[Any] | None = None
         self._last_poll = 0.0
         self._stopped = False
-        self._task_id = ""
+        self._task_id = task_id
 
     @property
     def future(self) -> Future[Any] | None:
@@ -75,6 +80,32 @@ class HoloIndexPostmergePoller:
         with self._lock:
             return self._task_id
 
+    def bind_task(self, task_id: str) -> bool:
+        """Bind one exact task before selection; never replace active work."""
+
+        with self._lock:
+            if (
+                self._stopped or self._future is not None
+                or not is_canonical_holoindex_postmerge_task_id(task_id)
+                or (self._task_id and self._task_id != task_id)
+            ):
+                return False
+            self._task_id = task_id
+            return True
+
+    def release_task(self, task_id: str) -> bool:
+        """Release only the completed controller binding; never active work."""
+
+        with self._lock:
+            if (
+                self._stopped or self._future is not None
+                or not is_canonical_holoindex_postmerge_task_id(task_id)
+                or self._task_id != task_id
+            ):
+                return False
+            self._task_id = ""
+            return True
+
     def poll(self) -> Dict[str, Any] | None:
         with self._lock:
             if self._stopped:
@@ -82,6 +113,8 @@ class HoloIndexPostmergePoller:
             completed = self._completed_result()
             if completed is not None:
                 return completed
+            if self._task_id:
+                return _poll_status(True, "TASK_BOUND")
             enabled = (
                 holoindex_postmerge_enabled()
                 if self._enabled is None
@@ -109,7 +142,10 @@ class HoloIndexPostmergePoller:
             return None
         try:
             result = dict(self._future.result().to_dict())
-            self._task_id = _canonical_task_id(result)
+            completed_task_id = _canonical_task_id(result)
+            if self._task_id and completed_task_id != self._task_id:
+                return _poll_status(False, "REJECTED", "postmerge_task_binding_conflict")
+            self._task_id = completed_task_id
             return result
         except Exception as exc:
             return _poll_status(False, "REJECTED", type(exc).__name__)

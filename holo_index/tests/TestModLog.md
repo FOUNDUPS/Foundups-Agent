@@ -1,12 +1,14 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
-## [2026-08-28] Owner acquisition receipt integrity
+## [2026-08-28] Owner acquisition cycle receipt integrity
 
-- Added direct receipt coverage for exact owner attempts, retry flag, and retry
-  reason. Communication counterexamples reseal malformed error/telemetry values
-  and forge top-level retry fields without updating the receipt; all reject.
-- Query-receipt plus root one-shot: **68 passed**; expanded communication
-  consumers: **148 passed**. Tests use only synthetic/O:-temporary state.
+- Added direct receipt coverage for exact owner attempts, retry flag, retry
+  reason, and acquisition cycle. Communication counterexamples reject malformed,
+  out-of-range, unequal, missing, or top-level-only cycle evidence.
+- Query-receipt plus one-shot cycle coverage: **77 passed**; three claim-clock
+  contention falsifiers raise the affected cross-package runtime surface to
+  **309 passed** before the independent
+  manifest shard. Tests use only synthetic/O:-temporary state.
 
 ## [2026-08-27] Exact-symbol and independent A-grade gate regressions
 

@@ -1,5 +1,42 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-28 - Claim-clock fencing and RSI truth release (0.4.129)
+
+- Independent audit reproduced deferred-SQLite lease-clock races. Three new
+  on-disk contention falsifiers pass for delayed issuance and start/completion
+  waits that cross expiry; no sleep, timeout, or lease ceiling was widened.
+- Affected Python selection is **309 passed**; backend manifest **8 passed**;
+  WSP_62 **16 passed**; registry/differential/Holo indexing **52 passed**. The
+  canonical registry is **1,607 tests / 268 quarantined** after rebase.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive 4-group release tiers pass; final wall is 202.154s.
+- Rebase validation exposed a Windows CRLF materialization false positive in
+  the raw-compared generated shard manifest; its exact path is now pinned to
+  LF without changing any packaged RedDog source byte.
+- Exact identities: backend `6160d5be6d36...5fdaffd8`, contract
+  `772c72ece00c...e50aa6f0`, package `5d7a7f254548...99461e93`, VSIX
+  `sha256:7e9bad6a3e02...6c39f4d1e` / 275,700 bytes.
+
+## 2026-08-28 - Exact-task liveness and v2 claim-fence release (0.4.128)
+
+- WSP_97 audit found two P0 counterexamples: claim digest omission of claim
+  identity/expiry with non-atomic late completion, and a permissive top-level
+  `scripts` namespace extension. Both were reproduced and closed without
+  increasing a WSP_62 ceiling.
+- The affected Python selection is **303 passed**; backend manifest is **8
+  passed**; WSP_62 is **16 passed**; registry/differential/Holo indexing is
+  **52 passed**. The canonical registry is **1,605 tests / 268 quarantined**.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive 4-group release tiers pass. The exact final package
+  release completed in 201.201 seconds.
+- The 1,363-file backend digest is `61bcfeb6ce69...e16c0d58`; the 18-shard
+  contract digest is `16bcddfc83a8...f6557361`; the 67-file package is 945,990
+  bytes at `e5eb5e0b0035...bf00d146`.
+- The independently inspected 0.4.128 VSIX is 275,700 bytes at
+  `sha256:f9fa068d79ff...7ab3ce30f`. Broad database audit separately exposed
+  inherited Chroma handle/corruption and quantum-test debt; none is relabeled
+  as a passing claim or attributed to the v2 lease slice.
+
 ## 2026-08-28 - Receipt-bound owner reproof release (0.4.127)
 
 - Independent WSP_97 review first rejected malformed error types, stale

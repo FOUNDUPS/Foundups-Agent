@@ -19,6 +19,7 @@ from holo_index.freshness_receipt import (
     freshness_receipt_path,
     load_freshness_receipt,
 )
+from holo_index.owner_acquisition_contract import owner_acquisition_cycle_valid
 
 
 SCHEMA_VERSION = "holoindex_query_receipt.v1"
@@ -371,6 +372,7 @@ def _owner_acquisition_evidence(result: Mapping[str, Any]) -> dict[str, Any]:
         "owner_attempts": lambda value: type(value) is int and value >= 0,
         "owner_retry_performed": lambda value: type(value) is bool,
         "owner_retry_reason": lambda value: type(value) is str,
+        "owner_acquisition_cycle": owner_acquisition_cycle_valid,
     }
     evidence: dict[str, Any] = {}
     for field, valid in fields.items():
