@@ -2,10 +2,26 @@
 
 **Module**: `modules/infrastructure/idle_automation`
 **Framework**: pytest
-**Last Updated**: 2026-07-24
+**Last Updated**: 2026-08-28
 **WSP Compliance**: WSP 22 (Module ModLog Protocol), WSP 34 (Test Validation)
 
 ---
+
+## 2026-08-28: Linked-control dependency runtime RED/GREEN
+
+- RED proved the post-merge executor forwarded its clean linked control
+  checkout directly to the authority transaction, reproducing the missing
+  `.venv`/snapshot-probe failure seen in the exact-main OpenClaw run.
+- GREEN reuses `resolve_holoindex_runtime_root()` and proves a distinct
+  same-repository primary runtime reaches the authority transaction while the
+  dedicated authority root remains unchanged.
+- Fresh focused result: **38 passed** across
+  `test_holoindex_postmerge_coordinator.py` and
+  `test_holoindex_postmerge_authority_order.py` plus the bounded
+  `test_holoindex_postmerge_runtime_root.py`, using O:-local temp storage.
+- The canonical WRE registry was regenerated from the staged new test and is
+  current at **1,609 tracked Python tests / 268 quarantined**; its focused
+  registry contract is **28 passed**.
 
 ## 2026-08-27: Exact-SHA activation order and AgentDB truth
 

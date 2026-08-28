@@ -1,5 +1,26 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-28 - Linked-control dependency runtime release (0.4.133)
+
+- RED independent audit reproduced an escaping resolver exception that left a
+  valid claimed task executing. GREEN normalizes the fault, durably fails the
+  task, and proves zero authority calls. Five pre-transaction gate cases and
+  the distinct runtime/source argument case pass in the bounded 155-line test
+  module; the exact three-file selection is **38 passed**.
+- WSP_62 differential is green: the executor main function is 181 lines versus
+  186 at base, the helper is 27 lines, and inherited oversized suites did not
+  grow. Independent WSP_97 re-audit returned GO after documentation truth was
+  narrowed to exclude installed-payload byte closure.
+- Backend generator **8 passed** at `b58778d3358e...19dc7b6`; fast 14-member,
+  conversation 32-test, contract 3-member, deterministic package, candidate
+  WSP_62, and exhaustive four-group release gates pass. Exact release wall is
+  224.617 seconds; package is 946,123 bytes at
+  `89f19ddb703b...b491e773`.
+- The read-only VSIX inspection found 69 safe entries, 67 extension members,
+  no encryption/duplicate/path/source-byte mismatch, and zero credential-value
+  patterns. Artifact: 275,743 bytes at
+  `sha256:0cd9288febe9...5c17971`.
+
 ## 2026-08-28 - Producer-ranked Holo owner release (0.4.132)
 
 - Producer-rank, HoloDAE Tier-0, synthetic runtime identity, and host-package

@@ -1,5 +1,22 @@
 # RedDog Extension Tests
 
+## 0.4.133 linked-control dependency runtime release
+
+- A bounded Python regression module proves the clean control root resolves to
+  a distinct primary dependency root while the dedicated authority argument is
+  unchanged. An injected resolver exception durably fails the task without an
+  authority call; five persisted-context/claim/authority/request/start gates
+  prove zero pre-transaction resolver or authority effects.
+- The three-file executor/coordinator selection is 38 passed; the backend
+  generator is 8 passed at 1,365 files. Fast 14-member, conversation 32-test,
+  contract 3-member, deterministic package, candidate WSP_62, and exhaustive
+  four-group release gates pass. Final staged-candidate wall is 224.617 seconds.
+- Exact identities: backend `b58778d3358e...19dc7b6`, contract
+  `b8d9b4c787cc...09d9db63`, package
+  `89f19ddb703b...b491e773`. The inspected 0.4.133 VSIX is 275,743 bytes at
+  `sha256:0cd9288febe9...5c17971`, with 69 safe entries, 67 exact source-byte
+  matches, and no credential-value-pattern hit.
+
 ## 0.4.132 producer-ranked Holo owner release
 
 - A generic owner-boundary counterexample proves a typed producer's

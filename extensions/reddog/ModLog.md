@@ -1,5 +1,27 @@
 # RedDog ModLog
 
+## 2026-08-28 - Linked-control dependency runtime release (0.4.133)
+
+- Reused the canonical same-repository runtime-root resolver in the sealed
+  post-merge executor. A clean linked control checkout may now supply task
+  authority while the primary checkout supplies dependency discovery and the
+  dedicated clean authority checkout remains the indexed source.
+- Resolver faults are normalized after task/request/claim gates and durably
+  finalize the executing task as failed. Five rejection-gate counterexamples
+  prove no runtime resolution or authority call occurs before transaction
+  admission. The main executor function shrank from 186 to 181 lines; the new
+  focused test module is 155 lines. Independent WSP_97 review returned GO.
+- Rotated the 1,365-file backend closure to `b58778d3358e...19dc7b6` and the
+  18-shard / 6,942-line / 492-assertion contract to
+  `b8d9b4c787cc...09d9db63`. The 67-file package is 946,123 bytes at
+  `89f19ddb703b...b491e773`; all four exhaustive groups pass in 224.617
+  seconds.
+- The inspected `O:\RedDog-Releases\reddog-0.4.133.vsix` is 275,743 bytes at
+  `sha256:0cd9288febe9...5c17971`, with 69 safe entries, zero source-byte
+  mismatches, and zero credential-value-pattern hits. Exact dependency-byte
+  closure, A-grade Holo, retrieval RSI, and the next automatic stale-main live
+  replay remain pending. (WSP 00/06/15/22/50/62/84/87/97)
+
 ## 2026-08-28 - Producer-ranked Holo owner release (0.4.132)
 
 - Preserved producer order inside each typed Holo result stream while retaining

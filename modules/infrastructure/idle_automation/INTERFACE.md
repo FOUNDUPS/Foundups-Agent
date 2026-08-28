@@ -41,6 +41,15 @@ for final binding, clean-HEAD, and `origin/main` proof. `CURRENT` is returned
 only when the owner exactly matches the canonical HEAD, generation, and
 freshness-receipt digest. Failure leaves the task failed or retryable, the
 request pending, and the completion event absent.
+The executor resolves `resolve_holoindex_runtime_root(repo_root)` before calling
+the authority transaction. A clean linked control checkout therefore retains
+task/control authority while the same-repository primary checkout supplies only
+its dependency-runtime candidate (normally `.venv`) for the existing probe to
+validate. The clean dedicated authority worktree remains repository/index
+source authority. The resolver
+falls back to the supplied control root when a related primary worktree cannot
+be proven; maintenance then fails closed if that root lacks the required probe
+runtime.
 Claims have a 7500-second lease, covering the bounded 7200-second maintenance
 timeout plus margin. A crashed or interrupted worker is reclaimed
 by exact assignment timestamp and enters the existing bounded retry policy.

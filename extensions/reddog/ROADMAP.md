@@ -2,11 +2,14 @@
 
 ## Status
 
-Phase: RedDog 0.4.132 resident architect thin-client surface.
+Phase: RedDog 0.4.133 resident architect thin-client surface.
 
-0.4.132 retains exact-task post-merge execution, receipt-bound owner
+0.4.133 retains exact-task post-merge execution, receipt-bound owner
 reacquisition, phase-aware liveness, and repeatable supervisor release. The
-bounded operator controller is not an extension command. A
+clean linked control checkout now resolves the same-repository primary
+dependency runtime before the sealed authority transaction; the dedicated
+clean authority checkout remains the indexed source. The bounded operator
+controller is not an extension command. A
 trusted stage-zero verifier must still bind the full runtime, signature, and
 empirical write denial, while normal operation still needs one persistent
 owner and independently governed retrieval RSI.

@@ -33,6 +33,15 @@ OpenClaw supervisor claimed and completed the AgentDB task, and a subsequent
 governed owner query returned CURRENT without reindex or repository mutation.
 That evidence is commit-bound and does not authorize a later HEAD.
 
+Linked control checkouts do not need their own virtual environment. Before the
+sealed authority transaction, the executor resolves the same-repository primary
+worktree and supplies it only as the dependency-runtime candidate; the existing
+maintenance probe then validates process-image/virtualenv path association and
+the resulting snapshot behavior. The dedicated clean authority checkout
+remains the sole indexed source; uncommitted repository source files in the
+primary IDE checkout do not become indexed source. Installed dependency bytes
+remain outside exact runtime closure and therefore outside any A-grade claim.
+
 ## WSP Compliance
 
 - **WSP 3**: Infrastructure domain - system automation and maintenance
