@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
+from holo_index.authority_worktree import resolve_holoindex_runtime_root
+
 from .holoindex_postmerge_contract import (
     CLAIM_AGENT_ID,
     COMPLETION_EVENT_PREFIX,
@@ -156,6 +158,35 @@ def _persist_completion(
     )
 
 
+def _run_authority_transaction(
+    *,
+    authority_transaction: Callable[..., Any] | None,
+    workspace: Path,
+    authority: Path,
+    target_sha: str,
+    authority_digest: str,
+    env: Mapping[str, str],
+) -> tuple[Any | None, str]:
+    """Resolve the dependency root and enter the sealed authority boundary."""
+    if authority_transaction is None:
+        from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_authority_transaction import (
+            advance_reddog_holoindex_authority,
+        )
+
+        authority_transaction = advance_reddog_holoindex_authority
+    try:
+        runtime_root = resolve_holoindex_runtime_root(workspace)
+    except (OSError, RuntimeError, ValueError):
+        return None, "postmerge_runtime_root_resolution_failed"
+    return authority_transaction(
+        workspace_root=runtime_root,
+        repo_root=authority,
+        target_repo_head_sha=target_sha,
+        expected_authority_root_digest=authority_digest,
+        environ=env,
+    ), ""
+
+
 def _execute_holoindex_postmerge_task_for_test(
     *,
     repo_root: Path | str,
@@ -251,9 +282,7 @@ def _execute_holoindex_postmerge_task_for_test(
             reasons=[request_error],
         )
     claim_id = str(context.get("claim_id") or "")
-    claim_binding_digest = str(
-        context.get("claim_binding_digest") or ""
-    )
+    claim_binding_digest = str(context.get("claim_binding_digest") or "")
     if not database.start_holoindex_postmerge_execution(
         task_id,
         CLAIM_AGENT_ID,
@@ -272,19 +301,16 @@ def _execute_holoindex_postmerge_task_for_test(
             },
         )
 
-    if authority_transaction is None:
-        from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_authority_transaction import (
-            advance_reddog_holoindex_authority,
-        )
-
-        authority_transaction = advance_reddog_holoindex_authority
-    transaction = authority_transaction(
-        workspace_root=workspace,
-        repo_root=authority,
-        target_repo_head_sha=target_sha,
-        expected_authority_root_digest=authority_digest,
-        environ=env,
+    transaction, transaction_setup_error = _run_authority_transaction(
+        authority_transaction=authority_transaction, workspace=workspace,
+        authority=authority, target_sha=target_sha,
+        authority_digest=authority_digest, env=env,
     )
+    if transaction_setup_error:
+        return _fail_claimed_task(
+            database, task_id=task_id, context=context, status="failed",
+            reasons=[transaction_setup_error],
+        )
     if not transaction.ready:
         status = "superseded" if transaction.status == "SUPERSEDED" else "failed"
         result = _fail_claimed_task(

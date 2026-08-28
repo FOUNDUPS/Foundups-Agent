@@ -1,5 +1,30 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-28] Holo Linked-Control Runtime and RedDog 0.4.133
+
+**WSP Protocols:** WSP 00, 06, 15, 22, 50, 62, 84, 87, 97
+
+- Reproduced the exact-main OpenClaw post-merge failure from a clean linked
+  control checkout: the checkout had no dependency runtime, so the isolated
+  final snapshot probe failed closed. Manual replay using the canonical primary
+  dependency runtime and dedicated clean authority refreshed exact main
+  `8842cbcd...` to generation `sha256:cd6a5c41...`; a governed owner query was
+  CURRENT/no-gap/no-reindex/first-attempt and all 33 replica artifacts remained
+  unchanged after full revalidation.
+- The executor now reuses the existing same-repository runtime-root resolver.
+  Authority/source separation remains intact, resolver faults finalize
+  durably, and five pre-transaction gates have zero resolver/authority effects.
+  Independent WSP_97 audit returned GO; focused validation is 38 passed. The
+  canonical WRE registry is current at 1,609 tests / 268 quarantined.
+- RedDog 0.4.133 binds backend `b58778d3358e...19dc7b6`, exhaustive contract
+  `b8d9b4c787cc...09d9db63`, and package
+  `89f19ddb703b...b491e773`. Four release groups pass in 224.617 seconds. The
+  verified O:-drive VSIX is 275,743 bytes at
+  `sha256:0cd9288febe9...5c17971` with exact package-member byte equality.
+- Installed dependency payload bytes are not yet sealed. Holo A-grade,
+  retrieval RSI, and automatic merged stale-main OpenClaw replay remain
+  explicitly pending.
+
 ## [2026-08-28] HoloIndex Ranked-Stream and HoloDAE Tier-0 Candidate (0.4.132)
 
 **WSP Protocols:** WSP 00, 05, 06, 15, 22, 34, 48, 50, 62, 83, 84, 87, 97

@@ -36,6 +36,12 @@ wsp_cycle(input="idle_automation", log=True)
   replica activation ordering passed a real broker-managed OpenClaw replay at
   exact main `cfd1e0051`, including atomic AgentDB completion and immutable
   post-query revalidation.
+- **Linked-control dependency-runtime resolution**: The post-merge executor now
+  resolves the existing same-repository primary runtime root before entering
+  the authority transaction. This preserves a clean control checkout and clean
+  indexed authority checkout while reusing the canonical primary `.venv` only
+  for dependencies. Focused tests are complete; a future stale-main event must
+  provide the next live OpenClaw repair replay.
 
 ### Exact-main Holo route replay gate (P0, completed at `cfd1e0051`)
 

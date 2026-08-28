@@ -12,6 +12,27 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-08-28 - Linked control checkout resolves canonical dependency runtime
+
+**WSP Protocol:** WSP 00, WSP 6, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 87, WSP 97
+
+- Reproduced the exact-main OpenClaw repair from a clean linked control
+  checkout. The sealed executor failed before maintenance because that checkout
+  had no `.venv`; the dedicated authority checkout still advanced, but the
+  isolated final snapshot probe correctly rejected the missing runtime.
+- Reused `resolve_holoindex_runtime_root()` in the existing post-merge executor
+  so the same-repository primary checkout supplies dependencies while the
+  dedicated clean authority checkout remains the only indexed source.
+- The manual recovery transaction then refreshed exact main `8842cbcd...` to
+  generation `sha256:cd6a5c41...`; an independent owner query returned CURRENT,
+  no gap, no reindex, first attempt, and post-query verification retained all
+  33 artifacts / 222,595,640 bytes unchanged. This proves recovery and the
+  resolver inputs separately; the new automatic executor wiring remains
+  focused-test evidence until another stale-main event exercises it live.
+- Added a bounded executor-runtime-root regression module covering argument
+  separation, resolver-failure finalization, and five pre-transaction no-effect
+  gates. No production module or authority API was created.
+
 ### 2026-08-27 - Exact-main OpenClaw acceptance completed
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 34, WSP 50, WSP 62, WSP 83, WSP 97, WSP 108
