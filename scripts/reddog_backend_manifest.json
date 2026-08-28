@@ -2426,7 +2426,7 @@
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_model_copy.py": "3d9b4ea7b8d4dfab3113e6a811b40f3c72d474c021609dab2d89acdba43846f8",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_model_descriptors.py": "79b0436837c602f2b4e814a1144bac1bac6254161173d6fa3ef210cd8334f870",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_receipt_proof.py": "53dfcccb3ee660eb2f9c0c06b36c0e3d87b4deec84101ef2707e62a2c9a724dc",
-    "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_windows.py": "a886998794db48cb08610d9b3ec323639d8634b220742a84d3adfbb689925612",
+    "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_acceptance_windows.py": "287f50ccffde42c44001caf5f65d1655f5c13e492bab71f1f80d1f662ca40f19",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_artifact_manifest.py": "117d30a606644c013bed4d1b6395edd561b0abc3fc6fc5c4db011380f731badf",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_authority_marker.py": "3ca794c540ad3a4cfe33cb0f17425b9f1009b998b9b944fab806dcc385e34c45",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_authority_transaction.py": "92e99933072c76695f7885d8625de54f81fb6ae2b133fed167e6e8e9aac90b84",

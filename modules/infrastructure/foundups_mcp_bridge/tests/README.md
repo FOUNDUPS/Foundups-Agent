@@ -43,6 +43,26 @@ Exact opt-in evidence on this slice:
 - Both are single-builder resource/reuse proofs, not query-latency or
   horizontal-throughput benchmarks.
 
+## Inert Python base-runtime closure
+
+- `test_reddog_holoindex_base_runtime_contract.py` proves canonical contract
+  parsing, runnable Windows base-prefix topology, file-role classification,
+  required/optional role coverage, bounds, digest binding, and permanently
+  false activation/closure authority fields.
+- `test_reddog_holoindex_base_runtime.py` proves content addressing, exact
+  reuse without recopy, excluded `site-packages`/documentation, immutable old
+  generations, staging-before-publication verification, and rejection of
+  mutated/unlisted payloads.
+- `test_reddog_holoindex_base_runtime_edges.py` covers missing roots/roles,
+  route/store aliases, wrong generation identity, aggregate path bounds,
+  contract tampering, Windows ADS, and the protected-source lease mode's lack of a
+  DELETE-access requirement.
+- `test_reddog_holoindex_base_runtime_scale.py` is opt-in. The real installed
+  base passed first materialization plus canonical reuse at 4,068 files /
+  372 child directories / 81,515,843 bytes in 239.94 seconds as generation
+  `sha256:3efe4fba...`. All generated/test bytes were O:-local. No live Holo
+  route, replica, owner, maintenance, or extension state was touched.
+
 ## Exact retrieval runtime-environment binding
 
 - Adversarial tests cover executable/source mutation, manifest parity, raw

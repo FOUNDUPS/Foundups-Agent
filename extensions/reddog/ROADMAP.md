@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase: RedDog 0.4.136 resident architect thin-client surface.
+Phase: RedDog 0.4.137 resident architect thin-client surface.
 
-0.4.136 retains exact-task post-merge execution, receipt-bound owner
+0.4.137 retains exact-task post-merge execution, receipt-bound owner
 reacquisition, phase-aware liveness, repeatable supervisor release, and
 same-repository dependency-runtime resolution. Every verified requery now
 enters through the original workspace/control root while its captured clean
@@ -14,7 +14,7 @@ trusted stage-zero verifier must still bind the full runtime, signature, and
 empirical write denial, while normal operation still needs one persistent
 owner and independently governed retrieval RSI.
 The receipt-bound owner reproof and separately contained pre-owner exact-binding
-repair are live-accepted at exact main `09e98fff`: the governed OpenClaw/WRE
+repair are live-accepted at exact main `0f992c9b`: the governed OpenClaw/WRE
 transaction completed, the ordinary owner query was CURRENT/no-gap/no-reindex
 on attempt one, and full verification retained all 33 replica artifacts.
 This exact-commit proof does not close runtime exactness, A-grade, RSI, or scale.
@@ -36,6 +36,9 @@ Current implementation:
   25.5-second bootstrap. This is single-owner readiness, not A-grade or scale.
 - [x] Implement and production-shape-test a maintenance-only exact dependency
   materializer; it is intentionally not reachable from the VSIX runtime.
+- [x] Implement and production-shape-test an inert exact Windows Python
+  base-runtime materializer. It preserves runnable topology but is intentionally
+  not reachable from the VSIX or owner runtime.
 - [ ] P0-A: use a separately trusted stage-zero verifier to bind the owner
   Python executable, ABI/platform, standard library, native loader closure,
   sealed dependency generation, backend build, deterministic execution knobs,

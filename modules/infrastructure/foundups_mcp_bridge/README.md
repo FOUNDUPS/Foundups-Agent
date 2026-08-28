@@ -6,17 +6,18 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 ## Current governed Holo status (2026-08-29)
 
-Exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e` is active at immutable
-generation `sha256:7869f238...` and freshness receipt `sha256:fd0a0005...`.
+Exact main `0f992c9b55067055049674f49568e58315242c35` is active at immutable
+generation `sha256:eeb23404...` and freshness receipt `sha256:d0c47d66...`.
 The real pre-owner stale-HEAD transaction completed through OpenClaw/WRE, and
 a fresh one-shot query returned `CURRENT`, no gap, no reindex, and first-attempt
-success. Full production verification retained 33 artifacts / 222,719,702
+success. Full production verification retained 33 artifacts / 222,706,129
 bytes with unchanged descriptor, replica, and path identities.
 
-This establishes usable governed retrieval, not A-grade or RSI. The latest
+This establishes usable governed retrieval and working maintenance-replica
+RSI, not A-grade or retrieval-quality RSI. The latest
 clean-authority public benchmark failed the fixed `0.95` MRR/nDCG floors at
-`0.91666667` and `0.93198851`, and exact dependency payload closure remains
-false. Retrieval proposal, independent administered admission, promotion,
+`0.91666667` and `0.93198851`; neither the exact dependency nor base-runtime
+generation is activated. Retrieval proposal, independent administered admission, promotion,
 canary, ranker rollback, and candidate-bound outcome learning are absent.
 
 ## Holo retrieval runtime identity
@@ -68,6 +69,25 @@ secrets. Interpreter/standard-library/native-library closure, signing,
 write-denial, resident-owner binding, and retrieval-quality promotion remain
 separate P0 layers. Therefore the exact-closure and A-grade statements above
 remain unchanged.
+
+The next inert prerequisite now also exists for the Windows Python base
+runtime. `materialize_base_runtime(...)` preserves the runnable base-prefix
+topology for the interpreter, Python/VCRuntime libraries, `Lib`, `DLLs`, and
+`tcl`, while excluding development/documentation roots and
+`Lib/site-packages`. Every admitted file byte, file role, directory (including
+empty directories), and policy root is content-addressed and fully reproved.
+It reuses the hardened bounded tree-copy primitives and a read-only source
+lease mode that does not demand DELETE authority from protected installed-Python
+roots. Production shape passed 4,068 files / 372 child directories /
+81,515,843 bytes as generation `sha256:3efe4fba...`, including exact reuse.
+
+This base-runtime generation is also intentionally inert. Its descriptor
+reports native-loader closure, deterministic effects, signature, write denial,
+activation eligibility, and exact runtime closure as false. It does not change
+the owner, supervisor, route, replica, VSIX, or query-time behavior. A protected
+stage-zero admission must compose this generation with the exact dependency
+generation and independently prove external loader closure, deterministic
+controls, signing, and empirical write denial before route-v2 can exist.
 
 ## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
 

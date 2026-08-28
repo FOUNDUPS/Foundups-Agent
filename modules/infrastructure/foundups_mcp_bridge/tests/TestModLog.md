@@ -1,5 +1,23 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Inert base-runtime closure falsification
+
+- Added 39 strict contract tests and adversarial materialization/edge coverage
+  for runnable topology, role coverage, projections, exact reuse, source and
+  published mutation, unlisted bytes, staging corruption, aliases, path bounds,
+  contract tampering, ADS, and protected-source lease access.
+- Synthetic base-runtime closure passed 55 tests with one opt-in scale skip;
+  dependency/runtime-environment/sealed-runtime/process-image adjacency passed
+  82 tests with five expected capability skips.
+- The first real run failed closed on four unclassified `DLLs` data files. The
+  next failed closed because the protected source root denied unnecessary
+  DELETE access. Focused fixes added an explicit runtime-data role and a
+  read-only source-lease mode without relaxing share denial.
+- The repaired opt-in production shape passed exact materialization and reuse:
+  4,068 files / 372 child directories / 81,515,843 bytes, generation
+  `sha256:3efe4fba...`, 239.94 seconds. All generated/test bytes were O:-local;
+  no live Holo state was touched.
+
 ## [2026-08-28] Producer-rank preservation falsification
 
 - Added a direct owner-response counterexample proving a typed producer's
