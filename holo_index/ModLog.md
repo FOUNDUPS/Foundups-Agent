@@ -1,5 +1,23 @@
 # HoloIndex Package ModLog
 
+## [2026-08-28] Producer-ranked owner merge candidate
+
+- Live exact-main benchmarking proved the collection-local exact-symbol winner
+  was reordered by owner flattening because the latter compared raw similarity
+  and discarded producer rank. This was an integration gap between two passing
+  unit boundaries, not a corpus-label or threshold defect.
+- The owner now merges only the heads of each producer-ranked typed stream.
+  Broad current-status queries first apply the existing stable authority tier;
+  ordinary and historical queries retain producer order. Cross-bucket score,
+  casefold deduplication, and exact-module Tier-0 reservation remain in force.
+- Added source-accurate root contracts for `modules/ai_intelligence/holo_dae`,
+  whose missing README/INTERFACE caused a governed multi-module RSI query to
+  fail `HOLOINDEX_TIER0_INCOMPLETE`. The contracts explicitly quarantine the
+  legacy direct-index/auto-reindex launcher from governed retrieval authority.
+- This is a pre-merge ranker candidate. No threshold, relevance judgment,
+  corpus, index, route, replica, owner, promotion, or RSI authority changed.
+  (WSP 00/15/22/48/50/62/83/84/87/97)
+
 ## [2026-08-28] Current-truth retrieval candidate
 
 - Admitted the canonical Holo README/INTERFACE/ROADMAP/CLI/test/memory and

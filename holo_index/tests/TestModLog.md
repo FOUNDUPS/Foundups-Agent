@@ -1,5 +1,21 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-08-28] Producer-ranked owner merge falsifier
+
+- Added a generic counterexample in which a collection-local exact-symbol
+  winner has `50.6%` similarity and its already-demoted semantic neighbor has
+  `51.0%`. Owner flattening must preserve the producer order while still
+  comparing each typed stream head globally.
+- Existing cross-bucket score, current-vs-history authority, deduplication,
+  and exact-module Tier-0 cases remain the non-regression boundary. The first
+  pre-manifest combined run passed 206 tests and failed six owner constructors
+  only because the bound backend manifest correctly rejected the changed
+  source. Those failures are retained as closure evidence, not behavior
+  failures. (WSP 05/06/34/50/62/97)
+- After regenerating the authenticated source manifest and isolating synthetic
+  owner construction from the host package layout, the focused
+  Holo/bridge/HoloDAE matrix passes 246/246.
+
 ## [2026-08-28] Current-truth indexing and ranking falsifiers
 
 - Added classification and query-intent counterexamples, bounded current-docs

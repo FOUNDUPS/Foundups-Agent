@@ -1,5 +1,23 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-28] Producer-rank preservation falsification
+
+- Added a direct owner-response counterexample proving a typed producer's
+  exact-symbol winner cannot be reversed by a slightly higher raw similarity
+  on the next item.
+- The complete flatten group is 16/16 before manifest regeneration. A wider
+  pre-manifest run passed 206 and failed six owner-construction cases only at
+  the intentional authenticated source-closure check. (WSP 05/06/34/50/97)
+- The final focused Holo/bridge/HoloDAE matrix is 246/246. Synthetic owner
+  construction now injects a false-grade test runtime identity so unit tests
+  do not inherit multiple host `site-packages` roots; the dedicated runtime
+  closure suite retains the real fail-closed boundary.
+- The first complete bridge run exposed eight host-coupled tests after 1,180
+  passes / 14 skips: four HTTP fixtures and four runtime-identity cases saw
+  both machine and per-user package roots. HTTP owners now inject an explicitly
+  non-A-grade synthetic identity, while runtime tests use one synthetic package
+  root and still exercise all manifest, tamper, and ambiguity falsifiers.
+
 ## [2026-08-28] Current-truth response-order falsification
 
 - Reproduced the governed-adapter `where` incompatibility, then added a real

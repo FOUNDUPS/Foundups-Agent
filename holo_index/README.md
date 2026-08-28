@@ -2,12 +2,13 @@
 
 ## Current operational truth (2026-08-28)
 
-Governed local retrieval is usable at exact main
-`5ca0c0aaa5299e6f2d3b409368e54e99fd06240c`. The active immutable replica is
-generation `sha256:a913b641...` with freshness receipt
-`sha256:f9382c4d...`. A fresh governed owner query returned `CURRENT`, no index
-gap, no reindex, and first-attempt success; a later controller fast-path also
-returned `OWNER_READY` without starting maintenance or query runtimes.
+Live authority is the receipt from a fresh governed owner query, not a commit
+or generation copied into this document. At the start of the current ranking
+transaction, exact main `1dc016fc3223244cfc37efd2a4fea4022118c342`
+was independently accepted at generation `sha256:ba5119f...` and freshness
+receipt `sha256:5e1164d6...`: `CURRENT`, no index gap, no reindex, first
+attempt. The completed post-merge transaction was reconciled as `OWNER_READY`
+without starting a runtime or repeating maintenance.
 
 HoloIndex is not yet A-grade and retrieval RSI is not operational. The latest
 clean-authority public benchmark passed Recall@8 at `1.0` but failed the fixed
@@ -18,12 +19,13 @@ retrieval proposer, administered independent evaluator, signed admission,
 shadow canary, promotion, ranker rollback, or candidate-bound production
 outcome learner.
 
-The current-truth retrieval candidate on this branch admits canonical Holo
-contracts, indexes their heading-scoped status sections, classifies current
-contracts separately from implementation, vision, and history, and preserves
-that authority through owner-level global ranking. It is not active evidence
-until merged, regenerated at exact main, activated, and remeasured. Historical
-evidence below remains useful only for its named commit and generation.
+Canonical Holo contracts and bounded heading-scoped status sections are active
+in that generation. The ranked-stream slice preserves each producer-ranked
+typed result stream while merging globally, instead of silently reordering a
+collection's exact-symbol winner by raw similarity. It also restores the
+missing HoloDAE README/INTERFACE Tier-0 pair. Operational acceptance of either
+change is owned only by exact-main regeneration, activation, and remeasurement;
+this prose is never promotion evidence.
 
 ## Closed command-import boundary
 
@@ -766,8 +768,8 @@ HoloIndex uses a gamification system to encourage quality behaviors:
 - **Variants**: Different reward multipliers (currently variant A)
 
 ## Performance
-- **Governed semantic query**: latest public p95 approximately 4.78 seconds;
-  the six-case clean-authority benchmark took approximately 101 seconds
+- **Governed semantic query**: the latest exact-main public run measured p95
+  `4.483s`; the separate candidate-author run measured `4.437s`
 - **Historical targets**: <200ms dual search and <500ms cached LLM inference
   are not current acceptance evidence
 - **Index Size**: ~500MB for full codebase
@@ -783,6 +785,6 @@ HoloIndex uses a gamification system to encourage quality behaviors:
 - SQLite (violation tracking)
 
 ## Status
-[PARTIAL] **GOVERNED QUERY USABLE** - Base-bound maintenance/freshness repair
-is observed working. Exact-current-main controller acceptance, exact runtime
-closure, resident scale, A-grade quality, and retrieval RSI remain blocked.
+[PARTIAL] **GOVERNED QUERY USABLE** - Exact-main maintenance, activation, and
+controller reconciliation are observed working. Exact runtime closure,
+resident scale, A-grade quality, and retrieval RSI remain blocked.

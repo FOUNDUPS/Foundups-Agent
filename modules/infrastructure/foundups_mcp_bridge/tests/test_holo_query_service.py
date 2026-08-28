@@ -10,6 +10,7 @@ from typing import Any, Mapping
 
 import pytest
 
+from modules.infrastructure.foundups_mcp_bridge.src import holo_query_service
 from holo_index.freshness_receipt import (
     ALL_COLLECTIONS,
     CollectionFreshness,
@@ -127,6 +128,15 @@ def _service(
     **kwargs: Any,
 ) -> HoloIndexQueryOwnerService:
     monkeypatch.setenv("HOLOINDEX_QUERY_SERVICE_TOKEN", TOKEN)
+    monkeypatch.setattr(
+        holo_query_service,
+        "_owner_runtime_environment",
+        lambda _replica, _backend_factory: (
+            _test_digest("synthetic-ranker"),
+            _test_digest("synthetic-runtime"),
+            False,
+        ),
+    )
     selected_backend = backend or _Backend()
     factory = backend_factory or (lambda _path: selected_backend)
     raw_loader = receipt_loader or (lambda _path: _receipt())

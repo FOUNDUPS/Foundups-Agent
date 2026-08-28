@@ -1,5 +1,23 @@
 # RedDog Extension Tests
 
+## 0.4.132 producer-ranked Holo owner release
+
+- A generic owner-boundary counterexample proves a typed producer's
+  exact-symbol winner survives a slightly higher raw-similarity neighbor while
+  cross-stream head scoring, current-truth authority, Tier-0 reservation, and
+  case-insensitive deduplication remain enforced.
+- The complete bridge suite is 1,188 passed / 14 expected skips. Its first run
+  exposed eight host-coupled synthetic cases; the fixtures now use explicit
+  non-A-grade runtime identities or one synthetic package root without
+  relaxing the real ambiguous-package fail-closed contract.
+- Backend closure is 1,365 files at `64e314c2931b...9b77d3`; exhaustive contract
+  identity is `052b944c5bd7...0cc96`; package identity is 67 files / 946,088
+  bytes at `a492686c440f...f0c589`. Exhaustive four-group release passes in
+  203.191 seconds with no timeout.
+- `O:\RedDog-Releases\reddog-0.4.132.vsix` is 275,728 bytes at
+  `sha256:f40ed659c685...25e40b`; read-only inspection found 69 safe entries,
+  exact extension-source equality, and no credential-pattern member.
+
 ## 0.4.131 current-truth Holo retrieval
 
 - Current/history intent falsifiers cover temporal queries, case-insensitive

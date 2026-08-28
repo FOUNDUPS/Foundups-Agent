@@ -3,15 +3,16 @@
 ## [2026-08-28] Current-truth retrieval and RSI gate
 
 **Current status:** governed retrieval is operational at exact main
-`5ca0c0aaa5299e6f2d3b409368e54e99fd06240c`, active generation
-`sha256:a913b641...`, and freshness receipt `sha256:f9382c4d...`. A fresh owner
-query and a later controller fast-path both passed without reindexing. One
-immediate in-process post-completion proof false-negative remains diagnostic
-debt; it is not evidence of persistent replica corruption.
+`1dc016fc3223244cfc37efd2a4fea4022118c342`, active generation
+`sha256:ba5119f...`, and freshness receipt `sha256:5e1164d6...` as of the
+start of this candidate transaction. A fresh owner query passed without
+reindexing, and the completed post-merge transaction later reconciled as
+`OWNER_READY` without starting runtimes or repeating maintenance. Future live
+status must come from a fresh governed receipt rather than these as-of values.
 
 **A-grade verdict: NO-GO.** The latest clean-authority public benchmark measured
 Recall@8 `1.0`, MRR `0.91666667`, nDCG@8 `0.93198851`, and p95 semantic latency
-about `4.78s`. MRR and nDCG fail the immutable `0.95` floor, and exact runtime
+`4.483s`. MRR and nDCG fail the immutable `0.95` floor, and exact runtime
 payload closure is false for all six cases.
 
 **Retrieval RSI verdict: NO-GO.** Observation and deterministic public
@@ -31,11 +32,13 @@ WSP_15 orders the remaining P0 layers as follows:
 4. add independent admission, shadow canary, signed promotion, rollback proof,
    and candidate-bound outcome learning.
 
-The current candidate is the smallest prerequisite: authoritative Holo
-contracts enter the exact docs source set, receive bounded heading-level
-records, and retain current-vs-history authority through global owner ranking.
-It is not promoted or operational until merged, exact-main regenerated,
-activated, and remeasured.
+The active generation already contains the authoritative current-truth docs
+slice. The ranked-stream slice repairs its next measured integration defect:
+owner global flattening now merges producer-ranked streams without reversing
+an exact-symbol winner on a slightly higher raw similarity. It also restores
+the missing HoloDAE Tier-0 contract pair that caused a broad RSI query to fail
+closed. Operational acceptance is owned only by exact-main regeneration,
+activation, and remeasurement; this roadmap is never promotion evidence.
 
 ## [2026-08-27] Historical A-grade retrieval truth gate
 

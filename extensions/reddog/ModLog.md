@@ -1,5 +1,23 @@
 # RedDog ModLog
 
+## 2026-08-28 - Producer-ranked Holo owner release (0.4.132)
+
+- Preserved producer order inside each typed Holo result stream while retaining
+  deterministic current-truth authority and cross-stream head scoring. Restored
+  truthful HoloDAE Tier-0 contracts without granting its legacy launcher query,
+  reindex, maintenance, or RSI authority.
+- Rotated the 1,365-file backend closure to canonical digest
+  `64e314c2931b...9b77d3` and the 18-shard / 6,942-line / 492-assertion contract
+  to `052b944c5bd7...0cc96`. The deterministic 67-file package is 946,088 bytes
+  at `a492686c440f...f0c589`.
+- Fast, conversation, package, contract, candidate WSP_62, backend
+  compatibility, and exhaustive four-group release gates pass. Exhaustive wall
+  time is 203.191 seconds with no timeout. The verified
+  `O:\RedDog-Releases\reddog-0.4.132.vsix` is 275,728 bytes at
+  `sha256:f40ed659c685...25e40b`, with 69 safe entries, exact extension-source
+  equality, and no credential-pattern member. This is release integrity, not
+  A-grade HoloIndex or operational RSI proof. (WSP 00/05/06/15/22/34/50/62/83/84/87/97)
+
 ## 2026-08-28 - Current-truth Holo retrieval release candidate (0.4.131)
 
 - Added `document_truth.py` and the governed snapshot adapter to the exact

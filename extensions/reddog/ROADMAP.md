@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase: RedDog 0.4.131 resident architect thin-client surface.
+Phase: RedDog 0.4.132 resident architect thin-client surface.
 
-0.4.131 retains exact-task post-merge execution, receipt-bound owner
+0.4.132 retains exact-task post-merge execution, receipt-bound owner
 reacquisition, phase-aware liveness, and repeatable supervisor release. The
 bounded operator controller is not an extension command. A
 trusted stage-zero verifier must still bind the full runtime, signature, and

@@ -293,6 +293,27 @@ def test_flatten_hits_uses_global_score_across_typed_buckets() -> None:
     assert hits[1]["type"] == "wsp"
 
 
+def test_flatten_hits_preserves_producer_rank_within_typed_stream() -> None:
+    hits = core._flatten_hits(
+        {
+            "code_hits": [
+                {"path": "exact-symbol.py", "similarity": "50.6%"},
+                {"path": "semantic-neighbor.py", "similarity": "51.0%"},
+            ],
+            "skill_hits": [
+                {"path": "skill.md", "similarity": "49.0%"},
+            ],
+        },
+        3,
+    )
+
+    assert [item["path"] for item in hits] == [
+        "exact-symbol.py",
+        "semantic-neighbor.py",
+        "skill.md",
+    ]
+
+
 def test_flatten_hits_current_status_prefers_current_contract_over_history() -> None:
     hits = core._flatten_hits(
         {
