@@ -3,10 +3,10 @@
 ## [2026-08-29] Current-truth retrieval and RSI gate
 
 **Current status:** governed retrieval is operational at exact main
-`09e98fff04b4d94544d97a1dd7b795785d13db2e`, active generation
-`sha256:7869f238...`, and freshness receipt `sha256:fd0a0005...`. A fresh owner
+`9c27cd03953bb4573c0a1091f01af649434c872a`, active generation
+`sha256:4fdfbbb1...`, and freshness receipt `sha256:50cff0ab...`. A fresh owner
 query passed CURRENT/no-gap/no-reindex on attempt one and full verification
-preserved 33 artifacts / 222,719,702 bytes.
+preserved 33 artifacts / 222,979,317 bytes.
 Future live status must come from a fresh governed receipt.
 
 **A-grade verdict: NO-GO.** The latest clean-authority public benchmark measured
@@ -22,8 +22,9 @@ route rollback is not ranker rollback.
 
 WSP_15 orders the remaining P0 layers as follows:
 
-1. prove exact runtime payload/control closure through the ordinary registered
-   benchmark facade;
+1. complete the now-composed runtime's external native-loader, deterministic
+   pre-import, signature, empirical write-denial, and activation proofs through
+   the ordinary registered benchmark facade;
 2. deploy a disjoint sealed evaluator of at least 30 cases with authenticated
    proposer/evaluator identities and durable negative receipts;
 3. improve the generic ranker until all fixed quality floors pass without
@@ -31,7 +32,7 @@ WSP_15 orders the remaining P0 layers as follows:
 4. add independent admission, shadow canary, signed promotion, rollback proof,
    and candidate-bound outcome learning.
 
-The module-intent defect is closed at exact main `09e98fff`. The token
+The module-intent defect is closed historically at exact main `09e98fff`. The token
 `feedback` had selected telemetry data as a module and strict Tier-0 correctly
 rejected its missing contracts. The merged repair uses bounded exact-HEAD
 evidence—direct `src/tests` trees or regular root README/INTERFACE blobs—and

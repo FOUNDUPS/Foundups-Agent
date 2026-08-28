@@ -6,11 +6,11 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 ## Current governed Holo status (2026-08-29)
 
-Exact main `0f992c9b55067055049674f49568e58315242c35` is active at immutable
-generation `sha256:eeb23404...` and freshness receipt `sha256:d0c47d66...`.
+Exact main `9c27cd03953bb4573c0a1091f01af649434c872a` is active at immutable
+generation `sha256:4fdfbbb1...` and freshness receipt `sha256:50cff0ab...`.
 The real pre-owner stale-HEAD transaction completed through OpenClaw/WRE, and
 a fresh one-shot query returned `CURRENT`, no gap, no reindex, and first-attempt
-success. Full production verification retained 33 artifacts / 222,706,129
+success. Full production verification retained 33 artifacts / 222,979,317
 bytes with unchanged descriptor, replica, and path identities.
 
 This establishes usable governed retrieval and working maintenance-replica
@@ -88,6 +88,30 @@ the owner, supervisor, route, replica, VSIX, or query-time behavior. A protected
 stage-zero admission must compose this generation with the exact dependency
 generation and independently prove external loader closure, deterministic
 controls, signing, and empirical write denial before route-v2 can exist.
+
+The first inert composition prerequisite now exists as a third, tiny
+content-addressed generation. It contains only a canonical path-free descriptor
+and independently reruns both full-byte component verifiers. Its identity binds
+both generation, descriptor, inventory, and tree digests; file/directory/byte
+counts; the Windows platform; the exact `python.exe` row, bytes, and size; the
+separate `site-packages` role; and fixed `-I -S -B` isolation topology. It does
+not copy either payload. Reuse fully reproves the selected component roots, so
+base/dependency substitution fails closed. ABI/native-loader compatibility,
+deterministic effects, pre-import safety, signature, empirical write denial,
+activation eligibility, and exact closure remain false. The composition is a
+future proof/signing target, not an owner or route.
+
+Canonical verification uses a bounded reverse-order `B1 -> D1 -> D2 -> B2`
+full reproof and requires exact equality of both component bindings. This
+detects one-shot cross-pass mutation but does not prove ABA resistance,
+immutability, or durable write denial.
+
+The O:-local production shape passed: 72,261 dependency files / 11,639
+directories / 1,853,891,335 bytes materialized in 2,856.73 seconds; composition
+publication took 588.32 seconds. A fresh repaired-verifier process then accepted
+generation `sha256:44e21db7...` / descriptor `sha256:cbbfe268...` in 579.54
+seconds with the descriptor unchanged and every activation-grade flag false.
+This full-tree proof is an offline release gate and never query-time work.
 
 ## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
 

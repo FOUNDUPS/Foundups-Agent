@@ -8,6 +8,26 @@ while historical/baseline queries preserve semantic ordering. It also proves
 case-variant repository paths deduplicate globally. These are pure response
 tests with synthetic hits; they do not query or mutate HoloIndex.
 
+## Inert exact runtime composition
+
+- `test_reddog_holoindex_runtime_composition_contract.py` proves strict
+  canonical schema, typed component roles, domain-separated identity,
+  path/secret-free encoding, component-order/substitution rejection, exact
+  numeric typing, and forced-false activation-grade claims.
+- `test_reddog_holoindex_runtime_composition.py` proves descriptor-only
+  publication, exact reuse, independent base/dependency reproof, exact
+  interpreter-member binding, payload/descriptor/topology tamper rejection,
+  component substitution, byte-identical external alias rejection, overlap
+  rejection before mutation, reverse-order cross-pass mutation detection, and
+  quarantine when a component changes across publication. Focused coverage is
+  24 passed / 1 capability skip; the explicit adjacent runtime selection is
+  bounded to non-scale cases and passed 159 / 6 skips. Tests use an
+  explicit O:-local `--basetemp` when executed in governed validation.
+- The separate production gate materialized 72,261 dependency files / 11,639
+  directories / 1,853,891,335 bytes in 2,856.73 seconds, published composition
+  `sha256:44e21db7...` in 588.32 seconds, then passed a fresh repaired-verifier
+  reproof in 579.54 seconds with the descriptor unchanged.
+
 ## Inert dependency-runtime closure
 
 - `test_reddog_holoindex_dependency_runtime.py` proves content addressing,

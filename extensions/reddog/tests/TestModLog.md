@@ -1,5 +1,31 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-29 - Inert exact runtime composition release (0.4.138)
+
+- Added strict composition contract/materializer/verifier falsifiers and an
+  independent hostile review. The review reproduced a stale first-component
+  proof; exact-equality `B1 -> D1 -> D2 -> B2` reproof plus one-shot base and
+  dependency mutation cases closes that bounded race without claiming ABA
+  resistance or write denial.
+- Focused result is **24 passed / 1 capability skip**. The exact bounded
+  non-scale adjacent selection is **159 passed / 6 expected skips**. WSP_62
+  remains green at 324/519/486 source lines with no function above 50 lines.
+- Registry is 1,618/268; backend is `fccaca219ac3...0713be`; contract is
+  `0362913b7a2b...b4d05`; deterministic package is 67 files / 949,053 bytes at
+  `a655ffe69f1f...f4ea`.
+- VSIX inspection proves version 0.4.138, 276,441 bytes,
+  `sha256:f68a9cae2b1c...c1c47`, 69 safe unique entries, 67 exact source
+  members, and zero credential-value-pattern or source-byte mismatch findings.
+- Tests and packaging change no owner, route, replica, ACL, queue, maintenance,
+  execution, activation, A-grade, or retrieval-RSI state.
+- O:-local production evidence materialized the exact 72,261-file dependency
+  tree, published descriptor-only composition `sha256:44e21db7...`, and passed
+  the fresh repaired reverse reproof in 579.54 seconds with unchanged descriptor
+  identity and all activation-grade flags false.
+- Fast 14-member, O:-venv conversation (32 Python / 15 shared JavaScript
+  vectors), contract 3-member, package, and all four exhaustive release groups
+  pass. Exhaustive release completed in 170.331 seconds with no timeout.
+
 ## 2026-08-29 - Inert base-runtime backend binding (0.4.137)
 
 - Added strict and adversarial base-runtime coverage: **55 passed / 1 opt-in

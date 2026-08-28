@@ -1,7 +1,16 @@
 # RedDog
 
-Version: 0.4.137
-0.4.137 rebinds the authenticated backend manifest after adding the inert exact Windows Python base-runtime generation. The new backend layer preserves runnable interpreter/stdlib/native topology and passed production-shape materialization/reuse, but it is not reachable from the VSIX or owner. Native-loader closure, deterministic effects, signing, empirical write denial, route-v2 activation, A-grade, and retrieval RSI remain blocked. Exact main `0f992c9b` passed the governed OpenClaw/WRE refresh, CURRENT owner query, and unchanged 33-artifact replica verification.
+Version: 0.4.138
+0.4.138 adds the inert exact base/dependency runtime-composition boundary. It
+reproves both content-addressed payloads, binds the exact interpreter and
+isolated dependency launch topology, and publishes only a path-free descriptor;
+canonical verification uses exact-equality `B1 -> D1 -> D2 -> B2` reproof to
+detect one-shot cross-pass mutation without claiming ABA resistance or write
+denial. It is not reachable from the VSIX or owner. ABI/native-loader closure,
+deterministic effects, pre-import safety, signing, empirical write denial,
+route-v2 activation, A-grade, and retrieval RSI remain blocked. Exact main
+`9c27cd03` passed the governed OpenClaw/WRE refresh, CURRENT owner query, and
+unchanged 33-artifact replica verification.
 
 This candidate integrity-binds RedDog to the 1,365-file backend closure, including the operator controller, exact task-bound OpenClaw execution, receipt-bound owner cycles, integrity-bound AgentDB claim lease, and fail-closed runtime/task liveness.
 The operator controller remains outside the thin-client command surface, and the VSIX gains no maintenance, reindex, promotion, or execution authority.

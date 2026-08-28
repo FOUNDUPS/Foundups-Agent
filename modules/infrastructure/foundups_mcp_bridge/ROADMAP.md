@@ -1,5 +1,27 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-29: Inert exact runtime-composition generation
+
+**Implemented; still not activation.** A strict path-free composition contract,
+independent verifier, and descriptor-only materializer now bind one exact
+Windows base generation to one exact dependency generation. The identity covers
+both descriptor/inventory/tree digests and counts plus the exact `python.exe`
+member, separate `site-packages` role, and fixed `-I -S -B` launch topology.
+Both existing full-byte verifiers rerun as `B1 -> D1 -> D2 -> B2` on canonical
+verification and reuse, with exact equality required across both passes;
+neither payload is copied into the composition generation. This bounded
+cross-pass mutation proof does not establish ABA resistance or write denial.
+
+The schema forces ABI compatibility, external native-loader closure,
+deterministic effects, pre-import bootstrap safety, signature, empirical write
+denial, activation eligibility, and exact runtime closure false. Focused
+coverage is 24 passed / 1 capability skip; the explicit adjacent runtime
+non-scale selection is 159 passed / 6 capability skips. Production-pair
+verification passed: dependency materialization took 2,856.73 seconds,
+descriptor-only composition took 588.32 seconds, and a fresh repaired-verifier
+reproof took 579.54 seconds. The full dependency pass is an offline release
+long pole, not interactive-query work.
+
 ## 2026-08-29: Inert exact Windows Python base-runtime generation
 
 **Implemented and production-shape verified; this is not an activation
@@ -76,8 +98,7 @@ explicit absolute control-root limit or extend every creation, publication,
 contract, quarantine, and recovery syscall boundary.
 
 Next P0 layers are deliberately separate: durable hard-crash recovery and
-retention, signer/write-denial admission, composition of the exact base and
-dependency generations, external native-loader and deterministic-execution binding,
+retention, signer/write-denial admission, external native-loader and deterministic-execution binding,
 pre-import bootstrap verification, and resident authenticated owner selection.
 Only after those exist may the runtime exact-closure predicate become true.
 Retrieval RSI then needs a distinct authenticated proposer/evaluator,

@@ -1,0 +1,142 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "9c27cd03953bb4573c0a1091f01af649434c872a"
+  },
+  "execution_id": "HOLOINDEX_RUNTIME_COMPOSITION_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "inert_exact_base_dependency_runtime_composition",
+    "candidate_code_and_release": "verified",
+    "independent_wsp97_verification": "hostile_code_reaudit_go_final_staged_closure_pending",
+    "merged_exact_main_replay": "pending",
+    "maintenance_replica_rsi": "working",
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "runtime_environment_exact_closure_verified": false,
+    "resident_authenticated_owner": false,
+    "live_route_changed": false
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:ff92fe2f86049c47f6abf7540120fdaefe859a991e58dc459ddaaf056598126d",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "publish and verify only the inert exact composition before native-loader, deterministic execution, signing, write denial, route-v2, or activation"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 awakening and strict tracker gate passed before final execution at coherence 0.820.",
+      "The RedDog historical bootstrap shelf was read in its mandatory order and treated only as non-authoritative history.",
+      "Governed Holo retrieval was CURRENT at exact base 9c27cd03953bb4573c0a1091f01af649434c872a with no gap, no reindex, no authority mutation, and query receipt sha256:ca65a6b4f28d94493c234d1f9019203376f837059e6d868f35832db8ce01d7e7.",
+      "The governed result was fresh but noisy and committed-head-only; exact direct reads of the candidate module documents, component verifiers, materializers, contracts, fixtures, and tests completed the overlay audit.",
+      "Remote main and candidate HEAD were independently rechecked equal to 9c27cd03953bb4573c0a1091f01af649434c872a before receipt closure."
+    ],
+    "research": [
+      "The existing inert base and dependency generations were independently verifiable but had no typed artifact preventing arbitrary cross-generation pairing.",
+      "Existing confined JSON, isolated-store proof, operation lock, no-replace publication, owned quarantine, base verifier, and dependency verifier were reused rather than duplicated.",
+      "The first hostile audit reproduced a stale base binding by mutating python312.dll during dependency verification; the initial interpreter-only reread was insufficient.",
+      "The bounded repair uses B1 -> D1 -> D2 -> B2 full verification and exact dataclass equality, while explicitly retaining false write-denial, ABA, activation, and exact-closure claims."
+    ],
+    "micro_pass": [
+      "Focused composition contract and adversarial tests passed 24 with one capability skip, including byte-identical external alias rejection and injected post-base/post-dependency one-shot mutation failures.",
+      "The exact bounded non-scale adjacent selection passed 159 with six expected capability skips across base, dependency, runtime-environment, process-image, sealed-runtime, and composition tests.",
+      "WSP_62 inspection passed: contract 324 lines, descriptor 519, materializer 486; no changed function exceeds 50 lines and no changed class exceeds 200 lines.",
+      "The canonical test registry is current at 1618 entries with 268 quarantined entries.",
+      "The backend generator check retained 1365 runtime files at sha256:fccaca219ac33ae9deb3d4acc087fcf8a72926b161044cf92e485db5950713be; all eight generator tests passed.",
+      "git diff --check passed and no repository-local .reddog_test_tmp directory remained."
+    ],
+    "macro_pass": [
+      "Production dependency materialization published 72261 files, 11639 directories, and 1853891335 bytes as sha256:1f02b47c362a1ad489511a8f463f8e9fde41b5458947a325eaafdf07bab3fe84 in 2856.73 seconds.",
+      "Production composition published only its descriptor and empty orphan namespace as sha256:44e21db7d149c76598bbddf20262f9ec6da89d6147003f42b850a13ee665b279 in 588.32 seconds.",
+      "A fresh process running the repaired verifier accepted the exact production pair in 579.54 seconds; descriptor sha256:cbbfe2686b3ba768d463b4191a371942a3cce8a275371a5ee320864d458acdf4 remained unchanged and every activation-grade flag remained false.",
+      "Fast 14-member, O:-venv conversation 32-Python/15-JavaScript-vector, contract 3-member, package, and four-group exhaustive RedDog release gates passed; exhaustive duration was 170331 milliseconds with no timeout.",
+      "The contract has 18 shards, 6942 source lines, and 492 assertions at sha256:0362913b7a2b587159ee6bd5fc0e7fd4070b881040a74c3018ec4cc2150b4d05.",
+      "The deterministic package is 67 files and 949053 raw bytes at sha256:a655ffe69f1f474ecdd6ca04ab9dda0c380d2633ce006fc29d1692264b71f4ea.",
+      "The inspected 0.4.138 VSIX is 276441 bytes at sha256:f68a9cae2b1c37b4977660e676c6ae24b370c6fb21148d87d93d2d24b92c1c47, with 69 safe unique entries, 67 exact source members, and no encryption, symlink, unsafe path, sensitive filename, source mismatch, or credential-pattern finding.",
+      "Independent WSP_00/WSP_97 review first returned NO-GO with the cross-pass counterexample, then returned technical GO after reproducing the reverse reproof, both mutation falsifiers, alias rejection, WSP_62 bounds, and narrowed documentation claims."
+    ],
+    "hard_think": [
+      "A content-addressed component name is not a composition proof; the pair must bind every component descriptor, inventory, tree digest, count, byte total, platform, interpreter row, and dependency role.",
+      "Sequential full verification can stale its first result while the second component is read, so a bounded reverse pass and full-binding equality are required for this inert layer.",
+      "No finite read-only reproof establishes durable immutability against a concurrent writer; empirical write denial remains a separate principal and lifecycle gate.",
+      "The 72,261-file double pass is viable as offline release evidence but cannot scale as interactive query work."
+    ],
+    "dialectic_sweep": [
+      "A digest concatenation or descriptor naming-only artifact was rejected because it would not independently reprove either payload.",
+      "Copying both payloads again was rejected because it adds 1.9 GB of duplicate bytes without adding signer, loader, or write-denial evidence.",
+      "The initial B -> D -> interpreter approach was rejected after the hostile mutation counterexample, despite its passing nominal tests.",
+      "Promoting composition directly to route-v2 was rejected because native-loader closure, deterministic effects, pre-import bootstrap, signing, empirical write denial, and exact runtime closure remain false."
+    ],
+    "first_principles": [
+      "One inert descriptor may identify an exact verified pair without owning or copying either payload.",
+      "Canonical identity must be path-free and bind content, topology, roles, counts, platform, and exact launch-member bytes.",
+      "Every activation-grade property remains false until its own independently falsifiable gate passes.",
+      "Full-tree verification belongs to publication, reuse, release, and promotion boundaries, never the read-only query path."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_composition_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_composition_descriptor.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_composition_materializer.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/reddog_holoindex_runtime_composition_test_support.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_runtime_composition_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_runtime_composition.py",
+      "docs/audits/security/HOLOINDEX_RUNTIME_COMPOSITION_ASSUMPTION_AUDIT_PHASE1.md",
+      "extensions/reddog/package.json",
+      "O:-local RedDog 0.4.138 VSIX release artifact"
+    ]
+  },
+  "nonclaims": [
+    "No composition generation was activated or added to a live Holo route.",
+    "No ABI, native-loader closure, deterministic-effect, pre-import bootstrap, signature, ABA-resistance, empirical write-denial, activation, or exact-runtime-closure proof was produced.",
+    "No HoloIndex maintenance, reindex, replica replacement, owner mutation, ACL change, queue mutation, or production OpenClaw/Hermes worker dispatch occurred.",
+    "No HoloIndex A-grade or retrieval-quality RSI claim is made.",
+    "The VSIX was packaged and inspected but not installed by this transaction.",
+    "The O: virtual environment delegates to its installed base interpreter; all generated, test, dependency, composition, and temporary artifacts were confined to O:, and final conversation evidence disabled per-user site packages."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_RUNTIME_COMPOSITION_WSP15_ALLOCATION_RECEIPT_PHASE1.json",
+    "docs/audits/infrastructure/HOLOINDEX_RUNTIME_COMPOSITION_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/security/HOLOINDEX_RUNTIME_COMPOSITION_ASSUMPTION_AUDIT_PHASE1.md",
+    "modules/infrastructure/foundups_mcp_bridge/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}
