@@ -2,7 +2,9 @@
 
 **Version**: 1.1.0
 **Status**: Active identity and surface contract; authenticated PFMall transport is specified, not implemented
-**Last updated**: 2026-08-22
+**Last updated**: 2026-08-28
+
+**Vision:** `docs/REDDOG_OUTCOME_VISION.md` defines the Red Dog north-star outcome. This contract defines current identity, authority, surface, and implementation truth; where the two differ, the difference is roadmap work rather than license to overstate current capability.
 
 ## 1. Canonical identity
 
