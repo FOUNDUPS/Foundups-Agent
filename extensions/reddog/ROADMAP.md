@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase: RedDog 0.4.134 resident architect thin-client surface.
+Phase: RedDog 0.4.135 resident architect thin-client surface.
 
-0.4.134 retains exact-task post-merge execution, receipt-bound owner
+0.4.135 retains exact-task post-merge execution, receipt-bound owner
 reacquisition, phase-aware liveness, repeatable supervisor release, and
 same-repository dependency-runtime resolution. Every verified requery now
 enters through the original workspace/control root while its captured clean

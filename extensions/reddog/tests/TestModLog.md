@@ -1,5 +1,19 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-28 - Evidence-qualified Holo module intent (0.4.135)
+
+- Added no new extension behavior island: the release binds RedDog to the
+  repaired Holo backend and advances every current version fixture.
+- Fast, conversation (32 Python passes), deterministic 67-file package,
+  contract, and four-group exhaustive release tiers pass. The affected Python
+  owner/query/Tier-0 matrix is 334/334; the eight closure-generator tests pass.
+- Independent WSP_97 reproduced the exact suite, hostile Git environment,
+  false-container exclusion, realistic bounds, WSP_62 limits, and original
+  query inference, returning GO before packaging.
+- VSIX inspection proves version 0.4.135, 69 ZIP files / 67 extension members,
+  275,792 bytes, `sha256:b1b9e203dcab...b22a55a`, zero source mismatches, and
+  zero credential-value patterns. Post-merge live acceptance remains separate.
+
 ## 2026-08-28 - Holo owner-query root separation release (0.4.134)
 
 - RED reproduced `HOLOINDEX_AUTHORITY_ROOT_INVALID` when the completed

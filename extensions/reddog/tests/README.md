@@ -1,5 +1,17 @@
 # RedDog Extension Tests
 
+## 0.4.135 evidence-qualified Holo module intent
+
+- The authenticated 1,365-file backend closure is
+  `22fca9ba3e28...bf598351`; the 18 shards remain 6,942 lines / 492 assertions
+  at `sha256:7ed04109cbc6...f286343b`.
+- Fast, conversation, package, contract, and exhaustive release tiers pass.
+  Holo owner/service/Tier-0 adjacency is 334/334; backend generator is 8/8;
+  independent WSP_97 reproduced 334/334 and returned GO.
+- `O:\RedDog-Releases\reddog-0.4.135.vsix` is 275,792 bytes at
+  `sha256:b1b9e203dcab...b22a55a`. Its 67 source members exactly match the
+  package surface with zero byte mismatches or credential-value patterns.
+
 ## 0.4.134 Holo owner-query root separation release
 
 - Five focused caller tests prove verified owner queries use the original
