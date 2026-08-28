@@ -2,6 +2,14 @@
 
 ## Exact-main post-merge lifecycle
 
+`test_reddog_holoindex_owner_query_root_binding.py` proves all post-completion,
+incident-recheck, CURRENT-coordination, and blocked-recovery queries enter through
+the original workspace/control root while results remain classified against the
+independently captured authority. The authority selector separately proves a
+configured authority equal to the workspace is rejected. The focused root and
+affected lifecycle selection is 190 passed; merged exact-main replay remains the
+production acceptance gate.
+
 `test_holoindex_postmerge_runtime_owner_proof.py` owns the distinct
 post-completion readiness contract. It proves one fully receipt-bound exhausted
 transient can receive exactly one immediate reproof on acquisition cycles zero

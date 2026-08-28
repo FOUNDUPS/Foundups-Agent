@@ -1,15 +1,16 @@
 # moltbot_bridge Roadmap
 
 - IMPLEMENTED / LIVE REPLAY REQUIRED - EXACT-TASK RUNTIME READINESS:
-  exact-main `db44f8be` completed maintenance and atomic completion at
-  `sha256:b5a138e0...`; the controller falsely rejected before a governed query
-  returned the same CURRENT binding in 3.812 seconds and immutable verification
-  retained 33 artifacts / 222,033,165 bytes. The repair binds the admitted task
-  through same-root/Holo-only acknowledgment, retains owned bindings until stop,
-  releases pre-existing bindings exactly, rechecks sealed authority/task state,
-  applies phase-aware liveness, preflights the complete dispatch chain before
-  task creation, and uses distinct receipt-bound owner cycles.
-  Focused regressions pass; merged exact-main replay remains the acceptance gate.
+  exact-main `724954fa` completed real OpenClaw maintenance and atomic completion
+  at `sha256:4ede3b9d...`; the controller then falsely rejected
+  `owner_result_invalid_after_completion` because its requery supplied the selected
+  authority as the workspace entry root. The resolver's same-root rejection was
+  correct. A separate governed query returned the same CURRENT/no-gap/no-reindex
+  binding in 35.3 seconds and immutable verification retained 33 artifacts /
+  222,617,459 bytes. The focused repair preserves the original control root for
+  query entry and the clean authority for proof. Candidate caller regressions and
+  a production-shaped CURRENT proof pass; merged exact-main replay remains the
+  acceptance gate.
 - P1 WSP_62 DEBT: the controller is 673/675 lines. Keep the no-growth gate and
   next extract the cohesive Git admission/finalization policy with its existing
   counterexamples; do not mix that refactor into this security/runtime slice.

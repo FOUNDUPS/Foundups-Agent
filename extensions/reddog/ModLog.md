@@ -1,5 +1,30 @@
 # RedDog ModLog
 
+## 2026-08-28 - Holo owner-query root separation release (0.4.134)
+
+- Preserved the exact-main `724954fa` counterexample: real OpenClaw maintenance
+  and atomic completion succeeded at generation `sha256:4ede3b9d...`, but the
+  controller rejected because it recycled the clean authority checkout as the
+  workspace query root. A fresh query through the original control checkout was
+  CURRENT/no-gap/no-reindex, and full replica verification was unchanged.
+- Made the internal `workspace_repo_root` explicit through post-completion,
+  incident-recheck, CURRENT-coordination, and blocked-recovery paths. The
+  selected clean authority remains the independent result-verification target;
+  same-root authority remains invalid and query payloads gain no root choice.
+- The focused affected surface is 190 passed. The canonical registry is 1,610
+  tests / 268 quarantined with 52 registry/indexing tests passing. Rotated the
+  1,365-file backend closure to `bacffc8e18b4...a8076645` and the 18-shard /
+  6,942-line / 492-assertion contract to `3c951718cb13...e14a7f1f`.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic package,
+  candidate WSP_62, and all four exhaustive groups pass; the release wall is
+  184.6 seconds. The 67-file package is 946,244 bytes at
+  `e8e2329154f5...1852246e`. The inspected
+  `O:\RedDog-Releases\reddog-0.4.134.vsix` is 275,758 bytes at
+  `sha256:0bd21de0974b...a2a37e23`, with 69 safe entries, 67 exact source
+  members, and zero credential-value-pattern hits.
+  Merged exact-main controller replay remains required; this release does not
+  claim runtime exact closure, A-grade, or retrieval RSI. (WSP 00/06/15/22/50/62/84/87/97)
+
 ## 2026-08-28 - Linked-control dependency runtime release (0.4.133)
 
 - Reused the canonical same-repository runtime-root resolver in the sealed

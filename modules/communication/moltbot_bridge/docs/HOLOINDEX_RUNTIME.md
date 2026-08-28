@@ -91,18 +91,23 @@ Committed authority permits caller overlays; `clean_workspace_head` does not.
 
 ## Current truth and scale
 
-Exact-main `db44f8be3374785341d1c237ec61da774444eb14` completed maintenance,
+Exact-main `724954fa3799b19174a7ac0b653da8c95e9ccf13` completed maintenance,
 activation, verification, and atomic completion through the real OpenClaw
-supervisor at generation `sha256:b5a138e0...`. The pre-repair controller then
-rejected `owner_not_current_after_completion`. A fresh governed owner query
-returned CURRENT/no-gap/no-reindex with the same binding in 3.812 seconds, and
-full verification retained 33 artifacts / 222,033,165 bytes unchanged. The
-short completion-to-rejection interval plus immediate counterexample proved a
-false negative and exposed same-cycle reacquisition as an untested assumption;
-it did not prove port reuse caused the transient. This repair hardens that
-assumption and task/runtime liveness, with focused-test closure only until
-merged current-main replay. Evidence is commit-bound. The high-risk interleaving
-record is `REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md`.
+supervisor at generation
+`sha256:4ede3b9d714e2484256d587fbf798b00deb3c64c47f1c0aa2ad881274e066922`.
+The controller then rejected `owner_result_invalid_after_completion`. Exact
+reproduction showed the post-completion classifier passed the selected clean
+authority back into `query_once` as its workspace root, so the configured
+authority equalled the workspace and the resolver correctly returned
+`HOLOINDEX_AUTHORITY_ROOT_INVALID`. A fresh governed owner query entered through
+the original control root and returned CURRENT/no-gap/no-reindex in 35.3 seconds;
+full verification retained 33 artifacts / 222,617,459 bytes unchanged. The
+focused repair makes the workspace entry root explicit through every classifier
+caller while retaining the captured authority as the independent verification
+target. Candidate caller regressions and a production-shaped CURRENT proof pass;
+merged current-main replay remains required. Evidence is commit-bound. The
+high-risk decision record is
+`docs/audits/security/REDDOG_HOLO_OWNER_QUERY_WORKSPACE_ROOT_ASSUMPTION_AUDIT_20260828.md`.
 
 The runtime-environment digest covers executable, ABI/platform, verified RedDog
 source, distribution build records, replica/model artifacts, and allowlisted
@@ -113,7 +118,7 @@ dependency closure cannot be hashed per query; A-grade scale requires
 asynchronous signed/protected promotion plus a resident authenticated owner.
 
 Base-bound maintenance/freshness self-repair is observed operational;
-current-main controller acceptance remains pending. Retrieval-quality RSI still requires
+merged controller acceptance for this root-separation repair remains pending. Retrieval-quality RSI still requires
 an authenticated proposer, independently sealed evaluator, separate promoter,
 CAS/canary/semantic rollback, signed outcome ledger, and bounded WRE feedback
 loop. No outbound Hermes dispatch is part of this contract.

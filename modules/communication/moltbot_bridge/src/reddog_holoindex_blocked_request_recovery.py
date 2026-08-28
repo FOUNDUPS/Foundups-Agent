@@ -149,13 +149,14 @@ def _stage_payload(
 
 def _owner_matches_completion(
     *,
-    query: str,
+    query: str, workspace_repo_root: Path,
     selection: Any,
     completion: Mapping[str, Any],
     query_runner: Callable[..., Mapping[str, Any]] | None,
 ) -> tuple[bool, Mapping[str, Any]]:
     status, owner = query_and_classify_owner_result(
-        query=query, selection=selection, query_runner=_query_runner(query_runner)
+        query=query, selection=selection, workspace_repo_root=workspace_repo_root,
+        query_runner=_query_runner(query_runner),
     )
     matches = bool(
         status == CURRENT
@@ -270,14 +271,14 @@ def admit_holo_blocked_request_recovery(
     if completion_status == WAITING or completion is None:
         return _result(WAITING, "recovery_maintenance_not_completed")
     matched, _owner = _owner_matches_completion(
-        query=query.strip(), selection=selection, completion=completion,
+        query=query.strip(),
+        workspace_repo_root=Path(repo_root).resolve(strict=False),
+        selection=selection, completion=completion,
         query_runner=query_runner,
     )
     if not matched:
         return _result(WAITING, "recovery_completion_generation_not_active")
-    return admit_ready(
-        database, receipt, completion, stage_payload
-    )
+    return admit_ready(database, receipt, completion, stage_payload)
 
 
 __all__ = [

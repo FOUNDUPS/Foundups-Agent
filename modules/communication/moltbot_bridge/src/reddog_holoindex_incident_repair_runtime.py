@@ -131,7 +131,7 @@ def _current_owner_receipt(
 
 
 def _coordination_receipt(
-    *, coordinated: Any, incident_id: str, query: str,
+    *, coordinated: Any, incident_id: str, query: str, workspace_repo_root: Path,
     selection: HoloIndexAuthoritySelection, expected_target_head: str,
     binding: Mapping[str, Any],
     query_runner: Callable[..., Mapping[str, Any]] | None,
@@ -151,7 +151,9 @@ def _coordination_receipt(
     if accepted and status == "CURRENT":
         query_runner = _query_runner(query_runner)
         owner_status, result = query_and_classify_owner_result(
-            query=query, selection=selection, query_runner=query_runner
+            query=query, selection=selection,
+            workspace_repo_root=workspace_repo_root,
+            query_runner=query_runner,
         )
         if owner_status == CURRENT:
             return _current_owner_receipt(
@@ -174,8 +176,7 @@ def _coordination_receipt(
         receipt = HoloIndexIncidentRepairReceipt(True, status, maintenance_enqueued=True, **common)
         return seal_receipt(receipt)
     return seal_receipt(HoloIndexIncidentRepairReceipt(
-        False,
-        "ESCALATE",
+        False, "ESCALATE",
         coding_candidate_required=True,
         rejection_reasons=reasons or ("holoindex_incident_repair_unavailable",),
         **common,
@@ -190,11 +191,14 @@ def _validate_query(query: object) -> str | None:
 
 
 def _incident_recheck(
-    *, query: str, selection: HoloIndexAuthoritySelection,
+    *, query: str, workspace_repo_root: Path,
+    selection: HoloIndexAuthoritySelection,
     query_runner: Callable[..., Mapping[str, Any]], incident_id: str,
 ) -> HoloIndexIncidentRepairReceipt | None:
     owner_status, result = query_and_classify_owner_result(
-        query=query, selection=selection, query_runner=query_runner
+        query=query, selection=selection,
+        workspace_repo_root=workspace_repo_root,
+        query_runner=query_runner,
     )
     if owner_status == CURRENT:
         return _current_owner_receipt(
@@ -248,7 +252,7 @@ def coordinate_holoindex_incident_repair(
     stale_authority = binding["owner_error"] == AUTHORITY_ROOT_HEAD_MISMATCH
     if not stale_authority:
         recheck = _incident_recheck(
-            query=normalized_query, selection=selection,
+            query=normalized_query, workspace_repo_root=root, selection=selection,
             query_runner=query_runner, incident_id=incident_id,
         )
         if recheck is not None:
@@ -270,6 +274,7 @@ def coordinate_holoindex_incident_repair(
         selection = refreshed
     return _coordination_receipt(
         coordinated=coordinated, incident_id=incident_id, query=normalized_query,
+        workspace_repo_root=root,
         selection=selection,
         expected_target_head=expected_target_head,
         binding=binding,
