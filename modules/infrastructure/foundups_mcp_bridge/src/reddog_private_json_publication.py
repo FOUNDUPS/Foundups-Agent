@@ -19,6 +19,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 )
 
 from .reddog_holoindex_acceptance_windows import publish_windows_temp_no_replace
+from .reddog_windows_path_rename import rename_windows_path_no_replace
 
 
 ACCEPTANCE_SCHEMA_VERSION = "reddog_holoindex_candidate_acceptance.v1"
@@ -123,7 +124,7 @@ def _matches_owned_file(path: Path, proof: _OwnedFileProof) -> bool:
 
 def _rename_path_no_replace(source: Path, target: Path) -> None:
     if os.name == "nt":
-        os.rename(source, target)
+        rename_windows_path_no_replace(source, target)
         return
     if platform.system() != "Linux":
         _fail("RECEIPT_ATOMIC_RENAME_UNAVAILABLE")

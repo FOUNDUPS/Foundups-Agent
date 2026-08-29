@@ -1,5 +1,34 @@
 # RedDog ModLog
 
+## 2026-08-29 - Declared Windows/CPython ABI evidence release (0.4.139)
+
+- Rebound the VSIX to the 1,366-file authenticated backend after shared
+  Windows extended-path/no-replace publication hardening. The separate inert
+  ABI source remains outside the executable manifest, VSIX, owner, and route.
+- The bounded PE32+ parser, wheel/RECORD verifier, and declared-name graph earn
+  only declared machine/ABI compatibility. Hostile review forced strict modern
+  RVA delay descriptors, paired table bounds, aggregate work ceilings,
+  forwarder rejection, normalized RECORD ownership, stable error codes, and
+  long-path quarantine repair.
+- Focused ABI/PE coverage is **67 passed / one capability skip**; the explicit
+  non-scale dependency/security adjacency is **259 passed / seven expected
+  capability skips**. All new infrastructure sources remain below 600 lines
+  and all new functions are at or below 50 lines.
+- Backend identity is `4e634b8c7b99...8b37` / 1,366 files; all eight generator
+  tests pass. The 18-shard contract is `d68f91db0908...cce6` / 6,942 lines /
+  492 assertions. The deterministic package is 67 files / 948,777 bytes at
+  `44272f6f1e8f...06ed3`.
+- The externally stored `reddog-0.4.139.vsix` is 276,340 bytes at
+  `sha256:5deb3c4df7ac...15ec`: 69 safe unique entries, 67 exact mapped source
+  members, and zero encryption, symlink, unsafe-path, sensitive-name,
+  source-byte-mismatch, case-collision, or credential-pattern findings.
+- Fast 14-member, O:-venv conversation (32 Python / 15 shared JavaScript
+  vectors), contract 3-member, package, and all four exhaustive release groups
+  pass. Final exhaustive duration is 173.373 seconds with no timeout.
+- No native image was loaded and no owner, route, maintenance, activation,
+  external loader, deterministic execution, signing, write-denial, A-grade, or
+  retrieval-RSI authority was added. (WSP 00/6/15/22/50/62/84/87/97)
+
 ## 2026-08-29 - Inert runtime-composition boundary (0.4.138)
 
 - Added a descriptor-only backend composition that independently reproves and

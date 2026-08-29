@@ -1,5 +1,27 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Declared Windows/CPython ABI falsification
+
+- Added parser, pure-contract, derivation, publication, reuse, and hostile
+  boundary tests for inert composition-bound ABI evidence. The first green
+  nominal suite was rejected after independent agents reproduced delay
+  attribute aliasing, null loader-table acceptance, repeated-thunk work
+  amplification, forwarded-export false positives, duplicate RECORD ownership,
+  absolute-path error leakage, and Windows long-path quarantine failure.
+- The repaired focused matrix is **67 passed / one host-capability skip**. It
+  includes paired normal/delay table checks, modern RVA delay descriptors,
+  forwarder-aware Python exports and initializers, aggregate multi-file bounds,
+  RECORD traversal/duplicate rejection, ambiguous/nonlocal basename graph
+  rejection, stable error codes, and long-path post-publication quarantine.
+- The explicit non-scale ABI/acceptance/composition/base/dependency/environment/
+  process-image/sealed-runtime adjacency passed **259 / seven expected
+  capability skips** under an O:-local basetemp.
+- A read-only O:-local scan parsed 388 of 396 native-suffix files; all eight
+  rejects were PE32, while parsed metadata identified 384 AMD64 and four ARM64
+  images. This is a falsifier for broad AMD64 admission, not permission to
+  ignore incompatible artifacts. No live Holo, owner, route, maintenance,
+  registry, extension, or VSIX state was touched.
+
 ## [2026-08-29] Inert runtime-composition falsification
 
 - Added pure schema and end-to-end adversarial coverage for a descriptor-only

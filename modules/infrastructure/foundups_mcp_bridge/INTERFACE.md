@@ -26,20 +26,20 @@ closure remain false. The API never launches Python or changes a route/owner.
 
 ### `materialize_runtime_composition(...) -> RuntimeCompositionMaterializationResult`
 
-Creates or fully reproves one descriptor-only, content-addressed, inert pairing
-of an exact Windows base-runtime generation and exact dependency generation.
-It reruns both existing full-byte verifiers in bounded reverse order
-(`B1 -> D1 -> D2 -> B2`), requires exact full-binding equality, and binds all
-component identities and counts plus the exact `python.exe` inventory
-row/content and the separate `site-packages` launch role, and publishes through
-confined canonical JSON,
-per-store serialization, no-replace directory transition, and owned quarantine.
-The public binding is path-free. No payload is recopied. ABI/native-loader,
-determinism, pre-import bootstrap, signing, write denial, activation, and exact
-closure are schema-forced false; the API never spawns an owner or changes a
-route, ACL, queue, replica, or maintenance state.
-The reverse reproof detects one-shot cross-pass mutation but is not an ABA,
-immutability, or durable write-denial proof.
+Creates a path-free descriptor-only base/dependency pairing without recopying payloads.
+Both full-byte verifiers run `B1 -> D1 -> D2 -> B2` and must return identical
+complete bindings. Confined JSON, serialization, no-replace publication, and
+quarantine apply. ABI, loader, determinism, bootstrap, signing, write denial,
+activation, and exact closure remain false; reverse reproof is not immutability.
+
+### `materialize_runtime_abi_attestation(...) -> RuntimeAbiMaterializationResult`
+
+Reproves one composition and publishes path-free AMD64 PE32+/wheel/RECORD/
+CPython-link evidence in a disjoint store. Parsing is inert and bounded; delay
+tables and forwarded exports are explicit. The graph is not loader routing. Dynamic loads,
+API-set/SxS/KnownDLL resolution, determinism, bootstrap, signing, write denial,
+activation, and exact closure remain false. No owner, route, Skill, manifest,
+extension, or VSIX state changes.
 
 ### `materialize_dependency_runtime(...) -> DependencyRuntimeMaterializationResult`
 

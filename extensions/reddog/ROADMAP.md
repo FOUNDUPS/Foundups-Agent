@@ -2,13 +2,15 @@
 
 ## Status
 
-Phase: RedDog 0.4.138 resident architect thin-client surface.
+Phase: RedDog 0.4.139 resident architect thin-client surface.
 
-0.4.138 retains exact-task post-merge execution, receipt-bound owner
+0.4.139 retains exact-task post-merge execution, receipt-bound owner
 reacquisition, phase-aware liveness, repeatable supervisor release, and
-same-repository dependency-runtime resolution. The backend now also has an
-inert descriptor-only composition generation that prevents exact base and
-dependency payload mix-and-match without granting the VSIX runtime authority.
+same-repository dependency-runtime resolution. The maintenance source now also
+has inert, descriptor-only composition and declared Windows/CPython ABI
+generations that prevent payload mix-and-match and attest bounded
+PE/wheel/RECORD relationships without loading native images. The ABI files are
+outside the executable backend manifest and grant no VSIX runtime authority.
 Every verified requery now
 enters through the original workspace/control root while its captured clean
 authority remains the proof target. The bounded operator controller is not an
@@ -46,8 +48,12 @@ Current implementation:
   descriptor-only identity with exact-equality reverse-order full-byte reproof
   and exact interpreter/isolation topology. This remains inert; the bounded
   proof is neither ABA resistance nor write denial.
-- [ ] P0-A: extend that composition with external native-loader/ABI evidence,
-  deterministic pre-import execution, signature, and empirical write denial.
+- [x] Bind that composition to bounded PE32+ metadata, CPython/wheel/RECORD
+  declarations, non-forwarded interpreter exports, and a declared-name graph.
+  This proves declared ABI compatibility only; it does not invoke the Windows
+  loader or import a native module.
+- [ ] P0-A: add an external Windows native-loader closure, deterministic
+  pre-import execution, signature, and empirical write denial.
   Then publish a route-v2 binding with atomic CAS; content addressing alone is
   not reproducibility or activation authority.
 - [ ] P0-B: activate one authenticated resident owner against only that route-v2
