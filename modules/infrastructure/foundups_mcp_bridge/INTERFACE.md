@@ -61,7 +61,7 @@ path-free and explicitly keeps official provenance, signature, builder-runtime
 authentication, loader/native/subprocess/exact-runtime closure, network,
 download, extraction, installation, publication, import, execution,
 determinism, write denial, activation, A-grade, and retrieval RSI false. It
-does not materialize `site-packages`; that remains Phase 2C2.
+does not materialize `site-packages`; the focused [Phase 2C2a source contract](docs/clarity/REDDOG_BUILDER_PACKAGING_SOURCE_INTERFACE_PHASE2C2A.md) owns that API.
 
 ### `holo_query_bundle(...) -> Dict[str, Any]`
 

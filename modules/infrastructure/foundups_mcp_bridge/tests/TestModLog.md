@@ -1,5 +1,38 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Wheel-bound packaging source phase 2C2a falsification
+
+- Captured authentic RED collection before implementation: both new suites
+  failed with `ModuleNotFoundError` for the absent source-contract module; no
+  fixture or pytest configuration failed.
+- Added 44 focused falsifiers for wheel-vs-tree generation identity, exact raw
+  and extracted bytes, source lease duration, strict nonclaims, private byte
+  authority, canonical contracts, mutation/ADS/hardlink/extra topology,
+  store/limit/token rejection, pre/post-publication quarantine, valid/corrupt
+  no-replace winners, reuse, two-thread convergence, quarantine failure cause
+  preservation, O(depth) handle behavior across 105 sibling members, public
+  authority/nonclaim completeness, O:/E: pre-mutation confinement, valid
+  payload/token pre-mutation rejection, wheel ADS/hardlink/reparse and case
+  alias rejection, unconditional scope-exit source reproof, and mutations
+  between two consecutive complete verification passes, denied tail writes to
+  descriptor/inventory/wheel/member files under retained handles, and rejection
+  of a tail-added file by the terminal complete-topology proof. The final
+  falsifier flips both unsigned persisted authority booleans and proves neither
+  durable verification nor public reuse can inherit publication-time authority;
+  only current live-source verification becomes true on reuse.
+- The exact provisioned O: wheel passed first publication plus 200 full reuses
+  in **105.09 seconds**. One wheel-bound generation remained, durable binding
+  fields matched, only the first result carried publication-time lease
+  authority, every call carried current-verification authority, process
+  handle/RSS deltas stayed below fixed gates, no dependency runtime appeared,
+  and the source SHA remained unchanged.
+- The focused result is **44 passed / one expected opt-in skip**. Broader
+  evidence passed: **227 / 7 expected skips** across the exact 15-file adjacent
+  builder/dependency surface, **36 passed** for registry/manifest generation,
+  **66 / 1 expected skip** for the WSP_97 validator, and both extension
+  compatibility/package-surface checks. The final backend closure is 1,388
+  files at `ff0fb87a...e60c6`. (WSP 6/15/50/62/84/97)
+
 ## [2026-08-29] Reviewed packaging wheel admission falsification
 
 - Recorded an authentic RED collection failure before implementation:

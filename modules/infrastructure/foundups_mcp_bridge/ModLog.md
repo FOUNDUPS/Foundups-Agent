@@ -1,5 +1,42 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Wheel-bound inert packaging source phase 2C2a
+
+- Added a private retained-wheel payload capability shared by Phase 2C1
+  admission and Phase 2C2a. Exact bytes and parsed members never cross the
+  public API, and the original parent/file handles remain live through source
+  staging proof, no-replace publication, repeated full target proof, and an
+  unconditional scope-exit source reproof.
+- Added five WSP_62-bounded source modules: strict contract and generation ID,
+  O(depth) Windows create-new writer, Windows store/root/topology leasing,
+  canonical wheel-to-tree verifier, and serialized materializer with
+  ownership-safe no-delete quarantine/reuse.
+  Generation identity binds both wheel image and extracted tree; the verifier
+  reparses the stored wheel and compares every member byte-for-byte. Independent
+  review then forced public fixed-pin proof, exhaustive path-free nonclaims,
+  O:/E:-only stores, pre-mutation planning/token validation, wheel-file
+  ADS/hardlink/reparse rejection, and two consecutive complete verifier passes.
+  A hostile tail-mutation re-audit then forced bounded retained child file and
+  directory handles across pass two plus terminal handle/topology reproof.
+  A real-wheel authority re-audit then proved unsigned descriptor booleans could
+  launder historical lease authority. Durable verification now returns lease
+  authority false; only the live materializer grants current-verification
+  authority, and publication authority is true only for its own new publish.
+- Extracted the focused Phase 2C2a API contract under `docs/clarity/` so this
+  slice does not grow the inherited oversized `INTERFACE.md`. (WSP 62/83)
+- Source extraction/materialization is now true at this layer. No dependency
+  runtime is composed, and no provenance/signature/install/import/execution/
+  builder/loader/native/subprocess/determinism/write-denial/activation/A-grade/
+  retrieval-RSI authority is added. Phase 2C2b remains separately allocated.
+- Authentic RED collection failed only for the absent modules. Focused source
+  and scale coverage is 44 passed / one expected opt-in skip; the exact O:
+  wheel passed first publication plus 200 full reuses in 105.09 seconds with
+  unchanged source SHA and bounded resource deltas. The exact 15-file adjacent
+  builder/dependency surface passed 227 / seven expected skips; registry and
+  manifest coverage passed 36; the WSP_97 validator passed 66 / one expected
+  skip; and both extension compatibility/package checks passed.
+  (WSP 00/6/15/22/50/62/84/97)
+
 ## 2026-08-29 - Reviewed packaging wheel admission phase 2C1
 
 - Added a Windows retained-parent/file admission API for the exact

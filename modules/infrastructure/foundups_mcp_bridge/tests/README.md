@@ -78,6 +78,40 @@ provenance; public candidate build/reproof remain unbound.
   concurrency, horizontal scale, authenticated provenance, extraction,
   activation, A-grade, or retrieval-RSI proof.
 
+## Wheel-bound inert packaging source generation
+
+- `test_reddog_holoindex_query_runtime_builder_packaging_source.py` proves the
+  Phase 2C2a generation binds both exact wheel identity and extracted-tree
+  identity, persists raw wheel/member bytes, keeps public bindings path-free,
+  holds the source lease across contracts/publication, and conservatively
+  reports every operational nonclaim. Durable public reproof recognizes only
+  the exact configured wheel bytes and confers no live lease authority; the
+  private synthetic seam cannot upgrade its own result. It falsifies descriptor/inventory/wheel/member/topology
+  mutation, duplicate keys, wheel/member ADS and hardlinks, real or injected
+  reparse classification, case aliases, C: stores, valid-payload bounds and
+  invalid tokens before store mutation, pre/post-publication corruption, corrupt or valid
+  no-replace winners, exact reuse, same-store concurrency, quarantine failure,
+  source-authority overclaim by the private byte seam, source write attempts
+  during every target proof, skipped scope-exit reproof, and mutations between
+  two consecutive complete verification passes. Tail-race falsifiers attempt
+  descriptor/inventory/wheel/member writes immediately after pass two while
+  retained child handles are live, and inject one extra file that the terminal
+  complete-topology proof must reject before success.
+- Authority-laundering coverage flips both unsigned persisted lease/pin
+  booleans. Durable verification must return no lease authority, and a live
+  public reuse may report only current-verification authority, never historical
+  publication authority.
+- `test_reddog_holoindex_query_runtime_builder_packaging_source_scale.py`
+  separately proves a 105-member sibling shape retains handles by depth rather
+  than file count. Its opt-in physical gate persists the exact reviewed O:/E:
+  wheel once and fully reproves 200 exact reuses, requiring one generation,
+  no dependency runtime, unchanged source SHA, bounded handle/RSS deltas, and
+  an observed 120-second ceiling. The current physical result is 105.09 seconds.
+- This coverage proves inert source persistence only. It does not install,
+  import, execute, compose the dependency runtime, authenticate provenance, or
+  grant loader/native/subprocess/exact-runtime, activation, A-grade, or
+  retrieval-RSI authority.
+
 ## Inert declared Windows/CPython ABI attestation
 
 - `test_reddog_holoindex_windows_pe.py` falsifies malformed/truncated PE,

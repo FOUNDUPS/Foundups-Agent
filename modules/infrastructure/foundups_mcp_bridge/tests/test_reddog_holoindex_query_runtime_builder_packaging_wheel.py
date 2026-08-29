@@ -446,7 +446,7 @@ def test_public_admission_reads_one_exact_file_through_retained_leases(monkeypat
 @pytest.mark.skipif(os.name != "nt", reason="Windows held-descriptor contract")
 def test_retained_source_lease_denies_same_path_mutation(monkeypatch) -> None:
     temporary, root, path = _physical_fixture(monkeypatch)
-    original = wheel_module._prove_packaging_wheel_bytes_for_test
+    original = wheel_module._prove_packaging_wheel_payload_for_test
     attempted = False
 
     def attempt_mutation(**kwargs):
@@ -457,7 +457,7 @@ def test_retained_source_lease_denies_same_path_mutation(monkeypatch) -> None:
         return original(**kwargs)
 
     try:
-        monkeypatch.setattr(wheel_module, "_prove_packaging_wheel_bytes_for_test", attempt_mutation)
+        monkeypatch.setattr(wheel_module, "_prove_packaging_wheel_payload_for_test", attempt_mutation)
         result = admit_pinned_builder_packaging_wheel(
             wheel_path=path, wheel_store_root=root,
         )
