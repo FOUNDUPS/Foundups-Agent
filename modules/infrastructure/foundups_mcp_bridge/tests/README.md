@@ -1,5 +1,18 @@
 # foundups_mcp_bridge Tests
 
+## Base-prefix consumer correction
+
+- `test_reddog_holoindex_query_runtime_base_prefix_consumers.py` uses the
+  shared materializer to prove the process root validator and candidate
+  composition validator accept the real `generation/python-runtime` prefix,
+  while candidate validation rejects the obsolete root-level interpreter.
+- The two legacy fixtures also separate generation and prefix roots. Authentic
+  RED was three failures after their prior selection had passed 28 / one skip;
+  final focused evidence is 31 passed / one expected skip. The exact 13-file
+  adjacent selection passes 206 / four expected capability skips.
+- The test calls topology validators only; it does not launch a child or claim
+  process, import, native/subprocess, activation, A-grade, or RSI authority.
+
 ## Inert builder-runtime composition
 
 - `test_reddog_holoindex_query_runtime_builder_runtime_composition.py` proves

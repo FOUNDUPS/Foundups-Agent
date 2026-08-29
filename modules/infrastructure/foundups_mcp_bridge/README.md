@@ -63,10 +63,10 @@ dependency fields. The [focused interface](docs/clarity/REDDOG_BUILDER_RUNTIME_C
 keeps the result path-free and does not carry source live-proof truth forward.
 The join launches nothing and creates no artifact beyond the existing
 descriptor-only composition. Real base layouts use
-`<generation>/python-runtime/python.exe`; older Phase 2B process/candidate
-consumers still assume `<generation>/python.exe` and must be repaired next.
-Atomicity, provenance, process/pre-import/native/subprocess authority, write
-denial, activation, A-grade, and retrieval-quality RSI remain false.
+`<generation>/python-runtime/python.exe`; Phase 2C3b makes both older
+process/candidate consumers use the exact `base_prefix_root` and rejects the
+obsolete generation-root topology. A real composition passes both topology validators; child
+launch, provenance, closure, write denial, activation, A-grade, and RSI remain false.
 
 ## Holo retrieval runtime identity
 

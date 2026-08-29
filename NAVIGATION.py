@@ -121,6 +121,7 @@ NEED_TO = {
     "reddog holo postmerge completion policy": "modules/communication/moltbot_bridge/src/holoindex_postmerge_supervisor_policy.py:validate_supervisor_holoindex_postmerge_completion()",
     "reddog holo query builder authority receipt": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py:builder_authority_receipt()",
     "reddog holo query builder process proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py:prove_builder_process_authority()",
+    "reddog holo query base prefix consumers": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_base_prefix_consumers.py",
     "reddog holo query builder packaging proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging.py:prove_builder_packaging_authority()",
     "reddog holo query builder packaging wheel admission": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_wheel.py:admit_pinned_builder_packaging_wheel()",
     "reddog holo query builder packaging source generation": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_materializer.py:materialize_pinned_builder_packaging_source()",

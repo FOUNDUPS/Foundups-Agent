@@ -12,6 +12,7 @@ from modules.infrastructure.foundups_mcp_bridge.src import (
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_base_runtime_contract import (
     BaseRuntimeBinding,
+    PAYLOAD_DIRECTORY,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_dependency_runtime_contract import (
     DependencyRuntimeBinding,
@@ -34,25 +35,34 @@ def _d(char: str) -> str:
     return "sha256:" + char * 64
 
 
-def _fixture():
-    Path("O:/tmp").mkdir(parents=True, exist_ok=True)
-    temp = tempfile.TemporaryDirectory(prefix="reddog-builder-process-", dir="O:/tmp")
-    root = Path(temp.name)
-    base_root = root / "base"
-    dependency_root = root / "dependency"
-    site = dependency_root / "site-packages"
-    repo = root / "repo"
-    composition_root = root / "composition"
-    for directory in (base_root / "DLLs", base_root / "Lib", site, repo, composition_root):
+def _base_fixture(root: Path):
+    base_generation = root / "base"
+    base_root = base_generation / PAYLOAD_DIRECTORY
+    for directory in (base_root / "DLLs", base_root / "Lib"):
         directory.mkdir(parents=True, exist_ok=True)
     image = base_root / "python.exe"
     payload = b"sealed-python-image"
     image.write_bytes(payload)
     base = BaseRuntimeBinding(
-        base_root, base_root, base_root / "holoindex_base_runtime_descriptor.json",
+        base_generation, base_root,
+        base_generation / "holoindex_base_runtime_descriptor.json",
         _d("1"), _d("2"), _d("3"), _d("4"), 1, 2, len(payload), True,
         False, False, False, False, False, False,
     )
+    return base_root, image, payload, base
+
+
+def _fixture():
+    Path("O:/tmp").mkdir(parents=True, exist_ok=True)
+    temp = tempfile.TemporaryDirectory(prefix="reddog-builder-process-", dir="O:/tmp")
+    root = Path(temp.name)
+    base_root, image, payload, base = _base_fixture(root)
+    dependency_root = root / "dependency"
+    site = dependency_root / "site-packages"
+    repo = root / "repo"
+    composition_root = root / "composition"
+    for directory in (site, repo, composition_root):
+        directory.mkdir(parents=True, exist_ok=True)
     dependency = DependencyRuntimeBinding(
         dependency_root, site,
         dependency_root / "holoindex_dependency_payload_descriptor.json",

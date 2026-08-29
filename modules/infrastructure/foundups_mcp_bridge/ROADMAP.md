@@ -1,5 +1,27 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-30: Base-prefix consumer correction phase 2C3b
+
+**Implemented and falsified as a topology correction only; still not a child,
+producer, loader, or activation.** The process proof now treats
+`BaseRuntimeBinding.base_prefix_root` as the CPython prefix for the executable,
+DLLs, Lib, prefix roles, and `sys.path`. Candidate validation requires the
+canonical `<generation>/python-runtime` payload directory and binds the
+interpreter beneath it. Generation-root descriptor and inventory authority
+remain unchanged.
+
+The prior process and candidate suites were false-green because their synthetic
+base generation and payload prefix were the same directory. Both fixtures now
+model distinct generation/payload roots. A shared real-materialization suite
+proves both topology validators accept the actual composition and candidate
+validation rejects the obsolete `<generation>/python.exe` topology.
+
+**Next independently allocated P0 transaction:** bind the Phase 2C3a result to
+the smallest one-shot held-executable child and reprove its actual-process
+authority. Pre-import, ABI/native/subprocess closure, deterministic effects,
+signing, write denial, activation, A-grade, and retrieval RSI remain later
+independent gates.
+
 ## 2026-08-30: Inert builder-runtime composition phase 2C3a
 
 **Implemented and physically falsified as an inert join; not a producer,
@@ -15,13 +37,12 @@ The real reviewed O: wheel successfully composed with an exact synthetic base
 and reused both dependency and descriptor generations. This integration
 falsified an older synthetic topology assumption: materialized base runtimes
 place the interpreter at `<generation>/python-runtime/python.exe`, while the
-Phase 2B process/candidate consumers still require `<generation>/python.exe`.
+Phase 2B process/candidate consumers still required `<generation>/python.exe`.
 Phase 2C3a uses the real composition binding and launches nothing, so its proof
 remains valid.
 
-**Next independently allocated P0 transaction:** repair the existing process
-and candidate consumers/tests to use `base_prefix_root`, then build the smallest
-one-shot child adapter around the held executable and actual-process verifier.
+**Phase 2C3b addendum:** the process and candidate consumers/tests now use the
+real `base_prefix_root`. The smallest one-shot child adapter remains next.
 Pre-import, ABI/native/subprocess closure, deterministic effects, signing,
 write denial, activation, A-grade, and retrieval RSI remain later gates.
 
@@ -897,6 +918,8 @@ queries, and immutable replica revalidation are complete.
 The exact post-repair HEAD differential has zero errors and this non-zero
 accepted bridge set only:
 
+- WARNING: `README.md` has an inherited 1,044-line no-growth boundary; focused
+  Phase 2C3b detail is extracted under `docs/clarity/`.
 - WARNING: `INTERFACE.md` has an inherited 1,250-line no-growth boundary;
   focused Phase 2C2a detail is extracted under `docs/clarity/`.
 - WARNING: append-only `ModLog.md` 1,613 lines.

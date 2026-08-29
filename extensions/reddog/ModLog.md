@@ -1,5 +1,17 @@
 # RedDog ModLog
 
+## 2026-08-30 - Base-prefix consumer backend correction
+
+- Rebound the generated backend closure after the two existing query-runtime
+  consumers were corrected to the real `python-runtime` base prefix: 1,394
+  runtime files at `2ed73a864da8...dc5b`.
+- The extension does not call a new entry point or change conversation, owner,
+  routing, query, execution, or VSIX behavior. This topology-only repair adds no
+  child launch, import, provenance, native/subprocess closure, write denial,
+  activation, A-grade, or retrieval-RSI authority. The unchanged 67-file
+  package surface passes at 948,777 bytes and `393b7e0bcc71...d0931`; no VSIX is
+  emitted. (WSP 00/12/15/22/50/62/84/97)
+
 ## 2026-08-30 - Inert builder-runtime composition backend pin
 
 - Rebound the generated backend closure to include the two Phase 2C3a join

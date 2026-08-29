@@ -31,10 +31,10 @@ delete, process, import, owner, route, or extra persistent coordinator artifact
 is introduced. The only new durable object is the existing descriptor-only
 runtime-composition generation.
 
-The real base layout is `<base-generation>/python-runtime/python.exe`. Existing
-Phase 2B process/candidate consumers still assume the interpreter is directly
-under the generation root. Phase 2C3a launches nothing and is valid with the
-real binding; Phase 2C3b must correct those consumers before child execution.
+The real base layout is `<base-generation>/python-runtime/python.exe`. Phase
+2C3b now corrects the older process/candidate consumers and false-green
+synthetic fixtures to use that payload prefix. Phase 2C3a remains an inert join;
+the correction adds no child execution or other authority.
 
 Authenticated producer/process authority, pre-import, ABI/native/subprocess
 closure, deterministic effects, signing, write denial, activation, A-grade,

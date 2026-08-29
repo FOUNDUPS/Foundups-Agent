@@ -1,5 +1,24 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-30 - Base-prefix consumer correction phase 2C3b
+
+- Corrected the process root validator and candidate composition validator to
+  use the real `<generation>/python-runtime/python.exe` topology. Descriptor,
+  inventory, and generation identity remain rooted at the generation directory.
+- Existing synthetic fixtures had collapsed generation and prefix roots, so
+  28 passing tests / one skip were false-green for this boundary. A shared real
+  materialization produced three authentic RED failures before the two-line
+  production correction; both legacy fixtures now keep the roots distinct.
+- Final focused evidence is 31 passed / one expected skip; the exact 13-file
+  adjacent base/runtime/ABI/composition surface is 206 passed / four expected
+  capability skips. All changed Python functions are at most 45 lines; README
+  growth is zero at its recorded inherited 1,044-line WSP_62 boundary. The
+  registry is current at 1,638 / 269 quarantined and the 1,394-file backend
+  digest is `2ed73a864da8...dc5b`.
+- This topology-only repair launches no child and earns no import, producer,
+  pre-import/native/subprocess closure, write-denial, activation, A-grade, or
+  retrieval-RSI authority. (WSP 00/6/12/15/22/50/62/84/97)
+
 ## 2026-08-30 - Inert builder-runtime composition phase 2C3a
 
 - Added a WSP_62-bounded contract and coordinator that reuse Phase 2C2b and the
