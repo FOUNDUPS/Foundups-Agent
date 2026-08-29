@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1621,
+  "total_tests": 1625,
   "quarantined_tests": 268,
   "tests": [
     {
@@ -16687,6 +16687,19 @@
       "description": "Process-image authority contracts for isolated HoloIndex acceptance."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_distribution_graph",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_distribution_graph.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Hostile tests for positive query-runtime distribution projection."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_replica",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
@@ -16780,6 +16793,45 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_candidate_binding",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_candidate_binding.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "End-to-end binding tests for the inert query-runtime candidate."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_candidate_contract",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_candidate_contract.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Adversarial contract tests for the inert clean query-runtime candidate."
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_candidate_scale",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_candidate_scale.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Opt-in production-shape scale soak for the positive distribution graph."
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_runtime_abi",
@@ -16877,7 +16929,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_repo_tools_encoding.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -16890,7 +16942,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_repository_analysis_cache.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

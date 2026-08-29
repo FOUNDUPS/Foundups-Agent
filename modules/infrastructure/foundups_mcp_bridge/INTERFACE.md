@@ -247,15 +247,15 @@ Consumers evaluating a candidate must additionally compare this value with
 the digest of the clean authority candidate; repository identity alone does
 not prove which ranker bytes executed the query.
 
-The separately emitted `runtime_environment_digest` now binds the source
-closure, owner executable, ABI/platform, distribution build-record metadata,
-replica/model identities, declared runtime knobs, and required environment
-checks without exposing paths or secrets. Its
-`runtime_environment_exact_closure_verified` flag remains false because exact
-installed-distribution payload bytes and all deterministic runtime effects are
-not yet proven. Independent A-grade evaluation is therefore not reproducible
-at exact runtime-byte closure yet.
+The separately emitted `runtime_environment_digest` now binds the source closure, owner executable, ABI/platform,
+distribution build-record metadata, replica/model identities, declared runtime knobs, and required environment checks
+without exposing paths or secrets. Its `runtime_environment_exact_closure_verified` flag remains false because exact
+installed-distribution payload bytes and all deterministic runtime effects are not yet proven. Independent A-grade evaluation is therefore not reproducible at exact runtime-byte closure yet.
 
+Phase 2A appends inert graph/inventory/descriptor and private diagnostic seams. Public build/reproof fail with `QUERY_RUNTIME_CANDIDATE_BUILDER_RUNTIME_UNBOUND`; a parser pin
+is not execution provenance. Diagnostics bind the dependency tree, selected RECORD bytes, declarations, target markers, clean-HEAD repository, and
+declared Phase-2A modules/origins. Transitive builder/parser/stdlib execution, excluded
+bytes, topology, materialization, loader, activation, A-grade, and RSI remain unproved.
 Query requires `query` and `expected_repo_head_sha`; `limit` and
 `doc_type_filter` are optional. Success requires semantic retrieval, exact
 repository SHA, stable generation/receipt digest, seven verified baseline

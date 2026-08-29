@@ -4,23 +4,23 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
-## Latest recorded governed Holo evidence (historical; receipts are authoritative)
+## Governed Holo evidence and clean-runtime boundary
 
-Static documentation is not a live route authority. At the start of the ABI
-transaction, the governed one-shot was `CURRENT` at exact base
-`6b06a3ba909e5dea9c72aae68114b376282107cd`, with no gap or reindex; the
-generation-bound query and activation receipts remain authoritative.
-The real pre-owner stale-HEAD transaction completed through OpenClaw/WRE, and
-a fresh one-shot query returned `CURRENT`, no gap, no reindex, and first-attempt
-success. Full production verification retained 33 artifacts / 222,979,317
-bytes with unchanged descriptor, replica, and path identities.
+Static documentation is not live route authority. Consult generation-bound
+query, activation, and WSP_97 receipts for the current head. Retrieval and
+maintenance-replica RSI are usable, but A-grade and retrieval-quality RSI stay
+false until quality floors, independent promotion/rollback, candidate-bound
+learning, and exact runtime closure all pass.
 
-This establishes usable governed retrieval and working maintenance-replica
-RSI, not A-grade or retrieval-quality RSI. The latest
-clean-authority public benchmark failed the fixed `0.95` MRR/nDCG floors at
-`0.91666667` and `0.93198851`; neither the exact dependency nor base-runtime
-generation is activated. Retrieval proposal, independent administered admission, promotion,
-canary, ranker rollback, and candidate-bound outcome learning are absent.
+Phase 2A defines an inert clean query-runtime candidate schema, positive distribution
+graph, and diagnostic falsification seam. It binds one inert composition, its exact
+dependency tree, selected local RECORD bytes, canonical declarations, clean exact-HEAD
+repository identity, and the declared Phase-2A module set/origins. Broad ownership is
+retained before selection; prefix-local exclusions never become candidate files.
+Identity, markers, wheels, executable roles, and subprocess declarations fail closed.
+The parser pin is separate from the exact four-package MCP launch runtime but is not
+execution provenance: public build/reproof reject until a sealed builder is bound.
+Transitive builder/parser/stdlib closure, topology, excluded bytes, materialization, loader behavior, and activation remain unproved; the broad venv remains ineligible.
 
 ## Holo retrieval runtime identity
 
@@ -129,11 +129,11 @@ Search order, API sets, KnownDLLs, SxS, loaded modules, dynamic loading,
 signatures, determinism, bootstrap, write denial, activation, and exact closure
 remain schema-forced false.
 
-A read-only production-shape scan found 396 native-suffix artifacts: 388 PE32+
-(384 AMD64, four ARM64) and eight PE32; duplicate RECORD ownership also exists.
-The broad dependency generation is therefore ineligible. The next transaction
-must bind a query-runtime executable closure or clean pinned environment,
-without weakening architecture policy or adding filename ignores.
+A read-only production scan found 396 native-suffix artifacts: 384 AMD64
+PE32+, four ARM64 PE32+, eight PE32, and one duplicate RECORD path. Phase 2A
+can exclude them only from a physically separate positive candidate, never by
+logical filename rules over the broad tree. Import, DLL, subprocess, loader,
+determinism, signing, write-denial, activation, and exact closure remain open.
 
 ## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
 

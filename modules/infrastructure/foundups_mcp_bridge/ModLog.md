@@ -1,5 +1,47 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Inert clean query-runtime candidate phase 2A
+
+- Added WSP_62-bounded candidate inventory, descriptor, distribution-metadata,
+  graph, input, source, and RECORD modules. The diagnostic derivation path
+  derives approved volumes/components from one inert composition, binds its
+  exact dependency tree and selected local RECORD bytes, derives a canonical
+  declaration digest, and reproves clean exact-HEAD repository identity plus
+  the exact declared Phase-2A module set/origins before and after derivation
+  without importing or launching target candidate code.
+- Independent review proved the isolated `packaging==26.0` pin did not bind the
+  executing parser/interpreter/stdlib. Public build and reproof now fail closed
+  on `QUERY_RUNTIME_CANDIDATE_BUILDER_RUNTIME_UNBOUND`; the private seam is
+  diagnostic only. A sealed evidence-builder runtime is the next Phase-2B gate.
+- Broad metadata and local RECORD ownership are retained before dependency
+  selection. Prefix-local Scripts/share/include RECORD rows are validated as
+  explicit byte-unverified exclusions and cannot become files, module owners,
+  or subprocesses. The offline `packaging` pin is separate from the exact
+  four-package MCP launch requirements.
+- Requires-Dist remains evidence rather than authority. Startup hooks,
+  editable/direct installs, traversal/case collisions, ambiguous owners,
+  invalid extras/Requires-Python/wheels, disguised or undeclared executables,
+  and unused subprocess declarations fail closed. Unrecorded installed
+  topology remains a nonclaim. All runtime-completeness, loader,
+  subprocess, determinism, signing, write-denial, activation, exact-closure,
+  A-grade, and RSI claims remain false.
+- Three independent WSP_00/WSP_97 audits returned NO-GO on the first draft and
+  reproduced disconnected graph/schema inputs, contradictory marker/launch
+  environments, optional import grounding, dist-info aliasing, marker-extra
+  errors, incomplete RECORD provenance, unbounded selected reads, invalid
+  receipts, and documentation overclaims. The architecture was repaired; no
+  finding was waived or downgraded.
+- Evidence: [Phase-2A assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_CANDIDATE_ASSUMPTION_AUDIT_PHASE2A.md).
+- Hostile audit proved the broad venv is not a candidate: optional-package
+  presence changes behavior and `-I -S` reaches a base runtime outside O:/E:.
+  Physical clean O:/E: materialization is the next P0.
+- Final current-byte evidence: focused 73 passed / two expected skips; opt-in
+  45,450-member soak passed in 4.56 seconds; adjacent runtime contracts passed
+  274 / 11 expected skips; backend generator tests passed 8 and manifest check
+  retained 1,366 files / digest `4e634b8c...`; registry remained current at
+  1,625 tests / 268 quarantined. Independent architecture and security reviews
+  returned GO only for the inert diagnostic boundary.
+
 ## 2026-08-29 - Inert declared Windows/CPython ABI attestation
 
 - Added WSP_62-bounded PE parser, metadata verifier, declared-name graph,
