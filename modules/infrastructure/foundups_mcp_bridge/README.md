@@ -22,6 +22,20 @@ The parser pin is separate from the exact four-package MCP launch runtime but is
 execution provenance: public build/reproof reject until a sealed builder is bound.
 Transitive builder/parser/stdlib closure, topology, excluded bytes, materialization, loader behavior, and activation remain unproved; the broad venv remains ineligible. Phase 2B adds five inert, cross-bound process/packaging/pinned-Git/source/receipt components, compares two exact source bindings around the second Git/origin observation, deliberately omits worktree porcelain and global-clean claims, and keeps public build/reproof runtime-unbound; exact guarantees, host gaps, falsifiers, and nonclaims are recorded in the [roadmap](ROADMAP.md) and [assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md).
 
+Phase 2C1 adds only an inert source-wheel admission prerequisite. On Windows,
+`admit_pinned_builder_packaging_wheel(...)` holds the exact O:/E: source parent
+and file from before its single bounded read through raw ZIP/distribution proof
+and final identity reproof. It accepts only the repository-reviewed filename,
+74,366-byte size, and SHA-256 for `packaging==26.0`; the exact member set,
+deflate streams, Windows-safe names, METADATA, WHEEL, and RECORD must agree.
+The production API performs no network access, download, extraction,
+installation, publication, import, or execution. The PyPI comparison is not a
+signature or durable authenticated upstream-provenance proof. Builder-runtime,
+loader/native/subprocess/exact-runtime, write-denial, activation, A-grade, and
+retrieval-RSI authority remain false. Persistent source generation and reuse of
+the inert dependency materializer are the separate Phase 2C2 gate; see the
+[Phase 2C1 assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md).
+
 ## Holo retrieval runtime identity
 
 The shared owner-acquisition policy owns the two-attempt ceiling, 300-second

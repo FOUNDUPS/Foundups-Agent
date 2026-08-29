@@ -1,5 +1,30 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Reviewed packaging wheel admission falsification
+
+- Recorded an authentic RED collection failure before implementation:
+  `ModuleNotFoundError` for the absent wheel-admission module. That evidence
+  exists in the operator execution transcript; Git history alone cannot prove
+  the pre-code ordering, so no stronger durable test-first claim is made.
+- Added 63 unit falsifiers covering the internal byte proof, raw archive
+  envelope/layout and resource dialect, Windows-illegal/case/prefix paths,
+  exact source-only distribution roots, METADATA/WHEEL/RECORD ownership, and
+  Windows held-path/hardlink/ADS/mutation behavior. Independent probes for CRC,
+  unsupported method, executable/symlink attributes, multidisk, ZIP64,
+  duplicates, control paths, duplicate tags, all seven bool limits, and public
+  nonclaims were converted to durable tests.
+- The opt-in physical integration gate admitted the exact 74,366-byte
+  `sha256:b36f1fef...37529` wheel 200 times in 2.78 seconds with equal results,
+  bounded handle/RSS deltas, 24 members / 276,911 expanded bytes, and unchanged
+  source SHA. This is repeatability/leak evidence only.
+- The inherited 72,261 RECORD/inventory plus 1,500 Git/source scale tier passed
+  in 25.70 seconds after the shared-contract refactor. Full adjacent and
+  physical builder closure passed **142 tests / one expected absent O:/E:
+  pinned-Git-image skip in 29.79 seconds**. Generated backend-manifest plus
+  registry coverage passed **36 tests in 99.08 seconds**; the extension
+  compatibility/package surface passed **2 Node tests**. These results are
+  bound in the Phase 2C1 WSP_97 execution receipt. (WSP 6/15/50/62/84/97)
+
 ## [2026-08-29] Phase 2B.1 pinned-Git live-gate contract correction
 
 - Corrected the skipped O:/E: integration gate: a worktree-only mutation now

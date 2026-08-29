@@ -9891,6 +9891,28 @@
     },
     {
       "doc_type": "other",
+      "hash_sha256": "fc8ae2a423c93902f981cab8e0df92ff1deabe7836c7ba38d747fb9adbafdd60",
+      "links": {
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ],
+        "entry_points": [
+          "docs/README.md",
+          "modules/infrastructure/foundups_mcp_bridge/README.md"
+        ]
+      },
+      "module_hint": "holo_index",
+      "path": "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md",
+      "size_bytes": 7505,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 50",
+        "WSP 62"
+      ]
+    },
+    {
+      "doc_type": "other",
       "hash_sha256": "0b4bd4c874a59ff3064d47df2c3ac07392e0c1afba68e3dfabe68a54a786a718",
       "links": {
         "automation": [

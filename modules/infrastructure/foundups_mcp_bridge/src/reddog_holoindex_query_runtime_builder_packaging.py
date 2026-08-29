@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
-import base64
-import csv
 from dataclasses import dataclass
-from email.parser import BytesParser
 import importlib.machinery
-import io
 import os
 from pathlib import Path
-import re
 import stat
 import sys
 from types import ModuleType
@@ -41,12 +36,19 @@ from .reddog_holoindex_query_runtime_builder_contract import (
     BuilderPackagingAuthority,
     _packaging_authority_capability,
 )
+from .reddog_holoindex_packaging_distribution_contract import (
+    PACKAGING_DIST_INFO,
+    PACKAGING_DISTRIBUTION_NAME,
+    PACKAGING_DISTRIBUTION_VERSION,
+    PackagingDistributionContractError,
+    parse_packaging_record,
+    validate_packaging_metadata,
+)
 
 
-_NAME = "packaging"
-_VERSION = "26.0"
-_DIST_INFO = "packaging-26.0.dist-info"
-_RECORD_SIZE = re.compile(r"(?:0|[1-9][0-9]*)\Z")
+_NAME = PACKAGING_DISTRIBUTION_NAME
+_VERSION = PACKAGING_DISTRIBUTION_VERSION
+_DIST_INFO = PACKAGING_DIST_INFO
 _REQUIRED_MODULES = (
     "packaging",
     "packaging.markers",
@@ -337,32 +339,26 @@ def _row(
 
 
 def _validate_metadata(raw: bytes) -> None:
-    message = BytesParser().parsebytes(raw, headersonly=True)
-    if message.get_all("Name", []) != [_NAME] or message.get_all("Version", []) != [_VERSION]:
+    try:
+        validate_packaging_metadata(raw)
+    except PackagingDistributionContractError:
         _fail("QUERY_BUILDER_PACKAGING_VERSION_INVALID")
 
 
 def _parse_record(raw: bytes, record_path: str) -> tuple[tuple[str, int, str], ...]:
     try:
-        text = raw.decode("utf-8")
-        rows = tuple(csv.reader(io.StringIO(text, newline=""), strict=True))
-    except (UnicodeDecodeError, csv.Error):
-        _fail("QUERY_BUILDER_PACKAGING_RECORD_INVALID")
-    parsed = []
-    for row in rows:
-        if len(row) != 3 or canonical_relative_path(row[0]) != row[0]:
-            _fail("QUERY_BUILDER_PACKAGING_RECORD_INVALID")
-        if row[0] == record_path:
-            if row[1:] != ["", ""]:
+        parsed = parse_packaging_record(raw, record_path)
+        for path, _size, _digest in parsed:
+            if canonical_relative_path(path) != path:
                 _fail("QUERY_BUILDER_PACKAGING_RECORD_INVALID")
-            parsed.append((row[0], len(raw), digest_bytes(raw)))
-            continue
-        if not row[1].startswith("sha256=") or _RECORD_SIZE.fullmatch(row[2]) is None:
+        return parsed
+    except PackagingDistributionContractError as exc:
+        code = str(exc)
+        if code.endswith("UNHASHED_MEMBER"):
             _fail("QUERY_BUILDER_PACKAGING_RECORD_UNHASHED_MEMBER")
-        parsed.append((row[0], int(row[2]), _record_digest(row[1][7:])))
-    if sum(path == record_path for path, _size, _digest in parsed) != 1:
+        if code.endswith("OWNERSHIP_INVALID"):
+            _fail("QUERY_BUILDER_PACKAGING_RECORD_OWNERSHIP_INVALID")
         _fail("QUERY_BUILDER_PACKAGING_RECORD_INVALID")
-    return tuple(parsed)
 
 
 def _record_ownership_index(
@@ -378,18 +374,6 @@ def _record_ownership_index(
     ):
         _fail("QUERY_BUILDER_PACKAGING_RECORD_OWNERSHIP_INVALID")
     return {row[0]: row for row in record_rows}
-
-
-def _record_digest(value: str) -> str:
-    try:
-        padded = (value + "=" * (-len(value) % 4)).encode("ascii")
-        raw = base64.b64decode(padded, altchars=b"-_", validate=True)
-    except (ValueError, TypeError, UnicodeError):
-        _fail("QUERY_BUILDER_PACKAGING_RECORD_INVALID")
-    canonical = base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
-    if len(raw) != 32 or canonical != value:
-        _fail("QUERY_BUILDER_PACKAGING_RECORD_INVALID")
-    return "sha256:" + raw.hex()
 
 
 def _verify_record_member(

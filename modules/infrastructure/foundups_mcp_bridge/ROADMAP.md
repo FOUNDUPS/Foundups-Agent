@@ -1,5 +1,28 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-29: Reviewed packaging wheel admission phase 2C1
+
+**Implemented and physically falsified as inert source admission; not an
+authenticated builder runtime, extractor, materializer, or activation.** The
+Windows-only API binds the exact repository-reviewed `packaging==26.0` wheel
+filename/size/SHA through retained parent/file identities and a single bounded
+read. A strict raw parser rejects ZIP64, multidisk, flags, extras/comments,
+gaps/overlaps, unsafe Windows identities, unapproved roots/payloads, expansion
+bounds, metadata drift, and incomplete/noncanonical RECORD ownership.
+
+The exact provisioned O: artifact passed a 200-admission repeatability gate
+with bounded handle/RSS growth and unchanged source bytes. This is a local
+resource/leak proof, not throughput, concurrency, horizontal scale, official
+provenance, signature, download/install, extraction/publication, import,
+execution, loader/native/subprocess/exact-runtime, write-denial, activation,
+A-grade, or retrieval-RSI evidence.
+
+**Next P0 transaction (Phase 2C2):** design and falsify held-handle directory
+publication/quarantine, extract only the already-admitted member bytes into a
+content-addressed inert source generation, and reuse
+`materialize_dependency_runtime(...)`. No Phase 2C1 receipt grants Phase 2C2
+authority.
+
 ## 2026-08-29: Inert query-runtime builder authority phase 2B
 
 **Implemented as cross-bound structural component scaffolding; not an
@@ -23,8 +46,9 @@ validated inside the sorted unique 538-document index. A later WSP_15 slice
 should precompute the reference map once; this offline DocDAE scaling debt is
 not a query-runtime blocker.
 
-**Next P0 transaction:** provision and seal a dedicated O:/E: builder child with
-a governed Git trust anchor, exact source-only packaging materializer,
+**Superseded next-step note:** Phase 2C1 now admits the reviewed source wheel;
+Phase 2C2 must seal a dedicated O:/E: builder child with a governed Git trust
+anchor and exact source-only packaging materializer,
 dependency-before-source import order, direct verified pre-import loader,
 native/DLL/subprocess closure, deterministic controls, signing, and empirical
 write denial. Run the real public wrapper integration and only then bind its

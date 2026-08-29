@@ -1,5 +1,16 @@
 # RedDog ModLog
 
+## 2026-08-29 - Reviewed packaging wheel admission compatibility pin
+
+- Rebound the extension backend compatibility constant to the generated
+  1,381-file identity `f3cdaacf716a...9054`, including the inert strict
+  `packaging==26.0` wheel-admission prerequisite.
+- The extension does not call the admission API, download/install a wheel,
+  materialize a builder, or change candidate/owner/route/query behavior. A new
+  VSIX is not warranted by this non-user-facing admission-only layer.
+- Builder authentication, loader/native/subprocess/exact-runtime closure,
+  activation, A-grade, and retrieval RSI remain false. (WSP 00/15/22/50/62/97)
+
 ## 2026-08-29 - Inert query-runtime builder authority compatibility pin
 
 - Rebound the extension's backend compatibility constant to the generated
