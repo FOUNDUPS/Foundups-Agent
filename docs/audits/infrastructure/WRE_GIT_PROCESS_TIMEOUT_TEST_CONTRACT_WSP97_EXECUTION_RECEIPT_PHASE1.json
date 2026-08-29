@@ -1,0 +1,107 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "7269deb66f638cc6bbb8239aecf0c8b5ae6b8d22"
+  },
+  "execution_id": "WRE_GIT_PROCESS_TIMEOUT_TEST_CONTRACT_CORRECTION_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagent_audit",
+  "outcome": "completed",
+  "system_verdict": {
+    "test_contract": "corrected_to_current_public_process_pump",
+    "production_code_changed": false,
+    "timeout_cleanup_behavior": "preserved_and_publicly_exercised",
+    "phase2c_baseline_blocker": "resolved",
+    "runtime_or_authority_effect": false
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:f50560b42336f18000441b38bffeabe18e8c5f5c06cb003899d9abca7c2e7e67",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "repair the inherited WRE baseline in a focused transaction before resuming RedDog Phase 2C"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 detector-backed awakening passed at coherence 0.723 and the canonical tracker reported is_zen_compliant=true.",
+      "Governed Holo retrieval was CURRENT at exact base 7269deb66f638cc6bbb8239aecf0c8b5ae6b8d22 with no gap, no reindex, and no authority mutation.",
+      "Holo ranked wre_git_process_io.py and the exact stale test first; direct reads and Git history closed the contract lineage.",
+      "The pre-change focused run reproduced exactly 1 failed and 31 passed with AttributeError at the obsolete private call."
+    ],
+    "research": [
+      "Commit dff50350e split the bounded subprocess pump out of wre_git_bounded_io.py and removed _terminate_reader.",
+      "The current public run_bounded_process call owns timeout kill, reap, pipe closure, thread join, and TimeoutExpired propagation.",
+      "No other active WRE test exercised this exact timeout cleanup through the current public interface."
+    ],
+    "micro_pass": [
+      "The corrected focused archive module passed 32 tests in 3.54 seconds.",
+      "The new test exercises run_bounded_process and records kill, 30-second reap, both pipe closes, and 5-second reader join.",
+      "The changed test function is exactly 49 lines and the test file remains below the WSP 62 Python-file threshold."
+    ],
+    "macro_pass": [
+      "The archive plus adjacent WRE differential-plan runtime suites passed 54 tests in 26.45 seconds.",
+      "No production src file, registry entry, runtime route, environment, Holo owner, extension artifact, or sites/ path changed.",
+      "The immutable correction audit is attached in docs/doc_index.json and the module/test ModLogs record exact evidence."
+    ],
+    "hard_think": [
+      "Restoring the private helper would hide the refactor drift while adding a dead compatibility seam.",
+      "Directly testing _terminate_threads would repeat the same private coupling and remain vulnerable to another internal split.",
+      "The public behavior is the stable contract and can be falsified without launching a real child process."
+    ],
+    "dialectic_sweep": [
+      "Deleting the stale test was rejected because process cleanup remains load-bearing.",
+      "Bundling the correction into Phase 2C was rejected because it would contaminate attribution of the new artifact slice.",
+      "A focused public-interface test is smaller and more durable than restoring or patching private helpers."
+    ],
+    "first_principles": [
+      "Tests should bind observable public behavior, not implementation-private names.",
+      "A timeout process pump must terminate the child, close all owned pipes, join workers, and preserve the timeout signal.",
+      "The smallest valid repair is one test evolution plus truthful operational memory and no production code."
+    ],
+    "execute": [
+      "modules/infrastructure/wre_core/tests/test_wre_git_commit_archive.py",
+      "modules/infrastructure/wre_core/tests/TestModLog.md",
+      "modules/infrastructure/wre_core/ModLog.md",
+      "docs/audits/security/WRE_GIT_PROCESS_TIMEOUT_TEST_CONTRACT_CORRECTION_PHASE1.md",
+      "docs/audits/infrastructure/WRE_GIT_PROCESS_TIMEOUT_TEST_CONTRACT_WSP15_ALLOCATION_RECEIPT_PHASE1.json",
+      "docs/audits/infrastructure/WRE_GIT_PROCESS_TIMEOUT_TEST_CONTRACT_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+      "docs/doc_index.json"
+    ]
+  },
+  "nonclaims": [
+    "No production bounded-process behavior or public Python API changed.",
+    "No child process was launched by the corrected timeout unit test.",
+    "No RedDog packaging artifact, runtime activation, Holo route, A-grade, or RSI claim is made."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/WRE_GIT_PROCESS_TIMEOUT_TEST_CONTRACT_WSP15_ALLOCATION_RECEIPT_PHASE1.json",
+    "docs/audits/infrastructure/WRE_GIT_PROCESS_TIMEOUT_TEST_CONTRACT_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/security/WRE_GIT_PROCESS_TIMEOUT_TEST_CONTRACT_CORRECTION_PHASE1.md",
+    "docs/doc_index.json",
+    "modules/infrastructure/wre_core/ModLog.md",
+    "modules/infrastructure/wre_core/tests/TestModLog.md"
+  ]
+}

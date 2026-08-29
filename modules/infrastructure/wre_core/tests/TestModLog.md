@@ -1592,3 +1592,25 @@ verified unrelated to this slice on the clean tree.
   manifest admission. All temp/cache/database paths were pinned to
   `O:\pytest_tmp\reddog_wre_truth`; default PatternMemory and AgentDB digests
   remained unchanged.
+
+---
+
+## 2026-08-29 - Bounded Git process timeout test contract correction
+
+- Replaced a stale direct call to the removed private
+  `wre_git_bounded_io._terminate_reader` helper with a public
+  `run_bounded_process(...)` timeout test against the current split process
+  pump.
+- The test now proves timeout propagation, process kill/reap, both pipe closes,
+  and reader-thread join without restoring or exposing the removed private
+  seam. Production behavior is unchanged.
+- Baseline reproduction before correction:
+  `python -m pytest modules/infrastructure/wre_core/tests/test_wre_git_commit_archive.py -q --basetemp=O:/tmp/reddog-wre-archive-baseline-fix`
+  -> `1 failed, 31 passed`; failure was `AttributeError` at the obsolete test
+  call.
+- Corrected focused command:
+  `python -m pytest modules/infrastructure/wre_core/tests/test_wre_git_commit_archive.py -q --basetemp=O:/tmp/reddog-wre-archive-contract-fix`
+  -> `32 passed in 3.54s`.
+- Adjacent bounded Git/WRE differential command:
+  `python -m pytest modules/infrastructure/wre_core/tests/test_wre_git_commit_archive.py modules/infrastructure/wre_core/tests/test_wre_test_registry_differential_plan_runtime.py -q --basetemp=O:/tmp/reddog-wre-process-adjacent`
+  -> `54 passed in 26.45s`.

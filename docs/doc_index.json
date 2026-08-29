@@ -10123,6 +10123,26 @@
     },
     {
       "doc_type": "other",
+      "hash_sha256": "bde9c6a60d34b1f6cbc2b42cbce7dedf716857a1abb697a325ad9e40cd420f89",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": []
+      },
+      "module_hint": "docs_root",
+      "path": "docs/audits/security/WRE_GIT_PROCESS_TIMEOUT_TEST_CONTRACT_CORRECTION_PHASE1.md",
+      "size_bytes": 3341,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 15",
+        "WSP 50",
+        "WSP 62",
+        "WSP 97"
+      ]
+    },
+    {
+      "doc_type": "other",
       "hash_sha256": "9939dc5203c215f6d76ecdaac9c6180b1171547a75803231892980370c863d12",
       "links": {
         "automation": [
@@ -11514,5 +11534,5 @@
       ]
     }
   ],
-  "generated_at": "2026-08-29T10:10:26.573288Z"
+  "generated_at": "2026-08-29T10:50:00Z"
 }
