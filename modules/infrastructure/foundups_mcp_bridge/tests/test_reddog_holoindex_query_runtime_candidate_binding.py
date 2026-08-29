@@ -14,9 +14,9 @@ from holo_index.repository_state import RepositoryState
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_query_runtime_candidate_binding as binding_module,
 )
-
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_base_runtime_contract import (
     BaseRuntimeBinding,
+    PAYLOAD_DIRECTORY,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_dependency_runtime_contract import (
     DependencyRuntimeBinding,
@@ -100,10 +100,11 @@ def _dependency_binding(root: Path) -> tuple[DependencyRuntimeBinding, dict[str,
 
 
 def _base_binding(root: Path) -> BaseRuntimeBinding:
-    base_root = root / "base"
+    generation_root = root / "base"
+    base_root = generation_root / PAYLOAD_DIRECTORY
     return BaseRuntimeBinding(
-        generation_root=base_root, base_prefix_root=base_root,
-        descriptor_path=base_root / "holoindex_base_runtime_descriptor.json",
+        generation_root=generation_root, base_prefix_root=base_root,
+        descriptor_path=generation_root / "holoindex_base_runtime_descriptor.json",
         descriptor_digest=DIGESTS[2], generation_id=DIGESTS[3],
         inventory_digest=DIGESTS[4], base_runtime_tree_digest=DIGESTS[5],
         file_count=1, directory_count=0, total_bytes=1,
@@ -123,7 +124,7 @@ def _composition(root: Path) -> tuple[RuntimeCompositionBinding, dict[str, objec
         descriptor_path=composition_root / "holoindex_runtime_composition_descriptor.json",
         descriptor_digest=DIGESTS[6], generation_id=DIGESTS[7],
         base_runtime=base, dependency_runtime=dependency,
-        interpreter_path=base.generation_root / "python.exe",
+        interpreter_path=base.base_prefix_root / "python.exe",
         interpreter_content_digest=DIGESTS[8], interpreter_size=1,
         site_packages_root=dependency.site_packages_root,
         artifact_bytes_independently_reverified=True,

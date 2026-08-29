@@ -25,6 +25,7 @@ from .reddog_holoindex_dependency_runtime_contract import (
 )
 from .reddog_holoindex_base_runtime_contract import (
     DESCRIPTOR_NAME as BASE_DESCRIPTOR_NAME,
+    PAYLOAD_DIRECTORY,
 )
 from .reddog_holoindex_dependency_runtime_contract import (
     DESCRIPTOR_NAME as DEPENDENCY_DESCRIPTOR_NAME,
@@ -350,10 +351,10 @@ def _composition_truth(composition: RuntimeCompositionBinding) -> None:
     if (
         composition.descriptor_path
         != composition.generation_root / COMPOSITION_DESCRIPTOR_NAME
-        or base.base_prefix_root != base.generation_root
+        or base.base_prefix_root != base.generation_root / PAYLOAD_DIRECTORY
         or base.descriptor_path != base.generation_root / BASE_DESCRIPTOR_NAME
         or composition.interpreter_path
-        != base.generation_root / INTERPRETER_RELATIVE_PATH
+        != base.base_prefix_root / INTERPRETER_RELATIVE_PATH
         or dependency.descriptor_path
         != dependency.generation_root / DEPENDENCY_DESCRIPTOR_NAME
         or dependency.site_packages_root

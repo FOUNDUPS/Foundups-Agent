@@ -170,7 +170,7 @@ def _validated_roots(
     composition: RuntimeCompositionBinding, repo_root: Path,
 ) -> Mapping[str, Path]:
     roots = {
-        "base_runtime": composition.base_runtime.generation_root,
+        "base_runtime": composition.base_runtime.base_prefix_root,
         "dependency_runtime": composition.dependency_runtime.site_packages_root,
         "builder_source": repo_root,
     }

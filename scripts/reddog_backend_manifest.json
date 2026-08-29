@@ -2503,7 +2503,7 @@
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_verifier.py": "a5d3cc8c950481bebc5bff81383f164b955d9b59321bb2f196d58815316abf10",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_writer_windows.py": "94b22729917fa0bec9441e173029db7e171e98f8a249e1a2ac18d45e697cba2d",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_wheel.py": "bb7e2bce4730292138bd537cc77d7cdbec84bc648fe604202687d449c1465de6",
-    "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py": "8e1b3fd6b0dafb5bca091b1a1f26618f6437d5ee7534336e9b5c2a6c24070386",
+    "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py": "b9ec1d593505c00cd95910d301c01caa01d0db8a08341b9b4a54e4f87cbfd480",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition.py": "d3e1d6a34997513e1a67c8e561e5b29a682dcecc332c376920b0c12ce7b429c0",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition_contract.py": "d3621c86d5cd57f26345298502632adfd19499963ac90bc6b9ef85cc715586f1",
     "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_source.py": "5eb669e1aced451fbad9ccc42c6318ca03cbb5c47a456cf6a77c5c2ad098e312",

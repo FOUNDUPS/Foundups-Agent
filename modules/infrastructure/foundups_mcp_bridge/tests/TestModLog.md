@@ -1,5 +1,21 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-30] Base-prefix consumer false-green closure
+
+- The inherited process/candidate selection passed 28 tests / one skip while
+  both fixtures incorrectly made `generation_root == base_prefix_root`.
+  Shared real materialization then produced three authentic RED failures:
+  rejecting the valid process/candidate prefix and accepting the obsolete
+  candidate root-level interpreter.
+- Corrected both fixtures, required the canonical payload directory, and bound
+  process prefix roles to `base_prefix_root`. The shared test now invokes only
+  the two topology validators, preserving the explicit no-child boundary.
+- Final focused evidence is 31 passed / one expected skip; the exact 13-file
+  adjacent selection is 206 passed / four expected capability skips. Changed
+  Python functions are at most 45 lines after extracting the 41-line process
+  fixture. Registry generation/check is current at 1,638 tests / 269
+  quarantined. (WSP 6/15/50/62/84/97)
+
 ## [2026-08-30] Inert builder-runtime composition falsification
 
 - Captured authentic RED collection before production code: the focused suite
