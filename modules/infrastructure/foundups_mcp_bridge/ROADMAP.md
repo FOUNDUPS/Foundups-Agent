@@ -1,5 +1,36 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-29: Inert query-runtime builder authority phase 2B
+
+**Implemented as cross-bound structural component scaffolding; not an
+authenticated, executable, or activation-capable builder.** The slice separates
+process, packaging, pinned-Git, repository-source, and receipt contracts into
+WSP_62-bounded modules. It closes accepted-invalid RECORD case/alias/hash/size,
+METADATA cardinality, dist-info identity, hidden Git index flags, Git topology,
+held-executable TOCTOU, component substitution, and quadratic ownership lookup
+failures. Public candidate build/reproof stay unbound.
+
+The current host cannot complete a real public proof: Git is not provisioned on
+O:/E:, and the ambient packaging installation is not a separate source-only
+runtime. The opt-in 72,261 RECORD/inventory plus 1,500 Git/source-row soak is an
+algorithmic resource proof only, not physical closure, interactive latency, or
+horizontal throughput. Same-interpreter wrapper seals are not durable authority.
+
+Documentation projection exposed separate debt: the canonical DocDAE full
+cross-reference rebuild exceeded a 604-second ceiling without writing. The one
+new audit entry was projected with DocDAE's exact per-document methods and
+validated inside the sorted unique 538-document index. A later WSP_15 slice
+should precompute the reference map once; this offline DocDAE scaling debt is
+not a query-runtime blocker.
+
+**Next P0 transaction:** provision and seal a dedicated O:/E: builder child with
+a governed Git trust anchor, exact source-only packaging materializer,
+dependency-before-source import order, direct verified pre-import loader,
+native/DLL/subprocess closure, deterministic controls, signing, and empirical
+write denial. Run the real public wrapper integration and only then bind its
+authenticated producer receipt to candidate build/reproof. Activation, owner,
+route, VSIX, A-grade, and retrieval-RSI remain later independent gates.
+
 ## 2026-08-29: Inert clean query-runtime candidate phase 2A
 
 **Implemented as an inert contract, positive graph, and diagnostic reproof seam; not a governed evidence builder, materialized runtime, or activation.** Diagnostics
@@ -16,7 +47,9 @@ and before/after equality before evidence can be published.
 
 Hostile review proved the broad venv cannot be activated: optional Torch and Transformers packages alter behavior by presence, `-I -S` still reaches a base
 runtime outside O:/E:, and one trace cannot enumerate DLL/delay/ctypes/CFFI or
-process surfaces. Next is the sealed builder, then physical clean O:/E: materialization and startup parsing. Then the inert ABI layer may be
+process surfaces. Phase 2B now supplies only the inert structural builder
+components described above; the sealed child remains next. Physical clean O:/E:
+materialization and startup parsing follow. Then the inert ABI layer may be
 regenerated over selected native rows; Windows loader resolution remains later. The candidate parser's pinned `packaging` dependency stays outside the exact
 four-package MCP runtime launch requirements.
 

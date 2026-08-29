@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import subprocess
 import sys
+import threading
 
 import pytest
 
@@ -20,6 +21,7 @@ from modules.infrastructure.wre_core.src.wre_test_registry_differential_plan_run
     produce_registry_scope_projection,
 )
 from modules.infrastructure.wre_core.src import wre_git_bounded_io
+from modules.infrastructure.wre_core.src import wre_git_process_io
 from modules.infrastructure.wre_core.src import wre_test_registry_git_binding
 from modules.infrastructure.wre_core.src import wre_test_registry_scope_plan
 
@@ -298,7 +300,7 @@ def test_invalid_sha_rejects_before_any_git_process(
     repo, base = repository
     request = _request(base, "--help", ["modules/example/demo/src/api.py"])
     monkeypatch.setattr(
-        wre_git_bounded_io.subprocess, "Popen",
+        wre_git_process_io.subprocess, "Popen",
         lambda *args, **kwargs: (_ for _ in ()).throw(
             AssertionError("Git started before SHA validation")
         ),
@@ -311,6 +313,74 @@ def test_bounded_git_stdout_terminates_at_ceiling(tmp_path: Path) -> None:
         wre_git_bounded_io.run_bounded_stdout(
             (sys.executable, "-c", "import sys;sys.stdout.write('x'*10000)"),
             cwd=tmp_path, max_bytes=100, timeout_s=10,
+        )
+
+
+def test_bounded_git_stdout_supports_bounded_binary_stdin() -> None:
+    runtime_root = Path("O:/tmp")
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    observed = wre_git_bounded_io.run_bounded_stdout(
+        (
+            sys.executable, "-c",
+            "import sys;data=sys.stdin.buffer.read();sys.stdout.buffer.write(data[::-1])",
+        ),
+        cwd=runtime_root, max_bytes=16, timeout_s=10, stdin_bytes=b"builder",
+    )
+    assert observed == b"redliub"
+
+
+def test_bounded_git_stdin_ceiling_rejects_before_process(monkeypatch) -> None:
+    runtime_root = Path("O:/tmp")
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(
+        wre_git_process_io.subprocess, "Popen",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("process started before stdin ceiling validation")
+        ),
+    )
+    with pytest.raises(ValueError, match="bounded_git_output_configuration_invalid"):
+        wre_git_bounded_io.run_bounded_stdout(
+            (sys.executable, "-c", "pass"), cwd=runtime_root,
+            max_bytes=1, timeout_s=1, stdin_bytes=b"x" * (8 * 1024 * 1024 + 1),
+        )
+
+
+def test_bounded_git_stdin_tolerates_early_child_exit() -> None:
+    runtime_root = Path("O:/tmp")
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    observed = wre_git_bounded_io.run_bounded_stdout(
+        (sys.executable, "-c", "pass"), cwd=runtime_root,
+        max_bytes=1, timeout_s=10, stdin_bytes=b"x" * (1024 * 1024),
+    )
+    assert observed == b""
+
+
+def test_bounded_git_stdin_timeout_leaves_no_io_threads() -> None:
+    runtime_root = Path("O:/tmp")
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    with pytest.raises(subprocess.TimeoutExpired):
+        wre_git_bounded_io.run_bounded_stdout(
+            (sys.executable, "-c", "import time;time.sleep(30)"),
+            cwd=runtime_root, max_bytes=1, timeout_s=1,
+            stdin_bytes=b"x" * (8 * 1024 * 1024),
+        )
+    assert not any(
+        thread.name in {"wre-git-stdin", "wre-git-stdout"}
+        for thread in threading.enumerate()
+    )
+
+
+def test_bounded_git_output_ceiling_terminates_concurrent_stdin() -> None:
+    runtime_root = Path("O:/tmp")
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    with pytest.raises(ValueError, match="bounded_git_output_exceeded"):
+        wre_git_bounded_io.run_bounded_stdout(
+            (
+                sys.executable, "-c",
+                "import sys;sys.stdout.buffer.write(b'x'*10000);sys.stdout.flush()",
+            ),
+            cwd=runtime_root, max_bytes=100, timeout_s=10,
+            stdin_bytes=b"y" * (8 * 1024 * 1024),
         )
 
 

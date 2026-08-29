@@ -24,6 +24,8 @@ WRE Core owns:
   OpenClaw/Hermes adapters;
 - independent autonomous-slice verification contracts.
 - canonical test-registry shards and differential test-evidence contracts.
+- bounded Git stdout/file capture and optional binary stdin for exact object
+  batches, with concurrent pipe draining, byte/time ceilings, and cleanup.
 
 It does not yet own a complete authenticated production promoter, automatic
 artifact activation/rollback, a hundred-agent scheduler, or a proven
@@ -97,6 +99,7 @@ The normative contract is
 | `src/fmas_wsp62_contract.py` | Syntactic WSP 62 parser; grants no provenance |
 | `src/fmas_health_triage.py` | Exact-HEAD WSP 62 admission and proposal receipt |
 | `src/fmas_improvement_bridge.py` | Finding-to-ImprovementJob mapping |
+| `src/wre_git_bounded_io.py` | Sanitized bounded Git reads and <=8 MiB binary stdin batches |
 
 ## Code-health admission
 

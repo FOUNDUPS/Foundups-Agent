@@ -1,6 +1,23 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-08-29] - BOUNDED GIT BINARY STDIN HARDENING
+
+- Extended `run_bounded_stdout` with an <=8 MiB binary stdin channel for
+  batched exact-object reads while concurrently draining bounded stdout.
+- Added deterministic broken-pipe handling, timeout/output-overflow process
+  termination, named writer/reader cleanup, and explicit pipe closure.
+- Extracted the generic pipe/thread pump into `wre_git_process_io.py`; the
+  public Git wrapper is 109 lines and the private pump is 143 lines, restoring
+  the registry subsystem's stricter 200-line WSP_62 ceiling without changing
+  the public API.
+- Six focused tests cover round-trip input, pre-spawn ceiling rejection, early
+  child exit, blocked-writer timeout cleanup, concurrent output overflow, and
+  the existing stdout ceiling. This adds no Git mutation or execution authority.
+- Reprojected the canonical test registry to **1,631 registered / 268
+  quarantined**; the RedDog builder contract suite no longer invokes a local
+  helper at module scope, check mode passes, and all 28 registry tests pass.
+
 ### [2026-08-28] - REDDOG OWNER-PROOF REGISTRY REPROJECTION
 
 - Registered the distinct post-completion owner-proof falsifier after staging

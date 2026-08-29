@@ -23,6 +23,16 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'
 
 Use a unique child directory for concurrent workers.
 
+## Bounded Git I/O tier
+
+`test_wre_test_registry_differential_plan_runtime.py` includes the bounded-I/O
+primitive used by RedDog's inert pinned-Git batch proof. Six focused cases cover
+stdout overflow, binary stdin round-trip, the 8 MiB pre-spawn ceiling, early
+child exit/broken pipe, timeout cleanup with no retained named I/O threads, and
+concurrent output overflow while stdin is blocked. The test interpreter and
+temporary root must remain on O:. The helpers do not mutate Git or authenticate
+an executable/repository.
+
 ## Execution-truth tier
 
 ```powershell

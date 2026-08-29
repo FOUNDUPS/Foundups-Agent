@@ -6,7 +6,7 @@ This file maps problems to existing solutions to prevent vibecoding.
 0102 agents MUST consult this file BEFORE creating any new code.
 
 Status: ACTIVE curated map - Holo semantic retrieval remains fail-closed when stale
-Last Updated: 2026-08-27 - Added exact-main RedDog/Holo maintenance controller
+Last Updated: 2026-08-29 - Added inert RedDog query-runtime builder authority components
 WSP Compliance: WSP 87 (Code Navigation), WSP 50 (Pre-Action Verification)
 
 COVERAGE:
@@ -119,6 +119,12 @@ NEED_TO = {
     "reddog holo exact main postmerge controller": "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py:run_holoindex_postmerge_runtime_once()",
     "reddog holo postmerge cli": "scripts/reddog_holoindex_postmerge_runtime_once.py",
     "reddog holo postmerge completion policy": "modules/communication/moltbot_bridge/src/holoindex_postmerge_supervisor_policy.py:validate_supervisor_holoindex_postmerge_completion()",
+    "reddog holo query builder authority receipt": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py:builder_authority_receipt()",
+    "reddog holo query builder process proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py:prove_builder_process_authority()",
+    "reddog holo query builder packaging proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging.py:prove_builder_packaging_authority()",
+    "reddog holo query builder pinned git proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_git.py:prove_pinned_git_authority()",
+    "reddog holo query builder source proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_source.py:prove_builder_source_authority()",
+    "reddog holo query builder scale proof": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_scale.py",
     "reddog main readonly operational bootstrap": "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap.py:run_reddog_main_readonly_operational_bootstrap()",
     "reddog main bootstrap result projection": "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap_result.py:RedDogMainReadonlyBootstrapResult",
     "reddog authority profile typed rehydration": "modules/communication/moltbot_bridge/src/reddog_authority_profile_rehydration.py:rehydrate_authority_profile_runtime()",

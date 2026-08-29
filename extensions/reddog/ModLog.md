@@ -1,5 +1,15 @@
 # RedDog ModLog
 
+## 2026-08-29 - Inert query-runtime builder authority compatibility pin
+
+- Rebound the extension's backend compatibility constant to the generated
+  1,378-file backend identity `48a91fa832bd...d3fc1d`. The added five-module
+  builder authority remains inert and public candidate build/reproof still
+  fail closed as runtime-unbound.
+- No candidate, owner, route, activation, exact-runtime, A-grade, or retrieval
+  RSI authority is added. A matching packaged VSIX remains a release gate, not
+  evidence supplied by this source pin. (WSP 00/6/15/22/50/62/84/87/97)
+
 ## 2026-08-29 - Declared Windows/CPython ABI evidence release (0.4.139)
 
 - Rebound the VSIX to the 1,366-file authenticated backend after shared
