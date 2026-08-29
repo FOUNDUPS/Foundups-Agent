@@ -1,5 +1,22 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-30 - Inert builder-runtime composition phase 2C3a
+
+- Added a WSP_62-bounded contract and coordinator that reuse Phase 2C2b and the
+  existing runtime-composition materializer. The result cross-binds all durable
+  dependency fields, preserves exact reuse booleans, emits path-free evidence,
+  and forces every producer/process/loader/execution/activation claim false.
+- Authentic RED collection failed on the absent module. Independent hostile
+  review found and closed a hidden exception-chain path disclosure before
+  packaging. Final focused coverage passes 36 tests, including the real
+  reviewed O: wheel with an exact synthetic base; the adjacent builder/base/
+  composition selection passes 318 with six expected capability skips.
+- Real composition exposed inherited topology drift: base runtimes use the
+  `python-runtime` payload root but Phase 2B process/candidate consumers still
+  assume `python.exe` is at the generation root. This slice launches nothing;
+  the consumer repair is the next independently allocated P0 transaction.
+  (WSP 00/6/12/15/22/50/62/84/97)
+
 ## 2026-08-29 - Sequential builder/dependency composition phase 2C2b
 
 - Added a WSP_62-bounded coordinator and path-free contract for exact source

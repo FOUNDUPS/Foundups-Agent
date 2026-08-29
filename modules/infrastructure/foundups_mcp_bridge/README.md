@@ -12,15 +12,13 @@ maintenance-replica RSI are usable, but A-grade and retrieval-quality RSI stay
 false until quality floors, independent promotion/rollback, candidate-bound
 learning, and exact runtime closure all pass.
 
-Phase 2A defines an inert clean query-runtime candidate schema, positive distribution
-graph, and diagnostic falsification seam. It binds one inert composition, its exact
-dependency tree, selected local RECORD bytes, canonical declarations, clean exact-HEAD
-repository identity, and the declared Phase-2A module set/origins. Broad ownership is
-retained before selection; prefix-local exclusions never become candidate files.
-Identity, markers, wheels, executable roles, and subprocess declarations fail closed.
-The parser pin is separate from the exact four-package MCP launch runtime but is not
-execution provenance: public build/reproof reject until a sealed builder is bound.
-Transitive builder/parser/stdlib closure, topology, excluded bytes, materialization, loader behavior, and activation remain unproved; the broad venv remains ineligible. Phase 2B adds five inert, cross-bound process/packaging/pinned-Git/source/receipt components, compares two exact source bindings around the second Git/origin observation, deliberately omits worktree porcelain and global-clean claims, and keeps public build/reproof runtime-unbound; exact guarantees, host gaps, falsifiers, and nonclaims are recorded in the [roadmap](ROADMAP.md) and [assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md).
+Phase 2A defines an inert clean query-runtime candidate schema and positive
+distribution graph over one composition, exact dependency bytes, declarations,
+clean exact-HEAD source identity, and selected modules/origins. Identity,
+markers, wheels, executable roles, and subprocess declarations fail closed.
+Public build/reproof reject until a sealed builder is bound. Phase 2B adds inert
+process/packaging/pinned-Git/source/receipt components but still supplies no
+authenticated producer; see the [roadmap](ROADMAP.md) and [assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md).
 
 Phase 2C1 adds only an inert source-wheel admission prerequisite. On Windows,
 `admit_pinned_builder_packaging_wheel(...)` holds the exact O:/E: source parent
@@ -57,18 +55,18 @@ destination is restricted to O:/E: before mutation. The exact O: artifact
 passed first publication plus 200 full reuses
 in 105.09 seconds with unchanged source bytes and bounded handles/RSS.
 
-This remains inert materialization, not installation or execution. Phase 2C2b
-now composes the source generation with the existing dependency materializer
-through the focused [sequential composition interface](docs/clarity/REDDOG_BUILDER_DEPENDENCY_COMPOSITION_INTERFACE_PHASE2C2B.md).
-It observes source S1, releases that call, materializes the dependency, then
-observes source S2 and requires durable S1/S2 identity plus
-`source.dependency_tree_digest == dependency.generation_id`. It adds no outer
-or cross-store lock, rollback, deletion, or persisted composition artifact.
-Therefore cross-store atomicity, a simultaneous snapshot, persistent write
-denial, post-return immutability, provenance/signature, install/import/
-execution, authenticated builder/loader/native/subprocess/exact-runtime
-closure, deterministic effects, activation, A-grade, and retrieval-quality
-RSI remain false; see the [Phase 2C2b assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C2B.md).
+Phase 2C2b sequentially proves source S1, its inert dependency, then source S2
+with durable S1/S2 identity and exact tree-generation equality; it adds no
+cross-store lock or rollback. Phase 2C3a now passes that exact dependency into
+the existing base/runtime-composition materializer and cross-binds all durable
+dependency fields. The [focused interface](docs/clarity/REDDOG_BUILDER_RUNTIME_COMPOSITION_INTERFACE_PHASE2C3A.md)
+keeps the result path-free and does not carry source live-proof truth forward.
+The join launches nothing and creates no artifact beyond the existing
+descriptor-only composition. Real base layouts use
+`<generation>/python-runtime/python.exe`; older Phase 2B process/candidate
+consumers still assume `<generation>/python.exe` and must be repaired next.
+Atomicity, provenance, process/pre-import/native/subprocess authority, write
+denial, activation, A-grade, and retrieval-quality RSI remain false.
 
 ## Holo retrieval runtime identity
 

@@ -75,6 +75,10 @@ STATIC_RUNTIME_FILES = (
     "modules/infrastructure/foundups_mcp_bridge/src/"
     "reddog_holoindex_query_runtime_builder_dependency_composition.py",
     "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_runtime_composition_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_runtime_composition.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
     "reddog_holoindex_query_runtime_builder_process.py",
     "modules/infrastructure/foundups_mcp_bridge/src/"
     "reddog_holoindex_query_runtime_builder_source.py",

@@ -1,5 +1,19 @@
 # foundups_mcp_bridge Tests
 
+## Inert builder-runtime composition
+
+- `test_reddog_holoindex_query_runtime_builder_runtime_composition.py` proves
+  exact Phase 2C2b-to-runtime call order, every durable dependency identity
+  field, typed results and exact reuse booleans, path-free failures/projection,
+  source/dependency preservation without rollback, descriptor-only persistence,
+  and immutable false process/loader/execution/activation claims.
+- The public integration gate composes the reviewed O:/E: packaging wheel with
+  an exact base fixture, proves first publication and full reuse, and preserves
+  wheel bytes. It also asserts the real `python-runtime/python.exe` topology.
+  Focused evidence is 36 passed; adjacent builder/base/composition evidence is
+  318 passed / six expected capability or opt-in skips. Every stable failure
+  also proves that neither `__cause__` nor `__context__` retains a private path.
+
 ## Sequential builder/dependency composition
 
 - `test_reddog_holoindex_query_runtime_builder_dependency_composition.py`

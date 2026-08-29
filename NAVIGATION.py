@@ -128,6 +128,8 @@ NEED_TO = {
     "reddog holo query builder packaging source topology": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_topology_windows.py:pinned_builder_packaging_source_generation()",
     "reddog holo query builder dependency composition": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_dependency_composition.py:compose_pinned_builder_dependency_runtime()",
     "reddog holo query builder dependency composition contract": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_dependency_composition_contract.py:BuilderDependencyCompositionBinding",
+    "reddog holo query builder runtime composition": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition.py:compose_pinned_builder_runtime()",
+    "reddog holo query builder runtime composition contract": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition_contract.py:BuilderRuntimeCompositionBinding",
     "reddog holo query builder pinned git proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_git.py:prove_pinned_git_authority()",
     "reddog holo query builder source proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_source.py:prove_builder_source_authority()",
     "reddog holo query builder scale proof": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_scale.py",

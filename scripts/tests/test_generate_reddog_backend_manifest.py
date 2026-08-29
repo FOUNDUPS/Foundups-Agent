@@ -225,6 +225,10 @@ def _assert_registry_and_builder_runtime_files(generated: dict[str, object]) -> 
         "reddog_holoindex_query_runtime_builder_dependency_composition_contract.py",
         "modules/infrastructure/foundups_mcp_bridge/src/"
         "reddog_holoindex_query_runtime_builder_dependency_composition.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_runtime_composition_contract.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_runtime_composition.py",
     ):
         assert relative in required
     for relative in (
@@ -261,7 +265,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "a5831a36d548792b080aa841ebd308f972668f1daa2dc60b86891f97b5485509"
+    assert digest == "5c081f20d5dbc5f6f1ec8f4095f18f105212b6d3271d6e1d580a4b645d85f9c6"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")
