@@ -1,5 +1,21 @@
 # RedDog ModLog
 
+## 2026-08-29 - Sequential builder/dependency composition backend pin
+
+- Rebound the generated backend compatibility closure to include the two
+  Phase 2C2b composition modules and their previously unreachable sealed
+  dependency materializer: 1,391 runtime files at
+  `a5831a36d548...85509`.
+- The extension does not call the coordinator or change conversation, owner,
+  route, query, execution, or VSIX behavior. This backend-only pin adds no
+  cross-store atomicity, simultaneous snapshot, provenance/signature,
+  install/import/execution, authenticated builder/loader/native/subprocess/
+  exact-runtime closure, write denial, activation, A-grade, or retrieval RSI
+  authority. No VSIX is emitted for this inert prerequisite slice.
+  Backend compatibility and the deterministic package-surface gate passed; the
+  unchanged 67-file surface is 948,777 bytes at `e7196a12e2ba...20dd6`.
+  (WSP 00/12/15/22/50/62/84/97)
+
 ## 2026-08-29 - Wheel-bound packaging-source backend pin
 
 - Rebound the generated backend compatibility closure to include the five

@@ -1,5 +1,32 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-29: Sequential builder/dependency composition phase 2C2b
+
+**Implemented and falsified as a sequential composition proof; not an atomic,
+installed, importable, executable, or authenticated builder runtime.** The
+coordinator calls the sealed source materializer for S1, lets that call release
+its source-store lease, calls the existing dependency materializer under only
+its own store lease, then calls the source materializer again for S2. It
+requires live fixed-pin source authority for both observations, exact durable
+S1/S2 identity excluding call-local publication truth, an inert verified
+dependency binding, and
+`source.dependency_tree_digest == dependency.generation_id`.
+
+The coordinator introduces no outer or cross-store lock, rollback, deletion,
+or persistent composition artifact. A dependency failure leaves a valid source
+generation intact. Its path-free binding explicitly marks the proof as
+sequential and denies cross-store atomicity, simultaneous-snapshot authority,
+persistent write denial, and post-return immutability. Provenance/signing,
+installation/import/execution, authenticated builder and pre-import/loader/
+native/subprocess/exact-runtime closure, deterministic effects, activation,
+A-grade, and retrieval RSI remain later independently falsified gates.
+
+**Next independently allocated P0 transaction:** bind the composition to an
+authenticated producer boundary only after selecting and falsifying the
+smallest sealed O:/E: child/process and pre-import loader closure. It must not
+convert structural composition into provenance, execution, write-denial,
+activation, or retrieval-quality authority.
+
 ## 2026-08-29: Wheel-bound inert packaging source phase 2C2a
 
 **Implemented and physically falsified as persistent inert source; not an
@@ -29,14 +56,11 @@ release. This closes inter-pass and admitted-file tail mutation, and rejects a
 tail-added path before success; it is not persistent destination write denial,
 an atomic snapshot, or post-return immutability.
 
-**Next independently allocated P0 transaction (Phase 2C2b):** verify source
-S1, release its store lock, call the existing inert
-`materialize_dependency_runtime(...)`, verify source S2, require S1 == S2 and
-source `dependency_tree_digest == dependency generation_id`. It must not claim
-cross-store atomicity or delete/roll back a valid source generation when the
-dependency transaction fails. Sealed child execution, Git trust, loader/
-native/subprocess closure, deterministic controls, signing, empirical write
-denial, activation, A-grade, and retrieval RSI are later independent gates.
+**Completed by Phase 2C2b:** source S1/dependency/source S2 composition with
+durable source identity and dependency-tree equality, without a cross-store
+lock or rollback. Sealed child execution, Git trust, loader/native/subprocess
+closure, deterministic controls, signing, empirical write denial, activation,
+A-grade, and retrieval RSI remain later independent gates.
 
 ## 2026-08-29: Reviewed packaging wheel admission phase 2C1
 
@@ -58,7 +82,7 @@ A-grade, or retrieval-RSI evidence.
 **Completed by Phase 2C2a:** held-handle source generation, exact admitted-byte
 extraction, no-replace publication, full reproof, and no-delete quarantine.
 The Phase 2C1 receipt itself still grants none of that authority. Dependency
-composition remains the separate Phase 2C2b transaction described above.
+  composition is supplied only by the sequential Phase 2C2b gate above.
 
 ## 2026-08-29: Inert query-runtime builder authority phase 2B
 
@@ -84,8 +108,8 @@ should precompute the reference map once; this offline DocDAE scaling debt is
 not a query-runtime blocker.
 
 **Corrected next-step note:** Phase 2C2a supplies only the exact source-only
-packaging generation. Phase 2C2b may bind it to the already-existing inert
-dependency materializer. A sealed O:/E: child, governed Git trust, pre-import
+packaging generation. Phase 2C2b binds it sequentially to the already-existing
+inert dependency materializer. A sealed O:/E: child, governed Git trust, pre-import
 loader, native/DLL/subprocess closure, deterministic controls, signing, and
 empirical write denial are not Phase 2C2 promises; each requires a later
 independently falsified receipt before candidate build/reproof can accept an

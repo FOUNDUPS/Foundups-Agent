@@ -35,8 +35,9 @@ The result truthfully reports source extraction/materialization while official
 provenance, signature, download/install, import, child execution, builder
 authentication, pre-import/native/subprocess/exact-runtime closure,
 determinism, write denial, activation, A-grade, and retrieval RSI remain false.
-It does not invoke `materialize_dependency_runtime(...)`; dependency
-composition is the separately allocated Phase 2C2b interface.
+It does not invoke `materialize_dependency_runtime(...)`; the separately
+allocated [Phase 2C2b composition interface](REDDOG_BUILDER_DEPENDENCY_COMPOSITION_INTERFACE_PHASE2C2B.md)
+owns that sequential proof without changing this source-only authority.
 
 The terminal retained proof denies tail changes to admitted files and detects
 tail-added paths. It does not claim persistent destination write denial, an

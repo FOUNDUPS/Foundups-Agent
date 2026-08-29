@@ -1,5 +1,32 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Sequential builder/dependency composition phase 2C2b
+
+- Added a WSP_62-bounded coordinator and path-free contract for exact source
+  S1, dependency materialization, and source S2 sequencing. Both source calls
+  require current fixed-pin live authority; durable S1/S2 identity deliberately
+  excludes call-local publication truth, and the source tree digest must equal
+  the dependency generation ID.
+- Reused the existing sealed Phase 2C2a source and dependency materializers.
+  No outer lock, nested cross-store lease, rollback, deletion, or persistent
+  composition artifact was added. A valid source generation remains intact on
+  later failure. Independent hostile review found and closed a type-confusion
+  path in the publication-lease field before this transaction was packaged.
+- Added a focused interface document rather than growing the inherited
+  oversized `INTERFACE.md`; the module README remains at or below its inherited
+  line count. Public evidence is path-free and explicitly denies cross-store
+  atomicity, simultaneous snapshot, persistent write denial, post-return
+  immutability, provenance/signature, install/import/execution, authenticated
+  builder/loader/native/subprocess/exact-runtime closure, deterministic effects,
+  activation, A-grade, and retrieval RSI. (WSP 00/6/12/15/22/50/62/84/97)
+- Focused composition coverage passed 19 tests, including sealed public first
+  publication and full reuse of the real reviewed O: wheel. The exact 16-file
+  adjacent builder/dependency surface passed 246 with seven expected opt-in or host
+  skips; generated registry/manifest coverage passed 58; and WSP_97 validator
+  coverage passed 66 with one expected capability skip. The registry remains
+  current at 1,636 tests / 269 quarantines. The authenticated backend closure
+  is 1,391 files at `a5831a36d548...85509`.
+
 ## 2026-08-29 - Wheel-bound inert packaging source phase 2C2a
 
 - Added a private retained-wheel payload capability shared by Phase 2C1

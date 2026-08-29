@@ -1,5 +1,31 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Sequential builder/dependency composition falsification
+
+- Added 19 focused falsifiers for exact source/dependency/source sequencing,
+  live source authority at both observations, durable source identity excluding
+  call-local publication truth, dependency-tree equality, a real dependency
+  materializer call, source/tree drift, invalid dependency claims, strict bool
+  and reuse handling, stable path-free failures, no rollback/deletion, and
+  path-free public nonclaims.
+- The initial authentic run exposed a Windows `Path` subtype rejection in the
+  contract; replacing exact-class path checks with `isinstance(..., Path)` made
+  valid Windows bindings admissible without weakening absolute-path checks.
+  Independent hostile review then identified that the call-local publication
+  field required exact-bool validation; a hostile `Path` falsifier closes that
+  authority-leak surface. A second three-stage falsifier requires every reuse
+  observation to be an exact boolean. The final physical falsifier runs the
+  sealed public coordinator against the real reviewed O: wheel for first
+  publication and complete reuse, with unchanged source bytes.
+- Final evidence is **19 focused passes**, **246 / seven expected skips** across
+  the exact 16-file adjacent builder/dependency surface, **58 generated
+  registry/manifest passes**, and **66 / one expected skip** for the WSP_97
+  validator. The registry is current at 1,636 tests / 269 quarantines; the
+  backend closure is 1,391 files at `a5831a36d548...85509`.
+  Extension compatibility and deterministic 67-file package-surface checks
+  passed; no VSIX was emitted for this backend-only slice.
+  (WSP 6/15/50/62/84/97)
+
 ## [2026-08-29] Wheel-bound packaging source phase 2C2a falsification
 
 - Captured authentic RED collection before implementation: both new suites
