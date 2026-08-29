@@ -1,28 +1,28 @@
 # foundups_mcp_bridge Roadmap
 
-## 2026-08-29: Inert declared Windows/CPython ABI attestation
+## 2026-08-29: Inert clean query-runtime candidate phase 2A
 
-**Implemented and hostile-tested; still not activation.** A dependency-free,
-bounded PE32+ parser, wheel/RECORD verifier, declared-name graph, composition-
-bound descriptor verifier, and isolated materializer now attest admitted
-AMD64 native images without loading them. Independent WSP_97 review falsified
-the first draft on delay-attribute dialect, null/missing loader tables,
-per-descriptor resource amplification, export forwarders, duplicate RECORD
-rows, path-leaking errors, Windows long-path quarantine, and WSP_62 growth.
-The repaired layer accepts only the modern RVA delay dialect, validates paired
-INT/IAT structure and writable HMOD virtual span, caches repeated thunk tables,
-uses aggregate limits, excludes forwarded Python exports, rejects ambiguous
-RECORD paths, translates OS errors to stable codes, and keeps every new source
-file below the infrastructure threshold with functions at or below 50 lines.
+**Implemented as an inert contract, positive graph, and diagnostic reproof seam; not a governed evidence builder, materialized runtime, or activation.** Diagnostics
+bind one composition, dependency inventory/tree, confined selected bytes, clean-HEAD repository, declared Phase-2A modules/origins, declarations, markers, roots, module
+origins, and a lower-bound trace. Broad RECORD ownership precedes selection; selected
+local rows are byte-bound and prefix-local external rows are explicit exclusions.
+Requires-Python/extras, wheels, executables, and subprocess use fail closed. Installed topology and dynamic/import/native-loader completeness remain unproved; all loader,
+determinism, signature, write-denial, activation, exact-closure, A-grade, and RSI
+claims remain false.
 
-The production-shape read-only scan proves why activation remains blocked:
-the broad dependency snapshot contains eight PE32 and four ARM64 artifacts as
-well as duplicate RECORD ownership. Do not weaken the AMD64/CP312 contract.
-The next P0 slice is a separately content-bound executable-closure manifest
-that classifies Python-importable native modules and declared dynamic loads,
-or a clean pinned query-only environment. Only after that closure passes may
-actual Windows loader resolution, dynamic loading, signatures, deterministic
-pre-import execution, write denial, and route-v2 be attempted.
+The parser pin does not authenticate executing `packaging`, interpreter, or stdlib; public build/reproof reject with `QUERY_RUNTIME_CANDIDATE_BUILDER_RUNTIME_UNBOUND`.
+Phase 2B must bind process image, parser RECORD bytes/origins, transitive local source,
+and before/after equality before evidence can be published.
+
+Hostile review proved the broad venv cannot be activated: optional Torch and Transformers packages alter behavior by presence, `-I -S` still reaches a base
+runtime outside O:/E:, and one trace cannot enumerate DLL/delay/ctypes/CFFI or
+process surfaces. Next is the sealed builder, then physical clean O:/E: materialization and startup parsing. Then the inert ABI layer may be
+regenerated over selected native rows; Windows loader resolution remains later. The candidate parser's pinned `packaging` dependency stays outside the exact
+four-package MCP runtime launch requirements.
+
+The prior ABI scan found eight PE32, four ARM64, and one duplicate native
+RECORD path. They may disappear only through a physically separate positive
+candidate, never filename ignores or a relaxed ABI contract.
 
 ## 2026-08-29: Inert exact runtime-composition generation
 

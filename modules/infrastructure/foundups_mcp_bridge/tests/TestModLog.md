@@ -1,5 +1,34 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Clean query-runtime candidate falsification
+
+- Added contract, metadata, graph, bound-build/reproof, and opt-in scale tests
+  for exact identity, approved volumes, composition/dependency/source binding,
+  strict target markers, extras/Requires-Python, distribution and wheel
+  identity, unique module-origin/RECORD owners, selected-byte bounds, path/case
+  order, startup/editable rejection, executable roles, and exact subprocess use.
+- Independent hostile probes first found and reproduced five accepted-invalid
+  schema cases plus graph/marker/RECORD/resource gaps. Regression tests now pin
+  those falsifiers; the 45,450-member scale tier is opt-in and separate from
+  interactive validation.
+- Second-round hostile tests pin clean exact-HEAD source authority, before/after
+  component and source equality, O:/E:-only inputs, bounded sequences, broad
+  ownership ambiguity, explicit external exclusions, normalized parsed
+  dependency names, and direct/transitive FastAPI/Uvicorn rejection.
+- A third audit proved the ambient `packaging` parser was pinned but not
+  execution-bound. Public build/reproof now reject; 73 focused tests (plus two
+  expected capability/opt-in skips) pin the private diagnostic boundary,
+  declared Phase-2A module bytes/origins, linked-root rejection when supported,
+  nested bounds, limit ceilings, exact source-root cross-binding, repeat
+  determinism, and launcher/candidate requirement disjointness.
+  The opt-in 45,450-member scale tier passed current bytes in 4.56 seconds.
+- Adjacent runtime contracts passed 274 / 11 expected skips; backend manifest
+  generation passed 8 and the exact 1,366-file digest remained current. The
+  test registry remained current at 1,625 tests / 268 quarantined.
+- A live trace remains lower-bound evidence only. No DLL, ctypes/CFFI, plugin,
+  subprocess, loader, activation, owner, route, maintenance, or VSIX claim was
+  introduced.
+
 ## [2026-08-29] Declared Windows/CPython ABI falsification
 
 - Added parser, pure-contract, derivation, publication, reuse, and hostile

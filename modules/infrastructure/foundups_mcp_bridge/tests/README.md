@@ -1,5 +1,30 @@
 # foundups_mcp_bridge Tests
 
+## Inert clean query-runtime candidate
+
+- `test_reddog_holoindex_query_runtime_candidate_contract.py` proves exact
+  identity, approved O:/E: volumes, standalone launch policy, deterministic
+  ordering, path/case defenses, graph cross-binding, metadata ownership,
+  reachable distribution closure, descriptor-pair reproof, and strict nonclaims.
+- `test_reddog_holoindex_query_distribution_graph.py` proves module-origin/
+  broad RECORD ownership, exact target markers, extras/Requires-Python,
+  dist-info and wheel identity, selected-local-byte binding, explicit external
+  exclusions, startup/editable rejection, executable classification, and exact
+  declared-subprocess use.
+- `test_reddog_holoindex_query_runtime_candidate_binding.py` exercises the
+  private diagnostic composition/dependency/source build and exact before/
+  after reproof seam with confined O:-local files, source mutation/hardlink/
+  origin rejection, approved volumes, nested bounds, exact source-root
+  cross-binding, deterministic repeat equality, limit ceilings, disjoint
+  requirements, and transitive transport denial. It proves both public entry
+  points reject while the evidence-builder runtime is unbound. The opt-in
+  `test_reddog_holoindex_query_runtime_candidate_scale.py` supplies the separate
+  45,450-member production-shape resource tier.
+- Focused evidence is 73 passed / two expected capability or opt-in skips. No
+  authenticated parser/stdlib builder, broad-venv activation, unrecorded
+  topology, complete trace, Windows loader, owner, route, maintenance, or VSIX
+  claim is made.
+
 ## Inert declared Windows/CPython ABI attestation
 
 - `test_reddog_holoindex_windows_pe.py` falsifies malformed/truncated PE,
