@@ -46,3 +46,7 @@ denial, post-return immutability, official provenance, signature, installation,
 import, child execution, authenticated builder runtime, pre-import/loader/
 native/subprocess/exact-runtime closure, deterministic effects, activation,
 A-grade, and retrieval RSI are explicitly false.
+
+Phase 2C3a now consumes this exact dependency binding through the existing
+runtime-composition materializer. It does not retroactively add atomicity,
+provenance, execution, or current-at-return source authority to Phase 2C2b.

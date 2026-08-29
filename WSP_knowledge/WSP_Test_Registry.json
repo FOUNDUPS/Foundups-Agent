@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1636,
+  "total_tests": 1637,
   "quarantined_tests": 269,
   "tests": [
     {
@@ -16914,6 +16914,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_builder_runtime_composition",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_runtime_composition.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "integration",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-integration",
+      "capabilities": [],
+      "execution_type": "integration",
+      "collectable": true,
+      "timeout_s": 600,
+      "quarantine_reasons": [],
+      "description": "Falsification tests for inert builder-runtime composition."
     },
     {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_builder_scale",

@@ -1,5 +1,22 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-30] Inert builder-runtime composition falsification
+
+- Captured authentic RED collection before production code: the focused suite
+  failed with `ModuleNotFoundError` for the absent coordinator module.
+- Added 36 falsifiers for exact outer call order, complete dependency identity,
+  exact result classes and booleans, stable path-free strings and exception
+  graphs, stage short-circuiting, no rollback/delete, descriptor-only
+  persistence, strict runtime nonclaims, first publication, exact reuse, and
+  the public reviewed O: wheel with an exact synthetic base.
+- The real binding exposed that the base payload root is `python-runtime`; this
+  is retained as next-sprint process/candidate consumer debt rather than hidden
+  by synthetic fixtures. Focused tests pass 36; the adjacent selection passes
+  318 with six expected capability/opt-in skips. Generated-manifest coverage
+  passes 8; WSP_97 coverage passes 74 with one expected skip. The registry is
+  current at 1,637 / 269 quarantined and the 1,394-file backend digest is
+  `5c081f20d5db...f9c6`. (WSP 6/15/50/62/84/97)
+
 ## [2026-08-29] Sequential builder/dependency composition falsification
 
 - Added 19 focused falsifiers for exact source/dependency/source sequencing,

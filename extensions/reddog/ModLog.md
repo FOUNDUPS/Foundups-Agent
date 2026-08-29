@@ -1,5 +1,17 @@
 # RedDog ModLog
 
+## 2026-08-30 - Inert builder-runtime composition backend pin
+
+- Rebound the generated backend closure to include the two Phase 2C3a join
+  modules: 1,394 runtime files at `5c081f20d5db...f9c6`.
+- The extension does not call the coordinator or change conversation, owner,
+  route, query, execution, or VSIX behavior. Producer/process/pre-import/native/
+  subprocess authority, write denial, activation, A-grade, and retrieval RSI
+  remain false. No VSIX is emitted for this backend-only prerequisite.
+  The unchanged 67-file package surface passes at 948,777 bytes and
+  `8f910b6fca78...009c`.
+  (WSP 00/12/15/22/50/62/84/97)
+
 ## 2026-08-29 - Sequential builder/dependency composition backend pin
 
 - Rebound the generated backend compatibility closure to include the two

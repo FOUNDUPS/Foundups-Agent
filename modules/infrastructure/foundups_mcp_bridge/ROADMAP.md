@@ -1,5 +1,30 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-30: Inert builder-runtime composition phase 2C3a
+
+**Implemented and physically falsified as an inert join; not a producer,
+process, or activation.** The coordinator calls Phase 2C2b, passes its exact
+dependency generation to the existing runtime-composition materializer, and
+requires equality across every dependency path identity, digest, count, byte,
+and inert authority field. It creates no outer lock, rollback, deletion,
+process, import, route, owner, or persistent coordinator artifact. Its public
+binding is path-free and refuses to represent the earlier source observation
+as current authority after the longer composition call.
+
+The real reviewed O: wheel successfully composed with an exact synthetic base
+and reused both dependency and descriptor generations. This integration
+falsified an older synthetic topology assumption: materialized base runtimes
+place the interpreter at `<generation>/python-runtime/python.exe`, while the
+Phase 2B process/candidate consumers still require `<generation>/python.exe`.
+Phase 2C3a uses the real composition binding and launches nothing, so its proof
+remains valid.
+
+**Next independently allocated P0 transaction:** repair the existing process
+and candidate consumers/tests to use `base_prefix_root`, then build the smallest
+one-shot child adapter around the held executable and actual-process verifier.
+Pre-import, ABI/native/subprocess closure, deterministic effects, signing,
+write denial, activation, A-grade, and retrieval RSI remain later gates.
+
 ## 2026-08-29: Sequential builder/dependency composition phase 2C2b
 
 **Implemented and falsified as a sequential composition proof; not an atomic,
