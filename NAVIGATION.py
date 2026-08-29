@@ -122,6 +122,7 @@ NEED_TO = {
     "reddog holo query builder authority receipt": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py:builder_authority_receipt()",
     "reddog holo query builder process proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py:prove_builder_process_authority()",
     "reddog holo query builder packaging proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging.py:prove_builder_packaging_authority()",
+    "reddog holo query builder packaging wheel admission": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_wheel.py:admit_pinned_builder_packaging_wheel()",
     "reddog holo query builder pinned git proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_git.py:prove_pinned_git_authority()",
     "reddog holo query builder source proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_source.py:prove_builder_source_authority()",
     "reddog holo query builder scale proof": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_scale.py",

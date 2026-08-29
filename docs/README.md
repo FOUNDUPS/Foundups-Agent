@@ -19,7 +19,7 @@
 | [Vision & Automation](#vision--automation-systems) | 3 | Browser automation and vision AI systems |
 | [0102 Session Briefings](#0102-session-briefings) | 1 | Session-start onboarding digests for 0102 |
 | [Session Reports](#session-reports) | 6 | Completed work sessions and sprints |
-| [Analysis & Audits](#analysis--audits) | 12 | Deep dives, audits, and first principles analysis |
+| [Analysis & Audits](#analysis--audits) | 13 | Deep dives, audits, and first principles analysis |
 | [Implementation Plans](#implementation-plans) | 6 | Execution plans and implementation guides |
 
 ---
@@ -110,6 +110,7 @@
 |----------|------|------------|----------------|
 | [012_VISION_DEEP_THINK_ANALYSIS.md](012_VISION_DEEP_THINK_ANALYSIS.md) | Deep Analysis | 012 vision system analysis | WSP 25, WSP 44 |
 | [HOLO_COMPREHENSIVE_AUDIT_20251130.md](HOLO_COMPREHENSIVE_AUDIT_20251130.md) | Audit | HoloIndex comprehensive audit | WSP 50, WSP 87 |
+| [HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md) | Assumption Audit | Inert reviewed builder-wheel admission and nonclaims | WSP 15, WSP 50, WSP 62, WSP 97 |
 | [HOLO_CLI_FIRST_PRINCIPLES_AUDIT.md](HOLO_CLI_FIRST_PRINCIPLES_AUDIT.md) | First Principles | HoloIndex CLI architecture | WSP 1 |
 | [HOLODAE_DEEP_DIVE_BECOMING_THE_HOLODAE.md](HOLODAE_DEEP_DIVE_BECOMING_THE_HOLODAE.md) | Deep Dive | HoloDAE consciousness and operation | WSP 80, WSP 91 |
 | [QWEN_AI_VS_SCRIPT_ANALYSIS.md](QWEN_AI_VS_SCRIPT_ANALYSIS.md) | Comparison | Qwen AI vs script automation analysis | WSP 77 |

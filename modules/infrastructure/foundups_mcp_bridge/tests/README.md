@@ -62,6 +62,22 @@ image is provisioned. The installed 42-row packaging tree is not source-only.
 Same-interpreter wrappers are structural misuse guards, not authenticated
 provenance; public candidate build/reproof remain unbound.
 
+## Reviewed packaging wheel admission
+
+- `test_reddog_holoindex_query_runtime_builder_packaging_wheel.py` binds the
+  strict raw ZIP/distribution byte proof and falsifies envelope/layout, flags,
+  versions, methods, attributes, CRC/deflate, Windows paths and collisions,
+  source-only roots, resource ceilings, METADATA/WHEEL/RECORD ownership, exact
+  public-path leases, hardlinks, ADS, mutation denial, and every false public
+  capability claim.
+- `test_reddog_holoindex_query_runtime_builder_packaging_wheel_scale.py` is an
+  opt-in integration gate for the separately provisioned exact O:/E: reviewed
+  wheel. Once enabled, a missing artifact fails rather than skips. It performs
+  200 equal admissions, bounds process handle/RSS growth, and proves source
+  SHA-256 unchanged. This is local repeatability/leak evidence, not throughput,
+  concurrency, horizontal scale, authenticated provenance, extraction,
+  activation, A-grade, or retrieval-RSI proof.
+
 ## Inert declared Windows/CPython ABI attestation
 
 - `test_reddog_holoindex_windows_pe.py` falsifies malformed/truncated PE,

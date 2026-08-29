@@ -1,5 +1,28 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Reviewed packaging wheel admission phase 2C1
+
+- Added a Windows retained-parent/file admission API for the exact
+  repository-reviewed `packaging-26.0-py3-none-any.whl` filename, 74,366-byte
+  size, and SHA-256. The implementation reads once through a duplicated held
+  descriptor and retains the leases through strict proof and final identity.
+- Added a bounded raw deflate-only wheel parser and shared packaging
+  distribution contract. Hostile verification forced exact EOCD/central/local
+  layout, flags/method/attributes, CRC/deflate consumption, Windows-illegal and
+  case/prefix identity rejection, expansion ceilings, and exact
+  METADATA/WHEEL/RECORD ownership.
+- Split synthetic byte proof from the public result after independent review
+  caught false reviewed-pin/held-lease claims. The public path-free receipt is
+  now constructed only after the fixed pin and final live-handle reproof.
+- Focused unit and exact physical repeatability evidence is recorded in the
+  test ModLog. The generated backend closure is 1,381 files at
+  `f3cdaacf716a115e4c1d411dddab3f6e1c13a83eb27b313c3ef388f9acd99054`.
+- No network/download occurs in the production API. Official provenance,
+  signature, extraction, installation, publication, builder/import/loader/
+  native/subprocess/exact-runtime authority, execution, determinism,
+  write-denial, activation, A-grade, and retrieval-RSI remain false. Phase 2C2
+  materialization is separately blocked. (WSP 00/6/15/22/50/62/84/87/97)
+
 ## 2026-08-29 - Phase 2B.1 pinned-Git test-contract correction
 
 - Corrected one opt-in live O:/E: test that incorrectly expected the pinned-Git

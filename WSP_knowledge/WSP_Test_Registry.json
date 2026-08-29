@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1631,
+  "total_tests": 1633,
   "quarantined_tests": 268,
   "tests": [
     {
@@ -16836,6 +16836,32 @@
       "description": ""
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_builder_packaging_wheel",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging_wheel.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_builder_packaging_wheel_scale",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging_wheel_scale.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "integration",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-integration",
+      "capabilities": [],
+      "execution_type": "integration",
+      "collectable": true,
+      "timeout_s": 600,
+      "quarantine_reasons": [],
+      "description": "Opt-in physical reviewed-wheel repeatability and resource integration gate."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_builder_process",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_process.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
@@ -16918,7 +16944,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_runtime_abi.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

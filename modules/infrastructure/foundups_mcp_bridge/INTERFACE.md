@@ -49,6 +49,20 @@ Publication is fully reverified, atomic no-replace, and serialized by store iden
 Windows copying is O(depth), ADS-aware, and extended-path safe for payloads.
 Unsafe topology rejects; activation, signing, routes, and write denial stay false.
 
+### `admit_pinned_builder_packaging_wheel(...) -> BuilderPackagingWheelAdmission`
+
+Windows-only inert admission for the exact repository-reviewed
+`packaging-26.0-py3-none-any.whl` pin (74,366 bytes,
+`sha256:b36f1fef...37529`) from one immediate child of a dedicated O:/E: source
+store. The source directory and regular single-link file remain leased across a
+single bounded descriptor read, strict non-ZIP64 raw archive proof, exact
+METADATA/WHEEL/RECORD ownership, and final identity/path reproof. The result is
+path-free and explicitly keeps official provenance, signature, builder-runtime
+authentication, loader/native/subprocess/exact-runtime closure, network,
+download, extraction, installation, publication, import, execution,
+determinism, write denial, activation, A-grade, and retrieval RSI false. It
+does not materialize `site-packages`; that remains Phase 2C2.
+
 ### `holo_query_bundle(...) -> Dict[str, Any]`
 
 Remote read-only MCP tool for one generation-bound Holo query plus lexical WSP
