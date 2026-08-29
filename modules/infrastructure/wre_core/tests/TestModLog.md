@@ -1,5 +1,18 @@
 # TestModLog - wre_core/tests
 
+## 2026-08-29: Bounded Git binary stdin
+
+- Added five adversarial cases beside the existing stdout ceiling: bounded
+  binary round-trip, >8 MiB pre-spawn rejection, early child exit, blocked
+  writer timeout/thread cleanup, and output overflow with concurrent stdin.
+- The six-case focused selection passes. No real repository is mutated and no
+  Git executable, object, or promotion authority is inferred from the helper.
+- The WSP_62 registry regression now includes both the 109-line public wrapper
+  and 143-line extracted process pump; neither module may exceed 200 lines.
+- Registry write/check is current at **1,631 total / 268 quarantined** after
+  the RedDog builder contract fixture became collectable; the complete
+  registry contract passes **28/28**.
+
 ## 2026-08-28: RedDog owner-proof registry reprojection
 
 - Added the tracked, distinct post-completion proof suite to the canonical

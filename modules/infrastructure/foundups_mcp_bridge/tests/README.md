@@ -25,6 +25,40 @@
   topology, complete trace, Windows loader, owner, route, maintenance, or VSIX
   claim is made.
 
+## Inert query-runtime builder component authority
+
+- `test_reddog_holoindex_query_runtime_builder_contract.py` proves strict
+  component schemas, source/dependency cross-binding, deterministic path-free
+  identity, raw-mapping rejection, and immutable false operational claims.
+- `test_reddog_holoindex_query_runtime_builder_process.py` proves the actual
+  image, exact isolation flags/prefix/sys.path order, O:/E: disjoint directory
+  roots, image bytes, cross-binding digests, and public before/after reproof.
+- `test_reddog_holoindex_query_runtime_builder_packaging.py` uses a synthetic
+  nine-row source-only fixture to falsify RECORD case/hash/size/blank rows,
+  wrong dist-info/package roots, duplicate METADATA headers, caches, unlisted
+  files, loader/origin substitution, final-member mutation, and wrapper drift.
+- `test_reddog_holoindex_query_runtime_builder_git.py` covers strict paths,
+  tree/batch framing and independent object hashing, hidden index flags,
+  topology/indirection/hardlinks, sanitized environment, held executable
+  pre/post hashing, stable error mapping, the absence of the worktree-status
+  filter execution surface, and an opt-in real O:/E: Git gate.
+- `test_reddog_holoindex_query_runtime_builder_source.py` covers manifest and
+  exact-HEAD byte binding, origin/cache/alias rejection, linear committed-file
+  lookup, path-free output, and two-pass public source/Git reproof including
+  second-observation source mutation.
+- `test_reddog_holoindex_query_runtime_builder_scale.py` is opt-in and stresses
+  72,261 inventory/RECORD rows plus 1,500 batched Git blobs and physical source
+  rows. It samples RSS/handles before fixture creation, mutates the final source
+  row, and requires deterministic receipts. It does not create 72,261 physical
+  packaging files and is not public-builder, query-latency, or throughput proof.
+
+Latest focused evidence is **83 passed / one expected O:/E: Git-image skip**.
+Latest upper-shape evidence is **72,261 / 1,500 rows in 34.438s, +6 handles,
++77,557,760 RSS bytes**. The live Git gate skips because no sealed O:/E: Git
+image is provisioned. The installed 42-row packaging tree is not source-only.
+Same-interpreter wrappers are structural misuse guards, not authenticated
+provenance; public candidate build/reproof remain unbound.
+
 ## Inert declared Windows/CPython ABI attestation
 
 - `test_reddog_holoindex_windows_pe.py` falsifies malformed/truncated PE,

@@ -20,7 +20,7 @@ retained before selection; prefix-local exclusions never become candidate files.
 Identity, markers, wheels, executable roles, and subprocess declarations fail closed.
 The parser pin is separate from the exact four-package MCP launch runtime but is not
 execution provenance: public build/reproof reject until a sealed builder is bound.
-Transitive builder/parser/stdlib closure, topology, excluded bytes, materialization, loader behavior, and activation remain unproved; the broad venv remains ineligible.
+Transitive builder/parser/stdlib closure, topology, excluded bytes, materialization, loader behavior, and activation remain unproved; the broad venv remains ineligible. Phase 2B adds five inert, cross-bound process/packaging/pinned-Git/source/receipt components, compares two exact source bindings around the second Git/origin observation, deliberately omits worktree porcelain and global-clean claims, and keeps public build/reproof runtime-unbound; exact guarantees, host gaps, falsifiers, and nonclaims are recorded in the [roadmap](ROADMAP.md) and [assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md).
 
 ## Holo retrieval runtime identity
 

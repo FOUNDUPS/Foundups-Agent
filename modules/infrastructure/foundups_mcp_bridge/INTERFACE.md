@@ -255,7 +255,7 @@ installed-distribution payload bytes and all deterministic runtime effects are n
 Phase 2A appends inert graph/inventory/descriptor and private diagnostic seams. Public build/reproof fail with `QUERY_RUNTIME_CANDIDATE_BUILDER_RUNTIME_UNBOUND`; a parser pin
 is not execution provenance. Diagnostics bind the dependency tree, selected RECORD bytes, declarations, target markers, clean-HEAD repository, and
 declared Phase-2A modules/origins. Transitive builder/parser/stdlib execution, excluded
-bytes, topology, materialization, loader, activation, A-grade, and RSI remain unproved.
+bytes, topology, materialization, loader, activation, A-grade, and RSI remain unproved. Phase 2B structurally exposes `prove_builder_process_authority`, `prove_builder_packaging_authority`, `prove_pinned_git_authority`, `prove_builder_source_authority`, and `builder_authority_receipt`; the components cross-bind source/dependency identities and compare two exact bound HEAD/source observations without worktree porcelain/global-clean claims, but same-interpreter wrappers are unauthenticated, the O:/E: live-Git gate skips, public build/reproof stays runtime-unbound, and every operational field remains false (see [roadmap](ROADMAP.md) and [assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md)).
 Query requires `query` and `expected_repo_head_sha`; `limit` and
 `doc_type_filter` are optional. Success requires semantic retrieval, exact
 repository SHA, stable generation/receipt digest, seven verified baseline

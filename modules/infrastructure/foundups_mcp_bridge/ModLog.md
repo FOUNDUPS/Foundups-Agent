@@ -1,5 +1,43 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Inert query-runtime builder authority phase 2B
+
+- Added separate process, packaging, pinned-Git, repository-source, and receipt
+  modules. The receipt path-free cross-binds source-root and dependency-inventory
+  identity but keeps all execution, loader, native, subprocess, deterministic,
+  signing, write-denial, activation, exact-closure, A-grade, and RSI claims false.
+- Hardened packaging ownership to require literal `packaging/` and
+  `packaging-26.0.dist-info/`, one exact Name/Version header, canonical ASCII
+  RECORD sizes and base64url hashes, exact case, complete physical inventory,
+  and every loaded `packaging.*` origin. Replaced quadratic RECORD lookup with
+  one collision-checked index.
+- Extracted a bounded pinned-Git authority: one O:/E: executable handle encloses
+  pre/post descriptor hashing and all sanitized Git plumbing calls; exact HEAD,
+  ordinary index flags, bound committed blob IDs/bytes, and `.git` topology bind
+  the result. Worktree porcelain was removed because hostile local
+  config/attributes can make `git status` launch an unpinned filter process;
+  this component makes no global-clean claim. Bounded stdin now supports one
+  batched `cat-file --batch` request.
+- Bound two observations of loaded source bytes to the backend manifest and
+  exact HEAD blobs; replaced quadratic committed-file lookup with a strict
+  exact-case index and reject second-pass source mutation.
+- Added public-wrapper before/after mutation/error tests and hostile component,
+  path, RECORD, loader, topology, index, source, and held-image falsifiers.
+  Latest focused result is **83 passed / one expected unprovisioned O:/E: Git
+  skip**. The opt-in upper-shape result is **72,261 packaging rows / 1,500 Git
+  and source rows in 34.438s, +6 handles, +77,557,760 RSS bytes**.
+- The scale tier is algorithmic, not a physical packaging or public-builder
+  proof. The current host has no O:/E: Git image and the ambient 42-row
+  packaging installation is not source-only. Typed wrapper seals are
+  same-interpreter misuse guards, not authenticated provenance. Public candidate
+  build/reproof remain unbound.
+- Security assumptions and nonclaims are recorded in
+  `docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md`.
+- The generated backend closure is 1,378 files at
+  `48a91fa832bd99de90d9580394ac2a5da492a0925aed36b90c3cea7508d3fc1d`;
+  the extension compatibility constant and independent digest test carry the
+  same pin. A new packaged VSIX remains a separate release gate.
+
 ## 2026-08-29 - Inert clean query-runtime candidate phase 2A
 
 - Added WSP_62-bounded candidate inventory, descriptor, distribution-metadata,

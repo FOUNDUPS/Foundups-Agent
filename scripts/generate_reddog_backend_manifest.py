@@ -52,6 +52,16 @@ STATIC_RUNTIME_FILES = (
     "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py",
     "modules/infrastructure/wre_core/src/"
     "wre_test_registry_differential_plan_runtime.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_git.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_process.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_source.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_system_service_entrypoint.py",
     "modules/communication/moltbot_bridge/src/"

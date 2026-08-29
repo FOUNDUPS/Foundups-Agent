@@ -1,5 +1,29 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Inert query-runtime builder authority falsification
+
+- Added six focused builder suites for the cross-bound receipt, actual-process
+  topology, source-only packaging ownership, held/pinned Git observations,
+  exact manifest/HEAD source bytes, and opt-in resource scale.
+- Hostile review reproduced and closed missing cross-component identities,
+  incomplete `packaging.*` enumeration, permissive roots/sys.path, dist-info and
+  package-root aliases, duplicate METADATA, noncanonical RECORD hashes/sizes,
+  hidden Git index flags, unbound topology, executable hash/hold TOCTOU, raw
+  exception leakage, quadratic ownership/source lookup, and the worktree-status
+  surface that could launch an unpinned repository-configured filter process.
+- Public process/packaging/source wrappers now prove two observations or reject
+  mutation, including source bytes changed during the second origin pass; the
+  Git suite includes a real O:/E:-only integration gate that currently skips
+  because this host has no provisioned image.
+- Latest focused result is **83 passed / one expected O:/E: Git-image skip**.
+  The opt-in upper-shape tier passed **72,261 packaging rows / 1,500 Git and
+  source rows in 34.438s, +6 handles, +77,557,760 RSS bytes**.
+- The packaging fixture is synthetic (nine rows); the scale tier exercises
+  linear parser/index/batch/source algorithms rather than 72,261 physical
+  packaging files. The ambient 42-row installation remains ineligible. Typed
+  wrappers are not durable authentication, and every public candidate,
+  activation, exact-runtime, A-grade, and retrieval-RSI claim stays false.
+
 ## [2026-08-29] Clean query-runtime candidate falsification
 
 - Added contract, metadata, graph, bound-build/reproof, and opt-in scale tests

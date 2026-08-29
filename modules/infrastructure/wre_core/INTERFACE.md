@@ -60,6 +60,20 @@ Common fail-closed fields:
 Known `blocked_by` values include `wre_skill_scan`, `skill_load`, and
 `ab_variant_binding`.
 
+## Bounded Git byte I/O
+
+`run_bounded_stdout(argv, *, cwd, max_bytes, timeout_s, environment=None,
+stdin_bytes=None) -> bytes` captures stdout under an exact byte ceiling. Optional
+binary stdin is limited to 8 MiB and is written concurrently with stdout reads
+so `git cat-file --batch` cannot deadlock on full pipes. Timeout, output
+overflow, early child exit/broken pipe, reader/writer failure, and nonzero exit
+all terminate or fail closed; process pipes and named I/O threads are closed.
+
+`run_bounded_stdout_file(...)` retains the same stdout/time behavior and does
+not accept stdin. These helpers grant no repository, mutation, commit, or Git
+trust authority; callers must supply their own sanitized environment, exact
+executable/repository binding, and object validation.
+
 ### `execute_skill_with_reasoning(...) -> dict`
 
 Adds:
