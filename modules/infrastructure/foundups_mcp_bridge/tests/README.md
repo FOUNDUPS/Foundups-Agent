@@ -41,7 +41,10 @@
   tree/batch framing and independent object hashing, hidden index flags,
   topology/indirection/hardlinks, sanitized environment, held executable
   pre/post hashing, stable error mapping, the absence of the worktree-status
-  filter execution surface, and an opt-in real O:/E: Git gate.
+  filter execution surface, and an opt-in real O:/E: Git gate. The live gate
+  proves that Git authority remains bound to committed HEAD after a worktree-
+  only byte change; source authority separately rejects those changed bytes
+  against the backend manifest or exact HEAD blob.
 - `test_reddog_holoindex_query_runtime_builder_source.py` covers manifest and
   exact-HEAD byte binding, origin/cache/alias rejection, linear committed-file
   lookup, path-free output, and two-pass public source/Git reproof including
