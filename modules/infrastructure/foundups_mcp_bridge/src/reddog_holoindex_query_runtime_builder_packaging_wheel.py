@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 import hashlib
 import os
 from pathlib import Path
 import stat
-from typing import Mapping
+from typing import Iterator, Mapping
 
 from modules.infrastructure.shared_utilities.runtime_artifact_windows_streams import (
     require_unnamed_data_stream_only,
@@ -29,6 +30,7 @@ from .reddog_holoindex_packaging_distribution_contract import (
 from .reddog_holoindex_strict_wheel_archive import (
     StrictWheelArchiveError,
     StrictWheelLimits,
+    StrictWheelMember,
     parse_strict_wheel_archive,
 )
 
@@ -65,6 +67,36 @@ class _BuilderPackagingWheelByteProof:
     member_count: int
     expanded_bytes: int
     compressed_bytes: int
+
+
+@dataclass(frozen=True)
+class _BuilderPackagingWheelPayload:
+    """Exact parsed bytes with no reviewed-pin or retained-lease authority."""
+
+    wheel_bytes: bytes
+    members: tuple[StrictWheelMember, ...]
+    proof: _BuilderPackagingWheelByteProof
+
+
+@dataclass
+class _RetainedBuilderPackagingWheel:
+    """Private same-handle capability retained through source publication."""
+
+    payload: _BuilderPackagingWheelPayload
+    directory_lease: object
+    file_lease: object
+    path: Path
+    expected_identity: tuple[int, int, int, int, int]
+    _admission: "BuilderPackagingWheelAdmission | None" = None
+
+    def reprove_and_admit(self) -> "BuilderPackagingWheelAdmission":
+        _final_reproof(
+            self.directory_lease, self.file_lease, self.path,
+            self.expected_identity,
+        )
+        admission = _public_admission(self.payload.proof)
+        self._admission = admission
+        return admission
 
 
 @dataclass(frozen=True)
@@ -123,9 +155,53 @@ def admit_pinned_builder_packaging_wheel(
 ) -> BuilderPackagingWheelAdmission:
     """Admit the exact repository-reviewed wheel without reopening its path."""
 
+    with _retain_pinned_builder_packaging_wheel(
+        wheel_path=wheel_path, wheel_store_root=wheel_store_root, limits=limits,
+    ) as retained:
+        return retained.reprove_and_admit()
+
+
+@contextmanager
+def _retain_pinned_builder_packaging_wheel(
+    *, wheel_path: Path | str, wheel_store_root: Path | str,
+    limits: BuilderPackagingWheelLimits = BuilderPackagingWheelLimits(),
+) -> Iterator[_RetainedBuilderPackagingWheel]:
+    """Yield exact bytes while both original source leases remain live."""
+
     if os.name != "nt":
         _fail("BUILDER_PACKAGING_WHEEL_WINDOWS_REQUIRED")
     _require_limits(limits)
+    retained: _RetainedBuilderPackagingWheel | None = None
+    setup_complete = body_complete = False
+    try:
+        retained = _open_retained_builder_packaging_wheel(
+            wheel_path, wheel_store_root, limits,
+        )
+        setup_complete = True
+        yield retained
+        body_complete = True
+        _final_reproof(
+            retained.directory_lease, retained.file_lease, retained.path,
+            retained.expected_identity,
+        )
+    except BaseException as exc:
+        if setup_complete and not body_complete:
+            raise
+        if isinstance(exc, BuilderPackagingWheelError):
+            raise
+        if isinstance(exc, (StrictWheelArchiveError, PackagingDistributionContractError)):
+            _fail(str(exc))
+        _fail("BUILDER_PACKAGING_WHEEL_ADMISSION_UNAVAILABLE")
+    finally:
+        if retained is not None:
+            retained.file_lease.close()
+            retained.directory_lease.close()
+
+
+def _open_retained_builder_packaging_wheel(
+    wheel_path: Path | str, wheel_store_root: Path | str,
+    limits: BuilderPackagingWheelLimits,
+) -> _RetainedBuilderPackagingWheel:
     path, root = _approved_paths(wheel_path, wheel_store_root)
     directory_lease = file_lease = None
     try:
@@ -140,26 +216,20 @@ def admit_pinned_builder_packaging_wheel(
         )
         require_unnamed_data_stream_only(path)
         payload = _read_leased_bytes(file_lease, path, limits)
-        proof = _prove_packaging_wheel_bytes_for_test(
-            wheel_bytes=payload,
-            expected_filename=PACKAGING_26_WHEEL_FILENAME,
+        parsed = _prove_packaging_wheel_payload_for_test(
+            wheel_bytes=payload, expected_filename=PACKAGING_26_WHEEL_FILENAME,
             expected_size=PACKAGING_26_WHEEL_SIZE,
-            expected_sha256=PACKAGING_26_WHEEL_SHA256,
-            limits=limits,
+            expected_sha256=PACKAGING_26_WHEEL_SHA256, limits=limits,
         )
-        _final_reproof(directory_lease, file_lease, path, expected_identity)
-        return _public_admission(proof)
-    except BuilderPackagingWheelError:
-        raise
-    except (StrictWheelArchiveError, PackagingDistributionContractError) as exc:
-        _fail(str(exc))
-    except Exception:
-        _fail("BUILDER_PACKAGING_WHEEL_ADMISSION_UNAVAILABLE")
-    finally:
+        return _RetainedBuilderPackagingWheel(
+            parsed, directory_lease, file_lease, path, expected_identity,
+        )
+    except BaseException:
         if file_lease is not None:
             file_lease.close()
         if directory_lease is not None:
             directory_lease.close()
+        raise
 
 
 def _prove_packaging_wheel_bytes_for_test(
@@ -171,6 +241,20 @@ def _prove_packaging_wheel_bytes_for_test(
     limits: BuilderPackagingWheelLimits = BuilderPackagingWheelLimits(),
 ) -> _BuilderPackagingWheelByteProof:
     """Private byte parser seam with no reviewed-pin or held-lease claim."""
+
+    return _prove_packaging_wheel_payload_for_test(
+        wheel_bytes=wheel_bytes, expected_filename=expected_filename,
+        expected_size=expected_size, expected_sha256=expected_sha256,
+        limits=limits,
+    ).proof
+
+
+def _prove_packaging_wheel_payload_for_test(
+    *, wheel_bytes: bytes, expected_filename: str, expected_size: int,
+    expected_sha256: str,
+    limits: BuilderPackagingWheelLimits = BuilderPackagingWheelLimits(),
+) -> _BuilderPackagingWheelPayload:
+    """Return immutable bytes/members without path, pin, or lease authority."""
 
     _require_limits(limits)
     if (
@@ -191,7 +275,7 @@ def _prove_packaging_wheel_bytes_for_test(
         distribution = prove_packaging_distribution_members(members)
     except (StrictWheelArchiveError, PackagingDistributionContractError) as exc:
         _fail(str(exc))
-    return _BuilderPackagingWheelByteProof(
+    proof = _BuilderPackagingWheelByteProof(
         central_directory_digest=archive.central_directory_digest,
         member_set_digest=archive.member_set_digest,
         metadata_digest=distribution.metadata_digest,
@@ -205,6 +289,9 @@ def _prove_packaging_wheel_bytes_for_test(
         expanded_bytes=archive.expanded_bytes,
         compressed_bytes=archive.compressed_bytes,
     )
+    return _BuilderPackagingWheelPayload(
+        wheel_bytes=wheel_bytes, members=archive.members, proof=proof,
+    )
 
 
 def _public_admission(
@@ -217,7 +304,18 @@ def _public_admission(
         wheel_filename=PACKAGING_26_WHEEL_FILENAME,
         wheel_size=PACKAGING_26_WHEEL_SIZE,
         wheel_sha256="sha256:" + PACKAGING_26_WHEEL_SHA256,
-        **asdict(proof),
+        central_directory_digest=proof.central_directory_digest,
+        member_set_digest=proof.member_set_digest,
+        metadata_digest=proof.metadata_digest,
+        wheel_metadata_digest=proof.wheel_metadata_digest,
+        record_digest=proof.record_digest,
+        owned_files_digest=proof.owned_files_digest,
+        distribution_name=proof.distribution_name,
+        distribution_version=proof.distribution_version,
+        wheel_tag=proof.wheel_tag,
+        member_count=proof.member_count,
+        expanded_bytes=proof.expanded_bytes,
+        compressed_bytes=proof.compressed_bytes,
     )
 
 

@@ -1,5 +1,43 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-29: Wheel-bound inert packaging source phase 2C2a
+
+**Implemented and physically falsified as persistent inert source; not an
+installed, importable, executable, or authenticated builder.** One private
+Phase 2C1 capability retains the original wheel directory/file handles while
+the exact raw image and admitted members are written. Five WSP_62-bounded
+modules separate the canonical contract, O(depth) Windows writer, Windows
+store/root/topology leasing, full wheel-to-tree verifier, and
+no-replace/quarantine materializer.
+
+The generation identity binds the wheel pin and archive/distribution digests
+as well as the extracted dependency-tree digest. Canonical verification
+reparses the stored wheel, compares every extracted member byte-for-byte,
+proves exact file and empty-directory topology, and rejects ADS, hardlinks,
+reparse points, case aliases, mutation, corrupt
+reuse, and unowned no-replace winners. The exact O: artifact passed first
+publication plus 200 full reuses in 105.09 seconds with unchanged source SHA
+and bounded handle/RSS deltas. This is repeatability/leak evidence, not
+throughput or horizontal-scale proof. Public verification requires the fixed
+reviewed bytes but treats persisted lease booleans as non-authoritative. The
+live materializer exposes current-verification authority on publish/reuse and
+publication-time authority only for its own new publication. Stores are
+O:/E:-only and payload bounds/tokens fail before store creation. Every verification runs two
+consecutive complete passes, with every admitted child file/directory retained
+across pass two and a terminal handle plus complete-topology proof before
+release. This closes inter-pass and admitted-file tail mutation, and rejects a
+tail-added path before success; it is not persistent destination write denial,
+an atomic snapshot, or post-return immutability.
+
+**Next independently allocated P0 transaction (Phase 2C2b):** verify source
+S1, release its store lock, call the existing inert
+`materialize_dependency_runtime(...)`, verify source S2, require S1 == S2 and
+source `dependency_tree_digest == dependency generation_id`. It must not claim
+cross-store atomicity or delete/roll back a valid source generation when the
+dependency transaction fails. Sealed child execution, Git trust, loader/
+native/subprocess closure, deterministic controls, signing, empirical write
+denial, activation, A-grade, and retrieval RSI are later independent gates.
+
 ## 2026-08-29: Reviewed packaging wheel admission phase 2C1
 
 **Implemented and physically falsified as inert source admission; not an
@@ -17,11 +55,10 @@ provenance, signature, download/install, extraction/publication, import,
 execution, loader/native/subprocess/exact-runtime, write-denial, activation,
 A-grade, or retrieval-RSI evidence.
 
-**Next P0 transaction (Phase 2C2):** design and falsify held-handle directory
-publication/quarantine, extract only the already-admitted member bytes into a
-content-addressed inert source generation, and reuse
-`materialize_dependency_runtime(...)`. No Phase 2C1 receipt grants Phase 2C2
-authority.
+**Completed by Phase 2C2a:** held-handle source generation, exact admitted-byte
+extraction, no-replace publication, full reproof, and no-delete quarantine.
+The Phase 2C1 receipt itself still grants none of that authority. Dependency
+composition remains the separate Phase 2C2b transaction described above.
 
 ## 2026-08-29: Inert query-runtime builder authority phase 2B
 
@@ -46,14 +83,14 @@ validated inside the sorted unique 538-document index. A later WSP_15 slice
 should precompute the reference map once; this offline DocDAE scaling debt is
 not a query-runtime blocker.
 
-**Superseded next-step note:** Phase 2C1 now admits the reviewed source wheel;
-Phase 2C2 must seal a dedicated O:/E: builder child with a governed Git trust
-anchor and exact source-only packaging materializer,
-dependency-before-source import order, direct verified pre-import loader,
-native/DLL/subprocess closure, deterministic controls, signing, and empirical
-write denial. Run the real public wrapper integration and only then bind its
-authenticated producer receipt to candidate build/reproof. Activation, owner,
-route, VSIX, A-grade, and retrieval-RSI remain later independent gates.
+**Corrected next-step note:** Phase 2C2a supplies only the exact source-only
+packaging generation. Phase 2C2b may bind it to the already-existing inert
+dependency materializer. A sealed O:/E: child, governed Git trust, pre-import
+loader, native/DLL/subprocess closure, deterministic controls, signing, and
+empirical write denial are not Phase 2C2 promises; each requires a later
+independently falsified receipt before candidate build/reproof can accept an
+authenticated producer. Activation, owner, route, VSIX, A-grade, and
+retrieval-RSI remain later independent gates.
 
 ## 2026-08-29: Inert clean query-runtime candidate phase 2A
 
@@ -811,7 +848,8 @@ queries, and immutable replica revalidation are complete.
 The exact post-repair HEAD differential has zero errors and this non-zero
 accepted bridge set only:
 
-- WARNING: `INTERFACE.md` 1,147 lines.
+- WARNING: `INTERFACE.md` has an inherited 1,250-line no-growth boundary;
+  focused Phase 2C2a detail is extracted under `docs/clarity/`.
 - WARNING: append-only `ModLog.md` 1,613 lines.
 - WARNING: `src/holo_tools.py` 1,094 lines. Its candidate-grown `holo_search`
   is now a 41-line orchestrator with cohesive helpers, so the function error is

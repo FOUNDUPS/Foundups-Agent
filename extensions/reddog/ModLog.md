@@ -1,5 +1,20 @@
 # RedDog ModLog
 
+## 2026-08-29 - Wheel-bound packaging-source backend pin
+
+- Rebound the generated backend compatibility closure to include the five
+  inert Phase 2C2a source-generation modules: 1,388 runtime files at
+  `ff0fb87a81bf...e60c6`. The extension does not call the
+  materializer, expose private generation paths, compose a dependency runtime,
+  or change conversation, owner, route, query, execution, or VSIX behavior.
+- Backend compatibility and deterministic package-surface checks passed. The
+  67-file extension surface is 948,777 bytes at `e0d580ab82d7...f00359`.
+  No VSIX is emitted for this backend-only prerequisite slice.
+- Source persistence is backend-only evidence. Builder authentication,
+  provenance/signature, install/import/execution, loader/native/subprocess/
+  exact-runtime closure, determinism, write denial, activation, A-grade, and
+  retrieval RSI remain false. (WSP 00/15/22/50/62/84/97)
+
 ## 2026-08-29 - Reviewed packaging wheel admission compatibility pin
 
 - Rebound the extension backend compatibility constant to the generated

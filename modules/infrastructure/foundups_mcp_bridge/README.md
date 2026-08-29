@@ -32,9 +32,44 @@ The production API performs no network access, download, extraction,
 installation, publication, import, or execution. The PyPI comparison is not a
 signature or durable authenticated upstream-provenance proof. Builder-runtime,
 loader/native/subprocess/exact-runtime, write-denial, activation, A-grade, and
-retrieval-RSI authority remain false. Persistent source generation and reuse of
-the inert dependency materializer are the separate Phase 2C2 gate; see the
+retrieval-RSI authority remain false. Persistent source generation is the
+separate [Phase 2C2a interface gate](docs/clarity/REDDOG_BUILDER_PACKAGING_SOURCE_INTERFACE_PHASE2C2A.md); see the
 [Phase 2C1 assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md).
+
+Phase 2C2a now persists the exact retained-handle-read wheel bytes and only the
+already-admitted member bytes as one wheel-bound, content-addressed inert
+source generation. The generation identity cross-binds the reviewed wheel,
+strict archive/distribution digests, and the exact extracted dependency-tree
+digest, so a different wheel encoding cannot alias an identical tree. Windows
+writes use create-new files and O(depth) directory leases; staging and the
+atomic no-replace target each receive two consecutive complete full-byte
+wheel-to-tree passes. During pass two, bounded raw handles retain every admitted
+file and child directory; exit reproves each handle and complete live topology
+before release. Owned failures are preserved by no-delete quarantine.
+Public verification independently requires the fixed reviewed wheel bytes but
+never trusts a persisted lease boolean. Durable reproof returns both lease
+claims false. The live public materializer reports current-verification lease
+authority on every call and publication-time authority only for a generation
+that call actually publishes; reuse cannot inherit the historical claim.
+The private synthetic seam remains explicitly non-authoritative.
+Public bindings are path-free and expose every authority/nonclaim field. The
+destination is restricted to O:/E: before mutation. The exact O: artifact
+passed first publication plus 200 full reuses
+in 105.09 seconds with unchanged source bytes and bounded handles/RSS.
+
+This is source materialization, not installation or execution. Phase 2C2a does
+not call `materialize_dependency_runtime(...)`, import the tree, launch a
+child, or change an owner, route, query, extension, or VSIX. Authenticated
+upstream provenance, signature, builder authentication, loader/native/
+subprocess/exact-runtime closure, deterministic effects, write denial,
+activation, A-grade, and retrieval-quality RSI remain false. The terminal
+retained proof denies tail changes to admitted files and detects a tail-added
+path before success. It is not persistent destination write denial, an atomic
+filesystem snapshot, or post-return immutability. Phase 2C2b is a
+separate coordinator/reproof transaction that may reuse the existing inert
+dependency materializer without claiming cross-store atomicity.
+The proof boundary and rejected alternatives are recorded in the
+[Phase 2C2a assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_ASSUMPTION_AUDIT_PHASE2C2A.md).
 
 ## Holo retrieval runtime identity
 
