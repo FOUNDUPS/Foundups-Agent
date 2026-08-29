@@ -1,5 +1,37 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Inert declared Windows/CPython ABI attestation
+
+- Added WSP_62-bounded PE parser, metadata verifier, declared-name graph,
+  strict inventory/descriptor contract, independent verifier, and isolated
+  materializer for one exact runtime composition. The layer rehashes every
+  admitted native byte and binds AMD64 PE32+, compatible wheel tags, unique
+  exact RECORD ownership, normal/modern-delay imports, exports/forwarders, and
+  direct/reachable CPython ABI evidence without loading an image. Every
+  nonzero export target is mapped, every EAT slot is aggregate-accounted,
+  decoded name work is cached/bounded, and present delay tables are cardinality
+  matched.
+- Three independent WSP_00/WSP_97 audits returned NO-GO on the first draft.
+  Repaired delay dialect ambiguity, null/mismatched INT/IAT/HMOD structure,
+  multiplicative thunk work, forwarded Python exports, traversal/duplicate
+  RECORD rows, aggregate graph/resource bounds, absolute-path error leakage,
+  and Windows extended-path publication/quarantine. Added exact falsifiers for
+  each counterexample.
+- Split the declared graph into its own module and decomposed the fixture and
+  contract validators. Every new infrastructure source is below 600 lines and
+  every touched/new function is at or below the WSP_62 50-line ceiling.
+- Focused ABI/PE coverage passed 67 / one capability skip; the explicit
+  ABI/acceptance/composition/base/dependency/environment/process-image/sealed-
+  runtime adjacency passed 259 / seven expected capability skips.
+- The read-only O:-local production-shaped parser scan saw 396 native-suffix
+  artifacts: 388 PE32+ (384 AMD64, four ARM64) plus eight rejected PE32. The
+  broad dependency payload also retains duplicate RECORD ownership, so current
+  production admission correctly fails. No owner, route, Holo maintenance, or
+  Skill registry changed. The ABI source remains outside the executable
+  manifest and VSIX; only the shared long-path publication repair changed the
+  backend manifest and triggered the separately verified 0.4.139 release.
+  (WSP 00/15/22/50/62/83/84/87/97)
+
 ## 2026-08-29 - Inert exact runtime-composition generation
 
 - Added WSP_62-bounded contract, verifier, and materializer siblings that bind

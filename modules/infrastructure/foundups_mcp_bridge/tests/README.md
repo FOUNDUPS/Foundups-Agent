@@ -1,5 +1,27 @@
 # foundups_mcp_bridge Tests
 
+## Inert declared Windows/CPython ABI attestation
+
+- `test_reddog_holoindex_windows_pe.py` falsifies malformed/truncated PE,
+  unsupported delay dialects, null/mismatched normal and delay loader tables,
+  missing HMOD, repeated-thunk amplification, export-table nulls, forwarder
+  classification, overlap, ordinal handling, and resource-limit type/size
+  errors.
+- `test_reddog_holoindex_runtime_abi_contract.py` proves canonical path-free
+  inventory/descriptor identity, strict native/distribution cross-bindings,
+  exact numeric types, and permanently false activation-grade claims.
+- `test_reddog_holoindex_runtime_abi.py` proves exact composition reproof,
+  cp312/abi3 rules, non-forwarded Python exports, ambiguous declared-name
+  rejection, exact unique RECORD ownership, traversal rejection, aggregate
+  multi-image limits, stable path-free errors, no-replace publication/reuse,
+  tamper/mutation/alias rejection, and Windows long-path quarantine.
+- The focused result is 67 passed / one host-capability skip. Tests use only
+  disposable O:-local roots. The explicit ABI, acceptance-guard, composition,
+  base, dependency, runtime-environment, process-image, and sealed-runtime
+  adjacency passed 259 / seven expected capability skips. The production-shaped parser scan is read-only
+  and correctly leaves the mixed-architecture broad dependency closure
+  ineligible; it is not an activation or loader-resolution test.
+
 ## Current-truth global response ordering
 
 `test_holo_query_service_edges.py` proves broad current-status queries preserve

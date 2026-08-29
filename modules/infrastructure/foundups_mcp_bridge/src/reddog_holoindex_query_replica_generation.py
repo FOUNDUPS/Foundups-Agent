@@ -6,6 +6,8 @@ import ctypes
 import os
 from pathlib import Path
 
+from .reddog_windows_path_rename import rename_windows_path_no_replace
+
 
 class QueryReplicaGenerationError(RuntimeError):
     """Stable generation-publication failure."""
@@ -17,7 +19,12 @@ def publish_directory_no_replace(source: Path, target: Path) -> None:
     if target.exists():
         raise QueryReplicaGenerationError("QUERY_REPLICA_GENERATION_EXISTS")
     if os.name == "nt":
-        os.rename(source, target)
+        try:
+            rename_windows_path_no_replace(source, target)
+        except FileExistsError as exc:
+            raise QueryReplicaGenerationError(
+                "QUERY_REPLICA_GENERATION_EXISTS"
+            ) from exc
         return
     if os.uname().sysname != "Linux":
         raise QueryReplicaGenerationError(

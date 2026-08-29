@@ -4,10 +4,12 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
-## Current governed Holo status (2026-08-29)
+## Latest recorded governed Holo evidence (historical; receipts are authoritative)
 
-Exact main `9c27cd03953bb4573c0a1091f01af649434c872a` is active at immutable
-generation `sha256:4fdfbbb1...` and freshness receipt `sha256:50cff0ab...`.
+Static documentation is not a live route authority. At the start of the ABI
+transaction, the governed one-shot was `CURRENT` at exact base
+`6b06a3ba909e5dea9c72aae68114b376282107cd`, with no gap or reindex; the
+generation-bound query and activation receipts remain authoritative.
 The real pre-owner stale-HEAD transaction completed through OpenClaw/WRE, and
 a fresh one-shot query returned `CURRENT`, no gap, no reindex, and first-attempt
 success. Full production verification retained 33 artifacts / 222,979,317
@@ -112,6 +114,26 @@ publication took 588.32 seconds. A fresh repaired-verifier process then accepted
 generation `sha256:44e21db7...` / descriptor `sha256:cbbfe268...` in 579.54
 seconds with the descriptor unchanged and every activation-grade flag false.
 This full-tree proof is an offline release gate and never query-time work.
+
+The next inert prerequisite is a composition-bound Windows/CPython ABI attestation.
+`materialize_runtime_abi_attestation(...)` reproves the composition, parses every
+admitted `.exe`, `.dll`, and `.pyd` without loading it, and publishes path-free
+evidence in a separate store. It admits only AMD64 PE32+ and modern RVA delay
+descriptors, validates loader-table structure and forwarders, and enforces
+per-image/aggregate bounds. Compatible wheel tags and unique RECORD rows bind
+each admitted dependency-native byte by exact SHA-256 and size.
+
+This earns only declared PE/machine, wheel/RECORD, and reachable non-forwarded
+CPython export facts. Its basename graph is not Windows loader resolution.
+Search order, API sets, KnownDLLs, SxS, loaded modules, dynamic loading,
+signatures, determinism, bootstrap, write denial, activation, and exact closure
+remain schema-forced false.
+
+A read-only production-shape scan found 396 native-suffix artifacts: 388 PE32+
+(384 AMD64, four ARM64) and eight PE32; duplicate RECORD ownership also exists.
+The broad dependency generation is therefore ineligible. The next transaction
+must bind a query-runtime executable closure or clean pinned environment,
+without weakening architecture policy or adding filename ignores.
 
 ## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
 

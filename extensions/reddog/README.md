@@ -1,18 +1,12 @@
 # RedDog
 
-Version: 0.4.138
-0.4.138 adds the inert exact base/dependency runtime-composition boundary. It
-reproves both content-addressed payloads, binds the exact interpreter and
-isolated dependency launch topology, and publishes only a path-free descriptor;
-canonical verification uses exact-equality `B1 -> D1 -> D2 -> B2` reproof to
-detect one-shot cross-pass mutation without claiming ABA resistance or write
-denial. It is not reachable from the VSIX or owner. ABI/native-loader closure,
-deterministic effects, pre-import safety, signing, empirical write denial,
-route-v2 activation, A-grade, and retrieval RSI remain blocked. Exact main
-`9c27cd03` passed the governed OpenClaw/WRE refresh, CURRENT owner query, and
-unchanged 33-artifact replica verification.
+Version: 0.4.139
+0.4.139 rebinds the extension after shared Windows long-path/no-replace publication hardening and records a separate inert, composition-bound Windows/CPython declared-ABI layer.
+The bounded PE32+ parser, wheel/RECORD verifier, and declared-name graph inspect static evidence without loading a native image.
+ABI source remains outside the executable backend manifest, VSIX, owner, and route.
+External loader resolution, deterministic/pre-import execution, signing, empirical write denial, route-v2 activation, A-grade, and retrieval RSI remain blocked.
 
-This candidate integrity-binds RedDog to the 1,365-file backend closure, including the operator controller, exact task-bound OpenClaw execution, receipt-bound owner cycles, integrity-bound AgentDB claim lease, and fail-closed runtime/task liveness.
+This candidate integrity-binds RedDog to the 1,366-file backend closure at `sha256:4e634b8c7b99...8b37`, including the operator controller, exact task-bound OpenClaw execution, receipt-bound owner cycles, integrity-bound AgentDB claim lease, and fail-closed runtime/task liveness.
 The operator controller remains outside the thin-client command surface, and the VSIX gains no maintenance, reindex, promotion, or execution authority.
 
 ## Continuous conversation surface
@@ -1000,9 +994,4 @@ npm run test:package
 vsce package --no-dependencies
 ```
 
-From Cursor:
-
-1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.137.vsix` (or current package version).
-3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
-4. Run `RedDog: Open` from Command Palette or the three-dot command list.
+From Cursor, run `Extensions: Install from VSIX...`, choose `reddog-0.4.139.vsix` (or the current version), reload the window, then run `RedDog: Open`; do not use workspace-extension install for normal operation.

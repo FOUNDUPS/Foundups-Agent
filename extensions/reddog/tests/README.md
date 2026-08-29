@@ -1,5 +1,30 @@
 # RedDog Extension Tests
 
+## 0.4.139 declared Windows/CPython ABI evidence release
+
+- The extension advances because the authenticated backend manifest changed
+  after shared Windows extended-path/no-replace publication hardening. The
+  inert ABI modules themselves remain outside the executable backend manifest,
+  VSIX, owner, and route.
+- Focused ABI/PE tests pass 67 / one capability skip; the explicit non-scale
+  ABI/acceptance/composition/base/dependency/environment/process/sealed-runtime
+  adjacency passes 259 / seven expected capability skips.
+- Backend manifest check is 1,366 files at `4e634b8c7b99...8b37`; its eight
+  independent generator tests pass. Contract identity is
+  `d68f91db0908...cce6` across 18 shards / 6,942 lines / 492 assertions.
+- The final deterministic package is 67 files / 948,777 bytes at
+  `sha256:44272f6f1e8f...06ed3`. Fast 14-member, O:-venv conversation
+  (32 Python / 15 JavaScript vectors), contract 3-member, package, and all four
+  exhaustive groups pass; the final exhaustive wall is 173.373 seconds.
+- The externally stored and inspected `reddog-0.4.139.vsix` is 276,340 bytes at
+  `sha256:5deb3c4df7ac...15ec`, with 69 safe unique entries, 67 exact mapped
+  source members, and zero duplicate, case-collision, encryption, symlink,
+  unsafe-path, sensitive-name, source-byte-mismatch, or credential-pattern
+  findings.
+- The tests do not load a native image or grant loader, owner, route,
+  maintenance, activation, signing, write-denial, A-grade, or retrieval-RSI
+  authority.
+
 ## 0.4.138 inert exact runtime composition
 
 - The release changes no extension authority. It binds versioned documentation

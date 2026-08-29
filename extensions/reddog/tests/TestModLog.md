@@ -1,5 +1,30 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-29 - Declared Windows/CPython ABI evidence release (0.4.139)
+
+- Hostile WSP_00/WSP_97 review rejected the first candidate for delay-table,
+  forwarder, aggregate-bound, RECORD ownership, exception-leakage, Windows
+  long-path, and WSP_62 defects. Each reproduced defect now has a focused
+  fail-closed regression.
+- Final ABI/PE evidence is **67 passed / one capability skip**; explicit
+  non-scale adjacency is **259 passed / seven expected capability skips**.
+  New infrastructure sources are 485/456/267/360/247/534/40 lines and no new
+  function exceeds the inclusive 50-line ceiling.
+- Backend manifest is 1,366 files at `4e634b8c7b99...8b37`; all eight generator
+  tests pass. Contract identity is `d68f91db0908...cce6` / 18 shards / 6,942
+  lines / 492 assertions. Package identity is 67 files / 948,777 bytes at
+  `44272f6f1e8f...06ed3`.
+- Final release replay passes fast 14-member, O:-venv conversation 32-Python /
+  15-JavaScript-vector, contract 3-member, deterministic package, and all four
+  exhaustive groups in 173.373 seconds without timeout.
+- VSIX inspection proves version 0.4.139, 276,340 bytes,
+  `sha256:5deb3c4df7ac...15ec`, 69 safe unique entries, 67 exact mapped source
+  members, and zero archive, path, byte, sensitive-name, or credential-pattern
+  defect.
+- ABI source remains inert and outside the executable backend manifest. No test
+  or package action changed Holo maintenance, owner, route, queue, ACL,
+  activation, external loader, signing, write denial, A-grade, or retrieval RSI.
+
 ## 2026-08-29 - Inert exact runtime composition release (0.4.138)
 
 - Added strict composition contract/materializer/verifier falsifiers and an

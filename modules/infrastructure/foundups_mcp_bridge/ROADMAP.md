@@ -1,5 +1,29 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-29: Inert declared Windows/CPython ABI attestation
+
+**Implemented and hostile-tested; still not activation.** A dependency-free,
+bounded PE32+ parser, wheel/RECORD verifier, declared-name graph, composition-
+bound descriptor verifier, and isolated materializer now attest admitted
+AMD64 native images without loading them. Independent WSP_97 review falsified
+the first draft on delay-attribute dialect, null/missing loader tables,
+per-descriptor resource amplification, export forwarders, duplicate RECORD
+rows, path-leaking errors, Windows long-path quarantine, and WSP_62 growth.
+The repaired layer accepts only the modern RVA delay dialect, validates paired
+INT/IAT structure and writable HMOD virtual span, caches repeated thunk tables,
+uses aggregate limits, excludes forwarded Python exports, rejects ambiguous
+RECORD paths, translates OS errors to stable codes, and keeps every new source
+file below the infrastructure threshold with functions at or below 50 lines.
+
+The production-shape read-only scan proves why activation remains blocked:
+the broad dependency snapshot contains eight PE32 and four ARM64 artifacts as
+well as duplicate RECORD ownership. Do not weaken the AMD64/CP312 contract.
+The next P0 slice is a separately content-bound executable-closure manifest
+that classifies Python-importable native modules and declared dynamic loads,
+or a clean pinned query-only environment. Only after that closure passes may
+actual Windows loader resolution, dynamic loading, signatures, deterministic
+pre-import execution, write denial, and route-v2 be attempted.
+
 ## 2026-08-29: Inert exact runtime-composition generation
 
 **Implemented; still not activation.** A strict path-free composition contract,
