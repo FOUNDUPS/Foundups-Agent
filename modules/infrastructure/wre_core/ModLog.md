@@ -4574,3 +4574,12 @@ Phase 3 completes the autonomous execution chain:
 5. **Regression coverage**:
    - Updated existing tests for `_run(..., cwd=...)` support.
    - Added multi-lock aggregation test validating scope, lock count, and aggregated severity totals.
+# 2026-08-29 - WRE Git process timeout test contract correction
+
+- Corrected inherited test drift after the bounded Git byte pump was split
+  into `wre_git_process_io.py`: the archive suite now exercises the public
+  `run_bounded_process(...)` timeout behavior instead of a removed private
+  helper. No production source or runtime behavior changed.
+- Grounded by current Holo evidence at exact base
+  `7269deb66f638cc6bbb8239aecf0c8b5ae6b8d22` and documented under WSP 15,
+  WSP 50, WSP 62, and WSP 97 before resuming RedDog Phase 2C.
