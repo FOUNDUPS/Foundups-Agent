@@ -1,5 +1,24 @@
 # foundups_mcp_bridge Tests
 
+## Sequential builder/dependency composition
+
+- `test_reddog_holoindex_query_runtime_builder_dependency_composition.py`
+  proves the exact source/dependency/source call order, current live source
+  authority at both observations, durable S1/S2 identity, call-local
+  publication-truth exclusion, dependency-tree equality, and one real inert
+  dependency materialization from the reproved source tree. Its physical gate
+  calls the sealed public coordinator against the reviewed O:/E: wheel for
+  first publication and complete reuse, skipping only when that artifact is
+  not provisioned.
+- Falsifiers cover source drift, tree mismatch, publication-field type
+  confusion, non-boolean reuse observations, absent live authority at either
+  observation, invalid dependency evidence/nonclaims, path-free stable failures
+  at all three stages, source
+  preservation without rollback, and exhaustive path-free composition
+  nonclaims. This proves a sequential structural binding only; no cross-store
+  atomicity, simultaneous snapshot, install/import/execution, authenticated
+  runtime, activation, A-grade, or retrieval RSI is claimed.
+
 ## Inert clean query-runtime candidate
 
 - `test_reddog_holoindex_query_runtime_candidate_contract.py` proves exact

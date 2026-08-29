@@ -57,19 +57,18 @@ destination is restricted to O:/E: before mutation. The exact O: artifact
 passed first publication plus 200 full reuses
 in 105.09 seconds with unchanged source bytes and bounded handles/RSS.
 
-This is source materialization, not installation or execution. Phase 2C2a does
-not call `materialize_dependency_runtime(...)`, import the tree, launch a
-child, or change an owner, route, query, extension, or VSIX. Authenticated
-upstream provenance, signature, builder authentication, loader/native/
-subprocess/exact-runtime closure, deterministic effects, write denial,
-activation, A-grade, and retrieval-quality RSI remain false. The terminal
-retained proof denies tail changes to admitted files and detects a tail-added
-path before success. It is not persistent destination write denial, an atomic
-filesystem snapshot, or post-return immutability. Phase 2C2b is a
-separate coordinator/reproof transaction that may reuse the existing inert
-dependency materializer without claiming cross-store atomicity.
-The proof boundary and rejected alternatives are recorded in the
-[Phase 2C2a assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_ASSUMPTION_AUDIT_PHASE2C2A.md).
+This remains inert materialization, not installation or execution. Phase 2C2b
+now composes the source generation with the existing dependency materializer
+through the focused [sequential composition interface](docs/clarity/REDDOG_BUILDER_DEPENDENCY_COMPOSITION_INTERFACE_PHASE2C2B.md).
+It observes source S1, releases that call, materializes the dependency, then
+observes source S2 and requires durable S1/S2 identity plus
+`source.dependency_tree_digest == dependency.generation_id`. It adds no outer
+or cross-store lock, rollback, deletion, or persisted composition artifact.
+Therefore cross-store atomicity, a simultaneous snapshot, persistent write
+denial, post-return immutability, provenance/signature, install/import/
+execution, authenticated builder/loader/native/subprocess/exact-runtime
+closure, deterministic effects, activation, A-grade, and retrieval-quality
+RSI remain false; see the [Phase 2C2b assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C2B.md).
 
 ## Holo retrieval runtime identity
 

@@ -221,6 +221,10 @@ def _assert_registry_and_builder_runtime_files(generated: dict[str, object]) -> 
         "modules/infrastructure/wre_core/src/wre_test_registry_impact_binding.py",
         "modules/infrastructure/wre_core/src/wre_test_registry_scope_plan.py",
         "modules/infrastructure/wre_core/src/wre_recognized_dependency_binding.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_dependency_composition_contract.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_dependency_composition.py",
     ):
         assert relative in required
     for relative in (
@@ -257,7 +261,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "ff0fb87a81bf5304688c138f79207789ffbf916a7be1181c956638f1340e60c6"
+    assert digest == "a5831a36d548792b080aa841ebd308f972668f1daa2dc60b86891f97b5485509"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")
