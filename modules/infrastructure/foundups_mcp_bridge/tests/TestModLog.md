@@ -1,5 +1,36 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-29] Phase 2B.1 pinned-Git live-gate contract correction
+
+- Corrected the skipped O:/E: integration gate: a worktree-only mutation now
+  must reprove identical committed-HEAD Git authority. The prior expected
+  `REPOSITORY_STATE_INVALID` had no production path because the Git component
+  intentionally avoids worktree porcelain and never claims global cleanliness.
+- Preserved the layered rejection boundary: source-authority tests continue to
+  reject bound worktree bytes that differ from either the backend manifest or
+  their exact committed HEAD blobs. No production authority code changed.
+- Fresh verification recorded 2026-08-29 19:20 JST (failure signature: none):
+  - `& 'O:/Foundups-Agent/.venv/Scripts/python.exe' -m pytest
+    modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_git.py
+    modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_source.py
+    -q --basetemp='O:/tmp/reddog-phase2b1-pytest'`:
+    **29 passed / 1 expected O:/E: Git-image skip in 0.59s**.
+  - `$tests = Get-ChildItem
+    modules/infrastructure/foundups_mcp_bridge/tests
+    -Filter 'test_reddog_holoindex_query_runtime_builder*.py' |
+    Sort-Object Name; & 'O:/Foundups-Agent/.venv/Scripts/python.exe'
+    -m pytest @($tests.FullName) -q
+    --basetemp='O:/tmp/reddog-phase2b1-builder-suite'`:
+    **77 passed / 2 expected Git-image/opt-in-scale skips in 1.92s**.
+  - `& 'O:/Foundups-Agent/.venv/Scripts/python.exe' -m pytest
+    modules/infrastructure/wre_core/tests/test_wre_test_registry.py -q
+    --basetemp=O:/tmp/reddog-phase2b1-registry`: **28 passed in 11.00s**.
+  - `& 'O:/Foundups-Agent/.venv/Scripts/python.exe'
+    scripts/generate_reddog_backend_manifest.py --check`: **PASS**, 1,378
+    runtime files, digest `48a91fa832bd99de90d9580394ac2a5da492a0925aed36b90c3cea7508d3fc1d`.
+  Evidence is bound in
+  `docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_WSP97_EXECUTION_RECEIPT_PHASE2B1.json`.
+
 ## [2026-08-29] Inert query-runtime builder authority falsification
 
 - Added six focused builder suites for the cross-bound receipt, actual-process

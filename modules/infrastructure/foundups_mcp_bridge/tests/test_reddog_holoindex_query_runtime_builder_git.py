@@ -278,7 +278,7 @@ def _sha256_file(path: Path) -> str:
     return "sha256:" + hasher.hexdigest()
 
 
-def test_live_oe_pinned_git_authority_when_provisioned() -> None:
+def test_live_oe_pinned_git_authority_binds_head_not_worktree_when_provisioned() -> None:
     raw = os.environ.get("REDDOG_PINNED_GIT_EXE", "")
     executable = Path(raw) if raw else Path()
     if (
@@ -302,11 +302,11 @@ def test_live_oe_pinned_git_authority_when_provisioned() -> None:
         assert authority.repo_head_sha == head
         assert authority.committed_files[0][0:2] == ("bound.py", len(b"BOUND = True\n"))
         (root / "bound.py").write_bytes(b"BOUND = False\n")
-        with pytest.raises(QueryRuntimeBuilderGitError, match="REPOSITORY_STATE_INVALID"):
-            prove_pinned_git_authority(
-                root=root, expected_head=head, executable=executable,
-                expected_digest=_sha256_file(executable), bound_paths=("bound.py",),
-            )
+        reproved = prove_pinned_git_authority(
+            root=root, expected_head=head, executable=executable,
+            expected_digest=_sha256_file(executable), bound_paths=("bound.py",),
+        )
+        assert reproved == authority
 
 
 def test_stream_validation_errors_map_to_stable_git_errors(monkeypatch) -> None:

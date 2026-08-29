@@ -9870,6 +9870,27 @@
     },
     {
       "doc_type": "other",
+      "hash_sha256": "bfc24b4212d0d989966118ad8982f0e69ea5e38e3736fcef61e9a705cbd0a012",
+      "links": {
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ],
+        "entry_points": [
+          "modules/infrastructure/foundups_mcp_bridge/ModLog.md"
+        ]
+      },
+      "module_hint": "holo_index",
+      "path": "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_CORRECTION_PHASE2B1.md",
+      "size_bytes": 2542,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 15",
+        "WSP 97"
+      ]
+    },
+    {
+      "doc_type": "other",
       "hash_sha256": "0b4bd4c874a59ff3064d47df2c3ac07392e0c1afba68e3dfabe68a54a786a718",
       "links": {
         "automation": [
@@ -11493,5 +11514,5 @@
       ]
     }
   ],
-  "generated_at": "2026-08-29T08:38:49.183366Z"
+  "generated_at": "2026-08-29T10:10:26.573288Z"
 }

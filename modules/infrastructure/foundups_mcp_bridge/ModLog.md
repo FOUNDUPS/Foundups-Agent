@@ -1,5 +1,17 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-29 - Phase 2B.1 pinned-Git test-contract correction
+
+- Corrected one opt-in live O:/E: test that incorrectly expected the pinned-Git
+  component to reject a worktree-only byte mutation. Direct reproduction proved
+  HEAD, tree, index flags, and committed blobs remain invariant, which is the
+  component's intentional authority boundary.
+- Kept worktree-byte rejection in source authority, where bytes are compared to
+  the backend manifest and exact HEAD blobs. No production code, public API,
+  runtime, route, owner, activation, or RSI claim changed.
+- Recorded the verified assumptions and failure disposition in
+  `docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_CORRECTION_PHASE2B1.md`.
+
 ## 2026-08-29 - Inert query-runtime builder authority phase 2B
 
 - Added separate process, packaging, pinned-Git, repository-source, and receipt
