@@ -461,3 +461,6 @@ modules/platform_integration/antifafm_broadcaster/telemetry/
 # RedDog Fusion extension VSIX (build artifact — package with vsce, do not commit)
 extensions/foundups_advisory_workers/*.vsix
 extensions/reddog/*.vsix
+
+# Private patent drafts and unpublished enabling material
+private/patents/

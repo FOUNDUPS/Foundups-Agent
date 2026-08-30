@@ -99,6 +99,10 @@ implementation sources of truth:
    and future white-label products.
 6. PQN Swarm Hub internal PoC:
    incubate inside `modules/foundups/` until gate/registry/rESP/ROC contracts stabilize.
+7. RedDog Lick integration:
+   connect FoundUps/AutoPost encounter capture to RedDog's consent-first,
+   non-authoritative connection handshake; begin with participant claim and
+   device/passkey evidence before any biometric research lane.
 
 ### P2 (After)
 1. Dynamic pricing and queue optimization.
@@ -160,4 +164,3 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
   modules/foundups/agent_market/tests `
   modules/foundups/simulator/tests -q
 ```
-
