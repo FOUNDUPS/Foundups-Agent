@@ -1,0 +1,103 @@
+{
+  "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
+  "foundup_id": "esingularity_001",
+  "name": "eSingularity",
+  "version": "0.1.0",
+  "description": "Japanese-first community campaign to save Sukatto Land Kuzuryu and demonstrate a new local future for Fukui.",
+  "tagline": "温泉を守る。福井のAIの未来をつくる。",
+  "tier": "F0_DAE",
+  "lifecycle_stage": "proto",
+  "entry_url": "https://esingularity.ai/",
+  "routing_prefix": "/f/esingularity_001",
+  "icon_url": "frontend/public/pwa-icon-192.png",
+  "required_subscription_tier": "free",
+  "is_invite_only": false,
+  "capabilities": ["community_campaign", "multilingual", "offline", "pwa"],
+  "agent_routes": [],
+  "holo_collections": [],
+  "data_namespace": "idb_esingularity_001",
+  "cabr_contract": {
+    "v1_gate": "not_applicable",
+    "v2_proof": "not_applicable",
+    "v3_score_min": 0.0
+  },
+  "owner_id": "012",
+  "category": "community",
+  "launch_readiness": "ready",
+  "created_at": "2026-08-30T00:00:00Z",
+  "build_contract": {
+    "contract_version": "0.1.0",
+    "foundup_id": "esingularity_001",
+    "module_path": "modules/foundups/esingularity",
+    "owner_lane": "WRE",
+    "status": "BASELINE_DECLARATIVE_ONLY",
+    "build": {
+      "mode": "build",
+      "command": ["npm", "run", "build"],
+      "working_directory": "modules/foundups/esingularity/frontend",
+      "notes": "Declarative validation command only; no autonomous deployment authority."
+    },
+    "test": {
+      "command": ["python", "-m", "pytest", "modules/foundups/esingularity/tests"],
+      "required": true,
+      "notes": "Manifest, registry, route, and hosting contract tests."
+    },
+    "dry_run": {
+      "required": true,
+      "default": true,
+      "command": null,
+      "notes": "Dry-run is required before any WRE execution."
+    },
+    "safe_mutation_surface": ["modules/foundups/esingularity/**"],
+    "forbidden_paths": [
+      ".env",
+      ".env.*",
+      "main.py",
+      "**/*_dae.py",
+      "**/vendor/**",
+      "**/wallet/**",
+      "**/token/**",
+      "**/reward/**",
+      "**/payout/**",
+      "**/cabr/**",
+      "**/blockchain/**",
+      "**/credentials*",
+      "**/secrets*"
+    ],
+    "required_gates": [
+      "genesis_gate",
+      "manifest_gate",
+      "dry_run_gate",
+      "test_gate",
+      "destructive_action_guard_d0_d6",
+      "typed_exec_boundary",
+      "no_live_launch",
+      "policy_required_sovereign_valve_for_non_dry_run"
+    ],
+    "evidence_output": {
+      "path": "modules/foundups/esingularity/evidence/",
+      "redaction_required": true,
+      "notes": "Evidence path declaration only."
+    },
+    "readiness": {
+      "manifest_ready": false,
+      "build_ready": false,
+      "autonomous_execution_ready": false,
+      "reason": "The public site builds normally, but WRE manifest/build promotion and autonomous deployment remain disabled."
+    }
+  },
+  "execution_routing": {
+    "orchestrator": "openclaw",
+    "executor": "hermes",
+    "auditor": "ai_overseer",
+    "wre_coordinator": true,
+    "external_agent_allowed": false,
+    "external_agent_contract_required": true,
+    "declarative_only": true,
+    "can_self_authorize": false,
+    "build_plan_source": "modules/foundups/agent/src/build_plan_generator.py",
+    "job_contract_source": "modules/communication/moltbot_bridge/src/foundup_job_contract.py",
+    "notes": "Routing declaration only. It grants no deployment, CABR, payout, DAO, or destructive authority."
+  },
+  "signature": ""
+}
