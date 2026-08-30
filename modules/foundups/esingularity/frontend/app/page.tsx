@@ -3,6 +3,7 @@ import Link from 'next/link';
 import EventAlert from '../components/EventAlert';
 import LineButton from '../components/LineButton';
 import Brand from '../components/Brand';
+import HeroMusic from '../components/HeroMusic';
 
 const LINE_URL = 'https://line.me/ti/p/baXEozL_Q6';
 
@@ -24,20 +25,43 @@ export default function Home() {
       </header>
 
       <main id="top">
-        <section className="hero" aria-labelledby="hero-title">
+        <section className="hero" id="hero" aria-labelledby="hero-title">
           <div className="hero-grid" aria-hidden="true" />
           <EventAlert />
           <div className="hero-copy">
-            <p className="eyebrow"><span /> 温泉を守る · 福井の選択</p>
+            <p className="eyebrow"><span /> WHY · 温泉を守る</p>
             <h1 id="hero-title">温泉を守り、<br /><em>地域のAI基盤でまちを元気に。</em></h1>
-            <p className="hero-lead">後戻りできなくなる前に、もう一つの未来を比べる機会をください。建物を残して温泉を再開し、上階を学びと挑戦の拠点へ。周辺の土地には福井のAI基盤をつくり、食・祭り・地域の仕事を育てます。</p>
+            <p className="hero-lead">壊すために公費を使う前に、この建物で福井の未来をつくろう。温泉を再開する。学びと起業の拠点をつくる。地域のコンピュートの熱を、地域へ返す。</p>
             <div className="hero-actions"><a className="button button-primary" href={LINE_URL} target="_blank" rel="noreferrer">LINEで仲間になる <span>↗</span></a><a className="button button-ghost" href="#story">計画を見る <span>↓</span></a></div>
+            <HeroMusic />
+          </div>
+        </section>
+
+        <section className="future-place section" id="future-place" aria-labelledby="future-place-title">
+          <div className="future-place-heading">
+            <div><p className="eyebrow"><span /> WHAT · ここがどう変わる？</p><h2 id="future-place-title">温泉を残す。<br /><em>夜まで人が集まる場所</em>をつくる。</h2></div>
+            <p>保存するだけではありません。温泉、地域の食、小さな商い、学び、光の文化を一つの場所につなぐ構想です。</p>
+          </div>
+          <div className="future-place-visuals">
+            <figure className="future-place-visual">
+              <Image src="/satellite-view.jpeg" alt="既存建物、駐車場、周辺土地を使ったプロジェクト配置構想" width={1320} height={1245} sizes="(max-width: 670px) 100vw, 50vw" />
+              <figcaption><span>SITE CONCEPT</span> 012提供の配置構想です。完成済みの施設を示す画像ではありません。</figcaption>
+            </figure>
+            <figure className="future-place-visual">
+              <Image src="/concept-onsen.jpg" alt="露天風呂と小さな飲食店が夜に集まる将来構想" width={440} height={290} sizes="(max-width: 670px) 100vw, 50vw" />
+              <figcaption><span>ONSEN CONCEPT</span> 温泉と地域の食がつながる将来イメージです。実際の配置・規模・熱利用は調査で決まります。</figcaption>
+            </figure>
+          </div>
+          <div className="future-place-cards" role="list">
+            <article role="listitem"><span>01 · ROTENBURO</span><h3>日本初を目指す、<br />コンピュート排熱の露天風呂。</h3><p>回収できる熱を片側の露天風呂に集中し、男女どちらの湯を温めるかを日替わりでシステムが案内する構想です。</p><small>ENGINEERING VALIDATION REQUIRED</small></article>
+            <article role="listitem"><span>02 · FOOD</span><h3>あわら型の、<br />小さなコンテナ横丁。</h3><p>あわら温泉の横丁型モデルに着想を得て、地域の料理人、農家、学生が小さく商いを始められる場所へ。</p><small>AWARA-INSPIRED COMMUNITY FOOD COURT</small></article>
+            <article className="akira-card" role="listitem"><Image src="/akira-hasegawa.jpeg" alt="D-K（デジタル掛け軸）を提唱する長谷川章氏" width={1320} height={1323} sizes="(max-width: 1050px) 100vw, 33vw" /><span>03 · NIGHT</span><h3>夜は、長谷川章氏の<br />D-Kという光の舞台へ。</h3><p>建物を毎晩変化する光のキャンバスにする構想。九頭竜の水と龍を、地域の新しい夜景にします。</p><small>PROPOSED DIGITAL KAKEJIKU EXPERIENCE</small></article>
           </div>
         </section>
 
         <section className="innovation-hub section" id="innovation-hub" aria-labelledby="innovation-hub-title">
           <div className="hub-heading">
-            <div><p className="eyebrow light"><span /> ESINGULARITY INNOVATION HUB</p><h2 id="innovation-hub-title">温泉の上に、<br /><em>福井の学びと挑戦</em>を重ねる。</h2></div>
+            <div><p className="eyebrow light"><span /> HOW · ESINGULARITY INNOVATION HUB</p><h2 id="innovation-hub-title">温泉の上に、<br /><em>福井の学びと挑戦</em>を重ねる。</h2></div>
             <p>1階の温泉を地域の居場所として再開し、その上を世代ごとの学び、研究、起業がつながる場所へ。これは現時点の構想であり、建物調査と地域・所有者との合意を経て具体化します。</p>
           </div>
 
@@ -46,10 +70,10 @@ export default function Home() {
           </div>
 
           <div className="hub-floors" role="list" aria-label="Innovation Hub floor concept">
-            <article role="listitem"><span>01F</span><div><strong>温泉と地域の居場所</strong><p>温泉を再開し、世代を超えて人が集まる入口に。</p></div></article>
-            <article role="listitem"><span>02F</span><div><strong>小・中学生</strong><p>AIを安全に学び、先生と一緒に試せる学習スタジオ。</p></div></article>
-            <article role="listitem"><span>03F</span><div><strong>高校生・大学生</strong><p>地域の課題を教材に、研究と実践をつなぐ場所。</p></div></article>
-            <article role="listitem"><span>04F</span><div><strong>大学プロジェクト・スタートアップ</strong><p>研究を実証し、福井で新しい仕事へ育てる場所。</p></div></article>
+            <article role="listitem"><span>GROUND FLOOR</span><div><strong>温泉とコミュニティ空間</strong><p>温泉、大きな露天風呂、あわら型コンテナ・フードコート。</p></div></article>
+            <article role="listitem"><span>2ND FLOOR</span><div><strong>小・中学生</strong><p>AIを安全に学び、先生と一緒に試せる学習スタジオ。</p></div></article>
+            <article role="listitem"><span>3RD FLOOR</span><div><strong>高校生・大学生</strong><p>地域の課題を通じて、研究と実践をつなぐ場所。</p></div></article>
+            <article role="listitem"><span>4TH FLOOR</span><div><strong>大学プロジェクト・スタートアップ</strong><p>研究を試し、福井の新しい仕事へ育てる場所。</p></div></article>
           </div>
           <p className="hub-caveat">構想図：階ごとの利用方法は、耐震・設備・消防・法令調査と関係者協議により変更されます。</p>
 
@@ -85,7 +109,7 @@ export default function Home() {
         </section>
 
         <section className="story section" id="story" aria-labelledby="story-title">
-          <div className="section-index">01 <span>/ THE BUILDING</span></div>
+          <div className="section-index">WHY <span>/ THE BUILDING</span></div>
           <div className="story-heading"><div><p className="eyebrow"><span /> A PUBLIC ASSET WITH A HISTORY</p><h2 id="story-title">これは、古い建物の話ではない。<br /><em>次の30年</em>を選ぶ話です。</h2></div><p>1994年、市民の健康・交流・憩いのために開館。天然温泉、体育館、宴会場、宿泊・研修機能を備え、2018年度には約13万人が利用しました。公の施設としての機能は2021年6月に廃止されました。</p></div>
 
           <div className="fact-rail" role="list" aria-label="Facility facts">
@@ -103,7 +127,7 @@ export default function Home() {
         </section>
 
         <section className="proposal section" id="proposal" aria-labelledby="proposal-title">
-          <div className="section-index">03 <span>/ THE PROPOSAL</span></div>
+          <div className="section-index">HOW <span>/ AI RICE FIELD</span></div>
           <div className="proposal-intro"><div><p className="eyebrow"><span /> AIの田んぼ</p><h2 id="proposal-title">AIにも、<br /><em>「ごはん」</em>が必要です。</h2></div><p>人にお米をつくる田んぼがあるように、AIには「計算する力」を生み出す場所が必要です。それがデータセンターです。</p></div>
           <div className="ai-rice-flow" aria-label="AIの田んぼが計算力を生み出す流れ">
             <article><span aria-hidden="true">⚡</span><strong>電力・データ・<br />コンピューター</strong></article>
@@ -119,42 +143,22 @@ export default function Home() {
         </section>
 
         <section className="people section" id="people" aria-labelledby="people-title">
-          <div className="section-index">07 <span>/ WHO MUST BE IN THE ROOM</span></div>
+          <div className="section-index">WHO <span>/ COMMUNITY</span></div>
           <div className="people-grid"><div className="people-intro"><p className="eyebrow"><span /> NOT A TOP-DOWN PROJECT</p><h2 id="people-title">最初に集めるのは、<br />お金ではなく<em>当事者</em>です。</h2><Image src="/why-preserve.jpg" alt="公共資産、地域AI基盤、農業・教育・産業の未来を守る" width={451} height={486} sizes="(max-width: 1050px) 70vw, 38vw" /></div><div className="stakeholder-list">{stakeholderRings.map(([number, title, body]) => <article key={number}><span>{number}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></div>
         </section>
 
         <section className="community-calendar section" id="meetings" aria-labelledby="meetings-title">
-          <div className="calendar-heading"><div><p className="eyebrow light"><span /> COMMUNITY MEETINGS</p><h2 id="meetings-title">会って、<br /><em>話す。</em></h2></div><p>ウェブサイトだけで決めるプロジェクトではありません。周辺地域を歩き、住民の経験、心配、希望を聞くことから始めます。</p></div>
+          <div className="calendar-heading"><div><p className="eyebrow light"><span /> WHEN · COMMUNITY MEETINGS</p><h2 id="meetings-title">会って、<br /><em>話す。</em></h2></div><p>ウェブサイトだけで決めるプロジェクトではありません。周辺地域を歩き、住民の経験、心配、希望を聞くことから始めます。</p></div>
           <div className="calendar-grid">
             <article className="public-meeting"><span>次回の公開ミーティング</span><strong>日程・場所を確認中</strong><p>公開できる情報が確定してから掲載します。先に案内を受け取りたい方は、LINEコミュニティにご参加ください。</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEで案内を受け取る <b>↗</b></a></article>
             <details className="member-calendar"><summary><span>メンバー予定</span><strong>LINEコミュニティ参加者向け</strong></summary><div><p>地域での小さな対話、準備会、情報共有の詳しい予定を、参加メンバーへLINEでお知らせする構想です。</p><p className="calendar-honesty">現在、このウェブサイトに会員認証や保護されたカレンダーはありません。ボタンが専用ページを開くようには見せません。</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEに参加 <b>↗</b></a></div></details>
           </div>
         </section>
 
-        <section className="team section team-preview" id="team" aria-labelledby="team-title">
-          <div className="section-index light">08 <span>/ TEAM & NETWORK</span></div>
-          <div className="team-preview-heading"><div><p className="eyebrow light"><span /> PEOPLE BEFORE ORGANIZATION</p><h2 id="team-title">いまは、<br /><em>二人から。</em></h2></div><div><p>人間の012とAI共同開発者の0102。確認できた役割だけを公開し、地域の参加とともにチームを育てます。</p><Link className="button button-primary" href="/team">チームを見る <span>→</span></Link></div></div>
-          <div className="team-preview-grid">
-            <Link className="team-preview-card card-012" href="/team/012"><div><Image src="/team/012-landowners-private.png" alt="012 Michael J Trout with local community members" fill sizes="(max-width: 670px) 92vw, 33vw" /></div><span>FOUNDER · CAMPAIGN DIRECTOR</span><strong>012 · Monk UnDaoDu</strong><b>PROFILE ↗</b></Link>
-            <Link className="team-preview-card card-0102" href="/team/0102"><div><Image src="/team/0102-primary.jpg" alt="Luminous intelligence network representing 0102" fill sizes="(max-width: 670px) 92vw, 33vw" /></div><span>AI STRATEGIC COMMAND</span><strong>0102</strong><b>PROFILE ↗</b></Link>
-          </div>
-          <p className="team-preview-note"><span>IDENTITY STANDARD</span> 人物名と役割は確認できた範囲だけを掲載します。写真は、それだけで支持・提携を意味しません。</p>
-        </section>
-
-        <section className="process section" aria-labelledby="process-title">
-          <div className="section-index light">09 <span>/ PRE-CONSTRUCTION ACTION PLAN</span></div>
-          <div className="process-heading"><p className="eyebrow light"><span /> FROM INTEREST TO A CREDIBLE ALTERNATIVE</p><h2 id="process-title">関心を、<br />実行できる代案に変える。</h2></div>
-          <ol className="process-list"><li><span>01</span><div><strong>MOBILIZE</strong><h3>イベントで地域の声を可視化する</h3><p>参加者、周辺地域、利用経験者、保護者、農家、学生から、建物の記憶、残したい理由、懸念を集める。</p></div></li><li><span>02</span><div><strong>AMEND</strong><h3>議会に正式な条件変更を求める</h3><p>解体を止めずに準備を継続しつつ、不可逆な契約前まで適格な再生案を審査できる予算・決議上の道を残す。</p></div></li><li><span>03</span><div><strong>PROVE & TRANSFER</strong><h3>安全性・需要・責任移管を証明する</h3><p>改修費、運営主体、利用需要、借地合意、責任分担を検証し、市の純負担を解体案と同じ条件で比較する。</p></div></li><li><span>04</span><div><strong>TRIGGER REVIEW</strong><h3>条件達成で資金の振替審査へ</h3><p>市の負担を減らす案を期限前に提出し、純回避費用を上限とする一回限りの移行支援を正式審査へ進める。</p></div></li></ol>
-        </section>
-
         <section className="join simple-join section" id="join" aria-labelledby="join-title">
           <div className="join-copy"><p className="eyebrow light"><span /> ADD YOUR NAME · SAVE THE ONSEN</p><h2 id="join-title">温泉を守るチームに、<br /><em>あなたの名前</em>を。</h2><p>これは寄付や投資の申込みではありません。イベントで声を届けたい人、施設を利用したことがある人、教育・農業・技術で協力できる人をつなぎ、代案を実行できるチームへ育てるための登録です。登録名を本人の許可なく公開することはありません。</p><a className="line-button" href={LINE_URL} target="_blank" rel="noreferrer"><span>LINE</span><strong>LINEでチームに参加</strong><i>↗</i></a><div className="location"><span>PROJECT SITE</span><strong>旧すかっとランド九頭竜</strong><p>福井県福井市天菅生町3-10</p></div></div>
         </section>
 
-        <section className="sources section" aria-labelledby="sources-title">
-          <div className="section-index">10 <span>/ SOURCES & TRANSPARENCY</span></div>
-          <div className="sources-grid"><div><p className="eyebrow"><span /> VERIFY THE CLAIMS</p><h2 id="sources-title">根拠を公開する。</h2><p>確定事実、外部統計、未来の構想、内部モデル、未検証の仮説を区別しています。</p></div><details className="sources-details"><summary>資料・根拠を見る <span>詳しい確認をしたい方へ</span></summary><ul><li><a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p071776.html" target="_blank" rel="noreferrer">福井市 財産有効活用民間提案制度 <span>↗</span></a></li><li><a href="https://www.city.fukui.lg.jp/sisei/gikai/shigikaishikumi/p022677_d/fil/aramasi1.pdf" target="_blank" rel="noreferrer">福井市「市政のあらまし」 <span>↗</span></a></li><li><a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p071776_d/fil/SUKATTO.pdf" target="_blank" rel="noreferrer">福井市「旧すかっとランド九頭竜」施設資料 <span>↗</span></a></li><li><a href="https://www.city.fukui.lg.jp/sisei/gikai/shitsumon/p004052_d/fil/0806a.pdf" target="_blank" rel="noreferrer">福井市議会 2026年6月質問資料 <span>↗</span></a></li><li><a href="https://www.mlit.go.jp/statistics/details/t-other-2_tk_000362.html" target="_blank" rel="noreferrer">国土交通省 建設工事費デフレーター <span>↗</span></a></li><li><a href="https://jp.linkedin.com/in/openstartup" target="_blank" rel="noreferrer">012 公開プロフィール <span>↗</span></a></li></ul></details></div>
-        </section>
       </main>
 
       <footer><Brand href="#top" /><p>AI × ONSEN × EDUCATION × AGRICULTURE × COMMUNITY</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEで参加 ↗</a></footer>

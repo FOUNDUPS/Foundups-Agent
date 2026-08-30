@@ -77,3 +77,42 @@ def test_hero_campaign_message_is_equivalent_across_languages() -> None:
     assert "Revitalize the Community with Local Compute." in switcher
     assert "Salve o onsen." in switcher
     assert "Revitalize a comunidade com computação local." in switcher
+    assert "壊すために公費を使う前に" in page
+    assert "Before spending public money to demolish this place" in switcher
+    assert "Antes de gastar dinheiro público para demolir este lugar" in switcher
+
+
+def test_landing_music_is_opt_in_and_project_owned() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    music = (FRONTEND_ROOT / "components" / "HeroMusic.tsx").read_text(encoding="utf-8")
+    assert "<HeroMusic />" in page
+    assert "autoplay" not in music.lower()
+    assert "IntersectionObserver" in music
+    assert (FRONTEND_ROOT / "public" / "audio" / "9dragonheads.mp3").is_file()
+
+
+def test_future_place_is_labeled_as_a_conditional_concept() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    assert "SITE CONCEPT" in page
+    assert "ONSEN CONCEPT" in page
+    assert "日本初を目指す" in page
+    assert "ENGINEERING VALIDATION REQUIRED" in page
+    assert "長谷川章氏" in page
+    assert "GROUND FLOOR" in page
+    assert (FRONTEND_ROOT / "public" / "satellite-view.jpeg").is_file()
+    assert (FRONTEND_ROOT / "public" / "concept-onsen.jpg").is_file()
+    assert (FRONTEND_ROOT / "public" / "akira-hasegawa.jpeg").is_file()
+    assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v1.webp").exists()
+    assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v2.webp").exists()
+    assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v3.webp").exists()
+    assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v4.webp").exists()
+
+
+def test_landing_journey_uses_plain_campaign_questions() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    for label in ("WHY · 温泉を守る", "WHAT · ここがどう変わる？", "HOW · ESINGULARITY INNOVATION HUB", "WHEN · COMMUNITY MEETINGS"):
+        assert label in page
+    for removed_index in ("08 <span>", "09 <span>", "10 <span>"):
+        assert removed_index not in page
+    assert "PRE-CONSTRUCTION ACTION PLAN" not in page
+    assert "SOURCES & TRANSPARENCY" not in page

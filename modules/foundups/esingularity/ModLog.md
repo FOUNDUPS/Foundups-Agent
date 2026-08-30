@@ -1,5 +1,17 @@
 # Project eSingularity ModLog
 
+## 2026-08-31 — Community future and opt-in soundtrack
+
+- Replaced the long hero paragraph with a four-sentence campaign statement centered on public choice, the onsen, learning, startups, and local compute heat.
+- Added an opt-in `0102 MUSIC` control using the project-owned “9 Dragon Heads” track; playback fades and pauses after the hero leaves the viewport and never autoplays.
+- Added a mobile-first, explicitly labeled concept section showing a one-sided rotenburo, an Awara-inspired container food court, and a proposed D-K night experience.
+- Removed the generated aerial render and replaced it with 012's supplied `SateliteView.jpeg` site concept, the supplied `ConceptOnsen.jpg` future image, and the supplied Akira Hasegawa portrait. Each concept image is labeled so it cannot be mistaken for completed construction.
+- Described the compute-heated rotenburo as an ambition to become Japan's first, not a verified uniqueness claim, and retained engineering-validation language.
+- Recast the four-floor concept as Ground Floor through 4th Floor with community, school, university, research, and startup uses.
+- Removed landing-page sections 08–10 (team preview, internal action plan, and source portal) while retaining the dedicated Team route and the public LINE conversion.
+- Replaced remaining numeric journey labels with plain-language WHY / WHAT / HOW / WHEN cues.
+- Added multilingual and asset-presence contract coverage for the new public journey.
+
 ## 2026-08-31 — Campaign-first hero headline
 
 - Replaced the literal, passive English translation “This onsen—before we destroy it.” with the active campaign message “Save the Onsen. Revitalize the Community with Local Compute.”
