@@ -129,6 +129,10 @@ Use four statuses:
 
 ### Planning Reference
 
+- `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`
+  - RedDog-owned recurring engagement handshake used by FoundUps and AutoPost
+    flows; feasibility is one use case
+  - specified, not implemented; not a WSP and not identity authority
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md`
 - `modules/foundups/docs/CONTINUATION_RUNBOOK.md`
 - `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
@@ -208,9 +212,14 @@ Reason:
 - `AutoPost`
   - repo: `FOUNDUPS/autopost` (live on GitHub)
   - web: `autopost.foundups.com` (redirect)
-  - status: PoC — Vite + React + TypeScript + Gemini API, camera capture-to-post
+  - status: external source owns implementation truth; current 2026-08-30
+    README/roadmap describe a Vite + React + TypeScript local-perception capture
+    layer using Liquid VLM, provider-neutral `CaptureEvent`/`CaptureDecision`,
+    IndexedDB provenance, and YouTube upload proof
   - classification: `CANDIDATE_FOUNDUP` (HIGH priority) — both a FoundUp AND a tool
   - role: content pipeline for entire FOUNDUPS ecosystem (users post unlisted videos → YouTube → FoundUp routing → pfMALL display + social distribution)
+  - Lick boundary: AutoPost can capture a permissioned encounter event; RedDog
+    owns the handshake and identity-confidence interpretation
   - part of: AI Automation service FoundUp
   - Discord: AUTOPOST category planned (#autopost-general doubles as user troubleshooting, monitored by 0102/OBAI)
   - docs: ROADMAP.md and ModLog.md added 2026-04-06

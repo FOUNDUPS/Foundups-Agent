@@ -2,6 +2,17 @@
 
 ## Chronological Change Log
 
+### 2026-08-30 - RedDog Lick cross-domain planning reference
+
+- Linked the RedDog-owned Lick handshake into FoundUps planning without
+  relocating it into the FoundUps domain or WSP framework.
+- Defined AutoPost as the permissioned capture surface and RedDog as the
+  encounter-confidence interpreter; feasibility is one consumer and neither
+  record grants work authority.
+- Updated the stale AutoPost implementation summary to defer to its external
+  repository's current Liquid VLM and provider-neutral capture contracts.
+- Documentation only. WSP 15/22/50/73/87/97.
+
 ### 2026-08-26 - Canonical FoundUps/RedDog Lifecycle Alignment
 
 - Repaired the master architecture's false "no PWA" and fixed-scale claims.

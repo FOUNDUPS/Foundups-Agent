@@ -35,6 +35,12 @@ expands only through current authenticated policy and work receipts:
 That layered path produces a practical Digital Twin without confusing
 conversation, memory, worker availability, or personality with authority.
 
+Canonical RedDog navigation:
+
+- [RedDog documentation map](docs/REDDOG_DOCUMENTATION_MAP.md)
+- [RedDog outcome / vision](docs/REDDOG_OUTCOME_VISION.md)
+- [RedDog Lick connection handshake](extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md)
+
 ---
 
 ## 🌐 **THE INTELLIGENT INTERNET ORCHESTRATION SYSTEM**
