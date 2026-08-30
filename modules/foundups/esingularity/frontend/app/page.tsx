@@ -43,7 +43,7 @@ export default function Home() {
             <p>保存するだけではありません。温泉、地域の食、小さな商い、学び、光の文化を一つの場所につなぐ構想です。</p>
           </div>
           <figure className="future-place-visual">
-            <Image src="/onsen-future-concept-v2.webp" alt="既存の南北に長い建物と南端の曲線棟、駐車場を残し、南側に露天風呂を加えた再生構想イメージ" width={1293} height={1216} sizes="(max-width: 670px) 100vw, 86vw" />
+            <Image src="/onsen-future-concept-v4.webp" alt="既存の南北に長い建物と南端の曲線棟、駐車場を残し、南側に露天風呂を加えた再生構想イメージ" width={1293} height={1217} sizes="(max-width: 670px) 100vw, 86vw" />
             <figcaption><span>CONCEPT RENDER</span> 現時点の構想イメージです。実際の配置・規模・熱利用は、建物・設備・法令・事業性の調査で決まります。</figcaption>
           </figure>
           <div className="future-place-cards" role="list">

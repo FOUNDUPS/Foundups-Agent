@@ -5,7 +5,7 @@
 - Replaced the long hero paragraph with a four-sentence campaign statement centered on public choice, the onsen, learning, startups, and local compute heat.
 - Added an opt-in `0102 MUSIC` control using the project-owned “9 Dragon Heads” track; playback fades and pauses after the hero leaves the viewport and never autoplays.
 - Added a mobile-first, explicitly labeled concept section showing a one-sided rotenburo, an Awara-inspired container food court, and a proposed D-K night experience.
-- Replaced the first fictionalized render after a geometry audit. The corrected top-down overlay preserves the recognizable long north–south building, its connected curved southern end, west parking, and places the outdoor onsen expansion beyond the existing structure.
+- Replaced the first fictionalized render after a geometry audit. The final concept directly edits 012's Google Maps top-view composition, preserving the recognizable long north–south building, its connected curved southern end, west parking, roads, and orientation while placing the outdoor onsen expansion beyond the existing structure.
 - Described the compute-heated rotenburo as an ambition to become Japan's first, not a verified uniqueness claim, and retained engineering-validation language.
 - Recast the four-floor concept as Ground Floor through 4th Floor with community, school, university, research, and startup uses.
 - Removed landing-page sections 08–10 (team preview, internal action plan, and source portal) while retaining the dedicated Team route and the public LINE conversion.

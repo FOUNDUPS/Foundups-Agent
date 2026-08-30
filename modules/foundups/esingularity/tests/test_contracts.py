@@ -98,8 +98,10 @@ def test_future_place_is_labeled_as_a_conditional_concept() -> None:
     assert "ENGINEERING VALIDATION REQUIRED" in page
     assert "長谷川章氏" in page
     assert "GROUND FLOOR" in page
-    assert (FRONTEND_ROOT / "public" / "onsen-future-concept-v2.webp").is_file()
+    assert (FRONTEND_ROOT / "public" / "onsen-future-concept-v4.webp").is_file()
     assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v1.webp").exists()
+    assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v2.webp").exists()
+    assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v3.webp").exists()
 
 
 def test_landing_journey_uses_plain_campaign_questions() -> None:
