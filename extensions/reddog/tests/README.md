@@ -1,5 +1,33 @@
 # RedDog Extension Tests
 
+## 0.4.140 held builder child evidence release
+
+- Backend compatibility advances to the 1,398-file closure at
+  `700d50f84e12...86e09ed`. The child is backend evidence only; no extension
+  command or runtime caller is added.
+- Focused Python tests cover the shared bounded runner and strict child
+  evidence. The physical Windows gate launches the exact qualified O: runtime
+  and repeats complete composition verification around it.
+- The conversation tier honors `REDDOG_TEST_PYTHON`, suppresses user-site
+  discovery, erases every case-insensitive ambient `PYTHON*` and `PYTEST*`
+  control before setting its exact six-key test contract, and admits only validated
+  O:/E: interpreter, dependency, repository, and temporary roots.
+- Runner unit evidence is 22/22. Focused physical runner/maintenance/
+  process-image/child evidence is 70 passed / two capability skips in 108.06
+  seconds and includes the qualified physical Windows child.
+- Backend generator passes eight and the registry is current at 1,640 / 269.
+  Conversation passes 32 Python tests and 15 shared JS vectors. Complete bridge
+  replay is 1,694 passed / 23 capability skips in 638.81 seconds, including the
+  recursion-limit-independent 128-level health JSON gate. Final release is four
+  groups PASS in 214.279 seconds; the package is 67 files / 948,410 bytes. The
+  inspected VSIX identity and all exact digests are retained in the external
+  WSP_97 receipt rather than self-referenced inside the package.
+  Archive inspection requires zero duplicate, collision, encryption, symlink,
+  unsafe-path, sensitive-name, source-byte-mismatch, or credential-value-pattern
+  findings. No test grants
+  producer, pre-import/native/subprocess, write-denial, route, owner,
+  activation, A-grade, or retrieval-RSI authority.
+
 ## 0.4.139 declared Windows/CPython ABI evidence release
 
 - The extension advances because the authenticated backend manifest changed

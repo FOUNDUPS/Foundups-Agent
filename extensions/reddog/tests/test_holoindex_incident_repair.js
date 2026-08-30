@@ -191,8 +191,8 @@ assert(extensionSource.includes('holoGenerationBoundQuery.isObserved(baseResult)
 assert(extensionSource.includes('holoIncidentRepair.shouldCoordinate(baseResult, observed, query)'));
 assert(extensionSource.includes('await holoIncidentRepair.coordinateAsync'));
 assert((extensionSource.match(/holoIncidentRepair\.metadata\(incidentRepair\)/g) || []).length >= 4);
-assert.strictEqual(pkg.version, '0.4.139');
-assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.139'"));
+assert.strictEqual(pkg.version, '0.4.140');
+assert(extensionSource.includes("const EXTENSION_VERSION = '0.4.140'"));
 assert(!fs.readFileSync(path.join(extDir, 'holoindex_incident_repair.js'), 'utf8').includes('qwen'));
 
 function asyncBase() {

@@ -22,6 +22,7 @@ from .holo_query_transport import (
 HEALTH_PATH = "/holoindex/v1/health"
 HEALTH_SCHEMA_VERSION = "holoindex_query_service.v1"
 MAX_HEALTH_RESPONSE_BYTES = 65_536
+MAX_HEALTH_JSON_DEPTH = 128
 BINDING_MISMATCH_ERROR = "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH"
 EMPTY_BINDING = ("", "", "", "")
 
@@ -43,6 +44,32 @@ def _exact_health_payload(value: object) -> dict[str, object] | None:
     return value if type(value) is dict else None
 
 
+def _health_json_depth_allowed(body: bytes) -> bool:
+    depth = 0
+    in_string = False
+    escaped = False
+    for byte in body:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif byte == 0x5C:
+                escaped = True
+            elif byte == 0x22:
+                in_string = False
+            continue
+        if byte == 0x22:
+            in_string = True
+        elif byte in {0x5B, 0x7B}:
+            depth += 1
+            if depth > MAX_HEALTH_JSON_DEPTH:
+                return False
+        elif byte in {0x5D, 0x7D}:
+            depth -= 1
+            if depth < 0:
+                return False
+    return depth == 0 and not in_string and not escaped
+
+
 def _decode_health_payload(body: bytes) -> dict[str, object] | None:
     def unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
         result: dict[str, object] = {}
@@ -55,6 +82,8 @@ def _decode_health_payload(body: bytes) -> dict[str, object] | None:
     def reject_constant(_value: str) -> None:
         raise _InvalidHealthJson("nonstandard health JSON constant")
 
+    if not _health_json_depth_allowed(body):
+        return None
     try:
         value = json.loads(
             body.decode("utf-8"), object_pairs_hook=unique_object,
@@ -321,7 +350,7 @@ def _authenticated_health_rejection(**kwargs: object) -> str:
 
 __all__ = [
     "AuthenticatedOwnerHealthProof", "BINDING_MISMATCH_ERROR",
-    "HEALTH_SCHEMA_VERSION", "MAX_HEALTH_RESPONSE_BYTES",
+    "HEALTH_SCHEMA_VERSION", "MAX_HEALTH_JSON_DEPTH", "MAX_HEALTH_RESPONSE_BYTES",
     "_authenticated_health_exchange", "_authenticated_health_probe",
     "_authenticated_health_rejection", "_health_binding_rejection_code",
     "_health_contract_ready", "_health_rejection_code",

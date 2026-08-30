@@ -2,15 +2,17 @@
 
 ## Status
 
-Phase: RedDog 0.4.139 resident architect thin-client surface.
+Phase: RedDog 0.4.140 resident architect thin-client surface.
 
-0.4.139 retains exact-task post-merge execution, receipt-bound owner
-reacquisition, phase-aware liveness, repeatable supervisor release, and
-same-repository dependency-runtime resolution. The maintenance source now also
-has inert, descriptor-only composition and declared Windows/CPython ABI
-generations that prevent payload mix-and-match and attest bounded
-PE/wheel/RECORD relationships without loading native images. The ABI files are
-outside the executable backend manifest and grant no VSIX runtime authority.
+0.4.140 adds the smallest one-shot held-executable child above the inert exact
+builder composition. A real O:-materialized CPython 3.12.10 process passed the
+same full composition proof before and after launch and emitted bounded,
+canonical, path-free evidence. That release is the last official 3.12 Windows
+binary, so it is qualified evidence with known patch debt—not production
+activation or current-security-patch authority. The child API returns evidence,
+not the unforgeable in-process capability. Native/pre-import closure,
+deterministic effects, provenance/signing, empirical write denial, route-v2
+activation, A-grade, and retrieval RSI remain separate fail-closed gates.
 Every verified requery now
 enters through the original workspace/control root while its captured clean
 authority remains the proof target. The bounded operator controller is not an

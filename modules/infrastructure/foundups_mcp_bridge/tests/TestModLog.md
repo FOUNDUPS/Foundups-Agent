@@ -1,5 +1,40 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-08-30] Held builder child falsification
+
+- Captured authentic RED collection before implementation: both new focused
+  tests failed import because the child contract and bounded runner were absent.
+- Closed child flags/path/environment, strict one-line JSON, identity binding,
+  timeout/overflow/tree cleanup, before/after full reproof, and temp/protected
+  root aliasing. A real qualified O: child passes without changing its
+  composition descriptor.
+- Shared runner extraction preserves maintenance compatibility. Production
+  modules remain below 500 lines and every changed function is below 50 lines.
+  Hostile review added direct-size, live-overflow, output/read failure, timeout,
+  complete protected-root, after-child mutation, and accidental-construction
+  falsifiers. Extension README was compressed to 998 lines.
+- A later authentic RED test proved that direct-parent exit could leave an
+  inherited-stdout descendant alive. Windows Job Object containment now kills
+  that tree without resolving an external cleanup executable. Setup, assignment,
+  enumeration, resume, terminate, close, and reader-start failures now have
+  direct falsifiers.
+- Two pre-`-B` validation paths polluted writable inert generations (21/181 and
+  6/32 pycache/pyc). Both are quarantined; subprocess fixtures and the explicit
+  O:/E: conversation harness now suppresses bytecode and user-site imports.
+  Focused physical adjacency is 70/two capability skips in 108.06 seconds and
+  includes the physical child, with zero active/source bytecode residue.
+- Complete final original-order bridge replay is 1,694 passed / 23 capability
+  skips in 638.81 seconds. It first exposed and then closes health JSON admission
+  that had depended on the ambient recursion limit; 160/160 focused health
+  vectors now enforce an explicit string-aware 128-level structural cap.
+- Final source-image inspection found four prior encodings pyc files. The whole
+  image is retained in O: forensic quarantine; the rematerialized runtime is
+  byte-equal to all 3,845 qualified archive members with no missing/extra files,
+  and both source/active trees are clean after a `-B` verification host run. A
+  second four-file cache stamped 08:27:30 was preserved as a complete image and
+  rematerialized archive-exact before final closure; attribution remains unknown.
+  (WSP 6/15/22/50/62/84/97)
+
 ## [2026-08-30] Base-prefix consumer false-green closure
 
 - The inherited process/candidate selection passed 28 tests / one skip while

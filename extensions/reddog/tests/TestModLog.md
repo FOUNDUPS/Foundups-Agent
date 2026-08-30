@@ -1,5 +1,44 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-08-30 - Held builder child evidence release (0.4.140)
+
+- Authentic RED collection preceded implementation. Focused falsifiers now
+  cover held launch, isolation flags, closed environment/path, bounded output,
+  canonical serialization, exact identity, surrounding composition stability,
+  protected-root aliasing, and explicit authority nonclaims.
+- Maintenance child behavior is replayed after shared-runner extraction; the
+  physical Windows integration launches the actual O:-materialized runtime.
+- Corrected the conversation test harness to honor `REDDOG_TEST_PYTHON` after
+  validation exposed an ambient non-O:/E: interpreter selection despite O:
+  temp roots. A later real failure proved that an O: interpreter could still
+  discover per-user packages elsewhere; the harness now uses `-B -s`, disables
+  user-site discovery, erases every case-insensitive ambient `PYTHON*` and
+  `PYTEST*` control before installing six exact values, and validates its O:/E:
+  dependency, repository, and temporary roots.
+- Replaced source-text-only confinement assertions with executable negative
+  tests for missing/relative/wrong-volume Python, false-green pytest controls,
+  E: admission, absent absolute files, and intermediate junction/reparse paths.
+  The full conversation tier remains 32 Python tests plus 15 shared JavaScript
+  vectors.
+- Hostile audit reproduced writable-runtime pollution. The 21-directory/181-pyc
+  and 6-directory/32-pyc generations are preserved in O: quarantine; exact
+  source rematerialization restored the same sealed identities. Final physical,
+  adjacent, conversation, and release runs leave both active/source trees at
+  zero pycache/pyc.
+- Backend is 1,398 files at `700d50f84e12...86e09ed`; contract is 18 shards /
+  6,942 lines / 492 assertions. Runner unit evidence is 22/22; focused physical
+  adjacency is 70/two capability skips in 108.06 seconds and includes the child;
+  registry is 1,640/269 and conversation is 32 Python plus 15 JS. Complete
+  bridge replay is 1,694/23 capability skips in 638.81 seconds after closing
+  recursion-limit-dependent health JSON depth admission.
+- Final release is four groups PASS in 214.279 seconds. Package surface is 67
+  files / 948,410 bytes. Exact package and inspected VSIX identities are
+  retained externally so packaged documentation is not a self-referential
+  content-digest claim.
+- Final source-runtime hygiene retained two additional four-pyc images in O:
+  quarantine, rematerialized 3,845/3,845 archive members byte-exact each time, and
+  hardened the canonical Holo query host with `-B` plus bytecode suppression.
+
 ## 2026-08-29 - Declared Windows/CPython ABI evidence release (0.4.139)
 
 - Hostile WSP_00/WSP_97 review rejected the first candidate for delay-table,

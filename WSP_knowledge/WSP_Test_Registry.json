@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1638,
+  "total_tests": 1640,
   "quarantined_tests": 269,
   "tests": [
     {
@@ -16348,6 +16348,21 @@
       "description": "Tests for FoundUps MCP Bridge FastMCP HTTP Server.\n==================================================\n\nWSP References:\n- WSP 96: Model Context Protocol Governance and Consensus\n- WSP 97: Truthful Verification (explicit perception boundary & protocol canary)\n- WSP 34: Test Coverage Standards"
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_bounded_child_process",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_bounded_child_process.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Falsifiers for the shared bounded one-shot child runner."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_acceptance_guards",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_acceptance_guards.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
@@ -16486,7 +16501,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance_script.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
       "capabilities": [
         "process"
       ],
@@ -16808,6 +16823,21 @@
       "description": "Real-topology falsifiers for query-runtime base-prefix consumers."
     },
     {
+      "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_builder_child",
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_child.py",
+      "owner": "modules/infrastructure/foundups_mcp_bridge",
+      "suite_class": "integration",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-integration",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "integration",
+      "collectable": true,
+      "timeout_s": 600,
+      "quarantine_reasons": [],
+      "description": "Falsifiers for one held-executable RedDog builder child."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_mcp_bridge::tests::test_reddog_holoindex_query_runtime_builder_contract",
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_contract.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
@@ -16972,7 +17002,7 @@
       "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_candidate_binding.py",
       "owner": "modules/infrastructure/foundups_mcp_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-02",
+      "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

@@ -1,5 +1,60 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-08-30 - Held builder child phase 2C3c
+
+- Added one bounded held-executable child over the exact Phase 2C3a runtime.
+  The parent performs complete before/after composition proof, supplies only a
+  fixed isolated import path and O:/E: temp environment, validates canonical
+  bounded evidence, and retains no serialized authority capability.
+- Reused the existing held-executable proof and extracted the maintenance
+  subprocess logic into a WSP_62-bounded shared runner. Maintenance public
+  names and limits remain intact; live stdout overflow now terminates the tree,
+  and direct parsing is independently capped. Evidence wrappers reject direct
+  accidental construction.
+- A later hostile audit reproduced direct-parent exit with a live inherited-
+  stdout descendant. Windows children now start suspended, enter a private
+  kill-on-close Job Object, and resume only after assignment; Job setup fails
+  closed. Final audit removed ambient `taskkill` lookup: cleanup explicitly
+  terminates the Job before handle release, and every lifecycle failure surfaces.
+- A real O:-materialized CPython 3.12.10 child passed. The known source-only
+  security-update gap remains explicit; producer provenance, pre-import/native/
+  subprocess closure, deterministic effects, signing, write denial, activation,
+  A-grade, and retrieval RSI remain false. The backend is 1,398 files at
+  `700d50f84e12...86e09ed`. (WSP 00/6/12/15/22/50/62/84/97)
+- Independent NO-GO review exposed unstaged `-B`, WSP_62 doc growth, missing
+  falsifiers, a pending receipt, and two writable-runtime pollution events.
+  Every finding was reproduced and closed; both invalid generations remain in
+  O: forensic quarantine, the exact runtime was rematerialized, and final
+  physical/adjacent/release replay leaves active and source trees bytecode-free.
+- Current runner unit evidence is 22/22; the focused physical runner/
+  maintenance/process-image/child matrix is 70 passed / two capability skips in
+  108.06 seconds and includes the physical child. Generator is eight, registry
+  is 1,640/269, and the WSP_97 receipt is structurally
+  complete/compliant. (WSP 6/15/50/62/84/97)
+- Full bridge replay surfaced one order-dependent health-boundary defect: a
+  raised process recursion limit could admit unused 2,000-level JSON. The new
+  string-aware 128-level pre-parse cap failed authentic RED then passed all 160
+  focused vectors; final original-order macro replay is 1,694 passed / 23
+  capability skips in 638.81 seconds.
+- Final runtime hygiene found four encodings pyc files in the writable qualified
+  source image, all timestamped before the resumed release closure. The entire
+  affected runtime is retained in O: quarantine; rematerialization matches all
+  3,845 archive members with zero missing, changed, or extra files. The
+  canonical Holo host command now applies `-B` and
+  `PYTHONDONTWRITEBYTECODE=1`; source and active images both end at zero bytecode.
+- The post-gate check found a second four-file encodings cache stamped 08:27:30,
+  also before the resumed exhaustive/release runs. Its creator cannot be proven
+  from filesystem evidence. The complete image is retained at
+  `O:\RedDog-Builder-Artifacts\quarantine\source-runtime-3.12.10-encodings-pycache-recurrence-20260830-091617`;
+  archive-only rematerialization again proved 3,845 members with zero missing,
+  changed, or extra files.
+- Independent final review then reproduced ambient cleanup-executable lookup,
+  unchecked Job termination/close results, and reader-thread startup escape.
+  Cleanup now uses only the Job and direct process handles, explicitly terminates
+  before closing, surfaces lifecycle failures, and contains reader startup. The
+  focused physical runner/maintenance/process/child matrix is 70/2 capability
+  skips; runner unit boundary is 22/22.
+
 ## 2026-08-30 - Base-prefix consumer correction phase 2C3b
 
 - Corrected the process root validator and candidate composition validator to

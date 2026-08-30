@@ -1,0 +1,30 @@
+{
+  "schema_version": "reddog_wsp15_allocation_receipt.v1",
+  "receipt_id": "phase2c3c-held-builder-child-allocation",
+  "requested_operation": "implement_reddog_held_builder_child_phase2c3c",
+  "base_commit": "96d5db5685a015932205bd573b7ea1674b0897cd",
+  "complexity": 4,
+  "importance": 5,
+  "deferability": 5,
+  "impact": 5,
+  "mps_total": 19,
+  "priority": "P0",
+  "reasoning_tier": "ULTRA",
+  "decision": "reuse the sealed composition/process proof and extract the existing bounded runner for exactly one evidence-only child, with Windows Job Object descendant containment and explicit health JSON depth admission",
+  "verification_plan": [
+    "focused contract and launcher falsifiers",
+    "maintenance-runner compatibility",
+    "direct-parent-exit descendant containment independent of taskkill",
+    "health JSON depth rejection independent of ambient recursion limits",
+    "complete original-order bridge macro replay",
+    "bytecode-suppressed canonical Holo host invocation and clean source/runtime proof",
+    "actual O-only qualified child integration",
+    "backend generator and extension contract/package tiers",
+    "independent WSP_00/WSP_97 hostile audit"
+  ],
+  "execution_plane": "local_tools_plus_independent_wsp00_subagent_audit",
+  "queue_mutation_allowed": false,
+  "hermes_execution_allowed": false,
+  "openclaw_candidate": true,
+  "wsp_refs": ["WSP_00", "WSP_6", "WSP_12", "WSP_15", "WSP_22", "WSP_50", "WSP_62", "WSP_84", "WSP_97"]
+}

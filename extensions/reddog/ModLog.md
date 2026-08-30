@@ -1,5 +1,35 @@
 # RedDog ModLog
 
+## 2026-08-30 - Held builder child evidence release (0.4.140)
+
+- Rebound the authenticated backend to 1,398 runtime files at
+  `700d50f84e12...86e09ed` and added one held, isolated, bounded child above the
+  exact inert builder-runtime composition.
+- The API returns path-free observation evidence, not the private
+  `BuilderProcessAuthority` capability. CPython 3.12.10 physical evidence
+  carries explicit patch debt; native/pre-import/subprocess closure,
+  deterministic effects, signing, write denial, activation, A-grade, and
+  retrieval RSI remain false.
+- The extension gains no new command, route, owner, maintenance, queue, Git,
+  or execution authority. Exact release/package/VSIX identities live in the
+  external WSP_97 release receipt, avoiding a self-referential digest inside
+  packaged bytes.
+  (WSP 00/6/12/15/22/50/62/84/97)
+- Final hostile review added Windows Job Object descendant containment behind
+  the backend runner and executable negative tests for missing/relative/wrong-
+  volume Python, ambient control removal, and intermediate junction rejection.
+  These harden tests and backend containment without widening VSIX authority.
+- Full bridge replay then exposed an ambient-recursion-limit weakness in health
+  JSON admission. A string-aware 128-level pre-parse depth gate closed the
+  authentic RED; the final original-order macro is 1,694 passed / 23 capability
+  skips in 638.81 seconds.
+- Independent final review found false-green conversation controls, ambient
+  cleanup-executable resolution, unchecked Job termination/close results, and a
+  reader-start escape. Authentic REDs now strip every case-insensitive
+  `PYTHON*`/`PYTEST*` key before six exact values, use only Job/direct-process
+  handles for cleanup, surface every Job lifecycle error, and close failed
+  reader startup without widening extension authority.
+
 ## 2026-08-30 - Base-prefix consumer backend correction
 
 - Rebound the generated backend closure after the two existing query-runtime

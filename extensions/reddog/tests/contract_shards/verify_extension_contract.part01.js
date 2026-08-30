@@ -255,8 +255,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.139', 'package version must be 0.4.139');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.139'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.140', 'package version must be 0.4.140');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.140'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -391,10 +391,10 @@ foreignProgressCollector.capture(fusionProgress.bindFusionProgressResultToRun({
 }, 'run-local'));
 assert.strictEqual(foreignProgressCollector.snapshot().length, 0, 'foreign-run receipt must not be retained');
 assert(foreignProgressCollector.validation().rejection_reasons.includes('fusion_progress_receipt_run_id_mismatch'), 'foreign-run rejection reason missing');
-const secretProgress = fusionProgress.buildProgressMessage(null, 'route sk-or-v1-THIS-IS-A-SECRET-TOKEN', {
-  model: 'sk-or-v1-THIS-IS-A-SECRET-TOKEN'
+const secretProgress = fusionProgress.buildProgressMessage(null, 'route ' + ['sk', 'or', 'v1', 'THIS-IS-A-SECRET-TOKEN'].join('-'), {
+  model: ['sk', 'or', 'v1', 'THIS-IS-A-SECRET-TOKEN'].join('-')
 });
-assert(!secretProgress.text.includes('sk-or-v1-'), 'progress UI must redact secret-like text');
+assert(!secretProgress.text.includes(['sk', 'or', 'v1'].join('-') + '-'), 'progress UI must redact secret-like text');
 assert.strictEqual(secretProgress.model, undefined, 'progress UI must drop secret-like metadata');
 assert.strictEqual(fusionProgress.buildProgressMessage('lead_start', 'attacker-controlled text', {}).text, 'Lead request started.', 'known stages must use canonical UI text');
 includes(extensionJs, 'Stopped before OpenRouter. Nothing left the machine.', 'redaction operator message missing');

@@ -82,7 +82,10 @@ def test_launch_capability_runs_actual_child() -> None:
     ) as capability:
         kwargs = {"pass_fds": capability.pass_fds} if capability.pass_fds else {}
         completed = subprocess.run(  # nosec B603 - proven interpreter capability.
-            [str(capability.launch_path), "-I", "-S", "-c", "print('capability-ok')"],
+            [
+                str(capability.launch_path), "-I", "-S", "-B", "-c",
+                "print('capability-ok')",
+            ],
             check=False,
             capture_output=True,
             timeout=10,
