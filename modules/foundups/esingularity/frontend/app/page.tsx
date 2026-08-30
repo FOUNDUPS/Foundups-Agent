@@ -42,14 +42,20 @@ export default function Home() {
             <div><p className="eyebrow"><span /> WHAT · ここがどう変わる？</p><h2 id="future-place-title">温泉を残す。<br /><em>夜まで人が集まる場所</em>をつくる。</h2></div>
             <p>保存するだけではありません。温泉、地域の食、小さな商い、学び、光の文化を一つの場所につなぐ構想です。</p>
           </div>
-          <figure className="future-place-visual">
-            <Image src="/onsen-future-concept-v4.webp" alt="既存の南北に長い建物と南端の曲線棟、駐車場を残し、南側に露天風呂を加えた再生構想イメージ" width={1293} height={1217} sizes="(max-width: 670px) 100vw, 86vw" />
-            <figcaption><span>CONCEPT RENDER</span> 現時点の構想イメージです。実際の配置・規模・熱利用は、建物・設備・法令・事業性の調査で決まります。</figcaption>
-          </figure>
+          <div className="future-place-visuals">
+            <figure className="future-place-visual">
+              <Image src="/satellite-view.jpeg" alt="既存建物、駐車場、周辺土地を使ったプロジェクト配置構想" width={1320} height={1245} sizes="(max-width: 670px) 100vw, 50vw" />
+              <figcaption><span>SITE CONCEPT</span> 012提供の配置構想です。完成済みの施設を示す画像ではありません。</figcaption>
+            </figure>
+            <figure className="future-place-visual">
+              <Image src="/concept-onsen.jpg" alt="露天風呂と小さな飲食店が夜に集まる将来構想" width={440} height={290} sizes="(max-width: 670px) 100vw, 50vw" />
+              <figcaption><span>ONSEN CONCEPT</span> 温泉と地域の食がつながる将来イメージです。実際の配置・規模・熱利用は調査で決まります。</figcaption>
+            </figure>
+          </div>
           <div className="future-place-cards" role="list">
             <article role="listitem"><span>01 · ROTENBURO</span><h3>日本初を目指す、<br />コンピュート排熱の露天風呂。</h3><p>回収できる熱を片側の露天風呂に集中し、男女どちらの湯を温めるかを日替わりでシステムが案内する構想です。</p><small>ENGINEERING VALIDATION REQUIRED</small></article>
             <article role="listitem"><span>02 · FOOD</span><h3>あわら型の、<br />小さなコンテナ横丁。</h3><p>あわら温泉の横丁型モデルに着想を得て、地域の料理人、農家、学生が小さく商いを始められる場所へ。</p><small>AWARA-INSPIRED COMMUNITY FOOD COURT</small></article>
-            <article role="listitem"><span>03 · NIGHT</span><h3>夜は、長谷川章氏の<br />D-Kという光の舞台へ。</h3><p>建物を毎晩変化する光のキャンバスにする構想。九頭竜の水と龍を、地域の新しい夜景にします。</p><small>PROPOSED DIGITAL KAKEJIKU EXPERIENCE</small></article>
+            <article className="akira-card" role="listitem"><Image src="/akira-hasegawa.jpeg" alt="D-K（デジタル掛け軸）を提唱する長谷川章氏" width={1320} height={1323} sizes="(max-width: 1050px) 100vw, 33vw" /><span>03 · NIGHT</span><h3>夜は、長谷川章氏の<br />D-Kという光の舞台へ。</h3><p>建物を毎晩変化する光のキャンバスにする構想。九頭竜の水と龍を、地域の新しい夜景にします。</p><small>PROPOSED DIGITAL KAKEJIKU EXPERIENCE</small></article>
           </div>
         </section>
 

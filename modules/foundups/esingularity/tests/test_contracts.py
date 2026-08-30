@@ -93,15 +93,19 @@ def test_landing_music_is_opt_in_and_project_owned() -> None:
 
 def test_future_place_is_labeled_as_a_conditional_concept() -> None:
     page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
-    assert "CONCEPT RENDER" in page
+    assert "SITE CONCEPT" in page
+    assert "ONSEN CONCEPT" in page
     assert "日本初を目指す" in page
     assert "ENGINEERING VALIDATION REQUIRED" in page
     assert "長谷川章氏" in page
     assert "GROUND FLOOR" in page
-    assert (FRONTEND_ROOT / "public" / "onsen-future-concept-v4.webp").is_file()
+    assert (FRONTEND_ROOT / "public" / "satellite-view.jpeg").is_file()
+    assert (FRONTEND_ROOT / "public" / "concept-onsen.jpg").is_file()
+    assert (FRONTEND_ROOT / "public" / "akira-hasegawa.jpeg").is_file()
     assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v1.webp").exists()
     assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v2.webp").exists()
     assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v3.webp").exists()
+    assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v4.webp").exists()
 
 
 def test_landing_journey_uses_plain_campaign_questions() -> None:
