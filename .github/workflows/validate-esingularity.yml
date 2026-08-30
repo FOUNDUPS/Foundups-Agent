@@ -1,0 +1,59 @@
+name: Validate eSingularity
+
+on:
+  pull_request:
+    paths:
+      - 'modules/foundups/esingularity/**'
+      - 'modules/foundups/foundup_registry.json'
+      - 'public/f/public_catalog.json'
+      - '.github/workflows/validate-esingularity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'modules/foundups/esingularity/**'
+      - 'modules/foundups/foundup_registry.json'
+      - 'public/f/public_catalog.json'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python test dependency
+        run: python -m pip install pytest
+
+      - name: Validate FoundUp contracts
+        run: python -m pytest modules/foundups/esingularity/tests -q
+
+      - name: Validate public catalog projection
+        run: python -m modules.foundups.public_catalog_projector --validate
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: modules/foundups/esingularity/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: modules/foundups/esingularity/frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: modules/foundups/esingularity/frontend
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: modules/foundups/esingularity/frontend
+        run: npm run build

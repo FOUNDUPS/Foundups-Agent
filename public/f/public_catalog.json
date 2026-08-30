@@ -51,6 +51,21 @@
       "portfolio_priority": 3,
       "portfolio_ready": false,
       "is_dual_identity": true
+    },
+    {
+      "foundup_id": "esingularity_001",
+      "display_name": "eSingularity",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "polished",
+      "website_url": "https://esingularity.ai/",
+      "poc_url": "https://esingularity.ai/",
+      "app_url": "https://esingularity.ai/",
+      "github_url": "https://github.com/FOUNDUPS/Foundups-Agent",
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "A Fukui community campaign to preserve Sukatto Land Kuzuryu and test a future combining the onsen, education, innovation, and locally focused AI infrastructure.",
+      "portfolio_priority": 4,
+      "portfolio_ready": true
     }
   ]
 }
