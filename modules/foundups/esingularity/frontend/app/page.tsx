@@ -29,7 +29,7 @@ export default function Home() {
           <EventAlert />
           <div className="hero-copy">
             <p className="eyebrow"><span /> 温泉を守る · 福井の選択</p>
-            <h1 id="hero-title">この温泉を、<br /><em>壊す前に。</em></h1>
+            <h1 id="hero-title">温泉を守り、<br /><em>地域のAI基盤でまちを元気に。</em></h1>
             <p className="hero-lead">後戻りできなくなる前に、もう一つの未来を比べる機会をください。建物を残して温泉を再開し、上階を学びと挑戦の拠点へ。周辺の土地には福井のAI基盤をつくり、食・祭り・地域の仕事を育てます。</p>
             <div className="hero-actions"><a className="button button-primary" href={LINE_URL} target="_blank" rel="noreferrer">LINEで仲間になる <span>↗</span></a><a className="button button-ghost" href="#story">計画を見る <span>↓</span></a></div>
           </div>
