@@ -66,3 +66,14 @@ def test_sites_configuration_and_primary_routes_are_present() -> None:
     assert (FRONTEND_ROOT / "app" / "team" / "page.tsx").is_file()
     for required_library in ("db.ts", "event.ts", "i18n.ts", "project-data.ts", "team.ts"):
         assert (FRONTEND_ROOT / "lib" / required_library).is_file()
+
+
+def test_hero_campaign_message_is_equivalent_across_languages() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
+    assert "温泉を守り、" in page
+    assert "地域のAI基盤でまちを元気に。" in page
+    assert "Save the Onsen." in switcher
+    assert "Revitalize the Community with Local Compute." in switcher
+    assert "Salve o onsen." in switcher
+    assert "Revitalize a comunidade com computação local." in switcher
