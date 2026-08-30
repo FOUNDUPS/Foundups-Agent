@@ -27,7 +27,7 @@ const copy: Record<string, [string, string]> = {
   '夜まで人が集まる場所': ['Build a place people visit into the night.', 'Criar um lugar onde as pessoas se reúnem até a noite.'],
   'をつくる。': ['', ''],
   '保存するだけではありません。温泉、地域の食、小さな商い、学び、光の文化を一つの場所につなぐ構想です。': ['This is more than preservation. The vision connects the onsen, local food, small businesses, learning, and a culture of light in one place.', 'É mais do que preservação. A visão conecta o onsen, comida local, pequenos negócios, aprendizagem e uma cultura de luz em um só lugar.'],
-  '温泉、露天風呂、コンテナ型フードコート、D-Kの光を組み合わせた再生構想イメージ': ['Concept image combining the onsen, open-air baths, a container food court, and D-K light art', 'Imagem conceitual que combina o onsen, banhos ao ar livre, praça de alimentação em contêineres e arte luminosa D-K'],
+  '既存の南北に長い建物と南端の曲線棟、駐車場を残し、南側に露天風呂を加えた再生構想イメージ': ['Concept image preserving the existing long north–south building, connected curved southern wing, and parking while adding an outdoor bath to the south', 'Imagem conceitual que preserva o edifício existente alongado no sentido norte–sul, a ala curva conectada ao sul e o estacionamento, acrescentando um banho ao ar livre ao sul'],
   '現時点の構想イメージです。実際の配置・規模・熱利用は、建物・設備・法令・事業性の調査で決まります。': ['This is a concept image. Final layout, scale, and heat use depend on building, engineering, regulatory, and commercial studies.', 'Esta é uma imagem conceitual. O layout, a escala e o uso do calor dependerão de estudos do edifício, de engenharia, regulatórios e comerciais.'],
   '日本初を目指す、': ['Aiming to create Japan’s first', 'Com o objetivo de criar o primeiro do Japão'],
   'コンピュート排熱の露天風呂。': ['rotenburo warmed by recovered compute heat.', 'rotenburo aquecido com calor recuperado da computação.'],
