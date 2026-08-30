@@ -64,3 +64,5 @@ def test_sites_configuration_and_primary_routes_are_present() -> None:
     assert (FRONTEND_ROOT / "app" / "page.tsx").is_file()
     assert (FRONTEND_ROOT / "app" / "future" / "page.tsx").is_file()
     assert (FRONTEND_ROOT / "app" / "team" / "page.tsx").is_file()
+    for required_library in ("db.ts", "event.ts", "i18n.ts", "project-data.ts", "team.ts"):
+        assert (FRONTEND_ROOT / "lib" / required_library).is_file()
