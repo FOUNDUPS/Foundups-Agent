@@ -116,6 +116,77 @@ def test_future_place_is_labeled_as_a_conditional_concept() -> None:
     assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v4.webp").exists()
 
 
+def test_innovation_hub_uses_learn_create_launch_without_language_leakage() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    styles = (FRONTEND_ROOT / "app" / "globals.css").read_text(encoding="utf-8")
+    switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
+
+    for floor_label in (
+        "GROUND FLOOR · GATHER",
+        "2ND FLOOR · LEARN",
+        "3RD FLOOR · CREATE",
+        "4TH FLOOR · LAUNCH",
+    ):
+        assert floor_label in page
+
+    for english_copy in (
+        "build Fukui’s place to learn, create and launch.",
+        "AI Learning Studio — Primary and Middle School",
+        "A parent- and teacher-guided studio",
+        "AI Creation Lab — High School and University",
+        "collaborate with AI to research local and regional challenges",
+        "AI Launch Hub — University Projects and Startups",
+        "new projects, startups, and work in Fukui",
+    ):
+        assert english_copy in switcher
+
+    assert ".section h2 em,.return-heading h3{font-family:inherit;font-style:normal}" in styles
+    assert ".return-heading h3{font-weight:850}" in styles
+    assert "[placeholder],[aria-label],[title],[alt]" in switcher
+
+
+def test_vision_focuses_on_public_outcomes_not_the_removed_choice_diagram() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
+
+    assert 'className="choice-path"' not in page
+    for english_copy in (
+        "A Large Rotenburo Designed as a Regional Destination",
+        "test whether recovered heat from the AI Rice Field data center",
+        "Learning, Experimentation, and Launch",
+        "launch solutions built in Fukui",
+        "AI “Rice Field” — Local Compute",
+        "separate from the existing onsen building",
+        "Give local people a low-cost place to start small food businesses",
+        "D-K Light, Festivals, and Culture",
+        "A proposed nightly Akira Hasegawa D-K light experience",
+    ):
+        assert english_copy in switcher
+
+    assert "日本最大" not in page
+
+
+def test_stakeholder_campaign_sequence_is_native_and_multilingual() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
+    styles = (FRONTEND_ROOT / "app" / "globals.css").read_text(encoding="utf-8")
+
+    assert 'src="/why-preserve.jpg"' not in page
+    assert 'className="campaign-sequence"' in page
+    for phase in ("STOP", "ASSEMBLE", "LAND", "CITY", "UNIVERSITIES", "CUSTOMERS + PARTNERS"):
+        assert phase in page
+    for english_copy in (
+        "Stop Demolition. Keep Time to Compare.",
+        "Build the COGDC Coalition",
+        "Secure Landowner Agreement",
+        "Present a City-Ready Alternative",
+        "Define Use with Fukui Universities",
+        "Secure Corporate Customers and Partners",
+    ):
+        assert english_copy in switcher
+    assert ".campaign-sequence" in styles
+
+
 def test_landing_journey_uses_plain_campaign_questions() -> None:
     page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
     for label in ("WHY · 温泉を守る", "WHAT · ここがどう変わる？", "HOW · ESINGULARITY INNOVATION HUB", "WHEN · COMMUNITY MEETINGS"):
@@ -183,3 +254,8 @@ def test_visitor_spending_scenario_is_transparent_not_a_forecast() -> None:
     assert "multiplier effects" in switcher
     assert "日本最大" not in page
     assert "Japan’s largest" not in switcher
+    assert "This is the only layer currently quantified." in switcher
+    assert "Supplier effects, income, jobs, and tax revenue remain excluded" in switcher
+    assert "Fukui Prefecture economic-impact analysis" in switcher
+    assert "See the illustrative 30-year total and method" in switcher
+    assert 'className="impact-layers"' in page

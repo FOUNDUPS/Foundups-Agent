@@ -50,7 +50,7 @@ const copy: Record<string, [string, string]> = {
   '思い出を守る。': ['Protect the memories.', 'Proteja as memórias.'],
   '012の温泉の記憶を読む →': ['Read 012’s onsen memory →', 'Leia a memória de 012 no onsen →'],
   '温泉の上に、': ['Above the onsen,', 'Acima do onsen,'],
-  '福井の学びと挑戦': ['build Fukui’s place to learn and create.', 'construir um espaço para Fukui aprender e criar.'],
+  '福井の「学ぶ・創る・始める」': ['build Fukui’s place to learn, create and launch.', 'criar o lugar de Fukui para aprender, criar e lançar.'],
   'を重ねる。': ['', ''],
   '1階の温泉を地域の居場所として再開し、その上を世代ごとの学び、研究、起業がつながる場所へ。これは現時点の構想であり、建物調査と地域・所有者との合意を経て具体化します。': ['Reopen the first-floor onsen as a community gathering place. Above it, connect learning, research, and entrepreneurship across generations. This is a current concept to be refined through a building survey and agreements with the community and owners.', 'Reabrir o onsen do primeiro andar como ponto de encontro da comunidade. Acima dele, conectar aprendizado, pesquisa e empreendedorismo entre gerações. Este é um conceito atual, a ser definido após vistoria do edifício e acordos com a comunidade e os proprietários.'],
   'お米': ['Rice', 'Arroz'],
@@ -59,12 +59,12 @@ const copy: Record<string, [string, string]> = {
   'AIのごはん': ['Food for AI', 'Alimento da IA'],
   '温泉と地域の居場所': ['Onsen and community space', 'Onsen e espaço comunitário'],
   '温泉を再開し、世代を超えて人が集まる入口に。': ['Reopen the onsen as a gateway where generations gather.', 'Reabrir o onsen como uma porta de entrada onde gerações se encontram.'],
-  '小・中学生': ['Primary and middle school', 'Ensino fundamental'],
-  'AIを安全に学び、先生と一緒に試せる学習スタジオ。': ['A learning studio where students can understand AI safely and try it with teachers.', 'Um estúdio de aprendizagem onde estudantes podem entender a IA com segurança e experimentá-la com professores.'],
-  '高校生・大学生': ['High school and university', 'Ensino médio e universidade'],
-  '地域の課題を教材に、研究と実践をつなぐ場所。': ['A place connecting research and practice through local challenges.', 'Um espaço que conecta pesquisa e prática por meio dos desafios locais.'],
-  '大学プロジェクト・スタートアップ': ['University projects and startups', 'Projetos universitários e startups'],
-  '研究を実証し、福井で新しい仕事へ育てる場所。': ['A place to test research and grow it into new work in Fukui.', 'Um espaço para testar pesquisas e transformá-las em novos trabalhos em Fukui.'],
+  'AI学習スタジオ（小・中学生）': ['AI Learning Studio — Primary and Middle School', 'Estúdio de aprendizagem de IA — Ensino fundamental'],
+  '保護者と先生が見守る中で、子どもたちがAIの仕組みを安全に学び、対話し、一緒に創る場所。': ['A parent- and teacher-guided studio where children can safely learn how AI works, interact with it, and create alongside it.', 'Um estúdio acompanhado por pais e professores, onde as crianças podem aprender com segurança como a IA funciona, interagir com ela e criar ao seu lado.'],
+  'AI創造ラボ（高校生・大学生）': ['AI Creation Lab — High School and University', 'Laboratório de criação com IA — Ensino médio e universidade'],
+  'AIと協働し、地域の課題を研究し、実践的な解決策を生み出す場所。': ['A place where students collaborate with AI to research local and regional challenges and develop practical solutions.', 'Um lugar onde estudantes colaboram com a IA para pesquisar desafios locais e regionais e desenvolver soluções práticas.'],
+  'AIローンチ・ハブ（大学プロジェクト・スタートアップ）': ['AI Launch Hub — University Projects and Startups', 'Polo de lançamento com IA — Projetos universitários e startups'],
+  'AIを活用した研究とアイデアを、福井の新しいプロジェクト、起業、仕事へ育てる場所。': ['A place to turn AI-assisted research and ideas into new projects, startups, and work in Fukui.', 'Um lugar para transformar pesquisas e ideias apoiadas por IA em novos projetos, startups e trabalho em Fukui.'],
   '構想図：階ごとの利用方法は、耐震・設備・消防・法令調査と関係者協議により変更されます。': ['Concept: floor uses may change after structural, equipment, fire-safety and legal reviews and consultation with stakeholders.', 'Conceito: o uso dos andares poderá mudar após análises estruturais, de instalações, segurança contra incêndio e legislação, além de consultas às partes envolvidas.'],
   'Computeが、': ['Compute Powers', 'A computação impulsiona'],
   '福井を動かす。': ['Fukui.', 'Fukui.'],
@@ -108,6 +108,15 @@ const copy: Record<string, [string, string]> = {
   '小さな店や台所から、地域の商いを始める。': ['Give local people a low-cost place to start small food businesses.', 'Dar às pessoas locais um lugar acessível para iniciar pequenos negócios de alimentação.'],
   '祭りと文化': ['Festivals and culture', 'Festivais e cultura'],
   'イベントと光で、夜も人が集まる場所へ。': ['Use festivals and light to bring people together after dark.', 'Usar festivais e luz para reunir pessoas depois do anoitecer.'],
+  '温泉 — 地域の目的地となる大露天風呂': ['Onsen — A Large Rotenburo Designed as a Regional Destination', 'Onsen — Um grande rotenburo concebido como destino regional'],
+  '1階の温泉を地域の集いの場として再開し、AIの田んぼ（データセンター）の回収熱で温泉水を補助加温できるかを技術検証します。': ['Reopen the first-floor onsen as a community gathering place and test whether recovered heat from the AI Rice Field data center can supplement its water heating.', 'Reabrir o onsen do primeiro andar como ponto de encontro comunitário e testar se o calor recuperado do data center AI Rice Field pode complementar o aquecimento da água.'],
+  '学ぶ・試す・立ち上げる': ['Learning, Experimentation, and Launch', 'Aprendizagem, experimentação e lançamento'],
+  '上階を、学生・研究者がAIを学び、試し、福井発の解決策を立ち上げる拠点へ。': ['Turn the upper floors into a base where students and researchers learn and test AI—and launch solutions built in Fukui.', 'Transformar os andares superiores em uma base onde estudantes e pesquisadores aprendem e testam IA — e lançam soluções criadas em Fukui.'],
+  'AIの「田んぼ」— 地域の計算力': ['AI “Rice Field” — Local Compute', '“Arrozal” de IA — Computação local'],
+  '既存の温泉棟とは別に、周辺の土地へ福井で使う計算力をつくる。': ['Build computing power for Fukui on the surrounding land, separate from the existing onsen building.', 'Criar capacidade computacional para Fukui nos terrenos ao redor, separada do edifício existente do onsen.'],
+  '小さな店や台所から、低い初期負担で地域の食の商いを始められる場所へ。': ['Give local people a low-cost place to start small food businesses.', 'Dar às pessoas locais um lugar de baixo custo para iniciar pequenos negócios de alimentação.'],
+  'D-Kの光・祭り・文化': ['D-K Light, Festivals, and Culture', 'Luz D-K, festivais e cultura'],
+  '長谷川章氏のD-Kによる夜の光の体験と地域イベントで、福井内外から人が集まる場所へ。': ['A proposed nightly Akira Hasegawa D-K light experience and community events can draw people from Fukui and beyond.', 'Uma experiência noturna proposta de luz D-K de Akira Hasegawa e eventos comunitários podem atrair pessoas de Fukui e de outras regiões.'],
   'AIにも、': ['AI needs', 'A IA também precisa de'],
   '「ごはん」': ['“food,” too.', '“alimento”.'],
   'が必要です。': ['', ''],
@@ -198,8 +207,12 @@ const copy: Record<string, [string, string]> = {
   '年間13万人の実績は、': ['A proven audience of 130,000 a year', 'Um público comprovado de 130 mil pessoas por ano'],
   '地域経済の出発点。': ['is a starting point for the local economy.', 'é um ponto de partida para a economia local.'],
   '温泉に、地域の食、D-K、祭り、学びを重ねれば、滞在時間と地域での消費を増やせる可能性があります。': ['Adding local food, D-K, festivals, and learning to the onsen could encourage longer stays and more local spending.', 'Somar comida local, D-K, festivais e aprendizagem ao onsen pode estimular estadias mais longas e mais gastos na região.'],
+  '年間129,649人。': ['129,649 annual visits.', '129.649 visitas anuais.'],
+  '需要は、すでにあった。': ['The demand was already there.', 'A demanda já existia.'],
+  '次の価値は、一回の来場を地域での食事、買い物、宿泊、交通にどれだけつなげられるかで決まります。': ['What comes next depends on how each visit connects to local food, shopping, lodging, and transport.', 'O próximo valor depende de quanto cada visita se conecta à alimentação, às compras, à hospedagem e ao transporte locais.'],
   '約1.3億〜7.2億円 / 年': ['About ¥130M–¥720M / year', 'Cerca de ¥130–720 milhões / ano'],
   '直接消費シナリオ': ['Direct-spending scenario', 'Cenário de gasto direto'],
+  '来場者の直接消費シナリオ': ['Direct-spending scenario', 'Cenário de gasto direto dos visitantes'],
   '約38.9億〜215.7億円 / 30年': ['About ¥3.9B–¥21.6B / 30 years', 'Cerca de ¥3,9–21,6 bilhões / 30 anos'],
   '30年間の直接消費機会': ['30-year direct-spending opportunity', 'Oportunidade de gasto direto em 30 anos'],
   '地域の食・横丁': ['Local food and yokocho', 'Comida local e yokocho'],
@@ -208,6 +221,18 @@ const copy: Record<string, [string, string]> = {
   '空港・新幹線からの周遊': ['Connections from the airport and Shinkansen', 'Conexões a partir do aeroporto e do Shinkansen'],
   '2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2025年日帰り観光消費単価5,546円までを掛けた単純な試算です。30年間の数字は、来場者数と単価を一定として割引を行わない説明用の累計です。建設、運営、コンピュート収入、雇用、経済波及効果は含みません。': ['A simple screening calculation applying ¥1,000 in assumed incremental spending through Fukui Prefecture’s 2025 average day-trip spending of ¥5,546 to fiscal-2018 attendance. The 30-year figure holds attendance and spending constant and is not discounted. It excludes construction, operations, compute revenue, jobs, and multiplier effects.', 'Um cálculo preliminar que aplica de ¥1.000 em gasto adicional presumido até a média de ¥5.546 por viagem de um dia em Fukui em 2025 ao público do ano fiscal de 2018. O total de 30 anos mantém público e gasto constantes e não é descontado. Não inclui construção, operação, receita de computação, empregos nem efeitos multiplicadores.'],
   '福井県観光客入込数（推計）2025年': ['Fukui Prefecture Tourism Statistics 2025', 'Estatísticas de Turismo de Fukui 2025'],
+  '経済効果を検証する三つの段階': ['Three stages for validating economic impact', 'Três etapas para validar o impacto econômico'],
+  '来場者の直接消費': ['Direct visitor spending', 'Gasto direto dos visitantes'],
+  '現在数字で示しているのは、この層だけです。': ['This is the only layer currently quantified.', 'Esta é a única camada atualmente quantificada.'],
+  '県内取引と所得への波及': ['Local supplier and income effects', 'Efeitos sobre fornecedores e renda locais'],
+  '消費項目と県内調達率を確認し、福井県産業連関表で分析します。': ['After confirming spending categories and local capture, analyze them with Fukui’s input-output table.', 'Após confirmar as categorias de gasto e a retenção local, analisá-las com a matriz insumo-produto de Fukui.'],
+  '雇用・税収・地域への還元': ['Jobs, tax revenue, and community returns', 'Empregos, receita tributária e retorno à comunidade'],
+  '分析が完了するまで、数字を掲載しません。': ['No figures will be published until that analysis is complete.', 'Nenhum valor será publicado até que essa análise esteja concluída.'],
+  '30年間の参考累計と計算方法': ['See the illustrative 30-year total and method', 'Ver o total ilustrativo de 30 anos e o método'],
+  '来場者数と消費額が一定の場合の単純累計': ['Simple cumulative total if attendance and spending remain constant', 'Total cumulativo simples se o público e os gastos permanecerem constantes'],
+  '割引を行わない説明用の参考値であり、予測ではありません。': ['An undiscounted illustration—not a forecast.', 'Uma ilustração sem desconto — não uma previsão.'],
+  '2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2025年日帰り観光消費単価5,546円までを掛けた単純な試算です。この試算に含むのは来場者の直接消費だけです。取引先への波及、所得、雇用、税収は、福井県産業連関表による分析が完了するまで含めません。': ['This simple screen applies a ¥1,000 project assumption through Fukui’s 2025 average day-trip spend of ¥5,546 to FY2018 attendance. It includes direct visitor spending only. Supplier effects, income, jobs, and tax revenue remain excluded until a Fukui input-output analysis is complete.', 'Esta estimativa simples aplica uma hipótese do projeto de ¥1.000 até o gasto médio de ¥5.546 por excursionista em Fukui em 2025 ao público do ano fiscal de 2018. Inclui apenas o gasto direto dos visitantes. Efeitos sobre fornecedores, renda, empregos e receita tributária permanecem excluídos até a conclusão de uma análise insumo-produto de Fukui.'],
+  '福井県 経済波及効果分析': ['Fukui Prefecture economic-impact analysis', 'Análise de impacto econômico da Província de Fukui'],
   '1994年、市民の健康・交流・憩いのために開館。天然温泉、体育館、宴会場、宿泊・研修機能を備え、2018年度には約13万人が利用しました。公の施設としての機能は2021年6月に廃止されました。': ['Sukatto Land cost ¥4.68 billion to build. Its indexed construction-cost reference is about ¥6.8 billion. Demolition has been discussed at roughly ¥1.58 billion. In fiscal 2018, 129,649 people used it. Before paying to erase that asset, test what it could produce over the next 30 years.', 'Inaugurado em 1994 para saúde, convivência e lazer públicos, o complexo inclui fonte termal natural, ginásio, salões, hospedagem e espaços de treinamento. Cerca de 130 mil pessoas o utilizaram no ano fiscal de 2018. Sua função pública terminou em junho de 2021.'],
   '開館': ['Opened', 'Inauguração'],
   '高齢者を中心とした健康・交流の公共拠点として誕生。': ['Created as a public center for health and connection, especially for older residents.', 'Criado como centro público de saúde e convivência, especialmente para moradores idosos.'],
@@ -302,6 +327,20 @@ const copy: Record<string, [string, string]> = {
   '最初に集めるのは、': ['First gather', 'Primeiro, reunir'],
   'お金ではなく': ['stakeholders—not money.', 'as pessoas envolvidas — não dinheiro.'],
   '当事者': ['', ''],
+  '資金の話を始める前に、解体を止め、土地・行政・教育・需要を一つの実行可能な代案につなぎます。': ['Before discussing capital, stop demolition and connect land, government, education, and demand into one workable alternative.', 'Antes de discutir capital, interromper a demolição e conectar terra, governo, educação e demanda em uma alternativa viável.'],
+  '温泉を守るための関係者づくりの順序': ['Stakeholder-building sequence to save the onsen', 'Sequência de formação de partes interessadas para salvar o onsen'],
+  '解体を止め、比較の時間を確保する': ['Stop Demolition. Keep Time to Compare.', 'Interromper a demolição. Preservar tempo para comparar.'],
+  '条件を満たす代案を比較できるまで、後戻りできない解体契約を結ばないよう求める。': ['Ask that no irreversible demolition contract be executed until a qualified alternative can be compared.', 'Pedir que nenhum contrato irreversível de demolição seja executado até que uma alternativa qualificada possa ser comparada.'],
+  'COGDC推進チームをつくる': ['Build the COGDC Coalition', 'Formar a coalizão COGDC'],
+  '地域住民、発起人、技術・運営の実務家、公益パートナーを一つの実行チームへ。': ['Bring residents, organizers, technical and operating experts, and public-interest partners into one delivery team.', 'Reunir moradores, organizadores, especialistas técnicos e operacionais e parceiros de interesse público em uma equipe de execução.'],
+  '地権者と合意する': ['Secure Landowner Agreement', 'Firmar acordo com os proprietários'],
+  '地代、責任、期間、将来の選択肢を含む土地利用の条件を、地権者と協議する。': ['Negotiate land-use terms covering rent, responsibility, duration, and future options with the landowners.', 'Negociar com os proprietários os termos de uso da terra, incluindo aluguel, responsabilidades, duração e opções futuras.'],
+  '市が審査できる代案にする': ['Present a City-Ready Alternative', 'Apresentar uma alternativa pronta para análise da cidade'],
+  '安全性、責任移管、資金計画、市の財政効果を示し、正式に比較できる提案へ。': ['Demonstrate safety, liability transfer, financing, and fiscal impact so the City can formally compare the proposal.', 'Demonstrar segurança, transferência de responsabilidade, financiamento e impacto fiscal para que a cidade possa comparar formalmente a proposta.'],
+  '福井の大学と利用計画をつくる': ['Define Use with Fukui Universities', 'Definir o uso com as universidades de Fukui'],
+  '教育・研究で必要な計算力と、最初に実行する地域プロジェクトを具体化する。': ['Define the compute needed for education and research and the first regional projects to run.', 'Definir a computação necessária para educação e pesquisa e os primeiros projetos regionais a executar.'],
+  '企業顧客・事業パートナーを確保する': ['Secure Corporate Customers and Partners', 'Garantir clientes corporativos e parceiros'],
+  '電力、通信、建設、運営の体制と、計算力を利用する中核顧客の約束を積み上げる。': ['Build commitments for power, networks, construction, operations, and anchor customers that will use the compute.', 'Construir compromissos para energia, redes, construção, operação e clientes âncora que utilizarão a computação.'],
   '012と0102を核に、Endorsers、土地所有者、地域の人々、教育・技術の仲間が加わる、生きたチームディレクトリです。写真をタップすると、その人の物語へ進みます。': ['A living directory built around 012 and 0102, joined by endorsers, landowners, community members, educators, and technical collaborators. Tap a photograph to open that person’s story.', 'Um diretório vivo centrado em 012 e 0102, com apoiadores, proprietários, comunidade, educadores e colaboradores técnicos. Toque em uma foto para abrir a história daquela pessoa.'],
   '顔が見える。': ['See the faces.', 'Veja os rostos.'],
   '役割がわかる。': ['Understand the roles.', 'Entenda os papéis.'],
@@ -415,13 +454,13 @@ function applyLanguage(language: Language) {
     node = walker.nextNode() as Text | null;
   }
 
-  document.querySelectorAll('[placeholder],[aria-label],[title]').forEach((element) => {
+  document.querySelectorAll('[placeholder],[aria-label],[title],[alt]').forEach((element) => {
     let attributes = originalAttributes.get(element);
     if (!attributes) {
       attributes = new Map();
       originalAttributes.set(element, attributes);
     }
-    for (const name of ['placeholder', 'aria-label', 'title']) {
+    for (const name of ['placeholder', 'aria-label', 'title', 'alt']) {
       const current = element.getAttribute(name);
       if (current !== null && !attributes.has(name)) attributes.set(name, current);
       const source = attributes.get(name);
