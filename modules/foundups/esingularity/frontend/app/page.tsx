@@ -77,14 +77,15 @@ export default function Home() {
           </div>
           <p className="hub-caveat">構想図：階ごとの利用方法は、耐震・設備・消防・法令調査と関係者協議により変更されます。</p>
 
-          <div className="return-heading"><p className="eyebrow light"><span /> RETURN ON COMPUTE</p><h3>計算力から、<br />福井に何が返る？</h3><p>データセンターの価値は、機械の台数ではありません。地域の人が、その計算力で何を学び、試し、つくれるかです。</p></div>
+          <div className="return-heading"><p className="eyebrow light"><span /> FUKUI × COMPUTE</p><h3>Computeが、<br />福井を動かす。</h3><p>福井には、AIを学ぶ大学、スマート農業、県民衛星、世界に誇るものづくりがすでにあります。地域の計算力は、それらをつなぎ、試し、育てる基盤です。</p></div>
           <div className="compute-return" role="list">
-            <article role="listitem"><span>🎓</span><strong>一人ひとりの学び</strong><p>先生の代わりではなく、先生と子どもを支えるAIを、地域で学び試す。</p><a href="https://www.mext.go.jp/zyoukatsu/ai/index.html" target="_blank" rel="noreferrer">文部科学省の取組 <b>↗</b></a></article>
-            <article role="listitem"><span>🌾</span><strong>自動化する農業</strong><p>ドローン、自動走行農機、草刈り・除草、圃場の見守りを支えるAI研究へ。</p><a href="https://www.maff.go.jp/j/nousin/noukan/tyotei/kizyun/attach/tebiki.html" target="_blank" rel="noreferrer">農林水産省の手引き <b>↗</b></a></article>
-            <article role="listitem"><span>🧪</span><strong>試せる場所</strong><p>学生、大学、地域企業、起業家が、自分たちの課題でAIを実験できる。</p><a href="https://www.meti.go.jp/policy/mono_info_service/geniac/" target="_blank" rel="noreferrer">経済産業省 GENIAC <b>↗</b></a></article>
-            <article role="listitem"><span>🛡️</span><strong>地域で管理できる選択肢</strong><p>計算、モデル、適切に管理されたデータを、より地域の管理下に置ける選択肢を増やす。</p><a href="https://www.meti.go.jp/press/2024/04/20240419002/20240419002.html" target="_blank" rel="noreferrer">国内計算資源と経済安全保障 <b>↗</b></a></article>
+            <article role="listitem"><span>🎓</span><strong>福井の学生と大学</strong><p>福井大学や福井県立大学では、データサイエンス・AI教育がすでに進んでいます。地域の計算力で、授業を実験と研究へ。</p><a href="https://www.dsai.u-fukui.ac.jp/" target="_blank" rel="noreferrer">福井大学 AI教育研究センター <b>↗</b></a></article>
+            <article role="listitem"><span>🌾</span><strong>福井の田んぼ</strong><p>自動走行農機、ロボット草刈機、収量計測、センシングドローン。福井の農業を、福井のAIで支える。</p><a href="https://www.pref.fukui.lg.jp/doc/021037/service/service.html" target="_blank" rel="noreferrer">福井県 スマート農業支援 <b>↗</b></a></article>
+            <article role="listitem"><span>🛰️</span><strong>県民衛星「すいせん」</strong><p>福井は衛星をつくり、農地、森林、災害、文化財にデータを活用しています。次は、そのデータを地域で計算する力へ。</p><a href="https://www.pref.fukui.lg.jp/doc/chisangi/fukusat/suisen_syokai.html" target="_blank" rel="noreferrer">福井県民衛星プロジェクト <b>↗</b></a></article>
+            <article role="listitem"><span>🏭</span><strong>福井のものづくり</strong><p>繊維、眼鏡、機械、電子部品。地域の計算力で、設計、検査、自動化、新製品開発を加速する。</p><a href="https://kigyoritti.pref.fukui.lg.jp/outline/technical" target="_blank" rel="noreferrer">福井県の技術と産業 <b>↗</b></a></article>
           </div>
-          <p className="future-compute-line">未来を動かすのは、<strong>Compute。</strong><br />福井の電力から、福井が使える計算力を。</p>
+          <div className="local-control-callout"><strong>福井の知識とデータを、福井で価値に変える。</strong><p>すべてを地域だけに閉じるという意味ではありません。福井の組織が、計算、モデル、適切に管理されたデータを、より地域の管理下に置ける選択肢を増やします。</p></div>
+          <p className="future-compute-line">未来を動かすのは、<strong>Compute。</strong><br />福井の電力 → 福井の計算力 → 福井の未来。</p>
         </section>
 
         <section className="vision-overview section" id="vision" aria-labelledby="vision-title">
@@ -110,13 +111,20 @@ export default function Home() {
 
         <section className="story section" id="story" aria-labelledby="story-title">
           <div className="section-index">WHY <span>/ THE BUILDING</span></div>
-          <div className="story-heading"><div><p className="eyebrow"><span /> A PUBLIC ASSET WITH A HISTORY</p><h2 id="story-title">これは、古い建物の話ではない。<br /><em>次の30年</em>を選ぶ話です。</h2></div><p>1994年、市民の健康・交流・憩いのために開館。天然温泉、体育館、宴会場、宿泊・研修機能を備え、2018年度には約13万人が利用しました。公の施設としての機能は2021年6月に廃止されました。</p></div>
+          <div className="story-heading"><div><p className="eyebrow"><span /> A PUBLIC ASSET WITH A HISTORY</p><h2 id="story-title">これは、古い建物の話ではない。<br /><em>福井の次の30年を動かす計算力を、</em>誰が持つかという話です。</h2></div><p>1994年、市民の健康・交流・憩いのために開館。天然温泉、体育館、宴会場、宿泊・研修機能を備え、2018年度には約13万人が利用しました。公の施設としての機能は2021年6月に廃止されました。</p></div>
 
           <div className="fact-rail" role="list" aria-label="Facility facts">
             <article role="listitem"><span>1994</span><strong>開館</strong><p>高齢者を中心とした健康・交流の公共拠点として誕生。</p></article>
             <article role="listitem"><span>8,099㎡</span><strong>延床面積</strong><p>宿泊・研修、健康、交流の複数棟からなる大規模資産。</p></article>
             <article role="listitem"><span>129,649人</span><strong>2018年度利用</strong><p>入館者と宿泊者を合わせた、閉館前の利用実績。</p></article>
             <article role="listitem"><span>2021</span><strong>機能廃止</strong><p>いま問われているのは、解体前に再利用を検証するかどうか。</p></article>
+          </div>
+
+          <div className="visitor-impact" aria-labelledby="visitor-impact-title">
+            <div className="visitor-impact-copy"><p className="eyebrow"><span /> VISITOR ECONOMY · SCREENING SCENARIO</p><h3 id="visitor-impact-title">年間13万人の実績は、<br /><em>地域経済の出発点。</em></h3><p>温泉に、地域の食、D-K、祭り、学びを重ねれば、滞在時間と地域での消費を増やせる可能性があります。</p></div>
+            <div className="visitor-impact-number"><span>約1.3億〜5.1億円 / 年</span><strong>直接消費シナリオ</strong><code>129,649 visits × ¥1,000–¥3,972</code></div>
+            <div className="visitor-opportunities" role="list"><span role="listitem">🍜 地域の食・横丁</span><span role="listitem">🎨 D-K・祭り・夜間滞在</span><span role="listitem">♨️ 温泉・宿泊</span><span role="listitem">✈️ 空港・新幹線からの周遊</span></div>
+            <div className="scenario-note"><strong>PROJECT SCENARIO — NOT A FORECAST</strong><p>2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2024年日帰り観光消費単価3,972円までを掛けた単純な試算です。建設、運営、コンピュート収入、雇用、経済波及効果は含みません。</p><a href="https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/023.pdf" target="_blank" rel="noreferrer">福井県観光客入込数（推計）2024年 <b>↗</b></a></div>
           </div>
 
         </section>

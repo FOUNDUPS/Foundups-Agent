@@ -116,3 +116,38 @@ def test_landing_journey_uses_plain_campaign_questions() -> None:
         assert removed_index not in page
     assert "PRE-CONSTRUCTION ACTION PLAN" not in page
     assert "SOURCES & TRANSPARENCY" not in page
+
+
+def test_fukui_compute_story_is_local_specific_and_multilingual() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
+
+    for claim in ("Computeが、", "福井の学生と大学", "福井の田んぼ", "県民衛星「すいせん」", "福井のものづくり"):
+        assert claim in page
+    for official_source in (
+        "https://www.dsai.u-fukui.ac.jp/",
+        "https://www.pref.fukui.lg.jp/doc/021037/service/service.html",
+        "https://www.pref.fukui.lg.jp/doc/chisangi/fukusat/suisen_syokai.html",
+        "https://kigyoritti.pref.fukui.lg.jp/outline/technical",
+    ):
+        assert official_source in page
+
+    assert "The future runs on " in switcher
+    assert "Fukui energy → Fukui compute → Fukui’s future." in switcher
+    assert "From Fukui power, create computing power Fukui can use." not in switcher
+    assert "It is about who owns the compute" in switcher
+    assert "that will power Fukui’s next 30 years." in switcher
+
+
+def test_visitor_spending_scenario_is_transparent_not_a_forecast() -> None:
+    page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
+
+    assert 129_649 * 1_000 == 129_649_000
+    assert 129_649 * 3_972 == 514_965_828
+    assert "約1.3億〜5.1億円 / 年" in page
+    assert "129,649 visits × ¥1,000–¥3,972" in page
+    assert "PROJECT SCENARIO — NOT A FORECAST" in page
+    assert "multiplier effects" in switcher
+    assert "日本最大" not in page
+    assert "Japan’s largest" not in switcher
