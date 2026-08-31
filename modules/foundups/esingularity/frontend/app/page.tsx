@@ -7,12 +7,13 @@ import HeroMusic from '../components/HeroMusic';
 
 const LINE_URL = 'https://line.me/ti/p/baXEozL_Q6';
 
-const stakeholderRings = [
-  ['01', '天菅生町と近隣住民', '騒音・水・交通・景観・温泉再開について、最初に話を聞く人たち。'],
-  ['02', '子ども・学生・研究者', '大安寺の学びと、まず県内5大学の研究・教育に地域の計算資源をつなぐ。'],
-  ['03', '農業・地域産業', '農業AI、ドローン、自動運転農機、ものづくりDXを地域で育てる。'],
-  ['04', '技術・運営パートナー', '電力、通信、冷却、建築、セキュリティ、データセンター運営の実務家。'],
-  ['05', '福井市と市民', '解体か再生かを、公開された根拠と地域の声で判断する。'],
+const campaignSteps = [
+  ['01', 'STOP', '解体を止め、比較の時間を確保する', '条件を満たす代案を比較できるまで、後戻りできない解体契約を結ばないよう求める。'],
+  ['02', 'ASSEMBLE', 'COGDC推進チームをつくる', '地域住民、発起人、技術・運営の実務家、公益パートナーを一つの実行チームへ。'],
+  ['03', 'LAND', '地権者と合意する', '地代、責任、期間、将来の選択肢を含む土地利用の条件を、地権者と協議する。'],
+  ['04', 'CITY', '市が審査できる代案にする', '安全性、責任移管、資金計画、市の財政効果を示し、正式に比較できる提案へ。'],
+  ['05', 'UNIVERSITIES', '福井の大学と利用計画をつくる', '教育・研究で必要な計算力と、最初に実行する地域プロジェクトを具体化する。'],
+  ['06', 'CUSTOMERS + PARTNERS', '企業顧客・事業パートナーを確保する', '電力、通信、建設、運営の体制と、計算力を利用する中核顧客の約束を積み上げる。'],
 ];
 
 export default function Home() {
@@ -69,7 +70,7 @@ export default function Home() {
 
         <section className="innovation-hub section" id="innovation-hub" aria-labelledby="innovation-hub-title">
           <div className="hub-heading">
-            <div><p className="eyebrow light"><span /> HOW · ESINGULARITY INNOVATION HUB</p><h2 id="innovation-hub-title">温泉の上に、<br /><em>福井の学びと挑戦</em>を重ねる。</h2></div>
+            <div><p className="eyebrow light"><span /> HOW · ESINGULARITY INNOVATION HUB</p><h2 id="innovation-hub-title">温泉の上に、<br /><em>福井の「学ぶ・創る・始める」</em>を重ねる。</h2></div>
             <p>1階の温泉を地域の居場所として再開し、その上を世代ごとの学び、研究、起業がつながる場所へ。これは現時点の構想であり、建物調査と地域・所有者との合意を経て具体化します。</p>
           </div>
 
@@ -78,10 +79,10 @@ export default function Home() {
           </div>
 
           <div className="hub-floors" role="list" aria-label="Innovation Hub floor concept">
-            <article role="listitem"><span>GROUND FLOOR</span><div><strong>温泉とコミュニティ空間</strong><p>温泉、大きな露天風呂、あわら型コンテナ・フードコート。</p></div></article>
-            <article role="listitem"><span>2ND FLOOR</span><div><strong>小・中学生</strong><p>AIを安全に学び、先生と一緒に試せる学習スタジオ。</p></div></article>
-            <article role="listitem"><span>3RD FLOOR</span><div><strong>高校生・大学生</strong><p>地域の課題を通じて、研究と実践をつなぐ場所。</p></div></article>
-            <article role="listitem"><span>4TH FLOOR</span><div><strong>大学プロジェクト・スタートアップ</strong><p>研究を試し、福井の新しい仕事へ育てる場所。</p></div></article>
+            <article role="listitem"><span>GROUND FLOOR · GATHER</span><div><strong>温泉とコミュニティ空間</strong><p>温泉、大きな露天風呂、あわら型コンテナ・フードコート。</p></div></article>
+            <article role="listitem"><span>2ND FLOOR · LEARN</span><div><strong>AI学習スタジオ（小・中学生）</strong><p>保護者と先生が見守る中で、子どもたちがAIの仕組みを安全に学び、対話し、一緒に創る場所。</p></div></article>
+            <article role="listitem"><span>3RD FLOOR · CREATE</span><div><strong>AI創造ラボ（高校生・大学生）</strong><p>AIと協働し、地域の課題を研究し、実践的な解決策を生み出す場所。</p></div></article>
+            <article role="listitem"><span>4TH FLOOR · LAUNCH</span><div><strong>AIローンチ・ハブ（大学プロジェクト・スタートアップ）</strong><p>AIを活用した研究とアイデアを、福井の新しいプロジェクト、起業、仕事へ育てる場所。</p></div></article>
           </div>
           <p className="hub-caveat">構想図：階ごとの利用方法は、耐震・設備・消防・法令調査と関係者協議により変更されます。</p>
 
@@ -101,19 +102,12 @@ export default function Home() {
             <div><p className="eyebrow"><span /> 選択肢を比べる</p><h2 id="vision-title">壊すだけではない。<br /><em>こう変えられる。</em></h2></div>
             <p>閉館した施設を、そのまま残す話ではありません。温泉を中心に、人が集まり、学び、働き、挑戦できる場所へ育てる提案です。</p>
           </div>
-          <div className="choice-path" aria-label="現在から二つの選択肢への流れ">
-            <article><span>いま</span><strong>閉館した施設</strong><p>解体に向けた手続きが進んでいます。</p></article>
-            <b aria-hidden="true">↓</b>
-            <article className="choice"><span>選択</span><strong>解体する</strong><i>または</i><strong>もう一つの未来を比べる</strong></article>
-            <b aria-hidden="true">↓</b>
-            <article className="future"><span>私たちの提案</span><strong>温泉を中心に、地域の未来をつくる</strong></article>
-          </div>
           <div className="vision-cards" role="list" aria-label="再生後の五つの役割">
-            <article role="listitem"><span aria-hidden="true">♨️</span><div><strong>温泉</strong><p>1階の温泉を再開し、地域の居場所を取り戻す。</p></div></article>
-            <article role="listitem"><span aria-hidden="true">🎓</span><div><strong>学びと挑戦</strong><p>上階を学生、研究者、地域企業の活動拠点へ。</p></div></article>
-            <article role="listitem"><span aria-hidden="true">🌾</span><div><strong>AIの田んぼ</strong><p>周辺の土地に、福井で使う計算力をつくる。</p></div></article>
-            <article role="listitem"><span aria-hidden="true">🍜</span><div><strong>食と起業</strong><p>小さな店や台所から、地域の商いを始める。</p></div></article>
-            <article role="listitem"><span aria-hidden="true">🎨</span><div><strong>祭りと文化</strong><p>イベントと光で、夜も人が集まる場所へ。</p></div></article>
+            <article role="listitem"><span aria-hidden="true">♨️</span><div><strong>温泉 — 地域の目的地となる大露天風呂</strong><p>1階の温泉を地域の集いの場として再開し、AIの田んぼ（データセンター）の回収熱で温泉水を補助加温できるかを技術検証します。</p></div></article>
+            <article role="listitem"><span aria-hidden="true">🎓</span><div><strong>学ぶ・試す・立ち上げる</strong><p>上階を、学生・研究者がAIを学び、試し、福井発の解決策を立ち上げる拠点へ。</p></div></article>
+            <article role="listitem"><span aria-hidden="true">🌾</span><div><strong>AIの「田んぼ」— 地域の計算力</strong><p>既存の温泉棟とは別に、周辺の土地へ福井で使う計算力をつくる。</p></div></article>
+            <article role="listitem"><span aria-hidden="true">🍜</span><div><strong>食と起業</strong><p>小さな店や台所から、低い初期負担で地域の食の商いを始められる場所へ。</p></div></article>
+            <article role="listitem"><span aria-hidden="true">🎨</span><div><strong>D-Kの光・祭り・文化</strong><p>長谷川章氏のD-Kによる夜の光の体験と地域イベントで、福井内外から人が集まる場所へ。</p></div></article>
           </div>
         </section>
 
@@ -129,10 +123,12 @@ export default function Home() {
           </div>
 
           <div className="visitor-impact" aria-labelledby="visitor-impact-title">
-            <div className="visitor-impact-copy"><p className="eyebrow"><span /> VISITOR ECONOMY · SCREENING SCENARIO</p><h3 id="visitor-impact-title">年間13万人の実績は、<br /><em>地域経済の出発点。</em></h3><p>温泉に、地域の食、D-K、祭り、学びを重ねれば、滞在時間と地域での消費を増やせる可能性があります。</p></div>
-            <div className="visitor-impact-number"><span>約1.3億〜7.2億円 / 年</span><strong>直接消費シナリオ</strong><code>129,649 visits × ¥1,000–¥5,546</code><hr /><span className="visitor-impact-horizon">約38.9億〜215.7億円 / 30年</span><strong>30年間の直接消費機会</strong></div>
+            <div className="visitor-impact-copy"><p className="eyebrow"><span /> VISITOR ECONOMY · SCREENING SCENARIO</p><h3 id="visitor-impact-title">年間129,649人。<br /><em>需要は、すでにあった。</em></h3><p>次の価値は、一回の来場を地域での食事、買い物、宿泊、交通にどれだけつなげられるかで決まります。</p></div>
+            <div className="visitor-impact-number"><span>約1.3億〜7.2億円 / 年</span><strong>来場者の直接消費シナリオ</strong><code>129,649 visits × ¥1,000–¥5,546</code></div>
             <div className="visitor-opportunities" role="list"><span role="listitem">🍜 地域の食・横丁</span><span role="listitem">🎨 D-K・祭り・夜間滞在</span><span role="listitem">♨️ 温泉・宿泊</span><span role="listitem">✈️ 空港・新幹線からの周遊</span></div>
-            <div className="scenario-note"><strong>PROJECT SCENARIO — NOT A FORECAST</strong><p>2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2025年日帰り観光消費単価5,546円までを掛けた単純な試算です。30年間の数字は、来場者数と単価を一定として割引を行わない説明用の累計です。建設、運営、コンピュート収入、雇用、経済波及効果は含みません。</p><a href="https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/024.pdf" target="_blank" rel="noreferrer">福井県観光客入込数（推計）2025年 <b>↗</b></a></div>
+            <div className="impact-layers" role="list" aria-label="経済効果を検証する三つの段階"><article className="measured" role="listitem"><span>NOW · CALCULATED</span><strong>来場者の直接消費</strong><p>現在数字で示しているのは、この層だけです。</p></article><article role="listitem"><span>NEXT · INPUT-OUTPUT</span><strong>県内取引と所得への波及</strong><p>消費項目と県内調達率を確認し、福井県産業連関表で分析します。</p></article><article role="listitem"><span>AFTER VALIDATION</span><strong>雇用・税収・地域への還元</strong><p>分析が完了するまで、数字を掲載しません。</p></article></div>
+            <details className="impact-method"><summary>30年間の参考累計と計算方法</summary><div><span>約38.9億〜215.7億円 / 30年</span><strong>来場者数と消費額が一定の場合の単純累計</strong><p>割引を行わない説明用の参考値であり、予測ではありません。</p></div></details>
+            <div className="scenario-note"><strong>PROJECT SCENARIO — NOT A FORECAST</strong><p>2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2025年日帰り観光消費単価5,546円までを掛けた単純な試算です。この試算に含むのは来場者の直接消費だけです。取引先への波及、所得、雇用、税収は、福井県産業連関表による分析が完了するまで含めません。</p><div className="scenario-links"><a href="https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/024.pdf" target="_blank" rel="noreferrer">福井県観光客入込数（推計）2025年 <b>↗</b></a><a href="https://www.pref.fukui.lg.jp/doc/toukei-jouhou/hakyukouka.html" target="_blank" rel="noreferrer">福井県 経済波及効果分析 <b>↗</b></a></div></div>
           </div>
 
         </section>
@@ -160,7 +156,8 @@ export default function Home() {
 
         <section className="people section" id="people" aria-labelledby="people-title">
           <div className="section-index">WHO <span>/ COMMUNITY</span></div>
-          <div className="people-grid"><div className="people-intro"><p className="eyebrow"><span /> NOT A TOP-DOWN PROJECT</p><h2 id="people-title">最初に集めるのは、<br />お金ではなく<em>当事者</em>です。</h2><Image src="/why-preserve.jpg" alt="公共資産、地域AI基盤、農業・教育・産業の未来を守る" width={451} height={486} sizes="(max-width: 1050px) 70vw, 38vw" /></div><div className="stakeholder-list">{stakeholderRings.map(([number, title, body]) => <article key={number}><span>{number}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></div>
+          <div className="people-intro"><p className="eyebrow"><span /> NOT A TOP-DOWN PROJECT</p><h2 id="people-title">最初に集めるのは、<br />お金ではなく<em>当事者</em>です。</h2><p>資金の話を始める前に、解体を止め、土地・行政・教育・需要を一つの実行可能な代案につなぎます。</p></div>
+          <ol className="campaign-sequence" aria-label="温泉を守るための関係者づくりの順序">{campaignSteps.map(([number, phase, title, body]) => <li key={number}><div className="campaign-step-label"><span>{number}</span><small>{phase}</small></div><h3>{title}</h3><p>{body}</p></li>)}</ol>
         </section>
 
         <section className="community-calendar section" id="meetings" aria-labelledby="meetings-title">

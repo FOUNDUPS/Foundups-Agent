@@ -1,5 +1,14 @@
 # eSingularity TestModLog
 
+## 2026-09-01 — Innovation Hub language and typography coverage
+
+- Added regression checks for the Gather → Learn → Create → Launch floor progression.
+- Added English-copy checks for the AI learning, creation, and launch floor descriptions.
+- Added typography checks that highlighted campaign headings keep one consistent font voice.
+- Added outcome-card checks, removed-choice-diagram coverage, and multilingual alt-text handling.
+- Added a regression contract for the native six-step campaign coalition sequence and removal of the old stakeholder image.
+- Added economic-impact checks that keep the direct-spending layer distinct, expose the 30-year method progressively, and exclude supplier, wage, job, and tax figures until official input-output analysis is complete.
+
 ## 2026-09-01 — Awara and D-K visual-reference coverage
 
 - Added contract checks for the official Awara Yukemuri Yokocho and D-K gallery destinations.
