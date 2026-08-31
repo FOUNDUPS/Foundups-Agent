@@ -79,6 +79,9 @@ footer{min-height:120px;display:grid;grid-template-columns:1fr auto 1fr;align-it
 @media(max-width:1050px){.hub-heading,.return-heading{grid-template-columns:1fr}.hub-floors,.compute-return{grid-template-columns:repeat(2,1fr)}.return-heading{gap:25px}.return-heading .eyebrow{margin-bottom:0}}
 @media(max-width:670px){.innovation-hub{padding-left:19px;padding-right:19px}.compute-equation{grid-template-columns:1fr auto 1fr;gap:14px;margin-top:48px;padding:24px 15px}.compute-equation em{grid-column:1/4}.compute-equation span:nth-of-type(2){grid-column:1}.hub-floors,.compute-return,.local-control-callout,.visitor-impact{grid-template-columns:1fr}.hub-floors article{min-height:170px}.compute-return article{min-height:240px}.return-heading{margin-top:78px;padding-top:55px}.local-control-callout{gap:16px}.future-compute-line{margin-top:55px}.visitor-impact{margin-top:55px;padding:22px 17px;gap:26px}.visitor-impact-number{padding:26px 20px}.visitor-impact-number code{overflow-wrap:anywhere}.visitor-opportunities,.scenario-note{grid-column:1}.visitor-opportunities{grid-template-columns:1fr 1fr}.visitor-opportunities span{min-height:92px;padding:18px 13px}}
 
+.visitor-impact-number hr{width:100%;margin:30px 0;border:0;border-top:1px solid rgba(255,255,255,.2)}
+.visitor-impact-number .visitor-impact-horizon{font-size:clamp(23px,2.5vw,38px);color:#fff}
+
 /* Stable flag artwork; the English control uses the Union Flag. */
 .flag-en{background:linear-gradient(90deg,transparent 41%,#c8102e 41% 59%,transparent 59%),linear-gradient(0deg,transparent 35%,#c8102e 35% 65%,transparent 65%),linear-gradient(90deg,transparent 34%,#fff 34% 66%,transparent 66%),linear-gradient(0deg,transparent 22%,#fff 22% 78%,transparent 78%),linear-gradient(32deg,transparent 44%,#fff 44% 56%,transparent 56%),linear-gradient(-32deg,transparent 44%,#fff 44% 56%,transparent 56%),#012169}.flag-en:after{display:none}.flag-emoji{display:none}
 

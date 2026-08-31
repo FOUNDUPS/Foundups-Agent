@@ -135,8 +135,28 @@ def test_fukui_compute_story_is_local_specific_and_multilingual() -> None:
     assert "The future runs on " in switcher
     assert "Fukui energy → Fukui compute → Fukui’s future." in switcher
     assert "From Fukui power, create computing power Fukui can use." not in switcher
-    assert "It is about who owns the compute" in switcher
-    assert "that will power Fukui’s next 30 years." in switcher
+    assert "Demolition is madness." in switcher
+    assert "Fukui would pay to erase an asset—" in switcher
+    assert "and 30 years of possibility." in switcher
+
+
+def test_english_ai_rice_field_has_complete_plain_language_copy() -> None:
+    switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
+
+    for english_copy in (
+        "AI needs",
+        "“food,” too.",
+        "Just as rice fields produce food for people",
+        "Electricity, data, and",
+        "Computing power",
+        "AI gets to work",
+        "This facility would not directly operate farm machinery.",
+        "Fukui energy → Fukui compute → Fukui knowledge → Fukui jobs",
+        "Research for drones, field monitoring, weed detection, and yield forecasting.",
+        "Give students and researchers a local place to learn and test AI.",
+        "Develop AI in Fukui for manufacturing, design, and better operations.",
+    ):
+        assert english_copy in switcher
 
 
 def test_visitor_spending_scenario_is_transparent_not_a_forecast() -> None:
@@ -144,10 +164,14 @@ def test_visitor_spending_scenario_is_transparent_not_a_forecast() -> None:
     switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
 
     assert 129_649 * 1_000 == 129_649_000
-    assert 129_649 * 3_972 == 514_965_828
-    assert "約1.3億〜5.1億円 / 年" in page
-    assert "129,649 visits × ¥1,000–¥3,972" in page
+    assert 129_649 * 5_546 == 719_033_354
+    assert 129_649 * 1_000 * 30 == 3_889_470_000
+    assert 129_649 * 5_546 * 30 == 21_571_000_620
+    assert "約1.3億〜7.2億円 / 年" in page
+    assert "約38.9億〜215.7億円 / 30年" in page
+    assert "129,649 visits × ¥1,000–¥5,546" in page
     assert "PROJECT SCENARIO — NOT A FORECAST" in page
+    assert "holds attendance and spending constant and is not discounted" in switcher
     assert "multiplier effects" in switcher
     assert "日本最大" not in page
     assert "Japan’s largest" not in switcher

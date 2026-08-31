@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-01 — English campaign economics and translation integrity
+
+- Reframed the English building-history section as a value-at-stake campaign argument: original construction, indexed construction-cost reference, demolition estimate, and verified FY2018 use.
+- Updated the visitor-spending screen to Fukui Prefecture's 2025 official day-trip benchmark (¥5,546) and added a clearly labeled, undiscounted 30-year direct-spending scenario.
+- Kept asset value, demolition spending, direct visitor spending, compute revenue, and input-output multiplier effects separate to avoid invalid addition of stocks and flows.
+- Completed the missing English strings for the choice, five-part future, and AI Rice Field sections so Japanese no longer leaks into those English views.
+- Added contract coverage for English AI Rice Field copy and the visitor-scenario arithmetic.
+
 ## 2026-08-31 — Fukui-specific compute and visitor-economy story
 
 - Replaced the generic “return on compute” cards with four Fukui-specific, officially sourced stories: local AI education, smart agriculture, prefectural satellite Suisen, and regional manufacturing.
