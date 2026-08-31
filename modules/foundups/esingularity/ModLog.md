@@ -1,5 +1,14 @@
 # Project eSingularity ModLog
 
+## 2026-08-31 — Fukui-specific compute and visitor-economy story
+
+- Replaced the generic “return on compute” cards with four Fukui-specific, officially sourced stories: local AI education, smart agriculture, prefectural satellite Suisen, and regional manufacturing.
+- Tightened the English campaign line to “The future runs on compute. Fukui energy → Fukui compute → Fukui’s future.” and aligned the Portuguese translation.
+- Reframed the building story around who controls the compute that will power Fukui’s next 30 years.
+- Added a mobile-first direct-spending screening scenario based on the verified FY2018 attendance and Fukui Prefecture’s 2024 day-trip tourism-spending benchmark.
+- Labeled the scenario as not a forecast, excluded multiplier effects and unrelated project revenues, and avoided an unsupported “Japan’s largest” outdoor-spa claim.
+- Added contract coverage for official local sources, multilingual copy, transparent arithmetic, and overclaim prevention.
+
 ## 2026-08-31 — Community future and opt-in soundtrack
 
 - Replaced the long hero paragraph with a four-sentence campaign statement centered on public choice, the onsen, learning, startups, and local compute heat.
