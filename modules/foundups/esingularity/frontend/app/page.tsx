@@ -114,17 +114,17 @@ export default function Home() {
           <div className="story-heading"><div><p className="eyebrow"><span /> A PUBLIC ASSET WITH A HISTORY</p><h2 id="story-title">これは、古い建物の話ではない。<br /><em>福井の次の30年を動かす計算力を、</em>誰が持つかという話です。</h2></div><p>1994年、市民の健康・交流・憩いのために開館。天然温泉、体育館、宴会場、宿泊・研修機能を備え、2018年度には約13万人が利用しました。公の施設としての機能は2021年6月に廃止されました。</p></div>
 
           <div className="fact-rail" role="list" aria-label="Facility facts">
-            <article role="listitem"><span>1994</span><strong>開館</strong><p>高齢者を中心とした健康・交流の公共拠点として誕生。</p></article>
-            <article role="listitem"><span>8,099㎡</span><strong>延床面積</strong><p>宿泊・研修、健康、交流の複数棟からなる大規模資産。</p></article>
+            <article role="listitem"><span>46.8億円</span><strong>建設時</strong><p>福井市の公表資料に記載された建設費。</p></article>
+            <article role="listitem"><span>約68億円</span><strong>指数換算参考</strong><p>国の建設工事費指数による参考値。鑑定額ではありません。</p></article>
+            <article role="listitem"><span>約15.8億円</span><strong>解体見込み</strong><p>2026年6月の福井市議会質問資料に示された見込み。</p></article>
             <article role="listitem"><span>129,649人</span><strong>2018年度利用</strong><p>入館者と宿泊者を合わせた、閉館前の利用実績。</p></article>
-            <article role="listitem"><span>2021</span><strong>機能廃止</strong><p>いま問われているのは、解体前に再利用を検証するかどうか。</p></article>
           </div>
 
           <div className="visitor-impact" aria-labelledby="visitor-impact-title">
             <div className="visitor-impact-copy"><p className="eyebrow"><span /> VISITOR ECONOMY · SCREENING SCENARIO</p><h3 id="visitor-impact-title">年間13万人の実績は、<br /><em>地域経済の出発点。</em></h3><p>温泉に、地域の食、D-K、祭り、学びを重ねれば、滞在時間と地域での消費を増やせる可能性があります。</p></div>
-            <div className="visitor-impact-number"><span>約1.3億〜5.1億円 / 年</span><strong>直接消費シナリオ</strong><code>129,649 visits × ¥1,000–¥3,972</code></div>
+            <div className="visitor-impact-number"><span>約1.3億〜7.2億円 / 年</span><strong>直接消費シナリオ</strong><code>129,649 visits × ¥1,000–¥5,546</code><hr /><span className="visitor-impact-horizon">約38.9億〜215.7億円 / 30年</span><strong>30年間の直接消費機会</strong></div>
             <div className="visitor-opportunities" role="list"><span role="listitem">🍜 地域の食・横丁</span><span role="listitem">🎨 D-K・祭り・夜間滞在</span><span role="listitem">♨️ 温泉・宿泊</span><span role="listitem">✈️ 空港・新幹線からの周遊</span></div>
-            <div className="scenario-note"><strong>PROJECT SCENARIO — NOT A FORECAST</strong><p>2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2024年日帰り観光消費単価3,972円までを掛けた単純な試算です。建設、運営、コンピュート収入、雇用、経済波及効果は含みません。</p><a href="https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/023.pdf" target="_blank" rel="noreferrer">福井県観光客入込数（推計）2024年 <b>↗</b></a></div>
+            <div className="scenario-note"><strong>PROJECT SCENARIO — NOT A FORECAST</strong><p>2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2025年日帰り観光消費単価5,546円までを掛けた単純な試算です。30年間の数字は、来場者数と単価を一定として割引を行わない説明用の累計です。建設、運営、コンピュート収入、雇用、経済波及効果は含みません。</p><a href="https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/024.pdf" target="_blank" rel="noreferrer">福井県観光客入込数（推計）2025年 <b>↗</b></a></div>
           </div>
 
         </section>

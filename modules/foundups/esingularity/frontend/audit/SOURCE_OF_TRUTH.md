@@ -1,6 +1,6 @@
 # eSingularity.ai source-of-truth ledger
 
-Last audited: 2026-08-29 (Asia/Tokyo)
+Last audited: 2026-09-01 (Asia/Tokyo)
 
 Claim classes:
 
@@ -16,6 +16,7 @@ Claim classes:
 | Total floor area: 8,099.56 m² | A | Fukui City property sheet, `SUKATTO.pdf`, p.2 | Verified | May be shown as existing-building scale. |
 | Facility opened 1994-04-06 | A | Fukui City, *市政のあらまし* | Verified | May be shown in history. |
 | FY2018 users: 129,649 | A | Fukui City, *市政のあらまし* FY2019 | Verified | May be shown with fiscal-year label. |
+| Visitor direct-spending screen: ¥129.649M–¥719.033M/year; ¥3.889B–¥21.571B over 30 years | B / calculated from A + official benchmark | 129,649 FY2018 users × ¥1,000 project assumption through Fukui Prefecture's 2025 average day-trip spend of ¥5,546 | Arithmetic verified. The 30-year total holds visits and spend constant, is undiscounted, and is not an I-O analysis. | Label prominently as a project screening scenario, not a forecast. Do not add demolition cost, asset value, compute revenue, or multiplier effects into one total. |
 | Public-facility function abolished 2021-06-24 | A | Fukui City property sheet, `SUKATTO.pdf`, p.3 | Verified | Use exact date only when useful. |
 | Demolition figure: approximately ¥1.58B | A-limited | Fukui City Council June 2026 general-question outline, `0806a.pdf` | Verified only as a figure raised in a council question; not yet verified as an adopted budget or contractor price | Phrase narrowly and date it. Do not call it an awarded contract, final cost, or project funding source. |
 | Indexed 2025 construction-cost reference: about ¥6.8B | C / calculated from A | ¥4.68B × MLIT 2025 non-residential index 121.6 / 1994 index 83.7 = ¥6.799B | Arithmetic verified against MLIT annual deflator dated 2026-06-30 | Label as an indexed construction-cost reference, not appraisal, market value, or certified replacement cost. |
@@ -47,3 +48,5 @@ Claim classes:
 - Fukui City FY2024 facility record: https://www.city.fukui.lg.jp/sisei/gikai/shigikaishikumi/p022677_d/fil/aramasi6.pdf
 - Fukui City Council June 2026 question outline: https://www.city.fukui.lg.jp/sisei/gikai/shitsumon/p004052_d/fil/0806a.pdf
 - MLIT construction-cost deflator: https://www.mlit.go.jp/statistics/details/t-other-2_tk_000362.html
+- Fukui Prefecture 2025 tourism statistics: https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/024.pdf
+- Fukui Prefecture input-output analysis method and tool: https://www.pref.fukui.lg.jp/doc/toukei-jouhou/hakyukouka.html
