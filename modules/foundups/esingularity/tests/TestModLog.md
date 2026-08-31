@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-01 — Awara and D-K visual-reference coverage
+
+- Added contract checks for the official Awara Yukemuri Yokocho and D-K gallery destinations.
+- Added regression checks that the artist portrait remains a compact 52-pixel identity element and no longer dominates the night-experience card.
+- Added translation checks for the Japanese-first reference links.
+
 ## 2026-09-01 — English economic-story regression coverage
 
 - Added assertions for the complete English AI Rice Field explanation and use cases.

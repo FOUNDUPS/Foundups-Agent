@@ -54,8 +54,16 @@ export default function Home() {
           </div>
           <div className="future-place-cards" role="list">
             <article role="listitem"><span>01 · ROTENBURO</span><h3>日本初を目指す、<br />コンピュート排熱の露天風呂。</h3><p>回収できる熱を片側の露天風呂に集中し、男女どちらの湯を温めるかを日替わりでシステムが案内する構想です。</p><small>ENGINEERING VALIDATION REQUIRED</small></article>
-            <article role="listitem"><span>02 · FOOD</span><h3>あわら型の、<br />小さなコンテナ横丁。</h3><p>あわら温泉の横丁型モデルに着想を得て、地域の料理人、農家、学生が小さく商いを始められる場所へ。</p><small>AWARA-INSPIRED COMMUNITY FOOD COURT</small></article>
-            <article className="akira-card" role="listitem"><Image src="/akira-hasegawa.jpeg" alt="D-K（デジタル掛け軸）を提唱する長谷川章氏" width={1320} height={1323} sizes="(max-width: 1050px) 100vw, 33vw" /><span>03 · NIGHT</span><h3>夜は、長谷川章氏の<br />D-Kという光の舞台へ。</h3><p>建物を毎晩変化する光のキャンバスにする構想。九頭竜の水と龍を、地域の新しい夜景にします。</p><small>PROPOSED DIGITAL KAKEJIKU EXPERIENCE</small></article>
+            <article className="media-card food-card" role="listitem">
+              <a className="card-reference-image awara-reference-image" href="https://yukemuriyokocho.com/" target="_blank" rel="noreferrer"><span>実例を見る：あわら温泉「湯けむり横丁」↗</span></a>
+              <span>02 · FOOD</span><h3>あわら型の、<br />小さなコンテナ横丁。</h3><p>あわら温泉の横丁型モデルに着想を得て、地域の料理人、農家、学生が小さく商いを始められる場所へ。</p><small>AWARA-INSPIRED COMMUNITY FOOD COURT</small>
+            </article>
+            <article className="media-card akira-card" role="listitem">
+              <a className="card-reference-image dk-reference-image" href="https://www.digital-kakejiku.com/" target="_blank" rel="noreferrer"><span>D-K公式ギャラリーを開く ↗</span></a>
+              <span>03 · NIGHT</span><h3>夜は、長谷川章氏の<br />D-Kという光の舞台へ。</h3><p>建物を毎晩変化する光のキャンバスにする構想。九頭竜の水と龍を、地域の新しい夜景にします。</p>
+              <div className="artist-reference"><Image src="/akira-hasegawa.jpeg" alt="D-K（デジタル掛け軸）を提唱する長谷川章氏" width={64} height={64} sizes="64px" /><a href="https://www.digital-kakejiku.com/" target="_blank" rel="noreferrer">長谷川章氏とD-Kの作品を見る <b>↗</b></a></div>
+              <small>PROPOSED DIGITAL KAKEJIKU EXPERIENCE</small>
+            </article>
           </div>
         </section>
 

@@ -61,7 +61,7 @@ Audit date: 2026-08-29 (Asia/Tokyo)
 
 ## P4 — optional enhancements after correctness
 
-- [ ] Lightweight D-K/Kuzuryu visual treatment using clearly labeled concept imagery.
+- [x] Lightweight D-K treatment using a linked official-work example, compact artist identity, and a clearly labeled proposed Sukatto Land experience.
 - [ ] Install-prompt guidance only where browser support makes it useful.
 - [ ] Performance telemetry/Core Web Vitals monitoring after launch.
 
