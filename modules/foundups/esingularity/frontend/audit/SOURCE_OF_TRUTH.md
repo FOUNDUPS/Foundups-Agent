@@ -50,3 +50,5 @@ Claim classes:
 - MLIT construction-cost deflator: https://www.mlit.go.jp/statistics/details/t-other-2_tk_000362.html
 - Fukui Prefecture 2025 tourism statistics: https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/024.pdf
 - Fukui Prefecture input-output analysis method and tool: https://www.pref.fukui.lg.jp/doc/toukei-jouhou/hakyukouka.html
+- Awara Onsen Yukemuri Yokocho official site and photographic reference: https://yukemuriyokocho.com/
+- Akira Hasegawa's official D-K / Digital Kakejiku gallery: https://www.digital-kakejiku.com/

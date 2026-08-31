@@ -1,5 +1,11 @@
 # Project eSingularity ModLog
 
+## 2026-09-01 — Public visual-reference audit
+
+- Replaced the oversized Hasegawa portrait treatment with a real D-K work preview from the artist's official gallery and a compact 52-pixel artist identity.
+- Added a linked photographic reference to Awara Onsen's official Yukemuri Yokocho site so residents can see the local model behind the container-food concept.
+- Kept both examples secondary to the campaign story, translated the link labels, added keyboard focus states, and retained the D-K proposal label so past work is not mistaken for a completed Sukatto Land installation.
+
 ## 2026-09-01 — English campaign economics and translation integrity
 
 - Reframed the English building-history section as a value-at-stake campaign argument: original construction, indexed construction-cost reference, demolition estimate, and verified FY2018 use.

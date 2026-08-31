@@ -93,6 +93,8 @@ def test_landing_music_is_opt_in_and_project_owned() -> None:
 
 def test_future_place_is_labeled_as_a_conditional_concept() -> None:
     page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
+    styles = (FRONTEND_ROOT / "app" / "globals.css").read_text(encoding="utf-8")
+    switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
     assert "SITE CONCEPT" in page
     assert "ONSEN CONCEPT" in page
     assert "日本初を目指す" in page
@@ -102,6 +104,12 @@ def test_future_place_is_labeled_as_a_conditional_concept() -> None:
     assert (FRONTEND_ROOT / "public" / "satellite-view.jpeg").is_file()
     assert (FRONTEND_ROOT / "public" / "concept-onsen.jpg").is_file()
     assert (FRONTEND_ROOT / "public" / "akira-hasegawa.jpeg").is_file()
+    assert 'className="card-reference-image awara-reference-image"' in page
+    assert 'className="card-reference-image dk-reference-image"' in page
+    assert "See the real example: Awara Onsen Yukemuri Yokocho" in switcher
+    assert "Open the official D-K gallery" in switcher
+    assert ".artist-reference img{width:52px;height:52px" in styles
+    assert ".card-reference-image{position:relative;display:block;width:calc(100% + 56px);height:150px" in styles
     assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v1.webp").exists()
     assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v2.webp").exists()
     assert not (FRONTEND_ROOT / "public" / "onsen-future-concept-v3.webp").exists()
