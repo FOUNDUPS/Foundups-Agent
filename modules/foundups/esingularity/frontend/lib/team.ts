@@ -13,6 +13,16 @@ export type TeamProfile = {
   facts: Array<{ label: string; value: string }>;
   gallery: Array<{ src: string; alt: string; caption: string; position?: string }>;
   links?: Array<{ label: string; href: string }>;
+  feature?: {
+    kind: 'video';
+    eyebrow: string;
+    title: string;
+    description: string;
+    cta: string;
+    href: string;
+    image: string;
+    imageAlt: string;
+  };
   disclosure?: string;
 };
 
@@ -68,21 +78,35 @@ export const teamProfiles: TeamProfile[] = [
   {
     slug: 'hasegawa',
     group: 'endorsers',
-    role: 'ENDORSER',
-    name: 'Hasegawa',
-    secondary: 'Dedicated endorser profile',
+    role: 'D-K · DIGITAL KAKEJIKU',
+    name: '長谷川 章',
+    secondary: 'Akira Hasegawa · D-K artist',
     image: '/team/hasegawa-private.png',
-    imageAlt: 'Hasegawa pictured with Michael J Trout',
+    imageAlt: 'Akira Hasegawa pictured with Michael J Trout',
     imagePosition: '48% 42%',
-    introduction: 'eSingularity.aiのEndorsersセクションに置く、Hasegawaの専用プロフィールです。',
-    statement: '氏名の完全表記、経歴、プロジェクトへの言葉は、本人が確認した文面だけを掲載します。写真を先に公開し、言葉を勝手につくらないことも、このキャンペーンの信頼性の一部です。',
+    introduction: 'D-K（デジタル掛軸）を生み出したアーティスト、長谷川章。',
+    statement: '光が建物の表情をゆっくり変え、同じ景色を二度と繰り返さないD-K。閉じた施設を、夜に人が集まる九頭竜のランドマークへ変える文化構想として紹介します。',
     facts: [
-      { label: 'CIRCLE', value: 'Endorsers' },
-      { label: 'PROFILE', value: '本人確認用の専用ページ' },
-      { label: 'STATEMENT', value: '承認後に掲載' },
+      { label: 'ART', value: 'D-K / Digital Kakejiku' },
+      { label: 'ARTIST', value: '長谷川 章 / Akira Hasegawa' },
+      { label: 'SITE VISION', value: '夜の文化・九頭竜のランドマーク' },
     ],
     gallery: [],
-    disclosure: 'このページは012から提供された写真と姓に基づく初期プロフィールです。完全な氏名・肩書・支持文は確認後に更新します。',
+    feature: {
+      kind: 'video',
+      eyebrow: 'D-K IN MOTION',
+      title: '静止画では伝わらない光を、映像で。',
+      description: 'D-Kが建築と夜の風景をどう変えるのか。まず作品の動きを見て、その可能性を感じてください。',
+      cta: 'YouTubeで映像を見る',
+      href: 'https://www.youtube.com/watch?v=jI9decHbUIY',
+      image: '/team/hasegawa-private.png',
+      imageAlt: 'Akira Hasegawa and Michael J Trout, used as the D-K video link poster',
+    },
+    links: [
+      { label: 'D-K デジタル掛軸 公式サイト', href: 'https://www.digital-kakejiku.com/' },
+      { label: 'D-Kを映像で見る', href: 'https://www.youtube.com/watch?v=jI9decHbUIY' },
+    ],
+    disclosure: '映像と公式サイトはD-Kを理解するための外部資料です。この掲載だけで、施設への設置契約やプロジェクトへの正式な支持を意味するものではありません。',
   },
   {
     slug: 'community',

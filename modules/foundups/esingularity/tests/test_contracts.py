@@ -258,4 +258,25 @@ def test_visitor_spending_scenario_is_transparent_not_a_forecast() -> None:
     assert "Supplier effects, income, jobs, and tax revenue remain excluded" in switcher
     assert "Fukui Prefecture economic-impact analysis" in switcher
     assert "See the illustrative 30-year total and method" in switcher
+    assert "About ¥130M–¥720M / year" not in switcher
+    assert "About ¥3.9B–¥21.6B / 30 years" not in switcher
+    assert "¥129.6M–¥719.0M / year" in switcher
+    assert "¥3.89B–¥21.57B / 30 years" in switcher
+    assert "Track attendance, repeat visits, overnight stays" in switcher
+    assert "Separate construction from permanent jobs" in switcher
+    assert "What successful community campaigns measure" in switcher
+    assert "https://www.ncdsinc.net/case-studies/forward-sioux-falls" in page
+    assert "https://www.ncdsinc.net/case-studies/aspire-clarksville" in page
+    assert "These outcomes and ratios are not transferred to Fukui." in switcher
     assert 'className="impact-layers"' in page
+
+
+def test_hasegawa_profile_links_to_dk_video_without_autoplay() -> None:
+    team = (FRONTEND_ROOT / "lib" / "team.ts").read_text(encoding="utf-8")
+    profile = (FRONTEND_ROOT / "app" / "team" / "[slug]" / "page.tsx").read_text(encoding="utf-8")
+
+    assert "https://www.youtube.com/watch?v=jI9decHbUIY" in team
+    assert "https://www.digital-kakejiku.com/" in team
+    assert "profile.feature?.kind === 'video'" in profile
+    assert "自動再生はしません" in profile
+    assert "<iframe" not in profile
