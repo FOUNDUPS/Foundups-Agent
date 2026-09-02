@@ -212,4 +212,5 @@ No implementation item may be marked complete until it passes build, data check,
 - Build: `python -m pytest ../tests/test_contracts.py -q` (17 passed), `npm run lint`, and `npm run build` passed.
 - Mobile: verified at 390×844 in Japanese; the hero, continuous ticker, stacked action cards, and City contact controls render without horizontal clipping. Added anchor scroll spacing for the fixed header.
 - Language regression: verified the full new action and City-contact section in English and Portuguese against the Japanese source; no Japanese copy leaked into either translated action path.
-- Status: `[FIXED] [VERIFIED] [SOURCE CHECKED] [MOBILE CHECKED]`; production deployment pending.
+- Production: Sites version 21 deployed successfully and the custom domain `https://esingularity.ai` was rechecked at 390×844 with a cache-busting query. The Japanese ticker and action controls were present; the English action path was rechecked with no Japanese leakage.
+- Status: `[FIXED] [VERIFIED] [SOURCE CHECKED] [MOBILE CHECKED] [LIVE CHECKED]`.
