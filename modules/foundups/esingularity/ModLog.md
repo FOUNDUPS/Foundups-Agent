@@ -1,5 +1,14 @@
 # Project eSingularity ModLog
 
+## 2026-09-03 — Japanese participation sweep
+
+- Kept the existing visual system and page order; no redesign was introduced.
+- Replaced the expired meeting ticker with a persistent Japanese action ticker for visiting, listening, learning, sharing, joining the citizens’ declaration, and contacting Fukui City.
+- Removed a repeated five-benefit summary by repurposing the same card section into direct campaign actions using `pics.yumori.info`, `pc.yumori.info`, `yumori.me`, and the approved 0102 music playlist.
+- Added native mobile sharing with clipboard fallback and an official, respectful City Hall contact card using Fukui City's published department, phone number, hours, and inquiry form.
+- Preserved the unreliable `music.yumori.info` vanity label while linking directly to Suno until the vanity hostname's HTTPS forwarding works reliably.
+- Added equivalent English and Portuguese strings so the Japanese-first enhancements do not leak Japanese when visitors switch languages.
+
 ## 2026-09-01 — NCDS-style outcome scorecard
 
 - Removed the vague English “About” labels by displaying the arithmetic at one- and two-decimal precision while retaining the Japanese approximation marker.

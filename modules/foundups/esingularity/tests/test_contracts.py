@@ -145,25 +145,34 @@ def test_innovation_hub_uses_learn_create_launch_without_language_leakage() -> N
     assert "[placeholder],[aria-label],[title],[alt]" in switcher
 
 
-def test_vision_focuses_on_public_outcomes_not_the_removed_choice_diagram() -> None:
+def test_public_action_section_replaces_the_repeated_vision_summary() -> None:
     page = (FRONTEND_ROOT / "app" / "page.tsx").read_text(encoding="utf-8")
     switcher = (FRONTEND_ROOT / "components" / "LanguageSwitcher.tsx").read_text(encoding="utf-8")
+    ticker = (FRONTEND_ROOT / "components" / "CampaignTicker.tsx").read_text(encoding="utf-8")
+    share = (FRONTEND_ROOT / "components" / "CampaignShareButton.tsx").read_text(encoding="utf-8")
 
     assert 'className="choice-path"' not in page
+    assert "再生後の五つの役割" not in page
+    assert "見る。知る。共有する。" in page
+    assert 'id="city-action"' in page
+    assert "0776-20-5400" in page
+    assert "mailform101607.html?PAGE_NO=15196" in page
+    for vanity_url in ("pics.yumori.info", "music.yumori.info", "pc.yumori.info", "yumori.me"):
+        assert vanity_url in page
     for english_copy in (
-        "A Large Rotenburo Designed as a Regional Destination",
-        "test whether recovered heat from the AI Rice Field data center",
-        "Learning, Experimentation, and Launch",
-        "launch solutions built in Fukui",
-        "AI “Rice Field” — Local Compute",
-        "separate from the existing onsen building",
-        "Give local people a low-cost place to start small food businesses",
-        "D-K Light, Festivals, and Culture",
-        "A proposed nightly Akira Hasegawa D-K light experience",
+        "See the site and the vision",
+        "Listen to the music of Kuzuryu",
+        "Understand the renewal plan",
+        "Share with family and friends",
+        "Join the citizens’ declaration",
+        "make your voice heard.",
     ):
         assert english_copy in switcher
-
-    assert "日本最大" not in page
+    for action in ("VISIT", "LISTEN", "LEARN", "SHARE", "JOIN", "ACT", "SAVE THE DRAGON"):
+        assert action in ticker
+    assert "8月31日" not in ticker
+    assert "navigator.share" in share
+    assert "navigator.clipboard.writeText" in share
 
 
 def test_stakeholder_campaign_sequence_is_native_and_multilingual() -> None:

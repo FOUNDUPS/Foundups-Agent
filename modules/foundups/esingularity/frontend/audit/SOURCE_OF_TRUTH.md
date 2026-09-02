@@ -1,6 +1,6 @@
 # eSingularity.ai source-of-truth ledger
 
-Last audited: 2026-09-01 (Asia/Tokyo)
+Last audited: 2026-09-03 (Asia/Tokyo)
 
 Claim classes:
 
@@ -35,6 +35,10 @@ Claim classes:
 | Monday campaign event | Unverified/current | No authoritative date, time, exact location, or public-status source found | Not verified | Keep disabled; do not publish as upcoming until structured fields are confirmed. |
 | LINE invitation URL | Verified project asset | Operator-provided `https://line.me/ti/p/baXEozL_Q6` | HTTP 200 on 2026-08-29 | One shared direct link in all languages. |
 | Approved LINE QR | Shared visual asset | QR embedded in approved campaign artwork; no standalone Drive image was located | Visual asset found; standalone scan verification still required | Preserve source pixels. Do not regenerate or apply lossy optimization. |
+| Official Fukui City contact for the former facility | A — verified official | Fukui City former Sukatto Land Kuzuryu page and official inquiry form | Verified 2026-09-03: Community Comprehensive Care Promotion Division, 0776-20-5400, weekdays 8:30–17:15 | May be used for a respectful call/message action. Do not imply that the City endorses the campaign. |
+| `yumori.me` civic declaration | Verified campaign route | Operator-created forwarding route to the YUMORI citizens’ declaration Google Form | HTTPS destination opened and title verified 2026-09-03 | Label as a citizens’ declaration, not an investment, donation, or official City form. |
+| `pics.yumori.info` and `pc.yumori.info` | Verified campaign routes | Operator-created forwarding routes to project photo and plan documents | HTTPS destinations opened 2026-09-03 | May be used as optional deeper campaign resources. |
+| `music.yumori.info` | Partially verified vanity route | HTTP forwarding reaches the approved Suno playlist; HTTPS forwarding timed out during 2026-09-03 audit | Vanity hostname is not reliable over HTTPS yet | Display the memorable vanity name, but link directly to the canonical Suno playlist until HTTPS forwarding is repaired. |
 
 ## Authoritative project documents
 
@@ -51,6 +55,8 @@ Claim classes:
 - MLIT construction-cost deflator: https://www.mlit.go.jp/statistics/details/t-other-2_tk_000362.html
 - Fukui Prefecture 2025 tourism statistics: https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/024.pdf
 - Fukui Prefecture input-output analysis method and tool: https://www.pref.fukui.lg.jp/doc/toukei-jouhou/hakyukouka.html
+- Fukui City former Sukatto Land Kuzuryu contact page: https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196.html
+- Fukui City official inquiry form for that page: https://www.city.fukui.lg.jp/inquiry/mailform101607.html?PAGE_NO=15196
 - Awara Onsen Yukemuri Yokocho official site and photographic reference: https://yukemuriyokocho.com/
 - Akira Hasegawa's official D-K / Digital Kakejiku gallery: https://www.digital-kakejiku.com/
 

@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-03 — Japanese action-path regression coverage
+
+- Replaced the obsolete repeated-vision assertions with checks for the see/listen/learn/share/join/act campaign journey.
+- Added checks for all campaign vanity routes, native share and clipboard fallback behavior, and the complete ticker action set.
+- Added official Fukui City contact checks and a regression guard preventing the expired August 31 notice from returning to the ticker.
+
 ## 2026-09-01 — Economic scorecard and benchmark guardrails
 
 - Added regression checks for the precise English annual and 30-year direct-spending displays with no “About” prefix.
