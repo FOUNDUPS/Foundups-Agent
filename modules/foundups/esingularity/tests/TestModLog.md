@@ -5,6 +5,7 @@
 - Replaced the obsolete repeated-vision assertions with checks for the see/listen/learn/share/join/act campaign journey.
 - Added checks for all campaign vanity routes, native share and clipboard fallback behavior, and the complete ticker action set.
 - Added official Fukui City contact checks and a regression guard preventing the expired August 31 notice from returning to the ticker.
+- Replaced the D-K root-URL substring assertion with parsed scheme/host/path validation after CodeQL correctly identified the former test as an incomplete URL-sanitization pattern.
 
 ## 2026-09-01 — Economic scorecard and benchmark guardrails
 

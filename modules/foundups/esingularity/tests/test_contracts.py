@@ -1,7 +1,9 @@
 """Contract tests for the eSingularity FoundUp migration."""
 
 import json
+import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 from modules.foundups.agent.src.foundup_manifest_validator import validate_manifest_file
 
@@ -283,9 +285,15 @@ def test_visitor_spending_scenario_is_transparent_not_a_forecast() -> None:
 def test_hasegawa_profile_links_to_dk_video_without_autoplay() -> None:
     team = (FRONTEND_ROOT / "lib" / "team.ts").read_text(encoding="utf-8")
     profile = (FRONTEND_ROOT / "app" / "team" / "[slug]" / "page.tsx").read_text(encoding="utf-8")
+    external_hrefs = [urlparse(href) for href in re.findall(r"href: '([^']+)'", team)]
 
     assert "https://www.youtube.com/watch?v=jI9decHbUIY" in team
-    assert "https://www.digital-kakejiku.com/" in team
+    assert any(
+        href.scheme == "https"
+        and href.hostname == "www.digital-kakejiku.com"
+        and href.path == "/"
+        for href in external_hrefs
+    )
     assert "profile.feature?.kind === 'video'" in profile
     assert "自動再生はしません" in profile
     assert "<iframe" not in profile
