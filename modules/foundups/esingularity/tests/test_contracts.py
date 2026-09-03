@@ -157,7 +157,7 @@ def test_public_action_section_replaces_the_repeated_vision_summary() -> None:
     assert 'id="city-action"' in page
     assert "0776-20-5400" in page
     assert "mailform101607.html?PAGE_NO=15196" in page
-    for vanity_url in ("pics.yumori.info", "music.yumori.info", "pc.yumori.info", "yumori.me"):
+    for vanity_url in ("pics.yumori.info", "music.yumori.me", "pc.yumori.info", "yumori.me"):
         assert vanity_url in page
     for english_copy in (
         "See the site and the vision",

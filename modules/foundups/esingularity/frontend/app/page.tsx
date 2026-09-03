@@ -8,7 +8,7 @@ import HeroMusic from '../components/HeroMusic';
 
 const LINE_URL = 'https://line.me/ti/p/baXEozL_Q6';
 const PICS_URL = 'https://pics.yumori.info';
-const MUSIC_URL = 'https://suno.com/playlist/73bf2103-2bcb-4790-9ca1-0e313667ec56';
+const MUSIC_URL = 'https://music.yumori.me';
 const PLAN_URL = 'https://pc.yumori.info';
 const YUMORI_URL = 'https://yumori.me';
 const CITY_CONTACT_URL = 'https://www.city.fukui.lg.jp/inquiry/mailform101607.html?PAGE_NO=15196';
@@ -110,7 +110,7 @@ export default function Home() {
           </div>
           <div className="vision-cards action-cards" role="list" aria-label="九頭竜を守るために今できること">
             <article role="listitem"><span aria-hidden="true">👀</span><div><strong>現地と構想を見る</strong><p>写真で、建物、土地、地域の記憶を確かめる。</p><a href={PICS_URL} target="_blank" rel="noreferrer">pics.yumori.info <b>↗</b></a></div></article>
-            <article role="listitem"><span aria-hidden="true">🎵</span><div><strong>九頭竜の音楽を聴く</strong><p>九頭竜と温泉再生の物語を、0102 MUSICで感じる。</p><a href={MUSIC_URL} target="_blank" rel="noreferrer">music.yumori.info <b>↗</b></a></div></article>
+            <article role="listitem"><span aria-hidden="true">🎵</span><div><strong>九頭竜の音楽を聴く</strong><p>九頭竜と温泉再生の物語を、0102 MUSICで感じる。</p><a href={MUSIC_URL} target="_blank" rel="noreferrer">music.yumori.me <b>↗</b></a></div></article>
             <article role="listitem"><span aria-hidden="true">📖</span><div><strong>再生計画を知る</strong><p>COGDC、温泉、教育、食、文化をつなぐ計画を読む。</p><a href={PLAN_URL} target="_blank" rel="noreferrer">pc.yumori.info <b>↗</b></a></div></article>
             <article role="listitem"><span aria-hidden="true">📣</span><div><strong>家族や友人に共有する</strong><p>yumori.infoを送り、九頭竜の未来を話題にする。</p><CampaignShareButton /></div></article>
             <article role="listitem"><span aria-hidden="true">✍️</span><div><strong>市民宣言に参加する</strong><p>解体前に代案を比べる機会を残す意思を伝える。</p><a href={YUMORI_URL} target="_blank" rel="noreferrer">yumori.me <b>↗</b></a></div></article>

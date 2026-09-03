@@ -2,7 +2,7 @@
 
 const actions = [
   { label: 'VISIT', text: '写真で現地を見る', href: 'https://pics.yumori.info' },
-  { label: 'LISTEN', text: '九頭竜の音楽を聴く', href: 'https://suno.com/playlist/73bf2103-2bcb-4790-9ca1-0e313667ec56' },
+  { label: 'LISTEN', text: '九頭竜の音楽を聴く', href: 'https://music.yumori.me' },
   { label: 'LEARN', text: '再生計画を読む', href: 'https://pc.yumori.info' },
   { label: 'SHARE', text: 'yumori.infoを共有する', href: '#act-now' },
   { label: 'JOIN', text: 'YUMORI市民宣言に参加する', href: 'https://yumori.me' },

@@ -38,7 +38,7 @@ Claim classes:
 | Official Fukui City contact for the former facility | A — verified official | Fukui City former Sukatto Land Kuzuryu page and official inquiry form | Verified 2026-09-03: Community Comprehensive Care Promotion Division, 0776-20-5400, weekdays 8:30–17:15 | May be used for a respectful call/message action. Do not imply that the City endorses the campaign. |
 | `yumori.me` civic declaration | Verified campaign route | Operator-created forwarding route to the YUMORI citizens’ declaration Google Form | HTTPS destination opened and title verified 2026-09-03 | Label as a citizens’ declaration, not an investment, donation, or official City form. |
 | `pics.yumori.info` and `pc.yumori.info` | Verified campaign routes | Operator-created forwarding routes to project photo and plan documents | HTTPS destinations opened 2026-09-03 | May be used as optional deeper campaign resources. |
-| `music.yumori.info` | Partially verified vanity route | HTTP forwarding reaches the approved Suno playlist; HTTPS forwarding timed out during 2026-09-03 audit | Vanity hostname is not reliable over HTTPS yet | Display the memorable vanity name, but link directly to the canonical Suno playlist until HTTPS forwarding is repaired. |
+| `music.yumori.me` | Verified vanity route | HTTP and HTTPS forwarding both reach the approved Suno playlist; rechecked 2026-09-03 | Working campaign music route | Use as the visible label and direct music link. |
 
 ## Authoritative project documents
 

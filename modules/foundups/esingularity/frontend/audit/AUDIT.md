@@ -208,7 +208,7 @@ No implementation item may be marked complete until it passes build, data check,
 - Defect: the landing journey explained the same five-part future twice but did not give residents a compact path to see project photos, read the plan, share the campaign, join the citizens’ declaration, or contact Fukui City.
 - Fix: preserved the existing section and card design while replacing the repeated summary with `見る・聴く・知る・共有する・参加する`; added a continuous campaign-action ticker in place of the expired event alert.
 - Civic action: used Fukui City's official former-facility contact page, published telephone number and hours, and official inquiry form; the suggested message asks only that reuse proposals be fairly compared before a demolition contract.
-- Link control: `pics.yumori.info`, `pc.yumori.info`, and `yumori.me` were opened successfully. Because `music.yumori.info` did not complete HTTPS forwarding, the public control links directly to the approved Suno playlist while retaining the memorable vanity label.
+- Link control: `pics.yumori.info`, `pc.yumori.info`, `music.yumori.me`, and `yumori.me` were opened successfully. The corrected music vanity route forwards over HTTPS to the approved Suno playlist and is used directly by the public controls.
 - Build: `python -m pytest ../tests/test_contracts.py -q` (17 passed), `npm run lint`, and `npm run build` passed.
 - Mobile: verified at 390×844 in Japanese; the hero, continuous ticker, stacked action cards, and City contact controls render without horizontal clipping. Added anchor scroll spacing for the fixed header.
 - Language regression: verified the full new action and City-contact section in English and Portuguese against the Japanese source; no Japanese copy leaked into either translated action path.
