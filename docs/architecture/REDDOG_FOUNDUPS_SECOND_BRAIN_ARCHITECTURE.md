@@ -7,6 +7,9 @@
 **Controlling protocol:** WSP_60 Module Memory Architecture
 **WSP addendum:** `WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md`
 
+Related interaction/cognition architecture:
+`docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md`
+
 ## Canonical terminology
 
 ```text
@@ -57,6 +60,15 @@ relationship's runtime. The Principal Memex helps 0102 interpret stable 012
 goals, preferences, terminology, decision history, and cross-FoundUp strategy.
 Current repository evidence remains authoritative for code truth, and signed
 authorization remains authoritative for work.
+
+The interaction surface and cognition depth may operate as two latency bands of
+that same Digital Twin relationship. The intended fast RedDog loop owns live
+conversation while the deeper 0102 loop performs background retrieval,
+verification, omission/contradiction detection, WSP application, model
+escalation, and worker orchestration. Background results return as bounded
+context deltas; they do not create a second identity, replace source evidence,
+or grant execution authority. The detailed architecture and proposed delivery
+sequence are defined in `REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md`.
 
 The structural read-only projection is implemented in
 `modules/ai_intelligence/digital_twin/src/principal_memex_projection.py`. A
