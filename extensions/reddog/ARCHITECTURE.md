@@ -139,6 +139,7 @@ Any RedDog implementation or redesign should preserve these invariants:
 7. **The interface may stay simple while the backend becomes complex.** Capability growth behind RedDog must not force equivalent cognitive complexity onto the human.
 8. **Proxy action requires governed authority.** Acting socially or operationally for a principal must remain bounded, attributable, and reversible where possible.
 9. **Human life is the optimization target.** RedDog exists to remove digital busywork, not maximize engagement with RedDog itself.
+10. **Relationship memory is provenance-bearing.** Contact identity, meetings, commitments, introductions, and relationship history must preserve uncertainty and source evidence rather than becoming untraceable prose memory.
 
 ## 8. Consequences for Implementation
 
@@ -147,6 +148,7 @@ This architecture suggests a deliberate split between:
 - RedDog conversation/input/output state;
 - principal identity and consent state;
 - 0102 reasoning and memory state;
+- principal-scoped contact/relationship memory;
 - orchestration/task state;
 - tool/execution authority;
 - external-agent/social presence;
@@ -160,10 +162,20 @@ A feature that requires RedDog to own deep orchestration, durable reasoning memo
 
 The long-term RedDog objective is a personal proxy that handles the busy digital world while the human is free to remain primarily in the physical and social world.
 
-That includes agent-mediated communication, social presence, filtering, retrieval, scheduling, monitoring, coordination, and other machine-compatible work. The desired outcome is not an ever-more-compelling feed. It is an increasingly effective personal attention firewall backed by a capable digital twin.
+That includes agent-mediated communication, social presence, filtering, retrieval, scheduling, monitoring, coordination, relationship continuity, and other machine-compatible work. The desired outcome is not an ever-more-compelling feed. It is an increasingly effective personal attention firewall backed by a capable digital twin.
 
 In short:
 
 > RedDog lives at the machine boundary so the human does not have to.
 
 And behind RedDog, 0102 carries the deeper recursive intelligence and orchestration required to make that boundary useful.
+
+## 10. Contact / Relationship Memory
+
+Contact memory is a first-class subsystem behind 0102, not a loose folder and not a UI feature owned by RedDog. RedDog provides the capture and attention surface; 0102 performs extraction, entity resolution, temporal/relationship retrieval, and contextual reasoning over a principal-scoped store.
+
+The detailed design is defined in [`docs/CONTACT_MEMORY_ARCHITECTURE.md`](docs/CONTACT_MEMORY_ARCHITECTURE.md).
+
+The target behavior is simple at the human boundary: capture a card, screenshot, photograph, spoken name, or meeting note once; the system should preserve it, encrypt it, index it, connect it to prior encounters and projects, and retrieve it when it materially improves a future interaction.
+
+Lick may attach governed encounter/identity evidence to that memory, while remaining a separate identity/handshake concern rather than becoming the contact database itself.
