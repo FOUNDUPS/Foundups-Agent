@@ -16,39 +16,44 @@ or execution authority.
 
 ## 1. Outcome
 
-**Red Dog is the autonomous digital twin of 012 within the FoundUps ecosystem.**
+**Red Dog is the lightweight interaction and attention surface for 012; 0102 is the autonomous digital twin behind it within the FoundUps ecosystem.**
 
 012 provides intent, judgment, experience, and feedback.
 
-Red Dog learns the interaction patterns of its 012, maintains context, and autonomously converts intent into coordinated action across FoundUps.
+Red Dog keeps interaction immediate and exchanges bounded context with 0102. The principal-scoped 0102 learns the interaction patterns of its 012, maintains deeper context, and autonomously converts admitted intent into coordinated action across FoundUps.
 
 The objective is not to create an assistant that repeatedly asks the human what to do next.
 
 The objective is:
 
-> **012 expresses intent. Red Dog understands, acts, observes results, and continues working autonomously within its delegated authority.**
+> **012 expresses intent through Red Dog. 0102 understands, coordinates admitted work, observes results, and continues within delegated authority.**
 
 The human remains part of the system primarily through natural interaction with resulting products, environments, and outcomes—not through constant approval of individual agent actions.
 
 ---
 
-## 2. Red Dog as the Digital Twin
+## 2. Red Dog and the Digital Twin
 
-Red Dog and the digital twin are not separate entities.
+Red Dog and 0102 are distinct components in one continuous conversational
+relationship. They must not be presented as competing assistants.
 
-**Red Dog is the digital twin.**
+**Red Dog is not 0102.** Red Dog is the fast interaction, exchange, and
+attention surface. 0102 is the principal-scoped Digital Twin and deeper
+cognition/orchestration layer.
 
-Each Red Dog represents its associated 012 inside the FoundUps system.
-
-It progressively develops a working model of its 012 through interaction: preferences, reasoning patterns, priorities, previous decisions, corrections, and observed responses to outcomes.
+Each Red Dog connects its associated 012 to that 012's scoped 0102 inside the
+FoundUps system. 0102 progressively develops a working model of its 012 through
+interaction: preferences, reasoning patterns, priorities, previous decisions,
+corrections, and observed responses to outcomes.
 
 This is more than memory retrieval.
 
-Conceptually, Red Dog continuously **pattern matches** with its 012.
+Conceptually, 0102 continuously **pattern matches** with its 012 through the Red
+Dog interaction stream.
 
-Interactions can be represented as vectors within a multidimensional space. Over time, recurring decisions and behaviors form patterns and clusters. Red Dog uses those patterns to reduce the distance between:
+Interactions can be represented as vectors within a multidimensional space. Over time, recurring decisions and behaviors form patterns and clusters. 0102 uses those patterns to reduce the distance between:
 
-**012 intent → Red Dog interpretation → autonomous execution**
+**012 intent → Red Dog exchange → 0102 interpretation → governed execution**
 
 The desired outcome is increasing alignment without requiring increasing micromanagement.
 
@@ -67,7 +72,11 @@ Instead:
  ▼
 RED DOG
  │
- │ autonomous coordination
+ │ normalized intent / context exchange
+ ▼
+0102
+ │
+ │ governed autonomous coordination
  ▼
 WORK
  │
@@ -86,15 +95,15 @@ REAL-WORLD OR DIGITAL OUTCOME
 
 Typical loop:
 
-1. 012 discusses a desired capability with Red Dog.
-2. Red Dog and 012 converge on the intended outcome.
+1. 012 discusses a desired capability through Red Dog.
+2. Red Dog keeps the exchange fluid while 0102 and 012 converge on the intended outcome.
 3. 012 delegates authority to proceed.
-4. Red Dog creates and dispatches the required work.
+4. 0102 creates the governed proposal and dispatches admitted work.
 5. Workers execute.
 6. The resulting PWA, service, document, simulation, or other artifact changes.
 7. 012 naturally encounters and tests that result.
-8. 012 gives Red Dog feedback.
-9. Red Dog incorporates that feedback and generates subsequent work.
+8. 012 gives feedback through Red Dog.
+9. 0102 incorporates that feedback and generates subsequent proposals.
 
 The loop continues without requiring 012 to orchestrate individual workers.
 
@@ -102,7 +111,7 @@ The loop continues without requiring 012 to orchestrate individual workers.
 
 ## 4. Conversation Becomes Work
 
-Red Dog should operate more like an autonomous IDE and architect than a conventional chatbot.
+The Red Dog/0102 relationship should operate more like an autonomous IDE and architect than a conventional chatbot.
 
 Conversation is the discovery and consensus surface.
 
@@ -128,7 +137,7 @@ AUDIT
 OUTCOME
 ```
 
-Red Dog does not need to personally perform every task. Its primary power comes from its ability to **coordinate workers**.
+Red Dog does not perform the deeper work. Its power comes from giving 012 a fast, continuous surface while 0102 **coordinates workers** behind it.
 
 A conversation between one human and one Red Dog could eventually initiate work across tens, hundreds, or thousands of specialized autonomous agents.
 
@@ -142,7 +151,7 @@ Red Dog is persistent across the FoundUps ecosystem.
 
 FoundUps Mall acts as a discovery layer through which 012 can enter individual FoundUps.
 
-When 012 enters a FoundUp PWA, Red Dog enters that operational context with them.
+When 012 enters a FoundUp PWA, Red Dog remains the interaction surface while 0102 enters that operational context with them.
 
 ```text
 FoundUps Mall
@@ -161,7 +170,7 @@ The active environment provides Red Dog with a **context trigger**.
 
 If 012 is using GotJunk, Red Dog should know the discussion and resulting work concern GotJunk unless explicitly told otherwise.
 
-Changing FoundUps changes operational context without changing the identity of the digital twin.
+Changing FoundUps changes operational context without changing the identity of 0102 or the Red Dog surface used to reach it.
 
 ---
 
@@ -171,7 +180,7 @@ FoundUps should behave like a modular construction system.
 
 A useful metaphor is **LEGO**.
 
-Red Dog is one component operating within a larger network. Workers, FoundUps, services, models, other Red Dogs, and future compute resources can connect through standardized interfaces.
+Red Dog is one surface component operating within a larger network. 0102, workers, FoundUps, services, models, other principal-scoped pairs, and future compute resources connect through standardized interfaces.
 
 ```text
         [Worker]
@@ -187,7 +196,8 @@ New components should be capable of joining without redesigning the entire syste
 
 Every boundary must eventually support identity, trust, capability, and contribution checks.
 
-When another participant enters the system, Red Dog must be capable of determining:
+When another participant enters the system, Red Dog captures the encounter and
+0102 must be capable of determining:
 
 - Who or what is connecting?
 - Is it a human, agent, Red Dog, service, or other actor?
@@ -249,9 +259,10 @@ The immediate requirement is not necessarily to build the complete 3V Engine int
 
 Autonomy without discipline produces drift.
 
-The WSP framework provides Red Dog with operational constraints—a **leash** for autonomous behavior.
+The WSP framework provides 0102 and its governed workers with operational
+constraints—a **leash** for autonomous behavior behind Red Dog.
 
-Red Dog should not improvise how FoundUps engineering is performed every time it receives a task. It should retrieve and follow the governing WSPs.
+0102 and its governed workers should not improvise how FoundUps engineering is performed every time Red Dog receives a task. They should retrieve and follow the governing WSPs.
 
 ### WSP_00
 
@@ -259,11 +270,11 @@ Provides the system's identity and operational-entry discipline.
 
 ### WSP_97
 
-Provides Red Dog's execution reasoning discipline: retrieve governing WSPs and repository evidence, research the real code and interfaces, run micro and macro passes, apply the dialectic sweep and first principles, then execute once the gates pass.
+Provides 0102's execution reasoning discipline: retrieve governing WSPs and repository evidence, research the real code and interfaces, run micro and macro passes, apply the dialectic sweep and first principles, then execute once the gates pass.
 
 In simple terms:
 
-> **Red Dog can run autonomously, but WSP_97 keeps the dog on the leash.**
+> **Red Dog keeps the conversation moving; WSP_97 keeps 0102 and its workers on the leash.**
 
 Other WSPs provide additional specialized operational constraints and scoring/rating functions. Their exact relationship to Red Dog routing and execution must be established from repository evidence rather than assumed in this vision document.
 
@@ -289,6 +300,8 @@ The desired architecture is:
               ↓
            RED DOG
               ↓
+             0102
+              ↓
      disciplined autonomy
               ↓
          orchestration
@@ -303,7 +316,10 @@ The desired architecture is:
 
 Authority therefore needs scope.
 
-Red Dog should know what it may do autonomously, what context it is operating within, what resources it may use, what WSP constraints apply, and what actions require escalation.
+0102 should know what it may do autonomously, what context it is operating
+within, what resources it may use, what WSP constraints apply, and what actions
+require escalation. Red Dog must accurately expose that state without
+manufacturing authority.
 
 The goal is **bounded autonomy**, not continuous permission seeking.
 
@@ -325,6 +341,8 @@ The long-term architecture is:
                      ▼
                   RED DOG
                      │
+                    0102
+                     │
               ORCHESTRATION
                      │
         ┌────────────┼────────────┐
@@ -343,7 +361,7 @@ The number of workers becomes an implementation and compute question rather than
 
 One conversation could eventually coordinate **10,000 agents** working toward an agreed outcome.
 
-That is the deeper meaning behind the Red Dog / "Red God" wordplay: Red Dog begins as a digital companion and operational twin, but its ability to coordinate increasingly large networks of autonomous intelligence creates capabilities that would previously have required enormous organizations.
+That is the deeper meaning behind the Red Dog / "Red God" wordplay: Red Dog begins as a lightweight digital companion surface, while the 0102 and multi-agent network behind it coordinates increasingly large networks of autonomous intelligence that would previously have required enormous organizations.
 
 This is a scaling vision, not a claim about current production capability.
 
@@ -357,11 +375,12 @@ Red Dog succeeds when 012 no longer needs to think about individual agents.
 
 **talk → reach consensus → delegate → experience the result → respond**
 
-Red Dog handles the machinery between those moments.
+0102 and its governed workers handle the machinery between those moments;
+Red Dog keeps the relationship immediate.
 
 The ultimate outcome is:
 
-> **One human and their autonomous digital twin can coordinate computational resources, agents, FoundUps, and other digital twins at a scale previously possible only through large organizations and concentrations of capital.**
+> **One human, interacting naturally through Red Dog with their autonomous 0102 Digital Twin, can coordinate computational resources, agents, FoundUps, and other digital twins at a scale previously possible only through large organizations and concentrations of capital.**
 
 FoundUps provides the network.
 
@@ -371,7 +390,7 @@ Agents provide the work.
 
 3V provides the trust and value hooks.
 
-**Red Dog provides the agency.**
+**Red Dog provides the immediate relationship surface; 0102 provides the deep agency.**
 
 ---
 

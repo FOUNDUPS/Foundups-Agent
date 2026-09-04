@@ -101,9 +101,9 @@ jobs:
           grep -q 'CABR remains the.*Consensus-Driven Autonomous Benefit Rate' \
             WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md
 
-      - name: Verify 0102 public-key identity correction
+      - name: Verify 0102 public-key and RedDog surface identity correction
         run: |
-          grep -q 'RedDog is an operational state' \
+          grep -q 'RedDog is not 0102 and is not an independent authority source' \
             docs/contracts/REDDOG_0102_PUBLIC_KEY_OPERATIONAL_IDENTITY_ADDENDUM_PHASE1.md
           grep -q 'durable_identity_resolves_to_0102_public_key' \
             docs/architecture/architecture_registry.yaml

@@ -12,11 +12,16 @@ not mean RedDog has 376 canonical specifications.
 | Need | Canonical entry | Authority |
 |---|---|---|
 | What RedDog is becoming | `docs/REDDOG_OUTCOME_VISION.md` | Product North Star; future statements are not implementation claims |
+| RedDog identity boundary | `extensions/reddog/ARCHITECTURE.md` | Canonical invariant: RedDog fast surface != 0102 deep Digital Twin |
 | Fast RedDog + deep 0102 cognition split | `docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md` | Cross-domain architecture vision; not implementation truth |
 | Current extension/runtime truth | `extensions/reddog/README.md` | Current product/runtime status |
 | Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
 | Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Product contract; specified, not implemented |
+| Contact/relationship memory | `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md` | Architecture vision; specified, not implemented |
+| Mosh Pit activity projection | `extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |
+| Memex projection emitter | `extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` | Product contract; specified, not implemented |
+| Memex emitter implementation work order | `extensions/reddog/docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` | Work order; never completion evidence |
 | FoundUps/second-brain architecture | `docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md` | Architecture decision context |
 | Phase-1 alignment findings | `docs/audits/architecture/REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1.md` | Evidence audit, not runtime authority |
 | Lick/Gemini/patent findings | `docs/audits/architecture/REDDOG_LICK_HANDSHAKE_AUDIT_PHASE1.md` | Evidence audit, not runtime authority |
@@ -47,11 +52,13 @@ The canonical division of responsibility is:
 
 Within RedDog operation, the intended cognition split is:
 
-`012 <-> fast RedDog interaction loop -> deep 0102 cognition/orchestration -> governed workers`
+`012 <-> fast RedDog interaction/exchange surface -> deep 0102 cognition/orchestration -> governed workers`
 
-The fast and deep loops are not separate digital twins. They are latency and
-responsibility layers of one principal-scoped RedDog/0102 Digital Twin
-relationship. See `docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md`.
+RedDog and 0102 are not the same component and are not competing assistants.
+They form one continuous principal-scoped conversational relationship across
+two latency and responsibility layers. See
+`extensions/reddog/ARCHITECTURE.md` and
+`docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md`.
 
 The Lick runs at the RedDog engagement boundary. AutoPost can supply a
 permissioned capture event, but it does not decide identity or grant authority.

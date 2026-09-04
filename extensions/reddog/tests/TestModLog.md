@@ -1,5 +1,21 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-09-05 - Identity / merged builder reconciliation (0.4.141 candidate)
+
+- Applied the RedDog/0102 identity contract above the already merged `0.4.140`
+  builder evidence; the corrected identity first lands in `0.4.141`.
+- Preserved executable negatives for missing, relative, wrong-volume, and
+  reparse-backed runtimes; suspended Job containment; closed environment;
+  bounded output; composition reproof; and authority nonclaims.
+- Reverified the merged package-surface expectations and exact order for the
+  repository-only `.gitignore` and `ARCHITECTURE.md` exclusions.
+- Focused identity, conversation, shard, Holo incident, tiering, and manifest
+  checks pass. Contract shards are 18 / 6,942 lines / 492 assertions at
+  `sha256:10b5118a5c9c...e32ad247`; the package is 67 files / 950,193 bytes at
+  `sha256:cb6e5d4bb38d...15b281b8`; the registry is current at 1,641 / 269.
+- Prior physical and full-release results remain exact-commit historical
+  evidence. Fresh 0.4.141 aggregate release and VSIX inspection are required.
+
 ## 2026-08-30 - Held builder child evidence release (0.4.140)
 
 - Authentic RED collection preceded implementation. Focused falsifiers now

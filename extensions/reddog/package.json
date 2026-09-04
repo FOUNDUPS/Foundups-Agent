@@ -1,8 +1,8 @@
 {
   "name": "reddog",
-  "displayName": "RedDog - FoundUps Architect",
-  "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.140",
+  "displayName": "RedDog - FoundUps Interface",
+  "description": "Open the lightweight RedDog interaction surface backed by governed 0102 cognition.",
+  "version": "0.4.141",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {

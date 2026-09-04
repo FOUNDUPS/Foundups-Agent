@@ -23,14 +23,14 @@ Breadcrumbs
 = episodic continuity and recent operational history
 
 RedDog
-= the operator-facing product identity, persona, and conversation surface of a
-  principal-scoped 0102 Digital Twin
+= the lightweight, low-latency interaction, exchange, and attention surface
+  through which 012 communicates with a principal-scoped 0102 Digital Twin
 
 012 Principal Memex
 = persistent principal cognition that informs 0102 across FoundUps
 
 0102 Digital Twin
-= the active reasoning/orchestration relationship presented to 012 as RedDog
+= the deep cognition, reasoning, retrieval, and orchestration layer behind RedDog
 
 RedDog services
 = the runtime hosts for authenticated conversation, models, memory adapters,
@@ -44,7 +44,7 @@ store, conversation transcript, AgentDB queue, or authority source.
 ## Principal Memex and RedDog
 
 ```text
-012 <-> RedDog / principal-scoped 0102 Digital Twin
+012 <-> RedDog fast surface <-> principal-scoped 0102 Digital Twin
           |
           +-> Principal Memex (principal cognition)
           +-> scoped FoundUp Memex (one FoundUp cognition)
@@ -54,15 +54,15 @@ store, conversation transcript, AgentDB queue, or authority source.
                     -> OpenClaw -> WRE -> Hermes / FoundUp DAEs
 ```
 
-RedDog is how 012 encounters the principal-scoped 0102 Digital Twin; it is not
-a container holding a separate 0102 identity. RedDog services may host that
-relationship's runtime. The Principal Memex helps 0102 interpret stable 012
+RedDog is how 012 encounters the principal-scoped 0102 Digital Twin, but RedDog
+is not 0102. RedDog services may host the continuous relationship's runtime.
+The Principal Memex helps 0102 interpret stable 012
 goals, preferences, terminology, decision history, and cross-FoundUp strategy.
 Current repository evidence remains authoritative for code truth, and signed
 authorization remains authoritative for work.
 
-The interaction surface and cognition depth may operate as two latency bands of
-that same Digital Twin relationship. The intended fast RedDog loop owns live
+The interaction surface and cognition depth operate as distinct components in
+one continuous conversational relationship. The intended fast RedDog loop owns live
 conversation while the deeper 0102 loop performs background retrieval,
 verification, omission/contradiction detection, WSP application, model
 escalation, and worker orchestration. Background results return as bounded
@@ -141,9 +141,11 @@ Each FoundUp is a decentralized autonomous entity, not merely a repository or ap
 - governed research and environmental signals;
 - decision history, contradictions, and supersession.
 
-RedDog operates through the Memex of the FoundUp currently in scope. RedDog does not silently collapse all FoundUps into one memory store.
+0102 operates against the scoped Memex of the FoundUp currently in context and
+returns bounded results through RedDog. Neither layer silently collapses all
+FoundUps into one memory store.
 
-One continuous RedDog identity does not yet mean one durable conversation is
+One continuous RedDog/0102 conversational relationship does not yet mean one durable conversation is
 implemented across every surface. The VSIX currently discards raw provider
 history, and the p.fMALL/phone authenticated resident adapter remains
 specified, not implemented. Continuity becomes `OBSERVED` only when the

@@ -4,7 +4,7 @@
 
 **Status:** ACTIVE
 
-**Last Updated:** 2026-08-28
+**Last Updated:** 2026-09-05
 
 **WSP Compliance:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 87 (Code Navigation)
 
@@ -14,9 +14,11 @@
 
 Start with [REDDOG_DOCUMENTATION_MAP.md](REDDOG_DOCUMENTATION_MAP.md). It
 separates current product truth, architecture, WSP authority, audits, test
-evidence, and historical memory. The recurring Lick is a RedDog product
-handshake, not a WSP; its contract lives at
-[`extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`](../extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md).
+evidence, and historical memory. The canonical identity boundary is
+[`extensions/reddog/ARCHITECTURE.md`](../extensions/reddog/ARCHITECTURE.md):
+RedDog is the fast interaction/exchange surface, while 0102 is the deeper
+Digital Twin and orchestration layer. The map also owns navigation to Lick,
+Contact Memory, Mosh Pit, and the specified-not-implemented Memex emitter.
 
 ## Quick Navigation
 

@@ -1,5 +1,10 @@
 # RedDog / FoundUp Memex Projection Emitter
 
+Status: `SPECIFIED_NOT_IMPLEMENTED`
+
+This document defines a target contract. It is not evidence that a projection
+emitter, authorization service, renderer, or external sink is operational.
+
 ## Purpose
 
 The emitter turns existing FoundUp memory state into governed, human-readable projections without creating another memory database.

@@ -20,6 +20,7 @@ const FAST_TESTS = Object.freeze([
   'test_holoindex_async_bridge.js',
   'test_holoindex_incident_repair.js',
   'test_bridge_python_environment.js',
+  'test_reddog_identity_boundary.js',
   'test_conversation_plane_policy.js',
   'test_conversational_draft_policy.js',
   'test_progressive_execution_stage.js',

@@ -1,5 +1,29 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-05] RedDog Identity / Merged Builder Reconciliation (0.4.141)
+
+**WSP Protocols:** WSP 00, 06, 12, 15, 22, 50, 62, 73, 84, 87, 97
+
+- Reconciled the already-merged PR #1606 `0.4.140` builder child with the
+  RedDog/0102 identity correction. The corrected boundary first lands in
+  `0.4.141`; the exact `0.4.140` builder evidence remains history below.
+- Preserved the evidence-only held child, suspended Windows Job Object launch,
+  closed O:/E: environment, strict path-free JSON, and zero new extension,
+  Git, owner, route, maintenance, activation, or execution authority.
+- Reverified `.gitignore` and `ARCHITECTURE.md` as repository-only package
+  exclusions with the deterministic expectations already merged in `0.4.140`.
+- Replayed the identity, conversation, shard, Holo incident, tiering, and
+  manifest-focused gates. The authenticated contract remains 18 shards / 6,942
+  lines / 492 assertions at `sha256:10b5118a5c9c...e32ad247`; the deterministic
+  package remains 67 files / 950,193 bytes at
+  `sha256:cb6e5d4bb38d...15b281b8`; the registry is current at 1,641 / 269.
+- Aligned the FoundUp Memex focused CI identity assertion with the revised
+  RedDog-surface contract; the gate no longer requires the superseded
+  `RedDog is an operational state` sentence.
+- The original 0.4.140 physical/release evidence remains historical evidence
+  for its exact commit. Rebased 0.4.141 promotion requires a fresh full release
+  replay, VSIX inspection, and exact-current-main post-merge proof.
+
 ## [2026-08-30] RedDog Held Builder Child and Holo Query Host Hygiene (0.4.140)
 
 **WSP Protocols:** WSP 00, 06, 12, 15, 22, 50, 62, 84, 87, 97

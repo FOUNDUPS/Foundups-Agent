@@ -58,7 +58,7 @@ assert.doesNotThrow(() => conversationTier.assertAllowedArtifactVolume(
 assert.doesNotThrow(() => conversationTier.assertAllowedArtifactVolume(
   'E:\\trusted\\python.exe', 'test Python override', 'win32'
 ));
-const temporaryBase = process.platform === 'win32' ? 'O:\\tmp' : os.tmpdir();
+const temporaryBase = os.tmpdir();
 const confinementRoot = fs.mkdtempSync(
   path.join(temporaryBase, 'reddog-conversation-guard-')
 );

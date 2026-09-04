@@ -255,8 +255,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.140', 'package version must be 0.4.140');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.140'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.141', 'package version must be 0.4.141');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.141'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -303,7 +303,7 @@ assert(
   operationsIntercept >= 0 && conversationPromptAssembly >= 0 && operationsIntercept < conversationPromptAssembly,
   'operations control must intercept before WSP prompt/Fusion assembly'
 );
-includes(readme, 'The VSIX is the IDE-side thin client for RedDog, the operator-facing identity/persona of the principal-scoped 0102 Digital Twin.', 'README product identity statement missing');
+includes(readme, 'RedDog is the lightweight fast\ninteraction/exchange surface; 0102 is the principal-scoped Digital Twin', 'README product identity boundary missing');
 includes(iface, 'Fusion is one internal reasoning mode, not the product identity', 'INTERFACE mode identity statement missing');
 includes(roadmap, 'RedDog is the resident FoundUps architect identity and conversation product across thin-client surfaces.', 'ROADMAP product identity statement missing');
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');

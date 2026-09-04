@@ -576,11 +576,14 @@ reservation. Detached completion and generic task finalization reject.
 
 ## Vision
 
-RedDog hosts the continuous **0102 Digital Twin** product/persona. OpenClaw may
-host the principal-scoped 0102 execution runtime behind RedDog and remains its
-resident multi-channel gateway/work supervisor; the main read-only bootstrap re-exports its stable result identity from `reddog_main_readonly_operational_bootstrap_result.py`:
+RedDog is the lightweight, low-latency interaction, exchange, and attention
+surface for the continuous relationship with the principal-scoped **0102
+Digital Twin**. RedDog is not 0102. OpenClaw may host the 0102 execution runtime
+behind RedDog and remains the resident multi-channel gateway/work supervisor;
+the main read-only bootstrap re-exports its stable result identity from
+`reddog_main_readonly_operational_bootstrap_result.py`:
 - **Channels**: WhatsApp, Telegram, Discord, voice, and authenticated thin clients
-- **Policy and conversation**: RedDog/0102 with WSP governance
+- **Policy and conversation**: RedDog fast surface with governed 0102 deep cognition
 - **Supervision**: OpenClaw admits bounded work to WRE/Hermes
 - **Work surface**: Foundups-Agent and FoundUp DAEs
 
@@ -597,7 +600,10 @@ These fields round-trip through `to_dict()` / `from_dict()` and are not an
 alias for the existing-module build or extraction actions.
 
 ```
-012 ──voice/chat/PFMall/VSIX──► RedDog 0102 conversation plane
+012 ──voice/chat/PFMall/VSIX──► RedDog fast interaction surface
+                                         │ bounded turn/context exchange
+                                         ▼
+                                    0102 deep layer
                                          │ proposal-only boundary
                                          ▼
                               OpenClaw work supervisor
