@@ -1,90 +1,163 @@
-# RedDog Mosh Pit Activity Memory Architecture
+# RedDog Mosh Pit Projection Architecture
 
 ## Purpose
 
-The Mosh Pit is the principal-scoped, append/prepend activity ledger that answers a different question from contact memory:
+The **Mosh Pit is not a new memory subsystem**. It is a governed, reverse-chronological project/FoundUp projection assembled from the memory architecture already present in FoundUps Agent:
 
-> What did 012 + 0102 actually do, in what order, what changed because of it, and what evidence proves it?
+- **Breadcrumbs** record the evidence-backed activity/discovery trail.
+- **Brain** is the durable consolidation component that interprets current state, active work, queued work, roadmap state, verified outcomes, and breadcrumb position.
+- **Memex** is the canonical broader FoundUp memory/current-state surface; Brain is one component inside it.
+- **RedDog** is the low-latency human-facing proxy/attention boundary that retrieves and presents the useful projection.
+- **0102** performs the deeper normalization, retrieval, reasoning, evidence reconciliation, and prioritization behind RedDog.
+- **Mosh Pit** is a view: what we did, what happened, what is complete, what remains open, and what should be resumed next.
 
-It is not a diary, transcript dump, city history, generic RAG store, or automatic public feed. It is an evidence-backed operational history of the shared 012/0102 work.
+The founding YUMORI workflow is the alpha pattern: 012 acts in the physical world while 0102 simultaneously performs research, documentation, architecture, coding, analysis, and artifact work. Both streams must be recoverable as **our** single operational history.
 
-The founding YUMORI workflow is the alpha pattern: physical-world actions by 012 and digital/research/engineering actions by 0102 occur in parallel and must be recoverable as one project history.
-
-## Layer Ownership
+## Canonical Flow
 
 ```text
-live interaction / capture
+live interaction / capture / repo work / external encounter
         |
         v
 RedDog surface
   - low-latency interaction
-  - capture receipt
-  - immediate ambiguity only
+  - capture/attention boundary
         |
         v
-0102 activity-memory cognition
-  - normalize STT aliases (0102 / 01-02 / zero one zero two)
-  - identify actors/projects/events
-  - retrieve related evidence
-  - distinguish fact / inference / claim
-  - generate candidate ledger events
+0102 normalization + evidence binding
+  - normalize STT aliases
+  - identify actor / FoundUp / event
+  - classify fact vs inference vs proposal
+  - connect evidence, contacts, PRs, artifacts
         |
         v
-Mosh Pit logger / curator worker
-  - deduplicate
-  - provenance-bind
-  - assign confidence
-  - preserve corrections
-  - prepend accepted event
+Breadcrumbs
+  - chronological activity/discovery trail
+  - provenance-bearing event records
         |
         v
-principal-scoped event store
+FoundUp Brain / Memex
+  - current state
+  - active work
+  - queued/open work
+  - roadmap state
+  - verified outcomes
+  - breadcrumb high-water mark / history position
         |
-        +--> project Mosh Pit views
-        +--> stakeholder-safe views
-        +--> grant / deck / report chronology
-        +--> RedDog contextual recall
+        +--> Mosh Pit reverse chronology
+        +--> accomplishments / milestones
+        +--> open loops / "go back to this"
+        +--> stakeholder-safe status report
+        +--> RedDog "what are we doing?" retrieval
 ```
 
-RedDog should not itself become the historical database. RedDog is the front attention/capture layer. 0102 owns deeper interpretation and retrieval. A bounded **Mosh Pit logger/curator worker** maintains the operational ledger behind them.
+No duplicate Mosh Pit database should be created. The same underlying event/evidence graph should feed contact memory, Breadcrumbs, Brain/Memex, and Mosh Pit projections.
 
-## Core Event Model
+## Breadcrumb Contract
 
-Every accepted event should carry at least:
+Breadcrumbs are the event trail. A meaningful operational breadcrumb should be capable of carrying or resolving to:
 
-- `event_id`
-- timestamp or bounded/approximate time
-- actor: `012`, `0102`, `PC`, external party, or joint actor
-- project / FoundUp
-- concise action (noun/verb factual form)
-- outcome, if observed
-- source evidence references
-- provenance and confidence
-- disclosure class
-- correction/supersession links
-- optional related contact/organization/meeting entities
-- optional Git commit / PR / artifact references
+- event/timestamp or bounded approximate time;
+- canonical actor: `012`, `0102`, `012 + 0102`, `PC`, or relevant external party;
+- FoundUp/project scope;
+- concise factual action;
+- observed result/outcome when known;
+- evidence/provenance references;
+- confidence / truth classification;
+- related contact, organization, meeting, commitment, PR, commit, or artifact identifiers;
+- disclosure class;
+- correction/supersession linkage where needed.
 
-The canonical store is structured events. The human-facing Mosh Pit document is a **view**, not the database.
+Breadcrumb history should remain source-preserving. Correcting a normalized fact must not destroy the original transcript, image, capture, or receipt.
 
-## Reverse-Chronological View
+## Brain / Memex Contract
 
-The Mosh Pit view grows upward:
+Brain/Memex answers **what the breadcrumb trail means now**.
+
+For one FoundUp it should consolidate, without silently rewriting history:
+
+- current state;
+- completed/verified outcomes;
+- active work;
+- queued work;
+- unresolved commitments;
+- roadmap state;
+- relationship-dependent follow-ups;
+- relevant breadcrumb range/high-water mark;
+- candidate next actions.
+
+This is the layer that handles 012 moving rapidly between topics. A diversion does not need to be manually remembered by 012. Brain/Memex should retain the open loop so RedDog can later surface: "we still need to return to this."
+
+## Mosh Pit Projection
+
+Mosh Pit is the human-readable activity/history projection over selected Breadcrumbs plus current-state interpretation from Brain/Memex.
+
+Its default YUMORI-style rendering is reverse chronological and grows upward:
 
 ```text
 [space for next event]
-2026-09-05 ...
-2026-09-04 ...
-2026-09-03 ...
+2026-09-05
+- 012: ...
+- 0102: ...
+- PC: ...
+
+2026-09-04
+- 012: ...
+- 0102: ...
+
 ...
+
 RESEARCH / PRE-LAUNCH FOUNDATION
 ```
 
-New accepted events are prepended. Old events are not silently rewritten. Material corrections create explicit correction/supersession evidence while the rendered view may show the corrected canonical fact.
+The oldest/origin material remains at the bottom. New material is prepended. This ordering is a **view rule**, not a storage rule.
 
-## What Belongs in the Ledger
+## Retrieval Contract for RedDog
 
-The spine is:
+RedDog must be able to answer compactly when 012 asks variants of:
+
+- "What have we done?"
+- "Where were we?"
+- "What did we accomplish today/this week?"
+- "Show me the YUMORI timeline."
+- "What is still left over?"
+- "What do we need to go back to?"
+- "What did 0102 build?"
+- "What did 012 do in the field?"
+
+Retrieval should combine existing memory lanes rather than depend on a single prose document:
+
+1. resolve FoundUp/project scope;
+2. retrieve matching/recent Breadcrumbs;
+3. retrieve Brain/Memex current state and open/queued work;
+4. retrieve verified Git/PR/artifact evidence where relevant;
+5. deduplicate multiple receipts representing one event;
+6. normalize aliases while preserving source evidence;
+7. sort events by event time for the requested view;
+8. return a concise projection with explicit actor attribution and provenance class;
+9. separately identify **completed**, **open**, and **next-highest-leverage** work when requested.
+
+For a general "what are we doing?" request, the target RedDog output is:
+
+```text
+NOW
+- current highest-leverage work
+
+OPEN LOOPS
+- items Brain/Memex says remain active/queued/unresolved
+
+RECENT ACCOMPLISHMENTS
+- reverse-chronological selected Breadcrumbs
+
+HISTORY
+- available on request as the full Mosh Pit projection
+```
+
+This is consistent with the existing `query_past_work` / Breadcrumb retrieval and unresolved-work concepts in the OpenClaw memory query lane. Runtime expansion should extend those existing surfaces rather than create a parallel query system.
+
+## What Belongs in a Project Mosh Pit
+
+The operational spine is:
 
 ```text
 012/0102 found out
@@ -92,78 +165,45 @@ The spine is:
 -> decided
 -> acted / built
 -> response observed
--> next action
+-> outcome recorded
+-> next/open action retained
 ```
 
-External facts enter the timeline only when they caused, constrained, validated, or materially changed our work. The Mosh Pit is not a parallel history of the city, a company, or the world.
+External events enter only when they caused, constrained, validated, or materially changed our work. The Mosh Pit is not a history of the City, NVIDIA, an investor, or another organization.
 
 Examples:
 
 - `012: met Sano; presented reuse concept.`
 - `0102: eSingularity PWA moved into canonical FoundUps module; PR #1608.`
-- `012 + 0102: NVIDIA/Japan compute-financing research changed viability assessment; active collateral work began.`
+- `012 + 0102: Japan/NVIDIA compute-infrastructure research changed viability assessment; active collateral work began.`
 - `PC: quorum established; second meeting scheduled.`
 
-## Daily Logger Pattern
+## Event / Truth Classification
 
-A lightweight logger worker should be able to run continuously/asynchronously from receipts and again at a daily reconciliation boundary.
+Useful projections must preserve the distinction between:
 
-### Continuous candidate capture
+- **OBSERVED** — directly evidenced event/result;
+- **REPORTED_BY_012** — 012's contemporaneous account;
+- **INFERRED** — derived relationship/significance;
+- **PROPOSED** — future action or strategy, not accomplished fact.
 
-Candidate events can be spawned by:
-
-- conversation decisions
-- photos/business cards/screenshots
-- calendar/meeting evidence where authorized
-- Git commits and PRs
-- created/updated artifacts
-- government/business interactions captured by 012
-- explicit commitments and follow-ups
-- AutoPost capture receipts
-
-The worker does **not** publish every interaction. It creates candidate events.
-
-### Daily reconciliation
-
-At a daily boundary, the curator asks:
-
-1. What materially happened today?
-2. Is it already represented?
-3. What evidence supports it?
-4. Which actor owns the action: 012, 0102, PC, joint, external?
-5. Is timing exact, approximate, or unknown?
-6. Does it belong to this FoundUp/project?
-7. What disclosure class applies?
-8. Is a human decision needed because identity/causation is ambiguous?
-
-If nothing material changed, no ledger entry is required.
-
-## Evidence and Truth Boundary
-
-The logger must distinguish:
-
-- **OBSERVED** — directly evidenced event/result.
-- **REPORTED_BY_012** — principal's contemporaneous account, preserved as such.
-- **INFERRED** — derived relationship or significance.
-- **PROPOSED** — future action/strategy, not accomplished fact.
-
-Example: `zazen protest occurred` and `vote was postponed` may both be observed/reported. `protest caused postponement` must not become an asserted fact without evidence supporting causation.
+Example: `zazen protest occurred` and `decision was postponed` can coexist as historical events. `protest caused postponement` must not be promoted to fact without supporting evidence.
 
 ## Actor Attribution
 
-Actor prefixes are first-class metadata, not decoration.
+Actor labels are provenance, not ownership partitions:
 
-- **012** — principal's physical-world action.
-- **0102** — digital-twin research, documentation, architecture, coding, analysis, artifact work.
-- **012 + 0102** — genuinely joint decision/discovery/work product.
-- **PC** — formal preparatory-committee action once organizational authority exists.
-- **External** — response or event included only because it materially changed our activity.
+- **012** — principal's physical-world execution;
+- **0102** — digital-twin research, documentation, architecture, coding, analysis, artifacts;
+- **012 + 0102** — genuinely joint decision/discovery/work product;
+- **PC** — formal committee action after organizational authority exists;
+- **External** — included only when its action materially changed ours.
 
-The shared-operation convention remains **our work**. Actor attribution records execution provenance; it does not divide the operation into competing ownership claims.
+The founding-operation convention remains **our work**.
 
 ## STT / Alias Normalization
 
-Surface transcription must not fragment identity. Examples such as:
+Surface transcription must not fragment identity. These all normally resolve to canonical actor `0102` when context supports it:
 
 ```text
 0102
@@ -172,104 +212,109 @@ Surface transcription must not fragment identity. Examples such as:
 zero one zero two
 ```
 
-normalize to the same canonical actor `0102` when context/evidence supports it. Original transcript text remains preserved as evidence. Normalization never destroys the source artifact.
-
-The same principle applies to contact names, project names, Japanese/English aliases, and known speech-recognition artifacts.
+The original transcript remains attached as provenance. The same rule applies to known project/contact aliases and recurring STT artifacts.
 
 ## Contact Memory Integration
 
-Mosh Pit activity memory and contact memory share the event graph but answer different questions:
+Contact memory and Mosh Pit are different projections over overlapping event evidence:
 
-- **Contact memory**: who is this person, what is our relationship, what commitments remain?
-- **Mosh Pit**: what did our operation do and what happened next?
+- **Contact memory**: who is this person, what is our relationship, what happened between us, what commitments remain?
+- **Mosh Pit**: what did our operation do, what happened next, and how did the FoundUp advance?
 
-A meeting can therefore exist once as an event and be projected into both views.
-
-```text
-Meeting Event
-  -> participant edges -> Contact Memory
-  -> project/action edge -> Mosh Pit
-  -> evidence edge -> capture/photo/message
-  -> commitment edges -> follow-up system
-```
-
-No duplicate prose record is required.
+A meeting should exist once as an event/breadcrumb and be projected into both contexts.
 
 ## Git / Engineering Integration
 
-For FoundUps work, Git history is high-value evidence. The logger can ingest PR/commit receipts and attach them to project events.
+Git history is high-value evidence for 0102 activity. Include technical work in a project Mosh Pit when it:
 
-Do not dump every repository change into every Mosh Pit. Include technical work when it:
-
-1. directly builds the FoundUp/project;
+1. directly builds that FoundUp/project;
 2. emerges directly from field use of that FoundUp/project; or
-3. materially improves the 012/0102 system used to execute it.
+3. materially improves the 012/0102 system being used to execute it.
 
-This allows a project chronology to show physical and digital execution in parallel without becoming a repository changelog.
+Do not turn the Mosh Pit into a complete repository changelog.
+
+## Daily Reconciliation
+
+A bounded curator/logging worker can reconcile candidate Breadcrumbs asynchronously and at a daily boundary. It should ask:
+
+1. What materially happened?
+2. Is it already represented by another receipt?
+3. What evidence supports it?
+4. Which actor owns execution provenance?
+5. Which FoundUp/project does it belong to?
+6. Is the time exact, approximate, or unknown?
+7. Is the item completed, open, blocked, or proposed?
+8. Does Brain/Memex already retain the associated open loop?
+9. Is human resolution required for identity, causation, or disclosure ambiguity?
+
+The worker creates/curates Breadcrumb evidence and Brain/Memex candidates; it does not maintain a second historical database.
 
 ## Disclosure Views
 
-One underlying event store can render different governed views:
+One underlying evidence trail can support multiple governed projections:
 
-- **private principal view** — names, evidence, relationship notes, exact counterparties where legitimate.
-- **team/PC view** — operational facts needed by the organization.
-- **stakeholder view** — concise milestones; confidential investor/contact identities withheld.
-- **public view** — approved facts only.
+- **private principal** — full legitimate evidence and counterparties;
+- **team/PC** — operational facts needed by the organization;
+- **stakeholder** — concise milestones with confidential counterparties withheld;
+- **public** — explicitly approved facts only.
 
-Disclosure is a view policy. Redaction does not alter the canonical private event.
+Redaction is a projection policy, not a mutation of canonical evidence.
 
-## Google Doc / Human Mosh Pit
+## Google Doc Projection
 
-A living Google Doc can be a convenient human-facing projection for YUMORI, with new entries prepended at the top. It should not become the only canonical memory store.
+A living Google Doc is appropriate as a convenient stakeholder/human Mosh Pit view for YUMORI. It should be generated from approved Breadcrumb/Brain/Memex state and should not become the sole canonical memory store.
 
-Target behavior:
+Target:
 
 ```text
-structured event store
--> render stakeholder-safe reverse chronology
--> prepend/update living Google Doc
--> retain evidence references internally
+Breadcrumbs + Brain/Memex
+-> Mosh Pit projection
+-> disclosure filter
+-> prepend/sync living Google Doc
 ```
 
-If Google Doc synchronization is unavailable, the event store remains authoritative and can regenerate the view later.
+If Google synchronization is unavailable, the underlying memory remains intact and the document can be regenerated later.
 
 ## Attention Behavior
 
-The Mosh Pit logger normally stays below the RedDog attention boundary. RedDog surfaces it only when:
+This machinery normally stays beneath the RedDog attention boundary. Surface it when:
 
-- an event is materially ambiguous;
+- 012 explicitly asks for history/status/accounting;
+- an open loop is being forgotten;
+- a commitment/follow-up is at risk;
 - evidence conflicts;
-- a promised follow-up is at risk;
 - a milestone changes the next action;
-- the principal asks for an accounting/history;
 - a stakeholder report needs refresh.
 
-The human should not spend the day maintaining the log. **Act first; organize never; reconcile automatically.**
+**Act first; capture automatically; reconcile below the attention boundary.**
 
-## Implementation Slices
+## Implementation Direction
 
-1. **Documentation / schema** — define event and disclosure contracts.
-2. **Local event store** — principal-scoped, append-only/correction-aware structured events.
-3. **Conversation/capture candidate adapter** — explicit receipt input first; no ambient surveillance assumption.
-4. **Git receipt adapter** — PR/commit candidates matched to FoundUps/projects.
-5. **Daily curator worker** — dedupe, evidence classification, project matching, ambiguity queue.
-6. **Mosh Pit renderer** — reverse chronology with actor prefixes.
-7. **Google Doc adapter** — governed prepend/sync of approved view.
-8. **RedDog attention integration** — surface only consequential ambiguity/follow-up.
+Do not build a separate Mosh Pit store. Extend existing surfaces in this order:
+
+1. define a project/FoundUp-aware Breadcrumb event contract;
+2. ensure relevant 012/0102/PC events can enter that trail with provenance;
+3. ensure Brain/Memex can consolidate completion/open-loop state from those receipts;
+4. extend existing past-work/unresolved-work retrieval to emit a unified project activity projection;
+5. add Git/PR/artifact receipt matching;
+6. add the reverse-chronological Mosh Pit renderer;
+7. add optional governed Google Doc synchronization;
+8. keep RedDog output concise by default and expand full history only on request.
 
 ## Non-Goals / Safety
 
-- No automatic public posting.
-- No silent inference of sensitive identity.
-- No claim that every conversation sentence is a historical event.
-- No rewriting source evidence to match normalized entities.
-- No causal claims without evidence.
-- No contact or project data crossing principal boundaries.
-- No Google Doc, GitHub, email, social, financial, or other external mutation without the appropriate governed authority.
-- No requirement that 012 manually maintain the ledger.
+- no new parallel memory database;
+- no automatic public posting;
+- no silent sensitive-identity inference;
+- no conversion of every utterance into a historical event;
+- no destruction of source text during normalization;
+- no causal claim without evidence;
+- no principal-boundary leakage;
+- no external mutation authority implied by memory retrieval;
+- no requirement that 012 manually maintain the log.
 
 ## Founding Alpha
 
-YUMORI demonstrates the need directly. 012 moves through the physical world — City Hall, police, community, investors, prefecture — while 0102 simultaneously builds websites, research, economic models, RedDog architecture, documentation, and code. A useful digital twin must remember both streams as one evidence-backed operational history and be able to answer, at any moment:
+YUMORI makes the architecture visible. 012 moves through City Hall, police, community, investors, and prefectural offices while 0102 simultaneously builds websites, research, models, documentation, RedDog architecture, and code. Breadcrumbs preserve those events. Brain/Memex keeps their current meaning and open loops. RedDog should be able to retrieve the relevant projection on demand and answer:
 
-> What have we done, what changed, what is still open, and what is the next highest-leverage action?
+> **What have we done? What changed? What is complete? What remains open? What do we return to next?**
