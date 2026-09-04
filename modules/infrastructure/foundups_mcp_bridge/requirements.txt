@@ -1,5 +1,5 @@
 # Validated canonical Streamable HTTP runtime (2026-08-21).
 fastmcp==2.13.0.2
-mcp==1.20.0
+mcp==1.28.1
 pydantic==2.12.3
 uvicorn==0.38.0
