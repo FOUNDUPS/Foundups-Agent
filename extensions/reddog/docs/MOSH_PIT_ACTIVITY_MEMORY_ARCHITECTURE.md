@@ -153,7 +153,15 @@ HISTORY
 - available on request as the full Mosh Pit projection
 ```
 
-This is consistent with the existing `query_past_work` / Breadcrumb retrieval and unresolved-work concepts in the OpenClaw memory query lane. Runtime expansion should extend those existing surfaces rather than create a parallel query system.
+### Current implementation boundary
+
+The repository already contains reusable runtime pieces for this retrieval path:
+
+- `query_past_work()` searches workspace memory plus AgentDB Breadcrumbs;
+- `query_unresolved_work()` retrieves unresolved/queued work;
+- FoundUp Brain/Memex assembly already consumes Breadcrumb state plus active/queued work and verified outcomes.
+
+This PR **does not claim that a unified Mosh Pit runtime renderer is already wired into RedDog**. It defines the canonical composition so the next runtime slice extends those existing query surfaces rather than creating a parallel memory/query stack.
 
 ## What Belongs in a Project Mosh Pit
 
@@ -295,7 +303,7 @@ Do not build a separate Mosh Pit store. Extend existing surfaces in this order:
 1. define a project/FoundUp-aware Breadcrumb event contract;
 2. ensure relevant 012/0102/PC events can enter that trail with provenance;
 3. ensure Brain/Memex can consolidate completion/open-loop state from those receipts;
-4. extend existing past-work/unresolved-work retrieval to emit a unified project activity projection;
+4. extend existing `query_past_work()` + `query_unresolved_work()` retrieval to emit a unified project activity projection;
 5. add Git/PR/artifact receipt matching;
 6. add the reverse-chronological Mosh Pit renderer;
 7. add optional governed Google Doc synchronization;
