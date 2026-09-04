@@ -27,10 +27,15 @@ encrypted evidence object + capture receipt
         +--> Projects / commitments / follow-ups
         +--> source image/document provenance
         |
+        +--> project/FoundUp Breadcrumb when the encounter materially advances work
+        |
         v
 principal-scoped contact memory index
         |
         +<---- Lick identity/encounter evidence where governed
+        |
+        +----> Brain/Memex current-state consolidation
+        +----> Mosh Pit activity/history projection when project-relevant
         |
         v
 contextual retrieval for RedDog / 0102
@@ -73,6 +78,8 @@ Every meaningful encounter is an immutable or append-only event containing:
 - projects/topics involved
 - confidence/provenance per extracted fact
 
+When an interaction materially advances a FoundUp/project, the same event should be represented or referenced as a **Breadcrumb** for that project. Do not duplicate the meeting into an unrelated prose history. Contact Memory, Breadcrumbs, Brain/Memex, and Mosh Pit should project from the same underlying evidence.
+
 ### Relationship graph
 
 Contacts connect to organizations, projects, places, meetings, other contacts, commitments, and FoundUps through typed temporal edges. Examples:
@@ -83,6 +90,7 @@ Person --introduced_by--> Person
 Person --supports--> YUMORI
 Person --met_with--> 012
 Meeting --concerned--> Project
+Meeting --breadcrumb_for--> FoundUp
 Commitment --owned_by--> 012 or Person
 Contact --identity_evidence--> Capture
 ```
@@ -103,6 +111,28 @@ RedDog contact memory should combine:
 6. provenance/confidence filtering.
 
 The result is an entity-centric relationship memory with RAG as one component, not a pile of embedded documents.
+
+## Breadcrumb / Brain / Mosh Pit Integration
+
+The layers answer different questions:
+
+- **Contact memory**: who is this person, what is our relationship, what happened between us, and what remains open?
+- **Breadcrumbs**: what materially happened in the operation/project, in sequence, with evidence?
+- **Brain/Memex**: what do those events mean now — current state, open work, queued work, commitments, and next actions?
+- **Mosh Pit**: what reverse-chronological history/accomplishment/status view should RedDog render for 012, the PC, a stakeholder, or another governed audience?
+
+One interaction can therefore feed all four without becoming four independent records.
+
+```text
+Meeting Event
+  -> participant edges -> Contact Memory
+  -> project event/breadcrumb -> Breadcrumbs
+  -> open commitment -> Brain/Memex current state
+  -> selected history/status projection -> Mosh Pit
+  -> evidence edge -> capture/photo/message/Lick receipt
+```
+
+This is particularly important for RedDog retrieval. When 012 asks "what have we done?" or "what do we need to go back to?", RedDog should be able to traverse project Breadcrumbs plus Brain/Memex open state while still resolving the relevant people through Contact Memory.
 
 ## Lick Integration
 
@@ -126,6 +156,7 @@ capture photo/card/contact screenshot
 -> entity resolution against existing contact memory
 -> create/update contact candidate
 -> link encounter/project/context
+-> create project Breadcrumb candidate if materially relevant
 -> RedDog surfaces only ambiguity or required human decision
 ```
 
@@ -157,6 +188,6 @@ This follows the RedDog attention invariant: relationship context is always near
 
 ## Alpha Pattern
 
-The current founding workflow is already an external alpha of this system: 012 captures screenshots, cards, photographs, meeting facts, and names; 0102 resolves them against projects and prior interactions; the resulting context is reused in later messages and meetings.
+The current founding workflow is already an external alpha of this system: 012 captures screenshots, cards, photographs, meeting facts, and names; 0102 resolves them against projects and prior interactions; relevant events become operational Breadcrumbs; Brain/Memex retains the resulting state/open loops; RedDog later retrieves the relationship or project history through contact and Mosh Pit views.
 
 The implementation objective is to convert that manual recursive behavior into a dependable principal-scoped subsystem without losing provenance, ambiguity handling, or the RedDog/0102 layer separation.
