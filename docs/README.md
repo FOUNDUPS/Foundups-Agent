@@ -10,6 +10,14 @@
 
 ---
 
+## RedDog Canonical Navigation
+
+Start with [REDDOG_DOCUMENTATION_MAP.md](REDDOG_DOCUMENTATION_MAP.md). It
+separates current product truth, architecture, WSP authority, audits, test
+evidence, and historical memory. The recurring Lick is a RedDog product
+handshake, not a WSP; its contract lives at
+[`extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`](../extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md).
+
 ## Quick Navigation
 
 | Category | Count | Description |

@@ -97,6 +97,13 @@ Current implementation:
   presentation-only.
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
+- [ ] RedDog Lick connection handshake: ship explicit consent, encounter
+  boundary, participant claim, passkey/device possession, expiry, guest
+  fallback, and a non-authoritative `LickReceipt` before evaluating biometrics.
+  AutoPost may provide a permissioned capture event for feasibility and other
+  engagements, but it does not decide identity. Voice/face, gait, cardiac,
+  cadence, EEG, and Wi-Fi CSI remain separately evaluated research/step-up
+  lanes. See `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`.
 
 - Governed Holo resident binding (implemented / exact-main live acceptance passed): the VSIX one-shot and canonical
   resident/OpenClaw read-only worker now use the same verified replica resolver

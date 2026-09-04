@@ -1,0 +1,37 @@
+{
+  "name": "esingularity",
+  "version": "0.1.0",
+  "type": "foundup",
+  "description": "Japanese-first public campaign PWA for Save Sukatto Land Kuzuryu and Project eSingularity Fukui",
+  "deployment": {
+    "platform": "openai_sites",
+    "public_url": "https://esingularity.ai/",
+    "config_path": "frontend/.openai/hosting.json"
+  },
+  "tech_stack": {
+    "frontend": "Vinext + Next App Router + React + TypeScript",
+    "hosting": "OpenAI Sites / Cloudflare Workers",
+    "features": ["PWA", "Japanese-first", "Multilingual", "LINE campaign", "Mobile-first"]
+  },
+  "wsp_compliance": {
+    "wsp_3": "FoundUp domain ownership",
+    "wsp_49": "Module structure",
+    "wsp_60": "Module memory",
+    "wsp_97": "Truth boundary",
+    "wsp_104": "Route namespace and tenant isolation"
+  },
+  "docs": {
+    "readme": "README.md",
+    "interface": "INTERFACE.md",
+    "roadmap": "ROADMAP.md",
+    "modlog": "ModLog.md"
+  },
+  "api": {
+    "type": "PWA",
+    "endpoints": ["/api/interest"]
+  },
+  "memory": {
+    "path": "memory/",
+    "type": "module_memory"
+  }
+}

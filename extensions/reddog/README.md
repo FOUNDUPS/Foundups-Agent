@@ -10,6 +10,15 @@ claim. Native/pre-import closure, deterministic effects, signing, write denial,
 route-v2 activation, A-grade, and RSI remain false; the VSIX gains no
 maintenance, reindex, promotion, route, owner, or execution authority.
 
+Documentation entry points: the repository-wide
+[RedDog documentation map](../../docs/REDDOG_DOCUMENTATION_MAP.md) separates
+current product truth from audits and history. The
+[RedDog Lick connection handshake](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md)
+is a planned consent-aware engagement adapter. It is not implemented, is not a
+WSP, and has no biometric, identity, wallet, work, or execution effect.
+`ARCHITECTURE.md` and `.gitignore` are repository governance inputs and remain
+outside the fixed 67-file executable VSIX surface.
+
 ## Continuous conversation surface
 
 `conversation_plane_policy.js` keeps intent, reasoning depth, and effect ceiling independent; unknown text is `CHAT / FAST / NONE`, and risk never raises effects. Chat gets no repository/HoloIndex context or work authority; shared Python/JavaScript vectors run through `npm run test:conversation`.

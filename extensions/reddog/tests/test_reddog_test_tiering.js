@@ -103,7 +103,8 @@ try {
     PYTEST_ADDOPTS: '--collect-only',
     PYTEST_PLUGINS: 'untrusted_plugin',
     REDDOG_TEST_SITE_PACKAGES: process.platform === 'win32'
-      ? path.join(repoRoot, '.venv', 'Lib', 'site-packages')
+      ? (process.env.REDDOG_TEST_SITE_PACKAGES
+        || path.join(repoRoot, '.venv', 'Lib', 'site-packages'))
       : extensionRoot
   });
   const controlled = conversationTier.controlledPythonEnvironment(

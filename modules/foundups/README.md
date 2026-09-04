@@ -10,6 +10,7 @@ For active execution, use these first:
 | [ROADMAP.md](ROADMAP.md) | Domain-level layered roadmap |
 | [FOUNDUP_EXFOLIATION_PROTOCOL.md](docs/FOUNDUP_EXFOLIATION_PROTOCOL.md) | Core vs spin-out decision rule |
 | [PQN_SWARM_HUB_FOUNDUP_BRIEF.md](docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md) | Internal-first PQN swarm FoundUp brief |
+| [RedDog Lick connection handshake](../../extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md) | Cross-domain engagement contract; RedDog-owned, specified not implemented |
 
 ### Submodule Roadmaps
 

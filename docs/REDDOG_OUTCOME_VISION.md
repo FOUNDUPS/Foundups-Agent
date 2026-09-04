@@ -5,6 +5,15 @@
 
 ---
 
+Canonical navigation: [RedDog documentation map](REDDOG_DOCUMENTATION_MAP.md) ·
+[current extension status](../extensions/reddog/README.md) ·
+[Lick connection handshake](../extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md)
+
+The Lick is a planned recurring, consent-aware connection handshake. It builds
+bounded confidence about the current encounter before RedDog personalizes or
+steps up an action. It is not implemented, is not a WSP, and grants no identity
+or execution authority.
+
 ## 1. Outcome
 
 **Red Dog is the autonomous digital twin of 012 within the FoundUps ecosystem.**

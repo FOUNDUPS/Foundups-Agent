@@ -42,6 +42,27 @@ This protocol establishes the **Canonical Secrets Management Architecture** for 
 2. **Authorization Layer**: Secret-specific access control and role-based permissions  
 3. **Audit Layer**: Comprehensive logging and monitoring of all secret operations
 
+### 2.3 Product identity handshake boundary
+
+WSP 71 governs credential and secret handling; it does not turn a biometric or
+product handshake into a secret or authenticator. RedDog's product-level
+[Lick connection handshake](../../extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md)
+is a security-relevant implementation reference because it handles sensitive
+identity evidence and step-up routing. The Lick remains outside
+`WSP_framework` and is not itself a WSP.
+
+Any implementation MUST preserve these WSP 71 boundaries:
+
+- biometric templates, match outputs, enrollment handles, device attestations,
+  and deletion keys are sensitive security material even when they are not
+  reusable passwords;
+- protected effects still require an authenticated possession/signing factor
+  and existing authorization; a Lick confidence score is not a credential;
+- raw biometric material MUST NOT be committed to Git, logs, prompts, or a
+  general-purpose memory store; and
+- private patent drafts and unpublished enabling material MUST remain outside
+  version control and are not runtime secrets-manager inputs.
+
 ## 3. Secrets Management Implementation
 
 ### 3.1 Secret Storage Standards

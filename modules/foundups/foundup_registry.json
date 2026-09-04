@@ -1,7 +1,7 @@
 {
   "$schema": "./foundup_registry.schema.json",
   "schema_version": "1.0.0",
-  "last_updated": "2026-05-25T12:00:00Z",
+  "last_updated": "2026-08-30T05:23:20Z",
   "entities": [
     {
       "foundup_id": "gotjunk_001",
@@ -605,6 +605,49 @@
       "portfolio_ready": false,
       "portfolio_evidence_docs": [
         "docs/audits/architecture/HOLOINDEX_PUBLIC_FOUNDUP_CONNECTIVE_TRUST_SURFACE_DOCS_PHASE1.md"
+      ]
+    },
+    {
+      "foundup_id": "esingularity_001",
+      "display_name": "eSingularity",
+      "entity_type": "foundup",
+      "module_path": "modules/foundups/esingularity",
+      "stage": "proto",
+      "tier": "F0_DAE",
+      "implementation_status": "IMPLEMENTED",
+      "public_surface_status": "promoted",
+      "poc_status": "proto",
+      "prototype_gate_status": "passed",
+      "manifest_status": "exists",
+      "manifest_path": "modules/foundups/esingularity/foundup_manifest.json",
+      "hermes_openclaw_build_status": "none",
+      "token_status": "TOKEN_DEFERRED",
+      "token_symbol": null,
+      "evidence_docs": [
+        "modules/foundups/esingularity/docs/MONOREPO_MIGRATION_2026-08-30.md",
+        "modules/foundups/esingularity/frontend/audit/AUDIT.md",
+        "modules/foundups/esingularity/frontend/audit/SOURCE_OF_TRUTH.md"
+      ],
+      "next_slice": null,
+      "public_url_or_route": "https://esingularity.ai/",
+      "mall_entry_status": "listed",
+      "invite_required": false,
+      "notes": "Live Japanese-first community campaign PWA. Canonical source incubates in the monorepo; public deployment remains on OpenAI Sites. Token deferred; this is not fundraising.",
+      "audit_date": "2026-08-30",
+      "auditor": "0102",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "polished",
+      "website_url": "https://esingularity.ai/",
+      "poc_url": "https://esingularity.ai/",
+      "app_url": "https://esingularity.ai/",
+      "github_url": "https://github.com/FOUNDUPS/Foundups-Agent",
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "A Fukui community campaign to preserve Sukatto Land Kuzuryu and test a future combining the onsen, education, innovation, and locally focused AI infrastructure.",
+      "portfolio_priority": 4,
+      "portfolio_ready": true,
+      "portfolio_evidence_docs": [
+        "modules/foundups/esingularity/frontend/audit/AUDIT.md"
       ]
     },
     {

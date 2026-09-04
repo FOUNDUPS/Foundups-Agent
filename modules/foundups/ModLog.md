@@ -2,6 +2,35 @@
 
 ## Chronological Change Log
 
+### 2026-08-30 - RedDog Lick cross-domain planning reference
+
+- Linked the RedDog-owned Lick handshake into FoundUps planning without
+  relocating it into the FoundUps domain or WSP framework.
+- Defined AutoPost as the permissioned capture surface and RedDog as the
+  encounter-confidence interpreter; feasibility is one consumer and neither
+  record grants work authority.
+- Updated the stale AutoPost implementation summary to defer to its external
+  repository's current Liquid VLM and provider-neutral capture contracts.
+- Documentation only. WSP 15/22/50/73/87/97.
+
+---
+
+### 2026-08-30 - eSingularity FoundUp Monorepo Migration
+
+- Added `modules/foundups/esingularity/` as the canonical internal Proto for
+  Project eSingularity and its live Japanese-first campaign PWA.
+- Migrated the existing Sites source into the module's `frontend/` block while
+  preserving the live domain, hosting project, D1 declaration, routes, assets,
+  and public behavior.
+- Added the FoundUp manifest, registry entry, WSP 104 namespace, scope-free
+  public catalog projection, module memory, documentation, and contract tests.
+- Token status remains `TOKEN_DEFERRED`; no fundraising, CABR, payout, DAO, DNS,
+  or Foundups shell authority was activated.
+
+**WSP References:** WSP 3, 22, 49, 60, 97, 104
+
+---
+
 ### 2026-08-26 - Canonical FoundUps/RedDog Lifecycle Alignment
 
 - Repaired the master architecture's false "no PWA" and fixed-scale claims.

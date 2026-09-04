@@ -2,6 +2,9 @@
 
 ## 2026-08-30 - Held builder child evidence release (0.4.140)
 
+- Reconciled the release with current `main`; the new RedDog architecture and
+  private-data ignore policy remain repository-only and do not widen the fixed
+  67-file executable VSIX package surface.
 - Rebound the authenticated backend to 1,398 runtime files at
   `700d50f84e12...86e09ed` and added one held, isolated, bounded child above the
   exact inert builder-runtime composition.
@@ -29,6 +32,18 @@
   `PYTHON*`/`PYTEST*` key before six exact values, use only Job/direct-process
   handles for cleanup, surface every Job lifecycle error, and close failed
   reader startup without widening extension authority.
+
+## 2026-08-30 - Lick connection handshake specification
+
+- Defined the recurring RedDog Lick as a consent-aware product handshake, not
+  a WSP and not a feasibility-only document.
+- Added provisional encounter profiles, explicit identity claims, device-first
+  step-up, modality conflict/expiry, guest fallback, and no-authority receipts.
+- Traced the anti-deepfake lineage to rESP patent claims 26 and 29–31 and
+  figures 17/19 while retaining biometric, CMST, 7.05 Hz, and filing-status
+  assertions as unverified research/legal claims.
+- Documentation only; no collection, matching, identity, wallet, work, or
+  execution behavior changed. (WSP 15/22/50/73/87/97)
 
 ## 2026-08-30 - Base-prefix consumer backend correction
 

@@ -60,6 +60,7 @@ If already landed:
 
 | Slice | Commit | Evidence |
 |-------|--------|----------|
+| `esingularity_foundup_monorepo_migration` | (this slice) | `modules/foundups/esingularity/` canonical module + registry/catalog projection + CI validation |
 | `openclaw_training_route` | `a5376861e` | `openclaw_execution_routes.py` TRAINING intent |
 | `openclaw_training_route_tests` | `d8ae025e8` | `test_openclaw_training_route.py` (413 lines) |
 | `foundups_canon_docs` | `8b136335d` | `FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`, `FOUNDUP_EXFOLIATION_PROTOCOL.md`, `PQN_SWARM_HUB_FOUNDUP_BRIEF.md` |
