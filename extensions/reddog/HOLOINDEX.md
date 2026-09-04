@@ -16,6 +16,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 ## Documentation
 
 - `ARCHITECTURE.md` - canonical RedDog/0102 identity boundary: 012 <-> RedDog surface/proxy <-> 0102 digital twin/orchestrator; attention firewall and recursive co-development invariants
+- `docs/CONTACT_MEMORY_ARCHITECTURE.md` - principal-scoped relationship memory: encrypted capture, entity/event graph, semantic retrieval, provenance, AutoPost ingest, and Lick encounter/identity linkage
 - `README.md`, `INTERFACE.md`, `ModLog.md`, `ROADMAP.md`
 - `docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md` - acceptance baseline pack
 - `docs/acceptance/` - baseline artifact storage
