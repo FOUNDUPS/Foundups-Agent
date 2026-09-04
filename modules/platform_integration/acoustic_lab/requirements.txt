@@ -22,7 +22,7 @@ requests==2.31.0
 yt-dlp==2024.3.10
 
 # Ethereum Integration (testnet only)
-web3==6.15.0
+web3==7.15.0
 eth-account==0.10.0
 
 # Development and Testing
