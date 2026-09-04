@@ -12,6 +12,7 @@ not mean RedDog has 376 canonical specifications.
 | Need | Canonical entry | Authority |
 |---|---|---|
 | What RedDog is becoming | `docs/REDDOG_OUTCOME_VISION.md` | Product North Star; future statements are not implementation claims |
+| Fast RedDog + deep 0102 cognition split | `docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md` | Cross-domain architecture vision; not implementation truth |
 | Current extension/runtime truth | `extensions/reddog/README.md` | Current product/runtime status |
 | Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
@@ -43,6 +44,14 @@ not mean RedDog has 376 canonical specifications.
 The canonical division of responsibility is:
 
 `0102 Hub develops -> pfMALL presents -> AutoPost captures/routes -> RedDog operates`
+
+Within RedDog operation, the intended cognition split is:
+
+`012 <-> fast RedDog interaction loop -> deep 0102 cognition/orchestration -> governed workers`
+
+The fast and deep loops are not separate digital twins. They are latency and
+responsibility layers of one principal-scoped RedDog/0102 Digital Twin
+relationship. See `docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md`.
 
 The Lick runs at the RedDog engagement boundary. AutoPost can supply a
 permissioned capture event, but it does not decide identity or grant authority.
