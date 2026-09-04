@@ -30,7 +30,7 @@ Creates a path-free descriptor-only base/dependency pairing without recopying pa
 Both full-byte verifiers run `B1 -> D1 -> D2 -> B2` and must return identical
 complete bindings. Confined JSON, serialization, no-replace publication, and
 quarantine apply. ABI, loader, determinism, bootstrap, signing, write denial,
-activation, and exact closure remain false; reverse reproof is not immutability.
+activation, and exact closure remain false; reverse reproof is not immutability. The evidence-only `run_builder_process_once(...)` API is specified in the focused [Phase 2C3c interface](docs/clarity/REDDOG_BUILDER_PROCESS_CHILD_INTERFACE_PHASE2C3C.md).
 
 ### `materialize_runtime_abi_attestation(...) -> RuntimeAbiMaterializationResult`
 
@@ -147,7 +147,7 @@ Canonical bounded JSON, copied immutable binding maps, duplicate/type/path/link/
 ### `build_query_replica_owner_route(...) -> QueryReplicaOwnerRoute`
 
 Health transport requires exact built-ins: literal `127.0.0.1`, port 1..65535, printable token >=32, and finite positive timeout <=300.
-JSON is an exact dict with unique keys at every depth and no NaN/Infinity; parse, Unicode, recursion, primitive, and oversize failures return unavailable. Bindings are exact four-tuples; only expected canonical fields may be empty wildcards.
+JSON is an exact dict with unique keys at every depth and no NaN/Infinity. A string-aware pre-parse scan admits at most 128 structural nesting levels independently of the process recursion limit; parse, Unicode, depth, recursion, primitive, and oversize failures return unavailable. Bindings are exact four-tuples; only expected canonical fields may be empty wildcards.
 Exchange parses canonical then mandatory replica expectation before transport/HTTP. Binding malformation returns mismatch; HTTP/OSError failures return unavailable, and targeted close failures preserve the proof. Context entry calls `start()`, so a complete route remains mandatory.
 `ensure_reddog_holoindex_owner(..., query_replica_route=route)` passes split roots,
 reproves before spawn/health, and denies ambient/public paths or reuse drift.
@@ -429,12 +429,14 @@ active caller worktree is invalid. Child stdout is drained to at most 16 KiB
 in memory; stderr and disk capture are disabled. Only an explicitly
 allowlisted stable code from the final JSON line crosses the boundary; detail,
 forged/malformed/oversized output, paths, and logs reduce to
-`HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. Windows timeout makes a bounded exact-PID
-`taskkill /T /F` attempt; missing, denied, or timed-out `taskkill` falls back to bounded direct-child kill/wait. POSIX signals the exact new process group but cannot
-contain a descendant that starts a new session. Such an escaped descendant may retain
-stdout and the daemon reader until it exits. This is cooperative trusted-host
-best-effort containment, not a hostile-process or OS-privilege guarantee; never
-assume the whole tree is gone.
+`HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. Windows starts the child suspended,
+assigns it to a private kill-on-close Job Object, then resumes it. Closing that
+guard explicitly terminates the full descendant tree even after direct-parent
+exit, then releases the handle; no PATH-resolved external executable is used.
+Job setup, assignment, resume, terminate, or close failure fails the operation.
+POSIX signals the exact new process group but
+cannot contain a descendant that starts a new session. This is a trusted-host
+containment boundary, not an OS-privilege or hostile-kernel guarantee.
 
 Optional `owner_runtime_root` supplies the trusted `.venv` for nonsealed
 refresh/start; inherited `PYTHONPATH` and user-site packages stay disabled.

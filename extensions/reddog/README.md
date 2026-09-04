@@ -1,10 +1,14 @@
 # RedDog
 
-Version: 0.4.139
-0.4.139 rebinds the extension after shared Windows long-path/no-replace publication hardening and records a separate inert, composition-bound Windows/CPython declared-ABI layer.
-The bounded PE32+ parser, wheel/RECORD verifier, and declared-name graph inspect static evidence without loading a native image.
-ABI source remains outside the executable backend manifest, VSIX, owner, and route.
-External loader resolution, deterministic/pre-import execution, signing, empirical write denial, route-v2 activation, A-grade, and retrieval RSI remain blocked.
+Version: 0.4.140
+0.4.140 binds the 1,398-file backend at `sha256:700d50f84e12...86e09ed` and adds
+one bounded held-executable builder child. The parent reproves the exact inert
+composition around a child using `-I -S -B -E -s`, a fixed six-entry `sys.path`,
+and closed O:/E: temp state. Strict JSON is evidence, never process authority.
+CPython 3.12.10 is the last official 3.12 Windows binary, not a current-patch
+claim. Native/pre-import closure, deterministic effects, signing, write denial,
+route-v2 activation, A-grade, and RSI remain false; the VSIX gains no
+maintenance, reindex, promotion, route, owner, or execution authority.
 
 Documentation entry points: the repository-wide
 [RedDog documentation map](../../docs/REDDOG_DOCUMENTATION_MAP.md) separates
@@ -12,9 +16,8 @@ current product truth from audits and history. The
 [RedDog Lick connection handshake](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md)
 is a planned consent-aware engagement adapter. It is not implemented, is not a
 WSP, and has no biometric, identity, wallet, work, or execution effect.
-
-This candidate integrity-binds RedDog to the 1,366-file backend closure at `sha256:4e634b8c7b99...8b37`, including the operator controller, exact task-bound OpenClaw execution, receipt-bound owner cycles, integrity-bound AgentDB claim lease, and fail-closed runtime/task liveness.
-The operator controller remains outside the thin-client command surface, and the VSIX gains no maintenance, reindex, promotion, or execution authority.
+`ARCHITECTURE.md` and `.gitignore` are repository governance inputs and remain
+outside the fixed 67-file executable VSIX surface.
 
 ## Continuous conversation surface
 
@@ -1001,4 +1004,4 @@ npm run test:package
 vsce package --no-dependencies
 ```
 
-From Cursor, run `Extensions: Install from VSIX...`, choose `reddog-0.4.139.vsix` (or the current version), reload the window, then run `RedDog: Open`; do not use workspace-extension install for normal operation.
+From Cursor, run `Extensions: Install from VSIX...`, choose `reddog-0.4.140.vsix` (or the current version), reload the window, then run `RedDog: Open`; do not use workspace-extension install for normal operation.

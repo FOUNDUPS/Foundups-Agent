@@ -139,7 +139,7 @@ def _run_descendant_timeout(
     session_option = ",start_new_session=True" if escaped_session else ""
     child = (
         "import os,subprocess,sys,time; from pathlib import Path; "
-        "desc=subprocess.Popen([sys.executable,'-c','import time; time.sleep(15)']"
+        "desc=subprocess.Popen([sys.executable,'-B','-c','import time; time.sleep(15)']"
         f"{session_option}); "
         f"Path({str(pid_file)!r}).write_text(f'{{os.getpid()}},{{desc.pid}}'); "
         "time.sleep(15)"
@@ -150,29 +150,27 @@ def _run_descendant_timeout(
     def recording_popen(*args, **kwargs):
         process = real_popen(*args, **kwargs)
         opened.append(process)
-        readiness_deadline = time.monotonic() + 2.0
-        while not pid_file.exists() and time.monotonic() < readiness_deadline:
-            if process.poll() is not None:
-                break
-            time.sleep(0.01)
-        assert pid_file.exists(), "refresh fixture did not publish process identities"
         return process
 
     monkeypatch.setattr(subprocess, "Popen", recording_popen)
     started = time.monotonic()
     with pytest.raises(subprocess.TimeoutExpired):
         handshake._bounded_refresh_runner(
-            [_runtime_executable(), "-c", child],
+            [_runtime_executable(), "-B", "-c", child],
             cwd=str(tmp_path),
             env=os.environ.copy(),
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             shell=False,
-            timeout=0.25,
+            timeout=0.75,
             check=False,
         )
     elapsed = time.monotonic() - started
+    readiness_deadline = time.monotonic() + 2.0
+    while not pid_file.exists() and time.monotonic() < readiness_deadline:
+        time.sleep(0.01)
+    assert pid_file.exists(), "refresh fixture did not publish process identities"
     direct_pid, descendant_pid = map(int, pid_file.read_text().split(","))
     return elapsed, opened[0], direct_pid, descendant_pid
 
@@ -262,7 +260,7 @@ def test_refresh_timeout_remains_stable_and_secret_free(tmp_path: Path, monkeypa
 def test_default_refresh_runner_bounds_retained_stdout(tmp_path: Path) -> None:
     completed = handshake._bounded_refresh_runner(
         [
-            _runtime_executable(),
+            _runtime_executable(), "-B",
             "-c",
             f"import sys; sys.stdout.buffer.write(b'x' * "
             f"{handshake._REFRESH_STDOUT_MAX_BYTES + 1})",
@@ -288,7 +286,7 @@ def test_timeout_kills_descendant_and_releases_reader_pipe(
     pid_file = tmp_path / "refresh-pids.txt"
     child = (
         "import os,subprocess,sys,time; from pathlib import Path; "
-        "desc=subprocess.Popen([sys.executable,'-c','import time; time.sleep(5)']); "
+        "desc=subprocess.Popen([sys.executable,'-B','-c','import time; time.sleep(5)']); "
         f"Path({str(pid_file)!r}).write_text(f'{{os.getpid()}},{{desc.pid}}'); "
         "time.sleep(5)"
     )
@@ -304,7 +302,7 @@ def test_timeout_kills_descendant_and_releases_reader_pipe(
     started = time.monotonic()
     with pytest.raises(subprocess.TimeoutExpired):
         handshake._bounded_refresh_runner(
-            [_runtime_executable(), "-c", child],
+            [_runtime_executable(), "-B", "-c", child],
             cwd=str(tmp_path),
             env=os.environ.copy(),
             stdin=subprocess.DEVNULL,
@@ -327,25 +325,16 @@ def test_timeout_kills_descendant_and_releases_reader_pipe(
     assert not _refresh_reader_alive()
 
 
-@pytest.mark.skipif(os.name != "nt", reason="Windows taskkill fallback contract")
-@pytest.mark.parametrize("taskkill_failure", ["missing", "denied", "hung"])
-def test_taskkill_failure_bounds_direct_child_and_exposes_retained_reader(
+@pytest.mark.skipif(os.name != "nt", reason="Windows Job Object contract")
+def test_windows_job_bounds_tree_without_external_taskkill(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-    taskkill_failure: str,
 ) -> None:
     real_run = subprocess.run
-    taskkill_commands = []
 
     def intercepted_run(command, **kwargs):
         if command and command[0] == "taskkill":
-            taskkill_commands.append(command)
-            if taskkill_failure == "missing":
-                raise FileNotFoundError("taskkill unavailable")
-            if taskkill_failure == "denied":
-                return subprocess.CompletedProcess(command, returncode=5)
-            time.sleep(handshake._REFRESH_CAPTURE_CLEANUP_SECONDS + 0.05)
-            raise subprocess.TimeoutExpired(command, timeout=kwargs.get("timeout"))
+            raise AssertionError("bounded cleanup must not resolve ambient taskkill")
         return real_run(command, **kwargs)
 
     assert not _refresh_reader_alive()
@@ -355,17 +344,12 @@ def test_taskkill_failure_bounds_direct_child_and_exposes_retained_reader(
     )
     try:
         assert elapsed < 3.5
-        assert taskkill_commands == [
-            ["taskkill", "/PID", str(refresh_process.pid), "/T", "/F"]
-        ]
         assert refresh_process.poll() is not None
         assert _wait_process_absent(refresh_process.pid)
-        if script_pid != refresh_process.pid:
-            assert _process_exists(script_pid)
-        assert _process_exists(descendant_pid)
-        assert refresh_process.stdout is not None
-        assert not refresh_process.stdout.closed
-        assert _refresh_reader_alive()
+        assert _wait_process_absent(script_pid)
+        assert _wait_process_absent(descendant_pid)
+        assert _wait_reader_absent()
+        assert refresh_process.stdout is not None and refresh_process.stdout.closed
     finally:
         monkeypatch.setattr(subprocess, "run", real_run)
         _kill_exact_pid(descendant_pid, windows_runner=real_run)

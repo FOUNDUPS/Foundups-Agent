@@ -110,9 +110,11 @@ read validates the same token before request or header formatting.
 
 R22 requires strict JSON conformance before any health field is trusted.
 Duplicate object keys reject at the top level and every nested object; NaN,
-Infinity, and `-Infinity` reject. Invalid UTF-8, malformed syntax, primitives,
-oversize bodies, and parser recursion return unavailable rather than ready or a
-terminal owner error. The client still reads at most 65,537 bytes and closes
+Infinity, and `-Infinity` reject. A string-aware byte scan rejects structural
+nesting above 128 before JSON parsing, independent of the ambient Python
+recursion limit. Invalid UTF-8, malformed syntax, primitives, oversize bodies,
+depth, and parser recursion return unavailable rather than ready or a terminal
+owner error. The client still reads at most 65,537 bytes and closes
 the connection through the existing exchange lifecycle.
 
 R23 treats `IncompleteRead`, bad status/remote disconnect, response-state, and
@@ -480,14 +482,15 @@ drained into a bounded 16 KiB in-memory buffer, stderr is discarded, and no
 capture file is created. For a nonzero exit, only an allowlisted stable error
 code in the final JSON line may cross the parent boundary; optional detail is
 validated but discarded. Malformed, forged, oversized, or free-text output
-returns `HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. On Windows, timeout makes a
-bounded exact-PID `taskkill /T /F` attempt. If `taskkill` is missing, denied, or
-times out, bounded direct-child kill/wait is the fallback; an escaped descendant
-may retain stdout and the daemon reader until that descendant exits. POSIX signals
-the exact isolated process group, but cannot contain a descendant that starts a
-new session. Only the reader closes its pipe. This is cooperative trusted-host
-best-effort containment, not a hostile-process or OS-privilege guarantee; never
-assume the whole tree is gone. If refresh and receipt publication succeed but subsequent
+returns `HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. On Windows, the child starts
+suspended, enters a private kill-on-close Job Object, and resumes only after
+assignment. Cleanup explicitly terminates the Job before closing its final
+handle; no PATH-resolved external executable participates. Job setup,
+assignment, resume, terminate, or close failure fails the operation. POSIX
+signals the exact isolated process group,
+but cannot contain a descendant that starts a new session. Only the reader
+closes its pipe. This is a trusted-host containment boundary, not an OS-
+privilege or hostile-kernel guarantee. If refresh and receipt publication succeed but subsequent
 owner startup or health fails, the persisted receipt can remain CURRENT while
 the operational preflight still returns false. A snapshot-only incremental
 receipt cannot satisfy this sequence.

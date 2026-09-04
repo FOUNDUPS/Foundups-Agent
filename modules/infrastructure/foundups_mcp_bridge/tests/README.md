@@ -1,5 +1,27 @@
 # foundups_mcp_bridge Tests
 
+## Held builder child evidence
+
+- `test_reddog_bounded_child_process.py` preserves bounded output, timeout,
+  process-tree cleanup, and no-shell/no-unbounded-read behavior after extracting
+  the maintenance runner.
+- `test_reddog_holoindex_query_runtime_builder_child.py` falsifies forged
+  bindings, wrong process identity, ambiguous/noncanonical JSON, protected-root
+  aliasing, ambient environment/path inheritance, and authority inflation.
+- The opt-in Windows integration composes the reviewed packaging wheel with the
+  qualified O:-materialized CPython 3.12.10 base, launches that exact held
+  interpreter, and proves the descriptor unchanged afterward. It proves no
+  current-patch, pre-import/native/subprocess, write-denial, activation,
+  A-grade, or RSI claim.
+- Focused runner unit boundary is 22/22. The physical runner/maintenance/
+  process-image/child matrix is 70 passed / two capability skips in 108.06
+  seconds and includes the qualified physical Windows child.
+  Both the clean source and materialized runtime retain zero pycache directories
+  and pyc files afterward.
+- The complete bridge macro is 1,694 passed / 23 capability skips in 638.81
+  seconds. It includes an explicit health-JSON depth boundary that remains
+  fail-closed after the process recursion limit is raised.
+
 ## Base-prefix consumer correction
 
 - `test_reddog_holoindex_query_runtime_base_prefix_consumers.py` uses the
@@ -617,7 +639,10 @@ Exact opt-in evidence on this slice:
 - Fake HTTP RED was ready under duplicate-`ok` last-wins. Expanded RED/GREEN is
   **24 failed / 10 passed -> 34/34** across all 19 security-relevant key
   positions, nested duplicates, NaN/infinities, depth 64/2,000, primitives,
-  syntax, UTF-8, oversize/status failures, and one unique JSON control.
+  syntax, UTF-8, oversize/status failures, and one unique JSON control. The
+  2,000-level falsifier raises the process recursion limit first and still fails
+  closed at the explicit 128-level structural boundary; brackets inside JSON
+  strings do not consume depth.
 - Invalid representations never produce ready/terminal evidence. Each admitted
   transport performs the same request, read limit 65,537, and single close.
 - Combined R16-R22 is **200/200**; lifecycle is **302 passed / 1 host skip**;
@@ -792,9 +817,9 @@ the disposable process fixture.
   replica-root configuration, existing isolated-store proof, exact route build,
   and stable fail-closed error reduction.
 - `test_reddog_holoindex_maintenance_diagnostics.py`: bounded child-output
-  capture, strict stable-error propagation, cooperative descendant containment,
-  failed-`taskkill`/escaped-session limits, exact-PID test cleanup, and secret-free
-  failure behavior.
+  capture, strict stable-error propagation, Windows kill-on-close Job Object
+  containment with no external cleanup executable, POSIX escaped-session
+  limits, exact-PID test cleanup, and secret-free failure behavior.
 - `test_reddog_holoindex_acceptance_guards.py`: clean worktree authority,
   distinct clean related dependency runtime with verified local site-packages,
   disjoint/reparse-safe store, TOCTOU identity, canonical digest, and immutable

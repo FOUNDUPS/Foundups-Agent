@@ -130,7 +130,8 @@ RIGHT: Simplest layer → Test → Feedback → Course correct → Next layer �
 ### Step 2: HoloIndex Search
 ```powershell
 $main = Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Parent
-'{"query":"[task]","limit":5}' | python "$main/scripts/reddog_holoindex_owner_query_once.py"
+$env:PYTHONDONTWRITEBYTECODE = "1"
+'{"query":"[task]","limit":5}' | python -B "$main/scripts/reddog_holoindex_owner_query_once.py"
 ```
 - Derive the canonical main checkout from Git's common directory so the same
   command works from main and linked worker worktrees. Accept its
@@ -140,6 +141,9 @@ $main = Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Pare
   root-bound freshness proof correctly rejects a different authority root.
 - A query path is read-only. On failure, preserve the exact error and route the
   existing governed WRE/CI maintenance path; never reindex inside the query.
+- Keep `-B` and `PYTHONDONTWRITEBYTECODE=1` on the query host. This prevents a
+  writable qualified interpreter base from gaining untracked bytecode before
+  the owner boundary can enforce its own runtime closure.
 - Find existing implementations FIRST
 - Examples: "test orchestration" -> autonomous_refactoring.py
 - NEVER vibecode - always search first

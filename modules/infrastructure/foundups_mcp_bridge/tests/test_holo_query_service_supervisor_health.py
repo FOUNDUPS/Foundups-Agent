@@ -1,6 +1,7 @@
 """Supervisor authenticated health-boundary contracts."""
 
 from .holo_query_service_supervisor_support import *  # noqa: F401,F403
+import sys
 
 @pytest.mark.parametrize(
     "kind",
@@ -150,11 +151,22 @@ def test_nonstandard_json_constants_never_admit_ready(
     assert proof.rejection == ""
     _assert_complete_health_exchange(events)
 
-def test_unique_deep_health_json_below_recursion_limit_remains_valid(
+def test_unique_health_json_within_depth_limit_remains_valid(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     nested = "[" * 64 + "0" + "]" * 64
     body = _health_json_body_with_prefix(f'"extra":{nested},')
+    events = _install_health_json_response(monkeypatch, body)
+
+    proof = _exchange_health_json()
+
+    assert proof.ready
+    _assert_complete_health_exchange(events)
+
+def test_health_json_depth_scan_ignores_brackets_inside_strings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    body = _health_json_body_with_prefix('"extra":"[[{{structures}}]]",')
     events = _install_health_json_response(monkeypatch, body)
 
     proof = _exchange_health_json()
@@ -169,7 +181,12 @@ def test_health_json_over_recursion_limit_fails_closed_without_exception(
     body = _health_json_body_with_prefix(f'"extra":{nested},')
     events = _install_health_json_response(monkeypatch, body)
 
-    proof = _exchange_health_json()
+    previous_limit = sys.getrecursionlimit()
+    try:
+        sys.setrecursionlimit(max(previous_limit, 10_000))
+        proof = _exchange_health_json()
+    finally:
+        sys.setrecursionlimit(previous_limit)
 
     assert not proof.ready
     assert proof.rejection == ""

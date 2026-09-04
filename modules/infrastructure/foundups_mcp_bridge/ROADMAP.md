@@ -1,5 +1,25 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-08-30: Held builder child phase 2C3c
+
+**Implemented and physically falsified as inert evidence; not retained
+authority or activation.** The parent proves an exact Phase 2C3a binding,
+holds its interpreter across exactly one bounded child, replaces the child
+environment and `sys.path`, validates one canonical output record, and repeats
+the full composition proof. Protected runtime, canonical, repository, and temp
+roots must be disjoint. The child returns process observation evidence; the
+private `BuilderProcessAuthority` capability does not cross JSON.
+
+A qualified O:-materialized CPython 3.12.10 child passed the real integration.
+That is the final official CPython 3.12 Windows binary release, so it carries
+known patch debt and cannot prove current security patching. Next P0 work is an
+independently allocated current-runtime/profile migration plus provenance and
+pre-import/native-loader closure. Deterministic effects, signing, empirical
+write denial, route-v2 activation, A-grade, and retrieval RSI remain false.
+Hostile replay also demonstrated the write-denial gap by polluting two otherwise
+exact generations with bytecode; both are quarantined, the active generation is
+clean/rematerialized, and all release harnesses now suppress bytecode writes.
+
 ## 2026-08-30: Base-prefix consumer correction phase 2C3b
 
 **Implemented and falsified as a topology correction only; still not a child,
@@ -16,11 +36,10 @@ model distinct generation/payload roots. A shared real-materialization suite
 proves both topology validators accept the actual composition and candidate
 validation rejects the obsolete `<generation>/python.exe` topology.
 
-**Next independently allocated P0 transaction:** bind the Phase 2C3a result to
-the smallest one-shot held-executable child and reprove its actual-process
-authority. Pre-import, ABI/native/subprocess closure, deterministic effects,
-signing, write denial, activation, A-grade, and retrieval RSI remain later
-independent gates.
+**Historical next step:** Phase 2C3c now supplies the smallest held child and
+reproves process evidence. It does not preserve process authority. Pre-import,
+ABI/native/subprocess closure, deterministic effects, signing, write denial,
+activation, A-grade, and retrieval RSI remain independent gates.
 
 ## 2026-08-30: Inert builder-runtime composition phase 2C3a
 

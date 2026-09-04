@@ -1,5 +1,37 @@
 # FoundUps Agent - Development Log
 
+## [2026-08-30] RedDog Held Builder Child and Holo Query Host Hygiene (0.4.140)
+
+**WSP Protocols:** WSP 00, 06, 12, 15, 22, 50, 62, 84, 87, 97
+
+- Added one evidence-only held builder child above the sealed runtime
+  composition. Windows starts it suspended inside a private kill-on-close Job
+  Object; no new extension command, Git, worker, owner, route, or activation
+  authority is granted.
+- Full bridge replay is 1,694 passed / 23 capability skips. The replay exposed
+  and closed health JSON depth admission that depended on the ambient Python
+  recursion limit; an explicit string-aware 128-level pre-parse cap now fails
+  closed.
+- Independent final review removed ambient cleanup-executable lookup, made Job
+  termination precede handle release with explicit error propagation, and
+  contained reader-thread startup failure. The conversation tier now strips all
+  case-insensitive `PYTHON*`/`PYTEST*` controls before setting six exact values.
+- A final source-runtime inspection found four historical encodings bytecode
+  files. The complete affected runtime is retained in O: forensic quarantine;
+  its replacement is byte-exact to all 3,845 qualified archive members. The
+  canonical Holo query command now uses `-B` plus
+  `PYTHONDONTWRITEBYTECODE=1`, and both source and active runtime remain clean.
+- The post-gate hygiene check found a second four-file encodings cache stamped
+  08:27:30, before the resumed exhaustive/release runs. Filesystem evidence
+  cannot assign its creator. That entire image is also retained in O:
+  quarantine, and a second archive-exact 3,845-member rematerialization closes
+  the release boundary without silently deleting evidence.
+- Backend is 1,398 files at `700d50f84e12...86e09ed`; four release groups pass
+  in 214.279 seconds. The inspected O: VSIX is 276,270 bytes at
+  `sha256:13b629dd2801...c8eaff6` with 69 safe entries and 67 byte-exact source
+  members. A-grade, retrieval RSI, producer provenance, and durable activation
+  remain explicit nonclaims.
+
 ## [2026-08-28] Holo Linked-Control Runtime and RedDog 0.4.133
 
 **WSP Protocols:** WSP 00, 06, 15, 22, 50, 62, 84, 87, 97

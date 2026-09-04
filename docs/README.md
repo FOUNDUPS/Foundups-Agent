@@ -4,7 +4,7 @@
 
 **Status:** ACTIVE
 
-**Last Updated:** 2026-02-08
+**Last Updated:** 2026-08-28
 
 **WSP Compliance:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 87 (Code Navigation)
 
@@ -27,7 +27,7 @@ handshake, not a WSP; its contract lives at
 | [Vision & Automation](#vision--automation-systems) | 3 | Browser automation and vision AI systems |
 | [0102 Session Briefings](#0102-session-briefings) | 1 | Session-start onboarding digests for 0102 |
 | [Session Reports](#session-reports) | 6 | Completed work sessions and sprints |
-| [Analysis & Audits](#analysis--audits) | 14 | Deep dives, audits, and first principles analysis |
+| [Analysis & Audits](#analysis--audits) | 15 | Deep dives, audits, and first principles analysis |
 | [Implementation Plans](#implementation-plans) | 6 | Execution plans and implementation guides |
 
 ---
@@ -123,6 +123,7 @@ handshake, not a WSP; its contract lives at
 | [HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C2B.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_DEPENDENCY_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C2B.md) | Assumption Audit | Sequential source/dependency composition and non-atomic boundary | WSP 15, WSP 50, WSP 62, WSP 97 |
 | [HOLOINDEX_QUERY_RUNTIME_BUILDER_RUNTIME_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C3A.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_RUNTIME_COMPOSITION_ASSUMPTION_AUDIT_PHASE2C3A.md) | Assumption Audit | Inert builder dependency/base-runtime composition and process-topology drift | WSP 15, WSP 50, WSP 62, WSP 97 |
 | [HOLOINDEX_QUERY_RUNTIME_BASE_PREFIX_CONSUMER_ASSUMPTION_AUDIT_PHASE2C3B.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BASE_PREFIX_CONSUMER_ASSUMPTION_AUDIT_PHASE2C3B.md) | Assumption Audit | Real base-prefix consumer correction and false-green fixture repair | WSP 15, WSP 50, WSP 62, WSP 97 |
+| [HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_ASSUMPTION_AUDIT_PHASE2C3C.md](audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_CHILD_ASSUMPTION_AUDIT_PHASE2C3C.md) | Assumption Audit | Held builder-child evidence boundary, real O: runtime, and explicit nonclaims | WSP 15, WSP 50, WSP 62, WSP 97 |
 | [HOLO_CLI_FIRST_PRINCIPLES_AUDIT.md](HOLO_CLI_FIRST_PRINCIPLES_AUDIT.md) | First Principles | HoloIndex CLI architecture | WSP 1 |
 | [HOLODAE_DEEP_DIVE_BECOMING_THE_HOLODAE.md](HOLODAE_DEEP_DIVE_BECOMING_THE_HOLODAE.md) | Deep Dive | HoloDAE consciousness and operation | WSP 80, WSP 91 |
 | [QWEN_AI_VS_SCRIPT_ANALYSIS.md](QWEN_AI_VS_SCRIPT_ANALYSIS.md) | Comparison | Qwen AI vs script automation analysis | WSP 77 |
