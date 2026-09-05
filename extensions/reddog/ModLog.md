@@ -1,5 +1,18 @@
 # RedDog ModLog
 
+## 2026-09-05 - Identity / merged builder reconciliation (0.4.141)
+
+- Corrected foreground identity above the merged `0.4.140` builder release;
+  the fast-RedDog/deep-0102 boundary first lands in `0.4.141`.
+- Preserved the 1,398-file backend at `700d50f84e12...86e09ed` and its
+  suspended, Job-contained, bounded evidence child without changing the
+  private builder capability or any extension authority.
+- Reverified the merged `.gitignore` and `ARCHITECTURE.md` package exclusions
+  and their deterministic order. The VSIX remains a fixed 67-file thin client.
+- Exact 0.4.140 physical/release evidence is preserved as historical evidence;
+  fresh 0.4.141 release and VSIX promotion gates remain mandatory.
+  (WSP 00/6/12/15/22/50/62/73/84/97)
+
 ## 2026-08-30 - Held builder child evidence release (0.4.140)
 
 - Reconciled the release with current `main`; the new RedDog architecture and

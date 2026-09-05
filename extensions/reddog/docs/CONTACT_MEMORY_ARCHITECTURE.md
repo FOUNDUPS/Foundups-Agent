@@ -1,5 +1,10 @@
 # RedDog Contact Memory Architecture
 
+Status: `ARCHITECTURE_VISION` / `SPECIFIED_NOT_IMPLEMENTED`
+
+The founding workflow described here is manual alpha evidence, not proof that a
+Contact Memory runtime is wired.
+
 ## Purpose
 
 RedDog needs a principal-scoped relationship memory so a human can meet people, exchange a card, take a photograph, speak a note, or attend a meeting without later having to manually reconstruct who the person was, why they mattered, what was discussed, or what should happen next.

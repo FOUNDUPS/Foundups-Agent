@@ -1,5 +1,10 @@
 # RedDog Mosh Pit Projection Architecture
 
+Status: `PARTIALLY_SUPPORTED` / `UNIFIED_RENDERER_NOT_IMPLEMENTED`
+
+Existing Breadcrumb and Brain/Memex query components are reusable inputs. The
+unified Mosh Pit projection and reverse-chronological renderer are not wired.
+
 ## Purpose
 
 The **Mosh Pit is not a new memory subsystem**. It is a governed, reverse-chronological project/FoundUp projection assembled from the memory architecture already present in FoundUps Agent:

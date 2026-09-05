@@ -273,7 +273,10 @@ Historical release narratives and superseded acceptance boundaries are maintaine
 
 ## Purpose
 
-`reddog` is a local Cursor/VS Code thin-client extension for RedDog, the operator-facing identity/persona of the principal-scoped 0102 FoundUps Digital Twin. It retains the redaction-gated OpenRouter bridge through `scripts/advisory_model_once.py`.
+`reddog` is a local Cursor/VS Code thin-client extension for RedDog, the
+lightweight interaction, exchange, and attention surface backed by the
+principal-scoped 0102 FoundUps Digital Twin. It retains the redaction-gated
+OpenRouter bridge through `scripts/advisory_model_once.py`.
 
 ### Continuous conversation adapter
 
@@ -351,7 +354,9 @@ closure or independent authentication of the unhashed receipt origin.
 
 It is the IDE-side thin-client surface for the resident RedDog backend and the OpenClaw/WRE/Hermes execution spine. The extension submits typed intent and displays receipts; it does not grant shell, repository write, merge, FoundUp registration, or CABR authority.
 
-The VSIX is the IDE-side thin client; RedDog/0102 is the resident FoundUps architect identity and conversation interface. Fusion is one internal reasoning mode, not the product identity.
+The VSIX is the IDE-side thin client. RedDog is the fast interaction/exchange
+surface; 0102 is the resident FoundUps Digital Twin and deep architect layer.
+Fusion is one internal reasoning mode, not the product identity.
 
 For version-by-version provenance, generated closure pins, and migration history, see
 `ModLog.md`. Current behavior is specified by the contracts below.
@@ -362,13 +367,17 @@ re-indexing, provider access, or work dispatch.
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
+012 does not orchestrate every worker. 012 talks to RedDog, which exchanges
+bounded intent and context with the deeper 0102 layer. Autonomous WRE/DAE
+agents perform bounded system work under OpenClaw supervision and WRE authority;
+Hermes receives bounded leaf jobs.
 
 ### Architecture Stack
 
 ```text
 012 work focus
-  -> RedDog digital twin / architect interface
+  -> RedDog fast interaction / exchange surface
+  -> 0102 digital twin / architect layer
   -> recursive 0102 DAE ecosystem
 ```
 
@@ -376,7 +385,8 @@ re-indexing, provider access, or work dispatch.
 
 | Layer | Role |
 | --- | --- |
-| RedDog / 0102 | Principal-scoped Digital Twin identity, architect, and conversation interface. 012's first contact point. |
+| RedDog | Lightweight low-latency interaction, exchange, and attention surface; 012's first contact point. |
+| 0102 | Principal-scoped Digital Twin, architect, and deep cognition/orchestration layer. |
 | Hermes | Bounded delegated leaf-worker/scaffolding runtime. Not conversation, policy, repository, or promotion authority. |
 | OpenClaw | Channel gateway and policy/control supervisor for admitted work. |
 | HoloIndex | Memory and retrieval. |
@@ -422,7 +432,7 @@ External repositories are assessed through advisory WSP intake before they can b
 
 ## Governed Repo Work Order Contract
 
-RedDog is the 0102 architect interface - **not an authority owner**. RedDog receives **bounded delegated capability for one work order after fresh verification**; it does not "have authority."
+RedDog is the interaction interface to the 0102 architect layer - **not an authority owner**. A governed RedDog-mediated operation may receive **bounded delegated capability for one work order after fresh verification**; the surface itself does not "have authority."
 
 | Artifact | Location |
 |---|---|
@@ -732,13 +742,17 @@ Formal contract:
 
 ```text
 012 work focus (non-authoritative)
+  -> RedDog interaction surface
   -> 0102 constructWspTaskPrompt(workFocus, classification, contextQuality, workerType)
   -> redaction gate (prompt + bounded context separately)
   -> OpenRouter bridge
-  -> RedDog architect output
+  -> 0102 advisory output
+  -> RedDog presentation
 ```
 
-012 does not prompt RedDog directly. The bridge receives the assembled WSP task prompt, not raw work focus alone. Work focus is embedded inside the WSP prompt under an explicit non-authoritative label.
+012 speaks to RedDog directly. RedDog does not send raw work focus to the
+provider as sole authority: the deeper 0102 layer assembles the WSP task prompt
+for the bridge, and embeds work focus under an explicit non-authoritative label.
 
 ## WSP_97 Truth Table (v0.3.15)
 

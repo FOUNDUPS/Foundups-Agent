@@ -14,7 +14,7 @@ RedDog should be presented to 012 as the fast, front-facing interaction layer of
 
 The deeper reasoning, repository retrieval, Memex/Brain consultation, WSP application, verification, planning, and worker orchestration remain a second layer beneath that interaction surface.
 
-The intended relationship is not two independent assistants. It is one Digital Twin operating at two different latency and responsibility bands:
+The intended relationship is not two independent assistants. It is one continuous conversational relationship implemented by two distinct components at different latency and responsibility bands:
 
 ```text
 012
@@ -332,7 +332,7 @@ Conversational agreement, context packets, memory retrieval, or model confidence
 
 ### Competing twins
 
-Do not instantiate the fast and deep loops as independent identities that disagree in front of 012. They are latency layers of one RedDog/0102 Digital Twin relationship.
+Do not instantiate the fast and deep loops as independent assistants that disagree in front of 012, and do not collapse them into one component. RedDog is the fast surface; 0102 is the Digital Twin and deep cognition layer behind it.
 
 ### Stale context injection
 

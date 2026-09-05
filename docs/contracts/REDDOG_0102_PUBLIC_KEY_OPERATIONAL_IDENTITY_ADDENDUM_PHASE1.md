@@ -1,12 +1,13 @@
 # REDDOG_0102_PUBLIC_KEY_OPERATIONAL_IDENTITY_ADDENDUM_PHASE1
 
-Status: ARCHITECTURE ADDENDUM; decision-only; no key generation, permission change, CABR calculation, token routing, compute allocation, or Memex mutation.
-Date: 2026-07-14
+Status: ARCHITECTURE ADDENDUM; revised by WSP 73 v2.3; decision-only; no key generation, permission change, CABR calculation, token routing, compute allocation, or Memex mutation.
+Date: 2026-09-05
 WSP: WSP_29, WSP_60, WSP_97, WSP_100
 
 ## Purpose
 
-Clarify the identity relationship among 012, 0102, RedDog, CABR, and the FoundUp Memex without creating a separate arbitrary RedDog identity namespace.
+Clarify the identity relationship among 012, 0102, the RedDog surface, CABR,
+and the FoundUp Memex without making the surface a cryptographic authority.
 
 ## Canonical identity model
 
@@ -18,11 +19,14 @@ Clarify the identity relationship among 012, 0102, RedDog, CABR, and the FoundUp
 = the public-key-identifiable digital twin acting for that 012
 
 RedDog
-= the operational state assumed by 0102 inside the FoundUps ecosystem
+= the lightweight interaction, exchange, and attention surface between 012 and 0102
 ```
 
-RedDog is an operational state of 0102, not an independent authority source.
-RedDog is not a separate person, account, or independent digital twin. Thousands of 0102s may operate as RedDogs for their respective 012 principals. The durable cryptographic identity belongs to the 0102 keypair; RedDog describes the current operational role/state.
+RedDog is not 0102 and is not an independent authority source. It is not a
+separate person, account, or independent digital twin. Many principals may use
+their own RedDog surfaces to interact with their respective 0102s. The durable
+cryptographic identity belongs to the 0102 keypair; a RedDog presentation or
+session label does not create authority.
 
 ## Identifier correction
 
@@ -36,13 +40,14 @@ The current ratified identity contract contains `reddog_id` and `reddog_public_k
 = stable public identifier and revocation lookup key
 
 reddog_operational_state
-= role/state asserted for a scoped FoundUps operation
+= compatibility label for a scoped 0102 operation behind a RedDog surface
 ```
 
 A future contract revision should either:
 
 1. replace `reddog_id` with a value deterministically derived from the 0102 public-key fingerprint; or
-2. explicitly define `reddog_id` as a compatibility alias for that fingerprint-derived 0102 identity.
+2. explicitly define `reddog_id` as a compatibility alias for that
+   fingerprint-derived 0102 worker identity, not the RedDog UI surface.
 
 No randomly assigned, user-selected, or separately self-sovereign RedDog ID should be treated as authority.
 
@@ -51,8 +56,8 @@ No randomly assigned, user-selected, or separately self-sovereign RedDog ID shou
 The anti-self-grant rule remains unchanged:
 
 - 012 authorizes the 0102 identity and its initial scope using the authenticated principal authority;
-- the 0102 private key signs scoped work authority and execution receipts while operating in RedDog state;
-- RedDog state cannot grant itself new scope;
+- the 0102 private key signs scoped work authority and execution receipts behind the RedDog surface;
+- the RedDog surface cannot grant 0102 or itself new scope;
 - role text, account names, CABR values, and claimed founder status are never sufficient authority by themselves.
 
 ## CABR relationship
@@ -94,7 +99,7 @@ Future Memex authorization should evaluate separate inputs:
 capability decision
 = authenticated 012 principal
 + 0102 public-key identity
-+ current RedDog operational state
++ current RedDog session/surface binding
 + constitutional or delegated role
 + explicit FoundUp scope
 + scope-specific CABR evidence
@@ -110,8 +115,8 @@ At ecosystem scale:
 
 ```text
 one 012 -> one or more authorized 0102 key identities
-one 0102 -> may enter RedDog operational state
-one RedDog operation -> bound to one principal, one key, one scope, one snapshot, and one receipt chain
+one 0102 -> may serve one or more authorized RedDog sessions
+one RedDog-mediated operation -> bound to one principal, one 0102 key, one scope, one snapshot, and one receipt chain
 ```
 
 Every action must remain attributable to the cryptographic 0102 identity and its authorizing 012 principal.

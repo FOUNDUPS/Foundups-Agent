@@ -1,5 +1,10 @@
 # WSP97 M2M Implementation Prompt — RedDog / FoundUp Memex Projection Emitter
 
+Status: `IMPLEMENTATION_WORK_ORDER` / `NOT_COMPLETION_EVIDENCE`
+
+Executing or reading this prompt does not prove that any listed runtime slice
+exists, passed its gates, or received authority.
+
 ## Mission
 
 Implement the first governed runtime slice of the **Memex Projection Emitter** described in:

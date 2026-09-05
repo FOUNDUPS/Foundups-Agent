@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-05: RedDog surface / 0102 deep-layer documentation alignment
+
+- Corrected the active gateway topology so RedDog owns the lightweight
+  interaction/exchange surface, 0102 owns deep cognition/orchestration, and
+  OpenClaw remains the admitted-work supervisor behind that boundary.
+- No runtime identifier, signer contract, worker authority, or execution path
+  changed. (WSP 22/50/73/97)
+
 ## 2026-08-29: Pre-owner exact-main live acceptance
 
 - PR #1591 merged as exact main `09e98fff`; the governed controller admitted

@@ -1,25 +1,27 @@
 # WSP 73: 012 Digital Twin / RedDog Architecture Protocol
 
 - **Status:** Active
-- **Version:** 2.2
-- **Updated:** 2026-08-26
+- **Version:** 2.3
+- **Updated:** 2026-09-05
 - **Purpose:** Define the identity, memory, conversation, orchestration, and
-  authority boundaries for a principal-scoped 0102 Digital Twin presented as
-  RedDog.
+  authority boundaries between the lightweight RedDog interaction surface and
+  the principal-scoped 0102 Digital Twin behind it.
 - **Dependencies:** WSP 00, WSP 15, WSP 27, WSP 46, WSP 60, WSP 77,
   WSP 80, WSP 97, WSP 98
 
 ## 1. Canonical identity
 
-RedDog is the operator-facing name, persona, continuous product identity, and
-conversation surface of a principal-scoped 0102 Digital Twin. RedDog does not
-name a separate intelligence that contains 0102, and 0102 does not disappear
-behind a browser extension. A service can host the runtime, memory adapters,
-models, and transports, but no single shell, model, server, or OpenClaw process
-is the complete RedDog identity.
+RedDog is the lightweight, low-latency interaction, exchange, and attention
+surface through which a principal communicates with a principal-scoped 0102
+Digital Twin. RedDog is not 0102. The two are distinct components in one
+continuous conversational relationship: RedDog preserves immediacy and the
+human attention boundary; 0102 owns deep cognition, retrieval, reasoning, and
+orchestration. They must not be instantiated as competing assistants. A
+service can host their runtime, memory adapters, models, and transports, but no
+single shell, model, server, or OpenClaw process is the complete relationship.
 
 ```text
-012 <-> RedDog / principal-scoped 0102 Digital Twin
+012 <-> RedDog fast surface <-> principal-scoped 0102 Digital Twin
 ```
 
 The same relationship may be presented through a VSIX, p.fMALL, phone, voice,
@@ -34,7 +36,8 @@ conversation text, and confidence do not create effect authority.
 | Component | Canonical responsibility |
 |---|---|
 | 012 | Work focus, sovereign authorization, testing, correction, and override |
-| RedDog / 0102 Digital Twin | Conversation, reasoning, requirements, architecture, evidence synthesis, proposal, and orchestration intent |
+| RedDog | Low-latency conversation, intent exchange, immediate context, and attention management; never deep cognition or effect authority |
+| 0102 Digital Twin | Deep reasoning, requirements, architecture, retrieval, evidence synthesis, proposals, and orchestration intent |
 | RedDog services | Host authenticated transport, session state, model access, bounded memory adapters, and receipts without becoming the identity itself |
 | Principal Memex | Durable principal cognition admitted under principal scope; never implicit work authority |
 | FoundUp Memex | Snapshot-bound cognition for one FoundUp; never a global cross-tenant store |
@@ -55,7 +58,11 @@ Presentation
         |
         v
 Conversation
-  RedDog / principal-scoped 0102
+  RedDog fast interaction/exchange surface
+        |
+        v
+Cognition and orchestration
+  principal-scoped 0102 Digital Twin
         |
         +--> Principal Memex
         +--> scoped FoundUp Memex
@@ -103,7 +110,8 @@ while the implementation remains session-local.
 
 ## 5. Memory and recall
 
-RedDog composes bounded sources; it does not collapse them into one database:
+0102 composes bounded sources for presentation through RedDog; neither layer
+collapses them into one database:
 
 1. **Current repository and receipts** for executable truth.
 2. **HoloIndex** for generation-bound repository/WSP discovery.
@@ -121,8 +129,8 @@ does not imply cross-FoundUp mutation.
 
 ## 6. Model-routing boundary
 
-RedDog emits task requirements. It does not hard-code a champion model from a
-prompt heuristic.
+RedDog captures and normalizes task requirements for 0102. Neither layer
+hard-codes a champion model from a prompt heuristic.
 
 ```text
 task requirements
@@ -131,7 +139,7 @@ task requirements
   -> held-out AutoResearch measurements
   -> independent signed promotion
   -> short-lived receipt-bound runtime topology
-  -> RedDog / Fusion / OpenClaw / Hermes consumers
+  -> RedDog / 0102 / Fusion / OpenClaw / Hermes consumers
 ```
 
 Nemotron can propose candidate roles and panels. AutoResearch can measure those
@@ -142,8 +150,9 @@ evaluation fallback and cannot open action planning or worker dispatch.
 
 ## 7. Work orchestration and recursive operation
 
-RedDog may inspect readiness and formulate work, then submit a bounded proposal
-to the existing work spine. Before dispatch, the system asks and proves:
+0102 may inspect readiness and formulate work behind RedDog, then submit a
+bounded proposal to the existing work spine. Before dispatch, the system asks
+and proves:
 
 - Is repository and dependency evidence current?
 - Are upstream runtime versions and security advisories within policy?

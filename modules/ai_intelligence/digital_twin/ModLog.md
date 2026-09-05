@@ -2,6 +2,13 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-09-05 - RedDog surface / 0102 Digital Twin boundary correction
+
+- Corrected the active module contract: RedDog is the fast interaction and
+  attention surface; 0102 is the principal-scoped Digital Twin and deep
+  cognition/orchestration layer behind it. The Principal Memex and all effect
+  authority boundaries remain unchanged. (WSP 22/50/73/97)
+
 ## 2026-08-26 - Durable resident first-TURN resolution alignment
 
 - Aligned current Digital Twin truth with the implemented explicit v2 journal

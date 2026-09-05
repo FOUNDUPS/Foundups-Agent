@@ -1,5 +1,24 @@
 # RedDog Extension Tests
 
+## 0.4.141 identity / merged builder reconciliation candidate
+
+- The fast-RedDog/deep-0102 identity boundary is applied above the already
+  merged `0.4.140` builder release and first lands in `0.4.141`.
+- Backend compatibility binds 1,398 files at `700d50f84e12...86e09ed`.
+  Focused runner and physical child tests cover suspended Job containment,
+  fixed O:/E: roots, bounded canonical JSON, and explicit authority nonclaims.
+- `.gitignore` and `ARCHITECTURE.md` retain their merged `.vscodeignore`
+  exclusions and exact package-surface regression order.
+- Focused identity, conversation, shard, Holo incident, tiering, and manifest
+  checks pass. The authenticated contract is 18 shards / 6,942 lines / 492
+  assertions at `sha256:10b5118a5c9c...e32ad247`; the canonical registry is
+  current at 1,641 tests / 269 quarantined.
+- The deterministic thin package is 67 files / 950,193 bytes at
+  `sha256:cb6e5d4bb38d...15b281b8`, below the one MiB cap.
+- Exact 0.4.140 full-release and VSIX results remain historical. This 0.4.141
+  candidate must produce its own aggregate release, package, archive, and
+  exact-main evidence before promotion.
+
 ## 0.4.140 held builder child evidence release
 
 - Backend compatibility advances to the 1,398-file closure at

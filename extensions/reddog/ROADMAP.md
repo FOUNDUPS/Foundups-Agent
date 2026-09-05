@@ -2,17 +2,25 @@
 
 ## Status
 
-Phase: RedDog 0.4.140 resident architect thin-client surface.
+Phase: RedDog 0.4.141 held builder-child identity rebind candidate.
 
-0.4.140 adds the smallest one-shot held-executable child above the inert exact
-builder composition. A real O:-materialized CPython 3.12.10 process passed the
-same full composition proof before and after launch and emitted bounded,
-canonical, path-free evidence. That release is the last official 3.12 Windows
-binary, so it is qualified evidence with known patch debt—not production
-activation or current-security-patch authority. The child API returns evidence,
-not the unforgeable in-process capability. Native/pre-import closure,
-deterministic effects, provenance/signing, empirical write denial, route-v2
-activation, A-grade, and retrieval RSI remain separate fail-closed gates.
+0.4.141 first binds the corrected architecture: foreground RedDog is the
+lightweight interaction/exchange surface, while 0102 remains the deep Digital
+Twin, architect, and orchestration layer behind it. It preserves the 0.4.140
+one-shot held-executable builder child and its suspended, Job-contained,
+O:-runtime proof as bounded path-free evidence rather than the private builder
+capability. No extension, Git, owner, route, maintenance, activation, or
+execution authority is added. The prior 0.4.140 builder release evidence
+remains exact-commit history; fresh 0.4.141
+release, VSIX, and post-merge evidence remain mandatory promotion gates.
+
+0.4.139 retains exact-task post-merge execution, receipt-bound owner
+reacquisition, phase-aware liveness, repeatable supervisor release, and
+same-repository dependency-runtime resolution. The maintenance source now also
+has inert, descriptor-only composition and declared Windows/CPython ABI
+generations that prevent payload mix-and-match and attest bounded
+PE/wheel/RECORD relationships without loading native images. The ABI files are
+outside the executable backend manifest and grant no VSIX runtime authority.
 Every verified requery now
 enters through the original workspace/control root while its captured clean
 authority remains the proof target. The bounded operator controller is not an
@@ -365,17 +373,28 @@ Current implementation:
 
 ## Architecture Direction
 
-This extension is the IDE-side RedDog thin client. RedDog/0102 is the continuous principal-scoped identity; resident services host conversation/model state while OpenClaw supervises admitted work, WRE retains execution authority, and Hermes receives bounded leaf jobs.
+This extension is the IDE-side RedDog thin client. RedDog is the lightweight
+fast interaction/exchange surface; 0102 is the principal-scoped Digital Twin
+and deep cognition/orchestration layer behind it. Resident services host
+conversation/model state while OpenClaw supervises admitted work, WRE retains
+execution authority, and Hermes receives bounded leaf jobs.
 
-RedDog is the resident FoundUps architect identity and conversation product across thin-client surfaces. Fusion is one internal reasoning mode; authority-bearing work remains in the signed OpenClaw/WRE/Hermes worker path.
+RedDog is the continuous conversation and attention surface across thin
+clients. 0102 is the resident FoundUps architect and deep reasoning layer.
+Fusion is one internal reasoning mode; authority-bearing work remains in the
+signed OpenClaw/WRE/Hermes worker path.
 
 ### RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
+012 does not orchestrate every worker. 012 talks to RedDog; RedDog exchanges
+bounded intent and context with 0102. The deeper 0102 layer participates in the
+recursive DAE ecosystem. Autonomous WRE/DAE agents perform bounded work under
+OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
 
 ```text
 012 work focus
-  -> RedDog digital twin / architect interface
+  -> RedDog fast interaction / exchange surface
+  -> 0102 digital twin / architect layer
   -> recursive 0102 DAE ecosystem
   -> OpenClaw policy / control supervision
   -> WRE execution authority -> Hermes bounded leaf jobs

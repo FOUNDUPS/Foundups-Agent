@@ -2,10 +2,12 @@
 
 ## Product boundary
 
-RedDog is the operator-facing product identity, persona, and conversation
-surface of the principal-scoped 0102 Digital Twin. RedDog services may host its
-runtime, but RedDog is not a separate shell containing 0102 and no single
-process owns the complete identity. The Principal Memex is the bounded
+RedDog is the lightweight, low-latency interaction, exchange, and attention
+surface through which 012 communicates with the principal-scoped 0102 Digital
+Twin. RedDog is not 0102. The two are distinct components in one continuous
+conversational relationship: RedDog owns immediacy and presentation; 0102 owns
+deep cognition and orchestration. RedDog services may host the relationship's
+runtime, but no single process owns it. The Principal Memex is the bounded
 cognition substrate that may help 0102 understand 012; it is neither the
 Digital Twin nor operational authority.
 

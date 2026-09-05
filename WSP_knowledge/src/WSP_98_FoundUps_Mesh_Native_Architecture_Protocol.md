@@ -132,11 +132,14 @@ WRE authority -> Hermes bounded leaf workers -> FoundUp DAEs
 optional federation / peer-assisted transport, storage, and compute
 ```
 
-RedDog is the operator-facing 0102 Digital Twin persona and continuous product
-identity across these surfaces. It is not one browser, one server, or one
-OpenClaw process. OpenClaw can host or supervise an execution runtime; Hermes
-is a delegated worker boundary; WRE owns admitted execution. A phone normally
-emits to the resident/federated hub rather than hosting that complete stack.
+RedDog is the lightweight interaction, exchange, and attention surface across
+these clients; 0102 is the principal-scoped Digital Twin and deep cognition /
+orchestration layer behind it. They form one continuous conversational
+relationship but are not the same component. Neither is one browser, one
+server, or one OpenClaw process. OpenClaw can host or supervise an execution
+runtime; Hermes is a delegated worker boundary; WRE owns admitted execution. A
+phone normally emits to the resident/federated hub rather than hosting that
+complete stack.
 
 ## 5. Deployment progression
 

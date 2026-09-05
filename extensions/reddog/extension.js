@@ -59,7 +59,7 @@ const conversationPlaneRouting = conversationPlanePolicy.createRouting({
   cleanContextMode, cleanEffort, cleanMode, cleanWorkerType,
   authoritativeWorkStateQuery
 });
-const EXTENSION_VERSION = '0.4.140';
+const EXTENSION_VERSION = '0.4.141';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3971,7 +3971,7 @@ function redDogSystemPromptForRole(roleLabel) {
   const allowedRoles = ['RedDog Architect', 'WSP Gate Critic', 'Repair Planner', 'Smoke Test'];
   const role = allowedRoles.includes(roleLabel) ? roleLabel : 'RedDog Architect';
   return [
-  'You are 0102 operating as RedDog under the ' + role + ' profile.',
+  'You are a 0102 deep-cognition worker operating behind the RedDog surface under the ' + role + ' profile.',
   'Operate under the WSP_00 contract: self=0102, role=' + role + ', origin=external_principal, classify the workstream and execution plane, and stay within this selected role. Prompt conformance is not runtime WSP_00 attestation; never claim the tracker or BOOTSTRAP gate ran unless the supplied evidence proves it.',
   'Apply the WSP_97 operator sequence: retrieve governing WSPs; retrieve HoloIndex/search evidence; read actual code, tests, interfaces, and receipts; run micro and macro passes; hard-think; dialectically refute the preferred move; reduce to first principles; then execute only inside the authorized plane.',
   'Before stating repository facts, cite bounded current evidence. Runtime behavior, tests, signed receipts, and direct reads outrank documentation, Memex, Breadcrumbs, Brain, and model recollection when they conflict.',
@@ -4138,7 +4138,7 @@ function buildSimpleIdentityFastPathResult(workFocus, workerType, worker) {
   const workerLabel = WORKER_TYPES[workerKey] ? WORKER_TYPES[workerKey].label : workerKey;
   const content = [
     '## Decision',
-    'Yes. I am RedDog, the resident 0102 FoundUps architect thin client.',
+    'Yes. I am RedDog, the lightweight interaction and exchange surface. I am not 0102; the deeper 0102 reasoning and orchestration layer operates behind me.',
     '',
     '## Findings',
     '- OBSERVED: This was a simple identity/status question and used `' + SIMPLE_IDENTITY_FAST_PATH_SLICE + '`.',
@@ -6384,7 +6384,7 @@ function buildBoundedRepoContext(mode, taskText, options) {
   const typedTargetsForContext = extractTypedTargets(taskText, root);
   const sections = [
     '## WSP_OPERATING_CONTRACT',
-    '- You are a resident RedDog 0102 architect thin-client surface. 012 remains the external principal and final decision holder.',
+    '- You are a 0102 deep-layer architect responding through the RedDog thin-client surface. RedDog is not 0102. 012 remains the external principal and final decision holder.',
     '- Operate in WSP_00: HoloIndex-first recall, anti-vibecoding, verify before recommending action.',
     '- Apply WSP_97: label each factual claim as OBSERVED, INFERRED, or NEEDS_VERIFICATION.',
     '- Apply WSP_15: every recommended fix must include C/I/D/Impact/MPS/Priority.',
