@@ -103,6 +103,23 @@ export default async function TeamProfilePage({ params }: { params: Promise<{ sl
           </section>
         )}
 
+        {profile.feature?.kind === 'video' && (
+          <section className="profile-video" aria-labelledby="profile-video-title">
+            <a className="profile-video-poster" href={profile.feature.href} target="_blank" rel="noreferrer" aria-label={`${profile.feature.cta}（外部サイト）`}>
+              <Image src={profile.feature.image} alt={profile.feature.imageAlt} fill sizes="(max-width: 900px) 100vw, 52vw" style={{ objectPosition: profile.imagePosition ?? '50% 50%' }} />
+              <span className="profile-video-play" aria-hidden="true">▶</span>
+              <small>YOUTUBE · EXTERNAL</small>
+            </a>
+            <div className="profile-video-copy">
+              <p className="eyebrow light"><span /> {profile.feature.eyebrow}</p>
+              <h2 id="profile-video-title">{profile.feature.title}</h2>
+              <p>{profile.feature.description}</p>
+              <a className="profile-video-link" href={profile.feature.href} target="_blank" rel="noreferrer">{profile.feature.cta} <span>↗</span></a>
+              <small>外部サイトで開きます。自動再生はしません。</small>
+            </div>
+          </section>
+        )}
+
         {profile.gallery.length > 0 && (
           <section className="profile-gallery"><div className="profile-gallery-heading"><span>FIELD NOTES</span><h2>一枚の顔から、<br />活動の背景へ。</h2></div><div className="profile-gallery-grid">{profile.gallery.map((item) => <figure key={item.src}><div><Image src={item.src} alt={item.alt} fill sizes="(max-width: 760px) 92vw, 45vw" style={{ objectPosition: item.position ?? '50% 50%' }} /></div><figcaption>{item.caption}</figcaption></figure>)}</div></section>
         )}

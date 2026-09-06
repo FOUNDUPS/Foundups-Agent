@@ -1,5 +1,21 @@
 # Project eSingularity ModLog
 
+## 2026-09-03 — Japanese participation sweep
+
+- Kept the existing visual system and page order; no redesign was introduced.
+- Replaced the expired meeting ticker with a persistent Japanese action ticker for visiting, listening, learning, sharing, joining the citizens’ declaration, and contacting Fukui City.
+- Removed a repeated five-benefit summary by repurposing the same card section into direct campaign actions using `pics.yumori.info`, `pc.yumori.info`, `yumori.me`, and the approved 0102 music playlist.
+- Added native mobile sharing with clipboard fallback and an official, respectful City Hall contact card using Fukui City's published department, phone number, hours, and inquiry form.
+- Corrected the campaign music route to `music.yumori.me` after verifying its HTTPS forwarding reaches the approved Suno playlist.
+- Added equivalent English and Portuguese strings so the Japanese-first enhancements do not leak Japanese when visitors switch languages.
+
+## 2026-09-01 — NCDS-style outcome scorecard
+
+- Removed the vague English “About” labels by displaying the arithmetic at one- and two-decimal precision while retaining the Japanese approximation marker.
+- Expanded the public measurement plan to cover repeat visits, overnight stays, local purchasing, yokocho sales, business starts, payroll, locally retained spending, construction versus permanent jobs, university projects, partnerships, tax revenue, and community returns.
+- Added two NCDS community-campaign examples behind progressive disclosure to demonstrate outcome measurement without presenting another region's results as a Fukui forecast.
+- Preserved the direct-spending scenario as the only quantified layer and kept all supplier, income, employment, and tax impacts pending Fukui input-output analysis.
+
 ## 2026-09-01 — Learn, Create, Launch language pass
 
 - Reframed the Innovation Hub floors as a clear progression: Gather, Learn, Create, Launch.
@@ -16,6 +32,7 @@
 
 - Replaced the oversized Hasegawa portrait treatment with a real D-K work preview from the artist's official gallery and a compact 52-pixel artist identity.
 - Added a linked photographic reference to Awara Onsen's official Yukemuri Yokocho site so residents can see the local model behind the container-food concept.
+- Added the operator-provided D-K YouTube video as an opt-in external feature on Akira Hasegawa's profile; it does not embed, autoplay, or imply a signed installation agreement.
 - Kept both examples secondary to the campaign story, translated the link labels, added keyboard focus states, and retained the D-K proposal label so past work is not mistaken for a completed Sukatto Land installation.
 
 ## 2026-09-01 — English campaign economics and translation integrity

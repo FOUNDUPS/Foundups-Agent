@@ -1,5 +1,18 @@
 # eSingularity TestModLog
 
+## 2026-09-03 — Japanese action-path regression coverage
+
+- Replaced the obsolete repeated-vision assertions with checks for the see/listen/learn/share/join/act campaign journey.
+- Added checks for all campaign vanity routes, native share and clipboard fallback behavior, and the complete ticker action set.
+- Added official Fukui City contact checks and a regression guard preventing the expired August 31 notice from returning to the ticker.
+- Replaced the D-K root-URL substring assertion with exact full-line membership after CodeQL correctly identified the former test as an incomplete URL-sanitization pattern.
+
+## 2026-09-01 — Economic scorecard and benchmark guardrails
+
+- Added regression checks for the precise English annual and 30-year direct-spending displays with no “About” prefix.
+- Added checks for the broader Fukui outcome scorecard and the explicit separation of construction and permanent employment.
+- Added checks for the two official NCDS case-study links and the warning that their outcomes and ratios are not transferred to Fukui.
+
 ## 2026-09-01 — Innovation Hub language and typography coverage
 
 - Added regression checks for the Gather → Learn → Create → Launch floor progression.
@@ -13,6 +26,7 @@
 
 - Added contract checks for the official Awara Yukemuri Yokocho and D-K gallery destinations.
 - Added regression checks that the artist portrait remains a compact 52-pixel identity element and no longer dominates the night-experience card.
+- Added coverage for the operator-provided D-K YouTube link and the no-iframe/no-autoplay profile treatment.
 - Added translation checks for the Japanese-first reference links.
 
 ## 2026-09-01 — English economic-story regression coverage

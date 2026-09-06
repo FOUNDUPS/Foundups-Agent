@@ -1,11 +1,17 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import EventAlert from '../components/EventAlert';
+import CampaignTicker from '../components/CampaignTicker';
+import CampaignShareButton from '../components/CampaignShareButton';
 import LineButton from '../components/LineButton';
 import Brand from '../components/Brand';
 import HeroMusic from '../components/HeroMusic';
 
 const LINE_URL = 'https://line.me/ti/p/baXEozL_Q6';
+const PICS_URL = 'https://pics.yumori.info';
+const MUSIC_URL = 'https://music.yumori.me';
+const PLAN_URL = 'https://pc.yumori.info';
+const YUMORI_URL = 'https://yumori.me';
+const CITY_CONTACT_URL = 'https://www.city.fukui.lg.jp/inquiry/mailform101607.html?PAGE_NO=15196';
 
 const campaignSteps = [
   ['01', 'STOP', '解体を止め、比較の時間を確保する', '条件を満たす代案を比較できるまで、後戻りできない解体契約を結ばないよう求める。'],
@@ -28,7 +34,7 @@ export default function Home() {
       <main id="top">
         <section className="hero" id="hero" aria-labelledby="hero-title">
           <div className="hero-grid" aria-hidden="true" />
-          <EventAlert />
+          <CampaignTicker />
           <div className="hero-copy">
             <p className="eyebrow"><span /> WHY · 温泉を守る</p>
             <h1 id="hero-title">温泉を守り、<br /><em>地域のAI基盤でまちを元気に。</em></h1>
@@ -97,17 +103,22 @@ export default function Home() {
           <p className="future-compute-line">未来を動かすのは、<strong>Compute。</strong><br />福井の電力 → 福井の計算力 → 福井の未来。</p>
         </section>
 
-        <section className="vision-overview section" id="vision" aria-labelledby="vision-title">
+        <section className="vision-overview section" id="act-now" aria-labelledby="vision-title">
           <div className="vision-heading">
-            <div><p className="eyebrow"><span /> 選択肢を比べる</p><h2 id="vision-title">壊すだけではない。<br /><em>こう変えられる。</em></h2></div>
-            <p>閉館した施設を、そのまま残す話ではありません。温泉を中心に、人が集まり、学び、働き、挑戦できる場所へ育てる提案です。</p>
+            <div><p className="eyebrow"><span /> VISIT · SHARE · LEARN · ACT</p><h2 id="vision-title">見る。知る。共有する。<br /><em>そして、動く。</em></h2></div>
+            <p>九頭竜を守るために、今できることを一つ選んでください。温泉を残す力は、一人ひとりの声から始まります。</p>
           </div>
-          <div className="vision-cards" role="list" aria-label="再生後の五つの役割">
-            <article role="listitem"><span aria-hidden="true">♨️</span><div><strong>温泉 — 地域の目的地となる大露天風呂</strong><p>1階の温泉を地域の集いの場として再開し、AIの田んぼ（データセンター）の回収熱で温泉水を補助加温できるかを技術検証します。</p></div></article>
-            <article role="listitem"><span aria-hidden="true">🎓</span><div><strong>学ぶ・試す・立ち上げる</strong><p>上階を、学生・研究者がAIを学び、試し、福井発の解決策を立ち上げる拠点へ。</p></div></article>
-            <article role="listitem"><span aria-hidden="true">🌾</span><div><strong>AIの「田んぼ」— 地域の計算力</strong><p>既存の温泉棟とは別に、周辺の土地へ福井で使う計算力をつくる。</p></div></article>
-            <article role="listitem"><span aria-hidden="true">🍜</span><div><strong>食と起業</strong><p>小さな店や台所から、低い初期負担で地域の食の商いを始められる場所へ。</p></div></article>
-            <article role="listitem"><span aria-hidden="true">🎨</span><div><strong>D-Kの光・祭り・文化</strong><p>長谷川章氏のD-Kによる夜の光の体験と地域イベントで、福井内外から人が集まる場所へ。</p></div></article>
+          <div className="vision-cards action-cards" role="list" aria-label="九頭竜を守るために今できること">
+            <article role="listitem"><span aria-hidden="true">👀</span><div><strong>現地と構想を見る</strong><p>写真で、建物、土地、地域の記憶を確かめる。</p><a href={PICS_URL} target="_blank" rel="noreferrer">pics.yumori.info <b>↗</b></a></div></article>
+            <article role="listitem"><span aria-hidden="true">🎵</span><div><strong>九頭竜の音楽を聴く</strong><p>九頭竜と温泉再生の物語を、0102 MUSICで感じる。</p><a href={MUSIC_URL} target="_blank" rel="noreferrer">music.yumori.me <b>↗</b></a></div></article>
+            <article role="listitem"><span aria-hidden="true">📖</span><div><strong>再生計画を知る</strong><p>COGDC、温泉、教育、食、文化をつなぐ計画を読む。</p><a href={PLAN_URL} target="_blank" rel="noreferrer">pc.yumori.info <b>↗</b></a></div></article>
+            <article role="listitem"><span aria-hidden="true">📣</span><div><strong>家族や友人に共有する</strong><p>yumori.infoを送り、九頭竜の未来を話題にする。</p><CampaignShareButton /></div></article>
+            <article role="listitem"><span aria-hidden="true">✍️</span><div><strong>市民宣言に参加する</strong><p>解体前に代案を比べる機会を残す意思を伝える。</p><a href={YUMORI_URL} target="_blank" rel="noreferrer">yumori.me <b>↗</b></a></div></article>
+          </div>
+          <div className="city-action" id="city-action">
+            <div><p className="eyebrow"><span /> ACT NOW · SAVE THE DRAGON</p><h3>福井市役所に、<br />声を届ける。</h3><p>旧すかっとランド九頭竜の公式問い合わせ先は、福井市 福祉健康部 地域包括ケア推進課です。</p></div>
+            <div className="city-action-contact"><a href="tel:0776205400"><strong>電話する</strong><span>0776-20-5400</span></a><a href={CITY_CONTACT_URL} target="_blank" rel="noreferrer"><strong>メールで伝える</strong><span>福井市公式フォーム ↗</span></a><small>受付：平日 8:30–17:15</small></div>
+            <blockquote><span>伝える言葉の例</span>「旧すかっとランド九頭竜について、解体契約前に再利用案を公正に比較する機会を残してください。」</blockquote>
           </div>
         </section>
 
@@ -126,8 +137,9 @@ export default function Home() {
             <div className="visitor-impact-copy"><p className="eyebrow"><span /> VISITOR ECONOMY · SCREENING SCENARIO</p><h3 id="visitor-impact-title">年間129,649人。<br /><em>需要は、すでにあった。</em></h3><p>次の価値は、一回の来場を地域での食事、買い物、宿泊、交通にどれだけつなげられるかで決まります。</p></div>
             <div className="visitor-impact-number"><span>約1.3億〜7.2億円 / 年</span><strong>来場者の直接消費シナリオ</strong><code>129,649 visits × ¥1,000–¥5,546</code></div>
             <div className="visitor-opportunities" role="list"><span role="listitem">🍜 地域の食・横丁</span><span role="listitem">🎨 D-K・祭り・夜間滞在</span><span role="listitem">♨️ 温泉・宿泊</span><span role="listitem">✈️ 空港・新幹線からの周遊</span></div>
-            <div className="impact-layers" role="list" aria-label="経済効果を検証する三つの段階"><article className="measured" role="listitem"><span>NOW · CALCULATED</span><strong>来場者の直接消費</strong><p>現在数字で示しているのは、この層だけです。</p></article><article role="listitem"><span>NEXT · INPUT-OUTPUT</span><strong>県内取引と所得への波及</strong><p>消費項目と県内調達率を確認し、福井県産業連関表で分析します。</p></article><article role="listitem"><span>AFTER VALIDATION</span><strong>雇用・税収・地域への還元</strong><p>分析が完了するまで、数字を掲載しません。</p></article></div>
+            <div className="impact-layers" role="list" aria-label="経済効果を検証する三つの段階"><article className="measured" role="listitem"><span>NOW · CALCULATED</span><strong>来場者の直接消費</strong><p>来場者数、再来訪、宿泊、食・買い物・交通の消費を追跡します。現在数字で示しているのは、この層だけです。</p></article><article role="listitem"><span>NEXT · INPUT-OUTPUT</span><strong>県内取引と所得への波及</strong><p>県内調達、横丁の売上、新規事業、給与、県内に残る消費を確認し、福井県産業連関表で分析します。</p></article><article role="listitem"><span>AFTER VALIDATION</span><strong>雇用・税収・地域への還元</strong><p>建設雇用と常用雇用を分け、税収、学生・大学のプロジェクト、連携機関、地域への還元を検証します。分析完了まで数字は掲載しません。</p></article></div>
             <details className="impact-method"><summary>30年間の参考累計と計算方法</summary><div><span>約38.9億〜215.7億円 / 30年</span><strong>来場者数と消費額が一定の場合の単純累計</strong><p>割引を行わない説明用の参考値であり、予測ではありません。</p></div></details>
+            <details className="impact-method impact-benchmarks"><summary>地域キャンペーンは何を測っているか</summary><div><p>福井の予測ではなく、成果指標を設計するための実例です。</p><div className="benchmark-links"><a href="https://www.ncdsinc.net/case-studies/forward-sioux-falls" target="_blank" rel="noreferrer"><strong>Forward Sioux Falls</strong><span>新規雇用・設備投資・新規給与を追跡 <b>↗</b></span></a><a href="https://www.ncdsinc.net/case-studies/aspire-clarksville" target="_blank" rel="noreferrer"><strong>Aspire Clarksville</strong><span>雇用・設備投資・小売売上・世帯所得を追跡 <b>↗</b></span></a></div><small>これらの成果や比率を福井に当てはめるものではありません。</small></div></details>
             <div className="scenario-note"><strong>PROJECT SCENARIO — NOT A FORECAST</strong><p>2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2025年日帰り観光消費単価5,546円までを掛けた単純な試算です。この試算に含むのは来場者の直接消費だけです。取引先への波及、所得、雇用、税収は、福井県産業連関表による分析が完了するまで含めません。</p><div className="scenario-links"><a href="https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/024.pdf" target="_blank" rel="noreferrer">福井県観光客入込数（推計）2025年 <b>↗</b></a><a href="https://www.pref.fukui.lg.jp/doc/toukei-jouhou/hakyukouka.html" target="_blank" rel="noreferrer">福井県 経済波及効果分析 <b>↗</b></a></div></div>
           </div>
 
