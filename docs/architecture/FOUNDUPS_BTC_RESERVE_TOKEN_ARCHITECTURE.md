@@ -178,7 +178,7 @@ Build a **hybrid Algorand + multisig BTC vault** architecture that:
 - Bio-decaying (Michaelis-Menten demurrage incentivizes velocity and participation)
 - Cross-FoundUp universal (works across all FoundUps in the ecosystem)
 - Medium of exchange within the protocol
-- Canonical constraint: 1 UPS = 1 satoshi (at genesis)
+- Canonical constraint: 1 UPS = 1,000 satoshi (at genesis; `genesis_ups_per_btc = 100,000`)
 
 ### What UPS IS NOT:
 - Not a stablecoin (not pegged to USD or any fiat)
