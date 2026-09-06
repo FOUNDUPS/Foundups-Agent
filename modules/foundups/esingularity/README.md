@@ -1,6 +1,6 @@
 # Project eSingularity FoundUp
 
-Project eSingularity is a Japanese-first community campaign and public-information PWA for preserving Sukatto Land Kuzuryu and demonstrating a community-focused AI infrastructure alternative for Fukui.
+Project eSingularity is a Japanese-first community campaign and public-information PWA for preserving Sukatto Land Kuzuryu and testing a community-owned green data center (COG DC) alternative for Fukui.
 
 **FoundUp ID**: `esingularity_001`
 
@@ -13,12 +13,13 @@ Project eSingularity is a Japanese-first community campaign and public-informati
 
 ## Purpose
 
-The current public journey is deliberately simple:
+The current public journey is deliberately simple. The existing hero is followed by a ten-slide YUMORI presentation, while the existing campaign ticker carries one `NEW` notification linking to it:
 
 1. Understand what is at risk.
 2. See the alternative to demolition.
 3. Understand the potential benefit to Fukui.
-4. Join the LINE community.
+4. Understand how students and FoundUps could use our COG DC compute.
+5. Become a YUMORI or join the LINE community without financial obligation.
 
 The financial models, engineering research, and source audits support the public claims but are not the main public experience.
 
@@ -27,6 +28,8 @@ The financial models, engineering research, and source audits support the public
 ```text
 modules/foundups/esingularity/
 ├── frontend/               # Live Japanese-first Vinext/Sites PWA
+│   ├── content/            # Canonical Japanese deck and derived language states
+│   └── audit/              # Public-claim evidence ledger
 ├── src/                    # Stable FoundUp identity contract
 ├── tests/                  # Manifest, registry, route, and hosting checks
 ├── docs/                   # Migration and architecture records
@@ -56,6 +59,8 @@ npm run dev -- --host 127.0.0.1
 - The Foundups.com shell does not own or duplicate eSingularity product logic.
 - The site remains inside the monorepo until it passes the FoundUp exfoliation readiness gate.
 - No token, investment offer, or fundraising claim is created by this module registration.
+- The deck is additive: it does not replace the existing hero, ticker, campaign actions, or deeper public sections.
+- Contact candidates remain in the ignored RedDog manual-alpha store until a governed Contact Memory runtime exists.
 
 ## WSP alignment
 

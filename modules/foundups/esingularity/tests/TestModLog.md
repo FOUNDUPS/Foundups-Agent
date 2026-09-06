@@ -1,5 +1,12 @@
 # eSingularity TestModLog
 
+## 2026-09-06 — YUMORI presentation contract coverage
+
+- Replaced corrupted legacy assertions with twelve UTF-8 contract tests for the current public architecture.
+- Added exact ticker-notification and ten-slide Japanese canonical-source checks.
+- Added complete English/Portuguese derivation, proposition, progressive-disclosure, floor-ladder, and COG DC ownership checks.
+- Added economics label, autoplay/pause/touch, generated-asset, official-outreach-source, and `/future` route regressions.
+
 ## 2026-09-01 — Innovation Hub language and typography coverage
 
 - Added regression checks for the Gather → Learn → Create → Launch floor progression.

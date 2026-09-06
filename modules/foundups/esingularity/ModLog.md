@@ -1,5 +1,19 @@
 # Project eSingularity ModLog
 
+## 2026-09-06 — Japanese-first YUMORI cinematic presentation
+
+- Added a mobile-first ten-slide presentation immediately below the existing hero, without replacing the page shell or campaign sections.
+- Added exactly one `NEW` presentation link to the existing ticker and preserved every existing ticker destination.
+- Established `frontend/content/yumori-presentation.ts` as the Japanese canonical content boundary with complete derived English and Portuguese states.
+- Added timed progression, explicit pause, previous/next and slide controls, touch swiping, interaction pause, reduced-motion handling, and progressive evidence disclosure.
+- Replaced the old floor allocation with the lower-public / third-floor emerging FoundUps / top-floor advanced FoundUps ladder, with the COG DC shown as separate infrastructure.
+- Corrected generic “regional compute” language to our COG DC compute used by the people and projects working there.
+- Added two generated concept visuals for the compute-field and autonomous-agriculture slides; all other visuals reuse existing project assets or native diagrams.
+- Preserved the deployed campaign action and economics surfaces, including their benchmark disclosure and language mappings.
+- Repaired the corrupted `/future` route and removed the speculative capacity timeline in favor of evidence-gated demand, engineering, and economics validation.
+- Researched five current Fukui academic/technical outreach candidates from official public sources. Stored the governed candidate record in the ignored RedDog manual-alpha location; no private contact data entered public Git.
+- Validated production build, lint, twelve contract tests, all ten slide states, Japanese/English/Portuguese switching, internal anchors, touch-width layout, and external links.
+
 ## 2026-09-01 — Learn, Create, Launch language pass
 
 - Reframed the Innovation Hub floors as a clear progression: Gather, Learn, Create, Launch.

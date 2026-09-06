@@ -13905,7 +13905,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Contract tests for the eSingularity FoundUp migration."
+      "description": "Contract tests for the eSingularity FoundUp and YUMORI public deck."
     },
     {
       "id": "test::modules::foundups::gotjunk::tests::test_manifest",
