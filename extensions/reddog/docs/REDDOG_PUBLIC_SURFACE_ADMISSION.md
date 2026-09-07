@@ -29,12 +29,14 @@ unmounted until its host and public-only responder pass deployment review.
 | Source | Responsibility |
 |---|---|
 | `modules/communication/moltbot_bridge/src/reddog_public_policy.py` | Exact public origins, strict input, lowered-only ceilings, unsigned Lick Verification evidence |
-| `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` | Atomic guest session/nonce/quota accounting through an injected existing AgentDB SQLite connection factory |
-| `modules/communication/moltbot_bridge/src/reddog_public_http.py` | Optional FastAPI router; bounded JSON, exact CORS, public-only responder, cancellation/deadline and late-result handling |
-| `modules/communication/moltbot_bridge/tests/public_surface/` | Real SQLite and in-process ASGI tests with synthetic responders |
+| `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` | Atomic guest session/nonce/quota accounting and status recovery through an injected existing AgentDB SQLite connection factory |
+| `modules/communication/moltbot_bridge/src/reddog_public_http.py` | Optional FastAPI router; bounded JSON, exact CORS, public-only responder, cancellation/deadline, late-result handling and bearer-bound status |
+| `modules/communication/moltbot_bridge/tests/public_surface/` | Real SQLite, actual DatabaseManager-wrapper and in-process ASGI tests with synthetic responders |
 
-The gate uses `agent_db.db.get_connection`; it does not create a second memory
-database. Only `reddog_public_budget_v1` and `reddog_public_session_v1` are owned.
+The gate accepts `agent_db.db.get_connection`; it does not create a second memory
+database. The continuity tests execute the unchanged DatabaseManager wrapper
+against temporary SQLite databases; the actual PC binding is not verified.
+Only `reddog_public_budget_v1` and `reddog_public_session_v1` are owned.
 No conversation text, raw address, media, private memory, or raw session bearer
 is stored. SQLite is the supported accounting backend for this slice; other
 backends must fail closed until independently implemented and verified.
@@ -42,7 +44,7 @@ backends must fail closed until independently implemented and verified.
 ## Endpoints and hard ceilings
 
 Routes are `/api/reddog/public/{surface}/{operation}` with POST operations
-`encounter`, `turn`, and `withdraw`; OPTIONS is narrow CORS preflight.
+`encounter`, `turn`, `status`, and `withdraw`; OPTIONS is narrow CORS preflight.
 
 | Surface | Exact allowed browser origin |
 |---|---|
@@ -81,6 +83,27 @@ A timed-out or cancelled provider keeps its busy slot until it actually finishes
 An uncooperative provider cannot create unlimited replacement calls. Orphaned
 reservations after a process crash intentionally fail closed; the next slice
 must prove host-owned recovery rather than clearing them optimistically.
+
+### Guest status and lost-response recovery
+
+`POST .../{surface}/status` requires the existing bearer, the same validated
+surface/origin/subject binding, and exactly `{}` as its JSON body. It returns
+`revision`, `nonce`, `remaining_turns`, `in_flight`, `expires_at`,
+`idle_expires_at`, `server_time`, `disclosure: public`, and `effect_ceiling: NONE`.
+It returns no reply history, raw bearer, private memory or identity authority.
+
+Status does not invoke a responder, rotate a nonce, renew idle/absolute expiry,
+refund a consumed turn, or clear a busy slot. Its transaction only advances the
+existing fail-closed clock watermark. Expired sessions return 410; withdrawn,
+unknown or cross-boundary sessions disclose no status. An exhausted but still
+active session may report zero remaining turns; that does not reopen its budget.
+
+After an uncertain network outcome, a client should fetch status rather than
+replay the original turn. A new explicit turn may use the recovered revision
+and nonce only when no work is in flight. A lost reply is not recoverable from
+this content-free store. Clients must ignore late status responses that would
+regress local revision/request order. Polling remains subject to the trusted
+edge's request limits; this API is not an unlimited polling entitlement.
 
 ## Lick and 3V
 
@@ -168,12 +191,15 @@ changes without independent held-out evidence.
 See the suite [README](../../../modules/communication/moltbot_bridge/tests/public_surface/README.md)
 and [TestModLog](../../../modules/communication/moltbot_bridge/tests/public_surface/TestModLog.md).
 Local evidence is isolated source execution, not the PC or production host.
+The guest-status continuation uses CI evidence recorded in PR #1635, not a
+claim that local execution or the resident host became available.
 
 The next bounded transaction is the
 [remote integration work order](prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md).
 It closes host/ingress proof before adding browser/AutoPost UI, then returns to
 private resident transport, authorized context deltas, voice, and omission-critic
-work. The public guest gate does not complete those independent layers.
+work. Its completion ledger separates source implementation from runtime
+activation. The public guest gate does not complete those independent layers.
 
 Technical anchors: [OWASP session timeouts](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html),
 [OWASP REST security](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html),
