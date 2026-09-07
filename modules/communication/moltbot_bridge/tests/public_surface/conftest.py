@@ -1,5 +1,6 @@
 """Isolated source loading avoids starting unrelated legacy OpenClaw imports."""
 import importlib
+import importlib.util
 from pathlib import Path
 import sys
 import types
@@ -31,6 +32,22 @@ def store(tmp_path):
     gate = sessions.PublicSessionGate(connect)
     gate.initialize()
     return gate, connect
+
+
+@pytest.fixture
+def database_store(tmp_path, monkeypatch):
+    """Load unchanged DB source with an isolated singleton and temporary path."""
+    path = SRC.parents[2] / "infrastructure" / "database" / "src" / "db_manager.py"
+    spec = importlib.util.spec_from_file_location("_reddog_public_test_db", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setenv("FOUNDUPS_DB_ENGINE", "sqlite")
+    monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "actual-agentdb.sqlite"))
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    manager = module.DatabaseManager()
+    gate = sessions.PublicSessionGate(manager.get_connection)
+    gate.initialize()
+    return gate, manager, module
 
 
 @pytest.fixture
