@@ -146,7 +146,7 @@ async def preflight(surface: str, operation: str, request: Request):
     origin = request.headers.get("origin", "")
     try:
         checked_surface(surface, origin)
-        if operation not in {"encounter", "turn", "withdraw"}:
+        if operation not in {"encounter", "turn", "status", "withdraw"}:
             raise PublicAdmissionError("public_operation_invalid", 404)
     except PublicAdmissionError as exc:
         return _response({"error": exc.code}, exc.status)
@@ -154,6 +154,22 @@ async def preflight(surface: str, operation: str, request: Request):
     result.headers["Access-Control-Allow-Methods"] = "POST"
     result.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
     return result
+
+
+async def _non_turn(binding: PublicSurfaceBinding, common: dict,
+                    operation: str, request: Request) -> dict:
+    if operation == "encounter":
+        body = await _body(request)
+        return binding.gate.open_encounter(**common, body=body, now=binding.clock())
+    if operation == "status":
+        token = _token(request)
+        body = await _body(request)
+        if type(body) is not dict or body:
+            raise PublicAdmissionError("public_status_shape_invalid")
+        return binding.gate.session_status(**common, token=token, now=binding.clock())
+    if operation == "withdraw":
+        return binding.gate.withdraw(**common, token=_token(request), now=binding.clock())
+    raise PublicAdmissionError("public_operation_invalid", 404)
 
 
 @router.post("/{surface}/{operation}")
@@ -164,18 +180,13 @@ async def public_request(surface: str, operation: str, request: Request):
         safe_origin = origin
         binding = _binding(request)
         common = dict(surface=surface, origin=origin, subject=_peer(binding, request))
-        if operation == "encounter":
-            body = await _body(request)
-            result = binding.gate.open_encounter(**common, body=body, now=binding.clock())
-        elif operation == "turn":
+        if operation == "turn":
             token = _token(request)
             body = await _body(request)
             turn = binding.gate.reserve_turn(**common, token=token, body=body, now=binding.clock())
             result = await _reply(binding, turn, token)
-        elif operation == "withdraw":
-            result = binding.gate.withdraw(**common, token=_token(request), now=binding.clock())
         else:
-            raise PublicAdmissionError("public_operation_invalid", 404)
+            result = await _non_turn(binding, common, operation, request)
         return _response(result, 200, safe_origin)
     except PublicAdmissionError as exc:
         return _error(exc.code, exc.status, safe_origin, turn)
