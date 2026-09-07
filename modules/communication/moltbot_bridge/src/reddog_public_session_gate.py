@@ -1,0 +1,187 @@
+"""Atomic guest quotas in the existing AgentDB SQLite database, not new memory.
+
+The trusted host supplies agent_db.db.get_connection. Initialization is explicit.
+SQLite only in this slice; PostgreSQL and live host activation require proof.
+No source text, raw address, media, private memory, or bearer token is retained.
+"""
+from __future__ import annotations
+
+from contextlib import contextmanager
+from dataclasses import dataclass
+import hashlib
+import secrets
+from typing import Callable
+
+from .reddog_public_policy import (
+    PublicAdmissionError, PublicPolicy, checked_clock, checked_hex,
+    checked_surface, encounter_request, lick_verification_evidence, turn_request,
+)
+
+
+@dataclass(frozen=True)
+class PublicTurn:
+    """Public-only inference input; not a private conversation capability."""
+
+    message: str
+    surface: str
+    reservation_id: str
+    revision: int
+    next_nonce: str
+    remaining_turns: int
+    max_output_tokens: int
+    deadline_epoch: int
+    disclosure: str = "public"
+    effect_ceiling: str = "NONE"
+
+
+class PublicSessionGate:
+    def __init__(self, connection_factory: Callable, policy: PublicPolicy | None = None):
+        self._connect = connection_factory
+        self.policy = policy or PublicPolicy()
+        if type(self.policy) is not PublicPolicy or not callable(connection_factory):
+            raise PublicAdmissionError("public_configuration_invalid", 503)
+
+    def initialize(self) -> None:
+        """Trusted deployment setup only; caller never supplies a database path."""
+        with self._connect() as conn:
+            conn.execute("SELECT sqlite_version()")  # Unsupported backends fail closed.
+            conn.execute("""CREATE TABLE IF NOT EXISTS reddog_public_budget_v1 (
+                bucket TEXT PRIMARY KEY, day INTEGER NOT NULL, used INTEGER NOT NULL)""")
+            conn.execute("""CREATE TABLE IF NOT EXISTS reddog_public_session_v1 (
+                token_hash TEXT PRIMARY KEY, encounter TEXT NOT NULL,
+                surface TEXT NOT NULL, origin TEXT NOT NULL, subject TEXT NOT NULL,
+                actor_claim TEXT NOT NULL, created INTEGER NOT NULL,
+                last_seen INTEGER NOT NULL, revision INTEGER NOT NULL,
+                nonce TEXT NOT NULL, busy TEXT, closed INTEGER NOT NULL DEFAULT 0)""")
+            conn.commit()
+
+    @contextmanager
+    def _transaction(self, now: int):
+        checked_clock(now)
+        with self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                clock = conn.execute(
+                    "SELECT used FROM reddog_public_budget_v1 WHERE bucket='clock'"
+                ).fetchone()
+                if clock and now < clock["used"]:
+                    raise PublicAdmissionError("public_clock_rollback", 503)
+                conn.execute("""INSERT INTO reddog_public_budget_v1 VALUES ('clock',-1,?)
+                    ON CONFLICT(bucket) DO UPDATE SET used=excluded.used""", (now,))
+                yield conn
+                conn.commit()
+            except BaseException:
+                conn.rollback()
+                raise
+
+    def _spend(self, conn, bucket: str, now: int, maximum: int) -> None:
+        day = now // 86400
+        conn.execute("""INSERT INTO reddog_public_budget_v1 VALUES (?,?,0)
+            ON CONFLICT(bucket) DO UPDATE SET day=excluded.day, used=0
+            WHERE reddog_public_budget_v1.day < excluded.day""", (bucket, day))
+        changed = conn.execute("""UPDATE reddog_public_budget_v1 SET used=used+1
+            WHERE bucket=? AND day=? AND used < ?""", (bucket, day, maximum))
+        if changed.rowcount != 1:
+            raise PublicAdmissionError("public_daily_quota_exhausted", 429)
+
+    def _cleanup(self, conn, now: int) -> None:
+        conn.execute("DELETE FROM reddog_public_budget_v1 WHERE day>=0 AND day<?",
+                     (now // 86400 - 1,))
+        conn.execute("""DELETE FROM reddog_public_session_v1
+            WHERE busy IS NULL AND (closed=1 OR created<=? OR last_seen<=?)""",
+                     (now - self.policy.session_seconds, now - self.policy.idle_seconds))
+
+    def open_encounter(self, *, surface: str, origin: str, subject: str,
+                       body: dict, now: int) -> dict:
+        checked_surface(surface, origin)
+        checked_hex(subject, "subject")  # HMAC supplied by trusted ingress, not JSON.
+        claim = encounter_request(body)
+        token, encounter, nonce = secrets.token_hex(32), secrets.token_hex(16), secrets.token_hex(32)
+        with self._transaction(now) as conn:
+            self._cleanup(conn, now)
+            self._spend(conn, "sessions:global", now, self.policy.global_sessions_daily)
+            self._spend(conn, "sessions:" + subject, now, self.policy.subject_sessions_daily)
+            conn.execute("""INSERT INTO reddog_public_session_v1
+                (token_hash,encounter,surface,origin,subject,actor_claim,created,last_seen,revision,nonce)
+                VALUES (?,?,?,?,?,?,?,?,0,?)""",
+                         (self._hash(token), encounter, surface, origin, subject, claim, now, now, nonce))
+        return {"token": token, "nonce": nonce, "revision": 0,
+                "remaining_turns": self.policy.session_turns,
+                "lick": lick_verification_evidence(encounter, claim, now + self.policy.session_seconds)}
+
+    @staticmethod
+    def _hash(token: str) -> str:
+        checked_hex(token, "session")
+        return hashlib.sha256(token.encode("ascii")).hexdigest()
+
+    def _session(self, conn, token: str, surface: str, origin: str, subject: str):
+        checked_surface(surface, origin)
+        checked_hex(subject, "subject")
+        row = conn.execute("SELECT * FROM reddog_public_session_v1 WHERE token_hash=?",
+                           (self._hash(token),)).fetchone()
+        if not row or row["closed"] or (row["surface"], row["origin"], row["subject"]) != (surface, origin, subject):
+            raise PublicAdmissionError("public_session_denied", 403)
+        return row
+
+    def reserve_turn(self, *, surface: str, origin: str, subject: str,
+                     token: str, body: dict, now: int) -> PublicTurn:
+        nonce, revision, message = turn_request(body, self.policy)
+        reservation, next_nonce = secrets.token_hex(32), secrets.token_hex(32)
+        with self._transaction(now) as conn:
+            row = self._session(conn, token, surface, origin, subject)
+            self._check_turn(row, nonce, revision, now)
+            count = conn.execute("SELECT COUNT(*) AS n FROM reddog_public_session_v1 WHERE busy IS NOT NULL").fetchone()
+            if count["n"] >= self.policy.concurrent_calls:
+                raise PublicAdmissionError("public_concurrency_exhausted", 429)
+            self._spend(conn, "turns:global", now, self.policy.global_turns_daily)
+            self._spend(conn, "turns:" + subject, now, self.policy.subject_turns_daily)
+            conn.execute("""UPDATE reddog_public_session_v1
+                SET revision=revision+1, nonce=?, busy=?, last_seen=? WHERE token_hash=?""",
+                         (next_nonce, reservation, now, self._hash(token)))
+        return PublicTurn(message, surface, reservation, revision + 1, next_nonce,
+                          self.policy.session_turns - revision - 1, self.policy.output_tokens,
+                          min(now + self.policy.request_seconds, row["created"] + self.policy.session_seconds,
+                              now + self.policy.idle_seconds))
+
+    def _check_turn(self, row, nonce: str, revision: int, now: int) -> None:
+        if now < row["last_seen"]:
+            raise PublicAdmissionError("public_clock_rollback", 503)
+        if now >= row["created"] + self.policy.session_seconds or now >= row["last_seen"] + self.policy.idle_seconds:
+            raise PublicAdmissionError("public_session_expired", 410)
+        if row["revision"] >= self.policy.session_turns:
+            raise PublicAdmissionError("public_session_quota_exhausted", 429)
+        if row["busy"] is not None:
+            raise PublicAdmissionError("public_turn_in_flight", 409)
+        if revision != row["revision"] or not secrets.compare_digest(nonce, row["nonce"]):
+            raise PublicAdmissionError("public_replay_rejected", 409)
+
+    def finish_turn(self, *, token: str, reservation_id: str, now: int) -> bool:
+        """Trusted provider completion only. Never refund a failed/timed-out call."""
+        checked_hex(reservation_id, "reservation")
+        with self._transaction(now) as conn:
+            result = conn.execute("""UPDATE reddog_public_session_v1 SET busy=NULL
+                WHERE token_hash=? AND busy=?""", (self._hash(token), reservation_id))
+            conn.execute("DELETE FROM reddog_public_session_v1 WHERE token_hash=? AND closed=1 AND busy IS NULL",
+                         (self._hash(token),))
+        return result.rowcount == 1
+
+    def delivery_allowed(self, *, token: str, revision: int, now: int) -> bool:
+        """Recheck expiry/withdrawal/current revision immediately before delivery."""
+        with self._transaction(now) as conn:
+            row = conn.execute("SELECT * FROM reddog_public_session_v1 WHERE token_hash=?",
+                               (self._hash(token),)).fetchone()
+            return bool(row and not row["closed"] and row["revision"] == revision
+                        and now < row["created"] + self.policy.session_seconds
+                        and now < row["last_seen"] + self.policy.idle_seconds)
+
+    def withdraw(self, *, surface: str, origin: str, subject: str,
+                 token: str, now: int) -> dict:
+        with self._transaction(now) as conn:
+            row = self._session(conn, token, surface, origin, subject)
+            conn.execute("""UPDATE reddog_public_session_v1 SET closed=1,
+                actor_claim='withdrawn', nonce='' WHERE token_hash=?""", (self._hash(token),))
+            if row["busy"] is None:
+                conn.execute("DELETE FROM reddog_public_session_v1 WHERE token_hash=?", (self._hash(token),))
+        return {"encounter_id": row["encounter"], "withdrawn": True,
+                "in_flight_retained_until_completion": row["busy"] is not None,
+                "abuse_counters_retained": True, "authority_granted": "none"}

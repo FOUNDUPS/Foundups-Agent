@@ -1,0 +1,36 @@
+name: RedDog public admission
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'modules/communication/moltbot_bridge/src/reddog_public_*.py'
+      - 'modules/communication/moltbot_bridge/tests/public_surface/**'
+      - '.github/workflows/reddog-public-admission.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'modules/communication/moltbot_bridge/src/reddog_public_*.py'
+      - 'modules/communication/moltbot_bridge/tests/public_surface/**'
+      - '.github/workflows/reddog-public-admission.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  public-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated test dependencies
+        run: python -m pip install pytest==9.0.2 coverage==7.13.3 fastapi==0.128.2 httpx==0.28.1
+      - name: Verify public guest boundary
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+        run: |
+          python -m coverage run --branch --include='*/reddog_public_policy.py,*/reddog_public_session_gate.py,*/reddog_public_http.py' -m pytest -q --confcutdir=modules/communication/moltbot_bridge/tests/public_surface modules/communication/moltbot_bridge/tests/public_surface
+          python -m coverage report -m --fail-under=90
