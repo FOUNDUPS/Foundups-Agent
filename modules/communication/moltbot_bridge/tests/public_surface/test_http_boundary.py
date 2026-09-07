@@ -1,6 +1,8 @@
 """Real ASGI router with synthetic responder; no live provider or network call."""
 import asyncio
+import ast
 import json
+from pathlib import Path
 import sys
 
 import httpx
@@ -204,3 +206,90 @@ def test_wrong_binding_and_database_failure_are_fixed_unavailable(api_module, st
             response = await c.post(BASE+"encounter", json=CONSENT)
             assert response.status_code == 503 and "PRIVATE_ERROR" not in response.text
     asyncio.run(run())
+
+
+def test_lost_response_status_recovers_next_nonce_without_duplicate_call(api_module, store):
+    async def run():
+        app, _, seen = host(api_module, store)
+        async with client(app) as c:
+            session = (await c.post(BASE+"encounter", json=CONSENT)).json()
+            await c.post(BASE+"turn", headers=auth(session), json=payload(session))
+            assert (await c.post(BASE+"turn", headers=auth(session), json=payload(session))).status_code == 409
+            response = await c.post(BASE+"status", headers=auth(session), json={})
+            snapshot = response.json()
+            assert response.status_code == 200 and response.headers["cache-control"] == "no-store"
+            assert len(seen) == 1 and snapshot["revision"] == 1 and snapshot["remaining_turns"] == 9
+            assert not snapshot["in_flight"] and "reply" not in snapshot and "token" not in snapshot
+            session.update(snapshot)
+            assert (await c.post(BASE+"turn", headers=auth(session), json=payload(session))).status_code == 200
+            assert len(seen) == 2
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("body", [None, [], {"principal_id": "012"}, {"knowledge_answer": "tSingularity"}, {"nonce": "a"*64}])
+def test_status_rejects_client_identity_or_state_fields(api_module, store, body):
+    async def run():
+        app, _, seen = host(api_module, store)
+        async with client(app) as c:
+            session = (await c.post(BASE+"encounter", json=CONSENT)).json()
+            response = await c.post(BASE+"status", headers=auth(session) | {"Content-Type": "application/json"}, content=json.dumps(body))
+            assert response.status_code == 400 and response.json() == {"error": "public_status_shape_invalid"}
+            assert not seen
+    asyncio.run(run())
+
+
+def test_status_needs_bearer_and_does_not_extend_expiry(api_module, store):
+    async def run():
+        app, binding, seen = host(api_module, store)
+        async with client(app) as c:
+            session = (await c.post(BASE+"encounter", json=CONSENT)).json()
+            assert (await c.post(BASE+"status", json={})).status_code == 403
+            assert (await c.options(BASE+"status")).status_code == 200
+            binding.clock = lambda: NOW+119
+            response = await c.post(BASE+"status", headers=auth(session), json={})
+            assert response.status_code == 200 and response.json()["idle_expires_at"] == NOW+120
+            binding.clock = lambda: NOW+120
+            expired = await c.post(BASE+"status", headers=auth(session), json={})
+            assert expired.status_code == 410 and "nonce" not in expired.json()
+            assert not seen
+    asyncio.run(run())
+
+
+def test_status_does_not_cross_surface_or_peer(api_module, store):
+    async def run():
+        app, _, seen = host(api_module, store)
+        async with client(app) as c:
+            session = (await c.post(BASE+"encounter", json=CONSENT)).json()
+            response = await c.post("/api/reddog/public/esingularity/status", headers=auth(session) | {"Origin": "https://esingularity.ai"}, json={})
+            assert response.status_code == 403 and "nonce" not in response.json()
+        transport = httpx.ASGITransport(app=app, client=("127.0.0.2", 12345))
+        async with httpx.AsyncClient(transport=transport, base_url="https://gateway.example") as c:
+            response = await c.post(BASE+"status", headers=auth(session) | {"Origin": ORIGIN}, json={})
+            assert response.status_code == 403 and "nonce" not in response.json()
+        assert not seen
+    asyncio.run(run())
+
+
+def test_http_status_uses_actual_database_manager(api_module, database_store):
+    async def run():
+        gate, manager, _ = database_store
+        app, _, seen = host(api_module, (gate, manager.get_connection))
+        async with client(app) as c:
+            session = (await c.post(BASE+"encounter", json=CONSENT)).json()
+            await c.post(BASE+"turn", headers=auth(session), json=payload(session))
+            response = await c.post(BASE+"status", headers=auth(session), json={})
+            assert response.status_code == 200 and response.json()["remaining_turns"] == 9
+            assert len(seen) == 1
+            assert (await c.post(BASE+"withdraw", headers=auth(session))).status_code == 200
+            denied = await c.post(BASE+"status", headers=auth(session), json={})
+            assert denied.status_code == 403 and "nonce" not in denied.json()
+    asyncio.run(run())
+
+
+def test_public_runtime_stays_within_wsp62_bounds(api_module):
+    for module in [p, s, api_module]:
+        source = Path(module.__file__).read_text(encoding="utf-8")
+        assert len(source.splitlines()) < 400
+        for node in ast.walk(ast.parse(source)):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                assert node.end_lineno - node.lineno + 1 <= 30, node.name
