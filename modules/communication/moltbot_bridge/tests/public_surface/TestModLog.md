@@ -17,3 +17,17 @@
   and runtime were absent; this is not a successful bootstrap or Holo proof.
 - Full-checkout registry generation, CI and deployment evidence must be recorded
   in the PR. Historical pass counts are not substituted for those gates.
+
+## CI portability repair
+
+- GitHub Actions at source head `ea419dfed724a332e55aa9055766ba1eadf063c5`
+  ran all 152 tests successfully on Python 3.12.14. Coverage then failed because
+  the inherited repository config selected `modules/livechat/src` and ignored
+  the suite include filter; no public-boundary coverage data was collected.
+- Added an explicit suite `.coveragerc`; it measures all three source files with
+  the same 90% floor without changing root coverage or any test assertion.
+- The bounded full-checkout registry worker succeeded, producing commit
+  `1d9406aec720f1e05b9bdd207806324df728054b`: 1,643 registered files,
+  both new suites collectable, unchanged 269 quarantined files.
+- Temporary branch-only registry writer is removed after that successful run.
+  Fresh final-head CI remains the merge gate.

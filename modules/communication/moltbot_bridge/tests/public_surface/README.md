@@ -13,8 +13,8 @@ nearby resident tests were read before adding this suite (WSP_97/WSP_22).
 Run from repository root:
 
 ```sh
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m coverage run --branch --include='*/reddog_public_policy.py,*/reddog_public_session_gate.py,*/reddog_public_http.py' -m pytest -q --confcutdir=modules/communication/moltbot_bridge/tests/public_surface modules/communication/moltbot_bridge/tests/public_surface
-python -m coverage report -m --fail-under=90
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m coverage run --rcfile=modules/communication/moltbot_bridge/tests/public_surface/.coveragerc -m pytest -q --confcutdir=modules/communication/moltbot_bridge/tests/public_surface modules/communication/moltbot_bridge/tests/public_surface
+python -m coverage report --rcfile=modules/communication/moltbot_bridge/tests/public_surface/.coveragerc
 ```
 
 The dedicated CI job runs the same bounded suite. Whole-repository, authenticated
