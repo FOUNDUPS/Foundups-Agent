@@ -123,6 +123,23 @@ class PublicSessionGate:
             raise PublicAdmissionError("public_session_denied", 403)
         return row
 
+    def session_status(self, *, surface: str, origin: str, subject: str,
+                       token: str, now: int) -> dict:
+        """Recover current admission state, not replies, identity or work authority.
+
+        A status read never rotates the nonce, renews idle time, refunds budget,
+        clears a busy slot or invokes inference. The existing bearer is required.
+        """
+        with self._transaction(now) as conn:
+            row = self._session(conn, token, surface, origin, subject)
+            self._check_active(row, now)
+            return {"revision": row["revision"], "nonce": row["nonce"],
+                    "remaining_turns": max(0, self.policy.session_turns - row["revision"]),
+                    "in_flight": row["busy"] is not None,
+                    "expires_at": row["created"] + self.policy.session_seconds,
+                    "idle_expires_at": row["last_seen"] + self.policy.idle_seconds,
+                    "server_time": now, "disclosure": "public", "effect_ceiling": "NONE"}
+
     def reserve_turn(self, *, surface: str, origin: str, subject: str,
                      token: str, body: dict, now: int) -> PublicTurn:
         nonce, revision, message = turn_request(body, self.policy)
@@ -143,11 +160,14 @@ class PublicSessionGate:
                           min(now + self.policy.request_seconds, row["created"] + self.policy.session_seconds,
                               now + self.policy.idle_seconds))
 
-    def _check_turn(self, row, nonce: str, revision: int, now: int) -> None:
+    def _check_active(self, row, now: int) -> None:
         if now < row["last_seen"]:
             raise PublicAdmissionError("public_clock_rollback", 503)
         if now >= row["created"] + self.policy.session_seconds or now >= row["last_seen"] + self.policy.idle_seconds:
             raise PublicAdmissionError("public_session_expired", 410)
+
+    def _check_turn(self, row, nonce: str, revision: int, now: int) -> None:
+        self._check_active(row, now)
         if row["revision"] >= self.policy.session_turns:
             raise PublicAdmissionError("public_session_quota_exhausted", 429)
         if row["busy"] is not None:
