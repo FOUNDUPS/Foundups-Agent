@@ -146,6 +146,22 @@ export default function YumoriPresentation() {
         <button className="yumori-play" type="button" onClick={() => setPlaying((current) => !current)} aria-label={playing ? copy.controls.pause : copy.controls.play}>{playing ? 'Ⅱ' : '▶'}<span>{playing ? copy.controls.pause : copy.controls.play}</span></button>
       </div>
 
+      {locale === 'ja' && (
+        <figure style={{ margin: 'clamp(2rem, 5vw, 4.5rem) auto', width: 'min(100%, 1180px)' }}>
+          <Image
+            src="/yumori-economic-flow-ja.svg"
+            alt="解体案と、民間資本からSPV・SPC、地域コンピュート、収益、温泉・地域還元へつなぐ再生案を比較する60日間検証の概念図"
+            width={1600}
+            height={900}
+            sizes="(max-width: 1200px) 94vw, 1180px"
+            style={{ width: '100%', height: 'auto', borderRadius: '18px' }}
+          />
+          <figcaption style={{ marginTop: '0.75rem', fontSize: '0.82rem', lineHeight: 1.65, opacity: 0.72 }}>
+            経済フローの概念図。約15.8億円は市議会資料に示された解体見込みで、再生案の資金・収益は確約値ではありません。60日間で電力、通信、建物、土地、需要、資金、温泉運営を検証します。
+          </figcaption>
+        </figure>
+      )}
+
       <aside className="yumori-outreach" id="yumori-outreach" aria-labelledby="yumori-outreach-title">
         <div><p>07 · RESEARCH OUTREACH</p><h3 id="yumori-outreach-title">{outreachLabel.title}</h3><span>{outreachLabel.note}</span></div>
         <ol>{outreach.map((candidate) => <li key={candidate.name}><a href={candidate.href} target="_blank" rel="noreferrer"><strong>{candidate.name}</strong><span>{candidate.institution}</span><small>{candidate.fit[locale]} ↗</small></a></li>)}</ol>
