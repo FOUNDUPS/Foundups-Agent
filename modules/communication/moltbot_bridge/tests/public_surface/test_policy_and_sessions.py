@@ -241,3 +241,116 @@ def test_concurrency_cap_retains_slot_until_actual_completion(store):
         turn(gate, b, subject="b"*64)
     gate.finish_turn(token=a["token"], reservation_id=first.reservation_id, now=NOW)
     assert turn(gate, b, subject="b"*64).remaining_turns == 9
+
+
+def status(gate, session, now=NOW, **kw):
+    return gate.session_status(**(COMMON | kw), token=session["token"], now=now)
+
+
+def test_status_recovers_consumed_nonce_without_replaying_or_refunding(store):
+    gate, connect = store
+    session = encounter(gate)
+    result = turn(gate, session, "PRIVATE_REPLY_CANARY")
+    snapshot = status(gate, session)
+    assert snapshot["revision"] == 1 and snapshot["nonce"] == result.next_nonce
+    assert snapshot["in_flight"] is True and snapshot["remaining_turns"] == 9
+    assert set(snapshot) == {"revision", "nonce", "remaining_turns", "in_flight",
+                            "expires_at", "idle_expires_at", "server_time", "disclosure", "effect_ceiling"}
+    assert snapshot["disclosure"] == "public" and snapshot["effect_ceiling"] == "NONE"
+    assert "PRIVATE_REPLY_CANARY" not in json.dumps(snapshot) and session["token"] not in json.dumps(snapshot)
+    with pytest.raises(p.PublicAdmissionError, match="in_flight"):
+        turn(gate, session | snapshot)
+    advance(gate, session, result)
+    assert not status(gate, session)["in_flight"]
+    with connect() as conn:
+        assert conn.execute("SELECT used FROM reddog_public_budget_v1 WHERE bucket='turns:global'").fetchone()["used"] == 1
+
+
+def test_status_polling_does_not_extend_idle_or_rotate_nonce(store):
+    gate, _ = store
+    session = encounter(gate)
+    for age in [1, 60, 119]:
+        snapshot = status(gate, session, now=NOW+age)
+        assert snapshot["nonce"] == session["nonce"] and snapshot["revision"] == 0
+        assert snapshot["idle_expires_at"] == NOW+120 and snapshot["expires_at"] == NOW+600
+        assert snapshot["server_time"] == NOW+age and snapshot["remaining_turns"] == 10
+    with pytest.raises(p.PublicAdmissionError, match="expired"):
+        status(gate, session, now=NOW+120)
+
+
+@pytest.mark.parametrize("scope", [dict(subject="b"*64), dict(origin="https://evil.example"),
+    dict(surface="esingularity", origin="https://esingularity.ai"),
+    dict(surface="autopost", origin="https://autopost.foundups.com")])
+def test_status_cannot_disclose_other_scopes(store, scope):
+    gate, _ = store
+    session = encounter(gate)
+    with pytest.raises(p.PublicAdmissionError):
+        status(gate, session, **scope)
+
+
+@pytest.mark.parametrize("token", [None, "", "b"*64, "012", "tSingularity"])
+def test_status_requires_existing_bearer(store, token):
+    gate, _ = store
+    encounter(gate)
+    with pytest.raises(p.PublicAdmissionError):
+        status(gate, {"token": token})
+
+
+def test_status_at_quota_and_after_withdrawal(store):
+    _, connect = store
+    gate = s.PublicSessionGate(connect, p.PublicPolicy(session_turns=1))
+    session = encounter(gate)
+    advance(gate, session, turn(gate, session))
+    snapshot = status(gate, session)
+    assert snapshot["remaining_turns"] == 0
+    with pytest.raises(p.PublicAdmissionError, match="quota"):
+        turn(gate, session | snapshot)
+    gate.withdraw(**COMMON, token=session["token"], now=NOW)
+    with pytest.raises(p.PublicAdmissionError, match="denied"):
+        status(gate, session)
+
+
+def test_actual_database_wrapper_restart_and_nonce_recovery(database_store):
+    gate, manager, module = database_store
+    session = encounter(gate)
+    result = turn(gate, session)
+    advance(gate, session, result)
+    module.DatabaseManager.reset_for_tests()
+    restarted = module.DatabaseManager()
+    restored_gate = s.PublicSessionGate(restarted.get_connection)
+    snapshot = status(restored_gate, session)
+    assert snapshot["revision"] == 1 and snapshot["nonce"] == result.next_nonce
+    with pytest.raises(p.PublicAdmissionError, match="replay"):
+        turn(restored_gate, session)
+    assert turn(restored_gate, session | snapshot).remaining_turns == 8
+    rows = manager.execute_query("SELECT used FROM reddog_public_budget_v1 WHERE bucket='turns:global'")
+    assert rows == [{"used": 2}]
+
+
+def test_actual_database_wrapper_concurrency_and_fail_closed_restart(database_store):
+    gate, manager, _ = database_store
+    session = encounter(gate)
+    def attempt(_):
+        try:
+            return turn(s.PublicSessionGate(manager.get_connection), session)
+        except p.PublicAdmissionError:
+            return None
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(attempt, range(16)))
+    assert sum(result is not None for result in results) == 1
+    restarted = s.PublicSessionGate(manager.get_connection)
+    snapshot = status(restarted, session)
+    assert snapshot["in_flight"] and snapshot["remaining_turns"] == 9
+    with pytest.raises(p.PublicAdmissionError, match="in_flight"):
+        turn(restarted, session | snapshot)
+    assert manager.execute_query("SELECT used FROM reddog_public_budget_v1 WHERE bucket='turns:global'") == [{"used": 1}]
+
+
+def test_denied_status_rolls_back_actual_database_clock(database_store):
+    gate, _, _ = database_store
+    session = encounter(gate)
+    with pytest.raises(p.PublicAdmissionError):
+        status(gate, session, now=NOW+10, subject="b"*64)
+    assert status(gate, session)["server_time"] == NOW
+    with pytest.raises(p.PublicAdmissionError, match="clock_rollback"):
+        status(gate, session, now=NOW-1)
