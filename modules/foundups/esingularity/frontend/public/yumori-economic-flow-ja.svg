@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">YUMORI.me 解体と再生の経済フロー</title>
+  <desc id="desc">約15.8億円の解体案と、民間資本、SPVまたはSPC、地域コンピュート、収益、温泉・地域還元をつなぐ再生案を比較し、60日間で主要条件を検証する概念図。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07182f"/><stop offset="1" stop-color="#123c64"/></linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b6b4f"/><stop offset="1" stop-color="#14956a"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity=".18"/></filter>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;fill:#0b1c31}
+      .white{fill:#fff}.muted{fill:#506173}.small{font-size:24px}.body{font-size:29px}.label{font-size:26px;font-weight:700;letter-spacing:.04em}.head{font-size:46px;font-weight:800}.big{font-size:64px;font-weight:900}.arrow{fill:#1f6ca8}.card{fill:#fff;stroke:#d8e2ec;stroke-width:2}.pill{fill:#eef5fa}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#f4f7fa"/>
+  <rect width="1600" height="150" fill="url(#bg)"/>
+  <text x="70" y="70" class="white head">コンピュートは、温泉を救い、地域を再生し、日本を変えられるか。</text>
+  <text x="70" y="112" class="white body">壊す前に、経済・技術・需要を同じ物差しで検証する。</text>
+  <text x="1440" y="78" text-anchor="end" class="white label">YUMORI.me</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="205" width="430" height="245" rx="28" fill="#fff" stroke="#d7b9b9" stroke-width="3"/>
+    <rect x="70" y="205" width="430" height="70" rx="28" fill="#8e2f2f"/>
+    <rect x="70" y="245" width="430" height="30" fill="#8e2f2f"/>
+    <text x="105" y="253" class="white label">解体する場合</text>
+    <text x="105" y="337" class="muted body">解体費の見込み</text>
+    <text x="105" y="402" class="big" fill="#8e2f2f">約15.8億円</text>
+    <text x="105" y="438" class="muted small">建物の再利用オプションは消滅</text>
+  </g>
+
+  <path d="M530 325 H645" stroke="#1f6ca8" stroke-width="14" stroke-linecap="round"/>
+  <path d="M635 295 L680 325 L635 355 Z" class="arrow"/>
+  <text x="605" y="392" text-anchor="middle" class="label" fill="#1f6ca8">60日間で比較</text>
+
+  <g filter="url(#shadow)">
+    <rect x="700" y="205" width="830" height="245" rx="28" fill="#fff" stroke="#b8d9c8" stroke-width="3"/>
+    <rect x="700" y="205" width="830" height="70" rx="28" fill="url(#green)"/>
+    <rect x="700" y="245" width="830" height="30" fill="#0b6b4f"/>
+    <text x="735" y="253" class="white label">再生する場合：地域コンピュート × 温泉 × 地域</text>
+    <text x="735" y="330" class="body">民間資本を新しい収益資産へ投じ、既存資産を再生する。</text>
+    <text x="735" y="382" class="body">収益から電力・運営・返済・更新を支払い、余剰を温泉と地域へ。</text>
+    <text x="735" y="430" class="label" fill="#0b6b4f">成立条件を確認してから、段階的に実行する。</text>
+  </g>
+
+  <text x="70" y="535" class="head">経済の仕組み</text>
+  <g transform="translate(70 575)">
+    <rect class="card" x="0" y="0" width="205" height="130" rx="20"/><text x="102" y="53" text-anchor="middle" class="label">民間資本</text><text x="102" y="91" text-anchor="middle" class="small muted">投資・融資</text>
+    <path d="M215 65 H265" stroke="#1f6ca8" stroke-width="8"/><path d="M255 48 L282 65 L255 82 Z" class="arrow"/>
+    <rect class="card" x="290" y="0" width="205" height="130" rx="20"/><text x="392" y="53" text-anchor="middle" class="label">SPV / SPC</text><text x="392" y="91" text-anchor="middle" class="small muted">資産・契約・資金</text>
+    <path d="M505 65 H555" stroke="#1f6ca8" stroke-width="8"/><path d="M545 48 L572 65 L545 82 Z" class="arrow"/>
+    <rect class="card" x="580" y="0" width="205" height="130" rx="20"/><text x="682" y="53" text-anchor="middle" class="label">コンピュート</text><text x="682" y="91" text-anchor="middle" class="small muted">AI・研究・企業利用</text>
+    <path d="M795 65 H845" stroke="#1f6ca8" stroke-width="8"/><path d="M835 48 L862 65 L835 82 Z" class="arrow"/>
+    <rect class="card" x="870" y="0" width="205" height="130" rx="20"/><text x="972" y="53" text-anchor="middle" class="label">売上収入</text><text x="972" y="91" text-anchor="middle" class="small muted">利用料金</text>
+    <path d="M1085 65 H1135" stroke="#1f6ca8" stroke-width="8"/><path d="M1125 48 L1152 65 L1125 82 Z" class="arrow"/>
+    <rect class="card" x="1160" y="0" width="300" height="130" rx="20"/><text x="1310" y="44" text-anchor="middle" class="label">費用・返済・更新</text><text x="1310" y="82" text-anchor="middle" class="small muted">電力・運営・設備更新</text><text x="1310" y="112" text-anchor="middle" class="small muted">残余 → 温泉・地域還元</text>
+  </g>
+
+  <g transform="translate(70 745)">
+    <rect x="0" y="0" width="1460" height="105" rx="24" class="pill" stroke="#c8d8e7" stroke-width="2"/>
+    <text x="35" y="42" class="label">60日間で確認：</text>
+    <text x="250" y="42" class="body">電力 ｜ 通信 ｜ 建物・アスベスト ｜ 土地・権利 ｜ 需要 ｜ 資金調達 ｜ 温泉運営</text>
+    <text x="35" y="82" class="body" fill="#0b6b4f">解体は60日後にも選べる。先に解体すれば、この建物で再生可能性を検証することは二度とできない。</text>
+  </g>
+</svg>
