@@ -3,6 +3,33 @@
 Status: work order only; not completion or execution authority by itself.
 Origin: external principal 012. Role: 0102 architect/engineer.
 
+Canonical navigation: [RedDog documentation map](../../../../docs/REDDOG_DOCUMENTATION_MAP.md) ·
+[public admission contract](../REDDOG_PUBLIC_SURFACE_ADMISSION.md) ·
+[test inventory](../../../../modules/communication/moltbot_bridge/tests/public_surface/README.md).
+
+## Source lineage and completion ledger
+
+The initial implementation entered `main` through [PR #1633](https://github.com/FOUNDUPS/Foundups-Agent/pull/1633),
+squash `8980aa29b2a17655ad5d927c94059c068400c118`; it was not a direct main push.
+[PR #1635](https://github.com/FOUNDUPS/Foundups-Agent/pull/1635) adds guest status
+recovery and actual DatabaseManager-wrapper tests. Read its live merge/check
+state before treating it as available on main. Neither PR is deployment evidence.
+
+| Work | Source state / remaining evidence |
+|---|---|
+| Public guest consent, caps, expiry, replay and cancellation boundaries | Implemented in #1633; optional, unmounted |
+| Lost-response nonce/revision recovery | Implemented by #1635; same bearer/surface/origin/subject; never replays inference |
+| SQLite DatabaseManager wrapper | Exercised by #1635 tests with temporary databases; actual PC lifecycle remains unverified |
+| Resident host, trusted edge and public-only responder | Not activated; needs actual deployment/model/accounting bindings |
+| AutoPost mobile, foundups.com and eSingularity.ai clients | Not implemented by these admission slices; preserve existing source ownership |
+| Protected 012/0102 identity and 3V integration | Public evidence is unsigned/provisional; no protected identity or engine invocation |
+| Private continuity, admitted context deltas, voice and omission critic | Still separate unfinished layers; use the existing dual-loop sequence |
+| Live HoloIndex repair and recursive improvement | Requires a reachable configured owner and exact receipt; not established by GitHub CI |
+
+Do not equate a linked work order, source merge, test pass or mocked responder
+with completion of a downstream row. Continue the next unblocked bounded slice;
+record exact missing environment dependencies rather than inventing readiness.
+
 ## Recover and isolate
 
 Read `AGENTS.md`, WSP_00, WSP_97, WSP_10, WSP_15 and the RedDog documentation map.
@@ -37,7 +64,8 @@ improvement just because a query was attempted.
 2. Review `PublicSessionGate` with the actual SQLite DatabaseManager wrapper,
    process concurrency, restart/crash and clock behavior. Prove orphaned busy-slot
    recovery through owned process/lease evidence; never erase counters or allow
-   a second inference merely to clear an error.
+   a second inference merely to clear an error. Guest `status` cannot clear such
+   a slot, and replacing a Python host object is not proof of process termination.
 3. Bind an independently reviewed zero-tool, public-only responder. Its input is
    PublicTurn, not the principal Memex or private resident work envelope. Enforce
    max output tokens and provider-side deadlines. No arbitrary URL/model selection
@@ -63,8 +91,13 @@ biometrics, publishing and private-memory disclosure.
 Client obligations: show consent and guest status; render output as text, not
 trusted HTML; expose remaining turns and expiry; respect 429/410/503; do not
 retry a consumed nonce; do not save credentials or raw conversation to localStorage.
-A timeout consumes budget. Do not claim "sent", "saved", "remembered" or
-"executed" from model text.
+A timeout consumes budget. After a lost reply, use `POST .../{surface}/status`
+with the existing bearer and `{}` to recover the latest revision/nonce. Do not
+resubmit the uncertain turn automatically. The response includes `in_flight`,
+`expires_at`, `idle_expires_at` and `server_time`; status polling does not renew
+those bounds or recover reply text. Apply status responses monotonically by
+revision and request order; never overwrite newer client state with a late read.
+Do not claim "sent", "saved", "remembered" or "executed" from model text.
 
 ## Identity and 3V
 
@@ -87,7 +120,8 @@ Verify: wrong origin, spoofed forwarded identity, cross-surface/private-scope
 leakage, expired and replayed nonce, parallel over-cap requests, restart quotas,
 withdrawal during a response, body/output bounds, provider cancellation ignored,
 clock rollback, unavailable DB/model, synthetic public/private canaries, and
-`tSingularity` as ordinary capped text.
+`tSingularity` as ordinary capped text. Also verify lost-response status recovery,
+no idle renewal, no quota refund, preserved busy slots and stale-client rejection.
 
 Run targeted tests, dependency/security tiers, required CI and exact-host live
 acceptance. Record commands and results honestly. Keep deployment distinct from
