@@ -13,30 +13,33 @@ Canonical navigation: [documentation map](../../../docs/REDDOG_DOCUMENTATION_MAP
 AutoPost is the first intended mobile RedDog surface. `foundups.com` and
 `eSingularity.ai` are additional public surfaces, not public doors into 012's
 private 0102 runtime. This slice implements their shared **guest admission
-boundary**, not the complete voice, memory, dual-loop, Lick, or 3V system.
+boundary** plus the explicit non-biometric AutoPost Lick PoC. It is not the
+complete voice, memory, dual-loop, biometric Lick, or 3V system.
 
 RedDog remains the fast surface. 0102 remains the deeper twin. A public
 responder receives only a bounded public turn and a server-selected surface.
 It must never be configured to call the existing private OpenClaw webhook,
 private Memex, tools, work-order promotion, or worker dispatch.
 
-No site, AutoPost source, deployment, existing webhook, WSP, model topology,
-or signed runtime manifest is changed by this slice. The router is intentionally
-unmounted until its host and public-only responder pass deployment review.
+The linked AutoPost source change adds the opt-in client and capture provenance;
+no site deployment, existing webhook, WSP, model topology, or signed runtime
+manifest is changed. The router remains intentionally unmounted until its host
+and public-only responder pass deployment review.
 
 ## Implemented ownership
 
 | Source | Responsibility |
 |---|---|
-| `modules/communication/moltbot_bridge/src/reddog_public_policy.py` | Exact public origins, strict input, lowered-only ceilings, unsigned Lick Verification evidence |
-| `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` | Atomic guest session/nonce/quota accounting and status recovery through an injected existing AgentDB SQLite connection factory |
+| `modules/communication/moltbot_bridge/src/reddog_public_policy.py` | Exact public origins, strict inputs, bounded Lick consent/challenge/receipt schemas, unsigned Verification evidence |
+| `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` | Atomic guest/Lick session, one-use challenge, nonce, quota, expiry, withdrawal and status accounting through an injected existing AgentDB SQLite connection factory |
 | `modules/communication/moltbot_bridge/src/reddog_public_http.py` | Optional FastAPI router; bounded JSON, exact CORS, public-only responder, cancellation/deadline, late-result handling and bearer-bound status |
 | `modules/communication/moltbot_bridge/tests/public_surface/` | Real SQLite, actual DatabaseManager-wrapper and in-process ASGI tests with synthetic responders |
 
 The gate accepts `agent_db.db.get_connection`; it does not create a second memory
 database. The continuity tests execute the unchanged DatabaseManager wrapper
 against temporary SQLite databases; the actual PC binding is not verified.
-Only `reddog_public_budget_v1` and `reddog_public_session_v1` are owned.
+Only `reddog_public_budget_v1`, `reddog_public_session_v1`, and the content-free
+`reddog_lick_open_v1` challenge/profile binding are owned.
 No conversation text, raw address, media, private memory, or raw session bearer
 is stored. SQLite is the supported accounting backend for this slice; other
 backends must fail closed until independently implemented and verified.
@@ -44,7 +47,9 @@ backends must fail closed until independently implemented and verified.
 ## Endpoints and hard ceilings
 
 Routes are `/api/reddog/public/{surface}/{operation}` with POST operations
-`encounter`, `turn`, `status`, and `withdraw`; OPTIONS is narrow CORS preflight.
+`encounter`, `lick`, `challenge`, `turn`, `status`, and `withdraw`; OPTIONS is
+narrow CORS preflight. `lick` returns a random challenge; `challenge` consumes
+it exactly once before a Lick-bound session may submit a turn.
 
 | Surface | Exact allowed browser origin |
 |---|---|
@@ -120,10 +125,13 @@ This subset accepts scoped consent and a self-declared `human`, `agent`, or
 - the record is **unsigned**, grants no authority, and has an expiry;
 - Validation and Valuation have not been evaluated.
 
-This is an implemented evidence projection hook, not a live 3V-engine invocation
-or an authenticated `LickReceipt`. Human account proof requires a separate
-possession-bound authentication flow; an agent requires its own verifiable
-key/registration/delegation binding. Neither can be inferred from conversation.
+The legacy `encounter` operation returns that evidence projection. The opt-in
+`lick` plus `challenge` operations now return an unsigned, provisional
+`reddog.lick.receipt.v1` only after a randomized challenge is consumed once.
+That challenge proves request continuity, not identity, liveness, or human
+presence. Human account proof still requires a separate possession-bound
+authentication flow; an agent requires its own verifiable key/registration/
+delegation binding. Neither can be inferred from conversation.
 Assistive AI use by a human is not itself evidence of impersonation.
 
 The full [Lick contract](REDDOG_LICK_CONNECTION_HANDSHAKE.md), including protected

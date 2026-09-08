@@ -17,6 +17,7 @@ SURFACE_ORIGINS = MappingProxyType({
     "autopost": frozenset({"https://autopost.foundups.com"}),
 })
 CONSENT_VERSION = "reddog.public-guest.v1"
+LICK_CONSENT_VERSION = "reddog.lick.open.v1"
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 
 
@@ -94,6 +95,61 @@ def encounter_request(body: dict) -> str:
     if type(claim) is not str or claim not in {"human", "agent", "unspecified"}:
         raise PublicAdmissionError("public_actor_claim_invalid")
     return claim
+
+
+def lick_encounter_request(body: dict) -> tuple[str, str | None]:
+    """Validate the open-source, non-biometric AutoPost Lick request."""
+    required = {"consent", "consent_version", "actor_claim", "profile_mode",
+                "display_name", "retention"}
+    if type(body) is not dict or set(body) != required:
+        raise PublicAdmissionError("lick_encounter_shape_invalid")
+    if body["consent"] is not True or body["consent_version"] != LICK_CONSENT_VERSION:
+        raise PublicAdmissionError("lick_consent_required", 403)
+    if body["retention"] != "session":
+        raise PublicAdmissionError("lick_retention_invalid")
+    claim = body["actor_claim"]
+    if type(claim) is not str or claim not in {"human", "agent", "unspecified"}:
+        raise PublicAdmissionError("public_actor_claim_invalid")
+    mode, display_name = body["profile_mode"], body["display_name"]
+    if mode == "guest" and display_name is None:
+        return claim, None
+    if mode == "named" and type(display_name) is str:
+        return claim, checked_text(display_name, 80)
+    raise PublicAdmissionError("lick_profile_claim_invalid")
+
+
+def lick_challenge_request(body: dict) -> str:
+    if type(body) is not dict or set(body) != {"challenge"}:
+        raise PublicAdmissionError("lick_challenge_shape_invalid")
+    return checked_hex(body["challenge"], "challenge")
+
+
+def lick_receipt(*, encounter: str, profile_id: str, claim: str,
+                 display_name: str | None, surface: str, issued: int,
+                 expires: int) -> dict:
+    """Non-authoritative receipt: continuity proof, never identity or access."""
+    return {
+        "schema_version": "reddog.lick.receipt.v1",
+        "encounter_id": encounter,
+        "profile": {
+            "schema_version": "reddog.lick.encounter-profile.v1",
+            "profile_id": profile_id,
+            "actor_claim": claim,
+            "display_name": display_name,
+            "identity_state": "provisional",
+        },
+        "surface": surface,
+        "consent": {"version": LICK_CONSENT_VERSION, "scope": "current_encounter",
+                    "retention": "session"},
+        "proofs": [{"kind": "randomized_challenge_continuity", "result": "completed"}],
+        "issued_at": issued,
+        "expires_at": expires,
+        "identity_verified": False,
+        "human_presence_proven": False,
+        "biometrics_collected": False,
+        "signed": False,
+        "authority_granted": "none",
+    }
 
 
 def turn_request(body: dict, policy: PublicPolicy) -> tuple[str, int, str]:

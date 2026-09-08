@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-08: Open-source non-biometric RedDog Lick PoC
+
+- Added an opt-in AutoPost Lick at the existing fail-closed public boundary:
+  exact consent shape, guest/display-name claim, randomized single-use
+  continuity challenge, provisional encounter profile, and bounded receipt.
+- Lick-bound turns remain blocked until the challenge is consumed. Expiry,
+  withdrawal, replay rejection, quotas, and public-only effect ceiling are
+  inherited from the existing persistent session gate.
+- No biometric field is accepted or stored. Challenge and bearer values are
+  stored only as digests/in memory; every receipt states identity and human
+  presence are unverified and `authority_granted: none`.
+- The implementation is open source and makes no patent-status claim.
+  (WSP 22/50/62/71/97)
+
 ## 2026-09-05: RedDog surface / 0102 deep-layer documentation alignment
 
 - Corrected the active gateway topology so RedDog owns the lightweight

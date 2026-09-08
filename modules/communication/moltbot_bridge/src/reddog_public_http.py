@@ -146,7 +146,7 @@ async def preflight(surface: str, operation: str, request: Request):
     origin = request.headers.get("origin", "")
     try:
         checked_surface(surface, origin)
-        if operation not in {"encounter", "turn", "status", "withdraw"}:
+        if operation not in {"encounter", "lick", "challenge", "turn", "status", "withdraw"}:
             raise PublicAdmissionError("public_operation_invalid", 404)
     except PublicAdmissionError as exc:
         return _response({"error": exc.code}, exc.status)
@@ -161,6 +161,13 @@ async def _non_turn(binding: PublicSurfaceBinding, common: dict,
     if operation == "encounter":
         body = await _body(request)
         return binding.gate.open_encounter(**common, body=body, now=binding.clock())
+    if operation == "lick":
+        body = await _body(request)
+        return binding.gate.open_lick_encounter(**common, body=body, now=binding.clock())
+    if operation == "challenge":
+        body = await _body(request)
+        return binding.gate.complete_lick_challenge(
+            **common, token=_token(request), body=body, now=binding.clock())
     if operation == "status":
         token = _token(request)
         body = await _body(request)
