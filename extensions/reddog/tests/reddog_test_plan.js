@@ -26,6 +26,7 @@ const FAST_TESTS = Object.freeze([
   'test_progressive_execution_stage.js',
   'test_principal_activity_ledger.js',
   'test_principal_activity_extension_adapter.js',
+  'test_principal_activity_runtime_registration.js',
   'test_authoritative_work_state_query.js',
   'test_backend_compatibility_contract.js',
   'test_backend_compatibility_async.js',
