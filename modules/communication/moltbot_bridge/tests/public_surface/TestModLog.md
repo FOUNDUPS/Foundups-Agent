@@ -1,5 +1,53 @@
 # Public-surface TestModLog
 
+## 2026-09-08 — Lick-aware host lease recovery (current slice)
+
+- Verified replacement base: `e6dfa919f474158d0001296d3bd6e166129fc5f8`,
+  which already contains the open-source non-biometric Lick PoC. The earlier
+  lease branch/PR #1640 was based on pre-Lick `098436475737d17fdf06c6bf78de2671aef86da6`
+  and is superseded rather than allowed to overwrite newer RedDog source.
+- Isolated replacement branch:
+  `feature/reddog-public-host-lease-recovery-v2-20260908`.
+- WSP 97 scope decision: preserve the existing Lick consent/challenge/profile/
+  receipt/cleanup paths and add host ownership around them. Process lease/crash
+  recovery remains a distinct lifecycle contract, so it owns one focused
+  `test_host_lease_recovery.py` file. The README now also lists the Lick test
+  that was present on `main` but absent from the human test inventory.
+- Source adds a nullable `busy_owner` migration and content-free
+  `reddog_public_host_lease_v1` table while retaining `reddog_lick_open_v1`.
+  Raw host-owner tokens are SHA-256 hashed before storage.
+- Configured host owners are one-use. `register_host()` cannot replay a token;
+  `renew_host()` extends only a currently live lease. Expired owner hashes are
+  retained as tombstones so an old process identity cannot become valid again
+  after orphan recovery.
+- A configured host must hold a live lease before guest/Lick encounter,
+  challenge completion, status, turn reservation, completion, withdrawal, or
+  delivery. Busy turns are owner-bound. A separately registered replacement
+  host may clear only a busy slot whose recorded owner lease is inactive.
+- Recovery preserves revision, rotated nonce, Lick challenge-complete/profile
+  state, session/subject/global counters, expiry, and no-authority semantics.
+  It neither replays inference nor refunds a turn. Pre-lease busy rows with no
+  owner evidence remain fail-closed.
+- Tests cover live renewal, owner-token replay, old-host completion/delivery
+  rejection, Lick start/challenge lease gating, Lick profile survival across
+  recovery, actual DatabaseManager restart, and schema migration.
+- No final pass count or coverage is claimed yet. Canonical registry generation,
+  focused CI, repository CI, exact-final-head review, and PR squash are pending.
+- No live WSP_00 bootstrap, resident Holo owner receipt/repair, provider call,
+  public host mount, site deployment, protected identity proof, or 3V engine
+  invocation is claimed by this source slice.
+
+## 2026-09-08 — superseded pre-Lick lease evidence
+
+- Earlier branch `feature/reddog-public-host-lease-recovery-20260908` started from
+  `098436475737d17fdf06c6bf78de2671aef86da6` and opened PR #1640.
+- PR-head `3d9393319be7cdf0c99420fa13f34350cc47de80` ran focused Actions
+  `34192048020`: 190 passed, zero skips, 95% combined branch-aware coverage;
+  repository CI `34192048206` also completed successfully.
+- Those checks are **superseded evidence**. Review subsequently found a lease
+  tombstone issue, and `main` independently advanced with overlapping Lick PoC
+  changes. Neither the old branch nor its green checks may authorize merge.
+
 ## 2026-09-08 — guest status recovery and actual DB wrapper
 
 - Base: `8980aa29b2a17655ad5d927c94059c068400c118`, merged through PR #1633.
@@ -53,6 +101,6 @@
   the same 90% floor without changing root coverage or any test assertion.
 - The bounded full-checkout registry worker succeeded, producing commit
   `1d9406aec720f1e05b9bdd207806324df728054b`: 1,643 registered files,
-  both new suites collectable, unchanged 269 quarantined files.
-- Temporary branch-only registry writer is removed after that successful run.
-  Fresh final-head CI remains the merge gate.
+  both then-current suites collectable, unchanged 269 quarantined files.
+- Temporary branch-only registry writer was removed after that successful run.
+  Fresh final-head CI remains the merge gate for each later slice.
