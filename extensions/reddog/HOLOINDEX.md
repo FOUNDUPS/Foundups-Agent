@@ -12,15 +12,16 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 
 - `scripts/advisory_model_once.py` - OpenRouter bridge and redaction gate (repo root)
 - `scripts/reddog_holoindex_owner_query_once.py` - authenticated generation-bound owner query bridge (repo root)
-- `modules/communication/moltbot_bridge/src/reddog_public_policy.py` - public guest origins, caps, and unsigned Lick Verification input; no identity or private authority
-- `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest quotas, expiry, replay, withdrawal and concurrency accounting
+- `modules/communication/moltbot_bridge/src/reddog_public_policy.py` - public guest origins/caps plus non-biometric Lick consent/challenge/receipt schemas; no identity or private authority
+- `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest/Lick quotas, status, challenge gating, expiry, withdrawal, one-use host leases and owner-bound orphan recovery
 - `modules/communication/moltbot_bridge/src/reddog_public_http.py` - opt-in public-only ASGI router; unmounted until host/responder/ingress proof
 
 ## Documentation
 
 - `ARCHITECTURE.md` - canonical RedDog/0102 identity boundary: 012 <-> RedDog surface/proxy <-> 0102 digital twin/orchestrator; attention firewall and recursive co-development invariants
-- `docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` - bounded guest admission for AutoPost, foundups.com and eSingularity.ai; implementation evidence, 3V Verification linkage and live activation gaps
-- `docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` - next host/mobile/site integration work order; HoloIndex requery/repair, existing database/host reuse, no knowledge-answer unlock
+- `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` - open-source non-biometric Lick PoC status plus separately gated broader confidence ladder
+- `docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` - bounded guest/Lick admission for AutoPost, foundups.com and eSingularity.ai; caps/status/host-lease source evidence, 3V Verification linkage and live activation gaps
+- `docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` - resident host/mobile/site work order; HoloIndex requery/repair, lease lifecycle, public-only model surface, trusted ingress, no knowledge-answer unlock
 - `docs/CONTACT_MEMORY_ARCHITECTURE.md` - principal-scoped relationship memory: encrypted capture, entity/event graph, semantic retrieval, provenance, AutoPost ingest, Breadcrumb/Brain/Memex projection linkage, and Lick encounter/identity linkage
 - `docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Mosh Pit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
 - `docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` - secure read-only projection/emitter layer for RedDog/founder views; principal+FoundUp+disclosure authorization, deterministic JSON/Markdown rendering, sink isolation, and threat model
@@ -34,6 +35,8 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `buildCopyMarkdown`, `buildRunTraceSection`, `holoIndexMetaFromBundle`, `evaluateTargetRecall`
 - `isGenerationBoundHoloQueryAccepted`, `mergeGenerationBoundHoloResult`, `buildMetaFromBundle`
 - `PublicPolicy`, `PublicSessionGate`, `PublicSurfaceBinding`, `lick_verification_evidence`
+- `open_lick_encounter`, `complete_lick_challenge`, `lick_receipt`
+- `register_host`, `renew_host`, `reclaim_orphaned_turns`, `session_status`
 
 ## Memory / history recall targets
 
