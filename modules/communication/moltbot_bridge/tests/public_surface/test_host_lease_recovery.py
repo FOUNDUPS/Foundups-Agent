@@ -1,7 +1,6 @@
 """Lease-backed orphan recovery for the distinct public-host lifecycle contract."""
 import hashlib
 import json
-import sqlite3
 
 import pytest
 import sys
@@ -56,6 +55,20 @@ def test_invalid_or_missing_host_cannot_claim_recovery(store, owner):
         return
     with pytest.raises(p.PublicAdmissionError, match="configuration_invalid"):
         s.PublicSessionGate(connect, host_owner=owner)
+
+
+def test_host_owner_token_is_one_use_and_cannot_resurrect(store):
+    _, connect = store
+    first = host(connect, HOST_A)
+    with pytest.raises(p.PublicAdmissionError, match="owner_reused"):
+        first.register_host(now=NOW + 1)
+    expired = NOW + s.HOST_LEASE_SECONDS + 1
+    with pytest.raises(p.PublicAdmissionError, match="owner_reused"):
+        first.register_host(now=expired)
+    with pytest.raises(p.PublicAdmissionError, match="lease_expired"):
+        first.renew_host(now=expired)
+    replacement = host(connect, HOST_B, expired)
+    assert replacement.renew_host(now=expired + 1) == expired + 1 + s.HOST_LEASE_SECONDS
 
 
 def test_host_token_is_hashed_and_busy_slot_is_owner_bound(store):
