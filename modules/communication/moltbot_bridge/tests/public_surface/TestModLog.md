@@ -3,7 +3,7 @@
 ## 2026-09-08 — host lease orphan-recovery slice
 
 - Base: `098436475737d17fdf06c6bf78de2671aef86da6`; isolated branch
-  `feature/reddog-public-host-lease-recovery-20260908`.
+  `feature/reddog-public-host-lease-recovery-20260908`; PR #1640.
 - WSP 97 test-reuse decision: host/process lease recovery is a distinct
   lifecycle contract from guest policy/HTTP behavior, so it receives one
   focused `test_host_lease_recovery.py` file rather than duplicating policy
@@ -14,17 +14,32 @@
   only reservations whose recorded owner lease has expired or disappeared.
   Revision, rotated nonce, session/subject/global turn counters and expiry are
   preserved; no inference is replayed and no quota is refunded.
-- A live owner renewal blocks recovery. An expired owner cannot finish or
-  deliver after another host has reclaimed the slot. Legacy busy rows without
-  owner evidence are deliberately not reclaimed during migration.
+- Host-owner tokens are one-use. `register_host()` cannot replay a token and
+  `renew_host()` cannot resurrect an expired lease. Expired owner hashes remain
+  as tombstones after recovery so an old process token cannot become valid
+  again later. A live renewal blocks foreign recovery.
+- An expired owner cannot finish or deliver after another host reclaims its
+  slot. Legacy busy rows without owner evidence are deliberately not reclaimed
+  during migration.
 - The focused tests also use the unchanged DatabaseManager wrapper across a
   singleton restart and temporary SQLite database. This is source-level lease
   semantics, not proof that the actual resident PC heartbeat or process-death
   detector is running.
-- Canonical registry generation and focused/repository CI are pending on the
-  branch. No fresh pass count, coverage percentage, live WSP_00 bootstrap,
-  Holo owner receipt, provider call, deployment or host activation is claimed
-  in this entry until those gates complete.
+- Canonical test registry generation completed through the existing generator:
+  1,644 registered test files, 269 quarantined; the temporary writer self-removed
+  before PR review. No counts were hand-edited.
+- PR-head `3d9393319be7cdf0c99420fa13f34350cc47de80` ran focused GitHub Actions
+  `34192048020`: **190 passed, zero skips, 95% combined branch-aware coverage**;
+  HTTP 93%, policy 96%, session gate 97%. Repository CI `34192048206` also
+  completed successfully. This evidence is deliberately **superseded** because
+  review then found that deleting expired lease rows could permit later host
+  token reuse.
+- The tombstone correction at later heads retains expired lease rows and adds
+  an adversarial post-recovery owner-token replay case. Final exact-head focused
+  and repository CI remain required before merge; the superseded green checks
+  do not authorize a later head.
+- No live WSP_00 bootstrap, Holo owner receipt, provider call, deployment or
+  host activation is claimed by this source/test evidence.
 
 ## 2026-09-08 — guest status recovery and actual DB wrapper
 
