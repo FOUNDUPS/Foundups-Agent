@@ -96,7 +96,7 @@ def test_live_owner_renewal_blocks_foreign_recovery(store):
     assert status(second, session, NOW + 61)["in_flight"] is True
 
 
-def test_expired_owner_recovery_preserves_nonce_revision_and_quota(store):
+def test_expired_owner_recovery_preserves_nonce_revision_quota_and_tombstone(store):
     _, connect = store
     first = host(connect, HOST_A)
     session = encounter(first)
@@ -105,6 +105,8 @@ def test_expired_owner_recovery_preserves_nonce_revision_and_quota(store):
     recovery_now = NOW + s.HOST_LEASE_SECONDS + 1
     second = host(connect, HOST_B, recovery_now)
     assert second.reclaim_orphaned_turns(now=recovery_now) == 1
+    with pytest.raises(p.PublicAdmissionError, match="owner_reused"):
+        first.register_host(now=recovery_now)
     snapshot = status(second, session, recovery_now)
     assert snapshot["in_flight"] is False
     assert snapshot["revision"] == reserved.revision == 1
@@ -115,7 +117,8 @@ def test_expired_owner_recovery_preserves_nonce_revision_and_quota(store):
     assert resumed.revision == 2
     with connect() as conn:
         used = conn.execute("SELECT used FROM reddog_public_budget_v1 WHERE bucket='turns:global'").fetchone()[0]
-    assert used == 2
+        leases = conn.execute("SELECT COUNT(*) FROM reddog_public_host_lease_v1").fetchone()[0]
+    assert used == 2 and leases == 2
 
 
 def test_expired_owner_cannot_finish_or_deliver_after_recovery(store):
