@@ -14,7 +14,8 @@ from typing import Callable
 
 from .reddog_public_policy import (
     PublicAdmissionError, PublicPolicy, checked_clock, checked_hex,
-    checked_surface, encounter_request, lick_verification_evidence, turn_request,
+    checked_surface, encounter_request, lick_challenge_request,
+    lick_encounter_request, lick_receipt, lick_verification_evidence, turn_request,
 )
 
 
@@ -53,6 +54,12 @@ class PublicSessionGate:
                 actor_claim TEXT NOT NULL, created INTEGER NOT NULL,
                 last_seen INTEGER NOT NULL, revision INTEGER NOT NULL,
                 nonce TEXT NOT NULL, busy TEXT, closed INTEGER NOT NULL DEFAULT 0)""")
+            conn.execute("""CREATE TABLE IF NOT EXISTS reddog_lick_open_v1 (
+                token_hash TEXT PRIMARY KEY,
+                profile_id TEXT NOT NULL, display_name TEXT,
+                challenge_hash TEXT NOT NULL, challenge_complete INTEGER NOT NULL DEFAULT 0,
+                consent_version TEXT NOT NULL,
+                FOREIGN KEY(token_hash) REFERENCES reddog_public_session_v1(token_hash))""")
             conn.commit()
 
     @contextmanager
@@ -87,6 +94,10 @@ class PublicSessionGate:
     def _cleanup(self, conn, now: int) -> None:
         conn.execute("DELETE FROM reddog_public_budget_v1 WHERE day>=0 AND day<?",
                      (now // 86400 - 1,))
+        conn.execute("""DELETE FROM reddog_lick_open_v1 WHERE token_hash IN (
+            SELECT token_hash FROM reddog_public_session_v1
+            WHERE busy IS NULL AND (closed=1 OR created<=? OR last_seen<=?))""",
+                     (now - self.policy.session_seconds, now - self.policy.idle_seconds))
         conn.execute("""DELETE FROM reddog_public_session_v1
             WHERE busy IS NULL AND (closed=1 OR created<=? OR last_seen<=?)""",
                      (now - self.policy.session_seconds, now - self.policy.idle_seconds))
@@ -108,6 +119,75 @@ class PublicSessionGate:
         return {"token": token, "nonce": nonce, "revision": 0,
                 "remaining_turns": self.policy.session_turns,
                 "lick": lick_verification_evidence(encounter, claim, now + self.policy.session_seconds)}
+
+    def open_lick_encounter(self, *, surface: str, origin: str, subject: str,
+                            body: dict, now: int) -> dict:
+        """Start an opt-in Lick; the returned challenge grants no turn access."""
+        checked_surface(surface, origin)
+        checked_hex(subject, "subject")
+        claim, display_name = lick_encounter_request(body)
+        token, encounter = secrets.token_hex(32), secrets.token_hex(16)
+        turn_nonce, challenge = secrets.token_hex(32), secrets.token_hex(32)
+        profile_id = "lick_" + secrets.token_hex(16)
+        with self._transaction(now) as conn:
+            self._cleanup(conn, now)
+            self._spend(conn, "sessions:global", now, self.policy.global_sessions_daily)
+            self._spend(conn, "sessions:" + subject, now, self.policy.subject_sessions_daily)
+            self._insert_lick(conn, token, encounter, surface, origin, subject,
+                              claim, now, turn_nonce, profile_id, display_name,
+                              challenge, body["consent_version"])
+        return {
+            "token": token,
+            "challenge": challenge,
+            "encounter_id": encounter,
+            "state": "challenge_pending",
+            "expires_at": now + self.policy.session_seconds,
+            "identity_state": "provisional",
+            "authority_granted": "none",
+        }
+
+    def _insert_lick(self, conn, token, encounter, surface, origin, subject,
+                     claim, now, turn_nonce, profile_id, display_name,
+                     challenge, consent_version) -> None:
+        token_hash = self._hash(token)
+        conn.execute("""INSERT INTO reddog_public_session_v1
+            (token_hash,encounter,surface,origin,subject,actor_claim,created,last_seen,revision,nonce)
+            VALUES (?,?,?,?,?,?,?,?,0,?)""",
+                     (token_hash, encounter, surface, origin, subject, claim, now, now, turn_nonce))
+        conn.execute("""INSERT INTO reddog_lick_open_v1
+            (token_hash,profile_id,display_name,challenge_hash,consent_version)
+            VALUES (?,?,?,?,?)""",
+                     (token_hash, profile_id, display_name,
+                      hashlib.sha256(challenge.encode("ascii")).hexdigest(), consent_version))
+
+    def complete_lick_challenge(self, *, surface: str, origin: str, subject: str,
+                                token: str, body: dict, now: int) -> dict:
+        """Consume one randomized challenge and issue a non-authoritative receipt."""
+        challenge = lick_challenge_request(body)
+        with self._transaction(now) as conn:
+            session = self._session(conn, token, surface, origin, subject)
+            self._check_active(session, now)
+            token_hash = self._hash(token)
+            row = conn.execute("SELECT * FROM reddog_lick_open_v1 WHERE token_hash=?",
+                               (token_hash,)).fetchone()
+            supplied = hashlib.sha256(challenge.encode("ascii")).hexdigest()
+            if not row or row["challenge_complete"] or not secrets.compare_digest(
+                    supplied, row["challenge_hash"]):
+                raise PublicAdmissionError("lick_challenge_rejected", 409)
+            conn.execute("""UPDATE reddog_lick_open_v1
+                SET challenge_complete=1, challenge_hash='' WHERE token_hash=?""",
+                         (token_hash,))
+            return {
+                "nonce": session["nonce"],
+                "revision": session["revision"],
+                "remaining_turns": self.policy.session_turns - session["revision"],
+                "state": "ready",
+                "lick_receipt": lick_receipt(
+                    encounter=session["encounter"], profile_id=row["profile_id"],
+                    claim=session["actor_claim"], display_name=row["display_name"],
+                    surface=session["surface"], issued=now,
+                    expires=session["created"] + self.policy.session_seconds),
+            }
 
     @staticmethod
     def _hash(token: str) -> str:
@@ -146,6 +226,10 @@ class PublicSessionGate:
         reservation, next_nonce = secrets.token_hex(32), secrets.token_hex(32)
         with self._transaction(now) as conn:
             row = self._session(conn, token, surface, origin, subject)
+            lick = conn.execute("SELECT challenge_complete FROM reddog_lick_open_v1 WHERE token_hash=?",
+                                (self._hash(token),)).fetchone()
+            if lick and not lick["challenge_complete"]:
+                raise PublicAdmissionError("lick_challenge_required", 403)
             self._check_turn(row, nonce, revision, now)
             count = conn.execute("SELECT COUNT(*) AS n FROM reddog_public_session_v1 WHERE busy IS NOT NULL").fetchone()
             if count["n"] >= self.policy.concurrent_calls:
@@ -181,6 +265,9 @@ class PublicSessionGate:
         with self._transaction(now) as conn:
             result = conn.execute("""UPDATE reddog_public_session_v1 SET busy=NULL
                 WHERE token_hash=? AND busy=?""", (self._hash(token), reservation_id))
+            conn.execute("""DELETE FROM reddog_lick_open_v1 WHERE token_hash IN (
+                SELECT token_hash FROM reddog_public_session_v1
+                WHERE token_hash=? AND closed=1 AND busy IS NULL)""", (self._hash(token),))
             conn.execute("DELETE FROM reddog_public_session_v1 WHERE token_hash=? AND closed=1 AND busy IS NULL",
                          (self._hash(token),))
         return result.rowcount == 1
@@ -201,6 +288,7 @@ class PublicSessionGate:
             conn.execute("""UPDATE reddog_public_session_v1 SET closed=1,
                 actor_claim='withdrawn', nonce='' WHERE token_hash=?""", (self._hash(token),))
             if row["busy"] is None:
+                conn.execute("DELETE FROM reddog_lick_open_v1 WHERE token_hash=?", (self._hash(token),))
                 conn.execute("DELETE FROM reddog_public_session_v1 WHERE token_hash=?", (self._hash(token),))
         return {"encounter_id": row["encounter"], "withdrawn": True,
                 "in_flight_retained_until_completion": row["busy"] is not None,

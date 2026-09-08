@@ -1,5 +1,24 @@
 # OpenClaw Bridge Interface
 
+## Public RedDog Lick PoC
+
+`PublicSessionGate.open_lick_encounter(...)` accepts the exact open-source,
+non-biometric consent/profile shape for the `autopost` public surface and
+returns a bearer plus random challenge. `complete_lick_challenge(...)` consumes
+that challenge once and returns a provisional `reddog.lick.receipt.v1` plus the
+existing turn nonce. Lick-bound turns reject until challenge completion.
+
+The bearer and challenge are not identity or capability material. The receipt
+is unsigned, states that identity and human presence are unverified, states
+that no biometrics were collected, and always grants `none` authority. Existing
+origin/subject binding, quotas, idle/absolute expiry, replay defense,
+withdrawal, and effect ceiling remain authoritative. The optional HTTP router
+adds `lick` and `challenge` operations but remains unmounted and undeployed.
+
+Canonical product and deployment boundaries are in
+`extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` and
+`extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md`.
+
 ## HoloIndex runtime interface
 
 `run_holoindex_postmerge_runtime_once(...)` owns one clean exact-main maintenance lifecycle;

@@ -17,8 +17,8 @@ not mean RedDog has 376 canonical specifications.
 | Current extension/runtime truth | `extensions/reddog/README.md` | Current product/runtime status |
 | Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
-| Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Product contract; specified, not implemented |
-| Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Implemented isolated boundary; unmounted, not deployed; not private 0102 access |
+| Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric PoC implemented; broader confidence ladder specified; not deployed |
+| Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |
 | Public host and AutoPost/site integration work order | `extensions/reddog/docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` | Remaining implementation/activation gates; never completion evidence |
 | Contact/relationship memory | `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md` | Architecture vision; specified, not implemented |
 | Mosh Pit activity projection | `extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |
@@ -26,7 +26,7 @@ not mean RedDog has 376 canonical specifications.
 | Memex emitter implementation work order | `extensions/reddog/docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` | Work order; never completion evidence |
 | FoundUps/second-brain architecture | `docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md` | Architecture decision context |
 | Phase-1 alignment findings | `docs/audits/architecture/REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1.md` | Evidence audit, not runtime authority |
-| Lick/Gemini/patent findings | `docs/audits/architecture/REDDOG_LICK_HANDSHAKE_AUDIT_PHASE1.md` | Evidence audit, not runtime authority |
+| Lick/Gemini/rESP findings | `docs/audits/architecture/REDDOG_LICK_HANDSHAKE_AUDIT_PHASE1.md` | Historical evidence audit, not runtime or patent-status authority |
 | Public member digital-twin contract | `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` | Public-surface contract |
 | FoundUps domain integration | `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` | FoundUps domain navigation |
 | Sensitive evidence/secret boundary | `WSP_framework/src/WSP_71_Secrets_Management_Protocol.md` §2.3 | Security requirements that reference, but do not redefine, the Lick |

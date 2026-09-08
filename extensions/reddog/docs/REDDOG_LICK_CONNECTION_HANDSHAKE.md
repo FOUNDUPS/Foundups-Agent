@@ -1,6 +1,6 @@
 # RedDog Lick Connection Handshake
 
-Status: `SPECIFIED_NOT_IMPLEMENTED`
+Status: `NON_BIOMETRIC_POC_IMPLEMENTED_NOT_DEPLOYED`; broader confidence ladder remains specified
 
 Owner: RedDog product surface
 
@@ -179,7 +179,7 @@ challenge and presentation-attack testing. MVP is gated on independent error,
 spoof, demographic, privacy, deletion, and recovery evidence plus a separate
 possession/signing factor for protected actions.
 
-## Patent material reuse boundary
+## Open-source research lineage
 
 `WSP_knowledge/docs/Papers/Patent_Series/04_rESP_Patent_Updated.md` contains
 the closest existing invention material:
@@ -191,19 +191,13 @@ the closest existing invention material:
 - figure 17 illustrates biometric-triggered renewable key generation; and
 - figure 19 illustrates a living signature for anti-deepfake verification.
 
-Those passages supply a research and intellectual-property lineage for the
-Lick. They do **not** prove that CMST, `det(g)`, a 7.05 Hz resonance, a derived
+Those passages supply historical research lineage for the Lick. They do **not**
+prove that CMST, `det(g)`, a 7.05 Hz resonance, a derived
 key, or deepfake detection works. The repository records application number
 `71387071`, but a public patent-record search performed on 2026-08-30 did not
-locate a matching published application. Filing status and claim scope must be
-confirmed with patent counsel before the product says "patented," "patent
-pending," or "quantum-resistant."
-
-Potentially new claim material—including recurring multimodal engagement,
-progressive encounter profiles, confidence decay, local template custody, and
-step-up routing—must be reviewed before enabling details are published. This
-product contract intentionally defines boundaries and record shapes without
-asserting novelty or legal coverage.
+locate a matching published application. The Lick implementation is being
+developed as open source and makes no "patented," "patent pending," novelty,
+or legal-coverage claim. `71387071` must not be presented as verified protection.
 
 ## Privacy and security requirements
 
@@ -226,21 +220,25 @@ asserting novelty or legal coverage.
 
 ## Delivery stages
 
-### Stage 0 — documentation and patent review
+### Stage 0 — documentation and research review
 
 - [x] Name and place the Lick as a RedDog product handshake, not a WSP.
 - [x] Trace the existing rESP patent claims and anti-deepfake use case.
-- [ ] Confirm filing status, ownership, priority date, and claim scope with
-  patent counsel before publishing new enabling matter.
+- [x] Record that the Lick lane is open source and makes no patent-status claim.
 - [ ] Complete privacy, threat-model, and jurisdiction review.
 
 ### Stage 1 — explicit, non-biometric Lick
 
-- [ ] Implement encounter boundaries, consent receipts, participant claims,
-  passkey/device proof, expiry, guest fallback, and `LickReceipt`.
-- [ ] Integrate the handshake with RedDog surfaces and the AutoPost capture
-  contract.
-- [ ] Keep all protected effects behind existing authority systems.
+- [x] Implement explicit session consent, guest/display-name claims, a
+  randomized one-use continuity challenge, provisional `EncounterProfile`,
+  expiry, withdrawal, and non-authoritative `LickReceipt` at the isolated
+  RedDog public boundary.
+- [x] Add the AutoPost consent/guest UI, memory-only client, and bounded capture
+  provenance adapter.
+- [x] Keep all protected effects behind existing authority systems; the receipt
+  always says `authority_granted: none`.
+- [ ] Add possession-bound existing-profile proof, participant/channel-change
+  detection, independent label correction, and deletion-tombstone UI.
 
 ### Stage 2 — evaluated voice/face step-up
 
@@ -260,14 +258,14 @@ asserting novelty or legal coverage.
 
 ## Acceptance gates
 
-The Lick cannot move from `SPECIFIED_NOT_IMPLEMENTED` until tests demonstrate:
+The broader Lick cannot move beyond the non-biometric PoC until tests demonstrate:
 
 1. a new participant receives a provisional profile, never an automatic
    verified-012 designation;
 2. an existing participant can decline biometrics and continue as a guest;
 3. participant or channel change expires prior confidence;
-4. replayed voice/video and static biometric artifacts do not pass a protected
-   step-up path;
+4. replayed voice/video and static biometric artifacts do not pass a future
+   protected step-up path;
 5. raw samples remain local under the default configuration;
 6. deletion removes templates and breaks future matching while preserving only
    the minimum deletion receipt;
