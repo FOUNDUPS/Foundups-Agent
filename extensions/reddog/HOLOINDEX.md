@@ -23,6 +23,8 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` - next host/mobile/site integration work order; HoloIndex requery/repair, existing database/host reuse, no knowledge-answer unlock
 - `docs/CONTACT_MEMORY_ARCHITECTURE.md` - principal-scoped relationship memory: encrypted capture, entity/event graph, semantic retrieval, provenance, AutoPost ingest, Breadcrumb/Brain/Memex projection linkage, and Lick encounter/identity linkage
 - `docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Mosh Pit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
+- `docs/MOSH_PIT_PROTOCOL.md` - canonical 012-centered Mosh Pit behavior: inclusion/exclusion gate, 012 vs 012+0102 vs 0102-delegated attribution, evidence/truth handling, contact linkage, daily reconciliation, YUMORI alpha, privacy
+- `docs/prompts/WSP97_REDDOG_MOSH_PIT_PROTOCOL_IMPLEMENTATION_PROMPT.md` - implementation work order for the 012-centered Mosh Pit projection; reuse existing Breadcrumb/Brain/Memex seams, no parallel store, deterministic inclusion gate, tests and acceptance criteria
 - `docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` - secure read-only projection/emitter layer for RedDog/founder views; principal+FoundUp+disclosure authorization, deterministic JSON/Markdown rendering, sink isolation, and threat model
 - `docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` - implementation work order: WSP_00 intake, WSP 97/HoloIndex ownership discovery, bounded M2M slices, fail-closed security tests, no parallel memory store, no external mutation authority
 - `README.md`, `INTERFACE.md`, `ModLog.md`, `ROADMAP.md`
@@ -48,6 +50,7 @@ Target composition:
 
 ```text
 Breadcrumb history + Brain/Memex current/open state + relevant evidence
+-> Mosh Pit inclusion gate centered on 012 continuity
 -> authorized Memex Projection Emitter
 -> project-scoped Mosh Pit / compact status projection
 -> RedDog / founder view
