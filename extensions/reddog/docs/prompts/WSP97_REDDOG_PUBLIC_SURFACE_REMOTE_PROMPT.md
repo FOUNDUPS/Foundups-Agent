@@ -11,15 +11,20 @@ Canonical navigation: [RedDog documentation map](../../../../docs/REDDOG_DOCUMEN
 
 The initial implementation entered `main` through [PR #1633](https://github.com/FOUNDUPS/Foundups-Agent/pull/1633),
 squash `8980aa29b2a17655ad5d927c94059c068400c118`; it was not a direct main push.
-[PR #1635](https://github.com/FOUNDUPS/Foundups-Agent/pull/1635) adds guest status
-recovery and actual DatabaseManager-wrapper tests. Read its live merge/check
-state before treating it as available on main. Neither PR is deployment evidence.
+[PR #1635](https://github.com/FOUNDUPS/Foundups-Agent/pull/1635), squash
+`fcbedcc6dae6c8a96334a3ed02eceaf3a35d2afd`, added guest status recovery and
+actual DatabaseManager-wrapper tests. Neither PR is deployment evidence.
+
+The current host-lease recovery slice is developed on
+`feature/reddog-public-host-lease-recovery-20260908`. Treat it as unavailable on
+`main` until its PR is verified and squash-merged.
 
 | Work | Source state / remaining evidence |
 |---|---|
 | Public guest consent, caps, expiry, replay and cancellation boundaries | Implemented in #1633; optional, unmounted |
-| Lost-response nonce/revision recovery | Implemented by #1635; same bearer/surface/origin/subject; never replays inference |
-| SQLite DatabaseManager wrapper | Exercised by #1635 tests with temporary databases; actual PC lifecycle remains unverified |
+| Lost-response nonce/revision recovery | Implemented in #1635; same bearer/surface/origin/subject; never replays inference |
+| SQLite DatabaseManager wrapper | Exercised with temporary databases; actual PC lifecycle remains unverified |
+| Host lease / orphaned busy-slot recovery | Source implementation in current lease slice: one-use hashed owner, live renewal, expired-owner recovery without nonce/quota rollback; actual heartbeat/process lifecycle still unbound |
 | Resident host, trusted edge and public-only responder | Not activated; needs actual deployment/model/accounting bindings |
 | AutoPost mobile, foundups.com and eSingularity.ai clients | Not implemented by these admission slices; preserve existing source ownership |
 | Protected 012/0102 identity and 3V integration | Public evidence is unsigned/provisional; no protected identity or engine invocation |
@@ -39,8 +44,9 @@ bindings. Do not reuse, reset or stage another worker's changes. Create a new
 owned worktree/branch from verified current main.
 
 Read `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` and its tests.
-This source slice has **no mounted live host, deployed UI, authenticated owner
-flow, 3V engine invocation, or voice/context-delta implementation**.
+The source slices still have **no mounted live public host, deployed UI,
+authenticated owner flow, 3V engine invocation, or voice/context-delta
+implementation**.
 
 ## HoloIndex before expansion
 
@@ -61,19 +67,25 @@ improvement just because a query was attempted.
 1. Inventory the existing authenticated resident host, public ingress, AgentDB
    connection factory, deployment routes and public-only model topology. Do not
    create a second host, queue, database or camera stack for convenience.
-2. Review `PublicSessionGate` with the actual SQLite DatabaseManager wrapper,
-   process concurrency, restart/crash and clock behavior. Prove orphaned busy-slot
-   recovery through owned process/lease evidence; never erase counters or allow
-   a second inference merely to clear an error. Guest `status` cannot clear such
-   a slot, and replacing a Python host object is not proof of process termination.
-3. Bind an independently reviewed zero-tool, public-only responder. Its input is
-   PublicTurn, not the principal Memex or private resident work envelope. Enforce
-   max output tokens and provider-side deadlines. No arbitrary URL/model selection
-   from browser input and no private OpenClaw fallback.
-4. Supply edge-authenticated subject accounting, TLS, origin routing, rate limits,
+2. Bind the existing lease primitives into the actual resident process lifecycle:
+   generate a fresh random host owner on each process start, call `register_host`
+   exactly once, renew before the 60-second lease expires, let a separately
+   registered replacement process call `reclaim_orphaned_turns`, and preserve
+   fail-closed legacy rows with no owner evidence. Do not reuse a host-owner
+   token after restart. Do not clear busy state on ordinary exception or shutdown.
+3. Prove shutdown/drain semantics. A clean host may wait/cancel its own provider
+   tasks but must not rewrite quota, revision, nonce, or another host's busy
+   owner. An expired host cannot finish or deliver a turn.
+4. Bind an independently reviewed zero-tool, public-only responder. Its input is
+   `PublicTurn`, not the principal Memex or private resident work envelope. Give
+   public chat its own verified runtime surface/binding; do **not** reuse
+   `reddog_backend_architect` merely because a model route already exists.
+   Enforce max output tokens and provider-side deadlines. No arbitrary URL/model
+   selection from browser input and no private OpenClaw fallback.
+5. Supply edge-authenticated subject accounting, TLS, origin routing, rate limits,
    key custody and shared budgets across replicas/surfaces. The existing direct
    peer HMAC is not sufficient attribution behind an unverified proxy.
-5. Mount the router on the proven host only after those tests pass. Leave public
+6. Mount the router on the proven host only after those tests pass. Leave public
    exposure disabled when any dependency is unavailable.
 
 ## Then add surfaces, one at a time
@@ -113,15 +125,19 @@ explicit budgets and independent work authority.
 ## Acceptance and publication
 
 Read existing TestModLog/README and nearest tests before adding cases. Extend
-this suite for same-boundary scenarios. Register new test files using the
-canonical generator; do not hand-edit counts or skip its check.
+existing files for the same contract; create a new test file only for a materially
+distinct lifecycle/contract and update the inventory in the same slice. Register
+new test files using the canonical generator; do not hand-edit counts or skip its
+check.
 
 Verify: wrong origin, spoofed forwarded identity, cross-surface/private-scope
 leakage, expired and replayed nonce, parallel over-cap requests, restart quotas,
 withdrawal during a response, body/output bounds, provider cancellation ignored,
 clock rollback, unavailable DB/model, synthetic public/private canaries, and
 `tSingularity` as ordinary capped text. Also verify lost-response status recovery,
-no idle renewal, no quota refund, preserved busy slots and stale-client rejection.
+no idle renewal, no quota refund, preserved busy slots, stale-client rejection,
+host-owner one-use semantics, live renewal, expired-owner reclamation, old-host
+finish/delivery rejection and pre-lease fail-closed rows.
 
 Run targeted tests, dependency/security tiers, required CI and exact-host live
 acceptance. Record commands and results honestly. Keep deployment distinct from
