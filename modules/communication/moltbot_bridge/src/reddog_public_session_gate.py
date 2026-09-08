@@ -1,8 +1,8 @@
-"""Atomic guest quotas in the existing AgentDB SQLite database, not new memory.
+"""Atomic public RedDog state in the existing AgentDB SQLite database.
 
-The trusted host supplies agent_db.db.get_connection. Initialization is explicit.
-SQLite only in this slice; PostgreSQL and live host activation require proof.
-No source text, raw address, media, private memory, or bearer token is retained.
+The trusted host supplies ``agent_db.db.get_connection``. SQLite is the only
+verified accounting backend in this slice. No conversation text, raw address,
+media, private memory, bearer, challenge, or host-owner token is retained.
 """
 from __future__ import annotations
 
@@ -17,6 +17,9 @@ from .reddog_public_policy import (
     checked_surface, encounter_request, lick_challenge_request,
     lick_encounter_request, lick_receipt, lick_verification_evidence, turn_request,
 )
+
+
+HOST_LEASE_SECONDS = 60
 
 
 @dataclass(frozen=True)
@@ -36,16 +39,23 @@ class PublicTurn:
 
 
 class PublicSessionGate:
-    def __init__(self, connection_factory: Callable, policy: PublicPolicy | None = None):
+    def __init__(self, connection_factory: Callable, policy: PublicPolicy | None = None,
+                 host_owner: str | None = None):
         self._connect = connection_factory
         self.policy = policy or PublicPolicy()
+        self.host_owner = host_owner
         if type(self.policy) is not PublicPolicy or not callable(connection_factory):
             raise PublicAdmissionError("public_configuration_invalid", 503)
+        if host_owner is not None:
+            try:
+                checked_hex(host_owner, "host_owner")
+            except PublicAdmissionError as exc:
+                raise PublicAdmissionError("public_configuration_invalid", 503) from exc
 
     def initialize(self) -> None:
         """Trusted deployment setup only; caller never supplies a database path."""
         with self._connect() as conn:
-            conn.execute("SELECT sqlite_version()")  # Unsupported backends fail closed.
+            conn.execute("SELECT sqlite_version()")
             conn.execute("""CREATE TABLE IF NOT EXISTS reddog_public_budget_v1 (
                 bucket TEXT PRIMARY KEY, day INTEGER NOT NULL, used INTEGER NOT NULL)""")
             conn.execute("""CREATE TABLE IF NOT EXISTS reddog_public_session_v1 (
@@ -54,13 +64,25 @@ class PublicSessionGate:
                 actor_claim TEXT NOT NULL, created INTEGER NOT NULL,
                 last_seen INTEGER NOT NULL, revision INTEGER NOT NULL,
                 nonce TEXT NOT NULL, busy TEXT, closed INTEGER NOT NULL DEFAULT 0)""")
+            self._ensure_session_columns(conn)
             conn.execute("""CREATE TABLE IF NOT EXISTS reddog_lick_open_v1 (
                 token_hash TEXT PRIMARY KEY,
                 profile_id TEXT NOT NULL, display_name TEXT,
                 challenge_hash TEXT NOT NULL, challenge_complete INTEGER NOT NULL DEFAULT 0,
                 consent_version TEXT NOT NULL,
                 FOREIGN KEY(token_hash) REFERENCES reddog_public_session_v1(token_hash))""")
+            conn.execute("""CREATE TABLE IF NOT EXISTS reddog_public_host_lease_v1 (
+                owner_hash TEXT PRIMARY KEY, started INTEGER NOT NULL,
+                lease_until INTEGER NOT NULL)""")
             conn.commit()
+
+    @staticmethod
+    def _ensure_session_columns(conn) -> None:
+        names = {row["name"] for row in conn.execute(
+            "PRAGMA table_info(reddog_public_session_v1)"
+        ).fetchall()}
+        if "busy_owner" not in names:
+            conn.execute("ALTER TABLE reddog_public_session_v1 ADD COLUMN busy_owner TEXT")
 
     @contextmanager
     def _transaction(self, now: int):
@@ -80,6 +102,56 @@ class PublicSessionGate:
             except BaseException:
                 conn.rollback()
                 raise
+
+    def register_host(self, *, now: int) -> int:
+        """Register one process owner exactly once; raw owner material is never stored."""
+        owner, lease_until = self._configured_owner_hash(), now + HOST_LEASE_SECONDS
+        with self._transaction(now) as conn:
+            result = conn.execute("""INSERT INTO reddog_public_host_lease_v1
+                (owner_hash,started,lease_until) VALUES (?,?,?)
+                ON CONFLICT(owner_hash) DO NOTHING""", (owner, now, lease_until))
+            if result.rowcount != 1:
+                raise PublicAdmissionError("public_host_owner_reused", 503)
+        return lease_until
+
+    def renew_host(self, *, now: int) -> int:
+        """Renew only an unexpired owner lease; a stalled host cannot resurrect itself."""
+        owner, lease_until = self._configured_owner_hash(), now + HOST_LEASE_SECONDS
+        with self._transaction(now) as conn:
+            result = conn.execute("""UPDATE reddog_public_host_lease_v1
+                SET lease_until=? WHERE owner_hash=? AND lease_until>?""",
+                                  (lease_until, owner, now))
+            if result.rowcount != 1:
+                raise PublicAdmissionError("public_host_lease_expired", 503)
+        return lease_until
+
+    def reclaim_orphaned_turns(self, *, now: int) -> int:
+        """Release only busy slots whose recorded host lease is no longer active."""
+        with self._transaction(now) as conn:
+            self._require_host(conn, now)
+            result = conn.execute("""UPDATE reddog_public_session_v1
+                SET busy=NULL,busy_owner=NULL WHERE busy IS NOT NULL
+                AND busy_owner IS NOT NULL AND NOT EXISTS (
+                    SELECT 1 FROM reddog_public_host_lease_v1 h
+                    WHERE h.owner_hash=reddog_public_session_v1.busy_owner
+                    AND h.lease_until>?)""", (now,))
+        return result.rowcount
+
+    def _configured_owner_hash(self) -> str:
+        if self.host_owner is None:
+            raise PublicAdmissionError("public_host_lease_unconfigured", 503)
+        return self._hash_hex(self.host_owner, "host_owner")
+
+    def _owner_or_none(self) -> str | None:
+        return self._configured_owner_hash() if self.host_owner is not None else None
+
+    def _require_host(self, conn, now: int) -> None:
+        if self.host_owner is None:
+            return
+        row = conn.execute("""SELECT lease_until FROM reddog_public_host_lease_v1
+            WHERE owner_hash=?""", (self._configured_owner_hash(),)).fetchone()
+        if not row or row["lease_until"] <= now:
+            raise PublicAdmissionError("public_host_lease_expired", 503)
 
     def _spend(self, conn, bucket: str, now: int, maximum: int) -> None:
         day = now // 86400
@@ -105,10 +177,11 @@ class PublicSessionGate:
     def open_encounter(self, *, surface: str, origin: str, subject: str,
                        body: dict, now: int) -> dict:
         checked_surface(surface, origin)
-        checked_hex(subject, "subject")  # HMAC supplied by trusted ingress, not JSON.
+        checked_hex(subject, "subject")
         claim = encounter_request(body)
         token, encounter, nonce = secrets.token_hex(32), secrets.token_hex(16), secrets.token_hex(32)
         with self._transaction(now) as conn:
+            self._require_host(conn, now)
             self._cleanup(conn, now)
             self._spend(conn, "sessions:global", now, self.policy.global_sessions_daily)
             self._spend(conn, "sessions:" + subject, now, self.policy.subject_sessions_daily)
@@ -130,21 +203,16 @@ class PublicSessionGate:
         turn_nonce, challenge = secrets.token_hex(32), secrets.token_hex(32)
         profile_id = "lick_" + secrets.token_hex(16)
         with self._transaction(now) as conn:
+            self._require_host(conn, now)
             self._cleanup(conn, now)
             self._spend(conn, "sessions:global", now, self.policy.global_sessions_daily)
             self._spend(conn, "sessions:" + subject, now, self.policy.subject_sessions_daily)
             self._insert_lick(conn, token, encounter, surface, origin, subject,
                               claim, now, turn_nonce, profile_id, display_name,
                               challenge, body["consent_version"])
-        return {
-            "token": token,
-            "challenge": challenge,
-            "encounter_id": encounter,
-            "state": "challenge_pending",
-            "expires_at": now + self.policy.session_seconds,
-            "identity_state": "provisional",
-            "authority_granted": "none",
-        }
+        return {"token": token, "challenge": challenge, "encounter_id": encounter,
+                "state": "challenge_pending", "expires_at": now + self.policy.session_seconds,
+                "identity_state": "provisional", "authority_granted": "none"}
 
     def _insert_lick(self, conn, token, encounter, surface, origin, subject,
                      claim, now, turn_nonce, profile_id, display_name,
@@ -165,6 +233,7 @@ class PublicSessionGate:
         """Consume one randomized challenge and issue a non-authoritative receipt."""
         challenge = lick_challenge_request(body)
         with self._transaction(now) as conn:
+            self._require_host(conn, now)
             session = self._session(conn, token, surface, origin, subject)
             self._check_active(session, now)
             token_hash = self._hash(token)
@@ -174,25 +243,24 @@ class PublicSessionGate:
             if not row or row["challenge_complete"] or not secrets.compare_digest(
                     supplied, row["challenge_hash"]):
                 raise PublicAdmissionError("lick_challenge_rejected", 409)
-            conn.execute("""UPDATE reddog_lick_open_v1
-                SET challenge_complete=1, challenge_hash='' WHERE token_hash=?""",
-                         (token_hash,))
-            return {
-                "nonce": session["nonce"],
-                "revision": session["revision"],
-                "remaining_turns": self.policy.session_turns - session["revision"],
-                "state": "ready",
-                "lick_receipt": lick_receipt(
-                    encounter=session["encounter"], profile_id=row["profile_id"],
-                    claim=session["actor_claim"], display_name=row["display_name"],
-                    surface=session["surface"], issued=now,
-                    expires=session["created"] + self.policy.session_seconds),
-            }
+            conn.execute("""UPDATE reddog_lick_open_v1 SET challenge_complete=1,
+                challenge_hash='' WHERE token_hash=?""", (token_hash,))
+            return {"nonce": session["nonce"], "revision": session["revision"],
+                    "remaining_turns": self.policy.session_turns - session["revision"],
+                    "state": "ready", "lick_receipt": lick_receipt(
+                        encounter=session["encounter"], profile_id=row["profile_id"],
+                        claim=session["actor_claim"], display_name=row["display_name"],
+                        surface=session["surface"], issued=now,
+                        expires=session["created"] + self.policy.session_seconds)}
 
     @staticmethod
-    def _hash(token: str) -> str:
-        checked_hex(token, "session")
-        return hashlib.sha256(token.encode("ascii")).hexdigest()
+    def _hash_hex(value: str, field: str) -> str:
+        checked_hex(value, field)
+        return hashlib.sha256(value.encode("ascii")).hexdigest()
+
+    @classmethod
+    def _hash(cls, token: str) -> str:
+        return cls._hash_hex(token, "session")
 
     def _session(self, conn, token: str, surface: str, origin: str, subject: str):
         checked_surface(surface, origin)
@@ -205,12 +273,9 @@ class PublicSessionGate:
 
     def session_status(self, *, surface: str, origin: str, subject: str,
                        token: str, now: int) -> dict:
-        """Recover current admission state, not replies, identity or work authority.
-
-        A status read never rotates the nonce, renews idle time, refunds budget,
-        clears a busy slot or invokes inference. The existing bearer is required.
-        """
+        """Recover current admission state without replies or authority."""
         with self._transaction(now) as conn:
+            self._require_host(conn, now)
             row = self._session(conn, token, surface, origin, subject)
             self._check_active(row, now)
             return {"revision": row["revision"], "nonce": row["nonce"],
@@ -225,6 +290,7 @@ class PublicSessionGate:
         nonce, revision, message = turn_request(body, self.policy)
         reservation, next_nonce = secrets.token_hex(32), secrets.token_hex(32)
         with self._transaction(now) as conn:
+            self._require_host(conn, now)
             row = self._session(conn, token, surface, origin, subject)
             lick = conn.execute("SELECT challenge_complete FROM reddog_lick_open_v1 WHERE token_hash=?",
                                 (self._hash(token),)).fetchone()
@@ -236,9 +302,9 @@ class PublicSessionGate:
                 raise PublicAdmissionError("public_concurrency_exhausted", 429)
             self._spend(conn, "turns:global", now, self.policy.global_turns_daily)
             self._spend(conn, "turns:" + subject, now, self.policy.subject_turns_daily)
-            conn.execute("""UPDATE reddog_public_session_v1
-                SET revision=revision+1, nonce=?, busy=?, last_seen=? WHERE token_hash=?""",
-                         (next_nonce, reservation, now, self._hash(token)))
+            conn.execute("""UPDATE reddog_public_session_v1 SET revision=revision+1,
+                nonce=?,busy=?,busy_owner=?,last_seen=? WHERE token_hash=?""",
+                         (next_nonce, reservation, self._owner_or_none(), now, self._hash(token)))
         return PublicTurn(message, surface, reservation, revision + 1, next_nonce,
                           self.policy.session_turns - revision - 1, self.policy.output_tokens,
                           min(now + self.policy.request_seconds, row["created"] + self.policy.session_seconds,
@@ -263,8 +329,14 @@ class PublicSessionGate:
         """Trusted provider completion only. Never refund a failed/timed-out call."""
         checked_hex(reservation_id, "reservation")
         with self._transaction(now) as conn:
-            result = conn.execute("""UPDATE reddog_public_session_v1 SET busy=NULL
-                WHERE token_hash=? AND busy=?""", (self._hash(token), reservation_id))
+            self._require_host(conn, now)
+            owner = self._owner_or_none()
+            query = "UPDATE reddog_public_session_v1 SET busy=NULL,busy_owner=NULL WHERE token_hash=? AND busy=?"
+            params = (self._hash(token), reservation_id)
+            if owner is not None:
+                query += " AND busy_owner=?"
+                params += (owner,)
+            result = conn.execute(query, params)
             conn.execute("""DELETE FROM reddog_lick_open_v1 WHERE token_hash IN (
                 SELECT token_hash FROM reddog_public_session_v1
                 WHERE token_hash=? AND closed=1 AND busy IS NULL)""", (self._hash(token),))
@@ -273,8 +345,12 @@ class PublicSessionGate:
         return result.rowcount == 1
 
     def delivery_allowed(self, *, token: str, revision: int, now: int) -> bool:
-        """Recheck expiry/withdrawal/current revision immediately before delivery."""
+        """Recheck expiry, withdrawal, revision, and host lease before delivery."""
         with self._transaction(now) as conn:
+            try:
+                self._require_host(conn, now)
+            except PublicAdmissionError:
+                return False
             row = conn.execute("SELECT * FROM reddog_public_session_v1 WHERE token_hash=?",
                                (self._hash(token),)).fetchone()
             return bool(row and not row["closed"] and row["revision"] == revision
@@ -284,6 +360,7 @@ class PublicSessionGate:
     def withdraw(self, *, surface: str, origin: str, subject: str,
                  token: str, now: int) -> dict:
         with self._transaction(now) as conn:
+            self._require_host(conn, now)
             row = self._session(conn, token, surface, origin, subject)
             conn.execute("""UPDATE reddog_public_session_v1 SET closed=1,
                 actor_claim='withdrawn', nonce='' WHERE token_hash=?""", (self._hash(token),))
