@@ -97,14 +97,15 @@ class PublicSessionGate:
                 raise
 
     def register_host(self, *, now: int) -> int:
-        """Register or refresh this process owner; raw owner material is never stored."""
+        """Register one process owner exactly once; raw owner material is never stored."""
         owner = self._configured_owner_hash()
         lease_until = now + HOST_LEASE_SECONDS
         with self._transaction(now) as conn:
-            conn.execute("""INSERT INTO reddog_public_host_lease_v1
+            result = conn.execute("""INSERT INTO reddog_public_host_lease_v1
                 (owner_hash,started,lease_until) VALUES (?,?,?)
-                ON CONFLICT(owner_hash) DO UPDATE SET lease_until=excluded.lease_until""",
-                         (owner, now, lease_until))
+                ON CONFLICT(owner_hash) DO NOTHING""", (owner, now, lease_until))
+            if result.rowcount != 1:
+                raise PublicAdmissionError("public_host_owner_reused", 503)
         return lease_until
 
     def renew_host(self, *, now: int) -> int:
