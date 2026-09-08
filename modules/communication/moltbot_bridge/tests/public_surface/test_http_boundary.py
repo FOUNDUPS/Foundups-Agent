@@ -14,13 +14,15 @@ s = sys.modules["_reddog_public_boundary_tests.reddog_public_session_gate"]
 NOW = 1800000000
 ORIGIN = "https://foundups.com"
 BASE = "/api/reddog/public/foundups/"
+HOST_OWNER = "f" * 64
 CONSENT = {"consent": True, "consent_version": p.CONSENT_VERSION, "actor_claim": "human"}
 
 
 def host(api, store, respond=None, policy=None):
-    gate, connect = store
-    if policy:
-        gate = s.PublicSessionGate(connect, policy)
+    _, connect = store
+    gate = s.PublicSessionGate(connect, policy, host_owner=HOST_OWNER)
+    gate.initialize()
+    gate.register_host(now=NOW)
     seen = []
     async def reply(turn):
         seen.append(turn)
@@ -54,6 +56,14 @@ def test_no_binding_is_unavailable_not_private_fallback(api_module):
             assert result.status_code == 503
             assert result.json() == {"error": "public_surface_unavailable"}
     asyncio.run(run())
+
+
+def test_http_binding_requires_configured_host_lease(api_module, store):
+    gate, _ = store
+    async def responder(_):
+        return "Public response."
+    with pytest.raises(p.PublicAdmissionError, match="public_configuration_invalid"):
+        api_module.PublicSurfaceBinding(gate, responder, b"z"*32, lambda: NOW)
 
 
 def test_public_round_trip_claims_and_tokens_never_dispatch_private_work(api_module, store):
@@ -245,6 +255,8 @@ def test_status_needs_bearer_and_does_not_extend_expiry(api_module, store):
             session = (await c.post(BASE+"encounter", json=CONSENT)).json()
             assert (await c.post(BASE+"status", json={})).status_code == 403
             assert (await c.options(BASE+"status")).status_code == 200
+            binding.gate.renew_host(now=NOW+59)
+            binding.gate.renew_host(now=NOW+118)
             binding.clock = lambda: NOW+119
             response = await c.post(BASE+"status", headers=auth(session), json={})
             assert response.status_code == 200 and response.json()["idle_expires_at"] == NOW+120
