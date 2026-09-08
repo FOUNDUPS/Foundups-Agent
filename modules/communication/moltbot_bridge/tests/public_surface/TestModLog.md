@@ -1,5 +1,31 @@
 # Public-surface TestModLog
 
+## 2026-09-08 — host lease orphan-recovery slice
+
+- Base: `098436475737d17fdf06c6bf78de2671aef86da6`; isolated branch
+  `feature/reddog-public-host-lease-recovery-20260908`.
+- WSP 97 test-reuse decision: host/process lease recovery is a distinct
+  lifecycle contract from guest policy/HTTP behavior, so it receives one
+  focused `test_host_lease_recovery.py` file rather than duplicating policy
+  cases in the existing files.
+- Source adds a hashed host-owner lease table plus a `busy_owner` migration on
+  the existing public session table. Raw host-owner material is not persisted.
+- Recovery is explicit and fail-closed: a registered replacement host may clear
+  only reservations whose recorded owner lease has expired or disappeared.
+  Revision, rotated nonce, session/subject/global turn counters and expiry are
+  preserved; no inference is replayed and no quota is refunded.
+- A live owner renewal blocks recovery. An expired owner cannot finish or
+  deliver after another host has reclaimed the slot. Legacy busy rows without
+  owner evidence are deliberately not reclaimed during migration.
+- The focused tests also use the unchanged DatabaseManager wrapper across a
+  singleton restart and temporary SQLite database. This is source-level lease
+  semantics, not proof that the actual resident PC heartbeat or process-death
+  detector is running.
+- Canonical registry generation and focused/repository CI are pending on the
+  branch. No fresh pass count, coverage percentage, live WSP_00 bootstrap,
+  Holo owner receipt, provider call, deployment or host activation is claimed
+  in this entry until those gates complete.
+
 ## 2026-09-08 — guest status recovery and actual DB wrapper
 
 - Base: `8980aa29b2a17655ad5d927c94059c068400c118`, merged through PR #1633.
