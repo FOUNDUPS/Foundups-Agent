@@ -1,5 +1,7 @@
 'use strict';
 
+const principalActivityExtensionAdapter = require('./principal_activity_extension_adapter');
+
 const SECRET_KEY = 'reddog.principalMemex.disclosure.v2';
 const DISCLOSURE_SCHEMA = 'reddog_principal_memex_disclosure.v2';
 const SUPPLY_FIELDS = Object.freeze([
@@ -212,7 +214,8 @@ function registerCommands(vscode, context) {
       if (result.cleared) {
         vscode.window.showInformationMessage('Principal Memex disclosure cleared.');
       }
-    })
+    }),
+    ...principalActivityExtensionAdapter.registerCommands(vscode, context)
   ];
 }
 
