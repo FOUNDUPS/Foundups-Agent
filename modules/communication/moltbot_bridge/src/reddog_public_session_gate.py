@@ -130,11 +130,6 @@ class PublicSessionGate:
                     SELECT 1 FROM reddog_public_host_lease_v1 h
                     WHERE h.owner_hash=reddog_public_session_v1.busy_owner
                     AND h.lease_until>?)""", (now,))
-            conn.execute("""DELETE FROM reddog_public_host_lease_v1
-                WHERE lease_until<=? AND NOT EXISTS (
-                    SELECT 1 FROM reddog_public_session_v1 s
-                    WHERE s.busy_owner=reddog_public_host_lease_v1.owner_hash
-                    AND s.busy IS NOT NULL)""", (now,))
         return result.rowcount
 
     def _configured_owner_hash(self) -> str:
