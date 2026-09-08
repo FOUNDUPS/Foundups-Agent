@@ -1,7 +1,7 @@
 # RedDog public-surface admission — bounded first slice
 
 Date: 2026-09-08  
-Status: implemented, isolated tests passed; **not activated or deployed**  
+Status: implemented source boundaries; **not activated or deployed**  
 Baseline: `28273b0005563a41b9aa738654e0b70361542efb`
 
 Canonical navigation: [documentation map](../../../docs/REDDOG_DOCUMENTATION_MAP.md) ·
@@ -12,7 +12,7 @@ Canonical navigation: [documentation map](../../../docs/REDDOG_DOCUMENTATION_MAP
 
 AutoPost is the first intended mobile RedDog surface. `foundups.com` and
 `eSingularity.ai` are additional public surfaces, not public doors into 012's
-private 0102 runtime. This slice implements their shared **guest admission
+private 0102 runtime. These slices implement their shared **guest admission
 boundary**, not the complete voice, memory, dual-loop, Lick, or 3V system.
 
 RedDog remains the fast surface. 0102 remains the deeper twin. A public
@@ -21,7 +21,7 @@ It must never be configured to call the existing private OpenClaw webhook,
 private Memex, tools, work-order promotion, or worker dispatch.
 
 No site, AutoPost source, deployment, existing webhook, WSP, model topology,
-or signed runtime manifest is changed by this slice. The router is intentionally
+or signed runtime manifest is activated by these files. The router remains
 unmounted until its host and public-only responder pass deployment review.
 
 ## Implemented ownership
@@ -29,17 +29,19 @@ unmounted until its host and public-only responder pass deployment review.
 | Source | Responsibility |
 |---|---|
 | `modules/communication/moltbot_bridge/src/reddog_public_policy.py` | Exact public origins, strict input, lowered-only ceilings, unsigned Lick Verification evidence |
-| `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` | Atomic guest session/nonce/quota accounting and status recovery through an injected existing AgentDB SQLite connection factory |
+| `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` | Atomic guest session/nonce/quota accounting, status recovery, host leases and owner-bound orphan recovery through an injected existing AgentDB SQLite connection factory |
 | `modules/communication/moltbot_bridge/src/reddog_public_http.py` | Optional FastAPI router; bounded JSON, exact CORS, public-only responder, cancellation/deadline, late-result handling and bearer-bound status |
-| `modules/communication/moltbot_bridge/tests/public_surface/` | Real SQLite, actual DatabaseManager-wrapper and in-process ASGI tests with synthetic responders |
+| `modules/communication/moltbot_bridge/tests/public_surface/` | Real SQLite, actual DatabaseManager-wrapper and in-process ASGI tests with synthetic responders plus a distinct host-lease lifecycle suite |
 
 The gate accepts `agent_db.db.get_connection`; it does not create a second memory
-database. The continuity tests execute the unchanged DatabaseManager wrapper
-against temporary SQLite databases; the actual PC binding is not verified.
-Only `reddog_public_budget_v1` and `reddog_public_session_v1` are owned.
-No conversation text, raw address, media, private memory, or raw session bearer
-is stored. SQLite is the supported accounting backend for this slice; other
-backends must fail closed until independently implemented and verified.
+database. Tests execute the unchanged DatabaseManager wrapper against temporary
+SQLite databases; the actual PC binding and resident heartbeat are not verified.
+Owned storage is limited to `reddog_public_budget_v1`,
+`reddog_public_session_v1`, and `reddog_public_host_lease_v1`. Existing session
+rows gain a nullable `busy_owner` column. No conversation text, raw address,
+media, private memory, raw session bearer, or raw host-owner token is stored.
+SQLite is the supported accounting backend for these slices; other backends must
+fail closed until independently implemented and verified.
 
 ## Endpoints and hard ceilings
 
@@ -80,9 +82,35 @@ object replacement and session rotation. Daily counters are retained until
 cleanup after the following UTC day; they are not conversation memory.
 
 A timed-out or cancelled provider keeps its busy slot until it actually finishes.
-An uncooperative provider cannot create unlimited replacement calls. Orphaned
-reservations after a process crash intentionally fail closed; the next slice
-must prove host-owned recovery rather than clearing them optimistically.
+An uncooperative provider cannot create unlimited replacement calls.
+
+### Host lease and crash-orphan recovery
+
+A configured public host may supply a cryptographically random 64-hex
+`host_owner`. The gate hashes that value before persistence. `register_host()`
+accepts a host-owner token exactly once and creates a short lease;
+`renew_host()` is the only way for that same running process to extend an
+unexpired lease. Re-registering the same token is rejected before or after
+expiry, so a stalled process cannot resurrect itself by replaying its startup
+identity.
+
+When a configured host reserves a turn, the busy reservation is bound to the
+hashed process owner. A separately registered replacement host may call
+`reclaim_orphaned_turns()` after the prior owner lease is no longer active.
+Recovery clears only `busy` and `busy_owner`. It does **not** decrement revision,
+restore the prior nonce, renew expiry, replay inference, or refund session,
+subject, or global usage. The old host cannot finish or deliver after its lease
+expires. A live renewed owner blocks foreign recovery.
+
+Legacy busy rows created before owner tracking have `busy_owner = NULL`. They
+remain fail-closed and are not reclaimed merely because the schema changed;
+there is insufficient evidence that the older provider call is dead.
+
+These are lease/recovery primitives, not a running resident lifecycle. The
+production host still needs one unique owner token per process, one startup
+registration, periodic renewal before the lease expires, replacement-host
+recovery, and shutdown/drain behavior. No heartbeat scheduler or process-death
+adapter is mounted by this source slice.
 
 ### Guest status and lost-response recovery
 
@@ -145,9 +173,10 @@ explicit budget; a public knowledge answer cannot select it.
 
 The existing host must explicitly supply `PublicSurfaceBinding`: persistent
 AgentDB accounting, a reviewed public-only responder, a deployment-owned secret
-for pseudonymous peer accounting, and a trustworthy clock. Without that binding,
-the router returns 503 and never falls back to private OpenClaw or a browser key.
-No such binding or network listener is installed by these files.
+for pseudonymous peer accounting, and a trustworthy clock. A configured
+lease-backed host must additionally own a unique process token and keep its
+lease current. Without those bindings, the router remains unavailable and must
+never fall back to private OpenClaw or a browser key.
 
 The current adapter uses the direct transport peer and ignores forwarded headers.
 Behind a proxy this may group visitors together; a trusted edge subject adapter,
@@ -163,21 +192,22 @@ There are no biometric templates in this slice to delete.
 ## WSP and retrieval evidence
 
 Read WSP_00, WSP_97, WSP_10, WSP_15, WSP_29 and the canonical RedDog/AutoPost
-contracts before design. Classification: one bounded implementation layer, no
-live worker dispatch. WSP_15 planning scores C=4, I=5, D=4, Impact=5: 18/P0;
-this planning assessment is **not** an authenticated allocation receipt.
+contracts before design. Each change remains a bounded implementation layer,
+not live worker dispatch. Planning priority is recorded in the owning PR; it is
+not represented as an authenticated WSP_15 allocation receipt because current
+WSP_97 explicitly marks end-to-end allocation enforcement as not implemented.
 
-This environment had no checkout or resident owner. The WSP_00 and Holo owner
-commands failed with missing script files; Git clone also failed at DNS, and
-HoloIndex connector discovery returned no service. This is an environment
-availability limitation, not evidence of a Holo source defect. Exact-commit
-GitHub retrieval was the fallback. No Holo freshness, bootstrap success, RSI
-promotion, full-repository test pass, or PC working-tree state is asserted.
+This chat environment does not provide the configured resident HoloIndex owner
+or canonical PC checkout needed for a live WSP_00/Holo execution receipt.
+Exact-commit GitHub retrieval is the fallback evidence source. CI freshness
+checks are useful repository gates but do not substitute for the live owner
+query required by the remote work order. No Holo repair, bootstrap success, RSI
+promotion, or PC working-tree state is asserted from these source changes.
 
 Retain this retrieval regression case for the remote owner:
 
 ```json
-{"query":"RedDog Lick public surface usage cap timeout 3V Verification tSingularity","limit":5,"include_bundle":true,"module_hint":"modules/communication/moltbot_bridge","must_include":["extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md","modules/communication/moltbot_bridge/src/reddog_public_policy.py","modules/communication/moltbot_bridge/src/reddog_public_session_gate.py","modules/communication/moltbot_bridge/src/reddog_public_http.py"]}
+{"query":"RedDog Lick public surface usage cap timeout host lease crash recovery 3V Verification tSingularity","limit":5,"include_bundle":true,"module_hint":"modules/communication/moltbot_bridge","must_include":["extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md","modules/communication/moltbot_bridge/src/reddog_public_policy.py","modules/communication/moltbot_bridge/src/reddog_public_session_gate.py","modules/communication/moltbot_bridge/src/reddog_public_http.py"]}
 ```
 
 Require `ok=true`, `freshness=CURRENT`, `index_gap_detected=false`; retain exact
@@ -190,16 +220,15 @@ changes without independent held-out evidence.
 
 See the suite [README](../../../modules/communication/moltbot_bridge/tests/public_surface/README.md)
 and [TestModLog](../../../modules/communication/moltbot_bridge/tests/public_surface/TestModLog.md).
-Local evidence is isolated source execution, not the PC or production host.
-The guest-status continuation uses CI evidence recorded in PR #1635, not a
-claim that local execution or the resident host became available.
+Source and CI evidence do not prove the PC or production host.
 
-The next bounded transaction is the
+The next bounded transaction remains the
 [remote integration work order](prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md).
-It closes host/ingress proof before adding browser/AutoPost UI, then returns to
-private resident transport, authorized context deltas, voice, and omission-critic
-work. Its completion ledger separates source implementation from runtime
-activation. The public guest gate does not complete those independent layers.
+It must connect the lease primitives to the actual resident host lifecycle,
+public-only responder, trusted ingress and shared budgets before adding browser
+or AutoPost UI. After the public host lane is proven, return to private resident
+transport, authorized context deltas, voice, and omission-critic work. The public
+guest gate does not complete those independent layers.
 
 Technical anchors: [OWASP session timeouts](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html),
 [OWASP REST security](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html),
