@@ -47,7 +47,7 @@ public/member/
 | `mall-tile-field.js` | Video Mall tile grid. Exposes `window.mallTileField` API. |
 | `mall-planes.js` | FoundUp view planes. Exposes `window.mallPlanes` API. |
 | `gesture-engine.js` | Touch/mouse gesture detection. |
-| `red-dog-concierge.js` | Legacy FAQ topics. Will be removed when OpenClaw lands. |
+| `red-dog-concierge.js` | Local help topics plus explicit-consent public project Q&A candidate. |
 
 ## Current UX
 

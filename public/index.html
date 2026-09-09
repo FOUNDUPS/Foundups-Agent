@@ -972,6 +972,17 @@
       display: flex;
     }
 
+    .chat-panel [hidden] { display: none !important; }
+    .chat-panel .chat-public-controls { padding: 10px 16px; font-size: 0.76rem; line-height: 1.5; border-top: 1px solid var(--border); }
+    .chat-panel .chat-public-controls p { margin: 0 0 8px; }
+    .chat-panel .chat-public-controls button, .chat-panel .chat-close { border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; color: var(--text); background: rgba(124,92,252,.18); cursor: pointer; }
+    .chat-panel .chat-close { margin-left: auto; }
+    .chat-panel button:disabled { opacity: .5; cursor: default; }
+    .chat-panel .chat-msg { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .chat-panel a { color: #b8a6ff; text-decoration: underline; }
+    .chat-panel .chat-messages { min-height: 70px; }
+    .chat-panel { max-height: min(620px, calc(100dvh - 115px)); }
+
     @keyframes chatSlideIn {
       from {
         opacity: 0;
@@ -1597,26 +1608,33 @@
   </footer>
 
   <!-- CHAT WIDGET -->
-  <button class="chat-fab" id="chatFab" aria-label="Chat with 0102"><img src="/logo-dog.png" alt="Chat"
+  <button class="chat-fab" id="chatFab" aria-label="Chat with Red Dog" aria-controls="chatPanel" aria-expanded="false"><img src="/logo-dog.png" alt=""
       style="width:28px;height:auto;"></button>
-  <div class="chat-panel" id="chatPanel">
+  <div class="chat-panel" id="chatPanel" role="dialog" aria-labelledby="chatTitle">
     <div class="chat-header">
       <div class="chat-avatar"><img src="/logo-dog.png" alt="" style="width:20px;height:auto;"></div>
       <div>
-        <div class="chat-title">0102 — FoundUPS Agent</div>
-        <div class="chat-status">●Online</div>
+        <div class="chat-title" id="chatTitle">Red Dog · 0102</div>
+        <div class="chat-status">FoundUPS project guide</div>
       </div>
+      <button class="chat-close" id="chatClose" type="button" aria-label="Close Red Dog chat">×</button>
     </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="chat-msg bot">Hey! I'm 0102, the FoundUPS agent. I can answer questions about how FoundUPS works and what Return on Compute means.</div>
+    <div class="chat-messages" id="chatMessages" data-reddog-messages role="log" aria-live="polite" aria-label="Conversation">
+      <div class="chat-msg bot">I'm Red Dog, the public face of 0102. Ask about FoundUPS, Return on Compute, or the YUMORI.me plan to save and revitalize the onsen.</div>
       <div class="chat-msg bot">Access is invite-only right now. To join, you'll need an invite code and to sign in through the gateway above. Chat can't grant access.</div>
       <div class="chat-msg bot">Can't wait? Connect with <a href="https://linkedin.com/in/openstartup/" target="_blank"
           style="color:var(--accent);text-decoration:underline;">UnDaoDu on LinkedIn</a>.</div>
     </div>
-    <div class="chat-input-wrap">
-      <input type="text" id="chatInput" placeholder="Ask about FoundUPS..." maxlength="500" autocomplete="off">
-      <button id="chatSend">Send</button>
+    <div class="chat-public-controls">
+      <div data-reddog-consent><p>Your public questions are sent to AI providers through OpenRouter. Avoid private information. Up to 10 questions; 2-minute idle and 10-minute total session limits. Daily limits also apply.</p><button type="button" data-reddog-start>Agree and start chat</button></div>
+      <p data-reddog-status role="status"></p>
+      <button type="button" data-reddog-check hidden>Check session</button>
+      <button type="button" data-reddog-end hidden>End chat &amp; clear</button>
     </div>
+    <form class="chat-input-wrap" data-reddog-form>
+      <input type="text" id="chatInput" data-reddog-input aria-label="Question for Red Dog" placeholder="Ask about FoundUPS..." maxlength="2000" autocomplete="off" disabled>
+      <button id="chatSend" data-reddog-send type="submit" disabled>Send</button>
+    </form>
   </div>
 
   <!-- FIREBASE -->
@@ -2401,80 +2419,33 @@
       }
       animate();
     })();
-    // === CHAT WIDGET ===
-    (function () {
-      const fab = document.getElementById('chatFab');
-      const panel = document.getElementById('chatPanel');
-      const msgs = document.getElementById('chatMessages');
-      const input = document.getElementById('chatInput');
-      const sendBtn = document.getElementById('chatSend');
-      if (!fab || !panel) return;
+  </script>
 
-      const CHAT_ENDPOINT = 'https://chat-3wqfxfmvuq-uc.a.run.app';
-      const sessionId = 'sess_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now();
-      let sending = false;
-
-      // Rate limiting — max 5 messages per 60 seconds
-      const MSG_LIMIT = 5;
-      const MSG_WINDOW = 60000;
-      const msgTimestamps = [];
-
-      fab.addEventListener('click', () => {
-        const isOpen = panel.classList.toggle('open');
-        fab.classList.toggle('open', isOpen);
-        if (isOpen) input.focus();
-      });
-
-      function addMsg(text, type) {
-        const div = document.createElement('div');
-        div.className = 'chat-msg ' + type;
-        div.textContent = text;
-        msgs.appendChild(div);
-        msgs.scrollTop = msgs.scrollHeight;
-        return div;
-      }
-
-      async function sendMessage() {
-        const text = input.value.trim();
-        if (!text || sending) return;
-
-        // Rate limit check
-        const now = Date.now();
-        while (msgTimestamps.length && msgTimestamps[0] < now - MSG_WINDOW) msgTimestamps.shift();
-        if (msgTimestamps.length >= MSG_LIMIT) {
-          addMsg("Slow down — try again in a minute.", 'bot');
-          return;
-        }
-        msgTimestamps.push(now);
-
-        sending = true;
-        sendBtn.disabled = true;
-        input.value = '';
-
-        addMsg(text, 'user');
-        const typingEl = addMsg('0102 is thinking...', 'bot typing');
-
-        try {
-          const res = await fetch(CHAT_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text, sessionId }),
-          });
-          const data = await res.json();
-          typingEl.remove();
-          addMsg(data.reply || 'I couldn\'t process that right now. Try again shortly.', 'bot');
-        } catch (err) {
-          typingEl.remove();
-          addMsg("Chat is temporarily unavailable. For access questions, use the SIGN UP / ENTER button above.", 'bot');
-        }
-        sending = false;
-        sendBtn.disabled = false;
-        input.focus();
-      }
-
-      sendBtn.addEventListener('click', sendMessage);
-      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
-    })();
+  <script type="module">
+    const fab = document.getElementById('chatFab');
+    const panel = document.getElementById('chatPanel');
+    const close = document.getElementById('chatClose');
+    function toggleChat(open) {
+      panel.classList.toggle('open', open);
+      fab.classList.toggle('open', open);
+      fab.setAttribute('aria-expanded', String(open));
+      if (open) {
+        const input = panel.querySelector('[data-reddog-input]');
+        const target = input.disabled ? panel.querySelector('[data-reddog-start]') : input;
+        (target.disabled ? close : target).focus();
+      } else fab.focus();
+    }
+    fab.addEventListener('click', () => toggleChat(!panel.classList.contains('open')));
+    close.addEventListener('click', () => toggleChat(false));
+    panel.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') { event.preventDefault(); toggleChat(false); }
+    });
+    import('/js/reddog-public-client.js').then(({ mountPublicChat }) => {
+      mountPublicChat(panel);
+    }).catch(() => {
+      panel.querySelector('[data-reddog-start]').disabled = true;
+      panel.querySelector('[data-reddog-status]').textContent = 'Chat could not load. Please refresh the page or use the project links.';
+    });
   </script>
 
   <script src="js/foundup-cube.js?v=2"></script>

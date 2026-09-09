@@ -1,5 +1,14 @@
 # Project eSingularity interface
 
+## Public Red Dog delivery candidate
+
+POST `/api/reddog/public/{esingularity|foundups}/{encounter|turn|status|withdraw}`
+is a bounded public Q&A contract with exact origins, explicit consent, token,
+nonce and revision checks. GET `/api/reddog/health` reports configuration presence.
+The JA/EN/PT chat uses reviewed public project documents and a dated public Mosh
+Pit summary. No private recall or execution is exposed. See
+`docs/REDDOG_PUBLIC_RUNTIME.md`; implementation is not live activation evidence.
+
 ## Public routes
 
 | Route | Purpose |

@@ -1,5 +1,7 @@
 # RedDog
 
+OpenRouter credential owners and restart/deployment requirements are tracked in [the consumer inventory](docs/OPENROUTER_CREDENTIAL_CONSUMERS.md).
+
 Version: 0.4.141
 0.4.141 first binds the corrected fast-RedDog/deep-0102 identity boundary while preserving the 0.4.140 builder release: 1,398 backend files at `sha256:700d50f84e12...86e09ed` with one evidence-only held child. It changes no extension effect authority.
 

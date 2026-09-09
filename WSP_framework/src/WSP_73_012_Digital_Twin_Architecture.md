@@ -148,6 +148,31 @@ Production consumers accept only current, authenticated, provider-available
 runtime bindings. A static extension roster is an explicit dialogue-only
 evaluation fallback and cannot open action planning or worker dispatch.
 
+### 6.1 Bounded public dialogue deployment
+
+A public website may expose a separately admitted RedDog question-and-answer
+adapter with `CHAT / FAST / NONE`. It receives the public turn and a
+server-selected, reviewed public project snapshot. It receives no principal
+Memex, stakeholder-only Mosh Pit feed, resident conversation capability, tools,
+or work-order route. Public dialogue can be useful before private resident
+continuity is implemented; its successful reply does not complete that layer.
+
+This adapter may use one operator-configured dialogue provider/model after its
+public admission and deployment boundaries are reviewed. Record it as a public
+dialogue deployment binding, not an evaluated champion or promoted AI Gateway
+runtime topology. Browser input cannot select providers, models, endpoints,
+disclosure, or authority. The production topology and promotion requirements in
+Section 6 remain mandatory for the governed consumers described there.
+
+Preserve source identifiers, revision, review time, and fact/proposal status in
+public context. A curated activity summary is not live Mosh Pit access. Adding
+live public activity requires a separately authorized public projection with
+freshness and disclosure checks; failure never opens the stakeholder/private
+source. Guest quotas and session state are public admission accounting, not
+principal memory or durable cross-surface conversation. See
+`extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` and WSP 97's public
+delivery evidence gate for transport and deployment requirements.
+
 ## 7. Work orchestration and recursive operation
 
 0102 may inspect readiness and formulate work behind RedDog, then submit a

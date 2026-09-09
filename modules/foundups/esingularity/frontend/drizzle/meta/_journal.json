@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1788963011050,
+      "tag": "0000_reddog_public_accounting",
+      "breakpoints": true
+    }
+  ]
+}

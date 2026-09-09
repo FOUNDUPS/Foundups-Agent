@@ -1,5 +1,7 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
+For every OpenRouter worker, see [credential consumers and rotation](../../../extensions/reddog/docs/OPENROUTER_CREDENTIAL_CONSUMERS.md). Existing runtime/model/redaction gates remain mandatory after configuration changes.
+
 ## Mosh Pit activity projection candidate
 
 The local `query_mosh_pit()` seam produces newest-first activity days with
