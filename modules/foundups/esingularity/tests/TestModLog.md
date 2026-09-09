@@ -1,5 +1,12 @@
 # eSingularity TestModLog
 
+## 2026-09-09 — YUMORI.me contact-ledger Skillz coverage
+
+- Added a contract test that requires `yumori_contact_ledger` to remain present in the WSP 95 registry as a prototype with the expected module-owned location and WSP chain.
+- Added regression checks for Gmail `message_id` / `thread_id` lineage and the rule that no extra campaign tracking signature is invented.
+- Added context-source checks for `YUMORI.me Contacts`, `YUMORI.me Moshpit`, and `YUMORI.me Contacts Pics` while preserving the no-private-dump repository boundary.
+- Added a truth-boundary assertion that the Skillz grants no Gmail/Drive mutation authority and requires live connected sources for current state.
+
 ## 2026-09-06 — YUMORI presentation contract coverage
 
 - Replaced corrupted legacy assertions with twelve UTF-8 contract tests for the current public architecture.
