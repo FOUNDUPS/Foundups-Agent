@@ -23,7 +23,7 @@ import os
 import time
 import logging
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import requests
 
 # Import model registry for centralized model management
@@ -56,7 +56,7 @@ class GatewayResult:
 class ProviderConfig:
     """Configuration for AI provider"""
     name: str
-    api_key: Optional[str]
+    api_key: Optional[str] = field(repr=False)
     base_url: str
     models: Dict[str, str]  # task_type -> model_name
     cost_per_token: float
@@ -513,13 +513,24 @@ class AIGateway:
         else:
             data['temperature'] = self._get_provider_temperature(provider.name, 0.7)
 
-        response = requests.post(
-            f"{provider.base_url}/chat/completions",
-            headers=headers,
-            json=data,
-            timeout=provider.timeout
-        )
-        response.raise_for_status()
+        try:
+            response = requests.post(
+                f"{provider.base_url}/chat/completions",
+                headers=headers,
+                json=data,
+                timeout=provider.timeout,
+                **({'allow_redirects': False} if provider.name == 'openrouter' else {}),
+            )
+            if provider.name == 'openrouter' and 300 <= getattr(response, 'status_code', 200) < 400:
+                raise requests.HTTPError('openrouter_redirect_rejected')
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            if provider.name != 'openrouter':
+                raise
+            # Keep exception bodies, URLs and attached requests out of callers'
+            # logs/receipts. Preserve timeout classification without raw detail.
+            error_type = requests.Timeout if isinstance(exc, requests.Timeout) else requests.RequestException
+            raise error_type('openrouter_request_failed') from None
 
         result = response.json()
         return result['choices'][0]['message']['content'].strip()

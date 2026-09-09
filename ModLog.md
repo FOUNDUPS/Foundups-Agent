@@ -1,5 +1,9 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-09 — OpenRouter credential consumer audit
+
+Completed an OpenRouter consumer audit across the gateway, RedDog extension, Fusion workers and public website service. Shared transport security corrections and an owner/restart inventory are reviewable in PR #1648. No provider key was found, changed, rotated or deployed; source audit is distinct from activation. WSP 15, 50, 71, 97.
+
 ## [2026-09-09] Public Red Dog website delivery candidate
 
 - Implemented the shared Foundups/eSingularity public OpenRouter service, client

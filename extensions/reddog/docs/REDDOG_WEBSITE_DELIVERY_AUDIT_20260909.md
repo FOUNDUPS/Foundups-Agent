@@ -299,3 +299,35 @@ completed successfully (Validate eSingularity run `34366564992`). These checks
 do not establish live Red Dog operation. Firebase publishing access, selected
 model, provider configuration, production D1/ingress and actual replies remain
 unverified.
+
+### Repository-wide OpenRouter consumer follow-through
+
+012 requested that every codebase consumer be checked after the credential
+discussion. A clean checkout of the published branch recovered working Git
+metadata after the original linked worktree's parent disappeared. No prior
+working files were deleted. Holo owner retrieval on the clean checkout returned
+`MISSING_GENERATION_BINDING`, freshness UNKNOWN and an index gap; scoped `rg`
+retrieval was used without reindexing or repairing the owner from this work.
+
+All active readers already use `OPENROUTER_API_KEY`. The
+[consumer inventory](OPENROUTER_CREDENTIAL_CONSUMERS.md) records each runtime
+owner, how configuration reaches it, and restart/deployment requirements. Public
+catalog discovery remains keyless; the old infrastructure client stays dormant.
+Model bindings and private execution authority are not replaced with public
+website policy. No named code consumer of the rotated Sites bypass token was
+found, and that token is distinct from the unrotated OpenRouter credential.
+
+The audit found real containment gaps in the shared Python transports: advisory
+HTTP errors copied upstream bodies, and redirects were enabled. Advisory, alias
+and AI Gateway OpenRouter requests now reject redirects. Advisory errors withhold
+upstream bodies/reasons; gateway representations hide keys and request exceptions
+remain content-free. Fusion artifact, audit and architect runners inherit the
+shared advisory fix without loosening their execution gates. The public Worker
+already rejects redirects and sanitizes errors, so its saved build is unchanged.
+
+119 focused Python checks and the extension environment-isolation check pass.
+Tests use synthetic in-memory HTTP handling and mocked requests, with no real
+key or provider spend. A dedicated CI workflow repeats those checks. This is
+source-level completion: hosted configuration remains absent, and original
+machine secrets, running service refreshes, Firebase publication, deployed
+D1/ingress and real replies are still unverified.

@@ -1,5 +1,7 @@
 # Red Dog public website runtime
 
+The repository-wide [OpenRouter consumer inventory](../../../../extensions/reddog/docs/OPENROUTER_CREDENTIAL_CONSUMERS.md) records environment ownership and restart/deployment requirements. Browser surfaces never receive provider credentials.
+
 Status: implemented and locally tested; native Site version 28 saved, not deployed.
 Production activation and provider replies remain unverified.
 Review date: 2026-09-09. Owned branch: `feat/reddog-public-openrouter`.

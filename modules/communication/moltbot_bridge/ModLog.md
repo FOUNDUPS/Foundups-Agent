@@ -1,5 +1,9 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-09 — OpenRouter credential consumer audit
+
+The optional live Fusion alias now disables redirects and rejects non-200 responses before body parsing. FoundUps Fusion artifact/audit/architect workers inherit the advisory transport fix. Explicit authorization, redaction, model binding and dormant-client boundaries are preserved. WSP 15, 50, 71, 97.
+
 ## 2026-09-09: Mosh Pit activity projection and curation candidate
 
 - Extended the memory query surface with an unmounted, read-only Mosh Pit
