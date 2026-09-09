@@ -98,6 +98,8 @@ Sync Date
 ```
 
 The canonical uniqueness constraint is Gmail `Message ID`, not subject text.
+Gmail `thread_id` is the canonical conversation-lineage key for grouping the
+first outbound, follow-ups, inbound replies, and closure in one conversation.
 
 A single Gmail message can involve many contacts through To/CC. The event row
 must preserve those addresses. Contact roll-ups may associate the same Gmail
