@@ -1,13 +1,11 @@
 {
   "version": "2.0",
-  "last_updated": "2026-08-26T00:00:00+00:00",
-  "total_skills": 28,
+  "last_updated": "2026-09-09T02:42:00+00:00",
+  "total_skills": 29,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
-      "agents": [
-        "gemma"
-      ],
+      "agents": ["gemma"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "unknown",
@@ -15,9 +13,7 @@
     },
     "gemma_pqn_emergence_detector": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_emergence_detector",
-      "agents": [
-        "gemma"
-      ],
+      "agents": ["gemma"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "unknown",
@@ -25,9 +21,7 @@
     },
     "qwen_google_research_integrator": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_google_research_integrator",
-      "agents": [
-        "qwen"
-      ],
+      "agents": ["qwen"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "unknown",
@@ -35,70 +29,40 @@
     },
     "qwen_pqn_research_coordinator": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_pqn_research_coordinator",
-      "agents": [
-        "qwen"
-      ],
+      "agents": ["qwen"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "unknown",
-      "wsp_chain": [
-        "WSP 77"
-      ]
+      "wsp_chain": ["WSP 77"]
     },
     "qwen_wsp_compliance_auditor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_wsp_compliance_auditor",
-      "agents": [
-        "qwen"
-      ],
+      "agents": ["qwen"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "unknown",
-      "wsp_chain": [
-        "WSP 3",
-        "WSP 49",
-        "WSP 11",
-        "WSP 5",
-        "WSP 6",
-        "WSP 34",
-        "WSP 22",
-        "WSP 15",
-        "WSP 8",
-        "WSP 83"
-      ]
+      "wsp_chain": ["WSP 3", "WSP 49", "WSP 11", "WSP 5", "WSP 6", "WSP 34", "WSP 22", "WSP 15", "WSP 8", "WSP 83"]
     },
     "qwen_gitpush": {
       "location": "modules/infrastructure/git_push_dae/skillz/qwen_gitpush",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "DECISION",
       "version": "1.0.0",
       "promotion_state": "prototype",
       "domain": "autonomous_operations",
-      "wsp_chain": [
-        "WSP 15",
-        "WSP 96",
-        "WSP 62"
-      ]
+      "wsp_chain": ["WSP 15", "WSP 96", "WSP 62"]
     },
     "gemma_domain_trainer_prototype": {
       "location": ".claude/skills/gemma_domain_trainer_prototype",
-      "agents": [
-        "gemma"
-      ],
+      "agents": ["gemma"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 15"
-      ]
+      "wsp_chain": ["WSP 15"]
     },
     "gemma_noise_detector_prototype": {
       "location": ".claude/skills/gemma_noise_detector_prototype",
-      "agents": [
-        "gemma"
-      ],
+      "agents": ["gemma"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "prototype",
@@ -106,95 +70,47 @@
     },
     "qwen_cleanup_strategist_prototype": {
       "location": ".claude/skills/qwen_cleanup_strategist_prototype",
-      "agents": [
-        "qwen"
-      ],
+      "agents": ["qwen"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 15",
-        "WSP 83",
-        "WSP 64",
-        "WSP 50"
-      ]
+      "wsp_chain": ["WSP 15", "WSP 83", "WSP 64", "WSP 50"]
     },
     "qwen_roadmap_auditor_prototype": {
       "location": ".claude/skills/qwen_roadmap_auditor_prototype",
-      "agents": [
-        "qwen"
-      ],
+      "agents": ["qwen"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 83",
-        "WSP 22",
-        "WSP 50",
-        "WSP 15",
-        "WSP 96"
-      ]
+      "wsp_chain": ["WSP 83", "WSP 22", "WSP 50", "WSP 15", "WSP 96"]
     },
     "qwen_training_data_miner_prototype": {
       "location": ".claude/skills/qwen_training_data_miner_prototype",
-      "agents": [
-        "qwen"
-      ],
+      "agents": ["qwen"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 15",
-        "WSP 64",
-        "WSP 3",
-        "WSP 50"
-      ]
+      "wsp_chain": ["WSP 15", "WSP 64", "WSP 3", "WSP 50"]
     },
     "qwen_wsp_enhancement": {
       "location": ".claude/skills/qwen_wsp_enhancement",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "unknown",
-      "wsp_chain": [
-        "WSP 80",
-        "WSP 96",
-        "WSP 91",
-        "WSP 27",
-        "WSP 60",
-        "WSP 32",
-        "WSP 72",
-        "WSP 54"
-      ]
+      "wsp_chain": ["WSP 80", "WSP 96", "WSP 91", "WSP 27", "WSP 60", "WSP 32", "WSP 72", "WSP 54"]
     },
     "unicode_daemon_monitor_prototype": {
       "location": ".claude/skills/unicode_daemon_monitor_prototype",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 5",
-        "WSP 72",
-        "WSP 90",
-        "WSP 46",
-        "WSP 77",
-        "WSP 80",
-        "WSP 22"
-      ]
+      "wsp_chain": ["WSP 5", "WSP 72", "WSP 90", "WSP 46", "WSP 77", "WSP 80", "WSP 22"]
     },
     "youtube_dae": {
       "location": ".claude/skills/youtube_dae",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "GENERAL",
       "version": 1.0,
       "promotion_state": "unknown",
@@ -202,10 +118,7 @@
     },
     "youtube_moderation_prototype": {
       "location": ".claude/skills/youtube_moderation_prototype",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "GENERAL",
       "version": "1.0_prototype",
       "promotion_state": "prototype",
@@ -213,238 +126,126 @@
     },
     "qwen_holo_output_skill": {
       "location": "holo_index/skills/qwen_holo_output_skill",
-      "agents": [
-        "qwen"
-      ],
+      "agents": ["qwen"],
       "intent_type": "GENERAL",
       "version": "1.0_prototype",
       "promotion_state": "unknown",
-      "wsp_chain": [
-        "WSP 90",
-        "WSP 64",
-        "WSP 83",
-        "WSP 87",
-        "WSP 96",
-        "WSP 50"
-      ]
+      "wsp_chain": ["WSP 90", "WSP 64", "WSP 83", "WSP 87", "WSP 96", "WSP 50"]
     },
     "openclaw_intent_router": {
       "location": "modules/communication/moltbot_bridge/skillz/openclaw_intent_router",
-      "agents": [
-        "gemma"
-      ],
+      "agents": ["gemma"],
       "intent_type": "CLASSIFICATION",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 46",
-        "WSP 50",
-        "WSP 73",
-        "WSP 96"
-      ]
+      "wsp_chain": ["WSP 46", "WSP 50", "WSP 73", "WSP 96"]
     },
     "openclaw_executor": {
       "location": "modules/communication/moltbot_bridge/skillz/openclaw_executor",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "DECISION",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 46",
-        "WSP 50",
-        "WSP 73",
-        "WSP 77",
-        "WSP 91",
-        "WSP 96"
-      ]
+      "wsp_chain": ["WSP 46", "WSP 50", "WSP 73", "WSP 77", "WSP 91", "WSP 96"]
     },
     "linkedin_agentic_reply": {
       "location": "modules/platform_integration/linkedin_agent/skillz/linkedin_agentic_reply",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "DECISION",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 42",
-        "WSP 46",
-        "WSP 50",
-        "WSP 77",
-        "WSP 95",
-        "WSP 96"
-      ],
+      "wsp_chain": ["WSP 42", "WSP 46", "WSP 50", "WSP 77", "WSP 95", "WSP 96"],
       "description": "Agentic LinkedIn reply wardrobe with selected-post reading and model-routed drafting"
     },
     "m2m_compile_gate": {
       "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_compile_gate",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "DECISION",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 95",
-        "WSP 99",
-        "WSP 50",
-        "WSP 11",
-        "WSP 22",
-        "WSP 87"
-      ]
+      "wsp_chain": ["WSP 95", "WSP 99", "WSP 50", "WSP 11", "WSP 22", "WSP 87"]
     },
     "m2m_stage_promote_safe": {
       "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_stage_promote_safe",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "DECISION",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 95",
-        "WSP 99",
-        "WSP 50",
-        "WSP 11",
-        "WSP 22"
-      ]
+      "wsp_chain": ["WSP 95", "WSP 99", "WSP 50", "WSP 11", "WSP 22"]
     },
     "m2m_qwen_runtime_health": {
       "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_qwen_runtime_health",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "TELEMETRY",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 95",
-        "WSP 99",
-        "WSP 50",
-        "WSP 60",
-        "WSP 22"
-      ]
+      "wsp_chain": ["WSP 95", "WSP 99", "WSP 50", "WSP 60", "WSP 22"]
     },
     "m2m_holo_retrieval_benchmark": {
       "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_holo_retrieval_benchmark",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "TELEMETRY",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 95",
-        "WSP 99",
-        "WSP 87",
-        "WSP 50",
-        "WSP 22"
-      ]
+      "wsp_chain": ["WSP 95", "WSP 99", "WSP 87", "WSP 50", "WSP 22"]
     },
     "strategic_diligence_gate": {
       "location": "modules/ai_intelligence/ai_overseer/skillz/strategic_diligence_gate",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "DECISION",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 15",
-        "WSP 50",
-        "WSP 64",
-        "WSP 77",
-        "WSP 91",
-        "WSP 95"
-      ]
+      "wsp_chain": ["WSP 15", "WSP 50", "WSP 64", "WSP 77", "WSP 91", "WSP 95"]
     },
     "data_architecture_audit": {
       "location": "modules/ai_intelligence/ai_overseer/skillz/data_architecture_audit",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "TELEMETRY",
       "version": "1.0.0",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 78",
-        "WSP 96",
-        "WSP 77",
-        "WSP 50"
-      ],
+      "wsp_chain": ["WSP 78", "WSP 96", "WSP 77", "WSP 50"],
       "invocation": "/audit-data",
       "description": "WSP 78 compliance auditing of FoundUps data architecture"
     },
     "auto_test_registry_audit": {
       "location": "modules/infrastructure/wre_core/skillz/auto_test_registry_audit",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "TELEMETRY",
       "version": "2.2",
       "promotion_state": "production",
       "domain": "testing",
-      "wsp_chain": [
-        "WSP 00",
-        "WSP 6",
-        "WSP 15",
-        "WSP 50",
-        "WSP 62",
-        "WSP 97"
-      ],
+      "wsp_chain": ["WSP 00", "WSP 6", "WSP 15", "WSP 50", "WSP 62", "WSP 97"],
       "description": "Canonical test registry and bounded exact-SHA shard projection without test execution."
     },
     "reddog_operations": {
       "location": "modules/communication/moltbot_bridge/skillz/reddog_operations",
-      "logical_roles": [
-        "principal",
-        "researcher",
-        "critic",
-        "implementer",
-        "verifier"
-      ],
+      "logical_roles": ["principal", "researcher", "critic", "implementer", "verifier"],
       "intent_type": "DECISION",
       "version": "1.1.0",
       "promotion_state": "production",
       "domain": "operations",
-      "wsp_chain": [
-        "WSP 00",
-        "WSP 15",
-        "WSP 50",
-        "WSP 77",
-        "WSP 95",
-        "WSP 97"
-      ],
+      "wsp_chain": ["WSP 00", "WSP 15", "WSP 50", "WSP 77", "WSP 95", "WSP 97"],
       "description": "Provider-neutral operating discipline for bounded RedDog repository work."
     },
     "qwen_bulk_import_migration": {
       "location": "modules/infrastructure/wre_core/skillz/qwen_bulk_import_migration",
-      "agents": [
-        "qwen",
-        "gemma"
-      ],
+      "agents": ["qwen", "gemma"],
       "intent_type": "REFACTORING",
       "version": "1.0_prototype",
       "promotion_state": "prototype",
-      "wsp_chain": [
-        "WSP 77",
-        "WSP 50",
-        "WSP 84",
-        "WSP 22"
-      ],
+      "wsp_chain": ["WSP 77", "WSP 50", "WSP 84", "WSP 22"],
       "invocation": "/migrate-imports",
       "description": "Deterministic bulk-import migration prototype; Qwen/Gemma adapters are not bound"
+    },
+    "yumori_contact_ledger": {
+      "location": "modules/foundups/esingularity/skillz/yumori_contact_ledger",
+      "agents": ["qwen", "gemma"],
+      "intent_type": "MAINTENANCE",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_operations",
+      "wsp_chain": ["WSP 00", "WSP 15", "WSP 22", "WSP 50", "WSP 95", "WSP 97"],
+      "description": "Reconcile YUMORI.me Gmail correspondence with the connected Contacts and Email Log ledger while preserving message/thread lineage."
     }
   }
 }
