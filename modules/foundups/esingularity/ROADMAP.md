@@ -1,5 +1,15 @@
 # Project eSingularity roadmap
 
+## YUMORI.me Mosh Pit integration
+
+The shared activity projection and expandable renderer candidate lives in
+`modules/communication/moltbot_bridge`, with the registered Red Dog curation
+Skillz alongside it. Reuse this for a stakeholder-gated project feed in the
+existing frontend after a real authenticated source is bound. Proposed namespace:
+`/f/esingularity_001/mosh-pit`. No route or deployment is added by this candidate.
+See `extensions/reddog/docs/MOSH_PIT_WAVE_MVP.md` for membership, write flow and
+the open-source comparison. Keep private chronology out of public build assets.
+
 ## Phase 1 — Monorepo incubation (current)
 
 - [x] Preserve the live Japanese-first campaign PWA.

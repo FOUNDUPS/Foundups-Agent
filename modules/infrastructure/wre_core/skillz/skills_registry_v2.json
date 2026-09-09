@@ -428,6 +428,16 @@
       ],
       "description": "Provider-neutral operating discipline for bounded RedDog repository work."
     },
+    "reddog_mosh_pit": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_mosh_pit",
+      "logical_roles": ["researcher", "implementer", "verifier"],
+      "intent_type": "GENERATION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "communication",
+      "wsp_chain": ["WSP 00", "WSP 50", "WSP 60", "WSP 95", "WSP 97"],
+      "description": "Curate activity-only FoundUp Mosh Pits: newest-first days, expandable entries, explicit disclosure, no notification noise."
+    },
     "qwen_bulk_import_migration": {
       "location": "modules/infrastructure/wre_core/skillz/qwen_bulk_import_migration",
       "agents": [

@@ -1,5 +1,12 @@
 # Tests - OpenClaw Bridge
 
+## Mosh Pit candidate
+
+`test_mosh_pit_projection.py` uses synthetic breadcrumb snapshots to exercise
+activity-only selection, explicit stakeholder/public fields, timezone ordering,
+folded threads, actor/truth preservation, input bounds, source denial and WRE
+wardrobe discovery. No real authorization provider or live deployment is tested.
+
 ## Exact-main post-merge lifecycle
 
 `test_reddog_holoindex_owner_query_root_binding.py` proves all post-completion,

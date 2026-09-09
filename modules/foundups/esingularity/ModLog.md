@@ -1,5 +1,12 @@
 # Project eSingularity ModLog
 
+## 2026-09-09 — YUMORI.me Mosh Pit integration path
+
+- Linked the shared bridge-owned activity projection, expandable renderer and
+  Red Dog curation prototype into the project roadmap. Stakeholder membership,
+  authenticated host binding and write flows are explicitly pending. No public
+  frontend route, hosting configuration or campaign content changed.
+
 ## 2026-09-06 — Japanese-first YUMORI cinematic presentation
 
 - Added a mobile-first ten-slide presentation immediately below the existing hero, without replacing the page shell or campaign sections.

@@ -1,5 +1,14 @@
 # OpenClaw Bridge - Digital Twin Execution Layer
 
+## Mosh Pit activity projection candidate
+
+The local `query_mosh_pit()` seam produces newest-first activity days with
+expandable details/replies from a trusted authorized breadcrumb source. The
+source is mandatory and no live route is wired. The registered prototype
+`reddog_mosh_pit` Skillz keeps notification noise and plans out of the feed.
+See `extensions/reddog/docs/MOSH_PIT_WAVE_MVP.md` for research, source contract,
+stakeholder membership design and the remaining host integration.
+
 ## HoloIndex runtime truth
 
 The exact-main controller requires clean `refs/remotes/origin/main`, sealed repair/completion

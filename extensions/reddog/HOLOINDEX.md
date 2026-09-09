@@ -37,6 +37,11 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 
 ## Memory / history recall targets
 
+- `docs/MOSH_PIT_WAVE_MVP.md` - activity-only expandable feed, open-source research, stakeholder access and exact candidate/live boundaries
+- `modules/communication/moltbot_bridge/src/mosh_pit_projection.py` - local read-only candidate over authorized breadcrumb snapshots; no production source
+- `modules/communication/moltbot_bridge/src/mosh_pit_render.py` - escaped, folded HTML over approved projection fields
+- `modules/communication/moltbot_bridge/skillz/reddog_mosh_pit/SKILLz.md` - registered prototype activity curation discipline
+
 When the principal asks "what have we done?", "where were we?", "what is still open?", "show the timeline", or equivalent, recall these before inventing a new memory surface:
 
 - `modules/communication/moltbot_bridge/src/openclaw_memory_queries.py` - existing `query_past_work`, decision, Breadcrumb, and unresolved-work retrieval surfaces; canonical runtime extension point for unified FoundUp activity/timeline queries

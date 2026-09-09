@@ -1,5 +1,12 @@
 # moltbot_bridge Roadmap
 
+- LOCAL CANDIDATE: Mosh Pit activity-only projection, disclosure-specific
+  fields, daily order, folded HTML and registered curation Skillz.
+- NEXT MOSH PIT SLICE: real host session/membership/disclosure source, scoped
+  pagination and existing FoundUp frontend; then authenticated activity/reply
+  writes, revision conflicts and revocation. No live route is wired now.
+  See `extensions/reddog/docs/MOSH_PIT_WAVE_MVP.md`.
+
 - COMPLETE AT EXACT MAIN `09e98fff` - PRE-OWNER EXACT-HEAD REPAIR ADMISSION: a
   zero-attempt `REPO_HEAD_MISMATCH` now reaches the existing post-merge task
   only after exact authority/no-effect validation and independent reproduction
