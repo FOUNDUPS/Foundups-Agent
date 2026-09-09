@@ -6,6 +6,7 @@ import json
 from dataclasses import asdict
 
 from modules.foundups.esingularity.jhr.src.jhr_agent import run_jhr_cycle
+from modules.foundups.esingularity.jhr.src.rss_retriever import discover_candidates
 
 
 def run_jhr_once(retriever=None, *, threshold: int = 12) -> dict:
@@ -15,7 +16,7 @@ def run_jhr_once(retriever=None, *, threshold: int = 12) -> dict:
 
 
 def main() -> int:
-    result = run_jhr_once()
+    result = run_jhr_once(retriever=discover_candidates)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
