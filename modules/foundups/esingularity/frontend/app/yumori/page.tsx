@@ -4,7 +4,6 @@ const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5c
 const JHR_URL = '/reports/jhr';
 const ESINGULARITY_URL = '/';
 const INZAI_IMAGE = 'https://www.re-port.net/picture_l/report/0000074457_09.png';
-const COUNCIL_ROSTER_URL = 'https://www.city.fukui.lg.jp/sisei/gikai/giin/p020856.html';
 const CITY_CONTACT_URL = 'https://www.city.fukui.lg.jp/inquiry/mailform101607.html?PAGE_NO=15196';
 
 export const metadata: Metadata = {
@@ -99,11 +98,7 @@ export default function YumoriPage() {
       <div style={{display:'flex',gap:12,flexWrap:'wrap',margin:'28px 0'}}>
         <Join dark />
         <a href={JHR_URL} style={{...darkJoin,background:'#334537'}}>NEW — JAPAN HYPERSCALER REPORT #001 →</a>
-      </div>
-      <div style={{borderTop:'1px solid #aaa',paddingTop:24,marginTop:30}}>
-        <h3 style={{fontSize:'clamp(1.4rem,3vw,2rem)',margin:'0 0 14px'}}>福井から行動する</h3>
-        <p style={body}>福井市役所や市議会へ意見を届ける。市議会の公式名簿から、自分の地域や関心に近い議員を確認する。</p>
-        <p><a href={CITY_CONTACT_URL} target="_blank" rel="noreferrer" style={link}>福井市へ意見を送る →</a><a href={COUNCIL_ROSTER_URL} target="_blank" rel="noreferrer" style={link}>福井市公式・議員名簿を見る →</a></p>
+        <a href={CITY_CONTACT_URL} target="_blank" rel="noreferrer" aria-label="福井市へ電話・連絡する" style={{...darkJoin,background:'#6b3e2e'}}>☎ 福井市に電話・連絡する ↗</a>
       </div>
     </section>
   </main>;
