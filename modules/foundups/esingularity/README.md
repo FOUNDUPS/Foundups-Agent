@@ -23,6 +23,18 @@ The current public journey is deliberately simple. The existing hero is followed
 
 The financial models, engineering research, and source audits support the public claims but are not the main public experience.
 
+## Canonical narrative spine
+
+The project-wide experiment thesis is:
+
+**Can compute save an onsen, revitalize a region, and help transform Japan?**
+
+The canonical narrative contract lives in [`docs/YUMORI_EXPERIMENT_THESIS.md`](docs/YUMORI_EXPERIMENT_THESIS.md).
+
+That document defines how the thesis concatenates across the local-resident website, national/media Document 01, mayoral Document 02, evidence Document 03, founder/background Document 04, YouTube, and RedDog communications context. The central recursive fact is that compute is not merely proposed as future infrastructure; AI compute is already being used to create and test the project.
+
+The website should use a short local/action-oriented expression of the thesis rather than copying the full national/media narrative onto the homepage.
+
 ## Module structure
 
 ```text
@@ -32,7 +44,7 @@ modules/foundups/esingularity/
 │   └── audit/              # Public-claim evidence ledger
 ├── src/                    # Stable FoundUp identity contract
 ├── tests/                  # Manifest, registry, route, and hosting checks
-├── docs/                   # Migration and architecture records
+├── docs/                   # Migration, architecture, and narrative contracts
 ├── memory/                 # WSP 60 module memory documentation
 ├── foundup_manifest.json   # p.fMALL/FoundUps discovery contract
 ├── module.json             # Module discovery metadata
