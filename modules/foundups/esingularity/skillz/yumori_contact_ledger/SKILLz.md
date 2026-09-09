@@ -1,7 +1,7 @@
 ---
 name: yumori_contact_ledger
 description: Reconcile YUMORI.me campaign contacts with Gmail thread history and the connected YUMORI.me Contacts ledger without duplicating canonical email bodies.
-version: 0.1.0
+version: 0.2.0
 intent_type: MAINTENANCE
 promotion_state: prototype
 category: workflow
@@ -26,6 +26,8 @@ evals:
     expected: live_gmail_and_drive_are_read_before_current_state_claims
   - name: privacy_boundary
     expected: repo_stores_workflow_contract_not_private_contact_dump
+  - name: moshpit_followup_index
+    expected: material_milestones_and_open_followups_are_recorded_without_private_contact_duplication
 retirement_date: null
 ---
 # YUMORI.me Contact Ledger
@@ -174,6 +176,40 @@ Before drafting or sending a reply, read the entire relevant thread.
 - Closure: mark `CLOSED` and do not keep nudging the contact unless new material
   facts justify a separate future approach.
 
+## Moshpit operational discipline
+
+Use `YUMORI.me Moshpit` as the campaign's current operational memory and open-loop
+index, not as a private-address book or a duplicate mailbox.
+
+When a day's work materially changes the campaign:
+
+1. Read the current Moshpit before writing so the newest date remains first and
+   completed work is not re-added as a future task.
+2. Add one short bullet per material event: protest/action, committee decision,
+   formal request, media development, stakeholder meeting, source/evidence
+   update, or meaningful outreach outcome.
+3. Put unresolved actions in the same entry with an explicit `OPEN` marker and a
+   concrete follow-up target. Examples: awaiting a government document, arranging
+   a landowner meeting, obtaining a reply from a reporter, or reaching a higher
+   decision-maker.
+4. When a new contact/business card arrives, transcribe verified identity fields
+   into `YUMORI.me Contacts`, preserve the source image in `YUMORI.me Contacts
+   Pics`, and record only that cross-indexing event in the Moshpit. Do not copy
+   private phone/email/address fields into the Moshpit merely for convenience.
+5. If Gmail has not yet surfaced a user-reported send, label the Moshpit note as
+   user-reported/needs Gmail reconciliation rather than manufacturing a
+   `message_id` or claiming connector verification.
+6. Apply STT repair before indexing. If a spoken term conflicts with established
+   campaign entities or sounds semantically wrong, resolve it against canonical
+   context before writing (for example Sano vs. a transcription artifact, or AI
+   `tanbo`/rice field rather than an unrelated word). Do not preserve obvious STT
+   noise as a new entity.
+7. Keep milestone facts separate from proposals and assumptions. Use explicit
+   labels such as observed, 012-reported, proposed, and open/needs verification
+   when the evidence class differs.
+8. After updating Moshpit, reconcile any affected contact rows and Email Log
+   entries so the operational record and communication index do not drift.
+
 ## Current YUMORI.me context anchors
 
 The campaign question is:
@@ -194,7 +230,8 @@ Moshpit`; do not turn this Skillz file into a stale duplicate campaign dossier.
 This is a module-owned WSP 95 Skillz candidate. RedDog/WRE discovery should find
 it through `skills_registry_v2.json` and use it when the work focus contains
 YUMORI.me contacts, outreach, Gmail replies, campaign email audit, contact
-ledger, stakeholder follow-up, or communications history.
+ledger, stakeholder follow-up, Moshpit update, campaign activity log, open
+follow-up, business-card indexing, or communications history.
 
 The Skillz grants no Gmail or Drive mutation authority by itself. Connector
 permissions and explicit task authority remain separate. If connected Gmail or
