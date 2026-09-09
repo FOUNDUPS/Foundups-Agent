@@ -1,5 +1,16 @@
 # Project eSingularity ModLog
 
+## 2026-09-09 — YUMORI.me contact ledger / RedDog Rolodex Skillz
+
+- Added module-owned prototype Skillz `skillz/yumori_contact_ledger/SKILLz.md` for reconciling YUMORI.me stakeholder outreach, replies, bounces, closures, and follow-ups.
+- Defined Gmail `message_id` as the unique communication-event key and `thread_id` as the conversation-lineage key; no extra email tracking signature is required.
+- Defined the connected Google Sheet `YUMORI.me Contacts` as the operational index/roll-up, with `Contacts` and `Email Log` tabs, while Gmail remains the canonical message store.
+- Added `docs/YUMORI_CONTACT_LEDGER_CONTEXT.md` so RedDog/HoloIndex can recover the external source names, schema, truth hierarchy, status vocabulary, and campaign-context pointers without storing private contact dumps in Git.
+- Kept `YUMORI.me Moshpit` as the dated milestone log rather than a message-by-message mailbox duplicate, and `YUMORI.me Contacts Pics` as source imagery/contact transcription evidence.
+- Registered the Skillz as a WSP 95 prototype in `skills_registry_v2.json` so RedDog/WRE Rolodex discovery can surface it for YUMORI.me contacts, Gmail replies, stakeholder outreach, and communications-history work.
+- Added contract coverage requiring the Skillz, context file, and registry entry to remain connected and preventing accidental replacement of Gmail lineage with a custom signature.
+- Explicitly kept live Gmail/Drive state outside repository authority: current communication claims require connected-source reads and unavailable sources must be marked `NEEDS_VERIFICATION`.
+
 ## 2026-09-06 — Japanese-first YUMORI cinematic presentation
 
 - Added a mobile-first ten-slide presentation immediately below the existing hero, without replacing the page shell or campaign sections.
