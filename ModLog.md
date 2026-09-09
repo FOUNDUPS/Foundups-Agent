@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-10] Qualified agent production-line packet R24
+
+WSPs: 15, 22, 50, 83, 97. Documentation only, continuing the existing roadmap PR.
+
+- Added [R24](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md): qualify agents, admit/lease tickets, execute, independently audit, establish reward eligibility and confirm authorized settlement.
+- Reused FAM/WRE/AgentDB ownership; retained stable filenames and expanded the planning backlog to 25 packets. No new scheduler, runtime implementation, dispatch or payout.
+- Documented the existing persistent FAM `PAID`/`INITIATED` mismatch as an acceptance gap. Qualification tags, reviewer approval and initiated payout remain insufficient proof of production delivery.
+- Validation is recorded in the [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md).
+
 ## [2026-09-10] Canonical RSI roadmap and archive integration
 
 WSPs: 00, 15, 22, 50, 81, 83, 97. Documentation only; source implementation and concurrent product lanes preserved.

@@ -11,6 +11,7 @@ Status: dated evidence snapshot. Source: `fb58e5279673ef9de30735ccfedc8001c3bb79
 - [Production skill integrity](production_skill_integrity.json), [FoundUp registry snapshot](foundup_registry_snapshot.json), [Holo recovery receipt](holo_recovery_receipt.json).
 - [Maintained system roadmap](../../../../ROADMAP.md), [planning backlog](../../../roadmaps/rsi_swarm_backlog.json), [dispatch and cost runbook](../../../operations/RSI_SWARM_DISPATCH.md).
 - [Documentation integration record](INTEGRATION.md).
+- [R24 production-line packet](../../../roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md): later qualification/ticket/audit/reward specification; not part of the frozen audit findings.
 
 The original audit was produced outside the repository to protect concurrent work. Its report and evidence files above are copied unchanged. Statements about “this audit,” local paths, source counts and “no commits” refer to that original audit, not later documentation integration. Reproduction paths identify the original machine; substitute a clean checkout at the recorded SHA and separate scratch storage elsewhere.
 

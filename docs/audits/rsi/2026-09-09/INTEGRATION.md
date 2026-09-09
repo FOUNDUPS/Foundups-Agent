@@ -17,3 +17,12 @@ Validation: focused documentation checks passed: new local link targets; 24 uniq
 `python -B scripts/generate_codex_tooling_projection.py --check` reported `stale:.agents/skills/file_set`. The extra `japan_hyperscaler_report/SKILL.md` is already tracked in the integration base without a matching canonical `.claude/skills` source. No projection inputs/outputs changed in this slice; generated AGENTS/config contents and all shared skill bytes otherwise match their sources. This is an existing product-lane issue, not a passing projection check and not repaired here. Prior failing production-skill integrity evidence is also retained unchanged.
 
 Delivery note: WSP 00 navigation is a separate addition from open PR #1636. Reconcile those narrow document hunks at integration; do not replace that owner's semantic repair or mark it merged. Documentation changes also make old source-bound retrieval receipts historical; refresh only through the existing governed post-merge maintenance owner when required.
+
+
+## Production-line refinement (012 direction, 2026-09-10)
+
+Added explicit packet R24 and refined the operating model from generic swarm coordination to qualified agents completing tickets under independent audit and reward rules. The active backlog now has 25 packets; the original audit and initial 24-packet integration record remain historical. Filenames containing `swarm` remain stable to preserve links.
+
+Source inspection found that FAM already has the required task/proof/verification/payout entities, but its persistent task `PAID` transition occurs with payout `INITIATED`. R24 requires reconciled settlement truth, role-specific qualification and independent audit composition. No runtime or accounting behavior changed; no agent was dispatched and no reward was transferred. The Holo continuation returned CURRENT/no-gap for the pinned audit source; FAM module memory and exact implementation were directly read to resolve generic-agent ranking noise.
+
+Validation for this refinement: local document links and packet attachment; 25 unique non-executable packet IDs and acyclic dependencies; JSON/index hashes; unchanged WSP mirrors and frozen audit evidence; documentation-only diff and whitespace. Runtime tests are not claimed for this specification change.

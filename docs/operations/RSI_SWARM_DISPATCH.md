@@ -1,6 +1,14 @@
-# RSI swarm dispatch and cost control
+# RSI production line: ticket dispatch and cost control
 
 Parent authority: [system roadmap](../../ROADMAP.md). Status: operating plan; runtime observations are dated 2026-09-10 JST. This document configures no runtime, authorizes no new effect, and does not make the backlog executable.
+
+## Production-line operating model
+
+Use **agent production line** for qualification → ticket assignment → bounded execution → independent audit → accepted contribution → authorized reward settlement. “Swarm” may describe the available pool, not the rules for accepting or rewarding work. The existing filename is retained for link compatibility.
+
+[Implement this through packet R24](../roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md). It names the existing FAM/WRE/AgentDB owners, qualification requirements, reward conditions and acceptance tests. The pool can work concurrently within station and reviewer capacity; a single job need not launch a panel or sub-swarm. Each ticket fixes its acceptance criteria, scope, price/reward policy, budget and independent reviewer before assignment.
+
+FAM currently exposes `open → claimed → submitted → verified → paid`; the persistent pipeline sets the task `paid` while its payout is only `initiated`. Treat actual reward delivery as unproven until the settlement owner returns confirmation. Qualification, review and settlement are distinct gates. Reviewers should be rewarded for correct assessment, including justified rejection.
 
 ## Which component does what
 

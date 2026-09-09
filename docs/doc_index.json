@@ -1716,7 +1716,7 @@
     },
     {
       "doc_type": "readme",
-      "hash_sha256": "9ef6ceaeb7d9e022f5d5d9d5af45296cada234d77286ee553c931df6e54c8fc3",
+      "hash_sha256": "14d375ea87de9d4842143ba3bd488fad5939dd0763d4e945393dc92611b359fe",
       "links": {
         "automation": [
           "doc_dae"
@@ -1738,7 +1738,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/README.md",
-      "size_bytes": 16578,
+      "size_bytes": 16664,
       "status": "active",
       "wsp_refs": [
         "WSP 0",
@@ -9366,7 +9366,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "0953cb00b924a615ac28515d65ec697037a411702a5882e903e911eaabe6b230",
+      "hash_sha256": "f51c77118a978b26851005d39c946d6ad817e6e1b4b7e8c5202e3585d5aa130a",
       "links": {
         "automation": [
           "doc_dae"
@@ -9378,7 +9378,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/INTEGRATION.md",
-      "size_bytes": 3490,
+      "size_bytes": 4764,
       "status": "active",
       "wsp_refs": [
         "WSP 00"
@@ -9407,7 +9407,7 @@
     },
     {
       "doc_type": "readme",
-      "hash_sha256": "79f890e65968d7664dfc770e75249745a372846aeb241101ce6de782a06f3cea",
+      "hash_sha256": "ab43fa20d3d11be9e89db2057712e28145736bcd3930ce23bd10fbab386c61cc",
       "links": {
         "automation": [
           "doc_dae"
@@ -9420,7 +9420,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/README.md",
-      "size_bytes": 1851,
+      "size_bytes": 2032,
       "status": "active",
       "wsp_refs": []
     },
@@ -11342,7 +11342,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "a7006887f706b83c5128a3190fef15e2269c870ece3dc5d792319a7b41985cee",
+      "hash_sha256": "76beeb1ab55e2573b2e05f3f76e29607dd04718a656573b0d0ecfbe92af40078",
       "links": {
         "automation": [
           "doc_dae"
@@ -11356,7 +11356,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/operations/RSI_SWARM_DISPATCH.md",
-      "size_bytes": 10813,
+      "size_bytes": 12028,
       "status": "active",
       "wsp_refs": []
     },
@@ -11468,6 +11468,27 @@
       "size_bytes": 17489,
       "status": "active",
       "wsp_refs": []
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "2ee140d4e59bc5cb223cc75fba0565f2d3107c6d57e4d01334b814b1357d90a8",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ROADMAP.md",
+          "docs/README.md",
+          "docs/operations/RSI_SWARM_DISPATCH.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md",
+      "size_bytes": 10478,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 15"
+      ]
     },
     {
       "doc_type": "other",

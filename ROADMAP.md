@@ -19,7 +19,8 @@ Read only the entry table and selected packet before retrieving its module conte
 | Evidence behind the completion verdict | [Dated audit](docs/audits/rsi/2026-09-09/README.md) |
 | System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
 | Next work | Wave 0 below; R01 integrity, R02 authority reconciliation, R03 retrieval entry context |
-| Cost, model roles and actual dispatch prerequisites | [Swarm dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
+| Cost, model roles and actual dispatch prerequisites | [Production-line dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
+| Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
 | Packet IDs, dependencies and priorities | [Planning backlog](docs/roadmaps/rsi_swarm_backlog.json) — never directly executable |
 | RedDog product navigation and owner boundaries | [RedDog documentation map](docs/REDDOG_DOCUMENTATION_MAP.md) |
 | Module-specific plans | [Module roadmap navigation](modules/ROADMAP.md) |
@@ -30,6 +31,12 @@ Authority order: 012's applicable instructions and delegated policy → governin
 The baseline below remains `fb58e5279673ef9de30735ccfedc8001c3bb79d6`. Documentation integration started at `eb2994f5d1530d9f086e2f2265c65033acecd93c`; the six intervening commits affect eSingularity/YUMORI and its skill, not the inspected WRE/model-routing files. Their new product work is outside this dated audit. Reconcile the latest commit and active claims again at dispatch.
 
 R00 recovery is historical success at its recorded source/generation. R02 documentation authority integration is delivered by this revision; enforcement mapping, the stale ledger's individual entries, WSP 46 reconciliation, and other owners' work remain open. Do not mark all of R02 or G0 complete merely because this roadmap is now discoverable.
+
+## Operating model: a qualified agent production line
+
+Agents connect and qualify for a task family, receive or claim an admitted ticket, execute within its scope, submit evidence, undergo independent audit, and earn the agreed reward after acceptance and authorized settlement. A pool of agents can staff several stations concurrently. “Swarm” describes the pool when useful; **production line** describes how work is assigned, accepted and rewarded.
+
+The [R24 implementation packet](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) binds qualification, tickets, independent audit and reward accounting to existing WRE/AgentDB/FAM owners. Current FAM payout initiation is not confirmed settlement. Rewarded-production claims require R24 evidence in addition to the applicable work gates; no financial action is authorized by this roadmap.
 
 ## Target architecture and ownership
 
@@ -89,7 +96,7 @@ The concurrent lane owns its product and connection work. This roadmap does not 
 | G2: independently evaluated candidate | Exact baseline/candidate artifacts; independent test/effect producer; held-out cases; reproducible metrics; negative cases. | Author cannot promote or retain the candidate as successful. |
 | G3: governed activation and rollback | Independent promotion decision; exact-byte activation; bounded canary; tested rollback and recovery. | No production RSI label, even if unit tests are green. |
 | G4: retained improvement | Authenticated outcomes influence the next decision; measurable improvement across successive generations; failed variants remain visible. | Storage alone is not learning. |
-| G5: sustained bounded swarm | Restart/replay/cancellation/expiry/conflict/overload tests; resource and verifier capacity; no lost/duplicate effects. | Keep worker count at the last proved level. |
+| G5: sustained bounded production line | Restart/replay/cancellation/expiry/conflict/overload tests; resource and verifier capacity; no lost/duplicate effects. | Keep worker count at the last proved level. |
 
 The WSP bootstrap is required by the repository but is not a substitute for G0–G5.
 
@@ -145,9 +152,11 @@ Choose the exact optimization only after baseline measurement. If it cannot prod
 
 - **R16 — Durable FoundUp job lifecycle. P0 before broad build execution.** Replace/retire the production use of the legacy in-memory queue through existing AgentDB/FAM owners. Define the boundary between work execution and business lifecycle events. Acceptance: atomic claim, lease/expiry, retry, terminal receipt, idempotent replay, restart recovery, and no silent loss or duplicate external effects. Reuse the maintenance task's proven patterns where applicable.
 - **R17 — Concurrent PatternMemory/cache ownership. P0 before multiple writers.** Give each work item a connection or explicit serialized transaction owner; synchronize bounded admission caches; bind all entries to content/generation. Acceptance: deterministic conflicting updates, lock contention, crash during commit, replay, cache invalidation, and no cross-FoundUp contamination. `check_same_thread=False` alone does not pass.
-- **R18 — Resource-aware swarm scheduling. P1.** Extend the existing coordinator with explicit writer and verifier capacity, per-FoundUp budgets, queue limits, cancellation, provider failure, and backpressure. Begin with one coordinator, at most two independent author jobs, and reserved independent verification capacity. These are proposed initial operating limits, not current upstream defaults. Acceptance: pressure cannot starve verification or cause unbounded fanout; jobs remain attributable and stoppable. Increase concurrency only after a measured run at the next size passes.
+- **R18 — Resource-aware ticket scheduling. P1.** Extend the existing coordinator with explicit writer and verifier capacity, per-FoundUp budgets, queue limits, cancellation, provider failure, and backpressure. Begin with one coordinator, at most two independent author jobs, and reserved independent verification capacity. These are proposed initial operating limits, not current upstream defaults. Acceptance: pressure cannot starve verification or cause unbounded fanout; jobs remain attributable and stoppable. Increase concurrency only after a measured run at the next size passes.
 - **R19 — CI/quarantine and promotion evidence. P1.** Preserve the current registry and exact impact analysis; triage 269 quarantined test files by reason and capability. Select the subset relevant to each packet rather than demanding immediate cleanup of all historical tests. Acceptance: every required scope has an executable or explicitly blocked test plan; no candidate can omit a required test to pass; merge/base changes invalidate prior evidence; production-promotion checks run where they claim to run.
 - **R23 — Sustained multi-generation proof. P0 for the RSI completion claim.** Run at least three successive candidate/evaluation cycles and a bounded soak across restarts, provider faults, duplicate delivery, source advancement, and conflicting jobs. Include at least one rejected candidate and one rollback. Measure retained benefit on later tasks. Acceptance: G0–G5 all pass for a declared scope and worker count, with complete independent receipts and no unresolved critical failures. Sample size comes from baseline variance and the predeclared decision rule; a token count or an arbitrary number of runs is not statistical proof.
+
+- **R24 — Qualified agent production line and verified rewards. P0 for this product claim.** [Full implementation packet](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md). Reuse FAM AgentProfile/Task/Proof/Verification/Payout, WRE admission, AgentDB claims, existing qualification/model evidence and independent verifier ownership. Acceptance: qualified assignment, one durable ticket claim, real confined work, independent audit, policy-correct reward eligibility, no duplicate entitlement, and accurate distinction between initiated and confirmed settlement. Start with one internal artifact and a simulated reward ledger. Actual settlement requires its own authorized adapter and proof. Integrated execution depends on R06/R08/R09/R16/R18; design mapping may proceed earlier.
 
 ## Wave 5 — extend the proven loop to FoundUps
 
@@ -184,13 +193,18 @@ flowchart LR
     R19 --> R23
     R15 --> R20 --> R21
     R20 --> R22
+    R06 --> R24
+    R08 --> R24
+    R09 --> R24
+    R16 --> R24
+    R18 --> R24
 ```
 
 R04 is also a prerequisite wherever the selected runtime's authority contract demands exact closure. R05 gates retrieval-quality promotion, not every form of unrelated RSI. The dispatcher must add those capability-specific dependencies when compiling a real work order.
 
 The main sequence is **current truth → one real worker → independent outcome → verified memory → promotion/rollback → first improving cycle → sustained concurrency**. Existing foundations should be reused; most packets are integration, operational composition, or proof work. Split any packet that spans multiple authority changes into smaller reviewable slices.
 
-## Swarm dispatch contract
+## Ticket dispatch contract
 
 Every compiled packet must contain:
 
@@ -216,6 +230,7 @@ The numeric budgets must be filled from current policy and measured runtime capa
 | Worker integration | R06–R08, R16 | Independently scoped verifier work | Shared route/consumer/job contract changes |
 | Evaluation/memory | R09–R11, R14, R17 | Non-overlapping worker adapters | PatternMemory, ratchet, verifier contract writers |
 | Release/reliability | R12–R13, R18–R19, R23 | Documentation and isolated tests | Promoter/activation/shared registry writers |
+| Production-line integration | R24 qualification, audit and rewards | Read-only contract mapping | FAM/WRE/ledger/settlement owners |
 | Product owner | R20–R22 when ready | Core work outside its reserved paths | Current YUMORI/eSingularity/RedDog lane |
 
 Use OpenClaw to supervise admitted jobs and Hermes to execute the bounded leaves. Do not instantiate six independent architectural authorities. The single coordinator resolves dependencies and path conflicts; the independent verifier remains able to reject a coordinator's or author's result.
@@ -230,7 +245,7 @@ Stop or quarantine a packet when source/runtime authority changes, its lease exp
 
 ## Practical planning horizon
 
-There are 24 packets including the already completed recovery. They are dependency-sized planning units, not 24 one-shot prompts or a reliable calendar estimate. Several will split into interface, implementation, negative-proof, and live-acceptance slices.
+There are 25 packets including the already completed recovery and the production-line packet R24. They are dependency-sized planning units, not 25 one-shot prompts or a reliable calendar estimate. Several will split into interface, implementation, negative-proof, and live-acceptance slices.
 
 Plan commitment one wave at a time. Measure cycle time, review throughput, and resource costs during Wave 1, then forecast later waves from actual data. Keep verifier and rollback work on the critical path rather than postponing them until after broad deployment. Do not advertise “RSI complete” until G0–G5 have evidence for the declared operating scope.
 
@@ -264,3 +279,4 @@ Preliminary architect estimates using canonical C/I/D/Impact (each 1–5): compl
 | R21 | 4 | 4 | 3 | 4 | 15 | P1 |
 | R22 | 3 | 4 | 3 | 3 | 13 | P1 |
 | R23 | 5 | 5 | 3 | 5 | 18 | P0 |
+| R24 | 4 | 5 | 4 | 5 | 18 | P0 |

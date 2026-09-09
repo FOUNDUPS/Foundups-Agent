@@ -1,6 +1,6 @@
 # Foundups-Agent Documentation Index
 
-**System execution planning:** [Root roadmap](../ROADMAP.md) → [dated RSI audit](audits/rsi/2026-09-09/README.md) → [bounded dispatch and cost control](operations/RSI_SWARM_DISPATCH.md). [Superseded roadmap register](_archive/roadmaps/2026-09-10/README.md).
+**System execution planning:** [Root roadmap](../ROADMAP.md) → [dated RSI audit](audits/rsi/2026-09-09/README.md) → [production-line dispatch and cost control](operations/RSI_SWARM_DISPATCH.md) → [R24 implementation packet](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md). [Superseded roadmap register](_archive/roadmaps/2026-09-10/README.md).
 
 **Purpose:** Central catalog of all architecture documentation, session reports, and design documents.
 
