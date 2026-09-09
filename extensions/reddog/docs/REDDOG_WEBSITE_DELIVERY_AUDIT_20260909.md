@@ -257,3 +257,18 @@ The current evidence remains 18 frontend checks plus 41 Python checks, the
 shared transport checks, lint, TypeScript and production build. Runtime key/model,
 Firebase publishing access, token rotation, deployed D1/ingress and real replies
 remain the activation gates.
+
+### GitHub publication resolved
+
+The same-destination Git push retry reached Git authentication rather than an
+automatic-review rejection, but the shell had no GitHub login. The existing
+connected GitHub integration then created the reviewed tree and branch without
+terminal credentials. The returned tree
+`417059a0846d25b1e7fb11dd525a37ab3119a5d5` exactly matched the local checkpoint.
+Commit `5edd090208cd76f8e8dbe6f44061cffa7cf2c5c3` opened
+[PR #1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648), stacked on the
+existing Mosh Pit PR #1645. This is a draft and is not merged. The eSingularity
+GitHub Actions validation was observed running; local checks are already listed
+above, and no successful remote conclusion is implied here. Source publication
+is now complete. Provider configuration, deployment and token rotation remain
+separate unresolved gates.
