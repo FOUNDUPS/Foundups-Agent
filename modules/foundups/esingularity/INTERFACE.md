@@ -30,6 +30,30 @@
 
 The Foundups shell owns discovery and routing. The eSingularity module owns campaign content, product UI, public routes, and its deployment.
 
+## YUMORI.me contact-ledger interface
+
+The live communications system is external and connector-backed. The repository
+provides its reconciliation contract through:
+
+`skillz/yumori_contact_ledger/SKILLz.md`
+
+and:
+
+`docs/YUMORI_CONTACT_LEDGER_CONTEXT.md`
+
+Required external source titles are:
+
+- Gmail correspondence for YUMORI.me outreach.
+- Google Sheet `YUMORI.me Contacts` (`Contacts` + `Email Log` tabs).
+- Google Doc `YUMORI.me Moshpit` for dated campaign milestones.
+- Google Doc `YUMORI.me Contacts Pics` for source imagery/contact transcription.
+
+Canonical communication lineage uses Gmail `message_id` and `thread_id`; no
+custom email indexing signature is required. The spreadsheet is an index and
+roll-up, not a duplicate mailbox. RedDog/WRE may discover the workflow through
+the WSP 95 Skillz registry, but the Skillz itself grants no external mutation
+authority. Current claims require live connector reads.
+
 ## Shared external actions
 
 - Canonical LINE invitation: `https://line.me/ti/p/baXEozL_Q6`
@@ -44,6 +68,7 @@ The Sites project configuration remains at `frontend/.openai/hosting.json`. The 
 ## Safety boundary
 
 - No secrets belong in the frontend or module manifests.
+- No private contact dump or full Gmail message body belongs in public Git.
 - No token or investment surface is enabled.
 - Public financial claims remain governed by `frontend/audit/SOURCE_OF_TRUTH.md`.
 - Unverified event details stay disabled rather than being inferred.

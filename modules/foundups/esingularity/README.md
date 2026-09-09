@@ -30,9 +30,11 @@ modules/foundups/esingularity/
 ├── frontend/               # Live Japanese-first Vinext/Sites PWA
 │   ├── content/            # Canonical Japanese deck and derived language states
 │   └── audit/              # Public-claim evidence ledger
+├── skillz/                 # WSP 95 module-owned operational Skillz
+│   └── yumori_contact_ledger/
 ├── src/                    # Stable FoundUp identity contract
-├── tests/                  # Manifest, registry, route, and hosting checks
-├── docs/                   # Migration and architecture records
+├── tests/                  # Manifest, registry, route, hosting, and Skillz checks
+├── docs/                   # Migration, architecture, and external-context contracts
 ├── memory/                 # WSP 60 module memory documentation
 ├── foundup_manifest.json   # p.fMALL/FoundUps discovery contract
 ├── module.json             # Module discovery metadata
@@ -41,6 +43,21 @@ modules/foundups/esingularity/
 ├── ROADMAP.md
 └── ModLog.md
 ```
+
+## YUMORI.me communications ledger
+
+The operational YUMORI.me contact system lives in connected Google services,
+not in public Git:
+
+- Gmail is the canonical message/thread record.
+- `YUMORI.me Contacts` is the Google Sheet contact and Email Log index.
+- `YUMORI.me Moshpit` is the dated campaign milestone record.
+- `YUMORI.me Contacts Pics` preserves contact-source imagery such as business cards.
+
+The repo stores the reconciliation contract and RedDog/WRE discovery hook at
+`skillz/yumori_contact_ledger/SKILLz.md`, with source/schema context in
+`docs/YUMORI_CONTACT_LEDGER_CONTEXT.md`. The Skillz uses Gmail `message_id` and
+`thread_id` rather than inventing a second tracking signature.
 
 ## Local workflow
 
@@ -60,12 +77,15 @@ npm run dev -- --host 127.0.0.1
 - The site remains inside the monorepo until it passes the FoundUp exfoliation readiness gate.
 - No token, investment offer, or fundraising claim is created by this module registration.
 - The deck is additive: it does not replace the existing hero, ticker, campaign actions, or deeper public sections.
-- Contact candidates remain in the ignored RedDog manual-alpha store until a governed Contact Memory runtime exists.
+- Public-site contact candidates remain in the ignored RedDog manual-alpha store until a governed Contact Memory runtime exists.
+- Private operational correspondence/contact rows remain in connected Gmail/Drive; the repo contains workflow contracts, not a private contact dump.
+- A Skillz file grants no Gmail/Drive mutation authority. Live state must be read from the connected sources before current-state claims or actions.
 
 ## WSP alignment
 
 - WSP 3: FoundUp ownership under `modules/foundups/`
 - WSP 22: module change documentation
 - WSP 49/60: module structure and memory
+- WSP 95: module-owned Skillz and Rolodex registry discovery
 - WSP 97: truth-boundary labels and no implied activation
 - WSP 104: stable `/f/{foundup_id}` namespace and tenant isolation

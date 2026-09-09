@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-08-26T00:00:00+00:00",
-  "total_skills": 28,
+  "last_updated": "2026-09-09T02:42:00+00:00",
+  "total_skills": 29,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -445,6 +445,26 @@
       ],
       "invocation": "/migrate-imports",
       "description": "Deterministic bulk-import migration prototype; Qwen/Gemma adapters are not bound"
+    },
+    "yumori_contact_ledger": {
+      "location": "modules/foundups/esingularity/skillz/yumori_contact_ledger",
+      "agents": [
+        "qwen",
+        "gemma"
+      ],
+      "intent_type": "MAINTENANCE",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Reconcile YUMORI.me Gmail correspondence with the connected Contacts and Email Log ledger while preserving message/thread lineage."
     }
   }
 }
