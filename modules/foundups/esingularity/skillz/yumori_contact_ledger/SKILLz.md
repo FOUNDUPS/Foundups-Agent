@@ -183,7 +183,7 @@ The campaign question is:
 
 The immediate civic ask is not automatic approval of the eSingularity concept.
 It is a short evidence-based window to compare reuse against irreversible
- demolition and convene the relevant parties.
+demolition and convene the relevant parties.
 
 For project facts, economics, building claims, council timing, and current
 strategy, retrieve the eSingularity module docs and the connected `YUMORI.me
