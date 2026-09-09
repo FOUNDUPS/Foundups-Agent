@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Noto_Sans_JP, Space_Mono } from 'next/font/google';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import PwaRegister from '../components/PwaRegister';
+import RedDogChat from '../components/RedDogChat';
 import './globals.css';
 
 const noto = Noto_Sans_JP({ variable: '--font-noto', subsets: ['latin'], weight: ['400', '500', '600', '700', '900'] });
@@ -31,5 +32,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ja"><body className={`${noto.variable} ${mono.variable}`}><LanguageSwitcher /><PwaRegister />{children}</body></html>;
+  return <html lang="ja"><body className={`${noto.variable} ${mono.variable}`}><LanguageSwitcher /><PwaRegister />{children}<RedDogChat /></body></html>;
 }

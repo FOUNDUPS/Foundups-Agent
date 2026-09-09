@@ -1,5 +1,15 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-09] Public Red Dog website delivery candidate
+
+- Implemented the shared Foundups/eSingularity public OpenRouter service, client
+  controls, reviewed YUMORI sources and curated activity snapshot. Live activation
+  remains pending runtime secrets and deployment canaries.
+- Applied requested WSP 15/73/97/106 clarifications with exact knowledge mirrors.
+- Checkpoint base `c3666c02c1a819f8906e56f31fdc67d6ad46111d` on owned branch
+  `feat/reddog-public-openrouter`; original working tree remains untouched.
+- Evidence and recovery: `extensions/reddog/docs/REDDOG_WEBSITE_DELIVERY_AUDIT_20260909.md`.
+
 ## [2026-09-05] RedDog Identity / Merged Builder Reconciliation (0.4.141)
 
 **WSP Protocols:** WSP 00, 06, 12, 15, 22, 50, 62, 73, 84, 87, 97

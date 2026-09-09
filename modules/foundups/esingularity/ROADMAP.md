@@ -1,5 +1,15 @@
 # Project eSingularity roadmap
 
+## Public Red Dog website activation
+
+- [x] Implement shared OpenRouter API, consent controls and reviewed public context.
+- [x] Check atomic quotas, replay, transport recovery, types and existing contracts.
+- [ ] Configure the server key/model, verify deployed ingress and D1 migration.
+- [ ] Activate the reviewed Site version and Firebase Foundups client; verify both.
+- [ ] Connect an approved live public Mosh Pit projection (currently dated summary).
+
+See `docs/REDDOG_PUBLIC_RUNTIME.md` for evidence and dependencies.
+
 ## YUMORI.me Mosh Pit integration
 
 The shared activity projection and expandable renderer candidate lives in

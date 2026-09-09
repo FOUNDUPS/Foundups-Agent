@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { chatGPTSignInPath, chatGPTSignOutPath } from '@/app/chatgpt-auth';
 import { MOSH_PATH } from '@/lib/mosh-pit-policy';
 import { currentMoshPit } from '@/lib/mosh-pit-server';
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 export default async function MoshPitPage() {
   const result = await currentMoshPit();
   return <main className="mosh-page" lang="ja" data-yumori-localized>
-    <header className="mosh-header"><a href="/">YUMORI.me</a><h1>Mosh Pit <span>活動ログ</span></h1>
+    <header className="mosh-header"><Link href="/">YUMORI.me</Link><h1>Mosh Pit <span>活動ログ</span></h1>
       {result.status !== 'signed_out' && <a href={chatGPTSignOutPath(MOSH_PATH)} target="_top">ログアウト</a>}
     </header>
     {result.status === 'ready' ? <>

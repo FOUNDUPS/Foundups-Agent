@@ -108,6 +108,17 @@ Each module receives a score from 1 (lowest) to 5 (highest) in four dimensions. 
     - queue/backlog artifacts for scored work items
     - variant-specific output contracts for explicit MPS derivatives such as `MPS-M`
 
+### 3.1 Same-Outcome Implementation Choice
+
+MPS orders approved outcomes; it does not reward making an implementation more
+complex. When alternative designs deliver the same outcome, record their
+dependencies, remaining evidence, and the smallest independently testable layer
+under WSP 97. Prefer the lower-complexity design that preserves the required
+behavior and authority boundaries. Sequence genuine prerequisites before their
+consumers; unrelated future architecture is not a prerequisite merely because
+it has a higher score. This comparison does not change MPS dimensions, P0-P4
+thresholds, budgets, or an authenticated allocation plan.
+
 ## 4. Priority Classification
 
 The total MPS score (range: 4-20) and the LLME score determine priority.
