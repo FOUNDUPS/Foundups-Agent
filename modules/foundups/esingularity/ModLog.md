@@ -1,5 +1,14 @@
 # Project eSingularity ModLog
 
+## 2026-09-09 — Canonical YUMORI experiment thesis
+
+- Added `docs/YUMORI_EXPERIMENT_THESIS.md` as the project-wide narrative spine: **Can compute save an onsen, revitalize a region, and help transform Japan?**
+- Made the recursive fact explicit: compute is not merely proposed as future infrastructure; AI compute is already being used to research, analyze, translate, organize, communicate, and test the project.
+- Defined surface ownership so the local-resident website remains concise, Drive Document 01 carries the national/media story, Document 02 carries the mayoral ask, Document 03 tests the evidence, Document 04 carries founder background, and YouTube documents the live experiment.
+- Clarified that Akira Hasegawa/D-K is a cultural proposal strand rather than the authorial frame of Document 01 unless a separate contribution is explicitly written and approved.
+- Preserved truth boundaries around building reuse, compute capacity, heat recovery, funding, stakeholder support, and national repeatability.
+- Added the canonical thesis pointer to the module README; no public frontend copy was changed in this documentation slice.
+
 ## 2026-09-06 — Japanese-first YUMORI cinematic presentation
 
 - Added a mobile-first ten-slide presentation immediately below the existing hero, without replacing the page shell or campaign sections.
