@@ -120,6 +120,53 @@ For a request to work on a named FoundUp:
    independent verifier, and promotion gates. The grounding receipt grants no
    shell, worktree, PR, merge, signer, or re-index authority.
 
+## Canonical Email Draft Operations
+
+For consequential email drafting, review, revision, forwarding, or send
+handoff, treat version control as an operational safety boundary.
+
+1. Resolve the newest authoritative message body before editing. Priority is:
+   an exact user-supplied body explicitly declared current, then the current
+   provider-side draft, then the exact sent message/thread, then an explicitly
+   designated connected document. Conversation history and model memory are
+   context only; they are never authoritative message text when a current
+   artifact exists.
+2. Maintain one canonical provider-side draft. Apply later edits in place
+   rather than creating replacement drafts. Use a descriptive operational
+   subject as a retrieval key and reminder; clean the subject before send when
+   requested.
+3. Before review or send, retrieve the current provider-side draft again.
+   Verify `To`, `Cc`, `Bcc`, subject, exact body, reply/thread target, and all
+   attachment filenames.
+4. Search Sent before sending a draft that resembles a prior message. A draft
+   can remain after the message was already sent. If an exact or substantially
+   identical sent message exists, block duplicate send until the principal
+   confirms it is a follow-up.
+5. If a stale duplicate draft is confirmed, delete it when the connector
+   exposes safe delete authority. If delete is unavailable, record it as stale
+   and never use it as canonical.
+6. If the body claims an attachment is included but the provider draft has no
+   matching attachment, block send until reconciled.
+7. For replies and forwards, read the source message first so recipients,
+   quoted context, thread state, and claims remain grounded.
+8. Resolve recipient identity from connected evidence when names or titles are
+   ambiguous. Distinguish role-bearing names explicitly, and treat likely STT
+   artifacts as non-authoritative until reconciled.
+9. When the principal asks what an email says, translate or summarize the
+   exact current artifact. If the provider exposes only a snippet, state that
+   limitation and never reconstruct the unseen remainder from an older
+   version.
+10. If the principal supplies a newer exact body after review, promote that
+    body to canonical and update the saved draft in place before any send.
+
+Fail closed on ambiguous canonical bodies, unresolved recipient identity,
+missing claimed attachments, unresolved duplicate-send risk, unverified
+reply targets that materially change context, or material edits made after the
+principal's last approval.
+
+This discipline supplements connector authority; it never grants send, delete,
+or mutation authority by itself.
+
 ## Start Operations Boundary
 
 The Start Operations cycle is read-only. It may inspect, prioritize, research,
