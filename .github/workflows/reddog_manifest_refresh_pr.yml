@@ -1,0 +1,60 @@
+name: RedDog manifest refresh PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'skill/reddog-canonical-email-drafts'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Regenerate RedDog backend manifest and pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/generate_reddog_backend_manifest.py --write > /tmp/reddog_manifest.out
+          digest="$(head -n 1 /tmp/reddog_manifest.out)"
+          python - "$digest" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          digest = sys.argv[1].strip()
+          if not re.fullmatch(r"[0-9a-f]{64}", digest):
+              raise SystemExit(f"invalid_manifest_digest:{digest}")
+          path = Path("extensions/reddog/backend_compatibility_constants.js")
+          text = path.read_text(encoding="utf-8")
+          updated, count = re.subn(
+              r"const EXPECTED_MANIFEST_SHA256 = '[0-9a-f]{64}';",
+              f"const EXPECTED_MANIFEST_SHA256 = '{digest}';",
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("manifest_pin_not_found")
+          path.write_text(updated, encoding="utf-8", newline="\n")
+          PY
+
+      - name: Commit generated files when stale
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- scripts/reddog_backend_manifest.json extensions/reddog/backend_compatibility_constants.js; then
+            echo "RedDog backend manifest already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/reddog_backend_manifest.json extensions/reddog/backend_compatibility_constants.js
+          git commit -m "chore(reddog): refresh backend manifest"
+          git push origin "HEAD:${{ github.head_ref }}"
