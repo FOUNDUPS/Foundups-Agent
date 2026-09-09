@@ -1,5 +1,25 @@
 # Project eSingularity ModLog
 
+## 2026-09-09 — Gated Mosh Pit reader, second local layer
+
+- Added a dynamic activity-first reader and GET API with official Sites sign-in,
+  separate server read approvals, no-store behavior and bounded upstream checks.
+  Missing/expired/revoked membership denies before fetch; only an explicitly
+  bound stakeholder snapshot reaches native expandable daily bullets.
+- Kept activity ownership in AgentDB/Brain/Memex. Independent source inspection
+  confirmed the deployed canonical host and membership adapter are missing;
+  documented a dedicated gateway contract, not a relabeled resident capability.
+  No private records, runtime credentials, write routes or deployment added.
+- Added seven focused synthetic gate/render tests. Type checking exposed six
+  shadowed translation keys and invalid combined PWA icon-purpose types;
+  removed shadowed entries while retaining effective translations, and split
+  icon descriptors to preserve both existing purposes with valid types.
+- Validation: seven frontend gate/render tests, 42 existing project/projection
+  tests, TypeScript and the production build pass. Independent review verified
+  provenance labels, strict expiration dates and the 50-root response bound.
+  No browser or deployed-auth validation performed. WSP 22/50/60/97/104; first-layer retrieval
+  limitation remains documented, with no authority or production promotion.
+
 ## 2026-09-09 — YUMORI.me Mosh Pit integration path
 
 - Linked the shared bridge-owned activity projection, expandable renderer and

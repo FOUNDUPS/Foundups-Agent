@@ -1,7 +1,12 @@
 # FoundUps Mosh Pit — Wave-style MVP
 
-Status: **LOCAL_READ_ONLY_CANDIDATE / HOST_NOT_WIRED**
+Status: **LOCAL_GATED_READER / HOST_NOT_WIRED**
 Research and source inspection: 2026-09-09.
+
+Continuation: the existing Site now has a local gated reader/API, official
+Sites sign-in helpers and separate server read approvals. It is not deployed,
+and canonical source authentication/membership plus writes remain unconnected.
+See `modules/foundups/esingularity/docs/MOSH_PIT_GATEWAY.md` for the second layer.
 
 ## Product decision
 

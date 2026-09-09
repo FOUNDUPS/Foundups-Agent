@@ -5,8 +5,10 @@
 The shared activity projection and expandable renderer candidate lives in
 `modules/communication/moltbot_bridge`, with the registered Red Dog curation
 Skillz alongside it. Reuse this for a stakeholder-gated project feed in the
-existing frontend after a real authenticated source is bound. Proposed namespace:
-`/f/esingularity_001/mosh-pit`. No route or deployment is added by this candidate.
+existing frontend. The second local layer implements the gated reader at
+`/f/esingularity_001/mosh-pit` and GET `/api/mosh-pit`; the canonical host remains
+unconnected and no deployment is made. See `docs/MOSH_PIT_GATEWAY.md` for the
+read-approval policy, upstream contract, limitations, and remaining write layer.
 See `extensions/reddog/docs/MOSH_PIT_WAVE_MVP.md` for membership, write flow and
 the open-source comparison. Keep private chronology out of public build assets.
 

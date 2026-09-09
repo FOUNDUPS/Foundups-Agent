@@ -1,5 +1,11 @@
 # eSingularity tests
 
+The frontend Mosh Pit gate has focused synthetic tests. From `frontend`, run
+`node --test tests/mosh-pit.test.mjs`; run `npx tsc --noEmit` for type checking.
+These cover membership-before-fetch, scope/expiry, response bounds, explicit
+stakeholder disclosure and escaped expandable rendering. They do not assert
+that the canonical host or live sign-in has been connected.
+
 The test suite verifies the monorepo and public-presentation contracts:
 
 - canonical FoundUp identity and WSP 104 namespace;
