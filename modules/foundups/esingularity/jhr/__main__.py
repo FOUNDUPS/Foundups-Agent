@@ -5,7 +5,7 @@ from .agent import run_once
 
 
 def main() -> int:
-    repo_root = Path(__file__).resolve().parents[3]
+    repo_root = Path(__file__).resolve().parents[4]
     result = run_once(repo_root)
     print(
         f"JHR status={result.status} score={result.significance_score} "
