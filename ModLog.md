@@ -1,5 +1,15 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-10] Canonical RSI roadmap and archive integration
+
+WSPs: 00, 15, 22, 50, 81, 83, 97. Documentation only; source implementation and concurrent product lanes preserved.
+
+- Replaced stale system completion percentages with the evidence-bound root roadmap, six completion gates and 24 non-executable planning packets.
+- Attached the dated 2026-09-09 audit and module census; archived two obsolete system-wide roadmaps with original-body hashes and retained module-local plans.
+- Added WSP 00/97 navigation, synchronized their knowledge mirrors, and marked the April active-slice ledger as historical until reconciled. State-semantics PR #1636 remains a separate owned change.
+- Documented Nemotron's evaluation-only role, verified provider/model routing, one bounded canary, and cost-per-accepted-slice policy. Local OpenClaw version was observed; model-binding query returned UNCONFIGURED with no model call/mutation.
+- Validation and limits: [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md). Historical WRE results remain 234 passed / 1 failed / 4 skipped at the audit SHA; this documentation integration does not claim to fix the skill manifest or complete RSI.
+
 ## [2026-09-05] RedDog Identity / Merged Builder Reconciliation (0.4.141)
 
 **WSP Protocols:** WSP 00, 06, 12, 15, 22, 50, 62, 73, 84, 87, 97

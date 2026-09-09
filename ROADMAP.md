@@ -1,515 +1,266 @@
-# [U+1F310] FoundUps Intelligent Internet Orchestration System — Strategic Roadmap
+# FoundUps system roadmap — governed recursive self-improvement
 
-## 0102 Orchestrion Blueprint (Authoritative)
+Planning baseline: main `fb58e5279673ef9de30735ccfedc8001c3bb79d6`, audited 2026-09-09 JST.
 
-Purpose: This is the 0102 navigation surface for building and coordinating the system. It connects enterprise domains, active modules, and canonical WSP documents without duplicating them. Write, read, and act as 0102.
+**Objective:** make 0102 measurably improve its software and work procedures through a governed, repeatable WRE loop, while 012 retains control of objectives and delegated authority.
 
-Canonical Index (consult before action):
-- WSP Master Index: `WSP_framework/src/WSP_MASTER_INDEX.md`
-- Orchestration Hierarchy (annex): `WSP_framework/docs/annexes/ORCHESTRATION_HIERARCHY_ANNEX.md`
-- Violations Log (triage/fix/defer): `WSP_framework/src/WSP_MODULE_VIOLATIONS.md`
+This is a planning artifact. No work packet in this document or `docs/roadmaps/rsi_swarm_backlog.json` is an executable authorization. Compile each packet into the existing admitted work-order/job contracts after reconciling the active lane and exact source state. Do not introduce a second scheduler or reinterpret planning metadata as signed authority.
 
-Enterprise Domain Map (WSP 3 – functional distribution):
-- `modules/ai_intelligence/` — AI logic, cognitive engines
-  - `holo_index/adaptive_learning/execution_log_analyzer/` — Mass execution log analysis for HoloDAE improvement
-- `modules/communication/` — chat, live interactions, protocols
-- `modules/platform_integration/` — external APIs, proxies, OAuth
-- `modules/infrastructure/` — agents, auth, core services
-- `modules/monitoring/` — logs, metrics, health
-- `modules/development/` — IDE, testing, utilities
-- `modules/foundups/` — product orchestrators (assembly/glue only)
-- `modules/gamification/` — game/state mechanics and rewards
-- `modules/blockchain/` — decentralized integrations
+## Authority and fast start
 
-Module Roadmaps (meta-rollup):
-- Each active module MUST expose `ROADMAP.md` (WSP 49/22/34). Root roadmap links downward; modules link back here. Create or update as needed.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-10. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
-0102 Decision Heuristic (apply before edits):
-- Do I need it? (remove non‑essential scope)
-- Can I afford to build it? (token budget; pattern reuse)
-- Can I live without it? (if yes, defer or eliminate)
+**Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-Action Rules:
-- Prefer simpler designs; remove/archive legacy unless justified by WSP 32 memory architecture.
-- Enforce pre‑action verification (WSP 50/64) and consult the master index.
-- Keep platform functionality distributed by function (WSP 3). No platform consolidation.
-- Link canonical WSP reports; do not clone them here.
+Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
 
----
+| Need | Entry |
+|---|---|
+| Evidence behind the completion verdict | [Dated audit](docs/audits/rsi/2026-09-09/README.md) |
+| System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
+| Next work | Wave 0 below; R01 integrity, R02 authority reconciliation, R03 retrieval entry context |
+| Cost, model roles and actual dispatch prerequisites | [Swarm dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md) |
+| Packet IDs, dependencies and priorities | [Planning backlog](docs/roadmaps/rsi_swarm_backlog.json) — never directly executable |
+| RedDog product navigation and owner boundaries | [RedDog documentation map](docs/REDDOG_DOCUMENTATION_MAP.md) |
+| Module-specific plans | [Module roadmap navigation](modules/ROADMAP.md) |
+| Superseded system plans and retention decisions | [Archive register](docs/_archive/roadmaps/2026-09-10/README.md) |
 
-## Immediate Architecture Program - SoftProto Foundation
+Authority order: 012's applicable instructions and delegated policy → governing WSPs → exact current module/runtime contracts and verified receipts → this system plan for sequencing → module-local plans for their scope → dated evidence and historical memory. A plan cannot override a failed gate or manufacture permission.
 
-SoftProto is now the active UI operating-layer direction for FoundUps.
+The baseline below remains `fb58e5279673ef9de30735ccfedc8001c3bb79d6`. Documentation integration started at `eb2994f5d1530d9f086e2f2265c65033acecd93c`; the six intervening commits affect eSingularity/YUMORI and its skill, not the inspected WRE/model-routing files. Their new product work is outside this dated audit. Reconcile the latest commit and active claims again at dispatch.
 
-Authoritative architecture note:
-- `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
-- `modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+R00 recovery is historical success at its recorded source/generation. R02 documentation authority integration is delivered by this revision; enforcement mapping, the stale ledger's individual entries, WSP 46 reconciliation, and other owners' work remain open. Do not mark all of R02 or G0 complete merely because this roadmap is now discoverable.
 
-Core decision:
-- `Svelte` is the rendering layer
-- `SoftProto` is the schema/registry/store/command system above it
-- do not rewrite the live gateway or member shell into Svelte first
+## Target architecture and ownership
 
-Execution sequence:
-1. lock the SoftProto contract first
-2. audit each active surface against that contract
-3. build one isolated Svelte spike inside `/member/`
-4. adopt it across gateway, Mall, user panel, and FoundUp views in phases
-
-Current surface split:
-- `A`: gateway / landing
-- `B`: Mall shell / navigation / PWA
-- `C`: user panel / Red Dog digital-twin surface
-- `D`: support / audit
-
-The rule from this point forward:
-- no new hard-coded UI placement when the feature clearly belongs in the future schema-driven layer
-- AI edits and user edits must eventually mutate the same layout/gesture state
-
-Complementary FoundUps runtime rule:
-- p.fMALL remains the installed control shell
-- product FoundUps may live in separate repos
-- the preferred user experience is still one app through in-scope route
-  deployment, not separate install surfaces
-- see `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
-
----
-
-**[TARGET] Revolutionary Mission:** Building the **orchestration infrastructure for an intelligent internet** where 0102 agents autonomously interact, coordinate, and collectively build FoundUps across all platforms.
-
-**[U+1F300] Foundational Principle:** We are creating the framework for autonomous agent coordination that will transform the internet from a human-operated network to an **intelligent, self-coordinating ecosystem** where ideas automatically manifest into reality.
-
----
-
-## [DATA] Ecosystem Audit Snapshot (2026-02-07, updated 2026-03-13)
-
-### System-Wide Status
-| Metric | Value |
-|--------|-------|
-| Total modules | 120+ across 7 enterprise domains |
-| WSP compliance | 53% (63 fully compliant, 31 partial, 26+ missing docs) |
-| Production-ready systems | 4 (video_indexer, livechat, wre_core, digital_twin) |
-| Active security controls | 45+ tests, honeypot defense, skill scanning, graduated permissions |
-| HoloIndex search quality | 100% relevance (after noise reduction sprint) |
-| main.py startup time | 2s (down from 30s+) |
-
-### WSP 15 MPS Priority Queue (P0 - Immediate)
-
-| Item | MPS Score | Domain | Status |
-|------|-----------|--------|--------|
-| Gemma 270M intent classification for OpenClaw | 18/20 | communication | DONE - Hybrid classifier: keyword pre-filter + Gemma binary validation |
-| AgentPermissionManager SOURCE tier | 17/20 | communication | DONE - File-specific permission gate + execution block |
-| HoloIndex ghost hit elimination | 17/20 | infrastructure | DONE - Similarity threshold + dedup fix |
-| Rate limiting on OpenClaw webhook endpoints | 15/20 | communication | DONE - TokenBucket per-sender/channel + 429 responses + 4 tests |
-| WRE graceful degradation for COMMAND intents | 15/20 | communication | DONE - Advisory fallback when WRE unavailable instead of hard-block |
-
-### WSP 15 MPS Priority Queue (P1 - Next Sprint)
-
-| Item | MPS Score | Domain | Status |
-|------|-----------|--------|--------|
-| FAM task pipeline (open->claimed->submitted->verified->paid) | 14/20 | foundups | PoC - Needs integration testing |
-| Cross-platform memory unification (WSP 60) | 14/20 | infrastructure | DESIGN - Memory silos across modules |
-| Video indexer persistence layer hardening | 13/20 | ai_intelligence | IN PROGRESS - metadata_db added |
-| OpenClaw-to-WRE bridge for COMMAND tier | 13/20 | communication | DESIGN - Autonomy tier escalation path |
-| Unified analytics dashboard | 12/20 | monitoring | NOT STARTED - Phase 2 objective |
-
-### OpenClaw Security Audit (2026-02-07): CLEAN
-- Honeypot defense: 2-phase deception operational
-- Skill safety guard: fail-closed policy verified
-- Graduated autonomy: ADVISORY -> OBSERVE -> SUGGEST -> SOURCE tiers defined
-- Secret redaction: patterns validated across all output paths
-- Gap: Keyword-based intent classification vulnerable to prompt injection (P0)
-
----
-
-## [U+1F310] **THE INTELLIGENT INTERNET VISION**
-
-### **[TARGET] Complete Ecosystem Architecture**
-```
-+-----------------------------------------------------------------------------+
-[U+2502]                    [U+1F310] THE INTELLIGENT INTERNET ROADMAP                      [U+2502]
-+-----------------------------------------------------------------------------+
-[U+2502]                                                                             [U+2502]
-[U+2502] PHASE 1: FOUNDATION ([OK] 85% COMPLETE)                                       [U+2502]
-[U+2502] +-- [U+1F4BB] VSCode Multi-Agent IDE [OK]                                            [U+2502]
-[U+2502] +-- [U+1F4E1] Auto Meeting Orchestration [OK]                                        [U+2502]
-[U+2502] +-- [U+1F310] Platform Access Modules [OK]                                           [U+2502]
-[U+2502] +-- [U+1F300] WRE Core Infrastructure [OK]                                           [U+2502]
-[U+2502]                                                                             [U+2502]
-[U+2502] PHASE 2: CROSS-PLATFORM INTELLIGENCE ([U+1F6A7] IN PROGRESS)                      [U+2502]
-[U+2502] +-- [AI] Agent Intelligence Sharing                                           [U+2502]
-[U+2502] +-- [DATA] Cross-FoundUp Knowledge                                              [U+2502]
-[U+2502] +-- [REFRESH] Pattern Recognition Systems                                          [U+2502]
-[U+2502]                                                                             [U+2502]
-[U+2502] PHASE 3: INTERNET ORCHESTRATION ([TARGET] NEXT TARGET)                           [U+2502]
-[U+2502] +-- [BOT] Agent-to-Agent Communication                                         [U+2502]
-[U+2502] +-- [U+1F310] Autonomous Promotion Strategies                                      [U+2502]
-[U+2502] +-- [UP] Real-Time Market Intelligence                                        [U+2502]
-[U+2502]                                                                             [U+2502]
-[U+2502] PHASE 4: COLLECTIVE BUILDING ([U+1F52E] STRATEGIC HORIZON)                        [U+2502]
-[U+2502] +-- [HANDSHAKE] Multi-Founder Coordination                                           [U+2502]
-[U+2502] +-- [LINK] Resource Sharing Protocols                                           [U+2502]
-[U+2502] +-- [ROCKET] Autonomous Business Development                                      [U+2502]
-[U+2502]                                                                             [U+2502]
-+-----------------------------------------------------------------------------+
+```mermaid
+flowchart TD
+    P[012: objective and delegated policy] --> R[0102 / RedDog: propose bounded work]
+    WSP[WSP: governing requirements] --> W[WRE: admission, job ownership, evidence]
+    R --> W
+    H[HoloIndex: current retrieval] --> R
+    M[Scoped Memex: principal and FoundUp context] --> R
+    W --> Q[Existing AgentDB claims and leases]
+    Q --> O[OpenClaw: supervise admitted jobs]
+    O --> HE[Hermes: bounded leaf worker]
+    HE --> A[Candidate artifact and execution receipts]
+    A --> V[Independent verifier and held-out evaluator]
+    V --> G[Authorized promoter]
+    G --> C[Activation, canary, rollback]
+    C --> E[Observed outcome receipts]
+    E --> PM[Admitted PatternMemory / outcome retention]
+    PM --> R
+    Q --> F[FAM lifecycle/event records where applicable]
 ```
 
-### **[ROCKET] The Autonomous Internet Lifecycle**
+The diagram is the target composition, not a statement that every arrow is operational. Holo maintenance is separately owned and never runs inside a query. Hermes artifact generation must not acquire Git, deployment, promotion, or memory-admission authority merely because it returned useful text.
+
+| Owner | Responsibility | Boundary |
+|---|---|---|
+| 012 | Select objectives; delegate bounded standing policy; correct or revoke it. | Runtime prompts cannot manufacture or widen delegated authority. |
+| 0102 architect / RedDog | Interpret intent, choose a slice, score priorities, reconcile ownership. | Does not certify its own outcome or create a parallel source of execution truth. |
+| WRE control plane | Admit exact scope, bind source/runtime, persist claims, evaluate receipts, coordinate promotion. | Reuse existing contracts and stores; do not make every module a new orchestrator. |
+| OpenClaw | Resident supervision, routing, progress/cancellation under the admitted task. | Hub/provider roles must be explicit; no autonomous permission expansion. |
+| Hermes | One bounded native leaf per current accepted profile; return artifact content and lifecycle evidence. | No broad tools, nested fanout, or independent production write authority under that profile. |
+| Independent verifier | Reproduce tests/effects; compare to an independently owned baseline and held-out corpus. | Different identity, evidence authority, and workspace from author; worker text is untrusted input. |
+| Promotion/activation owner | Accept verified candidate, activate exact bytes, observe, roll back. | Distinct from proposal generation; respects predelegated policy and revocation. |
+| Memory owner | Admit provenance-bearing outcomes; preserve failures, supersession, and scope. | Raw success assertions and model confidence never become verified learning. |
+
+Use upstream capabilities through adapters. OpenClaw has agent-scoped routing/state; Hermes has native child delegation and parallel task batches. Pin and verify the actual installed versions before dispatch; current web features are not proof of the local runtime. [OpenClaw documentation](https://docs.openclaw.ai/concepts/multi-agent), [Hermes documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation/)
+
+## Working alongside YUMORI.me/eSingularity/RedDog
+
+The concurrent lane owns its product and connection work. This roadmap does not authorize another agent to edit it.
+
+1. Resolve the current main SHA, active owner, open change, and path claims before assigning a packet. If already implemented, verify it and close/replace the packet instead of duplicating it.
+2. Use one worktree per writing worker. Preserve the original feature checkout. Do not reset, stash, clean, switch, merge, or commit someone else's work.
+3. Treat `modules/foundups/esingularity/**`, its frontend/hosting, `extensions/reddog/**`, and the active RedDog connection/operations paths as reserved until ownership is explicitly released or coordinated.
+4. Route the observed `reddog_operations` manifest defect to that existing owner first. This audit found a failure; it did not create a competing repair branch.
+5. Serialize changes that overlap WRE coordination, the bridge, shared registry/manifest files, WSP mirrors, or `main.py`. Parallel analysis is acceptable; parallel conflicting writes are not.
+6. Index maintenance uses its existing leases and exact-main controller. Concurrent main advancement invalidates a run's authority; replan or repeat the governed transaction against the new target instead of weakening the check.
+7. Do not publish a site, send outreach, train on private conversation data, or activate a service as a side effect of an RSI packet.
+
+## Completion gates
+
+| Gate | Required evidence | Failure means |
+|---|---|---|
+| G0: reproducible baseline | Clean pinned source; current registry; recorded test failures/quarantine; usable Holo receipt; active lane reconciliation. | No code packet may assume stale source or silently absorb another lane. |
+| G1: one admitted worker job | Signed/authorized work item → durable claim → actual selected runtime → bounded artifact → complete receipt chain. | Simulation and provider text cannot be called execution. |
+| G2: independently evaluated candidate | Exact baseline/candidate artifacts; independent test/effect producer; held-out cases; reproducible metrics; negative cases. | Author cannot promote or retain the candidate as successful. |
+| G3: governed activation and rollback | Independent promotion decision; exact-byte activation; bounded canary; tested rollback and recovery. | No production RSI label, even if unit tests are green. |
+| G4: retained improvement | Authenticated outcomes influence the next decision; measurable improvement across successive generations; failed variants remain visible. | Storage alone is not learning. |
+| G5: sustained bounded swarm | Restart/replay/cancellation/expiry/conflict/overload tests; resource and verifier capacity; no lost/duplicate effects. | Keep worker count at the last proved level. |
+
+The WSP bootstrap is required by the repository but is not a substitute for G0–G5.
+
+## Wave 0 — recover and establish current truth
+
+**Outcome:** a receiving worker can identify the exact source, owner, runtime, documents, and baseline without asking 012 to reconstruct status.
+
+- **R00 — Holo operational recovery. OBSERVED COMPLETE at this SHA.** The existing controller and three semantic queries passed. Retain the receipts; do not enqueue a duplicate repair for the completed task.
+- **R01 — Production skill integrity. P0, existing RedDog owner.** Reconcile `modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md` and its `SKILL_MANIFEST.json` against intended committed content. The manifest currently matches neither working bytes nor Git blob bytes. Preserve exact-byte admission. Acceptance: both registered production bundles pass integrity; the documented WRE tier has no unexplained failures. If another lane already fixes this, verify its exact commit rather than authoring another fix.
+- **R02 — Canonical completion and WSP enforcement map. P1, partially delivered (documentation authority only).** Reconcile stale ledger entries, WSP 46 fallback language, the WSP 00 mirror wording, and current WRE truth. For every RSI requirement, name its normative source, implementation owner, test, and runtime receipt or missing status. Treat research-only requirements separately. Edit `CLAUDE.md` rather than its generated AGENTS projection when a learned operating rule needs to persist. Acceptance: a fresh verifier can determine current slice ownership and each G0–G5 gap without relying on an old completion claim.
+- **R03 — Reliable retrieval entry context. P0.** Reuse `authority_worktree.py`, the one-shot owner bridge, `holo_query_bundle`, incident repair, and the exact-main controller. Define how a feature worker selects current-main reference retrieval versus its own committed snapshot, and how local overlay evidence is labeled. Acceptance: clean-main, divergent-feature, dirty-overlay, stale-authority, main-advances-mid-run, and no-MCP cases have truthful results; queries never reindex; repair is idempotent and preserves other owners. The successful recovery is the first fixture/example, not proof of arbitrary branch support.
+
+**Wave exit:** G0 is reproducible. Keep the observed manifest failure visible until reconciled. The test-registry check already passes at this baseline; do not regenerate it as unnecessary work.
+
+## Wave 1 — connect the existing work and evidence path
+
+**Outcome:** one real bounded worker can do one admitted task and return independently attributable evidence.
+
+- **R04 — Exact runtime closure for the selected production path. P0 for claims that require it.** Reuse the existing runtime builder, artifact manifests, dependency/runtime bindings, and independent producers. Bind actual payload bytes and the declared interpreter/library/process boundary; metadata hashes alone are insufficient. Acceptance: changed runtime bytes, replaced sources, stale generation, and mismatched dependency closure reject; the chosen exact-main positive path passes. Holo A-grade/retrieval-promotion claims remain blocked while `runtime_environment_exact_closure_verified=false`. This need not block effect-free planning or unrelated isolated tests.
+- **R05 — Retrieval quality and missing collections. P1.** Reuse the existing public benchmark and sealed-corpus gate. Evaluate current-contract ordering, Tier-0 inclusion, duplicate/historical noise, and scoped retrieval. Determine whether work-ledger/vocabulary collections are required for the chosen scenario before implementing them. Acceptance: independent corpus ownership, recorded baseline, predeclared quality thresholds, tamper rejection, and real caller wiring. Never call the three successful audit queries an A-grade benchmark.
+- **R06 — Compile a planning packet into the existing work contracts. P0.** Bind objective, exact source, capability, worker runtime, scope, budget, expiry, policy, and required evidence using existing signed work-order, ImprovementJob, FoundUpJob, and route contracts as applicable. Resolve which contract owns each phase; do not make every record an independent job. Acceptance: altered paths, replay, wrong FoundUp, stale source, unsupported action, and deserialized self-granted flags reject before dispatch.
+- **R07 — Select and prove the current OpenClaw/Hermes route. P0.** Use the real native API/provider adapter; do not revive the legacy blocked `HermesJobExecutor` merely because it has a convenient name. Start with the supported one-leaf profile. Acceptance: one real child lifecycle, signed provider/model agreement, no forbidden tools/effects, timeout and cancellation evidence, validated returned artifact bytes, and correct provider attribution. A fixture or text-only response is insufficient.
+- **R08 — One safe authoring/execution vertical. P0.** Extend the existing confined artifact/worktree write path and independent artifact validation. Start with a bounded, disposable candidate workspace and one allowed artifact. Acceptance: all writes are confined and receipt-bound; no product/shared checkout changes; repeated request does not duplicate effects; incomplete/failed jobs remain recoverable; a fresh verifier reproduces the artifact from the receipt.
+- **R09 — Production composition of independent verification. P0.** Reuse `wre_autonomous_slice_verifier_runtime.py`, independent evidence producers, exact-source test registry/differential evidence, and held-out gates. Acceptance: the verifier actually runs under separately bound authority; forged author receipts fail; required tests are not silently omitted; skipped/quarantined cases are explicit; changed candidate/base/runtime invalidates the result.
+
+**Wave exit:** G1 passes, and the independent G2 producer is callable. Preserve the difference between an available verifier contract and authenticated operational invocation.
+
+## Wave 2 — make learning outcomes trustworthy
+
+**Outcome:** a worker proposal can be judged and retained without certifying itself.
+
+- **R10 — Independent outcome evaluator. P0.** Specify the task's observable result, oracle, held-out cases, baseline, failure rules, and real cost/latency measurements. Connect the evaluator after execution in the generic WRE path. Acceptance: correct behavior succeeds, convincing but incorrect text fails, effect-less “success” fails, and baseline/candidate identities are reproducible. Structural fidelity remains a separate metric.
+- **R11 — Verified retention into scoped memory. P0.** Compose the existing outcome ratchet, held-out regression gate, and PatternMemory sink. Define atomic admission/idempotency and recovery when the store or sink fails. Acceptance: unverified or wrong-scope outcomes are excluded; accepted evidence is retained once; failed and superseded variants stay discoverable; the next invocation demonstrably reads the accepted version. Caller-provided token/success fields stay unverified until authenticated.
+- **R14 — Immutable experimental candidates and A/B evidence. P1.** Bind each candidate label to immutable artifact/runtime bytes. Replace a bare observed-rate margin with an experiment decision contract: per-arm minimum evidence, predeclared outcome, cost, uncertainty, stopping, and regression rules. Reuse current sample storage. Acceptance: under-sampled or mixed-version experiments remain inconclusive; a winner label never directly changes production.
+
+**Wave exit:** G2 and the retention half of G4 pass in a controlled environment. `apply_improvement()` and `promote_variation()` remain blocked until their authenticated downstream owners are ready.
+
+## Wave 3 — close promotion, activation, and rollback
+
+**Outcome:** one authorized improvement can be activated, observed, and reversed through the same governed path.
+
+- **R12 — Authenticated independent promoter. P0.** Compose existing signed authority and verification receipts into a concrete promotion owner. Protect its trust material outside candidate-controlled scope. Acceptance: proposer/verifier/promoter separation; exact one-time decision; expiry/revocation; candidate/base/runtime mismatch; replay; and policy downgrade rejection. Do not implement promotion by updating a database Boolean.
+- **R13 — Activation, canary, and rollback owner. P0.** Reuse existing artifact/route publication and atomic transition patterns for the selected skill/runtime asset. Pre-authorize a bounded rollback policy with 012's delegated scope so routine regression recovery does not require repeated prompting. Acceptance: exact-byte activation, observable canary, known-good prior version, forced bad-candidate rollback, interrupted activation recovery, and proof that rolled-back traffic/selection uses the restored version.
+- **R15 — First end-to-end RSI canary. P0.** Improve the **test-registry-audit work procedure/context assembly** behind the existing healthy production skill, initially in an internal canary. Keep registry meaning, required test selection, and correctness oracles independent and unchanged. Target fewer redundant steps/tokens or lower latency with equal or better correctness. The candidate may not change its judge, safety criteria, or quarantine rules. Acceptance: observe → current retrieval → proposal → real bounded execution → independent evaluation → authorized activation → measured outcome → retained memory → a better subsequent invocation; force one regression and demonstrate rollback.
+
+Choose the exact optimization only after baseline measurement. If it cannot produce a measurable beneficial change, reject it and nominate another equally bounded internal workflow. A no-op loop or a cheaper but less correct result does not pass.
+
+**Wave exit:** G3 and a first G4 pass. This earns “bounded RSI canary validated,” not “FoundUps production complete.”
+
+## Wave 4 — prove concurrency and repeatability
+
+**Outcome:** the loop remains reliable when more than one job exists and a worker or service fails.
+
+- **R16 — Durable FoundUp job lifecycle. P0 before broad build execution.** Replace/retire the production use of the legacy in-memory queue through existing AgentDB/FAM owners. Define the boundary between work execution and business lifecycle events. Acceptance: atomic claim, lease/expiry, retry, terminal receipt, idempotent replay, restart recovery, and no silent loss or duplicate external effects. Reuse the maintenance task's proven patterns where applicable.
+- **R17 — Concurrent PatternMemory/cache ownership. P0 before multiple writers.** Give each work item a connection or explicit serialized transaction owner; synchronize bounded admission caches; bind all entries to content/generation. Acceptance: deterministic conflicting updates, lock contention, crash during commit, replay, cache invalidation, and no cross-FoundUp contamination. `check_same_thread=False` alone does not pass.
+- **R18 — Resource-aware swarm scheduling. P1.** Extend the existing coordinator with explicit writer and verifier capacity, per-FoundUp budgets, queue limits, cancellation, provider failure, and backpressure. Begin with one coordinator, at most two independent author jobs, and reserved independent verification capacity. These are proposed initial operating limits, not current upstream defaults. Acceptance: pressure cannot starve verification or cause unbounded fanout; jobs remain attributable and stoppable. Increase concurrency only after a measured run at the next size passes.
+- **R19 — CI/quarantine and promotion evidence. P1.** Preserve the current registry and exact impact analysis; triage 269 quarantined test files by reason and capability. Select the subset relevant to each packet rather than demanding immediate cleanup of all historical tests. Acceptance: every required scope has an executable or explicitly blocked test plan; no candidate can omit a required test to pass; merge/base changes invalidate prior evidence; production-promotion checks run where they claim to run.
+- **R23 — Sustained multi-generation proof. P0 for the RSI completion claim.** Run at least three successive candidate/evaluation cycles and a bounded soak across restarts, provider faults, duplicate delivery, source advancement, and conflicting jobs. Include at least one rejected candidate and one rollback. Measure retained benefit on later tasks. Acceptance: G0–G5 all pass for a declared scope and worker count, with complete independent receipts and no unresolved critical failures. Sample size comes from baseline variance and the predeclared decision rule; a token count or an arbitrary number of runs is not statistical proof.
+
+## Wave 5 — extend the proven loop to FoundUps
+
+These packets do not block the first internal RSI canary.
+
+- **R20 — One FoundUp lifecycle vertical. P1.** Select an owner-released internal target with a defined outcome; reuse genesis, registry, scaffold, FAM, and work contracts. Validate idea/intake → admitted task → real bounded artifact → proof → independent verification → lifecycle update. Keep financial/chain actions outside this first proof. An externalized project requires its own exact repository evidence.
+- **R21 — pAVS/MCP truth and authority convergence. P1.** Reconcile backend-specific status metadata, the hardcoded CABR score, registration/auth limitations, and the legacy direct Holo adapter. Use the supported generation-bound query surface. Acceptance: real, unavailable, and placeholder results remain distinct; no fabricated score can authorize acceptance or rewards; transport conformance and per-FoundUp authorization are tested separately. Defer production financial consequences to their own acceptance work.
+- **R22 — RedDog/eSingularity consumer integration. Reserved for the active owner.** Surface the eventual work/verification/outcome states through the existing conversation/client contract. Reconcile that lane's current implementation before defining changes. Acceptance: proposal, queued, running, verified, activated, rolled back, and blocked states reflect authoritative receipts; a conversational reply never fabricates completion. Do not implement a duplicate client or alter the campaign site from this lane.
+
+## Dependency map and critical path
+
+```mermaid
+flowchart LR
+    R00 --> R03
+    R01 --> R06
+    R02 --> R06
+    R03 --> R06
+    R06 --> R07 --> R08 --> R09 --> R10 --> R11
+    R04 --> R05
+    R09 --> R12
+    R10 --> R12
+    R11 --> R12 --> R13
+    R10 --> R14
+    R11 --> R14
+    R13 --> R15
+    R14 --> R15
+    R06 --> R16
+    R11 --> R17
+    R16 --> R18
+    R17 --> R18
+    R09 --> R19
+    R15 --> R23
+    R18 --> R23
+    R19 --> R23
+    R15 --> R20 --> R21
+    R20 --> R22
 ```
-[IDEA] IDEA (012 Founder)
-    v
-[U+1F4BB] Multi-Agent IDE Awakening (Phase 1) [OK]
-    v
-[U+1F4E1] Cross-Founder Connection (Phase 1) [OK]
-    v
-[AI] Intelligence Sharing (Phase 2) [U+1F6A7]
-    v
-[U+1F310] Internet Orchestration (Phase 3) [TARGET]
-    v
-[HANDSHAKE] Collective Building (Phase 4) [U+1F52E]
-    v
-[U+1F984] INTELLIGENT INTERNET ACHIEVED
-```
-
----
-
-## [U+1F3D7]️ **PHASE 1: FOUNDATION INFRASTRUCTURE** [OK] **85% COMPLETE**
-
-### **[TARGET] Core Cube: VSCode Multi-Agent Development Environment** [OK] **OPERATIONAL**
-
-#### **[U+1F4BB] IDE FoundUps Module** [OK] **COMPLETE**
-- **Status**: Phase 3 Autonomous Development Workflows implemented
-- **LLME Score**: 88/100 — Revolutionary multi-agent IDE capabilities
-- **Next**: Integration with Cross-Platform Intelligence (Phase 2)
-- **Location**: `modules/development/ide_foundups/`
-
-#### **[U+1F300] WRE Core Infrastructure** [OK] **OPERATIONAL** 
-- **Status**: Complete autonomous development orchestration engine
-- **Capabilities**: WSP 54 agent suite, remote build orchestrator, 24/7 supervisor daemon
-- **OpenClaw/IronClaw**: Autonomous skill execution with graduated permissions
-- **Next**: Enhanced cross-platform coordination protocols
-- **Location**: `modules/infrastructure/wre_core/`
-
-#### **[BOT] WRE Hermes Executor Lane** [U+1F6A7] **DRY-RUN OPERATIONAL**
-- **Adapter seam**: Landed (PR #478) — HermesJobExecutor maps FoundUpJob to delegate_task contract
-- **Workspace binding**: Landed (PR #478) — Path constraints, evidence output path, blocked paths
-- **Checkpoint protocol**: Landed (PR #479) — STATE/RESULT/BLOCKER/NEXT_ACTION fields in result
-- **Evidence collection**: Landed (PR #479) — metadata.json + checkpoint.json in `.hermes_evidence/{job_id}/`
-- **Live delegation**: BLOCKED — `HERMES_DELEGATE_ENABLED=0` default, real execution not implemented
-- **Next priority**: `WRE_HERMES_EXECUTOR_CONSUMER_BINDING_DRY_RUN_PHASE1` — Wire executor into FoundUpJobConsumer drain loop
-- **WSP 97**: All truth fields remain false (real_execution_performed, verification_complete, cabr_ready, payout_ready)
-- **Location**: `modules/infrastructure/wre_core/src/hermes_job_executor.py`
-
-#### **[GLOBE] FoundUps Agent Workspace** [TARGET] **PLANNED EXTERNAL SYSTEM**
-- **Status**: Fork/adaptation plan documented (v1.0.0)
-- **Source**: Fork from `outsourc-e/hermes-workspace` (external, NOT cloned/vendored)
-- **Positioning**: External compatible system, not FoundUps Core
-- **Integration surface**: WSP task packets, WRE gateway APIs, checkpoint/evidence artifacts
-- **What it provides**: Swarm UI, Kanban board, tmux workers, autonomous execution runtime
-- **What FoundUps provides**: WSP governance, FoundUpJob queue, CABR verification, policy gates
-- **Plan location**: `docs/architecture/FOUNDUPS_AGENT_WORKSPACE_FORK_PLAN.md`
-- **Gateway contract**: `docs/architecture/WRE_GATEWAY_ADAPTER_DESIGN.md`
-- **WSP 15 Priority**: P0 (fork plan) complete, P1 (gateway design) complete, P2 (external repo inspection) next
-- **WSP 97 Truth**: No live delegation enabled, evidence is observability only
-
-### **[U+1F4E1] Auto Meeting Orchestration Ecosystem** [OK] **COMPLETE**
-
-#### **Strategic Decomposition Achievement** [OK] **PHASE 1 COMPLETE**
-```
-[NOTE] Intent Manager -> [U+1F4E1] Presence Aggregator -> [HANDSHAKE] Consent Engine -> [ROCKET] Session Launcher -> [CLIPBOARD] Post-Meeting Feedback
-```
-
-**Revolutionary Capabilities**:
-- **Cross-Founder Connection**: Autonomous coordination between founders and their 0102 agent teams
-- **WSP 25/44 Intelligence**: Post-meeting feedback with semantic rating and learning
-- **Event-Driven Architecture**: Modular, scalable coordination across enterprise domains
-- **Rejection Learning**: System adaptation based on interaction patterns
-
-**Module Status**:
-- **Intent Manager**: [OK] Complete with enhanced lifecycle (WSP 25/44 integration)
-- **Presence Aggregator**: [OK] Complete with cross-platform monitoring  
-- **Consent Engine**: [OK] Complete with intelligent prompting
-- **Session Launcher**: [OK] Complete with multi-platform coordination
-- **Post-Meeting Feedback**: [OK] Complete with WSP semantic intelligence
-
-### **[U+1F310] Internet Access Layer for 0102 Agents** [OK] **OPERATIONAL**
-
-#### **[U+1F3AC] YouTube Block** [OK] **WSP 5 & WSP 11 COMPLIANT**
-- **Purpose**: 0102 agents autonomously create content, manage livestreams, engage communities
-- **Status**: Complete component orchestration across enterprise domains
-- **Capabilities**: Authentication, stream discovery, community engagement, cross-domain orchestration
-- **Location**: `modules/platform_integration/youtube_proxy/`
-
-#### **[ROCKET] Social Media Orchestration System** [OK] **WSP 49, WSP 42, WSP 65 COMPLIANT**
-- **Purpose**: Unified cross-platform social media management with intelligent orchestration
-- **Status**: Production ready with comprehensive testing and validation
-- **Revolutionary Achievement**: First unified social media orchestrator with cross-platform intelligence
-- **Location**: `modules/platform_integration/social_media_orchestrator/`
-
-**Core Capabilities**:
-- **Cross-Platform Posting**: Simultaneous content deployment across Twitter, LinkedIn, and extensible platforms
-- **Intelligent Scheduling**: Platform-optimized timing with retry logic and exponential backoff
-- **OAuth Coordination**: Centralized authentication management with secure credential encryption
-- **Content Orchestration**: Platform-specific formatting, character limits, and engagement optimization
-- **Hello World Testing**: Safe dry-run verification without actual API calls
-
-#### **[U+1F4BC] LinkedIn Unified Integration** [OK] **WSP 49, WSP 65 COMPLIANT**
-- **Purpose**: Professional networking automation with unified OAuth, content optimization, and engagement management
-- **Status**: Production ready - **CONSOLIDATED** from 3 separate modules (linkedin_agent, linkedin_scheduler, linkedin_proxy)
-- **Revolutionary Achievement**: First unified LinkedIn integration eliminating redundancy through component consolidation
-- **Location**: `modules/platform_integration/linkedin/`
-
-**Professional Capabilities**:
-- **Unified Management**: Single interface replacing 3 separate modules (WSP 65 compliance)
-- **Professional Content**: LinkedIn API v2 integration with professional tone optimization
-- **Networking Automation**: Connection management, professional messaging, industry targeting
-- **Company Pages**: Advanced company page management and analytics integration
-- **Analytics**: Comprehensive professional engagement metrics and performance tracking
-
-#### **[BIRD] X/Twitter DAE Integration** [OK] **WSP 26-29, WSP 42 COMPLIANT**
-- **Purpose**: Autonomous Twitter engagement with DAE protocols and CABR engine integration
-- **Status**: DAE framework operational with Social Media Orchestrator integration
-- **Capabilities**: Autonomous content posting, mention monitoring, engagement automation
-- **Location**: `modules/platform_integration/x_twitter/` (integrated with orchestrator)
-
-#### **[U+1F4F1] Platform Integration Framework** [OK] **EXTENSIBLE FOUNDATION**
-- **Purpose**: Universal internet access for 0102 agents across any platform
-- **Architecture**: WSP 42 Universal Platform Protocol for consistent integration
-- **Scalability**: Functional distribution across enterprise domains
-
----
-
-## [AI] **PHASE 2: CROSS-PLATFORM INTELLIGENCE** [U+1F6A7] **IN PROGRESS**
-
-### **[TARGET] Strategic Objectives**
-
-#### **[REFRESH] Agent Intelligence Sharing** [U+1F6A7] **NEXT PRIORITY**
-**Goal**: Agents learn from interactions across YouTube/LinkedIn/X and share intelligence
-- **Platform Memory Integration**: Unified learning across all internet platforms
-- **Cross-FoundUp Knowledge**: Intelligence sharing between different FoundUp agent teams  
-- **Behavioral Pattern Recognition**: Collective identification of successful coordination strategies
-- **Implementation**: Enhanced WSP 60 memory architecture with cross-platform data correlation
-
-#### **[DATA] Unified Analytics Dashboard** [TARGET] **TARGET**
-**Goal**: Real-time intelligence across all platform interactions
-- **Cross-Platform Metrics**: Unified view of agent performance across YouTube/LinkedIn/X
-- **Coordination Effectiveness**: Measurement of cross-founder collaboration success
-- **Learning Velocity**: Rate of improvement in agent intelligence and coordination
-- **Predictive Insights**: Pattern recognition for optimal coordination strategies
-
-#### **[BOT] Enhanced Agent Coordination** [TARGET] **TARGET**
-**Goal**: Agents coordinate strategies across platforms for maximum impact
-- **Content Strategy Synchronization**: YouTube content aligned with LinkedIn professional presence
-- **Cross-Platform Promotion**: Coordinated promotion strategies across all platforms
-- **Audience Intelligence**: Shared understanding of community engagement patterns
-- **Resource Optimization**: Efficient allocation of agent capabilities across platforms
-
----
-
-## [TERMINAL] Entrypoint (main.py) Roadmap
-
-**Purpose**: main.py is the system entrypoint - it should remain thin and delegate to modules.
-
-| Item | Priority | Status | WSP Ref |
-|------|----------|--------|---------|
-| WSP 90 Phase 2: Review 155 entrypoint files for UTF-8 cleanup | Low | DEFERRED | WSP 90 |
-| Feature flags: ENABLE_LINKEDIN, ENABLE_X for platform triggers | P1 | NOT STARTED | - |
-| Startup metrics: Track module load times for optimization | P2 | NOT STARTED | WSP 91 |
-| Graceful degradation: Continue if non-critical modules fail | P2 | PARTIAL | - |
-
-**Architecture Principle**: main.py orchestrates, modules execute. No business logic in entrypoint.
-
-**Tracking**: `modules/development/wsp_tools/TODO_WSP90_PHASE2.md` for UTF-8 deferred items.
-
----
-
-## [LINK] Integration Plan: Posting & Engagement (Execution Epics)
-
-Epic 1: YouTube Baseline Verification (No new code)
-- AC1: `main.py` discovers active livestream and starts chat listener
-- AC2: Send message via `LiveChatListener.send_chat_message` succeeds
-- AC3: Tokens refresh via oauth/token_manager without manual steps
-
-Epic 2: LinkedIn Independent Posting
-- AC1: `LinkedInOAuthManager` obtains/validates access token
-- AC2: `LinkedInScheduler.create_text_post` works in test-mode, then live
-- AC3: Deprecation notice added in `linkedin_agent/src/automation` pointing to `linkedin_scheduler`
-
-Epic 3: X/Twitter Independent Posting
-- AC1: `XTwitterDAENode.authenticate_twitter` succeeds (or simulates if Tweepy unavailable)
-- AC2: `post_autonomous_content` posts or simulates
-
-Epic 4: Hook into main.py (Feature Flags)
-- AC1: Env flags ENABLE_LINKEDIN/ENABLE_X control optional posting triggers from YouTube events
-- AC2: No regressions in YouTube baseline when flags disabled
-
-Tracking: Update module ModLogs and WSP 70 status notes; no new code added unless a verified gap remains per WSP 50.
-
-## [U+1F310] **PHASE 3: INTERNET ORCHESTRATION PROTOCOL** [TARGET] **NEXT TARGET**
-
-### **[BOT] Agent-to-Agent Communication**
-**Revolutionary Capability**: Direct 0102 agent coordination across platforms and FoundUps
-- **Agent Discovery Protocol**: Agents find and connect with other agents across the internet
-- **Secure Agent Channels**: Encrypted communication protocols for agent coordination  
-- **Cross-FoundUp Collaboration**: Agents coordinate resources across different FoundUp projects
-- **Intelligence Marketplace**: Agents share specialized knowledge and capabilities
-
-### **[U+1F310] Autonomous Promotion Strategies**
-**Revolutionary Capability**: Agents develop and execute optimal content/networking approaches
-- **Dynamic Strategy Evolution**: Agents continuously improve promotion strategies based on results
-- **Platform-Specific Optimization**: Tailored approaches for YouTube, LinkedIn, X, and emerging platforms
-- **Viral Pattern Recognition**: Agents identify and replicate successful content patterns
-- **Cross-Platform Amplification**: Coordinated promotion campaigns across all platforms
-
-### **[UP] Real-Time Market Intelligence**  
-**Revolutionary Capability**: Agents monitor trends and adapt FoundUp development automatically
-- **Trend Detection Systems**: Real-time identification of market opportunities and threats
-- **Competitive Intelligence**: Automated monitoring of similar projects and strategies
-- **Demand Forecasting**: Predictive analysis of market needs and timing
-- **Adaptive Development**: Automatic adjustment of FoundUp features based on market intelligence
-
----
-
-## [ROCKET] **PHASE 4: COLLECTIVE FOUNDUP BUILDING** [U+1F52E] **STRATEGIC HORIZON**
-
-### **[HANDSHAKE] Multi-Founder Coordination**
-**Breakthrough Capability**: Complex projects involving multiple founders + agent teams
-- **Project Decomposition**: Automatic breakdown of complex projects across multiple FoundUps
-- **Resource Coordination**: Intelligent allocation of capabilities across founder teams
-- **Timeline Synchronization**: Coordinated development schedules across multiple projects
-- **Success Sharing**: Fair distribution of outcomes based on contribution and impact
-
-### **[LINK] Resource Sharing Protocols**
-**Revolutionary Efficiency**: Agents coordinate shared development resources
-- **Capability Marketplace**: Agents offer specialized services to other agent teams
-- **Infrastructure Sharing**: Shared development, testing, and deployment resources
-- **Knowledge Base Federation**: Distributed learning across the entire ecosystem
-- **Cost Optimization**: Efficient resource utilization across all FoundUps
-
-### **[ROCKET] Autonomous Business Development**
-**Market Revolution**: Agents identify and pursue collaboration opportunities
-- **Partnership Discovery**: Automated identification of synergistic FoundUp combinations
-- **Deal Negotiation Agents**: Autonomous negotiation of collaboration terms
-- **Market Creation**: Agents identify and create new market opportunities
-- **Economic Optimization**: Automatic optimization of business models and revenue streams
-
----
-
-## [U+1F3AD] **CURRENT THEATERS OF OPERATION**
-
-### **[OK] OPERATIONAL MODULES**
-These modules are actively operational and ready for Phase 2 intelligence enhancement:
-
-#### **Platform Integration Blocks**
-- **[U+1F3AC] YouTube Agent**: `modules/platform_integration/youtube_proxy/` — WSP 5/11 Compliant
-- **[U+1F4BC] LinkedIn Agent**: `modules/platform_integration/linkedin_agent/` — WSP 5/11 Compliant  
-- **[BIRD] X Agent**: `modules/platform_integration/x_twitter/` — WSP 26-29 Compliant
-- **[U+1F3D7]️ Remote Agent**: `modules/platform_integration/remote_builder/` — Development workflows
-
-#### **Communication Orchestration**
-- **[NOTE] Intent Manager**: `modules/communication/intent_manager/` — Meeting coordination
-- **[U+1F4E1] Presence Aggregator**: `modules/integration/presence_aggregator/` — Cross-platform monitoring
-- **[HANDSHAKE] Consent Engine**: `modules/communication/consent_engine/` — Intelligent prompting
-- **[ROCKET] Session Launcher**: `modules/platform_integration/session_launcher/` — Multi-platform coordination
-- **[CLIPBOARD] Post-Meeting Feedback**: `modules/ai_intelligence/post_meeting_feedback/` — WSP 25/44 learning
-- **[ALERT] Liberty Alert**: `modules/communication/liberty_alert/` — Open-source mesh alert system for community protection
-
-#### **Development Environment**
-- **[U+1F4BB] IDE FoundUps**: `modules/development/ide_foundups/` — Multi-agent VSCode system
-- **[U+1F300] WRE Core**: `modules/infrastructure/wre_core/` — Autonomous development orchestration
-
-### **[U+1F6A7] NEXT DEVELOPMENT PRIORITIES**
-
-#### **[REFRESH] Phase 2: Cross-Platform Intelligence Implementation**
-1. **Enhanced YouTube Agent Capabilities**
-   - Content strategy AI with cross-platform optimization
-   - Livestream coordination with LinkedIn professional presence
-   - Community building with X/Twitter engagement synchronization
-
-2. **[U+1F4BC] LinkedIn Professional Network Expansion**
-   - Strategic networking with YouTube audience insights
-   - FoundUp showcasing coordinated with content creation
-   - Business development with cross-platform intelligence
-
-3. **[LINK] Cross-Platform Intelligence Integration**
-   - Unified agent memory across all platforms
-   - Coordination analytics with real-time effectiveness monitoring
-   - Adaptive strategies based on multi-platform feedback
-
----
-
-## [U+2699]️ **FOUNDATION: The Windsurf Recursive Engine (WRE)**
-
-### **[U+1F300] WRE Agent Implementation Status**
-Following **WSP 54: WRE Agent Duties Specification**, the autonomous agent suite provides the foundation for intelligent internet orchestration:
-
-#### **[OK] OPERATIONAL AGENTS**
-- **ComplianceAgent**: [OK] **Implemented & Tested** — Enforces WSP structural integrity across all platforms
-- **ScoringAgent**: [OK] **Enhanced** — Unified WSP framework integration (WSP 8/15/25/37/44)
-- **DocumentationAgent**: [OK] **Implemented** — Automated WSP-compliant documentation generation
-- **ChroniclerAgent**: [OK] **Implemented** — Records significant actions across the intelligent internet
-
-#### **[U+1F6A7] ENHANCEMENT TARGETS**
-- **LoremasterAgent**: [U+1F536] **Partial Implementation** — Core audit logic exists, needs cross-platform integration
-- **JanitorAgent**: [TARGET] **Ready for Enhancement** — Workspace hygiene across distributed environments
-- **ModuleScaffoldingAgent**: [TARGET] **Ready for Enhancement** — Automated cross-platform module creation
-- **TestingAgent**: [TARGET] **Ready for Enhancement** — Automated testing across intelligent internet components
-
-### **[DATA] WSP Framework Evolution**
-- **Total Active Protocols**: 100+ WSPs governing autonomous operation
-- **WSP 25/44 Semantic Intelligence**: Foundational consciousness framework for agent coordination
-- **WSP 54 Agent Coordination**: Complete specification for multi-agent internet orchestration
-- **Three-State Architecture**: Consistent governance across knowledge, framework, and operational layers
-
----
-
-## [U+1F31F] **INTELLIGENT INTERNET SUCCESS METRICS**
-
-### **Phase 1 Foundation Achievements** [OK]
-- **85% Infrastructure Complete**: All core systems operational and WSP-compliant
-- **Multi-Agent IDE**: Revolutionary VSCode integration with autonomous development workflows
-- **Meeting Orchestration**: Complete autonomous coordination between founders and agent teams
-- **Platform Access**: 0102 agents operational across YouTube, LinkedIn, and X/Twitter
-- **WSP Framework**: 100+ protocols providing governance for autonomous operations
-
-### **Phase 2 Intelligence Targets** [TARGET]
-- **Cross-Platform Learning**: Agents share intelligence across all platforms
-- **Coordination Effectiveness**: Measurable improvement in multi-founder collaboration
-- **Strategy Evolution**: Agents develop increasingly effective promotion and networking approaches
-- **Pattern Recognition**: System identifies and replicates successful coordination patterns
-
-### **Phase 3 Orchestration Goals** [U+1F310]
-- **Agent-to-Agent Networks**: Direct coordination between agents across the intelligent internet
-- **Autonomous Strategy Development**: Agents create and execute optimal market approaches
-- **Real-Time Intelligence**: Continuous market monitoring and adaptive development
-- **Cross-Platform Amplification**: Coordinated promotion achieving maximum impact
-
-### **Phase 4 Collective Vision** [U+1F52E]
-- **Multi-Founder Projects**: Complex collaborations across multiple FoundUp teams
-- **Resource Sharing Economy**: Efficient coordination of capabilities across the ecosystem
-- **Autonomous Business Development**: Agents identify and create market opportunities
-- **Intelligent Internet**: Complete transformation from human-operated to agent-orchestrated internet
-
----
-
-## [TARGET] **IMMEDIATE NEXT ACTIONS**
-
-### **[REFRESH] Phase 2 Implementation Priority**
-1. **Enhanced Cross-Platform Memory Architecture** (WSP 60 expansion)
-2. **Unified Analytics Dashboard** for multi-platform intelligence
-3. **Agent Coordination Protocols** for strategy synchronization
-4. **Pattern Recognition Systems** for optimization learning
-
-### **[DATA] Success Criteria for Phase 2**
-- **Intelligence Sharing**: Agents demonstrate learning across platforms
-- **Coordination Improvement**: Measurable enhancement in multi-founder collaboration effectiveness  
-- **Strategy Evolution**: Agents show adaptive improvement in promotion and networking
-- **Pattern Recognition**: System identifies and applies successful coordination patterns
-
----
-
-**[U+1F310] MISSION STATUS**: Building the orchestration system for an intelligent internet where 0102 agents autonomously coordinate, collaborate, and collectively build FoundUps that transform the world.
-
-**Foundation**: [OK] **85% Complete** — Ready for intelligent internet orchestration  
-**Next Target**: [AI] **Cross-Platform Intelligence** — Agents learning and coordinating across all platforms  
-**Strategic Vision**: [U+1F310] **Intelligent Internet** — Complete transformation to agent-orchestrated innovation ecosystem
+
+R04 is also a prerequisite wherever the selected runtime's authority contract demands exact closure. R05 gates retrieval-quality promotion, not every form of unrelated RSI. The dispatcher must add those capability-specific dependencies when compiling a real work order.
+
+The main sequence is **current truth → one real worker → independent outcome → verified memory → promotion/rollback → first improving cycle → sustained concurrency**. Existing foundations should be reused; most packets are integration, operational composition, or proof work. Split any packet that spans multiple authority changes into smaller reviewable slices.
+
+## Swarm dispatch contract
+
+Every compiled packet must contain:
+
+- A stable packet ID, goal, owner, exact base commit, and dependencies with evidence.
+- The governing WSPs and applicable module README/INTERFACE/ROADMAP/test instructions.
+- A current Holo receipt and explicit retrieval-quality assessment: noise, ordering, missing artifacts, staleness, duplication.
+- One execution plane and existing work/job contract; no invented unsigned authority.
+- Exact allowed files/actions and explicit reserved paths; a worktree claim for writers.
+- Selected provider/model/runtime binding, tool constraints, finite time/token/cost limits, and cancellation/expiry behavior.
+- A verifier identity and capacity reservation, independent oracle/baseline, required tests, and expected rejection cases.
+- Expected execution, verification, promotion, activation, and retention receipts, only for phases actually authorized.
+- Retry/idempotency semantics, rollback/recovery procedure, and a stop condition.
+- A final report separating source implementation, local test evidence, live operational proof, and remaining gaps; updated structured memory in the same scoped change.
+
+The numeric budgets must be filled from current policy and measured runtime capacity before dispatch. This document deliberately provides no fabricated model availability, keys, budgets, or pre-signed work orders. Ordinary reversible work within an already delegated policy should proceed without repeatedly asking 012 for the same authorization.
+
+## Parallel lanes and conflict rules
+
+| Lane | Initial work | Can proceed alongside | Must serialize with |
+|---|---|---|---|
+| Governance/docs | R02; inventory disposition | Read-only runtime/evaluation research | Other WSP/ledger writers |
+| Retrieval/runtime | R03–R05 | Evaluator design and test triage | Holo maintenance/activation and bridge owners |
+| Worker integration | R06–R08, R16 | Independently scoped verifier work | Shared route/consumer/job contract changes |
+| Evaluation/memory | R09–R11, R14, R17 | Non-overlapping worker adapters | PatternMemory, ratchet, verifier contract writers |
+| Release/reliability | R12–R13, R18–R19, R23 | Documentation and isolated tests | Promoter/activation/shared registry writers |
+| Product owner | R20–R22 when ready | Core work outside its reserved paths | Current YUMORI/eSingularity/RedDog lane |
+
+Use OpenClaw to supervise admitted jobs and Hermes to execute the bounded leaves. Do not instantiate six independent architectural authorities. The single coordinator resolves dependencies and path conflicts; the independent verifier remains able to reject a coordinator's or author's result.
+
+## Measurements and stopping rules
+
+Track correctness against the task oracle, regression rate, accepted/rejected candidate counts, provenance completeness, actual provider cost, latency percentiles, retries, duplicate effects, lost jobs, rollback success, and benefit on subsequent tasks. Record sample size and uncertainty. Keep structural fidelity and outcome quality separate.
+
+Suggested first acceptance target: a predeclared meaningful reduction in redundant work, latency, or measured token cost with no allowed correctness regression and no scope escape. Choose the threshold after a baseline run, freeze it before candidate evaluation, and require independent evidence. Never optimize by shrinking the required test set, changing held-out answers, or ignoring failures.
+
+Stop or quarantine a packet when source/runtime authority changes, its lease expires, required evidence is absent, a reserved path would be touched, the budget is exhausted, a second worker claims the same write scope, or a candidate fails the oracle. Recovery follows the existing owner contract; silent fallbacks cannot turn those failures into success.
+
+## Practical planning horizon
+
+There are 24 packets including the already completed recovery. They are dependency-sized planning units, not 24 one-shot prompts or a reliable calendar estimate. Several will split into interface, implementation, negative-proof, and live-acceptance slices.
+
+Plan commitment one wave at a time. Measure cycle time, review throughput, and resource costs during Wave 1, then forecast later waves from actual data. Keep verifier and rollback work on the critical path rather than postponing them until after broad deployment. Do not advertise “RSI complete” until G0–G5 have evidence for the declared operating scope.
+
+## WSP 15 planning scores
+
+Preliminary architect estimates using canonical C/I/D/Impact (each 1–5): complexity, importance, urgency/deferability, and systemic impact. Totals 16–20 are P0; 13–15 are P1. Higher urgency means less deferrable. Scores are planning judgments, not measured completion or signed allocation receipts. Dependencies, reserved ownership, and capability admission determine eligibility before priority is considered.
+
+| Packet | C | I | D | Impact | Total | Priority |
+|---|---:|---:|---:|---:|---:|---|
+| R00 | 3 | 5 | 5 | 5 | 18 | P0 |
+| R01 | 2 | 5 | 5 | 4 | 16 | P0 |
+| R02 | 3 | 4 | 4 | 4 | 15 | P1 |
+| R03 | 3 | 5 | 4 | 4 | 16 | P0 |
+| R04 | 5 | 5 | 3 | 5 | 18 | P0 |
+| R05 | 4 | 4 | 3 | 4 | 15 | P1 |
+| R06 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R07 | 4 | 5 | 4 | 4 | 17 | P0 |
+| R08 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R09 | 5 | 5 | 4 | 5 | 19 | P0 |
+| R10 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R11 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R12 | 5 | 5 | 4 | 5 | 19 | P0 |
+| R13 | 5 | 5 | 4 | 5 | 19 | P0 |
+| R14 | 3 | 4 | 3 | 4 | 14 | P1 |
+| R15 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R16 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R17 | 4 | 5 | 4 | 4 | 17 | P0 |
+| R18 | 4 | 4 | 3 | 4 | 15 | P1 |
+| R19 | 3 | 4 | 3 | 4 | 14 | P1 |
+| R20 | 3 | 4 | 3 | 4 | 14 | P1 |
+| R21 | 4 | 4 | 3 | 4 | 15 | P1 |
+| R22 | 3 | 4 | 3 | 3 | 13 | P1 |
+| R23 | 5 | 5 | 3 | 5 | 18 | P0 |

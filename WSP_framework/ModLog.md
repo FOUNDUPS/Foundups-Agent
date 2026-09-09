@@ -1,3 +1,4 @@
+- **2026-09-10**: Added narrow WSP 00/97 navigation to the canonical root RSI roadmap and synchronized both knowledge mirrors. The roadmap owns sequencing only; no state-machine, execution-policy, priority-budget or runtime change. Preserved the separate state-semantics repair lane. Root ModLog and the dated RSI audit integration record carry validation. (WSP 00/15/22/50/81/83/97)
 - **2026-08-30**: **WSP 71 RedDog Lick Security Reference** - Added a narrow
   security boundary for the external RedDog Lick product handshake. The Lick
   remains outside WSP and grants no credential or authority; WSP 71 now

@@ -4,7 +4,7 @@
   "documents": [
     {
       "doc_type": "other",
-      "hash_sha256": "6641fd0999cb235b90f949eed7ab35d19e672c3a4a50e69c81e9fcfc51bbe78f",
+      "hash_sha256": "ad3d9cbeae06615fcf74f51b679440a090cee230aa742dde939937cf1c25d13d",
       "links": {
         "automation": [
           "doc_dae"
@@ -19,12 +19,14 @@
           "docs/audits/architecture/FOUNDUPS_WORK_LEDGER_BRAIN_CURRENT_STATE_AUDIT_PHASE1.md",
           "docs/audits/holoindex_search_quality/FOUNDUPS_WORK_LEDGER_HOLOINDEX_IMPLEMENTATION_PHASE1.md",
           "docs/audits/holoindex_search_quality/FOUNDUPS_WORK_LEDGER_HOLOINDEX_INTEGRATION_PHASE1.md",
-          "docs/audits/holoindex_search_quality/FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1.md"
+          "docs/audits/holoindex_search_quality/FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1.md",
+          "ROADMAP.md",
+          "docs/README.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
-      "size_bytes": 16304,
+      "size_bytes": 16788,
       "status": "active",
       "wsp_refs": [
         "WSP 27",
@@ -1714,7 +1716,7 @@
     },
     {
       "doc_type": "readme",
-      "hash_sha256": "2bbaf232f80b7a1a2889db9171a60d8886e6e08af87bf1e9120111b532c8451a",
+      "hash_sha256": "9ef6ceaeb7d9e022f5d5d9d5af45296cada234d77286ee553c931df6e54c8fc3",
       "links": {
         "automation": [
           "doc_dae"
@@ -1729,12 +1731,14 @@
           "README.md",
           "templates/module_readme_wsp_template.md",
           "templates/module_readme_template.md",
-          "prompt/Prometheus.md"
+          "prompt/Prometheus.md",
+          "ROADMAP.md",
+          "docs/README.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/README.md",
-      "size_bytes": 15897,
+      "size_bytes": 16578,
       "status": "active",
       "wsp_refs": [
         "WSP 0",
@@ -1767,24 +1771,24 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "64e6d43923f39a7399c59defdec3364c34bf2f58b81455b6293082ec095acc3a",
+      "hash_sha256": "b3ce92420e8c47c03af1ff4efc788525dba37a203d4dd88a04ad54f7b14d8272",
       "links": {
         "automation": [
           "doc_dae"
         ],
         "entry_points": [
           "README.md",
-          "docs/REDDOG_OUTCOME_VISION.md",
-          "docs/README.md",
-          "docs/audits/architecture/REDDOG_LICK_HANDSHAKE_AUDIT_PHASE1.md",
-          "extensions/reddog/README.md"
+          "ROADMAP.md",
+          "docs/README.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/REDDOG_DOCUMENTATION_MAP.md",
-      "size_bytes": 4067,
+      "size_bytes": 6173,
       "status": "active",
-      "wsp_refs": []
+      "wsp_refs": [
+        "WSP 97"
+      ]
     },
     {
       "doc_type": "other",
@@ -2667,6 +2671,82 @@
         "WSP 49",
         "WSP 77",
         "WSP 91"
+      ]
+    },
+    {
+      "doc_type": "roadmap",
+      "hash_sha256": "8988c2e20df0f3c83fea279b1991a54ce15585305dd84eb9efb2f74e1f549c89",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "docs/_archive/roadmaps/2026-09-10/README.md",
+          "modules/ROADMAP.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/_archive/roadmaps/2026-09-10/MODULE_ROLLUP_ROADMAP.md",
+      "size_bytes": 13035,
+      "status": "archived",
+      "wsp_refs": [
+        "WSP 22",
+        "WSP 26",
+        "WSP 4"
+      ]
+    },
+    {
+      "doc_type": "readme",
+      "hash_sha256": "a649e43a6924b5f7dc846c5a91d97ba652cd43192786bb333728ae6dceb09fc6",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ROADMAP.md",
+          "docs/README.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/_archive/roadmaps/2026-09-10/README.md",
+      "size_bytes": 2371,
+      "status": "archived",
+      "wsp_refs": []
+    },
+    {
+      "doc_type": "roadmap",
+      "hash_sha256": "4559afdf3469deebcc92638ed1686d5d40953e7ca4794fb69b72ef22d7af2983",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "docs/_archive/roadmaps/2026-09-10/README.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/_archive/roadmaps/2026-09-10/SYSTEM_ROADMAP.md",
+      "size_bytes": 30335,
+      "status": "archived",
+      "wsp_refs": [
+        "WSP 11",
+        "WSP 15",
+        "WSP 25",
+        "WSP 26",
+        "WSP 3",
+        "WSP 32",
+        "WSP 42",
+        "WSP 49",
+        "WSP 5",
+        "WSP 50",
+        "WSP 54",
+        "WSP 60",
+        "WSP 65",
+        "WSP 70",
+        "WSP 8",
+        "WSP 90",
+        "WSP 91",
+        "WSP 97"
       ]
     },
     {
@@ -9264,6 +9344,107 @@
     },
     {
       "doc_type": "other",
+      "hash_sha256": "6751fdf9dc079d7e2cfc1991add0021e0540d1f0065c789349420c873f68b2b8",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "docs/audits/rsi/2026-09-09/README.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/audits/rsi/2026-09-09/AUDIT.md",
+      "size_bytes": 21605,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 29",
+        "WSP 46",
+        "WSP 48"
+      ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "0953cb00b924a615ac28515d65ec697037a411702a5882e903e911eaabe6b230",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ModLog.md",
+          "docs/audits/rsi/2026-09-09/README.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/audits/rsi/2026-09-09/INTEGRATION.md",
+      "size_bytes": 3490,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 00"
+      ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "9725716911b5beaf41d774fb40371800033e62cb09f616416bed88e036e53727",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ROADMAP.md",
+          "docs/audits/rsi/2026-09-09/README.md",
+          "modules/ROADMAP.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/audits/rsi/2026-09-09/MODULE_MAP.md",
+      "size_bytes": 22874,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 3"
+      ]
+    },
+    {
+      "doc_type": "readme",
+      "hash_sha256": "79f890e65968d7664dfc770e75249745a372846aeb241101ce6de782a06f3cea",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ROADMAP.md",
+          "docs/README.md",
+          "docs/audits/rsi/2026-09-09/INTEGRATION.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/audits/rsi/2026-09-09/README.md",
+      "size_bytes": 1851,
+      "status": "active",
+      "wsp_refs": []
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "98ec3d8d52c48796f8ab625ddb1885480c7f607ef44ba9564abfce8b58894afc",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "docs/audits/rsi/2026-09-09/README.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/audits/rsi/2026-09-09/VALIDATION.md",
+      "size_bytes": 6026,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 62"
+      ]
+    },
+    {
+      "doc_type": "other",
       "hash_sha256": "f7e2ebbd7079be8f32baf4efbf318c608a2c04387bec2821d5290916264f1b39",
       "links": {
         "automation": [
@@ -11158,6 +11339,26 @@
         "WSP 91",
         "WSP 96"
       ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "a7006887f706b83c5128a3190fef15e2269c870ece3dc5d792319a7b41985cee",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ROADMAP.md",
+          "docs/README.md",
+          "docs/REDDOG_DOCUMENTATION_MAP.md",
+          "docs/audits/rsi/2026-09-09/README.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/operations/RSI_SWARM_DISPATCH.md",
+      "size_bytes": 10813,
+      "status": "active",
+      "wsp_refs": []
     },
     {
       "doc_type": "analysis",

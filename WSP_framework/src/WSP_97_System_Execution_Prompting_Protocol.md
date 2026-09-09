@@ -7,6 +7,10 @@
 
 ---
 
+## System roadmap navigation
+
+After bootstrap, read [the root system roadmap](../../ROADMAP.md#authority-and-fast-start) for completion gates, current planning priorities and the selected work packet. Follow its module and evidence links on demand. The roadmap owns cross-system sequencing; it does not redefine this protocol, certify completion, grant authority or replace a current signed work order. Historical plans are listed in the roadmap archive register.
+
 ## What "Follow WSP 97" Means
 
 When a prompt, handoff, or principal instruction says `follow WSP 97`, the default instruction is:

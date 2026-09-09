@@ -1,5 +1,7 @@
 # RedDog Documentation Map
 
+**System planning parent:** [Root RSI roadmap](../ROADMAP.md). [Dispatch and model-cost runbook](operations/RSI_SWARM_DISPATCH.md). These sequence cross-system work; the product and runtime authorities below retain their scope.
+
 Status: canonical navigation entry point
 
 Use this map before broad text search. A 2026-08-30 inventory found 376

@@ -1,5 +1,7 @@
 # FoundUps - Compute Focus Network
 
+**System roadmap:** [RSI completion gates and next work](ROADMAP.md). For current completion claims, start there and follow the dated audit evidence; the vision below is not proof of production readiness.
+
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![WSP Framework](https://img.shields.io/badge/WSP-100%2B%20protocols-green.svg)](WSP_framework/)
