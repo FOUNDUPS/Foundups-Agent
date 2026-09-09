@@ -272,3 +272,30 @@ GitHub Actions validation was observed running; local checks are already listed
 above, and no successful remote conclusion is implied here. Source publication
 is now complete. Provider configuration, deployment and token rotation remain
 separate unresolved gates.
+
+
+### Authorized token rotation and environment-location check
+
+012 explicitly authorized the pending Sites token rotation. The native rotation
+operation succeeded on 2026-09-09; its documented behavior immediately invalidates
+the previous sign-in bypass token. The replacement value was not displayed,
+written to source, or retained for testing. This completes the token-rotation
+gate described above; OpenRouter credentials were not involved in that operation.
+
+012 identified the codebase's `.env` as the existing OpenRouter credential source.
+A value-suppressing local check found no repository-root `.env` in the available
+checkout. The frontend `.env` exists, but `OPENROUTER_API_KEY`,
+`OPENROUTER_MODEL`, and `REDDOG_SUBJECT_KEY` are empty. No populated OpenRouter
+key was found in the accessible scratch environment files or process environment.
+This does not establish absence on 012's original machine or another checkout.
+No credential value was printed or transferred. Resolving that file's accessible
+location is the remaining credential input; never request its contents in chat.
+
+The hosted environment was rechecked at revision 0 with no entries, and saved
+Site version 28 still has its archive and the recorded source commit. No runtime
+settings were changed and no deployment or provider request was made. Existing
+GitHub validation for commit `bc333556182395088b59d7f8205fe1ffb9e9efbf`
+completed successfully (Validate eSingularity run `34366564992`). These checks
+do not establish live Red Dog operation. Firebase publishing access, selected
+model, provider configuration, production D1/ingress and actual replies remain
+unverified.
