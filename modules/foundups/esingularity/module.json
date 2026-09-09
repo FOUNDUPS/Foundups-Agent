@@ -1,8 +1,8 @@
 {
   "name": "esingularity",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "foundup",
-  "description": "Japanese-first public campaign PWA for Save Sukatto Land Kuzuryu and Project eSingularity Fukui",
+  "description": "Japanese-first public campaign PWA for Save Sukatto Land Kuzuryu, Project eSingularity Fukui, and Japan Hyperscaler Report research",
   "deployment": {
     "platform": "openai_sites",
     "public_url": "https://esingularity.ai/",
@@ -11,7 +11,23 @@
   "tech_stack": {
     "frontend": "Vinext + Next App Router + React + TypeScript",
     "hosting": "OpenAI Sites / Cloudflare Workers",
-    "features": ["PWA", "Japanese-first", "Multilingual", "LINE campaign", "Mobile-first"]
+    "features": [
+      "PWA",
+      "Japanese-first",
+      "Multilingual",
+      "LINE campaign",
+      "Mobile-first",
+      "Japan Hyperscaler Report"
+    ]
+  },
+  "research": {
+    "jhr": {
+      "name": "Japan Hyperscaler Report",
+      "module_path": "jhr/",
+      "public_route": "/reports/jhr",
+      "launch_adapter": "jhr/scripts/launch.py",
+      "publication_policy": "significance-gated; fail-closed under WSP_97"
+    }
   },
   "wsp_compliance": {
     "wsp_3": "FoundUp domain ownership",
