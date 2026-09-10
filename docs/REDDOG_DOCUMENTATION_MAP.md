@@ -16,7 +16,7 @@ not mean RedDog has 376 canonical specifications.
 | What RedDog is becoming | `docs/REDDOG_OUTCOME_VISION.md` | Product North Star; future statements are not implementation claims |
 | RedDog identity boundary | `extensions/reddog/ARCHITECTURE.md` | Canonical invariant: RedDog fast surface != 0102 deep Digital Twin |
 | Fast RedDog + deep 0102 cognition split | `docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md` | Cross-domain architecture vision; not implementation truth |
-| Hybrid tickets, bounded teams and consented 012 feedback | [Hybrid architecture decision](architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md), [R24](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md), [R25](roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) | Cross-domain implementation plan; not live federation or voting authority |
+| Hybrid tickets, bounded teams and active-012 feedback into 3V | [Hybrid architecture decision](architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md), [R24](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md), [R25](roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) | Cross-domain implementation plan; not live federation or voting authority |
 | Current extension/runtime truth | `extensions/reddog/README.md` | Current product/runtime status |
 | Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |

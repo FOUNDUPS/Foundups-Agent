@@ -4,7 +4,7 @@ Date: 2026-09-11. Status: `SPECIFIED_NOT_IMPLEMENTED` for the integrated model. 
 
 ## Decision
 
-Use a **hybrid agent production system**: a governed ticket queue outside, a bounded self-organizing team inside selected tickets, and a consented feedback network around the FoundUp. One qualified worker remains the economical default. A swarm is an execution topology, not an authority, a judge or a payment system.
+Use a **hybrid agent production system**: a governed ticket queue outside, a bounded self-organizing team inside selected tickets, and a consented feedback network of 012s actively engaged with that FoundUp. One qualified worker remains the economical default. A swarm is an execution topology, not an authority, a judge or a payment system.
 
 The kitchen analogy still works: the ticket fixes the order and constraints; qualified stations coordinate their work; an independent inspector checks the result. A team may propose a better division of work without rewriting the order, increasing its spending limit or appointing itself inspector.
 
@@ -36,8 +36,8 @@ flowchart TD
     P[012 intent or feedback] <--> R[Own RedDog fast surface]
     R --> D[0102 retrieves and applies WSP 97]
     D --> V[Versioned proposal and measurable acceptance]
-    V --> F[Consented relevant feedback cohort]
-    F --> O[Other RedDogs ask their own opted-in 012s]
+    V --> F[Relevant opted-in cohort active in this FoundUp]
+    F --> O[Own RedDog rechecks activity before asking]
     O --> S[Scoped summaries with dissent and provenance]
     S --> V
     V --> T[Existing WRE ticket admission and durable claim]
@@ -51,9 +51,11 @@ flowchart TD
     M --> R
 ```
 
-The feedback branch is optional and deadline-bound; ordinary admitted work does not wait for every principal. Existing delegated policy handles routine execution without repeatedly asking 012 to approve the same scope. WSP 48's feedback annex separately treats 012 as a feedback/adoption actor and its future sovereign consensus as a runtime gate. A request for thoughts cannot silently become that approval.
+The feedback branch is optional and deadline-bound; ordinary admitted work does not wait for every principal. Only actively engaged principals in the same FoundUp may receive the prompt, at a relevant natural interaction boundary. Recheck activity, permission and attention limits at delivery; inactive or stale participants receive no solicitation. Existing delegated policy handles routine execution without repeatedly asking 012 to approve the same scope. WSP 48's feedback annex separately treats 012 as a feedback/adoption actor and its future sovereign consensus as a runtime gate. A request for thoughts cannot silently become that approval.
 
-For example, 012 reports difficulty finding a FoundUp's next action. RedDog preserves the concern as feedback. The deep loop checks current behavior and duplicate proposals, records the intended improvement and test, and invites only a relevant opted-in cohort to comment. Other principals may reveal accessibility or workflow conflicts. The ticket incorporates those constraints, a worker creates a candidate, an independent evaluator checks it, and the governed release path returns the observed result to the original conversation.
+For example, 012 reports difficulty finding a FoundUp's next action. RedDog preserves the concern as feedback. The deep loop checks current behavior and duplicate proposals, records the intended improvement and test, and makes it available to the RedDogs of relevant opted-in active participants. While another 012 is actively using or discussing that FoundUp, their own RedDog may ask what they think of the proposal. Those principals may reveal accessibility or workflow conflicts. The ticket incorporates those constraints, a worker creates a candidate, an independent evaluator checks it, and the governed release path returns the observed result to the original conversation.
+
+This contributes to **V1 Validation**: does the proposed change meet an actual participant need? Independent **V2 Verification** checks the artifact and outcomes. **V3 Valuation** assesses supported benefit under the existing CABR/PoB contract. [R25's 3V mapping](../roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#connection-to-cabr--3v) ties these responsibilities to WSP 26/29 and records missing runtime integration. Feedback may inform participation/social evidence under that contract; it is not automatically verified benefit, a scoring increment or a reward.
 
 RedDog should earn “that was smart” by remembering, connecting evidence and coordinating useful work. Its answer can say, “Your feedback and two other participants' concerns shaped this proposal; this test supports the change.” Do not present shared human suggestions as independently discovered model knowledge. Keep detailed sources available with authorized disclosure; do not reveal private identities to prove attribution. Never invent participant counts, agreement or memory.
 
@@ -84,7 +86,7 @@ One principal with several RedDogs remains one principal for any future principa
 
 ## Scale by scope and backpressure
 
-Partition tickets and feedback subscriptions by FoundUp and authorized principal scope. Route a proposal only to affected, opted-in cohorts. Bound recipients, solicitation frequency, queue depth, outstanding questions and response windows. Batch related questions into a digest at a natural conversational boundary. A RedDog should not ask its 012 about every change in the network.
+Partition tickets and feedback subscriptions by FoundUp and authorized principal scope. Route a proposal only to affected, opted-in principals with fresh meaningful activity in that same FoundUp. Match proposals on existing active interactions; do not wake inactive participants or continuously poll every RedDog. Bound recipients, solicitation frequency, queue depth, outstanding questions and response windows. Batch related questions at a natural interaction boundary while eligibility still holds. Activity in another FoundUp, passive membership or an idle tab does not qualify. R25 owns the activity evidence/expiry contract. A RedDog should not ask its 012 about every change in the network.
 
 Use the existing durable owner for idempotent claims, leases, deduplication and recovery. A change of proposal version invalidates stale feedback claims; material changes may require a new bounded consultation. A late response becomes a new input, not a silent rewrite of the accepted ticket. Revocation must stop pending disclosure and invalidate reusable projections according to their retention contract.
 
@@ -119,4 +121,4 @@ The local source check exposed disabled admitted history and read-only learning 
 
 This document resolves that planning choice. It does not supersede module contracts, ratify deferred voting powers or archive still-useful scoped designs. Root ROADMAP, R24, the dispatch guide, R25 and the RedDog map provide one connected navigation path. WSP 00/97 already point to the root plan. Historical audits retain their dates and findings; the [integration record](../audits/rsi/2026-09-09/INTEGRATION.md) records retrieval quality, validation and delivery limits.
 
-Applicable protocols: WSP 15 prioritization; WSP 22 change records; WSP 48 feedback/evolution boundaries; WSP 50 retrieval; WSP 60 memory ownership; WSP 73 principal scope; WSP 77 coordination; WSP 96 governance; WSP 97 execution discipline; WSP 103/104 federation and namespace isolation.
+Applicable protocols: WSP 15 prioritization; WSP 22 change records; WSP 26 engagement signals and WSP 29 CABR/3V; WSP 48 feedback/evolution boundaries; WSP 50 retrieval; WSP 60 memory ownership; WSP 73 principal scope; WSP 77 coordination; WSP 96 governance; WSP 97 execution discipline; WSP 103/104 federation and namespace isolation.

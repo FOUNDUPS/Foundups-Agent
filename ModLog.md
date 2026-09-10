@@ -1,5 +1,13 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-11] Active FoundUp participation gate and R25 / 3V mapping
+
+WSPs: 15, 22, 26, 29, 48, 50, 97. Documentation only; 012 clarification.
+
+- Tightened [R25](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md): another RedDog may ask about a proposed change only while its 012 is actively engaged with that same FoundUp, with current permission, relevance and attention capacity. Activity is rechecked at delivery; inactive, paused, idle-only or stale cases receive no solicitation.
+- Mapped responses to V1 Validation evidence, distinct from independent V2 Verification and CABR-governed V3 Valuation. WSP 26/29 support engagement/community-feedback inputs; the current task-metric hooks, simulator placeholders and review-only scoring seam do not prove a live feedback adapter.
+- Added activity-expiry, duplicate-signal and feedback-to-verification/reward rejection cases; retained 26 non-executable packets. No participant messages, source implementation, scoring or reward changes. Evidence and checks: [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md).
+
 ## [2026-09-11] Hybrid ticket teams and consented RedDog feedback
 
 WSPs: 15, 22, 48, 50, 60, 73, 77, 96, 97, 103, 104. Documentation only.

@@ -1288,7 +1288,7 @@
     },
     {
       "packet_id": "R25",
-      "title": "Connect consented 012/RedDog feedback to governed FoundUp tickets",
+      "title": "Connect active 012/RedDog feedback to FoundUp validation and governed tickets",
       "wave": 5,
       "priority": "P1",
       "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
@@ -1306,7 +1306,7 @@
         "modules/infrastructure/database",
         "modules/foundups/agent_market"
       ],
-      "acceptance": "Scoped typed feedback and versioned proposal; bounded opted-in cohort; deduplication and visible dissent; revoked/stale/cross-scope rejection; one durable ticket mapping and authenticated result return; attention and cost targets tested at declared workload",
+      "acceptance": "Fresh same-FoundUp active engagement and consent rechecked at delivery; inactive/paused/stale participants receive no prompt; typed V1 feedback and versioned proposal; bounded cohort with deduplication and dissent; independent V2 verification and separately governed V3 valuation; one durable ticket mapping and authenticated result return",
       "dispatchable": false,
       "execution_authority": "none; planning only",
       "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
@@ -1318,14 +1318,17 @@
         "Fill numeric budgets and bind runtime from current authority",
         "Reserve separate verifier and isolated workspace",
         "Define negative cases, exact verification command, stop and recovery conditions",
-        "Bind participant consent/disclosure, proposal version, recipient and attention budgets; coordinate existing conversation owner; no outreach authorization inferred from this JSON"
+        "Bind participant consent/disclosure, proposal version, recipient and attention budgets; coordinate existing conversation owner; no outreach authorization inferred from this JSON",
+        "Define qualifying active-engagement events, authoritative activity source, freshness/expiry and pause semantics; recheck before delivery",
+        "Bind typed V1 feedback separately from V2 verification and V3 valuation; no automatic CABR increment or reward from replies"
       ],
       "conditional_dependencies": [
         "R04 wherever selected authority requires exact runtime closure",
         "R05 before retrieval-quality promotion claims",
         "R22 supported conversation adapter before live product delivery",
         "R24 for qualified team/reward claims",
-        "R11 for retained verified-outcome claims"
+        "R11 for retained verified-outcome claims",
+        "R21 CABR truth reconciliation before production feedback scoring claims"
       ],
       "forbidden_in_this_audit": [
         "source changes",
@@ -1345,7 +1348,9 @@
         "basis": "Near-term feedback integration; does not displace core RSI admission/verification blockers"
       },
       "packet_document": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
-      "early_scope": "R25-A design and synthetic local proof may precede integrated execution dependencies; no new runtime authority"
+      "early_scope": "R25-A design and synthetic local proof may precede integrated execution dependencies; no new runtime authority",
+      "active_engagement_policy": "Required at selection and delivery for the same FoundUp; first pilot uses explicit active client context; no dormant-principal solicitation",
+      "three_v_mapping": "V1 feedback on relevance/usefulness; V2 independently verified artifact/outcome; V3 valuation under existing CABR/PoB evidence policy; specified, not live integration"
     }
   ],
   "canonical_roadmap": "ROADMAP.md",

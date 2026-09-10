@@ -1771,7 +1771,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "74aab24031ee018eea019b7b1402210486abff7745f179810662bcbecd08b60c",
+      "hash_sha256": "93d86495915a082fdeb4c7caa667b0740d3a4003daa23012c0cae4ae9a85429f",
       "links": {
         "automation": [
           "doc_dae"
@@ -1785,7 +1785,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/REDDOG_DOCUMENTATION_MAP.md",
-      "size_bytes": 6507,
+      "size_bytes": 6512,
       "status": "active",
       "wsp_refs": [
         "WSP 97"
@@ -3167,7 +3167,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "2e682783f7f5d7405b9e8bb3a662b061c60baf63282802a073cb565afdc21405",
+      "hash_sha256": "97074085252ff9fdca2abc4434b9c2e9d7eec5a54776f033812cc3a8ddef3c43",
       "links": {
         "automation": [
           "doc_dae"
@@ -3188,11 +3188,13 @@
       },
       "module_hint": "docs_root",
       "path": "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
-      "size_bytes": 16635,
+      "size_bytes": 17984,
       "status": "active",
       "wsp_refs": [
         "WSP 15",
         "WSP 22",
+        "WSP 26",
+        "WSP 29",
         "WSP 48",
         "WSP 50",
         "WSP 60",
@@ -9429,7 +9431,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "d71f1363207cba7e54c8b529844afc6864cfc19480157968060bcbd8795717d1",
+      "hash_sha256": "89a9461e9576a4ef046ccbdc8aec33de3f4db6dfabbc4267c2191f854b740bfc",
       "links": {
         "automation": [
           "doc_dae"
@@ -9442,7 +9444,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/INTEGRATION.md",
-      "size_bytes": 8333,
+      "size_bytes": 11055,
       "status": "active",
       "wsp_refs": [
         "WSP 00"
@@ -11406,7 +11408,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "205859ee089a5f3cc61897b8454e8aa91483a9b361bb26e8c756ddd049ccabcd",
+      "hash_sha256": "1a7f0a55dc5cf2cdfbbbe8da7b96a1e0af2bd81f4e3b701c8cbd27c1f284fb51",
       "links": {
         "automation": [
           "doc_dae"
@@ -11422,7 +11424,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/operations/RSI_SWARM_DISPATCH.md",
-      "size_bytes": 12825,
+      "size_bytes": 13031,
       "status": "active",
       "wsp_refs": []
     },
@@ -11562,7 +11564,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "d44bdad6f0784a4212c1468a35e7fe7fd9ec49a31d2a6e08ab5fbc406557c0e2",
+      "hash_sha256": "b23c7bc2c612147270537a43640fdb1d76b6792ea77996dd80e9940f84712603",
       "links": {
         "automation": [
           "doc_dae"
@@ -11582,11 +11584,13 @@
       },
       "module_hint": "docs_root",
       "path": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
-      "size_bytes": 7836,
+      "size_bytes": 13091,
       "status": "active",
       "wsp_refs": [
         "WSP 15",
         "WSP 22",
+        "WSP 26",
+        "WSP 29",
         "WSP 48",
         "WSP 50",
         "WSP 60",
