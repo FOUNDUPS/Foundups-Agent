@@ -10,7 +10,7 @@ export const metadata: Metadata = {
       {
         url: "/yumori-inzai-fukui-comparison.webp",
         width: 1600,
-        height: 1200,
+        height: 989,
         alt: "千葉・印西クラスの大型データセンター用地を福井の田園に重ねた概念比較",
       },
     ],
@@ -36,9 +36,9 @@ export default function JhrLayout({ children }: { children: ReactNode }) {
           <p style={{ margin: "0 0 8px", fontWeight: 900, letterSpacing: ".12em", fontSize: ".82rem" }}>
             JAPAN HYPERSCALER REPORT / JHR
           </p>
-          <h1 style={{ margin: "0 0 12px", fontSize: "clamp(2.2rem,7vw,5.5rem)", lineHeight: 1.02, letterSpacing: "-.045em" }}>
+          <p style={{ margin: "0 0 12px", fontSize: "clamp(2.2rem,7vw,5.5rem)", lineHeight: 1.02, letterSpacing: "-.045em", fontWeight: 900 }}>
             これが、20年後の福井でいいですか？
-          </h1>
+          </p>
           <p style={{ margin: "0 0 24px", fontSize: "clamp(1rem,2.2vw,1.45rem)", lineHeight: 1.65, maxWidth: 920 }}>
             千葉・印西で進む大規模データセンター集積を、福井の田園のスケールで考える。これは福井で確定した計画ではありません。公開情報に基づく概念比較です。
           </p>
