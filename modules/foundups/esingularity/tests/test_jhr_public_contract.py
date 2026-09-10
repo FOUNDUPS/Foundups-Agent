@@ -46,6 +46,7 @@ def test_live_field_status_has_one_canonical_source_for_public_surfaces() -> Non
 def test_ticker_resolves_latest_published_jhr_issue_from_registry() -> None:
     registry = read(FRONTEND_ROOT / "content" / "jhr-issues.ts")
     ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
+    sitemap = read(FRONTEND_ROOT / "app" / "sitemap.ts")
 
     assert "getLatestPublishedJhrIssue" in registry
     assert "status: 'published'" in registry
@@ -56,6 +57,11 @@ def test_ticker_resolves_latest_published_jhr_issue_from_registry() -> None:
     assert "latestJhrIssue.tickerJa" in ticker
     assert "latestJhrIssue.href" in ticker
     assert "UPDATE 9/10｜仙台200MW・印西の地区計画・福井の選択肢" not in ticker
+
+    assert 'import { jhrIssues } from "../content/jhr-issues"' in sitemap
+    assert "issue.status === \"published\"" in sitemap
+    assert "`${base}${issue.href}`" in sitemap
+    assert "new Date(issue.updatedAt)" in sitemap
 
 
 def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> None:
