@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { currentFieldStatus } from '../../content/current-field-status';
+import YumoriImageRotator from './YumoriImageRotator';
 
 const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform';
 const JHR_URL = '/reports/jhr';
@@ -28,6 +29,39 @@ const budgetCommittee = [
   { name: '榊原 光賀', phone: '080-3048-2989' },
   { name: '漆﨑 與', phone: '0776-38-1350' },
   { name: '髙田 稔浩', phone: '0776-34-2075' },
+] as const;
+
+const heroSlides = [
+  {
+    src: '/yumori-protest-1.svg',
+    alt: '九頭龍の旗を掲げてYUMORIの一人抗議を行う僧',
+    caption: 'YUMORIは現場から始まります。九頭龍の旗とともに、一人で声を上げる。',
+  },
+  {
+    src: FUKUI_HYPERSCALE_COMPARISON_IMAGE,
+    alt: '印西クラスの巨大データセンターを旧すかっとランド九頭竜周辺の田園に重ねた概念比較図',
+    caption: 'もし印西クラスの土地利用が福井に来たら？ 概念比較図です。タップして詳しく見る。',
+    href: '#hyperscale',
+  },
+  {
+    src: INZAI_IMAGE,
+    alt: '千葉県印西市の大規模データセンター開発地',
+    caption: 'CHIBA / INZAI — 大規模データセンター集積の現実。タップして福井との比較を見る。',
+    href: '#hyperscale',
+  },
+] as const;
+
+const hyperscaleSlides = [
+  {
+    src: INZAI_IMAGE,
+    alt: '千葉県印西市の大規模データセンター開発地',
+    caption: 'CHIBA / INZAI — 現実の集積。DPDC印西パーク開発地。画像出典: R.E.port。規模理解のための外部参照画像。',
+  },
+  {
+    src: FUKUI_HYPERSCALE_COMPARISON_IMAGE,
+    alt: '印西クラスの大規模データセンターを旧すかっとランド九頭竜周辺の田園に重ねた概念比較図',
+    caption: 'FUKUI — もし同じ規模の土地利用が来たら。公開情報をもとにした概念比較。実際の用地計画・測量・立地決定ではありません。',
+  },
 ] as const;
 
 export const metadata: Metadata = {
@@ -65,15 +99,13 @@ export default function YumoriPage() {
         <p style={body}>湯守は、湯と場所を守る人。YUMORI.meは、その考えを地域の建物、土地、文化、知識、電力、そしてAI時代の計算力へ広げます。</p>
         <div style={{marginTop:30,display:'flex',gap:12,flexWrap:'wrap'}}>
           <Join />
+          <a href="#hyperscale" style={{...join,background:'#8b5b2b',color:'#fff'}}>福井に何が来るのか見る ↓</a>
           <a href={JHR_URL} style={{...join,background:'#334537',color:'#fff'}}>JHR 最新レポート →</a>
           <a href={YUMORI_INFO_URL} target="_blank" rel="noreferrer" style={{...join,background:'#6b3e2e',color:'#fff'}}>YUMORI.info / 資料 ↗</a>
         </div>
         <p style={{marginTop:18, opacity:.65}}>最初の目標：1,000 YUMORI。1,000人に達した段階で、全国運動を支える正式な組織化を検討します。</p>
       </div>
-      <figure style={{margin:0}}>
-        <img src="/team/012-landowners.jpg" alt="YUMORI.meの地域活動写真" style={{width:'100%',display:'block',borderRadius:22,maxHeight:620,objectFit:'cover'}}/>
-        <figcaption style={{fontSize:12,opacity:.65,marginTop:8}}>YUMORI.meは現場から始まった市民・地域運動です。既存の活動写真を使用。</figcaption>
-      </figure>
+      <YumoriImageRotator slides={heroSlides} intervalMs={5500} aspectRatio="16 / 9" maxHeight={620} />
     </section>
 
     <section style={{...panel, background:'#f0eadf', color:'#111511'}}>
@@ -93,21 +125,14 @@ export default function YumoriPage() {
       </div>
     </section>
 
-    <section style={{...panel, background:'#dce2d6', color:'#111511'}}>
+    <section id="hyperscale" style={{...panel, background:'#dce2d6', color:'#111511', scrollMarginTop:24}}>
       <p style={{fontWeight:850,letterSpacing:'.15em'}}>02 / SEE WHAT IS COMING — HYPERSCALE</p>
       <h2 style={title}>印西を見てください。<br/>これが福井の田園に来たら？</h2>
       <p style={{...body,maxWidth:1050}}>千葉・印西／白井は、国内最大級のデータセンター集積地です。NTT DATAは2026年4月、このエリアで<strong>約250MW</strong>の新キャンパス開発を発表しました。印西市では、駅周辺のデータセンター建設に伴う景観・騒音への懸念が都市計画上の課題として明記され、地区計画の変更も進んでいます。</p>
       <p style={{...body,maxWidth:1050}}>国も地方分散を進めています。経済産業省は9道県を「データセンター集積型GX戦略地域」の有望地域として一次選定し、将来的なGW級拡張や30ha以上を目安とする産業用地を想定しています。9月9日には仙台で、約7.2ha・200MW級のAIデータセンター構想も発表されました。</p>
 
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:22,alignItems:'start',margin:'30px 0 26px'}}>
-        <figure style={{margin:0}}>
-          <img src={INZAI_IMAGE} alt="千葉県印西市の大規模データセンター開発地" style={{width:'100%',display:'block',borderRadius:18,aspectRatio:'4 / 3',objectFit:'cover'}}/>
-          <figcaption style={{fontSize:12,opacity:.72,marginTop:8}}><strong>CHIBA / INZAI — 現実の集積。</strong> DPDC印西パーク開発地。画像出典: R.E.port。規模理解のための外部参照画像。</figcaption>
-        </figure>
-        <figure style={{margin:0}}>
-          <img src={FUKUI_HYPERSCALE_COMPARISON_IMAGE} alt="印西クラスの大規模データセンターを旧すかっとランド九頭竜周辺の田園に重ねた概念比較図" style={{width:'100%',display:'block',borderRadius:18,aspectRatio:'4 / 3',objectFit:'cover'}}/>
-          <figcaption style={{fontSize:12,opacity:.72,marginTop:8}}><strong>FUKUI — もし同じ規模の土地利用が来たら。</strong> 公開情報をもとにした概念比較。実際の用地計画・測量・立地決定ではありません。</figcaption>
-        </figure>
+      <div style={{maxWidth:980,margin:'30px 0 26px'}}>
+        <YumoriImageRotator slides={hyperscaleSlides} intervalMs={6500} aspectRatio="4 / 3" maxHeight={720} />
       </div>
 
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:34,alignItems:'start'}}>
