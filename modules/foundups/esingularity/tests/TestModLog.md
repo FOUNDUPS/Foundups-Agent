@@ -1,5 +1,11 @@
 # eSingularity TestModLog
 
+## 2026-09-11 — JHR latest-issue registry coverage
+
+- Extended the existing JHR public-contract suite instead of creating a parallel test file.
+- Added regression coverage requiring the campaign ticker to resolve its JHR text and href from the canonical published-issue registry.
+- Added a guard that rejects reintroduction of the former hard-coded JHR ticker copy.
+
 ## 2026-09-06 — YUMORI presentation contract coverage
 
 - Replaced corrupted legacy assertions with twelve UTF-8 contract tests for the current public architecture.
