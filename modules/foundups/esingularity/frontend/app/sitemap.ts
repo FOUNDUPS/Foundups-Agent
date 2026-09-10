@@ -1,7 +1,17 @@
 import type { MetadataRoute } from "next";
 
+import { jhrIssues } from "../content/jhr-issues";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://esingularity.ai";
+  const publishedJhrIssues = jhrIssues
+    .filter((issue) => issue.status === "published")
+    .map((issue) => ({
+      url: `${base}${issue.href}`,
+      lastModified: new Date(issue.updatedAt),
+      changeFrequency: "daily" as const,
+      priority: 1,
+    }));
 
   return [
     {
@@ -16,11 +26,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    {
-      url: `${base}/reports/jhr`,
-      lastModified: new Date("2026-09-11"),
-      changeFrequency: "daily",
-      priority: 1,
-    },
+    ...publishedJhrIssues,
   ];
 }
