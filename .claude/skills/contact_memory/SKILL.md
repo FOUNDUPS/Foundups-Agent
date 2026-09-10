@@ -8,7 +8,7 @@ Status: manual-alpha retrieval contract; runtime integration remains `SPECIFIED_
 
 ## Objective
 
-Resolve people quickly and safely from names, aliases, organizations, screenshots, business cards, remembered descriptions, and Mosh Pit references without repeatedly re-reading raw evidence or silently merging distinct people.
+Resolve people quickly and safely from names, aliases, organizations, screenshots, business cards, remembered descriptions, and relationship context without repeatedly re-reading raw evidence or silently merging distinct people.
 
 The operational pattern is:
 
@@ -18,16 +18,14 @@ alias / description / screenshot
 -> stable contact ID
 -> structured contact row
 -> source image / card provenance when needed
--> Mosh Pit / Breadcrumb / interaction context
+-> project Breadcrumb / Mosh Pit context only as activity history
 ```
 
 ## Stable identity token
 
-Every indexed contact should have one stable principal-scoped ID and may be referenced in project records as:
+Every indexed contact should have one stable principal-scoped ID such as `YMC-xxxx` inside Contact Memory / Contact Index.
 
-`[[CONTACT:YMC-xxxx]]`
-
-The token identifies the contact entity. It does not assert that every field on the entity is verified.
+The stable ID belongs to the contact system. **Do not write contact IDs or contact tokens into Mosh Pit.**
 
 ## Manual-alpha source order for YUMORI
 
@@ -36,8 +34,8 @@ When YUMORI relationship context is available through the connected workspace, r
 1. `YUMORI.me Contacts` -> `Contact Index` tab.
 2. Canonical row in `YUMORI.me Contacts` -> `Contacts` tab.
 3. `YUMORI.me Contacts Pics` for the original business-card / LINE / contact image named by `Source / Image`.
-4. `YUMORI.me モッシュピット｜活動ログ` for project-relevant interactions using the stable `[[CONTACT:...]]` token.
-5. Gmail or other communication history only when the structured row and Mosh Pit do not answer the question.
+4. `YUMORI.me モッシュピット｜活動ログ` only for what happened in the operation: meetings, decisions, sends, replies, outcomes, open loops, and other breadcrumbs.
+5. Gmail or other communication history only when the structured contact row and project breadcrumbs do not answer the question.
 
 Do not begin by OCRing every image again when a verified contact index already points to the evidence.
 
@@ -49,7 +47,7 @@ Do not begin by OCRing every image again when a verified contact index already p
 4. If multiple entities match an alias, return all plausible candidates and use conversation context to disambiguate. Never silently select one.
 5. If the answer depends on identity spelling, title, phone, email, or organization and the field is not verified, inspect the indexed source image before asserting it.
 6. If a source image corrects OCR or a prior transcription, update the structured contact row while retaining the original source filename and verification note.
-7. When an interaction materially advances a project, the Mosh Pit entry should reference the stable contact token rather than copy personal contact details.
+7. If an interaction materially advances the project, add only the activity breadcrumb to Mosh Pit. Keep identity/contact resolution in Contact Memory.
 
 ## Alias collision rule
 
@@ -57,47 +55,49 @@ Aliases are many-to-many. A label such as `BB100`, `BBR100`, `the reporter`, `th
 
 Required behavior:
 
-- preserve every candidate contact ID;
+- preserve every candidate contact ID in Contact Index;
 - prefer explicit source evidence over remembered romanization;
 - never collapse two contacts because they share an organization or nickname;
-- record relationship edges such as `introduced_by`, `works_at`, or `recommended` instead of merging people.
+- record relationship edges such as `introduced_by`, `works_at`, or `recommended` in Contact Memory rather than merging people.
 
-Example pattern:
-
-```text
-BBR100
-  -> [[CONTACT:<person-A>]]  (specific person)
-  -> [[CONTACT:<person-B>]]  (office / introducer)
-```
-
-The user phrase alone is not sufficient to choose between them.
+The user's phrase alone is not sufficient to choose between multiple candidates.
 
 ## Image provenance rule
 
 A contact image is evidence, not the canonical entity itself.
 
-For every useful card / screenshot / posted-contact photo, retain:
+For every useful card / screenshot / posted-contact photo, retain in Contact Memory / Contact Index:
 
 - stable contact ID;
 - source filename or capture ID;
 - extracted name / organization / handles;
 - verification status;
 - any OCR variants;
-- a link or pointer from the structured contact index to that image.
+- a pointer from the structured contact index to that image.
 
 Once the image has been verified, future retrieval should start from the index and only reopen the image when verification or additional detail is required.
 
-## Mosh Pit concatenation rule
+## Mosh Pit boundary — breadcrumb only
 
-Mosh Pit is the project-history projection, not a duplicate address book.
+**Mosh Pit contains no contact information. Period.**
 
-Project-relevant entries should use a contact token:
+Mosh Pit is a reverse-chronological breadcrumb trail for 012 / 0102 project activity. It may record that a meeting happened, a message was sent, a reply arrived, a decision was made, a document changed, an outcome occurred, or an open loop remains.
 
-```text
-[[CONTACT:YMC-0123]] met with 012; discussed ...
-```
+Do not place any of the following in Mosh Pit:
 
-The contact entity resolves who the person is. The Mosh Pit resolves what happened in the project. The source image resolves identity evidence. These are joined by the contact ID rather than duplicated prose.
+- email addresses;
+- phone numbers;
+- physical addresses;
+- business-card data;
+- source-image filenames used for identity resolution;
+- alias lists;
+- Contact Index rows;
+- stable contact IDs or `[[CONTACT:...]]` tokens;
+- copied contact profiles.
+
+A person's name or role may appear only when it is necessary to understand the historical breadcrumb itself. It must never function as a substitute contact record.
+
+Contact Memory answers **who the person is and how to reach/resolve them**. Mosh Pit answers **what happened**.
 
 ## Write-back rule
 
@@ -105,15 +105,15 @@ When new evidence materially improves identity resolution:
 
 1. update the structured contact row;
 2. ensure the contact appears in the Contact Index;
-3. attach/preserve the source image pointer;
+3. attach/preserve the source image pointer in the contact system;
 4. add aliases or OCR variants without replacing the canonical verified name;
-5. add or update a Mosh Pit event only if the interaction is project-relevant;
+5. add a Mosh Pit breadcrumb only if a project-relevant event occurred, and keep it free of contact information;
 6. preserve uncertainty on readings/romanizations until verified.
 
 ## Privacy / truth boundary
 
 - Contact data is principal-scoped and not public by default.
-- Do not publish raw emails, phones, addresses, cards, or screenshots merely because they are indexed.
+- Do not publish raw emails, phones, addresses, cards, screenshots, IDs, or aliases merely because they are indexed.
 - Keep `VERIFIED`, `REPORTED`, `OCR`, and `UNVERIFIED` distinctions visible.
 - A contact index entry is not consent, support, committee membership, investment commitment, or authority.
 - Never claim the automated Contact Memory runtime is active merely because the manual-alpha Google Sheet / Docs workflow works.
