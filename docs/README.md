@@ -1,12 +1,12 @@
 # Foundups-Agent Documentation Index
 
-**System execution planning:** [Root roadmap](../ROADMAP.md) → [dated RSI audit](audits/rsi/2026-09-09/README.md) → [production-line dispatch and cost control](operations/RSI_SWARM_DISPATCH.md) → [R24 implementation packet](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md). [Superseded roadmap register](_archive/roadmaps/2026-09-10/README.md).
+**System execution planning:** [Root roadmap](../ROADMAP.md) → [dated RSI audit](audits/rsi/2026-09-09/README.md) → [production-line dispatch and cost control](operations/RSI_SWARM_DISPATCH.md) → [R24 implementation packet](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md). [Hybrid architecture and current RedDog assessment](architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) → [R25 feedback packet](roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md). [Superseded roadmap register](_archive/roadmaps/2026-09-10/README.md).
 
 **Purpose:** Central catalog of all architecture documentation, session reports, and design documents.
 
 **Status:** ACTIVE
 
-**Last Updated:** 2026-09-05
+**Last Updated:** 2026-09-11
 
 **WSP Compliance:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 87 (Code Navigation)
 

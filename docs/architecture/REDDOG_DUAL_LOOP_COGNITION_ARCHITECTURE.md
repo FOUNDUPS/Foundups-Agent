@@ -8,6 +8,8 @@ Canonical navigation: [RedDog documentation map](../REDDOG_DOCUMENTATION_MAP.md)
 
 ---
 
+**Execution/feedback extension (2026-09-11):** [Hybrid tickets, bounded teams and consented 012 feedback](REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) supplies the cross-domain operating decision and [R25](../roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) maps its feedback work. It preserves this fast/deep split and adds no current runtime authority.
+
 ## 1. Decision
 
 RedDog should be presented to 012 as the fast, front-facing interaction layer of the principal-scoped 0102 Digital Twin.

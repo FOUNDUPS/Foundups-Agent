@@ -1,5 +1,15 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-11] Hybrid ticket teams and consented RedDog feedback
+
+WSPs: 15, 22, 48, 50, 60, 73, 77, 96, 97, 103, 104. Documentation only.
+
+- Added the [hybrid architecture assessment](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md): governed tickets with optional bounded self-organizing teams; evidence synthesis remains separate from independent audit, authorization and settlement.
+- Extended R24 with a qualified flat-team slice and added [R25](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) for consented, scoped 012/RedDog feedback, proposal reconciliation and truthful ticket outcomes. The maintained backlog has 26 non-executable packets.
+- Corrected root README swarm/identity wording against the current RedDog product architecture; connected existing dual-loop and deferred-governance documents without granting their deferred powers. PoC, ticket/feedback MVP and RSI MVP have distinct acceptance evidence.
+- Holo retrieval succeeded at the pinned audit SHA. Main through `3621b16afa14399cda12aeda15cae6ad0283f4ea` adds product changes outside the inspected RedDog/WRE surfaces. No current deployment, live swarm or federation claim is added.
+- Prepared this continuation in a fresh isolated worktree after concurrent YUMORI edits appeared in the earlier documentation checkout. No runtime code, service, model configuration, messages to other principals or rewards changed. Validation and delivery limits: [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md).
+
 ## [2026-09-10] Qualified agent production-line packet R24
 
 WSPs: 15, 22, 50, 83, 97. Documentation only, continuing the existing roadmap PR.

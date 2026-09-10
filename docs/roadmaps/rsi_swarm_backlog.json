@@ -1228,7 +1228,7 @@
     },
     {
       "packet_id": "R24",
-      "title": "Qualify agents and operate audited tickets with verified rewards",
+      "title": "Qualify agents and bounded teams for audited tickets with verified rewards",
       "wave": 4,
       "priority": "P0",
       "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
@@ -1249,7 +1249,7 @@
         "modules/infrastructure/database",
         "modules/communication/moltbot_bridge"
       ],
-      "acceptance": "Qualified runtime-bound worker; one leased ticket; real confined artifact; independent audit; policy-bound reward eligibility; duplicate/rejected work cannot earn entitlement; initiated and confirmed settlement remain distinct",
+      "acceptance": "Qualified runtime-bound worker; one leased ticket; real confined artifact; independent audit; policy-bound reward eligibility; duplicate/rejected work cannot earn entitlement; initiated and confirmed settlement remain distinct; optional flat teams require a separately qualified profile, aggregate limits, child receipts, preserved failed lanes and independent audit outside the author team",
       "dispatchable": false,
       "execution_authority": "none; planning only",
       "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
@@ -1285,12 +1285,76 @@
         "basis": "Prerequisite for a qualified, audited and rewarded production-line claim; planning estimate only"
       },
       "packet_document": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md"
+    },
+    {
+      "packet_id": "R25",
+      "title": "Connect consented 012/RedDog feedback to governed FoundUp tickets",
+      "wave": 5,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "specified_not_implemented",
+      "dependencies": [
+        "R06",
+        "R09",
+        "R16"
+      ],
+      "owner_role": "existing RedDog conversation and FoundUp Memex/WRE owners with independent disclosure and outcome review",
+      "reuse_scope_candidates": [
+        "extensions/reddog",
+        "modules/communication/moltbot_bridge",
+        "modules/infrastructure/wre_core",
+        "modules/infrastructure/database",
+        "modules/foundups/agent_market"
+      ],
+      "acceptance": "Scoped typed feedback and versioned proposal; bounded opted-in cohort; deduplication and visible dissent; revoked/stale/cross-scope rejection; one durable ticket mapping and authenticated result return; attention and cost targets tested at declared workload",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Bind participant consent/disclosure, proposal version, recipient and attention budgets; coordinate existing conversation owner; no outreach authorization inferred from this JSON"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims",
+        "R22 supported conversation adapter before live product delivery",
+        "R24 for qualified team/reward claims",
+        "R11 for retained verified-outcome claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md; existing conversation/Memex/WRE tests; exact commands fixed per admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Near-term feedback integration; does not displace core RSI admission/verification blockers"
+      },
+      "packet_document": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
+      "early_scope": "R25-A design and synthetic local proof may precede integrated execution dependencies; no new runtime authority"
     }
   ],
   "canonical_roadmap": "ROADMAP.md",
   "dispatch_runbook": "docs/operations/RSI_SWARM_DISPATCH.md",
   "documentation_integrated_on": "2026-09-10",
   "documentation_integration_base": "eb2994f5d1530d9f086e2f2265c65033acecd93c",
-  "operating_model": "qualified_agent_production_line",
-  "production_line_packet": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md"
+  "operating_model": "governed_ticket_production_with_optional_bounded_teams_and_consented_feedback",
+  "production_line_packet": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md",
+  "hybrid_refined_on": "2026-09-11",
+  "hybrid_architecture": "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
+  "feedback_packet": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md"
 }

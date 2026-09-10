@@ -13,6 +13,8 @@ Status: dated evidence snapshot. Source: `fb58e5279673ef9de30735ccfedc8001c3bb79
 - [Documentation integration record](INTEGRATION.md).
 - [R24 production-line packet](../../../roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md): later qualification/ticket/audit/reward specification; not part of the frozen audit findings.
 
+- [Hybrid architecture](../../../architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) and [R25 feedback packet](../../../roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md): 2026-09-11 planning refinement, with current-source checks separately recorded.
+
 The original audit was produced outside the repository to protect concurrent work. Its report and evidence files above are copied unchanged. Statements about “this audit,” local paths, source counts and “no commits” refer to that original audit, not later documentation integration. Reproduction paths identify the original machine; substitute a clean checkout at the recorded SHA and separate scratch storage elsewhere.
 
 The audit is a complete tracked-file census and a critical-path assessment, not an exhaustive functional/security audit of every module. A dated census, test count or Holo generation must never be promoted into current-main or production completion evidence.

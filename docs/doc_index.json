@@ -1716,29 +1716,29 @@
     },
     {
       "doc_type": "readme",
-      "hash_sha256": "14d375ea87de9d4842143ba3bd488fad5939dd0763d4e945393dc92611b359fe",
+      "hash_sha256": "3cfdafa4b8d3a7d89facb1179298299f176684f4da433af26d8c4074e030cdde",
       "links": {
         "automation": [
           "doc_dae"
         ],
         "entry_points": [
-          "SUPERADMIN_ONBOARDING.md",
-          "CONTRIBUTING.md",
           ".prompt_reddog_always_holoindex_grounding_phase1.md",
-          "ModLog.md",
           "AGENTS.md",
           "CLAUDE.md",
+          "CONTRIBUTING.md",
+          "ModLog.md",
           "README.md",
-          "templates/module_readme_wsp_template.md",
-          "templates/module_readme_template.md",
-          "prompt/Prometheus.md",
           "ROADMAP.md",
-          "docs/README.md"
+          "SUPERADMIN_ONBOARDING.md",
+          "docs/README.md",
+          "prompt/Prometheus.md",
+          "templates/module_readme_template.md",
+          "templates/module_readme_wsp_template.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/README.md",
-      "size_bytes": 16664,
+      "size_bytes": 16847,
       "status": "active",
       "wsp_refs": [
         "WSP 0",
@@ -1771,7 +1771,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "b3ce92420e8c47c03af1ff4efc788525dba37a203d4dd88a04ad54f7b14d8272",
+      "hash_sha256": "74aab24031ee018eea019b7b1402210486abff7745f179810662bcbecd08b60c",
       "links": {
         "automation": [
           "doc_dae"
@@ -1779,12 +1779,13 @@
         "entry_points": [
           "README.md",
           "ROADMAP.md",
-          "docs/README.md"
+          "docs/README.md",
+          "docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/REDDOG_DOCUMENTATION_MAP.md",
-      "size_bytes": 6173,
+      "size_bytes": 6507,
       "status": "active",
       "wsp_refs": [
         "WSP 97"
@@ -2986,18 +2987,20 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "4963d9361a17353c001b47d62ca0992e46012f709c67ec82cd9a536ba8c07e6e",
+      "hash_sha256": "201de4734bfb52ae4327592611c44d223c99738a61402bc05884230cb12af1ac",
       "links": {
         "automation": [
           "doc_dae"
         ],
         "entry_points": [
-          "docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md"
+          "docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md",
+          "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
+          "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md",
-      "size_bytes": 2496,
+      "size_bytes": 2961,
       "status": "active",
       "wsp_refs": []
     },
@@ -3030,6 +3033,27 @@
         "WSP 30",
         "WSP 64",
         "WSP 87"
+      ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "41362fc260e36208099989e2f37c90994726673219532a42b6c8d2eaa2fdf9b0",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
+          "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md",
+      "size_bytes": 14664,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 15",
+        "WSP 97"
       ]
     },
     {
@@ -3140,6 +3164,45 @@
       "size_bytes": 9050,
       "status": "active",
       "wsp_refs": []
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "2e682783f7f5d7405b9e8bb3a662b061c60baf63282802a073cb565afdc21405",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ModLog.md",
+          "README.md",
+          "ROADMAP.md",
+          "docs/README.md",
+          "docs/REDDOG_DOCUMENTATION_MAP.md",
+          "docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md",
+          "docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md",
+          "docs/audits/rsi/2026-09-09/README.md",
+          "docs/operations/RSI_SWARM_DISPATCH.md",
+          "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md",
+          "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
+      "size_bytes": 16635,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 15",
+        "WSP 22",
+        "WSP 48",
+        "WSP 50",
+        "WSP 60",
+        "WSP 73",
+        "WSP 77",
+        "WSP 96",
+        "WSP 97",
+        "WSP 103",
+        "WSP 104"
+      ]
     },
     {
       "doc_type": "other",
@@ -9366,19 +9429,20 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "f51c77118a978b26851005d39c946d6ad817e6e1b4b7e8c5202e3585d5aa130a",
+      "hash_sha256": "d71f1363207cba7e54c8b529844afc6864cfc19480157968060bcbd8795717d1",
       "links": {
         "automation": [
           "doc_dae"
         ],
         "entry_points": [
           "ModLog.md",
+          "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
           "docs/audits/rsi/2026-09-09/README.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/INTEGRATION.md",
-      "size_bytes": 4764,
+      "size_bytes": 8333,
       "status": "active",
       "wsp_refs": [
         "WSP 00"
@@ -9407,7 +9471,7 @@
     },
     {
       "doc_type": "readme",
-      "hash_sha256": "ab43fa20d3d11be9e89db2057712e28145736bcd3930ce23bd10fbab386c61cc",
+      "hash_sha256": "68814671ca8868fef6a805a4b8ed27e7c6fb595255ed17904d0cd5e524f0a855",
       "links": {
         "automation": [
           "doc_dae"
@@ -9420,7 +9484,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/README.md",
-      "size_bytes": 2032,
+      "size_bytes": 2286,
       "status": "active",
       "wsp_refs": []
     },
@@ -11342,7 +11406,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "76beeb1ab55e2573b2e05f3f76e29607dd04718a656573b0d0ecfbe92af40078",
+      "hash_sha256": "205859ee089a5f3cc61897b8454e8aa91483a9b361bb26e8c756ddd049ccabcd",
       "links": {
         "automation": [
           "doc_dae"
@@ -11351,12 +11415,14 @@
           "ROADMAP.md",
           "docs/README.md",
           "docs/REDDOG_DOCUMENTATION_MAP.md",
-          "docs/audits/rsi/2026-09-09/README.md"
+          "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
+          "docs/audits/rsi/2026-09-09/README.md",
+          "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/operations/RSI_SWARM_DISPATCH.md",
-      "size_bytes": 12028,
+      "size_bytes": 12825,
       "status": "active",
       "wsp_refs": []
     },
@@ -11471,23 +11537,65 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "2ee140d4e59bc5cb223cc75fba0565f2d3107c6d57e4d01334b814b1357d90a8",
+      "hash_sha256": "9c38356ab4ee77a0e7a5b0b3fe0c1d9974a5be1ebd735d8af81e760e9a3fb61f",
       "links": {
         "automation": [
           "doc_dae"
         ],
         "entry_points": [
+          "ModLog.md",
           "ROADMAP.md",
           "docs/README.md",
+          "docs/REDDOG_DOCUMENTATION_MAP.md",
+          "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
+          "docs/audits/rsi/2026-09-09/README.md",
           "docs/operations/RSI_SWARM_DISPATCH.md"
         ]
       },
       "module_hint": "docs_root",
       "path": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md",
-      "size_bytes": 10478,
+      "size_bytes": 12177,
       "status": "active",
       "wsp_refs": [
         "WSP 15"
+      ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "d44bdad6f0784a4212c1468a35e7fe7fd9ec49a31d2a6e08ab5fbc406557c0e2",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ModLog.md",
+          "ROADMAP.md",
+          "docs/README.md",
+          "docs/REDDOG_DOCUMENTATION_MAP.md",
+          "docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md",
+          "docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md",
+          "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
+          "docs/audits/rsi/2026-09-09/README.md",
+          "docs/operations/RSI_SWARM_DISPATCH.md",
+          "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
+      "size_bytes": 7836,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 15",
+        "WSP 22",
+        "WSP 48",
+        "WSP 50",
+        "WSP 60",
+        "WSP 73",
+        "WSP 77",
+        "WSP 96",
+        "WSP 97",
+        "WSP 103",
+        "WSP 104"
       ]
     },
     {
