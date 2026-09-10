@@ -1,6 +1,8 @@
 'use client';
 
 const actions = [
+  { label: 'LIVE', text: '9/10 午前｜僧は福井市役所前。チラシ・YUMORI Tシャツ・準備委員会。会いに来てください。', href: 'https://yumori.me/' },
+  { label: 'JHR', text: 'UPDATE 9/10｜仙台200MW・印西の地区計画・福井の選択肢', href: '/reports/jhr' },
   { label: 'NEW', text: 'YUMORI / COG DC 10枚のプレゼンを見る', href: '#yumori-deck' },
   { label: 'VISIT', text: '写真で現地を見る', href: 'https://pics.yumori.info' },
   { label: 'LISTEN', text: '九頭竜の音楽を聴く', href: 'https://music.yumori.me' },
