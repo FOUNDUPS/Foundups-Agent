@@ -43,3 +43,15 @@ def test_live_field_status_has_one_canonical_source_for_public_surfaces() -> Non
     assert "currentFieldStatus.detailEn" in yumori
     assert "label: 'JHR'" in ticker
     assert "href: '/reports/jhr'" in ticker
+
+
+def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> None:
+    layout = read(FRONTEND_ROOT / "app" / "layout.tsx")
+    presentation = read(FRONTEND_ROOT / "components" / "YumoriPresentation.tsx")
+
+    assert 'href="/reports/jhr"' in layout
+    assert "JHR · レポートを読む / READ REPORT" in layout
+    assert "const reportLabels" in presentation
+    assert "JAPAN HYPERSCALER REPORTを読む" in presentation
+    assert "READ THE JAPAN HYPERSCALER REPORT" in presentation
+    assert presentation.count('href="/reports/jhr"') >= 2
