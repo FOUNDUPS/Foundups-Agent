@@ -2768,3 +2768,11 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
   Every new security module is at most 200 lines with functions at most 50.
 - Added owner-policy v4 tier/requester regressions and a real signer-socket check
   proving only the signed provider principal reaches grant signing.
+## 2026-09-09: Mosh Pit local candidate
+
+- Focused suite: 30 passing synthetic contracts for activity filtering,
+  disclosure, source denial, scope/expiry, ordering, duplicates, HTML escaping,
+  actor/truth preservation and wardrobe discovery.
+- Independent review found and closed unhashable classification and timestamp
+  overflow exceptions. Host membership, real capability revocation and live
+  deployment remain untested/unimplemented, not implied by fixture denial.

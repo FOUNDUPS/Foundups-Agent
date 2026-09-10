@@ -80,6 +80,11 @@ With no research retriever connected, JHR fails closed and returns `NO_REPORT` r
 
 ## Architectural boundaries
 
+The local Mosh Pit reader is at `/f/esingularity_001/mosh-pit`, with sign-in,
+explicit read approvals and expandable activity threads. It is not deployed;
+the canonical activity host and posting remain unconnected. See
+`docs/MOSH_PIT_GATEWAY.md` for its guarded integration contract.
+
 - `esingularity.ai` remains the primary campaign domain.
 - Foundups.com discovers the project through the registry and `/f/esingularity_001` namespace.
 - The Foundups.com shell does not own or duplicate eSingularity product logic.

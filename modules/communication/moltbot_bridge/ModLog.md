@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-09-09: Mosh Pit activity projection and curation candidate
+
+- Extended the memory query surface with an unmounted, read-only Mosh Pit
+  entrypoint requiring a trusted authorized source. Added daily activity-only
+  projection, explicit audience/actor fields and escaped expandable HTML.
+- Added a registered prototype curation Skillz: newest-first days, one activity
+  per bullet, plans/references after history, no automatic notification noise.
+- Reused breadcrumb-shaped inputs; no new store, production auth source, write
+  route, private data import, external publishing or deployment.
+- Focused tests cover scope/expiry/source denial, noisy/proposed events,
+  duplicates, Tokyo dates, disclosure, actor attribution, folded replies,
+  malformed inputs and wardrobe discovery. Independent review also checked
+  permutation determinism and reply truncation. (WSP 22/50/60/95/97)
+
 ## 2026-09-08: Open-source non-biometric RedDog Lick PoC
 
 - Added an opt-in AutoPost Lick at the existing fail-closed public boundary:

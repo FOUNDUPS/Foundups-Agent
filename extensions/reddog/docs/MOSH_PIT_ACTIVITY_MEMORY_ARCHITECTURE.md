@@ -1,9 +1,11 @@
 # RedDog Mosh Pit Projection Architecture
 
-Status: `PARTIALLY_SUPPORTED` / `UNIFIED_RENDERER_NOT_IMPLEMENTED`
+Status: `LOCAL_READ_ONLY_CANDIDATE` / `HOST_NOT_WIRED`
 
-Existing Breadcrumb and Brain/Memex query components are reusable inputs. The
-unified Mosh Pit projection and reverse-chronological renderer are not wired.
+Existing Breadcrumb and Brain/Memex query components are reusable inputs. A
+bounded local activity projection and expandable HTML renderer now exist; the
+authenticated source, live UI, writes and unified Brain/Memex composition remain
+unwired. See [Wave-style MVP](MOSH_PIT_WAVE_MVP.md) for exact scope and research.
 
 ## Purpose
 
@@ -116,6 +118,11 @@ RESEARCH / PRE-LAUNCH FOUNDATION
 ```
 
 The oldest/origin material remains at the bottom. New material is prepended. This ordering is a **view rule**, not a storage rule.
+
+The default feed contains activities only: one concise bullet per event, with
+details/discussion expandable beneath it. Plans, NOW/OPEN LOOPS summaries,
+navigation and reference material never precede the activity dates. Automated
+copyright/video-block notices and routine system diagnostics are excluded.
 
 ## Retrieval Contract for RedDog
 
@@ -275,7 +282,10 @@ Redaction is a projection policy, not a mutation of canonical evidence.
 
 ## Google Doc Projection
 
-A living Google Doc is appropriate as a convenient stakeholder/human Mosh Pit view for YUMORI. It should be generated from approved Breadcrumb/Brain/Memex state and should not become the sole canonical memory store.
+A living Google Doc is a compatibility/export view for YUMORI.me. The intended
+primary interface is the stakeholder-gated, expandable activity feed described
+in the Wave-style MVP. Either view uses approved Breadcrumb/Brain/Memex state;
+neither becomes a second canonical memory store.
 
 Target:
 

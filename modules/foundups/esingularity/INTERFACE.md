@@ -9,7 +9,16 @@
 | `/team` | Verified public team directory |
 | `/team/[slug]` | Individual public profile |
 
-## YUMORI presentation contract
+## Local stakeholder reader (not deployed)
+
+- `/f/esingularity_001/mosh-pit` uses Sites sign-in plus a separate server read
+  approval policy; only a validated stakeholder projection reaches the page.
+- GET `/api/mosh-pit` returns 401/403/503/200 for absent identity, denial,
+  unavailable source/configuration, and validated activity respectively.
+- No write endpoint, public fallback or parallel activity store is introduced.
+- Canonical host wiring is still required. See `docs/MOSH_PIT_GATEWAY.md`.
+
+## YUMORI presentation behavior
 
 - The landing page mounts the presentation at `#yumori-deck`, immediately after the existing hero.
 - The existing campaign ticker contains exactly one `NEW` notification linking to that anchor; the ticker itself is not replaced or duplicated.

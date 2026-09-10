@@ -1,5 +1,15 @@
 # RedDog ModLog
 
+## 2026-09-09 - Mosh Pit Wave-style MVP and local candidate
+
+- Recorded primary-source comparison of Apache Wave, Yjs, Tiptap/Hocuspocus
+  and Etherpad; selected activity-first FoundUps integration with later optional
+  co-editing. Corrected architecture status and Google Docs export positioning.
+- Linked the read-only bridge projection, expandable renderer and prototype
+  wardrobe skill. No VSIX/runtime package or production source was activated.
+- Documented the missing HoloIndex generation receipt and remaining host,
+  membership, writes and live UI gates. (WSP 22/50/60/95/97)
+
 ## 2026-09-05 - Identity / merged builder reconciliation (0.4.141)
 
 - Corrected foreground identity above the merged `0.4.140` builder release;

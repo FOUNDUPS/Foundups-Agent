@@ -1,6 +1,13 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+### [2026-09-09] - Mosh Pit curation wardrobe prototype
+
+- Registered bridge-owned `reddog_mosh_pit` with exact relative path, version,
+  logical roles and prototype state. Loader discovery and eval metadata are
+  exercised by the focused Mosh Pit tests. No production promotion or runtime
+  effect authority is implied. (WSP 22/50/95/97)
+
 ### [2026-08-29] - BOUNDED GIT BINARY STDIN HARDENING
 
 - Extended `run_bounded_stdout` with an <=8 MiB binary stdin channel for

@@ -1,9 +1,10 @@
 # RedDog / FoundUp Memex Projection Emitter
 
-Status: `SPECIFIED_NOT_IMPLEMENTED`
+Status: `FULL_EMITTER_SPECIFIED` / `LOCAL_MOSH_PIT_CANDIDATE_ONLY`
 
-This document defines a target contract. It is not evidence that a projection
-emitter, authorization service, renderer, or external sink is operational.
+This document defines the full target contract. A local Mosh Pit projection and
+HTML renderer candidate are described in [MOSH_PIT_WAVE_MVP.md](MOSH_PIT_WAVE_MVP.md).
+No production authorization source, unified emitter or external sink is wired.
 
 ## Purpose
 

@@ -1,5 +1,20 @@
 # OpenClaw Bridge Interface
 
+## Mosh Pit local candidate
+
+`openclaw_memory_queries.query_mosh_pit(request, source=..., capability=...)`
+delegates to `project_mosh_pit()`. The trusted host source must verify session,
+project membership, revocation, disclosure and snapshot before returning rows.
+No production source or conversational/HTTP route is wired. Missing/denied
+authority has no fallback to unrestricted past-work retrieval.
+
+The candidate reads normalized `data.mosh_pit` from existing breadcrumb-shaped
+rows, selects explicit audience fields, groups activities by event day, and
+attaches one level of discussion. `render_mosh_pit_html()` emits escaped folded
+HTML from that approved result. Rendering alone is not authentication.
+Contract, bounds and remaining integration:
+`extensions/reddog/docs/MOSH_PIT_WAVE_MVP.md`.
+
 ## Public RedDog Lick PoC
 
 `PublicSessionGate.open_lick_encounter(...)` accepts the exact open-source,
