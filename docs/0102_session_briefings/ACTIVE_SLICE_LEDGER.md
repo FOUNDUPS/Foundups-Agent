@@ -1,5 +1,7 @@
 # Active Slice Ledger
 
+> Dated ledger snapshot: entries below were last reconciled on 2026-04-21. They do not establish current lane ownership. Start at [the system roadmap](../../ROADMAP.md), then verify current commits, open changes and runtime claims before choosing a slice. Preserve these historical entries until each owner reconciles them.
+
 **Authority**: 0102 architect lane
 **Updated**: 2026-04-21 (LEDGER-RECON3 post-PR-queue-cleanup)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.

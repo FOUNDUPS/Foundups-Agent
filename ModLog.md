@@ -1,5 +1,42 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-11] Active FoundUp participation gate and R25 / 3V mapping
+
+WSPs: 15, 22, 26, 29, 48, 50, 97. Documentation only; 012 clarification.
+
+- Tightened [R25](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md): another RedDog may ask about a proposed change only while its 012 is actively engaged with that same FoundUp, with current permission, relevance and attention capacity. Activity is rechecked at delivery; inactive, paused, idle-only or stale cases receive no solicitation.
+- Mapped responses to V1 Validation evidence, distinct from independent V2 Verification and CABR-governed V3 Valuation. WSP 26/29 support engagement/community-feedback inputs; the current task-metric hooks, simulator placeholders and review-only scoring seam do not prove a live feedback adapter.
+- Added activity-expiry, duplicate-signal and feedback-to-verification/reward rejection cases; retained 26 non-executable packets. No participant messages, source implementation, scoring or reward changes. Evidence and checks: [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md).
+
+## [2026-09-11] Hybrid ticket teams and consented RedDog feedback
+
+WSPs: 15, 22, 48, 50, 60, 73, 77, 96, 97, 103, 104. Documentation only.
+
+- Added the [hybrid architecture assessment](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md): governed tickets with optional bounded self-organizing teams; evidence synthesis remains separate from independent audit, authorization and settlement.
+- Extended R24 with a qualified flat-team slice and added [R25](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) for consented, scoped 012/RedDog feedback, proposal reconciliation and truthful ticket outcomes. The maintained backlog has 26 non-executable packets.
+- Corrected root README swarm/identity wording against the current RedDog product architecture; connected existing dual-loop and deferred-governance documents without granting their deferred powers. PoC, ticket/feedback MVP and RSI MVP have distinct acceptance evidence.
+- Holo retrieval succeeded at the pinned audit SHA. Main through `3621b16afa14399cda12aeda15cae6ad0283f4ea` adds product changes outside the inspected RedDog/WRE surfaces. No current deployment, live swarm or federation claim is added.
+- Prepared this continuation in a fresh isolated worktree after concurrent YUMORI edits appeared in the earlier documentation checkout. No runtime code, service, model configuration, messages to other principals or rewards changed. Validation and delivery limits: [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md).
+
+## [2026-09-10] Qualified agent production-line packet R24
+
+WSPs: 15, 22, 50, 83, 97. Documentation only, continuing the existing roadmap PR.
+
+- Added [R24](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md): qualify agents, admit/lease tickets, execute, independently audit, establish reward eligibility and confirm authorized settlement.
+- Reused FAM/WRE/AgentDB ownership; retained stable filenames and expanded the planning backlog to 25 packets. No new scheduler, runtime implementation, dispatch or payout.
+- Documented the existing persistent FAM `PAID`/`INITIATED` mismatch as an acceptance gap. Qualification tags, reviewer approval and initiated payout remain insufficient proof of production delivery.
+- Validation is recorded in the [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md).
+
+## [2026-09-10] Canonical RSI roadmap and archive integration
+
+WSPs: 00, 15, 22, 50, 81, 83, 97. Documentation only; source implementation and concurrent product lanes preserved.
+
+- Replaced stale system completion percentages with the evidence-bound root roadmap, six completion gates and 24 non-executable planning packets.
+- Attached the dated 2026-09-09 audit and module census; archived two obsolete system-wide roadmaps with original-body hashes and retained module-local plans.
+- Added WSP 00/97 navigation, synchronized their knowledge mirrors, and marked the April active-slice ledger as historical until reconciled. State-semantics PR #1636 remains a separate owned change.
+- Documented Nemotron's evaluation-only role, verified provider/model routing, one bounded canary, and cost-per-accepted-slice policy. Local OpenClaw version was observed; model-binding query returned UNCONFIGURED with no model call/mutation.
+- Validation and limits: [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md). Historical WRE results remain 234 passed / 1 failed / 4 skipped at the audit SHA; this documentation integration does not claim to fix the skill manifest or complete RSI.
+
 ## [2026-09-05] RedDog Identity / Merged Builder Reconciliation (0.4.141)
 
 **WSP Protocols:** WSP 00, 06, 12, 15, 22, 50, 62, 73, 84, 87, 97

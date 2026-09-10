@@ -1,0 +1,23 @@
+{
+  "status": "historical_not_execution_authority",
+  "archives": [
+    {
+      "original_path": "ROADMAP.md",
+      "archive_path": "docs/_archive/roadmaps/2026-09-10/SYSTEM_ROADMAP.md",
+      "source_commit": "eb2994f5d1530d9f086e2f2265c65033acecd93c",
+      "original_sha256": "abf85fd47a1c1d36c9fb571f0ad3c17484a745c7195be95943c9a8f3224e3f2b",
+      "hash_basis": "original canonical Git blob bytes before documented whitespace normalization",
+      "body_transformation": "canonical LF; strip trailing spaces/tabs only",
+      "archived_body_sha256": "06e2a0bbdfbe5985d7075f9ce4997ba62a57262f0973c1d32e48a73650b800e4"
+    },
+    {
+      "original_path": "modules/ROADMAP.md",
+      "archive_path": "docs/_archive/roadmaps/2026-09-10/MODULE_ROLLUP_ROADMAP.md",
+      "source_commit": "eb2994f5d1530d9f086e2f2265c65033acecd93c",
+      "original_sha256": "dd5b1f729a81ed402268196478176da2394acef35a5bcb6261b48f78513999b6",
+      "hash_basis": "original canonical Git blob bytes before documented whitespace normalization",
+      "body_transformation": "canonical LF; strip trailing spaces/tabs only",
+      "archived_body_sha256": "6985e1f5dfe82b0e22e73bb95b65256f4ccbd1890b061047adacfa22fef0b074"
+    }
+  ]
+}
