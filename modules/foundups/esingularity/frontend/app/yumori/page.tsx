@@ -3,10 +3,31 @@ import { currentFieldStatus } from '../../content/current-field-status';
 
 const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform';
 const JHR_URL = '/reports/jhr';
-const ESINGULARITY_URL = '/';
+const ESINGULARITY_URL = 'https://esingularity.ai/';
 const YUMORI_INFO_URL = 'https://yumori.info/';
 const INZAI_IMAGE = 'https://www.re-port.net/picture_l/report/0000074457_09.png';
 const CITY_CONTACT_URL = 'https://www.city.fukui.lg.jp/inquiry/mailform101607.html?PAGE_NO=15196';
+const MAYOR_CONTACT_URL = 'https://www.city.fukui.lg.jp/inquiry/mailform10662.html?PAGE_NO=178';
+const COUNCIL_ROSTER_URL = 'https://www.city.fukui.lg.jp/sisei/gikai/giin/p015976.html';
+const COUNCIL_MEMBERS_URL = 'https://www.city.fukui.lg.jp/sisei/gikai/giin/p020856.html';
+
+const budgetCommittee = [
+  { name: '八田 一以', phone: '0776-54-0849', role: '委員長' },
+  { name: '堀川 秀樹', phone: '090-3292-0136', role: '副委員長' },
+  { name: '奥島 光晴', phone: '0776-36-3418' },
+  { name: '堀江 廣海', phone: '0776-41-2589' },
+  { name: '藤田 諭', phone: '0776-98-4556' },
+  { name: '田中 義乃', phone: '0776-23-2131' },
+  { name: '近藤 實', phone: '0776-54-7921' },
+  { name: '菅生 敬一', phone: '0776-54-3672' },
+  { name: '池上 優徳', phone: '0776-86-1155' },
+  { name: '寺島 恭也', phone: '0776-25-4677' },
+  { name: '山田 文葉', phone: '090-9767-7469' },
+  { name: '酒井 良樹', phone: '0776-54-0590' },
+  { name: '榊原 光賀', phone: '080-3048-2989' },
+  { name: '漆﨑 與', phone: '0776-38-1350' },
+  { name: '髙田 稔浩', phone: '0776-34-2075' },
+] as const;
 
 export const metadata: Metadata = {
   title: 'YUMORI.me — 湯守になる。壊す前に守る。地域のAIを地域へ。',
@@ -61,7 +82,7 @@ export default function YumoriPage() {
         <div>
           <p style={body}>YUMORI.meは、旧すかっとランド九頭竜を守る活動から始まりました。閉館したからといって、建物の価値、地域の記憶、将来の用途までゼロになるわけではありません。</p>
           <p style={body}>福井市議会資料には解体見込み約15.8億円が示されています。問うべきなのは、<strong>その費用を支出する前に、再利用・民間投資・地域コンピュートなどの代替案を十分に比較したのか</strong>ということです。</p>
-          <p style={body}>私たちは結論を決めつけません。60日間、比較してほしい。壊す前に調べる。それがYUMORIの出発点です。</p>
+          <p style={body}><strong>今の最優先は、解体を止めることです。</strong> 解体前に、再利用の可能性を検証する時間を確保してほしい。壊す前に調べる。それがYUMORIの出発点です。</p>
           <div style={{marginTop:26}}><Join dark /></div>
         </div>
         <figure style={{margin:0}}>
@@ -79,7 +100,7 @@ export default function YumoriPage() {
           <p style={body}>全国には、公共施設、工場、ホテル、倉庫、温浴施設など、十分に使われていない建物があります。すべてをデータセンターにできるわけではありません。だから構造、電力、光回線、冷却、排熱先を先に調べ、成立する場所だけを再利用する。</p>
           <p style={body}><strong>COG DC — Community-Owned Green Data Center</strong> は1MWから始め、5→10→20MWへ必要な分だけ育てるモジュール型。第一用途は計算力の輸出ではなく、地域の学校、大学、農業、病院、自治体、ものづくり、企業です。</p>
           <p style={body}>Educational Singularity Lab、学生、研究、FoundUps、地域企業を同じ拠点につなぎ、データセンターを「箱」ではなく地域再生のハブにする。</p>
-          <p><a href={ESINGULARITY_URL} style={link}>eSingularity / 福井の実証構想を見る →</a></p>
+          <p><a href={ESINGULARITY_URL} target="_blank" rel="noreferrer" style={link}>eSingularity / 福井の実証構想を見る →</a></p>
           <Join />
         </div>
         <figure style={{margin:0}}>
@@ -102,6 +123,40 @@ export default function YumoriPage() {
         </div>
         <figure style={{margin:0}}><img src={INZAI_IMAGE} alt="千葉県印西市の大規模データセンター開発地" style={{width:'100%',display:'block',borderRadius:18}}/><figcaption style={{fontSize:12,opacity:.65,marginTop:8}}>DPDC印西パーク開発地。画像出典: R.E.port。規模理解のための外部参照画像。</figcaption></figure>
       </div>
+    </section>
+
+    <section style={{...panel, background:'#7a1f1f', color:'#fff'}}>
+      <p style={{fontWeight:900,letterSpacing:'.15em'}}>緊急行動 / CALL NOW</p>
+      <h2 style={title}>9月25日を待たないでください。</h2>
+      <p style={{...body,fontWeight:750}}>旧すかっとランド九頭竜の解体を止めるため、<strong>今、市長と予算特別委員へ声を届けてください。</strong> 解体予算が決まれば、止めることはさらに難しくなります。</p>
+
+      <div style={{margin:'28px 0',padding:'22px',background:'rgba(255,255,255,.1)',borderRadius:18,maxWidth:980}}>
+        <p style={{margin:'0 0 8px',fontWeight:900}}>電話では、これだけ伝えてください。</p>
+        <p style={{fontSize:'clamp(1.2rem,2.5vw,1.8rem)',lineHeight:1.55,margin:0,fontWeight:850}}>「旧すかっとランド九頭竜を、再活用の可能性を十分に検証する前に解体しないでください。解体予算に反対してください。」</p>
+      </div>
+
+      <div style={{display:'flex',gap:12,flexWrap:'wrap',margin:'24px 0 34px'}}>
+        <a href="tel:0776205205" style={{...join,background:'#fff',color:'#7a1f1f'}}>☎ 西行市長・秘書課 0776-20-5205</a>
+        <a href={MAYOR_CONTACT_URL} target="_blank" rel="noreferrer" style={{...join,background:'#fff',color:'#7a1f1f'}}>✉ 市長へメール ↗</a>
+        <a href="tel:0776205510" style={{...join,background:'#111511',color:'#fff'}}>☎ 市議会 議事調査課 0776-20-5510</a>
+        <Join />
+      </div>
+
+      <h3 style={{fontSize:'clamp(1.5rem,3vw,2.4rem)',margin:'0 0 18px'}}>予算特別委員会 — 一人ひとりに電話できます</h3>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12,maxWidth:1100}}>
+        {budgetCommittee.map((member) => (
+          <a key={member.name} href={`tel:${member.phone.replace(/-/g,'')}`} style={{display:'block',padding:'16px 18px',borderRadius:14,background:'#fff',color:'#111511',textDecoration:'none'}}>
+            <strong style={{display:'block',fontSize:'1.08rem'}}>{member.name}{'role' in member && member.role ? `　${member.role}` : ''}</strong>
+            <span style={{display:'block',marginTop:6,fontWeight:800}}>☎ {member.phone}</span>
+          </a>
+        ))}
+      </div>
+
+      <p style={{marginTop:22,fontSize:13,opacity:.8}}>委員会名簿は福井市公式サイト（2026年8月31日現在）、電話番号は福井市議員名簿を参照。</p>
+      <p style={{marginTop:8}}>
+        <a href={COUNCIL_ROSTER_URL} target="_blank" rel="noreferrer" style={{...link,color:'#fff'}}>福井市 予算特別委員会名簿 ↗</a>
+        <a href={COUNCIL_MEMBERS_URL} target="_blank" rel="noreferrer" style={{...link,color:'#fff'}}>福井市 議員名簿・連絡先 ↗</a>
+      </p>
     </section>
 
     <section style={{...panel, background:'#f4f1e8', color:'#111511'}}>
