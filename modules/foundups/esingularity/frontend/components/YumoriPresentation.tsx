@@ -26,6 +26,12 @@ const visualLabels = {
   pt: { flow: 'Fluxo de energia pelo COG DC até computação, calor recuperável e comunidade', floors: 'Andares de desenvolvimento FoundUp no edifício preservado com COG DC separado', top: 'Utilidade, execução e valor validados', third: 'Pequenos estúdios de projeto', lower: 'Educação, exposições, robótica e eventos', japan: 'Mapa conceitual da possível validação além de Fukui' },
 } as const;
 
+const reportLabels = {
+  ja: 'JAPAN HYPERSCALER REPORTを読む',
+  en: 'READ THE JAPAN HYPERSCALER REPORT',
+  pt: 'LER O JAPAN HYPERSCALER REPORT',
+} as const;
+
 function SlideVisual({ slide, priority, locale }: { slide: YumoriSlide; priority: boolean; locale: YumoriLocale }) {
   const labels = visualLabels[locale];
   if (slide.visual === 'cogdc') {
@@ -118,6 +124,7 @@ export default function YumoriPresentation() {
       <div className="yumori-deck-heading">
         <p>{copy.label}</p>
         <h2 id="yumori-deck-title">{copy.title}</h2>
+        <a href="/reports/jhr" style={{ display: 'inline-block', marginTop: '0.75rem', fontWeight: 900, textDecoration: 'underline' }}>{reportLabels[locale]} ↗</a>
       </div>
 
       <article key={slide.id} className={`yumori-slide yumori-slide-${slide.visual}`} aria-label={`${copy.controls.slide} ${active + 1} / ${copy.slides.length}`}>
@@ -126,6 +133,9 @@ export default function YumoriPresentation() {
           <div className="yumori-slide-index"><span>{slide.kicker}</span><b>{String(active + 1).padStart(2, '0')} / {String(copy.slides.length).padStart(2, '0')}</b></div>
           <h3 aria-live="polite">{slide.proposition}</h3>
           {slide.number && <div className="yumori-slide-number"><strong>{slide.number}</strong>{slide.numberLabel && <span>{slide.numberLabel}</span>}</div>}
+          <a href="/reports/jhr" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, margin: '1rem 0', padding: '10px 14px', borderRadius: 999, background: '#0b2545', color: '#fff', textDecoration: 'none', fontWeight: 900, fontSize: 13 }}>
+            {reportLabels[locale]} <span aria-hidden="true">↗</span>
+          </a>
           <details className="yumori-slide-details" onToggle={(event) => { if (event.currentTarget.open) setPlaying(false); }}>
             <summary>{copy.controls.details}<span aria-hidden="true">＋</span></summary>
             <div>
