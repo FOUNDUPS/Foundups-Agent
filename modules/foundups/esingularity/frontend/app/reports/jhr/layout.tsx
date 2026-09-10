@@ -1,7 +1,25 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 const YUMORI_ME = "https://yumori.me/";
 const YUMORI_INFO = "https://yumori.info/";
+
+export const metadata: Metadata = {
+  openGraph: {
+    images: [
+      {
+        url: "/yumori-inzai-fukui-comparison.webp",
+        width: 1600,
+        height: 1200,
+        alt: "千葉・印西クラスの大型データセンター用地を福井の田園に重ねた概念比較",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/yumori-inzai-fukui-comparison.webp"],
+  },
+};
 
 export default function JhrLayout({ children }: { children: ReactNode }) {
   return (
