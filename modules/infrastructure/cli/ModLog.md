@@ -2,6 +2,23 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.3.16 — Japanese STT reuse for phone prototype (2026-09-10)
+
+**WSP Protocol:** 05, 06, 22, 97
+**Phase:** Enhancement
+**Agent:** 0102 / Codex
+
+- Added explicit language / `OPENCLAW_VOICE_STT_LANGUAGE` to Whisper, Cohere and
+  Google adapters. Japanese maps to Google's ja-JP locale; English remains default.
+- Current Cohere processor requires language and exposes `decode`; support that
+  contract and its chunk metadata, retaining legacy `batch_decode` compatibility.
+  Inspected the official transformers 5.17.0 wheel and model-card usage.
+- Made the package's main-menu export lazy, allowing microphone/STT reuse without
+  importing unrelated menus. The normal `run_main_menu` export remains available.
+- A new external adapter uses these contracts; no telephone action was installed
+  in general voice routing. See the [prototype](../../platform_integration/elevenlabs_calls/README.md).
+- Tests and live limitations: [tests/TestModLog.md](tests/TestModLog.md).
+
 ## V0.3.15 - Cohere Transcribe STT Backend (2026-03-30)
 
 ### Added

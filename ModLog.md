@@ -1,5 +1,20 @@
 # FoundUps Agent - Development Log
 
+## [2026-09-10] Japanese message-call prototype
+
+**WSP Protocols:** 03, 05, 06, 15, 22, 34, 49, 97, 105
+
+- Added a local [ElevenLabs/Twilio phone adapter](modules/platform_integration/elevenlabs_calls/README.md)
+  with prepared Japanese messages, a microphone trigger, dedicated agent profile,
+  persistent duplicate suppression and truthful call status.
+- Reused existing CLI microphone/STT; repaired forced-English Whisper and current
+  Cohere language/decoder handling. Fixed voice-ingestion public exports and
+  lazy-loaded the CLI main-menu boundary for speech reuse.
+- Setup, research, roadmap, ModLog and WSP 97 evidence live with the owning module.
+  The implementation is offline verified; real provider provisioning, Japanese
+  telephone audio and voicemail acceptance remain pending. No RedDog/WRE runtime
+  promotion or live call is claimed.
+
 ## [2026-09-05] RedDog Identity / Merged Builder Reconciliation (0.4.141)
 
 **WSP Protocols:** WSP 00, 06, 12, 15, 22, 50, 62, 73, 84, 87, 97

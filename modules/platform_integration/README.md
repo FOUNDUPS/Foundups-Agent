@@ -58,6 +58,13 @@ This domain follows **enterprise-scale modular architecture** where:
 
 ## [U+1F310] Platform Integration Modules
 
+### Telephone calls
+
+- **[elevenlabs_calls](elevenlabs_calls/README.md)** — Local Japanese message-call
+  prototype using ElevenLabs Agents and Twilio. Prepared text/contact, optional
+  spoken trigger, durable duplicate protection. Offline verified; live acceptance
+  and RedDog/WRE promotion remain explicit roadmap gates.
+
 ### **[BIRD] Social Media Platforms**
 
 #### **X (Twitter) - DAE Communication Node** 🟠

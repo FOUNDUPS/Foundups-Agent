@@ -1,5 +1,10 @@
 # voice_command_ingestion Roadmap (Sprint Plan)
 
+## Japanese input integration (2026-09-10)
+- [x] Explicit Japanese/detection selection in real-time Whisper and ingestion.
+- [x] Shared CLI adapter use by the Japanese message-call prototype.
+- [ ] Benchmark Japanese microphone recognition on the operator's workstation.
+
 ## Sprint 0 - Architecture Lock (COMPLETE)
 - [x] Confirm reuse of LiveChat routing (message_processor/message_router)
 - [x] Document whisper.cpp vs faster-whisper decision
