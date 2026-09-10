@@ -4,6 +4,7 @@
 
 - Extended the existing JHR public-contract suite instead of creating a parallel test file.
 - Added regression coverage requiring the campaign ticker to resolve its JHR text and href from the canonical published-issue registry.
+- Added the same registry seam to the sitemap so published JHR issue URLs and update dates are not maintained separately.
 - Added a guard that rejects reintroduction of the former hard-coded JHR ticker copy.
 
 ## 2026-09-06 — YUMORI presentation contract coverage
