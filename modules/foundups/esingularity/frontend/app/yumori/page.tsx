@@ -6,6 +6,7 @@ const JHR_URL = '/reports/jhr';
 const ESINGULARITY_URL = 'https://esingularity.ai/';
 const YUMORI_INFO_URL = 'https://yumori.info/';
 const INZAI_IMAGE = 'https://www.re-port.net/picture_l/report/0000074457_09.png';
+const FUKUI_HYPERSCALE_COMPARISON_IMAGE = '/yumori-inzai-fukui-comparison.webp';
 const CITY_CONTACT_URL = 'https://www.city.fukui.lg.jp/inquiry/mailform101607.html?PAGE_NO=15196';
 const MAYOR_CONTACT_URL = 'https://www.city.fukui.lg.jp/inquiry/mailform10662.html?PAGE_NO=178';
 const COUNCIL_ROSTER_URL = 'https://www.city.fukui.lg.jp/sisei/gikai/giin/p015976.html';
@@ -92,8 +93,44 @@ export default function YumoriPage() {
       </div>
     </section>
 
+    <section style={{...panel, background:'#dce2d6', color:'#111511'}}>
+      <p style={{fontWeight:850,letterSpacing:'.15em'}}>02 / SEE WHAT IS COMING — HYPERSCALE</p>
+      <h2 style={title}>印西を見てください。<br/>これが福井の田園に来たら？</h2>
+      <p style={{...body,maxWidth:1050}}>千葉・印西／白井は、国内最大級のデータセンター集積地です。NTT DATAは2026年4月、このエリアで<strong>約250MW</strong>の新キャンパス開発を発表しました。印西市では、駅周辺のデータセンター建設に伴う景観・騒音への懸念が都市計画上の課題として明記され、地区計画の変更も進んでいます。</p>
+      <p style={{...body,maxWidth:1050}}>国も地方分散を進めています。経済産業省は9道県を「データセンター集積型GX戦略地域」の有望地域として一次選定し、将来的なGW級拡張や30ha以上を目安とする産業用地を想定しています。9月9日には仙台で、約7.2ha・200MW級のAIデータセンター構想も発表されました。</p>
+
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:22,alignItems:'start',margin:'30px 0 26px'}}>
+        <figure style={{margin:0}}>
+          <img src={INZAI_IMAGE} alt="千葉県印西市の大規模データセンター開発地" style={{width:'100%',display:'block',borderRadius:18,aspectRatio:'4 / 3',objectFit:'cover'}}/>
+          <figcaption style={{fontSize:12,opacity:.72,marginTop:8}}><strong>CHIBA / INZAI — 現実の集積。</strong> DPDC印西パーク開発地。画像出典: R.E.port。規模理解のための外部参照画像。</figcaption>
+        </figure>
+        <figure style={{margin:0}}>
+          <img src={FUKUI_HYPERSCALE_COMPARISON_IMAGE} alt="印西クラスの大規模データセンターを旧すかっとランド九頭竜周辺の田園に重ねた概念比較図" style={{width:'100%',display:'block',borderRadius:18,aspectRatio:'4 / 3',objectFit:'cover'}}/>
+          <figcaption style={{fontSize:12,opacity:.72,marginTop:8}}><strong>FUKUI — もし同じ規模の土地利用が来たら。</strong> 公開情報をもとにした概念比較。実際の用地計画・測量・立地決定ではありません。</figcaption>
+        </figure>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:34,alignItems:'start'}}>
+        <div>
+          <p style={body}>福井にハイパースケール・キャンパスの立地が決まったわけではありません。ただし、福井市と小浜市はすでにGX戦略地域の<strong>「脱炭素電源活用型」有望地域</strong>に入っています。電力とAIインフラをめぐる全国競争の外にいるわけではありません。</p>
+          <p style={body}>だからYUMORIが提案するのは「データセンター反対」ではありません。<strong>地域の需要を、地域の小さなコンピュートで先に満たす。</strong> 既存建物を再利用し、1MWから始め、5→10→20MWへ必要な分だけ育てる。学校、大学、病院、農業、自治体、地域企業が使える計算資源を地域に残し、排熱も地域で使う。</p>
+          <p style={body}>巨大な外部キャンパスが来てから土地・電力・景観を守るのでは遅い。<strong>今のうちに地域側のAIインフラを設計することが、ハイパースケール集中への現実的な緩和策です。</strong></p>
+          <div style={{display:'flex',gap:12,flexWrap:'wrap',marginTop:22}}>
+            <a href={JHR_URL} style={{...darkJoin,background:'#334537'}}>JAPAN HYPERSCALER REPORT — 9/10更新版 →</a>
+            <a href={YUMORI_INFO_URL} target="_blank" rel="noreferrer" style={{...darkJoin,background:'#4b5660'}}>YUMORI.info / 詳細資料 ↗</a>
+            <Join dark />
+          </div>
+        </div>
+        <aside style={{padding:'22px',borderRadius:18,background:'#111511',color:'#fff'}}>
+          <p style={{margin:'0 0 8px',fontWeight:900,letterSpacing:'.1em'}}>YUMORI POSITION</p>
+          <p style={{fontSize:'clamp(1.15rem,2vw,1.55rem)',lineHeight:1.55,margin:0,fontWeight:800}}>データセンターは来る。<br/>だから、地域の土地・電力・利益を守る設計を先にする。</p>
+          <p lang="en" style={{fontSize:14,lineHeight:1.65,opacity:.8,marginBottom:0}}>Data centers are coming. The choice is whether communities design local compute first—or wait until land, power and value are concentrated elsewhere.</p>
+        </aside>
+      </div>
+    </section>
+
     <section style={panel}>
-      <p style={{fontWeight:850,letterSpacing:'.15em'}}>02 / REUSE — TURN WASTE INTO INFRASTRUCTURE</p>
+      <p style={{fontWeight:850,letterSpacing:'.15em'}}>03 / REUSE — TURN WASTE INTO INFRASTRUCTURE</p>
       <h2 style={title}>壊して終わる建物を、<br/>地域のAIインフラへ。</h2>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:34,alignItems:'start'}}>
         <div>
@@ -107,21 +144,6 @@ export default function YumoriPage() {
           <img src="/satellite-view.jpeg" alt="旧すかっとランド九頭竜と周辺土地を使った既存のYUMORI配置構想" style={{width:'100%',display:'block',borderRadius:18}}/>
           <figcaption style={{fontSize:12,opacity:.65,marginTop:8}}>既存のYUMORI配置構想。完成済み施設ではなく、再利用可能性を検討するための概念図です。</figcaption>
         </figure>
-      </div>
-    </section>
-
-    <section style={{...panel, background:'#dce2d6', color:'#111511'}}>
-      <p style={{fontWeight:850,letterSpacing:'.15em'}}>03 / SEE WHAT IS COMING — HYPERSCALE</p>
-      <h2 style={title}>印西を見てください。<br/>そして仙台を見てください。</h2>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:34,alignItems:'start'}}>
-        <div>
-          <p style={body}>経済産業省は、北海道・秋田・宮城・栃木・茨城・富山・香川・福岡・鹿児島の9道県を、データセンター集積型GX戦略地域の一次審査通過地域として公表しています。選定要件は将来的なGW級への拡張、30ha以上を目安とする産業用地などです。</p>
-          <p style={body}>千葉・印西では巨大集積が進む一方、2026年8月、市はデータセンター等への対応として地区計画変更の手続きを具体化しました。白井ではNTT DATAが約200MWの新キャンパスを計画。さらに9月9日、仙台では別の事業者が200MW級AIデータセンター構想を発表しました。</p>
-          <p style={body}>福井に巨大データセンターが来ることが決まったわけではありません。しかし、全国の流れは明確です。YUMORIはデータセンターそのものに反対するのではなく、<strong>田んぼや地域の土地を何十haも集約する大型キャンパスだけを唯一の未来にしない</strong>ための運動です。</p>
-          <p><a href={JHR_URL} style={link}>JAPAN HYPERSCALER REPORT #001 — 9/10更新版を読む →</a></p>
-          <Join dark />
-        </div>
-        <figure style={{margin:0}}><img src={INZAI_IMAGE} alt="千葉県印西市の大規模データセンター開発地" style={{width:'100%',display:'block',borderRadius:18}}/><figcaption style={{fontSize:12,opacity:.65,marginTop:8}}>DPDC印西パーク開発地。画像出典: R.E.port。規模理解のための外部参照画像。</figcaption></figure>
       </div>
     </section>
 
