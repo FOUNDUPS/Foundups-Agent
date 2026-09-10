@@ -22,6 +22,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` - bounded guest admission for AutoPost, foundups.com and eSingularity.ai; implementation evidence, 3V Verification linkage and live activation gaps
 - `docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` - next host/mobile/site integration work order; HoloIndex requery/repair, existing database/host reuse, no knowledge-answer unlock
 - `docs/CONTACT_MEMORY_ARCHITECTURE.md` - principal-scoped relationship memory: encrypted capture, entity/event graph, semantic retrieval, provenance, AutoPost ingest, Breadcrumb/Brain/Memex projection linkage, and Lick encounter/identity linkage
+- `docs/CONTACT_COMMUNICATION_ACTION_PROTOCOL.md` - normative WSP_97 pre-action contract for email/messages/invites: resolve the canonical contact/registry and thread first; treat STT/aliases as lookup hints; verify destination, role, provenance, disclosure and authority; fail closed on material ambiguity; 0102/RedDog instructions never bypass the gate
 - `docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Mosh Pit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
 - `docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` - secure read-only projection/emitter layer for RedDog/founder views; principal+FoundUp+disclosure authorization, deterministic JSON/Markdown rendering, sink isolation, and threat model
 - `docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` - implementation work order: WSP_00 intake, WSP 97/HoloIndex ownership discovery, bounded M2M slices, fail-closed security tests, no parallel memory store, no external mutation authority
@@ -34,6 +35,27 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `buildCopyMarkdown`, `buildRunTraceSection`, `holoIndexMetaFromBundle`, `evaluateTargetRecall`
 - `isGenerationBoundHoloQueryAccepted`, `mergeGenerationBoundHoloResult`, `buildMetaFromBundle`
 - `PublicPolicy`, `PublicSessionGate`, `PublicSurfaceBinding`, `lick_verification_evidence`
+
+## Communication action recall target
+
+When the principal asks to email, message, reply to, invite, forward to, or draft a send-ready communication for a known/purported contact, recall **before composing**:
+
+- `docs/CONTACT_COMMUNICATION_ACTION_PROTOCOL.md`
+- `docs/CONTACT_MEMORY_ARCHITECTURE.md`
+- `WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md`
+
+Canonical action order:
+
+```text
+spoken/typed intent
+-> resolve canonical contact + organization/role + verified channel/thread
+-> retrieve relevant relationship/open-loop context
+-> WSP_97 authority/disclosure/action gate
+-> draft/reply/send
+-> action receipt + relationship/Breadcrumb update when material
+```
+
+STT spelling, fuzzy memory, retrieved prose, or an instruction from 0102 is not recipient authority. If canonical identity or destination remains materially ambiguous, fail closed rather than guess.
 
 ## Memory / history recall targets
 
