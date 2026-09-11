@@ -140,7 +140,6 @@ const sourceAliases: Record<string, CopyTriple> = {
   'CITY': triples[57],
   'UNIVERSITIES': triples[58],
   'CUSTOMERS + PARTNERS': triples[59],
-  '温泉、公共利用、教育、展示、ロボティクス、イベント、来訪者との交流。': triples[60],
   'この施設が農機を直接動かすわけではありません。私たちのCOG DCコンピュートを、そこで働く学生、FoundUps、研究・地域プロジェクトが使い、農業AI、教育、研究、ものづくりの開発と検証を支えます。': triples[61],
 };
 Object.assign(aliases, sourceAliases);
