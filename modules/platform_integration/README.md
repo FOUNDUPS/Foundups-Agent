@@ -2,8 +2,8 @@
 
 ## [U+1F3E2] WSP Enterprise Domain Overview
 
-**Domain Purpose**: External platform and API integration following **WSP-3 functional distribution principles**  
-**Architecture**: Distributed modules for platform-specific concerns while maintaining domain coherence  
+**Domain Purpose**: External platform and API integration following **WSP-3 functional distribution principles**
+**Architecture**: Distributed modules for platform-specific concerns while maintaining domain coherence
 **Organization**: Master coordination node with individual module autonomy
 
 ---
@@ -68,71 +68,71 @@ This domain follows **enterprise-scale modular architecture** where:
 ### **[BIRD] Social Media Platforms**
 
 #### **X (Twitter) - DAE Communication Node** 🟠
-**Location**: [`x_twitter/`](x_twitter/README.md)  
-**Type**: Full autonomous DAE communication system  
-**Status**: WSP-26 through WSP-29 compliant  
-**Capabilities**: Entangled authentication, autonomous posting, smart DAO evolution  
-**Testing**: Comprehensive DAE test suite  
+**Location**: [`x_twitter/`](x_twitter/README.md)
+**Type**: Full autonomous DAE communication system
+**Status**: WSP-26 through WSP-29 compliant
+**Capabilities**: Entangled authentication, autonomous posting, smart DAO evolution
+**Testing**: Comprehensive DAE test suite
 **Documentation**: [README](x_twitter/README.md) | [ROADMAP](x_twitter/ROADMAP.md) | [ModLog](x_twitter/ModLog.md)
 
 #### **LinkedIn Agent** 🟡
-**Location**: [`linkedin_agent/`](linkedin_agent/README.md)  
-**Type**: Professional network automation  
-**Status**: Foundation established  
-**Capabilities**: Profile management, connection automation, content scheduling  
-**Testing**: Module-specific test suite  
+**Location**: [`linkedin_agent/`](linkedin_agent/README.md)
+**Type**: Professional network automation
+**Status**: Foundation established
+**Capabilities**: Profile management, connection automation, content scheduling
+**Testing**: Module-specific test suite
 **Documentation**: [README](linkedin_agent/README.md) | [ROADMAP](linkedin_agent/ROADMAP.md) | [ModLog](linkedin_agent/ModLog.md)
 
 #### **LinkedIn Proxy** 🟡
-**Location**: [`linkedin_proxy/`](linkedin_proxy/README.md)  
-**Type**: API gateway and rate limiting  
-**Status**: Foundation established  
-**Capabilities**: API request proxying, rate limiting, error handling  
-**Testing**: Module-specific test suite  
+**Location**: [`linkedin_proxy/`](linkedin_proxy/README.md)
+**Type**: API gateway and rate limiting
+**Status**: Foundation established
+**Capabilities**: API request proxying, rate limiting, error handling
+**Testing**: Module-specific test suite
 **Documentation**: [README](linkedin_proxy/README.md) | [ROADMAP](linkedin_proxy/ROADMAP.md) | [ModLog](linkedin_proxy/ModLog.md)
 
 #### **LinkedIn Scheduler** 🟡
-**Location**: [`linkedin_scheduler/`](linkedin_scheduler/README.md)  
-**Type**: Content scheduling and timing optimization  
-**Status**: Foundation established  
-**Capabilities**: Post scheduling, optimal timing analysis, content queuing  
-**Testing**: Module-specific test suite  
+**Location**: [`linkedin_scheduler/`](linkedin_scheduler/README.md)
+**Type**: Content scheduling and timing optimization
+**Status**: Foundation established
+**Capabilities**: Post scheduling, optimal timing analysis, content queuing
+**Testing**: Module-specific test suite
 **Documentation**: [README](linkedin_scheduler/README.md) | [ROADMAP](linkedin_scheduler/ROADMAP.md) | [ModLog](linkedin_scheduler/ModLog.md)
 
 ### **[U+1F4FA] Video Platforms**
 
 #### **YouTube Authentication** 🟢
-**Location**: [`youtube_auth/`](youtube_auth/README.md)  
-**Type**: OAuth and credential management  
-**Status**: Foundation established  
-**Capabilities**: YouTube API authentication, token management, credential rotation  
-**Testing**: Module-specific test suite  
+**Location**: [`youtube_auth/`](youtube_auth/README.md)
+**Type**: OAuth and credential management
+**Status**: Foundation established
+**Capabilities**: YouTube API authentication, token management, credential rotation
+**Testing**: Module-specific test suite
 **Documentation**: [README](youtube_auth/README.md) | [ROADMAP](youtube_auth/ROADMAP.md) | [ModLog](youtube_auth/ModLog.md)
 
 #### **YouTube Proxy** 🟢
-**Location**: [`youtube_proxy/`](youtube_proxy/README.md)  
-**Type**: API gateway and data processing  
-**Status**: Foundation established  
-**Capabilities**: YouTube API proxying, data transformation, rate limiting  
-**Testing**: Module-specific test suite  
+**Location**: [`youtube_proxy/`](youtube_proxy/README.md)
+**Type**: API gateway and data processing
+**Status**: Foundation established
+**Capabilities**: YouTube API proxying, data transformation, rate limiting
+**Testing**: Module-specific test suite
 **Documentation**: [README](youtube_proxy/README.md) | [ROADMAP](youtube_proxy/ROADMAP.md) | [ModLog](youtube_proxy/ModLog.md)
 
 ### **[TOOL] Infrastructure Integration**
 
 #### **Stream Resolver** [U+1F535]
-**Location**: [`stream_resolver/`](stream_resolver/README.md)  
-**Type**: Multi-platform stream management  
-**Status**: Foundation established  
-**Capabilities**: Stream URL resolution, platform detection, metadata extraction  
-**Testing**: Module-specific test suite  
+**Location**: [`stream_resolver/`](stream_resolver/README.md)
+**Type**: Multi-platform stream management
+**Status**: Foundation established
+**Capabilities**: Stream URL resolution, platform detection, metadata extraction
+**Testing**: Module-specific test suite
 **Documentation**: [README](stream_resolver/README.md) | [ROADMAP](stream_resolver/ROADMAP.md) | [ModLog](stream_resolver/ModLog.md)
 
 #### **Remote Builder** [U+1F535]
-**Location**: [`remote_builder/`](remote_builder/README.md)  
-**Type**: Remote development and deployment  
-**Status**: POC development  
-**Capabilities**: Remote module building, webhook endpoints, build orchestration  
-**Testing**: Module-specific test suite  
+**Location**: [`remote_builder/`](remote_builder/README.md)
+**Type**: Remote development and deployment
+**Status**: POC development
+**Capabilities**: Remote module building, webhook endpoints, build orchestration
+**Testing**: Module-specific test suite
 **Documentation**: [README](remote_builder/README.md) | [ROADMAP](remote_builder/ROADMAP.md) | [MODLOG](remote_builder/MODLOG.md)
 
 ---
@@ -150,7 +150,7 @@ All modules follow standardized structure:
 ```
 [module_name]/
 +-- README.md               # Module documentation
-+-- ROADMAP.md             # Module development plan  
++-- ROADMAP.md             # Module development plan
 +-- ModLog.md              # Module change history
 +-- src/                   # Implementation code
 +-- tests/                 # Module-specific test suite
@@ -189,4 +189,6 @@ All modules follow standardized structure:
 
 ---
 
-*This domain exemplifies enterprise-scale modular architecture where individual modules maintain autonomy while benefiting from coordinated patterns and shared architectural principles.* 
+*This domain exemplifies enterprise-scale modular architecture where individual modules maintain autonomy while benefiting from coordinated patterns and shared architectural principles.*
+Japanese phone-call agent build: [roadmap](elevenlabs_calls/ROADMAP.md) ·
+[M2M/Prometheus work orders](elevenlabs_calls/work_orders/README.md).

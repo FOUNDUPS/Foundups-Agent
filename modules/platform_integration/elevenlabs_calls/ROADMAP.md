@@ -50,3 +50,14 @@ authority is proposed. IVR, appointments and autonomous retries remain unplanned
 03 live CLI acceptance → 04 request preparation → 05 governed runtime binding →
 06 full voice-to-call acceptance → 08 closeout. Order 07 sound POC follows 03 and
 is optional for prototype closure. Work-order creation does not complete these gates.
+
+| Work order | Deliverable | Dependency |
+|---|---|---|
+| [JP-CALL-01](work_orders/01_baseline.json) | Reproduce the existing prototype baseline and identify concrete gaps without rebuilding it. | None |
+| [JP-CALL-02](work_orders/02_provider_setup.json) | Make the existing ElevenLabs/Twilio adapter ready for a controlled Japanese call. | JP-CALL-01 |
+| [JP-CALL-03](work_orders/03_live_acceptance.json) | Prove that the current prepared-request prototype leaves a complete Japanese message. | JP-CALL-02 |
+| [JP-CALL-04](work_orders/04_request_preparation.json) | Turn an English or Japanese instruction into a resolved Japanese call request using existing voice and contact components. | JP-CALL-03 |
+| [JP-CALL-05](work_orders/05_runtime_binding.json) | Expose one discoverable phone action through the existing governed RedDog/WRE boundary. | JP-CALL-04 |
+| [JP-CALL-06](work_orders/06_end_to_end.json) | Verify the full speak-to-0102, call-in-Japanese, report-result prototype in its actual host. | JP-CALL-05 |
+| [JP-CALL-07](work_orders/07_sound_poc.json) | Measure Japanese telephone sound quality after the calling prototype works. | JP-CALL-03 |
+| [JP-CALL-08](work_orders/08_closeout.json) | Publish a truthful reproducible prototype handoff and reconcile all agent evidence. | JP-CALL-06 |

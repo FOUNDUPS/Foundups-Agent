@@ -1,5 +1,15 @@
 # ModLog — elevenlabs_calls
 
+## 2026-09-11 — PR closeout and discovery links
+
+Added direct links to all eight work orders in ROADMAP.md, domain-index links and
+NAVIGATION.py entries. Updated against current main without conflicts. Work orders
+remain planned; merging this prototype does not certify live call delivery.
+WSP 00 used its documented torch-free gate fallback (detector unavailable).
+Holo query could not import its package in the recovered sparse checkout; lexical
+module evidence established ownership. WSP 97 scope: retrieve existing roadmap,
+check owner boundaries, preserve one work-order source, add links and validate.
+
 ## 2026-09-11 — M2M/Prometheus build assignments
 
 **WSP Protocol:** 15, 21, 22, 97, 99
