@@ -2,6 +2,14 @@
 
 This module provides the command-line interface for the FoundUps Agent system.
 
+Japanese STT: set `OPENCLAW_VOICE_STT_LANGUAGE=ja`; the Whisper, Cohere and Google
+adapters receive the selected language. Explicit adapter arguments override the
+environment. Cohere decoding supports current `decode` and older `batch_decode`
+processors. Desktop TTS is unchanged. Speech imports no longer boot the main menu.
+The [Japanese message-call prototype](../../platform_integration/elevenlabs_calls/README.md)
+reuses microphone capture with a dedicated local command; general RedDog voice
+routing has no newly registered telephone action.
+
 ## Purpose
 
 Extracted from `main.py` per WSP 62 (file size enforcement) to maintain compliant module sizes.
