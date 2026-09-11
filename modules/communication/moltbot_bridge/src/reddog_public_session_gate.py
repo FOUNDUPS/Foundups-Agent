@@ -13,7 +13,7 @@ import secrets
 from typing import Callable
 
 from .reddog_public_policy import (
-    PublicAdmissionError, PublicPolicy, checked_clock, checked_hex,
+    LICK_CONSENT_VERSION, PublicAdmissionError, PublicPolicy, checked_clock, checked_hex,
     checked_surface, encounter_request, lick_challenge_request,
     lick_encounter_request, lick_receipt, lick_verification_evidence, turn_request,
 )
@@ -118,7 +118,9 @@ class PublicSessionGate:
                          (self._hash(token), encounter, surface, origin, subject, claim, now, now, nonce))
         return {"token": token, "nonce": nonce, "revision": 0,
                 "remaining_turns": self.policy.session_turns,
-                "lick": lick_verification_evidence(encounter, claim, now + self.policy.session_seconds)}
+                "lick": lick_verification_evidence(
+                    encounter, claim, now + self.policy.session_seconds,
+                    consent_version=body["consent_version"])}
 
     def open_lick_encounter(self, *, surface: str, origin: str, subject: str,
                             body: dict, now: int) -> dict:
@@ -144,6 +146,9 @@ class PublicSessionGate:
             "expires_at": now + self.policy.session_seconds,
             "identity_state": "provisional",
             "authority_granted": "none",
+            "verification": lick_verification_evidence(
+                encounter, claim, now + self.policy.session_seconds,
+                consent_version=LICK_CONSENT_VERSION),
         }
 
     def _insert_lick(self, conn, token, encounter, surface, origin, subject,

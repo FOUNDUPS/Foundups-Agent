@@ -1,6 +1,7 @@
 """Synthetic, real-SQLite tests; no model, network, private data or paid calls."""
 from concurrent.futures import ThreadPoolExecutor
 import json
+from pathlib import Path
 
 import pytest
 import sys
@@ -10,6 +11,8 @@ s = sys.modules["_reddog_public_boundary_tests.reddog_public_session_gate"]
 NOW = 1800000000
 COMMON = dict(surface="foundups", origin="https://foundups.com", subject="a" * 64)
 CLAIM = dict(consent=True, consent_version=p.CONSENT_VERSION, actor_claim="unspecified")
+CONTRACT = json.loads((Path(__file__).resolve().parents[5] /
+                       "extensions/reddog/contracts/public-surface-v1.json").read_text())
 
 
 def encounter(gate, **kw):
@@ -27,7 +30,7 @@ def advance(gate, session, result, now=NOW):
 
 
 @pytest.mark.parametrize("surface,origin", [(k, next(iter(v))) for k, v in p.SURFACE_ORIGINS.items()])
-def test_all_three_surfaces_bind_guest_only(store, surface, origin):
+def test_all_declared_surfaces_bind_guest_only(store, surface, origin):
     gate, _ = store
     session = encounter(gate, surface=surface, origin=origin)
     evidence = session["lick"]
@@ -40,6 +43,74 @@ def test_all_three_surfaces_bind_guest_only(store, surface, origin):
     assert evidence["validation"] == evidence["valuation"] == "not_evaluated"
     result = turn(gate, session, surface=surface, origin=origin)
     assert result.disclosure == "public" and result.effect_ceiling == "NONE"
+
+
+def test_language_neutral_contract_matches_python_policy():
+    policy = p.PublicPolicy()
+    limits = {name: getattr(policy, name) for name in policy.__dataclass_fields__}
+    origins = {name: sorted(values) for name, values in p.SURFACE_ORIGINS.items()}
+    assert CONTRACT["schema_version"] == "reddog.public-surface.contract.v1"
+    assert CONTRACT["limits"] == limits
+    assert {name: sorted(values) for name, values in CONTRACT["surfaces"].items()} == origins
+    assert CONTRACT["consent_versions"] == {
+        "guest": p.CONSENT_VERSION, "lick": p.LICK_CONSENT_VERSION,
+    }
+    assert CONTRACT["classification"] == {
+        "disclosure": "public", "effect_ceiling": "NONE", "authority_granted": "none",
+    }
+    allowed = CONTRACT["allowed_values"]
+    assert sorted(p.ACTOR_CLAIMS) == sorted(allowed["actor_claims"])
+    assert sorted(p.LICK_PROFILE_MODES) == sorted(allowed["lick_profile_modes"])
+    assert sorted(p.LICK_RETENTIONS) == sorted(allowed["lick_retentions"])
+    assert sorted(p.PUBLIC_OPERATIONS) == sorted(CONTRACT["operations"])
+    assert {name: sorted(fields) for name, fields in p.REQUEST_FIELDS.items()} == {
+        name: sorted(fields) for name, fields in CONTRACT["request_fields"].items()
+    }
+
+
+def _fixed_evidence(record):
+    dynamic = {"encounter_id", "actor_claim", "expires_at"}
+    return {key: value for key, value in record.items() if key not in dynamic}
+
+
+@pytest.mark.parametrize("kind,version", [
+    ("guest_verification", p.CONSENT_VERSION),
+    ("lick_verification", p.LICK_CONSENT_VERSION),
+])
+def test_verification_evidence_matches_contract(kind, version):
+    evidence = p.lick_verification_evidence(
+        "encounter", "human", NOW + 600, consent_version=version,
+    )
+    assert _fixed_evidence(evidence) == CONTRACT["evidence"][kind]
+
+
+def test_lick_receipt_matches_contract():
+    receipt = p.lick_receipt(
+        encounter="encounter", profile_id="profile", claim="human",
+        display_name="Builder", surface="yumori", issued=NOW, expires=NOW + 600,
+    )
+    expected = CONTRACT["evidence"]["lick_receipt"]
+    assert receipt["schema_version"] == expected["schema_version"]
+    assert receipt["profile"]["schema_version"] == expected["profile_schema_version"]
+    assert receipt["profile"]["identity_state"] == expected["identity_state"]
+    assert receipt["consent"] == {
+        "version": expected["consent_version"], "scope": expected["consent_scope"],
+        "retention": expected["consent_retention"],
+    }
+    assert receipt["proofs"] == [{
+        "kind": expected["proof_kind"], "result": expected["proof_result"],
+    }]
+    for field in ("identity_verified", "human_presence_proven", "biometrics_collected",
+                  "signed", "authority_granted"):
+        assert receipt[field] == expected[field]
+
+
+@pytest.mark.parametrize("version", ["reddog.unknown.v1", None, []])
+def test_verification_rejects_unknown_consent_version(version):
+    with pytest.raises(p.PublicAdmissionError, match="consent_version_invalid"):
+        p.lick_verification_evidence(
+            "encounter", "human", NOW + 600, consent_version=version,
+        )
 
 
 @pytest.mark.parametrize("claim", ["human", "agent", "unspecified"])
@@ -61,6 +132,17 @@ def test_limits_cannot_be_disabled_or_widened(field, value):
     ("foundups", "https://foundups.com.evil.example"), ("foundups", "http://foundups.com"),
     ("foundups", "null"), ("foundups", "https://esingularity.ai"), ("unknown", "https://foundups.com")])
 def test_origin_is_exact_and_not_identity(surface, origin):
+    with pytest.raises(p.PublicAdmissionError):
+        p.checked_surface(surface, origin)
+
+
+@pytest.mark.parametrize("surface,origin", [
+    ("yumori", "http://yumori.me"),
+    ("yumori", "https://yumori.info"),
+    ("yumori", "https://yumori.me.evil.example"),
+    ("esingularity", "https://yumori.me"),
+])
+def test_yumori_origin_is_exact_and_surface_bound(surface, origin):
     with pytest.raises(p.PublicAdmissionError):
         p.checked_surface(surface, origin)
 

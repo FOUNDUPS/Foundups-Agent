@@ -1,0 +1,134 @@
+{
+  "schema_version": "reddog.public-surface.contract.v1",
+  "classification": {
+    "disclosure": "public",
+    "effect_ceiling": "NONE",
+    "authority_granted": "none"
+  },
+  "surfaces": {
+    "autopost": [
+      "https://autopost.foundups.com"
+    ],
+    "esingularity": [
+      "https://esingularity.ai",
+      "https://www.esingularity.ai"
+    ],
+    "foundups": [
+      "https://foundups.com"
+    ],
+    "yumori": [
+      "https://yumori.me",
+      "https://www.yumori.me"
+    ]
+  },
+  "consent_versions": {
+    "guest": "reddog.public-guest.v1",
+    "lick": "reddog.lick.open.v1"
+  },
+  "allowed_values": {
+    "actor_claims": [
+      "human",
+      "agent",
+      "unspecified"
+    ],
+    "lick_profile_modes": [
+      "guest",
+      "named"
+    ],
+    "lick_retentions": [
+      "session"
+    ]
+  },
+  "operations": [
+    "encounter",
+    "lick",
+    "challenge",
+    "turn",
+    "status",
+    "withdraw"
+  ],
+  "request_fields": {
+    "encounter": [
+      "consent",
+      "consent_version",
+      "actor_claim"
+    ],
+    "lick": [
+      "consent",
+      "consent_version",
+      "actor_claim",
+      "profile_mode",
+      "display_name",
+      "retention"
+    ],
+    "challenge": [
+      "challenge"
+    ],
+    "turn": [
+      "nonce",
+      "revision",
+      "message"
+    ],
+    "status": [],
+    "withdraw": []
+  },
+  "limits": {
+    "session_seconds": 600,
+    "idle_seconds": 120,
+    "session_turns": 10,
+    "subject_sessions_daily": 3,
+    "global_sessions_daily": 200,
+    "subject_turns_daily": 20,
+    "global_turns_daily": 1000,
+    "concurrent_calls": 4,
+    "input_chars": 2000,
+    "output_tokens": 256,
+    "reply_chars": 4000,
+    "request_seconds": 15
+  },
+  "evidence": {
+    "guest_verification": {
+      "schema_version": "reddog.lick.public-verification.v1",
+      "stage": "verification",
+      "consent_version": "reddog.public-guest.v1",
+      "identity_state": "provisional",
+      "identity_verified": false,
+      "human_presence_proven": false,
+      "agent_assistance_detected": null,
+      "assistance_assessment": "not_performed",
+      "signed": false,
+      "authority_granted": "none",
+      "validation": "not_evaluated",
+      "valuation": "not_evaluated"
+    },
+    "lick_verification": {
+      "schema_version": "reddog.lick.public-verification.v1",
+      "stage": "verification",
+      "consent_version": "reddog.lick.open.v1",
+      "identity_state": "provisional",
+      "identity_verified": false,
+      "human_presence_proven": false,
+      "agent_assistance_detected": null,
+      "assistance_assessment": "not_performed",
+      "signed": false,
+      "authority_granted": "none",
+      "validation": "not_evaluated",
+      "valuation": "not_evaluated"
+    },
+    "lick_receipt": {
+      "schema_version": "reddog.lick.receipt.v1",
+      "profile_schema_version": "reddog.lick.encounter-profile.v1",
+      "consent_version": "reddog.lick.open.v1",
+      "consent_scope": "current_encounter",
+      "consent_retention": "session",
+      "identity_state": "provisional",
+      "proof_kind": "randomized_challenge_continuity",
+      "proof_result": "completed",
+      "identity_verified": false,
+      "human_presence_proven": false,
+      "biometrics_collected": false,
+      "signed": false,
+      "authority_granted": "none"
+    }
+  }
+}
