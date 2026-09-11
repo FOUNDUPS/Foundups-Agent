@@ -24,6 +24,15 @@
 - D-K visual language may be inspired by Akira Hasegawa's Digital Kakejiku work, but Hasegawa participation or headquarters status is never represented as committed without separate agreement.
 - The full design/provenance record is `docs/YUMORI_VISION_DECK_20260911.md`.
 
+## Japanese-first public copy contract
+
+- Japanese (`html lang="ja"`) is the canonical public reading experience. English-only structural labels are not allowed to leak into the Japanese tab except proper names or technical identifiers such as `COG DC`, `D-K`, `AI`, `eSingularity`, and a defined `FoundUp` term.
+- Public-facing `Innovation Hub` wording is replaced by `イノベーション・スペース` / `Innovation Space`. The space is for people and teams; a person is not a FoundUp.
+- `FoundUp` names a problem-solving project. Japanese copy should introduce it as `FoundUpプロジェクト` or `課題解決プロジェクト` when the audience may not know the term. Do not use `FoundUps` as a label for people.
+- Floor labels in Japanese are purpose-based: `下層階 · 温泉・地域スペース`, `3階 · 挑戦・育成スペース`, `最上階 · 実証・発展スペース`, and `別棟 · COG DC`.
+- The Japanese surface uses Japanese section labels for building value, visitor economy, council decision, AI rice-field explanation, community participation, meetings, and calls to action instead of decorative English headings.
+- `frontend/components/JapaneseSurfacePolisher.tsx` is the bounded compatibility layer for legacy hard-coded labels while route-by-route copy is migrated to a true structured locale source. It must preserve English and Portuguese equivalents when the language switcher changes `html.lang`.
+
 ## FoundUps shell contract
 
 | Field | Value |
