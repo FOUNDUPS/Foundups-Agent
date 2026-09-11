@@ -1,0 +1,54 @@
+name: RedDog backend manifest refresh (temporary)
+
+on:
+  push:
+    branches:
+      - fix/reddog-current-main-reconciliation-20260912
+    paths:
+      - .github/workflows/reddog-backend-manifest-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Regenerate manifest, pin digest, verify, self-remove
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          digest="$(python scripts/generate_reddog_backend_manifest.py --write | head -n1)"
+          python - "$digest" <<'PY'
+          from pathlib import Path
+          import re, sys
+          path = Path('extensions/reddog/backend_compatibility_constants.js')
+          text = path.read_text(encoding='utf-8')
+          digest = sys.argv[1]
+          text, count = re.subn(
+              r"EXPECTED_MANIFEST_SHA256 = '[a-f0-9]{64}'",
+              f"EXPECTED_MANIFEST_SHA256 = '{digest}'",
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit('manifest digest pin not found')
+          path.write_text(text, encoding='utf-8', newline='\n')
+          PY
+          python scripts/generate_reddog_backend_manifest.py --check
+          python -m pytest -q scripts/tests/test_generate_reddog_backend_manifest.py
+          git rm .github/workflows/reddog-backend-manifest-once.yml
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/reddog_backend_manifest.json extensions/reddog/backend_compatibility_constants.js
+          git commit -m "chore(reddog): refresh backend compatibility manifest"
+          git push origin HEAD:fix/reddog-current-main-reconciliation-20260912
