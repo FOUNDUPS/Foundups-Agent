@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_JP, Space_Mono } from 'next/font/google';
+import JhrPromo from '../components/JhrPromo';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import PwaRegister from '../components/PwaRegister';
 import './globals.css';
@@ -37,30 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <LanguageSwitcher />
         <PwaRegister />
         {children}
-        <a
-          href="/reports/jhr"
-          aria-label="Japan Hyperscaler Reportを読む"
-          style={{
-            position: 'fixed',
-            right: 16,
-            bottom: 16,
-            zIndex: 1000,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '12px 16px',
-            borderRadius: 999,
-            background: '#0b2545',
-            color: '#fff',
-            textDecoration: 'none',
-            fontWeight: 900,
-            fontSize: 13,
-            letterSpacing: '.03em',
-            boxShadow: '0 8px 28px rgba(0,0,0,.28)',
-          }}
-        >
-          JHR · レポートを読む / READ REPORT ↗
-        </a>
+        <JhrPromo />
       </body>
     </html>
   );

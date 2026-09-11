@@ -1,5 +1,12 @@
 # eSingularity TestModLog
 
+## 2026-09-11 — JHR visibility and canonical-link audit
+
+- Extended the existing JHR public-contract suite instead of adding a parallel test file.
+- Added a canonical JHR issue registry with an absolute eSingularity report URL so custom-domain rendering cannot silently retarget the ticker to another host.
+- Added regression coverage for the persistent visual JHR promo, the existing Fukui/Inzai comparison image, registry-driven sitemap entries, and removal of hard-coded ticker copy.
+- Added a concise three-signal visual summary and explicit Fukui truth boundary to the JHR hero while removing the duplicate hero H1 semantics.
+
 ## 2026-09-06 — YUMORI presentation contract coverage
 
 - Replaced corrupted legacy assertions with twelve UTF-8 contract tests for the current public architecture.
