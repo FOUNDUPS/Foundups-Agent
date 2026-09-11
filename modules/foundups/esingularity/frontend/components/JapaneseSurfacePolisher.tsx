@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 
 type Language = 'ja' | 'en' | 'pt';
-
 type CopyTriple = Record<Language, string>;
 
 const triples: CopyTriple[] = [
@@ -39,6 +38,38 @@ const triples: CopyTriple[] = [
   { ja: '対象施設', en: 'PROJECT SITE', pt: 'LOCAL DO PROJETO' },
   { ja: 'AI × 温泉 × 教育 × 農業 × 地域', en: 'AI × ONSEN × EDUCATION × AGRICULTURE × COMMUNITY', pt: 'IA × ONSEN × EDUCAÇÃO × AGRICULTURA × COMUNIDADE' },
   { ja: 'JHR · レポートを読む ↗', en: 'JHR · READ REPORT ↗', pt: 'JHR · LER RELATÓRIO ↗' },
+
+  // Japanese tab should read like a Japanese public site, not an English design with Japanese paragraphs.
+  { ja: 'なぜ · 温泉を守る', en: 'WHY · SAVE THE ONSEN', pt: 'POR QUÊ · SALVAR O ONSEN' },
+  { ja: '未来像 · ここがどう変わる？', en: 'WHAT · HOW WILL THIS PLACE CHANGE?', pt: 'VISÃO · COMO ESTE LUGAR VAI MUDAR?' },
+  { ja: '敷地構想', en: 'SITE CONCEPT', pt: 'CONCEITO DO LOCAL' },
+  { ja: '温泉構想', en: 'ONSEN CONCEPT', pt: 'CONCEITO DO ONSEN' },
+  { ja: '01 · 露天風呂', en: '01 · ROTENBURO', pt: '01 · ROTENBURO' },
+  { ja: '技術検証が必要', en: 'ENGINEERING VALIDATION REQUIRED', pt: 'VALIDAÇÃO TÉCNICA NECESSÁRIA' },
+  { ja: '02 · 食', en: '02 · FOOD', pt: '02 · COMIDA' },
+  { ja: 'あわら型 · 地域の食の横丁', en: 'AWARA-INSPIRED COMMUNITY FOOD COURT', pt: 'VILA GASTRONÔMICA COMUNITÁRIA INSPIRADA EM AWARA' },
+  { ja: '03 · 夜', en: '03 · NIGHT', pt: '03 · NOITE' },
+  { ja: 'D-K / デジタル掛軸 提案構想', en: 'PROPOSED DIGITAL KAKEJIKU EXPERIENCE', pt: 'EXPERIÊNCIA DIGITAL KAKEJIKU PROPOSTA' },
+  { ja: '写真', en: 'VISIT', pt: 'VISITAR' },
+  { ja: '聴く', en: 'LISTEN', pt: 'OUVIR' },
+  { ja: '計画', en: 'PLAN', pt: 'PLANO' },
+  { ja: '詳しく', en: 'EXPLORE', pt: 'EXPLORAR' },
+  { ja: '参加', en: 'JOIN', pt: 'PARTICIPAR' },
+  { ja: '行動', en: 'ACTION', pt: 'AÇÃO' },
+  { ja: '反対票', en: 'VOTE NO', pt: 'VOTE NÃO' },
+  { ja: '10枚のビジョン', en: 'PRESENTATION', pt: 'APRESENTAÇÃO' },
+  { ja: '僧の現在地', en: 'MONK', pt: 'MONGE' },
+  { ja: '新着', en: 'NEW', pt: 'NOVO' },
+  { ja: '温泉を守る', en: 'SAVE OUR ONSEN', pt: 'SALVE NOSSO ONSEN' },
+  { ja: '九頭竜を守る', en: 'SAVE THE DRAGON', pt: 'SALVE KUZURYU' },
+  { ja: '停止', en: 'STOP', pt: 'PARAR' },
+  { ja: 'チーム形成', en: 'ASSEMBLE', pt: 'FORMAR EQUIPE' },
+  { ja: '土地', en: 'LAND', pt: 'TERRENO' },
+  { ja: '市', en: 'CITY', pt: 'CIDADE' },
+  { ja: '大学', en: 'UNIVERSITIES', pt: 'UNIVERSIDADES' },
+  { ja: '顧客・協力者', en: 'CUSTOMERS + PARTNERS', pt: 'CLIENTES + PARCEIROS' },
+  { ja: '温泉・地域・教育', en: 'ONSEN · COMMUNITY · EDUCATION', pt: 'ONSEN · COMUNIDADE · EDUCAÇÃO' },
+  { ja: '私たちのCOG DCコンピュートを、そこで働く学生、FoundUpプロジェクト、研究・地域プロジェクトが使い、農業AI、教育、研究、ものづくりの開発と検証を支えます。', en: 'Students, FoundUp projects, research and community projects working there can use our COG DC compute to support development and validation in agricultural AI, education, research and manufacturing.', pt: 'Estudantes, projetos FoundUp, pesquisa e projetos comunitários que trabalham ali podem usar nossa computação COG DC para apoiar desenvolvimento e validação em IA agrícola, educação, pesquisa e manufatura.' },
 ];
 
 const aliases: Record<string, CopyTriple> = {};
@@ -81,6 +112,36 @@ const sourceAliases: Record<string, CopyTriple> = {
   'PROJECT SITE': triples[29],
   'AI × ONSEN × EDUCATION × AGRICULTURE × COMMUNITY': triples[30],
   'JHR · レポートを読む / READ REPORT ↗': triples[31],
+  'WHY · 温泉を守る': triples[32],
+  'WHAT · ここがどう変わる？': triples[33],
+  'SITE CONCEPT': triples[34],
+  'ONSEN CONCEPT': triples[35],
+  '01 · ROTENBURO': triples[36],
+  'ENGINEERING VALIDATION REQUIRED': triples[37],
+  '02 · FOOD': triples[38],
+  'AWARA-INSPIRED COMMUNITY FOOD COURT': triples[39],
+  '03 · NIGHT': triples[40],
+  'PROPOSED DIGITAL KAKEJIKU EXPERIENCE': triples[41],
+  'VISIT': triples[42],
+  'LISTEN': triples[43],
+  'PLAN': triples[44],
+  'EXPLORE': triples[45],
+  'JOIN': triples[46],
+  'ACTION': triples[47],
+  'VOTE NO': triples[48],
+  'PRESENTATION': triples[49],
+  'MONK': triples[50],
+  'NEW': triples[51],
+  'SAVE OUR ONSEN': triples[52],
+  'SAVE THE DRAGON': triples[53],
+  'STOP': triples[54],
+  'ASSEMBLE': triples[55],
+  'LAND': triples[56],
+  'CITY': triples[57],
+  'UNIVERSITIES': triples[58],
+  'CUSTOMERS + PARTNERS': triples[59],
+  '温泉、公共利用、教育、展示、ロボティクス、イベント、来訪者との交流。': triples[60],
+  'この施設が農機を直接動かすわけではありません。私たちのCOG DCコンピュートを、そこで働く学生、FoundUps、研究・地域プロジェクトが使い、農業AI、教育、研究、ものづくりの開発と検証を支えます。': triples[61],
 };
 Object.assign(aliases, sourceAliases);
 
