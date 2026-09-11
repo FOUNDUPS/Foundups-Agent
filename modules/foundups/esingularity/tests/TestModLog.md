@@ -1,5 +1,13 @@
 # eSingularity TestModLog
 
+## 2026-09-11 — Full-screen real-building vision deck coverage
+
+- Updated the existing presentation contract tests to treat `frontend/content/yumori-vision.ts` as the current real-building ten-slide semantic/evidence source.
+- Added regression coverage for the optimized `public/vision/vision-sprite.jpg`, responsive sprite positioning, full-screen/deep-link behavior, keyboard Left/Right/Escape controls, touch swiping and reduced-motion handling.
+- Added exact current slide-spine checks for option value, D-K, 24-hour onsen/wellness, AI rice field, COG DC heat reuse, 60 FoundUps plus B1 gym/rest/recovery, local problem-to-FoundUp, distributed Fukui prototype and closing choice.
+- Added financial truth-boundary checks for reported demolition estimate vs. modeled five-year revenue and cumulative FCFE.
+- Retained public-source checks on the landing page for Fukui AI/agriculture/satellite/manufacturing sources and the official D-K destination.
+
 ## 2026-09-06 — YUMORI presentation contract coverage
 
 - Replaced corrupted legacy assertions with twelve UTF-8 contract tests for the current public architecture.

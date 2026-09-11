@@ -1,5 +1,17 @@
 # Project eSingularity ModLog
 
+## 2026-09-11 — Real-building full-screen YUMORI vision deck
+
+- Replaced the presentation renderer with the revised ten-slide vision based on 012's photographs of the actual former Sukatto Land Kuzuryu building rather than a generic greenfield resort.
+- Kept eSingularity.ai as the canonical vision surface and YUMORI.me as the movement/join surface; the final deck action routes to YUMORI instead of duplicating a second independently maintained deck.
+- Added full-screen 16:9 presentation mode, touch swipe, previous/next, direct slide selectors, optional nine-second progression, reduced-motion handling, keyboard Left/Right/Escape, and `?vision=1&slide=N#yumori-deck` deep links.
+- Packed the ten approved concept slides into one optimized vertical sprite at `frontend/public/vision/vision-sprite.jpg`; structured Japanese-first text/evidence remains in `frontend/content/yumori-vision.ts` for accessibility, search, translation and RedDog grounding.
+- Preserved whole-slide rendering with no text cropping and kept bathers inside screened/private onsen areas rather than public event circulation.
+- Added the revised program: 24-hour onsen concept, B1 gym/rest/recovery, D-K-inspired night activation, COG DC heat-reuse candidates, 60 FoundUps with maximum three humans per team, local problem-to-FoundUp agriculture, and Fukui distributed-compute prototype.
+- Kept Slide 02 accounting categories separate: reported ~¥1.58B demolition estimate, verified 129,649 FY2018 users, modeled ~¥5.37B five-year revenue and modeled ~¥1.94B cumulative five-year FCFE. These are not forecasts or guarantees and are not added together as one return measure.
+- Added `docs/YUMORI_VISION_DECK_20260911.md` and updated `INTERFACE.md` so future agents can recover the visual, domain, evidence, financial and D-K truth boundaries without relying on chat history.
+- Updated existing contract coverage for the sprite, full-screen/deep-link controls, current ten-slide spine and retained public-source boundaries.
+
 ## 2026-09-06 — Japanese-first YUMORI cinematic presentation
 
 - Added a mobile-first ten-slide presentation immediately below the existing hero, without replacing the page shell or campaign sections.

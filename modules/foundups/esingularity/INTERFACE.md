@@ -4,19 +4,34 @@
 
 | Route | Purpose |
 | --- | --- |
-| `/` | 温泉を守る / campaign landing page |
+| `/` | 温泉を守る / campaign landing page and canonical 10-slide vision presentation |
 | `/future` | 福井の未来 / community-benefit explanation |
 | `/team` | Verified public team directory |
 | `/team/[slug]` | Individual public profile |
 
 ## YUMORI presentation contract
 
+- eSingularity.ai is the canonical home of the project vision; YUMORI.me remains the movement/join surface.
 - The landing page mounts the presentation at `#yumori-deck`, immediately after the existing hero.
 - The existing campaign ticker contains exactly one `NEW` notification linking to that anchor; the ticker itself is not replaced or duplicated.
-- `frontend/content/yumori-presentation.ts` is the canonical content boundary: Japanese is authored first, and English/Portuguese states derive from it.
-- The component presents ten slides with previous/next controls, direct slide selectors, touch swiping, a play/pause control, and nine-second timed progression.
-- Focus, pointer, wheel, disclosure, or navigation interaction pauses timed progression. Reduced-motion preference disables it.
-- Each slide follows image/visual → proposition → explanation → evidence, with detailed material collapsed by default.
+- `frontend/content/yumori-vision.ts` is the canonical content boundary for the current real-building 10-slide vision. Japanese is authored first; English and Portuguese are derived states.
+- `frontend/content/yumori-presentation.ts` remains the legacy/detail presentation source used by existing campaign evidence and translation contracts; do not silently merge the two truth layers.
+- The visual deck is built from the 2026-09-11 real Sukatto Land Kuzuryu photo set and generated adaptive-reuse concepts. The runtime serves one optimized vertical sprite at `frontend/public/vision/vision-sprite.jpg`; structured text/evidence stays in HTML/TypeScript for accessibility, search, translation and RedDog grounding.
+- The component presents ten 16:9 slides with previous/next controls, direct slide selectors, touch swiping, play/pause, reduced-motion handling and keyboard Left/Right/Escape support.
+- `?vision=1&slide=N#yumori-deck` is the canonical deep-link form for opening the deck full screen at a specific slide. Full-screen rendering uses `contain`/whole-slide semantics: no slide text may be cropped.
+- Slide 01 is the real-building reuse vision. Slide 02 separates reported demolition cost from modeled five-year revenue/FCFE. Slides 03-10 cover D-K culture, onsen/wellness, AI rice field, COG DC heat reuse, 60 FoundUps/eSingularity Lab plus B1 gym/recovery, local problem-to-FoundUp, Fukui distributed-compute prototype, and the closing choice.
+- Bathing visuals must remain private/screened and non-sexualized; public circulation and bath zones are not depicted as mixed.
+- D-K visual language may be inspired by Akira Hasegawa's Digital Kakejiku work, but Hasegawa participation or headquarters status is never represented as committed without separate agreement.
+- The full design/provenance record is `docs/YUMORI_VISION_DECK_20260911.md`.
+
+## Japanese-first public copy contract
+
+- Japanese (`html lang="ja"`) is the canonical public reading experience. English-only structural labels are not allowed to leak into the Japanese tab except proper names or technical identifiers such as `COG DC`, `D-K`, `AI`, `eSingularity`, and a defined `FoundUp` term.
+- Public-facing `Innovation Hub` wording is replaced by `イノベーション・スペース` / `Innovation Space`. The space is for people and teams; a person is not a FoundUp.
+- `FoundUp` names a problem-solving project. Japanese copy should introduce it as `FoundUpプロジェクト` or `課題解決プロジェクト` when the audience may not know the term. Do not use `FoundUps` as a label for people.
+- Floor labels in Japanese are purpose-based: `下層階 · 温泉・地域スペース`, `3階 · 挑戦・育成スペース`, `最上階 · 実証・発展スペース`, and `別棟 · COG DC`.
+- The Japanese surface uses Japanese section labels for building value, visitor economy, council decision, AI rice-field explanation, community participation, meetings, and calls to action instead of decorative English headings.
+- `frontend/components/JapaneseSurfacePolisher.tsx` is the bounded compatibility layer for legacy hard-coded labels while route-by-route copy is migrated to a true structured locale source. It must preserve English and Portuguese equivalents when the language switcher changes `html.lang`.
 
 ## FoundUps shell contract
 
@@ -46,7 +61,8 @@ The Sites project configuration remains at `frontend/.openai/hosting.json`. The 
 - No secrets belong in the frontend or module manifests.
 - No token or investment surface is enabled.
 - Public financial claims remain governed by `frontend/audit/SOURCE_OF_TRUTH.md`.
+- The slide-02 financial figures are explicitly modeled feasibility outputs, not forecasts or guarantees; they must not be combined with the municipal demolition estimate as though they were the same accounting measure.
 - Unverified event details stay disabled rather than being inferred.
-- COG DC capacity, heat recovery, demand, economics, and national reuse remain proposals pending validation.
+- COG DC capacity, heat recovery, demand, economics, 24-hour onsen operations, bath scale, 60-FoundUp occupancy, basement program and national reuse remain proposals pending validation.
 - Akira Hasegawa is not represented as committed to the project.
 - Public academic profiles are labeled as outreach candidates only; no membership or support is implied.
