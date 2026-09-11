@@ -62,6 +62,8 @@ const EXPECTED_RUNTIME_FILES = Object.freeze([
   'operator_wardrobe_selection_proof.js',
   'orchestration_prompt_routes.js',
   'orchestration_prompt_trace.js',
+  'principal_activity_extension_adapter.js',
+  'principal_activity_ledger.js',
   'principal_memex_disclosure_source.js',
   'progressive_execution_stage.js',
   'repo_audit_grounding.js',
