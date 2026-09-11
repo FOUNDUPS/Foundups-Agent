@@ -106,68 +106,68 @@ const source: VisionSource[] = [
   },
   {
     id: 'esingularity-lab', image: '/vision/slide-07.jpg',
-    alt: { ja: '実在建物の上層2フロアを60 FoundUpsのeSingularity Labにし、地下をジム・休憩・回復に使う構想', en: 'Upper two floors of the real building adapted for 60 FoundUps, with basement gym, rest and recovery.', pt: 'Dois andares superiores do edifício real adaptados para 60 FoundUps, com academia, descanso e recuperação no subsolo.' },
-    title: { ja: '60 FoundUps。1チーム最大3人。あとはAI。', en: '60 FoundUps. Max 3 humans per team. The rest is AI.', pt: '60 FoundUps. Máximo de 3 humanos por equipe. O resto é IA.' },
-    summary: { ja: '少人数チームが地域課題を解き、成果を示したFoundUpが上位スペースへ進む競争・学習・実装環境を構想します。', en: 'Small teams solve real problems and advance through a competitive learn-build-demonstrate environment.', pt: 'Pequenas equipes resolvem problemas reais e avançam por um ambiente competitivo de aprender, construir e demonstrar.' },
+    alt: { ja: '実在建物の上層2フロアを60のFoundUpプロジェクトが競い学ぶeSingularityイノベーション・スペースにし、地下をジム・休憩・回復に使う構想', en: 'Upper two floors of the real building adapted as an eSingularity Innovation Space for 60 FoundUp projects, with basement gym, rest and recovery.', pt: 'Dois andares superiores do edifício real adaptados como Espaço de Inovação eSingularity para 60 projetos FoundUp, com academia, descanso e recuperação no subsolo.' },
+    title: { ja: '60のFoundUpプロジェクト。1チーム最大3人。あとはAI。', en: '60 FoundUp projects. Max 3 humans per team. The rest is AI.', pt: '60 projetos FoundUp. Máximo de 3 humanos por equipe. O resto é IA.' },
+    summary: { ja: '上層2フロアは、人をFoundUpと呼ぶ場所ではなく、小さなチームが課題解決プロジェクトを競い、学び、実証するeSingularityイノベーション・スペースです。', en: 'The upper two floors are an eSingularity Innovation Space where small teams compete, learn and validate problem-solving FoundUp projects; people themselves are not FoundUps.', pt: 'Os dois andares superiores são um Espaço de Inovação eSingularity onde pequenas equipes competem, aprendem e validam projetos FoundUp de solução de problemas; as pessoas não são FoundUps.' },
     evidence: {
-      ja: ['FoundUpは問題の収益化より問題解決を先に置くという本プロジェクトの概念です。', '60チーム、最大3人、階用途は構想値で、建物・消防・運営検証により変更されます。'],
-      en: ['FoundUp is this project’s concept: solve the problem first; monetization follows value creation.', '60 teams, max three humans and floor uses are design targets subject to building, fire and operating validation.'],
-      pt: ['FoundUp é o conceito do projeto: resolver o problema primeiro; monetização vem após criar valor.', '60 equipes, no máximo três humanos e usos dos andares são metas sujeitas a validação construtiva, contra incêndio e operacional.'],
+      ja: ['FoundUpは人ではなく、課題解決を目的とするプロジェクトです。', '1チーム最大3人は構想上の運営原則で、入居数・選抜方法・階用途は今後の検証事項です。', '地下はジム、休憩、回復スペースとしての再利用候補です。'],
+      en: ['A FoundUp is a problem-solving project, not a label for a person.', 'The three-human maximum is a proposed operating principle; occupancy, selection and floor allocation remain to be validated.', 'The basement is a candidate for gym, rest and recovery reuse.'],
+      pt: ['FoundUp é um projeto de solução de problemas, não um rótulo para uma pessoa.', 'O máximo de três humanos é um princípio operacional proposto; ocupação, seleção e alocação dos andares ainda precisam ser validadas.', 'O subsolo é candidato a reuso como academia, descanso e recuperação.'],
     },
-    link: { label: { ja: 'FoundUps基盤を見る', en: 'See FoundUps foundation', pt: 'Ver base FoundUps' }, href: 'https://github.com/FOUNDUPS/Foundups-Agent' },
+    link: { label: { ja: 'イノベーション・スペース構想を見る', en: 'See the Innovation Space concept', pt: 'Ver o conceito do Espaço de Inovação' }, href: '#innovation-hub' },
   },
   {
     id: 'local-problem', image: '/vision/slide-08.jpg',
-    alt: { ja: '福井の農業現場で農家、学生、AI、COG DC、ロボット、ドローンが地域課題を検証する構想', en: 'Fukui field-test vision with farmers, students, AI, COG DC, robots and drones solving local problems.', pt: 'Visão de testes em campo em Fukui com agricultores, estudantes, IA, COG DC, robôs e drones resolvendo problemas locais.' },
-    title: { ja: '福井の課題から、福井の会社をつくる。', en: 'Turn local problems into local companies.', pt: 'Transformar problemas locais em empresas locais.' },
-    summary: { ja: '地域課題 → AI + COG DC → 試作 → 現場検証 → FoundUpという実装ループをつくります。', en: 'Build a local loop: problem → AI + COG DC → prototype → field test → FoundUp.', pt: 'Criar um ciclo local: problema → IA + COG DC → protótipo → teste de campo → FoundUp.' },
+    alt: { ja: '福井の農業課題を農家、学生、小型ロボット、ドローン、COG DCで検証するFoundUp構想', en: 'Fukui agriculture problem-solving concept with farmers, students, robots, drones and COG DC-enabled FoundUp projects.', pt: 'Conceito de solução de problemas agrícolas em Fukui com agricultores, estudantes, robôs, drones e projetos FoundUp apoiados pelo COG DC.' },
+    title: { ja: '福井の課題から、福井のFoundUpをつくる。', en: 'Turn local problems into local FoundUp projects.', pt: 'Transformar problemas locais em projetos FoundUp locais.' },
+    summary: { ja: '農業、除草、ドローン、画像認識など、地域課題をAIとコンピュートで試作し、現場で検証します。', en: 'Prototype local solutions with AI and compute, then validate them in real fields and workplaces.', pt: 'Prototipar soluções locais com IA e computação e validá-las em campos e locais de trabalho reais.' },
     evidence: {
-      ja: ['農業、除草、ドローン、画像認識、小型ロボットは候補例であり、導入済み設備ではありません。', '実際のテーマは地域・大学・企業との需要確認から決めます。'],
-      en: ['Agriculture, weeding, drones, vision and small robots are candidate examples, not deployed systems.', 'Actual projects should be chosen through demand discovery with local partners.'],
-      pt: ['Agricultura, capina, drones, visão e pequenos robôs são exemplos candidatos, não sistemas já implantados.', 'Projetos reais devem ser escolhidos por descoberta de demanda com parceiros locais.'],
+      ja: ['地域課題 → AI + COG DC → 試作 → 現場検証 → FoundUp。', '自律農機やドローン等は導入済み設備ではなく、検証候補です。'],
+      en: ['Local problem → AI + COG DC → prototype → field validation → FoundUp.', 'Autonomous farm machines and drones are validation candidates, not installed equipment.'],
+      pt: ['Problema local → IA + COG DC → protótipo → validação em campo → FoundUp.', 'Máquinas agrícolas autônomas e drones são candidatos de validação, não equipamentos já instalados.'],
     },
-    link: { label: { ja: '福井の未来を見る', en: 'See Fukui future', pt: 'Ver futuro de Fukui' }, href: '/future' },
+    link: { label: { ja: '地域活用を見る', en: 'See local applications', pt: 'Ver aplicações locais' }, href: '#innovation-hub' },
   },
   {
     id: 'fukui-prototype', image: '/vision/slide-09.jpg',
-    alt: { ja: '福井を起点に学校、自治体、地域産業、大学、温泉、農村へ分散型コンピュートの可能性を示す日本地図', en: 'Japan map showing Fukui as a prototype node for distributed compute across schools, government, industry, universities, onsen and rural communities.', pt: 'Mapa do Japão mostrando Fukui como nó protótipo de computação distribuída para escolas, governo, indústria, universidades, onsen e comunidades rurais.' },
-    title: { ja: '福井から、日本の分散型コンピュートへ。', en: 'From Fukui to a distributed compute model for Japan.', pt: 'De Fukui para um modelo distribuído de computação no Japão.' },
-    summary: { ja: '巨大集中だけでなく、条件の合う地域に小さく役立つAIインフラを育てられるか、福井をプロトタイプに検証します。', en: 'Use Fukui as a prototype for community-scale AI infrastructure that complements, rather than merely copies, hyperscale concentration.', pt: 'Usar Fukui como protótipo de infraestrutura de IA em escala comunitária que complemente, em vez de apenas copiar, a concentração hyperscale.' },
+    alt: { ja: '福井を起点に、日本各地の学校、地域施設、温泉、大学、産業へ分散型コンピュートの可能性を広げる概念図', en: 'Concept map extending distributed compute from Fukui to schools, civic assets, onsens, universities and industry across Japan.', pt: 'Mapa conceitual estendendo computação distribuída de Fukui para escolas, ativos públicos, onsens, universidades e indústria em todo o Japão.' },
+    title: { ja: '福井から、日本の分散型コンピュートへ。', en: 'From Fukui to a distributed compute model for Japan.', pt: 'De Fukui para um modelo de computação distribuída para o Japão.' },
+    summary: { ja: '巨大集中型だけではなく、地域に役立つ小さなAIインフラを検証する福井プロトタイプです。', en: 'Fukui is a prototype for testing smaller, region-serving AI infrastructure alongside hyperscale systems.', pt: 'Fukui é um protótipo para testar infraestrutura de IA menor e voltada à região ao lado de sistemas hiperscale.' },
     evidence: {
-      ja: ['1 → 5 → 10 → 20+ MWは需要・電力・土地・許認可・資本で段階判断する構想です。', '全国展開や他自治体参加は未決定です。'],
-      en: ['1 → 5 → 10 → 20+ MW is a staged concept gated by demand, power, land, permits and capital.', 'National replication or participation by other municipalities is not yet decided.'],
-      pt: ['1 → 5 → 10 → 20+ MW é um conceito em etapas condicionado por demanda, energia, terreno, licenças e capital.', 'Replicação nacional ou participação de outros municípios ainda não está decidida.'],
+      ja: ['1→5→10→20+MWは段階的な構想レンジで、確定容量・契約・許認可ではありません。', '他地域への展開は各地の建物、安全、電力、通信、需要、土地、運営主体ごとに検証します。'],
+      en: ['1→5→10→20+MW is a staged vision range, not contracted or permitted capacity.', 'Replication elsewhere requires site-specific validation of buildings, safety, power, network, demand, land and operators.'],
+      pt: ['1→5→10→20+MW é uma faixa de visão por etapas, não capacidade contratada ou licenciada.', 'Replicação em outros locais exige validação específica de edifícios, segurança, energia, rede, demanda, terreno e operadores.'],
     },
-    link: { label: { ja: 'JAPAN HYPERSCALER REPORT', en: 'JAPAN HYPERSCALER REPORT', pt: 'JAPAN HYPERSCALER REPORT' }, href: '/reports/jhr' },
+    link: { label: { ja: '福井の未来を見る', en: 'See Fukui’s future', pt: 'Ver o futuro de Fukui' }, href: '/future' },
   },
   {
     id: 'choice', image: '/vision/slide-10.jpg',
-    alt: { ja: '実在建物を残した再生構想の夕景と、解体前に未来を比較するYUMORI参加呼びかけ', en: 'Closing adaptive-reuse vision of the real building and a call to compare futures before demolition.', pt: 'Visão final de reuso adaptativo do edifício real e convite para comparar futuros antes da demolição.' },
+    alt: { ja: '実在する建物が残る夕景の中で、解体前に未来を比較しYUMORIに参加する選択を示す構想', en: 'Closing vision of the real building still standing, inviting comparison before demolition and participation through YUMORI.', pt: 'Visão final do edifício real ainda de pé, convidando à comparação antes da demolição e à participação via YUMORI.' },
     title: { ja: '建物は、まだ立っている。選択肢も、まだ残っている。', en: 'The building is still standing. So is the choice.', pt: 'O edifício ainda está de pé. A escolha também.' },
-    summary: { ja: '解体前に未来を比較し、再利用を検証する努力の守り手＝YUMORIを募ります。', en: 'Compare the futures before demolition and become a YUMORI—a guardian of the effort to test reuse.', pt: 'Compare os futuros antes da demolição e torne-se YUMORI — guardião do esforço de testar o reuso.' },
+    summary: { ja: '解体前に未来を比較する。その判断を守る人がYUMORIです。', en: 'Compare the future before demolition. YUMORI is the movement that protects that choice.', pt: 'Comparar o futuro antes da demolição. YUMORI é o movimento que protege essa escolha.' },
     evidence: {
-      ja: ['YUMORI参加は寄付、投資、契約、運営責任の引受けを意味しません。', '現在の組織は設立準備段階です。'],
-      en: ['Joining YUMORI does not itself mean donating, investing, contracting or taking operating responsibility.', 'The organization remains in a preparatory stage.'],
-      pt: ['Entrar no YUMORI não significa por si só doar, investir, contratar ou assumir responsabilidade operacional.', 'A organização permanece em fase preparatória.'],
+      ja: ['YUMORI参加は寄付・投資・契約・運営責任の引受けではありません。', 'eSingularity.aiがビジョン、YUMORI.meが参加の入口です。'],
+      en: ['Joining YUMORI is not a donation, investment, contract or operating obligation.', 'eSingularity.ai owns the vision; YUMORI.me is the participation gateway.'],
+      pt: ['Participar do YUMORI não é doação, investimento, contrato nem obrigação operacional.', 'eSingularity.ai abriga a visão; YUMORI.me é a porta de participação.'],
     },
-    link: { label: { ja: 'YUMORI / 湯守になる', en: 'Become a YUMORI', pt: 'Torne-se YUMORI' }, href: 'https://yumori.me' },
+    link: { label: { ja: '湯守になる', en: 'Become a YUMORI', pt: 'Tornar-se YUMORI' }, href: 'https://yumori.me' },
   },
 ];
 
-export const visionUi = {
-  ja: { label: 'YUMORI / PROJECT eSINGULARITY — 10枚の未来', title: '10枚で未来を見る', fullscreen: '全画面で見る', exit: '全画面を閉じる', previous: '前へ', next: '次へ', pause: '停止', play: '再生', details: '根拠・注記', jhr: 'JHRを読む', join: 'YUMORIに参加' },
-  en: { label: 'YUMORI / PROJECT eSINGULARITY — 10-SLIDE VISION', title: 'See the future in 10 slides', fullscreen: 'View fullscreen', exit: 'Exit fullscreen', previous: 'Previous', next: 'Next', pause: 'Pause', play: 'Play', details: 'Evidence & notes', jhr: 'Read JHR', join: 'Join YUMORI' },
-  pt: { label: 'YUMORI / PROJECT eSINGULARITY — VISÃO EM 10 SLIDES', title: 'Veja o futuro em 10 slides', fullscreen: 'Ver em tela cheia', exit: 'Sair da tela cheia', previous: 'Anterior', next: 'Próximo', pause: 'Pausar', play: 'Reproduzir', details: 'Evidências e notas', jhr: 'Ler JHR', join: 'Entrar no YUMORI' },
-} as const;
+export const visionUi: Record<YumoriLocale, { label: string; title: string; previous: string; next: string; pause: string; play: string; details: string; fullscreen: string; exit: string; join: string; jhr: string }> = {
+  ja: { label: 'YUMORI / PROJECT ESINGULARITY — 10枚のビジョン', title: '壊す前に、未来を比べる。', previous: '前へ', next: '次へ', pause: '自動再生を止める', play: '自動再生', details: '根拠と注記', fullscreen: '全画面で見る', exit: '全画面を閉じる', join: 'YUMORIに参加', jhr: 'JHRを読む' },
+  en: { label: 'YUMORI / PROJECT ESINGULARITY — 10-SLIDE VISION', title: 'Before Demolition, Compare the Future.', previous: 'Previous', next: 'Next', pause: 'Pause autoplay', play: 'Autoplay', details: 'Evidence & notes', fullscreen: 'View full screen', exit: 'Exit full screen', join: 'Join YUMORI', jhr: 'Read JHR' },
+  pt: { label: 'YUMORI / PROJECT ESINGULARITY — VISÃO EM 10 SLIDES', title: 'Antes de demolir, compare o futuro.', previous: 'Anterior', next: 'Próximo', pause: 'Pausar reprodução', play: 'Reprodução automática', details: 'Evidências e notas', fullscreen: 'Ver em tela cheia', exit: 'Sair da tela cheia', join: 'Participar do YUMORI', jhr: 'Ler JHR' },
+};
 
 export function getYumoriVisionSlides(locale: YumoriLocale): YumoriVisionSlide[] {
-  return source.map((slide) => ({
-    id: slide.id,
-    image: slide.image,
-    alt: slide.alt[locale],
-    title: slide.title[locale],
-    summary: slide.summary[locale],
-    evidence: slide.evidence[locale],
-    link: { label: slide.link.label[locale], href: slide.link.href },
+  return source.map((item) => ({
+    id: item.id,
+    image: item.image,
+    alt: item.alt[locale],
+    title: item.title[locale],
+    summary: item.summary[locale],
+    evidence: item.evidence[locale],
+    link: { label: item.link.label[locale], href: item.link.href },
   }));
 }
