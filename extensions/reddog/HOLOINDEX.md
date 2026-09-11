@@ -15,6 +15,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `modules/communication/moltbot_bridge/src/reddog_public_policy.py` - public guest origins, caps, and unsigned Lick Verification input; no identity or private authority
 - `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest quotas, expiry, replay, withdrawal and concurrency accounting
 - `modules/communication/moltbot_bridge/src/reddog_public_http.py` - opt-in public-only ASGI router; unmounted until host/responder/ingress proof
+- `modules/foundups/mobile_worker_skills/foundups-contact-discovery/SKILL.md` - public contact discovery worker: canonical identity anchor, official/public email + social discovery, cross-verification, purpose separation, provenance/confidence, no guessed private data
 
 ## Documentation
 
@@ -22,6 +23,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` - bounded guest admission for AutoPost, foundups.com and eSingularity.ai; implementation evidence, 3V Verification linkage and live activation gaps
 - `docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` - next host/mobile/site integration work order; HoloIndex requery/repair, existing database/host reuse, no knowledge-answer unlock
 - `docs/CONTACT_MEMORY_ARCHITECTURE.md` - principal-scoped relationship memory: encrypted capture, entity/event graph, semantic retrieval, provenance, AutoPost ingest, Breadcrumb/Brain/Memex projection linkage, and Lick encounter/identity linkage
+- `docs/contact_research/FUKUI_CITY_COUNCIL_PUBLIC_CONTACTS_2026-09-11.md` - alpha evidence seed for all 31 sitting Fukui City councilors: city-listed phones, verified public political emails/social hubs, purpose labels, provenance, confidence, unresolved contacts and identity-collision warnings
 - `docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Mosh Pit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
 - `docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` - secure read-only projection/emitter layer for RedDog/founder views; principal+FoundUp+disclosure authorization, deterministic JSON/Markdown rendering, sink isolation, and threat model
 - `docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` - implementation work order: WSP_00 intake, WSP 97/HoloIndex ownership discovery, bounded M2M slices, fail-closed security tests, no parallel memory store, no external mutation authority
