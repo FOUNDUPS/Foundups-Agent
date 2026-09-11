@@ -31,6 +31,7 @@ def test_foundup_is_a_project_not_a_person_label() -> None:
     assert "実証を通過したFoundUpプロジェクト" in polisher
     assert "課題を解くFoundUpプロジェクト" in polisher
     assert "収益化は目的ではなく" in polisher
+    assert "そこで働く学生、FoundUpプロジェクト、研究・地域プロジェクト" in polisher
 
 
 def test_japanese_structural_labels_are_available() -> None:
@@ -46,5 +47,31 @@ def test_japanese_structural_labels_are_available() -> None:
         "議会に求める判断",
         "しくみ · AIの田んぼ",
         "誰がつくるか · 地域",
+    ):
+        assert phrase in polisher
+
+
+def test_japanese_tab_replaces_decorative_english_labels() -> None:
+    polisher = read("components/JapaneseSurfacePolisher.tsx")
+    for phrase in (
+        "なぜ · 温泉を守る",
+        "未来像 · ここがどう変わる？",
+        "敷地構想",
+        "温泉構想",
+        "01 · 露天風呂",
+        "技術検証が必要",
+        "02 · 食",
+        "03 · 夜",
+        "写真",
+        "聴く",
+        "計画",
+        "詳しく",
+        "反対票",
+        "10枚のビジョン",
+        "僧の現在地",
+        "新着",
+        "停止",
+        "チーム形成",
+        "顧客・協力者",
     ):
         assert phrase in polisher
