@@ -1,0 +1,335 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "68d875f0-6430-433a-a137-04b47a417cef",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "reddog_web_budget_v2": {
+      "name": "reddog_web_budget_v2",
+      "columns": {
+        "bucket": {
+          "name": "bucket",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day": {
+          "name": "day",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "used": {
+          "name": "used",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "maximum": {
+          "name": "maximum",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated": {
+          "name": "updated",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "reddog_web_budget_v2_bucket_day_pk": {
+          "columns": [
+            "bucket",
+            "day"
+          ],
+          "name": "reddog_web_budget_v2_bucket_day_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "reddog_web_budget_v2_bounds": {
+          "name": "reddog_web_budget_v2_bounds",
+          "value": "\"reddog_web_budget_v2\".\"used\" >= 0 AND \"reddog_web_budget_v2\".\"maximum\" > 0 AND \"reddog_web_budget_v2\".\"used\" <= \"reddog_web_budget_v2\".\"maximum\""
+        }
+      }
+    },
+    "reddog_web_clock_v2": {
+      "name": "reddog_web_clock_v2",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_seen": {
+          "name": "last_seen",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "reddog_web_clock_v2_bounds": {
+          "name": "reddog_web_clock_v2_bounds",
+          "value": "\"reddog_web_clock_v2\".\"id\" = 1 AND \"reddog_web_clock_v2\".\"last_seen\" >= 0"
+        }
+      }
+    },
+    "reddog_web_lick_v1": {
+      "name": "reddog_web_lick_v1",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "profile_id": {
+          "name": "profile_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "challenge_hash": {
+          "name": "challenge_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "challenge_complete": {
+          "name": "challenge_complete",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "consent_version": {
+          "name": "consent_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_reddog_web_lick_v1_profile": {
+          "name": "idx_reddog_web_lick_v1_profile",
+          "columns": [
+            "profile_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "reddog_web_lick_v1_token_hash_reddog_web_session_v2_token_hash_fk": {
+          "name": "reddog_web_lick_v1_token_hash_reddog_web_session_v2_token_hash_fk",
+          "tableFrom": "reddog_web_lick_v1",
+          "tableTo": "reddog_web_session_v2",
+          "columnsFrom": [
+            "token_hash"
+          ],
+          "columnsTo": [
+            "token_hash"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "reddog_web_lick_v1_challenge": {
+          "name": "reddog_web_lick_v1_challenge",
+          "value": "(\"reddog_web_lick_v1\".\"challenge_complete\" = 0 AND length(\"reddog_web_lick_v1\".\"challenge_hash\") = 64) OR (\"reddog_web_lick_v1\".\"challenge_complete\" = 1 AND \"reddog_web_lick_v1\".\"challenge_hash\" = '')"
+        },
+        "reddog_web_lick_v1_display": {
+          "name": "reddog_web_lick_v1_display",
+          "value": "\"reddog_web_lick_v1\".\"display_name\" IS NULL OR length(\"reddog_web_lick_v1\".\"display_name\") <= 80"
+        }
+      }
+    },
+    "reddog_web_session_v2": {
+      "name": "reddog_web_session_v2",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "encounter": {
+          "name": "encounter",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "surface": {
+          "name": "surface",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "actor_claim": {
+          "name": "actor_claim",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created": {
+          "name": "created",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_seen": {
+          "name": "last_seen",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "revision": {
+          "name": "revision",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nonce": {
+          "name": "nonce",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "busy": {
+          "name": "busy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "busy_until": {
+          "name": "busy_until",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "closing": {
+          "name": "closing",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "idx_reddog_web_session_v2_encounter": {
+          "name": "idx_reddog_web_session_v2_encounter",
+          "columns": [
+            "encounter"
+          ],
+          "isUnique": true
+        },
+        "idx_reddog_web_session_v2_expiry": {
+          "name": "idx_reddog_web_session_v2_expiry",
+          "columns": [
+            "created",
+            "last_seen"
+          ],
+          "isUnique": false
+        },
+        "idx_reddog_web_session_v2_busy_until": {
+          "name": "idx_reddog_web_session_v2_busy_until",
+          "columns": [
+            "busy_until"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "reddog_web_session_v2_token": {
+          "name": "reddog_web_session_v2_token",
+          "value": "length(\"reddog_web_session_v2\".\"token_hash\") = 64"
+        },
+        "reddog_web_session_v2_revision": {
+          "name": "reddog_web_session_v2_revision",
+          "value": "\"reddog_web_session_v2\".\"revision\" >= 0 AND \"reddog_web_session_v2\".\"revision\" <= 10"
+        },
+        "reddog_web_session_v2_clock": {
+          "name": "reddog_web_session_v2_clock",
+          "value": "\"reddog_web_session_v2\".\"created\" >= 0 AND \"reddog_web_session_v2\".\"last_seen\" >= \"reddog_web_session_v2\".\"created\""
+        },
+        "reddog_web_session_v2_closing": {
+          "name": "reddog_web_session_v2_closing",
+          "value": "\"reddog_web_session_v2\".\"closing\" IN (0, 1)"
+        },
+        "reddog_web_session_v2_busy_pair": {
+          "name": "reddog_web_session_v2_busy_pair",
+          "value": "(\"reddog_web_session_v2\".\"busy\" IS NULL AND \"reddog_web_session_v2\".\"busy_until\" IS NULL) OR (\"reddog_web_session_v2\".\"busy\" IS NOT NULL AND \"reddog_web_session_v2\".\"busy_until\" IS NOT NULL)"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}
