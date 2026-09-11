@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1649,
+  "total_tests": 1651,
   "quarantined_tests": 269,
   "tests": [
     {
@@ -6671,6 +6671,19 @@
       "description": "Test YouTube DAE for stream detection and social media posting"
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::public_surface::test_host_lease_recovery",
+      "path": "modules/communication/moltbot_bridge/tests/public_surface/test_host_lease_recovery.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Lease-backed orphan recovery for the distinct public-host lifecycle contract."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::public_surface::test_http_boundary",
       "path": "modules/communication/moltbot_bridge/tests/public_surface/test_http_boundary.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -7153,7 +7166,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_revocation_linux.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-01",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
       "capabilities": [
         "network"
       ],
@@ -7617,7 +7630,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8041,7 +8054,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_authority_profile_slice_verifier_plan_materialization.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8502,7 +8515,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8999,7 +9012,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_client.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [
         "network"
       ],
@@ -9482,7 +9495,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_openclaw_live_enqueue_writer.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9969,7 +9982,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_new_scope_admission.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10584,7 +10597,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_runtime_artifact_manifest.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11033,7 +11046,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11585,7 +11598,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_work_order_signature_verifier.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13962,6 +13975,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Contract tests for the eSingularity FoundUp and YUMORI public deck."
+    },
+    {
+      "id": "test::modules::foundups::esingularity::tests::test_japanese_surface_copy",
+      "path": "modules/foundups/esingularity/tests/test_japanese_surface_copy.py",
+      "owner": "modules/foundups/esingularity",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-esingularity-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Japanese-first public-copy regression checks for eSingularity."
     },
     {
       "id": "test::modules::foundups::esingularity::tests::test_jhr_public_contract",
