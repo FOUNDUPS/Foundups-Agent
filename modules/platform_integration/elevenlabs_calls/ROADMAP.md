@@ -43,3 +43,10 @@ external-effect authorization. Add a discoverable assistant tool then test the
 whole “speak to 0102 → call → report” path. The current ChatGPT session has no
 installed phone tool. No independent scheduler, dialer service or shared-memory
 authority is proposed. IVR, appointments and autonomous retries remain unplanned.
+
+## Agent execution map
+
+[M2M/Prometheus assignments](work_orders/README.md): 01 baseline → 02 provider setup →
+03 live CLI acceptance → 04 request preparation → 05 governed runtime binding →
+06 full voice-to-call acceptance → 08 closeout. Order 07 sound POC follows 03 and
+is optional for prototype closure. Work-order creation does not complete these gates.

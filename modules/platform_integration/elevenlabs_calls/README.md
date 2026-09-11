@@ -64,3 +64,9 @@ Keep the dedicated agent unchanged during a test campaign.
 Free-form contact resolution, IVR navigation, transfer, scheduling and autonomous
 runtime promotion are outside this prototype. See the roadmap for the explicit
 integration gates; there is no new parallel orchestration service here.
+
+## Agent build work orders
+
+See the [M2M/Prometheus work-order pack](work_orders/README.md) for eight dependency-ordered
+assignments covering provider setup, live acceptance, request preparation, governed
+runtime integration, end-to-end verification, sound experiments and handoff.

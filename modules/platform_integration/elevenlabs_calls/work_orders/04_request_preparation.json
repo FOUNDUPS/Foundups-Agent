@@ -1,0 +1,88 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "worker",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "B",
+  "S": {
+    "owner": "modules/platform_integration/elevenlabs_calls",
+    "read": [
+      "modules/platform_integration/elevenlabs_calls/src/request.py",
+      "modules/platform_integration/elevenlabs_calls/src/speech.py",
+      "modules/platform_integration/elevenlabs_calls/src/cli.py",
+      "modules/platform_integration/elevenlabs_calls/INTERFACE.md"
+    ],
+    "write": [
+      "modules/platform_integration/elevenlabs_calls/src/request.py",
+      "modules/platform_integration/elevenlabs_calls/src/speech.py",
+      "modules/platform_integration/elevenlabs_calls/src/cli.py",
+      "modules/platform_integration/elevenlabs_calls/tests",
+      "modules/platform_integration/elevenlabs_calls/INTERFACE.md"
+    ]
+  },
+  "M": "exec",
+  "T": "JP-CALL-04",
+  "R": [
+    0,
+    5,
+    6,
+    21,
+    22,
+    34,
+    84,
+    97,
+    99
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "single_carrier_adapter": true,
+    "delivery_requires_external_confirmation": true,
+    "automatic_redial": false,
+    "effect_boundary": "Offline fixtures and previews; live tests belong to assigned acceptance jobs."
+  },
+  "O": [
+    "request-preparation implementation",
+    "focused test evidence",
+    "interface updates",
+    "work_orders/results/JP-CALL-04.json (redacted; coordinator integrates)"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Credential disclosure risk",
+    "Attempt to claim unobserved live success"
+  ],
+  "X": {
+    "status": "waiting_dependencies",
+    "created_utc": "2026-09-11T00:00:00Z",
+    "timestamp_precision": "date; midnight is a date marker, not execution time",
+    "baseline_commit": "196976aea3516426552238e70be54e015c397999",
+    "depends_on": [
+      "JP-CALL-03"
+    ],
+    "objective": "Turn an English or Japanese instruction into a resolved Japanese call request using existing voice and contact components.",
+    "steps": [
+      "Audit existing contact-resolution and voice routing owners before adding a narrow preparation entry point.",
+      "Resolve an exact enabled contact; produce sender_name_ja and message_ja without adding promises or changing intent. Preserve the existing validated request format.",
+      "Reuse current microphone/STT adapters. Surface ambiguous names, negation, uncertain transcription and missing message details for targeted clarification.",
+      "Keep preparation preview separate from execution and carry one stable request ID from the bound instruction through submission.",
+      "Add behavioral tests for Japanese names, duplicate names, English-to-Japanese intent preservation, negation, missing fields and uncertain transcription."
+    ],
+    "acceptance": [
+      "A concrete instruction produces the intended validated request and readable preview.",
+      "Ambiguous or negated instructions never reach the call adapter.",
+      "Existing prepared-request CLI and duplicate protections remain compatible."
+    ],
+    "token_budget": {
+      "analysis": 2500,
+      "planning": 1500,
+      "implementation": 8000,
+      "documentation": 2000
+    },
+    "coherence": {
+      "required_threshold": 0.618,
+      "measured": null
+    },
+    "rollback": "Revert only owned changes; preserve journal and evidence. Reconcile any external effects; never automatically redial."
+  }
+}
