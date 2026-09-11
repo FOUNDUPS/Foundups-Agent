@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_JP, Space_Mono } from 'next/font/google';
+import JapaneseSurfacePolisher from '../components/JapaneseSurfacePolisher';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import PwaRegister from '../components/PwaRegister';
 import './globals.css';
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ja">
       <body className={`${noto.variable} ${mono.variable}`}>
         <LanguageSwitcher />
+        <JapaneseSurfacePolisher />
         <PwaRegister />
         {children}
         <a
