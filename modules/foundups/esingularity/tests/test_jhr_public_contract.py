@@ -41,17 +41,38 @@ def test_live_field_status_has_one_canonical_source_for_public_surfaces() -> Non
     assert "currentFieldStatus.tickerJa" in ticker
     assert "currentFieldStatus.detailJa" in yumori
     assert "currentFieldStatus.detailEn" in yumori
-    assert "label: 'JHR'" in ticker
-    assert "href: '/reports/jhr'" in ticker
 
 
-def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> None:
+def test_jhr_publication_registry_drives_ticker_and_sitemap() -> None:
+    registry = read(FRONTEND_ROOT / "content" / "jhr-issues.ts")
+    ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
+    sitemap = read(FRONTEND_ROOT / "app" / "sitemap.ts")
+
+    assert "getLatestPublishedJhrIssue" in registry
+    assert "https://esingularity.ai/reports/jhr" in registry
+    assert "status: 'published'" in registry
+    assert "heroImage: 'https://esingularity.ai/yumori-inzai-fukui-comparison.webp'" in registry
+    assert "latestJhrIssue.tickerJa" in ticker
+    assert "latestJhrIssue.href" in ticker
+    assert "UPDATE 9/10｜仙台200MW・印西の地区計画・福井の選択肢" not in ticker
+    assert "jhrIssues" in sitemap
+    assert "issue.href" in sitemap
+    assert "new Date(issue.updatedAt)" in sitemap
+
+
+def test_jhr_is_visibly_promoted_with_existing_comparison_image() -> None:
     layout = read(FRONTEND_ROOT / "app" / "layout.tsx")
+    promo = read(FRONTEND_ROOT / "components" / "JhrPromo.tsx")
+    report_layout = read(FRONTEND_ROOT / "app" / "reports" / "jhr" / "layout.tsx")
     presentation = read(FRONTEND_ROOT / "components" / "YumoriPresentation.tsx")
 
-    assert 'href="/reports/jhr"' in layout
-    assert "JHR · レポートを読む / READ REPORT" in layout
+    assert "<JhrPromo />" in layout
+    assert "issue.heroImage" in promo
+    assert "issue.href" in promo
+    assert "pathname.startsWith('/reports/jhr')" in promo
+    assert "JAPAN HYPERSCALER REPORT" in promo
+    assert "3 SIGNALS / まず知ってほしい3点" in report_layout
+    assert "概念比較図。福井でこの規模の開発が決定したことを示すものではありません。" in report_layout
     assert "const reportLabels" in presentation
     assert "JAPAN HYPERSCALER REPORTを読む" in presentation
     assert "READ THE JAPAN HYPERSCALER REPORT" in presentation
-    assert presentation.count('href="/reports/jhr"') >= 2
