@@ -39,6 +39,21 @@ def test_skill_preserves_gmail_lineage_and_external_truth_boundary() -> None:
     assert "The Skillz grants no Gmail or Drive mutation authority by itself" in skill
 
 
+def test_government_correspondence_uses_live_routing_without_repo_pii() -> None:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+
+    assert "Government correspondence operating contract" in skill
+    assert "Repo first for project truth" in skill
+    assert "Read correspondence before drafting" in skill
+    assert "Card fallback" in skill
+    assert "Japanese-first government drafting" in skill
+    assert "Correspondence Routing" in skill
+    assert "DEFAULT_BCC" in skill
+    assert "No private addresses in Git" in skill
+    assert "Do not guess undisclosed internal addresses" in skill
+    assert "Post-send reconciliation" in skill
+
+
 def test_context_contract_names_the_live_sources_without_private_dump() -> None:
     context = CONTEXT_PATH.read_text(encoding="utf-8")
 
