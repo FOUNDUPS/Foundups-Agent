@@ -185,8 +185,38 @@ export default function FinanceDashboard() {
         <div className="benefit-grid" role="list">
           {snapshot.catalog.products.map((product) => {
             const target = targetsByProduct.get(product.id);
-            return <article key={product.id} role="listitem"><div><h3>{product.name_ja}</h3><p><strong>{product.name_en}</strong></p><p>{product.description}</p><p>{product.billing_units.join(' · ')}</p>{target && <p>YUMORI target: {priceLabel(target.price, target.currency, target.unit)} · {target.evidence_status}</p>}</div></article>;
+            return <article key={product.id} role="listitem"><div><h3>{product.name_ja}</h3><p><strong>{product.name_en}</strong></p><p>{product.description}</p><p>{product.billing_units.join(' · ')}</p>{target ? <p>YUMORI target: {priceLabel(target.price, target.currency, target.unit)} · {target.evidence_status}</p> : <p>YUMORI target: TBD / 未設定</p>}</div></article>;
           })}
+        </div>
+      </section>
+
+      <section className="section" aria-labelledby="reconciliation-title">
+        <div className="future-heading">
+          <p className="eyebrow"><span /> PRICE RECONCILIATION</p>
+          <h2 id="reconciliation-title">私たちの価格と市場を、<em>比較できる時だけ比較</em></h2>
+          <p>{snapshot.price_reconciliation.truth_boundary}</p>
+        </div>
+        <div className="benefit-grid" role="list">
+          {snapshot.price_reconciliation.targets.map((row) => (
+            <article key={row.target.id} role="listitem">
+              <div>
+                <h3>{priceLabel(row.target.price, row.target.currency, row.target.unit)}</h3>
+                <p>{row.target.product_id} · {row.target.evidence_status}</p>
+                {row.comparisons.length === 0 && <p>直接比較できる同一商品ベンチマークはまだありません。</p>}
+                {row.comparisons.map((comparison) => (
+                  <div key={comparison.benchmark.id}>
+                    <p><strong>{comparison.benchmark.provider}</strong> · {comparison.benchmark.hardware}</p>
+                    {comparison.comparison_status === 'DIRECT_PRICE_RATIO_ONLY' && (
+                      <p>DIRECT PRICE RATIO ONLY · 市場基準 {comparison.benchmark_gpu_hour_basis == null ? 'N/A' : priceLabel(comparison.benchmark_gpu_hour_basis, comparison.benchmark.currency, 'GPU-hour')} · 差分 {comparison.delta_pct == null ? 'N/A' : percent.format(comparison.delta_pct)}</p>
+                    )}
+                    {comparison.comparison_status === 'FX_REQUIRED' && <p>FX REQUIRED · 通貨換算には日付・出典付き為替レートが必要です。</p>}
+                    {comparison.comparison_status === 'UNIT_NOT_COMPARABLE' && <p>UNIT NOT COMPARABLE · 単位が一致しないため比率を出しません。</p>}
+                    {comparison.scope_warning && <p>{comparison.scope_warning}</p>}
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
