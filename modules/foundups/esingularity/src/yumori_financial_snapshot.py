@@ -109,7 +109,7 @@ def build_finance_snapshot(
         "catalog": build_public_catalog_snapshot(c),
         "price_reconciliation": build_price_reconciliation(c),
         "capacity_planning": [asdict(capacity_plan(mw)) for mw in range(1, 6)],
-        "capacity_economics": [row.as_dict() for row in capacity_economics_table()],
+        "capacity_economics": [row.as_dict() for row in capacity_economics_table(a)],
         "capacity_allocation": capacity_allocation.as_dict(),
     }
 
