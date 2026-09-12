@@ -16,6 +16,8 @@ campaign needs one place to answer questions such as:
 - Was the reply human, automated, negative, positive, or a delivery failure?
 - What is the next action?
 - Which Gmail thread contains the evidence?
+- Who should be To/CC/BCC on a recurring class of correspondence?
+- Which contact route is verified, and where is the source card if it is not in the structured row?
 
 The live system is deliberately split so the spreadsheet is an index rather
 than a duplicate mailbox.
@@ -25,13 +27,16 @@ than a duplicate mailbox.
 Agents with connected Google access should resolve these exact titles:
 
 - `YUMORI.me Contacts` — Google Sheet; operational contact ledger.
+  - `Contacts` — structured identity and verified routes.
+  - `Email Log` — Gmail event index.
+  - `Correspondence Routing` — mutable To/CC/BCC policy keyed by Contact ID.
 - `YUMORI.me Moshpit` — Google Doc; dated campaign activity/milestone record.
 - `YUMORI.me Contacts Pics` — Google Doc; original contact/business-card imagery.
 - Gmail account containing YUMORI.me outbound and inbound correspondence.
 
-Do not hard-code Drive file IDs or private contact dumps into the public repo.
-Resolve by exact title through the connected account and verify the selected
-file before reading or writing.
+Do not hard-code Drive file IDs, private contact dumps, or mutable routing
+addresses into the public repo. Resolve by exact title through the connected
+account and verify the selected file before reading or writing.
 
 ## Current sheet contract
 
@@ -106,6 +111,45 @@ must preserve those addresses. Contact roll-ups may associate the same Gmail
 message/thread with more than one contact, but the Email Log must not create
 fake duplicate message IDs merely to represent CC membership.
 
+### `Correspondence Routing` tab
+
+This tab stores policy, not addresses. Minimum fields:
+
+```text
+Contact ID
+Name
+Channel
+Visibility
+Policy
+Scope
+Status
+Notes
+```
+
+Examples of policy values include `DEFAULT_BCC` and future conditional routing
+states. The address is resolved from the current `Contacts` row at send time.
+A routing row can therefore be changed, disabled, or expanded without changing
+Git history or leaking private routes into repository code/docs.
+
+For government correspondence, read this tab before sending. Apply active
+routing rows matching the scope unless the principal explicitly overrides them
+for that message. BCC identities must remain hidden from visible recipients.
+
+## Government correspondence lookup order
+
+When the request is to communicate with a city, council, prefecture, public
+office, or named official:
+
+1. Read the registered `yumori_contact_ledger` Skillz and relevant repo truth first.
+2. Read the full relevant Gmail thread/history.
+3. Resolve the official/contact in `YUMORI.me Contacts`.
+4. If identity or route is missing/ambiguous, inspect `YUMORI.me Contacts Pics` business-card imagery.
+5. If still unresolved, use the official public government/organization page or the person's own public professional/campaign page.
+6. Never infer undisclosed internal government addresses from an email pattern and never treat absence of bounce as identity verification.
+7. Read `Correspondence Routing` for current To/CC/BCC policy.
+8. Draft government-facing correspondence Japanese-first unless explicitly instructed otherwise.
+9. After an authorized send, reconcile Gmail -> Email Log -> Contacts -> Moshpit when material.
+
 ## Canonical concatenation model
 
 ```text
@@ -113,6 +157,7 @@ Gmail message_id  -> unique communication event
 Gmail thread_id   -> conversation sequence
 normalized email  -> contact-route join
 YMC Contact ID    -> stable spreadsheet entity
+Routing policy    -> mutable visibility/scope instruction
 Moshpit date      -> material campaign milestone
 ```
 
@@ -181,6 +226,12 @@ YUMORI email log
 YUMORI Gmail replies
 YUMORI stakeholder outreach
 YUMORI campaign communications
+YUMORI government correspondence
+government correspondence skill
+city correspondence
+council correspondence
+use correspondence skill
+Correspondence Routing
 Save the Onsen contacts
 Sukatto Land Kuzuryu outreach
 YMC contact ID
