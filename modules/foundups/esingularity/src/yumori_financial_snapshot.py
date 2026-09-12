@@ -6,6 +6,7 @@ and audit consumers:
 
 - operating model: ``yumori_financial_model.py``
 - feasibility/offtake: ``yumori_feasibility_finance.py``
+- physical reservations: ``yumori_capacity_allocation.py``
 - products/benchmarks/public funding: ``yumori_financial_catalog.py``
 - market comparison: ``yumori_price_reconciliation.py``
 
@@ -22,6 +23,10 @@ import json
 from pathlib import Path
 from typing import Dict, Iterable
 
+from .yumori_capacity_allocation import (
+    audit_gpu_capacity,
+    require_committed_capacity_valid,
+)
 from .yumori_feasibility_finance import (
     CustomerOfftake,
     FeasibilityFundingInputs,
@@ -84,11 +89,13 @@ def build_finance_snapshot(
 
     ``funding_inputs`` is deliberately optional. If it is omitted, the snapshot
     reports feasibility as NOT_RUN rather than fabricating capital commitments or
-    a lender CFADS assumption.
+    a lender CFADS assumption. Explicit customer records are always audited
+    against the current physical GPU inventory.
     """
     a = assumptions or default_assumptions()
     c = catalog or load_catalog()
     records = tuple(customer_offtake)
+    capacity_allocation = audit_gpu_capacity(a.total_gpus, records)
     snapshot: Dict[str, object] = {
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
         "foundup_id": c.foundup_id,
@@ -97,6 +104,7 @@ def build_finance_snapshot(
         "catalog": build_public_catalog_snapshot(c),
         "price_reconciliation": build_price_reconciliation(c),
         "capacity_planning": [asdict(capacity_plan(mw)) for mw in range(1, 6)],
+        "capacity_allocation": capacity_allocation.as_dict(),
     }
 
     if funding_inputs is None:
@@ -111,6 +119,9 @@ def build_finance_snapshot(
         }
         return snapshot
 
+    # Feasibility/funding work may use signed or verified reservations as evidence,
+    # so overcommitted physical capacity is a hard failure before any funding result.
+    require_committed_capacity_valid(a.total_gpus, records)
     offtake = summarize_offtake(records)
     funding = calculate_feasibility_funding(funding_inputs, offtake)
     snapshot["feasibility"] = {
@@ -121,7 +132,8 @@ def build_finance_snapshot(
         "truth_boundary": (
             "Annual contracted revenue, nominal multi-year value, take-or-pay "
             "evidence, and actual upfront cash remain separate. Only explicit "
-            "verified/committed upfront cash enters pre-debt construction funding."
+            "verified/committed upfront cash enters pre-debt construction funding, "
+            "and committed GPU reservations cannot exceed physical inventory."
         ),
     }
     return snapshot
