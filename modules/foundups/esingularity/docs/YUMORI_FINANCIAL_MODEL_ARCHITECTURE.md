@@ -9,9 +9,13 @@ The eSingularity FoundUp repository is the canonical implementation/history laye
 - Excel/PDF/Drive/web surfaces are generated, collaboration, or publication artifacts.
 - A generated workbook is not allowed to silently become a second calculation authority.
 
-Canonical engine:
+Canonical operating engine:
 
 `modules/foundups/esingularity/src/yumori_financial_model.py`
+
+Adjacent feasibility/evidence engine:
+
+`modules/foundups/esingularity/src/yumori_feasibility_finance.py`
 
 Prototype RedDog/WRE discovery contract:
 
@@ -55,11 +59,71 @@ Material corrections include:
 
 These are still MODELLED / LEGACY-SCENARIO assumptions, not bankable forecasts or committed financing.
 
+## Feasibility evidence layer
+
+`yumori_feasibility_finance.py` is deliberately adjacent to the canonical operating model rather than embedded into it prematurely. It captures the NCDS-style evidence/capital sequence while preserving the existing P&L/debt outputs until the evidence contract is independently validated.
+
+### Customer/offtake contract
+
+Each customer record can distinguish:
+
+- organization and customer type;
+- product;
+- requested GPUs/nodes and hours/month or reserved capacity;
+- start date and contract term;
+- current provider/current price and proposed YUMORI price;
+- annual contracted value;
+- nominal multi-year contract value;
+- take-or-pay/minimum commitment;
+- deposit/prepayment percentage;
+- actual upfront cash;
+- procurement constraints;
+- evidence status and source.
+
+Critical accounting boundary:
+
+- normal operating contracts are revenue/underwriting evidence;
+- nominal multi-year contract value is not construction cash;
+- take-or-pay improves bankability but is not automatically cash;
+- only explicit actual upfront cash on VERIFIED/COMMITTED records reduces the pre-debt construction funding gap.
+
+### Feasibility funding contract
+
+The current pure calculation surface measures:
+
+- Phase-1 project cost;
+- committed City cash support;
+- City in-kind support reported separately;
+- committed Prefecture cash;
+- awarded national support;
+- verified/committed customer upfront cash;
+- private quiet-phase capital commitments;
+- public campaign capital commitments;
+- potential public support reported separately;
+- pre-debt cash total and funding percentage;
+- adjustable pre-debt target (default 80%);
+- remaining funding gap;
+- CFADS, DSCR requirement, interest rate and loan term;
+- DSCR-supported amortizing debt capacity;
+- deployed debt = MIN(remaining funding requirement, supportable debt);
+- remaining unfunded gap after debt.
+
+If a gap remains, the model exposes it. It does not force a financial close.
+
+### Capacity planning boundary
+
+Planning relationship:
+
+- 1 MW ~= 384 GPUs ~= 48 x 8-GPU nodes;
+- 5 MW ~= 1,920 GPUs ~= 240 x 8-GPU nodes.
+
+This is a planning relationship, not a grid/procurement commitment. Multiple products may monetize one physical GPU pool, but the same capacity must never be counted twice.
+
 ## Workbook export contract
 
 A generated live workbook should preserve the useful prior structure while making the calculation chain visible.
 
-Recommended tabs:
+Current stable tabs:
 
 - 0. Model Inputs
 - 1. Executive Summary
@@ -76,6 +140,11 @@ Recommended tabs:
 - 12. Demand & Pricing
 - 13. Audit Checks
 
+Future feasibility sheets should be appended by domain name rather than renumbering existing stable sheets blindly, for example:
+
+- NCDS Feasibility Funding
+- 1–5 MW Pricing & Offtake
+
 The workbook should contain formulas mirroring the Python equations with cached Python-calculated outputs. Editable inputs remain visually distinct. Externally sourced inputs carry source notes/comments.
 
 ## Bounded evidence retrieval
@@ -90,6 +159,14 @@ Large ModLogs, audit files, work ledgers, repository trees and workbooks must no
 
 This progressive-disclosure rule prevents retrieval failures while preserving WSP 50/WSP 97 traceability.
 
+## Validation and integration gates
+
+- The canonical operating model and exporter already have focused tests on their finance implementation branch.
+- The feasibility/offtake layer has focused contract tests for revenue/nominal/upfront-cash separation, committed-vs-potential funding, 80% pre-debt target, DSCR debt capacity, and capacity scaling.
+- The feasibility layer is not yet allowed to alter the canonical P&L/debt model.
+- Integration into exporter or operating statements requires a separate bounded sprint with reconciliation tests.
+- Exact-head CI must be reported honestly; absence of a CI run is not a green test result.
+
 ## History
 
-Material changes use a bounded PR. Review history remains in the PR. Once exact-head validation passes, the slice should be squash-merged so the FoundUp has one discoverable completed change on its main lineage.
+Material changes use a bounded PR. Review history remains in the PR. Finance work was audit-first consolidated into the existing eSingularity/YUMORI branch rather than maintained as a parallel source of truth. Once exact-head validation passes, the completed slice should be squash-merged so the FoundUp has one discoverable change on its main lineage.
