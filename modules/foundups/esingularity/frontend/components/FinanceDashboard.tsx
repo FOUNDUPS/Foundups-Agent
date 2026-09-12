@@ -7,22 +7,14 @@ import {
   FinanceSnapshot,
 } from '../lib/finance-api';
 
-const money = new Intl.NumberFormat('ja-JP', {
-  style: 'currency',
-  currency: 'JPY',
-  maximumFractionDigits: 0,
-});
+const money = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 });
 const number = new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 1 });
-const percent = new Intl.NumberFormat('ja-JP', {
-  style: 'percent',
-  maximumFractionDigits: 1,
-});
+const percent = new Intl.NumberFormat('ja-JP', { style: 'percent', maximumFractionDigits: 1 });
+const multiple = new Intl.NumberFormat('ja-JP', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 function priceLabel(price: number, currency: string, unit: string) {
   const formatted = new Intl.NumberFormat(currency === 'JPY' ? 'ja-JP' : 'en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: currency === 'JPY' ? 0 : 3,
+    style: 'currency', currency, maximumFractionDigits: currency === 'JPY' ? 0 : 3,
   }).format(price);
   return `${formatted} / ${unit}`;
 }
@@ -32,9 +24,7 @@ function dateLabel(value: string) {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.valueOf())) return value;
   return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+    year: 'numeric', month: 'short', day: 'numeric',
     hour: value.includes('T') ? '2-digit' : undefined,
     minute: value.includes('T') ? '2-digit' : undefined,
     timeZone: 'Asia/Tokyo',
@@ -46,6 +36,7 @@ export default function FinanceDashboard() {
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState('');
+  const [selectedMw, setSelectedMw] = useState(1);
   const [pue, setPue] = useState('');
   const [tariff, setTariff] = useState('');
   const [utilizationY1, setUtilizationY1] = useState('');
@@ -78,9 +69,7 @@ export default function FinanceDashboard() {
     }
   }
 
-  useEffect(() => {
-    void loadDefault();
-  }, []);
+  useEffect(() => { void loadDefault(); }, []);
 
   async function runScenario(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,132 +101,117 @@ export default function FinanceDashboard() {
     return new Map(snapshot.catalog.yumori_price_targets.map((target) => [target.product_id, target]));
   }, [snapshot]);
 
-  if (loading) {
-    return <main className="future-page"><section className="section"><p>FIN.YUMORI を読み込み中…</p></section></main>;
-  }
-
-  if (!snapshot) {
-    return (
-      <main className="future-page">
-        <section className="section">
-          <p className="eyebrow"><span /> FINANCE API</p>
-          <h1>財務モデルAPIが未接続です。</h1>
-          <p>この画面はローカル計算にフォールバックしません。Python財務APIを接続すると、同じコードベースの計算結果が表示されます。</p>
-          {error && <p role="alert">{error}</p>}
-        </section>
-      </main>
-    );
-  }
+  if (loading) return <main className="future-page"><section className="section"><p>FIN.YUMORI を読み込み中…</p></section></main>;
+  if (!snapshot) return <main className="future-page"><section className="section"><p className="eyebrow"><span /> FINANCE API</p><h1>財務モデルAPIが未接続です。</h1><p>この画面はローカル計算にフォールバックしません。Python財務APIを接続すると表示されます。</p>{error && <p role="alert">{error}</p>}</section></main>;
 
   const summary = snapshot.operating_model.summary;
   const assumptions = snapshot.operating_model.assumptions;
+  const history = snapshot.facility_history;
+  const fy2018 = history.operating_history.find((row) => row.period === 'FY2018') ?? history.operating_history.at(-1)!;
+  const fy2018City = history.city_fiscal_history.find((row) => row.period === 'FY2018') ?? history.city_fiscal_history.at(-1)!;
+  const selected = snapshot.capacity_economics.find((row) => row.mw === selectedMw) ?? snapshot.capacity_economics[0];
 
   return (
     <main className="future-page">
       <section className="future-hero">
-        <p className="eyebrow light"><span /> FIN.YUMORI · LIVE PYTHON MODEL</p>
-        <h1>数字を固定しない。<br /><em>根拠と一緒に動かす。</em></h1>
-        <p>財務計算はPythonモデルが実行します。価格、需要、電力、助成制度を証拠ステータスと一緒に確認し、シナリオをその場で再計算するための試験画面です。</p>
+        <p className="eyebrow light"><span /> FIN.YUMORI · SIMPLE BUSINESS VIEW</p>
+        <h1>温泉を残すために、<br /><em>計算機はいくら稼げる？</em></h1>
+        <p>まずは難しい財務表ではなく、旧施設の実績と、1〜5 MW の現在モデルを並べて見ます。数字はPythonから取得し、画面側では計算しません。</p>
         <p><strong>{snapshot.operating_model.status}</strong> · as of {snapshot.as_of}</p>
       </section>
 
-      <section className="section" aria-labelledby="finance-summary-title">
-        <div className="future-heading">
-          <p className="eyebrow"><span /> MODEL OUTPUT</p>
-          <h2 id="finance-summary-title">現在のモデル・<em>サマリー</em></h2>
-          <p>{snapshot.operating_model.truth_boundary}</p>
-        </div>
+      <section className="section" aria-labelledby="history-title">
+        <div className="future-heading"><p className="eyebrow"><span /> HISTORIC ONsen</p><h2 id="history-title">旧施設は、<em>実際どうだった？</em></h2><p>{history.truth_boundary}</p></div>
         <div className="benefit-grid" role="list">
-          <article role="listitem"><div><h3>5年売上 / Revenue</h3><p>{money.format(summary.five_year_revenue_jpy)}</p></div></article>
-          <article role="listitem"><div><h3>5年 EBITDA</h3><p>{money.format(summary.five_year_ebitda_jpy)}</p></div></article>
-          <article role="listitem"><div><h3>5年 FCFE</h3><p>{money.format(summary.five_year_fcfe_jpy)}</p></div></article>
-          <article role="listitem"><div><h3>株主 IRR</h3><p>{summary.equity_irr == null ? 'N/A' : percent.format(summary.equity_irr)}</p></div></article>
+          <article role="listitem"><div><h3>2018 利用者</h3><p>{number.format(fy2018.users)} 人</p><p>{fy2018.evidence_status}</p></div></article>
+          <article role="listitem"><div><h3>2018 利用料金収入</h3><p>{money.format(fy2018.user_fee_revenue_jpy)}</p><p>旧すかっとランド九頭竜</p></div></article>
+          <article role="listitem"><div><h3>2018 市の純負担</h3><p>{money.format(fy2018City.city_net_cost_jpy)}</p><p>すかっとランド＋すこやかドームの市側コスト</p></div></article>
+          <article role="listitem"><div><h3>閉館中の既知維持費</h3><p>{money.format(history.current_carrying_cost.known_annual_cost_jpy)}</p><p>土地・人件費・再開運営費等は除外</p></div></article>
         </div>
+        <p><strong>重要：</strong>再開後の温泉全体OPEXはまだ確定していません。市の純負担や閉館中維持費を「温泉の総運営費」と置き換えません。</p>
       </section>
 
-      <section className="growth section" aria-labelledby="scenario-title">
-        <p className="eyebrow"><span /> DYNAMIC SCENARIO</p>
-        <h2 id="scenario-title">前提を変えて、<em>Pythonで再計算</em></h2>
-        <p className="growth-lead">ここで変更する値はすべて「MODEL ONLY」です。保存・契約・資金コミットは行いません。</p>
-        <form onSubmit={runScenario}>
-          <div className="benefit-grid">
-            <label><strong>PUE</strong><br /><input type="number" min="1" step="0.001" value={pue} onChange={(e) => setPue(e.target.value)} /></label>
-            <label><strong>電力単価 / JPY-kWh</strong><br /><input type="number" min="0" step="0.1" value={tariff} onChange={(e) => setTariff(e.target.value)} /></label>
-            <label><strong>Year 1 利用率</strong><br /><input type="number" min="0" max="1" step="0.01" value={utilizationY1} onChange={(e) => setUtilizationY1(e.target.value)} /></label>
-            <label><strong>企業予約 / JPY-GPUh</strong><br /><input type="number" min="0" step="1" value={enterprisePrice} onChange={(e) => setEnterprisePrice(e.target.value)} /></label>
-            <label><strong>バースト / JPY-GPUh</strong><br /><input type="number" min="0" step="1" value={burstPrice} onChange={(e) => setBurstPrice(e.target.value)} /></label>
-            <label><strong>大学研究 / JPY-GPUh</strong><br /><input type="number" min="0" step="1" value={academicPrice} onChange={(e) => setAcademicPrice(e.target.value)} /></label>
+      <section className="growth section" aria-labelledby="mw-title">
+        <p className="eyebrow"><span /> 1–5 MW BUSINESS SCALE</p>
+        <h2 id="mw-title">規模を動かすと、<em>事業はどう変わる？</em></h2>
+        <p className="growth-lead">現在の1 MWモデルを単純に1〜5 MWへ展開した「検討用」の見方です。実際の電力工事・冷却・人員・資金調達は別途検証します。</p>
+        <label htmlFor="mw-slider"><strong>データセンター規模：{selectedMw} MW</strong></label>
+        <input id="mw-slider" type="range" min="1" max="5" step="1" value={selectedMw} onChange={(e) => setSelectedMw(Number(e.target.value))} style={{ width: '100%' }} />
+        <p>1 MW　—　2 MW　—　3 MW　—　4 MW　—　5 MW</p>
+        <div className="benefit-grid" role="list">
+          <article role="listitem"><div><h3>GPU在庫</h3><p>{number.format(selected.gpus)} GPUs</p><p>{number.format(selected.eight_gpu_nodes)} × 8-GPU nodes</p></div></article>
+          <article role="listitem"><div><h3>概算プロジェクト費</h3><p>{money.format(selected.estimated_project_cost_jpy)}</p><p>MODEL ONLY</p></div></article>
+          <article role="listitem"><div><h3>Year 1 売上</h3><p>{money.format(selected.year1_revenue_jpy)}</p></div></article>
+          <article role="listitem"><div><h3>Year 1 運営費</h3><p>{money.format(selected.year1_operating_cost_jpy)}</p></div></article>
+          <article role="listitem"><div><h3>Year 1 EBITDA</h3><p>{money.format(selected.year1_ebitda_jpy)}</p></div></article>
+        </div>
+        <div className="benefit-grid" role="list">
+          <article role="listitem"><div><h3>旧2018利用料収入との比率</h3><p>{multiple.format(selected.historic_fy2018_user_fee_revenue_coverage_x)}×</p></div></article>
+          <article role="listitem"><div><h3>2018市純負担との比率</h3><p>{multiple.format(selected.historic_fy2018_city_net_cost_coverage_x)}×</p></div></article>
+          <article role="listitem"><div><h3>閉館維持費との比率</h3><p>{multiple.format(selected.current_dormant_carrying_cost_coverage_x)}×</p></div></article>
+        </div>
+        <p>{selected.scaling_rule}</p>
+      </section>
+
+      <section className="section" aria-labelledby="panels-title">
+        <div className="future-heading"><p className="eyebrow"><span /> OPEN THE NUMBERS</p><h2 id="panels-title">必要な時だけ、<em>詳しく見る</em></h2></div>
+
+        <details className="growth-details">
+          <summary>旧施設の実績を見る <span>City evidence</span></summary>
+          <div className="benefit-grid" role="list">
+            {history.operating_history.map((row) => <article key={row.period} role="listitem"><div><h3>{row.period_label}</h3><p>{number.format(row.users)} users</p><p>{money.format(row.user_fee_revenue_jpy)} 利用料金</p><p><a href={row.source_url} target="_blank" rel="noreferrer">福井市資料 ↗</a></p></div></article>)}
           </div>
-          <p><button className="button button-primary" type="submit" disabled={calculating}>{calculating ? 'Pythonで計算中…' : 'シナリオを再計算'}</button> <button className="button button-ghost" type="button" onClick={() => void loadDefault()}>既定値へ戻す</button></p>
-          {error && <p role="alert">{error}</p>}
-        </form>
-      </section>
+          <p>既知の旧運営人件費（FY2015）: {money.format(history.operator_cost_evidence.fy2015_personnel_cost_jpy)}。監査は直近収支が赤字だったとしています。</p>
+          <p>{history.operator_cost_evidence.evidence_gap}</p>
+        </details>
 
-      <section className="section" aria-labelledby="capacity-title">
-        <div className="future-heading"><p className="eyebrow"><span /> 1–5 MW INVENTORY</p><h2 id="capacity-title">売る前に、<em>物理在庫を守る</em></h2><p>GPU商品は同じ物理プールから消費します。同じGPUを企業・大学・バーストで二重計上しません。</p></div>
-        <div className="benefit-grid" role="list">
-          {snapshot.capacity_planning.map((plan) => <article key={plan.mw} role="listitem"><div><h3>{number.format(plan.mw)} MW</h3><p>{number.format(plan.gpus)} GPUs<br />{number.format(plan.eight_gpu_nodes)} × 8-GPU nodes</p></div></article>)}
-        </div>
-      </section>
+        <details className="growth-details">
+          <summary>データセンターの商品を見る <span>Revenue menu</span></summary>
+          <div className="benefit-grid" role="list">
+            {snapshot.catalog.products.map((product) => {
+              const target = targetsByProduct.get(product.id);
+              return <article key={product.id} role="listitem"><div><h3>{product.name_ja}</h3><p>{product.name_en}</p><p>{product.description}</p>{target ? <p>{priceLabel(target.price, target.currency, target.unit)} · {target.evidence_status}</p> : <p>価格: TBD</p>}</div></article>;
+            })}
+          </div>
+        </details>
 
-      <section className="section" aria-labelledby="menu-title">
-        <div className="future-heading"><p className="eyebrow"><span /> DATA CENTER MENU</p><h2 id="menu-title">データセンターを、<em>コーヒーショップのメニュー</em>のように見る</h2><p>計算、AI運用、ストレージ、回線、運用支援、コロケーション、排熱までを別商品として管理します。</p></div>
-        <div className="benefit-grid" role="list">
-          {snapshot.catalog.products.map((product) => {
-            const target = targetsByProduct.get(product.id);
-            return <article key={product.id} role="listitem"><div><h3>{product.name_ja}</h3><p><strong>{product.name_en}</strong></p><p>{product.description}</p><p>{product.billing_units.join(' · ')}</p>{target ? <p>YUMORI target: {priceLabel(target.price, target.currency, target.unit)} · {target.evidence_status}</p> : <p>YUMORI target: TBD / 未設定</p>}</div></article>;
-          })}
-        </div>
-      </section>
+        <details className="growth-details">
+          <summary>日本・世界の価格を見る <span>Market benchmarks</span></summary>
+          <div className="benefit-grid" role="list">
+            {snapshot.catalog.market_benchmarks.map((item) => <article key={item.id} role="listitem"><div><h3>{item.provider}</h3><p>{item.market} · {item.hardware}</p><p><strong>{priceLabel(item.price, item.currency, item.unit)}</strong></p><p>{item.evidence_status} · {item.effective_or_checked_date}</p><p><a href={item.source_url} target="_blank" rel="noreferrer">一次情報 ↗</a></p></div></article>)}
+          </div>
+        </details>
 
-      <section className="section" aria-labelledby="reconciliation-title">
-        <div className="future-heading">
-          <p className="eyebrow"><span /> PRICE RECONCILIATION</p>
-          <h2 id="reconciliation-title">私たちの価格と市場を、<em>比較できる時だけ比較</em></h2>
-          <p>{snapshot.price_reconciliation.truth_boundary}</p>
-        </div>
-        <div className="benefit-grid" role="list">
-          {snapshot.price_reconciliation.targets.map((row) => (
-            <article key={row.target.id} role="listitem">
-              <div>
-                <h3>{priceLabel(row.target.price, row.target.currency, row.target.unit)}</h3>
-                <p>{row.target.product_id} · {row.target.evidence_status}</p>
-                {row.comparisons.length === 0 && <p>直接比較できる同一商品ベンチマークはまだありません。</p>}
-                {row.comparisons.map((comparison) => (
-                  <div key={comparison.benchmark.id}>
-                    <p><strong>{comparison.benchmark.provider}</strong> · {comparison.benchmark.hardware}</p>
-                    {comparison.comparison_status === 'DIRECT_PRICE_RATIO_ONLY' && (
-                      <p>DIRECT PRICE RATIO ONLY · 市場基準 {comparison.benchmark_gpu_hour_basis == null ? 'N/A' : priceLabel(comparison.benchmark_gpu_hour_basis, comparison.benchmark.currency, 'GPU-hour')} · 差分 {comparison.delta_pct == null ? 'N/A' : percent.format(comparison.delta_pct)}</p>
-                    )}
-                    {comparison.comparison_status === 'FX_REQUIRED' && <p>FX REQUIRED · 通貨換算には日付・出典付き為替レートが必要です。</p>}
-                    {comparison.comparison_status === 'UNIT_NOT_COMPARABLE' && <p>UNIT NOT COMPARABLE · 単位が一致しないため比率を出しません。</p>}
-                    {comparison.scope_warning && <p>{comparison.scope_warning}</p>}
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+        <details className="growth-details">
+          <summary>助成金・公的支援を見る <span>Grants</span></summary>
+          <p>制度が存在しても、採択されるまでは建設資金として数えません。</p>
+          <div className="benefit-grid" role="list">
+            {snapshot.catalog.funding_opportunities.map((grant) => <article key={grant.id} role="listitem"><div><h3>{grant.program_name}</h3><p>{grant.agency} · {grant.lifecycle}</p><p>{grant.subsidy_rate_text}<br />{grant.cap_text}</p><p>締切: {grant.deadlines.length ? grant.deadlines.map(dateLabel).join(' / ') : '要確認'}</p><p>{grant.yumori_relevance}</p><p><a href={grant.source_url} target="_blank" rel="noreferrer">一次情報 ↗</a></p></div></article>)}
+          </div>
+        </details>
 
-      <section className="section" aria-labelledby="benchmark-title">
-        <div className="future-heading"><p className="eyebrow"><span /> JAPAN + GLOBAL BENCHMARKS</p><h2 id="benchmark-title">市場価格を、<em>出典付きで比較</em></h2><p>通貨は原通貨を保持します。為替を固定して見かけ上の比較を作りません。</p></div>
-        <div className="benefit-grid" role="list">
-          {snapshot.catalog.market_benchmarks.map((item) => <article key={item.id} role="listitem"><div><h3>{item.provider}</h3><p>{item.market} · {item.hardware}</p><p><strong>{priceLabel(item.price, item.currency, item.unit)}</strong></p>{item.normalized_gpu_hour != null && <p>Normalized: {priceLabel(item.normalized_gpu_hour, item.currency, 'GPU-hour')}</p>}<p>checked {item.effective_or_checked_date} · {item.evidence_status}</p><p><a href={item.source_url} target="_blank" rel="noreferrer">一次情報 / source ↗</a></p></div></article>)}
-        </div>
-      </section>
-
-      <section className="section" aria-labelledby="grants-title">
-        <div className="future-heading"><p className="eyebrow"><span /> GRANTS + PUBLIC FUNDING</p><h2 id="grants-title">制度は見せる。<em>採択前は資金にしない。</em></h2><p>公募の存在が確認できても、採択・コミットされるまでは建設資金に算入しません。</p></div>
-        <div className="benefit-grid" role="list">
-          {snapshot.catalog.funding_opportunities.map((grant) => <article key={grant.id} role="listitem"><div><h3>{grant.program_name}</h3><p>{grant.agency} · {grant.lifecycle}</p><p><strong>{grant.subsidy_rate_text}</strong><br />{grant.cap_text}</p><p>締切: {grant.deadlines.length ? grant.deadlines.map(dateLabel).join(' / ') : '個別確認 / confirm with agency'}</p><p>{grant.yumori_relevance}</p><p>{grant.funding_treatment} · checked {grant.checked_date}</p><p><a href={grant.source_url} target="_blank" rel="noreferrer">一次情報 / source ↗</a></p></div></article>)}
-        </div>
-      </section>
-
-      <section className="section">
-        <p className="eyebrow"><span /> CURRENT BASE INPUTS</p>
-        <p>{assumptions.total_gpus} GPUs · IT {number.format(assumptions.it_power_kw)} kW · site {number.format(assumptions.total_site_power_kw)} kW · PUE {assumptions.pue} · electricity {money.format(assumptions.electricity_tariff_jpy_per_kwh)}/kWh</p>
-        <p>Legacy grants input shown by the operating model: {money.format(assumptions.grants_jpy)}. This remains a model assumption and is not treated as awarded funding by the grants/NCDS ledger.</p>
+        <details className="growth-details">
+          <summary>高度な財務モデルを見る <span>Advanced scenario</span></summary>
+          <div className="benefit-grid" role="list">
+            <article role="listitem"><div><h3>5年売上</h3><p>{money.format(summary.five_year_revenue_jpy)}</p></div></article>
+            <article role="listitem"><div><h3>5年 EBITDA</h3><p>{money.format(summary.five_year_ebitda_jpy)}</p></div></article>
+            <article role="listitem"><div><h3>5年 FCFE</h3><p>{money.format(summary.five_year_fcfe_jpy)}</p></div></article>
+            <article role="listitem"><div><h3>株主 IRR</h3><p>{summary.equity_irr == null ? 'N/A' : percent.format(summary.equity_irr)}</p></div></article>
+          </div>
+          <form onSubmit={runScenario}>
+            <div className="benefit-grid">
+              <label><strong>PUE</strong><br /><input type="number" min="1" step="0.001" value={pue} onChange={(e) => setPue(e.target.value)} /></label>
+              <label><strong>電力単価 / JPY-kWh</strong><br /><input type="number" min="0" step="0.1" value={tariff} onChange={(e) => setTariff(e.target.value)} /></label>
+              <label><strong>Year 1 利用率</strong><br /><input type="number" min="0" max="1" step="0.01" value={utilizationY1} onChange={(e) => setUtilizationY1(e.target.value)} /></label>
+              <label><strong>企業予約 / JPY-GPUh</strong><br /><input type="number" min="0" step="1" value={enterprisePrice} onChange={(e) => setEnterprisePrice(e.target.value)} /></label>
+              <label><strong>バースト / JPY-GPUh</strong><br /><input type="number" min="0" step="1" value={burstPrice} onChange={(e) => setBurstPrice(e.target.value)} /></label>
+              <label><strong>大学研究 / JPY-GPUh</strong><br /><input type="number" min="0" step="1" value={academicPrice} onChange={(e) => setAcademicPrice(e.target.value)} /></label>
+            </div>
+            <p><button className="button button-primary" type="submit" disabled={calculating}>{calculating ? 'Pythonで計算中…' : 'Pythonで再計算'}</button> <button className="button button-ghost" type="button" onClick={() => void loadDefault()}>既定値へ戻す</button></p>
+            {error && <p role="alert">{error}</p>}
+          </form>
+          <p>Base: {assumptions.total_gpus} GPUs · IT {number.format(assumptions.it_power_kw)} kW · PUE {assumptions.pue} · electricity {money.format(assumptions.electricity_tariff_jpy_per_kwh)}/kWh</p>
+        </details>
       </section>
     </main>
   );
