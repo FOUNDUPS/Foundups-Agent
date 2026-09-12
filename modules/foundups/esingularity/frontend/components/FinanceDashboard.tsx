@@ -109,6 +109,8 @@ export default function FinanceDashboard() {
   const history = snapshot.facility_history;
   const fy2018 = history.operating_history.find((row) => row.period === 'FY2018') ?? history.operating_history.at(-1)!;
   const fy2018City = history.city_fiscal_history.find((row) => row.period === 'FY2018') ?? history.city_fiscal_history.at(-1)!;
+  const fy2019Usage = history.usage_only_history.find((row) => row.period === 'FY2019');
+  const firstManagement = history.management_finance_history.at(0);
   const selected = snapshot.capacity_economics.find((row) => row.mw === selectedMw) ?? snapshot.capacity_economics[0];
 
   return (
@@ -121,7 +123,7 @@ export default function FinanceDashboard() {
       </section>
 
       <section className="section" aria-labelledby="history-title">
-        <div className="future-heading"><p className="eyebrow"><span /> HISTORIC ONsen</p><h2 id="history-title">旧施設は、<em>実際どうだった？</em></h2><p>{history.truth_boundary}</p></div>
+        <div className="future-heading"><p className="eyebrow"><span /> HISTORIC ONSEN</p><h2 id="history-title">旧施設は、<em>実際どうだった？</em></h2><p>{history.truth_boundary}</p></div>
         <div className="benefit-grid" role="list">
           <article role="listitem"><div><h3>2018 利用者</h3><p>{number.format(fy2018.users)} 人</p><p>{fy2018.evidence_status}</p></div></article>
           <article role="listitem"><div><h3>2018 利用料金収入</h3><p>{money.format(fy2018.user_fee_revenue_jpy)}</p><p>旧すかっとランド九頭竜</p></div></article>
@@ -161,6 +163,8 @@ export default function FinanceDashboard() {
           <div className="benefit-grid" role="list">
             {history.operating_history.map((row) => <article key={row.period} role="listitem"><div><h3>{row.period_label}</h3><p>{number.format(row.users)} users</p><p>{money.format(row.user_fee_revenue_jpy)} 利用料金</p><p><a href={row.source_url} target="_blank" rel="noreferrer">福井市資料 ↗</a></p></div></article>)}
           </div>
+          {fy2019Usage && <p>FY2019 公表利用者数: <strong>{number.format(fy2019Usage.users)}人</strong>。同じ公開資料群から利用料金収入を確認できていないため、収入は補間していません。</p>}
+          {firstManagement && <p>指定管理第1期の平均指定管理料: <strong>{money.format(firstManagement.management_fee_jpy)}/年</strong>。後期は指定管理料ゼロ・納付金方式へ移行しており、これは利用料金収入や運営費とは別の資金制度です。</p>}
           <p>既知の旧運営人件費（FY2015）: {money.format(history.operator_cost_evidence.fy2015_personnel_cost_jpy)}。監査は直近収支が赤字だったとしています。</p>
           <p>{history.operator_cost_evidence.evidence_gap}</p>
         </details>
