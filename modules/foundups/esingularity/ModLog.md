@@ -41,7 +41,8 @@
 - Tightened the English education copy around parent- and teacher-guided AI learning, regional problem-solving, and launching projects and startups in Fukui.
 - Preserved Japanese as the canonical source, added equivalent Portuguese copy, and verified every Japanese landing-page text node has a translation entry.
 - Normalized campaign-heading typography so emphasized English lines retain the same font family, style, weight, and spacing.
-- Added outcome-card checks, removed-choice-diagram coverage, and multilingual alt-text handling.
+- Replaced the abstract demolition-choice diagram and made the five community outcomes the focus: onsen, learning and launch, local compute, food entrepreneurship, and D-K culture.
+- Kept the rotenburo scale as an explicitly stated ambition, and kept recovered-heat use subject to technical testing.
 - Rebuilt the stakeholder section as a native mobile-responsive campaign sequence instead of a pasted image: stop demolition, assemble the COGDC coalition, align landowners, prepare a City-ready alternative, define university use, and secure customers and operating partners.
 - Reframed visitor economics around proven demand and direct spending, moved the illustrative 30-year total behind progressive disclosure, and added the unquantified supplier, income, employment, and tax-analysis stages required by Fukui's official input-output method.
 
