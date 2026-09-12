@@ -1,5 +1,13 @@
 # eSingularity TestModLog
 
+## 2026-09-12 — Shared-host domain routing configuration
+
+- Retrieved this inventory, tests README, and the existing `test_yumori_national_landing.py` before authoring tests. The Python suite covers movement content; the new dependency-free Node suite covers the distinct executable routing configuration without replacing that suite.
+- Added `test_domain_routing.mjs`: before-files ordering, exact YUMORI.me and www host matches, eSingularity.ai/YUMORI.info/unknown-host exclusions, root-only internal rewrite, unchanged report/API/asset paths, and no query override or new redirect.
+- Wired the Node command into the existing Validate eSingularity workflow after Node setup; retained all existing validation steps.
+- Fresh local evidence: 18 configuration checks passed using Node v22.16.0 with `--experimental-strip-types`, against the patch based on `3b74a04205b05fc0d84172d52b8862ff608b1d6e`.
+- This result is not a frontend build, HTTP/SPA test, DNS check or production deployment receipt. Those remain separate acceptance gates.
+
 ## 2026-09-11 — Full-screen real-building vision deck coverage
 
 - Updated the existing presentation contract tests to treat `frontend/content/yumori-vision.ts` as the current real-building ten-slide semantic/evidence source.

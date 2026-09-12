@@ -46,6 +46,9 @@ jobs:
           cache: npm
           cache-dependency-path: modules/foundups/esingularity/frontend/package-lock.json
 
+      - name: Validate domain routing configuration
+        run: node --experimental-strip-types --test modules/foundups/esingularity/tests/test_domain_routing.mjs
+
       - name: Install frontend dependencies
         working-directory: modules/foundups/esingularity/frontend
         run: npm ci

@@ -4,7 +4,8 @@
 
 | Route | Purpose |
 | --- | --- |
-| `/` | 温泉を守る / campaign landing page and canonical 10-slide vision presentation |
+| `/` | 温泉を守る / campaign landing page and canonical 10-slide vision presentation on eSingularity.ai |
+| `/yumori` | YUMORI movement, case for support, participation and evidence; also served internally at YUMORI.me `/` |
 | `/future` | 福井の未来 / community-benefit explanation |
 | `/team` | Verified public team directory |
 | `/team/[slug]` | Individual public profile |
@@ -55,6 +56,19 @@ The Foundups shell owns discovery and routing. The eSingularity module owns camp
 ## Hosting contract
 
 The Sites project configuration remains at `frontend/.openai/hosting.json`. The frontend uses Vinext/Next App Router with Cloudflare-compatible output and the existing D1 binding declared by Sites.
+
+### Domain roles — one deployment, separate front pages
+
+| Public entry | Required behavior |
+| --- | --- |
+| `https://yumori.me/` | Serve the existing `app/yumori/page.tsx` movement/case-for-support page internally; keep YUMORI.me visible |
+| `https://www.yumori.me/` | Same movement page when this alias is bound to the project |
+| `https://esingularity.ai/` | Keep the existing `app/page.tsx` project/vision page |
+| `https://yumori.info/` | Preserve the existing external redirect to eSingularity.ai |
+
+`frontend/next.config.ts` owns the executable host mapping. A host-restricted `beforeFiles` rewrite maps only `/` on YUMORI.me/www to `/yumori`, before the existing project homepage is selected. It does not redirect visitors to another origin, copy either page, change a database, or rewrite all paths. JHR, API, asset and explicit `/yumori` paths remain unchanged. Other hosts, including preview hosts, keep their normal routes.
+
+**Publication gate:** committed configuration is not proof that production is fixed. The existing Sites project must receive the patch and bind the intended YUMORI host(s), with HTTPS and original-host forwarding verified. Retrieve the DNS records required by Sites rather than guessing them; preserve nameservers, mail records and unrelated subdomains. Leave YUMORI.info forwarding intact. Compare live Sites source with GitHub before publishing so newer live content is not overwritten by an older checkout. Record the deployed version/source receipt and verify direct plus client-side navigation, canonical metadata, query strings, signup, JHR and cache behavior on both hosts before reporting restoration.
 
 ## Safety boundary
 
