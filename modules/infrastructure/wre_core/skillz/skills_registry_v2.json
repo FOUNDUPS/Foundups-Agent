@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-09-09T02:42:00+00:00",
-  "total_skills": 29,
+  "last_updated": "2026-09-12T16:40:00+09:00",
+  "total_skills": 30,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -465,6 +465,27 @@
         "WSP 97"
       ],
       "description": "Reconcile YUMORI.me Gmail correspondence with the connected Contacts and Email Log ledger while preserving message/thread lineage."
+    },
+    "yumori_financial_model": {
+      "location": "modules/foundups/esingularity/skillz/yumori_financial_model",
+      "agents": [
+        "qwen",
+        "gemma"
+      ],
+      "intent_type": "ANALYSIS",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 84",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Audit, recalculate, scenario-test, and export the YUMORI/eSingularity financial model from repository-owned equations without treating generated spreadsheets as calculation authority."
     }
   }
 }
