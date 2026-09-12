@@ -1,5 +1,13 @@
 # Project eSingularity ModLog
 
+## 2026-09-12 — Question-led opening, first-slide review
+
+- Recovered the original demolition/reuse concept, added the requested excavator, and replaced baked figures with Japanese-first live copy plus English and Brazilian Portuguese translations.
+- The root hero and first vision slide ask whether to demolish the community's heart, show the narrowly sourced approximate ¥1.58B estimate, and link to the existing committee form. Full-screen deep links pause autoplay.
+- Preserved subsequent content, YUMORI.me route/domain behavior and JHR. Moved the existing hero map into a disclosure to shorten the opening.
+- Traced repository ledger to the updated integrated financial workbook, functional model and master prospectus; documented conflicting model generations without publishing unaudited returns or aggregating cost categories.
+- Review and verification record: `docs/OPENING_REVIEW_20260912.md`. Routing: 18 passed; focused changed-file lint passed. Existing TypeScript baseline issues and an incomplete production build remain before merge. Awaiting 012's first-slide visual validation; not deployed.
+
 ## 2026-09-12 — Restore the join-first YUMORI committee landing
 
 - Restored the exact three-panel national movement funnel from PR #1653 at `frontend/app/yumori/page.tsx`: WHY / WHAT / HOW, five JOIN YUMORI actions, the Japan Hyperscaler Report link, and the initial 1,000-person committee target.

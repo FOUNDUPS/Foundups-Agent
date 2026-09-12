@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Brand from '../components/Brand';
 import YumoriPresentation from '../components/YumoriPresentation';
-import FukuiComparisonMap from '../components/FukuiComparisonMap';
+import EsingularityOpening from '../components/EsingularityOpening';
 
 const YUMORI_URL = 'https://yumori.me';
 
@@ -38,21 +38,7 @@ export default function Home() {
       </header>
 
       <main id="top">
-        <section className="hero project-hero" id="hero" aria-labelledby="hero-title">
-          <div className="hero-grid" aria-hidden="true" />
-          <div className="hero-copy">
-            <p className="eyebrow"><span /> 構想 · 旧すかっとランド九頭竜</p>
-            <h1 id="hero-title"><span className="hero-compute-question">コンピュートで、</span><em>温泉を救えるか。</em><span>地域を再生できるか。</span><span>日本を変えられるか。</span></h1>
-            <p className="hero-lead">旧すかっとランド九頭竜の温泉、食、文化、学び、起業を、地域のAI計算基盤「COGDC」につなぐ構想。計算事業が費用と設備更新を賄い、その余剰で地域を支えられるか。熱の再利用とともに検証します。</p>
-            <div className="hero-actions">
-              <a className="button button-primary" href="?vision=1&slide=1#yumori-deck">10枚で構想を見る <span>↗</span></a>
-              <a className="button button-ghost" href="/reports/jhr">JHR・最新レポート <span>→</span></a>
-            </div>
-            <a className="hero-jhr-news" href="/reports/jhr#latest"><span>JHR｜9月12日確認</span><strong>仙台200MW計画、9月11日に資金調達協議の基本合意を発表。</strong><small>ハイパースケーラー＝巨大なクラウド・AI計算基盤を運営する企業。全国の動きと福井への意味を読む →</small></a>
-            <a className="hero-vote-action" href="https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform"><strong>この構想を、解体で終わらせない。</strong><span>解体予算に反対を。VOTE NO</span><b>湯守に登録・準備委員会に参加 →</b></a>
-          </div>
-          <FukuiComparisonMap />
-        </section>
+        <EsingularityOpening />
 
         <YumoriPresentation />
 

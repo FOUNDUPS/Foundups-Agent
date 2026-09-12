@@ -539,3 +539,22 @@
     transition: none !important;
   }
 }
+
+/* First-slide review only: preserve the recovered whole artwork, with live copy below. */
+.openingStage { display: grid; grid-template-rows: minmax(180px, 1fr) auto auto; aspect-ratio: auto; min-height: 0; }
+.openingStage .slideImage { position: relative !important; grid-row: 1; width: 100% !important; height: auto !important; max-height: 55vh; object-fit: contain; }
+.openingStage .imageScrim { display: none; }
+.openingStage .stageCopy { position: static; width: auto; padding: 20px 6%; text-shadow: none; }
+.openingStage .stageCopy > span { margin-bottom: 8px; }
+.openingStage .stageCopy h3 { font-size: clamp(24px, 3vw, 42px); }
+.openingStage .stageCopy p { font-size: 16px; max-width: 900px; }
+.openingStage .stageAction { position: static; width: auto; margin: 0 6% 18px; }
+.fullscreen .openingStage { overflow-y: auto; display: block; }
+.fullscreen .openingStage .slideImage { max-height: 38vh; }
+.fullscreen .openingStage .stageCopy { padding: 12px 6%; }
+.fullscreen .openingStage .stageCopy h3 { font-size: clamp(24px, 2.5vw, 32px); }
+.openingStage .nav { top: 20%; bottom: auto; }
+.openingFigure { margin: 0; grid-row: 1; }
+.openingArtwork { position: relative; }
+.openingFigure figcaption { padding: 10px 6% 0; font-size: 13px; line-height: 1.7; color: #b8c5d4; }
+.openingFigure figcaption a { text-decoration: underline; }

@@ -80,3 +80,6 @@ The Sites project configuration remains at `frontend/.openai/hosting.json`. The 
 - COG DC capacity, heat recovery, demand, economics, 24-hour onsen operations, bath scale, 60-FoundUp occupancy, basement program and national reuse remain proposals pending validation.
 - Akira Hasegawa is not represented as committed to the project.
 - Public academic profiles are labeled as outreach candidates only; no membership or support is implied.
+# First opening review contract (2026-09-12)
+
+`frontend/content/esingularity-opening.ts` supplies the root hero and deck slide `vision` with Japanese-first `ja/en/pt` content, a single recovered visual and the existing direct YUMORI committee form URL. Portuguese opening content is Brazilian Portuguese. `?vision=1&slide=1#yumori-deck` opens the existing full-screen deck paused. Remaining slide records and YUMORI.me routing are unchanged. See `docs/OPENING_REVIEW_20260912.md` for source admission and pending review gates.

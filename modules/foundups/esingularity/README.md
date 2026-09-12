@@ -96,3 +96,6 @@ With no research retriever connected, JHR fails closed and returns `NO_REPORT` r
 - WSP 49/60: module structure and memory
 - WSP 97: truth-boundary labels, evidence gates, and no implied activation
 - WSP 104: stable `/f/{foundup_id}` namespace and tenant isolation
+# Opening review (2026-09-12)
+
+The first-slide-only proposal and financial source trace are recorded in [OPENING_REVIEW_20260912.md](docs/OPENING_REVIEW_20260912.md). Japanese canonical opening copy lives in `frontend/content/esingularity-opening.ts`, shared by the root hero and first deck slide. Later slides await 012's validation of this opening.
