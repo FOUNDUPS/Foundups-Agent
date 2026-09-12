@@ -1,1 +1,3 @@
-# No Python runtime dependencies. The product runtime is in frontend/package.json.
+# Python dependency for repo-generated YUMORI financial workbook exports.
+# The product web runtime remains in frontend/package.json.
+XlsxWriter>=3.2,<4
