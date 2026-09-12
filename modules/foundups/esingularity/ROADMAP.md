@@ -1,5 +1,16 @@
 # Project eSingularity roadmap
 
+## Permanent architecture guardrail
+
+- [x] Keep one canonical monorepo frontend and one existing Sites deployment.
+- [x] Keep `esingularity.ai/` focused on the Fukui eSingularity project/vision through `frontend/app/page.tsx`.
+- [x] Keep `yumori.me/` and `www.yumori.me/` focused on the YUMORI movement and preparatory-committee join funnel through `frontend/app/yumori/page.tsx`.
+- [x] Select the YUMORI root internally by hostname so YUMORI.me stays visible in the browser.
+- [x] Protect the split with dependency-free routing tests and movement-page content tests.
+- [x] Leave the external YUMORI.info → eSingularity.ai forwarding rule outside this frontend and unchanged.
+
+These are continuing acceptance gates, not completed features that may later be removed. Every homepage redesign, merge reconciliation, and production publish must preserve both domain roles. Shared hosting must never become shared homepage content.
+
 ## Phase 1 — Monorepo incubation (current)
 
 - [x] Preserve the live Japanese-first campaign PWA.

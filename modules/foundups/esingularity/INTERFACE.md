@@ -1,10 +1,24 @@
 # Project eSingularity interface
 
-## Public routes
+## Domain identity contract — non-negotiable
+
+This is one FoundUp and one deployed frontend with two deliberately different public homepages:
+
+| Concern | eSingularity.ai | YUMORI.me / www.YUMORI.me |
+| --- | --- | --- |
+| Public purpose | Fukui project and vision | National YUMORI movement, case for support, and preparatory-committee conversion |
+| Root-page source | `frontend/app/page.tsx` | `frontend/app/yumori/page.tsx` |
+| Root selection | Normal filesystem `/` route | Internal hostname-specific `/` → `/yumori` rewrite |
+| Browser hostname | Remains eSingularity.ai | Remains YUMORI.me; no cross-domain redirect |
+| Safe edit boundary | May evolve without replacing the movement page | May evolve without replacing the project page |
+
+Agents resolving merges or synchronizing a Sites checkout must preserve **both** page files and verify both hostnames. Similar subject matter, shared components, or one shared deployment never authorizes collapsing the pages. `yumori.info` is a separate external forwarding rule and is not an alternate YUMORI content source.
+
+## Filesystem routes
 
 | Route | Purpose |
 | --- | --- |
-| `/` | 温泉を守る / campaign landing page and canonical 10-slide vision presentation on eSingularity.ai |
+| `/` | eSingularity project/vision landing on eSingularity.ai |
 | `/yumori` | YUMORI movement, case for support, participation and evidence; also served internally at YUMORI.me `/` |
 | `/future` | 福井の未来 / community-benefit explanation |
 | `/team` | Verified public team directory |
@@ -69,6 +83,8 @@ The Sites project configuration remains at `frontend/.openai/hosting.json`. The 
 `frontend/next.config.ts` owns the executable host mapping. A host-restricted `beforeFiles` rewrite maps only `/` on YUMORI.me/www to `/yumori`, before the existing project homepage is selected. It does not redirect visitors to another origin, copy either page, change a database, or rewrite all paths. JHR, API, asset and explicit `/yumori` paths remain unchanged. Other hosts, including preview hosts, keep their normal routes.
 
 **Publication gate:** committed configuration is not proof that production is fixed. The existing Sites project must receive the patch and bind the intended YUMORI host(s), with HTTPS and original-host forwarding verified. Retrieve the DNS records required by Sites rather than guessing them; preserve nameservers, mail records and unrelated subdomains. Leave YUMORI.info forwarding intact. Compare live Sites source with GitHub before publishing so newer live content is not overwritten by an older checkout. Record the deployed version/source receipt and verify direct plus client-side navigation, canonical metadata, query strings, signup, JHR and cache behavior on both hosts before reporting restoration.
+
+**Merge/deployment gate:** any branch that changes `frontend/app/page.tsx`, `frontend/app/yumori/page.tsx`, or `frontend/next.config.ts` must be checked against the domain matrix above. A valid change may update one experience while the other is being developed in another branch or session; reconciliation must keep both latest intended surfaces. Never solve a conflict by choosing one landing page for both hostnames.
 
 ## Safety boundary
 

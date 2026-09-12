@@ -20,6 +20,15 @@ python -m pytest modules/foundups/esingularity/tests -q
 
 ## Shared-host domain routing
 
+The regression boundary protects two independent concerns:
+
+| Test surface | Contract protected |
+| --- | --- |
+| `test_domain_routing.mjs` | YUMORI.me/www root internally selects `/yumori`; eSingularity.ai is excluded and keeps the filesystem homepage |
+| `test_yumori_national_landing.py` | The YUMORI page remains the join-first WHY/WHAT/HOW movement funnel with five committee actions and the 1,000-person target |
+
+Passing only one side is insufficient: correct routing to the wrong page is still a production failure, and correct page content without hostname routing is not deployed behavior.
+
 `test_domain_routing.mjs` imports the actual `frontend/next.config.ts` with Node's built-in type stripping. It checks the before-files ordering, exact YUMORI.me/www host restriction, root-only internal destination, exclusion of eSingularity.ai/YUMORI.info/other hosts, and absence of broad path or query overrides. No npm dependency is needed for these configuration tests.
 
 ```powershell
