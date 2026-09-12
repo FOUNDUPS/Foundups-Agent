@@ -24,6 +24,13 @@ For the current founding pair, `012` is the monk and `0102` is the digital co-fo
 
 ## 1. RedDog Is the Surface, Not the Twin
 
+The [Lick contract](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md) owns recurring
+encounter checks at this surface. Its evaluated continuous/mutual design keeps
+human presence, participant continuity, media provenance, and action authority
+separate; the current unsigned PoC establishes request continuity only.
+See the [audit](../../docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md)
+before treating this design as deployed human or deepfake verification.
+
 RedDog exists to keep the biological human out of unnecessary machine work.
 
 Its job is to be fast, present, interruptible, and cheap enough to remain at the interaction surface. It accepts voice/text/context, maintains conversational continuity, surfaces only what deserves human attention, and delegates deeper work rather than trying to become the entire reasoning system itself.

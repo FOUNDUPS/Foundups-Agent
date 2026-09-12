@@ -1,5 +1,55 @@
 # RedDog Roadmap
 
+## Continuous Lick design and evaluation
+
+Evaluated 2026-09-13 (Asia/Tokyo); runtime expansion is
+`SPECIFIED_NOT_IMPLEMENTED`. Canonical
+[design](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md#continuous-lick-and-mutual-verification-proposed)
+and [audit](../../docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md).
+These are bounded follow-on slices, not new WSPs or completed security claims.
+
+- [x] `LICK_CONTINUOUS_AUDIT`: distinguish request continuity, live-human
+  evidence, participant/profile continuity, media provenance, and action
+  authority. Evaluate Gemini's palette/000–222 coupling against source.
+- [ ] `LICK_ENCOUNTER_RENEWAL`: finish existing stage-1 possession binding,
+  participant/channel-change invalidation, corrections, and withdrawal UI.
+  Keep sensing opt-in and reuse AutoPost capture plus existing session/AgentDB
+  ownership. At this audit, host recovery is pending in PR #1680, with #1641
+  as earlier lineage; recheck those branches before implementation. Reuse the
+  [public-surface work order](docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md)
+  rather than creating another host, memory store, or guest-authority path.
+- [ ] `LICK_MUTUAL_CONTINUITY_POC`: two local clients, synthetic data, explicit
+  peer trust bootstrap, reviewed session-key delegation, both nonces, peer/role/
+  channel/purpose binding, expiry, and signed acknowledgements. Prove replay,
+  wrong-peer, wrong-channel, revocation, and reconnect rejection. Report human
+  presence as unknown; this is machine/session evidence only.
+- [ ] `LICK_STREAM_PROVENANCE_POC`: evaluate C2PA live-video support using one
+  sender, receiver, and actual rendition path. Start from AutoPost's existing
+  `foundupsAuthorIdentity.ts` signer/verifier; audit key custody, peer trust,
+  stable-ID linkability, and received-byte comparison before extending it.
+  Bind media to encounter/track/epoch; test altered, reordered, missing,
+  cross-stream and replayed segments, clock rollback, expired keys, unsigned
+  downgrade, and provenance stripping. Show receiver-owned evidence status and
+  declared AI transformations. Measure delay and overhead; stop for review
+  after this layer before sensor work.
+- [ ] `LICK_CAPTURE_LIVENESS_EVALUATION`: define the capture trust boundary,
+  local template custody, participant/track association, accessible challenges,
+  and issuer trust. Test virtual-device injection, presentation artifacts,
+  real-time relays, human-operated synthetic media, and compromised endpoints.
+  Predeclare test sets/thresholds; measure attack acceptance, legitimate
+  rejection, uncertainty, detection delay, device conditions, battery, and
+  accessibility. No universal human-presence/deepfake guarantee follows.
+- [ ] `LICK_GOVERNED_INTEGRATION`: consume scoped, expiring assessments in 3V
+  Verification and existing action-specific authority checks. Verify that
+  high semantic state, affect colors, peer assertions, signed media, and an
+  authorized but unattended agent cannot mint human presence or extra effects.
+  Retain guest communication when an optional modality is unavailable.
+
+The affect palette is optional communication context, not an authentication
+gate. The security target is bounded rejection of invalid evidence in conforming
+clients, not making deepfake creation impossible. Ship no production human
+assurance until the applicable capture/liveness and recovery gates pass.
+
 ## Status
 
 Phase: RedDog 0.4.141 held builder-child identity rebind candidate.
@@ -106,11 +156,13 @@ Current implementation:
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
 - [x] RedDog Lick non-biometric PoC: explicit session consent, guest/display-name
-  claims, one-use continuity challenge, provisional encounter profile,
+  claims, one-use request-continuity challenge, provisional encounter profile,
   expiry/withdrawal, AutoPost capture linkage, and a non-authoritative
   `LickReceipt`. Not deployed; possession proof, change detection, corrections,
   and deletion-tombstone UI remain before any biometric evaluation. AutoPost
-  does not decide identity. See `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`.
+  does not decide identity. Human presence and receipt signatures remain false.
+  See `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` and the continuous Lick section
+  above for separately unimplemented mutual/media verification.
 
 - Governed Holo resident binding (implemented / exact-main live acceptance passed): the VSIX one-shot and canonical
   resident/OpenClaw read-only worker now use the same verified replica resolver

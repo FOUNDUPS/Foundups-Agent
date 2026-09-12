@@ -1,5 +1,25 @@
 # RedDog ModLog
 
+## 2026-09-13 - Continuous Lick audit and evaluated design
+
+- Audited the Gemini proposal and 012's continuous/mutual Lick use case against
+  main `08d005635f25aeae2606473c960fd803bd784157`, the public handshake code,
+  AutoPost's existing author/media signer, WSP 44 semantic-state engine,
+  WSP 73 authority boundary, and primary standards.
+- Expanded the existing Lick contract with pseudonymous human-presence intent,
+  per-interaction freshness, independent claim states, peer trust, capture and
+  media binding, bounded deepfake-resistance claims, and accessible fallback.
+- Corrected illustrative records that reused implemented v1 schema names with
+  incompatible fields; their broader proposed shape is now explicitly labeled.
+- Kept affect advisory and semantic state separate from authentication and
+  effects. Added small evaluation slices to ROADMAP and audit discovery links
+  to the documentation map, HOLOINDEX, and architecture.
+- Existing Lick test file: 12 passed, two inherited pytest configuration
+  warnings. The new design is not implemented or security-validated; no
+  runtime/API, WSP protocol, deployment, or collection behavior changed.
+  See the linked audit for retrieval limitations and exact verification scope.
+  (WSP 00/22/44/50/73/87/97)
+
 ## 2026-09-05 - Identity / merged builder reconciliation (0.4.141)
 
 - Corrected foreground identity above the merged `0.4.140` builder release;
