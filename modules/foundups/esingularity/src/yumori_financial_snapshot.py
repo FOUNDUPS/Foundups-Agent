@@ -7,6 +7,7 @@ and audit consumers:
 - operating model: ``yumori_financial_model.py``
 - feasibility/offtake: ``yumori_feasibility_finance.py``
 - products/benchmarks/public funding: ``yumori_financial_catalog.py``
+- market comparison: ``yumori_price_reconciliation.py``
 
 A caller may request the operating/catalog snapshot without inventing funding
 inputs. Feasibility is calculated only when explicit ``FeasibilityFundingInputs``
@@ -38,6 +39,7 @@ from .yumori_financial_model import (
     calculate_model,
     default_assumptions,
 )
+from .yumori_price_reconciliation import build_price_reconciliation
 
 SNAPSHOT_SCHEMA_VERSION = "yumori.finance.snapshot.v1"
 
@@ -93,6 +95,7 @@ def build_finance_snapshot(
         "as_of": c.as_of,
         "operating_model": _operating_projection(a),
         "catalog": build_public_catalog_snapshot(c),
+        "price_reconciliation": build_price_reconciliation(c),
         "capacity_planning": [asdict(capacity_plan(mw)) for mw in range(1, 6)],
     }
 
