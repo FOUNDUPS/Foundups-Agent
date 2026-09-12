@@ -47,6 +47,7 @@ def _operating_projection(assumptions: ModelAssumptions) -> Dict[str, object]:
     return {
         "status": "MODEL ONLY / VALIDATE INPUTS",
         "model_name": assumptions.model_name,
+        "assumptions": asdict(assumptions),
         "years": [asdict(year) for year in result.years],
         "debt_schedules": {
             key: [asdict(row) for row in rows]
