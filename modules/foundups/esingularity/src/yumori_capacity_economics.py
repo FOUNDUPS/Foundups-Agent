@@ -2,7 +2,7 @@
 
 This is intentionally a *planning linearization*, not a replacement for the
 canonical project model or a bankable engineering forecast. It answers the
-simple public question: if the current 1 MW scenario were repeated at 1-5 MW,
+simple public question: if the active 1 MW scenario were repeated at 1-5 MW,
 what order of magnitude of revenue, operating cost, EBITDA, and capital would
 that imply?
 
@@ -17,7 +17,7 @@ from dataclasses import asdict, dataclass
 from typing import Dict, Tuple
 
 from .yumori_facility_history import load_facility_history
-from .yumori_financial_model import calculate_model, default_assumptions
+from .yumori_financial_model import ModelAssumptions, calculate_model, default_assumptions
 from .yumori_feasibility_finance import capacity_plan
 
 
@@ -40,12 +40,15 @@ class CapacityEconomics:
         return asdict(self)
 
 
-def capacity_economics(mw: int) -> CapacityEconomics:
+def capacity_economics(
+    mw: int,
+    assumptions: ModelAssumptions | None = None,
+) -> CapacityEconomics:
     if mw not in range(1, 6):
         raise ValueError("Public planning capacity must be an integer from 1 to 5 MW")
 
-    assumptions = default_assumptions()
-    base = calculate_model(assumptions)
+    a = assumptions or default_assumptions()
+    base = calculate_model(a)
     y1 = base.years[0]
     plan = capacity_plan(float(mw))
     history = load_facility_history()
@@ -62,7 +65,7 @@ def capacity_economics(mw: int) -> CapacityEconomics:
 
     # Facility reuse/repair basis stays fixed; compute hardware scales linearly.
     # This is a model-only order-of-magnitude capital indicator.
-    estimated_project_cost = assumptions.facility_capex_jpy + assumptions.compute_capex_jpy * mw
+    estimated_project_cost = a.facility_capex_jpy + a.compute_capex_jpy * mw
 
     return CapacityEconomics(
         mw=mw,
@@ -77,7 +80,7 @@ def capacity_economics(mw: int) -> CapacityEconomics:
         current_dormant_carrying_cost_coverage_x=(ebitda / carrying),
         status="MODEL ONLY / SIMPLE 1MW LINEARIZATION",
         scaling_rule=(
-            "Revenue and modeled operating cost are linearly scaled from the current "
+            "Revenue and modeled operating cost are linearly scaled from the active "
             "1 MW Year-1 scenario. Facility CapEx remains fixed while compute CapEx "
             "scales linearly. This does not model stepped grid/fiber/cooling upgrades, "
             "staffing economies, financing, or full reopened-onsen OPEX."
@@ -85,5 +88,8 @@ def capacity_economics(mw: int) -> CapacityEconomics:
     )
 
 
-def capacity_economics_table() -> Tuple[CapacityEconomics, ...]:
-    return tuple(capacity_economics(mw) for mw in range(1, 6))
+def capacity_economics_table(
+    assumptions: ModelAssumptions | None = None,
+) -> Tuple[CapacityEconomics, ...]:
+    a = assumptions or default_assumptions()
+    return tuple(capacity_economics(mw, a) for mw in range(1, 6))
