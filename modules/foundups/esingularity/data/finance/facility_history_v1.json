@@ -4,141 +4,39 @@
   "as_of": "2026-09-12",
   "truth_boundary": "Verified municipal history and carrying-cost evidence. These records are not YUMORI operating forecasts and must not be added to project revenue or OPEX without an explicit modeling rule.",
   "operating_history": [
-    {
-      "period": "FY2005",
-      "period_label": "H17 (pre designated-manager baseline)",
-      "users": 142484,
-      "lodging_users": 19213,
-      "day_users": 123271,
-      "user_fee_revenue_jpy": 151132000,
-      "evidence_status": "VERIFIED",
-      "scope": "Sukatto Land Kuzuryu",
-      "source_url": "https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"
-    },
-    {
-      "period": "FY2006-2010 average",
-      "period_label": "H18-H22 average",
-      "users": 150187,
-      "lodging_users": 16227,
-      "day_users": 133960,
-      "user_fee_revenue_jpy": 125940000,
-      "evidence_status": "VERIFIED",
-      "scope": "Sukatto Land Kuzuryu",
-      "source_url": "https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"
-    },
-    {
-      "period": "FY2011-2015 average",
-      "period_label": "H23-H27 average",
-      "users": 133014,
-      "lodging_users": 15159,
-      "day_users": 117855,
-      "user_fee_revenue_jpy": 102395000,
-      "evidence_status": "VERIFIED",
-      "scope": "Sukatto Land Kuzuryu",
-      "source_url": "https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"
-    },
-    {
-      "period": "FY2016",
-      "period_label": "H28",
-      "users": 135782,
-      "lodging_users": 13597,
-      "day_users": 122185,
-      "user_fee_revenue_jpy": 103626000,
-      "evidence_status": "VERIFIED",
-      "scope": "Sukatto Land Kuzuryu",
-      "source_url": "https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"
-    },
-    {
-      "period": "FY2017",
-      "period_label": "H29",
-      "users": 133421,
-      "lodging_users": 15382,
-      "day_users": 118039,
-      "user_fee_revenue_jpy": 120749000,
-      "evidence_status": "VERIFIED",
-      "scope": "Sukatto Land Kuzuryu",
-      "source_url": "https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"
-    },
-    {
-      "period": "FY2018",
-      "period_label": "H30",
-      "users": 129649,
-      "lodging_users": 15621,
-      "day_users": 114028,
-      "user_fee_revenue_jpy": 124886000,
-      "evidence_status": "VERIFIED",
-      "scope": "Sukatto Land Kuzuryu",
-      "source_url": "https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"
-    }
+    {"period":"FY2005","period_label":"H17 (pre designated-manager baseline)","users":142484,"lodging_users":19213,"day_users":123271,"user_fee_revenue_jpy":151132000,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2006-2010 average","period_label":"H18-H22 average","users":150187,"lodging_users":16227,"day_users":133960,"user_fee_revenue_jpy":125940000,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2011-2015 average","period_label":"H23-H27 average","users":133014,"lodging_users":15159,"day_users":117855,"user_fee_revenue_jpy":102395000,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2016","period_label":"H28","users":135782,"lodging_users":13597,"day_users":122185,"user_fee_revenue_jpy":103626000,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2017","period_label":"H29","users":133421,"lodging_users":15382,"day_users":118039,"user_fee_revenue_jpy":120749000,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2018","period_label":"H30","users":129649,"lodging_users":15621,"day_users":114028,"user_fee_revenue_jpy":124886000,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"}
+  ],
+  "usage_only_history": [
+    {"period":"FY2019","period_label":"R1","users":124561,"lodging_users":14417,"day_users":110144,"user_fee_revenue_jpy":null,"evidence_status":"VERIFIED_USAGE_ONLY","scope":"Sukatto Land Kuzuryu; City published usage, no fee-revenue value recovered in this audit","source_url":"https://www.city.fukui.lg.jp/sisei/gikai/shigikaishikumi/p022677_d/fil/aramasi1.pdf"}
+  ],
+  "management_finance_history": [
+    {"period":"FY2006-2010 average","management_fee_jpy":42000000,"payment_to_city_jpy":0,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu designated-management arrangement","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2011-2015 average","management_fee_jpy":0,"payment_to_city_jpy":467000,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu; average payment to City","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2016","management_fee_jpy":0,"payment_to_city_jpy":0,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2017","management_fee_jpy":0,"payment_to_city_jpy":0,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"},
+    {"period":"FY2018","management_fee_jpy":0,"payment_to_city_jpy":0,"evidence_status":"VERIFIED","scope":"Sukatto Land Kuzuryu","source_url":"https://www.city.fukui.lg.jp/fukusi/kfukusi/ikigai/p015196_d/fil/monitoring-30sukatto.pdf"}
   ],
   "city_fiscal_history": [
-    {
-      "period": "FY2016",
-      "city_revenue_jpy": 11210648,
-      "city_expenditure_jpy": 34751453,
-      "city_net_cost_jpy": 23540805,
-      "combined_users": 131422,
-      "cost_per_user_jpy": 179,
-      "scope": "Sukatto Land Kuzuryu + Sukoyaka Dome; city-side fiscal cost, not operator P&L",
-      "evidence_status": "VERIFIED",
-      "source_url": "https://www.city.fukui.lg.jp/sisei/kansa/seido/p021826_d/fil/R1houkatugaibukansa.pdf"
-    },
-    {
-      "period": "FY2017",
-      "city_revenue_jpy": 10880564,
-      "city_expenditure_jpy": 30868114,
-      "city_net_cost_jpy": 19987550,
-      "combined_users": 126350,
-      "cost_per_user_jpy": 158,
-      "scope": "Sukatto Land Kuzuryu + Sukoyaka Dome; city-side fiscal cost, not operator P&L",
-      "evidence_status": "VERIFIED",
-      "source_url": "https://www.city.fukui.lg.jp/sisei/kansa/seido/p021826_d/fil/R1houkatugaibukansa.pdf"
-    },
-    {
-      "period": "FY2018",
-      "city_revenue_jpy": 3749958,
-      "city_expenditure_jpy": 23365560,
-      "city_net_cost_jpy": 19615602,
-      "combined_users": 120293,
-      "cost_per_user_jpy": 163,
-      "scope": "Sukatto Land Kuzuryu + Sukoyaka Dome; city-side fiscal cost, not operator P&L",
-      "evidence_status": "VERIFIED",
-      "source_url": "https://www.city.fukui.lg.jp/sisei/kansa/seido/p021826_d/fil/R1houkatugaibukansa.pdf"
-    }
+    {"period":"FY2016","city_revenue_jpy":11210648,"city_expenditure_jpy":34751453,"city_net_cost_jpy":23540805,"combined_users":131422,"cost_per_user_jpy":179,"scope":"Sukatto Land Kuzuryu + Sukoyaka Dome; city-side fiscal cost, not operator P&L","evidence_status":"VERIFIED","source_url":"https://www.city.fukui.lg.jp/sisei/kansa/seido/p021826_d/fil/R1houkatugaibukansa.pdf"},
+    {"period":"FY2017","city_revenue_jpy":10880564,"city_expenditure_jpy":30868114,"city_net_cost_jpy":19987550,"combined_users":126350,"cost_per_user_jpy":158,"scope":"Sukatto Land Kuzuryu + Sukoyaka Dome; city-side fiscal cost, not operator P&L","evidence_status":"VERIFIED","source_url":"https://www.city.fukui.lg.jp/sisei/kansa/seido/p021826_d/fil/R1houkatugaibukansa.pdf"},
+    {"period":"FY2018","city_revenue_jpy":3749958,"city_expenditure_jpy":23365560,"city_net_cost_jpy":19615602,"combined_users":120293,"cost_per_user_jpy":163,"scope":"Sukatto Land Kuzuryu + Sukoyaka Dome; city-side fiscal cost, not operator P&L","evidence_status":"VERIFIED","source_url":"https://www.city.fukui.lg.jp/sisei/kansa/seido/p021826_d/fil/R1houkatugaibukansa.pdf"}
   ],
   "current_carrying_cost": {
-    "period": "FY2024 equivalent / R6",
-    "known_annual_cost_jpy": 7892646,
-    "components": {
-      "water_jpy": 175835,
-      "electricity_jpy": 4310771,
-      "emergency_generator_maintenance_jpy": 209000,
-      "elevator_maintenance_jpy": 198000,
-      "building_fire_periodic_inspection_jpy": 499400,
-      "electrical_safety_management_jpy": 673200,
-      "septic_system_management_jpy": 831600,
-      "hygiene_management_jpy": 499840,
-      "fire_equipment_maintenance_jpy": 495000
-    },
-    "excluded": [
-      "land burden / leased-land equivalent",
-      "repairs",
-      "active-use utilities above dormant levels",
-      "staffing",
-      "program operations",
-      "new business operating costs"
-    ],
-    "land_burden_reference_jpy_per_m2": 454.86,
-    "building_rent_if_regional_promotion_use": 0,
-    "evidence_status": "VERIFIED",
-    "source_url": "https://www.city.fukui.lg.jp/sisei/plan/reform/p071776_d/fil/SUKATTO.pdf"
+    "period":"FY2024 equivalent / R6","known_annual_cost_jpy":7892646,
+    "components":{"water_jpy":175835,"electricity_jpy":4310771,"emergency_generator_maintenance_jpy":209000,"elevator_maintenance_jpy":198000,"building_fire_periodic_inspection_jpy":499400,"electrical_safety_management_jpy":673200,"septic_system_management_jpy":831600,"hygiene_management_jpy":499840,"fire_equipment_maintenance_jpy":495000},
+    "excluded":["land burden / leased-land equivalent","repairs","active-use utilities above dormant levels","staffing","program operations","new business operating costs"],
+    "land_burden_reference_jpy_per_m2":454.86,"building_rent_if_regional_promotion_use":0,"evidence_status":"VERIFIED","source_url":"https://www.city.fukui.lg.jp/sisei/plan/reform/p071776_d/fil/SUKATTO.pdf"
   },
   "operator_cost_evidence": {
-    "fy2015_personnel_cost_jpy": 70110000,
-    "latest_audited_direction": "The City audit states the recent designated-manager result was loss-making and identifies higher personnel cost as a principal cause.",
-    "full_reopened_onsen_opex_jpy": null,
-    "evidence_gap": "A complete reopened-onset annual operator expense total has not yet been recovered from the City public materials located in this audit. Do not substitute city fiscal cost or dormant carrying cost for full operator OPEX.",
-    "evidence_status": "PARTIAL_VERIFIED",
-    "source_url": "https://www.city.fukui.lg.jp/sisei/kansa/seido/p021826_d/fil/R1houkatugaibukansa.pdf"
+    "fy2015_personnel_cost_jpy":70110000,
+    "latest_audited_direction":"The City audit states the recent designated-manager result was loss-making and identifies higher personnel cost as a principal cause.",
+    "full_reopened_onsen_opex_jpy":null,
+    "evidence_gap":"A complete reopened-onsen annual operator expense total has not yet been recovered from the City public materials located in this audit. Do not substitute city fiscal cost or dormant carrying cost for full operator OPEX.",
+    "evidence_status":"PARTIAL_VERIFIED","source_url":"https://www.city.fukui.lg.jp/sisei/kansa/seido/p021826_d/fil/R1houkatugaibukansa.pdf"
   }
 }
