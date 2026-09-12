@@ -10,7 +10,21 @@ def test_facility_history_loads_and_reconciles_city_costs():
     assert history.operating_history[-1].period == "FY2018"
     assert history.operating_history[-1].users == 129_649
     assert history.operating_history[-1].user_fee_revenue_jpy == 124_886_000
+    assert history.usage_only_history[-1].period == "FY2019"
+    assert history.usage_only_history[-1].users == 124_561
+    assert history.usage_only_history[-1].user_fee_revenue_jpy is None
     assert history.city_fiscal_history[-1].city_net_cost_jpy == 19_615_602
+
+
+def test_designated_management_finance_stays_separate_from_customer_revenue():
+    history = load_facility_history()
+    first = history.management_finance_history[0]
+    last = history.management_finance_history[-1]
+    assert first.period == "FY2006-2010 average"
+    assert first.management_fee_jpy == 42_000_000
+    assert last.period == "FY2018"
+    assert last.management_fee_jpy == 0
+    assert last.payment_to_city_jpy == 0
 
 
 def test_closed_facility_known_carrying_cost_matches_components():
