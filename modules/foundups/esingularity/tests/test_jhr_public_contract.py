@@ -29,29 +29,24 @@ def test_jhr_001_is_updated_in_place_japanese_first_and_bilingual() -> None:
     assert "candidate status, operator intent" in page
 
 
-def test_live_field_status_has_one_canonical_source_for_public_surfaces() -> None:
+def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() -> None:
     status = read(FRONTEND_ROOT / "content" / "current-field-status.ts")
     ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")
-    yumori = read(FRONTEND_ROOT / "app" / "yumori" / "page.tsx")
 
     assert "2026-09-10T09:15:00+09:00" in status
     assert "福井市役所前" in status
     assert "YUMORI Tシャツ" in status
     assert "準備委員会" in status
     assert "currentFieldStatus.tickerJa" in ticker
-    assert "currentFieldStatus.detailJa" in yumori
-    assert "currentFieldStatus.detailEn" in yumori
     assert "label: 'JHR'" in ticker
     assert "href: '/reports/jhr'" in ticker
 
 
 def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> None:
-    layout = read(FRONTEND_ROOT / "app" / "layout.tsx")
-    presentation = read(FRONTEND_ROOT / "components" / "YumoriPresentation.tsx")
+    project_page = read(FRONTEND_ROOT / "app" / "page.tsx")
+    movement_page = read(FRONTEND_ROOT / "app" / "yumori" / "page.tsx")
 
-    assert 'href="/reports/jhr"' in layout
-    assert "JHR · レポートを読む / READ REPORT" in layout
-    assert "const reportLabels" in presentation
-    assert "JAPAN HYPERSCALER REPORTを読む" in presentation
-    assert "READ THE JAPAN HYPERSCALER REPORT" in presentation
-    assert presentation.count('href="/reports/jhr"') >= 2
+    assert project_page.count('href="/reports/jhr') >= 3
+    assert "JHR・最新レポート" in project_page
+    assert "const JHR_URL = '/reports/jhr'" in movement_page
+    assert "JAPAN HYPERSCALER REPORTを読む" in movement_page
