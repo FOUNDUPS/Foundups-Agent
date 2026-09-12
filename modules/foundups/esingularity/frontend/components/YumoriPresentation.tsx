@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getYumoriVisionSlides, visionUi, type YumoriLocale } from '../content/yumori-vision';
 import styles from './YumoriPresentation.module.css';
+import { openingCopy } from '../content/esingularity-opening';
+import openingStyles from './EsingularityOpening.module.css';
 
 const AUTOPLAY_MS = 9000;
 const SWIPE_DISTANCE = 55;
@@ -54,11 +56,17 @@ export default function YumoriPresentation() {
   }, []);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const requested = Number(url.searchParams.get('slide'));
-    if (Number.isInteger(requested) && requested >= 1 && requested <= slides.length) setActive(requested - 1);
-    if (url.searchParams.get('vision') === '1') setFullscreen(true);
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setPlaying(false);
+    const frame = window.requestAnimationFrame(() => {
+      const url = new URL(window.location.href);
+      const requested = Number(url.searchParams.get('slide'));
+      if (Number.isInteger(requested) && requested >= 1 && requested <= slides.length) setActive(requested - 1);
+      if (url.searchParams.get('vision') === '1') {
+        setFullscreen(true);
+        setPlaying(false);
+      }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setPlaying(false);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [slides.length]);
 
   useEffect(() => {
@@ -140,7 +148,7 @@ export default function YumoriPresentation() {
       </div>
 
       <div
-        className={styles.stage}
+        className={`${styles.stage} ${slide.id === 'vision' ? styles.openingStage : ''}`}
         aria-label={`${active + 1} / ${slides.length}: ${slide.title}`}
         onPointerDown={(event) => {
           if (event.pointerType === 'mouse' && event.button !== 0) return;
@@ -155,14 +163,21 @@ export default function YumoriPresentation() {
         }}
         onPointerCancel={() => { pointerStart.current = null; }}
       >
-        <Image className={styles.slideImage} src={slide.image} alt={slide.alt} fill sizes="100vw" draggable={false} />
+        {slide.id === 'vision' ? <figure className={styles.openingFigure}>
+          <div className={styles.openingArtwork}>
+            <Image className={styles.slideImage} src={slide.image} alt={slide.alt} width={1672} height={941} sizes="100vw" draggable={false} />
+            <span className={openingStyles.left}>{openingCopy[locale].left}</span>
+            <span className={openingStyles.right}>{openingCopy[locale].right}</span>
+          </div>
+          <figcaption>{openingCopy[locale].note} {openingCopy[locale].costNote} <a href="https://www.city.fukui.lg.jp/sisei/gikai/shitsumon/p004052_d/fil/0806a.pdf">{openingCopy[locale].source} ↗</a></figcaption>
+        </figure> : <Image className={styles.slideImage} src={slide.image} alt={slide.alt} fill sizes="100vw" draggable={false} />}
         <div className={styles.imageScrim} aria-hidden="true" />
         <div className={styles.stageCopy}>
           <span>{String(active + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
           <h3>{slide.title}</h3>
           <p>{slide.summary}</p>
         </div>
-        <a className={styles.stageAction} href="https://yumori.me">
+        <a className={styles.stageAction} href={slide.signupUrl ?? "https://yumori.me"}>
           <span>YUMORI</span><strong>{slide.action}</strong><b aria-hidden="true">↗</b>
         </a>
         <div className={styles.nav}>

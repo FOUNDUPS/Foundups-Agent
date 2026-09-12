@@ -1,5 +1,21 @@
 # Project eSingularity ModLog
 
+## 2026-09-12 — Resolve opening-review build and CI holdups
+
+- Repaired five stale presentation contracts against current content/rendering, retaining financial/architecture safeguards; restored a direct localized JHR link beside the opening. Python: 25 passed; domain routing: 18 passed.
+- Regenerated the canonical test registry: added the previously omitted existing Japanese-copy test. Registry check passes.
+- Escaped two report apostrophes, deferred header-slot lookup with cleanup, removed six superseded translation entries while preserving effective last values, and represented both manifest icon purposes as separate typed entries. Full lint: zero errors/four image warnings. TypeScript: passed.
+- Traced the apparent build stall to Vinext's sequential Google Fonts downloads: 124 Noto Sans JP and six Space Mono files, without per-file progress or fetch timeout. Reused 77 valid cached Noto files and downloaded the other 47, then let Vinext generate its own CSS/cache. Production build completed successfully with original typography. Added CI font caching keyed to lockfile/layout.
+- No YUMORI route, domain configuration, or later-slide content changes. PR #1688 remains the first-slide review; no deployment in this repair slice.
+
+## 2026-09-12 — Question-led opening, first-slide review
+
+- Recovered the original demolition/reuse concept, added the requested excavator, and replaced baked figures with Japanese-first live copy plus English and Brazilian Portuguese translations.
+- The root hero and first vision slide ask whether to demolish the community's heart, show the narrowly sourced approximate ¥1.58B estimate, and link to the existing committee form. Full-screen deep links pause autoplay.
+- Preserved subsequent content, YUMORI.me route/domain behavior and JHR. Moved the existing hero map into a disclosure to shorten the opening.
+- Traced repository ledger to the updated integrated financial workbook, functional model and master prospectus; documented conflicting model generations without publishing unaudited returns or aggregating cost categories.
+- Review and verification record: `docs/OPENING_REVIEW_20260912.md`. Routing: 18 passed; focused changed-file lint passed. Existing TypeScript baseline issues and an incomplete production build remain before merge. Awaiting 012's first-slide visual validation; not deployed.
+
 ## 2026-09-12 — Make the two-homepage architecture durable
 
 **WSP Protocol**: WSP 00, WSP 22, WSP 50, WSP 57, WSP 83, WSP 97

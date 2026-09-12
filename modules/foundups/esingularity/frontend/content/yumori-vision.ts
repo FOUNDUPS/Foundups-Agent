@@ -1,6 +1,8 @@
+import { OPENING_IMAGE, OPENING_SIGNUP_URL, openingCopy } from './esingularity-opening';
 export type YumoriLocale = 'ja' | 'en' | 'pt';
 
 export type YumoriVisionSlide = {
+  signupUrl?: string;
   id: string;
   image: string;
   alt: string;
@@ -175,11 +177,12 @@ export const visionUi: Record<YumoriLocale, { label: string; title: string; prev
 export function getYumoriVisionSlides(locale: YumoriLocale): YumoriVisionSlide[] {
   return source.map((item) => ({
     id: item.id,
-    image: item.image,
-    alt: item.alt[locale],
-    title: item.title[locale],
-    summary: item.summary[locale],
-    action: item.action[locale],
+    signupUrl: item.id === 'vision' ? OPENING_SIGNUP_URL : undefined,
+    image: item.id === 'vision' ? OPENING_IMAGE : item.image,
+    alt: item.id === 'vision' ? openingCopy[locale].alt : item.alt[locale],
+    title: item.id === 'vision' ? openingCopy[locale].title : item.title[locale],
+    summary: item.id === 'vision' ? openingCopy[locale].body : item.summary[locale],
+    action: item.id === 'vision' ? openingCopy[locale].join : item.action[locale],
     evidence: item.evidence[locale],
     link: { label: item.link.label[locale], href: item.link.href },
   }));

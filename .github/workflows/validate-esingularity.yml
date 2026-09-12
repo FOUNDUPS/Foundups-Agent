@@ -57,6 +57,14 @@ jobs:
         working-directory: modules/foundups/esingularity/frontend
         run: npm run lint
 
+      - name: Cache self-hosted fonts
+        # Vinext fetches Japanese font subsets sequentially during analysis.
+        # Preserve its cache without changing typography or skipping the build.
+        uses: actions/cache@v4
+        with:
+          path: modules/foundups/esingularity/frontend/.vinext/fonts
+          key: esingularity-fonts-${{ runner.os }}-${{ hashFiles('modules/foundups/esingularity/frontend/package-lock.json', 'modules/foundups/esingularity/frontend/app/layout.tsx') }}
+
       - name: Build frontend
         working-directory: modules/foundups/esingularity/frontend
         run: npm run build

@@ -1,0 +1,22 @@
+.opening { padding: 145px max(24px, 5vw) 40px; background: #06182a; color: #f4f7fb; }
+.label { color: #d6b16e; font-size: 14px; letter-spacing: .08em; margin: 0 0 12px; }
+.opening h1 { font-size: clamp(28px, 3.7vw, 58px); line-height: 1.4; margin: 0 0 24px; font-weight: 850; text-wrap: balance; }
+.visual { margin: 0; }
+.visual > a { display: block; position: relative; border: 1px solid #42536a; border-radius: 8px; overflow: hidden; background: #05111e; }
+.visual img { width: 100%; height: auto; display: block; }
+.fullscreen { position: absolute; top: 16px; right: 16px; padding: 12px 16px; border: 1px solid #8192a5; border-radius: 6px; background: #06182aeb; color: white; font-size: 16px; font-weight: 750; }
+.left,.right { position: absolute; bottom: 20px; max-width: 44%; padding: 8px 14px; font-size: clamp(16px, 2vw, 28px); background: #06182ae8; border-radius: 4px; font-weight: 750; }
+.left { left: 20px; } .right { right: 20px; color: #f3d18e; }
+.visual figcaption { font-size: 13px; color: #b8c5d4; margin-top: 10px; line-height: 1.7; }
+.message { display: grid; grid-template-columns: 1.4fr 1fr; align-items: center; gap: 32px; margin-top: 20px; }
+.body { font-size: 18px; line-height: 1.85; margin: 0; }
+.mission { color: #aac8df; font-size: 16px; line-height: 1.8; margin: 14px 0 0; }
+.action a { display: block; padding: 18px 22px; background: #f0c97f; border: 2px solid #f0c97f; border-radius: 6px; color: #06182a; font-size: 18px; line-height: 1.5; font-weight: 850; text-align: center; }
+.action a:hover { background: #ffdfa2; }
+.action p { font-size: 14px; line-height: 1.7; text-align: center; margin: 10px 0 0; }
+.research { margin-top: 24px; color: #c8dae9; font-size: 16px; }
+.research summary { cursor: pointer; padding: 12px 0; text-decoration: underline; }
+.research > figure { max-width: 620px; margin: 20px auto 0; }
+.opening a:focus-visible,.research summary:focus-visible { outline: 3px solid #78dbff; outline-offset: 4px; }
+@media (min-width: 1100px) { .visual > a { max-height: 44vh; } .visual img { height: 44vh; object-fit: cover; object-position: center 55%; } }
+@media (max-width: 800px) { .opening { padding: 148px 20px 28px; } .message { grid-template-columns: 1fr; gap: 20px; } .body { font-size: 16px; } .fullscreen { top: 8px; right: 8px; padding: 8px 10px; font-size: 14px; } .left,.right { bottom: 8px; padding: 6px 8px; font-size: 14px; } .left { left: 8px; } .right { right: 8px; } }
