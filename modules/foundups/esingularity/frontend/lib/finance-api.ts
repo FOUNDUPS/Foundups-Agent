@@ -38,6 +38,32 @@ export type MarketBenchmark = {
   notes: string;
 };
 
+export type PriceComparison = {
+  benchmark: MarketBenchmark;
+  comparison_status: 'DIRECT_PRICE_RATIO_ONLY' | 'FX_REQUIRED' | 'UNIT_NOT_COMPARABLE';
+  target_price: number;
+  target_currency: string;
+  target_unit: string;
+  benchmark_gpu_hour_basis?: number;
+  absolute_delta?: number;
+  delta_pct?: number | null;
+  target_to_benchmark_ratio?: number | null;
+  scope_warning?: string;
+};
+
+export type PriceReconciliationTarget = {
+  target: PriceTarget;
+  comparisons: PriceComparison[];
+  direct_comparison_count: number;
+  fx_required_count: number;
+};
+
+export type PriceReconciliation = {
+  as_of: string;
+  truth_boundary: string;
+  targets: PriceReconciliationTarget[];
+};
+
 export type FundingOpportunity = {
   id: string;
   kind: string;
@@ -132,6 +158,7 @@ export type FinanceSnapshot = {
     truth_boundary: string;
   };
   catalog: FinanceCatalog;
+  price_reconciliation: PriceReconciliation;
   capacity_planning: CapacityPlan[];
   feasibility: Record<string, unknown>;
   scenario?: {
