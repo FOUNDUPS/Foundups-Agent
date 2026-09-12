@@ -11,6 +11,7 @@ from fastapi import FastAPI
 p = sys.modules["_reddog_public_boundary_tests.reddog_public_policy"]
 s = sys.modules["_reddog_public_boundary_tests.reddog_public_session_gate"]
 NOW = 1_800_000_000
+HOST_OWNER = "e" * 64
 COMMON = dict(surface="autopost", origin="https://autopost.foundups.com", subject="a" * 64)
 REQUEST = {
     "consent": True,
@@ -135,7 +136,10 @@ def test_database_contains_no_raw_challenge_token(store):
 
 def test_http_lick_round_trip(api_module, store):
     async def run():
-        gate, _ = store
+        _, connect = store
+        gate = s.PublicSessionGate(connect, host_owner=HOST_OWNER)
+        gate.initialize()
+        gate.register_host(now=NOW)
         async def respond(_turn):
             return "Public response."
         app = FastAPI()

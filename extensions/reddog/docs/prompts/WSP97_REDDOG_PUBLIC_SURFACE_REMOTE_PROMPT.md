@@ -1,7 +1,8 @@
-# Remote work order: RedDog public host and first mobile adapter
+# Remote work order: RedDog public host, AutoPost attention, and website adapters
 
-Status: work order only; not completion or execution authority by itself.
-Origin: external principal 012. Role: 0102 architect/engineer.
+Status: work order only; not completion or execution authority by itself.  
+Origin: external principal 012. Role: 0102 architect/engineer.  
+Current audit anchor: `docs/audits/architecture/REDDOG_SURFACE_RUNTIME_RECONCILIATION_20260912.md`.
 
 Canonical navigation: [RedDog documentation map](../../../../docs/REDDOG_DOCUMENTATION_MAP.md) ·
 [public admission contract](../REDDOG_PUBLIC_SURFACE_ADMISSION.md) ·
@@ -9,126 +10,155 @@ Canonical navigation: [RedDog documentation map](../../../../docs/REDDOG_DOCUMEN
 
 ## Source lineage and completion ledger
 
-The initial implementation entered `main` through [PR #1633](https://github.com/FOUNDUPS/Foundups-Agent/pull/1633),
-squash `8980aa29b2a17655ad5d927c94059c068400c118`; it was not a direct main push.
-[PR #1635](https://github.com/FOUNDUPS/Foundups-Agent/pull/1635) adds guest status
-recovery and actual DatabaseManager-wrapper tests. Read its live merge/check
-state before treating it as available on main. Neither PR is deployment evidence.
+Merged baseline:
+
+- PR #1633: public guest consent, caps, expiry, replay/cancellation boundary.
+- PR #1635: lost-response nonce/revision status recovery and DatabaseManager-wrapper tests.
+- PR #1639: non-biometric Lick PoC; AutoPost PR #11 is the matching mobile client/provenance surface.
+
+Open/stale evidence:
+
+- PR #1641 implemented/tested host leases and orphan recovery but was never merged and is stale relative to current main. Preserve it as evidence; do not merge it directly.
+- PR #1648 contains useful foundups.com/eSingularity.ai/OpenRouter delivery work but duplicates the public session/accounting authority in Cloudflare D1 and is stacked on another open branch. Preserve useful UI/provider/knowledge work; do not merge the duplicated authority unchanged.
+
+Current 2026-09-12 reconciliation branch rebuilds the host-lease source from current main. Read its live PR/check state before treating that capability as merged.
 
 | Work | Source state / remaining evidence |
 |---|---|
-| Public guest consent, caps, expiry, replay and cancellation boundaries | Implemented in #1633; optional, unmounted |
-| Lost-response nonce/revision recovery | Implemented by #1635; same bearer/surface/origin/subject; never replays inference |
-| SQLite DatabaseManager wrapper | Exercised by #1635 tests with temporary databases; actual PC lifecycle remains unverified |
-| Resident host, trusted edge and public-only responder | Not activated; needs actual deployment/model/accounting bindings |
-| AutoPost mobile, foundups.com and eSingularity.ai clients | Not implemented by these admission slices; preserve existing source ownership |
-| Protected 012/0102 identity and 3V integration | Public evidence is unsigned/provisional; no protected identity or engine invocation |
-| Private continuity, admitted context deltas, voice and omission critic | Still separate unfinished layers; use the existing dual-loop sequence |
-| Live HoloIndex repair and recursive improvement | Requires a reachable configured owner and exact receipt; not established by GitHub CI |
-
-Do not equate a linked work order, source merge, test pass or mocked responder
-with completion of a downstream row. Continue the next unblocked bounded slice;
-record exact missing environment dependencies rather than inventing readiness.
+| Public guest consent, caps, expiry and replay | merged; router still optional/unmounted |
+| Lost-response nonce/revision recovery | merged; same bearer/surface/origin/subject; never replays inference |
+| Non-biometric Lick + AutoPost provenance | merged in both repositories; no identity/authority claim |
+| Public host lease/orphan recovery | being reconstructed from current main; requires fresh exact-head CI and merge |
+| AutoPost RedDog attention | not implemented; current camera/Liquid/recording paths are not RedDog attention |
+| Resident startup/renew/replacement/shutdown lease adapter | not implemented |
+| Public-only model responder + trusted edge/shared accounting | not activated |
+| foundups.com/eSingularity.ai RedDog | #1648 is reusable evidence/UI/provider work, not merge-ready architecture |
+| Protected 012/0102 identity and 3V integration | public Lick evidence remains provisional/no-authority |
+| Private context deltas, voice/TTS and omission critic | separate dual-loop work after public surface boundaries are proven |
+| Live HoloIndex recursive repair | requires reachable configured owner and exact receipt; GitHub CI is not that proof |
 
 ## Recover and isolate
 
-Read `AGENTS.md`, WSP_00, WSP_97, WSP_10, WSP_15 and the RedDog documentation map.
-Run the actual WSP_00 bootstrap and tracker from the canonical repository root.
-Record exact current HEAD, status, worktrees, open owned PRs and available model
-bindings. Do not reuse, reset or stage another worker's changes. Create a new
-owned worktree/branch from verified current main.
+1. Read `AGENTS.md`, WSP_00, WSP_97, WSP_10, WSP_15, the RedDog documentation map, public admission contract, and current surface reconciliation audit.
+2. Run the real WSP_00 bootstrap/tracker from canonical repo root.
+3. Run the canonical HoloIndex owner query. Require current/no-gap evidence.
+4. Record exact current HEAD, working trees, owned PRs and runtime bindings. Preserve concurrent work.
+5. Never revive stale branch state by force-resetting current main.
 
-Read `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` and its tests.
-This source slice has **no mounted live host, deployed UI, authenticated owner
-flow, 3V engine invocation, or voice/context-delta implementation**.
+If HoloIndex fails, preserve the original failure/HEAD, use the governed owner incident/repair route, test that owning repair, requery, then return to the RedDog transaction. Missing owner/runtime configuration is not permission to weaken freshness or reindex in a user-facing query.
 
-## HoloIndex before expansion
+## Transaction A — merge current-main host lease recovery
 
-Use the canonical owner query in `AGENTS.md`, resolving the main/control root
-through Git's common directory. Run the exact regression query in the admission
-document. Require a current no-gap receipt, not merely a successful process exit.
+The public gate must have exactly these invariants before exposure:
 
-On failure preserve the error and its original request/HEAD. Retrieve the current
-owner incident classifier and governed post-merge repair/controller. Repair only
-through that authority, run its closest existing tests, and requery before
-returning to RedDog. Missing runtime configuration is not permission to alter
-Holo source, widen timeout/freshness gates or reindex from the query path.
-Record the retrieval case and held-out evaluation; do not claim recursive
-improvement just because a query was attempted.
+- fresh random owner token per public-host process lifetime;
+- raw owner token never persisted;
+- one registration per owner; expired identity cannot resurrect;
+- renewal only while live;
+- busy reservations bound to the owner;
+- replacement can reclaim only after recorded owner expiry;
+- recovery clears busy ownership only: never revision/nonce/Lick/quota/expiry;
+- no inference replay/refund;
+- pre-lease ownerless busy rows remain fail closed;
+- HTTP `PublicSurfaceBinding` refuses an unleased gate.
 
-## First implementable scope
+Use current-main tests/TestModLog and regenerate the canonical registry. Run focused public boundary and repository CI on the exact final head. Merge through a clean squash PR only after those gates pass.
 
-1. Inventory the existing authenticated resident host, public ingress, AgentDB
-   connection factory, deployment routes and public-only model topology. Do not
-   create a second host, queue, database or camera stack for convenience.
-2. Review `PublicSessionGate` with the actual SQLite DatabaseManager wrapper,
-   process concurrency, restart/crash and clock behavior. Prove orphaned busy-slot
-   recovery through owned process/lease evidence; never erase counters or allow
-   a second inference merely to clear an error. Guest `status` cannot clear such
-   a slot, and replacing a Python host object is not proof of process termination.
-3. Bind an independently reviewed zero-tool, public-only responder. Its input is
-   PublicTurn, not the principal Memex or private resident work envelope. Enforce
-   max output tokens and provider-side deadlines. No arbitrary URL/model selection
-   from browser input and no private OpenClaw fallback.
-4. Supply edge-authenticated subject accounting, TLS, origin routing, rate limits,
-   key custody and shared budgets across replicas/surfaces. The existing direct
-   peer HMAC is not sufficient attribution behind an unverified proxy.
-5. Mount the router on the proven host only after those tests pass. Leave public
-   exposure disabled when any dependency is unavailable.
+## Transaction B — AutoPost RedDog attention
 
-## Then add surfaces, one at a time
+Work in `FOUNDUPS/autopost` from fresh main. Reuse its existing camera stream, `CaptureController`, Lick client, provenance, correction UI and local Liquid vision. Do **not** create a second camera stack.
 
-Start inside the existing `FOUNDUPS/autopost` UI, not a copied monorepo camera.
-Verify its actual post-redirect origin first. Reuse capture, correction and media
-ownership. Add camera-off text conversation first; voice is a separately measured
-adapter. Public guest conversation must not inherit the monk's private session.
+Implement an explicit RedDog sensory state:
 
-Add the same thin public guest adapter on foundups.com and the canonical
-`modules/foundups/esingularity/frontend` surface. Confirm deployment ownership
-before editing. Keep public conversation consent distinct from recording,
-biometrics, publishing and private-memory disclosure.
+```text
+DORMANT
+  preview may exist; local capture intelligence may exist
+  no remote RedDog visual/audio/STT processing
 
-Client obligations: show consent and guest status; render output as text, not
-trusted HTML; expose remaining turns and expiry; respect 429/410/503; do not
-retry a consumed nonce; do not save credentials or raw conversation to localStorage.
-A timeout consumes budget. After a lost reply, use `POST .../{surface}/status`
-with the existing bearer and `{}` to recover the latest revision/nonce. Do not
-resubmit the uncertain turn automatically. The response includes `in_flight`,
-`expires_at`, `idle_expires_at` and `server_time`; status polling does not renew
-those bounds or recover reply text. Apply status responses monotonically by
-revision and request order; never overwrite newer client state with a late read.
-Do not claim "sent", "saved", "remembered" or "executed" from model text.
+ATTENDING
+  entered only by explicit visible engagement/hold
+  may sample bounded frames from the same viewport
+  may process permitted microphone audio through a governed browser/STT adapter
+  may emit bounded transcript/percept events to RedDog/0102
+
+release/cancel/background/session invalidation/transport loss -> DORMANT
+```
+
+Keep separate:
+
+- camera permission/preview;
+- local Liquid/WebGPU analysis;
+- photo/video recording and media retention;
+- Lick encounter/provenance;
+- RedDog attention;
+- RedDog conversation transcript;
+- publishing.
+
+Do not send raw continuous video by default. The first visual contract should be sampled/bounded and explicitly scoped. Do not save RedDog bearer or raw conversation to localStorage.
+
+Before writing tests, read AutoPost's closest test inventory/TestModLog/fixtures. Extend existing test files when possible.
+
+## Transaction C — resident lease lifecycle
+
+Reuse the existing broker-managed OpenClaw resident service and DAE launch broker. Do not create a second server.
+
+Bind the public gate lifecycle:
+
+1. generate owner on public resident startup;
+2. initialize AgentDB gate and register once before public binding exists;
+3. renew on a bounded scheduler safely inside the 60-second lease;
+4. replacement process registers a new owner and reclaims only expired-owner busy slots;
+5. stop renewal before shutdown; never reuse old owner;
+6. status/health exposes bounded lifecycle state without owner material;
+7. provider/PublicSurfaceBinding remains a distinct zero-tool public surface, never private OpenClaw/Memex fallback.
+
+DAE heartbeat can trigger/observe renewal only through an explicit tested adapter; existing heartbeat records alone are not the lease.
+
+## Transaction D — visual/audio transport
+
+There is no authorization to push camera/microphone data through the ordinary text `turn` shape.
+
+Inventory existing STT and perception contracts first. Current Foundups-Agent STT ownership includes `modules/infrastructure/cli/src/openclaw_voice.py`; the Japanese-call module reuses that policy. A browser adapter may use browser-native/local encoding/transport as needed, but language selection, transcript normalization and RedDog/0102 admission must conform to the existing voice ownership rather than create a competing STT authority.
+
+Define separate bounded sensory event shapes with purpose, surface, encounter/Lick reference, timestamp/freshness and retention/disclosure. Prove dormant state sends none. Raw media storage/biometric extraction remains off unless a separate consented contract explicitly adds it.
+
+## Transaction E — websites
+
+Rebase/salvage #1648 on current main only after the shared public contract is merged.
+
+Keep useful work where still valid:
+
+- public RedDog UI on foundups.com/eSingularity.ai;
+- fixed server-side OpenRouter model/provider selection;
+- no browser provider key;
+- public knowledge packet/source links;
+- strict public/private context boundary;
+- deployment-owned ingress/key configuration.
+
+Do not maintain an undocumented second public-session authority. Choose and document one of these before implementation:
+
+1. route website sessions to the canonical resident public gate; or
+2. keep Cloudflare/D1 as an edge deployment adapter **only** with explicit contract-parity tests against the canonical semantics and a clear single-authority/conformance rule.
+
+The edge may enforce stricter limits. It must not diverge on Lick, nonce/revision, quotas, expiry, recovery, disclosure or authority ceilings. Public website sessions never inherit 012's private bearer/context.
 
 ## Identity and 3V
 
-Lick contributes to Verification. It does not perform Validation/Valuation or
-authorize work. Keep unsigned public evidence explicitly unsigned/unverified.
+Lick contributes evidence to Verification. It does not perform Validation/Valuation or grant work authority. A human account uses separately verified possession proof; an agent uses its own key/registration/delegation. Names, voice, conversational knowledge, `tSingularity`, or the answer to "why 0102?" are not authentication and never remove caps.
 
-A human account uses a separately verified possession-bound challenge. An agent
-uses its own key/registration and bounded delegation. A voice/name/knowledge
-answer, including `tSingularity`, proves neither. Never block assistive-AI users
-merely because they receive assistance. Higher authenticated tiers retain
-explicit budgets and independent work authority.
+## Acceptance
 
-## Acceptance and publication
+For every slice:
 
-Read existing TestModLog/README and nearest tests before adding cases. Extend
-this suite for same-boundary scenarios. Register new test files using the
-canonical generator; do not hand-edit counts or skip its check.
+- WSP_97 evidence before design;
+- HoloIndex owner retrieval when runtime exists;
+- reuse test inventory before new test files;
+- focused tests, dependency/security tests, then appropriate macro CI;
+- exact-final-head checks, no historical aggregate substitutions;
+- no deployment claim from source/tests;
+- clean PR and squash merge;
+- update TestModLog/documentation map/HoloIndex only where ownership requires it.
 
-Verify: wrong origin, spoofed forwarded identity, cross-surface/private-scope
-leakage, expired and replayed nonce, parallel over-cap requests, restart quotas,
-withdrawal during a response, body/output bounds, provider cancellation ignored,
-clock rollback, unavailable DB/model, synthetic public/private canaries, and
-`tSingularity` as ordinary capped text. Also verify lost-response status recovery,
-no idle renewal, no quota refund, preserved busy slots and stale-client rejection.
+Return after public surfaces are proven to the private dual-loop sequence:
 
-Run targeted tests, dependency/security tiers, required CI and exact-host live
-acceptance. Record commands and results honestly. Keep deployment distinct from
-source merge. Publish a clean PR; squash only when the applicable checks pass.
-Preserve unowned work and report remaining blockers with exact receipts.
-
-Return to the existing dual-loop work: authenticated private turn/status/cancel
-handlers -> authorized Memex/context-delta admission -> fast surface injection
--> voice -> omission critic and WSP_15 intervention ranking -> governed workers.
-Do not implement every layer in one unreviewable change.
+`authenticated private conversation -> authorized context deltas -> fast RedDog injection -> voice/TTS -> omission critic -> WSP_15 intervention ranking -> governed workers`.
