@@ -1,7 +1,7 @@
 ---
 name: yumori_financial_model
-description: Audit, recalculate, scenario-test, and export the YUMORI/eSingularity financial model from repository-owned equations without treating generated spreadsheets or legacy outputs as calculation authority.
-version: 0.1.0
+description: Audit, recalculate, scenario-test, feasibility-test, and export the YUMORI/eSingularity financial model from repository-owned equations without treating generated spreadsheets or legacy outputs as calculation authority.
+version: 0.2.0
 intent_type: ANALYSIS
 promotion_state: prototype
 category: workflow
@@ -16,6 +16,7 @@ wsp_chain:
   - WSP 84
   - WSP 95
   - WSP 97
+  - WSP 109
 evals:
   - name: repo_is_calculation_authority
     expected: python_model_precedes_spreadsheet_output
@@ -25,6 +26,10 @@ evals:
     expected: visitor_spend_is_never_project_revenue_or_tax_revenue
   - name: finance_reconciliation
     expected: revenue_power_depreciation_debt_fcfe_irr_and_npv_are_equation_driven
+  - name: customer_cash_boundary
+    expected: annual_revenue_nominal_contract_value_and_actual_upfront_cash_are_distinct
+  - name: debt_capacity_boundary
+    expected: deployed_debt_is_lesser_of_remaining_gap_and_dscr_supported_capacity
   - name: bounded_retrieval
     expected: large_repo_artifacts_are_searched_then_read_in_small_relevant_windows
   - name: reddog_boundary
@@ -35,19 +40,23 @@ retirement_date: null
 
 ## Three Skill Questions
 
-1. **Do we need it?** Yes. Financial-model audit, scenario changes, public-number reconciliation, and spreadsheet regeneration recur and materially affect campaign credibility.
+1. **Do we need it?** Yes. Financial-model audit, feasibility funding, customer/offtake validation, scenario changes, public-number reconciliation, and spreadsheet regeneration recur and materially affect campaign credibility.
 2. **Can we live without it?** Poorly. Reconstructing formulas from chat or from presentation workbooks creates drift and silently reintroduces stale numbers.
-3. **Can we afford not to have it?** No. Incorrect IRR, power, debt, tax, revenue, or public-impact claims create material decision and credibility risk.
+3. **Can we afford not to have it?** No. Incorrect IRR, power, debt, tax, revenue, customer cash, or public-impact claims create material decision and credibility risk.
 
-Decision: maintain one module-owned prototype Skillz. Do not split separate IRR, spreadsheet, demand, or audit Skillz unless a future workflow independently passes the Three Skill Questions.
+Decision: maintain one module-owned prototype Skillz. Do not split separate IRR, spreadsheet, demand, funding, or audit Skillz unless a future workflow independently passes the Three Skill Questions.
 
 ## Purpose
 
-Route financial-model work to the canonical Python calculation engine in:
+Route core financial-model work to:
 
 `modules/foundups/esingularity/src/yumori_financial_model.py`
 
-The repository owns assumptions, equations, reconciliation rules, and tests. Excel/PDF/Drive/web outputs are generated or publication surfaces.
+Route feasibility-funding and customer/offtake evidence work to:
+
+`modules/foundups/esingularity/src/yumori_feasibility_finance.py`
+
+The repository owns assumptions, equations, reconciliation rules, and tests. Excel/PDF/Drive/web outputs are generated or publication surfaces. The feasibility module is an adjacent evidence/capital gate; it does not replace the canonical Phase-1 P&L engine.
 
 ## Positive triggers
 
@@ -56,6 +65,10 @@ Use this Skillz when asked to:
 - compare a legacy/static financial model with a new model;
 - change capacity, utilization, pricing, power, PUE, CapEx, debt, tax, staffing, or other financial assumptions;
 - calculate or reconcile revenue, EBITDA, FCFE, NPV, IRR, DSCR, debt schedules, depreciation, or power expense;
+- assess NCDS-style feasibility funding, pre-debt funding targets, customer deposits/prepayments, or remaining project funding gaps;
+- distinguish customer annual revenue, nominal multi-year contract value, take-or-pay evidence, and actual upfront construction cash;
+- size debt from CFADS / DSCR / rate / term and cap deployed debt at the remaining funding requirement;
+- evaluate 1–5 MW planning capacity and customer/offtake evidence without double-counting the same physical GPU pool;
 - regenerate or export the YUMORI financial workbook;
 - explain why a financial output changed;
 - reconcile numbers shown on eSingularity/YUMORI public surfaces with the code model.
@@ -82,7 +95,7 @@ A spreadsheet cell is not authoritative merely because it exists. A model output
 1. Retrieve governing WSPs and the exact eSingularity finance code before stating current model facts.
 2. Retrieve the smallest relevant workbook/source evidence before changing assumptions.
 3. Run a micro pass on the exact equation/assumption being changed.
-4. Run a macro pass on P&L, cash flow, debt, public-value ledgers, and public copy affected downstream.
+4. Run a macro pass on P&L, cash flow, debt, public-value ledgers, feasibility funding, customer/offtake, and public copy affected downstream.
 5. Run the dialectic sweep: existing formula, competing interpretation, missing evidence, strongest downside case.
 6. Change repository assumptions/equations first.
 7. Run focused model tests and validation checks.
@@ -113,6 +126,44 @@ Keep five ledgers distinct:
 
 Never add visitor-spending reference values into project-company revenue or tax receipts.
 
+## Customer/offtake accounting boundary
+
+The same physical GPU pool may support several products, but capacity must never be double-counted.
+
+For each customer/offtake record distinguish:
+- annual contracted operating revenue;
+- nominal multi-year contract value;
+- take-or-pay / minimum-purchase evidence;
+- deposit/prepayment percentage;
+- **actual upfront cash received/committed before operations**.
+
+Normal university or corporate compute purchases do not become construction capital. Nominal contract value does not reduce the funding gap. Only explicit actual upfront cash from `VERIFIED` or `COMMITTED` records enters the pre-debt construction funding calculation.
+
+## Feasibility funding boundary
+
+The current NCDS-style feasibility calculation lives in `yumori_feasibility_finance.py` and is intentionally not yet wired into the canonical P&L/debt schedule.
+
+Pre-debt cash includes only explicit committed cash sources:
+- city cash support;
+- prefecture committed cash;
+- national awarded support;
+- verified/committed customer upfront cash;
+- private quiet-phase capital commitments;
+- public campaign capital commitments.
+
+The following are reported separately and do **not** automatically reduce the cash funding gap:
+- city in-kind support;
+- candidate/potential grants or support;
+- ordinary annual customer revenue;
+- nominal multi-year contract value;
+- non-cash take-or-pay evidence.
+
+Debt rule:
+
+`deployed debt = MIN(remaining funding requirement, DSCR-supported amortizing debt capacity)`
+
+If a gap remains after debt, the model must expose the gap rather than forcing the financing to close.
+
 ## Reconciliation invariants
 
 - Tier revenue = integer GPUs x 8,760 hours x utilization x price.
@@ -122,6 +173,8 @@ Never add visitor-spending reference values into project-company revenue or tax 
 - FCFE reconciles to CFO - maintenance CapEx - principal repayment.
 - Equity IRR is solved from the actual equity cash-flow sequence; never hard-code the displayed result.
 - Sources equal uses at initial funding.
+- Customer annual revenue, nominal contract value, and actual upfront cash never share one field or arithmetic role.
+- Potential support and in-kind support never silently become cash funding.
 - Every modelled result remains modelled until validated by external evidence.
 
 ## Legacy workbook rule
@@ -130,6 +183,6 @@ The preset workbook is evidence of the intended structure and assumptions, not c
 
 ## RedDog / Rolodex behavior
 
-RedDog should discover this Skillz for YUMORI/eSingularity finance requests and hand the work to the governed calculation path. RedDog may summarize a validated result returned by the model; it must not infer, interpolate, or invent missing financial values.
+RedDog should discover this Skillz for YUMORI/eSingularity finance, feasibility-funding, customer/offtake, and workbook requests and hand the work to the governed calculation path. RedDog may summarize a validated result returned by the model; it must not infer, interpolate, or invent missing financial values.
 
-This prototype grants no authority to publish new financial claims, commit financing, represent grants as awarded, or treat demand leads as customer commitments.
+This prototype grants no authority to publish new financial claims, commit financing, represent grants as awarded, treat demand leads as customer commitments, or treat nominal contracts as received construction cash.
