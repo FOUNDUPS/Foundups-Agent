@@ -1,5 +1,17 @@
 # Project eSingularity ModLog
 
+## 2026-09-12 — CCP v2 audit and repository-first material intake
+
+- Text-reviewed all 23 documents in the supplied CCP v2 Drive folder and the current 03; recorded every source ID, language pair, disposition, coverage limit and known unread legacy record in `docs/materials/source_registry.json`.
+- Added `docs/materials/YUMORI_CCP_V2_AUDIT.md` with 20 claim-disposition findings, limited official-source checks and a reproducible diagnostic of the supplied investor pitch. This does not certify or replace the separate FIN workbook.
+- Added Japanese-first `docs/materials/YUMORI_03_RESEARCH_INTEGRATION.md` with a complete English review version. It is a proposed source unit, not the complete 03 source, and has not been published to Drive.
+- Reused existing public-claim, vision, JHR and private-contact ownership boundaries. Did not import raw contact directories or correspondence into public Git.
+- Recorded 012's correction that YUMORI.info redirects to eSingularity.ai, rather than treating the alias as another content source. No DNS or deployment change was made.
+- Connected the intake to this module's README and roadmap, with bounded MATERIALS-02 through MATERIALS-05 continuation work for legacy intake, reconciliation, existing-ID publication and anti-drift preflight.
+- Local static checks passed for 23 unique source IDs, 11 language pairs and the transcribed financial arithmetic. These are not repository tests.
+- Verification limits: WSP_00 runtime gate, HoloIndex owner-query and repository tests were not performed because no runnable checkout was obtained. Complete WSP_15 allocation verification also remains outstanding. GitHub retrieval was the fallback. This is a docs-only draft review slice, not a fully WSP-executed promotion.
+- Full project-material migration, native-layout audit, all-source verification, Drive publication and automated synchronization remain incomplete. Existing Drive documents, public site, runtime and tests were unchanged.
+
 ## 2026-09-11 — Real-building full-screen YUMORI vision deck
 
 - Replaced the presentation renderer with the revised ten-slide vision based on 012's photographs of the actual former Sukatto Land Kuzuryu building rather than a generic greenfield resort.
