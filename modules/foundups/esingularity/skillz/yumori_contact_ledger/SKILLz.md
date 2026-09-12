@@ -30,6 +30,8 @@ evals:
     expected: repo_stores_workflow_contract_not_private_contact_dump
   - name: moshpit_followup_index
     expected: material_milestones_and_open_followups_are_recorded_without_private_contact_duplication
+  - name: government_correspondence_routing
+    expected: japanese_first_government_mail_resolves_verified_routes_and_default_bcc_from_connected_ledgers_without_hard_coded_addresses
 retirement_date: null
 ---
 # YUMORI.me Contact Ledger
@@ -57,8 +59,9 @@ Maintain one recoverable communications picture for the YUMORI.me Save the Onsen
 External sources:
 1. Gmail — canonical correspondence record.
 2. Google Sheet `YUMORI.me Contacts` — operational contact/index ledger.
-3. Google Doc `YUMORI.me Moshpit` — dated campaign milestones and material outcomes.
-4. Google Doc `YUMORI.me Contacts Pics` — source imagery/business cards and transcription evidence.
+3. `Correspondence Routing` tab in `YUMORI.me Contacts` — mutable To/CC/BCC policy keyed by Contact ID, never by hard-coded repo addresses.
+4. Google Doc `YUMORI.me Moshpit` — dated campaign milestones and material outcomes.
+5. Google Doc `YUMORI.me Contacts Pics` — source imagery/business cards and transcription evidence.
 
 Repository context: `modules/foundups/esingularity/docs/YUMORI_CONTACT_LEDGER_CONTEXT.md`.
 
@@ -66,7 +69,8 @@ Repository context: `modules/foundups/esingularity/docs/YUMORI_CONTACT_LEDGER_CO
 
 ```text
 Gmail message/thread bytes
-  -> YUMORI.me Contacts / Email Log index
+  -> YUMORI.me Contacts / Email Log / Correspondence Routing
+  -> YUMORI.me Contacts Pics when identity/route needs card verification
   -> YUMORI.me Moshpit milestone summary
   -> repository workflow/context documentation
   -> model recollection
@@ -126,6 +130,27 @@ Recover prior pitch and reporter context. Distinguish acknowledgement, request f
 ### Government / political / administrative
 Recover the exact prior request and current procedural status. Separate observed official facts from campaign strategy. Address authority/jurisdiction precisely. Never imply that a meeting, copied email, or receipt equals support.
 
+#### Government correspondence operating contract
+
+Use this branch when 012 says variants of `government correspondence`, `use the correspondence skill`, `write/send this to the city`, `send this to council`, or asks for follow-up with a public office.
+
+1. **Repo first for project truth.** Read the relevant eSingularity/YUMORI repo source, Skillz, Breadcrumbs/Moshpit architecture, financial/legal contract, or current implementation before treating a Drive derivative as canonical project truth. External official records remain primary evidence for what government actually published or said.
+2. **Read correspondence before drafting.** Search Gmail for the agency, named official, subject, and prior request. Read the full relevant thread before sending a reply/follow-up. Preserve `message_id` and `thread_id` lineage.
+3. **Resolve contacts from the ledger.** Read `YUMORI.me Contacts`. Never infer a current address from a remembered name or email pattern.
+4. **Card fallback.** If the contact is missing, ambiguous, or a TTS-normalized Japanese name cannot be resolved from the structured ledger, inspect `YUMORI.me Contacts Pics` and other source-card imagery before asking 012 to repeat information.
+5. **Public-source fallback.** If no verified route exists in the ledger/card evidence, research the official municipal/prefectural/organization site or the person's own public professional/campaign page. Do not guess undisclosed internal addresses and do not treat absence of bounce as identity verification.
+6. **Japanese-first government drafting.** Government-facing correspondence is drafted in natural formal Japanese unless 012 explicitly requests another language. Keep the request concrete, procedural, evidence-based, and easy for a Japanese administrative recipient to route internally.
+7. **Identity and authority.** Retrieve the current committee/signatory/principal role from live project records before signing. When 0102 acts as proxy/translator, label that role accurately. Do not imply legal representation, committee authority, endorsement, land ownership, taxpayer status, or official filing status beyond verified/current evidence.
+8. **Procedural precision.** Distinguish ordinary email, formal information-disclosure request, petition/陳情, PFI/PPP proposal, resident audit request, hearing request, and litigation/legal-consultation notice. An email receipt does not become a statutory filing merely because it was copied to an office.
+9. **To/CC/BCC are data, not code.** Read the connected `Correspondence Routing` tab at send time. Apply active rows matching the correspondence scope. `DEFAULT_BCC` means include the currently resolved contact route in BCC unless 012 explicitly overrides it for that message. Never expose BCC recipients in To/CC or the body merely because they are routing observers.
+10. **No private addresses in Git.** The repo stores only this workflow contract and stable Contact-ID semantics. Do not hard-code private/personal email addresses, phone numbers, street addresses, or mutable BCC lists in Skillz, docs, tests, source, or configuration.
+11. **Reuse before creating Docs.** Prefer an existing canonical filing/proposal/evidence document. Create a new Drive document only when a distinct formal filing or collaboration artifact is actually required. Record its purpose/lifecycle so temporary working documents can later be archived or deleted without losing the sent/signed record.
+12. **Send only when authorized.** Drafting does not itself grant mutation authority. When the user explicitly asks to send now and the route is verified, use the connected mail action; otherwise draft/review only.
+13. **Post-send reconciliation.** Record the sent Gmail event in Email Log/Contacts, preserve the message/thread identifiers, update delivery/reply state when known, and add only material project milestones/open loops to Moshpit.
+14. **No tracking decoration.** Do not add a custom campaign tracking signature, pixel, hidden identifier, or recipient fingerprint to government correspondence.
+
+This branch intentionally stores no named default-BCC people in Git. `Correspondence Routing` is the live operational authority so the list can change without code changes or PII leakage.
+
 ### Auto-reply
 Record `AUTO ONLY`; do not treat it as human engagement.
 
@@ -156,6 +181,8 @@ Mark `CLOSED`. Do not nudge again unless materially new facts justify a genuinel
 
 `Email Log` should preserve Message ID, Thread ID, Contact ID/relationship, Direction, Date JST, From, To, CC, Subject, Event Type, short Snippet/Note, Status, Gmail URL, Sync Date.
 
+`Correspondence Routing` should preserve Contact ID, human-readable name, channel, visibility (`TO`/`CC`/`BCC`), policy (`DEFAULT_BCC`, conditional routing, etc.), scope, active/inactive status, and a short non-secret note. Resolve the actual address from `Contacts`; do not duplicate addresses into this routing tab unless operationally required.
+
 ## Moshpit discipline
 
 Use Moshpit as operational memory/open-loop index, not a mailbox or private address book. Keep newest material milestones first. Mark unresolved actions `OPEN`. Keep facts separate from proposals/assumptions. Apply STT repair against canonical campaign entities before indexing. Preserve contact-source imagery in `YUMORI.me Contacts Pics`, structured identity in the Contacts Sheet, and only material cross-index events in Moshpit.
@@ -171,6 +198,6 @@ Immediate civic ask: preserve a short evidence-based review window to compare re
 
 This is the parent YUMORI.me correspondence Skillz. Branch inside it by task/reply type unless a future branch independently passes the Three Skill Questions and has distinct tools, invariants, evaluation requirements, or lifecycle.
 
-RedDog/WRE should discover it for YUMORI.me contacts, outreach, Gmail replies, campaign email audit, stakeholder follow-up, Moshpit updates, business-card indexing, and communications history.
+RedDog/WRE should discover it for YUMORI.me contacts, outreach, Gmail replies, campaign email audit, government correspondence, stakeholder follow-up, Moshpit updates, business-card indexing, and communications history.
 
-The Skillz grants no Gmail/Drive mutation authority. If connected sources are unavailable, report `NEEDS_VERIFICATION`; never reconstruct live correspondence from repository memory.
+The Skillz grants no Gmail or Drive mutation authority by itself. If connected sources are unavailable, report `NEEDS_VERIFICATION`; never reconstruct live correspondence from repository memory.
