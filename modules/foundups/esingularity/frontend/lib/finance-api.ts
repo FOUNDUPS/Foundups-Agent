@@ -131,6 +131,19 @@ export type FacilityOperatingHistory = {
   source_url: string;
 };
 
+export type FacilityUsageOnlyHistory = Omit<FacilityOperatingHistory, 'user_fee_revenue_jpy'> & {
+  user_fee_revenue_jpy: number | null;
+};
+
+export type FacilityManagementFinance = {
+  period: string;
+  management_fee_jpy: number;
+  payment_to_city_jpy: number;
+  evidence_status: string;
+  scope: string;
+  source_url: string;
+};
+
 export type FacilityCityFiscalHistory = {
   period: string;
   city_revenue_jpy: number;
@@ -149,6 +162,8 @@ export type FacilityHistory = {
   as_of: string;
   truth_boundary: string;
   operating_history: FacilityOperatingHistory[];
+  usage_only_history: FacilityUsageOnlyHistory[];
+  management_finance_history: FacilityManagementFinance[];
   city_fiscal_history: FacilityCityFiscalHistory[];
   current_carrying_cost: {
     period: string;
