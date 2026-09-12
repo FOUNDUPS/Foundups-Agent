@@ -1,195 +1,163 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import CampaignTicker from '../components/CampaignTicker';
-import CampaignShareButton from '../components/CampaignShareButton';
-import LineButton from '../components/LineButton';
 import Brand from '../components/Brand';
-import HeroMusic from '../components/HeroMusic';
 import YumoriPresentation from '../components/YumoriPresentation';
+import FukuiComparisonMap from '../components/FukuiComparisonMap';
 
-const LINE_URL = 'https://line.me/ti/p/baXEozL_Q6';
-const PICS_URL = 'https://pics.yumori.info';
-const MUSIC_URL = 'https://music.yumori.me';
-const PLAN_URL = 'https://pc.yumori.info';
 const YUMORI_URL = 'https://yumori.me';
-const CITY_CONTACT_URL = 'https://www.city.fukui.lg.jp/inquiry/mailform101607.html?PAGE_NO=15196';
 
-const campaignSteps = [
-  ['01', 'STOP', '解体を止め、比較の時間を確保する', '条件を満たす代案を比較できるまで、後戻りできない解体契約を結ばないよう求める。'],
-  ['02', 'ASSEMBLE', 'COGDC推進チームをつくる', '地域住民、発起人、技術・運営の実務家、公益パートナーを一つの実行チームへ。'],
-  ['03', 'LAND', '地権者と合意する', '地代、責任、期間、将来の選択肢を含む土地利用の条件を、地権者と協議する。'],
-  ['04', 'CITY', '市が審査できる代案にする', '安全性、責任移管、資金計画、市の財政効果を示し、正式に比較できる提案へ。'],
-  ['05', 'UNIVERSITIES', '福井の大学と利用計画をつくる', '教育・研究で必要な計算力と、最初に実行する地域プロジェクトを具体化する。'],
-  ['06', 'CUSTOMERS + PARTNERS', '企業顧客・事業パートナーを確保する', '電力、通信、建設、運営の体制と、計算力を利用する中核顧客の約束を積み上げる。'],
-];
+function YumoriAction({ children }: { children: string }) {
+  return <a className="section-action" href={YUMORI_URL}><span>行動はYUMORI.me</span><strong>{children}</strong><b aria-hidden="true">↗</b></a>;
+}
 
 export default function Home() {
   return (
     <>
-      <header className="site-header">
+      <header className="site-header home-header">
         <Brand href="#top" />
-        <nav aria-label="Primary navigation"><a href="#top">温泉を守る</a><a href="#innovation-hub">AI拠点</a><Link href="/future">福井の未来</Link><Link href="/team">チーム</Link></nav>
-        <LineButton />
+        <nav className="desktop-nav" aria-label="主要ナビゲーション">
+          <a href="#future-place">施設構想</a>
+          <a href="#innovation-space">イノベーション・スペース</a>
+          <a href="#proposal">COGDC</a>
+          <Link href="/future">福井の未来</Link>
+          <Link className="jhr-nav-link" href="/reports/jhr">JHR・最新レポート</Link>
+        </nav>
+        <a className="header-cta" href={YUMORI_URL}>YUMORI.me <span>↗</span></a>
+        <div id="home-language-controls" />
+        <details className="mobile-nav">
+          <summary aria-label="メニューを開く">メニュー</summary>
+          <div>
+            <a href="#future-place">施設構想</a>
+            <a href="#innovation-space">イノベーション・スペース</a>
+            <a href="#proposal">COGDC</a>
+            <Link href="/future">福井の未来</Link>
+          <Link className="jhr-nav-link" href="/reports/jhr">JHR・最新レポート</Link>
+            <a href={YUMORI_URL}>参加・行動はYUMORI.me ↗</a>
+          </div>
+        </details>
       </header>
 
       <main id="top">
-        <section className="hero" id="hero" aria-labelledby="hero-title">
+        <section className="hero project-hero" id="hero" aria-labelledby="hero-title">
           <div className="hero-grid" aria-hidden="true" />
-          <CampaignTicker />
           <div className="hero-copy">
-            <p className="eyebrow"><span /> WHY · 温泉を守る</p>
-            <h1 id="hero-title">温泉を守り、<br /><em>私たちのCOG DCでまちを元気に。</em></h1>
-            <p className="hero-lead">壊すために公費を使う前に、この建物で福井の未来をつくろう。温泉を再開する。学びと起業の拠点をつくる。私たちのCOG DCから回収できる熱を、地域へ返せるか検証する。</p>
-            <div className="hero-actions"><a className="button button-primary" href={LINE_URL} target="_blank" rel="noreferrer">LINEで仲間になる <span>↗</span></a><a className="button button-ghost" href="#story">計画を見る <span>↓</span></a></div>
-            <HeroMusic />
+            <p className="eyebrow"><span /> 構想 · 旧すかっとランド九頭竜</p>
+            <h1 id="hero-title"><span className="hero-compute-question">コンピュートで、</span><em>温泉を救えるか。</em><span>地域を再生できるか。</span><span>日本を変えられるか。</span></h1>
+            <p className="hero-lead">旧すかっとランド九頭竜の温泉、食、文化、学び、起業を、地域のAI計算基盤「COGDC」につなぐ構想。計算事業が費用と設備更新を賄い、その余剰で地域を支えられるか。熱の再利用とともに検証します。</p>
+            <div className="hero-actions">
+              <a className="button button-primary" href="?vision=1&slide=1#yumori-deck">10枚で構想を見る <span>↗</span></a>
+              <a className="button button-ghost" href="/reports/jhr">JHR・最新レポート <span>→</span></a>
+            </div>
+            <a className="hero-jhr-news" href="/reports/jhr#latest"><span>JHR｜9月12日確認</span><strong>仙台200MW計画、9月11日に資金調達協議の基本合意を発表。</strong><small>ハイパースケーラー＝巨大なクラウド・AI計算基盤を運営する企業。全国の動きと福井への意味を読む →</small></a>
+            <a className="hero-vote-action" href="https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform"><strong>この構想を、解体で終わらせない。</strong><span>解体予算に反対を。VOTE NO</span><b>湯守に登録・準備委員会に参加 →</b></a>
           </div>
+          <FukuiComparisonMap />
         </section>
 
         <YumoriPresentation />
 
         <section className="future-place section" id="future-place" aria-labelledby="future-place-title">
           <div className="future-place-heading">
-            <div><p className="eyebrow"><span /> WHAT · ここがどう変わる？</p><h2 id="future-place-title">温泉を残す。<br /><em>夜まで人が集まる場所</em>をつくる。</h2></div>
+            <div><p className="eyebrow"><span /> 施設構想 · ここがどう変わる？</p><h2 id="future-place-title">温泉を残す。<br /><em>夜まで人が集まる場所</em>をつくる。</h2></div>
             <p>保存するだけではありません。温泉、地域の食、小さな商い、学び、光の文化を一つの場所につなぐ構想です。</p>
           </div>
           <div className="future-place-visuals">
             <figure className="future-place-visual">
               <Image src="/satellite-view.jpeg" alt="既存建物、駐車場、周辺土地を使ったプロジェクト配置構想" width={1320} height={1245} sizes="(max-width: 670px) 100vw, 50vw" />
-              <figcaption><span>SITE CONCEPT</span> 012提供の配置構想です。完成済みの施設を示す画像ではありません。</figcaption>
+              <figcaption><span>配置構想</span> 012提供の初期案です。完成済みの施設を示す画像ではありません。</figcaption>
             </figure>
             <figure className="future-place-visual">
               <Image src="/concept-onsen.jpg" alt="露天風呂と小さな飲食店が夜に集まる将来構想" width={440} height={290} sizes="(max-width: 670px) 100vw, 50vw" />
-              <figcaption><span>ONSEN CONCEPT</span> 温泉と地域の食がつながる将来イメージです。実際の配置・規模・熱利用は調査で決まります。</figcaption>
+              <figcaption><span>温泉構想</span> 実際の配置・規模・熱利用は調査で決まります。</figcaption>
             </figure>
           </div>
           <div className="future-place-cards" role="list">
-            <article role="listitem"><span>01 · ROTENBURO</span><h3>COG DCの回収熱を、<br />露天風呂へ活かせるか。</h3><p>回収できる熱を温泉の補助加温に使えるか、温度、距離、年間需要、設備費を技術検証する構想です。</p><small>ENGINEERING VALIDATION REQUIRED</small></article>
+            <article role="listitem"><span>01 · 露天風呂</span><h3>COG DCの回収熱を、<br />露天風呂へ活かせるか。</h3><p>回収できる熱を温泉の補助加温に使えるか、温度、距離、年間需要、設備費を技術検証する構想です。</p><small>工学検証が必要です</small></article>
             <article className="media-card food-card" role="listitem">
-              <a className="card-reference-image awara-reference-image" href="https://yukemuriyokocho.com/" target="_blank" rel="noreferrer"><span>実例を見る：あわら温泉「湯けむり横丁」↗</span></a>
-              <span>02 · FOOD</span><h3>あわら型の、<br />小さなコンテナ横丁。</h3><p>あわら温泉の横丁型モデルに着想を得て、地域の料理人、農家、学生が小さく商いを始められる場所へ。</p><small>AWARA-INSPIRED COMMUNITY FOOD COURT</small>
+              <a className="card-reference-image awara-reference-image" href="https://yukemuriyokocho.com/" target="_blank" rel="noreferrer"><span>実例：あわら温泉「湯けむり横丁」↗</span></a>
+              <span>02 · 地域の食</span><h3>あわら型の、<br />小さなコンテナ横丁。</h3><p>あわら温泉の横丁型モデルに着想を得て、地域の料理人、農家、学生が小さく商いを始められる場所へ。</p><small>あわらの地域横丁を参考にした構想</small>
             </article>
             <article className="media-card akira-card" role="listitem">
               <a className="card-reference-image dk-reference-image" href="https://www.digital-kakejiku.com/" target="_blank" rel="noreferrer"><span>D-K公式ギャラリーを開く ↗</span></a>
-              <span>03 · NIGHT</span><h3>夜は、D-Kによる<br />光の舞台を提案。</h3><p>建物を毎晩変化する光のキャンバスにする構想。長谷川章氏の参加は未承認で、現在は提案段階です。</p>
+              <span>03 · 夜の文化</span><h3>夜は、D-Kによる<br />光の舞台を提案。</h3><p>建物を毎晩変化する光のキャンバスにする構想。長谷川章氏の参加は未承認で、現在は提案段階です。</p>
               <div className="artist-reference"><Image src="/akira-hasegawa.jpeg" alt="D-K（デジタル掛け軸）を提唱する長谷川章氏" width={64} height={64} sizes="64px" /><a href="https://www.digital-kakejiku.com/" target="_blank" rel="noreferrer">長谷川章氏とD-Kの作品を見る <b>↗</b></a></div>
-              <small>PROPOSED DIGITAL KAKEJIKU EXPERIENCE</small>
+              <small>提案中のデジタル掛け軸体験</small>
             </article>
           </div>
+          <YumoriAction>なくなる前に、温泉を残す仲間になる</YumoriAction>
         </section>
 
-        <section className="innovation-hub section" id="innovation-hub" aria-labelledby="innovation-hub-title">
+        <section className="innovation-hub section" id="innovation-space" aria-labelledby="innovation-space-title">
           <div className="hub-heading">
-            <div><p className="eyebrow light"><span /> HOW · ESINGULARITY INNOVATION HUB</p><h2 id="innovation-hub-title">温泉の上に、<br /><em>福井の「学ぶ・創る・始める」</em>を重ねる。</h2></div>
-            <p>1階の温泉を地域の居場所として再開し、その上を世代ごとの学び、研究、起業がつながる場所へ。これは現時点の構想であり、建物調査と地域・所有者との合意を経て具体化します。</p>
+            <div><p className="eyebrow light"><span /> 仕組み · eSingularity イノベーション・スペース</p><h2 id="innovation-space-title">温泉の上に、<br /><em>福井の「学ぶ・創る・始める」</em>を重ねる。</h2></div>
+            <p>1階の温泉を地域の居場所として再開し、その上を世代ごとの学び、研究、起業がつながる場所へ。建物調査と地域・所有者との合意を経て具体化します。</p>
           </div>
 
           <div className="compute-equation" aria-label="お米と人の関係は、コンピュートとAIの関係に似ています">
-            <span><b>お米</b><small>人のごはん</small></span><i>:</i><strong>人</strong><em>=</em><span><b>Compute</b><small>AIのごはん</small></span><i>:</i><strong>AI</strong>
+            <span><b>お米</b><small>人のごはん</small></span><i>:</i><strong>人</strong><em>=</em><span><b>コンピュート</b><small>AIのごはん</small></span><i>:</i><strong>AI</strong>
           </div>
 
-          <div className="hub-floors" role="list" aria-label="Innovation Hub floor concept">
-            <article role="listitem"><span>LOWER LEVELS · PUBLIC</span><div><strong>温泉・地域・教育</strong><p>温泉、公共利用、教育、展示、ロボティクス、イベント、来訪者との交流。</p></div></article>
-            <article role="listitem"><span>THIRD FLOOR · EMERGING</span><div><strong>学生と初期FoundUps</strong><p>選抜された学生と若いチームが、旧客室を小さなプロジェクトスタジオとして使い、実課題を解く。</p></div></article>
-            <article role="listitem"><span>TOP FLOOR · ADVANCED</span><div><strong>検証されたFoundUps</strong><p>実用性、実行力、現実の価値を示したプロジェクトが上階へ進み、独立したAIネイティブ事業を目指す。</p></div></article>
-            <article role="listitem"><span>SEPARATE INFRASTRUCTURE</span><div><strong>私たちのCOG DC</strong><p>建物とは別に配置し、そこで働く人とプロジェクトへCOG DCコンピュートを提供する構想。</p></div></article>
+          <div className="hub-floors" role="list" aria-label="イノベーション・スペースの階別構想">
+            <article role="listitem"><span>低層階 · 公共・交流スペース</span><div><strong>温泉・地域・教育</strong><p>温泉、公共利用、教育、展示、ロボティクス、イベント、来訪者との交流。</p></div></article>
+            <article role="listitem"><span>3階 · 挑戦・育成スペース</span><div><strong>学生・チームと初期FoundUpプロジェクト</strong><p>選抜された学生と小さなチームが、旧客室をプロジェクトスタジオとして使い、実課題を解きます。</p></div></article>
+            <article role="listitem"><span>最上階 · 実証・発展スペース</span><div><strong>検証されたFoundUpプロジェクト</strong><p>実用性、実行力、現実の価値を示したプロジェクトが、独立したAIネイティブ事業を目指します。</p></div></article>
+            <article role="listitem"><span>別棟 · COG DC</span><div><strong>私たちのCOG DC</strong><p>温泉棟とは別に配置し、そこで働く人とプロジェクトへ計算資源を提供する構想です。</p></div></article>
           </div>
           <p className="hub-caveat">構想図：階ごとの利用方法は、耐震・設備・消防・法令調査と関係者協議により変更されます。</p>
 
-          <div className="return-heading"><p className="eyebrow light"><span /> FUKUI × COG DC COMPUTE</p><h3>私たちのComputeが、<br />福井を動かす。</h3><p>福井には、AIを学ぶ大学、スマート農業、県民衛星、世界に誇るものづくりがすでにあります。私たちのCOG DCコンピュートは、そこで働く人とプロジェクトが、それらをつなぎ、試し、育てるための基盤です。</p></div>
+          <div className="return-heading"><p className="eyebrow light"><span /> 福井 × COG DC コンピュート</p><h3>私たちの計算資源が、<br />福井を動かす。</h3><p>福井には、AIを学ぶ大学、スマート農業、県民衛星、世界に誇るものづくりがすでにあります。COG DCは、それらをつなぎ、試し、育てるための地域基盤です。</p></div>
           <div className="compute-return" role="list">
-            <article role="listitem"><span>🎓</span><strong>福井の学生と大学</strong><p>福井大学や福井県立大学では、データサイエンス・AI教育がすでに進んでいます。私たちのCOG DCコンピュートで、授業を実験と研究へ。</p><a href="https://www.dsai.u-fukui.ac.jp/" target="_blank" rel="noreferrer">福井大学 AI教育研究センター <b>↗</b></a></article>
-            <article role="listitem"><span>🌾</span><strong>福井の田んぼ</strong><p>自動走行農機、ロボット草刈機、収量計測、センシングドローン。福井の農業を、福井のAIで支える。</p><a href="https://www.pref.fukui.lg.jp/doc/021037/service/service.html" target="_blank" rel="noreferrer">福井県 スマート農業支援 <b>↗</b></a></article>
-            <article role="listitem"><span>🛰️</span><strong>県民衛星「すいせん」</strong><p>福井は衛星をつくり、農地、森林、災害、文化財にデータを活用しています。次は、そのデータを地域で計算する力へ。</p><a href="https://www.pref.fukui.lg.jp/doc/chisangi/fukusat/suisen_syokai.html" target="_blank" rel="noreferrer">福井県民衛星プロジェクト <b>↗</b></a></article>
-            <article role="listitem"><span>🏭</span><strong>福井のものづくり</strong><p>繊維、眼鏡、機械、電子部品。私たちのCOG DCコンピュートで、設計、検査、自動化、新製品開発を支える。</p><a href="https://kigyoritti.pref.fukui.lg.jp/outline/technical" target="_blank" rel="noreferrer">福井県の技術と産業 <b>↗</b></a></article>
+            <article role="listitem"><span>🎓</span><strong>福井の学生と大学</strong><p>データサイエンス・AI教育を、地域の実験と研究へつなぎます。</p><a href="https://www.dsai.u-fukui.ac.jp/system/" target="_blank" rel="noreferrer">福井大学 AI教育研究センター <b>↗</b></a></article>
+            <article role="listitem"><span>🌾</span><strong>福井の田んぼ</strong><p>自動走行農機、草刈り、収量計測、センシングの研究を地域で支えます。</p><a href="https://www.pref.fukui.lg.jp/doc/021037/service/service.html" target="_blank" rel="noreferrer">福井県 スマート農業支援 <b>↗</b></a></article>
+            <article role="listitem"><span>🛰️</span><strong>県民衛星「すいせん」</strong><p>農地、森林、災害、文化財のデータを地域で活かす計算力へ。</p><a href="https://www.pref.fukui.lg.jp/doc/chisangi/fukusat/suisen_syokai.html" target="_blank" rel="noreferrer">福井県民衛星プロジェクト <b>↗</b></a></article>
+            <article role="listitem"><span>🏭</span><strong>福井のものづくり</strong><p>設計、検査、自動化、新製品開発に使うAIを福井で育てます。</p><a href="https://kigyoritti.pref.fukui.lg.jp/outline/technical" target="_blank" rel="noreferrer">福井県の技術と産業 <b>↗</b></a></article>
           </div>
           <div className="local-control-callout"><strong>福井の知識とデータを、福井で価値に変える。</strong><p>すべてを地域だけに閉じるという意味ではありません。福井の組織が、計算、モデル、適切に管理されたデータを、より地域の管理下に置ける選択肢を増やします。</p></div>
-          <p className="future-compute-line">未来を動かすのは、<strong>私たちのCOG DC Compute。</strong><br />電力 → COG DC → プロジェクト → 福井の未来。</p>
+          <p className="future-compute-line">電力 → COG DC → FoundUpプロジェクト → <strong>福井の未来。</strong></p>
+          <YumoriAction>この場所を実現する仲間になる</YumoriAction>
         </section>
 
-        <section className="vision-overview section" id="act-now" aria-labelledby="vision-title">
-          <div className="vision-heading">
-            <div><p className="eyebrow"><span /> VISIT · SHARE · LEARN · ACT</p><h2 id="vision-title">見る。知る。共有する。<br /><em>そして、動く。</em></h2></div>
-            <p>九頭竜を守るために、今できることを一つ選んでください。温泉を残す力は、一人ひとりの声から始まります。</p>
-          </div>
-          <div className="vision-cards action-cards" role="list" aria-label="九頭竜を守るために今できること">
-            <article role="listitem"><span aria-hidden="true">👀</span><div><strong>現地と構想を見る</strong><p>写真で、建物、土地、地域の記憶を確かめる。</p><a href={PICS_URL} target="_blank" rel="noreferrer">pics.yumori.info <b>↗</b></a></div></article>
-            <article role="listitem"><span aria-hidden="true">🎵</span><div><strong>九頭竜の音楽を聴く</strong><p>九頭竜と温泉再生の物語を、0102 MUSICで感じる。</p><a href={MUSIC_URL} target="_blank" rel="noreferrer">music.yumori.me <b>↗</b></a></div></article>
-            <article role="listitem"><span aria-hidden="true">📖</span><div><strong>再生計画を知る</strong><p>COG DC、温泉、教育、食、文化をつなぐ計画を読む。</p><a href={PLAN_URL} target="_blank" rel="noreferrer">pc.yumori.info <b>↗</b></a></div></article>
-            <article role="listitem"><span aria-hidden="true">📣</span><div><strong>家族や友人に共有する</strong><p>yumori.infoを送り、九頭竜の未来を話題にする。</p><CampaignShareButton /></div></article>
-            <article role="listitem"><span aria-hidden="true">✍️</span><div><strong>市民宣言に参加する</strong><p>解体前に代案を比べる機会を残す意思を伝える。</p><a href={YUMORI_URL} target="_blank" rel="noreferrer">yumori.me <b>↗</b></a></div></article>
-          </div>
-          <div className="city-action" id="city-action">
-            <div><p className="eyebrow"><span /> ACT NOW · SAVE THE DRAGON</p><h3>福井市役所に、<br />声を届ける。</h3><p>旧すかっとランド九頭竜の公式問い合わせ先は、福井市 福祉健康部 地域包括ケア推進課です。</p></div>
-            <div className="city-action-contact"><a href="tel:0776205400"><strong>電話する</strong><span>0776-20-5400</span></a><a href={CITY_CONTACT_URL} target="_blank" rel="noreferrer"><strong>メールで伝える</strong><span>福井市公式フォーム ↗</span></a><small>受付：平日 8:30–17:15</small></div>
-            <blockquote><span>伝える言葉の例</span>「旧すかっとランド九頭竜について、解体契約前に再利用案を公正に比較する機会を残してください。」</blockquote>
-          </div>
-        </section>
-
-        <section className="story section" id="story" aria-labelledby="story-title">
-          <div className="section-index">WHY <span>/ THE BUILDING</span></div>
-          <div className="story-heading"><div><p className="eyebrow"><span /> A PUBLIC ASSET WITH A HISTORY</p><h2 id="story-title">これは、古い建物の話ではない。<br /><em>福井の次の30年を動かす計算力を、</em>誰が持つかという話です。</h2></div><p>1994年、市民の健康・交流・憩いのために開館。天然温泉、体育館、宴会場、宿泊・研修機能を備え、2018年度には約13万人が利用しました。公の施設としての機能は2021年6月に廃止されました。</p></div>
-
-          <div className="fact-rail" role="list" aria-label="Facility facts">
+        <section className="story section" id="evidence" aria-labelledby="evidence-title">
+          <div className="section-index">根拠 <span>/ 実在する公共施設</span></div>
+          <div className="story-heading"><div><p className="eyebrow"><span /> 公表資料から始める</p><h2 id="evidence-title">構想と事実を、<br /><em>混ぜない。</em></h2></div><p>1994年に開館した実在施設です。公開資料で確認できる事実、プロジェクトの仮説、まだ必要な検証を分けて表示します。</p></div>
+          <div className="fact-rail" role="list" aria-label="施設の公表事実">
             <article role="listitem"><span>46.8億円</span><strong>建設時</strong><p>福井市の公表資料に記載された建設費。</p></article>
-            <article role="listitem"><span>約68億円</span><strong>指数換算参考</strong><p>国の建設工事費指数による参考値。鑑定額ではありません。</p></article>
-            <article role="listitem"><span>約15.8億円</span><strong>解体見込み</strong><p>2026年6月の福井市議会質問資料に示された見込み。</p></article>
+            <article role="listitem"><span>8,099.56㎡</span><strong>延床面積</strong><p>福井市の財産資料に記載された既存建物の規模。</p></article>
+            <article role="listitem"><span>約15.8億円</span><strong>将来の解体見込み</strong><p>2026年6月の市議会質問資料に示された見込みで、確定契約額ではありません。</p></article>
             <article role="listitem"><span>129,649人</span><strong>2018年度利用</strong><p>入館者と宿泊者を合わせた、閉館前の利用実績。</p></article>
           </div>
-
-          <div className="visitor-impact" aria-labelledby="visitor-impact-title">
-            <div className="visitor-impact-copy"><p className="eyebrow"><span /> VISITOR ECONOMY · SCREENING SCENARIO</p><h3 id="visitor-impact-title">年間129,649人。<br /><em>需要は、すでにあった。</em></h3><p>次の価値は、一回の来場を地域での食事、買い物、宿泊、交通にどれだけつなげられるかで決まります。</p></div>
-            <div className="visitor-impact-number"><span>約1.3億〜7.2億円 / 年</span><strong>来場者の直接消費シナリオ</strong><code>129,649 visits × ¥1,000–¥5,546</code></div>
-            <div className="visitor-opportunities" role="list"><span role="listitem">🍜 地域の食・横丁</span><span role="listitem">🎨 D-K・祭り・夜間滞在</span><span role="listitem">♨️ 温泉・宿泊</span><span role="listitem">✈️ 空港・新幹線からの周遊</span></div>
-            <div className="impact-layers" role="list" aria-label="経済効果を検証する三つの段階"><article className="measured" role="listitem"><span>NOW · CALCULATED</span><strong>来場者の直接消費</strong><p>現在数字で示しているのは、この層だけです。</p></article><article role="listitem"><span>NEXT · INPUT-OUTPUT</span><strong>県内取引と所得への波及</strong><p>消費項目と県内調達率を確認し、福井県産業連関表で分析します。</p></article><article role="listitem"><span>AFTER VALIDATION</span><strong>雇用・税収・地域への還元</strong><p>分析が完了するまで、数字を掲載しません。</p></article></div>
-            <details className="impact-method"><summary>30年間の参考累計と計算方法</summary><div><span>約38.9億〜215.7億円 / 30年</span><strong>来場者数と消費額が一定の場合の単純累計</strong><p>割引を行わない説明用の参考値であり、予測ではありません。</p></div></details>
-            <details className="impact-method impact-benchmarks"><summary>地域キャンペーンは何を測っているか</summary><div><p>福井の予測ではなく、成果指標を設計するための実例です。</p><div className="benchmark-links"><a href="https://www.ncdsinc.net/case-studies/forward-sioux-falls" target="_blank" rel="noreferrer"><strong>Forward Sioux Falls</strong><span>新規雇用・設備投資・新規給与を追跡 <b>↗</b></span></a><a href="https://www.ncdsinc.net/case-studies/aspire-clarksville" target="_blank" rel="noreferrer"><strong>Aspire Clarksville</strong><span>雇用・設備投資・小売売上・世帯所得を追跡 <b>↗</b></span></a></div><small>これらの成果や比率を福井に当てはめるものではありません。</small></div></details>
-            <div className="scenario-note"><strong>PROJECT SCENARIO — NOT A FORECAST</strong><p>2018年度の利用実績に、1人あたり1,000円の追加消費仮定から、福井県の2025年日帰り観光消費単価5,546円までを掛けた単純な試算です。この試算に含むのは来場者の直接消費だけです。取引先への波及、所得、雇用、税収は、福井県産業連関表による分析が完了するまで含めません。</p><div className="scenario-links"><a href="https://www.pref.fukui.lg.jp/doc/kankou/fukuiken-kankoukyakusu_d/fil/024.pdf" target="_blank" rel="noreferrer">福井県観光客入込数（推計）2025年 <b>↗</b></a><a href="https://www.pref.fukui.lg.jp/doc/toukei-jouhou/hakyukouka.html" target="_blank" rel="noreferrer">福井県 経済波及効果分析 <b>↗</b></a></div></div>
+          <div className="evidence-boundary">
+            <strong>再利用の事業性、資金調達、工事費は検証中です。</strong>
+            <p>監査を通過していない売上、利益、投資回収などの数値は、このサイトの根拠として公開しません。</p>
+            <div className="scenario-links"><a href="https://www.city.fukui.lg.jp/sisei/plan/reform/p071776_d/fil/SUKATTO.pdf" target="_blank" rel="noreferrer">福井市 財産資料 <b>↗</b></a><a href="https://www.city.fukui.lg.jp/sisei/gikai/shitsumon/p004052_d/fil/0806a.pdf" target="_blank" rel="noreferrer">福井市議会 2026年6月質問資料 <b>↗</b></a></div>
           </div>
-
-        </section>
-
-        <section className="pause section" aria-labelledby="pause-title">
-          <Image src="/campaign-message.jpg" alt="温泉を守れ、すかっとランド九頭竜の解体を止めよう" width={1280} height={330} sizes="(max-width: 1050px) 90vw, 40vw" />
-          <div className="pause-copy"><p className="eyebrow light"><span /> THE COUNCIL AMENDMENT</p><h2 id="pause-title">解体準備は進めても、<br /><em>代案の扉は閉じない</em>。</h2><p>求めるのは、固定60日間の停止ではありません。補正予算、附帯決議、または同等の正式措置により、解体契約の締結など後戻りが困難になる時点まで、条件を満たす再生案を受け付け、解体執行前に比較評価できる道を残すことです。</p><div className="no-money ask-rule"><strong>THE RULE</strong><span>期限前に、安全性、実行主体、借地合意、資金計画、市の財政効果を証明できた場合、解体案と同じ条件で正式に審査する。</span></div><ul className="decision-conditions"><li><strong>期限</strong> 解体契約締結など、公費上の後戻りが困難になる前</li><li><strong>責任移管</strong> 改修・運営・維持・将来処分を適法な範囲で新主体へ</li><li><strong>土地合意</strong> 全敷地の土地所有者と借地条件・負担について合意</li></ul></div>
+          <YumoriAction>壊す前に、再利用案を比べる時間を求める</YumoriAction>
         </section>
 
         <section className="proposal section" id="proposal" aria-labelledby="proposal-title">
-          <div className="section-index">HOW <span>/ AI RICE FIELD</span></div>
-          <div className="proposal-intro"><div><p className="eyebrow"><span /> AIの田んぼ</p><h2 id="proposal-title">AIにも、<br /><em>「ごはん」</em>が必要です。</h2></div><p>人にお米をつくる田んぼがあるように、AIには「計算する力」を生み出す場所が必要です。それがデータセンターです。</p></div>
+          <div className="section-index">技術構想 <span>/ AIの田んぼ</span></div>
+          <div className="proposal-intro"><div><p className="eyebrow"><span /> 地域主体の小規模AI計算基盤</p><h2 id="proposal-title">AIにも、<br /><em>「ごはん」</em>が必要です。</h2></div><p>人にお米をつくる田んぼがあるように、AIには「計算する力」を生み出す場所が必要です。それがCOG DCです。</p></div>
           <div className="ai-rice-flow" aria-label="AIの田んぼが計算力を生み出す流れ">
-            <article><span aria-hidden="true">⚡</span><strong>電力・データ・<br />コンピューター</strong></article>
-            <b aria-hidden="true">↓</b>
-            <article className="field"><span aria-hidden="true">🌾</span><strong>AIの田んぼ</strong><small>データセンター</small></article>
-            <b aria-hidden="true">↓</b>
-            <article><span aria-hidden="true">🧮</span><strong>計算する力</strong><small>コンピュート</small></article>
-            <b aria-hidden="true">↓</b>
-            <article><span aria-hidden="true">🤖</span><strong>AIが仕事をする</strong></article>
+            <article><span aria-hidden="true">⚡</span><strong>電力・データ・<br />コンピューター</strong></article><b aria-hidden="true">↓</b>
+            <article className="field"><span aria-hidden="true">🌾</span><strong>AIの田んぼ</strong><small>COG DC</small></article><b aria-hidden="true">↓</b>
+            <article><span aria-hidden="true">🧮</span><strong>計算する力</strong><small>コンピュート</small></article><b aria-hidden="true">↓</b>
+            <article><span aria-hidden="true">🤖</span><strong>AIと人が課題を解く</strong></article>
           </div>
-          <div className="local-compute"><p>この施設が農機を直接動かすわけではありません。私たちのCOG DCコンピュートを、そこで働く学生、FoundUps、研究・地域プロジェクトが使い、農業AI、教育、研究、ものづくりの開発と検証を支えます。</p><strong>電力 → 私たちのCOG DCコンピュート → 解決策 → 福井の仕事</strong></div>
+          <div className="local-compute"><p>この施設が農機を直接動かすわけではありません。学生・チームと初期FoundUpプロジェクトがCOG DCを使い、農業AI、教育、研究、ものづくりの開発と検証を進める構想です。</p><strong>電力 → COG DC → 解決策 → 福井の仕事</strong></div>
           <div className="compute-uses" role="list" aria-label="福井での活用例"><article role="listitem"><span>🌾</span><div><strong>農業</strong><p>ドローン、畑の見守り、雑草検知、収穫予測などの研究へ。</p></div></article><article role="listitem"><span>🎓</span><div><strong>教育・大学</strong><p>学生と研究者が、地域でAIを学び試せる環境へ。</p></div></article><article role="listitem"><span>🏭</span><div><strong>地域企業</strong><p>製造、設計、業務改善に使うAIを福井で育てる。</p></div></article></div>
+          <YumoriAction>地域のコンピュートを、地域の手に</YumoriAction>
         </section>
 
-        <section className="people section" id="people" aria-labelledby="people-title">
-          <div className="section-index">WHO <span>/ COMMUNITY</span></div>
-          <div className="people-intro"><p className="eyebrow"><span /> NOT A TOP-DOWN PROJECT</p><h2 id="people-title">最初に集めるのは、<br />お金ではなく<em>当事者</em>です。</h2><p>資金の話を始める前に、解体を止め、土地・行政・教育・需要を一つの実行可能な代案につなぎます。</p></div>
-          <ol className="campaign-sequence" aria-label="温泉を守るための関係者づくりの順序">{campaignSteps.map(([number, phase, title, body]) => <li key={number}><div className="campaign-step-label"><span>{number}</span><small>{phase}</small></div><h3>{title}</h3><p>{body}</p></li>)}</ol>
-        </section>
-
-        <section className="community-calendar section" id="meetings" aria-labelledby="meetings-title">
-          <div className="calendar-heading"><div><p className="eyebrow light"><span /> WHEN · COMMUNITY MEETINGS</p><h2 id="meetings-title">会って、<br /><em>話す。</em></h2></div><p>ウェブサイトだけで決めるプロジェクトではありません。周辺地域を歩き、住民の経験、心配、希望を聞くことから始めます。</p></div>
-          <div className="calendar-grid">
-            <article className="public-meeting"><span>次回の公開ミーティング</span><strong>日程・場所を確認中</strong><p>公開できる情報が確定してから掲載します。先に案内を受け取りたい方は、LINEコミュニティにご参加ください。</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEで案内を受け取る <b>↗</b></a></article>
-            <details className="member-calendar"><summary><span>メンバー予定</span><strong>LINEコミュニティ参加者向け</strong></summary><div><p>地域での小さな対話、準備会、情報共有の詳しい予定を、参加メンバーへLINEでお知らせする構想です。</p><p className="calendar-honesty">現在、このウェブサイトに会員認証や保護されたカレンダーはありません。ボタンが専用ページを開くようには見せません。</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEに参加 <b>↗</b></a></div></details>
+        <section className="site-boundary section" aria-labelledby="site-boundary-title">
+          <div><p className="eyebrow light"><span /> 二つのサイト、二つの役割</p><h2 id="site-boundary-title">構想を知る。<br /><em>行動につなぐ。</em></h2></div>
+          <div className="boundary-grid">
+            <article><span>eSingularity.ai / YUMORI.info</span><strong>プロジェクトと施設の情報</strong><p>建物、温泉、COG DC、イノベーション・スペース、根拠、検証状況を説明します。</p><a href="#yumori-deck">10枚の構想を見る ↑</a></article>
+            <article className="boundary-action"><span>YUMORI.me</span><strong>参加と市民行動</strong><p>温泉を守る運動、参加登録、共有、市への働きかけは、キャンペーンサイトに集約します。</p><a href={YUMORI_URL}>YUMORI.meへ進む ↗</a></article>
           </div>
         </section>
-
-        <section className="join simple-join section" id="join" aria-labelledby="join-title">
-          <div className="join-copy"><p className="eyebrow light"><span /> ADD YOUR NAME · SAVE THE ONSEN</p><h2 id="join-title">温泉を守るチームに、<br /><em>あなたの名前</em>を。</h2><p>これは寄付や投資の申込みではありません。イベントで声を届けたい人、施設を利用したことがある人、教育・農業・技術で協力できる人をつなぎ、代案を実行できるチームへ育てるための登録です。登録名を本人の許可なく公開することはありません。</p><a className="line-button" href={LINE_URL} target="_blank" rel="noreferrer"><span>LINE</span><strong>LINEでチームに参加</strong><i>↗</i></a><div className="location"><span>PROJECT SITE</span><strong>旧すかっとランド九頭竜</strong><p>福井県福井市天菅生町3-10</p></div></div>
-        </section>
-
       </main>
 
-      <footer><Brand href="#top" /><p>AI × ONSEN × EDUCATION × AGRICULTURE × COMMUNITY</p><a href={LINE_URL} target="_blank" rel="noreferrer">LINEで参加 ↗</a></footer>
+      <footer><Brand href="#top" /><p>温泉 × COG DC × 学び × 地域</p><a href={YUMORI_URL}>参加・行動はYUMORI.me ↗</a></footer>
     </>
   );
 }

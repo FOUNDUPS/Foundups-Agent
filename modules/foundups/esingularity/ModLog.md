@@ -6,8 +6,11 @@
 - Added a host-restricted `beforeFiles` rewrite in `frontend/next.config.ts`: only YUMORI.me/www `/` maps internally to the existing `/yumori` route. eSingularity.ai's project page and the existing YUMORI.info redirect remain untouched.
 - Left page content, assets, JHR, signup destination, Sites project ID, D1 binding and DNS unchanged. The inspected service worker already uses network-only navigation; no speculative cache fix was added.
 - Updated this module's INTERFACE hosting/domain contract and test documentation so subsequent sessions recover the separation from repository truth.
-- Added dependency-free Node configuration checks and connected them to the existing validation workflow. Fresh local run: 18 passed on Node v22.16.0. Existing Python tests and frontend build were not run locally because the container could not resolve external hosts or install the full checkout/dependencies.
-- Status: repository implementation, NOT a verified Sites publication or domain restoration. No deployment ID or DNS-change receipt exists for this slice. Apply the narrow patch to reconciled current Sites source and verify both hosts before claiming the incident resolved.
+- Added dependency-free Node configuration checks and connected them to the existing validation workflow. Fresh local run: 18 passed. The reconciled production frontend also completed the Sites production build. Full lint still reports four pre-existing presentation/accessibility errors plus five image warnings outside this routing slice. The Python module suite reports 20 passed and five stale contract failures against the newer production homepage/presentation/JHR structure; none exercises or fails the hostname rewrite.
+- Reconciled the Foundups branch with the newer Sites production source (`14efff19f8d7bc0eefcf2ee7a2cb41a12cf9f0bb`) before applying the routing patch, preventing a rollback of the current homepage, Fukui map, JHR, language, performance and public FAQ work.
+- Published the exact routing source (`b8bd40eb82475bccba0507a17167cfc2c8b21cc3`) as Sites version 43; deployment `appgdep_6aa556c60e588191aafe94caef929fe6` completed successfully on the existing public eSingularity project.
+- DNS was not changed. Sites already reported eSingularity.ai, www.eSingularity.ai, YUMORI.me and www.YUMORI.me active with active SSL; public YUMORI.me apex A and www CNAME records matched the platform-supplied targets. YUMORI.info was not modified.
+- Fresh cache-busted production checks returned the YUMORI page at YUMORI.me and www while retaining each hostname and query string, retained the project homepage at eSingularity.ai, and retained YUMORI.info's redirect to eSingularity.ai. Direct `/yumori`, JHR, signup destination, representative assets and mobile-user-agent responses remained healthy.
 
 ## 2026-09-11 — Real-building full-screen YUMORI vision deck
 
@@ -41,8 +44,9 @@
 - Tightened the English education copy around parent- and teacher-guided AI learning, regional problem-solving, and launching projects and startups in Fukui.
 - Preserved Japanese as the canonical source, added equivalent Portuguese copy, and verified every Japanese landing-page text node has a translation entry.
 - Normalized campaign-heading typography so emphasized English lines retain the same font family, style, weight, and spacing.
-- Replaced the abstract demolition-choice diagram and made the five community outcomes the focus: onsen, learning and launch, local compute, food entrepreneurship, and D-K culture.
+- Removed the abstract demolition-choice diagram and made the five community outcomes the focus: onsen, learning and launch, local compute, food entrepreneurship, and D-K culture.
 - Kept the rotenburo scale as an explicitly stated ambition, and kept recovered-heat use subject to technical testing.
+- Extended language switching to image alt text so English and Portuguese accessibility copy no longer remains Japanese.
 - Rebuilt the stakeholder section as a native mobile-responsive campaign sequence instead of a pasted image: stop demolition, assemble the COGDC coalition, align landowners, prepare a City-ready alternative, define university use, and secure customers and operating partners.
 - Reframed visitor economics around proven demand and direct spending, moved the illustrative 30-year total behind progressive disclosure, and added the unquantified supplier, income, employment, and tax-analysis stages required by Fukui's official input-output method.
 
