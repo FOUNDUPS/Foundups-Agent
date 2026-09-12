@@ -1,5 +1,17 @@
 # Project eSingularity ModLog
 
+## 2026-09-12 — Separate YUMORI.me entry on the shared Sites app
+
+- Selected one existing hosting project with hostname routing instead of a second deployment or copied campaign page.
+- Added a host-restricted `beforeFiles` rewrite in `frontend/next.config.ts`: only YUMORI.me/www `/` maps internally to the existing `/yumori` route. eSingularity.ai's project page and the existing YUMORI.info redirect remain untouched.
+- Left page content, assets, JHR, signup destination, Sites project ID, D1 binding and DNS unchanged. The inspected service worker already uses network-only navigation; no speculative cache fix was added.
+- Updated this module's INTERFACE hosting/domain contract and test documentation so subsequent sessions recover the separation from repository truth.
+- Added dependency-free Node configuration checks and connected them to the existing validation workflow. Fresh local run: 18 passed. The reconciled production frontend also completed the Sites production build. Full lint still reports four pre-existing presentation/accessibility errors plus five image warnings outside this routing slice. The Python module suite reports 20 passed and five stale contract failures against the newer production homepage/presentation/JHR structure; none exercises or fails the hostname rewrite.
+- Reconciled the Foundups branch with the newer Sites production source (`14efff19f8d7bc0eefcf2ee7a2cb41a12cf9f0bb`) before applying the routing patch, preventing a rollback of the current homepage, Fukui map, JHR, language, performance and public FAQ work.
+- Published the exact routing source (`b8bd40eb82475bccba0507a17167cfc2c8b21cc3`) as Sites version 43; deployment `appgdep_6aa556c60e588191aafe94caef929fe6` completed successfully on the existing public eSingularity project.
+- DNS was not changed. Sites already reported eSingularity.ai, www.eSingularity.ai, YUMORI.me and www.YUMORI.me active with active SSL; public YUMORI.me apex A and www CNAME records matched the platform-supplied targets. YUMORI.info was not modified.
+- Fresh cache-busted production checks returned the YUMORI page at YUMORI.me and www while retaining each hostname and query string, retained the project homepage at eSingularity.ai, and retained YUMORI.info's redirect to eSingularity.ai. Direct `/yumori`, JHR, signup destination, representative assets and mobile-user-agent responses remained healthy.
+
 ## 2026-09-11 — Real-building full-screen YUMORI vision deck
 
 - Replaced the presentation renderer with the revised ten-slide vision based on 012's photographs of the actual former Sukatto Land Kuzuryu building rather than a generic greenfield resort.

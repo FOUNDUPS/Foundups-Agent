@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { usePathname } from 'next/navigation';
 
 type Language = 'ja' | 'en' | 'pt';
 
@@ -11,6 +13,112 @@ const languages: Array<{ id: Language; label: string }> = [
 ];
 
 const copy: Record<string, [string, string]> = {
+  "JHR・最新レポート": ["JHR · Latest report", "JHR · Relatório atual"],
+  "コンピュートで、": ["Can compute…", "A computação pode…"],
+  "温泉を救えるか。": ["Save an onsen?", "Salvar um onsen?"],
+  "地域を再生できるか。": ["Revitalize a region?", "Revitalizar uma região?"],
+  "日本を変えられるか。": ["Transform Japan?", "Transformar o Japão?"],
+  "旧すかっとランド九頭竜の温泉、食、文化、学び、起業を、地域のAI計算基盤「COGDC」につなぐ構想。計算事業が費用と設備更新を賄い、その余剰で地域を支えられるか。熱の再利用とともに検証します。": ["A proposal connecting the former Sukatto Land Kuzuryu onsen, food, culture, learning and new ventures with local AI computing: COGDC. Can compute cover its costs and equipment renewal, then support the community with its surplus? We will test this alongside heat reuse.", "Uma proposta que conecta o onsen Sukatto Land Kuzuryu, gastronomia, cultura, aprendizagem e novos negócios à computação local de IA: COGDC. Pode a computação cobrir custos e renovação dos equipamentos e apoiar a comunidade com o excedente? Vamos avaliar isso junto com o reaproveitamento de calor."],
+  "JHR｜9月12日確認": ["JHR · Checked September 12", "JHR · Verificado em 12 de setembro"],
+  "仙台200MW計画、9月11日に資金調達協議の基本合意を発表。": ["Sendai 200 MW project: basic agreement for financing discussions announced September 11.", "Projeto de 200 MW em Sendai: acordo básico para discutir financiamento anunciado em 11 de setembro."],
+  "ハイパースケーラー＝巨大なクラウド・AI計算基盤を運営する企業。全国の動きと福井への意味を読む →": ["Hyperscalers operate vast cloud and AI computing systems. Read the national developments and what they mean for Fukui →", "Hyperscalers operam vastos sistemas de computação em nuvem e IA. Veja os avanços nacionais e o significado para Fukui →"],
+  "この構想を、解体で終わらせない。": ["Do not let demolition end this possibility.", "Não deixe a demolição encerrar esta possibilidade."],
+  "解体予算に反対を。VOTE NO": ["Oppose the demolition budget. VOTE NO", "Contra o orçamento de demolição. VOTE NÃO"],
+  "湯守に登録・準備委員会に参加 →": ["Sign up as a YUMORI · Join the preparatory committee →", "Cadastre-se como YUMORI · Participe do comitê preparatório →"],
+  "福井の土地を、どう使う？": ["How should Fukui use its land?", "Como Fukui deve usar sua terra?"],
+  "もし、印西クラスの": ["What if an Inzai-scale", "E se um centro da escala de Inzai"],
+  "巨大データセンターが来たら。": ["data center came here?", "viesse para cá?"],
+  "地図を全画面で見る ⛶": ["View map full screen ⛶", "Ver mapa em tela cheia ⛶"],
+  "地図を全画面で見る": ["View map full screen", "Ver mapa em tela cheia"],
+  "温泉・COGDC構想の拠点": ["Onsen / proposed COGDC site", "Onsen / local proposto para COGDC"],
+  "大型施設を仮に置く比較範囲": ["Hypothetical comparison area", "Área hipotética de comparação"],
+  "白枠は指定された仮の範囲です。27haの実測図ではなく、この場所での開発計画を示すものでもありません。": ["The white outline follows the selected hypothetical area. It is not calibrated to 27 ha and does not represent a development planned here.", "O contorno branco segue a área hipotética indicada. Não está calibrado para 27 ha nem representa um empreendimento previsto aqui."],
+  "比較の根拠：印西27ha・仙台7.18ha →": ["Area sources: Inzai 27 ha · Sendai 7.18 ha →", "Fontes: Inzai 27 ha · Sendai 7,18 ha →"],
+  "福井の土地利用・概念比較": ["Fukui land use · Conceptual comparison", "Uso da terra em Fukui · Comparação conceitual"],
+  "閉じる ×": ["Close ×", "Fechar ×"],
+  "黄色：温泉・COGDC構想の拠点 ／ 白枠：比較範囲（縮尺未検証）": ["Yellow: onsen / proposed COGDC site. White: comparison area (scale unverified).", "Amarelo: onsen / local proposto para COGDC. Branco: área de comparação (escala não verificada)."],
+
+  '施設構想': ['Facility concept', 'Conceito da instalação'],
+  'イノベーション・スペース': ['Innovation Space', 'Espaço de Inovação'],
+  'メニュー': ['Menu', 'Menu'],
+  '参加・行動はYUMORI.me ↗': ['Participation & action: YUMORI.me ↗', 'Participação e ação: YUMORI.me ↗'],
+  '構想 · 旧すかっとランド九頭竜': ['VISION · FORMER SUKATTO LAND KUZURYU', 'VISÃO · ANTIGO SUKATTO LAND KUZURYU'],
+  '旧すかっとランド九頭竜を、': ['Transform the former Sukatto Land Kuzuryu', 'Transformar o antigo Sukatto Land Kuzuryu'],
+  '温泉 × AI × 学びの未来へ。': ['into a future of onsen × AI × learning.', 'em um futuro de onsen × IA × aprendizagem.'],
+  '温泉を、': ['Can compute', 'A computação pode'],
+  'コンピュートで': ['save the onsen?', 'salvar o onsen?'],
+  '救えるか。': ['', ''],
+  '旧すかっとランド九頭竜を壊す前に、温泉・学び・地域の仕事と、地域主体の小規模AI計算基盤（COG DC）を組み合わせる再利用案を検証します。建物を活かし、計算で生まれる熱を温泉へ返せるか。その可能性を、構想と公開根拠で示します。': ['Before the former Sukatto Land Kuzuryu is demolished, test an adaptive-reuse option combining its onsen, learning, local work, and a small community-led AI computing facility (COG DC). This site uses the vision and public evidence to ask whether the building can be reused and recoverable compute heat returned to the onsen.', 'Antes da demolição do antigo Sukatto Land Kuzuryu, testar uma opção de reuso que combine onsen, aprendizagem, trabalho local e uma pequena infraestrutura comunitária de computação de IA (COG DC). Este site usa a visão e evidências públicas para avaliar se o edifício pode ser reutilizado e se o calor recuperável da computação pode voltar ao onsen.'],
+  '実在する施設を、温泉、地域の食、文化、教育、FoundUpプロジェクト、そして地域主体の小規模AI計算基盤（COG DC）につなぐ再利用構想です。建物と温泉を活かしながら、別棟の計算基盤と回収熱の可能性を段階的に検証します。': ['An adaptive-reuse vision connecting the real facility with its onsen, local food, culture, education, FoundUp projects, and a small community-led AI computing facility (COG DC). The separate compute building and potential heat recovery will be tested step by step.', 'Uma visão de reuso que conecta a instalação real ao onsen, à gastronomia local, cultura, educação, projetos FoundUp e a uma pequena infraestrutura comunitária de computação de IA (COG DC). O edifício separado de computação e o possível reaproveitamento de calor serão testados por etapas.'],
+  '10枚で構想を見る': ['See the vision in 10 slides', 'Ver a visão em 10 slides'],
+  '施設構想を読む': ['Read the facility concept', 'Ler o conceito da instalação'],
+  'このサイトの役割': ['ROLE OF THIS SITE', 'FUNÇÃO DESTE SITE'],
+  'ここでは構想・施設・根拠を説明します。参加と市民行動はYUMORI.meへ。': ['This site explains the vision, facility, and evidence. Participation and civic action belong on YUMORI.me.', 'Este site explica a visão, a instalação e as evidências. Participação e ação cívica ficam no YUMORI.me.'],
+  'この構想が問うこと': ['THE QUESTION', 'A QUESTÃO'],
+  '福井から、日本の地域再生モデルをつくれるか。': ['Can Fukui become a model for regional regeneration across Japan?', 'Fukui pode se tornar um modelo de regeneração regional para o Japão?'],
+  '行動はYUMORI.me': ['ACTION AT YUMORI.me', 'AÇÃO NO YUMORI.me'],
+  '温泉を残す準備委員会に参加する': ['Join the preparatory committee working to preserve the onsen', 'Participar do comitê preparatório para preservar o onsen'],
+  'なくなる前に、温泉を残す仲間になる': ['Help preserve the onsen before it is gone', 'Ajude a preservar o onsen antes que desapareça'],
+  'この場所を実現する仲間になる': ['Join the people working to make this place possible', 'Junte-se às pessoas que trabalham para tornar este lugar possível'],
+  '壊す前に、再利用案を比べる時間を求める': ['Ask for time to compare reuse before demolition', 'Peça tempo para comparar o reuso antes da demolição'],
+  '地域のコンピュートを、地域の手に': ['Keep regional compute in regional hands', 'Mantenha a computação regional em mãos locais'],
+  '構想イメージ': ['CONCEPT IMAGE', 'IMAGEM CONCEITUAL'],
+  '完成済み施設の写真ではありません': ['Not a photograph of a completed facility', 'Não é uma fotografia de uma instalação concluída'],
+  '施設構想 · ここがどう変わる？': ['FACILITY VISION · HOW COULD THIS PLACE CHANGE?', 'VISÃO DA INSTALAÇÃO · COMO ESTE LUGAR PODERIA MUDAR?'],
+  '配置構想': ['SITE CONCEPT', 'CONCEITO DO LOCAL'],
+  '012提供の初期案です。完成済みの施設を示す画像ではありません。': ['An early concept supplied by 012; it does not show a completed facility.', 'Um conceito inicial fornecido por 012; não mostra uma instalação concluída.'],
+  '実際の配置・規模・熱利用は調査で決まります。': ['The final layout, scale, and heat use depend on further study.', 'O layout, a escala e o uso do calor dependerão de estudos adicionais.'],
+  '工学検証が必要です': ['ENGINEERING VALIDATION REQUIRED', 'VALIDAÇÃO DE ENGENHARIA NECESSÁRIA'],
+  '実例：あわら温泉「湯けむり横丁」↗': ['Real example: Awara Onsen Yukemuri Yokocho ↗', 'Exemplo real: Yukemuri Yokocho, em Awara Onsen ↗'],
+  '02 · 地域の食': ['02 · LOCAL FOOD', '02 · GASTRONOMIA LOCAL'],
+  'あわらの地域横丁を参考にした構想': ['CONCEPT INSPIRED BY AWARA’S COMMUNITY YOKOCHO', 'CONCEITO INSPIRADO NO YOKOCHO COMUNITÁRIO DE AWARA'],
+  '03 · 夜の文化': ['03 · NIGHT CULTURE', '03 · CULTURA NOTURNA'],
+  '提案中のデジタル掛け軸体験': ['PROPOSED DIGITAL KAKEJIKU EXPERIENCE', 'EXPERIÊNCIA DIGITAL KAKEJIKU PROPOSTA'],
+  '仕組み · eSingularity イノベーション・スペース': ['HOW · eSINGULARITY INNOVATION SPACE', 'COMO · ESPAÇO DE INOVAÇÃO eSINGULARITY'],
+  '1階の温泉を地域の居場所として再開し、その上を世代ごとの学び、研究、起業がつながる場所へ。建物調査と地域・所有者との合意を経て具体化します。': ['Reopen the first-floor onsen as a community place, with learning, research, and entrepreneurship connected above it. The concept will be refined through building studies and agreements with the community and owners.', 'Reabrir o onsen do primeiro andar como espaço comunitário, conectando aprendizagem, pesquisa e empreendedorismo nos andares superiores. O conceito será definido por estudos do edifício e acordos com a comunidade e os proprietários.'],
+  '低層階 · 公共・交流スペース': ['LOWER LEVELS · PUBLIC & COMMUNITY SPACE', 'ANDARES INFERIORES · ESPAÇO PÚBLICO E COMUNITÁRIO'],
+  '選抜された学生と小さなチームが、旧客室をプロジェクトスタジオとして使い、実課題を解きます。': ['Selected students and small teams use former guest rooms as project studios to solve real problems.', 'Estudantes selecionados e pequenas equipes usam antigos quartos como estúdios de projeto para resolver problemas reais.'],
+  '検証されたFoundUpプロジェクト': ['Validated FoundUp projects', 'Projetos FoundUp validados'],
+  '実用性、実行力、現実の価値を示したプロジェクトが、独立したAIネイティブ事業を目指します。': ['Projects that demonstrate usefulness, execution, and real-world value can develop toward independent AI-native ventures.', 'Projetos que demonstram utilidade, execução e valor no mundo real podem avançar para iniciativas independentes nativas de IA.'],
+  '温泉棟とは別に配置し、そこで働く人とプロジェクトへ計算資源を提供する構想です。': ['A separate facility proposed to provide compute to the people and projects working here.', 'Uma instalação separada proposta para fornecer computação às pessoas e aos projetos que trabalham aqui.'],
+  '私たちの計算資源が、': ['Our compute', 'Nossa computação'],
+  '福井には、AIを学ぶ大学、スマート農業、県民衛星、世界に誇るものづくりがすでにあります。COG DCは、それらをつなぎ、試し、育てるための地域基盤です。': ['Fukui already has AI education, smart agriculture, a prefectural satellite, and world-class manufacturing. COG DC is proposed as local infrastructure for connecting, testing, and developing them.', 'Fukui já possui educação em IA, agricultura inteligente, um satélite provincial e indústria de classe mundial. O COG DC é proposto como infraestrutura local para conectar, testar e desenvolver essas capacidades.'],
+  'データサイエンス・AI教育を、地域の実験と研究へつなぎます。': ['Connect data-science and AI education to local experiments and research.', 'Conectar a educação em ciência de dados e IA a experimentos e pesquisas locais.'],
+  '自動走行農機、草刈り、収量計測、センシングの研究を地域で支えます。': ['Support local research into autonomous farm machinery, mowing, yield measurement, and sensing.', 'Apoiar pesquisas locais sobre máquinas agrícolas autônomas, corte de vegetação, medição de produtividade e sensoriamento.'],
+  '農地、森林、災害、文化財のデータを地域で活かす計算力へ。': ['Build compute that helps use farmland, forest, disaster, and cultural-heritage data locally.', 'Criar computação para usar localmente dados de terras agrícolas, florestas, desastres e patrimônio cultural.'],
+  '設計、検査、自動化、新製品開発に使うAIを福井で育てます。': ['Develop AI in Fukui for design, inspection, automation, and new products.', 'Desenvolver em Fukui IA para projeto, inspeção, automação e novos produtos.'],
+  '福井の未来。': ['Fukui’s future.', 'O futuro de Fukui.'],
+  '/ 実在する公共施設': ['/ A REAL PUBLIC FACILITY', '/ UMA INSTALAÇÃO PÚBLICA REAL'],
+  '公表資料から始める': ['START WITH PUBLIC RECORDS', 'COMEÇAR PELOS REGISTROS PÚBLICOS'],
+  '構想と事実を、': ['Keep the vision', 'Manter a visão'],
+  '混ぜない。': ['separate from verified facts.', 'separada dos fatos verificados.'],
+  '1994年に開館した実在施設です。公開資料で確認できる事実、プロジェクトの仮説、まだ必要な検証を分けて表示します。': ['This is a real facility that opened in 1994. We separate facts confirmed in public records, project hypotheses, and work that still requires validation.', 'Esta é uma instalação real inaugurada em 1994. Separamos fatos confirmados em registros públicos, hipóteses do projeto e pontos que ainda exigem validação.'],
+  '福井市の財産資料に記載された既存建物の規模。': ['Existing-building scale reported in Fukui City property records.', 'Escala do edifício existente informada nos registros patrimoniais da cidade de Fukui.'],
+  '将来の解体見込み': ['Future demolition estimate', 'Estimativa futura de demolição'],
+  '2026年6月の市議会質問資料に示された見込みで、確定契約額ではありません。': ['An estimate cited in a June 2026 City Council question document; it is not a final contract price.', 'Uma estimativa citada em documento de perguntas do Conselho Municipal de junho de 2026; não é um preço contratual final.'],
+  '再利用の事業性、資金調達、工事費は検証中です。': ['Reuse economics, financing, and construction costs remain under validation.', 'A viabilidade econômica do reuso, o financiamento e os custos de construção seguem em validação.'],
+  '監査を通過していない売上、利益、投資回収などの数値は、このサイトの根拠として公開しません。': ['Revenue, profit, payback, and other figures that have not passed audit are not published here as evidence.', 'Receita, lucro, retorno e outros números que não passaram por auditoria não são publicados aqui como evidência.'],
+  '/ AIの田んぼ': ['/ AI RICE FIELD', '/ ARROZAL DE IA'],
+  '地域主体の小規模AI計算基盤': ['SMALL COMMUNITY-LED AI COMPUTE', 'PEQUENA COMPUTAÇÃO DE IA LIDERADA PELA COMUNIDADE'],
+  '人にお米をつくる田んぼがあるように、AIには「計算する力」を生み出す場所が必要です。それがCOG DCです。': ['Just as rice fields produce food for people, AI needs a place that produces computing power. That is the role proposed for COG DC.', 'Assim como os arrozais produzem alimento para as pessoas, a IA precisa de um lugar que produza capacidade computacional. Esse é o papel proposto para o COG DC.'],
+  'AIと人が課題を解く': ['AI and people solve problems', 'IA e pessoas resolvem problemas'],
+  'この施設が農機を直接動かすわけではありません。学生・チームと初期FoundUpプロジェクトがCOG DCを使い、農業AI、教育、研究、ものづくりの開発と検証を進める構想です。': ['The facility would not directly operate farm machinery. Students, teams, and early FoundUp projects could use COG DC to develop and validate agricultural AI, education, research, and manufacturing applications.', 'A instalação não operaria diretamente máquinas agrícolas. Estudantes, equipes e projetos FoundUp iniciais poderiam usar o COG DC para desenvolver e validar aplicações em IA agrícola, educação, pesquisa e manufatura.'],
+  '電力 → COG DC → 解決策 → 福井の仕事': ['Power → COG DC → solutions → work in Fukui', 'Energia → COG DC → soluções → trabalho em Fukui'],
+  '二つのサイト、二つの役割': ['TWO SITES, TWO ROLES', 'DOIS SITES, DUAS FUNÇÕES'],
+  '構想を知る。': ['Understand the vision.', 'Conhecer a visão.'],
+  '行動につなぐ。': ['Connect it to action.', 'Conectá-la à ação.'],
+  'プロジェクトと施設の情報': ['Project and facility information', 'Informações do projeto e da instalação'],
+  '建物、温泉、COG DC、イノベーション・スペース、根拠、検証状況を説明します。': ['Explains the building, onsen, COG DC, Innovation Space, evidence, and validation status.', 'Explica o edifício, onsen, COG DC, Espaço de Inovação, evidências e status de validação.'],
+  '10枚の構想を見る ↑': ['See the 10-slide vision ↑', 'Ver a visão em 10 slides ↑'],
+  '参加と市民行動': ['Participation and civic action', 'Participação e ação cívica'],
+  '温泉を守る運動、参加登録、共有、市への働きかけは、キャンペーンサイトに集約します。': ['The campaign to protect the onsen, participation, sharing, and civic outreach are kept together on the campaign site.', 'A campanha para proteger o onsen, a participação, o compartilhamento e a mobilização cívica ficam reunidos no site da campanha.'],
+  'YUMORI.meへ進む ↗': ['Go to YUMORI.me ↗', 'Ir para YUMORI.me ↗'],
+  '温泉 × COG DC × 学び × 地域': ['ONSEN × COG DC × LEARNING × COMMUNITY', 'ONSEN × COG DC × APRENDIZAGEM × COMUNIDADE'],
+  '主要ナビゲーション': ['Primary navigation', 'Navegação principal'],
+  'メニューを開く': ['Open menu', 'Abrir menu'],
+  '福井の田園と小規模な地域AI計算基盤を組み合わせた構想イメージ': ['Concept image combining Fukui rice fields with small community AI compute infrastructure', 'Imagem conceitual combinando arrozais de Fukui com pequena infraestrutura comunitária de computação de IA'],
+  'イノベーション・スペースの階別構想': ['Innovation Space floor concept', 'Conceito dos andares do Espaço de Inovação'],
+  '施設の公表事実': ['Published facility facts', 'Fatos publicados sobre a instalação'],
   '温泉を守る': ['Save the Onsen', 'Salve o onsen'],
   '福井の未来': ['Fukui’s Future', 'Futuro de Fukui'],
   '福井に、': ['In Fukui,', 'Em Fukui,'],
@@ -565,6 +673,9 @@ function applyLanguage(language: Language) {
 
 export default function LanguageSwitcher() {
   const [language, setLanguage] = useState<Language>('ja');
+  const pathname = usePathname();
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => { setHeaderSlot(document.getElementById('home-language-controls')); }, [pathname]);
   const languageRef = useRef<Language>('ja');
 
   useEffect(() => {
@@ -591,7 +702,7 @@ export default function LanguageSwitcher() {
     applyLanguage(next);
   }
 
-  return (
+  const controls = (
     <div className="language-switcher" data-language-switcher aria-label="Language selection">
       {languages.map((item) => (
         <button key={item.id} type="button" onClick={() => choose(item.id)} aria-label={item.label} aria-pressed={language === item.id} title={item.label}>
@@ -600,4 +711,5 @@ export default function LanguageSwitcher() {
       ))}
     </div>
   );
+  return headerSlot ? createPortal(controls, headerSlot) : controls;
 }

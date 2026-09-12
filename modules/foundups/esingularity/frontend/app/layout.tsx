@@ -10,24 +10,24 @@ const mono = Space_Mono({ variable: '--font-mono', subsets: ['latin'], weight: [
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://esingularity.ai'),
-  title: '温泉を守る | Project eSingularity 福井',
-  description: '旧すかっとランド九頭竜を壊す前に、もう一つの未来を。温泉、学び、福井のAI基盤、食、文化をつなぐ地域再生プロジェクトです。',
+  title: 'Project eSingularity | 温泉 × COG DC × 学びの地域再生構想',
+  description: '旧すかっとランド九頭竜を、温泉、地域の食、文化、教育、FoundUpプロジェクト、地域主体の小規模AI計算基盤（COG DC）につなぐ施設再利用構想です。',
   manifest: '/manifest.webmanifest',
   icons: { icon: '/favicon.svg', apple: '/pwa-icon-192.png' },
   openGraph: {
-    title: '温泉を守る。福井のAIの未来をつくる。',
-    description: '旧すかっとランド九頭竜を壊す前に、地域で別の未来を比べる機会を。',
+    title: 'Project eSingularity — 温泉 × COG DC × 学び',
+    description: '旧すかっとランド九頭竜の施設、温泉、イノベーション・スペース、地域AI計算基盤をつなぐ再利用構想。',
     url: 'https://esingularity.ai',
     siteName: 'eSingularity.ai',
     locale: 'ja_JP',
     type: 'website',
-    images: [{ url: '/campaign-phase-2.jpg', width: 930, height: 1280, alt: 'eSingularity.ai 温泉を守るキャンペーン' }],
+    images: [{ url: '/yumori-compute-field.webp', width: 1672, height: 941, alt: '福井の田園と地域AI計算基盤を組み合わせたProject eSingularity構想' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '温泉を守る。福井のAIの未来をつくる。',
-    description: '旧すかっとランド九頭竜を壊す前に、地域で別の未来を比べる機会を。',
-    images: ['/campaign-phase-2.jpg'],
+    title: 'Project eSingularity — 温泉 × COG DC × 学び',
+    description: '旧すかっとランド九頭竜の施設再利用と、地域主体のAI計算基盤の構想。',
+    images: ['/yumori-compute-field.webp'],
   },
 };
 
@@ -39,30 +39,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <JapaneseSurfacePolisher />
         <PwaRegister />
         {children}
-        <a
-          href="/reports/jhr"
-          aria-label="Japan Hyperscaler Reportを読む"
-          style={{
-            position: 'fixed',
-            right: 16,
-            bottom: 16,
-            zIndex: 1000,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '12px 16px',
-            borderRadius: 999,
-            background: '#0b2545',
-            color: '#fff',
-            textDecoration: 'none',
-            fontWeight: 900,
-            fontSize: 13,
-            letterSpacing: '.03em',
-            boxShadow: '0 8px 28px rgba(0,0,0,.28)',
-          }}
-        >
-          JHR · レポートを読む / READ REPORT ↗
-        </a>
       </body>
     </html>
   );

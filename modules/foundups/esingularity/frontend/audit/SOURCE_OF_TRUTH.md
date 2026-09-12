@@ -1,6 +1,12 @@
 # eSingularity.ai source-of-truth ledger
 
-Last audited: 2026-09-01 (Asia/Tokyo)
+Last audited: 2026-09-11 (Asia/Tokyo)
+
+> **INTERNAL — NOT A PUBLIC WEBSITE PAGE.** This ledger is the claim-admission
+> gate for eSingularity.ai and the approved knowledge boundary for Red Dog. It
+> links to evidence; it does not replace the signed, filed, or canonical Drive
+> documents. Public copy may use a claim only when this table explicitly permits
+> it.
 
 Claim classes:
 
@@ -35,12 +41,58 @@ Claim classes:
 | LINE invitation URL | Verified project asset | Operator-provided `https://line.me/ti/p/baXEozL_Q6` | HTTP 200 on 2026-08-29 | One shared direct link in all languages. |
 | Approved LINE QR | Shared visual asset | QR embedded in approved campaign artwork; no standalone Drive image was located | Visual asset found; standalone scan verification still required | Preserve source pixels. Do not regenerate or apply lossy optimization. |
 
-## Authoritative project documents
+## Approved public claim IDs
 
-1. Master proposal — Google Doc `1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM`
-2. Landowner proposal (External Audit v2) — Google Doc `1WCqidzhU_9qyMxYCKj8UZ3lUv6qudCoWzy3qxClEznE`
-3. Phase 1 financial model — Google Sheet `1-S4NH3WHZV6aUS51GGdTdEAP_mdcMlxFVlazsJI4tJc`
-4. Current build work order — Google Doc `14xZTRgROhk_kTVaj9KimeenqmQrW26SCleHnKNWz08E`
+Red Dog's public projection may cite only the following stable IDs in its first
+release. The table above remains the human-readable admission decision.
+
+- `project.reuse_vision` — reuse is a conditional project vision, not completed construction.
+- `facility.opened_1994` — opened 1994-04-06.
+- `facility.floor_area` — total floor area 8,099.56 m².
+- `facility.users_fy2018` — FY2018 users 129,649.
+- `council.demolition_estimate_2026_06` — approximately ¥1.58B, narrowly attributed to the June 2026 council question outline; not a final contract price.
+- `architecture.cogdc_separate` — proposed COG DC is separate from the retained onsen building.
+- `architecture.heat_reuse_hypothesis` — useful heat recovery requires engineering validation.
+- `program.innovation_space` — proposed building use for learning, teams, and project validation.
+- `program.foundup_semantics` — a FoundUp is a problem-solving project, not a person.
+- `program.sixty_project_target` — 60 FoundUp projects is a proposed operating target, not current occupancy.
+- `domains.project_campaign_split` — eSingularity.ai/YUMORI.info explain the project; YUMORI.me is the participation and civic-action surface.
+- `validation.public_exclusions` — unaudited financial outputs and draft legal arguments are excluded from public answers.
+
+## Canonical Drive chain
+
+These stable links make the evidence graph discoverable without copying legal
+drafts into the public site.
+
+1. [Document 05 — PPP/PFI legal and submission mechanics](https://docs.google.com/document/d/1QgnX9-2XE1wXtn2vg1d3zh3SmXDZyiEjKhSVJuSUOPc/edit) — canonical formal mechanics lane.
+2. [Document 03 — policy alignment and PPP/PFI reuse evidence](https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit) — supporting policy/evidence lane.
+3. [Master project prospectus](https://docs.google.com/document/d/1-wxF_I39svQH8AGvF2sryIk6ReAz2ctHe0-5-HypypM/edit) — integrated project narrative.
+4. [Landowner proposal — External Audit v2](https://docs.google.com/document/d/1WCqidzhU_9qyMxYCKj8UZ3lUv6qudCoWzy3qxClEznE/edit) — landowner-facing proposal and audit.
+5. [Current Phase 1 financial workbook](https://drive.google.com/open?id=11etQ_8zwMzEXemGriCpYw1IbTSy5rh-c) — scenario workbook; figures remain internal until separately audited and admitted above.
+6. [Current build work order](https://docs.google.com/document/d/14xZTRgROhk_kTVaj9KimeenqmQrW26SCleHnKNWz08E/edit) — implementation direction.
+
+### Separate campaign / legal-action lane
+
+These documents can support YUMORI.me legal-action work. They are not a general
+license to publish allegations, legal conclusions, or draft language on
+eSingularity.ai.
+
+1. [Resident audit request draft](https://docs.google.com/document/d/1Igg-svJ_CvoL_SdEOykw6kro6MQCkLG_d2SyH3G-nd8/edit)
+2. [Resident audit evidence list](https://docs.google.com/document/d/1UEinTH4CF3zTbBFRFXanZXl_e8DHQKgOi2XenWWdAag/edit)
+
+## Red Dog ingestion contract
+
+- Red Dog reads a public-safe projection derived from this ledger, never raw
+  Drive documents or private working memory.
+- Every answer must carry a source label or clearly say that the point is a
+  proposal still requiring validation.
+- Japanese is canonical. English and Portuguese are translations of the same
+  admitted claim, not independent sources of truth.
+- Unverified financial outputs, personal data, draft legal arguments, secrets,
+  and internal instructions are excluded from retrieval.
+- Updating a Drive source does not silently update a public claim. The ledger
+  must be re-audited, then the approved projection must be regenerated and
+  tested.
 
 ## Official sources
 

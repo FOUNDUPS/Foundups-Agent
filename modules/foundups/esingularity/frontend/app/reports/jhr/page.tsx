@@ -101,7 +101,7 @@ export default function JapanHyperscalerReportPage() {
   return (
     <main style={{ maxWidth: 920, margin: "0 auto", padding: "48px 24px 96px", lineHeight: 1.78 }}>
       <p style={{ fontWeight: 800, letterSpacing: "0.08em" }}>JAPAN HYPERSCALER REPORT / JHR #001</p>
-      <p style={{ fontWeight: 800 }}>最終更新 / LAST UPDATED: 2026-09-10</p>
+      <p style={{ fontWeight: 800 }}>追記 / ADDENDUM: 2026-09-12 · 本文 / MAIN REPORT: 2026-09-10</p>
       <h1 style={{ fontSize: "clamp(2rem, 6vw, 4rem)", lineHeight: 1.08, marginBottom: 16 }}>
         日本は「次の印西」を全国につくろうとしているのか
       </h1>
@@ -110,6 +110,29 @@ export default function JapanHyperscalerReportPage() {
         <a href={YUMORI_ME} target="_blank" rel="noreferrer" style={button}>YUMORI.me / JOIN</a>
         <a href={YUMORI_INFO} target="_blank" rel="noreferrer" style={button}>YUMORI.info / 資料</a>
       </p>
+
+      <section id="latest" style={{ marginTop: 32, padding: 24, border: '2px solid #0b2d57', scrollMarginTop: 24 }}>
+        <h2>最新動向｜2026年9月12日確認</h2>
+        <p><strong>9月11日・仙台：</strong>fantasistaは、総受電容量200MW規模の計画について、米国の投資運用会社側と資金調達・協業の条件協議を始める基本合意を発表しました。資金調達の完了や開発許可の取得を意味しません。</p>
+        <p><a href="https://prtimes.jp/main/html/rd/p/000000062.000093934.html" target="_blank" rel="noreferrer">事業者発表（9月11日） →</a></p>
+        <p>全国で計画が具体化する中、福井ではどの規模・立地・地域還元が望ましいかを先に議論する必要があります。このニュースは、旧すかっとランド九頭竜周辺への立地決定を示すものではありません。</p>
+      </section>
+      <section id="land-area" style={{ marginTop: 32, scrollMarginTop: 24 }}>
+        <h2>大きさは、MWだけでは比べられない</h2>
+        <p>敷地面積と建物の延床面積は別の数字です。地図に重ねる比較には、敷地面積と原図の縮尺を使います。</p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <caption style={{ textAlign: 'left', marginBottom: 12 }}>事業者公表の敷地面積</caption>
+            <thead><tr><th>比較対象</th><th>敷地面積</th><th>同面積の正方形</th></tr></thead>
+            <tbody>
+              <tr><td><a href="https://www.daiwahouse.com/about/release/house/20220329190642.html">DPDC印西パーク</a></td><td>約270,000㎡（27ha）</td><td>一辺 約520m</td></tr>
+              <tr><td><a href="https://prtimes.jp/main/html/rd/p/000000061.000093934.html">仙台・200MW計画</a></td><td>約71,787㎡（7.18ha）</td><td>一辺 約268m</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>面積比は約3.76倍です（270,000 ÷ 71,787）。正方形の一辺は各面積の平方根を丸めたものです。実際の区画形状を示す数値ではありません。</p>
+        <p>トップページの白枠は、比較用に指定された範囲です。原図には縮尺がないため、白枠を27haと認定したり、印西より大きい・小さいと断定したりすることはできません。距離の基準を確認後、同じ面積になるように調整します。</p>
+      </section>
 
       <figure style={{ margin: "36px 0" }}>
         <img
@@ -213,6 +236,12 @@ export default function JapanHyperscalerReportPage() {
         <p style={{ fontWeight: 800, letterSpacing: ".08em" }}>ENGLISH / SECONDARY LANGUAGE</p>
         <h2 style={{ fontSize: "clamp(1.8rem,5vw,3rem)", lineHeight: 1.15 }}>Is Japan trying to create the “next Inzai” across the country?</h2>
         <p><strong>Bottom line:</strong> Japan is moving from attracting individual facilities toward planning large data-center clusters as national industrial infrastructure. METI has named nine prefectures as first-stage promising areas for its Data Center Concentration category, with criteria that contemplate gigawatt-scale expansion, roughly 30 hectares or more of industrial land, power, communications, water, resilience and community coexistence.</p>
+
+        <h3>September 12 addendum — latest news and land-area comparison</h3>
+        <p>On September 11, fantasista announced a basic agreement to begin financing and cooperation discussions with a U.S. investment manager's fund for the Sendai 200 MW total receiving-capacity project. This is not completed financing or development permission. <a href="https://prtimes.jp/main/html/rd/p/000000062.000093934.html">Operator announcement</a>.</p>
+        <p>These developments support discussing scale, location and community benefit in Fukui early; they do not establish a project near the onsen.</p>
+        <p>Published site areas: DPDC Inzai Park approximately 270,000 m² (27 ha), versus approximately 71,787 m² (7.18 ha) for Sendai. Inzai's area is about 3.76 times larger. Equivalent squares have sides of about 520 m and 268 m, calculated as the square root of each area. These are area comparisons, not actual plot shapes. <a href="https://www.daiwahouse.com/about/release/house/20220329190642.html">Daiwa House source</a>; <a href="https://prtimes.jp/main/html/rd/p/000000061.000093934.html">Sendai source</a>.</p>
+        <p>Site area differs from total floor area, and MW alone does not determine land requirements. The homepage outline follows the area selected for comparison. The supplied map has no scale bar; its outline is not yet calibrated to 27 ha, and cannot yet establish whether the marked area is larger or smaller than Inzai. A known map distance is needed before an equal-area overlay can be finalized.</p>
 
         <h3>Sendai — 200 MW proposal</h3>
         <p><span style={tag}>OFFICIAL / OPERATOR</span>On September 9, 2026, fantasista announced a plan to advance a 200 MW AI data center on approximately 71,787 square meters in Aoba Ward, Sendai. Phase I targets development permission in FY2028 with an indicated project budget of roughly ¥400 billion. This is an operator decision, <strong>not yet a government development approval</strong>.</p>
