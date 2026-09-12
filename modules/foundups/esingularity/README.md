@@ -23,6 +23,12 @@ The current public journey is deliberately simple. The existing hero is followed
 
 The financial models, engineering research, and source audits support the public claims but are not the main public experience.
 
+## Project materials and Drive outputs
+
+Start with [docs/materials/README.md](docs/materials/README.md) before creating or revising a project document. It links the 23-document CCP v2 intake registry, claim-disposition audit and Japanese-first proposed 03 integration source. Accepted project material belongs in this module; Drive documents are derived outputs with stable existing file IDs, not independent factual masters.
+
+012 clarified on 2026-09-12 that **YUMORI.info redirects to eSingularity.ai**. It is an alias for the same project publication destination, not a separate content source. YUMORI.me remains the movement surface. The materials migration is partial; the registry records unread legacy records, unpublished outputs and runtime checks not performed. No automatic Drive synchronization is activated.
+
 ## Japan Hyperscaler Report (JHR)
 
 JHR is the eSingularity research/publication lane for tracking Japan's hyperscale data-center expansion, policy, grid constraints, land-use effects, community response, and implications for Fukui and distributed COG DC infrastructure.
@@ -51,6 +57,7 @@ modules/foundups/esingularity/
 ├── src/                    # Stable FoundUp identity contract
 ├── tests/                  # Manifest, registry, route, and hosting checks
 ├── docs/                   # Migration and architecture records
+│   └── materials/          # Research intake, source registry and derived-document source units
 ├── memory/                 # WSP 60 module memory documentation
 ├── foundup_manifest.json   # p.fMALL/FoundUps discovery contract
 ├── module.json             # Module discovery metadata
