@@ -1,6 +1,10 @@
 # RedDog Lick Connection Handshake
 
-Status: `NON_BIOMETRIC_POC_IMPLEMENTED_NOT_DEPLOYED`; broader confidence ladder remains specified
+Status: `NON_BIOMETRIC_POC_IMPLEMENTED_NOT_DEPLOYED`; continuous presence, mutual verification, and live-media binding are `SPECIFIED_NOT_IMPLEMENTED`
+
+Evaluated expansion: 2026-09-13 (Asia/Tokyo). See the
+[continuous Lick audit](../../../docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md)
+for code evidence, corrections to the Gemini proposal, and unresolved risks.
 
 Owner: RedDog product surface
 
@@ -21,11 +25,17 @@ Lick.
 
 ## Product intent
 
-RedDog should be able to say, in effect, "Who am I talking with?" and build a
-bounded confidence picture from what the participant says, what the current
-device can prove, and the modalities the participant has allowed. The result
-is a renewable connection assessment, not a permanent assertion that a body is
-a particular legal person.
+RedDog should continually ask, in effect, "Is a live participant still present,
+is this the same encounter, and does the received material belong to it?"
+The default goal is human presence and encounter continuity without discovering
+civil identity. A participant can remain pseudonymous. Recognizing the monk as
+UnDaoDu additionally requires a previously trusted, consented profile binding;
+detecting a human alone cannot establish that name.
+
+The result is a renewable, bounded assessment from permitted evidence. Presence,
+same-person continuity, account control, and media provenance are separate
+claims. Neither a profile nor a successful challenge proves one unique human
+across the ecosystem; Sybil resistance is a separate problem.
 
 On a first encounter, RedDog creates a provisional `EncounterProfile`. It does
 not automatically declare the person to be a verified 012. A participant may
@@ -41,8 +51,9 @@ silently upgrading identity assurance.
 2. **Announce and obtain scoped consent.** Explain which modalities are
    available, why each would be used, retention, and how to continue without
    optional biometrics.
-3. **Capture an explicit claim.** Ask the participant how they wish to be
-   addressed and whether they are claiming an existing profile.
+3. **Offer an optional profile claim.** Accept a guest without a name; ask how
+   to address the participant only when useful. Existing-profile recognition
+   requires a separate, consented binding.
 4. **Collect permitted evidence.** Prefer device possession and an explicit
    challenge. Add biometric or behavioral observations only when allowed.
 5. **Compare locally where possible.** Raw biometric samples should remain on
@@ -62,7 +73,7 @@ silently upgrading identity assurance.
 
 | Modality | Appropriate Lick use | Current posture |
 |---|---|---|
-| Explicit name/profile claim | Addressing and candidate selection | Required, not proof by itself |
+| Optional name/profile claim | Addressing and candidate selection | Guest needs no name; a claim is not proof |
 | Device passkey or possession proof | Strong account-binding factor | Preferred for protected actions |
 | Face with presentation-attack detection | Optional continuity or step-up signal | Supported only after evaluated implementation |
 | Voiceprint plus spoken challenge | Optional speaker continuity and liveness signal | Research/evaluation lane |
@@ -78,13 +89,18 @@ No single passive modality authorizes a protected action. A biometric match is
 combined with a possession factor or another authenticated channel when the
 result affects access, signing, wallet control, publishing, or work authority.
 
-## Core records
+## Core records (broader design, not the current wire contract)
+
+The examples below describe proposed fields. The implemented `*.v1` payloads
+are owned by `reddog_public_policy.py`; they use a different, bounded shape.
+Do not send these examples to the existing public endpoints or silently extend
+their strict input schemas. Any future transport needs an explicit version.
 
 ### `EncounterProfile`
 
 ```json
 {
-  "schema_version": "reddog.lick.encounter-profile.v1",
+  "schema_version": "reddog.lick.encounter-profile.proposed",
   "encounter_profile_id": "ephemeral-pseudonymous-id",
   "display_name_claim": "participant supplied",
   "claimed_012_id": null,
@@ -102,7 +118,7 @@ result affects access, signing, wallet control, publishing, or work authority.
 
 ```json
 {
-  "schema_version": "reddog.lick.receipt.v1",
+  "schema_version": "reddog.lick.receipt.proposed",
   "lick_id": "unique nonce-bound id",
   "encounter_profile_id": "ephemeral-pseudonymous-id",
   "surface": "phone|pfmall|autopost|ide|other",
@@ -148,7 +164,13 @@ The bounded flow is:
 The Lick answers "what confidence do we have about this encounter?" It does
 not answer whether a proposal is feasible and does not authorize FoundUp work.
 
-### PoC that can be tested now
+### Stage-1 target behavior and implemented subset
+
+The implemented challenge is a one-use random value returned to the client and
+echoed with its bearer. An automated client can complete it. Its receipt states
+`identity_verified: false`, `human_presence_proven: false`, `signed: false`,
+and `authority_granted: none`. This proves request continuity only. The steps
+below include unfinished target behavior; see Delivery stages for their status.
 
 The first PoC deliberately avoids biometric identification. It reuses
 AutoPost's existing `CaptureEvent`, local storage/provenance, correction UI,
@@ -218,6 +240,171 @@ or legal-coverage claim. `71387071` must not be presented as verified protection
 - No biometric, conversational, or health-derived evidence enters model
   training without separate explicit consent.
 
+## Continuous Lick and mutual verification (proposed)
+
+### Always checking means renewable evidence
+
+During an explicitly enabled encounter, inspect evidence freshness and binding
+on every interaction and each received media segment. Renew permitted local
+observations at a bounded, measured cadence; do not run a model, a biometric
+challenge, or a remote call on every token. A transport heartbeat proves only
+transport activity. It must not refresh a human-presence observation.
+
+Bind observations to a particular speaker/track and time interval. A live
+bystander, wearable, or pulse somewhere in the room does not prove the person
+shown in the stream is live. Unknown speaker association stays unknown.
+Participant change, capture-device/track change, backgrounding, timeout,
+contradiction, or consent withdrawal invalidates the affected claims. Renewal
+after a gap starts a new epoch; it never retroactively verifies missing media.
+
+Show when sensing is active and allow pause/withdrawal. Silence, camera-off,
+poor connectivity, disability, atypical cadence, and assistive translation are
+not evidence of deception. Offer an accessible step-up or ordinary guest use.
+An unattended but authorized agent may continue delegated work while its
+human-presence state is explicitly unknown or expired.
+
+### Separate claims before choosing an action
+
+| Claim | Evidence required for a future supported assessment | Does not establish |
+|---|---|---|
+| Human presence | Fresh, evaluated liveness evidence bound to the relevant capture path and participant | Name, uniqueness, intentions, or authority |
+| Participant continuity | Consented comparison against a prior observation with quality, conflict, and expiry records | Civil identity or continuous observation during gaps |
+| Account/key control | Valid possession proof with a trusted enrollment or delegation binding | The signer is the person in the video |
+| Media provenance | Valid segment binding, accepted signer, freshness, and declared capture/transformation chain | Physical truth before the signing boundary |
+| Action authority | Existing principal/project/disclosure capability and action-specific approval rules | Blanket permission from any of the above claims |
+
+Each assessment records method/version, evidence issuer, subject/track scope,
+observed time, expiry, outcome, quality, failure reasons, and consent scope.
+Use `supported`, `unknown`, `conflicting`, `expired`, or `withdrawn`; a supported
+claim is bounded by its method and threat model. Optional numeric scores need
+calibration. Do not average these claims into one identity/trust score, and do
+not equate agent semantic state with a probability of human presence.
+
+### Two Red Dogs close the encounter loop
+
+1. Each side obtains consent locally and establishes an ephemeral encounter
+   key through a reviewed authentication/delegation flow. WebAuthn/passkeys
+   can authenticate to a relying party; they are not arbitrary per-frame
+   signing keys. Session-key delegation is a separate, bounded contract.
+2. Establish peer trust from an existing trusted binding or explicit pairing.
+   An unfamiliar self-signed key remains an unrecognized peer. Trust in an
+   evidence issuer must state which capture/liveness methods it can attest.
+3. Exchange fresh unpredictable challenges over authenticated channels. Bind
+   signed responses to both challenges, both peer keys and roles, encounter
+   ID, epoch, channel binding, purpose, policy version, and expiry. Each side
+   verifies the other independently; circular endorsement creates no evidence.
+4. Exchange only scoped assessments and necessary proof references. Each
+   receiver applies its own policy; the other RedDog's assertion cannot set
+   local authority or silently raise assurance. No raw biometric templates or
+   global human fingerprint are required in the exchange. Treat received
+   content and assertions as data, never as instructions to the verifier.
+5. Bind media segments to that encounter and return a signed acknowledgement
+   of the transcript/segment evidence actually checked. This acknowledges
+   receipt and verification scope, not truth, endorsement, or authorization.
+6. Reject stale, replayed, wrong-peer, wrong-channel, wrong-purpose, or revoked
+   proofs. On loss of freshness, remove the affected assurance indicator and
+   hold only actions requiring it. Ordinary unverified communication can remain.
+
+Use reviewed cryptographic libraries and a specified canonical encoding,
+domain separation, algorithm allowlist, key rotation/revocation, and recovery
+procedure before implementation. This is a requirements sequence, not a new
+cryptographic protocol specification. Account recovery cannot restore prior
+human-continuity assurance without fresh evidence.
+
+### Bind the stream, not merely its login
+
+Reuse and evaluate AutoPost's existing
+[`foundupsAuthorIdentity.ts`](https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/modules/identity/foundupsAuthorIdentity.ts)
+first: it already signs an original-media fingerprint in `foundups.media.v1`.
+Its verifier checks a manifest against the public key carried in that manifest;
+it does not itself compare received media bytes, establish external signer
+trust, or verify a live encounter. The stored key is non-extractable after
+import, but generation temporarily exports private JWK material; hardware
+capture attestation must not be inferred. Do not create a second author-identity
+store. Review the stable author ID's linkability before adding pairwise use.
+
+The receiver must verify the bytes it presents. The proposed media evidence
+binds stream/encounter ID, epoch, track ID, segment sequence, capture interval,
+content hash, continuity link, signer/delegation, and current assessment
+reference. Validate freshness against a bounded clock-skew and latency policy;
+a timestamp or reusable video overlay is insufficient.
+
+Evaluate the existing C2PA live-video specification as the provenance carrier
+before inventing a format. C2PA provenance alone does not prove human liveness.
+A transcoder, editor, or AI voice translator must declare its transformation
+and bind output to input; exact content hashes do not survive transcoding.
+If a platform strips provenance, display provenance unavailable. A sidecar is
+usable only if it is authenticated and binds the actual rendered rendition.
+
+For the monk's livestream, his RedDog may maintain local presence/continuity
+evidence while signing the bound capture stream. A viewer's RedDog validates
+that stream and, if already paired, recognizes the established UnDaoDu profile.
+It can independently check the viewer locally. Mutual replies require both
+directions' encounter checks; passive viewing does not require revealing a
+viewer's identity or liveness to the broadcaster. Broadcast verification should
+reuse source segment proofs rather than demand a fresh challenge per viewer.
+
+Render assurance in the receiver's trusted application chrome, never as a
+badge burned into video. Distinguish source provenance, recent human-presence
+evidence, known-profile continuity, transformed media, and unavailable evidence.
+An authorized synthetic/translated voice is labeled as such and is not passed
+off as an unmodified live human voice.
+
+### Security claim and residual risks
+
+The target is to prevent invalidly bound or replayed media from being accepted
+as verified within conforming clients under a stated trust model. It does not
+make deepfake creation impossible. A real human can operate a deepfake; a
+compromised capture application can sign fabricated frames; two compromised
+RedDogs can exchange mutually consistent lies. Secure signing protects bytes
+after its trust boundary and cannot repair fabricated input before it.
+
+Evaluate presentation attacks, virtual-camera/audio injection, real-time
+relays, person/track substitution, key theft, colluding endpoints, and false
+issuer attestations. Define the trusted capture boundary and its attestation
+limits before advertising human assurance. Even measured liveness/PAD has
+residual errors. Absence of valid provenance means unverified, not fake.
+
+### Affect palette, Un-Dao-Du, and WSP authority
+
+The palette may present uncertain, consented interaction cues to help RedDog
+adjust pace, wording, clarification, and attention. It is not a biometric,
+deception detector, or moral score. Anger must not reject a person's handshake;
+polite language must not authorize a harmful action. Keep affect optional,
+correctable, local where possible, and outside peer identity attestations.
+
+An evaluated design interpretation of Un-Dao-Du is: Un respects consent and
+non-imposition; Dao clarifies the participant's intended constructive outcome;
+Du checks concrete consequences and restraint before protected effects.
+These are design principles, not claims that a sentiment vector measures them.
+Suspected coercion may prompt a private check or hold a sensitive transaction;
+it cannot be established from tone alone.
+
+Lick supplies bounded encounter evidence to 3V Verification. Validation and
+Valuation remain separate. WSP 44's implemented `SemanticStateEngine` uses
+three named axes, ten valid codes with `A <= B <= C`, and optional constrained
+transitions; it is not a capability token or compulsory authorization ladder.
+WSP 73 and the conversation policy keep intent, reasoning depth, and effect
+ceiling independent. A `222` code, high confidence, friendly color, or signed
+Lick receipt never grants private 0102 access or worker-dispatch authority.
+
+### Prototype gates for this expansion
+
+Follow the [bounded roadmap](../ROADMAP.md#continuous-lick-design-and-evaluation).
+First demonstrate mutual request/stream continuity with synthetic media and
+human presence explicitly unknown. Add human-assurance claims only after
+capture-path and liveness evaluation. Report attack acceptance and legitimate
+rejection rates with denominators, uncertainty, device/environment conditions,
+and independent held-out attacks. Measure detection delay, latency, battery,
+compute/network cost, and accessibility burden. Predeclare acceptance thresholds
+for the intended use; zero successes in a small attack sample is not impossibility.
+
+Required negative cases include replay, reordered/missing/cross-stream segments,
+reconnect/clock rollback, downgrade to unsigned media, sensor loss, consent
+withdrawal, account recovery, synthetic-source disclosure, and action-authority
+invariance under affect/state changes. No production capability is enabled by
+this documentation update.
+
 ## Delivery stages
 
 ### Stage 0 — documentation and research review
@@ -225,6 +412,8 @@ or legal-coverage claim. `71387071` must not be presented as verified protection
 - [x] Name and place the Lick as a RedDog product handshake, not a WSP.
 - [x] Trace the existing rESP patent claims and anti-deepfake use case.
 - [x] Record that the Lick lane is open source and makes no patent-status claim.
+- [x] Audit continuous presence, mutual verification, media binding, affect,
+  and semantic-state claims; specify boundaries without claiming implementation.
 - [ ] Complete privacy, threat-model, and jurisdiction review.
 
 ### Stage 1 — explicit, non-biometric Lick
@@ -276,6 +465,8 @@ The broader Lick cannot move beyond the non-biometric PoC until tests demonstrat
 
 ## External technical anchors
 
+- [C2PA 2.4 technical specification, live video and trust model](https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html)
+- [W3C WebAuthn Level 3, presence, verification, and relying-party binding](https://www.w3.org/TR/webauthn-3/)
 - [NIST SP 800-63B, Use of Biometrics](https://pages.nist.gov/800-63-4/sp800-63b/authenticators/)
 - [NIST SP 800-63A, Identity Proofing Requirements](https://pages.nist.gov/800-63-4/sp800-63a/ial-general/)
 - [NIST Speaker Recognition Evaluation Chronicles](https://www.nist.gov/publications/nist-speaker-recognition-evaluation-chronicles)
