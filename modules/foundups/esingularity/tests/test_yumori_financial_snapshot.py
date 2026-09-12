@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import pytest
 
 from modules.foundups.esingularity.src.yumori_feasibility_finance import (
@@ -49,17 +51,10 @@ def test_capacity_economics_follow_active_scenario_assumptions():
     base = default_assumptions()
     base_snapshot = build_finance_snapshot(base)
     richer_tiers = tuple(
-        type(tier)(
-            key=tier.key,
-            name=tier.name,
-            gpu_count=tier.gpu_count,
-            price_jpy_per_gpu_hour=tier.price_jpy_per_gpu_hour * 1.10,
-            status=tier.status,
-            source=tier.source,
-        )
+        replace(tier, price_jpy_per_gpu_hour=tier.price_jpy_per_gpu_hour * 1.10)
         for tier in base.tiers
     )
-    changed = type(base)(**{**base.__dict__, "tiers": richer_tiers})
+    changed = replace(base, tiers=richer_tiers)
     changed_snapshot = build_finance_snapshot(changed)
     assert changed_snapshot["capacity_economics"][0]["year1_revenue_jpy"] > base_snapshot["capacity_economics"][0]["year1_revenue_jpy"]
 
