@@ -1,5 +1,14 @@
 # Project eSingularity ModLog
 
+## 2026-09-12 — Restore the join-first YUMORI committee landing
+
+- Restored the exact three-panel national movement funnel from PR #1653 at `frontend/app/yumori/page.tsx`: WHY / WHAT / HOW, five JOIN YUMORI actions, the Japan Hyperscaler Report link, and the initial 1,000-person committee target.
+- Preserved the hostname-restricted rewrite, eSingularity.ai homepage, direct `/yumori` route, signup destination, assets, language infrastructure, and the single shared Sites project. No DNS or YUMORI.info change was made.
+- Focused ESLint completed with zero errors (one retained `no-img-element` warning), and the Sites production build completed successfully.
+- Published Sites source `21a8d0161c2bc2fc8b9ca3c8f510225aae3ae3a3` as version 44; deployment `appgdep_6aa569bcb5688191b13efe46e738346e` succeeded.
+- Fresh cache-busted HTTP and Cloud Browser checks confirmed YUMORI.me and www show the restored movement page while keeping their hostnames and query strings; eSingularity.ai remains the project/vision homepage. YUMORI.info's existing HTTP redirect still points to `https://eSingularity.ai`; its DNS/forwarding was not modified.
+
+
 ## 2026-09-12 — Separate YUMORI.me entry on the shared Sites app
 
 - Selected one existing hosting project with hostname routing instead of a second deployment or copied campaign page.
