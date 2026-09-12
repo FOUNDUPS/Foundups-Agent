@@ -1,5 +1,12 @@
 # eSingularity TestModLog
 
+## 2026-09-12 — Repair first-slide CI contracts
+
+- Updated existing tests to the current image renderer and content owners; removed assertions requiring the retired presentation file, corrupt sprite or unaudited financial returns.
+- Retained architecture, economics qualification, accessibility and current Japanese-copy protections. JHR checks now follow the mounted opening component and require its direct report link.
+- Regenerated the canonical test registry using its script; the only missing entry was the existing `test_japanese_surface_copy.py`.
+- Local Python suite: 25 passed. Domain checks: 18 passed. No YUMORI route or domain configuration changes.
+
 ## 2026-09-12 — Distinct-homepage regression contract
 
 - Refreshed the existing YUMORI landing tests in place after the join-first PR #1653 page was restored; no duplicate test file was created.

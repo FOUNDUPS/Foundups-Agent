@@ -2,6 +2,18 @@
 
 Status: draft for 012's visual validation. Do not extend to later slides or publish this draft before the requested opening review.
 
+## Build/CI repair follow-up
+
+The earlier verification limitations below describe the initial review and are superseded by this repair result: **25 Python tests, 18 domain checks, registry validation, full lint (zero errors/four existing image warnings), TypeScript and production build pass locally.**
+
+GitHub had stopped before build: presentation tests referenced a missing retired source, sprite markup, superseded copy and removed link locations. Updated those existing tests to protect current behavior and financial exclusions; the opening now has a direct localized JHR link. The generated test registry was missing the existing Japanese-copy test and is regenerated in place.
+
+The local “analyze client references” delay was real work: Vinext downloads 124 Noto Sans JP and six Space Mono files sequentially, with no per-download progress or timeout in its fetch implementation. Recovered 77 valid cached Noto files and fetched 47 remaining files from the exact Google CSS URLs (eight concurrent requests, 30-second request timeout, WOFF2 signature checked). Vinext then generated its own cache CSS and completed the unchanged production build. No fonts, dependencies or typography were replaced. CI now caches `.vinext/fonts`, keyed to layout/lockfile. Font bytes are build cache, not committed assets.
+
+Minimal gate repairs also escape two English-report apostrophes; preserve effective translation values while dropping superseded duplicate keys; defer/cancel language header-slot lookup; and keep both manifest icon purposes using separate typed entries. YUMORI route/config remain unchanged.
+
+Workspace cleanup removed the original linked-worktree Git metadata; the repair uses a fresh clone of PR #1688. Follow-up work remains on that PR and is not published.
+
 ## Scope and intent
 
 012 requested surgical changes in FOUNDUPS/Foundups-Agent, Japanese first, then English and Brazilian Portuguese. The opening asks whether the community should lose its heart, asks Fukui City to investigate compute-enabled reuse, and links directly to the existing YUMORI committee registration form. The three compute mission questions remain below the image. The existing land-use comparison remains available in a closed disclosure.

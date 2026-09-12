@@ -16,6 +16,7 @@ export const openingCopy = {
     costNote: '2026年6月・市議会質問資料の概算。確定契約額ではありません。',
     source: '解体費の出典を見る',
     map: '土地利用の比較とJHRを見る',
+    report: 'JHR・日本ハイパースケーラーレポートを読む',
   },
   en: {
     label: 'Former Sukatto Land Kuzuryu · A choice for the community',
@@ -31,6 +32,7 @@ export const openingCopy = {
     costNote: 'Estimate cited in June 2026 council questions; not a final contract price.',
     source: 'See demolition estimate source',
     map: 'Explore the land-use comparison and JHR',
+    report: 'Read the Japan Hyperscaler Report',
   },
   pt: {
     label: 'Antigo Sukatto Land Kuzuryu · Uma escolha para a comunidade',
@@ -46,5 +48,6 @@ export const openingCopy = {
     costNote: 'Estimativa citada nas perguntas à Câmara em junho de 2026; não é o valor final de um contrato.',
     source: 'Ver a fonte da estimativa de demolição',
     map: 'Ver a comparação de uso do solo e o JHR',
+    report: 'Ler o Relatório sobre Hyperscalers no Japão',
   },
 };

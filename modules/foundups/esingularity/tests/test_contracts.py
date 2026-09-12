@@ -59,7 +59,9 @@ def test_sites_configuration_and_primary_routes_are_present() -> None:
 def test_existing_ticker_receives_one_deck_notification() -> None:
     page = read("app/page.tsx")
     ticker = read("components/CampaignTicker.tsx")
-    assert page.count("<CampaignTicker />") == 1
+    # The compact project opening replaces the former ticker; retain the
+    # reusable ticker's single deck notification for its campaign consumers.
+    assert page.count("<EsingularityOpening />") == 1
     assert "<YumoriPresentation />" in page
     assert "{ label: 'NEW', text: 'YUMORI / COG DC 10枚のプレゼンを見る', href: '#yumori-deck' }" in ticker
     assert ticker.count("href: '#yumori-deck'") == 1
@@ -105,32 +107,30 @@ def test_current_vision_propositions_and_progressive_disclosure_are_present() ->
 def test_fullscreen_deck_uses_real_building_sprite_and_accessible_controls() -> None:
     component = read("components/YumoriPresentation.tsx")
     css = read("components/YumoriPresentation.module.css")
-    assert (FRONTEND_ROOT / "public" / "vision" / "vision-sprite.jpg").is_file()
-    assert "SPRITE_URL = '/vision/vision-sprite.jpg'" in component
-    assert "backgroundPosition" in component
-    assert "background-size:100% 1000%" in css
-    assert "role=\"img\"" in component
-    assert "aria-label={slide.alt}" in component
+    # Check the current image renderer, not the retired corrupt sprite.
+    asset = FRONTEND_ROOT / "public" / "vision" / "onsen-choice-clean.png"
+    assert asset.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert "src={slide.image}" in component and "alt={slide.alt}" in component
+    assert "object-fit: contain" in css
     assert "ArrowLeft" in component and "ArrowRight" in component and "Escape" in component
     assert "prefers-reduced-motion: reduce" in component
-    assert "Math.abs(distance) > 55" in component
+    assert "SWIPE_DISTANCE = 55" in component
+    assert "Math.abs(distanceX) > SWIPE_DISTANCE" in component
     assert "AUTOPLAY_MS = 9000" in component
     assert "https://yumori.me" in component
-    assert 'href="/reports/jhr"' in component
+    assert 'href="/reports/jhr"' in read("components/EsingularityOpening.tsx")
 
 
 def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
     page = read("app/page.tsx")
-    content = read("content/yumori-presentation.ts")
     vision = read("content/yumori-vision.ts")
-    combined = page + content + vision
+    combined = page + vision
     for required in (
-        "COMMUNITY-OWNED GREEN DATA CENTER",
-        "私たちのCOG DCコンピュート",
-        "THIRD FLOOR · EMERGING",
-        "TOP FLOOR · ADVANCED",
-        "SEPARATE INFRASTRUCTURE",
-        "IDEA → PROJECT → FOUNDUP → VALIDATED FOUNDUP → INDEPENDENT AI-NATIVE BUSINESS",
+        "私たちのCOG DC",
+        "3階 · 挑戦・育成スペース",
+        "最上階 · 実証・発展スペース",
+        "温泉棟とは別に配置",
+        "独立したAIネイティブ事業",
         "地下をジム・休憩・回復",
     ):
         assert required in combined
@@ -140,16 +140,16 @@ def test_cog_dc_and_floor_model_match_current_truth_boundary() -> None:
 
 
 def test_economic_claims_are_labeled_and_arithmetic_is_sound() -> None:
-    content = read("content/yumori-presentation.ts")
+    content = read("content/esingularity-opening.ts")
     vision = read("content/yumori-vision.ts")
     assert 129_649 * 1_000 == 129_649_000
     assert 129_649 * 5_546 == 719_033_354
-    for label in ("VERIFIED", "REPORTED", "MODELLED"):
-        assert label in vision
-    assert "5年売上 約53.7億円" in vision
-    assert "5年累計FCFE 約19.4億円" in vision
-    assert "予測・保証ではありません" in vision
-    assert "予算・契約額ではありません" in content
+    assert "確定契約額ではありません" in content and "確定契約額ではありません" in vision
+    assert "2026年6月" in content
+    assert "再利用の事業性、資金調達、工事費は検証中" in vision
+    for excluded in ("5年売上 約53.7億円", "5年累計FCFE 約19.4億円", "230,000"):
+        assert excluded not in content + vision
+    assert "costNote" in read("components/EsingularityOpening.tsx")
 
 
 def test_existing_public_assets_and_local_sources_remain_present() -> None:

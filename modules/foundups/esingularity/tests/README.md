@@ -7,10 +7,12 @@ The test suite verifies the monorepo and public-presentation contracts:
 - Sites configuration and frontend build metadata;
 - explicit token deferral rather than an invented token;
 - existing public routes remain present in source;
-- exactly one presentation notification is added to the existing ticker;
+- the compact opening and deck are mounted once, with the reusable ticker retaining its single deck notification;
 - the Japanese canonical source has ten slides with complete derived language states;
 - floor allocation, COG DC ownership, economics labels, timed controls, assets, and outreach provenance remain truth-bound;
 - the `/future` source remains valid UTF-8 and free of the superseded speculative capacity schedule.
+
+Opening review checks use `content/esingularity-opening.ts` and `content/yumori-vision.ts`, not the retired `yumori-presentation.ts` or sprite renderer. They protect the recovered PNG signature, accessible image/control hooks, separate onsen/compute architecture, qualified demolition estimate, excluded unaudited financial returns, and direct JHR access from the opening.
 
 Run from the repository root:
 

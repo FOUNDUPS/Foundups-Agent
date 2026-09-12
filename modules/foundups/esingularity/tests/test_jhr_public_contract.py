@@ -46,7 +46,10 @@ def test_jhr_is_visibly_reachable_across_esingularity_and_yumori_panels() -> Non
     project_page = read(FRONTEND_ROOT / "app" / "page.tsx")
     movement_page = read(FRONTEND_ROOT / "app" / "yumori" / "page.tsx")
 
-    assert project_page.count('href="/reports/jhr') >= 3
+    opening = read(FRONTEND_ROOT / "components" / "EsingularityOpening.tsx")
+    assert "<EsingularityOpening />" in project_page
+    assert project_page.count('href="/reports/jhr') >= 2
+    assert 'href="/reports/jhr"' in opening
     assert "JHR・最新レポート" in project_page
     assert "const JHR_URL = '/reports/jhr'" in movement_page
     assert "JAPAN HYPERSCALER REPORTを読む" in movement_page

@@ -36,6 +36,7 @@ export default function EsingularityOpening() {
         <div className={styles.action}><a href={OPENING_SIGNUP_URL}>{copy.join} ↗</a><p>{copy.vote}</p></div>
       </div>
     </div>
+    <p className={styles.research} data-yumori-localized><a href="/reports/jhr">{copy.report} ↗</a></p>
     <details className={styles.research}>
       <summary data-yumori-localized>{copy.map}</summary>
       <FukuiComparisonMap />
