@@ -1,3 +1,9 @@
-# Python dependency for repo-generated YUMORI financial workbook exports.
-# The product web runtime remains in frontend/package.json.
+# Repo-generated YUMORI financial workbook projection.
 XlsxWriter>=3.2,<4
+
+# Thin Python finance transport. Business logic remains in src/yumori_financial_*.py.
+fastapi>=0.104,<1
+uvicorn[standard]>=0.24,<1
+
+# FastAPI/Starlette TestClient contract tests.
+httpx>=0.24,<1
