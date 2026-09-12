@@ -1,3 +1,3 @@
-# Python dependencies for repo-native eSingularity utilities.
-# Frontend runtime remains in frontend/package.json.
-xlsxwriter>=3.2,<4
+# Python dependency for repo-generated YUMORI financial workbook exports.
+# The product web runtime remains in frontend/package.json.
+XlsxWriter>=3.2,<4

@@ -36,14 +36,16 @@ retirement_date: null
 ## Three Skill Questions
 
 1. **Do we need it?** Yes. Financial-model audit, scenario changes, public-number reconciliation, and spreadsheet regeneration recur and materially affect campaign credibility.
-2. **Can we live without it?** Poorly. Reconstructing formulas from chat or presentation workbooks creates drift and silently reintroduces stale numbers.
+2. **Can we live without it?** Poorly. Reconstructing formulas from chat or from presentation workbooks creates drift and silently reintroduces stale numbers.
 3. **Can we afford not to have it?** No. Incorrect IRR, power, debt, tax, revenue, or public-impact claims create material decision and credibility risk.
 
 Decision: maintain one module-owned prototype Skillz. Do not split separate IRR, spreadsheet, demand, or audit Skillz unless a future workflow independently passes the Three Skill Questions.
 
-## Canonical calculation surface
+## Purpose
 
-`modules/foundups/esingularity/src/finance/model.py`
+Route financial-model work to the canonical Python calculation engine in:
+
+`modules/foundups/esingularity/src/yumori_financial_model.py`
 
 The repository owns assumptions, equations, reconciliation rules, and tests. Excel/PDF/Drive/web outputs are generated or publication surfaces.
 
@@ -58,6 +60,10 @@ Use this Skillz when asked to:
 - explain why a financial output changed;
 - reconcile numbers shown on eSingularity/YUMORI public surfaces with the code model.
 
+## Non-triggers
+
+Do not use this for unrelated personal finance, generic accounting education, or one-off arithmetic with no YUMORI/eSingularity model relationship.
+
 ## Truth hierarchy
 
 ```text
@@ -71,15 +77,15 @@ verified external evidence / signed commercial terms
 
 A spreadsheet cell is not authoritative merely because it exists. A model output is not a verified fact merely because an equation produced it.
 
-## WSP 97 procedure
+## WSP 97 operating procedure
 
-1. Retrieve governing WSPs and exact eSingularity finance code before stating current model facts.
+1. Retrieve governing WSPs and the exact eSingularity finance code before stating current model facts.
 2. Retrieve the smallest relevant workbook/source evidence before changing assumptions.
 3. Run a micro pass on the exact equation/assumption being changed.
 4. Run a macro pass on P&L, cash flow, debt, public-value ledgers, and public copy affected downstream.
 5. Run the dialectic sweep: existing formula, competing interpretation, missing evidence, strongest downside case.
 6. Change repository assumptions/equations first.
-7. Run focused model tests and reconciliation checks.
+7. Run focused model tests and validation checks.
 8. Generate/re-generate publication artifacts from the code result.
 9. Compare output to the prior workbook and record material deltas.
 10. Update eSingularity documentation/ModLog when the canonical model changes.
@@ -88,16 +94,13 @@ A spreadsheet cell is not authoritative merely because it exists. A model output
 
 Large ModLogs, audits, work ledgers, trees, and workbooks must not be dumped wholesale into agent context by default.
 
-```text
-search / HoloIndex -> exact symbol or heading -> bounded read -> adjacent bounded read only if required
-```
+- Search/index first.
+- Read the smallest useful line/range window, normally 80-200 lines or a specific spreadsheet range.
+- Continue only when the current window points to additional required evidence.
+- For spreadsheet audits, inspect named sheets/ranges/formulas rather than exporting every cell into context.
+- A deliberate larger read requires a known bounded file size and a reason that the whole artifact is necessary.
 
-Defaults:
-- read roughly 50-150 lines around a located symbol/heading;
-- for spreadsheets inspect named sheets/ranges/formulas instead of every cell;
-- use existing Holo bounded-read behavior (`DIRECT_READ_PER_FILE_BYTES`) where available;
-- if a tool returns a truncated/oversized payload, retry with an exact path/range rather than repeating the broad fetch;
-- stop when evidence for the current claim is sufficient.
+This is a reliability rule: progressive disclosure reduces retrieval failures and keeps WSP 97 evidence traceable.
 
 ## Ledger boundaries
 
@@ -113,26 +116,20 @@ Never add visitor-spending reference values into project-company revenue or tax 
 ## Reconciliation invariants
 
 - Tier revenue = integer GPUs x 8,760 hours x utilization x price.
-- Power expense uses the explicitly labelled power-cost basis; inferred legacy calibration must stay labelled until engineering replaces it.
-- Depreciation stops when useful life ends.
-- Debt interest/principal reconcile to stated financing method and terms.
-- FCFE = operating cash flow - maintenance CapEx - principal repayment.
+- Power expense = stated IT kW x utilization x PUE x 8,760 x tariff unless a later engineering model explicitly replaces it.
+- Depreciation stops when the useful life ends.
+- Debt interest and principal reconcile to the stated financing method/terms.
+- FCFE reconciles to CFO - maintenance CapEx - principal repayment.
 - Equity IRR is solved from the actual equity cash-flow sequence; never hard-code the displayed result.
 - Sources equal uses at initial funding.
 - Every modelled result remains modelled until validated by external evidence.
 
 ## Legacy workbook rule
 
-The preset workbook is evidence of intended structure and assumptions, not calculation authority. Preserve useful layout/assumptions but record and correct arithmetic contradictions.
-
-Phase-1 audit examples:
-- Tier B/C revenue rows do not consistently reconcile to published GPU counts/prices/utilization.
-- Electricity expense reconciles to an inferred 840 kW full-load basis while the operating assumptions state 850 kW IT allocation.
-- Hardware depreciation continues into Year 5 despite a stated four-year life.
-- Displayed 68.4% equity IRR does not reconcile to the shown equity/FCFE sequence.
+The preset workbook is evidence of the intended structure and assumptions, not calculation authority. Preserve useful assumptions and layout, but record and correct arithmetic contradictions. `audit_legacy_model()` is the current deterministic reconciliation surface.
 
 ## RedDog / Rolodex behavior
 
-RedDog discovers this Skillz for YUMORI/eSingularity finance requests and routes work to the governed calculation path. RedDog may summarize a validated result returned by the model; it must not infer, interpolate, or invent missing financial values.
+RedDog should discover this Skillz for YUMORI/eSingularity finance requests and hand the work to the governed calculation path. RedDog may summarize a validated result returned by the model; it must not infer, interpolate, or invent missing financial values.
 
 This prototype grants no authority to publish new financial claims, commit financing, represent grants as awarded, or treat demand leads as customer commitments.
