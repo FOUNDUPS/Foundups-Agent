@@ -5,19 +5,27 @@ from modules.foundups.esingularity.src.yumori_feasibility_finance import (
     EvidenceStatus,
     FeasibilityFundingInputs,
 )
+from modules.foundups.esingularity.src.yumori_financial_model import default_assumptions
 from modules.foundups.esingularity.src.yumori_financial_snapshot import (
     SNAPSHOT_SCHEMA_VERSION,
     build_finance_snapshot,
 )
 
 
-def test_snapshot_combines_model_catalog_and_capacity_without_inventing_funding():
+def test_snapshot_combines_model_history_catalog_and_capacity_without_inventing_funding():
     snapshot = build_finance_snapshot()
     assert snapshot["schema_version"] == SNAPSHOT_SCHEMA_VERSION
     assert snapshot["foundup_id"] == "esingularity_001"
     assert len(snapshot["capacity_planning"]) == 5
     assert snapshot["capacity_planning"][0]["gpus"] == 384
     assert snapshot["capacity_planning"][-1]["gpus"] == 1920
+    assert len(snapshot["capacity_economics"]) == 5
+    assert snapshot["capacity_economics"][0]["mw"] == 1
+    assert snapshot["capacity_economics"][-1]["mw"] == 5
+    assert snapshot["facility_history"]["operating_history"][-1]["users"] == 129_649
+    assert snapshot["facility_history"]["operating_history"][-1]["user_fee_revenue_jpy"] == 124_886_000
+    assert snapshot["facility_history"]["city_fiscal_history"][-1]["city_net_cost_jpy"] == 19_615_602
+    assert snapshot["facility_history"]["current_carrying_cost"]["known_annual_cost_jpy"] == 7_892_646
     assert snapshot["capacity_allocation"]["total_gpu_capacity"] == 384
     assert snapshot["capacity_allocation"]["committed_reserved_gpus"] == 0
     assert snapshot["capacity_allocation"]["committed_headroom_gpus"] == 384
@@ -35,6 +43,25 @@ def test_snapshot_preserves_canonical_operating_model_outputs():
     assert round(summary["five_year_fcfe_jpy"]) == 1_691_425_157
     assert 0.59 < summary["equity_irr"] < 0.61
     assert all(snapshot["operating_model"]["validation"].values())
+
+
+def test_capacity_economics_follow_active_scenario_assumptions():
+    base = default_assumptions()
+    base_snapshot = build_finance_snapshot(base)
+    richer_tiers = tuple(
+        type(tier)(
+            key=tier.key,
+            name=tier.name,
+            gpu_count=tier.gpu_count,
+            price_jpy_per_gpu_hour=tier.price_jpy_per_gpu_hour * 1.10,
+            status=tier.status,
+            source=tier.source,
+        )
+        for tier in base.tiers
+    )
+    changed = type(base)(**{**base.__dict__, "tiers": richer_tiers})
+    changed_snapshot = build_finance_snapshot(changed)
+    assert changed_snapshot["capacity_economics"][0]["year1_revenue_jpy"] > base_snapshot["capacity_economics"][0]["year1_revenue_jpy"]
 
 
 def test_explicit_feasibility_inputs_keep_contract_value_cash_and_capacity_separate():
