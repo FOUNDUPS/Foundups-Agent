@@ -7,7 +7,7 @@ This module is evidence/configuration adjacent to the canonical calculation engi
 - this module owns normalized product definitions, public market benchmarks,
   model-only YUMORI price targets, and public-funding opportunity metadata.
 
-The catalog is repository data, not a second financial engine.  External facts may
+The catalog is repository data, not a second financial engine. External facts may
 be VERIFIED while project pricing/funding remains MODEL ONLY or POTENTIAL.
 Generated Excel/website/JSON surfaces consume this contract; they do not become
 calculation authority.
@@ -19,12 +19,13 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
-from typing import Dict, Iterable, Mapping, Sequence, Tuple
+from typing import Dict, Iterable, Mapping, Tuple
 
 CATALOG_SCHEMA_VERSION = "yumori.finance.catalog.v1"
-DEFAULT_CATALOG_PATH = (
-    Path(__file__).resolve().parents[1] / "data" / "finance" / "catalog_v1.json"
-)
+BENCHMARK_SCHEMA_VERSION = "yumori.finance.benchmarks.v1"
+_DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "finance"
+DEFAULT_CATALOG_PATH = _DATA_DIR / "catalog_v1.json"
+DEFAULT_GLOBAL_BENCHMARKS_PATH = _DATA_DIR / "global_market_benchmarks_v1.json"
 
 _ALLOWED_EVIDENCE = {"VERIFIED", "COMMITTED", "POTENTIAL", "MODEL ONLY"}
 _ALLOWED_FUNDING_TREATMENT = {
@@ -272,13 +273,38 @@ def _parse_funding(raw: Mapping[str, object]) -> FundingOpportunity:
     return opportunity
 
 
-def load_catalog(path: str | Path | None = None) -> FinancialCatalog:
+def _load_benchmark_supplement(path: Path) -> tuple[str, Tuple[MarketBenchmark, ...]]:
+    if not path.exists():
+        return "", ()
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if raw.get("schema_version") != BENCHMARK_SCHEMA_VERSION:
+        raise ValueError(
+            f"Unsupported finance benchmark schema: {raw.get('schema_version')!r}; "
+            f"expected {BENCHMARK_SCHEMA_VERSION!r}"
+        )
+    as_of = str(raw.get("as_of", ""))
+    benchmarks = tuple(_parse_benchmark(v) for v in raw["market_benchmarks"])
+    return as_of, benchmarks
+
+
+def load_catalog(
+    path: str | Path | None = None,
+    *,
+    benchmark_supplement_path: str | Path | None = None,
+) -> FinancialCatalog:
     """Load and validate the repository-owned finance catalog.
 
     Validation fails closed on duplicate IDs, unknown product references,
     unsupported truth-status values, invalid source URLs, and invalid prices.
+    Frequently changing global market evidence is loaded from a separate
+    repository supplement but normalized into the same public catalog contract.
     """
     catalog_path = Path(path) if path is not None else DEFAULT_CATALOG_PATH
+    supplement_path = (
+        Path(benchmark_supplement_path)
+        if benchmark_supplement_path is not None
+        else DEFAULT_GLOBAL_BENCHMARKS_PATH
+    )
     raw = json.loads(catalog_path.read_text(encoding="utf-8"))
 
     if raw.get("schema_version") != CATALOG_SCHEMA_VERSION:
@@ -289,7 +315,11 @@ def load_catalog(path: str | Path | None = None) -> FinancialCatalog:
 
     products = tuple(_parse_product(v) for v in raw["products"])
     targets = tuple(_parse_price_target(v) for v in raw["yumori_price_targets"])
-    benchmarks = tuple(_parse_benchmark(v) for v in raw["market_benchmarks"])
+    core_benchmarks = tuple(_parse_benchmark(v) for v in raw["market_benchmarks"])
+    supplement_as_of, supplemental_benchmarks = _load_benchmark_supplement(
+        supplement_path
+    )
+    benchmarks = (*core_benchmarks, *supplemental_benchmarks)
     funding = tuple(_parse_funding(v) for v in raw["funding_opportunities"])
 
     _require_unique_ids("product", products)
@@ -304,10 +334,11 @@ def load_catalog(path: str | Path | None = None) -> FinancialCatalog:
                 f"{record.id} references unknown product_id: {record.product_id}"
             )
 
+    core_as_of = str(raw["as_of"])
     catalog = FinancialCatalog(
         schema_version=str(raw["schema_version"]),
         foundup_id=str(raw["foundup_id"]),
-        as_of=str(raw["as_of"]),
+        as_of=max(core_as_of, supplement_as_of) if supplement_as_of else core_as_of,
         truth_boundary=str(raw["truth_boundary"]),
         products=products,
         yumori_price_targets=targets,
@@ -355,6 +386,10 @@ def build_public_catalog_snapshot(
             "gpu_capacity": (
                 "Products marked EXCLUSIVE_GPU_POOL or EXCLUSIVE_GPU_POOL_PLUS_SERVICE "
                 "draw from the same physical GPU inventory and must not be double-counted."
+            ),
+            "currency": (
+                "Market evidence remains in source currency. Any display conversion "
+                "must carry a dated FX source rather than a hard-coded rate."
             ),
         },
     }
