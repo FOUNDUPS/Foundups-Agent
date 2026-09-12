@@ -88,6 +88,27 @@ export type YearResult = {
   dscr: number | null;
 };
 
+export type ModelAssumptions = {
+  utilization: number[];
+  total_gpus: number;
+  pue: number;
+  it_power_kw: number;
+  total_site_power_kw: number;
+  electricity_tariff_jpy_per_kwh: number;
+  facility_capex_jpy: number;
+  compute_capex_jpy: number;
+  grants_jpy: number;
+  sponsor_equity_jpy: number;
+  tiers: Array<{
+    key: string;
+    name: string;
+    gpu_count: number;
+    price_jpy_per_gpu_hour: number;
+    status: string;
+    source: string;
+  }>;
+};
+
 export type FinanceSnapshot = {
   schema_version: string;
   foundup_id: string;
@@ -95,6 +116,7 @@ export type FinanceSnapshot = {
   operating_model: {
     status: string;
     model_name: string;
+    assumptions: ModelAssumptions;
     years: YearResult[];
     summary: {
       five_year_revenue_jpy: number;
@@ -142,7 +164,7 @@ async function financeFetch<T>(path: string, init?: RequestInit): Promise<T> {
       'content-type': 'application/json',
       ...(init?.headers ?? {}),
     },
-    cache: init?.method && init.method !== 'GET' ? 'no-store' : 'no-store',
+    cache: 'no-store',
   });
   if (!response.ok) {
     let detail = `${response.status} ${response.statusText}`;
