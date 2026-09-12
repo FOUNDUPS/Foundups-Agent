@@ -7,6 +7,8 @@ and audit consumers:
 - operating model: ``yumori_financial_model.py``
 - feasibility/offtake: ``yumori_feasibility_finance.py``
 - physical reservations: ``yumori_capacity_allocation.py``
+- public 1-5 MW planning: ``yumori_capacity_economics.py``
+- municipal facility history: ``yumori_facility_history.py``
 - products/benchmarks/public funding: ``yumori_financial_catalog.py``
 - market comparison: ``yumori_price_reconciliation.py``
 
@@ -27,6 +29,8 @@ from .yumori_capacity_allocation import (
     audit_gpu_capacity,
     require_committed_capacity_valid,
 )
+from .yumori_capacity_economics import capacity_economics_table
+from .yumori_facility_history import build_public_facility_history
 from .yumori_feasibility_finance import (
     CustomerOfftake,
     FeasibilityFundingInputs,
@@ -101,9 +105,11 @@ def build_finance_snapshot(
         "foundup_id": c.foundup_id,
         "as_of": c.as_of,
         "operating_model": _operating_projection(a),
+        "facility_history": build_public_facility_history(),
         "catalog": build_public_catalog_snapshot(c),
         "price_reconciliation": build_price_reconciliation(c),
         "capacity_planning": [asdict(capacity_plan(mw)) for mw in range(1, 6)],
+        "capacity_economics": [row.as_dict() for row in capacity_economics_table()],
         "capacity_allocation": capacity_allocation.as_dict(),
     }
 
