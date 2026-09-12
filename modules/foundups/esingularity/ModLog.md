@@ -1,5 +1,17 @@
 # Project eSingularity ModLog
 
+## 2026-09-12 — Make the two-homepage architecture durable
+
+**WSP Protocol**: WSP 00, WSP 22, WSP 50, WSP 57, WSP 83, WSP 97
+**Phase**: Documentation and regression hardening
+
+- Made the one-project/two-public-experience architecture prominent in README, INTERFACE, ROADMAP, and test documentation: eSingularity.ai owns the project/vision homepage; YUMORI.me owns the movement/join homepage.
+- Added explicit merge and deployment gates so parallel work on either landing cannot overwrite or absorb the other, while retaining the single monorepo frontend and Sites project.
+- Refreshed the existing YUMORI content tests to match the restored join-first page and paired them with the existing hostname-routing tests.
+- Fresh focused validation: 18 Node routing checks and eight Python YUMORI/JHR contract functions passed. The environment lacks `pytest`; the broader direct runner still reaches the pre-existing missing legacy `frontend/content/yumori-presentation.ts` reference outside this documentation slice.
+- Made no frontend, DNS, hosting, or YUMORI.info forwarding change. This slice is designed to coexist with independent eSingularity.ai redesign work.
+- HoloIndex retrieval was attempted first but returned `MISSING_GENERATION_BINDING`; repository-local WSP and module evidence was used as the documented fallback.
+
 ## 2026-09-12 — Restore the join-first YUMORI committee landing
 
 - Restored the exact three-panel national movement funnel from PR #1653 at `frontend/app/yumori/page.tsx`: WHY / WHAT / HOW, five JOIN YUMORI actions, the Japan Hyperscaler Report link, and the initial 1,000-person committee target.
