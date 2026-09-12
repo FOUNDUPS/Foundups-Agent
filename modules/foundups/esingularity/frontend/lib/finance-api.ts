@@ -104,6 +104,73 @@ export type CapacityPlan = {
   eight_gpu_nodes: number;
 };
 
+export type CapacityEconomics = {
+  mw: number;
+  gpus: number;
+  eight_gpu_nodes: number;
+  estimated_project_cost_jpy: number;
+  year1_revenue_jpy: number;
+  year1_operating_cost_jpy: number;
+  year1_ebitda_jpy: number;
+  historic_fy2018_user_fee_revenue_coverage_x: number;
+  historic_fy2018_city_net_cost_coverage_x: number;
+  current_dormant_carrying_cost_coverage_x: number;
+  status: string;
+  scaling_rule: string;
+};
+
+export type FacilityOperatingHistory = {
+  period: string;
+  period_label: string;
+  users: number;
+  lodging_users: number;
+  day_users: number;
+  user_fee_revenue_jpy: number;
+  evidence_status: string;
+  scope: string;
+  source_url: string;
+};
+
+export type FacilityCityFiscalHistory = {
+  period: string;
+  city_revenue_jpy: number;
+  city_expenditure_jpy: number;
+  city_net_cost_jpy: number;
+  combined_users: number;
+  cost_per_user_jpy: number;
+  scope: string;
+  evidence_status: string;
+  source_url: string;
+};
+
+export type FacilityHistory = {
+  schema_version: string;
+  facility: string;
+  as_of: string;
+  truth_boundary: string;
+  operating_history: FacilityOperatingHistory[];
+  city_fiscal_history: FacilityCityFiscalHistory[];
+  current_carrying_cost: {
+    period: string;
+    known_annual_cost_jpy: number;
+    components: Record<string, number>;
+    excluded: string[];
+    land_burden_reference_jpy_per_m2: number;
+    building_rent_if_regional_promotion_use: number;
+    evidence_status: string;
+    source_url: string;
+  };
+  operator_cost_evidence: {
+    fy2015_personnel_cost_jpy: number;
+    latest_audited_direction: string;
+    full_reopened_onsen_opex_jpy: number | null;
+    evidence_gap: string;
+    evidence_status: string;
+    source_url: string;
+  };
+  accounting_rules: Record<string, string>;
+};
+
 export type YearResult = {
   year: number;
   utilization: number;
@@ -157,9 +224,12 @@ export type FinanceSnapshot = {
     validation: Record<string, boolean>;
     truth_boundary: string;
   };
+  facility_history: FacilityHistory;
   catalog: FinanceCatalog;
   price_reconciliation: PriceReconciliation;
   capacity_planning: CapacityPlan[];
+  capacity_economics: CapacityEconomics[];
+  capacity_allocation: Record<string, unknown>;
   feasibility: Record<string, unknown>;
   scenario?: {
     status: string;
