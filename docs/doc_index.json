@@ -4,7 +4,7 @@
   "documents": [
     {
       "doc_type": "other",
-      "hash_sha256": "ad3d9cbeae06615fcf74f51b679440a090cee230aa742dde939937cf1c25d13d",
+      "hash_sha256": "c1e722e421dd7687fe6650b973f383f229cf62e03e39f55900d82c7c1b4ede79",
       "links": {
         "automation": [
           "doc_dae"
@@ -26,7 +26,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
-      "size_bytes": 16788,
+      "size_bytes": 18193,
       "status": "active",
       "wsp_refs": [
         "WSP 27",
@@ -425,7 +425,7 @@
     },
     {
       "doc_type": "readme",
-      "hash_sha256": "9981349cfb8b26f6595f5b02dccc87da89b323816d16eecafa2c2574d55816de",
+      "hash_sha256": "f8f0f74252944e4ffeebe4f72621ec0afdd10f7bcf150b70add8f9f95353e36c",
       "links": {
         "automation": [
           "doc_dae"
@@ -445,7 +445,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/0102_session_briefings/README.md",
-      "size_bytes": 1450,
+      "size_bytes": 1887,
       "status": "active",
       "wsp_refs": []
     },
@@ -9431,7 +9431,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "92c0e3f69111ec19263d3495392c92259ae319a30ae9f207f35ef93091b0b639",
+      "hash_sha256": "19288d94948b2b6146d74c0ab46e0f213422fec53c40e2c96b4d12b391dd945f",
       "links": {
         "automation": [
           "doc_dae"
@@ -9444,7 +9444,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/audits/rsi/2026-09-09/INTEGRATION.md",
-      "size_bytes": 19435,
+      "size_bytes": 21364,
       "status": "active",
       "wsp_refs": [
         "WSP 00"
@@ -11536,6 +11536,61 @@
       "size_bytes": 17489,
       "status": "active",
       "wsp_refs": []
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "4e79866c22426cea23b3d57bde3723c468ce261e31fd75970c6a8f84a7b9722e",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
+          "docs/audits/rsi/2026-09-09/INTEGRATION.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_EVIDENCE.json",
+      "size_bytes": 18066,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 22",
+        "WSP 46",
+        "WSP 50",
+        "WSP 81",
+        "WSP 95",
+        "WSP 97"
+      ]
+    },
+    {
+      "doc_type": "other",
+      "hash_sha256": "22f28e0a46378daacbcfc4218e01bed7ca319db82dd20230be8d1a8fff293c54",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ROADMAP.md",
+          "WSP_framework/src/WSP_CORE.md",
+          "WSP_framework/src/WSP_MASTER_INDEX.md",
+          "WSP_framework/src/WSP_46_Windsurf_Recursive_Engine_Protocol.md",
+          "docs/0102_session_briefings/README.md",
+          "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+          "docs/audits/rsi/2026-09-09/INTEGRATION.md"
+        ]
+      },
+      "module_hint": "docs_root",
+      "path": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
+      "size_bytes": 36028,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 22",
+        "WSP 46",
+        "WSP 50",
+        "WSP 81",
+        "WSP 95",
+        "WSP 97"
+      ]
     },
     {
       "doc_type": "other",

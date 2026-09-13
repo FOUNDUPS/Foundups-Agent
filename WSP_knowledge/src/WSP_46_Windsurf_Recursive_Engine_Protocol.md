@@ -1,11 +1,17 @@
 # WSP 46: Windsurf Recursive Engine (WRE) Protocol
 - **Status:** Active
-- **Last Runtime Truth Review:** 2026-07-17
+- **Last Runtime Truth Review:** 2026-09-13 (source `35ed430c6`; bounded contracts, not production certification)
 - **Purpose:** To define the architecture and operation of the WRE, the **module building engine** and **DAE/plugin orchestration control plane** for autonomous FoundUp operations, located at `modules/infrastructure/wre_core`.
 - **Trigger:** When any module building or autonomous operation is required. The WRE is the primary entry point for such tasks.
 - **Input:** A module building goal, typically from a 012 (Human Rider) or derived from roadmap analysis.
 - **Output:** The successful, WSP-compliant construction of modules that become social media agents for autonomous FoundUps, with all outcomes recorded in the WRE Chronicle.
 - **Responsible Agent(s):** Windsurf Recursive Engine (WRE) and its multi-agent coordination system.
+
+## Current implementation boundary — 2026-09-13
+
+The architecture below includes intended capabilities and historical achievements. Operational completion requires source-bound evidence for the selected path. See the [system roadmap](../../ROADMAP.md) and [R00–R25 enforcement map](../../docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) for owners, tests and outstanding proof.
+
+Current WRE contracts fail closed on missing or invalid Skillz assets. Local model output is a proposal with no verified effect; execution does not establish independently evaluated outcome quality. Generic candidate promotion and improvement application remain blocked pending their independent owners. WSP 95 §3.1 governs production promotion. Component tests, successful storage and a protocol's Active status do not establish a complete evaluator → promoter → activation/rollback → retained improvement loop.
 
 ## 1. Overview
 
@@ -72,7 +78,7 @@ The runtime is split across ingress, execution, and governance layers:
   - Enforces memory preflight for module-changing execution paths.
 - **WRE Master Orchestrator (`modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py`)**:
   - Plugin registration, skill execution loop, libido gating, and pattern-memory feedback.
-  - Provides compatibility registration paths and deterministic fallback execution when skill assets are missing.
+  - Retains compatibility registration and filename resolution where supported, but missing or invalid skill assets fail closed; no synthetic execution success or mock fallback is admitted.
 
 `modules/infrastructure/wre_core_main/` is not the canonical runtime surface and must not be used as the primary WRE entrypoint.
 
@@ -97,8 +103,8 @@ The DAEs (Decentralized Autonomous Entities) are the pattern-based orchestrators
 **Key Architecture Changes:**
 - **DAE Gateway** (`modules/infrastructure/wre_core/wre_gateway/`) routes WSP 21 envelopes to DAEs
 - **Sub-agents are tools** within DAE cubes, not independent agents
-- **Pattern recall** achieves 97% token reduction (50-200 tokens vs 25,000)
-- **0102 autonomous operation** - DAEs decide and execute without 012 approval
+- **Pattern recall targets (historical):** the previously stated 97% reduction and 50-200 versus 25,000 token figures are planning claims, not measurements of the current runtime. Report actual provider usage and correctness under fixed task conditions before claiming savings.
+- **0102 autonomous operation** - DAEs decide and execute within existing delegated scope and runtime policy. The DAE role or architecture diagram does not itself grant permission or satisfy a failed admission gate.
 
 ### 2.4 Future Vision
 The long-term vision for the WRE is to achieve a "Great Connection," transforming it from a passive tool into a fully autonomous, self-regulating, and purpose-driven system. This involves several key areas of development:
@@ -312,10 +318,11 @@ The future direction is guided by the following principles:
 
 -   **The UnDu Mission**: All development and autonomous action will be guided by the "UnDu" mission (WSP 25), focusing on creating technology that solves foundational problems rather than creating new ones.
 
-### 5.1 Unified Orchestrator Enhancement Achievement
+### 5.1 Historical Unified Orchestrator Enhancement Record
 
-**[U+2705] COMPLETED: Professional Peer Review Integration**
-The WRE has been enhanced with a unified orchestrator providing:
+**Historical claim: Professional Peer Review Integration.** The list below preserves the earlier achievement report. It does not establish present end-to-end enforcement, measured savings or production RSI completion; use the current implementation boundary and mapped evidence above.
+
+The earlier report described a unified orchestrator providing:
 - **Professional Peer Review System**: Complete integration with WSP_agentic toolkit (491 lines)
 - **8-Phase Orchestration**: Initialization -> Agent Awakening -> Protocol Validation -> Peer Review -> Zen Coding -> Autonomous Execution -> Recursive Improvement -> Compliance Check
 - **Standardized Awakening**: Reproducible agent awakening with coherence metrics

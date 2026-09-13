@@ -1,5 +1,11 @@
 # TestModLog - wre_core/tests
 
+## 2026-09-13: R02 existing contract verification
+
+- Five existing files (execution truth, runtime admission, telemetry truth, loader hygiene and PatternMemory): **18 passed, 96 deselected in 3.61s**. Expression: `skill_load_failure or missing_registered_location or local_inference or outcome_quality or legacy_promote_variation or token or application_is_proposal_only or prototype or manifest_failure`.
+- Used importlib mode, explicit async plugin, disabled plugin autoload and isolated TMP/TEMP, AgentDB, PatternMemory, lyrics database, cache and basetemp. Injected/test model behavior only; no provider dispatch or production writes.
+- Confirms bounded failure/proposal/unknown-outcome contracts supporting the documentation corrections. No test implementation changed. Source/test inventory links in the R02 map do not assert that its other referenced suites ran in this selection. WSP 22, 50, 95, 97.
+
 ## 2026-09-13: R01 exact-byte repair verification
 
 - Documented 14-file WRE execution-truth tier: **235 passed, 4 platform-limited link/reparse skips in 35.45s**, with isolated TMP/TEMP, AgentDB, PatternMemory, lyrics database, cache and basetemp; importlib mode and explicit async plugin.

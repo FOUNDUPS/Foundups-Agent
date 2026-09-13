@@ -1,0 +1,394 @@
+{
+  "artifact_type": "non_executable_source_evidence_inventory",
+  "baseline_commit": "35ed430c61e4e35c1b779f03c13e40368c82b65f",
+  "original_audit_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+  "recorded_on": "2026-09-13",
+  "canonical_map": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
+  "execution_authority": "none",
+  "packet_ids": [
+    "R00",
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R05",
+    "R06",
+    "R07",
+    "R08",
+    "R09",
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    "R14",
+    "R15",
+    "R16",
+    "R17",
+    "R18",
+    "R19",
+    "R20",
+    "R21",
+    "R22",
+    "R23",
+    "R24",
+    "R25"
+  ],
+  "fresh_test_selection": {
+    "passed": 18,
+    "deselected": 96,
+    "seconds": 3.61
+  },
+  "test_reference_policy": "presence is not a passing-run claim",
+  "sources": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "base_git_blob_sha256": "9e2e484a41d671ff7b7083d1d4e1824693ddb233fce2dbf6d5c4b1dc4cc2a2c9",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "WSP_framework/src/WSP_46_Windsurf_Recursive_Engine_Protocol.md",
+      "base_git_blob_sha256": "eea29d79cc70b898ba65e3cc8fc7df7fce0a90e5ef8b354f219d33cc285bfeba",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "WSP_framework/src/WSP_CORE.md",
+      "base_git_blob_sha256": "3731b5e5aa73227bac40c3c1af6356f372986c17c9429d7f73f379d6e12e65c3",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "WSP_knowledge/WSP_Test_Registry.json",
+      "base_git_blob_sha256": "f321dffc0b8d5064e93620bbc9c77383fc49a34cd2a71133a16c305bcb95a992",
+      "unchanged_from_original_audit_source": false
+    },
+    {
+      "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+      "base_git_blob_sha256": "ad3d9cbeae06615fcf74f51b679440a090cee230aa742dde939937cf1c25d13d",
+      "unchanged_from_original_audit_source": false
+    },
+    {
+      "path": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md",
+      "base_git_blob_sha256": "9c38356ab4ee77a0e7a5b0b3fe0c1d9974a5be1ebd735d8af81e760e9a3fb61f",
+      "unchanged_from_original_audit_source": false
+    },
+    {
+      "path": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
+      "base_git_blob_sha256": "b23c7bc2c612147270537a43640fdb1d76b6792ea77996dd80e9940f84712603",
+      "unchanged_from_original_audit_source": false
+    },
+    {
+      "path": "extensions/reddog/INTERFACE.md",
+      "base_git_blob_sha256": "7cce44e2c08a9baeb1d65b3d34e452f55495f3242a6116681085be7b8fa70092",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "holo_index/authority_worktree.py",
+      "base_git_blob_sha256": "1cf54ca000208430c720839003fb25426104f74e6cf263eca6ef68c7fda89650",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/src/m2m_holo_retrieval_benchmark.py",
+      "base_git_blob_sha256": "0c2012d7a8a1520e9788fb72441bef90eb0f45d6b28e580d1fcf4bc56b5ac438",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_m2m_holo_retrieval_benchmark.py",
+      "base_git_blob_sha256": "562bf83b0c733c3b6b538d45f418a90b1492b0e302cfb09dbc0ec3b1b01bb74b",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py",
+      "base_git_blob_sha256": "d8b27c6930c08263d67fb04eb8d14529914e5ebe90a93e9d116f4cca7d8fa0de",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py",
+      "base_git_blob_sha256": "ccfec49e191b6fa5fdef9c26b9a190247e474df5ba29dbb44c9eadfc41c21ca5",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py",
+      "base_git_blob_sha256": "475f71cd7bbc8bdc1f68966af7152c5b3fd39a5720cb6b2150561c06e4fc50ac",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+      "base_git_blob_sha256": "6a3425479c53074ff4f43630fe0f9eee849662e67e3b1157c3c8647687307ec4",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+      "base_git_blob_sha256": "24584023ef71a092ea3f193537a7698153714dd7ce1b4e407f18716b08dd3d07",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/src/reddog_work_order_signature_verifier.py",
+      "base_git_blob_sha256": "16d96983d9a05a8ccfd733aac59e1315d488aa27b51f794f2965b05da82332d6",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_authoritative_work_state_query.py",
+      "base_git_blob_sha256": "c8d5c0ad378d59cd27375943b6f70f430e16853b5a47637e4328e0e1e933a591",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_bounded_artifact_generation_authority.py",
+      "base_git_blob_sha256": "6b4a0aade45fff0e4186d4ddfea5c87b969e223f752f560868c6fd3e9f3f28fa",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_bounded_artifact_generation_runtime.py",
+      "base_git_blob_sha256": "6162036b0272ec7758fffb9bd76e4c4a900a0db251e08b63ccfe322a815d0e25",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_hermes_api_artifact_provider.py",
+      "base_git_blob_sha256": "52c89050fa56210099ae0648873aac6a22e65ab8a2e7c103b2053d01effa4da6",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_owner_query_root_binding.py",
+      "base_git_blob_sha256": "34e580969abc88a5c5fc549c73f4d6fe2de955fffa5fc04795746e3ff37226c7",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_admission.py",
+      "base_git_blob_sha256": "add3c7d00694ddda18bc62fabd4fc50a7d3c5d4b71540b3edc111ebbe6ba4b6b",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_history.py",
+      "base_git_blob_sha256": "a735d045298acde4eafaa8d704900ef3902014c219776db57f01235c25fcc6bb",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/foundups/agent/README.md",
+      "base_git_blob_sha256": "fb491a71b1309f49d466da1f703317944f5589f3fa901335888f8d26ff82e298",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/foundups/agent_market/README.md",
+      "base_git_blob_sha256": "13bb4665ed1d563e93289750941011263a4172002a6af78c95be8c4e8a85d329",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/foundups/agent_market/src/cabr_hooks.py",
+      "base_git_blob_sha256": "4c85da51e5211f3d5f72eeaa45e8f9d3e8dac3d39239e917acee788e59af64df",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/foundups/agent_market/src/task_pipeline.py",
+      "base_git_blob_sha256": "6ecc5790b57223b1cce38cdfedc4f735508c7d6338e09f4cbaac3c2088decc83",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_cabr_hooks.py",
+      "base_git_blob_sha256": "f28bce2041381bc716f46473249f09c2c0c50d5ff10da10df37743da04ec3054",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+      "base_git_blob_sha256": "25e8be9ab1ce33e2d3ad6e5d1b3ef9ea107ff5ee0e548c9b93957dbc05b526c8",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/database/src/agent_db.py",
+      "base_git_blob_sha256": "e6985744dd44d1c772270b2ddf938079b14e44f7cb51a12f7e6ac2138312b46e",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/database/tests/test_signed_worker_assurance_recovery.py",
+      "base_git_blob_sha256": "b77628f7009489696a3fb18b8ca3be91aa002d41891a3cb9d5a0992b4312b89a",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/database/tests/test_signed_worker_assurance_reservation.py",
+      "base_git_blob_sha256": "d001d91effdb4d4c4875839bcfc28dfe0011f2eb07ca686253fa831905339709",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "base_git_blob_sha256": "fac3e292ef0575819ac76fed8cbb5012f3d462db5a6866ab0800bc9c6fb3e0c0",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition.py",
+      "base_git_blob_sha256": "d3e1d6a34997513e1a67c8e561e5b29a682dcecc332c376920b0c12ce7b429c0",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_runtime_composition.py",
+      "base_git_blob_sha256": "9e29c543c747a6073748e204cefb5f4a583728b92df6df722dce941fd5a8d921",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/pavs_mcp/src/server.py",
+      "base_git_blob_sha256": "9e37f36eb4ab7e30428eb60f1ef3ebba0e7821101a1cf188c4d9f06d1129f14b",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/INTERFACE.md",
+      "base_git_blob_sha256": "690ac928f4ce8ace00e1538d36c79821bbc2f5165749a4dfd51ebc4135c65e28",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/ROADMAP.md",
+      "base_git_blob_sha256": "53996ece3d69d0fa0a5502b363dbf2151846c393cc2bca95df14122e45f17080",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/recursive_improvement/src/learning.py",
+      "base_git_blob_sha256": "f4516669b253a15a94d54147f2db58237107b0d5588ae21bd39ecf8eb46d0628",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/scripts/generate_test_registry.py",
+      "base_git_blob_sha256": "316dbd5ba3c88c2590759638cf3e6effc6905d75dbc2492f9444a40602b45eb1",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md",
+      "base_git_blob_sha256": "64855a943eea31224ff47c9f3a1bcd0d4365f0aaf8d56f8998430bbe728e2094",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py",
+      "base_git_blob_sha256": "f9fc069ac24d298453f8b08c52d0b9c9ffe56215776d119ebb71f96ba880acd0",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/foundup_job_consumer.py",
+      "base_git_blob_sha256": "d6fda12a0b3e9426c2db888fd04fba7dcb06eae86ba0c0dd9e6f97f7bebb0c63",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/foundup_job_router.py",
+      "base_git_blob_sha256": "4378f68627b71a7c9ecd75901537a46ff771862e54b7ea62fad3f8dba391b966",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/improvement_job_contract.py",
+      "base_git_blob_sha256": "e0f2b282b958f1ecbffe4d8da68741be07dbe620a2bcb01e55f0b1ad481b3dbf",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/local_skill_inference.py",
+      "base_git_blob_sha256": "c7d32a2802736bef75430dfd908c90415d442255d2e397bfd5d43d08904cf11e",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/pattern_ab_evidence.py",
+      "base_git_blob_sha256": "bf03c370ac7e7563c0184937de90ab7c1c1dc3bff525d3083415805e4db7d850",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/pattern_memory.py",
+      "base_git_blob_sha256": "79a3ddd8fb987569e879e50a9bfd0068e576b7521f6936c9c774da01849aea33",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/reddog_held_out_recursive_improvement_regression_gate.py",
+      "base_git_blob_sha256": "556412cc3954090f427c084c07caa5bcacd26c9a99ab8983d658105c50167d63",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/reddog_verified_outcome_ratchet.py",
+      "base_git_blob_sha256": "5802215eea3e26632e9b93f6641a2abdaeb001894ab2ab5316200028fe7d1f38",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/skill_manifest_guard.py",
+      "base_git_blob_sha256": "4506e17a35bbb5e65bbeb201f4818baa4157e09420a9d1dcb04685cafb4dd0e0",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/skill_runtime_admission.py",
+      "base_git_blob_sha256": "1e59f0390528b20328b244becd59edcff68ae674f3e47f25df28eeb3ffb81efa",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/wre_autonomous_slice_verifier_runtime.py",
+      "base_git_blob_sha256": "7e65e82f75f7e9af60615e92eb21e2b4b2b0cc58d86c837a5c1001ac14bd5473",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/src/wre_independent_evidence_producer_runtime.py",
+      "base_git_blob_sha256": "a689863ed0b1895854aeff9a39d1be9505f8fe5fceca30f72a4f658700e5ac41",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py",
+      "base_git_blob_sha256": "049ea61dcf7f0391b849ca34cd04e44335c351ffcc7b5c05dc7a6c5cffa399e1",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_improvement_job_contract.py",
+      "base_git_blob_sha256": "e397046af86e737366338a18486b2fde9de5166c5f98887512736946f2f65bc1",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_pattern_memory.py",
+      "base_git_blob_sha256": "051bc5ff09501a0ba14c09457bcdfe455f62fecdcbc92e1285ecc48f923585ed",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_reddog_held_out_recursive_improvement_regression_gate.py",
+      "base_git_blob_sha256": "1095d5453838dd54a6131147515dfbba279211b6674115e320afec817106f12b",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_reddog_verified_outcome_ratchet.py",
+      "base_git_blob_sha256": "94df02b06c7e23e2423ac659bc4106e6ef25dcda3d29c6151e4f39ce3290dad7",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_skill_manifest_guard.py",
+      "base_git_blob_sha256": "5b5097f965eef17b801c03a8f43e52fc3f531b3cf6f439f3e1eaab9a6100219b",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_wre_autonomous_slice_verifier_runtime.py",
+      "base_git_blob_sha256": "82d57a6b755f5312ba29e32394712bc0608d49284241a039a5eeefebe09b29f2",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_wre_execution_truth.py",
+      "base_git_blob_sha256": "eb0b77059728600a0d83b69946e13a196f97f7c5a61b570ca4a0b44b9d7cb452",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_wre_independent_evidence_producer_runtime.py",
+      "base_git_blob_sha256": "411b39b90e540c50dfa54a2a199a42327a7a066c97dc13869001355f366736f5",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py",
+      "base_git_blob_sha256": "c3db176179c864056d7a20b9f29411b5b1e90a8cbb58467af833e64e6a985d8e",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_wre_skills_loader_hygiene.py",
+      "base_git_blob_sha256": "b7f389e18287c3a77e5b53c16566ccbf38c75b84f2e4c7a826cd01e60e14555b",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_wre_telemetry_truth.py",
+      "base_git_blob_sha256": "b4fd236513b37a43d539498bf61a34bc0eb4d6d1564d0681e924e0cc47f57664",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/tests/test_wre_test_registry.py",
+      "base_git_blob_sha256": "5516ed985d1606e19b6bbe99df6e0b5867ea77ddf91eb08c928126711034b7a5",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py",
+      "base_git_blob_sha256": "fff6f91b9fd8eb7a56954e220595fe84e4a77fd312cff074be33310590c7c11c",
+      "unchanged_from_original_audit_source": true
+    },
+    {
+      "path": "scripts/reddog_holoindex_owner_query_once.py",
+      "base_git_blob_sha256": "137333f12d49a62f6dd5c95720a3bbcad09d8118e9ab9b4fa02583c867ce452e",
+      "unchanged_from_original_audit_source": true
+    }
+  ]
+}

@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: R02 enforcement map and current documentation boundaries
+
+- Added the R00–R25 requirement/owner/test/gap map and 70-file pinned source inventory. Confirmed roadmap #1656 and R01 #1702 merged; current-source baseline is `35ed430c6`.
+- Reconciled WSP 46 missing-asset fallback and historical completion/cost wording, WSP_CORE's prose-versus-enforcement boundary, catalog links, and the April ledger's onboarding status. Synchronized the three knowledge mirrors. One WRE requirements comment changed; runtime and dependency behavior are unchanged.
+- Existing focused boundary tests: 18 passed, 96 deselected. Source hashes, new links, mirror parity and non-executable packet coverage are checked for the documentation slice. Concurrent YUMORI/eSingularity/RedDog work is preserved.
+- R02 remains partial: individual historical dispositions and independently bound review are pending. R03 retrieval entry and the remaining G0–G5 proof remain open. No live dispatch, promotion, feedback solicitation or settlement claim. WSP 22, 46, 50, 81, 95, 97.
+
 ## [2026-09-13] Roadmap CI backend inventory reconciliation
 
 - Traced the next CI blocker to stale inventory hashes for two phone/voice files already on main. Regenerated the existing backend manifest and updated its extension/test digest pins; closure membership and all enforcement limits stay unchanged.

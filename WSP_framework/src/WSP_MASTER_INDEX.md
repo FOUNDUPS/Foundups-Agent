@@ -40,7 +40,9 @@ Policy: Do not delete WSPs. All status changes must be reflected here and cross-
 
 ### [U+1F4CA] SYSTEM STATUS TRACKING
 
-**For complete system transformation status, see: [WSP_SYSTEM_STATUS_REPORT.md](../../WSP_knowledge/reports/WSP_SYSTEM_STATUS_REPORT.md)**. Authoritative status details are maintained under WSP 70. This index provides catalog pointers only.
+For current RSI planning and completion gates, start at the [system roadmap](../../ROADMAP.md) and its [R00–R25 enforcement map](../../docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md), reviewed against source `35ed430c6` on 2026-09-13. The map covers those packets, not every clause in this catalog; production RSI remains incomplete.
+
+Retain [WSP_SYSTEM_STATUS_REPORT.md](../../WSP_knowledge/reports/WSP_SYSTEM_STATUS_REPORT.md) as a dated status source; reconcile its claims against current source and receipts before use. WSP 70 governs status reporting. This index supplies navigation and normative status, not runtime certification.
 
 ---
 
