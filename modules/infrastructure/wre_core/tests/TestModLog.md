@@ -1,5 +1,11 @@
 # TestModLog - wre_core/tests
 
+## 2026-09-13: Registry inventory and separate Skillz preflight
+
+- `test_wre_test_registry.py`: 28 passed in an isolated temporary/database environment. Plugin autoload was disabled; two configuration warnings were emitted because the async plugin was not loaded for this synchronous selection.
+- Existing generator now records 1,650 tracked Python test files / 269 quarantined after adding the already-tracked Japanese-copy test to the inventory. No test implementation or quarantine policy changed.
+- `TestCheckoutLocalSkillResolution::test_every_registered_production_skill_is_executable_content`: reproduced one failure, manifest hash mismatch for `reddog_operations/SKILLz.md`. That R01 finding remains a separate repair; no full WRE pass is claimed. WSP 22, 50, 97.
+
 ## 2026-08-29: Bounded Git binary stdin
 
 - Added five adversarial cases beside the existing stdout ceiling: bounded

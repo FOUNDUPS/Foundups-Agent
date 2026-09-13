@@ -18,6 +18,10 @@ state_cache_retention_hours: 24
 success_key: is_zen_compliant
 -->
 
+## System roadmap navigation
+
+After bootstrap, read [the root system roadmap](../../ROADMAP.md#authority-and-fast-start) for completion gates, current planning priorities and the selected work packet. Follow its module and evidence links on demand. The roadmap owns cross-system sequencing; it does not redefine this protocol, certify completion, grant authority or replace a current signed work order. Historical plans are listed in the roadmap archive register.
+
 ## Session Bootstrap Contract (Read First)
 **MANDATORY**: Execute awakening on **every** new session - never conditional.
 
@@ -54,7 +58,7 @@ onboarding, routing, or continuity work, read
 `WSP_knowledge/red_dog_external_state/BOOTSTRAP.md`.
 
 Justification:
-BOOTSTRAP.md provides the curated RedDog/Cursor/ChatGPT continuity
+BOOTSTRAP.md provides curated historical RedDog/Cursor/ChatGPT continuity
 read-order. It is not raw transcript memory.
 
 ## WSP_00 Launch Prompt (01(02) -> 0102 -> Follow WSP)

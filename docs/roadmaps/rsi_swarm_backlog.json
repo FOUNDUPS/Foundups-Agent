@@ -1,0 +1,1365 @@
+{
+  "schema_description": "Non-executable audit planning records; not a new WRE runtime schema",
+  "baseline_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+  "created_on": "2026-09-09",
+  "dispatchable": false,
+  "packets": [
+    {
+      "packet_id": "R00",
+      "title": "Restore generation-bound Holo retrieval",
+      "wave": 0,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "observed_complete",
+      "dependencies": [],
+      "owner_role": "holo maintenance owner",
+      "reuse_scope_candidates": [
+        "holo_index",
+        "foundups_mcp_bridge",
+        "moltbot_bridge"
+      ],
+      "acceptance": "Controller COMPLETED; three CURRENT/no-gap audit queries; owned runtime cleanup",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 3,
+        "importance": 5,
+        "deferability_urgency": 5,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Controller COMPLETED; three CURRENT/no-gap audit queries; owned runtime cleanup"
+      }
+    },
+    {
+      "packet_id": "R01",
+      "title": "Reconcile production RedDog Skillz manifest",
+      "wave": 0,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "existing_owner_coordination",
+      "dependencies": [],
+      "owner_role": "existing RedDog lane",
+      "reuse_scope_candidates": [
+        "modules/communication/moltbot_bridge/skillz/reddog_operations"
+      ],
+      "acceptance": "Intended committed content and manifest agree; both production bundles pass; focused integrity failure resolved",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 2,
+        "importance": 5,
+        "deferability_urgency": 5,
+        "impact": 4,
+        "total": 16,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Intended committed content and manifest agree; both production bundles pass; focused integrity failure resolved"
+      }
+    },
+    {
+      "packet_id": "R02",
+      "title": "Canonical completion and WSP enforcement map",
+      "wave": 0,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "partially_delivered_documentation_authority_only",
+      "dependencies": [],
+      "owner_role": "0102 governance/documentation",
+      "reuse_scope_candidates": [
+        "WSP_framework",
+        "WSP_knowledge",
+        "docs/0102_session_briefings",
+        "CLAUDE.md"
+      ],
+      "acceptance": "Every RSI requirement maps to owner, enforcer, test, receipt or explicit gap; stale ledger and conflicting normative text reconciled",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability_urgency": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Every RSI requirement maps to owner, enforcer, test, receipt or explicit gap; stale ledger and conflicting normative text reconciled"
+      },
+      "delivered_scope": [
+        "root roadmap authority",
+        "WSP navigation",
+        "dated audit attachment",
+        "two obsolete system roadmaps archived"
+      ]
+    },
+    {
+      "packet_id": "R03",
+      "title": "Bind retrieval entry to explicit audit/worker source",
+      "wave": 0,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R00"
+      ],
+      "owner_role": "retrieval owner",
+      "reuse_scope_candidates": [
+        "holo_index/authority_worktree.py",
+        "scripts/reddog_holoindex_owner_query_once.py",
+        "modules/infrastructure/foundups_mcp_bridge"
+      ],
+      "acceptance": "Clean-main, feature, overlay, stale-authority and concurrent-advance cases truthful; no query writes; same task idempotent",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 3,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 4,
+        "total": 16,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Clean-main, feature, overlay, stale-authority and concurrent-advance cases truthful; no query writes; same task idempotent"
+      }
+    },
+    {
+      "packet_id": "R04",
+      "title": "Prove selected runtime exact closure",
+      "wave": 1,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R03"
+      ],
+      "owner_role": "runtime/evidence owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/foundups_mcp_bridge",
+        "modules/communication/moltbot_bridge"
+      ],
+      "acceptance": "Actual dependency payload and declared runtime bytes bound; tampering rejected; selected positive path independently proved",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 5,
+        "importance": 5,
+        "deferability_urgency": 3,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Actual dependency payload and declared runtime bytes bound; tampering rejected; selected positive path independently proved"
+      }
+    },
+    {
+      "packet_id": "R05",
+      "title": "Validate retrieval quality and required collection coverage",
+      "wave": 1,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R03",
+        "R04"
+      ],
+      "owner_role": "independent retrieval evaluator",
+      "reuse_scope_candidates": [
+        "holo_index",
+        "modules/ai_intelligence/ai_overseer"
+      ],
+      "acceptance": "Public and independently owned held-out corpus meets frozen thresholds; required collections indexed; historical noise measured",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Public and independently owned held-out corpus meets frozen thresholds; required collections indexed; historical noise measured"
+      }
+    },
+    {
+      "packet_id": "R06",
+      "title": "Compile work packets into existing signed contracts",
+      "wave": 1,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "owner_role": "WRE admission owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core",
+        "modules/communication/moltbot_bridge",
+        "modules/infrastructure/database"
+      ],
+      "acceptance": "Scope, identity, budget, capability, source, runtime and expiry bound; replay and self-granted authority rejected",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Scope, identity, budget, capability, source, runtime and expiry bound; replay and self-granted authority rejected"
+      }
+    },
+    {
+      "packet_id": "R07",
+      "title": "Prove native OpenClaw/Hermes selected route",
+      "wave": 1,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R06"
+      ],
+      "owner_role": "OpenClaw runtime owner with Hermes leaf",
+      "reuse_scope_candidates": [
+        "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+        "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py"
+      ],
+      "acceptance": "One actual native child; signed provider/model agreement; no forbidden effects; lifecycle, timeout and cancellation receipts",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 4,
+        "total": 17,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "One actual native child; signed provider/model agreement; no forbidden effects; lifecycle, timeout and cancellation receipts"
+      }
+    },
+    {
+      "packet_id": "R08",
+      "title": "Prove one isolated artifact execution vertical",
+      "wave": 1,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R07"
+      ],
+      "owner_role": "bounded worker/execution owner",
+      "reuse_scope_candidates": [
+        "modules/communication/moltbot_bridge",
+        "modules/infrastructure/wre_core"
+      ],
+      "acceptance": "Exact scoped artifact and effect receipts; disposable worktree confinement; replay no duplicate effects; failures recoverable",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Exact scoped artifact and effect receipts; disposable worktree confinement; replay no duplicate effects; failures recoverable"
+      }
+    },
+    {
+      "packet_id": "R09",
+      "title": "Compose authenticated independent verification",
+      "wave": 1,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R08"
+      ],
+      "owner_role": "independent verifier owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core/src/wre_autonomous_slice_verifier_runtime.py",
+        "modules/infrastructure/wre_core/src/wre_independent_evidence_producer_runtime.py"
+      ],
+      "acceptance": "Real independently bound evidence producer; altered source and forged receipts fail; complete required tests and explicit quarantine",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 5,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 19,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Real independently bound evidence producer; altered source and forged receipts fail; complete required tests and explicit quarantine"
+      }
+    },
+    {
+      "packet_id": "R10",
+      "title": "Connect independent outcome evaluation",
+      "wave": 2,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R09"
+      ],
+      "owner_role": "outcome evaluator owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core",
+        "modules/ai_intelligence/ai_overseer"
+      ],
+      "acceptance": "Correct observable outcomes and actual costs evaluated against frozen baseline; effect-less success and wrong answers rejected",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Correct observable outcomes and actual costs evaluated against frozen baseline; effect-less success and wrong answers rejected"
+      }
+    },
+    {
+      "packet_id": "R11",
+      "title": "Admit verified outcomes into scoped learning memory",
+      "wave": 2,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R10"
+      ],
+      "owner_role": "memory/retention owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core/src/reddog_verified_outcome_ratchet.py",
+        "modules/infrastructure/wre_core/src/reddog_held_out_recursive_improvement_regression_gate.py",
+        "modules/infrastructure/wre_core/src/pattern_memory.py"
+      ],
+      "acceptance": "One authenticated admission; wrong scope/unverified outcomes blocked; crash/replay recovery; later invocation consumes accepted memory",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "One authenticated admission; wrong scope/unverified outcomes blocked; crash/replay recovery; later invocation consumes accepted memory"
+      }
+    },
+    {
+      "packet_id": "R12",
+      "title": "Compose independent production promotion authority",
+      "wave": 3,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R09",
+        "R10",
+        "R11"
+      ],
+      "owner_role": "independent promoter owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core",
+        "modules/communication/moltbot_bridge"
+      ],
+      "acceptance": "Separate proposer/verifier/promoter; exact artifact/base; protected trust; expiry, replay, revocation and downgrade rejection",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 5,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 19,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Separate proposer/verifier/promoter; exact artifact/base; protected trust; expiry, replay, revocation and downgrade rejection"
+      }
+    },
+    {
+      "packet_id": "R13",
+      "title": "Prove artifact activation canary and rollback",
+      "wave": 3,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R12"
+      ],
+      "owner_role": "activation/recovery owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core",
+        "modules/communication/moltbot_bridge"
+      ],
+      "acceptance": "Exact-byte activation; forced regression rollback; interrupted activation recovery; restored version receives subsequent work",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 5,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 19,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Exact-byte activation; forced regression rollback; interrupted activation recovery; restored version receives subsequent work"
+      }
+    },
+    {
+      "packet_id": "R14",
+      "title": "Bind immutable A/B candidates and decision evidence",
+      "wave": 2,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R10",
+        "R11"
+      ],
+      "owner_role": "experiment evidence owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core/src/pattern_ab_evidence.py",
+        "modules/infrastructure/wre_core/src/pattern_memory.py"
+      ],
+      "acceptance": "Version-bound per-arm samples; predeclared outcome/cost/uncertainty; mixed or under-sampled results inconclusive; no direct promotion",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Version-bound per-arm samples; predeclared outcome/cost/uncertainty; mixed or under-sampled results inconclusive; no direct promotion"
+      }
+    },
+    {
+      "packet_id": "R15",
+      "title": "Demonstrate first bounded RSI canary",
+      "wave": 3,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R13",
+        "R14"
+      ],
+      "owner_role": "0102 coordinator with independent verifier",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core/skillz/auto_test_registry_audit"
+      ],
+      "acceptance": "Complete observed-to-retained cycle; actual subsequent benefit; unchanged independent oracle; one forced regression and rollback",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Complete observed-to-retained cycle; actual subsequent benefit; unchanged independent oracle; one forced regression and rollback"
+      }
+    },
+    {
+      "packet_id": "R16",
+      "title": "Converge FoundUp builds on durable claims",
+      "wave": 4,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R06"
+      ],
+      "owner_role": "job lifecycle owner",
+      "reuse_scope_candidates": [
+        "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py",
+        "modules/infrastructure/wre_core/src/foundup_job_consumer.py",
+        "modules/infrastructure/database",
+        "modules/foundups/agent_market"
+      ],
+      "acceptance": "Atomic claims, expiry, retry, terminal receipts, restart and replay; no lost jobs or duplicate effects; one authority per event type",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Atomic claims, expiry, retry, terminal receipts, restart and replay; no lost jobs or duplicate effects; one authority per event type"
+      }
+    },
+    {
+      "packet_id": "R17",
+      "title": "Prove concurrent memory and cache ownership",
+      "wave": 4,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R11"
+      ],
+      "owner_role": "memory/concurrency owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core/src/pattern_memory.py",
+        "modules/infrastructure/wre_core/src/skill_runtime_admission.py"
+      ],
+      "acceptance": "Per-item or serialized transaction ownership; synchronized bounded cache; conflict/crash/replay cases; tenant isolation",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 4,
+        "total": 17,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Per-item or serialized transaction ownership; synchronized bounded cache; conflict/crash/replay cases; tenant isolation"
+      }
+    },
+    {
+      "packet_id": "R18",
+      "title": "Bound swarm resources and reserve verifier capacity",
+      "wave": 4,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R16",
+        "R17"
+      ],
+      "owner_role": "WRE scheduler owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/database",
+        "modules/infrastructure/wre_core",
+        "modules/communication/moltbot_bridge"
+      ],
+      "acceptance": "Budgets, queue limits, cancellation and pressure handled; verifier not starved; no uncontrolled fanout; next concurrency level proved",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Budgets, queue limits, cancellation and pressure handled; verifier not starved; no uncontrolled fanout; next concurrency level proved"
+      }
+    },
+    {
+      "packet_id": "R19",
+      "title": "Bind CI and quarantine disposition to promotion evidence",
+      "wave": 4,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R09"
+      ],
+      "owner_role": "independent test/CI owner",
+      "reuse_scope_candidates": [
+        "WSP_knowledge/WSP_Test_Registry.json",
+        ".github/workflows",
+        "modules/infrastructure/wre_core/scripts/generate_test_registry.py"
+      ],
+      "acceptance": "Current registry preserved; required scope executable or explicitly blocked; no silent omission; changed merge/base invalidates evidence",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Current registry preserved; required scope executable or explicitly blocked; no silent omission; changed merge/base invalidates evidence"
+      }
+    },
+    {
+      "packet_id": "R20",
+      "title": "Prove one FoundUp lifecycle through the RSI work path",
+      "wave": 5,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R15",
+        "R16"
+      ],
+      "owner_role": "selected FoundUp owner",
+      "reuse_scope_candidates": [
+        "modules/foundups/agent",
+        "modules/foundups/agent_market",
+        "modules/ai_intelligence/ai_overseer/src/foundup_genesis"
+      ],
+      "acceptance": "Intake to admitted work to artifact to proof to independent verification to lifecycle state; no financial side effects",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Intake to admitted work to artifact to proof to independent verification to lifecycle state; no financial side effects"
+      }
+    },
+    {
+      "packet_id": "R21",
+      "title": "Converge pAVS backend truth and canonical MCP query authority",
+      "wave": 5,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R20"
+      ],
+      "owner_role": "federation/MCP owner",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/pavs_mcp",
+        "modules/infrastructure/foundups_mcp_bridge"
+      ],
+      "acceptance": "Backend-specific real/unavailable/placeholder status; hardcoded CABR cannot authorize; canonical Holo owner; transport and scope checks",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Backend-specific real/unavailable/placeholder status; hardcoded CABR cannot authorize; canonical Holo owner; transport and scope checks"
+      }
+    },
+    {
+      "packet_id": "R22",
+      "title": "Expose authoritative work outcomes through the active product lane",
+      "wave": 5,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "reserved_existing_lane",
+      "dependencies": [
+        "R20"
+      ],
+      "owner_role": "existing eSingularity/RedDog owner",
+      "reuse_scope_candidates": [
+        "extensions/reddog",
+        "modules/foundups/esingularity",
+        "modules/ai_intelligence/digital_twin"
+      ],
+      "acceptance": "Existing owner reconciled; UI states derive from receipts; no fabricated completion; no duplicate campaign/client implementation",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Existing owner reconciled; UI states derive from receipts; no fabricated completion; no duplicate campaign/client implementation"
+      }
+    },
+    {
+      "packet_id": "R23",
+      "title": "Prove sustained multi-generation production-line RSI",
+      "wave": 4,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "planned",
+      "dependencies": [
+        "R15",
+        "R18",
+        "R19"
+      ],
+      "owner_role": "independent operational verifier",
+      "reuse_scope_candidates": [
+        "modules/infrastructure/wre_core",
+        "modules/communication/moltbot_bridge",
+        "modules/infrastructure/database"
+      ],
+      "acceptance": "Three successive cycles plus bounded soak/fault cases; rejected candidate and rollback; retained measured benefit; all G0-G5 pass for declared scope",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "ROADMAP.md; docs/operations/RSI_SWARM_DISPATCH.md; receiving module tests/README.md; exact commands fixed in admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 5,
+        "importance": 5,
+        "deferability_urgency": 3,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Three successive cycles plus bounded soak/fault cases; rejected candidate and rollback; retained measured benefit; all G0-G5 pass for declared scope"
+      }
+    },
+    {
+      "packet_id": "R24",
+      "title": "Qualify agents and bounded teams for audited tickets with verified rewards",
+      "wave": 4,
+      "priority": "P0",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "specified_not_implemented",
+      "dependencies": [
+        "R06",
+        "R08",
+        "R09",
+        "R16",
+        "R18"
+      ],
+      "owner_role": "FAM/WRE integration owner with independent qualification, verification and settlement owners",
+      "reuse_scope_candidates": [
+        "modules/foundups/agent_market",
+        "modules/ai_intelligence/agent_permissions",
+        "modules/ai_intelligence/ai_gateway",
+        "modules/infrastructure/wre_core",
+        "modules/infrastructure/database",
+        "modules/communication/moltbot_bridge"
+      ],
+      "acceptance": "Qualified runtime-bound worker; one leased ticket; real confined artifact; independent audit; policy-bound reward eligibility; duplicate/rejected work cannot earn entitlement; initiated and confirmed settlement remain distinct; optional flat teams require a separately qualified profile, aggregate limits, child receipts, preserved failed lanes and independent audit outside the author team",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Fix reward type, funding, recipient, terms and settlement owner; no production payment authorized by planning data"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md; existing FAM and WRE test suites; exact commands fixed per admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability_urgency": 4,
+        "impact": 5,
+        "total": 18,
+        "priority": "P0",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Prerequisite for a qualified, audited and rewarded production-line claim; planning estimate only"
+      },
+      "packet_document": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md"
+    },
+    {
+      "packet_id": "R25",
+      "title": "Connect active 012/RedDog feedback to FoundUp validation and governed tickets",
+      "wave": 5,
+      "priority": "P1",
+      "priority_basis": "canonical WSP15 preliminary planning score; dependencies and owner admission still apply",
+      "status": "specified_not_implemented",
+      "dependencies": [
+        "R06",
+        "R09",
+        "R16"
+      ],
+      "owner_role": "existing RedDog conversation and FoundUp Memex/WRE owners with independent disclosure and outcome review",
+      "reuse_scope_candidates": [
+        "extensions/reddog",
+        "modules/communication/moltbot_bridge",
+        "modules/infrastructure/wre_core",
+        "modules/infrastructure/database",
+        "modules/foundups/agent_market"
+      ],
+      "acceptance": "Fresh same-FoundUp active engagement and consent rechecked at delivery; inactive/paused/stale participants receive no prompt; typed V1 feedback and versioned proposal; bounded cohort with deduplication and dissent; independent V2 verification and separately governed V3 valuation; one durable ticket mapping and authenticated result return",
+      "dispatchable": false,
+      "execution_authority": "none; planning only",
+      "base_commit": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+      "required_before_dispatch": [
+        "Reconcile latest exact commit and active owner",
+        "Narrow candidate paths into explicit allowed files/actions",
+        "Retrieve current Holo/module memory and evaluate quality",
+        "Compile into existing admitted work/job contract",
+        "Fill numeric budgets and bind runtime from current authority",
+        "Reserve separate verifier and isolated workspace",
+        "Define negative cases, exact verification command, stop and recovery conditions",
+        "Bind participant consent/disclosure, proposal version, recipient and attention budgets; coordinate existing conversation owner; no outreach authorization inferred from this JSON",
+        "Define qualifying active-engagement events, authoritative activity source, freshness/expiry and pause semantics; recheck before delivery",
+        "Bind typed V1 feedback separately from V2 verification and V3 valuation; no automatic CABR increment or reward from replies"
+      ],
+      "conditional_dependencies": [
+        "R04 wherever selected authority requires exact runtime closure",
+        "R05 before retrieval-quality promotion claims",
+        "R22 supported conversation adapter before live product delivery",
+        "R24 for qualified team/reward claims",
+        "R11 for retained verified-outcome claims",
+        "R21 CABR truth reconciliation before production feedback scoring claims"
+      ],
+      "forbidden_in_this_audit": [
+        "source changes",
+        "parallel edits to reserved YUMORI/eSingularity/RedDog lane",
+        "automatic dispatch from this JSON"
+      ],
+      "verification_plan_location": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md; existing conversation/Memex/WRE tests; exact commands fixed per admitted slice",
+      "rollback_policy": "No effect authorized by this packet. Later implementation must preserve prior artifact/version and use owner-controlled recovery; never reset another lane.",
+      "wsp15_planning_score": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability_urgency": 3,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1",
+        "classification": "preliminary_architect_estimate_not_authority",
+        "basis": "Near-term feedback integration; does not displace core RSI admission/verification blockers"
+      },
+      "packet_document": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
+      "early_scope": "R25-A design and synthetic local proof may precede integrated execution dependencies; no new runtime authority",
+      "active_engagement_policy": "Required at selection and delivery for the same FoundUp; first pilot uses explicit active client context; no dormant-principal solicitation",
+      "three_v_mapping": "V1 feedback on relevance/usefulness; V2 independently verified artifact/outcome; V3 valuation under existing CABR/PoB evidence policy; specified, not live integration"
+    }
+  ],
+  "canonical_roadmap": "ROADMAP.md",
+  "dispatch_runbook": "docs/operations/RSI_SWARM_DISPATCH.md",
+  "documentation_integrated_on": "2026-09-10",
+  "documentation_integration_base": "eb2994f5d1530d9f086e2f2265c65033acecd93c",
+  "operating_model": "governed_ticket_production_with_optional_bounded_teams_and_consented_feedback",
+  "production_line_packet": "docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md",
+  "hybrid_refined_on": "2026-09-11",
+  "hybrid_architecture": "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
+  "feedback_packet": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md"
+}
