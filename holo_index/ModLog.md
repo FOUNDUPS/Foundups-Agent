@@ -1,5 +1,11 @@
 # HoloIndex Package ModLog
 
+## [2026-09-13] R03 interpreter selection recovery
+
+- Diagnosed ambient Python/base mismatch excluding the existing vetted dependency path; the owned child reported missing NumPy. Reused the existing repository venv with the matched reference helper, without source or index mutation.
+- Normal default-budget query: CURRENT/no-gap, one owner attempt, reference `78b79c36`. A 60-second diagnostic query timed out; current-main source `89bdd7a5` still rejects the older authority with zero attempts. See CLI_REFERENCE.md for exact evidence boundaries and the reusable Windows recipe.
+- Existing runtime-selection tests: 2 passed / 16 deselected. Updated canonical instructions and R03 status; exact-current-main qualification and runtime/quality acceptance remain open. WSP 22, 50, 84, 87, 97.
+
 ## [2026-09-13] R03 source selection and existing fallback documentation
 
 - Corrected bootstrap/canonical-agent retrieval instructions to bind the helper's actual source, distinguish primary checkout from current main, and reuse the existing local bundle when semantic retrieval is unavailable. Extended this module's atlas/interface rather than adding a service or module.

@@ -130,12 +130,20 @@ RIGHT: Simplest layer → Test → Feedback → Course correct → Next layer �
 ### Step 2: HoloIndex Search
 ```powershell
 $taskQueryRoot = git rev-parse --show-toplevel
+$taskRuntimeRoot = Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Parent
+$taskPython = Join-Path $taskRuntimeRoot ".venv/Scripts/python.exe"
+if (-not (Test-Path -LiteralPath $taskPython -PathType Leaf)) { throw "Vetted Holo interpreter unavailable; use the documented local fallback." }
 $env:PYTHONDONTWRITEBYTECODE = "1"
-'{"query":"[task]","limit":5,"include_bundle":true}' | python -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
+'{"query":"[task]","limit":5,"include_bundle":true}' | & $taskPython -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
 ```
 - The helper's own checkout selects the workspace source. Git's common
   directory locates a primary checkout, not necessarily current main or this
   feature. Verify the source before reusing another checkout's query result.
+- On Windows, the primary checkout supplies vetted dependencies, while the
+  task helper still selects source. Use its existing venv interpreter; an
+  ambient Python with a different base can lose NumPy under the owner
+  import guard. Do not install packages or weaken that guard to compensate.
+  See the linked procedure for runtime checks and sealed-launcher boundaries.
 - Accept semantic evidence only when `ok=true`, `freshness=CURRENT`,
   `index_gap_detected=false`, and source/generation match the intended query.
   A separately selected clean reference proves only its recorded SHA.

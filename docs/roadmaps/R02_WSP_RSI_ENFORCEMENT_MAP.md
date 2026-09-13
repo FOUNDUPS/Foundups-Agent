@@ -84,6 +84,8 @@ Normative source key: [WSP catalog](../../WSP_framework/src/WSP_MASTER_INDEX.md)
 
 Later R03 checkpoint (2026-09-13, source `773a29e70`): the [existing entry procedure](../../holo_index/CLI_REFERENCE.md#source-bound-owner-queries) reconciles bootstrap commands and documents the six-case matrix. All 81 existing entry/root tests pass and local bundle retrieval succeeds. The matched reference now fails owner startup; no new current-main semantic acceptance is claimed. These later observations do not change the pinned R02 source inventory or close R03.
 
+Later runtime-selection checkpoint (2026-09-13, documentation source `89bdd7a5`): a bounded child diagnostic identified missing NumPy under the ambient interpreter. Using the existing vetted venv and default query budget restored uninstrumented CURRENT/no-gap retrieval with one attempt at the matched `78b79c36` reference. Current-main `89bdd7a5` still rejects the older authority before owner startup. See the [recorded correction](../../holo_index/CLI_REFERENCE.md#interpreter-correction-checkpoint--2026-09-13); R03 remains partial. No runtime source or index change was needed.
+
 ### R04 — Holo runtime builder and independent producer
 
 **Normative references:** WSP 12 / 71 / 95 / 97. **Evidence level:** `CONTRACT_AND_GAP`.
@@ -392,7 +394,7 @@ Disposition vocabulary: `merged_bounded_scope` means the named deliverable is in
 2. **Avoid accidental dependency growth:** the old main.py warning hooks, financial review and UI/extraction tracks are owner handoffs, not new prerequisites for the first internal registry-audit RSI canary. R20's later lifecycle demonstration uses a dedicated synthetic fixture; active FoundUps remain excluded.
 3. **Preserve archive evidence:** the April ledger and SoftProto documents remain in place. Per-contract SoftProto replacement review and unresolved owner receipts remain open. No old retention instruction is executed, no project is activated and no lane is reassigned.
 4. **Separate review remains required:** the 15 dispositions are architect-authored source analysis, not independent verification. A separately bound reviewer must challenge the R06–R15 chain and the coverage omissions. Keep R02 partial and every backlog packet non-executable.
-5. **Next runtime-facing preparation:** continue the existing R03 startup-diagnostic/authority owner path, then R06–R08 admission and one bounded artifact. Do not bypass failed runtime binding or launch a parallel orchestrator to accelerate dispatch.
+5. **Next runtime-facing preparation:** continue the existing R03 exact-current-main authority qualification (the matched-reference interpreter correction is recorded above), then R06–R08 admission and one bounded artifact. Do not bypass failed runtime binding or launch a parallel orchestrator to accelerate dispatch.
 
 Evidence inventory: the existing [R02 source inventory](R02_WSP_RSI_ENFORCEMENT_EVIDENCE.json) retains its original 70-source baseline and adds a separate `ledger_reconciliation` block with this source, exact Git-blob hashes, commit ancestry and all 15 dispositions. Commit ancestry proves inclusion, not feature completeness. The GitHub commit-to-PR lookup for `fde9d64a4` returned #384, merged at `59b2ed3df115e4ae2194f80149eb9ac3e6f3716e`; its title is `docs(rolodex): regenerate artifacts after CF4 file-specific binding`. This records the mismatch for BH1 rather than silently closing provenance.
 

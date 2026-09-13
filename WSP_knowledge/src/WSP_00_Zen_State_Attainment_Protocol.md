@@ -166,9 +166,17 @@ checkout, which may be dirty, on another branch, or behind `origin/main`.
 
 ```powershell
 $taskQueryRoot = git rev-parse --show-toplevel
+$taskRuntimeRoot = Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Parent
+$taskPython = Join-Path $taskRuntimeRoot ".venv/Scripts/python.exe"
+if (-not (Test-Path -LiteralPath $taskPython -PathType Leaf)) { throw "Vetted Holo interpreter unavailable; use the documented local fallback." }
 $env:PYTHONDONTWRITEBYTECODE = "1"
-'{"query":"<task>","limit":5,"include_bundle":true,"module_hint":"holo_index"}' | python -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
+'{"query":"<task>","limit":5,"include_bundle":true,"module_hint":"holo_index"}' | & $taskPython -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
 ```
+
+This Windows command selects the primary checkout only for its existing
+vetted Python dependencies; the task helper still selects source. Do not
+substitute an ambient interpreter or override a required sealed launcher.
+Runtime-path validation and exact runtime closure remain separate checks.
 
 Set `module_hint` to the actual module for the task. The complete
 [source-selection and fallback procedure](../../holo_index/CLI_REFERENCE.md#source-bound-owner-queries)

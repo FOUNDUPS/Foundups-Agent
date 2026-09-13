@@ -1,5 +1,11 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-09-13: Holo startup diagnostic and existing interpreter reuse
+
+- Observed the existing owner through the shared bounded capture primitive in an external diagnostic harness. Retained only exit codes and allowlisted error categories; both failed children exited 1 with missing NumPy. No production diagnostic API or runtime code changed.
+- The existing trusted_holo_site_packages guard rejects the ambient interpreter's different base. The canonical venv satisfies the guard and restores normal reference semantic retrieval with one attempt at `78b79c36`; current-main authority mismatch remains separate.
+- Existing runtime-selection tests passed 2 / 16 deselected. Holo CLI_REFERENCE.md and canonical retrieval instructions now select dependencies separately from source. Exact closure/admission remains unproved; no guard, route or index was changed. WSP 22, 50, 84, 97.
+
 ## 2026-08-30 - Held builder child phase 2C3c
 
 - Added one bounded held-executable child over the exact Phase 2C3a runtime.

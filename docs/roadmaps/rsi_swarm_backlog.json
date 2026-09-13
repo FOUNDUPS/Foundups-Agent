@@ -254,11 +254,37 @@
         "local_bundle": "observed_success_UNKNOWN_freshness_zero_owner_attempts",
         "current_semantic_acceptance": false,
         "remaining": [
-          "recover matched-reference owner readiness through existing admitted owner path",
           "prove exact-current-main semantic and runtime bindings",
           "complete operational matrix including concurrent main advance"
         ],
-        "runtime_source_changes": false
+        "runtime_source_changes": false,
+        "runtime_selection_checkpoint": {
+          "date": "2026-09-13",
+          "documentation_source": "89bdd7a5f35225ea612e76c066b3d0948a945861",
+          "matched_reference_source": "78b79c36c2d776e030cd0ee8aa23359a67f952ec",
+          "cause": "ambient_interpreter_base_mismatch_excluded_vetted_dependencies_numpy_missing",
+          "repair": "reuse_existing_primary_checkout_venv_with_task_checkout_helper",
+          "reference_query": {
+            "ok": true,
+            "freshness": "CURRENT",
+            "index_gap_detected": false,
+            "owner_attempts": 1,
+            "no_reindex": true
+          },
+          "current_main_query": {
+            "ok": false,
+            "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+            "owner_attempts": 0,
+            "bundle_ok": true
+          },
+          "existing_runtime_tests": {
+            "passed": 2,
+            "deselected": 16
+          },
+          "runtime_source_changes": false,
+          "new_packages_installed": false,
+          "procedure": "holo_index/CLI_REFERENCE.md#interpreter-correction-checkpoint--2026-09-13"
+        }
       }
     },
     {

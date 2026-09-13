@@ -1,5 +1,11 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-09-13] Existing Windows runtime-selection regression
+
+- `test_reddog_sealed_holo_runtime.py -k 'trusted_holo_site_packages or actual_windows_primary_checkout'`: **2 passed, 16 deselected in 0.39s**. Vetted primary-checkout venv, `-B`, disabled plugin autoload, explicit async plugin, isolated temporary/cache paths and importlib mode.
+- Covers synthetic checkout/version rejection and the real primary checkout's vetted dependency path. No test source changed; no provider, maintenance or product test was selected.
+- Separate normal Holo query restored CURRENT/no-gap at matched reference `78b79c36`; this is not current-main or exact-runtime-closure acceptance. WSP 22, 50, 97.
+
 ## [2026-08-30] Held builder child falsification
 
 - Captured authentic RED collection before implementation: both new focused
