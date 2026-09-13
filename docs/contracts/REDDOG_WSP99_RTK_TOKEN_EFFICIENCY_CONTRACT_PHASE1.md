@@ -141,6 +141,16 @@ RedDogComputeDecision:
 
 ### 3c. Fidelity gate specification [SPECIFIED_NOT_IMPLEMENTED]
 
+**2026-09-13 implementation correction:** the historical sketch below allowed
+default `IMPLEMENT` to hide action loss and inspected the pre-serialization
+scope. It is not the current acceptance algorithm. The existing compiler now
+emits explicit `A:<action>`; the existing gate compares compiled, parsed and
+decompiled actions, parsed scope and parsed stop conditions. Missing or changed
+fields fail. Legacy actionless packets remain readable but cannot prove action
+preservation. See the [current P2 interface](../../modules/infrastructure/token_efficiency/INTERFACE.md#public-api-p2-compact-fidelity-gate)
+and its regression tests. Full prose fidelity, authenticated context delivery
+and independent RSI acceptance remain open.
+
 ```python
 def assert_m2m_fidelity(original_prose: str, lane: str, wsp_refs: list[int]) -> bool:
     """

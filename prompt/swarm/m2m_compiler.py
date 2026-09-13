@@ -83,6 +83,7 @@ class M2MPrompt:
     sender: str = "0102-ORCH"
     receiver: str = ""
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    action: str = ""  # Empty only for legacy packets without an explicit action.
 
     def to_compact(self) -> str:
         """Serialize to 012 compact format (single line)."""
@@ -92,6 +93,9 @@ class M2MPrompt:
             f"M:{self.mode.value}",
             f"T:{self.task_hash}",
         ]
+
+        if self.action:
+            parts.append(f"A:{self.action}")
 
         if self.wsp_refs:
             parts.append(f"R:{self.wsp_refs}")
@@ -123,6 +127,9 @@ class M2MPrompt:
             f"  TASK: {self.task_hash}",
             f"  WSP: {self.wsp_refs}",
         ]
+
+        if self.action:
+            lines.append(f"  ACTION: {self.action}")
 
         if self.invariants:
             lines.append("  INVARIANTS:")
@@ -203,6 +210,7 @@ class M2MCompiler:
             outputs=outputs or [],
             fail_conditions=fail_conditions or [],
             sender=sender,
+            action=action,
         )
 
     def decompile(self, m2m: M2MPrompt) -> str:
@@ -217,8 +225,10 @@ class M2MCompiler:
         """
         parts = []
 
-        # Action based on mode
-        if m2m.mode == Mode.EXEC:
+        # Preserve an explicit action; retain mode-only rendering for legacy packets.
+        if m2m.action:
+            parts.append(f"{m2m.action} task {m2m.task_hash} (mode: {m2m.mode.value})")
+        elif m2m.mode == Mode.EXEC:
             parts.append(f"Execute task {m2m.task_hash}")
         elif m2m.mode == Mode.PLAN:
             parts.append(f"Plan implementation for {m2m.task_hash}")
@@ -252,7 +262,7 @@ class M2MCompiler:
         """
         # Parse key:value pairs
         parts = {}
-        for match in re.finditer(r'([LSMTRIOFC]):(\[[^\]]+\]|\{[^}]+\}|\S+)', compact):
+        for match in re.finditer(r'([LSMTRIOFCA]):(\[[^\]]+\]|\{[^}]+\}|\S+)', compact):
             key, value = match.groups()
             parts[key] = value
 
@@ -298,6 +308,7 @@ class M2MCompiler:
             invariants=invariants,
             outputs=outputs,
             fail_conditions=fail_conditions,
+            action=parts.get("A", ""),
         )
 
     def _extract_action(self, text: str) -> str:

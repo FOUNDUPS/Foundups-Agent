@@ -89,7 +89,16 @@ parsing, as well as before serialization. A condition containing a comma or
 bracket can be changed by the current compact parser; the gate rejects that
 loss instead of returning PASS from the original in-memory list. Two observed
 regressions failed before the correction; all 53 fidelity/compatibility tests
-pass afterward. The wire grammar and compiler are unchanged.
+pass afterward. That stop-rule repair left the wire grammar and compiler unchanged.
+
+A subsequent action check at main `7b7a1946` found 13 false passes among the 14
+recognized verbs in plan mode: the compiler discarded the verb and the gate
+allowed a default `IMPLEMENT`. The existing compiler now serializes `A:<action>`
+and preserves it through parsing/decompilation. The gate requires an exact
+action match and checks the parsed scope, including missing or changed scopes.
+The expanded fidelity/compatibility selection passes 158 tests, including all
+14 verbs in all seven modes and wire-corruption rejection. Legacy actionless
+packets retain their old reader behavior; they do not prove action fidelity.
 
 This gate owns compact prompt packets. It is not the AI Overseer reference-YAML
 compiler's acceptance gate. Its existing CTX.HOLO check round-trips the supplied

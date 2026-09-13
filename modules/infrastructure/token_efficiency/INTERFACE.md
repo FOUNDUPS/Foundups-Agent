@@ -110,9 +110,26 @@ P2 fidelity clarification (2026-09-13): the existing
 the requested stop conditions with both the compiled object and the parsed
 compact packet. A lossy comma/bracket round-trip returns `passed=False`,
 `fail_conditions_match=False` and an explanatory mismatch in `errors`.
-The compiler grammar and function signature are unchanged. This is a field
+That stop-rule repair left the compiler grammar and function signature unchanged. This is a field
 preservation check, not full prose equivalence, authenticated CTX.HOLO delivery
 or admission of the AI Overseer YAML-document candidate.
+
+The subsequent action/scope correction adds the optional `M2MPrompt.action`
+field (empty for legacy packets). New `M2MCompiler.compile(...)` output carries
+its extracted verb as compact `A:<action>` and YAML `MISSION.ACTION`.
+`parse_compact(...)` restores it and `decompile(...)` preserves it independently
+of mode. Legacy actionless packets keep their mode-only rendering. An older
+reader that ignores `A` cannot establish action fidelity.
+
+`M2MFidelityGate.assert_fidelity(...)` now compares the extracted action with
+both serialized-roundtrip fields and the decompiled verb. Missing or changed
+actions return `passed=False`, including loss of an explicit `IMPLEMENT`.
+`roundtrip_scope` reports the actual parsed scope; missing, shortened or
+retargeted scopes fail instead of being masked by the compiled object.
+The standalone `assert_m2m_fidelity(...)` raises `FidelityError` for those
+failures. Signatures and original positional dataclass arguments remain valid.
+These checks do not turn the compiler's heuristic extraction into a complete
+prose or objective-preservation oracle.
 
 ## Public API (P3: Telemetry Service)
 

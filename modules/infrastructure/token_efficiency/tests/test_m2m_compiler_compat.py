@@ -121,6 +121,19 @@ class TestCompactFormatBackwardCompat:
         m2m = compiler.parse_compact(compact)
         assert m2m.mode == Mode.EXEC
         assert m2m.lane == Lane.A
+        assert m2m.action == ""  # Legacy packets do not establish an action.
+
+    def test_explicit_action_survives_compact_and_yaml(self):
+        compiler = M2MCompiler()
+        m2m = compiler.compile("Rollback the registry module", mode="plan")
+        parsed = compiler.parse_compact(m2m.to_compact())
+        assert parsed.action == "ROLLBACK"
+        assert "  ACTION: ROLLBACK" in parsed.to_yaml()
+        assert compiler._extract_action(compiler.decompile(parsed)) == "ROLLBACK"
+
+    def test_legacy_object_compact_shape_unchanged(self):
+        m2m = M2MPrompt(Lane.A, "registry", Mode.PLAN, "abc123", [50])
+        assert m2m.to_compact() == "L:A S:registry M:plan T:abc123 R:[50]"
 
     def test_parse_compact_plan_unchanged(self):
         """parse_compact() with M:plan works as before."""

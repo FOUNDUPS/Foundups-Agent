@@ -1,5 +1,14 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: RSI compact action and scope preservation
+
+- Continued from main `7b7a1946171d6105e0e495835dc724683c719ad5`. WSP 00 bootstrap/strict gate passed. The signed artifact-provider bootstrap already exists; missing configured admission remains an R06/R07 dependency. No provider call or active service change.
+- Real compiler round trips exposed 13 false passes among 14 recognized actions in plan mode. Extended the existing compiler with explicit `A:<action>` and tightened the existing fidelity gate to compare parsed action/scope and decompiled action. Legacy actionless packets keep their prior rendering; they do not certify action preservation.
+- Reused existing test files: 99 failures / 59 passes before the repair, 158 passes afterward (two pytest configuration warnings with auto plugins disabled). Coverage includes all 14 verbs in seven modes, changed/dropped wire fields, standalone fail-closed behavior and legacy compatibility. This is local contract evidence, not independent G2 execution or G4 retained benefit.
+- Aligned WSP 99 and its exact knowledge mirror, existing schema, interface, historical-spec correction and canonical RSI evidence. Existing backend inventory regeneration retains the same 1,400 paths with two changed runtime hashes; all 15 RedDog fast groups and eight staged manifest tests pass. No new module or scheduler. WSP 15 local item score: complexity 2 + importance 4 + deferability 4 + impact 4 = 14/P1; it advances the existing R10 dependency without altering packet priorities.
+- Retrieval evaluation: semantic owner rejected the newer source with HEAD mismatch; local bundle truth remains UNKNOWN/no semantic qualification. Current module contracts and existing tests came first; duplicate arrays/unrelated hits were omitted and absent optional docs recorded. Deterministic reproduction was sufficient, so no Qwen/Gemma model call or fabricated learning receipt was needed.
+- Reusable lesson: compare actual serialized/parsed fields, not a source object or decompiler default. Preserve the original objective until an independently bound oracle proves whole-context fidelity. Protected products, frozen audit files and all 26 non-dispatchable packet contracts remain outside this repair. WSP 00/15/22/50/81/84/87/97/99.
+
 ## 2026-09-13: Post-merge Holo public-quality evidence
 
 - PR #1710 merged as `5326080d583625aebbc230242117fb7fcf0044a6`, all ten checks successful and accepted tree equal to main. Continued through the existing exact-main maintenance controller; completed and stopped both runtimes it started.

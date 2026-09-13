@@ -305,7 +305,7 @@ class M2MFidelityGate:
         roundtrip_action = self.compiler._extract_action(roundtrip_prose)
 
         original_scope = self.compiler._extract_scope(original_prose)
-        roundtrip_scope = m2m.scope  # Use M2M scope, not extracted from roundtrip
+        roundtrip_scope = parsed.scope
 
         # Check WSP refs
         wsp_refs_match = m2m.wsp_refs == wsp_refs and parsed.wsp_refs == wsp_refs
@@ -332,17 +332,25 @@ class M2MFidelityGate:
         if parsed.mode.value != mode.lower():
             raise FidelityError("mode", mode.lower(), parsed.mode.value)
 
-        # Check action verb (allow default to IMPLEMENT)
-        action_ok = (original_action == roundtrip_action or roundtrip_action == "IMPLEMENT")
+        # A mode-only decompiler default cannot certify a missing action.
+        action_ok = (
+            original_action == m2m.action == parsed.action == roundtrip_action
+        )
         if not action_ok:
-            errors.append(f"action mismatch: {original_action} vs {roundtrip_action}")
+            errors.append(
+                f"action mismatch: expected {original_action}, compiled {m2m.action}, "
+                f"parsed {parsed.action}, decompiled {roundtrip_action}"
+            )
 
-        # Check scope (if present in original)
-        scope_ok = True
-        if original_scope:
-            scope_ok = original_scope in roundtrip_prose or m2m.scope == original_scope
-            if not scope_ok:
-                errors.append(f"scope mismatch: {original_scope} not in roundtrip")
+        # Compare the parsed scope, not just the pre-serialization object.
+        scope_ok = original_scope == m2m.scope == roundtrip_scope
+        if original_scope and original_scope not in roundtrip_prose:
+            scope_ok = False
+        if not scope_ok:
+            errors.append(
+                f"scope mismatch: expected {original_scope}, compiled {m2m.scope}, "
+                f"parsed {roundtrip_scope}; scope must also survive decompilation"
+            )
 
         # CTX.HOLO validation for applicable modes
         ctx_holo_preserved = None

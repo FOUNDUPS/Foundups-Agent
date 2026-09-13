@@ -59,6 +59,13 @@ Machine-to-machine compact format for swarm-internal communication:
 - `swarm/0102_M2M_SCHEMA.yaml` - Canonical K:V schema definition
 - `swarm/m2m_compiler.py` - Qwen-delegatable 012 prose -> M2M compiler
 
+The compiler now emits an explicit `A:<action>` field, preserving the recognized
+verb across compact parsing and decompilation independently of mode. Legacy
+packets without `A` remain readable with mode-only rendering. This helper does
+not preserve an arbitrary full objective or authenticate a work order. See the
+[field-fidelity contract](../modules/infrastructure/token_efficiency/INTERFACE.md#public-api-p2-compact-fidelity-gate)
+before using compact output as worker context.
+
 **012 Compact Format** (4x token reduction):
 ```yaml
 L:A S:modules/sim/ M:exec T:sse_001 R:[50,22] I:{atomic:true} O:[ModLog.md] F:[test_fail]

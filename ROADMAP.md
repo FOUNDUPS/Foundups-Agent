@@ -37,6 +37,12 @@ R00 recovery is historical success at its recorded source/generation. R02 now in
 
 ## Current delivery checkpoint — 2026-09-13
 
+The latest R10 field-preservation repair adds explicit action transport to the
+existing compact compiler and checks parsed action/scope in the existing gate.
+All 158 focused tests pass after reproducing action loss; old packets remain
+readable. See the [continuation evidence](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
+Worker admission, full-context fidelity and G0–G5 completion remain separate.
+
 After PR #1710 merged, governed Holo maintenance completed at
 `5326080d583625aebbc230242117fb7fcf0044a6` and stopped both owned runtimes.
 The existing six-case public retrieval benchmark passed its unchanged 0.95
@@ -59,8 +65,11 @@ Preparatory observations are now recorded in the [registry/context and Science
 Hub checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13).
 The existing registry audit passed once at its pinned source. A deterministic
 M2M reference candidate was rejected for lost instructions; YAML parsing alone
-does not establish fidelity. The existing compact-prompt fidelity gate now
-rejects stop conditions changed during parsing; 53 focused tests pass.
+does not establish fidelity. The existing compact-prompt compiler now preserves
+its recognized action; the fidelity gate rejects changed actions, scopes and
+stop conditions during serialization. The expanded 158-case fidelity/compatibility
+selection passes, including legacy packet compatibility. Full objective/prose
+preservation and admitted evaluator wiring remain open.
 Science Hub's 36 selected standalone tests passed
 with an injected detector and disposable persistence. These qualify baseline
 work and negative cases for R10/R15/R20/R23; no completion gate advances and no
