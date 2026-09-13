@@ -600,6 +600,17 @@ Boot prompts contain content that M2M's K:V transform destroys:
 - **Threshold**: cosine sim >= 0.5 for HoloIndex discoverability
 - **P0 hardening**: Full headers (no truncation), 30-char keys, 80-char values
 
+These historical metrics do not prove instruction preservation. The 2026-09-13
+[RSI reference-context experiment](../../../docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13)
+lost eight declared boundary passages. Its actual runbook candidate failed the
+shim's YAML gate; a synthetic valid-YAML candidate passed while omitting the
+worker/verifier independence rule. `compile_to_staged` checks structure;
+`m2m_compile_gate` additionally checks YAML parsing. Neither currently evaluates
+semantic fidelity, required-reference retention or a section-coverage threshold.
+Keep executable Skillz verbatim and use original reference context until the
+task's separately defined preservation checks pass. A compression percentage,
+embedding similarity or `gate_status=PASS` is not promotion authority.
+
 ---
 
 ## Strategic Diligence Gate SKILLz

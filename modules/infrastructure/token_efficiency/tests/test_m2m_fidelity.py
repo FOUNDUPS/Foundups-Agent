@@ -142,6 +142,25 @@ class TestM2MFidelityBasics:
         assert result.passed
         assert result.fail_conditions_match
 
+    @pytest.mark.parametrize("condition", [
+        "halt on safety, auth or scope failure",
+        "missing [independent] review",
+    ])
+    def test_lossy_fail_condition_roundtrip_is_rejected(self, condition):
+        """A parsable compact packet must not silently change its stop rule."""
+        gate = M2MFidelityGate()
+        result = gate.assert_fidelity(
+            original_prose="Review the registry module",
+            lane="QA",
+            wsp_refs=[50, 97],
+            mode="plan",
+            fail_conditions=[condition],
+        )
+
+        assert not result.passed
+        assert not result.fail_conditions_match
+        assert any("fail_conditions mismatch" in error for error in result.errors)
+
 
 class TestCTXHoloPreservation:
     """ADDENDUM_HOLOINDEX_M2M_INVARIANT: CTX.HOLO preservation tests."""

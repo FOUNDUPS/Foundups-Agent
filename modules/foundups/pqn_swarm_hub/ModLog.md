@@ -1,5 +1,15 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## 2026-09-13: External RSI workload baseline
+
+- Selected contract, detector-bridge and persistence tests from external
+  `FOUNDUPS/science-swarm-hub` at `bdf0e15f019f83d76fa9cf94b131716bde559350`:
+  36 passed in 1.01 seconds. Reused its existing injected detector fixture and
+  disposable SQLite paths; tracked external source bytes unchanged.
+- Linked results into the existing root RSI roadmap/runbook. No code was copied
+  into this stub and no external source was modified. Live detector/FAM/social
+  effects and system improvement were not tested. WSP 22, 48, 50, 84, 97.
+
 ## V0.15.0 - Monorepo Stub Cutover
 
 **Slice**: `science_swarm_hub_monorepo_stub_cutover`

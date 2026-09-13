@@ -1,6 +1,17 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 
+## 2026-09-13: Registry procedure baseline for system RSI
+
+- Ran the existing `auto_test_registry_audit` verification command at source
+  `bcc877829653997d7df638b7069258a061d04ee1`: current registry, 1,650 total /
+  269 quarantined, exit 0, one wall-time sample of 18.589 seconds. Skillz,
+  generator and registry hashes remain unchanged; no registry write or model call.
+- The root RSI runbook records this baseline and rejection of a lossy M2M
+  reference candidate. Production Skillz remains verbatim. Independent worker
+  admission, repeated comparisons, activation, rollback and retained benefit
+  are still required; no R15 completion or WRE runtime change. WSP 22, 48, 97.
+
 ## 2026-09-13: R02 contract-to-protocol reconciliation
 
 - Corrected the optional inference dependency comment: unavailability fails closed and generated text is an unverified proposal. Dependency requirements and Python runtime are unchanged.

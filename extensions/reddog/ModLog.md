@@ -1,5 +1,14 @@
 # RedDog ModLog
 
+## 2026-09-13 - Pin compact fidelity stop-condition correction
+
+- Refreshed the existing 1,400-file backend manifest after the token-efficiency
+  gate began checking parsed stop conditions. Membership is unchanged; the
+  only runtime hash change is `token_efficiency/src/m2m_fidelity_gate.py`.
+- Updated the compatibility pin and generator-test expectation to
+  `8e0141cee8d20a84d48e1f8ccd5c03cff82e541e7bae4734533fc347bbc99437`.
+  No extension service, product route, provider binding or package was activated.
+
 ## 2026-09-13 - Pin WSL advisory release-suffix correction
 
 - Regenerated the existing backend manifest after the WSL OpenClaw version

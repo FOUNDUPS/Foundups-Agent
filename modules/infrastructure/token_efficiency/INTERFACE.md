@@ -103,6 +103,17 @@ Get or create the bypass classifier singleton.
 4. **No raw storage**: Only hashes and lengths, never raw content
 5. **M2M output**: All decisions in WSP-99 M2M format
 
+## Public API (P2: Compact Fidelity Gate)
+
+P2 fidelity clarification (2026-09-13): the existing
+`M2MFidelityGate.assert_fidelity(...)` result's `fail_conditions_match` compares
+the requested stop conditions with both the compiled object and the parsed
+compact packet. A lossy comma/bracket round-trip returns `passed=False`,
+`fail_conditions_match=False` and an explanatory mismatch in `errors`.
+The compiler grammar and function signature are unchanged. This is a field
+preservation check, not full prose equivalence, authenticated CTX.HOLO delivery
+or admission of the AI Overseer YAML-document candidate.
+
 ## Public API (P3: Telemetry Service)
 
 ### Classes

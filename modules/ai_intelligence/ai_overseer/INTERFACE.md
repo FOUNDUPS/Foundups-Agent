@@ -73,6 +73,14 @@ Execute one of the module-local M2M workflow skillz by name.
 - `payload`: skill-specific execution payload
 - `m2m`: when `True`, wrap response in WSP 99-style M2M envelope
 
+**Compile gate boundary**: `m2m_compile_gate` stages candidate content and checks
+YAML parsing. `gate_status=PASS` reports that check only. Required-reference
+retention, section coverage and semantic/instruction fidelity are not currently
+implemented gates. The direct sentinel call has structural validation only.
+The shim writes its existing JSONL outcome record in module memory and removes
+the staged file on YAML failure; it does not promote it. Boot/Skillz rejection
+remains in the sentinel. See the [dated preservation counterexample](../../../docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13).
+
 **Returns (m2m=False)**:
 ```python
 {

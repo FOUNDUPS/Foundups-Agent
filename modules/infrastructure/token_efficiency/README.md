@@ -82,6 +82,21 @@ The classifier always fails closed:
 
 ## Files
 
+### 2026-09-13 compact fidelity correction
+
+`M2MFidelityGate` now compares stop conditions after compact serialization and
+parsing, as well as before serialization. A condition containing a comma or
+bracket can be changed by the current compact parser; the gate rejects that
+loss instead of returning PASS from the original in-memory list. Two observed
+regressions failed before the correction; all 53 fidelity/compatibility tests
+pass afterward. The wire grammar and compiler are unchanged.
+
+This gate owns compact prompt packets. It is not the AI Overseer reference-YAML
+compiler's acceptance gate. Its existing CTX.HOLO check round-trips the supplied
+context object separately; it does not prove that context traversed the compact
+packet or authenticate a retrieval receipt. General prose preservation and
+independent RSI acceptance remain separate. See the [system evidence checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13).
+
 ```
 modules/infrastructure/token_efficiency/
   src/

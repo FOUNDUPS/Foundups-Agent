@@ -81,7 +81,7 @@ separate levels of evidence.
 | Existing judges and retention | The [ROC evaluator](../../modules/infrastructure/wre_core/src/wre_research_evaluator.py) parses literal configuration with AST, not arbitrary target execution. The [model output verifier](../../modules/ai_intelligence/ai_gateway/src/model_autoresearch_semantic_verifier.py) checks content-bound records and declared required/forbidden terms. [PatternMemory](../../modules/infrastructure/wre_core/src/pattern_memory.py) and [model cycle feedback](../../modules/ai_intelligence/ai_gateway/src/model_autoresearch_cycle_feedback_ledger.py) have distinct owners. | Freeze a relevant oracle and baseline; a better simulated margin or keyword match is not general task correctness. Keep model feedback separate from admitted skill memory, then prove the next invocation consumes the accepted result; R10/R11/R14. |
 | Promotion, activation and rollback | Existing model promotion/runtime binding and WRE evidence/activation patterns are already mapped in R02. The generic [legacy variation promoter](../../modules/infrastructure/wre_core/src/pattern_ab_evidence.py) still rejects direct production mutation. | Compose the matching independent authorities for the chosen asset. Model campaign evidence cannot substitute for generic skill activation or rollback proof; R12/R13/R15. |
 | PQN research engine | [PQN interface](../../modules/ai_intelligence/pqn_alignment/INTERFACE.md), existing research orchestrator and detector API perform research execution. It is distinct from the FoundUp's work registry. | Run a bounded, reproducible research-workflow experiment with fixed seeds/oracle and explicit scratch output. Judge reproducibility and task quality, not stronger apparent PQN signals; R10/R15/R23. |
-| PQN FoundUp / Science Swarm Hub | The [monorepo entry](../../modules/foundups/pqn_swarm_hub/README.md) is a compatibility stub. The actual [external implementation](https://github.com/FOUNDUPS/science-swarm-hub/tree/bdf0e15f019f83d76fa9cf94b131716bde559350) has work registry, submissions, verification, contribution records, participant gates and optional SQLite storage. | Use a pinned external checkout and existing injected detector/store seams. Do not rebuild these services under the monorepo stub. Connect task/result evidence to existing FAM/WRE owners; R20/R23/R24. External runtime tests remain unexecuted in this review. |
+| PQN FoundUp / Science Swarm Hub | The [monorepo entry](../../modules/foundups/pqn_swarm_hub/README.md) is a compatibility stub. The actual [external implementation](https://github.com/FOUNDUPS/science-swarm-hub/tree/bdf0e15f019f83d76fa9cf94b131716bde559350) has work registry, submissions, verification, contribution records, participant gates and optional SQLite storage. | Use a pinned external checkout and existing injected detector/store seams. Do not rebuild these services under the monorepo stub. Connect task/result evidence to existing FAM/WRE owners; R20/R23/R24. The later baseline below passes 36 selected standalone tests; live detector, FAM, publication and RSI integration remain unverified. |
 | GotJunk — separately identified candidate | [Existing module](../../modules/foundups/gotjunk/README.md) and [HXA12 dry-run proof](../../modules/infrastructure/wre_core/tests/test_hxa12_gotjunk_second_proof_dryrun.py) already exist. [WREAdapter.execute_skill](../../modules/foundups/gotjunk/adapters/wre_adapter.py) raises `NotImplementedError`; the factory proof explicitly reports no real execution. | Qualify an isolated real-code/fixture task through the existing generic job path before claiming live integration. Reuse the dry-run proof as groundwork, not RSI acceptance; R08/R20/R23. The spoken name “GetK” has not been confirmed as GotJunk; resolve it before assigning a named ticket. |
 | Auto-post | Existing social orchestrator, formatting/routing and duplicate prevention are listed above. | Qualify preparation/deduplication with a recording sink first; live posting is a separate effect. Reuse this workload for cross-task retained-benefit checks; R15/R23. |
 | FAM, qualified teams and reward accounting | [R24](../roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) already binds worker qualification, tickets, independent audit, acceptance and reward policy to existing owners. | Science Hub contribution records are not confirmed FAM/financial settlement. Keep optional teams and reward effects behind their existing proof gates; R20/R21/R24. |
@@ -117,7 +117,9 @@ supports an injected runner and otherwise imports the configured detector.
 Use that seam with fixed test inputs and independently reproduced artifacts;
 do not optimize the submitted metric merely to pass its own threshold.
 Package publication/installation, live research participation and settlement
-were not verified. No package, remote code or FoundUp experiment was executed.
+were not verified in that source review. The later isolated baseline below
+executes selected tests from the same pinned external source without installing
+the package or calling a live detector, FAM service or publication adapter.
 
 ### System first, then prove transfer across workloads
 
@@ -143,6 +145,67 @@ No dependency, numerical priority or packet ID is changed by this coverage
 addition. Current work-order admission and exact runtime/source evidence still
 decide what can execute. The expanded list corrects omissions in the roadmap;
 it does not claim that all components are already integrated or RSI-complete.
+
+## Baseline and context preservation checkpoint — 2026-09-13
+
+These are preparatory observations for R10/R15/R20/R23, not an admitted worker
+cycle or a promotion receipt. The [machine-readable evidence](../roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
+pins the source, selected commands/tests, hashes and rejected candidate. It
+does not alter the frozen September 9 audit or any packet dependency/priority.
+
+| Observation | Result | What it establishes |
+|---|---|---|
+| Registry audit at `bcc877829653997d7df638b7069258a061d04ee1` | Existing `generate_test_registry.py --check`: exit 0, 1,650 registered / 269 quarantined, one wall-time sample of 18.589 seconds. | A reproducible starting observation. Skillz, generator and registry hashes stayed unchanged. One sample is not a statistical performance baseline or an improvement. |
+| Existing deterministic M2M compiler on a copied dispatch runbook at the same SHA | 28,223 to 641 bytes; 186 to 14 lines. All eight declared boundary passages absent; the actual shim rejects invalid YAML and removes its stage. | Reject this candidate. Byte/line reduction is not measured model-token savings. |
+| Existing M2M shim on a synthetic seven-line reference | YAML gate PASS, but `The worker must not approve its own output.` is absent from the candidate. | YAML parsing does not prove preservation. This is a synthetic counterexample, not a claim that the real runbook passed. |
+| Existing compact-prompt fidelity gate | At the baseline it reported PASS when a comma split one stop condition into two. The repaired comparison checks the parsed packet and rejects that loss; 53 fidelity/compatibility tests pass. | A narrow field-preservation defect is repaired in the existing owner. The compact prompt grammar and the reference-YAML compressor are distinct. |
+| External Science Hub at `bdf0e15f019f83d76fa9cf94b131716bde559350` | `test_contracts.py`, `test_detector_bridge.py`, `test_persistence.py`: 36 passed in 1.01 seconds; total process wall time 1.714 seconds, one sample. | Existing contracts, injected detector-artifact handling and disposable SQLite persistence execute. No live detector, FAM/publication suite, package install or financial settlement was tested. |
+
+The eight predeclared runbook passages cover ticket/reviewer assignment,
+settlement confirmation, signed-binding provenance, actual execution evidence,
+non-dispatchable planning, protected project scope, separate 3V roles, and
+unchanged registry/quarantine/oracle behavior. The source text and missing
+passages are retained in the evidence artifact. Both M2M candidates were
+rejected; no source was replaced and no PatternMemory success was recorded.
+The production registry `SKILLz.md` was copied unchanged and correctly rejected
+by the existing boot/Skillz exclusion.
+
+The [existing M2M owner](../../modules/ai_intelligence/ai_overseer/src/m2m_compression_sentinel.py),
+[compile shim](../../modules/ai_intelligence/ai_overseer/src/ai_overseer.py) and
+separate [compact-prompt fidelity gate](../../modules/infrastructure/token_efficiency/src/m2m_fidelity_gate.py)
+are existing extension points. Holo retrieved the compact gate and its tests;
+it must not be recreated or mistaken for a reference-YAML validator. Its stop
+condition comparison now includes the parsed packet. Its CTX.HOLO check still
+round-trips a separately supplied context object, not context serialized through
+the compact packet; this does not authenticate current retrieval. The compiler's
+existing grammar and other fidelity limits remain unchanged.
+
+The reference compiler documentation now distinguishes structure and YAML
+parsing from unimplemented fidelity checks. Before this producer is
+eligible for R15 context, R10 must bind source and candidate bytes to an
+independently fixed preservation corpus. Reject omitted or inverted negations,
+authority limits, dependencies, references and executable commands; include
+valid-YAML counterexamples and stale-source cases. A proposer must not choose
+its own required passages, relax the judge or turn a local helper's PASS into
+promotion. Keep the original text as the fallback. Do not create another
+compression engine to bypass this result.
+
+For the next registry workflow ticket, use the existing production Skillz
+verbatim, its generator contract and the selected packet's exact current
+references. The full system audit is navigation, not mandatory per-call
+context. Fix the input set, oracle, budgets and held-out negative cases before
+authoring a candidate. Obtain actual worker/verifier usage and repeated
+paired latency measurements only after R06–R09 admission; then compare an
+accepted change against the same unchanged registry/quarantine oracle. These
+observations do not prove cost savings, G1 admission or G4 retained benefit.
+
+Science Hub's test named `test_real_detector_verdict` also uses its existing
+`fake_detector_runner` fixture. Record the runner that executed, not the test
+name. All tracked external source bytes stayed unchanged; the source checkout
+and test state were separate from the active monorepo/product lanes. A later
+transfer experiment must bind both repository SHAs to the same admitted
+system-improvement lineage. Passing these project tests alone does not close
+R20/R23, authenticate a verifier or establish the PQN hypothesis.
 
 ## First bounded dispatch
 
