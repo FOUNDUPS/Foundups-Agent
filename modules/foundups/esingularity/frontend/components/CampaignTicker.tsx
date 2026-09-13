@@ -5,7 +5,7 @@ import { currentFieldStatus } from '../content/current-field-status';
 
 const actions = [
   { label: 'VOTE NO', text: currentFieldStatus.tickerJa, href: currentFieldStatus.href },
-  { label: 'JHR', text: 'UPDATE 9/14｜なぜ福井に「AI交番」が必要なのか｜日本語＋English', href: '/reports/jhr#jhr-002' },
+  { label: 'JHR', text: '9/14更新｜AIのニュースと福井の仕事・学び｜AI交番・COGDC｜日本語＋English', href: '/reports/jhr#jhr-002' },
   { label: 'NEW', text: 'YUMORI / COG DC 10枚のプレゼンを見る', href: '#yumori-deck' },
   { label: 'VISIT', text: '写真で現地を見る', href: 'https://pics.yumori.info' },
   { label: 'LISTEN', text: '九頭竜の音楽を聴く', href: 'https://music.yumori.me' },
