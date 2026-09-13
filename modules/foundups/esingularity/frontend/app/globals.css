@@ -188,3 +188,6 @@ html:not([lang="ja"]) .ja-only-break{display:none}
 @media(max-width:1500px){.site-header.home-header{grid-template-columns:minmax(0,1fr) auto auto;gap:8px 16px;padding:10px 22px 0}.home-header .desktop-nav{grid-row:2;grid-column:1/-1;justify-content:flex-start;gap:30px;overflow-x:auto;padding-bottom:6px}.home-header>.header-cta{grid-row:1;grid-column:2}#home-language-controls{grid-row:1;grid-column:3}.home-header~main .project-hero{padding-top:156px}}
 @media(max-width:1050px){.home-header~main .project-hero{grid-template-columns:1fr}.fukui-map-panel{width:min(100%,700px);justify-self:center}.fukui-map-drawing{max-height:650px}}
 @media(max-width:670px){.site-header.home-header{padding-inline:12px;gap:4px 8px}.home-header .desktop-nav{gap:22px;font-size:14px}.home-header>.header-cta{font-size:13px;padding:8px}.home-header~main .project-hero{padding:150px 20px 48px}.home-header~main .project-hero h1{font-size:clamp(29px,7.4vw,46px)}.fukui-map-heading,.fukui-map-panel figcaption{padding:16px}.fukui-map-expand{font-size:13px;top:8px;right:8px}.fukui-map-dialog{padding:12px}.map-dialog-toolbar strong{font-size:14px}}
+
+/* The movement page has no project header: keep its shared ticker in normal flow. */
+.campaign-ticker.campaign-ticker-inline{position:relative;top:auto}

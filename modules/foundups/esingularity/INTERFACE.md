@@ -60,6 +60,10 @@ Agents resolving merges or synchronizing a Sites checkout must preserve **both**
 
 The Foundups shell owns discovery and routing. The eSingularity module owns campaign content, product UI, public routes, and its deployment.
 
+## Shared campaign ticker
+
+Both homepages render `CampaignTicker.tsx` from the single `content/current-field-status.ts` object. The project page uses `<CampaignTicker />`; the movement page uses `<CampaignTicker movement />`, placing it in normal flow and resolving project-only fragment links to eSingularity.ai. Updating the canonical status and publishing the shared frontend updates both sites. Do not maintain separate ticker copy.
+
 ## Shared external actions
 
 - Canonical LINE invitation: `https://line.me/ti/p/baXEozL_Q6`

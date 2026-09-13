@@ -41,6 +41,12 @@ def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() ->
     for field in ("updatedLabelJa", "locationJa", "tickerJa", "detailJa", "detailEn", "href"):
         assert re.search(rf"{field}: '[^']+'", status)
     assert "currentFieldStatus.href" in ticker
+    project = read(FRONTEND_ROOT / "app" / "page.tsx")
+    movement = read(FRONTEND_ROOT / "app" / "yumori" / "page.tsx")
+    assert project.count("<CampaignTicker />") == 1
+    assert movement.count("<CampaignTicker movement />") == 1
+    assert "../../components/CampaignTicker" in movement
+    assert "https://esingularity.ai/${action.href}" in ticker
     assert "currentFieldStatus.tickerJa" in ticker
     assert "label: 'JHR'" in ticker
     assert "href: '/reports/jhr'" in ticker

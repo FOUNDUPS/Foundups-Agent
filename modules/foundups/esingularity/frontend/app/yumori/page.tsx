@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import CampaignTicker from '../../components/CampaignTicker';
 
 const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform';
 const JHR_URL = '/reports/jhr';
@@ -26,6 +27,7 @@ function Join({ dark=false }: { dark?: boolean }) {
 
 export default function YumoriPage() {
   return <main style={{ background:'#0b0d0c', color:'#f4f1e8', minHeight:'100vh', fontFamily:'system-ui,sans-serif' }}>
+    <CampaignTicker movement />
     <section style={{ ...panel, minHeight:'82vh', display:'grid', alignContent:'end' }}>
       <p style={{ letterSpacing:'.18em', fontWeight:850 }}>YUMORI.me / 湯守</p>
       <h1 style={{ fontSize:'clamp(4.5rem,14vw,11rem)', lineHeight:.8, letterSpacing:'-.075em', margin:'20px 0 32px' }}>YUMORI<span style={{opacity:.5}}>.me</span></h1>

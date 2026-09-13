@@ -45,7 +45,7 @@ The financial models, engineering research, and source audits support the public
 
 ## Campaign ticker updates
 
-Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. Edit `frontend/content/current-field-status.ts`; the shared `CampaignTicker.tsx` renders it. Date and time-limit each invitation in Japan time.
+Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. Edit `frontend/content/current-field-status.ts`; the shared `CampaignTicker.tsx` renders it on both eSingularity.ai and YUMORI.me. Date and time-limit each invitation in Japan time.
 
 ## Japan Hyperscaler Report (JHR)
 
