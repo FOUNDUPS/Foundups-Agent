@@ -1,5 +1,14 @@
 # Project eSingularity ModLog
 
+## 2026-09-14 — JHR #002 news, jobs and publication repair
+
+- Existing #002 was present at canonical `fb03ff8ce`, but Sites source `3f30e1a` still rendered #001. Reused #002 and preserved the #001 archive.
+- Added Japanese/English context linking TBS's September 14 programme listing and September 13 TBS NEWS DIG coverage syndicated by Livedoor. Distinguished AI safety reporting from Japanese job-loss statistics. Added the March 5 Anthropic US labour-market study with geographic and evidentiary limits; connected the proposal to training, paid work and local business outcomes without job guarantees.
+- Updated homepage/ticker deep links and page metadata to #002. Published patch preserves existing Sites ticker layout and both homepages; canonical ticker layout changes from earlier commits are outside this content patch.
+- WSP 50/97 retrieval: local checkout was stale; fetched origin/main and used an isolated worktree. Holo owner query returned MISSING_GENERATION_BINDING / freshness UNKNOWN; bounded file/history inspection used, no reindex. WSP 00 detector lacked torch; documented tracker fallback passed with detector witness absent.
+- Three existing JHR contract functions passed via runpy; 18 domain-routing tests passed. Corrected the previously stale ticker assertion to validate the #002 deep link and its actual target. Build/publication completion recorded below when available.
+
+
 ## 2026-09-13 — Shared YUMORI.me branding in both website skills
 
 - Recorded 012's branding direction in the existing FoundUp-owned website skill: preserve YUMORI.me, the branded JOIN action, Japanese-first `me GUARDIAN!` identity line, katakana JHR title, Japanese default and complete English coverage. Supporting context must retain the brand, and responsive layouts must avoid clipped or duplicated labels.

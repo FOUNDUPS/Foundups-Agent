@@ -50,7 +50,7 @@ export default function Home() {
               <a className="button button-primary" href="?vision=1&slide=1#yumori-deck">10枚で構想を見る <span>↗</span></a>
               <a className="button button-ghost" href="/reports/jhr">JHR・最新レポート <span>→</span></a>
             </div>
-            <a className="hero-jhr-news" href="/reports/jhr#latest"><span>JHR｜9月12日確認</span><strong>仙台200MW計画、9月11日に資金調達協議の基本合意を発表。</strong><small>ハイパースケーラー＝巨大なクラウド・AI計算基盤を運営する企業。全国の動きと福井への意味を読む →</small></a>
+            <a className="hero-jhr-news" href="/reports/jhr#jhr-002"><span>JHR #002｜9月14日更新</span><strong>AIのニュースを、福井の仕事・学び・地域所有の計算基盤へ。</strong><small>なぜ福井に「AI交番」が必要なのか。報道と研究をもとに読む →</small></a>
             <a className="hero-vote-action" href="https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform"><strong>この構想を、解体で終わらせない。</strong><span>解体予算に反対を。VOTE NO</span><b>湯守に登録・準備委員会に参加 →</b></a>
           </div>
           <FukuiComparisonMap />

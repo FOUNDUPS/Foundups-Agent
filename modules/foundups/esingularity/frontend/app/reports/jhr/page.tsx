@@ -4,9 +4,9 @@ const YUMORI_ME = "https://yumori.me/";
 const YUMORI_INFO = "https://yumori.info/";
 
 export const metadata: Metadata = {
-  title: "Japan Hyperscaler Report #001 | eSingularity",
+  title: "Japan Hyperscaler Report #002 | AI交番・仕事・COGDC",
   description:
-    "日本全国のハイパースケール・データセンター政策、仙台200MW計画、印西の地区計画、福井の分散型AIインフラを日本語・英語で追跡。",
+    "JHR #002：9月14日のAI報道から福井の仕事・学び・COGDCを考える。日本語・英語で掲載、第1号も保存。",
   keywords: [
     "Japan Hyperscaler Report",
     "JHR",
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "https://esingularity.ai/reports/jhr" },
   openGraph: {
-    title: "JHR #001 — 日本は『次の印西』を全国につくろうとしているのか",
-    description: "仙台200MW、印西の地区計画、GX戦略地域。巨大化する前に福井は地域分散型AIインフラを選べるか。",
+    title: "JHR #002 — なぜ福井にAI交番が必要なのか",
+    description: "9月14日のAI報道から、福井の仕事・学び・地域所有の計算基盤を考える。第1号も継続掲載。",
     type: "article",
     url: "https://esingularity.ai/reports/jhr",
   },

@@ -44,6 +44,13 @@ export default function JhrLayout({ children }: { children: ReactNode }) {
 
           <div style={{ padding: "34px clamp(22px,5vw,52px) 46px", color: "#06101c" }}>
             <p><span style={tag}>JAPANESE / PRIMARY</span></p>
+            <h2>9月14日のニュースから、福井の仕事を考える</h2>
+            <p>今朝のTBS「THE TIME,」は、AIの危険性と開発減速を番組の話題に掲げました。前日の9月13日、TBS NEWS DIGは、アンソロピックのダリオ・アモデイCEOが、安全対策と第三者による検証が追いつくよう開発ペースを緩める必要性を訴えたと報じています。<a href="https://www.tbs.co.jp/tv/20260914_BC7D.html">9月14日の公式番組案内</a> ／ <a href="https://news.livedoor.com/article/detail/32312185/">9月13日のTBS NEWS DIG記事（ライブドア転載）</a></p>
+            <p>これは、日本で何人の仕事が失われたかを示す統計ではありません。しかし、地域がAIをどう使い、誰が責任を持ち、働く人がどう学び直すかという問いにつながります。<strong>JHRの論点は、AIへの不安を、地域が準備する力へ変えられるかです。</strong></p>
+            <h3>「仕事が変わる」に、地域はどう備えるか</h3>
+            <p>Anthropicの2026年3月5日の米国労働市場研究では、AIの影響を受けやすい職種で失業率の系統的な上昇は確認されず、若年層の採用鈍化を示唆する結果が報告されました。AIが作業を行えることと、職業全体が消えることは同じではありません。この米国の結果を、日本の失業予測に置き換えることもできません。<a href="https://www.anthropic.com/research/labor-market-impacts">研究本文・方法と限界</a></p>
+            <p>だから福井で検証したいのは、サーバーを置くだけの計画ではありません。学生が地元企業の課題で学ぶ。働く人が業務の一部をAIで試し、結果を人が確かめる。農家や製造業が現場の知識を使い、小さな課題解決プロジェクトを育てる。COGDCとAI交番を、その計算資源・学習・相談の拠点にできるかという提案です。</p>
+            <p><strong>地域所有なら雇用が自動的に増える、という保証はありません。</strong> 事業性の検証では、地元の有給雇用、研修から実務への移行、参加企業の成果、運営費、地域に残る価値を確認する必要があります。小規模なAIにも、アクセス管理、記録、セキュリティ、評価、人間の責任が必要です。</p>
             <p><strong>最初に、ハイパースケーラーそのものを敵にしません。</strong> 大規模クラウドと大規模データセンターは、日本のAI、産業、研究を支える重要なインフラです。問題は「来るか、来ないか」だけではありません。土地、電力、計算設備、データ、運営権、そしてAI時代に生まれる経済価値を、誰が所有し、誰が長期的に受け取るのかです。</p>
             <p>巨大データセンターは、大きな設備投資、固定資産税、建設需要、雇用を地域にもたらす可能性があります。一方で、施設の所有者、計算資源、主要顧客、利益配分、意思決定が地域外にある場合、地域が土地と電力を提供するだけで、AI経済の生産資本そのものを持てるとは限りません。<strong>「誘致」と「地域がAI資本を持つこと」は同じではありません。</strong></p>
             <p>だからJHRが問うのは、ハイパースケーラーへの賛否ではありません。日本の地域に、もう一つの選択肢をつくれるかです。</p>
@@ -72,6 +79,11 @@ export default function JhrLayout({ children }: { children: ReactNode }) {
             <div lang="en">
               <p><span style={tag}>ENGLISH / SECONDARY</span></p>
               <h2>Why Fukui Needs an AI Koban</h2>
+              <h3>The September 14 news—and Fukui’s working future</h3>
+              <p>TBS’s September 14 THE TIME, listing features AI risk and a possible development slowdown. On September 13, TBS NEWS DIG reported Dario Amodei’s call to slow development so safeguards and independent evaluation can keep pace. <a href="https://www.tbs.co.jp/tv/20260914_BC7D.html">Official programme listing</a> / <a href="https://news.livedoor.com/article/detail/32312185/">TBS report, syndicated by Livedoor</a>.</p>
+              <p>This is not a count of Japanese jobs lost. JHR’s analysis connects the news to a local question: can Fukui build the skills, access and accountability to prepare for changing work?</p>
+              <p>Anthropic’s March 5 US labour-market study found no systematic unemployment increase in highly exposed occupations, alongside tentative evidence of slower hiring for younger workers. Task exposure is not the same as a whole job disappearing, and US findings are not a Japanese unemployment forecast. <a href="https://www.anthropic.com/research/labor-market-impacts">Study and limitations</a>.</p>
+              <p>The proposal is to give students, workers, farms and local businesses somewhere to learn, test practical AI projects and review results with human oversight. Community ownership does not guarantee jobs. Feasibility work must assess paid local employment, pathways from training to practical work, participating firms’ outcomes, operating costs and value retained locally. Small AI systems still require access controls, logs, security, evaluation and accountable people.</p>
               <p>This is not an argument against hyperscalers. Large cloud and data-center infrastructure are important to Japan. The deeper question is ownership: who owns the land-intensive compute infrastructure, who controls it, and where the long-term economic value of the AI economy accumulates.</p>
               <p>A hyperscale campus can bring major capital investment, construction activity, taxes and jobs. But attracting infrastructure is not the same as a community owning productive AI capital. YUMORI / eSingularity therefore proposes a complementary model: <strong>COGDC — Community-Owned Green Data Center</strong>, with the community-scale node described as an <strong>AI Koban</strong>.</p>
               <p>A koban is not national headquarters. It is a small local node close to the community and connected to a much larger network. An AI Koban follows the same architecture: locally accountable compute, learning and data capability that connects outward to Japanese and global cloud infrastructure when larger capacity is needed.</p>

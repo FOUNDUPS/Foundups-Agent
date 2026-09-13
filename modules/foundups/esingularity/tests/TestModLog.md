@@ -1,5 +1,9 @@
 # eSingularity TestModLog
 
+## 2026-09-14 — JHR issue deep link
+
+- Updated the existing ticker destination check for #002 and require its target ID in the report. The old exact /reports/jhr assertion was already incompatible with the preceding #002 commit. Three dependency-free JHR checks and 18 routing checks pass.
+
 ## 2026-09-13 — Shared ticker consumers
 
 - Extended the existing field-status contract to require exactly one shared ticker on each homepage and correct project-link resolution from the movement page.
