@@ -3167,7 +3167,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "eb65001a6e3b098e8910276de7614127e929b5cee9a0a6e9a95c45764c4b3ee3",
+      "hash_sha256": "b79a8429f578089ae1a3aa656d6b89a2b504a8d8529a219605af3df9e02453fd",
       "links": {
         "automation": [
           "doc_dae"
@@ -3188,7 +3188,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md",
-      "size_bytes": 18424,
+      "size_bytes": 18673,
       "status": "active",
       "wsp_refs": [
         "WSP 15",
@@ -11408,7 +11408,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "b768ff4ec3f940877a59e767c33f6ceaf95fe3f34ea6f83e3742aba11df49944",
+      "hash_sha256": "88e484880dbe69baf79c09d048b9ace68f2235b781fd4952e8561e79bd9eb234",
       "links": {
         "automation": [
           "doc_dae"
@@ -11424,7 +11424,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/operations/RSI_SWARM_DISPATCH.md",
-      "size_bytes": 17602,
+      "size_bytes": 28223,
       "status": "active",
       "wsp_refs": []
     },
@@ -11564,7 +11564,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "d63f14895a17fd2cd796067ddeae11a488f4231ee84b51f4047cc994d3598dec",
+      "hash_sha256": "ffe2922ffa4cf00426971d120f0027df827ffc0f6cf26e7c7f1a39fdf5196d89",
       "links": {
         "automation": [
           "doc_dae"
@@ -11581,7 +11581,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md",
-      "size_bytes": 51124,
+      "size_bytes": 51434,
       "status": "active",
       "wsp_refs": [
         "WSP 22",
@@ -11619,7 +11619,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "6198ac75f80f5eb0b28a06ff1b6fdd326625af6b209c6531162473f5a4aed341",
+      "hash_sha256": "dbdbe02a99d003018511f72d2cf24ff5181fa8b8f6820bf4a2a0c103cbdc7ded",
       "links": {
         "automation": [
           "doc_dae"
@@ -11639,7 +11639,7 @@
       },
       "module_hint": "docs_root",
       "path": "docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md",
-      "size_bytes": 13572,
+      "size_bytes": 13684,
       "status": "active",
       "wsp_refs": [
         "WSP 15",

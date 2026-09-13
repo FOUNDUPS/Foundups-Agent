@@ -1,5 +1,12 @@
 # FoundUps Agent - Development Log
 
+## 2026-09-13: Existing research components and early-stage RSI workloads
+
+- Applied 012's clarification: system RSI comes first, while selected early-stage FoundUps/other repositories are eligible test workloads. Replaced the blanket active-FoundUp exclusion; YUMORI/eSingularity and concurrent reserved lanes stay protected. Existing packet IDs, dependencies, numerical priorities and admission gates remain unchanged.
+- Expanded the existing dispatch runbook with WRE Auto Researcher, AI Gateway model AutoResearch, independent judges/retention, PQN engine, external Science Swarm Hub, GotJunk dry-run groundwork, auto-post and existing orchestration/feedback/reward owners. Added concrete reuse pointers to R07/R10/R14/R15/R20/R23 instead of creating modules or another research engine.
+- Source review at `837da85f0`; Science Hub inspected at `bdf0e15f019f83d76fa9cf94b131716bde559350`. WRE Auto Researcher's live commit is blocked and its constructor has scratch/model-loading effects; Science Hub threshold decisions are not independent RSI/scientific proof; GotJunk's WRE adapter is unimplemented. The spoken GetK identity remains unconfirmed.
+- WSP 00 bootstrap/strict gate and WSP 97 retrieval/source/adjacent-owner review completed. Documentation-only assessment; no researcher, model campaign, package installation, FoundUp test, outreach or deployment executed. Structural validation is recorded in the PR. WSP 22, 48, 50, 84, 97.
+
 ## 2026-09-13: Restore matched-reference Holo retrieval with existing runtime
 
 - WSP 00 bootstrap/strict gate passed; WSP 97 traced the startup failure through the existing supervisor and dependency guard. Bounded, non-authoritative diagnostics identified missing NumPy under the ambient Python 3.12.2 base; raw output was not retained.

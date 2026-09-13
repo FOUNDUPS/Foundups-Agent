@@ -44,7 +44,7 @@ MCP can expose these existing operations for easier tool access, but it cannot s
 
 ## Internal RSI validation candidates
 
-012's 2026-09-13 correction separates system improvement from active FoundUp development. Use internal workflows with synthetic inputs and disposable state. Exclude all active FoundUps, including YUMORI.me/eSingularity, from RSI experiments and their datasets. No posting, campaign change, account access, live research-session mutation or project deployment is authorized by this candidate assessment.
+012's latest 2026-09-13 clarification permits system-first improvement and selected early-stage FoundUps/other repositories as RSI test workloads. This supersedes the earlier blanket active-FoundUp exclusion. Preserve YUMORI.me/eSingularity and concurrent reserved lanes. Use isolated source checkouts, declared test inputs and disposable state; a candidate entry alone does not authorize posting, account access, live-session mutation, outreach or deployment.
 
 | Candidate | Existing implementation to reuse | First isolated experiment | Fixed independent checks |
 |---|---|---|---|
@@ -52,7 +52,7 @@ MCP can expose these existing operations for easier tool access, but it cannot s
 | Auto-post workflow — candidate for a later repeat | [Social Media Orchestrator](../../modules/platform_integration/social_media_orchestrator/README.md), its [interface](../../modules/platform_integration/social_media_orchestrator/INTERFACE.md), and [duplicate prevention](../../modules/platform_integration/social_media_orchestrator/src/core/duplicate_prevention_manager.py) | Replay synthetic post requests through isolated formatting/routing/deduplication work, with an injected no-network recording sink. | Correct destination/content, no duplicate dispatch, retry/idempotency behavior, zero external effects, and cost/latency against unchanged fixtures. Do not count a mocked sink as proof of real posting. |
 | PQN researcher — candidate for a later repeat | [PQN research orchestrator](../../modules/ai_intelligence/pqn_alignment/src/pqn_research_dae_orchestrator.py), [detector API](../../modules/ai_intelligence/pqn_alignment/src/detector/api.py), and [research interface](../../modules/ai_intelligence/pqn_alignment/INTERFACE.md) | Improve research-task preparation, experiment scheduling or artifact assembly using fixed synthetic sequences/seeds and scratch output. | Reproducibility, schema/invariant checks, evidence traceability, held-out task quality and cost/latency. Keep detector thresholds, hypotheses and judging criteria fixed; a stronger apparent PQN signal is not proof of RSI or a scientific claim. |
 
-These are planning candidates, not a declaration that their isolation or end-to-end RSI loop already works. The inspected source is `2b56415aebf551b54caf4b4fe3cfa53f27d5856b`. Only documentation/source reads were performed for this assessment; neither auto-post nor PQN experiments/tests were launched.
+The first three workflow observations above originated at `2b56415aebf551b54caf4b4fe3cfa53f27d5856b`. The expanded component review below is pinned separately to `837da85f0b10aaacd393c78f5162efe10e5cfad1` and the named external commit. These are planning candidates, not claims that isolation or end-to-end RSI already works. This review performed source/document reads only; it launched no Auto Researcher, provider campaign, FoundUp test or PQN experiment.
 
 Before admitting a candidate:
 
@@ -62,13 +62,93 @@ Before admitting a candidate:
 4. The PQN detector API already accepts `out_dir` and `seed`; its default writes under the shared detection logs. Use an explicit scratch directory and inspect the downstream runner before execution. The [PQN test guide](../../modules/ai_intelligence/pqn_alignment/tests/README.md) supplies synthetic/invariant candidates, not permission to run provider or active research sessions.
 5. Apply R06–R15's admitted worker, independent evaluator, promotion, activation and rollback requirements to the **isolated candidate**. Retain verified improvement only in its test memory until separately admitted. Report mocks, unavailable providers, skips and real effects separately.
 
-R20/R22 are later synthetic lifecycle/consumer demonstrations. R24/R25 first use synthetic qualification and participant fixtures; their future live product vision does not authorize an experiment against an active FoundUp. Product adoption is a separate decision after a system improvement is proven.
+R20/R22 may later use a dedicated fixture or an explicitly selected early-stage repository/test consumer. R24/R25 first use synthetic qualification and participant fixtures; any later cohort remains scoped and consented. Protected projects remain excluded. Neither a product launch nor external federation is needed to prove system RSI.
+
+## Existing component coverage and RSI insertion points
+
+Reviewed main: `837da85f0b10aaacd393c78f5162efe10e5cfad1` (2026-09-13).
+This extends the existing full audit with the components raised by 012; it is
+not a fresh claim that every repository/module has been operationally tested.
+Source presence, existing wiring, exercised behavior and complete RSI remain
+separate levels of evidence.
+
+| Component / existing owner | What exists and where it fits | Next bounded connection or evidence; existing packet |
+|---|---|---|
+| HoloIndex + WSP | [Owner-query entry](../../holo_index/CLI_REFERENCE.md#source-bound-owner-queries) retrieves source-bound context; WSP governs work. | Exact-current-main qualification remains open. Reuse the restored reference runtime; R03–R05. |
+| WRE + AgentDB + OpenClaw/Hermes | [WRE interface](../../modules/infrastructure/wre_core/INTERFACE.md), existing signed worker dispatch and durable job owners carry tickets/leaf results. | Admit one real bounded artifact through the existing path; do not attach another scheduler to Auto Researcher; R06–R09/R16–R18. |
+| WRE Auto Researcher | [WREAutoResearcher](../../modules/infrastructure/wre_core/src/wre_auto_researcher.py), [research evaluator](../../modules/infrastructure/wre_core/src/wre_research_evaluator.py), [existing tests](../../modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py). Proposes changes to a scratch copy and compares ROC simulation metrics. Non-dry-run and live commit remain `SPECIFIED_NOT_IMPLEMENTED`. | Reuse as a bounded proposal/evaluation producer where its target contract fits. Static Python caller search finds its own CLI and tests, not a separately wired generic WRE job caller. Bind proposals/results to the admitted ticket and independent oracle; R07/R10/R14/R15. Do not replace `IGitRunner` with unrestricted Git execution. |
+| AI Gateway model AutoResearch | [Campaign planner](../../modules/ai_intelligence/ai_gateway/src/model_champion_challenger_autoresearch.py), [configured runner](../../modules/ai_intelligence/ai_gateway/src/model_autoresearch_configured_gateway_runner.py), [model interface](../../modules/ai_intelligence/ai_gateway/INTERFACE.md). Campaign planning, exact model/provider budgets, benchmark receipts and feedback admission already exist. | Use this path to compare model quality/cost for a fixed ticket family; its planner does not itself call providers or change defaults. Require current runtime/call admission and a task-appropriate judge; R07/R10/R14/R18. |
+| Existing judges and retention | The [ROC evaluator](../../modules/infrastructure/wre_core/src/wre_research_evaluator.py) parses literal configuration with AST, not arbitrary target execution. The [model output verifier](../../modules/ai_intelligence/ai_gateway/src/model_autoresearch_semantic_verifier.py) checks content-bound records and declared required/forbidden terms. [PatternMemory](../../modules/infrastructure/wre_core/src/pattern_memory.py) and [model cycle feedback](../../modules/ai_intelligence/ai_gateway/src/model_autoresearch_cycle_feedback_ledger.py) have distinct owners. | Freeze a relevant oracle and baseline; a better simulated margin or keyword match is not general task correctness. Keep model feedback separate from admitted skill memory, then prove the next invocation consumes the accepted result; R10/R11/R14. |
+| Promotion, activation and rollback | Existing model promotion/runtime binding and WRE evidence/activation patterns are already mapped in R02. The generic [legacy variation promoter](../../modules/infrastructure/wre_core/src/pattern_ab_evidence.py) still rejects direct production mutation. | Compose the matching independent authorities for the chosen asset. Model campaign evidence cannot substitute for generic skill activation or rollback proof; R12/R13/R15. |
+| PQN research engine | [PQN interface](../../modules/ai_intelligence/pqn_alignment/INTERFACE.md), existing research orchestrator and detector API perform research execution. It is distinct from the FoundUp's work registry. | Run a bounded, reproducible research-workflow experiment with fixed seeds/oracle and explicit scratch output. Judge reproducibility and task quality, not stronger apparent PQN signals; R10/R15/R23. |
+| PQN FoundUp / Science Swarm Hub | The [monorepo entry](../../modules/foundups/pqn_swarm_hub/README.md) is a compatibility stub. The actual [external implementation](https://github.com/FOUNDUPS/science-swarm-hub/tree/bdf0e15f019f83d76fa9cf94b131716bde559350) has work registry, submissions, verification, contribution records, participant gates and optional SQLite storage. | Use a pinned external checkout and existing injected detector/store seams. Do not rebuild these services under the monorepo stub. Connect task/result evidence to existing FAM/WRE owners; R20/R23/R24. External runtime tests remain unexecuted in this review. |
+| GotJunk — separately identified candidate | [Existing module](../../modules/foundups/gotjunk/README.md) and [HXA12 dry-run proof](../../modules/infrastructure/wre_core/tests/test_hxa12_gotjunk_second_proof_dryrun.py) already exist. [WREAdapter.execute_skill](../../modules/foundups/gotjunk/adapters/wre_adapter.py) raises `NotImplementedError`; the factory proof explicitly reports no real execution. | Qualify an isolated real-code/fixture task through the existing generic job path before claiming live integration. Reuse the dry-run proof as groundwork, not RSI acceptance; R08/R20/R23. The spoken name “GetK” has not been confirmed as GotJunk; resolve it before assigning a named ticket. |
+| Auto-post | Existing social orchestrator, formatting/routing and duplicate prevention are listed above. | Qualify preparation/deduplication with a recording sink first; live posting is a separate effect. Reuse this workload for cross-task retained-benefit checks; R15/R23. |
+| FAM, qualified teams and reward accounting | [R24](../roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) already binds worker qualification, tickets, independent audit, acceptance and reward policy to existing owners. | Science Hub contribution records are not confirmed FAM/financial settlement. Keep optional teams and reward effects behind their existing proof gates; R20/R21/R24. |
+| 012/RedDog feedback and 3V | [R25](../roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) already covers same-FoundUp active engagement, consent, scoped proposals and typed feedback. | Reuse it for selected early-stage cohorts when admitted. V1 opinions do not self-certify V2 correctness, V3 valuation or promotion; initial tests remain synthetic. |
+
+### Apply the existing Auto Researcher without broadening its claims
+
+`dry_run=True` does not mean “no side effects”: its constructor creates a results
+directory/copy/TSV and attempts to obtain the Qwen engine. Its present mutable
+target is literal allocation/multiplier configuration for a sustainability
+simulator. It is not an already-connected generic code editor or a proven
+registry-workflow optimizer. Qualify paths/model loading and evaluate the
+existing contract before any experiment. If a registry procedure requires a
+different target shape, extend the appropriate existing owner only after the
+interface mismatch is demonstrated; do not make the ROC metric its judge.
+
+Likewise, model AutoResearch is an existing model-selection/evaluation lane.
+Connect its evidence through the admitted model/runtime binding and the same
+ticket lifecycle. Do not merge the two Auto Research systems into a new engine
+or equate their feedback stores with automatic PatternMemory promotion.
+
+### External Science Hub evidence boundary
+
+Remote inspected: `FOUNDUPS/science-swarm-hub`, main
+`bdf0e15f019f83d76fa9cf94b131716bde559350`. The pinned
+[verification implementation](https://github.com/FOUNDUPS/science-swarm-hub/blob/bdf0e15f019f83d76fa9cf94b131716bde559350/src/pqn_swarm_hub/verification.py)
+accepts submitted coherence/PQN-rate values against configurable thresholds;
+its manual path records a supplied verifier ID and decision. Those operations
+alone do not authenticate independent execution or establish scientific truth.
+The existing
+[detector bridge](https://github.com/FOUNDUPS/science-swarm-hub/blob/bdf0e15f019f83d76fa9cf94b131716bde559350/src/pqn_swarm_hub/detector_bridge.py)
+supports an injected runner and otherwise imports the configured detector.
+Use that seam with fixed test inputs and independently reproduced artifacts;
+do not optimize the submitted metric merely to pass its own threshold.
+Package publication/installation, live research participation and settlement
+were not verified. No package, remote code or FoundUp experiment was executed.
+
+### System first, then prove transfer across workloads
+
+1. **System baseline:** R03–R09 establishes current retrieval and one admitted
+   real worker artifact before any FoundUp is needed. Record baseline quality,
+   cost, latency and allowed effects for the registry-audit procedure.
+2. **One retained system improvement:** R10–R15 binds a fitting existing
+   proposal producer, fixed independent oracle, accepted artifact, activation,
+   forced regression/rollback and a better subsequent invocation. Reuse WRE
+   Auto Researcher only where its inspected contract fits. Model AutoResearch
+   can separately test economical model assignments for this same task family.
+3. **Early-stage transfer:** R20/R23 qualifies Science Hub or another selected
+   repository at a pinned commit using isolated real source and test state.
+   GotJunk's existing dry-run proof is a candidate starting point. Measure
+   whether the *system improvement* transfers; passing a project's tests alone
+   does not prove RSI. Keep project-specific improvements labeled separately.
+4. **Broaden only from evidence:** repeat across auto-post/PQN/another admitted
+   workload with explicit per-ticket budgets. Add bounded teams only when
+   measured benefit outweighs coordination and review cost. R24/R25 retain
+   independent audit, reward and scoped feedback responsibilities.
+
+No dependency, numerical priority or packet ID is changed by this coverage
+addition. Current work-order admission and exact runtime/source evidence still
+decide what can execute. The expanded list corrects omissions in the roadmap;
+it does not claim that all components are already integrated or RSI-complete.
 
 ## First bounded dispatch
 
 Use R06/R07/R08 to prove one documentation artifact before authorizing broader implementation:
 
-1. Verify merged R01 integrity in the selected source and obtain current clean worktree claims. Apply the internal-only validation scope above; preserve all active project/service lanes and the separate WSP state-semantics work.
+1. Verify merged R01 integrity in the selected source and obtain current clean worktree claims. Apply the system-first / selected-early-stage validation scope above; preserve all active project/service lanes and the separate WSP state-semantics work.
 2. Ask the existing runtime's binding query for its selected model/provider. The acceptance signal is `MODEL_RUNTIME_BINDING_READY`, with current verified evidence and the correct surface. Reuse the signed-evidence supply and authenticated operations bootstrap. Never populate trusted keys, acceptance flags or receipts from this planning document.
 3. Compile one packet using the existing [work-order intake](../../modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py), [signed worker dispatch](../../modules/communication/moltbot_bridge/src/reddog_openclaw_hermes_0102_worker_dispatch_runtime.py) and model binding. Bind one base SHA, permitted source reads, output artifact, expiry, budgets, tool profile, owner and separate verifier.
 4. Candidate task: read the canonical roadmap entry and R06–R09, then return a short dependency/acceptance checklist as a bounded artifact. No repository write, Git operation, service activation, nested delegation or deployment is needed for this first canary. Finalize the exact artifact name and byte limit in the admitted contract.

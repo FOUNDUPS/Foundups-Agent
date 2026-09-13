@@ -6,7 +6,7 @@ This is a derived evidence map for the [system roadmap](../../ROADMAP.md), cover
 
 **Verdict:** R01's local integrity repair is present. R02's requirement map, selected documentation contradictions and pending-ledger dispositions are reconciled in this revision. The complete generic evaluator → promoter → activation/rollback → measured retained improvement chain remains unproved. R02 stays partial until remaining owner/archival decisions and independent review of the required path are complete.
 
-Current planning constraint (012 correction, 2026-09-13): the [system roadmap's validation scope](../../ROADMAP.md#rsi-validation-scope-internal-workflows-and-dedicated-fixtures) excludes active FoundUps from RSI experiments. R15 uses an internal workflow; R20/R22 use dedicated synthetic lifecycle/consumer fixtures. Later product adoption is separate. This constraint supersedes any live-product interpretation of the dated packet descriptions below without changing their source inventory.
+Current planning constraint (012 clarification, 2026-09-13): the [system roadmap's validation scope](../../ROADMAP.md#rsi-validation-scope-internal-workflows-and-dedicated-fixtures) starts with system RSI and permits selected early-stage FoundUps/other repositories as test workloads. YUMORI/eSingularity and reserved lanes remain protected. The [expanded component map](../operations/RSI_SWARM_DISPATCH.md#existing-component-coverage-and-rsi-insertion-points) explicitly includes WRE Auto Researcher, model AutoResearch, PQN research and external Science Swarm Hub. These later source observations do not rewrite the original pinned inventory or prove complete integration.
 
 ## Evidence levels and use
 
@@ -312,7 +312,7 @@ Later runtime-selection checkpoint (2026-09-13, documentation source `89bdd7a5`)
 
 **Observed boundary:** Authoritative work-state query contracts are available for consumer integration. The existing product lane owns delivery and must be reconciled before edits.
 
-**Required next evidence:** Show principal-scoped queued/running/blocked/verified/activated outcomes from authenticated owners in a dedicated synthetic test consumer. Active FoundUps and live product state are excluded; eventual adoption is separately scoped.
+**Required next evidence:** Show principal-scoped queued/running/blocked/verified/activated outcomes from authenticated owners in a dedicated synthetic test consumer. Protected active FoundUps and unscoped live product state are excluded; selected early-stage test consumers may be qualified under the current scope.
 
 ### R23 — Production RSI operations owner
 
@@ -391,7 +391,7 @@ Disposition vocabulary: `merged_bounded_scope` means the named deliverable is in
 ### Reconciliation decisions and next tickets
 
 1. **Reuse before implementation:** do not issue another schema, skill-evolution report, A/B engine, diagnostic owner, or Holo query bridge. The code above already supplies those bounded surfaces. The missing acceptance conditions are the ticket scope.
-2. **Avoid accidental dependency growth:** the old main.py warning hooks, financial review and UI/extraction tracks are owner handoffs, not new prerequisites for the first internal registry-audit RSI canary. R20's later lifecycle demonstration uses a dedicated synthetic fixture; active FoundUps remain excluded.
+2. **Avoid accidental dependency growth:** the old main.py warning hooks, financial review and UI/extraction tracks are owner handoffs, not new prerequisites for the first internal registry-audit RSI canary. Under 012's later scope clarification, R20 may use a dedicated synthetic fixture or a selected early-stage repository; YUMORI/eSingularity and reserved lanes remain protected.
 3. **Preserve archive evidence:** the April ledger and SoftProto documents remain in place. Per-contract SoftProto replacement review and unresolved owner receipts remain open. No old retention instruction is executed, no project is activated and no lane is reassigned.
 4. **Separate review remains required:** the 15 dispositions are architect-authored source analysis, not independent verification. A separately bound reviewer must challenge the R06–R15 chain and the coverage omissions. Keep R02 partial and every backlog packet non-executable.
 5. **Next runtime-facing preparation:** continue the existing R03 exact-current-main authority qualification (the matched-reference interpreter correction is recorded above), then R06–R08 admission and one bounded artifact. Do not bypass failed runtime binding or launch a parallel orchestrator to accelerate dispatch.
